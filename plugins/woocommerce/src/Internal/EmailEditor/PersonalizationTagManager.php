@@ -111,6 +111,21 @@ class PersonalizationTagManager {
 			)
 		);
 
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Shopper Country', 'woocommerce' ),
+				'woocommerce/shopper-country',
+				__( 'Shopper', 'woocommerce' ),
+				function ( array $context ): string {
+					if ( isset( $context['order'] ) ) {
+						$country_code = $context['order']->get_billing_country();
+						return WC()->countries->countries[ $country_code ] ?? $country_code ?? '';
+					}
+					return '';
+				},
+			)
+		);
+
 		// Order Personalization Tags.
 		$registry->register(
 			new Personalization_Tag(
@@ -122,6 +137,116 @@ class PersonalizationTagManager {
 						return '';
 					}
 					return $context['order']->get_order_number() ?? '';
+				},
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Order Date', 'woocommerce' ),
+				'woocommerce/order-date',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context, array $parameters = array() ): string {
+					if ( ! isset( $context['order'] ) ) {
+						return '';
+					}
+					$format       = isset( $parameters['format'] ) && is_string( $parameters['format'] ) ? $parameters['format'] : wc_date_format();
+					$date_created = $context['order']->get_date_created();
+					if ( ! $date_created ) {
+						return '';
+					}
+					return wc_format_datetime( $date_created, $format );
+				},
+				array(
+					'format' => wc_date_format(),
+				),
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Order Items', 'woocommerce' ),
+				'woocommerce/order-items',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context ): string {
+					if ( ! isset( $context['order'] ) ) {
+						return '';
+					}
+					$items = array();
+					foreach ( $context['order']->get_items() as $item ) {
+						$items[] = $item->get_name();
+					}
+					return implode( ', ', $items );
+				},
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Order Subtotal', 'woocommerce' ),
+				'woocommerce/order-subtotal',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context ): string {
+					if ( ! isset( $context['order'] ) ) {
+						return '';
+					}
+					return (string) $context['order']->get_subtotal();
+				},
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Order Tax', 'woocommerce' ),
+				'woocommerce/order-tax',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context ): string {
+					if ( ! isset( $context['order'] ) ) {
+						return '';
+					}
+					return (string) $context['order']->get_total_tax();
+				},
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Order Total', 'woocommerce' ),
+				'woocommerce/order-total',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context ): string {
+					if ( ! isset( $context['order'] ) ) {
+						return '';
+					}
+					return (string) $context['order']->get_total();
+				},
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Payment Method', 'woocommerce' ),
+				'woocommerce/order-payment-method',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context ): string {
+					if ( ! isset( $context['order'] ) ) {
+						return '';
+					}
+					return $context['order']->get_payment_method_title();
+				},
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Payment URL', 'woocommerce' ),
+				'woocommerce/order-payment-url',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context ): string {
+					if ( ! isset( $context['order'] ) ) {
+						return '';
+					}
+					return $context['order']->get_checkout_payment_url();
 				},
 			)
 		);
@@ -162,6 +287,43 @@ class PersonalizationTagManager {
 				},
 			)
 		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Store Name', 'woocommerce' ),
+				'woocommerce/store-name',
+				__( 'Store', 'woocommerce' ),
+				function ( array $context ): string {
+					if ( isset( $context['wc_email'] ) && ! empty( $context['wc_email']->get_from_name() ) ) {
+						return $context['wc_email']->get_from_name();
+					}
+
+					return wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+				},
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Store Address', 'woocommerce' ),
+				'woocommerce/store-address',
+				__( 'Store', 'woocommerce' ),
+				function (): string {
+					$address_parts = array(
+						WC()->countries->get_base_address(),
+						WC()->countries->get_base_address_2(),
+						WC()->countries->get_base_city(),
+						WC()->countries->get_base_state(),
+						WC()->countries->get_base_postcode(),
+						WC()->countries->countries[ WC()->countries->get_base_country() ] ?? WC()->countries->get_base_country() ?? '',
+					);
+
+					$address = implode( "\n", array_filter( $address_parts ) );
+					return trim( $address );
+				},
+			)
+		);
+
 		$registry->register(
 			new Personalization_Tag(
 				__( 'My Account URL', 'woocommerce' ),
