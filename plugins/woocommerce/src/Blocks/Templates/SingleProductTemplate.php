@@ -146,7 +146,7 @@ class SingleProductTemplate extends AbstractTemplate {
 		return array_reduce(
 			$parsed_blocks,
 			function ( $carry, $block ) use ( $single_product_template_blocks ) {
-				if ( in_array( $block['blockName'], $single_product_template_blocks, true ) ) {
+				if ( in_array( $block['blockName'], $single_product_template_blocks, true ) || ( 'core/pattern' === $block['blockName'] && isset( $block['attrs']['slug'] ) && 'woocommerce-blocks/related-products' === $block['attrs']['slug'] ) ) {
 					if ( $carry['is_already_replaced'] ) {
 						return array(
 							'blocks'              => $carry['blocks'],
