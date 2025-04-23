@@ -100,7 +100,9 @@ const addToCartWithOptionsStore = store(
 					context.variation.splice( index, 1 );
 				}
 			},
-			addQuantity: ( event: HTMLElementEvent< HTMLButtonElement > ) => {
+			increaseQuantity: (
+				event: HTMLElementEvent< HTMLButtonElement >
+			) => {
 				const inputData = getInputData( event );
 				if ( ! inputData ) {
 					return;
@@ -115,7 +117,7 @@ const addToCartWithOptionsStore = store(
 					dispatchChangeEvent( inputElement );
 				}
 			},
-			removeQuantity: (
+			decreaseQuantity: (
 				event: HTMLElementEvent< HTMLButtonElement >
 			) => {
 				const inputData = getInputData( event );
