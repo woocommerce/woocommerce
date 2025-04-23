@@ -13,6 +13,7 @@ import { PostPreviewButton } from '@wordpress/editor';
 import { storeName } from '../../store';
 import { recordEvent } from '../../events';
 import { SendPreviewEmail } from './send-preview-email';
+import { useEditorMode } from '../../hooks';
 
 export function PreviewDropdown() {
 	const previewDeviceType = useSelect(
@@ -26,6 +27,8 @@ export function PreviewDropdown() {
 	const changeDeviceType = ( newDeviceType: string ) => {
 		void changePreviewDeviceType( newDeviceType );
 	};
+
+	const [ editorMode ] = useEditorMode();
 
 	const deviceIcons = {
 		mobile,
@@ -74,47 +77,54 @@ export function PreviewDropdown() {
 								{ __( 'Mobile', 'woocommerce' ) }
 							</MenuItem>
 						</MenuGroup>
-						<MenuGroup>
-							<MenuItem
-								className="block-editor-post-preview__button-resize"
-								onClick={ () => {
-									void togglePreviewModal( true );
-									recordEvent(
-										'header_preview_dropdown_send_test_email_selected'
-									);
-									onClose();
-								} }
-							>
-								{ __( 'Send a test email', 'woocommerce' ) }
-							</MenuItem>
-						</MenuGroup>
-						<MenuGroup>
-							<div className="edit-post-header-preview__grouping-external">
-								<PostPreviewButton
-									role="menuitem"
-									forceIsAutosaveable={ true }
-									aria-label={ __(
-										'Preview in new tab',
-										'woocommerce'
-									) }
-									textContent={
-										<>
-											{ __(
+						{ editorMode === 'email' && (
+							<>
+								<MenuGroup>
+									<MenuItem
+										className="block-editor-post-preview__button-resize"
+										onClick={ () => {
+											void togglePreviewModal( true );
+											recordEvent(
+												'header_preview_dropdown_send_test_email_selected'
+											);
+											onClose();
+										} }
+									>
+										{ __(
+											'Send a test email',
+											'woocommerce'
+										) }
+									</MenuItem>
+								</MenuGroup>
+								<MenuGroup>
+									<div className="edit-post-header-preview__grouping-external">
+										<PostPreviewButton
+											role="menuitem"
+											forceIsAutosaveable={ true }
+											aria-label={ __(
 												'Preview in new tab',
 												'woocommerce'
 											) }
-											<Icon icon={ external } />
-										</>
-									}
-									onPreview={ () => {
-										recordEvent(
-											'header_preview_dropdown_preview_in_new_tab_selected'
-										);
-										onClose();
-									} }
-								/>
-							</div>
-						</MenuGroup>
+											textContent={
+												<>
+													{ __(
+														'Preview in new tab',
+														'woocommerce'
+													) }
+													<Icon icon={ external } />
+												</>
+											}
+											onPreview={ () => {
+												recordEvent(
+													'header_preview_dropdown_preview_in_new_tab_selected'
+												);
+												onClose();
+											} }
+										/>
+									</div>
+								</MenuGroup>{ ' ' }
+							</>
+						) }
 					</>
 				) }
 			</DropdownMenu>
