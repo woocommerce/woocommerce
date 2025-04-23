@@ -152,10 +152,15 @@
 	display: flex;
 	justify-content: space-between;
 
+	.wc-block-components-radio-control__label,
+	.wc-block-components-radio-control__description {
+		flex-grow: 1;
+	}
+
 	.wc-block-components-radio-control__secondary-label,
 	.wc-block-components-radio-control__secondary-description {
 		text-align: right;
-		flex-basis: 50%;
+		flex: 0 0 50%;
 	}
 }
 

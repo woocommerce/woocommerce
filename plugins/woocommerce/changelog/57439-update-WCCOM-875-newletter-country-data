@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+Comment: Update format of country and state submitted to the newsletter subscription endpoint on WooCommerce.com during onboarding
+
