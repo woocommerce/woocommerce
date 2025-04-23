@@ -226,6 +226,10 @@ export const PaymentGatewayListItem = ( {
 									acceptIncentive={ acceptIncentive }
 									installingPlugin={ installingPlugin }
 									incentive={ incentive }
+									setOnboardingModalOpen={
+										setIsOnboardingModalOpen
+									}
+									onboardingType={ gateway.onboarding.type }
 								/>
 							) }
 
