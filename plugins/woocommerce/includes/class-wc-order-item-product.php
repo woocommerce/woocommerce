@@ -7,6 +7,7 @@
  * @since   3.0.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\NumberUtil;
@@ -450,7 +451,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 		$order = $this->get_order();
 
-		if ( $order && $order->has_status( 'completed' ) ) {
+		if ( $order && $order->has_status( OrderStatus::COMPLETED ) ) {
 			/**
 			 * Filter the backorder meta key.
 			 * Make sure to use the same filter as used in set_backorder_meta().
