@@ -44,7 +44,9 @@ if ( $email_improvements_enabled ) {
 	echo sprintf( esc_html__( 'Your order on %s has been refunded. There are more details below for your reference:', 'woocommerce' ), esc_html( $blogname ) ) . "\n\n";
 }
 
-/*
+/**
+ * Show order details.
+ *
  * @hooked WC_Emails::order_details() Shows the order details table.
  * @hooked WC_Structured_Data::generate_order_data() Generates structured data.
  * @hooked WC_Structured_Data::output_structured_data() Outputs structured data.
@@ -54,14 +56,20 @@ do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_tex
 
 echo "\n----------------------------------------\n\n";
 
-/*
+/**
+ * Show order meta data.
+ *
  * @hooked WC_Emails::order_meta() Shows order meta data.
+ * @since 1.0.0
  */
 do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email );
 
-/*
+/**
+ * Show customer details and email address.
+ *
  * @hooked WC_Emails::customer_details() Shows customer details
  * @hooked WC_Emails::email_address() Shows email address
+ * @since 1.0.0
  */
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 
@@ -75,4 +83,9 @@ if ( $additional_content ) {
 	echo "\n\n----------------------------------------\n\n";
 }
 
+/**
+ * Filter the email footer text.
+ *
+ * @since 4.0.0
+ */
 echo wp_kses_post( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );
