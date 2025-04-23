@@ -10,6 +10,9 @@ use WP_Block;
  * It's responsible to render each child product in a form of a list item.
  */
 class AddToCartWithOptionsGroupedProductSelectorItemTemplate extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -73,8 +76,6 @@ class AddToCartWithOptionsGroupedProductSelectorItemTemplate extends AbstractBlo
 
 		$content = '';
 
-		wp_enqueue_script_module( $this->get_full_block_name() );
-
 		$children = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
 
 		foreach ( $children as $child ) {
@@ -82,15 +83,5 @@ class AddToCartWithOptionsGroupedProductSelectorItemTemplate extends AbstractBlo
 		}
 
 		return $content;
-	}
-
-	/**
-	 * Disable the frontend script for this block type, it's built with script modules.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 * @return null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
 	}
 }

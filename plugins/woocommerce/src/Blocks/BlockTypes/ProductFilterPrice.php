@@ -13,6 +13,8 @@ use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
  */
 final class ProductFilterPrice extends AbstractBlock {
 
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -119,8 +121,6 @@ final class ProductFilterPrice extends AbstractBlock {
 		if ( is_admin() || wp_doing_ajax() ) {
 			return '';
 		}
-
-		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		$price_range   = $this->get_filtered_price( $block );
 		$min_range     = $price_range['min_price'] ?? 0;
@@ -236,16 +236,5 @@ final class ProductFilterPrice extends AbstractBlock {
 			'min_price' => intval( floor( floatval( $price_results->min_price ?? 0 ) ) ),
 			'max_price' => intval( ceil( floatval( $price_results->max_price ?? 0 ) ) ),
 		);
-	}
-
-	/**
-	 * Disable the block type script, this uses script modules.
-	 *
-	 * @param string|null $key The key.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
 	}
 }
