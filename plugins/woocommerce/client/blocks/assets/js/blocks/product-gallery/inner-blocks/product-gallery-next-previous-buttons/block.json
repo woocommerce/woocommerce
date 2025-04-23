@@ -14,7 +14,21 @@
 			"background": true,
 			"text": true
 		},
+		"align": true,
+		"layout": {
+			"default": {
+				"type": "flex",
+				"orientation": "horizontal",
+				"verticalAlignment": "center"
+			},
+			"allowVerticalAlignment": true,
+			"allowOrientation": false,
+			"allowJustification": false
+		},
 		"shadow": true,
+		"spacing": {
+			"margin": true
+		},
 		"__experimentalBorder": {
 			"radius": true
 		}
