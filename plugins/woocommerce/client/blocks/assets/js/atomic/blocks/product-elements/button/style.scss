@@ -7,6 +7,22 @@
 	align-items: center;
 	gap: $gap-small;
 
+	// Style: Fill & Outline
+	&.is-style-outline {
+		.wp-block-button__link {
+			border: 2px solid currentColor;
+
+			&:not(.has-text-color) {
+				color: currentColor;
+			}
+
+			&:not(.has-background) {
+				background-color: transparent;
+				background-image: none;
+			}
+		}
+	}
+
 	.wp-block-button__link {
 		word-break: break-word;
 		white-space: normal;
@@ -84,27 +100,11 @@
 .theme-twentytwentyone {
 	// Prevent buttons appearing disabled in the editor.
 	.editor-styles-wrapper
-	.wc-block-components-product-button
-	.wp-block-button__link {
+		.wc-block-components-product-button
+		.wp-block-button__link {
 		background-color: var(--button--color-background);
 		color: var(--button--color-text);
 		border-color: var(--button--color-background);
-	}
-}
-
-// Style: Fill & Outline
-.wp-block-button.is-style-outline {
-	.wp-block-button__link {
-		border: 2px solid currentColor;
-
-		&:not(.has-text-color) {
-			color: currentColor;
-		}
-
-		&:not(.has-background) {
-			background-color: transparent;
-			background-image: none;
-		}
 	}
 }
 
