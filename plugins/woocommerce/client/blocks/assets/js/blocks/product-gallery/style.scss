@@ -123,9 +123,6 @@ $dialog-padding: 20px;
 
 	@for $i from 10 through 50 {
 		&.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i} {
-			$gap-width: $thumbnails-gap * ($i - 1);
-			$border-width: $i * $thumbnails-border-width * 2;
-
 			flex-basis: calc($i * 1%);
 			aspect-ratio: 1 / calc(100 / $i);
 		}
@@ -322,6 +319,8 @@ body.wc-block-product-gallery-dialog-open {
 // - Thumbnails appear below the main gallery image and are arranged horizontally in a row
 // - Next/Previous buttons are hidden
 @include breakpoint("<600px") {
+	.is-vertical.wc-block-product-gallery,
+	.is-horizontal.wc-block-product-gallery,
 	.wc-block-product-gallery {
 		@include horizontal-thumbnails;
 		flex-direction: column;
