@@ -401,6 +401,17 @@ final class BlockTypesController {
 			'ProductsByAttribute',
 			'ProductCategory',
 			'ProductTag',
+			'ProductFilters',
+			'ProductFilterStatus',
+			'ProductFilterPrice',
+			'ProductFilterPriceSlider',
+			'ProductFilterAttribute',
+			'ProductFilterRating',
+			'ProductFilterActive',
+			'ProductFilterRemovableChips',
+			'ProductFilterClearButton',
+			'ProductFilterCheckboxList',
+			'ProductFilterChips',
 		);
 	}
 
