@@ -64,11 +64,11 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 		ob_start();
 		?>
 		<div
-			class="wc-block-product-gallery-large-image-next-previous"
+			class="wc-block-product-gallery-large-image-next-previous <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
 			data-wp-interactive="woocommerce/product-gallery"
 		>
 			<button
-				class="wc-block-product-gallery-large-image-next-previous__button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
+				class="wc-block-product-gallery-large-image-next-previous__button"
 				style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
 				data-wp-on--click="actions.selectPreviousImage"
 				data-wp-bind--disabled="context.disableLeft"
@@ -90,7 +90,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 				</svg>
 			</button>
 			<button
-				class="wc-block-product-gallery-large-image-next-previous__button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
+				class="wc-block-product-gallery-large-image-next-previous__button"
 				style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
 				data-wp-on--click="actions.selectNextImage"
 				data-wp-bind--disabled="context.disableRight"
