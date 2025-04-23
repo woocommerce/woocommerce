@@ -510,8 +510,8 @@ class ProductQuery extends AbstractBlock {
 	private function get_query_vars_from_filter_blocks() {
 		$attributes_filter_query_args = array_reduce(
 			array_values( $this->get_filter_by_attributes_query_vars() ),
-			function ( $acc, $array ) {
-				return array_merge( array_values( $array ), $acc );
+			function ( $acc, $arr ) {
+				return array_merge( array_values( $arr ), $acc );
 			},
 			array()
 		);
