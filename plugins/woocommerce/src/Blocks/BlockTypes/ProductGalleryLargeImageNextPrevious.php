@@ -60,15 +60,16 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 		}
 
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+		$vertical_alignment = StyleAttributesUtils::get_align_class_and_style( $attributes );
 
 		ob_start();
 		?>
 		<div
-			class="wc-block-product-gallery-large-image-next-previous <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
+			class="wc-block-product-gallery-large-image-next-previous <?php echo esc_attr( $vertical_alignment['class'] ); ?>"
 			data-wp-interactive="woocommerce/product-gallery"
 		>
 			<button
-				class="wc-block-product-gallery-large-image-next-previous__button"
+				class="wc-block-product-gallery-large-image-next-previous__button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
 				style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
 				data-wp-on--click="actions.selectPreviousImage"
 				data-wp-bind--disabled="context.disableLeft"
@@ -90,7 +91,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 				</svg>
 			</button>
 			<button
-				class="wc-block-product-gallery-large-image-next-previous__button"
+				class="wc-block-product-gallery-large-image-next-previous__button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
 				style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
 				data-wp-on--click="actions.selectNextImage"
 				data-wp-bind--disabled="context.disableRight"
