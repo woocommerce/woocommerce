@@ -225,7 +225,7 @@ class CheckoutSchema extends AbstractSchema {
 	 * @param \WC_Cart|null      $cart           Cart object.
 	 * @return array
 	 */
-	protected function get_checkout_response( \WC_Order $order, PaymentResult $payment_result = null, \WC_Cart $cart = null ) {
+	protected function get_checkout_response( \WC_Order $order, ?PaymentResult $payment_result = null, ?\WC_Cart $cart = null ) {
 		$payment_result = $payment_result ? [
 			'payment_status'  => $payment_result->status,
 			'payment_details' => $this->prepare_payment_details_for_response( $payment_result->payment_details ),

@@ -8,11 +8,13 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
-
 /**
  * AddToCartWithOptions class.
  */
 class AddToCartWithOptions extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -31,6 +33,33 @@ class AddToCartWithOptions extends AbstractBlock {
 		parent::enqueue_data( $attributes );
 		$this->asset_data_registry->add( 'isBlockifiedAddToCart', Features::is_enabled( 'blockified-add-to-cart' ) );
 		$this->asset_data_registry->add( 'productTypes', wc_get_product_types() );
+		$this->asset_data_registry->add( 'addToCartWithOptionsTemplatePartIds', $this->get_template_part_ids() );
+	}
+
+	/**
+	 * Get template part IDs for each product type.
+	 *
+	 * @return array Array of product types with their corresponding template part IDs.
+	 */
+	protected function get_template_part_ids() {
+		$product_types = array_keys( wc_get_product_types() );
+		$current_theme = wp_get_theme()->get_stylesheet();
+
+		$template_part_ids = array();
+		foreach ( $product_types as $product_type ) {
+			$slug = $product_type . '-product-add-to-cart-with-options';
+
+			// Check if theme template exists.
+			$theme_has_template = BlockTemplateUtils::theme_has_template_part( $slug );
+
+			if ( $theme_has_template ) {
+				$template_part_ids[ $product_type ] = "{$current_theme}//{$slug}";
+			} else {
+				$template_part_ids[ $product_type ] = "woocommerce/woocommerce//{$slug}";
+			}
+		}
+
+		return $template_part_ids;
 	}
 
 	/**
@@ -74,8 +103,6 @@ class AddToCartWithOptions extends AbstractBlock {
 			return '';
 		}
 
-		wp_enqueue_script_module( $this->get_full_block_name() );
-
 		$product_type = $product->get_type();
 
 		if ( in_array( $product_type, array( ProductType::SIMPLE, ProductType::EXTERNAL, ProductType::VARIABLE, ProductType::GROUPED ), true ) ) {
@@ -111,10 +138,31 @@ class AddToCartWithOptions extends AbstractBlock {
 				)
 			);
 
+			/**
+			 * Filters the change the quantity to add to cart.
+			 *
+			 * @since 10.9.0
+			 * @param number $default_quantity The default quantity.
+			 * @param number $product_id The product id.
+			 */
+			$default_quantity = apply_filters( 'woocommerce_add_to_cart_quantity', 1, $product->get_id() );
+
+			$context = array(
+				'productId' => $product->get_id(),
+				'quantity'  => $default_quantity,
+				'variation' => array(),
+			);
+
 			$wrapper_attributes = get_block_wrapper_attributes(
 				array(
-					'class' => $classes,
-					'style' => esc_attr( $classes_and_styles['styles'] ),
+					'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
+					'data-wp-context'     => wp_json_encode(
+						$context,
+						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+					),
+					'data-wp-on--submit'  => 'actions.handleSubmit',
+					'class'               => $classes,
+					'style'               => esc_attr( $classes_and_styles['styles'] ),
 				)
 			);
 
@@ -133,7 +181,7 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			if ( ! $is_disabled_compatibility_layer ) {
 				ob_start();
-				if ( ProductType::SIMPLE === $product_type ) {
+				if ( ProductType::SIMPLE === $product_type && $product->is_in_stock() && $product->is_purchasable() ) {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_quantity.
 					 *
@@ -171,7 +219,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				$hooks_before = ob_get_clean();
 
 				ob_start();
-				if ( ProductType::SIMPLE === $product_type ) {
+				if ( ProductType::SIMPLE === $product_type && $product->is_in_stock() && $product->is_purchasable() ) {
 					/**
 					 * Hook: woocommerce_after_add_to_cart_quantity.
 					 *
@@ -251,15 +299,5 @@ class AddToCartWithOptions extends AbstractBlock {
 		$product = $previous_product;
 
 		return $form_html;
-	}
-
-	/**
-	 * Disable the frontend script for this block type, it's built with script modules.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 * @return null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
 	}
 }

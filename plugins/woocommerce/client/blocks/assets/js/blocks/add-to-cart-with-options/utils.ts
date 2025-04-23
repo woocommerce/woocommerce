@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
 import { getSetting, getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean } from '@woocommerce/types';
 
@@ -15,4 +14,4 @@ const isBlockifiedAddToCart = getSettingWithCoercion(
 const isBlockTheme = getSetting< boolean >( 'isBlockTheme' );
 
 export const shouldBlockifiedAddToCartWithOptionsBeRegistered =
-	isExperimentalBlocksEnabled() && isBlockifiedAddToCart && isBlockTheme;
+	isBlockifiedAddToCart && isBlockTheme;

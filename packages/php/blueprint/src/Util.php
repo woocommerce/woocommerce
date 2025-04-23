@@ -27,69 +27,78 @@ class Util {
 	}
 
 	/**
-	 * @param array $row array row with key and value
-	 * @param string $table name
-	 * @param string $type one of insert, insert ignore, replace into
+	 * Convert an array to an insert SQL query.
+	 *
+	 * @param array  $row Array row with key and value.
+	 * @param string $table Name of the table.
+	 * @param string $type One of insert, insert ignore, replace into.
 	 *
 	 * @return false|string
 	 */
-	public static function array_to_insert_sql ($row, $table, $type = 'insert ignore') {
-		if (empty($row) || !is_array($row)) {
-			return false; // Return false if input data is empty or not an array
+	public static function array_to_insert_sql( $row, $table, $type = 'insert ignore' ) {
+		if ( empty( $row ) || ! is_array( $row ) ) {
+			return false; // Return false if input data is empty or not an array.
 		}
 
-		$allowed_types = ['insert', 'insert ignore', 'replace into'];
-		if (!in_array($type, $allowed_types)) {
-			return false; // Return false if input type is not valid
+		$allowed_types = array( 'insert', 'insert ignore', 'replace into' );
+		if ( ! in_array( $type, $allowed_types, true ) ) {
+			return false; // Return false if input type is not valid.
 		}
 
-		// Get column names and values
-		$columns = '`' . implode('`, `', array_keys($row)) . '`';
-		$escapedValues = array_map(fn($value) => "'" . addslashes($value) . "'", $row);
-		$values = implode(', ', $escapedValues);
-		// Construct final SQL query
+		// Get column names and values.
+		$columns        = '`' . implode( '`, `', array_keys( $row ) ) . '`';
+		$escaped_values = array_map( fn( $value ) => "'" . addslashes( $value ) . "'", $row );
+		$values         = implode( ', ', $escaped_values );
+		// Construct final SQL query.
 		return "{$type} `$table` ($columns) VALUES ($values);";
 	}
 
 	/**
 	 * Convert a string from snake_case to camelCase.
 	 *
-	 * @param string $string The string to be converted.
+	 * @param string $string_to_convert The string to be converted.
 	 *
 	 * @return string
 	 */
-	public static function snake_to_camel( $string ) {
-		// Split the string by underscores
-		$words = explode( '_', $string );
+	public static function snake_to_camel( $string_to_convert ) {
+		// Split the string by underscores.
+		$words = explode( '_', $string_to_convert );
 
-		// Capitalize the first letter of each word
+		// Capitalize the first letter of each word.
 		$words = array_map( 'ucfirst', $words );
 
-		// Join the words back together
+		// Join the words back together.
 		return implode( '', $words );
 	}
 
-	public static function array_flatten($array) {
-		return new RecursiveIteratorIterator(new RecursiveArrayIterator($array));
+	/**
+	 * Flatten an array.
+	 *
+	 * @param array $array_to_flatten The array to be flattened.
+	 *
+	 * @return \RecursiveIteratorIterator
+	 */
+	public static function array_flatten( $array_to_flatten ) {
+		return new RecursiveIteratorIterator( new RecursiveArrayIterator( $array_to_flatten ) );
 	}
 
 	/**
 	 * Convert a string from camelCase to snake_case.
-	 * 
+	 *
 	 * @param string $input The string to be converted.
 	 *
 	 * @return string
 	 */
 	public static function camel_to_snake( $input ) {
-		// Replace all uppercase letters with an underscore followed by the lowercase version of the letter
+		// Replace all uppercase letters with an underscore followed by the lowercase version of the letter.
 		$pattern     = '/([a-z])([A-Z])/';
 		$replacement = '$1_$2';
 		$snake       = preg_replace( $pattern, $replacement, $input );
 
-		// Replace spaces with underscores
+		// Replace spaces with underscores.
 		$snake = str_replace( ' ', '_', $snake );
 
-		// Convert the entire string to lowercase
+		// Convert the entire string to lowercase.
 		return strtolower( $snake );
 	}
 

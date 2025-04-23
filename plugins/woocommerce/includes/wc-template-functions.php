@@ -32,8 +32,11 @@ function wc_template_redirect() {
 
 	// When on the checkout with an empty cart, redirect to cart page.
 	if ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_redirect_empty_cart', true ) ) {
-		wp_safe_redirect( wc_get_cart_url() );
-		exit;
+		// Only redirect if we're not already on the cart page to prevent infinite loops.
+		if ( ! is_cart() ) {
+			wp_safe_redirect( wc_get_cart_url() );
+			exit;
+		}
 	}
 
 	// Logout endpoint under My Account page. Logging out requires a valid nonce.
@@ -1747,10 +1750,10 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false, $image_
 		array(
 			'title'                   => _wp_specialchars( get_post_field( 'post_title', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
 			'data-caption'            => _wp_specialchars( get_post_field( 'post_excerpt', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
-			'data-src'                => esc_url( $full_src[0] ),
-			'data-large_image'        => esc_url( $full_src[0] ),
-			'data-large_image_width'  => esc_attr( $full_src[1] ),
-			'data-large_image_height' => esc_attr( $full_src[2] ),
+			'data-src'                => isset( $full_src[0] ) ? esc_url( $full_src[0] ) : '',
+			'data-large_image'        => isset( $full_src[0] ) ? esc_url( $full_src[0] ) : '',
+			'data-large_image_width'  => isset( $full_src[1] ) ? esc_attr( $full_src[1] ) : '',
+			'data-large_image_height' => isset( $full_src[2] ) ? esc_attr( $full_src[2] ) : '',
 			'class'                   => esc_attr( $main_image ? 'wp-post-image' : '' ),
 			'alt'                     => esc_attr( $alt_text ),
 		),
@@ -1770,7 +1773,7 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false, $image_
 		$image_params
 	);
 
-	return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" data-thumb-alt="' . esc_attr( $alt_text ) . '" data-thumb-srcset="' . esc_attr( $thumbnail_srcset ) . '"  data-thumb-sizes="' . esc_attr( $thumbnail_sizes ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
+	return '<div data-thumb="' . esc_url( isset( $thumbnail_src[0] ) ? $thumbnail_src[0] : '' ) . '" data-thumb-alt="' . esc_attr( $alt_text ) . '" data-thumb-srcset="' . esc_attr( isset( $thumbnail_srcset ) ? $thumbnail_srcset : '' ) . '"  data-thumb-sizes="' . esc_attr( isset( $thumbnail_sizes ) ? $thumbnail_sizes : '' ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( isset( $full_src[0] ) ? $full_src[0] : '' ) . '">' . $image . '</a></div>';
 }
 
 if ( ! function_exists( 'woocommerce_get_alt_from_product_title_and_position' ) ) {
@@ -2760,60 +2763,6 @@ if ( ! function_exists( 'woocommerce_maybe_show_product_subcategories' ) ) {
 		}
 
 		return $loop_html;
-	}
-}
-
-if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
-	/**
-	 * This is a legacy function which used to check if we needed to display subcats and then output them. It was called by templates.
-	 *
-	 * From 3.3 onwards this is all handled via hooks and the woocommerce_maybe_show_product_subcategories function.
-	 *
-	 * Since some templates have not updated compatibility, to avoid showing incorrect categories this function has been deprecated and will
-	 * return nothing. Replace usage with woocommerce_output_product_categories to render the category list manually.
-	 *
-	 * This is a legacy function which also checks if things should display.
-	 * Themes no longer need to call these functions. It's all done via hooks.
-	 *
-	 * @deprecated 3.3.1 @todo Add a notice in a future version.
-	 * @param array $args Arguments.
-	 * @return null|boolean
-	 */
-	function woocommerce_product_subcategories( $args = array() ) {
-		$defaults = array(
-			'before'        => '',
-			'after'         => '',
-			'force_display' => false,
-		);
-
-		$args = wp_parse_args( $args, $defaults );
-
-		if ( $args['force_display'] ) {
-			// We can still render if display is forced.
-			woocommerce_output_product_categories(
-				array(
-					'before'    => $args['before'],
-					'after'     => $args['after'],
-					'parent_id' => is_product_category() ? get_queried_object_id() : 0,
-				)
-			);
-			return true;
-		} else {
-			// Output nothing. woocommerce_maybe_show_product_subcategories will handle the output of cats.
-			$display_type = woocommerce_get_loop_display_mode();
-
-			if ( 'subcategories' === $display_type ) {
-				// This removes pagination and products from display for themes not using wc_get_loop_prop in their product loops. @todo Remove in future major version.
-				global $wp_query;
-
-				if ( $wp_query->is_main_query() ) {
-					$wp_query->post_count    = 0;
-					$wp_query->max_num_pages = 0;
-				}
-			}
-
-			return 'subcategories' === $display_type || 'both' === $display_type;
-		}
 	}
 }
 
@@ -4199,38 +4148,6 @@ function woocommerce_output_all_notices() {
 	echo '<div class="woocommerce-notices-wrapper">';
 	wc_print_notices();
 	echo '</div>';
-}
-
-/**
- * Products RSS Feed.
- *
- * @deprecated 2.6
- */
-function wc_products_rss_feed() {
-	wc_deprecated_function( 'wc_products_rss_feed', '2.6' );
-}
-
-if ( ! function_exists( 'woocommerce_reset_loop' ) ) {
-
-	/**
-	 * Reset the loop's index and columns when we're done outputting a product loop.
-	 *
-	 * @deprecated 3.3
-	 */
-	function woocommerce_reset_loop() {
-		wc_reset_loop();
-	}
-}
-
-if ( ! function_exists( 'woocommerce_product_reviews_tab' ) ) {
-	/**
-	 * Output the reviews tab content.
-	 *
-	 * @deprecated 2.4.0 Unused.
-	 */
-	function woocommerce_product_reviews_tab() {
-		wc_deprecated_function( 'woocommerce_product_reviews_tab', '2.4' );
-	}
 }
 
 /**

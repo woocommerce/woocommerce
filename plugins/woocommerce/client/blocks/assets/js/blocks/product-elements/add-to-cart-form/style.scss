@@ -1,3 +1,5 @@
+@import "../../../base/components/skeleton/style";
+
 .wc-block-add-to-cart-form {
 	/**
 	* This is a base style for the input text element in WooCommerce that prevents inputs from appearing too small.
@@ -138,4 +140,15 @@ div.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
 		// WooCommerce core styles: https://github.com/woocommerce/woocommerce/blob/c9f62609155825cd817976c7611b9b0415e90f2f/plugins/woocommerce/client/legacy/css/woocommerce.scss/#L111-L112
 		width: 3.631em;
 	}
+}
+
+// Express payment button spacing
+:where(.wp-block-woocommerce-add-to-cart-form > * + *) {
+	margin-top: 12px;
+	padding: 0 4px;
+}
+
+// WooCommerce Payments has its own spacing already.
+:where(.wp-block-woocommerce-add-to-cart-form .wcpay-express-checkout-wrapper) {
+	padding: 0;
 }

@@ -21,13 +21,17 @@ export const ValidationInputError = ( {
 	propertyName = '',
 	elementId = '',
 }: ValidationInputErrorProps ): JSX.Element | null => {
-	const { validationError, validationErrorId } = useSelect( ( select ) => {
-		const store = select( validationStore );
-		return {
-			validationError: store.getValidationError( propertyName ),
-			validationErrorId: store.getValidationErrorId( elementId ),
-		};
-	} );
+	const { validationError, validationErrorId } = useSelect(
+		( select ) => {
+			const store = select( validationStore );
+
+			return {
+				validationError: store.getValidationError( propertyName ),
+				validationErrorId: store.getValidationErrorId( elementId ),
+			};
+		},
+		[ propertyName, elementId ]
+	);
 
 	if ( ! errorMessage || typeof errorMessage !== 'string' ) {
 		if ( validationError?.message && ! validationError?.hidden ) {
@@ -40,6 +44,7 @@ export const ValidationInputError = ( {
 	return (
 		<div className="wc-block-components-validation-error" role="alert">
 			<p id={ validationErrorId }>
+				{ /* @ts-expect-error - TS wants the Icon component to define svg specific props, but it's not always SVG */ }
 				<Icon icon={ warning } />
 				<span>{ errorMessage }</span>
 			</p>

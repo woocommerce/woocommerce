@@ -146,7 +146,7 @@ trait UseWPFunctions {
 	 * @param string $redirect Optional. URL to redirect to after activation.
 	 * @param bool   $network_wide Optional. Whether to enable the plugin for all sites in the network.
 	 * @param bool   $silent Optional. Whether to prevent calling activation hooks.
-	 * @return WP_Error|null WP_Error on failure, null on success.
+	 * @return \WP_Error|null WP_Error on failure, null on success.
 	 */
 	public function wp_activate_plugin( $plugin, $redirect = '', $network_wide = false, $silent = false ) {
 		if ( ! function_exists( 'activate_plugin' ) ) {

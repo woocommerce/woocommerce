@@ -142,7 +142,7 @@ export const useSchemaParser = < T extends FormType | 'global' >(
 	}
 	return {
 		parser: null,
-		data: null,
+		data,
 	};
 };
 

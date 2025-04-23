@@ -109,6 +109,18 @@ As this information is not automatically updated, it would be best to refer dire
 
 The following WP Data API calls are used in the Core Profiler:
 
+- `resolveSelect( coreStore ).getEntityRecord( 'root', 'site' )`
+
+This is used to retrieve the store's name.
+
+- `resolveSelect( settingsOptionsStore ).getSettingValue( 'general', 'woocommerce_default_country' )`
+
+This is used to retrieve the store's country.
+
+- `resolveSelect( settingsOptionsStore ).getSettingValue( 'advanced', 'woocommerce_allow_tracking' )`
+
+This is used to retrieve whether the user has opted in to usage tracking.
+
 - `resolveSelect( onboardingStore ).getFreeExtensions()`
 
 This is used to retrieve the list of extensions that will be shown on the Extensions page. It makes an API call to the WooCommerce REST API, which will make a call to WooCommerce.com if permitted. Otherwise it retrieves the locally stored list of free extensions.
@@ -133,6 +145,10 @@ This is used to retrieve the URL that the browser should be redirected to in ord
 
 This is used to indicate to WooCommerce Admin that the Core Profiler has been completed, and this sets the Store's coming-soon mode to true. This hides the store pages from the public until the store is ready.
 
+- `resolveSelect( onboardingStore ).getProfileItems()`
+
+This is used to retrieve the profile items that have been completed by the user.
+
 - `dispatch( onboardingStore ).updateProfileItems( profileItems )`
 
 This is used to update `woocommerce_onboarding_profile`.
@@ -140,6 +156,14 @@ This is used to update `woocommerce_onboarding_profile`.
 - `dispatch( onboardingStore ).updateStoreCurrencyAndMeasurementUnits( countryCode )`
 
 This is used to update the store's currency and measurement units, which can be found under WooCommerce → Settings → General → Currency Options and WooCommerce → Settings → Products → Measurements.
+
+- `dispatch( settingOptionsStore ).saveSetting( 'general', 'woocommerce_default_country', countryCode )`
+
+This is used to update the store's country.
+
+- `dispatch( settingOptionsStore ).saveSetting( 'advanced', 'woocommerce_allow_tracking', optInDataSharing )`
+
+This is used to update the user's preference for usage tracking.
 
 ### Extensions Installation
 

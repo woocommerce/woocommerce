@@ -1,11 +1,13 @@
 {
 	"name": "woocommerce/related-products",
-	"version": "1.0.0",
 	"title": "Related Products",
 	"icon": "product",
 	"description": "Display related products.",
 	"category": "woocommerce",
 	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
 		"align": true,
 		"reusable": false,
 		"inserter": false

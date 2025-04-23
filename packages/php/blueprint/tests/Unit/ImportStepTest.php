@@ -19,6 +19,8 @@ class ImportStepTest extends TestCase {
 	}
 
 	/**
+	 * Set up the test.
+	 *
 	 * @return void
 	 */
 	public function setUp(): void {
@@ -44,6 +46,8 @@ class ImportStepTest extends TestCase {
 	}
 
 	/**
+	 * Test it returns warn when it cannot find valid importer.
+	 *
 	 * @return void
 	 */
 	public function test_it_returns_warn_when_it_cannot_find_valid_importer() {
@@ -56,6 +60,8 @@ class ImportStepTest extends TestCase {
 	}
 
 	/**
+	 * Test it returns validation error.
+	 *
 	 * @return void
 	 */
 	public function test_it_returns_validation_error() {

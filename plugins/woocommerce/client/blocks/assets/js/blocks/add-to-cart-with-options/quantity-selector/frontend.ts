@@ -2,7 +2,16 @@
  * External dependencies
  */
 import { store } from '@wordpress/interactivity';
-import { HTMLElementEvent } from '@woocommerce/types';
+import type { HTMLElementEvent } from '@woocommerce/types';
+
+/**
+ * Internal dependencies
+ */
+import type { AddToCartWithOptionsStore } from '../frontend';
+
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 const getInputElementFromEvent = (
 	event: HTMLElementEvent< HTMLButtonElement >
@@ -48,8 +57,14 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 	inputElement.dispatchEvent( event );
 };
 
+const { actions: wooAddToCartWithOptionsActions } =
+	store< AddToCartWithOptionsStore >(
+		'woocommerce/add-to-cart-with-options',
+		{},
+		{ lock: universalLock }
+	);
+
 store( 'woocommerce/add-to-cart-with-options', {
-	state: {},
 	actions: {
 		addQuantity: ( event: HTMLElementEvent< HTMLButtonElement > ) => {
 			const inputData = getInputData( event );
@@ -60,6 +75,7 @@ store( 'woocommerce/add-to-cart-with-options', {
 			const newValue = currentValue + step;
 
 			if ( maxValue === undefined || newValue <= maxValue ) {
+				wooAddToCartWithOptionsActions?.setQuantity( newValue );
 				inputElement.value = newValue.toString();
 				dispatchChangeEvent( inputElement );
 			}
@@ -73,6 +89,7 @@ store( 'woocommerce/add-to-cart-with-options', {
 			const newValue = currentValue - step;
 
 			if ( newValue >= minValue ) {
+				wooAddToCartWithOptionsActions?.setQuantity( newValue );
 				inputElement.value = newValue.toString();
 				dispatchChangeEvent( inputElement );
 			}

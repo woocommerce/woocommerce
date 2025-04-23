@@ -42,31 +42,6 @@ function wc_empty_cart() {
 }
 
 /**
- * Load the persistent cart.
- *
- * @param string  $user_login User login.
- * @param WP_User $user       User data.
- * @deprecated 2.3
- */
-function wc_load_persistent_cart( $user_login, $user ) {
-	if ( ! $user || ! apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
-		return;
-	}
-
-	$saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
-
-	if ( ! $saved_cart ) {
-		return;
-	}
-
-	$cart = WC()->session->cart;
-
-	if ( empty( $cart ) || ! is_array( $cart ) || 0 === count( $cart ) ) {
-		WC()->session->cart = $saved_cart['cart'];
-	}
-}
-
-/**
  * Retrieves unvalidated referer from '_wp_http_referer' or HTTP referer.
  *
  * Do not use for redirects, use {@see wp_get_referer()} instead.
@@ -315,7 +290,8 @@ function wc_cart_totals_coupon_html( $coupon ) {
 	}
 
 	$discount_amount_html = apply_filters( 'woocommerce_coupon_discount_amount_html', $discount_amount_html, $coupon );
-	$coupon_html          = $discount_amount_html . ' <a href="' . esc_url( add_query_arg( 'remove_coupon', rawurlencode( $coupon->get_code() ), Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) ? wc_get_checkout_url() : wc_get_cart_url() ) ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->get_code() ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
+	// translators: %s: coupon code.
+	$coupon_html = $discount_amount_html . ' <a role="button" aria-label="' . sprintf( esc_attr__( 'Remove %s coupon', 'woocommerce' ), $coupon->get_code() ) . '" href="' . esc_url( add_query_arg( 'remove_coupon', rawurlencode( $coupon->get_code() ), Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) ? wc_get_checkout_url() : wc_get_cart_url() ) ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->get_code() ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
 
 	echo wp_kses( apply_filters( 'woocommerce_cart_totals_coupon_html', $coupon_html, $coupon, $discount_amount_html ), array_replace_recursive( wp_kses_allowed_html( 'post' ), array( 'a' => array( 'data-coupon' => true ) ) ) ); // phpcs:ignore PHPCompatibility.PHP.NewFunctions.array_replace_recursiveFound
 }

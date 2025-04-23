@@ -45,7 +45,7 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 				[
 					'core/heading',
 					{
-						level: 4,
+						level: 3,
 						content: __( 'Rating', 'woocommerce' ),
 						style: {
 							spacing: {

@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Switch from using FeaturesUtil to get_option for the Email Editor Integration package

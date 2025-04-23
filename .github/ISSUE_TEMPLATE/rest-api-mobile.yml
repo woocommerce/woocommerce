@@ -1,7 +1,7 @@
 name: 📱 REST API issue for mobile apps
 description: Bug reports and enhancement requests for the REST API related to its usage by the native mobile apps.
 title: "[REST API]: "
-labels: ["type: task", "focus: rest api", "stakeholder: mobile teams"]
+labels: ["focus: rest api", "stakeholder: mobile teams"]
 body:
   - type: markdown
     attributes:
