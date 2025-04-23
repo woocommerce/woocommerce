@@ -93,8 +93,26 @@ function ReadOnlyContent( {
 	);
 }
 
+function Placeholder( { layoutClassNames } ) {
+	const blockProps = useBlockProps( { className: layoutClassNames } );
+	return (
+		<div { ...blockProps }>
+			<p>
+				{ __(
+					'This block displays the product description. When viewing a product page, the description content will automatically appear here.',
+					'woocommerce'
+				) }
+			</p>
+		</div>
+	);
+}
+
 function EditableContent( { context = {} } ) {
 	const { postType, postId } = context;
+
+	const blockProps = useBlockProps( {
+		className: 'product-description__editable-content',
+	} );
 
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
 		'postType',
@@ -117,15 +135,17 @@ function EditableContent( { context = {} } ) {
 
 	const initialInnerBlocks = [ [ 'core/paragraph' ] ];
 
-	const props = useInnerBlocksProps(
-		useBlockProps( { className: 'product-description__editable-content' } ),
-		{
-			value: blocks,
-			onInput,
-			onChange,
-			template: ! hasInnerBlocks ? initialInnerBlocks : undefined,
-		}
-	);
+	const props = useInnerBlocksProps( blockProps, {
+		value: blocks,
+		onInput,
+		onChange,
+		template: ! hasInnerBlocks ? initialInnerBlocks : undefined,
+	} );
+
+	if ( ! entityRecord ) {
+		return <Placeholder layoutClassNames={ blockProps.className } />;
+	}
+
 	return <div { ...props } />;
 }
 
@@ -147,20 +167,6 @@ function Content( props ) {
 			postType={ postType }
 			postId={ postId }
 		/>
-	);
-}
-
-function Placeholder( { layoutClassNames } ) {
-	const blockProps = useBlockProps( { className: layoutClassNames } );
-	return (
-		<div { ...blockProps }>
-			<p>
-				{ __(
-					'This block displays the product description. When viewing a product page, the description content will automatically appear here.',
-					'woocommerce'
-				) }
-			</p>
-		</div>
 	);
 }
 
