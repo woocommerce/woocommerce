@@ -30,7 +30,7 @@ const getInputElementFromEvent = (
 
 	const inputElement = target.parentElement?.querySelector(
 		'.input-text.qty.text'
-	) as HTMLInputElement | null | undefined;
+	) as HTMLInputElement | null;
 
 	return inputElement;
 };
