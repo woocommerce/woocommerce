@@ -44,6 +44,7 @@ class ProductFilters extends AbstractBlock {
 		if ( is_singular() ) {
 			$canonical_url_no_pagination = get_permalink();
 		}
+
 		$this->asset_data_registry->add( 'canonicalUrl', html_entity_decode( $canonical_url_no_pagination ) );
 	}
 
@@ -57,7 +58,6 @@ class ProductFilters extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		wp_enqueue_script( 'wc-settings' );
-		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		$query_id      = $block->context['queryId'] ?? 0;
 		$filter_params = $this->get_filter_params( $query_id );
@@ -244,10 +244,27 @@ class ProductFilters extends AbstractBlock {
 	}
 
 	/**
-	 * Disable the block type script, this uses script modules.
+	 * Disable the style handle for this block type. We use block.json to load the style.
 	 *
-	 * @param string|null $key The key.
+	 * @return null
+	 */
+	protected function get_block_type_style() {
+		return null;
+	}
+
+	/**
+	 * Disable the editor style handle for this block type. We use block.json to load the style.
 	 *
+	 * @return null
+	 */
+	protected function get_block_type_editor_style() {
+		return null;
+	}
+
+	/**
+	 * Disable the script handle for this block type. We use block.json to load the script.
+	 *
+	 * @param string|null $key The key of the script to get.
 	 * @return null
 	 */
 	protected function get_block_type_script( $key = null ) {

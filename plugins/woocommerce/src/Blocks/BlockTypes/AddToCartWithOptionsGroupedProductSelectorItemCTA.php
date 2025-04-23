@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptionsQuantitySelector;
 use WP_Block;
 
 /**
@@ -12,6 +11,9 @@ use WP_Block;
  * a checkbox, or a link.
  */
 class AddToCartWithOptionsGroupedProductSelectorItemCTA extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
