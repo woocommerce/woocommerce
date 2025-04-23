@@ -20,35 +20,46 @@ const getVerticalAlignmentClass = ( verticalAlignment?: string ) => {
 	return '';
 };
 
+const getAlignClass = ( align?: string ) => {
+	if ( align === 'left' ) {
+		return 'alignleft';
+	}
+	if ( align === 'right' ) {
+		return 'alignright';
+	}
+	if ( align === 'center' ) {
+		return 'aligncenter';
+	}
+	// Default to spread.
+	return '';
+};
+
 export const Edit = ( {
 	attributes,
 }: {
-	attributes: { layout: { verticalAlignment: string } };
+	attributes: { layout: { verticalAlignment: string }; align: string };
 } ) => {
-	const verticalAlignment = attributes?.layout?.verticalAlignment;
-	const verticalAlignmentClass =
-		getVerticalAlignmentClass( verticalAlignment );
-
-	const { style, ...blockProps } = useBlockProps( {
-		className: clsx(
-			'wc-block-product-gallery-large-image-next-previous',
-			verticalAlignmentClass
-		),
+	const blockProps = useBlockProps( {
+		className: 'wc-block-product-gallery-large-image-next-previous__button',
 	} );
 
+	const verticalAlign = attributes?.layout?.verticalAlignment;
+	const verticalAlignClass = getVerticalAlignmentClass( verticalAlign );
+	const horizontalAlign = attributes?.align;
+	const horizontalAlignClass = getAlignClass( horizontalAlign );
+
+	const containerClassName = clsx(
+		'wc-block-product-gallery-large-image-next-previous',
+		verticalAlignClass,
+		horizontalAlignClass
+	);
+
 	return (
-		<div { ...blockProps }>
-			<button
-				className="wc-block-product-gallery-large-image-next-previous__button"
-				style={ style }
-				disabled
-			>
+		<div className={ containerClassName }>
+			<button { ...blockProps } disabled>
 				<PrevIcon className="wc-block-product-gallery-large-image-next-previous__icon wc-block-product-gallery-large-image-next-previous__icon--left" />
 			</button>
-			<button
-				className="wc-block-product-gallery-large-image-next-previous__button"
-				style={ style }
-			>
+			<button { ...blockProps }>
 				<NextIcon className="wc-block-product-gallery-large-image-next-previous__icon wc-block-product-gallery-large-image-next-previous__icon--right" />
 			</button>
 		</div>
