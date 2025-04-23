@@ -23,8 +23,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
 
-/*
+/**
+ * Hook for the woocommerce_email_header.
+ *
  * @hooked WC_Emails::email_header() Output the email header
+ * @since 3.7.0
  */
 do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
@@ -49,7 +52,9 @@ if ( ! empty( $order->get_billing_first_name() ) ) {
 
 <?php
 
-/*
+/**
+ * Show order details.
+ *
  * @hooked WC_Emails::order_details() Shows the order details table.
  * @hooked WC_Structured_Data::generate_order_data() Generates structured data.
  * @hooked WC_Structured_Data::output_structured_data() Outputs structured data.
@@ -57,14 +62,20 @@ if ( ! empty( $order->get_billing_first_name() ) ) {
  */
 do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email );
 
-/*
+/**
+ * Show order meta data.
+ *
  * @hooked WC_Emails::order_meta() Shows order meta data.
+ * @since 1.0.0
  */
 do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email );
 
-/*
+/**
+ * Show customer details and email address.
+ *
  * @hooked WC_Emails::customer_details() Shows customer details
  * @hooked WC_Emails::email_address() Shows email address
+ * @since 1.0.0
  */
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 
@@ -77,7 +88,9 @@ if ( $additional_content ) {
 	echo $email_improvements_enabled ? '</td></tr></table>' : '';
 }
 
-/*
- * @hooked WC_Emails::email_footer() Output the email footer
+/**
+ * Output the email footer
+ *
+ * @since 4.0.0
  */
 do_action( 'woocommerce_email_footer', $email );
