@@ -11,6 +11,5 @@
 	"supports": {
 		"interactivity": true
 	},
-	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"editorStyle": "file:../woocommerce/add-to-cart-with-options-quantity-selector-editor.css"
+	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

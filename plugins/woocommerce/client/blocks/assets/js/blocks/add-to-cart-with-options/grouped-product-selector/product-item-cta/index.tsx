@@ -11,7 +11,6 @@ import metadata from './block.json';
 import ProductItemCTAEdit from './edit';
 import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../../utils';
 import './style.scss';
-import './editor.scss';
 
 if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
 	registerBlockType( metadata, {
