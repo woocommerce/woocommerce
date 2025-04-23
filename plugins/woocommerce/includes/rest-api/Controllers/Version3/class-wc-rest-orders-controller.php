@@ -353,6 +353,8 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	public function get_item_schema() {
 		$schema = parent::get_item_schema();
 
+		$schema['properties']['created_via']['readonly'] = false;
+
 		$schema['properties']['coupon_lines']['items']['properties']['discount']['readonly'] = true;
 
 		$schema['properties']['manual_update'] = array(
