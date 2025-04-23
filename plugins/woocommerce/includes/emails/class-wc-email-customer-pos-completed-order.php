@@ -27,9 +27,9 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * Constructor.
 		 */
 		public function __construct() {
-			$this->id             = 'customer_completed_order';
+			$this->id             = 'customer_pos_completed_order';
 			$this->customer_email = true;
-			$this->title          = __( 'Completed order', 'woocommerce' );
+			$this->title          = __( 'POS completed order', 'woocommerce' );
 			$this->template_html  = 'emails/customer-completed-order.php';
 			$this->template_plain = 'emails/plain/customer-completed-order.php';
 			$this->placeholders   = array(
@@ -37,16 +37,13 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 				'{order_number}' => '',
 			);
 
-			// Triggers for this email.
-			add_action( 'woocommerce_order_status_completed_notification', array( $this, 'trigger' ), 10, 2 );
-
 			// Call parent constructor.
 			parent::__construct();
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Let shoppers know once their order is complete and is being shipped.', 'woocommerce' )
-				: __( 'Order complete emails are sent to customers when their orders are marked completed and usually indicate that their orders have been shipped.', 'woocommerce' );
+				? __( 'Let shoppers know once their POS order is complete.', 'woocommerce' )
+				: __( 'Order complete emails are sent to customers when their POS orders are marked completed.', 'woocommerce' );
 		}
 
 		/**

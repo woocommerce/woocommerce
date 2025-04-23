@@ -44,8 +44,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 */
 		public function __construct() {
 			$this->customer_email = true;
-			$this->id             = 'customer_refunded_order';
-			$this->title          = __( 'Refunded order', 'woocommerce' );
+			$this->id             = 'customer_pos_refunded_order';
+			$this->title          = __( 'POS refunded order', 'woocommerce' );
 			$this->template_html  = 'emails/customer-refunded-order.php';
 			$this->template_plain = 'emails/plain/customer-refunded-order.php';
 			$this->placeholders   = array(
@@ -53,17 +53,13 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 				'{order_number}' => '',
 			);
 
-			// Triggers for this email.
-			add_action( 'woocommerce_order_fully_refunded_notification', array( $this, 'trigger_full' ), 10, 2 );
-			add_action( 'woocommerce_order_partially_refunded_notification', array( $this, 'trigger_partial' ), 10, 2 );
-
 			// Call parent constructor.
 			parent::__construct();
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Let shoppers know when a full or partial refund is on its way to them.', 'woocommerce' )
-				: __( 'Order refunded emails are sent to customers when their orders are refunded.', 'woocommerce' );
+				? __( 'Let shoppers know when a full or partial refund is on its way to them for their POS order.', 'woocommerce' )
+				: __( 'Order refunded emails are sent to customers when their POS orders are refunded.', 'woocommerce' );
 		}
 
 		/**
