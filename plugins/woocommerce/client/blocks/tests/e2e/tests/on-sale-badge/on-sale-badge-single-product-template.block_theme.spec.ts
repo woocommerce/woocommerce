@@ -26,8 +26,6 @@ const blockData = {
 			badgeContainer: '.wp-block-woocommerce-product-sale-badge',
 		},
 	},
-	// This margin is applied via Block Styles to the product sale badge. It's necessary to take it into account when calculating the position of the badge. https://github.com/woocommerce/woocommerce-blocks/blob/445b9431ccba460f9badd41d52ed991958524e33/assets/js/blocks/product-gallery/edit.tsx/#L44-L53
-	margin: 4,
 	slug: 'single-product',
 	productPage: '/product/hoodie/',
 	productPageNotOnSale: '/product/album/',
@@ -188,7 +186,7 @@ test.describe( `${ blockData.name }`, () => {
 
 					return badge.x - badgeContainer.x;
 				} )
-				.toEqual( blockData.margin );
+				.toEqual( 0 );
 
 			await editor.saveSiteEditorEntities( {
 				isOnlyCurrentEntityDirty: true,
@@ -203,7 +201,7 @@ test.describe( `${ blockData.name }`, () => {
 
 					return badge.x - badgeContainer.x;
 				} )
-				.toEqual( blockData.margin );
+				.toEqual( 0 );
 		} );
 
 		test( 'should be aligned to the center', async ( {
@@ -274,7 +272,7 @@ test.describe( `${ blockData.name }`, () => {
 
 					return badgeContainer.right - badge.right;
 				} )
-				.toEqual( blockData.margin );
+				.toEqual( 0 );
 
 			await editor.saveSiteEditorEntities( {
 				isOnlyCurrentEntityDirty: true,
@@ -289,7 +287,7 @@ test.describe( `${ blockData.name }`, () => {
 
 					return badgeContainer.right - badge.right;
 				} )
-				.toEqual( blockData.margin );
+				.toEqual( 0 );
 		} );
 	} );
 } );
