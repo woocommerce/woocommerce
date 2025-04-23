@@ -249,7 +249,7 @@ abstract class AbstractBlock {
 		if (
 			! is_admin() &&
 			! wp_is_block_theme() &&
-			$block_settings['style'] &&
+			! empty( $block_settings['style'] ) &&
 			(
 				! function_exists( 'wp_should_load_separate_core_block_assets' ) ||
 				! wp_should_load_separate_core_block_assets()
