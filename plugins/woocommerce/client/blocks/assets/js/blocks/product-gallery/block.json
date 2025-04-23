@@ -33,5 +33,7 @@
 		}
 	},
 	"viewScript": "wc-product-gallery-frontend",
-	"example": {}
+	"example": {},
+	"viewScriptModule": "woocommerce/product-gallery",
+	"style": "file:../woocommerce/product-gallery-style.css"
 }

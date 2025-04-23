@@ -38,11 +38,10 @@ class ExportSchema {
 	 * Export the schema steps.
 	 *
 	 * @param string[] $steps Array of step names to export, optional.
-	 * @param bool     $zip Whether to export as a ZIP file, optional.
 	 *
 	 * @return array The exported schema array.
 	 */
-	public function export( $steps = array(), $zip = false ) {
+	public function export( $steps = array() ) {
 		$schema = array(
 			'landingPage' => $this->wp_apply_filters( 'wooblueprint_export_landingpage', '/' ),
 			'steps'       => array(),
@@ -70,18 +69,6 @@ class ExportSchema {
 					unset( $exporters[ $key ] );
 				}
 			}
-		}
-
-		if ( $zip ) {
-			$exporters = array_map(
-				function ( $exporter ) {
-					if ( $exporter instanceof ExportInstallPluginSteps ) {
-						$exporter->include_private_plugins( true );
-					}
-					return $exporter;
-				},
-				$exporters
-			);
 		}
 
 		/**

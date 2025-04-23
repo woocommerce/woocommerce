@@ -83,7 +83,8 @@
 			"label": "Outline"
 		}
 	],
-	"viewScript": [ "wc-product-button-interactivity-frontend" ],
 	"apiVersion": 3,
-	"$schema": "https://schemas.wp.org/trunk/block.json"
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"viewScriptModule": "woocommerce/product-button",
+	"style": "file:../woocommerce/product-button-style.css"
 }

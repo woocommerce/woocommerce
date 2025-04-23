@@ -52,5 +52,7 @@
 	"usesContext": [ "filterData" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
-	"$schema": "https://schemas.wp.org/trunk/block.json"
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"viewScriptModule": "woocommerce/product-filter-price-slider",
+	"style": "file:../woocommerce/product-filter-price-slider-style.css"
 }

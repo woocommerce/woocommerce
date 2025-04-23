@@ -9,6 +9,7 @@ import {
 	useInnerBlocksProps,
 	useBlockProps,
 } from '@wordpress/block-editor';
+import { getSetting } from '@woocommerce/settings';
 
 const TemplatePartInnerBlocks = ( {
 	blockProps,
@@ -68,54 +69,12 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 }: {
 	productType: string;
 } ) => {
-	const { templatePartId } = useSelect(
-		( select ) => {
-			const {
-				getCurrentTheme,
-				getEditedEntityRecord,
-				hasFinishedResolution,
-			} = select( coreStore );
+	const addToCartWithOptionsTemplatePartIds = getSetting(
+		'addToCartWithOptionsTemplatePartIds',
+		{}
+	) as Record< string, string | null >;
 
-			const currentTheme = getCurrentTheme()?.stylesheet;
-
-			if ( ! currentTheme ) {
-				return {
-					templatePartId: null,
-				};
-			}
-
-			const templatePartSlug = `${ productType }-product-add-to-cart-with-options`;
-			const themeTemplatePartId = `${ currentTheme }//${ templatePartSlug }`;
-			const wooCommerceTemplatePartId = `woocommerce/woocommerce//${ templatePartSlug }`;
-
-			const getThemeEntityArgs = [
-				'postType',
-				'wp_template_part',
-				themeTemplatePartId,
-			] as const;
-			const themeEntityRecord = themeTemplatePartId
-				? getEditedEntityRecord( ...getThemeEntityArgs )
-				: null;
-			const hasResolvedEntity = themeTemplatePartId
-				? hasFinishedResolution(
-						'getEditedEntityRecord',
-						getThemeEntityArgs
-				  )
-				: false;
-
-			const themeTemplatePartIsMissing =
-				hasResolvedEntity &&
-				( ! themeEntityRecord ||
-					Object.keys( themeEntityRecord ).length === 0 );
-
-			return {
-				templatePartId: themeTemplatePartIsMissing
-					? wooCommerceTemplatePartId
-					: themeTemplatePartId,
-			};
-		},
-		[ productType ]
-	);
+	const templatePartId = addToCartWithOptionsTemplatePartIds?.[ productType ];
 
 	const blockProps = useBlockProps();
 
