@@ -764,7 +764,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						id: 'woocommerce_enable_ajax_add_to_cart_product_pages',
 						label: '',
 						description:
-							'Enable AJAX add to cart buttons on single product pages',
+							'Enable AJAX add to cart buttons on product pages',
 						type: 'checkbox',
 						default: 'yes',
 						value: 'yes',
