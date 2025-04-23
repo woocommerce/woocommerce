@@ -408,8 +408,19 @@ class WC_Frontend_Scripts {
 		if ( is_checkout() ) {
 			self::enqueue_script( 'wc-checkout' );
 		}
-		if ( is_checkout() && count( Package::container()->get( AddressProviderService::class )->get_registered_providers() ) > 0 ) {
-			self::enqueue_script( 'wc-address-autocomplete' );
+		if ( is_checkout() ) {
+			try {
+				$address_provider_service = Package::container()->get( AddressProviderService::class );
+				if ( $address_provider_service && method_exists( $address_provider_service, 'get_registered_providers' ) ) {
+					$registered_providers = $address_provider_service->get_registered_providers();
+					if ( is_array( $registered_providers ) && count( $registered_providers ) > 0 ) {
+						self::enqueue_script( 'wc-address-autocomplete' );
+					}
+				}
+			} catch ( Exception $e ) {
+				// Log the error for debugging purposes.
+				error_log( 'Error fetching registered providers: ' . $e->getMessage() );
+			}
 		}
 		if ( is_add_payment_method_page() ) {
 			self::enqueue_script( 'wc-add-payment-method' );
