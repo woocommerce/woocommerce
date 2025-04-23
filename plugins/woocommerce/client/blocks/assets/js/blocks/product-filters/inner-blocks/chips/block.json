@@ -52,5 +52,8 @@
 		"customSelectedChipBorder": {
 			"type": "string"
 		}
-	}
+	},
+	"viewScriptModule": "woocommerce/product-filter-chips",
+	"style": "file:../woocommerce/product-filter-chips-style.css",
+	"editorStyle": "file:../woocommerce/product-filter-chips-editor.css"
 }
