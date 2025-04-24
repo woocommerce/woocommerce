@@ -170,7 +170,6 @@
 				button.dataset.originalText = button.textContent;
 			}
 			button.textContent = data.button_text;
-			// @todo we need to reset the button text after switching the variation.
 
 			updateFragments( data.fragments );
 			updateLiveRegion( data.success_message );

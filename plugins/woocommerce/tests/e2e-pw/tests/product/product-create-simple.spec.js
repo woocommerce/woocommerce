@@ -329,7 +329,6 @@ for ( const productType of Object.keys( productData ) ) {
 					.getByRole( 'button', { name: 'Add to cart' } )
 					.click();
 
-				// Verify the button text was updated.
 				await expect(
 					page.getByRole( 'button' ).getByText( '1 in cart' )
 				).toBeVisible();

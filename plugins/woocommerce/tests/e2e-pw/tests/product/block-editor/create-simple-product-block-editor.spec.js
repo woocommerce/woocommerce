@@ -496,8 +496,13 @@ test.describe( 'General tab', { tag: [ tags.GUTENBERG ] }, () => {
 
 			await page.goto( `?post_type=product&p=${ productId }` );
 
-			await page.locator( 'button[name="add-to-cart"]' ).click();
-			await page.getByRole( 'link', { name: 'View cart' } ).click();
+			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+
+			await expect(
+				page.getByRole( 'button' ).getByText( '1 in cart' )
+			).toBeVisible();
+
+			await page.goto( 'cart/' );
 
 			await checkCartContent(
 				false,
