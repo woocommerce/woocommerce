@@ -120,6 +120,12 @@
 				margin-bottom: 0;
 				vertical-align: middle;
 			}
+
+			.variations {
+				td, th {
+					word-break: normal;
+				}
+			}
 		}
 
 		.related.products {
