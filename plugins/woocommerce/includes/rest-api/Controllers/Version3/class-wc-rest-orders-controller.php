@@ -119,6 +119,12 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 			if ( ! is_null( $value ) ) {
 				switch ( $key ) {
+					case 'created_via':
+						// Created via is only writable on order creation.
+						if ( ! $creating ) {
+							unset( $request[ $key ] );
+						}
+						break;
 					case 'coupon_lines':
 					case 'status':
 						// Change should be done later so transitions have new data.
@@ -270,7 +276,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			}
 
 			if ( $creating ) {
-				$object->set_created_via( 'rest-api' );
+				$object->set_created_via( ! empty( $request['created_via'] ) ? sanitize_text_field( wp_unslash( $request['created_via'] ) ) : 'rest-api' );
 				$object->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 				$object->save();
 				$object->calculate_totals();
@@ -360,6 +366,8 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	 */
 	public function get_item_schema() {
 		$schema = parent::get_item_schema();
+
+		$schema['properties']['created_via']['readonly'] = false;
 
 		$schema['properties']['coupon_lines']['items']['properties']['discount']['readonly'] = true;
 

@@ -14,6 +14,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  */
 class ProductFilterPriceSlider extends AbstractBlock {
 
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -33,8 +35,6 @@ class ProductFilterPriceSlider extends AbstractBlock {
 		if ( is_admin() || wp_doing_ajax() || empty( $block->context['filterData'] ) || empty( $block->context['filterData']['price'] ) ) {
 			return '';
 		}
-
-		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		$price_data = $block->context['filterData']['price'];
 		$min_price  = $price_data['minPrice'];
@@ -150,16 +150,5 @@ class ProductFilterPriceSlider extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
-	}
-
-	/**
-	 * Disable the block type script, this uses script modules.
-	 *
-	 * @param string|null $key The key.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
 	}
 }

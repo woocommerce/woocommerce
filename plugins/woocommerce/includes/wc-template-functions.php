@@ -2766,60 +2766,6 @@ if ( ! function_exists( 'woocommerce_maybe_show_product_subcategories' ) ) {
 	}
 }
 
-if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
-	/**
-	 * This is a legacy function which used to check if we needed to display subcats and then output them. It was called by templates.
-	 *
-	 * From 3.3 onwards this is all handled via hooks and the woocommerce_maybe_show_product_subcategories function.
-	 *
-	 * Since some templates have not updated compatibility, to avoid showing incorrect categories this function has been deprecated and will
-	 * return nothing. Replace usage with woocommerce_output_product_categories to render the category list manually.
-	 *
-	 * This is a legacy function which also checks if things should display.
-	 * Themes no longer need to call these functions. It's all done via hooks.
-	 *
-	 * @deprecated 3.3.1 @todo Add a notice in a future version.
-	 * @param array $args Arguments.
-	 * @return null|boolean
-	 */
-	function woocommerce_product_subcategories( $args = array() ) {
-		$defaults = array(
-			'before'        => '',
-			'after'         => '',
-			'force_display' => false,
-		);
-
-		$args = wp_parse_args( $args, $defaults );
-
-		if ( $args['force_display'] ) {
-			// We can still render if display is forced.
-			woocommerce_output_product_categories(
-				array(
-					'before'    => $args['before'],
-					'after'     => $args['after'],
-					'parent_id' => is_product_category() ? get_queried_object_id() : 0,
-				)
-			);
-			return true;
-		} else {
-			// Output nothing. woocommerce_maybe_show_product_subcategories will handle the output of cats.
-			$display_type = woocommerce_get_loop_display_mode();
-
-			if ( 'subcategories' === $display_type ) {
-				// This removes pagination and products from display for themes not using wc_get_loop_prop in their product loops. @todo Remove in future major version.
-				global $wp_query;
-
-				if ( $wp_query->is_main_query() ) {
-					$wp_query->post_count    = 0;
-					$wp_query->max_num_pages = 0;
-				}
-			}
-
-			return 'subcategories' === $display_type || 'both' === $display_type;
-		}
-	}
-}
-
 if ( ! function_exists( 'woocommerce_output_product_categories' ) ) {
 	/**
 	 * Display product sub categories as thumbnails.
@@ -4202,38 +4148,6 @@ function woocommerce_output_all_notices() {
 	echo '<div class="woocommerce-notices-wrapper">';
 	wc_print_notices();
 	echo '</div>';
-}
-
-/**
- * Products RSS Feed.
- *
- * @deprecated 2.6
- */
-function wc_products_rss_feed() {
-	wc_deprecated_function( 'wc_products_rss_feed', '2.6' );
-}
-
-if ( ! function_exists( 'woocommerce_reset_loop' ) ) {
-
-	/**
-	 * Reset the loop's index and columns when we're done outputting a product loop.
-	 *
-	 * @deprecated 3.3
-	 */
-	function woocommerce_reset_loop() {
-		wc_reset_loop();
-	}
-}
-
-if ( ! function_exists( 'woocommerce_product_reviews_tab' ) ) {
-	/**
-	 * Output the reviews tab content.
-	 *
-	 * @deprecated 2.4.0 Unused.
-	 */
-	function woocommerce_product_reviews_tab() {
-		wc_deprecated_function( 'woocommerce_product_reviews_tab', '2.4' );
-	}
 }
 
 /**
