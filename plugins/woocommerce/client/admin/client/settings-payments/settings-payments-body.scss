@@ -4,8 +4,7 @@ html {
 	font-family: $font-sf-pro-display;
 }
 
-/* Use this carefully as in changes the body background to white. Include it only in components, otherwise white background will be all over the pages. */
-body.woocommerce-feature-enabled-reactify-classic-payments-settings {
+body.woocommerce-feature-enabled-reactify-classic-payments-settings.woocommerce_page_wc-settings-checkout {
 	#mainform,
 	#wpcontent {
 		background: #fff;

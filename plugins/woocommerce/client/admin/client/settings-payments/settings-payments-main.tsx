@@ -519,7 +519,8 @@ export const SettingsPaymentsMain = () => {
 					/>
 				) }
 			</div>
-			{ providersContainWooPaymentsNeedsSetup( providers ) && (
+			{ ( providersContainWooPaymentsNeedsSetup( providers ) ||
+				providersContainWooPaymentsInTestMode( providers ) ) && (
 				<WooPaymentsModal
 					isOpen={ isOnboardingModalOpen }
 					setIsOpen={ setIsOnboardingModalOpen }
