@@ -10,6 +10,7 @@
  // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Domain\Services\AddressProviderService;
 use Automattic\WooCommerce\Blocks\Package;
 
@@ -256,11 +257,6 @@ class WC_Frontend_Scripts {
 				'deps'    => array( 'jquery', 'woocommerce' ),
 				'version' => $version,
 			),
-			'wc-address-autocomplete'    => array(
-				'src'     => self::get_asset_url( 'assets/js/frontend/address-autocomplete' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'woocommerce' ),
-				'version' => $version,
-			),
 			'wc-cart'                    => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/cart' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ),
@@ -332,6 +328,15 @@ class WC_Frontend_Scripts {
 				'version' => '1.7.21-wc.' . $version,
 			),
 		);
+
+		if ( Features::is_enabled( 'experimental-blocks' ) ) {
+			$register_scripts['wc-address-autocomplete'] = array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/address-autocomplete' . $suffix . '.js' ),
+				'deps'    => array( 'jquery', 'woocommerce' ),
+				'version' => $version,
+			);
+		}
+
 		foreach ( $register_scripts as $name => $props ) {
 			self::register_script( $name, $props['src'], $props['deps'], $props['version'] );
 		}
@@ -408,18 +413,13 @@ class WC_Frontend_Scripts {
 		if ( is_checkout() ) {
 			self::enqueue_script( 'wc-checkout' );
 		}
-		if ( is_checkout() ) {
-			try {
-				$address_provider_service = Package::container()->get( AddressProviderService::class );
-				if ( $address_provider_service && method_exists( $address_provider_service, 'get_registered_providers' ) ) {
-					$registered_providers = $address_provider_service->get_registered_providers();
-					if ( is_array( $registered_providers ) && count( $registered_providers ) > 0 ) {
-						self::enqueue_script( 'wc-address-autocomplete' );
-					}
+		if ( is_checkout() && Features::is_enabled( 'experimental-blocks' ) ) {
+			$address_provider_service = Package::container()->get( AddressProviderService::class );
+			if ( $address_provider_service && method_exists( $address_provider_service, 'get_registered_providers' ) ) {
+				$registered_providers = $address_provider_service->get_registered_providers();
+				if ( is_array( $registered_providers ) && count( $registered_providers ) > 0 ) {
+					self::enqueue_script( 'wc-address-autocomplete' );
 				}
-			} catch ( Exception $e ) {
-				// Log the error for debugging purposes.
-				error_log( 'Error fetching registered providers: ' . $e->getMessage() );
 			}
 		}
 		if ( is_add_payment_method_page() ) {
@@ -583,9 +583,10 @@ class WC_Frontend_Scripts {
 					'debug_mode'                => Constants::is_true( 'WP_DEBUG' ),
 					/* translators: %s: Order history URL on My Account section */
 					'i18n_checkout_error'       => sprintf( esc_attr__( 'There was an error processing your order. Please check for any charges in your payment method and review your <a href="%s">order history</a> before placing the order again.', 'woocommerce' ), esc_url( wc_get_account_endpoint_url( 'orders' ) ) ),
-					'address_providers'         => Package::container()->get( AddressProviderService::class )->get_registered_providers(),
-
 				);
+				if ( Features::is_enabled( 'experimental-blocks' ) ) {
+					$params['address_providers'] = Package::container()->get( AddressProviderService::class )->get_registered_providers();
+				}
 				break;
 			case 'wc-address-i18n':
 				$params = array(
