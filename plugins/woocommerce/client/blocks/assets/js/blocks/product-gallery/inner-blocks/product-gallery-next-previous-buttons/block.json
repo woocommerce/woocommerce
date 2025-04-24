@@ -18,7 +18,7 @@
 		"layout": {
 			"default": {
 				"type": "flex",
-				"orientation": "horizontal",
+				"flexWrap": "nowrap",
 				"verticalAlignment": "center"
 			},
 			"allowVerticalAlignment": true,
@@ -31,7 +31,8 @@
 		},
 		"__experimentalBorder": {
 			"radius": true
-		}
+		},
+		"__experimentalSelector": ".wc-block-product-gallery-large-image-next-previous__button"
 	},
 	"ancestor": [ "woocommerce/product-gallery-large-image" ]
 }
