@@ -4,13 +4,13 @@
 import { Modal, TextControl, Button } from '@wordpress/components';
 import { useEffect, useState } from 'react';
 import { __ } from '@wordpress/i18n';
-import { validateRequiredField, validateNumericField } from './validation';
 
 /**
  * Internal dependencies
  */
 import { BankAccount } from './types';
 import { getDefaultRoutingField } from './utils';
+import { validateRequiredField, validateNumericField } from './validation';
 import './bank-account-modal.scss';
 
 interface Props {
@@ -112,7 +112,7 @@ export const BankAccountModal = ( {
 
 			<TextControl
 				className={ 'bank-account-modal__field' }
-				label={ __( 'Account Name', 'woocommerce' ) }
+				label={ __( 'Account Name *', 'woocommerce' ) }
 				required
 				value={ formData.account_name }
 				onChange={ ( value ) => updateField( 'account_name', value ) }
@@ -127,7 +127,7 @@ export const BankAccountModal = ( {
 
 			<TextControl
 				className={ 'bank-account-modal__field' }
-				label={ __( 'Account Number', 'woocommerce' ) }
+				label={ __( 'Account Number *', 'woocommerce' ) }
 				required
 				value={ formData.account_number }
 				onChange={ ( value ) => updateField( 'account_number', value ) }
@@ -220,7 +220,6 @@ export const BankAccountModal = ( {
 				</Button>
 				<Button
 					variant={ 'primary' }
-					style={ { marginLeft: '8px' } }
 					onClick={ () => {
 						if ( validate() ) {
 							onSave( formData );
