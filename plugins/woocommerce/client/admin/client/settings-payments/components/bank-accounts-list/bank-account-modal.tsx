@@ -4,6 +4,7 @@
 import { Modal, TextControl, Button } from '@wordpress/components';
 import { useEffect, useState } from 'react';
 import { __ } from '@wordpress/i18n';
+import { validateRequiredField, validateNumericField } from './validation';
 
 /**
  * Internal dependencies
@@ -41,6 +42,42 @@ export const BankAccountModal = ( {
 		'routing_number' | 'sort_code' | 'iban'
 	>( 'iban' );
 
+	const [ errors, setErrors ] = useState<
+		Partial< Record< keyof BankAccount, string > >
+	>( {} );
+
+	const validate = () => {
+		const newErrors: Partial< Record< keyof BankAccount, string > > = {};
+
+		newErrors.account_name = validateRequiredField( formData.account_name );
+		newErrors.account_number =
+			validateRequiredField( formData.account_number ) ||
+			validateNumericField( formData.account_number );
+
+		if ( routingField === 'routing_number' ) {
+			newErrors.routing_number = validateRequiredField(
+				formData.routing_number
+			);
+		}
+
+		if ( routingField === 'sort_code' ) {
+			newErrors.sort_code = validateRequiredField( formData.sort_code );
+		}
+
+		if ( routingField === 'iban' ) {
+			newErrors.iban = validateRequiredField( formData.iban );
+		}
+
+		newErrors.bic = validateRequiredField( formData.bic );
+
+		const filteredErrors = Object.fromEntries(
+			Object.entries( newErrors ).filter( ( [ , v ] ) => v )
+		);
+		setErrors( filteredErrors );
+
+		return Object.keys( filteredErrors ).length === 0;
+	};
+
 	useEffect( () => {
 		if ( account ) {
 			if ( account.routing_number ) setRoutingField( 'routing_number' );
@@ -70,8 +107,7 @@ export const BankAccountModal = ( {
 			<p className={ 'bank-account-modal__description' }>
 				{ account
 					? __( 'Edit your bank account details.', 'woocommerce' )
-					: __( 'Add your bank account details.', 'woocommerce' )
-				}
+					: __( 'Add your bank account details.', 'woocommerce' ) }
 			</p>
 
 			<TextControl
@@ -80,6 +116,13 @@ export const BankAccountModal = ( {
 				required
 				value={ formData.account_name }
 				onChange={ ( value ) => updateField( 'account_name', value ) }
+				help={
+					errors.account_name ? (
+						<span className="bank-account-modal__error">
+							{ errors.account_name }
+						</span>
+					) : undefined
+				}
 			/>
 
 			<TextControl
@@ -88,6 +131,13 @@ export const BankAccountModal = ( {
 				required
 				value={ formData.account_number }
 				onChange={ ( value ) => updateField( 'account_number', value ) }
+				help={
+					errors.account_number ? (
+						<span className="bank-account-modal__error">
+							{ errors.account_number }
+						</span>
+					) : undefined
+				}
 			/>
 
 			<TextControl
@@ -106,6 +156,13 @@ export const BankAccountModal = ( {
 					onChange={ ( value ) =>
 						updateField( 'routing_number', value )
 					}
+					help={
+						errors.routing_number ? (
+							<span className="bank-account-modal__error">
+								{ errors.routing_number }
+							</span>
+						) : undefined
+					}
 				/>
 			) }
 
@@ -116,6 +173,13 @@ export const BankAccountModal = ( {
 					required
 					value={ formData.sort_code }
 					onChange={ ( value ) => updateField( 'sort_code', value ) }
+					help={
+						errors.sort_code ? (
+							<span className="bank-account-modal__error">
+								{ errors.sort_code }
+							</span>
+						) : undefined
+					}
 				/>
 			) }
 
@@ -126,6 +190,13 @@ export const BankAccountModal = ( {
 					required
 					value={ formData.iban }
 					onChange={ ( value ) => updateField( 'iban', value ) }
+					help={
+						errors.iban ? (
+							<span className="bank-account-modal__error">
+								{ errors.iban }
+							</span>
+						) : undefined
+					}
 				/>
 			) }
 
@@ -134,6 +205,13 @@ export const BankAccountModal = ( {
 				label={ __( 'BIC / SWIFT', 'woocommerce' ) }
 				value={ formData.bic }
 				onChange={ ( value ) => updateField( 'bic', value ) }
+				help={
+					errors.bic ? (
+						<span className="bank-account-modal__error">
+							{ errors.bic }
+						</span>
+					) : undefined
+				}
 			/>
 
 			<div className={ 'bank-account-modal__actions' }>
@@ -143,7 +221,11 @@ export const BankAccountModal = ( {
 				<Button
 					variant={ 'primary' }
 					style={ { marginLeft: '8px' } }
-					onClick={ () => onSave( formData ) }
+					onClick={ () => {
+						if ( validate() ) {
+							onSave( formData );
+						}
+					} }
 				>
 					{ __( 'Save', 'woocommerce' ) }
 				</Button>
