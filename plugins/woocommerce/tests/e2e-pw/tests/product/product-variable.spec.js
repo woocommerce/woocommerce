@@ -158,7 +158,9 @@ async function selectVariation(
 			.getByRole( 'button', { name: 'Add to cart', exact: true } )
 			.click();
 		await expect(
-			page.getByText( `“${ productName }” has been added to your cart.` )
+			page.getByText(
+				`“${ productName } – ${ variations[ 0 ].value }” has been added to your cart.`
+			)
 		).toBeVisible();
 	}
 }
