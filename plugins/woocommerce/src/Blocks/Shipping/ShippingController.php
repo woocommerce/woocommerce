@@ -334,10 +334,10 @@ class ShippingController {
 	 */
 	public function register_local_pickup() {
 		if ( CartCheckoutUtils::is_checkout_block_default() ) {
-			if ( method_exists( WC(), 'shipping' ) && method_exists( WC()->shipping, 'register_shipping_method' ) ) {
+			if ( WC() && method_exists( WC(), 'shipping' ) && method_exists( WC()->shipping, 'register_shipping_method' ) ) {
 				WC()->shipping->register_shipping_method( new PickupLocation() );
 			} else {
-				wc_get_logger()->error( sprintf( 'Error registering pickup location: WC()->shipping->register_shipping_method is not available' ), array( 'source' => 'shipping-controller' ) );
+				wc_get_logger()->error( 'Error registering pickup location: WC()->shipping->register_shipping_method is not available', array( 'source' => 'shipping-controller' ) );
 			}
 		}
 	}
