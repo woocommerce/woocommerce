@@ -194,7 +194,6 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		if ( ! empty( $product_ids_to_export ) && is_array( $product_ids_to_export ) ) {
 			// Ensure IDs are integers.
 			$args['include'] = array_map( 'absint', $product_ids_to_export );
-			// When specific IDs are provided, ignore category filtering.
 		}
 		if ( ! empty( $this->product_category_to_export ) ) {
 			$args['category'] = $this->product_category_to_export;
