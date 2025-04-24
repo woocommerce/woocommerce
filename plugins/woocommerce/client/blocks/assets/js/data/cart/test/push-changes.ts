@@ -141,18 +141,6 @@ describe( 'pushChanges', () => {
 
 		// Check that the mock was called with full address data.
 		await expect( updateCustomerDataMock ).toHaveBeenCalledWith( {
-			billing_address: {
-				first_name: 'John',
-				last_name: 'Doe',
-				address_1: '123 Main St',
-				address_2: '',
-				city: 'New York',
-				state: 'NY',
-				postcode: '10001',
-				country: 'US',
-				email: 'john.doe@mail.com',
-				phone: '555-555-5555',
-			},
 			shipping_address: {
 				first_name: 'John',
 				last_name: 'Doe',
