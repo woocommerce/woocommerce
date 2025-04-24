@@ -204,8 +204,8 @@ export const isCustomerDataUpdating = ( state: CartState ): boolean => {
  * @param {CartState} state The current state.
  * @return {boolean} address is being applied for billing only.
  */
-export const isCustomerBillingDataUpdating = ( state: CartState ): boolean => {
-	return !! state.metaData.updatingCustomerBillingData;
+export const isEssentialBillingDataUpdating = ( state: CartState ): boolean => {
+	return !! state.metaData.updatingEssentialBillingData;
 };
 
 /**
@@ -214,8 +214,10 @@ export const isCustomerBillingDataUpdating = ( state: CartState ): boolean => {
  * @param {CartState} state The current state.
  * @return {boolean} address is being applied for shipping only.
  */
-export const isCustomerShippingDataUpdating = ( state: CartState ): boolean => {
-	return !! state.metaData.updatingCustomerShippingData;
+export const isEssentialShippingDataUpdating = (
+	state: CartState
+): boolean => {
+	return !! state.metaData.updatingEssentialShippingData;
 };
 
 /**

@@ -166,7 +166,6 @@ const reducer: Reducer< CartState > = ( state = defaultCartState, action ) => {
 			};
 			break;
 		case types.UPDATING_CUSTOMER_DATA:
-			console.log( 'UPDATING_CUSTOMER_DATA', action );
 			state = {
 				...state,
 				metaData: {
@@ -175,23 +174,22 @@ const reducer: Reducer< CartState > = ( state = defaultCartState, action ) => {
 				},
 			};
 			break;
-		case types.UPDATING_CUSTOMER_BILLING_DATA:
-			console.log( 'UPDATING_CUSTOMER_BILLING_DATA', action );
+		case types.UPDATING_ESSENTIAL_BILLING_DATA:
 			state = {
 				...state,
 				metaData: {
 					...state.metaData,
-					updatingCustomerBillingData: !! action.isResolving,
+					updatingEssentialBillingData: !! action.isResolving,
 				},
 			};
 			break;
-		case types.UPDATING_CUSTOMER_SHIPPING_DATA:
-			console.log( 'UPDATING_CUSTOMER_SHIPPING_DATA', action );
+		case types.UPDATING_ESSENTIAL_SHIPPING_DATA:
+			console.log( 'UPDATING_ESSENTIAL_SHIPPING_DATA', action );
 			state = {
 				...state,
 				metaData: {
 					...state.metaData,
-					updatingCustomerShippingData: !! action.isResolving,
+					updatingEssentialShippingData: !! action.isResolving,
 				},
 			};
 			break;

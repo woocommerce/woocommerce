@@ -130,9 +130,9 @@ export function updatingCustomerData( isResolving: boolean ) {
 /**
  * Returns an action object used to track when customer billing data is being updated.
  */
-export function updatingCustomerBillingData( isResolving: boolean ) {
+export function updatingEssentialBillingData( isResolving: boolean ) {
 	return {
-		type: types.UPDATING_CUSTOMER_BILLING_DATA,
+		type: types.UPDATING_ESSENTIAL_BILLING_DATA,
 		isResolving,
 	};
 }
@@ -140,9 +140,9 @@ export function updatingCustomerBillingData( isResolving: boolean ) {
 /**
  * Returns an action object used to track when customer shipping data is being updated.
  */
-export function updatingCustomerShippingData( isResolving: boolean ) {
+export function updatingEssentialShippingData( isResolving: boolean ) {
 	return {
-		type: types.UPDATING_CUSTOMER_SHIPPING_DATA,
+		type: types.UPDATING_ESSENTIAL_SHIPPING_DATA,
 		isResolving,
 	};
 }
