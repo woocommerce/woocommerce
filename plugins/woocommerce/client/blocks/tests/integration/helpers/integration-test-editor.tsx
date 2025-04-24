@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState, useEffect } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { registerCoreBlocks } from '@wordpress/block-library';
@@ -9,15 +9,8 @@ import {
 	type BlockAttributes,
 	type BlockInstance,
 	createBlock,
-	getBlockTypes,
-	unregisterBlockType,
 } from '@wordpress/blocks';
-import { useSelect } from '@wordpress/data';
 import '@wordpress/format-library';
-import {
-	store as richTextStore,
-	unregisterFormatType,
-} from '@wordpress/rich-text';
 import {
 	type EditorSettings,
 	type EditorBlockListSettings,
