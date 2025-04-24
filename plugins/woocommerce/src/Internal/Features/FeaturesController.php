@@ -12,7 +12,6 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
-use Automattic\WooCommerce\Internal\PointOfSale\PointOfSaleController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\PluginUtil;
@@ -224,7 +223,6 @@ class FeaturesController {
 			$container = wc_get_container();
 			$container->get( CustomOrdersTableController::class )->add_feature_definition( $this );
 			$container->get( CostOfGoodsSoldController::class )->add_feature_definition( $this );
-			$container->get( PointOfSaleController::class )->add_feature_definition( $this );
 
 			$this->init_compatibility_info_by_feature();
 		}
@@ -450,6 +448,15 @@ class FeaturesController {
 				*/
 				'is_legacy'          => true,
 				'enabled_by_default' => false,
+			),
+			'point_of_sale'                 => array(
+				'name'               => __( 'Point of Sale (alpha)', 'woocommerce' ),
+				'description'        => __(
+					'Enable Point of Sale functionality for your WooCommerce store',
+					'woocommerce'
+				),
+				'enabled_by_default' => true,
+				'disable_ui'         => true,
 			),
 		);
 

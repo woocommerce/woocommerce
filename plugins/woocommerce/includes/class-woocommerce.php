@@ -345,7 +345,6 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
 		Automattic\WooCommerce\Internal\Admin\WcPayWelcomePage::instance()->register();
-		$container->get( Automattic\WooCommerce\Internal\PointOfSale\PointOfSaleController::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
