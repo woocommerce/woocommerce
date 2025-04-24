@@ -5,10 +5,6 @@
  * Inserter: no
  */
 ?>
-<!-- wp:group {"metadata":{"name":"Sticky Header"},"style":{"position":{"type":"sticky","top":"0px"}},"layout":{"type":"default"}} -->
-<div class="wp-block-group"><!-- wp:template-part {"slug":"header"} /--></div>
-<!-- /wp:group -->
-
 <!-- wp:group {"tagName":"main","metadata":{"name":"Product Archives"},"className":"is-style-default","style":{"spacing":{"padding":{"top":"0","bottom":"0"},"margin":{"top":"0","bottom":"0"}}},"layout":{"inherit":true,"type":"constrained"}} -->
 <main class="wp-block-group is-style-default" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0"><!-- wp:spacer {"height":"var:preset|spacing|60"} -->
 <div style="height:var(--wp--preset--spacing--60)" aria-hidden="true" class="wp-block-spacer"></div>
@@ -173,5 +169,3 @@ echo sprintf( esc_html__( 'No results found. You can try %1$sclearing any filter
 <div style="height:var(--wp--preset--spacing--80)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer --></main>
 <!-- /wp:group -->
-
-<!-- wp:template-part {"slug":"footer"} /-->
