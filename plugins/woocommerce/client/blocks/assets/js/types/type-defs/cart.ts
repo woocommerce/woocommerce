@@ -203,8 +203,8 @@ export interface Cart extends Record< string, unknown > {
 }
 export interface CartMeta {
 	updatingCustomerData: boolean;
-	updatingCustomerBillingData: boolean;
-	updatingCustomerShippingData: boolean;
+	updatingEssentialBillingData: boolean;
+	updatingEssentialShippingData: boolean;
 	updatingSelectedRate: boolean;
 	isCartDataStale: boolean;
 	applyingCoupon: string;

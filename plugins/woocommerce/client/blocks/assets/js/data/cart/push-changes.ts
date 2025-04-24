@@ -133,18 +133,38 @@ const updateCustomerData = (): void => {
 		return;
 	}
 
+	// Define the fields that are considered "essential" for calculations
+	const BILLING_ESSENTIAL_FIELDS = [ 'country' ];
+	const SHIPPING_ESSENTIAL_FIELDS = [ 'country', 'state', 'postcode' ];
+
+	let isEssentialBillingDataChanged =
+		localState.dirtyProps.billingAddress.some( ( field ) =>
+			BILLING_ESSENTIAL_FIELDS.includes( field as string )
+		);
+	let isEssentialShippingDataChanged =
+		localState.dirtyProps.shippingAddress.some( ( field ) =>
+			SHIPPING_ESSENTIAL_FIELDS.includes( field as string )
+		);
+
 	dispatch( cartStore )
-		.updateCustomerData( {
-			...( isBillingAddressDirty && {
-				billing_address: localState.customerData.billingAddress,
-			} ),
-			...( isShippingAddressDirty && {
-				shipping_address: localState.customerData.shippingAddress,
-			} ),
-		} )
-		.then( () => {
+		.updateCustomerData(
+			{
+				...( isBillingAddressDirty && {
+					billing_address: localState.customerData.billingAddress,
+				} ),
+				...( isShippingAddressDirty && {
+					shipping_address: localState.customerData.shippingAddress,
+				} ),
+			},
+			true,
+			isEssentialBillingDataChanged,
+			isEssentialShippingDataChanged
+		)
+		.then( ( response ) => {
 			localState.dirtyProps.billingAddress = [];
 			localState.dirtyProps.shippingAddress = [];
+			isEssentialBillingDataChanged = false;
+			isEssentialShippingDataChanged = false;
 			localState.doingPush = false;
 		} )
 		.catch( ( response ) => {

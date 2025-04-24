@@ -52,7 +52,9 @@ export const ShippingCalculator = ( {
 					{
 						shipping_address: newAddress,
 					},
-					false
+					false,
+					false,
+					true // essential shipping data changed
 				)
 				.then( () => {
 					removeNoticesWithContext( noticeContext );

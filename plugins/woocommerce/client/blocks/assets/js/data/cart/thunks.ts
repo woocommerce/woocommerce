@@ -495,17 +495,24 @@ export const updateCustomerData =
 		// Address data to be updated; can contain both billing_address and shipping_address.
 		customerData: Partial< BillingAddressShippingAddress >,
 		// If the address is being edited, we don't update the customer data in the store from the response.
-		editing = true
+		editing = true,
+		isEssentialBillingDataChanged = false,
+		isEssentialShippingDataChanged = false
 	) =>
 	async ( { dispatch }: CartThunkArgs ) => {
 		try {
-			console.log( '!!!Updating customer data', customerData );
 			dispatch.updatingCustomerData( true );
-			if ( 'billing_address' in customerData ) {
-				dispatch.updatingCustomerBillingData( true );
+			if (
+				'billing_address' in customerData &&
+				isEssentialBillingDataChanged
+			) {
+				dispatch.updatingEssentialBillingData( true );
 			}
-			if ( 'shipping_address' in customerData ) {
-				dispatch.updatingCustomerShippingData( true );
+			if (
+				'shipping_address' in customerData &&
+				isEssentialShippingDataChanged
+			) {
+				dispatch.updatingEssentialShippingData( true );
 			}
 
 			const { response } = await apiFetchWithHeaders< {
@@ -529,8 +536,8 @@ export const updateCustomerData =
 			return Promise.reject( error );
 		} finally {
 			dispatch.updatingCustomerData( false );
-			dispatch.updatingCustomerBillingData( false );
-			dispatch.updatingCustomerShippingData( false );
+			dispatch.updatingEssentialBillingData( false );
+			dispatch.updatingEssentialShippingData( false );
 		}
 	};
 

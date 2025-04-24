@@ -96,8 +96,8 @@ export const defaultCartState: CartState = {
 	},
 	metaData: {
 		updatingCustomerData: false,
-		updatingCustomerBillingData: false,
-		updatingCustomerShippingData: false,
+		updatingEssentialBillingData: false,
+		updatingEssentialShippingData: false,
 		updatingSelectedRate: false,
 		applyingCoupon: '',
 		removingCoupon: '',
