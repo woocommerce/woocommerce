@@ -1,0 +1,5 @@
+Significance: patch
+Type: changed
+Comment: Update `yoast/phpunit-polyfills` to v4, and add PHPUnit 12 config (as a symlink to the PHPUnit 11 config, since it's identical).
+
+
