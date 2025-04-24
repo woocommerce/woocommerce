@@ -8,7 +8,17 @@
 	"keywords": [ "WooCommerce" ],
 	"supports": {
 		"align": true,
-		"interactivity": true
+		"interactivity": true,
+		"layout": {
+			"default": {
+				"type": "flex",
+				"flexWrap": "nowrap",
+				"orientation": "horizontal"
+			},
+			"allowOrientation": true,
+			"allowEditing": true,
+			"allowJustification": false
+		}
 	},
 	"textdomain": "woocommerce",
 	"usesContext": [ "postId" ],
