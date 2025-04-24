@@ -25,12 +25,12 @@ class Quote extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
-		$content = '';
+		$content    = '';
 		$dom_helper = new Dom_Document_Helper( $block_content );
 
 		// Extract citation if present.
 		$citation_content = '';
-		$cite_element = $dom_helper->find_element( 'cite' );
+		$cite_element     = $dom_helper->find_element( 'cite' );
 		if ( $cite_element ) {
 			$citation_content = $this->get_citation_wrapper( $dom_helper->get_element_inner_html( $cite_element ), $parsed_block['email_attrs'] ?? array() );
 		}
