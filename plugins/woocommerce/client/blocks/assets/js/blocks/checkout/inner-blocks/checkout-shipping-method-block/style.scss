@@ -71,6 +71,7 @@ $component-background-hover: color-mix(in srgb, currentColor 12%, transparent);
 	@include font-size(regular, 1rem);
 	font-weight: bold;
 	line-height: 28px; // Match the icon size
+	text-wrap: balance;
 }
 
 .wc-block-checkout__shipping-method-option-price {
