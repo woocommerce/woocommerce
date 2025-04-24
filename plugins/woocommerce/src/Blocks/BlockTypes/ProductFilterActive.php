@@ -46,9 +46,12 @@ final class ProductFilterActive extends AbstractBlock {
 			'data-wp-bind--hidden' => '!state.hasActiveFilters',
 		);
 
-		if ( empty( $active_filters ) ) {
-			$wrapper_attributes['hidden'] = true;
-		}
+		wp_interactivity_state(
+			'woocommerce/product-filters',
+			array(
+				'hasActiveFilters' => ! empty( $active_filters ),
+			),
+		);
 
 		wp_interactivity_config(
 			'woocommerce/product-filters',

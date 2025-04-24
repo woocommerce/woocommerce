@@ -120,14 +120,14 @@ class ImportInstallTheme implements StepProcessor {
 
 
 	/**
-	 * Install the theme from the local plugin path.
+	 * Install the theme from the local path.
 	 *
-	 * @param string $local_plugin_path The local path of the plugin to be installed.
+	 * @param string $local_path The local path of the theme to be installed.
 	 *
 	 * @return bool True if the installation was successful, false otherwise.
 	 */
-	protected function install( $local_plugin_path ) {
-		$unzip_result = $this->wp_unzip_file( $local_plugin_path, $this->wp_get_theme_root() );
+	protected function install( $local_path ) {
+		$unzip_result = $this->wp_unzip_file( $local_path, $this->wp_get_theme_root() );
 
 		if ( $this->is_wp_error( $unzip_result ) ) {
 			return false;
