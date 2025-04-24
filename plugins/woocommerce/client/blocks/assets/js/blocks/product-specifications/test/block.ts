@@ -39,12 +39,11 @@ describe( 'Product Specifications block', () => {
 			}
 		} );
 
-		test( 'should handle section visibility toggles correctly', () => {
+		test( 'should show all sections by default', () => {
 			const block = within(
 				screen.getByLabelText( /Block: Product Specifications/i )
 			);
 
-			// Test initial state - all sections should be visible by default
 			expect( block.getByText( /Weight/i ) ).toBeInTheDocument();
 			expect( block.getByText( /Dimensions/i ) ).toBeInTheDocument();
 			expect( block.getByText( /Test Attribute/i ) ).toBeInTheDocument();
@@ -63,57 +62,86 @@ describe( 'Product Specifications block', () => {
 					name: /Show Attributes/i,
 				} )
 			).toBeChecked();
+		} );
 
-			// Test hiding weight section
+		test( 'should hide weight section when toggled off', () => {
+			const block = within(
+				screen.getByLabelText( /Block: Product Specifications/i )
+			);
+
 			fireEvent.click(
 				screen.getByRole( 'checkbox', { name: /Show Weight/i } )
 			);
+
 			expect( block.queryByText( /Weight/i ) ).not.toBeInTheDocument();
 			expect( block.getByText( /Dimensions/i ) ).toBeInTheDocument();
 			expect( block.getByText( /Test Attribute/i ) ).toBeInTheDocument();
+		} );
 
-			// Test hiding dimensions section
+		test( 'should hide dimensions section when toggled off', () => {
+			const block = within(
+				screen.getByLabelText( /Block: Product Specifications/i )
+			);
+
 			fireEvent.click(
 				screen.getByRole( 'checkbox', {
 					name: /Show Dimensions/i,
 				} )
 			);
-			expect( block.queryByText( /Weight/i ) ).not.toBeInTheDocument();
+
+			expect( block.getByText( /Weight/i ) ).toBeInTheDocument();
+
 			expect(
 				block.queryByText( /Dimensions/i )
 			).not.toBeInTheDocument();
 			expect( block.getByText( /Test Attribute/i ) ).toBeInTheDocument();
+		} );
 
-			// Test hiding attributes section
+		test( 'should hide attributes section when toggled off', () => {
+			const block = within(
+				screen.getByLabelText( /Block: Product Specifications/i )
+			);
+
 			fireEvent.click(
 				screen.getByRole( 'checkbox', {
 					name: /Show Attributes/i,
 				} )
 			);
-			expect( block.queryByText( /Weight/i ) ).not.toBeInTheDocument();
-			expect(
-				block.queryByText( /Dimensions/i )
-			).not.toBeInTheDocument();
+
+			expect( block.getByText( /Weight/i ) ).toBeInTheDocument();
+			expect( block.getByText( /Dimensions/i ) ).toBeInTheDocument();
 			expect(
 				block.queryByText( /Test Attribute/i )
 			).not.toBeInTheDocument();
+		} );
 
-			// Test restoring visibility by toggling all sections back on
+		test( 'should restore visibility when sections are toggled back on', () => {
+			const block = within(
+				screen.getByLabelText( /Block: Product Specifications/i )
+			);
+
+			// First hide all sections
 			fireEvent.click(
 				screen.getByRole( 'checkbox', { name: /Show Weight/i } )
 			);
 			fireEvent.click(
-				screen.getByRole( 'checkbox', {
-					name: /Show Dimensions/i,
-				} )
+				screen.getByRole( 'checkbox', { name: /Show Dimensions/i } )
 			);
 			fireEvent.click(
-				screen.getByRole( 'checkbox', {
-					name: /Show Attributes/i,
-				} )
+				screen.getByRole( 'checkbox', { name: /Show Attributes/i } )
 			);
 
-			// Verify all sections are visible again
+			// Then show them all again
+			fireEvent.click(
+				screen.getByRole( 'checkbox', { name: /Show Weight/i } )
+			);
+			fireEvent.click(
+				screen.getByRole( 'checkbox', { name: /Show Dimensions/i } )
+			);
+			fireEvent.click(
+				screen.getByRole( 'checkbox', { name: /Show Attributes/i } )
+			);
+
 			expect( block.getByText( /Weight/i ) ).toBeInTheDocument();
 			expect( block.getByText( /Dimensions/i ) ).toBeInTheDocument();
 			expect( block.getByText( /Test Attribute/i ) ).toBeInTheDocument();
