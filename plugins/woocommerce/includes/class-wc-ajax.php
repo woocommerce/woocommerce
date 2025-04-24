@@ -548,6 +548,7 @@ class WC_AJAX {
 				$variation    = $product->get_variation_attributes();
 			}
 
+			$cart_item_key = null;
 			if ( $passed_validation && ProductStatus::PUBLISH === $product_status ) {
 				$cart_item_key = WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variation );
 				if ( $cart_item_key ) {
@@ -561,7 +562,9 @@ class WC_AJAX {
 					 */
 					do_action( 'woocommerce_ajax_added_to_cart', $product_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 				}
-			} else {
+			}
+
+			if ( ! $cart_item_key ) {
 				// If there was an error adding to the cart, redirect to the product page to show any errors.
 				$data = array(
 					'error'       => true,
