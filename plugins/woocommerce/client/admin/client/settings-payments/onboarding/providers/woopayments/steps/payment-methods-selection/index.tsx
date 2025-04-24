@@ -131,7 +131,8 @@ export default function PaymentMethodsSelection() {
 								)
 							) }
 						</div>
-						{ ! isExpanded && (
+						{ /* Show button only if not expanded and there are initially hidden items */ }
+						{ ! isExpanded && hiddenCount > 0 && (
 							<Button
 								className="settings-payments-methods__show-more"
 								onClick={ () => {
