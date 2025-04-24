@@ -134,14 +134,18 @@ class AddToCartWithOptionsQuantitySelector extends AbstractBlock {
 
 		$is_external_product_with_url        = $product instanceof \WC_Product_External && $product->get_product_url();
 		$can_only_be_purchased_one_at_a_time = $product->is_sold_individually();
+		$managing_stock                      = $product->managing_stock();
+		$stock_quantity                      = $product->get_stock_quantity();
 
-		if ( $is_external_product_with_url || $can_only_be_purchased_one_at_a_time ) {
+		if ( $is_external_product_with_url || $can_only_be_purchased_one_at_a_time || ( $managing_stock && $stock_quantity <= 1 ) ) {
 			$product = $previous_product;
 
 			return '';
 		}
 
-		$is_stepper_style = isset( $attributes['quantitySelectorStyle'] ) && 'stepper' === $attributes['quantitySelectorStyle'] && ! $product->is_sold_individually();
+		wp_enqueue_script_module( $this->get_full_block_name() );
+
+		$is_stepper_style = isset( $attributes['quantitySelectorStyle'] ) && 'stepper' === $attributes['quantitySelectorStyle'];
 
 		ob_start();
 

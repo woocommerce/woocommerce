@@ -105,11 +105,27 @@ class AddToCartWithOptions extends AbstractBlock {
 
 		$product_type = $product->get_type();
 
+		$slug = $product_type . '-product-add-to-cart-with-options';
+
 		if ( in_array( $product_type, array( ProductType::SIMPLE, ProductType::EXTERNAL, ProductType::VARIABLE, ProductType::GROUPED ), true ) ) {
+			$template_part_path = Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $slug . '.html';
+		} else {
+			/**
+			 * Filter to declare product type's cart block template is supported.
+			 *
+			 * @since 9.9.0
+			 * @param mixed string|boolean The template part path if it exists
+			 * @param string $product_type The product type
+			 */
+			$template_part_path = apply_filters( '__experimental_woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part', false, $product_type );
+		}
+
+		if ( is_string( $template_part_path ) && file_exists( $template_part_path ) ) {
+
 			$template_part_contents = '';
-			$slug                   = $product_type . '-product-add-to-cart-with-options';
 			// Determine if we need to load the template part from the DB, the theme or WooCommerce in that order.
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( $slug ), 'wp_template_part' );
+
 			if ( is_countable( $templates_from_db ) && count( $templates_from_db ) > 0 ) {
 				$template_slug_to_load = $templates_from_db[0]->theme;
 			} else {
@@ -123,7 +139,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			}
 
 			if ( '' === $template_part_contents ) {
-				$template_part_contents = file_get_contents( Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $slug . '.html' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+				$template_part_contents = file_get_contents( $template_part_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			}
 
 			$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
@@ -273,14 +289,19 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			ob_start();
 
-			remove_action( 'woocommerce_' . $product_type . '_add_to_cart', 'woocommerce_' . $product_type . '_add_to_cart', 30 );
-			/**
-			 * Trigger the single product add to cart action that prints the markup.
-			 *
-			 * @since 9.9.0
-			 */
-			do_action( 'woocommerce_' . $product->get_type() . '_add_to_cart' );
-			add_action( 'woocommerce_' . $product_type . '_add_to_cart', 'woocommerce_' . $product_type . '_add_to_cart', 30 );
+			if ( in_array( $product_type, array( ProductType::SIMPLE, ProductType::EXTERNAL, ProductType::VARIABLE, ProductType::GROUPED ), true ) ) {
+
+				$add_to_cart_fn = 'woocommerce_' . $product_type . '_add_to_cart';
+				remove_action( 'woocommerce_' . $product_type . '_add_to_cart', $add_to_cart_fn, 30 );
+
+				/**
+				 * Trigger the single product add to cart action that prints the markup.
+				 *
+				 * @since 9.9.0
+				 */
+				do_action( 'woocommerce_' . $product->get_type() . '_add_to_cart' );
+				add_action( 'woocommerce_' . $product_type . '_add_to_cart', $add_to_cart_fn, 30 );
+			}
 
 			$form_html = $form_html . ob_get_clean();
 		} else {
