@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Fixed issue where the blockified template was showing the post title and excerpt for password-protected products.

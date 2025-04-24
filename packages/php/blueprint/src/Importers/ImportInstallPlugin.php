@@ -60,34 +60,46 @@ class ImportInstallPlugin implements StepProcessor {
 			return $result;
 		}
 
+		// If the plugin is already installed, skip the installation.
 		if ( isset( $installed_plugins[ $plugin->slug ] ) ) {
 			$result->add_info( "Skipped installing {$plugin->slug}. It is already installed." );
 			return $result;
 		}
+
+		// If the resource type is not supported, return an error.
 		if ( $this->storage->is_supported_resource( $plugin->resource ) === false ) {
 			$result->add_error( "Invalid resource type for {$plugin->slug}." );
 			return $result;
 		}
 
+		// Download the plugin.
 		$downloaded_path = $this->storage->download( $plugin->slug, $plugin->resource );
 		if ( ! $downloaded_path ) {
 			$result->add_error( "Unable to download {$plugin->slug} with {$plugin->resource} resource type." );
 			return $result;
 		}
 
+		// Install the plugin.
 		$install = $this->install( $downloaded_path );
-		$install && $result->add_info( "Installed {$plugin->slug}." );
 
-		if ( isset( $schema->options, $schema->options->activate ) && true === $schema->options->activate ) {
+		if ( is_wp_error( $install ) ) {
+			$result->add_error( "Failed to install {$plugin->slug}." );
+			return $result;
+		}
+
+		$result->add_info( "Installed {$plugin->slug}." );
+
+		// If the plugin should be activated, activate it.
+		$should_activate = isset( $schema->options, $schema->options->activate ) && true === $schema->options->activate;
+		if ( $should_activate ) {
 			$activate = $this->activate( $plugin->slug );
 
 			if ( $activate instanceof \WP_Error ) {
 				$result->add_error( "Failed to activate {$plugin->slug}." );
+				return $result;
 			}
 
-			if ( null === $activate ) {
-				$result->add_info( "Activated {$plugin->slug}." );
-			}
+			$result->add_info( "Activated {$plugin->slug}." );
 		}
 
 		return $result;
@@ -97,7 +109,7 @@ class ImportInstallPlugin implements StepProcessor {
 	 * Installs a plugin from the given local path.
 	 *
 	 * @param string $local_plugin_path Path to the local plugin file.
-	 * @return bool True on success, false on failure.
+	 * @return bool|WP_Error True on success, WP_Error on failure.
 	 */
 	protected function install( $local_plugin_path ) {
 		if ( ! class_exists( 'Plugin_Upgrader' ) ) {
