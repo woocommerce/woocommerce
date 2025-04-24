@@ -449,7 +449,7 @@ class FeaturesController {
 				'is_legacy'          => true,
 				'enabled_by_default' => false,
 			),
-			'point_of_sale'                 => array(
+			'point_of_sale'                      => array(
 				'name'               => __( 'Point of Sale (alpha)', 'woocommerce' ),
 				'description'        => __(
 					'Enable Point of Sale functionality for your WooCommerce store',
