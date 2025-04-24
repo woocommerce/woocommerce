@@ -8,10 +8,6 @@
 declare( strict_types=1 );
 
 use Automattic\WooCommerce\Enums\OrderStatus;
-use WC_Helper_Product;
-use WC_Helper_Order;
-use WC_Order_Item_Product;
-use WC_Unit_Test_Case;
 
 /**
  * WC_Order_Item_Product unit tests.
