@@ -219,6 +219,7 @@ export const BankAccountModal = ( {
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
 				<Button
+					className={ 'bank-account-modal__save' }
 					variant={ 'primary' }
 					onClick={ () => {
 						if ( validate() ) {
