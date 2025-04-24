@@ -20,7 +20,7 @@ const RadioControl = ( {
 	options = [],
 	disabled = false,
 	highlightChecked = false,
-	descriptionStackingDirection = 'row',
+	descriptionStackingDirection,
 }: RadioControlProps ): JSX.Element | null => {
 	const instanceId = useInstanceId( RadioControl );
 	const radioControlId = id || instanceId;
