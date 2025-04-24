@@ -11,26 +11,26 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
  */
 class PointOfSaleController implements RegisterHooksInterface {
 
-    /**
-     * The feature key for Point of Sale.
-     *
-     * @var string
-     */
-    private const FEATURE_KEY = 'point_of_sale';
+	/**
+	 * The feature key for Point of Sale.
+	 *
+	 * @var string
+	 */
+	private const FEATURE_KEY = 'point_of_sale';
 
-    /**
-     * The FeaturesController instance.
-     *
-     * @var FeaturesController
-     */
-    private FeaturesController $features_controller;
+	/**
+	 * The FeaturesController instance.
+	 *
+	 * @var FeaturesController
+	 */
+	private FeaturesController $features_controller;
 
-    /**
-     * Register all hooks used by the class.
-     */
-    public function register() {}
+	/**
+	 * Register all hooks used by the class.
+	 */
+	public function register() {}
 
-    /**
+	/**
 	 * Initialize the instance, runs when the instance is created by the dependency injection container.
 	 *
 	 * @internal
@@ -49,7 +49,7 @@ class PointOfSaleController implements RegisterHooksInterface {
 		return $this->features_controller->feature_is_enabled( self::FEATURE_KEY );
 	}
 
-    /**
+	/**
 	 * Add the feature information for the features settings page.
 	 *
 	 * @param FeaturesController $features_controller The instance of FeaturesController to use.
@@ -58,11 +58,11 @@ class PointOfSaleController implements RegisterHooksInterface {
 	 */
 	public function add_feature_definition( $features_controller ) {
 		$definition = array(
-            'description'        => __( 'Enable Point of Sale functionality for your WooCommerce store', 'woocommerce' ),
-            'is_experimental'    => true,
-            'enabled_by_default' => true,
-            'order'             => 20,
-            'disable_ui'        => true,
+			'description'        => __( 'Enable Point of Sale functionality for your WooCommerce store', 'woocommerce' ),
+			'is_experimental'    => true,
+			'enabled_by_default' => true,
+			'order'              => 20,
+			'disable_ui'         => true,
 		);
 
 		$features_controller->add_feature_definition(
