@@ -38,7 +38,11 @@ function registerAddressAutocompleteProvider( provider ) {
 
 	// Check if provider is registered on server
 	var serverProviders = [];
-	if ( window && window.wc_checkout_params && window.wc_checkout_params.address_providers ) {
+	if (
+		window &&
+		window.wc_checkout_params &&
+		window.wc_checkout_params.address_providers
+	) {
 		serverProviders = window.wc_checkout_params.address_providers;
 	}
 
