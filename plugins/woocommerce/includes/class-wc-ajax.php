@@ -265,7 +265,7 @@ class WC_AJAX {
 				),
 				'cart_hash' => WC()->cart->get_cart_hash(),
 			),
-			$args
+			is_array( $args ) ? $args : array()
 		);
 
 		wp_send_json( $data );
@@ -579,22 +579,62 @@ class WC_AJAX {
 			}
 		}
 
+		foreach ( $products_to_add as $product_to_add ) {
+			/**
+			 * Filters the HTML for the quantity display in the cart.
+			 *
+			 * @since 9.9.0
+			 * @param string $quantity_html The HTML for the quantity display.
+			 * @param int $product_id The product ID.
+			 * @return string The filtered quantity HTML.
+			 */
+			$quantity_html = apply_filters(
+				'woocommerce_add_to_cart_qty_html',
+				( $product_to_add['quantity'] > 1 ? absint( $product_to_add['quantity'] ) . ' &times; ' : '' ),
+				$product_to_add['product_id']
+			);
+
+			/**
+			 * Filters the product name HTML in quotes for cart messages.
+			 *
+			 * @since 9.9.0
+			 * @param string $product_name The product name HTML in quotes.
+			 * @param int $product_id The product ID.
+			 * @return string The filtered product name HTML.
+			 */
+			$product_name = apply_filters(
+				'woocommerce_add_to_cart_item_name_in_quotes',
+				/* translators: %s: product name */
+				sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), get_the_title( $product_to_add['product_id'] ) ),
+				$product_to_add['product_id']
+			);
+
+			$titles[] = $quantity_html . $product_name;
+			$count   += $product_to_add['quantity'];
+		}
+
+		$titles = array_filter( $titles );
+		/* translators: %s: product name */
+		$success_message = sprintf( _n( '%s has been added to your cart.', '%s have been added to your cart.', $count, 'woocommerce' ), wc_format_list_of_items( $titles ) );
+
 		$args = array();
-		if ( ! is_array( $_POST['product_id'] ) ) {
+		if ( ! is_array( $product_id_param ) ) {
 			// We will only return 'X in cart' when adding one product at a time,
 			// so we are excluding grouped products.
 			$args = array(
-				'button_text' => esc_attr(
+				'button_text'     => esc_attr(
 					sprintf(
 						/* translators: %s number of products in cart. */
 						_n( '%d in cart', '%d in cart', $cart_item['quantity'], 'woocommerce' ),
 						$cart_item['quantity']
 					)
 				),
+				'success_message' => wp_strip_all_tags( $success_message ),
 			);
 		} else {
 			$args = array(
-				'button_text' => __( 'Added to cart', 'woocommerce' ),
+				'button_text'     => __( 'Added to cart', 'woocommerce' ),
+				'success_message' => wp_strip_all_tags( $success_message ),
 			);
 		}
 		self::get_refreshed_fragments( $args );

@@ -97,6 +97,32 @@
 		}
 	}
 
+	function updateLiveRegion( message ) {
+		if ( ! message ) {
+			return;
+		}
+
+		let liveRegion = document.querySelector(
+			'.widget_shopping_cart_live_region'
+		);
+
+		if ( ! liveRegion ) {
+			liveRegion = document.createElement( 'div' );
+			liveRegion.className =
+				'widget_shopping_cart_live_region screen-reader-text';
+			liveRegion.setAttribute( 'role', 'status' );
+			document.body.appendChild( liveRegion );
+		}
+
+		// If the response after adding/removing an item to/from the cart is really fast,
+		// screen readers may not have time to identify the changes in the live region element.
+		// So, we add a delay to ensure an interval between messages.
+		setTimeout( () => {
+			liveRegion.innerHTML = message;
+			liveRegion.setAttribute( 'aria-relevant', 'all' );
+		}, 1000 );
+	}
+
 	async function addToCart( formData, button ) {
 		const formDataObject = new URLSearchParams();
 		formData.forEach( ( item ) => {
@@ -147,6 +173,7 @@
 			// @todo we need to reset the button text after switching the variation.
 
 			updateFragments( data.fragments );
+			updateLiveRegion( data.success_message );
 
 			return data;
 		} catch ( error ) {
