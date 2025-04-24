@@ -67,9 +67,15 @@ export const BankAccountModal = ( {
 			onRequestClose={ onClose }
 			shouldCloseOnClickOutside={ false }
 		>
-			<p>{ __( 'Add your bank account details.', 'woocommerce' ) }</p>
+			<p className={ 'bank-account-modal__description' }>
+				{ account
+					? __( 'Edit your bank account details.', 'woocommerce' )
+					: __( 'Add your bank account details.', 'woocommerce' )
+				}
+			</p>
 
 			<TextControl
+				className={ 'bank-account-modal__field' }
 				label={ __( 'Account Name', 'woocommerce' ) }
 				required
 				value={ formData.account_name }
@@ -77,6 +83,7 @@ export const BankAccountModal = ( {
 			/>
 
 			<TextControl
+				className={ 'bank-account-modal__field' }
 				label={ __( 'Account Number', 'woocommerce' ) }
 				required
 				value={ formData.account_number }
@@ -84,6 +91,7 @@ export const BankAccountModal = ( {
 			/>
 
 			<TextControl
+				className={ 'bank-account-modal__field' }
 				label={ __( 'Bank Name', 'woocommerce' ) }
 				value={ formData.bank_name }
 				onChange={ ( value ) => updateField( 'bank_name', value ) }
@@ -91,6 +99,7 @@ export const BankAccountModal = ( {
 
 			{ routingField === 'routing_number' && (
 				<TextControl
+					className={ 'bank-account-modal__field' }
 					label={ __( 'Routing Number', 'woocommerce' ) }
 					required
 					value={ formData.routing_number }
@@ -102,6 +111,7 @@ export const BankAccountModal = ( {
 
 			{ routingField === 'sort_code' && (
 				<TextControl
+					className={ 'bank-account-modal__field' }
 					label={ __( 'BSB', 'woocommerce' ) }
 					required
 					value={ formData.sort_code }
@@ -111,6 +121,7 @@ export const BankAccountModal = ( {
 
 			{ routingField === 'iban' && (
 				<TextControl
+					className={ 'bank-account-modal__field' }
 					label={ __( 'IBAN', 'woocommerce' ) }
 					required
 					value={ formData.iban }
@@ -119,19 +130,14 @@ export const BankAccountModal = ( {
 			) }
 
 			<TextControl
+				className={ 'bank-account-modal__field' }
 				label={ __( 'BIC / SWIFT', 'woocommerce' ) }
 				value={ formData.bic }
 				onChange={ ( value ) => updateField( 'bic', value ) }
 			/>
 
-			<div
-				style={ {
-					display: 'flex',
-					justifyContent: 'flex-end',
-					marginTop: '16px',
-				} }
-			>
-				<Button variant={ 'secondary' } onClick={ onClose }>
+			<div className={ 'bank-account-modal__actions' }>
+				<Button variant={ 'tertiary' } onClick={ onClose }>
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
 				<Button
