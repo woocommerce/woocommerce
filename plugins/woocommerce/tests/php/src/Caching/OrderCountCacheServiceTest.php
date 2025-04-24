@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Caching;
 use WC_Helper_Order;
 use WC_Order;
 use Automattic\WooCommerce\Caches\OrderCountCache;
+use Automattic\WooCommerce\Caches\OrderCountCacheService;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
@@ -134,5 +135,14 @@ class OrderCountCacheServiceTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( $initial_count[ OrderInternalStatus::PENDING ], $count[ OrderInternalStatus::PENDING ] );
 		$this->assertEquals( $initial_count[ OrderInternalStatus::COMPLETED ], $count[ OrderInternalStatus::COMPLETED ] );
 		$this->assertEquals( $initial_count[ OrderInternalStatus::CANCELLED ] + 1, $count[ OrderInternalStatus::CANCELLED ] );
+	}
+
+	/**
+	 * Test that background actions are scheduled.
+	 */
+	public function test_background_actions_scheduled() {
+		$order_count_cache_service = wc_get_container()->get( OrderCountCacheService::class );
+		$order_count_cache_service->schedule_background_actions();
+		$this->assertTrue( as_has_scheduled_action( 'woocommerce_refresh_order_count_cache' ) );
 	}
 }
