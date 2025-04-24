@@ -28,8 +28,6 @@ final class ProductFilterActive extends AbstractBlock {
 			return $content;
 		}
 
-		wp_enqueue_script_module( $this->get_full_block_name() );
-
 		$active_filters = $block->context['activeFilters'];
 
 		$filter_context = array(
@@ -84,10 +82,18 @@ final class ProductFilterActive extends AbstractBlock {
 	}
 
 	/**
-	 * Disable the block type script, this uses script modules.
+	 * Disable the editor style handle for this block type.
 	 *
-	 * @param string|null $key The key.
+	 * @return null
+	 */
+	protected function get_block_type_editor_style() {
+		return null;
+	}
+
+	/**
+	 * Disable the script handle for this block type. We use block.json to load the script.
 	 *
+	 * @param string|null $key The key of the script to get.
 	 * @return null
 	 */
 	protected function get_block_type_script( $key = null ) {
