@@ -1504,14 +1504,17 @@ class Checkout extends MockeryTestCase {
 	}
 
 	/**
-	 * Test that custom status 'ready_for_pickup' is retained for free orders.
+	 * Helper method to register custom order status.
+	 *
+	 * @param string $status_name             Custom status name to register.
+	 * @param bool   $add_to_payment_statuses Whether to add the status to valid statuses for payment.
 	 */
-	public function test_custom_status_retained_for_free_order() {
+	private function register_custom_order_status( $status_name, $add_to_payment_statuses = false ) {
 		add_filter(
 			'woocommerce_register_shop_order_post_statuses',
-			function ( $order_statuses ) {
-				$order_statuses['wc-ready_for_pickup'] = array(
-					'label'                     => 'Ready for Pickup',
+			function ( $order_statuses ) use ( $status_name ) {
+				$order_statuses[ 'wc-' . $status_name ] = array(
+					'label'                     => 'Custom status for testing',
 					'public'                    => false,
 					'exclude_from_search'       => false,
 					'show_in_admin_all_list'    => true,
@@ -1523,11 +1526,29 @@ class Checkout extends MockeryTestCase {
 
 		add_filter(
 			'wc_order_statuses',
-			function ( $order_statuses ) {
-				$order_statuses['wc-ready_for_pickup'] = 'Ready for Pickup';
+			function ( $order_statuses ) use ( $status_name ) {
+				$order_statuses[ 'wc-' . $status_name ] = 'Custom status for testing';
 				return $order_statuses;
 			}
 		);
+
+		if ( $add_to_payment_statuses ) {
+			add_filter(
+				'woocommerce_valid_order_statuses_for_payment',
+				function ( $statuses ) use ( $status_name ) {
+					$statuses[] = $status_name;
+					return $statuses;
+				}
+			);
+		}
+	}
+
+	/**
+	 * Test that custom status is retained for free orders.
+	 */
+	public function test_custom_status_retained_for_free_order() {
+		$status_name = 'ready_for_pickup';
+		$this->register_custom_order_status( $status_name );
 
 		// Create a simple product and add to cart.
 		$product = \WC_Helper_Product::create_simple_product();
@@ -1542,8 +1563,8 @@ class Checkout extends MockeryTestCase {
 		// Hook into the checkout process to set the custom status.
 		add_action(
 			'woocommerce_store_api_checkout_order_processed',
-			function ( \WC_Order $order ) {
-				$order->set_status( 'ready_for_pickup' );
+			function ( \WC_Order $order ) use ( $status_name ) {
+				$order->set_status( $status_name );
 				$order->save();
 			}
 		);
@@ -1583,35 +1604,16 @@ class Checkout extends MockeryTestCase {
 		$order    = wc_get_order( $order_id );
 
 		// Assert status remains custom
-		$this->assertEquals( 'ready_for_pickup', $order->get_status(), 'Order status should remain custom for free orders.' );
+		$this->assertEquals( $status_name, $order->get_status(), 'Order status should remain custom for free orders.' );
 	}
 
 	/**
-	 * Test that custom status 'ready_for_pickup' is retained for non-free orders
-	 * when the custom status is not in the valid statuses for payment list.
+	 * Test that custom status is retained for non-free orders when the custom 
+	 * status is not in the valid statuses for payment list.
 	 */
 	public function test_custom_status_retained_for_non_free_order() {
-		add_filter(
-			'woocommerce_register_shop_order_post_statuses',
-			function ( $order_statuses ) {
-				$order_statuses['wc-ready_for_pickup'] = array(
-					'label'                     => 'Ready for Pickup',
-					'public'                    => false,
-					'exclude_from_search'       => false,
-					'show_in_admin_all_list'    => true,
-					'show_in_admin_status_list' => true,
-				);
-				return $order_statuses;
-			}
-		);
-
-		add_filter(
-			'wc_order_statuses',
-			function ( $order_statuses ) {
-				$order_statuses['wc-ready_for_pickup'] = 'Ready for Pickup';
-				return $order_statuses;
-			}
-		);
+		$status_name = 'ready_for_pickup';
+		$this->register_custom_order_status( $status_name );
 
 		// Create a simple product with a non-zero price and add to cart.
 		$product = \WC_Helper_Product::create_simple_product();
@@ -1626,8 +1628,8 @@ class Checkout extends MockeryTestCase {
 		// Hook into the checkout process to set the custom status.
 		add_action(
 			'woocommerce_store_api_checkout_order_processed',
-			function ( \WC_Order $order ) {
-				$order->set_status( 'ready_for_pickup' );
+			function ( \WC_Order $order ) use ( $status_name ) {
+				$order->set_status( $status_name );
 				$order->save();
 			}
 		);
@@ -1667,44 +1669,16 @@ class Checkout extends MockeryTestCase {
 		$order    = wc_get_order( $order_id );
 
 		// Assert status remains custom (the key test here - verifying needs_payment() returns false despite non-zero total)
-		$this->assertEquals( 'ready_for_pickup', $order->get_status(), 'Order status should remain custom for non-free orders when the status is not valid for payment.' );
+		$this->assertEquals( $status_name, $order->get_status(), 'Order status should remain custom for non-free orders when the status is not valid for payment.' );
 	}
 
 	/**
-	 * Test that custom status 'ready_for_pickup' goes through payment flow
+	 * Test that custom status goes through payment flow
 	 * when added to valid statuses for payment list.
 	 */
 	public function test_custom_status_with_payment_when_added_to_valid_statuses() {
-		add_filter(
-			'woocommerce_register_shop_order_post_statuses',
-			function ( $order_statuses ) {
-				$order_statuses['wc-ready_for_pickup'] = array(
-					'label'                     => 'Ready for Pickup',
-					'public'                    => false,
-					'exclude_from_search'       => false,
-					'show_in_admin_all_list'    => true,
-					'show_in_admin_status_list' => true,
-				);
-				return $order_statuses;
-			}
-		);
-
-		add_filter(
-			'wc_order_statuses',
-			function ( $order_statuses ) {
-				$order_statuses['wc-ready_for_pickup'] = 'Ready for Pickup';
-				return $order_statuses;
-			}
-		);
-
-		// Add our custom status to valid statuses for payment list
-		add_filter(
-			'woocommerce_valid_order_statuses_for_payment',
-			function ( $statuses ) {
-				$statuses[] = 'ready_for_pickup';
-				return $statuses;
-			}
-		);
+		$status_name = 'ready_for_pickup';
+		$this->register_custom_order_status( $status_name, true );
 
 		// Create a simple product with a non-zero price and add to cart.
 		$product = \WC_Helper_Product::create_simple_product();
@@ -1719,9 +1693,9 @@ class Checkout extends MockeryTestCase {
 		// Add a hook to check the needs_payment() result and set the status
 		add_action(
 			'woocommerce_store_api_checkout_order_processed',
-			function ( \WC_Order $order ) {
+			function ( \WC_Order $order ) use ( $status_name ) {
 				// Set our custom status
-				$order->set_status( 'ready_for_pickup' );
+				$order->set_status( $status_name );
 				$order->save();
 			}
 		);
