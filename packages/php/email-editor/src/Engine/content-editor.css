@@ -106,10 +106,11 @@ ol.has-background {
 }
 
 /*
- * Reset the margin for the quote block.
+ * Reset the margin and padding of the quote block.
  */
 .wp-block-quote {
 	margin-inline: 0;
+	padding: var(--wp--style--block-gap, 16px);
 }
 
 /*

@@ -13,3 +13,18 @@ h5.has-background,
 h6.has-background {
 	padding: 16px 24px;
 }
+
+/**
+ * Default styles for the quote block.
+ */
+.wp-block-quote .email-block-quote-content {
+	padding: var(--wp--style--block-gap, 16px);
+}
+
+.wp-block-quote:not(.has-text-align-right):not(.has-text-align-center) {
+	border-left: 1px solid #000;
+}
+
+.wp-block-quote.has-text-align-right {
+	border-right: 1px solid #000;
+}
