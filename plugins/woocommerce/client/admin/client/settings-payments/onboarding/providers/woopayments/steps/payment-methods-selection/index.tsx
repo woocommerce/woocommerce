@@ -4,7 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Icon } from '@wordpress/components';
 import { RecommendedPaymentMethod } from '@woocommerce/data';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { close } from '@wordpress/icons';
 
@@ -37,15 +37,20 @@ export default function PaymentMethodsSelection() {
 	const contextPaymentMethodsState = currentStep?.context?.pms_state;
 	const contextPaymentMethods = currentStep?.context?.recommended_pms;
 
+	// Memoize the combined recommended payment methods
+	const recommendedPaymentMethods = useMemo( () => {
+		return contextPaymentMethods
+			? combineRequestMethods( contextPaymentMethods )
+			: [];
+	}, [ contextPaymentMethods ] );
+
+	// Update the local payment methods state when the context changes
 	useEffect( () => {
 		if ( contextPaymentMethodsState ) {
 			setPaymentMethodsState( contextPaymentMethodsState );
 		}
 	}, [ contextPaymentMethodsState ] );
 
-	const recommendedPaymentMethods = contextPaymentMethods
-		? combineRequestMethods( contextPaymentMethods )
-		: [];
 
 	// Calculate hidden count based on the stored initial visibility (Memoized)
 	const hiddenCount = useMemo( () => {
