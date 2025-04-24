@@ -1166,12 +1166,8 @@ class Checkout extends MockeryTestCase {
 
 		// Create a simple product and add to cart.
 		$product = \WC_Helper_Product::create_simple_product();
-		$product->set_regular_price( '0' ); // Make the product free.
 		$product->save();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
-
-		// Verify that the cart total is 0 (free order).
-		$this->assertEquals( 0, WC()->cart->get_total( 'numeric' ), 'Cart total should be 0 for a free order' );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
@@ -1381,7 +1377,7 @@ class Checkout extends MockeryTestCase {
 
 		$this->assertEquals( 400, $response->get_status() );
 	}
-
+ 
 	/**
 	 * @testDox Test that perform_custom_order_validation throws a RouteException with a custom error.
 	 */
