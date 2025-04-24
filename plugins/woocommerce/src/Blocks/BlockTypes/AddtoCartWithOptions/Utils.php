@@ -114,7 +114,7 @@ class Utils {
 			$product = wc_get_product( $post_id );
 		}
 
-		if ( ! $product instanceof \WC_Product ) {
+		if ( ! $product instanceof \WC_Product && $previous_product instanceof \WC_Product ) {
 			$product = $previous_product;
 		}
 
