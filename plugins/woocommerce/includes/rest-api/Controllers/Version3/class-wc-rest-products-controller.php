@@ -1771,7 +1771,14 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		);
 
 		$params['search_sku'] = array(
-			'description'       => __( 'Limit results to those with a SKU that partial matches a string.', 'woocommerce' ),
+			'description'       => __( "Limit results to those with a SKU that partial matches a string. This argument takes precedence over 'sku'.", 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['search_sku_or_name'] = array(
+			'description'       => __( "Limit results to those with a name or SKU that partial matches a string. This argument takes precedence over 'search', 'sku' and 'search_sku'.", 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
