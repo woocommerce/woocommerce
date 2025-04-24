@@ -104,8 +104,6 @@ class AddToCartWithOptionsGroupedProductSelectorItemCTA extends AbstractBlock {
 		$markup       = '';
 
 		if ( $product_data['is_valid'] ) {
-			wp_enqueue_script_module( $this->get_full_block_name() );
-
 			if ( ! $product->is_purchasable() || $product->has_options() || ! $product->is_in_stock() ) {
 				$markup = $this->get_button_markup( $product );
 			} elseif ( $product->is_sold_individually() ) {
@@ -122,16 +120,5 @@ class AddToCartWithOptionsGroupedProductSelectorItemCTA extends AbstractBlock {
 		$product = $previous_product;
 
 		return $markup;
-	}
-
-	/**
-	 * Enqueue frontend script
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content Rendered block output.
-	 * @param WP_Block $block Block instance.
-	 */
-	protected function enqueue_scripts( $attributes = array(), $content = '', $block = null ) {
-		wp_enqueue_script_module( 'woocommerce/add-to-cart-with-options-quantity-selector' );
 	}
 }
