@@ -16,6 +16,7 @@ export interface ImageDataItem {
 	src: string;
 	srcSet: string;
 	sizes: string;
+	isActive?: boolean;
 }
 
 interface ImageDataObject {

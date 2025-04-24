@@ -243,6 +243,11 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
+			await page.setViewportSize( {
+				height: 667,
+				width: 390, // iPhone 12 Pro
+			} );
+
 			const blockFrontend = await pageObject.getMainImageBlock( {
 				page: 'frontend',
 			} );
