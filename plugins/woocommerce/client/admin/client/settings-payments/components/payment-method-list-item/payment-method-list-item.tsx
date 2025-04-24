@@ -4,6 +4,7 @@
 import { decodeEntities } from '@wordpress/html-entities';
 import { type RecommendedPaymentMethod } from '@woocommerce/data';
 import { ToggleControl } from '@wordpress/components';
+import { useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -41,14 +42,29 @@ export const PaymentMethodListItem = ( {
 	isExpanded,
 	...props
 }: PaymentMethodListItemProps ) => {
-	// Rendering logic
-	// If the category is primary, render the method regardless of the state.
-	// If the category is secondary, render the method if the list is expanded or the method is enabled.
-	const shouldRender =
-		shouldRenderPaymentMethodInMainList(
-			method,
-			paymentMethodsState[ method.id ]
-		) || isExpanded;
+	const shouldRenderRef = useRef< boolean | null >( null );
+
+	// Only initialize the ref once the state for this method is available.
+	if (
+		shouldRenderRef.current === null &&
+		paymentMethodsState[ method.id ] !== undefined
+	) {
+		// Rendering logic
+		// If the category is primary, render the method regardless of the state.
+		// If the category is secondary, render the method if the list is expanded or the method is enabled.
+		const initialShouldRenderBasedOnState =
+			shouldRenderPaymentMethodInMainList(
+				method,
+				paymentMethodsState[ method.id ]
+			);
+		// Calculate the initial render state *based on the available state*.
+		shouldRenderRef.current = initialShouldRenderBasedOnState;
+	}
+
+	// Determine final rendering decision:
+	// Render if the list is expanded OR if it was initially supposed to be rendered.
+	// This is to prevent the method from being hidden behind the "Show more" button when it was enabled and then disabled.
+	const shouldRender = isExpanded || ( shouldRenderRef.current ?? false );
 
 	if ( ! shouldRender ) {
 		return null;
