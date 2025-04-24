@@ -96,28 +96,15 @@ class ExportSchema {
 			}
 		}
 
-		$export_steps      = array();
-		$exporters_classes = array();
 		// Make sure the user has the required capabilities to export the steps.
 		foreach ( $exporters as $exporter ) {
 			if ( ! $exporter->check_step_capabilities() ) {
 				return new WP_Error( 'wooblueprint_insufficient_permissions', 'Insufficient permissions to export for step: ' . $exporter->get_step_name() );
 			}
-
-			$step_name           = $exporter instanceof HasAlias ? $exporter->get_alias() : $exporter->get_step_name();
-			$export_steps[]      = $step_name;
-			$exporters_classes[] = get_class( $exporter );
 		}
 
 		$logger = new Logger();
-		$logger->log(
-			sprintf( 'Starting export of %d steps', count( $export_steps ) ),
-			WC_Log_Levels::INFO,
-			array(
-				'steps'     => $export_steps,
-				'exporters' => $exporters_classes,
-			)
-		);
+		$logger->start_export( $exporters );
 
 		foreach ( $exporters as $exporter ) {
 			try {
@@ -127,25 +114,12 @@ class ExportSchema {
 
 			} catch ( \Throwable $e ) {
 				$step_name = $exporter instanceof HasAlias ? $exporter->get_alias() : $exporter->get_step_name();
-				$logger->log(
-					sprintf( 'Export "%s" step failed', $step_name ),
-					WC_Log_Levels::ERROR,
-					array(
-						'error' => $e->getMessage(),
-					)
-				);
+				$logger->export_step_failed( $step_name, $e );
 				return new WP_Error( 'wooblueprint_export_step_failed', 'Export step failed: ' . $e->getMessage() );
 			}
 		}
 
-		$logger->log(
-			sprintf( 'Export of %d steps completed', count( $export_steps ) ),
-			WC_Log_Levels::INFO,
-			array(
-				'steps'     => $export_steps,
-				'exporters' => $exporters_classes,
-			)
-		);
+		$logger->complete_export( $exporters );
 
 		return $schema;
 	}

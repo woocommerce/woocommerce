@@ -87,34 +87,15 @@ class ImportStep {
 		}
 
 		$importer = $this->indexed_importers[ $this->step_definition->step ];
-
-		$logger = new Logger();
-		$logger->log(
-			sprintf( 'Starting import "%s" step', $this->step_definition->step ),
-			WC_Log_Levels::INFO,
-			array(
-				'importer' => get_class( $importer ),
-			)
-		);
+		$logger   = new Logger();
+		$logger->start_import( $this->step_definition->step, get_class( $importer ) );
 
 		$importer_result = $importer->process( $this->step_definition );
 
 		if ( $importer_result->is_success() ) {
-			$logger->log(
-				sprintf( 'Import "%s" step completed', $this->step_definition->step ),
-				WC_Log_Levels::INFO,
-				array(
-					'messages' => $importer_result->get_messages( 'info' ),
-				)
-			);
+			$logger->complete_import( $this->step_definition->step, $importer_result );
 		} else {
-			$logger->log(
-				sprintf( 'Import "%s" step failed', $this->step_definition->step ),
-				WC_Log_Levels::ERROR,
-				array(
-					'messages' => $importer_result->get_messages( 'error' ),
-				)
-			);
+			$logger->import_step_failed( $this->step_definition->step, $importer_result );
 		}
 
 		$result->merge_messages( $importer_result );
