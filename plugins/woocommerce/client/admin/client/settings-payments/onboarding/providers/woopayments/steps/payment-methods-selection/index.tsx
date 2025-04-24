@@ -57,6 +57,39 @@ export default function PaymentMethodsSelection() {
 		[ paymentMethodsState ]
 	);
 
+	// Calculate and store initial visibility *once* when data is ready
+	useEffect( () => {
+		// Only proceed if the map hasn't been populated yet
+		if ( initialVisibilityMap !== null ) {
+			return;
+		}
+
+		// Ensure both methods and state are sufficiently loaded
+		if (
+			recommendedPaymentMethods.length > 0 &&
+			Object.keys( combinedState ).length > 0 // Use combinedState length
+		) {
+			// Check if all necessary state keys are present for the current methods in the *combined* state
+			const allKeysPresent = recommendedPaymentMethods.every( ( m ) => {
+				const isPresent = combinedState[ m.id ] !== undefined; // Check in combinedState
+				return isPresent;
+			} );
+
+			if ( allKeysPresent ) {
+				const calculatedMap: Record< string, boolean > = {};
+				recommendedPaymentMethods.forEach( ( method ) => {
+					calculatedMap[ method.id ] =
+						shouldRenderPaymentMethodInMainList(
+							method,
+							combinedState[ method.id ] // Use combinedState value
+						);
+				} );
+				// Set the state with the calculated initial visibility map
+				setInitialVisibilityMap( calculatedMap );
+			}
+		}
+		// Depend on methods and the *combined* state
+	}, [ recommendedPaymentMethods, combinedState ] );
 
 	// Calculate hidden count based on the stored initial visibility (Memoized)
 	const hiddenCount = useMemo( () => {
