@@ -368,7 +368,9 @@ test.describe( 'Merchant → Checkout', () => {
 				await expect( shippingCompanyInput ).toBeHidden();
 
 				// Enable the company field.
-				await shippingCompanyToggle.check();
+				await expect( async () => {
+					await shippingCompanyToggle.check();
+				} ).toPass();
 
 				// Verify that the company field is visible and the field is optional.
 				await expect( shippingCompanyInput ).toBeVisible();
@@ -378,13 +380,17 @@ test.describe( 'Merchant → Checkout', () => {
 				);
 
 				// Make the company field required.
-				await shippingCompanyRequiredToggle.check();
+				await expect( async () => {
+					await shippingCompanyRequiredToggle.check();
+				} ).toPass();
 
 				// Verify that the company field is required.
 				await expect( shippingCompanyRequiredToggle ).toBeChecked();
 
 				// Disable the company field.
-				await shippingCompanyToggle.uncheck();
+				await expect( async () => {
+					await shippingCompanyToggle.uncheck();
+				} ).toPass();
 
 				// Verify that the company field is hidden.
 				await expect( shippingCompanyInput ).toBeHidden();
@@ -466,7 +472,9 @@ test.describe( 'Merchant → Checkout', () => {
 				await expect( shippingApartmentOptionalToggle ).toBeChecked();
 
 				// Make the apartment number required.
-				await shippingApartmentRequiredToggle.check();
+				await expect( async () => {
+					await shippingApartmentRequiredToggle.check();
+				} ).toPass();
 
 				// Verify that the apartment field is required.
 				await expect( shippingApartmentRequiredToggle ).toBeChecked();
@@ -558,7 +566,9 @@ test.describe( 'Merchant → Checkout', () => {
 				);
 
 				// Make the phone number required.
-				await shippingPhoneRequiredToggle.check();
+				await expect( async () => {
+					await shippingPhoneRequiredToggle.check();
+				} ).toPass();
 
 				// Verify that the phone field is required.
 				await expect( shippingPhoneRequiredToggle ).toBeChecked();
@@ -567,7 +577,9 @@ test.describe( 'Merchant → Checkout', () => {
 				);
 
 				// Disable the phone field.
-				await shippingPhoneToggle.uncheck();
+				await expect( async () => {
+					await shippingPhoneToggle.uncheck();
+				} ).toPass();
 
 				// Verify that the phone field is hidden.
 				await expect( shippingPhoneInput ).toBeHidden();

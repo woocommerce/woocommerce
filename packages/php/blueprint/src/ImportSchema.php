@@ -3,7 +3,6 @@
 namespace Automattic\WooCommerce\Blueprint;
 
 use Automattic\WooCommerce\Blueprint\Schemas\JsonSchema;
-use Automattic\WooCommerce\Blueprint\Schemas\ZipSchema;
 use Opis\JsonSchema\Errors\ErrorFormatter;
 use Opis\JsonSchema\Validator;
 
@@ -72,11 +71,9 @@ class ImportSchema {
 	 */
 	public static function create_from_file( $file ) {
 		// @todo check for mime type
-		// @todo check for allowed types -- json or zip
 		$path_info = pathinfo( $file );
-		$is_zip    = 'zip' === $path_info['extension'];
 
-		return $is_zip ? self::create_from_zip( $file ) : self::create_from_json( $file );
+		return self::create_from_json( $file );
 	}
 
 	/**
@@ -87,17 +84,6 @@ class ImportSchema {
 	 */
 	public static function create_from_json( $json_path ) {
 		return new self( new JsonSchema( $json_path ) );
-	}
-
-	/**
-	 * Create an ImportSchema instance from a ZIP file.
-	 *
-	 * @param string $zip_path The ZIP file path.
-	 *
-	 * @return ImportSchema The created ImportSchema instance.
-	 */
-	public static function create_from_zip( $zip_path ) {
-		return new self( new ZipSchema( $zip_path ) );
 	}
 
 	/**

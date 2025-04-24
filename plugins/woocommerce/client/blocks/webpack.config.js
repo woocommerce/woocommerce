@@ -13,7 +13,7 @@ const {
 	getCartAndCheckoutFrontendConfig,
 } = require( './bin/webpack-configs.js' );
 
-const interactivityBlocksConfig = require( './bin/webpack-config-interactivity-blocks-frontend.js' );
+const interactivityBlocksConfig = require( './bin/webpack-config-interactive-blocks.js' );
 
 // Only options shared between all configs should be defined here.
 const sharedConfig = {

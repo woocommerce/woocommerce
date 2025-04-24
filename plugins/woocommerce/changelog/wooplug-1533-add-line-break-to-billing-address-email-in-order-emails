@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Allow customer's email in billing address in order emails to break line when too long
