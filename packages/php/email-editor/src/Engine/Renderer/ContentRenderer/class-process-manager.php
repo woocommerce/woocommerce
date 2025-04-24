@@ -39,13 +39,13 @@ class Process_Manager {
 	/**
 	 * Process_Manager constructor.
 	 *
-	 * @param Cleanup_Preprocessor       $cleanup_preprocessor Cleanup preprocessor.
-	 * @param Blocks_Width_Preprocessor  $blocks_width_preprocessor Blocks width preprocessor.
-	 * @param Typography_Preprocessor    $typography_preprocessor Typography preprocessor.
-	 * @param Spacing_Preprocessor       $spacing_preprocessor Spacing preprocessor.
+	 * @param Cleanup_Preprocessor          $cleanup_preprocessor Cleanup preprocessor.
+	 * @param Blocks_Width_Preprocessor     $blocks_width_preprocessor Blocks width preprocessor.
+	 * @param Typography_Preprocessor       $typography_preprocessor Typography preprocessor.
+	 * @param Spacing_Preprocessor          $spacing_preprocessor Spacing preprocessor.
 	 * @param Quote_Text_Align_Preprocessor $quote_text_align_preprocessor Quote text align preprocessor.
-	 * @param Highlighting_Postprocessor $highlighting_postprocessor Highlighting postprocessor.
-	 * @param Variables_Postprocessor    $variables_postprocessor Variables postprocessor.
+	 * @param Highlighting_Postprocessor    $highlighting_postprocessor Highlighting postprocessor.
+	 * @param Variables_Postprocessor       $variables_postprocessor Variables postprocessor.
 	 */
 	public function __construct(
 		Cleanup_Preprocessor $cleanup_preprocessor,

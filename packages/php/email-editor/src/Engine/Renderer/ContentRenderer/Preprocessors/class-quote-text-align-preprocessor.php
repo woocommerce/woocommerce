@@ -72,4 +72,4 @@ class Quote_Text_Align_Preprocessor implements Preprocessor {
 
 		return $blocks;
 	}
-} 
+}

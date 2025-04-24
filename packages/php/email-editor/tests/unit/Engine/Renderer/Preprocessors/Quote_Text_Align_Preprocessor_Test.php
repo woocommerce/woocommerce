@@ -184,4 +184,4 @@ class Quote_Text_Align_Preprocessor_Test extends \Email_Editor_Unit_Test {
 
 		$this->assertEquals( 'left', $result[0]['innerBlocks'][0]['innerBlocks'][0]['attrs']['textAlign'] );
 	}
-} 
+}
