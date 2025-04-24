@@ -139,7 +139,13 @@ class AddToCartForm extends AbstractBlock {
 		}
 
 		$is_external_product_with_url = $product instanceof \WC_Product_External && $product->get_product_url();
-		$is_stepper_style             = 'stepper' === $attributes['quantitySelectorStyle'] && ! $product->is_sold_individually() && Features::is_enabled( 'add-to-cart-with-options-stepper-layout' );
+		$managing_stock               = $product->managing_stock();
+		$stock_quantity               = $product->get_stock_quantity();
+
+		/**
+		 * The stepper buttons don't show when the product is sold individually or stock quantity is less or equal to 1 because the quantity input field is hidden.
+		 */
+		$is_stepper_style = 'stepper' === $attributes['quantitySelectorStyle'] && ! $product->is_sold_individually() && ( ( $managing_stock && $stock_quantity > 1 ) || ! $managing_stock ) && Features::is_enabled( 'add-to-cart-with-options-stepper-layout' );
 
 		if ( $is_descendent_of_single_product_block ) {
 			add_filter( 'woocommerce_add_to_cart_form_action', array( $this, 'add_to_cart_form_action' ), 10 );
