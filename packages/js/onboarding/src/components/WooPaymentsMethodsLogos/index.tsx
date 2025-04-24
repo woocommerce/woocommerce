@@ -152,7 +152,7 @@ export const WooPaymentsMethodsLogos = ( {
 	 * The default is set according to https://woocommerce.com/document/woopayments/payment-methods.
 	 * If not eligible for WooPay, the total number of payment methods is reduced by one.
 	 */
-	totalPaymentMethods = 22,
+	totalPaymentMethods = 21,
 }: {
 	isWooPayEligible: boolean;
 	maxElements: number;
