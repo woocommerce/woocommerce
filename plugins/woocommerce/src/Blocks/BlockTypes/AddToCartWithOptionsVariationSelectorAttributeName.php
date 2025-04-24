@@ -69,8 +69,6 @@ class AddToCartWithOptionsVariationSelectorAttributeName extends AbstractBlock {
 
 		$label_text = esc_html( wc_attribute_label( $attribute_name ) );
 
-		wp_enqueue_script_module( $this->get_full_block_name() );
-
 		return sprintf(
 			'<label %s>%s</label>',
 			$wrapper_attributes,

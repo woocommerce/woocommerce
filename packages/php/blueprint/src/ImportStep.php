@@ -8,7 +8,7 @@ use Opis\JsonSchema\Validator;
 /**
  * Class ImportStep
  *
- * Import a signle step from a JSON definition.
+ * Import a single step from a JSON definition.
  *
  * @package Automattic\WooCommerce\Blueprint
  */

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent infinite redirect loop when cart shortcode is present on checkout page with empty cart.

@@ -121,37 +121,54 @@ const Edit = ( {
 		);
 	}
 
-	const productData: Record< string, { label: string; value: string } > = {
-		weight: {
+	const productData: Record< string, { label: string; value: string } > = {};
+
+	if ( showWeight ) {
+		productData.weight = {
 			label: __( 'Weight', 'woocommerce' ),
 			value: '',
-		},
-		dimensions: {
+		};
+
+		if ( isSpecificProductContext ) {
+			productData.weight.value = product.weight
+				? `${ product.weight } ${ weightUnit }`
+				: '';
+		} else {
+			productData.weight.value = `10 ${ weightUnit }`;
+		}
+	}
+
+	if ( showDimensions ) {
+		productData.dimensions = {
 			label: __( 'Dimensions', 'woocommerce' ),
 			value: '',
-		},
-	};
-
-	if ( isSpecificProductContext ) {
-		productData.weight.value = product?.weight
-			? `${ product.weight } ${ weightUnit }`
-			: '';
-		productData.dimensions.value = product?.dimensions
-			? getFormattedDimensions( product.dimensions, dimensionUnit )
-			: '';
-		product?.attributes?.forEach( ( attribute ) => {
-			productData[ attribute.name.toLowerCase() ] = {
-				label: attribute.name,
-				value: attribute.options.join( ', ' ),
-			};
-		} );
-	} else {
-		productData.weight.value = `10 ${ weightUnit }`;
-		productData.dimensions.value = `10 × 10 × 10 ${ dimensionUnit }`;
-		productData.test_attribute = {
-			label: __( 'Test Attribute', 'woocommerce' ),
-			value: __( 'First, Second, Third', 'woocommerce' ),
 		};
+
+		if ( isSpecificProductContext ) {
+			productData.dimensions.value = product.dimensions
+				? getFormattedDimensions( product.dimensions, dimensionUnit )
+				: '';
+		} else {
+			productData.dimensions.value = `10 × 10 × 10 ${ dimensionUnit }`;
+		}
+	}
+
+	if ( showAttributes ) {
+		if ( isSpecificProductContext ) {
+			if ( product.attributes ) {
+				product.attributes.forEach( ( attribute ) => {
+					productData[ attribute.name.toLowerCase() ] = {
+						label: attribute.name,
+						value: attribute.options.join( ', ' ),
+					};
+				} );
+			}
+		} else {
+			productData.test_attribute = {
+				label: __( 'Test Attribute', 'woocommerce' ),
+				value: __( 'First, Second, Third', 'woocommerce' ),
+			};
+		}
 	}
 
 	if ( ! showWeight ) {
