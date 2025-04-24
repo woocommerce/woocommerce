@@ -29,6 +29,11 @@ type PaymentMethodListItemProps = {
 	 * Indicates whether the payment methods list is currently expanded.
 	 */
 	isExpanded: boolean;
+	/**
+	 * The pre-calculated initial visibility status passed from the parent.
+	 * If undefined, the component calculates its own initial visibility.
+	 */
+	initialVisibilityStatus?: boolean | null;
 };
 
 /**
@@ -40,31 +45,34 @@ export const PaymentMethodListItem = ( {
 	paymentMethodsState,
 	setPaymentMethodsState,
 	isExpanded,
+	initialVisibilityStatus,
 	...props
 }: PaymentMethodListItemProps ) => {
+	// Internal ref for fallback mechanism when prop is not provided
 	const shouldRenderRef = useRef< boolean | null >( null );
 
-	// Only initialize the ref once the state for this method is available.
-	if (
-		shouldRenderRef.current === null &&
-		paymentMethodsState[ method.id ] !== undefined
-	) {
-		// Rendering logic
-		// If the category is primary, render the method regardless of the state.
-		// If the category is secondary, render the method if the list is expanded or the method is enabled.
-		const initialShouldRenderBasedOnState =
-			shouldRenderPaymentMethodInMainList(
+	// Fallback: Calculate initial visibility internally if prop is not provided
+	if ( initialVisibilityStatus === undefined ) {
+		// Only initialize the ref once the state for this method is available.
+		if (
+			shouldRenderRef.current === null &&
+			paymentMethodsState[ method.id ] !== undefined
+		) {
+			shouldRenderRef.current = shouldRenderPaymentMethodInMainList(
 				method,
 				paymentMethodsState[ method.id ]
 			);
-		// Calculate the initial render state *based on the available state*.
-		shouldRenderRef.current = initialShouldRenderBasedOnState;
+		}
 	}
 
 	// Determine final rendering decision:
-	// Render if the list is expanded OR if it was initially supposed to be rendered.
-	// This is to prevent the method from being hidden behind the "Show more" button when it was enabled and then disabled.
-	const shouldRender = isExpanded || ( shouldRenderRef.current ?? false );
+	// Prioritize the prop if provided, otherwise use the internal ref state.
+	const baseVisibility =
+		initialVisibilityStatus !== undefined
+			? initialVisibilityStatus ?? false
+			: shouldRenderRef.current ?? false;
+
+	const shouldRender = isExpanded || baseVisibility;
 
 	if ( ! shouldRender ) {
 		return null;
