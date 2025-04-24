@@ -171,20 +171,6 @@ const Edit = ( {
 		}
 	}
 
-	if ( ! showWeight ) {
-		productData.weight.value = '';
-	}
-	if ( ! showDimensions ) {
-		productData.dimensions.value = '';
-	}
-	if ( ! showAttributes ) {
-		Object.entries( productData ).forEach( ( [ key, data ] ) => {
-			if ( key !== 'weight' && key !== 'dimensions' ) {
-				data.value = '';
-			}
-		} );
-	}
-
 	return (
 		<>
 			<InspectorControls>
