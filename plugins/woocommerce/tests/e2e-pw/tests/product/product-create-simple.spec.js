@@ -195,7 +195,7 @@ for ( const productType of Object.keys( productData ) ) {
 						page.getByText( 'Shipping class', { exact: true } )
 					).toBeVisible();
 					await page
-						.locator('#_weight')
+						.locator( '#_weight' )
 						.fill( productData[ productType ].shipping.weight );
 					await page
 						.getByPlaceholder( 'Length', { exact: true } )
@@ -212,8 +212,12 @@ for ( const productType of Object.keys( productData ) ) {
 			// eslint-disable-next-line playwright/no-conditional-in-test
 			if ( productData[ productType ].virtual ) {
 				await test.step( 'add virtual product details', async () => {
-					await page.getByRole('checkbox', { name: 'Virtual' }).check();
-					await expect(page.getByRole('checkbox', { name: 'Virtual' })).toBeChecked();
+					await page
+						.getByRole( 'checkbox', { name: 'Virtual' } )
+						.check();
+					await expect(
+						page.getByRole( 'checkbox', { name: 'Virtual' } )
+					).toBeChecked();
 				} );
 			}
 
@@ -324,7 +328,13 @@ for ( const productType of Object.keys( productData ) ) {
 				await page
 					.getByRole( 'button', { name: 'Add to cart' } )
 					.click();
-				await page.getByRole( 'link', { name: 'View cart' } ).click();
+
+				// Verify the button text was updated.
+				await expect(
+					page.getByRole( 'button' ).getByText( '1 in cart' )
+				).toBeVisible();
+
+				await page.goto( 'cart/' );
 
 				await checkCartContent(
 					false,
