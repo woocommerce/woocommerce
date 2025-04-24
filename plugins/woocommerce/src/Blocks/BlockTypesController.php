@@ -371,9 +371,7 @@ final class BlockTypesController {
 	 */
 	protected function get_widget_area_block_types() {
 		return array(
-			'ActiveFilters',
 			'AllReviews',
-			'AttributeFilter',
 			'Breadcrumbs',
 			'CartLink',
 			'CatalogSorting',
@@ -381,26 +379,12 @@ final class BlockTypesController {
 			'CustomerAccount',
 			'FeaturedCategory',
 			'FeaturedProduct',
-			'FilterWrapper',
 			'MiniCart',
-			'PriceFilter',
 			'ProductCategories',
 			'ProductResultsCount',
 			'ProductSearch',
-			'RatingFilter',
 			'ReviewsByCategory',
 			'ReviewsByProduct',
-			'StockFilter',
-			// Below product grids are hidden from inserter however they could have been used in widgets.
-			// Keep them for backward compatibility.
-			'HandpickedProducts',
-			'ProductBestSellers',
-			'ProductNew',
-			'ProductOnSale',
-			'ProductTopRated',
-			'ProductsByAttribute',
-			'ProductCategory',
-			'ProductTag',
 			'ProductFilters',
 			'ProductFilterStatus',
 			'ProductFilterPrice',
@@ -412,6 +396,27 @@ final class BlockTypesController {
 			'ProductFilterClearButton',
 			'ProductFilterCheckboxList',
 			'ProductFilterChips',
+
+			// Keep hidden legacy filter blocks for backward compatibility.
+			'ActiveFilters',
+			'AttributeFilter',
+			'FilterWrapper',
+			'PriceFilter',
+			'RatingFilter',
+			'StockFilter',
+			// End: legacy filter blocks.
+
+			// Below product grids are hidden from inserter however they could have been used in widgets.
+			// Keep them for backward compatibility.
+			'HandpickedProducts',
+			'ProductBestSellers',
+			'ProductNew',
+			'ProductOnSale',
+			'ProductTopRated',
+			'ProductsByAttribute',
+			'ProductCategory',
+			'ProductTag',
+			// End: legacy product grids blocks.
 		);
 	}
 
