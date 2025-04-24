@@ -68,39 +68,29 @@ const CustomerAddress = () => {
 		]
 	);
 
-	const renderAddressCardComponent = useCallback(
-		() => (
-			<AddressCard
-				address={ shippingAddress }
-				target="shipping"
-				onEdit={ () => {
-					setEditing( true );
-				} }
-				isExpanded={ editing }
-			/>
-		),
-		[ shippingAddress, editing, setEditing ]
-	);
-
-	const renderAddressFormComponent = useCallback(
-		() => (
-			<Form< ShippingAddress >
-				id="shipping"
-				addressType="shipping"
-				onChange={ onChangeAddress }
-				values={ shippingAddress }
-				fields={ ADDRESS_FORM_KEYS }
-				isEditing={ editing }
-			/>
-		),
-		[ onChangeAddress, shippingAddress, editing ]
-	);
-
 	return (
 		<AddressWrapper
 			isEditing={ editing }
-			addressCard={ renderAddressCardComponent }
-			addressForm={ renderAddressFormComponent }
+			addressCard={
+				<AddressCard
+					address={ shippingAddress }
+					target="shipping"
+					onEdit={ () => {
+						setEditing( true );
+					} }
+					isExpanded={ editing }
+				/>
+			}
+			addressForm={
+				<Form< ShippingAddress >
+					id="shipping"
+					addressType="shipping"
+					onChange={ onChangeAddress }
+					values={ shippingAddress }
+					fields={ ADDRESS_FORM_KEYS }
+					isEditing={ editing }
+				/>
+			}
 		/>
 	);
 };

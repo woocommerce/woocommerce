@@ -113,7 +113,7 @@
 		"prettier": "npm:wp-prettier@^3.0.3",
 		"ts-loader": "9.5.x",
 		"typescript": "5.7.x",
-		"wireit": "0.14.10",
+		"wireit": "0.14.12",
 		"wp-types": "^3.65.0"
 	},
 	"config": {

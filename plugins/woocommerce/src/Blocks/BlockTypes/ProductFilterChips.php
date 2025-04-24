@@ -8,6 +8,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  */
 final class ProductFilterChips extends AbstractBlock {
 
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -29,8 +31,6 @@ final class ProductFilterChips extends AbstractBlock {
 		) {
 			return '';
 		}
-
-		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		$items       = $block->context['filterData']['items'] ?? array();
 		$show_counts = $block->context['filterData']['showCounts'] ?? false;
@@ -112,16 +112,5 @@ final class ProductFilterChips extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
-	}
-
-	/**
-	 * Disable the block type script, this uses script modules.
-	 *
-	 * @param string|null $key The key.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
 	}
 }
