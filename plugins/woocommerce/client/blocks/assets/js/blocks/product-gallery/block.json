@@ -8,7 +8,17 @@
 	"keywords": [ "WooCommerce" ],
 	"supports": {
 		"align": true,
-		"interactivity": true
+		"interactivity": true,
+		"layout": {
+			"default": {
+				"type": "flex",
+				"flexWrap": "nowrap",
+				"orientation": "horizontal"
+			},
+			"allowOrientation": true,
+			"allowEditing": true,
+			"allowJustification": false
+		}
 	},
 	"textdomain": "woocommerce",
 	"usesContext": [ "postId" ],
@@ -33,5 +43,7 @@
 		}
 	},
 	"viewScript": "wc-product-gallery-frontend",
-	"example": {}
+	"example": {},
+	"viewScriptModule": "woocommerce/product-gallery",
+	"style": "file:../woocommerce/product-gallery-style.css"
 }
