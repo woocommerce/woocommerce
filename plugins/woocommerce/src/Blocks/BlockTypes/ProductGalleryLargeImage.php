@@ -72,7 +72,6 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		}
 
 		$images_html = $this->get_main_images_html( $block->context, $post_id );
-		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		$processor = new \WP_HTML_Tag_Processor( $content );
 		$processor->next_tag();
@@ -203,13 +202,11 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	}
 
 	/**
-	 * Disable the block type script, this uses script modules.
-	 *
-	 * @param string|null $key The key.
+	 * Disable the editor style handle for this block type.
 	 *
 	 * @return null
 	 */
-	protected function get_block_type_script( $key = null ) {
+	protected function get_block_type_editor_style() {
 		return null;
 	}
 }
