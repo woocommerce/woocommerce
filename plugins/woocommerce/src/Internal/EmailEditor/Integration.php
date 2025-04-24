@@ -257,10 +257,9 @@ class Integration {
 
 			if ( json_last_error() === JSON_ERROR_NONE && isset( $decoded_body->postId ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 				$post_id = absint( $decoded_body->postId ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-				$post    = get_post( $post_id );
 
-				if ( $post instanceof \WP_Post ) {
-					$email_type = $post->post_name;
+				$email_type = get_post_meta( $post_id, self::WC_EMAIL_TYPE_ID_POST_META_KEY, true );
+				if ( ! empty( $email_type ) ) {
 					return $this->update_email_preview_data( $data, $email_type );
 				}
 			}
