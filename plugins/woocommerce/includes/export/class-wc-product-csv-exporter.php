@@ -183,6 +183,19 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'paginate' => true,
 		);
 
+		/**
+		 * Filter to allow exporting only specific product IDs.
+		 *
+		 * @since x.x.x
+		 * @param array $product_ids Array of product IDs to export. Default empty array.
+		 */
+		$product_ids_to_export = apply_filters( 'woocommerce_product_export_product_ids', array() );
+
+		if ( ! empty( $product_ids_to_export ) && is_array( $product_ids_to_export ) ) {
+			// Ensure IDs are integers.
+			$args['include'] = array_map( 'absint', $product_ids_to_export );
+			// When specific IDs are provided, ignore category filtering.
+		}
 		if ( ! empty( $this->product_category_to_export ) ) {
 			$args['category'] = $this->product_category_to_export;
 		}
@@ -193,15 +206,17 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		$variable_products = array();
 
 		foreach ( $products->products as $product ) {
-			// Check if the category is set, this means we need to fetch variations separately as they are not tied to a category.
-			if ( ! empty( $args['category'] ) && $product->is_type( ProductType::VARIABLE ) ) {
-				$variable_products[] = $product->get_id();
+			// Check if the product is variable and if either the include or category filter is active.
+			if ( $product->is_type( ProductType::VARIABLE ) && ( ! empty( $args['include'] ) || ! empty( $args['category'] ) ) ) {
+				if ( ! in_array( $product->get_id(), $variable_products, true ) ) {
+					$variable_products[] = $product->get_id();
+				}
 			}
 
 			$this->row_data[] = $this->generate_row_data( $product );
 		}
 
-		// If a category was selected we loop through the variations as they are not tied to a category so will be excluded by default.
+		// If variable products were identified (either through include or category filters), fetch their variations.
 		if ( ! empty( $variable_products ) ) {
 			foreach ( $variable_products as $parent_id ) {
 				$products = wc_get_products(
