@@ -20,7 +20,6 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
     transition: border, background-color, color, box-shadow, opacity, filter;
     transition-duration: 0.15s;
     transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    backdrop-filter: blur(30px) brightness(120%);
 }
 
 /* Make sure footers have no margin. */

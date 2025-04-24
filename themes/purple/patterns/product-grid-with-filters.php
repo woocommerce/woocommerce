@@ -1,12 +1,16 @@
 <?php
 /**
- * Title: archive-product
- * Slug: woostarter/archive-product
- * Inserter: no
+ * Title: Product grids with filters
+ * Slug: woostarter/product-grid-with-filters
+ * Categories: WooCommerce
+ * Inserter: yes
+ * 
  */
 ?>
-<!-- wp:group {"tagName":"main","metadata":{"name":"Product Archives"},"className":"is-style-default","style":{"spacing":{"padding":{"top":"0","bottom":"0"},"margin":{"top":"0","bottom":"0"}}},"layout":{"inherit":true,"type":"constrained"}} -->
-<main class="wp-block-group is-style-default" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0"><!-- wp:spacer {"height":"var:preset|spacing|60"} -->
+<!-- wp:group {"metadata":{"name":"Product Archives","patternName":"woostarter/archive-product"},"align":"wide","layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignwide">
+
+<!-- wp:spacer {"height":"var:preset|spacing|60"} -->
 <div style="height:var(--wp--preset--spacing--60)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
 
@@ -57,8 +61,8 @@
 <h4 class="wp-block-woocommerce-accordion-header has-medium-font-size accordion-item__heading"><button class="accordion-item__toggle" style="padding-top:1rem;padding-bottom:1rem"><span>Price</span><span class="accordion-item__toggle-icon has-icon-chevron" style="width:1.2em;height:1.2em"><svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0041 10.5547L11.9996 16.0134L5.99512 10.5547L7.00413 9.44482L11.9996 13.9862L16.9951 9.44483L18.0041 10.5547Z" fill="currentColor"></path></svg></span></button></h4>
 <!-- /wp:woocommerce/accordion-header -->
 
-<!-- wp:woocommerce/accordion-panel -->
-<div class="wp-block-woocommerce-accordion-panel"><div class="accordion-content__wrapper"><!-- wp:woocommerce/product-filter-price -->
+<!-- wp:woocommerce/accordion-panel {"style":{"spacing":{"padding":{"right":"var:preset|spacing|20","left":"var:preset|spacing|20","top":"var:preset|spacing|20","bottom":"var:preset|spacing|20"},"margin":{"bottom":"var:preset|spacing|30"}}}} -->
+<div class="wp-block-woocommerce-accordion-panel"><div class="accordion-content__wrapper" style="margin-bottom:var(--wp--preset--spacing--30);padding-top:var(--wp--preset--spacing--20);padding-right:var(--wp--preset--spacing--20);padding-bottom:var(--wp--preset--spacing--20);padding-left:var(--wp--preset--spacing--20)"><!-- wp:woocommerce/product-filter-price -->
 <div class="wp-block-woocommerce-product-filter-price"><!-- wp:woocommerce/product-filter-price-slider -->
 <div class="wp-block-woocommerce-product-filter-price-slider wc-block-product-filter-price-slider"></div>
 <!-- /wp:woocommerce/product-filter-price-slider --></div>
@@ -71,8 +75,8 @@
 <h4 class="wp-block-woocommerce-accordion-header has-medium-font-size accordion-item__heading"><button class="accordion-item__toggle" style="padding-top:1rem;padding-bottom:1rem"><span>Rating</span><span class="accordion-item__toggle-icon has-icon-chevron" style="width:1.2em;height:1.2em"><svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0041 10.5547L11.9996 16.0134L5.99512 10.5547L7.00413 9.44482L11.9996 13.9862L16.9951 9.44483L18.0041 10.5547Z" fill="currentColor"></path></svg></span></button></h4>
 <!-- /wp:woocommerce/accordion-header -->
 
-<!-- wp:woocommerce/accordion-panel -->
-<div class="wp-block-woocommerce-accordion-panel"><div class="accordion-content__wrapper"><!-- wp:woocommerce/product-filter-rating -->
+<!-- wp:woocommerce/accordion-panel {"style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}}} -->
+<div class="wp-block-woocommerce-accordion-panel"><div class="accordion-content__wrapper" style="padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30)"><!-- wp:woocommerce/product-filter-rating -->
 <div class="wp-block-woocommerce-product-filter-rating"><!-- wp:woocommerce/product-filter-checkbox-list -->
 <div class="wp-block-woocommerce-product-filter-checkbox-list wc-block-product-filter-checkbox-list"></div>
 <!-- /wp:woocommerce/product-filter-checkbox-list --></div>
@@ -85,8 +89,8 @@
 <h4 class="wp-block-woocommerce-accordion-header has-medium-font-size accordion-item__heading"><button class="accordion-item__toggle" style="padding-top:1rem;padding-bottom:1rem"><span>Color</span><span class="accordion-item__toggle-icon has-icon-chevron" style="width:1.2em;height:1.2em"><svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0041 10.5547L11.9996 16.0134L5.99512 10.5547L7.00413 9.44482L11.9996 13.9862L16.9951 9.44483L18.0041 10.5547Z" fill="currentColor"></path></svg></span></button></h4>
 <!-- /wp:woocommerce/accordion-header -->
 
-<!-- wp:woocommerce/accordion-panel -->
-<div class="wp-block-woocommerce-accordion-panel"><div class="accordion-content__wrapper"><!-- wp:woocommerce/product-filter-attribute -->
+<!-- wp:woocommerce/accordion-panel {"style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}}} -->
+<div class="wp-block-woocommerce-accordion-panel"><div class="accordion-content__wrapper" style="padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30)"><!-- wp:woocommerce/product-filter-attribute -->
 <div class="wp-block-woocommerce-product-filter-attribute"><!-- wp:woocommerce/product-filter-checkbox-list -->
 <div class="wp-block-woocommerce-product-filter-checkbox-list wc-block-product-filter-checkbox-list"></div>
 <!-- /wp:woocommerce/product-filter-checkbox-list --></div>
@@ -99,8 +103,8 @@
 <h4 class="wp-block-woocommerce-accordion-header has-medium-font-size accordion-item__heading"><button class="accordion-item__toggle" style="padding-top:1rem;padding-bottom:1rem"><span>Status</span><span class="accordion-item__toggle-icon has-icon-chevron" style="width:1.2em;height:1.2em"><svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0041 10.5547L11.9996 16.0134L5.99512 10.5547L7.00413 9.44482L11.9996 13.9862L16.9951 9.44483L18.0041 10.5547Z" fill="currentColor"></path></svg></span></button></h4>
 <!-- /wp:woocommerce/accordion-header -->
 
-<!-- wp:woocommerce/accordion-panel -->
-<div class="wp-block-woocommerce-accordion-panel"><div class="accordion-content__wrapper"><!-- wp:woocommerce/product-filter-status -->
+<!-- wp:woocommerce/accordion-panel {"style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}}} -->
+<div class="wp-block-woocommerce-accordion-panel"><div class="accordion-content__wrapper" style="padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30)"><!-- wp:woocommerce/product-filter-status -->
 <div class="wp-block-woocommerce-product-filter-status"><!-- wp:woocommerce/product-filter-checkbox-list -->
 <div class="wp-block-woocommerce-product-filter-checkbox-list wc-block-product-filter-checkbox-list"></div>
 <!-- /wp:woocommerce/product-filter-checkbox-list --></div>
@@ -109,15 +113,15 @@
 <!-- /wp:woocommerce/accordion-item --></div>
 <!-- /wp:woocommerce/accordion-group -->
 
-<!-- wp:woocommerce/product-filter-active -->
-<div class="wp-block-woocommerce-product-filter-active"><!-- wp:woocommerce/product-filter-removable-chips -->
+<!-- wp:woocommerce/product-filter-active {"style":{"spacing":{"margin":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}}} -->
+<div class="wp-block-woocommerce-product-filter-active" style="margin-top:var(--wp--preset--spacing--40);margin-bottom:var(--wp--preset--spacing--40)"><!-- wp:woocommerce/product-filter-removable-chips -->
 <div class="wp-block-woocommerce-product-filter-removable-chips wc-block-product-filter-removable-chips"></div>
 <!-- /wp:woocommerce/product-filter-removable-chips -->
 
 <!-- wp:woocommerce/product-filter-clear-button -->
 <!-- wp:buttons {"layout":{"type":"flex","verticalAlignment":"stretched"}} -->
-<div class="wp-block-buttons"><!-- wp:button {"textAlign":"center","width":100,"className":"wc-block-product-filter-clear-button is-style-outline","style":{"border":{"width":"1px"},"typography":{"textDecoration":"none"},"outline":"none","fontSize":"medium","spacing":{"padding":{"left":"8px","right":"8px","top":"5px","bottom":"5px"}}}} -->
-<div class="wp-block-button has-custom-width wp-block-button__width-100 wc-block-product-filter-clear-button is-style-outline"><a class="wp-block-button__link has-text-align-center wp-element-button" style="border-width:1px;padding-top:5px;padding-right:8px;padding-bottom:5px;padding-left:8px;text-decoration:none"><?php esc_html_e('Clear filters', 'woostarter');?></a></div>
+<div class="wp-block-buttons"><!-- wp:button {"textAlign":"center","textColor":"theme-4","className":"wc-block-product-filter-clear-button is-style-outline","style":{"typography":{"textDecoration":"underline"},"outline":"none","fontSize":"medium","spacing":{"padding":{"left":"0px","right":"0px","top":"0px","bottom":"0px"}},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}},"border":{"radius":"0px","width":"0px","style":"none"},"color":{"background":"#00000000"}},"fontSize":"medium"} -->
+<div class="wp-block-button wc-block-product-filter-clear-button is-style-outline"><a class="wp-block-button__link has-theme-4-color has-text-color has-background has-link-color has-medium-font-size has-text-align-center has-custom-font-size wp-element-button" style="border-style:none;border-width:0px;border-radius:0px;background-color:#00000000;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px;text-decoration:underline"><?php esc_html_e('Clear filters', 'woostarter');?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons -->
 <!-- /wp:woocommerce/product-filter-clear-button --></div>
@@ -128,12 +132,12 @@
 <!-- wp:column {"width":"88%"} -->
 <div class="wp-block-column" style="flex-basis:88%"><!-- wp:woocommerce/product-collection {"queryId":3,"query":{"woocommerceAttributes":[],"woocommerceStockStatus":["instock","outofstock","onbackorder"],"taxQuery":[],"isProductCollectionBlock":true,"perPage":10,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":true},"tagName":"div","displayLayout":{"type":"flex","columns":4,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"queryContextIncludes":["collection"],"__privatePreviewState":{"isPreview":false,"previewMessage":"Actual products will vary depending on the page being viewed."},"align":"wide"} -->
 <div class="wp-block-woocommerce-product-collection alignwide"><!-- wp:woocommerce/product-template -->
-<!-- wp:woocommerce/product-image {"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} /-->
+ <!-- wp:woocommerce/product-image {"imageSizing":"thumbnail","isDescendentOfQueryLoop":true,"style":{"dimensions":{"aspectRatio":"3/4"}}} /-->
 
 <!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group"><!-- wp:post-title {"textAlign":"left","level":3,"isLink":true,"__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+<div class="wp-block-group"><!-- wp:post-title {"textAlign":"left","level":3,"isLink":true,"fontSize":"large","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
 
-<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"left","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /--></div>
+<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"left","fontSize":"medium","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /--></div>
 <!-- /wp:group -->
 <!-- /wp:woocommerce/product-template -->
 
@@ -167,5 +171,5 @@ echo sprintf( esc_html__( 'No results found. You can try %1$sclearing any filter
 
 <!-- wp:spacer {"height":"var:preset|spacing|80"} -->
 <div style="height:var(--wp--preset--spacing--80)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer --></main>
+<!-- /wp:spacer --></div>
 <!-- /wp:group -->
