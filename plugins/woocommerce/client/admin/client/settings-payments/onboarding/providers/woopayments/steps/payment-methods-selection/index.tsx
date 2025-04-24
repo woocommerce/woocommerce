@@ -51,6 +51,12 @@ export default function PaymentMethodsSelection() {
 		}
 	}, [ contextPaymentMethodsState ] );
 
+	// Combine state to match combined methods list
+	const combinedState = useMemo(
+		() => combinePaymentMethodsState( paymentMethodsState ),
+		[ paymentMethodsState ]
+	);
+
 
 	// Calculate hidden count based on the stored initial visibility (Memoized)
 	const hiddenCount = useMemo( () => {
