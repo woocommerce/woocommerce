@@ -3,8 +3,6 @@
  */
 import { useProductDataContext } from '@woocommerce/shared-context';
 import { Disabled, Spinner } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
-import { isSiteEditorPage } from '@woocommerce/utils';
 import { useBlockProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 
@@ -15,10 +13,6 @@ import QuantityStepper from '../../components/quantity-stepper';
 
 const CTA = () => {
 	const { isLoading, product } = useProductDataContext();
-	const isSiteEditor = useSelect(
-		( select ) => isSiteEditorPage( select( 'core/edit-site' ) ),
-		[]
-	);
 
 	if ( isLoading ) {
 		return <Spinner />;
@@ -43,7 +37,7 @@ const CTA = () => {
 				/>
 			);
 		}
-		return <QuantityStepper isSiteEditor={ isSiteEditor } />;
+		return <QuantityStepper />;
 	}
 
 	return (
