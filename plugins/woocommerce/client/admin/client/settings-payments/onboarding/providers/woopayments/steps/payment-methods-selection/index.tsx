@@ -28,6 +28,11 @@ export default function PaymentMethodsSelection() {
 	const [ paymentMethodsState, setPaymentMethodsState ] = useState< {
 		[ key: string ]: boolean;
 	} >( {} );
+	// Store the calculated initial visibility status in state to trigger re-render
+	const [ initialVisibilityMap, setInitialVisibilityMap ] = useState< Record<
+		string,
+		boolean
+	> | null >( null );
 
 	const contextPaymentMethodsState = currentStep?.context?.pms_state;
 	const contextPaymentMethods = currentStep?.context?.recommended_pms;
