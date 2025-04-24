@@ -4,16 +4,12 @@
 // Bright colors
 $discount-color: $alert-green;
 
-$input-border-gray: #50575e;
-$input-border-dark: rgba(255, 255, 255, 0.4);
-$controls-border-dark: rgba(255, 255, 255, 0.6);
-$input-text-active: #2b2d2f;
-$input-placeholder-dark: rgba(255, 255, 255, 0.6);
+$input-text-light: #2b2d2f;
 $input-text-dark: #fff;
+$input-placeholder-dark: rgba(255, 255, 255, 0.6);
+$input-border-dark: rgba(255, 255, 255, 0.4);
+$input-background-light: #fff;
 $input-background-dark: rgba(0, 0, 0, 0.1);
-$select-dropdown-dark: #1e1e1e;
-$select-dropdown-light: #fff;
-$select-item-dark: rgba(0, 0, 0, 0.4);
 $image-placeholder-border-color: #f2f2f2;
 
 // Universal colors for use on the frontend, currently being applied to checkout blocks.
