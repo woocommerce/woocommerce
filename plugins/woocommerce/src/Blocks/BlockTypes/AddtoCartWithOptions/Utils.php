@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
+namespace Automattic\WooCommerce\Blocks\BlockTypes\AddtoCartWithOptions;
 
 /**
  * Utility methods used for the Add to Cart with Options block.
