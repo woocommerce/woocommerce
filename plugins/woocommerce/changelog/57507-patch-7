@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Fix warning in ProductQuery where no result would be returned if passing a term id
+
