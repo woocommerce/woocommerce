@@ -136,11 +136,6 @@ const Edit = ( {
 		} else {
 			productData.weight.value = `10 ${ weightUnit }`;
 		}
-
-		productData.weight.value =
-			isSpecificProductContext && product.weight
-				? `${ product.weight } ${ weightUnit }`
-				: `10 ${ weightUnit }`;
 	}
 
 	if ( showDimensions ) {
