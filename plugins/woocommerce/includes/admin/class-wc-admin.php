@@ -255,6 +255,7 @@ class WC_Admin {
 	 * Preview email editor placeholder dummy content.
 	 */
 	public function preview_email_editor_dummy_content() {
+		$message = '';
 		if ( ! isset( $_GET['preview_woocommerce_mail_editor_content'] ) ) {
 			return;
 		}
