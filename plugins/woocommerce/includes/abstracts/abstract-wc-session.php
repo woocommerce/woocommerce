@@ -19,7 +19,7 @@ abstract class WC_Session {
 	/**
 	 * Customer ID.
 	 *
-	 * @var int $_customer_id Customer ID.
+	 * @var string $_customer_id Customer ID.
 	 */
 	protected $_customer_id;
 
@@ -119,7 +119,7 @@ abstract class WC_Session {
 	/**
 	 * Get customer ID.
 	 *
-	 * @return int
+	 * @return string
 	 */
 	public function get_customer_id() {
 		return $this->_customer_id;

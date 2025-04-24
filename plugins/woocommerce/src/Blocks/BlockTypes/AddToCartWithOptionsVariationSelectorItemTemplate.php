@@ -55,8 +55,6 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 			$content .= $this->get_product_row( $product_attribute_name, $product_attribute_terms, $attributes, $block );
 		}
 
-		wp_enqueue_script_module( $this->get_full_block_name() );
-
 		return $content;
 	}
 

@@ -101,6 +101,11 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$this->set_object_read( true );
 		}
 
+		if ( $this->get_id() && __CLASS__ === get_class( $this ) ) {
+			wc_doing_it_wrong( __METHOD__, 'WC_Order_Item should not be instantiated directly.', '9.9.0' );
+			return;
+		}
+
 		$type             = 'line_item' === $this->get_type() ? 'product' : $this->get_type();
 		$this->data_store = WC_Data_Store::load( 'order-item-' . $type );
 		if ( $this->get_id() > 0 ) {

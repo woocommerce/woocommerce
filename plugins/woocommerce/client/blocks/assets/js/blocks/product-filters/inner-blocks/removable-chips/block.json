@@ -39,5 +39,6 @@
 		"customChipBorder": {
 			"type": "string"
 		}
-	}
+	},
+	"style": "file:../woocommerce/product-filter-removable-chips-style.css"
 }
