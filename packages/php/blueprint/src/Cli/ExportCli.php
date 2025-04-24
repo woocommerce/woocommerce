@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Blueprint\Cli;
 
 use Automattic\WooCommerce\Blueprint\ExportSchema;
+use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 
 /**
  * Class ExportCli
@@ -12,6 +13,8 @@ use Automattic\WooCommerce\Blueprint\ExportSchema;
  * @package Automattic\WooCommerce\Blueprint\Cli
  */
 class ExportCli {
+	use UseWPFunctions;
+
 	/**
 	 * The path where the exported schema will be saved.
 	 *
@@ -40,11 +43,10 @@ class ExportCli {
 
 		$exporter = new ExportSchema();
 
-		$schema = $exporter->export( $args['steps'] );
+		$schema   = $exporter->export( $args['steps'] );
+		$is_saved = $this->wp_filesystem_put_contents( $this->save_to, wp_json_encode( $schema, JSON_PRETTY_PRINT ) );
 
-		// phpcs:ignore
-		$save = file_put_contents( $this->save_to, json_encode( $schema, JSON_PRETTY_PRINT ) );
-		if ( false === $save ) {
+		if ( false === $is_saved ) {
 			\WP_CLI::error( "Failed to save to {$this->save_to}" );
 		} else {
 			\WP_CLI::success( "Exported JSON to {$this->save_to}" );

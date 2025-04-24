@@ -2,6 +2,9 @@
 
 namespace Automattic\WooCommerce\Blueprint;
 
+use WP_Error;
+use WP_Theme;
+
 /**
  * Trait UseWPFunctions
  */
@@ -146,7 +149,7 @@ trait UseWPFunctions {
 	 * @param string $redirect Optional. URL to redirect to after activation.
 	 * @param bool   $network_wide Optional. Whether to enable the plugin for all sites in the network.
 	 * @param bool   $silent Optional. Whether to prevent calling activation hooks.
-	 * @return \WP_Error|null WP_Error on failure, null on success.
+	 * @return WP_Error|null WP_Error on failure, null on success.
 	 */
 	public function wp_activate_plugin( $plugin, $redirect = '', $network_wide = false, $silent = false ) {
 		if ( ! function_exists( 'activate_plugin' ) ) {
@@ -160,7 +163,7 @@ trait UseWPFunctions {
 	 * Deletes plugins.
 	 *
 	 * @param array $plugins List of plugins to delete.
-	 * @return array|WP_Error Array of results or WP_Error on failure.
+	 * @return array|WP_Error|null Array of results or WP_Error on failure, null if filesystem credentials are required to proceed.
 	 */
 	public function wp_delete_plugins( $plugins ) {
 		if ( ! function_exists( 'delete_plugins' ) ) {
@@ -202,7 +205,7 @@ trait UseWPFunctions {
 		if ( ! function_exists( 'switch_theme' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/theme.php';
 		}
-		return switch_theme( $name );
+		switch_theme( $name );
 	}
 
 	/**
@@ -216,8 +219,9 @@ trait UseWPFunctions {
 				require_once ABSPATH . 'wp-admin/includes/file.php';
 			}
 
-			WP_Filesystem();
-			$this->filesystem_initialized = true;
+			$initialized                  = WP_Filesystem();
+			$this->filesystem_initialized = $initialized;
+			return $initialized;
 		}
 
 		return true;
@@ -282,12 +286,29 @@ trait UseWPFunctions {
 	 * @param string $file_path The path to the file to write.
 	 * @param mixed  $content    The data to write to the file.
 	 *
-	 * @return mixed
+	 * @return bool True on success, false on failure.
 	 */
 	public function wp_filesystem_put_contents( $file_path, $content ) {
 		global $wp_filesystem;
-		$this->wp_init_filesystem();
+		if ( ! $this->wp_init_filesystem() ) {
+			return false;
+		}
 
 		return $wp_filesystem->put_contents( $file_path, $content );
+	}
+
+	/**
+	 * Alias for WP_Filesystem::get_contents().
+	 *
+	 * @param string $file_path The path to the file to read.
+	 * @return string|false The contents of the file, or false on failure.
+	 */
+	public function wp_filesystem_get_contents( $file_path ) {
+		global $wp_filesystem;
+		if ( ! $this->wp_init_filesystem() ) {
+			return false;
+		}
+
+		return $wp_filesystem->get_contents( $file_path );
 	}
 }
