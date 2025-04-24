@@ -30,8 +30,13 @@ class ImportActivateTheme implements StepProcessor {
 		// phpcs:ignore
 		$name   = $schema->themeName;
 
-		$switch = $this->wp_switch_theme( $name );
-		$switch && $result->add_debug( "Switched theme to '{$name}'." );
+		$this->wp_switch_theme( $name );
+
+		$current_theme = $this->wp_get_theme()->get_stylesheet();
+
+		if ( $current_theme === $name ) {
+			$result->add_debug( "Switched theme to '$name'." );
+		}
 
 		return $result;
 	}
