@@ -35,12 +35,15 @@ const getVerticalAlignmentClass = ( attributes: BlockAttributes ) => {
 	return '';
 };
 
+// We want the local styles classes to be applied to the button, but not the container.
+// Based on convention, we could filter out the local styles classes by checking if they start with 'has-'
+// but this is not future-proof, hence iterating over the local styles classes and removing them from the container class name.
 const filterLocalStylesClasses = (
 	blockPropsClasses: string,
 	localStylesClasses: string[]
 ) => {
-	const classes = localStylesClasses.join( ' ' ).split( ' ' );
-	const containerClassName = classes.reduce(
+	const allLocalClasses = localStylesClasses.join( ' ' ).split( ' ' );
+	const containerClassName = allLocalClasses.reduce(
 		( className, localClass ) => className.replace( localClass, '' ),
 		blockPropsClasses
 	);
