@@ -12,6 +12,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postproce
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Variables_Postprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Blocks_Width_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Cleanup_Preprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Quote_Text_Align_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Spacing_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Typography_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Process_Manager;
@@ -51,13 +52,16 @@ class Process_Manager_Test extends \Email_Editor_Unit_Test {
 		$spacing = $this->createMock( Spacing_Preprocessor::class );
 		$spacing->expects( $this->once() )->method( 'preprocess' )->willReturn( array() );
 
+		$quote_text_align = $this->createMock( Quote_Text_Align_Preprocessor::class );
+		$quote_text_align->expects( $this->once() )->method( 'preprocess' )->willReturn( array() );
+
 		$highlighting = $this->createMock( Highlighting_Postprocessor::class );
 		$highlighting->expects( $this->once() )->method( 'postprocess' )->willReturn( '' );
 
 		$variables = $this->createMock( Variables_Postprocessor::class );
 		$variables->expects( $this->once() )->method( 'postprocess' )->willReturn( '' );
 
-		$process_nanager = new Process_Manager( $cleanup, $blocks_width, $typography, $spacing, $highlighting, $variables );
+		$process_nanager = new Process_Manager( $cleanup, $blocks_width, $typography, $spacing, $quote_text_align, $highlighting, $variables );
 		$this->assertEquals( array(), $process_nanager->preprocess( array(), $layout, $styles ) );
 		$this->assertEmpty( $process_nanager->postprocess( '' ) );
 	}
