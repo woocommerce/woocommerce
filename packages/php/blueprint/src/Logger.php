@@ -3,8 +3,6 @@
 namespace Automattic\WooCommerce\Blueprint;
 
 use Automattic\WooCommerce\Blueprint\UseWPFunctions;
-use WC_Log_Levels;
-use WC_Logger_Interface;
 
 /**
  * Class Logger
@@ -15,7 +13,7 @@ class Logger {
 	/**
 	 * WooCommerce logger class instance.
 	 *
-	 * @var WC_Logger_Interface
+	 * @var \WC_Logger_Interface
 	 */
 	private $logger;
 
@@ -33,7 +31,7 @@ class Logger {
 	 * @param string $level   The log level.
 	 * @param array  $context The context of the log.
 	 */
-	public function log( string $message, string $level = WC_Log_Levels::DEBUG, $context = array() ) {
+	public function log( string $message, string $level = \WC_Log_Levels::DEBUG, $context = array() ) {
 		$this->logger->log(
 			$level,
 			$message,
@@ -57,7 +55,7 @@ class Logger {
 
 		$this->log(
 			sprintf( 'Starting export of %d steps', count( $export_data['steps'] ) ),
-			WC_Log_Levels::INFO,
+			\WC_Log_Levels::INFO,
 			array(
 				'steps'     => $export_data['steps'],
 				'exporters' => $export_data['exporters'],
@@ -75,7 +73,7 @@ class Logger {
 
 		$this->log(
 			sprintf( 'Export of %d steps completed', count( $export_data['steps'] ) ),
-			WC_Log_Levels::INFO,
+			\WC_Log_Levels::INFO,
 			array(
 				'steps'     => $export_data['steps'],
 				'exporters' => $export_data['exporters'],
@@ -114,7 +112,7 @@ class Logger {
 	public function export_step_failed( string $step_name, \Throwable $exception ) {
 		$this->log(
 			sprintf( 'Export "%s" step failed', $step_name ),
-			WC_Log_Levels::ERROR,
+			\WC_Log_Levels::ERROR,
 			array(
 				'error' => $exception->getMessage(),
 			)
@@ -130,7 +128,7 @@ class Logger {
 	public function start_import( string $step_name, string $importer_class ) {
 		$this->log(
 			sprintf( 'Starting import "%s" step', $step_name ),
-			WC_Log_Levels::INFO,
+			\WC_Log_Levels::INFO,
 			array(
 				'importer' => $importer_class,
 			)
@@ -146,7 +144,7 @@ class Logger {
 	public function complete_import( string $step_name, StepProcessorResult $result ) {
 		$this->log(
 			sprintf( 'Import "%s" step completed', $step_name ),
-			WC_Log_Levels::INFO,
+			\WC_Log_Levels::INFO,
 			array(
 				'messages' => $result->get_messages( 'info' ),
 			)
@@ -162,7 +160,7 @@ class Logger {
 	public function import_step_failed( string $step_name, StepProcessorResult $result ) {
 		$this->log(
 			sprintf( 'Import "%s" step failed', $step_name ),
-			WC_Log_Levels::ERROR,
+			\WC_Log_Levels::ERROR,
 			array(
 				'messages' => $result->get_messages( 'error' ),
 			)

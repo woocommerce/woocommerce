@@ -21,8 +21,7 @@ require 'vendor/yoast/phpunit-polyfills/phpunitpolyfills-autoload.php';
 require "{$_tests_dir}/includes/bootstrap.php";
 
 // Stubs.
-require_once __DIR__ . '/Unit/stubs/WC_Logger_Interface.php';
-require_once __DIR__ . '/Unit/stubs/WC_Log_Levels.php';
+require_once __DIR__ . '/stubs/stubs.php';
 
 if ( ! function_exists( 'wc_get_logger' ) ) {
 	/**

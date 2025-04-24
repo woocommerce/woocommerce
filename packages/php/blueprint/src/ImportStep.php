@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Blueprint;
 use Opis\JsonSchema\Errors\ErrorFormatter;
 use Opis\JsonSchema\Validator;
 use Automattic\WooCommerce\Blueprint\Logger;
-use WC_Log_Levels;
 
 /**
  * Class ImportStep

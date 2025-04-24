@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
 use Automattic\WooCommerce\Blueprint\Logger;
 use Automattic\WooCommerce\Blueprint\Steps\Step;
 use WP_Error;
-use WC_Log_Levels;
 
 /**
  * Class ExportSchema
