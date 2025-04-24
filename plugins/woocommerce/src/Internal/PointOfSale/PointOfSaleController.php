@@ -28,11 +28,7 @@ class PointOfSaleController implements RegisterHooksInterface {
     /**
      * Register all hooks used by the class.
      */
-    public function register() {
-        if ( ! $this->feature_is_enabled() ) {
-            return;
-        }
-    }
+    public function register() {}
 
     /**
 	 * Initialize the instance, runs when the instance is created by the dependency injection container.
