@@ -47,6 +47,21 @@ export default function PaymentMethodsSelection() {
 		? combineRequestMethods( contextPaymentMethods )
 		: [];
 
+	// Calculate hidden count based on the stored initial visibility (Memoized)
+	const hiddenCount = useMemo( () => {
+		// Use the state map now
+		if ( ! initialVisibilityMap || isExpanded ) {
+			return 0;
+		}
+
+		// Filter based on the stored initial visibility status from state
+		return recommendedPaymentMethods.filter(
+			// Count if initial visibility was false
+			( method ) => ! ( initialVisibilityMap[ method.id ] ?? false )
+		).length;
+		// Depend on the state map now
+	}, [ recommendedPaymentMethods, isExpanded, initialVisibilityMap ] );
+
 	return (
 		<div className="settings-payments-onboarding-modal__step--content">
 			<div className="woocommerce-layout__header woocommerce-recommended-payment-methods">
@@ -121,15 +136,9 @@ export default function PaymentMethodsSelection() {
 								aria-expanded={ isExpanded }
 							>
 								{ sprintf(
-									/* translators: %s: number of disabled payment methods */
+									/* translators: %s: number of hidden payment methods */
 									__( 'Show more (%s)', 'woocommerce' ),
-									recommendedPaymentMethods?.filter(
-										( method ) =>
-											! shouldRenderPaymentMethodInMainList(
-												method,
-												paymentMethodsState[ method.id ]
-											)
-									).length ?? 0
+									hiddenCount
 								) }
 							</Button>
 						) }
