@@ -373,7 +373,7 @@ class WC_Post_Types {
 			)
 		);
 
-		// Register the product form post type wne the feature is enabled.
+		// Register the product form post type when the feature is enabled.
 		if ( Features::is_enabled( 'product-editor-template-system' ) ) {
 			register_post_type(
 				'product_form',

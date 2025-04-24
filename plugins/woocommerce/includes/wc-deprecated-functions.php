@@ -1179,3 +1179,138 @@ function wc_get_log_file_name( $handle ) {
 
 	return "{$file_id}-{$hash}";
 }
+
+/**
+ * Load the persistent cart.
+ *
+ * @param string  $user_login User login.
+ * @param WP_User $user       User data.
+ * @deprecated 2.3
+ */
+function wc_load_persistent_cart( $user_login, $user ) {
+	if ( ! $user || ! apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
+		return;
+	}
+
+	$saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+
+	if ( ! $saved_cart ) {
+		return;
+	}
+
+	$cart = WC()->session->cart;
+
+	if ( empty( $cart ) || ! is_array( $cart ) || 0 === count( $cart ) ) {
+		WC()->session->cart = $saved_cart['cart'];
+	}
+}
+
+if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
+	/**
+	 * This is a legacy function which used to check if we needed to display subcats and then output them. It was called by templates.
+	 *
+	 * From 3.3 onwards this is all handled via hooks and the woocommerce_maybe_show_product_subcategories function.
+	 *
+	 * Since some templates have not updated compatibility, to avoid showing incorrect categories this function has been deprecated and will
+	 * return nothing. Replace usage with woocommerce_output_product_categories to render the category list manually.
+	 *
+	 * This is a legacy function which also checks if things should display.
+	 * Themes no longer need to call these functions. It's all done via hooks.
+	 *
+	 * @deprecated 3.3.1 @todo Add a notice in a future version.
+	 * @param array $args Arguments.
+	 * @return null|boolean
+	 */
+	function woocommerce_product_subcategories( $args = array() ) {
+		$defaults = array(
+			'before'        => '',
+			'after'         => '',
+			'force_display' => false,
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+
+		if ( $args['force_display'] ) {
+			// We can still render if display is forced.
+			woocommerce_output_product_categories(
+				array(
+					'before'    => $args['before'],
+					'after'     => $args['after'],
+					'parent_id' => is_product_category() ? get_queried_object_id() : 0,
+				)
+			);
+			return true;
+		} else {
+			// Output nothing. woocommerce_maybe_show_product_subcategories will handle the output of cats.
+			$display_type = woocommerce_get_loop_display_mode();
+
+			if ( 'subcategories' === $display_type ) {
+				// This removes pagination and products from display for themes not using wc_get_loop_prop in their product loops. @todo Remove in future major version.
+				global $wp_query;
+
+				if ( $wp_query->is_main_query() ) {
+					$wp_query->post_count    = 0;
+					$wp_query->max_num_pages = 0;
+				}
+			}
+
+			return 'subcategories' === $display_type || 'both' === $display_type;
+		}
+	}
+}
+
+/**
+ * Products RSS Feed.
+ *
+ * @deprecated 2.6
+ */
+function wc_products_rss_feed() {
+	wc_deprecated_function( 'wc_products_rss_feed', '2.6' );
+}
+
+if ( ! function_exists( 'woocommerce_reset_loop' ) ) {
+
+	/**
+	 * Reset the loop's index and columns when we're done outputting a product loop.
+	 *
+	 * @deprecated 3.3
+	 */
+	function woocommerce_reset_loop() {
+		wc_reset_loop();
+	}
+}
+
+if ( ! function_exists( 'woocommerce_product_reviews_tab' ) ) {
+	/**
+	 * Output the reviews tab content.
+	 *
+	 * @deprecated 2.4.0 Unused.
+	 */
+	function woocommerce_product_reviews_tab() {
+		wc_deprecated_function( 'woocommerce_product_reviews_tab', '2.4' );
+	}
+}
+
+/**
+ * Get the URL to the WooCommerce Legacy REST API.
+ *
+ * Note that as of WooCommerce 9.0 the WooCommerce Legacy REST API has been moved to a dedicated extension,
+ * and the implementation of its root endpoint in WooCommerce core is now just a stub that will always return an error.
+ * See the setup_legacy_api_stub method in includes/class-woocommerce.php and:
+ * https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/
+ *
+ * @deprecated 9.0.0 The Legacy REST API has been removed from WooCommerce core.
+ *
+ * @since 2.1
+ * @param string $path an endpoint to include in the URL.
+ * @return string the URL.
+ */
+function get_woocommerce_api_url( $path ) {
+	$url = get_home_url( null, 'wc-api/v3/', is_ssl() ? 'https' : 'http' );
+
+	if ( ! empty( $path ) && is_string( $path ) ) {
+		$url .= ltrim( $path, '/' );
+	}
+
+	return $url;
+}

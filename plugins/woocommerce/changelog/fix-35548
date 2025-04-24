@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Prevent WC_Order_Item from being instantiated with an ID directly.

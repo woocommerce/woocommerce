@@ -31,7 +31,7 @@ export interface RadioControlOptionProps {
 	disabled?: boolean;
 	// Should the selected option be highlighted with a border?
 	highlightChecked?: boolean;
-	descriptionStackingDirection: 'column' | 'row';
+	descriptionStackingDirection?: 'column' | 'row';
 }
 
 interface RadioControlOptionContent {
@@ -49,5 +49,5 @@ export interface RadioControlOption extends RadioControlOptionContent {
 
 export interface RadioControlOptionLayout extends RadioControlOptionContent {
 	id?: string;
-	descriptionStackingDirection: 'column' | 'row';
+	descriptionStackingDirection?: 'column' | 'row';
 }

@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Add blueprint CLI initialization to 'init' hook to prevent premature translation loading in WC_CLI class.

@@ -64,8 +64,7 @@ test.describe( `${ blockData.name }`, () => {
 		);
 
 		await expect( chipsBlock ).toBeVisible();
-
-		await chipsBlock.click();
+		await editor.selectBlocks( chipsBlock );
 
 		await editor.openDocumentSettingsSidebar();
 
@@ -92,8 +91,7 @@ test.describe( `${ blockData.name }`, () => {
 		);
 
 		await expect( chipsBlock ).toBeVisible();
-
-		await chipsBlock.click();
+		await editor.selectBlocks( chipsBlock );
 
 		await editor.openDocumentSettingsSidebar();
 
