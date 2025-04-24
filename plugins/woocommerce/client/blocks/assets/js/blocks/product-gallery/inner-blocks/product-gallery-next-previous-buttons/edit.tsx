@@ -3,7 +3,19 @@
  */
 import type { BlockAttributes } from '@wordpress/blocks';
 import clsx from 'clsx';
-import { useBlockProps } from '@wordpress/block-editor';
+import {
+	useBlockProps,
+	/* eslint-disable */
+	/* @ts-ignore module is exported as experimental */
+	__experimentalUseBorderProps as useBorderProps,
+	/* @ts-ignore module is exported as experimental */
+	__experimentalUseColorProps as useColorProps,
+	/* @ts-ignore module is exported as experimental */
+	__experimentalGetSpacingClassesAndStyles as useSpacingProps,
+	/* @ts-ignore module is exported as experimental */
+	__experimentalGetShadowClassesAndStyles as useShadowProps,
+	/* eslint-enable */
+} from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -23,15 +35,16 @@ const getVerticalAlignmentClass = ( attributes: BlockAttributes ) => {
 	return '';
 };
 
-const splitClassName = ( className: string ) => {
-	const classNamesArray = className.split( ' ' );
-	const containerClassName = classNamesArray
-		.filter( ( cn ) => ! cn.startsWith( 'has' ) )
-		.join( ' ' );
-	const buttonClassName = classNamesArray
-		.filter( ( cn ) => cn.startsWith( 'has' ) )
-		.join( ' ' );
-	return { containerClassName, buttonClassName };
+const filterLocalStylesClasses = (
+	blockPropsClasses: string,
+	localStylesClasses: string[]
+) => {
+	const classes = localStylesClasses.join( ' ' ).split( ' ' );
+	const containerClassName = classes.reduce(
+		( className, localClass ) => className.replace( localClass, '' ),
+		blockPropsClasses
+	);
+	return containerClassName;
 };
 
 export const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
@@ -43,27 +56,44 @@ export const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
 		),
 	} );
 
-	const { containerClassName, buttonClassName } = splitClassName( className );
+	const borderProps = useBorderProps( attributes );
+	const colorProps = useColorProps( attributes );
+	const spacingProps = useSpacingProps( attributes );
+	const shadowProps = useShadowProps( attributes );
+
+	const containerClassName = filterLocalStylesClasses( className, [
+		borderProps.className,
+		colorProps.className,
+		spacingProps.className,
+		shadowProps.className,
+	] );
+
+	const buttonClassName = clsx(
+		'wc-block-product-gallery-large-image-next-previous__button',
+		borderProps.className,
+		colorProps.className,
+		spacingProps.className,
+		shadowProps.className
+	);
+
+	const buttonStyles = {
+		...style,
+		...borderProps.style,
+		...colorProps.style,
+		...spacingProps.style,
+		...shadowProps.style,
+	};
 
 	return (
 		<div { ...blockProps } className={ containerClassName }>
 			<button
-				className={ clsx(
-					buttonClassName,
-					'wc-block-product-gallery-large-image-next-previous__button'
-				) }
-				style={ style }
+				className={ buttonClassName }
+				style={ buttonStyles }
 				disabled
 			>
 				<PrevIcon className="wc-block-product-gallery-large-image-next-previous__icon wc-block-product-gallery-large-image-next-previous__icon--left" />
 			</button>
-			<button
-				style={ style }
-				className={
-					buttonClassName +
-					' wc-block-product-gallery-large-image-next-previous__button'
-				}
-			>
+			<button className={ buttonClassName } style={ buttonStyles }>
 				<NextIcon className="wc-block-product-gallery-large-image-next-previous__icon wc-block-product-gallery-large-image-next-previous__icon--right" />
 			</button>
 		</div>
