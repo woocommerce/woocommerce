@@ -23,10 +23,6 @@ export const getActiveFilters = ( queryParamKey = 'filter_rating' ) => {
 	return parsedParams;
 };
 
-export function generateUniqueId() {
-	return Math.floor( Math.random() * Date.now() );
-}
-
 export const formatSlug = ( slug: string ) =>
 	slug
 		.trim()
