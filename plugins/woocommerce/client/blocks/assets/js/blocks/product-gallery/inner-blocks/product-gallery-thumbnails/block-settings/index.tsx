@@ -16,7 +16,7 @@ import type { ProductGalleryThumbnailsSettingsProps } from '../types';
 
 const minValue = 10;
 const maxValue = 50;
-const defaultValue = 33;
+const defaultValue = 25;
 
 export const ProductGalleryThumbnailsBlockSettings = ( {
 	attributes,

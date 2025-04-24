@@ -126,8 +126,10 @@ const Blueprint = () => {
 					{
 						docLink: (
 							<a
-								href="#tba"
+								href="https://woocommerce.com/document/woocommerce-blueprints/"
+								target="_blank"
 								className="woocommerce-admin-inline-documentation-link"
+								rel="noreferrer"
 							>
 								{ __( 'Learn more', 'woocommerce' ) }
 							</a>
