@@ -1377,7 +1377,7 @@ class Checkout extends MockeryTestCase {
 
 		$this->assertEquals( 400, $response->get_status() );
 	}
- 
+
 	/**
 	 * @testDox Test that perform_custom_order_validation throws a RouteException with a custom error.
 	 */
