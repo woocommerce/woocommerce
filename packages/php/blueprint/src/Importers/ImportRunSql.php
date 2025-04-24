@@ -165,9 +165,11 @@ class ImportRunSql implements StepProcessor {
 	 */
 	private function contains_suspicious_comments( string $sql_content ): bool {
 		// Quick check if there are any comments at all before running regex.
-		if ( strpos( $sql_content, '--' ) === false &&
-		strpos( $sql_content, '/*' ) === false &&
-		strpos( $sql_content, '#' ) === false ) {
+		if (
+			strpos( $sql_content, '--' ) === false &&
+			strpos( $sql_content, '/*' ) === false &&
+			strpos( $sql_content, '#' ) === false
+		) {
 			return false;
 		}
 
