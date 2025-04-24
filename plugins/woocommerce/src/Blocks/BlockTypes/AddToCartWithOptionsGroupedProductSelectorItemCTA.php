@@ -99,11 +99,10 @@ class AddToCartWithOptionsGroupedProductSelectorItemCTA extends AbstractBlock {
 		global $product;
 		$previous_product = $product;
 
-		$product_data = Utils::get_product_from_context( $block, $previous_product );
-		$product      = $product_data['product'];
-		$markup       = '';
+		$product = Utils::get_product_from_context( $block, $previous_product );
+		$markup  = '';
 
-		if ( $product_data['is_valid'] ) {
+		if ( $product ) {
 			if ( ! $product->is_purchasable() || $product->has_options() || ! $product->is_in_stock() ) {
 				$markup = $this->get_button_markup( $product );
 			} elseif ( $product->is_sold_individually() ) {

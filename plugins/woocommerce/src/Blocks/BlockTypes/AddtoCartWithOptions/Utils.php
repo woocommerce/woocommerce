@@ -100,11 +100,11 @@ class Utils {
 	}
 
 	/**
-	 * Get product from block context, preserving the global product.
+	 * Get product from block context.
 	 *
-	 * @param \WP_Block   $block The block instance.
-	 * @param \WC_Product $previous_product The previous product (usually from global scope).
-	 * @return array Array containing the product to use and a boolean indicating if a valid product was found.
+	 * @param \WP_Block        $block The block instance.
+	 * @param \WC_Product|null $previous_product The previous product (usually from global scope).
+	 * @return \WC_Product|null The product instance or null if not found.
 	 */
 	public static function get_product_from_context( $block, $previous_product ) {
 		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
@@ -118,11 +118,6 @@ class Utils {
 			$product = $previous_product;
 		}
 
-		$is_valid_product = $product instanceof \WC_Product;
-
-		return array(
-			'product'  => $product,
-			'is_valid' => $is_valid_product,
-		);
+		return $product instanceof \WC_Product ? $product : null;
 	}
 }

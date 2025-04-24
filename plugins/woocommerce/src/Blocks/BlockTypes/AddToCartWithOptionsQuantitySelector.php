@@ -52,10 +52,9 @@ class AddToCartWithOptionsQuantitySelector extends AbstractBlock {
 		global $product;
 		$previous_product = $product;
 
-		$product_data = Utils::get_product_from_context( $block, $previous_product );
-		$product      = $product_data['product'];
+		$product = Utils::get_product_from_context( $block, $previous_product );
 
-		if ( ! $product_data['is_valid'] ) {
+		if ( ! $product ) {
 			return '';
 		}
 
