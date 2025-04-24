@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix incorrect type on woocommerce_email_sent hook
