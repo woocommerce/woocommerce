@@ -19,14 +19,20 @@ class OrgPluginResourceStorage implements ResourceStorage {
 	 *
 	 * @param string $slug The slug of the plugin to be downloaded.
 	 *
-	 * @return string|null The path to the downloaded plugin file, or null on failure.
+	 * @return string|false The path to the downloaded plugin file, or false on failure.
 	 */
 	public function download( $slug ): ?string {
 		$download_link = $this->get_download_link( $slug );
+
 		if ( ! $download_link ) {
 			return false;
 		}
-		return $this->download_url( $download_link );
+		$result = $this->download_url( $download_link );
+
+		if ( is_wp_error( $result ) ) {
+			return false;
+		}
+		return $result;
 	}
 
 	/**
@@ -34,7 +40,7 @@ class OrgPluginResourceStorage implements ResourceStorage {
 	 *
 	 * @param string $url The URL to download the file from.
 	 *
-	 * @return string|null The path to the downloaded file, or null on failure.
+	 * @return string|WP_Error The path to the downloaded file, or WP_Error on failure.
 	 */
 	protected function download_url( $url ) {
 		return $this->wp_download_url( $url );
@@ -57,6 +63,10 @@ class OrgPluginResourceStorage implements ResourceStorage {
 				),
 			)
 		);
+
+		if ( is_wp_error( $info ) ) {
+			return null;
+		}
 
 		if ( is_object( $info ) && isset( $info->download_link ) ) {
 			return $info->download_link;

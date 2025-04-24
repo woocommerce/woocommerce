@@ -24,6 +24,10 @@ class OrgThemeResourceStorage extends OrgPluginResourceStorage {
 			)
 		);
 
+		if ( is_wp_error( $info ) ) {
+			return null;
+		}
+
 		if ( isset( $info->download_link ) ) {
 			return $info->download_link;
 		}
