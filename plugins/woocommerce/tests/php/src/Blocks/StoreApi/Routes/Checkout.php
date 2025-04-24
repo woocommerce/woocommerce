@@ -1170,7 +1170,7 @@ class Checkout extends MockeryTestCase {
 		$product->save();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		// Verify that the cart total is 0 (free order)
+		// Verify that the cart total is 0 (free order).
 		$this->assertEquals( 0, WC()->cart->get_total( 'numeric' ), 'Cart total should be 0 for a free order' );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
@@ -1557,7 +1557,7 @@ class Checkout extends MockeryTestCase {
 		WC()->cart->empty_cart();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		// Verify that the cart total is 0 (free order)
+		// Verify that the cart total is 0 (free order).
 		$this->assertEquals( 0, WC()->cart->get_total( 'numeric' ), 'Cart total should be 0 for a free order' );
 
 		// Hook into the checkout process to set the custom status.
@@ -1603,12 +1603,12 @@ class Checkout extends MockeryTestCase {
 		$order_id = $response->get_data()['order_id'];
 		$order    = wc_get_order( $order_id );
 
-		// Assert status remains custom
+		// Assert status remains custom.
 		$this->assertEquals( $status_name, $order->get_status(), 'Order status should remain custom for free orders.' );
 	}
 
 	/**
-	 * Test that custom status is retained for non-free orders when the custom 
+	 * Test that custom status is retained for non-free orders when the custom
 	 * status is not in the valid statuses for payment list.
 	 */
 	public function test_custom_status_retained_for_non_free_order() {
@@ -1617,12 +1617,12 @@ class Checkout extends MockeryTestCase {
 
 		// Create a simple product with a non-zero price and add to cart.
 		$product = \WC_Helper_Product::create_simple_product();
-		$product->set_regular_price( '10.00' ); // Make sure the product is not free
+		$product->set_regular_price( '10.00' ); // Make sure the product is not free.
 		$product->save();
 		WC()->cart->empty_cart();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		// Verify that the cart total is NOT 0 (non-free order)
+		// Verify that the cart total is NOT 0 (non-free order).
 		$this->assertGreaterThan( 0, WC()->cart->get_total( 'numeric' ), 'Cart total should be greater than 0 for a non-free order' );
 
 		// Hook into the checkout process to set the custom status.
@@ -1668,7 +1668,7 @@ class Checkout extends MockeryTestCase {
 		$order_id = $response->get_data()['order_id'];
 		$order    = wc_get_order( $order_id );
 
-		// Assert status remains custom (the key test here - verifying needs_payment() returns false despite non-zero total)
+		// Assert status remains custom (the key test here - verifying needs_payment() returns false despite non-zero total).
 		$this->assertEquals( $status_name, $order->get_status(), 'Order status should remain custom for non-free orders when the status is not valid for payment.' );
 	}
 
@@ -1682,19 +1682,19 @@ class Checkout extends MockeryTestCase {
 
 		// Create a simple product with a non-zero price and add to cart.
 		$product = \WC_Helper_Product::create_simple_product();
-		$product->set_regular_price( '10.00' ); // Make sure the product is not free
+		$product->set_regular_price( '10.00' ); // Make sure the product is not free.
 		$product->save();
 		WC()->cart->empty_cart();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		// Verify that the cart total is NOT 0 (non-free order)
+		// Verify that the cart total is NOT 0 (non-free order).
 		$this->assertGreaterThan( 0, WC()->cart->get_total( 'numeric' ), 'Cart total should be greater than 0 for a non-free order' );
 
-		// Add a hook to check the needs_payment() result and set the status
+		// Add a hook to check the needs_payment() result and set the status.
 		add_action(
 			'woocommerce_store_api_checkout_order_processed',
 			function ( \WC_Order $order ) use ( $status_name ) {
-				// Set our custom status
+				// Set our custom status.
 				$order->set_status( $status_name );
 				$order->save();
 			}
@@ -1734,7 +1734,7 @@ class Checkout extends MockeryTestCase {
 		$order_id = $response->get_data()['order_id'];
 		$order    = wc_get_order( $order_id );
 
-		// Order shouldn't stay in custom status, instead we let payment gateway set the correct status
+		// Order shouldn't stay in custom status, instead we let payment gateway set the correct status.
 		$this->assertEquals( 'on-hold', $order->get_status(), 'Order status should be controlled by the payment gateway, not remain custom.' );
 	}
 }
