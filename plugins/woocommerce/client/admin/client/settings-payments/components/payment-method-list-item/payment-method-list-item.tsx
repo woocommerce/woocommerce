@@ -49,19 +49,20 @@ export const PaymentMethodListItem = ( {
 	...props
 }: PaymentMethodListItemProps ) => {
 	// Internal ref for fallback mechanism when prop is not provided
-	const shouldRenderRef = useRef< boolean | null >( null );
+	const shouldRenderInMainListRef = useRef< boolean | null >( null );
 
 	// Fallback: Calculate initial visibility internally if prop is not provided
 	if ( initialVisibilityStatus === undefined ) {
 		// Only initialize the ref once the state for this method is available.
 		if (
-			shouldRenderRef.current === null &&
+			shouldRenderInMainListRef.current === null &&
 			paymentMethodsState[ method.id ] !== undefined
 		) {
-			shouldRenderRef.current = shouldRenderPaymentMethodInMainList(
-				method,
-				paymentMethodsState[ method.id ]
-			);
+			shouldRenderInMainListRef.current =
+				shouldRenderPaymentMethodInMainList(
+					method,
+					paymentMethodsState[ method.id ]
+				);
 		}
 	}
 
@@ -70,7 +71,7 @@ export const PaymentMethodListItem = ( {
 	const baseVisibility =
 		initialVisibilityStatus !== undefined
 			? initialVisibilityStatus ?? false
-			: shouldRenderRef.current ?? false;
+			: shouldRenderInMainListRef.current ?? false;
 
 	const shouldRender = isExpanded || baseVisibility;
 
