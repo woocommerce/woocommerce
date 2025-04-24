@@ -57,7 +57,8 @@ function registerAddressAutocompleteProvider( provider ) {
 		return false;
 	}
 
-	// Add provider to registry
+	// Freeze and add provider to registry.
+	Object.freeze( provider );
 	wooAddressProviders[ provider.id ] = provider;
 	return true;
 }
