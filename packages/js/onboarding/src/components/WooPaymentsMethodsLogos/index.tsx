@@ -30,7 +30,6 @@ import Eps from '../../images/payment-methods/eps';
 import Becs from '../../images/payment-methods/becs';
 import Przelewy24 from '../../images/payment-methods/przelewy24';
 import GrabPay from '../../images/payment-methods/grabpay';
-import WechatPay from '../../images/payment-methods/wechat-pay';
 
 /**
  * Payment methods list.
@@ -119,10 +118,6 @@ const PaymentMethods = [
 	{
 		name: 'grabpay',
 		component: <GrabPay key="grabpay" />,
-	},
-	{
-		name: 'wechatpay',
-		component: <WechatPay key="wechatpay" />,
 	},
 ];
 
