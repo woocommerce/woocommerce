@@ -886,6 +886,7 @@ class PaymentProviders {
 					ExtensionSuggestions::AMAZON_PAY,
 					ExtensionSuggestions::SQUARE,
 					ExtensionSuggestions::PAYONEER,
+					ExtensionSuggestions::AIRWALLEX,
 					ExtensionSuggestions::COINBASE, // We don't have suggestion details yet.
 					ExtensionSuggestions::AUTHORIZE_NET, // We don't have suggestion details yet.
 					ExtensionSuggestions::BOLT, // We don't have suggestion details yet.
