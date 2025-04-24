@@ -97,7 +97,7 @@
 		"webpack": "5.97.x",
 		"webpack-cli": "5.1.x",
 		"webpack-rtl-plugin": "2.0.x",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"peerDependencies": {
 		"@types/react": "18.3.x",

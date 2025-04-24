@@ -22,7 +22,7 @@ import { DowngradeNotice } from '../components/downgrade-notice';
 import { useProductTypeSelector } from '../../../shared/stores/product-type-template-state';
 import type { Attributes } from '../types';
 import { AddToCartWithOptionsEditTemplatePart } from './edit-template-part';
-import '../edit.scss';
+import '../editor.scss';
 
 export type FeaturesKeys = 'isBlockifiedAddToCart';
 

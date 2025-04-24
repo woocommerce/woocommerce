@@ -17,9 +17,9 @@ const blockData = {
 		frontend: {},
 		editor: {
 			leftArrow:
-				'.wc-block-product-gallery-large-image-next-previous-left',
+				'.wc-block-product-gallery-large-image-next-previous__icon--left',
 			rightArrow:
-				'.wc-block-product-gallery-large-image-next-previous-right',
+				'.wc-block-product-gallery-large-image-next-previous__icon--right',
 		},
 	},
 	slug: 'single-product',
@@ -89,11 +89,13 @@ test.describe( `${ blockData.name }`, () => {
 			name: 'woocommerce/product-gallery',
 		} );
 
-		const block = await pageObject.getNextPreviousButtonsBlock( {
+		const blocks = await pageObject.getNextPreviousButtonsBlock( {
 			page: 'editor',
 		} );
 
-		await expect( block ).toBeVisible();
+		// There are two "instances" of the block in the editor, so we need to check both.
+		await expect( blocks.nth( 0 ) ).toBeVisible();
+		await expect( blocks.nth( 1 ) ).toBeVisible();
 	} );
 
 	test( 'Renders Next/Previous Button block on the frontend side', async ( {
@@ -115,6 +117,32 @@ test.describe( `${ blockData.name }`, () => {
 		} );
 
 		await expect( block ).toBeVisible();
+	} );
+
+	test( 'Next/Previous Button block is hidden on mobile', async ( {
+		admin,
+		editor,
+		page,
+		pageObject,
+	} ) => {
+		await addBlock( admin, editor );
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( blockData.productPage );
+
+		await page.setViewportSize( {
+			height: 667,
+			width: 390, // iPhone 12 Pro
+		} );
+
+		const block = await pageObject.getNextPreviousButtonsBlock( {
+			page: 'frontend',
+		} );
+
+		await expect( block ).toBeHidden();
 	} );
 
 	test.describe( `${ blockData.name } Settings`, () => {

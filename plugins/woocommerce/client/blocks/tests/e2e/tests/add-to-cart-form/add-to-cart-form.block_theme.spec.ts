@@ -74,6 +74,12 @@ class BlockUtils {
 		);
 	}
 
+	async createManagedStockProduct() {
+		await wpCLI(
+			'wc product create --name="Managed Stock" --regular_price=10 --manage_stock=true --stock_quantity=1 --user=admin'
+		);
+	}
+
 	/**
 	 * Sets the min, max, and step attributes for the input field.
 	 * This is useful for simulating extensions that set these attributes via woocommerce_quantity_input
@@ -282,6 +288,30 @@ test.describe( `${ blockData.name } Block`, () => {
 			await editor.insertBlock( { name: 'woocommerce/single-product' } );
 
 			const productName = 'Sold Individually';
+
+			await blockUtils.configureSingleProductBlock( productName );
+			await blockUtils.enableStepperMode();
+
+			await editor.publishAndVisitPost();
+
+			const minusButton = page.getByLabel( `Reduce quantity` );
+			const plusButton = page.getByLabel( `Increase quantity ` );
+
+			await expect( minusButton ).toBeHidden();
+			await expect( plusButton ).toBeHidden();
+		} );
+
+		test( "doesn't render stepper when the product stock is managed and the stock quantity is 1", async ( {
+			admin,
+			editor,
+			blockUtils,
+			page,
+		} ) => {
+			await blockUtils.createManagedStockProduct();
+			await admin.createNewPost();
+			await editor.insertBlock( { name: 'woocommerce/single-product' } );
+
+			const productName = 'Managed Stock';
 
 			await blockUtils.configureSingleProductBlock( productName );
 			await blockUtils.enableStepperMode();

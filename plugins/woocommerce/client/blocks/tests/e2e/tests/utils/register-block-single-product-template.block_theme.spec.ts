@@ -142,15 +142,19 @@ test.describe( 'registerProductBlockType registers', () => {
 			'site-editor.php?postType=wp_template&activeView=WooCommerce'
 		);
 
-		const singleProductTemplate = page.getByRole( 'button', {
-			name: 'Single Product',
-		} );
+		const singleProductTemplate = page.getByLabel( 'Single Product' );
 
 		await expect( singleProductTemplate ).toBeVisible();
 
 		const previewCanvas = singleProductTemplate.frameLocator(
 			'iframe[title="Editor canvas"]'
 		);
+
+		// Wait for the iframe to be fully loaded.
+		await previewCanvas.locator( 'body' ).evaluate( () => {
+			return document?.readyState === 'complete';
+		} );
+
 		for ( const blockType of productBlockTypes ) {
 			const block = previewCanvas.locator(
 				`[data-type="${ blockType }"]`

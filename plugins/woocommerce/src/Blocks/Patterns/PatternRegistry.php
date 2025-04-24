@@ -176,9 +176,10 @@ class PatternRegistry {
 			include $source;
 			$pattern_data['content'] = ob_get_clean();
 
-			if ( ! $pattern_data['content'] ) {
-				return;
-			}
+		}
+
+		if ( empty( $pattern_data['content'] ) ) {
+			return;
 		}
 
 		$category_labels = $this->get_category_labels();
