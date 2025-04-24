@@ -986,7 +986,7 @@ class WC_Form_Handler {
 			$valid_nonce = wp_verify_nonce( $nonce_value, 'woocommerce-login' );
 		}
 
-		if ( isset( $_POST['login'], $_POST['username'], $_POST['password'] ) && $valid_nonce ) {
+		if ( isset( $_POST['login'], $_POST['username'], $_POST['password'] ) && is_string( $_POST['username'] ) && is_string( $_POST['password'] ) && $valid_nonce ) {
 
 			try {
 				$creds = array(

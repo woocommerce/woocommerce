@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Ensure related products are always an array in `wc_get_related_products` function.

@@ -190,4 +190,29 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $grouped_product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 		$this->assertStringContainsString( 'Read more', $markup, 'The Grouped Product Add to Cart with Options form contains a button.' );
 	}
+
+	/**
+	 * Tests that the quantity selector block is not visible for sold individually products and manage stock products with stock quantity <= 1.
+	 */
+	public function test_stepper_not_visible_for_sold_individually_products_and_manage_stock() {
+		$simple_product = new \WC_Product_Simple();
+		$simple_product->set_regular_price( 10 );
+		$simple_product->set_sold_individually( true );
+		$simple_product_id = $simple_product->save();
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $simple_product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+		$this->assertStringNotContainsString( 'data-block-name="woocommerce/add-to-cart-with-options-quantity-selector"', $markup, 'The Add to Cart with Options form does not contain a quantity selector block for sold individually products.' );
+
+		$simple_product->set_sold_individually( false );
+		$simple_product->set_manage_stock( true );
+		$simple_product->set_stock_quantity( 1 );
+		$simple_product->save();
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $simple_product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+		$this->assertStringNotContainsString( 'data-block-name="woocommerce/add-to-cart-with-options-quantity-selector"', $markup, 'The Add to Cart with Options form does not contain a quantity selector block for products with manage stock set to true and stock quantity set to 1.' );
+
+		$simple_product->set_stock_quantity( 10 );
+		$simple_product->save();
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $simple_product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+		$this->assertStringContainsString( 'data-block-name="woocommerce/add-to-cart-with-options-quantity-selector"', $markup, 'The Add to Cart with Options form contains a quantity selector block for products with manage stock set to true and stock quantity > 1.' );
+	}
 }

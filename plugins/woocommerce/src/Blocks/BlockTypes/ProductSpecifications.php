@@ -44,48 +44,55 @@ class ProductSpecifications extends AbstractBlock {
 
 		$product_data = array();
 
-		if ( $product->has_weight() ) {
+		// Get display settings with defaults.
+		$show_weight     = isset( $attributes['showWeight'] ) ? $attributes['showWeight'] : true;
+		$show_dimensions = isset( $attributes['showDimensions'] ) ? $attributes['showDimensions'] : true;
+		$show_attributes = isset( $attributes['showAttributes'] ) ? $attributes['showAttributes'] : true;
+
+		if ( $show_weight && $product->has_weight() ) {
 			$product_data['weight'] = array(
 				'label' => __( 'Weight', 'woocommerce' ),
 				'value' => wc_format_weight( $product->get_weight() ),
 			);
 		}
 
-		if ( $product->has_dimensions() ) {
+		if ( $show_dimensions && $product->has_dimensions() ) {
 			$product_data['dimensions'] = array(
 				'label' => __( 'Dimensions', 'woocommerce' ),
 				'value' => wc_format_dimensions( $product->get_dimensions( false ) ),
 			);
 		}
 
-		foreach ( $product->get_attributes() as $attribute ) {
-			$values = array();
+		if ( $show_attributes ) {
+			foreach ( $product->get_attributes() as $attribute ) {
+				$values = array();
 
-			if ( $attribute->is_taxonomy() ) {
-				$attribute_taxonomy = $attribute->get_taxonomy_object();
-				$attribute_values   = wc_get_product_terms( $product->get_id(), $attribute->get_name(), array( 'fields' => 'all' ) );
+				if ( $attribute->is_taxonomy() ) {
+					$attribute_taxonomy = $attribute->get_taxonomy_object();
+					$attribute_values   = wc_get_product_terms( $product->get_id(), $attribute->get_name(), array( 'fields' => 'all' ) );
 
-				foreach ( $attribute_values as $attribute_value ) {
-					$value_name = esc_html( $attribute_value->name );
+					foreach ( $attribute_values as $attribute_value ) {
+						$value_name = esc_html( $attribute_value->name );
 
-					if ( $attribute_taxonomy->attribute_public ) {
-						$values[] = '<a href="' . esc_url( get_term_link( $attribute_value->term_id, $attribute->get_name() ) ) . '" rel="tag">' . $value_name . '</a>';
-					} else {
-						$values[] = $value_name;
+						if ( $attribute_taxonomy->attribute_public ) {
+							$values[] = '<a href="' . esc_url( get_term_link( $attribute_value->term_id, $attribute->get_name() ) ) . '" rel="tag">' . $value_name . '</a>';
+						} else {
+							$values[] = $value_name;
+						}
+					}
+				} else {
+					$values = $attribute->get_options();
+
+					foreach ( $values as &$value ) {
+						$value = make_clickable( esc_html( $value ) );
 					}
 				}
-			} else {
-				$values = $attribute->get_options();
 
-				foreach ( $values as &$value ) {
-					$value = make_clickable( esc_html( $value ) );
-				}
+				$product_data[ 'attribute_' . sanitize_title_with_dashes( $attribute->get_name() ) ] = array(
+					'label' => wc_attribute_label( $attribute->get_name() ),
+					'value' => wpautop( wptexturize( implode( ', ', $values ) ) ),
+				);
 			}
-
-			$product_data[ 'attribute_' . sanitize_title_with_dashes( $attribute->get_name() ) ] = array(
-				'label' => wc_attribute_label( $attribute->get_name() ),
-				'value' => wpautop( wptexturize( implode( ', ', $values ) ) ),
-			);
 		}
 
 		if ( empty( $product_data ) ) {

@@ -17,50 +17,24 @@ import { ProductGalleryBlockSettings } from './block-settings/index';
 import type { ProductGalleryBlockAttributes } from './types';
 
 const TEMPLATE: InnerBlockTemplate[] = [
+	[ 'woocommerce/product-gallery-thumbnails' ],
 	[
-		'core/group',
-		{
-			layout: {
-				type: 'flex',
-				flexWrap: 'nowrap',
-				verticalAlignment: 'top',
-			},
-			metadata: {
-				name: 'Gallery Area',
-			},
-			className: 'wc-block-product-gallery__gallery-area',
-		},
+		'woocommerce/product-gallery-large-image',
+		{},
 		[
-			[ 'woocommerce/product-gallery-thumbnails' ],
 			[
-				'woocommerce/product-gallery-large-image',
-				{},
-				[
-					[
-						'woocommerce/product-sale-badge',
-						{
-							align: 'right',
-							style: {
-								spacing: {
-									margin: {
-										top: '4px',
-										right: '4px',
-										bottom: '4px',
-										left: '4px',
-									},
-								},
-							},
-						},
-					],
-					[
-						'woocommerce/product-gallery-large-image-next-previous',
-						{
-							style: {
-								border: { radius: '100%' },
-							},
-						},
-					],
-				],
+				'woocommerce/product-sale-badge',
+				{
+					align: 'right',
+				},
+			],
+			[
+				'woocommerce/product-gallery-large-image-next-previous',
+				{
+					style: {
+						border: { radius: '100%' },
+					},
+				},
 			],
 		],
 	],
@@ -88,7 +62,6 @@ export const Edit = withProductDataContext(
 						'woocommerce/product-gallery-large-image',
 						'woocommerce/product-gallery-thumbnails',
 					] }
-					templateLock={ false }
 					template={ TEMPLATE }
 				/>
 			</div>
