@@ -48,7 +48,12 @@ function registerAddressAutocompleteProvider( provider ) {
 	}
 
 	var isRegistered = serverProviders.some( function ( serverProvider ) {
-		return serverProvider.id === provider.id;
+		return (
+			serverProvider &&
+			typeof serverProvider === 'object' &&
+			typeof serverProvider.id === 'string' &&
+			serverProvider.id === provider.id
+		);
 	} );
 	if ( ! isRegistered ) {
 		console.error(
