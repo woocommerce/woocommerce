@@ -7,6 +7,7 @@
 
 declare( strict_types=1 );
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use WC_Helper_Product;
 use WC_Helper_Order;
 use WC_Order_Item_Product;
@@ -57,7 +58,7 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		$this->assertTrue( $found_backorder_before, 'Backorder meta should exist before order completion.' );
 
 		// 5. Complete the order.
-		$order->update_status( 'completed' );
+		$order->update_status( OrderStatus::COMPLETED );
 		$order->save();
 
 		// 6. Assert: Check meta is excluded after completion.
