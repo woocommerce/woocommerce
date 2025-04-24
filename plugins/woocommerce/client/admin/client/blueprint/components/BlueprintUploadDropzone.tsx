@@ -10,7 +10,7 @@ import {
 	Icon,
 } from '@wordpress/components';
 import { closeSmall, upload } from '@wordpress/icons';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useMachine } from '@xstate5/react';
 import {
 	assertEvent,
@@ -21,6 +21,7 @@ import {
 } from 'xstate5';
 import apiFetch from '@wordpress/api-fetch';
 import { dispatch } from '@wordpress/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -51,7 +52,9 @@ const parseBlueprintSteps = async ( file: File ) => {
 
 	// Ensure the parsed data is an array
 	if ( ! Array.isArray( steps ) ) {
-		throw new Error( 'Invalid JSON format: Expected an array.' );
+		throw new Error(
+			__( 'Invalid JSON format: Expected an array.', 'woocommerce' )
+		);
 	}
 
 	return steps;
@@ -70,7 +73,9 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 	try {
 		// Ensure the parsed data is an array
 		if ( ! Array.isArray( steps ) ) {
-			throw new Error( 'Invalid JSON format: Expected an array.' );
+			throw new Error(
+				__( 'Invalid JSON format: Expected an array.', 'woocommerce' )
+			);
 		}
 
 		const MAX_STEP_SIZE_BYTES =
@@ -90,13 +95,17 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 						{
 							step: step.step,
 							type: 'error',
-							message: `Step exceeds maximum size limit of ${ (
-								MAX_STEP_SIZE_BYTES /
-								( 1024 * 1024 )
-							).toFixed( 2 ) }MB (Current: ${ (
-								stepSize /
-								( 1024 * 1024 )
-							).toFixed( 2 ) }MB)`,
+							message: sprintf(
+								/* translators: 1: Maximum size in MB, 2: Current size in MB */ __(
+									'Step exceeds maximum size limit of %1$.2fMB (Current: %2$.2fMB)',
+									'woocommerce'
+								),
+								(
+									MAX_STEP_SIZE_BYTES /
+									( 1024 * 1024 )
+								).toFixed( 2 ),
+								( stepSize / ( 1024 * 1024 ) ).toFixed( 2 )
+							),
 						},
 					],
 				} );
@@ -134,7 +143,7 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 		dispatch( 'core/notices' ).createSuccessNotice( errorMessage );
 		return errors;
 	} catch ( e ) {
-		throw new Error( 'Error reading or parsing file' );
+		throw e;
 	}
 };
 
@@ -184,20 +193,27 @@ export const fileUploadMachine = setup( {
 				settings_to_overwrite: event.output.settings_to_overwrite,
 			} );
 		} ),
-		reportError: ( { event } ) => {
-			if ( event.type === 'ERROR' ) {
-				return assign( {
-					error: event.error,
-				} );
-			} else if (
-				event.type === 'xstate.error.actor.0.fileUpload.uploading' ||
-				event.type === 'xstate.error.actor.0.fileUpload.importer'
-			) {
-				return assign( {
-					error: event.output,
-				} );
+		reportError: assign( ( { event } ) => {
+			recordEvent( 'blueprint_import_error' );
+
+			const error = new Error(
+				// default error message if no error is provided
+				__(
+					'An error occurred while importing your Blueprint.',
+					'woocommerce'
+				)
+			);
+
+			if ( 'error' in event ) {
+				error.message = event.error.message;
+			} else if ( 'output' in event && 'message' in event.output ) {
+				error.message = event.output.message;
 			}
-		},
+
+			return {
+				error,
+			};
+		} ),
 	},
 	actors: {
 		importer: fromPromise(
@@ -267,7 +283,11 @@ export const fileUploadMachine = setup( {
 					target: 'error',
 					actions: assign( {
 						error: new Error(
-							'Error reading or parsing file. Please check the schema.'
+							/* translators: Error message when the file is not a valid Blueprint. */
+							__(
+								'Error reading or parsing file. Please check the schema.',
+								'woocommerce'
+							)
 						),
 					} ),
 				},
@@ -312,7 +332,6 @@ export const fileUploadMachine = setup( {
 									name: 'BlueprintImportError',
 									message: event.output
 										.map( ( item ) => {
-											const step = `step: ${ item.step }`;
 											const errors = item.messages
 												.filter(
 													( msg ) =>
@@ -323,7 +342,16 @@ export const fileUploadMachine = setup( {
 														`  ${ msg.message.trim() }.`
 												) // Trim and append a period
 												.join( '\n' ); // Join messages with newlines
-											return `${ step }\nerrors:\n${ errors }`;
+
+											return sprintf(
+												/* translators: 1: Step name 2: Error messages */
+												__(
+													'Step: %1$s Errors: %2$s',
+													'woocommerce'
+												),
+												item.step,
+												errors
+											);
 										} )
 										.join( '\n\n' ),
 								};
@@ -337,6 +365,14 @@ export const fileUploadMachine = setup( {
 			},
 		},
 		importSuccess: {
+			entry: ( { context } ) => {
+				recordEvent( 'blueprint_import_success', {
+					has_partial_errors: Boolean(
+						context.error?.name === 'BlueprintImportError'
+					),
+					steps_count: context.steps?.length || 0,
+				} );
+			},
 			always: 'idle',
 		},
 	},
