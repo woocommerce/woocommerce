@@ -14,6 +14,7 @@ import { registerPlugin, getPlugin } from '@wordpress/plugins';
 import { __, sprintf } from '@wordpress/i18n';
 import { CollapsibleContent } from '@woocommerce/components';
 import { settings, plugins, layout } from '@wordpress/icons';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -33,7 +34,7 @@ const icons = {
 
 const Blueprint = () => {
 	const [ exportEnabled, setExportEnabled ] = useState( true );
-	const [ error, setError ] = useState( null );
+	const [ exportError, setExportError ] = useState( null );
 
 	const blueprintStepGroups =
 		window.wcSettings?.admin?.blueprint_step_groups || [];
@@ -85,8 +86,19 @@ const Blueprint = () => {
 			if ( url ) {
 				window.URL.revokeObjectURL( url );
 			}
+
+			recordEvent( 'blueprint_export_success', {
+				has_plugins: _steps.plugins?.length > 0,
+				has_themes: _steps.themes?.length > 0,
+				has_settings: _steps.settings?.length > 0,
+				settings_exported: _steps.settings,
+			} );
 		} catch ( e ) {
-			setError( e.message );
+			setExportError( e.message );
+
+			recordEvent( 'blueprint_export_error', {
+				error_message: e.message || 'unknown',
+			} );
 		}
 
 		setExportEnabled( true );
@@ -105,17 +117,6 @@ const Blueprint = () => {
 
 	return (
 		<div className="blueprint-settings-slotfill">
-			{ error && (
-				<Notice
-					status="error"
-					onRemove={ () => {
-						setError( null );
-					} }
-					isDismissible
-				>
-					{ error }
-				</Notice>
-			) }
 			<h3>{ __( 'Blueprint', 'woocommerce' ) }</h3>
 			<p className="blueprint-settings-intro-text">
 				{ createInterpolateElement(
@@ -130,6 +131,9 @@ const Blueprint = () => {
 								target="_blank"
 								className="woocommerce-admin-inline-documentation-link"
 								rel="noreferrer"
+								onClick={ () => {
+									recordEvent( 'blueprint_learn_more_click' );
+								} }
 							>
 								{ __( 'Learn more', 'woocommerce' ) }
 							</a>
@@ -152,6 +156,18 @@ const Blueprint = () => {
 					'woocommerce'
 				) }
 			</p>
+			{ exportError && (
+				<Notice
+					className="blueprint-export-error"
+					status="error"
+					onRemove={ () => {
+						setExportError( null );
+					} }
+					isDismissible
+				>
+					{ exportError }
+				</Notice>
+			) }
 			{ blueprintStepGroups.map( ( group, index ) => (
 				<div key={ index } className="blueprint-settings-export-group">
 					<Icon
