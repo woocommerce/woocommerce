@@ -53,7 +53,6 @@ class ImportDeletePlugin implements StepProcessor {
 	 * @return bool True if the user has the required capabilities. False otherwise.
 	 */
 	public function check_step_capabilities( $schema ): bool {
-		return current_user_can( 'deactivate_plugins' ) &&
-		current_user_can( 'delete_plugins' );
+		return current_user_can( 'deactivate_plugins' ) && current_user_can( 'delete_plugins' );
 	}
 }
