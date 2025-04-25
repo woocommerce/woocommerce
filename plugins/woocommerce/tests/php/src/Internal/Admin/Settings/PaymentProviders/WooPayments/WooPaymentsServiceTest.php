@@ -381,7 +381,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				'status'         => $expected_step_statuses[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ] ?? WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				'errors'         => array(),
 				'context'        => array(
-					'fields'          => array(
+					// Only with a working WPCOM connection we include the fields.
+					'fields'          => ( $wpcom_connection['is_store_connected'] && $wpcom_connection['has_connected_owner'] ) ? array(
 						'business_types'      => $this->get_mock_onboarding_fields_business_types(),
 						'mccs_display_tree'   => array(
 							array(
@@ -443,7 +444,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 							'electronics_and_computers' => 'digital_products__other_digital_goods',
 						),
 						'available_countries' => $this->get_woopayments_supported_countries(),
-					),
+					) : array(),
 					'sub_steps'       => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['sub_steps'] ?? array(),
 					'self_assessment' => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['self_assessment'] ?? array(),
 				),
@@ -4045,7 +4046,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		// Assert.
 		$this->assertEquals( $expected_response, $result );
 		$this->assertCount( 1, $requests_made );
-		$this->assertCount( 3, $updated_stored_profiles );
+		$this->assertCount( 2, $updated_stored_profiles );
 		// The in_progress flag should have been set first to true, then to false.
 		$this->assertEquals(
 			array(
@@ -4059,19 +4060,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			$updated_stored_profiles[1]['onboarding'][ $location ]['steps'][ $step_id ]['data']
 		);
-		// The step status should have been set to completed.
-		$this->assertEquals(
-			array(
-				'statuses' => array(
-					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $started_timestamp,
-					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $this->current_time,
-				),
-				'data'     => array(
-					'in_progress' => false,
-				),
-			),
-			$updated_stored_profiles[2]['onboarding'][ $location ]['steps'][ $step_id ]
-		);
+		// There is no automatic completion of the step due to its async nature.
 	}
 
 	/**
