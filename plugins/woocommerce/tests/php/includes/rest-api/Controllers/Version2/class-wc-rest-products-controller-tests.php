@@ -16,7 +16,7 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpSetUpBeforeClass() {
-		for ( $i = 1; $i <= 4; $i ++ ) {
+		for ( $i = 1; $i <= 4; $i++ ) {
 			self::$products[] = WC_Helper_Product::create_simple_product();
 		}
 
@@ -133,16 +133,18 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	public function test_product_api_get_all_fields_v2() {
 		$expected_response_fields = $this->get_expected_response_fields();
 
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$product  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() ) );
 
 		$this->assertEquals( 200, $response->get_status() );
 
 		$response_fields = array_keys( $response->get_data() );
 
+		// phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		$this->assertEmpty( array_diff( $expected_response_fields, $response_fields ), 'These fields were expected but not present in API V2 response: ' . print_r( array_diff( $expected_response_fields, $response_fields ), true ) );
 
 		$this->assertEmpty( array_diff( $response_fields, $expected_response_fields ), 'These fields were not expected in the API V2 response: ' . print_r( array_diff( $response_fields, $expected_response_fields ), true ) );
+		// phpcs:enable WordPress.PHP.DevelopmentFunctions.error_log_print_r
 	}
 
 	/**
@@ -156,7 +158,7 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		$call_product_data_wrapper = function () use ( $product ) {
 			return $this->get_product_data( $product );
 		};
-		$response = $call_product_data_wrapper->call( new WC_REST_Products_Controller() );
+		$response                  = $call_product_data_wrapper->call( new WC_REST_Products_Controller() );
 		$this->assertArrayHasKey( 'id', $response );
 	}
 
@@ -165,7 +167,7 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_products_get_each_field_one_by_one_v2() {
 		$expected_response_fields = $this->get_expected_response_fields();
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$product                  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 
 		foreach ( $expected_response_fields as $field ) {
 			$request = new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() );
@@ -194,7 +196,7 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 			$this->assertArrayHasKey( 'meta_data', $order );
 			$this->assertEquals( 1, count( $order['meta_data'] ) );
 			$meta_keys = array_map(
-				function( $meta_item ) {
+				function ( $meta_item ) {
 					return $meta_item->get_data()['key'];
 				},
 				$order['meta_data']
@@ -218,7 +220,7 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
 			$meta_keys = array_map(
-				function( $meta_item ) {
+				function ( $meta_item ) {
 					return $meta_item->get_data()['key'];
 				},
 				$order['meta_data']
@@ -243,7 +245,7 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
 			$meta_keys = array_map(
-				function( $meta_item ) {
+				function ( $meta_item ) {
 					return $meta_item->get_data()['key'];
 				},
 				$order['meta_data']
@@ -270,7 +272,7 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 			$this->assertArrayHasKey( 'meta_data', $order );
 			$this->assertEquals( 1, count( $order['meta_data'] ) );
 			$meta_keys = array_map(
-				function( $meta_item ) {
+				function ( $meta_item ) {
 					return $meta_item->get_data()['key'];
 				},
 				$order['meta_data']
