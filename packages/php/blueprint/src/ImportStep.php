@@ -87,6 +87,12 @@ class ImportStep {
 
 		$importer = $this->indexed_importers[ $this->step_definition->step ];
 
+		// validate importer is a step processor before processing.
+		if ( ! $importer instanceof StepProcessor ) {
+			$result->add_warn( "Importer {$this->step_definition->step} is not a valid step processor" );
+			return $result;
+		}
+
 		// validate steps before processing.
 		$this->validate_step_schemas( $importer, $result );
 
