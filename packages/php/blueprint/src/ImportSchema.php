@@ -68,11 +68,11 @@ class ImportSchema {
 	 *
 	 * @param string $file The file path.
 	 * @return ImportSchema The created ImportSchema instance.
+	 *
+	 * @throws \RuntimeException If the JSON file cannot be read.
+	 * @throws \InvalidArgumentException If the JSON is invalid or missing 'steps' field.
 	 */
 	public static function create_from_file( $file ) {
-		// @todo check for mime type
-		$path_info = pathinfo( $file );
-
 		return self::create_from_json( $file );
 	}
 
@@ -81,6 +81,9 @@ class ImportSchema {
 	 *
 	 * @param string $json_path The JSON file path.
 	 * @return ImportSchema The created ImportSchema instance.
+	 *
+	 * @throws \RuntimeException If the JSON file cannot be read.
+	 * @throws \InvalidArgumentException If the JSON is invalid or missing 'steps' field.
 	 */
 	public static function create_from_json( $json_path ) {
 		return new self( new JsonSchema( $json_path ) );
@@ -108,6 +111,14 @@ class ImportSchema {
 		 * @since 0.0.1
 		 */
 		$step_processors = $this->wp_apply_filters( 'wooblueprint_importers', $step_processors );
+
+		// Validate that the step processors are instances of StepProcessor.
+		$step_processors = array_filter(
+			$step_processors,
+			function ( $step_processor ) {
+				return $step_processor instanceof StepProcessor;
+			}
+		);
 
 		$indexed_step_processors = Util::index_array(
 			$step_processors,
@@ -159,8 +170,7 @@ class ImportSchema {
 				continue;
 			}
 
-			// phpcs:ignore
-			$validate = $this->validator->validate( $step_json, json_encode( $step_schema ) );
+			$validate = $this->validator->validate( $step_json, wp_json_encode( $step_schema ) );
 
 			if ( ! $validate->isValid() ) {
 				$result->add_error( "Schema validation failed for step {$step_json->step}" );

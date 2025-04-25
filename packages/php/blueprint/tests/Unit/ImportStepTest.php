@@ -1,6 +1,7 @@
 <?php
 
 use Automattic\WooCommerce\Blueprint\Tests\stubs\Importers\DummyImporter;
+use Automattic\WooCommerce\Blueprint\Tests\stubs\Steps\DummyStep;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\Blueprint\ImportStep;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
@@ -57,6 +58,37 @@ class ImportStepTest extends TestCase {
 
 		$this->assertCount( 1, $result->get_messages( 'warn' ) );
 		$this->assertEquals( 'Unable to find an importer for dummy' . $rand, $result->get_messages( 'warn' )[0]['message'] );
+	}
+
+	/**
+	 * Test it returns warn when importer is not a step processor.
+	 *
+	 * @return void
+	 */
+	public function test_it_returns_warn_when_importer_is_not_a_step_processor() {
+		// Create a filter that adds an invalid importer (not implementing StepProcessor).
+		add_filter(
+			'wooblueprint_importers',
+			function ( $importers ) {
+				$importers[] = new class() {
+					/**
+					 * Get the step class name.
+					 *
+					 * @return string
+					 */
+					public function get_step_class() {
+						return DummyStep::class;
+					}
+				};
+				return $importers;
+			}
+		);
+
+		$importer = new ImportStep( (object) array( 'step' => DummyStep::get_step_name() ) );
+		$result   = $importer->import();
+
+		$this->assertCount( 1, $result->get_messages( 'warn' ) );
+		$this->assertEquals( sprintf( 'Importer %s is not a valid step processor', DummyStep::get_step_name() ), $result->get_messages( 'warn' )[0]['message'] );
 	}
 
 	/**
