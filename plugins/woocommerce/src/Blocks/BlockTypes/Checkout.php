@@ -414,6 +414,35 @@ class Checkout extends AbstractBlock {
 			}
 			$country_data[ $country_code ]['format'] = $format;
 		}
+		$address_fields_for_shipping_rates = [ 'state', 'country', 'postcode', 'city' ];
+		$essential_shipping_data = apply_filters( 'woocommerce_essential_shipping_data', [] );
+		//check if each entry in the array is a string
+		if ( is_array( $essential_shipping_data ) ) {
+			foreach ( $essential_shipping_data as $key => $value ) {
+				if ( ! is_string( $value ) ) {
+					unset( $essential_shipping_data[ $key ] );
+				}
+			}
+			$essential_shipping_data = array_merge( $address_fields_for_shipping_rates, $essential_shipping_data );
+			$this->asset_data_registry->add( 'addressFieldsForShippingRates', $essential_shipping_data );
+
+			//maybe write a log, check if filters fail silently
+			//document filters
+		}
+
+		$essential_billing_data = apply_filters( 'woocommerce_essential_billing_data', [] );
+		if (is_array( $essential_billing_data ) ) {
+			foreach ( $essential_billing_data as $key => $value ) {
+				if ( ! is_string( $value ) ) {
+					unset( $essential_billing_data[ $key ] );
+				}
+			}
+		}
+
+		if ( is_array( $essential_billing_data ) ) {
+			$this->asset_data_registry->add( 'essentialBillingData', $essential_billing_data );
+		}
+
 
 		$this->asset_data_registry->add( 'countryData', $country_data );
 		$this->asset_data_registry->add( 'defaultAddressFormat', $address_formats['default'] );

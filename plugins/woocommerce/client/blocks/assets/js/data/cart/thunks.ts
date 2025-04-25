@@ -497,7 +497,7 @@ export const updateCustomerData =
 		// If the address is being edited, we don't update the customer data in the store from the response.
 		editing = true,
 		isEssentialBillingDataChanged = false,
-		isEssentialShippingDataChanged = false
+		haveAddressFieldsForShippingRatesChanged = false
 	) =>
 	async ( { dispatch }: CartThunkArgs ) => {
 		try {
@@ -510,9 +510,9 @@ export const updateCustomerData =
 			}
 			if (
 				'shipping_address' in customerData &&
-				isEssentialShippingDataChanged
+				haveAddressFieldsForShippingRatesChanged
 			) {
-				dispatch.updatingEssentialShippingData( true );
+				dispatch.updatingAddressFieldsForShippingRates( true );
 			}
 
 			const { response } = await apiFetchWithHeaders< {
@@ -537,7 +537,7 @@ export const updateCustomerData =
 		} finally {
 			dispatch.updatingCustomerData( false );
 			dispatch.updatingEssentialBillingData( false );
-			dispatch.updatingEssentialShippingData( false );
+			dispatch.updatingAddressFieldsForShippingRates( false );
 		}
 	};
 
