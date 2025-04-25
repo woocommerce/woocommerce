@@ -13,6 +13,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Domain\Services\AddressProviderService;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -414,7 +415,7 @@ class WC_Frontend_Scripts {
 			self::enqueue_script( 'wc-checkout' );
 		}
 		if ( is_checkout() && Features::is_enabled( 'experimental-blocks' ) ) {
-			$address_provider_service = Package::container()->get( AddressProviderService::class );
+			$address_provider_service = wc_get_container()->get( AddressProviderController::class );
 			if ( $address_provider_service && method_exists( $address_provider_service, 'get_registered_providers' ) ) {
 				$registered_providers = $address_provider_service->get_registered_providers();
 				if ( is_array( $registered_providers ) && count( $registered_providers ) > 0 ) {
@@ -585,7 +586,7 @@ class WC_Frontend_Scripts {
 					'i18n_checkout_error'       => sprintf( esc_attr__( 'There was an error processing your order. Please check for any charges in your payment method and review your <a href="%s">order history</a> before placing the order again.', 'woocommerce' ), esc_url( wc_get_account_endpoint_url( 'orders' ) ) ),
 				);
 				if ( Features::is_enabled( 'experimental-blocks' ) ) {
-					$params['address_providers'] = Package::container()->get( AddressProviderService::class )->get_registered_providers();
+					$params['address_providers'] = wc_get_container()->get( AddressProviderController::class )->get_registered_providers();
 				}
 				break;
 			case 'wc-address-i18n':
