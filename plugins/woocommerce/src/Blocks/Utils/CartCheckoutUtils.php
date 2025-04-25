@@ -453,4 +453,13 @@ class CartCheckoutUtils {
 			}
 		}
 	}
+
+	/**
+	 * Check if the cart page is defined.
+	 *
+	 * @return bool True if the cart page is defined, false otherwise.
+	 */
+	public static function has_cart_page() {
+		return wc_get_page_permalink( 'cart', -1 ) !== -1;
+	}
 }

@@ -1,18 +1,16 @@
+$component-background: color-mix(in srgb, currentColor 6%, transparent);
+$component-background-hover: color-mix(in srgb, currentColor 12%, transparent);
+
 .wc-block-checkout__shipping-method .wc-block-checkout__shipping-method-container {
 	width: 100%;
 	display: flex;
-	gap: $gap;
 	justify-content: space-between;
-}
-
-// This nested selector is solely for specificity to override a quite specific style set in the button component.
-// We have avoided nesting all the styles in case specificity changes introduce regressions elsewhere.
-.edit-post-visual-editor {
-	.wc-block-checkout__shipping-method-container {
-		.wc-block-checkout__shipping-method-option {
-			min-height: 80px;
-		}
-	}
+	align-items: stretch;
+	flex-direction: row;
+	border-radius: $universal-border-radius * 2;
+	background-color: $component-background;
+	gap: $gap-smallest;
+	padding: $gap-smallest;
 }
 
 .edit-post-visual-editor .wc-block-checkout__shipping-method-option,
@@ -23,63 +21,61 @@
 	justify-content: center;
 	flex-wrap: wrap;
 	align-items: center;
-	height: 100%;
-	min-height: 80px;
 	box-sizing: border-box;
 	flex-basis: 0;
-	gap: 4px;
-	padding: 16px 12px;
-	background-color: transparent;
-	outline: 1px solid $universal-border-light;
-	border-radius: $universal-border-radius;
+	gap: 0;
 	cursor: pointer;
 	position: relative; // Add this for pseudo-element positioning
+	padding: $gap-small;
+	border-radius: $universal-border-radius;
+	border: 2px solid transparent;
+	background-color: transparent;
+	color: $input-text-light;
 
 	.has-dark-controls & {
-		outline: 1px solid $input-border-dark;
+		color: $input-text-dark;
 	}
 
-	&::after {
-		content: "";
-		position: absolute;
-		top: -3px;
-		right: -3px;
-		bottom: -3px;
-		left: -3px;
-		border-radius: calc(#{$universal-border-radius} + 2px);
-		pointer-events: none;
-	}
-
+	&:hover,
 	&:focus-within {
-		outline: 1.5px solid currentColor;
-		&::after {
-			outline: 1px solid currentColor;
-		}
-	}
-
-	&:hover {
-		background-color: $universal-background;
+		background-color: $component-background-hover;
+		outline: none;
 	}
 
 	&.wc-block-checkout__shipping-method-option--selected {
-		outline: 1.5px solid currentColor;
-		background-color: $universal-background;
-		&:focus-within::after {
-			outline: 1px solid currentColor;
+		border: 2px solid currentColor;
+		background: $input-background-light;
+
+		.has-dark-controls & {
+			background: $input-background-dark;
 		}
 	}
+}
+
+.wc-block-checkout__shipping-method-option-title-wrapper {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	flex-wrap: nowrap;
+	gap: $gap-smallest;
 }
 
 .wc-block-checkout__shipping-method-option-icon {
 	fill: currentColor;
+	flex-shrink: 0;
+	vertical-align: middle;
 }
 
 .wc-block-checkout__shipping-method-option-title {
+	@include reset-typography();
 	@include font-size(regular, 1rem);
 	font-weight: bold;
+	line-height: 28px; // Match the icon size
+	text-wrap: balance;
 }
 
 .wc-block-checkout__shipping-method-option-price {
+	@include reset-typography();
 	@include font-size(small, 1rem);
 	flex-basis: 100%;
 	text-align: center;

@@ -41,13 +41,13 @@
 		background-color: #fff;
 		padding: em($gap-small) 0 em($gap-small) $gap;
 		border-radius: $universal-border-radius;
-		border: 1px solid $input-border-gray;
+		border: 1px solid $universal-border-strong;
 		width: 100%;
 		font-family: inherit;
 		margin: 0;
 		box-sizing: border-box;
 		height: 3em;
-		color: $input-text-active;
+		color: $input-text-light;
 		cursor: text;
 
 		&:focus {

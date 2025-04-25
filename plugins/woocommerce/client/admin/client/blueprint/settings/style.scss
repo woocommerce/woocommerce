@@ -160,6 +160,31 @@
 	.blueprint-settings-export-button {
 		margin-top: 14px;
 	}
+
+	.components-notice.is-error {
+		background: #fce2e4;
+		border-left-color: #cc1818;
+		padding: 12px;
+
+		button.components-notice__dismiss {
+			align-self: inherit;
+			svg {
+				fill: #1e1e1e;
+				width: 15px;
+			}
+		}
+
+		.components-notice__content {
+			margin: 0;
+
+			pre {
+				color: $gray-900;
+				line-height: 24px; /* 184.615% */
+				margin: 0;
+				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+			}
+		}
+	}
 }
 
 // Show the notice at the bottom right of the screen
@@ -233,3 +258,6 @@
 	}
 }
 
+.blueprint-export-error {
+	margin: 16px 0;
+}

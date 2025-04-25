@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\BlockTypes\AddtoCartWithOptions\Utils;
 use WP_Block;
 
 /**
@@ -30,31 +31,20 @@ class AddToCartWithOptionsGroupedProductSelectorItemCTA extends AbstractBlock {
 	private function get_quantity_selector_markup( $product ) {
 		ob_start();
 
-		woocommerce_quantity_input(
-			array(
-				/**
-				 * Filter the minimum quantity value allowed for the product.
-				 *
-				 * @since 2.0.0
-				 * @param int        $min_value Minimum quantity value.
-				 * @param WC_Product $product   Product object.
-				 */
-				'min_value'   => apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product ),
-				/**
-				 * Filter the maximum quantity value allowed for the product.
-				 *
-				 * @since 2.0.0
-				 * @param int        $max_value Maximum quantity value.
-				 * @param WC_Product $product   Product object.
-				 */
-				'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product ),
-				'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity(), // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			)
-		);
+		woocommerce_quantity_input( Utils::get_quantity_input_args( $product ) );
 
-		$quantity_selector_html = ob_get_clean();
+		$quantity_html = ob_get_clean();
 
-		return $quantity_selector_html;
+		// Modify the quantity input to add stepper buttons.
+		$product_name = $product->get_name();
+
+		$quantity_html = Utils::add_quantity_steppers( $quantity_html, $product_name );
+		$quantity_html = Utils::add_quantity_stepper_classes( $quantity_html );
+
+		// Add interactive data attribute for the stepper functionality.
+		$quantity_html = Utils::make_quantity_input_interactive( $quantity_html );
+
+		return $quantity_html;
 	}
 
 	/**
@@ -106,19 +96,13 @@ class AddToCartWithOptionsGroupedProductSelectorItemCTA extends AbstractBlock {
 	 * @return string Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ): string {
-		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
-
 		global $product;
-
 		$previous_product = $product;
 
-		if ( ! empty( $post_id ) ) {
-			$product = wc_get_product( $post_id );
-		}
+		$product = Utils::get_product_from_context( $block, $previous_product );
+		$markup  = '';
 
-		$markup = '';
-
-		if ( $product instanceof \WC_Product ) {
+		if ( $product ) {
 			if ( ! $product->is_purchasable() || $product->has_options() || ! $product->is_in_stock() ) {
 				$markup = $this->get_button_markup( $product );
 			} elseif ( $product->is_sold_individually() ) {
