@@ -161,15 +161,14 @@ const productGallery = {
 			const { imageData } = context;
 
 			const allImageIds = getAllImageIds( imageData );
+			const imageId = allImageIds[ newImageIndex ];
 			const { disableLeft, disableRight } = getArrowsState(
 				newImageIndex,
 				allImageIds.length
 			);
+
 			context.disableLeft = disableLeft;
 			context.disableRight = disableRight;
-
-			const imageId = allImageIds[ newImageIndex ];
-
 			context.selectedImageId = imageId;
 
 			if ( imageId !== -1 ) {
@@ -219,9 +218,9 @@ const productGallery = {
 			const { imageData, selectedImageId } = getContext();
 			const allImageIds = getAllImageIds( imageData );
 			const selectedImageIndex = allImageIds.indexOf( selectedImageId );
-			const newImageNumber = Math.max( 0, selectedImageIndex - 1 );
+			const newImageIndex = Math.max( 0, selectedImageIndex - 1 );
 
-			actions.selectImage( newImageNumber );
+			actions.selectImage( newImageIndex );
 		},
 		onSelectedLargeImageKeyDown: ( event: KeyboardEvent ) => {
 			if (
@@ -357,10 +356,10 @@ const productGallery = {
 							currentImageId &&
 							allImageIds.includes( currentImageId )
 						) {
-							const nextImageNumber =
-								allImageIds.indexOf( currentImageId ) + 1;
+							const nextImageIndex =
+								allImageIds.indexOf( currentImageId );
 
-							actions.selectImage( nextImageNumber );
+							actions.selectImage( nextImageIndex );
 						} else {
 							actions.selectImage( 1 );
 						}
