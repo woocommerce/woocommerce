@@ -26,11 +26,17 @@ class RestApiTest extends WP_Test_REST_TestCase {
 	private $temp_file;
 
 	/**
+	 * @var int User ID with administrator role.
+	 */
+	private $user;
+
+	/**
 	 * Setup test case.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->rest_api = new RestApi();
+		$this->useAdmin();
 
 		// Create a temporary test file with valid Blueprint schema.
 		$this->temp_file   = wp_tempnam( 'blueprint_test_' );
@@ -52,6 +58,20 @@ class RestApiTest extends WP_Test_REST_TestCase {
 		$wp_filesystem->put_contents( $this->temp_file, $blueprint_content );
 	}
 
+	/**
+	 * Use a user with administrator role.
+	 *
+	 * @return void
+	 */
+	public function useAdmin() {
+		// Register an administrator user and log in.
+		$this->user = $this->factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+		wp_set_current_user( $this->user );
+	}
 
 	/**
 	 * Clean up after each test.
