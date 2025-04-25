@@ -56,25 +56,16 @@ class ImportRunSql implements StepProcessor {
 	 * @return bool True if the user has the required capabilities. False otherwise.
 	 */
 	public function check_step_capabilities( $schema ): bool {
-		// General check.
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return false;
 		}
 
-		$sql           = $schema->sql->contents;
-		$sql_lowercase = strtolower( trim( $sql ) );
-
-		// Check for specific operations.
-		if ( strpos( $sql_lowercase, 'posts' ) !== false ) {
-			if ( ! current_user_can( 'edit_posts' ) ) {
-				return false;
-			}
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			return false;
 		}
 
-		if ( strpos( $sql_lowercase, 'users' ) !== false ) {
-			if ( ! current_user_can( 'edit_users' ) ) {
-				return false;
-			}
+		if ( ! current_user_can( 'edit_users' ) ) {
+			return false;
 		}
 
 		return true;
