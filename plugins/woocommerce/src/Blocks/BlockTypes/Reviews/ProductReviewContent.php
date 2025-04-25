@@ -40,7 +40,11 @@ class ProductReviewContent extends AbstractBlock {
 			return '';
 		}
 
-		/** This filter is documented in wp-includes/comment-template.php */
+		/**
+		 * This filter is documented in wp-includes/comment-template.php
+		 *
+		 * @since 1.2.0
+		 */
 		$comment_text = apply_filters( 'comment_text', $comment_text, $comment, $args );
 
 		$moderation_note = '';
@@ -48,9 +52,9 @@ class ProductReviewContent extends AbstractBlock {
 			$commenter = wp_get_current_commenter();
 
 			if ( $commenter['comment_author_email'] ) {
-				$moderation_note = __( 'Your review is awaiting moderation.' );
+				$moderation_note = __( 'Your review is awaiting moderation.', 'woocommerce' );
 			} else {
-				$moderation_note = __( 'Your review is awaiting moderation. This is a preview; your review will be visible after it has been approved.' );
+				$moderation_note = __( 'Your review is awaiting moderation. This is a preview; your review will be visible after it has been approved.', 'woocommerce' );
 			}
 			$moderation_note = '<p><em class="review-awaiting-moderation">' . $moderation_note . '</em></p>';
 			if ( ! $show_pending_links ) {
