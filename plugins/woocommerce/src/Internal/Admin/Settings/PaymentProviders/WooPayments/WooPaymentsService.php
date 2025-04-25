@@ -798,14 +798,16 @@ class WooPaymentsService {
 			$location
 		);
 
-		// Try to get the pre-KYC fields.
-		try {
-			$business_verification_step['context']['fields'] = $this->get_onboarding_kyc_fields();
-		} catch ( Exception $e ) {
-			$business_verification_step['errors'][] = array(
-				'code'    => 'fields_error',
-				'message' => $e->getMessage(),
-			);
+		// Try to get the pre-KYC fields, but only if the required step is completed.
+		if ( $this->check_onboarding_step_requirements( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location ) ) {
+			try {
+				$business_verification_step['context']['fields'] = $this->get_onboarding_kyc_fields();
+			} catch ( Exception $e ) {
+				$business_verification_step['errors'][] = array(
+					'code'    => 'fields_error',
+					'message' => $e->getMessage(),
+				);
+			}
 		}
 
 		// If the step is not completed, we need to add the actions.
