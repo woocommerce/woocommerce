@@ -171,8 +171,8 @@ class WooPaymentsService {
 			case self::ONBOARDING_STEP_TEST_ACCOUNT:
 				// The step can only be completed if the requirements are met.
 				if ( $this->check_onboarding_step_requirements( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ) {
-					// If the account is a valid test account, the step is completed.
-					if ( $this->has_valid_account() && $this->has_test_account() ) {
+					// If the account is a valid, working test account, the step is completed.
+					if ( $this->has_test_account() && $this->has_valid_account() && $this->has_working_account() ) {
 						return self::ONBOARDING_STEP_STATUS_COMPLETED;
 					}
 
@@ -1218,6 +1218,24 @@ class WooPaymentsService {
 		$account_service = $this->proxy->call_static( '\WC_Payments', 'get_account_service' );
 
 		return $account_service->is_stripe_account_valid();
+	}
+
+	/**
+	 * Determine if WooPayments has a working account set up.
+	 *
+	 * This is a more specific check than has_valid_account() and checks if payments are enabled for the account.
+	 *
+	 * @return bool Whether WooPayments has a working account set up.
+	 */
+	private function has_working_account(): bool {
+		if ( ! $this->has_account() ) {
+			return false;
+		}
+
+		$account_service = $this->proxy->call_static( '\WC_Payments', 'get_account_service' );
+		$account_status  = $account_service->get_account_status_data();
+
+		return ! empty( $account_status['paymentsEnabled'] );
 	}
 
 	/**
