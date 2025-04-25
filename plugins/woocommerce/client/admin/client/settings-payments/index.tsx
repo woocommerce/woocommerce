@@ -85,14 +85,14 @@ const SettingsPaymentsBacsChunk = lazy(
 const SettingsPaymentsCodChunk = lazy(
 	() =>
 		import(
-			/* webpackChunkName: "settings-payments-bacs" */ './offline/settings-payments-cod'
+			/* webpackChunkName: "settings-payments-cod" */ './offline/settings-payments-cod'
 		)
 );
 
 const SettingsPaymentsChequeChunk = lazy(
 	() =>
 		import(
-			/* webpackChunkName: "settings-payments-bacs" */ './offline/settings-payments-cheque'
+			/* webpackChunkName: "settings-payments-cheque" */ './offline/settings-payments-cheque'
 		)
 );
 
