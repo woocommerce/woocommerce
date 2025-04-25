@@ -30,6 +30,8 @@ class WCTransactionalEmails {
 		'customer_reset_password',
 		'failed_order',
 		'new_order',
+		'customer_pos_completed_order',
+		'customer_pos_refunded_order',
 	);
 
 	/**
