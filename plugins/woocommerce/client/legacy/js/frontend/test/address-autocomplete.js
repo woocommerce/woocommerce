@@ -42,15 +42,19 @@ describe( 'Address Autocomplete Provider Registration', () => {
 			window.wc.addressAutocomplete.registerAddressAutocompleteProvider();
 		expect( result ).toBe( false );
 		expect( console.error ).toHaveBeenCalledWith(
+			'Error registering address provider:',
 			'Address provider must be a valid object'
 		);
 	} );
 
 	test( 'should reject null provider', () => {
 		const result =
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider( null );
+			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
+				null
+			);
 		expect( result ).toBe( false );
 		expect( console.error ).toHaveBeenCalledWith(
+			'Error registering address provider:',
 			'Address provider must be a valid object'
 		);
 	} );
@@ -70,6 +74,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 			);
 		expect( result ).toBe( false );
 		expect( console.error ).toHaveBeenCalledWith(
+			'Error registering address provider:',
 			'Provider test-provider not registered on server'
 		);
 	} );
@@ -89,6 +94,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 			);
 		expect( result ).toBe( false );
 		expect( console.error ).toHaveBeenCalledWith(
+			'Error registering address provider:',
 			'Server providers configuration is invalid'
 		);
 	} );
@@ -106,6 +112,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 			);
 		expect( result ).toBe( false );
 		expect( console.error ).toHaveBeenCalledWith(
+			'Error registering address provider:',
 			'Address provider must have a valid ID'
 		);
 	} );
@@ -124,6 +131,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 			);
 		expect( result ).toBe( false );
 		expect( console.error ).toHaveBeenCalledWith(
+			'Error registering address provider:',
 			'Address provider must have a valid ID'
 		);
 	} );
@@ -141,6 +149,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 			);
 		expect( result ).toBe( false );
 		expect( console.error ).toHaveBeenCalledWith(
+			'Error registering address provider:',
 			'Address provider must have a canSearch function'
 		);
 	} );
@@ -158,6 +167,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 			);
 		expect( result ).toBe( false );
 		expect( console.error ).toHaveBeenCalledWith(
+			'Error registering address provider:',
 			'Address provider must have a search function'
 		);
 	} );
@@ -175,6 +185,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 			);
 		expect( result ).toBe( false );
 		expect( console.error ).toHaveBeenCalledWith(
+			'Error registering address provider:',
 			'Address provider must have a select function'
 		);
 	} );
@@ -193,6 +204,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 			);
 		expect( result ).toBe( false );
 		expect( console.error ).toHaveBeenCalledWith(
+			'Error registering address provider:',
 			'Provider unregistered-provider not registered on server'
 		);
 	} );
