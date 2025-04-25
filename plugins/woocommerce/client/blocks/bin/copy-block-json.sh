@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Move to the project root by finding the directory containing plugins/woocommerce and pnpm-workspace.yaml
+while [ ! -d "plugins/woocommerce" ] || [ ! -f "pnpm-workspace.yaml" ]; do
+    if [ "$PWD" = "/" ]; then
+        echo "Error: Could not find project root"
+        exit 1
+    fi
+    cd ..
+done
+
 # Set target directory
 TARGET_DIR="plugins/woocommerce/assets/client/blocks"
 
