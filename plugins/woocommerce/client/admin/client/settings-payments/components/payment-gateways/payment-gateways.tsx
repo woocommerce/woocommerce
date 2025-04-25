@@ -67,9 +67,8 @@ export const PaymentGateways = ( {
 }: PaymentGatewaysProps ) => {
 	const { invalidateResolution: invalidateMainStore } =
 		useDispatch( paymentSettingsStore );
-	const { invalidateResolution: invalidateWooPaymentsOnboardingStore } = useDispatch(
-		woopaymentsOnboardingStore
-	);
+	const { invalidateResolution: invalidateWooPaymentsOnboardingStore } =
+		useDispatch( woopaymentsOnboardingStore );
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
 	const storeCountryCode = (
 		window.wcSettings?.admin?.preloadSettings?.general
