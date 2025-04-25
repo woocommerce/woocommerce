@@ -183,13 +183,14 @@ const reducer: Reducer< CartState > = ( state = defaultCartState, action ) => {
 				},
 			};
 			break;
-		case types.UPDATING_ESSENTIAL_SHIPPING_DATA:
-			console.log( 'UPDATING_ESSENTIAL_SHIPPING_DATA', action );
+		case types.UPDATING_ADDRESS_FIELDS_FOR_SHIPPING_RATES:
+			console.log( 'UPDATING_ADDRESS_FIELDS_FOR_SHIPPING_RATES', action );
 			state = {
 				...state,
 				metaData: {
 					...state.metaData,
-					updatingEssentialShippingData: !! action.isResolving,
+					updatingAddressFieldsForShippingRates:
+						!! action.isResolving,
 				},
 			};
 			break;

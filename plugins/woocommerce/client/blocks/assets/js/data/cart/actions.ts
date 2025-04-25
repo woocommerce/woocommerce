@@ -140,9 +140,9 @@ export function updatingEssentialBillingData( isResolving: boolean ) {
 /**
  * Returns an action object used to track when customer shipping data is being updated.
  */
-export function updatingEssentialShippingData( isResolving: boolean ) {
+export function updatingAddressFieldsForShippingRates( isResolving: boolean ) {
 	return {
-		type: types.UPDATING_ESSENTIAL_SHIPPING_DATA,
+		type: types.UPDATING_ADDRESS_FIELDS_FOR_SHIPPING_RATES,
 		isResolving,
 	};
 }

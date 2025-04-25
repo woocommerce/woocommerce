@@ -5,6 +5,7 @@ import { debounce } from '@woocommerce/base-utils';
 import { CartBillingAddress, CartShippingAddress } from '@woocommerce/types';
 import { select, dispatch } from '@wordpress/data';
 import isShallowEqual from '@wordpress/is-shallow-equal';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -31,6 +32,12 @@ const localState = {
 	},
 };
 
+const addressFieldsForShippingRates: string[] = getSetting(
+	'addressFieldsForShippingRates',
+	[]
+);
+
+const essentialBillingData = getSetting( 'essentialBillingData', [] );
 /**
  * Initializes the customer data cache on the first run.
  */
@@ -134,16 +141,15 @@ const updateCustomerData = (): void => {
 	}
 
 	// Define the fields that are considered "essential" for calculations
-	const BILLING_ESSENTIAL_FIELDS = [ 'country' ];
-	const SHIPPING_ESSENTIAL_FIELDS = [ 'country', 'state', 'postcode' ];
+	const BILLING_ESSENTIAL_FIELDS = [ 'country', ...essentialBillingData ];
 
 	let isEssentialBillingDataChanged =
 		localState.dirtyProps.billingAddress.some( ( field ) =>
 			BILLING_ESSENTIAL_FIELDS.includes( field as string )
 		);
-	let isEssentialShippingDataChanged =
+	let haveAddressFieldsForShippingRatesChanged =
 		localState.dirtyProps.shippingAddress.some( ( field ) =>
-			SHIPPING_ESSENTIAL_FIELDS.includes( field as string )
+			addressFieldsForShippingRates.includes( field as string )
 		);
 
 	dispatch( cartStore )
@@ -158,13 +164,13 @@ const updateCustomerData = (): void => {
 			},
 			true,
 			isEssentialBillingDataChanged,
-			isEssentialShippingDataChanged
+			haveAddressFieldsForShippingRatesChanged
 		)
 		.then( ( response ) => {
 			localState.dirtyProps.billingAddress = [];
 			localState.dirtyProps.shippingAddress = [];
 			isEssentialBillingDataChanged = false;
-			isEssentialShippingDataChanged = false;
+			haveAddressFieldsForShippingRatesChanged = false;
 			localState.doingPush = false;
 		} )
 		.catch( ( response ) => {

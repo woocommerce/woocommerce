@@ -217,7 +217,7 @@ export const isEssentialBillingDataUpdating = ( state: CartState ): boolean => {
 export const isEssentialShippingDataUpdating = (
 	state: CartState
 ): boolean => {
-	return !! state.metaData.updatingEssentialShippingData;
+	return !! state.metaData.updatingAddressFieldsForShippingRates;
 };
 
 /**
