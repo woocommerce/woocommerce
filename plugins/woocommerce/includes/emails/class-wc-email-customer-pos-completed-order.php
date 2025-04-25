@@ -174,6 +174,24 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 				? __( 'Thanks again! If you need any help with your order, please contact us at {store_email}.', 'woocommerce' )
 				: __( 'Thanks for shopping with us.', 'woocommerce' );
 		}
+
+		/**
+		 * Get block editor email template content.
+		 *
+		 * @return string
+		 */
+		public function get_block_editor_email_template_content() {
+			$this->add_pos_customizations();
+			return wc_get_template_html(
+				$this->template_block_content,
+				array(
+					'order'         => $this->object,
+					'sent_to_admin' => false,
+					'plain_text'    => false,
+					'email'         => $this,
+				)
+			);
+		}
 		
 		/**
 		 * Enable order email actions for POS orders.

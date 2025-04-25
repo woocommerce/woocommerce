@@ -260,6 +260,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_block_editor_email_template_content() {
+			$this->add_pos_customizations();
 			return wc_get_template_html(
 				$this->template_block_content,
 				array(
