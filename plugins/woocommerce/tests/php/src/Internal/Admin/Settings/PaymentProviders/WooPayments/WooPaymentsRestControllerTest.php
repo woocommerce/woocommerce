@@ -753,11 +753,10 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$step_id      = WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION;
 		$country_code = 'US';
 		$this->mock_onboarding_details( $country_code );
-		$self_assessment        = array(
+		$self_assessment = array(
 			'some_data' => 'some_value',
 		);
-		$progressive_onboarding = true;
-		$session_data           = array(
+		$session_data    = array(
 			'some_session_data' => 'some_session_value',
 		);
 
@@ -771,7 +770,6 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/kyc_session' );
 		$request->set_param( 'location', $country_code );
 		$request->set_param( 'self_assessment', $self_assessment );
-		$request->set_param( 'progressive', $progressive_onboarding );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.

@@ -4140,9 +4140,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 * @throws \Exception On GET request not mocked.
 	 */
 	public function test_get_onboarding_kyc_session_uses_stored_data() {
-		$step_id     = WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION;
-		$location    = 'US';
-		$progressive = true;
+		$step_id  = WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION;
+		$location = 'US';
 
 		// Arrange the NOX profile.
 		$self_assessment = array(
@@ -4177,7 +4176,6 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		// Arrange the REST API requests.
 		$requests_made     = array();
 		$expected_payload  = array(
-			'progressive'     => $progressive,
 			'self_assessment' => $self_assessment,
 		);
 		$expected_response = array(
@@ -4204,7 +4202,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		// Act.
-		$result = $this->sut->get_onboarding_kyc_session( $location, array(), $progressive );
+		$result = $this->sut->get_onboarding_kyc_session( $location, array() );
 
 		// Assert.
 		self::assertEquals( $expected_response + array( 'locale' => 'en_US' ), $result );
@@ -4221,20 +4219,15 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	public function test_get_onboarding_kyc_session_uses_received_data() {
 		$step_id         = WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION;
 		$location        = 'US';
-		$progressive     = false;
 		$self_assessment = array(
-			'business_type'     => 'individual',
-			'mcc'               => 4567,
-			'annual_revenue'    => 'from_100m_to_1b',
-			'go_live_timeframe' => 'when_the_stars_align',
+			'business_type' => 'individual',
+			'mcc'           => 4567,
 		);
 
 		// Arrange the NOX profile.
 		$stored_self_assessment = array(
-			'business_type'     => 'company',
-			'mcc'               => 1234,
-			'annual_revenue'    => 'from_1m_to_20m',
-			'go_live_timeframe' => 'already_live',
+			'business_type' => 'company',
+			'mcc'           => 1234,
 		);
 		$stored_profile         = array(
 			'onboarding' => array(
@@ -4264,7 +4257,6 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		// Arrange the REST API requests.
 		$requests_made     = array();
 		$expected_payload  = array(
-			'progressive'     => $progressive ? 'true' : 'false',
 			'self_assessment' => $self_assessment,
 		);
 		$expected_response = array(
@@ -4293,8 +4285,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		// Act.
 		$result = $this->sut->get_onboarding_kyc_session(
 			$location,
-			$self_assessment,
-			$progressive
+			$self_assessment
 		);
 
 		// Assert.
