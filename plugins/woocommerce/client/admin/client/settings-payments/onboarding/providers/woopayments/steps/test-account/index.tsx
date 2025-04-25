@@ -16,6 +16,7 @@ import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import WooPaymentsStepHeader from '../../components/header';
 import { useOnboardingContext } from '../../data/onboarding-context';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
+import { disableWooPaymentsTestMode } from '~/settings-payments/utils';
 import './style.scss';
 
 interface StepCheckResponse {
@@ -251,6 +252,9 @@ const TestAccountStep = () => {
 							<Button
 								variant="secondary"
 								onClick={ () => {
+									// Disable test mode.
+									disableWooPaymentsTestMode();
+
 									// This will refresh the steps and move the modal to the next step
 									navigateToNextStep();
 								} }
