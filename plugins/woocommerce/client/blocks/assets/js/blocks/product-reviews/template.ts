@@ -67,7 +67,7 @@ const TEMPLATE: InnerBlockTemplate[] = [
 								},
 								[
 									[
-										'core/comment-date',
+										'woocommerce/product-review-date',
 										{
 											fontSize: 'small',
 										},
