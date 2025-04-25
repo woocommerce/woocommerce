@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
-use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 
 /**
  * ProductButton class.
@@ -88,7 +88,7 @@ class ProductButton extends AbstractBlock {
 
 		$is_descendent_of_add_to_cart_form = isset( $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] ) ? $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] : false;
 
-		if ( $is_descendent_of_add_to_cart_form && ProductType::SIMPLE === $product->get_type() && ( ! $product->is_in_stock() || ! $product->is_purchasable() ) ) {
+		if ( $is_descendent_of_add_to_cart_form && Utils::is_not_purchasable_simple_product( $product ) ) {
 			$product = $previous_product;
 
 			return '';

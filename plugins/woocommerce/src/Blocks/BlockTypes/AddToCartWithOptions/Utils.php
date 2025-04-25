@@ -1,7 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\Blocks\BlockTypes\AddtoCartWithOptions;
+namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
+
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * Utility methods used for the Add to Cart with Options block.
@@ -119,5 +121,15 @@ class Utils {
 		}
 
 		return $product instanceof \WC_Product ? $product : null;
+	}
+
+	/**
+	 * Check if a product is a simple product that is not purchasable or not in stock.
+	 *
+	 * @param \WC_Product $product The product to check.
+	 * @return bool True if the product is a simple product that is not purchasable or not in stock.
+	 */
+	public static function is_not_purchasable_simple_product( $product ) {
+		return ProductType::SIMPLE === $product->get_type() && ( ! $product->is_in_stock() || ! $product->is_purchasable() );
 	}
 }
