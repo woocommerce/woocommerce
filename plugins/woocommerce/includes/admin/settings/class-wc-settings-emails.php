@@ -669,8 +669,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			height: 40px;
 			width: 100%;
 			">
-				<h3> <?php echo esc_html__( 'Loading...', 'woocommerce' ); ?>  </h3>
+				<h3> <?php esc_html_e( 'Loading&hellip;', 'woocommerce' ); ?>  </h3>
 			</div>
+		</div>
 		<div>
 			<p><?php echo wp_kses_post( wpautop( wptexturize( $desc_help_text ) ) ); ?></p>
 		</div>
