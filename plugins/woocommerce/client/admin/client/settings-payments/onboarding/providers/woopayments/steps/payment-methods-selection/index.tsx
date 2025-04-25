@@ -4,7 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Icon } from '@wordpress/components';
 import { RecommendedPaymentMethod } from '@woocommerce/data';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { close } from '@wordpress/icons';
 
@@ -28,19 +28,83 @@ export default function PaymentMethodsSelection() {
 	const [ paymentMethodsState, setPaymentMethodsState ] = useState< {
 		[ key: string ]: boolean;
 	} >( {} );
+	// Store the calculated initial visibility status in state to trigger re-render
+	const [ initialVisibilityMap, setInitialVisibilityMap ] = useState< Record<
+		string,
+		boolean
+	> | null >( null );
 
 	const contextPaymentMethodsState = currentStep?.context?.pms_state;
 	const contextPaymentMethods = currentStep?.context?.recommended_pms;
 
+	// Memoize the combined recommended payment methods
+	const recommendedPaymentMethods = useMemo( () => {
+		return contextPaymentMethods
+			? combineRequestMethods( contextPaymentMethods )
+			: [];
+	}, [ contextPaymentMethods ] );
+
+	// Update the local payment methods state when the context changes
 	useEffect( () => {
 		if ( contextPaymentMethodsState ) {
 			setPaymentMethodsState( contextPaymentMethodsState );
 		}
 	}, [ contextPaymentMethodsState ] );
 
-	const recommendedPaymentMethods = contextPaymentMethods
-		? combineRequestMethods( contextPaymentMethods )
-		: [];
+	// Combine state to match combined methods list
+	const combinedState = useMemo(
+		() => combinePaymentMethodsState( paymentMethodsState ),
+		[ paymentMethodsState ]
+	);
+
+	// Calculate and store initial visibility *once* when data is ready
+	useEffect( () => {
+		// Only proceed if the map hasn't been populated yet
+		if ( initialVisibilityMap !== null ) {
+			return;
+		}
+
+		// Ensure both methods and state are sufficiently loaded
+		if (
+			recommendedPaymentMethods.length > 0 &&
+			Object.keys( combinedState ).length > 0 // Use combinedState length
+		) {
+			// Check if all necessary state keys are present for the current methods in the *combined* state
+			const allKeysPresent = recommendedPaymentMethods.every( ( m ) => {
+				const isPresent = combinedState[ m.id ] !== undefined; // Check in combinedState
+				return isPresent;
+			} );
+
+			if ( allKeysPresent ) {
+				const calculatedMap: Record< string, boolean > = {};
+				recommendedPaymentMethods.forEach( ( method ) => {
+					calculatedMap[ method.id ] =
+						shouldRenderPaymentMethodInMainList(
+							method,
+							combinedState[ method.id ] // Use combinedState value
+						);
+				} );
+				// Set the state with the calculated initial visibility map
+				setInitialVisibilityMap( calculatedMap );
+			}
+		}
+		// Depend on methods and the *combined* state
+	}, [ recommendedPaymentMethods, combinedState ] );
+
+	// Calculate hidden count based on the stored initial visibility (Memoized)
+	const hiddenCount = useMemo( () => {
+		// Use the state map now
+		if ( ! initialVisibilityMap || isExpanded ) {
+			return 0;
+		}
+
+		// Filter based on the stored initial visibility status from state
+		return recommendedPaymentMethods.filter(
+			// Count if initial visibility was false
+			( method ) => ! ( initialVisibilityMap[ method.id ] ?? false )
+		).length;
+		// Depend on the state map now
+	}, [ recommendedPaymentMethods, isExpanded, initialVisibilityMap ] );
 
 	return (
 		<div className="settings-payments-onboarding-modal__step--content">
@@ -100,13 +164,22 @@ export default function PaymentMethodsSelection() {
 												} );
 											}
 										} }
+										// Pass down the calculated initial visibility for this specific method from state
+										initialVisibilityStatus={
+											initialVisibilityMap
+												? initialVisibilityMap[
+														method.id
+												  ] ?? null
+												: null
+										}
 										isExpanded={ isExpanded }
 										key={ method.id }
 									/>
 								)
 							) }
 						</div>
-						{ ! isExpanded && (
+						{ /* Show button only if not expanded and there are initially hidden items */ }
+						{ ! isExpanded && hiddenCount > 0 && (
 							<Button
 								className="settings-payments-methods__show-more"
 								onClick={ () => {
@@ -116,15 +189,9 @@ export default function PaymentMethodsSelection() {
 								aria-expanded={ isExpanded }
 							>
 								{ sprintf(
-									/* translators: %s: number of disabled payment methods */
+									/* translators: %s: number of hidden payment methods */
 									__( 'Show more (%s)', 'woocommerce' ),
-									recommendedPaymentMethods?.filter(
-										( method ) =>
-											! shouldRenderPaymentMethodInMainList(
-												method,
-												paymentMethodsState[ method.id ]
-											)
-									).length ?? 0
+									hiddenCount
 								) }
 							</Button>
 						) }

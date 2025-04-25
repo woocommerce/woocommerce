@@ -4,6 +4,7 @@
 import { decodeEntities } from '@wordpress/html-entities';
 import { type RecommendedPaymentMethod } from '@woocommerce/data';
 import { ToggleControl } from '@wordpress/components';
+import { useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -28,6 +29,11 @@ type PaymentMethodListItemProps = {
 	 * Indicates whether the payment methods list is currently expanded.
 	 */
 	isExpanded: boolean;
+	/**
+	 * The pre-calculated initial visibility status passed from the parent.
+	 * If undefined, the component calculates its own initial visibility.
+	 */
+	initialVisibilityStatus?: boolean | null;
 };
 
 /**
@@ -39,16 +45,35 @@ export const PaymentMethodListItem = ( {
 	paymentMethodsState,
 	setPaymentMethodsState,
 	isExpanded,
+	initialVisibilityStatus,
 	...props
 }: PaymentMethodListItemProps ) => {
-	// Rendering logic
-	// If the category is primary, render the method regardless of the state.
-	// If the category is secondary, render the method if the list is expanded or the method is enabled.
-	const shouldRender =
-		shouldRenderPaymentMethodInMainList(
-			method,
-			paymentMethodsState[ method.id ]
-		) || isExpanded;
+	// Internal ref for fallback mechanism when prop is not provided
+	const shouldRenderInMainListRef = useRef< boolean | null >( null );
+
+	// Fallback: Calculate initial visibility internally if prop is not provided
+	if ( initialVisibilityStatus === undefined ) {
+		// Only initialize the ref once the state for this method is available.
+		if (
+			shouldRenderInMainListRef.current === null &&
+			paymentMethodsState[ method.id ] !== undefined
+		) {
+			shouldRenderInMainListRef.current =
+				shouldRenderPaymentMethodInMainList(
+					method,
+					paymentMethodsState[ method.id ]
+				);
+		}
+	}
+
+	// Determine final rendering decision:
+	// Prioritize the prop if provided, otherwise use the internal ref state.
+	const baseVisibility =
+		initialVisibilityStatus !== undefined
+			? initialVisibilityStatus ?? false
+			: shouldRenderInMainListRef.current ?? false;
+
+	const shouldRender = isExpanded || baseVisibility;
 
 	if ( ! shouldRender ) {
 		return null;
