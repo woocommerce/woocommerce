@@ -164,31 +164,16 @@ const BusinessDetails: React.FC = () => {
 			{ selectedCountry &&
 				selectedBusinessType &&
 				selectedBusinessStructure && (
-					<span data-testid={ 'mcc-select' }>
-						<OnboardingGroupedSelectField
-							name="mcc"
-							options={ mccsFlatList }
-							onChange={ updateDataOnChange }
-							searchable
-						/>
-					</span>
-				) }
-
-			{ selectedCountry &&
-				selectedBusinessType &&
-				selectedBusinessStructure &&
-				selectedMcc && (
 					<>
-						<OnboardingSelectField
-							name="annual_revenue"
-							options={ annualRevenues }
-							onChange={ updateDataOnChange }
-						/>
-						<OnboardingSelectField
-							name="go_live_timeframe"
-							options={ goLiveTimeframes }
-							onChange={ updateDataOnChange }
-						/>
+						<span data-testid={ 'mcc-select' }>
+							<OnboardingGroupedSelectField
+								name="mcc"
+								options={ mccsFlatList }
+								onChange={ updateDataOnChange }
+								searchable
+							/>
+						</span>
+
 						<span className={ 'woopayments-onboarding__tos' }>
 							{ strings.tos }
 						</span>

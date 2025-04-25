@@ -208,54 +208,6 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		);
 		register_rest_route(
 			$this->route_namespace,
-			'/' . $this->rest_base . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/check/po_eligible',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_business_verification_check_po_eligible' ),
-					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
-					'args'                => array(
-						'location'        => array(
-							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
-							'type'              => 'string',
-							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
-							'required'          => false,
-							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
-						),
-						'self_assessment' => array(
-							'description' => __( 'Self assessment data for the business and store. Used only if there is no stored self assessment data.', 'woocommerce' ),
-							'type'        => 'object',
-							'required'    => false,
-							'properties'  => array(
-								'country'           => array(
-									'type'        => 'string',
-									'description' => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
-								),
-								'business_type'     => array(
-									'type'        => 'string',
-									'description' => esc_html__( 'The business type ID as received in the fields context.', 'woocommerce' ),
-								),
-								'mcc'               => array(
-									'type'        => array( 'integer', 'string' ),
-									'description' => esc_html__( 'The merchant category code. It can be either a numeric MCC code or an ID as received in the fields context.', 'woocommerce' ),
-								),
-								'annual_revenue'    => array(
-									'type'        => 'string',
-									'description' => esc_html__( 'The annual revenue range ID as received in the fields context.', 'woocommerce' ),
-								),
-								'go_live_timeframe' => array(
-									'type'        => 'string',
-									'description' => esc_html__( 'The go live timeframe ID as received in the fields context.', 'woocommerce' ),
-								),
-							),
-						),
-					),
-				),
-			),
-			$override
-		);
-		register_rest_route(
-			$this->route_namespace,
 			'/' . $this->rest_base . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/kyc_session',
 			array(
 				array(
@@ -263,20 +215,14 @@ class WooPaymentsRestController extends RestApiControllerBase {
 					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_business_verification_kyc_session_init' ),
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
-						'location'    => array(
+						'location' => array(
 							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
 							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
 						),
-						'progressive' => array(
-							'description'       => __( 'Whether the session is for progressive onboarding.', 'woocommerce' ),
-							'type'              => 'boolean',
-							'default'           => false,
-							'sanitize_callback' => 'wc_string_to_bool',
-						),
-						'source'      => array(
+						'source'   => array(
 							'description'       => __( 'The upmost entry point from where the merchant entered the onboarding flow.', 'woocommerce' ),
 							'type'              => 'string',
 							'required'          => false,
@@ -556,39 +502,6 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Handle the onboarding business verification step check PO eligible action.
-	 *
-	 * @param WP_REST_Request $request The request object.
-	 *
-	 * @return WP_Error|WP_REST_Response The response.
-	 */
-	protected function handle_onboarding_business_verification_check_po_eligible( WP_REST_Request $request ) {
-		// If we receive self assessment data with the request, we will use it.
-		$self_assessment = ! empty( $request->get_param( 'self_assessment' ) ) ? wc_clean( wp_unslash( $request->get_param( 'self_assessment' ) ) ) : array();
-
-		$location = $request->get_param( 'location' );
-		if ( empty( $location ) ) {
-			// Fall back to the providers country if no location is provided.
-			$location = $this->payments->get_country();
-		}
-
-		try {
-			$result = $this->woopayments->get_onboarding_kyc_po_eligible( $location, $self_assessment );
-		} catch ( Exception $e ) {
-			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
-		}
-
-		return rest_ensure_response(
-			array_merge(
-				array(
-					'success' => true,
-				),
-				$result
-			)
-		);
-	}
-
-	/**
 	 * Handle the onboarding business verification step KYC session initialization action.
 	 *
 	 * @param WP_REST_Request $request The request object.
@@ -596,8 +509,6 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 * @return WP_Error|WP_REST_Response The response.
 	 */
 	protected function handle_onboarding_business_verification_kyc_session_init( WP_REST_Request $request ) {
-		$progressive = (bool) $request->get_param( 'progressive' );
-
 		// If we receive self assessment data with the request, we will use it.
 		$self_assessment = ! empty( $request->get_param( 'self_assessment' ) ) ? wc_clean( wp_unslash( $request->get_param( 'self_assessment' ) ) ) : array();
 
@@ -608,7 +519,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		}
 
 		try {
-			$account_session = $this->woopayments->get_onboarding_kyc_session( $location, $self_assessment, $progressive );
+			$account_session = $this->woopayments->get_onboarding_kyc_session( $location, $self_assessment );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
 		}

@@ -12,7 +12,7 @@ import { useOnboardingContext } from '../../../data/onboarding-context';
 import StripeSpinner from '../../../components/stripe-spinner';
 import BannerNotice from '../../../components/banner-notice';
 import { useBusinessVerificationContext } from '../data/business-verification-context';
-import { finalizeOnboarding, isPoEligible } from '../utils/actions';
+import { finalizeOnboarding } from '../utils/actions';
 import { EmbeddedAccountOnboarding } from '../components/embedded';
 
 interface Props {
@@ -31,20 +31,6 @@ const EmbeddedKyc: React.FC< Props > = ( {
 	const [ loading, setLoading ] = useState( true );
 	const [ loadError, setLoadError ] = useState< LoadError | null >( null );
 	const fallbackUrl = currentStep?.actions?.kyc_fallback?.href ?? '';
-
-	// Fetch whether the account is eligible for progressive onboarding
-	useEffect( () => {
-		const checkEligibility = async () => {
-			const eligibility = await isPoEligible( data );
-			setIsEligible( eligibility );
-		};
-
-		if ( ! continueKyc ) {
-			checkEligibility();
-		} else {
-			setIsEligible( false );
-		}
-	}, [ continueKyc, data ] );
 
 	const handleStepChange = () => {
 		// To-Do: Track step change.
@@ -126,7 +112,6 @@ const EmbeddedKyc: React.FC< Props > = ( {
 						onStepChange={ handleStepChange }
 						onLoaderStart={ () => setLoading( false ) }
 						onLoadError={ handleLoadError }
-						isPoEligible={ isEligible }
 						onboardingData={ data }
 						collectPayoutRequirements={ collectPayoutRequirements }
 					/>

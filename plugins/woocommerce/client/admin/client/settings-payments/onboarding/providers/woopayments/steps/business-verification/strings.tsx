@@ -67,14 +67,6 @@ export default {
 			'What type of goods or services does your business sell? ',
 			'woocommerce'
 		),
-		annual_revenue: __(
-			'What is your estimated annual Ecommerce revenue (USD)?',
-			'woocommerce'
-		),
-		go_live_timeframe: __(
-			'What is the estimated timeline for taking your store live?',
-			'woocommerce'
-		),
 	},
 	errors: {
 		generic: __( 'Please provide a response', 'woocommerce' ),
