@@ -360,7 +360,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => fn( $request ) => $this->run( $request, 'test_mode_disable' ),
+					'callback'            => fn( $request ) => $this->run( $request, 'test_mode_account_disable' ),
 					'validation_callback' => 'rest_validate_request_arg',
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
@@ -704,9 +704,9 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 *
 	 * @return WP_Error|WP_REST_Response The response.
 	 */
-	protected function test_mode_disable( WP_REST_Request $request ) {
+	protected function test_mode_account_disable( WP_REST_Request $request ) {
 		try {
-			$this->woopayments->test_mode_disable( $request->get_param( 'from' ) ?? '', $request->get_param( 'source' ) ?? '' );
+			$this->woopayments->test_mode_account_disable( $request->get_param( 'from' ) ?? '', $request->get_param( 'source' ) ?? '' );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
