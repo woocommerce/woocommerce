@@ -41,8 +41,7 @@ class ExportWCTaxRates implements StepExporter, HasAlias {
 		$table = $wpdb->prefix . $table;
 		return array_map(
 			fn( $record ) => new RunSql( Util::array_to_insert_sql( $record, $table, 'replace into' ) ),
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$wpdb->get_results( "SELECT * FROM {$table}", ARRAY_A )
+			$wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i', $table ), ARRAY_A ),
 		);
 	}
 
