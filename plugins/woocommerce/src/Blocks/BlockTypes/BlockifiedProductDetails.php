@@ -41,7 +41,7 @@ class BlockifiedProductDetails extends AbstractBlock {
 	/**
 	 * Hide empty accordion items.
 	 *
-	 * @param string $content Block content.
+	 * @param string   $content Block content.
 	 * @param WP_Block $block Block instance.
 	 *
 	 * @return string Rendered block output.
@@ -59,7 +59,11 @@ class BlockifiedProductDetails extends AbstractBlock {
 				$rendered_content_block = ( new WP_Block( $content_block, $block->context ) )->render();
 				$p                      = new WP_HTML_Tag_Processor( $rendered_content_block );
 
-				return $p->next_tag( 'img' ) || $p->next_tag( 'video' ) || $p->next_tag( 'iframe' ) || ! empty( wp_strip_all_tags( $rendered_content_block, true ) );
+				return $p->next_tag( 'img' ) ||
+					$p->next_tag( 'iframe' ) ||
+					$p->next_tag( 'video' ) ||
+					$p->next_tag( 'meter' ) ||
+					! empty( wp_strip_all_tags( $rendered_content_block, true ) );
 			},
 			$accordion_items
 		);
@@ -70,6 +74,7 @@ class BlockifiedProductDetails extends AbstractBlock {
 		while ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-accordion-item' ) ) ) {
 			if ( ! $accordion_items_visibility[ $counter ] ) {
 				$p->set_attribute( 'style', 'display:none;' );
+				$p->set_attribute( 'hidden', true );
 			}
 			++$counter;
 		}
