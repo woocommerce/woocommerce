@@ -107,8 +107,6 @@ export const isPreKycComplete = ( data: OnboardingFields ): boolean => {
 	const requiredFields: ( keyof OnboardingFields )[] = [
 		'business_type',
 		'country',
-		'go_live_timeframe',
-		'annual_revenue',
 		'mcc',
 	];
 

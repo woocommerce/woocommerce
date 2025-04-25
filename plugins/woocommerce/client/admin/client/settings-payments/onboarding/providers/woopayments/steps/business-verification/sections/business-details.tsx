@@ -65,20 +65,7 @@ const BusinessDetails: React.FC = () => {
 		);
 	const selectedMcc = mccsFlatList.find( ( mcc ) => mcc.key === data.mcc );
 
-	const annualRevenues = Object.entries( strings.annualRevenues ).map(
-		( [ key, name ] ) => ( {
-			key,
-			name,
-		} )
-	);
-	const goLiveTimeframes = Object.entries( strings.goLiveTimeframes ).map(
-		( [ key, name ] ) => ( {
-			key,
-			name,
-		} )
-	);
-
-	const updateBusinessVerificaitonData = (
+	const updateBusinessVerificationData = (
 		selfAssessmentData: OnboardingFields
 	) => {
 		const href = currentStep?.actions?.save?.href;
@@ -107,7 +94,7 @@ const BusinessDetails: React.FC = () => {
 			newData = { ...newData, business_type: undefined };
 		}
 		setData( newData );
-		updateBusinessVerificaitonData( newData );
+		updateBusinessVerificationData( newData );
 	};
 
 	const updateDataOnChange = (
@@ -121,7 +108,7 @@ const BusinessDetails: React.FC = () => {
 			[ name ]: selectedItem?.key,
 		};
 
-		updateBusinessVerificaitonData( newData );
+		updateBusinessVerificationData( newData );
 	};
 
 	return (
