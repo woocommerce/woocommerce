@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Filters: review usage of :where selector, remove them for form elements of checkbox list.
