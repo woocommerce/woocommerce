@@ -7,6 +7,7 @@ import clsx from 'clsx';
 import {
 	PaymentProvider,
 	paymentSettingsStore,
+	woopaymentsOnboardingStore,
 	WC_ADMIN_NAMESPACE,
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
@@ -64,7 +65,11 @@ export const PaymentGateways = ( {
 	setBusinessRegistrationCountry,
 	setIsOnboardingModalOpen,
 }: PaymentGatewaysProps ) => {
-	const { invalidateResolution } = useDispatch( paymentSettingsStore );
+	const { invalidateResolution: invalidateMainStore } =
+		useDispatch( paymentSettingsStore );
+	const { invalidateResolution: invalidateWooPaymentsOnboardingStore } = useDispatch(
+		woopaymentsOnboardingStore
+	);
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
 	const storeCountryCode = (
 		window.wcSettings?.admin?.preloadSettings?.general
@@ -142,9 +147,13 @@ export const PaymentGateways = ( {
 
 								// Update UI.
 								setBusinessRegistrationCountry( value );
-								invalidateResolution( 'getPaymentProviders', [
+								invalidateMainStore( 'getPaymentProviders', [
 									value,
 								] );
+								invalidateWooPaymentsOnboardingStore(
+									'getOnboardingData',
+									[]
+								);
 							} );
 						} }
 					/>
