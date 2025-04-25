@@ -677,7 +677,7 @@ class WooPaymentsService {
 	}
 
 	/**
-	 * Disable test mode account during the switch-to-live onboarding flow.
+	 * Disable test account during the switch-to-live onboarding flow.
 	 *
 	 * @param string $from   Optional. Where in the UI the request is coming from.
 	 *                       If not provided, it will identify the origin as the WC Admin Payments settings.
@@ -687,7 +687,7 @@ class WooPaymentsService {
 	 * @return array The response from the WooPayments API.
 	 * @throws Exception If the KYC session could not be finished or there was an error.
 	 */
-	public function test_mode_account_disable( string $from = '', string $source = '' ): array {
+	public function disable_test_account( string $from = '', string $source = '' ): array {
 		// Call the WooPayments API to reset onboarding.
 		$response = $this->proxy->call_static(
 			Utils::class,

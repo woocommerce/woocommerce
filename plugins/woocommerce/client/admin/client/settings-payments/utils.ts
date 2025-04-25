@@ -129,12 +129,12 @@ export const resetWooPaymentsAccount = async () => {
 };
 
 /**
- * Disables the test mode action.
+ * Disables the WooPayments test account.
  */
 export const disableWooPaymentsTestMode = async () => {
 	try {
 		const response = await apiFetch( {
-			url: '/wp-json/wc-admin/settings/payments/woopayments/onboarding/test_mode/disable',
+			url: '/wp-json/wc-admin/settings/payments/woopayments/onboarding/test_account/disable',
 			method: 'POST',
 		} );
 		return response;
