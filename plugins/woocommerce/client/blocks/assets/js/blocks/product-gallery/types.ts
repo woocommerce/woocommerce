@@ -19,11 +19,6 @@ export interface ImageDataItem {
 	isActive?: boolean;
 }
 
-interface ImageDataObject {
-	images: Record< number, ImageDataItem >;
-	image_ids: number[];
-}
-
 export interface ProductGalleryContext {
 	selectedImageId: number;
 	isDialogOpen: boolean;
@@ -33,8 +28,7 @@ export interface ProductGalleryContext {
 	touchStartX: number;
 	touchCurrentX: number;
 	isDragging: boolean;
-	userHasInteracted: boolean;
-	imageData: ImageDataObject;
+	imageData: ImageDataItem[];
 	image: ImageDataItem;
 	thumbnailsOverflow: {
 		top: boolean;
