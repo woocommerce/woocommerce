@@ -9,9 +9,9 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
  */
 class CatalogSorting extends \WP_UnitTestCase {
 	/**
-	 * Tests that the correct content is rendered for each product type.
+	 * Tests that the Catalog Sorting block has the correct font size based on the default style attribute.
 	 */
-	public function test_catalog_sorting_render() {
+	public function test_catalog_sorting_has_small_font_size() {
 		$temp_product = \WC_Helper_Product::create_simple_product();
 		$temp_product->set_name( 'Test Product' );
 		$temp_product->save();
@@ -23,7 +23,6 @@ class CatalogSorting extends \WP_UnitTestCase {
 		wc_set_loop_prop( 'current_page', 1 );
 
 		$markup = do_blocks( '<!-- wp:woocommerce/catalog-sorting /-->' );
-		error_log( $markup );
-		$this->assertStringContainsString( 'has-small-font-size', $markup, 'The Catalog Sorting block is rendered.' );
+		$this->assertStringContainsString( 'has-small-font-size', $markup, 'The Catalog Sorting block has the correct font size.' );
 	}
 }
