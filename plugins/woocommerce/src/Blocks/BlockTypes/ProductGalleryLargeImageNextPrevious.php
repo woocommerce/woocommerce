@@ -59,7 +59,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 			return '';
 		}
 
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array("align") );
 		$vertical_alignment = StyleAttributesUtils::get_align_class_and_style( $attributes );
 
 		ob_start();
