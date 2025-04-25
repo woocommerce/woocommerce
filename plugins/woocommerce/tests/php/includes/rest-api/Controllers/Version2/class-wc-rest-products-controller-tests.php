@@ -1,5 +1,7 @@
 <?php
 
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+
 /**
  * class WC_REST_Products_Controller_Tests.
  * Product Controller tests for V2 REST API.
@@ -315,5 +317,110 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 'Сирене', $data['attributes'][0]['name'] );
+	}
+
+	/**
+	 * Data provider for test_search_by_sku_or_name.
+	 *
+	 * @return array[] Array of query string arguments and expected obtained SKUs pairs.
+	 */
+	public function data_provider_for_test_search_by_sku_or_name() {
+		return array(
+			// search_sku_or_name alone.
+
+			array(
+				array( 'search_sku_or_name' => 'shi blu' ),
+				array( 'ebs', 'cbs', 'Elegant blue shirt', 'Casual blue shirt' ),
+			),
+
+			// search_sku_or_name supersedes search, search_sku and sku.
+
+			array(
+				array(
+					'search_sku_or_name' => 'shi blu',
+					'search'             => 'red',
+				),
+				array( 'ebs', 'cbs', 'Elegant blue shirt', 'Casual blue shirt' ),
+			),
+			array(
+				array(
+					'search_sku_or_name' => 'shi blu',
+					'search_sku'         => 'the',
+				),
+				array( 'ebs', 'cbs', 'Elegant blue shirt', 'Casual blue shirt' ),
+			),
+			array(
+				array(
+					'search_sku_or_name' => 'shi blu',
+					'sku'                => 'thesku1',
+				),
+				array( 'ebs', 'cbs', 'Elegant blue shirt', 'Casual blue shirt' ),
+			),
+
+			// search, search_sku and sku by themselves still work.
+
+			array(
+				array( 'search' => 'red' ),
+				array( 'rs' ),
+			),
+			array(
+				array( 'search_sku' => 'the' ),
+				array( 'thesku1', 'thesku2' ),
+			),
+			array(
+				array(
+					'search_sku' => 'the',
+					'sku'        => 'foo',
+				),
+				array( 'thesku1', 'thesku2' ),
+			),
+			array(
+				array( 'sku' => 'thesku1' ),
+				array( 'thesku1' ),
+			),
+		);
+	}
+
+	/**
+	 * @testdox Tests for the search_by_sku_or_name query string argument.
+	 *
+	 * @dataProvider data_provider_for_test_search_by_sku_or_name
+	 *
+	 * @param array $query_string_args Query string arguments for the products query.
+	 * @param array $expected_obtained_data Expected list of SKUs obtained.
+	 */
+	public function test_search_by_sku_or_name( array $query_string_args, array $expected_obtained_data ) {
+		$skus_and_names = array(
+			'ebs'                => 'Elegant blue shirt',
+			'cbs'                => 'Casual blue shirt',
+			'rs'                 => 'Red shirt',
+			'bm'                 => 'Blue mug',
+			'Elegant blue shirt' => 'Foobar 1',
+			'Casual blue shirt'  => 'Foobar 2',
+			'Red shirt'          => 'Foobar 3',
+			'Blue mug'           => 'Foobar 4',
+			'thesku1'            => 'Foobar 5',
+			'thesku2'            => 'Foobar 6',
+		);
+
+		foreach ( $skus_and_names as $sku => $name ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_name( $name );
+			$product->set_sku( $sku );
+			$product->save();
+		}
+
+		$query_string_args['_fields'] = 'sku';
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params( $query_string_args );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$actual_data = $response->get_data();
+		$actual_data = ArrayUtil::select( $actual_data, 'sku' );
+
+		$this->assertEqualsCanonicalizing( $expected_obtained_data, $actual_data );
 	}
 }
