@@ -1,0 +1,5 @@
+Significance: patch
+Type: enhancement
+Comment: Add utility method to check if a simple product is not purchasable or not in stock in AddToCartWithOptions Block.
+
+
