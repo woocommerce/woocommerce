@@ -50,6 +50,7 @@ const Blueprint = () => {
 	);
 
 	const exportBlueprint = async ( _steps ) => {
+		setExportError( null );
 		setExportEnabled( false );
 
 		const linkContainer = document.getElementById(
@@ -65,6 +66,7 @@ const Blueprint = () => {
 					steps: _steps,
 				},
 			} );
+
 			const link = document.createElement( 'a' );
 			let url = null;
 
@@ -94,14 +96,41 @@ const Blueprint = () => {
 				settings_exported: _steps.settings,
 			} );
 		} catch ( e ) {
-			setExportError( e.message );
-
 			recordEvent( 'blueprint_export_error', {
 				error_message: e.message || 'unknown',
 			} );
-		}
 
-		setExportEnabled( true );
+			setExportError( e.message );
+
+			switch ( true ) {
+				case e instanceof Error:
+					setExportError( e.message );
+					break;
+				case typeof e === 'string':
+					setExportError( e );
+					break;
+				case e.errors &&
+					e.errors.wooblueprint_insufficient_permissions &&
+					e.errors.wooblueprint_insufficient_permissions.length > 0:
+					setExportError(
+						__(
+							'Sorry, you are not allowed to export the selected settings.',
+							'woocommerce'
+						)
+					);
+					break;
+				default:
+					setExportError(
+						__(
+							'An unknown error occurred while exporting the settings.',
+							'woocommerce'
+						)
+					);
+					break;
+			}
+		} finally {
+			setExportEnabled( true );
+		}
 	};
 
 	// Handle checkbox change
