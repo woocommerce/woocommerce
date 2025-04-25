@@ -18,9 +18,19 @@ import {
 } from '~/settings-payments/components/sortable';
 import './bank-account-list.scss';
 
+/**
+ * Generates a random string ID for new bank accounts.
+ *
+ * @return {string} A unique identifier string.
+ */
 function generateId() {
 	return Math.random().toString( 36 ).substring( 2, 10 );
 }
+
+/**
+ * Props for BankAccountsList component.
+ *
+ */
 interface Props {
 	initialAccounts: BankAccount[];
 	onChange: ( accounts: BankAccount[] ) => void;
@@ -28,6 +38,13 @@ interface Props {
 	defaultCountry: string;
 }
 
+/**
+ * BankAccountsList component renders a sortable list of bank accounts,
+ * allowing users to add, edit, reorder, and delete accounts.
+ *
+ * @param {Props} props Component props.
+ * @return {Element} The rendered component.
+ */
 export const BankAccountsList = ( {
 	initialAccounts,
 	onChange,
@@ -41,11 +58,21 @@ export const BankAccountsList = ( {
 	const [ accountToDelete, setAccountToDelete ] =
 		useState< BankAccount | null >( null );
 
+	/**
+	 * Opens the bank account modal for adding or editing an account.
+	 *
+	 * @param {BankAccount | null} account The account to edit, or null to add a new one.
+	 */
 	const openModal = ( account: BankAccount | null = null ) => {
 		setSelectedAccount( account );
 		setIsModalOpen( true );
 	};
 
+	/**
+	 * Handles saving of a bank account, either updating an existing one or adding a new one.
+	 *
+	 * @param {BankAccount} updated The updated or new bank account.
+	 */
 	const handleSave = ( updated: BankAccount ) => {
 		const newAccounts = accounts.some( ( acc ) => acc.id === updated.id )
 			? accounts.map( ( acc ) =>
@@ -57,6 +84,9 @@ export const BankAccountsList = ( {
 		setIsModalOpen( false );
 	};
 
+	/**
+	 * Confirms and deletes the selected bank account.
+	 */
 	const confirmDelete = () => {
 		if ( ! accountToDelete ) return;
 		const newAccounts = accounts.filter(
@@ -67,6 +97,11 @@ export const BankAccountsList = ( {
 		setAccountToDelete( null );
 	};
 
+	/**
+	 * Updates the ordering of bank accounts after drag-and-drop sorting.
+	 *
+	 * @param {BankAccount[]} newAccounts The reordered list of bank accounts.
+	 */
 	const handleUpdateOrdering = ( newAccounts: BankAccount[] ) => {
 		setAccounts( newAccounts );
 		updateOrdering( newAccounts );

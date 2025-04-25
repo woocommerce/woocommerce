@@ -13,6 +13,14 @@ import { getDefaultRoutingField } from './utils';
 import { validateRequiredField, validateNumericField } from './validation';
 import './bank-account-modal.scss';
 
+/**
+ * Props for the BankAccountModal component.
+ *
+ * @property {BankAccount | null}             account        - The bank account to edit, or null to add a new account.
+ * @property {() => void}                     onClose        - Callback invoked when the modal should be closed.
+ * @property {(account: BankAccount) => void} onSave         - Callback invoked when the bank account is saved.
+ * @property {string}                         defaultCountry - The default country used to determine the routing field.
+ */
 interface Props {
 	account: BankAccount | null;
 	onClose: () => void;
@@ -20,6 +28,13 @@ interface Props {
 	defaultCountry: string;
 }
 
+/**
+ * BankAccountModal component renders a modal dialog for adding or editing a bank account.
+ * It manages form state, validation, and invokes callbacks to save or close the modal.
+ *
+ * @param {Props} props - Component props.
+ * @return {Element} The rendered modal component.
+ */
 export const BankAccountModal = ( {
 	account,
 	onClose,
@@ -46,6 +61,11 @@ export const BankAccountModal = ( {
 		Partial< Record< keyof BankAccount, string > >
 	>( {} );
 
+	/**
+	 * Validates the form fields and sets error messages accordingly.
+	 *
+	 * @return {boolean} True if the form is valid, false otherwise.
+	 */
 	const validate = () => {
 		const newErrors: Partial< Record< keyof BankAccount, string > > = {};
 
@@ -89,6 +109,12 @@ export const BankAccountModal = ( {
 		}
 	}, [ account, defaultCountry ] );
 
+	/**
+	 * Updates a specific field in the form data state.
+	 *
+	 * @param {keyof BankAccount} field - The field name to update.
+	 * @param {string}            value - The new value for the field.
+	 */
 	const updateField = ( field: keyof BankAccount, value: string ) => {
 		setFormData( ( prev ) => ( { ...prev, [ field ]: value } ) );
 	};
