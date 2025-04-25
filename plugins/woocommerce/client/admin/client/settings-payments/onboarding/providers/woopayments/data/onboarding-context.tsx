@@ -56,12 +56,11 @@ export const OnboardingProvider: React.FC< {
 		WooPaymentsProviderOnboardingStep[]
 	>( [] );
 
-	const { invalidateResolutionForStoreSelector } = useDispatch(
-		woopaymentsOnboardingStore
-	);
+	const {
+		invalidateResolutionForStoreSelector: invalidateWooPaymentsOnboarding,
+	} = useDispatch( woopaymentsOnboardingStore );
 
-	// Make UI refresh when plugin is installed.
-	const { invalidateResolutionForStoreSelector: invalidatePaymentGateways } =
+	const { invalidateResolutionForStoreSelector: invalidatePaymentProviders } =
 		useDispatch( paymentSettingsStore );
 
 	// Initial data fetch from store
@@ -230,6 +229,12 @@ export const OnboardingProvider: React.FC< {
 		);
 	}, [ stateStoreSteps, areStepDependenciesCompleted ] );
 
+	const resetLocalState = () => {
+		setStateStoreSteps( [] );
+		setIsStateStoreLoading( true );
+		setAllSteps( [] );
+	};
+
 	return (
 		<OnboardingContext.Provider
 			value={ {
@@ -242,13 +247,16 @@ export const OnboardingProvider: React.FC< {
 				getStepByKey,
 				closeModal: () => {
 					closeModal();
-					// Refresh the onboarding steps to get the latest data after closing the modal.
-					// This is to avoid showing the loader next time, but still have fresh data.
-					refreshOnboardingSteps();
+
+					// Reset the onboarding data both in the store and local state.
+					// This is important to ensure that the onboarding data is cleared when the modal is closed.
+					// This is to avoid stale data when the modal is opened again.
+					resetLocalState();
+					invalidateWooPaymentsOnboarding( 'getOnboardingData' );
 
 					// Invalidate the getPaymentProviders store selector to ensure the latest data is fetched.
 					// This is important to ensure that the payment providers buttons are up to date.
-					invalidatePaymentGateways( 'getPaymentProviders' );
+					invalidatePaymentProviders( 'getPaymentProviders' );
 				},
 			} }
 		>
