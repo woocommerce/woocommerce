@@ -76,7 +76,8 @@ const TestAccountStep = () => {
 			currentStep?.status === 'not_started' &&
 			! testAccountCreationSuccess
 		) {
-			// Send a request to the server to start the test account setup.
+			// Send a request to the server to initialize the test account setup.
+			// We don't wait for the response here, as we want to start the polling immediately.
 			apiFetch( {
 				url: currentStep?.actions?.init?.href,
 				method: 'POST',
