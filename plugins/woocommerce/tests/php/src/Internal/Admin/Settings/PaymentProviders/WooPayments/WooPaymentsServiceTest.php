@@ -4064,273 +4064,6 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that get_onboarding_kyc_po_eligible throws an exception when the REST API call fails.
-	 *
-	 * @return void
-	 * @throws \Exception On POST request not mocked.
-	 */
-	public function test_get_onboarding_kyc_po_eligible_throws_on_error_response() {
-		$location = 'US';
-
-		// Arrange the REST API requests.
-		$requests_made  = array();
-		$expected_error = array(
-			'code'    => 'error',
-			'message' => 'Error message',
-		);
-		$this->mockable_proxy->register_static_mocks(
-			array(
-				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_error ) {
-						if ( '/wc/v3/payments/onboarding/router/po_eligible' === $endpoint ) {
-							$requests_made[] = $params;
-							return new WP_Error( $expected_error['code'], $expected_error['message'] );
-						}
-
-						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
-					},
-				),
-			)
-		);
-
-		// Assert.
-		$this->expectException( \Exception::class );
-		$this->expectExceptionMessage( $expected_error['message'] );
-
-		// Act.
-		$this->sut->get_onboarding_kyc_po_eligible( $location, array() );
-	}
-
-	/**
-	 * Test that get_onboarding_kyc_po_eligible throws an exception when the REST API call doesn't respond properly.
-	 *
-	 * @return void
-	 * @throws \Exception On POST request not mocked.
-	 */
-	public function test_get_onboarding_kyc_po_eligible_throws_on_failure() {
-		$location = 'US';
-
-		// Arrange the REST API requests.
-		$requests_made = array();
-		// No 'result' entry.
-		$expected_response = array(
-			'context' => array(
-				'reason' => 'Some reason',
-			),
-		);
-		$this->mockable_proxy->register_static_mocks(
-			array(
-				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
-						if ( '/wc/v3/payments/onboarding/router/po_eligible' === $endpoint ) {
-							$requests_made[] = $params;
-							return $expected_response;
-						}
-
-						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
-					},
-				),
-			)
-		);
-
-		// Assert.
-		$this->expectException( \Exception::class );
-		$this->expectExceptionMessage( esc_html__( 'Failed to determine KYC progressive onboarding eligibility.', 'woocommerce' ) );
-
-		// Act.
-		$this->sut->get_onboarding_kyc_po_eligible( $location, array() );
-	}
-
-	/**
-	 * Test that get_onboarding_kyc_po_eligible uses stored data when no data is provided.
-	 *
-	 * @return void
-	 * @throws \Exception On POST request not mocked.
-	 */
-	public function test_get_onboarding_kyc_po_eligible_uses_stored_data() {
-		$step_id  = WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION;
-		$location = 'US';
-
-		// Arrange the NOX profile.
-		$self_assessment = array(
-			'business_type'     => 'company',
-			'mcc'               => 1234,
-			'annual_revenue'    => 'from_1m_to_20m',
-			'go_live_timeframe' => 'already_live',
-		);
-		$stored_profile  = array(
-			'onboarding' => array(
-				$location => array(
-					'steps' => array(
-						$step_id => array(
-							'data' => array(
-								'self_assessment' => $self_assessment,
-							),
-						),
-					),
-				),
-			),
-		);
-		$this->mockable_proxy->register_function_mocks(
-			array(
-				'get_option' => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
-					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
-						return $stored_profile;
-					}
-
-					return $default_value;
-				},
-			)
-		);
-
-		// Arrange the REST API requests.
-		$requests_made     = array();
-		$expected_payload  = array(
-			'business' => array(
-				'country' => $location,
-				'type'    => $self_assessment['business_type'],
-				'mcc'     => $self_assessment['mcc'],
-			),
-			'store'    => array(
-				'annual_revenue'    => $self_assessment['annual_revenue'],
-				'go_live_timeframe' => $self_assessment['go_live_timeframe'],
-			),
-		);
-		$expected_response = array(
-			'result'  => 'eligible',
-			'context' => array(
-				'reason' => 'Some reason',
-			),
-		);
-		$this->mockable_proxy->register_static_mocks(
-			array(
-				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
-						if ( '/wc/v3/payments/onboarding/router/po_eligible' === $endpoint ) {
-							$requests_made[] = $params;
-							return $expected_response;
-						}
-
-						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
-					},
-				),
-			)
-		);
-
-		// Act.
-		$result = $this->sut->get_onboarding_kyc_po_eligible( $location, array() );
-
-		// Assert.
-		self::assertEquals(
-			array(
-				'eligible' => true,
-				'context'  => $expected_response['context'],
-			),
-			$result
-		);
-		self::assertCount( 1, $requests_made );
-		self::assertEquals( $expected_payload, $requests_made[0] );
-	}
-
-	/**
-	 * Test that get_onboarding_kyc_po_eligible uses received data, superseding the stored data.
-	 *
-	 * @return void
-	 * @throws \Exception On POST request not mocked.
-	 */
-	public function test_get_onboarding_kyc_po_eligible_uses_received_data() {
-		$step_id         = WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION;
-		$location        = 'US';
-		$self_assessment = array(
-			'country'           => 'RO',
-			'business_type'     => 'individual',
-			'mcc'               => 4567,
-			'annual_revenue'    => 'from_100m_to_1b',
-			'go_live_timeframe' => 'when_the_stars_align',
-		);
-
-		// Arrange the NOX profile.
-		$stored_self_assessment = array(
-			'business_type'     => 'company',
-			'mcc'               => 1234,
-			'annual_revenue'    => 'from_1m_to_20m',
-			'go_live_timeframe' => 'already_live',
-		);
-		$stored_profile         = array(
-			'onboarding' => array(
-				$location => array(
-					'steps' => array(
-						$step_id => array(
-							'data' => array(
-								'self_assessment' => $stored_self_assessment,
-							),
-						),
-					),
-				),
-			),
-		);
-		$this->mockable_proxy->register_function_mocks(
-			array(
-				'get_option' => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
-					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
-						return $stored_profile;
-					}
-
-					return $default_value;
-				},
-			)
-		);
-
-		// Arrange the REST API requests.
-		$requests_made     = array();
-		$expected_payload  = array(
-			'business' => array(
-				'country' => $self_assessment['country'],
-				'type'    => $self_assessment['business_type'],
-				'mcc'     => $self_assessment['mcc'],
-			),
-			'store'    => array(
-				'annual_revenue'    => $self_assessment['annual_revenue'],
-				'go_live_timeframe' => $self_assessment['go_live_timeframe'],
-			),
-		);
-		$expected_response = array(
-			'result'  => 'eligible',
-			'context' => array(
-				'reason' => 'Some reason',
-			),
-		);
-		$this->mockable_proxy->register_static_mocks(
-			array(
-				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
-						if ( '/wc/v3/payments/onboarding/router/po_eligible' === $endpoint ) {
-							$requests_made[] = $params;
-							return $expected_response;
-						}
-
-						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
-					},
-				),
-			)
-		);
-
-		// Act.
-		$result = $this->sut->get_onboarding_kyc_po_eligible( $location, $self_assessment );
-
-		// Assert.
-		self::assertEquals(
-			array(
-				'eligible' => true,
-				'context'  => $expected_response['context'],
-			),
-			$result
-		);
-		self::assertCount( 1, $requests_made );
-		self::assertEquals( $expected_payload, $requests_made[0] );
-	}
-
-	/**
 	 * Test that get_onboarding_kyc_session throws an exception when the REST API call fails.
 	 *
 	 * @return void
@@ -4407,16 +4140,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 * @throws \Exception On GET request not mocked.
 	 */
 	public function test_get_onboarding_kyc_session_uses_stored_data() {
-		$step_id     = WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION;
-		$location    = 'US';
-		$progressive = true;
+		$step_id  = WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION;
+		$location = 'US';
 
 		// Arrange the NOX profile.
 		$self_assessment = array(
-			'business_type'     => 'company',
-			'mcc'               => 1234,
-			'annual_revenue'    => 'from_1m_to_20m',
-			'go_live_timeframe' => 'already_live',
+			'business_type' => 'company',
+			'mcc'           => 1234,
 		);
 		$stored_profile  = array(
 			'onboarding' => array(
@@ -4446,7 +4176,6 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		// Arrange the REST API requests.
 		$requests_made     = array();
 		$expected_payload  = array(
-			'progressive'     => $progressive,
 			'self_assessment' => $self_assessment,
 		);
 		$expected_response = array(
@@ -4473,7 +4202,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		// Act.
-		$result = $this->sut->get_onboarding_kyc_session( $location, array(), $progressive );
+		$result = $this->sut->get_onboarding_kyc_session( $location, array() );
 
 		// Assert.
 		self::assertEquals( $expected_response + array( 'locale' => 'en_US' ), $result );
@@ -4490,20 +4219,15 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	public function test_get_onboarding_kyc_session_uses_received_data() {
 		$step_id         = WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION;
 		$location        = 'US';
-		$progressive     = false;
 		$self_assessment = array(
-			'business_type'     => 'individual',
-			'mcc'               => 4567,
-			'annual_revenue'    => 'from_100m_to_1b',
-			'go_live_timeframe' => 'when_the_stars_align',
+			'business_type' => 'individual',
+			'mcc'           => 4567,
 		);
 
 		// Arrange the NOX profile.
 		$stored_self_assessment = array(
-			'business_type'     => 'company',
-			'mcc'               => 1234,
-			'annual_revenue'    => 'from_1m_to_20m',
-			'go_live_timeframe' => 'already_live',
+			'business_type' => 'company',
+			'mcc'           => 1234,
 		);
 		$stored_profile         = array(
 			'onboarding' => array(
@@ -4533,7 +4257,6 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		// Arrange the REST API requests.
 		$requests_made     = array();
 		$expected_payload  = array(
-			'progressive'     => $progressive ? 'true' : 'false',
 			'self_assessment' => $self_assessment,
 		);
 		$expected_response = array(
@@ -4562,8 +4285,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		// Act.
 		$result = $this->sut->get_onboarding_kyc_session(
 			$location,
-			$self_assessment,
-			$progressive
+			$self_assessment
 		);
 
 		// Assert.

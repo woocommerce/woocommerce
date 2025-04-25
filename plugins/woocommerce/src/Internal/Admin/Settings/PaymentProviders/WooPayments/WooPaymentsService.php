@@ -503,71 +503,17 @@ class WooPaymentsService {
 	}
 
 	/**
-	 * Get the onboarding KYC progressive onboarding (PO) eligibility.
-	 *
-	 * @param string $location        The location for which we are onboarding.
-	 *                                This is a ISO 3166-1 alpha-2 country code.
-	 * @param array  $self_assessment Optional. The self-assessment data.
-	 *                                If not provided, the stored data will be used.
-	 *
-	 * @return array The KYC PO eligibility data.
-	 * @throws Exception If the eligibility could not be determined or there was an error.
-	 */
-	public function get_onboarding_kyc_po_eligible( string $location, array $self_assessment = array() ): array {
-		if ( empty( $self_assessment ) ) {
-			// Get the stored self-assessment data.
-			$self_assessment = (array) $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'self_assessment' );
-		}
-
-		// Prepare the needed details.
-		$request_payload = array(
-			'business' => array(
-				'country' => $self_assessment['country'] ?? $location,
-				'type'    => $self_assessment['business_type'] ?? '',
-				'mcc'     => $self_assessment['mcc'] ?? '',
-			),
-			'store'    => array(
-				'annual_revenue'    => $self_assessment['annual_revenue'] ?? '',
-				'go_live_timeframe' => $self_assessment['go_live_timeframe'] ?? '',
-			),
-		);
-
-		// Call the WooPayments API to determine PO eligibility.
-		$response_data = $this->proxy->call_static(
-			Utils::class,
-			'rest_endpoint_post_request',
-			'/wc/v3/payments/onboarding/router/po_eligible',
-			$request_payload
-		);
-
-		if ( is_wp_error( $response_data ) ) {
-			throw new Exception( esc_html( $response_data->get_error_message() ) );
-		}
-
-		if ( ! is_array( $response_data ) || ! isset( $response_data['result'] ) ) {
-			throw new Exception( esc_html__( 'Failed to determine KYC progressive onboarding eligibility.', 'woocommerce' ) );
-		}
-
-		return array(
-			'eligible' => ( 'eligible' === $response_data['result'] ),
-			'context'  => $response_data['context'] ?? array(),
-		);
-	}
-
-	/**
 	 * Get the onboarding KYC account session.
 	 *
 	 * @param string $location        The location for which we are onboarding.
 	 *                                This is a ISO 3166-1 alpha-2 country code.
 	 * @param array  $self_assessment Optional. The self-assessment data.
 	 *                                If not provided, the stored data will be used.
-	 * @param bool   $progressive     Optional. Whether the KYC session is for progressive onboarding.
-	 *                                Default is to get the KYC session for regular onboarding.
 	 *
 	 * @return array The KYC account session data.
 	 * @throws Exception If the KYC session data could not be retrieved or there was an error.
 	 */
-	public function get_onboarding_kyc_session( string $location, array $self_assessment = array(), bool $progressive = false ): array {
+	public function get_onboarding_kyc_session( string $location, array $self_assessment = array() ): array {
 		if ( empty( $self_assessment ) ) {
 			// Get the stored self-assessment data.
 			$self_assessment = (array) $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'self_assessment' );
@@ -579,7 +525,6 @@ class WooPaymentsService {
 			'rest_endpoint_post_request',
 			'/wc/v3/payments/onboarding/kyc/session',
 			array(
-				'progressive'     => $progressive ? 'true' : 'false',
 				'self_assessment' => $self_assessment,
 			)
 		);

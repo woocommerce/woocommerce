@@ -9,24 +9,7 @@ export type OnboardingFields = {
 	business_type?: string;
 	'company.structure'?: string;
 	mcc?: string;
-	annual_revenue?: string;
-	go_live_timeframe?: string;
 };
-
-export interface PoEligibleResponse {
-	result: 'eligible' | 'not_eligible';
-}
-
-export interface PoEligibleData {
-	location: string;
-	self_assessment: {
-		country: string;
-		type: string;
-		mcc: string;
-		annual_revenue: string;
-		go_live_timeframe: string;
-	};
-}
 
 export interface Country {
 	key: string;
