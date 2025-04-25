@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add personalization tags for Shopper Country, Order Date, Order Items, Order Subtotal, Order Tax, Order Total, Payment Method, Payment URL, Store Name, Store Address.
