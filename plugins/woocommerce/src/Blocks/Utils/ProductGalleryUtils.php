@@ -15,16 +15,9 @@ class ProductGalleryUtils {
 	 * @return array An array of image data for the product gallery.
 	 */
 	public static function get_product_gallery_image_data( $product ) {
-		$image_data = array(
-			// Image src data.
-			'images'    => array(),
-			// List of image IDs.
-			'image_ids' => array(),
-		);
-
 		if ( ! $product instanceof \WC_Product ) {
 			wc_doing_it_wrong( __FUNCTION__, __( 'Invalid product object.', 'woocommerce' ), '9.8.0' );
-			return $image_data;
+			return array();
 		}
 
 		$gallery_image_ids           = self::get_product_gallery_image_ids( $product );
@@ -35,13 +28,7 @@ class ProductGalleryUtils {
 			return $image_data;
 		}
 
-		$image_data['image_ids'] = $all_image_ids;
-		$image_data['images']    = array_combine(
-			$all_image_ids,
-			self::get_image_src_data( $all_image_ids )
-		);
-
-		return $image_data;
+		return self::get_image_src_data( $all_image_ids );
 	}
 
 	/**
