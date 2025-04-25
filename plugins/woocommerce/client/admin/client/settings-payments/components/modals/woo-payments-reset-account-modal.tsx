@@ -5,7 +5,10 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Button, Modal } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-import { paymentSettingsStore } from '@woocommerce/data';
+import {
+	paymentSettingsStore,
+	woopaymentsOnboardingStore,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -40,6 +43,9 @@ export const WooPaymentsResetAccountModal = ( {
 	const [ isResettingAccount, setIsResettingAccount ] = useState( false );
 	const { invalidateResolutionForStoreSelector: invalidatePaymentGateways } =
 		useDispatch( paymentSettingsStore );
+	const {
+		invalidateResolutionForStoreSelector: invalidateWooPaymentsOnboarding,
+	} = useDispatch( woopaymentsOnboardingStore );
 	const { createNotice } = useDispatch( 'core/notices' );
 
 	/**
@@ -51,8 +57,10 @@ export const WooPaymentsResetAccountModal = ( {
 
 		resetWooPaymentsAccount()
 			.then( () => {
-				// Refresh the store
+				// Refresh the providers store.
 				invalidatePaymentGateways( 'getPaymentProviders' );
+				// Refresh the WooPayments in-context onboarding store.
+				invalidateWooPaymentsOnboarding( 'getOnboardingData' );
 			} )
 			.catch( () => {
 				createNotice(
