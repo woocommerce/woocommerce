@@ -6,8 +6,7 @@
  */
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Blocks\Domain\Services\AddressProviderService;
-use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -58,7 +57,7 @@ class WC_Settings_General extends WC_Settings_Page {
 			// This is in a try because getting the class from the container may fail if the class is not available.
 			// If it fails, these settings should not be shown as the feature is not available.
 			try {
-				$autocomplete_class     = Package::container()->get( AddressProviderService::class );
+				$autocomplete_class     = wc_get_container()->get( AddressProviderController::class );
 				$autocomplete_providers = $autocomplete_class->get_registered_providers();
 				$autocomplete_available = ! empty( $autocomplete_providers );
 
