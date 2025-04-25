@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set target directory
-TARGET_DIR="plugins/woocommerce/build/woocommerce/assets"
+TARGET_DIR="plugins/woocommerce/assets/client/blocks"
 
 # Create target directory if it doesn't exist
 mkdir -p "$TARGET_DIR"
