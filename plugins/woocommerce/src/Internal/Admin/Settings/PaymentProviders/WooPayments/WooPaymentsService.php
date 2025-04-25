@@ -171,8 +171,8 @@ class WooPaymentsService {
 			case self::ONBOARDING_STEP_TEST_ACCOUNT:
 				// The step can only be completed if the requirements are met.
 				if ( $this->check_onboarding_step_requirements( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ) {
-					// If the account is a valid test account, the step is completed.
-					if ( $this->has_valid_account() && $this->has_test_account() ) {
+					// If the account is a valid, working test account, the step is completed.
+					if ( $this->has_test_account() && $this->has_valid_account() && $this->has_working_account() ) {
 						return self::ONBOARDING_STEP_STATUS_COMPLETED;
 					}
 
@@ -481,6 +481,7 @@ class WooPaymentsService {
 			'rest_endpoint_post_request',
 			'/wc/v3/payments/onboarding/test_drive_account/init',
 			array(
+				'country'      => $location,
 				'capabilities' => ( ! empty( $step_data['payment_methods'] ) && is_array( $step_data['payment_methods'] ) ) ? $step_data['payment_methods'] : array(),
 				'source'       => ! empty( $source ) ? $source : self::FROM_NOX_IN_CONTEXT,
 				'from'         => self::FROM_NOX_IN_CONTEXT,
@@ -497,9 +498,6 @@ class WooPaymentsService {
 		if ( ! is_array( $response ) || empty( $response['success'] ) ) {
 			throw new Exception( esc_html__( 'Failed to initialize the test account.', 'woocommerce' ) );
 		}
-
-		// Mark the test account step as completed.
-		$this->set_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
 		return $response;
 	}
@@ -834,14 +832,17 @@ class WooPaymentsService {
 			$location
 		);
 
-		// Try to get the pre-KYC fields.
-		try {
-			$business_verification_step['context']['fields'] = $this->get_onboarding_kyc_fields();
-		} catch ( Exception $e ) {
-			$business_verification_step['errors'][] = array(
-				'code'    => 'fields_error',
-				'message' => $e->getMessage(),
-			);
+		// Try to get the pre-KYC fields, but only if the required step is completed.
+		// This is because WooPayments needs a working WPCOM connection to be able to fetch the fields.
+		if ( $this->check_onboarding_step_requirements( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location ) ) {
+			try {
+				$business_verification_step['context']['fields'] = $this->get_onboarding_kyc_fields();
+			} catch ( Exception $e ) {
+				$business_verification_step['errors'][] = array(
+					'code'    => 'fields_error',
+					'message' => $e->getMessage(),
+				);
+			}
 		}
 
 		// If the step is not completed, we need to add the actions.
@@ -1252,6 +1253,24 @@ class WooPaymentsService {
 		$account_service = $this->proxy->call_static( '\WC_Payments', 'get_account_service' );
 
 		return $account_service->is_stripe_account_valid();
+	}
+
+	/**
+	 * Determine if WooPayments has a working account set up.
+	 *
+	 * This is a more specific check than has_valid_account() and checks if payments are enabled for the account.
+	 *
+	 * @return bool Whether WooPayments has a working account set up.
+	 */
+	private function has_working_account(): bool {
+		if ( ! $this->has_account() ) {
+			return false;
+		}
+
+		$account_service = $this->proxy->call_static( '\WC_Payments', 'get_account_service' );
+		$account_status  = $account_service->get_account_status_data();
+
+		return ! empty( $account_status['paymentsEnabled'] );
 	}
 
 	/**

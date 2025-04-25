@@ -122,7 +122,7 @@ export const SettingsPaymentsMain = () => {
 		return select( pluginsStore ).getInstalledPlugins();
 	}, [] );
 
-	// Make UI refresh when plugin is installed.
+	// Used to invalidate the API data for the Payments Settings page.
 	const { invalidateResolutionForStoreSelector } =
 		useDispatch( paymentSettingsStore );
 

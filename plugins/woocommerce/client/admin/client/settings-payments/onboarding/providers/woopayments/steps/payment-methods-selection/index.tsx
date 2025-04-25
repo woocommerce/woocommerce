@@ -106,6 +106,23 @@ export default function PaymentMethodsSelection() {
 		// Depend on the state map now
 	}, [ recommendedPaymentMethods, isExpanded, initialVisibilityMap ] );
 
+	const savePaymentMethodsState = ( state: Record< string, boolean > ) => {
+		// Update the local state
+		setPaymentMethodsState( state );
+
+		// Send the updated state to the server
+		const href = currentStep?.actions?.save?.href;
+		if ( href ) {
+			apiFetch( {
+				url: href,
+				method: 'POST',
+				data: {
+					payment_methods: decouplePaymentMethodsState( state ),
+				},
+			} );
+		}
+	};
+
 	return (
 		<div className="settings-payments-onboarding-modal__step--content">
 			<div className="woocommerce-layout__header woocommerce-recommended-payment-methods">
@@ -146,23 +163,8 @@ export default function PaymentMethodsSelection() {
 											// Update the local state
 											setPaymentMethodsState( state );
 
-											// Send the updated state to the server
-											const href =
-												currentStep?.actions?.save
-													?.href;
-											// Send POST request to the href with the payment methods state
-											if ( href ) {
-												apiFetch( {
-													url: href,
-													method: 'POST',
-													data: {
-														payment_methods:
-															decouplePaymentMethodsState(
-																state
-															),
-													},
-												} );
-											}
+											// Persist the state on the backend.
+											savePaymentMethodsState( state );
 										} }
 										// Pass down the calculated initial visibility for this specific method from state
 										initialVisibilityStatus={
@@ -202,14 +204,20 @@ export default function PaymentMethodsSelection() {
 						className="components-button is-primary"
 						onClick={ () => {
 							const href = currentStep?.actions?.finish?.href;
-							if ( href ) {
-								apiFetch( {
-									url: href,
-									method: 'POST',
-								} );
-
-								navigateToNextStep();
+							if ( ! href ) {
+								return;
 							}
+
+							// Persist the final state on the backend, just in case the user didn't change anything.
+							savePaymentMethodsState( paymentMethodsState );
+
+							// Mark the step as completed.
+							apiFetch( {
+								url: href,
+								method: 'POST',
+							} ).then( () => {
+								navigateToNextStep();
+							} );
 						} }
 						isBusy={ false }
 						disabled={ false }

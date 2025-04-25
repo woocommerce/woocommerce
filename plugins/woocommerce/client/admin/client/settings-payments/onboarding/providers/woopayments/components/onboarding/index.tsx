@@ -16,9 +16,9 @@ import { useOnboardingContext } from '../../data/onboarding-context';
  * WooPaymentsOnboarding component for the WooPayments onboarding modal.
  */
 export default function WooPaymentsOnboarding(): React.ReactNode {
-	const { steps, isLoading, currentStep } = useOnboardingContext();
+	const { steps, isLoading, currentStep, navigateToStep } =
+		useOnboardingContext();
 
-	const { navigateToStep } = useOnboardingContext();
 	const location = useLocation();
 
 	// Forces navigation to the current step only if the URL does not already match.
