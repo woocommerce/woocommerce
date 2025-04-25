@@ -799,6 +799,7 @@ class WooPaymentsService {
 		);
 
 		// Try to get the pre-KYC fields, but only if the required step is completed.
+		// This is because WooPayments needs a working WPCOM connection to be able to fetch the fields.
 		if ( $this->check_onboarding_step_requirements( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location ) ) {
 			try {
 				$business_verification_step['context']['fields'] = $this->get_onboarding_kyc_fields();
