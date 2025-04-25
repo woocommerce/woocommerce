@@ -4,6 +4,8 @@ namespace Automattic\WooCommerce\Blueprint;
 
 use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
 use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
+use Automattic\WooCommerce\Blueprint\Logger;
+use Automattic\WooCommerce\Blueprint\Steps\Step;
 use WP_Error;
 
 /**
@@ -100,18 +102,23 @@ class ExportSchema {
 			}
 		}
 
-		foreach ( $exporters as $exporter ) {
-			$this->publish( 'onBeforeExport', $exporter );
-			$step = $exporter->export();
+		$logger = new Logger();
+		$logger->start_export( $exporters );
 
-			if ( is_array( $step ) ) {
-				foreach ( $step as $_step ) {
-					$schema['steps'][] = $_step->get_json_array();
-				}
-			} else {
-				$schema['steps'][] = $step->get_json_array();
+		foreach ( $exporters as $exporter ) {
+			try {
+				$this->publish( 'onBeforeExport', $exporter );
+				$step = $exporter->export();
+				$this->add_result_to_schema( $schema, $step );
+
+			} catch ( \Throwable $e ) {
+				$step_name = $exporter instanceof HasAlias ? $exporter->get_alias() : $exporter->get_step_name();
+				$logger->export_step_failed( $step_name, $e );
+				return new WP_Error( 'wooblueprint_export_step_failed', 'Export step failed: ' . $e->getMessage() );
 			}
 		}
+
+		$logger->complete_export( $exporters );
 
 		return $schema;
 	}
@@ -131,5 +138,22 @@ class ExportSchema {
 				}
 			}
 		);
+	}
+
+	/**
+	 * Add export result to the schema array.
+	 *
+	 * @param array      $schema Schema array to add steps to.
+	 * @param array|Step $step   Step or array of steps to add.
+	 */
+	private function add_result_to_schema( array &$schema, $step ): void {
+		if ( is_array( $step ) ) {
+			foreach ( $step as $_step ) {
+				$schema['steps'][] = $_step->get_json_array();
+			}
+			return;
+		}
+
+		$schema['steps'][] = $step->get_json_array();
 	}
 }

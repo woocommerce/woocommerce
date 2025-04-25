@@ -4,12 +4,11 @@ use Automattic\WooCommerce\Blueprint\Tests\stubs\Importers\DummyImporter;
 use Automattic\WooCommerce\Blueprint\Tests\stubs\Steps\DummyStep;
 use Automattic\WooCommerce\Blueprint\ImportStep;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
-use WP_UnitTestCase;
 
 /**
  * Class ImportStepTest
  */
-class ImportStepTest extends WP_UnitTestCase {
+class ImportStepTest extends \WP_UnitTestCase {
 
 	/**
 	 * Tear down Mockery after each test.
@@ -51,21 +50,21 @@ class ImportStepTest extends WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	public function test_it_returns_warn_when_it_cannot_find_valid_importer() {
+	public function test_it_returns_error_when_it_cannot_find_valid_importer() {
 		$rand     = wp_rand( 1, 99999999 );
 		$importer = new ImportStep( (object) array( 'step' => 'dummy' . $rand ) );
 		$result   = $importer->import();
 
-		$this->assertCount( 1, $result->get_messages( 'warn' ) );
-		$this->assertEquals( 'Unable to find an importer for dummy' . $rand, $result->get_messages( 'warn' )[0]['message'] );
+		$this->assertCount( 1, $result->get_messages( 'error' ) );
+		$this->assertEquals( 'Unable to find an importer', $result->get_messages( 'error' )[0]['message'] );
 	}
 
 	/**
-	 * Test it returns warn when importer is not a step processor.
+	 * Test it returns error when importer is not a step processor.
 	 *
 	 * @return void
 	 */
-	public function test_it_returns_warn_when_importer_is_not_a_step_processor() {
+	public function test_it_returns_error_when_importer_is_not_a_step_processor() {
 		// Create a filter that adds an invalid importer (not implementing StepProcessor).
 		add_filter(
 			'wooblueprint_importers',
@@ -87,8 +86,8 @@ class ImportStepTest extends WP_UnitTestCase {
 		$importer = new ImportStep( (object) array( 'step' => DummyStep::get_step_name() ) );
 		$result   = $importer->import();
 
-		$this->assertCount( 1, $result->get_messages( 'warn' ) );
-		$this->assertEquals( sprintf( 'Importer %s is not a valid step processor', DummyStep::get_step_name() ), $result->get_messages( 'warn' )[0]['message'] );
+		$this->assertCount( 1, $result->get_messages( 'error' ) );
+		$this->assertEquals( 'Incorrect importer type', $result->get_messages( 'error' )[0]['message'] );
 	}
 
 	/**
@@ -123,6 +122,6 @@ class ImportStepTest extends WP_UnitTestCase {
 		$importer = new ImportStep( (object) array( 'step' => 'setSiteOptions' ) );
 		$result   = $importer->import();
 		$this->assertNotEmpty( $result->get_messages( 'error' ) );
-		$this->assertEquals( 'User does not have the required capabilities to run setSiteOptions step', $result->get_messages( 'error' )[0]['message'] );
+		$this->assertEquals( 'User does not have the required capabilities to run step', $result->get_messages( 'error' )[0]['message'] );
 	}
 }
