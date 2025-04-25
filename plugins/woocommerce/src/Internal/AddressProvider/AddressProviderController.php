@@ -117,6 +117,22 @@ class AddressProviderController {
 			$providers[] = $provider_instance;
 		}
 
+			// Check if there's a preferred provider set in the settings.
+		$preferred_provider_id = get_option( 'woocommerce_address_autocomplete_provider', '' );
+
+		if ( ! empty( $preferred_provider_id ) && ! empty( $providers ) ) {
+			// Look for the preferred provider in the array.
+			foreach ( $providers as $key => $provider ) {
+				if ( $provider->id === $preferred_provider_id ) {
+					// Found the preferred provider, move it to the beginning of the array.
+					$preferred_provider = $provider;
+					unset( $providers[ $key ] );
+					array_unshift( $providers, $preferred_provider );
+					break;
+				}
+			}
+		}
+
 		// Update the cache.
 		$this->cached_provider_class_names = $provider_class_names;
 		$this->cached_providers            = $providers;
