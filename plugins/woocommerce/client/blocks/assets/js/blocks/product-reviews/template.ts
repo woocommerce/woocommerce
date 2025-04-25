@@ -6,7 +6,7 @@ import { InnerBlockTemplate } from '@wordpress/blocks';
 const TEMPLATE: InnerBlockTemplate[] = [
 	[ 'woocommerce/product-reviews-title' ],
 	[
-		'core/comment-template',
+		'woocommerce/product-review-template',
 		{},
 		[
 			[

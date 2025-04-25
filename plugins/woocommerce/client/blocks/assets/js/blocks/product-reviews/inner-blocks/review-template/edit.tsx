@@ -1,0 +1,342 @@
+/**
+ * External dependencies
+ */
+import { useState, memo } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
+import { BlockInstance, BlockEditProps } from '@wordpress/blocks';
+import {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore No types for this exist yet.
+	BlockContextProvider,
+	useBlockProps,
+	// @ts-expect-error no exported member.
+	useInnerBlocksProps,
+	store as blockEditorStore,
+	// @ts-expect-error no exported member.
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalUseBlockPreview as useBlockPreview,
+} from '@wordpress/block-editor';
+// It doesn't seem to notice the External dependency block when @ts-ignore is added.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { Spinner } from '@wordpress/components';
+// eslint-disable-next-line @woocommerce/dependency-group
+import { store as coreStore } from '@wordpress/core-data';
+
+/**
+ * Internal dependencies
+ */
+import { useCommentQueryArgs, useCommentTree } from './hooks';
+
+interface EmptyComment {
+	commentId: number;
+	children: EmptyComment[];
+}
+
+interface ReviewTemplateInnerBlocksProps {
+	comment: EmptyComment;
+	activeCommentId: number;
+	setActiveCommentId: ( id: number ) => void;
+	firstCommentId: number;
+	blocks: BlockInstance[];
+}
+
+interface ReviewTemplatePreviewProps {
+	blocks: BlockInstance[];
+	commentId: number;
+	setActiveCommentId: ( id: number ) => void;
+	isHidden: boolean;
+}
+
+type ReviewTemplateAttributes = {
+	postId?: number;
+};
+
+const TEMPLATE = [
+	[ 'core/avatar' ],
+	[ 'core/comment-author-name' ],
+	[ 'core/comment-date' ],
+	[ 'core/comment-content' ],
+	[ 'core/comment-reply-link' ],
+	[ 'core/comment-edit-link' ],
+];
+
+interface ReviewSettings {
+	perPage: number;
+	pageComments: boolean;
+	threadComments: boolean;
+	threadCommentsDepth: number;
+}
+
+/**
+ * Function that returns a review structure that will be rendered with default placehoders.
+ *
+ * Each review has a `reviewId` property that is always a negative number in
+ * case of the placeholders. This is to ensure that the review does not
+ * conflict with the actual (real) reviews.
+ *
+ * @param {Object}  settings                       Review Settings.
+ * @param {number}  [settings.perPage]             - Reviews per page setting or block attribute.
+ * @param {boolean} [settings.pageComments]        - Enable break reviews into pages setting.
+ * @param {boolean} [settings.threadComments]      - Enable threaded (nested) reviews setting.
+ * @param {number}  [settings.threadCommentsDepth] - Level deep of threaded reviews.
+ *
+ * @typedef {{id: null, children: EmptyComment[]}} EmptyComment
+ * @return {EmptyComment[]}                 		Inner blocks of the Review Template
+ */
+const getCommentsPlaceholder = ( {
+	perPage,
+	pageComments,
+	threadComments,
+	threadCommentsDepth,
+}: ReviewSettings ) => {
+	// Limit commentsDepth to 3
+	const commentsDepth = ! threadComments
+		? 1
+		: Math.min( threadCommentsDepth, 3 );
+
+	const buildChildrenComment = ( commentsLevel: number ): EmptyComment[] => {
+		// Render children comments until commentsDepth is reached
+		if ( commentsLevel < commentsDepth ) {
+			const nextLevel = commentsLevel + 1;
+
+			return [
+				{
+					commentId: -( commentsLevel + 3 ),
+					children: buildChildrenComment( nextLevel ),
+				},
+			];
+		}
+		return [];
+	};
+
+	// Add the first comment and its children
+	const placeholderComments = [
+		{ commentId: -1, children: buildChildrenComment( 1 ) },
+	];
+
+	// Add a second comment unless the break comments setting is active and set to less than 2, and there is one nested comment max
+	if ( ( ! pageComments || perPage >= 2 ) && commentsDepth < 3 ) {
+		placeholderComments.push( {
+			commentId: -2,
+			children: [],
+		} );
+	}
+
+	// Add a third comment unless the break comments setting is active and set to less than 3, and there aren't nested comments
+	if ( ( ! pageComments || perPage >= 3 ) && commentsDepth < 2 ) {
+		placeholderComments.push( {
+			commentId: -3,
+			children: [],
+		} );
+	}
+
+	// In case that the value is set but larger than 3 we truncate it to 3.
+	return placeholderComments;
+};
+
+const CommentTemplatePreview = ( {
+	blocks,
+	commentId,
+	setActiveCommentId,
+	isHidden,
+}: ReviewTemplatePreviewProps ) => {
+	const blockPreviewProps = useBlockPreview( {
+		blocks,
+	} );
+
+	const handleOnClick = () => {
+		setActiveCommentId( commentId );
+	};
+
+	const style = {
+		display: isHidden ? 'none' : undefined,
+	};
+
+	return (
+		<div
+			{ ...blockPreviewProps }
+			tabIndex={ 0 }
+			role="button"
+			style={ style }
+			onClick={ handleOnClick }
+			onKeyDown={ handleOnClick }
+		/>
+	);
+};
+
+const MemoizedCommentTemplatePreview = memo( CommentTemplatePreview );
+
+const ReviewTemplateInnerBlocks = memo( function ReviewTemplateInnerBlocks( {
+	comment,
+	activeCommentId,
+	setActiveCommentId,
+	firstCommentId,
+	blocks,
+}: ReviewTemplateInnerBlocksProps ) {
+	const { children, ...innerBlocksProps } = useInnerBlocksProps(
+		{},
+		{ template: TEMPLATE }
+	);
+
+	return (
+		<li { ...innerBlocksProps }>
+			{ comment.commentId === ( activeCommentId || firstCommentId )
+				? children
+				: null }
+
+			<MemoizedCommentTemplatePreview
+				blocks={ blocks }
+				commentId={ comment.commentId }
+				setActiveCommentId={ setActiveCommentId }
+				isHidden={
+					comment.commentId === ( activeCommentId || firstCommentId )
+				}
+			/>
+
+			{ comment?.children?.length > 0 ? (
+				<ol>
+					{ comment.children.map(
+						(
+							{
+								commentId,
+								...childComment
+							}: { commentId: number; children: EmptyComment[] },
+							index: number
+						) => (
+							<BlockContextProvider
+								key={ commentId || index }
+								value={ {
+									commentId: commentId < 0 ? null : commentId,
+								} }
+							>
+								<ReviewTemplateInnerBlocks
+									comment={ { commentId, ...childComment } }
+									activeCommentId={ activeCommentId }
+									setActiveCommentId={ setActiveCommentId }
+									blocks={ blocks }
+									firstCommentId={ firstCommentId }
+								/>
+							</BlockContextProvider>
+						)
+					) }
+				</ol>
+			) : null }
+		</li>
+	);
+} );
+
+export default function CommentTemplateEdit( {
+	clientId,
+	attributes,
+}: BlockEditProps< ReviewTemplateAttributes > ) {
+	const blockProps = useBlockProps();
+	const { postId } = attributes;
+
+	const [ activeCommentId, setActiveCommentId ] = useState< number >( 0 );
+	const {
+		commentOrder,
+		threadCommentsDepth,
+		threadComments,
+		commentsPerPage,
+		pageComments,
+	} = useSelect( ( select ) => {
+		const { getSettings } = select( blockEditorStore ) as unknown as {
+			getSettings(): {
+				// eslint-disable-next-line @typescript-eslint/naming-convention
+				__experimentalDiscussionSettings: {
+					commentOrder: string;
+					threadCommentsDepth: number;
+					threadComments: boolean;
+					commentsPerPage: number;
+					pageComments: boolean;
+				};
+			};
+		};
+		return getSettings().__experimentalDiscussionSettings;
+	}, [] );
+
+	const commentQuery = useCommentQueryArgs( {
+		postId: postId ?? 0,
+	} );
+
+	const { topLevelComments, blocks } = useSelect(
+		( select ) => {
+			const { getEntityRecords } = select( coreStore );
+			const { getBlocks } = select( blockEditorStore ) as unknown as {
+				getBlocks( clientId: string ): BlockInstance[];
+			};
+			return {
+				// Request only top-level comments. Replies are embedded.
+				topLevelComments: commentQuery
+					? getEntityRecords( 'root', 'comment', commentQuery )
+					: null,
+				blocks: getBlocks( clientId ),
+			};
+		},
+		[ clientId, commentQuery ]
+	);
+
+	// Generate a tree structure of comment IDs.
+	let commentTree = useCommentTree(
+		// Reverse the order of top comments if needed.
+		commentOrder === 'desc' && topLevelComments
+			? [ ...topLevelComments ].reverse()
+			: topLevelComments
+	);
+
+	if ( ! topLevelComments ) {
+		return (
+			<p { ...blockProps }>
+				<Spinner />
+			</p>
+		);
+	}
+
+	if ( ! postId ) {
+		commentTree = getCommentsPlaceholder( {
+			perPage: commentsPerPage,
+			pageComments,
+			threadComments,
+			threadCommentsDepth,
+		} );
+	}
+
+	if ( ! commentTree.length ) {
+		return (
+			<p { ...blockProps }>
+				{ __( 'No results found.', 'woocommerce' ) }
+			</p>
+		);
+	}
+
+	return (
+		<ol { ...blockProps }>
+			{ commentTree &&
+				commentTree.map(
+					(
+						{
+							commentId,
+							...commentData
+						}: { commentId: number; children: EmptyComment[] },
+						index: number
+					) => (
+						<BlockContextProvider
+							key={ commentId || index }
+							value={ {
+								commentId: commentId < 0 ? null : commentId,
+							} }
+						>
+							<ReviewTemplateInnerBlocks
+								comment={ { commentId, ...commentData } }
+								activeCommentId={ activeCommentId }
+								setActiveCommentId={ setActiveCommentId }
+								blocks={ blocks }
+								firstCommentId={ commentTree[ 0 ]?.commentId }
+							/>
+						</BlockContextProvider>
+					)
+				) }
+		</ol>
+	);
+}
