@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { LoadError } from '@stripe/connect-js';
 
