@@ -499,9 +499,6 @@ class WooPaymentsService {
 			throw new Exception( esc_html__( 'Failed to initialize the test account.', 'woocommerce' ) );
 		}
 
-		// Mark the test account step as completed.
-		$this->set_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
-
 		return $response;
 	}
 
