@@ -1,120 +1,119 @@
 # See https://github.com/shufo/auto-assign-reviewer-by-files/blob/main/README.md for configuration format
 
 "*":
-  - team: flux
+  - Flux
 
 ".github/**/*":
-  - team: flux
+  - Flux
 
 "bin/*":
-  - team: flux
+  - Flux
 
 "docs/**/*":
-  - team: developer-advocacy
+  - Developer Advocacy
 
 "packages/js/api/**/*":
-  - team: flux
+  - Flux
 
 "packages/js/e2e-utils/**/*":
-  - team: flux
+  - Flux
 
 "packages/js/e2e-environment/**/*":
-  - team: flux
+  - Flux
 
 "packages/js/api-core-tests/**/*":
-  - team: flux
+  - Flux
 
 "packages/js/e2e-core-tests/**/*":
-  - team: flux
+  - Flux
 
 "packages/js/admin-e2e-tests/**/*":
-  - team: flux
+  - Flux
 
 "packages/js/components/**/*":
-  - team: woo-fse
+  - Kirigami
 
 "packages/js/csv-export/**/*":
-  - team: woo-fse
+  - SomewhereWarm
 
 "packages/js/currency/**/*":
-  - team: fractal
+  - Rubik
 
 "packages/js/customer-effort-score/**/*":
-  - team: woo-fse
+  - Kirigami
 
 "packages/js/data/**/*":
-  - team: woo-fse
+  - Ventures
 
 "packages/js/date/**/*":
-  - team: woo-fse
+  - Rubik
 
 "packages/js/dependency-extraction-webpack-plugin/**/*":
-  - team: flux
+  - Flux
 
 "packages/js/eslint-plugin/**/*":
-  - team: flux
+  - Flux
 
 "packages/js/experimental/**/*":
-  - team: woo-fse
+  - Kirigami
 
 "packages/js/explat/**/*":
-  - team: woo-fse
+  - Kirigami
 
 "packages/js/navigation/**/*":
-  - team: woo-fse
+  - SomewhereWarm
 
 "packages/js/number/**/*":
-  - team: woo-fse
+  - Rubik
 
 "packages/js/onboarding/**/*":
-  - team: woo-fse
+  - Rubik
 
 "packages/js/product-editor/**/*":
-  - team: woo-fse
+  - Kirigami
 
 "packages/js/tracks/**/*":
-  - team: woo-fse
+  - Flux
 
 "plugins/woocommerce/**/*":
-  - team: flux
+  - Flux
 
 "plugins/woocommerce/templates/**/*":
-  - team: rubik
-  - team: woo-fse
+  - Rubik
+  - Kirigami
 
 "plugins/woocommerce/templates/emails/**/*":
-  - team: flux
+  - Ballade
 
 "plugins/woocommerce/src/Admin/**/*":
-  - team: woo-fse
+  - team: Kirigami
 
 "plugins/woocommerce/src/Blocks/**/*":
-  - team: rubik
-  - team: woo-fse
+  - Rubik
+  - Kirigami
 
 "plugins/woocommerce/src/Internal/Admin/**/*":
-  - team: woo-fse
+  - Kirigami
 
 "plugins/woocommerce/src/StoreApi/**/*":
-  - team: rubik
-  - team: woo-fse
+  - Rubik
+  - Kirigami
 
 "plugins/woocommerce/client/admin/**/*":
-  - team: woo-fse
+  - Kirigami
 
 "plugins/woocommerce/client/blocks/**/*":
-  - team: rubik
-  - team: woo-fse
+  - Rubik
+  - Kirigami
 
 "plugins/woocommerce-beta-tester/**/*":
-  - team: woo-fse
-  - team: flux
+  - Flux
 
 "tools/**/*":
-  - team: flux
+  - Flux
 
 '**/composer.json':
-  - team: flux
+  - Flux
 
 '**/package.json':
-  - team: flux
+  - Flux

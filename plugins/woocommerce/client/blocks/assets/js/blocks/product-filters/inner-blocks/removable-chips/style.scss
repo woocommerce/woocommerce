@@ -47,11 +47,12 @@
 		border-radius: 2px;
 		font-size: 0.875em;
 		display: flex;
+		gap: $gap-smaller;
 		align-items: center;
 		justify-content: space-between;
 
 		.wc-block-product-filter-removable-chips__remove {
-			background: none;
+			background-color: transparent;
 			border: none;
 			cursor: pointer;
 			padding: 0;

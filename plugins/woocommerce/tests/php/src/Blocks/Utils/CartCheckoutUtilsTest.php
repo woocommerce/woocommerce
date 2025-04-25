@@ -76,4 +76,14 @@ class CartCheckoutUtilsTest extends WP_UnitTestCase {
 		$this->assertEquals( 'required', get_option( 'woocommerce_checkout_company_field' ) );
 		$this->assertEquals( 'required', get_option( 'woocommerce_checkout_address_2_field' ) );
 	}
+
+	/**
+	 * Test has_cart_page() function.
+	 */
+	public function test_has_cart_page() {
+		wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '' );
+		$this->assertTrue( CartCheckoutUtils::has_cart_page() );
+		delete_option( 'woocommerce_cart_page_id' );
+		$this->assertFalse( CartCheckoutUtils::has_cart_page() );
+	}
 }
