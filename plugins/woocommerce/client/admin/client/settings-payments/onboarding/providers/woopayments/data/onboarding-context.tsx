@@ -36,7 +36,6 @@ const OnboardingContext = createContext< OnboardingContextType >( {
 	navigateToStep: () => undefined,
 	navigateToNextStep: () => undefined,
 	getStepByKey: () => undefined,
-	refreshOnboardingSteps: () => undefined,
 	closeModal: () => undefined,
 } );
 
@@ -162,10 +161,6 @@ export const OnboardingProvider: React.FC< {
 		areStepDependenciesCompleted,
 	] );
 
-	const refreshOnboardingSteps = useCallback( () => {
-		invalidateResolutionForStoreSelector( 'getOnboardingData' );
-	}, [ invalidateResolutionForStoreSelector ] );
-
 	/**
 	 * useEffect functions
 	 */
@@ -245,7 +240,6 @@ export const OnboardingProvider: React.FC< {
 				navigateToStep,
 				navigateToNextStep,
 				getStepByKey,
-				refreshOnboardingSteps,
 				closeModal: () => {
 					closeModal();
 					// Refresh the onboarding steps to get the latest data after closing the modal.
