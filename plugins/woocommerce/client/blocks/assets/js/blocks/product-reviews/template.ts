@@ -80,7 +80,7 @@ const TEMPLATE: InnerBlockTemplate[] = [
 									],
 								],
 							],
-							[ 'core/comment-content' ],
+							[ 'woocommerce/product-review-content' ],
 						],
 					],
 				],
