@@ -337,7 +337,7 @@ class Api {
 	 * @return  string             The generated path.
 	 */
 	public function get_block_asset_build_path( $filename, $type = 'js' ) {
-		return "assets/client/blocks/$filename.$type";
+		return $this->package->get_path( "assets/client/blocks/$filename.$type" );
 	}
 
 	/**
