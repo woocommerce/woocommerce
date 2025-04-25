@@ -17,10 +17,9 @@ import { checkOverflow } from './utils';
 const getContext = ( ns?: string ) =>
 	getContextFn< ProductGalleryContext >( ns );
 
-const getArrowsState = ( imageNumber: number, totalImages: number ) => ( {
-	// One-based index so it ranges from 1 to imagesIds.length.
-	disableLeft: imageNumber === 1,
-	disableRight: imageNumber === totalImages,
+const getArrowsState = ( imageIndex: number, totalImages: number ) => ( {
+	disableLeft: imageIndex === 0,
+	disableRight: imageIndex === totalImages - 1,
 } );
 
 const getAllImageIds = ( imageData: ImageDataItem[] ) =>
@@ -143,18 +142,6 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 	} );
 };
 
-/**
- * Gets the number of the active image.
- *
- * @param {number[]} imageIds        - The IDs of the images.
- * @param {number}   selectedImageId - The ID of the selected image.
- * @return {number} The number of the active image.
- */
-const getSelectedImageNumber = (
-	imageIds: number[],
-	selectedImageId: number
-) => imageIds.indexOf( selectedImageId ) + 1;
-
 const productGallery = {
 	state: {
 		/**
@@ -169,24 +156,23 @@ const productGallery = {
 		},
 	},
 	actions: {
-		selectImage: ( newImageNumber: number ) => {
+		selectImage: ( newImageIndex: number ) => {
 			const context = getContext();
 			const { imageData } = context;
 
 			const allImageIds = getAllImageIds( imageData );
 			const { disableLeft, disableRight } = getArrowsState(
-				newImageNumber,
+				newImageIndex,
 				allImageIds.length
 			);
 			context.disableLeft = disableLeft;
 			context.disableRight = disableRight;
 
-			const imageIndex = newImageNumber - 1;
-			const imageId = allImageIds[ imageIndex ];
+			const imageId = allImageIds[ newImageIndex ];
 
 			context.selectedImageId = imageId;
 
-			if ( imageIndex !== -1 ) {
+			if ( imageId !== -1 ) {
 				scrollImageIntoView( imageId );
 				scrollThumbnailIntoView( imageId );
 			}
@@ -207,25 +193,23 @@ const productGallery = {
 			const context = getContext();
 			const { imageData } = context;
 			const allImageIds = getAllImageIds( imageData );
-			const newImageNumber = allImageIds.indexOf( imageId ) + 1;
-			actions.selectImage( newImageNumber );
+			const newImageIndex = allImageIds.indexOf( imageId );
+			actions.selectImage( newImageIndex );
 		},
 		selectNextImage: ( event?: MouseEvent ) => {
 			if ( event ) {
 				event.stopPropagation();
 			}
+
 			const { imageData, selectedImageId } = getContext();
 			const allImageIds = getAllImageIds( imageData );
-			const selectedImageNumber = getSelectedImageNumber(
-				allImageIds,
-				selectedImageId
-			);
-			const newImageNumber = Math.min(
-				allImageIds.length,
-				selectedImageNumber + 1
+			const selectedImageIndex = allImageIds.indexOf( selectedImageId );
+			const newImageIndex = Math.min(
+				allImageIds.length - 1,
+				selectedImageIndex + 1
 			);
 
-			actions.selectImage( newImageNumber );
+			actions.selectImage( newImageIndex );
 		},
 		selectPreviousImage: ( event?: MouseEvent ) => {
 			if ( event ) {
@@ -234,11 +218,8 @@ const productGallery = {
 
 			const { imageData, selectedImageId } = getContext();
 			const allImageIds = getAllImageIds( imageData );
-			const selectedImageNumber = getSelectedImageNumber(
-				allImageIds,
-				selectedImageId
-			);
-			const newImageNumber = Math.max( 1, selectedImageNumber - 1 );
+			const selectedImageIndex = allImageIds.indexOf( selectedImageId );
+			const newImageNumber = Math.max( 0, selectedImageIndex - 1 );
 
 			actions.selectImage( newImageNumber );
 		},
