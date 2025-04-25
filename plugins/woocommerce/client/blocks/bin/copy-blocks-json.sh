@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# This script mimics the CopyWebpackPlugin behavior from the WooCommerce Blocks webpack configuration
+# to make block.json files available for unit testing without requiring a full build.
+# Ensure that the logic of this script is kept in sync with the logic of the CopyWebpackPlugin in the WooCommerce Blocks webpack configuration:
+# https://github.com/woocommerce/woocommerce/blob/84d1da7be3cbd3d8f40b17ad58729f668fd82b6a/plugins/woocommerce/client/blocks/bin/webpack-configs.js#L229-L256
+
 # Move to the project root by finding the directory containing plugins/woocommerce and pnpm-workspace.yaml
 while [ ! -d "plugins/woocommerce" ] || [ ! -f "pnpm-workspace.yaml" ]; do
     if [ "$PWD" = "/" ]; then
