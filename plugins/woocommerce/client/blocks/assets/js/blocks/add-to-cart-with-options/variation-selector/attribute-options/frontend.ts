@@ -17,6 +17,7 @@ type Option = {
 };
 
 type Context = {
+	attribute: string;
 	name: string;
 	selectedValue: string | null;
 	option: Option;
@@ -61,9 +62,70 @@ const { state, actions } = store(
 				const { selectedValue, option } = getContext< PillsContext >();
 				return selectedValue === option.value;
 			},
+			get isPillDisabled() {
+				const { name, option } = getContext< PillsContext >();
+				const { variation, availableVariations } = getContext(
+					'woocommerce/add-to-cart-with-options'
+				);
+
+				if ( ! variation || variation.length === 0 ) {
+					return false;
+				}
+
+				const isCurrentAttributeSelected = variation.some(
+					( attr ) => attr.attribute === name
+				);
+				const attributesToMatch = isCurrentAttributeSelected
+					? variation.length - 1
+					: variation.length;
+
+				return ! availableVariations.some( ( availableVariation ) => {
+					// Skip variations that don't match the current pills.
+					if (
+						availableVariation.attributes[
+							'attribute_' + name.toLowerCase()
+						] !== option.value &&
+						availableVariation.attributes[
+							'attribute_' + name.toLowerCase()
+						] !== '' // "" is used for "any".
+					) {
+						return false;
+					}
+
+					// Count how many attributes from the variation match the
+					// currently selected attributes.
+					const matchingAttributes = variation.filter( ( attr ) => {
+						const availableVariationAttributeValue =
+							availableVariation.attributes[
+								'attribute_' + attr.attribute.toLowerCase()
+							];
+						// If the current available variation matches the selected value.
+						if ( availableVariationAttributeValue === attr.value ) {
+							return true;
+						}
+						// If the current available variation has an empty value (matching any),
+						// only count variations that match the currently selected
+						if ( availableVariationAttributeValue === '' ) {
+							if (
+								attr.attribute !== name ||
+								option.value === attr.value
+							) {
+								return true;
+							}
+						}
+						return false;
+					} ).length;
+
+					return matchingAttributes >= attributesToMatch;
+				} );
+			},
 			get pillTabIndex() {
 				const { selectedValue, focused, option, options } =
 					getContext< PillsContext >();
+
+				if ( state.isPillDisabled ) {
+					return -1;
+				}
 
 				// Allow the first pill to be focused when no option is selected.
 				if (
@@ -90,6 +152,9 @@ const { state, actions } = store(
 		actions: {
 			toggleSelected() {
 				const context = getContext< PillsContext >();
+				if ( state.isPillDisabled ) {
+					return;
+				}
 				if ( context.selectedValue === context.option.value ) {
 					context.selectedValue = '';
 				} else {
@@ -107,6 +172,7 @@ const { state, actions } = store(
 						keyWasProcessed = true;
 						break;
 
+					// @todo fix arrow navigation.
 					case 'Up':
 					case 'ArrowUp':
 					case 'Left':
