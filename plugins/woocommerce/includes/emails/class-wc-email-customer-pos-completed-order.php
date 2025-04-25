@@ -9,6 +9,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+require_once dirname( __FILE__ ) . '/trait-wc-pos-email-customizations.php';
+
+use WC_POS_Email_Customizations;
+
 if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 
 	/**
@@ -22,6 +26,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 	 * @extends     WC_Email
 	 */
 	class WC_Email_Customer_POS_Completed_Order extends WC_Email {
+		use WC_POS_Email_Customizations;
 
 		/**
 		 * Constructor.
@@ -103,7 +108,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_content_html() {
-			return wc_get_template_html(
+			$this->add_pos_customizations();
+			$content = wc_get_template_html(
 				$this->template_html,
 				array(
 					'order'              => $this->object,
@@ -114,6 +120,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 					'email'              => $this,
 				)
 			);
+			$this->remove_pos_customizations();
+			return $content;
 		}
 
 		/**
@@ -122,7 +130,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_content_plain() {
-			return wc_get_template_html(
+			$this->add_pos_customizations();
+			$content = wc_get_template_html(
 				$this->template_plain,
 				array(
 					'order'              => $this->object,
@@ -133,6 +142,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 					'email'              => $this,
 				)
 			);
+			$this->remove_pos_customizations();
+			return $content;
 		}
 
 		/**
