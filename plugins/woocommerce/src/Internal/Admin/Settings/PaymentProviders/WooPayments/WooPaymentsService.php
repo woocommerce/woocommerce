@@ -679,15 +679,17 @@ class WooPaymentsService {
 	/**
 	 * Disable test account during the switch-to-live onboarding flow.
 	 *
-	 * @param string $from   Optional. Where in the UI the request is coming from.
-	 *                       If not provided, it will identify the origin as the WC Admin Payments settings.
-	 * @param string $source Optional. The source for the current onboarding flow.
-	 *                       If not provided, it will identify the source as the WC Admin Payments settings.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param string $from     Optional. Where in the UI the request is coming from.
+	 *                         If not provided, it will identify the origin as the WC Admin Payments settings.
+	 * @param string $source   Optional. The source for the current onboarding flow.
+	 *                         If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return array The response from the WooPayments API.
 	 * @throws Exception If the KYC session could not be finished or there was an error.
 	 */
-	public function disable_test_account( string $from = '', string $source = '' ): array {
+	public function disable_test_account( string $location, string $from = '', string $source = '' ): array {
 		// Call the WooPayments API to reset onboarding.
 		$response = $this->proxy->call_static(
 			Utils::class,
@@ -704,8 +706,12 @@ class WooPaymentsService {
 		}
 
 		if ( ! is_array( $response ) || empty( $response['success'] ) ) {
-			throw new Exception( esc_html__( 'Failed to disable test mode account.', 'woocommerce' ) );
+			throw new Exception( esc_html__( 'Failed to disable test account.', 'woocommerce' ) );
 		}
+
+		// For sanity, make sure the payment methods step is marked as completed.
+		// This is to avoid the user being prompted to set up payment methods again.
+		$this->set_onboarding_step_completed( self::ONBOARDING_STEP_PAYMENT_METHODS, $location );
 
 		return $response;
 	}

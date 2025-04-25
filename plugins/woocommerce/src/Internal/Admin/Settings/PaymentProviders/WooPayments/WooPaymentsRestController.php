@@ -706,7 +706,11 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 */
 	protected function handle_test_account_disable( WP_REST_Request $request ) {
 		try {
-			$this->woopayments->disable_test_account( $request->get_param( 'from' ) ?? '', $request->get_param( 'source' ) ?? '' );
+			$this->woopayments->disable_test_account(
+				$this->payments->get_country(),
+				$request->get_param( 'from' ) ?? '',
+				$request->get_param( 'source' ) ?? ''
+			);
 		} catch ( Exception $e ) {
 			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
