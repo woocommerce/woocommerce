@@ -21,13 +21,11 @@ interface Props {
 }
 
 const EmbeddedKyc: React.FC< Props > = ( {
-	continueKyc = false,
 	collectPayoutRequirements = false,
 } ) => {
 	const { data } = useBusinessVerificationContext();
 	const { currentStep, navigateToNextStep } = useOnboardingContext();
 	const [ finalizingAccount, setFinalizingAccount ] = useState( false );
-	const [ isEligible, setIsEligible ] = useState< boolean | null >( null );
 	const [ loading, setLoading ] = useState( true );
 	const [ loadError, setLoadError ] = useState< LoadError | null >( null );
 	const fallbackUrl = currentStep?.actions?.kyc_fallback?.href ?? '';
@@ -105,17 +103,14 @@ const EmbeddedKyc: React.FC< Props > = ( {
 				</div>
 			) }
 			{
-				// Only render the embedded onboarding component once the PO eligibility has been determined.
-				isEligible !== null && (
-					<EmbeddedAccountOnboarding
-						onExit={ handleOnExit }
-						onStepChange={ handleStepChange }
-						onLoaderStart={ () => setLoading( false ) }
-						onLoadError={ handleLoadError }
-						onboardingData={ data }
-						collectPayoutRequirements={ collectPayoutRequirements }
-					/>
-				)
+				<EmbeddedAccountOnboarding
+					onExit={ handleOnExit }
+					onStepChange={ handleStepChange }
+					onLoaderStart={ () => setLoading( false ) }
+					onLoadError={ handleLoadError }
+					onboardingData={ data }
+					collectPayoutRequirements={ collectPayoutRequirements }
+				/>
 			}
 		</>
 	);
