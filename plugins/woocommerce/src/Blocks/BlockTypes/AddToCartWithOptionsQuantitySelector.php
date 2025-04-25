@@ -22,18 +22,6 @@ class AddToCartWithOptionsQuantitySelector extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-quantity-selector';
 
 	/**
-	 * Enqueue assets specific to this block.
-	 * Enqueue frontend scripts for the stepper functionality.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content Block content.
-	 * @param WP_Block $block Block instance.
-	 */
-	protected function enqueue_assets( $attributes, $content, $block ) {
-		parent::enqueue_assets( $attributes, $content, $block );
-	}
-
-	/**
 	 * Render the block.
 	 *
 	 * The selector is hidden for:
