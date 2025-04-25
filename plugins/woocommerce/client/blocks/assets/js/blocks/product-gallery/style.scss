@@ -107,6 +107,7 @@ $dialog-padding: 20px;
 		font-size: 12px;
 		padding: 0;
 		background: #fff;
+		outline-offset: -2px;
 
 		&:disabled {
 			.wc-block-product-gallery-large-image-next-previous__icon {
