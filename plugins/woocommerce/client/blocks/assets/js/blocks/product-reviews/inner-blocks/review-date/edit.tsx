@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useEntityProp } from '@wordpress/core-data';
+import type { BlockEditProps } from '@wordpress/blocks';
 import {
 	dateI18n,
 	humanTimeDiff,
@@ -20,17 +21,6 @@ import { PanelBody, ToggleControl } from '@wordpress/components';
 // eslint-disable-next-line @woocommerce/dependency-group
 import { __, _x } from '@wordpress/i18n';
 
-interface EditProps {
-	attributes: {
-		format: string;
-		isLink: boolean;
-	};
-	context: {
-		commentId: number;
-	};
-	setAttributes: ( attributes: Partial< EditProps[ 'attributes' ] > ) => void;
-}
-
 /**
  * Renders the `woocommerce/product-review-date` block on the editor.
  *
@@ -48,7 +38,12 @@ export default function Edit( {
 	attributes: { format, isLink },
 	context: { commentId },
 	setAttributes,
-}: EditProps ) {
+}: BlockEditProps< {
+	format: string;
+	isLink: boolean;
+} > & {
+	context: { commentId: number };
+} ) {
 	const blockProps = useBlockProps();
 	let [ date ] = useEntityProp(
 		'root',
