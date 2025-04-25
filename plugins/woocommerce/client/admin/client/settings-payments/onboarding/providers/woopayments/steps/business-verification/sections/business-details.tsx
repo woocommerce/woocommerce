@@ -63,22 +63,8 @@ const BusinessDetails: React.FC = () => {
 		selectedBusinessType?.structures.find(
 			( structure ) => structure.key === data[ 'company.structure' ]
 		);
-	const selectedMcc = mccsFlatList.find( ( mcc ) => mcc.key === data.mcc );
 
-	const annualRevenues = Object.entries( strings.annualRevenues ).map(
-		( [ key, name ] ) => ( {
-			key,
-			name,
-		} )
-	);
-	const goLiveTimeframes = Object.entries( strings.goLiveTimeframes ).map(
-		( [ key, name ] ) => ( {
-			key,
-			name,
-		} )
-	);
-
-	const updateBusinessVerificaitonData = (
+	const updateBusinessVerificationData = (
 		selfAssessmentData: OnboardingFields
 	) => {
 		const href = currentStep?.actions?.save?.href;
@@ -107,7 +93,7 @@ const BusinessDetails: React.FC = () => {
 			newData = { ...newData, business_type: undefined };
 		}
 		setData( newData );
-		updateBusinessVerificaitonData( newData );
+		updateBusinessVerificationData( newData );
 	};
 
 	const updateDataOnChange = (
@@ -121,7 +107,7 @@ const BusinessDetails: React.FC = () => {
 			[ name ]: selectedItem?.key,
 		};
 
-		updateBusinessVerificaitonData( newData );
+		updateBusinessVerificationData( newData );
 	};
 
 	return (
@@ -164,31 +150,16 @@ const BusinessDetails: React.FC = () => {
 			{ selectedCountry &&
 				selectedBusinessType &&
 				selectedBusinessStructure && (
-					<span data-testid={ 'mcc-select' }>
-						<OnboardingGroupedSelectField
-							name="mcc"
-							options={ mccsFlatList }
-							onChange={ updateDataOnChange }
-							searchable
-						/>
-					</span>
-				) }
-
-			{ selectedCountry &&
-				selectedBusinessType &&
-				selectedBusinessStructure &&
-				selectedMcc && (
 					<>
-						<OnboardingSelectField
-							name="annual_revenue"
-							options={ annualRevenues }
-							onChange={ updateDataOnChange }
-						/>
-						<OnboardingSelectField
-							name="go_live_timeframe"
-							options={ goLiveTimeframes }
-							onChange={ updateDataOnChange }
-						/>
+						<span data-testid={ 'mcc-select' }>
+							<OnboardingGroupedSelectField
+								name="mcc"
+								options={ mccsFlatList }
+								onChange={ updateDataOnChange }
+								searchable
+							/>
+						</span>
+
 						<span className={ 'woopayments-onboarding__tos' }>
 							{ strings.tos }
 						</span>
