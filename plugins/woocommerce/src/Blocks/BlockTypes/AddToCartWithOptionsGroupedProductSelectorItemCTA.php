@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\BlockTypes\AddtoCartWithOptions\Utils;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use WP_Block;
 
 /**
