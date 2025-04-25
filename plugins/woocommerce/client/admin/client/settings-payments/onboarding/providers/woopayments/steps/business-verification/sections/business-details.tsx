@@ -63,7 +63,6 @@ const BusinessDetails: React.FC = () => {
 		selectedBusinessType?.structures.find(
 			( structure ) => structure.key === data[ 'company.structure' ]
 		);
-	const selectedMcc = mccsFlatList.find( ( mcc ) => mcc.key === data.mcc );
 
 	const updateBusinessVerificationData = (
 		selfAssessmentData: OnboardingFields
