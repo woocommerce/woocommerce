@@ -56,4 +56,24 @@ trait WC_POS_Email_Customizations {
 		);
 		return apply_filters( 'woocommerce_order_formatted_item_subtotal', $subtotal, $item, $this );
 	}
+
+	/**
+	 * Enable email template for REST API order valid templates for POS orders.
+	 */
+	protected function enable_email_template_for_pos_orders() {
+		add_filter( 'woocommerce_rest_order_actions_email_valid_template_classes', array( $this, 'add_to_valid_template_classes' ), 10, 2 );
+	}
+
+	/**
+	 * Add this email template to the list of valid templates for POS orders.
+	 *
+	 * @param array    $valid_template_classes Array of valid template class names.
+	 * @param WC_Order $order                  The order.
+	 * @return array Modified array of valid template class names.
+	 */
+	public function add_to_valid_template_classes( $valid_template_classes, $order ) {
+        // TODO: Check if the order is a POS order.
+		$valid_template_classes[] = get_class( $this );
+		return $valid_template_classes;
+	}
 }

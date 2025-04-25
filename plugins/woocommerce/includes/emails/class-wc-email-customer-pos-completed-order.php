@@ -42,6 +42,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 				'{order_number}' => '',
 			);
 
+			$this->enable_order_email_actions_for_pos_orders();
+
 			// Call parent constructor.
 			parent::__construct();
 
@@ -76,6 +78,21 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 			}
 
 			$this->restore_locale();
+		}
+
+		/**
+		 * Trigger the sending of this email when requested via the REST API.
+		 *
+		 * @param int    $order_id    The order ID.
+		 * @param string $template_id The email template ID.
+		 */
+		public function maybe_trigger_from_api( $order_id, $template_id ) {
+			if ( $this->id === $template_id ) {
+				$order = wc_get_order( $order_id );
+				if ( $order ) {
+					$this->trigger( $order_id, $order );
+				}
+			}
 		}
 
 		/**
@@ -156,6 +173,15 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 			return $this->email_improvements_enabled
 				? __( 'Thanks again! If you need any help with your order, please contact us at {store_email}.', 'woocommerce' )
 				: __( 'Thanks for shopping with us.', 'woocommerce' );
+		}
+		
+		/**
+		 * Enable order email actions for POS orders.
+		 */
+		private function enable_order_email_actions_for_pos_orders() {
+			$this->enable_email_template_for_pos_orders();
+			// Enable send email when requested.
+			add_action( 'woocommerce_rest_order_actions_email_send', array( $this, 'maybe_trigger_from_api' ), 10, 2 );
 		}
 	}
 
