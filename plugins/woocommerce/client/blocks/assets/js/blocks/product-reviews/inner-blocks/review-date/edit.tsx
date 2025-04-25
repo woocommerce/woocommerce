@@ -32,7 +32,7 @@ interface EditProps {
 }
 
 /**
- * Renders the `core/comment-date` block on the editor.
+ * Renders the `woocommerce/product-review-date` block on the editor.
  *
  * @param {Object} props                   React props.
  * @param {Object} props.setAttributes     Callback for updating block attributes.
@@ -74,7 +74,7 @@ export default function Edit( {
 				/>
 				<ToggleControl
 					__nextHasNoMarginBottom
-					label={ __( 'Link to comment', 'woocommerce' ) }
+					label={ __( 'Link to review', 'woocommerce' ) }
 					onChange={ () => setAttributes( { isLink: ! isLink } ) }
 					checked={ isLink }
 				/>
@@ -83,10 +83,10 @@ export default function Edit( {
 	);
 
 	if ( ! commentId || ! date ) {
-		date = _x( 'Comment Date', 'block title', 'woocommerce' );
+		date = _x( 'Review Date', 'block title', 'woocommerce' );
 	}
 
-	let commentDate =
+	let reviewDate =
 		date instanceof Date ? (
 			<time dateTime={ dateI18n( 'c', date, true ) }>
 				{ format === 'human-diff'
@@ -98,12 +98,12 @@ export default function Edit( {
 		);
 
 	if ( isLink ) {
-		commentDate = (
+		reviewDate = (
 			<a
-				href="#comment-date-pseudo-link"
+				href="#review-date-pseudo-link"
 				onClick={ ( event ) => event.preventDefault() }
 			>
-				{ commentDate }
+				{ reviewDate }
 			</a>
 		);
 	}
@@ -111,7 +111,7 @@ export default function Edit( {
 	return (
 		<>
 			{ inspectorControls }
-			<div { ...blockProps }>{ commentDate }</div>
+			<div { ...blockProps }>{ reviewDate }</div>
 		</>
 	);
 }
