@@ -147,7 +147,11 @@ class WooPaymentsService {
 		// First, we check the status of the onboarding step based on the current state of the store.
 		switch ( $step_id ) {
 			case self::ONBOARDING_STEP_PAYMENT_METHODS:
-				// No custom checks, for now.
+				// If there is already a valid account, report the step as completed
+				// since allowing the user to configure payment methods won't have any effect.
+				if ( $this->has_valid_account() ) {
+					return self::ONBOARDING_STEP_STATUS_COMPLETED;
+				}
 				break;
 			case self::ONBOARDING_STEP_WPCOM_CONNECTION:
 				if ( $this->has_working_wpcom_connection() ) {
