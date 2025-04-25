@@ -628,16 +628,18 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			'https://wordpress.org/plugins/wp-mail-logging/',
 			'https://woocommerce.com/document/email-faq'
 		);
-		$email_post_manager = WCTransactionalEmailPostsManager::get_instance();
-		$emails             = WC()->mailer()->get_emails();
-		$email_types        = array();
+		$email_post_manager   = WCTransactionalEmailPostsManager::get_instance();
+		$emails               = WC()->mailer()->get_emails();
+		$email_types          = array();
+		$post_id_for_template = null;
 		foreach ( $emails as $email_key => $email ) {
+			$post_id       = $email_post_manager->get_email_template_post_id( $email->id );
 			$email_types[] = array(
 				'title'       => $email->get_title(),
 				'description' => $email->get_description(),
 				'id'          => $email->id,
 				'email_key'   => strtolower( $email_key ),
-				'post_id'     => $email_post_manager->get_email_template_post_id( $email->id ),
+				'post_id'     => $post_id,
 				'enabled'     => $email->is_enabled(),
 				'manual'      => $email->is_manual(),
 				'recipients'  => array(
@@ -646,13 +648,17 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'bcc' => $email->get_bcc_recipient(),
 				),
 			);
+
+			// Store the first valid post ID we find.
+			if ( ! $post_id_for_template && $post_id ) {
+				$post_id_for_template = $post_id;
+			}
 		}
 		// Create URL for email editor template mode.
 		$edit_template_url = null;
-		if ( $email ) {
-			$email_post        = $email_post_manager->get_email_post( $email->id );
+		if ( $post_id_for_template ) {
 			$email_template_id = get_stylesheet() . '//' . WooEmailTemplate::TEMPLATE_SLUG;
-			$edit_template_url = admin_url( 'post.php?post=' . $email_post->ID . '&action=edit&template=' . $email_template_id );
+			$edit_template_url = admin_url( 'post.php?post=' . $post_id_for_template . '&action=edit&template=' . $email_template_id );
 		}
 
 		?>
