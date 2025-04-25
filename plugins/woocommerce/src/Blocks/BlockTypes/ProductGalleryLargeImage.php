@@ -104,15 +104,6 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	private function get_main_images_html( $context ) {
 		$base_classes = 'wc-block-woocommerce-product-gallery-large-image__image';
 
-		$directives      = $this->get_directives( $context );
-		$directives_html = array_reduce(
-			array_keys( $directives ),
-			function ( $carry, $key ) use ( $directives ) {
-				return $carry . ' ' . $key . '="' . esc_attr( $directives[ $key ] ) . '"';
-			},
-			''
-		);
-
 		if ( $context['fullScreenOnClick'] ) {
 			$base_classes .= ' wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click';
 		}
@@ -122,11 +113,13 @@ class ProductGalleryLargeImage extends AbstractBlock {
 
 		ob_start();
 		?>
-			<ul class="wc-block-product-gallery-large-image__container" tabindex="-1">
-				<template data-wp-each--image="state.processedImageData" data-wp-each-key="context.image.id">
-					<?php // No need to use wp_kses on $directives_html because this markup is built internally. ?>
-					<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					<li class="wc-block-product-gallery-large-image__wrapper" <?php echo $directives_html; ?>>
+			<ul
+				class="wc-block-product-gallery-large-image__container"
+				tabindex="-1"
+				data-wp-interactive="woocommerce/product-gallery"
+			>
+				<template data-wp-each--image="context.imageData" data-wp-each-key="context.image.id">
+					<li class="wc-block-product-gallery-large-image__wrapper">
 						<img
 							class="<?php echo esc_attr( $base_classes ); ?>"
 							data-wp-bind--src="context.image.src"
@@ -135,10 +128,16 @@ class ProductGalleryLargeImage extends AbstractBlock {
 							data-wp-bind--data-image-id="context.image.id"
 							data-wp-bind--tabindex="context.image.tabIndex"
 							data-wp-on--keydown="actions.onSelectedLargeImageKeyDown"
-							data-wp-class--wc-block-woocommerce-product-gallery-large-image__image--active-image-slide="context.image.isActive"
 							data-wp-on--touchstart="actions.onTouchStart"
 							data-wp-on--touchmove="actions.onTouchMove"
 							data-wp-on--touchend="actions.onTouchEnd"
+							<?php if ( $context['hoverZoom'] ) : ?>
+								data-wp-on--mousemove="actions.startZoom"
+								data-wp-on--mouseleave="actions.resetZoom"
+							<?php endif; ?>
+							<?php if ( $context['fullScreenOnClick'] ) : ?>
+								data-wp-on--click="actions.openDialog"
+							<?php endif; ?>
 							loading="lazy"
 							alt=""
 						/>
@@ -148,57 +147,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		<?php
 		$template = ob_get_clean();
 
-		return $template;
-	}
-
-	/**
-	 * Get directives for the block.
-	 *
-	 * @param array $block_context The block context.
-	 *
-	 * @return array
-	 */
-	private function get_directives( $block_context ) {
-		return array_merge(
-			$this->get_zoom_directives( $block_context ),
-			$this->get_open_dialog_directives( $block_context )
-		);
-	}
-
-	/**
-	 * Get directives for zoom.
-	 *
-	 * @param array $block_context The block context.
-	 *
-	 * @return array
-	 */
-	private function get_zoom_directives( $block_context ) {
-		if ( ! $block_context['hoverZoom'] ) {
-			return array();
-		}
-
-		return array(
-			'data-wp-interactive'    => 'woocommerce/product-gallery',
-			'data-wp-on--mousemove'  => 'actions.startZoom',
-			'data-wp-on--mouseleave' => 'actions.resetZoom',
-		);
-	}
-
-	/**
-	 * Get directives for opening the dialog.
-	 *
-	 * @param array $block_context The block context.
-	 *
-	 * @return array
-	 */
-	private function get_open_dialog_directives( $block_context ) {
-		if ( ! $block_context['fullScreenOnClick'] ) {
-			return array();
-		}
-
-		return array(
-			'data-wp-on--click' => 'actions.openDialog',
-		);
+		return wp_interactivity_process_directives( $template );
 	}
 
 	/**
