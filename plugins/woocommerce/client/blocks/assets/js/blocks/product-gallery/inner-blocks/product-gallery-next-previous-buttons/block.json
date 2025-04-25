@@ -12,7 +12,8 @@
 		"interactivity": true,
 		"color": {
 			"background": true,
-			"text": true
+			"text": true,
+			"__experimentalSkipSerialization": true
 		},
 		"align": true,
 		"layout": {
@@ -27,10 +28,12 @@
 		},
 		"shadow": true,
 		"spacing": {
-			"margin": true
+			"margin": true,
+			"__experimentalSkipSerialization": true
 		},
 		"__experimentalBorder": {
-			"radius": true
+			"radius": true,
+			"__experimentalSkipSerialization": true
 		},
 		"__experimentalSelector": ".wc-block-product-gallery-large-image-next-previous__button"
 	},

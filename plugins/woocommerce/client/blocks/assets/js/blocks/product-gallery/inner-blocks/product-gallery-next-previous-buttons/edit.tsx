@@ -35,24 +35,9 @@ const getVerticalAlignmentClass = ( attributes: BlockAttributes ) => {
 	return '';
 };
 
-// We want the local styles classes to be applied to the button, but not the container.
-// Based on convention, we could filter out the local styles classes by checking if they start with 'has-'
-// but this is not future-proof, hence iterating over the local styles classes and removing them from the container class name.
-const filterLocalStylesClasses = (
-	blockPropsClasses: string,
-	localStylesClasses: string[]
-) => {
-	const allLocalClasses = localStylesClasses.join( ' ' ).split( ' ' );
-	const containerClassName = allLocalClasses.reduce(
-		( className, localClass ) => className.replace( localClass, '' ),
-		blockPropsClasses
-	);
-	return containerClassName;
-};
-
 export const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
 	const verticalAlignmentClass = getVerticalAlignmentClass( attributes );
-	const { style, className, ...blockProps } = useBlockProps( {
+	const { style, ...blockProps } = useBlockProps( {
 		className: clsx(
 			'wc-block-product-gallery-large-image-next-previous',
 			verticalAlignmentClass
@@ -63,13 +48,6 @@ export const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
 	const colorProps = useColorProps( attributes );
 	const spacingProps = useSpacingProps( attributes );
 	const shadowProps = useShadowProps( attributes );
-
-	const containerClassName = filterLocalStylesClasses( className, [
-		borderProps.className,
-		colorProps.className,
-		spacingProps.className,
-		shadowProps.className,
-	] );
 
 	const buttonClassName = clsx(
 		'wc-block-product-gallery-large-image-next-previous__button',
@@ -88,7 +66,7 @@ export const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
 	};
 
 	return (
-		<div { ...blockProps } className={ containerClassName }>
+		<div { ...blockProps }>
 			<button
 				className={ buttonClassName }
 				style={ buttonStyles }
