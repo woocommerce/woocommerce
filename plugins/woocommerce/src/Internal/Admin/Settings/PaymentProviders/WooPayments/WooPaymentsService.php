@@ -638,7 +638,7 @@ class WooPaymentsService {
 	}
 
 	/**
-	 * Finish the onboarding KYC account session.
+	 * Reset onboarding.
 	 *
 	 * @param string $from   Optional. Where in the UI the request is coming from.
 	 *                       If not provided, it will identify the origin as the WC Admin Payments settings.
@@ -670,6 +670,40 @@ class WooPaymentsService {
 
 		// Remove NOX-specific onboarding data.
 		$this->proxy->call_function( 'delete_option', self::NOX_PROFILE_OPTION_KEY );
+
+		return $response;
+	}
+
+	/**
+	 * Disable test mode during live onboarding.
+	 *
+	 * @param string $from   Optional. Where in the UI the request is coming from.
+	 *                       If not provided, it will identify the origin as the WC Admin Payments settings.
+	 * @param string $source Optional. The source for the current onboarding flow.
+	 *                       If not provided, it will identify the source as the WC Admin Payments settings.
+	 *
+	 * @return array The response from the WooPayments API.
+	 * @throws Exception If the KYC session could not be finished or there was an error.
+	 */
+	public function test_mode_disable( string $from = '', string $source = '' ): array {
+		// Call the WooPayments API to reset onboarding.
+		$response = $this->proxy->call_static(
+			Utils::class,
+			'rest_endpoint_post_request',
+			'/wc/v3/payments/onboarding/test_drive_account/disable',
+			array(
+				'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
+				'source' => ! empty( $source ) ? esc_attr( $source ) : self::FROM_PAYMENT_SETTINGS,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			throw new Exception( esc_html( $response->get_error_message() ) );
+		}
+
+		if ( ! is_array( $response ) || empty( $response['success'] ) ) {
+			throw new Exception( esc_html__( 'Failed to disable test mode.', 'woocommerce' ) );
+		}
 
 		return $response;
 	}

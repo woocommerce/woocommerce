@@ -354,6 +354,33 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			),
 			$override
 		);
+		register_rest_route(
+			$this->route_namespace,
+			'/' . $this->rest_base . '/onboarding/test_mode/disable',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'test_mode_disable' ),
+					'validation_callback' => 'rest_validate_request_arg',
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => array(
+						'from'   => array(
+							'description'       => __( 'Where from in the onboarding flow this request was triggered.', 'woocommerce' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'source' => array(
+							'description'       => __( 'The upmost entry point from where the merchant entered the onboarding flow.', 'woocommerce' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
+				),
+			),
+			$override
+		);
 	}
 
 	/**
@@ -659,6 +686,27 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	protected function reset_onboarding( WP_REST_Request $request ) {
 		try {
 			$this->woopayments->reset_onboarding( $request->get_param( 'from' ) ?? '', $request->get_param( 'source' ) ?? '' );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+			)
+		);
+	}
+
+	/**
+	 * Handle the onboarding test mode disable action.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_Error|WP_REST_Response The response.
+	 */
+	protected function test_mode_disable( WP_REST_Request $request ) {
+		try {
+			$this->woopayments->test_mode_disable( $request->get_param( 'from' ) ?? '', $request->get_param( 'source' ) ?? '' );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
