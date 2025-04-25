@@ -5,7 +5,7 @@
 # Ensure that the logic of this script is kept in sync with the logic of the CopyWebpackPlugin in the WooCommerce Blocks webpack configuration:
 # https://github.com/woocommerce/woocommerce/blob/84d1da7be3cbd3d8f40b17ad58729f668fd82b6a/plugins/woocommerce/client/blocks/bin/webpack-configs.js#L229-L256
 
-# Move to the project root by finding the directory containing plugins/woocommerce and pnpm-workspace.yaml
+# Move to the project root
 while [ ! -d "plugins/woocommerce" ] || [ ! -f "pnpm-workspace.yaml" ]; do
     if [ "$PWD" = "/" ]; then
         echo "Error: Could not find project root"
@@ -28,11 +28,17 @@ find plugins/woocommerce/client/blocks/assets/js -name "block.json" | while read
     # Check if it's a parent block by looking for "parent" field
     if grep -q '"parent":' "$file"; then
         # It's an inner block
+        target_path="$TARGET_DIR/inner-blocks/$block_name/block.json"
         mkdir -p "$TARGET_DIR/inner-blocks/$block_name"
-        cp "$file" "$TARGET_DIR/inner-blocks/$block_name/block.json"
+        if [ ! -f "$target_path" ]; then
+            cp "$file" "$target_path"
+        fi
     else
         # It's a regular block
+        target_path="$TARGET_DIR/$block_name/block.json"
         mkdir -p "$TARGET_DIR/$block_name"
-        cp "$file" "$TARGET_DIR/$block_name/block.json"
+        if [ ! -f "$target_path" ]; then
+            cp "$file" "$target_path"
+        fi
     fi
 done
