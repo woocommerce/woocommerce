@@ -20,16 +20,8 @@ require 'vendor/yoast/phpunit-polyfills/phpunitpolyfills-autoload.php';
 // Start up the WP testing environment.
 require "{$_tests_dir}/includes/bootstrap.php";
 
+
+define( 'WOO_BLUEPRINT_TESTS', true );
+
 // Stubs.
 require_once __DIR__ . '/stubs/stubs.php';
-
-if ( ! function_exists( 'wc_get_logger' ) ) {
-	/**
-	 * Mock wc_get_logger function.
-	 *
-	 * @return WC_Logger_Interface
-	 */
-	function wc_get_logger() {
-		return Mockery::mock( 'WC_Logger_Interface' )->shouldReceive( 'log' )->getMock();
-	}
-}

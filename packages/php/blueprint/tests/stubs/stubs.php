@@ -5,7 +5,7 @@
 
 // This file should only be loaded during test runs to prevent conflicts in development environments.
 // During local development, files are copied to the WooCommerce vendor directory where the autoloader might attempt to load this file.
-if ( class_exists( 'PHPUnit\Framework\TestCase', false ) ) {
+if ( defined( 'WOO_BLUEPRINT_TESTS' ) ) {
 
 	if ( ! class_exists( 'WC_Log_Levels', false ) ) {
 		/**
@@ -110,6 +110,17 @@ if ( class_exists( 'PHPUnit\Framework\TestCase', false ) ) {
 			 * @param array  $context Log context.
 			 */
 			public function debug( $message, $context = array() );
+		}
+	}
+
+	if ( ! function_exists( 'wc_get_logger' ) ) {
+		/**
+		 * Mock wc_get_logger function.
+		 *
+		 * @return WC_Logger_Interface
+		 */
+		function wc_get_logger() { // phpcs:ignore Universal.Files.SeparateFunctionsFromOO.Mixed
+			return Mockery::mock( 'WC_Logger_Interface' )->shouldReceive( 'log' )->getMock();
 		}
 	}
 }
