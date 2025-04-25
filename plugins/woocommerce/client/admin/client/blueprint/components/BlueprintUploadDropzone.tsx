@@ -22,6 +22,8 @@ import {
 import apiFetch from '@wordpress/api-fetch';
 import { dispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { createInterpolateElement } from '@wordpress/element';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -147,11 +149,26 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 	}
 };
 
+const checkImportAllowed = async (): Promise< boolean > => {
+	try {
+		const response = await apiFetch< { import_allowed: boolean } >( {
+			path: 'wc-admin/blueprint/import-allowed',
+			method: 'GET',
+		} );
+		return response.import_allowed;
+	} catch ( error ) {
+		throw new Error(
+			__( 'Failed to check if imports are allowed.', 'woocommerce' )
+		);
+	}
+};
+
 interface FileUploadContext {
 	file?: File;
 	steps?: BlueprintStep[];
 	error?: Error;
 	settings_to_overwrite?: string[];
+	import_allowed?: boolean;
 }
 
 type FileUploadEvents =
@@ -223,6 +240,7 @@ export const fileUploadMachine = setup( {
 		stepsParser: fromPromise( ( { input }: { input: { file: File } } ) =>
 			parseBlueprintSteps( input.file )
 		),
+		importAllowedChecker: fromPromise( () => checkImportAllowed() ),
 	},
 	guards: {
 		hasSettingsToOverwrite: ( { context } ) =>
@@ -233,13 +251,32 @@ export const fileUploadMachine = setup( {
 	},
 } ).createMachine( {
 	id: 'fileUpload',
-	initial: 'idle',
+	initial: 'checkingImportAllowed',
 	context: () => ( {} ),
 	states: {
+		checkingImportAllowed: {
+			invoke: {
+				src: 'importAllowedChecker',
+				onDone: {
+					target: 'idle',
+					actions: assign( {
+						import_allowed: ( { event } ) => event.output,
+						error: () => undefined,
+					} ),
+				},
+				onError: {
+					target: 'error',
+					actions: assign( {
+						error: ( { event } ) => event.error as Error,
+					} ),
+				},
+			},
+		},
 		idle: {
 			on: {
 				UPLOAD: {
 					target: 'parsingSteps',
+					guard: ( { context } ) => context.import_allowed === true,
 					actions: assign( {
 						file: ( { event } ) => event.file,
 						error: () => undefined,
@@ -393,6 +430,39 @@ export const BlueprintUploadDropzone = () => {
 
 	return (
 		<>
+			{ state.matches( 'checkingImportAllowed' ) && (
+				<div className="blueprint-upload-form">
+					<div className="blueprint-upload-dropzone-uploading">
+						<Spinner />
+					</div>
+				</div>
+			) }
+			{ state.context.import_allowed === false &&
+				! state.context.error && (
+					<Notice
+						status="warning"
+						isDismissible={ false }
+						className="blueprint-upload-dropzone-notice"
+					>
+						{ createInterpolateElement(
+							__(
+								'Blueprint imports are disabled by default for live sites. <br/>Enable <link>Coming Soon mode</link> or define "ALLOW_BLUEPRINT_IMPORT_IN_LIVE_MODE" as true.',
+								'woocommerce'
+							),
+							{
+								br: <br />,
+								link: (
+									// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/control-has-associated-label
+									<a
+										href={ getAdminLink(
+											'admin.php?page=wc-settings&tab=site-visibility'
+										) }
+									/>
+								),
+							}
+						) }
+					</Notice>
+				) }
 			{ state.context.error && (
 				<div className="blueprint-upload-dropzone-error">
 					<Notice
@@ -405,49 +475,50 @@ export const BlueprintUploadDropzone = () => {
 					</Notice>
 				</div>
 			) }
-			{ ( state.matches( 'idle' ) ||
-				state.matches( 'error' ) ||
-				state.matches( 'parsingSteps' ) ) && (
-				<div className="blueprint-upload-form">
-					<FormFileUpload
-						className="blueprint-upload-field"
-						accept="application/json, application/zip"
-						multiple={ false }
-						onChange={ ( evt ) => {
-							const file = evt.target.files?.[ 0 ]; // since multiple is disabled it has to be in 0
-							if ( file ) {
-								send( { type: 'UPLOAD', file } );
-							}
-						} }
-					>
-						<div className="blueprint-upload-dropzone">
-							<Icon icon={ upload } />
-							<p className="blueprint-upload-dropzone-text">
-								{ __( 'Drag and drop or ', 'woocommerce' ) }
-								<span>
-									{ __( 'choose a file', 'woocommerce' ) }
-								</span>
-							</p>
-							<DropZone
-								onFilesDrop={ ( files ) => {
-									if ( files.length > 1 ) {
+			{ state.context.import_allowed &&
+				( state.matches( 'idle' ) ||
+					state.matches( 'error' ) ||
+					state.matches( 'parsingSteps' ) ) && (
+					<div className="blueprint-upload-form">
+						<FormFileUpload
+							className="blueprint-upload-field"
+							accept="application/json, application/zip"
+							multiple={ false }
+							onChange={ ( evt ) => {
+								const file = evt.target.files?.[ 0 ]; // since multiple is disabled it has to be in 0
+								if ( file ) {
+									send( { type: 'UPLOAD', file } );
+								}
+							} }
+						>
+							<div className="blueprint-upload-dropzone">
+								<Icon icon={ upload } />
+								<p className="blueprint-upload-dropzone-text">
+									{ __( 'Drag and drop or ', 'woocommerce' ) }
+									<span>
+										{ __( 'choose a file', 'woocommerce' ) }
+									</span>
+								</p>
+								<DropZone
+									onFilesDrop={ ( files ) => {
+										if ( files.length > 1 ) {
+											send( {
+												type: 'ERROR',
+												error: new Error(
+													'Only one file can be uploaded at a time'
+												),
+											} );
+										}
 										send( {
-											type: 'ERROR',
-											error: new Error(
-												'Only one file can be uploaded at a time'
-											),
+											type: 'UPLOAD',
+											file: files[ 0 ],
 										} );
-									}
-									send( {
-										type: 'UPLOAD',
-										file: files[ 0 ],
-									} );
-								} }
-							></DropZone>
-						</div>
-					</FormFileUpload>
-				</div>
-			) }
+									} }
+								></DropZone>
+							</div>
+						</FormFileUpload>
+					</div>
+				) }
 			{ state.matches( 'importing' ) && (
 				<div className="blueprint-upload-form">
 					<div className="blueprint-upload-dropzone-uploading">
@@ -480,6 +551,7 @@ export const BlueprintUploadDropzone = () => {
 				<Button
 					className="woocommerce-blueprint-import-button"
 					variant="primary"
+					disabled={ ! state.context.import_allowed }
 					onClick={ () => {
 						send( { type: 'IMPORT' } );
 					} }
