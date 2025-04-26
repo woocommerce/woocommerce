@@ -3,6 +3,7 @@
  */
 import { SHOP_URL } from '@woocommerce/block-settings';
 import Button from '@woocommerce/base-components/button';
+import { useStyleProps } from '@woocommerce/base-hooks';
 import clsx from 'clsx';
 
 /**
@@ -30,37 +31,21 @@ const Block = ( {
 		return null;
 	}
 
-	// Generate color classes based on attributes.
-	const colorClasses = clsx( {
-		[ `has-${ textColor }-color` ]: textColor,
-		[ `has-${ backgroundColor }-background-color` ]: backgroundColor,
+	const styleProps = useStyleProps( {
+		style,
+		textColor,
+		backgroundColor,
 	} );
-
-	const buttonStyles: Record< string, string > = {};
-
-	const parsedStyle =
-		typeof style === 'string' ? JSON.parse( style ) : style || {};
-	if ( parsedStyle?.color?.text ) {
-		buttonStyles.color = parsedStyle.color.text;
-	}
-	if ( parsedStyle?.color?.background ) {
-		buttonStyles.backgroundColor = parsedStyle.color.background;
-	}
 
 	return (
 		<div className="wp-block-button has-text-align-center">
 			<Button
 				className={ clsx(
 					className,
-					'wp-block-button__link',
-					'wc-block-mini-cart__shopping-button',
-					colorClasses
+					styleProps.className,
+					'wc-block-mini-cart__shopping-button'
 				) }
-				style={
-					Object.keys( buttonStyles ).length > 0
-						? buttonStyles
-						: undefined
-				}
+				style={ styleProps.style }
 				variant={ getVariant( className, 'contained' ) }
 				href={ SHOP_URL }
 			>
