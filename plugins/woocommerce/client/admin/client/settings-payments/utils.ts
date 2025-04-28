@@ -128,6 +128,21 @@ export const resetWooPaymentsAccount = async () => {
 	}
 };
 
+/**
+ * Disables the WooPayments test account.
+ */
+export const disableWooPaymentsTestMode = async () => {
+	try {
+		const response = await apiFetch( {
+			url: '/wp-json/wc-admin/settings/payments/woopayments/onboarding/test_account/disable',
+			method: 'POST',
+		} );
+		return response;
+	} catch ( error ) {
+		throw error;
+	}
+};
+
 export const getWooPaymentsSetupLiveAccountLink = () => {
 	return getAdminLink(
 		'admin.php?wcpay-connect=1&_wpnonce=' +

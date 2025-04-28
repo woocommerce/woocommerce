@@ -32,21 +32,16 @@ interface EmbeddedAccountOnboardingProps extends EmbeddedComponentProps {
 	onExit: () => void;
 	onStepChange?: ( step: string ) => void;
 	collectPayoutRequirements?: boolean;
-	isPoEligible?: boolean;
 }
 
 /**
  * Hook to initialize Stripe Connect.
  *
  * @param onboardingData - Data required for onboarding.
- * @param isPoEligible   - Whether the user is eligible for progressive onboarding.
  *
  * @return Returns stripeConnectInstance, error, and loading state.
  */
-const useInitializeStripe = (
-	onboardingData: OnboardingFields,
-	isPoEligible: boolean
-) => {
+const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
 	const [ stripeConnectInstance, setStripeConnectInstance ] =
 		useState< StripeConnectInstance | null >( null );
 	const { currentStep } = useOnboardingContext();
@@ -60,8 +55,7 @@ const useInitializeStripe = (
 			try {
 				const accountSession = await createKycAccountSession(
 					onboardingData,
-					currentStep?.actions?.kyc_session?.href ?? '',
-					isPoEligible
+					currentStep?.actions?.kyc_session?.href ?? ''
 				);
 
 				// To-Do: Track the embedded component redirection event.
@@ -95,7 +89,7 @@ const useInitializeStripe = (
 		};
 
 		initializeStripe();
-	}, [ onboardingData, isPoEligible ] );
+	}, [ onboardingData ] );
 
 	return { stripeConnectInstance, initializationError, loading };
 };
@@ -110,7 +104,6 @@ const useInitializeStripe = (
  * @param onLoadError                       - Callback function when the onboarding load error occurs.
  * @param [onStepChange]                    - Callback function when the onboarding step changes.
  * @param [collectPayoutRequirements=false] - Whether to collect payout requirements.
- * @param [isPoEligible=false]              - Whether the user is eligible for progressive onboarding.
  *
  * @return Rendered Account Onboarding component.
  */
@@ -122,13 +115,10 @@ export const EmbeddedAccountOnboarding: React.FC<
 	onLoaderStart,
 	onLoadError,
 	onStepChange,
-	isPoEligible = false,
 	collectPayoutRequirements = false,
 } ) => {
-	const { stripeConnectInstance, initializationError } = useInitializeStripe(
-		onboardingData,
-		isPoEligible
-	);
+	const { stripeConnectInstance, initializationError } =
+		useInitializeStripe( onboardingData );
 
 	return (
 		<>
