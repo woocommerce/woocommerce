@@ -324,7 +324,7 @@ dispatch( setIsCartDataStale( isCartDataStale ) );
 
 ### updatingCustomerData
 
-This action returns an action object to indicate if the customer data is being updated.
+This action returns an action object to indicate if the customer data (billing and/or shipping address) is being updated.
 
 #### _Parameters_ <!-- omit in toc -->
 
@@ -705,7 +705,7 @@ Returns the cart meta from state.
 #### _Returns_ <!-- omit in toc -->
 
 -   `object`: The current cart meta with the following keys:
-    -   _updatingCustomerData_ `boolean`: If the customer data is being updated.
+    -   _updatingCustomerData_ `boolean`: If the customer data (billing and/or shipping address) is being updated.
     -   _updatingSelectedRate_ `boolean`: If the selected rate is being updated.
     -   _isCartDataStale_ `boolean`: If the cart data is stale.
     -   _applyingCoupon_ `string`: The coupon code being applied.

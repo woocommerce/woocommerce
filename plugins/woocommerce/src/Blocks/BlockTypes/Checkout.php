@@ -414,34 +414,6 @@ class Checkout extends AbstractBlock {
 			}
 			$country_data[ $country_code ]['format'] = $format;
 		}
-		$address_fields_for_shipping_rates = [ 'state', 'country', 'postcode', 'city' ];
-		$essential_shipping_data = apply_filters( 'woocommerce_essential_shipping_data', [] );
-		//check if each entry in the array is a string
-		if ( is_array( $essential_shipping_data ) ) {
-			foreach ( $essential_shipping_data as $key => $value ) {
-				if ( ! is_string( $value ) ) {
-					unset( $essential_shipping_data[ $key ] );
-				}
-			}
-			$essential_shipping_data = array_merge( $address_fields_for_shipping_rates, $essential_shipping_data );
-			$this->asset_data_registry->add( 'addressFieldsForShippingRates', $essential_shipping_data );
-
-			//maybe write a log, check if filters fail silently
-			//document filters
-		}
-
-		$essential_billing_data = apply_filters( 'woocommerce_essential_billing_data', [] );
-		if (is_array( $essential_billing_data ) ) {
-			foreach ( $essential_billing_data as $key => $value ) {
-				if ( ! is_string( $value ) ) {
-					unset( $essential_billing_data[ $key ] );
-				}
-			}
-		}
-
-		if ( is_array( $essential_billing_data ) ) {
-			$this->asset_data_registry->add( 'essentialBillingData', $essential_billing_data );
-		}
 
 
 		$this->asset_data_registry->add( 'countryData', $country_data );
@@ -481,6 +453,56 @@ class Checkout extends AbstractBlock {
 		$this->asset_data_registry->add( 'localPickupCost', $pickup_location_settings['cost'] );
 		$this->asset_data_registry->add( 'collectableMethodIds', $local_pickup_method_ids );
 		$this->asset_data_registry->add( 'shippingMethodsExist', CartCheckoutUtils::shipping_methods_exist() > 0 );
+
+		/**
+		 * This section handles the shipping address fields that trigger shipping rate recalculation.
+		 * The address_fields_for_shipping_rates array contains the default fields that affect shipping rates.
+		 * Additional fields names can be added via the 'woocommerce_essential_shipping_data' filter.
+		 * The filtered array is validated to ensure all entries are strings before being registered.
+		 */
+
+		$address_fields_for_shipping_rates = [ 'state', 'country', 'postcode', 'city' ];
+		$filtered_fields = apply_filters( 'woocommerce_address_fields_for_shipping_rates', [] );
+
+		if ( is_array( $filtered_fields ) ) {
+			wc_get_logger()->warning(
+				sprintf(
+					__( 'Address fields for shipping rates must be an array of strings.'),
+				),
+				array( 'source' => 'woocommerce_address_fields_for_shipping_rates' )
+			);
+			foreach ( $filtered_fields as $key => $value ) {
+				if ( ! is_string( $value ) ) {
+					wc_get_logger()->warning(
+						sprintf(
+							/* translators: %s: field value */
+							__( 'Address fields for shipping rates values must be strings. Non-string value removed for key: %s', 'woocommerce' ),
+							$key
+						),
+						array( 'source' => 'woocommerce_address_fields_for_shipping_rates' )
+					);
+					unset( $filtered_fields[ $key ] );
+				}
+			}
+			$address_fields_for_shipping_rates = array_merge( $address_fields_for_shipping_rates, $filtered_fields );
+		}
+
+		$this->asset_data_registry->add( 'addressFieldsForShippingRates', $address_fields_for_shipping_rates );
+
+
+		$essential_billing_data = apply_filters( 'woocommerce_essential_billing_data', [] );
+		if (is_array( $essential_billing_data ) ) {
+			foreach ( $essential_billing_data as $key => $value ) {
+				if ( ! is_string( $value ) ) {
+					unset( $essential_billing_data[ $key ] );
+				}
+			}
+		}
+
+		if ( is_array( $essential_billing_data ) ) {
+			$this->asset_data_registry->add( 'essentialBillingData', $essential_billing_data );
+		}
+
 
 		$is_block_editor = $this->is_block_editor();
 
