@@ -52,7 +52,6 @@ describe( 'Intro Banners', () => {
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
-					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
 					isPTKPatternsAPIAvailable: false,
 					activeThemeHasMods: false,

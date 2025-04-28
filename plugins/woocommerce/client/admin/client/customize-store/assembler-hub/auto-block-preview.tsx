@@ -22,23 +22,15 @@ import {
 	__unstableEditorStyles as EditorStyles,
 	// @ts-expect-error No types for this exist yet.
 	__unstableIframe as Iframe,
-	// @ts-expect-error No types for this exist yet.
-	privateApis as blockEditorPrivateApis,
 	BlockList,
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
-// @ts-expect-error No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 
 /**
  * Internal dependencies
  */
 import { LogoBlockContext } from './logo-block-context';
-import { SYSTEM_FONT_SLUG } from './sidebar/global-styles/font-pairing-variations/constants';
 import { PreloadFonts } from './preload-fonts';
-import { FontFamily } from '../types/font';
-import { CustomizeStoreContext } from '.';
 import { selectBlockOnHover } from './utils/select-block-on-hover';
 import { PopoverStatus, usePopoverHandler } from './hooks/use-popover-handler';
 import { useAddAutoBlockPreviewEventListenersAndObservers } from './hooks/auto-block-preview-event-listener';
@@ -58,7 +50,6 @@ interface BlockListWithRenderAppender
 // This is used to avoid rendering the block list if the sizes change.
 let MemoizedBlockList: React.ComponentType< BlockListWithRenderAppender >;
 
-const { useGlobalSetting } = unlock( blockEditorPrivateApis );
 const MAX_HEIGHT = 2000;
 
 export type ScaledBlockPreviewProps = {
