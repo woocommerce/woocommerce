@@ -62,14 +62,14 @@ class QuantitySelector extends AbstractAddToCartWithOptionsBlock {
 
 		ob_start();
 
-		woocommerce_quantity_input( Utils::get_quantity_input_args( $product ) );
+		woocommerce_quantity_input( $this->get_quantity_input_args( $product ) );
 
 		$product_html = ob_get_clean();
 
 		$product_name = $product->get_name();
 
-		$product_html = Utils::add_quantity_steppers( $product_html, $product_name );
-		$product_html = Utils::add_quantity_stepper_classes( $product_html );
+		$product_html = $this->add_quantity_steppers( $product_html, $product_name );
+		$product_html = $this->add_quantity_stepper_classes( $product_html );
 
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
@@ -90,7 +90,7 @@ class QuantitySelector extends AbstractAddToCartWithOptionsBlock {
 			)
 		);
 
-		$form = Utils::make_quantity_input_interactive( $product_html, $wrapper_attributes );
+		$form = $this->make_quantity_input_interactive( $product_html, $wrapper_attributes );
 
 		$product = $previous_product;
 

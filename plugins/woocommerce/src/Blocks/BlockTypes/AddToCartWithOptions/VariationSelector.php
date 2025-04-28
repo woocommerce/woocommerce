@@ -38,11 +38,23 @@ class VariationSelector extends AbstractAddToCartWithOptionsBlock {
 				return '';
 			}
 
-			add_filter( 'woocommerce_product_supports', array( $this, 'check_product_supports' ), 10, 3 );
+			add_filter( 'woocommerce_product_supports', array( $this, 'check_product_supports_wrapper' ), 10, 3 );
 
 			return $content;
 		}
 
 		return '';
+	}
+
+	/**
+	 * Checks if the product supports a specific feature.
+	 *
+	 * @param bool       $supports Whether the product supports the feature.
+	 * @param string     $feature  The feature being checked.
+	 * @param WC_Product $product  The product being checked.
+	 * @return bool
+	 */
+	public function check_product_supports_wrapper( $supports, $feature, $product ) {
+		return parent::check_product_supports( $supports, $feature, $product );
 	}
 }
