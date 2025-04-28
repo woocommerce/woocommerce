@@ -28,7 +28,7 @@ if ( $login_reminder_at_checkout ) : ?>
 	<div class="woocommerce-form-login-toggle">
 		<?php
 		wc_print_notice(
-			apply_filters( 'woocommerce_checkout_login_message', esc_html__( 'Returning customer?', 'woocommerce' ) ) .
+			apply_filters( 'woocommerce_checkout_login_message', esc_html__( 'Returning customer?', 'woocommerce' ) ) . // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			' <a href="#" class="showlogin">' . esc_html__( 'Click here to login', 'woocommerce' ) . '</a>',
 			'notice'
 		);
