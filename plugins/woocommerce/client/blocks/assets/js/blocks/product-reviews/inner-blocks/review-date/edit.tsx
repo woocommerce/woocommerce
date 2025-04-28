@@ -41,26 +41,6 @@ export default function Edit( {
 		'date_format'
 	);
 
-	const inspectorControls = (
-		<InspectorControls>
-			<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
-				<DateFormatPicker
-					format={ format }
-					defaultFormat={ siteFormat }
-					onChange={ ( nextFormat: string ) =>
-						setAttributes( { format: nextFormat } )
-					}
-				/>
-				<ToggleControl
-					__nextHasNoMarginBottom
-					label={ __( 'Link to review', 'woocommerce' ) }
-					onChange={ () => setAttributes( { isLink: ! isLink } ) }
-					checked={ isLink }
-				/>
-			</PanelBody>
-		</InspectorControls>
-	);
-
 	if ( ! commentId || ! date ) {
 		date = _x( 'Review Date', 'block title', 'woocommerce' );
 	}
@@ -89,7 +69,23 @@ export default function Edit( {
 
 	return (
 		<>
-			{ inspectorControls }
+			<InspectorControls>
+				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
+					<DateFormatPicker
+						format={ format }
+						defaultFormat={ siteFormat }
+						onChange={ ( nextFormat: string ) =>
+							setAttributes( { format: nextFormat } )
+						}
+					/>
+					<ToggleControl
+						__nextHasNoMarginBottom
+						label={ __( 'Link to review', 'woocommerce' ) }
+						onChange={ () => setAttributes( { isLink: ! isLink } ) }
+						checked={ isLink }
+					/>
+				</PanelBody>
+			</InspectorControls>
 			<div { ...blockProps }>{ reviewDate }</div>
 		</>
 	);
