@@ -9,7 +9,6 @@ import { AnyInterpreter } from 'xstate';
  */
 import { Intro } from '../';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
-import { FlowType } from '~/customize-store/types';
 
 jest.mock( '../../assembler-hub/site-hub', () => ( {
 	SiteHub: jest.fn( () => null ),
@@ -94,7 +93,6 @@ describe( 'Intro Banners', () => {
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
-					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
 					isPTKPatternsAPIAvailable: false,
 					activeThemeHasMods: false,
@@ -141,7 +139,6 @@ describe( 'Intro Banners', () => {
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
-					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
 					isPTKPatternsAPIAvailable: false,
 					activeThemeHasMods: false,
