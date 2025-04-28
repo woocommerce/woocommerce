@@ -15,7 +15,6 @@ use WP_Block;
 abstract class AbstractAddToCartWithOptionsBlock extends AbstractBlock {
 	use EnableBlockJsonAssetsTrait;
 
-	// AddToCartWithOptions Class.
 	/**
 	 * Get template part IDs for each product type.
 	 *
@@ -41,9 +40,7 @@ abstract class AbstractAddToCartWithOptionsBlock extends AbstractBlock {
 
 		return $template_part_ids;
 	}
-	// AddToCartWithOptions Class.
 
-	// GroupedProductSelectorItemCTA Class.
 	/**
 	 * Gets the quantity selector markup for a product.
 	 *
@@ -108,10 +105,7 @@ abstract class AbstractAddToCartWithOptionsBlock extends AbstractBlock {
 		}
 		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity-' . $product->get_id() ) . '" /><label for="' . esc_attr( 'quantity-' . $product->get_id() ) . '" class="screen-reader-text">' . $label . '</label>';
 	}
-	// GroupedProductSelectorItemCTA Class.
 
-	// GroupedProductSelectorItemTemplate Class.
-	// VariationSelectorItemTemplate Class.
 	/**
 	 * Renders a new block with custom context
 	 *
@@ -132,10 +126,7 @@ abstract class AbstractAddToCartWithOptionsBlock extends AbstractBlock {
 		// Render with dynamic set to false to prevent calling render_callback.
 		return $new_block->render( array( 'dynamic' => false ) );
 	}
-	// GroupedProductSelectorItemTemplate Class.
-	// VariationSelectorItemTemplate Class.
 
-	// QuantitySelector Class.
 	/**
 	 * Add increment and decrement buttons to the quantity input field.
 	 *
@@ -226,9 +217,7 @@ abstract class AbstractAddToCartWithOptionsBlock extends AbstractBlock {
 
 		return '<div data-wp-interactive="woocommerce/add-to-cart-with-options">' . $quantity_html . '</div>';
 	}
-	// QuantitySelector Class.
 
-	// VariationSelector Class.
 	/**
 	 * Get variations data.
 	 *
@@ -267,9 +256,7 @@ abstract class AbstractAddToCartWithOptionsBlock extends AbstractBlock {
 
 		return $supports;
 	}
-	// VariationSelector Class.
 
-	// VariationSelectorAttributeOptions Class.
 	/**
 	 * Get the block's attributes.
 	 *
@@ -417,9 +404,7 @@ abstract class AbstractAddToCartWithOptionsBlock extends AbstractBlock {
 			$options,
 		);
 	}
-	// VariationSelectorAttributeOptions Class.
 
-	// VariationSelectorItemTemplate Class.
 	/**
 	 * Get product attributes terms.
 	 *
@@ -466,7 +451,6 @@ abstract class AbstractAddToCartWithOptionsBlock extends AbstractBlock {
 
 		return $items;
 	}
-	// VariationSelectorItemTemplate Class.
 
 	/**
 	 * Create a term item for attribute options.
