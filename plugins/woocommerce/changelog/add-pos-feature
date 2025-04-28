@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add hidden point_of_sale feature for POS in Woo mobile apps, enabled by default.
+Add point-of-sale feature flag for mobile Point of Sale feature that is only enabled in development environment.
