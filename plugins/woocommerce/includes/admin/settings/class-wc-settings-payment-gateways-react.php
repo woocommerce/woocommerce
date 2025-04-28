@@ -32,7 +32,6 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 	 * @return array List of section identifiers.
 	 */
 	private function get_reactify_render_sections() {
-		// @todo Add 'woocommerce_payments' when WooPayments Reactified settings page is done.
 		$sections = array(
 			self::MAIN_SECTION_NAME,
 			self::OFFLINE_SECTION_NAME,
