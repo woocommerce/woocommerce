@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
-use WP_Block;
 
 /**
  * Block type for the CTA of grouped product selector items in add to cart with options.
@@ -23,9 +22,9 @@ class GroupedProductSelectorItemCTA extends AbstractAddToCartWithOptionsBlock {
 	/**
 	 * Render the block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content Block content.
-	 * @param WP_Block $block Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content Block content.
+	 * @param \WP_Block $block Block instance.
 	 * @return string Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ): string {

@@ -27,9 +27,9 @@ class QuantitySelector extends AbstractAddToCartWithOptionsBlock {
 	 * - External products with URLs
 	 * - Products sold individually
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content Block content.
-	 * @param WP_Block $block Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content Block content.
+	 * @param \WP_Block $block Block instance.
 	 *
 	 * @return string | void Rendered block output.
 	 */

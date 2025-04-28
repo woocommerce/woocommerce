@@ -21,9 +21,9 @@ class VariationSelectorAttributeOptions extends AbstractAddToCartWithOptionsBloc
 	/**
 	 * Render the block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content Block content.
-	 * @param WP_Block $block Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content Block content.
+	 * @param \WP_Block $block Block instance.
 	 * @return string Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ): string {
