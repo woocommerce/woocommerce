@@ -20,23 +20,18 @@ TARGET_DIR="plugins/woocommerce/assets/client/blocks"
 # Create target directory if it doesn't exist
 mkdir -p "$TARGET_DIR"
 
-# Define generic blocks (keep in sync with webpack-entries.js)
-generic_blocks=(
-    "accordion-group"
-    "accordion-header"
-    "accordion-item"
-    "accordion-panel"
-)
+# Define generic blocks as a space-separated string (keep in sync with webpack-entries.js)
+generic_blocks="accordion-group accordion-header accordion-item accordion-panel"
 
 # Find all block.json files
 find plugins/woocommerce/client/blocks/assets/js -name "block.json" | while read file; do
     # Read the block name from the JSON file
     block_name=$(cat "$file" | grep -o '"name": "[^"]*"' | cut -d'"' -f4 | cut -d'/' -f2)
 
-    # Function to check if a block is in the generic_blocks array
+    # Function to check if a block is in the generic_blocks string
     is_generic_block=false
-    for gb in "${generic_blocks[@]}"; do
-        if [[ "$block_name" == "$gb" ]]; then
+    for gb in $generic_blocks; do
+        if [ "$block_name" = "$gb" ]; then
             is_generic_block=true
             break
         fi
