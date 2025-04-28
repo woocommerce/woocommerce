@@ -106,13 +106,37 @@ $dialog-padding: 20px;
 		font-size: 12px;
 		padding: 0;
 		background: #fff;
+		outline-offset: -2px;
 
 		&:disabled {
 			.wc-block-product-gallery-large-image-next-previous__icon {
-				opacity: 35%;
+				opacity: 30%;
 			}
 			cursor: not-allowed;
 		}
+	}
+
+	&.alignleft {
+		justify-content: flex-start;
+		gap: 0;
+	}
+
+	&.alignright {
+		justify-content: flex-end;
+		gap: 0;
+	}
+
+	&.aligncenter {
+		justify-content: center;
+		gap: 0;
+	}
+
+	&.aligntop {
+		align-items: flex-start;
+	}
+
+	&.alignbottom {
+		align-items: flex-end;
 	}
 }
 
