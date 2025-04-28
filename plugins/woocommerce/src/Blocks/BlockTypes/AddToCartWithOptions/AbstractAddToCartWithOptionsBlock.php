@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use WP_Block;
 
 /**
@@ -51,18 +52,18 @@ abstract class AbstractAddToCartWithOptionsBlock extends AbstractBlock {
 	protected function get_quantity_selector_markup( $product ) {
 		ob_start();
 
-		woocommerce_quantity_input( Utils::get_quantity_input_args( $product ) );
+		woocommerce_quantity_input( $this->get_quantity_input_args( $product ) );
 
 		$quantity_html = ob_get_clean();
 
 		// Modify the quantity input to add stepper buttons.
 		$product_name = $product->get_name();
 
-		$quantity_html = Utils::add_quantity_steppers( $quantity_html, $product_name );
-		$quantity_html = Utils::add_quantity_stepper_classes( $quantity_html );
+		$quantity_html = $this->add_quantity_steppers( $quantity_html, $product_name );
+		$quantity_html = $this->add_quantity_stepper_classes( $quantity_html );
 
 		// Add interactive data attribute for the stepper functionality.
-		$quantity_html = Utils::make_quantity_input_interactive( $quantity_html );
+		$quantity_html = $this->make_quantity_input_interactive( $quantity_html );
 
 		return $quantity_html;
 	}
@@ -133,6 +134,99 @@ abstract class AbstractAddToCartWithOptionsBlock extends AbstractBlock {
 	// GroupedProductSelectorItemTemplate Class.
 	// VariationSelectorItemTemplate Class.
 
+	// QuantitySelector Class.
+	/**
+	 * Add increment and decrement buttons to the quantity input field.
+	 *
+	 * @param string $quantity_html Quantity input HTML.
+	 * @param string $product_name Product name.
+	 * @return string Quantity input HTML with increment and decrement buttons.
+	 */
+	protected function add_quantity_steppers( $quantity_html, $product_name ) {
+		// Regex pattern to match the <input> element with id starting with 'quantity_'.
+		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
+		// Replacement string to add button BEFORE the matched <input> element.
+		/* translators: %s refers to the item name in the cart. */
+		$minus_button = '<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '"type="button" data-wp-on--click="actions.decreaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>$1';
+		// Replacement string to add button AFTER the matched <input> element.
+		/* translators: %s refers to the item name in the cart. */
+		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.increaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
+		$new_html    = preg_replace( $pattern, $minus_button, $quantity_html );
+		$new_html    = preg_replace( $pattern, $plus_button, $new_html );
+		return $new_html;
+	}
+
+	/**
+	 * Add classes to the Quantity Selector needed for the stepper style.
+	 *
+	 * @param string $quantity_html The Quantity Selector HTML.
+	 *
+	 * @return string The Quantity Selector HTML with classes added.
+	 */
+	protected function add_quantity_stepper_classes( $quantity_html ) {
+		$html = new \WP_HTML_Tag_Processor( $quantity_html );
+
+		// Add classes to the form.
+		while ( $html->next_tag( array( 'class_name' => 'quantity' ) ) ) {
+			$html->add_class( 'wc-block-components-quantity-selector' );
+		}
+
+		$html = new \WP_HTML_Tag_Processor( $html->get_updated_html() );
+		while ( $html->next_tag( array( 'class_name' => 'input-text' ) ) ) {
+			$html->add_class( 'wc-block-components-quantity-selector__input' );
+		}
+
+		return $html->get_updated_html();
+	}
+
+	/**
+	 * Get standardized quantity input arguments for WooCommerce quantity input.
+	 *
+	 * @param \WC_Product $product The product object.
+	 * @return array Arguments for woocommerce_quantity_input().
+	 */
+	protected function get_quantity_input_args( $product ) {
+		return array(
+			/**
+			 * Filter the minimum quantity value allowed for the product.
+			 *
+			 * @since 2.0.0
+			 * @param int        $min_value Minimum quantity value.
+			 * @param WC_Product $product   Product object.
+			 */
+			'min_value'   => apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product ),
+			/**
+			 * Filter the maximum quantity value allowed for the product.
+			 *
+			 * @since 2.0.0
+			 * @param int        $max_value Maximum quantity value.
+			 * @param WC_Product $product   Product object.
+			 */
+			'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product ),
+			'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity(), // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		);
+	}
+
+	/**
+	 * Make the quantity input interactive by wrapping it with the necessary data attribute.
+	 *
+	 * @param string $quantity_html The quantity HTML.
+	 * @param string $wrapper_attributes Optional wrapper attributes.
+	 * @return string The quantity HTML with interactive wrapper.
+	 */
+	protected function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = '' ) {
+		if ( ! empty( $wrapper_attributes ) ) {
+			return sprintf(
+				'<div %1$s data-wp-interactive="woocommerce/add-to-cart-with-options">%2$s</div>',
+				$wrapper_attributes,
+				$quantity_html
+			);
+		}
+
+		return '<div data-wp-interactive="woocommerce/add-to-cart-with-options">' . $quantity_html . '</div>';
+	}
+	// QuantitySelector Class.
+
 	// VariationSelector Class.
 	/**
 	 * Get variations data.
@@ -165,7 +259,7 @@ abstract class AbstractAddToCartWithOptionsBlock extends AbstractBlock {
 	 * @return bool True if the product supports the feature, false otherwise.
 	 * @since  9.9.0
 	 */
-	public function check_product_supports( $supports, $feature, $product ) {
+	protected function check_product_supports( $supports, $feature, $product ) {
 		if ( 'ajax_add_to_cart' === $feature ) {
 			return true;
 		}
@@ -188,34 +282,6 @@ abstract class AbstractAddToCartWithOptionsBlock extends AbstractBlock {
 		);
 
 		return wp_parse_args( $attributes, $defaults );
-	}
-
-	/**
-	 * Get the normalized version of the attributes.
-	 *
-	 * @param array $attributes         The element's attributes.
-	 * @param array $default_attributes The element's default attributes.
-	 * @return string The HTML element's attributes.
-	 */
-	protected function get_normalized_attributes( $attributes, $default_attributes = array() ) {
-		$normalized_attributes = array();
-
-		$merged_attributes = array_merge( $default_attributes, $attributes );
-
-		foreach ( $merged_attributes as $key => $value ) {
-			if ( is_null( $value ) ) {
-				continue;
-			}
-			if ( is_array( $value ) || is_object( $value ) ) {
-				$value = wp_json_encode(
-					$value,
-					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-				);
-			}
-			$normalized_attributes[] = sprintf( '%s="%s"', esc_attr( $key ), esc_attr( $value ) );
-		}
-
-		return implode( ' ', $normalized_attributes );
 	}
 
 	/**
@@ -251,7 +317,7 @@ abstract class AbstractAddToCartWithOptionsBlock extends AbstractBlock {
 		foreach ( $attribute_terms as $attribute_term ) {
 			$pills .= sprintf(
 				'<div %s>%s</div>',
-				$this->get_normalized_attributes(
+				Utils::get_normalized_attributes(
 					array(
 						'role'                       => 'radio',
 						'class'                      => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill',
@@ -271,7 +337,7 @@ abstract class AbstractAddToCartWithOptionsBlock extends AbstractBlock {
 
 		return sprintf(
 			'<div %s>%s</div>',
-			$this->get_normalized_attributes(
+			Utils::get_normalized_attributes(
 				array(
 					'class'               => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills',
 					'role'                => 'radiogroup',
@@ -318,7 +384,7 @@ abstract class AbstractAddToCartWithOptionsBlock extends AbstractBlock {
 		foreach ( $attribute_terms as $attribute_term ) {
 			$options .= sprintf(
 				'<option %s>%s</option>',
-				$this->get_normalized_attributes(
+				Utils::get_normalized_attributes(
 					array(
 						'value'           => $attribute_term['value'],
 						'selected'        => $attribute_term['isSelected'] ? 'selected' : null,
@@ -333,7 +399,7 @@ abstract class AbstractAddToCartWithOptionsBlock extends AbstractBlock {
 
 		return sprintf(
 			'<select %s>%s</select>',
-			$this->get_normalized_attributes(
+			Utils::get_normalized_attributes(
 				array(
 					'class'               => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown',
 					'id'                  => $attribute_id,
@@ -370,27 +436,6 @@ abstract class AbstractAddToCartWithOptionsBlock extends AbstractBlock {
 		if ( $is_taxonomy ) {
 			$items = array_map(
 				function ( $term ) use ( $attribute_name, $product, $selected_attribute ) {
-					// return array(
-					// 'value'      => $term->slug,
-					// **
-					// * Filter the variation option name.
-					// *
-					// * @since 9.7.0
-					// *
-					// * @param string     $option_label    The option label.
-					// * @param WP_Term|string|null $item   Term object for taxonomies, option string for custom attributes.
-					// * @param string     $attribute_name  Name of the attribute.
-					// * @param WC_Product $product         Product object.
-					// */
-					// 'label'      => apply_filters(
-					// 'woocommerce_variation_option_name',
-					// $term->name,
-					// $term,
-					// $attribute_name,
-					// $product
-					// ),
-					// 'isSelected' => $selected_attribute === $term->slug,
-					// );
 					return $this->create_term_item(
 						$term,              // The term object.
 						$term->slug,        // The term value.
@@ -405,27 +450,6 @@ abstract class AbstractAddToCartWithOptionsBlock extends AbstractBlock {
 		} else {
 			$items = array_map(
 				function ( $term_value ) use ( $attribute_name, $product, $selected_attribute ) {
-					// return array(
-					// 'value'      => $term,
-					// **
-					// * Filter the variation option name.
-					// *
-					// * @since 9.7.0
-					// *
-					// * @param string     $option_label    The option label.
-					// * @param WP_Term|string|null $item   Term object for taxonomies, option string for custom attributes.
-					// * @param string     $attribute_name  Name of the attribute.
-					// * @param WC_Product $product         Product object.
-					// */
-					// 'label'      => apply_filters(
-					// 'woocommerce_variation_option_name',
-					// $term,
-					// null,
-					// $attribute_name,
-					// $product
-					// ),
-					// 'isSelected' => $selected_attribute === $term,
-					// );
 					return $this->create_term_item(
 						null,               // No term object for custom attributes.
 						$term_value,        // The term value.
