@@ -39,7 +39,7 @@
 					padding: $gap-large;
 				}
 
-				@media screen and (max-width: 782px) {
+				@media screen and (max-width: $break-medium) {
 					padding: $gap-large;
 				}
 			}
@@ -100,7 +100,7 @@
 					height: 40px;
 					border-radius: 4px;
 				}
-				@media screen and (max-width: 782px) {
+				@media screen and (max-width: $break-medium) {
 					align-items: flex-start;
 
 					img {
