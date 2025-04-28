@@ -34,6 +34,15 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
 
 		WC()->cart->empty_cart();
+
+		add_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
+	}
+
+	/**
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 	}
 
 	/**
