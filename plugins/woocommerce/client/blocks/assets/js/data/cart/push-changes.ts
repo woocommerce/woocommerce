@@ -37,7 +37,6 @@ const addressFieldsForShippingRates: string[] = getSetting(
 	[]
 );
 
-const essentialBillingData = getSetting( 'essentialBillingData', [] );
 /**
  * Initializes the customer data cache on the first run.
  */
@@ -140,13 +139,6 @@ const updateCustomerData = (): void => {
 		return;
 	}
 
-	// Define the fields that are considered "essential" for calculations
-	const BILLING_ESSENTIAL_FIELDS = [ 'country', ...essentialBillingData ];
-
-	let isEssentialBillingDataChanged =
-		localState.dirtyProps.billingAddress.some( ( field ) =>
-			BILLING_ESSENTIAL_FIELDS.includes( field as string )
-		);
 	let haveAddressFieldsForShippingRatesChanged =
 		localState.dirtyProps.shippingAddress.some( ( field ) =>
 			addressFieldsForShippingRates.includes( field as string )
@@ -163,14 +155,11 @@ const updateCustomerData = (): void => {
 				} ),
 			},
 			true,
-			isEssentialBillingDataChanged,
 			haveAddressFieldsForShippingRatesChanged
 		)
 		.then( ( response ) => {
 			localState.dirtyProps.billingAddress = [];
 			localState.dirtyProps.shippingAddress = [];
-			isEssentialBillingDataChanged = false;
-			haveAddressFieldsForShippingRatesChanged = false;
 			localState.doingPush = false;
 		} )
 		.catch( ( response ) => {

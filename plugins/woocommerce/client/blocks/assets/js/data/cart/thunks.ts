@@ -496,18 +496,12 @@ export const updateCustomerData =
 		customerData: Partial< BillingAddressShippingAddress >,
 		// If the address is being edited, we don't update the customer data in the store from the response.
 		editing = true,
-		isEssentialBillingDataChanged = false,
 		haveAddressFieldsForShippingRatesChanged = false
 	) =>
 	async ( { dispatch }: CartThunkArgs ) => {
 		try {
 			dispatch.updatingCustomerData( true );
-			if (
-				'billing_address' in customerData &&
-				isEssentialBillingDataChanged
-			) {
-				dispatch.updatingEssentialBillingData( true );
-			}
+			// Signal that the fields needed for shipping rate calculations have changed
 			if (
 				'shipping_address' in customerData &&
 				haveAddressFieldsForShippingRatesChanged
@@ -536,7 +530,6 @@ export const updateCustomerData =
 			return Promise.reject( error );
 		} finally {
 			dispatch.updatingCustomerData( false );
-			dispatch.updatingEssentialBillingData( false );
 			dispatch.updatingAddressFieldsForShippingRates( false );
 		}
 	};

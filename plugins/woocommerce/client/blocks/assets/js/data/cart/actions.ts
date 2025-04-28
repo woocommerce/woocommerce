@@ -127,15 +127,6 @@ export function updatingCustomerData( isResolving: boolean ) {
 		isResolving,
 	};
 }
-/**
- * Returns an action object used to track when customer billing data is being updated.
- */
-export function updatingEssentialBillingData( isResolving: boolean ) {
-	return {
-		type: types.UPDATING_ESSENTIAL_BILLING_DATA,
-		isResolving,
-	};
-}
 
 /**
  * Returns an action object used to track when customer shipping data is being updated.

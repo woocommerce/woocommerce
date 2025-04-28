@@ -102,9 +102,6 @@ describe( 'useStoreCart', () => {
 					.fn()
 					.mockReturnValue( ! mockCartIsLoading ),
 				isCustomerDataUpdating: jest.fn().mockReturnValue( false ),
-				isEssentialBillingDataUpdating: jest
-					.fn()
-					.mockReturnValue( false ),
 				areAddressFieldsForShippingRatesUpdating: jest
 					.fn()
 					.mockReturnValue( false ),

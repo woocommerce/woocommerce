@@ -199,16 +199,6 @@ export const isCustomerDataUpdating = ( state: CartState ): boolean => {
 };
 
 /**
- * Retrieves if the address is being applied for billing only
- *
- * @param {CartState} state The current state.
- * @return {boolean} address is being applied for billing only.
- */
-export const isEssentialBillingDataUpdating = ( state: CartState ): boolean => {
-	return !! state.metaData.updatingEssentialBillingData;
-};
-
-/**
  * Retrieves if the address is being applied for shipping only
  *
  * @param {CartState} state The current state.
