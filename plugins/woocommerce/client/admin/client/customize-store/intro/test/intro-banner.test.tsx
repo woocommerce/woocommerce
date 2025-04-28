@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { AnyInterpreter } from 'xstate';
 
 /**
@@ -46,7 +46,6 @@ describe( 'Intro Banners', () => {
 							},
 						},
 						customizeStoreTaskCompleted: false,
-						currentThemeIsAiGenerated: false,
 					},
 					themeConfiguration: {},
 					transitionalScreen: {

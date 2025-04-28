@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { resolveSelect } from '@wordpress/data';
-import { store as coreStore } from '@wordpress/core-data';
-import { onboardingStore, optionsStore } from '@woocommerce/data';
+import { onboardingStore } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -40,22 +39,12 @@ export const fetchCustomizeStoreCompleted = async () => {
 };
 
 export const fetchIntroData = async () => {
-	const currentTemplatePromise = resolveSelect(
-		coreStore
-	).getDefaultTemplateId( { slug: 'home' } );
-
-	const maybePreviousTemplatePromise = resolveSelect(
-		optionsStore
-	).getOption( 'woocommerce_admin_customize_store_completed_theme_id' );
-
 	const getTaskPromise =
 		resolveSelect( onboardingStore ).getTask( 'customize-store' );
 
 	const themeDataPromise = fetchThemeCards();
 
 	const [ task, themeData ] = await Promise.all( [
-		currentTemplatePromise,
-		maybePreviousTemplatePromise,
 		getTaskPromise,
 		themeDataPromise,
 	] );
