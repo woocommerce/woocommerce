@@ -284,9 +284,7 @@ final class BlockTypesController {
 	 */
 	public function add_data_attributes( $content, $block ) {
 
-		$content = trim( $content );
-
-		if ( ! $this->block_should_have_data_attributes( $block['blockName'] ) ) {
+		if ( ! is_string( $content ) || ! $this->block_should_have_data_attributes( $block['blockName'] ) ) {
 			return $content;
 		}
 
@@ -296,10 +294,9 @@ final class BlockTypesController {
 		$processor = new \WP_HTML_Tag_Processor( $content );
 
 		if (
-			false === $processor->next_token() ||
-			'DIV' !== $processor->get_token_name() ||
-			$processor->is_tag_closer()
+			false === $processor->next_tag() || $processor->is_tag_closer()
 		) {
+
 			return $content;
 		}
 
@@ -374,9 +371,7 @@ final class BlockTypesController {
 	 */
 	protected function get_widget_area_block_types() {
 		return array(
-			'ActiveFilters',
 			'AllReviews',
-			'AttributeFilter',
 			'Breadcrumbs',
 			'CartLink',
 			'CatalogSorting',
@@ -384,16 +379,33 @@ final class BlockTypesController {
 			'CustomerAccount',
 			'FeaturedCategory',
 			'FeaturedProduct',
-			'FilterWrapper',
 			'MiniCart',
-			'PriceFilter',
 			'ProductCategories',
 			'ProductResultsCount',
 			'ProductSearch',
-			'RatingFilter',
 			'ReviewsByCategory',
 			'ReviewsByProduct',
+			'ProductFilters',
+			'ProductFilterStatus',
+			'ProductFilterPrice',
+			'ProductFilterPriceSlider',
+			'ProductFilterAttribute',
+			'ProductFilterRating',
+			'ProductFilterActive',
+			'ProductFilterRemovableChips',
+			'ProductFilterClearButton',
+			'ProductFilterCheckboxList',
+			'ProductFilterChips',
+
+			// Keep hidden legacy filter blocks for backward compatibility.
+			'ActiveFilters',
+			'AttributeFilter',
+			'FilterWrapper',
+			'PriceFilter',
+			'RatingFilter',
 			'StockFilter',
+			// End: legacy filter blocks.
+
 			// Below product grids are hidden from inserter however they could have been used in widgets.
 			// Keep them for backward compatibility.
 			'HandpickedProducts',
@@ -404,6 +416,7 @@ final class BlockTypesController {
 			'ProductsByAttribute',
 			'ProductCategory',
 			'ProductTag',
+			// End: legacy product grids blocks.
 		);
 	}
 
@@ -531,10 +544,11 @@ final class BlockTypesController {
 			$block_types[] = 'Accordion\AccordionHeader';
 			$block_types[] = 'BlockifiedProductDetails';
 			$block_types[] = 'ProductDescription';
-
+			$block_types[] = 'ProductSpecifications';
 			$block_types[] = 'Reviews\ProductReviews';
 			$block_types[] = 'Reviews\ProductReviewRating';
 			$block_types[] = 'Reviews\ProductReviewsTitle';
+			$block_types[] = 'Reviews\ProductReviewForm';
 		}
 
 		/**

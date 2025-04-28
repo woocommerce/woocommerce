@@ -130,26 +130,30 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The months filter options works as expected when the oldest order has a future date.
+	 * @testdox The months filter options works as expected when all orders have a future date.
+	 *
+	 * When all orders have a future date, the month options range should go from the current date to
+	 * the order date farthest in the future.
 	 */
 	public function test_get_months_filter_options_only_future_orders() {
-		$start_date     = new \WC_DateTime( '+ 1 year' );
-		$current_date   = new \WC_DateTime();
-		$expected_count = $this->get_months_count( $current_date, $start_date );
+		$current_date   = new \WC_DateTime( 'now', new \DateTimeZone( 'UTC' ) );
+		$start_date     = new \WC_DateTime( '+ 1 years', new \DateTimeZone( 'UTC' ) );
+		$end_date       = new \WC_DateTime( '+ 2 years', new \DateTimeZone( 'UTC' ) );
+		$expected_count = $this->get_months_count( $current_date, $end_date );
 
 		$order = \WC_Helper_Order::create_order();
 		$order->set_date_created( $start_date );
 		$order->save();
 
 		$order = \WC_Helper_Order::create_order();
-		$order->set_date_created( new \WC_DateTime( '+ 2 years' ) );
+		$order->set_date_created( $end_date );
 		$order->save();
 
 		$year_months = $this->call_get_months_filter_options( $this->sut );
 
 		$this->assertCount( $expected_count, $year_months );
-		$this->assertEquals( $start_date->format( 'Y' ), $year_months[0]->year );
-		$this->assertEquals( $start_date->format( 'n' ), $year_months[0]->month );
+		$this->assertEquals( $end_date->format( 'Y' ), $year_months[0]->year );
+		$this->assertEquals( $end_date->format( 'n' ), $year_months[0]->month );
 		$this->assertEquals( gmdate( 'Y', time() ), end( $year_months )->year );
 		$this->assertEquals( gmdate( 'n', time() ), end( $year_months )->month );
 	}
@@ -175,5 +179,57 @@ class ListTableTest extends \WC_Unit_Test_Case {
 		$start_month_diff  = $start_month - 1;
 
 		return $months_from_years - $start_month_diff + $end_month;
+	}
+
+	/**
+	 * @testdox When filtering by created_via, only orders with that specific value should be shown.
+	 */
+	public function test_filtering_by_created_via_shows_only_matching_orders() {
+		$order1 = \WC_Helper_Order::create_order();
+		$order1->set_created_via( 'rest-api' );
+		$order1->save();
+
+		$order2 = \WC_Helper_Order::create_order();
+		$order2->set_created_via( 'pos-rest-api' );
+		$order2->save();
+
+		$_GET['_created_via'] = 'rest-api';
+
+		$this->sut->prepare_items();
+
+		$get_items = function () {
+			return $this->items;
+		};
+
+		$filtered_items = $get_items->call( $this->sut );
+
+		$this->assertCount( 1, $filtered_items ); // Only one order should be shown.
+		$this->assertEquals( 'rest-api', $filtered_items[0]->get_created_via() );
+		$this->assertEquals( $order1->get_id(), $filtered_items[0]->get_id() );
+	}
+
+	/**
+	 * @testdox When the created_via filter is empty, all orders should be shown.
+	 */
+	public function test_filtering_by_created_via_shows_all_orders_when_no_filter() {
+		$order1 = \WC_Helper_Order::create_order();
+		$order1->set_created_via( 'rest-api' );
+		$order1->save();
+
+		$order2 = \WC_Helper_Order::create_order();
+		$order2->set_created_via( 'pos-rest-api' );
+		$order2->save();
+
+		unset( $_GET['_created_via'] );
+
+		$this->sut->prepare_items();
+
+		$get_items = function () {
+			return $this->items;
+		};
+
+		$filtered_items = $get_items->call( $this->sut );
+
+		$this->assertCount( 2, $filtered_items ); // Both orders should be shown.
 	}
 }

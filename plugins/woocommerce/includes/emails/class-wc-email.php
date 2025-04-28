@@ -926,10 +926,10 @@ class WC_Email extends WC_Settings_API {
 		 *
 		 * @since 5.6.0
 		 * @param bool     $return Whether the email was sent successfully.
-		 * @param int      $id     Email ID.
+		 * @param string   $id     Email ID.
 		 * @param WC_Email $this   WC_Email instance.
 		 */
-		do_action( 'woocommerce_email_sent', $return, $this->id, $this );
+		do_action( 'woocommerce_email_sent', $return, (string) $this->id, $this );
 
 		return $return;
 	}
@@ -1223,7 +1223,7 @@ class WC_Email extends WC_Settings_API {
 		// Do admin actions.
 		$this->admin_actions();
 		?>
-		<h2><?php echo esc_html( $this->get_title() ); ?> <?php wc_back_link( __( 'Return to emails', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=email' ) ); ?></h2>
+		<?php wc_back_header( $this->get_title(), __( 'Return to emails', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=email' ) ); ?>
 
 		<?php echo wpautop( wp_kses_post( $this->get_description() ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
 

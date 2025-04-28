@@ -6,7 +6,7 @@ The setting options data store provides a centralized way to manage WooCommerce 
 
 ```js
 import { useSelect } from '@wordpress/data';
-import { store as settingOptionsStore } from '@woocommerce/data';
+import { experimentalSettingOptionsStore as settingOptionsStore } from '@woocommerce/data';
 
 function MySettingsComponent() {
 	const settings = useSelect( ( select ) => {

@@ -43,7 +43,6 @@ export function RawStylesSidebar( props: Props ): JSX.Element {
 				closeLabel={ __( 'Close styles sidebar', 'woocommerce' ) }
 				icon={ styles }
 				scope={ storeName }
-				smallScreenTitle={ __( 'No title', 'woocommerce' ) }
 				{ ...props }
 			>
 				<NavigatorProvider initialPath="/">

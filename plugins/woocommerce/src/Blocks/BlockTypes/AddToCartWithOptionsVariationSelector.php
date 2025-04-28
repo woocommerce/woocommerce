@@ -7,6 +7,9 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  * Block type for variation selector in add to cart with options.
  */
 class AddToCartWithOptionsVariationSelector extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -56,6 +59,8 @@ class AddToCartWithOptionsVariationSelector extends AbstractBlock {
 				return '';
 			}
 
+			add_filter( 'woocommerce_product_supports', array( $this, 'check_product_supports' ), 10, 3 );
+
 			return $content;
 		}
 
@@ -63,12 +68,22 @@ class AddToCartWithOptionsVariationSelector extends AbstractBlock {
 	}
 
 	/**
-	 * Disable the frontend script for this block type, it's built with script modules.
+	 * Add 'ajax_add_to_cart' support to a Variable Product.
 	 *
-	 * @param string $key Data to get, or default to everything.
-	 * @return array|string|null
+	 * This is needed so the ProductButton block could add a Variable Product to
+	 * the Cart without a page refresh.
+	 *
+	 * @param  bool        $supports If features are already supported or not.
+	 * @param  string      $feature  The feature to check if is supported.
+	 * @param  \WC_Product $product  The product to check.
+	 * @return bool True if the product supports the feature, false otherwise.
+	 * @since  9.9.0
 	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
+	public function check_product_supports( $supports, $feature, $product ) {
+		if ( 'ajax_add_to_cart' === $feature ) {
+			return true;
+		}
+
+		return $supports;
 	}
 }

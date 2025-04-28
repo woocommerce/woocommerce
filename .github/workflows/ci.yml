@@ -14,17 +14,23 @@ on:
     branches:
       - 'trunk'
       - 'release/*'
-  release:
-    types: [published, edited]
   workflow_call:
     inputs:
       trigger:
-        description: 'Type of run to trigger. E.g. daily-e2e, release-checks, etc.'
+        description: 'Type of run to trigger. E.g. nightly-checks, release-checks, etc.'
         required: true
         default: 'default'
         type: string
       wc-version:
         description: 'Specific WooCommerce version to install by the test jobs supporting it'
+        required: false
+        type: string
+      refName:
+        description: 'The ref name to run tests on. It needs to have a corresponding release published.'
+        required: false
+        type: string
+      artifactName:
+        description: 'The release artifact name to download and run tests for.'
         required: false
         type: string
 
@@ -52,7 +58,7 @@ jobs:
         with:
           filters: |
             needs-code-validation:
-              - '!((**/*.md)|(**/changelog/*)|(.github/**)|(.husky/**)|(.cursor/**)|(.gitignore)|(**/readme.txt))'
+              - '!((**/*.md)|(docs/docs-manifest.json)|(**/changelog/*)|(.github/**)|(.husky/**)|(.cursor/**)|(.gitignore)|(**/readme.txt))'
             needs-changelog-validation:
               - '{packages,plugins}/*/!((changelog/*)|(readme.txt))'
             needs-markdown-validation:
@@ -76,6 +82,8 @@ jobs:
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
+        with:
+          ref: ${{ inputs.refName != '' && inputs.refName || '' }}
 
       - name: Setup - pnpm
         uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
@@ -99,23 +107,12 @@ jobs:
 
             let githubEvent = ${{ toJson( github.event_name ) }};
 
-            const refType = ${{ toJson( github.ref_type ) }};
-            const refName = ${{ toJson( github.ref_name ) }};
-                        
-            if ( refType === 'tag' && refName !== 'nightly' ) {
-              githubEvent = 'release-checks';
-            }
-
-            if ( refType === 'tag' && refName === 'nightly' ) {
-              githubEvent = 'nightly-checks';
-            }
-
             let trigger = ${{ toJson( inputs.trigger ) }};
             if ( trigger ) {
               githubEvent = trigger;
             }
 
-            // `pre-release` should trigger `release-checks`, but without a 'tag' ref. 
+            // `pre-release` should trigger `release-checks`, but without a specific refName. 
             // This will run all release-checks against the branch the workflow targeted, instead of a release artifact.
             if ( trigger === 'pre-release' ) {
               githubEvent = 'release-checks';
@@ -127,7 +124,7 @@ jobs:
   project-lint-jobs:
     name: "Lint - ${{ matrix.projectName }} ${{ ( matrix.optional && ' (optional)' ) || '' }}"
     runs-on: ubuntu-latest
-    needs: 'project-jobs'
+    needs: [ 'identify-jobs-to-run', 'project-jobs' ]
     if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' && needs.project-jobs.outputs.lint-jobs != '[]' }}
     strategy:
       fail-fast: false
@@ -138,6 +135,7 @@ jobs:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
         with:
+          ref: ${{ inputs.refName != '' && inputs.refName || '' }}
           # We tried to speed checkout up with shallow copies, but `git merge-base ...` used on different levels of tooling forces us to follow this approach.
           fetch-depth: ${{ ( ( matrix.projectName == '@woocommerce/plugin-woocommerce' && '0' ) || '1' ) }}
 
@@ -165,6 +163,8 @@ jobs:
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
+        with:
+          ref: ${{ inputs.refName != '' && inputs.refName || '' }}
 
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Install Monorepo'
@@ -177,10 +177,10 @@ jobs:
           pull-package-deps: '${{ matrix.projectName }}'
 
       - name: 'Update wp-env config'
-        if: ${{ github.ref_type == 'tag' }}
+        if: ${{ inputs.artifactName != '' }}
         env:
-          RELEASE_TAG: ${{ github.ref_name }}
-          ARTIFACT_NAME: ${{ github.ref_name == 'nightly' && 'woocommerce-trunk-nightly.zip' || 'woocommerce.zip' }}
+          RELEASE_TAG: ${{ inputs.refName != '' && inputs.refName || github.ref_name }}
+          ARTIFACT_NAME: ${{ inputs.artifactName }}
           # band-aid to get the path to wp-env.json for blocks e2e tests, until they're migrated to plugins/woocommerce
           WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.testEnv.start == 'env:start:blocks' && 'plugins/woocommerce/client/blocks' || matrix.projectPath  }}
         run: node .github/workflows/scripts/override-wp-env-plugins.js
@@ -189,7 +189,21 @@ jobs:
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
         env: ${{ matrix.testEnv.envVars }}
-        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+        run: |
+          # randomized wp-env ports to reduce the number of ports usage conflicts in the range of 1024 - 49151
+          min=10
+          max=99
+          randomized=$(( $RANDOM % ( $max - $min + 1 ) + $min ))
+          httpport="${randomized}80"
+          mysqlport="${randomized}36"
+
+          # provision the environment to propagate the randomized ports
+          echo "WP_ENV_TESTS_PORT=$httpport" >> "$GITHUB_ENV"
+          echo "WP_ENV_TESTS_MYSQL_PORT=$mysqlport" >> "$GITHUB_ENV"
+          # WP_BASE_URL is set only to satisfy blocks E2Es setup (setupRest).
+          echo "WP_BASE_URL=http://localhost:$httpport" >> "$GITHUB_ENV"
+          
+          WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
 
       - name: 'Determine BuildKite Analytics Message'
         env:
@@ -225,7 +239,7 @@ jobs:
           pattern: 'last-run__${{ strategy.job-index }}'
 
       - name: 'Run tests (${{ matrix.testType }})'
-        timeout-minutes: ${{ ( github.event_name == 'pull_request' && matrix.testType == 'e2e' && 25 ) || 360 }}
+        timeout-minutes: ${{ ( github.event_name == 'pull_request' && matrix.testType == 'e2e' && 20 ) || 360 }}
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
           BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
@@ -233,6 +247,7 @@ jobs:
           LAST_FAILED_RUN: ${{ vars.LAST_FAILED_RUN }}
           GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           WC_VERSION: ${{ inputs.wc-version }}
+          PLUGIN_SLUG: ${{ inputs.refName == 'nightly' && 'woocommerce-trunk-nightly' || '' }} # required by test:plugincheck
         run: |
           lastRunFile="${{ steps.download-last-run-info.outputs.download-path }}/last-run__${{ strategy.job-index }}/.last-run.json"
           lastRunFileDest="$ARTIFACTS_PATH/.last-run.json"
@@ -279,6 +294,7 @@ jobs:
           name: 'last-run__${{ strategy.job-index }}'
           path: '${{ env.ARTIFACTS_PATH }}/.last-run.json'
           if-no-files-found: ignore
+          include-hidden-files: true
           overwrite: true
 
       - name: 'Upload artifacts'
@@ -309,6 +325,7 @@ jobs:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
         with:
+          ref: ${{ inputs.refName != '' && inputs.refName || '' }}
           sparse-checkout: |
               .github/workflows/scripts
 
@@ -331,14 +348,16 @@ jobs:
     name: 'Report results on Slack'
     runs-on: ubuntu-latest
     needs: ['project-jobs', 'project-lint-jobs', 'project-test-jobs', 'evaluate-project-jobs']
-    if: ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce'  }}
+    if: ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce' }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
         with:
+          ref: ${{ inputs.refName != '' && inputs.refName || '' }}
           sparse-checkout: |
               package.json
               ./tools/monorepo-utils
+              .github/workflows
 
       - name: 'Setup PNPM'
         uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
@@ -346,22 +365,23 @@ jobs:
       - name: 'Send messages for failed jobs'
         env:
           SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
-          SLACK_CHANNEL: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
+          DEFAULT_CHECKS_CHANNEL: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
+          RELEASE_CHECKS_CHANNEL: ${{ secrets.RELEASE_CHECKS_CHANNEL }}
+          DAILY_CHECKS_CHANNEL: ${{ secrets.DAILY_CHECKS_CHANNEL }}
           HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
           INPUT_TRIGGER: ${{ inputs.trigger }}
-          RUN_TYPE: ${{ github.ref_type == 'tag' && (github.ref_name == 'nightly' && 'nightly-checks' || 'release-checks') || '' }}
         run: |
           COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
 
           if [[ -n "${INPUT_TRIGGER}" ]]; then
               CHECKS_TYPE="${INPUT_TRIGGER}"
           else
-              CHECKS_TYPE="${RUN_TYPE}"
+              CHECKS_TYPE=""
           fi
 
-          pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "$CHECKS_TYPE Build jobs matrix" -m "$COMMIT_MESSAGE"
-          pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "$CHECKS_TYPE Linting" -m "$COMMIT_MESSAGE"
-          pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$CHECKS_TYPE Tests" -m "$COMMIT_MESSAGE"
+          pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "$CHECKS_TYPE build jobs matrix" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
+          pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "$CHECKS_TYPE linting" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
+          pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$CHECKS_TYPE tests" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
 
   test-reports:
     name: 'Test reports - ${{ matrix.report }}'
@@ -395,16 +415,15 @@ jobs:
           HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           EVENT_NAME: ${{ inputs.trigger == '' && github.event_name || inputs.trigger }}
+          REF_NAME: ${{ inputs.refName != '' && inputs.refName || github.ref_name }}
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             REPORT_TITLE="$PR_TITLE"
             REF_NAME="$GITHUB_HEAD_REF"
           elif [[ "${{ github.event_name }}" == "push" ]]; then
             REPORT_TITLE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
-            REF_NAME="$GITHUB_REF_NAME"
           else
             REPORT_TITLE="$EVENT_NAME"
-            REF_NAME="$GITHUB_REF_NAME"
           fi
 
           gh workflow run report.yml \
@@ -433,6 +452,7 @@ jobs:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
         with:
+          ref: ${{ inputs.refName != '' && inputs.refName || '' }}
           sparse-checkout: |
               .github/actions/report-flaky-tests
 
@@ -468,7 +488,7 @@ jobs:
 
     steps:
       - uses: 'actions/checkout@v4'
-
+          
       - name: 'Setup - node'
         uses: 'actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65'
         with:
@@ -488,7 +508,15 @@ jobs:
 
   validate-changelog:
     name: 'Validate changelog'
-    if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.user.login != 'github-actions[bot]' && github.event.pull_request.base.ref == 'trunk' && needs.identify-jobs-to-run.outputs.needs-changelog-validation == 'true' && ! contains( github.event.pull_request.body, '[x] This Pull Request does not require a changelog' ) }}
+    if: |-
+      ${{
+        ! cancelled() && 
+        github.event_name == 'pull_request' && 
+        github.event.pull_request.user.login != 'github-actions[bot]' && 
+        needs.identify-jobs-to-run.outputs.needs-changelog-validation == 'true' && 
+        ( github.event.pull_request.base.ref == 'trunk' || startsWith( github.event.pull_request.base.ref, 'release/' ) ) && 
+        ! contains( github.event.pull_request.body, '[x] This Pull Request does not require a changelog' ) 
+      }}
     needs: [ 'identify-jobs-to-run' ]
     runs-on: ubuntu-latest
     permissions:

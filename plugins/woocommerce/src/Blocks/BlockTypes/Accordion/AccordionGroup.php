@@ -4,11 +4,14 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes\Accordion;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 
 /**
  * AccordionGroup class.
  */
 class AccordionGroup extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
@@ -30,8 +33,6 @@ class AccordionGroup extends AbstractBlock {
 			return $content;
 		}
 
-		wp_enqueue_script_module( $this->get_full_block_name() );
-
 		$p = new \WP_HTML_Tag_Processor( $content );
 
 		if ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-accordion-group' ) ) ) {
@@ -47,15 +48,5 @@ class AccordionGroup extends AbstractBlock {
 		}
 
 		return $content;
-	}
-
-	/**
-	 * Disable the frontend script for this block type, it's built with script modules.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 * @return null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
 	}
 }

@@ -8,7 +8,7 @@ import { sanitizeHTML } from '@woocommerce/utils';
 import { useDispatch } from '@wordpress/data';
 import { usePrevious } from '@woocommerce/base-hooks';
 import { decodeEntities } from '@wordpress/html-entities';
-import type { NoticeType } from '@woocommerce/types';
+import type { NoticeStatus, NoticeType } from '@woocommerce/types';
 import type { NoticeBannerProps } from '@woocommerce/base-components/notice-banner';
 
 /**
@@ -25,8 +25,16 @@ const StoreNotices = ( {
 } ): JSX.Element => {
 	const ref = useRef< HTMLDivElement >( null );
 	const { removeNotice } = useDispatch( 'core/notices' );
-	const noticeIds = notices.map( ( notice ) => notice.id );
-	const previousNoticeIds = usePrevious( noticeIds );
+	// Only scroll to the container when an error notice is added, not info notices.
+	const errorIds = notices
+		.map( ( notice ) => {
+			if ( notice.status === 'error' || notice.status === 'warning' ) {
+				return notice.id;
+			}
+			return null;
+		} )
+		.filter( Boolean );
+	const previousErrorIds = usePrevious( errorIds );
 
 	useEffect( () => {
 		// Scroll to container when an error is added here.
@@ -48,17 +56,17 @@ const StoreNotices = ( {
 			return;
 		}
 
-		const newNoticeIds = noticeIds.filter(
+		const newErrorIds = errorIds.filter(
 			( value ) =>
-				! previousNoticeIds || ! previousNoticeIds.includes( value )
+				! previousErrorIds || ! previousErrorIds.includes( value )
 		);
 
-		if ( newNoticeIds.length && containerRef?.scrollIntoView ) {
+		if ( newErrorIds.length && containerRef?.scrollIntoView ) {
 			containerRef.scrollIntoView( {
 				behavior: 'smooth',
 			} );
 		}
-	}, [ noticeIds, previousNoticeIds, ref ] );
+	}, [ errorIds, previousErrorIds, ref ] );
 
 	// Group notices by whether or not they are dismissible. Dismissible notices can be grouped.
 	const dismissibleNotices = notices.filter(
@@ -124,7 +132,7 @@ const StoreNotices = ( {
 							),
 						} ) );
 					const noticeProps: Omit< NoticeBannerProps, 'children' > = {
-						status,
+						status: status as NoticeStatus,
 						onRemove: () => {
 							noticeGroup.forEach( ( notice ) => {
 								removeNotice( notice.id, notice.context );

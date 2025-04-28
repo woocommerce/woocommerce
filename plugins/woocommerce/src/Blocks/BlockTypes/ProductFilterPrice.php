@@ -13,6 +13,8 @@ use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
  */
 final class ProductFilterPrice extends AbstractBlock {
 
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -120,8 +122,6 @@ final class ProductFilterPrice extends AbstractBlock {
 			return '';
 		}
 
-		wp_enqueue_script_module( $this->get_full_block_name() );
-
 		$price_range   = $this->get_filtered_price( $block );
 		$min_range     = $price_range['min_price'] ?? 0;
 		$max_range     = $price_range['max_price'] ?? 0;
@@ -142,8 +142,9 @@ final class ProductFilterPrice extends AbstractBlock {
 		);
 
 		$wrapper_attributes = array(
-			'data-wp-key'     => wp_unique_prefixed_id( $this->get_full_block_name() ),
-			'data-wp-context' => wp_json_encode(
+			'data-wp-interactive' => 'woocommerce/product-filters',
+			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
+			'data-wp-context'     => wp_json_encode(
 				array(
 					'filterType' => 'price',
 					'minRange'   => $min_range,
@@ -235,16 +236,5 @@ final class ProductFilterPrice extends AbstractBlock {
 			'min_price' => intval( floor( floatval( $price_results->min_price ?? 0 ) ) ),
 			'max_price' => intval( ceil( floatval( $price_results->max_price ?? 0 ) ) ),
 		);
-	}
-
-	/**
-	 * Disable the block type script, this uses script modules.
-	 *
-	 * @param string|null $key The key.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
 	}
 }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Move deprecated functions to wc-deprecated-functions.php

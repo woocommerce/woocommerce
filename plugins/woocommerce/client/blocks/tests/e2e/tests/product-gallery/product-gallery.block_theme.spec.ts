@@ -212,7 +212,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			const nextButton = page
 				.locator(
-					'.wc-block-product-gallery-large-image-next-previous--button'
+					'.wc-block-product-gallery-large-image-next-previous__button'
 				)
 				.nth( 1 );
 			await nextButton.click();
@@ -227,7 +227,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			const previousButton = page
 				.locator(
-					'.wc-block-product-gallery-large-image-next-previous--button'
+					'.wc-block-product-gallery-large-image-next-previous__button'
 				)
 				.first();
 			await previousButton.click();
@@ -275,7 +275,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			const nextButton = page
 				.locator(
-					'.wc-block-product-gallery-large-image-next-previous--button'
+					'.wc-block-product-gallery-large-image-next-previous__button'
 				)
 				.nth( 1 );
 			await nextButton.click();

@@ -214,8 +214,9 @@ final class ProductFilterAttribute extends AbstractBlock {
 		}
 
 		$wrapper_attributes = array(
-			'data-wp-key'     => wp_unique_prefixed_id( $this->get_full_block_name() ),
-			'data-wp-context' => wp_json_encode(
+			'data-wp-interactive' => 'woocommerce/product-filters',
+			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
+			'data-wp-context'     => wp_json_encode(
 				array(
 					'activeLabelTemplate' => "$product_attribute->name: {{label}}",
 					'filterType'          => 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug ),
@@ -408,10 +409,18 @@ final class ProductFilterAttribute extends AbstractBlock {
 	}
 
 	/**
-	 * Disable the block type script, this uses script modules.
+	 * Disable the editor style handle for this block type.
 	 *
-	 * @param string|null $key The key.
+	 * @return null
+	 */
+	protected function get_block_type_editor_style() {
+		return null;
+	}
+
+	/**
+	 * Disable the script handle for this block type. We use block.json to load the script.
 	 *
+	 * @param string|null $key The key of the script to get.
 	 * @return null
 	 */
 	protected function get_block_type_script( $key = null ) {
