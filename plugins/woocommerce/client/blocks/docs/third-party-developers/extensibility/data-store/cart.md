@@ -52,6 +52,7 @@
     -   [isItemPendingQuantity( cartItemKey )](#isitempendingquantity-cartitemkey-)
     -   [isItemPendingDelete( cartItemKey )](#isitempendingdelete-cartitemkey-)
     -   [isCustomerDataUpdating](#iscustomerdataupdating)
+    -   [areAddressFieldsForShippingRatesUpdating](#areaddressfieldsforshippingratesupdating)
     -   [isShippingRateBeingSelected](#isshippingratebeingselected)
     -   [getItemsPendingQuantityUpdate](#getitemspendingquantityupdate)
     -   [getItemsPendingDelete](#getitemspendingdelete)
@@ -920,6 +921,21 @@ Queries whether the customer data is being updated.
 ```js
 const store = select( cartStore );
 const isCustomerDataUpdating = store.isCustomerDataUpdating();
+```
+
+### areAddressFieldsForShippingRatesUpdating
+
+Queries whether shipping address fields impacting the shipping rates are being updated.
+
+#### _Returns_ <!-- omit in toc -->
+
+-   `boolean`: True if shipping address fields impacting the shipping rates are being updated.
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = select( cartStore );
+const areAddressFieldsForShippingRatesUpdating = store.isCustomerDataUpdating();
 ```
 
 ### isShippingRateBeingSelected

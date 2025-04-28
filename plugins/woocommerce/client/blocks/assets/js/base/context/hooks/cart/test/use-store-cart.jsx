@@ -105,7 +105,7 @@ describe( 'useStoreCart', () => {
 				isEssentialBillingDataUpdating: jest
 					.fn()
 					.mockReturnValue( false ),
-				isEssentialShippingDataUpdating: jest
+				areAddressFieldsForShippingRatesUpdating: jest
 					.fn()
 					.mockReturnValue( false ),
 			},

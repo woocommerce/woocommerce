@@ -214,7 +214,8 @@ export const isEssentialBillingDataUpdating = ( state: CartState ): boolean => {
  * @param {CartState} state The current state.
  * @return {boolean} address is being applied for shipping only.
  */
-export const isEssentialShippingDataUpdating = (
+//rename const to the new name based on updatingAddressFieldsForShippingRates
+export const areAddressFieldsForShippingRatesUpdating = (
 	state: CartState
 ): boolean => {
 	return !! state.metaData.updatingAddressFieldsForShippingRates;
