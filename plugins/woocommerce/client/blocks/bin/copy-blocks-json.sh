@@ -25,7 +25,7 @@ find plugins/woocommerce/client/blocks/assets/js -name "block.json" | while read
     # Read the block name from the JSON file
     block_name=$(cat "$file" | grep -o '"name": "[^"]*"' | cut -d'"' -f4 | cut -d'/' -f2)
 
-    # Check if it's a parent block by looking for "parent" field
+    # Check if it's an inner block by looking for "parent" field
     if grep -q '"parent":' "$file"; then
         # It's an inner block
         target_path="$TARGET_DIR/inner-blocks/$block_name/block.json"
