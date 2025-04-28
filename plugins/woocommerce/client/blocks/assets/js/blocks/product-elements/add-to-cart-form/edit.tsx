@@ -47,10 +47,14 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 		[]
 	);
 
+	// Check whether the current theme is block theme or not.
 	const isBlockTheme = useSelect( ( select ) => {
 		const themeSupports = select( coreStore ).getThemeSupports?.();
 		return themeSupports?.['block-templates'] === true;
 	}, [] );
+
+	const buttonBlockClass = ( ! isBlockTheme ) ? 'wp-block-button' : '' 
+	const buttonLinkClass = ( ! isBlockTheme ) ? 'wp-block-button__link wc-block-components-button' : ''
 
 	return (
 		<>
@@ -104,22 +108,13 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 											readOnly
 										/>
 									</div>
-									{ ! isBlockTheme ? (
-										<div className='wp-block-button'>
-											<button
-												className={ `single_add_to_cart_button alt wp-element-button wp-block-button__link wc-block-components-button` }
-											>
-												{ __( 'Add to cart', 'woocommerce' ) }
-											</button>
-										</div>
-									) : (
-											<button
-												className={ `single_add_to_cart_button alt wp-element-button` }
-											>
-												{ __( 'Add to cart', 'woocommerce' ) }
-											</button>
-										)
-									}
+									<div className={buttonBlockClass}>
+										<button
+											className={ `single_add_to_cart_button alt wp-element-button ${buttonLinkClass}` }
+										>
+											{ __( 'Add to cart', 'woocommerce' ) }
+										</button>
+									</div>
 								</>
 							) }
 							{ props.attributes.quantitySelectorStyle ===

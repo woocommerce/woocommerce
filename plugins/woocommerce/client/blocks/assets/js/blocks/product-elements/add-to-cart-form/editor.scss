@@ -8,11 +8,13 @@
 	.components-disabled {
 		display: flex;
 
+		// Remove the default block button margin when inside add to cart form in classic themes.
+		// This is required to vertically center the quantity input.
 		.wp-block-button {
 			margin: 0 !important;
 
 			.single_add_to_cart_button {
-				border: medium;
+				border: none;
 				margin: 0;
 			}
 		}
