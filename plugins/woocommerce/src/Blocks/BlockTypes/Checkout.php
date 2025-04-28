@@ -468,7 +468,7 @@ class Checkout extends AbstractBlock {
 		 * @since 9.9.0
 		 * @return array
 		 */
-		$filtered_fields                   = apply_filters( 'woocommerce_address_fields_for_shipping_rates', [] );
+		$filtered_fields = apply_filters( 'woocommerce_address_fields_for_shipping_rates', [] );
 
 		if ( is_array( $filtered_fields ) ) {
 			wc_get_logger()->warning(

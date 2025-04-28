@@ -123,6 +123,7 @@ describe( 'pushChanges', () => {
 				email: 'john.doe@mail.com',
 				phone: '555-555-5555',
 			},
+			// Only the shipping postcode is changed.
 			shippingAddress: {
 				first_name: 'John',
 				last_name: 'Doe',
@@ -139,20 +140,24 @@ describe( 'pushChanges', () => {
 		// Push these changes to the server, the `updateCustomerData` mock is set to reject (in the original mock at the top of the file), to simulate a server error.
 		pushChanges( false );
 
-		// Check that the mock was called with full address data.
-		await expect( updateCustomerDataMock ).toHaveBeenCalledWith( {
-			shipping_address: {
-				first_name: 'John',
-				last_name: 'Doe',
-				address_1: '123 Main St',
-				address_2: '',
-				city: 'Houston',
-				state: 'TX',
-				postcode: 'ABCDEF',
-				country: 'US',
-				phone: '555-555-5555',
+		// Check that the mock was called with only the shipping address data.
+		await expect( updateCustomerDataMock ).toHaveBeenCalledWith(
+			{
+				shipping_address: {
+					first_name: 'John',
+					last_name: 'Doe',
+					address_1: '123 Main St',
+					address_2: '',
+					city: 'Houston',
+					state: 'TX',
+					postcode: 'ABCDEF',
+					country: 'US',
+					phone: '555-555-5555',
+				},
 			},
-		} );
+			true,
+			true
+		);
 
 		// This assertion is required to ensure the async `catch` block in `pushChanges` is done executing and all side effects finish.
 		await expect( updateCustomerDataMock ).toHaveReturned();
@@ -161,7 +166,7 @@ describe( 'pushChanges', () => {
 		updateCustomerDataMock.mockReset();
 		updateCustomerDataMock.mockResolvedValue( jest.fn() );
 
-		// Simulate the user updating the postcode only.
+		// Simulate the user updating the shipping postcode only.
 		getCustomerDataMock.mockReturnValue( {
 			billingAddress: {
 				first_name: 'John',
@@ -191,30 +196,99 @@ describe( 'pushChanges', () => {
 		// Although only one property was updated between calls, we should expect City, State, and Postcode to be pushed
 		// to the server because the previous push failed when they were originally changed.
 		pushChanges( false );
-		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith( {
-			billing_address: {
+		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
+			{
+				shipping_address: {
+					first_name: 'John',
+					last_name: 'Doe',
+					address_1: '123 Main St',
+					address_2: '',
+					city: 'Houston',
+					state: 'TX',
+					postcode: '77058',
+					country: 'US',
+					phone: '555-555-5555',
+				},
+			},
+			true,
+			true
+		);
+	} );
+
+	it( 'Does not push the shipping address if the billing address is changed', async () => {
+		// Simulate the user updating the billing postcode only.
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress: {
 				first_name: 'John',
 				last_name: 'Doe',
 				address_1: '123 Main St',
 				address_2: '',
 				city: 'New York',
 				state: 'NY',
-				postcode: '10001',
+				postcode: '10002',
 				country: 'US',
 				email: 'john.doe@mail.com',
 				phone: '555-555-5555',
 			},
-			shipping_address: {
-				first_name: 'John',
-				last_name: 'Doe',
-				address_1: '123 Main St',
-				address_2: '',
-				city: 'Houston',
-				state: 'TX',
-				postcode: '77058',
+		} );
+
+		pushChanges( false );
+
+		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
+			{
+				billingAddress: {
+					first_name: 'John',
+					last_name: 'Doe',
+					address_1: '123 Main St',
+					address_2: '',
+					city: 'New York',
+					state: 'NY',
+					postcode: '10002',
+					country: 'US',
+					email: 'john.doe@mail.com',
+					phone: '555-555-5555',
+				},
+			},
+			true,
+			false // because the billing address is changed
+		);
+	} );
+
+	// it accounts for shipping field changes that impact the rates; changing other shipping fields outside of country, state, city and zip code
+	it( 'accounts for shipping field changes that impact the rates', async () => {
+		// Simulate the user updating the shipping postcode only.
+		getCustomerDataMock.mockReturnValue( {
+			shippingAddress: {
+				first_name: 'John 2',
+				last_name: 'Doe 2',
+				address_1: '123-2 Main St',
+				address_2: 'Apartment 2',
+				city: 'New York',
+				state: 'NY',
+				postcode: '10001',
 				country: 'US',
-				phone: '555-555-5555',
+				phone: '222-2222-2222',
 			},
 		} );
-	} );
+
+		pushChanges( false );
+
+		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
+			{
+				shipping_address: {
+					first_name: 'John 2',
+					last_name: 'Doe 2',
+					address_1: '123-2 Main St',
+					address_2: 'Apartment 2',
+					city: 'New York',
+					state: 'NY',
+					postcode: '10001',
+					country: 'US',
+					phone: '222-2222-2222',
+				},
+			},
+			true,
+			false // because the shipping rates impacting fields are not changed
+		);
+
 } );
