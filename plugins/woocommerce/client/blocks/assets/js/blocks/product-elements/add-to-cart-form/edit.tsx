@@ -10,6 +10,7 @@ import { useSelect } from '@wordpress/data';
 import { isSiteEditorPage } from '@woocommerce/utils';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean } from '@woocommerce/types';
+import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -45,6 +46,11 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 		( select ) => isSiteEditorPage( select( 'core/edit-site' ) ),
 		[]
 	);
+
+	const isBlockTheme = useSelect( ( select ) => {
+		const themeSupports = select( coreStore ).getThemeSupports?.();
+		return themeSupports?.['block-templates'] === true;
+	}, [] );
 
 	return (
 		<>
@@ -98,11 +104,22 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 											readOnly
 										/>
 									</div>
-									<button
-										className={ `single_add_to_cart_button alt wp-element-button` }
-									>
-										{ __( 'Add to cart', 'woocommerce' ) }
-									</button>
+									{ ! isBlockTheme ? (
+										<div className='wp-block-button'>
+											<button
+												className={ `single_add_to_cart_button alt wp-element-button wp-block-button__link wc-block-components-button` }
+											>
+												{ __( 'Add to cart', 'woocommerce' ) }
+											</button>
+										</div>
+									) : (
+											<button
+												className={ `single_add_to_cart_button alt wp-element-button` }
+											>
+												{ __( 'Add to cart', 'woocommerce' ) }
+											</button>
+										)
+									}
 								</>
 							) }
 							{ props.attributes.quantitySelectorStyle ===
