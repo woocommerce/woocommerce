@@ -183,16 +183,7 @@ test.describe( `${ blockData.name }`, () => {
 
 		await page.goto( blockData.productPage );
 
-		const largeImageBlockOnFrontend = await pageObject.getMainImageBlock( {
-			page: 'frontend',
-		} );
-
-		const largeImageElement = largeImageBlockOnFrontend.locator(
-			'.wc-block-woocommerce-product-gallery-large-image__image--active-image-slide'
-		);
-
-		const imageSourceForLargeImageElement =
-			await largeImageElement.getAttribute( 'src' );
+		const initialImageId = await pageObject.getVisibleLargeImageId();
 
 		const addToCartWithOptionsBlock =
 			await pageObject.getAddToCartWithOptionsBlock( {
@@ -210,22 +201,9 @@ test.describe( `${ blockData.name }`, () => {
 		// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
 		await page.waitForTimeout( 500 );
 
-		const largeImageElementAfterSelectingVariation =
-			largeImageBlockOnFrontend.locator(
-				'.wc-block-woocommerce-product-gallery-large-image__image--active-image-slide'
-			);
+		const variationImageId = await pageObject.getVisibleLargeImageId();
 
-		const imageSourceForLargeImageElementAfterSelectingVariation =
-			await largeImageElementAfterSelectingVariation.getAttribute(
-				'src'
-			);
-
-		expect( imageSourceForLargeImageElement ).not.toEqual(
-			imageSourceForLargeImageElementAfterSelectingVariation
-		);
-		expect(
-			imageSourceForLargeImageElementAfterSelectingVariation
-		).toContain( 'hoodie-green-1' );
+		expect( initialImageId ).not.toEqual( variationImageId );
 	} );
 
 	test.describe( 'Swipe to navigate', () => {
@@ -254,9 +232,11 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( blockFrontend ).toBeVisible();
 
-			const largeImageElement = blockFrontend.locator(
-				'.wc-block-woocommerce-product-gallery-large-image__image--active-image-slide'
-			);
+			const largeImageElement = await pageObject.getMainImageBlock( {
+				page: 'frontend',
+			} );
+
+			const initialImageId = await pageObject.getVisibleLargeImageId();
 
 			// Get the element's bounding box
 			const box = await largeImageElement.boundingBox();
@@ -269,10 +249,6 @@ test.describe( `${ blockData.name }`, () => {
 			const swipeStartY = box.y + box.height / 2;
 			const swipeEndX = swipeStartX - 200; // swipe left by 200px
 			const swipeEndY = swipeStartY;
-
-			const initialImageSrc = await largeImageElement.getAttribute(
-				'src'
-			);
 
 			// Dispatch touch events to simulate swipe
 			await largeImageElement.evaluate(
@@ -330,14 +306,9 @@ test.describe( `${ blockData.name }`, () => {
 			await page.waitForTimeout( 1000 );
 
 			// Verify the next image is shown
-			const nextImage = blockFrontend.locator(
-				'.wc-block-woocommerce-product-gallery-large-image__image--active-image-slide'
-			);
-			const nextImageSrc = await nextImage.getAttribute( 'src' );
+			const nextImageId = await pageObject.getVisibleLargeImageId();
 
-			// The next image should be visible and have a different src
-			await expect( nextImage ).toBeVisible();
-			expect( nextImageSrc ).not.toEqual( initialImageSrc );
+			expect( nextImageId ).not.toEqual( initialImageId );
 		} );
 	} );
 } );

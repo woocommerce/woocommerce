@@ -52,16 +52,6 @@ export const getImageId = async ( imgElement: Locator ) => {
 	return null;
 };
 
-export const getVisibleLargeImageId = async (
-	mainImageBlockLocator: Locator
-) => {
-	const mainImage = mainImageBlockLocator.locator(
-		'.wc-block-woocommerce-product-gallery-large-image__image--active-image-slide'
-	);
-
-	return getImageId( mainImage );
-};
-
 export const getIsDialogOpen = async (
 	productGalleryBlock: Locator
 ): Promise< boolean > => {
@@ -116,11 +106,8 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const visibleLargeImageId = await getVisibleLargeImageId(
-				await pageObject.getMainImageBlock( {
-					page: 'frontend',
-				} )
-			);
+			const visibleLargeImageId =
+				await pageObject.getVisibleLargeImageId();
 
 			const firstImageThumbnailId = await getThumbnailImageIdByNth(
 				0,
@@ -145,11 +132,8 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const visibleLargeImageId = await getVisibleLargeImageId(
-				await pageObject.getMainImageBlock( {
-					page: 'frontend',
-				} )
-			);
+			const visibleLargeImageId =
+				await pageObject.getVisibleLargeImageId();
 
 			const secondImageThumbnailId = await getThumbnailImageIdByNth(
 				1,
@@ -169,11 +153,12 @@ test.describe( `${ blockData.name }`, () => {
 				.nth( 1 )
 				.click();
 
-			const newVisibleLargeImageId = await getVisibleLargeImageId(
-				await pageObject.getMainImageBlock( {
-					page: 'frontend',
-				} )
-			);
+			// Wait for the transition to complete
+			// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
+			await page.waitForTimeout( 400 );
+
+			const newVisibleLargeImageId =
+				await pageObject.getVisibleLargeImageId();
 
 			expect( newVisibleLargeImageId ).toBe( secondImageThumbnailId );
 		} );
@@ -193,11 +178,8 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const initialVisibleLargeImageId = await getVisibleLargeImageId(
-				await pageObject.getMainImageBlock( {
-					page: 'frontend',
-				} )
-			);
+			const initialVisibleLargeImageId =
+				await pageObject.getVisibleLargeImageId();
 
 			const secondImageThumbnailId = await getThumbnailImageIdByNth(
 				1,
@@ -210,33 +192,15 @@ test.describe( `${ blockData.name }`, () => {
 				secondImageThumbnailId
 			);
 
-			const nextButton = page
-				.locator(
-					'.wc-block-product-gallery-large-image-next-previous__button'
-				)
-				.nth( 1 );
-			await nextButton.click();
+			await pageObject.clickNextButton();
 
-			const nextImageId = await getVisibleLargeImageId(
-				await pageObject.getMainImageBlock( {
-					page: 'frontend',
-				} )
-			);
+			const nextImageId = await pageObject.getVisibleLargeImageId();
 
 			expect( nextImageId ).toBe( secondImageThumbnailId );
 
-			const previousButton = page
-				.locator(
-					'.wc-block-product-gallery-large-image-next-previous__button'
-				)
-				.first();
-			await previousButton.click();
+			await pageObject.clickPreviousButton();
 
-			const previousImageId = await getVisibleLargeImageId(
-				await pageObject.getMainImageBlock( {
-					page: 'frontend',
-				} )
-			);
+			const previousImageId = await pageObject.getVisibleLargeImageId();
 
 			expect( previousImageId ).toBe( initialVisibleLargeImageId );
 		} );
@@ -256,11 +220,8 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const initialVisibleLargeImageId = await getVisibleLargeImageId(
-				await pageObject.getMainImageBlock( {
-					page: 'frontend',
-				} )
-			);
+			const initialVisibleLargeImageId =
+				await pageObject.getVisibleLargeImageId();
 
 			const secondImageThumbnailId = await getThumbnailImageIdByNth(
 				1,
@@ -273,18 +234,9 @@ test.describe( `${ blockData.name }`, () => {
 				secondImageThumbnailId
 			);
 
-			const nextButton = page
-				.locator(
-					'.wc-block-product-gallery-large-image-next-previous__button'
-				)
-				.nth( 1 );
-			await nextButton.click();
+			await pageObject.clickNextButton();
 
-			const nextImageId = await getVisibleLargeImageId(
-				await pageObject.getMainImageBlock( {
-					page: 'frontend',
-				} )
-			);
+			const nextImageId = await pageObject.getVisibleLargeImageId();
 
 			expect( nextImageId ).toBe( secondImageThumbnailId );
 
@@ -307,9 +259,8 @@ test.describe( `${ blockData.name }`, () => {
 			);
 			await closePopUpButton.click();
 
-			const singleProductImageId = await getVisibleLargeImageId(
-				largeImageBlock
-			);
+			const singleProductImageId =
+				await pageObject.getVisibleLargeImageId();
 
 			expect( singleProductImageId ).toBe( nextImageId );
 		} );
