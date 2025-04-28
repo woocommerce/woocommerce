@@ -5,6 +5,8 @@ import clsx from 'clsx';
 import { __, _x } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import type { BlockEditProps } from '@wordpress/blocks';
+import { store as coreStore } from '@wordpress/core-data';
+import { PanelBody, ToggleControl } from '@wordpress/components';
 import {
 	// @ts-expect-error AlignmentControl is not exported from @wordpress/block-editor
 	AlignmentControl,
@@ -12,13 +14,8 @@ import {
 	InspectorControls,
 	useBlockProps,
 } from '@wordpress/block-editor';
-// Fix dependency group error.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { store as coreStore } from '@wordpress/core-data';
-// eslint-disable-next-line @woocommerce/dependency-group
-import { PanelBody, ToggleControl } from '@wordpress/components';
 
-type WordPressComment = {
+type Comment = {
 	author_name?: string;
 	author: number;
 };
@@ -67,44 +64,6 @@ export default function Edit( {
 		[ commentId ]
 	);
 
-	const blockControls = (
-		<BlockControls>
-			<AlignmentControl
-				value={ textAlign }
-				onChange={ ( newAlign: string | undefined ) => {
-					if ( typeof newAlign === 'string' ) {
-						setAttributes( { textAlign: newAlign } );
-					}
-				} }
-			/>
-		</BlockControls>
-	);
-
-	const inspectorControls = (
-		<InspectorControls>
-			<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
-				<ToggleControl
-					__nextHasNoMarginBottom
-					label={ __( 'Link to authors URL', 'woocommerce' ) }
-					onChange={ () => setAttributes( { isLink: ! isLink } ) }
-					checked={ isLink }
-				/>
-				{ isLink && (
-					<ToggleControl
-						__nextHasNoMarginBottom
-						label={ __( 'Open in new tab', 'woocommerce' ) }
-						onChange={ ( value ) =>
-							setAttributes( {
-								linkTarget: value ? '_blank' : '_self',
-							} )
-						}
-						checked={ linkTarget === '_blank' }
-					/>
-				) }
-			</PanelBody>
-		</InspectorControls>
-	);
-
 	if ( ! commentId || ! displayName ) {
 		displayName = _x( 'Review Author', 'block title', 'woocommerce' );
 	}
@@ -121,8 +80,38 @@ export default function Edit( {
 	);
 	return (
 		<>
-			{ inspectorControls }
-			{ blockControls }
+			<InspectorControls>
+				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
+					<ToggleControl
+						__nextHasNoMarginBottom
+						label={ __( 'Link to authors URL', 'woocommerce' ) }
+						onChange={ () => setAttributes( { isLink: ! isLink } ) }
+						checked={ isLink }
+					/>
+					{ isLink && (
+						<ToggleControl
+							__nextHasNoMarginBottom
+							label={ __( 'Open in new tab', 'woocommerce' ) }
+							onChange={ ( value ) =>
+								setAttributes( {
+									linkTarget: value ? '_blank' : '_self',
+								} )
+							}
+							checked={ linkTarget === '_blank' }
+						/>
+					) }
+				</PanelBody>
+			</InspectorControls>
+			<BlockControls>
+				<AlignmentControl
+					value={ textAlign }
+					onChange={ ( newAlign: string | undefined ) => {
+						if ( typeof newAlign === 'string' ) {
+							setAttributes( { textAlign: newAlign } );
+						}
+					} }
+				/>
+			</BlockControls>
 			<div { ...blockProps }>{ displayAuthor }</div>
 		</>
 	);
