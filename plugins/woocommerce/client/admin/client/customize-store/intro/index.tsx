@@ -63,12 +63,6 @@ const BANNER_COMPONENTS = {
 	'non-default-block-theme': NonDefaultBlockThemeBanner,
 };
 
-const MODAL_COMPONENTS = {
-	'no-modal': null,
-};
-
-type ModalStatus = keyof typeof MODAL_COMPONENTS;
-
 const ThemeCards = ( {
 	sendEvent,
 	themeData,
