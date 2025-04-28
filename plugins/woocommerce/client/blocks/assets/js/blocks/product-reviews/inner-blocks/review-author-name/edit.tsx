@@ -23,24 +23,10 @@ type WordPressComment = {
 	author: number;
 };
 
-type WordPressUser = {
+type User = {
 	name?: string;
 };
 
-/**
- * Renders the `woocommerce/product-review-author-name` block on the editor.
- *
- * @param {Object} props                       React props.
- * @param {Object} props.setAttributes         Callback for updating block attributes.
- * @param {Object} props.attributes            Block attributes.
- * @param {string} props.attributes.isLink     Whether the author name should be linked.
- * @param {string} props.attributes.linkTarget Target of the link.
- * @param {string} props.attributes.textAlign  Text alignment.
- * @param {Object} props.context               Inherited context.
- * @param {string} props.context.commentId     The comment ID.
- *
- * @return {JSX.Element} React element.
- */
 export default function Edit( {
 	attributes: { isLink, linkTarget, textAlign },
 	context: { commentId },
@@ -65,7 +51,7 @@ export default function Edit( {
 				'root',
 				'comment',
 				commentId
-			) as WordPressComment | null;
+			) as Comment | null;
 			const authorName = comment?.author_name;
 
 			if ( comment && ! authorName ) {
@@ -73,7 +59,7 @@ export default function Edit( {
 					'root',
 					'user',
 					comment.author
-				) as WordPressUser | null;
+				) as User | null;
 				return user?.name ?? __( 'Anonymous', 'woocommerce' );
 			}
 			return authorName ?? '';
