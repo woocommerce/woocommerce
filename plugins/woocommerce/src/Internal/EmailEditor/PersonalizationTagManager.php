@@ -35,9 +35,9 @@ class PersonalizationTagManager {
 	public function register_personalization_tags( Personalization_Tags_Registry $registry ) {
 		$registry->register(
 			new Personalization_Tag(
-				__( 'Shopper Email', 'woocommerce' ),
-				'woocommerce/shopper-email',
-				__( 'Shopper', 'woocommerce' ),
+				__( 'Customer Email', 'woocommerce' ),
+				'woocommerce/customer-email',
+				__( 'Customer', 'woocommerce' ),
 				function ( array $context ): string {
 					if ( isset( $context['order'] ) ) {
 						return $context['order']->get_billing_email() ?? '';
@@ -49,9 +49,9 @@ class PersonalizationTagManager {
 
 		$registry->register(
 			new Personalization_Tag(
-				__( 'Shopper First Name', 'woocommerce' ),
-				'woocommerce/shopper-first-name',
-				__( 'Shopper', 'woocommerce' ),
+				__( 'Customer First Name', 'woocommerce' ),
+				'woocommerce/customer-first-name',
+				__( 'Customer', 'woocommerce' ),
 				function ( array $context ): string {
 					if ( isset( $context['order'] ) ) {
 						return $context['order']->get_billing_first_name() ?? '';
@@ -65,9 +65,9 @@ class PersonalizationTagManager {
 
 		$registry->register(
 			new Personalization_Tag(
-				__( 'Shopper Last Name', 'woocommerce' ),
-				'woocommerce/shopper-last-name',
-				__( 'Shopper', 'woocommerce' ),
+				__( 'Customer Last Name', 'woocommerce' ),
+				'woocommerce/customer-last-name',
+				__( 'Customer', 'woocommerce' ),
 				function ( array $context ): string {
 					if ( isset( $context['order'] ) ) {
 						return $context['order']->get_billing_last_name() ?? '';
@@ -81,9 +81,9 @@ class PersonalizationTagManager {
 
 		$registry->register(
 			new Personalization_Tag(
-				__( 'Shopper Full Name', 'woocommerce' ),
-				'woocommerce/shopper-full-name',
-				__( 'Shopper', 'woocommerce' ),
+				__( 'Customer Full Name', 'woocommerce' ),
+				'woocommerce/customer-full-name',
+				__( 'Customer', 'woocommerce' ),
 				function ( array $context ): string {
 					if ( isset( $context['order'] ) ) {
 						return $context['order']->get_formatted_billing_full_name() ?? '';
@@ -99,9 +99,9 @@ class PersonalizationTagManager {
 
 		$registry->register(
 			new Personalization_Tag(
-				__( 'Shopper Username', 'woocommerce' ),
-				'woocommerce/shopper-username',
-				__( 'Shopper', 'woocommerce' ),
+				__( 'Customer Username', 'woocommerce' ),
+				'woocommerce/customer-username',
+				__( 'Customer', 'woocommerce' ),
 				function ( array $context ): string {
 					if ( isset( $context['wp_user'] ) ) {
 						return stripslashes( $context['wp_user']->user_login ?? '' );
@@ -113,9 +113,9 @@ class PersonalizationTagManager {
 
 		$registry->register(
 			new Personalization_Tag(
-				__( 'Shopper Country', 'woocommerce' ),
-				'woocommerce/shopper-country',
-				__( 'Shopper', 'woocommerce' ),
+				__( 'Customer Country', 'woocommerce' ),
+				'woocommerce/customer-country',
+				__( 'Customer', 'woocommerce' ),
 				function ( array $context ): string {
 					if ( isset( $context['order'] ) ) {
 						$country_code = $context['order']->get_billing_country();
