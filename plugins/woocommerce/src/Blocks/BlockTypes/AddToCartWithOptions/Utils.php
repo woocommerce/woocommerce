@@ -132,4 +132,19 @@ class Utils {
 	public static function is_not_purchasable_simple_product( $product ) {
 		return ProductType::SIMPLE === $product->get_type() && ( ! $product->is_in_stock() || ! $product->is_purchasable() );
 	}
+
+	/**
+	 * Modifies the block context for product button blocks when inside the Add to Cart with Options block.
+	 *
+	 * @param array $context The block context.
+	 * @param array $block   The parsed block.
+	 * @return array Modified block context.
+	 */
+	public static function set_is_descendant_of_add_to_cart_with_options_context( $context, $block ) {
+		if ( 'woocommerce/product-button' === $block['blockName'] ) {
+			$context['woocommerce/isDescendantOfAddToCartWithOptions'] = true;
+		}
+
+		return $context;
+	}
 }
