@@ -19,3 +19,6 @@ require 'vendor/yoast/phpunit-polyfills/phpunitpolyfills-autoload.php';
 
 // Start up the WP testing environment.
 require "{$_tests_dir}/includes/bootstrap.php";
+
+
+define( 'WOO_BLUEPRINT_TESTS', true );

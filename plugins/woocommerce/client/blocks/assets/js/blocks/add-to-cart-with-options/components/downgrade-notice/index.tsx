@@ -25,17 +25,8 @@ const downgradeToClassicAddToCartWithOptions = ( blockClientId: string ) => {
 		return false;
 	}
 
-	const foundQuantitySelectorBlock = findBlock( {
-		blocks,
-		findCondition: ( block ) =>
-			block.name ===
-			'woocommerce/add-to-cart-with-options-quantity-selector',
-	} );
-
 	const newBlock = createBlock( 'woocommerce/add-to-cart-form', {
-		quantitySelectorStyle:
-			foundQuantitySelectorBlock?.attributes?.quantitySelectorStyle ||
-			'input',
+		quantitySelectorStyle: 'input',
 	} );
 
 	dispatch( 'core/block-editor' ).replaceBlock(

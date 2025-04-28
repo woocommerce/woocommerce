@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { FormEvent } from 'react';
+import type { FormEvent, HTMLElementEvent } from 'react';
 import { store, getContext } from '@wordpress/interactivity';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import type { CartVariationItem } from '@woocommerce/types';
@@ -22,6 +22,49 @@ const { state: wooState } = store< WooCommerce >(
 	{},
 	{ lock: universalLock }
 );
+
+const getInputElementFromEvent = (
+	event: HTMLElementEvent< HTMLButtonElement >
+) => {
+	const target = event.target as HTMLButtonElement;
+
+	const inputElement = target.parentElement?.querySelector(
+		'.input-text.qty.text'
+	) as HTMLInputElement | null;
+
+	return inputElement;
+};
+
+const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
+	const inputElement = getInputElementFromEvent( event );
+
+	if ( ! inputElement ) {
+		return;
+	}
+
+	const parsedValue = parseInt( inputElement.value, 10 );
+	const parsedMinValue = parseInt( inputElement.min, 10 );
+	const parsedMaxValue = parseInt( inputElement.max, 10 );
+	const parsedStep = parseInt( inputElement.step, 10 );
+
+	const currentValue = isNaN( parsedValue ) ? 0 : parsedValue;
+	const minValue = isNaN( parsedMinValue ) ? 1 : parsedMinValue;
+	const maxValue = isNaN( parsedMaxValue ) ? undefined : parsedMaxValue;
+	const step = isNaN( parsedStep ) ? 1 : parsedStep;
+
+	return {
+		currentValue,
+		minValue,
+		maxValue,
+		step,
+		inputElement,
+	};
+};
+
+const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
+	const event = new Event( 'change' );
+	inputElement.dispatchEvent( event );
+};
 
 const addToCartWithOptionsStore = store(
 	'woocommerce/add-to-cart-with-options',
@@ -55,6 +98,40 @@ const addToCartWithOptionsStore = store(
 				);
 				if ( index >= 0 ) {
 					context.variation.splice( index, 1 );
+				}
+			},
+			increaseQuantity: (
+				event: HTMLElementEvent< HTMLButtonElement >
+			) => {
+				const inputData = getInputData( event );
+				if ( ! inputData ) {
+					return;
+				}
+				const { currentValue, maxValue, step, inputElement } =
+					inputData;
+				const newValue = currentValue + step;
+
+				if ( maxValue === undefined || newValue <= maxValue ) {
+					addToCartWithOptionsStore.actions.setQuantity( newValue );
+					inputElement.value = newValue.toString();
+					dispatchChangeEvent( inputElement );
+				}
+			},
+			decreaseQuantity: (
+				event: HTMLElementEvent< HTMLButtonElement >
+			) => {
+				const inputData = getInputData( event );
+				if ( ! inputData ) {
+					return;
+				}
+				const { currentValue, minValue, step, inputElement } =
+					inputData;
+				const newValue = currentValue - step;
+
+				if ( newValue >= minValue ) {
+					addToCartWithOptionsStore.actions.setQuantity( newValue );
+					inputElement.value = newValue.toString();
+					dispatchChangeEvent( inputElement );
 				}
 			},
 			*handleSubmit( event: FormEvent< HTMLFormElement > ) {

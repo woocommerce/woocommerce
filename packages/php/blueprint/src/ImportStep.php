@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Blueprint;
 
 use Opis\JsonSchema\Errors\ErrorFormatter;
 use Opis\JsonSchema\Validator;
+use Automattic\WooCommerce\Blueprint\Logger;
 
 /**
  * Class ImportStep
@@ -78,25 +79,63 @@ class ImportStep {
 	 * @return StepProcessorResult
 	 */
 	public function import() {
-		$result = StepProcessorResult::success( 'ImportStep' );
+		$result = StepProcessorResult::success( $this->step_definition->step );
 
-		if ( ! isset( $this->indexed_importers[ $this->step_definition->step ] ) ) {
-			$result->add_warn( "Unable to find an importer for {$this->step_definition->step}" );
+		if ( ! $this->can_import( $result ) ) {
 			return $result;
 		}
 
 		$importer = $this->indexed_importers[ $this->step_definition->step ];
+		$logger   = new Logger();
+		$logger->start_import( $this->step_definition->step, get_class( $importer ) );
 
-		// validate steps before processing.
-		$this->validate_step_schemas( $importer, $result );
+		$importer_result = $importer->process( $this->step_definition );
 
-		if ( count( $result->get_messages( 'error' ) ) !== 0 ) {
-			return $result;
+		if ( $importer_result->is_success() ) {
+			$logger->complete_import( $this->step_definition->step, $importer_result );
+		} else {
+			$logger->import_step_failed( $this->step_definition->step, $importer_result );
 		}
 
-		$result->merge_messages( $importer->process( $this->step_definition ) );
+		$result->merge_messages( $importer_result );
 
 		return $result;
+	}
+
+	/**
+	 * Check if the step can be imported.
+	 *
+	 * @param StepProcessorResult $result The result object to add messages to.
+	 *
+	 * @return bool True if the step can be imported, false otherwise.
+	 */
+	protected function can_import( &$result ) {
+		// Check if the importer exists.
+		if ( ! isset( $this->indexed_importers[ $this->step_definition->step ] ) ) {
+			$result->add_error( 'Unable to find an importer' );
+			return false;
+		}
+
+		$importer = $this->indexed_importers[ $this->step_definition->step ];
+		// Validate importer is a step processor before processing.
+		if ( ! $importer instanceof StepProcessor ) {
+			$result->add_error( 'Incorrect importer type' );
+			return false;
+		}
+
+		// Validate steps schemas before processing.
+		if ( ! $this->validate_step_schemas( $importer, $result ) ) {
+			$result->add_error( 'Schema validation failed for step' );
+			return false;
+		}
+
+		// Validate step capabilities before processing.
+		if ( ! $importer->check_step_capabilities( $this->step_definition ) ) {
+			$result->add_error( 'User does not have the required capabilities to run step' );
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -105,7 +144,7 @@ class ImportStep {
 	 * @param StepProcessor       $importer The importer.
 	 * @param StepProcessorResult $result The result object to add messages to.
 	 *
-	 * @return void
+	 * @return bool True if the step schemas are valid, false otherwise.
 	 */
 	protected function validate_step_schemas( StepProcessor $importer, StepProcessorResult $result ) {
 		$step_schema = call_user_func( array( $importer->get_step_class(), 'get_schema' ) );
@@ -121,6 +160,9 @@ class ImportStep {
 			}
 
 			$result->add_error( implode( "\n", $formatted_errors ) );
+
+			return false;
 		}
+		return true;
 	}
 }

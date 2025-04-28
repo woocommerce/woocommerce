@@ -43,8 +43,13 @@ class ExportCli {
 
 		$exporter = new ExportSchema();
 
-		$schema   = $exporter->export( $args['steps'] );
-		$is_saved = $this->wp_filesystem_put_contents( $this->save_to, wp_json_encode( $schema, JSON_PRETTY_PRINT ) );
+		$result = $exporter->export( $args['steps'] );
+		if ( is_wp_error( $result ) ) {
+			\WP_CLI::error( $result->get_error_message() );
+			return;
+		}
+
+		$is_saved = $this->wp_filesystem_put_contents( $this->save_to, wp_json_encode( $result, JSON_PRETTY_PRINT ) );
 
 		if ( false === $is_saved ) {
 			\WP_CLI::error( "Failed to save to {$this->save_to}" );

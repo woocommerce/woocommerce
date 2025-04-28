@@ -59,12 +59,13 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 			return '';
 		}
 
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'align' ) );
+		$vertical_alignment = StyleAttributesUtils::get_align_class_and_style( $attributes );
 
 		ob_start();
 		?>
 		<div
-			class="wc-block-product-gallery-large-image-next-previous"
+			class="wc-block-product-gallery-large-image-next-previous <?php echo esc_attr( $vertical_alignment['class'] ); ?>"
 			data-wp-interactive="woocommerce/product-gallery"
 		>
 			<button

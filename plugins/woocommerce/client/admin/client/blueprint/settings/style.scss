@@ -161,9 +161,7 @@
 		margin-top: 14px;
 	}
 
-	.components-notice.is-error {
-		background: #fce2e4;
-		border-left-color: #cc1818;
+	.components-notice {
 		padding: 12px;
 
 		button.components-notice__dismiss {
@@ -174,16 +172,18 @@
 			}
 		}
 
-		.components-notice__content {
+		.components-notice__content,
+		&.is-error .components-notice__content pre {
 			margin: 0;
-
-			pre {
-				color: $gray-900;
-				line-height: 24px; /* 184.615% */
-				margin: 0;
-				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-			}
+			color: $gray-900;
+			line-height: 24px; /* 184.615% */
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 		}
+	}
+
+	.components-notice.is-error {
+		background: #fce2e4;
+		border-left-color: #cc1818;
 	}
 }
 
