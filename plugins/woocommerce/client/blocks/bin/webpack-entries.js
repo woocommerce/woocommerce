@@ -208,6 +208,7 @@ const blocks = {
 
 /**
  * Blocks that are generic and will likely be pushed up to Gutenberg or a public block registry.
+ * Keep in sync with the generic_blocks array in copy-blocks-json.sh
  */
 const genericBlocks = {
 	'accordion-group': {
