@@ -21,6 +21,7 @@ import '../settings-payments-body.scss';
 import { GatewaySettingsForm } from '~/settings-payments/components/gateway-settings-form';
 import { PaymentSettingsLayout } from '~/settings-payments/components/payment-settings-layout';
 import { PaymentSettingsSection } from '~/settings-payments/components/payment-settings-section';
+import { FieldPlaceholder } from '~/settings-payments/components/field-placeholder';
 
 /**
  * Component for managing Cheque payment gateway settings.
@@ -86,10 +87,6 @@ export const SettingsPaymentsCheque = () => {
 			} );
 	};
 
-	if ( isLoading || ! chequeSettings ) {
-		return <p>Loading settings...</p>;
-	}
-
 	return (
 		<PaymentSettingsLayout>
 			<GatewaySettingsForm>
@@ -100,63 +97,81 @@ export const SettingsPaymentsCheque = () => {
 						'woocommerce'
 					) }
 				>
-					<CheckboxControl
-						label={ __( 'Enable check payments', 'woocommerce' ) }
-						help={ __(
-							'Enable or disable this payment method.',
-							'woocommerce'
-						) }
-						checked={ Boolean( formValues.enabled ) }
-						onChange={ ( checked ) => {
-							setFormValues( {
-								...formValues,
-								enabled: checked,
-							} );
-						} }
-					/>
-					<TextControl
-						label={ __( 'Title', 'woocommerce' ) }
-						help={ __(
-							'This controls the title which the user sees during checkout.',
-							'woocommerce'
-						) }
-						placeholder={ __( 'Check payments', 'woocommerce' ) }
-						value={ String( formValues.title ) }
-						onChange={ ( value ) => {
-							setFormValues( {
-								...formValues,
-								title: value,
-							} );
-						} }
-					/>
-					<TextareaControl
-						label={ __( 'Description', 'woocommerce' ) }
-						help={ __(
-							'Payment method description that the customer will see on your checkout.',
-							'woocommerce'
-						) }
-						value={ String( formValues.description ) }
-						onChange={ ( value ) => {
-							setFormValues( {
-								...formValues,
-								description: value,
-							} );
-						} }
-					/>
-					<TextareaControl
-						label={ __( 'Instructions', 'woocommerce' ) }
-						help={ __(
-							'Instructions that will be added to the thank you page and emails.',
-							'woocommerce'
-						) }
-						value={ String( formValues.instructions ) }
-						onChange={ ( value ) => {
-							setFormValues( {
-								...formValues,
-								instructions: value,
-							} );
-						} }
-					/>
+					{ isLoading ? (
+						<FieldPlaceholder size="small" />
+					) : (
+						<CheckboxControl
+							label={ __(
+								'Enable check payments',
+								'woocommerce'
+							) }
+							checked={ Boolean( formValues.enabled ) }
+							onChange={ ( checked ) => {
+								setFormValues( {
+									...formValues,
+									enabled: checked,
+								} );
+							} }
+						/>
+					) }
+					{ isLoading ? (
+						<FieldPlaceholder size="medium" />
+					) : (
+						<TextControl
+							label={ __( 'Title', 'woocommerce' ) }
+							help={ __(
+								'This controls the title which the user sees during checkout.',
+								'woocommerce'
+							) }
+							placeholder={ __(
+								'Check payments',
+								'woocommerce'
+							) }
+							value={ String( formValues.title ) }
+							onChange={ ( value ) => {
+								setFormValues( {
+									...formValues,
+									title: value,
+								} );
+							} }
+						/>
+					) }
+					{ isLoading ? (
+						<FieldPlaceholder size="large" />
+					) : (
+						<TextareaControl
+							label={ __( 'Description', 'woocommerce' ) }
+							help={ __(
+								'Payment method description that the customer will see on your checkout.',
+								'woocommerce'
+							) }
+							value={ String( formValues.description ) }
+							onChange={ ( value ) => {
+								setFormValues( {
+									...formValues,
+									description: value,
+								} );
+							} }
+						/>
+					) }
+					{ isLoading ? (
+						<FieldPlaceholder size="large" />
+					) : (
+						<TextareaControl
+							label={ __( 'Instructions', 'woocommerce' ) }
+							help={ __(
+								'Instructions that will be added to the thank you page and emails.',
+								'woocommerce'
+							) }
+							value={ String( formValues.instructions ) }
+							onChange={ ( value ) => {
+								setFormValues( {
+									...formValues,
+									instructions: value,
+								} );
+							} }
+						/>
+					) }
 				</PaymentSettingsSection>
 			</GatewaySettingsForm>
 			<Card className={ 'payment-settings-card__wrapper ' }>
