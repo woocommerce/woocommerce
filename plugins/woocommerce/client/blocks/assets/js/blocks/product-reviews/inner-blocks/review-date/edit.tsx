@@ -18,19 +18,6 @@ import {
 	__experimentalDateFormatPicker as DateFormatPicker,
 } from '@wordpress/block-editor';
 
-/**
- * Renders the `woocommerce/product-review-date` block on the editor.
- *
- * @param {Object} props                   React props.
- * @param {Object} props.setAttributes     Callback for updating block attributes.
- * @param {Object} props.attributes        Block attributes.
- * @param {string} props.attributes.format Format of the date.
- * @param {string} props.attributes.isLink Whether the author name should be linked.
- * @param {Object} props.context           Inherited context.
- * @param {string} props.context.commentId The comment ID.
- *
- * @return {JSX.Element} React element.
- */
 export default function Edit( {
 	attributes: { format, isLink },
 	context: { commentId },
