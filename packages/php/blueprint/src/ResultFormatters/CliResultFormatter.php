@@ -49,13 +49,13 @@ class CliResultFormatter {
 			}
 		}
 
-		$format_items_exist = function_exists( 'format_items' );
+		$format_items_exist = function_exists( '\WP_CLI\Utils\format_items' );
 
-		if ( $format_items_exist ) {
-			format_items( 'table', $items, $header );
-		} else {
+		if ( ! $format_items_exist ) {
 			throw new \Exception( 'WP CLI Utils not found' );
 		}
+
+		format_items( 'table', $items, $header );
 	}
 
 	/**

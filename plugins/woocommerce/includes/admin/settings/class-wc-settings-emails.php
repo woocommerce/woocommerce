@@ -660,7 +660,18 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			id="wc_settings_email_listing_slotfill" class="wc-settings-prevent-change-event woocommerce-email-listing-listview"
 			data-email-types="<?php echo esc_attr( wp_json_encode( $email_types ) ); ?>"
 			data-edit-template-url="<?php echo esc_attr( $edit_template_url ); ?>"
-		></div>
+		>
+			<div style="
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 12px;
+			height: 40px;
+			width: 100%;
+			">
+				<h3> <?php esc_html_e( 'Loading&hellip;', 'woocommerce' ); ?>  </h3>
+			</div>
+		</div>
 		<div>
 			<p><?php echo wp_kses_post( wpautop( wptexturize( $desc_help_text ) ) ); ?></p>
 		</div>
