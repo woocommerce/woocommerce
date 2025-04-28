@@ -8,6 +8,8 @@ import {
 	humanTimeDiff,
 	getSettings as getDateSettings,
 } from '@wordpress/date';
+import { PanelBody, ToggleControl } from '@wordpress/components';
+import { __, _x } from '@wordpress/i18n';
 import {
 	InspectorControls,
 	useBlockProps,
@@ -15,11 +17,6 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalDateFormatPicker as DateFormatPicker,
 } from '@wordpress/block-editor';
-// Fix dependency group error
-// eslint-disable-next-line @woocommerce/dependency-group
-import { PanelBody, ToggleControl } from '@wordpress/components';
-// eslint-disable-next-line @woocommerce/dependency-group
-import { __, _x } from '@wordpress/i18n';
 
 /**
  * Renders the `woocommerce/product-review-date` block on the editor.
