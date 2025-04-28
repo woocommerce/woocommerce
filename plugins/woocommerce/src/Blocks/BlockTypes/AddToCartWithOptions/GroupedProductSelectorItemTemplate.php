@@ -52,7 +52,7 @@ class GroupedProductSelectorItemTemplate extends AbstractAddToCartWithOptionsBlo
 	 * @param WP_Block $block The Block.
 	 * @return string Row HTML
 	 */
-	protected function get_product_row( $product_id, $attributes, $block ): string {
+	private function get_product_row( $product_id, $attributes, $block ): string {
 		global $post, $product;
 		$previous_post    = $post;
 		$previous_product = $product;
@@ -73,25 +73,6 @@ class GroupedProductSelectorItemTemplate extends AbstractAddToCartWithOptionsBlo
 		$product = $previous_product;
 
 		return $block_content;
-
-		// // Get an instance of the current Post Template block.
-		// $block_instance = $block->parsed_block;
-
-		// $new_block = new WP_Block(
-		// $block_instance,
-		// array(
-		// 'postType' => 'product',
-		// 'postId'   => $post->ID,
-		// ),
-		// );
-
-		// // Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
-		// // `render_callback` and ensure that no wrapper markup is included.
-		// $block_content = $new_block->render( array( 'dynamic' => false ) );
-
-		// $post    = $previous_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		// $product = $previous_product;
-		// return $block_content;
 	}
 
 	/**
@@ -100,7 +81,7 @@ class GroupedProductSelectorItemTemplate extends AbstractAddToCartWithOptionsBlo
 	 * @param \WP_Post|\WC_Product $post The post or product object.
 	 * @return array The prepared block context.
 	 */
-	protected function prepare_block_context( $post ) {
+	private function prepare_block_context( $post ) {
 		return array(
 			'postType' => 'product',
 			'postId'   => $post->get_id(),

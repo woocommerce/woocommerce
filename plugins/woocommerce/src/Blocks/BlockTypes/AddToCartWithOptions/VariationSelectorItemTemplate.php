@@ -56,7 +56,6 @@ class VariationSelectorItemTemplate extends AbstractAddToCartWithOptionsBlock {
 			return '';
 		}
 
-		// Use the trait's method to render the block with context.
 		$context = $this->prepare_block_context(
 			array(
 				'name'  => $attribute_name,
@@ -67,22 +66,6 @@ class VariationSelectorItemTemplate extends AbstractAddToCartWithOptionsBlock {
 		// Render the inner blocks of the Variation Selector Item Template block with `dynamic` set to `false`
 		// to prevent calling `render_callback` and ensure that no wrapper markup is included.
 		return $this->render_block_with_context( $block, $context );
-
-		// // Get an instance of the current Variation Selector Item Template block.
-		// $block_instance = $block->parsed_block;
-
-		// $new_block = new WP_Block(
-		// $block_instance,
-		// array(
-		// 'woocommerce/attributeId'    => 'wc_product_attribute_' . uniqid(),
-		// 'woocommerce/attributeName'  => $attribute_name,
-		// 'woocommerce/attributeTerms' => $attribute_terms,
-		// ),
-		// );
-
-		// // Render the inner blocks of the Variation Selector Item Template block with `dynamic` set to `false`
-		// // to prevent calling `render_callback` and ensure that no wrapper markup is included.
-		// return $new_block->render( array( 'dynamic' => false ) );
 	}
 
 	/**
@@ -92,7 +75,7 @@ class VariationSelectorItemTemplate extends AbstractAddToCartWithOptionsBlock {
 	 * @param array $item Item data including name and terms.
 	 * @return array Context for the block
 	 */
-	protected function prepare_block_context( $item ) {
+	private function prepare_block_context( $item ) {
 		return array(
 			'woocommerce/attributeId'    => 'wc_product_attribute_' . uniqid(),
 			'woocommerce/attributeName'  => $item['name'],
