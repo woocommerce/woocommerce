@@ -2,12 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	useCallback,
-	useMemo,
-	useEffect,
-	useContext,
-} from '@wordpress/element';
+import { useCallback, useMemo, useEffect } from '@wordpress/element';
 import { Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import { BlockInstance } from '@wordpress/blocks';

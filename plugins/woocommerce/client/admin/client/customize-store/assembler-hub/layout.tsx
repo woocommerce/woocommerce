@@ -11,7 +11,7 @@ import {
 	useViewportMatch,
 } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import { useState, useContext, useEffect } from '@wordpress/element';
+import { useState, useContext } from '@wordpress/element';
 import { __unstableMotion as motion } from '@wordpress/components';
 import {
 	// @ts-expect-error No types for this exist yet.
@@ -43,7 +43,6 @@ import { OnboardingTour, useOnboardingTour } from './onboarding-tour';
 import { HighlightedBlockContextProvider } from './context/highlighted-block-context';
 import { Transitional } from '../transitional';
 import { CustomizeStoreContext } from './';
-import { useQuery } from '@woocommerce/navigation';
 import { isWooExpress } from '~/utils/is-woo-express';
 import { trackEvent } from '../tracking';
 import { SidebarNavigationExtraScreen } from './sidebar/navigation-extra-screen/sidebar-navigation-extra-screen';

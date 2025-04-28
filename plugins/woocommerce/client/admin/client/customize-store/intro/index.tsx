@@ -285,10 +285,6 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 					'woocommerce'
 			  );
 
-	const [ openDesignChangeWarningModal, setOpenDesignChangeWarningModal ] =
-		useState( false );
-
-	let modalStatus: ModalStatus = 'no-modal';
 	let bannerStatus: BannerStatus = 'no-ai';
 
 	const isDefaultTheme = activeTheme === 'twentytwentyfour';

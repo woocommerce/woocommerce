@@ -5,7 +5,7 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import { useContext, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalHStack as HStack,

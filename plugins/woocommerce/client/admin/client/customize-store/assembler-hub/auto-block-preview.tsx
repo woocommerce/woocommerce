@@ -13,7 +13,6 @@ import {
 } from '@wordpress/element';
 import { Disabled, Popover } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { noop } from 'lodash';
 import { __ } from '@wordpress/i18n';
 import { useQuery } from '@woocommerce/navigation';
 import clsx from 'clsx';
@@ -94,14 +93,6 @@ function ScaledBlockPreview( {
 		null
 	);
 	const { setLogoBlockIds, logoBlockIds } = useContext( LogoBlockContext );
-	const [ fontFamilies ] = useGlobalSetting(
-		'typography.fontFamilies.theme'
-	) as [ FontFamily[] ];
-	const externalFontFamilies = fontFamilies.filter(
-		( { slug } ) => slug !== SYSTEM_FONT_SLUG
-	);
-
-	const { context } = useContext( CustomizeStoreContext );
 
 	if ( ! viewportWidth ) {
 		viewportWidth = containerWidth;
