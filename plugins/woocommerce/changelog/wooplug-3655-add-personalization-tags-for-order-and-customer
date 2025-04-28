@@ -1,4 +1,4 @@
-Significance: minor
-Type: add
+Significance: major
+Type: update
 
-Add personalization tags for Shopper Country, Order Date, Order Items, Order Subtotal, Order Tax, Order Total, Payment Method, Payment URL, Store Name, Store Address.
+Rename "Shopper" to "Customer" in personalization tags and introduce additional personalization tags for Customer Country, Order Date, Order Items, Order Subtotal, Order Tax, Order Total, Payment Method, Payment URL, Store URL, Store Name, Store Address.
