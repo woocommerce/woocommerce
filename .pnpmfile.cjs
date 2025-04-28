@@ -193,7 +193,7 @@ module.exports = {
 	hooks: {
 		afterAllResolved,
 		readPackage( pkg ) {
-			// We resolve @wordpress/interactivity and @wordpress/interactivity-router via pnpm's sub dir feature
+			// We resolve @wordpress/interactivity and @wordpress/interactivity-router via pnpm's git sub dir feature
 			// and as a result need to resolve some of their dependencies also via sub dir.
 			if ( pkg.name === '@wordpress/interactivity-router' ) {
 				if (
@@ -201,24 +201,13 @@ module.exports = {
 					pkg.dependencies[ '@wordpress/a11y' ] &&
 					pkg.dependencies[ '@wordpress/interactivity' ]
 				) {
-					pkg.dependencies[ '@wordpress/a11y' ] =
-						'github:woocommerce/gutenberg#interactivity-api&path:/packages/a11y';
+					//  Use the latest from npm
+					pkg.dependencies[ '@wordpress/a11y' ] = '4.22.0';
+
+					// Use the WooCommerce fork
 					pkg.dependencies[ '@wordpress/interactivity' ] =
 						'github:woocommerce/gutenberg#interactivity-api&path:/packages/interactivity';
 				}
-			}
-
-			if ( pkg.name === '@wordpress/a11y' && pkg.version === '4.22.0' ) {
-				pkg.dependencies[ '@wordpress/i18n' ] =
-					'github:woocommerce/gutenberg#interactivity-api&path:/packages/i18n';
-				pkg.dependencies[ '@wordpress/dom-ready' ] =
-					'github:woocommerce/gutenberg#interactivity-api&path:/packages/dom-ready';
-				insideInteractivityRouterPackage = false;
-			}
-
-			if ( pkg.name === '@wordpress/i18n' && pkg.version === '5.22.0' ) {
-				pkg.dependencies[ '@wordpress/hooks' ] =
-					'github:woocommerce/gutenberg#interactivity-api&path:/packages/hooks';
 			}
 
 			return pkg;
