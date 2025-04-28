@@ -33,17 +33,17 @@ const ShippingCalculatorAddress = ( {
 	const [ address, setAddress ] = useState( initialAddress );
 	const { showAllValidationErrors } = useDispatch( validationStore );
 	const focusReturnRef = useFocusReturn();
-	const { hasValidationErrors, isEssentialShippingDataUpdating } = useSelect(
-		( select ) => {
+	const { hasValidationErrors, areAddressFieldsForShippingRatesUpdating } =
+		useSelect( ( select ) => {
 			return {
 				hasValidationErrors:
 					select( validationStore ).hasValidationErrors(),
-				isEssentialShippingDataUpdating:
-					select( cartStore ).isEssentialShippingDataUpdating(),
+				areAddressFieldsForShippingRatesUpdating:
+					select(
+						cartStore
+					).areAddressFieldsForShippingRatesUpdating(),
 			};
-		},
-		[]
-	);
+		}, [] );
 	const { defaultFields } = useCheckoutAddress();
 	const formFields = useFormFields(
 		addressFields,
@@ -124,7 +124,7 @@ const ShippingCalculatorAddress = ( {
 			/>
 			<Button
 				className="wc-block-components-shipping-calculator-address__button"
-				disabled={ isEssentialShippingDataUpdating }
+				disabled={ areAddressFieldsForShippingRatesUpdating }
 				variant="outlined"
 				onClick={ handleClick }
 				type="submit"

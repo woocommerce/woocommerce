@@ -32,7 +32,7 @@ export const useShippingData = (): ShippingData => {
 			shippingRates: rates,
 			needsShipping: store.getNeedsShipping(),
 			hasCalculatedShipping: store.getHasCalculatedShipping(),
-			isLoadingRates: store.isEssentialShippingDataUpdating(),
+			isLoadingRates: store.areAddressFieldsForShippingRatesUpdating(),
 			isCollectable: rates.every(
 				( { shipping_rates: packageShippingRates } ) =>
 					packageShippingRates.find( ( { method_id: methodId } ) =>
