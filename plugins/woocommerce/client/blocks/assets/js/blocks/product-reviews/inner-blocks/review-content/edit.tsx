@@ -15,18 +15,6 @@ import {
 	useBlockProps,
 } from '@wordpress/block-editor';
 
-/**
- * Renders the `woocommerce/product-review-content` block on the editor.
- *
- * @param {Object} props                      React props.
- * @param {Object} props.setAttributes        Callback for updating block attributes.
- * @param {Object} props.attributes           Block attributes.
- * @param {string} props.attributes.textAlign The `textAlign` attribute.
- * @param {Object} props.context              Inherited context.
- * @param {string} props.context.commentId    The comment ID.
- *
- * @return {JSX.Element} React element.
- */
 export default function Edit( {
 	setAttributes,
 	attributes: { textAlign },
