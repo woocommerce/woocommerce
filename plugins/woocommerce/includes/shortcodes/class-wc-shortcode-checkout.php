@@ -157,7 +157,7 @@ class WC_Shortcode_Checkout {
 								}
 
 								// We only need to check products managing stock, with a limited stock qty.
-								if ( ! $product->managing_stock() || $product->backorders_allowed()  ) {
+								if ( ! $product->managing_stock() || $product->backorders_allowed() ) {
 									continue;
 								}
 
@@ -368,6 +368,15 @@ class WC_Shortcode_Checkout {
 
 			if ( wc_notice_count( 'error' ) === 0 && $non_js_checkout ) {
 				wc_add_notice( __( 'The order totals have been updated. Please confirm your order by pressing the "Place order" button at the bottom of the page.', 'woocommerce' ) );
+			}
+
+			if ( ! is_user_logged_in() ) {
+				woocommerce_login_form(
+					array(
+						'redirect' => wc_get_checkout_url(),
+						'hidden'   => true,
+					)
+				);
 			}
 
 			wc_get_template( 'checkout/form-checkout.php', array( 'checkout' => $checkout ) );
