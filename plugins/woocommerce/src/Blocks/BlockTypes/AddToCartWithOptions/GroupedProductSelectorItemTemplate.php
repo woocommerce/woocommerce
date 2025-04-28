@@ -103,7 +103,7 @@ class GroupedProductSelectorItemTemplate extends AbstractAddToCartWithOptionsBlo
 	protected function prepare_block_context( $post ) {
 		return array(
 			'postType' => 'product',
-			'postId'   => $post->ID,
+			'postId'   => $post->get_id(),
 		);
 	}
 }
