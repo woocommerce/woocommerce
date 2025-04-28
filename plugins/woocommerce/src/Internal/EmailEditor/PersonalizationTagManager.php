@@ -290,6 +290,17 @@ class PersonalizationTagManager {
 
 		$registry->register(
 			new Personalization_Tag(
+				__( 'Store URL', 'woocommerce' ),
+				'woocommerce/store-url',
+				__( 'Store', 'woocommerce' ),
+				function (): string {
+					return wc_get_page_permalink( 'shop' );
+				},
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
 				__( 'Store Name', 'woocommerce' ),
 				'woocommerce/store-name',
 				__( 'Store', 'woocommerce' ),
