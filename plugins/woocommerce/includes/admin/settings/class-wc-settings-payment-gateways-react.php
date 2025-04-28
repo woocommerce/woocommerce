@@ -21,6 +21,11 @@ if ( class_exists( 'WC_Settings_Payment_Gateways_React', false ) ) {
  */
 class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 
+	const TAB_NAME = 'checkout';
+
+	const MAIN_SECTION_NAME    = 'main';
+	const OFFLINE_SECTION_NAME = 'offline';
+
 	/**
 	 * Get the whitelist of sections to render using React.
 	 *
@@ -29,8 +34,8 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 	private function get_reactify_render_sections() {
 		// @todo Add 'woocommerce_payments' when WooPayments Reactified settings page is done.
 		$sections = array(
-			'offline',
-			'main',
+			self::MAIN_SECTION_NAME,
+			self::OFFLINE_SECTION_NAME,
 		);
 
 		/**
@@ -47,7 +52,7 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id    = 'checkout';
+		$this->id    = self::TAB_NAME;
 		$this->label = esc_html_x( 'Payments', 'Settings tab label', 'woocommerce' );
 
 		// Add filters and actions.
@@ -70,7 +75,7 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 	 * Output the settings.
 	 */
 	public function output() {
-		//phpcs:disable WordPress.Security.NonceVerification.Recommended
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		global $current_section;
 
 		// We don't want to output anything from the action for now. So we buffer it and discard it.
@@ -90,7 +95,7 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 			$payment_gateways = WC()->payment_gateways()->payment_gateways;
 			$this->render_classic_gateway_settings_page( $payment_gateways, $current_section );
 		} else {
-			$this->render_react_section( 'main' );
+			$this->render_react_section( self::MAIN_SECTION_NAME );
 		}
 
 		parent::output();
@@ -189,8 +194,8 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 
 		$this->save_settings_for_current_section();
 
-		if ( ! $current_section ) {
-			// If section is empty, we're on the main settings page. This makes sure 'gateway ordering' is saved.
+		if ( self::MAIN_SECTION_NAME === $standardized_section ) {
+			// This makes sure 'gateway ordering' is saved.
 			$wc_payment_gateways->process_admin_options();
 			$wc_payment_gateways->init();
 		} else {
