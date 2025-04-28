@@ -847,20 +847,30 @@ jQuery( function( $ ) {
 		},
 		show_login_form: function() {
 			var $form = $( 'form.login, form.woocommerce-form--login' );
-			$form.slideToggle( {
-				duration: 400,
-				complete: function () {
-					if ( $form.is( ':visible' ) ) {
-						// Scroll to the form
-						$( 'html, body' ).animate(
-							{
-								scrollTop: $form.offset().top - 50, // adjust offset as needed
-							},
-							300
-						);
-					}
-				},
-			} );
+			if ($form.is(':visible')) {
+				// If already visible, just scroll to it
+				$('html, body').animate(
+					{
+						scrollTop: $form.offset().top - 50, // adjust offset as needed
+					},
+					300
+				);
+			} else {
+				// If not visible, show it and then scroll
+				$form.slideToggle({
+					duration: 400,
+					complete: function () {
+						if ($form.is(':visible')) {
+							$('html, body').animate(
+								{
+									scrollTop: $form.offset().top - 50,
+								},
+								300
+							);
+						}
+					},
+				});
+			}
 			return false;
 		}
 	};
