@@ -43,10 +43,7 @@ import { OnboardingTour, useOnboardingTour } from './onboarding-tour';
 import { HighlightedBlockContextProvider } from './context/highlighted-block-context';
 import { Transitional } from '../transitional';
 import { CustomizeStoreContext } from './';
-import { AiOfflineModal } from '~/customize-store/assembler-hub/onboarding-tour/ai-offline-modal';
 import { useQuery } from '@woocommerce/navigation';
-import { FlowType } from '../types';
-import { isOfflineAIFlow } from '../guards';
 import { isWooExpress } from '~/utils/is-woo-express';
 import { trackEvent } from '../tracking';
 import { SidebarNavigationExtraScreen } from './sidebar/navigation-extra-screen/sidebar-navigation-extra-screen';
@@ -63,18 +60,6 @@ export const Layout = () => {
 		CustomizeStoreContext
 	);
 
-	const { customizing } = useQuery();
-
-	const [ showAiOfflineModal, setShowAiOfflineModal ] = useState(
-		isOfflineAIFlow( context.flowType ) && customizing !== 'true'
-	);
-
-	useEffect( () => {
-		setShowAiOfflineModal(
-			isOfflineAIFlow( context.flowType ) && customizing !== 'true'
-		);
-	}, [ context.flowType, customizing ] );
-
 	// This ensures the edited entity id and type are initialized properly.
 	useInitEditedEntityFromURL();
 	const {
@@ -89,13 +74,11 @@ export const Layout = () => {
 		// Click on "Take a tour" button
 		trackEvent( 'customize_your_store_assembler_hub_tour_start' );
 		setShowWelcomeTour( false );
-		setShowAiOfflineModal( false );
 	};
 
 	const skipTour = () => {
 		trackEvent( 'customize_your_store_assembler_hub_tour_skip' );
 		onClose();
-		setShowAiOfflineModal( false );
 	};
 
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
@@ -133,7 +116,6 @@ export const Layout = () => {
 						hasCompleteSurvey={
 							!! context?.transitionalScreen?.hasCompleteSurvey
 						}
-						aiOnline={ context?.flowType === FlowType.AIOnline }
 					/>
 				</EntityProvider>
 			</EntityProvider>
@@ -246,24 +228,12 @@ export const Layout = () => {
 								) }
 							</div>
 						</div>
-						{ ! isEditorLoading &&
-							shouldTourBeShown &&
-							( FlowType.AIOnline === context.flowType ||
-								FlowType.noAI === context.flowType ) && (
-								<OnboardingTour
-									skipTour={ skipTour }
-									takeTour={ takeTour }
-									onClose={ onClose }
-									flowType={ context.flowType }
-									{ ...onboardingTourProps }
-								/>
-							) }
-
-						{ ! isEditorLoading && showAiOfflineModal && (
-							<AiOfflineModal
-								shouldTourBeShown={ shouldTourBeShown }
+						{ ! isEditorLoading && shouldTourBeShown && (
+							<OnboardingTour
 								skipTour={ skipTour }
 								takeTour={ takeTour }
+								onClose={ onClose }
+								{ ...onboardingTourProps }
 							/>
 						) }
 					</EntityProvider>

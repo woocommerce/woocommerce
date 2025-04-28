@@ -3,6 +3,7 @@
  */
 import { parseAdminUrl } from '@woocommerce/navigation';
 import { captureException } from '@woocommerce/remote-logging';
+import { addFilter } from '@wordpress/hooks';
 
 /**
  * Internal dependencies

@@ -9,7 +9,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { FlowType, aiStatusResponse } from '../types';
+import { aiStatusResponse } from '../types';
 import { isIframe } from '~/customize-store/utils';
 
 export const fetchAiStatus = async (): Promise< aiStatusResponse > => {
@@ -141,6 +141,4 @@ export const setFlags = async () => {
 		// all of them to resolve before returning.
 		await Promise.all( Object.values( _featureFlags ) );
 	}
-
-	return FlowType.noAI;
 };

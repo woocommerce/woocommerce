@@ -161,34 +161,6 @@ export const ExistingThemeBanner = ( {
 	);
 };
 
-export const DefaultBanner = ( {
-	sendEvent,
-}: {
-	sendEvent: React.ComponentProps< typeof Intro >[ 'sendEvent' ];
-} ) => {
-	return (
-		<BaseIntroBanner
-			bannerTitle={ __(
-				'Use the power of AI to design your store',
-				'woocommerce'
-			) }
-			bannerText={ __(
-				'Design the look of your store, create pages, and generate copy using our built-in AI tools.',
-				'woocommerce'
-			) }
-			bannerClass=""
-			buttonIsLink={ false }
-			bannerButtonOnClick={ () => {
-				sendEvent( {
-					type: 'DESIGN_WITH_AI',
-				} );
-			} }
-			bannerButtonText={ __( 'Design with AI', 'woocommerce' ) }
-			showAIDisclaimer={ true }
-		/>
-	);
-};
-
 export const ThemeHasModsBanner = ( {
 	setOpenDesignChangeWarningModal,
 }: {

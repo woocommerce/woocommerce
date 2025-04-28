@@ -14,22 +14,16 @@ import { Text } from '@woocommerce/experimental';
 /**
  * Internal dependencies
  */
-import { CustomizeStoreComponent, FlowType } from '../types';
+import { CustomizeStoreComponent } from '../types';
 import { SiteHub } from '../assembler-hub/site-hub';
 import { ThemeCard } from './theme-card';
-import {
-	DesignChangeWarningModal,
-	StartNewDesignWarningModal,
-	StartOverWarningModal,
-	ThemeSwitchWarningModal,
-} from './warning-modals';
+import { ThemeSwitchWarningModal } from './warning-modals';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import './intro.scss';
 import {
 	NetworkOfflineBanner,
 	ThemeHasModsBanner,
 	JetpackOfflineBanner,
-	DefaultBanner,
 	ExistingAiThemeBanner,
 	ExistingThemeBanner,
 	NoAIBanner,
@@ -43,10 +37,8 @@ import { navigateOrParent } from '~/customize-store/utils';
 import { RecommendThemesAPIResponse } from '~/customize-store/types';
 import { customizeStoreStateMachineEvents } from '~/customize-store';
 import { trackEvent } from '~/customize-store/tracking';
-import { isNoAIFlow as isNoAiFlowGuard } from '../guards';
 
 export type events =
-	| { type: 'DESIGN_WITH_AI' }
 	| { type: 'JETPACK_OFFLINE_HOWTO' }
 	| { type: 'CLICKED_ON_BREADCRUMB' }
 	| { type: 'SELECTED_BROWSE_ALL_THEMES' }
@@ -65,18 +57,14 @@ const BANNER_COMPONENTS = {
 	'jetpack-offline': JetpackOfflineBanner,
 	'existing-ai-theme': ExistingAiThemeBanner,
 	'existing-theme': ExistingThemeBanner,
-	[ FlowType.noAI ]: NoAIBanner,
+	'no-ai': NoAIBanner,
 	'existing-no-ai-theme': ExistingNoAiThemeBanner,
 	'classic-theme': ClassicThemeBanner,
 	'non-default-block-theme': NonDefaultBlockThemeBanner,
-	default: DefaultBanner,
 };
 
 const MODAL_COMPONENTS = {
 	'no-modal': null,
-	'task-incomplete-override-design-changes': DesignChangeWarningModal,
-	'task-complete-with-ai-theme': StartOverWarningModal,
-	'task-complete-without-ai-theme': StartNewDesignWarningModal,
 };
 
 type ModalStatus = keyof typeof MODAL_COMPONENTS;
@@ -166,12 +154,10 @@ const ThemeCards = ( {
 const CustomizedThemeBanners = ( {
 	isBlockTheme,
 	isDefaultTheme,
-	isNoAiFlow,
 	sendEvent,
 }: {
 	isBlockTheme: boolean | undefined;
 	isDefaultTheme: boolean | undefined;
-	isNoAiFlow: boolean;
 	sendEvent: Sender< customizeStoreStateMachineEvents >;
 } ) => {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
@@ -205,7 +191,7 @@ const CustomizedThemeBanners = ( {
 											: 'classic',
 									}
 								);
-								if ( isDefaultTheme && isNoAiFlow ) {
+								if ( isDefaultTheme ) {
 									navigateOrParent(
 										window,
 										getNewPath(
@@ -260,12 +246,9 @@ const CustomizedThemeBanners = ( {
 			{ isModalOpen && (
 				<ThemeSwitchWarningModal
 					setIsModalOpen={ setIsModalOpen }
-					isNoAiFlow={ isNoAiFlow }
 					redirectToCYSFlow={ () =>
 						sendEvent( {
-							type: isNoAiFlow
-								? 'DESIGN_WITHOUT_AI'
-								: 'DESIGN_WITH_AI',
+							type: 'DESIGN_WITHOUT_AI',
 						} )
 					}
 				/>
@@ -289,9 +272,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 
 	const isNetworkOffline = useNetworkStatus();
 
-	const [ showError, setShowError ] = useState(
-		context.flowType === FlowType.noAI && context.intro.hasErrors
-	);
+	const [ showError, setShowError ] = useState( context.intro.hasErrors );
 
 	const errorMessage =
 		context.intro.errorStatus === 403
@@ -308,7 +289,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 		useState( false );
 
 	let modalStatus: ModalStatus = 'no-modal';
-	let bannerStatus: BannerStatus = 'default';
+	let bannerStatus: BannerStatus = 'no-ai';
 
 	const isDefaultTheme = activeTheme === 'twentytwentyfour';
 	interface Theme {
@@ -330,19 +311,16 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 		case isJetpackOffline as boolean:
 			bannerStatus = 'jetpack-offline';
 			break;
-		case context.flowType === FlowType.noAI && ! isBlockTheme:
+		case ! isBlockTheme:
 			bannerStatus = 'classic-theme';
 			break;
-		case context.flowType === FlowType.noAI &&
-			isBlockTheme &&
-			! isDefaultTheme:
+		case isBlockTheme && ! isDefaultTheme:
 			bannerStatus = 'non-default-block-theme';
 			break;
-		case context.flowType === FlowType.noAI &&
-			! customizeStoreTaskCompleted:
-			bannerStatus = FlowType.noAI;
+		case ! customizeStoreTaskCompleted:
+			bannerStatus = 'no-ai';
 			break;
-		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted:
+		case customizeStoreTaskCompleted:
 			bannerStatus = 'existing-no-ai-theme';
 			break;
 		case ! customizeStoreTaskCompleted && activeThemeHasMods:
@@ -356,46 +334,15 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			break;
 	}
 
-	switch ( true ) {
-		case openDesignChangeWarningModal === false:
-			modalStatus = 'no-modal';
-			break;
-		case bannerStatus === 'task-incomplete-active-theme-has-mods':
-			modalStatus = 'task-incomplete-override-design-changes';
-			break;
-		case bannerStatus === 'existing-ai-theme':
-			modalStatus = 'task-complete-with-ai-theme';
-			break;
-		case bannerStatus === 'existing-theme':
-			modalStatus = 'task-complete-without-ai-theme';
-			break;
-	}
-
-	const ModalComponent = MODAL_COMPONENTS[ modalStatus ];
-
 	const BannerComponent = BANNER_COMPONENTS[ bannerStatus ];
 
-	const sidebarMessage =
-		context.flowType === FlowType.AIOnline
-			? __(
-					'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using AI.',
-					'woocommerce'
-			  )
-			: __(
-					'Design a store that reflects your brand and business. Customize your active theme, select a professionally designed theme, or create a new look using our store designer.',
-					'woocommerce'
-			  );
+	const sidebarMessage = __(
+		'Design a store that reflects your brand and business. Customize your active theme, select a professionally designed theme, or create a new look using our store designer.',
+		'woocommerce'
+	);
 
 	return (
 		<>
-			{ ModalComponent && (
-				<ModalComponent
-					sendEvent={ sendEvent }
-					setOpenDesignChangeWarningModal={
-						setOpenDesignChangeWarningModal
-					}
-				/>
-			) }
 			<div className="woocommerce-customize-store-header">
 				<SiteHub
 					isTransparent={ false }
@@ -461,7 +408,6 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 							isBlockTheme={ isBlockTheme }
 							isDefaultTheme={ isDefaultTheme }
 							sendEvent={ sendEvent }
-							isNoAiFlow={ isNoAiFlowGuard( context.flowType ) }
 						/>
 					) }
 				</div>

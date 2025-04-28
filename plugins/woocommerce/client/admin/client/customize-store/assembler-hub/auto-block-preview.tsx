@@ -39,9 +39,7 @@ import { LogoBlockContext } from './logo-block-context';
 import { SYSTEM_FONT_SLUG } from './sidebar/global-styles/font-pairing-variations/constants';
 import { PreloadFonts } from './preload-fonts';
 import { FontFamily } from '../types/font';
-import { FontFamiliesLoaderDotCom } from './sidebar/global-styles/font-pairing-variations/font-families-loader-dot-com';
 import { CustomizeStoreContext } from '.';
-import { isAIFlow } from '../guards';
 import { selectBlockOnHover } from './utils/select-block-on-hover';
 import { PopoverStatus, usePopoverHandler } from './hooks/use-popover-handler';
 import { useAddAutoBlockPreviewEventListenersAndObservers } from './hooks/auto-block-preview-event-listener';
@@ -332,12 +330,6 @@ function ScaledBlockPreview( {
 						</style>
 						<MemoizedBlockList renderAppender={ false } />
 						<PreloadFonts />
-						{ isAIFlow( context.flowType ) && (
-							<FontFamiliesLoaderDotCom
-								fontFamilies={ externalFontFamilies }
-								onLoad={ noop }
-							/>
-						) }
 					</CustomIframeComponent>
 				</div>
 			</DisabledProvider>
