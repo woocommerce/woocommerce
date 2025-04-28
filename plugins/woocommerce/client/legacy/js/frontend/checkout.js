@@ -858,13 +858,6 @@ jQuery( function( $ ) {
 							},
 							300
 						);
-						// Focus the first input
-						$form
-							.find(
-								'input[type="text"], input[type="email"], input'
-							)
-							.filter( ':visible:first' )
-							.focus();
 					}
 				},
 			} );

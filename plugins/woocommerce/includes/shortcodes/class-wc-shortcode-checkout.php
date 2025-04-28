@@ -370,15 +370,6 @@ class WC_Shortcode_Checkout {
 				wc_add_notice( __( 'The order totals have been updated. Please confirm your order by pressing the "Place order" button at the bottom of the page.', 'woocommerce' ) );
 			}
 
-			if ( ! is_user_logged_in() ) {
-				woocommerce_login_form(
-					array(
-						'redirect' => wc_get_checkout_url(),
-						'hidden'   => true,
-					)
-				);
-			}
-
 			wc_get_template( 'checkout/form-checkout.php', array( 'checkout' => $checkout ) );
 
 		}
