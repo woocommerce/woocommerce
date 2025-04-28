@@ -309,17 +309,7 @@ class PersonalizationTagManager {
 				'woocommerce/store-address',
 				__( 'Store', 'woocommerce' ),
 				function (): string {
-					$address_parts = array(
-						WC()->countries->get_base_address(),
-						WC()->countries->get_base_address_2(),
-						WC()->countries->get_base_city(),
-						WC()->countries->get_base_state(),
-						WC()->countries->get_base_postcode(),
-						WC()->countries->countries[ WC()->countries->get_base_country() ] ?? WC()->countries->get_base_country() ?? '',
-					);
-
-					$address = implode( "\n", array_filter( $address_parts ) );
-					return trim( $address );
+					return WC()->mailer->get_store_address();
 				},
 			)
 		);
