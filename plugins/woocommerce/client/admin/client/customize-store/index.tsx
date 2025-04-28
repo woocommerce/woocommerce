@@ -211,7 +211,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 			activeTheme: '',
 			customizeStoreTaskCompleted: false,
-			currentThemeIsAiGenerated: false,
 		},
 		transitionalScreen: {
 			hasCompleteSurvey: false,

@@ -53,21 +53,12 @@ export const fetchIntroData = async () => {
 
 	const themeDataPromise = fetchThemeCards();
 
-	const [ currentTemplateId, maybePreviousTemplate, task, themeData ] =
-		await Promise.all( [
-			currentTemplatePromise,
-			maybePreviousTemplatePromise,
-			getTaskPromise,
-			themeDataPromise,
-		] );
-
-	let currentThemeIsAiGenerated = false;
-	if (
-		maybePreviousTemplate &&
-		currentTemplateId === maybePreviousTemplate
-	) {
-		currentThemeIsAiGenerated = true;
-	}
+	const [ task, themeData ] = await Promise.all( [
+		currentTemplatePromise,
+		maybePreviousTemplatePromise,
+		getTaskPromise,
+		themeDataPromise,
+	] );
 
 	const customizeStoreTaskCompleted = task?.isComplete;
 
@@ -81,7 +72,6 @@ export const fetchIntroData = async () => {
 		customizeStoreTaskCompleted,
 		themeData,
 		activeTheme: theme.stylesheet || '',
-		currentThemeIsAiGenerated,
 	};
 };
 

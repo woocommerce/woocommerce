@@ -22,10 +22,7 @@ import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import './intro.scss';
 import {
 	NetworkOfflineBanner,
-	ThemeHasModsBanner,
 	JetpackOfflineBanner,
-	ExistingAiThemeBanner,
-	ExistingThemeBanner,
 	NoAIBanner,
 	ExistingNoAiThemeBanner,
 	ClassicThemeBanner,
@@ -53,10 +50,7 @@ type BannerStatus = keyof typeof BANNER_COMPONENTS;
 
 const BANNER_COMPONENTS = {
 	'network-offline': NetworkOfflineBanner,
-	'task-incomplete-active-theme-has-mods': ThemeHasModsBanner,
 	'jetpack-offline': JetpackOfflineBanner,
-	'existing-ai-theme': ExistingAiThemeBanner,
-	'existing-theme': ExistingThemeBanner,
 	'no-ai': NoAIBanner,
 	'existing-no-ai-theme': ExistingNoAiThemeBanner,
 	'classic-theme': ClassicThemeBanner,
@@ -253,13 +247,7 @@ const CustomizedThemeBanners = ( {
 
 export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
-		intro: {
-			activeTheme,
-			themeData,
-			customizeStoreTaskCompleted,
-			currentThemeIsAiGenerated,
-		},
-		activeThemeHasMods,
+		intro: { activeTheme, themeData, customizeStoreTaskCompleted },
 	} = context;
 
 	const isJetpackOffline = false;
@@ -313,15 +301,6 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			break;
 		case customizeStoreTaskCompleted:
 			bannerStatus = 'existing-no-ai-theme';
-			break;
-		case ! customizeStoreTaskCompleted && activeThemeHasMods:
-			bannerStatus = 'task-incomplete-active-theme-has-mods';
-			break;
-		case customizeStoreTaskCompleted && currentThemeIsAiGenerated:
-			bannerStatus = 'existing-ai-theme';
-			break;
-		case customizeStoreTaskCompleted && ! currentThemeIsAiGenerated:
-			bannerStatus = 'existing-theme';
 			break;
 	}
 

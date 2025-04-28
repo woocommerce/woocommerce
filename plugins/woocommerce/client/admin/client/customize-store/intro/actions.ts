@@ -107,20 +107,6 @@ export const assignFetchIntroDataError = assign<
 	},
 } );
 
-export const assignCurrentThemeIsAiGenerated = assign<
-	customizeStoreStateMachineContext,
-	customizeStoreStateMachineEvents
->( {
-	intro: ( context, event ) => {
-		const currentThemeIsAiGenerated = (
-			event as DoneInvokeEvent< {
-				currentThemeIsAiGenerated: boolean;
-			} >
-		 ).data.currentThemeIsAiGenerated;
-		return { ...context.intro, currentThemeIsAiGenerated };
-	},
-} );
-
 export const assignNoAIFlowError = assign<
 	customizeStoreStateMachineContext,
 	customizeStoreStateMachineEvents

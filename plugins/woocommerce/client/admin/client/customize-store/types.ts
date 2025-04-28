@@ -43,7 +43,6 @@ export type customizeStoreStateMachineContext = {
 		themeData: RecommendThemesAPIResponse;
 		activeTheme: string;
 		customizeStoreTaskCompleted: boolean;
-		currentThemeIsAiGenerated: boolean;
 	};
 	transitionalScreen: {
 		hasCompleteSurvey: boolean;
