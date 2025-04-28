@@ -19,8 +19,7 @@
 		"build:project:copy-assets:legacy": "rsync -avhW --checksum --delete --quiet client/legacy/build/css/ assets/css && rsync -avhW --checksum --delete --quiet client/legacy/build/js/ assets/js",
 		"build:project:copy-assets:admin": "rsync -avhW --checksum --delete --quiet client/admin/build/ assets/client/admin",
 		"build:project:copy-assets:blocks": "rsync -avhW --checksum --delete --quiet client/blocks/build/ assets/client/blocks && wp-scripts build-blocks-manifest --input=assets/client/blocks --output=assets/client/blocks/blocks-json.php",
-		"email-editor:sync-php-package": "sh ./bin/sync-package.sh email-editor",
-		"email-editor:copy-php-package": "sh ./bin/sync-package.sh email-editor once",
+		"build:project:copy-assets:email-editor": "rsync -avhW --checksum --delete --quiet ../../packages/php/email-editor/src/ packages/email-editor/src",
 		"build:project:actualize-translation-domains": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"env:destroy": "pnpm wp-env destroy",
@@ -770,7 +769,8 @@
 			"node_modules/@woocommerce/block-library/build",
 			"node_modules/@woocommerce/classic-assets/build",
 			"node_modules/@woocommerce/admin-library/build",
-			"client/admin/node_modules/@woocommerce/email-editor/build/"
+			"client/admin/node_modules/@woocommerce/email-editor/build/",
+			"../../packages/php/email-editor/src/"
 		],
 		"ext": "js,css,php,json",
 		"ignoreRoot": []

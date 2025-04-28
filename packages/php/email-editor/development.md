@@ -22,25 +22,19 @@ You can extend your `.wp-env.override.json` file to map this package directly to
 }
 ```
 
-### 2. Using the Sync Script
+### 2. Using Build and Watch Commands
 
-Alternatively, you can use the sync script in the WooCommerce plugin to keep your changes synchronized:
+Alternatively, you can use the watch command within the WooCommerce plugin to keep your changes synchronized during development:
 
-1. For one-time synchronization:
-
-```bash
-pnpm --filter='@woocommerce/plugin-woocommerce' email-editor:copy-php-package
-```
-
-1. For continuous synchronization during development:
+Run the following command. It will watch for changes, rebuild assets if necessary, and sync the package files automatically:
 
 ```bash
-pnpm --filter='@woocommerce/plugin-woocommerce' email-editor:sync-php-package
+  pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:project
 ```
 
-This will watch for changes and sync them automatically. Press `Ctrl+C` to stop watching.
+Press `Ctrl+C` in the terminal to stop watching.
 
-The sync method is particularly useful when you don't want to restart wp-env after making changes to this package.
+Using the watch command is particularly useful when you don't want to restart `wp-env` after making modifications to this package.
 
 ## Running Tests
 
