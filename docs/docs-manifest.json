@@ -229,7 +229,7 @@
               "menu_title": "Totals Footer Item",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/totals-footer-item.md",
-              "hash": "548edd70e3a3c4ee7b35d56191bd8cdbb42ca4ec2f68ad21b19e49300c564433",
+              "hash": "3bbba54b1039906428bf449019310d04425a3d45a226a04a58e9205a576b0eea",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/totals-footer-item.md",
               "id": "90a9b8df374082f1713866a58b810303adb4d3da",
               "links": {
@@ -241,7 +241,7 @@
               "menu_title": "Order Summary Items",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/order-summary-items.md",
-              "hash": "21056453b5e6a2e25a8c0545e7f3014f6483936203692863bcb3d06a1963c419",
+              "hash": "eeb0ea4d91b6f7cdd49cdb3d0d7b7aa4f13355ba32154834b72f0b4629e6ee6b",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/order-summary-items.md",
               "id": "78eb3b135f82a3624a49979e3e93334295abd060",
               "links": {
@@ -277,7 +277,7 @@
               "menu_title": "Cart Line Items",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/cart-line-items.md",
-              "hash": "c03170d19a4eea81fa6fd5d29cc22160e27e24e28edbba67c481fbc23947319e",
+              "hash": "3e586b1ce761828e65305a2488e809778940434e101abe772c43465cdde67aa9",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/cart-line-items.md",
               "id": "97881b973dc1d08a54c54e0a04ecb75ee48dcee2",
               "links": {
@@ -1992,5 +1992,5 @@
       "categories": []
     }
   ],
-  "hash": "6d2eefd1c70c7dc5aa19844f6640cf4a7f64e1569c961f9d4f79da8ce15beb07"
+  "hash": "871dc55ac9868b0da2229e9fd26ea63fa77440db008ca3def8aa6a90358e19b5"
 }

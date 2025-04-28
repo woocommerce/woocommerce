@@ -139,7 +139,7 @@ const updateCustomerData = (): void => {
 		return;
 	}
 
-	let haveAddressFieldsForShippingRatesChanged =
+	const haveAddressFieldsForShippingRatesChanged =
 		localState.dirtyProps.shippingAddress.some( ( field ) =>
 			addressFieldsForShippingRates.includes( field as string )
 		);
@@ -157,7 +157,7 @@ const updateCustomerData = (): void => {
 			true,
 			haveAddressFieldsForShippingRatesChanged
 		)
-		.then( ( response ) => {
+		.then( () => {
 			localState.dirtyProps.billingAddress = [];
 			localState.dirtyProps.shippingAddress = [];
 			localState.doingPush = false;

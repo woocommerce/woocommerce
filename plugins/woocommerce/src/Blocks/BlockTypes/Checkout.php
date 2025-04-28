@@ -415,7 +415,6 @@ class Checkout extends AbstractBlock {
 			$country_data[ $country_code ]['format'] = $format;
 		}
 
-
 		$this->asset_data_registry->add( 'countryData', $country_data );
 		$this->asset_data_registry->add( 'defaultAddressFormat', $address_formats['default'] );
 		$this->asset_data_registry->add(
@@ -462,12 +461,19 @@ class Checkout extends AbstractBlock {
 		 */
 
 		$address_fields_for_shipping_rates = [ 'state', 'country', 'postcode', 'city' ];
-		$filtered_fields = apply_filters( 'woocommerce_address_fields_for_shipping_rates', [] );
+		/**
+		 * Filter the address fields for shipping rates.
+		 *
+		 * @param array $address_fields The address fields for shipping rates.
+		 * @since 9.9.0
+		 * @return array
+		 */
+		$filtered_fields                   = apply_filters( 'woocommerce_address_fields_for_shipping_rates', [] );
 
 		if ( is_array( $filtered_fields ) ) {
 			wc_get_logger()->warning(
 				sprintf(
-					__( 'Address fields for shipping rates must be an array of strings.'),
+					__( 'Address fields for shipping rates must be an array of strings.', 'woocommerce' ),
 				),
 				array( 'source' => 'woocommerce_address_fields_for_shipping_rates' )
 			);
@@ -488,7 +494,6 @@ class Checkout extends AbstractBlock {
 		}
 
 		$this->asset_data_registry->add( 'addressFieldsForShippingRates', $address_fields_for_shipping_rates );
-
 
 		$is_block_editor = $this->is_block_editor();
 

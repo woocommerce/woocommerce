@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Shipping related loading states shown only for address fields that impact the shipping rates
