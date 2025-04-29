@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  * Block type for variation selector attribute name in add to cart with options.
  * It's responsible to render the attribute name.
  */
-class AddToCartWithOptionsVariationSelectorAttributeName extends AbstractBlock {
+class VariationSelectorAttributeName extends AbstractBlock {
 	/**
 	 * Block name.
 	 *

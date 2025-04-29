@@ -13,7 +13,7 @@ use WP_Block;
  * It's responsible to render the CTA for each child product, that might be a button,
  * a checkbox, or a link.
  */
-class AddToCartWithOptionsGroupedProductSelectorItemCTA extends AbstractBlock {
+class GroupedProductSelectorItemCTA extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
 

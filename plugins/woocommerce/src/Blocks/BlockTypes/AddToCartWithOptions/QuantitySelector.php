@@ -9,9 +9,9 @@ use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
- * AddToCartWithOptionsQuantitySelector class.
+ * Block type for quantity selector in add to cart with options.
  */
-class AddToCartWithOptionsQuantitySelector extends AbstractBlock {
+class QuantitySelector extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
 

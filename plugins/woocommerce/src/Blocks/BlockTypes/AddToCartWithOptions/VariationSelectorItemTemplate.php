@@ -11,7 +11,7 @@ use WP_Block;
  * Block type for variation selector item in add to cart with options.
  * It's responsible to render each child attribute in a form of a list item.
  */
-class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
+class VariationSelectorItemTemplate extends AbstractBlock {
 	/**
 	 * Block name.
 	 *

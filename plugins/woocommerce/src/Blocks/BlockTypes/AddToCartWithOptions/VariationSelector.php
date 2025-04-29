@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 /**
  * Block type for variation selector in add to cart with options.
  */
-class AddToCartWithOptionsVariationSelector extends AbstractBlock {
+class VariationSelector extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
 

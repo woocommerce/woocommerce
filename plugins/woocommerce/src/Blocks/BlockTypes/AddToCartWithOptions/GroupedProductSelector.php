@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 /**
  * Block type for grouped product selector in add to cart with options.
  */
-class AddToCartWithOptionsGroupedProductSelector extends AbstractBlock {
+class GroupedProductSelector extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
 
