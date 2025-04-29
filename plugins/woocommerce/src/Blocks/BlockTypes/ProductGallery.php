@@ -46,7 +46,7 @@ class ProductGallery extends AbstractBlock {
 		}
 		ob_start();
 		?>
-		<dialog
+			<dialog
 				data-wp-ref
 				data-wp-bind--open="context.isDialogOpen"
 				data-wp-on--close="actions.closeDialog"
@@ -68,9 +68,9 @@ class ProductGallery extends AbstractBlock {
 							<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Output is already escaped by WooCommerce. ?>
 							<?php echo $images_html; ?>
 						</div>
+					</div>
 				</div>
-			</div>
-		</dialog>
+			</dialog>
 		<?php
 		return ob_get_clean();
 	}
