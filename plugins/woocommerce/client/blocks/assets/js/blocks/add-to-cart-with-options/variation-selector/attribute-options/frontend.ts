@@ -59,7 +59,7 @@ function setDefaultSelectedAttribute() {
 	setAttribute( context.name, context.selectedValue );
 }
 
-const isAttributeDisabled = ( {
+const isTermDisabled = ( {
 	attributeName,
 	attributeValue,
 	selectedAttributes,
@@ -137,7 +137,7 @@ const { state, actions } = store(
 						'woocommerce/add-to-cart-with-options'
 					);
 
-				return isAttributeDisabled( {
+				return isTermDisabled( {
 					attributeName: name,
 					attributeValue: option.value,
 					selectedAttributes: variation,
@@ -214,7 +214,7 @@ const { state, actions } = store(
 
 						for ( let i = index - 1; i >= 0; i-- ) {
 							if (
-								! isAttributeDisabled( {
+								! isTermDisabled( {
 									attributeName: context.name,
 									attributeValue: context.options[ i ].value,
 									selectedAttributes: variation,
@@ -258,7 +258,7 @@ const { state, actions } = store(
 							i++
 						) {
 							if (
-								! isAttributeDisabled( {
+								! isTermDisabled( {
 									attributeName: context.name,
 									attributeValue: context.options[ i ].value,
 									selectedAttributes: variation,
