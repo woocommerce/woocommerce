@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use WP_Block;
 
 /**
@@ -41,20 +42,15 @@ class GroupedProductSelectorItemTemplate extends AbstractBlock {
 		$post    = get_post( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$product = wc_get_product( $product_id );
 
-		// Get an instance of the current Post Template block.
-		$block_instance = $block->parsed_block;
-
-		$new_block = new WP_Block(
-			$block_instance,
+		// Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
+		// `render_callback` and ensure that no wrapper markup is included.
+		$block_content = Utils::render_block_with_context(
+			$block,
 			array(
 				'postType' => 'product',
 				'postId'   => $post->ID,
 			),
 		);
-
-		// Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
-		// `render_callback` and ensure that no wrapper markup is included.
-		$block_content = $new_block->render( array( 'dynamic' => false ) );
 
 		$post    = $previous_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$product = $previous_product;
