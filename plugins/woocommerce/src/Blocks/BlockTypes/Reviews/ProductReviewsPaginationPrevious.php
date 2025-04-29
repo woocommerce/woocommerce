@@ -25,7 +25,8 @@ class ProductReviewsPaginationPrevious extends AbstractBlock {
 	protected function render( $attributes, $content, $block ) {
 		$default_label    = __( 'Older Reviews', 'woocommerce' );
 		$label            = isset( $attributes['label'] ) && ! empty( $attributes['label'] ) ? $attributes['label'] : $default_label;
-		$pagination_arrow = get_comments_pagination_arrow( $block, 'previous' );
+		$pagination_arrow = $this->get_pagination_arrow( $block );
+		
 		if ( $pagination_arrow ) {
 			$label = $pagination_arrow . $label;
 		}
@@ -45,6 +46,28 @@ class ProductReviewsPaginationPrevious extends AbstractBlock {
 		}
 
 		return $previous_comments_link;
+	}
+
+	/**
+	 * Get the pagination arrow.
+	 *
+	 * @param \WP_Block $block Block instance.
+	 * @return string|null
+	 */
+	protected function get_pagination_arrow( $block ) {
+		$arrow_map = array(
+			'none'    => '',
+			'arrow'   => '←',
+			'chevron' => '«',
+		);
+
+		if ( ! empty( $block->context['reviews/paginationArrow'] ) && ! empty( $arrow_map[ $block->context['reviews/paginationArrow'] ] ) ) {
+			$arrow_attribute = $block->context['reviews/paginationArrow'];
+			$arrow           = $arrow_map[ $block->context['reviews/paginationArrow'] ];
+			$arrow_classes   = "wp-block-woocommerce-product-reviews-pagination-previous-arrow is-arrow-$arrow_attribute";
+			return "<span class='$arrow_classes' aria-hidden='true'>$arrow</span>";
+		}
+		return null;
 	}
 
 	/**

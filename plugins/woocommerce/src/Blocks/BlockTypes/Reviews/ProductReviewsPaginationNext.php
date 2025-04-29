@@ -32,7 +32,7 @@ class ProductReviewsPaginationNext extends AbstractBlock {
 		$max_page         = ( new \WP_Comment_Query( $comment_vars ) )->max_num_pages;
 		$default_label    = __( 'Newer Reviews' );
 		$label            = isset( $attributes['label'] ) && ! empty( $attributes['label'] ) ? $attributes['label'] : $default_label;
-		$pagination_arrow = get_comments_pagination_arrow( $block, 'next' );
+		$pagination_arrow = $this->get_pagination_arrow( $block );
 
 		$filter_link_attributes = static function () {
 			return get_block_wrapper_attributes();
@@ -51,6 +51,27 @@ class ProductReviewsPaginationNext extends AbstractBlock {
 			return '';
 		}
 		return $next_comments_link;
+	}
+
+	/**
+	 * Get the pagination arrow.
+	 *
+	 * @param \WP_Block $block Block instance.
+	 * @return string|null
+	 */
+	protected function get_pagination_arrow( $block ) {
+		$arrow_map = array(
+			'none'    => '',
+			'arrow'   => '→',
+			'chevron' => '»',
+		);
+		if ( ! empty( $block->context['reviews/paginationArrow'] ) && ! empty( $arrow_map[ $block->context['reviews/paginationArrow'] ] ) ) {
+			$arrow_attribute = $block->context['reviews/paginationArrow'];
+			$arrow           = $arrow_map[ $block->context['reviews/paginationArrow'] ];
+			$arrow_classes   = "wp-block-woocommerce-product-reviews-pagination-next-arrow is-arrow-$arrow_attribute";
+			return "<span class='$arrow_classes' aria-hidden='true'>$arrow</span>";
+		}
+		return null;
 	}
 
 	/**
