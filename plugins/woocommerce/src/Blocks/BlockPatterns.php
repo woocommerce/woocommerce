@@ -4,12 +4,9 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Blocks\AIContent\PatternsDictionary;
-use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
-use WP_Error;
 
 /**
  * Registers patterns under the `./patterns/` directory and from the PTK API and updates their content.
@@ -52,13 +49,6 @@ class BlockPatterns {
 	 * @var PatternRegistry $pattern_registry
 	 */
 	private PatternRegistry $pattern_registry;
-
-	/**
-	 * Patterns dictionary
-	 *
-	 * @var array|WP_Error
-	 */
-	private $dictionary;
 
 	/**
 	 * PTKPatternsStore instance.
