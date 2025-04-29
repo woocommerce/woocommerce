@@ -54,6 +54,68 @@ function setDefaultSelectedAttribute() {
 	setAttribute( context.name, context.selectedValue );
 }
 
+const isAttributeDisabled = ( {
+	attributeName,
+	attributeValue,
+	selectedAttributes,
+	availableVariations,
+} ) => {
+	if ( ! selectedAttributes || selectedAttributes.length === 0 ) {
+		return false;
+	}
+
+	const isCurrentAttributeSelected = selectedAttributes.some(
+		( selectedAttribute ) => selectedAttribute.attribute === attributeName
+	);
+	const attributesToMatch = isCurrentAttributeSelected
+		? selectedAttributes.length - 1
+		: selectedAttributes.length;
+
+	return ! availableVariations.some( ( availableVariation ) => {
+		// Skip variations that don't match the current pills.
+		if (
+			availableVariation.attributes[
+				'attribute_' + attributeName.toLowerCase()
+			] !== attributeValue &&
+			availableVariation.attributes[
+				'attribute_' + attributeName.toLowerCase()
+			] !== '' // "" is used for "any".
+		) {
+			return false;
+		}
+
+		// Count how many attributes from the variation match the
+		// currently selected attributes.
+		const matchingAttributes = selectedAttributes.filter(
+			( selectedAttribute ) => {
+				const availableVariationAttributeValue =
+					availableVariation.attributes[
+						'attribute_' + selectedAttribute.attribute.toLowerCase()
+					];
+				// If the current available variation matches the selected value.
+				if (
+					availableVariationAttributeValue === selectedAttribute.value
+				) {
+					return true;
+				}
+				// If the current available variation has an empty value (matching any),
+				// only count variations that match the currently selected
+				if ( availableVariationAttributeValue === '' ) {
+					if (
+						selectedAttribute.attribute !== attributeName ||
+						attributeValue === selectedAttribute.value
+					) {
+						return true;
+					}
+				}
+				return false;
+			}
+		).length;
+
+		return matchingAttributes >= attributesToMatch;
+	} );
+};
+
 const { state, actions } = store(
 	'woocommerce/add-to-cart-with-options-variation-selector-attribute-options__pills',
 	{
@@ -68,55 +130,11 @@ const { state, actions } = store(
 					'woocommerce/add-to-cart-with-options'
 				);
 
-				if ( ! variation || variation.length === 0 ) {
-					return false;
-				}
-
-				const isCurrentAttributeSelected = variation.some(
-					( attr ) => attr.attribute === name
-				);
-				const attributesToMatch = isCurrentAttributeSelected
-					? variation.length - 1
-					: variation.length;
-
-				return ! availableVariations.some( ( availableVariation ) => {
-					// Skip variations that don't match the current pills.
-					if (
-						availableVariation.attributes[
-							'attribute_' + name.toLowerCase()
-						] !== option.value &&
-						availableVariation.attributes[
-							'attribute_' + name.toLowerCase()
-						] !== '' // "" is used for "any".
-					) {
-						return false;
-					}
-
-					// Count how many attributes from the variation match the
-					// currently selected attributes.
-					const matchingAttributes = variation.filter( ( attr ) => {
-						const availableVariationAttributeValue =
-							availableVariation.attributes[
-								'attribute_' + attr.attribute.toLowerCase()
-							];
-						// If the current available variation matches the selected value.
-						if ( availableVariationAttributeValue === attr.value ) {
-							return true;
-						}
-						// If the current available variation has an empty value (matching any),
-						// only count variations that match the currently selected
-						if ( availableVariationAttributeValue === '' ) {
-							if (
-								attr.attribute !== name ||
-								option.value === attr.value
-							) {
-								return true;
-							}
-						}
-						return false;
-					} ).length;
-
-					return matchingAttributes >= attributesToMatch;
+				return isAttributeDisabled( {
+					attributeName: name,
+					attributeValue: option.value,
+					selectedAttributes: variation,
+					availableVariations: availableVariations,
 				} );
 			},
 			get pillTabIndex() {
@@ -164,30 +182,49 @@ const { state, actions } = store(
 				setAttribute( context.name, context.selectedValue );
 			},
 			handleKeyDown( event: KeyboardEvent< HTMLElement > ) {
-				let keyWasProcessed = false;
-
 				switch ( event.key ) {
 					case ' ':
+						event.stopPropagation();
+						event.preventDefault();
 						actions.toggleSelected();
-						keyWasProcessed = true;
 						break;
 
-					// @todo fix arrow navigation.
 					case 'Up':
 					case 'ArrowUp':
 					case 'Left':
 					case 'ArrowLeft': {
+						event.stopPropagation();
+						event.preventDefault();
 						const context = getContext< PillsContext >();
-						const index = state.index;
-						if ( index === -1 ) return;
-						const at =
-							index > 0 ? index - 1 : context.options.length - 1;
+						const { variation, availableVariations } = getContext(
+							'woocommerce/add-to-cart-with-options'
+						);
+						const { index } = state;
+						if ( index <= 0 ) {
+							return;
+						}
 
-						context.selectedValue = context.options[ at ].value;
-						context.focused = context.selectedValue;
+						for ( let i = index - 1; i >= 0; i-- ) {
+							if (
+								! isAttributeDisabled( {
+									attributeName: context.name,
+									attributeValue: context.options[ i ].value,
+									selectedAttributes: variation,
+									availableVariations: availableVariations,
+								} )
+							) {
+								context.selectedValue =
+									context.options[ i ].value;
+								context.focused = context.selectedValue;
 
-						setAttribute( context.name, context.selectedValue );
-						keyWasProcessed = true;
+								setAttribute(
+									context.name,
+									context.selectedValue
+								);
+
+								return;
+							}
+						}
 						break;
 					}
 
@@ -195,26 +232,46 @@ const { state, actions } = store(
 					case 'ArrowDown':
 					case 'Right':
 					case 'ArrowRight': {
+						event.stopPropagation();
+						event.preventDefault();
 						const context = getContext< PillsContext >();
-						const index = state.index;
-						if ( index === -1 ) return;
-						const at =
-							index < context.options.length - 1 ? index + 1 : 0;
+						const { variation, availableVariations } = getContext(
+							'woocommerce/add-to-cart-with-options'
+						);
+						const { index } = state;
+						if ( index >= context.options.length - 1 ) {
+							return;
+						}
 
-						context.selectedValue = context.options[ at ].value;
-						context.focused = context.selectedValue;
+						for (
+							let i = index + 1;
+							i < context.options.length;
+							i++
+						) {
+							if (
+								! isAttributeDisabled( {
+									attributeName: context.name,
+									attributeValue: context.options[ i ].value,
+									selectedAttributes: variation,
+									availableVariations: availableVariations,
+								} )
+							) {
+								context.selectedValue =
+									context.options[ i ].value;
+								context.focused = context.selectedValue;
 
-						setAttribute( context.name, context.selectedValue );
-						keyWasProcessed = true;
+								setAttribute(
+									context.name,
+									context.selectedValue
+								);
+
+								return;
+							}
+						}
 						break;
 					}
 					default:
 						break;
-				}
-
-				if ( keyWasProcessed ) {
-					event.stopPropagation();
-					event.preventDefault();
 				}
 			},
 		},
