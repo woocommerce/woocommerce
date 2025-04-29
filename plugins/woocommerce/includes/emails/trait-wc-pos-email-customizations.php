@@ -38,7 +38,7 @@ trait WC_POS_Email_Customizations {
 	 */
 	public function add_unit_price( $item_id, $item, $order ) {
 		$unit_price = $order->get_formatted_item_subtotal( $item );
-		echo '<br /><small>' . $unit_price . '</small>';
+		echo wp_kses_post( '<br /><small>' . $unit_price . '</small>' );
 	}
 
 	/**
