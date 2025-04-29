@@ -151,10 +151,7 @@ class Utils {
 				continue;
 			}
 			if ( is_array( $value ) || is_object( $value ) ) {
-				$value = wp_json_encode(
-					$value,
-					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-				);
+				$value = self::generate_interactive_context( $value );
 			}
 			$normalized_attributes[] = sprintf( '%s="%s"', esc_attr( $key ), esc_attr( $value ) );
 		}
@@ -181,5 +178,18 @@ class Utils {
 
 		// Render with dynamic set to false to prevent calling render_callback.
 		return $new_block->render( array( 'dynamic' => false ) );
+	}
+
+	/**
+	 * Generate JSON-encoded data-wp-context attribute.
+	 *
+	 * @param array $context_data Context data to encode.
+	 * @return string Normalized data-wp-context attribute.
+	 */
+	public static function generate_interactive_context( $context_data ) {
+		return wp_json_encode(
+			$context_data,
+			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+		);
 	}
 }
