@@ -158,4 +158,4 @@ class OrderTagsProvider extends AbstractTagProvider {
 			)
 		);
 	}
-} 
+}

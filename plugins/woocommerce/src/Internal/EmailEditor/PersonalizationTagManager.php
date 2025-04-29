@@ -52,9 +52,9 @@ class PersonalizationTagManager {
 	 */
 	public function __construct() {
 		$this->customer_tags_provider = new CustomerTagsProvider();
-		$this->order_tags_provider = new OrderTagsProvider();
-		$this->site_tags_provider = new SiteTagsProvider();
-		$this->store_tags_provider = new StoreTagsProvider();
+		$this->order_tags_provider    = new OrderTagsProvider();
+		$this->site_tags_provider     = new SiteTagsProvider();
+		$this->store_tags_provider    = new StoreTagsProvider();
 	}
 
 	/**

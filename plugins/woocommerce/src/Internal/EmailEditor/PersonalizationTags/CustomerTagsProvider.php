@@ -113,4 +113,4 @@ class CustomerTagsProvider extends AbstractTagProvider {
 			)
 		);
 	}
-} 
+}

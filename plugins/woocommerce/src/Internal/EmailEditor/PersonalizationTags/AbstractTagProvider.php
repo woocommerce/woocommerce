@@ -19,4 +19,4 @@ abstract class AbstractTagProvider {
 	 * @return void
 	 */
 	abstract public function register_tags( Personalization_Tags_Registry $registry ): void;
-} 
+}

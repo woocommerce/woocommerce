@@ -42,4 +42,4 @@ class SiteTagsProvider extends AbstractTagProvider {
 			)
 		);
 	}
-} 
+}
