@@ -51,7 +51,6 @@ export const SettingsPaymentsCod = () => {
 		Record< string, string | boolean | string[] >
 	>( {} );
 
-	console.log( codSettings );
 	useEffect( () => {
 		if ( codSettings ) {
 			setFormValues( {
@@ -184,7 +183,7 @@ export const SettingsPaymentsCod = () => {
 							} }
 						/>
 					) }
-					{ isLoading ? (
+					{ isLoading || ! codSettings ? (
 						<FieldPlaceholder size="medium" />
 					) : (
 						<TreeSelectControl
@@ -196,12 +195,16 @@ export const SettingsPaymentsCod = () => {
 								'Select shipping methods for which this payment method is enabled.',
 								'woocommerce'
 							) }
-							options={ mapShippingMethodsOptions(
-								codSettings.settings.enable_for_methods?.options ??
-									[]
-							) }
+							options={
+								codSettings.settings.enable_for_methods?.options
+									? mapShippingMethodsOptions(
+											codSettings.settings
+												.enable_for_methods.options
+									  )
+									: []
+							}
 							value={ formValues.enable_for_methods as string[] }
-							onChange={ ( value ) => {
+							onChange={ ( value: string[] ) => {
 								setFormValues( {
 									...formValues,
 									enable_for_methods: value,

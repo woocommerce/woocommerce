@@ -11,20 +11,26 @@ import {
 	Button,
 	Card,
 } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import { paymentGatewaysStore, optionsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import '../settings-payments-body.scss';
+import './settings-payments-offline-method.scss';
 import { FieldPlaceholder } from '~/settings-payments/components/field-placeholder';
 import { PaymentSettingsSection } from '~/settings-payments/components/payment-settings-section';
 import { BankAccountsList } from '~/settings-payments/components/bank-accounts-list';
 import { PaymentSettingsLayout } from '~/settings-payments/components/payment-settings-layout';
 import { GatewaySettingsForm } from '~/settings-payments/components/gateway-settings-form';
+import { BankAccount } from '~/settings-payments/components/bank-accounts-list/types';
 
 export const SettingsPaymentsBacs = () => {
+	const storeCountryCode =
+		window.wcSettings?.admin?.preloadSettings?.general
+			?.woocommerce_default_country || 'US';
+
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( 'core/notices' );
 
@@ -44,32 +50,41 @@ export const SettingsPaymentsBacs = () => {
 		const selectors = select( optionsStore );
 
 		return {
-			accountsOption: selectors.getOption( 'woocommerce_bacs_accounts' ),
+			accountsOption: selectors.getOption(
+				'woocommerce_bacs_accounts'
+			) as BankAccount[] | undefined,
 			isLoadingAccounts: ! selectors.hasFinishedResolution( 'getOption', [
 				'woocommerce_bacs_accounts',
 			] ),
 		};
 	}, [] );
 
-	const [ formValues, setFormValues ] = useState( {
-		enabled: bacsSettings?.enabled ?? false,
-		title: bacsSettings?.settings.title?.value ?? '',
-		description: bacsSettings?.settings.description?.value ?? '',
-		instructions: bacsSettings?.settings.instructions?.value ?? '',
-	} );
+	const [ formValues, setFormValues ] = useState<
+		Record< string, string | boolean | string[] >
+	>( {} );
 
-	type BankAccount = {
-		account_name: string;
-		account_number: string;
-		sort_code?: string;
-		iban?: string;
-		bic?: string;
-		bank_name?: string;
-	};
+	console.log( bacsSettings );
+	useEffect( () => {
+		if ( bacsSettings ) {
+			setFormValues( {
+				enabled: bacsSettings.enabled,
+				title: bacsSettings.settings.title.value,
+				description: bacsSettings.description,
+				instructions: bacsSettings.settings.instructions.value,
+			} );
+		}
+	}, [ bacsSettings ] );
 
-	const [ accounts, setAccounts ] = useState< BankAccount[] >(
-		accountsOption?.value ?? []
-	);
+	const [ accounts, setAccounts ] = useState< BankAccount[] >( [] );
+
+	useEffect( () => {
+		if ( accountsOption ) {
+			setAccounts( accountsOption );
+		}
+	}, [ accountsOption ] );
+
+	console.log( accountsOption );
+	console.log( bacsSettings );
 
 	const { updateOptions } = useDispatch( optionsStore );
 	const { updatePaymentGateway } = useDispatch( paymentGatewaysStore );
@@ -79,20 +94,35 @@ export const SettingsPaymentsBacs = () => {
 			return;
 		}
 
-		const settings: Record< string, string > = {
-			title: formValues.title,
-			description: formValues.description,
-			instructions: formValues.instructions,
+		const settings: Record< string, string | string[] > = {
+			title: String( formValues.title ),
+			instructions: String( formValues.instructions ),
 		};
 
 		try {
 			await Promise.all( [
 				updateOptions( {
-					woocommerce_bacs_accounts: accounts,
+					woocommerce_bacs_accounts: accounts.map(
+						( {
+							account_name,
+							account_number,
+							bank_name,
+							sort_code,
+							iban,
+							bic,
+						} ) => ( {
+							account_name,
+							account_number,
+							bank_name,
+							sort_code,
+							iban,
+							bic,
+						} )
+					),
 				} ),
 				updatePaymentGateway( 'bacs', {
-					enabled: formValues.enabled,
-					description: formValues.description,
+					enabled: Boolean( formValues.enabled ),
+					description: String( formValues.description ),
 					settings,
 				} ),
 			] );
@@ -138,6 +168,14 @@ export const SettingsPaymentsBacs = () => {
 					) : (
 						<TextControl
 							label={ __( 'Title', 'woocommerce' ) }
+							help={ __(
+								'This controls the title which the user sees during checkout.',
+								'woocommerce'
+							) }
+							placeholder={ __(
+								'Direct bank transfer payments',
+								'woocommerce'
+							) }
 							value={ String( formValues.title ) }
 							onChange={ ( value ) => {
 								setFormValues( {
@@ -152,6 +190,10 @@ export const SettingsPaymentsBacs = () => {
 					) : (
 						<TextareaControl
 							label={ __( 'Description', 'woocommerce' ) }
+							help={ __(
+								'Payment method description that the customer will see on your checkout.',
+								'woocommerce'
+							) }
 							value={ String( formValues.description ) }
 							onChange={ ( value ) => {
 								setFormValues( {
@@ -166,6 +208,10 @@ export const SettingsPaymentsBacs = () => {
 					) : (
 						<TextareaControl
 							label={ __( 'Instructions', 'woocommerce' ) }
+							help={ __(
+								'Instructions that will be added to the thank you page and emails.',
+								'woocommerce'
+							) }
 							value={ String( formValues.instructions ) }
 							onChange={ ( value ) => {
 								setFormValues( {
@@ -189,7 +235,8 @@ export const SettingsPaymentsBacs = () => {
 					) : (
 						<BankAccountsList
 							accounts={ accounts }
-							setAccounts={ setAccounts }
+							onChange={ setAccounts }
+							defaultCountry={ storeCountryCode }
 						/>
 					) }
 				</PaymentSettingsSection>
