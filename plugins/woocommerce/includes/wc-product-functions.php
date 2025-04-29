@@ -157,6 +157,9 @@ function wc_delete_product_transients( $post_id = 0 ) {
 			// Schedule the async deletion of related product transients.
 			// This should run async cause it also fetches all related products
 			// of the current product to be deleted which we can can't be sure how many there are.
+
+			// Add static cache here which is used to check if the transient is already scheduled.
+			// The cache exists ONLY on the current request to prevent searching the DB for every product.
 			static $scheduled = array();
 			$cache_key        = (int) $post_id;
 
