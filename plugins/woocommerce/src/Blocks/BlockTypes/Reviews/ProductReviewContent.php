@@ -49,8 +49,6 @@ class ProductReviewContent extends AbstractBlock {
 
 		$moderation_note = '';
 		if ( '0' === $comment->comment_approved ) {
-			$commenter = wp_get_current_commenter();
-
 			if ( $commenter['comment_author_email'] ) {
 				$moderation_note = __( 'Your review is awaiting moderation.', 'woocommerce' );
 			} else {
