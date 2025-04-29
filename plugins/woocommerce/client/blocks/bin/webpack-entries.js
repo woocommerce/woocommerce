@@ -209,7 +209,7 @@ const blocks = {
 	},
 	'product-review-content': {
 		customDir: 'product-reviews/inner-blocks/review-content',
-  },
+	},
 };
 
 /**
