@@ -62,7 +62,7 @@ class Quote extends Abstract_Block_Renderer {
 
 		return $this->add_spacer(
 			sprintf(
-				'<p class="email-block-quote-citation" style="margin: 0; font-style: italic;">%s</p>',
+				'<cite class="email-block-quote-citation" style="margin: 0; font-style: italic;">%s</cite>',
 				$citation_content
 			),
 			$email_attrs
