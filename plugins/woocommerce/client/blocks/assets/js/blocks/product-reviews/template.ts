@@ -44,7 +44,7 @@ const TEMPLATE: InnerBlockTemplate[] = [
 								},
 								[
 									[
-										'core/comment-author-name',
+										'woocommerce/product-review-author-name',
 										{
 											fontSize: 'small',
 										},
