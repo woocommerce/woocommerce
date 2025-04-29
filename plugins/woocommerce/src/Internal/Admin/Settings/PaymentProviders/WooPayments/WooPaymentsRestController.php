@@ -3,11 +3,13 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments;
 
+use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init as WCPayPromotion;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use Exception;
 use WP_Error;
+use WP_Http;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -332,7 +334,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	/**
 	 * Initialize the class instance.
 	 *
-	 * @param Payments           $payments The general payments settings page service.
+	 * @param Payments           $payments    The general payments settings page service.
 	 * @param WooPaymentsService $woopayments The WooPayments-specific Payments settings page service.
 	 *
 	 * @internal
@@ -346,7 +348,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 * Get the onboarding details for the given location.
 	 *
 	 * @param WP_REST_Request $request The request object.
-	 * @return WP_Error|WP_REST_Response
+	 * @return WP_Error|WP_REST_Response The response or error.
 	 */
 	protected function get_onboarding_details( WP_REST_Request $request ) {
 		$location = $request->get_param( 'location' );
@@ -357,8 +359,10 @@ class WooPaymentsRestController extends RestApiControllerBase {
 
 		try {
 			$onboarding_details = $this->woopayments->get_onboarding_details( $location, $this->get_rest_url_path( 'onboarding' ) );
+		} catch ( ApiException $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		} catch ( Exception $e ) {
-			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
+			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => WP_Http::INTERNAL_SERVER_ERROR ) );
 		}
 
 		return rest_ensure_response( $this->prepare_onboarding_details_response( $onboarding_details ) );
@@ -369,13 +373,10 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
-	 * @return WP_Error|WP_REST_Response The response.
+	 * @return WP_Error|WP_REST_Response The response or error.
 	 */
 	protected function handle_onboarding_step_start( WP_REST_Request $request ) {
-		$step_id = $request->get_param( 'step' );
-		if ( empty( $step_id ) || ! $this->woopayments->is_valid_onboarding_step_id( $step_id ) ) {
-			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_invalid_step', __( 'Invalid onboarding step ID.', 'woocommerce' ), array( 'status' => 400 ) );
-		}
+		$step_id = $request->get_param( 'step' ) ?? '';
 
 		$location = $request->get_param( 'location' );
 		if ( empty( $location ) ) {
@@ -383,19 +384,19 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$location = $this->payments->get_country();
 		}
 
-		$previous_status = $this->woopayments->get_onboarding_step_status( $step_id, $location );
-
 		try {
-			$this->woopayments->set_onboarding_step_started( $step_id, $location );
-		} catch ( Exception $e ) {
-			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
-		}
+			$previous_status = $this->woopayments->get_onboarding_step_status( $step_id, $location );
 
-		$response = array(
-			'success'         => true,
-			'previous_status' => $previous_status,
-			'current_status'  => $this->woopayments->get_onboarding_step_status( $step_id, $location ),
-		);
+			$this->woopayments->set_onboarding_step_started( $step_id, $location );
+
+			$response = array(
+				'success'         => true,
+				'previous_status' => $previous_status,
+				'current_status'  => $this->woopayments->get_onboarding_step_status( $step_id, $location ),
+			);
+		} catch ( ApiException $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 
 		return rest_ensure_response( $response );
 	}
@@ -408,10 +409,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 * @return WP_Error|WP_REST_Response The response.
 	 */
 	protected function handle_onboarding_step_save( WP_REST_Request $request ) {
-		$step_id = $request->get_param( 'step' );
-		if ( empty( $step_id ) || ! $this->woopayments->is_valid_onboarding_step_id( $step_id ) ) {
-			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_invalid_step', __( 'Invalid onboarding step ID.', 'woocommerce' ), array( 'status' => 400 ) );
-		}
+		$step_id = $request->get_param( 'step' ) ?? '';
 
 		$location = $request->get_param( 'location' );
 		if ( empty( $location ) ) {
@@ -421,8 +419,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 
 		try {
 			$this->woopayments->onboarding_step_save( $step_id, $location, $request->get_params() );
-		} catch ( Exception $e ) {
-			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
+		} catch ( ApiException $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 
 		return rest_ensure_response( array( 'success' => true ) );
@@ -433,13 +431,10 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
-	 * @return WP_Error|WP_REST_Response The response.
+	 * @return WP_Error|WP_REST_Response The response or error.
 	 */
 	protected function handle_onboarding_step_check( WP_REST_Request $request ) {
-		$step_id = $request->get_param( 'step' );
-		if ( empty( $step_id ) || ! $this->woopayments->is_valid_onboarding_step_id( $step_id ) ) {
-			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_invalid_step', __( 'Invalid onboarding step ID.', 'woocommerce' ), array( 'status' => 400 ) );
-		}
+		$step_id = $request->get_param( 'step' ) ?? '';
 
 		$location = $request->get_param( 'location' );
 		if ( empty( $location ) ) {
@@ -449,8 +444,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 
 		try {
 			$result = $this->woopayments->onboarding_step_check( $step_id, $location );
-		} catch ( Exception $e ) {
-			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
+		} catch ( ApiException $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 
 		// Merge the result with the success flag.
@@ -464,13 +459,10 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
-	 * @return WP_Error|WP_REST_Response The response.
+	 * @return WP_Error|WP_REST_Response The response or error.
 	 */
 	protected function handle_onboarding_step_finish( WP_REST_Request $request ) {
-		$step_id = $request->get_param( 'step' );
-		if ( empty( $step_id ) || ! $this->woopayments->is_valid_onboarding_step_id( $step_id ) ) {
-			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_invalid_step', __( 'Invalid onboarding step ID.', 'woocommerce' ), array( 'status' => 400 ) );
-		}
+		$step_id = $request->get_param( 'step' ) ?? '';
 
 		$location = $request->get_param( 'location' );
 		if ( empty( $location ) ) {
@@ -478,19 +470,19 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$location = $this->payments->get_country();
 		}
 
-		$previous_status = $this->woopayments->get_onboarding_step_status( $step_id, $location );
-
 		try {
-			$this->woopayments->set_onboarding_step_completed( $step_id, $location );
-		} catch ( Exception $e ) {
-			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
-		}
+			$previous_status = $this->woopayments->get_onboarding_step_status( $step_id, $location );
 
-		$response = array(
-			'success'         => true,
-			'previous_status' => $previous_status,
-			'current_status'  => $this->woopayments->get_onboarding_step_status( $step_id, $location ),
-		);
+			$this->woopayments->set_onboarding_step_completed( $step_id, $location );
+
+			$response = array(
+				'success'         => true,
+				'previous_status' => $previous_status,
+				'current_status'  => $this->woopayments->get_onboarding_step_status( $step_id, $location ),
+			);
+		} catch ( ApiException $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 
 		return rest_ensure_response( $response );
 	}
@@ -500,7 +492,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
-	 * @return WP_Error|WP_REST_Response The response.
+	 * @return WP_Error|WP_REST_Response The response or error.
 	 */
 	protected function handle_onboarding_test_account_init( WP_REST_Request $request ) {
 		$location = $request->get_param( 'location' );
@@ -514,15 +506,13 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$this->woopayments->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
 			$result = $this->woopayments->onboarding_test_account_init( $location, $request->get_param( 'source' ) ?? '' );
-		} catch ( Exception $e ) {
-			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
+		} catch ( ApiException $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 
 		return rest_ensure_response(
 			array_merge(
-				array(
-					'success' => true,
-				),
+				array( 'success' => true ),
 				$result
 			)
 		);
@@ -533,7 +523,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
-	 * @return WP_Error|WP_REST_Response The response.
+	 * @return WP_Error|WP_REST_Response The response or error.
 	 */
 	protected function handle_onboarding_business_verification_kyc_session_init( WP_REST_Request $request ) {
 		// If we receive self assessment data with the request, we will use it.
@@ -547,8 +537,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 
 		try {
 			$account_session = $this->woopayments->get_onboarding_kyc_session( $location, $self_assessment );
-		} catch ( Exception $e ) {
-			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
+		} catch ( ApiException $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 
 		return rest_ensure_response(
@@ -564,7 +554,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
-	 * @return WP_Error|WP_REST_Response The response.
+	 * @return WP_Error|WP_REST_Response The response or error.
 	 */
 	protected function handle_onboarding_business_verification_kyc_session_finish( WP_REST_Request $request ) {
 		$location = $request->get_param( 'location' );
@@ -575,8 +565,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 
 		try {
 			$response = $this->woopayments->finish_onboarding_kyc_session( $location, $request->get_param( 'source' ) ?? '' );
-		} catch ( Exception $e ) {
-			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
+		} catch ( ApiException $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 
 		// If there is no success key in the response, we assume the operation was successful.
@@ -592,13 +582,13 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
-	 * @return WP_Error|WP_REST_Response The response.
+	 * @return WP_Error|WP_REST_Response The response or error.
 	 */
 	protected function reset_onboarding( WP_REST_Request $request ) {
 		try {
 			$this->woopayments->reset_onboarding( $request->get_param( 'from' ) ?? '', $request->get_param( 'source' ) ?? '' );
-		} catch ( Exception $e ) {
-			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
+		} catch ( ApiException $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 
 		return rest_ensure_response(
@@ -613,7 +603,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
-	 * @return WP_Error|WP_REST_Response The response.
+	 * @return WP_Error|WP_REST_Response The response or error.
 	 */
 	protected function handle_test_account_disable( WP_REST_Request $request ) {
 		try {
@@ -622,8 +612,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 				$request->get_param( 'from' ) ?? '',
 				$request->get_param( 'source' ) ?? ''
 			);
-		} catch ( Exception $e ) {
-			return new WP_Error( 'woocommerce_rest_woopayments_onboarding_error', $e->getMessage(), array( 'status' => 500 ) );
+		} catch ( ApiException $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 
 		return rest_ensure_response(
