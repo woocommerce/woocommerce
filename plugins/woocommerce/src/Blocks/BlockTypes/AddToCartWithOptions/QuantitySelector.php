@@ -64,8 +64,6 @@ class QuantitySelector extends AbstractBlock {
 			return '';
 		}
 
-		wp_enqueue_script_module( $this->get_full_block_name() );
-
 		ob_start();
 
 		woocommerce_quantity_input( Utils::get_quantity_input_args( $product ) );
