@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\BlockPatterns as TestedBlockPatterns;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 use Automattic\WooCommerce\Blocks\Domain\Package;
-use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
 /**
  * Unit tests for the BlockPatterns class.
