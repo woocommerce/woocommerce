@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
-use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 use WP_Block;
 
 /**
@@ -62,7 +62,7 @@ class VariationSelectorItemTemplate extends AbstractBlock {
 			return '';
 		}
 
-		$block_content = Utils::render_block_with_context(
+		$block_content = AddToCartWithOptionsUtils::render_block_with_context(
 			$block,
 			array(
 				'woocommerce/attributeId'    => 'wc_product_attribute_' . uniqid(),

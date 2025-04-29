@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
-use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 
 /**
  * AddToCartWithOptions class.
@@ -176,7 +176,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			$wrapper_attributes = get_block_wrapper_attributes(
 				array(
 					'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
-					'data-wp-context'     => Utils::generate_interactive_context( $context ),
+					'data-wp-context'     => AddToCartWithOptionsUtils::generate_interactive_context( $context ),
 					'data-wp-on--submit'  => 'actions.handleSubmit',
 					'class'               => $classes,
 					'style'               => esc_attr( $classes_and_styles['styles'] ),

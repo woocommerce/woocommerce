@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
-use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
@@ -41,13 +41,13 @@ class QuantitySelector extends AbstractBlock {
 		global $product;
 		$previous_product = $product;
 
-		$product = Utils::get_product_from_context( $block, $previous_product );
+		$product = AddToCartWithOptionsUtils::get_product_from_context( $block, $previous_product );
 
 		if ( ! $product ) {
 			return '';
 		}
 
-		if ( Utils::is_not_purchasable_simple_product( $product ) ) {
+		if ( AddToCartWithOptionsUtils::is_not_purchasable_simple_product( $product ) ) {
 			$product = $previous_product;
 
 			return '';
@@ -66,14 +66,14 @@ class QuantitySelector extends AbstractBlock {
 
 		ob_start();
 
-		woocommerce_quantity_input( Utils::get_quantity_input_args( $product ) );
+		woocommerce_quantity_input( AddToCartWithOptionsUtils::get_quantity_input_args( $product ) );
 
 		$product_html = ob_get_clean();
 
 		$product_name = $product->get_name();
 
-		$product_html = Utils::add_quantity_steppers( $product_html, $product_name );
-		$product_html = Utils::add_quantity_stepper_classes( $product_html );
+		$product_html = AddToCartWithOptionsUtils::add_quantity_steppers( $product_html, $product_name );
+		$product_html = AddToCartWithOptionsUtils::add_quantity_stepper_classes( $product_html );
 
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
@@ -94,7 +94,7 @@ class QuantitySelector extends AbstractBlock {
 			)
 		);
 
-		$form = Utils::make_quantity_input_interactive( $product_html, $wrapper_attributes );
+		$form = AddToCartWithOptionsUtils::make_quantity_input_interactive( $product_html, $wrapper_attributes );
 
 		$product = $previous_product;
 

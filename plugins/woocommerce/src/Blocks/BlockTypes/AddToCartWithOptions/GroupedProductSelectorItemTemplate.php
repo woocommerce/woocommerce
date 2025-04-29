@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
-use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 use WP_Block;
 
 /**
@@ -44,7 +44,7 @@ class GroupedProductSelectorItemTemplate extends AbstractBlock {
 
 		// Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
 		// `render_callback` and ensure that no wrapper markup is included.
-		$block_content = Utils::render_block_with_context(
+		$block_content = AddToCartWithOptionsUtils::render_block_with_context(
 			$block,
 			array(
 				'postType' => 'product',
