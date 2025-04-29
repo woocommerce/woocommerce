@@ -203,8 +203,6 @@ function wc_delete_product_transients( $post_id = 0 ) {
  * @param int $post_id The product ID updated/created.
  */
 function wc_delete_related_product_transients( $post_id ) {
-	global $wpdb;
-
 	if ( ! is_numeric( $post_id ) ) {
 		return;
 	}
