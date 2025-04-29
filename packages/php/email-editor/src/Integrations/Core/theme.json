@@ -37,24 +37,7 @@
 					}
 				},
 				"css": "&.has-text-align-right { border-width: 0 1px 0 0; } &.has-text-align-center { border-width: 0; border-inline: 0; padding-inline: 0; }",
-				"variations": {
-					"plain": {
-						"border": {
-							"color": "transparent",
-							"style": "none",
-							"width": "0",
-							"radius": "0"
-						},
-						"spacing": {
-							"padding": {
-								"top": "0",
-								"right": "0",
-								"bottom": "0",
-								"left": "0"
-							}
-						}
-					}
-				}
+				"variations": {}
 			}
 		},
 		"elements": {
