@@ -444,7 +444,7 @@ export const SettingsPaymentsChequeWrapper = () => {
 	return (
 		<>
 			<Header
-				title={ __( 'Cheque', 'woocommerce' ) }
+				title={ __( 'Check', 'woocommerce' ) }
 				backLink={ getAdminLink(
 					'admin.php?page=wc-settings&tab=checkout&section=offline'
 				) }
@@ -456,7 +456,7 @@ export const SettingsPaymentsChequeWrapper = () => {
 							<div className="settings-payment-gateways">
 								<div className="settings-payment-gateways__header">
 									<div className="settings-payment-gateways__header-title">
-										{ __( 'Cheque', 'woocommerce' ) }
+										{ __( 'Check', 'woocommerce' ) }
 									</div>
 								</div>
 								<Placeholder />
