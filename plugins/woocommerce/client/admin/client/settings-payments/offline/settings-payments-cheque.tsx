@@ -18,6 +18,7 @@ import { useState, useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import '../settings-payments-body.scss';
+import './settings-payments-offline-method.scss';
 import { GatewaySettingsForm } from '~/settings-payments/components/gateway-settings-form';
 import { PaymentSettingsLayout } from '~/settings-payments/components/payment-settings-layout';
 import { PaymentSettingsSection } from '~/settings-payments/components/payment-settings-section';
