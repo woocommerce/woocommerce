@@ -215,10 +215,12 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				'<option %s>%s</option>',
 				$this->get_normalized_attributes(
 					array(
-						'value'           => $attribute_term['value'],
-						'selected'        => $attribute_term['isSelected'] ? 'selected' : null,
-						'data-wp-context' => array(
-							'option' => $attribute_term,
+						'value'                  => $attribute_term['value'],
+						'data-wp-bind--disabled' => 'state.isOptionDisabled',
+						'data-wp-context'        => array(
+							'option'  => $attribute_term,
+							'name'    => $attribute_name,
+							'options' => $attribute_terms,
 						),
 					),
 				),

@@ -95,10 +95,6 @@ class AddToCartWithOptionsPage {
 		await this.page
 			.getByRole( 'button', { name: 'Upgrade to the blockified' } )
 			.click();
-
-		await this.editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
 	}
 }
 

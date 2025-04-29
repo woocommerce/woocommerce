@@ -302,6 +302,25 @@ const { state, actions } = store(
 store(
 	'woocommerce/add-to-cart-with-options-variation-selector-attribute-options__dropdown',
 	{
+		state: {
+			get isOptionDisabled() {
+				const { name, option } = getContext< PillsContext >();
+				if ( option.value === '' ) {
+					return true;
+				}
+				const { variation, availableVariations } =
+					getContext< AddToCartWithOptionsStoreContext >(
+						'woocommerce/add-to-cart-with-options'
+					);
+
+				return isTermDisabled( {
+					attributeName: name,
+					attributeValue: option.value,
+					selectedAttributes: variation,
+					availableVariations: availableVariations,
+				} );
+			},
+		},
 		actions: {
 			handleChange( event: ChangeEvent< HTMLSelectElement > ) {
 				const context = getContext< Context >();

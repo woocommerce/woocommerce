@@ -85,11 +85,14 @@ test.describe( 'Add to Cart with Options Block', () => {
 		page,
 		pageObject,
 		editor,
-		admin,
 	} ) => {
 		await pageObject.setFeatureFlags();
 
 		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 
 		await page.goto( '/beanie' );
 
@@ -110,24 +113,67 @@ test.describe( 'Add to Cart with Options Block', () => {
 		await expect( addToCartButton ).toHaveText( '6 in cart' );
 	} );
 
-	test( "doesn't allow selecting invalid variations", async ( {
+	test( "doesn't allow selecting invalid variations in pills mode", async ( {
 		page,
 		pageObject,
+		editor,
 	} ) => {
 		await pageObject.setFeatureFlags();
 
 		await pageObject.updateSingleProductTemplate();
 
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
 		await page.goto( '/hoodie' );
 
-		const logoYesOption = page.getByRole( 'radio', { name: 'Yes' } );
+		const logoYesOption = page.getByRole( 'radio', {
+			name: 'Yes',
+			exact: true,
+		} );
 		const colorGreenOption = page.getByRole( 'radio', {
 			name: 'Green',
+			exact: true,
 		} );
 
 		await expect( colorGreenOption ).toBeEnabled();
 
 		await logoYesOption.click();
+
+		await expect( colorGreenOption ).toBeDisabled();
+	} );
+
+	test( "doesn't allow selecting invalid variations in dropdown mode", async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await pageObject.setFeatureFlags();
+
+		await pageObject.updateSingleProductTemplate();
+
+		await pageObject.switchProductType( 'Variable Product' );
+
+		const attributeOptionsBlock = await editor.getBlockByName(
+			'woocommerce/add-to-cart-with-options-variation-selector-attribute-options'
+		);
+		await editor.selectBlocks( attributeOptionsBlock.first() );
+
+		await page.getByRole( 'radio', { name: 'Dropdown' } ).click();
+
+		await editor.saveSiteEditorEntities();
+
+		await page.goto( '/hoodie' );
+
+		const colorGreenOption = page.getByRole( 'option', {
+			name: 'Green',
+			exact: true,
+		} );
+
+		await expect( colorGreenOption ).toBeEnabled();
+
+		await page.getByLabel( 'Logo', { exact: true } ).selectOption( 'Yes' );
 
 		await expect( colorGreenOption ).toBeDisabled();
 	} );
