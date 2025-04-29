@@ -7,10 +7,11 @@ export type SettingDefinition = {
 	description: string;
 	id: string;
 	label: string;
+	options?: Record< string, Record< string, string > >;
 	placeholder: string;
 	tip: string;
 	type: string;
-	value: string;
+	value: string | string[];
 	is_dismissed: string;
 };
 
@@ -30,7 +31,7 @@ export type PaymentGateway< TSettings = Record< string, SettingDefinition > > =
 	};
 
 export type PaymentGatewayUpdatePayload = PaymentGateway<
-	Record< string, string >
+	Record< string, string | string[] >
 >;
 
 export type PluginsState = {
