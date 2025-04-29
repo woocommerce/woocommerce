@@ -537,11 +537,6 @@ final class BlockTypesController {
 				$block_types[] = 'AddToCartWithOptions\GroupedProductSelectorItemTemplate';
 				$block_types[] = 'AddToCartWithOptions\GroupedProductSelectorItemCTA';
 			}
-			// Generic blocks that will be pushed upstream.
-			$block_types[] = 'Accordion\AccordionGroup';
-			$block_types[] = 'Accordion\AccordionItem';
-			$block_types[] = 'Accordion\AccordionPanel';
-			$block_types[] = 'Accordion\AccordionHeader';
 			$block_types[] = 'BlockifiedProductDetails';
 			$block_types[] = 'ProductDescription';
 			$block_types[] = 'ProductSpecifications';
@@ -555,6 +550,12 @@ final class BlockTypesController {
 			$block_types[] = 'Reviews\ProductReviewsPagination';
 			$block_types[] = 'Reviews\ProductReviewsPaginationNext';
 			$block_types[] = 'Reviews\ProductReviewsPaginationPrevious';
+			// Generic blocks that will be pushed upstream.
+			$block_types[] = 'Accordion\AccordionGroup';
+			$block_types[] = 'Accordion\AccordionItem';
+			$block_types[] = 'Accordion\AccordionPanel';
+			$block_types[] = 'Accordion\AccordionHeader';
+			// End: generic blocks that will be pushed upstream.
 		}
 
 		/**
