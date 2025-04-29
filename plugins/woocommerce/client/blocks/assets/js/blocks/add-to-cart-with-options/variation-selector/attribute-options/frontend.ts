@@ -3,11 +3,16 @@
  */
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { store, getContext, getElement } from '@wordpress/interactivity';
+import type { CartVariationItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import type { AddToCartWithOptionsStore } from '../../frontend';
+import type {
+	AddToCartWithOptionsStore,
+	Context as AddToCartWithOptionsStoreContext,
+	AvailableVariation,
+} from '../../frontend';
 import setStyles from './set-styles';
 
 type Option = {
@@ -59,6 +64,11 @@ const isAttributeDisabled = ( {
 	attributeValue,
 	selectedAttributes,
 	availableVariations,
+}: {
+	attributeName: string;
+	attributeValue: string;
+	selectedAttributes: CartVariationItem[];
+	availableVariations: AvailableVariation[];
 } ) => {
 	const isCurrentAttributeSelected = selectedAttributes.some(
 		( selectedAttribute ) => selectedAttribute.attribute === attributeName
@@ -122,9 +132,10 @@ const { state, actions } = store(
 			},
 			get isPillDisabled() {
 				const { name, option } = getContext< PillsContext >();
-				const { variation, availableVariations } = getContext(
-					'woocommerce/add-to-cart-with-options'
-				);
+				const { variation, availableVariations } =
+					getContext< AddToCartWithOptionsStoreContext >(
+						'woocommerce/add-to-cart-with-options'
+					);
 
 				return isAttributeDisabled( {
 					attributeName: name,
@@ -192,9 +203,10 @@ const { state, actions } = store(
 						event.stopPropagation();
 						event.preventDefault();
 						const context = getContext< PillsContext >();
-						const { variation, availableVariations } = getContext(
-							'woocommerce/add-to-cart-with-options'
-						);
+						const { variation, availableVariations } =
+							getContext< AddToCartWithOptionsStoreContext >(
+								'woocommerce/add-to-cart-with-options'
+							);
 						const { index } = state;
 						if ( index <= 0 ) {
 							return;
@@ -231,9 +243,10 @@ const { state, actions } = store(
 						event.stopPropagation();
 						event.preventDefault();
 						const context = getContext< PillsContext >();
-						const { variation, availableVariations } = getContext(
-							'woocommerce/add-to-cart-with-options'
-						);
+						const { variation, availableVariations } =
+							getContext< AddToCartWithOptionsStoreContext >(
+								'woocommerce/add-to-cart-with-options'
+							);
 						const { index } = state;
 						if ( index >= context.options.length - 1 ) {
 							return;
