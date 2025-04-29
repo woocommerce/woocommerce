@@ -78,7 +78,6 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-footer.php',
 					),
-					PatternsHelper::get_patterns_dictionary(),
 				),
 				array(
 					__DIR__ . '/patterns/mock-header.php',
@@ -95,7 +94,6 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-header.php',
 					),
-					PatternsHelper::get_patterns_dictionary(),
 				),
 			);
 
@@ -125,7 +123,6 @@ class BlockPatterns extends \WP_UnitTestCase {
 			->with(
 				__DIR__ . '/patterns/mock-cached.php',
 				$mock_patterns[0],
-				PatternsHelper::get_patterns_dictionary()
 			);
 
 		$this->block_patterns->register_block_patterns();
@@ -167,7 +164,6 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-footer.php',
 					),
-					PatternsHelper::get_patterns_dictionary(),
 				),
 				array(
 					__DIR__ . '/patterns/mock-header.php',
@@ -184,7 +180,6 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-header.php',
 					),
-					PatternsHelper::get_patterns_dictionary(),
 				),
 			);
 
