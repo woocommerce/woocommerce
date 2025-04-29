@@ -282,13 +282,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		// Fetch the fulfillment for the order.
 		try {
 			$fulfillment = new Fulfillment( $fulfillment_id );
-			if ( $fulfillment->get_id() !== $fulfillment_id || $fulfillment->get_entity_type() !== WC_Order::class || $fulfillment->get_entity_id() !== "$order_id" ) {
-				return $this->prepare_error_response(
-					'woocommerce_rest_fulfillment_invalid_id',
-					__( 'Invalid fulfillment ID.', 'woocommerce' ),
-					WP_Http::NOT_FOUND
-				);
-			}
+			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
 		} catch ( \Exception $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),
@@ -317,13 +311,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		// Update the fulfillment for the order.
 		try {
 			$fulfillment = new Fulfillment( $fulfillment_id );
-			if ( $fulfillment->get_id() !== $fulfillment_id || $fulfillment->get_entity_type() !== WC_Order::class || $fulfillment->get_entity_id() !== "$order_id" ) {
-				return $this->prepare_error_response(
-					'woocommerce_rest_fulfillment_invalid_id',
-					__( 'Invalid fulfillment ID.', 'woocommerce' ),
-					WP_Http::NOT_FOUND
-				);
-			}
+			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
 
 			$fulfillment->set_props( $request->get_json_params() );
 			if ( isset( $request->get_json_params()['meta_data'] ) && is_array( $request->get_json_params()['meta_data'] ) ) {
@@ -370,13 +358,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		// Delete the fulfillment for the order.
 		try {
 			$fulfillment = new Fulfillment( $fulfillment_id );
-			if ( $fulfillment->get_id() !== $fulfillment_id || $fulfillment->get_entity_type() !== WC_Order::class || $fulfillment->get_entity_id() !== "$order_id" ) {
-				return $this->prepare_error_response(
-					'woocommerce_rest_fulfillment_invalid_id',
-					__( 'Invalid fulfillment ID.', 'woocommerce' ),
-					WP_Http::NOT_FOUND
-				);
-			}
+			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
 			$fulfillment->delete();
 		} catch ( \Exception $e ) {
 			return $this->prepare_error_response(
@@ -408,13 +390,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		// Fetch the metadata for the fulfillment.
 		try {
 			$fulfillment = new Fulfillment( $fulfillment_id );
-			if ( $fulfillment->get_id() !== $fulfillment_id || $fulfillment->get_entity_type() !== WC_Order::class || $fulfillment->get_entity_id() !== "$order_id" ) {
-				return $this->prepare_error_response(
-					'woocommerce_rest_fulfillment_invalid_id',
-					__( 'Invalid fulfillment ID.', 'woocommerce' ),
-					WP_Http::NOT_FOUND
-				);
-			}
+			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
 		} catch ( \Exception $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),
@@ -445,14 +421,8 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		// Update the metadata for the fulfillment.
 		try {
 			$fulfillment = new Fulfillment( $fulfillment_id );
+			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
 
-			if ( $fulfillment->get_id() !== $fulfillment_id || $fulfillment->get_entity_type() !== WC_Order::class || $fulfillment->get_entity_id() !== "$order_id" ) {
-				return $this->prepare_error_response(
-					'woocommerce_rest_fulfillment_invalid_id',
-					__( 'Invalid fulfillment ID.', 'woocommerce' ),
-					WP_Http::NOT_FOUND
-				);
-			}
 			// Update the meta data keys that exist in the request.
 			foreach ( $request->get_json_params()['meta_data'] as $meta ) {
 				$fulfillment->update_meta_data( $meta['key'], $meta['value'], $meta['id'] ?? 0 );
@@ -496,13 +466,8 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		// Delete the metadata for the fulfillment.
 		try {
 			$fulfillment = new Fulfillment( $fulfillment_id );
-			if ( $fulfillment->get_id() !== $fulfillment_id || $fulfillment->get_entity_type() !== WC_Order::class || $fulfillment->get_entity_id() !== "$order_id" ) {
-				return $this->prepare_error_response(
-					'woocommerce_rest_fulfillment_invalid_id',
-					__( 'Invalid fulfillment ID.', 'woocommerce' ),
-					WP_Http::NOT_FOUND
-				);
-			}
+			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
+
 			$fulfillment->delete_meta_data( $request->get_param( 'meta_key' ) );
 			$fulfillment->save();
 		} catch ( \Exception $e ) {
@@ -1080,5 +1045,22 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			),
 			$status
 		);
+	}
+
+	/**
+	 * Validate the fulfillment.
+	 *
+	 * @param Fulfillment $fulfillment The fulfillment object.
+	 * @param int         $fulfillment_id The fulfillment ID.
+	 * @param int         $order_id The order ID.
+	 */
+	private function validate_fulfillment( Fulfillment $fulfillment, int $fulfillment_id, int $order_id ) {
+		if ( $fulfillment->get_id() !== $fulfillment_id || $fulfillment->get_entity_type() !== WC_Order::class || $fulfillment->get_entity_id() !== "$order_id" ) {
+			return $this->prepare_error_response(
+				'woocommerce_rest_fulfillment_invalid_id',
+				__( 'Invalid fulfillment ID.', 'woocommerce' ),
+				WP_Http::NOT_FOUND
+			);
+		}
 	}
 }

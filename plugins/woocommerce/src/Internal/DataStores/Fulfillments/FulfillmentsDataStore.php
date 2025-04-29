@@ -126,6 +126,9 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		global $wpdb;
 
 		$data_id = $data->get_id();
+
+		$this->validate_items( $data );
+
 		$wpdb->update(
 			$wpdb->prefix . 'wc_order_fulfillments',
 			array(
@@ -148,8 +151,6 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		if ( $wpdb->last_error ) {
 			throw new \Exception( esc_html__( 'Failed to update fulfillment.', 'woocommerce' ) . ' ' . esc_html( $wpdb->last_error ) );
 		}
-
-		$this->validate_items( $data );
 
 		// Update the metadata for the fulfillment.
 		$data->save_meta_data();
@@ -420,8 +421,13 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	 * @throws \Exception If the fulfillment data is invalid.
 	 */
 	private function validate_items( Fulfillment $data ): void {
-		if ( empty( $data->get_items() ) ) {
+		$items = $data->get_meta( '_items', true );
+		if ( empty( $items ) ) {
 			throw new \Exception( esc_html__( 'The fulfillment should contain at least one item.', 'woocommerce' ) );
+		}
+
+		if ( ! is_array( $items ) ) {
+			throw new \Exception( esc_html__( 'The fulfillment items should be an array.', 'woocommerce' ) );
 		}
 
 		foreach ( $data->get_items() as $item ) {
