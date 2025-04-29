@@ -85,6 +85,7 @@ const { state } = store< Store >(
 				const showTemporaryNumber =
 					animationStatus === AnimationStatus.IDLE ||
 					animationStatus === AnimationStatus.SLIDE_OUT;
+
 				const quantity = showTemporaryNumber
 					? tempQuantity || 0
 					: state.quantity;

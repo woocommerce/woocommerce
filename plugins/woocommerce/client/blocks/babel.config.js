@@ -11,14 +11,7 @@ module.exports = {
 		},
 	},
 	presets: [
-		[
-			'@wordpress/babel-preset-default',
-			{
-				targets: {
-					node: 'current',
-				},
-			},
-		],
+		[ '@wordpress/babel-preset-default' ],
 		[ '@babel/preset-typescript' ],
 	],
 };

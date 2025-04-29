@@ -44,21 +44,9 @@ const entries = {
 		'..',
 		'node_modules/@wordpress/interactivity-router/src/index.ts'
 	),
-
-	'@woocommerce/interactivity': './packages/interactivity/index.ts',
 };
 
 const [ jsRule, ...otherRules ] = moduleConfig.module.rules;
-
-const interactivityMatcher = /@wordpress(?:\+|[\\/])interactivity/;
-
-const modifiedJsRule = {
-	...jsRule,
-	exclude: {
-		and: [ /node_modules/ ],
-		not: [ interactivityMatcher ],
-	},
-};
 
 module.exports = {
 	entry: entries,
@@ -92,7 +80,7 @@ module.exports = {
 			requestToExternalModule( request ) {
 				if (
 					request.startsWith( '@woocommerce/stores/' ) ||
-					request.startsWith( '@woocommerce/interactivity' )
+					request.startsWith( '@wordpress/interactivity' )
 				) {
 					return `import ${ request }`;
 				}
@@ -106,7 +94,21 @@ module.exports = {
 	],
 	module: {
 		rules: [
-			modifiedJsRule,
+			{
+				test: /\.[jt]sx?$/,
+				use: [
+					{
+						loader: require.resolve( 'babel-loader' ),
+						options: {
+							presets: [
+								require.resolve(
+									'@wordpress/babel-preset-default'
+								),
+							],
+						},
+					},
+				],
+			},
 			...otherRules.filter(
 				( rule ) =>
 					! rule.test.test( '.css' ) &&

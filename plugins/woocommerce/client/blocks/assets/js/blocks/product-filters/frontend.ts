@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import * as iAPI from '@woocommerce/interactivity';
+import * as iAPI from '@wordpress/interactivity';
 
 const { getContext, store, getServerContext } = iAPI;
 const getSetting = window.wc.wcSettings.getSetting;
