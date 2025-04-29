@@ -527,15 +527,15 @@ final class BlockTypesController {
 		// when modifying this list.
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
 			if ( Features::is_enabled( 'blockified-add-to-cart' ) && wp_is_block_theme() ) {
-				$block_types[] = 'AddToCartWithOptions';
-				$block_types[] = 'AddToCartWithOptionsQuantitySelector';
-				$block_types[] = 'AddToCartWithOptionsVariationSelector';
-				$block_types[] = 'AddToCartWithOptionsVariationSelectorItemTemplate';
-				$block_types[] = 'AddToCartWithOptionsVariationSelectorAttributeName';
-				$block_types[] = 'AddToCartWithOptionsVariationSelectorAttributeOptions';
-				$block_types[] = 'AddToCartWithOptionsGroupedProductSelector';
-				$block_types[] = 'AddToCartWithOptionsGroupedProductSelectorItemTemplate';
-				$block_types[] = 'AddToCartWithOptionsGroupedProductSelectorItemCTA';
+				$block_types[] = 'AddToCartWithOptions\AddToCartWithOptions';
+				$block_types[] = 'AddToCartWithOptions\QuantitySelector';
+				$block_types[] = 'AddToCartWithOptions\VariationSelector';
+				$block_types[] = 'AddToCartWithOptions\VariationSelectorItemTemplate';
+				$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeName';
+				$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeOptions';
+				$block_types[] = 'AddToCartWithOptions\GroupedProductSelector';
+				$block_types[] = 'AddToCartWithOptions\GroupedProductSelectorItemTemplate';
+				$block_types[] = 'AddToCartWithOptions\GroupedProductSelectorItemCTA';
 			}
 			// Generic blocks that will be pushed upstream.
 			$block_types[] = 'Accordion\AccordionGroup';
