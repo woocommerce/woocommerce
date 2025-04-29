@@ -389,7 +389,7 @@ class WC_Discounts {
 
 			if ( is_a( $this->object, 'WC_Cart' ) && has_filter( 'woocommerce_coupon_get_discount_amount' ) ) {
 				// Send through the legacy filter, but not as cents.
-				$filtered_discount = wc_add_number_precision( apply_filters( 'woocommerce_coupon_get_discount_amount', wc_remove_number_precision( $discount ), wc_remove_number_precision( $price_to_discount ), $item->object, false, $coupon ) );
+				$filtered_discount = wc_add_number_precision( (float) apply_filters( 'woocommerce_coupon_get_discount_amount', wc_remove_number_precision( $discount ), wc_remove_number_precision( $price_to_discount ), $item->object, false, $coupon ) );
 
 				if ( $filtered_discount !== $discount ) {
 					$discount              = $filtered_discount;
@@ -427,7 +427,7 @@ class WC_Discounts {
 	 */
 	protected function apply_coupon_fixed_product( $coupon, $items_to_apply, $amount = null ) {
 		$total_discount  = 0;
-		$amount          = $amount ? $amount : wc_add_number_precision( $coupon->get_amount() );
+		$amount          = $amount ? $amount : wc_add_number_precision( (float) $coupon->get_amount() );
 		$limit_usage_qty = 0;
 		$applied_count   = 0;
 
@@ -454,7 +454,7 @@ class WC_Discounts {
 
 			if ( is_a( $this->object, 'WC_Cart' ) && has_filter( 'woocommerce_coupon_get_discount_amount' ) ) {
 				// Send through the legacy filter, but not as cents.
-				$discount = wc_add_number_precision( apply_filters( 'woocommerce_coupon_get_discount_amount', wc_remove_number_precision( $discount ), wc_remove_number_precision( $price_to_discount ), $item->object, false, $coupon ) );
+				$discount = wc_add_number_precision( (float) apply_filters( 'woocommerce_coupon_get_discount_amount', wc_remove_number_precision( $discount ), wc_remove_number_precision( $price_to_discount ), $item->object, false, $coupon ) );
 			}
 
 			$discount       = min( $discounted_price, $discount );
@@ -478,7 +478,7 @@ class WC_Discounts {
 	 */
 	protected function apply_coupon_fixed_cart( $coupon, $items_to_apply, $amount = null ) {
 		$total_discount = 0;
-		$amount         = $amount ? $amount : wc_add_number_precision( $coupon->get_amount() );
+		$amount         = $amount ? $amount : wc_add_number_precision( (float) $coupon->get_amount() );
 		$items_to_apply = array_filter( $items_to_apply, array( $this, 'filter_products_with_price' ) );
 		$item_count     = array_sum( wp_list_pluck( $items_to_apply, 'quantity' ) );
 
@@ -537,7 +537,7 @@ class WC_Discounts {
 			$apply_quantity = max( 0, apply_filters( 'woocommerce_coupon_get_apply_quantity', $apply_quantity, $item, $coupon, $this ) );
 
 			// Run coupon calculations.
-			$discount      = wc_add_number_precision( $coupon->get_discount_amount( $price_to_discount / $item->quantity, $item->object, true ) ) * $apply_quantity;
+			$discount      = wc_add_number_precision( (float) $coupon->get_discount_amount( $price_to_discount / $item->quantity, $item->object, true ) ) * $apply_quantity;
 			$discount      = wc_round_discount( min( $discounted_price, $discount ), 0 );
 			$applied_count = $applied_count + $apply_quantity;
 
@@ -565,7 +565,7 @@ class WC_Discounts {
 		$total_discount = 0;
 
 		foreach ( $items_to_apply as $item ) {
-			for ( $i = 0; $i < $item->quantity; $i ++ ) {
+			for ( $i = 0; $i < $item->quantity; $i++ ) {
 				// Find out how much price is available to discount for the item.
 				$price_to_discount = $this->get_discounted_price_in_cents( $item );
 
@@ -1088,9 +1088,9 @@ class WC_Discounts {
 	 */
 	protected function get_object_subtotal() {
 		if ( is_a( $this->object, 'WC_Cart' ) ) {
-			return wc_add_number_precision( $this->object->get_displayed_subtotal() );
+			return wc_add_number_precision( (float) $this->object->get_displayed_subtotal() );
 		} elseif ( is_a( $this->object, 'WC_Order' ) ) {
-			$subtotal = wc_add_number_precision( $this->object->get_subtotal() );
+			$subtotal = wc_add_number_precision( (float) $this->object->get_subtotal() );
 
 			if ( $this->object->get_prices_include_tax() ) {
 				// Add tax to tax-exclusive subtotal.
