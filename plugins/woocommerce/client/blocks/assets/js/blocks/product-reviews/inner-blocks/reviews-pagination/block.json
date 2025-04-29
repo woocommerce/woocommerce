@@ -43,7 +43,8 @@
 			"allowSwitching": false,
 			"allowInheriting": false,
 			"default": {
-				"type": "flex"
+				"type": "flex",
+				"justifyContent": "space-between"
 			}
 		},
 		"typography": {
