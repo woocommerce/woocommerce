@@ -144,7 +144,7 @@ final class Container {
 	 * @return array<int,class-string>
 	 */
 	private function get_service_providers(): array {
-		$providers = array(
+		return array(
 			AssignDefaultCategoryServiceProvider::class,
 			DownloadPermissionsAdjusterServiceProvider::class,
 			EmailPreviewServiceProvider::class,
@@ -178,10 +178,7 @@ final class Container {
 			AdminSuggestionsServiceProvider::class,
 			EmailEditorServiceProvider::class,
 			ProductFiltersServiceProvider::class,
+			AddressProviderServiceProvider::class,
 		);
-		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			$providers[] = AddressProviderServiceProvider::class;
-		}
-		return $providers;
 	}
 }
