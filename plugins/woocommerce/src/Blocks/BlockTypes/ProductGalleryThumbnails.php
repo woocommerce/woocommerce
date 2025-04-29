@@ -68,7 +68,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			return '';
 		}
 
-		$product_gallery_images = ProductGalleryUtils::get_product_gallery_image_data( $product );
+		$product_gallery_images = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_thumbnail' );
 		// Don't show the thumbnails block if there is only one image.
 		if ( count( $product_gallery_images ) <= 1 ) {
 			return '';
@@ -91,24 +91,23 @@ class ProductGalleryThumbnails extends AbstractBlock {
 				class="wc-block-product-gallery-thumbnails__scrollable"
 				data-wp-init="actions.onScroll"
 				data-wp-on--scroll="actions.onScroll">
-				<template
-					data-wp-each--image="context.imageData"
-					data-wp-each-key="context.image.id">
+				<?php foreach ( $product_gallery_images as $index => $image ) : ?>
 					<div class="wc-block-product-gallery-thumbnails__thumbnail">
 						<img
-							class="wc-block-product-gallery-thumbnails__thumbnail__image"
-							data-wp-bind--data-image-id="context.image.id"
-							data-wp-bind--src="context.image.src"
-							data-wp-bind--srcset="context.image.srcset"
-							data-wp-bind--sizes="context.image.sizes"
+							class="wc-block-product-gallery-thumbnails__thumbnail__image <?php echo $index === 0 ? 'is-active' : ''; ?>"
+							data-image-id="<?php echo esc_attr( $image['id'] ); ?>"
+							src="<?php echo esc_attr( $image['src'] ); ?>"
+							srcset="<?php echo esc_attr( $image['srcset'] ); ?>"
+							sizes="<?php echo esc_attr( $image['sizes'] ); ?>"
 							data-wp-on--click="actions.selectCurrentImage"
 							data-wp-on--keydown="actions.onThumbnailKeyDown"
 							data-wp-watch="callbacks.toggleActiveImageAtrributes"
 							decoding="async"
 							tabindex="0"
+							draggable="false"
 							loading="lazy" />
 					</div>
-				</template>
+				<?php endforeach; ?>
 			</div>
 		</div>
 		<?php
