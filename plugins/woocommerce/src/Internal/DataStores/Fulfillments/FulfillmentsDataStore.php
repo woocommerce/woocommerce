@@ -223,7 +223,13 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 			OBJECT
 		);
 
-		return $meta_data;
+		return array_map(
+			function ( $meta ) {
+				$meta->meta_value = json_decode( $meta->meta_value, true ) ?? $meta->meta_value;
+				return $meta;
+			},
+			$meta_data
+		);
 	}
 
 	/**
@@ -291,7 +297,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 			array(
 				'fulfillment_id' => $data_id,
 				'meta_key'       => $meta->key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_value'     => $meta->value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'meta_value'     => wp_json_encode( $meta->value ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			),
 			array(
 				'%d',
@@ -332,7 +338,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		$rows_updated = $wpdb->update(
 			$wpdb->prefix . 'wc_order_fulfillment_meta',
 			array(
-				'meta_value' => $meta->value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'meta_value' => wp_json_encode( $meta->value ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			),
 			array(
 				'fulfillment_id' => $data_id,

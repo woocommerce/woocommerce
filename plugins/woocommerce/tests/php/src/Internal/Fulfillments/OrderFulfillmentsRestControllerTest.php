@@ -206,17 +206,15 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 						),
 						array(
 							'key'   => '_items',
-							'value' => wp_json_encode(
+							'value' => array(
 								array(
-									array(
-										'item_id' => 1,
-										'qty'     => 2,
-									),
-									array(
-										'item_id' => 2,
-										'qty'     => 3,
-									),
-								)
+									'item_id' => 1,
+									'qty'     => 2,
+								),
+								array(
+									'item_id' => 2,
+									'qty'     => 3,
+								),
 							),
 						),
 					),
@@ -270,17 +268,15 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 						array(
 							'id'    => 0,
 							'key'   => '_items',
-							'value' => wp_json_encode(
+							'value' => array(
 								array(
-									array(
-										'item_id' => 1,
-										'qty'     => 2,
-									),
-									array(
-										'item_id' => 2,
-										'qty'     => 3,
-									),
-								)
+									'item_id' => 1,
+									'qty'     => 2,
+								),
+								array(
+									'item_id' => 2,
+									'qty'     => 3,
+								),
 							),
 						),
 					),
@@ -319,7 +315,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 					'qty'     => 3,
 				),
 			),
-			json_decode( $fulfillment['meta_data'][2]['value'], true )
+			$fulfillment['meta_data'][2]['value']
 		);
 
 		// Clean up the test environment.
@@ -403,7 +399,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 						array(
 							'id'    => 0,
 							'key'   => '_items',
-							'value' => wp_json_encode( $items ),
+							'value' => $items,
 						),
 					),
 				)
@@ -458,17 +454,15 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 						array(
 							'id'    => 0,
 							'key'   => '_items',
-							'value' => wp_json_encode(
+							'value' => array(
 								array(
-									array(
-										'item_id' => 1,
-										'qty'     => 2,
-									),
-									array(
-										'item_id' => 2,
-										'qty'     => 3,
-									),
-								)
+									'item_id' => 1,
+									'qty'     => 2,
+								),
+								array(
+									'item_id' => 2,
+									'qty'     => 3,
+								),
 							),
 						),
 					),
@@ -689,17 +683,15 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 						array(
 							'id'    => 0,
 							'key'   => '_items',
-							'value' => wp_json_encode(
+							'value' => array(
 								array(
-									array(
-										'item_id' => 1,
-										'qty'     => 2,
-									),
-									array(
-										'item_id' => 2,
-										'qty'     => 3,
-									),
-								)
+									'item_id' => 1,
+									'qty'     => 2,
+								),
+								array(
+									'item_id' => 2,
+									'qty'     => 3,
+								),
 							),
 						),
 					),
@@ -762,17 +754,15 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 						array(
 							'id'    => 0,
 							'key'   => '_items',
-							'value' => wp_json_encode(
+							'value' => array(
 								array(
-									array(
-										'item_id' => 10,
-										'qty'     => 20,
-									),
-									array(
-										'item_id' => 20,
-										'qty'     => 30,
-									),
-								)
+									'item_id' => 10,
+									'qty'     => 20,
+								),
+								array(
+									'item_id' => 20,
+									'qty'     => 30,
+								),
 							),
 						),
 					),
@@ -827,7 +817,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 								'qty'     => 30,
 							),
 						),
-						json_decode( $meta['value'], true )
+						$meta['value']
 					);
 					break;
 			}
@@ -874,17 +864,15 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 						array(
 							'id'    => 0,
 							'key'   => '_items',
-							'value' => wp_json_encode(
+							'value' => array(
 								array(
-									array(
-										'item_id' => 1,
-										'qty'     => 2,
-									),
-									array(
-										'item_id' => 2,
-										'qty'     => 3,
-									),
-								)
+									'item_id' => 1,
+									'qty'     => 2,
+								),
+								array(
+									'item_id' => 2,
+									'qty'     => 3,
+								),
 							),
 						),
 					),
@@ -943,7 +931,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 						array(
 							'id'    => 0,
 							'key'   => '_items',
-							'value' => wp_json_encode(
+							'value' =>
 								array(
 									array(
 										'item_id' => 1,
@@ -953,8 +941,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 										'item_id' => 2,
 										'qty'     => 3,
 									),
-								)
-							),
+
+								),
 						),
 					),
 				)
@@ -1066,7 +1054,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 						array(
 							'id'    => 0,
 							'key'   => '_items',
-							'value' => wp_json_encode( $items ),
+							'value' => $items,
 						),
 					),
 				)
@@ -1329,7 +1317,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 				),
 				array(
 					'key'   => '_items',
-					'value' => wp_json_encode(
+					'value' =>
 						array(
 							array(
 								'item_id' => 1,
@@ -1339,8 +1327,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 								'item_id' => 2,
 								'qty'     => 3,
 							),
-						)
-					),
+						),
 				),
 			),
 			array_map(
@@ -1384,17 +1371,15 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 				),
 				array(
 					'key'   => '_items',
-					'value' => wp_json_encode(
+					'value' => array(
 						array(
-							array(
-								'item_id' => 1,
-								'qty'     => 2,
-							),
-							array(
-								'item_id' => 2,
-								'qty'     => 3,
-							),
-						)
+							'item_id' => 1,
+							'qty'     => 2,
+						),
+						array(
+							'item_id' => 2,
+							'qty'     => 3,
+						),
 					),
 				),
 			),
@@ -1590,17 +1575,15 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 						array(
 							'id'    => 0,
 							'key'   => '_items',
-							'value' => wp_json_encode(
+							'value' => array(
 								array(
-									array(
-										'item_id' => 1,
-										'qty'     => 2,
-									),
-									array(
-										'item_id' => 2,
-										'qty'     => 3,
-									),
-								)
+									'item_id' => 1,
+									'qty'     => 2,
+								),
+								array(
+									'item_id' => 2,
+									'qty'     => 3,
+								),
 							),
 						),
 					),
@@ -1619,17 +1602,15 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 				),
 				array(
 					'key'   => '_items',
-					'value' => wp_json_encode(
+					'value' => array(
 						array(
-							array(
-								'item_id' => 1,
-								'qty'     => 2,
-							),
-							array(
-								'item_id' => 2,
-								'qty'     => 3,
-							),
-						)
+							'item_id' => 1,
+							'qty'     => 2,
+						),
+						array(
+							'item_id' => 2,
+							'qty'     => 3,
+						),
 					),
 				),
 			),

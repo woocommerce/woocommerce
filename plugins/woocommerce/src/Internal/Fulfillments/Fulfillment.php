@@ -191,26 +191,8 @@ class Fulfillment extends \WC_Data {
 	 * @return array Fulfillment items.
 	 */
 	public function get_items(): array {
-		// Get the meta data for this fulfillment.
-		$meta_data = $this->get_meta_data();
-
-		// Get the meta object with the "_items" meta key.
-		$items = array_values(
-			array_filter(
-				$meta_data,
-				function ( $meta ) {
-					return '_items' === $meta->key;
-				}
-			)
-		);
-
-		// If we have a matching meta key, decode the JSON and return it.
-		if ( 0 < count( $items ) ) {
-			return json_decode( $items[0]->value, true );
-		}
-
-		// If we don't have a matching meta key, return an empty array.
-		return array();
+		$items = $this->get_meta( '_items' );
+		return $items ? $items : array();
 	}
 
 	/**
@@ -219,7 +201,7 @@ class Fulfillment extends \WC_Data {
 	 * @param array $items Fulfillment items.
 	 */
 	public function set_items( array $items ): void {
-		$this->update_meta_data( '_items', wp_json_encode( $items ) );
+		$this->update_meta_data( '_items', $items );
 	}
 
 	/**

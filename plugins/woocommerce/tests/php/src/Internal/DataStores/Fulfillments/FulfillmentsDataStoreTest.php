@@ -302,7 +302,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $result );
 		$this->assertCount( 1, $result );
 		$this->assertIsObject( $result[0] );
-		$this->assertEquals( wp_json_encode( $items ), $result[0]->meta_value );
+		$this->assertEquals( $items, $result[0]->meta_value );
 		$this->assertEquals( '_items', $result[0]->meta_key );
 		$this->assertEquals( $fulfillment->get_id(), $result[0]->fulfillment_id );
 	}
@@ -334,7 +334,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$meta = $fulfillment->get_meta_data();
 		$this->assertCount( 1, $meta );
 		$this->assertEquals( '_items', $meta[0]->key );
-		$this->assertEquals( wp_json_encode( $items ), $meta[0]->value );
+		$this->assertEquals( $items, $meta[0]->value );
 		$this->assertNotNull( $meta[0]->id );
 
 		self::$order_fulfillment_data_store->delete_meta( $fulfillment, $meta[0] ); // phpcs:ignore
@@ -401,7 +401,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 			return;
 		}
 
-		self::assertEquals( 'new_meta_value', $meta->meta_value );
+		self::assertEquals( 'new_meta_value', json_decode( $meta->meta_value ) );
 	}
 
 	/**
@@ -626,7 +626,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 			);
 
 			$this->assertNotEmpty( $record, "$meta_key is empty" );
-			$this->assertEquals( $meta_value, reset( $record )->meta_value );
+			$this->assertEquals( $meta_value, json_decode( reset( $record )->meta_value, true ) );
 		}
 	}
 }
