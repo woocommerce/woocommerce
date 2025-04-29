@@ -112,7 +112,7 @@ class ProductGallery extends AbstractBlock {
 			return '';
 		}
 
-		$image_data             = ProductGalleryUtils::get_product_gallery_image_data( $product );
+		$image_data             = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_single' );
 		$classname              = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
 		$initial_image_id       = count( $image_data ) > 0 ? $image_data[0]['id'] : -1;
 		$classname_single_image = count( $image_data ) < 2 ? 'is-single-product-gallery-image' : '';
