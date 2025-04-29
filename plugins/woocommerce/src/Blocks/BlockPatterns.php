@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Blocks\AIContent\PatternsDictionary;
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
@@ -90,19 +91,6 @@ class BlockPatterns {
 	}
 
 	/**
-	 * Returns the Patterns dictionary.
-	 *
-	 * @return array|WP_Error
-	 */
-	private function get_patterns_dictionary() {
-		if ( null === $this->dictionary ) {
-			$this->dictionary = PatternsHelper::get_patterns_dictionary();
-		}
-
-		return $this->dictionary;
-	}
-
-	/**
 	 * Register block patterns from core.
 	 *
 	 * @return void
@@ -125,7 +113,7 @@ class BlockPatterns {
 			$pattern_path      = str_contains( $pattern['source'], $this->patterns_path ) ? $pattern['source'] : $this->patterns_path . '/' . $pattern['source'];
 			$pattern['source'] = $pattern_path;
 
-			$this->pattern_registry->register_block_pattern( $pattern_path, $pattern, $this->get_patterns_dictionary() );
+			$this->pattern_registry->register_block_pattern( $pattern_path, $pattern );
 		}
 	}
 
@@ -167,6 +155,9 @@ class BlockPatterns {
 
 		foreach ( $files as $file ) {
 			$data = get_file_data( $file, $default_headers );
+			ob_start();
+			include $file;
+			$data['content'] = ob_get_clean();
 			// We want to store the relative path in the cache, so we can use it later to register the pattern.
 			$data['source'] = str_replace( $this->patterns_path . '/', '', $file );
 			$patterns[]     = $data;
@@ -244,7 +235,7 @@ class BlockPatterns {
 			$pattern['slug']    = $pattern['name'];
 			$pattern['content'] = $pattern['html'];
 
-			$this->pattern_registry->register_block_pattern( $pattern['ID'], $pattern, $this->get_patterns_dictionary() );
+			$this->pattern_registry->register_block_pattern( $pattern['ID'], $pattern );
 		}
 	}
 
