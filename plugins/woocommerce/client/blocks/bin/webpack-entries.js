@@ -210,6 +210,9 @@ const blocks = {
 	'product-review-content': {
 		customDir: 'product-reviews/inner-blocks/review-content',
 	},
+	'product-review-author-name': {
+		customDir: 'product-reviews/inner-blocks/review-author-name',
+	},
 };
 
 /**
