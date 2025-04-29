@@ -94,7 +94,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 				<?php foreach ( $product_gallery_images as $index => $image ) : ?>
 					<div class="wc-block-product-gallery-thumbnails__thumbnail">
 						<img
-							class="wc-block-product-gallery-thumbnails__thumbnail__image <?php echo $index === 0 ? 'is-active' : ''; ?>"
+							class="wc-block-product-gallery-thumbnails__thumbnail__image <?php echo 0 === $index ? 'is-active' : ''; ?>"
 							data-image-id="<?php echo esc_attr( $image['id'] ); ?>"
 							src="<?php echo esc_attr( $image['src'] ); ?>"
 							srcset="<?php echo esc_attr( $image['srcset'] ); ?>"

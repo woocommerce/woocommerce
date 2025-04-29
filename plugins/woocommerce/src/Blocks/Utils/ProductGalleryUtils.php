@@ -6,6 +6,12 @@ namespace Automattic\WooCommerce\Blocks\Utils;
  * {@internal This class and its methods are not intended for public use.}
  */
 class ProductGalleryUtils {
+	/**
+	 * Get all image IDs for the product.
+	 *
+	 * @param \WC_Product $product The product object.
+	 * @return array An array of image IDs.
+	 */
 	public static function get_all_image_ids( $product ) {
 		if ( ! $product instanceof \WC_Product ) {
 			wc_doing_it_wrong( __FUNCTION__, __( 'Invalid product object.', 'woocommerce' ), '9.8.0' );
@@ -27,6 +33,7 @@ class ProductGalleryUtils {
 	 * Get the product gallery image data.
 	 *
 	 * @param \WC_Product $product The product object to retrieve the gallery images for.
+	 * @param string $size The size of the image to retrieve.
 	 * @return array An array of image data for the product gallery.
 	 */
 	public static function get_product_gallery_image_data( $product, $size ) {
