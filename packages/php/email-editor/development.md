@@ -29,7 +29,7 @@ Alternatively, you can use the watch command within the WooCommerce plugin to ke
 Run the following command. It will watch for changes, rebuild assets if necessary, and sync the package files automatically:
 
 ```bash
-  pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:project
+  pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:admin
 ```
 
 Press `Ctrl+C` in the terminal to stop watching.

@@ -769,7 +769,6 @@
 			"node_modules/@woocommerce/block-library/build",
 			"node_modules/@woocommerce/classic-assets/build",
 			"node_modules/@woocommerce/admin-library/build",
-			"client/admin/node_modules/@woocommerce/email-editor/build/",
 			"../../packages/php/email-editor/src/"
 		],
 		"ext": "js,css,php,json",
