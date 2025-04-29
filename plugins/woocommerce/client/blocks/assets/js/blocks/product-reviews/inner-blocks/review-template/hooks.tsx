@@ -13,12 +13,6 @@ const MAX_COMMENTS_PER_PAGE = 100;
 /**
  * Return an object with the query args needed to fetch the default page of
  * comments.
- *
- * @param {Object} props        Hook props.
- * @param {number} props.postId ID of the post that contains the comments.
- *                              discussion settings.
- *
- * @return {Object} Query args to retrieve the comments.
  */
 export const useCommentQueryArgs = ( { postId }: { postId: number } ) => {
 	// Initialize the query args that are not going to change.
@@ -38,14 +32,6 @@ export const useCommentQueryArgs = ( { postId }: { postId: number } ) => {
 	 * `newest` or `oldest`. In the first case, the only way to know the page's
 	 * index is by using the `X-WP-TotalPages` header, which forces to make an
 	 * additional request.
-	 *
-	 * @param {Object} props             Hook props.
-	 * @param {string} props.defaultPage Page shown by default (newest/oldest).
-	 * @param {number} props.postId      ID of the post that contains the comments.
-	 * @param {number} props.perPage     The number of comments included per page.
-	 * @param {Object} props.queryArgs   Other query args.
-	 *
-	 * @return {number} Index of the default comments page.
 	 */
 	const useDefaultPageIndex = ( {
 		defaultPage,
@@ -168,18 +154,13 @@ export const useCommentQueryArgs = ( { postId }: { postId: number } ) => {
 /**
  * Generate a tree structure of comment IDs from a list of comment entities. The
  * children of each comment are obtained from `_embedded`.
- *
- * @typedef {{ commentId: number, children: CommentNode }} CommentNode
- *
- * @param {Object[]} topLevelComments List of comment entities.
- * @return {{ commentTree: CommentNode[]}} Tree of comment IDs.
  */
 export const useCommentTree = (
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	topLevelComments: Array< {
 		id: number;
 		// eslint-disable-next-line @typescript-eslint/naming-convention
-		_embedded?: { children?: Array< any > };
+		_embedded?: { children?: Array< { id: number } > };
 	} >
 ) => {
 	const commentTree = useMemo(
@@ -191,14 +172,16 @@ export const useCommentTree = (
 				}: {
 					id: number;
 					// eslint-disable-next-line @typescript-eslint/naming-convention
-					_embedded?: { children?: Array< any > };
+					_embedded?: { children?: Array< { id: number } > };
 				} ) => {
 					const [ children ] = _embedded?.children || [ [] ];
 					return {
 						commentId: id,
-						children: children.map( ( child: { id: number } ) => ( {
-							commentId: child.id,
-						} ) ),
+						children: Array.isArray( children )
+							? children.map( ( child: { id: number } ) => ( {
+									commentId: child.id,
+							  } ) )
+							: [],
 					};
 				}
 			),
