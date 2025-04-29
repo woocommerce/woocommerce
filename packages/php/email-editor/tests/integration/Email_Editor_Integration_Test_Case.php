@@ -2,37 +2,36 @@
 /**
  * This file is part of the MailPoet plugin
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
 
-use MailPoet\EmailEditor\Container;
-use MailPoet\EmailEditor\EmailCssInliner;
-use MailPoet\EmailEditor\Engine\Dependency_Check;
-use MailPoet\EmailEditor\Engine\Email_Api_Controller;
-use MailPoet\EmailEditor\Engine\Email_Editor;
-use MailPoet\EmailEditor\Engine\Patterns\Patterns;
-use MailPoet\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
-use MailPoet\EmailEditor\Engine\Personalizer;
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Blocks_Registry;
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer;
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Highlighting_Postprocessor;
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Variables_Postprocessor;
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Blocks_Width_Preprocessor;
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Cleanup_Preprocessor;
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Spacing_Preprocessor;
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Typography_Preprocessor;
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Process_Manager;
-use MailPoet\EmailEditor\Engine\Renderer\Renderer;
-use MailPoet\EmailEditor\Engine\Send_Preview_Email;
-use MailPoet\EmailEditor\Engine\Settings_Controller;
-use MailPoet\EmailEditor\Engine\Templates\Templates;
-use MailPoet\EmailEditor\Engine\Templates\Templates_Registry;
-use MailPoet\EmailEditor\Engine\Theme_Controller;
-use MailPoet\EmailEditor\Engine\User_Theme;
-use MailPoet\EmailEditor\Integrations\Core\Initializer;
-use MailPoet\EmailEditor\Integrations\Utils\Default_Css_Inliner;
+use Automattic\WooCommerce\EmailEditor\Container;
+use Automattic\WooCommerce\EmailEditor\Email_Css_Inliner;
+use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
+use Automattic\WooCommerce\EmailEditor\Engine\Email_Api_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Engine\Patterns\Patterns;
+use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Blocks_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Highlighting_Postprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Variables_Postprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Blocks_Width_Preprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Cleanup_Preprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Spacing_Preprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Typography_Preprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Process_Manager;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Renderer;
+use Automattic\WooCommerce\EmailEditor\Engine\Send_Preview_Email;
+use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates;
+use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\User_Theme;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer;
 
 /**
  * Base class for MailPoet tests.
@@ -100,9 +99,9 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 	protected function initContainer(): void {
 		$container = new Container();
 		$container->set(
-      EmailCssInliner::class,
+			Email_Css_Inliner::class,
 			function () {
-				return new EmailCssInliner();
+				return new Email_Css_Inliner();
 			}
 		);
 		$container->set(
@@ -112,7 +111,7 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 			}
 		);
 		$container->set(
-			\MailPoet\EmailEditor\Engine\Theme_Controller::class,
+			\Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller::class,
 			function () {
 				return new Theme_Controller();
 			}
@@ -215,7 +214,7 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 					$container->get( Process_Manager::class ),
 					$container->get( Blocks_Registry::class ),
 					$container->get( Settings_Controller::class ),
-					$container->get( EmailCssInliner::class ),
+					$container->get( Email_Css_Inliner::class ),
 					$container->get( Theme_Controller::class ),
 				);
 			}
@@ -226,7 +225,7 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 				return new Renderer(
 					$container->get( Content_Renderer::class ),
 					$container->get( Templates::class ),
-					$container->get( EmailCssInliner::class ),
+					$container->get( Email_Css_Inliner::class ),
 					$container->get( Theme_Controller::class ),
 				);
 			}

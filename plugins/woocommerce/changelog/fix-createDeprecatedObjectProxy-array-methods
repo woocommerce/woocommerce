@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fix bug to unreleased createDeprecatedObjectProxy: Ensure array length is accessible on wcSettings arrays.
-
-

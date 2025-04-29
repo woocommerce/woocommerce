@@ -298,6 +298,7 @@ class CheckoutFieldsFrontend {
 	 */
 	protected function get_posted_additional_field_values( $location, $group, $sanitize = true ) {
 		$additional_fields = $this->checkout_fields_controller->get_fields_for_location( $location );
+		$field_values      = [];
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		foreach ( $additional_fields as $field_key => $field_data ) {
@@ -349,7 +350,7 @@ class CheckoutFieldsFrontend {
 			$field_value = $field_values[ $field_key ];
 
 			if ( empty( $field_value ) ) {
-				if ( ! empty( $field['required'] ) ) {
+				if ( true === $field['required'] ) {
 					$errors->add(
 						'required_field',
 						/* translators: %s: is the field label */

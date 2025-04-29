@@ -21,18 +21,18 @@ import { recordEvent, recordEventOnce } from '../../../events';
 
 const PANELS = {
 	text: {
-		title: __( 'Text', 'mailpoet' ),
+		title: __( 'Text', 'woocommerce' ),
 		description: __(
 			'Manage the fonts and typography used on text.',
-			'mailpoet'
+			'woocommerce'
 		),
 		defaultControls: DEFAULT_CONTROLS,
 	},
 	link: {
-		title: __( 'Links', 'mailpoet' ),
+		title: __( 'Links', 'woocommerce' ),
 		description: __(
 			'Manage the fonts and typography used on links.',
-			'mailpoet'
+			'woocommerce'
 		),
 		defaultControls: {
 			...DEFAULT_CONTROLS,
@@ -40,10 +40,10 @@ const PANELS = {
 		},
 	},
 	heading: {
-		title: __( 'Headings', 'mailpoet' ),
+		title: __( 'Headings', 'woocommerce' ),
 		description: __(
 			'Manage the fonts and typography used on headings.',
-			'mailpoet'
+			'woocommerce'
 		),
 		defaultControls: {
 			...DEFAULT_CONTROLS,
@@ -51,10 +51,10 @@ const PANELS = {
 		},
 	},
 	button: {
-		title: __( 'Buttons', 'mailpoet' ),
+		title: __( 'Buttons', 'woocommerce' ),
 		description: __(
 			'Manage the fonts and typography used on buttons.',
-			'mailpoet'
+			'woocommerce'
 		),
 		defaultControls: DEFAULT_CONTROLS,
 	},
@@ -84,7 +84,7 @@ export function ScreenTypographyElement( {
 			{ element === 'heading' && (
 				<Spacer marginX={ 4 } marginBottom="1em">
 					<ToggleGroupControl
-						label={ __( 'Select heading level', 'mailpoet' ) }
+						label={ __( 'Select heading level', 'woocommerce' ) }
 						hideLabelFromVision
 						value={ headingLevel }
 						onChange={ ( value ) => {
@@ -100,31 +100,35 @@ export function ScreenTypographyElement( {
 					>
 						<ToggleGroupControlOption
 							value="heading"
-							label={ _x( 'All', 'heading levels', 'mailpoet' ) }
+							label={ _x(
+								'All',
+								'heading levels',
+								'woocommerce'
+							) }
 						/>
 						<ToggleGroupControlOption
 							value="h1"
-							label={ _x( 'H1', 'Heading Level', 'mailpoet' ) }
+							label={ _x( 'H1', 'Heading Level', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="h2"
-							label={ _x( 'H2', 'Heading Level', 'mailpoet' ) }
+							label={ _x( 'H2', 'Heading Level', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="h3"
-							label={ _x( 'H3', 'Heading Level', 'mailpoet' ) }
+							label={ _x( 'H3', 'Heading Level', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="h4"
-							label={ _x( 'H4', 'Heading Level', 'mailpoet' ) }
+							label={ _x( 'H4', 'Heading Level', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="h5"
-							label={ _x( 'H5', 'Heading Level', 'mailpoet' ) }
+							label={ _x( 'H5', 'Heading Level', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="h6"
-							label={ _x( 'H6', 'Heading Level', 'mailpoet' ) }
+							label={ _x( 'H6', 'Heading Level', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 				</Spacer>

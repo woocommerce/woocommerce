@@ -5,7 +5,7 @@ import { debounce } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
 
 const isEventTrackingEnabled = applyFilters(
-	'mailpoet_email_editor_events_tracking_enabled',
+	'woocommerce_email_editor_events_tracking_enabled',
 	false
 );
 

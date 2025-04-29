@@ -1,5 +1,9 @@
-const { test: baseTest } = require( '../../../fixtures/block-editor-fixtures' );
-const { expect, tags } = require( '../../../fixtures/fixtures' );
+/**
+ * Internal dependencies
+ */
+import { test as baseTest } from '../../../fixtures/block-editor-fixtures';
+import { expect, tags } from '../../../fixtures/fixtures';
+import { WC_API_PATH } from '../../../utils/api-client';
 
 async function selectImagesInLibrary( page, imagesNames ) {
 	const dataIds = [];
@@ -24,11 +28,11 @@ async function selectImagesInLibrary( page, imagesNames ) {
 }
 
 const test = baseTest.extend( {
-	product: async ( { api }, use ) => {
+	product: async ( { restApi }, use ) => {
 		let product;
 
-		await api
-			.post( 'products', {
+		await restApi
+			.post( `${ WC_API_PATH }/products`, {
 				name: `Product ${ Date.now() }`,
 				type: 'simple',
 				description: `This is a description of the awesome product ${ Date.now() }`,
@@ -42,12 +46,14 @@ const test = baseTest.extend( {
 		await use( product );
 
 		// Cleanup
-		await api.delete( `products/${ product.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+			force: true,
+		} );
 	},
-	productWithGallery: async ( { api, product }, use ) => {
+	productWithGallery: async ( { restApi, product }, use ) => {
 		let productWithGallery;
-		await api
-			.put( `products/${ product.id }`, {
+		await restApi
+			.put( `${ WC_API_PATH }/products/${ product.id }`, {
 				images: [
 					{
 						src: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_2_front.jpg',

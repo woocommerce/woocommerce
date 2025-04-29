@@ -23,49 +23,6 @@ class ProductSaleBadge extends AbstractBlock {
 	protected $api_version = '3';
 
 	/**
-	 * Get block attributes.
-	 *
-	 * @return array
-	 */
-	protected function get_block_type_supports() {
-		return array(
-			'color'                  =>
-			array(
-				'gradients'  => true,
-				'background' => true,
-				'link'       => true,
-			),
-			'typography'             =>
-			array(
-				'fontSize'                        => true,
-				'lineHeight'                      => true,
-				'__experimentalFontFamily'        => true,
-				'__experimentalFontWeight'        => true,
-				'__experimentalFontStyle'         => true,
-				'__experimentalLetterSpacing'     => true,
-				'__experimentalTextTransform'     => true,
-				'__experimentalTextDecoration'    => true,
-				'__experimentalSkipSerialization' => true,
-			),
-			'__experimentalBorder'   =>
-			array(
-				'color'  => true,
-				'radius' => true,
-				'width'  => true,
-			),
-			'spacing'                =>
-			array(
-				'margin'                          => true,
-				'padding'                         => true,
-				'__experimentalSkipSerialization' => true,
-
-			),
-			'__experimentalSelector' => '.wc-block-components-product-sale-badge',
-
-		);
-	}
-
-	/**
 	 * Overwrite parent method to prevent script registration.
 	 *
 	 * It is necessary to register and enqueues assets during the render

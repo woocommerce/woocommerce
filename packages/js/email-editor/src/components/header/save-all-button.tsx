@@ -20,7 +20,7 @@ const SaveAllContent = ( { onToggle } ) => {
 	// Hacky way to change the text in the templates row of the save dropdown
 	useEffect( () => {
 		const panels = document.querySelectorAll(
-			'.mailpoet-email-editor-save-button__dropdown  .components-panel__body'
+			'.woocommerce-email-editor-save-button-dropdown  .components-panel__body'
 		);
 		panels.forEach( ( panel ) => {
 			const titleButton = panel.querySelector(
@@ -28,13 +28,14 @@ const SaveAllContent = ( { onToggle } ) => {
 			);
 			if (
 				titleButton &&
-				titleButton.textContent.trim() === __( 'Templates', 'mailpoet' )
+				titleButton.textContent.trim() ===
+					__( 'Templates', 'woocommerce' )
 			) {
 				const rows = panel.querySelectorAll( '.components-panel__row' );
 				if ( rows.length ) {
 					rows[ 0 ].textContent = __(
 						'This change will affect emails that use this template.',
-						'mailpoet'
+						'woocommerce'
 					);
 				}
 			}
@@ -43,7 +44,7 @@ const SaveAllContent = ( { onToggle } ) => {
 	return <EntitiesSavedStates close={ onToggle } />;
 };
 
-export function SaveAllButton() {
+export function SaveAllButton( { validateContent, isDisabled } ) {
 	const { isSaving } = useSelect(
 		( select ) => ( {
 			isSaving: select( storeName ).isSaving(),
@@ -53,9 +54,9 @@ export function SaveAllButton() {
 
 	const buttonRef = useRef( null );
 
-	let label = __( 'Save', 'mailpoet' );
+	let label = __( 'Save', 'woocommerce' );
 	if ( isSaving ) {
-		label = __( 'Saving', 'mailpoet' );
+		label = __( 'Saving', 'woocommerce' );
 	}
 
 	return (
@@ -65,17 +66,19 @@ export function SaveAllButton() {
 					placement: 'bottom',
 					anchor: buttonRef.current,
 				} }
-				contentClassName="mailpoet-email-editor-save-button__dropdown"
+				contentClassName="woocommerce-email-editor-save-button-dropdown"
 				renderToggle={ ( { onToggle } ) => (
 					<Button
 						onClick={ () => {
 							recordEvent(
 								'header_save_all_button_save_button_clicked'
 							);
-							onToggle();
+							if ( validateContent() ) {
+								onToggle();
+							}
 						} }
 						variant="primary"
-						disabled={ isSaving }
+						disabled={ isSaving || isDisabled }
 					>
 						{ label }
 					</Button>

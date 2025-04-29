@@ -17,22 +17,20 @@
 					.attr( 'href', woocommerce_admin.urls.add_product );
 			}
 			if ( woocommerce_admin.urls.export_products ) {
-				$title_action.after(
-					'<a href="' +
-						woocommerce_admin.urls.export_products +
-						'" class="page-title-action">' +
-						woocommerce_admin.strings.export_products +
-						'</a>'
-				);
+				const exportLink = document.createElement('a');
+				exportLink.href = woocommerce_admin.urls.export_products;
+				exportLink.className = 'page-title-action';
+				exportLink.textContent = woocommerce_admin.strings.export_products;
+
+				$title_action.after(exportLink);
 			}
 			if ( woocommerce_admin.urls.import_products ) {
-				$title_action.after(
-					'<a href="' +
-						woocommerce_admin.urls.import_products +
-						'" class="page-title-action">' +
-						woocommerce_admin.strings.import_products +
-						'</a>'
-				);
+				const importLink = document.createElement('a');
+				importLink.href = woocommerce_admin.urls.import_products;
+				importLink.className = 'page-title-action';
+				importLink.textContent = woocommerce_admin.strings.import_products;
+
+				$title_action.after(importLink);
 			}
 		} else {
 			$title_action.hide();

@@ -547,7 +547,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return array
 	 */
 	public function get_attributes( $context = 'view' ) {
-		return $this->get_prop( 'attributes', $context );
+		$attributes = $this->get_prop( 'attributes', $context );
+		if ( ! is_array( $attributes ) ) {
+			return array();
+		}
+
+		return $attributes;
 	}
 
 	/**
@@ -1964,7 +1969,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			 *
 			 * @since 9.8.0
 			 */
-			$html = apply_filters( 'woocommerce_empty_cogs_html', '', $this );
+			$html = apply_filters( 'woocommerce_product_empty_cogs_html', '', $this );
 		} else {
 			$html = wc_price( $value ) . $this->get_price_suffix();
 		}
@@ -1978,7 +1983,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		 *
 		 * @since 9.8.0
 		 */
-		return apply_filters( 'woocommerce_get_cogs_html', $html, $value, $this );
+		return apply_filters( 'woocommerce_product_get_cogs_html', $html, $value, $this );
 	}
 
 	/**

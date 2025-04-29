@@ -12,6 +12,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -205,7 +206,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * Output the gateway settings screen.
 	 */
 	public function admin_options() {
-		$is_reactify_enabled      = Features::is_enabled( 'reactify-classic-payments-settings' );
+		$is_reactify_enabled      = FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' );
 		$offline_payment_gateways = array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID );
 		$is_offline_gateway       = in_array( $this->id, $offline_payment_gateways, true );
 
@@ -214,9 +215,8 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			$return_url = add_query_arg( 'section', 'offline', $return_url );
 		}
 
-		echo '<h2>' . esc_html( $this->get_method_title() );
-		wc_back_link( __( 'Return to payments', 'woocommerce' ), $return_url );
-		echo '</h2>';
+		wc_back_header( $this->get_method_title(), __( 'Return to payments', 'woocommerce' ), $return_url );
+
 		echo wp_kses_post( wpautop( $this->get_method_description() ) );
 		parent::admin_options();
 	}

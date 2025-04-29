@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Add option to pre-install WC on WPCOM environment during tests execution.

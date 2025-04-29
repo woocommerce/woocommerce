@@ -1,3 +1,0 @@
-Significance: patch
-Type: add
-Comment: Add to the /wc/store/v1/products/{productId} API a feature that returns the grouped product ids when the product type is grouped

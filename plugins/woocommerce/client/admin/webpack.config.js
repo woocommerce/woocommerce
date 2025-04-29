@@ -5,9 +5,8 @@ const { get } = require( 'lodash' );
 const path = require( 'path' );
 const fs = require( 'fs' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
-const BundleAnalyzerPlugin =
-	require( 'webpack-bundle-analyzer' ).BundleAnalyzerPlugin;
+const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
+const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
@@ -139,10 +138,13 @@ const webpackConfig = {
 							[ '@babel/preset-typescript' ],
 						],
 						plugins: [
-							'@babel/plugin-transform-class-properties',
 							! isProduction &&
 								isHot &&
 								require.resolve( 'react-refresh/babel' ),
+							isProduction &&
+								require.resolve(
+									'babel-plugin-transform-react-remove-prop-types'
+								),
 						].filter( Boolean ),
 						cacheDirectory: path.resolve(
 							__dirname,
@@ -226,6 +228,15 @@ const webpackConfig = {
 		! process.env.STORYBOOK &&
 			new WooCommerceDependencyExtractionWebpackPlugin( {
 				requestToExternal( request ) {
+					switch ( request ) {
+						case 'react/jsx-runtime':
+						case 'react/jsx-dev-runtime':
+							// @wordpress/dependency-extraction-webpack-plugin version bump related, which added 'react-jsx-runtime' dependency.
+							// See https://github.com/WordPress/gutenberg/pull/61692 for more details about the dependency in general.
+							// For backward compatibility reasons we need to skip requesting to external here.
+							return null;
+					}
+
 					if ( request.startsWith( '@wordpress/dataviews' ) ) {
 						return null;
 					}

@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import apiClient from './api-client';
+import ApiClient, { WC_ADMIN_API_PATH } from './api-client';
 
 /**
  * Update the onboarding profile using a call to the wc-admin API.
@@ -11,9 +11,10 @@ import apiClient from './api-client';
  */
 
 export async function updateOnboardingProfile( data ) {
-	const path = 'wc-admin/onboarding/profile';
+	const apiClient = ApiClient.getInstance();
+	const path = `${ WC_ADMIN_API_PATH }/onboarding/profile`;
 
-	const updateResponse = await apiClient().put( path, data );
+	const updateResponse = await apiClient.put( path, data );
 
 	if ( updateResponse.statusCode !== 200 ) {
 		console.error(
@@ -22,7 +23,7 @@ export async function updateOnboardingProfile( data ) {
 		);
 	}
 
-	const newProfileResponse = await apiClient().get( path );
+	const newProfileResponse = await apiClient.get( path );
 
 	return newProfileResponse.statusCode === 200
 		? newProfileResponse.data

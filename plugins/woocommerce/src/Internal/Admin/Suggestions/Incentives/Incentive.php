@@ -238,12 +238,20 @@ abstract class Incentive {
 			return array();
 		}
 
-		$dismissals = array_filter(
-			$dismissed_incentives,
-			fn( $dismissed_incentive ) => $id === $dismissed_incentive['id']
+		$dismissals = array_values(
+			array_filter(
+				$dismissed_incentives,
+				fn( $dismissed_incentive ) => $id === $dismissed_incentive['id']
+			)
 		);
 
-		return array_column( $dismissals, 'context' );
+		return array_map(
+			fn( $dismissed_incentive ) => array(
+				'timestamp' => $dismissed_incentive['timestamp'],
+				'context'   => $dismissed_incentive['context'],
+			),
+			$dismissals
+		);
 	}
 
 	/**

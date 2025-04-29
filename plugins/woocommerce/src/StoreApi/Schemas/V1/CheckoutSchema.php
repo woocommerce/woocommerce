@@ -225,7 +225,7 @@ class CheckoutSchema extends AbstractSchema {
 	 * @param \WC_Cart|null      $cart           Cart object.
 	 * @return array
 	 */
-	protected function get_checkout_response( \WC_Order $order, PaymentResult $payment_result = null, \WC_Cart $cart = null ) {
+	protected function get_checkout_response( \WC_Order $order, ?PaymentResult $payment_result = null, ?\WC_Cart $cart = null ) {
 		$payment_result = $payment_result ? [
 			'payment_status'  => $payment_result->status,
 			'payment_details' => $this->prepare_payment_details_for_response( $payment_result->payment_details ),
@@ -326,7 +326,7 @@ class CheckoutSchema extends AbstractSchema {
 				'description' => $field['label'],
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
-				'required'    => $this->additional_fields_controller->is_conditional_field( $field ) ? false : $field['required'],
+				'required'    => $this->additional_fields_controller->is_conditional_field( $field ) ? false : true === $field['required'],
 			];
 
 			if ( 'select' === $field['type'] ) {
@@ -364,7 +364,7 @@ class CheckoutSchema extends AbstractSchema {
 		return array_reduce(
 			array_keys( $additional_fields_schema ),
 			function ( $carry, $key ) use ( $additional_fields_schema ) {
-				return $carry || $additional_fields_schema[ $key ]['required'];
+				return $carry || true === $additional_fields_schema[ $key ]['required'];
 			},
 			false
 		);
@@ -422,7 +422,7 @@ class CheckoutSchema extends AbstractSchema {
 
 		// on POST, loop over the schema instead of the fields. This is to ensure missing fields are validated.
 		foreach ( $additional_field_schema as $key => $schema ) {
-			if ( ! isset( $fields[ $key ] ) && ! $schema['required'] ) {
+			if ( ! isset( $fields[ $key ] ) && true !== $schema['required'] ) {
 				// Optional fields can go missing.
 				continue;
 			}

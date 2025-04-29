@@ -168,14 +168,14 @@ class NumberFilter extends Component {
 		const rangeStartOnChange = ( newRangeStart ) => {
 			onFilterChange( {
 				property: 'value',
-				key: [ newRangeStart, rangeEnd ],
+				value: [ newRangeStart, rangeEnd ],
 			} );
 		};
 
 		const rangeEndOnChange = ( newRangeEnd ) => {
 			onFilterChange( {
 				property: 'value',
-				key: [ rangeStart, newRangeEnd ],
+				value: [ rangeStart, newRangeEnd ],
 			} );
 		};
 

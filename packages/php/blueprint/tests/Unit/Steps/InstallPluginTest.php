@@ -11,22 +11,22 @@ class InstallPluginTest extends TestCase {
 	 * Test the constructor and JSON preparation.
 	 */
 	public function testConstructorAndPrepareJsonArray() {
-		$slug = 'sample-plugin';
+		$slug     = 'sample-plugin';
 		$resource = 'https://example.com/sample-plugin.zip';
-		$options = array( 'activate' => true );
+		$options  = array( 'activate' => true );
 
-		$installPlugin = new InstallPlugin( $slug, $resource, $options );
+		$install_plugin = new InstallPlugin( $slug, $resource, $options );
 
 		$expected_array = array(
-			'step'          => 'installPlugin',
-			'pluginZipFile' => array(
+			'step'       => 'installPlugin',
+			'pluginData' => array(
 				'resource' => $resource,
 				'slug'     => $slug,
 			),
-			'options'       => $options,
+			'options'    => $options,
 		);
 
-		$this->assertEquals( $expected_array, $installPlugin->prepare_json_array() );
+		$this->assertEquals( $expected_array, $install_plugin->prepare_json_array() );
 	}
 
 	/**
@@ -43,23 +43,22 @@ class InstallPluginTest extends TestCase {
 		$expected_schema = array(
 			'type'       => 'object',
 			'properties' => array(
-				'step'          => array(
+				'step'       => array(
 					'type' => 'string',
 					'enum' => array( 'installPlugin' ),
 				),
-				'pluginZipFile' => array(
-					'type'       => 'object',
-					'properties' => array(
-						'resource' => array(
-							'type' => 'string',
-						),
-						'slug'     => array(
-							'type' => 'string',
-						),
+				'pluginData' => array(
+					'anyOf' => array(
+						require __DIR__ . '/../../../src/Steps/schemas/definitions/VFSReference.php',
+						require __DIR__ . '/../../../src/Steps/schemas/definitions/LiteralReference.php',
+						require __DIR__ . '/../../../src/Steps/schemas/definitions/CorePluginReference.php',
+						require __DIR__ . '/../../../src/Steps/schemas/definitions/CoreThemeReference.php',
+						require __DIR__ . '/../../../src/Steps/schemas/definitions/UrlReference.php',
+						require __DIR__ . '/../../../src/Steps/schemas/definitions/GitDirectoryReference.php',
+						require __DIR__ . '/../../../src/Steps/schemas/definitions/DirectoryLiteralReference.php',
 					),
-					'required'   => array( 'resource', 'slug' ),
 				),
-				'options'       => array(
+				'options'    => array(
 					'type'       => 'object',
 					'properties' => array(
 						'activate' => array(
@@ -68,7 +67,7 @@ class InstallPluginTest extends TestCase {
 					),
 				),
 			),
-			'required'   => array( 'step', 'pluginZipFile' ),
+			'required'   => array( 'step', 'pluginData' ),
 		);
 
 		$this->assertEquals( $expected_schema, InstallPlugin::get_schema() );

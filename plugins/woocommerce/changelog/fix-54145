@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Remove unnecessary keyframes bundled in every blocks stylesheet

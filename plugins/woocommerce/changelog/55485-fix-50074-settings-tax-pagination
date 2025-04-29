@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix tax settings pagination blocking the UI and ensure design consistency.

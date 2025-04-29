@@ -1,4 +1,0 @@
-Significance: major
-Type: update
-
-Use React.createRoot to render react roots rather than React.render. This breaks backward compatibility in some cases. Payment methods setting state in a non-user initiated event will have their state batched and likely won't work.

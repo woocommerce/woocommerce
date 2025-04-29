@@ -30,14 +30,14 @@
 		"lint:lang:js": "eslint build.js"
 	},
 	"devDependencies": {
-		"@babel/core": "7.12.9",
+		"@babel/core": "7.25.7",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"chalk": "^4.1.2",
 		"eslint": "^8.55.0",
 		"glob": "^10.3.10",
 		"lodash": "^4.17.21",
 		"mkdirp": "^1.0.4",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

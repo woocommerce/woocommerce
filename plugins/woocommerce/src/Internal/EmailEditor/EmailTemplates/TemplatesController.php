@@ -4,8 +4,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates;
 
-use MailPoet\EmailEditor\Engine\Templates\Template;
-use MailPoet\EmailEditor\Engine\Templates\Templates_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\Templates\Template;
+use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates_Registry;
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 
 defined( 'ABSPATH' ) || exit;
@@ -31,7 +31,44 @@ class TemplatesController {
 	 * @return void
 	 */
 	final public function init(): void {
-		add_filter( 'mailpoet_email_editor_register_templates', array( $this, 'register_templates' ) );
+		add_filter( 'woocommerce_email_editor_register_templates', array( $this, 'register_templates' ) );
+		// Priority 100 ensures this runs last to remove email templates from the Site Editor.
+		add_filter( 'get_block_templates', array( $this, 'filter_email_templates' ), 100, 1 );
+	}
+
+	/**
+	 * Filters out email templates from the block templates list in the Site Editor.
+	 *
+	 * This function is necessary to prevent email templates from appearing in the Site Editor's
+	 * template list. Email templates are stored in the database with the same post type as site
+	 * templates, which causes them to be included in the Site Editor by default. By filtering
+	 * them out, we ensure that only relevant site templates are displayed, improving the user
+	 * experience and maintaining the intended separation between email and site templates.
+	 *
+	 * @param array $templates The list of block templates.
+	 * @return array The filtered list of block templates.
+	 */
+	public function filter_email_templates( $templates ) {
+		// Skip filtering if we're in a REST API request to avoid affecting API endpoints.
+		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			return $templates;
+		}
+
+		if ( ! is_admin() || ! function_exists( 'get_current_screen' ) ) {
+			return $templates;
+		}
+
+		$current_screen = get_current_screen();
+		if ( $current_screen && 'site-editor' === $current_screen->id ) {
+			$templates = array_filter(
+				$templates,
+				function ( $template ) {
+					return WooEmailTemplate::TEMPLATE_SLUG !== $template->slug;
+				}
+			);
+		}
+
+		return $templates;
 	}
 
 	/**

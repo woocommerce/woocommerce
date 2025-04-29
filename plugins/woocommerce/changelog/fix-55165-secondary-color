@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Return secondary color CSS variable to its original color

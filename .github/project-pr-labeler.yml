@@ -72,12 +72,14 @@
 
 'focus: performance tests':
   - plugins/woocommerce/tests/performance/**/*
+  - plugins/woocommerce/tests/metrics/**/*
 
 'focus: api tests':
-  - plugins/woocommerce/tests/api-core-tests/**/*
+  - plugins/woocommerce/tests/e2e-pw/tests/api-tests/**/*
 
 'focus: e2e tests':
   - plugins/woocommerce/tests/e2e-pw/**/*
+  - plugins/woocommerce/client/blocks/tests/e2e/**/*
 
 'focus: documentation':
   - docs/**/*

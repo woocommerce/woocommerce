@@ -1,8 +1,9 @@
 /**
  * Internal dependencies
  */
-const { test, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+import { expect, test } from '../../fixtures/fixtures';
+import { WC_API_PATH } from '../../utils/api-client';
+
 const randomNum = new Date().getTime().toString();
 const customer = {
 	username: `customer${ randomNum }`,
@@ -17,16 +18,10 @@ const product = {
 test.describe( 'Customer can manage downloadable file in My Account > Downloads page', () => {
 	let productId, orderId;
 
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.beforeAll( async ( { restApi, baseURL } ) => {
 		// add product
-		await api
-			.post( 'products', {
+		await restApi
+			.post( `${ WC_API_PATH }/products`, {
 				name: product.name,
 				type: 'simple',
 				regular_price: '9.99',
@@ -43,12 +38,12 @@ test.describe( 'Customer can manage downloadable file in My Account > Downloads 
 				productId = response.data.id;
 			} );
 		// create customer
-		await api
-			.post( 'customers', customer )
+		await restApi
+			.post( `${ WC_API_PATH }/customers`, customer )
 			.then( ( response ) => ( customer.id = response.data.id ) );
 		// create an order
-		await api
-			.post( 'orders', {
+		await restApi
+			.post( `${ WC_API_PATH }/orders`, {
 				set_paid: true,
 				status: 'completed',
 				billing: {
@@ -67,23 +62,21 @@ test.describe( 'Customer can manage downloadable file in My Account > Downloads 
 				orderId = response.data.id;
 			} );
 		// once the order is created, assign it to our existing customer user
-		await api.put( `orders/${ orderId }`, {
+		await restApi.put( `${ WC_API_PATH }/orders/${ orderId }`, {
 			customer_id: customer.id,
 		} );
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-		await api.delete( `products/${ productId }`, {
+	test.afterAll( async ( { restApi } ) => {
+		await restApi.delete( `${ WC_API_PATH }/products/${ productId }`, {
 			force: true,
 		} );
-		await api.delete( `orders/${ orderId }`, { force: true } );
-		await api.delete( `customers/${ customer.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
+			force: true,
+		} );
+		await restApi.delete( `${ WC_API_PATH }/customers/${ customer.id }`, {
+			force: true,
+		} );
 	} );
 
 	test( 'can see downloadable file and click to download it', async ( {

@@ -1,5 +1,5 @@
 {
-	"landingPage": "/wp-admin/admin.php?page=mailpoet-newsletters",
+	"landingPage": "/wp-admin/edit.php?post_type=woo_email",
 	"preferredVersions": {
 		"php": "8.2",
 		"wp": "latest"
@@ -16,17 +16,12 @@
 			"step": "installPlugin",
 			"pluginData": {
 				"resource": "url",
-				"url": "https://account.mailpoet.com/playground/plugin-proxy/branch:trunk"
+				"url": "https://github-proxy.com/https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip"
 			}
 		},
 		{
-			"step": "mkdir",
-			"path": "wordpress/wp-content/mu-plugins"
-		},
-		{
-			"step": "writeFile",
-			"path": "wordpress/wp-content/mu-plugins/addFilter-2.php",
-			"data": "<?php \nadd_filter('mailpoet_skip_welcome_wizard', '__return_true');"
+			"step": "runPHP",
+			"code": "<?php include 'wordpress/wp-load.php'; delete_transient( '_wc_activation_redirect' ); update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );"
 		}
 	]
 }

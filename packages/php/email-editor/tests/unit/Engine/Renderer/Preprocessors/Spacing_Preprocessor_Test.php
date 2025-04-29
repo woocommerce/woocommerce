@@ -1,19 +1,19 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine\Renderer\Preprocessors;
+namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\Preprocessors;
 
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Spacing_Preprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Spacing_Preprocessor;
 
 /**
  * Unit test for Spacing_Preprocessor
  */
-class Spacing_Preprocessor_Test extends \MailPoetUnitTest {
+class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 
 	/**
 	 * Spacing_Preprocessor instance

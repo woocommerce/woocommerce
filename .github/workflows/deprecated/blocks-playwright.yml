@@ -4,7 +4,7 @@ on:
     pull_request:
         paths:
             - '.github/workflows/blocks-playwright.yml' # This file
-            - 'plugins/woocommerce-blocks/**'
+            - 'plugins/woocommerce/client/blocks/**'
             - 'plugins/woocommerce/src/Blocks/**'
             - 'plugins/woocommerce/templates/**'
             - 'plugins/woocommerce/patterns/**'
@@ -17,7 +17,7 @@ on:
             - trunk
         paths:
             - '.github/workflows/blocks-playwright.yml' # This file
-            - 'plugins/woocommerce-blocks/**'
+            - 'plugins/woocommerce/client/blocks/**'
             - 'plugins/woocommerce/src/Blocks/**'
             - 'plugins/woocommerce/templates/**'
             - 'plugins/woocommerce/patterns/**'
@@ -36,7 +36,7 @@ jobs:
         runs-on: ubuntu-latest
         defaults:
             run:
-                working-directory: plugins/woocommerce-blocks
+                working-directory: plugins/woocommerce/client/blocks
         strategy:
             fail-fast: false
             matrix:
@@ -68,7 +68,7 @@ jobs:
               if: ${{ !cancelled() }}
               with:
                   name: failures-artifacts-shard-${{ matrix.shardIndex }}
-                  path: plugins/woocommerce-blocks/tests/e2e/artifacts/test-results
+                  path: plugins/woocommerce/client/blocks/tests/e2e/artifacts/test-results
                   if-no-files-found: ignore
 
             - name: Archive flaky test reports
@@ -76,7 +76,7 @@ jobs:
               if: ${{ !cancelled() }}
               with:
                   name: flaky-tests-report-shard-${{ matrix.shardIndex }}
-                  path: plugins/woocommerce-blocks/flaky-tests
+                  path: plugins/woocommerce/client/blocks/flaky-tests
                   if-no-files-found: ignore
 
     merge-artifacts:

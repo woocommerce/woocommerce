@@ -79,11 +79,11 @@ const PersonalizationTagsLinkPopover = ( {
 					position="bottom left"
 					onClose={ () => setIsPopoverVisible( false ) }
 					anchor={ linkElement } // Directly use commentSpan as the anchor
-					className="mailpoet-personalization-tag-popover"
+					className="woocommerce-personalization-tag-popover"
 				>
-					<div className="mailpoet-personalization-tag-popover__content">
+					<div className="woocommerce-personalization-tag-popover-content">
 						<TextControl
-							label={ __( 'Link Text', 'mailpoet' ) }
+							label={ __( 'Link Text', 'woocommerce' ) }
 							value={ linkText }
 							onChange={ ( value ) => setLinkText( value ) }
 							__nextHasNoMarginBottom // To avoid warning about deprecation in console
@@ -93,7 +93,7 @@ const PersonalizationTagsLinkPopover = ( {
 						<SelectControl
 							__next40pxDefaultSize
 							__nextHasNoMarginBottom
-							label={ __( 'Link tag', 'mailpoet' ) }
+							label={ __( 'Link tag', 'woocommerce' ) }
 							value={ linkHref }
 							onChange={ ( value ) => {
 								setLinkHref( value );
@@ -102,7 +102,7 @@ const PersonalizationTagsLinkPopover = ( {
 								.filter( ( tag ) => {
 									return (
 										tag.category ===
-										__( 'Link', 'mailpoet' )
+										__( 'Link', 'woocommerce' )
 									);
 								} )
 								.map( ( tag ) => {
@@ -112,14 +112,14 @@ const PersonalizationTagsLinkPopover = ( {
 									};
 								} ) }
 						/>
-						<div className="mailpoet-personalization-tag-popover__content-buttons">
+						<div className="woocommerce-personalization-tag-popover-content-buttons">
 							<Button
 								isTertiary
 								onClick={ () => {
 									setIsPopoverVisible( false );
 								} }
 							>
-								{ __( 'Cancel', 'mailpoet' ) }
+								{ __( 'Cancel', 'woocommerce' ) }
 							</Button>
 							<Button
 								isPrimary
@@ -128,7 +128,7 @@ const PersonalizationTagsLinkPopover = ( {
 									onUpdate( linkElement, linkHref, linkText );
 								} }
 							>
-								{ __( 'Update link', 'mailpoet' ) }
+								{ __( 'Update link', 'woocommerce' ) }
 							</Button>
 						</div>
 					</div>

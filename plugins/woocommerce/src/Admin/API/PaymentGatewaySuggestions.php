@@ -45,7 +45,7 @@ class PaymentGatewaySuggestions extends \WC_REST_Data_Controller {
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_suggestions' ),
-					'permission_callback' => array( $this, 'get_permission_check' ),
+					'permission_callback' => array( $this, 'user_can_manage_woocommerce' ),
 					'args'                => array(
 						'force_default_suggestions' => array(
 							'type'        => 'boolean',
@@ -83,6 +83,19 @@ class PaymentGatewaySuggestions extends \WC_REST_Data_Controller {
 			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage plugins.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
+	}
+
+	/**
+	 * Check if a given request has access to manage woocommerce.
+	 *
+	 * @return \WP_Error|boolean
+	 */
+	public function user_can_manage_woocommerce() {
+		if ( current_user_can( 'manage_woocommerce' ) ) {
+			return true;
+		}
+
+		return new \WP_Error( 'woocommerce_rest_invalid_user', __( 'You are not allowed to make this request.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 	}
 
 	/**

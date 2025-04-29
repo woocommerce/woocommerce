@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Minor refactor to TrackedLink component to make it more re-useable, and fixing some tests related to that component.

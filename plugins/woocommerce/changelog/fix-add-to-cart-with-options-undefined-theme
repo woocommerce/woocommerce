@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Avoid requesting template part before knowing the theme slug in the Add to Cart with Options block
-
-

@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Add support to install nightly builds in e2e tests.

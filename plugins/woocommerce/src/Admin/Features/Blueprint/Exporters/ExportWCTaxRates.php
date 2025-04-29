@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Blueprint\Util;
 /**
  * Class ExportWCTaxRates
  *
- * This class exports WooCommerce tax rates and implements the StepExporter interface.
+ * This class exports WooCommerce tax rates.
  *
  * @package Automattic\WooCommerce\Admin\Features\Blueprint\Exporters
  */
@@ -41,8 +41,7 @@ class ExportWCTaxRates implements StepExporter, HasAlias {
 		$table = $wpdb->prefix . $table;
 		return array_map(
 			fn( $record ) => new RunSql( Util::array_to_insert_sql( $record, $table, 'replace into' ) ),
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$wpdb->get_results( "SELECT * FROM {$table}", ARRAY_A )
+			$wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i', $table ), ARRAY_A ),
 		);
 	}
 
@@ -70,7 +69,7 @@ class ExportWCTaxRates implements StepExporter, HasAlias {
 	 * @return string Description text.
 	 */
 	public function get_description(): string {
-		return __( 'It includes all settings in WooCommerce | Settings | Tax.', 'woocommerce' );
+		return __( 'Includes all settings in WooCommerce | Settings | Tax.', 'woocommerce' );
 	}
 
 	/**
@@ -80,5 +79,14 @@ class ExportWCTaxRates implements StepExporter, HasAlias {
 	 */
 	public function get_alias(): string {
 		return 'setWCTaxRates';
+	}
+
+	/**
+	 * Check if the current user has the required capabilities for this step.
+	 *
+	 * @return bool True if the user has the required capabilities. False otherwise.
+	 */
+	public function check_step_capabilities(): bool {
+		return current_user_can( 'manage_woocommerce' );
 	}
 }

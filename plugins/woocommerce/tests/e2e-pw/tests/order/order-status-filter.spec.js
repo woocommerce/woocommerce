@@ -1,7 +1,9 @@
-const { test, expect } = require( '@playwright/test' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+/**
+ * Internal dependencies
+ */
+import { tags, expect, test } from '../../fixtures/fixtures';
+import { WC_API_PATH } from '../../utils/api-client';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 const orderBatchId = [];
 const statusColumnTextSelector = 'mark.order-status > span';
@@ -24,13 +26,7 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		test.beforeAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
+		test.beforeAll( async ( { restApi } ) => {
 			// create some orders we can filter
 			const orders = orderStatus.map( ( entryPair ) => {
 				const statusName = entryPair[ 1 ].replace( 'wc-', '' );
@@ -39,8 +35,8 @@ test.describe(
 					status: statusName,
 				};
 			} );
-			await api
-				.post( 'orders/batch', { create: orders } )
+			await restApi
+				.post( `${ WC_API_PATH }/orders/batch`, { create: orders } )
 				.then( ( response ) => {
 					for ( let i = 0; i < response.data.create.length; i++ ) {
 						orderBatchId.push( response.data.create[ i ].id );
@@ -48,14 +44,10 @@ test.describe(
 				} );
 		} );
 
-		test.afterAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
+		test.afterAll( async ( { restApi } ) => {
+			await restApi.post( `${ WC_API_PATH }/orders/batch`, {
+				delete: [ ...orderBatchId ],
 			} );
-			await api.post( 'orders/batch', { delete: [ ...orderBatchId ] } );
 		} );
 
 		for ( let i = 0; i < orderStatus.length; i++ ) {

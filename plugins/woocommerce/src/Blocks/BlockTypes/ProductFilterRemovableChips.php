@@ -8,6 +8,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  */
 final class ProductFilterRemovableChips extends AbstractBlock {
 
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -25,15 +27,12 @@ final class ProductFilterRemovableChips extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		if (
-			empty( $block->context['filterData'] ) ||
-			empty( $block->context['filterData']['parent'] )
+			empty( $block->context['filterData'] )
 		) {
 			return '';
 		}
 
-		$context      = $block->context['filterData'];
-		$filter_items = $context['items'] ?? array();
-		$parent_block = $context['parent'];
+		$filter_items = $block->context['filterData']['items'] ?? array();
 
 		$style = '';
 
@@ -44,8 +43,8 @@ final class ProductFilterRemovableChips extends AbstractBlock {
 		}
 
 		$wrapper_attributes = array(
-			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'data-wc-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
+			'data-wp-interactive' => 'woocommerce/product-filters',
+			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'class'               => esc_attr( $classes ),
 			'style'               => esc_attr( $style ),
 		);
@@ -56,36 +55,35 @@ final class ProductFilterRemovableChips extends AbstractBlock {
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<ul class="wc-block-product-filter-removable-chips__items">
 				<template
-					data-wc-each="state.items"
-					data-wc-each-key="context.item.uid"
+					data-wp-each="state.activeFilters"
+					data-wp-each-key="context.item.uid"
 				>
 					<li class="wc-block-product-filter-removable-chips__item">
-						<span class="wc-block-product-filter-removable-chips__label" data-wc-text="context.item.label"></span>
+						<span class="wc-block-product-filter-removable-chips__label" data-wp-text="context.item.activeLabel"></span>
 						<button
 							type="button"
 							class="wc-block-product-filter-removable-chips__remove"
-							data-wc-bind--aria-label="context.item.removeLabel"
-							data-wc-on--click="<?php echo esc_attr( $parent_block . '::actions.removeFilter' ); ?>"
-							data-wc-bind--data-filter-item="context.item"
+							data-wp-bind--aria-label="state.removeActiveFilterLabel"
+							data-wp-on--click="actions.removeActiveFilter"
 						>
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="25" height="25" class="wc-block-product-filter-removable-chips__remove-icon" aria-hidden="true" focusable="false"><path d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"></path></svg>
-							<span class="screen-reader-text" data-wc-text="context.item.removeLabel"></span>
+							<span class="screen-reader-text" data-wp-text="state.removeActiveFilterLabel"></span>
 						</button>
 					</li>
 				</template>
 				<?php foreach ( $filter_items as $item ) : ?>
 					<?php // translators: %s: item label. ?>
-					<?php $remove_label = sprintf( __( 'Remove filter: %s', 'woocommerce' ), $item['label'] ); ?>
-					<li class="wc-block-product-filter-removable-chips__item" data-wc-each-child>
+					<?php $remove_label = sprintf( __( 'Remove filter: %s', 'woocommerce' ), $item['activeLabel'] ); ?>
+					<li class="wc-block-product-filter-removable-chips__item" data-wp-each-child>
 						<span class="wc-block-product-filter-removable-chips__label">
-							<?php echo esc_html( $item['label'] ); ?>
+							<?php echo esc_html( $item['activeLabel'] ); ?>
 						</span>
 						<button
 							type="button"
 							class="wc-block-product-filter-removable-chips__remove"
 							aria-label="<?php echo esc_attr( $remove_label ); ?>"
-							data-wc-on--click="<?php echo esc_attr( $parent_block . '::actions.removeFilter' ); ?>"
-							data-filter-item="<?php echo esc_attr( wp_json_encode( $item, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) ); ?>"
+							data-wp-on--click="actions.removeActiveFilter"
+							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						>
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="25" height="25" class="wc-block-product-filter-removable-chips__remove-icon" aria-hidden="true" focusable="false"><path d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"></path></svg>
 							<span class="screen-reader-text"><?php echo esc_html( $remove_label ); ?></span>

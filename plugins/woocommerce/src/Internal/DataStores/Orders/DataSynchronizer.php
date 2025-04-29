@@ -470,8 +470,6 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * @param bool $use_cache Whether to use the cached value instead of fetching from database.
 	 */
 	public function get_current_orders_pending_sync_count( $use_cache = false ): int {
-		global $wpdb;
-
 		if ( $use_cache ) {
 			$pending_count = wp_cache_get( 'woocommerce_hpos_pending_sync_count', 'counts' );
 			if ( false !== $pending_count ) {
@@ -479,11 +477,55 @@ class DataSynchronizer implements BatchProcessorInterface {
 			}
 		}
 
+		$pending_count = $this->query_orders_pending_sync_count();
+
+		wp_cache_set( 'woocommerce_hpos_pending_sync_count', $pending_count, 'counts' );
+		return $pending_count;
+	}
+
+	/**
+	 * Check if there are orders pending synchronization.
+	 *
+	 * @param bool $use_cache Whether to use the cached value instead of fetching from database.
+	 * @return bool True if there are orders pending synchronization, false otherwise.
+	 */
+	public function has_orders_pending_sync( $use_cache = false ) {
+		if ( $use_cache ) {
+			$has_pending_sync = wp_cache_get( 'woocommerce_hpos_has_orders_pending_sync', 'counts' );
+			if ( false !== $has_pending_sync ) {
+				return (bool) $has_pending_sync;
+			}
+			$pending_count = wp_cache_get( 'woocommerce_hpos_pending_sync_count', 'counts' );
+			if ( false !== $pending_count ) {
+				return (int) $pending_count > 0;
+			}
+		}
+
+		$has_pending_sync = $this->query_orders_pending_sync_count( false ) > 0;
+
+		wp_cache_set( 'woocommerce_hpos_has_orders_pending_sync', $has_pending_sync, 'counts' );
+
+		return $has_pending_sync;
+	}
+
+	/**
+	 * Query the number of orders pending synchronization.
+	 *
+	 * @param bool $full_count Whether to return the full count or a single row.
+	 * @return int The number of orders pending synchronization.
+	 */
+	private function query_orders_pending_sync_count( $full_count = true ) {
+		global $wpdb;
+
 		$order_post_types = wc_get_order_types( 'cot-migration' );
 
 		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
 
 		$orders_table = $this->data_store::get_orders_table_name();
+
+		$count_clause = $full_count ? 'COUNT(1)' : '1';
+
+		$limit_clause = $full_count ? '' : 'LIMIT 1';
 
 		if ( empty( $order_post_types ) ) {
 			$this->error_logger->debug(
@@ -502,7 +544,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 		if ( ! $this->get_table_exists() ) {
 			$count = $wpdb->get_var(
 				$wpdb->prepare(
-					"SELECT COUNT(*) FROM $wpdb->posts where post_type in ( $order_post_type_placeholder )",
+					"SELECT $count_clause FROM $wpdb->posts where post_type in ( $order_post_type_placeholder )",
 					$order_post_types
 				)
 			);
@@ -512,23 +554,25 @@ class DataSynchronizer implements BatchProcessorInterface {
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			$missing_orders_count_sql = $wpdb->prepare(
 				"
-SELECT COUNT(1) FROM $wpdb->posts posts
+SELECT $count_clause FROM $wpdb->posts posts
 RIGHT JOIN $orders_table orders ON posts.ID=orders.id
 WHERE (posts.post_type IS NULL OR posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "')
  AND orders.status NOT IN ( 'auto-draft' )
- AND orders.type IN ($order_post_type_placeholder)",
+ AND orders.type IN ($order_post_type_placeholder)
+$limit_clause",
 				$order_post_types
 			);
 			$operator                 = '>';
 		} else {
 			$missing_orders_count_sql = $wpdb->prepare(
 				"
-SELECT COUNT(1) FROM $wpdb->posts posts
+SELECT $count_clause FROM $wpdb->posts posts
 LEFT JOIN $orders_table orders ON posts.ID=orders.id
 WHERE
   posts.post_type in ($order_post_type_placeholder)
   AND posts.post_status != 'auto-draft'
-  AND orders.id IS NULL",
+  AND orders.id IS NULL
+$limit_clause",
 				$order_post_types
 			);
 
@@ -559,13 +603,12 @@ SELECT(
 
 		$deleted_count  = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT count(1) FROM {$wpdb->prefix}wc_orders_meta WHERE meta_key=%s AND meta_value=%s",
+				"SELECT $count_clause FROM {$wpdb->prefix}wc_orders_meta WHERE meta_key=%s AND meta_value=%s",
 				array( self::DELETED_RECORD_META_KEY, $deleted_from_table )
 			)
 		);
 		$pending_count += $deleted_count;
 
-		wp_cache_set( 'woocommerce_hpos_pending_sync_count', $pending_count, 'counts' );
 		return $pending_count;
 	}
 

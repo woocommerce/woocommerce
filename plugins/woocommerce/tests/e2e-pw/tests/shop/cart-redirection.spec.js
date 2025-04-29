@@ -1,9 +1,9 @@
 /**
  * Internal dependencies
  */
-import { tags } from '../../fixtures/fixtures';
-const { test, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+import { tags, test, expect } from '../../fixtures/fixtures';
+import { WC_API_PATH } from '../../utils/api-client';
+import { checkCartContent } from '../../utils/cart';
 
 test.describe(
 	'Cart > Redirect to cart from shop',
@@ -14,16 +14,10 @@ test.describe(
 		let productId;
 		const productName = 'A redirect product test';
 
-		test.beforeAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
+		test.beforeAll( async ( { restApi } ) => {
 			// add products
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: productName,
 					type: 'simple',
 					regular_price: '17.99',
@@ -31,8 +25,8 @@ test.describe(
 				.then( ( response ) => {
 					productId = response.data.id;
 				} );
-			await api.put(
-				'settings/products/woocommerce_cart_redirect_after_add',
+			await restApi.put(
+				`${ WC_API_PATH }/settings/products/woocommerce_cart_redirect_after_add`,
 				{
 					value: 'yes',
 				}
@@ -44,18 +38,12 @@ test.describe(
 			await context.clearCookies();
 		} );
 
-		test.afterAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-			await api.delete( `products/${ productId }`, {
+		test.afterAll( async ( { restApi } ) => {
+			await restApi.delete( `${ WC_API_PATH }/products/${ productId }`, {
 				force: true,
 			} );
-			await api.put(
-				'settings/products/woocommerce_cart_redirect_after_add',
+			await restApi.put(
+				`${ WC_API_PATH }/settings/products/woocommerce_cart_redirect_after_add`,
 				{
 					value: 'no',
 				}
@@ -73,8 +61,19 @@ test.describe(
 				.click();
 
 			await expect( page ).toHaveURL( /.*\/cart/ );
-			await expect( page.locator( 'td.product-name' ) ).toContainText(
-				productName
+			await checkCartContent(
+				false,
+				page,
+				[
+					{
+						data: {
+							name: productName,
+							price: '17.99',
+						},
+						qty: 1,
+					},
+				],
+				0
 			);
 		} );
 
@@ -87,8 +86,19 @@ test.describe(
 			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 
 			await expect( page ).toHaveURL( /.*\/cart/ );
-			await expect( page.locator( 'td.product-name' ) ).toContainText(
-				productName
+			await checkCartContent(
+				false,
+				page,
+				[
+					{
+						data: {
+							name: productName,
+							price: '17.99',
+						},
+						qty: 1,
+					},
+				],
+				0
 			);
 		} );
 	}

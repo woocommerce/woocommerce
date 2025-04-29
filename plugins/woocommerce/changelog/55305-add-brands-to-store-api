@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Add WooCommerce brands to Store API response and filter products by brand ID and slug.

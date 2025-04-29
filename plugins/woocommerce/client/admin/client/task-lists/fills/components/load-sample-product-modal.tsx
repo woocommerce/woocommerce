@@ -10,7 +10,7 @@ import { Text } from '@woocommerce/experimental';
  */
 import './load-sample-product-modal.scss';
 
-const LoadSampleProductModal: React.FC = () => {
+const LoadSampleProductModal = () => {
 	return (
 		<Modal
 			className="woocommerce-products-load-sample-product-modal"

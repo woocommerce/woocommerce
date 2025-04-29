@@ -15,13 +15,19 @@ type WooPaymentGatewaySetupProps = {
  * @param {Object} props    React props.
  * @param {string} props.id Setup id.
  */
-export const WooPaymentGatewaySetup: React.FC< WooPaymentGatewaySetupProps > & {
-	Slot: React.VFC< React.ComponentProps< typeof Slot > & { id: string } >;
-} = ( { id, ...props } ) => (
+export const WooPaymentGatewaySetup = ( {
+	id,
+	...props
+}: WooPaymentGatewaySetupProps ) => (
 	<Fill name={ 'woocommerce_payment_gateway_setup_' + id } { ...props } />
 );
 
-WooPaymentGatewaySetup.Slot = ( { id, fillProps } ) => (
+WooPaymentGatewaySetup.Slot = ( {
+	id,
+	fillProps,
+}: WooPaymentGatewaySetupProps & {
+	fillProps?: React.ComponentProps< typeof Slot >[ 'fillProps' ];
+} ) => (
 	<Slot
 		name={ 'woocommerce_payment_gateway_setup_' + id }
 		fillProps={ fillProps }

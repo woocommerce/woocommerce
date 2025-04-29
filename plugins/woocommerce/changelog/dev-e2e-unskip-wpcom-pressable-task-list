@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Make the e2e test `activate-and-setup/task-list.spec.js` runnable on WPCOM and Pressable.

@@ -12,6 +12,7 @@ export { REVIEWS_STORE_NAME } from './reviews';
 export { NOTES_STORE_NAME } from './notes';
 export { REPORTS_STORE_NAME } from './reports';
 export { COUNTRIES_STORE_NAME } from './countries';
+export { NAVIGATION_STORE_NAME } from './navigation';
 export { OPTIONS_STORE_NAME } from './options';
 export { ITEMS_STORE_NAME } from './items';
 export { PAYMENT_GATEWAYS_STORE_NAME } from './payment-gateways';
@@ -72,11 +73,15 @@ export { store as paymentGatewaysStore } from './payment-gateways';
 export { store as importStore } from './import';
 export { store as experimentalProductFormStore } from './product-form';
 export { store as paymentSettingsStore } from './payment-settings';
+export { store as reportsStore } from './reports';
+export { store as itemsStore } from './items';
+export { store as experimentalSettingOptionsStore } from './setting-options';
 
 // Export hooks
 export { withSettingsHydration } from './settings/with-settings-hydration';
 export { withOnboardingHydration } from './onboarding/with-onboarding-hydration';
 export { withCurrentUserHydration } from './user/with-current-user-hydration';
+export { withNavigationHydration } from './navigation/with-navigation-hydration';
 export { withPluginsHydration } from './plugins/with-plugins-hydration';
 export {
 	withOptionsHydration,
@@ -88,7 +93,8 @@ export { useUser } from './user/use-user';
 
 // Export utils
 export { getVisibleTasks } from './onboarding/utils';
-export { getLeaderboard, searchItemsByString } from './items/utils';
+export { searchItemsByString } from './items/utils';
+export { getLeaderboard } from './items/store-aware-utils';
 export {
 	getFilterQuery,
 	getSummaryNumbers,
@@ -158,6 +164,12 @@ export { TaxClass } from './tax-classes/types';
 export { ProductTag, Query } from './product-tags/types';
 export { WCUser } from './user/types';
 export { UserPreferences } from './user/types';
+export {
+	Setting,
+	SettingsGroup,
+	SettingValue,
+	SettingType,
+} from './setting-options/types';
 
 /**
  * Internal dependencies
@@ -168,6 +180,7 @@ import type { PLUGINS_STORE_NAME } from './plugins';
 import type { ONBOARDING_STORE_NAME } from './onboarding';
 import type { USER_STORE_NAME } from './user';
 import type { OPTIONS_STORE_NAME } from './options';
+import type { NAVIGATION_STORE_NAME } from './navigation';
 import type { NOTES_STORE_NAME } from './notes';
 import type { REPORTS_STORE_NAME } from './reports';
 import type { ITEMS_STORE_NAME } from './items';
@@ -194,6 +207,7 @@ export type WCDataStoreName =
 	| typeof ONBOARDING_STORE_NAME
 	| typeof USER_STORE_NAME
 	| typeof OPTIONS_STORE_NAME
+	| typeof NAVIGATION_STORE_NAME
 	| typeof NOTES_STORE_NAME
 	| typeof REPORTS_STORE_NAME
 	| typeof ITEMS_STORE_NAME
@@ -255,6 +269,8 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof OPTIONS_STORE_NAME
 	? OptionsSelectors
+	: T extends typeof NAVIGATION_STORE_NAME
+	? WPDataSelectors
 	: T extends typeof NOTES_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof REPORTS_STORE_NAME

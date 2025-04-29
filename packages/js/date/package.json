@@ -38,7 +38,7 @@
 		"qs": "^6.11.2"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.23.5",
+		"@babel/core": "7.25.7",
 		"@types/jest": "27.5.x",
 		"@types/lodash": "^4.14.202",
 		"@types/node": "20.x.x",
@@ -53,7 +53,7 @@
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"peerDependencies": {
 		"lodash": "^4.17.0"
@@ -101,7 +101,6 @@
 						"src/**/*.{js,jsx,ts,tsx}",
 						"typings/**/*.ts"
 					],
-					"cascade": "test:js",
 					"events": [
 						"pull_request",
 						"push"

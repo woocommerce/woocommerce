@@ -1,5 +1,11 @@
-const { test: baseTest, expect, tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * Internal dependencies
+ */
+import { test as baseTest, expect, tags } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { WC_API_PATH } from '../../utils/api-client';
+import { checkCartContent } from '../../utils/cart';
+
 const productData = {
 	virtual: {
 		name: `Virtual product ${ Date.now() }`,
@@ -41,17 +47,19 @@ function removeHtmlTags( str ) {
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	product: async ( { api }, use ) => {
+	product: async ( { restApi }, use ) => {
 		const product = {};
 		await use( product );
-		await api.delete( `products/${ product.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+			force: true,
+		} );
 	},
 
-	category: async ( { api }, use ) => {
+	category: async ( { restApi }, use ) => {
 		let category = {};
 
-		await api
-			.post( 'products/categories', {
+		await restApi
+			.post( `${ WC_API_PATH }/products/categories`, {
 				name: `cat_${ Date.now() }`,
 			} )
 			.then( ( response ) => {
@@ -61,9 +69,10 @@ const test = baseTest.extend( {
 		await use( category );
 
 		// Category cleanup
-		await api.delete( `products/categories/${ category.id }`, {
-			force: true,
-		} );
+		await restApi.delete(
+			`${ WC_API_PATH }/products/categories/${ category.id }`,
+			{ force: true }
+		);
 	},
 } );
 
@@ -186,7 +195,7 @@ for ( const productType of Object.keys( productData ) ) {
 						page.getByText( 'Shipping class', { exact: true } )
 					).toBeVisible();
 					await page
-						.getByPlaceholder( '0' )
+						.locator('#_weight')
 						.fill( productData[ productType ].shipping.weight );
 					await page
 						.getByPlaceholder( 'Length', { exact: true } )
@@ -203,8 +212,8 @@ for ( const productType of Object.keys( productData ) ) {
 			// eslint-disable-next-line playwright/no-conditional-in-test
 			if ( productData[ productType ].virtual ) {
 				await test.step( 'add virtual product details', async () => {
-					await page.getByLabel( 'Virtual' ).check();
-					await expect( page.getByLabel( 'Virtual' ) ).toBeChecked();
+					await page.getByRole('checkbox', { name: 'Virtual' }).check();
+					await expect(page.getByRole('checkbox', { name: 'Virtual' })).toBeChecked();
 				} );
 			}
 
@@ -317,21 +326,20 @@ for ( const productType of Object.keys( productData ) ) {
 					.click();
 				await page.getByRole( 'link', { name: 'View cart' } ).click();
 
-				await expect(
-					page
-						.getByRole( 'link' )
-						.filter( { hasText: productData[ productType ].name } )
-				).toBeVisible();
-
-				await page
-					.getByRole( 'link', { name: 'Proceed to checkout' } )
-					.click();
-
-				await expect(
-					page
-						.getByRole( 'cell' )
-						.filter( { hasText: productData[ productType ].name } )
-				).toBeVisible();
+				await checkCartContent(
+					false,
+					page,
+					[
+						{
+							data: {
+								name: productData[ productType ].name,
+								price: productData[ productType ].regularPrice,
+							},
+							qty: 1,
+						},
+					],
+					0
+				);
 			} );
 		}
 	);

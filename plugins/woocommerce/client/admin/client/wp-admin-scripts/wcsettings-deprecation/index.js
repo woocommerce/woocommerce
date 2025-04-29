@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { createDeprecatedObjectProxy } from '../../utils';
+import { createDeprecatedPropertiesProxy } from '../../utils';
 import { deprecatedAdminProperties } from '../../utils/admin-settings';
 
 if (
@@ -10,7 +10,7 @@ if (
 	Object.keys( deprecatedAdminProperties ).length > 0 &&
 	process.env.NODE_ENV === 'development'
 ) {
-	wcSettings = createDeprecatedObjectProxy( wcSettings, {
+	wcSettings = createDeprecatedPropertiesProxy( wcSettings, {
 		admin: deprecatedAdminProperties,
 	} );
 }

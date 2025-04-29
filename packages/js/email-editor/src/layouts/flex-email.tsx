@@ -38,17 +38,17 @@ function JustificationControls( {
 		{
 			value: 'left',
 			icon: justifyLeft,
-			label: __( 'Justify items left', 'mailpoet' ),
+			label: __( 'Justify items left', 'woocommerce' ),
 		},
 		{
 			value: 'center',
 			icon: justifyCenter,
-			label: __( 'Justify items center', 'mailpoet' ),
+			label: __( 'Justify items center', 'woocommerce' ),
 		},
 		{
 			value: 'right',
 			icon: justifyRight,
-			label: __( 'Justify items right', 'mailpoet' ),
+			label: __( 'Justify items right', 'woocommerce' ),
 		},
 	];
 
@@ -71,7 +71,7 @@ function JustificationControls( {
 	return (
 		<ToggleGroupControl
 			__nextHasNoMarginBottom
-			label={ __( 'Justification', 'mailpoet' ) }
+			label={ __( 'Justification', 'woocommerce' ) }
 			value={ justificationValue }
 			onChange={ onChange }
 			className="block-editor-hooks__flex-layout-justification-controls"
@@ -115,7 +115,7 @@ function LayoutControls( { setAttributes, attributes, name: blockName } ) {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Layout', 'mailpoet' ) }>
+				<PanelBody title={ __( 'Layout', 'woocommerce' ) }>
 					<Flex>
 						<FlexItem>
 							<JustificationControls
@@ -168,7 +168,6 @@ export function addAttribute( settings: Block ) {
  * @return {Function} Wrapped component.
  */
 export const withLayoutControls = createHigherOrderComponent(
-	// @ts-expect-error No types for this exist yet.
 	( BlockEdit ) => ( props ) => {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		const supportLayout = hasLayoutBlockSupport( props.name );
@@ -223,17 +222,17 @@ export const withLayoutStyles = createHigherOrderComponent(
 export function initializeLayout() {
 	addFilter(
 		'blocks.registerBlockType',
-		'mailpoet-email-editor/layout/addAttribute',
+		'woocommerce-email-editor/layout/addAttribute',
 		addAttribute
 	);
 	addFilter(
 		'editor.BlockListBlock',
-		'mailpoet-email-editor/with-layout-styles',
+		'woocommerce-email-editor/with-layout-styles',
 		withLayoutStyles
 	);
 	addFilter(
 		'editor.BlockEdit',
-		'mailpoet-email-editor/with-inspector-controls',
+		'woocommerce-email-editor/with-inspector-controls',
 		withLayoutControls
 	);
 }

@@ -99,10 +99,12 @@ class DataSynchronizerTests extends \HposTestCase {
 	public function test_get_ids_orders_pending_sync_migration() {
 		$order_collection = $this->init_dirty_orders( 'posts' );
 		$this->assertEquals( 2, $this->sut->get_current_orders_pending_sync_count() );
+		$this->assertTrue( $this->sut->has_orders_pending_sync() );
 		$this->assertArraySubset( $order_collection['post_orders'], $this->sut->get_next_batch_to_process( 10 ) );
 
 		$this->sut->process_batch( $order_collection['post_orders'] );
 		$this->assertEquals( 0, $this->sut->get_current_orders_pending_sync_count() );
+		$this->assertFalse( $this->sut->has_orders_pending_sync() );
 	}
 
 	/**
@@ -111,10 +113,12 @@ class DataSynchronizerTests extends \HposTestCase {
 	public function test_get_ids_orders_pending_sync_backfill() {
 		$order_collection = $this->init_dirty_orders( 'cot' );
 		$this->assertEquals( 3, $this->sut->get_current_orders_pending_sync_count() );
+		$this->assertTrue( $this->sut->has_orders_pending_sync() );
 		$this->assertArraySubset( $order_collection['cot_orders'], $this->sut->get_next_batch_to_process( 10 ) );
 
 		$this->sut->process_batch( $order_collection['cot_orders'] );
 		$this->assertEquals( 0, $this->sut->get_current_orders_pending_sync_count() );
+		$this->assertFalse( $this->sut->has_orders_pending_sync() );
 	}
 
 	/**
@@ -125,16 +129,19 @@ class DataSynchronizerTests extends \HposTestCase {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 		$order = OrderHelper::create_complex_data_store_order();
 		$this->assertEquals( 1, $this->sut->get_current_orders_pending_sync_count() );
+		$this->assertTrue( $this->sut->has_orders_pending_sync() );
 		// Simulate that order was updated some time ago, and we are backfilling just now.
 		$order->set_date_modified( time() - 1000 );
 		$order->save();
 
 		$this->sut->process_batch( array( $order->get_id() ) );
 		$this->assertEquals( 0, $this->sut->get_current_orders_pending_sync_count() );
+		$this->assertFalse( $this->sut->has_orders_pending_sync() );
 
 		// So far so good, now if we change the authoritative source to posts, we should still have 0 order pending sync.
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 		$this->assertEquals( 0, $this->sut->get_current_orders_pending_sync_count() );
+		$this->assertFalse( $this->sut->has_orders_pending_sync() );
 	}
 
 	/**
@@ -672,7 +679,7 @@ class DataSynchronizerTests extends \HposTestCase {
 		);
 		$sync_setting = array_values( $sync_setting )[0];
 		$this->assertEquals( $sync_setting['value'], 'no' );
-		$this->assertTrue( str_contains( $sync_setting['desc_tip'], $auth_table_change_allowed_with_sync_pending ? "There's 1 order pending sync" : "There's currently 1 order out of sync" ) );
+		$this->assertTrue( str_contains( $sync_setting['desc_tip'], $auth_table_change_allowed_with_sync_pending ? "There are orders pending sync" : "There are currently orders out of sync" ) );
 		$this->assertTrue(
 			str_contains(
 				$sync_setting['desc_tip'],

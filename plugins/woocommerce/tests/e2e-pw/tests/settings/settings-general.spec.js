@@ -1,19 +1,15 @@
-const { test, expect } = require( '@playwright/test' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+/**
+ * Internal dependencies
+ */
+import { expect, test, tags } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { WC_API_PATH } from '../../utils/api-client';
 
 test.describe( 'WooCommerce General Settings', { tag: tags.SERVICES }, () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-		await api.post( 'settings/general/batch', {
+	test.afterAll( async ( { restApi } ) => {
+		await restApi.post( `${ WC_API_PATH }/settings/general/batch`, {
 			update: [
 				{
 					id: 'woocommerce_store_address',
@@ -49,12 +45,18 @@ test.describe( 'WooCommerce General Settings', { tag: tags.SERVICES }, () => {
 				},
 			],
 		} );
-		await api.put( 'settings/general/woocommerce_allowed_countries', {
-			value: 'all',
-		} );
-		await api.put( 'settings/general/woocommerce_currency', {
-			value: 'USD',
-		} );
+		await restApi.put(
+			`${ WC_API_PATH }/settings/general/woocommerce_allowed_countries`,
+			{
+				value: 'all',
+			}
+		);
+		await restApi.put(
+			`${ WC_API_PATH }/settings/general/woocommerce_currency`,
+			{
+				value: 'USD',
+			}
+		);
 	} );
 
 	test(

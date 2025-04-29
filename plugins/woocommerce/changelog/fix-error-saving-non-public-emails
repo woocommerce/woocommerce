@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Switch woo_email custom post type added for transactional emails to non-public. This was previously not possible due an issue in the email editor package.
+
+
