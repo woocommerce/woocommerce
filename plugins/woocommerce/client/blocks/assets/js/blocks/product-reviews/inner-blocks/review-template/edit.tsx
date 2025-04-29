@@ -262,8 +262,18 @@ export default function CommentTemplateEdit( {
 	let commentTree = useCommentTree(
 		// Reverse the order of top comments if needed.
 		commentOrder === 'desc' && topLevelComments
-			? [ ...topLevelComments ].reverse()
-			: topLevelComments
+			? [
+					...( topLevelComments as Array< {
+						id: number;
+						// eslint-disable-next-line @typescript-eslint/naming-convention
+						_embedded?: { children?: unknown[] };
+					} > ),
+			  ].reverse()
+			: ( topLevelComments as Array< {
+					id: number;
+					// eslint-disable-next-line @typescript-eslint/naming-convention
+					_embedded?: { children?: unknown[] };
+			  } > )
 	);
 
 	if ( ! topLevelComments ) {
