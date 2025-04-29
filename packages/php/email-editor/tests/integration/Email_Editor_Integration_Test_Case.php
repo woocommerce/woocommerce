@@ -21,6 +21,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postproce
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Variables_Postprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Blocks_Width_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Cleanup_Preprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Quote_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Spacing_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Typography_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Process_Manager;
@@ -177,6 +178,12 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 			}
 		);
 		$container->set(
+			Quote_Preprocessor::class,
+			function () {
+				return new Quote_Preprocessor();
+			}
+		);
+		$container->set(
 			Highlighting_Postprocessor::class,
 			function () {
 				return new Highlighting_Postprocessor();
@@ -196,6 +203,7 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 					$container->get( Blocks_Width_Preprocessor::class ),
 					$container->get( Typography_Preprocessor::class ),
 					$container->get( Spacing_Preprocessor::class ),
+					$container->get( Quote_Preprocessor::class ),
 					$container->get( Highlighting_Postprocessor::class ),
 					$container->get( Variables_Postprocessor::class ),
 				);
