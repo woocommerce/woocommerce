@@ -328,7 +328,7 @@ const productGallery = {
 			}
 
 			const selectFirstImage = () =>
-				withScope( () => actions.selectImage( 1 ) );
+				withScope( () => actions.selectImage( 0 ) );
 
 			const observer = new MutationObserver(
 				withScope( function ( mutations ) {
@@ -351,7 +351,7 @@ const productGallery = {
 
 							actions.selectImage( nextImageIndex );
 						} else {
-							actions.selectImage( 1 );
+							actions.selectImage( 0 );
 						}
 					}
 				} )
