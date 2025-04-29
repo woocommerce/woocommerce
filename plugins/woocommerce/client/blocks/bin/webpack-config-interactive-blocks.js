@@ -39,14 +39,25 @@ const entries = {
 		'node_modules/@wordpress/interactivity/src/index.ts'
 	),
 
+	'@wordpress/interactivity-router': path.resolve(
+		__dirname,
+		'..',
+		'node_modules/@wordpress/interactivity-router/src/index.ts'
+	),
+
 	'@woocommerce/interactivity': './packages/interactivity/index.ts',
 };
 
 const [ jsRule, ...otherRules ] = moduleConfig.module.rules;
 
-jsRule.exclude = {
-	and: [ /node_modules/ ],
-	not: [ /@wordpress[\\/]interactivity/ ],
+const interactivityMatcher = /@wordpress(?:\+|[\\/])interactivity/;
+
+const modifiedJsRule = {
+	...jsRule,
+	exclude: {
+		and: [ /node_modules/ ],
+		not: [ interactivityMatcher ],
+	},
 };
 
 module.exports = {
@@ -70,13 +81,6 @@ module.exports = {
 	},
 	resolve: {
 		extensions: [ '.js', '.ts', '.tsx' ],
-
-		// alias: {
-		// 	'@wordpress/interactivity': path.resolve(
-		// 		__dirname,
-		// 		'node_modules/@woocommerce/interactivity/src/index.ts'
-		// 	),
-		// },
 	},
 	plugins: [
 		new MiniCssExtractPlugin( {
@@ -102,7 +106,7 @@ module.exports = {
 	],
 	module: {
 		rules: [
-			jsRule,
+			modifiedJsRule,
 			...otherRules.filter(
 				( rule ) =>
 					! rule.test.test( '.css' ) &&

@@ -57,16 +57,20 @@ final class AssetsController {
 			$this->api->get_block_asset_build_path( 'interactivity-blocks-frontend-assets', 'php' )
 		);
 
+		// Dequeue the WordPress interactivity script modules and ensure it's removed from the import map.
 		wp_dequeue_script_module( '@wordpress/interactivity' );
 		wp_deregister_script_module( '@wordpress/interactivity' );
+		wp_dequeue_script_module( '@wordpress/interactivity-router' );
+		wp_deregister_script_module( '@wordpress/interactivity-router' );
 
 		foreach ( $asset_data as $handle => $data ) {
 			$handle_without_js = str_replace( '.js', '', $handle );
 			wp_register_script_module( $handle_without_js, plugins_url( $this->api->get_block_asset_build_path( $handle_without_js ), dirname( __DIR__ ) ), $data['dependencies'], $data['version'] );
 		}
 
+		// Re-enqueue the WordPress interactivity script module built within WooCommerce.
 		wp_enqueue_script_module( '@wordpress/interactivity' );
-		// wp_enqueue_script_module( '@woocommerce/interactivity' );
+		wp_enqueue_script_module( '@wordpress/interactivity-router' );
 	}
 
 	/**
