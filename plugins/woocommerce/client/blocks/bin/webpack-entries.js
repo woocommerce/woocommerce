@@ -204,9 +204,12 @@ const blocks = {
 	'product-review-form': {
 		customDir: 'product-reviews/inner-blocks/review-form',
 	},
+	'product-review-date': {
+		customDir: 'product-reviews/inner-blocks/review-date',
+	},
 	'product-review-content': {
 		customDir: 'product-reviews/inner-blocks/review-content',
-	},
+  },
 };
 
 /**
