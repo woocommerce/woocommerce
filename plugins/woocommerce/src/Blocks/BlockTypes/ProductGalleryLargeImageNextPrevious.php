@@ -54,7 +54,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 		$product_gallery_image_count = ProductGalleryUtils::get_product_gallery_image_count( $product );
 
 		// Don't show the arrows block if there is only one image.
-		if ( product_gallery_image_count <= 1 ) {
+		if ( $product_gallery_image_count <= 1 ) {
 			return '';
 		}
 
