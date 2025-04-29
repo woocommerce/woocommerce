@@ -32,6 +32,21 @@ const entries = {
 		'./assets/js/base/stores/woocommerce/cart.ts',
 	'@woocommerce/stores/store-notices':
 		'./assets/js/base/stores/store-notices.ts',
+
+	'@wordpress/interactivity': path.resolve(
+		__dirname,
+		'..',
+		'node_modules/@wordpress/interactivity/src/index.ts'
+	),
+
+	'@woocommerce/interactivity': './packages/interactivity/index.ts',
+};
+
+const [ jsRule, ...otherRules ] = moduleConfig.module.rules;
+
+jsRule.exclude = {
+	and: [ /node_modules/ ],
+	not: [ /@wordpress[\\/]interactivity/ ],
 };
 
 module.exports = {
@@ -55,6 +70,13 @@ module.exports = {
 	},
 	resolve: {
 		extensions: [ '.js', '.ts', '.tsx' ],
+
+		// alias: {
+		// 	'@wordpress/interactivity': path.resolve(
+		// 		__dirname,
+		// 		'node_modules/@woocommerce/interactivity/src/index.ts'
+		// 	),
+		// },
 	},
 	plugins: [
 		new MiniCssExtractPlugin( {
@@ -64,7 +86,10 @@ module.exports = {
 			combineAssets: true,
 			combinedOutputFile: './interactivity-blocks-frontend-assets.php',
 			requestToExternalModule( request ) {
-				if ( request.startsWith( '@woocommerce/stores/' ) ) {
+				if (
+					request.startsWith( '@woocommerce/stores/' ) ||
+					request.startsWith( '@woocommerce/interactivity' )
+				) {
 					return `import ${ request }`;
 				}
 			},
@@ -77,7 +102,8 @@ module.exports = {
 	],
 	module: {
 		rules: [
-			...moduleConfig.module.rules.filter(
+			jsRule,
+			...otherRules.filter(
 				( rule ) =>
 					! rule.test.test( '.css' ) &&
 					! rule.test.test( '.scss' ) &&
