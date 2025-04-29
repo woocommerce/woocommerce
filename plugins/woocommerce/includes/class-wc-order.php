@@ -2307,7 +2307,7 @@ class WC_Order extends WC_Abstract_Order {
 		foreach ( $this->get_refunds() as $refund ) {
 			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
 				if ( absint( $refunded_item->get_meta( '_refunded_item_id' ) ) === $item_id ) {
-					$total += $refunded_item->get_total();
+					$total += (int) $refunded_item->get_total();
 				}
 			}
 		}
