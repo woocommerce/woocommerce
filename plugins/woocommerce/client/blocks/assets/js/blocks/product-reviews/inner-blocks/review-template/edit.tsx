@@ -51,11 +51,11 @@ type ReviewTemplateAttributes = {
 
 const TEMPLATE = [
 	[ 'core/avatar' ],
+	[ 'core/comment-reply-link' ],
+	[ 'core/comment-edit-link' ],
 	[ 'woocommerce/product-review-author-name' ],
 	[ 'woocommerce/product-review-date' ],
 	[ 'woocommerce/product-review-content' ],
-	[ 'core/comment-reply-link' ],
-	[ 'core/comment-edit-link' ],
 ];
 
 interface ReviewSettings {
