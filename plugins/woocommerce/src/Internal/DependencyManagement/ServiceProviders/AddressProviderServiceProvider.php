@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
-use WC_Address_Provider;
 
 /**
  * Service class for managing address providers.
