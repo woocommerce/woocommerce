@@ -3,7 +3,7 @@ post_title: Email HTML - Best Practices
 menu_title: Email HTML - Best Practices
 ---
 
-<!-- markdownlint-disable MD024 -->;
+<!-- markdownlint-disable MD024 -->
 
 ## Overview
 
@@ -21,10 +21,10 @@ Email design and development require a different approach than traditional web d
 ### Use older, simpler HTML standards
 
 - Use HTML 4.01 or XHTML 1.0 - Many email clients use outdated rendering engines and don't support modern HTML5 features.
-- Avoid HTML5 elements in the main structure - Elements like &lt;section&gt;, &lt;article&gt;, and &lt;aside&gt; aren't supported in all email clients.
+- Avoid HTML5 elements in the main structure - Elements like `&lt;section&gt;`, `&lt;article&gt;`, and `&lt;aside&gt;` aren't supported in all email clients.
 - Always use lowercase for tags and attributes - This ensures maximum compatibility and prevents rendering issues in strict clients.
 - Always use quotes for attribute values - Unquoted attributes can cause parsing errors in some email clients.
-- Close all tags, even self-closing ones with a trailing slash (&lt;br /&gt;) - This prevents rendering issues in clients that expect XHTML-style syntax.
+- Close all tags, even self-closing ones with a trailing slash (`&lt;br /&gt;`) - This prevents rendering issues in clients that expect XHTML-style syntax.
 
 ### Tables as the foundation
 
@@ -55,7 +55,7 @@ Email design and development require a different approach than traditional web d
 
 ### CSS Support Limitations
 
-- Use inline CSS for everything critical - Many email clients strip &lt;style&gt; tags or ignore them entirely.
+- Use inline CSS for everything critical - Many email clients strip `&lt;style&gt;` tags or ignore them entirely.
 - Avoid CSS shorthand properties (use `margin-top` instead of `margin`) - Some email clients only recognize individual properties, not shorthand.
 - Avoid CSS positioning properties (`position`, `float`, `clear`) - These are poorly supported and can cause layout issues.
 - Avoid advanced selectors (stick to element, class, and ID selectors) - Complex selectors often fail in email clients with limited CSS support.
@@ -272,7 +272,7 @@ Limited support; always provide a fallback bgcolor:
 
 ### Semantic structure
 
-- Use semantic HTML where possible (p, h1, h2, etc.) - This improves screen reader interpretation and overall accessibility.
+- Use semantic HTML where possible (`p`, `h1`, `h2`, etc.) - This improves screen reader interpretation and overall accessibility.
 - Add `role="presentation"` to layout tables - This tells screen readers the table is for layout only, not data presentation.
 - Include proper heading structure - This creates a logical document outline that helps screen reader users navigate.
 - Use `aria-hidden="true"` for decorative elements - This prevents screen readers from announcing purely visual elements.
