@@ -129,12 +129,6 @@ class FilesystemUtil {
 	 * @throws \Exception If the file path is not a valid upload path.
 	 */
 	public static function validate_upload_file_path( string $path ): void {
-		$pre = apply_filters( 'woocommerce_pre_validate_upload_file_path', false, $path );
-
-		if ( $pre ) {
-			return;
-		}
-
 		$wp_filesystem = self::get_wp_filesystem();
 
 		// File must exist and be readable.
