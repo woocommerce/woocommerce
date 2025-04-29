@@ -4,7 +4,7 @@
 	"name": "woocommerce/product-reviews-pagination-next",
 	"title": "Product Reviews Next Page",
 	"category": "theme",
-	"ancestor": [ "woocommerce/product-reviews-pagination" ],
+	"parent": [ "woocommerce/product-reviews-pagination" ],
 	"description": "Displays the next product review's page link.",
 	"textdomain": "woocommerce",
 	"attributes": {
