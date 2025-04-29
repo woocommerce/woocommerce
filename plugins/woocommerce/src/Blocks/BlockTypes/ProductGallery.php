@@ -112,12 +112,13 @@ class ProductGallery extends AbstractBlock {
 			return '';
 		}
 
-		$image_data             = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_single' );
+		$image_ids              = ProductGalleryUtils::get_all_image_ids( $product );
 		$classname              = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
-		$initial_image_id       = count( $image_data ) > 0 ? $image_data[0]['id'] : -1;
-		$classname_single_image = count( $image_data ) < 2 ? 'is-single-product-gallery-image' : '';
+		$initial_image_id       = count( $image_ids ) > 0 ? $image_ids[0] : -1;
+		$classname_single_image = count( $image_ids ) < 2 ? 'is-single-product-gallery-image' : '';
 		$product_id             = strval( $product->get_id() );
-		$gallery_with_dialog    = $this->inject_dialog( $content, $this->render_dialog( $image_data ) );
+		$full_image_data        = ProductGalleryUtils::get_image_src_data( $image_ids, 'full' );
+		$gallery_with_dialog    = $this->inject_dialog( $content, $this->render_dialog( $full_image_data ) );
 		$p                      = new \WP_HTML_Tag_Processor( $gallery_with_dialog );
 
 		if ( $p->next_tag() ) {
@@ -126,7 +127,7 @@ class ProductGallery extends AbstractBlock {
 				'data-wp-context',
 				wp_json_encode(
 					array(
-						'imageData'          => $image_data,
+						'imageData'          => $image_ids,
 						'isDialogOpen'       => false,
 						'disableLeft'        => true,
 						'disableRight'       => false,
