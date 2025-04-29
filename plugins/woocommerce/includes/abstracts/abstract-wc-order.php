@@ -2189,8 +2189,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$include_tax             = 'excl' !== $tax_display;
 		$item_subtotal           = $this->get_item_subtotal( $item, $include_tax );
 		$formatted_item_subtotal = $this->get_formatted_price( $item_subtotal, $include_tax );
-
-		return apply_filters( 'woocommerce_order_formatted_line_subtotal', $formatted_item_subtotal, $item, $this );
+		return $formatted_item_subtotal;
 	}
 
 	/**

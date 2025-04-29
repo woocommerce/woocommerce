@@ -35,9 +35,8 @@ trait WC_POS_Email_Customizations {
 	 * @param int      $item_id       Order item ID.
 	 * @param array    $item          Order item data.
 	 * @param WC_Order $order         Order object.
-	 * @param bool     $plain_text    Whether is plain text email.
 	 */
-	public function add_unit_price( $item_id, $item, $order, $plain_text = false ) {
+	public function add_unit_price( $item_id, $item, $order ) {
 		$unit_price = $order->get_formatted_item_subtotal( $item );
 		echo '<br /><small>' . $unit_price . '</small>';
 	}

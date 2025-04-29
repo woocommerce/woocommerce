@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-require_once dirname( __FILE__ ) . '/trait-wc-pos-email-customizations.php';
+require_once __DIR__ . '/trait-wc-pos-email-customizations.php';
 
 use WC_POS_Email_Customizations;
 
@@ -192,7 +192,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 				)
 			);
 		}
-		
+
 		/**
 		 * Enable order email actions for POS orders.
 		 */
