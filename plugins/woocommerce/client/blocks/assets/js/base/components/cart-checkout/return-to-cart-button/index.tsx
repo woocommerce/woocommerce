@@ -27,7 +27,7 @@ const ReturnToCartButton = ( {
 	const Element = element;
 	return (
 		<Element
-			href={ cartLink }
+			{ ...( element === 'a' ? { href: cartLink } : {} ) }
 			className="wc-block-components-checkout-return-to-cart-button"
 		>
 			<Icon icon={ arrowLeft } />
