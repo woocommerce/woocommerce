@@ -11,6 +11,5 @@
 	"supports": {
 		"interactivity": true
 	},
-	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"viewScriptModule": "woocommerce/add-to-cart-with-options-grouped-product-selector"
+	"$schema": "https://schemas.wp.org/trunk/block.json"
 }
