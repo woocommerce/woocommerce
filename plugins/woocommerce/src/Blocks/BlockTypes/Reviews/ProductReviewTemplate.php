@@ -83,7 +83,7 @@ class ProductReviewTemplate extends AbstractBlock {
 			// comments.
 			if ( ! empty( $children ) && ! empty( $thread_comments ) ) {
 				if ( $current_depth < $thread_comments_depth ) {
-					$inner_content = $this->block_product_review_template_render_comments(
+					$inner_content  = $this->block_product_review_template_render_comments(
 						$children,
 						$block,
 						$current_depth + 1
