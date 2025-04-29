@@ -141,7 +141,7 @@ const { state, actions } = store(
 					attributeName: name,
 					attributeValue: option.value,
 					selectedAttributes: variation,
-					availableVariations: availableVariations,
+					availableVariations,
 				} );
 			},
 			get pillTabIndex() {
@@ -176,10 +176,10 @@ const { state, actions } = store(
 		},
 		actions: {
 			toggleSelected() {
-				const context = getContext< PillsContext >();
 				if ( state.isPillDisabled ) {
 					return;
 				}
+				const context = getContext< PillsContext >();
 				if ( context.selectedValue === context.option.value ) {
 					context.selectedValue = '';
 				} else {
@@ -218,7 +218,7 @@ const { state, actions } = store(
 									attributeName: context.name,
 									attributeValue: context.options[ i ].value,
 									selectedAttributes: variation,
-									availableVariations: availableVariations,
+									availableVariations,
 								} )
 							) {
 								context.selectedValue =
@@ -262,7 +262,7 @@ const { state, actions } = store(
 									attributeName: context.name,
 									attributeValue: context.options[ i ].value,
 									selectedAttributes: variation,
-									availableVariations: availableVariations,
+									availableVariations,
 								} )
 							) {
 								context.selectedValue =
@@ -317,7 +317,7 @@ store(
 					attributeName: name,
 					attributeValue: option.value,
 					selectedAttributes: variation,
-					availableVariations: availableVariations,
+					availableVariations,
 				} );
 			},
 		},
