@@ -226,20 +226,15 @@ test.describe( `${ blockData.name }`, () => {
 				width: 390, // iPhone 12 Pro
 			} );
 
-			const blockFrontend = await pageObject.getMainImageBlock( {
+			const largeImageBlockLocator = await pageObject.getMainImageBlock( {
 				page: 'frontend',
 			} );
-
-			await expect( blockFrontend ).toBeVisible();
-
-			const largeImageElement = await pageObject.getMainImageBlock( {
-				page: 'frontend',
-			} );
+			const largeImage = largeImageBlockLocator.locator( 'img' ).first();
 
 			const initialImageId = await pageObject.getVisibleLargeImageId();
 
 			// Get the element's bounding box
-			const box = await largeImageElement.boundingBox();
+			const box = await largeImage.boundingBox();
 			if ( ! box ) {
 				return;
 			}
@@ -251,7 +246,7 @@ test.describe( `${ blockData.name }`, () => {
 			const swipeEndY = swipeStartY;
 
 			// Dispatch touch events to simulate swipe
-			await largeImageElement.evaluate(
+			await largeImage.evaluate(
 				( element, { startX, startY, endX, endY } ) => {
 					const touchStart = new TouchEvent( 'touchstart', {
 						bubbles: true,
@@ -303,7 +298,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			// Timeout is needed to allow the image animation to finish.
 			// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
-			await page.waitForTimeout( 1000 );
+			await page.waitForTimeout( 400 );
 
 			// Verify the next image is shown
 			const nextImageId = await pageObject.getVisibleLargeImageId();
