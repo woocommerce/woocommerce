@@ -5,7 +5,7 @@
 	flex-flow: column;
 
 	// TODO: Add mobile styling (row instead of column).
-	@include breakpoint( '>960px' ) {
+	@include breakpoint( ">960px" ) {
 		padding: 0 56px;
 	}
 

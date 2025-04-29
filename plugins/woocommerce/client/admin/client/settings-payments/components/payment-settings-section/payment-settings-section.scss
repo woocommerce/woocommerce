@@ -2,11 +2,11 @@
 	display: flex;
 	flex-flow: row;
 
-	&:not( &:last-child ) {
+	&:not(&:last-child) {
 		margin-bottom: 24px;
 	}
 
-	@include breakpoint( '>782px' ) {
+	@include breakpoint( ">782px" ) {
 		flex-flow: row;
 	}
 
@@ -15,7 +15,7 @@
 		margin-bottom: 24px;
 		max-width: 328px;
 
-		@include breakpoint( '>782px' ) {
+		@include breakpoint( ">782px" ) {
 			flex: 0 0 33%;
 			margin: 0 24px 0 0;
 		}
