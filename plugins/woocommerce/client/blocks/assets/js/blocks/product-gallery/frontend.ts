@@ -11,7 +11,7 @@ import {
 /**
  * Internal dependencies
  */
-import type { ProductGalleryContext, ImageDataItem } from './types';
+import type { ProductGalleryContext } from './types';
 import { checkOverflow } from './utils';
 
 const getContext = ( ns?: string ) =>
@@ -21,9 +21,6 @@ const getArrowsState = ( imageIndex: number, totalImages: number ) => ( {
 	disableLeft: imageIndex === 0,
 	disableRight: imageIndex === totalImages - 1,
 } );
-
-const getAllImageIds = ( imageData: ImageDataItem[] ) =>
-	imageData ? imageData.map( ( image ) => image.id ) : [];
 
 /**
  * Scrolls the image into view for the main image.
@@ -151,8 +148,7 @@ const productGallery = {
 		 */
 		get imageIndex(): number {
 			const { imageData, selectedImageId } = getContext();
-			const allImageIds = getAllImageIds( imageData );
-			return allImageIds.indexOf( selectedImageId );
+			return imageData.indexOf( selectedImageId );
 		},
 	},
 	actions: {
@@ -160,11 +156,10 @@ const productGallery = {
 			const context = getContext();
 			const { imageData } = context;
 
-			const allImageIds = getAllImageIds( imageData );
-			const imageId = allImageIds[ newImageIndex ];
+			const imageId = imageData[ newImageIndex ];
 			const { disableLeft, disableRight } = getArrowsState(
 				newImageIndex,
-				allImageIds.length
+				imageData.length
 			);
 
 			context.disableLeft = disableLeft;
@@ -189,10 +184,8 @@ const productGallery = {
 				return;
 			}
 			const imageId = parseInt( imageIdValue, 10 );
-			const context = getContext();
-			const { imageData } = context;
-			const allImageIds = getAllImageIds( imageData );
-			const newImageIndex = allImageIds.indexOf( imageId );
+			const { imageData } = getContext();
+			const newImageIndex = imageData.indexOf( imageId );
 			actions.selectImage( newImageIndex );
 		},
 		selectNextImage: ( event?: MouseEvent ) => {
@@ -201,10 +194,9 @@ const productGallery = {
 			}
 
 			const { imageData, selectedImageId } = getContext();
-			const allImageIds = getAllImageIds( imageData );
-			const selectedImageIndex = allImageIds.indexOf( selectedImageId );
+			const selectedImageIndex = imageData.indexOf( selectedImageId );
 			const newImageIndex = Math.min(
-				allImageIds.length - 1,
+				imageData.length - 1,
 				selectedImageIndex + 1
 			);
 
@@ -216,8 +208,7 @@ const productGallery = {
 			}
 
 			const { imageData, selectedImageId } = getContext();
-			const allImageIds = getAllImageIds( imageData );
-			const selectedImageIndex = allImageIds.indexOf( selectedImageId );
+			const selectedImageIndex = imageData.indexOf( selectedImageId );
 			const newImageIndex = Math.max( 0, selectedImageIndex - 1 );
 
 			actions.selectImage( newImageIndex );
@@ -343,7 +334,6 @@ const productGallery = {
 				withScope( function ( mutations ) {
 					for ( const mutation of mutations ) {
 						const { imageData } = getContext();
-						const allImageIds = getAllImageIds( imageData );
 
 						const mutationTarget = mutation.target as HTMLElement;
 						const currentImageAttribute =
@@ -354,10 +344,10 @@ const productGallery = {
 						if (
 							mutation.type === 'attributes' &&
 							currentImageId &&
-							allImageIds.includes( currentImageId )
+							imageData.includes( currentImageId )
 						) {
 							const nextImageIndex =
-								allImageIds.indexOf( currentImageId );
+								imageData.indexOf( currentImageId );
 
 							actions.selectImage( nextImageIndex );
 						} else {

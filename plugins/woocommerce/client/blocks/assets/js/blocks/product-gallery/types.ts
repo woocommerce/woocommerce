@@ -11,14 +11,6 @@ export interface ProductGallerySettingsProps {
 	) => void;
 }
 
-export interface ImageDataItem {
-	id: number;
-	src: string;
-	srcSet: string;
-	sizes: string;
-	isActive?: boolean;
-}
-
 export interface ProductGalleryContext {
 	selectedImageId: number;
 	isDialogOpen: boolean;
@@ -28,8 +20,7 @@ export interface ProductGalleryContext {
 	touchStartX: number;
 	touchCurrentX: number;
 	isDragging: boolean;
-	imageData: ImageDataItem[];
-	image: ImageDataItem;
+	imageData: number[];
 	thumbnailsOverflow: {
 		top: boolean;
 		bottom: boolean;
