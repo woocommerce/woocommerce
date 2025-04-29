@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-require_once dirname( __FILE__ ) . '/trait-wc-pos-email-customizations.php';
+require_once __DIR__ . '/trait-wc-pos-email-customizations.php';
 
 if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 

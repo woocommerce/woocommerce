@@ -2177,7 +2177,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Gets item subtotal - formatted for display.
-	 * 
+	 *
 	 * This method returns the formatted unit price for an order item.
 	 *
 	 * @param object $item Item to get unit price from.
@@ -2185,9 +2185,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string Formatted item subtotal.
 	 */
 	public function get_formatted_item_subtotal( $item, $tax_display = '' ) {
-		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
-		$include_tax = 'excl' !== $tax_display;
-		$item_subtotal = $this->get_item_subtotal( $item, $include_tax );
+		$tax_display             = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
+		$include_tax             = 'excl' !== $tax_display;
+		$item_subtotal           = $this->get_item_subtotal( $item, $include_tax );
 		$formatted_item_subtotal = $this->get_formatted_price( $item_subtotal, $include_tax );
 
 		return apply_filters( 'woocommerce_order_formatted_line_subtotal', $formatted_item_subtotal, $item, $this );
@@ -2197,12 +2197,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Helper method to format price with or without tax.
 	 *
 	 * @param float $amount The amount to format.
-	 * @param bool $include_tax Whether to include tax in the formatted price.
+	 * @param bool  $include_tax Whether to include tax in the formatted price.
 	 * @return string Formatted price string.
 	 */
 	private function get_formatted_price( $amount, $include_tax ) {
 		if ( $include_tax ) {
-			$subtotal = wc_price( $amount, array( 'currency' => $this->get_currency() ) );			
+			$subtotal = wc_price( $amount, array( 'currency' => $this->get_currency() ) );
 		} else {
 			$ex_tax_label = $this->get_prices_include_tax() ? 1 : 0;
 
