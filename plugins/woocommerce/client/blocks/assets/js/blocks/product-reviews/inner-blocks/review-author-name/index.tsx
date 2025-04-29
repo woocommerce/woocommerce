@@ -9,6 +9,7 @@ import { commentAuthorName as icon } from '@wordpress/icons';
  */
 import metadata from './block.json';
 import edit from './edit';
+import './style.scss';
 
 // @ts-expect-error metadata is not typed.
 registerBlockType( metadata.name, {
