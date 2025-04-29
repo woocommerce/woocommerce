@@ -57,7 +57,9 @@ trait WC_POS_Email_Customizations {
 	 * @return array Modified array of valid template class names.
 	 */
 	public function add_to_valid_template_classes( $valid_template_classes, $order ) {
-        // TODO: Check if the order is a POS order.
+		if ( ! $order->is_pos_order() ) {
+			return $valid_template_classes;
+		}
 		$valid_template_classes[] = get_class( $this );
 		return $valid_template_classes;
 	}
