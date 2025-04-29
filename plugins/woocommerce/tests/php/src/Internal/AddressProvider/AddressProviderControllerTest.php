@@ -1297,4 +1297,3 @@ class AddressProviderControllerTest extends MockeryTestCase {
 		$this->assertEquals( 'provider-2', $providers[1]->id );
 	}
 }
-
