@@ -5,9 +5,9 @@ $dialog-padding: 20px;
 
 .wc-block-product-gallery-large-image {
 	width: 100%;
-	height: fit-content;
 	position: relative;
 	flex-grow: 1;
+	aspect-ratio: 1 / 1;
 
 	.wc-block-product-gallery-large-image__container {
 		display: flex;
