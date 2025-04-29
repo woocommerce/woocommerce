@@ -63,7 +63,6 @@ export const SettingsPaymentsBacs = () => {
 		Record< string, string | boolean | string[] >
 	>( {} );
 
-	console.log( bacsSettings );
 	useEffect( () => {
 		if ( bacsSettings ) {
 			setFormValues( {
@@ -82,9 +81,6 @@ export const SettingsPaymentsBacs = () => {
 			setAccounts( accountsOption );
 		}
 	}, [ accountsOption ] );
-
-	console.log( accountsOption );
-	console.log( bacsSettings );
 
 	const { updateOptions } = useDispatch( optionsStore );
 	const { updatePaymentGateway } = useDispatch( paymentGatewaysStore );
