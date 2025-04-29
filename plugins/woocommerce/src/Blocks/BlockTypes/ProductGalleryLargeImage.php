@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
+
 /**
  * ProductGalleryLargeImage class.
  */
@@ -71,7 +73,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 			return '';
 		}
 
-		$images_html = $this->get_main_images_html( $block->context, $post_id );
+		$images_html = $this->get_main_images_html( $block->context, $product );
 
 		$processor = new \WP_HTML_Tag_Processor( $content );
 		$processor->next_tag();
@@ -101,7 +103,8 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	 *
 	 * @return array
 	 */
-	private function get_main_images_html( $context ) {
+	private function get_main_images_html( $context, $product ) {
+		$image_data   = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_single' );
 		$base_classes = 'wc-block-woocommerce-product-gallery-large-image__image';
 
 		if ( $context['fullScreenOnClick'] ) {
@@ -118,19 +121,19 @@ class ProductGalleryLargeImage extends AbstractBlock {
 				tabindex="-1"
 				data-wp-interactive="woocommerce/product-gallery"
 			>
-				<template data-wp-each--image="context.imageData" data-wp-each-key="context.image.id">
+				<?php foreach ( $image_data as $image ) : ?>
 					<li class="wc-block-product-gallery-large-image__wrapper">
 						<img
 							class="<?php echo esc_attr( $base_classes ); ?>"
-							data-wp-bind--src="context.image.src"
-							data-wp-bind--srcset="context.image.srcset"
-							data-wp-bind--sizes="context.image.sizes"
-							data-wp-bind--data-image-id="context.image.id"
-							data-wp-bind--tabindex="context.image.tabIndex"
+							src="<?php echo esc_attr( $image['src'] ); ?>"
+							srcset="<?php echo esc_attr( $image['srcset'] ); ?>"
+							sizes="<?php echo esc_attr( $image['sizes'] ); ?>"
+							data-image-id="<?php echo esc_attr( $image['id'] ); ?>"
 							data-wp-on--keydown="actions.onSelectedLargeImageKeyDown"
 							data-wp-on--touchstart="actions.onTouchStart"
 							data-wp-on--touchmove="actions.onTouchMove"
 							data-wp-on--touchend="actions.onTouchEnd"
+							data-wp-watch="callbacks.toggleActiveImageAtrributes"
 							<?php if ( $context['hoverZoom'] ) : ?>
 								data-wp-on--mousemove="actions.startZoom"
 								data-wp-on--mouseleave="actions.resetZoom"
@@ -138,11 +141,12 @@ class ProductGalleryLargeImage extends AbstractBlock {
 							<?php if ( $context['fullScreenOnClick'] ) : ?>
 								data-wp-on--click="actions.openDialog"
 							<?php endif; ?>
+							tabindex="0"
 							loading="lazy"
 							alt=""
 						/>
 					</li>
-				</template>
+				<?php endforeach; ?>
 			</ul>
 		<?php
 		$template = ob_get_clean();
