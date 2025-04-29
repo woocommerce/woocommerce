@@ -633,4 +633,30 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			$order->get_formatted_item_subtotal( $item, 'incl' )
 		);
 	}
+
+	/**
+	 * @testdox Test if an order is a POS order based on the 'created_via' property.
+	 */
+	public function test_is_pos_order_returns_value_based_on_created_via_property() {
+		$order = wc_create_order();
+		$order->set_created_via( 'pos-rest-api' );
+		$order->save();
+
+		$this->assertTrue( $order->is_pos_order(), 'Order created via POS REST API should be identified as POS order' );
+
+		$order->set_created_via( 'checkout' );
+		$order->save();
+
+		$this->assertFalse( $order->is_pos_order(), 'Order created via checkout should not be identified as POS order' );
+
+		$order->set_created_via( 'admin' );
+		$order->save();
+
+		$this->assertFalse( $order->is_pos_order(), 'Order created via admin should not be identified as POS order' );
+
+		$order->set_created_via( '' );
+		$order->save();
+
+		$this->assertFalse( $order->is_pos_order(), 'Order with empty created_via should not be identified as POS order' );
+	}
 }

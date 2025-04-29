@@ -2655,4 +2655,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->set_prop( 'cogs_total_value', $value );
 		}
 	}
+
+	/**
+	 * Check if the order is a POS (Point of Sale) order.
+	 *
+	 * This method determines if an order was created via the POS REST API
+	 * by checking the 'created_via' property of the order.
+	 *
+	 * @since 9.9.0
+	 * @return bool True if the order is a POS order, false otherwise.
+	 */
+	public function is_pos_order(): bool {
+		return 'pos-rest-api' === $this->get_created_via();
+	}
 }
