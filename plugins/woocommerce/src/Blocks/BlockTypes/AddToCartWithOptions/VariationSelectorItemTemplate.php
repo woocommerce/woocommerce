@@ -12,31 +12,15 @@ use WP_Block;
  * It's responsible to render each child attribute in a form of a list item.
  */
 class VariationSelectorItemTemplate extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
 	protected $block_name = 'add-to-cart-with-options-variation-selector-item';
-
-	/**
-	 * Disable the frontend script for this block type, it's built with script modules.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 * @return array|string|null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
-	}
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
 
 	/**
 	 * Render the block.
