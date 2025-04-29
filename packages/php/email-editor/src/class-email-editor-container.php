@@ -23,7 +23,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preproces
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Cleanup_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Spacing_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Typography_Preprocessor;
-use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Quote_Text_Align_Preprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Quote_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Process_Manager;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Send_Preview_Email;
@@ -145,9 +145,9 @@ class Email_Editor_Container {
 			}
 		);
 		$container->register(
-			Quote_Text_Align_Preprocessor::class,
+			Quote_Preprocessor::class,
 			function () {
-				return new Quote_Text_Align_Preprocessor();
+				return new Quote_Preprocessor();
 			}
 		);
 		$container->register(
@@ -170,7 +170,7 @@ class Email_Editor_Container {
 					$container->get( Blocks_Width_Preprocessor::class ),
 					$container->get( Typography_Preprocessor::class ),
 					$container->get( Spacing_Preprocessor::class ),
-					$container->get( Quote_Text_Align_Preprocessor::class ),
+					$container->get( Quote_Preprocessor::class ),
 					$container->get( Highlighting_Postprocessor::class ),
 					$container->get( Variables_Postprocessor::class )
 				);

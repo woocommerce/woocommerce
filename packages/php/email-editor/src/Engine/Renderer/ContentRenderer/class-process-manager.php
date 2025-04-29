@@ -16,7 +16,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preproces
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Spacing_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Typography_Preprocessor;
-use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Quote_Text_Align_Preprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Quote_Preprocessor;
 
 /**
  * Class Process_Manager
@@ -39,20 +39,20 @@ class Process_Manager {
 	/**
 	 * Process_Manager constructor.
 	 *
-	 * @param Cleanup_Preprocessor          $cleanup_preprocessor Cleanup preprocessor.
-	 * @param Blocks_Width_Preprocessor     $blocks_width_preprocessor Blocks width preprocessor.
-	 * @param Typography_Preprocessor       $typography_preprocessor Typography preprocessor.
-	 * @param Spacing_Preprocessor          $spacing_preprocessor Spacing preprocessor.
-	 * @param Quote_Text_Align_Preprocessor $quote_text_align_preprocessor Quote text align preprocessor.
-	 * @param Highlighting_Postprocessor    $highlighting_postprocessor Highlighting postprocessor.
-	 * @param Variables_Postprocessor       $variables_postprocessor Variables postprocessor.
+	 * @param Cleanup_Preprocessor       $cleanup_preprocessor Cleanup preprocessor.
+	 * @param Blocks_Width_Preprocessor  $blocks_width_preprocessor Blocks width preprocessor.
+	 * @param Typography_Preprocessor    $typography_preprocessor Typography preprocessor.
+	 * @param Spacing_Preprocessor       $spacing_preprocessor Spacing preprocessor.
+	 * @param Quote_Preprocessor         $quote_preprocessor Quote preprocessor.
+	 * @param Highlighting_Postprocessor $highlighting_postprocessor Highlighting postprocessor.
+	 * @param Variables_Postprocessor    $variables_postprocessor Variables postprocessor.
 	 */
 	public function __construct(
 		Cleanup_Preprocessor $cleanup_preprocessor,
 		Blocks_Width_Preprocessor $blocks_width_preprocessor,
 		Typography_Preprocessor $typography_preprocessor,
 		Spacing_Preprocessor $spacing_preprocessor,
-		Quote_Text_Align_Preprocessor $quote_text_align_preprocessor,
+		Quote_Preprocessor $quote_preprocessor,
 		Highlighting_Postprocessor $highlighting_postprocessor,
 		Variables_Postprocessor $variables_postprocessor
 	) {
@@ -60,7 +60,7 @@ class Process_Manager {
 		$this->register_preprocessor( $blocks_width_preprocessor );
 		$this->register_preprocessor( $typography_preprocessor );
 		$this->register_preprocessor( $spacing_preprocessor );
-		$this->register_preprocessor( $quote_text_align_preprocessor );
+		$this->register_preprocessor( $quote_preprocessor );
 		$this->register_postprocessor( $highlighting_postprocessor );
 		$this->register_postprocessor( $variables_postprocessor );
 	}

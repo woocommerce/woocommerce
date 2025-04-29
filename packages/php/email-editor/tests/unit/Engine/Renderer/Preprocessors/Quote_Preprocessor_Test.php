@@ -8,12 +8,12 @@
 declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\Preprocessors;
 
-use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Quote_Text_Align_Preprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Quote_Preprocessor;
 
 /**
- * Unit test for Quote_Text_Align_Preprocessor
+ * Unit test for Quote_Preprocessor
  */
-class Quote_Text_Align_Preprocessor_Test extends \Email_Editor_Unit_Test {
+class Quote_Preprocessor_Test extends \Email_Editor_Unit_Test {
 
 	private const PARAGRAPH_BLOCK = array(
 		'blockName' => 'core/paragraph',
@@ -63,10 +63,52 @@ class Quote_Text_Align_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		),
 	);
 
+	private const QUOTE_BLOCK_WITH_CUSTOM_FONT_SIZE = array(
+		'blockName'   => 'core/quote',
+		'attrs'       => array(
+			'style' => array(
+				'typography' => array(
+					'fontSize' => '18px',
+				),
+			),
+		),
+		'innerBlocks' => array(
+			array(
+				'blockName' => 'core/paragraph',
+				'attrs'     => array(),
+				'innerHTML' => 'Quote content',
+			),
+		),
+	);
+
+	private const QUOTE_BLOCK_WITH_CHILD_FONT_SIZE = array(
+		'blockName'   => 'core/quote',
+		'attrs'       => array(
+			'style' => array(
+				'typography' => array(
+					'fontSize' => '18px',
+				),
+			),
+		),
+		'innerBlocks' => array(
+			array(
+				'blockName' => 'core/paragraph',
+				'attrs'     => array(
+					'style' => array(
+						'typography' => array(
+							'fontSize' => '16px',
+						),
+					),
+				),
+				'innerHTML' => 'Quote content',
+			),
+		),
+	);
+
 	/**
-	 * Instance of Quote_Text_Align_Preprocessor
+	 * Instance of Quote_Preprocessor
 	 *
-	 * @var Quote_Text_Align_Preprocessor
+	 * @var Quote_Preprocessor
 	 */
 	private $preprocessor;
 
@@ -89,7 +131,7 @@ class Quote_Text_Align_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
-		$this->preprocessor = new Quote_Text_Align_Preprocessor();
+		$this->preprocessor = new Quote_Preprocessor();
 		$this->layout       = array( 'contentSize' => '660px' );
 		$this->styles       = array(
 			'spacing' => array(
@@ -100,6 +142,13 @@ class Quote_Text_Align_Preprocessor_Test extends \Email_Editor_Unit_Test {
 					'bottom' => '10px',
 				),
 				'blockGap' => '10px',
+			),
+			'blocks'  => array(
+				'core/quote' => array(
+					'typography' => array(
+						'fontSize' => '20px',
+					),
+				),
 			),
 		);
 	}
@@ -183,5 +232,70 @@ class Quote_Text_Align_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
 
 		$this->assertEquals( 'left', $result[0]['innerBlocks'][0]['innerBlocks'][0]['attrs']['textAlign'] );
+	}
+
+	/**
+	 * Test it applies theme typography to quote children
+	 */
+	public function testItAppliesThemeTypographyToQuoteChildren(): void {
+		$blocks = array(
+			self::QUOTE_BLOCK_NO_TEXTALIGN,
+		);
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+
+		$this->assertEquals( '20px', $result[0]['innerBlocks'][0]['attrs']['style']['typography']['fontSize'] );
+	}
+
+	/**
+	 * Test it applies quote typography to children
+	 */
+	public function testItAppliesQuoteTypographyToChildren(): void {
+		$blocks = array(
+			self::QUOTE_BLOCK_WITH_CUSTOM_FONT_SIZE,
+		);
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+
+		$this->assertEquals( '18px', $result[0]['innerBlocks'][0]['attrs']['style']['typography']['fontSize'] );
+	}
+
+	/**
+	 * Test it preserves child typography when set
+	 */
+	public function testItPreservesChildTypographyWhenSet(): void {
+		$blocks = array(
+			self::QUOTE_BLOCK_WITH_CHILD_FONT_SIZE,
+		);
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+
+		$this->assertEquals( '16px', $result[0]['innerBlocks'][0]['attrs']['style']['typography']['fontSize'] );
+	}
+
+	/**
+	 * Test it merges theme and quote typography
+	 */
+	public function testItMergesThemeAndQuoteTypography(): void {
+		$blocks = array(
+			array(
+				'blockName'   => 'core/quote',
+				'attrs'       => array(
+					'style' => array(
+						'typography' => array(
+							'fontStyle' => 'italic',
+						),
+					),
+				),
+				'innerBlocks' => array(
+					array(
+						'blockName' => 'core/paragraph',
+						'attrs'     => array(),
+						'innerHTML' => 'Quote content',
+					),
+				),
+			),
+		);
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+
+		$this->assertEquals( '20px', $result[0]['innerBlocks'][0]['attrs']['style']['typography']['fontSize'] );
+		$this->assertEquals( 'italic', $result[0]['innerBlocks'][0]['attrs']['style']['typography']['fontStyle'] );
 	}
 }
