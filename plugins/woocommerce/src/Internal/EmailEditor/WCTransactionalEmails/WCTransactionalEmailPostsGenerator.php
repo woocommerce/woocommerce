@@ -250,7 +250,6 @@ class WCTransactionalEmailPostsGenerator {
 			'post_excerpt' => $email_data->get_description(),
 			'post_content' => $this->get_email_template( $email_data ),
 			'meta_input'   => array(
-				Integration::WC_EMAIL_TYPE_ID_POST_META_KEY => $email_type,
 				'_wp_page_template' => ( new WooEmailTemplate() )->get_slug(),
 			),
 		);
