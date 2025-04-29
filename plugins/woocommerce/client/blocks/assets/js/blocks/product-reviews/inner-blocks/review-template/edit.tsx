@@ -25,13 +25,13 @@ import {
  */
 import { useCommentQueryArgs, useCommentTree } from './hooks';
 
-interface EmptyComment {
+interface Comment {
 	commentId: number;
-	children: EmptyComment[];
+	children?: Comment[];
 }
 
 interface ReviewTemplateInnerBlocksProps {
-	comment: EmptyComment;
+	comment: Comment;
 	activeCommentId: number;
 	setActiveCommentId: ( id: number ) => void;
 	firstCommentId: number;
@@ -76,7 +76,7 @@ const getCommentsPlaceholder = ( {
 		? 1
 		: Math.min( threadCommentsDepth, 3 );
 
-	const buildChildrenComment = ( commentsLevel: number ): EmptyComment[] => {
+	const buildChildrenComment = ( commentsLevel: number ): Comment[] => {
 		// Render children comments until commentsDepth is reached
 		if ( commentsLevel < commentsDepth ) {
 			const nextLevel = commentsLevel + 1;
@@ -175,14 +175,11 @@ const ReviewTemplateInnerBlocks = memo( function ReviewTemplateInnerBlocks( {
 				}
 			/>
 
-			{ comment?.children?.length > 0 ? (
+			{ comment?.children && comment.children.length > 0 ? (
 				<ol>
 					{ comment.children.map(
 						(
-							{
-								commentId,
-								...childComment
-							}: { commentId: number; children: EmptyComment[] },
+							{ commentId, ...childComment }: Comment,
 							index: number
 						) => (
 							<BlockContextProvider
@@ -266,13 +263,13 @@ export default function CommentTemplateEdit( {
 					...( topLevelComments as Array< {
 						id: number;
 						// eslint-disable-next-line @typescript-eslint/naming-convention
-						_embedded?: { children?: unknown[] };
+						_embedded?: { children?: Array< { id: number } > };
 					} > ),
 			  ].reverse()
 			: ( topLevelComments as Array< {
 					id: number;
 					// eslint-disable-next-line @typescript-eslint/naming-convention
-					_embedded?: { children?: unknown[] };
+					_embedded?: { children?: Array< { id: number } > };
 			  } > )
 	);
 
@@ -309,7 +306,10 @@ export default function CommentTemplateEdit( {
 						{
 							commentId,
 							...commentData
-						}: { commentId: number; children: EmptyComment[] },
+						}: {
+							commentId: number;
+							children: Comment[];
+						},
 						index: number
 					) => (
 						<BlockContextProvider
