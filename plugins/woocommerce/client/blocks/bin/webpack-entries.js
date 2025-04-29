@@ -213,6 +213,9 @@ const blocks = {
 	'product-review-author-name': {
 		customDir: 'product-reviews/inner-blocks/review-author-name',
 	},
+	'product-reviews-pagination': {
+		customDir: 'product-reviews/inner-blocks/reviews-pagination',
+	},
 };
 
 /**
