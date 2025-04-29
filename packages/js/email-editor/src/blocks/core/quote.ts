@@ -5,9 +5,9 @@ import { addFilter } from '@wordpress/hooks';
 import { Block } from '@wordpress/blocks/index';
 
 /**
- * Remove the alignment control support for the Quote block.
+ * Remove the styles and alignment control support for the Quote block.
  */
-function disableQuoteAlignment() {
+function enhanceQuoteBlock() {
 	addFilter(
 		'blocks.registerBlockType',
 		'woocommerce-email-editor/change-quote',
@@ -15,6 +15,7 @@ function disableQuoteAlignment() {
 			if ( name === 'core/quote' ) {
 				return {
 					...settings,
+					styles: [],
 					supports: {
 						...settings.supports,
 						align: [],
@@ -26,4 +27,4 @@ function disableQuoteAlignment() {
 	);
 }
 
-export { disableQuoteAlignment };
+export { enhanceQuoteBlock };
