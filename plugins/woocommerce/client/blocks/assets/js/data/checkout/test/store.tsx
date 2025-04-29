@@ -15,10 +15,10 @@ const wait = ( timeout = 0 ) =>
 describe( 'Checkout store', () => {
 	describe( 'isCalculating', () => {
 		it( 'correctly infers isCalculating from number of calculating items', () => {
-			dispatch( store ).__internalIncrementCalculating();
+			dispatch( store ).__internalStartCalculation();
 			expect( select( store ).isCalculating() ).toBe( true );
 
-			dispatch( store ).__internalDecrementCalculating();
+			dispatch( store ).__internalFinishCalculation();
 			expect( select( store ).isCalculating() ).toBe( false );
 		} );
 

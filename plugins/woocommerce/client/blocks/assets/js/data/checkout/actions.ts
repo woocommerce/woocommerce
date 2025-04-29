@@ -71,20 +71,48 @@ export const __internalSetHasError = ( hasError = true ) => ( {
 } );
 
 /**
- * Used when any of the totals, taxes, shipping, etc need to be calculated, the `calculatingCount` will be increased
- * A `calculatingCount` of 0 means nothing is being updated.
+ * Signals the start of a singular calculation process for totals, taxes,
+ * shipping, etc. Increases the `calculatingCount` which tracks ongoing
+ * calculations. A `calculatingCount` of 0 means nothing is being updated.
  */
-export const __internalIncrementCalculating = () => ( {
+export const __internalStartCalculation = () => ( {
 	type: types.INCREMENT_CALCULATING,
 } );
 
 /**
- * When any of the totals, taxes, shipping, etc are done beign calculated, the `calculatingCount` will be decreased
- * A `calculatingCount` of 0 means nothing is being updated.
+ * Signals the completion of a singular calculation process for totals, taxes,
+ * shipping, etc. Increases the `calculatingCount` which tracks ongoing
+ * calculations. A `calculatingCount` of 0 means nothing is being updated.
  */
-export const __internalDecrementCalculating = () => ( {
+export const __internalFinishCalculation = () => ( {
 	type: types.DECREMENT_CALCULATING,
 } );
+
+/**
+ * @deprecated Use disableCheckoutFor thunk instead
+ */
+export const __internalIncrementCalculating = () => {
+	deprecated( '__internalIncrementCalculating', {
+		alternative: 'disableCheckoutFor',
+		plugin: 'WooCommerce',
+	} );
+	return {
+		type: types.INCREMENT_CALCULATING,
+	};
+};
+
+/**
+ * @deprecated Use disableCheckoutFor thunk instead
+ */
+export const __internalDecrementCalculating = () => {
+	deprecated( '__internalDecrementCalculating', {
+		alternative: 'disableCheckoutFor',
+		plugin: 'WooCommerce',
+	} );
+	return {
+		type: types.DECREMENT_CALCULATING,
+	};
+};
 
 /**
  * Set the customer id

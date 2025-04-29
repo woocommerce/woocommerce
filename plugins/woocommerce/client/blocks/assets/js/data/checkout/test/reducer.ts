@@ -141,11 +141,38 @@ describe.only( 'Checkout Store Reducer', () => {
 		};
 
 		expect(
-			reducer( defaultState, actions.__internalIncrementCalculating() )
+			reducer( defaultState, actions.__internalStartCalculation() )
 		).toEqual( expectedState );
 	} );
 
 	it( 'should handle DECREMENT_CALCULATING', () => {
+		const initialState = {
+			...defaultState,
+			calculatingCount: 1,
+		};
+
+		const expectedState = {
+			...defaultState,
+			calculatingCount: 0,
+		};
+
+		expect(
+			reducer( initialState, actions.__internalFinishCalculation() )
+		).toEqual( expectedState );
+	} );
+
+	it( 'should handle INCREMENT_CALCULATING using deprecated action', () => {
+		const expectedState = {
+			...defaultState,
+			calculatingCount: 1,
+		};
+
+		expect(
+			reducer( defaultState, actions.__internalIncrementCalculating() )
+		).toEqual( expectedState );
+	} );
+
+	it( 'should handle DECREMENT_CALCULATING using deprecated action', () => {
 		const initialState = {
 			...defaultState,
 			calculatingCount: 1,

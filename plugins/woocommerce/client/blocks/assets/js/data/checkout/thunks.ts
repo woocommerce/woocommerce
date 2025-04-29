@@ -184,13 +184,13 @@ export const updateDraftOrder = ( data: CheckoutPutData ) => {
 
 export const disableCheckoutFor = ( asyncFunc: () => Promise< unknown > ) => {
 	return async ( { dispatch }: CheckoutThunkArgs ) => {
-		dispatch.__internalIncrementCalculating();
+		dispatch.__internalStartCalculation();
 		try {
 			return await asyncFunc();
 			// No catch block here as we don't want to swallow any potential errors
 			// coming from asyncFunc.
 		} finally {
-			dispatch.__internalDecrementCalculating();
+			dispatch.__internalFinishCalculation();
 		}
 	};
 };

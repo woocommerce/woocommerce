@@ -65,13 +65,21 @@ The following actions can be dispatched from the Checkout data store:
 -   `__internalSrocessCheckoutResponse( response: CheckoutResponse )`: This is a thunk that will extract the paymentResult from the CheckoutResponse, and dispatch 3 actions: `__internalSetRedirectUrl`, `__internalSetPaymentResult` and `__internalSetAfterProcessing`.
 -   `__internalSetRedirectUrl( url: string )`: Set `state.redirectUrl` to `url`
 -   `__internalSetHasError( trueOrFalse: bool )`: Set `state.hasError` to `trueOrFalse`
--   `__internalIncrementCalculating()`: Increment `state.calculatingCount`
--   `__internalDecrementCalculating()`: Decrement `state.calculatingCount`
+-   `__internalStartCalculation`: Increment `state.calculatingCount`
+-   `__internalFinishCalculation`: Decrement `state.calculatingCount`
 -   `__internalSetCustomerId( id: number )`: Set `state.customerId` to `id`
 -   `__internalSetUseShippingAsBilling( useShippingAsBilling: boolean )`: Set `state.useShippingAsBilling` to `useShippingAsBilling`
 -   `__internalSetShouldCreateAccount( shouldCreateAccount: boolean )`: Set `state.shouldCreateAccount` to `shouldCreateAccount`
 -   `__internalSetOrderNotes( orderNotes: string )`: Set `state.orderNotes` to `orderNotes`
 -   `setExtensionData( namespace: string, extensionData: Record< string, unknown > )`: Set `state.extensionData` to `extensionData`
+
+##### Deprecated actions
+
+Please don't use actions listed below, instead relying on suggested alternatives.
+
+-   `__internalIncrementCalculating()`: Preferrably use `disableCheckoutFor` thunk, or `__internalStartCalculation` as a fallback
+-   `__internalDecrementCalculating()`: Preferrably use `disableCheckoutFor` thunk, or `__internalFinishCalculation` as a fallback
+-   `__internalSetExtensionData`: Use `setExtensionData` instead
 
 ## Contexts
 
