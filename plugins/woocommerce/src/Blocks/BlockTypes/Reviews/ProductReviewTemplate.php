@@ -2,7 +2,8 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes\Reviews;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
-
+use WP_Comment_Query;
+use WP_Block;
 /**
  * ProductReviewTemplate class.
  */
@@ -147,7 +148,7 @@ class ProductReviewTemplate extends AbstractBlock {
 		return sprintf(
 			'<ol %1$s>%2$s</ol>',
 			$wrapper_attributes,
-			block_product_review_template_render_comments( $comments, $block )
+			$this->block_product_review_template_render_comments( $comments, $block )
 		);
 	}
 }
