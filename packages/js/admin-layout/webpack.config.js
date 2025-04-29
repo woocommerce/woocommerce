@@ -1,19 +1,20 @@
 /**
  * Internal dependencies
  */
-const { webpackConfig } = require( '@woocommerce/internal-style-build' );
+const path = require('path');
+const { webpackConfig } = require('@woocommerce/internal-style-build');
 
 module.exports = {
 	mode: process.env.NODE_ENV || 'development',
 	entry: {
-		'build-style': __dirname + '/src/style.scss',
+		'build-style': path.resolve(__dirname, 'src/style.scss'),
 	},
 	output: {
 		path: __dirname,
 	},
 	module: {
-		parser: webpackConfig.parser,
 		rules: webpackConfig.rules,
+		parser: webpackConfig.parser,
 	},
 	plugins: webpackConfig.plugins,
 };
