@@ -116,7 +116,7 @@ const getCommentsPlaceholder = ( {
 	return placeholderComments;
 };
 
-const CommentTemplatePreview = ( {
+const ReviewTemplatePreview = ( {
 	blocks,
 	commentId,
 	setActiveCommentId,
@@ -146,7 +146,7 @@ const CommentTemplatePreview = ( {
 	);
 };
 
-const MemoizedCommentTemplatePreview = memo( CommentTemplatePreview );
+const MemoizedReviewTemplatePreview = memo( ReviewTemplatePreview );
 
 const ReviewTemplateInnerBlocks = memo( function ReviewTemplateInnerBlocks( {
 	comment,
@@ -166,7 +166,7 @@ const ReviewTemplateInnerBlocks = memo( function ReviewTemplateInnerBlocks( {
 				? children
 				: null }
 
-			<MemoizedCommentTemplatePreview
+			<MemoizedReviewTemplatePreview
 				blocks={ blocks }
 				commentId={ comment.commentId }
 				setActiveCommentId={ setActiveCommentId }
