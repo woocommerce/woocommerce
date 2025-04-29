@@ -32,12 +32,12 @@ jobs:
                   exempt-issue-labels: 'type: enhancement'
                   only-issue-labels: 'needs: author feedback'
                   close-issue-label: "status: can't reproduce"
-                  days-before-pr-stale: 7
-                  days-before-pr-close: 7
+                  days-before-pr-stale: 30
+                  days-before-pr-close: 14
                   stale-pr-label: 'status: stale'
                   only-pr-labels: 'needs: author feedback,type: community contribution'
-                  stale-pr-message: "As a part of this repository's maintenance, this PR is being marked as stale due to inactivity. Please feel free to comment on it in case we missed something.\n\n###### After 7 days with no activity this PR will be automatically closed."
-                  close-pr-message: 'This PR was closed because it has been 14 days with no activity.'
+                  stale-pr-message: "As a part of this repository's maintenance, this PR is being marked as stale due to inactivity. Please feel free to comment on it in case we missed something.\n\n###### After 30 days with no activity this PR will be automatically closed."
+                  close-pr-message: 'This PR was closed because it has been 1.5 months with no activity.'
                   delete-branch: true
                   ascending: true
             - name: Process stale flaky tests issues
