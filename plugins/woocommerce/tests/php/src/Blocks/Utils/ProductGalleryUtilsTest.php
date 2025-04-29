@@ -63,7 +63,7 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 		$variable_product->set_gallery_image_ids( $gallery_image_ids );
 		$variable_product->save();
 
-		$image_data = ProductGalleryUtils::get_product_gallery_image_data( $variable_product );
+		$image_data = ProductGalleryUtils::get_product_gallery_image_data( $variable_product, 'woocommerce_thumbnail' );
 
 		// Assert that $image_data is a non-empty array.
 		$this->assertIsArray( $image_data );
