@@ -31,20 +31,14 @@ class ProductReviewTemplate extends AbstractBlock {
 	 *
 	 * @since 6.3.0 Changed render_block_context priority to `1`.
 	 *
-	 * @global int $comment_depth
-	 *
 	 * @param WP_Comment[] $comments        The array of comments.
 	 * @param WP_Block     $block           Block instance.
+	 * @param int          $current_depth   Current depth of comments, defaults to 1.
 	 * @return string
 	 */
-	function block_product_review_template_render_comments( $comments, $block ) {
-		global $comment_depth;
+	protected function block_product_review_template_render_comments( $comments, $block, $current_depth = 1 ) {
 		$thread_comments       = get_option( 'thread_comments' );
 		$thread_comments_depth = get_option( 'thread_comments_depth' );
-
-		if ( empty( $comment_depth ) ) {
-			$comment_depth = 1;
-		}
 
 		$content = '';
 		foreach ( $comments as $comment ) {
@@ -88,18 +82,18 @@ class ProductReviewTemplate extends AbstractBlock {
 			// If the comment has children, recurse to create the HTML for the nested
 			// comments.
 			if ( ! empty( $children ) && ! empty( $thread_comments ) ) {
-				if ( $comment_depth < $thread_comments_depth ) {
-					++$comment_depth;
-					$inner_content  = block_product_review_template_render_comments(
+				if ( $current_depth < $thread_comments_depth ) {
+					$inner_content = $this->block_product_review_template_render_comments(
 						$children,
-						$block
+						$block,
+						$current_depth + 1
 					);
 					$block_content .= sprintf( '<ol>%1$s</ol>', $inner_content );
-					--$comment_depth;
 				} else {
-					$block_content .= block_product_review_template_render_comments(
+					$block_content .= $this->block_product_review_template_render_comments(
 						$children,
-						$block
+						$block,
+						$current_depth
 					);
 				}
 			}
