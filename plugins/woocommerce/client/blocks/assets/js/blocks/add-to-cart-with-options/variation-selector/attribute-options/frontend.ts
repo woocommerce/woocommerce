@@ -60,10 +60,6 @@ const isAttributeDisabled = ( {
 	selectedAttributes,
 	availableVariations,
 } ) => {
-	if ( ! selectedAttributes || selectedAttributes.length === 0 ) {
-		return false;
-	}
-
 	const isCurrentAttributeSelected = selectedAttributes.some(
 		( selectedAttribute ) => selectedAttribute.attribute === attributeName
 	);

@@ -39,7 +39,7 @@ class VariationSelectorItemTemplate extends AbstractBlock {
 		$product_attributes = $product->get_variation_attributes();
 
 		foreach ( $product_attributes as $product_attribute_name => $product_attribute_terms ) {
-			$content .= $this->get_product_row( $product_attribute_name, $product_attribute_terms, $attributes, $block );
+			$content .= $this->get_product_row( $product_attribute_name, $product_attribute_terms, $block );
 		}
 
 		return $content;
@@ -48,15 +48,31 @@ class VariationSelectorItemTemplate extends AbstractBlock {
 	/**
 	 * Get product row HTML.
 	 *
-	 * @param string   $product_attribute_name Product Attribute Name.
-	 * @param array    $product_attribute_terms Product Attribute Terms.
-	 * @param array    $attributes Block attributes.
+	 * @param string   $attribute_name Product Attribute Name.
+	 * @param array    $attribute_terms Product Attribute Terms.
 	 * @param WP_Block $block The Block.
 	 * @return string Row HTML
 	 */
-	private function get_product_row( $product_attribute_name, $product_attribute_terms, $attributes, $block ): string {
-		$attribute_name  = $product_attribute_name;
-		$attribute_terms = $this->get_terms( $product_attribute_name, $product_attribute_terms );
+	private function get_product_row( $attribute_name, $attribute_terms, $block ): string {
+		global $product;
+
+		$attribute_terms    = $this->get_terms( $attribute_name, $attribute_terms );
+		$product_variations = $product->get_available_variations();
+
+		// Filter out terms which are not available in the product variations.
+		$attribute_terms = array_filter(
+			$attribute_terms,
+			function ( $term ) use ( $product_variations, $attribute_name, $attribute_terms ) {
+				foreach ( $product_variations as $product_variation ) {
+					if (
+						$term['value'] === $product_variation['attributes'][ 'attribute_' . strtolower( $attribute_name ) ] ||
+						'' === $product_variation['attributes'][ 'attribute_' . strtolower( $attribute_name ) ]
+					) {
+						return true;
+					}
+				}
+			}
+		);
 
 		if ( empty( $attribute_terms ) ) {
 			return '';
