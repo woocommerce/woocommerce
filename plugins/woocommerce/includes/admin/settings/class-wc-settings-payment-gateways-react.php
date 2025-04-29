@@ -38,9 +38,9 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 		$sections = array(
 			self::MAIN_SECTION_NAME,
 			self::OFFLINE_SECTION_NAME,
-      self::COD_SECTION_NAME,
-      self::BACS_SECTION_NAME,
-      self::CHEQUE_SECTION_NAME,
+			self::COD_SECTION_NAME,
+			self::BACS_SECTION_NAME,
+			self::CHEQUE_SECTION_NAME,
 		);
 
 		/**
