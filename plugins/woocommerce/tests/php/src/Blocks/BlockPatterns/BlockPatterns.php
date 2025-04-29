@@ -58,6 +58,15 @@ class BlockPatterns extends \WP_UnitTestCase {
 	 * Tests if patterns are registered with the correct pattern data.
 	 */
 	public function test_block_patterns_registration() {
+
+		ob_start();
+		include __DIR__ . '/patterns/mock-header.php';
+		$mock_header_content = ob_get_clean();
+
+		ob_start();
+		include __DIR__ . '/patterns/mock-footer.php';
+		$mock_footer_content = ob_get_clean();
+
 		$this->pattern_registry
 			->expects( $this->exactly( 2 ) )
 			->method( 'register_block_pattern' )
@@ -76,6 +85,7 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-footer.php',
+						'content'       => $mock_footer_content,
 					),
 				),
 				array(
@@ -92,6 +102,7 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-header.php',
+						'content'       => $mock_header_content,
 					),
 				),
 			);
@@ -144,6 +155,14 @@ class BlockPatterns extends \WP_UnitTestCase {
 
 		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data );
 
+		ob_start();
+		include __DIR__ . '/patterns/mock-header.php';
+		$mock_header_content = ob_get_clean();
+
+		ob_start();
+		include __DIR__ . '/patterns/mock-footer.php';
+		$mock_footer_content = ob_get_clean();
+
 		$this->pattern_registry
 			->expects( $this->exactly( 2 ) )
 			->method( 'register_block_pattern' )
@@ -162,6 +181,7 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-footer.php',
+						'content'       => $mock_footer_content,
 					),
 				),
 				array(
@@ -178,6 +198,7 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-header.php',
+						'content'       => $mock_header_content,
 					),
 				),
 			);
