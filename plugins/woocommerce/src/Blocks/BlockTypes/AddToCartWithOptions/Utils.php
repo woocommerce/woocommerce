@@ -132,4 +132,32 @@ class Utils {
 	public static function is_not_purchasable_simple_product( $product ) {
 		return ProductType::SIMPLE === $product->get_type() && ( ! $product->is_in_stock() || ! $product->is_purchasable() );
 	}
+
+	/**
+	 * Get the normalized version of the attributes.
+	 *
+	 * @param array $attributes         The element's attributes.
+	 * @param array $default_attributes The element's default attributes.
+	 * @return string The HTML element's attributes.
+	 */
+	public static function get_normalized_attributes( $attributes, $default_attributes = array() ) {
+		$normalized_attributes = array();
+
+		$merged_attributes = array_merge( $default_attributes, $attributes );
+
+		foreach ( $merged_attributes as $key => $value ) {
+			if ( is_null( $value ) ) {
+				continue;
+			}
+			if ( is_array( $value ) || is_object( $value ) ) {
+				$value = wp_json_encode(
+					$value,
+					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+				);
+			}
+			$normalized_attributes[] = sprintf( '%s="%s"', esc_attr( $key ), esc_attr( $value ) );
+		}
+
+		return implode( ' ', $normalized_attributes );
+	}
 }

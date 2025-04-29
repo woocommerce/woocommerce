@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 
 /**
  * Block type for variation selector attribute options in add to cart with options.
@@ -85,34 +86,6 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	}
 
 	/**
-	 * Get the normalized version of the attributes.
-	 *
-	 * @param array $attributes         The element's attributes.
-	 * @param array $default_attributes The element's default attributes.
-	 * @return string The HTML element's attributes.
-	 */
-	protected function get_normalized_attributes( $attributes, $default_attributes = array() ) {
-		$normalized_attributes = array();
-
-		$merged_attributes = array_merge( $default_attributes, $attributes );
-
-		foreach ( $merged_attributes as $key => $value ) {
-			if ( is_null( $value ) ) {
-				continue;
-			}
-			if ( is_array( $value ) || is_object( $value ) ) {
-				$value = wp_json_encode(
-					$value,
-					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-				);
-			}
-			$normalized_attributes[] = sprintf( '%s="%s"', esc_attr( $key ), esc_attr( $value ) );
-		}
-
-		return implode( ' ', $normalized_attributes );
-	}
-
-	/**
 	 * Get the default selected attribute.
 	 *
 	 * @param array $attribute_terms The attribute's.
@@ -145,7 +118,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 		foreach ( $attribute_terms as $attribute_term ) {
 			$pills .= sprintf(
 				'<div %s>%s</div>',
-				$this->get_normalized_attributes(
+				Utils::get_normalized_attributes(
 					array(
 						'role'                       => 'radio',
 						'class'                      => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill',
@@ -165,7 +138,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 
 		return sprintf(
 			'<div %s>%s</div>',
-			$this->get_normalized_attributes(
+			Utils::get_normalized_attributes(
 				array(
 					'class'               => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills',
 					'role'                => 'radiogroup',
@@ -212,7 +185,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 		foreach ( $attribute_terms as $attribute_term ) {
 			$options .= sprintf(
 				'<option %s>%s</option>',
-				$this->get_normalized_attributes(
+				Utils::get_normalized_attributes(
 					array(
 						'value'           => $attribute_term['value'],
 						'selected'        => $attribute_term['isSelected'] ? 'selected' : null,
@@ -227,7 +200,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 
 		return sprintf(
 			'<select %s>%s</select>',
-			$this->get_normalized_attributes(
+			Utils::get_normalized_attributes(
 				array(
 					'class'               => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown',
 					'id'                  => $attribute_id,
