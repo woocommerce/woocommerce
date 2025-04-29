@@ -204,6 +204,15 @@ const blocks = {
 	'product-review-form': {
 		customDir: 'product-reviews/inner-blocks/review-form',
 	},
+	'product-review-date': {
+		customDir: 'product-reviews/inner-blocks/review-date',
+	},
+	'product-review-content': {
+		customDir: 'product-reviews/inner-blocks/review-content',
+	},
+	'product-review-author-name': {
+		customDir: 'product-reviews/inner-blocks/review-author-name',
+	},
 	'product-review-template': {
 		customDir: 'product-reviews/inner-blocks/review-template',
 	},
@@ -211,6 +220,7 @@ const blocks = {
 
 /**
  * Blocks that are generic and will likely be pushed up to Gutenberg or a public block registry.
+ * Keep in sync with the generic_blocks array in copy-blocks-json.sh
  */
 const genericBlocks = {
 	'accordion-group': {
