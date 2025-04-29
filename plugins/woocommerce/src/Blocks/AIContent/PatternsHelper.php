@@ -2,13 +2,10 @@
 
 namespace Automattic\WooCommerce\Blocks\AIContent;
 
-use WP_Error;
-
 /**
  * Patterns Helper class.
  *
  * @internal
- * @deprecated
+ * @deprecated This class can't be removed due https://github.com/woocommerce/woocommerce/issues/52311.
  */
-class PatternsHelper {
-}
+class PatternsHelper {}

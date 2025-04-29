@@ -2,16 +2,12 @@
 
 namespace Automattic\WooCommerce\Blocks\AIContent;
 
-use Automattic\WooCommerce\Blocks\AI\Connection;
-use Automattic\WooCommerce\Blocks\Images\Pexels;
-use WP_Error;
-
 /**
  * ContentProcessor class.
  *
  * Process images for content
  *
  * @internal
- * @deprecated
+ * @deprecated This class can't be removed due https://github.com/woocommerce/woocommerce/issues/52311.
  */
 class ContentProcessor {}
