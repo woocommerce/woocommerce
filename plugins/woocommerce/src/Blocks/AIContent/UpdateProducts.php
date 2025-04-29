@@ -115,9 +115,6 @@ class UpdateProducts {
 	 * @return bool
 	 */
 	public function should_update_dummy_product( $dummy_product ): bool {
-		$current_product_hash     = $this->get_hash_for_product( $dummy_product );
-		$ai_modified_product_hash = $this->get_hash_for_ai_modified_product( $dummy_product );
-
 		$date_created  = $dummy_product->get_date_created();
 		$date_modified = $dummy_product->get_date_modified();
 
@@ -135,7 +132,7 @@ class UpdateProducts {
 		$dummy_product_recently_modified = abs( $timestamp_current - $timestamp_modified ) < 10;
 		$dummy_product_not_modified      = abs( $timestamp_modified - $timestamp_created ) < 60;
 
-		if ( $current_product_hash === $ai_modified_product_hash || $dummy_product_not_modified || $dummy_product_recently_modified ) {
+		if ( $dummy_product_not_modified || $dummy_product_recently_modified ) {
 			return true;
 		}
 
