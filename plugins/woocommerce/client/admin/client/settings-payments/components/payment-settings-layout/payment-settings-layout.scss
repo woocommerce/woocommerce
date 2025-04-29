@@ -1,22 +1,22 @@
 .payment-settings-layout {
-  margin: 24px auto 0;
-  max-width: 1032px;
-  display: flex;
-  flex-flow: column;
+	margin: 24px auto 0;
+	max-width: 1032px;
+	display: flex;
+	flex-flow: column;
 
-  // TODO: Add mobile styling (row instead of column).
-  @include breakpoint( '>960px' ) {
-    padding: 0 56px;
-  }
+	// TODO: Add mobile styling (row instead of column).
+	@include breakpoint( '>960px' ) {
+		padding: 0 56px;
+	}
 
-  // Styling for the form actions in the payment settings section.
-  .form__actions {
-    display: flex;
-    flex-direction: row-reverse;
-  }
+	// Styling for the form actions in the payment settings section.
+	.form__actions {
+		display: flex;
+		flex-direction: row-reverse;
+	}
 
-  // Fix to remove box shadow from settings cards.
-  .payment-settings-card__wrapper {
-    box-shadow: none;
-  }
+	// Fix to remove box shadow from settings cards.
+	.payment-settings-card__wrapper {
+		box-shadow: none;
+	}
 }
