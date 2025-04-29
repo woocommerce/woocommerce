@@ -99,7 +99,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	/**
 	 * Get the main images html code. The first element of the array contains the HTML of the first image that is visible, the second element contains the HTML of the other images that are hidden.
 	 *
-	 * @param array $context The block context.
+	 * @param array       $context The block context.
 	 * @param \WC_Product $product The product object.
 	 *
 	 * @return array
