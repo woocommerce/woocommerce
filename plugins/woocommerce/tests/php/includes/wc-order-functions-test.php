@@ -191,7 +191,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	public function test_get_total_refunded_for_item() {
 		// Create a product.
 		$product = WC_Helper_Product::create_simple_product();
-		$product->set_regular_price( 100 );
+		$product->set_regular_price( 99.99 );
 		$product->save();
 
 		// Create an order with the product.
@@ -201,7 +201,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 			array(
 				'product'  => $product,
 				'quantity' => 2,
-				'total'    => 200,
+				'total'    => 199.98,
 			)
 		);
 		$order->add_item( $item );
@@ -219,34 +219,34 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		wc_create_refund(
 			array(
 				'order_id'   => $order->get_id(),
-				'amount'     => 50,
+				'amount'     => 49.99,
 				'line_items' => array(
 					$item_id => array(
 						'qty'          => 0.5,
-						'refund_total' => 50,
+						'refund_total' => 49.99,
 					),
 				),
 			)
 		);
 
 		// Verify the refunded amount for the item after first refund.
-		$this->assertEquals( 50, $order->get_total_refunded_for_item( $item_id ) );
+		$this->assertEquals( 49.99, $order->get_total_refunded_for_item( $item_id ) );
 
 		// Create second partial refund for remaining amount.
 		wc_create_refund(
 			array(
 				'order_id'   => $order->get_id(),
-				'amount'     => 150,
+				'amount'     => 149.99,
 				'line_items' => array(
 					$item_id => array(
 						'qty'          => 1.5,
-						'refund_total' => 150,
+						'refund_total' => 149.99,
 					),
 				),
 			)
 		);
 
 		// Verify the total refunded amount for the item after both refunds.
-		$this->assertEquals( 200, $order->get_total_refunded_for_item( $item_id ) );
+		$this->assertEquals( 199.98, $order->get_total_refunded_for_item( $item_id ) );
 	}
 }
