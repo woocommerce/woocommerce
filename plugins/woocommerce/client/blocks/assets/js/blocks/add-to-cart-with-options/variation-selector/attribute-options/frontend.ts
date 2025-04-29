@@ -306,7 +306,7 @@ store(
 			get isOptionDisabled() {
 				const { name, option } = getContext< PillsContext >();
 				if ( option.value === '' ) {
-					return true;
+					return false;
 				}
 				const { variation, availableVariations } =
 					getContext< AddToCartWithOptionsStoreContext >(
