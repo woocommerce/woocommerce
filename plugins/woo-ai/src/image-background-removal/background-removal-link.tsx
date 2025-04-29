@@ -14,7 +14,7 @@ import { useDispatch, select } from '@wordpress/data';
  */
 import MagicIcon from '../../assets/images/icons/magic.svg';
 import { FILENAME_APPEND, LINK_CONTAINER_ID } from './constants';
-import { useFeedbackSnackbar } from '../hooks';
+import { useDeprecationNotice } from '../hooks';
 import { recordTracksFactory, getPostId, getProductImageCount } from '../utils';
 import {
 	uploadImageToLibrary,
@@ -47,7 +47,7 @@ const recordBgRemovalTracks = recordTracksFactory(
 
 export const BackgroundRemovalLink = () => {
 	const { fetchImage } = useBackgroundRemoval();
-	const { showSnackbar, removeSnackbar } = useFeedbackSnackbar();
+	const { showDeprecationNotice } = useDeprecationNotice();
 	const hasBeenDismissedBefore = select( preferencesStore ).get(
 		'woo-ai-plugin',
 		preferenceId
@@ -67,9 +67,10 @@ export const BackgroundRemovalLink = () => {
 		set( 'woo-ai-plugin', preferenceId, true );
 
 	const onRemoveBackgroundClick = async () => {
-		removeSnackbar();
 		try {
 			recordBgRemovalTracks( 'click' );
+
+			showDeprecationNotice();
 
 			setState( 'generating' );
 
@@ -103,19 +104,6 @@ export const BackgroundRemovalLink = () => {
 			recordBgRemovalTracks( 'complete' );
 
 			setSpotlightAsDismissed();
-			showSnackbar( {
-				label: __( 'Was the generated image helpful?', 'woocommerce' ),
-				onPositiveResponse: () => {
-					recordBgRemovalTracks( 'feedback', {
-						response: 'positive',
-					} );
-				},
-				onNegativeResponse: () => {
-					recordBgRemovalTracks( 'feedback', {
-						response: 'negative',
-					} );
-				},
-			} );
 		} catch ( err ) {
 			//eslint-disable-next-line no-console
 			console.error( err );

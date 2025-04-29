@@ -17,43 +17,49 @@ class Woo_AI_Deprecation_Notice {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-		add_action( 'admin_notices', array( $this, 'display_deprecation_notice' ) );
-		add_action( 'wp_ajax_woo_ai_track_deprecation', array( $this, 'track_deprecation_usage_interaction' ) );
+		add_action( 'admin_footer', array( $this, 'output_deprecation_notice_data' ) );
+
+		// Register AJAX actions
 		add_action( 'wp_ajax_woo_ai_dismiss_deprecation', array( $this, 'dismiss_notice' ) );
+
+		// Check for reset query parameter for testing purposes
+		// TODO: Remove this before merging
+		if ( isset( $_GET['reset_woo_ai_notice'] ) && current_user_can( 'manage_options' ) ) {
+			delete_option( 'woo_ai_deprecation_dismissed' );
+			$current_url = remove_query_arg( 'reset_woo_ai_notice', $_SERVER['REQUEST_URI'] );
+			wp_safe_redirect( $current_url );
+			exit;
+		}
 	}
 
 	/**
-	 * Enqueue necessary scripts
+	 * Output deprecation notice data directly to the page
+	 * This is used to pass the nonce and dismissed state to the frontend.
 	 */
-	public function enqueue_scripts() {
-		if ( ! $this->should_enqueue_scripts() ) {
+	public function output_deprecation_notice_data() {
+		if ( ! $this->should_output_data() ) {
 			return;
 		}
 
-		wp_enqueue_script(
-			'woo-ai-deprecation-tracker',
-			plugins_url( 'assets/js/admin/track-deprecation.js', WOO_AI_FILE ),
-			array( 'jquery' ),
-			filemtime( plugin_dir_path( WOO_AI_FILE ) . 'assets/js/admin/track-deprecation.js' ),
-			true
+		$data = array(
+			'nonce' => wp_create_nonce( 'woo_ai_tracker' ),
+			'dismissed' => (bool) get_option( 'woo_ai_deprecation_dismissed', false ),
+			'ajaxurl' => admin_url( 'admin-ajax.php' ),
 		);
 
-		wp_localize_script(
-			'woo-ai-deprecation-tracker',
-			'wooAITracker',
-			array(
-				'nonce' => wp_create_nonce( 'woo_ai_tracker' ),
-			)
-		);
+		?>
+		<script type="text/javascript">
+			window.wooAITracker = <?php echo wp_json_encode( $data ); ?>;
+		</script>
+		<?php
 	}
 
 	/**
-	 * Check if usage tracking scripts should be enqueued, only on the product screen
+	 * Check if deprecation notice data should be output, only on the product screen
 	 *
 	 * @return bool
 	 */
-	private function should_enqueue_scripts() {
+	private function should_output_data() {
 		$screen = get_current_screen();
 		if ( ! $screen ) {
 			return false;
@@ -63,47 +69,19 @@ class Woo_AI_Deprecation_Notice {
 	}
 
 	/**
-	 * Display the deprecation notice: only show if the user has interacted with the plugin, and the notice has not been dismissed.
-	 */
-	public function display_deprecation_notice() {
-		if ( ! get_option( 'woo_ai_show_deprecation_notice', false ) || get_option( 'woo_ai_deprecation_dismissed', false ) ) {
-			return;
-		}
-
-		?>
-		<div class="notice notice-info is-dismissible woo-ai-deprecation-notice">
-			<p>
-				<?php
-				echo wp_kses_post(
-					sprintf(
-						/* translators: %1$s: Opening link tag, %2$s: Closing link tag */
-						__( 'Notice: The WooCommerce AI plugin is being deprecated. %1$sLearn more%2$s.', 'woo-ai' ),
-						'<a href="https://wordpress.com/contact" target="_blank" rel="noopener noreferrer">',
-						'</a>'
-					)
-				);
-				?>
-			</p>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Ajax handler for tracking deprecation notice state
-	 * This means the user has interacted with the plugin in some way, so we should show the notice to them.
-	 */
-	public function track_deprecation_usage_interaction() {
-		check_ajax_referer( 'woo_ai_tracker', 'nonce' );
-		update_option( 'woo_ai_show_deprecation_notice', true );
-		wp_send_json_success();
-	}
-
-	/**
 	 * Ajax handler for dismissing the notice
 	 * This means the user has dismissed the notice, so we should not show it to them again.
 	 */
 	public function dismiss_notice() {
-		check_ajax_referer( 'woo_ai_tracker', 'nonce' );
+		// Get the nonce from POST data
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
+
+		// Verify the nonce
+		if ( ! wp_verify_nonce( $nonce, 'woo_ai_tracker' ) ) {
+			wp_send_json_error( array( 'message' => 'Invalid nonce' ), 403 );
+			return;
+		}
+
 		update_option( 'woo_ai_deprecation_dismissed', true );
 		wp_send_json_success();
 	}
