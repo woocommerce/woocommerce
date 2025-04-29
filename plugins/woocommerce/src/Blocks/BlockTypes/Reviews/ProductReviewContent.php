@@ -56,7 +56,7 @@ class ProductReviewContent extends AbstractBlock {
 			} else {
 				$moderation_note = __( 'Your review is awaiting moderation. This is a preview; your review will be visible after it has been approved.', 'woocommerce' );
 			}
-			$moderation_note = '<p><em class="review-awaiting-moderation">' . $moderation_note . '</em></p>';
+			$moderation_note = '<p><em class="review-awaiting-moderation">' . esc_html( $moderation_note ) . '</em></p>';
 			if ( ! $show_pending_links ) {
 				$comment_text = wp_kses( $comment_text, array() );
 			}
