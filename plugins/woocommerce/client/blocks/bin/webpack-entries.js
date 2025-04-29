@@ -216,6 +216,9 @@ const blocks = {
 	'product-reviews-pagination': {
 		customDir: 'product-reviews/inner-blocks/reviews-pagination',
 	},
+	'product-reviews-pagination-next': {
+		customDir: 'product-reviews/inner-blocks/reviews-pagination-next',
+	},
 };
 
 /**

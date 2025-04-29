@@ -553,6 +553,7 @@ final class BlockTypesController {
 			$block_types[] = 'Reviews\ProductReviewContent';
 			$block_types[] = 'Reviews\ProductReviewAuthorName';
 			$block_types[] = 'Reviews\ProductReviewsPagination';
+			$block_types[] = 'Reviews\ProductReviewsPaginationNext';
 		}
 
 		/**
