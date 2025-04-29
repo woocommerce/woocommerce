@@ -31,7 +31,8 @@ class WooPaymentsService {
 	const ACTION_TYPE_REST     = 'REST';
 	const ACTION_TYPE_REDIRECT = 'REDIRECT';
 
-	const NOX_PROFILE_OPTION_KEY = 'woocommerce_woopayments_nox_profile';
+	const NOX_PROFILE_OPTION_KEY    = 'woocommerce_woopayments_nox_profile';
+	const NOX_ONBOARDING_LOCKED_KEY = 'woocommerce_woopayments_nox_onboarding_locked';
 
 	const FROM_PAYMENT_SETTINGS = 'WCADMIN_PAYMENT_SETTINGS';
 	const FROM_NOX_IN_CONTEXT   = 'WCADMIN_NOX_IN_CONTEXT';
@@ -659,6 +660,98 @@ class WooPaymentsService {
 		$this->set_onboarding_step_completed( self::ONBOARDING_STEP_PAYMENT_METHODS, $location );
 
 		return $response;
+	}
+
+	/**
+	 * Check if an onboarding action should be allowed to be processed.
+	 *
+	 * @return void
+	 * @throws ApiException If the extension is not active or onboarding is locked.
+	 */
+	private function check_if_onboarding_action_is_acceptable() {
+		// If the WooPayments plugin is not active, we can't do anything.
+		if ( ! $this->is_extension_active() ) {
+			throw new ApiException(
+				'woocommerce_woopayments_onboarding_extension_not_active',
+				/* translators: %s: WooPayments. */
+				sprintf( esc_html__( 'The %s extension is not active.', 'woocommerce' ), 'WooPayments' ),
+				(int) WP_Http::FORBIDDEN
+			);
+		}
+
+		// If the onboarding is locked, we shouldn't do anything.
+		if ( $this->is_onboarding_locked() ) {
+			throw new ApiException(
+				'woocommerce_woopayments_onboarding_locked',
+				esc_html__( 'Another onboarding action is already in progress. Please wait for it to finish.', 'woocommerce' ),
+				(int) WP_Http::CONFLICT
+			);
+		}
+	}
+
+	/**
+	 * Check if an onboarding step action should be allowed to be processed.
+	 *
+	 * @param string $step_id The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return void
+	 * @throws ApiArgumentException If the onboarding step ID is invalid.
+	 * @throws ApiException If the extension is not active or step requirements are not met.
+	 */
+	private function check_if_onboarding_step_action_is_acceptable( string $step_id, string $location ): void {
+		// First, check general onboarding actions.
+		$this->check_if_onboarding_action_is_acceptable();
+
+		// Second, do onboarding step specific checks.
+		if ( ! $this->is_valid_onboarding_step_id( $step_id ) ) {
+			throw new ApiArgumentException(
+				'woocommerce_woopayments_onboarding_invalid_step_id',
+				esc_html__( 'Invalid onboarding step ID.', 'woocommerce' ),
+				(int) WP_Http::BAD_REQUEST
+			);
+		}
+		if ( ! $this->check_onboarding_step_requirements( $step_id, $location ) ) {
+			throw new ApiException(
+				'woocommerce_woopayments_onboarding_step_requirements_not_met',
+				esc_html__( 'Onboarding step requirements are not met.', 'woocommerce' ),
+				(int) WP_Http::FORBIDDEN
+			);
+		}
+	}
+
+	/**
+	 * Check if the onboarding is locked.
+	 *
+	 * @return bool Whether the onboarding is locked.
+	 */
+	private function is_onboarding_locked(): bool {
+		return 'yes' === $this->proxy->call_function( 'get_option', self::NOX_ONBOARDING_LOCKED_KEY, 'no' );
+	}
+
+	/**
+	 * Lock the onboarding.
+	 *
+	 * This will save a flag in the database to indicate that onboarding is locked.
+	 * This is used to prevent certain onboarding actions to happen while others have not finished.
+	 * This is especially important for actions that modify the account (initializing it, deleting it, etc.)
+	 * These actions tend to be longer-running and we want to have backstops in place to prevent race conditions.
+	 *
+	 * @return void
+	 */
+	private function set_onboarding_lock(): void {
+		$this->proxy->call_function( 'update_option', self::NOX_ONBOARDING_LOCKED_KEY, 'yes' );
+	}
+
+	/**
+	 * Unlock the onboarding.
+	 *
+	 * @return void
+	 */
+	private function clear_onboarding_lock(): void {
+		// We update rather than delete the option for performance reasons.
+		$this->proxy->call_function( 'update_option', self::NOX_ONBOARDING_LOCKED_KEY, 'no' );
 	}
 
 	/**
