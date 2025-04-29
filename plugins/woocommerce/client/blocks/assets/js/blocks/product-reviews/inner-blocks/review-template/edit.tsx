@@ -5,6 +5,8 @@ import { useState, memo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { BlockInstance, BlockEditProps } from '@wordpress/blocks';
+import { Spinner } from '@wordpress/components';
+import { store as coreStore } from '@wordpress/core-data';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -17,11 +19,6 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalUseBlockPreview as useBlockPreview,
 } from '@wordpress/block-editor';
-// It doesn't seem to notice the External dependency block when @ts-ignore is added.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { Spinner } from '@wordpress/components';
-// eslint-disable-next-line @woocommerce/dependency-group
-import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -54,9 +51,9 @@ type ReviewTemplateAttributes = {
 
 const TEMPLATE = [
 	[ 'core/avatar' ],
-	[ 'core/comment-author-name' ],
-	[ 'core/comment-date' ],
-	[ 'core/comment-content' ],
+	[ 'woocommerce/product-review-author-name' ],
+	[ 'woocommerce/product-review-date' ],
+	[ 'woocommerce/product-review-content' ],
 	[ 'core/comment-reply-link' ],
 	[ 'core/comment-edit-link' ],
 ];
@@ -68,22 +65,6 @@ interface ReviewSettings {
 	threadCommentsDepth: number;
 }
 
-/**
- * Function that returns a review structure that will be rendered with default placehoders.
- *
- * Each review has a `reviewId` property that is always a negative number in
- * case of the placeholders. This is to ensure that the review does not
- * conflict with the actual (real) reviews.
- *
- * @param {Object}  settings                       Review Settings.
- * @param {number}  [settings.perPage]             - Reviews per page setting or block attribute.
- * @param {boolean} [settings.pageComments]        - Enable break reviews into pages setting.
- * @param {boolean} [settings.threadComments]      - Enable threaded (nested) reviews setting.
- * @param {number}  [settings.threadCommentsDepth] - Level deep of threaded reviews.
- *
- * @typedef {{id: null, children: EmptyComment[]}} EmptyComment
- * @return {EmptyComment[]}                 		Inner blocks of the Review Template
- */
 const getCommentsPlaceholder = ( {
 	perPage,
 	pageComments,
