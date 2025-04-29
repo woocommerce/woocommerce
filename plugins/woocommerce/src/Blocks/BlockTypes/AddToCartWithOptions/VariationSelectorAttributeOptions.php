@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
-use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 
 /**
  * Block type for variation selector attribute options in add to cart with options.
@@ -118,7 +118,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 		foreach ( $attribute_terms as $attribute_term ) {
 			$pills .= sprintf(
 				'<div %s>%s</div>',
-				Utils::get_normalized_attributes(
+				AddToCartWithOptionsUtils::get_normalized_attributes(
 					array(
 						'role'                       => 'radio',
 						'class'                      => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill',
@@ -138,7 +138,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 
 		return sprintf(
 			'<div %s>%s</div>',
-			Utils::get_normalized_attributes(
+			AddToCartWithOptionsUtils::get_normalized_attributes(
 				array(
 					'class'               => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills',
 					'role'                => 'radiogroup',
@@ -185,7 +185,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 		foreach ( $attribute_terms as $attribute_term ) {
 			$options .= sprintf(
 				'<option %s>%s</option>',
-				Utils::get_normalized_attributes(
+				AddToCartWithOptionsUtils::get_normalized_attributes(
 					array(
 						'value'           => $attribute_term['value'],
 						'selected'        => $attribute_term['isSelected'] ? 'selected' : null,
@@ -200,7 +200,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 
 		return sprintf(
 			'<select %s>%s</select>',
-			Utils::get_normalized_attributes(
+			AddToCartWithOptionsUtils::get_normalized_attributes(
 				array(
 					'class'               => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown',
 					'id'                  => $attribute_id,
