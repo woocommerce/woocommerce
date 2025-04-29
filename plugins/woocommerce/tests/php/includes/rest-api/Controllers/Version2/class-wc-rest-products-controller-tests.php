@@ -326,32 +326,32 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	 */
 	public function data_provider_for_test_search_by_sku_or_name() {
 		return array(
-			// search_sku_or_name alone.
+			// search_name_or_sku alone.
 
 			array(
-				array( 'search_sku_or_name' => 'shi blu' ),
+				array( 'search_name_or_sku' => 'shi blu' ),
 				array( 'ebs', 'cbs', 'Elegant blue shirt', 'Casual blue shirt' ),
 			),
 
-			// search_sku_or_name supersedes search, search_sku and sku.
+			// search_name_or_sku supersedes search, search_sku and sku.
 
 			array(
 				array(
-					'search_sku_or_name' => 'shi blu',
+					'search_name_or_sku' => 'shi blu',
 					'search'             => 'red',
 				),
 				array( 'ebs', 'cbs', 'Elegant blue shirt', 'Casual blue shirt' ),
 			),
 			array(
 				array(
-					'search_sku_or_name' => 'shi blu',
+					'search_name_or_sku' => 'shi blu',
 					'search_sku'         => 'the',
 				),
 				array( 'ebs', 'cbs', 'Elegant blue shirt', 'Casual blue shirt' ),
 			),
 			array(
 				array(
-					'search_sku_or_name' => 'shi blu',
+					'search_name_or_sku' => 'shi blu',
 					'sku'                => 'thesku1',
 				),
 				array( 'ebs', 'cbs', 'Elegant blue shirt', 'Casual blue shirt' ),

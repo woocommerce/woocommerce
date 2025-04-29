@@ -45,12 +45,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	private $search_sku_arg_value = '';
 
 	/**
-	 * If the 'search_sku_or_name' argument is present this will be set
+	 * If the 'search_name_or_sku' argument is present this will be set
 	 * to an array of the (space-separated) tokens that form the argument value.
 	 *
 	 * @var array|null
 	 */
-	private $search_sku_or_name_tokens = null;
+	private $search_name_or_sku_tokens = null;
 
 	/**
 	 * Suggested product ids.
@@ -304,12 +304,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			);
 		}
 
-		$search_sku_or_name_arg = $request['search_sku_or_name'] ?? '';
+		$search_name_or_sku_arg = $request['search_name_or_sku'] ?? '';
 
-		if ( '' !== $search_sku_or_name_arg ) {
+		if ( '' !== $search_name_or_sku_arg ) {
 			// Do a tokenized search for name or SKU. Supersedes the 'search', 'search_sku' and 'sku' arguments.
-			$tokens                          = array_filter( array_map( 'trim', explode( ' ', $search_sku_or_name_arg ) ) );
-			$this->search_sku_or_name_tokens = array_map( 'esc_sql', $tokens );
+			$tokens                          = array_filter( array_map( 'trim', explode( ' ', $search_name_or_sku_arg ) ) );
+			$this->search_name_or_sku_tokens = array_map( 'esc_sql', $tokens );
 
 			unset( $request['search'] );
 			unset( $args['s'] );
@@ -394,7 +394,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
-		if ( ! empty( $request['sku'] ) || ! empty( $request['search_sku'] ) || $this->search_sku_or_name_tokens ) {
+		if ( ! empty( $request['sku'] ) || ! empty( $request['search_sku'] ) || $this->search_name_or_sku_tokens ) {
 			$args['post_type'] = array( 'product', 'product_variation' );
 		} else {
 			$args['post_type'] = $this->post_type;
@@ -431,7 +431,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return array
 	 */
 	protected function get_objects( $query_args ) {
-		$add_search_criteria = $this->search_sku_arg_value || $this->search_sku_or_name_tokens;
+		$add_search_criteria = $this->search_sku_arg_value || $this->search_name_or_sku_tokens;
 
 		// Add filters for search criteria in product postmeta via the lookup table.
 		if ( $add_search_criteria ) {
@@ -471,7 +471,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return string
 	 */
 	public function add_search_criteria_to_wp_query_join( $join ) {
-		if ( $this->search_sku_or_name_tokens ) {
+		if ( $this->search_name_or_sku_tokens ) {
 			if ( ! wc_product_sku_enabled() ) {
 				// The argument is effectively a tokenized name search: we don't need to join the meta lookup table.
 				return $join;
@@ -497,11 +497,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	public function add_search_criteria_to_wp_query_where( $where ) {
 		global $wpdb;
 
-		if ( $this->search_sku_or_name_tokens ) {
+		if ( $this->search_name_or_sku_tokens ) {
 			$use_sku                  = wc_product_sku_enabled();
 			$posts_clause_parts       = array();
 			$meta_lookup_clause_parts = array();
-			foreach ( $this->search_sku_or_name_tokens as $token ) {
+			foreach ( $this->search_name_or_sku_tokens as $token ) {
 				$like_search          = '%' . $wpdb->esc_like( $token ) . '%';
 				$posts_clause_parts[] = $wpdb->prepare( "($wpdb->posts.post_title LIKE %s)", $like_search );
 				if ( $use_sku ) {
@@ -1777,7 +1777,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
-		$params['search_sku_or_name'] = array(
+		$params['search_name_or_sku'] = array(
 			'description'       => __( "Limit results to those with a name or SKU that partial matches a string. This argument takes precedence over 'search', 'sku' and 'search_sku'.", 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
