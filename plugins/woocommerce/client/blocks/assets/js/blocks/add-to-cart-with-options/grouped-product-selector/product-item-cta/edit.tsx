@@ -3,17 +3,16 @@
  */
 import { useProductDataContext } from '@woocommerce/shared-context';
 import { Disabled, Spinner } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
-import { isSiteEditorPage } from '@woocommerce/utils';
 import { useBlockProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
+import QuantityStepper from '../../components/quantity-stepper';
+
 const CTA = () => {
 	const { isLoading, product } = useProductDataContext();
-	const isSiteEditor = useSelect(
-		( select ) => isSiteEditorPage( select( 'core/edit-site' ) ),
-		[]
-	);
 
 	if ( isLoading ) {
 		return <Spinner />;
@@ -38,28 +37,7 @@ const CTA = () => {
 				/>
 			);
 		}
-		return (
-			<div className="quantity">
-				<input
-					style={
-						// In the post editor, the editor isn't in an iframe, so WordPress styles are applied. We need to remove them.
-						! isSiteEditor
-							? {
-									backgroundColor: '#ffffff',
-									lineHeight: 'normal',
-									minHeight: 'unset',
-									boxSizing: 'unset',
-									borderRadius: 'unset',
-							  }
-							: {}
-					}
-					type="number"
-					value="1"
-					className="input-text qty text"
-					readOnly
-				/>
-			</div>
-		);
+		return <QuantityStepper />;
 	}
 
 	return (
