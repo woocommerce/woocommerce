@@ -73,7 +73,7 @@ export const useDeprecationNotice = () => {
 								LearnMore: (
 									<a
 										className="woo-ai-deprecation-notice-link"
-										href="https://woocommerce.com/document/woo-ai/"
+										href="https://woocommerce.com/document/woo-ai-deprecation/"
 									>
 										{ __( 'Learn More', 'woocommerce' ) }
 									</a>
