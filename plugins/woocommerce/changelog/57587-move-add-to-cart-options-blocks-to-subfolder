@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Move Add to Cart with Options block files into dedicated subfolder for improved code organization.
