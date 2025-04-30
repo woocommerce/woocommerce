@@ -148,7 +148,7 @@ export const useFormValidation = (
 		if (
 			hasSchemaRules( field, 'validation' ) && // Schema validation only run for fields with validation rules.
 			! field.hidden && // And visible
-			// @ts-expect-error
+			// @ts-expect-error field.key is part of values but TS can't seem to figure that out.
 			( field.required || values[ field.key ] ) // And is required or has a optional with a value (or both).
 		) {
 			acc[ field.key ] = field.rules.validation;
@@ -223,7 +223,7 @@ export const useFormValidation = (
 			if (
 				// Skip validation if
 				field.hidden || // the field is hidden
-				// @ts-expect-error
+				// @ts-expect-error field.key is part of values but TS can't seem to figure that out.
 				! ( field.required || values[ field.key ] ) // the field is not required and doesn't have a value
 				// the field is not in the values
 			) {
