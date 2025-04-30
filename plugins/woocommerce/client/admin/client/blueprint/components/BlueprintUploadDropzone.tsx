@@ -9,7 +9,7 @@ import {
 	Button,
 	Icon,
 } from '@wordpress/components';
-import { closeSmall, upload } from '@wordpress/icons';
+import { closeSmall, upload, check, warning } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
 import { useMachine } from '@xstate5/react';
 import {
@@ -130,19 +130,26 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 			}
 		}
 
-		let errorMessage;
 		if ( errors.length > 0 ) {
-			errorMessage = `${ __(
-				'Your Blueprint has been imported, but there were some errors. Please check the messages.',
-				'woocommerce'
-			) }`;
+			dispatch( 'core/notices' ).createWarningNotice(
+				`${ __(
+					'Your Blueprint has been imported, but there were some errors. Please check the messages.',
+					'woocommerce'
+				) }`,
+				{
+					icon: <Icon icon={ warning } size={ 24 } fill="#d63638" />,
+					explicitDismiss: true,
+				}
+			);
 		} else {
-			errorMessage = `${ __(
-				'Your Blueprint has been imported!',
-				'woocommerce'
-			) }`;
+			dispatch( 'core/notices' ).createSuccessNotice(
+				`${ __( 'Your Blueprint has been imported!', 'woocommerce' ) }`,
+				{
+					icon: <Icon icon={ check } size={ 24 } fill="#1ed15A" />,
+					explicitDismiss: true,
+				}
+			);
 		}
-		dispatch( 'core/notices' ).createSuccessNotice( errorMessage );
 		return errors;
 	} catch ( e ) {
 		throw e;
