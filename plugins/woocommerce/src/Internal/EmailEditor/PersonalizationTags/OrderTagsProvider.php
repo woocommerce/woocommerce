@@ -143,19 +143,5 @@ class OrderTagsProvider extends AbstractTagProvider {
 				},
 			)
 		);
-
-		$registry->register(
-			new Personalization_Tag(
-				__( 'Admin Order Note', 'woocommerce' ),
-				'woocommerce/admin-order-note',
-				__( 'Store', 'woocommerce' ),
-				function ( array $context ): string {
-					if ( isset( $context['wc_email'], $context['wc_email']->customer_note ) ) {
-						return wptexturize( $context['wc_email']->customer_note );
-					}
-					return '';
-				},
-			)
-		);
 	}
 }
