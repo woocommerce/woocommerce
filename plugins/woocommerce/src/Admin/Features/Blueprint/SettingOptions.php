@@ -17,6 +17,11 @@ class SettingOptions {
 	 */
 	private $setting_option_controller;
 
+	/**
+	 * Ignore setting types.
+	 *
+	 * @var array
+	 */
 	private $ignore_setting_types = array( 'title', 'sectionend', 'slotfill_placeholder' );
 
 
