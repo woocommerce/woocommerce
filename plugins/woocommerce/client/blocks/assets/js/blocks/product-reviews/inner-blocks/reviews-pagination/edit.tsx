@@ -71,7 +71,7 @@ export default function Edit( {
 		return (
 			<Warning>
 				{ __(
-					'Product Reviews Pagination block: paging reviews is disabled in the Discussion Settings',
+					'Product Reviews Pagination block: paging comments is disabled in the Discussion Settings',
 					'woocommerce'
 				) }
 			</Warning>
