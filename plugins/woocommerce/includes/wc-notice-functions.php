@@ -110,7 +110,7 @@ function wc_set_notices( $notices ) {
 		return;
 	}
 
-	WC()->session->set( 'wc_notices', $notices );
+	WC()->session->set( 'wc_notices', empty( $notices ) ? null : $notices );
 }
 
 /**

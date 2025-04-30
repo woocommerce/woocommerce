@@ -96,7 +96,9 @@ class WC_Session_Handler extends WC_Session {
 			$this->_has_cookie         = true;
 			$this->_data               = $this->get_session_data();
 
-			if ( ! $this->is_session_cookie_valid() ) {
+			if ( ! $this->is_session_cookie_valid() || empty( $this->_data ) ) {
+				// Other than the case of an invalid session cookie, if there is no longer any data in the session,
+				// remove it and clear the cookie so output caching is no longer bypassed.
 				$this->destroy_session();
 				$this->set_session_expiration();
 			}
