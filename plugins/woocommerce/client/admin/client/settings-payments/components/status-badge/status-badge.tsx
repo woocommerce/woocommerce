@@ -117,9 +117,7 @@ export const StatusBadge = ( {
 			{ popoverContent && (
 				<span
 					className="woocommerce-status-badge__icon-container"
-					onClick={ () => setPopoverVisible( ! isPopoverVisible ) }
-					onMouseEnter={ showPopover }
-					onMouseLeave={ hidePopoverDebounced }
+					onClick={ showPopover }
 					onKeyDown={ ( event ) => {
 						if ( event.key === 'Enter' || event.key === ' ' ) {
 							setPopoverVisible( ! isPopoverVisible );

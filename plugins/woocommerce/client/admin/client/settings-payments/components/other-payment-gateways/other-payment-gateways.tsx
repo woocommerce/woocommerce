@@ -159,17 +159,8 @@ export const OtherPaymentGateways = ( {
 								<span
 									className="other-payment-gateways__content__title__icon-container"
 									onClick={ () =>
-										setCategoryIdWithPopoverVisible(
-											category.id ===
-												categoryIdWithPopoverVisible
-												? ''
-												: category.id
-										)
-									}
-									onMouseEnter={ () =>
 										showPopover( category.id )
 									}
-									onMouseLeave={ hidePopoverDebounced }
 									onKeyDown={ ( event ) => {
 										if (
 											event.key === 'Enter' ||

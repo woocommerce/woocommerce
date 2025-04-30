@@ -48,9 +48,7 @@ export const OfficialBadge = ( { variant }: OfficialBadgeProps ) => {
 				className="woocommerce-official-extension-badge__container"
 				tabIndex={ 0 }
 				role="button"
-				onClick={ () => setPopoverVisible( ! isPopoverVisible ) }
-				onMouseEnter={ showPopover }
-				onMouseLeave={ hidePopoverDebounced }
+				onClick={ showPopover }
 				onKeyDown={ ( event ) => {
 					if ( event.key === 'Enter' || event.key === ' ' ) {
 						setPopoverVisible( ! isPopoverVisible );
