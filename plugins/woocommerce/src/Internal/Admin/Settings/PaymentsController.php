@@ -44,6 +44,7 @@ class PaymentsController {
 		add_action( 'admin_menu', array( $this, 'add_menu' ) );
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
 		add_filter( 'woocommerce_admin_allowed_promo_notes', array( $this, 'add_allowed_promo_notes' ) );
+		add_filter( 'woocommerce_get_sections_checkout', array( $this, 'handle_sections' ) );
 	}
 
 	/**
@@ -151,6 +152,24 @@ class PaymentsController {
 		}
 
 		return $promo_notes;
+	}
+
+	/**
+	 * Alter the Payments tab sections under certain conditions.
+	 *
+	 * @param array $sections The payments/checkout tab sections.
+	 *
+	 * @return array The filtered sections.
+	 */
+	public function handle_sections( array $sections ): array {
+		global $current_section;
+
+		// For WooPayments, we don't want any sections navigation.
+		if ( 'woocommerce_payments' === $current_section ) {
+			return array();
+		}
+
+		return $sections;
 	}
 
 	/**
