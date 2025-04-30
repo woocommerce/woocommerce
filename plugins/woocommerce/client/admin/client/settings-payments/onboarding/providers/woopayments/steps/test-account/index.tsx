@@ -51,6 +51,16 @@ const TestDriveLoader: React.FunctionComponent< {
 	</Loader>
 );
 
+// Constants for polling intervals and phase durations
+const POLLING_INTERVAL_INITIAL = 3000; // 3 seconds is the initial polling interval
+const POLLING_INTERVAL_EXTENDED_1 = 5000; // 5 seconds is the extended polling interval for phase 1
+const POLLING_INTERVAL_EXTENDED_2 = 7000; // 7 seconds is the extended polling interval for phase 2
+const EXTENDED_POLLING_PHASE_1_DURATION = 30000; // 30 seconds is the duration of phase 1
+const MAX_PROGRESS = 95; // Cap progress at 95%
+
+// Status types for the component
+type Status = 'idle' | 'initializing' | 'polling' | 'success' | 'error';
+
 const TestAccountStep = () => {
 	const { currentStep, navigateToNextStep, closeModal } =
 		useOnboardingContext();
