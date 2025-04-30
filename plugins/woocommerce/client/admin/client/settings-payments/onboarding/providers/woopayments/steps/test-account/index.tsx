@@ -171,56 +171,69 @@ const TestAccountStep = () => {
 						// Still pending, update progress and determine next poll
 						let nextPhase = pollingPhase;
 						let nextInterval = POLLING_INTERVAL_INITIAL;
+						let newProgress = 0;
 
 						// Use functional update to ensure we always increment from the latest progress
 						setProgress( ( currentProgress ) => {
-							const newProgress = Math.min(
-								currentProgress + 5,
-								MAX_PROGRESS
-							);
-
-							if ( newProgress >= MAX_PROGRESS ) {
-								if ( pollingPhase === 0 ) {
-									// Transition to phase 1
-									nextPhase = 1;
-									nextInterval = POLLING_INTERVAL_EXTENDED_1;
-									phase1StartTimeRef.current = Date.now();
-								} else if ( pollingPhase === 1 ) {
-									// Check if phase 1 duration exceeded
-									if (
-										phase1StartTimeRef.current &&
-										Date.now() -
-											phase1StartTimeRef.current >
-											EXTENDED_POLLING_PHASE_1_DURATION
-									) {
-										// Transition to phase 2
-										nextPhase = 2;
-										nextInterval =
-											POLLING_INTERVAL_EXTENDED_2;
-									} else {
-										// Stay in phase 1
-										nextPhase = 1;
-										nextInterval =
-											POLLING_INTERVAL_EXTENDED_1;
-									}
-								} else {
-									// Stay in phase 2
-									nextPhase = 2;
-									nextInterval = POLLING_INTERVAL_EXTENDED_2;
-								}
+							// Apply different increment logic based on phase
+							if ( pollingPhase === 0 ) {
+								// Phase 0: increment by INITIAL_PHASE_INCREMENT until MAX_INITIAL_PROGRESS
+								newProgress = Math.min(
+									currentProgress + INITIAL_PHASE_INCREMENT,
+									MAX_INITIAL_PROGRESS
+								);
+							} else if ( pollingPhase === 1 ) {
+								// Phase 1: increment by EXTENDED_PHASE_1_INCREMENT until 96%
+								newProgress = Math.min(
+									currentProgress +
+										EXTENDED_PHASE_1_INCREMENT,
+									MAX_EXTENDED_PHASE_1_PROGRESS
+								);
 							} else {
-								// Still in phase 0
-								nextPhase = 0;
-								nextInterval = POLLING_INTERVAL_INITIAL;
+								newProgress = currentProgress;
 							}
-
-							setPollingPhase( nextPhase ); // Update phase based on newProgress
-							return newProgress; // Return the calculated new progress for setProgress
+							return newProgress;
 						} );
 
-						// Schedule the next poll using the interval determined above
-						// Note: setPollingPhase happens *after* this render, but the interval
-						// for the *next* timeout is correctly determined based on the logic above.
+						// Update next phase and interval based on current phase and progress
+						if (
+							pollingPhase === 0 &&
+							newProgress >= MAX_INITIAL_PROGRESS
+						) {
+							// Transition to phase 1 when first reaching MAX_INITIAL_PROGRESS while in phase 0
+							nextPhase = 1;
+							nextInterval = POLLING_INTERVAL_EXTENDED_1;
+							phase1StartTimeRef.current = Date.now();
+						} else if ( pollingPhase === 1 ) {
+							// Already in phase 1, check if duration exceeded
+							if (
+								phase1StartTimeRef.current &&
+								Date.now() - phase1StartTimeRef.current >
+									EXTENDED_POLLING_PHASE_1_DURATION
+							) {
+								// Transition to phase 2
+								nextPhase = 2;
+								nextInterval = POLLING_INTERVAL_EXTENDED_2;
+							} else {
+								// Stay in phase 1
+								nextPhase = 1;
+								nextInterval = POLLING_INTERVAL_EXTENDED_1;
+							}
+						} else if ( pollingPhase === 2 ) {
+							// Stay in phase 2
+							nextPhase = 2;
+							nextInterval = POLLING_INTERVAL_EXTENDED_2;
+						} else {
+							// Stay in phase 0
+							nextPhase = 0;
+							nextInterval = POLLING_INTERVAL_INITIAL;
+						}
+
+						setPollingPhase( nextPhase ); // Update phase state
+
+						console.log( 'nextInterval', nextInterval );
+
+						// Schedule the next poll
 						pollingTimeoutRef.current = window.setTimeout(
 							poll,
 							nextInterval
@@ -239,7 +252,7 @@ const TestAccountStep = () => {
 
 		// Cleanup function for the effect
 		return () => {
-			clearTimers();
+			clearTimers(); // Clear any pending timeouts
 		};
 	}, [ status, currentStep, retryCounter, pollingPhase ] );
 
