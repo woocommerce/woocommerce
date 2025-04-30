@@ -157,12 +157,14 @@ export const OtherPaymentGateways = ( {
 									onClick={ () =>
 										setCategoryIdWithPopoverVisible(
 											category.id ===
-											categoryIdWithPopoverVisible
+												categoryIdWithPopoverVisible
 												? ''
 												: category.id
 										)
 									}
-									onMouseEnter={ () => hidePopoverDebounced.cancel() }
+									onMouseEnter={ () =>
+										hidePopoverDebounced.cancel()
+									}
 									onMouseLeave={ hidePopoverDebounced }
 									onKeyDown={ ( event ) => {
 										if (
