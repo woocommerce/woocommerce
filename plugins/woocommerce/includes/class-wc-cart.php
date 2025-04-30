@@ -26,6 +26,13 @@ require_once WC_ABSPATH . 'includes/class-wc-cart-session.php';
 class WC_Cart extends WC_Legacy_Cart {
 
 	/**
+	 * Cart context.
+	 *
+	 * @var string
+	 */
+	public $cart_context = 'shortcode';
+
+	/**
 	 * Contains an array of cart items.
 	 *
 	 * @var array
