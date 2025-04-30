@@ -73,6 +73,29 @@ const TestAccountStep = () => {
 	};
 
 	useEffect( () => {
+		// Create a polling function to check the status of the test account setup.
+		const checkTestAccountStatus = () => {
+			// Add progress
+			updateLoaderProgress( 100, 5 );
+
+			apiFetch( {
+				url: currentStep?.actions?.check?.href,
+				method: 'POST',
+			} ).then( ( response ) => {
+				if (
+					( response as StepCheckResponse )?.status === 'completed'
+				) {
+					// Set the progress to 100%.
+					setTestDriveLoaderProgress( 100 );
+
+					// Set the test account creation success to true after some time to avoid UI re-rendering rapidly.
+					setTimeout( () => {
+						setTestAccountCreationSuccess( true );
+					}, 1000 );
+				}
+			} );
+		};
+
 		if (
 			currentStep?.status === 'not_started' &&
 			! testAccountCreationSuccess
