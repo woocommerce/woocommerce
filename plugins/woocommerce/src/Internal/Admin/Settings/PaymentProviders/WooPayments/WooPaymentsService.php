@@ -730,6 +730,9 @@ class WooPaymentsService {
 		// For sanity, make sure the payment methods step is marked as completed.
 		// This is to avoid the user being prompted to set up payment methods again.
 		$this->set_onboarding_step_completed( self::ONBOARDING_STEP_PAYMENT_METHODS, $location );
+		// For sanity, make sure the test account step is marked as completed.
+		// After disabling a test account, the user should be prompted to set up a live account.
+		$this->set_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
 		return $response;
 	}
