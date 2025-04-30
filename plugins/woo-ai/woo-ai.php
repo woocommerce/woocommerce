@@ -84,11 +84,6 @@ function _woo_ai_bootstrap(): void {
 		include dirname( __FILE__ ) . '/includes/class-woo-ai-settings.php';
 		add_action( 'wp_loaded', array( 'Woo_AI_Settings', 'instance' ), 10 );
 	}
-
-	if ( ! class_exists( 'Woo_AI_Deprecation_Notice' ) ) {
-		include dirname( __FILE__ ) . '/includes/class-woo-ai-deprecation-notice.php';
-		new Woo_AI_Deprecation_Notice();
-	}
 }
 
 add_action( 'plugins_loaded', '_woo_ai_bootstrap' );

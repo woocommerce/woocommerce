@@ -11,10 +11,6 @@ type BackgroundRemovalParams = {
 declare global {
 	interface Window {
 		ajaxurl?: string;
-		wooAITracker?: {
-			nonce: string;
-			dismissed: boolean;
-		};
 	}
 }
 

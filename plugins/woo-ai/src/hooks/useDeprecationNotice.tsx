@@ -17,31 +17,12 @@ export const useDeprecationNotice = () => {
 	const [ noticeId, setNoticeId ] = useState< string | null >(
 		globalNoticeId
 	);
-	const [ isDismissed, setIsDismissed ] = useState< boolean >(
-		window.wooAITracker?.dismissed ?? false
-	);
+	const [ isDismissed, setIsDismissed ] = useState< boolean >( false );
 
-	const handleDismiss = async () => {
+	const handleDismiss = () => {
 		removeNotice( noticeId );
 		setNoticeId( null );
-
-		try {
-			if ( ! window.ajaxurl || ! window.wooAITracker?.nonce ) {
-				return;
-			}
-
-			const formData = new FormData();
-			formData.append( 'action', 'woo_ai_dismiss_deprecation' );
-			formData.append( 'nonce', window.wooAITracker.nonce );
-
-			await fetch( window.ajaxurl, {
-				method: 'POST',
-				body: formData,
-			} );
-			setIsDismissed( true );
-		} catch ( error ) {
-			// Silently fail to avoid breaking main functionality
-		}
+		setIsDismissed( true );
 	};
 
 	const showDeprecationNotice = async () => {
@@ -74,6 +55,8 @@ export const useDeprecationNotice = () => {
 									<a
 										className="woo-ai-deprecation-notice-link"
 										href="https://woocommerce.com/document/woo-ai-deprecation/"
+										target="_blank"
+										rel="noreferrer"
 									>
 										{ __( 'Learn More', 'woocommerce' ) }
 									</a>
