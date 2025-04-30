@@ -55,7 +55,7 @@ class SettingOptions {
 				continue;
 			}
 
-			$page_options[ $key ] = get_option( $key, null );
+			$page_options[ $key ] = get_option( $key, $setting['default'] ?? null );
 		}
 
 		return $page_options;
