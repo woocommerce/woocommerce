@@ -158,9 +158,7 @@ export const OtherPaymentGateways = ( {
 								</h3>
 								<span
 									className="other-payment-gateways__content__title__icon-container"
-									onClick={ () =>
-										showPopover( category.id )
-									}
+									onClick={ () => showPopover( category.id ) }
 									onKeyDown={ ( event ) => {
 										if (
 											event.key === 'Enter' ||
