@@ -48,18 +48,19 @@ class VariationSelectorItemTemplate extends AbstractBlock {
 	/**
 	 * Get product row HTML.
 	 *
-	 * @param string   $attribute_name Product Attribute Name.
-	 * @param array    $attribute_terms Product Attribute Terms.
+	 * @param string   $product_attribute_name Product Attribute Name.
+	 * @param array    $product_attribute_terms Product Attribute Terms.
 	 * @param WP_Block $block The Block.
 	 * @return string Row HTML
 	 */
-	private function get_product_row( $attribute_name, $attribute_terms, $block ): string {
+	private function get_product_row( $product_attribute_name, $product_attribute_terms, $block ): string {
 		global $product;
 
-		$attribute_terms    = $this->get_terms( $attribute_name, $attribute_terms );
+		$attribute_name     = $product_attribute_name;
+		$attribute_terms    = $this->get_terms( $attribute_name, $product_attribute_terms );
 		$product_variations = $product->get_available_variations();
 
-		// Filter out terms which are not available in the product variations.
+		// Filter out terms which are not available in any product variation.
 		$attribute_terms = array_filter(
 			$attribute_terms,
 			function ( $term ) use ( $product_variations, $attribute_name, $attribute_terms ) {

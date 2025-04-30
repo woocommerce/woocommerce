@@ -22,7 +22,6 @@ type Option = {
 };
 
 type Context = {
-	attribute: string;
 	name: string;
 	selectedValue: string | null;
 	option: Option;
@@ -59,7 +58,15 @@ function setDefaultSelectedAttribute() {
 	setAttribute( context.name, context.selectedValue );
 }
 
-const isTermDisabled = ( {
+/**
+ * Check if the attribute value is valid given the other selected attributes and
+ * the available variations.
+ *
+ * To know if an attribute value is valid given the other selected attributes,
+ * we make sure there is at least one available variation matching the current
+ * selected attributes and the attribute value being checked.
+ */
+const isAttributeValueValid = ( {
 	attributeName,
 	attributeValue,
 	selectedAttributes,
@@ -70,6 +77,11 @@ const isTermDisabled = ( {
 	selectedAttributes: CartVariationItem[];
 	availableVariations: AvailableVariation[];
 } ) => {
+	// If the current attribute is selected, we require one less attribute to
+	// match, this allows shoppers to switch between attributes. For example,
+	// if "Blue" and "Small" are selected, we want "Blue" and "Medium" to be
+	// valid, that's why we subtract one from the total number of attributes to
+	// match.
 	const isCurrentAttributeSelected = selectedAttributes.some(
 		( selectedAttribute ) => selectedAttribute.attribute === attributeName
 	);
@@ -77,8 +89,10 @@ const isTermDisabled = ( {
 		? selectedAttributes.length - 1
 		: selectedAttributes.length;
 
-	return ! availableVariations.some( ( availableVariation ) => {
-		// Skip variations that don't match the current pills.
+	// Check if there is at least one available variation matching the current
+	// selected attributes and the attribute value being checked.
+	return availableVariations.some( ( availableVariation ) => {
+		// Skip variations that don't match the current attribute value.
 		if (
 			availableVariation.attributes[
 				'attribute_' + attributeName.toLowerCase()
@@ -90,25 +104,28 @@ const isTermDisabled = ( {
 			return false;
 		}
 
-		// Count how many attributes from the variation match the
-		// currently selected attributes.
+		// Count how many of the selected attributes match the variation.
 		const matchingAttributes = selectedAttributes.filter(
 			( selectedAttribute ) => {
 				const availableVariationAttributeValue =
 					availableVariation.attributes[
 						'attribute_' + selectedAttribute.attribute.toLowerCase()
 					];
-				// If the current available variation matches the selected value.
+				// If the current available variation matches the selected
+				// value, count it.
 				if (
 					availableVariationAttributeValue === selectedAttribute.value
 				) {
 					return true;
 				}
-				// If the current available variation has an empty value (matching any),
-				// only count variations that match the currently selected
+				// If the current available variation has an empty value
+				// (matching any), count it if it refers to a different
+				// attribute or the attribute it refers matches the current
+				// selection.
 				if ( availableVariationAttributeValue === '' ) {
 					if (
-						selectedAttribute.attribute !== attributeName ||
+						selectedAttribute.attribute.toLowerCase() !==
+							attributeName.toLowerCase() ||
 						attributeValue === selectedAttribute.value
 					) {
 						return true;
@@ -137,7 +154,7 @@ const { state, actions } = store(
 						'woocommerce/add-to-cart-with-options'
 					);
 
-				return isTermDisabled( {
+				return ! isAttributeValueValid( {
 					attributeName: name,
 					attributeValue: option.value,
 					selectedAttributes: variation,
@@ -189,10 +206,11 @@ const { state, actions } = store(
 				setAttribute( context.name, context.selectedValue );
 			},
 			handleKeyDown( event: KeyboardEvent< HTMLElement > ) {
+				let keyWasProcessed = false;
+
 				switch ( event.key ) {
 					case ' ':
-						event.stopPropagation();
-						event.preventDefault();
+						keyWasProcessed = true;
 						actions.toggleSelected();
 						break;
 
@@ -200,8 +218,7 @@ const { state, actions } = store(
 					case 'ArrowUp':
 					case 'Left':
 					case 'ArrowLeft': {
-						event.stopPropagation();
-						event.preventDefault();
+						keyWasProcessed = true;
 						const context = getContext< PillsContext >();
 						const { variation, availableVariations } =
 							getContext< AddToCartWithOptionsStoreContext >(
@@ -214,7 +231,7 @@ const { state, actions } = store(
 
 						for ( let i = index - 1; i >= 0; i-- ) {
 							if (
-								! isTermDisabled( {
+								isAttributeValueValid( {
 									attributeName: context.name,
 									attributeValue: context.options[ i ].value,
 									selectedAttributes: variation,
@@ -240,8 +257,7 @@ const { state, actions } = store(
 					case 'ArrowDown':
 					case 'Right':
 					case 'ArrowRight': {
-						event.stopPropagation();
-						event.preventDefault();
+						keyWasProcessed = true;
 						const context = getContext< PillsContext >();
 						const { variation, availableVariations } =
 							getContext< AddToCartWithOptionsStoreContext >(
@@ -258,7 +274,7 @@ const { state, actions } = store(
 							i++
 						) {
 							if (
-								! isTermDisabled( {
+								isAttributeValueValid( {
 									attributeName: context.name,
 									attributeValue: context.options[ i ].value,
 									selectedAttributes: variation,
@@ -281,6 +297,11 @@ const { state, actions } = store(
 					}
 					default:
 						break;
+				}
+
+				if ( keyWasProcessed ) {
+					event.stopPropagation();
+					event.preventDefault();
 				}
 			},
 		},
@@ -305,15 +326,17 @@ store(
 		state: {
 			get isOptionDisabled() {
 				const { name, option } = getContext< PillsContext >();
+
 				if ( option.value === '' ) {
 					return false;
 				}
+
 				const { variation, availableVariations } =
 					getContext< AddToCartWithOptionsStoreContext >(
 						'woocommerce/add-to-cart-with-options'
 					);
 
-				return isTermDisabled( {
+				return ! isAttributeValueValid( {
 					attributeName: name,
 					attributeValue: option.value,
 					selectedAttributes: variation,
