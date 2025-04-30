@@ -246,7 +246,6 @@ test(
 			await page.goto( product.permalink );
 
 			await page.locator( 'button[name="add-to-cart"]' ).click();
-			await page.locator( 'button[name="add-to-cart"]' ).click();
 
 			await expect(
 				page.getByText(
