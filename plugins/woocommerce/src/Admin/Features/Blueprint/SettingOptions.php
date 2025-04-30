@@ -17,6 +17,8 @@ class SettingOptions {
 	 */
 	private $setting_option_controller;
 
+	private $ignore_setting_types = array( 'title', 'sectionend', 'slotfill_placeholder' );
+
 
 	/**
 	 * Constructor.
@@ -44,7 +46,7 @@ class SettingOptions {
 
 		foreach ( $settings as $setting ) {
 			// Skip if the setting type is not valid.
-			if ( 'sectionend' === $setting['type'] || 'slotfill_placeholder' === $setting['type'] || ! isset( $setting['id'] ) ) {
+			if ( in_array( $setting['type'], $this->ignore_setting_types, true ) || ! isset( $setting['id'] ) ) {
 				continue;
 			}
 
