@@ -160,9 +160,16 @@ export const OnboardingProvider: React.FC< {
 		areStepDependenciesCompleted,
 	] );
 
+	const resetLocalState = () => {
+		setStateStoreSteps( [] );
+		setIsStateStoreLoading( true );
+		setAllSteps( [] );
+	};
+
 	/**
 	 * useEffect functions
 	 */
+
 	// Update local state when store data changes
 	useEffect( () => {
 		if ( ! isStoreLoading && storeData.steps.length > 0 ) {
@@ -229,19 +236,13 @@ export const OnboardingProvider: React.FC< {
 		);
 	}, [ stateStoreSteps, areStepDependenciesCompleted ] );
 
-	useEffect(() => {
-		// Reset the onboarding data both in the store and local state when context mounts
+	useEffect( () => {
+		// Reset the onboarding data both in the store and local state when the onboardingcontext mounts.
 		// This is important to ensure that the onboarding data is cleared when the modal is closed.
 		// This is to avoid stale data when the modal is opened again.
 		resetLocalState();
 		invalidateWooPaymentsOnboarding( 'getOnboardingData' );
-	}, []);
-
-	const resetLocalState = () => {
-		setStateStoreSteps( [] );
-		setIsStateStoreLoading( true );
-		setAllSteps( [] );
-	};
+	}, [] );
 
 	return (
 		<OnboardingContext.Provider
