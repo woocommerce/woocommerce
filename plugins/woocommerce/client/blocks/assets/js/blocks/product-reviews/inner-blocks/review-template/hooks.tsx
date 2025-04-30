@@ -23,6 +23,7 @@ export const useCommentQueryArgs = ( { postId }: { postId: number } ) => {
 			context: 'embed',
 			parent: 0,
 			_embed: 'children',
+			type: 'review',
 		} ),
 		[]
 	);
