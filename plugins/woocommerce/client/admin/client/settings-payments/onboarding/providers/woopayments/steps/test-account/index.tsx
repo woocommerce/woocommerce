@@ -96,6 +96,8 @@ const TestAccountStep = () => {
 			} );
 		};
 
+		const stepHasError = currentStep?.errors?.[ 0 ];
+
 		if (
 			currentStep?.status === 'not_started' &&
 			! testAccountCreationSuccess
@@ -138,8 +140,8 @@ const TestAccountStep = () => {
 			return () => clearInterval( interval );
 		}
 
-		if ( currentStep?.errors?.[ 0 ] ) {
-			setErrorMessage( currentStep.errors[ 0 ] );
+		if ( stepHasError ) {
+			setErrorMessage( stepHasError );
 		}
 	}, [
 		currentStep?.status,
