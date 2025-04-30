@@ -6,7 +6,9 @@ import { __ } from '@wordpress/i18n';
 import { useLocation } from 'react-router-dom';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { getQueryArg } from '@wordpress/url';
-import { dispatch } from '@wordpress/data';
+import { dispatch, useDispatch } from '@wordpress/data';
+import { woopaymentsOnboardingStore } from '@woocommerce/data';
+
 /**
  * Internal dependencies
  */
@@ -31,6 +33,9 @@ export default function WooPaymentsModal( {
 		getQueryArg( window.location.href, 'wpcom_connection_return' ) || false;
 	const hasWPComConnection =
 		providerData?.onboarding?.state?.wpcom_has_working_connection || false;
+	const {
+		invalidateResolutionForStoreSelector: invalidateWooPaymentsOnboarding,
+	} = useDispatch( woopaymentsOnboardingStore );
 
 	// Open modal when on an onboarding route
 	React.useEffect( () => {
@@ -69,6 +74,13 @@ export default function WooPaymentsModal( {
 			history.push( newPath );
 		}
 	}, [ isOpen, location.pathname, history ] );
+
+	// If the modal is open, invalidate the context store to ensure the latest data is fetched
+	React.useEffect( () => {
+		if ( isOpen ) {
+			invalidateWooPaymentsOnboarding( 'getOnboardingData' );
+		}
+	}, [ isOpen ] );
 
 	// Handle modal close by navigating away from onboarding routes
 	const handleClose = () => {
