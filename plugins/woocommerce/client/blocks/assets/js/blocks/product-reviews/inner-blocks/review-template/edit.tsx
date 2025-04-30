@@ -204,12 +204,13 @@ const ReviewTemplateInnerBlocks = memo( function ReviewTemplateInnerBlocks( {
 	);
 } );
 
-export default function CommentTemplateEdit( {
+export default function ReviewTemplateEdit( {
 	clientId,
-	attributes,
-}: BlockEditProps< ReviewTemplateAttributes > ) {
+	context: { postId },
+}: BlockEditProps< ReviewTemplateAttributes > & {
+	context: { postId: number };
+} ) {
 	const blockProps = useBlockProps();
-	const { postId } = attributes;
 
 	const [ activeCommentId, setActiveCommentId ] = useState< number >( 0 );
 	const {
