@@ -528,6 +528,14 @@ class Checkout extends AbstractCartRoute {
 			'This action was deprecated in WooCommerce Blocks version 7.2.0. Please use woocommerce_store_api_checkout_order_processed instead.'
 		);
 
+		// Set the order status to 'pending' as an initial step.
+		// This allows the order to proceed towards completion. The hook
+		// 'woocommerce_store_api_checkout_order_processed' (fired below) can be used
+		// to set a custom status *after* this point.
+		// If payment isn't needed, the custom status is kept. If payment is needed,
+		// the payment gateway's statuses take precedence.
+		$this->order->update_status( 'pending' );
+
 		/**
 		 * Fires before an order is processed by the Checkout Block/Store API.
 		 *

@@ -4,7 +4,7 @@
 	.wc-blocks-components-select__container {
 		border-radius: $universal-border-radius;
 		box-sizing: border-box;
-		background: #fff;
+		background: $input-background-light;
 		width: 100%;
 		height: 3.125em;
 		position: relative;
@@ -33,7 +33,7 @@
 		appearance: none;
 		background: none;
 		padding: em($gap) em($gap-smaller) 0;
-		color: $input-text-active;
+		color: $input-text-light;
 		border: 1px solid $universal-border-strong;
 
 		&:focus {
@@ -63,7 +63,7 @@
 		top: 2px;
 		transform-origin: top left;
 		transition: all 200ms ease;
-		color: $input-text-active;
+		color: $input-text-light;
 		z-index: 1;
 		margin: 0;
 		overflow: hidden;
@@ -92,7 +92,7 @@
 		top: 50%;
 		right: $gap-small;
 		pointer-events: none;
-		fill: $input-text-active;
+		fill: $input-text-light;
 
 		.has-dark-controls & {
 			fill: $input-text-dark;
