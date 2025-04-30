@@ -116,8 +116,9 @@ class BlockPatterns extends \WP_UnitTestCase {
 	public function test_cached_block_patterns_registration() {
 		$mock_patterns = array(
 			array(
-				'title'  => 'Mock Cached',
-				'source' => __DIR__ . '/patterns/mock-cached.php',
+				'title'   => 'Mock Cached',
+				'source'  => __DIR__ . '/patterns/mock-cached.php',
+				'content' => '',
 			),
 		);
 		$pattern_data  = array(
