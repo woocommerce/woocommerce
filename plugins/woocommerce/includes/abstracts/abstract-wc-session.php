@@ -111,7 +111,7 @@ abstract class WC_Session {
 	 * @param mixed  $value Value to set.
 	 */
 	public function set( $key, $value ) {
-		if ( $value === null ) {
+		if ( null === $value ) {
 			$this->__unset( $key );
 
 			return;
@@ -121,7 +121,7 @@ abstract class WC_Session {
 		$serialized_original_value = $this->_data[ $key ] ?? null;
 		$serialized_value          = maybe_serialize( $value );
 
-		if ( $serialized_original_value === $serialized_value || $value === maybe_unserialize( $serialized_original_value ) ) {
+		if ( $serialized_original_value === $serialized_value || maybe_unserialize( $serialized_original_value ) === $value  ) {
 			return;
 		}
 
