@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 9.8.0
+ * @version 9.9.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -98,11 +98,18 @@ foreach ( $items as $item_id => $item ) :
 								)
 							);
 							echo '<div class="email-order-item-meta">';
+							// Using wp_kses instead of wp_kses_post to remove all block elements.
 							echo wp_kses(
 								$item_meta,
 								array(
 									'br'   => array(),
 									'span' => array(),
+									'a'    => array(
+										'href'   => true,
+										'target' => true,
+										'rel'    => true,
+										'title'  => true,
+									),
 								)
 							);
 							echo '</div>';
