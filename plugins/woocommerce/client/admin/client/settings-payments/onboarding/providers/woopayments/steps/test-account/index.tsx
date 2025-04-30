@@ -64,87 +64,188 @@ type Status = 'idle' | 'initializing' | 'polling' | 'success' | 'error';
 const TestAccountStep = () => {
 	const { currentStep, navigateToNextStep, closeModal } =
 		useOnboardingContext();
-	const [ testDriveLoaderProgress, setTestDriveLoaderProgress ] =
-		useState( 5 );
+
+	// Component State
+	const [ status, setStatus ] = useState< Status >( 'idle' );
+	const [ progress, setProgress ] = useState( 0 );
 	const [ errorMessage, setErrorMessage ] = useState< string | undefined >();
+	const [ pollingPhase, setPollingPhase ] = useState( 0 ); // 0: initial, 1: extended 1, 2: extended 2
 	const [ retryCounter, setRetryCounter ] = useState( 0 );
-	const [ testAccountCreationSuccess, setTestAccountCreationSuccess ] =
-		useState( false );
 
-	// Create a reference object.
-	const loaderProgressRef = useRef( testDriveLoaderProgress );
-	loaderProgressRef.current = testDriveLoaderProgress;
+	// Refs for timers and phase tracking
+	const pollingTimeoutRef = useRef< number | null >( null );
+	const phase1StartTimeRef = useRef< number | null >( null );
 
-	const updateLoaderProgress = ( maxPercent: number, progressBy: number ) => {
-		if ( loaderProgressRef.current < maxPercent ) {
-			const newProgress = loaderProgressRef.current + progressBy;
-			setTestDriveLoaderProgress( newProgress );
+	// Helper to clear timers
+	const clearTimers = () => {
+		if ( pollingTimeoutRef.current !== null ) {
+			clearTimeout( pollingTimeoutRef.current );
+			pollingTimeoutRef.current = null;
 		}
 	};
 
+	// Reset state function
+	const resetState = useCallback( () => {
+		setStatus( 'idle' );
+		setProgress( 0 );
+		setErrorMessage( undefined );
+		setPollingPhase( 0 );
+		phase1StartTimeRef.current = null;
+		clearTimers();
+	}, [ setStatus, setProgress, setErrorMessage, setPollingPhase ] );
+
+	// Main effect for handling initialization and polling loop
 	useEffect( () => {
-		// Create a polling function to check the status of the test account setup.
-		const checkTestAccountStatus = () => {
-			// Add progress
-			updateLoaderProgress( 100, 5 );
+		// -- Initialization Phase --
+		if ( status === 'idle' ) {
+			const stepHasError = currentStep?.errors?.[ 0 ];
+			if ( stepHasError ) {
+				setErrorMessage( stepHasError );
+				setStatus( 'error' );
+				return;
+			}
 
-			apiFetch( {
-				url: currentStep?.actions?.check?.href,
-				method: 'POST',
-			} ).then( ( response ) => {
-				if (
-					( response as StepCheckResponse )?.status === 'completed'
-				) {
-					// Set the progress to 100%.
-					setTestDriveLoaderProgress( 100 );
+			if ( currentStep?.status === 'completed' ) {
+				setStatus( 'success' );
+				setProgress( 100 ); // Show success state immediately
+				return;
+			}
 
-					// Set the test account creation success to true after some time to avoid UI re-rendering rapidly.
-					setTimeout( () => {
-						setTestAccountCreationSuccess( true );
-					}, 1000 );
-				}
-			} );
+			if ( currentStep?.status === 'not_started' ) {
+				setStatus( 'initializing' );
+				apiFetch< { success: boolean; message?: string } >( {
+					url: currentStep?.actions?.init?.href,
+					method: 'POST',
+				} )
+					.then( ( response ) => {
+						if ( response?.success ) {
+							// Start polling immediately after successful init
+							setStatus( 'polling' );
+						} else {
+							setErrorMessage(
+								response?.message ||
+									__(
+										'Creating test account failed. Please try again.',
+										'woocommerce'
+									)
+							);
+							setStatus( 'error' );
+						}
+					} )
+					.catch( ( error ) => {
+						setErrorMessage( error.message );
+						setStatus( 'error' );
+					} );
+			} else {
+				// If status is neither 'not_started' nor 'completed', assume we can start polling
+				setStatus( 'polling' );
+			}
+		}
+
+		// -- Polling Phase --
+		if ( status === 'polling' ) {
+			const poll = () => {
+				apiFetch< StepCheckResponse >( {
+					url: currentStep?.actions?.check?.href,
+					method: 'POST',
+				} )
+					.then( ( response ) => {
+						if ( response?.status === 'completed' ) {
+							// Use timeout for smoother transition to success UI
+							pollingTimeoutRef.current = window.setTimeout(
+								() => {
+									setStatus( 'success' );
+									setProgress( 100 ); // Visually complete
+								},
+								1000
+							);
+							return; // Stop polling loop
+						}
+
+						// Still pending, update progress and determine next poll
+						let nextPhase = pollingPhase;
+						let nextInterval = POLLING_INTERVAL_INITIAL;
+
+						// Use functional update to ensure we always increment from the latest progress
+						setProgress( ( currentProgress ) => {
+							const newProgress = Math.min(
+								currentProgress + 5,
+								MAX_PROGRESS
+							);
+
+							if ( newProgress >= MAX_PROGRESS ) {
+								if ( pollingPhase === 0 ) {
+									// Transition to phase 1
+									nextPhase = 1;
+									nextInterval = POLLING_INTERVAL_EXTENDED_1;
+									phase1StartTimeRef.current = Date.now();
+								} else if ( pollingPhase === 1 ) {
+									// Check if phase 1 duration exceeded
+									if (
+										phase1StartTimeRef.current &&
+										Date.now() -
+											phase1StartTimeRef.current >
+											EXTENDED_POLLING_PHASE_1_DURATION
+									) {
+										// Transition to phase 2
+										nextPhase = 2;
+										nextInterval =
+											POLLING_INTERVAL_EXTENDED_2;
+									} else {
+										// Stay in phase 1
+										nextPhase = 1;
+										nextInterval =
+											POLLING_INTERVAL_EXTENDED_1;
+									}
+								} else {
+									// Stay in phase 2
+									nextPhase = 2;
+									nextInterval = POLLING_INTERVAL_EXTENDED_2;
+								}
+							} else {
+								// Still in phase 0
+								nextPhase = 0;
+								nextInterval = POLLING_INTERVAL_INITIAL;
+							}
+
+							setPollingPhase( nextPhase ); // Update phase based on newProgress
+							return newProgress; // Return the calculated new progress for setProgress
+						} );
+
+						// Schedule the next poll using the interval determined above
+						// Note: setPollingPhase happens *after* this render, but the interval
+						// for the *next* timeout is correctly determined based on the logic above.
+						pollingTimeoutRef.current = window.setTimeout(
+							poll,
+							nextInterval
+						);
+					} )
+					.catch( ( error ) => {
+						setErrorMessage( error.message );
+						setStatus( 'error' );
+						clearTimers();
+					} );
+			};
+
+			// Start the first poll
+			poll();
+		}
+
+		// Cleanup function for the effect
+		return () => {
+			clearTimers();
 		};
+	}, [ status, currentStep, retryCounter, pollingPhase ] );
 
-		const stepHasError = currentStep?.errors?.[ 0 ];
-
-		if (
-			currentStep?.status === 'not_started' &&
-			! testAccountCreationSuccess
-		) {
-			// Send a request to the server to initialize the test account setup.
-			// We don't wait for the response here, as we want to start the polling immediately.
-			apiFetch( {
-				url: currentStep?.actions?.init?.href,
-				method: 'POST',
-			} ).catch( ( response ) => {
-				setErrorMessage( response.message );
-			} );
+	// Effect to reset state on retry
+	useEffect( () => {
+		if ( retryCounter > 0 ) {
+			resetState();
 		}
+	}, [ retryCounter, resetState ] );
 
-		if (
-			currentStep?.status !== 'completed' &&
-			! stepHasError &&
-			! testAccountCreationSuccess
-		) {
-			// Check the status of the test account setup every 3 seconds.
-			const interval = setInterval( checkTestAccountStatus, 3000 );
-			return () => clearInterval( interval );
-		}
-
-		if ( stepHasError ) {
-			setErrorMessage( stepHasError );
-		}
-	}, [
-		currentStep?.status,
-		currentStep?.errors,
-		currentStep?.actions?.init?.href,
-		currentStep?.actions?.check?.href,
-		retryCounter,
-		testAccountCreationSuccess,
-	] );
-
-	if ( testAccountCreationSuccess ) {
+	if ( status === 'success' ) {
+		// Render success state
 		return (
 			<>
 				<WooPaymentsStepHeader onClose={ closeModal } />
@@ -153,7 +254,7 @@ const TestAccountStep = () => {
 						<div className="woocommerce-woopayments-modal__content woocommerce-payments-test-account-step__success_content">
 							<h1 className="woocommerce-payments-test-account-step__success_content_title">
 								{ __(
-									'You’re ready to test payments!',
+									"You're ready to test payments!",
 									'woocommerce'
 								) }
 							</h1>
@@ -285,10 +386,13 @@ const TestAccountStep = () => {
 		);
 	}
 
+	// Render loading/error state
 	return (
 		<div className="woocommerce-payments-test-account-step">
 			<WooPaymentsStepHeader onClose={ closeModal } />
-			{ errorMessage && (
+
+			{ /* Error Notice */ }
+			{ status === 'error' && errorMessage && (
 				<Notice
 					status="warning"
 					isDismissible={ false }
@@ -297,9 +401,7 @@ const TestAccountStep = () => {
 							label: __( 'Try Again', 'woocommerce' ),
 							variant: 'primary',
 							onClick: () => {
-								// Increment the retry counter to trigger the test account setup again.
-								setRetryCounter( ( prev ) => prev + 1 );
-								setErrorMessage( undefined );
+								setRetryCounter( ( c ) => c + 1 );
 							},
 						},
 						{
@@ -317,7 +419,49 @@ const TestAccountStep = () => {
 					</p>
 				</Notice>
 			) }
-			<TestDriveLoader progress={ testDriveLoaderProgress } />
+
+			{ /* Informational notice for phase 1 */ }
+			{ status === 'polling' && pollingPhase === 1 && (
+				<Notice
+					status="info"
+					isDismissible={ false }
+					className="woocommerce-payments-test-account-step__info-notice"
+				>
+					<p>
+						{ __(
+							"The test account creation is taking a bit longer than expected, but don't worry—we're on it! Please bear with us for a few seconds more as we set everything up for your store.",
+							'woocommerce'
+						) }
+					</p>
+				</Notice>
+			) }
+
+			{ /* Informational notice for phase 2 */ }
+			{ status === 'polling' && pollingPhase === 2 && (
+				<Notice
+					status="info"
+					isDismissible={ false }
+					className="woocommerce-payments-test-account-step__info-notice"
+				>
+					<p>
+						{ __(
+							"Thank you for your patience! Unfortunately, the test account creation is taking a bit longer than we anticipated. But don't worry—we won't give up!",
+							'woocommerce'
+						) }
+					</p>
+					<p>
+						{ __(
+							'Feel free to close this modal and check back later. We appreciate your understanding!',
+							'woocommerce'
+						) }
+					</p>
+				</Notice>
+			) }
+
+			{ /* Loader - shown during initializing and polling */ }
+			{ ( status === 'initializing' || status === 'polling' ) && (
+				<TestDriveLoader progress={ progress } />
+			) }
 		</div>
 	);
 };
