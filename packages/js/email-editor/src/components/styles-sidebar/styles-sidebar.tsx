@@ -6,10 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { PluginSidebar, PluginSidebarMoreMenuItem } from '@wordpress/editor';
 import { useSelect } from '@wordpress/data';
 import { styles } from '@wordpress/icons';
-import {
-	__experimentalNavigatorProvider as NavigatorProvider,
-	__experimentalNavigatorScreen as NavigatorScreen,
-} from '@wordpress/components';
+import { Navigator } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -47,39 +44,39 @@ export function RawStylesSidebar(): JSX.Element {
 					className="woocommerce-email-editor-styles-panel"
 					header={ __( 'Styles', 'woocommerce' ) }
 				>
-					<NavigatorProvider initialPath="/">
-						<NavigatorScreen path="/">
+					<Navigator initialPath="/">
+						<Navigator.Screen path="/">
 							<ScreenRoot />
-						</NavigatorScreen>
+						</Navigator.Screen>
 
-						<NavigatorScreen path="/typography">
+						<Navigator.Screen path="/typography">
 							<ScreenTypography />
-						</NavigatorScreen>
+						</Navigator.Screen>
 
-						<NavigatorScreen path="/typography/text">
+						<Navigator.Screen path="/typography/text">
 							<ScreenTypographyElement element="text" />
-						</NavigatorScreen>
+						</Navigator.Screen>
 
-						<NavigatorScreen path="/typography/link">
+						<Navigator.Screen path="/typography/link">
 							<ScreenTypographyElement element="link" />
-						</NavigatorScreen>
+						</Navigator.Screen>
 
-						<NavigatorScreen path="/typography/heading">
+						<Navigator.Screen path="/typography/heading">
 							<ScreenTypographyElement element="heading" />
-						</NavigatorScreen>
+						</Navigator.Screen>
 
-						<NavigatorScreen path="/typography/button">
+						<Navigator.Screen path="/typography/button">
 							<ScreenTypographyElement element="button" />
-						</NavigatorScreen>
+						</Navigator.Screen>
 
-						<NavigatorScreen path="/colors">
+						<Navigator.Screen path="/colors">
 							<ScreenColors />
-						</NavigatorScreen>
+						</Navigator.Screen>
 
-						<NavigatorScreen path="/layout">
+						<Navigator.Screen path="/layout">
 							<ScreenLayout />
-						</NavigatorScreen>
-					</NavigatorProvider>
+						</Navigator.Screen>
+					</Navigator>
 				</PluginSidebar>
 			</>
 		)
