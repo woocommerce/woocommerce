@@ -6,7 +6,6 @@
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use WC_POS_Email_Customizations;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.

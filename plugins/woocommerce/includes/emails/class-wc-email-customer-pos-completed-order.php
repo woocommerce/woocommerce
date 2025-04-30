@@ -11,8 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once __DIR__ . '/trait-wc-pos-email-customizations.php';
 
-use WC_POS_Email_Customizations;
-
 if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 
 	/**
