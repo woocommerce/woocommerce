@@ -81,6 +81,22 @@ class BlockPatterns {
 	}
 
 	/**
+	 * Loads the content of a pattern.
+	 *
+	 * @param string $pattern_path The path to the pattern.
+	 * @return string The content of the pattern.
+	 */
+	private function load_pattern_content( $pattern_path ) {
+		if ( ! file_exists( $pattern_path ) ) {
+			return '';
+		}
+
+		ob_start();
+		include $pattern_path;
+		return ob_get_clean();
+	}
+
+	/**
 	 * Register block patterns from core.
 	 *
 	 * @return void
@@ -103,9 +119,8 @@ class BlockPatterns {
 			$pattern_path      = str_contains( $pattern['source'], $this->patterns_path ) ? $pattern['source'] : $this->patterns_path . '/' . $pattern['source'];
 			$pattern['source'] = $pattern_path;
 
-			ob_start();
-			include $pattern_path;
-			$pattern['content'] = ob_get_clean();
+			$content            = $this->load_pattern_content( $pattern_path );
+			$pattern['content'] = $content;
 
 			$this->pattern_registry->register_block_pattern( $pattern_path, $pattern );
 		}
