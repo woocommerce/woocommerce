@@ -72,6 +72,7 @@ export default function ProductListContent( props: {
 		 * If the productGroups set, component is likely used on Discover or NoResult component.
 		 */
 		if ( ! props.productGroup ) {
+			setProductsToShow( props.products );
 			return;
 		}
 
