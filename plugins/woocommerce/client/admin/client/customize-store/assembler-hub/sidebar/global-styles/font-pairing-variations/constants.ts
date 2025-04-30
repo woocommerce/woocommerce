@@ -2,7 +2,9 @@
  * Internal dependencies
  */
 import { FontFamiliesToInstall } from '~/customize-store/types/font';
-import { Look } from '~/customize-store/design-with-ai/types';
+
+const VALID_LOOKS = [ 'Contemporary', 'Classic', 'Bold' ] as const;
+type Look = ( typeof VALID_LOOKS )[ number ];
 
 export const FONT_PREVIEW_LARGE_WIDTH = 136;
 export const FONT_PREVIEW_LARGE_HEIGHT = 106;
