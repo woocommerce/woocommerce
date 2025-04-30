@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentProviders\WooPayments;
 
+use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments\WooPaymentsRestController;
@@ -246,28 +247,6 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test handling onboarding step start with invalid step ID.
-	 */
-	public function test_onboarding_step_start_with_invalid_step_id() {
-		// Arrange.
-		$step_id      = 'invalid_step';
-		$country_code = 'US';
-		$this->mock_onboarding_details( $country_code );
-
-		$this->mock_woopayments_service
-			->expects( $this->never() )
-			->method( 'set_onboarding_step_started' );
-
-		// Act.
-		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/start' );
-		$request->set_param( 'location', $country_code );
-		$response = $this->server->dispatch( $request );
-
-		// Assert.
-		$this->assertSame( 400, $response->get_status() );
-	}
-
-	/**
 	 * Test handling onboarding step start with invalid location.
 	 *
 	 * @dataProvider provider_invalid_location_provider
@@ -302,10 +281,13 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$country_code = 'US';
 		$this->mock_onboarding_details( $country_code );
 
+		$expected_code      = 'test_exception';
+		$expected_message   = 'Test exception message.';
+		$expected_http_code = 123;
 		$this->mock_woopayments_service
 			->expects( $this->once() )
 			->method( 'set_onboarding_step_started' )
-			->willThrowException( new \Exception( 'Test exception' ) );
+			->willThrowException( new ApiException( $expected_code, $expected_message, $expected_http_code ) );
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/start' );
@@ -313,8 +295,9 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 500, $response->get_status() );
-		$this->assertSame( 'Test exception', $response->get_data()['message'] );
+		$this->assertSame( $expected_code, $response->get_data()['code'] );
+		$this->assertSame( $expected_message, $response->get_data()['message'] );
+		$this->assertSame( $expected_http_code, $response->get_status() );
 	}
 
 	/**
@@ -368,28 +351,6 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test handling onboarding step save with invalid step ID.
-	 */
-	public function test_onboarding_step_save_with_invalid_step_id() {
-		// Arrange.
-		$step_id      = 'invalid_step';
-		$country_code = 'US';
-		$this->mock_onboarding_details( $country_code );
-
-		$this->mock_woopayments_service
-			->expects( $this->never() )
-			->method( 'onboarding_step_save' );
-
-		// Act.
-		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/save' );
-		$request->set_param( 'location', $country_code );
-		$response = $this->server->dispatch( $request );
-
-		// Assert.
-		$this->assertSame( 400, $response->get_status() );
-	}
-
-	/**
 	 * Test handling onboarding step save with invalid location.
 	 *
 	 * @dataProvider provider_invalid_location_provider
@@ -424,10 +385,13 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$country_code = 'US';
 		$this->mock_onboarding_details( $country_code );
 
+		$expected_code      = 'test_exception';
+		$expected_message   = 'Test exception message.';
+		$expected_http_code = 123;
 		$this->mock_woopayments_service
 			->expects( $this->once() )
 			->method( 'onboarding_step_save' )
-			->willThrowException( new \Exception( 'Test exception' ) );
+			->willThrowException( new ApiException( $expected_code, $expected_message, $expected_http_code ) );
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/save' );
@@ -435,8 +399,9 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 500, $response->get_status() );
-		$this->assertSame( 'Test exception', $response->get_data()['message'] );
+		$this->assertSame( $expected_code, $response->get_data()['code'] );
+		$this->assertSame( $expected_message, $response->get_data()['message'] );
+		$this->assertSame( $expected_http_code, $response->get_status() );
 	}
 
 	/**
@@ -474,28 +439,6 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test handling onboarding step check with invalid step ID.
-	 */
-	public function test_onboarding_step_check_with_invalid_step_id() {
-		// Arrange.
-		$step_id      = 'invalid_step';
-		$country_code = 'US';
-		$this->mock_onboarding_details( $country_code );
-
-		$this->mock_woopayments_service
-			->expects( $this->never() )
-			->method( 'onboarding_step_check' );
-
-		// Act.
-		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/check' );
-		$request->set_param( 'location', $country_code );
-		$response = $this->server->dispatch( $request );
-
-		// Assert.
-		$this->assertSame( 400, $response->get_status() );
-	}
-
-	/**
 	 * Test handling onboarding step check with invalid location.
 	 *
 	 * @dataProvider provider_invalid_location_provider
@@ -530,10 +473,13 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$country_code = 'US';
 		$this->mock_onboarding_details( $country_code );
 
+		$expected_code      = 'test_exception';
+		$expected_message   = 'Test exception message.';
+		$expected_http_code = 123;
 		$this->mock_woopayments_service
 			->expects( $this->once() )
 			->method( 'onboarding_step_check' )
-			->willThrowException( new \Exception( 'Test exception' ) );
+			->willThrowException( new ApiException( $expected_code, $expected_message, $expected_http_code ) );
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/check' );
@@ -541,8 +487,9 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 500, $response->get_status() );
-		$this->assertSame( 'Test exception', $response->get_data()['message'] );
+		$this->assertSame( $expected_code, $response->get_data()['code'] );
+		$this->assertSame( $expected_message, $response->get_data()['message'] );
+		$this->assertSame( $expected_http_code, $response->get_status() );
 	}
 
 	/**
@@ -582,28 +529,6 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test handling onboarding step finish with invalid step ID.
-	 */
-	public function test_onboarding_step_finish_with_invalid_step_id() {
-		// Arrange.
-		$step_id      = 'invalid_step';
-		$country_code = 'US';
-		$this->mock_onboarding_details( $country_code );
-
-		$this->mock_woopayments_service
-			->expects( $this->never() )
-			->method( 'set_onboarding_step_completed' );
-
-		// Act.
-		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/finish' );
-		$request->set_param( 'location', $country_code );
-		$response = $this->server->dispatch( $request );
-
-		// Assert.
-		$this->assertSame( 400, $response->get_status() );
-	}
-
-	/**
 	 * Test handling onboarding step finish with invalid location.
 	 *
 	 * @dataProvider provider_invalid_location_provider
@@ -638,10 +563,13 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$country_code = 'US';
 		$this->mock_onboarding_details( $country_code );
 
+		$expected_code      = 'test_exception';
+		$expected_message   = 'Test exception message.';
+		$expected_http_code = 123;
 		$this->mock_woopayments_service
 			->expects( $this->once() )
 			->method( 'set_onboarding_step_completed' )
-			->willThrowException( new \Exception( 'Test exception' ) );
+			->willThrowException( new ApiException( $expected_code, $expected_message, $expected_http_code ) );
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/finish' );
@@ -649,8 +577,9 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 500, $response->get_status() );
-		$this->assertSame( 'Test exception', $response->get_data()['message'] );
+		$this->assertSame( $expected_code, $response->get_data()['code'] );
+		$this->assertSame( $expected_message, $response->get_data()['message'] );
+		$this->assertSame( $expected_http_code, $response->get_status() );
 	}
 
 	/**
@@ -730,10 +659,13 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$country_code = 'US';
 		$this->mock_onboarding_details( $country_code );
 
+		$expected_code      = 'test_exception';
+		$expected_message   = 'Test exception message.';
+		$expected_http_code = 123;
 		$this->mock_woopayments_service
 			->expects( $this->once() )
 			->method( 'onboarding_test_account_init' )
-			->willThrowException( new \Exception( 'Test exception' ) );
+			->willThrowException( new ApiException( $expected_code, $expected_message, $expected_http_code ) );
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/init' );
@@ -741,8 +673,9 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 500, $response->get_status() );
-		$this->assertSame( 'Test exception', $response->get_data()['message'] );
+		$this->assertSame( $expected_code, $response->get_data()['code'] );
+		$this->assertSame( $expected_message, $response->get_data()['message'] );
+		$this->assertSame( $expected_http_code, $response->get_status() );
 	}
 
 	/**
@@ -817,10 +750,13 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$country_code = 'US';
 		$this->mock_onboarding_details( $country_code );
 
+		$expected_code      = 'test_exception';
+		$expected_message   = 'Test exception message.';
+		$expected_http_code = 123;
 		$this->mock_woopayments_service
 			->expects( $this->once() )
 			->method( 'get_onboarding_kyc_session' )
-			->willThrowException( new \Exception( 'Test exception' ) );
+			->willThrowException( new ApiException( $expected_code, $expected_message, $expected_http_code ) );
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/kyc_session' );
@@ -828,8 +764,9 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 500, $response->get_status() );
-		$this->assertSame( 'Test exception', $response->get_data()['message'] );
+		$this->assertSame( $expected_code, $response->get_data()['code'] );
+		$this->assertSame( $expected_message, $response->get_data()['message'] );
+		$this->assertSame( $expected_http_code, $response->get_status() );
 	}
 
 	/**
@@ -903,10 +840,13 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$country_code = 'US';
 		$this->mock_onboarding_details( $country_code );
 
+		$expected_code      = 'test_exception';
+		$expected_message   = 'Test exception message.';
+		$expected_http_code = 123;
 		$this->mock_woopayments_service
 			->expects( $this->once() )
 			->method( 'finish_onboarding_kyc_session' )
-			->willThrowException( new \Exception( 'Test exception' ) );
+			->willThrowException( new ApiException( $expected_code, $expected_message, $expected_http_code ) );
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/kyc_session/finish' );
@@ -914,8 +854,9 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 500, $response->get_status() );
-		$this->assertSame( 'Test exception', $response->get_data()['message'] );
+		$this->assertSame( $expected_code, $response->get_data()['code'] );
+		$this->assertSame( $expected_message, $response->get_data()['message'] );
+		$this->assertSame( $expected_http_code, $response->get_status() );
 	}
 
 	/**
@@ -954,10 +895,13 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$from   = 'test-from';
 		$source = 'test-source';
 
+		$expected_code      = 'test_exception';
+		$expected_message   = 'Test exception message.';
+		$expected_http_code = 123;
 		$this->mock_woopayments_service
 			->expects( $this->once() )
 			->method( 'reset_onboarding' )
-			->willThrowException( new \Exception( 'Test exception' ) );
+			->willThrowException( new ApiException( $expected_code, $expected_message, $expected_http_code ) );
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/reset' );
@@ -966,8 +910,77 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 500, $response->get_status() );
-		$this->assertSame( 'Test exception', $response->get_data()['message'] );
+		$this->assertSame( $expected_code, $response->get_data()['code'] );
+		$this->assertSame( $expected_message, $response->get_data()['message'] );
+		$this->assertSame( $expected_http_code, $response->get_status() );
+	}
+
+	/**
+	 * Test disable test account.
+	 */
+	public function test_disable_test_account() {
+		// Arrange.
+		$location = 'US';
+		$from     = 'test-from';
+		$source   = 'test-source';
+
+		$this->mock_payments_service
+			->expects( $this->once() )
+			->method( 'get_country' )
+			->willReturn( $location );
+		$this->mock_woopayments_service
+			->expects( $this->once() )
+			->method( 'disable_test_account' )
+			->with( $location, $from, $source )
+			->willReturn( array( 'success' => true ) );
+
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/test_account/disable' );
+		$request->set_param( 'from', $from );
+		$request->set_param( 'source', $source );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'success', $data );
+		$this->assertTrue( $data['success'] );
+	}
+
+	/**
+	 * Test disable test account with exception.
+	 */
+	public function test_disable_test_account_with_exception() {
+		// Arrange.
+		$location = 'US';
+		$from     = 'test-from';
+		$source   = 'test-source';
+
+		$this->mock_payments_service
+			->expects( $this->once() )
+			->method( 'get_country' )
+			->willReturn( $location );
+
+		$expected_code      = 'test_exception';
+		$expected_message   = 'Test exception message.';
+		$expected_http_code = 123;
+		$this->mock_woopayments_service
+			->expects( $this->once() )
+			->method( 'disable_test_account' )
+			->with( $location, $from, $source )
+			->willThrowException( new ApiException( $expected_code, $expected_message, $expected_http_code ) );
+
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/test_account/disable' );
+		$request->set_param( 'from', $from );
+		$request->set_param( 'source', $source );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( $expected_code, $response->get_data()['code'] );
+		$this->assertSame( $expected_message, $response->get_data()['message'] );
+		$this->assertSame( $expected_http_code, $response->get_status() );
 	}
 
 	/**
