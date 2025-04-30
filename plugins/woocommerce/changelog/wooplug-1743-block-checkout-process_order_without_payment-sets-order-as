@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Respect custom order status when processing order in Store API

@@ -46,8 +46,6 @@ trait CheckoutTrait {
 	 * @param PaymentResult    $payment_result Payment result object.
 	 */
 	private function process_without_payment( \WP_REST_Request $request, PaymentResult $payment_result ) {
-		// Transition the order to pending, and then completed. This ensures transactional emails fire for pending_to_complete events.
-		$this->order->update_status( 'pending' );
 		$this->order->payment_complete();
 
 		// Mark the payment as successful.
@@ -65,9 +63,6 @@ trait CheckoutTrait {
 	 */
 	private function process_payment( \WP_REST_Request $request, PaymentResult $payment_result ) {
 		try {
-			// Transition the order to pending before making payment.
-			$this->order->update_status( 'pending' );
-
 			// Prepare the payment context object to pass through payment hooks.
 			$context = new PaymentContext();
 			$context->set_payment_method( $this->get_request_payment_method_id( $request ) );
