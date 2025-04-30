@@ -10,7 +10,7 @@ import { useSelect } from '@wordpress/data';
 import { isSiteEditorPage } from '@woocommerce/utils';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean } from '@woocommerce/types';
-import { store as coreStore } from '@wordpress/core-data';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -47,14 +47,9 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 		[]
 	);
 
-	// Check whether the current theme is block theme or not.
-	const isBlockTheme = useSelect( ( select ) => {
-		const themeSupports = select( coreStore ).getThemeSupports?.();
-		return themeSupports?.['block-templates'] === true;
-	}, [] );
-
-	const buttonBlockClass = ( ! isBlockTheme ) ? 'wp-block-button' : '' 
-	const buttonLinkClass = ( ! isBlockTheme ) ? 'wp-block-button__link wc-block-components-button' : ''
+	const isBlockTheme = getSetting( 'isBlockTheme', false  );
+	const buttonBlockClass = ! isBlockTheme ? 'wp-block-button' : '' 
+	const buttonLinkClass = ! isBlockTheme ? 'wp-block-button__link wc-block-components-button' : ''
 
 	return (
 		<>
