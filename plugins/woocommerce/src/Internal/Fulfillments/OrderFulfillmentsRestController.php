@@ -1053,14 +1053,12 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @param Fulfillment $fulfillment The fulfillment object.
 	 * @param int         $fulfillment_id The fulfillment ID.
 	 * @param int         $order_id The order ID.
+	 *
+	 * @throws \Exception If the fulfillment ID is invalid.
 	 */
 	private function validate_fulfillment( Fulfillment $fulfillment, int $fulfillment_id, int $order_id ) {
 		if ( $fulfillment->get_id() !== $fulfillment_id || $fulfillment->get_entity_type() !== WC_Order::class || $fulfillment->get_entity_id() !== "$order_id" ) {
-			return $this->prepare_error_response(
-				'woocommerce_rest_fulfillment_invalid_id',
-				__( 'Invalid fulfillment ID.', 'woocommerce' ),
-				WP_Http::NOT_FOUND
-			);
+			throw new \Exception( esc_html__( 'Invalid fulfillment ID.', 'woocommerce' ), );
 		}
 	}
 }
