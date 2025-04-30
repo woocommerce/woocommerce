@@ -4,11 +4,9 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
-use WP_Error;
 
 /**
  * Registers patterns under the `./patterns/` directory and from the PTK API and updates their content.
@@ -53,13 +51,6 @@ class BlockPatterns {
 	private PatternRegistry $pattern_registry;
 
 	/**
-	 * Patterns dictionary
-	 *
-	 * @var array|WP_Error
-	 */
-	private $dictionary;
-
-	/**
 	 * PTKPatternsStore instance.
 	 *
 	 * @var PTKPatternsStore $ptk_patterns_store
@@ -90,16 +81,19 @@ class BlockPatterns {
 	}
 
 	/**
-	 * Returns the Patterns dictionary.
+	 * Loads the content of a pattern.
 	 *
-	 * @return array|WP_Error
+	 * @param string $pattern_path The path to the pattern.
+	 * @return string The content of the pattern.
 	 */
-	private function get_patterns_dictionary() {
-		if ( null === $this->dictionary ) {
-			$this->dictionary = PatternsHelper::get_patterns_dictionary();
+	private function load_pattern_content( $pattern_path ) {
+		if ( ! file_exists( $pattern_path ) ) {
+			return '';
 		}
 
-		return $this->dictionary;
+		ob_start();
+		include $pattern_path;
+		return ob_get_clean();
 	}
 
 	/**
@@ -125,7 +119,10 @@ class BlockPatterns {
 			$pattern_path      = str_contains( $pattern['source'], $this->patterns_path ) ? $pattern['source'] : $this->patterns_path . '/' . $pattern['source'];
 			$pattern['source'] = $pattern_path;
 
-			$this->pattern_registry->register_block_pattern( $pattern_path, $pattern, $this->get_patterns_dictionary() );
+			$content            = $this->load_pattern_content( $pattern_path );
+			$pattern['content'] = $content;
+
+			$this->pattern_registry->register_block_pattern( $pattern_path, $pattern );
 		}
 	}
 
@@ -244,7 +241,7 @@ class BlockPatterns {
 			$pattern['slug']    = $pattern['name'];
 			$pattern['content'] = $pattern['html'];
 
-			$this->pattern_registry->register_block_pattern( $pattern['ID'], $pattern, $this->get_patterns_dictionary() );
+			$this->pattern_registry->register_block_pattern( $pattern['ID'], $pattern );
 		}
 	}
 
