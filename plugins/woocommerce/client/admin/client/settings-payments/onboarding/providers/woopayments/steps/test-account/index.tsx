@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { Loader } from '@woocommerce/onboarding';
 import { __ } from '@wordpress/i18n';
