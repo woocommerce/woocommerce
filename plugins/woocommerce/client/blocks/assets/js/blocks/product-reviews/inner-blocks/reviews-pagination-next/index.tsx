@@ -11,8 +11,6 @@ import { registerBlockType } from '@wordpress/blocks';
 import metadata from './block.json';
 import edit from './edit';
 
-const { name } = metadata;
-export { metadata, name };
 
 // @ts-expect-error metadata is not typed.
 registerBlockType( metadata, {
