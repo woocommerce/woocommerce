@@ -235,6 +235,9 @@ describe( 'Testing cart', () => {
 		// React Transition Group uses deprecated findDOMNode, so we need to suppress the warning. This will have to be fixed in React 19.
 		expect( console ).toHaveErroredWith(
 			`Warning: findDOMNode is deprecated and will be removed in the next major release. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s`,
+			// TODO: This doesn't work after updating @wordpress/jest-preset-default
+			// which uses @wordpress/jest-console under the hood.
+			// Caused by https://github.com/WordPress/gutenberg/pull/53743
 			// The stack trace
 			expect.any( String )
 		);
