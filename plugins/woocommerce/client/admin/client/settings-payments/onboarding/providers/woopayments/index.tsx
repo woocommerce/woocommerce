@@ -7,6 +7,7 @@ import { useLocation } from 'react-router-dom';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { getQueryArg } from '@wordpress/url';
 import { dispatch } from '@wordpress/data';
+
 /**
  * Internal dependencies
  */
