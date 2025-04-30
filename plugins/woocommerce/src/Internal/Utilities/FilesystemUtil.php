@@ -156,7 +156,7 @@ class FilesystemUtil {
 	 * @return bool True if the file is inside the directory.
 	 */
 	private static function file_is_in_directory( string $file_path, string $directory ): bool {
-		// Extract protocol if it exists
+		// Extract protocol if it exists.
 		$protocol = '';
 		if ( preg_match( '#^([a-z0-9]+://)#i', $file_path, $matches ) ) {
 			$protocol  = $matches[1];
