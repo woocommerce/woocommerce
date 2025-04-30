@@ -118,7 +118,11 @@ class Checkout extends MockeryTestCase {
 		parent::tearDown();
 
 		remove_all_filters( 'woocommerce_get_country_locale' );
+		remove_all_filters( 'woocommerce_register_shop_order_post_statuses' );
+		remove_all_filters( 'wc_order_statuses' );
 		remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
+		remove_all_actions( 'woocommerce_store_api_checkout_order_processed' );
+		remove_all_actions( 'woocommerce_valid_order_statuses_for_payment' );
 
 		update_option( 'woocommerce_ship_to_countries', 'all' );
 		update_option( 'woocommerce_allowed_countries', 'all' );
@@ -1493,5 +1497,240 @@ class Checkout extends MockeryTestCase {
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_invalid_address_country', $response->get_data()['code'] );
 		$this->assertStringContainsString( 'Sorry, we do not allow orders from the provided country (FR)', $response->get_data()['message'] );
+	}
+
+	/**
+	 * Helper method to register custom order status.
+	 *
+	 * @param string $status_name             Custom status name to register.
+	 * @param bool   $add_to_payment_statuses Whether to add the status to valid statuses for payment.
+	 */
+	private function register_custom_order_status( $status_name, $add_to_payment_statuses = false ) {
+		add_filter(
+			'woocommerce_register_shop_order_post_statuses',
+			function ( $order_statuses ) use ( $status_name ) {
+				$order_statuses[ 'wc-' . $status_name ] = array(
+					'label'                     => 'Custom status for testing',
+					'public'                    => false,
+					'exclude_from_search'       => false,
+					'show_in_admin_all_list'    => true,
+					'show_in_admin_status_list' => true,
+				);
+				return $order_statuses;
+			}
+		);
+
+		add_filter(
+			'wc_order_statuses',
+			function ( $order_statuses ) use ( $status_name ) {
+				$order_statuses[ 'wc-' . $status_name ] = 'Custom status for testing';
+				return $order_statuses;
+			}
+		);
+
+		if ( $add_to_payment_statuses ) {
+			add_filter(
+				'woocommerce_valid_order_statuses_for_payment',
+				function ( $statuses ) use ( $status_name ) {
+					$statuses[] = $status_name;
+					return $statuses;
+				}
+			);
+		}
+	}
+
+	/**
+	 * Test that custom status is retained for free orders.
+	 */
+	public function test_custom_status_retained_for_free_order() {
+		$status_name = 'ready_for_pickup';
+		$this->register_custom_order_status( $status_name );
+
+		// Create a simple product and add to cart.
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '0' ); // Make the product free.
+		$product->save();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Verify that the cart total is 0 (free order).
+		$this->assertEquals( 0, WC()->cart->get_total( 'numeric' ), 'Cart total should be 0 for a free order' );
+
+		// Hook into the checkout process to set the custom status.
+		add_action(
+			'woocommerce_store_api_checkout_order_processed',
+			function ( \WC_Order $order ) use ( $status_name ) {
+				$order->set_status( $status_name );
+				$order->save();
+			}
+		);
+
+		// Create an order via checkout route.
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'email'                       => 'test@test.com',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'shipping_address' => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID, // Payment method might still be required, even if free.
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$order_id = $response->get_data()['order_id'];
+		$order    = wc_get_order( $order_id );
+
+		// Assert status remains custom.
+		$this->assertEquals( $status_name, $order->get_status(), 'Order status should remain custom for free orders.' );
+	}
+
+	/**
+	 * Test that custom status is retained for non-free orders when the custom
+	 * status is not in the valid statuses for payment list.
+	 */
+	public function test_custom_status_retained_for_non_free_order() {
+		$status_name = 'ready_for_pickup';
+		$this->register_custom_order_status( $status_name );
+
+		// Create a simple product with a non-zero price and add to cart.
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '10.00' ); // Make sure the product is not free.
+		$product->save();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Verify that the cart total is NOT 0 (non-free order).
+		$this->assertGreaterThan( 0, WC()->cart->get_total( 'numeric' ), 'Cart total should be greater than 0 for a non-free order' );
+
+		// Hook into the checkout process to set the custom status.
+		add_action(
+			'woocommerce_store_api_checkout_order_processed',
+			function ( \WC_Order $order ) use ( $status_name ) {
+				$order->set_status( $status_name );
+				$order->save();
+			}
+		);
+
+		// Create an order via checkout route.
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'email'                       => 'test@test.com',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'shipping_address' => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$order_id = $response->get_data()['order_id'];
+		$order    = wc_get_order( $order_id );
+
+		// Assert status remains custom (the key test here - verifying needs_payment() returns false despite non-zero total).
+		$this->assertEquals( $status_name, $order->get_status(), 'Order status should remain custom for non-free orders when the status is not valid for payment.' );
+	}
+
+	/**
+	 * Test that custom status goes through payment flow
+	 * when added to valid statuses for payment list.
+	 */
+	public function test_custom_status_with_payment_when_added_to_valid_statuses() {
+		$status_name = 'ready_for_pickup';
+		$this->register_custom_order_status( $status_name, true );
+
+		// Create a simple product with a non-zero price and add to cart.
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '10.00' ); // Make sure the product is not free.
+		$product->save();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Verify that the cart total is NOT 0 (non-free order).
+		$this->assertGreaterThan( 0, WC()->cart->get_total( 'numeric' ), 'Cart total should be greater than 0 for a non-free order' );
+
+		// Add a hook to check the needs_payment() result and set the status.
+		add_action(
+			'woocommerce_store_api_checkout_order_processed',
+			function ( \WC_Order $order ) use ( $status_name ) {
+				// Set our custom status.
+				$order->set_status( $status_name );
+				$order->save();
+			}
+		);
+
+		// Create an order via checkout route.
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'email'                       => 'test@test.com',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'shipping_address' => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$order_id = $response->get_data()['order_id'];
+		$order    = wc_get_order( $order_id );
+
+		// Order shouldn't stay in custom status, instead we let payment gateway set the correct status.
+		$this->assertEquals( 'on-hold', $order->get_status(), 'Order status should be controlled by the payment gateway, not remain custom.' );
 	}
 }

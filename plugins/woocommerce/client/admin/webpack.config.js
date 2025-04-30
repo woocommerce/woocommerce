@@ -221,6 +221,19 @@ const webpackConfig = {
 			],
 		} ),
 
+		// The email-editor is integrated as admin dependency, hence this copy step.
+		new CopyWebpackPlugin( {
+			patterns: [
+				{
+					from: path.join(
+						__dirname,
+						'../../../../packages/js/email-editor/build'
+					),
+					to: './email-editor',
+				},
+			],
+		} ),
+
 		// React Fast Refresh.
 		! isProduction && isHot && new ReactRefreshWebpackPlugin(),
 

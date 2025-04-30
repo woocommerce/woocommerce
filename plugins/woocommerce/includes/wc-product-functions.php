@@ -157,12 +157,35 @@ function wc_delete_product_transients( $post_id = 0 ) {
 			// Schedule the async deletion of related product transients.
 			// This should run async cause it also fetches all related products
 			// of the current product to be deleted which we can can't be sure how many there are.
-			WC()->queue()->schedule_single(
-				time(),
-				'wc_delete_related_product_transients_async',
-				array( 'post_id' => $post_id ),
-				'wc_delete_related_product_transients_group'
-			);
+
+			// Add static cache here which is used to check if the transient is already scheduled.
+			// The cache exists ONLY on the current request to prevent searching the DB for every product.
+			static $scheduled = array();
+			$cache_key        = (int) $post_id;
+
+			if ( ! isset( $scheduled[ $cache_key ] ) ) {
+				$queue                   = WC()->queue();
+				$existing                = $queue->search(
+					array(
+						'hook'     => 'wc_delete_related_product_transients_async',
+						'args'     => array( 'post_id' => $post_id ),
+						'status'   => 'pending',
+						'group'    => 'wc_delete_related_product_transients_group',
+						'per_page' => 1,
+					)
+				);
+				$scheduled[ $cache_key ] = ! empty( $existing );
+			}
+
+			if ( ! $scheduled[ $cache_key ] ) {
+				$queue->schedule_single(
+					time(),
+					'wc_delete_related_product_transients_async',
+					array( 'post_id' => $post_id ),
+					'wc_delete_related_product_transients_group'
+				);
+				$scheduled[ $cache_key ] = true;
+			}
 		}
 	}
 
@@ -180,8 +203,6 @@ function wc_delete_product_transients( $post_id = 0 ) {
  * @param int $post_id The product ID updated/created.
  */
 function wc_delete_related_product_transients( $post_id ) {
-	global $wpdb;
-
 	if ( ! is_numeric( $post_id ) ) {
 		return;
 	}
