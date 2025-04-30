@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
+use WP_Error;
 use WP_Http;
 
 defined( 'ABSPATH' ) || exit;
@@ -473,20 +474,33 @@ class WooPaymentsService {
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
-		// Call the WooPayments API to initialize the test account.
-		$response = $this->proxy->call_static(
-			Utils::class,
-			'rest_endpoint_post_request',
-			'/wc/v3/payments/onboarding/test_drive_account/init',
-			array(
-				'country'      => $location,
-				'capabilities' => ( ! empty( $step_data['payment_methods'] ) && is_array( $step_data['payment_methods'] ) ) ? $step_data['payment_methods'] : array(),
-				'source'       => ! empty( $source ) ? $source : self::FROM_NOX_IN_CONTEXT,
-				'from'         => self::FROM_NOX_IN_CONTEXT,
-			)
-		);
+		try {
+			// Call the WooPayments API to initialize the test account.
+			$response = $this->proxy->call_static(
+				Utils::class,
+				'rest_endpoint_post_request',
+				'/wc/v3/payments/onboarding/test_drive_account/init',
+				array(
+					'country'      => $location,
+					'capabilities' => ( ! empty( $step_data['payment_methods'] ) && is_array( $step_data['payment_methods'] ) ) ? $step_data['payment_methods'] : array(),
+					'source'       => ! empty( $source ) ? $source : self::FROM_NOX_IN_CONTEXT,
+					'from'         => self::FROM_NOX_IN_CONTEXT,
+				)
+			);
+		} catch ( Exception $e ) {
+			// Catch any exceptions to allow for proper error handling and onboarding unlock.
+			$response = new WP_Error(
+				'woocommerce_woopayments_onboarding_client_api_exception',
+				esc_html__( 'An unexpected error happened while initializing the test account.', 'woocommerce' ),
+				array(
+					'code'    => $e->getCode(),
+					'message' => $e->getMessage(),
+					'trace'   => $e->getTrace(),
+				)
+			);
+		}
 
-		// Unlock the onboarding after the API call finished.
+		// Unlock the onboarding after the API call finished or errored.
 		$this->clear_onboarding_lock();
 
 		if ( is_wp_error( $response ) ) {
@@ -532,17 +546,30 @@ class WooPaymentsService {
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
-		// Call the WooPayments API to get the KYC session.
-		$account_session = $this->proxy->call_static(
-			Utils::class,
-			'rest_endpoint_post_request',
-			'/wc/v3/payments/onboarding/kyc/session',
-			array(
-				'self_assessment' => $self_assessment,
-			)
-		);
+		try {
+			// Call the WooPayments API to get the KYC session.
+			$account_session = $this->proxy->call_static(
+				Utils::class,
+				'rest_endpoint_post_request',
+				'/wc/v3/payments/onboarding/kyc/session',
+				array(
+					'self_assessment' => $self_assessment,
+				)
+			);
+		} catch ( Exception $e ) {
+			// Catch any exceptions to allow for proper error handling and onboarding unlock.
+			$response = new WP_Error(
+				'woocommerce_woopayments_onboarding_client_api_exception',
+				esc_html__( 'An unexpected error happened while creating the KYC session.', 'woocommerce' ),
+				array(
+					'code'    => $e->getCode(),
+					'message' => $e->getMessage(),
+					'trace'   => $e->getTrace(),
+				)
+			);
+		}
 
-		// Unlock the onboarding after the API call finished.
+		// Unlock the onboarding after the API call finished or errored.
 		$this->clear_onboarding_lock();
 
 		if ( is_wp_error( $account_session ) ) {
@@ -586,18 +613,31 @@ class WooPaymentsService {
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
-		// Call the WooPayments API to finalize the KYC session.
-		$response = $this->proxy->call_static(
-			Utils::class,
-			'rest_endpoint_post_request',
-			'/wc/v3/payments/onboarding/kyc/finalize',
-			array(
-				'source' => ! empty( $source ) ? $source : self::FROM_PAYMENT_SETTINGS,
-				'from'   => self::FROM_NOX_IN_CONTEXT,
-			)
-		);
+		try {
+			// Call the WooPayments API to finalize the KYC session.
+			$response = $this->proxy->call_static(
+				Utils::class,
+				'rest_endpoint_post_request',
+				'/wc/v3/payments/onboarding/kyc/finalize',
+				array(
+					'source' => ! empty( $source ) ? $source : self::FROM_PAYMENT_SETTINGS,
+					'from'   => self::FROM_NOX_IN_CONTEXT,
+				)
+			);
+		} catch ( Exception $e ) {
+			// Catch any exceptions to allow for proper error handling and onboarding unlock.
+			$response = new WP_Error(
+				'woocommerce_woopayments_onboarding_client_api_exception',
+				esc_html__( 'An unexpected error happened while finalizing the KYC session.', 'woocommerce' ),
+				array(
+					'code'    => $e->getCode(),
+					'message' => $e->getMessage(),
+					'trace'   => $e->getTrace(),
+				)
+			);
+		}
 
-		// Unlock the onboarding after the API call finished.
+		// Unlock the onboarding after the API call finished or errored.
 		$this->clear_onboarding_lock();
 
 		if ( is_wp_error( $response ) ) {
@@ -640,18 +680,31 @@ class WooPaymentsService {
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
-		// Call the WooPayments API to reset onboarding.
-		$response = $this->proxy->call_static(
-			Utils::class,
-			'rest_endpoint_post_request',
-			'/wc/v3/payments/onboarding/reset',
-			array(
-				'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
-				'source' => ! empty( $source ) ? esc_attr( $source ) : self::FROM_PAYMENT_SETTINGS,
-			)
-		);
+		try {
+			// Call the WooPayments API to reset onboarding.
+			$response = $this->proxy->call_static(
+				Utils::class,
+				'rest_endpoint_post_request',
+				'/wc/v3/payments/onboarding/reset',
+				array(
+					'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
+					'source' => ! empty( $source ) ? esc_attr( $source ) : self::FROM_PAYMENT_SETTINGS,
+				)
+			);
+		} catch ( Exception $e ) {
+			// Catch any exceptions to allow for proper error handling and onboarding unlock.
+			$response = new WP_Error(
+				'woocommerce_woopayments_onboarding_client_api_exception',
+				esc_html__( 'An unexpected error happened while resetting onboarding.', 'woocommerce' ),
+				array(
+					'code'    => $e->getCode(),
+					'message' => $e->getMessage(),
+					'trace'   => $e->getTrace(),
+				)
+			);
+		}
 
-		// Unlock the onboarding after the API call finished.
+		// Unlock the onboarding after the API call finished or errored.
 		$this->clear_onboarding_lock();
 
 		if ( is_wp_error( $response ) ) {
@@ -696,18 +749,31 @@ class WooPaymentsService {
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
-		// Call the WooPayments API to disable the test account and prepare for the switch to live.
-		$response = $this->proxy->call_static(
-			Utils::class,
-			'rest_endpoint_post_request',
-			'/wc/v3/payments/onboarding/test_drive_account/disable',
-			array(
-				'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
-				'source' => ! empty( $source ) ? esc_attr( $source ) : self::FROM_PAYMENT_SETTINGS,
-			)
-		);
+		try {
+			// Call the WooPayments API to disable the test account and prepare for the switch to live.
+			$response = $this->proxy->call_static(
+				Utils::class,
+				'rest_endpoint_post_request',
+				'/wc/v3/payments/onboarding/test_drive_account/disable',
+				array(
+					'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
+					'source' => ! empty( $source ) ? esc_attr( $source ) : self::FROM_PAYMENT_SETTINGS,
+				)
+			);
+		} catch ( Exception $e ) {
+			// Catch any exceptions to allow for proper error handling and onboarding unlock.
+			$response = new WP_Error(
+				'woocommerce_woopayments_onboarding_client_api_exception',
+				esc_html__( 'An unexpected error happened while disabling the test account.', 'woocommerce' ),
+				array(
+					'code'    => $e->getCode(),
+					'message' => $e->getMessage(),
+					'trace'   => $e->getTrace(),
+				)
+			);
+		}
 
-		// Unlock the onboarding after the API call finished.
+		// Unlock the onboarding after the API call finished or errored.
 		$this->clear_onboarding_lock();
 
 		if ( is_wp_error( $response ) ) {
