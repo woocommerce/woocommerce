@@ -445,6 +445,10 @@ class ShippingController {
 	 * @return array
 	 */
 	public function remove_shipping_if_no_address( $packages ) {
+		if ( 'shortcode' === WC()->cart->cart_context ) {
+			return $packages;
+		}
+
 		$shipping_cost_requires_address = wc_string_to_bool( get_option( 'woocommerce_shipping_cost_requires_address', 'no' ) );
 
 		// Return early here for a small performance gain if we don't need to hide shipping costs until an address is entered.
