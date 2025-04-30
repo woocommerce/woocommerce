@@ -8,7 +8,7 @@ import { BlockEditProps } from '@wordpress/blocks';
 import { Disabled, Tooltip } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { isSiteEditorPage } from '@woocommerce/utils';
-import { getSettingWithCoercion } from '@woocommerce/settings';
+import { getSettingWithCoercion, getSetting } from '@woocommerce/settings';
 import { isBoolean } from '@woocommerce/types';
 
 /**
@@ -45,6 +45,12 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 		( select ) => isSiteEditorPage( select( 'core/edit-site' ) ),
 		[]
 	);
+
+	const isBlockTheme = getSetting( 'isBlockTheme', false );
+	const buttonBlockClass = ! isBlockTheme ? 'wp-block-button' : '';
+	const buttonLinkClass = ! isBlockTheme
+		? 'wp-block-button__link wc-block-components-button'
+		: '';
 
 	return (
 		<>
@@ -98,11 +104,16 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 											readOnly
 										/>
 									</div>
-									<button
-										className={ `single_add_to_cart_button alt wp-element-button` }
-									>
-										{ __( 'Add to cart', 'woocommerce' ) }
-									</button>
+									<div className={ buttonBlockClass }>
+										<button
+											className={ `single_add_to_cart_button alt wp-element-button ${ buttonLinkClass }` }
+										>
+											{ __(
+												'Add to cart',
+												'woocommerce'
+											) }
+										</button>
+									</div>
 								</>
 							) }
 							{ props.attributes.quantitySelectorStyle ===
@@ -140,14 +151,16 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 												+
 											</button>
 										</div>
-										<button
-											className={ `single_add_to_cart_button alt wp-element-button` }
-										>
-											{ __(
-												'Add to cart',
-												'woocommerce'
-											) }
-										</button>
+										<div className={ buttonBlockClass }>
+											<button
+												className={ `single_add_to_cart_button alt wp-element-button ${ buttonLinkClass }` }
+											>
+												{ __(
+													'Add to cart',
+													'woocommerce'
+												) }
+											</button>
+										</div>
 									</>
 								) }
 						</Disabled>

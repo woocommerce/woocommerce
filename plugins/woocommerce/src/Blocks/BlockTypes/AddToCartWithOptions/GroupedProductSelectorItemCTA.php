@@ -1,9 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\Blocks\BlockTypes;
+namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
-use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
+use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 use WP_Block;
 
 /**
@@ -11,7 +13,7 @@ use WP_Block;
  * It's responsible to render the CTA for each child product, that might be a button,
  * a checkbox, or a link.
  */
-class AddToCartWithOptionsGroupedProductSelectorItemCTA extends AbstractBlock {
+class GroupedProductSelectorItemCTA extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
 
@@ -31,18 +33,18 @@ class AddToCartWithOptionsGroupedProductSelectorItemCTA extends AbstractBlock {
 	private function get_quantity_selector_markup( $product ) {
 		ob_start();
 
-		woocommerce_quantity_input( Utils::get_quantity_input_args( $product ) );
+		woocommerce_quantity_input( AddToCartWithOptionsUtils::get_quantity_input_args( $product ) );
 
 		$quantity_html = ob_get_clean();
 
 		// Modify the quantity input to add stepper buttons.
 		$product_name = $product->get_name();
 
-		$quantity_html = Utils::add_quantity_steppers( $quantity_html, $product_name );
-		$quantity_html = Utils::add_quantity_stepper_classes( $quantity_html );
+		$quantity_html = AddToCartWithOptionsUtils::add_quantity_steppers( $quantity_html, $product_name );
+		$quantity_html = AddToCartWithOptionsUtils::add_quantity_stepper_classes( $quantity_html );
 
 		// Add interactive data attribute for the stepper functionality.
-		$quantity_html = Utils::make_quantity_input_interactive( $quantity_html );
+		$quantity_html = AddToCartWithOptionsUtils::make_quantity_input_interactive( $quantity_html );
 
 		return $quantity_html;
 	}
@@ -99,7 +101,7 @@ class AddToCartWithOptionsGroupedProductSelectorItemCTA extends AbstractBlock {
 		global $product;
 		$previous_product = $product;
 
-		$product = Utils::get_product_from_context( $block, $previous_product );
+		$product = AddToCartWithOptionsUtils::get_product_from_context( $block, $previous_product );
 		$markup  = '';
 
 		if ( $product ) {

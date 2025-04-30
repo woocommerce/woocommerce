@@ -1,8 +1,8 @@
 <?php
 /**
- * Customer processing order email
+ * Customer POS refunded order email (plain text)
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/customer-processing-order.php.
+ * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/customer-pos-refunded-order.php.
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you
  * (the theme developer) will need to copy the new files to your theme to
@@ -28,14 +28,25 @@ echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 /* translators: %s: Customer first name */
 echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ) . "\n\n";
 if ( $email_improvements_enabled ) {
-	echo esc_html__( 'Just to let you know &mdash; we’ve received your order, and it is now being processed.', 'woocommerce' ) . "\n\n";
+	if ( $partial_refund ) {
+		/* translators: %s: Site title */
+		echo sprintf( esc_html__( 'Your order from %s has been partially refunded.', 'woocommerce' ), esc_html( $blogname ) ) . "\n\n";
+	} else {
+		/* translators: %s: Site title */
+		echo sprintf( esc_html__( 'Your order from %s has been refunded.', 'woocommerce' ), esc_html( $blogname ) ) . "\n\n";
+	}
 	echo esc_html__( 'Here’s a reminder of what you’ve ordered:', 'woocommerce' ) . "\n\n";
+} elseif ( $partial_refund ) {
+	/* translators: %s: Site title */
+	echo sprintf( esc_html__( 'Your order on %s has been partially refunded. There are more details below for your reference:', 'woocommerce' ), esc_html( $blogname ) ) . "\n\n";
 } else {
-	/* translators: %s: Order number */
-	echo sprintf( esc_html__( 'Just to let you know &mdash; we\'ve received your order #%s, and it is now being processed:', 'woocommerce' ), esc_html( $order->get_order_number() ) ) . "\n\n";
+	/* translators: %s: Site title */
+	echo sprintf( esc_html__( 'Your order on %s has been refunded. There are more details below for your reference:', 'woocommerce' ), esc_html( $blogname ) ) . "\n\n";
 }
 
-/*
+/**
+ * Show order details.
+ *
  * @hooked WC_Emails::order_details() Shows the order details table.
  * @hooked WC_Structured_Data::generate_order_data() Generates structured data.
  * @hooked WC_Structured_Data::output_structured_data() Outputs structured data.
@@ -45,14 +56,20 @@ do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_tex
 
 echo "\n----------------------------------------\n\n";
 
-/*
+/**
+ * Show order meta data.
+ *
  * @hooked WC_Emails::order_meta() Shows order meta data.
+ * @since 1.0.0
  */
 do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email );
 
-/*
+/**
+ * Show customer details and email address.
+ *
  * @hooked WC_Emails::customer_details() Shows customer details
  * @hooked WC_Emails::email_address() Shows email address
+ * @since 1.0.0
  */
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 
@@ -66,4 +83,9 @@ if ( $additional_content ) {
 	echo "\n\n----------------------------------------\n\n";
 }
 
+/**
+ * Filter the email footer text.
+ *
+ * @since 4.0.0
+ */
 echo wp_kses_post( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );

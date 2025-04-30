@@ -1,8 +1,8 @@
 <?php
 /**
- * Customer completed order email
+ * Customer POS refunded order email
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/emails/customer-completed-order.php.
+ * This template can be overridden by copying it to yourtheme/woocommerce/emails/customer-pos-refunded-order.php.
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you
  * (the theme developer) will need to copy the new files to your theme to
@@ -17,14 +17,15 @@
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
 
-/*
+/**
+ * Hook for the woocommerce_email_header.
+ *
  * @hooked WC_Emails::email_header() Output the email header
+ * @since 3.7.0
  */
 do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
@@ -39,15 +40,36 @@ if ( ! empty( $order->get_billing_first_name() ) ) {
 }
 ?>
 </p>
-<p><?php esc_html_e( 'We have finished processing your order.', 'woocommerce' ); ?></p>
-<?php if ( $email_improvements_enabled ) : ?>
-	<p><?php esc_html_e( 'Here’s a reminder of what you’ve ordered:', 'woocommerce' ); ?></p>
-<?php endif; ?>
+
+<p>
+<?php
+if ( $email_improvements_enabled ) {
+	if ( $partial_refund ) {
+		/* translators: %s: Site title */
+		echo sprintf( esc_html__( 'Your order from %s has been partially refunded.', 'woocommerce' ), esc_html( $blogname ) ) . "\n\n";
+	} else {
+		/* translators: %s: Site title */
+		echo sprintf( esc_html__( 'Your order from %s has been refunded.', 'woocommerce' ), esc_html( $blogname ) ) . "\n\n";
+	}
+	echo '</p><p>';
+	echo esc_html__( 'Here’s a reminder of what you’ve ordered:', 'woocommerce' ) . "\n\n";
+
+} elseif ( $partial_refund ) {
+	/* translators: %s: Site title */
+	printf( esc_html__( 'Your order on %s has been partially refunded. There are more details below for your reference:', 'woocommerce' ), esc_html( $blogname ) );
+} else {
+	/* translators: %s: Site title */
+	printf( esc_html__( 'Your order on %s has been refunded. There are more details below for your reference:', 'woocommerce' ), esc_html( $blogname ) );
+}
+?>
+</p>
 <?php echo $email_improvements_enabled ? '</div>' : ''; ?>
 
 <?php
 
-/*
+/**
+ * Show order details.
+ *
  * @hooked WC_Emails::order_details() Shows the order details table.
  * @hooked WC_Structured_Data::generate_order_data() Generates structured data.
  * @hooked WC_Structured_Data::output_structured_data() Outputs structured data.
@@ -55,14 +77,20 @@ if ( ! empty( $order->get_billing_first_name() ) ) {
  */
 do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email );
 
-/*
+/**
+ * Show order meta data.
+ *
  * @hooked WC_Emails::order_meta() Shows order meta data.
+ * @since 1.0.0
  */
 do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email );
 
-/*
+/**
+ * Show customer details and email address.
+ *
  * @hooked WC_Emails::customer_details() Shows customer details
  * @hooked WC_Emails::email_address() Shows email address
+ * @since 1.0.0
  */
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 
@@ -75,7 +103,10 @@ if ( $additional_content ) {
 	echo $email_improvements_enabled ? '</td></tr></table>' : '';
 }
 
-/*
+/**
+ * Hook for the woocommerce_email_footer.
+ *
  * @hooked WC_Emails::email_footer() Output the email footer
+ * @since 4.0.0
  */
 do_action( 'woocommerce_email_footer', $email );

@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer completed order email (initial block content)
+ * Customer POS refunded order email (inital block version)
  *
  * This template can be overridden by editing it in the WooCommerce email editor.
  *
@@ -22,7 +22,12 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2> <?php echo esc_html__( 'Good things are heading your way!', 'woocommerce' ); ?> </h2>
+<h2> 
+<?php
+/* translators: %s: Order number */
+printf( esc_html__( 'Order refunded: %s', 'woocommerce' ), '<!--[woocommerce/order-number]-->' );
+?>
+</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
@@ -35,7 +40,12 @@ defined( 'ABSPATH' ) || exit;
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p> <?php echo esc_html__( 'We have finished processing your order.', 'woocommerce' ); ?> </p>
+<p>
+<?php
+/* translators: %s: Site title */
+printf( esc_html__( 'Your order from %s has been refunded.', 'woocommerce' ), '<!--[woocommerce/site-title]-->' );
+?>
+</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -47,10 +57,10 @@ defined( 'ABSPATH' ) || exit;
 <!-- /wp:woo/email-content -->
 
 <!-- wp:paragraph -->
-<p>
+<p> 
 <?php
 /* translators: %s: Store admin email */
-	printf( esc_html__( 'Thanks again! If you need any help with your order, please contact us at %s.', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );
+printf( esc_html__( 'If you need any help with your order, please contact us at %s', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );
 ?>
-	</p>
+</p>
 <!-- /wp:paragraph -->

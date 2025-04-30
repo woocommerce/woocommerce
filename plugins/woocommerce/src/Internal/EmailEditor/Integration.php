@@ -23,8 +23,6 @@ defined( 'ABSPATH' ) || exit;
 class Integration {
 	const EMAIL_POST_TYPE = 'woo_email';
 
-	const WC_EMAIL_TYPE_ID_POST_META_KEY = '_wc_email_type';
-
 	/**
 	 * The email editor page renderer instance.
 	 *
@@ -181,13 +179,15 @@ class Integration {
 			return;
 		}
 
-		$email_type = get_post_meta( $post_id, self::WC_EMAIL_TYPE_ID_POST_META_KEY, true );
+		$post_manager = WCTransactionalEmailPostsManager::get_instance();
+
+		$email_type = $post_manager->get_email_type_from_post_id( $post_id );
 
 		if ( empty( $email_type ) ) {
 			return;
 		}
 
-		WCTransactionalEmailPostsManager::get_instance()->delete_email_template( $email_type );
+		$post_manager->delete_email_template( $email_type );
 	}
 
 	/**
@@ -258,7 +258,7 @@ class Integration {
 			if ( json_last_error() === JSON_ERROR_NONE && isset( $decoded_body->postId ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 				$post_id = absint( $decoded_body->postId ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
-				$email_type = get_post_meta( $post_id, self::WC_EMAIL_TYPE_ID_POST_META_KEY, true );
+				$email_type = WCTransactionalEmailPostsManager::get_instance()->get_email_type_from_post_id( $post_id );
 				if ( ! empty( $email_type ) ) {
 					return $this->update_email_preview_data( $data, $email_type );
 				}
