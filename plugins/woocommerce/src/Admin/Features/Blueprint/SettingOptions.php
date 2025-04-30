@@ -44,7 +44,7 @@ class SettingOptions {
 
 		foreach ( $settings as $setting ) {
 			// Skip if the setting type is not valid.
-			if ( ! $this->setting_option_controller->is_setting_type_valid( $setting['type'] ) ) {
+			if ( 'sectionend' === $setting['type'] || 'slotfill_placeholder' === $setting['type'] || ! isset( $setting['id'] ) ) {
 				continue;
 			}
 
