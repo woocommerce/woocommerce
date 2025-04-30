@@ -504,9 +504,10 @@ class WC_Email extends WC_Settings_API {
 			$current_context = $this->personalizer->get_context();
 			$updated_context = $this->prepare_context_data( $current_context );
 			$this->personalizer->set_context( $updated_context );
-		}
 
-		$this->context_set = true;
+			// Mark context as set to avoid reconfiguration.
+			$this->context_set = true;
+		}
 	}
 
 	/**
