@@ -1,15 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\Blocks\BlockTypes;
+namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
+use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * Block type for variation selector attribute options in add to cart with options.
  * It's responsible to render the attribute options.
  */
-class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBlock {
+class VariationSelectorAttributeOptions extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
 
@@ -89,7 +91,7 @@ class AddToCartWithOptionsVariationSelectorAttributeOptions extends AbstractBloc
 	 * @param array $default_attributes The element's default attributes.
 	 * @return string The HTML element's attributes.
 	 */
-	protected function get_normalized_attributes( $attributes, $default_attributes = array() ) {
+	public static function get_normalized_attributes( $attributes, $default_attributes = array() ) {
 		$normalized_attributes = array();
 
 		$merged_attributes = array_merge( $default_attributes, $attributes );

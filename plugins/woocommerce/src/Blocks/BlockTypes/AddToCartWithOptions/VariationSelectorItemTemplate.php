@@ -1,40 +1,27 @@
 <?php
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\Blocks\BlockTypes;
+namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
+use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 use WP_Block;
 
 /**
  * Block type for variation selector item in add to cart with options.
  * It's responsible to render each child attribute in a form of a list item.
  */
-class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
+class VariationSelectorItemTemplate extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
 	protected $block_name = 'add-to-cart-with-options-variation-selector-item';
-
-	/**
-	 * Disable the frontend script for this block type, it's built with script modules.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 * @return array|string|null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
-	}
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
 
 	/**
 	 * Render the block.
@@ -75,11 +62,8 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 			return '';
 		}
 
-		// Get an instance of the current Variation Selector Item Template block.
-		$block_instance = $block->parsed_block;
-
-		$new_block = new WP_Block(
-			$block_instance,
+		$block_content = AddToCartWithOptionsUtils::render_block_with_context(
+			$block,
 			array(
 				'woocommerce/attributeId'    => 'wc_product_attribute_' . uniqid(),
 				'woocommerce/attributeName'  => $attribute_name,
@@ -89,7 +73,7 @@ class AddToCartWithOptionsVariationSelectorItemTemplate extends AbstractBlock {
 
 		// Render the inner blocks of the Variation Selector Item Template block with `dynamic` set to `false`
 		// to prevent calling `render_callback` and ensure that no wrapper markup is included.
-		return $new_block->render( array( 'dynamic' => false ) );
+		return $block_content;
 	}
 
 	/**

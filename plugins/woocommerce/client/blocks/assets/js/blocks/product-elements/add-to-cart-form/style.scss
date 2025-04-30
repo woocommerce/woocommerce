@@ -26,6 +26,11 @@
 		grid-auto-flow: column;
 		display: grid;
 
+		.quantity {
+			display: flex !important;
+			align-items: stretch;
+		}
+
 		> *:not(.quantity) {
 			// Hack to ensure input + button stat on the same row, together.
 			grid-column: 1 / -1;
@@ -38,9 +43,7 @@
 
 		> .quantity:not(.wc-block-components-quantity-selector) .qty {
 			margin-right: 0.5em;
-			padding-top: 0;
-			padding-bottom: 0;
-			height: calc(100% - 4px); // 4px border width
+			padding: 0 5px;
 		}
 
 		&.grouped_form {
