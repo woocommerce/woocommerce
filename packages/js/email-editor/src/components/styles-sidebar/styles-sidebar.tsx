@@ -45,6 +45,7 @@ export function RawStylesSidebar(): JSX.Element {
 					icon={ styles }
 					title={ __( 'Styles', 'woocommerce' ) }
 					className="woocommerce-email-editor-styles-panel"
+					header={ __( 'Styles', 'woocommerce' ) }
 				>
 					<NavigatorProvider initialPath="/">
 						<NavigatorScreen path="/">
