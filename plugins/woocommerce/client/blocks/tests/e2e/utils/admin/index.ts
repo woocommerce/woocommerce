@@ -7,6 +7,7 @@ import {
 	PageUtils,
 	Editor,
 } from '@wordpress/e2e-test-utils-playwright';
+import { wpCLI } from '@woocommerce/e2e-utils';
 
 type AdminConstructorProps = {
 	page: Page;
@@ -92,5 +93,15 @@ export class Admin extends CoreAdmin {
 		} );
 		await saveButton.click();
 		await saveButton.isDisabled();
+	}
+
+	async updateAddToCartAjaxSettings( enable: boolean ) {
+		const textOption = enable ? 'yes' : 'no';
+		await wpCLI(
+			`option update woocommerce_enable_ajax_add_to_cart ${ textOption }`
+		);
+		await wpCLI(
+			`option update woocommerce_enable_ajax_add_to_cart_product_pages ${ textOption }`
+		);
 	}
 }

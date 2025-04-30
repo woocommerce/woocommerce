@@ -6,7 +6,7 @@ import { expect, test } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
-import { blockData, handleAddToCartAjaxSetting } from './utils';
+import { blockData } from './utils';
 
 test.describe( `${ blockData.name } Block`, () => {
 	test.beforeEach( async ( { frontendUtils } ) => {
@@ -67,9 +67,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		admin,
 	} ) => {
-		await handleAddToCartAjaxSetting( admin, page, {
-			isChecked: true,
-		} );
+		await admin.updateAddToCartAjaxSettings( false );
 		await frontendUtils.goToShop();
 
 		const blocks = await frontendUtils.getBlockByName( blockData.slug );
@@ -97,10 +95,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		} );
 
 		await expect( productElement ).toBeVisible();
-
-		await handleAddToCartAjaxSetting( admin, page, {
-			isChecked: false,
-		} );
 	} );
 
 	test( 'the filter `woocommerce_product_add_to_cart_text` should be applied', async ( {

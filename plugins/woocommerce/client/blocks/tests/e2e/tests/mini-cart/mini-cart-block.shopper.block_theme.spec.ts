@@ -91,6 +91,7 @@ test.describe( 'Shopper → Notices', () => {
 		editor,
 		admin,
 	} ) => {
+		await admin.updateAddToCartAjaxSettings( true );
 		await admin.visitSiteEditor( {
 			postId: `twentytwentyfour//header`,
 			postType: 'wp_template_part',
@@ -107,10 +108,24 @@ test.describe( 'Shopper → Notices', () => {
 			.click();
 
 		await page.goto( blockData.productPage );
-		await page.click( 'text=Add to cart' );
+
+		await page
+			.getByRole( 'button', { name: 'Add to cart', exact: true } )
+			.click();
+
+		await expect(
+			page.getByRole( 'button' ).getByText( '1 in cart' )
+		).toBeVisible();
 
 		await expect( page.getByText( 'Your cart' ) ).toBeVisible();
-		await expect( page.getByText( '(3 items)' ) ).toBeVisible();
+		await expect( page.getByText( '(1 item)' ) ).toBeVisible();
+		await expect(
+			page
+				.getByRole( 'dialog' )
+				.getByText(
+					`The quantity of "${ SIMPLE_PHYSICAL_PRODUCT_NAME }" was`
+				)
+		).toBeHidden();
 	} );
 } );
 
