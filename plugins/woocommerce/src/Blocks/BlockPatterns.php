@@ -103,6 +103,10 @@ class BlockPatterns {
 			$pattern_path      = str_contains( $pattern['source'], $this->patterns_path ) ? $pattern['source'] : $this->patterns_path . '/' . $pattern['source'];
 			$pattern['source'] = $pattern_path;
 
+			ob_start();
+			include $pattern_path;
+			$pattern['content'] = ob_get_clean();
+
 			$this->pattern_registry->register_block_pattern( $pattern_path, $pattern );
 		}
 	}
@@ -145,9 +149,6 @@ class BlockPatterns {
 
 		foreach ( $files as $file ) {
 			$data = get_file_data( $file, $default_headers );
-			ob_start();
-			include $file;
-			$data['content'] = ob_get_clean();
 			// We want to store the relative path in the cache, so we can use it later to register the pattern.
 			$data['source'] = str_replace( $this->patterns_path . '/', '', $file );
 			$patterns[]     = $data;
