@@ -190,6 +190,7 @@ const TestAccountStep = () => {
 									MAX_EXTENDED_PHASE_1_PROGRESS
 								);
 							} else {
+								// Phase 2: Do not increment progress
 								newProgress = currentProgress;
 							}
 							return newProgress;
@@ -230,8 +231,6 @@ const TestAccountStep = () => {
 						}
 
 						setPollingPhase( nextPhase ); // Update phase state
-
-						console.log( 'nextInterval', nextInterval );
 
 						// Schedule the next poll
 						pollingTimeoutRef.current = window.setTimeout(
