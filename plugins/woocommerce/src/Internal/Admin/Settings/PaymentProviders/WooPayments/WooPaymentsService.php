@@ -21,6 +21,11 @@ class WooPaymentsService {
 
 	const GATEWAY_ID = 'woocommerce_payments';
 
+	/**
+	 * The minimum required version of the WooPayments extension.
+	 */
+	const EXTENSION_MINIMUM_VERSION = '9.3.0';
+
 	const ONBOARDING_PATH_BASE = '/woopayments/onboarding';
 
 	const ONBOARDING_STEP_PAYMENT_METHODS       = 'payment_methods';
@@ -816,6 +821,16 @@ class WooPaymentsService {
 				'woocommerce_woopayments_onboarding_extension_not_active',
 				/* translators: %s: WooPayments. */
 				sprintf( esc_html__( 'The %s extension is not active.', 'woocommerce' ), 'WooPayments' ),
+				(int) WP_Http::FORBIDDEN
+			);
+		}
+
+		// If the WooPayments installed version is less than the minimum required version, we can't do anything.
+		if ( defined( 'WCPAY_VERSION_NUMBER' ) && version_compare( WCPAY_VERSION_NUMBER, self::EXTENSION_MINIMUM_VERSION, '<' ) ) {
+			throw new ApiException(
+				'woocommerce_woopayments_onboarding_extension_version',
+				/* translators: %s: WooPayments. */
+				sprintf( esc_html__( 'The %s extension is not up-to-date. Please update to the latest version and try again.', 'woocommerce' ), 'WooPayments' ),
 				(int) WP_Http::FORBIDDEN
 			);
 		}
