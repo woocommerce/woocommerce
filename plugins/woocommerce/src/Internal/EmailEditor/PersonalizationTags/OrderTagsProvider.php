@@ -83,7 +83,7 @@ class OrderTagsProvider extends AbstractTagProvider {
 					if ( ! isset( $context['order'] ) ) {
 						return '';
 					}
-					return (string) $context['order']->get_subtotal();
+					return (string) $context['order']->get_subtotal() ?? '';
 				},
 			)
 		);
@@ -97,7 +97,7 @@ class OrderTagsProvider extends AbstractTagProvider {
 					if ( ! isset( $context['order'] ) ) {
 						return '';
 					}
-					return (string) $context['order']->get_total_tax();
+					return (string) $context['order']->get_total_tax() ?? '';
 				},
 			)
 		);
@@ -111,7 +111,7 @@ class OrderTagsProvider extends AbstractTagProvider {
 					if ( ! isset( $context['order'] ) ) {
 						return '';
 					}
-					return (string) $context['order']->get_total();
+					return (string) $context['order']->get_total() ?? '';
 				},
 			)
 		);
@@ -125,7 +125,7 @@ class OrderTagsProvider extends AbstractTagProvider {
 					if ( ! isset( $context['order'] ) ) {
 						return '';
 					}
-					return $context['order']->get_payment_method_title();
+					return $context['order']->get_payment_method_title() ?? '';
 				},
 			)
 		);
@@ -139,7 +139,7 @@ class OrderTagsProvider extends AbstractTagProvider {
 					if ( ! isset( $context['order'] ) ) {
 						return '';
 					}
-					return $context['order']->get_checkout_payment_url();
+					return $context['order']->get_checkout_payment_url() ?? '';
 				},
 			)
 		);

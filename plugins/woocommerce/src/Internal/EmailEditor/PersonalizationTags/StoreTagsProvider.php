@@ -40,7 +40,7 @@ class StoreTagsProvider extends AbstractTagProvider {
 				'woocommerce/store-url',
 				__( 'Store', 'woocommerce' ),
 				function (): string {
-					return wc_get_page_permalink( 'shop' );
+					return esc_attr( wc_get_page_permalink( 'shop' ) );
 				},
 			)
 		);
@@ -66,7 +66,7 @@ class StoreTagsProvider extends AbstractTagProvider {
 				'woocommerce/store-address',
 				__( 'Store', 'woocommerce' ),
 				function (): string {
-					return WC()->mailer->get_store_address();
+					return WC()->mailer->get_store_address() ?? '';
 				},
 			)
 		);
