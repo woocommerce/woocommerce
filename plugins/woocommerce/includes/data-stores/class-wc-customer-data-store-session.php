@@ -118,9 +118,9 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 					$data['meta_data'] = $session_value;
 				}
 			} else {
-				$session_value        = (string) $customer->{"get_$function_key"}( 'edit' );
-				if ( '' !== $session_value || isset($customer->get_changes()[ $session_key ] ) ) {
-					$data[ $session_key ] = (string) $session_value;
+				$session_value = (string) $customer->{"get_$function_key"}( 'edit' );
+				if ( '' !== $session_value || isset( $customer->get_changes()[ $session_key ] ) ) {
+					$data[ $session_key ] = $session_value;
 				}
 			}
 		}
