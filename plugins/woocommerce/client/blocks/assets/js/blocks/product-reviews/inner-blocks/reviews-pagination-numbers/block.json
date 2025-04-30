@@ -4,7 +4,7 @@
 	"name": "woocommerce/product-reviews-pagination-numbers",
 	"title": "Product Reviews Page Numbers",
 	"category": "woocommerce",
-	"parent": [ "woocommerce/product-reviews-pagination" ],
+	"ancestor": [ "woocommerce/product-reviews-pagination" ],
 	"description": "Displays a list of page numbers for product reviews pagination.",
 	"textdomain": "woocommerce",
 	"usesContext": [ "postId" ],

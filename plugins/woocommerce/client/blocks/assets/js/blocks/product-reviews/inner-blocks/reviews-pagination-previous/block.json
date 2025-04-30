@@ -4,7 +4,7 @@
 	"name": "woocommerce/product-reviews-pagination-previous",
 	"title": "Product Reviews Previous Page",
 	"category": "woocommerce",
-	"parent": [ "woocommerce/product-reviews-pagination" ],
+	"ancestor": [ "woocommerce/product-reviews-pagination" ],
 	"description": "Displays the previous product review's page link.",
 	"textdomain": "woocommerce",
 	"attributes": {
