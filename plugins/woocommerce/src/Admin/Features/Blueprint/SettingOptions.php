@@ -4,35 +4,25 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint;
 
-use Automattic\WooCommerce\Blueprint\UseWPFunctions;
-use Automattic\WooCommerce\Blueprint\Util;
-use WC_Admin_Settings;
-use WC_Settings_Page;
-
 /**
  * Handles getting options from WooCommerce settings pages.
  *
  * Class SettingOptions
  */
 class SettingOptions {
-	use UseWPFunctions;
+	/**
+	 * Setting option controller.
+	 *
+	 * @var \WC_REST_Setting_Options_Controller
+	 */
+	private $setting_option_controller;
+
 
 	/**
-	 * Array of WC_Settings_Page objects.
-	 *
-	 * @var WC_Settings_Page[]
-	 */
-	private array $setting_pages;
-	/**
 	 * Constructor.
-	 *
-	 * @param array $setting_pages Optional array of setting pages.
 	 */
-	public function __construct( array $setting_pages = array() ) {
-		if ( empty( $setting_pages ) ) {
-			$setting_pages = WC_Admin_Settings::get_settings_pages();
-		}
-		$this->setting_pages = $setting_pages;
+	public function __construct() {
+		$this->setting_option_controller = new \WC_REST_Setting_Options_Controller();
 	}
 
 	/**
@@ -40,126 +30,56 @@ class SettingOptions {
 	 *
 	 * @param string $page_id The page ID.
 	 * @return array
+	 *
+	 * @throws \Exception If the settings page is not found.
 	 */
 	public function get_page_options( $page_id ) {
-		$page      = $this->get_page( $page_id );
-		$page_info = $this->get_page_info( $page );
-		$options   = $this->merge_page_info_options( $page_info );
-		return array_column( $options, 'value', 'id' );
+		$settings = $this->setting_option_controller->get_group_settings( $page_id );
+
+		if ( is_wp_error( $settings ) ) {
+			throw new \Exception( esc_html( $settings->get_error_message() ) );
+		}
+
+		$page_options = array();
+
+		foreach ( $settings as $setting ) {
+			// Skip if the setting type is not valid.
+			if ( ! $this->setting_option_controller->is_setting_type_valid( $setting['type'] ) ) {
+				continue;
+			}
+
+			$key = is_array( $setting['option_key'] ) ? $setting['option_key'][0] : $setting['option_key'];
+
+			// Skip if the option key is already in the page options.
+			if ( in_array( $key, $page_options, true ) ) {
+				continue;
+			}
+
+			$page_options[ $key ] = get_option( $key, null );
+		}
+
+		return $page_options;
 	}
 
 	/**
 	 * Get a settings page by ID.
 	 *
-	 * @param string $page_id The page ID.
-	 * @return WC_Settings_Page|null
+	 * @deprecated 9.9.0 This method is no longer used.
+	 * @return null
 	 */
-	public function get_page( $page_id ) {
-		foreach ( $this->setting_pages as $page ) {
-			$id = $page->get_id();
-			if ( $id === $page_id ) {
-				return $page;
-			}
-		}
-
+	public function get_page() {
+		wc_deprecated_function( __METHOD__, '9.9.0' );
 		return null;
 	}
 
 	/**
 	 * Get information about a settings page.
 	 *
-	 * @param WC_Settings_Page $page The settings page.
+	 * @deprecated 9.9.0 This method is no longer used.
 	 * @return array
 	 */
-	protected function get_page_info( WC_Settings_Page $page ) {
-		$info = array(
-			'label'    => $page->get_label(),
-			'sections' => array(),
-			'options'  => array(),
-
-		);
-
-		foreach ( $page->get_sections() as $id => $section ) {
-			$section_id                      = Util::camel_to_snake( strtolower( $section ) );
-			$info['sections'][ $section_id ] = array(
-				'label'       => $section,
-				'subsections' => array(),
-			);
-
-			$settings = $page->get_settings_for_section( $id );
-
-			// Get subsections.
-			$subsections = array_filter(
-				$settings,
-				function ( $setting ) {
-					return isset( $setting['type'] ) && 'title' === $setting['type'] && isset( $setting['title'] );
-				}
-			);
-
-			foreach ( $subsections as $subsection ) {
-				if ( ! isset( $subsection['id'] ) ) {
-					$subsection['id'] = Util::camel_to_snake( strtolower( $subsection['title'] ) );
-				}
-
-				$info['sections'][ $section_id ]['subsections'][ $subsection['id'] ] = array(
-					'label' => $subsection['title'],
-				);
-			}
-
-			// Get options.
-			$info['sections'][ $section_id ]['options'] = $this->get_page_section_settings( $settings, $page->get_id(), $section_id );
-		}
-		return $info;
-	}
-
-
-	/**
-	 * Get settings for a specific page section.
-	 *
-	 * @param array  $settings The settings.
-	 * @param string $page The page ID.
-	 * @param string $section The section ID.
-	 * @return array
-	 */
-	private function get_page_section_settings( $settings, $page, $section = '' ) {
-		$current_title = '';
-		$data          = array();
-		foreach ( $settings as $setting ) {
-			if ( 'sectionend' === $setting['type'] || 'slotfill_placeholder' === $setting['type'] || ! isset( $setting['id'] ) ) {
-				continue;
-			}
-
-			if ( 'title' === $setting['type'] ) {
-				$current_title = Util::camel_to_snake( strtolower( $setting['title'] ) );
-			} else {
-				$location = $page . '.' . $section;
-				if ( $current_title ) {
-					$location .= '.' . $current_title;
-				}
-
-				$data[] = array(
-					'id'       => $setting['id'],
-					'value'    => $this->wp_get_option( $setting['id'], $setting['default'] ?? null ),
-					'title'    => $setting['title'] ?? $setting['desc'] ?? '',
-					'location' => $location,
-				);
-			}
-		}
-		return $data;
-	}
-
-	/**
-	 * Merge page info options.
-	 *
-	 * @param array $page_info The page info.
-	 *
-	 * @return array|mixed
-	 */
-	private function merge_page_info_options( array $page_info ) {
-		$options = $page_info['options'];
-		foreach ( $page_info['sections'] as $section ) {
-			$options = array_merge( $options, $section['options'] );
-		}
-		return $options;
+	protected function get_page_info() {
+		wc_deprecated_function( __METHOD__, '9.9.0' );
+		return array();
 	}
 }
