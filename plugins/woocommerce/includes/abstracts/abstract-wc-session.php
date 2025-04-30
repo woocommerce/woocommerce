@@ -121,7 +121,7 @@ abstract class WC_Session {
 		$serialized_original_value = $this->_data[ $key ] ?? null;
 		$serialized_value          = maybe_serialize( $value );
 
-		if ( $serialized_original_value === $serialized_value || maybe_unserialize( $serialized_original_value ) === $value  ) {
+		if ( $serialized_original_value === $serialized_value || maybe_unserialize( $serialized_original_value ) === $value ) {
 			return;
 		}
 
