@@ -1,15 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\Blocks\BlockTypes;
+namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
+use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 use WP_Block;
 
 /**
  * Block type for grouped product selector item in add to cart with options.
  * It's responsible to render each child product in a form of a list item.
  */
-class AddToCartWithOptionsGroupedProductSelectorItemTemplate extends AbstractBlock {
+class GroupedProductSelectorItemTemplate extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
 
@@ -39,20 +42,15 @@ class AddToCartWithOptionsGroupedProductSelectorItemTemplate extends AbstractBlo
 		$post    = get_post( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$product = wc_get_product( $product_id );
 
-		// Get an instance of the current Post Template block.
-		$block_instance = $block->parsed_block;
-
-		$new_block = new WP_Block(
-			$block_instance,
+		// Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
+		// `render_callback` and ensure that no wrapper markup is included.
+		$block_content = AddToCartWithOptionsUtils::render_block_with_context(
+			$block,
 			array(
 				'postType' => 'product',
 				'postId'   => $post->ID,
 			),
 		);
-
-		// Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
-		// `render_callback` and ensure that no wrapper markup is included.
-		$block_content = $new_block->render( array( 'dynamic' => false ) );
 
 		$post    = $previous_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$product = $previous_product;

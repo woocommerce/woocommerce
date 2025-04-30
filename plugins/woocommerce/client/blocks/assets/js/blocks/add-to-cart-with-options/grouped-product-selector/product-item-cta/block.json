@@ -15,6 +15,5 @@
 		"inserter": false,
 		"interactivity": true
 	},
-	"viewScriptModule": "woocommerce/add-to-cart-with-options-grouped-product-selector-item-cta",
 	"style": "file:../woocommerce/add-to-cart-with-options-grouped-product-selector-item-cta-style.css"
 }

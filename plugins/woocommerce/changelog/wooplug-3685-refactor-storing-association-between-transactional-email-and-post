@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Use only wp options table for saving WooCommerce email type - email editor post association

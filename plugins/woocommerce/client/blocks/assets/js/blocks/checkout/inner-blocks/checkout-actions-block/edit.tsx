@@ -120,7 +120,7 @@ export const Edit = ( {
 			<div className="wc-block-checkout__actions">
 				<div className="wc-block-checkout__actions_row">
 					{ showReturnToCart && (
-						<ReturnToCartButton href="#cart-page-placeholder">
+						<ReturnToCartButton element="span">
 							<RichText
 								multiline={ false }
 								allowedFormats={ [] }
