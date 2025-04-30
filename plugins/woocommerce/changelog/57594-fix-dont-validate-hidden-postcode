@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Don't run postcode validation for hidden postcodes.
