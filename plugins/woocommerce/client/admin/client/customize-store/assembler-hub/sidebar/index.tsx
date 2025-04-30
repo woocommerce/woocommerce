@@ -20,7 +20,7 @@ import { SidebarNavigationScreenTypography } from './sidebar-navigation-screen-t
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 import { SaveHub } from './save-hub';
 // In some cases, the assembler is loaded in an iframe, so we have to re-apply the filter.
-import '~/customize-store/design-with-ai/entrepreneur-flow';
+import '~/customize-store/entrepreneur-flow';
 import {
 	SidebarContent,
 	SidebarNavigationAnimationDirection,
