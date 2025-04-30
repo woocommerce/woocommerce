@@ -2953,3 +2953,29 @@ function wc_update_961_migrate_default_email_base_color() {
 function wc_update_980_remove_order_attribution_install_banner_dismissed_option() {
 	delete_option( 'woocommerce_order_attribution_install_banner_dismissed' );
 }
+
+/**
+ * Enable the new Payments Settings page feature for all stores.
+ *
+ * If there is a WCAdmin feature flag set, we will respect that and migrate it to the core feature flag.
+ */
+function wc_update_983_enable_new_payments_settings_page_feature() {
+	$option_name = 'woocommerce_feature_reactify-classic-payments-settings_enabled';
+
+	// First, migrate the WCAdmin feature flag to the new feature flag.
+	// If there is a value saved for the old feature flag, we will respect it.
+	$wc_admin_helper_features = get_option( 'wc_admin_helper_feature_values', array() );
+	foreach ( $wc_admin_helper_features as $feature => $value ) {
+		if ( 'reactify-classic-payments-settings' === $feature ) {
+			update_option( $option_name, filter_var( $value, FILTER_VALIDATE_BOOLEAN ) ? 'yes' : 'no' );
+
+			// Remove the old feature flag value to avoid further migrations.
+			unset( $wc_admin_helper_features[ $feature ] );
+			update_option( 'wc_admin_helper_feature_values', $wc_admin_helper_features );
+			return;
+		}
+	}
+
+	// If there is no WCAdmin feature flag to migrate, one-time force enable the feature.
+	update_option( $option_name, 'yes' );
+}
