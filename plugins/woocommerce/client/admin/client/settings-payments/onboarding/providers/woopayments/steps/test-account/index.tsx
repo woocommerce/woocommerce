@@ -72,7 +72,7 @@ const TestAccountStep = () => {
 
 	// Component State
 	const [ status, setStatus ] = useState< Status >( 'idle' );
-	const [ progress, setProgress ] = useState( 0 );
+	const [ progress, setProgress ] = useState( 20 );
 	const [ errorMessage, setErrorMessage ] = useState< string | undefined >();
 	const [ pollingPhase, setPollingPhase ] = useState( 0 ); // 0: initial, 1: extended 1, 2: extended 2
 	const [ retryCounter, setRetryCounter ] = useState( 0 );
