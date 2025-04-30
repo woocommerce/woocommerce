@@ -77,21 +77,6 @@ module.exports = {
 	],
 	module: {
 		rules: [
-			{
-				test: /\.[jt]sx?$/,
-				use: [
-					{
-						loader: require.resolve( 'babel-loader' ),
-						options: {
-							presets: [
-								require.resolve(
-									'@wordpress/babel-preset-default'
-								),
-							],
-						},
-					},
-				],
-			},
 			...moduleConfig.module.rules.filter(
 				( rule ) =>
 					! rule.test.test( '.css' ) &&
