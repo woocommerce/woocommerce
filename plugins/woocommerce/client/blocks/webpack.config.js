@@ -14,6 +14,7 @@ const {
 } = require( './bin/webpack-configs.js' );
 
 const interactivityBlocksConfig = require( './bin/webpack-config-interactive-blocks.js' );
+const interactivityAPIConfig = require( './bin/webpack-config-interactivity.js' );
 
 // Only options shared between all configs should be defined here.
 const sharedConfig = {
@@ -98,6 +99,11 @@ const InteractivityBlocksConfig = {
 	...interactivityBlocksConfig,
 };
 
+const InteractivityAPIConfig = {
+	...sharedConfig,
+	...interactivityAPIConfig,
+};
+
 module.exports = [
 	CartAndCheckoutFrontendConfig,
 	CoreConfig,
@@ -108,4 +114,5 @@ module.exports = [
 	SiteEditorConfig,
 	StylingConfig,
 	InteractivityBlocksConfig,
+	InteractivityAPIConfig,
 ];

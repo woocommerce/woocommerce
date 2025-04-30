@@ -32,21 +32,7 @@ const entries = {
 		'./assets/js/base/stores/woocommerce/cart.ts',
 	'@woocommerce/stores/store-notices':
 		'./assets/js/base/stores/store-notices.ts',
-
-	'@wordpress/interactivity': path.resolve(
-		__dirname,
-		'..',
-		'node_modules/@wordpress/interactivity/src/index.ts'
-	),
-
-	'@wordpress/interactivity-router': path.resolve(
-		__dirname,
-		'..',
-		'node_modules/@wordpress/interactivity-router/src/index.ts'
-	),
 };
-
-const [ jsRule, ...otherRules ] = moduleConfig.module.rules;
 
 module.exports = {
 	entry: entries,
@@ -78,10 +64,7 @@ module.exports = {
 			combineAssets: true,
 			combinedOutputFile: './interactivity-blocks-frontend-assets.php',
 			requestToExternalModule( request ) {
-				if (
-					request.startsWith( '@woocommerce/stores/' ) ||
-					request.startsWith( '@wordpress/interactivity' )
-				) {
+				if ( request.startsWith( '@woocommerce/stores/' ) ) {
 					return `import ${ request }`;
 				}
 			},
@@ -109,7 +92,7 @@ module.exports = {
 					},
 				],
 			},
-			...otherRules.filter(
+			...moduleConfig.module.rules.filter(
 				( rule ) =>
 					! rule.test.test( '.css' ) &&
 					! rule.test.test( '.scss' ) &&
