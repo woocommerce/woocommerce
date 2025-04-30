@@ -3,9 +3,8 @@
  */
 import { memo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { PluginSidebar, PluginSidebarMoreMenuItem } from '@wordpress/editor';
 import { useSelect } from '@wordpress/data';
-import { ComplementaryArea } from '@wordpress/interface';
-import { ComponentProps } from 'react';
 import { styles } from '@wordpress/icons';
 import {
 	__experimentalNavigatorProvider as NavigatorProvider,
@@ -15,7 +14,7 @@ import {
 /**
  * Internal dependencies
  */
-import { storeName, stylesSidebarId } from '../../store';
+import { storeName } from '../../store';
 import {
 	ScreenTypography,
 	ScreenTypographyElement,
@@ -24,9 +23,7 @@ import {
 	ScreenColors,
 } from './screens';
 
-type Props = ComponentProps< typeof ComplementaryArea >;
-
-export function RawStylesSidebar( props: Props ): JSX.Element {
+export function RawStylesSidebar(): JSX.Element {
 	const { userCanEditGlobalStyles } = useSelect( ( select ) => {
 		const { canEdit } = select( storeName ).canUserEditGlobalEmailStyles();
 		return {
@@ -36,49 +33,54 @@ export function RawStylesSidebar( props: Props ): JSX.Element {
 
 	return (
 		userCanEditGlobalStyles && (
-			<ComplementaryArea
-				identifier={ stylesSidebarId }
-				className="woocommerce-email-editor-styles-panel"
-				header={ __( 'Styles', 'woocommerce' ) }
-				closeLabel={ __( 'Close styles sidebar', 'woocommerce' ) }
-				icon={ styles }
-				scope={ storeName }
-				{ ...props }
-			>
-				<NavigatorProvider initialPath="/">
-					<NavigatorScreen path="/">
-						<ScreenRoot />
-					</NavigatorScreen>
+			<>
+				<PluginSidebarMoreMenuItem
+					target="email-styles-sidebar"
+					icon={ styles }
+				>
+					{ __( 'Email styles', 'woocommerce' ) }
+				</PluginSidebarMoreMenuItem>
+				<PluginSidebar
+					name="email-styles-sidebar"
+					icon={ styles }
+					title={ __( 'Styles', 'woocommerce' ) }
+					className="woocommerce-email-editor-styles-panel"
+				>
+					<NavigatorProvider initialPath="/">
+						<NavigatorScreen path="/">
+							<ScreenRoot />
+						</NavigatorScreen>
 
-					<NavigatorScreen path="/typography">
-						<ScreenTypography />
-					</NavigatorScreen>
+						<NavigatorScreen path="/typography">
+							<ScreenTypography />
+						</NavigatorScreen>
 
-					<NavigatorScreen path="/typography/text">
-						<ScreenTypographyElement element="text" />
-					</NavigatorScreen>
+						<NavigatorScreen path="/typography/text">
+							<ScreenTypographyElement element="text" />
+						</NavigatorScreen>
 
-					<NavigatorScreen path="/typography/link">
-						<ScreenTypographyElement element="link" />
-					</NavigatorScreen>
+						<NavigatorScreen path="/typography/link">
+							<ScreenTypographyElement element="link" />
+						</NavigatorScreen>
 
-					<NavigatorScreen path="/typography/heading">
-						<ScreenTypographyElement element="heading" />
-					</NavigatorScreen>
+						<NavigatorScreen path="/typography/heading">
+							<ScreenTypographyElement element="heading" />
+						</NavigatorScreen>
 
-					<NavigatorScreen path="/typography/button">
-						<ScreenTypographyElement element="button" />
-					</NavigatorScreen>
+						<NavigatorScreen path="/typography/button">
+							<ScreenTypographyElement element="button" />
+						</NavigatorScreen>
 
-					<NavigatorScreen path="/colors">
-						<ScreenColors />
-					</NavigatorScreen>
+						<NavigatorScreen path="/colors">
+							<ScreenColors />
+						</NavigatorScreen>
 
-					<NavigatorScreen path="/layout">
-						<ScreenLayout />
-					</NavigatorScreen>
-				</NavigatorProvider>
-			</ComplementaryArea>
+						<NavigatorScreen path="/layout">
+							<ScreenLayout />
+						</NavigatorScreen>
+					</NavigatorProvider>
+				</PluginSidebar>
+			</>
 		)
 	);
 }

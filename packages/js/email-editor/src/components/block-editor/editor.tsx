@@ -15,6 +15,7 @@ import { useNavigateToEntityRecord } from '../../hooks/use-navigate-to-entity-re
 import { Editor } from '../../private-apis';
 import { useEmailCss } from '../../hooks';
 import { TemplateSelection } from '../template-select';
+import { StylesSidebar } from '../styles-sidebar';
 
 export function InnerEditor( {
 	postId: initialPostId,
@@ -96,6 +97,7 @@ export function InnerEditor( {
 			>
 				<PostLockedModal />
 				<TemplateSelection />
+				<StylesSidebar />
 			</Editor>
 		</SlotFillProvider>
 	);
