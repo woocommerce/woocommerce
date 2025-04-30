@@ -170,7 +170,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
 					array( 'post_id' => $post_id ),
 					'wc_delete_related_product_transients_group'
 				);
-				$scheduled[ $cache_key ] = ! empty( $existing );
+				$scheduled[ $cache_key ] = null !== $existing;
 			}
 
 			if ( ! $scheduled[ $cache_key ] ) {
