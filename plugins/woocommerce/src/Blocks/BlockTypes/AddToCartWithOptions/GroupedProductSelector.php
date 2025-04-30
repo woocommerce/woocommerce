@@ -1,12 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\Blocks\BlockTypes;
+namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
+
+use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 
 /**
  * Block type for grouped product selector in add to cart with options.
  */
-class AddToCartWithOptionsGroupedProductSelector extends AbstractBlock {
+class GroupedProductSelector extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
 
