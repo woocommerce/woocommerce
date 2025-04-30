@@ -248,11 +248,9 @@ export const OnboardingProvider: React.FC< {
 				closeModal: () => {
 					closeModal();
 
-					// Reset the onboarding data both in the store and local state.
-					// This is important to ensure that the onboarding data is cleared when the modal is closed.
-					// This is to avoid stale data when the modal is opened again.
+					// Reset the onboarding data in the local state.
+					// The onboarding data store is invalidated on modal open to ensure the latest data is fetched.
 					resetLocalState();
-					invalidateWooPaymentsOnboarding( 'getOnboardingData' );
 
 					// Invalidate the getPaymentProviders store selector to ensure the latest data is fetched.
 					// This is important to ensure that the payment providers buttons are up to date.
