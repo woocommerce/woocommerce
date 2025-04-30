@@ -267,13 +267,13 @@ const TestAccountStep = () => {
 	const getPhaseMessage = ( phase: number ) => {
 		if ( phase === 1 ) {
 			return __(
-				"The test account creation is taking a bit longer than expected, but don't worry—we're on it! Please bear with us for a few seconds more as we set everything up for your store.",
+				"The test account creation is taking a bit longer than expected, but don't worry — we're on it! Please bear with us for a few seconds more as we set everything up for your store.",
 				'woocommerce'
 			);
 		}
 		if ( phase === 2 ) {
 			return __(
-				"Thank you for your patience! Unfortunately, the test account creation is taking a bit longer than we anticipated. But don't worry—we won't give up! Feel free to close this modal and check back later. We appreciate your understanding!",
+				"Thank you for your patience! Unfortunately, the test account creation is taking a bit longer than we anticipated. But don't worry — we won't give up! Feel free to close this modal and check back later. We appreciate your understanding!",
 				'woocommerce'
 			);
 		}
