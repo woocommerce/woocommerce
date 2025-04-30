@@ -56,7 +56,10 @@ const POLLING_INTERVAL_INITIAL = 3000; // 3 seconds is the initial polling inter
 const POLLING_INTERVAL_EXTENDED_1 = 5000; // 5 seconds is the extended polling interval for phase 1
 const POLLING_INTERVAL_EXTENDED_2 = 7000; // 7 seconds is the extended polling interval for phase 2
 const EXTENDED_POLLING_PHASE_1_DURATION = 30000; // 30 seconds is the duration of phase 1
-const MAX_INITIAL_PROGRESS = 90; // Cap progress at 90%
+const MAX_INITIAL_PROGRESS = 90; // Cap progress at 90% for the initial phase
+const MAX_EXTENDED_PHASE_1_PROGRESS = 96; // Cap progress at 96% for the extended phase 1
+const INITIAL_PHASE_INCREMENT = 5; // Increment progress by 20% for the initial phase
+const EXTENDED_PHASE_1_INCREMENT = 1; // Increment progress by 1% for the extended phase 1
 
 // Status types for the component
 type Status = 'idle' | 'initializing' | 'polling' | 'success' | 'error';
