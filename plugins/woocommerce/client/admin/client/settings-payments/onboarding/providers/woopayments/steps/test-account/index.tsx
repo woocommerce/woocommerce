@@ -148,6 +148,9 @@ const TestAccountStep = () => {
 		// -- Polling Phase --
 		if ( status === 'polling' ) {
 			const poll = () => {
+				// Clear any existing timeout before starting a new one
+				clearTimers();
+
 				apiFetch< StepCheckResponse >( {
 					url: currentStep?.actions?.check?.href,
 					method: 'POST',
