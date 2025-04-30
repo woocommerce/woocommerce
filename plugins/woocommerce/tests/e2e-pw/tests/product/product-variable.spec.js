@@ -249,7 +249,11 @@ test.describe(
 				);
 			}
 
-			await page.getByRole( 'link', { name: 'View cart' } ).click();
+			await expect(
+				page.getByRole( 'button' ).getByText( '1 in cart' )
+			).toBeVisible();
+
+			await page.goto( 'cart/' );
 
 			const rowsLocator = 'tr.wc-block-cart-items__row';
 
