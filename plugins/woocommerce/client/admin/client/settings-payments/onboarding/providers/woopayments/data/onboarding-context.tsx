@@ -229,6 +229,14 @@ export const OnboardingProvider: React.FC< {
 		);
 	}, [ stateStoreSteps, areStepDependenciesCompleted ] );
 
+	useEffect(() => {
+		// Reset the onboarding data both in the store and local state when context mounts
+		// This is important to ensure that the onboarding data is cleared when the modal is closed.
+		// This is to avoid stale data when the modal is opened again.
+		resetLocalState();
+		invalidateWooPaymentsOnboarding( 'getOnboardingData' );
+	}, []);
+
 	const resetLocalState = () => {
 		setStateStoreSteps( [] );
 		setIsStateStoreLoading( true );
@@ -247,12 +255,6 @@ export const OnboardingProvider: React.FC< {
 				getStepByKey,
 				closeModal: () => {
 					closeModal();
-
-					// Reset the onboarding data both in the store and local state.
-					// This is important to ensure that the onboarding data is cleared when the modal is closed.
-					// This is to avoid stale data when the modal is opened again.
-					resetLocalState();
-					invalidateWooPaymentsOnboarding( 'getOnboardingData' );
 
 					// Invalidate the getPaymentProviders store selector to ensure the latest data is fetched.
 					// This is important to ensure that the payment providers buttons are up to date.
