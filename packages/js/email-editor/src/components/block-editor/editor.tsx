@@ -20,6 +20,7 @@ import {
 	unlockPatternsRelatedSelectorsFromCoreStore,
 } from '../../private-apis';
 import { useEmailCss } from '../../hooks';
+import { TemplateSelection } from '../template-select';
 
 
 export function InnerEditor( {
@@ -122,6 +123,7 @@ export function InnerEditor( {
 				styles={ styles }
 			>
 				<PostLockedModal />
+				<TemplateSelection />
 			</Editor>
 		</SlotFillProvider>
 	);
