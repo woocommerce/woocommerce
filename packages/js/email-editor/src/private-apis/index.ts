@@ -34,18 +34,6 @@ const { ExperimentalBlockCanvas: BlockCanvas } = unlock(
 const { Tabs } = unlock( componentsPrivateApis );
 
 /**
- * We need the following selectors from core store to fetch block patterns for the email post type.
- *
- * @param select - select function from the core store.
- */
-const unlockPatternsRelatedSelectorsFromCoreStore = ( select ) => {
-	const { hasFinishedResolution, getBlockPatternsForPostType } = unlock(
-		select( coreStore )
-	);
-	return { hasFinishedResolution, getBlockPatternsForPostType };
-};
-
-/**
  * Selector getEnabledClientIdsTree for block-editor store is used to find nearest editable block to select on click in
  * useSelectNearestEditableBlock
  * We copied useSelectNearestEditableBlock from Gutenberg.
@@ -76,7 +64,6 @@ export {
 	BlockCanvas,
 	Tabs,
 	StylesColorPanel,
-	unlockPatternsRelatedSelectorsFromCoreStore,
 	unlockGetEnabledClientIdsTree,
 	useGlobalStylesOutputWithConfig,
 	Editor,
