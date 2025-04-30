@@ -161,7 +161,8 @@ const addToCartWithOptionsStore = store(
 				} );
 			},
 		},
-	}
+	},
+	{ lock: true }
 );
 
 export type AddToCartWithOptionsStore = typeof addToCartWithOptionsStore;
