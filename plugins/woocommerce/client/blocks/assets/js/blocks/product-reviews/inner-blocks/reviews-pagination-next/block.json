@@ -3,7 +3,7 @@
 	"apiVersion": 3,
 	"name": "woocommerce/product-reviews-pagination-next",
 	"title": "Product Reviews Next Page",
-	"category": "theme",
+	"category": "woocommerce",
 	"parent": [ "woocommerce/product-reviews-pagination" ],
 	"description": "Displays the next product review's page link.",
 	"textdomain": "woocommerce",

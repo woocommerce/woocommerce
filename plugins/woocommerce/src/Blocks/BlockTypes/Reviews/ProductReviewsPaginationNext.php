@@ -30,7 +30,7 @@ class ProductReviewsPaginationNext extends AbstractBlock {
 
 		$comment_vars     = build_comment_query_vars_from_block( $block );
 		$max_page         = ( new \WP_Comment_Query( $comment_vars ) )->max_num_pages;
-		$default_label    = __( 'Newer Reviews' );
+		$default_label    = __( 'Newer Reviews', 'woocommerce' );
 		$label            = isset( $attributes['label'] ) && ! empty( $attributes['label'] ) ? $attributes['label'] : $default_label;
 		$pagination_arrow = $this->get_pagination_arrow( $block );
 

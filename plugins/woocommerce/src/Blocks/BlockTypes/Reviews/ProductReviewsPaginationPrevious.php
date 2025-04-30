@@ -26,7 +26,7 @@ class ProductReviewsPaginationPrevious extends AbstractBlock {
 		$default_label    = __( 'Older Reviews', 'woocommerce' );
 		$label            = isset( $attributes['label'] ) && ! empty( $attributes['label'] ) ? $attributes['label'] : $default_label;
 		$pagination_arrow = $this->get_pagination_arrow( $block );
-		
+
 		if ( $pagination_arrow ) {
 			$label = $pagination_arrow . $label;
 		}

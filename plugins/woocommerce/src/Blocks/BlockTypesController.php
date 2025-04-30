@@ -537,6 +537,7 @@ final class BlockTypesController {
 				$block_types[] = 'AddToCartWithOptions\GroupedProductSelectorItemTemplate';
 				$block_types[] = 'AddToCartWithOptions\GroupedProductSelectorItemCTA';
 			}
+
 			$block_types[] = 'BlockifiedProductDetails';
 			$block_types[] = 'ProductDescription';
 			$block_types[] = 'ProductSpecifications';
