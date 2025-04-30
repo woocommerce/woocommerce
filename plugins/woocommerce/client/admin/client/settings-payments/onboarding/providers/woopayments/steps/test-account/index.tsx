@@ -26,7 +26,8 @@ interface StepCheckResponse {
 
 const TestDriveLoader: React.FunctionComponent< {
 	progress: number;
-} > = ( { progress } ) => (
+	message?: string;
+} > = ( { progress, message } ) => (
 	<Loader className="woocommerce-payments-test-account-step__preloader">
 		<Loader.Layout className="woocommerce-payments-test-account-step__preloader-layout">
 			<Loader.Illustration>
@@ -42,10 +43,11 @@ const TestDriveLoader: React.FunctionComponent< {
 			</Loader.Title>
 			<Loader.ProgressBar progress={ progress ?? 0 } />
 			<Loader.Sequence interval={ 0 }>
-				{ __(
-					"In just a few moments, you'll be ready to test payments on your store.",
-					'woocommerce'
-				) }
+				{ message ||
+					__(
+						"In just a few moments, you'll be ready to test payments on your store.",
+						'woocommerce'
+					) }
 			</Loader.Sequence>
 		</Loader.Layout>
 	</Loader>
@@ -262,6 +264,22 @@ const TestAccountStep = () => {
 		}
 	}, [ retryCounter, resetState ] );
 
+	const getPhaseMessage = ( phase: number ) => {
+		if ( phase === 1 ) {
+			return __(
+				"The test account creation is taking a bit longer than expected, but don't worry—we're on it! Please bear with us for a few seconds more as we set everything up for your store.",
+				'woocommerce'
+			);
+		}
+		if ( phase === 2 ) {
+			return __(
+				"Thank you for your patience! Unfortunately, the test account creation is taking a bit longer than we anticipated. But don't worry—we won't give up! Feel free to close this modal and check back later. We appreciate your understanding!",
+				'woocommerce'
+			);
+		}
+		return undefined;
+	};
+
 	if ( status === 'success' ) {
 		// Render success state
 		return (
@@ -438,47 +456,12 @@ const TestAccountStep = () => {
 				</Notice>
 			) }
 
-			{ /* Informational notice for phase 1 */ }
-			{ status === 'polling' && pollingPhase === 1 && (
-				<Notice
-					status="info"
-					isDismissible={ false }
-					className="woocommerce-payments-test-account-step__info-notice"
-				>
-					<p>
-						{ __(
-							"The test account creation is taking a bit longer than expected, but don't worry—we're on it! Please bear with us for a few seconds more as we set everything up for your store.",
-							'woocommerce'
-						) }
-					</p>
-				</Notice>
-			) }
-
-			{ /* Informational notice for phase 2 */ }
-			{ status === 'polling' && pollingPhase === 2 && (
-				<Notice
-					status="info"
-					isDismissible={ false }
-					className="woocommerce-payments-test-account-step__info-notice"
-				>
-					<p>
-						{ __(
-							"Thank you for your patience! Unfortunately, the test account creation is taking a bit longer than we anticipated. But don't worry—we won't give up!",
-							'woocommerce'
-						) }
-					</p>
-					<p>
-						{ __(
-							'Feel free to close this modal and check back later. We appreciate your understanding!',
-							'woocommerce'
-						) }
-					</p>
-				</Notice>
-			) }
-
 			{ /* Loader - shown during initializing and polling */ }
 			{ ( status === 'initializing' || status === 'polling' ) && (
-				<TestDriveLoader progress={ progress } />
+				<TestDriveLoader
+					progress={ progress }
+					message={ getPhaseMessage( pollingPhase ) }
+				/>
 			) }
 		</div>
 	);
