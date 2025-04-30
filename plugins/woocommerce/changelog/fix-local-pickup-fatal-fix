@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add defensive checks against ShippingController->register_local_pickup

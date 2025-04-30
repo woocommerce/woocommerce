@@ -1,15 +1,8 @@
 {
 	"name": "woocommerce/add-to-cart-with-options-quantity-selector",
 	"title": "Quantity Selector (Experimental)",
-	"description": "Display an input field to select the number of products to add to cart.",
+	"description": "Display an input field with stepper to select the number of products to add to cart.",
 	"category": "woocommerce-product-elements",
-	"attributes": {
-		"quantitySelectorStyle": {
-			"type": "string",
-			"enum": [ "input", "stepper" ],
-			"default": "input"
-		}
-	},
 	"keywords": [ "WooCommerce" ],
 	"usesContext": [ "postId" ],
 	"ancestor": [ "woocommerce/add-to-cart-with-options" ],
@@ -18,8 +11,5 @@
 	"supports": {
 		"interactivity": true
 	},
-	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"viewScriptModule": "woocommerce/add-to-cart-with-options-quantity-selector",
-	"style": "file:../woocommerce/add-to-cart-with-options-quantity-selector-style.css",
-	"editorStyle": "file:../woocommerce/add-to-cart-with-options-quantity-selector-editor.css"
+	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

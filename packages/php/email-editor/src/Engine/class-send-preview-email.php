@@ -93,6 +93,8 @@ class Send_Preview_Email {
 			$language
 		);
 
+		$rendered_data = apply_filters( 'woocommerce_email_editor_send_preview_email_rendered_data', $rendered_data );
+
 		return $this->set_personalize_content( $rendered_data['html'] );
 	}
 
