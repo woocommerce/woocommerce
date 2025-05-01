@@ -15,7 +15,7 @@ import { getAvailableCategoryPaths, recordCategoryTracks } from './utils';
 import { useNewCategorySuggestions } from './useNewCategorySuggestions';
 import { useExistingCategorySuggestions } from './useExistingCategorySuggestions';
 import { createCategoriesFromPath } from '../utils/categoryCreator';
-import { CategorySuggestionFeedback } from './category-suggestion-feedback';
+import { useDeprecationNotice } from '../hooks';
 
 enum SuggestionsState {
 	Initial,
@@ -34,37 +34,11 @@ export const ProductCategorySuggestions = () => {
 		string[]
 	>( [] );
 	const [ newSuggestions, setNewSuggestions ] = useState< string[] >( [] );
-	const [ showFeedback, setShowFeedback ] = useState( false );
-	let feedbackTimeout: number | null = null;
 
+	const { showDeprecationNotice } = useDeprecationNotice();
 	useEffect( () => {
 		recordCategoryTracks( 'view_ui' );
 	}, [] );
-
-	/**
-	 * Show the feedback box after a delay.
-	 */
-	const showFeedbackAfterDelay = () => {
-		if ( feedbackTimeout ) {
-			clearTimeout( feedbackTimeout );
-			feedbackTimeout = null;
-		}
-
-		feedbackTimeout = setTimeout( () => {
-			setShowFeedback( true );
-		}, 5000 );
-	};
-
-	/**
-	 * Reset the feedback box.
-	 */
-	const resetFeedbackBox = () => {
-		if ( feedbackTimeout ) {
-			clearTimeout( feedbackTimeout );
-			feedbackTimeout = null;
-		}
-		setShowFeedback( false );
-	};
 
 	/**
 	 * Check if a suggestion is valid.
@@ -113,7 +87,6 @@ export const ProductCategorySuggestions = () => {
 		}
 		setExistingSuggestions( filtered );
 
-		showFeedbackAfterDelay();
 		recordCategoryTracks( 'stop', {
 			reason: 'finished',
 			suggestions_type: 'existing',
@@ -153,7 +126,6 @@ export const ProductCategorySuggestions = () => {
 		}
 		setNewSuggestions( filtered );
 
-		showFeedbackAfterDelay();
 		recordCategoryTracks( 'stop', {
 			reason: 'finished',
 			suggestions_type: 'new',
@@ -255,7 +227,6 @@ export const ProductCategorySuggestions = () => {
 	);
 
 	const fetchProductSuggestions = async () => {
-		resetFeedbackBox();
 		setExistingSuggestions( [] );
 		setNewSuggestions( [] );
 		setExistingSuggestionsState( SuggestionsState.Fetching );
@@ -264,6 +235,8 @@ export const ProductCategorySuggestions = () => {
 		recordCategoryTracks( 'start', {
 			current_categories: getCategories(),
 		} );
+
+		showDeprecationNotice();
 
 		await Promise.all( [
 			fetchExistingCategorySuggestions(),
@@ -360,11 +333,6 @@ export const ProductCategorySuggestions = () => {
 							</li>
 						) ) }
 					</ul>
-					{ showFeedback && (
-						<div className="wc-product-category-suggestions__feedback">
-							<CategorySuggestionFeedback />
-						</div>
-					) }
 				</div>
 			) }
 		</div>

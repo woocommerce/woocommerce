@@ -55,7 +55,6 @@ class SchemaController {
 				Schemas\V1\ProductBrandSchema::IDENTIFIER  => Schemas\V1\ProductBrandSchema::class,
 				Schemas\V1\ProductCollectionDataSchema::IDENTIFIER => Schemas\V1\ProductCollectionDataSchema::class,
 				Schemas\V1\ProductReviewSchema::IDENTIFIER => Schemas\V1\ProductReviewSchema::class,
-				Schemas\V1\AI\ProductsSchema::IDENTIFIER   => Schemas\V1\AI\ProductsSchema::class,
 				Schemas\V1\PatternsSchema::IDENTIFIER      => Schemas\V1\PatternsSchema::class,
 			],
 		];

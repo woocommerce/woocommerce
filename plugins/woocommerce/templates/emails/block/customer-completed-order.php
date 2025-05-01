@@ -35,7 +35,7 @@ defined( 'ABSPATH' ) || exit;
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p> <?php echo esc_html__( 'We’ve successfully processed your order, and it’s on its way to you.', 'woocommerce' ); ?> </p>
+<p> <?php echo esc_html__( 'We have finished processing your order.', 'woocommerce' ); ?> </p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -47,7 +47,7 @@ defined( 'ABSPATH' ) || exit;
 <!-- /wp:woo/email-content -->
 
 <!-- wp:paragraph -->
-<p> 
+<p>
 <?php
 /* translators: %s: Store admin email */
 	printf( esc_html__( 'Thanks again! If you need any help with your order, please contact us at %s.', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );
