@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useCallback, useMemo } from '@wordpress/element';
+import { useCallback } from '@wordpress/element';
 import type {
 	ValidationData,
 	ValidationContextError,
@@ -18,12 +18,12 @@ export const useValidation = (): ValidationData => {
 
 	const prefix = 'extensions-errors';
 
-	const { hasValidationErrors, getValidationErrorFromStore } = useSelect(
+	const { hasValidationErrors, getValidationErrorSelector } = useSelect(
 		( mapSelect ) => {
 			const store = mapSelect( validationStore );
 			return {
 				hasValidationErrors: store.hasValidationErrors(),
-				getValidationErrorFromStore: store.getValidationError,
+				getValidationErrorSelector: store.getValidationError,
 			};
 		},
 		[]
@@ -31,19 +31,25 @@ export const useValidation = (): ValidationData => {
 
 	const getValidationError = useCallback(
 		( validationErrorId: string ) =>
-			getValidationErrorFromStore( `${ prefix }-${ validationErrorId }` ),
-		[ getValidationErrorFromStore ]
+			getValidationErrorSelector( `${ prefix }-${ validationErrorId }` ),
+		[ getValidationErrorSelector, prefix ]
 	);
 
-	const memoizedCallbacks = useMemo(
-		() => ( {
-			clearValidationError: ( validationErrorId: string ) =>
+	return {
+		hasValidationErrors,
+		getValidationError,
+		clearValidationError: useCallback(
+			( validationErrorId: string ) =>
 				clearValidationError( `${ prefix }-${ validationErrorId }` ),
-			hideValidationError: ( validationErrorId: string ) =>
+			[ clearValidationError ]
+		),
+		hideValidationError: useCallback(
+			( validationErrorId: string ) =>
 				hideValidationError( `${ prefix }-${ validationErrorId }` ),
-			setValidationErrors: (
-				errorsObject: Record< string, ValidationContextError >
-			) =>
+			[ hideValidationError ]
+		),
+		setValidationErrors: useCallback(
+			( errorsObject: Record< string, ValidationContextError > ) =>
 				setValidationErrors(
 					Object.fromEntries(
 						Object.entries( errorsObject ).map(
@@ -54,13 +60,7 @@ export const useValidation = (): ValidationData => {
 						)
 					)
 				),
-		} ),
-		[ clearValidationError, hideValidationError, setValidationErrors ]
-	);
-
-	return {
-		hasValidationErrors,
-		getValidationError,
-		...memoizedCallbacks,
+			[ setValidationErrors ]
+		),
 	};
 };
