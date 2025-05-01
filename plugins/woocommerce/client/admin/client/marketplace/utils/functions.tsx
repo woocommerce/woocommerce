@@ -22,7 +22,8 @@ import {
 } from '../components/constants';
 import { Subscription } from '../components/my-subscriptions/types';
 import {
-	Product, ProductCardType,
+	Product,
+	ProductCardType,
 	ProductType,
 	SearchAPIJSONType,
 	SearchAPIProductType,

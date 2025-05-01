@@ -1,19 +1,19 @@
 /**
  * External dependencies
  */
-import {useContext, useEffect, useState} from '@wordpress/element';
-import {recordEvent} from '@woocommerce/tracks';
+import { useContext, useEffect, useState } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import ProductList from '../product-list/product-list';
-import {fetchDiscoverPageData, ProductGroup} from '../../utils/functions';
+import { fetchDiscoverPageData, ProductGroup } from '../../utils/functions';
 import ProductLoader from '../product-loader/product-loader';
-import {MarketplaceContext} from '../../contexts/marketplace-context';
-import {ProductCardType, ProductType} from '../product-list/types';
+import { MarketplaceContext } from '../../contexts/marketplace-context';
+import { ProductCardType, ProductType } from '../product-list/types';
 import './discover.scss';
-import {recordMarketplaceView} from '~/marketplace/utils/tracking';
+import { recordMarketplaceView } from '~/marketplace/utils/tracking';
 
 export default function Discover(): JSX.Element | null {
 	const [ productGroups, setProductGroups ] = useState<
