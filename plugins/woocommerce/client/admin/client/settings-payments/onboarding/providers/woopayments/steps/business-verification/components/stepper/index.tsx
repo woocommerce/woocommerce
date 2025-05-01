@@ -81,7 +81,7 @@ type ContextValue = ReturnType< typeof useContextValue >;
 const StepperContext = createContext< ContextValue | null >( null );
 
 interface StepperProps {
-	children: React.ReactElement< { name: string } >[];
+	children: React.ReactNode[];
 	initialStep?: string;
 	onStepChange?: ( step: string ) => void;
 	onComplete?: () => void;
