@@ -752,6 +752,14 @@
           "hash": "6d3fe596cb0b40babdbe14dd035bf374fbe696bd5a64b6c2c608a29c18e733e5",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/emails/email-preview.md",
           "id": "b84b4684c6a48a280d57969773134698bc04401a"
+        },
+        {
+          "post_title": "Email HTML - Best Practices",
+          "menu_title": "Email HTML - Best Practices",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/emails/email-html-best-practices.md",
+          "hash": "40f2d0a5459bedb4089dcf84bf2aaf162b8b8b4f6d7d67d879ee23481c09cfb8",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/emails/email-html-best-practices.md",
+          "id": "79c02f8dcd14aeaa6d93bcc8d2ad5b5c08479bac"
         }
       ],
       "categories": []
@@ -1992,5 +2000,5 @@
       "categories": []
     }
   ],
-  "hash": "6d2eefd1c70c7dc5aa19844f6640cf4a7f64e1569c961f9d4f79da8ce15beb07"
+  "hash": "aa81395232e552fb858fb6f0f21ac9ecc0776919e77997d4814b5111047fc082"
 }
