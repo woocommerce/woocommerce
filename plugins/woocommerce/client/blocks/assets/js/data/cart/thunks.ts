@@ -478,12 +478,13 @@ export const selectShippingRate =
 
 			dispatch.receiveCart( rest );
 			dispatch.shippingRatesBeingSelected( false );
-
 			return response as CartResponse;
 		} catch ( error ) {
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
 			dispatch.shippingRatesBeingSelected( false );
 			return Promise.reject( error );
+		} finally {
+			abortController = null;
 		}
 	};
 
