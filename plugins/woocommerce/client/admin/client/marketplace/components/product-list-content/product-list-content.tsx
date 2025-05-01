@@ -12,7 +12,7 @@ import './product-list-content.scss';
 import '~/customize-store/intro/intro.scss';
 import '~/customize-store/style.scss';
 import ProductCard from '../product-card/product-card';
-import { Product, ProductType } from '../product-list/types';
+import { Product, ProductCardType, ProductType } from '../product-list/types';
 import { appendURLParams } from '../../utils/functions';
 import { ADMIN_URL, getAdminSetting } from '~/utils/admin-settings';
 import { NoAIBanner } from '~/customize-store/intro/intro-banners';
@@ -22,6 +22,7 @@ export default function ProductListContent( props: {
 	group?: string;
 	productGroup?: string;
 	type: ProductType;
+	cardType: ProductCardType;
 	className?: string;
 	searchTerm?: string;
 	category?: string;
@@ -112,6 +113,7 @@ export default function ProductListContent( props: {
 					<Fragment key={ product.id }>
 						<ProductCard
 							type={ props.type }
+							cardType={ props.cardType }
 							product={ {
 								id: product.id,
 								slug: product.slug,
