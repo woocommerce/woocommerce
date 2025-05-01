@@ -22,6 +22,7 @@ export interface ProductCardProps {
 	isLoading?: boolean;
 	tracksData: ProductTracksData;
 	small?: boolean;
+	cardType?: 'compact' | 'regular';
 }
 
 function ProductCard( props: ProductCardProps ): JSX.Element {
@@ -181,7 +182,12 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 					className="woocommerce-marketplace__business-card__header"
 					style={ { backgroundColor: product.color } }
 				>
-					<img src={ `${ mainImage }?h=${ imageHeight }` } alt="" />
+					<img
+						src={ `${
+							mainImage || product.featuredImage
+						}?h=${ imageHeight }` }
+						alt=""
+					/>
 				</div>
 				<div className="woocommerce-marketplace__business-card__content">
 					<div className="woocommerce-marketplace__business-card__main-content">
