@@ -16,7 +16,7 @@ import { Editor } from '../../private-apis';
 import { useEmailCss } from '../../hooks';
 import { TemplateSelection } from '../template-select';
 import { StylesSidebar } from '../styles-sidebar';
-
+import { SendPreview } from '../preview';
 export function InnerEditor( {
 	postId: initialPostId,
 	postType: initialPostType,
@@ -98,6 +98,7 @@ export function InnerEditor( {
 				<PostLockedModal />
 				<TemplateSelection />
 				<StylesSidebar />
+				<SendPreview />
 			</Editor>
 		</SlotFillProvider>
 	);
