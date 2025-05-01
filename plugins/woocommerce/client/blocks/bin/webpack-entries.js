@@ -213,6 +213,18 @@ const blocks = {
 	'product-review-author-name': {
 		customDir: 'product-reviews/inner-blocks/review-author-name',
 	},
+	'product-reviews-pagination': {
+		customDir: 'product-reviews/inner-blocks/reviews-pagination',
+	},
+	'product-reviews-pagination-next': {
+		customDir: 'product-reviews/inner-blocks/reviews-pagination-next',
+	},
+	'product-reviews-pagination-previous': {
+		customDir: 'product-reviews/inner-blocks/reviews-pagination-previous',
+	},
+	'product-reviews-pagination-numbers': {
+		customDir: 'product-reviews/inner-blocks/reviews-pagination-numbers',
+	},
 	'product-review-template': {
 		customDir: 'product-reviews/inner-blocks/review-template',
 	},
