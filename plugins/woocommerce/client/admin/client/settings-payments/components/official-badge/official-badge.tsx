@@ -36,11 +36,7 @@ export const OfficialBadge = ( { variant }: OfficialBadgeProps ) => {
 
 	const hidePopoverDebounced = useDebounce( () => {
 		setPopoverVisible( false );
-	}, 350 );
-	const showPopover = () => {
-		setPopoverVisible( true );
-		hidePopoverDebounced.cancel();
-	};
+	}, 1000 );
 
 	return (
 		<Pill className={ `woocommerce-official-extension-badge` }>
@@ -49,7 +45,7 @@ export const OfficialBadge = ( { variant }: OfficialBadgeProps ) => {
 				tabIndex={ 0 }
 				role="button"
 				onClick={ () => setPopoverVisible( ! isPopoverVisible ) }
-				onMouseEnter={ showPopover }
+				onMouseEnter={ () => hidePopoverDebounced.cancel() }
 				onMouseLeave={ hidePopoverDebounced }
 				onKeyDown={ ( event ) => {
 					if ( event.key === 'Enter' || event.key === ' ' ) {

@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Avoid fatal error when filter attributes are passed as array in the URL

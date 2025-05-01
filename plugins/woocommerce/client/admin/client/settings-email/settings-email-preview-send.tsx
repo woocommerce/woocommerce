@@ -6,6 +6,7 @@ import { Icon, check, warning } from '@wordpress/icons';
 import apiFetch from '@wordpress/api-fetch';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { recordEvent } from '@woocommerce/tracks';
 import { isValidEmail } from '@woocommerce/product-editor/build/utils/validate-email'; // Import from the build directory so we don't load the entire product editor since we only need this one function.
 
 /**
@@ -48,10 +49,17 @@ export const EmailPreviewSend = ( { type }: EmailPreviewSendProps ) => {
 			} );
 			setNotice( response.message );
 			setNoticeType( 'success' );
+			recordEvent( 'settings_emails_preview_test_sent_successful', {
+				email_type: type,
+			} );
 		} catch ( e ) {
 			const wpError = e as WPError;
 			setNotice( wpError.message );
 			setNoticeType( 'error' );
+			recordEvent( 'settings_emails_preview_test_sent_failed', {
+				email_type: type,
+				error: wpError.message,
+			} );
 		}
 		setIsSending( false );
 	};
