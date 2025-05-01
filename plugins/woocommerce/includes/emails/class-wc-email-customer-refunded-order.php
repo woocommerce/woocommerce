@@ -121,7 +121,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 			 */
 			$subject = apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $subject ), $this->object, $this );
 			if ( $this->block_email_editor_enabled ) {
-				$subject = $this->personalizer->personalize_content( $subject );
+				$subject = $this->personalizer->personalize_transactional_content( $subject, $this );
 			}
 			return $subject;
 		}
@@ -193,10 +193,6 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 				$this->recipient                      = $this->object->get_billing_email();
 				$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
 				$this->placeholders['{order_number}'] = $this->object->get_order_number();
-			}
-
-			if ( $this->block_email_editor_enabled ) {
-				$this->personalizer->set_context( $this->prepare_context_data( $this->personalizer->get_context() ) );
 			}
 
 			if ( ! empty( $refund_id ) ) {

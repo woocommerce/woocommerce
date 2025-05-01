@@ -5,9 +5,8 @@
  * @package WooCommerce\Emails
  */
 
-use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
-use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
+use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Pelago\Emogrifier\CssInliner;
 use Pelago\Emogrifier\HtmlProcessor\CssToAttributeConverter;
@@ -272,7 +271,7 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Personalizer instance for converting Personalization tags.
 	 *
-	 * @var Personalizer
+	 * @var TransactionalEmailPersonalizer
 	 */
 	public $personalizer;
 
@@ -282,13 +281,6 @@ class WC_Email extends WC_Settings_API {
 	 * @var string
 	 */
 	public $template_block_content = 'emails/block/general-block-email.php';
-
-	/**
-	 * Indicates whether the context is already set to avoid repeated configuration.
-	 *
-	 * @var bool
-	 */
-	protected $context_set = false;
 
 	/**
 	 * Constructor.
@@ -325,8 +317,7 @@ class WC_Email extends WC_Settings_API {
 		}
 
 		if ( $this->block_email_editor_enabled ) {
-			$editor_container   = Email_Editor_Container::container();
-			$this->personalizer = $editor_container->get( Personalizer::class );
+			$this->personalizer = wc_get_container()->get( TransactionalEmailPersonalizer::class );
 		}
 		add_action( 'phpmailer_init', array( $this, 'handle_multipart' ) );
 		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -487,37 +478,11 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	 * Ensure the personalization context is ready.
-	 *
-	 * This method ensures the Personalizer context is set correctly before emails are generated.
-	 * It skips context reconfiguration if it's already set.
-	 *
-	 * @return void
-	 */
-	protected function ensure_personalization_context_is_set(): void {
-		if ( $this->context_set ) {
-			// Context is already set, skip reconfiguration.
-			return;
-		}
-
-		if ( $this->block_email_editor_enabled && isset( $this->personalizer ) ) {
-			$current_context = $this->personalizer->get_context();
-			$updated_context = $this->prepare_context_data( $current_context );
-			$this->personalizer->set_context( $updated_context );
-
-			// Mark context as set to avoid reconfiguration.
-			$this->context_set = true;
-		}
-	}
-
-	/**
 	 * Get email subject.
 	 *
 	 * @return string
 	 */
 	public function get_subject() {
-		$this->ensure_personalization_context_is_set();
-
 		/**
 		 * Provides an opportunity to inspect and modify subject for the email.
 		 *
@@ -530,7 +495,7 @@ class WC_Email extends WC_Settings_API {
 		$subject = apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->get_option_or_transient( 'subject', $this->get_default_subject() ) ), $this->object, $this );
 		if ( $this->block_email_editor_enabled ) {
 			// Because the new email editor uses rich-text component for subject editing, to be ensure that the subject is always in plain text, we need to strip all tags.
-			$subject = wp_strip_all_tags( $this->personalizer->personalize_content( $subject ) );
+			$subject = wp_strip_all_tags( $this->personalizer->personalize_transactional_content( $subject, $this ) );
 		}
 		return $subject;
 	}
@@ -543,8 +508,6 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_preheader() {
-		$this->ensure_personalization_context_is_set();
-
 		/**
 		 * Provides an opportunity to inspect and modify preheader for the email.
 		 *
@@ -556,7 +519,7 @@ class WC_Email extends WC_Settings_API {
 		 */
 		$preheader = apply_filters( 'woocommerce_email_preheader' . $this->id, $this->format_string( $this->get_option_or_transient( 'preheader', '' ) ), $this->object, $this );
 		if ( $this->block_email_editor_enabled ) {
-			$preheader = $this->personalizer->personalize_content( $preheader );
+			$preheader = $this->personalizer->personalize_transactional_content( $preheader, $this );
 		}
 		return $preheader;
 	}
@@ -817,7 +780,6 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_content() {
-		$this->ensure_personalization_context_is_set();
 		$this->sending = true;
 
 		$block_email_content = $this->get_block_email_html_content();
@@ -1511,29 +1473,6 @@ class WC_Email extends WC_Settings_API {
 		}
 
 		return $option;
-	}
-
-	/**
-	 * Prepare context data for email personalization.
-	 * Adds new order specific context data.
-	 *
-	 * @since x.x.x
-	 * @param array $context Previous version of context data.
-	 * @return array Context data for personalization
-	 */
-	protected function prepare_context_data( array $context ): array {
-		$context['recipient_email'] = $this->get_recipient();
-		$context['order']           = $this->object instanceof WC_Order ? $this->object : null;
-		// For emails of type new_user or reset_password we want to set user directly from the object.
-		if ( $this->object instanceof \WP_User ) {
-			$context['wp_user'] = $this->object;
-		} elseif ( $this->object instanceof WC_Order ) {
-			$context['wp_user'] = $this->object->get_user();
-		} else {
-			$context['wp_user'] = null;
-		}
-		$context['wc_email'] = $this;
-		return $context;
 	}
 
 	/**
