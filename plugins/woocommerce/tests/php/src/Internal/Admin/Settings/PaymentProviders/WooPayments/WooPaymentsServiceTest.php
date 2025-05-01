@@ -481,8 +481,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 						),
 						'available_countries' => $this->get_woopayments_supported_countries(),
 					) : array(),
-					'sub_steps'       => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['sub_steps'] ?? array(),
-					'self_assessment' => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['self_assessment'] ?? array(),
+					'sub_steps'        => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['sub_steps'] ?? array(),
+					'self_assessment'  => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['self_assessment'] ?? array(),
 					'has_test_account' => false,
 				),
 				'actions'        => array(
