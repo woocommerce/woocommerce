@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\Totals;
+use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 
 /**
  * ProductCollectionMock used to test Product Query block functions.
@@ -22,6 +23,7 @@ class TotalsMock extends Totals {
 			Package::container()->get( API::class ),
 			Package::container()->get( AssetDataRegistry::class ),
 			new IntegrationRegistry(),
+			new BlocksSharedState()
 		);
 	}
 
