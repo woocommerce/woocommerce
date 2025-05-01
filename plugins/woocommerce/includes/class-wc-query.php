@@ -942,6 +942,10 @@ class WC_Query {
 			if ( ! empty( $_GET ) ) {
 				foreach ( $_GET as $key => $value ) {
 					if ( 0 === strpos( $key, 'filter_' ) ) {
+						if ( ! is_string( $value ) ) {
+							continue;
+						}
+
 						$attribute    = wc_sanitize_taxonomy_name( str_replace( 'filter_', '', $key ) );
 						$taxonomy     = wc_attribute_taxonomy_name( $attribute );
 						$filter_terms = ! empty( $value ) ? explode( ',', wc_clean( wp_unslash( $value ) ) ) : array();

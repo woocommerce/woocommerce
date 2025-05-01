@@ -20,7 +20,7 @@ import {
 	getTags,
 	getAttributes,
 } from '../utils';
-import { useProductSlug } from '../hooks';
+import { useProductSlug, useDeprecationNotice } from '../hooks';
 import { ProductDataSuggestion } from '../utils/types';
 import { SuggestionItem, PoweredByLink, recordNameTracks } from './index';
 import { RandomLoadingMessage } from '../components';
@@ -64,6 +64,7 @@ export const ProductNameSuggestions = () => {
 		[]
 	);
 	const { updateProductSlug } = useProductSlug();
+	const { showDeprecationNotice } = useDeprecationNotice();
 	const { requestCompletion } = useCompletion( {
 		feature: WOO_AI_PLUGIN_FEATURE_NAME,
 		onStreamError: ( error ) => {
@@ -259,6 +260,8 @@ export const ProductNameSuggestions = () => {
 		recordNameTracks( 'start', {
 			current_title: getProductName(),
 		} );
+
+		showDeprecationNotice();
 
 		try {
 			await requestCompletion( buildPrompt(), undefined, 'json_object' );
