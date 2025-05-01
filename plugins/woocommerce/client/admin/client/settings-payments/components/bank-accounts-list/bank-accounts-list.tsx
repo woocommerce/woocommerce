@@ -84,18 +84,27 @@ export const BankAccountsList = ( {
 	 * @param {BankAccount} updated The updated or new bank account.
 	 */
 	const handleSave = ( updated: BankAccount ) => {
-		const newAccounts = accountsWithIds.some(
-			( acc ) =>
-				acc.account_name === updated.account_name &&
-				acc.account_number === updated.account_number
-		)
-			? accountsWithIds.map( ( acc ) =>
-					acc.account_name === updated.account_name &&
-					acc.account_number === updated.account_number
-						? { ...updated, id: acc.id }
-						: acc
-			  )
-			: [ ...accountsWithIds, { ...updated, id: generateId() } ];
+		const existingIndex = accountsWithIds.findIndex(
+			( acc ) => acc.id === selectedAccount?.id
+		);
+
+		let newAccounts;
+		if ( existingIndex !== -1 ) {
+			// Update existing
+			newAccounts = [ ...accountsWithIds ];
+			newAccounts[ existingIndex ] = {
+				...updated,
+				id: selectedAccount?.id || generateId(),
+			};
+		} else {
+			// Add new
+			newAccounts = [
+				...accountsWithIds,
+				{ ...updated, id: generateId() },
+			];
+		}
+
+		setAccountsWithIds( newAccounts );
 		onChange( newAccounts.map( ( { id, ...rest } ) => rest ) );
 		setIsModalOpen( false );
 	};

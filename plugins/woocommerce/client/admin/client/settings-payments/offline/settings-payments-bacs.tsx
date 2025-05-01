@@ -60,6 +60,7 @@ export const SettingsPaymentsBacs = () => {
 	const [ formValues, setFormValues ] = useState<
 		Record< string, string | boolean | string[] >
 	>( {} );
+	const [ isSaving, setIsSaving ] = useState( false );
 
 	useEffect( () => {
 		if ( bacsSettings ) {
@@ -88,6 +89,7 @@ export const SettingsPaymentsBacs = () => {
 			return;
 		}
 
+		setIsSaving( true );
 		const settings: Record< string, string | string[] > = {
 			title: String( formValues.title ),
 			instructions: String( formValues.instructions ),
@@ -127,6 +129,8 @@ export const SettingsPaymentsBacs = () => {
 			createErrorNotice(
 				__( 'Failed to update settings', 'woocommerce' )
 			);
+		} finally {
+			setIsSaving( false );
 		}
 	};
 
@@ -242,7 +246,12 @@ export const SettingsPaymentsBacs = () => {
 					</Settings.Section>
 
 					<Settings.Actions>
-						<Button variant="primary" type="submit">
+						<Button
+							variant="primary"
+							type="submit"
+							isBusy={ isSaving }
+							disabled={ isSaving }
+						>
 							{ __( 'Save changes', 'woocommerce' ) }
 						</Button>
 					</Settings.Actions>
