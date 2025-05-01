@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useCallback } from '@wordpress/element';
+import { useCallback, useMemo } from '@wordpress/element';
 import type {
 	ValidationData,
 	ValidationContextError,
@@ -18,34 +18,32 @@ export const useValidation = (): ValidationData => {
 
 	const prefix = 'extensions-errors';
 
-	const { hasValidationErrors, getValidationError } = useSelect(
+	const { hasValidationErrors, getValidationErrorFromStore } = useSelect(
 		( mapSelect ) => {
 			const store = mapSelect( validationStore );
 			return {
 				hasValidationErrors: store.hasValidationErrors(),
-				getValidationError: ( validationErrorId: string ) =>
-					store.getValidationError(
-						`${ prefix }-${ validationErrorId }`
-					),
+				getValidationErrorFromStore: store.getValidationError,
 			};
-		}
+		},
+		[]
 	);
 
-	return {
-		hasValidationErrors,
-		getValidationError,
-		clearValidationError: useCallback(
-			( validationErrorId: string ) =>
+	const getValidationError = useCallback(
+		( validationErrorId: string ) =>
+			getValidationErrorFromStore( `${ prefix }-${ validationErrorId }` ),
+		[ getValidationErrorFromStore ]
+	);
+
+	const memoizedCallbacks = useMemo(
+		() => ( {
+			clearValidationError: ( validationErrorId: string ) =>
 				clearValidationError( `${ prefix }-${ validationErrorId }` ),
-			[ clearValidationError ]
-		),
-		hideValidationError: useCallback(
-			( validationErrorId: string ) =>
+			hideValidationError: ( validationErrorId: string ) =>
 				hideValidationError( `${ prefix }-${ validationErrorId }` ),
-			[ hideValidationError ]
-		),
-		setValidationErrors: useCallback(
-			( errorsObject: Record< string, ValidationContextError > ) =>
+			setValidationErrors: (
+				errorsObject: Record< string, ValidationContextError >
+			) =>
 				setValidationErrors(
 					Object.fromEntries(
 						Object.entries( errorsObject ).map(
@@ -56,7 +54,13 @@ export const useValidation = (): ValidationData => {
 						)
 					)
 				),
-			[ setValidationErrors ]
-		),
+		} ),
+		[ clearValidationError, hideValidationError, setValidationErrors ]
+	);
+
+	return {
+		hasValidationErrors,
+		getValidationError,
+		...memoizedCallbacks,
 	};
 };
