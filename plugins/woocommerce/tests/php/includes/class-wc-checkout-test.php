@@ -77,10 +77,18 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		WC_Helper_Shipping_Zones::create_mock_zones();
 		// Add a flat rate and free shipping method to the US zone.
-		$zone = new WC_Shipping_Zone( 4 );
-		$zone->add_shipping_method( 'flat_rate' );
-		$zone->add_shipping_method( 'free_shipping' );
-		$zone->save();
+		$zones   = WC_Shipping_Zones::get_zones();
+		$us_zone = array_filter(
+			$zones,
+			function ( $zone ) {
+				return 'US' === $zone['zone_name'];
+			}
+		);
+		$us_zone = array_shift( $us_zone );
+		$us_zone = WC_Shipping_Zones::get_zone( $us_zone['zone_id'] );
+		$us_zone->add_shipping_method( 'flat_rate' );
+		$us_zone->add_shipping_method( 'free_shipping' );
+		$us_zone->save();
 
 		$product = WC_Helper_Product::create_simple_product( true );
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
