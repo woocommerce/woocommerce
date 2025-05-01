@@ -476,7 +476,7 @@ class WooPaymentsService {
 			);
 		}
 
-		$selected_payment_methods = $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_PAYMENT_METHODS, $location, 'payment_methods' ) || [];
+		$selected_payment_methods = $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_PAYMENT_METHODS, $location, 'payment_methods' ) || array();
 
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
