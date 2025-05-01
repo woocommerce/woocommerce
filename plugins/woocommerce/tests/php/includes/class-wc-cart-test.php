@@ -232,28 +232,73 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->get_customer()->set_shipping_postcode( '12345' );
 		$this->assertTrue( WC()->cart->show_shipping() );
 
-		// Make postcode optional, remove the value and re-test.
+		// Remove postcode while it is still required, validate shipping is hidden again.
 		WC()->cart->get_customer()->set_shipping_postcode( '' );
 		$this->assertFalse( WC()->cart->show_shipping() );
-		add_filter(
-			'woocommerce_checkout_fields',
-			function ( $fields ) {
-				$fields['billing']['billing_postcode']['required']   = 0;
-				$fields['shipping']['shipping_postcode']['required'] = 0;
-				return $fields;
-			}
-		);
+
+		/**
+		 * Make shipping fields postcode optional.
+		 * @param array $fields Shipping fields.
+		 *
+		 * @return array
+		 */
+		function make_shipping_fields_postcode_optional( $fields ) {
+			$fields['shipping_postcode']['required'] = 0;
+			return $fields;
+		}
 		add_filter(
 			'woocommerce_shipping_fields',
-			function ( $fields ) {
-				$fields['shipping_postcode']['required'] = 0;
-				return $fields;
-			}
+			'make_shipping_fields_postcode_optional'
 		);
+		$this->assertTrue( WC()->cart->show_shipping() );
+		// Check shipping still shows when postcode is optional and set.
+		WC()->cart->get_customer()->set_shipping_postcode( '12345' );
+		$this->assertTrue( WC()->cart->show_shipping() );
+
+		remove_all_filters( 'woocommerce_shipping_fields' );
+		$this->assertTrue( WC()->cart->show_shipping() );
+		WC()->cart->get_customer()->set_shipping_postcode( '' );
+		$this->assertFalse( WC()->cart->show_shipping() );
+
+		/**
+		 * Make locale postcode optional.
+		 * @param array $locales Locales.
+		 *
+		 * @return array
+		 */
+		function make_locale_postcode_optional( $locales ) {
+			foreach ( $locales as $country => $locale ) {
+				$locales[ $country ]['postcode']['required'] = false;
+				$locales[ $country ]['postcode']['hidden']   = true;
+			}
+			return $locales;
+		}
+		add_filter( 'woocommerce_get_country_locale', 'make_locale_postcode_optional' );
+
+		// Reset locales so they are regenerated with the new postcode optional.
+		WC()->countries->locale = null;
+		$this->assertTrue( WC()->cart->show_shipping() );
+		// Check shipping still shows when postcode is optional and set.
+		WC()->cart->get_customer()->set_shipping_postcode( '12345' );
+		$this->assertTrue( WC()->cart->show_shipping() );
+
+		// Check that both fields and locale filter work when both are in use together.
+		add_filter(
+			'woocommerce_shipping_fields',
+			'make_shipping_fields_postcode_optional'
+		);
+		WC()->cart->get_customer()->set_shipping_postcode( '' );
+		$this->assertTrue( WC()->cart->show_shipping() );
+
+		// Check shipping still shows when postcode is optional and set.
+		WC()->cart->get_customer()->set_shipping_postcode( '12345' );
 		$this->assertTrue( WC()->cart->show_shipping() );
 
 		// Reset.
+		remove_all_filters( 'woocommerce_shipping_fields' );
+		remove_all_filters( 'woocommerce_get_country_locale' );
 		update_option( 'woocommerce_shipping_cost_requires_address', $default_shipping_cost_requires_address );
+		add_filter( 'woocommerce_get_country_locale', 'make_locale_postcode_optional' );
 		$product->delete( true );
 		WC()->cart->get_customer()->set_shipping_country( 'GB' );
 		WC()->cart->get_customer()->set_shipping_state( '' );
