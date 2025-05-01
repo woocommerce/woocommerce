@@ -479,7 +479,7 @@ export const BlueprintUploadDropzone = () => {
 				( state.matches( 'idle' ) ||
 					state.matches( 'error' ) ||
 					state.matches( 'parsingSteps' ) ) && (
-					<div className="blueprint-upload-form">
+					<div className="blueprint-upload-form wc-settings-prevent-change-event">
 						<FormFileUpload
 							className="blueprint-upload-field"
 							accept="application/json, application/zip"
