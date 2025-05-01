@@ -26,9 +26,9 @@ require_once WC_ABSPATH . 'includes/class-wc-cart-session.php';
 class WC_Cart extends WC_Legacy_Cart {
 
 	/**
-	 * Cart context.
+	 * Cart context, used to determine if the cart is being used in a StoreAPI or shortcode context.
 	 *
-	 * @var string
+	 * @var string shortcode|store-api
 	 */
 	public $cart_context = 'shortcode';
 
