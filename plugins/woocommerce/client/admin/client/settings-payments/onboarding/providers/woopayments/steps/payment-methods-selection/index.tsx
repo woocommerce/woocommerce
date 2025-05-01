@@ -33,6 +33,8 @@ export default function PaymentMethodsSelection() {
 		string,
 		boolean
 	> | null >( null );
+	const [ isContinueButtonLoading, setIsContinueButtonLoading ] =
+		useState( false );
 
 	const contextPaymentMethodsState = currentStep?.context?.pms_state;
 	const contextPaymentMethods = currentStep?.context?.recommended_pms;
@@ -210,17 +212,19 @@ export default function PaymentMethodsSelection() {
 
 							// Persist the final state on the backend, just in case the user didn't change anything.
 							savePaymentMethodsState( paymentMethodsState );
+							setIsContinueButtonLoading( true );
 
 							// Mark the step as completed.
 							apiFetch( {
 								url: href,
 								method: 'POST',
 							} ).then( () => {
+								setIsContinueButtonLoading( false );
 								navigateToNextStep();
 							} );
 						} }
-						isBusy={ false }
-						disabled={ false }
+						isBusy={ isContinueButtonLoading }
+						disabled={ isContinueButtonLoading }
 					>
 						{ __( 'Continue', 'woocommerce' ) }
 					</Button>
