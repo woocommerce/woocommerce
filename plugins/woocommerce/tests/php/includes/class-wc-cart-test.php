@@ -232,6 +232,26 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->get_customer()->set_shipping_postcode( '12345' );
 		$this->assertTrue( WC()->cart->show_shipping() );
 
+		// Make postcode optional, remove the value and re-test.
+		WC()->cart->get_customer()->set_shipping_postcode( '' );
+		$this->assertFalse( WC()->cart->show_shipping() );
+		add_filter(
+			'woocommerce_checkout_fields',
+			function ( $fields ) {
+				$fields['billing']['billing_postcode']['required']   = 0;
+				$fields['shipping']['shipping_postcode']['required'] = 0;
+				return $fields;
+			}
+		);
+		add_filter(
+			'woocommerce_shipping_fields',
+			function ( $fields ) {
+				$fields['shipping_postcode']['required'] = 0;
+				return $fields;
+			}
+		);
+		$this->assertTrue( WC()->cart->show_shipping() );
+
 		// Reset.
 		update_option( 'woocommerce_shipping_cost_requires_address', $default_shipping_cost_requires_address );
 		$product->delete( true );
