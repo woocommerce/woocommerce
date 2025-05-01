@@ -22,7 +22,7 @@ import { FieldPlaceholder } from '~/settings-payments/components/field-placehold
 import { Settings } from '~/settings-payments/components/settings';
 
 /**
- * Component for managing Cash on Delivery payment gateway settings.
+ * This page is used to manage the settings for the Cash on delivery payment gateway.
  */
 export const SettingsPaymentsCod = () => {
 	const { createSuccessNotice, createErrorNotice } =

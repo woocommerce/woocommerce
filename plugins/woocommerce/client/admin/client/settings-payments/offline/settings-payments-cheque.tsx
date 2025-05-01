@@ -20,7 +20,9 @@ import { Settings } from '~/settings-payments/components/settings';
 import { FieldPlaceholder } from '~/settings-payments/components/field-placeholder';
 
 /**
- * Component for managing Cheque payment gateway settings.
+ * This page is used to manage the settings for the Cheque payment gateway.
+ * Noting that we refer to it as 'cheque' in the code, but use the American English spelling
+ * 'check' in the UI.
  */
 export const SettingsPaymentsCheque = () => {
 	const { createSuccessNotice, createErrorNotice } =

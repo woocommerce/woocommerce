@@ -21,6 +21,9 @@ import { BankAccountsList } from '~/settings-payments/components/bank-accounts-l
 import { BankAccount } from '~/settings-payments/components/bank-accounts-list/types';
 import { Settings } from '~/settings-payments/components/settings';
 
+/**
+ * This page is used to manage the settings for the BACS (Direct bank transfer) payment gateway.
+ */
 export const SettingsPaymentsBacs = () => {
 	const storeCountryCode =
 		window.wcSettings?.admin?.preloadSettings?.general
