@@ -17,8 +17,9 @@ import {
 	ProductDataContextProvider,
 	useProductDataContext,
 } from '@woocommerce/shared-context';
-import { useSelect } from '@wordpress/data';
+import { resolveSelect, useSelect } from '@wordpress/data';
 import type { ProductResponseItem } from '@woocommerce/types';
+import { productsStore } from '@woocommerce/data';
 
 interface Attributes {
 	className?: string;
@@ -87,6 +88,9 @@ export default function ProductItemTemplateEdit(
 	} );
 
 	const { product } = useProductDataContext();
+	const [ groupedProducts, setGroupedProducts ] = useState<
+		ProductResponseItem[] | null
+	>( null );
 
 	const { products } = useSelect(
 		( select ) => {
@@ -97,21 +101,41 @@ export default function ProductItemTemplateEdit(
 				per_page: 3,
 			};
 
-			const groupedProductIds = product.grouped_products ?? [];
-			if ( groupedProductIds.length ) {
-				query = { include: groupedProductIds };
+			if ( ! groupedProducts ) {
+				if ( product.id !== 0 && product.type === 'grouped' ) {
+					const groupedProductIds = product.grouped_products ?? [];
+					if ( groupedProductIds.length ) {
+						query = { include: groupedProductIds };
+					}
+
+					setGroupedProducts(
+						getEntityRecords< ProductResponseItem >(
+							'postType',
+							postType,
+							query
+						) ?? []
+					);
+				}
+
+				if ( product.id === 0 ) {
+					resolveSelect( productsStore )
+						.getProducts( {
+							type: 'grouped',
+							per_page: 3,
+						} )
+						.then( ( fetchedProducts ) => {
+							if ( fetchedProducts.length > 0 ) {
+								setGroupedProducts( fetchedProducts );
+							}
+						} );
+				}
 			}
 
 			return {
-				products:
-					getEntityRecords< ProductResponseItem >(
-						'postType',
-						postType,
-						query
-					) ?? [],
+				products: groupedProducts ?? [],
 			};
 		},
-		[ product ]
+		[ groupedProducts, product ]
 	);
 
 	const { blocks } = useSelect(

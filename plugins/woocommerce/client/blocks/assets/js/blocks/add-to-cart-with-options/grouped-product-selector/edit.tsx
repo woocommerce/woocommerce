@@ -36,22 +36,20 @@ export default function AddToCartWithOptionsGroupedProductSelectorEdit(
 
 	// If there is no product context, query for an existing grouped product.
 	useEffect( () => {
-		if ( ! groupedProduct ) {
-			if ( product.id !== 0 && product.type === 'grouped' ) {
-				setGroupedProduct( [ product as ProductResponseItem ] );
-			}
-			if ( product.id === 0 ) {
-				resolveSelect( productsStore )
-					.getProducts( {
-						type: 'grouped',
-						per_page: 3,
-					} )
-					.then( ( fetchedProduct ) => {
-						if ( fetchedProduct.length > 0 ) {
-							setGroupedProduct( fetchedProduct );
-						}
-					} );
-			}
+		if ( product.id !== 0 && product.type === 'grouped' ) {
+			setGroupedProduct( [ product as ProductResponseItem ] );
+		}
+		if ( groupedProduct.length === 0 && product.id === 0 ) {
+			resolveSelect( productsStore )
+				.getProducts( {
+					type: 'grouped',
+					per_page: 3,
+				} )
+				.then( ( fetchedProduct ) => {
+					if ( fetchedProduct.length > 0 ) {
+						setGroupedProduct( fetchedProduct );
+					}
+				} );
 		}
 	}, [ groupedProduct, product ] );
 
