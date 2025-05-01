@@ -115,10 +115,9 @@ export const BankAccountsList = ( {
 	const confirmDelete = () => {
 		if ( ! accountToDelete ) return;
 		const newAccounts = accountsWithIds.filter(
-			( acc ) =>
-				acc.account_name !== accountToDelete.account_name ||
-				acc.account_number !== accountToDelete.account_number
+			( acc ) => acc.id !== accountToDelete.id
 		);
+		setAccountsWithIds( newAccounts );
 		onChange( newAccounts.map( ( { id, ...rest } ) => rest ) );
 		setAccountToDelete( null );
 	};
@@ -172,13 +171,16 @@ export const BankAccountsList = ( {
 								<EllipsisMenu
 									label={ __( 'Options', 'woocommerce' ) }
 									placement={ 'bottom-right' }
-									renderContent={ () => (
+									renderContent={ ( {
+										onClose = () => {},
+									} ) => (
 										<MenuGroup>
 											<MenuItem
-												role={ 'menuitem' }
-												onClick={ () =>
-													openModal( account )
-												}
+												role="menuitem"
+												onClick={ () => {
+													onClose();
+													openModal( account );
+												} }
 											>
 												{ __(
 													'View / edit',
@@ -187,11 +189,12 @@ export const BankAccountsList = ( {
 											</MenuItem>
 											<MenuItem
 												isDestructive
-												onClick={ () =>
+												onClick={ () => {
+													onClose();
 													setAccountToDelete(
 														account
-													)
-												}
+													);
+												} }
 											>
 												{ __(
 													'Delete',
