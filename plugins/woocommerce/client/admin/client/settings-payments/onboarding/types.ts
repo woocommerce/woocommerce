@@ -109,6 +109,7 @@ export interface WooPaymentsProviderOnboardingStep {
 				status: 'completed' | 'not_started' | 'started';
 			}
 		>;
+		has_test_account?: boolean;
 	};
 	errors?: string[];
 }
@@ -130,5 +131,6 @@ export interface OnboardingContextType {
 	getStepByKey: (
 		stepKey: string
 	) => WooPaymentsProviderOnboardingStep | undefined;
+	refreshStoreData: () => void;
 	closeModal: () => void;
 }

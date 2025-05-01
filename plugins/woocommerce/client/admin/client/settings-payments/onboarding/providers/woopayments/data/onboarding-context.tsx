@@ -36,6 +36,7 @@ const OnboardingContext = createContext< OnboardingContextType >( {
 	navigateToStep: () => undefined,
 	navigateToNextStep: () => undefined,
 	getStepByKey: () => undefined,
+	refreshStoreData: () => undefined,
 	closeModal: () => undefined,
 } );
 
@@ -166,6 +167,14 @@ export const OnboardingProvider: React.FC< {
 		setAllSteps( [] );
 	};
 
+	const refreshStoreData = () => {
+		// Reset the onboarding data both in the store and local state when the onboardingcontext mounts.
+		// This is important to ensure that the onboarding data is cleared when the modal is closed.
+		// This is to avoid stale data when the modal is opened again.
+		resetLocalState();
+		invalidateWooPaymentsOnboarding( 'getOnboardingData' );
+	};
+
 	/**
 	 * useEffect functions
 	 */
@@ -237,11 +246,8 @@ export const OnboardingProvider: React.FC< {
 	}, [ stateStoreSteps, areStepDependenciesCompleted ] );
 
 	useEffect( () => {
-		// Reset the onboarding data both in the store and local state when the onboardingcontext mounts.
-		// This is important to ensure that the onboarding data is cleared when the modal is closed.
-		// This is to avoid stale data when the modal is opened again.
-		resetLocalState();
-		invalidateWooPaymentsOnboarding( 'getOnboardingData' );
+		// Invalidate the getOnboardingData store selector to ensure the latest data is fetched.
+		refreshStoreData();
 	}, [] );
 
 	return (
@@ -254,6 +260,7 @@ export const OnboardingProvider: React.FC< {
 				navigateToStep,
 				navigateToNextStep,
 				getStepByKey,
+				refreshStoreData,
 				closeModal: () => {
 					closeModal();
 

@@ -12,6 +12,7 @@ import { BusinessVerificationContextProvider } from './data/business-verificatio
 import { OnboardingForm } from './components/form';
 import BusinessDetails from './sections/business-details';
 import EmbeddedKyc from './sections/embedded-kyc';
+import ActivatePayments from './sections/activate-payments';
 import { Stepper } from './components/stepper';
 import Step from './components/step';
 import { getMccFromIndustry, getComingSoonShareKey } from './utils';
@@ -35,6 +36,7 @@ export const BusinessVerificationStep: React.FC = () => {
 		).split( ':' )[ 0 ],
 		...( currentStep?.context?.self_assessment ?? {} ),
 	};
+	const hasTestAccount = currentStep?.context?.has_test_account ?? false;
 
 	const handleStepChange = () => window.scroll( 0, 0 );
 
@@ -49,6 +51,11 @@ export const BusinessVerificationStep: React.FC = () => {
 						onStepChange={ handleStepChange }
 						onExit={ () => {} }
 					>
+						{ hasTestAccount && (
+							<Step name="activate" showHeading={ false }>
+								<ActivatePayments />
+							</Step>
+						) }
 						<Step name="business">
 							<OnboardingForm>
 								<BusinessDetails />
