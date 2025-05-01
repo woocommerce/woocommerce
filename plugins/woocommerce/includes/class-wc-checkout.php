@@ -835,6 +835,20 @@ class WC_Checkout {
 	 * @param  WP_Error $errors Validation error.
 	 */
 	protected function validate_posted_data( &$data, &$errors ) {
+
+		// Verify shipping was posted if needed.
+		if ( WC()->cart->needs_shipping() && WC()->cart->show_shipping() ) {
+			if ( empty( $data['shipping_method'] ) ) {
+				// Shipping is needed, but not posted, this would be caused if shipping was hidden from the front-end
+				// due to incorrectly modified checkout fields to make them optional by editing
+				// `woocommerce_checkout_fields`, `woocommerce_shipping_fields` or `woocommerce_billing_fields` and not
+				// updating the locale to reflect that. If the locale is not updated (which is a mistake), extensions
+				// need to manually set the frontend field's required attribute to false, otherwise changes to address
+				// fields will not be posted and shipping fragments will not be shown.
+				$errors->add( 'shipping_method', __( 'Please select a shipping method.', 'woocommerce' ) );
+			}
+		}
+
 		foreach ( $this->get_checkout_fields() as $fieldset_key => $fieldset ) {
 			$validate_fieldset = true;
 			if ( $this->maybe_skip_fieldset( $fieldset_key, $data ) ) {
