@@ -476,6 +476,8 @@ class WooPaymentsService {
 			);
 		}
 
+		$selected_payment_methods = $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_PAYMENT_METHODS, $location, 'payment_methods' ) || array();
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
@@ -487,7 +489,7 @@ class WooPaymentsService {
 				'/wc/v3/payments/onboarding/test_drive_account/init',
 				array(
 					'country'      => $location,
-					'capabilities' => ( ! empty( $step_data['payment_methods'] ) && is_array( $step_data['payment_methods'] ) ) ? $step_data['payment_methods'] : array(),
+					'capabilities' => $selected_payment_methods,
 					'source'       => ! empty( $source ) ? $source : self::FROM_NOX_IN_CONTEXT,
 					'from'         => self::FROM_NOX_IN_CONTEXT,
 				)
