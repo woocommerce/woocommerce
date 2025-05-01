@@ -9,6 +9,7 @@
  * @version 2.1.0
  */
 
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
@@ -1193,7 +1194,13 @@ class WC_Cart extends WC_Legacy_Cart {
 					$message         = apply_filters( 'woocommerce_cart_product_cannot_add_another_message', $message, $product_data );
 					$wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
 
-					throw new Exception( sprintf( '%s <a href="%s" class="button wc-forward%s">%s</a>', $message, esc_url( wc_get_cart_url() ), esc_attr( $wp_button_class ), __( 'View cart', 'woocommerce' ) ) );
+					if ( ! CartCheckoutUtils::has_cart_page() ) {
+						$message = sprintf( '%s', esc_html( $message ) );
+					} else {
+						$message = sprintf( '%s <a href="%s" class="button wc-forward%s">%s</a>', $message, esc_url( wc_get_cart_url() ), esc_attr( $wp_button_class ), __( 'View cart', 'woocommerce' ) );
+					}
+
+					throw new Exception( $message );
 				}
 			}
 
@@ -1254,13 +1261,17 @@ class WC_Cart extends WC_Legacy_Cart {
 					$stock_quantity_in_cart = $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ];
 					$wp_button_class        = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
 
-					$message = sprintf(
+					$message = CartCheckoutUtils::has_cart_page() ? sprintf(
 						'%s <a href="%s" class="button wc-forward%s">%s</a>',
 						/* translators: 1: quantity in stock 2: current quantity */
 						sprintf( __( 'You cannot add that amount to the cart &mdash; we have %1$s in stock and you already have %2$s in your cart.', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_quantity, $product_data ), wc_format_stock_quantity_for_display( $stock_quantity_in_cart, $product_data ) ),
 						esc_url( wc_get_cart_url() ),
 						esc_attr( $wp_button_class ),
 						__( 'View cart', 'woocommerce' )
+					) : sprintf(
+						'%s',
+						/* translators: 1: quantity in stock 2: current quantity */
+						sprintf( __( 'You cannot add that amount to the cart &mdash; we have %1$s in stock and you already have %2$s in your cart.', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_quantity, $product_data ), wc_format_stock_quantity_for_display( $stock_quantity_in_cart, $product_data ) )
 					);
 
 					/**

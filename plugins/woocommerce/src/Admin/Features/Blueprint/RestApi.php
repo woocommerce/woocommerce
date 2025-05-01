@@ -8,7 +8,8 @@ use Automattic\WooCommerce\Blueprint\Exporters\ExportInstallPluginSteps;
 use Automattic\WooCommerce\Blueprint\Exporters\ExportInstallThemeSteps;
 use Automattic\WooCommerce\Blueprint\ExportSchema;
 use Automattic\WooCommerce\Blueprint\ImportStep;
-use Automattic\WooCommerce\Blueprint\ZipExportedSchema;
+use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
+use WP_Error;
 
 /**
  * Class RestApi
@@ -29,6 +30,20 @@ class RestApi {
 	 * @var string
 	 */
 	protected $namespace = 'wc-admin';
+
+	/**
+	 * ComingSoonHelper instance.
+	 *
+	 * @var ComingSoonHelper
+	 */
+	protected $coming_soon_helper;
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		$this->coming_soon_helper = new ComingSoonHelper();
+	}
 
 	/**
 	 * Get maximum allowed file size for blueprint uploads.
@@ -58,7 +73,7 @@ class RestApi {
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'export' ),
-					'permission_callback' => array( $this, 'check_permission' ),
+					'permission_callback' => array( $this, 'check_export_permission' ),
 					'args'                => array(
 						'steps' => array(
 							'description' => __( 'A list of plugins to install', 'woocommerce' ),
@@ -98,7 +113,7 @@ class RestApi {
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'import_step' ),
-					'permission_callback' => array( $this, 'check_permission' ),
+					'permission_callback' => array( $this, 'check_import_permission' ),
 					'args'                => array(
 						'step_definition' => array(
 							'description' => __( 'The step definition to import', 'woocommerce' ),
@@ -110,16 +125,46 @@ class RestApi {
 				'schema' => array( $this, 'get_import_step_response_schema' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/blueprint/import-allowed',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_import_allowed' ),
+					'permission_callback' => function () {
+						return current_user_can( 'manage_woocommerce' );
+					},
+				),
+				'schema' => array( $this, 'get_import_allowed_schema' ),
+			)
+		);
 	}
 
 	/**
-	 * Check if the current user has permission to perform the request.
+	 * General permission check for export requests.
 	 *
 	 * @return bool|\WP_Error
 	 */
-	public function check_permission() {
-		if ( ! current_user_can( 'install_plugins' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+	public function check_export_permission() {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot export WooCommerce Blueprints.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+		return true;
+	}
+
+	/**
+	 * General permission check for import requests.
+	 *
+	 * @return bool|\WP_Error
+	 */
+	public function check_import_permission() {
+		if (
+			! current_user_can( 'manage_woocommerce' ) ||
+			! current_user_can( 'manage_options' )
+		) {
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot import WooCommerce Blueprints.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -164,6 +209,10 @@ class RestApi {
 
 		$data = $exporter->export( $steps );
 
+		if ( is_wp_error( $data ) ) {
+			return new \WP_REST_Response( $data, 400 );
+		}
+
 		return new \WP_HTTP_Response(
 			array(
 				'data' => $data,
@@ -193,15 +242,15 @@ class RestApi {
 	private function steps_payload_to_blueprint_steps( $steps ) {
 		$blueprint_steps = array();
 
-		if ( isset( $steps['settings'] ) ) {
+		if ( isset( $steps['settings'] ) && count( $steps['settings'] ) > 0 ) {
 			$blueprint_steps = array_merge( $blueprint_steps, $steps['settings'] );
 		}
 
-		if ( isset( $steps['plugins'] ) ) {
+		if ( isset( $steps['plugins'] ) && count( $steps['plugins'] ) > 0 ) {
 			$blueprint_steps[] = 'installPlugin';
 		}
 
-		if ( isset( $steps['themes'] ) ) {
+		if ( isset( $steps['themes'] ) && count( $steps['themes'] ) > 0 ) {
 			$blueprint_steps[] = 'installTheme';
 		}
 
@@ -216,6 +265,17 @@ class RestApi {
 	 * @return array
 	 */
 	public function import_step( \WP_REST_Request $request ) {
+		if ( ! $this->can_import_blueprint() ) {
+			return array(
+				'success'  => false,
+				'messages' => array(
+					array(
+						'message' => __( 'Blueprint imports are disabled', 'woocommerce' ),
+						'type'    => 'error',
+					),
+				),
+			);
+		}
 		// Get the raw body size.
 		$body_size = strlen( $request->get_body() );
 		if ( $body_size > $this->get_max_file_size() ) {
@@ -244,6 +304,63 @@ class RestApi {
 			'messages' => $result->get_messages(),
 		);
 	}
+
+
+	/**
+	 * Check if blueprint imports are allowed based on site status and configuration.
+	 *
+	 * @return bool Returns true if imports are allowed, false otherwise.
+	 */
+	private function can_import_blueprint() {
+		// Check if override constant is defined and true.
+		if ( defined( 'ALLOW_BLUEPRINT_IMPORT_IN_LIVE_MODE' ) && ALLOW_BLUEPRINT_IMPORT_IN_LIVE_MODE ) {
+			return true;
+		}
+
+		// Only allow imports in coming soon mode.
+		if ( $this->coming_soon_helper->is_site_live() ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Get whether blueprint imports are allowed.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function get_import_allowed() {
+		$can_import = $this->can_import_blueprint();
+
+		return rest_ensure_response(
+			array(
+				'import_allowed' => $can_import,
+			)
+		);
+	}
+
+	/**
+	 * Get the schema for the import-allowed endpoint.
+	 *
+	 * @return array
+	 */
+	public function get_import_allowed_schema() {
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'blueprint-import-allowed',
+			'type'       => 'object',
+			'properties' => array(
+				'import_allowed' => array(
+					'description' => __( 'Whether blueprint imports are currently allowed', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+			),
+		);
+	}
+
 
 	/**
 	 * Get the schema for the import-step endpoint.

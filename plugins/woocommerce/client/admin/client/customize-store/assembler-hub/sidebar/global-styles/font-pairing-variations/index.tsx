@@ -19,35 +19,19 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
  * Internal dependencies
  */
 import {
-	FONT_PAIRINGS,
 	FONT_PAIRINGS_WHEN_AI_IS_OFFLINE,
 	FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING,
 } from './constants';
 import { VariationContainer } from '../variation-container';
 import { FontPairingVariationPreview } from './preview';
-import { Look } from '~/customize-store/design-with-ai/types';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
-import { FlowType } from '~/customize-store/types';
 import { FontFamily } from './font-families-loader-dot-com';
-import { isAIFlow } from '~/customize-store/guards';
 import {
 	OptInContext,
 	OPTIN_FLOW_STATUS,
 } from '~/customize-store/assembler-hub/opt-in/context';
 
 export const FontPairing = () => {
-	const { aiSuggestions, isLoading } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } = select( optionsStore );
-		return {
-			aiSuggestions: getOption(
-				'woocommerce_customize_store_ai_suggestions'
-			) as { lookAndFeel: Look },
-			isLoading: ! hasFinishedResolution( 'getOption', [
-				'woocommerce_customize_store_ai_suggestions',
-			] ),
-		};
-	}, [] );
-
 	const { useGlobalSetting } = unlock( blockEditorPrivateApis );
 
 	const [ custom ] = useGlobalSetting( 'typography.fontFamilies.custom' ) as [
@@ -66,7 +50,6 @@ export const FontPairing = () => {
 	];
 
 	const { context } = useContext( CustomizeStoreContext );
-	const aiOnline = context.flowType === FlowType.AIOnline;
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
 	const trackingAllowed = useSelect(
 		( select ) =>
@@ -78,14 +61,6 @@ export const FontPairing = () => {
 	const { optInFlowStatus } = useContext( OptInContext );
 
 	const fontPairings = useMemo( () => {
-		if ( isAIFlow( context.flowType ) ) {
-			return aiOnline && aiSuggestions?.lookAndFeel
-				? FONT_PAIRINGS.filter( ( font ) =>
-						font.lookAndFeel.includes( aiSuggestions?.lookAndFeel )
-				  )
-				: FONT_PAIRINGS_WHEN_AI_IS_OFFLINE;
-		}
-
 		const defaultFonts = FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING.map(
 			( pair ) => {
 				const fontFamilies = pair.settings.typography.fontFamilies;
@@ -145,17 +120,14 @@ export const FontPairing = () => {
 
 		return [ ...defaultFonts, ...customFonts ];
 	}, [
-		aiOnline,
-		aiSuggestions?.lookAndFeel,
 		baseFontFamilies.theme,
-		context.flowType,
 		custom,
 		isFontLibraryAvailable,
 		optInFlowStatus,
 		trackingAllowed,
 	] );
 
-	if ( isLoading || optInFlowStatus === OPTIN_FLOW_STATUS.LOADING ) {
+	if ( optInFlowStatus === OPTIN_FLOW_STATUS.LOADING ) {
 		return (
 			<div className="woocommerce-customize-store_font-pairing-spinner-container">
 				<Spinner />

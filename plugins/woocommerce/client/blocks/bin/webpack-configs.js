@@ -226,6 +226,10 @@ const getMainConfig = ( options = {} ) => {
 				bundleAnalyzerReportTitle: 'Main',
 			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Main' ) ),
+			/**
+			 * Ensure that logic of this CopyWebpackPlugin is kept in sync with the copy-block-json.sh script:
+			 * https://github.com/woocommerce/woocommerce/blob/7d72fb937907bf841aabe959642be524eb093803/plugins/woocommerce/client/blocks/bin/copy-blocks-json.sh
+			 */
 			new CopyWebpackPlugin( {
 				patterns: [
 					{

@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use Automattic\WooCommerce\Blueprint\Steps\InstallTheme;
 use Automattic\WooCommerce\Blueprint\UseWPFunctions;
-use Plugin_Upgrader;
 
 /**
  * Class ImportInstallTheme
@@ -143,5 +142,16 @@ class ImportInstallTheme implements StepProcessor {
 	 */
 	public function get_step_class(): string {
 		return InstallTheme::class;
+	}
+
+	/**
+	 * Check if the current user has the required capabilities for this step.
+	 *
+	 * @param object $schema The schema to process.
+	 *
+	 * @return bool True if the user has the required capabilities. False otherwise.
+	 */
+	public function check_step_capabilities( $schema ): bool {
+		return current_user_can( 'install_themes' );
 	}
 }
