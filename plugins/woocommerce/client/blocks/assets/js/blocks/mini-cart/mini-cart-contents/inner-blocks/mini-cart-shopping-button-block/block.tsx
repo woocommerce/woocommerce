@@ -15,7 +15,7 @@ import { getVariant } from '../utils';
 type MiniCartShoppingButtonBlockProps = {
 	className: string;
 	startShoppingButtonLabel: string;
-	style?: Record< string, any >;
+	style?: string;
 	textColor?: string;
 	backgroundColor?: string;
 };
@@ -27,15 +27,15 @@ const Block = ( {
 	textColor,
 	backgroundColor,
 }: MiniCartShoppingButtonBlockProps ): JSX.Element | null => {
-	if ( ! SHOP_URL ) {
-		return null;
-	}
-
 	const styleProps = useStyleProps( {
 		style,
 		textColor,
 		backgroundColor,
 	} );
+
+	if ( ! SHOP_URL ) {
+		return null;
+	}
 
 	return (
 		<div className="wp-block-button has-text-align-center">
