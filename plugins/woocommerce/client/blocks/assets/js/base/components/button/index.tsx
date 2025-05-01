@@ -6,13 +6,11 @@ import { forwardRef } from '@wordpress/element';
 import clsx from 'clsx';
 import type { ForwardedRef } from 'react';
 import type { ButtonProps as AriakitButtonProps } from '@ariakit/react';
-import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import Spinner from '../../../../../packages/components/spinner';
 
 type WCButtonProps = AriakitButtonProps & { children?: React.ReactNode };
 
