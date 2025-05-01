@@ -489,7 +489,7 @@ class WooPaymentsService {
 				'/wc/v3/payments/onboarding/test_drive_account/init',
 				array(
 					'country'      => $location,
-					'capabilities' => ( ! empty( $step_data['payment_methods'] ) && is_array( $step_data['payment_methods'] ) ) ? $step_data['payment_methods'] : array(),
+					'capabilities' => $selected_payment_methods,
 					'source'       => ! empty( $source ) ? $source : self::FROM_NOX_IN_CONTEXT,
 					'from'         => self::FROM_NOX_IN_CONTEXT,
 				)
