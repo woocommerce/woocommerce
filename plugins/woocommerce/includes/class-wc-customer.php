@@ -283,44 +283,11 @@ class WC_Customer extends WC_Legacy_Customer {
 		// for the shipping calculator below (city, postcode, state), we're not respecting the filter for the country field.
 		// The country field is always required as a bare minimum for shipping.
 		$shipping_address = array(
-			'country' => $this->get_shipping_country(),
+			'country'  => $this->get_shipping_country(),
+			'city'     => $this->get_shipping_city(),
+			'state'    => $this->get_shipping_state(),
+			'postcode' => $this->get_shipping_postcode(),
 		);
-
-		/**
-		 * Filter to not require shipping city for shipping calculation, even if it is required at checkout.
-		 * This can be used to allow shipping calculations to be done without a city.
-		 *
-		 * @since 8.4.0
-		 *
-		 * @param bool $show_city Whether to use the city field. Default true.
-		 */
-		if ( apply_filters( 'woocommerce_shipping_calculator_enable_city', true ) ) {
-			$shipping_address['city'] = $this->get_shipping_city();
-		}
-
-		/**
-		 * Filter to not require shipping state for shipping calculation, even if it is required at checkout.
-		 * This can be used to allow shipping calculations to be done without a state.
-		 *
-		 * @since 8.4.0
-		 *
-		 * @param bool $show_state Whether to use the state field. Default true.
-		 */
-		if ( apply_filters( 'woocommerce_shipping_calculator_enable_state', true ) ) {
-			$shipping_address['state'] = $this->get_shipping_state();
-		}
-
-		/**
-		 * Filter to not require shipping postcode for shipping calculation, even if it is required at checkout.
-		 * This can be used to allow shipping calculations to be done without a postcode.
-		 *
-		 * @since 8.4.0
-		 *
-		 * @param bool $show_postcode Whether to use the postcode field. Default true.
-		 */
-		if ( apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true ) ) {
-			$shipping_address['postcode'] = $this->get_shipping_postcode();
-		}
 
 		$address_fields = WC()->countries->get_country_locale();
 		$locale_key     = ! empty( $shipping_address['country'] ) && array_key_exists( $shipping_address['country'], $address_fields ) ? $shipping_address['country'] : 'default';
