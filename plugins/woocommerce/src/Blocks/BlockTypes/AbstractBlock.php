@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use WP_Block;
@@ -6,7 +8,7 @@ use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Blocks\InteractivityAPIConfig;
+use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 
 /**
  * AbstractBlock class.
@@ -56,27 +58,27 @@ abstract class AbstractBlock {
 	protected $integration_registry;
 
 	/**
-	 * Instance of the interactivity API config.
+	 * Instance of the shared state class.
 	 *
-	 * @var InteractivityAPIConfig
+	 * @var BlocksSharedState
 	 */
-	protected $interactivity_api_config;
+	protected $blocks_shared_state;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param AssetApi               $asset_api Instance of the asset API.
-	 * @param AssetDataRegistry      $asset_data_registry Instance of the asset data registry.
-	 * @param IntegrationRegistry    $integration_registry Instance of the integration registry.
-	 * @param InteractivityAPIConfig $interactivity_api_config Instance of the interactivity API config.
-	 * @param string                 $block_name Optionally set block name during construct.
+	 * @param AssetApi            $asset_api Instance of the asset API.
+	 * @param AssetDataRegistry   $asset_data_registry Instance of the asset data registry.
+	 * @param IntegrationRegistry $integration_registry Instance of the integration registry.
+	 * @param BlocksSharedState   $blocks_shared_state Instance of the shared state class.
+	 * @param string              $block_name Optionally set block name during construct.
 	 */
-	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry, IntegrationRegistry $integration_registry, InteractivityAPIConfig $interactivity_api_config, $block_name = '' ) {
-		$this->asset_api                = $asset_api;
-		$this->asset_data_registry      = $asset_data_registry;
-		$this->integration_registry     = $integration_registry;
-		$this->interactivity_api_config = $interactivity_api_config;
-		$this->block_name               = $block_name ? $block_name : $this->block_name;
+	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry, IntegrationRegistry $integration_registry, BlocksSharedState $blocks_shared_state, $block_name = '' ) {
+		$this->asset_api            = $asset_api;
+		$this->asset_data_registry  = $asset_data_registry;
+		$this->integration_registry = $integration_registry;
+		$this->blocks_shared_state  = $blocks_shared_state;
+		$this->block_name           = $block_name ? $block_name : $this->block_name;
 		$this->initialize();
 	}
 

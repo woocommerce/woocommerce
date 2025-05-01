@@ -40,7 +40,7 @@ class ProductFilters extends AbstractBlock {
 			$canonical_url_no_pagination = get_permalink();
 		}
 
-		$this->interactivity_api_config->initialize_shared_config();
+		$this->blocks_shared_state->initialize_shared_config();
 
 		wp_interactivity_config(
 			$this->get_full_block_name(),

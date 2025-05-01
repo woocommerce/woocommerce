@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\Blocks;
+namespace Automattic\WooCommerce\Blocks\Utils;
 
 /**
- * Manages the registration of interactivity settings for WooCommerce blocks.
+ * Manages the registration of interactivity config and state that is commonly shared by WooCommerce blocks.
  * Initialization only happens on the first call to initialize_shared_config.
  * Intended to be used as a singleton.
  */
-class InteractivityAPIConfig {
+class BlocksSharedState {
 
 	/**
 	 * The namespace for the config.
@@ -26,6 +26,13 @@ class InteractivityAPIConfig {
 	private $core_config_registered = false;
 
 	/**
+	 * Cart state.
+	 *
+	 * @var mixed
+	 */
+	private $cart;
+
+	/**
 	 * Initialize the shared core config.
 	 */
 	public function initialize_shared_config() {
@@ -38,6 +45,29 @@ class InteractivityAPIConfig {
 		wp_interactivity_config( $this->settings_namespace, $this->get_currency_data() );
 		wp_interactivity_config( $this->settings_namespace, $this->get_locale_data() );
 		wp_interactivity_config( $this->settings_namespace, $this->get_core_data() );
+	}
+
+	/**
+	 * Initialize interactivity state for cart that is needed by multiple blocks.
+	 *
+	 * @return void
+	 */
+	public function initialize_shared_state() {
+		if ( null === $this->cart ) {
+			$cart = isset( WC()->cart )
+				? rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) )->data
+				: array();
+
+			wp_interactivity_state(
+				'woocommerce',
+				array(
+					'cart'     => $cart,
+					'nonce'    => wp_create_nonce( 'wc_store_api' ),
+					'noticeId' => '',
+					'restUrl'  => get_rest_url(),
+				)
+			);
+		}
 	}
 
 	/**

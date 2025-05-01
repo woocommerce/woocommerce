@@ -93,7 +93,7 @@ class ProductButton extends AbstractBlock {
 			return '';
 		}
 
-		$this->initialize_cart_state();
+		$this->blocks_shared_state->initialize_shared_state();
 
 		wp_interactivity_state(
 			'woocommerce/product-button',
@@ -285,27 +285,6 @@ class ProductButton extends AbstractBlock {
 		$product = $previous_product;
 
 		return $html;
-	}
-
-	/**
-	 * Initialize the cart state.
-	 */
-	private function initialize_cart_state() {
-		if ( null === self::$cart ) {
-			$cart = isset( WC()->cart )
-				? rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) )->data
-				: array();
-
-			wp_interactivity_state(
-				'woocommerce',
-				array(
-					'cart'     => $cart,
-					'nonce'    => wp_create_nonce( 'wc_store_api' ),
-					'noticeId' => '',
-					'restUrl'  => get_rest_url(),
-				)
-			);
-		}
 	}
 
 	/**
