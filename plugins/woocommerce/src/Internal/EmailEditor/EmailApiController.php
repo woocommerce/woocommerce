@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\EmailEditor;
 
 use Automattic\WooCommerce\EmailEditor\Validator\Builder;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 use WC_Email;
 
 defined( 'ABSPATH' ) || exit;
@@ -23,12 +24,20 @@ class EmailApiController {
 	private array $emails;
 
 	/**
+	 * The WooCommerce transactional email post manager.
+	 *
+	 * @var WCTransactionalEmailPostsManager|null
+	 */
+	private ?WCTransactionalEmailPostsManager $post_manager;
+
+	/**
 	 * Initialize the controller.
 	 *
 	 * @internal
 	 */
 	final public function init(): void {
-		$this->emails = WC()->mailer()->get_emails();
+		$this->emails       = WC()->mailer()->get_emails();
+		$this->post_manager = WCTransactionalEmailPostsManager::get_instance();
 	}
 
 	/**
@@ -38,10 +47,9 @@ class EmailApiController {
 	 * @return array - The email data.
 	 */
 	public function get_email_data( $post_data ): array {
-		$email_type  = get_post_meta( $post_data['id'], Integration::WC_EMAIL_TYPE_ID_POST_META_KEY, true );
+		$email_type  = $this->post_manager->get_email_type_from_post_id( $post_data['id'] );
 		$post_option = get_option( "woocommerce_{$email_type}_settings" );
-
-		$email = $this->get_email_by_type( $email_type );
+		$email       = $this->get_email_by_type( $email_type );
 
 		return array(
 			'subject'         => $post_option['subject'] ?? null,
@@ -63,7 +71,7 @@ class EmailApiController {
 		if ( ! array_key_exists( 'subject', $data ) && ! array_key_exists( 'preheader', $data ) ) {
 			return;
 		}
-		$email_type  = get_post_meta( $post->ID, Integration::WC_EMAIL_TYPE_ID_POST_META_KEY, true );
+		$email_type  = $this->post_manager->get_email_type_from_post_id( $post->ID );
 		$option_name = "woocommerce_{$email_type}_settings";
 		$post_option = get_option( $option_name );
 
