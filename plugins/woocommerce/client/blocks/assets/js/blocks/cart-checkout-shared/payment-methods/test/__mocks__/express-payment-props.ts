@@ -140,15 +140,11 @@ export const getExpectedExpressPaymentProps = ( name: string ) => ( {
 	onSubmit: expect.any( Function ),
 	paymentStatus: {
 		hasError: false,
-		hasFailed: false,
 		isDoingExpressPayment: false,
-		isFinished: false,
 		isIdle: true,
-		isPristine: true,
 		isProcessing: false,
 		isReady: false,
 		isStarted: false,
-		isSuccessful: false,
 	},
 	setExpressPaymentError: expect.any( Function ),
 	shippingData: {
