@@ -13,13 +13,13 @@
 
 		&.is-required {
 			label::after {
-				content: ' *';
+				content: " *"";
 			}
 		}
 	}
 
 	&__error {
-		color: #cc0000;
+		color: #c00;
 	}
 
 	&__actions {
