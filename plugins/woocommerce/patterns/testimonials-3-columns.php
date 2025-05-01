@@ -5,13 +5,13 @@
  * Categories: WooCommerce, Reviews
  */
 
-$main_header        = $content['titles'][3]['default'] ?? '';
-$first_review       = $content['titles'][0]['default'] ?? '';
-$second_review      = $content['titles'][1]['default'] ?? '';
-$third_review       = $content['titles'][2]['default'] ?? '';
-$first_description  = $content['descriptions'][0]['default'] ?? '';
-$second_description = $content['descriptions'][1]['default'] ?? '';
-$third_description  = $content['descriptions'][2]['default'] ?? '';
+$main_header        = __( 'What our customers say', 'woocommerce' );
+$first_review       = __( 'Eclectic finds, ethical delights', 'woocommerce' );
+$second_review      = __( 'Sip, Shop, Savor', 'woocommerce' );
+$third_review       = __( 'LOCAL LOVE', 'woocommerce' );
+$first_description  = __( 'Transformed my daily routine with unique, eco-friendly treasures. Exceptional quality and service. Proud to support a store that aligns with my values.', 'woocommerce' );
+$second_description = __( 'The organic coffee beans are a revelation. Each sip feels like a journey. Beautifully crafted accessories add a touch of elegance to my home.', 'woocommerce' );
+$third_description  = __( 'From sustainably sourced teas to chic vases, this store is a treasure trove. Love knowing my purchases contribute to a greener planet.', 'woocommerce' );
 ?>
 
 <!-- wp:group {"metadata":{"name":"Testimonials 3 Columns"},"align":"full","style":{"spacing":{"padding":{"top":"calc( 0.5 * var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal)))","bottom":"calc( 0.5 * var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal)))","left":"var(--wp--style--root--padding-left, var(--wp--custom--gap--horizontal))","right":"var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal))"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->

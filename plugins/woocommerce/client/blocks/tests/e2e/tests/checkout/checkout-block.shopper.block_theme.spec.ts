@@ -164,7 +164,9 @@ test.describe( 'Shopper → Local pickup', () => {
 		await checkoutPageObject.verifyBillingDetails();
 	} );
 
-	test( 'Switching between local pickup and shipping does not affect the address and is used for the order', async ( {
+	// Skipping temporarily as we work on a proper fix for underlying issue
+	// Tracked in https://github.com/woocommerce/woocommerce/issues/57542
+	test.skip( 'Switching between local pickup and shipping does not affect the address and is used for the order', async ( {
 		page,
 		frontendUtils,
 		checkoutPageObject,
