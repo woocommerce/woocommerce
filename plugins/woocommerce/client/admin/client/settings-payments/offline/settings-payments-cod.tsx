@@ -205,7 +205,8 @@ export const SettingsPaymentsCod = () => {
 									'woocommerce'
 								) }
 								options={
-									codSettings.settings.enable_for_methods?.options
+									codSettings.settings.enable_for_methods
+										?.options
 										? mapShippingMethodsOptions(
 												codSettings.settings
 													.enable_for_methods.options
@@ -213,7 +214,9 @@ export const SettingsPaymentsCod = () => {
 										: []
 								}
 								value={
-									Array.isArray(formValues.enable_for_methods)
+									Array.isArray(
+										formValues.enable_for_methods
+									)
 										? formValues.enable_for_methods
 										: []
 								}
@@ -238,7 +241,9 @@ export const SettingsPaymentsCod = () => {
 									'Accept cash on delivery if the order is virtual',
 									'woocommerce'
 								) }
-								checked={ Boolean( formValues.enable_for_virtual ) }
+								checked={ Boolean(
+									formValues.enable_for_virtual
+								) }
 								onChange={ ( checked ) => {
 									setFormValues( {
 										...formValues,
@@ -249,7 +254,12 @@ export const SettingsPaymentsCod = () => {
 						) }
 					</Settings.Section>
 					<Settings.Actions>
-						<Button variant="primary" type="submit" isBusy={ isSaving } disabled={ isSaving }>
+						<Button
+							variant="primary"
+							type="submit"
+							isBusy={ isSaving }
+							disabled={ isSaving }
+						>
 							{ __( 'Save changes', 'woocommerce' ) }
 						</Button>
 					</Settings.Actions>
