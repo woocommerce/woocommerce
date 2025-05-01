@@ -9,6 +9,19 @@
 	box-sizing: border-box;
 }
 
+.wc-block-cart__submit-button__text {
+	display: flex;
+	align-items: center;
+
+	// Prevent runts/widows. Overwrite `balance` with `pretty`, as `pretty` is not supported in all browsers.
+	text-wrap: balance;
+	text-wrap: pretty;
+
+	&--visually-hidden {
+		visibility: hidden;
+	}
+}
+
 .wc-block-cart {
 	.wc-block-cart__submit-container {
 		padding: 0;

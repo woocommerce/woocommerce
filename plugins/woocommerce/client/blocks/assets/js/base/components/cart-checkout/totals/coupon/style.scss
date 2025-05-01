@@ -35,6 +35,19 @@
 		white-space: nowrap;
 		flex: 1 1 auto;
 	}
+
+	.wc-block-components-totals-coupon__button__text {
+		display: flex;
+		align-items: center;
+
+		// Prevent runts/widows. Overwrite `balance` with `pretty`, as `pretty` is not supported in all browsers.
+		text-wrap: balance;
+		text-wrap: pretty;
+
+		&--visually-hidden {
+			visibility: hidden;
+		}
+	}
 }
 
 .wc-block-components-totals-coupon__content {
