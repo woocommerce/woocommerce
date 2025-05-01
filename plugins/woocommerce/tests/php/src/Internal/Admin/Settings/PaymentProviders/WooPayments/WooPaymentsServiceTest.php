@@ -418,7 +418,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				'errors'         => array(),
 				'context'        => array(
 					// Only with a working WPCOM connection we include the fields.
-					'fields'          => ( $wpcom_connection['is_store_connected'] && $wpcom_connection['has_connected_owner'] ) ? array(
+					'fields'           => ( $wpcom_connection['is_store_connected'] && $wpcom_connection['has_connected_owner'] ) ? array(
 						'business_types'      => $this->get_mock_onboarding_fields_business_types(),
 						'mccs_display_tree'   => array(
 							array(

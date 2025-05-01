@@ -4,7 +4,6 @@
 import React, { useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { Link } from '@woocommerce/components';
 import interpolateComponents from '@automattic/interpolate-components';
 
 /**
@@ -12,6 +11,7 @@ import interpolateComponents from '@automattic/interpolate-components';
  */
 import { useStepperContext } from '../components/stepper';
 import { disableWooPaymentsTestMode } from '~/settings-payments/utils';
+import strings from '../strings';
 
 const ActivatePayments: React.FC = () => {
 	const { nextStep } = useStepperContext();
@@ -39,24 +39,10 @@ const ActivatePayments: React.FC = () => {
 	return (
 		<>
 			<h1 className="stepper__heading">
-				{ __( 'Start accepting real payments', 'woocommerce' ) }
+			{ strings.steps.activate.heading }
 			</h1>
 			<p className="stepper__subheading">
-				{ interpolateComponents( {
-					mixedString: __(
-						'You are currently testing payments on your store. To activate real payments, you will need to provide some additional details about your business. {{link}}Learn more{{/link}}.',
-						'woocommerce'
-					),
-					components: {
-						link: (
-							<Link
-								href="https://woocommerce.com/document/woopayments/startup-guide/#sign-up-process"
-								target="_blank"
-								type="external"
-							/>
-						),
-					},
-				} ) }
+				{ strings.steps.activate.subheading }
 			</p>
 			<div className="stepper__content">
 				<Button
@@ -66,7 +52,7 @@ const ActivatePayments: React.FC = () => {
 					isBusy={ isContinueButtonLoading }
 					disabled={ isContinueButtonLoading }
 				>
-					{ __( 'Activate payments', 'woocommerce' ) }
+					{ strings.steps.activate.cta }
 				</Button>
 			</div>
 		</>

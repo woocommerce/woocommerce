@@ -8,12 +8,41 @@ import React from 'react';
 
 const documentationUrls = {
 	tos: 'https://wordpress.com/tos/',
+	signUpLink: 'https://woocommerce.com/document/woopayments/startup-guide/#sign-up-process',
 	merchantTerms: 'https://wordpress.com/tos/#more-woopay-specifically',
 	privacyPolicy: 'https://automattic.com/privacy/',
 };
 
 export default {
 	steps: {
+		activate: {
+			heading: __(
+				'Start accepting real payments',
+				'woocommerce'
+			),
+			subheading: interpolateComponents( {
+				mixedString: sprintf(
+					/* translators: %1$s: WooPayments, %2$s: WooPay  */
+					__(
+						'You are currently testing payments on your store. To activate real payments, you will need to provide some additional details about your business. {{link}}Learn more{{/link}}.',
+						'woocommerce'
+					),
+					'WooPayments',
+					'WooPay'
+				),
+				components: {
+					link: (
+						// eslint-disable-next-line jsx-a11y/anchor-has-content
+						<a
+							rel="external noopener noreferrer"
+							target="_blank"
+							href={ documentationUrls.signUpLink }
+						/>
+					),
+				},
+			} ),
+			cta: __( 'Activate payments', 'woocommerce' ),
+		},
 		business: {
 			heading: __(
 				'Let’s get your store ready to accept payments',
