@@ -277,8 +277,8 @@ class WC_Install {
 		'9.8.0' => array(
 			'wc_update_980_remove_order_attribution_install_banner_dismissed_option',
 		),
-		'9.8.3' => array(
-			'wc_update_983_enable_new_payments_settings_page_feature',
+		'9.8.4' => array(
+			'wc_update_984_enable_new_payments_settings_page_feature',
 		),
 	);
 
