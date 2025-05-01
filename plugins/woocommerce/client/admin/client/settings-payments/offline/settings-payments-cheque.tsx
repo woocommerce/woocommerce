@@ -2,8 +2,6 @@
  * External dependencies
  */
 import {
-	Card,
-	CardBody,
 	Button,
 	CheckboxControl,
 	TextControl,
@@ -18,10 +16,7 @@ import { useState, useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import '../settings-payments-body.scss';
-import './settings-payments-offline-method.scss';
-import { GatewaySettingsForm } from '~/settings-payments/components/gateway-settings-form';
-import { PaymentSettingsLayout } from '~/settings-payments/components/payment-settings-layout';
-import { PaymentSettingsSection } from '~/settings-payments/components/payment-settings-section';
+import { Settings } from '~/settings-payments/components/settings';
 import { FieldPlaceholder } from '~/settings-payments/components/field-placeholder';
 
 /**
@@ -89,100 +84,105 @@ export const SettingsPaymentsCheque = () => {
 	};
 
 	return (
-		<PaymentSettingsLayout>
-			<GatewaySettingsForm>
-				<PaymentSettingsSection
-					title={ __( 'Enable and customise', 'woocommerce' ) }
-					description={ __(
-						'Choose how you want to present check payments to your customers during checkout.',
-						'woocommerce'
-					) }
+		<Settings>
+			<Settings.Layout>
+				<Settings.Form
+					onSubmit={ ( e ) => {
+						e.preventDefault();
+						saveSettings();
+					} }
 				>
-					{ isLoading ? (
-						<FieldPlaceholder size="small" />
-					) : (
-						<CheckboxControl
-							label={ __(
-								'Enable check payments',
-								'woocommerce'
-							) }
-							checked={ Boolean( formValues.enabled ) }
-							onChange={ ( checked ) => {
-								setFormValues( {
-									...formValues,
-									enabled: checked,
-								} );
-							} }
-						/>
-					) }
-					{ isLoading ? (
-						<FieldPlaceholder size="medium" />
-					) : (
-						<TextControl
-							label={ __( 'Title', 'woocommerce' ) }
-							help={ __(
-								'This controls the title which the user sees during checkout.',
-								'woocommerce'
-							) }
-							placeholder={ __(
-								'Check payments',
-								'woocommerce'
-							) }
-							value={ String( formValues.title ) }
-							onChange={ ( value ) => {
-								setFormValues( {
-									...formValues,
-									title: value,
-								} );
-							} }
-						/>
-					) }
-					{ isLoading ? (
-						<FieldPlaceholder size="large" />
-					) : (
-						<TextareaControl
-							label={ __( 'Description', 'woocommerce' ) }
-							help={ __(
-								'Payment method description that the customer will see on your checkout.',
-								'woocommerce'
-							) }
-							value={ String( formValues.description ) }
-							onChange={ ( value ) => {
-								setFormValues( {
-									...formValues,
-									description: value,
-								} );
-							} }
-						/>
-					) }
-					{ isLoading ? (
-						<FieldPlaceholder size="large" />
-					) : (
-						<TextareaControl
-							label={ __( 'Instructions', 'woocommerce' ) }
-							help={ __(
-								'Instructions that will be added to the thank you page and emails.',
-								'woocommerce'
-							) }
-							value={ String( formValues.instructions ) }
-							onChange={ ( value ) => {
-								setFormValues( {
-									...formValues,
-									instructions: value,
-								} );
-							} }
-						/>
-					) }
-				</PaymentSettingsSection>
-			</GatewaySettingsForm>
-			<Card className={ 'payment-settings-card__wrapper ' }>
-				<CardBody className={ 'form__actions' }>
-					<Button variant={ 'primary' } onClick={ saveSettings }>
-						{ __( 'Save changes', 'woocommerce' ) }
-					</Button>
-				</CardBody>
-			</Card>
-		</PaymentSettingsLayout>
+					<Settings.Section
+						title={ __( 'Enable and customise', 'woocommerce' ) }
+						description={ __(
+							'Choose how you want to present check payments to your customers during checkout.',
+							'woocommerce'
+						) }
+					>
+						{ isLoading ? (
+							<FieldPlaceholder size="small" />
+						) : (
+							<CheckboxControl
+								label={ __(
+									'Enable check payments',
+									'woocommerce'
+								) }
+								checked={ Boolean( formValues.enabled ) }
+								onChange={ ( checked ) => {
+									setFormValues( {
+										...formValues,
+										enabled: checked,
+									} );
+								} }
+							/>
+						) }
+						{ isLoading ? (
+							<FieldPlaceholder size="medium" />
+						) : (
+							<TextControl
+								label={ __( 'Title', 'woocommerce' ) }
+								help={ __(
+									'This controls the title which the user sees during checkout.',
+									'woocommerce'
+								) }
+								placeholder={ __(
+									'Check payments',
+									'woocommerce'
+								) }
+								value={ String( formValues.title ) }
+								onChange={ ( value ) => {
+									setFormValues( {
+										...formValues,
+										title: value,
+									} );
+								} }
+							/>
+						) }
+						{ isLoading ? (
+							<FieldPlaceholder size="large" />
+						) : (
+							<TextareaControl
+								label={ __( 'Description', 'woocommerce' ) }
+								help={ __(
+									'Payment method description that the customer will see on your checkout.',
+									'woocommerce'
+								) }
+								value={ String( formValues.description ) }
+								onChange={ ( value ) => {
+									setFormValues( {
+										...formValues,
+										description: value,
+									} );
+								} }
+							/>
+						) }
+						{ isLoading ? (
+							<FieldPlaceholder size="large" />
+						) : (
+							<TextareaControl
+								label={ __( 'Instructions', 'woocommerce' ) }
+								help={ __(
+									'Instructions that will be added to the thank you page and emails.',
+									'woocommerce'
+								) }
+								value={ String( formValues.instructions ) }
+								onChange={ ( value ) => {
+									setFormValues( {
+										...formValues,
+										instructions: value,
+									} );
+								} }
+							/>
+						) }
+					</Settings.Section>
+					<Settings.Actions>
+						<Button variant="primary" type="submit">
+							{ __( 'Save changes', 'woocommerce' ) }
+						</Button>
+					</Settings.Actions>
+				</Settings.Form>
+			</Settings.Layout>
+		</Settings>
 	);
 };
 
