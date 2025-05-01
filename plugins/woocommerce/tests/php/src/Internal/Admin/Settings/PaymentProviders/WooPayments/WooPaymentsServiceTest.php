@@ -483,7 +483,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					) : array(),
 					'sub_steps'        => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['sub_steps'] ?? array(),
 					'self_assessment'  => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['self_assessment'] ?? array(),
-					'has_test_account' => false,
+					'has_test_account' => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['has_test_account'] ?? false,
 				),
 				'actions'        => array(
 					'start'              => array(
@@ -796,10 +796,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
-						'statuses' => array(
+						'statuses'         => array(
 							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
+						'has_test_account' => true,
 					),
 				),
 				$default_recommended_pms,
@@ -1021,10 +1022,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				),
 				array(
-					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT          => array(
 						'statuses' => array(
 							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
+						'has_test_account' => true,
 					),
 				),
 				$default_recommended_pms,
@@ -1062,6 +1066,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
+						'has_test_account' => true,
 					),
 				),
 				$default_recommended_pms,

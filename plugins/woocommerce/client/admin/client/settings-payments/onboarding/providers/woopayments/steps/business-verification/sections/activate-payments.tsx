@@ -2,9 +2,7 @@
  * External dependencies
  */
 import React, { useState } from 'react';
-import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import interpolateComponents from '@automattic/interpolate-components';
 
 /**
  * Internal dependencies
@@ -39,7 +37,7 @@ const ActivatePayments: React.FC = () => {
 	return (
 		<>
 			<h1 className="stepper__heading">
-			{ strings.steps.activate.heading }
+				{ strings.steps.activate.heading }
 			</h1>
 			<p className="stepper__subheading">
 				{ strings.steps.activate.subheading }
