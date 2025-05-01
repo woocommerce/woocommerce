@@ -54,8 +54,11 @@ export const SettingsPaymentsCod = () => {
 				title: codSettings.settings.title.value,
 				description: codSettings.description,
 				instructions: codSettings.settings.instructions.value,
-				enable_for_methods:
-					codSettings.settings.enable_for_methods.value,
+				enable_for_methods: Array.isArray(
+					codSettings.settings.enable_for_methods.value
+				)
+					? codSettings.settings.enable_for_methods.value
+					: [],
 				enable_for_virtual:
 					codSettings.settings.enable_for_virtual.value,
 			} );
@@ -209,7 +212,11 @@ export const SettingsPaymentsCod = () => {
 										  )
 										: []
 								}
-								value={ formValues.enable_for_methods as string[] }
+								value={
+									Array.isArray(formValues.enable_for_methods)
+										? formValues.enable_for_methods
+										: []
+								}
 								onChange={ ( value: string[] ) => {
 									setFormValues( {
 										...formValues,
