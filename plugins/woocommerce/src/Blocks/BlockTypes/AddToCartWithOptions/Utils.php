@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
 use Automattic\WooCommerce\Enums\ProductType;
+use WP_Block;
 
 /**
  * Utility methods used for the Add to Cart with Options block.
@@ -131,5 +132,26 @@ class Utils {
 	 */
 	public static function is_not_purchasable_simple_product( $product ) {
 		return ProductType::SIMPLE === $product->get_type() && ( ! $product->is_in_stock() || ! $product->is_purchasable() );
+	}
+
+	/**
+	 * Renders a new block with custom context
+	 *
+	 * @param WP_Block $block The block instance.
+	 * @param array    $context The context for the new block.
+	 * @return string Rendered block content
+	 */
+	public static function render_block_with_context( $block, $context ) {
+		// Get an instance of the current block.
+		$block_instance = $block->parsed_block;
+
+		// Create new block with custom context.
+		$new_block = new WP_Block(
+			$block_instance,
+			$context
+		);
+
+		// Render with dynamic set to false to prevent calling render_callback.
+		return $new_block->render( array( 'dynamic' => false ) );
 	}
 }

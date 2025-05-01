@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add static cache and queue search to prevent duplicate scheduling of the wc_delete_related_product_transients_async action in wc_delete_product_transients().
