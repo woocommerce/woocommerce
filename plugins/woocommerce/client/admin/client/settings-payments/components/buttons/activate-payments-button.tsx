@@ -9,9 +9,7 @@ import { PaymentIncentive } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import {
-	getWooPaymentsSetupLiveAccountLink,
-} from '~/settings-payments/utils';
+import { getWooPaymentsSetupLiveAccountLink } from '~/settings-payments/utils';
 
 interface ActivatePaymentsButtonProps {
 	/**

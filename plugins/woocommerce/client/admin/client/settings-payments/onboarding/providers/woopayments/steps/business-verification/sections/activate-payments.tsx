@@ -11,29 +11,29 @@ import interpolateComponents from '@automattic/interpolate-components';
  * Internal dependencies
  */
 import { useStepperContext } from '../components/stepper';
-import {
-	disableWooPaymentsTestMode,
-} from '~/settings-payments/utils';
+import { disableWooPaymentsTestMode } from '~/settings-payments/utils';
 
 const ActivatePayments: React.FC = () => {
 	const { nextStep } = useStepperContext();
 	const [ isContinueButtonLoading, setIsContinueButtonLoading ] =
 		useState( false );
-	
+
 	const handleContinue = () => {
 		// Set the continue button loading state to true.
 		setIsContinueButtonLoading( true );
 
 		// Disable test mode and redirect to the live account setup link.
-		disableWooPaymentsTestMode().then( () => {
-			// Set the continue button loading state to false.
-			setIsContinueButtonLoading( false );
-			// Navigate to the live account setup.
-			return nextStep();
-		} ).catch( () => {
-			// Handle any errors that occur during the process.
-			setIsContinueButtonLoading( false );
-		} );
+		disableWooPaymentsTestMode()
+			.then( () => {
+				// Set the continue button loading state to false.
+				setIsContinueButtonLoading( false );
+				// Navigate to the live account setup.
+				return nextStep();
+			} )
+			.catch( () => {
+				// Handle any errors that occur during the process.
+				setIsContinueButtonLoading( false );
+			} );
 	};
 
 	return (

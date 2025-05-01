@@ -173,7 +173,7 @@ export const OnboardingProvider: React.FC< {
 		// This is to avoid stale data when the modal is opened again.
 		resetLocalState();
 		invalidateWooPaymentsOnboarding( 'getOnboardingData' );
-	}
+	};
 
 	/**
 	 * useEffect functions
