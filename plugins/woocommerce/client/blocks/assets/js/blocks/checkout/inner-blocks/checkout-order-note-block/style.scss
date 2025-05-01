@@ -14,10 +14,10 @@
 	margin-top: $gap;
 
 	&:focus {
-		background-color: #fff;
-		color: $input-text-active;
+		background-color: $input-background-light;
+		color: $input-text-light;
 		outline: 0;
-		box-shadow: 0 0 0 1px $input-border-gray;
+		box-shadow: 0 0 0 1px $input-text-light;
 	}
 
 	.has-dark-controls & {

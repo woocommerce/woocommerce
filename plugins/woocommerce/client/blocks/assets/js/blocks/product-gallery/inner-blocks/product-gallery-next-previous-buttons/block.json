@@ -12,12 +12,30 @@
 		"interactivity": true,
 		"color": {
 			"background": true,
-			"text": true
+			"text": true,
+			"__experimentalSkipSerialization": true
+		},
+		"align": true,
+		"layout": {
+			"default": {
+				"type": "flex",
+				"flexWrap": "nowrap",
+				"verticalAlignment": "center"
+			},
+			"allowVerticalAlignment": true,
+			"allowOrientation": false,
+			"allowJustification": false
 		},
 		"shadow": true,
+		"spacing": {
+			"margin": true,
+			"__experimentalSkipSerialization": true
+		},
 		"__experimentalBorder": {
-			"radius": true
-		}
+			"radius": true,
+			"__experimentalSkipSerialization": true
+		},
+		"__experimentalSelector": ".wc-block-product-gallery-large-image-next-previous__button"
 	},
 	"ancestor": [ "woocommerce/product-gallery-large-image" ]
 }

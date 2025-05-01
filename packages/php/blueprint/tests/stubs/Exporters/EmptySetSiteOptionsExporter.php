@@ -28,4 +28,13 @@ class EmptySetSiteOptionsExporter implements StepExporter {
 	public function get_step_name() {
 		return SetSiteOptions::get_step_name();
 	}
+
+	/**
+	 * Check if the step is capable of being exported.
+	 *
+	 * @return bool True if the step is capable of being exported, false otherwise.
+	 */
+	public function check_step_capabilities(): bool {
+		return true;
+	}
 }

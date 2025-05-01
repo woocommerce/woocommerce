@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+CI: fix failing blocks E2E tests dependencies setup.

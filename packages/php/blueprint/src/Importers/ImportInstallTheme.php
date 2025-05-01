@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use Automattic\WooCommerce\Blueprint\Steps\InstallTheme;
 use Automattic\WooCommerce\Blueprint\UseWPFunctions;
-use Plugin_Upgrader;
 
 /**
  * Class ImportInstallTheme
@@ -120,14 +119,14 @@ class ImportInstallTheme implements StepProcessor {
 
 
 	/**
-	 * Install the theme from the local plugin path.
+	 * Install the theme from the local path.
 	 *
-	 * @param string $local_plugin_path The local path of the plugin to be installed.
+	 * @param string $local_path The local path of the theme to be installed.
 	 *
 	 * @return bool True if the installation was successful, false otherwise.
 	 */
-	protected function install( $local_plugin_path ) {
-		$unzip_result = $this->wp_unzip_file( $local_plugin_path, $this->wp_get_theme_root() );
+	protected function install( $local_path ) {
+		$unzip_result = $this->wp_unzip_file( $local_path, $this->wp_get_theme_root() );
 
 		if ( $this->is_wp_error( $unzip_result ) ) {
 			return false;
@@ -143,5 +142,16 @@ class ImportInstallTheme implements StepProcessor {
 	 */
 	public function get_step_class(): string {
 		return InstallTheme::class;
+	}
+
+	/**
+	 * Check if the current user has the required capabilities for this step.
+	 *
+	 * @param object $schema The schema to process.
+	 *
+	 * @return bool True if the user has the required capabilities. False otherwise.
+	 */
+	public function check_step_capabilities( $schema ): bool {
+		return current_user_can( 'install_themes' );
 	}
 }

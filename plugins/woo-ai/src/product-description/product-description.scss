@@ -24,6 +24,19 @@
 	.components-snackbar__action:has(.woo-ai-feedback-snackbar-action) {
 		text-decoration: none;
 	}
+
+	.woo-ai-deprecation-notice-action + .woo-ai-deprecation-notice-action {
+		margin-left: 10px;
+	}
+
+	.components-snackbar__action:has(.woo-ai-deprecation-notice-action) {
+		text-decoration: none;
+	}
+
+	.woo-ai-deprecation-notice-separator {
+		margin-left: 10px;
+		margin-right: 10px;
+	}
 }
 
 .wp-media-buttons {
@@ -43,5 +56,33 @@
 			padding: 0;
 		}
 	}
+}
+
+.woo-ai-deprecation-notice-link {
+	color: inherit;
+	font-size: inherit;
+	text-decoration: none;
+
+	&:hover {
+		color: #fff;
+		text-decoration: none;
+	}
+}
+
+.woo-ai-deprecation-notice-action {
+	color: inherit;
+	font-size: inherit;
+	text-decoration: none;
+	background: none;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+}
+
+.woo-ai-deprecation-notice-separator {
+	color: inherit;
+	font-size: inherit;
+	margin-left: 10px;
+	margin-right: 10px;
 }
 
