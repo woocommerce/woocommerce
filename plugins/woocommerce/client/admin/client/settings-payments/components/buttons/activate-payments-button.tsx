@@ -11,7 +11,6 @@ import { PaymentIncentive } from '@woocommerce/data';
  */
 import {
 	getWooPaymentsSetupLiveAccountLink,
-	disableWooPaymentsTestMode,
 } from '~/settings-payments/utils';
 
 interface ActivatePaymentsButtonProps {
@@ -65,9 +64,6 @@ export const ActivatePaymentsButton = ( {
 		}
 
 		if ( onboardingType === 'native_in_context' ) {
-			// Disable test mode.
-			disableWooPaymentsTestMode();
-
 			// Open the onboarding modal.
 			setOnboardingModalOpen( true );
 		} else {
