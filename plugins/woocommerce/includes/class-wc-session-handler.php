@@ -94,7 +94,15 @@ class WC_Session_Handler extends WC_Session {
 			$this->_session_expiration = $cookie[1];
 			$this->_session_expiring   = $cookie[2];
 			$this->_has_cookie         = true;
-			$this->_data               = $this->get_session_data();
+
+			/**
+			 * Allows filtering of the session data retrieved from storage during session cookie initialization.
+			 *
+			 * @param array $session_data The session data as retrieved from storage.
+			 *
+			 * @since 9.9.0
+			 */
+			$this->_data = apply_filters( 'woocommerce_restored_session_data', $this->get_session_data() );
 
 			if ( ! $this->is_session_cookie_valid() || empty( $this->_data ) ) {
 				// Other than the case of an invalid session cookie, if there is no longer any data in the session,
