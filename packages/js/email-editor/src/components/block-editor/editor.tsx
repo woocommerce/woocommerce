@@ -16,6 +16,7 @@ import { useMemo, useEffect } from '@wordpress/element';
 import { SlotFillProvider, Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import { useDispatch } from '@wordpress/data';
+import { CommandMenu } from '@wordpress/commands';
 
 /**
  * Internal dependencies
@@ -111,6 +112,7 @@ export function InnerEditor( {
 	return (
 		<SlotFillProvider>
 			<ErrorBoundary canCopyContent>
+				<CommandMenu />
 				<Editor
 					postId={ currentPost.postId }
 					postType={ currentPost.postType }

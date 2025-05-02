@@ -42,11 +42,6 @@
 	}
 }
 
-// We currently don't support command palette so we hide the shortcut
-.editor-document-bar__shortcut {
-	display: none !important;
-}
-
 // Temporarily hide text about amount of changes to save.
 // The wording is not great for email context.
 .entities-saved-states__text-prompt {
