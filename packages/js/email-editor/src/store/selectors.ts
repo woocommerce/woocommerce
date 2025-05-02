@@ -3,7 +3,6 @@
  */
 import { createRegistrySelector, createSelector } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
-import { store as interfaceStore } from '@wordpress/interface';
 import { store as editorStore } from '@wordpress/editor';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { serialize, parse } from '@wordpress/blocks';
@@ -56,11 +55,6 @@ export const isFeatureActive = createRegistrySelector(
 	( select ) =>
 		( _, feature: Feature ): boolean =>
 			!! select( preferencesStore ).get( storeName, feature )
-);
-
-export const isSidebarOpened = createRegistrySelector(
-	( select ) => (): boolean =>
-		!! select( interfaceStore ).getActiveComplementaryArea( storeName )
 );
 
 export const hasEdits = createRegistrySelector( ( select ) => (): boolean => {

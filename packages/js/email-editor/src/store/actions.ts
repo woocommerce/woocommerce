@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { dispatch, select } from '@wordpress/data';
-import { store as interfaceStore } from '@wordpress/interface';
 import {
 	store as coreStore,
 	store as coreDataStore,
@@ -73,22 +72,6 @@ export function updateSendPreviewEmail( toEmail: string ) {
 		state: { toEmail } as Partial< State[ 'preview' ] >,
 	} as const;
 }
-
-export const openSidebar =
-	( key = mainSidebarDocumentTab ) =>
-	( { registry } ): unknown => {
-		return registry
-			.dispatch( interfaceStore )
-			.enableComplementaryArea( storeName, key );
-	};
-
-export const closeSidebar =
-	() =>
-	( { registry } ): unknown => {
-		return registry
-			.dispatch( interfaceStore )
-			.disableComplementaryArea( storeName );
-	};
 
 export function toggleSettingsSidebarActiveTab( activeTab: string ) {
 	return {
