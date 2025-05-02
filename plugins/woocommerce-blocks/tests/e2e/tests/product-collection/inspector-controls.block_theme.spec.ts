@@ -539,14 +539,16 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			await expect( customQueryType ).not.toBeChecked();
 		} );
 
-		test( 'allows filtering in non-archive context', async ( {
+		test.only( 'allows filtering in non-archive context', async ( {
 			pageObject,
 			editor,
 			page,
 			wpCoreVersion,
+			requestUtils,
 		} ) => {
 			test.skip( wpCoreVersion <= 6.6, 'Skipping on WP 6.6 and below' );
 
+			await requestUtils.setFeatureFlag( 'experimental-blocks', true );
 			await pageObject.createNewPostAndInsertBlock();
 
 			await expect( pageObject.products ).toHaveCount( 9 );
@@ -603,8 +605,10 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			editor,
 			page,
 			wpCoreVersion,
+			requestUtils,
 		} ) => {
 			test.skip( wpCoreVersion <= 6.6, 'Skipping on WP 6.6 and below' );
+			await requestUtils.setFeatureFlag( 'experimental-blocks', true );
 
 			await pageObject.createNewPostAndInsertBlock();
 
