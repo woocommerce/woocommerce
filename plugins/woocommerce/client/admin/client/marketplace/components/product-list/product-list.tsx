@@ -12,7 +12,7 @@ interface ProductListProps {
 	products: Product[];
 	groupURL: string;
 	type: ProductType;
-	cardType: ProductCardType;
+	cardType?: ProductCardType;
 	groupURLText: string | null;
 	groupURLType: 'wc-admin' | 'wp-admin' | 'external' | undefined; // types defined by Link component
 }

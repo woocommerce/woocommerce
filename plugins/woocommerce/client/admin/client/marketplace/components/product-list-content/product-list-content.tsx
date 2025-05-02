@@ -22,7 +22,7 @@ export default function ProductListContent( props: {
 	group?: string;
 	productGroup?: string;
 	type: ProductType;
-	cardType: ProductCardType;
+	cardType?: ProductCardType;
 	className?: string;
 	searchTerm?: string;
 	category?: string;
