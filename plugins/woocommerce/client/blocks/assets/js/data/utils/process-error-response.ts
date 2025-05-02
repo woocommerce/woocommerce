@@ -78,7 +78,7 @@ export const getErrorDetails = (
 									message: decodeEntities(
 										additionalError.message
 									),
-									data,
+									data: additionalError.data,
 								},
 							];
 							if ( typeof additionalError.data !== 'undefined' ) {
