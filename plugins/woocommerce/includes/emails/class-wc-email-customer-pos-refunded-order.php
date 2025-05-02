@@ -5,13 +5,12 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\Internal\Email\OrderPriceFormatter;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
-
-require_once __DIR__ . '/trait-wc-pos-email-customizations.php';
 
 if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 
@@ -26,8 +25,6 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 	 * @extends  WC_Email
 	 */
 	class WC_Email_Customer_POS_Refunded_Order extends WC_Email {
-		use WC_POS_Email_Customizations;
-
 		/**
 		 * Refund order.
 		 *
@@ -353,6 +350,34 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 				$this->form_fields['cc']  = $this->get_cc_field();
 				$this->form_fields['bcc'] = $this->get_bcc_field();
 			}
+		}
+
+		/**
+		 * Add actions and filters before generating email content.
+		 */
+		private function add_pos_customizations() {
+			// Add action to display unit price in the beginning of the order item meta.
+			add_action( 'woocommerce_order_item_meta_start', array( $this, 'add_unit_price' ), 10, 4 );
+		}
+
+		/**
+		 * Remove actions and filters after generating email content.
+		 */
+		private function remove_pos_customizations() {
+			// Remove actions and filters after generating content to avoid affecting other emails.
+			remove_action( 'woocommerce_order_item_meta_start', array( $this, 'add_unit_price' ), 10 );
+		}
+
+		/**
+		 * Add unit price to order item meta start position.
+		 *
+		 * @param int      $item_id       Order item ID.
+		 * @param array    $item          Order item data.
+		 * @param WC_Order $order         Order object.
+		 */
+		public function add_unit_price( $item_id, $item, $order ) {
+			$unit_price = OrderPriceFormatter::get_formatted_item_subtotal( $order, $item );
+			echo wp_kses_post( '<br /><small>' . $unit_price . '</small>' );
 		}
 	}
 
