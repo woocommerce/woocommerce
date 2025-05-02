@@ -125,6 +125,7 @@
 			flex-direction: column;
 			gap: 2px;
 			color: $gray-900;
+			width: 100%;
 		}
 
 		&__title {
@@ -291,6 +292,16 @@
 			.woocommerce-marketplace__product-card__price-billing {
 				line-height: 1.5;
 			}
+
+			&.is-compact {
+				.woocommerce-marketplace__product-card__header {
+					padding: $large-gap;
+				}
+
+				.woocommerce-marketplace__product-card__footer {
+					padding: 0;
+				}
+			}
 		}
 
 		&.woocommerce-marketplace__product-card--business-service {
@@ -352,6 +363,61 @@
 						color: #2c3337;
 						border-radius: $grid-unit-05;
 					}
+				}
+			}
+		}
+
+		&.is-compact {
+			&,
+			.woocommerce-marketplace__product-card__header,
+			.woocommerce-marketplace__product-card__meta,
+			.woocommerce-marketplace__business-card__content {
+				min-width: 0; // allow text to overflow
+			}
+
+			&.woocommerce-marketplace__product-card--theme {
+				padding-bottom: 0;
+			}
+			.woocommerce-marketplace__product-card__content {
+				grid-template-rows: auto;
+			}
+
+			.woocommerce-marketplace__product-card__footer {
+				flex-wrap: wrap;
+				gap: 4px;
+			}
+
+			.woocommerce-marketplace__product-card__details {
+				align-items: center;
+			}
+
+			.woocommerce-marketplace__product-card__link {
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				display: block;
+			}
+
+			.woocommerce-marketplace__business-card {
+				flex-direction: row;
+				padding: $large-gap;
+				align-items: center;
+				gap: $small-gap;
+
+				.woocommerce-marketplace__business-card__content {
+					padding: 0;
+				}
+
+				.woocommerce-marketplace__product-card__description {
+					display: none;
+				}
+
+				.woocommerce-marketplace__business-card__header {
+					min-height: auto;
+					height: 48px;
+					width: 48px;
+					flex-shrink: 0;
+					border: none;
 				}
 			}
 		}
