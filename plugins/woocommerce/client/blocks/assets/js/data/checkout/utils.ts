@@ -28,7 +28,7 @@ import type {
 	OrderForm,
 	OrderFormValues,
 } from '@woocommerce/settings';
-import { removeNoticeById } from '@woocommerce/base-utils';
+import { removeNoticeForField } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies

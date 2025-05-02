@@ -88,10 +88,10 @@ export const removeNoticesWithContext = ( context: string ) => {
 /**
  * Remove a notice by its ID.
  *
- * @param {string} id - The ID of the notice to remove.
+ * @param {string} id        - The ID of the notice to remove.
  * @param {string} [context] - The context of the notice to remove.
  */
-export const removeNoticeById = ( id: string, context?: string ) => {
+export const removeNoticeForField = ( id: string, context?: string ) => {
 	const { removeNotice } = dispatch( noticesStore );
 
 	if ( context ) {
@@ -108,7 +108,7 @@ export const removeNoticeById = ( id: string, context?: string ) => {
 	// At this point we are removing the notice from all WC contexts since we don't know which one it is.
 	containers.forEach( ( container ) => {
 		getNotices( container ).forEach( ( notice ) => {
-			if ( notice.id === id ) {
+			if ( notice.id.startsWith( id ) ) {
 				removeNotice( notice.id, container );
 			}
 		} );
