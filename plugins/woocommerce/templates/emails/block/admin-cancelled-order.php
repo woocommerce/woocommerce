@@ -34,7 +34,7 @@ printf( esc_html__( 'Order cancelled: #%s,', 'woocommerce' ), '<!--[woocommerce/
 <p>
 <?php
 	/* translators: %s: Customer first name */
-	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/shopper-first-name]-->' );
+	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/customer-first-name]-->' );
 ?>
 </p>
 <!-- /wp:paragraph -->
@@ -44,7 +44,7 @@ printf( esc_html__( 'Order cancelled: #%s,', 'woocommerce' ), '<!--[woocommerce/
 <?php
 	/* translators: %1$s: Order number. %2$s: Customer full name */
 	$text = __( 'We’re getting in touch to let you know that order #%1$s from %2$s has been cancelled.', 'woocommerce' );
-	printf( esc_html( $text ), '<!--[woocommerce/order-number]-->', '<!--[woocommerce/shopper-full-name]-->' );
+	printf( esc_html( $text ), '<!--[woocommerce/order-number]-->', '<!--[woocommerce/customer-full-name]-->' );
 ?>
 </p>
 <!-- /wp:paragraph -->

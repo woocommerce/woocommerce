@@ -29,7 +29,7 @@ defined( 'ABSPATH' ) || exit;
 <p>
 <?php
 	/* translators: %s: Customer username */
-	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/shopper-username]-->' );
+	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/customer-username]-->' );
 ?>
 </p>
 <!-- /wp:paragraph -->
@@ -47,7 +47,7 @@ defined( 'ABSPATH' ) || exit;
 <p> 
 <?php
 /* translators: %s: Username */
-echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), '<!--[woocommerce/shopper-username]-->' ), array( 'b' => array() ) );
+echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), '<!--[woocommerce/customer-username]-->' ), array( 'b' => array() ) );
 ?>
 </p>
 <!-- /wp:paragraph -->

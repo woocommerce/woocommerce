@@ -25,7 +25,7 @@ import {
 } from '@woocommerce/settings';
 import { isNull } from '@woocommerce/types';
 import { useInstanceId } from '@wordpress/compose';
-import { dispatch } from '@wordpress/data';
+import { dispatch, select } from '@wordpress/data';
 import { useEffect, useRef } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import isShallowEqual from '@wordpress/is-shallow-equal';
@@ -103,28 +103,39 @@ const Form = <
 				return;
 			}
 			inputRef?.setErrorMessage( error );
+			const hasValidationError = select(
+				validationStore
+			).getValidationError( `${ addressType }_${ key }` );
+
+			// Check if this field already has a validation error, prevents up from surfacing already hidden errors.
+			if ( hasValidationError ) {
+				return;
+			}
 			dispatch( validationStore ).setValidationErrors( {
 				[ `${ addressType }_${ key }` ]: {
 					message: error,
 					hidden: !! inputRef?.isFocused(),
 				},
 			} );
-			if ( ! inputRef?.isFocused() ) {
-				inputRef?.revalidate();
-			}
 		} );
 
+		// Previous errors are cleared when they're no longer present.
 		if ( previousErrors ) {
+			const errorsToClear: string[] = [];
 			Object.entries( previousErrors ).forEach( ( [ key ] ) => {
 				const inputRef = inputsRef.current[ key ];
-				// If error was previously set but is now cleared
+
+				// If error was previously set but no longer exists, clear it.
 				if ( ! ( key in errors ) ) {
-					dispatch( validationStore ).clearValidationError(
-						`${ addressType }_${ key }`
-					);
+					errorsToClear.push( `${ addressType }_${ key }` );
 					inputRef?.setErrorMessage( '' );
 				}
 			} );
+			if ( errorsToClear.length ) {
+				dispatch( validationStore ).clearValidationErrors(
+					errorsToClear
+				);
+			}
 		}
 	}, [ errors, previousErrors, addressType, values ] );
 

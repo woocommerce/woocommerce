@@ -15,6 +15,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { CollapsibleContent } from '@woocommerce/components';
 import { settings, plugins, layout } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
+import { useUser } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -48,6 +49,8 @@ const Blueprint = () => {
 			return acc;
 		}, {} )
 	);
+
+	const { currentUserCan } = useUser();
 
 	const exportBlueprint = async ( _steps ) => {
 		setExportError( null );
@@ -170,14 +173,18 @@ const Blueprint = () => {
 					}
 				) }
 			</p>
-			<h4>{ __( 'Import', 'woocommerce' ) }</h4>
-			<p>
-				{ __(
-					'Import .json file, max size 50 MB. Only one Blueprint can be imported at a time.',
-					'woocommerce'
-				) }
-			</p>
-			<BlueprintUploadDropzone />
+			{ currentUserCan( 'manage_options' ) && (
+				<>
+					<h4>{ __( 'Import', 'woocommerce' ) }</h4>
+					<p>
+						{ __(
+							'Import .json file, max size 50 MB. Only one Blueprint can be imported at a time.',
+							'woocommerce'
+						) }
+					</p>
+					<BlueprintUploadDropzone />
+				</>
+			) }
 			<h4>{ __( 'Export', 'woocommerce' ) }</h4>
 			<p className="blueprint-settings-export-intro">
 				{ __(

@@ -100,10 +100,9 @@ class BlockEmailRenderer {
 	 * @return string Modified email content
 	 */
 	private function render_block_email( \WP_Post $email_post, string $woo_content, \WC_Email $wc_email ): ?string {
-		$subject   = $wc_email->get_subject(); // We will get subject from $email_post after we add it to the editor.
-		$preheader = ''; // We will get the preheader from $email_post after we add it to the editor.
 		try {
-			$this->personalizer->set_context( $this->prepare_context_data( $wc_email ) );
+			$subject             = $wc_email->get_subject(); // We will get subject from $email_post after we add it to the editor.
+			$preheader           = $wc_email->get_preheader();
 			$rendered_email_data = $this->renderer->render( $email_post, $subject, $preheader, 'en' );
 			$personalized_email  = $this->personalizer->personalize_content( $rendered_email_data['html'] );
 			$rendered_email      = str_replace( self::WOO_EMAIL_CONTENT_PLACEHOLDER, $woo_content, $personalized_email );
@@ -123,20 +122,5 @@ class BlockEmailRenderer {
 	 */
 	private function get_email_post_by_wc_email( \WC_Email $email ): ?\WP_Post {
 		return $this->template_manager->get_email_post( $email->id );
-	}
-
-	/**
-	 * Prepare context data for personalization.
-	 *
-	 * @param \WC_Email $wc_email WooCommerce email.
-	 * @return array
-	 */
-	private function prepare_context_data( \WC_Email $wc_email ): array {
-		$context                    = array();
-		$context['recipient_email'] = $wc_email->get_recipient();
-		$context['order']           = $wc_email->object instanceof \WC_Order ? $wc_email->object : null;
-		$context['wp_user']         = $wc_email->object instanceof \WP_User ? $wc_email->object : null;
-		$context['wc_email']        = $wc_email;
-		return $context;
 	}
 }
