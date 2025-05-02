@@ -49,14 +49,14 @@ class EmailApiController {
 	public function get_email_data( $post_data ): array {
 		$email_type  = $this->post_manager->get_email_type_from_post_id( $post_data['id'] );
 		$post_option = get_option( "woocommerce_{$email_type}_settings" );
-		$email       = $this->get_email_by_type( $email_type );
+		$email       = $this->get_email_by_type( $email_type ?? '' );
 
 		return array(
 			'subject'         => $post_option['subject'] ?? null,
 			'subject_full'    => $post_option['subject_full'] ?? null, // For customer_refunded_order email type because it has two different subjects.
 			'subject_partial' => $post_option['subject_partial'] ?? null,
 			'preheader'       => $post_option['preheader'] ?? null,
-			'default_subject' => $email->get_default_subject(),
+			'default_subject' => $email ? $email->get_default_subject() : null,
 			'email_type'      => $email_type,
 		);
 	}
