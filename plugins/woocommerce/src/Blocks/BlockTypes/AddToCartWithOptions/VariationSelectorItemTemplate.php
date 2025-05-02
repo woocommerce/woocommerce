@@ -98,7 +98,12 @@ class VariationSelectorItemTemplate extends AbstractBlock {
 	 *
 	 * @param string $attribute_name Product Attribute Name.
 	 * @param array  $attribute_terms Product Attribute Terms.
-	 * @return srtring
+	 * @return array[] Array of term data with structure:
+	 *                 [
+	 *                     'label'      => (string) Display label for the term.
+	 *                     'value'      => (string) Internal value/slug for the term.
+	 *                     'isSelected' => (bool)   Whether this term is the default selection.
+	 *                 ]
 	 */
 	protected function get_terms( $attribute_name, $attribute_terms ) {
 		global $product;
