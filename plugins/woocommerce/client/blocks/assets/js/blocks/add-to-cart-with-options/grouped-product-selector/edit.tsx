@@ -8,6 +8,8 @@ import { resolveSelect } from '@wordpress/data';
 import { productsStore } from '@woocommerce/data';
 import { useEffect, useState } from '@wordpress/element';
 import type { ProductResponseItem } from '@woocommerce/types';
+import { __ } from '@wordpress/i18n';
+import NoticeBanner from '@woocommerce/base-components/notice-banner';
 
 /**
  * Internal dependencies
@@ -55,7 +57,16 @@ export default function AddToCartWithOptionsGroupedProductSelectorEdit(
 	}, [ groupedProduct, product ] );
 
 	if ( groupedProduct.length === 0 ) {
-		return null;
+		return (
+			<div { ...innerBlocksProps }>
+				<NoticeBanner status="warning">
+					{ __(
+						'No grouped products were found. Please create a grouped product first.',
+						'woocommerce'
+					) }
+				</NoticeBanner>
+			</div>
+		);
 	}
 
 	return <div { ...innerBlocksProps } />;
