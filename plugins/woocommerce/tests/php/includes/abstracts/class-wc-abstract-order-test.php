@@ -599,4 +599,55 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		remove_action( 'woocommerce_before_order_object_save', $callback );
 		remove_action( 'woocommerce_order_status_' . $refunded_status, $should_not_be_called_callback );
 	}
+
+	/**
+	 * @testDox In case an error happened while saving an WC_Order_Item,
+	 *          hooks dependent on Wc_Order::$status_transition should not be called
+	 */
+	public function test_status_transition_hooks_shouldnot_be_called_when_order_save_errored_on_item_save() {
+		$initial_status  = OrderStatus::AUTO_DRAFT;
+		$initial_order_item_name  = 'Initial Order Item name';
+		$refunded_status = OrderStatus::REFUNDED;
+
+		// Simple action to make sure hook is not triggered.
+		$triggered                     = false;
+		$should_not_be_called_callback = static function () use ( &$triggered ) {
+			$triggered = true;
+		};
+		add_action( 'woocommerce_order_status_' . $refunded_status, $should_not_be_called_callback );
+
+		$order_item = new WC_Order_Item_Product();
+		$order_item->set_name($initial_order_item_name);
+
+		$order = new Wc_Order();
+		$order->set_status( $initial_status );
+		$order->add_item($order_item);
+		$order->save();
+
+		// add an action that will simulate an error while saving WC_Order_Item.
+		$callback = static function ( WC_Order_Item $item ) {
+			throw new \RuntimeException( 'Error while saving WC_Order_Item' );
+		};
+		add_action( 'woocommerce_before_order_item_object_save', $callback );
+
+		$order->get_items()[1]->set_name('CHANGED Order Item name');
+		$order->set_status( $refunded_status );
+		$order->save();
+
+		// Make sure status update has not been saved to database
+		// and our RuntimeException('Error while saving WC_Order_Item') worked.
+		$this->assertEquals(
+			$order->get_items()[1]->get_data()['name'],
+			$initial_order_item_name,
+			'Modified order item name has been saved to database but shouldn\'t have been'
+		);
+		$this->assertEquals(
+			$triggered,
+			false,
+			'"woocommerce_order_status_' . $refunded_status . '" action hook has been triggered but shouldn\'t have been'
+		);
+
+		remove_action( 'woocommerce_before_order_item_object_save', $callback );
+		remove_action( 'woocommerce_order_status_' . $refunded_status, $should_not_be_called_callback );
+	}
 }
