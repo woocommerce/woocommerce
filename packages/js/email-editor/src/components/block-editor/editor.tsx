@@ -2,7 +2,15 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
-import { PostLockedModal } from '@wordpress/editor';
+import {
+	AutosaveMonitor,
+	LocalAutosaveMonitor,
+	UnsavedChangesWarning,
+	EditorKeyboardShortcutsRegister,
+	EditorSnackbars,
+	ErrorBoundary,
+	PostLockedModal,
+} from '@wordpress/editor';
 import { useMemo } from '@wordpress/element';
 import { SlotFillProvider, Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
@@ -93,20 +101,27 @@ export function InnerEditor( {
 
 	return (
 		<SlotFillProvider>
-			<Editor
-				postId={ currentPost.postId }
-				postType={ currentPost.postType }
-				settings={ editorSettings }
-				templateId={ template && template.id }
-				styles={ styles }
-			>
-				<PostLockedModal />
-				<TemplateSelection />
-				<StylesSidebar />
-				<SendPreview />
-				<FullscreenMode isActive={ isFullscreenEnabled } />
-				<MoreMenu />
-			</Editor>
+			<ErrorBoundary canCopyContent>
+				<Editor
+					postId={ currentPost.postId }
+					postType={ currentPost.postType }
+					settings={ editorSettings }
+					templateId={ template && template.id }
+					styles={ styles }
+				>
+					<AutosaveMonitor />
+					<LocalAutosaveMonitor />
+					<UnsavedChangesWarning />
+					<EditorKeyboardShortcutsRegister />
+					<EditorSnackbars />
+					<PostLockedModal />
+					<TemplateSelection />
+					<StylesSidebar />
+					<SendPreview />
+					<FullscreenMode isActive={ isFullscreenEnabled } />
+					<MoreMenu />
+				</Editor>
+			</ErrorBoundary>
 		</SlotFillProvider>
 	);
 }
