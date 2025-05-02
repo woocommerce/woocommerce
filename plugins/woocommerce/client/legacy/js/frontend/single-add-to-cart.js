@@ -223,7 +223,11 @@
 				const variation = form.querySelector(
 					'input[name=variation_id]'
 				);
-				item.value = variation ? variation.value : button.value;
+				if ( variation && variation.value ) {
+					item.value = variation.value;
+				} else if ( ! item.value && button.value ) {
+					item.value = button.value;
+				}
 			}
 		} );
 
