@@ -4,12 +4,21 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\Utils;
 
+use InvalidArgumentException;
+
 /**
  * Manages the registration of interactivity config and state that is commonly shared by WooCommerce blocks.
  * Initialization only happens on the first call to initialize_shared_config.
  * Intended to be used as a singleton.
  */
 class BlocksSharedState {
+
+	/**
+	 * The consent statement for using private APIs of this class.
+	 *
+	 * @var string
+	 */
+	private $consent_statement = 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
 
 	/**
 	 * The namespace for the config.
@@ -33,9 +42,28 @@ class BlocksSharedState {
 	private $cart;
 
 	/**
-	 * Initialize the shared core config.
+	 * Check that the consent statement was passed.
+	 *
+	 * @param string $consent_statement - The consent statement string.
+	 * @return true
+	 * @throws \InvalidArgumentException - If the statement does not match the class consent statement string.
 	 */
-	public function initialize_shared_config() {
+	private function check_consent( $consent_statement ) {
+		if ( $consent_statement !== $this->consent_statement ) {
+			throw new \InvalidArgumentException( 'This method cannot be called without consenting the API may change.' );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Initialize the shared core config.
+	 *
+	 * @param string $consent_statement - The consent statement string.
+	 */
+	public function initialize_shared_config( $consent_statement ) {
+		$this->check_consent( $consent_statement );
+
 		if ( $this->core_config_registered ) {
 			return;
 		}
@@ -50,9 +78,12 @@ class BlocksSharedState {
 	/**
 	 * Initialize interactivity state for cart that is needed by multiple blocks.
 	 *
+	 * @param string $consent_statement - The consent statement string.
 	 * @return void
 	 */
-	public function initialize_shared_state() {
+	public function initialize_shared_state( $consent_statement ) {
+		$this->check_consent( $consent_statement );
+
 		if ( null === $this->cart ) {
 			$cart = isset( WC()->cart )
 				? rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) )->data
