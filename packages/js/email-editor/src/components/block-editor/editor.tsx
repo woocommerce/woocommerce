@@ -16,6 +16,7 @@ import { useMemo, useEffect } from '@wordpress/element';
 import { SlotFillProvider, Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import { useDispatch } from '@wordpress/data';
+
 /**
  * Internal dependencies
  */
@@ -27,6 +28,7 @@ import { TemplateSelection } from '../template-select';
 import { StylesSidebar } from '../styles-sidebar';
 import { SendPreview } from '../preview';
 import { MoreMenu } from '../more-menu';
+import { SettingsPanel } from '../sidebar/settings-panel';
 
 export function InnerEditor( {
 	postId: initialPostId,
@@ -126,6 +128,9 @@ export function InnerEditor( {
 					<SendPreview />
 					<FullscreenMode isActive={ isFullscreenEnabled } />
 					<MoreMenu />
+					{ currentPost.postType !== 'wp_template' && (
+						<SettingsPanel />
+					) }
 				</Editor>
 			</ErrorBoundary>
 		</SlotFillProvider>

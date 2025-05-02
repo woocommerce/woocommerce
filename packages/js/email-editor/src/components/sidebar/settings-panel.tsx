@@ -1,14 +1,13 @@
 /**
  * External dependencies
  */
-import { PanelBody } from '@wordpress/components';
+import { PluginDocumentSettingPanel } from '@wordpress/editor';
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
  */
-import { recordEvent } from '../../events';
 import { RichTextWithButton } from '../personalization-tags/rich-text-with-button';
 import { TemplateSelection } from './template-selection';
 
@@ -19,17 +18,13 @@ const SidebarExtensionComponent = applyFilters(
 
 export function SettingsPanel() {
 	return (
-		<PanelBody
+		<PluginDocumentSettingPanel
+			name="email-settings-panel"
 			title={ __( 'Settings', 'woocommerce' ) }
 			className="woocommerce-email-editor__settings-panel"
-			onToggle={ ( data ) =>
-				recordEvent( 'settings_panel_body_toggle', { opened: data } )
-			}
 		>
-			<>
-				<TemplateSelection />
-				{ <SidebarExtensionComponent /> }
-			</>
-		</PanelBody>
+			<TemplateSelection />
+			{ <SidebarExtensionComponent /> }
+		</PluginDocumentSettingPanel>
 	);
 }
