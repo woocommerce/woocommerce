@@ -37,7 +37,6 @@ import { store as validationStore } from '../validation';
 import {
 	CheckoutAndPaymentNotices,
 	CheckoutAfterProcessingWithErrorEventData,
-	CheckoutPutData,
 } from './types';
 import {
 	CONTACT_FORM_KEYS,
