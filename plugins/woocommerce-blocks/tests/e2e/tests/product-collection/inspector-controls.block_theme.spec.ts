@@ -539,7 +539,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			await expect( customQueryType ).not.toBeChecked();
 		} );
 
-		test.only( 'allows filtering in non-archive context', async ( {
+		test( 'allows filtering in non-archive context', async ( {
 			pageObject,
 			editor,
 			page,
