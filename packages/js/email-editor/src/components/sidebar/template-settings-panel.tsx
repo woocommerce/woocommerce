@@ -1,6 +1,8 @@
 /**
  * External dependencies
  */
+import { PluginDocumentSettingPanel } from '@wordpress/editor';
+import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 
 interface TemplatePanelSection {
@@ -20,10 +22,14 @@ export function TemplateSettingsPanel() {
 	}
 
 	return (
-		<>
+		<PluginDocumentSettingPanel
+			name="template-settings-panel"
+			title={ __( 'Settings', 'woocommerce' ) }
+			className="woocommerce-email-editor__settings-panel"
+		>
 			{ templateSections.map( ( section ) => (
 				<div key={ section.id }>{ section.render() }</div>
 			) ) }
-		</>
+		</PluginDocumentSettingPanel>
 	);
 }

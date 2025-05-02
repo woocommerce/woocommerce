@@ -29,6 +29,7 @@ import { StylesSidebar } from '../styles-sidebar';
 import { SendPreview } from '../preview';
 import { MoreMenu } from '../more-menu';
 import { SettingsPanel } from '../sidebar/settings-panel';
+import { TemplateSettingsPanel } from '../sidebar/template-settings-panel';
 
 export function InnerEditor( {
 	postId: initialPostId,
@@ -128,7 +129,9 @@ export function InnerEditor( {
 					<SendPreview />
 					<FullscreenMode isActive={ isFullscreenEnabled } />
 					<MoreMenu />
-					{ currentPost.postType !== 'wp_template' && (
+					{ currentPost.postType === 'wp_template' ? (
+						<TemplateSettingsPanel />
+					) : (
 						<SettingsPanel />
 					) }
 				</Editor>
