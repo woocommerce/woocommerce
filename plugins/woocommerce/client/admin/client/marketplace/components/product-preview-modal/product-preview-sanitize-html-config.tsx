@@ -45,6 +45,8 @@ const sanitizeHtmlConfig = {
 		'thead',
 		'tr',
 		'ul',
+		'footer',
+		'header',
 	],
 	allowedAttributes: [
 		'alt',

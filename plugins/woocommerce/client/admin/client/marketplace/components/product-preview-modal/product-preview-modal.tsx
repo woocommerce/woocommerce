@@ -133,11 +133,13 @@ export default function ProductPreviewModal( {
 
 	const productHeader = (
 		<div className="woocommerce-marketplace__product-preview-modal__header">
-			<img
-				className="woocommerce-marketplace__product-preview-modal__icon"
-				src={ productIcon }
-				alt={ productTitle }
-			/>
+			{ productIcon && (
+				<img
+					className="woocommerce-marketplace__product-preview-modal__icon"
+					src={ productIcon }
+					alt={ productTitle }
+				/>
+			) }
 			<div className="woocommerce-marketplace__product-preview-modal__header-content">
 				<h1>{ productTitle }</h1>
 				{ productVendor && (
@@ -157,11 +159,10 @@ export default function ProductPreviewModal( {
 			}
 			className="woocommerce-marketplace__product-preview-modal"
 			closeButtonLabel={ __( 'Close product preview', 'woocommerce' ) }
-			isFullScreen
+			size="large"
 			focusOnMount="firstElement"
 		>
 			{ productHeader }
-			<hr className="woocommerce-marketplace__product-preview-modal__divider" />
 			<div className="woocommerce-marketplace__product-preview-modal__content">
 				{ isLoading && (
 					<div className="woocommerce-marketplace__product-preview-modal__loading">

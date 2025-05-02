@@ -1,11 +1,6 @@
 @import "../../stylesheets/_variables.scss";
 
 .woocommerce-marketplace__product-preview-modal {
-	max-width: 1500px !important;
-
-	@media ( max-width: 599px ) {
-		border-radius: 0 !important;
-	}
 
 	.components-modal__header {
 		align-items: flex-start;
@@ -29,9 +24,9 @@
 
 	&__header {
 		display: flex;
-		gap: $grid-unit-40;
+		gap: $grid-unit-20;
 		align-items: center;
-		margin-top: $grid-unit-40;
+		margin: $grid-unit-40 0;
 	}
 
 	&__icon {
@@ -42,7 +37,6 @@
 
 	&__header-content h1 {
 		margin: 0;
-		font-size: $grid-unit-40;
 		line-height: 1;
 	}
 
@@ -50,7 +44,7 @@
 		display: flex;
 		gap: $grid-unit-05;
 		margin: $grid-unit-10 0 0;
-		font-size: 14px;
+		font-size: 1.125em;
 
 		& a {
 			display: -webkit-box;
@@ -58,16 +52,7 @@
 			-webkit-line-clamp: 1;
 			text-decoration: none;
 			overflow: hidden;
-			color: $woo-purple-50;
-
-			&:hover {
-				color: $woo-purple-70;
-			}
 		}
-	}
-
-	&__divider {
-		margin: $grid-unit-40 0;
 	}
 
 	&__loading {
