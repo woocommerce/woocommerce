@@ -36,12 +36,14 @@ const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
 } );
 
 test.describe( 'Shopper → Notices', () => {
-	test( 'Shopper can add item to cart from the archive page, and will not see a notice in the mini cart', async ( {
+	test( 'Shopper can add item to cart from the archive and product pages, and will not see a notice in the mini cart', async ( {
 		page,
 		editor,
 		admin,
 		productCollectionPage,
 	} ) => {
+		await admin.updateAddToCartAjaxSettings( true );
+
 		await admin.visitSiteEditor( {
 			postId: `twentytwentyfour//header`,
 			postType: 'wp_template_part',
@@ -84,37 +86,6 @@ test.describe( 'Shopper → Notices', () => {
 					`The quantity of "${ SIMPLE_PHYSICAL_PRODUCT_NAME }" was`
 				)
 		).toBeHidden();
-	} );
-
-	test( 'Shopper can add item to cart from the single product page, and will not see a notice in the mini cart', async ( {
-		page,
-		editor,
-		admin,
-	} ) => {
-		await admin.updateAddToCartAjaxSettings( true );
-
-		// Verify option was enabled.
-		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=products' );
-		await expect(
-			page.getByRole( 'checkbox', {
-				name: 'Enable AJAX add to cart buttons on product pages',
-			} )
-		).toBeChecked();
-
-		await admin.visitSiteEditor( {
-			postId: `twentytwentyfour//header`,
-			postType: 'wp_template_part',
-			canvas: 'edit',
-		} );
-		const miniCart = await editor.getBlockByName( 'woocommerce/mini-cart' );
-		await editor.selectBlocks( miniCart );
-		const openDrawerControl = editor.page.getByLabel(
-			'Open drawer when adding'
-		);
-		await openDrawerControl.check();
-		await editor.page
-			.getByRole( 'button', { name: 'Save', exact: true } )
-			.click();
 
 		await page.goto( blockData.productPage );
 
@@ -129,8 +100,12 @@ test.describe( 'Shopper → Notices', () => {
 			} )
 		).toBeHidden();
 
-		await expect( page.getByText( 'Your cart' ) ).toBeVisible();
-		await expect( page.getByText( '(1 item)' ) ).toBeVisible();
+		await expect(
+			page.getByText( 'Your cart', { exact: true } )
+		).toBeVisible();
+		await expect(
+			page.getByText( '(3 items)', { exact: true } )
+		).toBeVisible();
 		await expect(
 			page
 				.getByRole( 'dialog' )
