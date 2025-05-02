@@ -30,12 +30,6 @@ class ImportSchema {
 	 */
 	private Validator $validator;
 
-	/**
-	 * Built-in step processors.
-	 *
-	 * @var BuiltInStepProcessors The built-in step processors instance.
-	 */
-	private BuiltInStepProcessors $builtin_step_processors;
 
 	/**
 	 * ImportSchema constructor.
@@ -50,8 +44,6 @@ class ImportSchema {
 		}
 
 		$this->validator = $validator;
-
-		$this->builtin_step_processors = new BuiltInStepProcessors();
 	}
 
 	/**
@@ -68,11 +60,11 @@ class ImportSchema {
 	 *
 	 * @param string $file The file path.
 	 * @return ImportSchema The created ImportSchema instance.
+	 *
+	 * @throws \RuntimeException If the JSON file cannot be read.
+	 * @throws \InvalidArgumentException If the JSON is invalid or missing 'steps' field.
 	 */
 	public static function create_from_file( $file ) {
-		// @todo check for mime type
-		$path_info = pathinfo( $file );
-
 		return self::create_from_json( $file );
 	}
 
@@ -81,6 +73,9 @@ class ImportSchema {
 	 *
 	 * @param string $json_path The JSON file path.
 	 * @return ImportSchema The created ImportSchema instance.
+	 *
+	 * @throws \RuntimeException If the JSON file cannot be read.
+	 * @throws \InvalidArgumentException If the JSON is invalid or missing 'steps' field.
 	 */
 	public static function create_from_json( $json_path ) {
 		return new self( new JsonSchema( $json_path ) );
@@ -96,82 +91,11 @@ class ImportSchema {
 		$result    = StepProcessorResult::success( 'ImportSchema' );
 		$results[] = $result;
 
-		$step_processors = $this->builtin_step_processors->get_all();
-
-		/**
-		 * Filters the step processors.
-		 *
-		 * Allows adding/removing custom step processors.
-		 *
-		 * @param StepProcessor[] $step_processors The step processors.
-		 *
-		 * @since 0.0.1
-		 */
-		$step_processors = $this->wp_apply_filters( 'wooblueprint_importers', $step_processors );
-
-		$indexed_step_processors = Util::index_array(
-			$step_processors,
-			function ( $key, $step_processor ) {
-				return $step_processor->get_step_class()::get_step_name();
-			}
-		);
-
-		// validate steps before processing.
-		$this->validate_step_schemas( $indexed_step_processors, $result );
-
-		if ( count( $result->get_messages( 'error' ) ) !== 0 ) {
-			return $results;
-		}
-
 		foreach ( $this->schema->get_steps() as $step_schema ) {
-			$step_processor = $indexed_step_processors[ $step_schema->step ] ?? null;
-			if ( ! $step_processor instanceof StepProcessor ) {
-				$result->add_error( "Unable to create a step processor for {$step_schema->step}" );
-				continue;
-			}
-
-			$results[] = $step_processor->process( $step_schema );
+			$step_importer = new ImportStep( $step_schema, $this->validator );
+			$results[]     = $step_importer->import();
 		}
 
 		return $results;
-	}
-
-	/**
-	 * Validate the step schemas.
-	 *
-	 * @param array               $indexed_step_processors Array of step processors indexed by step name.
-	 * @param StepProcessorResult $result The result object to add messages to.
-	 *
-	 * @return void
-	 */
-	protected function validate_step_schemas( array $indexed_step_processors, StepProcessorResult $result ) {
-		$step_schemas = array_map(
-			function ( $step_processor ) {
-				return $step_processor->get_step_class()::get_schema();
-			},
-			$indexed_step_processors
-		);
-
-		foreach ( $this->schema->get_steps() as $step_json ) {
-			$step_schema = $step_schemas[ $step_json->step ] ?? null;
-			if ( ! $step_schema ) {
-				$result->add_info( "No schema found for step $step_json->step" );
-				continue;
-			}
-
-			// phpcs:ignore
-			$validate = $this->validator->validate( $step_json, json_encode( $step_schema ) );
-
-			if ( ! $validate->isValid() ) {
-				$result->add_error( "Schema validation failed for step {$step_json->step}" );
-				$errors           = ( new ErrorFormatter() )->format( $validate->error() );
-				$formatted_errors = array();
-				foreach ( $errors as $value ) {
-					$formatted_errors[] = implode( "\n", $value );
-				}
-
-				$result->add_error( implode( "\n", $formatted_errors ) );
-			}
-		}
 	}
 }

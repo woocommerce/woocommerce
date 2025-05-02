@@ -57,12 +57,12 @@
 		box-sizing: border-box;
 		min-height: 0;
 		height: 3.125em;
-		background-color: #fff;
-		color: $input-text-active;
+		background-color: $input-background-light;
+		color: $input-text-light;
 
 		&:focus {
-			background-color: #fff;
-			color: $input-text-active;
+			background-color: $input-background-light;
+			color: $input-text-light;
 			border: 1.5px solid currentColor;
 		}
 

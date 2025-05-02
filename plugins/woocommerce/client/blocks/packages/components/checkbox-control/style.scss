@@ -43,10 +43,10 @@
 		overflow: hidden;
 		position: static;
 		vertical-align: middle;
-		background-color: #fff;
+		background-color: $input-background-light;
 
 		&:checked {
-			background: #fff;
+			background: $input-background-light;
 		}
 
 		&:focus {
@@ -64,7 +64,7 @@
 		}
 
 		.has-dark-controls & {
-			border-color: $controls-border-dark;
+			border-color: $input-border-dark;
 			background-color: $input-background-dark;
 			color: $input-text-dark;
 
@@ -110,7 +110,7 @@
 		pointer-events: none;
 
 		.has-dark-controls & {
-			fill: #fff;
+			fill: $input-text-dark;
 		}
 	}
 
@@ -124,14 +124,14 @@
 .theme-twentytwentyone {
 	.wc-block-components-checkbox__input[type="checkbox"],
 	.has-dark-controls .wc-block-components-checkbox__input[type="checkbox"] {
-		background-color: #fff;
+		background-color: $input-background-light;
 		border-color: var(--form--border-color);
 		position: relative;
 	}
 
 	.wc-block-components-checkbox__input[type="checkbox"]:checked,
 	.has-dark-controls .wc-block-components-checkbox__input[type="checkbox"]:checked {
-		background-color: #fff;
+		background-color: $input-background-light;
 		border-color: var(--form--border-color);
 	}
 

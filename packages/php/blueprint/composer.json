@@ -3,7 +3,11 @@
 	"version": "0.0.1",
 	"autoload": {
 		"psr-4": {
-			"Automattic\\WooCommerce\\Blueprint\\": "src/",
+			"Automattic\\WooCommerce\\Blueprint\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
 			"Automattic\\WooCommerce\\Blueprint\\Tests\\": "tests/"
 		}
 	},

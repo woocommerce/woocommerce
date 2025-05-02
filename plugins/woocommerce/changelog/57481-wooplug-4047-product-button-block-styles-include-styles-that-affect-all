@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Product Button Block: increase CSS specificity.

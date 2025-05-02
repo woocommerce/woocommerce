@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: We allow the Airwallex extension to provide its own gateway titles and descriptions.
+
+

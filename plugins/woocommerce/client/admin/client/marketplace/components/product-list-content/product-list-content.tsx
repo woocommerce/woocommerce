@@ -72,6 +72,7 @@ export default function ProductListContent( props: {
 		 * If the productGroups set, component is likely used on Discover or NoResult component.
 		 */
 		if ( ! props.productGroup ) {
+			setProductsToShow( props.products );
 			return;
 		}
 
@@ -110,7 +111,6 @@ export default function ProductListContent( props: {
 				{ productsToShow.map( ( product, index ) => (
 					<Fragment key={ product.id }>
 						<ProductCard
-							key={ product.id }
 							type={ props.type }
 							product={ {
 								id: product.id,

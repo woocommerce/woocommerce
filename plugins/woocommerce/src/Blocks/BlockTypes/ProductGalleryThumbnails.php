@@ -75,7 +75,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			return '';
 		}
 
-		$thumbnail_size   = str_replace( '%', '', $attributes['thumbnailSize'] ?? '33%' );
+		$thumbnail_size   = str_replace( '%', '', $attributes['thumbnailSize'] ?? '25%' );
 		$thumbnails_class = 'wc-block-product-gallery-thumbnails--thumbnails-size-' . $thumbnail_size;
 
 		ob_start();
@@ -95,7 +95,9 @@ class ProductGalleryThumbnails extends AbstractBlock {
 				<template
 					data-wp-each--image="state.thumbnails"
 					data-wp-each-key="context.image.id">
-					<div class="wc-block-product-gallery-thumbnails__thumbnail">
+					<div
+						class="wc-block-product-gallery-thumbnails__thumbnail"
+						data-wp-class--wc-block-product-gallery-thumbnails__thumbnail--active="context.image.isActive">
 						<img
 							class="wc-block-product-gallery-thumbnails__thumbnail__image"
 							data-wp-bind--data-image-id="context.image.id"
