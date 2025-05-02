@@ -1311,7 +1311,7 @@ class WC_Checkout {
 			} catch ( WC_Data_Exception $e ) {
 				// Billing email will be validated later down in validate_posted_data. Skip it, throw other errors.
 				if ( 'customer_invalid_billing_email' !== $e->getErrorCode() ) {
-					throw $e;
+					throw new Exception( $e->getMessage(), $e->getCode(), $e->getPrevious() );
 				}
 			}
 
