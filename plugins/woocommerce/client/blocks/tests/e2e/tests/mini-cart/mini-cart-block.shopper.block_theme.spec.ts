@@ -92,6 +92,15 @@ test.describe( 'Shopper → Notices', () => {
 		admin,
 	} ) => {
 		await admin.updateAddToCartAjaxSettings( true );
+
+		// Verify option was enabled.
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=products' );
+		await expect(
+			page.getByRole( 'checkbox', {
+				name: 'Enable AJAX add to cart buttons on product pages',
+			} )
+		).toBeChecked();
+
 		await admin.visitSiteEditor( {
 			postId: `twentytwentyfour//header`,
 			postType: 'wp_template_part',
@@ -114,8 +123,11 @@ test.describe( 'Shopper → Notices', () => {
 			.click();
 
 		await expect(
-			page.getByRole( 'button' ).getByText( '1 in cart' )
-		).toBeVisible();
+			page.getByRole( 'button', {
+				name: 'Add to cart',
+				exact: true,
+			} )
+		).toBeHidden();
 
 		await expect( page.getByText( 'Your cart' ) ).toBeVisible();
 		await expect( page.getByText( '(1 item)' ) ).toBeVisible();
