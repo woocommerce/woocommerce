@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\EmailEditor;
 use Automattic\WooCommerce\EmailEditor\Bootstrap;
 use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 use Automattic\WooCommerce\Internal\EmailEditor\Package;
@@ -37,6 +38,11 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 	private \WP_Post $email_post;
 
 	/**
+	 * @var Personalizer $personalizer
+	 */
+	private Personalizer $personalizer;
+
+	/**
 	 * Setup test case.
 	 */
 	public function setUp(): void {
@@ -51,6 +57,7 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 		wc_get_container()->get( Package::class )->init();
 		wc_get_container()->get( Integration::class )->initialize();
 		Email_Editor_Container::container()->get( Bootstrap::class )->initialize();
+		$this->personalizer = Email_Editor_Container::container()->get( Personalizer::class );
 
 		$this->email_post = $this->factory()->post->create_and_get(
 			array(
@@ -78,8 +85,16 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 		$wc_mail_mock->id = 'test_email';
 		$wc_mail_mock->method( 'get_recipient' )->willReturn( 'customer@test.com' );
 		$wc_mail_mock->method( 'get_subject' )->willReturn( 'Test Woo Email' );
+		$wc_mail_mock->method( 'get_preheader' )->willReturn( 'Test Woo Preheader' );
 		$wc_mail_mock->method( 'get_content_html' )->willReturn( $test_woo_content );
 		$wc_mail_mock->method( 'get_block_editor_email_template_content' )->willReturn( $test_woo_content );
+
+		$this->personalizer->set_context(
+			array(
+				'wc_email'        => $wc_mail_mock,
+				'recipient_email' => $wc_mail_mock->get_recipient(),
+			)
+		);
 
 		$rendered_email = $this->block_email_renderer->maybe_render_block_email( $wc_mail_mock );
 
