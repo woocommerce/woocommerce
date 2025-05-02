@@ -260,7 +260,7 @@
 .rtl {
 	.wc-block-components-price-slider__range-input-progress {
 		--track-background: linear-gradient(to left, transparent var(--low), var(--range-color) 0, var(--range-color) var(--high), transparent 0) no-repeat 0 100% / 100% 100%;
-		--range-color: #{$studio-woocommerce-purple-30};
+		--range-color: currentColor;
 		background: var(--track-background);
 	}
 }
