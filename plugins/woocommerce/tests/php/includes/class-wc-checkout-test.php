@@ -123,6 +123,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$data['shipping_method'] = '';
 		$this->sut->validate_posted_data( $data, $errors );
 		$this->assertEquals( '', $errors->get_error_message( 'shipping_method' ) );
+		$zone->delete( true );
 	}
 
 	/**
