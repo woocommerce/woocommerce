@@ -1930,11 +1930,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			foreach ( $search_terms as $search_term ) {
 				$like       = '%' . $wpdb->esc_like( $search_term ) . '%';
 				$term_query = $wpdb->prepare(
-					"( posts.post_title LIKE %s ) OR ( posts.post_excerpt LIKE %s ) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s )",
+					'( posts.post_title LIKE %s ) OR ( posts.post_excerpt LIKE %s ) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s )',
 					array_fill( 0, 4, $like )
 				);
 
-				if ( $include_variations )  {
+				if ( $include_variations ) {
 					$term_query .= $wpdb->prepare( " OR ( wc_product_meta_lookup.sku = '' AND parent_wc_product_meta_lookup.sku LIKE %s )", $like );
 				}
 

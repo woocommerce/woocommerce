@@ -383,13 +383,13 @@ class Register {
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$results = $wpdb->get_results(
-				"
-					SELECT   url_id, url, enabled
-					FROM     {$table}
-					{$where_sql}
-					ORDER BY {$order_by} {$order}
-					{$limit_sql}
-				"
+			"
+				SELECT   url_id, url, enabled
+				FROM     {$table}
+				{$where_sql}
+				ORDER BY {$order_by} {$order}
+				{$limit_sql}
+			"
 		);
 
 		$total_rows = (int) $wpdb->get_var( "SELECT COUNT( * ) FROM {$table} {$where_sql}" );
