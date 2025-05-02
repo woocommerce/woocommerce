@@ -93,10 +93,25 @@ export default function ProductItemTemplateEdit(
 
 	useEffect( () => {
 		const fetchGroupedProducts = async (
-			productContext: ProductResponseItem
+			productContext: ProductResponseItem[]
 		) => {
-			const groupedProductIds = productContext.grouped_products ?? [];
+			if ( ! productContext || productContext.length === 0 ) {
+				return;
+			}
+
 			let query: Record< string, unknown > = { per_page: 3 };
+			let groupedProductIds: number[] = [];
+
+			// If there are multiple products, use these as the grouped products.
+			if ( productContext.length > 1 ) {
+				groupedProductIds = productContext.map( ( prod ) => prod.id );
+			}
+
+			// If there is a single product, use the grouped products from the product.
+			if ( productContext.length === 1 ) {
+				groupedProductIds = productContext[ 0 ].grouped_products;
+			}
+
 			if ( groupedProductIds.length ) {
 				query = { ...query, include: groupedProductIds };
 			}
@@ -110,15 +125,24 @@ export default function ProductItemTemplateEdit(
 
 		if ( ! groupedProducts ) {
 			if ( product.id !== 0 && product.type === 'grouped' ) {
-				fetchGroupedProducts( product );
+				fetchGroupedProducts( [ product ] );
 			} else if ( product.id === 0 ) {
 				// If product ID is 0, then we must be editing a template.
 				// Fetch an existing grouped product so template can be edited.
 				resolveSelect( productsStore )
 					.getProducts( { type: 'grouped', per_page: 1 } )
-					.then( ( fetchedProduct ) => {
-						if ( fetchedProduct.length > 0 ) {
-							fetchGroupedProducts( fetchedProduct[ 0 ] );
+					.then( ( fetchedGroupedProduct ) => {
+						if ( fetchedGroupedProduct.length > 0 ) {
+							fetchGroupedProducts( fetchedGroupedProduct );
+						} else {
+							// If there are no grouped products, query for any three other products.
+							resolveSelect( productsStore )
+								.getProducts( { per_page: 3, order: 'desc' } )
+								.then( ( fetchedProducts ) => {
+									if ( fetchedProducts.length > 0 ) {
+										fetchGroupedProducts( fetchedProducts );
+									}
+								} );
 						}
 					} );
 			}
