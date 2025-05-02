@@ -26,6 +26,7 @@ class OrderPriceFormatterTest extends WC_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order();
+		$order->set_prices_include_tax( false );
 		$item  = new WC_Order_Item_Product();
 		$item->set_props(
 			array(
