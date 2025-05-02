@@ -28,6 +28,7 @@ import type {
 	OrderForm,
 	OrderFormValues,
 } from '@woocommerce/settings';
+import { removeNoticeById } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -43,7 +44,6 @@ import {
 	CONTACT_FORM_KEYS,
 	ORDER_FORM_KEYS,
 } from '../../settings/blocks/constants';
-import { removeNoticeById } from '@woocommerce/base-utils';
 
 /**
  * Based on the given observers, create Error Notices where necessary
