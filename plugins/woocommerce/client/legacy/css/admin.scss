@@ -4160,7 +4160,6 @@ table.wc_shipping {
 }
 
 .wc-shipping-zone-settings {
-	margin-top: 8px !important;
 	#zone_name {
 		width: 600px;
 		padding: 2px 8px;
@@ -5106,6 +5105,9 @@ img.help_tip {
 
 	table.form-table {
 		margin: 0;
+		&.wc-shipping-zone-settings {
+			margin-top: 8px;
+		}
 		position: relative;
 		table-layout: fixed;
 
