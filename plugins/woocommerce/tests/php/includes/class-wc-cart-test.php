@@ -297,6 +297,32 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		// Reset.
 		remove_all_filters( 'woocommerce_shipping_fields' );
 		remove_all_filters( 'woocommerce_get_country_locale' );
+
+		/**
+		 * Remove unwanted fields from checkout page.
+		 *
+		 * @param array $fields of checkout fields.
+		 *
+		 * @return mixed
+		 */
+		function remove_unwanted_fields_from_checkout_page( $fields ) {
+			unset( $fields['shipping']['shipping_company'] );
+			unset( $fields['shipping']['shipping_city'] );
+			unset( $fields['shipping']['shipping_postcode'] );
+			unset( $fields['shipping']['shipping_address_2'] );
+			return $fields;
+		}
+		add_filter( 'woocommerce_checkout_fields', 'remove_unwanted_fields_from_checkout_page' );
+
+		WC()->cart->get_customer()->set_shipping_postcode( '' );
+		WC()->cart->get_customer()->set_shipping_city( '' );
+		$this->assertTrue( WC()->cart->show_shipping() );
+		WC()->cart->get_customer()->set_shipping_postcode( '12345' );
+		WC()->cart->get_customer()->set_shipping_city( 'San Francisco' );
+		$this->assertTrue( WC()->cart->show_shipping() );
+
+		remove_filter( 'woocommerce_checkout_fields', 'remove_unwanted_fields_from_checkout_page' );
+
 		update_option( 'woocommerce_shipping_cost_requires_address', $default_shipping_cost_requires_address );
 		add_filter( 'woocommerce_get_country_locale', 'make_locale_postcode_optional' );
 		$product->delete( true );
