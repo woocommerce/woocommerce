@@ -10,11 +10,12 @@ import {
 	EditorSnackbars,
 	ErrorBoundary,
 	PostLockedModal,
+	store as editorStore,
 } from '@wordpress/editor';
-import { useMemo } from '@wordpress/element';
+import { useMemo, useEffect } from '@wordpress/element';
 import { SlotFillProvider, Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
-
+import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
@@ -68,6 +69,11 @@ export function InnerEditor( {
 		},
 		[ currentPost.postType, currentPost.postId ]
 	);
+
+	const { removeEditorPanel } = useDispatch( editorStore );
+	useEffect( () => {
+		removeEditorPanel( 'post-status' );
+	}, [] );
 
 	const [ styles ] = useEmailCss();
 
