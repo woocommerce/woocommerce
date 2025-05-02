@@ -2,24 +2,9 @@
 
 .woocommerce-marketplace__product-preview-modal {
 
-	.components-modal__header {
-		align-items: flex-start;
-		background-image: url(../../assets/images/product-preview-modal-header.svg);
-		background-size: cover;
-
-		button {
-			svg {
-				fill: #fff;
-			}
-
-			&:focus {
-				box-shadow: none;
-			}
-
-			&:focus-visible {
-				box-shadow: 0 0 0 1px #fff;
-			}
-		}
+	.components-modal__header-heading {
+		// decreasing fonr weight as it's not the most important heading in the modal
+		font-weight: 400;
 	}
 
 	&__header {
