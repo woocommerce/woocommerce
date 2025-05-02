@@ -240,14 +240,18 @@ trait CheckoutTrait {
 			}
 		}
 
+		// The above logic sets visible fields, but not hidden fields. Unset the hidden fields here.
+		$other_posted_field_values = array_diff_key( $field_values, $additional_fields );
+
+		foreach ( $other_posted_field_values as $key => $value ) {
+			if ( $this->additional_fields_controller->is_field( $key ) ) {
+				$this->additional_fields_controller->persist_field_for_order( $key, '', $this->order, 'other', false );
+			}
+		}
+
 		// We need to sync the customer additional fields with the order otherwise they will be overwritten on next page load.
 		if ( 0 !== $this->order->get_customer_id() && get_current_user_id() === $this->order->get_customer_id() ) {
-			$customer = new WC_Customer( $this->order->get_customer_id() );
-			$this->additional_fields_controller->sync_customer_additional_fields_with_order(
-				$this->order,
-				$customer
-			);
-			$customer->save();
+			$this->additional_fields_controller->sync_customer_additional_fields_with_order( $this->order, wc()->customer );
 		}
 	}
 

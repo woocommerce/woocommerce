@@ -225,6 +225,9 @@ const blocks = {
 	'product-reviews-pagination-numbers': {
 		customDir: 'product-reviews/inner-blocks/reviews-pagination-numbers',
 	},
+	'product-review-template': {
+		customDir: 'product-reviews/inner-blocks/review-template',
+	},
 };
 
 /**

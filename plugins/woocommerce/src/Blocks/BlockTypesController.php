@@ -552,6 +552,7 @@ final class BlockTypesController {
 			$block_types[] = 'Reviews\ProductReviewsPaginationNext';
 			$block_types[] = 'Reviews\ProductReviewsPaginationPrevious';
 			$block_types[] = 'Reviews\ProductReviewsPaginationNumbers';
+			$block_types[] = 'Reviews\ProductReviewTemplate';
 
 			// Generic blocks that will be pushed upstream.
 			$block_types[] = 'Accordion\AccordionGroup';
