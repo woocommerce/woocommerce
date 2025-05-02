@@ -529,6 +529,21 @@ class WC_AJAX {
 			$quantity   = $product_to_add['quantity'];
 
 			$product = wc_get_product( $product_id );
+
+			if ( ! $product instanceof WC_Product ) {
+				if ( count( $products_to_add ) === 1 ) {
+					wc_add_notice( __( 'Product not found.', 'woocommerce' ), 'error' );
+
+					wp_send_json(
+						array(
+							'error' => true,
+						)
+					);
+				}
+
+				continue;
+			}
+
 			/**
 			 * Filters whether the product can be added to the cart.
 			 *
