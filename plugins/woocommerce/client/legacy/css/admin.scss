@@ -4160,6 +4160,7 @@ table.wc_shipping {
 }
 
 .wc-shipping-zone-settings {
+	margin-top: 8px !important;
 	#zone_name {
 		width: 600px;
 		padding: 2px 8px;
@@ -5866,7 +5867,7 @@ img.help_tip {
 }
 
 /**
- * Settings / Advanced / Features
+ * Settings / Advanced / Features / Emails
  */
 .woocommerce_page_wc-settings {
 	.wc-settings-row-woocommerce_custom_orders_table_enabled td.forminp {
@@ -5875,6 +5876,9 @@ img.help_tip {
 
 	.wc-settings-row-woocommerce_custom_orders_table_data_sync_enabled td.forminp {
 		padding-top: 0;
+	}
+	#email_notification_settings-description {
+		margin-top: 16px;
 	}
 }
 
