@@ -25,6 +25,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 	 * @extends  WC_Email
 	 */
 	class WC_Email_Customer_POS_Refunded_Order extends WC_Email {
+
 		/**
 		 * Refund order.
 		 *
