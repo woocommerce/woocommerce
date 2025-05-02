@@ -475,11 +475,8 @@ class WC_Emails {
 		if ( ! $customer_id ) {
 			return;
 		}
-
-		$user_pass = ! empty( $new_customer_data['user_pass'] ) ? $new_customer_data['user_pass'] : '';
-
 		$email = $this->emails['WC_Email_Customer_New_Account'];
-		$email->trigger( $customer_id, $user_pass, $password_generated );
+		$email->trigger( $customer_id, $new_customer_data['user_pass'] ?? '', $password_generated );
 	}
 
 	/**
