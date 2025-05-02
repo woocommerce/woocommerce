@@ -72,9 +72,15 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox 'validate_posted_data' adds errors for non-posted shipping method.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $shipping_requires_full_address True to enable "Hide shipping costs until an address is entered".
 	 */
-	public function test_validate_posted_data_adds_error_for_not_posted_shipping() {
+	public function test_validate_posted_data_adds_error_for_not_posted_shipping( $shipping_requires_full_address ) {
 
+		update_option( 'woocommerce_shipping_cost_requires_address', wc_bool_to_string( $shipping_requires_full_address ) );
 		WC_Helper_Shipping_Zones::create_mock_zones();
 		// Add a flat rate and free shipping method to the US zone.
 		$zones   = WC_Shipping_Zones::get_zones();
@@ -89,6 +95,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$us_zone->add_shipping_method( 'flat_rate' );
 		$us_zone->add_shipping_method( 'free_shipping' );
 		$us_zone->save();
+		delete_transient( 'wc_shipping_method_count' );
 
 		$product = WC_Helper_Product::create_simple_product( true );
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
@@ -103,15 +110,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		WC()->customer->set_billing_city( 'Los Angeles' );
 		WC()->customer->set_shipping_postcode( '90210' );
 
-		add_filter(
-			'woocommerce_cart_needs_shipping_address',
-			function () {
-				return true;
-			}
-		);
-
 		$errors = new WP_Error();
-
 		$this->sut->validate_posted_data( $data, $errors );
 
 		$this->assertEquals( 'Please select a shipping method.', $errors->get_error_message( 'shipping_method' ) );
