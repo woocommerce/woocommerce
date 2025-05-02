@@ -28,21 +28,15 @@ import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/
  * Internal dependencies
  */
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
-import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
-import { FlowType } from '~/customize-store/types';
-import { trackEvent } from '~/customize-store/tracking';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import {
 	SidebarNavigationAnimationDirection,
 	SidebarNavigationContext,
 } from '../components/sidebar';
 import { isFullComposabilityFeatureAndAPIAvailable } from '../utils/is-full-composability-enabled';
+import { trackEvent } from '~/customize-store/tracking';
 
 export const SidebarNavigationScreenMain = () => {
-	const {
-		context: { flowType },
-	} = useContext( CustomizeStoreContext );
-	const aiOnline = flowType === FlowType.AIOnline;
 	const { navigate } = useContext( SidebarNavigationContext );
 
 	return (
@@ -111,15 +105,7 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ aiOnline
-								? __(
-										'Change the color palette',
-										'woocommerce'
-								  )
-								: __(
-										'Choose your color palette',
-										'woocommerce'
-								  ) }
+							{ __( 'Choose your color palette', 'woocommerce' ) }
 						</NavigatorButton>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
@@ -145,9 +131,7 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ aiOnline
-								? __( 'Change fonts', 'woocommerce' )
-								: __( 'Choose fonts', 'woocommerce' ) }
+							{ __( 'Choose fonts', 'woocommerce' ) }
 						</NavigatorButton>
 					</ItemGroup>
 					<div className="woocommerce-edit-site-sidebar-navigation-screen-patterns__group-header">
@@ -180,9 +164,7 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ aiOnline
-								? __( 'Change your header', 'woocommerce' )
-								: __( 'Choose your header', 'woocommerce' ) }
+							{ __( 'Choose your header', 'woocommerce' ) }
 						</NavigatorButton>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
@@ -215,9 +197,7 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ aiOnline
-								? __( 'Change your homepage', 'woocommerce' )
-								: __( 'Design your homepage', 'woocommerce' ) }
+							{ __( 'Design your homepage', 'woocommerce' ) }
 						</NavigatorButton>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
@@ -243,19 +223,8 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ aiOnline
-								? __( 'Change your footer', 'woocommerce' )
-								: __( 'Choose your footer', 'woocommerce' ) }
+							{ __( 'Choose your footer', 'woocommerce' ) }
 						</NavigatorButton>
-						{ /* TODO: Turn on this in Phrase 2  */ }
-						{ /* <NavigatorButton
-							as={ SidebarNavigationItem }
-							path="/customize-store/assembler-hub/pages"
-							withChevron
-							icon={ pages }
-						>
-							{ __( 'Add and edit other pages', 'woocommerce' ) }
-						</NavigatorButton> */ }
 					</ItemGroup>
 				</>
 			}
