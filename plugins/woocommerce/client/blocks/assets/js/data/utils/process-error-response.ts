@@ -170,7 +170,7 @@ const getNoticeOptionsForParamError = (
 	}
 
 	// If the error response comes from an additional field we need to use the key as the ID so we can remove it later.
-	// Its also needed to ensure additional fields dont replace each other when there are multiple.
+	// It's also needed to ensure additional fields don't replace each other when there are multiple.
 	if ( objectHasProp( data, 'key' ) && isString( data.key ) ) {
 		additionalFieldId = `${ data.key }__${ id }`;
 		// console.log( 'additionalFieldId', additionalFieldId );
