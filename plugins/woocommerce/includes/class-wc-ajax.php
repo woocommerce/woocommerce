@@ -546,11 +546,20 @@ class WC_AJAX {
 				$variation_id = $product_id;
 				$product_id   = $product->get_parent_id();
 				$variation    = $product->get_variation_attributes();
+
+				foreach ( $_POST as $key => $value ) {
+					if ( 'attribute_' !== substr( $key, 0, 10 ) ) {
+						continue;
+					}
+
+					$variation[ sanitize_title( wp_unslash( $key ) ) ] = wp_unslash( $value );
+				}
 			}
 
 			$cart_item_key = null;
 			if ( $passed_validation && ProductStatus::PUBLISH === $product_status ) {
 				$cart_item_key = WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variation );
+
 				if ( $cart_item_key ) {
 					$cart_item = WC()->cart->get_cart_item( $cart_item_key );
 
