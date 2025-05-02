@@ -2,6 +2,19 @@
 	.blueprint-settings-slotfill {
 		min-height: 650px;
 	}
+
+	.components-snackbar .components-snackbar__content-with-icon {
+		padding-left: 0;
+	}
+
+	.components-snackbar .components-snackbar__icon {
+		display: flex;
+		margin-right: $gap-smaller;
+	}
+
+	.components-snackbar__content {
+		align-items: center;
+	}
 }
 
 .blueprint-settings-slotfill {
@@ -178,6 +191,7 @@
 			color: $gray-900;
 			line-height: 24px; /* 184.615% */
 			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+			text-wrap: auto;
 		}
 	}
 

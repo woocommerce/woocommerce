@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Defensive typecast of string to float when calculating refund totals
+
+
