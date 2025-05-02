@@ -58,7 +58,7 @@ const { useGlobalStylesOutputWithConfig } = unlock( blockEditorPrivateApis );
 /**
  * The Editor is the main component for the email editor.
  */
-const { Editor } = unlock( editorPrivateApis );
+const { Editor, FullscreenMode, ViewMoreMenuGroup } = unlock( editorPrivateApis );
 
 export {
 	BlockCanvas,
@@ -67,4 +67,6 @@ export {
 	unlockGetEnabledClientIdsTree,
 	useGlobalStylesOutputWithConfig,
 	Editor,
+	FullscreenMode,
+	ViewMoreMenuGroup,
 };
