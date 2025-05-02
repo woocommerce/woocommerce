@@ -34,7 +34,8 @@ export default function AddToCartWithOptionsGroupedProductSelectorEdit(
 		ProductResponseItem[]
 	>( [] );
 
-	// If there is no product context, query for an existing grouped product.
+	// If product ID is 0, then we must be editing a template.
+	// Fetch an existing grouped product so template can be edited.
 	useEffect( () => {
 		if ( product.id !== 0 && product.type === 'grouped' ) {
 			setGroupedProduct( [ product as ProductResponseItem ] );

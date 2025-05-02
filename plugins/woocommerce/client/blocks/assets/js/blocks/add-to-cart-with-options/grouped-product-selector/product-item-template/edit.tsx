@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
-import { store as coreStore } from '@wordpress/core-data';
+import { useState, useEffect } from '@wordpress/element';
 import {
 	useBlockProps,
 	useInnerBlocksProps,
@@ -92,51 +91,39 @@ export default function ProductItemTemplateEdit(
 		ProductResponseItem[] | null
 	>( null );
 
-	const { products } = useSelect(
-		( select ) => {
-			const postType = 'product';
-			const { getEntityRecords } = select( coreStore );
-
-			let query: Record< string, unknown > = {
-				per_page: 3,
-			};
-
-			if ( ! groupedProducts ) {
-				if ( product.id !== 0 && product.type === 'grouped' ) {
-					const groupedProductIds = product.grouped_products ?? [];
-					if ( groupedProductIds.length ) {
-						query = { include: groupedProductIds };
-					}
-
-					setGroupedProducts(
-						getEntityRecords< ProductResponseItem >(
-							'postType',
-							postType,
-							query
-						) ?? []
-					);
-				}
-
-				if ( product.id === 0 ) {
-					resolveSelect( productsStore )
-						.getProducts( {
-							type: 'grouped',
-							per_page: 3,
-						} )
-						.then( ( fetchedProducts ) => {
-							if ( fetchedProducts.length > 0 ) {
-								setGroupedProducts( fetchedProducts );
-							}
-						} );
-				}
+	useEffect( () => {
+		const fetchGroupedProducts = async (
+			productContext: ProductResponseItem
+		) => {
+			const groupedProductIds = productContext.grouped_products ?? [];
+			let query: Record< string, unknown > = { per_page: 3 };
+			if ( groupedProductIds.length ) {
+				query = { ...query, include: groupedProductIds };
 			}
 
-			return {
-				products: groupedProducts ?? [],
-			};
-		},
-		[ groupedProducts, product ]
-	);
+			const fetchedProducts = await resolveSelect(
+				productsStore
+			).getProducts( query );
+
+			setGroupedProducts( fetchedProducts ?? [] );
+		};
+
+		if ( ! groupedProducts ) {
+			if ( product.id !== 0 && product.type === 'grouped' ) {
+				fetchGroupedProducts( product );
+			} else if ( product.id === 0 ) {
+				// If product ID is 0, then we must be editing a template.
+				// Fetch an existing grouped product so template can be edited.
+				resolveSelect( productsStore )
+					.getProducts( { type: 'grouped', per_page: 1 } )
+					.then( ( fetchedProduct ) => {
+						if ( fetchedProduct.length > 0 ) {
+							fetchGroupedProducts( fetchedProduct[ 0 ] );
+						}
+					} );
+			}
+		}
+	}, [ groupedProducts, product ] );
 
 	const { blocks } = useSelect(
 		( select ) => {
@@ -153,7 +140,7 @@ export default function ProductItemTemplateEdit(
 		<div { ...blockProps }>
 			<InnerBlockLayoutContextProvider parentName="woocommerce/add-to-cart-with-options-grouped-product-selector-item">
 				<div role="list">
-					{ products.map( ( productItem ) => (
+					{ groupedProducts?.map( ( productItem ) => (
 						<ProductItem
 							key={ productItem.id }
 							attributes={ {
@@ -161,7 +148,8 @@ export default function ProductItemTemplateEdit(
 							} }
 							blocks={ blocks }
 							isSelected={
-								( selectedProductItem || products[ 0 ]?.id ) ===
+								( selectedProductItem ||
+									groupedProducts[ 0 ]?.id ) ===
 								productItem.id
 							}
 							onSelect={ () =>
