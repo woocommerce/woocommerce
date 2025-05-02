@@ -5,4 +5,5 @@ export interface BankAccount {
 	sort_code: string;
 	iban: string;
 	bic: string;
+	country_code?: string;
 }

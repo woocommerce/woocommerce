@@ -106,6 +106,7 @@ export const SettingsPaymentsBacs = () => {
 							sort_code,
 							iban,
 							bic,
+							country_code,
 						} ) => ( {
 							account_name,
 							account_number,
@@ -113,6 +114,7 @@ export const SettingsPaymentsBacs = () => {
 							sort_code,
 							iban,
 							bic,
+							country_code,
 						} )
 					),
 				} ),

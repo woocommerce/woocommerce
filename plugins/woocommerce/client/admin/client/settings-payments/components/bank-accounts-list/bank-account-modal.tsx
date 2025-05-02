@@ -55,9 +55,12 @@ export const BankAccountModal = ( {
 			sort_code: '',
 			iban: '',
 			bic: '',
+			country_code: defaultCountry,
 		}
 	);
-	const [ selectedCountry, setSelectedCountry ] = useState( defaultCountry );
+	const [ selectedCountry, setSelectedCountry ] = useState(
+		account?.country_code || defaultCountry
+	);
 	const [ errors, setErrors ] = useState<
 		Partial< Record< keyof BankAccount, string > >
 	>( {} );
@@ -123,7 +126,10 @@ export const BankAccountModal = ( {
 						value: code,
 					} )
 				) }
-				onChange={ ( value ) => setSelectedCountry( value ) }
+				onChange={ ( value ) => {
+					setSelectedCountry( value );
+					updateField( 'country_code', value );
+				} }
 			/>
 
 			<TextControl
