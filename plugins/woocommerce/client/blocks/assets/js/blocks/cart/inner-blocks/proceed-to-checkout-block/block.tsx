@@ -25,7 +25,7 @@ import { defaultButtonLabel } from './constants';
 const Block = ( {
 	checkoutPageId,
 	className,
-	buttonLabel: buttonLabelProp,
+	buttonLabel: buttonLabel,
 }: {
 	checkoutPageId: number;
 	className: string;
@@ -68,7 +68,7 @@ const Block = ( {
 
 	const label = applyCheckoutFilter< string >( {
 		filterName: 'proceedToCheckoutButtonLabel',
-		defaultValue: buttonLabelProp || defaultButtonLabel,
+		defaultValue: buttonLabel || defaultButtonLabel,
 		arg: { cart },
 	} );
 
@@ -79,20 +79,6 @@ const Block = ( {
 	} );
 
 	const { dispatchOnProceedToCheckout } = useCartEventsContext();
-
-	const buttonLabel = (
-		<div
-			// Hide this from screen readers while showing the spinner. The text will not be removed from the
-			// DOM, it will just be hidden with CSS to maintain the button's size while the spinner appears.
-			aria-hidden={ showSpinner }
-			className={ clsx( 'wc-block-cart__submit-button__text', {
-				'wc-block-cart__submit-button__text--visually-hidden':
-					showSpinner,
-			} ) }
-		>
-			{ label }
-		</div>
-	);
 
 	const submitContainerContents = (
 		<Button
@@ -112,7 +98,7 @@ const Block = ( {
 			} }
 		>
 			{ showSpinner && <Spinner /> }
-			{ buttonLabel }
+			{ label }
 		</Button>
 	);
 

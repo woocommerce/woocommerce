@@ -81,23 +81,6 @@ export const TotalsCoupon = ( {
 		}
 	};
 
-	const buttonLabel = (
-		<div
-			// Hide this from screen readers while showing the spinner. The text will not be removed from the
-			// DOM, it will just be hidden with CSS to maintain the button's size while the spinner appears.
-			aria-hidden={ isLoading }
-			className={ clsx(
-				'wc-block-components-totals-coupon__button__text',
-				{
-					'wc-block-components-totals-coupon__button__text--visually-hidden':
-						isLoading,
-				}
-			) }
-		>
-			{ __( 'Apply', 'woocommerce' ) }
-		</div>
-	);
-
 	return (
 		<Panel
 			className="wc-block-components-totals-coupon"
@@ -145,7 +128,7 @@ export const TotalsCoupon = ( {
 							type="submit"
 						>
 							{ isLoading && <Spinner /> }
-							{ buttonLabel }
+							{ __( 'Apply', 'woocommerce' ) }
 						</Button>
 					</form>
 					<ValidationInputError

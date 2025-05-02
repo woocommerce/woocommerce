@@ -7,18 +7,15 @@
 	width: 100%;
 	margin: 0;
 	box-sizing: border-box;
-}
 
-.wc-block-cart__submit-button__text {
-	display: flex;
-	align-items: center;
-
-	// Prevent runts/widows. Overwrite `balance` with `pretty`, as `pretty` is not supported in all browsers.
-	text-wrap: balance;
-	text-wrap: pretty;
-
-	&--visually-hidden {
-		visibility: hidden;
+	// Hides labels when the spinner is shown.
+	&--loading {
+		.wc-block-components-button__text {
+			visibility: hidden;
+		}
+		.wc-block-components-spinner {
+			visibility: visible;
+		}
 	}
 }
 
