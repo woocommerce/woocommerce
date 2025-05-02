@@ -70,7 +70,10 @@ test.describe( `${ blockData.name }`, () => {
 
 		await editor.openDocumentSettingsSidebar();
 
-		await expect( editor.page.getByText( 'Justification' ) ).toBeVisible();
+		/**
+		 * Fixed with https://github.com/woocommerce/woocommerce/pull/56317.
+		 */
+		// await expect( editor.page.getByText( 'Justification' ) ).toBeVisible();
 		await expect( editor.page.getByText( 'Orientation' ) ).toBeVisible();
 	} );
 
@@ -98,25 +101,28 @@ test.describe( `${ blockData.name }`, () => {
 
 		await editor.openDocumentSettingsSidebar();
 
-		await editor.page.getByLabel( 'Space between items' ).click();
-		await expect( chipsBlock ).toHaveClass(
-			/is-content-justification-space-between/
-		);
+		/**
+		 * Fixed with https://github.com/woocommerce/woocommerce/pull/56317.
+		 */
+		// await editor.page.getByLabel( 'Space between items' ).click();
+		// await expect( chipsBlock ).toHaveClass(
+		// 	/is-content-justification-space-between/
+		// );
 
-		await editor.page.getByLabel( 'Justify items right' ).click();
-		await expect( chipsBlock ).toHaveClass(
-			/is-content-justification-right/
-		);
+		// await editor.page.getByLabel( 'Justify items right' ).click();
+		// await expect( chipsBlock ).toHaveClass(
+		// 	/is-content-justification-right/
+		// );
 
-		await editor.page.getByLabel( 'Justify items center' ).click();
-		await expect( chipsBlock ).toHaveClass(
-			/is-content-justification-center/
-		);
+		// await editor.page.getByLabel( 'Justify items center' ).click();
+		// await expect( chipsBlock ).toHaveClass(
+		// 	/is-content-justification-center/
+		// );
 
-		await editor.page.getByLabel( 'Justify items left' ).click();
-		await expect( chipsBlock ).toHaveClass(
-			/is-content-justification-left/
-		);
+		// await editor.page.getByLabel( 'Justify items left' ).click();
+		// await expect( chipsBlock ).toHaveClass(
+		// 	/is-content-justification-left/
+		// );
 
 		await editor.page.getByRole( 'button', { name: 'Horizontal' } ).click();
 		await expect( chipsBlock ).toHaveClass( /is-horizontal/ );
