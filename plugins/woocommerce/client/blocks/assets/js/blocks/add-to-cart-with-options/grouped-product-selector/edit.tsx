@@ -8,8 +8,6 @@ import { resolveSelect } from '@wordpress/data';
 import { productsStore } from '@woocommerce/data';
 import { useEffect, useState } from '@wordpress/element';
 import type { ProductResponseItem } from '@woocommerce/types';
-import { __ } from '@wordpress/i18n';
-import NoticeBanner from '@woocommerce/base-components/notice-banner';
 
 /**
  * Internal dependencies
@@ -48,25 +46,27 @@ export default function AddToCartWithOptionsGroupedProductSelectorEdit(
 					type: 'grouped',
 					per_page: 1,
 				} )
-				.then( ( fetchedProduct ) => {
-					if ( fetchedProduct.length > 0 ) {
-						setGroupedProduct( fetchedProduct );
+				.then( ( fetchedGroupedProduct ) => {
+					if ( fetchedGroupedProduct.length > 0 ) {
+						setGroupedProduct( fetchedGroupedProduct );
+					} else {
+						// If there are no grouped products, query for any other product type.
+						resolveSelect( productsStore )
+							.getProducts( {
+								per_page: 1,
+							} )
+							.then( ( fetchedProduct ) => {
+								if ( fetchedProduct.length > 0 ) {
+									setGroupedProduct( fetchedProduct );
+								}
+							} );
 					}
 				} );
 		}
 	}, [ groupedProduct, product ] );
 
 	if ( groupedProduct.length === 0 ) {
-		return (
-			<div { ...innerBlocksProps }>
-				<NoticeBanner status="warning">
-					{ __(
-						'No grouped products were found. Please create a grouped product first.',
-						'woocommerce'
-					) }
-				</NoticeBanner>
-			</div>
-		);
+		return null;
 	}
 
 	return <div { ...innerBlocksProps } />;
