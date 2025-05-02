@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { debounce, removeAllNotices } from '@woocommerce/base-utils';
+import { debounce } from '@woocommerce/base-utils';
 import { select, dispatch } from '@wordpress/data';
 import type { AdditionalValues } from '@woocommerce/settings';
-import { ApiErrorResponse } from '@woocommerce/types';
+import { ApiErrorResponse, CheckoutResponse } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
 
 /**
@@ -14,7 +14,11 @@ import { STORE_KEY as CHECKOUT_STORE_KEY } from './constants';
 import { STORE_KEY as PAYMENT_STORE_KEY } from '../payment/constants';
 import { processErrorResponse } from '../utils';
 import { CheckoutPutData } from './types';
-import { hasValidationError, validateAdditionalFields } from './utils';
+import {
+	clearFieldErrorNotices,
+	hasValidationError,
+	validateAdditionalFields,
+} from './utils';
 
 // This is used to track and cache the local state of push changes.
 const localState = {
@@ -149,7 +153,7 @@ const updateCheckoutData = (): void => {
 	dispatch( CHECKOUT_STORE_KEY )
 		.updateDraftOrder( requestData )
 		.then( () => {
-			removeAllNotices();
+			clearFieldErrorNotices( requestData );
 			localState.doingPush = false;
 		} )
 		.catch( ( response: ApiErrorResponse ) => {
