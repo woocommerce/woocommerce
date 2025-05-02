@@ -67,26 +67,4 @@ class SettingOptions {
 
 		return $page_options;
 	}
-
-	/**
-	 * Get a settings page by ID.
-	 *
-	 * @deprecated 9.9.0 This method is no longer used.
-	 * @return null
-	 */
-	public function get_page() {
-		wc_deprecated_function( __METHOD__, '9.9.0' );
-		return null;
-	}
-
-	/**
-	 * Get information about a settings page.
-	 *
-	 * @deprecated 9.9.0 This method is no longer used.
-	 * @return array
-	 */
-	protected function get_page_info() {
-		wc_deprecated_function( __METHOD__, '9.9.0' );
-		return array();
-	}
 }
