@@ -46,7 +46,7 @@ export default function AddToCartWithOptionsGroupedProductSelectorEdit(
 			resolveSelect( productsStore )
 				.getProducts( {
 					type: 'grouped',
-					per_page: 3,
+					per_page: 1,
 				} )
 				.then( ( fetchedProduct ) => {
 					if ( fetchedProduct.length > 0 ) {
