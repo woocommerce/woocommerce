@@ -91,7 +91,7 @@
 		} else if ( state === 'added' ) {
 			button.classList.remove( 'loading' );
 			button.classList.add( 'added' );
-		} else if ( state === 'error' ) {
+		} else {
 			button.classList.remove( 'loading' );
 			button.classList.remove( 'added' );
 		}
@@ -176,8 +176,8 @@
 
 			return data;
 		} catch ( error ) {
-			handleButtonState( button, 'error' );
-			console.error( error );
+			// If there is an error, we fallback to reloading the page.
+			window.location.reload();
 		}
 	}
 

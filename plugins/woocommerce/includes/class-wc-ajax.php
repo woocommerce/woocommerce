@@ -496,9 +496,9 @@ class WC_AJAX {
 		$product_quantity_param = ArrayUtil::get_value_or_default( $_POST, 'quantity' );
 		$products_to_add        = array();
 
-		// Check if product_id and quantity are arrays.
+		// Check if product_id parameters is an array.
 		if ( is_array( $product_id_param ) ) {
-			// For each product_id, add the quantity to the products_to_add array.
+			// For each product_id, add the quantity to the $products_to_add array.
 			foreach ( $product_id_param as $index => $product_id ) {
 				$products_to_add[] = array(
 					/**
