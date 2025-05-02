@@ -9,6 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+use Automattic\WooCommerce\Internal\Email\OrderPriceFormatter;
+use Automattic\WooCommerce\Internal\Orders\POSOrderUtil;
+
 /**
  * Trait for handling POS email customizations.
  */
@@ -37,7 +40,7 @@ trait WC_POS_Email_Customizations {
 	 * @param WC_Order $order         Order object.
 	 */
 	public function add_unit_price( $item_id, $item, $order ) {
-		$unit_price = $order->get_formatted_item_subtotal( $item );
+		$unit_price = OrderPriceFormatter::get_formatted_item_subtotal( $order, $item );
 		echo wp_kses_post( '<br /><small>' . $unit_price . '</small>' );
 	}
 
@@ -56,7 +59,7 @@ trait WC_POS_Email_Customizations {
 	 * @return array Modified array of valid template class names.
 	 */
 	public function add_to_valid_template_classes( $valid_template_classes, $order ) {
-		if ( ! $order->is_pos_order() ) {
+		if ( ! POSOrderUtil::is_pos_order( $order ) ) {
 			return $valid_template_classes;
 		}
 		$valid_template_classes[] = get_class( $this );
