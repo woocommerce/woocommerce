@@ -1,9 +1,5 @@
 <?php
-/**
- * Class POSOrderUtilTest
- *
- * @package WooCommerce\Tests\Internal\Orders
- */
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Orders;
 
@@ -12,7 +8,9 @@ use WC_Order;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for POSOrderUtil class
+ * POSOrderUtil test.
+ *
+ * @covers \Automattic\WooCommerce\Internal\Orders\POSOrderUtil
  */
 class POSOrderUtilTest extends WC_Unit_Test_Case {
 

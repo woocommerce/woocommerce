@@ -1,9 +1,5 @@
 <?php
-/**
- * Class OrderPriceFormatterTest
- *
- * @package WooCommerce\Tests\Internal\Email
- */
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Email;
 
@@ -15,7 +11,9 @@ use WC_Tax;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for OrderPriceFormatter class
+ * OrderPriceFormatter test.
+ *
+ * @covers \Automattic\WooCommerce\Internal\Email\OrderPriceFormatter
  */
 class OrderPriceFormatterTest extends WC_Unit_Test_Case {
 
@@ -42,7 +40,7 @@ class OrderPriceFormatterTest extends WC_Unit_Test_Case {
 
 		// Test with tax display 'excl' but no tax rate.
 		$this->assertEquals(
-            wc_price(
+			wc_price(
 				10.00,
 				array(
 					'ex_tax_label' => 0,
@@ -83,7 +81,7 @@ class OrderPriceFormatterTest extends WC_Unit_Test_Case {
 
 		// Test with tax display 'excl' and prices including tax.
 		$this->assertEquals(
-            wc_price(
+			wc_price(
 				10.00,
 				array(
 					'ex_tax_label' => 1,
@@ -95,7 +93,7 @@ class OrderPriceFormatterTest extends WC_Unit_Test_Case {
 
 		// Test with tax display 'incl' and prices including tax.
 		$this->assertEquals(
-            wc_price( 12.00, array( 'currency' => $order->get_currency() ) ),
+			wc_price( 12.00, array( 'currency' => $order->get_currency() ) ),
 			OrderPriceFormatter::get_formatted_item_subtotal( $order, $item, 'incl' )
 		);
 	}
