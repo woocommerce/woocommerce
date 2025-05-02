@@ -1639,7 +1639,9 @@ class WC_Cart extends WC_Legacy_Cart {
 				if ( ! $country ) {
 					return false;
 				}
-				$country_fields = WC()->countries->get_address_fields( $country, 'shipping_' );
+				$country_fields  = WC()->countries->get_address_fields( $country, 'shipping_' );
+				$checkout_fields = WC()->checkout()->get_checkout_fields();
+
 				/**
 				 * Filter to not require shipping state for shipping calculation, even if it is required at checkout.
 				 * This can be used to allow shipping calculations to be done without a state.
@@ -1650,7 +1652,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				 */
 				$state_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_state', true );
 				$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'];
-				if ( $state_enabled && $state_required && ! $this->get_customer()->get_shipping_state() ) {
+				if ( $state_enabled && $state_required && ! $this->get_customer()->get_shipping_state() && isset( $checkout_fields['shipping']['shipping_state'] ) ) {
 					return false;
 				}
 				/**
@@ -1663,7 +1665,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				 */
 				$postcode_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true );
 				$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'];
-				if ( $postcode_enabled && $postcode_required && '' === $this->get_customer()->get_shipping_postcode() ) {
+				if ( $postcode_enabled && $postcode_required && '' === $this->get_customer()->get_shipping_postcode() && isset( $checkout_fields['shipping']['shipping_postcode'] ) ) {
 					return false;
 				}
 			}
