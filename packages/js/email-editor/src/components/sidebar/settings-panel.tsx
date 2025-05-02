@@ -10,22 +10,26 @@ import { applyFilters } from '@wordpress/hooks';
  */
 import { recordEvent } from '../../events';
 import { RichTextWithButton } from '../personalization-tags/rich-text-with-button';
+import { TemplateSelection } from './template-selection';
 
 const SidebarExtensionComponent = applyFilters(
 	'woocommerce_email_editor_setting_sidebar_extension_component',
 	RichTextWithButton
 ) as () => JSX.Element;
 
-export function DetailsPanel() {
+export function SettingsPanel() {
 	return (
 		<PanelBody
-			title={ __( 'Details', 'woocommerce' ) }
+			title={ __( 'Settings', 'woocommerce' ) }
 			className="woocommerce-email-editor__settings-panel"
 			onToggle={ ( data ) =>
-				recordEvent( 'details_panel_body_toggle', { opened: data } )
+				recordEvent( 'settings_panel_body_toggle', { opened: data } )
 			}
 		>
-			<>{ <SidebarExtensionComponent /> }</>
+			<>
+				<TemplateSelection />
+				{ <SidebarExtensionComponent /> }
+			</>
 		</PanelBody>
 	);
 }

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add subject and preheader rich-text components into the email sidebar.

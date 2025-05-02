@@ -1,0 +1,208 @@
+#payment_methods.settings-payments-onboarding-modal__step .settings-payments-onboarding-modal__step--content {
+	padding: 16px 32px 16px 0;
+}
+
+.settings-payments-onboarding-modal__step--content {
+	.settings-payments-methods__container {
+		width: 100%;
+
+		.settings-payments-methods__show-more {
+			display: block;
+			cursor: pointer;
+			margin: $gap $gap-large 0;
+			box-shadow: none;
+			color: var(--wp-admin-theme-color);
+			text-align: left;
+
+			@media screen and (max-width: $break-medium) {
+				margin: $gap $gap 0;
+			}
+		}
+
+		// Override styles for woocommerce list items.
+		.woocommerce-list {
+			border-bottom: 1px solid $gray-100;
+
+			&__item {
+				padding: 2 * $gap-smaller 4 * $gap-smaller;
+				border-color: $gray-100;
+
+				&:hover {
+					background-color: $white;
+
+					.woocommerce-list__item-title {
+						color: $gray-900;
+					}
+				}
+
+				@media screen and (max-width: 1024px) {
+					padding: $gap-large;
+				}
+
+				@media screen and (max-width: $break-medium) {
+					padding: $gap-large;
+				}
+			}
+
+			&__item.clickable-list-item:hover {
+				background-color: rgba(0, 0, 0, 0.02); /* Light overlay effect */
+			}
+
+			&__item-inner {
+				padding: 0;
+				align-items: stretch;
+			}
+
+			&__item-inner:focus {
+				box-shadow: none;
+			}
+
+			&__item-title {
+				font-size: 15px;
+				line-height: 20px;
+				color: $gray-900;
+				font-weight: 500;
+				display: inline-flex;
+				gap: 10px;
+				align-items: center;
+			}
+
+			&__item-content {
+				font-size: 13px;
+				font-weight: 400;
+				line-height: 20px;
+				color: $gray-700;
+
+				.woocommerce-woopayments-payment-methods-logos {
+					flex-wrap: wrap;
+				}
+			}
+
+			&__item-after {
+				&__actions {
+					display: flex;
+					gap: $gap;
+					margin-left: $gap;
+
+					.components-base-control {
+						margin-bottom: 0;
+					}
+
+					.components-button {
+						height: 32px;
+					}
+				}
+			}
+
+			&__item-before {
+				img {
+					max-width: 96px;
+					height: 40px;
+					border-radius: 4px;
+				}
+				@media screen and (max-width: $break-medium) {
+					align-items: flex-start;
+
+					img {
+						max-width: 30px;
+						height: 30px;
+						margin-top: 3px;
+					}
+				}
+			}
+
+			&__item-multi-row {
+				display: flex;
+
+				&.multi-row-space {
+					margin-bottom: $gap-large;
+				}
+			}
+		}
+	}
+
+	.woocommerce-recommended-payment-methods {
+		// Width to fill available space.
+		width: 100%;
+		width: -moz-available; /* WebKit-based browsers will ignore this. */
+		width: -webkit-fill-available; /* Mozilla-based browsers will ignore this. */
+		width: fill-available;
+		margin-right: $gap-small + $gap-smallest;
+		display: flex;
+		flex-direction: column;
+		height: calc(100% - 60px); // Account for continue button
+		max-height: 100%; // Ensure it doesn't grow beyond parent
+		overflow: hidden; // Prevent content from spilling out
+		padding: 0 !important; // There is a padding on the parent container that we need to override.
+		border-bottom: none !important;
+
+		@media screen and (max-width: $break-medium) {
+			height: calc(100% - 100px); // Account for small screen content being longer on the page.
+			margin-top: $gap-larger;
+		}
+
+		.woocommerce-layout__header-wrapper {
+			// This is the padding for the header. Controlling each side to adapt to the content.
+			padding: calc($gap-large / 2) $gap-large $gap-large $gap-large * 1.5;
+			border-bottom: 1px solid $gray-200;
+			flex-shrink: 0;
+			background: $white;
+			position: relative;
+			z-index: 1;
+
+			@media screen and (max-width: $break-medium) {
+				padding: $gap $gap-large;
+			}
+
+			.woocommerce-settings-payments-header__title {
+				@media screen and (max-width: $break-medium) {
+					padding: 0 !important;
+				}
+			}
+
+			.woocommerce-layout__header-title-and-close {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				width: 100%;
+			}
+		}
+
+		.woocommerce-recommended-payment-methods__list {
+			flex: 1;
+			min-height: 0;
+			position: relative;
+
+			.settings-payments-methods__container {
+				height: 100%;
+				overflow-y: auto;
+				scrollbar-width: none;
+				-ms-overflow-style: none;
+
+				&::-webkit-scrollbar {
+					display: none;
+				}
+
+				@media screen and (max-width: $break-medium) {
+					padding: 0;
+				}
+
+				.woocommerce-list {
+					margin-bottom: $gap;
+				}
+			}
+		}
+
+		.woocommerce-recommended-payment-methods__list_footer {
+			display: flex;
+			justify-content: flex-end;
+			padding: $gap-large;
+			background: $white;
+			flex-shrink: 0;
+
+			@media screen and (max-width: $break-medium) {
+				padding: $gap;
+			}
+		}
+	}
+}
