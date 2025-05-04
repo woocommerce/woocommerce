@@ -4,6 +4,8 @@
  */
 import { render } from '@testing-library/react';
 import { createElement } from '@wordpress/element';
+import GridIcon from 'gridicons';
+import { setSettings, __experimentalGetSettings } from '@wordpress/date'; // eslint-disable-line @wordpress/no-unsafe-wp-apis -- safe to use in tests, not in production
 
 /**
  * Internal dependencies
@@ -21,6 +23,76 @@ describe( 'Timeline', () => {
 	test( 'With data snapshot', () => {
 		const { container } = render( <Timeline items={ mockData } /> );
 		expect( container ).toMatchSnapshot();
+	} );
+
+	describe( 'Timezone handling', () => {
+		const originalWPTimeSettings = __experimentalGetSettings();
+
+		const mockItems = [
+			{
+				date: new Date( Date.UTC( 2020, 0, 20, 1, 30 ) ),
+				body: [
+					<p key={ '1' }>{ 'p element in body' }</p>,
+					'string in body',
+				],
+				headline: <p>{ 'p tag in headline' }</p>,
+				icon: (
+					<GridIcon
+						className={ 'is-success' }
+						icon={ 'checkmark' }
+						size={ 16 }
+					/>
+				),
+			},
+		];
+
+		beforeAll( () => {
+			// Set custom WP Date settings.
+			setSettings( {
+				...originalWPTimeSettings,
+				timezone: {
+					offset: '+3',
+					offsetFormatted: '+03:00',
+					string: 'Africa/Nairobi',
+					abbr: 'EAT',
+				},
+			} );
+		} );
+
+		afterAll( () => {
+			setSettings( originalWPTimeSettings );
+		} );
+
+		test( 'Renders with browser timezone (default)', () => {
+			const { getByText } = render(
+				<Timeline
+					items={ mockItems }
+					dateFormat="c"
+					clockFormat="g:ia"
+				/>
+			);
+			// Expect the UTC time 2020-01-20 01:30 to be displayed as browser local time: January 20, 2020 5:30am
+			expect(
+				getByText( '2020-01-20T05:30:00+04:00' )
+			).toBeInTheDocument();
+			expect( getByText( '5:30am' ) ).toBeInTheDocument();
+		} );
+
+		test( 'Renders with store timezone when useStoreTimezone is true', () => {
+			const { getByText } = render(
+				<Timeline
+					items={ mockItems }
+					dateFormat="c"
+					clockFormat="g:ia"
+					useStoreTimezone
+				/>
+			);
+			// Expect the UTC time 2020-01-20 01:30 to be displayed as the store time: January 20, 2020 4:30am
+			expect(
+				getByText( '2020-01-20T04:30:00+03:00' )
+			).toBeInTheDocument();
+			expect( getByText( '4:30am' ) ).toBeInTheDocument();
+		} );
 	} );
 
 	describe( 'Timeline utilities', () => {

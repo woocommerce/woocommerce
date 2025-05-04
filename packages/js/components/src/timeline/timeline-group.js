@@ -16,6 +16,7 @@ const TimelineGroup = ( {
 	className = '',
 	orderBy = 'desc',
 	clockFormat,
+	useStoreTimezone,
 } ) => {
 	const groupClassName = classnames(
 		'woocommerce-timeline-group',
@@ -28,6 +29,7 @@ const TimelineGroup = ( {
 				key={ itemKey }
 				item={ item }
 				clockFormat={ clockFormat }
+				useStoreTimezone={ useStoreTimezone }
 			/>
 		);
 	};
@@ -104,6 +106,10 @@ TimelineGroup.propTypes = {
 	 * The PHP clock format string used to format times, see php.net/date.
 	 */
 	clockFormat: PropTypes.string,
+	/**
+	 * Show dates and times in the store's timezone rather than the default browser timezone.
+	 */
+	useStoreTimezone: PropTypes.bool,
 };
 
 export default TimelineGroup;

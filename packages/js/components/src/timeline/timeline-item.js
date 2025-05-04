@@ -2,13 +2,21 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { format } from '@wordpress/date';
+import { dateI18n, format } from '@wordpress/date';
 import PropTypes from 'prop-types';
 import { createElement } from '@wordpress/element';
 
-const TimelineItem = ( { item = {}, className = '', clockFormat } ) => {
+const TimelineItem = ( {
+	item = {},
+	className = '',
+	clockFormat,
+	useStoreTimezone,
+} ) => {
 	const itemClassName = classnames( 'woocommerce-timeline-item', className );
-	const itemTimeString = format( clockFormat, item.date );
+
+	const itemTimeString = useStoreTimezone
+		? dateI18n( clockFormat, item.date )
+		: format( clockFormat, item.date );
 
 	return (
 		<li className={ itemClassName }>
@@ -69,6 +77,10 @@ TimelineItem.propTypes = {
 		 * The PHP clock format string used to format times, see php.net/date.
 		 */
 		clockFormat: PropTypes.string,
+		/**
+		 * Show dates and times in the store's timezone rather than the default browser timezone.
+		 */
+		useStoreTimezone: PropTypes.bool,
 	} ),
 };
 

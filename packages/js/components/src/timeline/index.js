@@ -4,7 +4,7 @@
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
-import { format } from '@wordpress/date';
+import { dateI18n, format } from '@wordpress/date';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -22,6 +22,7 @@ const Timeline = ( {
 	dateFormat = __( 'F j, Y', 'woocommerce' ),
 	/* translators: PHP clock format string used to display times, see php.net/date. */
 	clockFormat = __( 'g:ia', 'woocommerce' ),
+	useStoreTimezone = false,
 } ) => {
 	const timelineClassName = classnames( 'woocommerce-timeline', className );
 
@@ -37,9 +38,12 @@ const Timeline = ( {
 	}
 
 	const addGroupTitles = ( group ) => {
+		const title = useStoreTimezone
+			? dateI18n( dateFormat, group.date )
+			: format( dateFormat, group.date );
 		return {
 			...group,
-			title: format( dateFormat, group.date ),
+			title,
 		};
 	};
 
@@ -56,6 +60,7 @@ const Timeline = ( {
 							group={ group }
 							orderBy={ orderBy }
 							clockFormat={ clockFormat }
+							useStoreTimezone={ useStoreTimezone }
 						/>
 					) ) }
 			</ul>
@@ -116,6 +121,10 @@ Timeline.propTypes = {
 	 * The PHP clock format string used to format times, see php.net/date.
 	 */
 	clockFormat: PropTypes.string,
+	/**
+	 * Show dates and times in the store's timezone rather than the default browser timezone.
+	 */
+	useStoreTimezone: PropTypes.bool,
 };
 
 export { orderByOptions, groupByOptions } from './util';
