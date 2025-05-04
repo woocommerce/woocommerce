@@ -1,0 +1,24 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Generating a Pull Request Description
+
+This rule provides guidance for generating a pull request (PR) description in this repository.
+
+## Where to Find the Template
+
+The PR template is located at [`.github/PULL_REQUEST_TEMPLATE.md`](mdc:.github/PULL_REQUEST_TEMPLATE.md). Always use this template as the basis for your PR descriptions.
+
+## Best Practices
+
+- **Preserve Markdown Structure:** Do not remove or alter required markdown sections, especially those used by automation (e.g., changelog entry details and comments).
+- **Be Concise and Clear:** Summarize the changes, testing steps, and rationale in a way that is easy for reviewers to understand.
+- **Remove Irrelevant Sections:** You may erase template sections that are not applicable to your PR, except for those required by automation.
+- **Testing Instructions:** Provide clear, step-by-step instructions for how to test the changes.
+- **Changelog Section:** If no changelog entry is needed, check the appropriate box and provide a brief comment explaining why.
+
+## Example
+
+See the PR template for the required structure and sections. When generating a PR description, ensure that all required checkboxes and markdown details are preserved for automation compatibility.
