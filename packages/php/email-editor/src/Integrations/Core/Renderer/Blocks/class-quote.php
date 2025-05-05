@@ -120,7 +120,7 @@ class Quote extends Abstract_Block_Renderer {
 		)['declarations'];
 
 		return sprintf(
-			'<!--[if mso | IE]><table align="left" role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%%" style="%1$s"><tr><td style="%2$s" width="100%"><![endif]-->
+			'<!--[if mso | IE]><table align="left" role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%%" style="%1$s"><tr><td style="%2$s" width="100%%"><![endif]-->
 			<blockquote class="email-block-quote %3$s" style="%1$s %2$s">
 				{quote_content}
 				{citation_content}
