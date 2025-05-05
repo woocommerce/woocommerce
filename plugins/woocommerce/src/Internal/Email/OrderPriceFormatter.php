@@ -8,6 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Email;
 
 use WC_Abstract_Order;
+use WC_Order_Item;
 
 /**
  * Helper class for formatting prices in order emails.
@@ -20,11 +21,11 @@ class OrderPriceFormatter {
 	 * Gets item subtotal - formatted for display in emails.
 	 *
 	 * @param WC_Abstract_Order $order Order instance.
-	 * @param object            $item Item to get unit price from.
+	 * @param WC_Order_Item     $item Item to get unit price from.
 	 * @param string            $tax_display Incl or excl tax display mode.
 	 * @return string Formatted item subtotal.
 	 */
-	public static function get_formatted_item_subtotal( WC_Abstract_Order $order, $item, string $tax_display = '' ): string {
+	public static function get_formatted_item_subtotal( WC_Abstract_Order $order, WC_Order_Item $item, string $tax_display = '' ): string {
 		$tax_display   = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
 		$include_tax   = 'excl' !== $tax_display;
 		$item_subtotal = $order->get_item_subtotal( $item, $include_tax );
