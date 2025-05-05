@@ -40,14 +40,10 @@ class OrderPriceFormatter {
 	 * @return string Formatted price string.
 	 */
 	private static function format_price( WC_Abstract_Order $order, float $amount, bool $includes_tax ): string {
-		if ( $includes_tax ) {
-			return wc_price( $amount, array( 'currency' => $order->get_currency() ) );
-		}
-
 		return wc_price(
 			$amount,
 			array(
-				'ex_tax_label' => $order->get_prices_include_tax() ? 1 : 0,
+				'ex_tax_label' => ( !$includes_tax && $order->get_prices_include_tax() ) ? 1 : 0,
 				'currency'     => $order->get_currency(),
 			)
 		);
