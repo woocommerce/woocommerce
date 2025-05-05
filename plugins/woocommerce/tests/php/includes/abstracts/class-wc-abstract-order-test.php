@@ -565,7 +565,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$callback = static function ( WC_Order $order ) use ( $refunded_status ) {
 			$changes = $order->get_changes();
 			if ( ! empty( $changes ) && isset( $changes['status'] ) && $changes['status'] === $refunded_status ) {
-				throw new \RuntimeException( 'to prove my point' );
+				throw new \RuntimeException( 'Interrupt order persistence.' );
 			}
 		};
 		add_action( 'woocommerce_before_order_object_save', $callback );
@@ -584,13 +584,14 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$order->set_status( $refunded_status );
 		$order->save();
 
-		// Make sure status update has not been saved to database and our RuntimeException('to prove my point') worked.
-		$this->assertEquals(
+		// Make sure status update has not been saved to database
+		// and our RuntimeException('Interrupt order persistence.') worked.
+		$this->assertSame(
 			$order->get_data()['status'],
 			$initial_status,
-			'Status ' . $refunded_status . ' has been saved to database'
+			'Order status in database has been modified but but shouldn\'t have been'
 		);
-		$this->assertEquals(
+		$this->assertSame(
 			$triggered,
 			false,
 			'"woocommerce_order_status_' . $refunded_status . '" action hook has been triggered but shouldn\'t have been'
@@ -605,9 +606,9 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 *          hooks dependent on Wc_Order::$status_transition should not be called
 	 */
 	public function test_status_transition_hooks_shouldnot_be_called_when_order_save_errored_on_item_save() {
-		$initial_status  = OrderStatus::AUTO_DRAFT;
-		$initial_order_item_name  = 'Initial Order Item name';
-		$refunded_status = OrderStatus::REFUNDED;
+		$initial_status          = OrderStatus::AUTO_DRAFT;
+		$initial_order_item_name = 'Initial Order Item name';
+		$refunded_status         = OrderStatus::REFUNDED;
 
 		// Simple action to make sure hook is not triggered.
 		$triggered                     = false;
@@ -617,12 +618,14 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		add_action( 'woocommerce_order_status_' . $refunded_status, $should_not_be_called_callback );
 
 		$order_item = new WC_Order_Item_Product();
-		$order_item->set_name($initial_order_item_name);
+		$order_item->set_name( $initial_order_item_name );
 
 		$order = new Wc_Order();
 		$order->set_status( $initial_status );
-		$order->add_item($order_item);
+		$order->add_item( $order_item );
 		$order->save();
+
+		$order_item_id = $order_item->get_id();
 
 		// add an action that will simulate an error while saving WC_Order_Item.
 		$callback = static function ( WC_Order_Item $item ) {
@@ -630,18 +633,18 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		};
 		add_action( 'woocommerce_before_order_item_object_save', $callback );
 
-		$order->get_items()[1]->set_name('CHANGED Order Item name');
+		$order->get_items()[ $order_item_id ]->set_name( 'CHANGED Order Item name' );
 		$order->set_status( $refunded_status );
 		$order->save();
 
 		// Make sure status update has not been saved to database
 		// and our RuntimeException('Error while saving WC_Order_Item') worked.
-		$this->assertEquals(
-			$order->get_items()[1]->get_data()['name'],
+		$this->assertSame(
+			$order->get_items()[ $order_item_id ]->get_data()['name'],
 			$initial_order_item_name,
 			'Modified order item name has been saved to database but shouldn\'t have been'
 		);
-		$this->assertEquals(
+		$this->assertSame(
 			$triggered,
 			false,
 			'"woocommerce_order_status_' . $refunded_status . '" action hook has been triggered but shouldn\'t have been'

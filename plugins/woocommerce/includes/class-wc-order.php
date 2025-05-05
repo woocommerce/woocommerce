@@ -417,7 +417,7 @@ class WC_Order extends WC_Abstract_Order {
 		$status_transition = $this->status_transition;
 
 		$order_persisted       = array() === $this->changes;
-		$order_items_persisted = array() === array_filter(
+		$order_items_persisted = array() === $this->items_to_delete && array() === array_filter(
 			$this->get_items(),
 			static function ( $item ) {
 				return array() !== $item->get_changes();
