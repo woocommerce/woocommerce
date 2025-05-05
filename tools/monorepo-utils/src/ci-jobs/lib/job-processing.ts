@@ -357,9 +357,21 @@ async function createJobsForProject(
 				break;
 			}
 			case JobType.Test: {
-				// If there are dependency changes, we need to trigger the job
 				if ( dependenciesWithChanges.length > 0 ) {
-					projectChanges = true;
+					if ( ! jobConfig.onlyForDependencies ) {
+						// onlyForDependencies is not defined, meaning there are no exceptions so we should run the job.
+						projectChanges = true;
+					}
+
+					// If onlyForDependencies is defined, we should only run the job if one of the listed dependencies has changes.
+					if (
+						jobConfig.onlyForDependencies &&
+						jobConfig.onlyForDependencies.some( ( dep ) =>
+							dependenciesWithChanges.includes( dep )
+						)
+					) {
+						projectChanges = true;
+					}
 				}
 
 				const created = await createTestJob(

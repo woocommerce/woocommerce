@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update consumers of the `wc/store/cart` data store to use the `cartStore` `StoreDescriptor` rather than the `CART_STORE_KEY` key to access it.

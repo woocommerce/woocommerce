@@ -3,6 +3,7 @@
  */
 import './style.scss';
 import { isTaskListActive } from '~/hooks/use-tasklists-state';
+import { isFeatureEnabled } from '~/utils/features';
 import { BaseHeader } from './shared';
 
 export const EmbedHeader = ( {
@@ -13,7 +14,7 @@ export const EmbedHeader = ( {
 	query: Record< string, string >;
 } ) => {
 	const isReactifyPaymentsSettingsScreen = Boolean(
-		window.wcAdminFeatures?.[ 'reactify-classic-payments-settings' ] &&
+		isFeatureEnabled( 'reactify-classic-payments-settings' ) &&
 			query?.page === 'wc-settings' &&
 			query?.tab === 'checkout'
 	);

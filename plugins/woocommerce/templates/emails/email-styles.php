@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 9.8.0
+ * @version 9.9.0
  */
 
 use Automattic\WooCommerce\Internal\Email\EmailFont;
@@ -305,7 +305,7 @@ body {
 
 #body_content td ul.wc-item-meta {
 	font-size: small;
-	margin: 1em 0 0>;
+	margin: 1em 0 0;
 	padding: 0;
 	list-style: none;
 }
@@ -354,7 +354,14 @@ body {
 		color: <?php echo esc_attr( $text_lighter_20 ); ?>;
 		border: 1px solid <?php echo esc_attr( $body_darker_10 ); ?>;
 	<?php } ?>
+	word-break: break-all;
 }
+
+<?php if ( $email_improvements_enabled ) : ?>
+#addresses td + td {
+	padding-<?php echo is_rtl() ? 'right' : 'left'; ?>: 10px !important;
+}
+<?php endif; ?>
 
 .additional-fields {
 	padding: 12px 12px 0;

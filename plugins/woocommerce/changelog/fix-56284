@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed Store API `update_line_items_from_cart` method to prevent updating line items on every request.

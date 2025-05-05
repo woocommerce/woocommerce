@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Remove `woocommerce_order_attribution_install_banner_dismissed` option as it's moved to user meta.

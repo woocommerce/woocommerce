@@ -1,5 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Fix how we record onboarding state in the complete setup click event.
-
-

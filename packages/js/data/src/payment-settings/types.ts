@@ -44,17 +44,23 @@ export type PaymentIncentive = {
 	cta_label: string;
 	tc_url: string;
 	badge: string;
-	_dismissals: string[];
+	_dismissals: PaymentIncentiveDismissal[];
 	_links: {
 		dismiss: LinkData;
 	};
 };
+
+interface PaymentIncentiveDismissal {
+	timestamp: number; // timestamp in seconds
+	context: string;
+}
 
 export type RecommendedPaymentMethod = {
 	id: string;
 	_order: number;
 	title: string;
 	description: string;
+	category?: 'primary' | 'secondary';
 	icon: string;
 	enabled: boolean;
 	extraTitle: string;
@@ -66,6 +72,7 @@ export type PaymentProviderOnboardingState = {
 	started: boolean;
 	completed: boolean;
 	test_mode: boolean;
+	wpcom_has_working_connection?: boolean;
 };
 
 // General payment provider type.
@@ -89,6 +96,7 @@ export type PaymentProvider = {
 			onboard: LinkData;
 		};
 		recommended_payment_methods?: RecommendedPaymentMethod[];
+		type?: string;
 	};
 	tags?: string[];
 	_suggestion_id?: string;
@@ -107,6 +115,7 @@ export type PaymentGatewayProvider = PaymentProvider & {
 			onboard: LinkData;
 		};
 		recommended_payment_methods: RecommendedPaymentMethod[];
+		type: string;
 	};
 };
 
@@ -150,6 +159,8 @@ export type SuggestedPaymentExtension = {
 	tags: string[];
 	plugin: PluginData;
 	links: PaymentGatewayLink[];
+	_links?: Record< string, LinkData >;
+	_incentive?: PaymentIncentive;
 };
 
 export type SuggestedPaymentExtensionCategory = {

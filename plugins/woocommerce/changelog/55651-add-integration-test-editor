@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Introduce Integration Test Editor to the existing Blocks' Jest environment.

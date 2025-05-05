@@ -99,12 +99,9 @@ class Validation {
 
 		foreach ( $fields as $field ) {
 			if (
-				! empty( $field['rules'] ) && is_array( $field['rules'] ) &&
-				(
-					! empty( $field['rules']['required'] ) ||
-					! empty( $field['rules']['hidden'] ) ||
-					! empty( $field['rules']['validation'] )
-				)
+				( ! empty( $field['validation'] ) && is_array( $field['validation'] ) ) ||
+				( ! empty( $field['required'] ) && is_array( $field['required'] ) ) ||
+				( ! empty( $field['hidden'] ) && is_array( $field['hidden'] ) )
 			) {
 				$return = true;
 				break;
@@ -117,41 +114,42 @@ class Validation {
 	/**
 	 * Validate meta schema for field rules.
 	 *
-	 * @param array $rules The field rules.
+	 * @param mixed $rules The rules to validate.
 	 * @return bool|WP_Error True if the field options are valid, a WP_Error otherwise.
 	 */
 	public static function is_valid_schema( $rules ) {
+		if ( ! is_array( $rules ) ) {
+			return new WP_Error( 'woocommerce_rest_checkout_invalid_field_schema', 'Rules must be defined as an array.' );
+		}
+
+		if ( empty( $rules ) ) {
+			return true;
+		}
+
 		if ( empty( self::$meta_schema_json ) ) {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			self::$meta_schema_json = file_get_contents( __DIR__ . '/json-schema-draft-07.json' );
 		}
-		$validator    = new Validator();
-		$test_schemas = [ 'required', 'hidden', 'validation' ];
 
-		foreach ( $test_schemas as $rule ) {
-			if ( empty( $rules[ $rule ] ) ) {
-				continue;
-			}
-			if ( ! is_array( $rules[ $rule ] ) ) {
-				return new WP_Error( 'woocommerce_rest_checkout_invalid_field_schema', sprintf( 'The %s rules must be an array.', esc_html( $rule ) ) );
-			}
-			$result = $validator->validate(
-				Helper::toJSON(
-					[
-						'$schema'    => 'http://json-schema.org/draft-07/schema#',
-						'type'       => 'object',
-						'properties' => [
-							'test' => $rules[ $rule ],
-						],
-						'required'   => [ 'test' ],
-					]
-				),
-				self::$meta_schema_json
-			);
-			if ( $result->hasError() ) {
-				return new WP_Error( 'woocommerce_rest_checkout_invalid_field_schema', esc_html( (string) $result->error() ) );
-			}
+		$validator = new Validator();
+		$result    = $validator->validate(
+			Helper::toJSON(
+				[
+					'$schema'    => 'http://json-schema.org/draft-07/schema#',
+					'type'       => 'object',
+					'properties' => [
+						'test' => $rules,
+					],
+					'required'   => [ 'test' ],
+				]
+			),
+			self::$meta_schema_json
+		);
+
+		if ( $result->hasError() ) {
+			return new WP_Error( 'woocommerce_rest_checkout_invalid_field_schema', esc_html( (string) $result->error() ) );
 		}
+
 		return true;
 	}
 }

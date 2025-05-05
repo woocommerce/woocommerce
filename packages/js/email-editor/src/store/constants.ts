@@ -7,8 +7,6 @@ export const stylesSidebarId = 'email-editor/editor/styles';
 
 // these values are set once on a page load, so it's fine to keep them here.
 export const editorCurrentPostType =
-	window.MailPoetEmailEditor.current_post_type;
-export const editorCurrentPostId = parseInt(
-	window.MailPoetEmailEditor.current_post_id,
-	10
-);
+	window.WooCommerceEmailEditor.current_post_type;
+export const editorCurrentPostId =
+	window.WooCommerceEmailEditor.current_post_id;

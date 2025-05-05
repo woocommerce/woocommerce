@@ -4,6 +4,11 @@ namespace Automattic\WooCommerce\Blueprint;
 
 trait UsePubSub {
 
+	/**
+	 * Subscribers.
+	 *
+	 * @var array
+	 */
 	private array $subscribers = array();
 
 	/**

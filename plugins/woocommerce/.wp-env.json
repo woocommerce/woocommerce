@@ -32,6 +32,7 @@
 			},
 			"mappings": {
 				"wp-cli.yml": "./tests/wp-cli.yml",
+				"test-env-setup.sh": "./tests/e2e-pw/bin/test-env-setup.sh",
 				"wp-content/plugins/filter-setter.php": "./tests/e2e-pw/bin/filter-setter.php",
 				"wp-content/plugins/process-waiting-actions.php": "./tests/e2e-pw/bin/process-waiting-actions.php",
 				"wp-content/plugins/test-helper-apis.php": "./tests/e2e-pw/bin/test-helper-apis.php",

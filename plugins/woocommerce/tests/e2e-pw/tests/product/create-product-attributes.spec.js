@@ -5,6 +5,7 @@ import { expect, test as baseTest } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { getFakeProduct } from '../../utils/data';
 import { toggleVariableProductTour } from '../../utils/tours';
+import { WC_API_PATH, WC_ADMIN_API_PATH } from '../../utils/api-client';
 
 const productAttributes = [
 	{
@@ -29,23 +30,25 @@ const productAttributes = [
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	page: async ( { page, wcAdminApi }, use ) => {
-		await wcAdminApi.put( 'options', {
+	page: async ( { page, restApi }, use ) => {
+		await restApi.put( `${ WC_ADMIN_API_PATH }/options`, {
 			woocommerce_task_list_reminder_bar_hidden: 'yes',
 		} );
 
 		await use( page );
 	},
-	product: async ( { api }, use ) => {
+	product: async ( { restApi }, use ) => {
 		let product = getFakeProduct( { type: 'variable' } );
 
-		await api.post( 'products', product ).then( ( response ) => {
-			product = response.data;
-		} );
+		await restApi
+			.post( `${ WC_API_PATH }/products`, product )
+			.then( ( response ) => {
+				product = response.data;
+			} );
 
 		await use( product );
 
-		await api.delete( `products/${ product.id }`, {
+		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
 			force: true,
 		} );
 	},

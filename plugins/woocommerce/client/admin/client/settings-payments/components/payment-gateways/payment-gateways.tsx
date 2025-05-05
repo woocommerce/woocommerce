@@ -7,6 +7,7 @@ import clsx from 'clsx';
 import {
 	PaymentProvider,
 	paymentSettingsStore,
+	woopaymentsOnboardingStore,
 	WC_ADMIN_NAMESPACE,
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
@@ -34,13 +35,16 @@ interface PaymentGatewaysProps {
 	setupPlugin: (
 		id: string,
 		slug: string,
-		onboardingUrl: string | null
+		onboardingUrl: string | null,
+		attachUrl: string | null
 	) => void;
 	acceptIncentive: ( id: string ) => void;
+	shouldHighlightIncentive: boolean;
 	updateOrdering: ( providers: PaymentProvider[] ) => void;
 	isFetching: boolean;
 	businessRegistrationCountry: string | null;
 	setBusinessRegistrationCountry: ( country: string ) => void;
+	setIsOnboardingModalOpen: ( isOpen: boolean ) => void;
 }
 
 /**
@@ -54,12 +58,17 @@ export const PaymentGateways = ( {
 	installingPlugin,
 	setupPlugin,
 	acceptIncentive,
+	shouldHighlightIncentive,
 	updateOrdering,
 	isFetching,
 	businessRegistrationCountry,
 	setBusinessRegistrationCountry,
+	setIsOnboardingModalOpen,
 }: PaymentGatewaysProps ) => {
-	const { invalidateResolution } = useDispatch( paymentSettingsStore );
+	const { invalidateResolution: invalidateMainStore } =
+		useDispatch( paymentSettingsStore );
+	const { invalidateResolution: invalidateWooPaymentsOnboardingStore } =
+		useDispatch( woopaymentsOnboardingStore );
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
 	const storeCountryCode = (
 		window.wcSettings?.admin?.preloadSettings?.general
@@ -137,9 +146,13 @@ export const PaymentGateways = ( {
 
 								// Update UI.
 								setBusinessRegistrationCountry( value );
-								invalidateResolution( 'getPaymentProviders', [
+								invalidateMainStore( 'getPaymentProviders', [
 									value,
 								] );
+								invalidateWooPaymentsOnboardingStore(
+									'getOnboardingData',
+									[]
+								);
 							} );
 						} }
 					/>
@@ -213,7 +226,9 @@ export const PaymentGateways = ( {
 					installingPlugin={ installingPlugin }
 					setupPlugin={ setupPlugin }
 					acceptIncentive={ acceptIncentive }
+					shouldHighlightIncentive={ shouldHighlightIncentive }
 					updateOrdering={ updateOrdering }
+					setIsOnboardingModalOpen={ setIsOnboardingModalOpen }
 				/>
 			) }
 		</div>

@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Update checkout utils to fill the phone number and to ignore skip the country field if no country data is specified

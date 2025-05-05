@@ -99,7 +99,7 @@ You may not need to create a block to get your extension working the way you wan
 
 In this case, you could remove the block folder from the example block, modify the Webpack config file so it no longer reads from that directory, and include the code you need in the entry JavaScript file.
 
-More information about how to use filters can be found in the [Filter Registry](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/packages/checkout/filter-registry/README.md#filter-registry-) and [Available Filters](https://developer.woocommerce.com/docs/category/cart-and-checkout-blocks/available-filters/) documents.
+More information about how to use filters can be found in the [Filter Registry](../../plugins/woocommerce/client/blocks/packages/checkout/filter-registry/README.md) and [Available Filters](https://developer.woocommerce.com/docs/category/cart-and-checkout-blocks/available-filters/) documents.
 
 ### Importing WooCommerce components into your extension
 
@@ -119,14 +119,14 @@ const MyComponent = () => {
 
 ### Importing WooCommerce (React) hooks
 
-Currently, none of our hooks are designed to be used externally, so trying to import hooks such as `useStoreCart` is not supported. Instead, getting the data from the [`wc/store/...`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/data-store/) data stores is preferred.
+Currently, none of our hooks are designed to be used externally, so trying to import hooks such as `useStoreCart` is not supported. Instead, getting the data from the [`wc/store/...`](../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/data-store/) data stores is preferred.
 
 ## Back-end extensibility
 
 ### Modifying information during the Checkout process
 
-Modifying the server-side part of the Cart and Checkout blocks is possible using PHP. Some actions and filters from the shortcode cart/checkout experience will work too, but not all of them. We have a working document ([Hook alternatives document](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/hooks/hook-alternatives.md)) that outlines which hooks are supported as well as alternatives.
+Modifying the server-side part of the Cart and Checkout blocks is possible using PHP. Some actions and filters from the shortcode cart/checkout experience will work too, but not all of them. We have a working document ([Hook alternatives document](../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/hook-alternatives.md)) that outlines which hooks are supported as well as alternatives.
 
 ### Extending Store API
 
-If you need to change how the Store API works, or extend the data in the responses, see [Extending the Store API](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/rest-api).
+If you need to change how the Store API works, or extend the data in the responses, see [Extending the Store API](../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api).

@@ -17,7 +17,7 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
-
+use Automattic\WooCommerce\Blocks\Shipping\PickupLocation;
 use Automattic\WooCommerce\Tests\Blocks\StoreApi\MockSessionHandler;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use WC_Gateway_BACS;
@@ -36,21 +36,19 @@ class Checkout extends MockeryTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
+
 		global $wp_rest_server;
 		$wp_rest_server = new \Spy_REST_Server();
 		do_action( 'rest_api_init', $wp_rest_server );
+
+		wp_set_current_user( 0 );
 
 		$coupon = new \WC_Coupon();
 		$coupon->set_code( self::TEST_COUPON_CODE );
 		$coupon->set_amount( 2 );
 		$coupon->save();
-
-		wp_set_current_user( 0 );
-		$customer = get_user_by( 'email', 'testaccount@test.com' );
-
-		if ( $customer ) {
-			wp_delete_user( $customer->ID );
-		}
 
 		$formatters = new Formatters();
 		$formatters->register( 'money', MoneyFormatter::class );
@@ -77,14 +75,10 @@ class Checkout extends MockeryTestCase {
 		register_rest_route( $route->get_namespace(), $route->get_path(), $route->get_args(), true );
 
 		$fixtures = new FixtureData();
-
-		// Add a flat rate to the default zone.
-		$flat_rate    = WC()->shipping()->get_shipping_methods()['flat_rate'];
-		$default_zone = \WC_Shipping_Zones::get_zone( 0 );
-		$default_zone->add_shipping_method( $flat_rate->id );
-		$default_zone->save();
-
 		$fixtures->payments_enable_bacs();
+		$fixtures->shipping_add_pickup_location();
+		$fixtures->shipping_add_flat_rate_instance();
+
 		$this->products = array(
 			$fixtures->get_simple_product(
 				array(
@@ -122,23 +116,36 @@ class Checkout extends MockeryTestCase {
 	 */
 	protected function tearDown(): void {
 		parent::tearDown();
-		unset( WC()->countries->locale );
-		$default_zone     = \WC_Shipping_Zones::get_zone( 0 );
-		$shipping_methods = $default_zone->get_shipping_methods();
-		foreach ( $shipping_methods as $method ) {
-			$default_zone->delete_shipping_method( $method->instance_id );
-		}
-		$default_zone->save();
+
 		remove_all_filters( 'woocommerce_get_country_locale' );
+		remove_all_filters( 'woocommerce_register_shop_order_post_statuses' );
+		remove_all_filters( 'wc_order_statuses' );
+		remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
+		remove_all_actions( 'woocommerce_store_api_checkout_order_processed' );
+		remove_all_actions( 'woocommerce_valid_order_statuses_for_payment' );
+
+		update_option( 'woocommerce_ship_to_countries', 'all' );
+		update_option( 'woocommerce_allowed_countries', 'all' );
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
+
+		$fixtures = new FixtureData();
+		$fixtures->shipping_remove_pickup_location();
+		$fixtures->shipping_remove_methods_from_default_zone();
 
 		$coupon_to_delete = new \WC_Coupon( self::TEST_COUPON_CODE );
 		$coupon_to_delete->delete( true );
 
+		$customer_to_delete = get_user_by( 'email', 'testaccount@test.com' );
+		if ( $customer_to_delete ) {
+			wp_delete_user( $customer_to_delete->ID );
+		}
+
+		unset( WC()->countries->locale );
 		WC()->cart->empty_cart();
 		WC()->session->destroy_session();
 
-		global $wp_rest_server;
-		$wp_rest_server = null;
+		$GLOBALS['wp_rest_server'] = null;
 	}
 
 	/**
@@ -187,7 +194,6 @@ class Checkout extends MockeryTestCase {
 	public function test_virtual_product_post_data() {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
-		WC()->cart->empty_cart();
 		WC()->cart->add_to_cart( $this->products[2]->get_id(), 1 );
 		$request->set_body_params(
 			array(
@@ -606,6 +612,13 @@ class Checkout extends MockeryTestCase {
 		);
 
 		unset( WC()->countries->locale );
+
+		// Create shipping rates.
+		$flat_rate             = WC()->shipping()->get_shipping_methods()['flat_rate'];
+		$default_zone          = \WC_Shipping_Zones::get_zone( 0 );
+		$flat_rate_instance_id = $default_zone->add_shipping_method( $flat_rate->id );
+		$default_zone->save();
+
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 
@@ -915,9 +928,6 @@ class Checkout extends MockeryTestCase {
 		WC()->session = new MockSessionHandler();
 		WC()->session->init();
 
-		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
-		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
-
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
@@ -980,9 +990,6 @@ class Checkout extends MockeryTestCase {
 		$old_session  = WC()->session;
 		WC()->session = new MockSessionHandler();
 		WC()->session->init();
-
-		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
-		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
@@ -1154,6 +1161,13 @@ class Checkout extends MockeryTestCase {
 		foreach ( $shipping_methods as $shipping_method ) {
 			$wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'is_enabled' => '0' ), array( 'instance_id' => absint( $shipping_method->instance_id ) ) );
 		}
+		$fixtures = new FixtureData();
+		$fixtures->shipping_remove_pickup_location();
+
+		// Create a simple product and add to cart.
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->save();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
@@ -1191,7 +1205,6 @@ class Checkout extends MockeryTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$status   = $response->get_status();
 		$data     = $response->get_data();
-
 		$this->assertEquals( 400, $status, print_r( $data, true ) );
 		$this->assertEquals( 'woocommerce_rest_invalid_shipping_option', $data['code'], print_r( $data, true ) );
 		$this->assertEquals( 'Sorry, this order requires a shipping option.', $data['message'], print_r( $data, true ) );
@@ -1363,5 +1376,361 @@ class Checkout extends MockeryTestCase {
 		$response = rest_get_server()->dispatch( $request );
 
 		$this->assertEquals( 400, $response->get_status() );
+	}
+
+	/**
+	 * @testDox Test that perform_custom_order_validation throws a RouteException with a custom error.
+	 */
+	public function test_perform_custom_order_validation() {
+		$order_controller = new \Automattic\WooCommerce\StoreApi\Utilities\OrderController();
+		$order            = new \WC_Order();
+
+		// Set up a test action to add a custom validation error.
+		add_action(
+			'woocommerce_checkout_validate_order_before_payment',
+			function ( $order, $errors ) {
+				$errors->add( 'custom_error', 'This is a custom validation error' );
+			},
+			10,
+			2
+		);
+
+		// Use reflection to make the protected method accessible.
+		$reflection = new \ReflectionClass( $order_controller );
+		$method     = $reflection->getMethod( 'perform_custom_order_validation' );
+		$method->setAccessible( true );
+
+		// Assert that the method throws a RouteException with our custom error.
+		$this->expectException( \Automattic\WooCommerce\StoreApi\Exceptions\RouteException::class );
+		$this->expectExceptionMessage( 'This is a custom validation error' );
+
+		$method->invoke( $order_controller, $order );
+	}
+
+	/**
+	 * Test that local pickup orders bypass shipping country validation.
+	 */
+	public function test_local_pickup_country_validation() {
+		// Set shipping to a country that's not enabled for shipping.
+		update_option( 'woocommerce_ship_to_countries', 'specific' );
+		update_option( 'woocommerce_specific_ship_to_countries', array( 'GB' ) );
+
+		// Set chosen shipping method to pickup location.
+		WC()->session->set( 'chosen_shipping_methods', array( 'pickup_location:0' ) );
+		WC()->cart->add_to_cart( $this->products[0]->get_id(), 1 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'US',
+					'email'                       => 'test@test.com',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'shipping_address' => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+	}
+
+	/**
+	 * Test that local pickup orders still validate billing country.
+	 */
+	public function test_local_pickup_invalid_billing_country() {
+		// Set allowed countries to just US.
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		// Set chosen shipping method.
+		WC()->session->set( 'chosen_shipping_methods', array( 'pickup_location:0' ) );
+		WC()->cart->add_to_cart( $this->products[0]->get_id(), 1 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'email'                       => 'test@test.com',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'shipping_address' => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_invalid_address_country', $response->get_data()['code'] );
+		$this->assertStringContainsString( 'Sorry, we do not allow orders from the provided country (FR)', $response->get_data()['message'] );
+	}
+
+	/**
+	 * Helper method to register custom order status.
+	 *
+	 * @param string $status_name             Custom status name to register.
+	 * @param bool   $add_to_payment_statuses Whether to add the status to valid statuses for payment.
+	 */
+	private function register_custom_order_status( $status_name, $add_to_payment_statuses = false ) {
+		add_filter(
+			'woocommerce_register_shop_order_post_statuses',
+			function ( $order_statuses ) use ( $status_name ) {
+				$order_statuses[ 'wc-' . $status_name ] = array(
+					'label'                     => 'Custom status for testing',
+					'public'                    => false,
+					'exclude_from_search'       => false,
+					'show_in_admin_all_list'    => true,
+					'show_in_admin_status_list' => true,
+				);
+				return $order_statuses;
+			}
+		);
+
+		add_filter(
+			'wc_order_statuses',
+			function ( $order_statuses ) use ( $status_name ) {
+				$order_statuses[ 'wc-' . $status_name ] = 'Custom status for testing';
+				return $order_statuses;
+			}
+		);
+
+		if ( $add_to_payment_statuses ) {
+			add_filter(
+				'woocommerce_valid_order_statuses_for_payment',
+				function ( $statuses ) use ( $status_name ) {
+					$statuses[] = $status_name;
+					return $statuses;
+				}
+			);
+		}
+	}
+
+	/**
+	 * Test that custom status is retained for free orders.
+	 */
+	public function test_custom_status_retained_for_free_order() {
+		$status_name = 'ready_for_pickup';
+		$this->register_custom_order_status( $status_name );
+
+		// Create a simple product and add to cart.
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '0' ); // Make the product free.
+		$product->save();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Verify that the cart total is 0 (free order).
+		$this->assertEquals( 0, WC()->cart->get_total( 'numeric' ), 'Cart total should be 0 for a free order' );
+
+		// Hook into the checkout process to set the custom status.
+		add_action(
+			'woocommerce_store_api_checkout_order_processed',
+			function ( \WC_Order $order ) use ( $status_name ) {
+				$order->set_status( $status_name );
+				$order->save();
+			}
+		);
+
+		// Create an order via checkout route.
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'email'                       => 'test@test.com',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'shipping_address' => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID, // Payment method might still be required, even if free.
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$order_id = $response->get_data()['order_id'];
+		$order    = wc_get_order( $order_id );
+
+		// Assert status remains custom.
+		$this->assertEquals( $status_name, $order->get_status(), 'Order status should remain custom for free orders.' );
+	}
+
+	/**
+	 * Test that custom status is retained for non-free orders when the custom
+	 * status is not in the valid statuses for payment list.
+	 */
+	public function test_custom_status_retained_for_non_free_order() {
+		$status_name = 'ready_for_pickup';
+		$this->register_custom_order_status( $status_name );
+
+		// Create a simple product with a non-zero price and add to cart.
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '10.00' ); // Make sure the product is not free.
+		$product->save();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Verify that the cart total is NOT 0 (non-free order).
+		$this->assertGreaterThan( 0, WC()->cart->get_total( 'numeric' ), 'Cart total should be greater than 0 for a non-free order' );
+
+		// Hook into the checkout process to set the custom status.
+		add_action(
+			'woocommerce_store_api_checkout_order_processed',
+			function ( \WC_Order $order ) use ( $status_name ) {
+				$order->set_status( $status_name );
+				$order->save();
+			}
+		);
+
+		// Create an order via checkout route.
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'email'                       => 'test@test.com',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'shipping_address' => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$order_id = $response->get_data()['order_id'];
+		$order    = wc_get_order( $order_id );
+
+		// Assert status remains custom (the key test here - verifying needs_payment() returns false despite non-zero total).
+		$this->assertEquals( $status_name, $order->get_status(), 'Order status should remain custom for non-free orders when the status is not valid for payment.' );
+	}
+
+	/**
+	 * Test that custom status goes through payment flow
+	 * when added to valid statuses for payment list.
+	 */
+	public function test_custom_status_with_payment_when_added_to_valid_statuses() {
+		$status_name = 'ready_for_pickup';
+		$this->register_custom_order_status( $status_name, true );
+
+		// Create a simple product with a non-zero price and add to cart.
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '10.00' ); // Make sure the product is not free.
+		$product->save();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Verify that the cart total is NOT 0 (non-free order).
+		$this->assertGreaterThan( 0, WC()->cart->get_total( 'numeric' ), 'Cart total should be greater than 0 for a non-free order' );
+
+		// Add a hook to check the needs_payment() result and set the status.
+		add_action(
+			'woocommerce_store_api_checkout_order_processed',
+			function ( \WC_Order $order ) use ( $status_name ) {
+				// Set our custom status.
+				$order->set_status( $status_name );
+				$order->save();
+			}
+		);
+
+		// Create an order via checkout route.
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'email'                       => 'test@test.com',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'shipping_address' => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$order_id = $response->get_data()['order_id'];
+		$order    = wc_get_order( $order_id );
+
+		// Order shouldn't stay in custom status, instead we let payment gateway set the correct status.
+		$this->assertEquals( 'on-hold', $order->get_status(), 'Order status should be controlled by the payment gateway, not remain custom.' );
 	}
 }

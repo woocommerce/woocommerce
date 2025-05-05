@@ -1,4 +1,0 @@
-Significance: patch
-Type: performance
-
-Query related products once per day when loading product details page

@@ -1,15 +1,15 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Layout;
+namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Layout;
 
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Dummy_Block_Renderer;
-use MailPoet\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Dummy_Block_Renderer;
+use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
 
 require_once __DIR__ . '/../Dummy_Block_Renderer.php';
 

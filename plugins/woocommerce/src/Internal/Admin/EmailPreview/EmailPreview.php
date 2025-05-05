@@ -7,7 +7,9 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\EmailPreview;
 
+use Automattic\WooCommerce\Internal\EmailEditor\WooContentProcessor;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Throwable;
 use WC_Email;
 use WC_Order;
 use WC_Product;
@@ -177,9 +179,12 @@ class EmailPreview {
 		$object           = null;
 
 		if ( in_array( $email_type, self::USER_OBJECT_EMAILS, true ) ) {
-			$object                  = new WP_User( 0 );
-			$this->email->user_email = 'user_preview@example.com';
-			$this->email->user_login = 'user_preview';
+			$object                        = new WP_User( 0 );
+			$this->email->user_email       = 'user_preview@example.com';
+			$this->email->user_login       = 'user_preview';
+			$this->email->reset_key        = 'reset_key';
+			$this->email->user_id          = 0;
+			$this->email->set_password_url = 'https://example.com/set-password';
 			$this->email->set_object( $object );
 		} else {
 			$object = $this->get_dummy_order();
@@ -204,6 +209,15 @@ class EmailPreview {
 		 * @since 9.6.0
 		 */
 		$this->email = apply_filters( 'woocommerce_prepare_email_for_preview', $this->email );
+	}
+
+	/**
+	 * Get the email object.
+	 *
+	 * @return WC_Email
+	 */
+	public function get_email() {
+		return $this->email;
 	}
 
 	/**
@@ -412,7 +426,7 @@ class EmailPreview {
 	/**
 	 * Get the placeholders for the email preview.
 	 *
-	 * @param WC_Order|WP_User $email_object The object to render email with.
+	 * @param mixed $email_object The object to render email with. Can be WC_Order, WP_User, etc.
 	 * @return array
 	 */
 	private function get_placeholders( $email_object ) {
@@ -427,18 +441,19 @@ class EmailPreview {
 		/**
 		 * Placeholders for email preview.
 		 *
-		 * @param WC_Order $placeholders Placeholders for email subject.
-		 * @param string   $email_type The email type to preview.
+		 * @param array  $placeholders Placeholders for email subject.
+		 * @param string $email_type   The email type to preview.
+		 * @param mixed  $email_object The object to render email with. @since 9.9.0
 		 *
 		 * @since 9.6.0
 		 */
-		return apply_filters( 'woocommerce_email_preview_placeholders', $placeholders, $this->email_type );
+		return apply_filters( 'woocommerce_email_preview_placeholders', $placeholders, $this->email_type, $email_object );
 	}
 
 	/**
 	 * Set up filters for email preview.
 	 */
-	private function set_up_filters() {
+	public function set_up_filters() {
 		// Always show shipping address in the preview email.
 		add_filter( 'woocommerce_order_needs_shipping_address', array( $this, 'enable_shipping_address' ) );
 		// Email templates fetch product from the database to show additional information, which are not
@@ -455,7 +470,7 @@ class EmailPreview {
 	/**
 	 * Clean up filters after email preview.
 	 */
-	private function clean_up_filters() {
+	public function clean_up_filters() {
 		remove_filter( 'woocommerce_order_needs_shipping_address', array( $this, 'enable_shipping_address' ) );
 		remove_filter( 'woocommerce_order_item_product', array( $this, 'get_dummy_product_when_not_set' ), 10 );
 		remove_filter( 'woocommerce_is_email_preview', array( $this, 'enable_preview_mode' ) );
@@ -499,5 +514,57 @@ class EmailPreview {
 	 */
 	public function get_placeholder_image() {
 		return '<img src="' . WC()->plugin_url() . '/assets/images/placeholder.png" width="48" height="48" alt="" />';
+	}
+
+	/**
+	 * Generate placeholder content for a specific email type, typically used in the email editor.
+	 *
+	 * Encapsulates the logic for setting the email type, generating raw content, applying styles,
+	 * ensuring links open in new tabs, and handling errors based on WP_DEBUG.
+	 *
+	 * @param string $email_type_class_name The class name of the WC_Email type (e.g., 'WC_Email_Customer_Processing_Order').
+	 * @return string The generated and styled HTML content.
+	 * @throws \RuntimeException If content generation fails. If rendering fails.
+	 */
+	public function generate_placeholder_content( string $email_type_class_name ): string {
+		// Note: set_email_type can throw InvalidArgumentException.
+		$this->set_email_type( $email_type_class_name );
+
+		$woo_content_processor = wc_get_container()->get( WooContentProcessor::class );
+
+		$generate_content_closure = function () use ( $woo_content_processor ) {
+			// Note: If 'woocommerce_email_styles' filter was intentional and `prepare_css` isn't
+			// the intended callback, adjust accordingly. This assumes `prepare_css` applies styles
+			// needed for the Woo content block.
+			add_filter( 'woocommerce_email_styles', array( $woo_content_processor, 'prepare_css' ), 10, 2 );
+			$content = $woo_content_processor->get_woo_content( $this->get_email() );
+			$content = $this->get_email()->style_inline( $content );
+			$content = $this->ensure_links_open_in_new_tab( $content );
+			return $content;
+		};
+
+		$this->set_up_filters();
+
+		$message = '';
+		try {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				$message = $generate_content_closure();
+			} else {
+				// Use output buffering to prevent partial renders with PHP notices or warnings when WP_DEBUG is off.
+				ob_start();
+				try {
+					$message = $generate_content_closure();
+				} catch ( Throwable $e ) {
+					ob_end_clean();
+					// Let the caller handle the exception.
+					throw new \RuntimeException( esc_html__( 'There was an error rendering the email editor placeholder content.', 'woocommerce' ), 0, $e );
+				}
+				ob_end_clean();
+			}
+		} finally {
+			$this->clean_up_filters();
+		}
+
+		return $message;
 	}
 }

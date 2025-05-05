@@ -34,16 +34,16 @@ const CategorySection = ( {
 			{ categoriesToRender.map(
 				( [ category, items ]: [ string, PersonalizationTag[] ] ) => (
 					<div key={ category }>
-						<div className="mailpoet-personalization-tags-modal-category">
+						<div className="woocommerce-personalization-tags-modal-category">
 							{ category }
 						</div>
-						<div className="mailpoet-personalization-tags-modal-category-group">
+						<div className="woocommerce-personalization-tags-modal-category-group">
 							{ items.map( ( item ) => (
 								<div
-									className="mailpoet-personalization-tags-modal-category-group-item"
+									className="woocommerce-personalization-tags-modal-category-group-item"
 									key={ item.token }
 								>
-									<div className="mailpoet-personalization-tags-modal-item-text">
+									<div className="woocommerce-personalization-tags-modal-item-text">
 										<strong>{ item.name }</strong>
 										{ item.valueToInsert }
 									</div>
@@ -65,10 +65,10 @@ const CategorySection = ( {
 												}
 											} }
 										>
-											{ __( 'Insert', 'mailpoet' ) }
+											{ __( 'Insert', 'woocommerce' ) }
 										</Button>
 										{ category ===
-											__( 'Link', 'mailpoet' ) &&
+											__( 'Link', 'woocommerce' ) &&
 											canInsertLink && (
 												<>
 													<Button
@@ -82,7 +82,7 @@ const CategorySection = ( {
 													>
 														{ __(
 															'Insert as link',
-															'mailpoet'
+															'woocommerce'
 														) }
 													</Button>
 												</>

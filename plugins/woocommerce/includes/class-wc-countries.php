@@ -1213,7 +1213,7 @@ class WC_Countries {
 					),
 					'IE' => array(
 						'postcode' => array(
-							'required' => false,
+							'required' => true,
 							'label'    => __( 'Eircode', 'woocommerce' ),
 						),
 						'state'    => array(

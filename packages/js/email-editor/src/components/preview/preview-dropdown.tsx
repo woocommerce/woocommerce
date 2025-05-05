@@ -13,6 +13,7 @@ import { PostPreviewButton } from '@wordpress/editor';
 import { storeName } from '../../store';
 import { recordEvent } from '../../events';
 import { SendPreviewEmail } from './send-preview-email';
+import { useEditorMode } from '../../hooks';
 
 export function PreviewDropdown() {
 	const previewDeviceType = useSelect(
@@ -27,6 +28,8 @@ export function PreviewDropdown() {
 		void changePreviewDeviceType( newDeviceType );
 	};
 
+	const [ editorMode ] = useEditorMode();
+
 	const deviceIcons = {
 		mobile,
 		desktop,
@@ -35,8 +38,8 @@ export function PreviewDropdown() {
 	return (
 		<>
 			<DropdownMenu
-				className="mailpoet-preview-dropdown"
-				label={ __( 'Preview', 'mailpoet' ) }
+				className="woocommerce-preview-dropdown"
+				label={ __( 'Preview', 'woocommerce' ) }
 				icon={ deviceIcons[ previewDeviceType.toLowerCase() ] }
 				onToggle={ ( isOpened ) =>
 					recordEvent( 'header_preview_dropdown_clicked', {
@@ -59,7 +62,7 @@ export function PreviewDropdown() {
 									previewDeviceType === 'Desktop' && check
 								}
 							>
-								{ __( 'Desktop', 'mailpoet' ) }
+								{ __( 'Desktop', 'woocommerce' ) }
 							</MenuItem>
 							<MenuItem
 								className="block-editor-post-preview__button-resize"
@@ -71,50 +74,57 @@ export function PreviewDropdown() {
 								} }
 								icon={ previewDeviceType === 'Mobile' && check }
 							>
-								{ __( 'Mobile', 'mailpoet' ) }
+								{ __( 'Mobile', 'woocommerce' ) }
 							</MenuItem>
 						</MenuGroup>
-						<MenuGroup>
-							<MenuItem
-								className="block-editor-post-preview__button-resize"
-								onClick={ () => {
-									void togglePreviewModal( true );
-									recordEvent(
-										'header_preview_dropdown_send_test_email_selected'
-									);
-									onClose();
-								} }
-							>
-								{ __( 'Send a test email', 'mailpoet' ) }
-							</MenuItem>
-						</MenuGroup>
-						<MenuGroup>
-							<div className="edit-post-header-preview__grouping-external">
-								<PostPreviewButton
-									role="menuitem"
-									forceIsAutosaveable={ true }
-									aria-label={ __(
-										'Preview in new tab',
-										'mailpoet'
-									) }
-									textContent={
-										<>
-											{ __(
+						{ editorMode === 'email' && (
+							<>
+								<MenuGroup>
+									<MenuItem
+										className="block-editor-post-preview__button-resize"
+										onClick={ () => {
+											void togglePreviewModal( true );
+											recordEvent(
+												'header_preview_dropdown_send_test_email_selected'
+											);
+											onClose();
+										} }
+									>
+										{ __(
+											'Send a test email',
+											'woocommerce'
+										) }
+									</MenuItem>
+								</MenuGroup>
+								<MenuGroup>
+									<div className="edit-post-header-preview__grouping-external">
+										<PostPreviewButton
+											role="menuitem"
+											forceIsAutosaveable={ true }
+											aria-label={ __(
 												'Preview in new tab',
-												'mailpoet'
+												'woocommerce'
 											) }
-											<Icon icon={ external } />
-										</>
-									}
-									onPreview={ () => {
-										recordEvent(
-											'header_preview_dropdown_preview_in_new_tab_selected'
-										);
-										onClose();
-									} }
-								/>
-							</div>
-						</MenuGroup>
+											textContent={
+												<>
+													{ __(
+														'Preview in new tab',
+														'woocommerce'
+													) }
+													<Icon icon={ external } />
+												</>
+											}
+											onPreview={ () => {
+												recordEvent(
+													'header_preview_dropdown_preview_in_new_tab_selected'
+												);
+												onClose();
+											} }
+										/>
+									</div>
+								</MenuGroup>{ ' ' }
+							</>
+						) }
 					</>
 				) }
 			</DropdownMenu>

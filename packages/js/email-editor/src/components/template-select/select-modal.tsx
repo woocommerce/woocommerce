@@ -133,8 +133,8 @@ export function SelectTemplateModal( {
 		<Modal
 			title={
 				templateSelectMode === 'new'
-					? __( 'Start with an email preset', 'mailpoet' )
-					: __( 'Select a template', 'mailpoet' )
+					? __( 'Start with an email preset', 'woocommerce' )
+					: __( 'Select a template', 'woocommerce' )
 			}
 			onRequestClose={ () => {
 				recordEvent( 'template_select_modal_closed', {
@@ -166,7 +166,7 @@ export function SelectTemplateModal( {
 						} }
 						isBusy={ ! hasTemplates }
 					>
-						{ __( 'Start from scratch', 'mailpoet' ) }
+						{ __( 'Start from scratch', 'woocommerce' ) }
 					</Button>
 				</FlexItem>
 			</Flex>

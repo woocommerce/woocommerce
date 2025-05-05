@@ -14,7 +14,7 @@ export function ScreenLayout(): JSX.Element {
 	recordEventOnce( 'styles_sidebar_screen_layout_opened' );
 	return (
 		<>
-			<ScreenHeader title={ __( 'Layout', 'mailpoet' ) } />
+			<ScreenHeader title={ __( 'Layout', 'woocommerce' ) } />
 			<DimensionsPanel />
 		</>
 	);

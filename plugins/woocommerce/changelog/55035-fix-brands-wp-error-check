@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Adding a check for WP_Error and early exit.

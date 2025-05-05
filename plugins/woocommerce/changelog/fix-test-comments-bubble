@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix failing ReviewsListTableTest::test_comments_bubble unit tests

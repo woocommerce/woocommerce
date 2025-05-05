@@ -1,15 +1,15 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare( strict_types = 1 );
-namespace MailPoet\EmailEditor\Integrations\Core\Renderer\Blocks;
+namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Block_Renderer;
-use MailPoet\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Block_Renderer;
+use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
 use WP_Style_Engine;
 
 /**

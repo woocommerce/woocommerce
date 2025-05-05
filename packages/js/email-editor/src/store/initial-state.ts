@@ -21,13 +21,14 @@ export function getInitialState(): State {
 		editorSettings: getEditorSettings(),
 		theme: getEditorTheme(),
 		styles: {
-			globalStylesPostId: window.MailPoetEmailEditor.user_theme_post_id,
+			globalStylesPostId:
+				window.WooCommerceEmailEditor.user_theme_post_id,
 		},
 		autosaveInterval: 60,
 		urls: getUrls(),
 		preview: {
 			deviceType: 'Desktop',
-			toEmail: window.MailPoetEmailEditor.current_wp_user_email,
+			toEmail: window.WooCommerceEmailEditor.current_wp_user_email,
 			isModalOpened: false,
 			isSendingPreviewEmail: false,
 			sendingPreviewStatus: null,

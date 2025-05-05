@@ -8,6 +8,8 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1690,7 +1692,14 @@ class WC_Order extends WC_Abstract_Order {
 			return false;
 		}
 
-		$hide          = apply_filters( 'woocommerce_order_hide_shipping_address', array( 'local_pickup' ), $this );
+		/**
+		 * Filter to hide the shipping address for an order.
+		 *
+		 * @param array    $hide The shipping methods to hide the shipping address for.
+		 * @param WC_Order $this The order object.
+		 * @since 2.7.0
+		 */
+		$hide          = apply_filters( 'woocommerce_order_hide_shipping_address', LocalPickupUtils::get_local_pickup_method_ids(), $this );
 		$needs_address = false;
 
 		foreach ( $this->get_shipping_methods() as $shipping_method ) {
@@ -2180,6 +2189,31 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Get the total shipping tax refunded.
+	 *
+	 * @since  9.9.0
+	 * @return float
+	 */
+	public function get_total_shipping_tax_refunded() {
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'total_shipping_tax_refunded' . $this->get_id();
+		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
+
+		if ( false !== $cached_data ) {
+			return $cached_data;
+		}
+
+		$total_shipping_tax_refunded = 0;
+
+		if ( method_exists( $this->data_store, 'get_total_shipping_tax_refunded' ) ) {
+			$total_shipping_tax_refunded = $this->data_store->get_total_shipping_tax_refunded( $this );
+		}
+
+		wp_cache_set( $cache_key, $total_shipping_tax_refunded, $this->cache_group );
+
+		return $total_shipping_tax_refunded;
+	}
+
+	/**
 	 * Get the total shipping refunded.
 	 *
 	 * @since  2.4
@@ -2267,18 +2301,18 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param  int    $item_id   ID of the item we're checking.
 	 * @param  string $item_type Type of the item we're checking, if not a line_item.
-	 * @return int
+	 * @return float
 	 */
 	public function get_total_refunded_for_item( $item_id, $item_type = 'line_item' ) {
 		$total = 0;
 		foreach ( $this->get_refunds() as $refund ) {
 			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
 				if ( absint( $refunded_item->get_meta( '_refunded_item_id' ) ) === $item_id ) {
-					$total += $refunded_item->get_total();
+					$total += (float) $refunded_item->get_total();
 				}
 			}
 		}
-		return $total * -1;
+		return NumberUtil::round( $total * -1, wc_get_price_decimals() );
 	}
 
 	/**

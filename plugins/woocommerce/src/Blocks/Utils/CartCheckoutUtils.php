@@ -6,24 +6,77 @@ namespace Automattic\WooCommerce\Blocks\Utils;
  */
 class CartCheckoutUtils {
 	/**
-	 * Returns true if:
-	 * - The cart page is being viewed.
-	 * - The page contains a cart block, cart shortcode or classic shortcode block with the cart attribute.
+	 * Caches if we're on the cart page.
 	 *
-	 * @return bool
+	 * @var bool
 	 */
-	public static function is_cart_page() {
-		global $post;
+	private static $is_cart_page = null;
 
-		$page_id      = wc_get_page_id( 'cart' );
-		$is_cart_page = $page_id && is_page( $page_id );
+	/**
+	 * Caches if we're on the checkout page.
+	 *
+	 * @var bool
+	 */
+	private static $is_checkout_page = null;
 
-		if ( $is_cart_page ) {
+	/**
+	 * Returns true if the current page is a specific page type (cart or checkout).
+	 *
+	 * This is determined by looking at the global $post object and comparing it to the post ID defined in settings,
+	 * or checking the page contents for a block or shortcode.
+	 *
+	 * This function cannot be used accurately before the `pre_get_posts` action has been run.
+	 *
+	 * @param string $page_type The page type to check for.
+	 * @return bool|null
+	 */
+	private static function is_page_type( string $page_type ): ?bool {
+		if ( ! did_action( 'pre_get_posts' ) ) {
+			return null;
+		}
+
+		$page_id = wc_get_page_id( $page_type );
+
+		if ( $page_id && is_page( $page_id ) ) {
 			return true;
 		}
 
-		// Check page contents for block/shortcode.
-		return is_a( $post, 'WP_Post' ) && ( wc_post_content_has_shortcode( 'woocommerce_cart' ) || self::has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'cart', $post->post_content ) );
+		// If the is_page check returned false, check the page contents for a cart block or shortcode.
+		global $post;
+
+		if ( null === $post ) {
+			return null;
+		}
+
+		if ( $post instanceof \WP_Post ) {
+			return wc_post_content_has_shortcode( 'cart' === $page_type ? 'woocommerce_cart' : 'woocommerce_checkout' ) || self::has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', $page_type, $post->post_content );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Returns true on the cart page.
+	 *
+	 * @return bool
+	 */
+	public static function is_cart_page(): bool {
+		if ( null === self::$is_cart_page ) {
+			self::$is_cart_page = self::is_page_type( 'cart' );
+		}
+		return true === self::$is_cart_page;
+	}
+
+	/**
+	 * Returns true on the checkout page.
+	 *
+	 * @return bool
+	 */
+	public static function is_checkout_page(): bool {
+		if ( null === self::$is_checkout_page ) {
+			self::$is_checkout_page = self::is_page_type( 'checkout' );
+		}
+		return true === self::$is_checkout_page;
 	}
 
 	/**
@@ -47,32 +100,12 @@ class CartCheckoutUtils {
 	}
 
 	/**
-	 * Returns true if:
-	 * - The checkout page is being viewed.
-	 * - The page contains a checkout block, checkout shortcode or classic shortcode block with the checkout attribute.
-	 *
-	 * @return bool
-	 */
-	public static function is_checkout_page() {
-		global $post;
-
-		$page_id          = wc_get_page_id( 'checkout' );
-		$is_checkout_page = $page_id && is_page( $page_id );
-
-		if ( $is_checkout_page ) {
-			return true;
-		}
-
-		// Check page contents for block/shortcode.
-		return is_a( $post, 'WP_Post' ) && ( wc_post_content_has_shortcode( 'woocommerce_checkout' ) || self::has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'checkout', $post->post_content ) );
-	}
-
-	/**
 	 * Check if the post content contains a block with a specific attribute value.
 	 *
 	 * @param string $block_id The block ID to check for.
 	 * @param string $attribute The attribute to check.
 	 * @param string $value The value to check for.
+	 * @param string $post_content The post content to check.
 	 * @return boolean
 	 */
 	public static function has_block_variation( $block_id, $attribute, $value, $post_content ) {
@@ -84,10 +117,17 @@ class CartCheckoutUtils {
 			$blocks = (array) parse_blocks( $post_content );
 
 			foreach ( $blocks as $block ) {
+				$block_name = $block['blockName'] ?? '';
+
+				if ( $block_name !== $block_id ) {
+					continue;
+				}
+
 				if ( isset( $block['attrs'][ $attribute ] ) && $value === $block['attrs'][ $attribute ] ) {
 					return true;
 				}
-				// Cart is default so it will be empty.
+
+				// `Cart` is default for `woocommerce/classic-shortcode` so it will be empty in the block attributes.
 				if ( 'woocommerce/classic-shortcode' === $block_id && 'shortcode' === $attribute && 'cart' === $value && ! isset( $block['attrs']['shortcode'] ) ) {
 					return true;
 				}
@@ -103,7 +143,7 @@ class CartCheckoutUtils {
 	 * @return bool true if the WC cart page is using the Cart block.
 	 */
 	public static function is_cart_block_default() {
-		if ( wc_current_theme_is_fse_theme() ) {
+		if ( wp_is_block_theme() ) {
 			// Ignore the pages and check the templates.
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'cart' ), 'wp_template' );
 			foreach ( $templates_from_db as $template ) {
@@ -122,7 +162,7 @@ class CartCheckoutUtils {
 	 * @return bool true if the WC checkout page is using the Checkout block.
 	 */
 	public static function is_checkout_block_default() {
-		if ( wc_current_theme_is_fse_theme() ) {
+		if ( wp_is_block_theme() ) {
 			// Ignore the pages and check the templates.
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'checkout' ), 'wp_template' );
 			foreach ( $templates_from_db as $template ) {
@@ -267,7 +307,7 @@ class CartCheckoutUtils {
 
 		$block = str_replace( 'woocommerce/', '', $block );
 
-		if ( wc_current_theme_is_fse_theme() ) {
+		if ( wp_is_block_theme() ) {
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'page-' . $block ) );
 			foreach ( $templates_from_db as $template ) {
 				if ( ! has_block( 'woocommerce/page-content-wrapper', $template->content ) ) {
@@ -323,12 +363,12 @@ class CartCheckoutUtils {
 	/**
 	 * Removes accents from an array of values, sorts by the values, then returns the original array values sorted.
 	 *
-	 * @param array $array Array of values to sort.
+	 * @param array $sort_array Array of values to sort.
 	 * @return array Sorted array.
 	 */
-	protected static function deep_sort_with_accents( $array ) {
-		if ( ! is_array( $array ) || empty( $array ) ) {
-			return $array;
+	protected static function deep_sort_with_accents( $sort_array ) {
+		if ( ! is_array( $sort_array ) || empty( $sort_array ) ) {
+			return $sort_array;
 		}
 
 		$array_without_accents = array_map(
@@ -337,11 +377,11 @@ class CartCheckoutUtils {
 					? self::deep_sort_with_accents( $value )
 					: remove_accents( wc_strtolower( html_entity_decode( $value ) ) );
 			},
-			$array
+			$sort_array
 		);
 
 		asort( $array_without_accents );
-		return array_replace( $array_without_accents, $array );
+		return array_replace( $array_without_accents, $sort_array );
 	}
 
 	/**
@@ -412,5 +452,14 @@ class CartCheckoutUtils {
 				self::update_blocks_with_new_attrs( $block['innerBlocks'], $cart_or_checkout, $updated_attrs );
 			}
 		}
+	}
+
+	/**
+	 * Check if the cart page is defined.
+	 *
+	 * @return bool True if the cart page is defined, false otherwise.
+	 */
+	public static function has_cart_page() {
+		return wc_get_page_permalink( 'cart', -1 ) !== -1;
 	}
 }

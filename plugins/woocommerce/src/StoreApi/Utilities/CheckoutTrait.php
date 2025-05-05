@@ -46,8 +46,6 @@ trait CheckoutTrait {
 	 * @param PaymentResult    $payment_result Payment result object.
 	 */
 	private function process_without_payment( \WP_REST_Request $request, PaymentResult $payment_result ) {
-		// Transition the order to pending, and then completed. This ensures transactional emails fire for pending_to_complete events.
-		$this->order->update_status( 'pending' );
 		$this->order->payment_complete();
 
 		// Mark the payment as successful.
@@ -65,9 +63,6 @@ trait CheckoutTrait {
 	 */
 	private function process_payment( \WP_REST_Request $request, PaymentResult $payment_result ) {
 		try {
-			// Transition the order to pending before making payment.
-			$this->order->update_status( 'pending' );
-
 			// Prepare the payment context object to pass through payment hooks.
 			$context = new PaymentContext();
 			$context->set_payment_method( $this->get_request_payment_method_id( $request ) );
@@ -147,9 +142,27 @@ trait CheckoutTrait {
 	 */
 	private function update_order_from_request( \WP_REST_Request $request ) {
 		$this->order->set_customer_note( wc_sanitize_textarea( $request['customer_note'] ) ?? '' );
-		$this->order->set_payment_method( $this->get_request_payment_method_id( $request ) );
-		$this->order->set_payment_method_title( $this->get_request_payment_method_title( $request ) );
+		$payment_method = $this->get_request_payment_method( $request );
+		if ( null !== $payment_method ) {
+			WC()->session->set( 'chosen_payment_method', $payment_method->id );
+			$this->order->set_payment_method( $payment_method->id );
+			$this->order->set_payment_method_title( $payment_method->title );
+		}
+		wc_log_order_step(
+			'[Store API #5::update_order_from_request] Set customer note and payment method',
+			array(
+				'order_id' => $this->order->get_id(),
+				'payment'  => $this->order->get_payment_method_title(),
+			)
+		);
 		$this->persist_additional_fields_for_order( $request );
+		wc_log_order_step(
+			'[Store API #5::update_order_from_request] Persisted additional fields',
+			array(
+				'order_id' => $this->order->get_id(),
+				'payment'  => $this->order->get_payment_method_title(),
+			)
+		);
 
 		wc_do_deprecated_action(
 			'__experimental_woocommerce_blocks_checkout_update_order_from_request',
@@ -210,9 +223,13 @@ trait CheckoutTrait {
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
 			$document_object = $this->get_document_object_from_rest_request( $request );
 			$document_object->set_context( 'order' );
-			$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( 'order', $document_object );
+			$additional_fields_order   = $this->additional_fields_controller->get_contextual_fields_for_location( 'order', $document_object );
+			$additional_fields_contact = $this->additional_fields_controller->get_contextual_fields_for_location( 'contact', $document_object );
+			$additional_fields         = array_merge( $additional_fields_order, $additional_fields_contact );
 		} else {
-			$additional_fields = $this->additional_fields_controller->get_fields_for_location( 'order' );
+			$additional_fields_order   = $this->additional_fields_controller->get_fields_for_location( 'order' );
+			$additional_fields_contact = $this->additional_fields_controller->get_fields_for_location( 'contact' );
+			$additional_fields         = array_merge( $additional_fields_order, $additional_fields_contact );
 		}
 
 		$field_values = (array) $request['additional_fields'] ?? [];
@@ -223,14 +240,18 @@ trait CheckoutTrait {
 			}
 		}
 
+		// The above logic sets visible fields, but not hidden fields. Unset the hidden fields here.
+		$other_posted_field_values = array_diff_key( $field_values, $additional_fields );
+
+		foreach ( $other_posted_field_values as $key => $value ) {
+			if ( $this->additional_fields_controller->is_field( $key ) ) {
+				$this->additional_fields_controller->persist_field_for_order( $key, '', $this->order, 'other', false );
+			}
+		}
+
 		// We need to sync the customer additional fields with the order otherwise they will be overwritten on next page load.
 		if ( 0 !== $this->order->get_customer_id() && get_current_user_id() === $this->order->get_customer_id() ) {
-			$customer = new WC_Customer( $this->order->get_customer_id() );
-			$this->additional_fields_controller->sync_customer_additional_fields_with_order(
-				$this->order,
-				$customer
-			);
-			$customer->save();
+			$this->additional_fields_controller->sync_customer_additional_fields_with_order( $this->order, wc()->customer );
 		}
 	}
 

@@ -23,7 +23,10 @@ const logInFromMyAccount = async (
 ) => {
 	await page.locator( '#username' ).fill( username );
 	await page.locator( '#password' ).fill( password );
-	await page.locator( 'button[name="login"]' ).click();
+	const loginButton = page.locator( 'button[name="login"]' );
+	await loginButton.click();
+
+	await expect( loginButton ).toBeHidden();
 
 	if ( assertSuccess ) {
 		await expect(

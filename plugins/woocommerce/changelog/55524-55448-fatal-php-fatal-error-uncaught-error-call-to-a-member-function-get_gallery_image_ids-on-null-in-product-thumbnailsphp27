@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix - Add defensive check to prevent fatal errors when accessing product gallery with invalid product context.

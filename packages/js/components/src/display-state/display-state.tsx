@@ -12,11 +12,11 @@ export type DisplayStateProps = {
 	children: React.ReactNode;
 } & React.HTMLAttributes< HTMLDivElement >;
 
-export const DisplayState: React.FC< DisplayStateProps > = ( {
+export const DisplayState = ( {
 	state = 'visible',
 	children,
 	...props
-} ) => {
+}: DisplayStateProps ) => {
 	if ( state === 'visible' ) {
 		return <div { ...props }>{ children }</div>;
 	}

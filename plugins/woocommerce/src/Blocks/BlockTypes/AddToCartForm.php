@@ -10,6 +10,9 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  * CatalogSorting class.
  */
 class AddToCartForm extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -60,6 +63,7 @@ class AddToCartForm extends AbstractBlock {
 		parent::enqueue_data( $attributes );
 		$this->asset_data_registry->add( 'isStepperLayoutFeatureEnabled', Features::is_enabled( 'add-to-cart-with-options-stepper-layout' ) );
 		$this->asset_data_registry->add( 'isBlockifiedAddToCart', Features::is_enabled( 'blockified-add-to-cart' ) );
+		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
 	}
 
 	/**
@@ -74,10 +78,10 @@ class AddToCartForm extends AbstractBlock {
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
 		// Replacement string to add button BEFORE the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '"type="button" data-wc-on--click="actions.removeQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>$1';
+		$minus_button = '<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '"type="button" data-wp-on--click="actions.removeQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>$1';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wc-on--click="actions.addQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
+		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.addQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
 		$new_html    = preg_replace( $pattern, $minus_button, $product_html );
 		$new_html    = preg_replace( $pattern, $plus_button, $new_html );
 		return $new_html;
@@ -136,7 +140,13 @@ class AddToCartForm extends AbstractBlock {
 		}
 
 		$is_external_product_with_url = $product instanceof \WC_Product_External && $product->get_product_url();
-		$is_stepper_style             = 'stepper' === $attributes['quantitySelectorStyle'] && ! $product->is_sold_individually() && Features::is_enabled( 'add-to-cart-with-options-stepper-layout' );
+		$managing_stock               = $product->managing_stock();
+		$stock_quantity               = $product->get_stock_quantity();
+
+		/**
+		 * The stepper buttons don't show when the product is sold individually or stock quantity is less or equal to 1 because the quantity input field is hidden.
+		 */
+		$is_stepper_style = 'stepper' === $attributes['quantitySelectorStyle'] && ! $product->is_sold_individually() && ( ( $managing_stock && $stock_quantity > 1 ) || ! $managing_stock ) && Features::is_enabled( 'add-to-cart-with-options-stepper-layout' );
 
 		if ( $is_descendent_of_single_product_block ) {
 			add_filter( 'woocommerce_add_to_cart_form_action', array( $this, 'add_to_cart_form_action' ), 10 );
@@ -162,6 +172,7 @@ class AddToCartForm extends AbstractBlock {
 
 			return '';
 		}
+
 		$product_name = $product->get_name();
 		$product_html = $is_stepper_style ? $this->add_steppers( $product_html, $product_name ) : $product_html;
 
@@ -193,12 +204,7 @@ class AddToCartForm extends AbstractBlock {
 		$form = sprintf(
 			'<div %1$s %2$s>%3$s</div>',
 			$wrapper_attributes,
-			$is_stepper_style ? 'data-wc-interactive=\'' . wp_json_encode(
-				array(
-					'namespace' => 'woocommerce/add-to-cart-form',
-				),
-				JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-			) . '\'' : '',
+			$is_stepper_style ? 'data-wp-interactive="woocommerce/add-to-cart-form"' : '',
 			$product_html
 		);
 

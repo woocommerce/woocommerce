@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Allow WC_Email subclasses to access transient values

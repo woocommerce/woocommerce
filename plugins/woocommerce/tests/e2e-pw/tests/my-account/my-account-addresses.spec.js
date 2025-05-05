@@ -1,8 +1,9 @@
 /**
  * Internal dependencies
  */
-const { test, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+import { expect, test } from '../../fixtures/fixtures';
+import { WC_API_PATH } from '../../utils/api-client';
+
 const randomNum = new Date().getTime().toString();
 const customer = {
 	username: `customer${ randomNum }`,
@@ -11,27 +12,17 @@ const customer = {
 };
 
 test.describe( 'Customer can manage addresses in My Account > Addresses page', () => {
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.beforeAll( async ( { restApi } ) => {
 		// create customer
-		await api
-			.post( 'customers', customer )
+		await restApi
+			.post( `${ WC_API_PATH }/customers`, customer )
 			.then( ( response ) => ( customer.id = response.data.id ) );
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
+	test.afterAll( async ( { restApi } ) => {
+		await restApi.delete( `${ WC_API_PATH }/customers/${ customer.id }`, {
+			force: true,
 		} );
-		await api.delete( `customers/${ customer.id }`, { force: true } );
 	} );
 
 	test( 'can add billing address from my account', async ( { page } ) => {

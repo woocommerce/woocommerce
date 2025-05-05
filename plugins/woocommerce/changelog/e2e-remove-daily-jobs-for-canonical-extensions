@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-dev: remove some CI e2e jobs from daily runs

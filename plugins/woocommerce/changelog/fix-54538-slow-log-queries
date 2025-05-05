@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Improve the performance of the log viewer when using the database storage option and a high number of log entries are present

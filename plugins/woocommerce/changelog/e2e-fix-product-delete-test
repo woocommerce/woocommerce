@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-E2E tests: fixed product delete checks failing when no other products exist

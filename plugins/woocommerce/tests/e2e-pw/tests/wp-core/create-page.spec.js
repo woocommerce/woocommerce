@@ -12,9 +12,8 @@ import {
  * Internal dependencies
  */
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-
-const { test: baseTest, tags } = require( '../../fixtures/fixtures' );
-const { fillPageTitle } = require( '../../utils/editor' );
+import { tags, test as baseTest } from '../../fixtures/fixtures';
+import { fillPageTitle } from '../../utils/editor';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,

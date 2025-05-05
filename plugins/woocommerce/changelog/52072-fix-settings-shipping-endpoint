@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Update the settings configuration for shipping so that the shipping settings REST API endpoint does not return duplicate data.

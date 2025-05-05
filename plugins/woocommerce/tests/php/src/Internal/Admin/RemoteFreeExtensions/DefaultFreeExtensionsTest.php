@@ -47,6 +47,14 @@ class DefaultFreeExtensionsTest extends WC_Unit_Test_Case {
 					DefaultFreeExtensions::get_plugin( 'woocommerce-services:tax' ),
 				),
 			),
+			array(
+				'key'     => 'obw/core-profiler',
+				'title'   => 'Core Profiler Bundle',
+				'plugins' => array(
+					DefaultFreeExtensions::get_plugin( 'woocommerce-payments' ),
+					DefaultFreeExtensions::get_plugin( 'mailpoet' ),
+				),
+			),
 		);
 	}
 
@@ -146,5 +154,89 @@ class DefaultFreeExtensionsTest extends WC_Unit_Test_Case {
 			},
 			$results['bundles'][0]['plugins']
 		);
+	}
+
+	/**
+	 * Tests that core profiler bundle is removed when feature flag is enabled and user is in rollout group.
+	 */
+	public function test_core_profiler_bundle_is_removed_when_feature_enabled_and_in_rollout() {
+		// Enable the feature flag.
+		$filter = function ( $config ) {
+			$config['disable-core-profiler-fallback'] = true;
+			return $config;
+		};
+		add_filter( 'woocommerce_admin_get_feature_config', $filter );
+
+		// Set user in rollout group (1-60).
+		update_option( 'woocommerce_remote_variant_assignment', 30 );
+
+		$bundles     = DefaultFreeExtensions::get_all();
+		$bundle_keys = array_map(
+			function ( $bundle ) {
+				return $bundle->key;
+			},
+			$bundles
+		);
+
+		$this->assertNotContains( 'obw/core-profiler', $bundle_keys );
+
+		// Cleanup.
+		remove_filter( 'woocommerce_admin_get_feature_config', $filter );
+	}
+
+	/**
+	 * Tests that core profiler bundle remains when feature flag is enabled but user is not in rollout group.
+	 */
+	public function test_core_profiler_bundle_remains_when_feature_enabled_but_not_in_rollout() {
+		// Enable the feature flag.
+		$filter = function ( $config ) {
+			$config['disable-core-profiler-fallback'] = true;
+			return $config;
+		};
+		add_filter( 'woocommerce_admin_get_feature_config', $filter );
+
+		// Set user outside rollout group (61-120).
+		update_option( 'woocommerce_remote_variant_assignment', 90 );
+
+		$bundles     = DefaultFreeExtensions::get_all();
+		$bundle_keys = array_map(
+			function ( $bundle ) {
+				return $bundle->key;
+			},
+			$bundles
+		);
+
+		$this->assertContains( 'obw/core-profiler', $bundle_keys );
+
+		// Cleanup.
+		remove_filter( 'woocommerce_admin_get_feature_config', $filter );
+	}
+
+	/**
+	 * Tests that core profiler bundle remains when feature flag is disabled.
+	 */
+	public function test_core_profiler_bundle_remains_when_feature_disabled() {
+		// Disable the feature flag.
+		$filter = function ( $config ) {
+			$config['disable-core-profiler-fallback'] = false;
+			return $config;
+		};
+		add_filter( 'woocommerce_admin_get_feature_config', $filter );
+
+		// Set user in rollout group (shouldn't matter).
+		update_option( 'woocommerce_remote_variant_assignment', 30 );
+
+		$bundles     = DefaultFreeExtensions::get_all();
+		$bundle_keys = array_map(
+			function ( $bundle ) {
+				return $bundle->key;
+			},
+			$bundles
+		);
+
+		$this->assertContains( 'obw/core-profiler', $bundle_keys );
+
+		// Cleanup.
+		remove_filter( 'woocommerce_admin_get_feature_config', $filter );
 	}
 }

@@ -40,13 +40,16 @@ export function CampaignName() {
 
 	const titleRef = useRef( null );
 	return (
-		<div ref={ titleRef } className="mailpoet-email-editor-campaign-name">
+		<div
+			ref={ titleRef }
+			className="woocommerce-email-editor-campaign-name"
+		>
 			<Dropdown
 				popoverProps={ {
 					placement: 'bottom',
 					anchor: titleRef.current,
 				} }
-				contentClassName="mailpoet-email-editor-campaign-name-dropdown"
+				contentClassName="woocommerce-email-editor-campaign-name-dropdown"
 				renderToggle={ ( { isOpen, onToggle } ) => (
 					<>
 						<Button
@@ -57,17 +60,17 @@ export function CampaignName() {
 									{ isOpen }
 								);
 							} }
-							className="mailpoet-email-campaign-name-link"
+							className="woocommerce-email-campaign-name-link"
 						>
 							<Text size="body" as="h1">
 								<VisuallyHidden as="span">
-									{ __( 'Editing email:', 'mailpoet' ) }
+									{ __( 'Editing email:', 'woocommerce' ) }
 								</VisuallyHidden>
 								{ emailTitle }
 							</Text>
 						</Button>
 						<Button
-							className="mailpoet-email-campaign-name__toggle"
+							className="woocommerce-email-campaign-name__toggle"
 							icon={ chevronDown }
 							aria-expanded={ isOpen }
 							aria-haspopup="true"
@@ -78,16 +81,19 @@ export function CampaignName() {
 									{ isOpen }
 								);
 							} }
-							label={ __( 'Change campaign name', 'mailpoet' ) }
+							label={ __(
+								'Change campaign name',
+								'woocommerce'
+							) }
 						>
-							{ showIconLabels && __( 'Rename', 'mailpoet' ) }
+							{ showIconLabels && __( 'Rename', 'woocommerce' ) }
 						</Button>
 					</>
 				) }
 				renderContent={ () => (
-					<div className="mailpoet-email-editor-email-title-edit">
+					<div className="woocommerce-email-editor-email-title-edit">
 						<TextControl
-							label={ __( 'Campaign name', 'mailpoet' ) }
+							label={ __( 'Campaign name', 'woocommerce' ) }
 							value={ emailTitle }
 							onChange={ ( newTitle ) => {
 								setTitle( newTitle );
@@ -98,7 +104,7 @@ export function CampaignName() {
 							name="campaign_name"
 							help={ __(
 								`Name your email campaign to indicate its purpose. This would only be visible to you and not shown to your subscribers.`,
-								'mailpoet'
+								'woocommerce'
 							) }
 						/>
 					</div>

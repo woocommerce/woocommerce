@@ -1,16 +1,16 @@
 <?php
 /**
- * This file is part of the MailPoet Email Editor package.
+ * This file is part of the WooCommerce Email Editor package.
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
 
-namespace MailPoet\EmailEditor\Engine;
+namespace Automattic\WooCommerce\EmailEditor\Engine;
 
-use MailPoet\EmailEditor\Engine\PersonalizationTags\HTML_Tag_Processor;
-use MailPoet\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\HTML_Tag_Processor;
+use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 
 /**
  * Class for replacing personalization tags with their values in the email content.
@@ -67,6 +67,19 @@ class Personalizer {
 	 */
 	public function set_context( array $context ) {
 		$this->context = $context;
+	}
+
+	/**
+	 * Get the current context.
+	 *
+	 * The `context` is an associative array containing recipient-specific or
+	 * campaign-specific data. This data is used to resolve personalization tags
+	 * and provide input for tag callbacks during email content processing.
+	 *
+	 * @return array<string, mixed> The current context.
+	 */
+	public function get_context(): array {
+		return $this->context;
 	}
 
 	/**

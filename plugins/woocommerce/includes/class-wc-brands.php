@@ -38,7 +38,7 @@ class WC_Brands {
 		add_action( 'woocommerce_register_taxonomy', array( __CLASS__, 'init_taxonomy' ) );
 		add_action( 'widgets_init', array( $this, 'init_widgets' ) );
 
-		if ( ! wc_current_theme_is_fse_theme() ) {
+		if ( ! wp_is_block_theme() ) {
 			add_filter( 'template_include', array( $this, 'template_loader' ) );
 		}
 

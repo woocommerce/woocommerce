@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fixes performance impact on failed API request for A/B test assignments.

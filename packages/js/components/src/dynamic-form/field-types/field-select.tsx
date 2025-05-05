@@ -22,10 +22,7 @@ const transformOptions = ( options: Record< string, string > ) =>
 		value: { id: key },
 	} ) );
 
-export const SelectField: React.FC< ControlProps > = ( {
-	field,
-	...props
-} ) => {
+export const SelectField = ( { field, ...props }: ControlProps ) => {
 	const { description, label, options = {} } = field;
 
 	const transformedOptions: SelectControlOption[] = useMemo(

@@ -12,10 +12,7 @@ export type TaskListMenuProps = {
 	hideTaskListText?: string;
 };
 
-export const TaskListMenu: React.FC< TaskListMenuProps > = ( {
-	id,
-	hideTaskListText,
-} ) => {
+export const TaskListMenu = ( { id, hideTaskListText }: TaskListMenuProps ) => {
 	const { hideTaskList } = useDispatch( onboardingStore );
 
 	return (

@@ -9,7 +9,7 @@ import { addFilter } from '@wordpress/hooks';
 function disableGroupVariations() {
 	addFilter(
 		'blocks.registerBlockType',
-		'mailpoet-email-editor/disable-group-variations',
+		'woocommerce-email-editor/disable-group-variations',
 		( settings, name ) => {
 			if ( name === 'core/group' ) {
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-return

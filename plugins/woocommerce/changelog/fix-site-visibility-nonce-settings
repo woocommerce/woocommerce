@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fix unreleased change - make sure site visibility saving only checks for one nonce at a time.
-
-

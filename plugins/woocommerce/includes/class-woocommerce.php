@@ -29,6 +29,7 @@ use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
+use Automattic\WooCommerce\Caches\OrderCountCacheService;
 
 /**
  * Main WooCommerce Class.
@@ -42,7 +43,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '9.8.0';
+	public $version = '9.9.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -330,6 +331,7 @@ final class WooCommerce {
 		$container->get( ComingSoonAdminBarBadge::class );
 		$container->get( ComingSoonCacheInvalidator::class );
 		$container->get( ComingSoonRequestHandler::class );
+		$container->get( OrderCountCacheService::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
@@ -349,7 +351,11 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderStatusRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments\WooPaymentsRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreviewRestController::class )->register();
+
+		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
 	}
 
 	/**
@@ -606,6 +612,7 @@ final class WooCommerce {
 		/**
 		 * Abstract classes.
 		 */
+		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-address-provider.php';
 		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php';
 		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-object-query.php';
 		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-token.php';

@@ -1,5 +1,9 @@
-const { test: baseTest, expect, tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * Internal dependencies
+ */
+import { WC_API_PATH } from '../../utils/api-client';
+import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 const couponData = {
 	fixedCart: {
@@ -33,10 +37,12 @@ const couponData = {
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	coupon: async ( { api }, use ) => {
+	coupon: async ( { restApi }, use ) => {
 		const coupon = {};
 		await use( coupon );
-		await api.delete( `coupons/${ coupon.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/coupons/${ coupon.id }`, {
+			force: true,
+		} );
 	},
 } );
 

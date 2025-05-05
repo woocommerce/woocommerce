@@ -31,9 +31,14 @@ import {
 	isIncentiveDismissedInContext,
 	isSwitchIncentive,
 	isWooPayments,
+	getWooPaymentsFromProviders,
+	providersContainWooPaymentsNeedsSetup,
 	getWooPaymentsTestDriveAccountLink,
+	isIncentiveDismissedEarlierThanTimestamp,
+	isActionIncentive,
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
+import WooPaymentsModal from '~/settings-payments/onboarding/providers/woopayments';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 /**
@@ -50,7 +55,8 @@ export const SettingsPaymentsMain = () => {
 		PaymentProvider[] | null
 	>( null );
 	const { installAndActivatePlugins } = useDispatch( pluginsStore );
-	const { updateProviderOrdering } = useDispatch( paymentSettingsStore );
+	const { updateProviderOrdering, attachPaymentExtensionSuggestion } =
+		useDispatch( paymentSettingsStore );
 	const [ errorMessage, setErrorMessage ] = useState< string | null >( null );
 	const [
 		postSandboxAccountSetupModalVisible,
@@ -61,6 +67,9 @@ export const SettingsPaymentsMain = () => {
 		window.wcSettings?.admin?.woocommerce_payments_nox_profile
 			?.business_country_code || null
 	);
+
+	const [ isOnboardingModalOpen, setIsOnboardingModalOpen ] =
+		useState( false );
 
 	const assetUrl = getAdminSetting( 'wcAdminAssetUrl' );
 
@@ -113,7 +122,7 @@ export const SettingsPaymentsMain = () => {
 		return select( pluginsStore ).getInstalledPlugins();
 	}, [] );
 
-	// Make UI refresh when plugin is installed.
+	// Used to invalidate the API data for the Payments Settings page.
 	const { invalidateResolutionForStoreSelector } =
 		useDispatch( paymentSettingsStore );
 
@@ -193,6 +202,7 @@ export const SettingsPaymentsMain = () => {
 	// Determine what type of incentive surface to display.
 	let showModalIncentive = false;
 	let showBannerIncentive = false;
+	let shouldHighlightIncentive = false;
 	if ( incentiveProvider && incentive ) {
 		if ( isSwitchIncentive( incentive ) ) {
 			if (
@@ -208,15 +218,35 @@ export const SettingsPaymentsMain = () => {
 					'wc_settings_payments__banner'
 				)
 			) {
-				showBannerIncentive = true;
+				const referenceTimestamp = new Date();
+				referenceTimestamp.setDate( referenceTimestamp.getDate() - 30 );
+				// If the merchant dismissed the switcher incentive modal more than 30 days ago,
+				// show the banner instead of just highlighting the incentive.
+				// @see its server brother in plugins/woocommerce/src/Internal/Admin/Settings/PaymentsController::store_has_providers_with_incentive()
+				// for the admin menu red dot notice logic.
+				if (
+					isIncentiveDismissedEarlierThanTimestamp(
+						incentive,
+						'wc_settings_payments__modal',
+						referenceTimestamp.getTime()
+					)
+				) {
+					showBannerIncentive = true;
+				} else {
+					shouldHighlightIncentive = true;
+				}
 			}
-		} else if (
-			! isIncentiveDismissedInContext(
-				incentive,
-				'wc_settings_payments__banner'
-			)
-		) {
-			showBannerIncentive = true;
+		} else if ( isActionIncentive( incentive ) ) {
+			if (
+				! isIncentiveDismissedInContext(
+					incentive,
+					'wc_settings_payments__banner'
+				)
+			) {
+				showBannerIncentive = true;
+			} else {
+				shouldHighlightIncentive = true;
+			}
 		}
 	}
 
@@ -267,7 +297,12 @@ export const SettingsPaymentsMain = () => {
 	}, [ suggestions, providers, isFetching ] );
 
 	const setupPlugin = useCallback(
-		( id: string, slug: string, onboardingUrl: string | null ) => {
+		(
+			id: string,
+			slug: string,
+			onboardingUrl: string | null,
+			attachUrl: string | null
+		) => {
 			if ( installingPlugin ) {
 				return;
 			}
@@ -284,6 +319,10 @@ export const SettingsPaymentsMain = () => {
 			} );
 			installAndActivatePlugins( [ slug ] )
 				.then( async ( response ) => {
+					if ( attachUrl ) {
+						attachPaymentExtensionSuggestion( attachUrl );
+					}
+
 					createNoticesFromResponse( response );
 					invalidateResolutionForStoreSelector(
 						'getPaymentProviders'
@@ -312,25 +351,39 @@ export const SettingsPaymentsMain = () => {
 						provider_id: id,
 					} );
 
-					// If the installed and/or activated extension has recommended payment methods,
-					// redirect to the payment methods page.
+					/**
+					 * If the onboarding type is 'native_in_context', we need to open the WooPayments onboarding modal.
+					 * Otherwise, we redirect to the onboarding URL or the payment methods page.
+					 */
 					if (
-						(
-							updatedProvider?.onboarding
-								?.recommended_payment_methods ?? []
-						).length > 0
+						updatedProvider?.onboarding?.type ===
+						'native_in_context'
 					) {
-						const history = getHistory();
-						history.push( getNewPath( {}, '/payment-methods' ) );
+						setIsOnboardingModalOpen( true );
+						setInstallingPlugin( null );
+					} else {
+						// If the installed and/or activated extension has recommended payment methods,
+						// redirect to the payment methods page.
+						if (
+							(
+								updatedProvider?.onboarding
+									?.recommended_payment_methods ?? []
+							).length > 0
+						) {
+							const history = getHistory();
+							history.push(
+								getNewPath( {}, '/payment-methods' )
+							);
+
+							setInstallingPlugin( null );
+							return;
+						}
 
 						setInstallingPlugin( null );
-						return;
-					}
 
-					setInstallingPlugin( null );
-
-					if ( onboardingUrl ) {
-						window.location.href = onboardingUrl;
+						if ( onboardingUrl ) {
+							window.location.href = onboardingUrl;
+						}
 					}
 				} )
 				.catch( ( response: { errors: Record< string, string > } ) => {
@@ -440,10 +493,12 @@ export const SettingsPaymentsMain = () => {
 					installingPlugin={ installingPlugin }
 					setupPlugin={ setupPlugin }
 					acceptIncentive={ acceptIncentive }
+					shouldHighlightIncentive={ shouldHighlightIncentive }
 					updateOrdering={ handleOrderingUpdate }
 					isFetching={ isFetching }
 					businessRegistrationCountry={ storeCountry }
 					setBusinessRegistrationCountry={ setStoreCountry }
+					setIsOnboardingModalOpen={ setIsOnboardingModalOpen }
 				/>
 				{
 					// If no suggestions are available, only show a link to the WooCommerce.com payment marketplace page.
@@ -464,6 +519,17 @@ export const SettingsPaymentsMain = () => {
 					/>
 				) }
 			</div>
+			{ ( providersContainWooPaymentsNeedsSetup( providers ) ||
+				providersContainWooPaymentsInTestMode( providers ) ) && (
+				<WooPaymentsModal
+					isOpen={ isOnboardingModalOpen }
+					setIsOpen={ setIsOnboardingModalOpen }
+					providerData={
+						getWooPaymentsFromProviders( providers ) ||
+						( {} as PaymentProvider )
+					}
+				/>
+			) }
 			<WooPaymentsPostSandboxAccountSetupModal
 				isOpen={
 					postSandboxAccountSetupModalVisible &&

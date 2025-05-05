@@ -8,6 +8,7 @@ import { disableWelcomeModal } from '@woocommerce/e2e-utils-playwright';
  */
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { expect, test as baseTest } from '../../fixtures/fixtures';
+import { WC_API_PATH } from '../../utils/api-client';
 
 // need to figure out whether tests are being run on a mac
 const macOS = process.platform === 'darwin';
@@ -35,21 +36,25 @@ const clickOnCommandPaletteOption = async ( { page, optionName } ) => {
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	product: async ( { api }, use ) => {
+	product: async ( { restApi }, use ) => {
 		let product = {
 			id: 0,
 			name: `Product ${ Date.now() }`,
 			type: 'simple',
 		};
 
-		await api.post( 'products', product ).then( ( response ) => {
-			product = response.data;
-		} );
+		await restApi
+			.post( `${ WC_API_PATH }/products`, product )
+			.then( ( response ) => {
+				product = response.data;
+			} );
 
 		await use( product );
 
 		// Cleanup
-		await api.delete( `products/${ product.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+			force: true,
+		} );
 	},
 	page: async ( { page }, use ) => {
 		await page.goto( 'wp-admin/post-new.php' );

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix ensure the loading skeleton of the Add to Cart with Opt not exceeds the container.

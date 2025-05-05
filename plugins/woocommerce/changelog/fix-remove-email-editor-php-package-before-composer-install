@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Remove email editor php package before composer install

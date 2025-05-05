@@ -11,6 +11,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -52,7 +53,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		$current_order_coupons      = array_values( $order->get_coupons() );
 		$current_order_coupon_codes = array_map(
 			function ( $coupon ) {
-				return $coupon->get_code();
+				return wc_strtolower( $coupon->get_code() );
 			},
 			$current_order_coupons
 		);
@@ -71,7 +72,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			$coupon      = new WC_Coupon( $coupon_code );
 
 			// Skip check if the coupon is already applied to the order, as this could wrongly throw an error for single-use coupons.
-			if ( ! in_array( $coupon_code, $current_order_coupon_codes, true ) ) {
+			if ( ! in_array( wc_strtolower( $coupon_code ), $current_order_coupon_codes, true ) ) {
 				$check_result = $discounts->is_coupon_valid( $coupon );
 				if ( is_wp_error( $check_result ) ) {
 					throw new WC_REST_Exception( 'woocommerce_rest_' . $check_result->get_error_code(), $check_result->get_error_message(), 400 );
@@ -118,6 +119,12 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 			if ( ! is_null( $value ) ) {
 				switch ( $key ) {
+					case 'created_via':
+						// Created via is only writable on order creation.
+						if ( ! $creating ) {
+							unset( $request[ $key ] );
+						}
+						break;
 					case 'coupon_lines':
 					case 'status':
 						// Change should be done later so transitions have new data.
@@ -269,7 +276,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			}
 
 			if ( $creating ) {
-				$object->set_created_via( 'rest-api' );
+				$object->set_created_via( ! empty( $request['created_via'] ) ? sanitize_text_field( wp_unslash( $request['created_via'] ) ) : 'rest-api' );
 				$object->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 				$object->save();
 				$object->calculate_totals();
@@ -333,6 +340,19 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			}
 		}
 
+		// If created_via filter is provided, add it to query args.
+		if ( ! empty( $request['created_via'] ) ) {
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+				$args['created_via'] = $request['created_via'];
+			} else {
+				$args['meta_query'][] = array(
+					'key'     => '_created_via',
+					'value'   => $request['created_via'],
+					'compare' => 'IN',
+				);
+			}
+		}
+
 		// Put the statuses back for further processing (next/prev links, etc).
 		$request['status'] = $statuses;
 
@@ -346,6 +366,8 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	 */
 	public function get_item_schema() {
 		$schema = parent::get_item_schema();
+
+		$schema['properties']['created_via']['readonly'] = false;
 
 		$schema['properties']['coupon_lines']['items']['properties']['discount']['readonly'] = true;
 
@@ -418,6 +440,16 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 				'enum' => array_merge( array( 'any', OrderStatus::TRASH ), $this->get_order_statuses() ),
 			),
 			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['created_via'] = array(
+			'description'       => __( 'Limit result set to orders created via specific sources (e.g. checkout, admin).', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'string',
+			),
+			'validate_callback' => 'rest_validate_request_arg',
+			'sanitize_callback' => 'wp_parse_list',
 		);
 
 		return $params;

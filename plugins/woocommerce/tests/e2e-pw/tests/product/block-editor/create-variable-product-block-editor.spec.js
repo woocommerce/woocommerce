@@ -1,19 +1,14 @@
-/* eslint-disable playwright/no-conditional-in-test */
-const { test } = require( '../../../fixtures/block-editor-fixtures' );
-const { expect } = require( '@playwright/test' );
-
-const { clickOnTab } = require( '../../../utils/simple-products' );
-const {
-	disableVariableProductBlockTour,
-} = require( '../../../utils/product-block-editor' );
-
-const { variableProducts: utils } = require( '../../../utils' );
-const attributes = require( './fixtures/attributes' );
-const tabs = require( './data/tabs' );
-const {
-	waitForGlobalAttributesLoaded,
-} = require( './helpers/wait-for-global-attributes-loaded' );
-const { tags } = require( '../../../fixtures/fixtures' );
+/**
+ * Internal dependencies
+ */
+import { test } from '../../../fixtures/block-editor-fixtures';
+import { clickOnTab } from '../../../utils/simple-products';
+import { disableVariableProductBlockTour } from '../../../utils/product-block-editor';
+import { variableProducts as utils } from '../../../utils';
+import attributes from './fixtures/attributes';
+import tabs from './data/tabs';
+import { waitForGlobalAttributesLoaded } from './helpers/wait-for-global-attributes-loaded';
+import { expect, tags } from '../../../fixtures/fixtures';
 
 const {
 	createVariableProduct,

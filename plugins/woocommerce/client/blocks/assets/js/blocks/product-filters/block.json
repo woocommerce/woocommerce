@@ -1,0 +1,53 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/product-filters",
+	"title": "Product Filters",
+	"description": "Let shoppers filter products displayed on the page.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"supports": {
+		"align": true,
+		"color": {
+			"background": true,
+			"text": true,
+			"heading": true,
+			"enableContrastChecker": false,
+			"button": true
+		},
+		"multiple": true,
+		"inserter": true,
+		"interactivity": true,
+		"typography": {
+			"fontSize": true
+		},
+		"layout": {
+			"default": {
+				"type": "flex",
+				"orientation": "vertical",
+				"flexWrap": "nowrap",
+				"justifyContent": "stretch"
+			},
+			"allowEditing": false
+		},
+		"spacing": {
+			"blockGap": true
+		}
+	},
+	"textdomain": "woocommerce",
+	"usesContext": [ "postId", "query", "queryId" ],
+	"attributes": {
+		"isPreview": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"example": {
+		"attributes": {
+			"isPreview": true
+		}
+	},
+	"viewScriptModule": "woocommerce/product-filters",
+	"style": "file:../woocommerce/product-filters-style.css",
+	"editorStyle": "file:../woocommerce/product-filters-editor.css"
+}

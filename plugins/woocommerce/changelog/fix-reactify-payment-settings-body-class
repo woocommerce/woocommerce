@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Apply reactify-payments-settings class to the page body when the feature is active.

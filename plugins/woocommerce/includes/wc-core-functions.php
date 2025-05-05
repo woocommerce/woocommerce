@@ -33,13 +33,13 @@ require WC_ABSPATH . 'includes/wc-attribute-functions.php';
 require WC_ABSPATH . 'includes/wc-rest-functions.php';
 require WC_ABSPATH . 'includes/wc-widget-functions.php';
 require WC_ABSPATH . 'includes/wc-webhook-functions.php';
+require WC_ABSPATH . 'includes/wc-order-step-logger-functions.php';
 
 /**
  * Filters on data used in admin and frontend.
  */
 add_filter( 'woocommerce_coupon_code', 'html_entity_decode' );
 add_filter( 'woocommerce_coupon_code', 'wc_sanitize_coupon_code' );
-add_filter( 'woocommerce_coupon_code', 'wc_strtolower' );
 add_filter( 'woocommerce_stock_amount', 'intval' ); // Stock amounts are integers by default.
 add_filter( 'woocommerce_shipping_rate_label', 'sanitize_text_field' ); // Shipping rate label.
 add_filter( 'woocommerce_attribute_label', 'wp_kses_post', 100 );
@@ -1123,30 +1123,6 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = 
 }
 
 /**
- * Get the URL to the WooCommerce Legacy REST API.
- *
- * Note that as of WooCommerce 9.0 the WooCommerce Legacy REST API has been moved to a dedicated extension,
- * and the implementation of its root endpoint in WooCommerce core is now just a stub that will always return an error.
- * See the setup_legacy_api_stub method in includes/class-woocommerce.php and:
- * https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/
- *
- * @deprecated 9.0.0 The Legacy REST API has been removed from WooCommerce core.
- *
- * @since 2.1
- * @param string $path an endpoint to include in the URL.
- * @return string the URL.
- */
-function get_woocommerce_api_url( $path ) {
-	$url = get_home_url( null, 'wc-api/v3/', is_ssl() ? 'https' : 'http' );
-
-	if ( ! empty( $path ) && is_string( $path ) ) {
-		$url .= ltrim( $path, '/' );
-	}
-
-	return $url;
-}
-
-/**
  * Recursively get page children.
  *
  * @param  int $page_id Page ID.
@@ -1660,6 +1636,20 @@ function wc_back_link( $label, $url ) {
 }
 
 /**
+ * Outputs a header with "back" link so admin screens can easily jump back a page.
+ *
+ * @param string $title Title of the current page.
+ * @param string $label Label of the page to return to.
+ * @param string $url   URL of the page to return to.
+ */
+function wc_back_header( $title, $label, $url ) {
+	echo '<h2 class="wc-admin-header">';
+	echo '<small><a href="' . esc_url( $url ) . '" aria-label="' . esc_attr( $label ) . '"><span class="dashicons dashicons-arrow-left-alt2"></span></a></small>';
+	echo esc_html( $title );
+	echo '</h2>';
+}
+
+/**
  * Display a WooCommerce help tip.
  *
  * @since  2.5.0
@@ -2074,7 +2064,7 @@ function wc_remove_number_precision( $value ) {
  */
 function wc_add_number_precision_deep( $value, $round = true ) {
 	if ( ! is_array( $value ) ) {
-		return wc_add_number_precision( $value, $round );
+		return wc_add_number_precision( (float) $value, $round );
 	}
 
 	foreach ( $value as $key => $sub_value ) {
@@ -2626,8 +2616,7 @@ function wc_get_server_database_version() {
 		);
 	}
 
-	// phpcs:ignore WordPress.DB.RestrictedFunctions
-	$server_info = mysqli_get_server_info( $wpdb->dbh );
+	$server_info = $wpdb->get_var( 'SELECT VERSION()' );
 
 	return array(
 		'string' => $server_info,
@@ -2723,13 +2712,13 @@ function _wc_delete_transients( $transients ) {
 		}
 
 		// Limit the number of items in a single query to avoid exceeding database query parameter limits.
-		if ( count( $transients) > 199 ) {
+		if ( count( $transients ) > 199 ) {
 			// Process in smaller chunks to reduce memory usage.
 			$chunks  = array_chunk( $transients, 100 );
 			$success = true;
 
 			foreach ( $chunks as $chunk ) {
-				$result = wc_delete_transients( $chunk );
+				$result = _wc_delete_transients( $chunk );
 				if ( ! $result ) {
 					$success = false;
 				}
@@ -2754,6 +2743,11 @@ function _wc_delete_transients( $transients ) {
 				);
 			}
 
+			if ( empty( $options_to_clear ) ) {
+				// If there are no options to clear, return true immediately.
+				return true;
+			}
+
 			// Use a single query for better performance.
 			$wpdb->query(
 				$wpdb->prepare(
@@ -2764,7 +2758,7 @@ function _wc_delete_transients( $transients ) {
 
 			// Lets clear our options data from the cache.
 			// We can batch delete if available, introduced in WP 6.0.0.
-			if ( ! wp_installing() && ! empty( $options_to_clear ) ) {
+			if ( ! wp_installing() ) {
 				if ( function_exists( 'wp_cache_delete_multiple' ) ) {
 					wp_cache_delete_multiple( $options_to_clear, 'options' );
 				} else {

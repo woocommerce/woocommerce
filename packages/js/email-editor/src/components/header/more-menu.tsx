@@ -48,7 +48,7 @@ export function MoreMenu(): JSX.Element {
 					className: 'edit-site-more-menu__content',
 				} }
 				icon={ moreVertical }
-				label={ __( 'More', 'mailpoet' ) }
+				label={ __( 'More', 'woocommerce' ) }
 				onToggle={ ( isOpened ) =>
 					recordEvent( 'header_more_menu_dropdown_toggle', {
 						isOpened,
@@ -57,22 +57,24 @@ export function MoreMenu(): JSX.Element {
 			>
 				{ ( { onClose } ) => (
 					<>
-						<MenuGroup label={ _x( 'View', 'noun', 'mailpoet' ) }>
+						<MenuGroup
+							label={ _x( 'View', 'noun', 'woocommerce' ) }
+						>
 							<PreferenceToggleMenuItem
 								scope="core"
 								name="fixedToolbar"
-								label={ __( 'Top toolbar', 'mailpoet' ) }
+								label={ __( 'Top toolbar', 'woocommerce' ) }
 								info={ __(
 									'Access all block and document tools in a single place',
-									'mailpoet'
+									'woocommerce'
 								) }
 								messageActivated={ __(
 									'Top toolbar activated',
-									'mailpoet'
+									'woocommerce'
 								) }
 								messageDeactivated={ __(
 									'Top toolbar deactivated',
-									'mailpoet'
+									'woocommerce'
 								) }
 								onToggle={ () =>
 									recordEvent(
@@ -83,18 +85,18 @@ export function MoreMenu(): JSX.Element {
 							<PreferenceToggleMenuItem
 								scope="core"
 								name="focusMode"
-								label={ __( 'Spotlight mode', 'mailpoet' ) }
+								label={ __( 'Spotlight mode', 'woocommerce' ) }
 								info={ __(
 									'Focus at one block at a time',
-									'mailpoet'
+									'woocommerce'
 								) }
 								messageActivated={ __(
 									'Spotlight mode activated',
-									'mailpoet'
+									'woocommerce'
 								) }
 								messageDeactivated={ __(
 									'Spotlight mode deactivated',
-									'mailpoet'
+									'woocommerce'
 								) }
 								onToggle={ () =>
 									recordEvent(
@@ -105,18 +107,18 @@ export function MoreMenu(): JSX.Element {
 							<PreferenceToggleMenuItem
 								scope={ storeName }
 								name="fullscreenMode"
-								label={ __( 'Fullscreen mode', 'mailpoet' ) }
+								label={ __( 'Fullscreen mode', 'woocommerce' ) }
 								info={ __(
 									'Work without distraction',
-									'mailpoet'
+									'woocommerce'
 								) }
 								messageActivated={ __(
 									'Fullscreen mode activated',
-									'mailpoet'
+									'woocommerce'
 								) }
 								messageDeactivated={ __(
 									'Fullscreen mode deactivated',
-									'mailpoet'
+									'woocommerce'
 								) }
 								shortcut={ displayShortcut.secondary( 'f' ) }
 								onToggle={ () =>
@@ -137,7 +139,10 @@ export function MoreMenu(): JSX.Element {
 										);
 									} }
 								>
-									{ __( 'Restore from trash', 'mailpoet' ) }
+									{ __(
+										'Restore from trash',
+										'woocommerce'
+									) }
 								</MenuItem>
 							) : (
 								<MenuItem
@@ -150,7 +155,7 @@ export function MoreMenu(): JSX.Element {
 									} }
 									isDestructive
 								>
-									{ __( 'Move to trash', 'mailpoet' ) }
+									{ __( 'Move to trash', 'woocommerce' ) }
 								</MenuItem>
 							) }
 						</MenuGroup>

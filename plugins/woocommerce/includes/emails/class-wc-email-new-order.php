@@ -70,7 +70,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		 */
 		public function get_default_subject() {
 			return $this->email_improvements_enabled
-				? __( '[{site_title}]: Cha-ching! You’ve got a new order: #{order_number}', 'woocommerce' )
+				? __( '[{site_title}]: Cha-ching! You\'ve got a new order: #{order_number}', 'woocommerce' )
 				: __( '[{site_title}]: New order #{order_number}', 'woocommerce' );
 		}
 
@@ -166,6 +166,25 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 				)
 			);
 		}
+
+
+		/**
+		 * Get block editor email template content.
+		 *
+		 * @return string
+		 */
+		public function get_block_editor_email_template_content() {
+			return wc_get_template_html(
+				$this->template_block_content,
+				array(
+					'order'         => $this->object,
+					'sent_to_admin' => true,
+					'plain_text'    => false,
+					'email'         => $this,
+				)
+			);
+		}
+
 
 		/**
 		 * Default content to show below main email content.

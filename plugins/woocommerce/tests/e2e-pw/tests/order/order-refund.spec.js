@@ -1,7 +1,9 @@
-const { test, expect } = require( '@playwright/test' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+/**
+ * Internal dependencies
+ */
+import { tags, expect, test } from '../../fixtures/fixtures';
+import { WC_API_PATH } from '../../utils/api-client';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 test.use( { storageState: ADMIN_STATE_PATH } );
 
@@ -11,16 +13,10 @@ test.describe.serial(
 	() => {
 		let productId, orderId, currencySymbol;
 
-		test.beforeAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
+		test.beforeAll( async ( { restApi } ) => {
 			// create a simple product
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: 'Simple Refund Product',
 					type: 'simple',
 					regular_price: '9.99',
@@ -29,8 +25,8 @@ test.describe.serial(
 					productId = response.data.id;
 				} );
 			// create order
-			await api
-				.post( 'orders', {
+			await restApi
+				.post( `${ WC_API_PATH }/orders`, {
 					line_items: [
 						{
 							product_id: productId,
@@ -44,15 +40,13 @@ test.describe.serial(
 				} );
 		} );
 
-		test.afterAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
+		test.afterAll( async ( { restApi } ) => {
+			await restApi.delete( `${ WC_API_PATH }/products/${ productId }`, {
+				force: true,
 			} );
-			await api.delete( `products/${ productId }`, { force: true } );
-			await api.delete( `orders/${ orderId }`, { force: true } );
+			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
+				force: true,
+			} );
 		} );
 
 		test( 'can issue a refund by quantity', async ( { page } ) => {
@@ -149,16 +143,10 @@ test.describe(
 	() => {
 		let productWithStockId, productWithNoStockId, orderId;
 
-		test.beforeAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
+		test.beforeAll( async ( { restApi } ) => {
 			// create a simple product with managed stock
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: 'Product with stock',
 					type: 'simple',
 					regular_price: '9.99',
@@ -169,8 +157,8 @@ test.describe(
 					productWithStockId = response.data.id;
 				} );
 			// create a simple product with NO managed stock
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: 'Product with NO stock',
 					type: 'simple',
 					regular_price: '5.99',
@@ -179,8 +167,8 @@ test.describe(
 					productWithNoStockId = response.data.id;
 				} );
 			// create order
-			await api
-				.post( 'orders', {
+			await restApi
+				.post( `${ WC_API_PATH }/orders`, {
 					line_items: [
 						{
 							product_id: productWithNoStockId,
@@ -198,20 +186,22 @@ test.describe(
 				} );
 		} );
 
-		test.afterAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-			await api.delete( `products/${ productWithStockId }`, {
+		test.afterAll( async ( { restApi } ) => {
+			await restApi.delete(
+				`${ WC_API_PATH }/products/${ productWithStockId }`,
+				{
+					force: true,
+				}
+			);
+			await restApi.delete(
+				`${ WC_API_PATH }/products/${ productWithNoStockId }`,
+				{
+					force: true,
+				}
+			);
+			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
 				force: true,
 			} );
-			await api.delete( `products/${ productWithNoStockId }`, {
-				force: true,
-			} );
-			await api.delete( `orders/${ orderId }`, { force: true } );
 		} );
 
 		test( 'can update order after refunding item without automatic stock adjustment', async ( {

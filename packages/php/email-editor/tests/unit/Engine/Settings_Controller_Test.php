@@ -1,17 +1,17 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine;
+namespace Automattic\WooCommerce\EmailEditor\Engine;
 
 /**
  * Unit test class for Settings_Controller.
  */
-class Settings_Controller_Test extends \MailPoetUnitTest {
+class Settings_Controller_Test extends \Email_Editor_Unit_Test {
 	/**
 	 * Test it gets correct layout width without padding.
 	 */

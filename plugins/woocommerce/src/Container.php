@@ -7,9 +7,11 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce;
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\DependencyManagement\ContainerException;
 use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
 use Automattic\WooCommerce\Internal\DependencyManagement\RuntimeContainer;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AddressProviderServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AdminSettingsServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\CostOfGoodsSoldServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\COTMigrationServiceProvider;
@@ -42,6 +44,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\Coming
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\StatsServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ImportExportServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\EmailEditorServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductFiltersServiceProvider;
 
 /**
  * PSR11 compliant dependency injection container for WooCommerce.
@@ -106,9 +109,10 @@ final class Container {
 	 * Finds an entry of the container by its identifier and returns it.
 	 * See the comment about ContainerException in RuntimeContainer::get.
 	 *
-	 * @param string $id Identifier of the entry to look for.
+	 * @template T
+	 * @param string|class-string<T> $id Identifier of the entry to look for.
 	 *
-	 * @return mixed Resolved entry.
+	 * @return T Resolved entry.
 	 *
 	 * @throws NotFoundExceptionInterface No entry was found for the supplied identifier (only when using ExtendedContainer).
 	 * @throws Psr\Container\ContainerExceptionInterface Error while retrieving the entry.
@@ -126,7 +130,7 @@ final class Container {
 	 * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
 	 * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
 	 *
-	 * @param string $id Identifier of the entry to look for.
+	 * @param class-string $id Identifier of the entry to look for.
 	 *
 	 * @return bool
 	 */
@@ -137,7 +141,7 @@ final class Container {
 	/**
 	 * The list of service provider classes to register.
 	 *
-	 * @var string[]
+	 * @return array<int,class-string>
 	 */
 	private function get_service_providers(): array {
 		return array(
@@ -173,6 +177,8 @@ final class Container {
 			AdminSettingsServiceProvider::class,
 			AdminSuggestionsServiceProvider::class,
 			EmailEditorServiceProvider::class,
+			ProductFiltersServiceProvider::class,
+			AddressProviderServiceProvider::class,
 		);
 	}
 }

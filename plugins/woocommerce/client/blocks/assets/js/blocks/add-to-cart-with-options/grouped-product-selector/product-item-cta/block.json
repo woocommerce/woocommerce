@@ -1,0 +1,19 @@
+{
+	"name": "woocommerce/add-to-cart-with-options-grouped-product-selector-item-cta",
+	"title": "Grouped Product Selector Item CTA (Experimental)",
+	"description": "A CTA for a child product within the Grouped Product Selector block. Depending on the product type and properties, this might be a button, a checkbox or a link.",
+	"category": "woocommerce-product-elements",
+	"keywords": [ "WooCommerce" ],
+	"usesContext": [ "postId" ],
+	"ancestor": [
+		"woocommerce/add-to-cart-with-options-grouped-product-selector-item"
+	],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"supports": {
+		"inserter": false,
+		"interactivity": true
+	},
+	"style": "file:../woocommerce/add-to-cart-with-options-grouped-product-selector-item-cta-style.css"
+}

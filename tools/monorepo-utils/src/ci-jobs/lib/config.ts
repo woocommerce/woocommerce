@@ -72,7 +72,7 @@ interface BaseJobConfig {
 	optional?: boolean;
 
 	/**
-	 * Indicates whether or not a job has been created for this config.
+	 * Indicates whether a job has been created for this config.
 	 */
 	jobCreated?: boolean;
 }
@@ -341,6 +341,11 @@ export interface TestJobConfig extends BaseJobConfig {
 	 * The configuration for the report if one is needed.
 	 */
 	report?: ReportConfig;
+
+	/**
+	 * A list of dependencies that if changed should trigger the job. If not set, any changed dependency will trigger the job.
+	 */
+	onlyForDependencies?: string[];
 }
 
 /**
@@ -365,12 +370,29 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 		testType = raw.testType.toLowerCase();
 	}
 
+	if ( raw.onlyForDependencies ) {
+		if ( ! Array.isArray( raw.onlyForDependencies ) ) {
+			throw new ConfigError(
+				'onlyForDependencies configuration must be an array of strings.'
+			);
+		}
+
+		for ( const entry of raw.onlyForDependencies ) {
+			if ( typeof entry !== 'string' ) {
+				throw new ConfigError(
+					'onlyForDependencies configuration must be an array of strings.'
+				);
+			}
+		}
+	}
+
 	const config: TestJobConfig = {
 		...baseJob,
 		type: JobType.Test,
 		testType,
 		shardingArguments: raw.shardingArguments || [],
 		name: raw.name,
+		onlyForDependencies: raw.onlyForDependencies,
 	};
 
 	if ( raw.testEnv ) {

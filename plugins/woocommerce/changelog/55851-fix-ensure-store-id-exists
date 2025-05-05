@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix tracking reliability by ensuring store ID is always set

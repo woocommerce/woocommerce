@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-This PR fixes a bug where the tab sections reported their parent screen ID incorrectly in WooCommerce settings.

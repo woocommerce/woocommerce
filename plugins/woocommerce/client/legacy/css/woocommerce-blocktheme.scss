@@ -120,6 +120,12 @@
 				margin-bottom: 0;
 				vertical-align: middle;
 			}
+
+			.variations {
+				td, th {
+					word-break: normal;
+				}
+			}
 		}
 
 		.related.products {
@@ -438,6 +444,10 @@ a.added_to_cart {
 	}
 
 	.woocommerce-orders-table__cell.woocommerce-orders-table__cell-order-actions {
+		&::before {
+			display: none;
+		}
+
 		a {
 			display: block;
 			margin-bottom: 1em;

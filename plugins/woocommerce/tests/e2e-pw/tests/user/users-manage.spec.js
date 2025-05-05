@@ -1,55 +1,58 @@
-const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * Internal dependencies
+ */
+import { test as baseTest, expect } from '../../fixtures/fixtures';
+import { WP_API_PATH } from '../../utils/api-client';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { getFakeUser } from '../../utils/data';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	customer: async ( { api, wpApi }, use ) => {
-		const now = Date.now();
-		let user = {
-			username: `customer.${ now }`,
-			email: `customer.${ now }@example.com`,
-			billing: {
-				country: 'GB',
-			},
-		};
-		await api.post( 'customers', user ).then( ( response ) => {
-			user = response.data;
-		} );
+	user: async ( { restApi }, use ) => {
+		let user;
+		await restApi
+			.post( `${ WP_API_PATH }/users`, getFakeUser( 'subscriber' ) )
+			.then( ( response ) => {
+				user = response.data;
+			} );
 
 		await use( user );
 
-		// Use wp api instead, because the wc api incorrectly returns 400 instead of 404 if the user is already deleted.
-		// To avoid test failure in case of 400, an exception is required in the validateStatus api definition,
-		// which is not ideal because we want 400 errors to be thrown
-		await wpApi.delete( `./wp-json/wp/v2/users/${ user.id }`, {
-			data: {
+		try {
+			await restApi.delete( `${ WP_API_PATH }/users/${ user.id }`, {
 				force: true,
 				reassign: 1,
-			},
-		} );
+			} );
+		} catch ( error ) {
+			// Accept 404 error as the user might have been deleted already in the test
+			if ( error.data?.data?.status !== 404 ) {
+				throw error;
+			}
+		}
 	},
-	manager: async ( { wpApi }, use ) => {
-		const now = Date.now();
-		let user = {
-			username: `manager.${ now }`,
-			email: `manager.${ now }@example.com`,
-			password: 'ewdveth345tgrg',
-			roles: [ 'shop_manager' ],
-		};
+	customer: async ( { restApi, user }, use ) => {
+		let customer;
+		await restApi
+			.put( `${ WP_API_PATH }/users/${ user.id }`, {
+				roles: [ 'customer' ],
+			} )
+			.then( ( response ) => {
+				customer = response.data;
+			} );
 
-		const response = await wpApi.post( './wp-json/wp/v2/users', {
-			data: user,
-		} );
-		user = await response.json();
+		await use( customer );
+	},
+	manager: async ( { restApi, user }, use ) => {
+		let manager;
+		await restApi
+			.put( `${ WP_API_PATH }/users/${ user.id }`, {
+				roles: [ 'shop_manager' ],
+			} )
+			.then( ( response ) => {
+				manager = response.data;
+			} );
 
-		await use( user );
-
-		await wpApi.delete( `./wp-json/wp/v2/users/${ user.id }`, {
-			data: {
-				force: true,
-				reassign: 1,
-			},
-		} );
+		await use( manager );
 	},
 } );
 

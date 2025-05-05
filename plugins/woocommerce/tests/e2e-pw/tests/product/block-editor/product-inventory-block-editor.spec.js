@@ -1,12 +1,16 @@
-const { test: baseTest } = require( '../../../fixtures/block-editor-fixtures' );
-const { expect, tags } = require( '../../../fixtures/fixtures' );
+/**
+ * Internal dependencies
+ */
+import { test as baseTest } from '../../../fixtures/block-editor-fixtures';
+import { expect, tags } from '../../../fixtures/fixtures';
+import { WC_API_PATH } from '../../../utils/api-client';
 
 const test = baseTest.extend( {
-	product: async ( { api }, use ) => {
+	product: async ( { restApi }, use ) => {
 		let product;
 
-		await api
-			.post( 'products', {
+		await restApi
+			.post( `${ WC_API_PATH }/products`, {
 				name: `Product ${ Date.now() }`,
 				type: 'simple',
 				regular_price: '12.99',
@@ -19,7 +23,9 @@ const test = baseTest.extend( {
 		await use( product );
 
 		// Cleanup
-		await api.delete( `products/${ product.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+			force: true,
+		} );
 	},
 	page: async ( { page, product }, use ) => {
 		await test.step( 'go to product editor, inventory tab', async () => {
@@ -206,7 +212,9 @@ test(
 			await page.locator( 'button[name="add-to-cart"]' ).click();
 			await expect(
 				page.getByText(
-					`2 × “${ product.name }” have been added to your cart.`
+					new RegExp(
+						`2 × ["|“]${ product.name }["|”] have been added to your cart.`
+					)
 				)
 			).toBeVisible();
 		} );

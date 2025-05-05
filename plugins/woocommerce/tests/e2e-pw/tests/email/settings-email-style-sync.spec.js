@@ -78,6 +78,12 @@ test.describe( 'Email Style Sync', () => {
 		// Save settings
 		await page.locator( 'button.woocommerce-save-button' ).click();
 
+		await expect(
+			page
+				.locator( '#message' )
+				.filter( { hasText: 'Your settings have been saved' } )
+		).toBeVisible();
+
 		// Reload page and check if setting persisted
 		await page.reload();
 		await expect( autoSyncToggle ).toBeVisible();

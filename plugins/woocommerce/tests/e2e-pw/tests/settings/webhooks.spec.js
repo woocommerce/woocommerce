@@ -1,22 +1,18 @@
-const { test, expect } = require( '@playwright/test' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+/**
+ * Internal dependencies
+ */
+import { tags, test, expect } from '../../fixtures/fixtures.js';
+import { ADMIN_STATE_PATH } from '../../playwright.config.js';
+import { WC_API_PATH } from '../../utils/api-client.js';
 
 test.describe( 'Manage webhooks', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-		await api.get( 'webhooks' ).then( ( response ) => {
+	test.afterAll( async ( { restApi } ) => {
+		await restApi.get( `${ WC_API_PATH }/webhooks` ).then( ( response ) => {
 			const ids = response.data.map( ( webhook ) => webhook.id );
 
-			api.post( 'webhooks/batch', {
+			restApi.post( `${ WC_API_PATH }/webhooks/batch`, {
 				delete: ids,
 			} );
 		} );

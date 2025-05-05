@@ -70,7 +70,9 @@ class Init {
 		wp_register_style(
 			$style_name,
 			WCAdminAssets::get_url( $style_path_name . '/style', 'css' ),
-			isset( $style_assets['dependencies'] ) ? $style_assets['dependencies'] : array(),
+			// Manually set dependencies for now, because the asset file is not being generated correctly.
+			// See plugins/woocommerce/assets/client/admin/settings-editor/style.asset.php. Should be: `isset( $style_assets['dependencies'] ) ? $style_assets['dependencies'] : array(),`.
+			array( 'wp-components', 'wc-components' ),
 			WCAdminAssets::get_file_version( 'css', $style_assets['version'] ),
 		);
 
@@ -80,27 +82,6 @@ class Init {
 		wp_register_style( 'wc-global-presets', false ); // phpcs:ignore
 		wp_add_inline_style( 'wc-global-presets', wp_get_global_stylesheet( array( 'presets' ) ) );
 		wp_enqueue_style( 'wc-global-presets' );
-
-		// Gutenberg posts editor styles.
-		if ( function_exists( 'gutenberg_url' ) ) {
-			// phpcs:disable WordPress.WP.EnqueuedResourceParameters.MissingVersion
-			wp_register_style(
-				'wp-gutenberg-posts-dashboard',
-				gutenberg_url( 'build/edit-site/posts.css', __FILE__ ),
-				array( 'wp-components' ),
-			);
-			// phpcs:enable WordPress.WP.EnqueuedResourceParameters.MissingVersion
-			wp_enqueue_style( 'wp-gutenberg-posts-dashboard' );
-
-			// phpcs:disable WordPress.WP.EnqueuedResourceParameters.MissingVersion
-			wp_register_style(
-				'wp-gutenberg-edit-site',
-				gutenberg_url( 'build/edit-site/style.css', __FILE__ ),
-				array( 'wp-components' ),
-			);
-			// phpcs:enable WordPress.WP.EnqueuedResourceParameters.MissingVersion
-			wp_enqueue_style( 'wp-gutenberg-edit-site' );
-		}
 	}
 
 	/**
@@ -123,7 +104,7 @@ class Init {
 		wp_enqueue_script(
 			$script_name,
 			WCAdminAssets::get_url( $script_path_name . '/index', 'js' ),
-			array_merge( array( 'wp-edit-site' ), $script_assets['dependencies'] ),
+			$script_assets['dependencies'],
 			WCAdminAssets::get_file_version( 'js', $script_assets['version'] ),
 			true
 		);

@@ -1,9 +1,11 @@
-const { test } = require( '../../../fixtures/block-editor-fixtures' );
-const { expect } = require( '@playwright/test' );
-
-const { clickOnTab } = require( '../../../utils/simple-products' );
-const { api } = require( '../../../utils' );
-const { tags } = require( '../../../fixtures/fixtures' );
+/**
+ * Internal dependencies
+ */
+import { test } from '../../../fixtures/block-editor-fixtures';
+import { tags, expect } from '../../../fixtures/fixtures';
+import { clickOnTab } from '../../../utils/simple-products';
+import { WC_API_PATH } from '../../../utils/api-client';
+import { getFakeProduct } from '../../../utils/data';
 
 const NEW_EDITOR_ADD_PRODUCT_URL =
 	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product';
@@ -15,33 +17,29 @@ const productData = {
 	summary: 'This is a product summary',
 };
 
-const groupedProductsData = [
-	{
-		name: `Product name 1 ${ new Date().getTime().toString() }`,
-		productPrice: '400',
-		type: 'simple',
-	},
-	{
-		name: `Product name 2 ${ new Date().getTime().toString() }`,
-		productPrice: '600',
-		type: 'simple',
-	},
-];
-
-const productIds = [];
+const groupedProducts = [];
 
 test.describe( 'General tab', { tag: tags.GUTENBERG }, () => {
 	test.describe( 'Grouped product', () => {
-		test.beforeAll( async () => {
-			for ( const product of groupedProductsData ) {
-				const id = await api.create.product( product );
-				productIds.push( id );
+		test.beforeAll( async ( { restApi } ) => {
+			for ( let i = 0; i < 2; i++ ) {
+				await restApi
+					.post( `${ WC_API_PATH }/products`, getFakeProduct() )
+					.then( ( response ) =>
+						groupedProducts.push( response.data )
+					);
 			}
 		} );
 
-		test.afterAll( async () => {
-			for ( const productId of productIds ) {
-				await api.deletePost.product( productId );
+		test.afterAll( async ( { restApi } ) => {
+			for ( const p of groupedProducts ) {
+				await restApi
+					.delete( `${ WC_API_PATH }/products/${ p.id }`, {
+						force: true,
+					} )
+					.catch( ( err ) => {
+						console.log( err );
+					} );
 			}
 		} );
 		test.skip(
@@ -95,7 +93,7 @@ test.describe( 'General tab', { tag: tags.GUTENBERG }, () => {
 				} )
 				.isVisible();
 
-			for ( const product of groupedProductsData ) {
+			for ( const product of groupedProducts ) {
 				await page
 					.locator(
 						'.woocommerce-add-products-modal__form-group-content'
@@ -103,6 +101,7 @@ test.describe( 'General tab', { tag: tags.GUTENBERG }, () => {
 					.getByPlaceholder( 'Search for products' )
 					.fill( product.name );
 
+				// await page.pause();
 				await page.getByText( product.name ).click();
 			}
 
@@ -148,7 +147,7 @@ test.describe( 'General tab', { tag: tags.GUTENBERG }, () => {
 				page.getByRole( 'heading', { name: productData.name } )
 			).toBeVisible();
 
-			for ( const product of groupedProductsData ) {
+			for ( const product of groupedProducts ) {
 				await expect(
 					page.getByRole( 'link', { name: product.name } ).first()
 				).toBeVisible();

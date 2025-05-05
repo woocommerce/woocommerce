@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Product Gallery: improve loading time and remove layout shift when loading the block

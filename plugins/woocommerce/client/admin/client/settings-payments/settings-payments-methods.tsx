@@ -16,8 +16,8 @@ import { Button } from '@wordpress/components';
 import './settings-payments-body.scss';
 import './settings-payments-methods.scss';
 import {
-	getPaymentMethodById,
 	getRecommendedPaymentMethods,
+	combineRequestMethods,
 } from '~/settings-payments/utils';
 import { ListPlaceholder } from './components/list-placeholder';
 import { PaymentMethodListItem } from './components/payment-method-list-item';
@@ -36,48 +36,6 @@ interface SettingsPaymentsMethodsProps {
 		React.SetStateAction< PaymentMethodsState >
 	>;
 }
-
-/**
- * Combines Apple Pay and Google Pay into a single payment method.
- *
- * If both Apple Pay and Google Pay exist in the list of payment methods, they are combined into a single
- * method with the ID `apple_google`, including data from both methods. If either is missing, the original
- * list is returned.
- */
-const combineRequestMethods = (
-	paymentMethods: RecommendedPaymentMethod[]
-) => {
-	const applePay = getPaymentMethodById( 'apple_pay' )( paymentMethods );
-	const googlePay = getPaymentMethodById( 'google_pay' )( paymentMethods );
-
-	if ( ! applePay || ! googlePay ) {
-		return paymentMethods; // If either Apple Pay or Google Pay is not found, return the original paymentMethods
-	}
-
-	return paymentMethods
-		.map( ( method ) => {
-			if ( method.id === 'apple_pay' ) {
-				// Combine apple_pay and google_pay data into a new payment method
-				return {
-					...method,
-					id: 'apple_google',
-					extraTitle: googlePay.title,
-					extraDescription: googlePay.description,
-					extraIcon: googlePay.icon,
-				};
-			}
-
-			// Exclude GooglePay from the list
-			if ( method.id === 'google_pay' ) {
-				return null;
-			}
-
-			return method; // Keep the rest of the payment methods
-		} )
-		.filter(
-			( method ): method is RecommendedPaymentMethod => method !== null
-		); // Filter null values
-};
 
 /**
  * A component for displaying and managing the list of recommended payment methods.

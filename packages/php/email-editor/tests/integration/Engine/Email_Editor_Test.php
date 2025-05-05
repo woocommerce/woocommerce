@@ -1,12 +1,18 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine;
+namespace Automattic\WooCommerce\EmailEditor\Engine;
+
+use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Engine\Email_Api_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates;
+use Automattic\WooCommerce\EmailEditor\Engine\Patterns\Patterns;
+use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 
 /**
  * Integration test for Email_Editor class
@@ -40,7 +46,7 @@ class Email_Editor_Test extends \Email_Editor_Integration_Test_Case {
 			);
 			return $post_types;
 		};
-		add_filter( 'mailpoet_email_editor_post_types', $this->post_register_callback );
+		add_filter( 'woocommerce_email_editor_post_types', $this->post_register_callback );
 		$this->email_editor->initialize();
 	}
 
@@ -57,6 +63,6 @@ class Email_Editor_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		remove_filter( 'mailpoet_email_editor_post_types', $this->post_register_callback );
+		remove_filter( 'woocommerce_email_editor_post_types', $this->post_register_callback );
 	}
 }

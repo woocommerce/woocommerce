@@ -1,12 +1,13 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
 
+// phpcs:disable Universal.Files.SeparateFunctionsFromOO.Mixed -- We want to ignore this rule in bootstrap file.
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 if ( ! function_exists( 'register_block_template' ) ) {
@@ -93,7 +94,7 @@ if ( ! function_exists( 'apply_filters' ) ) {
 /**
  * Base class for unit tests.
  */
-abstract class MailPoetUnitTest extends \PHPUnit\Framework\TestCase {
+abstract class Email_Editor_Unit_Test extends \PHPUnit\Framework\TestCase {
 }
 
 require 'stubs.php';

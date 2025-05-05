@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Add file size validation to blueprint upload API to match UI's 50MB limit. 

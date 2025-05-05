@@ -111,7 +111,19 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 			} else {
 				$subject = $this->get_option( 'subject_full', $this->get_default_subject() );
 			}
-			return apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $subject ), $this->object, $this );
+			/**
+			 * Filter the email subject for customer refunded order.
+			 *
+			 * @param string $subject The email subject.
+			 * @param WC_Order $order Order object.
+			 * @param WC_Email_Customer_Refunded_Order $email Email object.
+			 * @since 3.7.0
+			 */
+			$subject = apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $subject ), $this->object, $this );
+			if ( $this->block_email_editor_enabled ) {
+				$subject = $this->personalizer->personalize_transactional_content( $subject, $this );
+			}
+			return $subject;
 		}
 
 		/**
@@ -125,6 +137,14 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 			} else {
 				$heading = $this->get_option( 'heading_full', $this->get_default_heading() );
 			}
+			/**
+			 * Filter the email heading for customer refunded order.
+			 *
+			 * @param string $heading The email heading.
+			 * @param WC_Order $order Order object.
+			 * @param WC_Email_Customer_Refunded_Order $email Email object.
+			 * @since 3.7.0
+			 */
 			return apply_filters( 'woocommerce_email_heading_customer_refunded_order', $this->format_string( $heading ), $this->object, $this );
 		}
 
@@ -228,6 +248,25 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 					'sent_to_admin'      => false,
 					'plain_text'         => true,
 					'email'              => $this,
+				)
+			);
+		}
+
+		/**
+		 * Get block editor email template content.
+		 *
+		 * @return string
+		 */
+		public function get_block_editor_email_template_content() {
+			return wc_get_template_html(
+				$this->template_block_content,
+				array(
+					'order'          => $this->object,
+					'refund'         => $this->refund,
+					'partial_refund' => $this->partial_refund,
+					'sent_to_admin'  => false,
+					'plain_text'     => false,
+					'email'          => $this,
 				)
 			);
 		}

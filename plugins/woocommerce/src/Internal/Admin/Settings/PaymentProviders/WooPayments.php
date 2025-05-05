@@ -3,10 +3,12 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 
+use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use WC_Abstract_Order;
 use WC_Payment_Gateway;
 use WooCommerce\Admin\Experimental_Abtest;
@@ -21,6 +23,57 @@ defined( 'ABSPATH' ) || exit;
 class WooPayments extends PaymentGateway {
 
 	const PREFIX = 'woocommerce_admin_settings_payments__woopayments__';
+
+	/**
+	 * Extract the payment gateway provider details from the object.
+	 *
+	 * @param WC_Payment_Gateway $gateway      The payment gateway object.
+	 * @param int                $order        Optional. The order to assign.
+	 *                                         Defaults to 0 if not provided.
+	 * @param string             $country_code Optional. The country code for which the details are being gathered.
+	 *                                         This should be a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return array The payment gateway provider details.
+	 */
+	public function get_details( WC_Payment_Gateway $gateway, int $order = 0, string $country_code = '' ): array {
+		$details = parent::get_details( $gateway, $order, $country_code );
+
+		// Switch the onboarding type to native.
+		$details['onboarding']['type'] = self::ONBOARDING_TYPE_NATIVE;
+
+		// Add WPCOM/Jetpack connection details to the onboarding state.
+		$wpcom_connection_manager       = new WPCOM_Connection_Manager( 'woocommerce' );
+		$is_connected                   = $wpcom_connection_manager->is_connected();
+		$has_connected_owner            = $wpcom_connection_manager->has_connected_owner();
+		$details['onboarding']['state'] = array_merge(
+			$details['onboarding']['state'],
+			array(
+				'wpcom_has_working_connection' => $is_connected && $has_connected_owner,
+				'wpcom_is_store_connected'     => $is_connected,
+				'wpcom_has_connected_owner'    => $has_connected_owner,
+				'wpcom_is_connection_owner'    => $has_connected_owner && $wpcom_connection_manager->is_connection_owner(),
+			)
+		);
+
+		// If the WooPayments installed version is less than minimum required version,
+		// we can't use the in-context onboarding flows.
+		if ( defined( 'WCPAY_VERSION_NUMBER' ) &&
+			version_compare( WCPAY_VERSION_NUMBER, PaymentProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION, '<' ) ) {
+
+			return $details;
+		}
+
+		// Switch the onboarding type to native in-context.
+		$details['onboarding']['type'] = self::ONBOARDING_TYPE_NATIVE_IN_CONTEXT;
+
+		// Provide the native, in-context onboarding URL instead of the external one.
+		// This is a catch-all URL that should start or continue the onboarding process.
+		$details['onboarding']['_links']['onboard'] = array(
+			'href' => Utils::wc_payments_settings_url( '/woopayments/onboarding' ),
+		);
+
+		return $details;
+	}
 
 	/**
 	 * Check if the payment gateway needs setup.
@@ -197,10 +250,27 @@ class WooPayments extends PaymentGateway {
 		}
 
 		// We run an experiment to determine the efficiency of test-account-first onboarding vs straight-to-live onboarding.
-		// If the experiment is active and the store is in the treatment group, we will do live onboarding.
+		// If the experiment is active and the store is in the treatment group, we will force live onboarding.
 		// Otherwise, we will do test-account-first onboarding (control group).
-		if ( ! $live_onboarding && Experimental_Abtest::in_treatment( 'woocommerce_payment_settings_onboarding_2025_v1' ) ) {
-			$live_onboarding = true;
+		// Stores that are determined by our routing logic that they should do straight-to-live onboarding
+		// will not be affected by the experiment.
+		if ( ! $live_onboarding ) {
+			$transient_key = 'wc_experiment_failure_woocommerce_payment_settings_onboarding_2025_v1';
+
+			// Try to get cached result first.
+			$cached_result = get_transient( $transient_key );
+
+			// If we have a cache entry that indicates an error, don't enforce anything. Just let the routing logic decide.
+			if ( 'error' !== $cached_result ) {
+				try {
+					if ( Experimental_Abtest::in_treatment( 'woocommerce_payment_settings_onboarding_2025_v1' ) ) {
+						$live_onboarding = true;
+					}
+				} catch ( \Exception $e ) {
+					// If the experiment fails, set a transient to avoid repeated failures.
+					set_transient( $transient_key, 'error', HOUR_IN_SECONDS );
+				}
+			}
 		}
 
 		// If we are doing live onboarding, we don't need to add more to the URL.

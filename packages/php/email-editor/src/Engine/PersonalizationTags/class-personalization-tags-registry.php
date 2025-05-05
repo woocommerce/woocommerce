@@ -1,13 +1,13 @@
 <?php
 /**
- * This file is part of the MailPoet Email Editor package.
+ * This file is part of the WooCommerce Email Editor package.
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
 
-namespace MailPoet\EmailEditor\Engine\PersonalizationTags;
+namespace Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags;
 
 /**
  * Registry for personalization tags.
@@ -28,7 +28,7 @@ class Personalization_Tags_Registry {
 	 * @return void
 	 */
 	public function initialize(): void {
-		apply_filters( 'mailpoet_email_editor_register_personalization_tags', $this );
+		apply_filters( 'woocommerce_email_editor_register_personalization_tags', $this );
 	}
 
 	/**

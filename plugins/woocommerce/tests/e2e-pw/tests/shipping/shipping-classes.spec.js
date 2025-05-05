@@ -1,4 +1,3 @@
-/* eslint-disable playwright/expect-expect */
 /**
  * External dependencies
  */
@@ -9,6 +8,7 @@ import { faker } from '@faker-js/faker';
  */
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
+import { WC_API_PATH } from '../../utils/api-client';
 
 const uq = faker.string.alphanumeric( 5 );
 
@@ -30,17 +30,17 @@ const uq = faker.string.alphanumeric( 5 );
 ].forEach( ( { testTitle, name, slug, expectedSlug, description } ) => {
 	const test = baseTest.extend( {
 		storageState: ADMIN_STATE_PATH,
-		page: async ( { api, page }, use ) => {
+		page: async ( { restApi, page }, use ) => {
 			await use( page );
 
 			// Cleanup
-			const allShippingClasses = await api.get(
-				'products/shipping_classes'
+			const allShippingClasses = await restApi.get(
+				`${ WC_API_PATH }/products/shipping_classes`
 			);
 			for ( const shippingClass of allShippingClasses.data ) {
 				if ( shippingClass.slug === expectedSlug ) {
-					await api.delete(
-						`products/shipping_classes/${ shippingClass.id }`,
+					await restApi.delete(
+						`${ WC_API_PATH }/products/shipping_classes/${ shippingClass.id }`,
 						{ force: true }
 					);
 				}
