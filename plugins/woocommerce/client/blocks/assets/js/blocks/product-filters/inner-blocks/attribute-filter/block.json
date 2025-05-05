@@ -93,5 +93,5 @@
 			"isPreview": true
 		}
 	},
-	"viewStyle": "woocommerce/product-filter-attribute-view-style"
+	"style": "woocommerce/product-filter-attribute-view-style"
 }
