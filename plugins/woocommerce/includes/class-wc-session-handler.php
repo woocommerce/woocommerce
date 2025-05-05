@@ -104,7 +104,7 @@ class WC_Session_Handler extends WC_Session {
 			 */
 			$this->_data = apply_filters( 'woocommerce_restored_session_data', $this->get_session_data() );
 
-			if ( ! $this->is_session_cookie_valid()  ) {
+			if ( ! $this->is_session_cookie_valid() ) {
 				$this->destroy_session();
 				$this->set_session_expiration();
 			} elseif ( empty( $this->_data ) && ! isset( WC()->cart ) ) {
