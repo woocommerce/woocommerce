@@ -37,7 +37,7 @@ class CartController {
 
 		// Load cart from session.
 		$cart               = $this->get_cart_instance();
-		$cart->cart_context = 'store-api';
+		$cart->_cart_context = 'store-api';
 		$cart->get_cart();
 	}
 

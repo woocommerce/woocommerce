@@ -445,7 +445,7 @@ class ShippingController {
 	 * @return array
 	 */
 	public function remove_shipping_if_no_address( $packages ) {
-		if ( 'shortcode' === WC()->cart->cart_context ) {
+		if ( 'shortcode' === WC()->cart->_cart_context ) {
 			return $packages;
 		}
 

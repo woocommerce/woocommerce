@@ -26,11 +26,12 @@ require_once WC_ABSPATH . 'includes/class-wc-cart-session.php';
 class WC_Cart extends WC_Legacy_Cart {
 
 	/**
-	 * Cart context, used to determine if the cart is being used in a StoreAPI or shortcode context.
+	 * Cart context, used to determine if the cart is being used in a StoreAPI or shortcode context. This should only
+	 * be used internally.
 	 *
 	 * @var string shortcode|store-api
 	 */
-	public $cart_context = 'shortcode';
+	public $_cart_context = 'shortcode';
 
 	/**
 	 * Contains an array of cart items.
@@ -1628,7 +1629,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
-			if ( 'store-api' === $this->cart_context ) {
+			if ( 'store-api' === $this->_cart_context ) {
 				$customer = $this->get_customer();
 
 				if ( ! $customer instanceof \WC_Customer || ! $customer->has_full_shipping_address() ) {
