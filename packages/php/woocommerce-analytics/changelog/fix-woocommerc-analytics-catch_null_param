@@ -1,4 +1,0 @@
-Significance: patch
-Type: fixed
-
-Catch PHP error if null param is errantly passed by third-party code.
