@@ -443,6 +443,12 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		$billing_address  = $order->get_formatted_billing_address();
 		$shipping_address = $order->get_formatted_shipping_address();
 
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		/**
+		 * Filter to customize the order details data that the woocommerce_get_order_details action will send.
+		 *
+		 * @param array $order_details Order details.
+		 */
 		$order_details = apply_filters(
 			'woocommerce_admin_order_preview_get_order_details',
 			array(
@@ -462,6 +468,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			),
 			$order
 		);
+		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		$order_details['data'] = array_intersect_key( $order_details['data'], array_flip( array( 'id', 'billing', 'shipping', 'customer_note' ) ) );
 		return $order_details;
