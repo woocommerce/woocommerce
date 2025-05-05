@@ -46,21 +46,24 @@
 			export_meta      = $( '#woocommerce-exporter-meta:checked' ).length ? 1: 0,
 			export_types     = $( '.woocommerce-exporter-types' ).val(),
 			export_category  = $( '.woocommerce-exporter-category' ).val();
+			// Check for specific product IDs from the hidden input.
+			var export_product_ids = $this.$form.find('input[name="product_ids"]').val() || '';
 
 		$.ajax( {
 			type: 'POST',
 			url: ajaxurl,
 			data: {
-				form             : data,
-				action           : 'woocommerce_do_ajax_product_export',
-				step             : step,
-				columns          : columns,
-				selected_columns : selected_columns,
-				export_meta      : export_meta,
-				export_types     : export_types,
-				export_category  : export_category,
-				filename         : filename,
-				security         : wc_product_export_params.export_nonce
+				form               : data,
+				action             : 'woocommerce_do_ajax_product_export',
+				step               : step,
+				columns            : columns,
+				selected_columns   : selected_columns,
+				export_meta        : export_meta,
+				export_types       : export_types,
+				export_category    : export_category,
+				export_product_ids : export_product_ids,
+				filename           : filename,
+				security           : wc_product_export_params.export_nonce
 			},
 			dataType: 'json',
 			success: function( response ) {

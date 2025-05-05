@@ -11,17 +11,64 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 wp_enqueue_script( 'wc-product-export' );
 
-$exporter = new WC_Product_CSV_Exporter();
+$exporter                = new WC_Product_CSV_Exporter();
+$product_ids_to_export = array();
+$is_exporting_specific = false;
+
+if ( ! empty( $_GET['product_ids'] ) ) {
+	$ids_raw = explode( ',', sanitize_text_field( wp_unslash( $_GET['product_ids'] ) ) );
+	$product_ids_to_export = array_filter( array_map( 'absint', $ids_raw ) );
+	if ( ! empty( $product_ids_to_export ) ) {
+		$is_exporting_specific = true;
+	}
+}
 ?>
 <div class="wrap woocommerce">
 	<h1><?php esc_html_e( 'Export Products', 'woocommerce' ); ?></h1>
 
-	<div class="woocommerce-exporter-wrapper">
+	<?php
+	if ( $is_exporting_specific ) {
+		$clear_url = remove_query_arg( 'product_ids' );
+		$count = count( $product_ids_to_export );
+		// translators: %1$d: Number of products, %2$s: URL to clear selection.
+		$notice = sprintf(
+			_n(
+				'You are exporting the %1$d product you selected in the previous step. <a href="%2$s">Clear selection</a> to export all products.',
+				'You are exporting the %1$d products you selected in the previous step. <a href="%2$s">Clear selection</a> to export all products.',
+				$count,
+				'woocommerce'
+			),
+			$count,
+			esc_url( $clear_url )
+		);
+		?>
+		<div class="notice notice-info inline">
+			<p><?php echo wp_kses_post( $notice ); ?></p>
+		</div>
+		<?php
+	}
+	?>
+
+	<div class="woocommerce-exporter-wrapper <?php echo $is_exporting_specific ? 'woocommerce-exporter-wrapper--specific-ids' : ''; ?>">
 		<form class="woocommerce-exporter">
+			<?php
+			// Add hidden input if exporting specific IDs, so JS can potentially pick it up.
+			if ( $is_exporting_specific ) {
+				echo '<input type="hidden" name="product_ids" value="' . esc_attr( implode( ',', $product_ids_to_export ) ) . '" />';
+			}
+			?>
 			<header>
 				<span class="spinner is-active"></span>
 				<h2><?php esc_html_e( 'Export products to a CSV file', 'woocommerce' ); ?></h2>
-				<p><?php esc_html_e( 'This tool allows you to generate and download a CSV file containing a list of all products.', 'woocommerce' ); ?></p>
+				<p>
+					<?php
+					if ( $is_exporting_specific ) {
+						esc_html_e( 'This tool allows you to generate and download a CSV file containing the selected products.', 'woocommerce' );
+					} else {
+						esc_html_e( 'This tool allows you to generate and download a CSV file containing a list of all products.', 'woocommerce' );
+					}
+					?>
+				</p>
 			</header>
 			<section>
 				<table class="form-table woocommerce-exporter-options">
@@ -42,7 +89,7 @@ $exporter = new WC_Product_CSV_Exporter();
 								</select>
 							</td>
 						</tr>
-						<tr>
+						<tr class="woocommerce-exporter-types-field">
 							<th scope="row">
 								<label for="woocommerce-exporter-types"><?php esc_html_e( 'Which product types should be exported?', 'woocommerce' ); ?></label>
 							</th>
@@ -56,7 +103,7 @@ $exporter = new WC_Product_CSV_Exporter();
 								</select>
 							</td>
 						</tr>
-						<tr>
+						<tr class="woocommerce-exporter-category-field">
 							<th scope="row">
 								<label for="woocommerce-exporter-category"><?php esc_html_e( 'Which product category should be exported?', 'woocommerce' ); ?></label>
 							</th>
@@ -95,4 +142,10 @@ $exporter = new WC_Product_CSV_Exporter();
 			</div>
 		</form>
 	</div>
+	<style type="text/css">
+		.woocommerce-exporter-wrapper--specific-ids .woocommerce-exporter-types-field,
+		.woocommerce-exporter-wrapper--specific-ids .woocommerce-exporter-category-field {
+			display: none;
+		}
+	</style>
 </div>

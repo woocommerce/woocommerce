@@ -57,6 +57,13 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	protected $product_category_to_export = array();
 
 	/**
+	 * Specific product IDs to export, overriding other filters if hook is not used.
+	 *
+	 * @var array
+	 */
+	protected $product_ids_to_export = array();
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -96,6 +103,16 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 */
 	public function set_product_category_to_export( $product_category_to_export ) {
 		$this->product_category_to_export = array_map( 'sanitize_title_with_dashes', $product_category_to_export );
+	}
+
+	/**
+	 * Specific product IDs to export.
+	 *
+	 * @param array $product_ids List of product IDs to export.
+	 * @since x.x.x // TODO: Update this version tag when releasing
+	 */
+	public function set_product_ids_to_export( $product_ids ) {
+		$this->product_ids_to_export = array_filter( array_map( 'absint', (array) $product_ids ) );
 	}
 
 	/**
@@ -173,7 +190,6 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	public function prepare_data_to_export() {
 		$args = array(
 			'status'   => array( ProductStatus::PRIVATE, ProductStatus::PUBLISH, ProductStatus::DRAFT, ProductStatus::FUTURE, ProductStatus::PENDING ),
-			'type'     => $this->product_types_to_export,
 			'limit'    => $this->get_limit(),
 			'page'     => $this->get_page(),
 			'orderby'  => array(
@@ -183,21 +199,38 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'paginate' => true,
 		);
 
+		// Determine which specific IDs to export, giving priority to the filter hook.
+		$ids_for_include = array();
+
 		/**
 		 * Filter to allow exporting only specific product IDs.
+		 * Takes precedence over IDs set via set_product_ids_to_export().
 		 *
 		 * @since x.x.x
 		 * @param array $product_ids Array of product IDs to export. Default empty array.
 		 */
-		$product_ids_to_export = apply_filters( 'woocommerce_product_export_product_ids', array() );
+		$hook_provided_ids = apply_filters( 'woocommerce_product_export_product_ids', array() );
+		$hook_provided_ids = array_map( 'absint', $hook_provided_ids );
 
-		if ( ! empty( $product_ids_to_export ) && is_array( $product_ids_to_export ) ) {
-			// Ensure IDs are integers.
-			$args['include'] = array_map( 'absint', $product_ids_to_export );
+		if ( ! empty( $hook_provided_ids ) && is_array( $hook_provided_ids ) ) {
+			$ids_for_include = array_map( 'absint', $hook_provided_ids );
+		} elseif ( ! empty( $this->product_ids_to_export ) ) {
+			// Use IDs from the property if the hook didn't provide any.
+			$ids_for_include = $this->product_ids_to_export; // Already sanitized in the setter.
 		}
-		if ( ! empty( $this->product_category_to_export ) ) {
-			$args['category'] = $this->product_category_to_export;
+
+		// Set up query args based on whether specific IDs are being exported.
+		if ( ! empty( $ids_for_include ) ) {
+			$args['include'] = $ids_for_include;
+			// Ignore type/category initially when specific IDs are provided.
+		} else {
+			// Use the type and category filters set on the instance.
+			$args['type']     = $this->product_types_to_export;
+			if ( ! empty( $this->product_category_to_export ) ) {
+				$args['category'] = $this->product_category_to_export;
+			}
 		}
+
 		$products = wc_get_products( apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", $args ) );
 
 		$this->total_rows  = $products->total;
