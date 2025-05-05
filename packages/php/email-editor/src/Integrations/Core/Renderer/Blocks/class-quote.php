@@ -32,7 +32,7 @@ class Quote extends Abstract_Block_Renderer {
 		$citation_content = '';
 		$cite_element     = $dom_helper->find_element( 'cite' );
 		if ( $cite_element ) {
-			$citation_content = $this->get_citation_wrapper( $dom_helper->get_element_inner_html( $cite_element ), $parsed_block['email_attrs'] ?? array() );
+			$citation_content = $this->get_citation_wrapper( $dom_helper->get_element_inner_html( $cite_element ), $parsed_block );
 		}
 
 		// Process inner blocks for main content.
@@ -52,20 +52,21 @@ class Quote extends Abstract_Block_Renderer {
 	 * Returns the citation content with a wrapper.
 	 *
 	 * @param string $citation_content The citation text.
-	 * @param array  $email_attrs The email attributes.
+	 * @param array  $parsed_block Parsed block.
 	 * @return string The wrapped citation HTML or empty string if no citation.
 	 */
-	private function get_citation_wrapper( string $citation_content, array $email_attrs ): string {
+	private function get_citation_wrapper( string $citation_content, array $parsed_block ): string {
 		if ( empty( $citation_content ) ) {
 			return '';
 		}
 
 		return $this->add_spacer(
 			sprintf(
-				'<cite class="email-block-quote-citation" style="margin: 0;">%s</cite>',
-				$citation_content
+				'<p style="margin: 0; %2$s"><cite class="email-block-quote-citation" style="display: block; margin: 0;">%1$s</cite></p>',
+				$citation_content,
+				WP_Style_Engine::compile_css( array( 'text-align' => $parsed_block['attrs']['textAlign'] ?? '' ), '' ),
 			),
-			$email_attrs
+			$parsed_block['email_attrs'] ?? array()
 		);
 	}
 
@@ -119,16 +120,12 @@ class Quote extends Abstract_Block_Renderer {
 		)['declarations'];
 
 		return sprintf(
-			'<table class="email-block-quote %3$s" style="%1$s" width="100%%" border="0" cellpadding="0" cellspacing="0" role="presentation">
-        <tbody>
-          <tr>
-            <td class="email-block-quote-content" style="%2$s" width="100%%">
-              {quote_content}
-              {citation_content}
-            </td>
-          </tr>
-        </tbody>
-      </table>',
+			'<!--[if mso | IE]><table align="left" role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%%" style="%1$s"><tr><td style="%2$s" width="100%"><![endif]-->
+			<blockquote class="email-block-quote %3$s" style="%1$s %2$s">
+				{quote_content}
+				{citation_content}
+			</blockquote>
+			<!--[if mso | IE]></td></tr></table><![endif]-->',
 			esc_attr( WP_Style_Engine::compile_css( $table_styles, '' ) ),
 			esc_attr( WP_Style_Engine::compile_css( $cell_styles, '' ) ),
 			esc_attr( $original_classname ),
