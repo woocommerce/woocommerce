@@ -309,7 +309,7 @@
               "menu_title": "Payment Method Integration",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
-              "hash": "7f5226a48549be8129b374f35ba93da35639ccda9a3d9d81583b3e2b8825663a",
+              "hash": "0bb4f4dbc6a168557b0290b9cf396416ef09999d01d26f8982bfc76c0198dde0",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
               "id": "c9a763b6976ecf03aeb961577c17c31f1ac7c420",
               "links": {
@@ -757,7 +757,7 @@
           "post_title": "Email HTML - Best Practices",
           "menu_title": "Email HTML - Best Practices",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/emails/email-html-best-practices.md",
-          "hash": "40f2d0a5459bedb4089dcf84bf2aaf162b8b8b4f6d7d67d879ee23481c09cfb8",
+          "hash": "200ad453e137d6886a47e823b2898a84d42f9ec98995b1e9daa6402b29fab464",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/emails/email-html-best-practices.md",
           "id": "79c02f8dcd14aeaa6d93bcc8d2ad5b5c08479bac"
         }
@@ -2000,5 +2000,5 @@
       "categories": []
     }
   ],
-  "hash": "aa81395232e552fb858fb6f0f21ac9ecc0776919e77997d4814b5111047fc082"
+  "hash": "e20902215ae7b0742ebc562e101128dbf5b1fea86aebede287d426a374b4f397"
 }
