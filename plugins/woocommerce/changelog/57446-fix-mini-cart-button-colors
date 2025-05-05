@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Mini-Cart Shopping Button block to correctly apply background and text colors to the button instead of the container

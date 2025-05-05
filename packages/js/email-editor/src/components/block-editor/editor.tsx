@@ -86,7 +86,10 @@ export function InnerEditor( {
 			...settings,
 			onNavigateToEntityRecord,
 			onNavigateToPreviousEntityRecord,
-			defaultRenderingMode: 'template-locked',
+			defaultRenderingMode:
+				currentPost.postType === 'wp_template'
+					? 'post-only'
+					: 'template-locked',
 			supportsTemplateMode: true,
 			__experimentalBlockPatterns: blockPatterns, // eslint-disable-line
 		} ),
@@ -95,6 +98,7 @@ export function InnerEditor( {
 			onNavigateToEntityRecord,
 			onNavigateToPreviousEntityRecord,
 			blockPatterns,
+			currentPost.postType,
 		]
 	);
 

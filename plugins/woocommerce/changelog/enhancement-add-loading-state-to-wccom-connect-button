@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Mark the WPCOM connect button as busy and disabled when clicked.

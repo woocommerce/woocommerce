@@ -9,7 +9,7 @@ import {
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import { useResizeObserver, useViewportMatch } from '@wordpress/compose';
-import { useContext, useMemo, useRef, useState } from '@wordpress/element';
+import { useMemo, useRef, useState } from '@wordpress/element';
 import {
 	// @ts-expect-error No types for this exist yet.
 	privateApis as blockEditorPrivateApis,
@@ -24,9 +24,6 @@ import {
 	FONT_PREVIEW_HEIGHT,
 } from './constants';
 import { FontFamily } from '~/customize-store/types/font';
-import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
-import { isAIFlow, isNoAIFlow } from '~/customize-store/guards';
-import { FontFamiliesLoaderDotCom } from './font-families-loader-dot-com';
 import { FontFamiliesLoader } from './font-families-loader';
 
 const { useGlobalStyle, useGlobalSetting } = unlock( blockEditorPrivateApis );
@@ -92,16 +89,8 @@ export const FontPairingVariationPreview = () => {
 
 	const ratio = width ? width / defaultWidth : 1;
 	const normalizedHeight = Math.ceil( defaultHeight * ratio );
-	const externalFontFamilies = fontFamilies.filter(
-		( { slug } ) => slug !== 'system-font'
-	);
 
-	const { context } = useContext( CustomizeStoreContext );
-
-	const [ isLoaded, setIsLoaded ] = useState(
-		( isAIFlow( context.flowType ) && ! externalFontFamilies.length ) ||
-			isNoAIFlow( context.flowType )
-	);
+	const [ isLoaded, setIsLoaded ] = useState( false );
 
 	const getFontFamilyName = ( targetFontFamily: string ) => {
 		const fontFamily = fontFamilies.find(
@@ -197,19 +186,11 @@ export const FontPairingVariationPreview = () => {
 						</HStack>
 					</div>
 				</div>
-				{ isAIFlow( context.flowType ) && (
-					<FontFamiliesLoaderDotCom
-						fontFamilies={ fontFamilies }
-						onLoad={ handleOnLoad }
-					/>
-				) }
-				{ isNoAIFlow( context.flowType ) && (
-					<FontFamiliesLoader
-						fontFamilies={ fontFamilies }
-						onLoad={ handleOnLoad }
-						iframeInstance={ iframeInstance.current }
-					/>
-				) }
+				<FontFamiliesLoader
+					fontFamilies={ fontFamilies }
+					onLoad={ handleOnLoad }
+					iframeInstance={ iframeInstance.current }
+				/>
 			</>
 		</GlobalStylesVariationIframe>
 	);

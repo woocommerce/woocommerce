@@ -4,25 +4,19 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint;
 
-use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCCoreProfilerOptions;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCPaymentGateways;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCSettingsAccount;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCSettingsAdvanced;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCSettingsEmails;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCSettingsGeneral;
+use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCSettingsTax;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCSettingsIntegrations;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCSettingsProducts;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCSettingsSiteVisibility;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCShipping;
-use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCTaskOptions;
-use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCTaxRates;
-use Automattic\WooCommerce\Admin\Features\Blueprint\Importers\ImportSetWCPaymentGateways;
-use Automattic\WooCommerce\Admin\Features\Blueprint\Importers\ImportSetWCShipping;
-use Automattic\WooCommerce\Admin\Features\Blueprint\Importers\ImportSetWCTaxRates;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
 use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
-use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 
 /**
@@ -75,7 +69,7 @@ class Init {
 		$classnames = array(
 			ExportWCSettingsGeneral::class,
 			ExportWCSettingsProducts::class,
-			ExportWCTaxRates::class,
+			ExportWCSettingsTax::class,
 			ExportWCShipping::class,
 			ExportWCPaymentGateways::class,
 			ExportWCSettingsAccount::class,
