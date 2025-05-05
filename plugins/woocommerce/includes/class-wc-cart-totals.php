@@ -662,15 +662,17 @@ final class WC_Cart_Totals {
 			$item->total_tax = 0;
 
 			if ( has_filter( 'woocommerce_get_discounted_price' ) ) {
-				/**
-				 * Allow plugins to filter this price like in the legacy cart class.
-				 *
-				 * This is legacy and should probably be deprecated in the future.
-				 * $item->object is the cart item object.
-				 * $this->cart is the cart object.
-				 */
 				$item->total = wc_add_number_precision(
-					apply_filters( 'woocommerce_get_discounted_price', wc_remove_number_precision( $item->total ), $item->object, $this->cart )
+					/**
+					 * Allow plugins to filter this price like in the legacy cart class.
+					 *
+					 * This is legacy and should probably be deprecated in the future.
+					 * $item->object is the cart item object.
+					 * $this->cart is the cart object.
+					 *
+					 * @since 3.2.0
+					 */
+					(float) apply_filters( 'woocommerce_get_discounted_price', wc_remove_number_precision( $item->total ), $item->object, $this->cart )
 				);
 			}
 

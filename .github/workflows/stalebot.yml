@@ -12,16 +12,16 @@ jobs:
     stale:
         runs-on: ubuntu-latest
         permissions:
-            contents: read
+            contents: write
             issues: write
             pull-requests: write
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         steps:
-            - name: Process stale issues
+            - name: Process stale issues and PRs
               uses: actions/stale@v9.0.0
               with:
                   repo-token: ${{ secrets.GITHUB_TOKEN }}
-                  stale-issue-message: "As a part of this repository's maintenance, this issue is being marked as stale due to inactivity. Please feel free to comment on it in case we missed something.\n\n###### After 7 days with no activity this issue will be automatically be closed."
+                  stale-issue-message: "As a part of this repository's maintenance, this issue is being marked as stale due to inactivity. Please feel free to comment on it in case we missed something.\n\n###### After 7 days with no activity this issue will be automatically closed."
                   close-issue-message: 'This issue was closed because it has been 14 days with no activity.'
                   operations-per-run: 140
                   days-before-stale: -1
@@ -29,10 +29,16 @@ jobs:
                   days-before-issue-stale: 7
                   days-before-issue-close: 7
                   stale-issue-label: 'status: stale'
-                  stale-pr-label: 'status: stale'
                   exempt-issue-labels: 'type: enhancement'
                   only-issue-labels: 'needs: author feedback'
                   close-issue-label: "status: can't reproduce"
+                  days-before-pr-stale: 30
+                  days-before-pr-close: 14
+                  stale-pr-label: 'status: stale'
+                  only-pr-labels: 'needs: author feedback'
+                  stale-pr-message: "As a part of this repository's maintenance, this PR is being marked as stale due to inactivity. Please feel free to comment on it in case we missed something.\n\n###### After 14 days with no activity this PR will be automatically closed."
+                  close-pr-message: 'This PR was closed because it has been 1.5 months with no activity.'
+                  delete-branch: true
                   ascending: true
             - name: Process stale flaky tests issues
               uses: actions/stale@v9.0.0
@@ -74,11 +80,11 @@ jobs:
                           repo: context.repo.repo,
                           pull_number: pr.number
                         });
-                        
+
                         // Find the latest approval date for this PR
                         let latestApproval = null;
                         const approvalReviews = [];
-                        
+
                         for (const review of reviews) {
                           if (review.state === 'APPROVED') {
                             const reviewDate = new Date(review.submitted_at);
@@ -88,14 +94,14 @@ jobs:
                             }
                           }
                         }
-                        
+
                         // Process only if we found any approvals
                         if (latestApproval) {
                           console.log(`PR #${pr.number} latest approval on ${latestApproval.toISOString()}`);
-                          
+
                           if (latestApproval < thirtyDaysAgo) {
                             console.log(`Found ${approvalReviews.length} approvals to dismiss on PR #${pr.number} (latest approval was on ${latestApproval.toISOString()})`);
-                            
+
                             // Dismiss all approvals
                             for (const review of approvalReviews) {
                               console.log(`Dismissing approval from ${review.user.login}`);
