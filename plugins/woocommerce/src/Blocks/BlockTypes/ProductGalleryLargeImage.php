@@ -142,8 +142,13 @@ class ProductGalleryLargeImage extends AbstractBlock {
 							<?php if ( $context['fullScreenOnClick'] ) : ?>
 								data-wp-on--click="actions.openDialog"
 							<?php endif; ?>
+							<?php if ( 0 === $index ) : ?>
+								fetchpriority="high"
+							<?php else : ?>
+								fetchpriority="low"
+								loading="lazy"
+							<?php endif; ?>
 							tabindex="0"
-							loading="lazy"
 							alt=""
 						/>
 					</li>
