@@ -2247,6 +2247,25 @@ ul.wc_coupon_list_block {
 	}
 }
 
+#woocommerce-order-items .woocommerce_order_items_wrapper, .wc-order-preview-table-wrapper {
+	small.refunded {
+		display: block;
+		color: red;
+		white-space: nowrap;
+		margin-top: 0.5em;
+
+		&::before {
+			@include icon_dashicons("\f171");
+			position: relative;
+			top: auto;
+			left: auto;
+			margin: -1px 4px 0 0;
+			vertical-align: middle;
+			line-height: 1em;
+		}
+	}
+}
+
 #woocommerce-order-items {
 	.inside {
 		display: block !important;
@@ -2674,23 +2693,6 @@ ul.wc_coupon_list_block {
 
 				&:hover .delete-order-tax {
 					visibility: visible;
-				}
-			}
-
-			small.refunded {
-				display: block;
-				color: $red;
-				white-space: nowrap;
-				margin-top: 0.5em;
-
-				&::before {
-					@include icon_dashicons("\f171");
-					position: relative;
-					top: auto;
-					left: auto;
-					margin: -1px 4px 0 0;
-					vertical-align: middle;
-					line-height: 1em;
 				}
 			}
 		}
