@@ -63,7 +63,7 @@
  * For the WYSIWYG experience we don't want to display any margins between blocks in the editor
  */
 .wp-block {
-	clear: both; // for ensuring that floated elements (images) are cleared
+	clear: both;
 }
 
 /*
@@ -113,4 +113,13 @@ ol.has-background {
 .is-mobile-preview figure > div {
 	max-width: 100% !important;
 	height: auto !important;
+}
+
+/*
+ * Reset default margin for blocks in template-mode
+ * This was causing the first block to have a margin-top set to block gap.
+ * We control the gab via different css
+ */
+.wp-site-blocks > * {
+	margin-block-start: 0;
 }
