@@ -257,10 +257,10 @@ class Utils {
 	 * This means we might exceed the target length by a few characters.
 	 * The append string length is not included in the character count.
 	 *
-	 * @param string      $text          The text to truncate.
-	 *                                   It will not be sanitized, stripped of HTML tags, or modified in any way before truncation.
-	 * @param int         $target_length The target character length of the truncated text.
-	 * @param string      $append        Optional. The string to append to the truncated text, if there is any truncation.
+	 * @param string $text          The text to truncate.
+	 *                              It will not be sanitized, stripped of HTML tags, or modified in any way before truncation.
+	 * @param int    $target_length The target character length of the truncated text.
+	 * @param string $append        Optional. The string to append to the truncated text, if there is any truncation.
 	 *
 	 * @return string The truncated text.
 	 */
