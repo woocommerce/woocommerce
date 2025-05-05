@@ -1,0 +1,15 @@
+.woocommerce-email-editor__settings-panel {
+	.woocommerce-settings-panel__preview-text-length {
+		color: #000;
+		display: inline-block;
+		float: right;
+		font-weight: 500;
+		padding: 3px;
+	}
+	.woocommerce-settings-panel__preview-text-length-warning {
+		color: #f0b849;
+	}
+	.woocommerce-settings-panel__preview-text-length-error {
+		color: #cc1818;
+	}
+}

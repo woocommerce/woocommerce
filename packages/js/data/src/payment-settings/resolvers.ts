@@ -43,7 +43,7 @@ export function* getOfflinePaymentGateways( country?: string ) {
 
 export function* getWooPayEligibility() {
 	const response: WooPayEligibilityResponse = yield apiFetch( {
-		path: `${ WC_ADMIN_NAMESPACE }/settings/payments/woopay-eligibility`,
+		path: `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/woopay-eligibility`,
 	} );
 
 	return response;

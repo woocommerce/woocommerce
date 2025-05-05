@@ -4,12 +4,17 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Modal } from '@wordpress/components';
 import { useState } from '@wordpress/element';
+import { useDispatch } from '@wordpress/data';
+import {
+	paymentSettingsStore,
+	woopaymentsOnboardingStore,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import './modals.scss';
-import { getWooPaymentsResetAccountLink } from '~/settings-payments/utils';
+import { resetWooPaymentsAccount } from '~/settings-payments/utils';
 
 interface WooPaymentsResetAccountModalProps {
 	/**
@@ -36,6 +41,12 @@ export const WooPaymentsResetAccountModal = ( {
 	isTestMode,
 }: WooPaymentsResetAccountModalProps ) => {
 	const [ isResettingAccount, setIsResettingAccount ] = useState( false );
+	const { invalidateResolutionForStoreSelector: invalidatePaymentGateways } =
+		useDispatch( paymentSettingsStore );
+	const {
+		invalidateResolutionForStoreSelector: invalidateWooPaymentsOnboarding,
+	} = useDispatch( woopaymentsOnboardingStore );
+	const { createNotice } = useDispatch( 'core/notices' );
 
 	/**
 	 * Handles the "Reset Account" action.
@@ -44,7 +55,29 @@ export const WooPaymentsResetAccountModal = ( {
 	const handleResetAccount = () => {
 		setIsResettingAccount( true );
 
-		window.location.href = getWooPaymentsResetAccountLink();
+		resetWooPaymentsAccount()
+			.then( () => {
+				// Refresh the providers store.
+				invalidatePaymentGateways( 'getPaymentProviders' );
+				// Refresh the WooPayments in-context onboarding store.
+				invalidateWooPaymentsOnboarding( 'getOnboardingData' );
+			} )
+			.catch( () => {
+				createNotice(
+					'error',
+					__(
+						'Failed to reset your WooPayments account.',
+						'woocommerce'
+					),
+					{
+						isDismissible: true,
+					}
+				);
+			} )
+			.finally( () => {
+				setIsResettingAccount( false );
+				onClose();
+			} );
 	};
 
 	return (

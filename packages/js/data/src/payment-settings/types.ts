@@ -60,6 +60,7 @@ export type RecommendedPaymentMethod = {
 	_order: number;
 	title: string;
 	description: string;
+	category?: 'primary' | 'secondary';
 	icon: string;
 	enabled: boolean;
 	extraTitle: string;
@@ -71,6 +72,7 @@ export type PaymentProviderOnboardingState = {
 	started: boolean;
 	completed: boolean;
 	test_mode: boolean;
+	wpcom_has_working_connection?: boolean;
 };
 
 // General payment provider type.
@@ -94,6 +96,7 @@ export type PaymentProvider = {
 			onboard: LinkData;
 		};
 		recommended_payment_methods?: RecommendedPaymentMethod[];
+		type?: string;
 	};
 	tags?: string[];
 	_suggestion_id?: string;
@@ -112,6 +115,7 @@ export type PaymentGatewayProvider = PaymentProvider & {
 			onboard: LinkData;
 		};
 		recommended_payment_methods: RecommendedPaymentMethod[];
+		type: string;
 	};
 };
 

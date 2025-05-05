@@ -1,14 +1,45 @@
 # Changelog
 
+## [0.7](https://github.com/woocommerce/woocommerce/releases/tag/0.7) - 2025-04-30 
+
+-   Minor - Adds deprecation notice for Woo AI interactions
+-   Minor - Bump node version.
+-   Patch - Comment: Fix comment typos across various files.
+-   Patch - Update Woo.com references to WooCommerce.com.
+-   Minor - Use @automattic/tour-kit@1.1.3
+-   Minor - Bump @wordpress/env to 10.14.0 and remove patch for 10.10.0
+-   Patch - Bump @wordpress/env to 10.17.0
+-   Patch - Bump wireit dependency version to latest.
+-   Patch - Fix pnpm version to 9.1.3 to avoid dependency installation issues.
+-   Patch - Minor tooling tweaks (zip compression level, composer invocation)
+-   Patch - Monorepo: bump and patch wp-env to reduce amount of crashes in CI.
+-   Minor - Monorepo: bump pnpm version to 9.15.0
+-   Patch - Monorepo: consolidate @babel/* dependencies versions across the monorepo.
+-   Patch - Monorepo: consolidate syncpack config around React 17/18 usage.
+-   Patch - Monorepo: enable Jest caching.
+-   Patch - Monorepo: ensure monorepo packages are linked via workspace-version of the dependencies.
+-   Patch - Monorepo: minor tweaks in zip building script (use frozen lock file when installing dependecies).
+-   Patch - Monorepo: refresh wireit dependencyOutputs configuration synchronization when installing dependencies.
+-   Patch - Monorepo: review deprecated dev-dependecies (take 2)
+-   Patch - Monorepo: tweak Webpack loaders paths filtering for better build perfromance.
+-   Minor - Remove unused React imports
+-   Patch - Update @wordpress-env package to version 9.0.7
+-   Major [ **BREAKING CHANGE** ] - Updated declared dependencies to React 18 and Wordpress 6.6
+-   Patch - Update pnpm to 9.1.0
+-   Patch - Update wireit to 0.14.10
+-   Minor - Upgraded Typescript in the monorepo to 5.7.2
+-   Minor - Fix typos.
+-   Patch - Request valid JSON from the API when generating AI product names
+
 ## [0.6](https://github.com/woocommerce/woocommerce/releases/tag/0.6) - 2024-03-29 
 
--   Patch - Woo AI - Fix z-index issue with Background Removal Spotlight.
+-   Patch - Woo AI
 -   Patch - Add composer install to changelog script.
 -   Patch - Update references to woocommerce.com to now reference woo.com.
--   Minor - Add React Testing Library and tests to the Woo AI plugin.
 -   Patch - Fix Woo AI webpack build configuration.
 -   Patch - Only initialize background removal when Jetpack connection is present.
 -   Patch - Update / tweak a few more links in docs and comments.
+-   Minor - Add React Testing Library and tests to the Woo AI plugin.
 
 ## [0.5](https://github.com/woocommerce/woocommerce/releases/tag/0.5) - 2023-10-19 
 

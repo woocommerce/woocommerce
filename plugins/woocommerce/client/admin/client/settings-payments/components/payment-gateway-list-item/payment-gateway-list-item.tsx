@@ -35,6 +35,7 @@ type PaymentGatewayItemProps = {
 	installingPlugin: string | null;
 	acceptIncentive: ( id: string ) => void;
 	shouldHighlightIncentive: boolean;
+	setIsOnboardingModalOpen: ( isOpen: boolean ) => void;
 };
 
 export const PaymentGatewayListItem = ( {
@@ -42,6 +43,7 @@ export const PaymentGatewayListItem = ( {
 	installingPlugin,
 	acceptIncentive,
 	shouldHighlightIncentive,
+	setIsOnboardingModalOpen,
 	...props
 }: PaymentGatewayItemProps ) => {
 	const itemIsWooPayments = isWooPayments( gateway.id );
@@ -175,6 +177,10 @@ export const PaymentGatewayListItem = ( {
 									installingPlugin={ installingPlugin }
 									incentive={ incentive }
 									acceptIncentive={ acceptIncentive }
+									setOnboardingModalOpen={
+										setIsOnboardingModalOpen
+									}
+									onboardingType={ gateway.onboarding.type }
 								/>
 							) }
 
@@ -203,6 +209,10 @@ export const PaymentGatewayListItem = ( {
 									gatewayHasRecommendedPaymentMethods
 								}
 								installingPlugin={ installingPlugin }
+								setOnboardingModalOpen={
+									setIsOnboardingModalOpen
+								}
+								onboardingType={ gateway.onboarding.type }
 							/>
 						) }
 
@@ -216,6 +226,10 @@ export const PaymentGatewayListItem = ( {
 									acceptIncentive={ acceptIncentive }
 									installingPlugin={ installingPlugin }
 									incentive={ incentive }
+									setOnboardingModalOpen={
+										setIsOnboardingModalOpen
+									}
+									onboardingType={ gateway.onboarding.type }
 								/>
 							) }
 

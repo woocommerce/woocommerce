@@ -79,6 +79,23 @@ class AddToCartWithOptionsPage {
 			{ clientId: parentClientId }
 		);
 	}
+
+	async updateSingleProductTemplate() {
+		await this.admin.visitSiteEditor( {
+			postId: 'woocommerce/woocommerce//single-product',
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+
+		const addToCartFormBlock = await this.editor.getBlockByName(
+			'woocommerce/add-to-cart-form'
+		);
+		await this.editor.selectBlocks( addToCartFormBlock );
+
+		await this.page
+			.getByRole( 'button', { name: 'Upgrade to the blockified' } )
+			.click();
+	}
 }
 
 export default AddToCartWithOptionsPage;

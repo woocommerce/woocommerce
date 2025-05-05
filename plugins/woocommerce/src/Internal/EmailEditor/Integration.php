@@ -45,6 +45,13 @@ class Integration {
 	private TemplateApiController $template_api_controller;
 
 	/**
+	 * The email data API controller instance.
+	 *
+	 * @var EmailApiController
+	 */
+	private EmailApiController $email_api_controller;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -71,6 +78,7 @@ class Integration {
 	 */
 	public function initialize() {
 		$this->init_hooks();
+		$this->extend_post_api();
 		$this->extend_template_post_api();
 		$this->register_hooks();
 	}
@@ -87,6 +95,7 @@ class Integration {
 		$container->get( WCTransactionalEmails::class );
 		$this->editor_page_renderer    = $container->get( PageRenderer::class );
 		$this->template_api_controller = $container->get( TemplateApiController::class );
+		$this->email_api_controller    = $container->get( EmailApiController::class );
 	}
 
 	/**
@@ -280,5 +289,20 @@ class Integration {
 		$type_param = isset( $_GET['woo_email'] ) ? sanitize_text_field( wp_unslash( $_GET['woo_email'] ) ) : '';
 		// phpcs:enable
 		return $this->update_email_preview_data( $data, $type_param );
+	}
+
+	/**
+	 * Extend the post API for the woo_email post type to add and save the woocommerce_data field.
+	 */
+	public function extend_post_api(): void {
+		register_rest_field(
+			self::EMAIL_POST_TYPE,
+			'woocommerce_data',
+			array(
+				'get_callback'    => array( $this->email_api_controller, 'get_email_data' ),
+				'update_callback' => array( $this->email_api_controller, 'save_email_data' ),
+				'schema'          => $this->email_api_controller->get_email_data_schema(),
+			)
+		);
 	}
 }
