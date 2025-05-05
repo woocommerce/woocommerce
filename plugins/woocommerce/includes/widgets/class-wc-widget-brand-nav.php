@@ -283,8 +283,6 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 			}
 		}
 
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
-		// nosemgrep: php.wp.security.xss.query-arg
 		return $link;
 	}
 
