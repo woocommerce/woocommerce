@@ -526,8 +526,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 		}
 
 		if ( ! isset( $cached_counts[ $query_hash ] ) ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$results                      = $wpdb->get_results( $query, ARRAY_A ); // @codingStandardsIgnoreLine
+			$results                      = $wpdb->get_results( $query, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$counts                       = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
 			$cached_counts[ $query_hash ] = $counts;
 			if ( true === $cache ) {
