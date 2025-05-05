@@ -27,9 +27,9 @@ class OrderPriceFormatter {
 	 */
 	public static function get_formatted_item_subtotal( WC_Abstract_Order $order, WC_Order_Item $item, string $tax_display = '' ): string {
 		$tax_display   = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
-		$include_tax   = 'excl' !== $tax_display;
-		$item_subtotal = $order->get_item_subtotal( $item, $include_tax );
-		return self::format_price( $order, $item_subtotal, $include_tax );
+		$includes_tax  = 'excl' !== $tax_display;
+		$item_subtotal = $order->get_item_subtotal( $item, $includes_tax );
+		return self::format_price( $order, $item_subtotal, $includes_tax );
 	}
 
 	/**
@@ -37,11 +37,11 @@ class OrderPriceFormatter {
 	 *
 	 * @param WC_Abstract_Order $order Order instance.
 	 * @param float             $amount The amount to format.
-	 * @param bool              $include_tax Whether to include tax in the formatted price.
+	 * @param bool              $includes_tax Whether to include tax in the formatted price.
 	 * @return string Formatted price string.
 	 */
-	private static function format_price( WC_Abstract_Order $order, float $amount, bool $include_tax ): string {
-		if ( $include_tax ) {
+	private static function format_price( WC_Abstract_Order $order, float $amount, bool $includes_tax ): string {
+		if ( $includes_tax ) {
 			return wc_price( $amount, array( 'currency' => $order->get_currency() ) );
 		}
 
