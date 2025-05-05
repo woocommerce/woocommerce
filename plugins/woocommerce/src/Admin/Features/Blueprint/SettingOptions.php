@@ -22,7 +22,7 @@ class SettingOptions {
 	 *
 	 * @var array
 	 */
-	private $ignore_setting_types = array( 'title', 'sectionend', 'slotfill_placeholder' );
+	private $ignore_setting_types = array( 'title', 'sectionend', 'slotfill_placeholder', 'hidden' );
 
 
 	/**
@@ -62,7 +62,8 @@ class SettingOptions {
 				continue;
 			}
 
-			$page_options[ $key ] = get_option( $key, $setting['default'] ?? null );
+			$default_value        = $setting['default'] ?? null;
+			$page_options[ $key ] = get_option( $key, $default_value );
 		}
 
 		return $page_options;
