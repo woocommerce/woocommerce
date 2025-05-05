@@ -396,7 +396,7 @@ const productGallery = {
 				}
 			}
 		},
-		toggleActiveImageAtrributes: () => {
+		toggleActiveImageAttributes: () => {
 			const element = getElement()?.ref as HTMLElement;
 			if ( ! element ) return false;
 
