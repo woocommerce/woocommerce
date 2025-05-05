@@ -122,7 +122,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 				tabindex="-1"
 				data-wp-interactive="woocommerce/product-gallery"
 			>
-				<?php foreach ( $image_data as $image ) : ?>
+				<?php foreach ( $image_data as $index => $image ) : ?>
 					<li class="wc-block-product-gallery-large-image__wrapper">
 						<img
 							class="<?php echo esc_attr( $base_classes ); ?>"
