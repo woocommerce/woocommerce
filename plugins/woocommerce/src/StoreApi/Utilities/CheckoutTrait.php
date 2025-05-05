@@ -238,7 +238,7 @@ trait CheckoutTrait {
 		}
 
 		// The above logic sets visible fields, but not hidden fields. Unset the hidden fields here.
-		$other_posted_field_values = array_diff_key( $field_values, $additional_fields );
+		$other_posted_field_values = array_diff_key( $request['additional_fields'], $additional_fields );
 
 		foreach ( $other_posted_field_values as $key => $value ) {
 			if ( $this->additional_fields_controller->is_field( $key ) ) {
