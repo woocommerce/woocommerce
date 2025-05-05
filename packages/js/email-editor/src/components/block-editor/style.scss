@@ -193,3 +193,9 @@
 .block-editor-block-inspector__advanced {
 	display: none;
 }
+
+// Enforce hidden state.
+// This is used to hide the publish button when there are no email edits.
+.force-hidden {
+	display: none !important;
+}

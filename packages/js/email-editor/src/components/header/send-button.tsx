@@ -45,6 +45,7 @@ export function SendButton( { validateContent, isContentInvalid } ) {
 	return (
 		<Button
 			variant="primary"
+			size="compact"
 			onClick={ () => {
 				recordEvent( 'header_send_button_clicked' );
 				if ( validateContent() ) {

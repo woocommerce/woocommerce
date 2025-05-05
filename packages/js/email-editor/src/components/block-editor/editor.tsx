@@ -31,6 +31,7 @@ import { SendPreview } from '../preview';
 import { MoreMenu } from '../more-menu';
 import { SettingsPanel } from '../sidebar/settings-panel';
 import { TemplateSettingsPanel } from '../sidebar/template-settings-panel';
+import { PublishSave } from '../../hacks/publish-save';
 
 export function InnerEditor( {
 	postId: initialPostId,
@@ -136,6 +137,7 @@ export function InnerEditor( {
 					) : (
 						<SettingsPanel />
 					) }
+					<PublishSave />
 				</Editor>
 			</ErrorBoundary>
 		</SlotFillProvider>
