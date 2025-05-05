@@ -1,6 +1,6 @@
 <?php
 /**
- * POSOrderUtil class file.
+ * PointOfSaleOrderUtil class file.
  */
 
 declare( strict_types = 1 );
@@ -14,7 +14,7 @@ use WC_Abstract_Order;
  *
  * @internal Just for internal use.
  */
-class POSOrderUtil {
+class PointOfSaleOrderUtil {
 	/**
 	 * Check if the order is a POS (Point of Sale) order.
 	 *

@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Automattic\WooCommerce\Internal\Email\OrderPriceFormatter;
-use Automattic\WooCommerce\Internal\Orders\POSOrderUtil;
+use Automattic\WooCommerce\Internal\Orders\PointOfSaleOrderUtil;
 
 if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 
@@ -243,7 +243,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @return array Modified array of valid template class names.
 		 */
 		public function add_to_valid_template_classes( $valid_template_classes, $order ) {
-			if ( ! POSOrderUtil::is_pos_order( $order ) ) {
+			if ( ! PointOfSaleOrderUtil::is_pos_order( $order ) ) {
 				return $valid_template_classes;
 			}
 			$valid_template_classes[] = get_class( $this );
