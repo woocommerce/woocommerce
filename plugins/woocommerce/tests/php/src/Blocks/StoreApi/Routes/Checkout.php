@@ -1034,7 +1034,7 @@ class Checkout extends MockeryTestCase {
 		$status   = $response->get_status();
 		$data     = $response->get_data();
 
-		$this->assertEquals( 200, $status, json_encode( $data, JSON_PRETTY_PRINT ) );;;
+		$this->assertEquals( 200, $status );
 		$this->assertEquals( 0, $data['customer_id'] );
 
 		// Return WC_Session to original state.
