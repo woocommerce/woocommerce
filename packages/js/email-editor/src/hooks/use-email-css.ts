@@ -13,6 +13,13 @@ import { EmailStyles, storeName } from '../store';
 import { useUserTheme } from './use-user-theme';
 import { useGlobalStylesOutputWithConfig } from '../private-apis';
 
+// Utility to normalize spacing value to --wp--preset--spacing--<value> format
+function normalizeSpacingValue(value: string): string {
+	if (typeof value !== 'string') return value;
+	const match = value.match(/^var:preset\|spacing\|([a-zA-Z0-9-]+)$/);
+	return match ? `var(--wp--preset--spacing--${match[1]})` : value;
+}
+
 export function useEmailCss() {
 	const { userTheme } = useUserTheme();
 	const { editorTheme, layout, deviceType } = useSelect( ( select ) => {
@@ -44,12 +51,21 @@ export function useEmailCss() {
 
 	const [ styles ] = useGlobalStylesOutputWithConfig( mergedConfig );
 
+	let rootContainerStyles = `display:flow-root; width:${ layout?.contentSize }; margin: 0 auto;box-sizing: border-box;`;
+	const padding = mergedConfig.styles?.spacing?.padding;
+	if (padding) {
+		rootContainerStyles += `padding-left:${ normalizeSpacingValue(padding.left) };`;
+		rootContainerStyles += `padding-right:${ normalizeSpacingValue(padding.right) };`;
+	}
+
+	console.log( 'rootContainerStyles', rootContainerStyles );
+
 	const finalStyles = useMemo(
 		() => {
 			return [
 			...( ( styles as string[] ) ?? [] ),
 			deviceType !== 'Mobile' && layout && {
-				css: `.is-root-container{display:flow-root; width:${ layout?.contentSize }; margin: 0 auto;box-sizing: border-box;}`,
+				css: `.is-root-container{ ${ rootContainerStyles } }`,
 			},
 		]},
 		[ styles ]
