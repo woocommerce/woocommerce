@@ -49,15 +49,21 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 			$this->description = $this->email_improvements_enabled
 				? __( 'Let shoppers know once their POS order is complete.', 'woocommerce' )
 				: __( 'Order complete emails are sent to customers when their POS orders are marked completed.', 'woocommerce' );
+
+			$this->manual = true;
 		}
 
 		/**
 		 * Trigger the sending of this email.
 		 *
-		 * @param int            $order_id The order ID.
-		 * @param WC_Order|false $order Order object.
+		 * @param int    $order_id The order ID.
+		 * @param string $template_id The email template ID.
 		 */
-		public function trigger( $order_id, $order = false ) {
+		public function trigger( $order_id, $template_id ) {
+			if ( $this->id !== $template_id ) {
+				return;
+			}
+
 			$this->setup_locale();
 
 			if ( $order_id && ! is_a( $order, 'WC_Order' ) ) {
@@ -76,21 +82,6 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 			}
 
 			$this->restore_locale();
-		}
-
-		/**
-		 * Trigger the sending of this email when requested via the REST API.
-		 *
-		 * @param int    $order_id    The order ID.
-		 * @param string $template_id The email template ID.
-		 */
-		public function maybe_trigger_from_api( $order_id, $template_id ) {
-			if ( $this->id === $template_id ) {
-				$order = wc_get_order( $order_id );
-				if ( $order ) {
-					$this->trigger( $order_id, $order );
-				}
-			}
 		}
 
 		/**
@@ -197,7 +188,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		private function enable_order_email_actions_for_pos_orders() {
 			$this->enable_email_template_for_pos_orders();
 			// Enable send email when requested.
-			add_action( 'woocommerce_rest_order_actions_email_send', array( $this, 'maybe_trigger_from_api' ), 10, 2 );
+			add_action( 'woocommerce_rest_order_actions_email_send', array( $this, 'trigger' ), 10, 2 );
 		}
 
 		/**
