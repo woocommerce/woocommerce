@@ -35,7 +35,7 @@
 		border-color: currentColor;
 	}
 
-	&--disabled {
+	&[aria-disabled="true"] {
 		border-color: var(--wc-subtext);
 		color: var(--wc-subtext);
 		text-decoration: line-through;

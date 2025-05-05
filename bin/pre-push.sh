@@ -50,8 +50,9 @@ if [ -n "$changedFiles" ]; then
 		echo -n "-> Executing '$command' ($iteration of $iterations) "
 		start=$SECONDS
 		result=$($command 2>&1)
+		code=$?
 		duration=$(( SECONDS - start ))
-		if [ $? -ne 0 ]; then
+		if [ $code -ne 0 ]; then
 			echo "[ERR] (aborting, please run manually to troubleshoot)"
 			exit 1
 		fi

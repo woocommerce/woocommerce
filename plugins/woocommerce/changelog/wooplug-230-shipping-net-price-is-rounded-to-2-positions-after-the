@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid rounding shipping price when creating shipping line items to match products
