@@ -153,14 +153,12 @@ test.describe( `${ blockData.name }`, () => {
 				.nth( 1 )
 				.click();
 
-			// Wait for the transition to complete
-			// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
-			await page.waitForTimeout( 400 );
+			await expect( async () => {
+				const newVisibleLargeImageId =
+					await pageObject.getVisibleLargeImageId();
 
-			const newVisibleLargeImageId =
-				await pageObject.getVisibleLargeImageId();
-
-			expect( newVisibleLargeImageId ).toBe( secondImageThumbnailId );
+				expect( newVisibleLargeImageId ).toBe( secondImageThumbnailId );
+			} ).toPass( { timeout: 1_000 } );
 		} );
 	} );
 
@@ -245,14 +243,14 @@ test.describe( `${ blockData.name }`, () => {
 			} );
 			await largeImageBlock.click();
 
-			// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
-			await page.waitForTimeout( 300 );
-			const popUpSelectedImageId =
-				await pageObject.getActiveImageElementId( {
-					page,
-				} );
+			await expect( async () => {
+				const popUpSelectedImageId =
+					await pageObject.getActiveImageElementId( {
+						page,
+					} );
 
-			expect( popUpSelectedImageId ).toBe( nextImageId );
+				expect( popUpSelectedImageId ).toBe( nextImageId );
+			} ).toPass( { timeout: 1_000 } );
 
 			const closePopUpButton = page.locator(
 				'.wc-block-product-gallery-dialog__close-button'

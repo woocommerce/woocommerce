@@ -197,13 +197,11 @@ test.describe( `${ blockData.name }`, () => {
 		await addToCartWithOptionsColorSelector.selectOption( 'Green' );
 		await addToCartWithOptionsSizeSelector.selectOption( 'No' );
 
-		// We trigger img srcs to be set after the mutation observer is triggered.
-		// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
-		await page.waitForTimeout( 500 );
+		await expect( async () => {
+			const variationImageId = await pageObject.getVisibleLargeImageId();
 
-		const variationImageId = await pageObject.getVisibleLargeImageId();
-
-		expect( initialImageId ).not.toEqual( variationImageId );
+			expect( initialImageId ).not.toEqual( variationImageId );
+		} ).toPass( { timeout: 1_000 } );
 	} );
 
 	test.describe( 'Swipe to navigate', () => {
@@ -296,14 +294,12 @@ test.describe( `${ blockData.name }`, () => {
 			const dialog = page.locator( '.wc-block-product-gallery-dialog' );
 			await expect( dialog ).toBeHidden();
 
-			// Timeout is needed to allow the image animation to finish.
-			// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
-			await page.waitForTimeout( 400 );
+			await expect( async () => {
+				// Verify the next image is shown
+				const nextImageId = await pageObject.getVisibleLargeImageId();
 
-			// Verify the next image is shown
-			const nextImageId = await pageObject.getVisibleLargeImageId();
-
-			expect( nextImageId ).not.toEqual( initialImageId );
+				expect( nextImageId ).not.toEqual( initialImageId );
+			} ).toPass( { timeout: 1_000 } );
 		} );
 	} );
 } );
