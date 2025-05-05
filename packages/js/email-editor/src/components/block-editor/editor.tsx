@@ -7,7 +7,6 @@ import {
 	LocalAutosaveMonitor,
 	UnsavedChangesWarning,
 	EditorKeyboardShortcutsRegister,
-	EditorSnackbars,
 	ErrorBoundary,
 	PostLockedModal,
 	store as editorStore,
@@ -32,6 +31,7 @@ import { MoreMenu } from '../more-menu';
 import { SettingsPanel } from '../sidebar/settings-panel';
 import { TemplateSettingsPanel } from '../sidebar/template-settings-panel';
 import { PublishSave } from '../../hacks/publish-save';
+import { EditorNotices } from '../notices';
 
 export function InnerEditor( {
 	postId: initialPostId,
@@ -125,7 +125,6 @@ export function InnerEditor( {
 					<LocalAutosaveMonitor />
 					<UnsavedChangesWarning />
 					<EditorKeyboardShortcutsRegister />
-					<EditorSnackbars />
 					<PostLockedModal />
 					<TemplateSelection />
 					<StylesSidebar />
@@ -138,6 +137,7 @@ export function InnerEditor( {
 						<SettingsPanel />
 					) }
 					<PublishSave />
+					<EditorNotices />
 				</Editor>
 			</ErrorBoundary>
 		</SlotFillProvider>
