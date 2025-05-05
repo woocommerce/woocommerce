@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Legacy Attribute Filter: fix the width of the dropdown style becomes too small when used within Row block.

@@ -74,11 +74,7 @@ export const OtherPaymentGateways = ( {
 
 	const hidePopoverDebounced = useDebounce( () => {
 		setCategoryIdWithPopoverVisible( '' );
-	}, 350 );
-	const showPopover = ( categoryId: string ) => {
-		setCategoryIdWithPopoverVisible( categoryId );
-		hidePopoverDebounced.cancel();
-	};
+	}, 1000 );
 
 	// Group suggestions by category.
 	const suggestionsByCategory = useMemo(
@@ -167,7 +163,7 @@ export const OtherPaymentGateways = ( {
 										)
 									}
 									onMouseEnter={ () =>
-										showPopover( category.id )
+										hidePopoverDebounced.cancel()
 									}
 									onMouseLeave={ hidePopoverDebounced }
 									onKeyDown={ ( event ) => {

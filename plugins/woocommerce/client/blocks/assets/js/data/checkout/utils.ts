@@ -22,7 +22,12 @@ import {
 } from '@wordpress/data/build-types/types';
 import { checkoutStore } from '@woocommerce/block-data';
 import { select } from '@wordpress/data';
-import type { AdditionalValues, ContactForm } from '@woocommerce/settings';
+import type {
+	ContactForm,
+	ContactFormValues,
+	OrderForm,
+	OrderFormValues,
+} from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -238,8 +243,28 @@ export const getPaymentResultFromCheckoutResponse = (
 	return paymentResult;
 };
 
+export const hasValidationError = (
+	fieldKey: keyof ContactForm | keyof OrderForm
+) => {
+	let prefix = '';
+	if ( CONTACT_FORM_KEYS.includes( fieldKey as keyof ContactForm ) ) {
+		prefix = 'contact_';
+	} else if ( ORDER_FORM_KEYS.includes( fieldKey as keyof OrderForm ) ) {
+		prefix = 'order_';
+	} else {
+		return false;
+	}
+	const error = select( validationStore ).getValidationError(
+		`${ prefix }${ fieldKey }`
+	);
+	if ( error ) {
+		return true;
+	}
+	return false;
+};
+
 export const validateAdditionalFields = (
-	additionalFields: AdditionalValues
+	additionalFields: OrderFormValues | ContactFormValues
 ): boolean => {
 	// Early return if no additional fields to validate
 	if ( Object.keys( additionalFields ).length === 0 ) {
@@ -247,24 +272,11 @@ export const validateAdditionalFields = (
 	}
 
 	// Check each additional field for validation errors
-	// The validation store prefixes ads a prefix depending on the field location
-	for ( const fieldKey of Object.keys( additionalFields ) ) {
-		let prefix = '';
-		if ( CONTACT_FORM_KEYS.includes( fieldKey as keyof ContactForm ) ) {
-			prefix = 'contact_';
-		} else if (
-			ORDER_FORM_KEYS.includes( fieldKey as keyof AdditionalValues )
-		) {
-			prefix = 'order_';
-		} else {
-			return false;
-		}
-
-		const error = select( validationStore ).getValidationError(
-			`${ prefix }${ fieldKey }`
-		);
-
-		if ( error && ! error.hidden ) {
+	// The validation store adds a prefix depending on the field location
+	for ( const fieldKey of Object.keys( additionalFields ) as Array<
+		keyof ContactForm | keyof OrderForm
+	> ) {
+		if ( hasValidationError( fieldKey ) ) {
 			return false;
 		}
 	}

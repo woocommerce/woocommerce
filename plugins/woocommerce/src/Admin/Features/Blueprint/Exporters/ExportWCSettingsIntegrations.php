@@ -4,6 +4,7 @@ declare( strict_types = 1);
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
+use Automattic\WooCommerce\Blueprint\Steps\SetSiteOptions;
 use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 
 /**
@@ -33,6 +34,28 @@ class ExportWCSettingsIntegrations extends ExportWCSettings {
 	public function get_label() {
 		return __( 'Integrations', 'woocommerce' );
 	}
+
+	/**
+	 * Export WooCommerce settings.
+	 *
+	 * @return SetSiteOptions
+	 */
+	public function export() {
+		if ( ! isset( WC()->integrations ) ) {
+			return new SetSiteOptions( array() );
+		}
+
+		$integrations = WC()->integrations->get_integrations();
+
+		$settings = array();
+		foreach ( $integrations as $integration ) {
+			$option_key              = $integration->get_option_key();
+			$settings[ $option_key ] = get_option( $option_key, null );
+		}
+
+		return new SetSiteOptions( $settings );
+	}
+
 
 	/**
 	 * Return description used in the frontend.
