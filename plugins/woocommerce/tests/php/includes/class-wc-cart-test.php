@@ -324,7 +324,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_checkout_fields', 'remove_unwanted_fields_from_checkout_page' );
 
 		update_option( 'woocommerce_shipping_cost_requires_address', $default_shipping_cost_requires_address );
-		add_filter( 'woocommerce_get_country_locale', 'make_locale_postcode_optional' );
 		$product->delete( true );
 		WC()->cart->get_customer()->set_shipping_country( 'GB' );
 		WC()->cart->get_customer()->set_shipping_state( '' );
