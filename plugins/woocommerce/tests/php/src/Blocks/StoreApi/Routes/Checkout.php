@@ -971,11 +971,11 @@ class Checkout extends MockeryTestCase {
 		$status   = $response->get_status();
 		$data     = $response->get_data();
 
-		$this->assertEquals( $status, 200, print_r( $data, true ) );
+		$this->assertEquals( 200, $status, print_r( $data, true ) );
 		$this->assertTrue( $data['customer_id'] > 0 );
 
 		$customer = get_user_by( 'id', $data['customer_id'] );
-		$this->assertEquals( $customer->user_email, 'testaccount@test.com' );
+		$this->assertEquals( 'testaccount@test.com', $customer->user_email );
 
 		// Return WC_Session to original state.
 		WC()->session = $old_session;
@@ -1034,8 +1034,8 @@ class Checkout extends MockeryTestCase {
 		$status   = $response->get_status();
 		$data     = $response->get_data();
 
-		$this->assertEquals( $status, 200 );
-		$this->assertEquals( $data['customer_id'], 0 );
+		$this->assertEquals( 200, $status, json_encode( $data, JSON_PRETTY_PRINT ) );;;
+		$this->assertEquals( 0, $data['customer_id'] );
 
 		// Return WC_Session to original state.
 		WC()->session = $old_session;

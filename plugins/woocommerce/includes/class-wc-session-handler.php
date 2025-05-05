@@ -104,9 +104,14 @@ class WC_Session_Handler extends WC_Session {
 			 */
 			$this->_data = apply_filters( 'woocommerce_restored_session_data', $this->get_session_data() );
 
-			if ( ! $this->is_session_cookie_valid() || empty( $this->_data ) ) {
-				// Other than the case of an invalid session cookie, if there is no longer any data in the session,
-				// remove it and clear the cookie so output caching is no longer bypassed.
+			if ( ! $this->is_session_cookie_valid()  ) {
+				$this->destroy_session();
+				$this->set_session_expiration();
+			} elseif ( empty( $this->_data ) && ! isset( WC()->cart ) ) {
+				// Only destroy the session if the data is empty and the cart has not been previously initialized.
+				// Ideally, we could remove the session cookie and reset the session any time the session is empty, however,
+				// $this->forget_session() calls `wc_empty_cart()` and can't be removed without breaking backward compatibility
+				// in cases where another extension already loaded and modified the cart before the session.
 				$this->destroy_session();
 				$this->set_session_expiration();
 			}
