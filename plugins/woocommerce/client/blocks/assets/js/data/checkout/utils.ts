@@ -283,23 +283,3 @@ export const validateAdditionalFields = (
 
 	return true;
 };
-
-export const hasValidationError = ( fieldKey: string ) => {
-	let prefix = '';
-	if ( CONTACT_FORM_KEYS.includes( fieldKey as keyof ContactForm ) ) {
-		prefix = 'contact_';
-	} else if (
-		ORDER_FORM_KEYS.includes( fieldKey as keyof AdditionalValues )
-	) {
-		prefix = 'order_';
-	} else {
-		return false;
-	}
-	const error = select( validationStore ).getValidationError(
-		`${ prefix }${ fieldKey }`
-	);
-	if ( error ) {
-		return true;
-	}
-	return false;
-};
