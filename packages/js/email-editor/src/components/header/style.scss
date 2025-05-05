@@ -56,3 +56,8 @@
 	.components-checkbox-control {
 	width: 100%;
 }
+
+// Fix placement of icon for external preview button in preview dropdown
+.components-dropdown-menu__menu .editor-preview-dropdown__button-external {
+	padding-right: 6px;
+}
