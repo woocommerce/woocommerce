@@ -95,6 +95,7 @@ export const __internalIncrementCalculating = () => {
 	deprecated( '__internalIncrementCalculating', {
 		alternative: 'disableCheckoutFor',
 		plugin: 'WooCommerce',
+		version: '9.9.0',
 	} );
 	return {
 		type: types.INCREMENT_CALCULATING,
@@ -108,6 +109,7 @@ export const __internalDecrementCalculating = () => {
 	deprecated( '__internalDecrementCalculating', {
 		alternative: 'disableCheckoutFor',
 		plugin: 'WooCommerce',
+		version: '9.9.0',
 	} );
 	return {
 		type: types.DECREMENT_CALCULATING,
@@ -229,6 +231,7 @@ export const __internalSetExtensionData = (
 	deprecated( '__internalSetExtensionData', {
 		alternative: 'setExtensionData',
 		plugin: 'WooCommerce',
+		version: '9.9.0',
 	} );
 	return setExtensionData( ...args );
 };

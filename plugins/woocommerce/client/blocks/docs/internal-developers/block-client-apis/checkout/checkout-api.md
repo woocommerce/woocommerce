@@ -77,8 +77,10 @@ The following actions can be dispatched from the Checkout data store:
 
 Please don't use actions listed below, instead relying on suggested alternatives.
 
--   `__internalIncrementCalculating()`: Preferrably use `disableCheckoutFor` thunk, or `__internalStartCalculation` as a fallback
--   `__internalDecrementCalculating()`: Preferrably use `disableCheckoutFor` thunk, or `__internalFinishCalculation` as a fallback
+###### Since 9.9.0
+
+-   `__internalIncrementCalculating()`: Use `disableCheckoutFor` thunk instead
+-   `__internalDecrementCalculating()`: Use `disableCheckoutFor` thunk instead
 -   `__internalSetExtensionData`: Use `setExtensionData` instead
 
 ## Contexts
