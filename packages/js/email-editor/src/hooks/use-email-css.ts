@@ -22,7 +22,7 @@ function normalizeSpacingValue(value: string): string {
 
 export function useEmailCss() {
 	const { userTheme } = useUserTheme();
-	const { editorTheme, layout, deviceType } = useSelect( ( select ) => {
+	const { editorTheme, layout, deviceType, editorSettingsStyles } = useSelect( ( select ) => {
 		const {
 			getEditorSettings,
 			// @ts-expect-error getDeviceType is not in types.
@@ -30,12 +30,14 @@ export function useEmailCss() {
 		} = select( editorStore );
 
 		const editorSettings = getEditorSettings();
+
 		return {
 			editorTheme: select( storeName ).getTheme(),
 			// @ts-expect-error There are no types for the experimental features settings.
 			// eslint-disable-next-line no-underscore-dangle
 			layout: editorSettings.__experimentalFeatures?.layout,
-			deviceType: getDeviceType()
+			deviceType: getDeviceType(),
+			editorSettingsStyles: editorSettings.styles
 		};
 	}, [] );
 
@@ -58,8 +60,6 @@ export function useEmailCss() {
 		rootContainerStyles += `padding-right:${ normalizeSpacingValue(padding.right) };`;
 	}
 
-	console.log( 'rootContainerStyles', rootContainerStyles );
-
 	const finalStyles = useMemo(
 		() => {
 			return [
@@ -67,6 +67,7 @@ export function useEmailCss() {
 			deviceType !== 'Mobile' && layout && {
 				css: `.is-root-container{ ${ rootContainerStyles } }`,
 			},
+			...(editorSettingsStyles ?? [])
 		]},
 		[ styles ]
 	);
