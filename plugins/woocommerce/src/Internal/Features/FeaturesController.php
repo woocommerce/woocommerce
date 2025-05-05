@@ -441,7 +441,7 @@ class FeaturesController {
 					'Enable the new payments settings experience',
 					'woocommerce'
 				),
-				'enabled_by_default' => false,
+				'enabled_by_default' => true,
 				'disable_ui'         => false,
 
 				/*

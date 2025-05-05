@@ -2953,3 +2953,10 @@ function wc_update_961_migrate_default_email_base_color() {
 function wc_update_980_remove_order_attribution_install_banner_dismissed_option() {
 	delete_option( 'woocommerce_order_attribution_install_banner_dismissed' );
 }
+
+/**
+ * One-time force enable the new Payments Settings page feature for all stores.
+ */
+function wc_update_984_enable_new_payments_settings_page_feature() {
+	update_option( 'woocommerce_feature_reactify-classic-payments-settings_enabled', 'yes' );
+}
