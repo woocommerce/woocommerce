@@ -1,0 +1,117 @@
+.settings-payments-onboarding-modal__content {
+	// Make sure the test account step takes the full height of the modal
+	#test_account {
+		height: 100%;
+	}
+}
+
+.woocommerce-payments-test-account-step {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+
+	.center-content {
+		text-align: center;
+	}
+
+	&__success_content_title {
+		font-size: 20px;
+		line-height: 24px;
+		font-weight: 500;
+		margin: 0;
+	}
+
+	&__preloader {
+		flex: 1;
+		display: flex;
+		min-height: 0;
+		text-align: center;
+
+		&-layout {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			height: 100%;
+			width: 100%;
+		}
+	}
+
+	&__error {
+		margin: $gap-small auto;
+		width: 90%;
+		max-width: 648px;
+
+		&-message {
+			margin-top: 0;
+		}
+
+		// Force the Cancel button to display as a link given it's not supported by the Notice component
+		&-cancel-button.is-secondary {
+			box-shadow: none;
+
+			&:hover {
+				box-shadow: none !important;
+			}
+		}
+
+		.components-notice__actions {
+			button {
+				margin-left: 0;
+			}
+		}
+	}
+
+	&__success_content_container {
+		margin: 56px auto 0 auto;
+		max-width: 648px;
+	}
+
+	&__success_content {
+		display: flex;
+		flex-direction: column;
+		gap: $gap-small;
+		align-items: center;
+
+		button {
+			width: 100%;
+			justify-content: center;
+		}
+
+		&_or-divider {
+			text-align: center;
+			display: flex;
+			width: 100%;
+			align-items: center;
+			color: $gray-700;
+			gap: $gap-small;
+
+			hr {
+				width: 100%;
+				border-top: 1px solid $gray-200;
+			}
+		}
+	}
+
+	&__success-whats-next {
+		display: flex;
+		flex-direction: column;
+		gap: $gap-small;
+		border: 1px solid $gray-200;
+		padding: $gap-large;
+
+		.woocommerce-woopayments-modal__content__item h2 {
+			font-size: 15px;
+			line-height: 20px;
+			color: $gray-900;
+			font-weight: 500;
+		}
+
+		.woocommerce-woopayments-modal__content__item h3 {
+			font-size: 13px;
+			line-height: 20px;
+			color: $gray-900;
+			font-weight: 500;
+		}
+	}
+}

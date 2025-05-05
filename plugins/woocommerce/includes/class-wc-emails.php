@@ -707,7 +707,7 @@ class WC_Emails {
 	 *
 	 * @return string
 	 */
-	private function get_store_address() {
+	public function get_store_address() {
 		add_filter(
 			'woocommerce_formatted_address_force_country_display',
 			array( $this, 'get_store_address_force_country_display' ),

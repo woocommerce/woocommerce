@@ -25,7 +25,11 @@ import {
 	WriteItForMeBtn,
 	TourSpotlight,
 } from '../components';
-import { useFeedbackSnackbar, useStoreBranding, useTinyEditor } from '../hooks';
+import {
+	useDeprecationNotice,
+	useStoreBranding,
+	useTinyEditor,
+} from '../hooks';
 import {
 	getProductName,
 	getPostId,
@@ -90,7 +94,7 @@ export function WriteItForMeButtonContainer() {
 	const tinyEditor = useTinyEditor();
 	const shortTinyEditor = useTinyEditor( 'excerpt' );
 
-	const { showSnackbar, removeSnackbar } = useFeedbackSnackbar();
+	const { showDeprecationNotice } = useDeprecationNotice();
 
 	const handleUseCompletionError = ( err: UseCompletionError ) => {
 		createWarningNotice( getApiError( err.code ?? '' ) );
@@ -111,6 +115,8 @@ export function WriteItForMeButtonContainer() {
 			},
 			onStreamError: handleUseCompletionError,
 			onCompletionFinished: ( reason, content ) => {
+				showDeprecationNotice();
+
 				recordDescriptionTracks( 'stop', {
 					reason,
 					character_count: content.length,
@@ -118,25 +124,6 @@ export function WriteItForMeButtonContainer() {
 				} );
 
 				setFetching( false );
-
-				if ( reason === 'finished' ) {
-					showSnackbar( {
-						label: __(
-							'Was the AI-generated description helpful?',
-							'woocommerce'
-						),
-						onPositiveResponse: () => {
-							recordDescriptionTracks( 'feedback', {
-								response: 'positive',
-							} );
-						},
-						onNegativeResponse: () => {
-							recordDescriptionTracks( 'feedback', {
-								response: 'negative',
-							} );
-						},
-					} );
-				}
 			},
 		} );
 
@@ -251,7 +238,6 @@ export function WriteItForMeButtonContainer() {
 
 	const onWriteItForMeClick = async () => {
 		setFetching( true );
-		removeSnackbar();
 
 		const prompt = buildPrompt();
 		recordDescriptionTracks( 'start', {
