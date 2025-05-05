@@ -22,11 +22,10 @@ class OrderPriceFormatter {
 	 *
 	 * @param WC_Abstract_Order $order Order instance.
 	 * @param WC_Order_Item     $item Item to get unit price from.
-	 * @param string            $tax_display Incl or excl tax display mode.
+	 * @param string            $tax_display 'incl' or 'excl' tax display mode.
 	 * @return string Formatted item subtotal.
 	 */
-	public static function get_formatted_item_subtotal( WC_Abstract_Order $order, WC_Order_Item $item, string $tax_display = '' ): string {
-		$tax_display   = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
+	public static function get_formatted_item_subtotal( WC_Abstract_Order $order, WC_Order_Item $item, string $tax_display ): string {
 		$includes_tax  = 'excl' !== $tax_display;
 		$item_subtotal = $order->get_item_subtotal( $item, $includes_tax );
 		return self::format_price( $order, $item_subtotal, $includes_tax );

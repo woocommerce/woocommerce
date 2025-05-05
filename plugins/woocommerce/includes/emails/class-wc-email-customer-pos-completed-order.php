@@ -224,7 +224,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @param WC_Order $order         Order object.
 		 */
 		public function add_unit_price( $item_id, $item, $order ) {
-			$unit_price = OrderPriceFormatter::get_formatted_item_subtotal( $order, $item );
+			$unit_price = OrderPriceFormatter::get_formatted_item_subtotal( $order, $item, get_option( 'woocommerce_tax_display_cart' ) );
 			echo wp_kses_post( '<br /><small>' . $unit_price . '</small>' );
 		}
 
