@@ -43,7 +43,7 @@ class OrderPriceFormatter {
 		return wc_price(
 			$amount,
 			array(
-				'ex_tax_label' => ( !$includes_tax && $order->get_prices_include_tax() ) ? 1 : 0,
+				'ex_tax_label' => ( ! $includes_tax && $order->get_prices_include_tax() ) ? 1 : 0,
 				'currency'     => $order->get_currency(),
 			)
 		);
