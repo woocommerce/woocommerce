@@ -229,7 +229,7 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test that session is destroyed if the session data is empty.
+	 * @testdox Test that session is destroyed if the session data is empty and the cart is not yet initialized.
 	 */
 	public function test_destroy_session_data_is_empty() {
 		$customer_id        = (string) get_current_user_id();
@@ -252,7 +252,8 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 		// Empty the only session data before initializing.
 		$handler->set( 'cart', null );
 		$handler->save_data();
-
+		WC()->cart = null;
+		
 		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
 
 		$handler->init_session_cookie();
