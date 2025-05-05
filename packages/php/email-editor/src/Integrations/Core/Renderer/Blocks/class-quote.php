@@ -97,6 +97,7 @@ class Quote extends Abstract_Block_Renderer {
 					)
 				),
 				'background' => $block_attributes['style']['background'] ?? array(),
+				'border'     => $block_attributes['style']['border'] ?? array(),
 			)
 		)['declarations'];
 
@@ -109,12 +110,6 @@ class Quote extends Abstract_Block_Renderer {
 
 		// Add default background size.
 		$table_styles['background-size'] = empty( $table_styles['background-size'] ) ? 'cover' : $table_styles['background-size'];
-
-		// Add default border style.
-		$border_styles = $this->get_styles_from_block( array( 'border' => $block_attributes['style']['border'] ?? array() ) )['declarations'];
-		if ( ! empty( $border_styles ) ) {
-			$table_styles = array_merge( $table_styles, array( 'border-style' => 'solid' ), $border_styles );
-		}
 
 		// Padding properties need to be added to the table cell.
 		$cell_styles = $this->get_styles_from_block(

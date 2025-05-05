@@ -17,6 +17,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preproces
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Spacing_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Typography_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Quote_Preprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Border_Style_Postprocessor;
 
 /**
  * Class Process_Manager
@@ -46,6 +47,7 @@ class Process_Manager {
 	 * @param Quote_Preprocessor         $quote_preprocessor Quote preprocessor.
 	 * @param Highlighting_Postprocessor $highlighting_postprocessor Highlighting postprocessor.
 	 * @param Variables_Postprocessor    $variables_postprocessor Variables postprocessor.
+	 * @param Border_Style_Postprocessor $border_style_postprocessor Border style postprocessor.
 	 */
 	public function __construct(
 		Cleanup_Preprocessor $cleanup_preprocessor,
@@ -54,7 +56,8 @@ class Process_Manager {
 		Spacing_Preprocessor $spacing_preprocessor,
 		Quote_Preprocessor $quote_preprocessor,
 		Highlighting_Postprocessor $highlighting_postprocessor,
-		Variables_Postprocessor $variables_postprocessor
+		Variables_Postprocessor $variables_postprocessor,
+		Border_Style_Postprocessor $border_style_postprocessor
 	) {
 		$this->register_preprocessor( $cleanup_preprocessor );
 		$this->register_preprocessor( $blocks_width_preprocessor );
@@ -62,6 +65,7 @@ class Process_Manager {
 		$this->register_preprocessor( $spacing_preprocessor );
 		$this->register_preprocessor( $quote_preprocessor );
 		$this->register_postprocessor( $highlighting_postprocessor );
+		$this->register_postprocessor( $border_style_postprocessor );
 		$this->register_postprocessor( $variables_postprocessor );
 	}
 
