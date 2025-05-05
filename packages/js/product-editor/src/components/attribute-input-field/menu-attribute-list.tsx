@@ -10,13 +10,15 @@ import { __experimentalSelectControlMenuItem as MenuItem } from '@woocommerce/co
 /**
  * Internal dependencies
  */
-import {
+import type {
 	MenuAttributeListProps,
-	NarrowedQueryAttribute,
+	AttributeInputFieldItemProps,
 	UseComboboxGetMenuPropsOptions,
 } from './types';
 
-function isNewAttributeListItem( attribute: NarrowedQueryAttribute ): boolean {
+function isNewAttributeListItem(
+	attribute: AttributeInputFieldItemProps
+): boolean {
 	return attribute.id === -99;
 }
 
@@ -24,12 +26,12 @@ function sanitizeSlugName( slug: string | undefined ): string {
 	return slug && slug.startsWith( 'pa_' ) ? slug.substring( 3 ) : '';
 }
 
-export const MenuAttributeList: React.FC< MenuAttributeListProps > = ( {
+export const MenuAttributeList = ( {
 	disabledAttributeMessage = '',
 	renderItems,
 	highlightedIndex,
 	getItemProps,
-} ) => {
+}: MenuAttributeListProps ) => {
 	if ( renderItems.length > 0 ) {
 		return (
 			<Fragment>

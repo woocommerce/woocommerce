@@ -1,0 +1,17 @@
+.settings-payments-onboarding-modal {
+	&__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: $gap 32px;
+		border-bottom: 1px solid $gray-200;
+
+		&--logo {
+			width: 64px;
+		}
+
+		&--close {
+			padding: 6px 0;
+		}
+	}
+}

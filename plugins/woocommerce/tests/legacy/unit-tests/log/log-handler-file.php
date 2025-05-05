@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests
  */
 
+use Automattic\WooCommerce\Utilities\LoggingUtil;
+
 /**
  * Class WC_Tests_Log_Handler_File
  * @package WooCommerce\Tests\Log
@@ -224,7 +226,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_log_file_path() {
-		$log_dir     = trailingslashit( WC_LOG_DIR );
+		$log_dir     = LoggingUtil::get_log_directory();
 		$date_suffix = gmdate( 'Y-m-d', time() );
 		$hash_name   = sanitize_file_name( wp_hash( 'unit-tests' ) );
 		$this->assertEquals( $log_dir . 'unit-tests-' . $date_suffix . '-' . $hash_name . '.log', WC_Log_Handler_File::get_log_file_path( 'unit-tests' ) );

@@ -8,6 +8,10 @@
  * @version  3.0.0
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -197,7 +201,7 @@ class WC_Meta_Box_Product_Data {
 		if ( ! empty( $file_urls ) ) {
 			$file_url_size = count( $file_urls );
 
-			for ( $i = 0; $i < $file_url_size; $i ++ ) {
+			for ( $i = 0; $i < $file_url_size; $i++ ) {
 				if ( ! empty( $file_urls[ $i ] ) ) {
 					$downloads[] = array(
 						'name'        => wc_clean( $file_names[ $i ] ),
@@ -329,7 +333,7 @@ class WC_Meta_Box_Product_Data {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		// Process product type first so we have the correct class to run setters.
 		$product_type = empty( $_POST['product-type'] ) ? WC_Product_Factory::get_product_type( $post_id ) : sanitize_title( wp_unslash( $_POST['product-type'] ) );
-		$classname    = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : 'simple' );
+		$classname    = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : ProductType::SIMPLE );
 		$product      = new $classname( $post_id );
 		$attributes   = self::prepare_attributes();
 		$stock        = null;
@@ -369,6 +373,7 @@ class WC_Meta_Box_Product_Data {
 		$errors = $product->set_props(
 			array(
 				'sku'                => isset( $_POST['_sku'] ) ? wc_clean( wp_unslash( $_POST['_sku'] ) ) : null,
+				'global_unique_id'   => isset( $_POST['_global_unique_id'] ) ? wc_clean( wp_unslash( $_POST['_global_unique_id'] ) ) : null,
 				'purchase_note'      => isset( $_POST['_purchase_note'] ) ? wp_kses_post( wp_unslash( $_POST['_purchase_note'] ) ) : '',
 				'downloadable'       => isset( $_POST['_downloadable'] ),
 				'virtual'            => isset( $_POST['_virtual'] ),
@@ -403,16 +408,24 @@ class WC_Meta_Box_Product_Data {
 				),
 				'product_url'        => isset( $_POST['_product_url'] ) ? esc_url_raw( wp_unslash( $_POST['_product_url'] ) ) : '',
 				'button_text'        => isset( $_POST['_button_text'] ) ? wc_clean( wp_unslash( $_POST['_button_text'] ) ) : '',
-				'children'           => 'grouped' === $product_type ? self::prepare_children() : null,
+				'children'           => ProductType::GROUPED === $product_type ? self::prepare_children() : null,
 				'reviews_allowed'    => ! empty( $_POST['comment_status'] ) && 'open' === $_POST['comment_status'],
 				'attributes'         => $attributes,
 				'default_attributes' => self::prepare_set_attributes( $attributes, 'default_attribute_' ),
 			)
 		);
 
+		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
+			$cogs_value = wc_clean( wp_unslash( $_POST['_cogs_value'] ?? null ) );
+			$product->set_cogs_value( is_null( $cogs_value ) ? null : (float) wc_format_decimal( $cogs_value ) );
+		}
+
 		if ( is_wp_error( $errors ) ) {
 			WC_Admin_Meta_Boxes::add_error( $errors->get_error_message() );
 		}
+
+		// Remove _product_template_id for products that were created with the new product editor.
+		$product->delete_meta_data( '_product_template_id' );
 
 		/**
 		 * Set props before save.
@@ -423,7 +436,7 @@ class WC_Meta_Box_Product_Data {
 
 		$product->save();
 
-		if ( $product->is_type( 'variable' ) ) {
+		if ( $product->is_type( ProductType::VARIABLE ) ) {
 			$original_post_title = isset( $_POST['original_post_title'] ) ? wc_clean( wp_unslash( $_POST['original_post_title'] ) ) : '';
 			$post_title          = isset( $_POST['post_title'] ) ? wc_clean( wp_unslash( $_POST['post_title'] ) ) : '';
 
@@ -473,13 +486,14 @@ class WC_Meta_Box_Product_Data {
 				);
 			}
 
+			$cogs_is_enabled = wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled();
 			for ( $i = 0; $i <= $max_loop; $i++ ) {
 
 				if ( ! isset( $_POST['variable_post_id'][ $i ] ) ) {
 					continue;
 				}
 				$variation_id = absint( $_POST['variable_post_id'][ $i ] );
-				$variation    = wc_get_product_object( 'variation', $variation_id );
+				$variation    = wc_get_product_object( ProductType::VARIATION, $variation_id );
 				$stock        = null;
 
 				// Handle stock changes.
@@ -516,7 +530,7 @@ class WC_Meta_Box_Product_Data {
 
 				$errors = $variation->set_props(
 					array(
-						'status'            => isset( $_POST['variable_enabled'][ $i ] ) ? 'publish' : 'private',
+						'status'            => isset( $_POST['variable_enabled'][ $i ] ) ? ProductStatus::PUBLISH : ProductStatus::PRIVATE,
 						'menu_order'        => isset( $_POST['variation_menu_order'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variation_menu_order'][ $i ] ) ) : null,
 						'regular_price'     => isset( $_POST['variable_regular_price'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_regular_price'][ $i ] ) ) : null,
 						'sale_price'        => isset( $_POST['variable_sale_price'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_sale_price'][ $i ] ) ) : null,
@@ -541,6 +555,7 @@ class WC_Meta_Box_Product_Data {
 						'image_id'          => isset( $_POST['upload_image_id'][ $i ] ) ? wc_clean( wp_unslash( $_POST['upload_image_id'][ $i ] ) ) : null,
 						'attributes'        => self::prepare_set_attributes( $parent->get_attributes(), 'attribute_', $i ),
 						'sku'               => isset( $_POST['variable_sku'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_sku'][ $i ] ) ) : '',
+						'global_unique_id'  => isset( $_POST['variable_global_unique_id'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_global_unique_id'][ $i ] ) ) : '',
 						'weight'            => isset( $_POST['variable_weight'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_weight'][ $i ] ) ) : '',
 						'length'            => isset( $_POST['variable_length'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_length'][ $i ] ) ) : '',
 						'width'             => isset( $_POST['variable_width'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_width'][ $i ] ) ) : '',
@@ -552,6 +567,14 @@ class WC_Meta_Box_Product_Data {
 
 				if ( is_wp_error( $errors ) ) {
 					WC_Admin_Meta_Boxes::add_error( $errors->get_error_message() );
+				}
+
+				if ( $cogs_is_enabled ) {
+					$cogs_value = wc_clean( wp_unslash( $_POST['variable_cost_value'][ $i ] ?? '' ) );
+					if ( '' === $cogs_value ) {
+						$cogs_value = null;
+					}
+					$variation->set_cogs_value( is_null( $cogs_value ) ? null : (float) wc_format_Decimal( $cogs_value ) );
 				}
 
 				/**

@@ -12,24 +12,23 @@ import {
 import { __ } from '@wordpress/i18n';
 import { starEmpty, starFilled } from '@wordpress/icons';
 import { cleanForSlug } from '@wordpress/url';
-import {
-	PRODUCTS_STORE_NAME,
-	WCDataSelector,
-	Product,
-} from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import classNames from 'classnames';
 import {
 	Button,
 	BaseControl,
 	Tooltip,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { useEntityProp, useEntityId } from '@wordpress/core-data';
+import {
+	useEntityProp,
+	useEntityId,
+	store as coreStore,
+} from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -40,16 +39,17 @@ import { useValidation } from '../../../contexts/validation-context';
 import { useProductEdits } from '../../../hooks/use-product-edits';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { ProductEditorBlockEditProps } from '../../../types';
-import { AUTO_DRAFT_NAME } from '../../../utils';
+import { AUTO_DRAFT_NAME, getPermalinkParts } from '../../../utils';
 import { NameBlockAttributes } from './types';
 
-export function Edit( {
+export function NameBlockEdit( {
 	attributes,
 	clientId,
 }: ProductEditorBlockEditProps< NameBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
-	// @ts-expect-error There are no types for this.
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	const { editEntityRecord, saveEntityRecord } = useDispatch( 'core' );
 
 	const { hasEdit } = useProductEdits();
@@ -58,13 +58,15 @@ export function Edit( {
 		useState( false );
 
 	const productId = useEntityId( 'postType', 'product' );
-	const product: Product = useSelect( ( select ) =>
-		// @ts-expect-error There are no types for this.
-		select( 'core' ).getEditedEntityRecord(
-			'postType',
-			'product',
-			productId
-		)
+	const product = useSelect(
+		( select ) =>
+			// @ts-expect-error getEditedEntityRecord is not typed correctly because we are overriding the type definition. https://github.com/woocommerce/woocommerce/blob/eeaf58e20064d837412d6c455e69cc5a5e2678b4/packages/js/product-editor/typings/index.d.ts#L15-L35
+			select( coreStore ).getEditedEntityRecord(
+				'postType',
+				'product',
+				productId
+			),
+		[ productId ]
 	);
 
 	const [ sku, setSku ] = useEntityProp( 'postType', 'product', 'sku' );
@@ -74,21 +76,8 @@ export function Edit( {
 		'name'
 	);
 
-	const { permalinkPrefix, permalinkSuffix } = useSelect(
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		( select: WCDataSelector ) => {
-			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
-			if ( productId ) {
-				const parts = getPermalinkParts( productId );
-				return {
-					permalinkPrefix: parts?.prefix,
-					permalinkSuffix: parts?.suffix,
-				};
-			}
-			return {};
-		}
-	);
+	const { prefix: permalinkPrefix, suffix: permalinkSuffix } =
+		getPermalinkParts( product );
 
 	const {
 		ref: nameRef,
@@ -98,14 +87,18 @@ export function Edit( {
 		'name',
 		async function nameValidator() {
 			if ( ! name || name === AUTO_DRAFT_NAME ) {
-				return __( 'Name field is required.', 'woocommerce' );
+				return {
+					message: __( 'Product name is required.', 'woocommerce' ),
+				};
 			}
 
 			if ( name.length > 120 ) {
-				return __(
-					'Please enter a product name shorter than 120 characters.',
-					'woocommerce'
-				);
+				return {
+					message: __(
+						'Please enter a product name shorter than 120 characters.',
+						'woocommerce'
+					),
+				};
 			}
 		},
 		[ name ]
@@ -171,7 +164,7 @@ export function Edit( {
 		const tooltipText = featured ? unmarkedText : markedText;
 
 		return (
-			<Tooltip text={ tooltipText } position="top center">
+			<Tooltip text={ tooltipText } placement="top">
 				{ featured ? (
 					<Button
 						icon={ starFilled }
@@ -212,7 +205,9 @@ export function Edit( {
 							'e.g. 12 oz Coffee Mug',
 							'woocommerce'
 						) }
-						onChange={ setName }
+						onChange={ ( nextValue ) => {
+							setName( nextValue ?? '' );
+						} }
 						value={ name && name !== AUTO_DRAFT_NAME ? name : '' }
 						autoComplete="off"
 						data-1p-ignore
@@ -234,7 +229,8 @@ export function Edit( {
 						onCancel={ () => setShowProductLinkEditModal( false ) }
 						onSaved={ () => setShowProductLinkEditModal( false ) }
 						saveHandler={ async ( updatedSlug ) => {
-							// @ts-expect-error There are no types for this.
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore
 							const { slug, permalink }: Product =
 								await saveEntityRecord( 'postType', 'product', {
 									id: product.id,

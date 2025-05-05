@@ -63,6 +63,7 @@ export {
 export {
 	BlockFill as __experimentalBlockFill,
 	BlockSlot as __experimentalBlockSlot,
+	SectionActions as __experimentalSectionActions,
 	BlockFillProps,
 	BlockSlotProps,
 } from './block-slot-fill';
@@ -90,3 +91,21 @@ export {
 } from './product-image';
 
 export { Notice as __experimentalNotice } from './notice';
+
+export {
+	SchedulePublishModal as __experimentalSchedulePublishModal,
+	SchedulePublishModalProps,
+} from './schedule-publish-modal';
+
+export {
+	CustomFields as __experimentalCustomFields,
+	CustomFieldsProps,
+} from './custom-fields';
+
+export { PluginSidebar as __experimentalModalBlockEditorPluginSidebar } from './iframe-editor';
+export { PluginMoreMenuItem as __experimentalModalBlockEditorPluginMoreMenuItem } from './iframe-editor';
+
+export {
+	ComboboxControl as __experimentalComboboxControl,
+	type ComboboxControlProps,
+} from './combobox-control';

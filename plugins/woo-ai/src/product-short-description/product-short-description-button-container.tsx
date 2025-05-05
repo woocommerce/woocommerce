@@ -17,7 +17,7 @@ import {
 	WOO_AI_PLUGIN_FEATURE_NAME,
 } from '../constants';
 import { StopCompletionBtn, WriteItForMeBtn } from '../components';
-import { useTinyEditor } from '../hooks';
+import { useTinyEditor, useDeprecationNotice } from '../hooks';
 import { getPostId, recordTracksFactory } from '../utils';
 import { translateApiErrors as getApiError } from '../utils/apiErrors';
 
@@ -43,7 +43,7 @@ export function buildShortDescriptionPrompt( longDesc: string ) {
 
 export function WriteShortDescriptionButtonContainer() {
 	const { createWarningNotice } = useDispatch( 'core/notices' );
-
+	const { showDeprecationNotice } = useDeprecationNotice();
 	const [ fetching, setFetching ] = useState< boolean >( false );
 	const tinyEditor = useTinyEditor();
 	const shortTinyEditor = useTinyEditor( 'excerpt' );
@@ -100,6 +100,8 @@ export function WriteShortDescriptionButtonContainer() {
 		! fetching && postContent.length >= MIN_DESC_LENGTH_FOR_SHORT_DESC;
 	const onWriteItForMeClick = async () => {
 		setFetching( true );
+
+		showDeprecationNotice();
 
 		const prompt = buildShortDescriptionPrompt( tinyEditor.getContent() );
 		recordShortDescriptionTracks( 'start', {

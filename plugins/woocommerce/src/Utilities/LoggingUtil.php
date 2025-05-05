@@ -84,6 +84,17 @@ final class LoggingUtil {
 	}
 
 	/**
+	 * Get the directory for storing log files.
+	 *
+	 * @param bool $create_dir Optional. True to attempt to create the log directory if it doesn't exist. Default true.
+	 *
+	 * @return string The full directory path, with trailing slash.
+	 */
+	public static function get_log_directory( bool $create_dir = true ): string {
+		return Settings::get_log_directory( $create_dir );
+	}
+
+	/**
 	 * Calculate the size, in bytes, of the log directory.
 	 *
 	 * @return int

@@ -3,12 +3,12 @@
  */
 import { createElement } from '@wordpress/element';
 import { Card, CardBody } from '@wordpress/components';
-import { __experimentalWooProductFieldItem as WooProductFieldItem } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
 import { ProductSectionLayout } from './product-section-layout';
+import { WooProductFieldItem } from '../woo-product-field-item';
 
 type ProductFieldSectionProps = {
 	id: string;
@@ -17,13 +17,13 @@ type ProductFieldSectionProps = {
 	className?: string;
 };
 
-export const ProductFieldSection: React.FC< ProductFieldSectionProps > = ( {
+export const ProductFieldSection = ( {
 	id,
 	title,
 	description,
 	className,
 	children,
-} ) => (
+}: React.PropsWithChildren< ProductFieldSectionProps > ) => (
 	<ProductSectionLayout
 		title={ title }
 		description={ description }

@@ -31,13 +31,8 @@ export function RemoveConfirmationModal( {
 	return (
 		<Modal
 			title={ title }
-			onRequestClose={ (
-				event:
-					| React.KeyboardEvent< Element >
-					| React.MouseEvent< Element >
-					| React.FocusEvent< Element >
-			) => {
-				if ( ! event.isPropagationStopped() && onCancel ) {
+			onRequestClose={ ( event ) => {
+				if ( event && ! event.isPropagationStopped() && onCancel ) {
 					onCancel();
 				}
 			} }

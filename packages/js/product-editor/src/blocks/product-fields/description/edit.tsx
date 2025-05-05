@@ -25,9 +25,9 @@ import {
  * Internal dependencies
  */
 import ModalEditorWelcomeGuide from '../../../components/modal-editor-welcome-guide';
-import { store } from '../../../store/product-editor-ui';
 import type { DescriptionBlockEditComponent } from './types';
 import FullEditorToolbarButton from './components/full-editor-toolbar-button';
+import { wooProductEditorUiStore } from '../../../store/product-editor-ui';
 
 /**
  * Check whether the parsed blocks become from the summary block.
@@ -49,29 +49,6 @@ export function getContentFromFreeform(
 	return false;
 }
 
-/**
- * By default the blocks variable always contains one paragraph
- * block with empty content, that causes the description to never
- * be empty. This function removes the default block to keep
- * the description empty.
- *
- * todo: this is not optimal. We cannot rely on the content attribute to
- * determine whether the description is empty or not
- *
- * @param blocks The block list
- * @return Empty array if there is only one block with empty content
- * in the list. The same block list otherwise.
- */
-function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
-	if ( blocks.length === 1 ) {
-		const { content } = blocks[ 0 ].attributes;
-		if ( ! content || ! content.trim() ) {
-			return [];
-		}
-	}
-	return blocks;
-}
-
 export function DescriptionBlockEdit( {
 	attributes,
 }: DescriptionBlockEditComponent ) {
@@ -89,9 +66,15 @@ export function DescriptionBlockEdit( {
 	const { isModalEditorOpen, modalEditorBlocks, hasChanged } = useSelect(
 		( select ) => {
 			return {
-				isModalEditorOpen: select( store ).isModalEditorOpen(),
-				modalEditorBlocks: select( store ).getModalEditorBlocks(),
-				hasChanged: select( store ).getModalEditorContentHasChanged(),
+				isModalEditorOpen: select(
+					wooProductEditorUiStore
+				).isModalEditorOpen(),
+				modalEditorBlocks: select(
+					wooProductEditorUiStore
+				).getModalEditorBlocks(),
+				hasChanged: select(
+					wooProductEditorUiStore
+				).getModalEditorContentHasChanged(),
 			};
 		},
 		[]
@@ -130,11 +113,7 @@ export function DescriptionBlockEdit( {
 			return;
 		}
 
-		if ( ! modalEditorBlocks?.length ) {
-			setDescription( '' );
-		}
-
-		const html = serialize( clearDescriptionIfEmpty( modalEditorBlocks ) );
+		const html = serialize( modalEditorBlocks );
 		setDescription( html );
 	}, [ modalEditorBlocks, setDescription, hasChanged ] );
 

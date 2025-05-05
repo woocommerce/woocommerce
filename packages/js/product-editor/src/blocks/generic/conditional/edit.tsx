@@ -39,7 +39,8 @@ export function Edit( {
 
 	const displayBlocks = useSelect(
 		( select ) => {
-			// @ts-expect-error There are no types for this.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			const product: Product = select( 'core' ).getEditedEntityRecord(
 				'postType',
 				postType,

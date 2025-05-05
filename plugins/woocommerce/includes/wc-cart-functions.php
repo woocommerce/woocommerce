@@ -9,6 +9,9 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 
 defined( 'ABSPATH' ) || exit;
@@ -37,31 +40,6 @@ function wc_empty_cart() {
 		WC()->cart = new WC_Cart();
 	}
 	WC()->cart->empty_cart( false );
-}
-
-/**
- * Load the persistent cart.
- *
- * @param string  $user_login User login.
- * @param WP_User $user       User data.
- * @deprecated 2.3
- */
-function wc_load_persistent_cart( $user_login, $user ) {
-	if ( ! $user || ! apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
-		return;
-	}
-
-	$saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
-
-	if ( ! $saved_cart ) {
-		return;
-	}
-
-	$cart = WC()->session->cart;
-
-	if ( empty( $cart ) || ! is_array( $cart ) || 0 === count( $cart ) ) {
-		WC()->session->cart = $saved_cart['cart'];
-	}
 }
 
 /**
@@ -123,9 +101,11 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 	$wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
 	if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
 		$return_to = apply_filters( 'woocommerce_continue_shopping_redirect', wc_get_raw_referer() ? wp_validate_redirect( wc_get_raw_referer(), false ) : wc_get_page_permalink( 'shop' ) );
-		$message   = sprintf( '<a href="%s" tabindex="1" class="button wc-forward%s">%s</a> %s', esc_url( $return_to ), esc_attr( $wp_button_class ), esc_html__( 'Continue shopping', 'woocommerce' ), esc_html( $added_text ) );
+		$message   = sprintf( '%s <a href="%s" class="button wc-forward%s">%s</a>', esc_html( $added_text ), esc_url( $return_to ), esc_attr( $wp_button_class ), esc_html__( 'Continue shopping', 'woocommerce' ) );
+	} elseif ( ! CartCheckoutUtils::has_cart_page() ) {
+		$message = sprintf( '%s', esc_html( $added_text ) );
 	} else {
-		$message = sprintf( '<a href="%s" tabindex="1" class="button wc-forward%s">%s</a> %s', esc_url( wc_get_cart_url() ), esc_attr( $wp_button_class ), esc_html__( 'View cart', 'woocommerce' ), esc_html( $added_text ) );
+		$message = sprintf( '%s <a href="%s" class="button wc-forward%s">%s</a>', esc_html( $added_text ), esc_url( wc_get_cart_url() ), esc_attr( $wp_button_class ), esc_html__( 'View cart', 'woocommerce' ) );
 	}
 
 	if ( has_filter( 'wc_add_to_cart_message' ) ) {
@@ -170,6 +150,10 @@ function wc_format_list_of_items( $items ) {
 function wc_clear_cart_after_payment() {
 	global $wp;
 
+	$should_clear_cart_after_payment = false;
+	$after_payment                   = false;
+
+	// If the order has been received, clear the cart.
 	if ( ! empty( $wp->query_vars['order-received'] ) ) {
 
 		$order_id  = absint( $wp->query_vars['order-received'] );
@@ -179,20 +163,38 @@ function wc_clear_cart_after_payment() {
 			$order = wc_get_order( $order_id );
 
 			if ( $order instanceof WC_Order && hash_equals( $order->get_order_key(), $order_key ) ) {
-				WC()->cart->empty_cart();
+				$should_clear_cart_after_payment = true;
+				$after_payment                   = true;
 			}
 		}
 	}
 
-	if ( WC()->session->order_awaiting_payment > 0 ) {
+	// If the order is awaiting payment, and we haven't already decided to clear the cart, check the order status.
+	if ( is_object( WC()->session ) && WC()->session->order_awaiting_payment > 0 && ! $should_clear_cart_after_payment ) {
 		$order = wc_get_order( WC()->session->order_awaiting_payment );
 
 		if ( $order instanceof WC_Order && $order->get_id() > 0 ) {
-			// If the order has not failed, or is not pending, the order must have gone through.
-			if ( ! $order->has_status( array( 'failed', 'pending', 'cancelled' ) ) ) {
-				WC()->cart->empty_cart();
-			}
+			// If the order status is neither pending, failed, nor cancelled, the order must have gone through.
+			$should_clear_cart_after_payment = ! $order->has_status( array( OrderStatus::FAILED, OrderStatus::PENDING, OrderStatus::CANCELLED ) );
+			$after_payment                   = true;
 		}
+	}
+
+	// If it doesn't look like a payment happened, bail early.
+	if ( ! $after_payment ) {
+		return;
+	}
+
+	/**
+	 * Determine whether the cart should be cleared after payment.
+	 *
+	 * @since 9.3.0
+	 * @param bool $should_clear_cart_after_payment Whether the cart should be cleared after payment.
+	 */
+	$should_clear_cart_after_payment = apply_filters( 'woocommerce_should_clear_cart_after_payment', $should_clear_cart_after_payment );
+
+	if ( $should_clear_cart_after_payment ) {
+		WC()->cart->empty_cart();
 	}
 }
 add_action( 'template_redirect', 'wc_clear_cart_after_payment', 20 );
@@ -283,8 +285,6 @@ function wc_cart_totals_coupon_html( $coupon ) {
 		$coupon = new WC_Coupon( $coupon );
 	}
 
-	$discount_amount_html = '';
-
 	$amount               = WC()->cart->get_coupon_discount_amount( $coupon->get_code(), WC()->cart->display_cart_ex_tax );
 	$discount_amount_html = '-' . wc_price( $amount );
 
@@ -293,7 +293,8 @@ function wc_cart_totals_coupon_html( $coupon ) {
 	}
 
 	$discount_amount_html = apply_filters( 'woocommerce_coupon_discount_amount_html', $discount_amount_html, $coupon );
-	$coupon_html          = $discount_amount_html . ' <a href="' . esc_url( add_query_arg( 'remove_coupon', rawurlencode( $coupon->get_code() ), Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) ? wc_get_checkout_url() : wc_get_cart_url() ) ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->get_code() ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
+	// translators: %s: coupon code.
+	$coupon_html = $discount_amount_html . ' <a role="button" aria-label="' . sprintf( esc_attr__( 'Remove %s coupon', 'woocommerce' ), $coupon->get_code() ) . '" href="' . esc_url( add_query_arg( 'remove_coupon', rawurlencode( $coupon->get_code() ), Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) ? wc_get_checkout_url() : wc_get_cart_url() ) ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->get_code() ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
 
 	echo wp_kses( apply_filters( 'woocommerce_cart_totals_coupon_html', $coupon_html, $coupon, $discount_amount_html ), array_replace_recursive( wp_kses_allowed_html( 'post' ), array( 'a' => array( 'data-coupon' => true ) ) ) ); // phpcs:ignore PHPCompatibility.PHP.NewFunctions.array_replace_recursiveFound
 }
@@ -392,8 +393,13 @@ function wc_cart_round_discount( $value, $precision ) {
  * @return string[]
  */
 function wc_get_chosen_shipping_method_ids() {
-	$method_ids     = array();
+	if ( ! is_callable( array( WC()->session, 'get' ) ) ) {
+		return array();
+	}
+
 	$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+	$method_ids     = array();
+
 	foreach ( $chosen_methods as $chosen_method ) {
 		if ( ! is_string( $chosen_method ) ) {
 			continue;
@@ -401,6 +407,7 @@ function wc_get_chosen_shipping_method_ids() {
 		$chosen_method = explode( ':', $chosen_method );
 		$method_ids[]  = current( $chosen_method );
 	}
+
 	return $method_ids;
 }
 
@@ -413,11 +420,15 @@ function wc_get_chosen_shipping_method_ids() {
  * @return string|bool Either the chosen method ID or false if nothing is chosen yet.
  */
 function wc_get_chosen_shipping_method_for_package( $key, $package ) {
-	$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
+	if ( ! is_callable( array( WC()->session, 'get' ) ) ) {
+		return false;
+	}
+
+	$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
 	$chosen_method  = isset( $chosen_methods[ $key ] ) ? $chosen_methods[ $key ] : false;
 	$changed        = wc_shipping_methods_have_changed( $key, $package );
 
-	// This is deprecated but here for BW compat. TODO: Remove in 4.0.0.
+	// This is deprecated but here for BW compat. Remove in 4.0.0.
 	$method_counts = WC()->session->get( 'shipping_method_counts' );
 
 	if ( ! empty( $method_counts[ $key ] ) ) {
@@ -439,6 +450,12 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 		WC()->session->set( 'chosen_shipping_methods', $chosen_methods );
 		WC()->session->set( 'shipping_method_counts', $method_counts );
 
+		/**
+		 * Fires when a shipping method is chosen.
+		 *
+		 * @since 3.2.0
+		 * @param string $chosen_method Chosen shipping method. e.g. flat_rate:1.
+		 */
 		do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
 	}
 	return $chosen_method;
@@ -462,7 +479,7 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 	 * If the customer has selected local pickup, keep it selected if it's still in the package. We don't want to auto
 	 * toggle between shipping and pickup even if available shipping methods are changed.
 	 *
-	 * This is important for block based checkout where there is an explicit toggle between shipping and pickup.
+	 * This is important for block-based checkout where there is an explicit toggle between shipping and pickup.
 	 */
 	$local_pickup_method_ids = LocalPickupUtils::get_local_pickup_method_ids();
 	$is_local_pickup_chosen  = in_array( $chosen_method_id, $local_pickup_method_ids, true );
@@ -510,6 +527,10 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
  * @return bool
  */
 function wc_shipping_methods_have_changed( $key, $package ) {
+	if ( ! is_callable( array( WC()->session, 'get' ) ) ) {
+		return false;
+	}
+
 	// Lookup previous methods from session.
 	$previous_shipping_methods = WC()->session->get( 'previous_shipping_methods' );
 	// Get new and old rates.
@@ -536,7 +557,7 @@ function wc_get_cart_item_data_hash( $product ) {
 				'woocommerce_cart_item_data_to_validate',
 				array(
 					'type'       => $product->get_type(),
-					'attributes' => 'variation' === $product->get_type() ? $product->get_variation_attributes() : '',
+					'attributes' => ProductType::VARIATION === $product->get_type() ? $product->get_variation_attributes() : '',
 				),
 				$product
 			)

@@ -1,16 +1,21 @@
 /**
  * External dependencies
  */
-import { ProductAttribute } from '@woocommerce/data';
+import type { ProductProductAttribute } from '@woocommerce/data';
+
+/**
+ * Internal dependencies
+ */
+import type { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 
 /**
  * Returns the attribute key. The key will be the `id` or the `name` when the id is 0.
  *
- * @param { ProductAttribute } attribute product attribute.
+ * @param { ProductProductAttribute } attribute product attribute.
  * @return string|number
  */
 export function getAttributeKey(
-	attribute: ProductAttribute
+	attribute: ProductProductAttribute
 ): number | string {
 	return attribute.id !== 0 ? attribute.id : attribute.name;
 }
@@ -21,7 +26,7 @@ export function getAttributeKey(
  * @param attribute Product attribute.
  * @return string
  */
-export const getAttributeId = ( attribute: ProductAttribute ) =>
+export const getAttributeId = ( attribute: ProductProductAttribute ) =>
 	`${ attribute.id }-${ attribute.name }`;
 
 /**
@@ -32,10 +37,10 @@ export const getAttributeId = ( attribute: ProductAttribute ) =>
  */
 export function reorderSortableProductAttributePositions(
 	items: Record< number | string, number >,
-	attributeKeyValues: Record< number | string, ProductAttribute >
-): ProductAttribute[] {
+	attributeKeyValues: Record< number | string, ProductProductAttribute >
+): ProductProductAttribute[] {
 	return Object.keys( attributeKeyValues ).map(
-		( attributeKey: number | string ): ProductAttribute => {
+		( attributeKey: number | string ): ProductProductAttribute => {
 			if ( ! isNaN( items[ attributeKey ] ) ) {
 				return {
 					...attributeKeyValues[ attributeKey ],
@@ -50,21 +55,24 @@ export function reorderSortableProductAttributePositions(
 }
 
 /**
- * Helper function to return the product attribute object. If attribute is a string it will create an object.
+ * Checks if the given attribute has
+ * either terms (global attributes) or options (local attributes).
  *
- * @param { Object | string } attribute product attribute as string or object.
+ * @param {EnhancedProductAttribute} attribute - The attribute to check.
+ * @return {boolean} True if the attribute has terms or options, false otherwise.
  */
-export function getProductAttributeObject(
-	attribute:
-		| string
-		| Omit< ProductAttribute, 'position' | 'visible' | 'variation' >
-): Omit< ProductAttribute, 'position' | 'visible' | 'variation' > {
-	return typeof attribute === 'string'
-		? {
-				id: 0,
-				name: attribute,
-				slug: attribute,
-				options: [],
-		  }
-		: attribute;
-}
+export const hasTermsOrOptions = (
+	attribute: EnhancedProductAttribute | null
+): boolean => !! ( attribute?.terms?.length || attribute?.options?.length );
+
+/**
+ * Checks if the given attribute is filled out,
+ * meaning it has a name and either terms or options.
+ *
+ * @param {EnhancedProductAttribute | null} attribute - The attribute to check.
+ * @return {attribute is EnhancedProductAttribute} - True if the attribute is filled out, otherwise false.
+ */
+export const isAttributeFilledOut = (
+	attribute: EnhancedProductAttribute | null
+): attribute is EnhancedProductAttribute =>
+	!! attribute?.name.length && hasTermsOrOptions( attribute );

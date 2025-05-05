@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\NoteTraits;
+use Automattic\WooCommerce\Enums\ProductStatus;
 
 /**
  * Class CustomizingProductCatalog
@@ -38,7 +39,7 @@ class CustomizingProductCatalog {
 			array(
 				'limit'    => 1,
 				'paginate' => true,
-				'status'   => array( 'publish' ),
+				'status'   => array( ProductStatus::PUBLISH ),
 				'orderby'  => 'post_date',
 				'order'    => 'DESC',
 			)
@@ -75,7 +76,7 @@ class CustomizingProductCatalog {
 		$note->add_action(
 			'day-after-first-product',
 			__( 'Learn more', 'woocommerce' ),
-			'https://woo.com/document/woocommerce-customizer/?utm_source=inbox&utm_medium=product'
+			'https://woocommerce.com/document/woocommerce-customizer/?utm_source=inbox&utm_medium=product'
 		);
 
 		return $note;

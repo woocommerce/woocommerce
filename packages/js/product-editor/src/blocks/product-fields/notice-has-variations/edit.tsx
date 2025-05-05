@@ -35,8 +35,11 @@ export function Edit( {
 		'attributes'
 	);
 
+	const [ productType ] = useEntityProp( 'postType', 'product', 'type' );
+
 	const isOptionsNoticeVisible =
-		hasAttributesUsedForVariations( productAttributes );
+		hasAttributesUsedForVariations( productAttributes ) &&
+		productType === 'variable';
 
 	return (
 		<div { ...blockProps }>

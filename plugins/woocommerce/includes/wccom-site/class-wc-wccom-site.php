@@ -1,6 +1,6 @@
 <?php
 /**
- * Woo.com Product Installation.
+ * WooCommerce.com Product Installation.
  *
  * @package WooCommerce\WCCom
  * @since   3.7.0
@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * WC_WCCOM_Site Class
  *
- * Main class for Woo.com connected site.
+ * Main class for WooCommerce.com connected site.
  */
 class WC_WCCOM_Site {
 
@@ -44,7 +44,7 @@ class WC_WCCOM_Site {
 	}
 
 	/**
-	 * Authenticate Woo.com request.
+	 * Authenticate WooCommerce.com request.
 	 *
 	 * @since 3.7.0
 	 * @param int|false $user_id User ID.
@@ -64,7 +64,7 @@ class WC_WCCOM_Site {
 		} else {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
-				function() {
+				function () {
 					return new Installer_Error( Installer_Error_Codes::NO_ACCESS_TOKEN );
 				}
 			);
@@ -78,7 +78,7 @@ class WC_WCCOM_Site {
 		} else {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
-				function() {
+				function () {
 					return new Installer_Error( Installer_Error_Codes::NO_SIGNATURE );
 				}
 			);
@@ -91,7 +91,7 @@ class WC_WCCOM_Site {
 		if ( empty( $site_auth['access_token'] ) ) {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
-				function() {
+				function () {
 					return new Installer_Error( Installer_Error_Codes::SITE_NOT_CONNECTED );
 				}
 			);
@@ -101,7 +101,7 @@ class WC_WCCOM_Site {
 		if ( ! hash_equals( $access_token, $site_auth['access_token'] ) ) {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
-				function() {
+				function () {
 					return new Installer_Error( Installer_Error_Codes::INVALID_TOKEN );
 				}
 			);
@@ -113,7 +113,7 @@ class WC_WCCOM_Site {
 		if ( ! self::verify_wccom_request( $body, $signature, $site_auth['access_token_secret'] ) ) {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
-				function() {
+				function () {
 					return new Installer_Error( Installer_Error_Codes::REQUEST_VERIFICATION_FAILED );
 				}
 			);
@@ -124,7 +124,7 @@ class WC_WCCOM_Site {
 		if ( ! $user ) {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
-				function() {
+				function () {
 					return new Installer_Error( Installer_Error_Codes::USER_NOT_FOUND );
 				}
 			);
@@ -183,7 +183,7 @@ class WC_WCCOM_Site {
 	}
 
 	/**
-	 * Verify Woo.com request from a given body and signature request.
+	 * Verify WooCommerce.com request from a given body and signature request.
 	 *
 	 * @since 3.7.0
 	 * @param string $body                Request body.
@@ -223,6 +223,8 @@ class WC_WCCOM_Site {
 		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/abstract-wc-rest-wccom-site-controller.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-installer-controller.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-ssr-controller.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-status-controller.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-connection-controller.php';
 
 		require_once WC_ABSPATH . 'includes/wccom-site/installation/class-wc-wccom-site-installation-state.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/installation/class-wc-wccom-site-installation-state-storage.php';
@@ -236,8 +238,10 @@ class WC_WCCOM_Site {
 		require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-activate-product.php';
 
 		$namespaces['wccom-site/v2'] = array(
-			'installer' => 'WC_REST_WCCOM_Site_Installer_Controller',
-			'ssr'       => 'WC_REST_WCCOM_Site_SSR_Controller',
+			'installer'  => 'WC_REST_WCCOM_Site_Installer_Controller',
+			'ssr'        => 'WC_REST_WCCOM_Site_SSR_Controller',
+			'status'     => 'WC_REST_WCCOM_Site_Status_Controller',
+			'connection' => 'WC_REST_WCCOM_Site_Connection_Controller',
 		);
 
 		return $namespaces;

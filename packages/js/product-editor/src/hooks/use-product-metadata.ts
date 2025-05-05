@@ -22,19 +22,23 @@ function useProductMetadata( options?: Options ) {
 	const thisId = useEntityId( 'postType', postType );
 	const id = options?.id || thisId;
 
-	// @ts-expect-error There are no types for this.
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	const { editEntityRecord } = useDispatch( 'core' );
 
 	const { isLoading, meta_data } = useSelect(
 		( select ) => {
-			// @ts-expect-error There are no types for this.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			const { getEditedEntityRecord, hasFinishedResolution } =
 				select( 'core' );
+			// @ts-expect-error Selector is not typed
 			const { meta_data: metadata }: Product = getEditedEntityRecord(
 				'postType',
 				postType,
 				id
 			);
+			// @ts-expect-error Selector is not typed
 			const isResolutionFinished = hasFinishedResolution(
 				'getEditedEntityRecord',
 				[ 'postType', postType, id ]

@@ -5,9 +5,13 @@
 
 namespace Automattic\WooCommerce\Internal\Features;
 
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController;
+use WC_Tracks;
+use WC_Site_Tracking;
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
-use Automattic\WooCommerce\Admin\Features\Navigation\Init;
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\PluginUtil;
@@ -18,12 +22,18 @@ defined( 'ABSPATH' ) || exit;
  * Class to define the WooCommerce features that can be enabled and disabled by admin users,
  * provides also a mechanism for WooCommerce plugins to declare that they are compatible
  * (or incompatible) with a given feature.
+ *
+ * Note: the 'woocommerce_register_feature_definitions' hook allows registering new features
+ * externally. This hook is deprecated, features should be registered from within get_feature_definitions.
+ * However, in case you use it for testing purposes, keep in mind that the hook is fired from inside 'init';
+ * therefore, features that need to be queried, enabled, or disabled before 'init' (e.g. during WP CLI initialization)
+ * can't be registered using the hook.
  */
 class FeaturesController {
 
-	use AccessiblePrivateMethods;
-
 	public const FEATURE_ENABLED_CHANGED_ACTION = 'woocommerce_feature_enabled_changed';
+
+	public const PLUGINS_COMPATIBLE_BY_DEFAULT_OPTION = 'woocommerce_plugins_are_compatible_with_features_by_default';
 
 	/**
 	 * The existing feature definitions.
@@ -77,28 +87,73 @@ class FeaturesController {
 	private $force_allow_enabling_plugins = false;
 
 	/**
+	 * List of plugins excluded from feature compatibility warnings in UI.
+	 *
+	 * @var string[]
+	 */
+	private $plugins_excluded_from_compatibility_ui;
+
+	/**
+	 * Flag indicating if additional features have been registered already
+	 * via woocommerce_register_feature_definitions action.
+	 *
+	 * @var bool
+	 */
+	private bool $registered_additional_features_via_action = false;
+
+	/**
+	 * Flag indicating if additional features have been registered already
+	 * via calls to other classes.
+	 *
+	 * @var bool
+	 */
+	private bool $registered_additional_features_via_class_calls = false;
+
+	/**
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
-		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
-		self::add_filter( 'added_option', array( $this, 'process_added_option' ), 999, 3 );
-		self::add_filter( 'woocommerce_get_sections_advanced', array( $this, 'add_features_section' ), 10, 1 );
-		self::add_filter( 'woocommerce_get_settings_advanced', array( $this, 'add_feature_settings' ), 10, 2 );
-		self::add_filter( 'deactivated_plugin', array( $this, 'handle_plugin_deactivation' ), 10, 1 );
-		self::add_filter( 'all_plugins', array( $this, 'filter_plugins_list' ), 10, 1 );
-		self::add_action( 'admin_notices', array( $this, 'display_notices_in_plugins_page' ), 10, 0 );
-		self::add_action( 'load-plugins.php', array( $this, 'maybe_invalidate_cached_plugin_data' ) );
-		self::add_action( 'after_plugin_row', array( $this, 'handle_plugin_list_rows' ), 10, 2 );
-		self::add_action( 'current_screen', array( $this, 'enqueue_script_to_fix_plugin_list_html' ), 10, 1 );
-		self::add_filter( 'views_plugins', array( $this, 'handle_plugins_page_views_list' ), 10, 1 );
-		self::add_filter( 'woocommerce_admin_shared_settings', array( $this, 'set_change_feature_enable_nonce' ), 20, 1 );
-		self::add_action( 'admin_init', array( $this, 'change_feature_enable_from_query_params' ), 20, 0 );
+		// In principle, register_additional_features is triggered manually from within class-woocommerce
+		// right before before_woocommerce_init is fired (this is needed for the features to be visible
+		// to plugins executing declare_compatibility).
+		// However we add additional checks/hookings here to support unit tests and possible overlooked/future
+		// DI container/class instantiation nuances.
+		if ( ! $this->registered_additional_features_via_action ) {
+			if ( did_action( 'before_woocommerce_init' ) ) {
+				// Needed for unit tests, where 'before_woocommerce_init' will have been fired already at this point.
+				$this->register_additional_features();
+			} else {
+				// This needs to have a higher $priority than the 'before_woocommerce_init' hooked by plugins that declare compatibility.
+				add_filter( 'before_woocommerce_init', array( $this, 'register_additional_features' ), -9999, 0 );
+			}
+		}
+
+		if ( did_action( 'init' ) ) {
+			// Needed for unit tests, where 'init' will have been fired already at this point.
+			$this->start_listening_for_option_changes();
+		} else {
+			add_filter( 'init', array( $this, 'start_listening_for_option_changes' ), 10, 0 );
+		}
+
+		add_filter( 'woocommerce_get_sections_advanced', array( $this, 'add_features_section' ), 10, 1 );
+		add_filter( 'woocommerce_get_settings_advanced', array( $this, 'add_feature_settings' ), 10, 2 );
+		add_filter( 'deactivated_plugin', array( $this, 'handle_plugin_deactivation' ), 10, 1 );
+		add_filter( 'all_plugins', array( $this, 'filter_plugins_list' ), 10, 1 );
+		add_action( 'admin_notices', array( $this, 'display_notices_in_plugins_page' ), 10, 0 );
+		add_action( 'load-plugins.php', array( $this, 'maybe_invalidate_cached_plugin_data' ) );
+		add_action( 'after_plugin_row', array( $this, 'handle_plugin_list_rows' ), 10, 2 );
+		add_action( 'current_screen', array( $this, 'enqueue_script_to_fix_plugin_list_html' ), 10, 1 );
+		add_filter( 'views_plugins', array( $this, 'handle_plugins_page_views_list' ), 10, 1 );
+		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'set_change_feature_enable_nonce' ), 20, 1 );
+		add_action( 'admin_init', array( $this, 'change_feature_enable_from_query_params' ), 20, 0 );
+		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'display_email_improvements_feedback_notice' ), 10, 2 );
 	}
 
 	/**
 	 * Register a feature.
 	 *
-	 * This should be called during the `woocommerce_register_feature_definitions` action hook.
+	 * This used to be called during the `woocommerce_register_feature_definitions` action hook,
+	 * now it's called directly from get_feature_definitions as needed.
 	 *
 	 * @param string $slug The ID slug of the feature.
 	 * @param string $name The name of the feature that will appear on the Features screen and elsewhere.
@@ -134,12 +189,13 @@ class FeaturesController {
 	 */
 	public function add_feature_definition( $slug, $name, array $args = array() ) {
 		$defaults = array(
-			'disable_ui'         => false,
-			'enabled_by_default' => false,
-			'is_experimental'    => true,
-			'is_legacy'          => false,
-			'name'               => $name,
-			'order'              => 10,
+			'disable_ui'                          => false,
+			'enabled_by_default'                  => false,
+			'is_experimental'                     => true,
+			'is_legacy'                           => false,
+			'plugins_are_incompatible_by_default' => false,
+			'name'                                => $name,
+			'order'                               => 10,
 		);
 		$args     = wp_parse_args( $args, $defaults );
 
@@ -153,102 +209,306 @@ class FeaturesController {
 	 */
 	private function get_feature_definitions() {
 		if ( empty( $this->features ) ) {
-			$legacy_features = array(
-				'analytics'            => array(
-					'name'               => __( 'Analytics', 'woocommerce' ),
-					'description'        => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
-					'option_key'         => Analytics::TOGGLE_OPTION_NAME,
-					'is_experimental'    => false,
-					'enabled_by_default' => true,
-					'disable_ui'         => false,
-					'is_legacy'          => true,
+			$this->init_feature_definitions();
+		}
+
+		if ( ! $this->registered_additional_features_via_class_calls ) {
+			// This needs to be set to true *before* additional feature definition calls are made,
+			// to prevent infinite loops in case one of these calls ends up calling here again.
+			$this->registered_additional_features_via_class_calls = true;
+
+			// Additional feature definitions.
+			// These used to be tied to the now deprecated woocommerce_register_feature_definitions action,
+			// and aren't processed in init_feature_definitions to avoid circular calls in the dependency injection container.
+			$container = wc_get_container();
+			$container->get( CustomOrdersTableController::class )->add_feature_definition( $this );
+			$container->get( CostOfGoodsSoldController::class )->add_feature_definition( $this );
+
+			$this->init_compatibility_info_by_feature();
+		}
+
+		return $this->features;
+	}
+
+	/**
+	 * Initialize the hardcoded feature definitions array.
+	 * This doesn't include:
+	 * - Features that get initialized via the (deprecated) woocommerce_register_feature_definitions.
+	 * - Features whose definition comes from another class. These are initialized directly in get_feature_definitions
+	 *   to avoid circular calls in the dependency injection container.
+	 */
+	private function init_feature_definitions(): void {
+		$alpha_feature_testing_is_enabled = Constants::is_true( 'WOOCOMMERCE_ENABLE_ALPHA_FEATURE_TESTING' );
+		$tracking_enabled                 = WC_Site_Tracking::is_tracking_enabled();
+
+		$legacy_features = array(
+			'analytics'                          => array(
+				'name'               => __( 'Analytics', 'woocommerce' ),
+				'description'        => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
+				'option_key'         => Analytics::TOGGLE_OPTION_NAME,
+				'is_experimental'    => false,
+				'enabled_by_default' => true,
+				'disable_ui'         => false,
+				'is_legacy'          => true,
+			),
+			'product_block_editor'               => array(
+				'name'            => __( 'New product editor', 'woocommerce' ),
+				'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
+				'is_experimental' => true,
+				'disable_ui'      => false,
+				'is_legacy'       => true,
+				'disabled'        => function () {
+					return version_compare( get_bloginfo( 'version' ), '6.2', '<' );
+				},
+				'desc_tip'        => function () {
+					$string = '';
+					if ( version_compare( get_bloginfo( 'version' ), '6.2', '<' ) ) {
+						$string = __(
+							'⚠ This feature is compatible with WordPress version 6.2 or higher.',
+							'woocommerce'
+						);
+					}
+
+					return $string;
+				},
+			),
+			'cart_checkout_blocks'               => array(
+				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
+				'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
+				'is_experimental' => false,
+				'disable_ui'      => true,
+			),
+			'rate_limit_checkout'                => array(
+				'name'               => __( 'Rate limit Checkout', 'woocommerce' ),
+				'description'        => sprintf(
+					// translators: %s is the URL to the rate limiting documentation.
+					__( 'Enables rate limiting for Checkout place order and Store API /checkout endpoint. To further control this, refer to <a href="%s" target="_blank">rate limiting documentation</a>.', 'woocommerce' ),
+					'https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/StoreApi/docs/rate-limiting.md'
 				),
-				'new_navigation'       => array(
-					'name'            => __( 'Navigation', 'woocommerce' ),
-					'description'     => __(
-						'Add the new WooCommerce navigation experience to the dashboard',
-						'woocommerce'
-					),
-					'option_key'      => Init::TOGGLE_OPTION_NAME,
-					'is_experimental' => false,
-					'disable_ui'      => false,
-					'is_legacy'       => true,
+				'is_experimental'    => false,
+				'disable_ui'         => false,
+				'enabled_by_default' => false,
+				'is_legacy'          => true,
+			),
+			'marketplace'                        => array(
+				'name'               => __( 'Marketplace', 'woocommerce' ),
+				'description'        => __(
+					'New, faster way to find extensions and themes for your WooCommerce store',
+					'woocommerce'
 				),
-				'product_block_editor' => array(
-					'name'            => __( 'New product editor', 'woocommerce' ),
-					'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
-					'is_experimental' => true,
-					'disable_ui'      => false,
-					'is_legacy'       => true,
-					'disabled'        => function() {
-						return version_compare( get_bloginfo( 'version' ), '6.2', '<' );
+				'is_experimental'    => false,
+				'enabled_by_default' => true,
+				'disable_ui'         => true,
+				'is_legacy'          => true,
+			),
+			// Marked as a legacy feature to avoid compatibility checks, which aren't really relevant to this feature.
+			// https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959.
+			'order_attribution'                  => array(
+				'name'               => __( 'Order Attribution', 'woocommerce' ),
+				'description'        => __(
+					'Enable this feature to track and credit channels and campaigns that contribute to orders on your site',
+					'woocommerce'
+				),
+				'enabled_by_default' => true,
+				'disable_ui'         => false,
+				'is_legacy'          => true,
+				'is_experimental'    => false,
+			),
+			'site_visibility_badge'              => array(
+				'name'               => __( 'Site visibility badge', 'woocommerce' ),
+				'description'        => __(
+					'Enable the site visibility badge in the WordPress admin bar',
+					'woocommerce'
+				),
+				'enabled_by_default' => true,
+				'disable_ui'         => false,
+				'is_legacy'          => true,
+				'is_experimental'    => false,
+				'disabled'           => false,
+			),
+			'hpos_fts_indexes'                   => array(
+				'name'               => __( 'HPOS Full text search indexes', 'woocommerce' ),
+				'description'        => __(
+					'Create and use full text search indexes for orders. This feature only works with high-performance order storage.',
+					'woocommerce'
+				),
+				'is_experimental'    => true,
+				'enabled_by_default' => false,
+				'is_legacy'          => true,
+				'option_key'         => CustomOrdersTableController::HPOS_FTS_INDEX_OPTION,
+			),
+			'hpos_datastore_caching'             => array(
+				'name'               => __( 'HPOS Data Caching', 'woocommerce' ),
+				'description'        => __(
+					'Enable order data caching in the datastore. This feature only works with high-performance order storage.',
+					'woocommerce'
+				),
+				'is_experimental'    => true,
+				'enabled_by_default' => false,
+				'is_legacy'          => true,
+				'disable_ui'         => false,
+				'option_key'         => CustomOrdersTableController::HPOS_DATASTORE_CACHING_ENABLED_OPTION,
+			),
+			'remote_logging'                     => array(
+				'name'               => __( 'Remote Logging', 'woocommerce' ),
+				'description'        => sprintf(
+					/* translators: %1$s: opening link tag, %2$s: closing link tag */
+					__( 'Allow WooCommerce to send error logs and non-sensitive diagnostic data to help improve WooCommerce. This feature requires %1$susage tracking%2$s to be enabled.', 'woocommerce' ),
+					'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=advanced&section=woocommerce_com' ) . '">',
+					'</a>'
+				),
+				'enabled_by_default' => true,
+				'disable_ui'         => false,
+
+				/*
+				 * This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
+				 * but we wish to handle compatibility checking in a similar fashion to legacy features. The
+				 * rational for setting legacy to true is therefore similar to that of the 'order_attribution'
+				 * feature.
+				 *
+				 * @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
+				 */
+				'is_legacy'          => true,
+				'is_experimental'    => false,
+				'setting'            => array(
+					'disabled' => function () use ( $tracking_enabled ) {
+						return ! $tracking_enabled;
 					},
-					'desc_tip'        => function() {
-						$string = '';
-						if ( version_compare( get_bloginfo( 'version' ), '6.2', '<' ) ) {
-							$string = __(
-								'⚠ This feature is compatible with WordPress version 6.2 or higher.',
-								'woocommerce'
-							);
+					'desc_tip' => function () use ( $tracking_enabled ) {
+						if ( ! $tracking_enabled ) {
+							return __( '⚠ Usage tracking must be enabled to use remote logging.', 'woocommerce' );
 						}
-
-						return $string;
+						return '';
 					},
 				),
-				'cart_checkout_blocks' => array(
-					'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
-					'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
+			),
+			'email_improvements'                 => array(
+				'name'            => __( 'Email improvements', 'woocommerce' ),
+				'description'     => __(
+					'Enable modern email design for transactional emails',
+					'woocommerce'
+				),
+
+					/*
+					 * This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
+					 * but as this feature doesn't affect all extensions, and the rollout is fairly short,
+					 * we'll skip the compatibility check by marking this as legacy. This is a workaround until
+					 * we can implement a more sophisticated compatibility checking system.
+					 *
+					 * @see https://github.com/woocommerce/woocommerce/issues/39147
+					 * @see https://github.com/woocommerce/woocommerce/issues/55540
+					 */
+					'is_legacy'       => true,
 					'is_experimental' => false,
-					'disable_ui'      => true,
 				),
-				'marketplace'          => array(
-					'name'               => __( 'Marketplace', 'woocommerce' ),
+				'blueprint'                          => array(
+					'name'               => __( 'Blueprint (beta)', 'woocommerce' ),
 					'description'        => __(
-						'New, faster way to find extensions and themes for your WooCommerce store',
-						'woocommerce'
-					),
-					'is_experimental'    => false,
-					'enabled_by_default' => true,
-					'disable_ui'         => true,
-					'is_legacy'          => true,
-				),
-				// Marked as a legacy feature to avoid compatibility checks, which aren't really relevant to this feature.
-				// https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959.
-				'order_attribution'    => array(
-					'name'               => __( 'Order Attribution', 'woocommerce' ),
-					'description'        => __(
-						'Enable this feature to track and credit channels and campaigns that contribute to orders on your site',
+						'Enable blueprint to import and export settings in bulk',
 						'woocommerce'
 					),
 					'enabled_by_default' => true,
 					'disable_ui'         => false,
-					'is_legacy'          => true,
-					'is_experimental'    => false,
+
+				/*
+				* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
+				* but we wish to handle compatibility checking in a similar fashion to legacy features. The
+				* rational for setting legacy to true is therefore similar to that of the 'order_attribution'
+				* feature.
+				*
+				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
+				*/
+				'is_legacy'          => true,
+				'is_experimental'    => false,
+			),
+			'reactify-classic-payments-settings' => array(
+				'name'               => __( 'Payments Settings (beta)', 'woocommerce' ),
+				'description'        => __(
+					'Enable the new payments settings experience',
+					'woocommerce'
 				),
-			);
+				'enabled_by_default' => false,
+				'disable_ui'         => false,
+				'is_experimental'    => false,
+			),
+			'block_email_editor'                 => array(
+				'name'               => __( 'Block Email Editor (alpha)', 'woocommerce' ),
+				'description'        => __(
+					'Enable the block-based email editor for transactional emails. <a href="https://github.com/woocommerce/woocommerce/discussions/52897#discussioncomment-11630256" target="_blank">Learn more</a>',
+					'woocommerce'
+				),
 
-			foreach ( $legacy_features as $slug => $definition ) {
-				$this->add_feature_definition( $slug, $definition['name'], $definition );
-			}
+				/*
+				* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
+				* but we wish to handle compatibility checking in a similar fashion to legacy features. The
+				* rational for setting legacy to true is therefore similar to that of the 'order_attribution'
+				* feature.
+				*
+				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
+				*/
+				'is_legacy'          => true,
+				'enabled_by_default' => false,
+			),
+		);
 
-			/**
-			 * The action for registering features.
-			 *
-			 * @since 8.3.0
-			 *
-			 * @param FeaturesController $features_controller The instance of FeaturesController.
-			 */
-			do_action( 'woocommerce_register_feature_definitions', $this );
+		if ( ! $tracking_enabled ) {
+			// Uncheck the remote logging feature when usage tracking is disabled.
+			$legacy_features['remote_logging']['setting']['value'] = 'no';
+		}
 
-			foreach ( array_keys( $this->features ) as $feature_id ) {
+		foreach ( $legacy_features as $slug => $definition ) {
+			$this->add_feature_definition( $slug, $definition['name'], $definition );
+		}
+
+		$this->init_compatibility_info_by_feature();
+	}
+
+	/**
+	 * Initialize the compatibility_info_by_feature property after all the features have been added.
+	 */
+	private function init_compatibility_info_by_feature() {
+		foreach ( array_keys( $this->features ) as $feature_id ) {
+			if ( ! isset( $this->compatibility_info_by_feature[ $feature_id ] ) ) {
 				$this->compatibility_info_by_feature[ $feature_id ] = array(
 					'compatible'   => array(),
 					'incompatible' => array(),
 				);
 			}
 		}
+	}
 
-		return $this->features;
+	/**
+	 * Function to trigger the (now deprecated) 'woocommerce_register_feature_definitions' hook.
+	 *
+	 * This function must execute immediately before the 'before_woocommerce_init'
+	 * action is fired, so that feature compatibility declarations happening
+	 * in that action find all the features properly declared already.
+	 *
+	 * @internal
+	 */
+	public function register_additional_features() {
+		if ( $this->registered_additional_features_via_action ) {
+			return;
+		}
+
+		if ( empty( $this->features ) ) {
+			$this->init_feature_definitions();
+		}
+
+		/**
+		 * The action for registering features.
+		 *
+		 * @since 8.3.0
+		 *
+		 * @param FeaturesController $features_controller The instance of FeaturesController.
+		 *
+		 * @deprecated 9.9.0 Features should be defined directly in get_feature_definitions.
+		 */
+		do_action( 'woocommerce_register_feature_definitions', $this );
+
+		$this->init_compatibility_info_by_feature();
+
+		$this->registered_additional_features_via_action = true;
 	}
 
 	/**
@@ -262,6 +522,8 @@ class FeaturesController {
 	final public function init( LegacyProxy $proxy, PluginUtil $plugin_util ) {
 		$this->proxy       = $proxy;
 		$this->plugin_util = $plugin_util;
+
+		$this->plugins_excluded_from_compatibility_ui = $plugin_util->get_plugins_excluded_from_compatibility_ui();
 	}
 
 	/**
@@ -285,7 +547,7 @@ class FeaturesController {
 		if ( ! $include_experimental ) {
 			$features = array_filter(
 				$features,
-				function( $feature ) {
+				function ( $feature ) {
 					return ! $feature['is_experimental'];
 				}
 			);
@@ -299,6 +561,34 @@ class FeaturesController {
 		}
 
 		return $features;
+	}
+
+	/**
+	 * Check if plugins that don't declare compatibility nor incompatibility with a given feature
+	 * are to be considered incompatible with that feature.
+	 *
+	 * @param string $feature_id Feature id to check.
+	 * @return bool True if plugins that don't declare compatibility nor incompatibility with the feature will be considered incompatible with the feature.
+	 * @throws \InvalidArgumentException The feature doesn't exist.
+	 */
+	public function get_plugins_are_incompatible_by_default( string $feature_id ): bool {
+		$feature_definition = $this->get_feature_definitions()[ $feature_id ] ?? null;
+		if ( is_null( $feature_definition ) ) {
+			throw new \InvalidArgumentException( esc_html( "The WooCommerce feature '$feature_id' doesn't exist" ) );
+		}
+
+		$incompatible_by_default = $feature_definition['plugins_are_incompatible_by_default'] ?? false;
+
+		/**
+		 * Filter to determine if plugins that don't declare compatibility nor incompatibility with a given feature
+		 * are to be considered incompatible with that feature.
+		 *
+		 * @param bool $incompatible_by_default Default value, true if plugins are to be considered incompatible by default with the feature.
+		 * @param string $feature_id The feature to check.
+		 *
+		 * @since 9.2.0
+		 */
+		return (bool) apply_filters( 'woocommerce_plugins_are_incompatible_with_feature_by_default', $incompatible_by_default, $feature_id );
 	}
 
 	/**
@@ -383,7 +673,7 @@ class FeaturesController {
 		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin[ $plugin_name ], $opposite_key );
 
 		if ( in_array( $feature_id, $this->compatibility_info_by_plugin[ $plugin_name ][ $opposite_key ], true ) ) {
-			throw new \Exception( "Plugin $plugin_name is trying to declare itself as $key with the '$feature_id' feature, but it already declared itself as $opposite_key" );
+			throw new \Exception( esc_html( "Plugin $plugin_name is trying to declare itself as $key with the '$feature_id' feature, but it already declared itself as $opposite_key" ) );
 		}
 
 		if ( ! in_array( $feature_id, $this->compatibility_info_by_plugin[ $plugin_name ][ $key ], true ) ) {
@@ -422,7 +712,7 @@ class FeaturesController {
 	 * @param bool   $enabled_features_only True to return only names of enabled plugins.
 	 * @return array An array having a 'compatible' and an 'incompatible' key, each holding an array of feature ids.
 	 */
-	public function get_compatible_features_for_plugin( string $plugin_name, bool $enabled_features_only = false ) : array {
+	public function get_compatible_features_for_plugin( string $plugin_name, bool $enabled_features_only = false ): array {
 		$this->verify_did_woocommerce_init( __FUNCTION__ );
 
 		$features = $this->get_feature_definitions();
@@ -455,9 +745,9 @@ class FeaturesController {
 	 *
 	 * @param string $feature_id Feature id.
 	 * @param bool   $active_only True to return only active plugins.
-	 * @return array An array having a 'compatible' and an 'incompatible' key, each holding an array of plugin names.
+	 * @return array An array having a 'compatible', an 'incompatible' and an 'uncertain' key, each holding an array of plugin names.
 	 */
-	public function get_compatible_plugins_for_feature( string $feature_id, bool $active_only = false ) : array {
+	public function get_compatible_plugins_for_feature( string $feature_id, bool $active_only = false ): array {
 		$this->verify_did_woocommerce_init( __FUNCTION__ );
 
 		$woo_aware_plugins = $this->plugin_util->get_woocommerce_aware_plugins( $active_only );
@@ -478,14 +768,15 @@ class FeaturesController {
 	/**
 	 * Check if the 'woocommerce_init' has run or is running, do a 'wc_doing_it_wrong' if not.
 	 *
-	 * @param string|null $function Name of the invoking method, if not null, 'wc_doing_it_wrong' will be invoked if 'woocommerce_init' has not run and is not running.
+	 * @param string|null $function_name Name of the invoking method, if not null, 'wc_doing_it_wrong' will be invoked if 'woocommerce_init' has not run and is not running.
+	 *
 	 * @return bool True if 'woocommerce_init' has run or is running, false otherwise.
 	 */
-	private function verify_did_woocommerce_init( string $function = null ): bool {
+	private function verify_did_woocommerce_init( ?string $function_name = null ): bool {
 		if ( ! $this->proxy->call_function( 'did_action', 'woocommerce_init' ) &&
 			! $this->proxy->call_function( 'doing_action', 'woocommerce_init' ) ) {
-			if ( ! is_null( $function ) ) {
-				$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . $function;
+			if ( ! is_null( $function_name ) ) {
+				$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . $function_name;
 				/* translators: 1: class::method 2: plugins_loaded */
 				$this->proxy->call_function( 'wc_doing_it_wrong', $class_and_method, sprintf( __( '%1$s should not be called before the %2$s action.', 'woocommerce' ), $class_and_method, 'woocommerce_init' ), '7.0' );
 			}
@@ -545,14 +836,31 @@ class FeaturesController {
 	}
 
 	/**
+	 * Adds our callbacks for the `updated_option` and `added_option` filter hooks.
+	 *
+	 * We delay adding these hooks until `init`, because both callbacks need to load our list of feature definitions,
+	 * and building that list requires translating various strings (which should not be done earlier than `init`).
+	 *
+	 * @return void
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function start_listening_for_option_changes(): void {
+		add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
+		add_filter( 'added_option', array( $this, 'process_added_option' ), 999, 3 );
+	}
+
+	/**
 	 * Handler for the 'added_option' hook.
 	 *
 	 * It fires FEATURE_ENABLED_CHANGED_ACTION when a feature is enabled or disabled.
 	 *
 	 * @param string $option The option that has been created.
 	 * @param mixed  $value The value of the option.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function process_added_option( string $option, $value ) {
+	public function process_added_option( string $option, $value ) {
 		$this->process_updated_option( $option, false, $value );
 	}
 
@@ -566,13 +874,15 @@ class FeaturesController {
 	 * @param mixed  $value     The new value of the option.
 	 *
 	 * @return void
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function process_updated_option( string $option, $old_value, $value ) {
+	public function process_updated_option( string $option, $old_value, $value ) {
 		$matches                   = array();
 		$is_default_key            = preg_match( '/^woocommerce_feature_([a-zA-Z0-9_]+)_enabled$/', $option, $matches );
 		$features_with_custom_keys = array_filter(
 			$this->get_feature_definitions(),
-			function( $feature ) {
+			function ( $feature ) {
 				return ! empty( $feature['option_key'] );
 			}
 		);
@@ -597,6 +907,14 @@ class FeaturesController {
 			return;
 		}
 
+		WC_Tracks::record_event(
+			self::FEATURE_ENABLED_CHANGED_ACTION,
+			array(
+				'feature_id' => $feature_id,
+				'enabled'    => $value,
+			)
+		);
+
 		/**
 		 * Action triggered when a feature is enabled or disabled (the value of the corresponding setting option is changed).
 		 *
@@ -614,8 +932,10 @@ class FeaturesController {
 	 *
 	 * @param array $sections The original sections array.
 	 * @return array The updated sections array.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function add_features_section( $sections ) {
+	public function add_features_section( $sections ) {
 		if ( ! isset( $sections['features'] ) ) {
 			$sections['features'] = __( 'Features', 'woocommerce' );
 		}
@@ -632,8 +952,10 @@ class FeaturesController {
 	 * @param array  $settings The existing settings for the corresponding settings section.
 	 * @param string $current_section The section to get the settings for.
 	 * @return array The updated settings array.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function add_feature_settings( $settings, $current_section ): array {
+	public function add_feature_settings( $settings, $current_section ): array {
 		if ( 'features' !== $current_section ) {
 			return $settings;
 		}
@@ -649,13 +971,16 @@ class FeaturesController {
 
 		$features = $this->get_features( true );
 
-		$feature_ids              = array_keys( $features );
-		usort( $feature_ids, function( $feature_id_a, $feature_id_b ) use ( $features ) {
-			return ( $features[ $feature_id_b ]['order'] ?? 0 ) <=> ( $features[ $feature_id_a ]['order'] ?? 0 );
-		} );
+		$feature_ids = array_keys( $features );
+		usort(
+			$feature_ids,
+			function ( $feature_id_a, $feature_id_b ) use ( $features ) {
+				return ( $features[ $feature_id_b ]['order'] ?? 0 ) <=> ( $features[ $feature_id_a ]['order'] ?? 0 );
+			}
+		);
 		$experimental_feature_ids = array_filter(
 			$feature_ids,
-			function( $feature_id ) use ( $features ) {
+			function ( $feature_id ) use ( $features ) {
 				return $features[ $feature_id ]['is_experimental'] ?? false;
 			}
 		);
@@ -689,6 +1014,10 @@ class FeaturesController {
 				continue;
 			}
 
+			if ( 'new_navigation' === $id && 'yes' !== get_option( $this->feature_enable_option_name( $id ), 'no' ) ) {
+				continue;
+			}
+
 			if ( isset( $features[ $id ]['disable_ui'] ) && $features[ $id ]['disable_ui'] ) {
 				continue;
 			}
@@ -709,7 +1038,7 @@ class FeaturesController {
 		if ( $this->verify_did_woocommerce_init() ) {
 			// Allow feature setting properties to be determined dynamically just before being rendered.
 			$feature_settings = array_map(
-				function( $feature_setting ) {
+				function ( $feature_setting ) {
 					foreach ( $feature_setting as $prop => $value ) {
 						if ( is_callable( $value ) ) {
 							$feature_setting[ $prop ] = call_user_func( $value );
@@ -753,25 +1082,15 @@ class FeaturesController {
 			$disabled = true;
 			$desc_tip = __( 'WooCommerce Admin has been disabled', 'woocommerce' );
 		} elseif ( 'new_navigation' === $feature_id ) {
-			$disabled = ! $this->feature_is_enabled( $feature_id );
-
-			if ( $disabled ) {
-				$update_text = sprintf(
-					// translators: 1: line break tag.
-					__( '%1$s The development of this feature is currently on hold.', 'woocommerce' ),
-					'<br/>'
-				);
-			} else {
-				$update_text = sprintf(
-					// translators: 1: line break tag.
-					__(
-						'%1$s This navigation will soon become unavailable while we make necessary improvements.
-			             If you turn it off now, you will not be able to turn it back on.',
-						'woocommerce'
-					),
-					'<br/>'
-				);
-			}
+			$update_text = sprintf(
+				// translators: 1: line break tag.
+				__(
+					'%1$s This navigation will soon become unavailable while we make necessary improvements.
+									If you turn it off now, you will not be able to turn it back on.',
+					'woocommerce'
+				),
+				'<br/>'
+			);
 
 			$needs_update = version_compare( get_bloginfo( 'version' ), '5.6', '<' );
 			if ( $needs_update && current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
@@ -791,7 +1110,6 @@ class FeaturesController {
 		}
 
 		if ( ! $this->is_legacy_feature( $feature_id ) && ! $disabled && $this->verify_did_woocommerce_init() ) {
-			$disabled                = ! $this->feature_is_enabled( $feature_id );
 			$plugin_info_for_feature = $this->get_compatible_plugins_for_feature( $feature_id, true );
 			$desc_tip                = $this->plugin_util->generate_incompatible_plugin_feature_warning( $feature_id, $plugin_info_for_feature );
 		}
@@ -843,8 +1161,10 @@ class FeaturesController {
 	 * Handle the plugin deactivation hook.
 	 *
 	 * @param string $plugin_name Name of the plugin that has been deactivated.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function handle_plugin_deactivation( $plugin_name ): void {
+	public function handle_plugin_deactivation( $plugin_name ): void {
 		unset( $this->compatibility_info_by_plugin[ $plugin_name ] );
 
 		foreach ( array_keys( $this->compatibility_info_by_feature ) as $feature ) {
@@ -863,63 +1183,71 @@ class FeaturesController {
 	 * if we are in the plugins page and the query string of the current request
 	 * looks like '?plugin_status=incompatible_with_feature&feature_id=<feature id>'.
 	 *
-	 * @param array $list The original list of plugins.
+	 * @param array $plugin_list The original list of plugins.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function filter_plugins_list( $list ): array {
+	public function filter_plugins_list( $plugin_list ): array {
 		if ( ! $this->verify_did_woocommerce_init() ) {
-			return $list;
+			return $plugin_list;
 		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput
 		if ( ! function_exists( 'get_current_screen' ) || get_current_screen() && 'plugins' !== get_current_screen()->id || 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
-			return $list;
+			return $plugin_list;
 		}
 
 		$feature_id = $_GET['feature_id'] ?? 'all';
 		if ( 'all' !== $feature_id && ! $this->feature_exists( $feature_id ) ) {
-			return $list;
+			return $plugin_list;
 		}
 
-		return $this->get_incompatible_plugins( $feature_id, $list );
+		return $this->get_incompatible_plugins( $feature_id, $plugin_list );
 	}
 
 	/**
 	 * Returns the list of plugins incompatible with a given feature.
 	 *
 	 * @param string $feature_id ID of the feature. Can also be `all` to denote all features.
-	 * @param array  $list       List of plugins to filter.
+	 * @param array  $plugin_list       List of plugins to filter.
 	 *
 	 * @return array List of plugins incompatible with the given feature.
 	 */
-	private function get_incompatible_plugins( $feature_id, $list ) {
-		$incompatibles = array();
+	public function get_incompatible_plugins( $feature_id, $plugin_list ) {
+		$incompatibles         = array();
+		$plugin_list           = array_diff_key( $plugin_list, array_flip( $this->plugins_excluded_from_compatibility_ui ) );
+		$feature_ids           = 'all' === $feature_id ? array_keys( $this->get_feature_definitions() ) : array( $feature_id );
+		$only_enabled_features = 'all' === $feature_id;
 
 		// phpcs:enable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
-		foreach ( array_keys( $list ) as $plugin_name ) {
+		foreach ( array_keys( $plugin_list ) as $plugin_name ) {
 			if ( ! $this->plugin_util->is_woocommerce_aware_plugin( $plugin_name ) || ! $this->proxy->call_function( 'is_plugin_active', $plugin_name ) ) {
 				continue;
 			}
 
-			$compatibility     = $this->get_compatible_features_for_plugin( $plugin_name );
-			$incompatible_with = array_filter(
-				array_merge( $compatibility['incompatible'], $compatibility['uncertain'] ),
-				function( $feature_id ) {
-					return ! $this->is_legacy_feature( $feature_id );
+			$compatibility_info = $this->get_compatible_features_for_plugin( $plugin_name );
+			foreach ( $feature_ids as $feature_id ) {
+				$features_considered_incompatible = array_filter(
+					$this->plugin_util->get_items_considered_incompatible( $feature_id, $compatibility_info ),
+					$only_enabled_features ?
+						fn( $feature_id ) => $this->feature_is_enabled( $feature_id ) && ! $this->is_legacy_feature( $feature_id ) :
+						fn( $feature_id ) => ! $this->is_legacy_feature( $feature_id )
+				);
+				if ( in_array( $feature_id, $features_considered_incompatible, true ) ) {
+					$incompatibles[] = $plugin_name;
 				}
-			);
-
-			if ( ( 'all' === $feature_id && ! empty( $incompatible_with ) ) || in_array( $feature_id, $incompatible_with, true ) ) {
-				$incompatibles[] = $plugin_name;
 			}
 		}
 
-		return array_intersect_key( $list, array_flip( $incompatibles ) );
+		return array_intersect_key( $plugin_list, array_flip( $incompatibles ) );
 	}
 
 	/**
 	 * Handler for the admin_notices action.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function display_notices_in_plugins_page(): void {
+	public function display_notices_in_plugins_page(): void {
 		if ( ! $this->verify_did_woocommerce_init() ) {
 			return;
 		}
@@ -933,7 +1261,7 @@ class FeaturesController {
 	/**
 	 * Shows a warning when there are any incompatibility between active plugins and enabled features.
 	 * The warning is shown in on any admin screen except the plugins screen itself, since
-	 * there's already a "You are viewing
+	 * there's already a "You are viewing plugins that are incompatible" notice.
 	 */
 	private function maybe_display_feature_incompatibility_warning(): void {
 		if ( ! current_user_can( 'activate_plugins' ) ) {
@@ -941,18 +1269,26 @@ class FeaturesController {
 		}
 
 		$incompatible_plugins = false;
+		$relevant_plugins     = array_diff( $this->plugin_util->get_woocommerce_aware_plugins( true ), $this->plugins_excluded_from_compatibility_ui );
 
-		foreach ( $this->plugin_util->get_woocommerce_aware_plugins( true ) as $plugin ) {
-			$compatibility     = $this->get_compatible_features_for_plugin( $plugin, true );
-			$incompatible_with = array_filter(
-				array_merge( $compatibility['incompatible'], $compatibility['uncertain'] ),
-				function( $feature_id ) {
-					return ! $this->is_legacy_feature( $feature_id );
-				}
-			);
+		foreach ( $relevant_plugins as $plugin ) {
+			$compatibility_info = $this->get_compatible_features_for_plugin( $plugin, true );
 
-			if ( $incompatible_with ) {
+			$incompatibles = array_filter( $compatibility_info['incompatible'], fn( $feature_id ) => ! $this->is_legacy_feature( $feature_id ) );
+			if ( ! empty( $incompatibles ) ) {
 				$incompatible_plugins = true;
+				break;
+			}
+
+			$uncertains = array_filter( $compatibility_info['uncertain'], fn( $feature_id ) => ! $this->is_legacy_feature( $feature_id ) );
+			foreach ( $uncertains as $feature_id ) {
+				if ( $this->get_plugins_are_incompatible_by_default( $feature_id ) ) {
+					$incompatible_plugins = true;
+					break;
+				}
+			}
+
+			if ( $incompatible_plugins ) {
 				break;
 			}
 		}
@@ -1042,8 +1378,10 @@ class FeaturesController {
 	 * @see https://github.com/woocommerce/woocommerce/issues/37343
 	 *
 	 * @return void
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function maybe_invalidate_cached_plugin_data(): void {
+	public function maybe_invalidate_cached_plugin_data(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		if ( ( $_GET['plugin_status'] ?? '' ) === 'incompatible_with_feature' ) {
 			wp_cache_delete( 'plugins', 'plugins' );
@@ -1056,9 +1394,15 @@ class FeaturesController {
 	 *
 	 * @param string $plugin_file The id of the plugin for which a row has been rendered in the plugins page.
 	 * @param array  $plugin_data Plugin data, as returned by 'get_plugins'.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function handle_plugin_list_rows( $plugin_file, $plugin_data ) {
+	public function handle_plugin_list_rows( $plugin_file, $plugin_data ) {
 		global $wp_list_table;
+
+		if ( in_array( $plugin_file, $this->plugins_excluded_from_compatibility_ui, true ) ) {
+			return;
+		}
 
 		if ( 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			return;
@@ -1078,7 +1422,7 @@ class FeaturesController {
 		$incompatible_features      = array_values(
 			array_filter(
 				$incompatible_features,
-				function( $feature_id ) {
+				function ( $feature_id ) {
 					return ! $this->is_legacy_feature( $feature_id );
 				}
 			)
@@ -1163,8 +1507,10 @@ class FeaturesController {
 	 * (and then some extra manual tweaking of margins is needed).
 	 *
 	 * @param string $current_screen The current screen object.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function enqueue_script_to_fix_plugin_list_html( $current_screen ): void {
+	public function enqueue_script_to_fix_plugin_list_html( $current_screen ): void {
 		if ( 'plugins' !== $current_screen->id ) {
 			return;
 		}
@@ -1196,8 +1542,10 @@ class FeaturesController {
 	 *
 	 * @param array $views An array of view ids => view links.
 	 * @return string[] The actual views array to use.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function handle_plugins_page_views_list( $views ): array {
+	public function handle_plugins_page_views_list( $views ): array {
 		// phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
 		if ( 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
 			return $views;
@@ -1236,6 +1584,8 @@ class FeaturesController {
 	 * @param array $settings Component settings.
 	 *
 	 * @return array
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function set_change_feature_enable_nonce( $settings ) {
 		$settings['_feature_nonce'] = wp_create_nonce( 'change_feature_enable' );
@@ -1247,8 +1597,10 @@ class FeaturesController {
 	 *
 	 * `/wp-admin/post.php?product_block_editor=1&_feature_nonce=1234`, 1 for on
 	 * `/wp-admin/post.php?product_block_editor=0&_feature_nonce=1234`, 0 for off
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function change_feature_enable_from_query_params(): void {
+	public function change_feature_enable_from_query_params(): void {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
@@ -1277,6 +1629,25 @@ class FeaturesController {
 		if ( count( $query_params_to_remove ) > 1 && isset( $_SERVER['REQUEST_URI'] ) ) {
 			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			wp_safe_redirect( remove_query_arg( $query_params_to_remove, $_SERVER['REQUEST_URI'] ) );
+		}
+	}
+
+	/**
+	 * Display the email improvements feedback notice to render CES modal in.
+	 *
+	 * @param string $feature_id The feature id.
+	 * @param bool   $is_enabled Whether the feature is enabled.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function display_email_improvements_feedback_notice( $feature_id, $is_enabled ): void {
+		if ( 'email_improvements' === $feature_id && ! $is_enabled ) {
+			add_action(
+				'admin_notices',
+				function () {
+					echo '<div id="wc_settings_features_email_feedback_slotfill"></div>';
+				}
+			);
 		}
 	}
 }

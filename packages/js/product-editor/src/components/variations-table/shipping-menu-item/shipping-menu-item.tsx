@@ -40,7 +40,6 @@ export function ShippingMenuItem( {
 
 	return (
 		<Dropdown
-			// @ts-expect-error missing prop in types.
 			popoverProps={ {
 				placement: 'right-start',
 			} }
@@ -63,41 +62,35 @@ export function ShippingMenuItem( {
 			renderContent={ () => (
 				<div className="components-dropdown-menu__menu">
 					<MenuGroup>
-						{ window.wcAdminFeatures[
-							'product-virtual-downloadable'
-						] && (
-							<MenuItem
-								onClick={ () => {
-									recordEvent(
-										'product_variations_menu_shipping_select',
-										{
-											source: TRACKS_SOURCE,
-											action: 'toggle_shipping',
-											variation_id: ids,
-										}
-									);
-									onChange(
-										selection.map(
-											( { id, virtual } ) => ( {
-												id,
-												virtual: ! virtual,
-											} )
-										)
-									);
-									recordEvent(
-										'product_variations_menu_shipping_update',
-										{
-											source: TRACKS_SOURCE,
-											action: 'toggle_shipping',
-											variation_id: ids,
-										}
-									);
-									onClose();
-								} }
-							>
-								{ __( 'Toggle shipping', 'woocommerce' ) }
-							</MenuItem>
-						) }
+						<MenuItem
+							onClick={ () => {
+								recordEvent(
+									'product_variations_menu_shipping_select',
+									{
+										source: TRACKS_SOURCE,
+										action: 'toggle_shipping',
+										variation_id: ids,
+									}
+								);
+								onChange(
+									selection.map( ( { id, virtual } ) => ( {
+										id,
+										virtual: ! virtual,
+									} ) )
+								);
+								recordEvent(
+									'product_variations_menu_shipping_update',
+									{
+										source: TRACKS_SOURCE,
+										action: 'toggle_shipping',
+										variation_id: ids,
+									}
+								);
+								onClose();
+							} }
+						>
+							{ __( 'Toggle shipping', 'woocommerce' ) }
+						</MenuItem>
 						<MenuItem
 							onClick={ () => {
 								recordEvent(

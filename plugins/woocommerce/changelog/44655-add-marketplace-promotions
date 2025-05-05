@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Adds logic to get notices of promotions from Woo.com endpoint, and (if necessary) show a bubble next to the WooCommerce "Extensions" menu item.

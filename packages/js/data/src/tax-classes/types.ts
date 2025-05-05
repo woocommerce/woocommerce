@@ -29,7 +29,7 @@ type ReadOnlyProperties = 'slug';
 
 type MutableProperties = Omit< TaxClass, ReadOnlyProperties >;
 
-type TaxClassActions = CrudActions<
+export type TaxClassActions = CrudActions<
 	'TaxClass',
 	TaxClass,
 	MutableProperties,

@@ -9,12 +9,15 @@ import dotenv from 'dotenv';
 /**
  * Internal dependencies
  */
+import PullRequest from './pull-requests/commands';
 import CodeFreeze from './code-freeze/commands';
+import Github from './github/commands';
 import Slack from './slack/commands/slack';
 import Manifest from './md-docs/commands';
 import Changefile from './changefile';
 import CIJobs from './ci-jobs';
 import WorkflowProfiler from './workflow-profiler/commands';
+import SlackTestReport from './slack-test-report';
 import { Logger } from './core/logger';
 import { isGithubCI } from './core/environment';
 
@@ -36,7 +39,10 @@ const program = new Command()
 	.addCommand( Changefile )
 	.addCommand( CIJobs )
 	.addCommand( WorkflowProfiler )
-	.addCommand( Manifest );
+	.addCommand( Manifest )
+	.addCommand( SlackTestReport )
+	.addCommand( PullRequest )
+	.addCommand( Github );
 
 program.exitOverride();
 

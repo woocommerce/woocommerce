@@ -2,11 +2,15 @@
  * External dependencies
  */
 import { PartialProductVariation, ProductVariation } from '@woocommerce/data';
+import { MenuItem } from '@wordpress/components';
 
 export type VariationActionsMenuProps = {
 	disabled?: boolean;
 	selection: ProductVariation[];
-	onChange( values: PartialProductVariation[] ): void;
+	onChange(
+		values: PartialProductVariation[] | React.FormEvent,
+		showSuccess?: boolean
+	): void;
 	onDelete( values: PartialProductVariation[] ): void;
 };
 
@@ -14,12 +18,17 @@ export type VariationQuickUpdateSlotProps = {
 	group: string;
 	supportsMultipleSelection: boolean;
 	selection: ProductVariation[];
-	onChange: ( values: PartialProductVariation[] ) => void;
+	onChange(
+		values: PartialProductVariation[] | React.FormEvent< HTMLDivElement >,
+		showSuccess?: boolean
+	): void;
 	onClose: () => void;
 };
 
-export type MenuItemProps = {
-	children?: React.ReactNode;
+export type MenuItemProps = Omit<
+	React.ComponentProps< typeof MenuItem >,
+	'onClick'
+> & {
 	order?: number;
 	group?: string;
 	supportsMultipleSelection?: boolean;

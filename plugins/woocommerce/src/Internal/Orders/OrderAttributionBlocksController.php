@@ -61,11 +61,18 @@ class OrderAttributionBlocksController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Hook into WP.
+	 * Register this class instance to the appropriate hooks.
 	 *
 	 * @return void
 	 */
 	public function register() {
+		add_action( 'init', array( $this, 'on_init' ) );
+	}
+
+	/**
+	 * Hook into WordPress on init.
+	 */
+	public function on_init() {
 		// Bail if the feature is not enabled.
 		if ( ! $this->features_controller->feature_is_enabled( 'order_attribution' ) ) {
 			return;
@@ -95,6 +102,11 @@ class OrderAttributionBlocksController implements RegisterHooksInterface {
 				$params     = $extensions['woocommerce/order-attribution'] ?? array();
 
 				if ( empty( $params ) ) {
+					return;
+				}
+
+				// Check if this order already has any attribution data to prevent duplicates attribution data.
+				if ( $this->order_attribution_controller->has_attribution( $order ) ) {
 					return;
 				}
 

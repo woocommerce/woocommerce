@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 use Automattic\WooCommerce\Internal\Admin\Logging\{ PageController, Settings };
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
+use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 
 /**
  * LoggingServiceProvider class.
@@ -19,6 +20,7 @@ class LoggingServiceProvider extends AbstractServiceProvider {
 		FileController::class,
 		PageController::class,
 		Settings::class,
+		RemoteLogger::class,
 	);
 
 	/**
@@ -37,5 +39,7 @@ class LoggingServiceProvider extends AbstractServiceProvider {
 		);
 
 		$this->share( Settings::class );
+
+		$this->share( RemoteLogger::class );
 	}
 }

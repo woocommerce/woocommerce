@@ -12,14 +12,14 @@ defined( 'ABSPATH' ) || exit;
  */
 class Init extends RemoteSpecsEngine {
 	/**
-	 * Slug of the category specifying marketing extensions on the Woo.com store.
+	 * Slug of the category specifying marketing extensions on the WooCommerce.com store.
 	 *
 	 * @var string
 	 */
 	const MARKETING_EXTENSION_CATEGORY_SLUG = 'marketing';
 
 	/**
-	 * Slug of the subcategory specifying marketing channels on the Woo.com store.
+	 * Slug of the subcategory specifying marketing channels on the WooCommerce.com store.
 	 *
 	 * @var string
 	 */
@@ -37,6 +37,7 @@ class Init extends RemoteSpecsEngine {
 	 */
 	public static function delete_specs_transient() {
 		MarketingRecommendationsDataSourcePoller::get_instance()->delete_specs_transient();
+		MiscRecommendationsDataSourcePoller::get_instance()->delete_specs_transient();
 	}
 
 	/**
@@ -57,12 +58,31 @@ class Init extends RemoteSpecsEngine {
 	}
 
 	/**
+	 * Get misc recommendations specs or fetch remotely if they don't exist.
+	 *
+	 * @since 9.5.0
+	 */
+	public static function get_misc_recommendations_specs() {
+		if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
+			return array();
+		}
+		$specs = MiscRecommendationsDataSourcePoller::get_instance()->get_specs_from_data_sources();
+
+		// Return empty specs if they don't yet exist.
+		if ( ! is_array( $specs ) ) {
+			return array();
+		}
+
+		return $specs;
+	}
+
+	/**
 	 * Process specs.
 	 *
 	 * @param array|null $specs Marketing recommendations spec array.
 	 * @return array
 	 */
-	protected static function evaluate_specs( array $specs = null ) {
+	protected static function evaluate_specs( ?array $specs = null ) {
 		$suggestions = array();
 		$errors      = array();
 
@@ -81,7 +101,7 @@ class Init extends RemoteSpecsEngine {
 	}
 
 	/**
-	 * Load recommended plugins from Woo.com
+	 * Load recommended plugins from WooCommerce.com
 	 *
 	 * @return array
 	 */
@@ -113,7 +133,7 @@ class Init extends RemoteSpecsEngine {
 	}
 
 	/**
-	 * Return only the recommended marketing channels from Woo.com.
+	 * Return only the recommended marketing channels from WooCommerce.com.
 	 *
 	 * @return array
 	 */
@@ -127,7 +147,7 @@ class Init extends RemoteSpecsEngine {
 	}
 
 	/**
-	 * Return all recommended marketing extensions EXCEPT the marketing channels from Woo.com.
+	 * Return all recommended marketing extensions EXCEPT the marketing channels from WooCommerce.com.
 	 *
 	 * @return array
 	 */
@@ -138,6 +158,38 @@ class Init extends RemoteSpecsEngine {
 				return self::is_marketing_plugin( $plugin_data ) && ! self::is_marketing_channel_plugin( $plugin_data );
 			}
 		);
+	}
+
+	/**
+	 * Load misc recommendations from WooCommerce.com
+	 *
+	 * @since 9.5.0
+	 * @return array
+	 */
+	public static function get_misc_recommendations(): array {
+		$specs   = self::get_misc_recommendations_specs();
+		$results = self::evaluate_specs( $specs );
+
+		$specs_to_return = $results['suggestions'];
+		$specs_to_save   = null;
+
+		if ( empty( $specs_to_return ) ) {
+			// When misc_recommendations is empty, replace it with defaults and save for 3 hours.
+			$specs_to_save = array();
+		} elseif ( count( $results['errors'] ) > 0 ) {
+			// When misc_recommendations is not empty but has errors, save it for 3 hours.
+			$specs_to_save = $specs;
+		}
+
+		if ( $specs_to_save ) {
+			MiscRecommendationsDataSourcePoller::get_instance()->set_specs_transient( $specs_to_save, 3 * HOUR_IN_SECONDS );
+		}
+		$errors = $results['errors'];
+		if ( ! empty( $errors ) ) {
+			self::log_errors( $errors );
+		}
+
+		return $specs_to_return;
 	}
 
 	/**

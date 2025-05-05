@@ -3,7 +3,7 @@
  */
 import { DragEventHandler } from 'react';
 import { ListItem, Tag } from '@woocommerce/components';
-import { ProductAttribute } from '@woocommerce/data';
+import { ProductProductAttribute } from '@woocommerce/data';
 import { sprintf, __ } from '@wordpress/i18n';
 import { Button, Tooltip } from '@wordpress/components';
 import { closeSmall } from '@wordpress/icons';
@@ -16,13 +16,13 @@ import NotFilterableIcon from './not-filterable-icon';
 import SeenIcon from '../../icons/seen-icon';
 
 type AttributeListItemProps = {
-	attribute: ProductAttribute;
+	attribute: ProductProductAttribute;
 	editLabel?: string;
 	removeLabel?: string;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
-	onEditClick?: ( attribute: ProductAttribute ) => void;
-	onRemoveClick?: ( attribute: ProductAttribute ) => void;
+	onEditClick?: ( attribute: ProductProductAttribute ) => void;
+	onRemoveClick?: ( attribute: ProductProductAttribute ) => void;
 };
 
 const VISIBLE_TEXT = __( 'Visible in product details', 'woocommerce' );
@@ -31,7 +31,7 @@ const NOT_FILTERABLE_CUSTOM_ATTR_TEXT = __(
 	'woocommerce'
 );
 
-export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
+export const AttributeListItem = ( {
 	attribute,
 	editLabel = __( 'Edit', 'woocommerce' ),
 	removeLabel = __( 'Remove attribute', 'woocommerce' ),
@@ -39,7 +39,7 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 	onDragEnd,
 	onEditClick,
 	onRemoveClick,
-} ) => {
+}: AttributeListItemProps ) => {
 	return (
 		<ListItem
 			className="woocommerce-attribute-list-item"
@@ -80,7 +80,7 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 					<Tooltip
 						// @ts-expect-error className is missing in TS, should remove this when it is included.
 						className="woocommerce-attribute-list-item__actions-tooltip"
-						position="top center"
+						placement="top"
 						text={ VISIBLE_TEXT }
 					>
 						<div className="woocommerce-attribute-list-item__actions-icon-wrapper">

@@ -21,7 +21,7 @@ $product_attributes = $product_object->get_attributes( 'edit' );
 			<p class="help">
 				<?php
 				esc_html_e(
-					'Add descriptive pieces of information that customers can use to search for this product on your store, such as “Material” or “Brand”.',
+					'Add descriptive pieces of information that customers can use to search for this product on your store, such as “Material” or “Size”.',
 					'woocommerce'
 				);
 				?>

@@ -5,10 +5,20 @@
  * @package WooCommerce\Tests\Order.
  */
 
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * Class WC_Order_Functions_Test
  */
 class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
+	/**
+	 * tearDown.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		WC()->cart->empty_cart();
+	}
 
 	/**
 	 * Test that wc_restock_refunded_items() preserves order item stock metadata.
@@ -31,7 +41,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$checkout = WC_Checkout::instance();
 		$order    = new WC_Order();
 		$checkout->set_data_from_cart( $order );
-		$order->set_status( 'wc-processing' );
+		$order->set_status( OrderInternalStatus::PROCESSING );
 		$order->save();
 
 		// Get the line item.
@@ -39,7 +49,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$line_item = reset( $items );
 
 		// Force a restock of one item.
-		$refunded_items = array();
+		$refunded_items                         = array();
 		$refunded_items[ $line_item->get_id() ] = array(
 			'qty' => 1,
 		);
@@ -79,22 +89,22 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 
 		$order = new WC_Order( $order_id );
 
-		$order->update_status( 'processing' );
+		$order->update_status( OrderStatus::PROCESSING );
 		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
 
-		$order->update_status( 'cancelled' );
+		$order->update_status( OrderStatus::CANCELLED );
 		$this->assertEquals( 0, wc_get_product( $product_id )->get_total_sales() );
 
-		$order->update_status( 'processing' );
+		$order->update_status( OrderStatus::PROCESSING );
 		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
 
-		$order->update_status( 'completed' );
+		$order->update_status( OrderStatus::COMPLETED );
 		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
 
-		$order->update_status( 'refunded' );
+		$order->update_status( OrderStatus::REFUNDED );
 		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
 
-		$order->update_status( 'processing' );
+		$order->update_status( OrderStatus::PROCESSING );
 		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
 
 		// Test trashing the order.
@@ -110,4 +120,133 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 0, wc_get_product( $product_id )->get_total_sales() );
 	}
 
+
+	/**
+	 * Test wc_update_coupon_usage_counts and check usage_count after order reflection.
+	 *
+	 * Tests the fix for issue #31245
+	 */
+	public function test_wc_update_coupon_usage_counts() {
+		$coupon   = WC_Helper_Coupon::create_coupon( 'test' );
+		$order_id = WC_Checkout::instance()->create_order(
+			array(
+				'billing_email'  => 'a@b.com',
+				'payment_method' => 'dummy',
+			)
+		);
+
+		$order = new WC_Order( $order_id );
+		$order->apply_coupon( $coupon );
+
+		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::CANCELLED );
+		$this->assertEquals( 0, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::PENDING );
+		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::FAILED );
+		$this->assertEquals( 0, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::COMPLETED );
+		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::REFUNDED );
+		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		// Test trashing the order.
+		$order->delete( false );
+		$this->assertEquals( 0, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		// To successfully untrash, we need to grab a new instance of the order.
+		$order = wc_get_order( $order_id );
+		$order->untrash();
+		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+	}
+
+	/**
+	 * Test getting total refunded for an item with and without refunds.
+	 */
+	public function test_get_total_refunded_for_item() {
+		// Create a product.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 99.99 );
+		$product->save();
+
+		// Create an order with the product.
+		$order = new WC_Order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'total'    => 199.98,
+			)
+		);
+		$order->add_item( $item );
+		$order->calculate_totals();
+		$order->save();
+
+		// Get the item ID.
+		$items   = $order->get_items();
+		$item_id = array_key_first( $items );
+
+		// Test that by default there is no refund.
+		$this->assertEquals( 0, $order->get_total_refunded_for_item( $item_id ) );
+
+		// Create first partial refund for 1 item.
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 49.99,
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 0.5,
+						'refund_total' => 49.99,
+					),
+				),
+			)
+		);
+
+		// Verify the refunded amount for the item after first refund.
+		$this->assertEquals( 49.99, $order->get_total_refunded_for_item( $item_id ) );
+
+		// Create second partial refund for remaining amount.
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 149.99,
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 1.5,
+						'refund_total' => 149.99,
+					),
+				),
+			)
+		);
+
+		// Verify the total refunded amount for the item after both refunds.
+		$this->assertEquals( 199.98, $order->get_total_refunded_for_item( $item_id ) );
+	}
 }

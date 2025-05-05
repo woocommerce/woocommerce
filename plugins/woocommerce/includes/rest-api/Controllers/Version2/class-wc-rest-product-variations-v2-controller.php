@@ -8,6 +8,9 @@
  * @since   3.0.0
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -137,10 +140,48 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	 *
 	 * @since  3.0.0
 	 * @param  int $id Object ID.
-	 * @return WC_Data
+	 * @return WC_Data|null
 	 */
 	protected function get_object( $id ) {
-		return wc_get_product( $id );
+		$object = wc_get_product( $id );
+		return ( $object && 0 !== $object->get_parent_id() ) ? $object : null;
+	}
+
+	/**
+	 * Checks that a variation belongs to the specified parent product.
+	 *
+	 * @param int $variation_id Variation ID.
+	 * @param int $parent_id    Parent product ID to check against.
+	 * @return bool TRUE if variation and parent product exist. FALSE otherwise.
+	 *
+	 * @since 9.2.0
+	 */
+	protected function check_variation_parent( int $variation_id, int $parent_id ): bool {
+		$variation = $this->get_object( $variation_id );
+		if ( ! $variation || $parent_id !== $variation->get_parent_id() ) {
+			return false;
+		}
+
+		$parent = wc_get_product( $variation->get_parent_id() );
+		if ( ! $parent ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access to read an item.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function get_item_permissions_check( $request ) {
+		if ( ! $this->check_variation_parent( (int) $request['id'], (int) $request['product_id'] ) ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		return parent::get_item_permissions_check( $request );
 	}
 
 	/**
@@ -150,18 +191,31 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	 * @return WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
+		if ( ! $this->check_variation_parent( (int) $request['id'], (int) $request['product_id'] ) ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'edit', $object->get_id() ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
-		// Check if variation belongs to the correct parent product.
-		if ( $object && 0 !== $object->get_parent_id() && absint( $request['product_id'] ) !== $object->get_parent_id() ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Parent product does not match current variation.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access to delete an item.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return bool|WP_Error
+	 */
+	public function delete_item_permissions_check( $request ) {
+		if ( ! $this->check_variation_parent( (int) $request['id'], (int) $request['product_id'] ) ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		return true;
+		return parent::delete_item_permissions_check( $request );
 	}
 
 	/**
@@ -274,7 +328,7 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 
 		// Status.
 		if ( isset( $request['visible'] ) ) {
-			$variation->set_status( false === $request['visible'] ? 'private' : 'publish' );
+			$variation->set_status( false === $request['visible'] ? ProductStatus::PRIVATE : ProductStatus::PUBLISH );
 		}
 
 		// SKU.
@@ -337,7 +391,7 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 		}
 
 		if ( isset( $request['in_stock'] ) ) {
-			$variation->set_stock_status( true === $request['in_stock'] ? 'instock' : 'outofstock' );
+			$variation->set_stock_status( true === $request['in_stock'] ? ProductStockStatus::IN_STOCK : ProductStockStatus::OUT_OF_STOCK );
 		}
 
 		if ( isset( $request['backorders'] ) ) {
@@ -595,11 +649,18 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 			if ( ! empty( $items[ $batch_type ] ) ) {
 				$injected_items = array();
 				foreach ( $items[ $batch_type ] as $item ) {
-					$injected_items[] = is_array( $item ) ? array_merge(
+					$injected_item = is_array( $item ) ? array_merge(
 						array(
 							'product_id' => $product_id,
 						), $item
 					) : $item;
+					if ( 'delete' === $batch_type && is_int( $item ) ) {
+						$injected_item = array(
+							'id'         => $item,
+							'product_id' => $product_id,
+						);
+					}
+					$injected_items[] = $injected_item;
 				}
 				$body_params[ $batch_type ] = $injected_items;
 			}
@@ -790,8 +851,8 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 				'tax_status'            => array(
 					'description' => __( 'Tax status.', 'woocommerce' ),
 					'type'        => 'string',
-					'default'     => 'taxable',
-					'enum'        => array( 'taxable', 'shipping', 'none' ),
+					'default'     => ProductTaxStatus::TAXABLE,
+					'enum'        => array( ProductTaxStatus::TAXABLE, ProductTaxStatus::SHIPPING, ProductTaxStatus::NONE ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'tax_class'             => array(

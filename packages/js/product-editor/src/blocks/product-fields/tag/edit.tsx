@@ -21,13 +21,13 @@ import { ProductEditorBlockEditProps } from '../../../types';
 
 export function Edit( {
 	attributes,
-	context,
+	context: { postType, isInSelectedTab },
 }: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { name, label, placeholder } = attributes;
 	const [ tags, setTags ] = useEntityProp<
 		Pick< ProductTag, 'id' | 'name' >[]
-	>( 'postType', context.postType || 'product', name || 'tags' );
+	>( 'postType', postType || 'product', name || 'tags' );
 
 	const tagFieldId = useInstanceId( BaseControl, 'tag-field' ) as string;
 
@@ -36,6 +36,7 @@ export function Edit( {
 			{
 				<TagField
 					id={ tagFieldId }
+					isVisible={ isInSelectedTab }
 					label={ label || __( 'Tags', 'woocommerce' ) }
 					placeholder={
 						placeholder ||

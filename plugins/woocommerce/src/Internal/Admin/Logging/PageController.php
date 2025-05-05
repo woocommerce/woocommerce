@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Internal\Admin\Logging;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\{ LogHandlerFileV2, Settings };
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ File, FileController, FileListTable, SearchListTable };
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use WC_Admin_Status;
 use WC_Log_Handler_File, WC_Log_Handler_DB;
 use WC_Log_Levels;
@@ -16,8 +15,6 @@ use WP_List_Table;
  * PageController class.
  */
 class PageController {
-
-	use AccessiblePrivateMethods;
 
 	/**
 	 * Instance of FileController.
@@ -66,19 +63,21 @@ class PageController {
 	 * @return void
 	 */
 	private function init_hooks(): void {
-		self::add_action( 'load-woocommerce_page_wc-status', array( $this, 'maybe_do_logs_tab_action' ), 2 );
+		add_action( 'load-woocommerce_page_wc-status', array( $this, 'maybe_do_logs_tab_action' ), 2 );
 
-		self::add_action( 'wc_logs_load_tab', array( $this, 'setup_screen_options' ) );
-		self::add_action( 'wc_logs_load_tab', array( $this, 'handle_list_table_bulk_actions' ) );
-		self::add_action( 'wc_logs_load_tab', array( $this, 'notices' ) );
+		add_action( 'wc_logs_load_tab', array( $this, 'setup_screen_options' ) );
+		add_action( 'wc_logs_load_tab', array( $this, 'handle_list_table_bulk_actions' ) );
+		add_action( 'wc_logs_load_tab', array( $this, 'notices' ) );
 	}
 
 	/**
 	 * Determine if the current tab on the Status page is Logs, and if so, fire an action.
 	 *
 	 * @return void
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function maybe_do_logs_tab_action(): void {
+	public function maybe_do_logs_tab_action(): void {
 		$is_logs_tab = 'logs' === filter_input( INPUT_GET, 'tab' );
 
 		if ( $is_logs_tab ) {
@@ -99,12 +98,14 @@ class PageController {
 	 * Notices to display on Logs screens.
 	 *
 	 * @return void
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function notices() {
+	public function notices() {
 		if ( ! $this->settings->logging_is_enabled() ) {
 			add_action(
 				'admin_notices',
-				function() {
+				function () {
 					?>
 					<div class="notice notice-warning">
 						<p>
@@ -395,7 +396,7 @@ class PageController {
 				if ( is_string( $line ) ) {
 					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- format_line does the escaping.
 					echo $this->format_line( $line, $line_number );
-					$line_number ++;
+					++$line_number;
 				}
 				?>
 			<?php endwhile; ?>
@@ -464,7 +465,7 @@ class PageController {
 			array(
 				'file_id' => array(
 					'filter'  => FILTER_CALLBACK,
-					'options' => function( $file_id ) {
+					'options' => function ( $file_id ) {
 						return sanitize_file_name( wp_unslash( $file_id ) );
 					},
 				),
@@ -484,13 +485,13 @@ class PageController {
 				),
 				'search'  => array(
 					'filter'  => FILTER_CALLBACK,
-					'options' => function( $search ) {
+					'options' => function ( $search ) {
 						return esc_html( wp_unslash( $search ) );
 					},
 				),
 				'source'  => array(
 					'filter'  => FILTER_CALLBACK,
-					'options' => function( $source ) {
+					'options' => function ( $source ) {
 						return File::sanitize_source( wp_unslash( $source ) );
 					},
 				),
@@ -543,8 +544,10 @@ class PageController {
 	 * @param string $view The current view within the Logs tab.
 	 *
 	 * @return void
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function setup_screen_options( string $view ): void {
+	public function setup_screen_options( string $view ): void {
 		$handler    = $this->settings->get_default_handler();
 		$list_table = null;
 
@@ -579,8 +582,10 @@ class PageController {
 	 * @param string $view The current view within the Logs tab.
 	 *
 	 * @return void
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function handle_list_table_bulk_actions( string $view ): void {
+	public function handle_list_table_bulk_actions( string $view ): void {
 		// Bail if we're not using the file handler.
 		if ( LogHandlerFileV2::class !== $this->settings->get_default_handler() ) {
 			return;
@@ -624,7 +629,7 @@ class PageController {
 					}
 
 					if ( is_wp_error( $export_error ) ) {
-						wp_die( wp_kses_post( $export_error ) );
+						wp_die( wp_kses_post( $export_error->get_error_message() ) );
 					}
 					break;
 				case 'delete':
@@ -654,7 +659,7 @@ class PageController {
 		if ( is_numeric( $deleted ) ) {
 			add_action(
 				'admin_notices',
-				function() use ( $deleted ) {
+				function () use ( $deleted ) {
 					?>
 					<div class="notice notice-info is-dismissible">
 						<p>
@@ -715,13 +720,18 @@ class PageController {
 			$message_chunks = explode( 'CONTEXT:', $segments[2], 2 );
 			if ( isset( $message_chunks[1] ) ) {
 				try {
-					$maybe_json = stripslashes( html_entity_decode( trim( $message_chunks[1] ) ) );
-					$context    = json_decode( $maybe_json, false, 512, JSON_THROW_ON_ERROR );
+					$maybe_json = html_entity_decode( addslashes( trim( $message_chunks[1] ) ) );
+
+					// Decode for validation.
+					$context = json_decode( $maybe_json, false, 512, JSON_THROW_ON_ERROR );
+
+					// Re-encode to make it pretty.
+					$context = wp_json_encode( $context, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
 
 					$message_chunks[1] = sprintf(
 						'<details><summary>%1$s</summary>%2$s</details>',
 						esc_html__( 'Additional context', 'woocommerce' ),
-						wp_json_encode( $context, JSON_PRETTY_PRINT )
+						stripslashes( $context )
 					);
 
 					$segments[2] = implode( ' ', $message_chunks );

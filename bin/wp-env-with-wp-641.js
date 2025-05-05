@@ -2,7 +2,7 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 
 const wpEnvRaw = fs.readFileSync(
-	path.join( __dirname, '../plugins/woocommerce-blocks/.wp-env.json' )
+	path.join( __dirname, '../plugins/woocommerce/client/blocks/.wp-env.json' )
 );
 const wpEnv = JSON.parse( wpEnvRaw );
 

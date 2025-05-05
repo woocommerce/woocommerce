@@ -4,7 +4,7 @@
 import { render, fireEvent } from '@testing-library/react';
 import { ProductVariation } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import React, { createElement } from 'react';
+import { createElement } from 'react';
 import { SlotFillProvider } from '@wordpress/components';
 
 /**
@@ -19,6 +19,26 @@ import {
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
+
+jest.mock( '@wordpress/media-utils', () => ( {
+	MediaUpload: ( {
+		onSelect,
+		render: mockRender,
+	}: {
+		onSelect: ( { id, url }: { id: number; url: string } ) => void;
+		render: ( { open }: { open: () => void } ) => JSX.Element | null;
+	} ) => {
+		const mockOpenMediaUploadModal = () => {
+			const uploadedImageMock = {
+				id: 1,
+				url: 'https://example.com/image.jpg',
+			};
+			onSelect( uploadedImageMock );
+		};
+		return mockRender( { open: mockOpenMediaUploadModal } );
+	},
+} ) );
+
 const mockVariation = {
 	id: 10,
 	manage_stock: false,

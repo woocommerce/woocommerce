@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add `source` event props for `marketing_recommended_extension` track events to differentiate recommendations from woo.com API or default fallback data.

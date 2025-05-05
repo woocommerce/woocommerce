@@ -8,30 +8,13 @@ namespace Automattic\WooCommerce\Blocks\Templates;
  *
  * @internal
  */
-abstract class AbstractPageTemplate {
-	/**
-	 * Page Template functionality is only initialized when using a block theme.
-	 */
-	public function __construct() {
-		if ( wc_current_theme_is_fse_theme() ) {
-			$this->init();
-		}
-	}
-
+abstract class AbstractPageTemplate extends AbstractTemplate {
 	/**
 	 * Initialization method.
 	 */
-	protected function init() {
+	public function init() {
 		add_filter( 'page_template_hierarchy', array( $this, 'page_template_hierarchy' ), 1 );
-		add_filter( 'pre_get_document_title', array( $this, 'page_template_title' ) );
 	}
-
-	/**
-	 * Returns the template slug.
-	 *
-	 * @return string
-	 */
-	abstract public static function get_slug();
 
 	/**
 	 * Returns the page object assigned to this template/page.
@@ -48,15 +31,6 @@ abstract class AbstractPageTemplate {
 	abstract protected function is_active_template();
 
 	/**
-	 * Should return the title of the page, or an empty string if the page title should not be changed.
-	 *
-	 * @return string
-	 */
-	public static function get_template_title() {
-		return '';
-	}
-
-	/**
 	 * When the page should be displaying the template, add it to the hierarchy.
 	 *
 	 * This places the template name e.g. `cart`, at the beginning of the template hierarchy array. The hook priority
@@ -67,13 +41,16 @@ abstract class AbstractPageTemplate {
 	 */
 	public function page_template_hierarchy( $templates ) {
 		if ( $this->is_active_template() ) {
-			array_unshift( $templates, $this->get_slug() );
+			array_unshift( $templates, static::SLUG );
 		}
 		return $templates;
 	}
 
 	/**
-	 * Filter the page title when the template is active.
+	 * Forces the page title to match the template title when this template is active.
+	 *
+	 * Only applies when hooked into `pre_get_document_title`. Most templates used for pages will not require this because
+	 * the page title should be used instead.
 	 *
 	 * @param string $title Page title.
 	 * @return string

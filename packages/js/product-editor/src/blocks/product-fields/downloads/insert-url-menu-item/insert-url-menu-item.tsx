@@ -10,7 +10,6 @@ import {
 	Button,
 	Dropdown,
 	MenuItem,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
@@ -33,8 +32,8 @@ function validateInput( input: HTMLInputElement ) {
 }
 
 export function InsertUrlMenuItem( {
-	onUploadSuccess,
-	onUploadError,
+	onLinkSuccess,
+	onLinkError,
 }: InsertUrlMenuItemProps ) {
 	function handleSubmit( event: FormEvent< HTMLFormElement > ) {
 		event.preventDefault();
@@ -50,9 +49,9 @@ export function InsertUrlMenuItem( {
 				url,
 			} as MediaItem;
 
-			onUploadSuccess( [ mediaItem ] );
+			onLinkSuccess( [ mediaItem ] );
 		} else {
-			onUploadError( urlInput.validationMessage );
+			onLinkError( urlInput.validationMessage );
 		}
 	}
 
@@ -70,7 +69,6 @@ export function InsertUrlMenuItem( {
 
 	return (
 		<Dropdown
-			// @ts-expect-error missing prop in types.
 			popoverProps={ {
 				placement: 'left',
 			} }

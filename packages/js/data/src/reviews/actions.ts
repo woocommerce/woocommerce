@@ -27,7 +27,7 @@ export function setReview( reviewId: number, reviewData: ReviewObject ) {
 	};
 }
 
-export function setError( query: ReviewsQueryParams | string, error: unknown ) {
+export function setError( query: string, error: unknown ) {
 	return {
 		type: TYPES.SET_ERROR,
 		query,

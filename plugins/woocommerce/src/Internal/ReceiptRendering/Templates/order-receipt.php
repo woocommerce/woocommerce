@@ -3,99 +3,74 @@
 <head>
 	<meta http-equiv="Content-Type" content="<?php bloginfo( 'html_type' ); ?>; charset=<?php echo get_option( 'blog_charset' ); ?>" />
 	<style>
-		html { font-family: "Helvetica Neue", sans-serif; font-size: <?php echo $constants['font_size']; ?>pt; }
-		header { margin-top: <?php echo $constants['margin']; ?>; }
-		h1 { font-size: <?php echo $constants['title_font_size']; ?>pt; font-weight: 500; text-align: center; }
-		h3 { color: #707070; margin:0; }
-		table {
-			background-color:#F5F5F5;
-			width:100%;
-			color: #707070;
-			margin: <?php echo $constants['margin'] / 2; ?>pt 0;
-			padding: <?php echo $constants['margin'] / 2; ?>pt;
-		}
-		table td:last-child { width: 30%; text-align: right; }
-		table tr:last-child { color: #000000; font-weight: bold; }
-		footer {
-			font-size: <?php echo $constants['footer_font_size']; ?>pt;
-			border-top: 1px solid #707070;
-			margin-top: <?php echo $constants['margin']; ?>pt;
-			padding-top: <?php echo $constants['margin']; ?>pt;
-		}
-		p { line-height: <?php echo $constants['line_height']; ?>pt; margin: 0 0 <?php echo $constants['margin'] / 2; ?> 0; }
-		<?php if ( $payment_info ) { ?>
-			.card-icon {
-				width: <?php echo $constants['icon_width']; ?>pt;
-				height: <?php echo $constants['icon_height']; ?>pt;
-				vertical-align: top;
-				background-repeat: no-repeat;
-				background-position-y: center;
-				display: inline-block;
-				background-image: url("data:image/svg+xml;base64,<?php echo $payment_info['card_icon']; ?>");
-			}
-		<?php } ?>
+<?php echo $data['css']; ?>
 	</style>
 </head>
 
 <body>
 <header>
-	<h1><?php echo $texts['receipt_title']; ?></h1>
-	<h3><?php echo strtoupper( $texts['amount_paid_section_title'] ); ?></h3>
+	<h1 id="receipt_title"><?php echo $data['texts']['receipt_title']; ?></h1>
+	<h3 id="amount_paid_section_title"><?php echo strtoupper( $data['texts']['amount_paid_section_title'] ); ?></h3>
 	<p>
-		<?php echo $formatted_amount; ?>
+		<?php echo $data['formatted_amount']; ?>
 	</p>
-	<h3><?php echo strtoupper( $texts['date_paid_section_title'] ); ?></h3>
+	<h3 id="date_paid_section_title"><?php echo strtoupper( $data['texts']['date_paid_section_title'] ); ?></h3>
 	<p>
-		<?php echo $formatted_date; ?>
+		<?php echo $data['formatted_date']; ?>
 	</p>
-	<?php if ( $payment_method ) { ?>
-		<h3><?php echo strtoupper( $texts['payment_method_section_title'] ); ?></h3>
+
+	<h3 id="payment_status_section_title"><?php echo strtoupper( $data['texts']['payment_status_section_title'] ); ?></h3>
+	<p><?php echo $data['texts']['payment_status']; ?></p>
+
+	<?php if ( isset( $data['payment_method'] ) ) { ?>
+		<h3 id="payment_method_section_title"><?php echo strtoupper( $data['texts']['payment_method_section_title'] ); ?></h3>
 		<p>
-			<?php if ( $payment_info ) { ?>
-				<span class="card-icon"></span> - <?php echo $payment_info['card_last4']; ?>
+			<?php if ( $data['show_payment_method_title'] ) { ?>
+				<span><?php echo $data['payment_method']; ?></span>
 			<?php } else { ?>
-				<p><?php echo $payment_method; ?></p>
+				<span class="card-icon"></span>
+				<?php if ( $data['payment_info']['card_last4'] ) { ?>
+					- <?php echo $data['payment_info']['card_last4']; ?>
+				<?php } ?>
 			<?php } ?>
 		</p>
 	<?php } ?>
 </header>
 
-<h3><?php echo strtoupper( $texts['summary_section_title'] ); ?></h3>
-<table>
+<h3 id="summary_section_title"><?php echo strtoupper( $data['texts']['summary_section_title'] ); ?></h3>
+<table id="line_items">
 	<?php
-	foreach ( $line_items as $line_item ) {
-		if ( isset( $line_item['quantity'] ) ) {
-			?>
-			<tr><td><?php echo $line_item['title']; ?> × <?php echo $line_item['quantity']; ?></td><td><?php echo $line_item['amount']; ?></td></tr>
-		<?php } else { ?>
-			<tr><td><?php echo $line_item['title']; ?></td><td><?php echo $line_item['amount']; ?></td></tr>
-			<?php
-		}
+	foreach ( $data['formatted_line_items'] as $formatted_line_item ) {
+		echo $formatted_line_item;
 	}
 	?>
 </table>
 
-<?php if ( ! empty( $notes ) ) { ?>
-	<h3><?php echo strtoupper( $texts['order_notes_section_title'] ); ?></h3>
-	<?php foreach ( $notes as $note ) { ?>
+<?php if ( ! empty( $data['notes'] ) ) { ?>
+	<h3 id="order_notes_section_title"><?php echo strtoupper( $data['texts']['order_notes_section_title'] ); ?></h3>
+	<?php foreach ( $data['notes'] as $note ) { ?>
 		<p><?php echo $note; ?></p>
 		<?php
 	}
 }
 
-if ( $payment_info ) {
+if (
+	! empty( $data['payment_info']['app_name'] )
+	|| ! empty( $data['payment_info']['aid'] )
+	|| ! empty( $data['payment_info']['account_type'] )
+) {
 	?>
 	<footer>
-		<p>
+		<p id="payment_info">
 			<?php
-			if ( $payment_info['app_name'] ) {
-				echo $texts['app_name'] . ': ' . $payment_info['app_name'] . '<br/>';
+			if ( $data['payment_info']['app_name'] ) {
+				echo $data['texts']['app_name'] . ': ' . $data['payment_info']['app_name'] . '<br/>';
 			}
-			if ( $payment_info['aid'] ) {
-				echo $texts['aid'] . ': ' . $payment_info['aid'] . '<br/>';
+			if ( $data['payment_info']['aid'] ) {
+				echo $data['texts']['aid'] . ': ' . $data['payment_info']['aid'] . '<br/>';
 			}
-			if ( $payment_info['account_type'] ) {
-				echo $texts['account_type'] . ': ' . $payment_info['account_type'];
+			if ( $data['payment_info']['account_type'] ) {
+				echo $data['texts']['account_type'] . ': ' . $data['payment_info']['account_type'];
 			}
 			?>
 		</p>

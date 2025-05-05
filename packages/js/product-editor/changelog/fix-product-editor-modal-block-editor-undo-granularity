@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make editor history in modal block editor less granular to match post editor behavior.

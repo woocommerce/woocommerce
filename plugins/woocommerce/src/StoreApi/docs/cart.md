@@ -16,7 +16,7 @@
 
 The cart API returns the current state of the cart for the current session or logged in user.
 
-All POST endpoints require [Nonce Tokens](nonce-tokens.md) and return the updated state of the full cart once complete.
+All POST endpoints require a [Nonce Token](nonce-tokens.md) or a [Cart Token](cart-tokens.md) and return the updated state of the full cart once complete.
 
 ## Get Cart
 
@@ -391,7 +391,7 @@ This allows the client to remain in sync with the cart data without additional r
 
 Add an item to the cart and return the full cart response, or an error.
 
-This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) is provided.
+This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) or [Cart Token](cart-tokens.md) is provided.
 
 ```http
 POST /cart/add-item
@@ -417,7 +417,7 @@ add_filter( 'woocommerce_store_api_add_to_cart_data', function( $add_to_cart_dat
 		$add_to_cart_data['cart_item_data']['custom-request-data'] = sanitize_text_field( $request['custom-request-param'] );
 	}
 	return $add_to_cart_data;
-} );
+}, 10, 2 );
 ```
 
 **Variation attribute naming:**
@@ -426,7 +426,10 @@ When adding variations to the cart, the naming of the attribute is important.
 
 For global attributes, the attribute posted to the API should be the slug of the attribute. This should have a `pa_` prefix. For example, if you have an attribute named `Color`, the slug will be `pa_color`.
 
-For product specific attributes, the attribute posted to the API should be the name of the attribute. For example, if you have an attribute named `Size`, the name will be `Size`. This is case-sensitive.
+For product specific attributes, the attribute posted to the API can be one of the following:
+
+- the name of the attribute. For example, if you have an attribute named `Size`, the name will be `Size`. This is case-sensitive.
+- the slug of the attribute. For example, if you have an attribute named `Autograph ✏️`, the name will be `attribute_autograph-%e2%9c%8f%ef%b8%8f`. This is case-sensitive. You can get this slug from the related `select` on the product page.
 
 **Example POST body:**
 
@@ -438,6 +441,10 @@ For product specific attributes, the attribute posted to the API should be the n
 		{
 			"attribute": "pa_color",
 			"value": "blue"
+		},
+		{
+			"attribute": "attribute_autograph-%e2%9c%8f%ef%b8%8f",
+			"value": "Yes"
 		},
 		{
 			"attribute": "Logo",
@@ -494,7 +501,7 @@ The JSON payload for adding multiple items to the cart would look like this:
 
 Remove an item from the cart and return the full cart response, or an error.
 
-This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) is provided.
+This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) or [Cart Token](cart-tokens.md) is provided.
 
 ```http
 POST /cart/remove-item
@@ -514,7 +521,7 @@ Returns the full [Cart Response](#cart-response) on success, or an [Error Respon
 
 Update an item in the cart and return the full cart response, or an error.
 
-This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) is provided.
+This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) or [Cart Token](cart-tokens.md) is provided.
 
 ```http
 POST /cart/update-item
@@ -535,7 +542,7 @@ Returns the full [Cart Response](#cart-response) on success, or an [Error Respon
 
 Apply a coupon to the cart and return the full cart response, or an error.
 
-This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) is provided.
+This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) or [Cart Token](cart-tokens.md) is provided.
 
 ```http
 POST /cart/apply-coupon/
@@ -555,7 +562,7 @@ Returns the full [Cart Response](#cart-response) on success, or an [Error Respon
 
 Remove a coupon from the cart and return the full cart response, or an error.
 
-This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) is provided.
+This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) or [Cart Token](cart-tokens.md) is provided.
 
 ```http
 POST /cart/remove-coupon/
@@ -575,7 +582,7 @@ Returns the full [Cart Response](#cart-response) on success, or an [Error Respon
 
 Update customer data and return the full cart response, or an error.
 
-This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) is provided.
+This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) or [Cart Token](cart-tokens.md) is provided.
 
 ```http
 POST /cart/update-customer
@@ -610,7 +617,7 @@ Returns the full [Cart Response](#cart-response) on success, or an [Error Respon
 
 Selects an available shipping rate for a package, then returns the full cart response, or an error.
 
-This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) is provided.
+This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) or [Cart Token](cart-tokens.md) is provided.
 
 ```http
 POST /cart/select-shipping-rate
@@ -633,6 +640,6 @@ Returns the full [Cart Response](#cart-response) on success, or an [Error Respon
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/docs/cart.md)
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./src/StoreApi/docs/cart.md)
 
 <!-- /FEEDBACK -->

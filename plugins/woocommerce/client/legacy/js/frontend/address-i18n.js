@@ -13,11 +13,9 @@ jQuery( function( $ ) {
 			field.find( 'label .optional' ).remove();
 			field.addClass( 'validate-required' );
 
-			if ( field.find( 'label .required' ).length === 0 ) {
+			if ( field.find( 'label .required[aria-hidden="true"]' ).length === 0 ) {
 				field.find( 'label' ).append(
-					'&nbsp;<abbr class="required" title="' +
-					wc_address_i18n_params.i18n_required_text +
-					'">*</abbr>'
+					'&nbsp;<span class="required" aria-hidden="true">*</span>'
 				);
 			}
 		} else {
@@ -41,9 +39,9 @@ jQuery( function( $ ) {
 				thislocale = locale['default'];
 			}
 
-			var $postcodefield = thisform.find( '#billing_postcode_field, #shipping_postcode_field' ),
-				$cityfield     = thisform.find( '#billing_city_field, #shipping_city_field' ),
-				$statefield    = thisform.find( '#billing_state_field, #shipping_state_field' );
+			var $postcodefield = thisform.find( '#billing_postcode_field, #shipping_postcode_field, #calc_shipping_postcode_field' ),
+				$cityfield     = thisform.find( '#billing_city_field, #shipping_city_field, #calc_shipping_city_field' ),
+				$statefield    = thisform.find( '#billing_state_field, #shipping_state_field, #calc_shipping_state_field' );
 
 			if ( ! $postcodefield.attr( 'data-o_class' ) ) {
 				$postcodefield.attr( 'data-o_class', $postcodefield.attr( 'class' ) );
@@ -74,7 +72,7 @@ jQuery( function( $ ) {
 				if (
 					typeof fieldLocale.placeholder === 'undefined' &&
 					typeof fieldLocale.label !== 'undefined' &&
-					! field.find( 'label' ).length
+					! field.find( 'label:not(.screen-reader-text)' ).length
 				) {
 					field.find( ':input' ).attr( 'placeholder', fieldLocale.label );
 					field.find( ':input' ).attr( 'data-placeholder', fieldLocale.label );

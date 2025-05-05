@@ -36,6 +36,13 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
+	 * Setting page icon.
+	 *
+	 * @var string
+	 */
+	public $icon = 'percent';
+
+	/**
 	 * Creates the React mount point for the embedded banner.
 	 */
 	public function conflict_error() {
@@ -44,7 +51,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 							<th scope="row" class="titledesc woocommerce_admin_tax_settings_slotfill_th">
 							</th>
 							<td class="forminp forminp-text woocommerce_admin_tax_settings_slotfill_td">
-		<div id="wc_conflict_error_slotfill"> </div>
+		<div id="wc_tax_settings_slotfill"> </div>
 	</td>
 	</tr>
 		<?php

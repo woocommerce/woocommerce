@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\Features;
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -39,38 +40,20 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		add_action(
 			'woocommerce_register_feature_definitions',
-			function( $features_controller ) {
-				$this->reset_features_list( $this->sut );
-
-				$features = array(
-					'mature1'       => array(
-						'name'            => 'Mature feature 1',
-						'description'     => 'The mature feature number 1',
-						'is_experimental' => false,
-					),
-					'mature2'       => array(
-						'name'            => 'Mature feature 2',
-						'description'     => 'The mature feature number 2',
-						'is_experimental' => false,
-					),
-					'experimental1' => array(
-						'name'            => 'Experimental feature 1',
-						'description'     => 'The experimental feature number 1',
-						'is_experimental' => true,
-					),
-					'experimental2' => array(
-						'name'            => 'Experimental feature 2',
-						'description'     => 'The experimental feature number 2',
-						'is_experimental' => true,
-					),
-				);
-
-				foreach ( $features as $slug => $definition ) {
-					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
-				}
-			},
-			11
+			array( $this, 'register_dummy_features' ),
+			11,
+			1
 		);
+
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing
+		$dummy_feature_registerer = new class() {
+			public function add_feature_definition( $features_controller ) {
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing
+		$container = wc_get_container();
+		$container->replace( CustomOrdersTableController::class, $dummy_feature_registerer );
+		$container->replace( CostOfGoodsSoldController::class, $dummy_feature_registerer );
 
 		$this->sut = new FeaturesController();
 		$this->sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
@@ -81,6 +64,38 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_feature_experimental2_enabled' );
 
 		remove_all_filters( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION );
+	}
+
+	/**
+	 * Register dummy features for unit tests.
+	 *
+	 * @param FeaturesController $features_controller The instance of FeaturesController to register the features in.
+	 */
+	public function register_dummy_features( $features_controller ) {
+		$features = array(
+			'mature1'       => array(
+				'name'            => 'Mature feature 1',
+				'description'     => 'The mature feature number 1',
+				'is_experimental' => false,
+			),
+			'mature2'       => array(
+				'name'            => 'Mature feature 2',
+				'description'     => 'The mature feature number 2',
+				'is_experimental' => false,
+			),
+			'experimental1' => array(
+				'name'            => 'Experimental feature 1',
+				'description'     => 'The experimental feature number 1',
+				'is_experimental' => true,
+			),
+			'experimental2' => array(
+				'name'            => 'Experimental feature 2',
+				'description'     => 'The experimental feature number 2',
+				'is_experimental' => true,
+			),
+		);
+
+		$this->reset_features_list( $features_controller, $features );
 	}
 
 	/**
@@ -123,26 +138,45 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Resets the array of registered features so we can populate it with test features.
+	 * Resets the array of registered features and repopulates it with test features.
 	 *
 	 * @param FeaturesController $sut The instance of the FeaturesController class.
+	 * @param array              $features The list of features to repopulate the controller with.
 	 *
 	 * @return void
 	 */
-	private function reset_features_list( $sut ) {
+	private function reset_features_list( $sut, $features ) {
 		$reflection_class = new \ReflectionClass( $sut );
 
-		$features = $reflection_class->getProperty( 'features' );
-		$features->setAccessible( true );
-		$features->setValue( $sut, array() );
+		$features_property = $reflection_class->getProperty( 'features' );
+		$features_property->setAccessible( true );
+		$features_property->setValue( $sut, array() );
+
+		$compat_property = $reflection_class->getProperty( 'compatibility_info_by_feature' );
+		$compat_property->setAccessible( true );
+		$compat_property->setValue( $sut, array() );
+
+		foreach ( $features as $slug => $definition ) {
+			$sut->add_feature_definition( $slug, $definition['name'], $definition );
+		}
+
+		$init_compat_info = $reflection_class->getMethod( 'init_compatibility_info_by_feature' );
+		$init_compat_info->setAccessible( true );
+		$init_compat_info->invoke( $sut );
 	}
 
 	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		$this->reset_features_list( $this->sut );
-		remove_all_actions( 'woocommerce_register_feature_definitions' );
+		remove_action(
+			'woocommerce_register_feature_definitions',
+			array( $this, 'register_dummy_features' ),
+			11,
+			1
+		);
+		$this->reset_container_replacements();
+		$this->reset_container_resolutions();
 
 		parent::tearDown();
 	}
@@ -187,7 +221,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		// No option for experimental2.
 
 		$actual = array_map(
-			function( $feature ) {
+			function ( $feature ) {
 				return array_intersect_key(
 					$feature,
 					array( 'is_enabled' => '' )
@@ -402,7 +436,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$this->simulate_inside_before_woocommerce_init_hook();
 
 		$this->ExpectException( \Exception::class );
-		$this->ExpectExceptionMessage( "Plugin the_plugin is trying to declare itself as incompatible with the 'mature1' feature, but it already declared itself as compatible" );
+		$this->ExpectExceptionMessage( esc_html( "Plugin the_plugin is trying to declare itself as incompatible with the 'mature1' feature, but it already declared itself as compatible" ) );
 
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin', true );
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin', false );
@@ -491,9 +525,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	public function test_get_compatible_enabled_features_for_registered_plugin() {
 		add_action(
 			'woocommerce_register_feature_definitions',
-			function( $features_controller ) {
-				$this->reset_features_list( $this->sut );
-
+			function ( $features_controller ) {
 				$features = array(
 					'mature1'       => array(
 						'name'            => 'Mature feature 1',
@@ -527,13 +559,13 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 					),
 				);
 
-				foreach ( $features as $slug => $definition ) {
-					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
-				}
+				$this->reset_features_list( $features_controller, $features );
 			},
 			20
 		);
 
+		$this->sut = new FeaturesController();
+		$this->sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
 		$this->simulate_inside_before_woocommerce_init_hook();
 
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin', true );
@@ -799,7 +831,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_no_warning_when_all_plugin_are_hpos_compatible() {
 		$this->simulate_inside_before_woocommerce_init_hook();
-		// phpcs:disable Squiz.Commenting
+		// phpcs:disable Squiz.Commenting, Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		$fake_plugin_util = new class() extends PluginUtil {
 			private $active_plugins;
 
@@ -813,6 +845,10 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			public function get_woocommerce_aware_plugins( bool $active_only = false ): array {
 				return $this->active_plugins;
 			}
+
+			public function get_plugins_excluded_from_compatibility_ui() {
+				return array();
+			}
 		};
 
 		$this->register_legacy_proxy_function_mocks(
@@ -822,15 +858,11 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 				},
 			)
 		);
-		// phpcs:enable
-
-		$local_sut = new FeaturesController();
+		// phpcs:enable Squiz.Commenting, Generic.CodeAnalysis.UnusedFunctionParameter.Found
 
 		add_action(
 			'woocommerce_register_feature_definitions',
-			function( $features_controller ) use ( $local_sut ) {
-				$this->reset_features_list( $local_sut );
-
+			function ( $features_controller ) {
 				$features = array(
 					'custom_order_tables'  => array(
 						'name'               => __( 'High-Performance order storage', 'woocommerce' ),
@@ -845,13 +877,12 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 					),
 				);
 
-				foreach ( $features as $slug => $definition ) {
-					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
-				}
+				$this->reset_features_list( $features_controller, $features );
 			},
 			20
 		);
 
+		$local_sut = new FeaturesController();
 		$local_sut->init( wc_get_container()->get( LegacyProxy::class ), $fake_plugin_util );
 		$plugins = array( 'compatible_plugin1', 'compatible_plugin2' );
 		$fake_plugin_util->set_active_plugins( $plugins );
@@ -880,10 +911,15 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testDox If there is an incompatible plugin, it is returned by get_incompatible_plugins.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_is_enabled True to test with HPOS enabled, false to test with HPOS disabled.
 	 */
-	public function test_show_warning_when_a_plugin_is_not_hpos_compatible() {
+	public function test_show_warning_when_a_plugin_is_not_hpos_compatible_if_hpos_is_enabled( bool $hpos_is_enabled ) {
 		$this->simulate_inside_before_woocommerce_init_hook();
-		// phpcs:disable Squiz.Commenting
+		// phpcs:disable Squiz.Commenting, Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		$fake_plugin_util = new class() extends PluginUtil {
 			private $active_plugins;
 
@@ -897,8 +933,11 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			public function get_woocommerce_aware_plugins( bool $active_only = false ): array {
 				return $this->active_plugins;
 			}
+
+			public function get_plugins_excluded_from_compatibility_ui() {
+				return array();
+			}
 		};
-		// phpcs:enable
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
@@ -907,19 +946,18 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 				},
 			)
 		);
-
-		$local_sut = new FeaturesController();
+		// phpcs:enable Squiz.Commenting, Generic.CodeAnalysis.UnusedFunctionParameter.Found
 
 		add_action(
 			'woocommerce_register_feature_definitions',
-			function( $features_controller ) use ( $local_sut ) {
-				$this->reset_features_list( $local_sut );
-
+			function ( $features_controller ) {
 				$features = array(
 					'custom_order_tables'  => array(
 						'name'               => __( 'High-Performance order storage', 'woocommerce' ),
-						'is_experimental'    => true,
+						'is_experimental'    => false,
 						'enabled_by_default' => false,
+						'option_key'         => CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+						'plugins_are_incompatible_by_default' => true,
 					),
 					'cart_checkout_blocks' => array(
 						'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
@@ -929,14 +967,14 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 					),
 				);
 
-				foreach ( $features as $slug => $definition ) {
-					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
-				}
+				$this->reset_features_list( $features_controller, $features );
 			},
 			20
 		);
 
+		$local_sut = new FeaturesController();
 		$local_sut->init( wc_get_container()->get( LegacyProxy::class ), $fake_plugin_util );
+		$local_sut->change_feature_enable( 'custom_order_tables', $hpos_is_enabled );
 		$plugins = array( 'compatible_plugin', 'incompatible_plugin' );
 		$fake_plugin_util->set_active_plugins( $plugins );
 		$local_sut->declare_compatibility( 'custom_order_tables', 'compatible_plugin' );
@@ -958,6 +996,8 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$incompatible_plugins = function () use ( $plugins ) {
 			return $this->get_incompatible_plugins( 'all', array_flip( $plugins ) );
 		};
-		$this->assertEquals( array( 'incompatible_plugin' ), array_keys( $incompatible_plugins->call( $local_sut ) ) );
+
+		$expected = $hpos_is_enabled ? array( 'incompatible_plugin' ) : array();
+		$this->assertEquals( $expected, array_keys( $incompatible_plugins->call( $local_sut ) ) );
 	}
 }

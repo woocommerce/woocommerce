@@ -3,7 +3,8 @@
  * Handle frontend scripts
  *
  * @package WooCommerce\Classes
- * @version 2.3.0
+ * @version 3.9.0
+ * @since 2.3.0
  */
 
  // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
@@ -88,7 +89,7 @@ class WC_Frontend_Scripts {
 					'media'   => 'all',
 					'has_rtl' => true,
 				),
-				'woocommerce-blocktheme'  => wc_current_theme_is_fse_theme() ? array(
+				'woocommerce-blocktheme'  => wp_is_block_theme() ? array(
 					'src'     => self::get_asset_url( 'assets/css/woocommerce-blocktheme.css' ),
 					'deps'    => '',
 					'version' => $version,
@@ -298,6 +299,11 @@ class WC_Frontend_Scripts {
 				'deps'    => array( 'jquery', 'woocommerce' ),
 				'version' => $version,
 			),
+			'wc-account-i18n'            => array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/account-i18n' . $suffix . '.js' ),
+				'deps'    => array( 'jquery' ),
+				'version' => $version,
+			),
 			'wc-password-strength-meter' => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/password-strength-meter' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'password-strength-meter' ),
@@ -388,6 +394,9 @@ class WC_Frontend_Scripts {
 			if ( ( 'no' === get_option( 'woocommerce_registration_generate_password' ) && ! is_user_logged_in() ) || is_edit_account_page() || is_lost_password_page() ) {
 				self::enqueue_script( 'wc-password-strength-meter' );
 			}
+		}
+		if ( is_account_page() ) {
+			self::enqueue_script( 'wc-account-i18n' );
 		}
 		if ( is_checkout() ) {
 			self::enqueue_script( 'wc-checkout' );
@@ -486,8 +495,10 @@ class WC_Frontend_Scripts {
 		switch ( $handle ) {
 			case 'woocommerce':
 				$params = array(
-					'ajax_url'    => WC()->ajax_url(),
-					'wc_ajax_url' => WC_AJAX::get_endpoint( '%%endpoint%%' ),
+					'ajax_url'           => WC()->ajax_url(),
+					'wc_ajax_url'        => WC_AJAX::get_endpoint( '%%endpoint%%' ),
+					'i18n_password_show' => esc_attr__( 'Show password', 'woocommerce' ),
+					'i18n_password_hide' => esc_attr__( 'Hide password', 'woocommerce' ),
 				);
 				break;
 			case 'wc-geolocation':
@@ -498,9 +509,17 @@ class WC_Frontend_Scripts {
 				break;
 			case 'wc-single-product':
 				$params = array(
-					'i18n_required_rating_text' => esc_attr__( 'Please select a rating', 'woocommerce' ),
-					'review_rating_required'    => wc_review_ratings_required() ? 'yes' : 'no',
-					'flexslider'                => apply_filters(
+					'i18n_required_rating_text'         => esc_attr__( 'Please select a rating', 'woocommerce' ),
+					'i18n_rating_options'               => array(
+						esc_attr__( '1 of 5 stars', 'woocommerce' ),
+						esc_attr__( '2 of 5 stars', 'woocommerce' ),
+						esc_attr__( '3 of 5 stars', 'woocommerce' ),
+						esc_attr__( '4 of 5 stars', 'woocommerce' ),
+						esc_attr__( '5 of 5 stars', 'woocommerce' ),
+					),
+					'i18n_product_gallery_trigger_text' => esc_attr__( 'View full-screen image gallery', 'woocommerce' ),
+					'review_rating_required'            => wc_review_ratings_required() ? 'yes' : 'no',
+					'flexslider'                        => apply_filters(
 						'woocommerce_single_product_carousel_options',
 						array(
 							'rtl'            => is_rtl(),
@@ -514,10 +533,10 @@ class WC_Frontend_Scripts {
 							'allowOneSlide'  => false,
 						)
 					),
-					'zoom_enabled'              => apply_filters( 'woocommerce_single_product_zoom_enabled', get_theme_support( 'wc-product-gallery-zoom' ) ),
-					'zoom_options'              => apply_filters( 'woocommerce_single_product_zoom_options', array() ),
-					'photoswipe_enabled'        => apply_filters( 'woocommerce_single_product_photoswipe_enabled', get_theme_support( 'wc-product-gallery-lightbox' ) ),
-					'photoswipe_options'        => apply_filters(
+					'zoom_enabled'                      => apply_filters( 'woocommerce_single_product_zoom_enabled', get_theme_support( 'wc-product-gallery-zoom' ) ),
+					'zoom_options'                      => apply_filters( 'woocommerce_single_product_zoom_options', array() ),
+					'photoswipe_enabled'                => apply_filters( 'woocommerce_single_product_photoswipe_enabled', get_theme_support( 'wc-product-gallery-lightbox' ) ),
+					'photoswipe_options'                => apply_filters(
 						'woocommerce_single_product_photoswipe_options',
 						array(
 							'shareEl'               => false,
@@ -527,7 +546,7 @@ class WC_Frontend_Scripts {
 							'showAnimationDuration' => 0,
 						)
 					),
-					'flexslider_enabled'        => apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) ),
+					'flexslider_enabled'                => apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) ),
 				);
 				break;
 			case 'wc-checkout':
@@ -541,7 +560,9 @@ class WC_Frontend_Scripts {
 					'checkout_url'              => WC_AJAX::get_endpoint( 'checkout' ),
 					'is_checkout'               => is_checkout() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0,
 					'debug_mode'                => Constants::is_true( 'WP_DEBUG' ),
-					'i18n_checkout_error'       => esc_attr__( 'Error processing checkout. Please try again.', 'woocommerce' ),
+					/* translators: %s: Order history URL on My Account section */
+					'i18n_checkout_error'       => sprintf( esc_attr__( 'There was an error processing your order. Please check for any charges in your payment method and review your <a href="%s">order history</a> before placing the order again.', 'woocommerce' ), esc_url( wc_get_account_endpoint_url( 'orders' ) ) ),
+
 				);
 				break;
 			case 'wc-address-i18n':
@@ -589,6 +610,7 @@ class WC_Frontend_Scripts {
 					'i18n_no_matching_variations_text' => esc_attr__( 'Sorry, no products matched your selection. Please choose a different combination.', 'woocommerce' ),
 					'i18n_make_a_selection_text'       => esc_attr__( 'Please select some product options before adding this product to your cart.', 'woocommerce' ),
 					'i18n_unavailable_text'            => esc_attr__( 'Sorry, this product is unavailable. Please choose a different combination.', 'woocommerce' ),
+					'i18n_reset_alert_text'            => esc_attr__( 'Your selection has been reset. Please select some product options before adding this product to your cart.', 'woocommerce' ),
 				);
 				break;
 			case 'wc-country-select':

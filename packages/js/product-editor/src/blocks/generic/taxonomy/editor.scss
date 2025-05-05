@@ -14,7 +14,10 @@
 		&__optional {
 			color: $gray-700;
 		}
-	}	
+		.components-modal__content { // make sure that inline popovers can exceed the dialog's limits
+			overflow: visible;
+		}
+	}
 
 	.components-base-control {
 		margin-bottom: $gap;

@@ -3,10 +3,12 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
-use Jetpack_Gutenberg;
+use WP_Post;
 
 /**
  * Customize Your Store Task
+ *
+ * @internal
  */
 class CustomizeStore extends Task {
 	/**
@@ -21,15 +23,41 @@ class CustomizeStore extends Task {
 
 		add_action( 'show_admin_bar', array( $this, 'possibly_hide_wp_admin_bar' ) );
 
-		// Use "switch_theme" instead of "after_switch_theme" because the latter is fired after the next WP load and we don't want to trigger action when switching theme to TT3 via onboarding theme API.
-		global $_GET;
-		$theme_switch_via_cys_ai_loader = isset( $_GET['theme_switch_via_cys_ai_loader'] ) ? 1 === absint( $_GET['theme_switch_via_cys_ai_loader'] ) : false;
-		if ( ! $theme_switch_via_cys_ai_loader ) {
-			add_action( 'switch_theme', array( $this, 'mark_task_as_complete' ) );
-		}
-
 		// Hook to remove unwanted UI elements when users are viewing with ?cys-hide-admin-bar=true.
 		add_action( 'wp_head', array( $this, 'possibly_remove_unwanted_ui_elements' ) );
+
+		add_action( 'save_post_wp_global_styles', array( $this, 'mark_task_as_complete_block_theme' ), 10, 3 );
+		add_action( 'save_post_wp_template', array( $this, 'mark_task_as_complete_block_theme' ), 10, 3 );
+		add_action( 'save_post_wp_template_part', array( $this, 'mark_task_as_complete_block_theme' ), 10, 3 );
+		add_action( 'customize_save_after', array( $this, 'mark_task_as_complete_classic_theme' ) );
+	}
+
+	/**
+	 * Mark the CYS task as complete whenever the user updates their global styles.
+	 *
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post Post object.
+	 * @param bool    $update Whether this is an existing post being updated.
+	 *
+	 * @return void
+	 */
+	public function mark_task_as_complete_block_theme( $post_id, $post, $update ) {
+		if ( $post instanceof WP_Post ) {
+			$is_cys_complete = $this->has_custom_global_styles( $post ) || $this->has_custom_template( $post );
+
+			if ( $is_cys_complete ) {
+				update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
+			}
+		}
+	}
+
+	/**
+	 * Mark the CYS task as complete whenever the user saves the customizer changes.
+	 *
+	 * @return void
+	 */
+	public function mark_task_as_complete_classic_theme() {
+		update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
 	}
 
 	/**
@@ -92,7 +120,7 @@ class CustomizeStore extends Task {
 	 * @return string
 	 */
 	public function get_action_url() {
-		return admin_url( 'wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store' );
+		return admin_url( 'admin.php?page=wc-admin&path=%2Fcustomize-store' );
 	}
 
 
@@ -128,7 +156,7 @@ class CustomizeStore extends Task {
 		// Default to is-fullscreen-mode to avoid jumps in the UI.
 		add_filter(
 			'admin_body_class',
-			static function( $classes ) {
+			static function ( $classes ) {
 				return "$classes is-fullscreen-mode";
 			}
 		);
@@ -196,7 +224,6 @@ class CustomizeStore extends Task {
 		wp_enqueue_script( 'wp-format-library' ); // Not sure if this is needed.
 		wp_enqueue_script( 'wp-router' );
 		wp_enqueue_style( 'wp-editor' );
-		wp_enqueue_style( 'wp-edit-site' );
 		wp_enqueue_style( 'wp-format-library' );
 		wp_enqueue_media();
 
@@ -211,18 +238,6 @@ class CustomizeStore extends Task {
 		 * @since 8.0.3
 		*/
 		do_action( 'enqueue_block_editor_assets' );
-
-		// Load Jetpack's block editor assets because they are not enqueued by default.
-		if ( class_exists( 'Jetpack_Gutenberg' ) ) {
-			Jetpack_Gutenberg::enqueue_block_editor_assets();
-		}
-	}
-
-	/**
-	 * Mark task as complete.
-	 */
-	public function mark_task_as_complete() {
-		update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
 	}
 
 	/**
@@ -250,5 +265,34 @@ class CustomizeStore extends Task {
 				body { overflow: hidden; }
 			</style>';
 		}
+	}
+
+	/**
+	 * Checks if the post has custom global styles stored (if it is different from the default global styles).
+	 *
+	 * @param WP_Post $post The post object.
+	 * @return bool
+	 */
+	private function has_custom_global_styles( WP_Post $post ) {
+		$required_keys = array( 'version', 'isGlobalStylesUserThemeJSON' );
+
+		$json_post_content = json_decode( $post->post_content, true );
+		if ( is_null( $json_post_content ) ) {
+			return false;
+		}
+
+		$post_content_keys = array_keys( $json_post_content );
+
+		return ! empty( array_diff( $post_content_keys, $required_keys ) ) || ! empty( array_diff( $required_keys, $post_content_keys ) );
+	}
+
+	/**
+	 * Checks if the post is a template or a template part.
+	 *
+	 * @param WP_Post $post The post object.
+	 * @return bool Whether the post is a template or a template part.
+	 */
+	private function has_custom_template( WP_Post $post ) {
+		return in_array( $post->post_type, array( 'wp_template', 'wp_template_part' ), true );
 	}
 }

@@ -2,19 +2,13 @@
  * External dependencies
  */
 import {
-	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	experimentalProductVariationsStore,
 	PartialProductVariation,
-	ProductAttribute,
+	ProductProductAttribute,
 	ProductVariation,
 } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
-import {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from '@wordpress/element';
+import { useCallback, useMemo, useRef, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -41,18 +35,24 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		params: GetVariationsRequest,
 		invalidateResolutionBeforeRequest = false
 	) {
-		const requestParams: GetVariationsRequest = {
-			page: 1,
-			per_page: perPageRef.current,
-			order: 'asc',
-			orderby: 'menu_order',
-			attributes: [],
-			...params,
-		};
+		const requestParams = {
+			product_id: params.product_id,
+			page: params.page || 1,
+			per_page: params.per_page || perPageRef.current,
+			order: params.order || 'asc',
+			orderby: ( params.orderby || 'menu_order' ) as
+				| 'date'
+				| 'id'
+				| 'include'
+				| 'title'
+				| 'slug'
+				| 'menu_order',
+			attributes: params.attributes || [],
+		} as const;
 
 		try {
 			const { invalidateResolution } = dispatch(
-				EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+				experimentalProductVariationsStore
 			);
 
 			if ( invalidateResolutionBeforeRequest ) {
@@ -65,18 +65,13 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			}
 
 			const { getProductVariations, getProductVariationsTotalCount } =
-				resolveSelect( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+				resolveSelect( experimentalProductVariationsStore );
 
 			setIsLoading( true );
 			setGetVariationsError( undefined );
 
-			const data = await getProductVariations< ProductVariation[] >(
-				requestParams
-			);
-
-			const total = await getProductVariationsTotalCount< number >(
-				requestParams
-			);
+			const data = await getProductVariations( requestParams );
+			const total = await getProductVariationsTotalCount( requestParams );
 
 			setVariations( data );
 			setTotalCount( total );
@@ -171,14 +166,14 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		setIsSelectingAll( true );
 
 		const { getProductVariations } = resolveSelect(
-			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+			experimentalProductVariationsStore
 		);
 
 		let currentPage = 1;
 		let fetchedCount = 0;
 
 		while ( fetchedCount < totalCount ) {
-			const chunk = await getProductVariations< ProductVariation[] >( {
+			const chunk = await getProductVariations( {
 				product_id: productId,
 				page: currentPage++,
 				per_page: 50,
@@ -189,7 +184,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 			fetchedCount += chunk.length;
 
-			chunk.forEach( ( variation ) => {
+			chunk.forEach( ( variation: ProductVariation ) => {
 				selectedVariationsRef.current[ variation.id ] = variation;
 			} );
 		}
@@ -208,7 +203,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 	// Filters
 
-	function onFilter( attribute: ProductAttribute ) {
+	function onFilter( attribute: ProductProductAttribute ) {
 		return function handleFilter( options: string[] ) {
 			let isPresent = false;
 
@@ -244,7 +239,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		};
 	}
 
-	function getFilters( attribute: ProductAttribute ) {
+	function getFilters( attribute: ProductProductAttribute ) {
 		return (
 			filters.find( ( filter ) => filter.attribute === attribute.slug )
 				?.terms ?? []
@@ -275,15 +270,28 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	}: PartialProductVariation ) {
 		if ( isUpdating[ variationId ] ) return;
 
-		const { updateProductVariation } = dispatch(
-			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+		setVariations( ( current ) =>
+			current.map( ( currentVariation ) => {
+				if ( currentVariation.id === variationId ) {
+					return {
+						...currentVariation,
+						...variation,
+					};
+				}
+				return currentVariation;
+			} )
 		);
 
-		return updateProductVariation< Promise< ProductVariation > >(
+		const { updateProductVariation } = dispatch(
+			experimentalProductVariationsStore
+		);
+
+		return updateProductVariation(
 			{ product_id: productId, id: variationId },
 			variation
-		).then( async ( response: ProductVariation ) => {
-			// @ts-expect-error There are no types for this.
+		).then( async ( response ) => {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
 				'postType',
 				'product_variation',
@@ -303,22 +311,24 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		if ( isUpdating[ variationId ] ) return;
 
 		const { deleteProductVariation, invalidateResolutionForStore } =
-			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+			dispatch( experimentalProductVariationsStore );
 
-		return deleteProductVariation< Promise< ProductVariation > >( {
+		return deleteProductVariation( {
 			product_id: productId,
 			id: variationId,
 		} ).then( async ( response: ProductVariation ) => {
 			onSelect( response )( false );
 
-			// @ts-expect-error There are no types for this.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
 				'postType',
 				'product',
 				productId,
 			] );
 
-			// @ts-expect-error There are no types for this.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
 				'postType',
 				'product_variation',
@@ -337,12 +347,13 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	}
 
 	async function onBatchUpdate( values: PartialProductVariation[] ) {
-		// @ts-expect-error There are no types for this.
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		const { invalidateResolution: coreInvalidateResolution } =
 			dispatch( 'core' );
 
 		const { batchUpdateProductVariations, invalidateResolutionForStore } =
-			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+			dispatch( experimentalProductVariationsStore );
 
 		selectedVariationsRef.current = {};
 		setSelectedCount( 0 );
@@ -367,9 +378,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 				)
 			);
 
-			const response = await batchUpdateProductVariations< {
-				update: ProductVariation[];
-			} >(
+			const response = await batchUpdateProductVariations(
 				{ product_id: productId },
 				{
 					update: subset,
@@ -405,12 +414,13 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	}
 
 	async function onBatchDelete( values: PartialProductVariation[] ) {
-		// @ts-expect-error There are no types for this.
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		const { invalidateResolution: coreInvalidateResolution } =
 			dispatch( 'core' );
 
 		const { batchUpdateProductVariations, invalidateResolutionForStore } =
-			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+			dispatch( experimentalProductVariationsStore );
 
 		selectedVariationsRef.current = {};
 		setSelectedCount( 0 );
@@ -435,9 +445,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 				)
 			);
 
-			const response = await batchUpdateProductVariations< {
-				delete: ProductVariation[];
-			} >(
+			const response = await batchUpdateProductVariations(
 				{ product_id: productId },
 				{
 					delete: subset.map( ( { id } ) => id ),
@@ -487,7 +495,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 	const wasGenerating = useRef( false );
 
-	useEffect( () => {
+	function getCurrentVariations() {
 		if ( isGenerating ) {
 			setFilters( [] );
 			onClearSelection();
@@ -508,7 +516,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		}
 
 		wasGenerating.current = Boolean( isGenerating );
-	}, [ productId, isGenerating ] );
+	}
 
 	return {
 		isLoading,
@@ -541,5 +549,6 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		isGenerating,
 		onGenerate,
 		variationsError: generateError ?? getVariationsError,
+		getCurrentVariations,
 	};
 }

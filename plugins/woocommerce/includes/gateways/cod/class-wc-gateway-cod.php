@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Enums\OrderStatus;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -22,6 +23,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package     WooCommerce\Classes\Payment
  */
 class WC_Gateway_COD extends WC_Payment_Gateway {
+
+	/**
+	 * Unique ID for this gateway.
+	 *
+	 * @var string
+	 */
+	const ID = 'cod';
 
 	/**
 	 * Gateway instructions that will be added to the thank you page and emails.
@@ -75,10 +83,10 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * Setup general properties for the gateway.
 	 */
 	protected function setup_properties() {
-		$this->id                 = 'cod';
+		$this->id                 = self::ID;
 		$this->icon               = apply_filters( 'woocommerce_cod_icon', '' );
 		$this->method_title       = __( 'Cash on delivery', 'woocommerce' );
-		$this->method_description = __( 'Have your customers pay with cash (or by other means) upon delivery.', 'woocommerce' );
+		$this->method_description = __( 'Let your shoppers pay upon delivery — by cash or other methods of payment.', 'woocommerce' );
 		$this->has_fields         = false;
 	}
 
@@ -143,49 +151,46 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function is_available() {
-		$order          = null;
-		$needs_shipping = false;
+		$is_virtual       = true;
+		$shipping_methods = array();
 
-		// Test if shipping is needed first.
-		if ( WC()->cart && WC()->cart->needs_shipping() ) {
-			$needs_shipping = true;
-		} elseif ( is_page( wc_get_page_id( 'checkout' ) ) && 0 < get_query_var( 'order-pay' ) ) {
-			$order_id = absint( get_query_var( 'order-pay' ) );
-			$order    = wc_get_order( $order_id );
-
-			// Test if order needs shipping.
-			if ( $order && 0 < count( $order->get_items() ) ) {
-				foreach ( $order->get_items() as $item ) {
-					$_product = $item->get_product();
-					if ( $_product && $_product->needs_shipping() ) {
-						$needs_shipping = true;
-						break;
-					}
-				}
-			}
+		// Get shipping methods from the cart or order.
+		if ( is_wc_endpoint_url( 'order-pay' ) ) {
+			$order            = wc_get_order( absint( get_query_var( 'order-pay' ) ) );
+			$shipping_methods = $order ? $order->get_shipping_methods() : array();
+			$is_virtual       = ! count( $shipping_methods );
+		} elseif ( WC()->cart && WC()->cart->needs_shipping() ) {
+			$shipping_methods = WC()->cart->get_shipping_methods();
+			$is_virtual       = false;
 		}
 
-		$needs_shipping = apply_filters( 'woocommerce_cart_needs_shipping', $needs_shipping );
-
-		// Virtual order, with virtual disabled.
-		if ( ! $this->enable_for_virtual && ! $needs_shipping ) {
+		// If COD is not enabled for virtual orders and the order does not need shipping, return false.
+		if ( ! $this->enable_for_virtual && $is_virtual ) {
 			return false;
 		}
 
-		// Only apply if all packages are being shipped via chosen method, or order is virtual.
-		if ( ! empty( $this->enable_for_methods ) && $needs_shipping ) {
-			$order_shipping_items            = is_object( $order ) ? $order->get_shipping_methods() : false;
-			$chosen_shipping_methods_session = WC()->session->get( 'chosen_shipping_methods' );
+		// Return early if:
+		// - There are no shipping methods resrictions in place.
+		// - The order is virtual so needs no shipping.
+		// - Shipping methods are not set yet.
+		if ( empty( $this->enable_for_methods ) || $is_virtual || ! $shipping_methods ) {
+			return parent::is_available();
+		}
 
-			if ( $order_shipping_items ) {
-				$canonical_rate_ids = $this->get_canonical_order_shipping_item_rate_ids( $order_shipping_items );
-			} else {
-				$canonical_rate_ids = $this->get_canonical_package_rate_ids( $chosen_shipping_methods_session );
-			}
+		// Get the selected shipping method ids. This works on both WC_Shipping_Rate and WC_Order_Item_Shipping class instances.
+		$canonical_rate_ids = array_unique(
+			array_values(
+				array_map(
+					function ( $shipping_method ) {
+						return $shipping_method && is_callable( array( $shipping_method, 'get_method_id' ) ) && is_callable( array( $shipping_method, 'get_instance_id' ) ) ? $shipping_method->get_method_id() . ':' . $shipping_method->get_instance_id() : null;
+					},
+					$shipping_methods
+				)
+			)
+		);
 
-			if ( ! count( $this->get_matching_rates( $canonical_rate_ids ) ) ) {
-				return false;
-			}
+		if ( ! count( $this->get_matching_rates( $canonical_rate_ids ) ) ) {
+			return false;
 		}
 
 		return parent::is_available();
@@ -205,7 +210,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 			if ( ! isset( $_REQUEST['tab'] ) || 'checkout' !== $_REQUEST['tab'] ) {
 				return false;
 			}
-			if ( ! isset( $_REQUEST['section'] ) || 'cod' !== $_REQUEST['section'] ) {
+			if ( ! isset( $_REQUEST['section'] ) || self::ID !== $_REQUEST['section'] ) {
 				return false;
 			}
 			// phpcs:enable WordPress.Security.NonceVerification
@@ -279,50 +284,6 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Converts the chosen rate IDs generated by Shipping Methods to a canonical 'method_id:instance_id' format.
-	 *
-	 * @since  3.4.0
-	 *
-	 * @param  array $order_shipping_items  Array of WC_Order_Item_Shipping objects.
-	 * @return array $canonical_rate_ids    Rate IDs in a canonical format.
-	 */
-	private function get_canonical_order_shipping_item_rate_ids( $order_shipping_items ) {
-
-		$canonical_rate_ids = array();
-
-		foreach ( $order_shipping_items as $order_shipping_item ) {
-			$canonical_rate_ids[] = $order_shipping_item->get_method_id() . ':' . $order_shipping_item->get_instance_id();
-		}
-
-		return $canonical_rate_ids;
-	}
-
-	/**
-	 * Converts the chosen rate IDs generated by Shipping Methods to a canonical 'method_id:instance_id' format.
-	 *
-	 * @since  3.4.0
-	 *
-	 * @param  array $chosen_package_rate_ids Rate IDs as generated by shipping methods. Can be anything if a shipping method doesn't honor WC conventions.
-	 * @return array $canonical_rate_ids  Rate IDs in a canonical format.
-	 */
-	private function get_canonical_package_rate_ids( $chosen_package_rate_ids ) {
-
-		$shipping_packages  = WC()->shipping()->get_packages();
-		$canonical_rate_ids = array();
-
-		if ( ! empty( $chosen_package_rate_ids ) && is_array( $chosen_package_rate_ids ) ) {
-			foreach ( $chosen_package_rate_ids as $package_key => $chosen_package_rate_id ) {
-				if ( ! empty( $shipping_packages[ $package_key ]['rates'][ $chosen_package_rate_id ] ) ) {
-					$chosen_rate          = $shipping_packages[ $package_key ]['rates'][ $chosen_package_rate_id ];
-					$canonical_rate_ids[] = $chosen_rate->get_method_id() . ':' . $chosen_rate->get_instance_id();
-				}
-			}
-		}
-
-		return $canonical_rate_ids;
-	}
-
-	/**
 	 * Indicates whether a rate exists in an array of canonically-formatted rate IDs that activates this gateway.
 	 *
 	 * @since  3.4.0
@@ -345,8 +306,16 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		if ( $order->get_total() > 0 ) {
+			/**
+			 * Filter the order status for COD orders.
+			 *
+			 * @since 2.6.0
+			 *
+			 * @param string $order_status Default status for COD orders.
+			 */
+			$process_payment_status = apply_filters( 'woocommerce_cod_process_payment_order_status', $order->has_downloadable_item() ? OrderStatus::ON_HOLD : OrderStatus::PROCESSING, $order );
 			// Mark as processing or on-hold (payment won't be taken until delivery).
-			$order->update_status( apply_filters( 'woocommerce_cod_process_payment_order_status', $order->has_downloadable_item() ? 'on-hold' : 'processing', $order ), __( 'Payment to be made upon delivery.', 'woocommerce' ) );
+			$order->update_status( $process_payment_status, __( 'Payment to be made upon delivery.', 'woocommerce' ) );
 		} else {
 			$order->payment_complete();
 		}
@@ -380,8 +349,8 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @return string
 	 */
 	public function change_payment_complete_order_status( $status, $order_id = 0, $order = false ) {
-		if ( $order && 'cod' === $order->get_payment_method() ) {
-			$status = 'completed';
+		if ( $order && self::ID === $order->get_payment_method() ) {
+			$status = OrderStatus::COMPLETED;
 		}
 		return $status;
 	}

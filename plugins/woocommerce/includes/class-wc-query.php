@@ -7,7 +7,7 @@
  */
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -15,8 +15,6 @@ defined( 'ABSPATH' ) || exit;
  * WC_Query Class.
  */
 class WC_Query {
-
-	use AccessiblePrivateMethods;
 
 	/**
 	 * Query vars to add to wp.
@@ -300,7 +298,7 @@ class WC_Query {
 	private function filter_out_valid_front_page_query_vars( $query ) {
 		return array_filter(
 			$query,
-			function( $key ) {
+			function ( $key ) {
 				return ! $this->is_query_var_valid_on_front_page( $key );
 			},
 			ARRAY_FILTER_USE_KEY
@@ -356,7 +354,7 @@ class WC_Query {
 					$q->is_home = false;
 
 					// WP supporting themes show post type archive.
-					if ( current_theme_supports( 'woocommerce' ) ) {
+					if ( wc_current_theme_supports_woocommerce_or_fse() ) {
 						$q->set( 'post_type', 'product' );
 					} else {
 						$q->is_singular = true;
@@ -376,7 +374,7 @@ class WC_Query {
 		}
 
 		// Special check for shops with the PRODUCT POST TYPE ARCHIVE on front.
-		if ( current_theme_supports( 'woocommerce' ) && $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
+		if ( wc_current_theme_supports_woocommerce_or_fse() && $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
 			// This is a front-page shop.
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page_id', '' );
@@ -539,7 +537,7 @@ class WC_Query {
 		self::$product_query = $q;
 
 		// Additional hooks to change WP Query.
-		self::add_filter( 'posts_clauses', array( $this, 'product_query_post_clauses' ), 10, 2 );
+		add_filter( 'posts_clauses', array( $this, 'product_query_post_clauses' ), 10, 2 );
 		add_filter( 'the_posts', array( $this, 'handle_get_posts' ), 10, 2 );
 
 		do_action( 'woocommerce_product_query', $q, $this );
@@ -551,8 +549,10 @@ class WC_Query {
 	 * @param array    $args Product query clauses.
 	 * @param WP_Query $wp_query The current product query.
 	 * @return array The updated product query clauses array.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function product_query_post_clauses( $args, $wp_query ) {
+	public function product_query_post_clauses( $args, $wp_query ) {
 		$args = $this->price_filter_post_clauses( $args, $wp_query );
 		$args = $this->filterer->filter_by_attribute_post_clauses( $args, $wp_query, self::get_layered_nav_chosen_attributes() );
 
@@ -587,7 +587,15 @@ class WC_Query {
 		// Get ordering from query string unless defined.
 		if ( ! $orderby ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$orderby_value = isset( $_GET['orderby'] ) ? wc_clean( (string) wp_unslash( $_GET['orderby'] ) ) : wc_clean( get_query_var( 'orderby' ) );
+			if ( isset( $_GET['orderby'] ) ) {
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$orderby_value = wc_clean( wp_unslash( $_GET['orderby'] ) );
+				if ( is_array( $orderby_value ) ) {
+					$orderby_value = $orderby_value[0];
+				}
+			} else {
+				$orderby_value = wc_clean( get_query_var( 'orderby' ) );
+			}
 
 			if ( ! $orderby_value ) {
 				if ( is_search() ) {
@@ -662,8 +670,18 @@ class WC_Query {
 	public function price_filter_post_clauses( $args, $wp_query ) {
 		global $wpdb;
 
+		/**
+		 * Filter whether to add the filter post clauses
+		 *
+		 * @param bool     $is_main_query Whether the current query is 'is_main_query'.
+		 * @param WP_Query $wp_query      The current WP_Query object.
+		 *
+		 * @since 9.9.0
+		 */
+		$enable_filtering = apply_filters( 'woocommerce_enable_post_clause_filtering', $wp_query->is_main_query(), $wp_query );
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( ! $wp_query->is_main_query() || ( ! isset( $_GET['max_price'] ) && ! isset( $_GET['min_price'] ) ) ) {
+		if ( ! $enable_filtering || ( ! isset( $_GET['max_price'] ) && ! isset( $_GET['min_price'] ) ) ) {
 			return $args;
 		}
 
@@ -806,7 +824,7 @@ class WC_Query {
 
 		// Hide out of stock products.
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
-			$product_visibility_not_in[] = $product_visibility_terms['outofstock'];
+			$product_visibility_not_in[] = $product_visibility_terms[ ProductStockStatus::OUT_OF_STOCK ];
 		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
@@ -815,7 +833,7 @@ class WC_Query {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$rating_filter = array_filter( array_map( 'absint', explode( ',', wp_unslash( $_GET['rating_filter'] ) ) ) );
 			$rating_terms  = array();
-			for ( $i = 1; $i <= 5; $i ++ ) {
+			for ( $i = 1; $i <= 5; $i++ ) {
 				if ( in_array( $i, $rating_filter, true ) && isset( $product_visibility_terms[ 'rated-' . $i ] ) ) {
 					$rating_terms[] = $product_visibility_terms[ 'rated-' . $i ];
 				}
@@ -924,6 +942,10 @@ class WC_Query {
 			if ( ! empty( $_GET ) ) {
 				foreach ( $_GET as $key => $value ) {
 					if ( 0 === strpos( $key, 'filter_' ) ) {
+						if ( ! is_string( $value ) ) {
+							continue;
+						}
+
 						$attribute    = wc_sanitize_taxonomy_name( str_replace( 'filter_', '', $key ) );
 						$taxonomy     = wc_attribute_taxonomy_name( $attribute );
 						$filter_terms = ! empty( $value ) ? explode( ',', wc_clean( wp_unslash( $value ) ) ) : array();
@@ -981,7 +1003,7 @@ class WC_Query {
 	 * @param string $status (default: 'instock').
 	 * @return array
 	 */
-	public function stock_status_meta_query( $status = 'instock' ) {
+	public function stock_status_meta_query( $status = ProductStockStatus::IN_STOCK ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		return array();
 	}
 

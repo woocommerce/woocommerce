@@ -6,22 +6,18 @@ import classNames from 'classnames';
 import { useInstanceId } from '@wordpress/compose';
 import { createElement, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import {
-	BaseControl,
-	Button,
-	Modal,
-	// @ts-expect-error `__experimentalInputControl` does exist.
-	__experimentalInputControl as InputControl,
-} from '@wordpress/components';
+import { BaseControl, Button, Modal } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import { ManageDownloadLimitsModalProps } from './types';
-import { useNumberInputProps } from '../../hooks/use-number-input-props';
+import { NumberControl } from '../number-control';
 
 const DOWNLOAD_LIMIT_MIN = 0;
+const DOWNLOAD_LIMIT_MAX = 10_000_000_000;
 const DOWNLOAD_EXPIRY_MIN = 0;
+const DOWNLOAD_EXPIRY_MAX = 10_000_000_000;
 
 /**
  * Download limit and download expiry currently support
@@ -122,71 +118,52 @@ export function ManageDownloadLimitsModal( {
 		return true;
 	}
 
-	const downloadLimitInputProps = useNumberInputProps( {
+	const downloadLimitProps = {
 		value: downloadLimit,
 		onChange: setDownloadLimit,
-	} );
-
-	const downloadLimitProps = {
-		value: downloadLimitInputProps.value,
-		onChange: downloadLimitInputProps.onChange,
 		id: useInstanceId(
 			BaseControl,
 			'product_download_limit_field'
 		) as string,
-		type: 'number',
 		min: DOWNLOAD_LIMIT_MIN,
+		max: DOWNLOAD_LIMIT_MAX,
 		className: classNames( {
 			'has-error': errors.downloadLimit,
 		} ),
 		label: __( 'Download limit', 'woocommerce' ),
-		help:
-			errors.downloadLimit ||
-			__(
-				'Decide how many times customers can download files after purchasing the product. Leave blank for unlimited re-downloads.',
-				'woocommerce'
-			),
-		placeholder: __( 'Unlimited', 'woocommerce' ),
-		suffix: (
-			<span className="woocommerce-manage-download-limits-modal__input-suffix">
-				{ __( 'times', 'woocommerce' ) }
-			</span>
+		help: __(
+			'Decide how many times customers can download files after purchasing the product. Leave blank for unlimited re-downloads.',
+			'woocommerce'
 		),
+		error: errors.downloadLimit,
+		placeholder: __( 'Unlimited', 'woocommerce' ),
+		suffix: __( 'times', 'woocommerce' ),
+
 		onBlur() {
 			validateDownloadLimit();
 		},
 	};
 
-	const downloadExpiryInputProps = useNumberInputProps( {
+	const downloadExpiryProps = {
 		value: downloadExpiry,
 		onChange: setDownloadExpiry,
-	} );
-
-	const downloadExpiryProps = {
-		value: downloadExpiryInputProps.value,
-		onChange: downloadExpiryInputProps.onChange,
 		id: useInstanceId(
 			BaseControl,
 			'product_download_expiry_field'
 		) as string,
-		type: 'number',
 		min: DOWNLOAD_EXPIRY_MIN,
+		max: DOWNLOAD_EXPIRY_MAX,
 		className: classNames( {
 			'has-error': errors.downloadExpiry,
 		} ),
 		label: __( 'Expiry period', 'woocommerce' ),
-		help:
-			errors.downloadExpiry ||
-			__(
-				'Decide how long customers can access the files after purchasing the product. Leave blank for unlimited access.',
-				'woocommerce'
-			),
-		placeholder: __( 'Unlimited', 'woocommerce' ),
-		suffix: (
-			<span className="woocommerce-manage-download-limits-modal__input-suffix">
-				{ __( 'days', 'woocommerce' ) }
-			</span>
+		help: __(
+			'Decide how long customers can access the files after purchasing the product. Leave blank for unlimited access.',
+			'woocommerce'
 		),
+		error: errors.downloadExpiry,
+		placeholder: __( 'Unlimited', 'woocommerce' ),
+		suffix: __( 'days', 'woocommerce' ),
 		onBlur() {
 			validateDownloadExpiry();
 		},
@@ -224,9 +201,9 @@ export function ManageDownloadLimitsModal( {
 		>
 			<form noValidate onSubmit={ handleSubmit }>
 				<div className="woocommerce-manage-download-limits-modal__content">
-					<InputControl { ...downloadLimitProps } />
+					<NumberControl { ...downloadLimitProps } />
 
-					<InputControl { ...downloadExpiryProps } />
+					<NumberControl { ...downloadExpiryProps } />
 				</div>
 
 				<div className="woocommerce-manage-download-limits-modal__actions">

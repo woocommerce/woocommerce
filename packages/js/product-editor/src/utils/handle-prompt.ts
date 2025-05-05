@@ -20,9 +20,7 @@ export async function handlePrompt( {
 	const value = window.prompt( message, defaultValue );
 
 	if ( value === null ) {
-		if ( onCancel ) {
-			onCancel();
-		}
+		onCancel?.();
 		return;
 	}
 

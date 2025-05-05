@@ -96,4 +96,139 @@ class WCAdminHelper {
 		}
 		return false;
 	}
+
+	/**
+	 * Test if the site is fresh. A fresh site must meet the following requirements.
+	 *
+	 * - The current user was registered less than 1 month ago.
+	 * - fresh_site option must be 1
+	 *
+	 * @return bool
+	 */
+	public static function is_site_fresh() {
+		$fresh_site = get_option( 'fresh_site' );
+		if ( '1' !== $fresh_site ) {
+			return false;
+		}
+
+		$current_userdata = get_userdata( get_current_user_id() );
+		// Return false if we can't get user meta data for some reason.
+		if ( ! $current_userdata ) {
+			return false;
+		}
+
+		$date      = new \DateTime( $current_userdata->user_registered );
+		$month_ago = new \DateTime( '-1 month' );
+
+		return $date > $month_ago;
+	}
+
+	/**
+	 * Check if the current page is a store page.
+	 *
+	 * This should only be called when WP has has set up the query, typically during or after the parse_query or template_redirect action hooks.
+	 *
+	 * @return bool
+	 */
+	public static function is_current_page_store_page() {
+		// WC store pages.
+		$store_pages = array(
+			'shop'        => wc_get_page_id( 'shop' ),
+			'cart'        => wc_get_page_id( 'cart' ),
+			'checkout'    => wc_get_page_id( 'checkout' ),
+			'terms'       => wc_terms_and_conditions_page_id(),
+			'coming_soon' => wc_get_page_id( 'coming_soon' ),
+		);
+
+		/**
+		 * Filter the store pages array to check if a URL is a store page.
+		 *
+		 * @since 8.8.0
+		 * @param array $store_pages The store pages array. The keys are the page slugs and the values are the page IDs.
+		 */
+		$store_pages = apply_filters( 'woocommerce_store_pages', $store_pages );
+
+		foreach ( $store_pages as $page_slug => $page_id ) {
+			if ( $page_id > 0 && is_page( $page_id ) ) {
+				return true;
+			}
+		}
+
+		// Product archive page.
+		if ( is_post_type_archive( 'product' ) ) {
+			return true;
+		}
+
+		// Product page.
+		if ( is_singular( 'product' ) ) {
+			return true;
+		}
+
+		// Product taxonomy page (e.g. Product Category, Product Tag, etc.).
+		if ( is_product_taxonomy() ) {
+			return true;
+		}
+
+		global $wp;
+		$url = self::get_url_from_wp( $wp );
+
+		/**
+		 * Filter if a URL is a store page.
+		 *
+		 * @since 9.3.0
+		 * @param bool   $is_store_page Whether or not the URL is a store page.
+		 * @param string $url           URL to check.
+		 */
+		$is_store_page = apply_filters( 'woocommerce_is_extension_store_page', false, $url );
+
+		return filter_var( $is_store_page, FILTER_VALIDATE_BOOL );
+	}
+
+	/**
+	 * Test if a URL is a store page.
+	 *
+	 * @param string $url URL to check. If not provided, the current URL will be used.
+	 * @return bool Whether or not the URL is a store page.
+	 * @deprecated 9.8.0 Use is_current_page_store_page instead.
+	 */
+	public static function is_store_page( $url = '' ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		_deprecated_function( __METHOD__, '9.8.0', 'is_current_page_store_page' );
+		return self::is_current_page_store_page();
+	}
+
+	/**
+	 * Get normalized URL path.
+	 * 1. Only keep the path and query string (if any).
+	 * 2. Remove wp home path from the URL path if WP is installed in a subdirectory.
+	 * 3. Remove leading and trailing slashes.
+	 *
+	 * For example:
+	 *
+	 * - https://example.com/wordpress/shop/uncategorized/test/?add-to-cart=123 => shop/uncategorized/test/?add-to-cart=123
+	 *
+	 * @param string $url URL to normalize.
+	 */
+	private static function get_normalized_url_path( $url ) {
+		$query           = wp_parse_url( $url, PHP_URL_QUERY );
+		$path            = wp_parse_url( $url, PHP_URL_PATH ) . ( $query ? '?' . $query : '' );
+		$home_path       = wp_parse_url( site_url(), PHP_URL_PATH ) ?? '';
+		$normalized_path = trim( substr( $path, strlen( $home_path ) ), '/' );
+		return $normalized_path;
+	}
+
+	/**
+	 * Builds the relative URL from the WP instance.
+	 *
+	 * @internal
+	 * @link https://wordpress.stackexchange.com/a/274572
+	 * @param \WP $wp WordPress environment instance.
+	 */
+	private static function get_url_from_wp( \WP $wp ) {
+		// Initialize query vars if they haven't been set.
+		if ( empty( $wp->query_vars ) || empty( $wp->request ) ) {
+			$wp->parse_request();
+		}
+
+		return home_url( add_query_arg( $wp->query_vars, $wp->request ) );
+	}
 }

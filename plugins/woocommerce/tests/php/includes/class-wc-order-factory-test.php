@@ -8,6 +8,8 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
  */
 class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 
+	use \Automattic\WooCommerce\RestApi\UnitTests\SerializingCacheTrait;
+
 	/**
 	 * Store COT state at the start of the test so we can restore it later.
 	 *

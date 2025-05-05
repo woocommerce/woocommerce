@@ -48,8 +48,12 @@
 	&__sidebar {
 		flex-shrink: 0;
 		height: 100%;
-		width: 280px;
 		overflow: scroll;
+		@media only screen and (max-width: $break-medium) {
+			width: 100%;
+			position: absolute;
+			z-index: 100;
+		}
 	}
 
 	.block-editor-block-contextual-toolbar.is-fixed {
@@ -70,5 +74,11 @@
 		.block-editor-block-toolbar__group-collapse-fixed-toolbar {
 			display: none;
 		}
+	}
+
+	.woocommerce-iframe-editor__header-right
+		.interface-pinned-items
+		.components-button {
+		display: flex;
 	}
 }

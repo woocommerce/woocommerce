@@ -2,14 +2,11 @@
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 
 /**
  * Controls the different pages/screens associated to the "Orders" menu page.
  */
 class PageController {
-
-	use AccessiblePrivateMethods;
 
 	/**
 	 * The order type.
@@ -143,7 +140,7 @@ class PageController {
 		}
 
 		// Not on an Orders page.
-		if ( 'admin.php' !== $pagenow || 0 !== strpos( $plugin_page, 'wc-orders' ) ) {
+		if ( empty( $plugin_page ) || 'admin.php' !== $pagenow || 0 !== strpos( $plugin_page, 'wc-orders' ) ) {
 			return;
 		}
 
@@ -152,14 +149,16 @@ class PageController {
 
 		$page_suffix = ( 'shop_order' === $this->order_type ? '' : '--' . $this->order_type );
 
-		self::add_action( 'load-woocommerce_page_wc-orders' . $page_suffix, array( $this, 'handle_load_page_action' ) );
-		self::add_action( 'admin_title', array( $this, 'set_page_title' ) );
+		add_action( 'load-woocommerce_page_wc-orders' . $page_suffix, array( $this, 'handle_load_page_action' ) );
+		add_action( 'admin_title', array( $this, 'set_page_title' ) );
 	}
 
 	/**
 	 * Perform initialization for the current action.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function handle_load_page_action() {
+	public function handle_load_page_action() {
 		$screen            = get_current_screen();
 		$screen->post_type = $this->order_type;
 
@@ -174,8 +173,10 @@ class PageController {
 	 * @param string $admin_title The admin screen title before it's filtered.
 	 *
 	 * @return string The filtered admin title.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function set_page_title( $admin_title ) {
+	public function set_page_title( $admin_title ) {
 		if ( ! $this->is_order_screen( $this->order_type ) ) {
 			return $admin_title;
 		}
@@ -447,12 +448,18 @@ class PageController {
 			$order_type = $order->get_type();
 		}
 
+		try {
+			$base_url = $this->get_base_page_url( $order_type );
+		} catch ( \Exception $e ) {
+			return '';
+		}
+
 		return add_query_arg(
 			array(
 				'action' => 'edit',
 				'id'     => absint( $order_id ),
 			),
-			$this->get_base_page_url( $order_type )
+			$base_url
 		);
 	}
 

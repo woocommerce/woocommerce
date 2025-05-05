@@ -26,7 +26,7 @@ class ExperimentalShippingRecommendation extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Set up shipping', 'woocommerce' );
+		return __( 'Get your products shipped', 'woocommerce' );
 	}
 
 	/**
@@ -80,7 +80,7 @@ class ExperimentalShippingRecommendation extends Task {
 	 * @return bool
 	 */
 	public static function has_plugins_active() {
-		return PluginsHelper::is_plugin_active( 'woocommerce-services' );
+		return PluginsHelper::is_plugin_active( 'woocommerce-shipping' );
 	}
 
 	/**

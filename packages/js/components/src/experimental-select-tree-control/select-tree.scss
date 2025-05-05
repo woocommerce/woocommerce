@@ -9,6 +9,21 @@
 	&__input:disabled {
 		background-color: $gray-100;
 	}
+	&__suffix, &__suffix-items {
+		display: flex;
+		align-items: center;
+		button {
+			height: $gap-large;
+			padding: 0 $gap-smallest;
+		}
+	}
+	&__icon-clear {
+		padding-right: 0;
+		svg {
+			fill: $gray-700;
+			cursor: pointer;
+		}
+	}
 }
 
 .woocommerce-experimental-select-tree-control__dropdown {

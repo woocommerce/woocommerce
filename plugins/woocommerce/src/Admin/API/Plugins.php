@@ -2,16 +2,13 @@
 /**
  * REST API Plugins Controller
  *
- * Handles requests to install and activate depedent plugins.
+ * Handles requests to install and activate dependent plugins.
  */
 
 namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
-use Automattic\WooCommerce\Admin\PaymentMethodSuggestionsDataSourcePoller;
 use Automattic\WooCommerce\Admin\PluginsHelper;
-use Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -19,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  * Plugins Controller.
  *
  * @internal
- * @extends WC_REST_Data_Controller
+ * @extends \WC_REST_Data_Controller
  */
 class Plugins extends \WC_REST_Data_Controller {
 	/**
@@ -213,8 +210,8 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Check if a given request has access to manage plugins.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
 		if ( ! current_user_can( 'install_plugins' ) ) {
@@ -226,8 +223,8 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Install the requested plugin.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|array Plugin Status
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|array Plugin Status
 	 */
 	public function install_plugin( $request ) {
 		wc_deprecated_function( 'install_plugin', '4.3', '\Automattic\WooCommerce\Admin\API\Plugins()->install_plugins' );
@@ -239,11 +236,12 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Installs the requested plugins.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|array Plugin Status
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|array Plugin Status
 	 */
 	public function install_plugins( $request ) {
 		$plugins = explode( ',', $request['plugins'] );
+		$source  = ! empty( $request['source'] ) ? $request['source'] : null;
 
 		if ( empty( $request['plugins'] ) || ! is_array( $plugins ) ) {
 			return new \WP_Error( 'woocommerce_rest_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce' ), 404 );
@@ -261,13 +259,32 @@ class Plugins extends \WC_REST_Data_Controller {
 			);
 		}
 
-		$data = PluginsHelper::install_plugins( $plugins );
+		$data = PluginsHelper::install_plugins( $plugins, null, $source );
+
+		// Gather some plugin details for each installed plugin.
+		$plugin_details = array();
+		if ( is_array( $data['installed'] ) ) {
+			foreach ( $data['installed'] as $plugin_slug ) {
+				$plugin_data = PluginsHelper::get_plugin_data( $plugin_slug );
+				if ( empty( $plugin_data ) ) {
+					continue;
+				}
+
+				$plugin_details[ $plugin_slug ] = array(
+					'name'        => $plugin_data['Name'],
+					'description' => $plugin_data['Description'],
+					'uri'         => $plugin_data['PluginURI'],
+					'version'     => $plugin_data['Version'],
+				);
+			}
+		}
 
 		return array(
 			'data'    => array(
-				'installed'    => $data['installed'],
-				'results'      => $data['results'],
-				'install_time' => $data['time'],
+				'installed'      => $data['installed'],
+				'results'        => $data['results'],
+				'install_time'   => $data['time'],
+				'plugin_details' => $plugin_details,
 			),
 			'errors'  => $data['errors'],
 			'success' => count( $data['errors']->errors ) === 0,
@@ -280,7 +297,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a list of recently scheduled installation jobs.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return array Jobs.
 	 */
 	public function get_installation_status( $request ) {
@@ -290,7 +307,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a list of recently scheduled installation jobs.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return array Job.
 	 */
 	public function get_job_installation_status( $request ) {
@@ -334,8 +351,8 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Activate the requested plugin.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|array Plugin Status
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|array Plugin Status
 	 */
 	public function activate_plugins( $request ) {
 		$plugins = explode( ',', $request['plugins'] );
@@ -358,10 +375,29 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		$data = PluginsHelper::activate_plugins( $plugins );
 
-		return( array(
+		// Gather some plugin details for each activated plugin.
+		$plugin_details = array();
+		if ( is_array( $data['activated'] ) ) {
+			foreach ( $data['activated'] as $plugin_slug ) {
+				$plugin_data = PluginsHelper::get_plugin_data( $plugin_slug );
+				if ( empty( $plugin_data ) ) {
+					continue;
+				}
+
+				$plugin_details[ $plugin_slug ] = array(
+					'name'        => $plugin_data['Name'],
+					'description' => $plugin_data['Description'],
+					'uri'         => $plugin_data['PluginURI'],
+					'version'     => $plugin_data['Version'],
+				);
+			}
+		}
+
+		return ( array(
 			'data'    => array(
-				'activated' => $data['activated'],
-				'active'    => $data['active'],
+				'activated'      => $data['activated'],
+				'active'         => $data['active'],
+				'plugin_details' => $plugin_details,
 			),
 			'errors'  => $data['errors'],
 			'success' => count( $data['errors']->errors ) === 0,
@@ -374,7 +410,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a list of recently scheduled activation jobs.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return array Job.
 	 */
 	public function get_activation_status( $request ) {
@@ -384,7 +420,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a list of recently scheduled activation jobs.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return array Jobs.
 	 */
 	public function get_job_activation_status( $request ) {
@@ -396,14 +432,15 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Generates a Jetpack Connect URL.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|array Connection URL for Jetpack
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|array Connection URL for Jetpack
 	 */
 	public function connect_jetpack( $request ) {
 		if ( ! class_exists( '\Jetpack' ) ) {
 			return new \WP_Error( 'woocommerce_rest_jetpack_not_active', __( 'Jetpack is not installed or active.', 'woocommerce' ), 404 );
 		}
 
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 		$redirect_url = apply_filters( 'woocommerce_admin_onboarding_jetpack_connect_redirect_url', esc_url_raw( $request['redirect_url'] ) );
 		$connect_url  = \Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-onboarding' );
 
@@ -420,12 +457,12 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 *  Kicks off the WCCOM Connect process.
 	 *
-	 * @return WP_Error|array Connection URL for Woo.com
+	 * @return \WP_Error|array Connection URL for WooCommerce.com
 	 */
 	public function request_wccom_connect() {
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-api.php';
 		if ( ! class_exists( 'WC_Helper_API' ) ) {
-			return new \WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the Woo.com Helper API.', 'woocommerce' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the WooCommerce.com Helper API.', 'woocommerce' ), 404 );
 		}
 
 		$redirect_uri = wc_admin_url( '&task=connect&wccom-connected=1' );
@@ -442,12 +479,12 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		$code = wp_remote_retrieve_response_code( $request );
 		if ( 200 !== $code ) {
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Woo.com. Please try again.', 'woocommerce' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
 		$secret = json_decode( wp_remote_retrieve_body( $request ) );
 		if ( empty( $secret ) ) {
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Woo.com. Please try again.', 'woocommerce' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
 		do_action( 'woocommerce_helper_connect_start' );
@@ -477,10 +514,10 @@ class Plugins extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Finishes connecting to Woo.com.
+	 * Finishes connecting to WooCommerce.com.
 	 *
 	 * @param  object $rest_request Request details.
-	 * @return WP_Error|array Contains success status.
+	 * @return \WP_Error|array Contains success status.
 	 */
 	public function finish_wccom_connect( $rest_request ) {
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php';
@@ -488,7 +525,7 @@ class Plugins extends \WC_REST_Data_Controller {
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-updater.php';
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-options.php';
 		if ( ! class_exists( 'WC_Helper_API' ) ) {
-			return new \WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the Woo.com Helper API.', 'woocommerce' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the WooCommerce.com Helper API.', 'woocommerce' ), 404 );
 		}
 
 		// Obtain an access token.
@@ -504,12 +541,12 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		$code = wp_remote_retrieve_response_code( $request );
 		if ( 200 !== $code ) {
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Woo.com. Please try again.', 'woocommerce' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
 		$access_token = json_decode( wp_remote_retrieve_body( $request ), true );
 		if ( ! $access_token ) {
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Woo.com. Please try again.', 'woocommerce' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
 		\WC_Helper_Options::update(
@@ -525,7 +562,7 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		if ( ! \WC_Helper::_flush_authentication_cache() ) {
 			\WC_Helper_Options::update( 'auth', array() );
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Woo.com. Please try again.', 'woocommerce' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
 		delete_transient( '_woocommerce_helper_subscriptions' );
@@ -542,13 +579,13 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a URL that can be used to connect to Square.
 	 *
-	 * @return WP_Error|array Connect URL.
+	 * @return \WP_Error|array Connect URL.
 	 */
 	public function connect_square() {
 		if ( ! class_exists( '\WooCommerce\Square\Handlers\Connection' ) ) {
 			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Square.', 'woocommerce' ), 500 );
 		}
-
+		$has_cbd_industry = false;
 		if ( 'US' === WC()->countries->get_base_country() ) {
 			$profile = get_option( OnboardingProfile::DATA_OPTION, array() );
 			if ( ! empty( $profile['industry'] ) ) {
@@ -592,26 +629,26 @@ class Plugins extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Returns a URL that can be used to by WCPay to verify business details with Stripe.
+	 * Returns a URL that can be used to point the merchant to the WooPayments onboarding flow.
 	 *
-	 * @return WP_Error|array Connect URL.
+	 * @return \WP_Error|array Connect URL.
 	 */
 	public function connect_wcpay() {
-		if ( ! class_exists( 'WC_Payments_Account' ) ) {
+		if ( ! class_exists( 'WC_Payments' ) ) {
 			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error communicating with the WooPayments plugin.', 'woocommerce' ), 500 );
 		}
 
-		$args = WooCommercePayments::is_account_partially_onboarded() ? [
-			'wcpay-login' => '1',
-			'_wpnonce'    => wp_create_nonce( 'wcpay-login' ),
-		] : [
-			'wcpay-connect' => 'WCADMIN_PAYMENT_TASK',
-			'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
-		];
-
-		return( array(
-			'connectUrl' => add_query_arg( $args, admin_url() ),
-		) );
+		// Use a WooPayments connect link to let the WooPayments plugin handle the connection flow.
+		return array(
+			'connectUrl' => add_query_arg(
+				array(
+					'wcpay-connect' => '1',
+					'from'          => 'WCADMIN_PAYMENT_TASK',
+					'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
+				),
+				admin_url( 'admin.php' )
+			),
+		);
 	}
 
 	/**

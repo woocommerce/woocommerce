@@ -1,6 +1,7 @@
 /**
  * Internal dependencies
  */
+import { Logger } from '../../core/logger';
 import {
 	CommandVarOptions,
 	JobType,
@@ -16,7 +17,9 @@ import { TestEnvVars, parseTestEnvConfig } from './test-environment';
  */
 interface LintJob {
 	projectName: string;
+	projectPath: string;
 	command: string;
+	optional: boolean;
 }
 
 /**
@@ -29,13 +32,27 @@ interface TestJobEnv {
 }
 
 /**
+ * A testing job report.
+ */
+interface TestJobReport {
+	resultsBlobName: string;
+	resultsPath: string;
+	allure: boolean;
+}
+
+/**
  * A testing job.
  */
 interface TestJob {
 	projectName: string;
+	projectPath: string;
 	name: string;
 	command: string;
 	testEnv: TestJobEnv;
+	shardNumber: number;
+	optional: boolean;
+	testType: string;
+	report: TestJobReport;
 }
 
 /**
@@ -71,9 +88,41 @@ function replaceCommandVars( command: string, options: CreateOptions ): string {
 }
 
 /**
+ * Multiplies a job based on the shards job config. It updates the job names and command - currently only supporting Playwright sharding.
+ *
+ * @param {TestJob}       job       The job to be multiplied.
+ * @param {TestJobConfig} jobConfig The job config.
+ * @return {TestJob[]} The list of sharded jobs.
+ */
+export function getShardedJobs(
+	job: TestJob,
+	jobConfig: TestJobConfig
+): TestJob[] {
+	let createdJobs = [];
+	const shards = jobConfig.shardingArguments.length;
+
+	if ( shards <= 1 ) {
+		createdJobs.push( job );
+	} else {
+		createdJobs = Array( shards )
+			.fill( null )
+			.map( ( _, i ) => {
+				const jobCopy = JSON.parse( JSON.stringify( job ) );
+				jobCopy.shardNumber = i + 1;
+				jobCopy.name = `${ job.name } ${ i + 1 }/${ shards }`;
+				jobCopy.command = `${ job.command } ${ jobConfig.shardingArguments[ i ] }`;
+				return jobCopy;
+			} );
+	}
+
+	return createdJobs;
+}
+
+/**
  * Checks the config against the changes and creates one if it should be run.
  *
  * @param {string}              projectName The name of the project that the job is for.
+ * @param {string}              projectPath The path of the project that the job is for.
  * @param {Object}              config      The config object for the lint job.
  * @param {Array.<string>|true} changes     The file changes that have occurred for the project or true if all projects should be marked as changed.
  * @param {Object}              options     The options to use when creating the job.
@@ -81,6 +130,7 @@ function replaceCommandVars( command: string, options: CreateOptions ): string {
  */
 function createLintJob(
 	projectName: string,
+	projectPath: string,
 	config: LintJobConfig,
 	changes: string[] | true,
 	options: CreateOptions
@@ -114,7 +164,9 @@ function createLintJob(
 
 	return {
 		projectName,
+		projectPath,
 		command: replaceCommandVars( config.command, options ),
+		optional: config.optional,
 	};
 }
 
@@ -122,53 +174,39 @@ function createLintJob(
  * Checks the config against the changes and creates one if it should be run.
  *
  * @param {string}              projectName The name of the project that the job is for.
+ * @param {string}              projectPath The path of the project that the job is for.
  * @param {Object}              config      The config object for the test job.
  * @param {Array.<string>|true} changes     The file changes that have occurred for the project or true if all projects should be marked as changed.
  * @param {Object}              options     The options to use when creating the job.
- * @param {Array.<string>}      cascadeKeys The cascade keys that have been triggered in dependencies.
+ * @param {number}              shardNumber The shard number for the job.
  * @return {Promise.<Object|null>} The job that should be run or null if no job should be run.
  */
 async function createTestJob(
 	projectName: string,
+	projectPath: string,
 	config: TestJobConfig,
 	changes: string[] | true,
 	options: CreateOptions,
-	cascadeKeys: string[]
+	shardNumber: number
 ): Promise< TestJob | null > {
 	let triggered = false;
-
 	// When we're forcing changes for all projects we don't need to check
 	// for any changed files before triggering the job.
 	if ( changes === true ) {
 		triggered = true;
 	} else {
-		// Some jobs can be configured to trigger when a dependency has a job that
-		// was triggered. For example, a code change in a dependency might mean
-		// that code is impacted in the current project even if no files were
-		// actually changed in this project.
-		if (
-			config.cascadeKeys &&
-			config.cascadeKeys.some( ( value ) =>
-				cascadeKeys.includes( value )
-			)
-		) {
-			triggered = true;
-		}
-
 		// Projects can configure jobs to be triggered when a
 		// changed file matches a path regex.
-		if ( ! triggered ) {
-			for ( const file of changes ) {
-				for ( const change of config.changes ) {
-					if ( change.test( file ) ) {
-						triggered = true;
-						break;
-					}
-				}
-
-				if ( triggered ) {
+		for ( const file of changes ) {
+			for ( const change of config.changes ) {
+				if ( change.test( file ) ) {
+					triggered = true;
 					break;
 				}
+			}
+
+			if ( triggered ) {
+				break;
 			}
 		}
 	}
@@ -179,12 +217,17 @@ async function createTestJob(
 
 	const createdJob: TestJob = {
 		projectName,
+		projectPath,
 		name: config.name,
 		command: replaceCommandVars( config.command, options ),
 		testEnv: {
 			shouldCreate: false,
 			envVars: {},
 		},
+		report: config.report,
+		shardNumber,
+		optional: config.optional,
+		testType: config.testType,
 	};
 
 	// We want to make sure that we're including the configuration for
@@ -197,23 +240,38 @@ async function createTestJob(
 		};
 	}
 
+	// Pre-release versions (beta, RC) are not always available, and we should not create the job if that's the case.
+	if (
+		[ 'beta', 'rc', 'prerelease', 'pre-release' ].includes(
+			config?.testEnv?.config?.wpVersion
+		) &&
+		! createdJob.testEnv.envVars.WP_VERSION
+	) {
+		Logger.warn(
+			`No WP offer was found for config.wpVersion:${ config.testEnv.config.wpVersion }. Job was not created.`
+		);
+		return null;
+	}
+
+	if ( createdJob.testEnv.envVars.WP_VERSION ) {
+		createdJob.name += ` [WP ${ createdJob.testEnv.envVars.WP_VERSION }]`;
+	}
+
 	return createdJob;
 }
 
 /**
  * Recursively checks the project for any jobs that should be executed and returns them.
  *
- * @param {Object}         node        The current project node to examine.
- * @param {Object|true}    changes     The changed files keyed by their project or true if all projects should be marked as changed.
- * @param {Object}         options     The options to use when creating the job.
- * @param {Array.<string>} cascadeKeys The cascade keys that have been triggered in dependencies.
+ * @param {Object}      node    The current project node to examine.
+ * @param {Object|true} changes The changed files keyed by their project or true if all projects should be marked as changed.
+ * @param {Object}      options The options to use when creating the job.
  * @return {Promise.<Object>} The jobs that have been created for the project.
  */
 async function createJobsForProject(
 	node: ProjectNode,
 	changes: ProjectFileChanges | true,
-	options: CreateOptions,
-	cascadeKeys: string[]
+	options: CreateOptions
 ): Promise< Jobs > {
 	// We're going to traverse the project graph and check each node for any jobs that should be triggered.
 	const newJobs: Jobs = {
@@ -221,43 +279,29 @@ async function createJobsForProject(
 		test: [],
 	};
 
-	// In order to simplify the way that cascades work we're going to recurse depth-first and check our dependencies
-	// for jobs before ourselves. This lets any cascade keys created in dependencies cascade to dependents.
-	const newCascadeKeys = [];
+	const dependenciesWithChanges = [];
+
 	for ( const dependency of node.dependencies ) {
-		// Each dependency needs to have its own cascade keys so that they don't cross-contaminate.
-
-		// Keey in mind that arrays are passed by reference in JavaScript. This means that any changes
-		// we make to the cascade keys array will be reflected in the parent scope. We need to copy
-		// the array before recursing our dependencies so that we don't accidentally add keys from
-		// one dependency to a sibling and accidentally trigger jobs that shouldn't be run.
-		const dependencyCascade = [ ...cascadeKeys ];
-
 		const dependencyJobs = await createJobsForProject(
 			dependency,
 			changes,
-			options,
-			dependencyCascade
+			options
 		);
+
 		newJobs.lint.push( ...dependencyJobs.lint );
 		newJobs.test.push( ...dependencyJobs.test );
 
-		// Track any new cascade keys added by the dependency.
-		// Since we're filtering out duplicates after the
-		// dependencies are checked we don't need to
-		// worry about their presence right now.
-		newCascadeKeys.push( ...dependencyCascade );
-	}
+		// First line of detection: implicit changes list points to the dependency.
+		const dependencyHasChanges =
+			( changes[ dependency.name ] || [] ).length > 0;
+		// Second line of detection: the dependency spawns jobs.
+		const dependencySpawnsJobs =
+			dependencyJobs.test.length + dependencyJobs.lint.length > 0;
 
-	// Now that we're done looking at the dependencies we can add the cascade keys that
-	// they created. This is deliberately modifying the function argument so that the
-	// "dependencyCascade" array created above will contain any of the keys that were
-	// triggered by children downstream. Make sure to avoid adding duplicates
-	// so that we don't waste time checking the same keys multiple times
-	// when we create the jobs.
-	cascadeKeys.push(
-		...newCascadeKeys.filter( ( value ) => ! cascadeKeys.includes( value ) )
-	);
+		if ( dependencyHasChanges || dependencySpawnsJobs ) {
+			dependenciesWithChanges.push( dependency.name );
+		}
+	}
 
 	// Projects that don't have any CI configuration don't have any potential jobs for us to check for.
 	if ( ! node.ciConfig ) {
@@ -267,6 +311,20 @@ async function createJobsForProject(
 	for ( const jobConfig of node.ciConfig.jobs ) {
 		// Make sure that we don't queue the same job more than once.
 		if ( jobConfig.jobCreated ) {
+			continue;
+		}
+
+		// Do not create a job if:
+		// - there is an event argument in ci-job cli,
+		// - a non-empty list of events is defined in the job config,
+		// - the event argument is not in the defined list of events.
+		if (
+			options.commandVars?.event &&
+			jobConfig.events.length > 0 &&
+			! jobConfig.events
+				.map( ( e ) => e.toLowerCase() )
+				.includes( options.commandVars.event.toLowerCase() )
+		) {
 			continue;
 		}
 
@@ -285,6 +343,7 @@ async function createJobsForProject(
 			case JobType.Lint: {
 				const created = createLintJob(
 					node.name,
+					node.path,
 					jobConfig,
 					projectChanges,
 					options
@@ -297,29 +356,39 @@ async function createJobsForProject(
 				newJobs.lint.push( created );
 				break;
 			}
-
 			case JobType.Test: {
+				if ( dependenciesWithChanges.length > 0 ) {
+					if ( ! jobConfig.onlyForDependencies ) {
+						// onlyForDependencies is not defined, meaning there are no exceptions so we should run the job.
+						projectChanges = true;
+					}
+
+					// If onlyForDependencies is defined, we should only run the job if one of the listed dependencies has changes.
+					if (
+						jobConfig.onlyForDependencies &&
+						jobConfig.onlyForDependencies.some( ( dep ) =>
+							dependenciesWithChanges.includes( dep )
+						)
+					) {
+						projectChanges = true;
+					}
+				}
+
 				const created = await createTestJob(
 					node.name,
+					node.path,
 					jobConfig,
 					projectChanges,
 					options,
-					cascadeKeys
+					0
 				);
 				if ( ! created ) {
 					break;
 				}
 
 				jobConfig.jobCreated = true;
-				newJobs.test.push( created );
 
-				// We need to track any cascade keys that this job is associated with so that
-				// dependent projects can trigger jobs with matching keys. We are expecting
-				// the array passed to this function to be modified by reference so this
-				// behavior is intentional.
-				if ( jobConfig.cascadeKeys ) {
-					cascadeKeys.push( ...jobConfig.cascadeKeys );
-				}
+				newJobs.test.push( ...getShardedJobs( created, jobConfig ) );
 				break;
 			}
 		}
@@ -341,5 +410,5 @@ export function createJobsForChanges(
 	changes: ProjectFileChanges | true,
 	options: CreateOptions
 ): Promise< Jobs > {
-	return createJobsForProject( root, changes, options, [] );
+	return createJobsForProject( root, changes, options );
 }

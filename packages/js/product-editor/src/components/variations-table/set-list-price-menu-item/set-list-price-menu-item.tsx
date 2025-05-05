@@ -46,7 +46,7 @@ export function SetListPriceMenuItem( {
 				onClose();
 			} }
 		>
-			{ __( 'Set list price', 'woocommerce' ) }
+			{ __( 'Set regular price', 'woocommerce' ) }
 		</MenuItem>
 	);
 }

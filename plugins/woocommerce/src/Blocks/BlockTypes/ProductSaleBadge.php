@@ -20,50 +20,7 @@ class ProductSaleBadge extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $api_version = '2';
-
-	/**
-	 * Get block attributes.
-	 *
-	 * @return array
-	 */
-	protected function get_block_type_supports() {
-		return array(
-			'color'                  =>
-			array(
-				'gradients'  => true,
-				'background' => true,
-				'link'       => true,
-			),
-			'typography'             =>
-			array(
-				'fontSize'                        => true,
-				'lineHeight'                      => true,
-				'__experimentalFontFamily'        => true,
-				'__experimentalFontWeight'        => true,
-				'__experimentalFontStyle'         => true,
-				'__experimentalLetterSpacing'     => true,
-				'__experimentalTextTransform'     => true,
-				'__experimentalTextDecoration'    => true,
-				'__experimentalSkipSerialization' => true,
-			),
-			'__experimentalBorder'   =>
-			array(
-				'color'  => true,
-				'radius' => true,
-				'width'  => true,
-			),
-			'spacing'                =>
-			array(
-				'margin'                          => true,
-				'padding'                         => true,
-				'__experimentalSkipSerialization' => true,
-
-			),
-			'__experimentalSelector' => '.wc-block-components-product-sale-badge',
-
-		);
-	}
+	protected $api_version = '3';
 
 	/**
 	 * Overwrite parent method to prevent script registration.
@@ -97,16 +54,22 @@ class ProductSaleBadge extends AbstractBlock {
 			return $content;
 		}
 
-		$post_id    = $block->context['postId'];
-		$product    = wc_get_product( $post_id );
+		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
+		$product = wc_get_product( $post_id );
+
+		if ( ! $product ) {
+			return null;
+		}
+
 		$is_on_sale = $product->is_on_sale();
 
 		if ( ! $is_on_sale ) {
 			return null;
 		}
 
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-		$classname          = isset( $attributes['className'] ) ? $attributes['className'] : '';
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
+
+		$classname = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
 
 		$align = isset( $attributes['align'] ) ? $attributes['align'] : '';
 

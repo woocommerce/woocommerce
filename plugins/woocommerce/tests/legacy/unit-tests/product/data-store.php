@@ -6,6 +6,9 @@
  * @since 3.0.0
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+
 /**
  * Class WC_Tests_Product_Data_Store
  */
@@ -24,7 +27,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test creating a new product.
+	 * Test creating a new product (published by default).
 	 *
 	 * @since 3.0.0
 	 */
@@ -34,10 +37,60 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$product->set_name( 'My Product' );
 		$product->save();
 
+		$this->assertEquals( ProductStatus::PUBLISH, $product->get_status() );
+
 		$read_product = new WC_Product( $product->get_id() );
 
 		$this->assertEquals( '42', $read_product->get_regular_price() );
 		$this->assertEquals( 'My Product', $read_product->get_name() );
+	}
+
+	/**
+	 * Test creating a new product (explicitly set to published).
+	 */
+	public function test_product_create_published() {
+		$product = new WC_Product();
+		$product->set_status( ProductStatus::PUBLISH );
+		$product->save();
+
+		$this->assertEquals( ProductStatus::PUBLISH, $product->get_status() );
+	}
+
+	/**
+	 * Test creating a new draft product.
+	 */
+	public function test_product_create_draft() {
+		$product = new WC_Product();
+		$product->set_status( ProductStatus::DRAFT );
+		$product->save();
+
+		$this->assertEquals( ProductStatus::DRAFT, $product->get_status() );
+	}
+
+	/**
+	 * Test creating a new product with woocommerce_new_product_data filter.
+	 */
+	public function test_product_create_with_woocommerce_new_product_data_filter() {
+		$force_draft_status_fn = function ( $data ) {
+			$data['post_status'] = ProductStatus::DRAFT;
+			return $data;
+		};
+
+		add_filter(
+			'woocommerce_new_product_data',
+			$force_draft_status_fn
+		);
+
+		$product = new WC_Product();
+		$product->set_status( ProductStatus::PENDING );
+		$product->save();
+
+		$this->assertEquals( ProductStatus::DRAFT, $product->get_status() );
+
+		remove_filter(
+			'woocommerce_new_product_data',
+			$force_draft_status_fn
+		);
 	}
 
 	/**
@@ -79,7 +132,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	public function test_product_trash() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->delete();
-		$this->assertEquals( 'trash', $product->get_status() );
+		$this->assertEquals( ProductStatus::TRASH, $product->get_status() );
 	}
 
 	/**
@@ -280,7 +333,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$variation->set_manage_stock( 'no' );
 		$variation->set_downloadable( 'no' );
 		$variation->set_virtual( 'no' );
-		$variation->set_stock_status( 'instock' );
+		$variation->set_stock_status( ProductStockStatus::IN_STOCK );
 		$variation->set_attributes( array( 'pa_color' => 'green' ) );
 		$variation->save();
 
@@ -301,7 +354,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$variation_2->set_manage_stock( 'no' );
 		$variation_2->set_downloadable( 'no' );
 		$variation_2->set_virtual( 'no' );
-		$variation_2->set_stock_status( 'instock' );
+		$variation_2->set_stock_status( ProductStockStatus::IN_STOCK );
 		$variation_2->set_attributes( array( 'pa_color' => 'red' ) );
 		$variation_2->save();
 
@@ -365,13 +418,13 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		// Now update some value unrelated to attributes.
 		$variation = wc_get_product( $variation->get_id() );
-		$variation->set_status( 'publish' );
+		$variation->set_status( ProductStatus::PUBLISH );
 		$variation->save();
 
 		// Load up the updated variation and verify that the saved state is correct.
 		$loaded_variation = wc_get_product( $variation->get_id() );
 
-		$this->assertEquals( 'publish', $loaded_variation->get_status( 'edit' ) );
+		$this->assertEquals( ProductStatus::PUBLISH, $loaded_variation->get_status( 'edit' ) );
 		$_attribute = $loaded_variation->get_attributes( 'edit' );
 		$this->assertEquals( 'green', $_attribute['color'] );
 	}
@@ -536,7 +589,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$future_sale_product->save();
 
 		$variable_draft_product = WC_Helper_Product::create_variation_product();
-		$variable_draft_product->set_status( 'draft' );
+		$variable_draft_product->set_status( ProductStatus::DRAFT );
 		$variable_draft_product->save();
 		$children                     = $variable_draft_product->get_children();
 		$variable_draft_product_child = wc_get_product( $children[0] );
@@ -1082,5 +1135,15 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( $children[2], $match );
+
+		// Test trying to get a variation of a variation.
+		$variation = wc_get_product( $children[0] );
+		$match     = $data_store->find_matching_product_variation(
+			$variation,
+			array(
+				'attribute_pa_size' => 'small',
+			)
+		);
+		$this->assertEquals( 0, $match );
 	}
 }

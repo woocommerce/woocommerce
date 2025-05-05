@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: manage @wordpress/dependency-extraction-webpack-plugin version via syncpack

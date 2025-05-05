@@ -10,18 +10,18 @@ Often, when writing new code or revising existing code, there is a desire to add
 
 Practices we generally allow, support and encourage include:
 
-* [Using existing hooks (or other alternatives) in preference to adding new hooks](#prefer-existing-hooks-or-other-alternatives)
-* [Adding lifecycle hooks](#adding-lifecycle-hooks)
-* [Optional escape hooks](#escape-hooks)
-* [Modifying the inputs and outputs of global rendering functions](#modifying-function-input-and-output-global-rendering-functions)
-* [Preferring the passing of objects over IDs](#prefer-passing-objects-over-ids)
+* [Using existing hooks (or other alternatives) in preference to adding new hooks](#0-prefer-existing-hooks-or-other-alternatives)
+* [Adding lifecycle hooks](#1-adding-lifecycle-hooks)
+* [Optional escape hooks](#2-escape-hooks)
+* [Modifying the inputs and outputs of global rendering functions](#3-modifying-function-input-and-output-global-rendering-functions)
+* [Preferring the passing of objects over IDs](#4-prefer-passing-objects-over-ids)
 
 On the flip side, there are several practices we discourage:
 
-* [Tying lifecycle hooks to methods of execution](#tying-lifecycle-hooks-to-methods-of-execution)
-* [Using filters as feature flags](#using-filters-as-feature-flags)
-* [Placing filter hooks inside templates and data stores](#placement-of-filter-hooks)
-* [Enumeration values within hook names](#enumeration-values-inside-hook-names)
+* [Tying lifecycle hooks to methods of execution](#5-tying-lifecycle-hooks-to-methods-of-execution)
+* [Using filters as feature flags](#6-using-filters-as-feature-flags)
+* [Placing filter hooks inside templates and data stores](#7-placement-of-filter-hooks)
+* [Enumeration values within hook names](#8-enumeration-values-inside-hook-names)
 
 Beyond those items, we generally otherwise adhere to WordPress coding standards. In regards to hooks, that specifically means following the:
 
@@ -30,13 +30,13 @@ Beyond those items, we generally otherwise adhere to WordPress coding standards.
 
 Please note that we provide example code throughout this guide to help illustrate some of the principles. However, to keep things concise, we usually omit unnecessary detail, including doc blocks (in practice, though, hooks should always be accompanied by doc blocks!).
 
-### Prefer existing hooks (or other alternatives)
+## Prefer existing hooks (or other alternatives)
 
 Hooks come with a long-term obligation: the last thing we want is to add a new hook that developers come to depend on, only to strip it away again. However, this can lead to difficulties when the time comes to refactor a piece of code that contains hooks, sometimes delaying meaningful change or limiting how easily we can implement a change without compromising on backward compatibility commitments.
 
 For those reasons, we always prefer that-wherever reasonable-an existing hook or alternative approach in preference to adding a new hook.
 
-### Adding lifecycle hooks
+## Adding lifecycle hooks
 
 Lifecycle hooks can be used to communicate that a lifecycle event is about to start, or that it has concluded. Examples of such events include:
 
@@ -67,7 +67,7 @@ function woocommerce_get_current_promotions( ...$args ) {
 }
 ```
 
-### Escape hooks
+## Escape hooks
 
 In some cases, it may be appropriate to support short-circuiting of functions or methods. This is what we call an escape hook, and can be useful as a means of overriding code when a better way of doing so is not available.
 
@@ -92,7 +92,7 @@ function get_product_metrics( $args ): array {
 }
 ```
 
-### Modifying function input and output (global rendering functions)
+## Modifying function input and output (global rendering functions)
 
 In the case of global rendering or formatting functions (so-called "template tags"), where it is not readily possible to implement better alternatives, it is permissible to add filters for both the function arguments and the function's return value.
 
@@ -109,7 +109,7 @@ function woocommerce_format_sale_price( ...$args ): string {
 }
 ```
 
-### Prefer passing objects over IDs
+## Prefer passing objects over IDs
 
 Some actions or filters provide an object ID (such as a product ID) as their primary value, while others will provide the actual object itself (such as a product object). For consistency, it is preferred that objects be passed.
 
@@ -127,7 +127,7 @@ function get_featured_product_for_current_customer( ) {
 }
 ```
 
-### Tying lifecycle hooks to methods of execution
+## Tying lifecycle hooks to methods of execution
 
 There can sometimes be multiple paths leading to the same action. For instance, an order can be updated via the REST API, through the admin environment, or on the front end. It may additionally happen via ajax, or via a regular request.
 
@@ -148,7 +148,7 @@ function on_ajax_order_creation() {
 }
 ```
 
-### Using filters as feature flags
+## Using filters as feature flags
 
 It is sometimes tempting to use a filter as a sort of feature flag, that enables or disables a piece of functionality. This should be avoided! Prefer using an option:
 
@@ -165,13 +165,13 @@ $super_products_enabled = (bool) apply_filters( 'woocommerce_super_products_are_
 $super_products_enabled = get_option( 'woocommerce_super_products_are_enabled', 'no' ) === 'yes';
 ```
 
-### Placement of filter hooks
+## Placement of filter hooks
 
 Filters should not be placed inside templates-only actions. If it is important that a value used within a template be filterable, then the relevant logic should be moved to whichever function or method decides to load the template-the result being passed in as a template variable.
 
 It is also preferred that filter hooks not be placed inside data-store classes, as this can reduce the integrity of those components: since, by design, they are replaceable by custom implementations-the risk of accidentally breaking those custom stores is higher.
 
-### Enumeration values inside hook names
+## Enumeration values inside hook names
 
 Though there is a case for dynamic hook names (where part of the hook name is created using a variable), a good rule of thumb is to avoid this if the variable contains what might be considered an enumeration value.
 
@@ -192,6 +192,6 @@ if ( is_wp_error( $result ) ) {
 
 The primary reason for avoiding this is that the more values there are in the enumeration set, the more filters developers have to include in their code.
 
-### Summary
+## Summary
 
 This document is a high-level guide to the inclusion and placement of hooks, not an exhaustive list. There will occasionally be exceptions, and there may be good rules and methodologies we are missing: if you have suggestions or ideas for improvement, please reach out!

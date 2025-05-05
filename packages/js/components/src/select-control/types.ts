@@ -1,9 +1,13 @@
 export type Option = {
 	key: string;
-	label: string;
+	label: string | React.ReactNode;
 	isDisabled?: boolean;
 	keywords?: Array< string >;
 	value?: unknown;
 };
 
-export type Selected = string | Option[];
+type SelectedOption = Omit< Option, 'label' > & {
+	label: string;
+};
+
+export type Selected = string | SelectedOption[];

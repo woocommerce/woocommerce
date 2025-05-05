@@ -1,0 +1,53 @@
+.woocommerce-item__payment-gateway-placeholder {
+	border-top: 1px solid $gray-200;
+	border-bottom: none; // This way we avoid a double border between items.
+	padding: 0 48px;
+
+	// Add back the bottom border for the last item.
+	&:nth-last-child(1 of .woocommerce-item__payment-gateway-placeholder) {
+		border-bottom: 1px solid $gray-200;
+	}
+
+	&:hover {
+		background-color: $white;
+	}
+
+	.woocommerce-list__item-inner {
+		padding: $gap-large 0;
+		align-items: flex-start;
+	}
+
+	.drag-handle-wrapper {
+		margin-right: 20px;
+	}
+
+	.list-placeholder {
+		&__title,
+		&__after,
+		&__before,
+		&__content {
+			background-color: $gray-100;
+			border-radius: 4px;
+		}
+
+		&__title {
+			width: 120px;
+			height: 20px;
+		}
+
+		&__after {
+			height: 32px;
+			width: 104px;
+		}
+
+		&__before {
+			width: 40px;
+			height: 40px;
+		}
+
+		&__content {
+			width: 360px;
+			height: 20px;
+		}
+	}
+}

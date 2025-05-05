@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\Utils\BlocksWpQuery;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
  * AbstractProductGrid class.
@@ -289,7 +290,7 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		$product_visibility_not_in = array( $product_visibility_terms['exclude-from-catalog'] );
 
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
-			$product_visibility_not_in[] = $product_visibility_terms['outofstock'];
+			$product_visibility_not_in[] = $product_visibility_terms[ ProductStockStatus::OUT_OF_STOCK ];
 		}
 
 		$query_args['tax_query'][] = array(
@@ -459,6 +460,7 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		$classes = array(
 			'wc-block-grid',
 			"wp-block-{$this->block_name}",
+			"wp-block-woocommerce-{$this->block_name}",
 			"wc-block-{$this->block_name}",
 			"has-{$this->attributes['columns']}-columns",
 		);
@@ -695,12 +697,12 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
-		$this->asset_data_registry->add( 'minColumns', wc_get_theme_support( 'product_blocks::min_columns', 1 ), true );
-		$this->asset_data_registry->add( 'maxColumns', wc_get_theme_support( 'product_blocks::max_columns', 6 ), true );
-		$this->asset_data_registry->add( 'defaultColumns', wc_get_theme_support( 'product_blocks::default_columns', 3 ), true );
-		$this->asset_data_registry->add( 'minRows', wc_get_theme_support( 'product_blocks::min_rows', 1 ), true );
-		$this->asset_data_registry->add( 'maxRows', wc_get_theme_support( 'product_blocks::max_rows', 6 ), true );
-		$this->asset_data_registry->add( 'defaultRows', wc_get_theme_support( 'product_blocks::default_rows', 3 ), true );
+		$this->asset_data_registry->add( 'minColumns', wc_get_theme_support( 'product_blocks::min_columns', 1 ) );
+		$this->asset_data_registry->add( 'maxColumns', wc_get_theme_support( 'product_blocks::max_columns', 6 ) );
+		$this->asset_data_registry->add( 'defaultColumns', wc_get_theme_support( 'product_blocks::default_columns', 3 ) );
+		$this->asset_data_registry->add( 'minRows', wc_get_theme_support( 'product_blocks::min_rows', 1 ) );
+		$this->asset_data_registry->add( 'maxRows', wc_get_theme_support( 'product_blocks::max_rows', 6 ) );
+		$this->asset_data_registry->add( 'defaultRows', wc_get_theme_support( 'product_blocks::default_rows', 3 ) );
 	}
 
 	/**

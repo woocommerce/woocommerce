@@ -2,15 +2,40 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0](https://www.npmjs.com/package/@woocommerce/extend-cart-checkout-block/v/1.5.0) - 2025-01-21 
+
+-   Patch - Fix some linting issues, update .nvmrc and .eslintrc [#54414]
+-   Minor - Monorepo: bump pnpm version to 9.15.0 [#54189]
+
+## [1.4.0](https://www.npmjs.com/package/@woocommerce/extend-cart-checkout-block/v/1.4.0) - 2025-01-08 
+
+-   Patch - Fix SASS errors when installing the template. [#54165]
+-   Patch - Prevent doing_it_wrong warnings while registering the example block. [#52195]
+-   Patch - CI: liverage composer packages cache in lint monorepo job [#52054]
+-   Patch - Fix pnpm version to 9.1.3 to avoid dependency installation issues. [#50828]
+-   Minor - Update all blocks to use API Version 3. [#48720]
+
+## [1.3.1](https://www.npmjs.com/package/@woocommerce/extend-cart-checkout-block/v/1.3.1) - 2024-07-10 
+
+-   Patch - Ensures the default text shows when saving the example newsletter subscription block. [#48581]
+
+## [1.3.0](https://www.npmjs.com/package/@woocommerce/extend-cart-checkout-block/v/1.3.0) - 2024-06-14 
+
+-   Minor - Adds an example of using the Additional Checkout Fields API [#48280]
+-   Minor - Bump node version. [#45148]
+-   Minor - Update pnpm monorepo-wide to 8.6.5 [#38990]
+-   Minor - Update pnpm to 8.6.7 [#39245]
+-   Patch - bump php version in packages/js/*/composer.json [#42020]
+-   Patch - Update pnpm to 9.1.0 [#47385]
+
 ## [1.2.0](https://www.npmjs.com/package/@woocommerce/extend-cart-checkout-block/v/1.2.0) - 2023-04-26 
 
 -   Patch - This patch includes the following changes:
-    
-    -   Add `prettier:npm:wp-prettier@2.6.2`
-    -   Add `.wp-env`
-    -   Add `.nvmrc`
-    -   Correct CSS handle of newsletter subscription block
-    -   Correct metadata category of newsletter subscription block [#37914]
+-   Minor - Add `prettier:npm:wp-prettier@2.6.2`
+-   Minor - Add `.wp-env`
+-   Minor - Add `.nvmrc`
+-   Minor - Correct CSS handle of newsletter subscription block
+-   Minor - Correct metadata category of newsletter subscription block [#37914]
 -   Minor - Update pnpm to version 8. [#37914]
 
 ## [1.1.0](https://www.npmjs.com/package/@woocommerce/extend-cart-checkout-block/v/1.1.0) - 2022-11-21 

@@ -1,4 +1,7 @@
 <?php
+declare( strict_types = 1);
+
+namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders;
 
 use Automattic\WooCommerce\Internal\Admin\Orders\EditLock;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
@@ -6,7 +9,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 /**
  * Tests related to order edit locking in admin.
  */
-class EditLockTest extends WC_Unit_Test_Case {
+class EditLockTest extends \WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**

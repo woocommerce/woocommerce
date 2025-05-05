@@ -19,6 +19,9 @@ export type IdQuery =
 	| IdType
 	| {
 			id: IdType;
+			key: IdType;
+	  }
+	| {
 			[ key: string ]: IdType;
 	  };
 
@@ -30,6 +33,7 @@ export type Item = {
 export type ItemQuery = BaseQueryParams & {
 	[ key: string ]: unknown;
 	parent_id?: IdType;
+	order_by?: string;
 };
 
 export type Params = {
@@ -40,6 +44,11 @@ type WithRequiredProperty< Type, Key extends keyof Type > = Type & {
 	[ Property in Key ]-?: Type[ Property ];
 };
 
+export type CrudActionOptions = {
+	optimisticQueryUpdate?: ItemQuery;
+	optimisticUrlParameters?: IdType[];
+};
+
 export type CrudActions<
 	ResourceName,
 	ItemType,
@@ -47,21 +56,25 @@ export type CrudActions<
 	RequiredFields extends keyof MutableProperties | undefined = undefined
 > = MapActions<
 	{
-		create: ( query: Partial< ItemType > ) => Item;
-		update: ( query: Partial< ItemType > ) => Item;
+		create: (
+			query: RequiredFields extends keyof MutableProperties
+				? WithRequiredProperty<
+						Partial< MutableProperties >,
+						RequiredFields
+				  >
+				: Partial< MutableProperties >,
+			options?: CrudActionOptions
+		) => ItemType;
+		update: ( idQuery: IdQuery, query: Partial< ItemType > ) => Item;
 	},
 	ResourceName,
-	RequiredFields extends keyof MutableProperties
-		? WithRequiredProperty< Partial< MutableProperties >, RequiredFields >
-		: Partial< MutableProperties >,
 	Generator< unknown, ItemType >
 > &
 	MapActions<
 		{
-			delete: ( id: IdType ) => Item;
+			delete: ( id: IdQuery ) => Item;
 		},
 		ResourceName,
-		IdType,
 		Generator< unknown, ItemType >
 	>;
 
@@ -126,13 +139,18 @@ export type CrudSelectors<
 export type MapSelectors< Type, ResourceName, ParamType, ReturnType > = {
 	[ Property in keyof Type as `get${ Capitalize<
 		string & ResourceName
-	> }${ Capitalize< string & Property > }` ]: ( x?: ParamType ) => ReturnType;
+	> }${ Capitalize< string & Property > }` ]: (
+		state: unknown,
+		x?: ParamType
+	) => ReturnType;
 };
 
-export type MapActions< Type, ResourceName, ParamType, ReturnType > = {
+export type MapActions< Type, ResourceName, ReturnType > = {
 	[ Property in keyof Type as `${ Lowercase<
 		string & Property
-	> }${ Capitalize< string & ResourceName > }` ]: (
-		x: ParamType
-	) => ReturnType;
+	> }${ Capitalize< string & ResourceName > }` ]: Type[ Property ] extends (
+		...args: infer P
+	) => unknown
+		? ( ...args: P ) => ReturnType
+		: never;
 };

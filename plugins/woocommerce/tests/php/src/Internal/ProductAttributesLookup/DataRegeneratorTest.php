@@ -51,7 +51,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->lookup_data_store = new class() extends LookupDataStore {
 			public $passed_products = array();
 
-			public function create_data_for_product( $product ) {
+			public function create_data_for_product( $product, $use_optimized_db_access = false ) {
 				$this->passed_products[] = $product;
 			}
 		};
@@ -111,16 +111,18 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	 * @testdox `initiate_regeneration` initializes the transient options, and enqueues the first step for time()+1.
 	 */
 	public function test_initiate_regeneration_initializes_temporary_options_and_enqueues_regeneration_step() {
+		// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wc_get_products' => function( $args ) {
+				'wc_get_products' => function ( $args ) {
 					return array( 100 );
 				},
-				'time'            => function() {
+				'time'            => function () {
 					return 1000;
 				},
 			)
 		);
+		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.Found
 
 		$this->sut->initiate_regeneration();
 
@@ -149,13 +151,15 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	 * @param mixed $get_products_result Result from wc_get_products.
 	 */
 	public function test_initiate_regeneration_does_not_enqueues_regeneration_step_when_no_products( $get_products_result ) {
+		// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wc_get_products' => function( $args ) use ( $get_products_result ) {
+				'wc_get_products' => function ( $args ) use ( $get_products_result ) {
 					return $get_products_result;
 				},
 			)
 		);
+		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.Found
 
 		$this->sut->initiate_regeneration();
 
@@ -173,7 +177,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wc_get_products' => function( $args ) use ( &$requested_products_offsets ) {
+				'wc_get_products' => function ( $args ) use ( &$requested_products_offsets ) {
 					if ( 'DESC' === current( $args['orderby'] ) ) {
 						return array( 100 );
 					} else {
@@ -181,7 +185,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 						return array( 1, 2, 3 );
 					}
 				},
-				'time'            => function() {
+				'time'            => function () {
 					return 1000;
 				},
 			)
@@ -221,20 +225,24 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	public function test_regeneration_uses_the_woocommerce_attribute_lookup_regeneration_step_size_filter( bool $set_filter ) {
 		$requested_step_sizes = array();
 
+		$filtered_size = DataRegenerator::PRODUCTS_PER_GENERATION_STEP / 2;
+
+		// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		if ( $set_filter ) {
 			\add_filter(
 				'woocommerce_attribute_lookup_regeneration_step_size',
-				function( $default_filter_size ) {
-					return 100;
+				function ( $default_filter_size ) use ( $filtered_size ) {
+					return $filtered_size;
 				}
 			);
 		}
+		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.Found
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wc_get_products' => function( $args ) use ( &$requested_step_sizes ) {
+				'wc_get_products' => function ( $args ) use ( &$requested_step_sizes, $filtered_size ) {
 					if ( 'DESC' === current( $args['orderby'] ) ) {
-						return array( 100 );
+						return array( $filtered_size );
 					} else {
 						$requested_step_sizes[] = $args['limit'];
 						return array( 1, 2, 3 );
@@ -251,7 +259,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 
 		remove_all_filters( ' woocommerce_attribute_lookup_regeneration_step_size' );
 
-		$expected_limit_value = $set_filter ? 100 : DataRegenerator::PRODUCTS_PER_GENERATION_STEP;
+		$expected_limit_value = $set_filter ? $filtered_size : DataRegenerator::PRODUCTS_PER_GENERATION_STEP;
 		$this->assertEquals( array( $expected_limit_value ), $requested_step_sizes );
 	}
 
@@ -267,7 +275,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	public function test_initiate_regeneration_finishes_when_no_more_products_available( $product_ids ) {
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wc_get_products' => function( $args ) use ( &$requested_products_offsets, $product_ids ) {
+				'wc_get_products' => function ( $args ) use ( &$requested_products_offsets, $product_ids ) {
 					if ( 'DESC' === current( $args['orderby'] ) ) {
 						return array( 100 );
 					} else {

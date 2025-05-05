@@ -1,110 +1,119 @@
 # See https://github.com/shufo/auto-assign-reviewer-by-files/blob/main/README.md for configuration format
 
 "*":
-  - team: vortex
+  - Flux
 
 ".github/**/*":
-  - team: vortex
+  - Flux
 
 "bin/*":
-  - team: vortex
+  - Flux
 
 "docs/**/*":
-  - team: developer-advocacy
+  - Developer Advocacy
 
 "packages/js/api/**/*":
-  - team: solaris
+  - Flux
 
 "packages/js/e2e-utils/**/*":
-  - team: solaris
+  - Flux
 
 "packages/js/e2e-environment/**/*":
-  - team: solaris
+  - Flux
 
 "packages/js/api-core-tests/**/*":
-  - team: solaris
+  - Flux
 
 "packages/js/e2e-core-tests/**/*":
-  - team: solaris
+  - Flux
 
 "packages/js/admin-e2e-tests/**/*":
-  - team: solaris
+  - Flux
 
 "packages/js/components/**/*":
-  - team: mothra
-  - team: ghidorah
+  - Kirigami
 
 "packages/js/csv-export/**/*":
-  - team: mothra
+  - SomewhereWarm
 
 "packages/js/currency/**/*":
-  - team: mothra
+  - Rubik
 
 "packages/js/customer-effort-score/**/*":
-  - team: mothra
+  - Kirigami
 
 "packages/js/data/**/*":
-  - team: mothra
-  - team: ghidorah
+  - Ventures
 
 "packages/js/date/**/*":
-  - team: mothra
+  - Rubik
 
 "packages/js/dependency-extraction-webpack-plugin/**/*":
-  - team: mothra
+  - Flux
 
 "packages/js/eslint-plugin/**/*":
-  - team: mothra
+  - Flux
 
 "packages/js/experimental/**/*":
-  - team: mothra
+  - Kirigami
 
 "packages/js/explat/**/*":
-  - team: mothra
-  - team: ghidorah
+  - Kirigami
 
 "packages/js/navigation/**/*":
-  - team: mothra
+  - SomewhereWarm
 
 "packages/js/number/**/*":
-  - team: mothra
+  - Rubik
 
 "packages/js/onboarding/**/*":
-  - team: ghidorah
+  - Rubik
 
 "packages/js/product-editor/**/*":
-  - team: mothra
+  - Kirigami
 
 "packages/js/tracks/**/*":
-  - team: mothra
+  - Flux
 
 "plugins/woocommerce/**/*":
-  - team: proton
+  - Flux
+
+"plugins/woocommerce/templates/**/*":
+  - Rubik
+  - Kirigami
+
+"plugins/woocommerce/templates/emails/**/*":
+  - Ballade
 
 "plugins/woocommerce/src/Admin/**/*":
-  - team: mothra
-  - team: ghidorah
+  - team: Kirigami
+
+"plugins/woocommerce/src/Blocks/**/*":
+  - Rubik
+  - Kirigami
 
 "plugins/woocommerce/src/Internal/Admin/**/*":
-  - team: mothra
-  - team: ghidorah
+  - Kirigami
 
-"plugins/woocommerce-admin/**/*":
-  - team: mothra
-  - team: ghidorah
+"plugins/woocommerce/src/StoreApi/**/*":
+  - Rubik
+  - Kirigami
 
-"plugins/woocommerce-blocks/**/*":
-  - team: rubik
-  - team: woo-fse
+"plugins/woocommerce/client/admin/**/*":
+  - Kirigami
+
+"plugins/woocommerce/client/blocks/**/*":
+  - Rubik
+  - Kirigami
 
 "plugins/woocommerce-beta-tester/**/*":
-  - team: vortex
+  - Flux
 
 "tools/**/*":
-  - team: vortex
+  - Flux
 
 '**/composer.json':
-  - team: vortex
+  - Flux
 
 '**/package.json':
-  - team: vortex
+  - Flux

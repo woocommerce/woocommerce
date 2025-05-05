@@ -1,4 +1,8 @@
+/**
+ * Internal dependencies
+ */
 import { encodeCredentials } from './plugin-utils';
+const { admin } = require( '../test-data/data' );
 
 export const setOption = async (
 	request,
@@ -10,15 +14,41 @@ export const setOption = async (
 		baseURL,
 		extraHTTPHeaders: {
 			Authorization: `Basic ${ encodeCredentials(
-				'admin',
-				'password'
+				admin.username,
+				admin.password
 			) }`,
 			cookie: '',
 		},
 	} );
 
-	await apiContext.post( '/wp-json/e2e-options/update', {
-		failOnStatusCode: true,
-		data: { option_name: optionName, option_value: optionValue },
+	return await apiContext
+		.post( './wp-json/e2e-options/update', {
+			failOnStatusCode: true,
+			data: { option_name: optionName, option_value: optionValue },
+		} )
+		.then( ( response ) => {
+			return response.json();
+		} );
+};
+
+export const deleteOption = async ( request, baseURL, optionName ) => {
+	const apiContext = await request.newContext( {
+		baseURL,
+		extraHTTPHeaders: {
+			Authorization: `Basic ${ encodeCredentials(
+				admin.username,
+				admin.password
+			) }`,
+			cookie: '',
+		},
 	} );
+
+	return await apiContext
+		.post( './wp-json/e2e-options/delete', {
+			failOnStatusCode: true,
+			data: { option_name: optionName },
+		} )
+		.then( ( response ) => {
+			return response.json();
+		} );
 };

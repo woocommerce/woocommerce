@@ -24,7 +24,6 @@ export function MultipleUpdateMenu( {
 
 	return (
 		<Dropdown
-			// @ts-expect-error missing prop in types.
 			popoverProps={ {
 				placement: 'bottom-end',
 			} }
@@ -35,7 +34,7 @@ export function MultipleUpdateMenu( {
 					icon={ isOpen ? chevronUp : chevronDown }
 					variant="secondary"
 					onClick={ onToggle }
-					className="variations-actions-menu__toogle"
+					className="variations-actions-menu__toggle"
 				>
 					<span>{ __( 'Quick update', 'woocommerce' ) }</span>
 				</Button>

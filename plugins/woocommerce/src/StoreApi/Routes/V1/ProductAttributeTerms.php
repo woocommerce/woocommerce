@@ -50,6 +50,7 @@ class ProductAttributeTerms extends AbstractTermsRoute {
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => '__return_true',
 				'args'                => $this->get_collection_params(),
+				'allow_batch'         => [ 'v1' => true ],
 			],
 			'schema' => [ $this->schema, 'get_public_item_schema' ],
 		];
@@ -63,6 +64,8 @@ class ProductAttributeTerms extends AbstractTermsRoute {
 	public function get_collection_params() {
 		$params                      = parent::get_collection_params();
 		$params['orderby']['enum'][] = 'menu_order';
+		$params['orderby']['enum'][] = 'name_num';
+		$params['orderby']['enum'][] = 'id';
 		return $params;
 	}
 

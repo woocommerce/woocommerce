@@ -10,7 +10,7 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import { WC_ADMIN_NAMESPACE, JETPACK_NAMESPACE } from '../constants';
 import { OPTIONS_STORE_NAME } from '../options';
-import { PAYPAL_NAMESPACE, STORE_NAME } from './constants';
+import { PAYPAL_NAMESPACE } from './constants';
 import {
 	setIsRequesting,
 	updateActivePlugins,
@@ -26,7 +26,10 @@ import {
 	PaypalOnboardingStatus,
 	RecommendedTypes,
 	JetpackConnectionDataResponse,
+	Plugin,
 } from './types';
+import { checkUserCapability } from '../utils';
+import { store } from './';
 
 // Can be removed in WP 5.9, wp.data is supported in >5.7.
 const resolveSelect =
@@ -36,7 +39,20 @@ type PluginGetResponse = {
 } & Response;
 
 type JetpackConnectionResponse = {
+	// https://github.com/Automattic/jetpack/blob/2db5b61f15b9923f7438caaef29311b75db64ac5/tools/js-tools/types/global.d.ts#L33
 	isActive: boolean;
+	isStaging: boolean;
+	isRegistered: boolean;
+	isUserConnected: boolean;
+	hasConnectedOwner: boolean;
+	offlineMode: {
+		isActive: boolean;
+		constant: boolean;
+		url: boolean;
+		filter: boolean;
+		wpLocalConstant: boolean;
+	};
+	isPublic: boolean;
 } & Response;
 
 type ConnectJetpackResponse = {
@@ -48,6 +64,8 @@ type ConnectJetpackResponse = {
 export function* getActivePlugins() {
 	yield setIsRequesting( 'getActivePlugins', true );
 	try {
+		yield checkUserCapability( 'manage_woocommerce' );
+
 		const url = WC_ADMIN_NAMESPACE + '/plugins/active';
 		const results: PluginGetResponse = yield apiFetch( {
 			path: url,
@@ -64,6 +82,8 @@ export function* getInstalledPlugins() {
 	yield setIsRequesting( 'getInstalledPlugins', true );
 
 	try {
+		yield checkUserCapability( 'manage_woocommerce' );
+
 		const url = WC_ADMIN_NAMESPACE + '/plugins/installed';
 		const results: PluginGetResponse = yield apiFetch( {
 			path: url,
@@ -86,7 +106,7 @@ export function* isJetpackConnected() {
 			method: 'GET',
 		} );
 
-		yield updateIsJetpackConnected( results.isActive );
+		yield updateIsJetpackConnected( results.hasConnectedOwner );
 	} catch ( error ) {
 		yield setError( 'isJetpackConnected', error );
 	}
@@ -96,10 +116,15 @@ export function* isJetpackConnected() {
 
 export function* getJetpackConnectionData() {
 	yield setIsRequesting( 'getJetpackConnectionData', true );
-
 	try {
-		const url = JETPACK_NAMESPACE + '/connection/data';
+		const isConnected: boolean = yield resolveSelect(
+			store,
+			'isJetpackConnected'
+		);
+		// See API side permission check here: https://github.com/Automattic/jetpack-connection/blob/trunk/src/class-manager.php#L1560-L1568.
+		yield checkUserCapability( isConnected ? 'read' : 'manage_options' );
 
+		const url = JETPACK_NAMESPACE + '/connection/data';
 		const results: JetpackConnectionDataResponse = yield apiFetch( {
 			path: url,
 			method: 'GET',
@@ -167,7 +192,7 @@ export function* getPaypalOnboardingStatus() {
 	const errorData: {
 		data?: { status: number };
 	} = yield resolveSelect(
-		STORE_NAME,
+		store,
 		'getPluginsError',
 		'getPaypalOnboardingStatus'
 	);

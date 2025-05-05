@@ -69,6 +69,19 @@ class WC_Autoloader {
 			return;
 		}
 
+		// The Legacy REST API was removed in WooCommerce 9.0, but some servers still have
+		// the includes/class-wc-api.php file after they upgrade, which causes a fatal error when executing
+		// "class_exists('WC_API')". This will prevent this error, while still making the class visible
+		// when it's provided by the WooCommerce Legacy REST API plugin.
+		if ( 'wc_api' === $class ) {
+			return;
+		}
+
+		// If the class is already loaded from a merged package, prevent autoloader from loading it as well.
+		if ( \Automattic\WooCommerce\Packages::should_load_class( $class ) ) {
+			return;
+		}
+
 		$file = $this->get_file_name_from_class( $class );
 		$path = '';
 

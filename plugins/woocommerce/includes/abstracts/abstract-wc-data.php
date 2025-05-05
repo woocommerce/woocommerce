@@ -485,11 +485,11 @@ abstract class WC_Data {
 			}
 
 			if ( ! empty( $matches ) ) {
-				// Set matches to null so only one key gets the new value.
+				// Update first match and delete the rest.
+				$array_key = array_shift( $matches );
 				foreach ( $matches as $meta_data_array_key ) {
 					$this->meta_data[ $meta_data_array_key ]->value = null;
 				}
-				$array_key = current( $matches );
 			}
 		}
 
@@ -709,8 +709,7 @@ abstract class WC_Data {
 				do_action( "added_{$this->object_type}_meta", $meta->id, $this->get_id(), $meta->key, $meta->value );
 
 				$meta->apply_changes();
-			} else {
-				if ( $meta->get_changes() ) {
+			} elseif ( $meta->get_changes() ) {
 					$this->data_store->update_meta( $this, $meta );
 					/**
 					 * Fires immediately after updating metadata.
@@ -723,7 +722,6 @@ abstract class WC_Data {
 					do_action( "updated_{$this->object_type}_meta", $meta->id, $this->get_id(), $meta->key, $meta->value );
 
 					$meta->apply_changes();
-				}
 			}
 		}
 		if ( ! empty( $this->cache_group ) ) {
@@ -815,7 +813,7 @@ abstract class WC_Data {
 	 * Sets a prop for a setter method.
 	 *
 	 * This stores changes in a special array so we can track what needs saving
-	 * the the DB later.
+	 * the DB later.
 	 *
 	 * @since 3.0.0
 	 * @param string $prop Name of prop to set.

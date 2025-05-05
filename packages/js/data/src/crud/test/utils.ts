@@ -7,6 +7,7 @@ import {
 	cleanQuery,
 	getGenericActionName,
 	getKey,
+	organizeItemsById,
 	getNamespaceKeys,
 	getRequestIdentifier,
 	getRestPath,
@@ -15,6 +16,7 @@ import {
 	isValidIdQuery,
 	parseId,
 } from '../utils';
+import type { Item } from '../types';
 
 describe( 'utils', () => {
 	it( 'should get the rest path when no parameters are given', () => {
@@ -49,6 +51,11 @@ describe( 'utils', () => {
 	it( 'should get the key when a parent is provided', () => {
 		const key = getKey( 3, [ 5 ] );
 		expect( key ).toEqual( '5/3' );
+	} );
+
+	it( 'should get the key when a parents are provided', () => {
+		const key = getKey( 3, [ 200, 10 ] );
+		expect( key ).toEqual( '200/10/3' );
 	} );
 
 	it( 'should get the correct ID information when only an ID is given', () => {
@@ -241,5 +248,90 @@ describe( 'utils', () => {
 		const args = [ { id: 22, parent_id: 88 }, 'second' ];
 		const sanitizedArgs = maybeReplaceIdQuery( args, '/my/namespace/' );
 		expect( sanitizedArgs ).toEqual( args );
+	} );
+
+	describe( 'organizeItemsById', () => {
+		it( 'should return the object Items and IDs when no urlParameters and existing data is provided', () => {
+			const items: Item[] = [
+				{ id: 1, name: 'Yum!' },
+				{ id: 2, name: 'Dynamite!' },
+			];
+			const { objItems, ids } = organizeItemsById( items );
+
+			expect( objItems ).toEqual( {
+				1: { id: 1, name: 'Yum!' },
+				2: { id: 2, name: 'Dynamite!' },
+			} );
+
+			expect( ids ).toEqual( [ 1, 2 ] );
+		} );
+
+		it( 'should return the object Items and IDs when urlParameters but no existing data is provided', () => {
+			const items: Item[] = [
+				{ id: 1, name: 'Yum!' },
+				{ id: 2, name: 'Dynamite!' },
+			];
+
+			const urlParameters = [ 200, 10 ];
+			const { objItems, ids } = organizeItemsById( items, urlParameters );
+
+			expect( objItems ).toEqual( {
+				'200/10/1': { id: 1, name: 'Yum!' },
+				'200/10/2': { id: 2, name: 'Dynamite!' },
+			} );
+
+			expect( ids ).toEqual( [ '200/10/1', '200/10/2' ] );
+		} );
+
+		it( 'should return the object Items and IDs when existing data but no urlParameters is provided', () => {
+			const items: Item[] = [
+				{ id: 1, name: 'Yum! Yum!!' },
+				{ id: 2, name: 'Dynamite!' },
+			];
+
+			const existingData = {
+				1: { id: 1, name: 'Yum!', price: 8.5 },
+				2: { id: 2, name: 'Dynamite!', price: 2.5 },
+			};
+
+			const { objItems, ids } = organizeItemsById(
+				items,
+				[],
+				existingData
+			);
+
+			expect( objItems ).toEqual( {
+				1: { id: 1, name: 'Yum! Yum!!', price: 8.5 },
+				2: { id: 2, name: 'Dynamite!', price: 2.5 },
+			} );
+
+			expect( ids ).toEqual( [ 1, 2 ] );
+		} );
+
+		it( 'should return the object Items and IDs when urlParameters and existing data is provided', () => {
+			const items: Item[] = [
+				{ id: 1, name: 'Yum! Yum!!' },
+				{ id: 2, name: 'Dynamite!' },
+			];
+
+			const urlParameters = [ 200, 10 ];
+			const existingData = {
+				'200/10/1': { id: 1, name: 'Yum!', price: 8.5 },
+				'200/10/2': { id: 2, name: 'Dynamite!', price: 2.5 },
+			};
+
+			const { objItems, ids } = organizeItemsById(
+				items,
+				urlParameters,
+				existingData
+			);
+
+			expect( objItems ).toEqual( {
+				'200/10/1': { id: 1, name: 'Yum! Yum!!', price: 8.5 },
+				'200/10/2': { id: 2, name: 'Dynamite!', price: 2.5 },
+			} );
+
+			expect( ids ).toEqual( [ '200/10/1', '200/10/2' ] );
+		} );
 	} );
 } );

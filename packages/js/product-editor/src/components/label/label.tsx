@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { createElement, createInterpolateElement } from '@wordpress/element';
+import {
+	createElement,
+	createInterpolateElement,
+	isValidElement,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Icon, help as helpIcon } from '@wordpress/icons';
 import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
@@ -13,17 +17,21 @@ import { sanitizeHTML } from '../../utils/sanitize-html';
 
 export interface LabelProps {
 	label: string;
+	labelId?: string;
 	required?: boolean;
 	note?: string;
 	tooltip?: string;
+	onClick?: ( event: React.MouseEvent ) => void;
 }
 
-export const Label: React.FC< LabelProps > = ( {
+export const Label = ( {
 	label,
+	labelId,
 	required,
 	tooltip,
 	note,
-} ) => {
+	onClick,
+}: LabelProps ) => {
 	let labelElement: JSX.Element | string = label;
 
 	if ( required ) {
@@ -31,14 +39,21 @@ export const Label: React.FC< LabelProps > = ( {
 			labelElement = createInterpolateElement(
 				__( '<label/> <note /> <required/>', 'woocommerce' ),
 				{
-					label: <span>{ label }</span>,
+					label: (
+						<span
+							dangerouslySetInnerHTML={ sanitizeHTML( label ) }
+						></span>
+					),
 					note: (
 						<span className="woocommerce-product-form-label__note">
 							{ note }
 						</span>
 					),
 					required: (
-						<span className="woocommerce-product-form-label__required">
+						<span
+							aria-hidden="true"
+							className="woocommerce-product-form-label__required"
+						>
 							{ /* translators: field 'required' indicator */ }
 							{ __( '*', 'woocommerce' ) }
 						</span>
@@ -51,7 +66,10 @@ export const Label: React.FC< LabelProps > = ( {
 				{
 					label: <span>{ label }</span>,
 					required: (
-						<span className="woocommerce-product-form-label__required">
+						<span
+							aria-hidden="true"
+							className="woocommerce-product-form-label__required"
+						>
 							{ /* translators: field 'required' indicator */ }
 							{ __( '*', 'woocommerce' ) }
 						</span>
@@ -73,9 +91,17 @@ export const Label: React.FC< LabelProps > = ( {
 		);
 	}
 
+	const spanAdditionalProps =
+		typeof labelElement === 'string'
+			? { dangerouslySetInnerHTML: sanitizeHTML( label ) }
+			: {};
+
 	return (
 		<div className="woocommerce-product-form-label__label">
-			{ labelElement }
+			{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */ }
+			<span id={ labelId } onClick={ onClick } { ...spanAdditionalProps }>
+				{ isValidElement( labelElement ) ? labelElement : null }
+			</span>
 
 			{ tooltip && (
 				<Tooltip

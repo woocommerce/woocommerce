@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Cart
  */
 
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+
 /**
  * Class Cart.
  */
@@ -58,7 +60,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'title'        => 'Flat rate',
 			'availability' => 'all',
 			'countries'    => '',
-			'tax_status'   => 'taxable',
+			'tax_status'   => ProductTaxStatus::TAXABLE,
 			'cost'         => '9.59',
 		);
 		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
@@ -226,7 +228,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'title'        => 'Flat rate',
 			'availability' => 'all',
 			'countries'    => '',
-			'tax_status'   => 'taxable',
+			'tax_status'   => ProductTaxStatus::TAXABLE,
 			'cost'         => '8.05',
 		);
 		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
@@ -1000,7 +1002,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'title'        => 'Flat rate',
 			'availability' => 'all',
 			'countries'    => '',
-			'tax_status'   => 'taxable',
+			'tax_status'   => ProductTaxStatus::TAXABLE,
 			'cost'         => '4.12',
 		);
 		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
@@ -1994,18 +1996,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Check.
 		$tax_totals = WC()->cart->get_tax_totals();
 		$this->assertEquals( array(), $tax_totals );
-	}
-
-	/**
-	 * Test is_coupon_emails_allowed function on the cart, specifically test wildcard emails.
-	 *
-	 * @return void
-	 */
-	public function test_is_coupon_emails_allowed() {
-		$this->assertEquals( true, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( '*.local' ) ) );
-		$this->assertEquals( false, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( '*.test' ) ) );
-		$this->assertEquals( true, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( 'customer@wc.local' ) ) );
-		$this->assertEquals( false, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( 'customer2@wc.local' ) ) );
 	}
 
 	/**

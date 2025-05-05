@@ -75,7 +75,13 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		$output    = '';
 
 		// Title.
-		$output .= '<strong><a href="' . esc_url( $edit_link ) . '" class="row-title">' . esc_html( $webhook->get_name() ) . '</a></strong>';
+		$warning_prefix =
+			$this->uses_legacy_rest_api( $webhook ) && ! WC()->legacy_rest_api_is_available() ?
+			sprintf(
+				"<span title='%s'>⚠️</span>️ ",
+				esc_html__( 'This webhook is configured to be delivered using the Legacy REST API, but the Legacy REST API plugin is not installed on this site.', 'woocommerce' )
+			) : '';
+		$output        .= '<strong>' . $warning_prefix . '<a href="' . esc_url( $edit_link ) . '" class="row-title">' . esc_html( $webhook->get_name() ) . '</a></strong>';
 
 		// Get actions.
 		$actions = array(
@@ -339,5 +345,26 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 				'total_pages' => $webhooks->max_num_pages,
 			)
 		);
+	}
+
+	/**
+	 * Get how many of the existing webhooks are configured to use the legacy payload format.
+	 *
+	 * @since 9.0.0
+	 *
+	 * @return int Count of existing webhooks are configured to use the legacy payload format.
+	 */
+	public function get_legacy_api_webhooks_count() {
+		return count( array_filter( $this->items, array( $this, 'uses_legacy_rest_api' ) ) );
+	}
+
+	/**
+	 * Check if a given webhook is configured to use the legacy payload format.
+	 *
+	 * @param WC_Webhook $webhook Webhook object.
+	 * @return bool True if the webhook is configured to use the legacy payload format.
+	 */
+	private function uses_legacy_rest_api( $webhook ) {
+		return 0 === strpos( $webhook->get_api_version(), 'legacy' );
 	}
 }

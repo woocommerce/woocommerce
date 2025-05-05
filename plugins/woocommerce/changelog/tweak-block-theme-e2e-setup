@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Setup E2E block theme without opening browser and remove obsolete CLI call.

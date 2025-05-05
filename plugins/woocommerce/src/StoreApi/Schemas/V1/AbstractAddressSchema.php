@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1);
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
 use Automattic\WooCommerce\StoreApi\Utilities\SanitizationUtils;
@@ -118,10 +119,12 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$validation_util   = new ValidationUtils();
 		$sanitization_util = new SanitizationUtils();
 		$address           = (array) $address;
-		$field_schema      = $this->get_properties();
-		$address           = array_reduce(
+		$schema            = $this->get_properties();
+		// omit all keys from address that are not in the schema. This should account for email.
+		$address = array_intersect_key( $address, $schema );
+		$address = array_reduce(
 			array_keys( $address ),
-			function( $carry, $key ) use ( $address, $validation_util, $field_schema ) {
+			function ( $carry, $key ) use ( $address, $validation_util, $schema ) {
 				switch ( $key ) {
 					case 'country':
 						$carry[ $key ] = wc_strtoupper( sanitize_text_field( wp_unslash( $address[ $key ] ) ) );
@@ -133,7 +136,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 						$carry[ $key ] = $address['postcode'] ? wc_format_postcode( sanitize_text_field( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
 						break;
 					default:
-						$carry[ $key ] = rest_sanitize_value_from_schema( wp_unslash( $address[ $key ] ), $field_schema[ $key ], $key );
+						$carry[ $key ] = rest_sanitize_value_from_schema( wp_unslash( $address[ $key ] ), $schema[ $key ], $key );
 						break;
 				}
 				if ( $this->additional_fields_controller->is_field( $key ) ) {
@@ -163,11 +166,21 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$validation_util = new ValidationUtils();
 		$schema          = $this->get_properties();
 
+		// Omit all keys from address that are not in the schema. This should account for email.
+		$address = array_intersect_key( $address, $schema );
+
 		// The flow is Validate -> Sanitize -> Re-Validate
 		// First validation step is to ensure fields match their schema, then we sanitize to put them in the
 		// correct format, and finally the second validation step is to ensure the correctly-formatted values
 		// match what we expect (postcode etc.).
 		foreach ( $address as $key => $value ) {
+			// Only run specific validation on properties that are defined in the schema and present in the address.
+			// This is for partial address pushes when only part of a customer address is sent.
+			// Full schema address validation still happens later, so empty, required values are disallowed.
+			if ( empty( $schema[ $key ] ) || empty( $address[ $key ] ) ) {
+				continue;
+			}
+
 			if ( is_wp_error( rest_validate_value_from_schema( $value, $schema[ $key ], $key ) ) ) {
 				$errors->add(
 					'invalid_' . $key,
@@ -219,49 +232,41 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			);
 		}
 
-		if ( ! empty( $address['phone'] ) && ! \WC_Validation::is_phone( $address['phone'] ) ) {
-			$errors->add(
-				'invalid_phone',
-				__( 'The provided phone number is not valid', 'woocommerce' )
-			);
+		if ( ! empty( $address['phone'] ) ) {
+			// This is a safe sanitize to prevent copy-paste issues with invisible chars. Won't ensure validation.
+			$address['phone'] = wc_remove_non_displayable_chars( $address['phone'] );
+
+			if ( ! \WC_Validation::is_phone( $address['phone'] ) ) {
+				$errors->add(
+					'invalid_phone',
+					__( 'The provided phone number is not valid', 'woocommerce' )
+				);
+			}
 		}
 
 		// Get additional field keys here as we need to know if they are present in the address for validation.
 		$additional_keys = array_keys( $this->get_additional_address_fields_schema() );
 
 		foreach ( array_keys( $address ) as $key ) {
-
 			// Skip email here it will be validated in BillingAddressSchema.
 			if ( 'email' === $key ) {
 				continue;
 			}
 
-			$properties = $this->get_properties();
-
 			// Only run specific validation on properties that are defined in the schema and present in the address.
 			// This is for partial address pushes when only part of a customer address is sent.
 			// Full schema address validation still happens later, so empty, required values are disallowed.
-			if ( empty( $properties[ $key ] ) || empty( $address[ $key ] ) ) {
+			if ( empty( $schema[ $key ] ) || empty( $address[ $key ] ) ) {
 				continue;
 			}
 
-			$result = rest_validate_value_from_schema( $address[ $key ], $properties[ $key ], $key );
-
-			// Check if a field is in the list of additional fields then validate the value against the custom validation rules defined for it.
-			// Skip additional validation if the schema validation failed.
-			if ( true === $result && in_array( $key, $additional_keys, true ) ) {
-				$result = $this->additional_fields_controller->validate_field( $key, $address[ $key ] );
-			}
+			$field_schema = $schema[ $key ];
+			$field_value  = isset( $address[ $key ] ) ? $address[ $key ] : null;
+			$result       = rest_validate_value_from_schema( $field_value, $field_schema, $key );
 
 			if ( is_wp_error( $result ) && $result->has_errors() ) {
 				$errors->merge_from( $result );
 			}
-		}
-
-		$result = $this->additional_fields_controller->validate_fields_for_location( $address, 'address', 'billing_address' === $this->title ? 'billing' : 'shipping' );
-
-		if ( is_wp_error( $result ) && $result->has_errors() ) {
-			$errors->merge_from( $result );
 		}
 
 		return $errors->has_errors( $errors ) ? $errors : true;
@@ -274,12 +279,11 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	 */
 	protected function get_additional_address_fields_schema() {
 		$additional_fields_keys = $this->additional_fields_controller->get_address_fields_keys();
-
-		$fields = $this->additional_fields_controller->get_additional_fields();
+		$fields                 = $this->additional_fields_controller->get_additional_fields();
 
 		$address_fields = array_filter(
 			$fields,
-			function( $key ) use ( $additional_fields_keys ) {
+			function ( $key ) use ( $additional_fields_keys ) {
 				return in_array( $key, $additional_fields_keys, true );
 			},
 			ARRAY_FILTER_USE_KEY
@@ -291,12 +295,12 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 				'description' => $field['label'],
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
-				'required'    => $field['required'],
+				'required'    => $this->additional_fields_controller->is_conditional_field( $field ) ? false : true === $field['required'],
 			];
 
 			if ( 'select' === $field['type'] ) {
 				$field_schema['enum'] = array_map(
-					function( $option ) {
+					function ( $option ) {
 						return $option['value'];
 					},
 					$field['options']

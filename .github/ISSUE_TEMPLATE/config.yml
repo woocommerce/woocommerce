@@ -1,11 +1,11 @@
 blank_issues_enabled: true
 contact_links:
   - name: Feature Requests
-    url: https://woo.com/feature-requests/woocommerce/
+    url: https://woocommerce.com/feature-requests/woocommerce/
     about: If you have an idea for a new feature that you wished existed in WooCommerce, take a look at our Feature Requests and vote, or open a new Feature Request yourself!
   - name: 🔒 Security issue
     url: https://hackerone.com/automattic/
     about: For security reasons, please report all security issues via HackerOne. If the issue is valid, a bug bounty will be paid out to you. Please disclose responsibly and not via GitHub (which allows for exploiting issues in the wild before the patch is released).
   - name: ❓ Support Question
-    url: https://woo.com/document/woocommerce-self-service-guide/
+    url: https://woocommerce.com/document/woocommerce-self-service-guide/
     about: If you have a question please see our docs or use our forums, helpdesk, or Slack community!

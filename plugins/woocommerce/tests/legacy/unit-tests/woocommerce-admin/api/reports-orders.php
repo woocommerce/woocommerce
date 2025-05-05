@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
  * Reports Orders REST API Test Class
@@ -65,11 +66,11 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$expected_customer_id = CustomersDataStore::get_customer_id_by_user_id( 1 );
 
@@ -90,6 +91,55 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'new', $order_report['customer_type'] );
 		$this->assertArrayHasKey( '_links', $order_report );
 		$this->assertArrayHasKey( 'order', $order_report['_links'] );
+	}
+
+	public function test_get_reports_with_orphaned_refund() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Populate all of the data.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 100 ); // $25 x 4.
+		// Make sure the order is paid at least a minute ago to avoid issues with the same timestamp - undeterministic order.
+		$order->set_date_paid( $order->get_date_paid()->modify( '-1 minute' ) );
+		$order->save();
+
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 100,
+				'order_id' => $order->get_id(),
+			)
+		);
+
+		// Since $order->delete() will delete the refund as well and
+		// wp_delete_post($order->get_id()) can be prevented by the following filter: maybe_prevent_deletion_of_post (see https://github.com/woocommerce/woocommerce/blob/97a0d9b16006b089f7d1e98af19d61f6d71b621b/plugins/woocommerce/src/Internal/DataStores/Orders/DataSynchronizer.php#L916 )
+		// we need to update the post_parent to a non-existent order to simulate an orphaned refund.
+		wp_update_post(
+			array(
+				'ID'          => $refund->get_id(),
+				'post_parent' => '99999999',
+			)
+		);
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 2, count( $reports ) );
+
+		$refund_report = $reports[0];
+		$order_report  = $reports[1];
+
+		$this->assertEquals( $order->get_id(), $order_report['order_id'] );
+		$this->assertEquals( $refund->get_id(), $refund_report['order_id'] );
 	}
 
 	/**
@@ -149,23 +199,48 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$order_variation_1 = wc_get_product( $product_variations[0] ); // Variation: size = small.
 		$order_variation_2 = wc_get_product( $product_variations[2] ); // Variation: size = huge, colour = red, number = 0.
 
+		// Create a simple product.
+		$size_attr_id = wc_attribute_taxonomy_id_by_name( 'pa_size' );
+		$small_term   = get_term_by( 'slug', 'small', 'pa_size' );
+
+		$global_attribute = new WC_Product_Attribute();
+		$global_attribute->set_id( $size_attr_id );
+		$global_attribute->set_name( 'pa_size' );
+		$global_attribute->set_options( array( $small_term->term_id ) ); // Set to small.
+		$global_attribute->set_position( 1 );
+		$global_attribute->set_visible( true );
+		$global_attribute->set_variation( false );
+		$attributes['global-size'] = $global_attribute;
+
+		$simple_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'attributes' => $attributes,
+			)
+		);
+
 		// Create orders for variations.
 		$variation_order_1 = WC_Helper_Order::create_order( $this->user, $order_variation_1 );
-		$variation_order_1->set_status( 'completed' );
+		$variation_order_1->set_status( OrderStatus::COMPLETED );
 		$variation_order_1->save();
 
 		$variation_order_2 = WC_Helper_Order::create_order( $this->user, $order_variation_2 );
-		$variation_order_2->set_status( 'completed' );
+		$variation_order_2->set_status( OrderStatus::COMPLETED );
 		$variation_order_2->save();
+
+		$simple_product_order_1 = WC_Helper_Order::create_order( $this->user, $simple_product );
+		$simple_product_order_1->set_status( OrderStatus::COMPLETED );
+		$simple_product_order_1->save();
 
 		// Create more orders for simple products.
 		for ( $i = 0; $i < 10; $i++ ) {
 			$order = WC_Helper_Order::create_order( $this->user );
-			$order->set_status( 'completed' );
+			$order->set_status( OrderStatus::COMPLETED );
 			$order->save();
 		}
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+		WC_Helper_Queue::run_all_pending( 'woocommerce-db-updates' );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params( array( 'per_page' => 15 ) );
@@ -174,11 +249,10 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 
 		// Sanity check before filtering by attribute.
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 12, count( $response_orders ) );
+		$this->assertEquals( 13, count( $response_orders ) );
 
 		// To filter by later.
 		$size_attr_id = wc_attribute_taxonomy_id_by_name( 'pa_size' );
-		$small_term   = get_term_by( 'slug', 'small', 'pa_size' );
 
 		// Test bad values to filter parameter.
 		$bad_args = array(
@@ -201,7 +275,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 
 			$this->assertEquals( 200, $response->get_status() );
 			// We expect all results since the attribute param is malformed.
-			$this->assertEquals( 12, count( $response_orders ) );
+			$this->assertEquals( 13, count( $response_orders ) );
 		}
 
 		// Filter by the "size" attribute, with value "small".
@@ -217,8 +291,15 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$response_orders = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 1, count( $response_orders ) );
-		$this->assertEquals( $response_orders[0]['order_id'], $variation_order_1->get_id() );
+		$this->assertEquals( 2, count( $response_orders ) );
+		$order_ids = array_map(
+			function ( $order ) {
+				return $order['order_id'];
+			},
+			$response_orders
+		);
+		$this->assertContains( $simple_product_order_1->get_id(), $order_ids );
+		$this->assertContains( $variation_order_1->get_id(), $order_ids );
 
 		// Verify the opposite result set.
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
@@ -234,8 +315,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$response_orders = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 1, count( $response_orders ) );
-		$this->assertEquals( $response_orders[0]['order_id'], $variation_order_2->get_id() );
+		$this->assertEquals( 11, count( $response_orders ) );
 	}
 
 	/**
@@ -277,21 +357,21 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 
 		// Create orders for variations.
 		$variation_order_1 = WC_Helper_Order::create_order( $this->user, $order_variation_1 );
-		$variation_order_1->set_status( 'completed' );
+		$variation_order_1->set_status( OrderStatus::COMPLETED );
 		$variation_order_1->save();
 
 		$variation_order_2 = WC_Helper_Order::create_order( $this->user, $order_variation_2 );
-		$variation_order_2->set_status( 'completed' );
+		$variation_order_2->set_status( OrderStatus::COMPLETED );
 		$variation_order_2->save();
 
 		// Create more orders for simple products.
 		for ( $i = 0; $i < 10; $i++ ) {
 			$order = WC_Helper_Order::create_order( $this->user );
-			$order->set_status( 'completed' );
+			$order->set_status( OrderStatus::COMPLETED );
 			$order->save();
 		}
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params( array( 'per_page' => 15 ) );
@@ -352,15 +432,15 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		);
 		$excluded_product_item->save();
 		$order_to_be_excluded->add_item( $excluded_product_item );
-		$order_to_be_excluded->set_status( 'completed' );
+		$order_to_be_excluded->set_status( OrderStatus::COMPLETED );
 		$order_to_be_excluded->save();
 
 		// Create an order that doesn't have the excluded products.
 		$order_to_be_included = WC_Helper_Order::create_order( $this->user, $simple_product );
-		$order_to_be_included->set_status( 'completed' );
+		$order_to_be_included->set_status( OrderStatus::COMPLETED );
 		$order_to_be_included->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Test product exclusion.
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
@@ -422,28 +502,28 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$first_simple_product = WC_Helper_Product::create_simple_product();
 		$first_order          = WC_Helper_Order::create_order( $this->user, $first_simple_product );
 		$first_order->set_currency( get_woocommerce_currency() );
-		$first_order->set_status( 'on-hold' );
+		$first_order->set_status( OrderStatus::ON_HOLD );
 		$first_order->save();
 
 		// Create another simple order with another currency.
 		$currencies = get_woocommerce_currencies();
-		// prevent base currency to be selected again
+		// prevent base currency to be selected again.
 		unset( $currencies[ get_woocommerce_currency() ] );
 		$second_currency = array_rand( $currencies );
 
 		$second_simple_product = WC_Helper_Product::create_simple_product();
 		$second_order          = WC_Helper_Order::create_order( $this->user, $second_simple_product );
 		$second_order->set_currency( $second_currency );
-		$second_order->set_status( 'on-hold' );
+		$second_order->set_status( OrderStatus::ON_HOLD );
 		$second_order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
-		// Get the created orders from REST API
+		// Get the created orders from REST API.
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'order_status' => array( 'on-hold' ),
+				'order_status' => array( OrderStatus::ON_HOLD ),
 			)
 		);
 		$response        = $this->server->dispatch( $request );
@@ -473,6 +553,5 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$second_order_from_response   = $response_orders[ $second_order->get_id() ];
 		$second_order_formatted_total = wp_strip_all_tags( html_entity_decode( $second_order->get_formatted_order_total() ), true );
 		$this->assertEquals( $second_order_from_response['total_formatted'], $second_order_formatted_total );
-
 	}
 }

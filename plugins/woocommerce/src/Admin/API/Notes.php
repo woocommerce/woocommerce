@@ -385,7 +385,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 	}
 
 	/**
-	 * Prepare an array with the the requested updates.
+	 * Prepare an array with the requested updates.
 	 *
 	 * @param WP_REST_Request $request  Request object.
 	 * @return array A list of the requested updates values.
@@ -538,7 +538,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 	 *
 	 * @param string $url The URL needing a nonce.
 	 * @param string $action The nonce action.
-	 * @param string $name The nonce anme.
+	 * @param string $name The nonce name.
 	 * @return string A fully formed URL.
 	 */
 	private function maybe_add_nonce_to_url( string $url, string $action = '', string $name = '' ) : string {
@@ -547,7 +547,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 		}
 
 		if ( empty( $name ) ) {
-			// Default paramater name.
+			// Default parameter name.
 			$name = '_wpnonce';
 		}
 

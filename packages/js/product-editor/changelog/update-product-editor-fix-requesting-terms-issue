@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Editor: fix issue when requesting attribute terms in the New Attributes modal

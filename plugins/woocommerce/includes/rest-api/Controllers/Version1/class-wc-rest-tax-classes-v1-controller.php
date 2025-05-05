@@ -160,7 +160,11 @@ class WC_REST_Tax_Classes_V1_Controller extends WC_REST_Controller {
 			$data[] = $class;
 		}
 
-		return rest_ensure_response( $data );
+		$total    = count( $data );
+		$response = rest_ensure_response( $data );
+		$response->header( 'X-WP-Total', (int) $total );
+		$response->header( 'X-WP-TotalPages', $total ? 1 : 0 );
+		return $response;
 	}
 
 	/**
@@ -213,7 +217,11 @@ class WC_REST_Tax_Classes_V1_Controller extends WC_REST_Controller {
 		}
 
 		$tax_class = WC_Tax::get_tax_class_by( 'slug', sanitize_title( $request['slug'] ) );
-		$deleted   = WC_Tax::delete_tax_class_by( 'slug', sanitize_title( $request['slug'] ) );
+		if ( ! $tax_class ) {
+			return new WP_Error( 'woocommerce_rest_tax_class_invalid_slug', __( 'Invalid slug.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$deleted = WC_Tax::delete_tax_class_by( 'slug', sanitize_title( $request['slug'] ) );
 
 		if ( ! $deleted ) {
 			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );

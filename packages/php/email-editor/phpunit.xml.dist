@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit backupGlobals="false"
+		 backupStaticAttributes="false"
+		 colors="true"
+		 bootstrap="tests/unit/bootstrap.php"
+		 convertErrorsToExceptions="true"
+		 convertNoticesToExceptions="true"
+		 convertWarningsToExceptions="true"
+		 processIsolation="false"
+		 stopOnFailure="false"
+		 verbose="true">
+	<testsuites>
+		<testsuite name="EmailEditorTestSuite">
+			<directory suffix="Test.php">./tests/unit</directory>
+		</testsuite>
+	</testsuites>
+
+	<php>
+		<ini name="display_errors" value="true"/>
+	</php>
+</phpunit>

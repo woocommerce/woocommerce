@@ -12,6 +12,7 @@ import { logError } from './error';
 import {
 	fetchExperimentAssignment,
 	fetchExperimentAssignmentWithAuth,
+	canTrack,
 } from './assignment';
 import { getAnonId, initializeAnonId } from './anon';
 declare global {
@@ -20,11 +21,14 @@ declare global {
 			isEnabled: boolean;
 			enable?: ( cb: () => void ) => void;
 		};
+		_wca: {
+			push?: ( cb: () => void ) => void;
+		};
 	}
 }
 
 export const initializeExPlat = (): void => {
-	if ( window.wcTracks?.isEnabled ) {
+	if ( canTrack ) {
 		initializeAnonId().catch( ( e ) => logError( { message: e.message } ) );
 	}
 };

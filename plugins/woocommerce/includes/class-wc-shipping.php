@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -312,10 +313,9 @@ class WC_Shipping {
 
 		$package['rates'] = array();
 
-		// If the package is not shippable, e.g. trying to ship to an invalid country, do not calculate rates.
-		if ( ! $this->is_package_shippable( $package ) ) {
-			return $package;
-		}
+		// If the package is not shippable, e.g. trying to ship to an invalid country, do not calculate rates. We can return
+		// local pickup rates here however since those are not shipped.
+		$is_shippable = $this->is_package_shippable( $package );
 
 		// Check if we need to recalculate shipping for this package.
 		$package_to_hash = $package;
@@ -334,6 +334,11 @@ class WC_Shipping {
 
 		if ( ! is_array( $stored_rates ) || $package_hash !== $stored_rates['package_hash'] || 'yes' === get_option( 'woocommerce_shipping_debug_mode', 'no' ) ) {
 			foreach ( $this->load_shipping_methods( $package ) as $shipping_method ) {
+				// If the package is not shippable and the shipping method does not support local pickup, skip it.
+				if ( ! $is_shippable && ! LocalPickupUtils::is_local_pickup_method( $shipping_method->id ) ) {
+					continue;
+				}
+
 				if ( ! $shipping_method->supports( 'shipping-zones' ) || $shipping_method->get_instance_id() ) {
 					/**
 					 * Fires before getting shipping rates for a package.
@@ -358,14 +363,42 @@ class WC_Shipping {
 				}
 			}
 
+			// Hide shipping rates when free shipping is available.
+			if ( 'yes' === get_option( 'woocommerce_shipping_hide_rates_when_free', 'no' ) ) {
+				$free_shipping = array();
+				$local_pickup  = array();
+
+				foreach ( $package['rates'] as $rate ) {
+					if ( 'free_shipping' === $rate->method_id ) {
+						$free_shipping[ $rate->id ] = $rate;
+						continue;
+					}
+
+					if ( $this->shipping_methods[ $rate->method_id ]->supports( 'local-pickup' ) || 'local_pickup' === $rate->method_id ) {
+						$local_pickup[ $rate->id ] = $rate;
+					}
+				}
+
+				if ( ! empty( $free_shipping ) ) {
+					$package['rates'] = array_merge( $free_shipping, $local_pickup );
+				}
+			}
+
 			/**
 			 * Filter the calculated shipping rates.
 			 *
 			 * @see https://gist.github.com/woogists/271654709e1d27648546e83253c1a813 for cache invalidation methods.
+			 * @since 2.0.0
 			 * @param array $package['rates'] Package rates.
 			 * @param array $package Package of cart items.
 			 */
 			$package['rates'] = apply_filters( 'woocommerce_package_rates', $package['rates'], $package );
+
+			// Package rates should be an array, if it was filtered into a non-array, reset it. Don't reset to the
+			// unfiltered value, as e.g. a 3pd could have set it to "false" to remove rates.
+			if ( ! is_array( $package['rates'] ) ) {
+				$package['rates'] = array();
+			}
 
 			// Store in session to avoid recalculation.
 			WC()->session->set(

@@ -36,7 +36,7 @@ class WC_REST_Webhooks_V2_Controller extends WC_REST_Webhooks_V1_Controller {
 		$webhook = wc_get_webhook( $id );
 
 		if ( empty( $webhook ) || is_null( $webhook ) ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$data = array(

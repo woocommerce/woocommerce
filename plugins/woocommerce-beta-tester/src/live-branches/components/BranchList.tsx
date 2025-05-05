@@ -2,9 +2,7 @@
  * External dependencies
  */
 import {
-	// @ts-ignore
 	__experimentalItemGroup as ItemGroup,
-	// @ts-ignore
 	__experimentalItem as Item,
 	Button,
 	Spinner,
@@ -14,7 +12,7 @@ import {
 	CardFooter,
 	ComboboxControl,
 } from '@wordpress/components';
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { css } from '@emotion/react';
 
 /**
@@ -108,7 +106,6 @@ const BranchInfo = ( { branch }: { branch: Branch } ) => {
 };
 
 const WooCommerceVersionInfo = () => {
-	// @ts-ignore
 	const version = window?.wc?.wcSettings?.WC_VERSION || 'unknown';
 
 	return (
@@ -153,7 +150,9 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 					) }
 					{ ! activeBranch && <WooCommerceVersionInfo /> }
 				</CardBody>
-				<CardFooter></CardFooter>
+				<CardFooter>
+					<Fragment />
+				</CardFooter>
 			</Card>
 			<Card elevation={ 3 } css={ cardStyle }>
 				<CardHeader>
@@ -164,8 +163,8 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 						onChange={ ( branchVersion ) => {
 							if ( branchVersion ) {
 								const branch = branches.find(
-									( branch ) =>
-										branch.version === branchVersion
+									( _branch ) =>
+										_branch.version === branchVersion
 								);
 
 								if ( branch ) {
@@ -181,14 +180,15 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 							};
 						} ) }
 					/>
-
 					<BranchListItem
 						branch={ selectedBranch }
 						onBranchActive={ setActiveBranch }
 						key={ selectedBranch.version }
 					/>
 				</CardBody>
-				<CardFooter></CardFooter>
+				<CardFooter>
+					<Fragment />
+				</CardFooter>
 			</Card>
 			{ installedBranchesExist && (
 				<Card elevation={ 3 } css={ cardStyle }>
@@ -206,7 +206,9 @@ export const BranchList = ( { branches }: { branches: Branch[] } ) => {
 							) ) }
 						</ItemGroup>
 					</CardBody>
-					<CardFooter></CardFooter>
+					<CardFooter>
+						<Fragment />
+					</CardFooter>
 				</Card>
 			) }
 		</>

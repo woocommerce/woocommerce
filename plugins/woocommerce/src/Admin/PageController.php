@@ -5,8 +5,13 @@
 
 namespace Automattic\WooCommerce\Admin;
 
-use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
 use Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Admin\Features\Features;
+
+use WC_Gateway_BACS;
+use WC_Gateway_Cheque;
+use WC_Gateway_COD;
+use WC_Gateway_Paypal;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -167,15 +172,17 @@ class PageController {
 			return apply_filters( 'woocommerce_navigation_get_breadcrumbs', array( '' ), $current_page );
 		}
 
-		if ( 1 === count( $current_page['title'] ) ) {
-			$breadcrumbs = $current_page['title'];
+		$page_title = ! empty( $current_page['page_title'] ) ? $current_page['page_title'] : $current_page['title'];
+		$page_title = (array) $page_title;
+		if ( 1 === count( $page_title ) ) {
+			$breadcrumbs = $page_title;
 		} else {
 			// If this page has multiple title pieces, only link the first one.
 			$breadcrumbs = array_merge(
 				array(
-					array( $current_page['path'], reset( $current_page['title'] ) ),
+					array( $current_page['path'], reset( $page_title ) ),
 				),
-				array_slice( $current_page['title'], 1 )
+				array_slice( $page_title, 1 )
 			);
 		}
 
@@ -218,7 +225,7 @@ class PageController {
 	 */
 	public function get_current_page() {
 		// If 'current_screen' hasn't fired yet, the current page calculation
-		// will fail which causes `false` to be returned for all subsquent calls.
+		// will fail which causes `false` to be returned for all subsequent calls.
 		if ( ! did_action( 'current_screen' ) ) {
 			_doing_it_wrong( __FUNCTION__, esc_html__( 'Current page retrieval should be called on or after the `current_screen` hook.', 'woocommerce' ), '0.16.0' );
 		}
@@ -247,6 +254,19 @@ class PageController {
 	 * @return string Current screen ID.
 	 */
 	public function get_current_screen_id() {
+		// Return early if this is a REST API request.
+		if ( wp_is_serving_rest_request() ) {
+			/**
+			 * Filter the current screen ID for REST API requests.
+			 *
+			 * @since 3.9.0
+			 *
+			 * @param string|boolean $screen_id The screen id or false if not identified.
+			 * @param WP_Screen      $current_screen The current WP_Screen.
+			 */
+			return apply_filters( 'woocommerce_navigation_current_screen_id', false, null );
+		}
+
 		$current_screen = get_current_screen();
 		if ( ! $current_screen ) {
 			// Filter documentation below.
@@ -293,9 +313,9 @@ class PageController {
 		$tabs_with_sections = apply_filters(
 			'woocommerce_navigation_page_tab_sections',
 			array(
-				'products'          => array( '', 'inventory', 'downloadable' ),
-				'shipping'          => array( '', 'options', 'classes' ),
-				'checkout'          => array( 'bacs', 'cheque', 'cod', 'paypal' ),
+				'products'          => array( '', 'inventory', 'downloadable', 'download_urls', 'advanced' ),
+				'shipping'          => array( '', 'options', 'classes', 'pickup_location' ),
+				'checkout'          => array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WC_Gateway_Paypal::ID ),
 				'email'             => $wc_email_ids,
 				'advanced'          => array(
 					'',
@@ -303,6 +323,8 @@ class PageController {
 					'webhooks',
 					'legacy_api',
 					'woocommerce_com',
+					'features',
+					'blueprint',
 				),
 				'browse-extensions' => array( 'helper' ),
 			)
@@ -323,7 +345,7 @@ class PageController {
 					$section = wc_clean( wp_unslash( $_GET['section'] ) );
 					if (
 						isset( $tabs_with_sections[ $tab ] ) &&
-						in_array( $section, array_keys( $tabs_with_sections[ $tab ] ) )
+						in_array( $section, array_values( $tabs_with_sections[ $tab ] ), true )
 					) {
 						$screen_pieces[] = $section;
 					}
@@ -392,7 +414,7 @@ class PageController {
 	}
 
 	/**
-	 * Returns true if we are on a page registed with this controller.
+	 * Returns true if we are on a page registered with this controller.
 	 *
 	 * @return boolean
 	 */
@@ -437,6 +459,7 @@ class PageController {
 			'id'         => null,
 			'parent'     => null,
 			'title'      => '',
+			'page_title' => '',
 			'capability' => 'view_woocommerce_reports',
 			'path'       => '',
 			'icon'       => '',
@@ -454,9 +477,13 @@ class PageController {
 			$options['position'] = intval( round( $options['position'] ) );
 		}
 
+		if ( empty( $options['page_title'] ) ) {
+			$options['page_title'] = $options['title'];
+		}
+
 		if ( is_null( $options['parent'] ) ) {
 			add_menu_page(
-				$options['title'],
+				$options['page_title'],
 				$options['title'],
 				$options['capability'],
 				$options['path'],
@@ -469,7 +496,7 @@ class PageController {
 			// @todo check for null path.
 			add_submenu_page(
 				$parent_path,
-				$options['title'],
+				$options['page_title'],
 				$options['title'],
 				$options['capability'],
 				$options['path'],
@@ -523,7 +550,7 @@ class PageController {
 	 */
 	public function remove_app_entry_page_menu_item() {
 		global $submenu;
-		// User does not have capabilites to see the submenu.
+		// User does not have capabilities to see the submenu.
 		if ( ! current_user_can( 'manage_woocommerce' ) || empty( $submenu['woocommerce'] ) ) {
 			return;
 		}
@@ -562,11 +589,27 @@ class PageController {
 	}
 
 	/**
+	 * Returns true if we are on a settings page.
+	 */
+	public static function is_settings_page() {
+		// phpcs:disable WordPress.Security.NonceVerification
+		return isset( $_GET['page'] ) && 'wc-settings' === $_GET['page'];
+		// phpcs:enable WordPress.Security.NonceVerification
+	}
+
+	/**
 	 *  Returns true if we are on a "classic" (non JS app) powered admin page.
 	 *
 	 * TODO: See usage in `admin.php`. This needs refactored and implemented properly in core.
 	 */
 	public static function is_embed_page() {
-		return wc_admin_is_connected_page() || ( ! self::is_admin_page() && class_exists( 'Automattic\WooCommerce\Admin\Features\Navigation\Screen' ) && Screen::is_woocommerce_page() );
+		return wc_admin_is_connected_page();
+	}
+
+	/**
+	 * Returns true if we are on a modern settings page.
+	 */
+	public static function is_modern_settings_page() {
+		return self::is_settings_page() && Features::is_enabled( 'settings' );
 	}
 }

@@ -10,7 +10,7 @@ Before you start, check out [WooCommerce Endpoints](./woocommerce-endpoints.md).
 
 The URL for each endpoint can be customized in **WooCommerce > Settings > Advanced** in the Page setup section.
 
-![Endpoints](https://developer.woo.com/wp-content/uploads/2023/12/endpoints.png)
+![Endpoints](https://developer.woocommerce.com/wp-content/uploads/2023/12/endpoints.png)
 
 Ensure that they are unique to avoid conflicts. If you encounter issues with 404s, go to **Settings > Permalinks** and save to flush the rewrite rules.
 
@@ -18,7 +18,7 @@ Ensure that they are unique to avoid conflicts. If you encounter issues with 404
 
 If you want to include an endpoint in your menus, you need to use the Links section:
 
-![The Links section of a menu item in WordPress](https://developer.woo.com/wp-content/uploads/2023/12/2014-02-26-at-14.26.png)
+![The Links section of a menu item in WordPress](https://developer.woocommerce.com/wp-content/uploads/2023/12/2014-02-26-at-14.26.png)
 
 Enter the full URL to the endpoint and then insert that into your menu.
 
@@ -48,24 +48,24 @@ Gateways need to use these methods for full 2.1+ compatibility.
 On Windows servers, the **web.config** file may not be set correctly to allow for the endpoints to work correctly. In this case, clicking on endpoint links (e.g. /edit-account/ or /customer-logout/) may appear to do nothing except refresh the page. In order to resolve this, try simplifying the **web.config** file on your Windows server. Here's a sample file configuration:
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<configuration>
-  <system.webServer>
-    <handlers accessPolicy="Read, Execute, Script" />
-    <rewrite>
-    <rules>
-      <rule name="wordpress" patternSyntax="Wildcard">
-        <match url="*" />
-        <conditions>
-          <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
-          <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
-        </conditions>
-        <action type="Rewrite" url="index.php" />
-      </rule>
-    </rules>
-    </rewrite>
-  </system.webServer>
-</configuration>
+<&lt;>?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;configuration&gt;
+  &lt;system.webServer&gt;
+    &lt;handlers accessPolicy="Read, Execute, Script" /&gt;
+    &lt;rewrite&gt;
+    &lt;rules&gt;
+      &lt;rule name="wordpress" patternSyntax="Wildcard"&gt;
+        &lt;match url="*" /&gt;
+        &lt;conditions&gt;
+          &lt;add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" /&gt;
+          &lt;add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" /&gt;
+        &lt;/conditions&gt;
+        &lt;action type="Rewrite" url="index.php" /&gt;
+      &lt;/rule&gt;
+    &lt;/rules&gt;
+    &lt;/rewrite&gt;
+  &lt;/system.webServer&gt;
+&lt;/configuration&gt;
 ```
 
 ### Pages direct to wrong place
@@ -74,6 +74,6 @@ Landing on the wrong page when clicking an endpoint URL is typically caused by i
 
 ### How to Remove "Downloads" from My Account
 
-Sometimes the "Downloads" endpoint on the "My account" page does not need to be displayed. This can be removed by going to **WooCommerce → Settings → Advanced → Account endpoints** and clearing the Downloads endpoint field.
+Sometimes the "Downloads" endpoint on the "My account" page does not need to be displayed. This can be removed by going to **WooCommerce > Settings > Advanced > Account endpoints** and clearing the Downloads endpoint field.
 
-![Account endpoints](https://developer.woo.com/wp-content/uploads/2023/12/Screenshot-2023-04-09-at-11.45.58-PM.png)
+![Account endpoints](https://developer.woocommerce.com/wp-content/uploads/2023/12/Screenshot-2023-04-09-at-11.45.58-PM.png)

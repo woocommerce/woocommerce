@@ -1,0 +1,25 @@
+{
+	"name": "woocommerce/add-to-cart-with-options",
+	"title": "Add to Cart with Options (Experimental)",
+	"description": "Create an \"Add To Cart\" composition by using blocks",
+	"category": "woocommerce-product-elements",
+	"attributes": {
+		"isDescendantOfAddToCartWithOptions": {
+			"type": "boolean",
+			"default": true
+		}
+	},
+	"usesContext": [ "postId" ],
+	"providesContext": {
+		"woocommerce/isDescendantOfAddToCartWithOptions": "isDescendantOfAddToCartWithOptions"
+	},
+	"textdomain": "woocommerce",
+	"supports": {
+		"interactivity": true
+	},
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"viewScriptModule": "woocommerce/add-to-cart-with-options",
+	"style": "file:../woocommerce/add-to-cart-with-options-style.css",
+	"editorStyle": "file:../woocommerce/add-to-cart-with-options-editor.css"
+}

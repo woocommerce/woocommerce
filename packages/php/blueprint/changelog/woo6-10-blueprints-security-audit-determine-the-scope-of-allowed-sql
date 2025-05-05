@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Enhance SQL execution safety in ImportRunSql class

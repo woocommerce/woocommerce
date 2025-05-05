@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Stabilize a flaky Price Filter test by addressing the unstable nature of the filter input.

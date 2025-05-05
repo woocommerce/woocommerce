@@ -11,6 +11,8 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -99,6 +101,7 @@ class WC_Emails {
 				'woocommerce_order_status_on-hold_to_cancelled',
 				'woocommerce_order_status_on-hold_to_failed',
 				'woocommerce_order_status_completed',
+				'woocommerce_order_status_failed',
 				'woocommerce_order_fully_refunded',
 				'woocommerce_order_partially_refunded',
 				'woocommerce_new_customer_note',
@@ -154,6 +157,8 @@ class WC_Emails {
 			WC()->payment_gateways();
 			WC()->shipping();
 
+			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+			/** This action is documented in includes/class-wc-emails.php in the send_transactional_email method. */
 			do_action_ref_array( $filter . '_notification', $args );
 		}
 	}
@@ -169,6 +174,17 @@ class WC_Emails {
 		try {
 			$args = func_get_args();
 			self::instance(); // Init self so emails exist.
+
+			/**
+			 * Action hook for email template classes to trigger the sending of an email.
+			 *
+			 * The name of the hook is based on the "parent" hook that is currently firing, that this is attached to.
+			 * See the WC_Emails::init_transactional_emails method for a list of hooks.
+			 *
+			 * @since 3.1.0
+			 *
+			 * @param array $args Args from the parent hook, which may differ depending on the hook.
+			 */
 			do_action_ref_array( current_filter() . '_notification', $args );
 		} catch ( Exception $e ) {
 			$error  = 'Transactional email triggered fatal error for callback ' . current_filter();
@@ -220,11 +236,12 @@ class WC_Emails {
 	 */
 	public function init() {
 		// Include email classes.
-		include_once dirname( __FILE__ ) . '/emails/class-wc-email.php';
+		include_once __DIR__ . '/emails/class-wc-email.php';
 
 		$this->emails['WC_Email_New_Order']                 = include __DIR__ . '/emails/class-wc-email-new-order.php';
 		$this->emails['WC_Email_Cancelled_Order']           = include __DIR__ . '/emails/class-wc-email-cancelled-order.php';
 		$this->emails['WC_Email_Failed_Order']              = include __DIR__ . '/emails/class-wc-email-failed-order.php';
+		$this->emails['WC_Email_Customer_Failed_Order']     = include __DIR__ . '/emails/class-wc-email-customer-failed-order.php';
 		$this->emails['WC_Email_Customer_On_Hold_Order']    = include __DIR__ . '/emails/class-wc-email-customer-on-hold-order.php';
 		$this->emails['WC_Email_Customer_Processing_Order'] = include __DIR__ . '/emails/class-wc-email-customer-processing-order.php';
 		$this->emails['WC_Email_Customer_Completed_Order']  = include __DIR__ . '/emails/class-wc-email-customer-completed-order.php';
@@ -290,6 +307,20 @@ class WC_Emails {
 	public function replace_placeholders( $string ) {
 		$domain = wp_parse_url( home_url(), PHP_URL_HOST );
 
+		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
+			$string = str_replace(
+				array(
+					'{store_address}',
+					'{store_email}',
+				),
+				array(
+					$this->get_store_address(),
+					$this->get_from_address(),
+				),
+				$string
+			);
+		}
+
 		return str_replace(
 			array(
 				'{site_title}',
@@ -302,8 +333,8 @@ class WC_Emails {
 				$this->get_blogname(),
 				$domain,
 				$domain,
-				'<a href="https://woo.com">WooCommerce</a>',
-				'<a href="https://woo.com">WooCommerce</a>',
+				'<a href="https://woocommerce.com">WooCommerce</a>',
+				'<a href="https://woocommerce.com">WooCommerce</a>',
 			),
 			$string
 		);
@@ -597,7 +628,7 @@ class WC_Emails {
 	}
 
 	/**
-	 * Renders any additional fields captured during block based checkout.
+	 * Renders any additional fields captured during block-based checkout.
 	 *
 	 * @param WC_Order $order         Order instance.
 	 * @param bool     $sent_to_admin If email is sent to admin.
@@ -610,8 +641,8 @@ class WC_Emails {
 
 		$checkout_fields = Package::container()->get( CheckoutFields::class );
 		$fields          = array_merge(
-			$checkout_fields->get_order_additional_fields_with_values( $order, 'contact', '', 'view' ),
-			$checkout_fields->get_order_additional_fields_with_values( $order, 'additional', '', 'view' ),
+			$checkout_fields->get_order_additional_fields_with_values( $order, 'contact', 'other', 'view' ),
+			$checkout_fields->get_order_additional_fields_with_values( $order, 'order', 'other', 'view' ),
 		);
 
 		if ( ! $fields ) {
@@ -634,7 +665,7 @@ class WC_Emails {
 	}
 
 	/**
-	 * Renders any additional address fields captured during block based checkout.
+	 * Renders any additional address fields captured during block-based checkout.
 	 *
 	 * @param string   $address_type Address type.
 	 * @param WC_Order $order         Order instance.
@@ -672,6 +703,47 @@ class WC_Emails {
 	}
 
 	/**
+	 * Get store address formatted for emails.
+	 *
+	 * @return string
+	 */
+	public function get_store_address() {
+		add_filter(
+			'woocommerce_formatted_address_force_country_display',
+			array( $this, 'get_store_address_force_country_display' ),
+			5
+		);
+		$result = wp_specialchars_decode(
+			WC()->countries->get_formatted_address(
+				array(
+					'address_1' => WC()->countries->get_base_address(),
+					'address_2' => WC()->countries->get_base_address_2(),
+					'city'      => WC()->countries->get_base_city(),
+					'state'     => WC()->countries->get_base_state(),
+					'country'   => WC()->countries->get_base_country(),
+					'postcode'  => WC()->countries->get_base_postcode(),
+				)
+			)
+		);
+		// Replace newlines by commas.
+		$result = preg_replace( '/<br\/?>/i', ', ', $result );
+		remove_filter(
+			'woocommerce_formatted_address_force_country_display',
+			array( $this, 'get_store_address_force_country_display' )
+		);
+		return $result;
+	}
+
+	/**
+	 * Force country display, used by WC_Emails::get_store address() method
+	 *
+	 * @return bool
+	 */
+	public function get_store_address_force_country_display() {
+		return true;
+	}
+
+	/**
 	 * Low stock notification email.
 	 *
 	 * @param WC_Product $product Product instance.
@@ -690,6 +762,14 @@ class WC_Emails {
 		 */
 		if ( false === apply_filters( 'woocommerce_should_send_low_stock_notification', true, $product->get_id() ) ) {
 			return;
+		}
+
+		// If this is a variation but stock is managed at the parent level, use the parent product for the notification.
+		if ( $product->is_type( 'variation' ) && 'parent' === $product->get_manage_stock() ) {
+			$parent_product = wc_get_product( $product->get_parent_id() );
+			if ( $parent_product ) {
+				$product = $parent_product;
+			}
 		}
 
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product low in stock', 'woocommerce' ) );
@@ -728,6 +808,14 @@ class WC_Emails {
 		 */
 		if ( false === apply_filters( 'woocommerce_should_send_no_stock_notification', true, $product->get_id() ) ) {
 			return;
+		}
+
+		// If this is a variation but stock is managed at the parent level, use the parent product for the notification.
+		if ( $product->is_type( ProductType::VARIATION ) && 'parent' === $product->get_manage_stock() ) {
+			$parent_product = wc_get_product( $product->get_parent_id() );
+			if ( $parent_product ) {
+				$product = $parent_product;
+			}
 		}
 
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product out of stock', 'woocommerce' ) );

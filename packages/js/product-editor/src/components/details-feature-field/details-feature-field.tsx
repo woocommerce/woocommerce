@@ -27,6 +27,7 @@ export const DetailsFeatureField = () => {
 
 	return (
 		<CheckboxControl
+			// @ts-expect-error label type is wrong
 			label={
 				<>
 					{ __( 'Feature this product', 'woocommerce' ) }
@@ -39,7 +40,7 @@ export const DetailsFeatureField = () => {
 							{
 								moreLink: (
 									<Link
-										href="https://woo.com/document/woocommerce-shortcodes/#products"
+										href="https://woocommerce.com/document/woocommerce-shortcodes/#products"
 										target="_blank"
 										type="external"
 										onClick={ () =>

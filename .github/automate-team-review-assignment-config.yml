@@ -17,9 +17,9 @@ when:
         - woo-fse
   - author:
       teamIs:
-        - vortex
+        - flux
       ignore:
         nameIs:
     assign:
       teams:
-        - vortex
+        - flux

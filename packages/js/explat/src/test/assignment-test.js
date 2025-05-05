@@ -1,3 +1,7 @@
+// Define that tracking is enabled before import
+// so that assignments can get the correct value.
+global.wcTracks.isEnabled = true;
+
 /**
  * External dependencies
  */
@@ -16,7 +20,6 @@ global.fetch = jest.fn().mockImplementation( () =>
 		status: 200,
 	} )
 );
-global.wcTracks.isEnabled = true;
 
 const fetchMock = jest.spyOn( global, 'fetch' );
 
@@ -47,7 +50,7 @@ describe( 'fetchExperimentAssignment', () => {
 			experimentName: '123',
 			anonId: null,
 		} );
-		await expect( fetchPromise ).rejects.toThrowError();
+		await expect( fetchPromise ).rejects.toThrow();
 	} );
 
 	it( 'should throw error when experiment_name is empty', async () => {
@@ -55,7 +58,7 @@ describe( 'fetchExperimentAssignment', () => {
 			experimentName: '',
 			anonId: null,
 		} );
-		await expect( fetchPromise ).rejects.toThrowError();
+		await expect( fetchPromise ).rejects.toThrow();
 	} );
 
 	it( 'should throw error when experiment_name is invalid', async () => {
@@ -63,7 +66,7 @@ describe( 'fetchExperimentAssignment', () => {
 			experimentName: '',
 			anonId: null,
 		} );
-		await expect( fetchPromise ).rejects.toThrowError();
+		await expect( fetchPromise ).rejects.toThrow();
 	} );
 
 	it( 'should return .json response', async () => {

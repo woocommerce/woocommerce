@@ -20,6 +20,7 @@ import { DownloadsMenuItem } from '../downloads-menu-item';
 import { VariationQuickUpdateMenuItem } from './variation-quick-update-menu-item';
 import { UpdateStockMenuItem } from '../update-stock-menu-item';
 import { SetListPriceMenuItem } from '../set-list-price-menu-item';
+import { AddImageMenuItem } from '../add-image-menu-item';
 
 export function VariationActions( {
 	selection,
@@ -65,11 +66,14 @@ export function VariationActions( {
 							onChange={ onChange }
 							onClose={ onClose }
 						/>
+						<AddImageMenuItem
+							selection={ selection }
+							onChange={ onChange }
+							onClose={ onClose }
+						/>
 					</>
 				) : (
 					<MenuItem
-						href={ singleSelection?.permalink }
-						target="_blank"
 						rel="noreferrer"
 						onClick={ () => {
 							recordEvent( 'product_variations_preview', {
@@ -114,14 +118,12 @@ export function VariationActions( {
 					onClose={ onClose }
 					supportsMultipleSelection={ supportsMultipleSelection }
 				/>
-				{ window.wcAdminFeatures[ 'product-virtual-downloadable' ] && (
-					<DownloadsMenuItem
-						selection={ selection }
-						onChange={ onChange }
-						onClose={ onClose }
-						supportsMultipleSelection={ supportsMultipleSelection }
-					/>
-				) }
+				<DownloadsMenuItem
+					selection={ selection }
+					onChange={ onChange }
+					onClose={ onClose }
+					supportsMultipleSelection={ supportsMultipleSelection }
+				/>
 			</MenuGroup>
 			<VariationQuickUpdateMenuItem.Slot
 				group={ 'secondary' }
@@ -138,7 +140,6 @@ export function VariationActions( {
 							? __( 'Delete variation', 'woocommerce' )
 							: undefined
 					}
-					variant="link"
 					onClick={ () => {
 						onDelete( selection );
 						onClose();

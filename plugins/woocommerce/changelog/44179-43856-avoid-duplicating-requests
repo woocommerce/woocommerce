@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Avoid duplicating requests to the `/onboarding/themes/recommended` and `/onboarding/tasks` endpoints during the CYS flow.

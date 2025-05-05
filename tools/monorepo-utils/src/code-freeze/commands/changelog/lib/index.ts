@@ -137,7 +137,11 @@ export const updateReleaseBranchChangelogs = async (
 		await git.commit(
 			`Update the readme files for the ${ version } release`
 		);
-		await git.push( 'origin', commitDirectToBase ? releaseBranch : branch );
+		await git.push(
+			'origin',
+			commitDirectToBase ? releaseBranch : branch,
+			commitDirectToBase ? [] : [ '--force' ]
+		);
 		await git.checkout( '.' );
 
 		if ( commitDirectToBase ) {
@@ -154,7 +158,7 @@ export const updateReleaseBranchChangelogs = async (
 			owner,
 			name,
 			title: `Release: Prepare the changelog for ${ version }`,
-			body: `This pull request was automatically generated during the code freeze to prepare the changelog for ${ version }`,
+			body: `This pull request was automatically generated to prepare the changelog for ${ version }`,
 			head: branch,
 			base: releaseBranch,
 		} );
@@ -202,14 +206,29 @@ export const updateTrunkChangelog = async (
 			'-b': null,
 			[ branch ]: null,
 		} );
-		await git.raw( [ 'cherry-pick', deletionCommitHash ] );
-		await git.push( 'origin', branch );
+
+		try {
+			await git.raw( [ 'cherry-pick', deletionCommitHash ] );
+		} catch ( e ) {
+			if (
+				e.message.includes( 'nothing to commit, working tree clean' )
+			) {
+				Logger.notice(
+					'Cherry-pick resulted in no changes, continuing without error.'
+				);
+				// No need to skip, just continue
+			} else {
+				throw e; // Re-throw if it's a different error
+			}
+		}
+
+		await git.push( 'origin', branch, [ '--force' ] );
 		Logger.notice( `Creating PR for ${ branch }` );
 		const pullRequest = await createPullRequest( {
 			owner,
 			name,
 			title: `Release: Remove ${ version } change files`,
-			body: `This pull request was automatically generated during the code freeze to remove the changefiles from ${ version } that are compiled into the \`${ releaseBranch }\` ${
+			body: `This pull request was automatically generated to remove the changefiles from ${ version } that are compiled into the \`${ releaseBranch }\` ${
 				prNumber > 0 ? `branch via #${ prNumber }` : ''
 			}`,
 			head: branch,
@@ -217,6 +236,12 @@ export const updateTrunkChangelog = async (
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 	} catch ( e ) {
-		Logger.error( e );
+		if ( e.message.includes( 'No commits between trunk' ) ) {
+			Logger.notice(
+				'No commits between trunk and the branch, skipping the PR.'
+			);
+		} else {
+			Logger.error( e );
+		}
 	}
 };

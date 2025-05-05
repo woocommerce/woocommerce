@@ -5,8 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes;
 
-use WC_Data_Store;
-use WC_Meta_Data;
+use Automattic\WooCommerce\Internal\DataStores\CustomMetaDataStore;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStoreMeta;
 use WC_Order;
 use WP_Ajax_Response;
 
@@ -92,14 +92,42 @@ class CustomMetaBox {
 	 * Compute keys to display in autofill when adding new meta key entry in custom meta box.
 	 * Currently, returns empty keys, will be implemented after caching is merged.
 	 *
-	 * @param array|null         $keys Keys to display in autofill.
-	 * @param \WP_Post|\WC_Order $order Order object.
+	 * @param mixed              $deprecated Unused argument. For backwards compatibility.
+	 * @param \WP_Post|\WC_Order $order      Order object.
 	 *
-	 * @return array|mixed Array of keys to display in autofill.
+	 * @return array Array of keys to display in autofill.
 	 */
-	public function order_meta_keys_autofill( $keys, $order ) {
-		if ( is_a( $order, \WC_Order::class ) ) {
+	public function order_meta_keys_autofill( $deprecated, $order ) {
+		if ( ! is_a( $order, \WC_Order::class ) ) {
 			return array();
+		}
+
+		/**
+		 * Filters values for the meta key dropdown in the Custom Fields meta box.
+		 *
+		 * Compatibility filter for `postmeta_form_keys` filter.
+		 *
+		 * @since 6.9.0
+		 *
+		 * @param array|null $keys Pre-defined meta keys to be used in place of a postmeta query. Default null.
+		 * @param \WC_Order  $order The current post object.
+		 */
+		$keys = apply_filters( 'postmeta_form_keys', null, $order );
+		if ( null === $keys || ! is_array( $keys ) ) {
+			/**
+			 * Compatibility filter for 'postmeta_form_limit', which filters the number of custom fields to retrieve
+			 * for the drop-down in the Custom Fields meta box.
+			 *
+			 * @since 8.8.0
+			 *
+			 * @param int $limit Number of custom fields to retrieve. Default 30.
+			 */
+			$limit = apply_filters( 'postmeta_form_limit', 30 );
+			$keys  = wc_get_container()->get( OrdersTableDataStoreMeta::class )->get_meta_keys( $limit );
+		}
+
+		if ( $keys ) {
+			natcasesort( $keys );
 		}
 
 		return $keys;
@@ -113,26 +141,12 @@ class CustomMetaBox {
 	 * @return void
 	 */
 	public function render_meta_form( \WC_Order $order ) : void {
-		$meta_key_input_id = 'metakeyselect';
-
-		$keys = $this->order_meta_keys_autofill( null, $order );
-		/**
-		 * Filters values for the meta key dropdown in the Custom Fields meta box.
-		 *
-		 * Compatibility filter for `postmeta_form_keys` filter.
-		 *
-		 * @since 6.9.0
-		 *
-		 * @param array|null $keys Pre-defined meta keys to be used in place of a postmeta query. Default null.
-		 * @param \WC_Order  $order The current post object.
-		 */
-		$keys = apply_filters( 'postmeta_form_keys', $keys, $order );
 		?>
 		<p><strong><?php esc_html_e( 'Add New Custom Field:', 'woocommerce' ); ?></strong></p>
 		<table id="newmeta">
 			<thead>
 			<tr>
-				<th class="left"><label for="<?php echo esc_attr( $meta_key_input_id ); ?>"><?php esc_html_e( 'Name', 'woocommerce' ); ?></label></th>
+				<th class="left"><label for="metakeyselect"><?php esc_html_e( 'Name', 'woocommerce' ); ?></label></th>
 				<th><label for="metavalue"><?php esc_html_e( 'Value', 'woocommerce' ); ?></label></th>
 			</tr>
 			</thead>
@@ -140,48 +154,36 @@ class CustomMetaBox {
 			<tbody>
 			<tr>
 				<td id="newmetaleft" class="left">
-					<?php if ( $keys ) { ?>
-						<select id="metakeyselect" name="metakeyselect">
-							<option value="#NONE#"><?php esc_html_e( '&mdash; Select &mdash;', 'woocommerce' ); ?></option>
-							<?php
-							foreach ( $keys as $key ) {
-								if ( is_protected_meta( $key, 'post' ) || ! current_user_can( 'edit_others_shop_order', $order->get_id() ) ) {
-									continue;
-								}
-								echo "\n<option value='" . esc_attr( $key ) . "'>" . esc_html( $key ) . '</option>';
-							}
-							?>
-						</select>
-						<input class="hide-if-js" type="text" id="metakeyinput" name="metakeyinput" value="" />
-						<a href="#postcustomstuff" class="hide-if-no-js" onclick="jQuery('#metakeyinput, #metakeyselect, #enternew, #cancelnew').toggle();return false;">
-							<span id="enternew"><?php esc_html_e( 'Enter new', 'woocommerce' ); ?></span>
-							<span id="cancelnew" class="hidden"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></span></a>
-					<?php } else { ?>
-						<input type="text" id="metakeyinput" name="metakeyinput" value="" />
-					<?php } ?>
+					<span id="metakey-search">
+					<select id="metakeyselect" name="metakeyselect" class="wc-order-metakey-search" data-placeholder="<?php esc_attr_e( 'Add existing', 'woocommerce' ); ?>" data-minimum-input-length="0" data-order_id="<?php echo esc_attr( $order->get_id() ); ?>">
+					</select>
+					</span>
+					<input class="hidden" type="text" id="metakeyinput" name="metakeyinput" value="" aria-label="<?php esc_attr_e( 'New custom field name', 'woocommerce' ); ?>" />
+					<button type="button" id="newmeta-button" class="button button-small hide-if-no-js" onclick="jQuery('#metakeyinput, #metakeyselect, #enternew, #cancelnew, #metakey-search').toggleClass('hidden');jQuery('#metakeyinput, #metakeyselect').filter(':visible').trigger('focus');">
+					<span id="enternew"><?php esc_html_e( 'Enter new', 'woocommerce' ); ?></span>
+					<span id="cancelnew" class="hidden"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></span>
 				</td>
-				<td><textarea id="metavalue" name="metavalue" rows="2" cols="25"></textarea></td>
+				<td><textarea id="metavalue" name="metavalue" rows="2" cols="25"></textarea>
+				<?php wp_nonce_field( 'add-meta', '_ajax_nonce-add-meta', false ); ?>
+				</td>
 			</tr>
-
-			<tr><td colspan="2">
-					<div class="submit">
-						<?php
-						submit_button(
-							__( 'Add Custom Field', 'woocommerce' ),
-							'',
-							'addmeta',
-							false,
-							array(
-								'id'            => 'newmeta-submit',
-								'data-wp-lists' => 'add:the-list:newmeta',
-							)
-						);
-						?>
-					</div>
-					<?php wp_nonce_field( 'add-meta', '_ajax_nonce-add-meta', false ); ?>
-				</td></tr>
 			</tbody>
 		</table>
+
+		<div class="submit add-custom-field">
+			<?php
+			submit_button(
+				__( 'Add Custom Field', 'woocommerce' ),
+				'',
+				'addmeta',
+				false,
+				array(
+					'id'            => 'newmeta-submit',
+					'data-wp-lists' => 'add:the-list:newmeta',
+				)
+			);
+			?>
+		</div>
 		<?php
 	}
 
@@ -207,6 +209,29 @@ class CustomMetaBox {
 	}
 
 	/**
+	 * WP Ajax handler to render the list of unique meta keys asynchronously.
+	 *
+	 * @return void
+	 */
+	public function search_metakeys_ajax(): void {
+		check_ajax_referer( 'search-order-metakeys', 'security' );
+
+		if ( ! isset( $_GET['order_id'] ) || ! current_user_can( 'edit_shop_orders' ) ) {
+			wp_die( -1 );
+		}
+
+		$order_id = intval( $_GET['order_id'] );
+		$order    = wc_get_order( $order_id );
+		if ( ! is_a( $order, \WC_Order::class ) ) {
+			wp_die( -1 );
+		}
+
+		$found_order_meta_keys = $this->order_meta_keys_autofill( null, $order );
+
+		wp_send_json( $found_order_meta_keys );
+	}
+
+	/**
 	 * Reimplementation of WP core's `wp_ajax_add_meta` method to support order custom meta updates with custom tables.
 	 */
 	public function add_meta_ajax() {
@@ -218,17 +243,20 @@ class CustomMetaBox {
 		$order_id = (int) $_POST['order_id'] ?? 0;
 		$order    = $this->verify_order_edit_permission_for_ajax( $order_id );
 
-		if ( isset( $_POST['metakeyselect'] ) && '#NONE#' === $_POST['metakeyselect'] && empty( $_POST['metakeyinput'] ) ) {
+		$select_meta_key = trim( sanitize_text_field( wp_unslash( $_POST['metakeyselect'] ?? '' ) ) );
+		$input_meta_key  = trim( sanitize_text_field( wp_unslash( $_POST['metakeyinput'] ?? '' ) ) );
+
+		if ( empty( $_POST['meta'] ) && in_array( $select_meta_key, array( '', '#NONE#' ), true ) && ! $input_meta_key ) {
 			wp_die( 1 );
 		}
 
-		if ( isset( $_POST['metakeyinput'] ) ) { // add meta.
-			$meta_key   = sanitize_text_field( wp_unslash( $_POST['metakeyinput'] ) );
-			$meta_value = sanitize_text_field( wp_unslash( $_POST['metavalue'] ?? '' ) );
-			$this->handle_add_meta( $order, $meta_key, $meta_value );
-		} else { // update.
-			$meta = wp_unslash( $_POST['meta'] ?? array() ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitization done below in array_walk.
+		if ( ! empty( $_POST['meta'] ) ) { // update.
+			$meta = wp_unslash( $_POST['meta'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitization done below in array_walk.
 			$this->handle_update_meta( $order, $meta );
+		} else { // add meta.
+			$meta_value = sanitize_text_field( wp_unslash( $_POST['metavalue'] ?? '' ) );
+			$meta_key   = $input_meta_key ? $input_meta_key : $select_meta_key;
+			$this->handle_add_meta( $order, $meta_key, $meta_value );
 		}
 	}
 

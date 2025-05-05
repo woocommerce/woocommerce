@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Schema } from '@wordpress/core-data';
+import { Post } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -10,7 +10,12 @@ import { ProductCategory } from '../product-categories/types';
 import { ProductTag } from '../product-tags/types';
 import { BaseQueryParams } from '../types';
 
-export type ProductType = 'simple' | 'grouped' | 'external' | 'variable';
+export type ProductType =
+	| 'simple'
+	| 'grouped'
+	| 'external'
+	| 'variable'
+	| 'variation';
 export type ProductStatus =
 	| 'auto-draft'
 	| 'deleted'
@@ -28,7 +33,7 @@ export type ProductDownload = {
 	file: string;
 };
 
-export type ProductAttribute = {
+export type ProductProductAttribute = {
 	id: number;
 	name: string;
 	slug: string;
@@ -69,10 +74,10 @@ export type ProductCatalogVisibility =
 	| 'hidden';
 
 export type Product< Status = ProductStatus, Type = ProductType > = Omit<
-	Schema.Post,
+	Post,
 	'status' | 'categories'
 > & {
-	attributes: ProductAttribute[];
+	attributes: ProductProductAttribute[];
 	average_rating: string;
 	backordered: boolean;
 	backorders: 'no' | 'notify' | 'yes';
@@ -178,7 +183,8 @@ export type ProductQuery<
 		| 'slug'
 		| 'price'
 		| 'popularity'
-		| 'rating';
+		| 'rating'
+		| 'menu_order';
 	slug?: string;
 	status?: Status;
 	type?: Type;

@@ -3,7 +3,9 @@
 ## Table of Contents <!-- omit in toc -->
 
 -   [List Products](#list-products)
--   [Single Product](#single-product)
+-   [Single Product by ID](#single-product-by-id)
+-   [Single Product by slug](#single-product-by-slug)
+-   [Product Variations](#product-variations)
 
 The store products API provides public product data so it can be rendered on the client side.
 
@@ -25,7 +27,8 @@ GET /products?type=simple
 GET /products?sku=sku-1,sku-2
 GET /products?featured=true
 GET /products?category=22
-GET /products?product-taxonomy=product-taxonomy-term-id
+GET /products?brand=adidas
+GET /products?_unstable_tax_my-taxonomy=my-taxonomy-term-id
 GET /products?tag=special-items
 GET /products?attributes[0][attribute]=pa_color&attributes[0][slug]=red
 GET /products?on_sale=true
@@ -56,8 +59,10 @@ GET /products?return_rating_counts=true
 | `type`                                      | string  |    no    | Limit result set to products assigned a specific type.                                                                                                                                                                                |
 | `sku`                                       | string  |    no    | Limit result set to products with specific SKU(s). Use commas to separate.                                                                                                                                                            |
 | `featured`                                  | boolean |    no    | Limit result set to featured products.                                                                                                                                                                                                |
-| `category`                                  | string  |    no    | Limit result set to products assigned a specific category ID.                                                                                                                                                                         |
+| `category`                                  | string  |    no    | Limit result set to products assigned to categories IDs or slugs, separated by commas.                                                                                                                                                                         |
 | `category_operator`                         | string  |    no    | Operator to compare product category terms. Allowed values: `in`, `not_in`, `and`                                                                                                                                                     |
+| `brand`                                     | string  |    no    | Limit result set to products assigned to brands IDs or slugs, separated by commas.                                                                                                                                                                           |
+| `brand_operator`                            | string  |    no    | Operator to compare product brand terms. Allowed values: `in`, `not_in`, `and`                                                                                                                                                     |
 | `_unstable_tax_[product-taxonomy]`          | string  |    no    | Limit result set to products assigned to the term ID of that custom product taxonomy. `[product-taxonomy]` should be the key of the custom product taxonomy registered.                                                               |
 | `_unstable_tax_[product-taxonomy]_operator` | string  |    no    | Operator to compare custom product taxonomy terms. Allowed values: `in`, `not_in`, `and`                                                                                                                                              |
 | `tag`                                       | string  |    no    | Limit result set to products assigned a specific tag ID.                                                                                                                                                                              |
@@ -276,7 +281,7 @@ curl "https://example-store.com/wp-json/wc/store/v1/products?type=variation"
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/docs/products.md)
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./src/StoreApi/docs/products.md)
 
 <!-- /FEEDBACK -->
 

@@ -5,6 +5,8 @@
  * @package WooCommerce\Admin\Tests\API.
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * WC_Admin_Tests_API_Reports_Downloads
  */
@@ -60,7 +62,7 @@ class WC_Admin_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 );
 		$order->save();
 
@@ -118,7 +120,7 @@ class WC_Admin_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 		$product_1 = $product->get_id();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 25 );
 		$order->save();
 		$order_1 = $order->get_id();
@@ -150,7 +152,7 @@ class WC_Admin_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 		$product_2 = $product->get_id();
 
 		$order = WC_Helper_Order::create_order( 2, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 10 );
 		$order->save();
 		$order_2 = $order->get_id();
@@ -169,7 +171,7 @@ class WC_Admin_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 		$object->set_timestamp( gmdate( 'Y-m-d H:00:00', $time - ( 2 * DAY_IN_SECONDS ) ) );
 		$id = $object->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		return array(
 			'time'      => $time,

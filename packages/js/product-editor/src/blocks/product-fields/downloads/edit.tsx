@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Button, Spinner } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
@@ -13,7 +13,12 @@ import {
 import { closeSmall } from '@wordpress/icons';
 import { MediaItem } from '@wordpress/media-utils';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { ListItem, MediaUploader, Sortable } from '@woocommerce/components';
+import {
+	ListItem,
+	MediaUploader,
+	MediaUploaderErrorCallback,
+	Sortable,
+} from '@woocommerce/components';
 import { Product, ProductDownload } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -33,6 +38,7 @@ import {
 import { EditDownloadsModal } from './edit-downloads-modal';
 import { UploadImage } from './upload-image';
 import { SectionActions } from '../../../components/block-slot-fill';
+import { InsertUrlLinkErrorCallback } from './insert-url-menu-item';
 
 function getFileName( url?: string ) {
 	const [ name ] = url?.split( '/' ).reverse() ?? [];
@@ -68,9 +74,12 @@ export function DownloadBlockEdit( {
 		useState< ProductDownload | null >();
 
 	const { allowedMimeTypes } = useSelect( ( select ) => {
-		const { getEditorSettings } = select( 'core/editor' );
+		const { getEditorSettings } = select( 'core/editor' ) as {
+			getEditorSettings: () => Record< string, unknown >;
+		};
+
 		return getEditorSettings();
-	} );
+	}, [] );
 
 	const allowedTypes = allowedMimeTypes
 		? Object.values( allowedMimeTypes )
@@ -135,35 +144,6 @@ export function DownloadBlockEdit( {
 		}
 	}
 
-	function handleFileReplace( files: MediaItem | MediaItem[] ) {
-		if (
-			! Array.isArray( files ) ||
-			! files?.length ||
-			files[ 0 ]?.id === undefined
-		) {
-			return;
-		}
-
-		const uploadedFile = {
-			id: stringifyId( files[ 0 ].id ),
-			file: files[ 0 ].url,
-			name:
-				files[ 0 ].title ||
-				files[ 0 ].alt ||
-				files[ 0 ].caption ||
-				getFileName( files[ 0 ].url ),
-		};
-		const stringifyIds = downloads.map( ( download ) => {
-			if ( download.file === selectedDownload?.file ) {
-				return stringifyEntityId( uploadedFile );
-			}
-			return stringifyEntityId( download );
-		} );
-
-		setDownloads( stringifyIds );
-		setSelectedDownload( uploadedFile );
-	}
-
 	function removeDownload( download: ProductDownload ) {
 		const otherDownloads = downloads.reduce< ProductDownload[] >(
 			function removeDownloadElement(
@@ -193,14 +173,29 @@ export function DownloadBlockEdit( {
 		};
 	}
 
-	function handleUploadError( error: unknown ) {
+	const handleUploadError: MediaUploaderErrorCallback = function ( error ) {
 		createErrorNotice(
-			typeof error === 'string'
-				? error
-				: __( 'There was an error uploading files', 'woocommerce' )
+			sprintf(
+				/* translators: %1$s is a line break, %2$s is the detailed error message */
+				__( 'Error uploading file:%1$s%2$s', 'woocommerce' ),
+				'\n',
+				error.message
+			)
 		);
-	}
+	};
 
+	const handleLinkError: InsertUrlLinkErrorCallback = function (
+		error: string
+	) {
+		createErrorNotice(
+			sprintf(
+				/* translators: %1$s is a line break, %2$s is the detailed error message */
+				__( 'Error linking file:%1$s%2$s', 'woocommerce' ),
+				'\n',
+				error
+			)
+		);
+	};
 	function editDownloadsModalSaveHandler( value: ProductDownload ) {
 		return function handleEditDownloadsModalSave() {
 			const newDownloads = downloads
@@ -230,6 +225,7 @@ export function DownloadBlockEdit( {
 					allowedTypes={ allowedTypes }
 					onUploadSuccess={ handleFileUpload }
 					onUploadError={ handleUploadError }
+					onLinkError={ handleLinkError }
 				/>
 			</SectionActions>
 
@@ -274,6 +270,9 @@ export function DownloadBlockEdit( {
 					buttonText=""
 					allowedMediaTypes={ allowedTypes }
 					multipleSelect={ 'add' }
+					maxUploadFileSize={
+						window.productBlockEditorSettings?.maxUploadFileSize
+					}
 					onUpload={ handleFileUpload }
 					onFileUploadChange={ handleFileUpload }
 					onError={ handleUploadError }
@@ -350,7 +349,7 @@ export function DownloadBlockEdit( {
 			) }
 			{ selectedDownload && (
 				<EditDownloadsModal
-					downloableItem={ { ...selectedDownload } }
+					downloadableItem={ { ...selectedDownload } }
 					onCancel={ () => setSelectedDownload( null ) }
 					onRemove={ () => {
 						removeDownload( selectedDownload );
@@ -363,8 +362,6 @@ export function DownloadBlockEdit( {
 						} );
 					} }
 					onSave={ editDownloadsModalSaveHandler( selectedDownload ) }
-					onUploadSuccess={ handleFileReplace }
-					onUploadError={ handleUploadError }
 				/>
 			) }
 		</div>

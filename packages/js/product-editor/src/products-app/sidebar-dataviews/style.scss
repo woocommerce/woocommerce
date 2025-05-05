@@ -1,0 +1,19 @@
+.edit-site-sidebar-navigation-screen__title-icon {
+    position: sticky;
+    top: 0;
+    background: $gray-900;
+    padding-top: $grid-unit-60;
+    margin-bottom: $grid-unit-10;
+    padding-bottom: $grid-unit-10;
+}
+
+.edit-site-sidebar-button {
+    color: #e0e0e0;
+    flex-shrink: 0;
+}
+
+.edit-site-sidebar-navigation-screen__title {
+    flex-grow: 1;
+    overflow-wrap: break-word;
+    padding: 2px 0 0
+}

@@ -26,30 +26,36 @@ import type {
 	TaxonomyMetadata,
 } from '../../../types';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
+import { Label } from '../../../components/label/label';
 
 interface TaxonomyBlockAttributes extends BlockAttributes {
 	label: string;
+	help?: string;
 	slug: string;
 	property: string;
 	createTitle: string;
 	dialogNameHelpText?: string;
 	parentTaxonomyText?: string;
+	placeholder?: string;
 }
 
 export function Edit( {
 	attributes,
-	context: { postType },
+	context: { postType, isInSelectedTab },
 }: ProductEditorBlockEditProps< TaxonomyBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { hierarchical }: TaxonomyMetadata = useSelect(
 		( select ) =>
-			// @ts-expect-error There are no types for this.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			select( 'core' ).getTaxonomy( attributes.slug ) || {
 				hierarchical: false,
-			}
+			},
+		[ attributes.slug ]
 	);
 	const {
 		label,
+		help,
 		slug,
 		property,
 		createTitle,
@@ -75,8 +81,10 @@ export function Edit( {
 	);
 
 	useEffect( () => {
-		searchDelayed( '' );
-	}, [] );
+		if ( isInSelectedTab ) {
+			searchDelayed( '' );
+		}
+	}, [ isInSelectedTab ] );
 
 	const [ selectedEntries, setSelectedEntries ] = useProductEntityProp<
 		Taxonomy[]
@@ -98,6 +106,10 @@ export function Edit( {
 		value: String( taxonomy.id ),
 	} ) );
 
+	function handleClear() {
+		setSelectedEntries( [] );
+	}
+
 	return (
 		<div { ...blockProps }>
 			<>
@@ -108,7 +120,7 @@ export function Edit( {
 							'woocommerce-taxonomy-select'
 						) as string
 					}
-					label={ label }
+					label={ <Label label={ label } tooltip={ help } /> }
 					isLoading={ isResolving }
 					disabled={ disabled }
 					multiple
@@ -169,6 +181,8 @@ export function Edit( {
 							);
 						}
 					} }
+					onClear={ handleClear }
+					isClearingAllowed={ ( selectedEntries || [] ).length > 0 }
 				></SelectTreeControl>
 				{ showCreateNewModal && (
 					<CreateTaxonomyModal

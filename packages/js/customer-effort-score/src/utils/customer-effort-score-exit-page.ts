@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
 import { getQuery } from '@woocommerce/navigation';
 
@@ -10,6 +10,7 @@ import { getQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { ALLOW_TRACKING_OPTION_NAME } from '../constants';
+import store from '../store';
 
 interface AdminWindow extends Window {
 	pagenow?: string;
@@ -19,12 +20,6 @@ declare let window: AdminWindow;
 
 const CUSTOMER_EFFORT_SCORE_EXIT_PAGE_KEY = 'customer-effort-score-exit-page';
 
-let allowTracking = false;
-const trackingPromise = resolveSelect( OPTIONS_STORE_NAME )
-	.getOption( ALLOW_TRACKING_OPTION_NAME )
-	.then( ( trackingOption ) => {
-		allowTracking = trackingOption === 'yes';
-	} );
 /**
  * Gets the list of exited pages from Localstorage.
  */
@@ -43,12 +38,26 @@ export const getExitPageData = () => {
 };
 
 /**
+ * Returns the value of whether tracking is allowed or not.
+ *
+ * @return boolean
+ */
+const isTrackingAllowed = async () => {
+	const trackingOption = await resolveSelect( optionsStore ).getOption(
+		ALLOW_TRACKING_OPTION_NAME
+	);
+
+	return trackingOption === 'yes';
+};
+
+/**
  * Adds the page to the exit page list in Localstorage.
  *
  * @param {string} pageId of page exited early.
  */
 export const addExitPage = async ( pageId: string ) => {
-	await trackingPromise;
+	const allowTracking = await isTrackingAllowed();
+
 	if ( ! ( window.localStorage && allowTracking ) ) {
 		return;
 	}
@@ -100,6 +109,9 @@ export const addCustomerEffortScoreExitPageListener = (
 	pageId: string,
 	hasUnsavedChanges: () => boolean
 ) => {
+	// Pre-fetch the tracking option so that it is available before the unload event.
+	isTrackingAllowed();
+
 	eventListeners[ pageId ] = () => {
 		if ( hasUnsavedChanges() ) {
 			addExitPage( pageId );
@@ -126,15 +138,7 @@ export const removeCustomerEffortScoreExitPageListener = ( pageId: string ) => {
  *
  * @param {string} pageId page id.
  */
-function getExitPageCESCopy( pageId: string ): {
-	action: string;
-	title: string;
-	firstQuestion: string;
-	secondQuestion: string;
-	noticeLabel?: string;
-	description?: string;
-	icon?: string;
-} | null {
+function getExitPageCESCopy( pageId: string ) {
 	switch ( pageId ) {
 		case 'product_edit_view':
 		case 'editing_new_product':
@@ -294,7 +298,7 @@ export function triggerExitPageCesSurvey() {
 		const copy = getExitPageCESCopy( exitPageItems[ 0 ] );
 
 		if ( copy?.title?.length ) {
-			dispatch( 'wc/customer-effort-score' ).addCesSurvey( {
+			dispatch( store ).addCesSurvey( {
 				...copy,
 				pageNow: window.pagenow,
 				adminPage: window.adminpage,

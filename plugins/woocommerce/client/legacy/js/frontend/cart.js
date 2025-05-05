@@ -104,7 +104,7 @@ jQuery( function ( $ ) {
 		// Remove errors
 		if ( ! preserve_notices ) {
 			$(
-				'.woocommerce-error, .woocommerce-message, .woocommerce-info, .is-error, .is-info, .is-success'
+				'.woocommerce-error, .woocommerce-message, .woocommerce-info, .is-error, .is-info, .is-success, .coupon-error-notice'
 			).remove();
 		}
 
@@ -136,10 +136,28 @@ jQuery( function ( $ ) {
 				$( document.body ).trigger( 'update_checkout' );
 			}
 
+			// Store the old coupon error message and value before the
+			// .woocommerce-cart-form is replaced with the new form.
+			var $old_coupon_field_val = $( '#coupon_code' ).val();
+			var $old_coupon_error_msg = $( '#coupon_code' )
+					.closest( '.coupon' )
+					.find( '.coupon-error-notice' );
+
 			$( '.woocommerce-cart-form' ).replaceWith( $new_form );
 			$( '.woocommerce-cart-form' )
 				.find( ':input[name="update_cart"]' )
 				.prop( 'disabled', true );
+
+			if ( preserve_notices && $old_coupon_error_msg.length > 0 ) {
+				var $new_coupon_field = $( '.woocommerce-cart-form' ).find( '#coupon_code' );
+				var $new_coupon_field_wrapper = $new_coupon_field.closest( '.coupon' );
+
+				$new_coupon_field.val( $old_coupon_field_val );
+				// The coupon input with error needs to be focused before adding the live region
+				// with the error message, otherwise the screen reader won't read it.
+				$new_coupon_field.focus();
+				show_coupon_error( $old_coupon_error_msg, $new_coupon_field_wrapper, true );
+			}
 
 			if ( $notices.length > 0 ) {
 				show_notice( $notices );
@@ -174,6 +192,45 @@ jQuery( function ( $ ) {
 				$( '.woocommerce-cart-form' );
 		}
 		$target.prepend( html_element );
+	};
+
+	/**
+	 * Shows coupon form errors.
+	 *
+	 * @param {string|object} html_element The HTML string response after applying an invalid coupon or a jQuery element.
+	 * @param {Object} $target Coupon field wrapper jQuery element.
+	 * @param {boolean} is_live_region Whether role="alert" should be added or not.
+	 */
+	var show_coupon_error = function ( html_element, $target, is_live_region ) {
+		if ( $target.length === 0 ) {
+			return;
+		}
+
+		var $coupon_error_el = html_element;
+
+		if ( typeof html_element === 'string' ) {
+			var msg = $( $.parseHTML( html_element ) ).text().trim();
+
+			if ( msg === '' ) {
+				return;
+			}
+
+			$coupon_error_el = $('<p>', {
+				class: 'coupon-error-notice',
+				id: 'coupon-error-notice',
+				text: msg
+			});
+		}
+
+		if ( is_live_region ) {
+			$coupon_error_el.attr( 'role', 'alert' );
+		}
+
+		$target.find( '#coupon_code' )
+			.addClass( 'has-error' )
+			.attr( 'aria-invalid', 'true' )
+			.attr( 'aria-describedby', 'coupon-error-notice' );
+		$target.append( $coupon_error_el );
 	};
 
 	/**
@@ -213,8 +270,19 @@ jQuery( function ( $ ) {
 		/**
 		 * Toggle Shipping Calculator panel
 		 */
-		toggle_shipping: function () {
-			$( '.shipping-calculator-form' ).slideToggle( 'slow' );
+		toggle_shipping: function ( event ) {
+			var $target = $( event.currentTarget );
+
+			$( '.shipping-calculator-form' ).slideToggle( 'slow', function () {
+				var self = this;
+
+				setTimeout( function () {
+					var $form = $( self );
+
+					$target.attr( 'aria-expanded', $form.is( ':visible' ) ? 'true' : 'false' );
+				}, 0 );
+			} );
+
 			$( 'select.country_to_state, input.country_to_state' ).trigger(
 				'change'
 			);
@@ -225,7 +293,7 @@ jQuery( function ( $ ) {
 		/**
 		 * Handles when a shipping method is selected.
 		 */
-		shipping_method_selected: function () {
+		shipping_method_selected: function ( event ) {
 			var shipping_methods = {};
 
 			// eslint-disable-next-line max-len
@@ -249,6 +317,12 @@ jQuery( function ( $ ) {
 				dataType: 'html',
 				success: function ( response ) {
 					update_cart_totals_div( response );
+
+					var newCurrentTarget = document.getElementById( event.currentTarget.id );
+
+					if ( newCurrentTarget ) {
+						newCurrentTarget.focus();
+					}
 				},
 				complete: function () {
 					unblock( $( 'div.cart_totals' ) );
@@ -309,6 +383,7 @@ jQuery( function ( $ ) {
 			this.apply_coupon = this.apply_coupon.bind( this );
 			this.remove_coupon_clicked =
 				this.remove_coupon_clicked.bind( this );
+			this.remove_coupon_error = this.remove_coupon_error.bind( this );
 			this.quantity_update = this.quantity_update.bind( this );
 			this.item_remove_clicked = this.item_remove_clicked.bind( this );
 			this.item_restore_clicked = this.item_restore_clicked.bind( this );
@@ -338,6 +413,11 @@ jQuery( function ( $ ) {
 				this.remove_coupon_clicked
 			);
 			$( document ).on(
+				'keydown',
+				'a.woocommerce-remove-coupon',
+				this.on_keydown_remove_coupon
+			);
+			$( document ).on(
 				'click',
 				'.woocommerce-cart-form .product-remove > a',
 				this.item_remove_clicked
@@ -351,6 +431,11 @@ jQuery( function ( $ ) {
 				'change input',
 				'.woocommerce-cart-form .cart_item :input',
 				this.input_changed
+			);
+			$( document ).on(
+				'blur change input',
+				'#coupon_code',
+				this.remove_coupon_error
 			);
 
 			$( '.woocommerce-cart-form :input[name="update_cart"]' ).prop(
@@ -519,16 +604,28 @@ jQuery( function ( $ ) {
 				dataType: 'html',
 				success: function ( response ) {
 					$(
-						'.woocommerce-error, .woocommerce-message, .woocommerce-info, .is-error, .is-info, .is-success'
+						'.woocommerce-error, .woocommerce-message, .woocommerce-info, ' +
+						'.is-error, .is-info, .is-success, .coupon-error-notice'
 					).remove();
-					show_notice( response );
+
+					// We only want to show coupon notices if they are not errors.
+					// Coupon errors are shown under the input.
+					if ( response.indexOf( 'woocommerce-error' ) === -1 && response.indexOf( 'is-error' ) === -1 ) {
+						show_notice( response );
+					} else {
+						var $coupon_wrapper = $text_field.closest( '.coupon' );
+
+						if ( $coupon_wrapper.length > 0 ) {
+							show_coupon_error( response, $coupon_wrapper, false );
+						}
+					}
+
 					$( document.body ).trigger( 'applied_coupon', [
 						coupon_code,
 					] );
 				},
 				complete: function () {
 					unblock( $form );
-					$text_field.val( '' );
 					cart.update_cart( true );
 				},
 			} );
@@ -570,6 +667,35 @@ jQuery( function ( $ ) {
 					cart.update_cart( true );
 				},
 			} );
+		},
+
+		/**
+		 * Handle when pressing the Space key on the remove coupon link.
+		 * This is necessary because the link got the role="button" attribute
+		 * and needs to act like a button.
+		 *
+		 * @param {Object} evt The JQuery event
+		 */
+		on_keydown_remove_coupon: function ( evt ) {
+			if ( evt.key === ' ' ) {
+				evt.preventDefault();
+				$( evt.currentTarget ).trigger( 'click' );
+			}
+		},
+
+		/**
+		 * Handle when the coupon input loses focus.
+		 *
+		 * @param {Object} evt The JQuery event
+		 */
+		remove_coupon_error: function ( evt ) {
+			$( evt.currentTarget )
+				.removeClass( 'has-error' )
+				.removeAttr( 'aria-invalid' )
+				.removeAttr( 'aria-describedby' )
+				.closest( '.coupon' )
+				.find( '.coupon-error-notice' )
+				.remove();
 		},
 
 		/**
@@ -630,6 +756,7 @@ jQuery( function ( $ ) {
 					unblock( $form );
 					unblock( $( 'div.cart_totals' ) );
 					$.scroll_to_notices( $( '[role="alert"]' ) );
+					$( document.body ).trigger( 'item_removed_from_classic_cart');
 				},
 			} );
 		},

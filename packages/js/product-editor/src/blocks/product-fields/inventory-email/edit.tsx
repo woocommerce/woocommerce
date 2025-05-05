@@ -14,7 +14,6 @@ import { getSetting } from '@woocommerce/settings';
 import { useInstanceId } from '@wordpress/compose';
 import {
 	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -52,10 +51,12 @@ export function Edit( {
 		`low_stock_amount-${ clientId }`,
 		async function stockQuantityValidator() {
 			if ( lowStockAmount && lowStockAmount < 0 ) {
-				return __(
-					'This field must be a positive number.',
-					'woocommerce'
-				);
+				return {
+					message: __(
+						'This field must be a positive number.',
+						'woocommerce'
+					),
+				};
 			}
 		},
 		[ lowStockAmount ]
@@ -105,9 +106,15 @@ export function Edit( {
 									__( '%d (store default)', 'woocommerce' ),
 									notifyLowStockAmount
 								) }
-								onChange={ setLowStockAmount }
-								onBlur={ validateLowStockAmount }
-								value={ lowStockAmount }
+								onChange={ ( nextValue ) => {
+									setLowStockAmount(
+										parseInt( nextValue ?? '', 10 )
+									);
+								} }
+								onBlur={ async () =>
+									await validateLowStockAmount()
+								}
+								value={ lowStockAmount?.toString() }
 								type="number"
 								min={ 0 }
 							/>

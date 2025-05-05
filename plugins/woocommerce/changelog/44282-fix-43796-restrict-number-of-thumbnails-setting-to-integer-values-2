@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Restrict the Number of Thumbnails setting from the Product Gallery block to integer values

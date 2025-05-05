@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\RemoteFreeExtensions;
 
-use Automattic\WooCommerce\Admin\DataSourcePoller;
+use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
 
 use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Init as RemoteFreeExtensions;
 use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\DefaultFreeExtensions;
@@ -140,9 +140,15 @@ class InitTest extends WC_Unit_Test_Case {
 		);
 
 		$bundles           = RemoteFreeExtensions::get_extensions();
+		$defaults          = DefaultFreeExtensions::get_all();
 		$stored_transients = get_transient( 'woocommerce_admin_' . RemoteFreeExtensionsDataSourcePoller::ID . '_specs' );
+
+		$this->assertTrue( count( $stored_transients['en_US'] ) === 0 );
 		$this->assertTrue( count( $bundles ) > 1 );
-		$this->assertEquals( count( $stored_transients['en_US'] ), count( DefaultFreeExtensions::get_all() ) );
+		$this->assertEquals( count( $bundles ), count( $defaults ) );
+		foreach ( $bundles as $key => $bundle ) {
+			$this->assertEquals( $defaults[ $key ]->key, $bundle['key'] );
+		}
 
 		$expires = (int) get_transient( '_transient_timeout_woocommerce_admin_' . RemoteFreeExtensionsDataSourcePoller::ID . '_specs' );
 		$this->assertTrue( ( $expires - time() ) < 3 * HOUR_IN_SECONDS );

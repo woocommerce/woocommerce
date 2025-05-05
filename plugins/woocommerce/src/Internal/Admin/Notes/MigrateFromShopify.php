@@ -71,7 +71,7 @@ class MigrateFromShopify {
 		$note->add_action(
 			'migrate-from-shopify',
 			__( 'Learn more', 'woocommerce' ),
-			'https://woo.com/posts/migrate-from-shopify-to-woocommerce/?utm_source=inbox&utm_medium=product',
+			'https://woocommerce.com/posts/migrate-from-shopify-to-woocommerce/?utm_source=inbox&utm_medium=product',
 			Note::E_WC_ADMIN_NOTE_ACTIONED
 		);
 		return $note;

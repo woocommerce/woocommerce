@@ -97,9 +97,58 @@ function getFilesFromDir( dir ) {
 		.map( ( dirent ) => path.join( dir, dirent.name ) );
 }
 
+/**
+ * A logging helper for printing steps and their substeps.
+ *
+ * @param {number} indent Value to indent the log.
+ * @param {any}    msg    Message to log.
+ * @param {...any} args   Rest of the arguments to pass to console.log.
+ */
+function logAtIndent( indent, msg, ...args ) {
+	const prefix = indent === 0 ? '▶ ' : '> ';
+	const newline = indent === 0 ? '\n' : '';
+	return console.log(
+		newline + '    '.repeat( indent ) + prefix + msg,
+		...args
+	);
+}
+
+/**
+ * Sanitizes branch name to be used in a path or a filename.
+ *
+ * @param {string} branch
+ *
+ * @return {string} Sanitized branch name.
+ */
+function sanitizeBranchName( branch ) {
+	return branch.replace( /[^a-zA-Z0-9-]/g, '-' );
+}
+
+/**
+ * Computes the median number from an array numbers.
+ *
+ * @param {number[]} array
+ *
+ * @return {number|undefined} Median value or undefined if array empty.
+ */
+function median( array ) {
+	if ( ! array || ! array.length ) return undefined;
+
+	const numbers = [ ...array ].sort( ( a, b ) => a - b );
+	const middleIndex = Math.floor( numbers.length / 2 );
+
+	if ( numbers.length % 2 === 0 ) {
+		return ( numbers[ middleIndex - 1 ] + numbers[ middleIndex ] ) / 2;
+	}
+	return numbers[ middleIndex ];
+}
+
 module.exports = {
 	askForConfirmation,
 	readJSONFile,
 	runShellScript,
 	getFilesFromDir,
+	logAtIndent,
+	sanitizeBranchName,
+	median
 };

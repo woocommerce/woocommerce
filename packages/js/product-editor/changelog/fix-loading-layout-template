@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Tweak useProductTemplate logic and avoid loading layout template before product is loaded

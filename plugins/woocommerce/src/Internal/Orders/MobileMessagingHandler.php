@@ -106,7 +106,7 @@ class MobileMessagingHandler {
 				),
 				self::prepare_utm_parameters( 'deeplinks_payments', $blog_id, $domain )
 			),
-			'https://woo.com/mobile/payments'
+			'https://woocommerce.com/mobile/payments'
 		);
 
 		return sprintf(
@@ -138,7 +138,7 @@ class MobileMessagingHandler {
 				),
 				self::prepare_utm_parameters( 'deeplinks_orders_details', $blog_id, $domain )
 			),
-			'https://woo.com/mobile/orders/details'
+			'https://woocommerce.com/mobile/orders/details'
 		);
 
 		return sprintf(
@@ -168,7 +168,7 @@ class MobileMessagingHandler {
 				),
 				self::prepare_utm_parameters( 'deeplinks_promote_app', $blog_id, $domain )
 			),
-			'https://woo.com/mobile'
+			'https://woocommerce.com/mobile'
 		);
 		return sprintf(
 			/* translators: 1: opening link tag 2: closing link tag. */
@@ -182,7 +182,7 @@ class MobileMessagingHandler {
 	}
 
 	/**
-	 * Prepares array of parameters used by Woo.com for tracking.
+	 * Prepares array of parameters used by WooCommerce.com for tracking.
 	 *
 	 * @param string   $campaign name of the deep link campaign.
 	 * @param int|null $blog_id blog id of the current site.

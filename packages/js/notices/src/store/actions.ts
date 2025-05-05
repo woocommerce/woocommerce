@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { uniqueId } from 'lodash';
-import { Status, Action as WPNoticeAction } from '@wordpress/notices';
+import type { WPNoticeAction } from '@wordpress/notices/build-types/store/actions';
 
 /**
  * Internal dependencies
@@ -45,7 +45,7 @@ export type Options = {
  *                                                             presented with notice.
  * @param {Object}                [options.icon]               An icon displayed with the notice.
  * @param {boolean}               [options.explicitDismiss]    Whether the notice includes
- *                                                             an explict dismiss button and
+ *                                                             an explicit dismiss button and
  *                                                             can't be dismissed by clicking
  *                                                             the body of the notice.
  * @param {Function}              [options.onDismiss]          Called when the notice is dismissed.
@@ -54,7 +54,7 @@ export type Options = {
  * @return {Object} WPNoticeAction object.
  */
 export function createNotice(
-	status: Status = DEFAULT_STATUS,
+	status: string = DEFAULT_STATUS,
 	content: string,
 	options: Partial< Options > = {}
 ) {

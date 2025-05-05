@@ -1,16 +1,16 @@
 <?php
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\WooCommerce\Blocks\AI\Connection;
-use Automattic\WooCommerce\Blocks\Images\Pexels;
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Domain\Package;
-use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
-use Automattic\WooCommerce\Blocks\AIContent\UpdatePatterns;
-use Automattic\WooCommerce\Blocks\AIContent\UpdateProducts;
+use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
+use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 
 /**
- * Registers patterns under the `./patterns/` directory and updates their content.
- * Each pattern is defined as a PHP file and defines its metadata using plugin-style headers.
+ * Registers patterns under the `./patterns/` directory and from the PTK API and updates their content.
+ * Each pattern from core is defined as a PHP file and defines its metadata using plugin-style headers.
  * The minimum required definition is:
  *
  *     /**
@@ -34,81 +34,109 @@ use Automattic\WooCommerce\Blocks\AIContent\UpdateProducts;
  * @internal
  */
 class BlockPatterns {
-	const SLUG_REGEX                 = '/^[A-z0-9\/_-]+$/';
-	const COMMA_SEPARATED_REGEX      = '/[\s,]+/';
-	const PATTERNS_AI_DATA_POST_TYPE = 'patterns_ai_data';
+	const CATEGORIES_PREFIXES = [ '_woo_', '_dotcom_imported_' ];
 
 	/**
-	 * Path to the patterns directory.
+	 * Path to the patterns' directory.
 	 *
 	 * @var string $patterns_path
 	 */
-	private $patterns_path;
+	private string $patterns_path;
+
+	/**
+	 * PatternRegistry instance.
+	 *
+	 * @var PatternRegistry $pattern_registry
+	 */
+	private PatternRegistry $pattern_registry;
+
+	/**
+	 * PTKPatternsStore instance.
+	 *
+	 * @var PTKPatternsStore $ptk_patterns_store
+	 */
+	private PTKPatternsStore $ptk_patterns_store;
 
 	/**
 	 * Constructor for class
 	 *
-	 * @param Package $package An instance of Package.
+	 * @param Package          $package An instance of Package.
+	 * @param PatternRegistry  $pattern_registry An instance of PatternRegistry.
+	 * @param PTKPatternsStore $ptk_patterns_store An instance of PTKPatternsStore.
 	 */
-	public function __construct( Package $package ) {
-		$this->patterns_path = $package->get_path( 'patterns' );
+	public function __construct(
+		Package $package,
+		PatternRegistry $pattern_registry,
+		PTKPatternsStore $ptk_patterns_store
+	) {
+		$this->patterns_path      = $package->get_path( 'patterns' );
+		$this->pattern_registry   = $pattern_registry;
+		$this->ptk_patterns_store = $ptk_patterns_store;
 
 		add_action( 'init', array( $this, 'register_block_patterns' ) );
-		add_action( 'update_option_woo_ai_describe_store_description', array( $this, 'schedule_on_option_update' ), 10, 2 );
-		add_action( 'update_option_woo_ai_describe_store_description', array( $this, 'update_ai_connection_allowed_option' ), 10, 2 );
-		add_action( 'upgrader_process_complete', array( $this, 'schedule_on_plugin_update' ), 10, 2 );
-		add_action( 'woocommerce_update_patterns_content', array( $this, 'update_patterns_content' ) );
+
+		if ( Features::is_enabled( 'pattern-toolkit-full-composability' ) ) {
+			add_action( 'init', array( $this, 'register_ptk_patterns' ) );
+		}
 	}
 
 	/**
-	 * Make sure the 'woocommerce_blocks_allow_ai_connection' option is set to true if the site is connected to AI.
+	 * Loads the content of a pattern.
 	 *
-	 * @param string $option The option name.
-	 * @param string $value The option value.
-	 *
-	 * @return bool
+	 * @param string $pattern_path The path to the pattern.
+	 * @return string The content of the pattern.
 	 */
-	public function update_ai_connection_allowed_option( $option, $value ): bool {
-		$ai_connection = new Connection();
-
-		$site_id = $ai_connection->get_site_id();
-
-		if ( is_wp_error( $site_id ) ) {
-			return update_option( 'woocommerce_blocks_allow_ai_connection', false );
+	private function load_pattern_content( $pattern_path ) {
+		if ( ! file_exists( $pattern_path ) ) {
+			return '';
 		}
 
-		$token = $ai_connection->get_jwt_token( $site_id );
-
-		if ( is_wp_error( $token ) ) {
-			return update_option( 'woocommerce_blocks_allow_ai_connection', false );
-		}
-
-		return update_option( 'woocommerce_blocks_allow_ai_connection', true );
+		ob_start();
+		include $pattern_path;
+		return ob_get_clean();
 	}
 
 	/**
-	 * Registers the block patterns and categories under `./patterns/`.
+	 * Register block patterns from core.
+	 *
+	 * @return void
 	 */
 	public function register_block_patterns() {
 		if ( ! class_exists( 'WP_Block_Patterns_Registry' ) ) {
 			return;
 		}
 
-		register_post_type(
-			self::PATTERNS_AI_DATA_POST_TYPE,
-			array(
-				'labels'           => array(
-					'name'          => __( 'Patterns AI Data', 'woocommerce' ),
-					'singular_name' => __( 'Patterns AI Data', 'woocommerce' ),
-				),
-				'public'           => false,
-				'hierarchical'     => false,
-				'rewrite'          => false,
-				'query_var'        => false,
-				'delete_with_user' => false,
-				'can_export'       => true,
-			)
-		);
+		$patterns = $this->get_block_patterns();
+		foreach ( $patterns as $pattern ) {
+			/**
+			 * Handle backward compatibility for pattern source paths.
+			 * Previously, patterns were stored with absolute paths. Now we store relative paths.
+			 * If we encounter a pattern with an absolute path (containing $patterns_path),
+			 * we keep it as is. Otherwise, we construct the full path from the relative source.
+			 *
+			 * Remove the backward compatibility logic in the WooCommerce 10.1 lifecycle: https://github.com/woocommerce/woocommerce/issues/57354.
+			 */
+			$pattern_path      = str_contains( $pattern['source'], $this->patterns_path ) ? $pattern['source'] : $this->patterns_path . '/' . $pattern['source'];
+			$pattern['source'] = $pattern_path;
+
+			$content            = $this->load_pattern_content( $pattern_path );
+			$pattern['content'] = $content;
+
+			$this->pattern_registry->register_block_pattern( $pattern_path, $pattern );
+		}
+	}
+
+	/**
+	 * Gets block pattern data from the cache if available
+	 *
+	 * @return array Block pattern data.
+	 */
+	private function get_block_patterns() {
+		$pattern_data = $this->get_pattern_cache();
+
+		if ( is_array( $pattern_data ) ) {
+			return $pattern_data;
+		}
 
 		$default_headers = array(
 			'title'         => 'Title',
@@ -119,286 +147,130 @@ class BlockPatterns {
 			'keywords'      => 'Keywords',
 			'blockTypes'    => 'Block Types',
 			'inserter'      => 'Inserter',
+			'featureFlag'   => 'Feature Flag',
+			'templateTypes' => 'Template Types',
 		);
 
 		if ( ! file_exists( $this->patterns_path ) ) {
-			return;
+			return array();
 		}
 
 		$files = glob( $this->patterns_path . '/*.php' );
 		if ( ! $files ) {
-			return;
+			return array();
 		}
 
-		$dictionary = PatternsHelper::get_patterns_dictionary();
+		$patterns = array();
 
 		foreach ( $files as $file ) {
-			$pattern_data = get_file_data( $file, $default_headers );
-
-			if ( empty( $pattern_data['slug'] ) ) {
-				_doing_it_wrong(
-					'register_block_patterns',
-					esc_html(
-						sprintf(
-						/* translators: %s: file name. */
-							__( 'Could not register file "%s" as a block pattern ("Slug" field missing)', 'woocommerce' ),
-							$file
-						)
-					),
-					'6.0.0'
-				);
-				continue;
-			}
-
-			if ( ! preg_match( self::SLUG_REGEX, $pattern_data['slug'] ) ) {
-				_doing_it_wrong(
-					'register_block_patterns',
-					esc_html(
-						sprintf(
-						/* translators: %1s: file name; %2s: slug value found. */
-							__( 'Could not register file "%1$s" as a block pattern (invalid slug "%2$s")', 'woocommerce' ),
-							$file,
-							$pattern_data['slug']
-						)
-					),
-					'6.0.0'
-				);
-				continue;
-			}
-
-			if ( \WP_Block_Patterns_Registry::get_instance()->is_registered( $pattern_data['slug'] ) ) {
-				continue;
-			}
-
-			// Title is a required property.
-			if ( ! $pattern_data['title'] ) {
-				_doing_it_wrong(
-					'register_block_patterns',
-					esc_html(
-						sprintf(
-						/* translators: %1s: file name; %2s: slug value found. */
-							__( 'Could not register file "%s" as a block pattern ("Title" field missing)', 'woocommerce' ),
-							$file
-						)
-					),
-					'6.0.0'
-				);
-				continue;
-			}
-
-			// For properties of type array, parse data as comma-separated.
-			foreach ( array( 'categories', 'keywords', 'blockTypes' ) as $property ) {
-				if ( ! empty( $pattern_data[ $property ] ) ) {
-					$pattern_data[ $property ] = array_filter(
-						preg_split(
-							self::COMMA_SEPARATED_REGEX,
-							(string) $pattern_data[ $property ]
-						)
-					);
-				} else {
-					unset( $pattern_data[ $property ] );
-				}
-			}
-
-			// Parse properties of type int.
-			foreach ( array( 'viewportWidth' ) as $property ) {
-				if ( ! empty( $pattern_data[ $property ] ) ) {
-					$pattern_data[ $property ] = (int) $pattern_data[ $property ];
-				} else {
-					unset( $pattern_data[ $property ] );
-				}
-			}
-
-			// Parse properties of type bool.
-			foreach ( array( 'inserter' ) as $property ) {
-				if ( ! empty( $pattern_data[ $property ] ) ) {
-					$pattern_data[ $property ] = in_array(
-						strtolower( $pattern_data[ $property ] ),
-						array( 'yes', 'true' ),
-						true
-					);
-				} else {
-					unset( $pattern_data[ $property ] );
-				}
-			}
-
-			// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
-			$pattern_data['title'] = translate_with_gettext_context( $pattern_data['title'], 'Pattern title', 'woocommerce' );
-			if ( ! empty( $pattern_data['description'] ) ) {
-				// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
-				$pattern_data['description'] = translate_with_gettext_context( $pattern_data['description'], 'Pattern description', 'woocommerce' );
-			}
-
-			$pattern_data_from_dictionary = $this->get_pattern_from_dictionary( $dictionary, $pattern_data['slug'] );
-
-			// The actual pattern content is the output of the file.
-			ob_start();
-
-			/*
-				For patterns that can have AI-generated content, we need to get its content from the dictionary and pass
-				it to the pattern file through the "$content" and "$images" variables.
-				This is to avoid having to access the dictionary for each pattern when it's registered or inserted.
-				Before the "$content" and "$images" variables were populated in each pattern. Since the pattern
-				registration happens in the init hook, the dictionary was being access one for each pattern and
-				for each page load. This way we only do it once on registration.
-				For more context: https://github.com/woocommerce/woocommerce-blocks/pull/11733
-			*/
-
-			$content = array();
-			$images  = array();
-			if ( ! is_null( $pattern_data_from_dictionary ) ) {
-				$content = $pattern_data_from_dictionary['content'];
-				$images  = $pattern_data_from_dictionary['images'] ?? array();
-			}
-			include $file;
-			$pattern_data['content'] = ob_get_clean();
-
-			if ( ! $pattern_data['content'] ) {
-				continue;
-			}
-
-			foreach ( $pattern_data['categories'] as $key => $category ) {
-				$category_slug = _wp_to_kebab_case( $category );
-
-				$pattern_data['categories'][ $key ] = $category_slug;
-
-				register_block_pattern_category(
-					$category_slug,
-					// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
-					array( 'label' => __( $category, 'woocommerce' ) )
-				);
-			}
-
-			register_block_pattern( $pattern_data['slug'], $pattern_data );
+			$data = get_file_data( $file, $default_headers );
+			// We want to store the relative path in the cache, so we can use it later to register the pattern.
+			$data['source'] = str_replace( $this->patterns_path . '/', '', $file );
+			$patterns[]     = $data;
 		}
+
+		$this->set_pattern_cache( $patterns );
+		return $patterns;
 	}
 
 	/**
-	 * Update the patterns content when the store description is changed.
+	 * Gets block pattern cache.
 	 *
-	 * @param string $option The option name.
-	 * @param string $value The option value.
+	 * @return array|false Returns an array of patterns if cache is found, otherwise false.
 	 */
-	public function schedule_on_option_update( $option, $value ) {
-		$last_business_description = get_option( 'last_business_description_with_ai_content_generated' );
+	private function get_pattern_cache() {
+		$pattern_data = get_site_transient( 'woocommerce_blocks_patterns' );
 
-		if ( $last_business_description === $value ) {
+		if ( is_array( $pattern_data ) && WOOCOMMERCE_VERSION === $pattern_data['version'] ) {
+			return $pattern_data['patterns'];
+		}
+
+		return false;
+	}
+
+	/**
+	 * Sets block pattern cache.
+	 *
+	 * @param array $patterns Block patterns data to set in cache.
+	 */
+	private function set_pattern_cache( array $patterns ) {
+		$pattern_data = array(
+			'version'  => WOOCOMMERCE_VERSION,
+			'patterns' => $patterns,
+		);
+
+		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data, MONTH_IN_SECONDS );
+	}
+
+	/**
+	 * Register patterns from the Patterns Toolkit.
+	 *
+	 * @return void
+	 */
+	public function register_ptk_patterns() {
+		// Only if the user has allowed tracking, we register the patterns from the PTK.
+		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
+		if ( ! $allow_tracking ) {
 			return;
 		}
 
-		$this->schedule_patterns_content_update( $value );
-	}
+		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
+		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
+		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
 
-	/**
-	 * Update the patterns content when the WooCommerce Blocks plugin is updated.
-	 *
-	 * @param \WP_Upgrader $upgrader_object  WP_Upgrader instance.
-	 * @param array        $options  Array of bulk item update data.
-	 */
-	public function schedule_on_plugin_update( $upgrader_object, $options ) {
-		if ( 'update' === $options['action'] && 'plugin' === $options['type'] && isset( $options['plugins'] ) ) {
-			foreach ( $options['plugins'] as $plugin ) {
-				if ( str_contains( $plugin, 'woocommerce-gutenberg-products-block.php' ) || str_contains( $plugin, 'woocommerce.php' ) ) {
-					$business_description = get_option( 'woo_ai_describe_store_description' );
-
-					if ( $business_description ) {
-						$this->schedule_patterns_content_update( $business_description );
-					}
-				}
+		$patterns = $this->ptk_patterns_store->get_patterns();
+		if ( empty( $patterns ) ) {
+			// Only log once per day by using a transient.
+			$transient_key = 'wc_ptk_pattern_store_warning';
+			// By only logging when patterns are empty and no fetch is scheduled,
+			// we ensure that warnings are only generated in genuinely problematic situations,
+			// such as when the pattern fetching mechanism has failed entirely.
+			if ( ! get_transient( $transient_key ) && ! call_user_func( $has_scheduled_action, 'fetch_patterns' ) ) {
+				wc_get_logger()->warning(
+					__( 'Empty patterns received from the PTK Pattern Store', 'woocommerce' ),
+				);
+				// Set the transient to true to indicate that the warning has been logged in the current day.
+				set_transient( $transient_key, true, DAY_IN_SECONDS );
 			}
-		}
-	}
-
-	/**
-	 * Update the patterns content when the store description is changed.
-	 *
-	 * @param string $business_description The business description.
-	 */
-	public function schedule_patterns_content_update( $business_description ) {
-		if ( ! class_exists( 'WooCommerce' ) ) {
 			return;
 		}
 
-		$action_scheduler = WP_PLUGIN_DIR . '/woocommerce/packages/action-scheduler/action-scheduler.php';
+		$patterns = $this->parse_categories( $patterns );
 
-		if ( ! file_exists( $action_scheduler ) ) {
-			return;
+		foreach ( $patterns as $pattern ) {
+			$pattern['slug']    = $pattern['name'];
+			$pattern['content'] = $pattern['html'];
+
+			$this->pattern_registry->register_block_pattern( $pattern['ID'], $pattern );
 		}
-
-		require_once $action_scheduler;
-
-		as_schedule_single_action( time(), 'woocommerce_update_patterns_content', array( $business_description ) );
 	}
 
 	/**
-	 * Update the patterns content.
+	 * Parse prefixed categories from the PTK patterns into the actual WooCommerce categories.
 	 *
-	 * @param string $value The new value saved for the add_option_woo_ai_describe_store_description option.
-	 *
-	 * @return bool|string|\WP_Error
+	 * @param array $patterns The patterns to parse.
+	 * @return array The parsed patterns.
 	 */
-	public function update_patterns_content( $value ) {
-		$allow_ai_connection = get_option( 'woocommerce_blocks_allow_ai_connection' );
+	private function parse_categories( array $patterns ) {
+		return array_map(
+			function ( $pattern ) {
+				$pattern['categories'] = array_map(
+					function ( $category ) {
+						foreach ( self::CATEGORIES_PREFIXES as $prefix ) {
+							if ( strpos( $category['title'], $prefix ) !== false ) {
+								$parsed_category   = str_replace( $prefix, '', $category['title'] );
+								$parsed_category   = str_replace( '_', ' ', $parsed_category );
+								$category['title'] = ucfirst( $parsed_category );
+							}
+						}
 
-		if ( ! $allow_ai_connection ) {
-			return new \WP_Error(
-				'ai_connection_not_allowed',
-				__( 'AI content generation is not allowed on this store. Update your store settings if you wish to enable this feature.', 'woocommerce' )
-			);
-		}
-
-		$ai_connection = new Connection();
-
-		$site_id = $ai_connection->get_site_id();
-
-		if ( is_wp_error( $site_id ) ) {
-			return $site_id->get_error_message();
-		}
-
-		$token = $ai_connection->get_jwt_token( $site_id );
-
-		if ( is_wp_error( $token ) ) {
-			return $token->get_error_message();
-		}
-
-		$business_description = get_option( 'woo_ai_describe_store_description' );
-
-		$images = ( new Pexels() )->get_images( $ai_connection, $token, $business_description );
-
-		if ( is_wp_error( $images ) ) {
-			return $images->get_error_message();
-		}
-
-		$populate_patterns = ( new UpdatePatterns() )->generate_content( $ai_connection, $token, $images, $business_description );
-
-		if ( is_wp_error( $populate_patterns ) ) {
-			return $populate_patterns->get_error_message();
-		}
-
-		$populate_products = ( new UpdateProducts() )->generate_content( $ai_connection, $token, $images, $business_description );
-
-		if ( is_wp_error( $populate_products ) ) {
-			return $populate_products->get_error_message();
-		}
-
-		return true;
-	}
-
-	/**
-	 * Filter the patterns dictionary to get the pattern data corresponding to the pattern slug.
-	 *
-	 * @param array  $dictionary The patterns dictionary.
-	 * @param string $slug The pattern slug.
-	 *
-	 * @return array|null
-	 */
-	private function get_pattern_from_dictionary( $dictionary, $slug ) {
-		foreach ( $dictionary as $pattern_dictionary ) {
-			if ( isset( $pattern_dictionary['slug'] ) && $pattern_dictionary['slug'] === $slug ) {
-				return $pattern_dictionary;
-			}
-		}
-
-		return null;
+						return $category;
+					},
+					$pattern['categories']
+				);
+				return $pattern;
+			},
+			$patterns
+		);
 	}
 }

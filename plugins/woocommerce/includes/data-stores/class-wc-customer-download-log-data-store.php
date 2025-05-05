@@ -149,10 +149,10 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 	}
 
 	/**
-	 * Get array of download log ids by specified args.
+	 * Get array of download logs, or the count of existing logs, by specified args.
 	 *
-	 * @param  array $args Arguments to define download logs to retrieve.
-	 * @return array
+	 * @param  array $args Arguments to define download logs to retrieve. If $args['return'] is 'count' then the count of existing logs will be returned.
+	 * @return array|int
 	 */
 	public function get_download_logs( $args = array() ) {
 		global $wpdb;
@@ -171,9 +171,11 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 			)
 		);
 
+		$is_count = 'count' === $args['return'];
+
 		$query   = array();
 		$table   = $wpdb->prefix . self::get_table_name();
-		$query[] = "SELECT * FROM {$table} WHERE 1=1";
+		$query[] = 'SELECT ' . ( $is_count ? 'COUNT(1)' : '*' ) . " FROM {$table} WHERE 1=1";
 
 		if ( $args['permission_id'] ) {
 			$query[] = $wpdb->prepare( 'AND permission_id = %d', $args['permission_id'] );
@@ -197,7 +199,13 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 			$query[] = $wpdb->prepare( 'LIMIT %d, %d', absint( $args['limit'] ) * absint( $args['page'] - 1 ), absint( $args['limit'] ) );
 		}
 
-		$raw_download_logs = $wpdb->get_results( implode( ' ', $query ) ); // WPCS: unprepared SQL ok.
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		if ( $is_count ) {
+			return absint( $wpdb->get_var( implode( ' ', $query ) ) );
+		}
+
+		$raw_download_logs = $wpdb->get_results( implode( ' ', $query ) );
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 		switch ( $args['return'] ) {
 			case 'ids':
@@ -222,6 +230,26 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 		return $this->get_download_logs(
 			array(
 				'permission_id' => $permission_id,
+			)
+		);
+	}
+
+	/**
+	 * Get the count of download logs for a given download permission.
+	 *
+	 * @param int $permission_id Permission to get logs count for.
+	 * @return int
+	 */
+	public function get_download_logs_count_for_permission( $permission_id ) {
+		// If no permission_id is passed, return an empty array.
+		if ( empty( $permission_id ) ) {
+			return 0;
+		}
+
+		return $this->get_download_logs(
+			array(
+				'permission_id' => $permission_id,
+				'return'        => 'count',
 			)
 		);
 	}

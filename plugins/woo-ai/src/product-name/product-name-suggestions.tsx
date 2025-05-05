@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { __experimentalUseCompletion as useCompletion } from '@woocommerce/ai';
@@ -21,7 +20,7 @@ import {
 	getTags,
 	getAttributes,
 } from '../utils';
-import { useProductSlug } from '../hooks';
+import { useProductSlug, useDeprecationNotice } from '../hooks';
 import { ProductDataSuggestion } from '../utils/types';
 import { SuggestionItem, PoweredByLink, recordNameTracks } from './index';
 import { RandomLoadingMessage } from '../components';
@@ -65,6 +64,7 @@ export const ProductNameSuggestions = () => {
 		[]
 	);
 	const { updateProductSlug } = useProductSlug();
+	const { showDeprecationNotice } = useDeprecationNotice();
 	const { requestCompletion } = useCompletion( {
 		feature: WOO_AI_PLUGIN_FEATURE_NAME,
 		onStreamError: ( error ) => {
@@ -240,7 +240,7 @@ export const ProductNameSuggestions = () => {
 			'Return a short and concise reason for each suggestion in seven words in the "reason" part of your response.',
 			"The product's properties are:",
 			`${ JSON.stringify( validProductData ) }`,
-			'Here is an example of a valid response:',
+			'Write your response in valid JSON. Here is an example of a valid response:',
 			'{"suggestions": [{"content": "An improved alternative to the product\'s title", "reason": "Reason for the suggestion"}, {"content": "Another improved alternative to the product title", "reason": "Reason for this suggestion"}]}',
 		];
 
@@ -261,8 +261,10 @@ export const ProductNameSuggestions = () => {
 			current_title: getProductName(),
 		} );
 
+		showDeprecationNotice();
+
 		try {
-			await requestCompletion( buildPrompt() );
+			await requestCompletion( buildPrompt(), undefined, 'json_object' );
 		} catch ( e ) {
 			setSuggestionsState( SuggestionsState.Failed );
 		}

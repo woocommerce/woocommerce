@@ -1,28 +1,26 @@
-const closeWelcomeModal = async ( { page } ) => {
-	// Close welcome popup if prompted
-	try {
+const { getCanvas } = require( '@woocommerce/e2e-utils-playwright/src' );
+
+const fillPageTitle = async ( page, title ) => {
+	// Close the Block Inserter if it's open.
+	// Since Gutenberg 19.9 it is expanded by default.
+	if (
 		await page
-			.getByLabel( 'Close', { exact: true } )
-			.click( { timeout: 5000 } );
-	} catch ( error ) {
-		// Welcome modal wasn't present, skipping action.
+			.getByRole( 'button', {
+				name: /Toggle block inserter|Block Inserter/,
+				expanded: true,
+			} )
+			.isVisible()
+	) {
+		await page.getByLabel( 'Close Block Inserter' ).click();
 	}
-};
 
-const goToPageEditor = async ( { page } ) => {
-	await page.goto( 'wp-admin/post-new.php?post_type=page' );
-
-	await closeWelcomeModal( { page } );
-};
-
-const goToPostEditor = async ( { page } ) => {
-	await page.goto( 'wp-admin/post-new.php' );
-
-	await closeWelcomeModal( { page } );
+	const canvas = await getCanvas( page );
+	// Gutenberg (since 19.9) uses the "Block: Title" label.
+	const block_title = canvas.getByLabel( /Add title|Block: Title/ );
+	await block_title.click();
+	await block_title.fill( title );
 };
 
 module.exports = {
-	closeWelcomeModal,
-	goToPageEditor,
-	goToPostEditor,
+	fillPageTitle,
 };

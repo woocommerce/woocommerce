@@ -9,7 +9,6 @@ import { createElement, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
@@ -52,10 +51,12 @@ export function Edit( {
 		`stock_quantity-${ clientId }`,
 		async function stockQuantityValidator() {
 			if ( manageStock && stockQuantity && stockQuantity < 0 ) {
-				return __(
-					'Stock quantity must be a positive number.',
-					'woocommerce'
-				);
+				return {
+					message: __(
+						'Stock quantity must be a positive number.',
+						'woocommerce'
+					),
+				};
 			}
 		},
 		[ manageStock, stockQuantity ]
@@ -81,11 +82,15 @@ export function Edit( {
 						<InputControl
 							id={ stockQuantityId }
 							name="stock_quantity"
-							ref={ stockQuantityRef }
-							label={ __( 'Available quantity', 'woocommerce' ) }
-							value={ stockQuantity }
-							onChange={ setStockQuantity }
-							onBlur={ validateStockQuantity }
+							ref={
+								stockQuantityRef as React.RefObject< HTMLInputElement >
+							}
+							label={ __( 'Available stock', 'woocommerce' ) }
+							value={ stockQuantity?.toString() }
+							onChange={ ( value ) => {
+								setStockQuantity( parseInt( value ?? '', 10 ) );
+							} }
+							onBlur={ () => validateStockQuantity() }
 							type="number"
 							min={ 0 }
 						/>

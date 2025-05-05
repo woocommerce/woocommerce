@@ -6,12 +6,14 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 defined( 'ABSPATH' ) || exit;
 
 global $wpdb;
 
-$report             = wc()->api->get_endpoint_data( '/wc/v3/system_status' );
+$report             = wc_get_container()->get( RestApiUtil::class )->get_endpoint_data( '/wc/v3/system_status' );
 $environment        = $report['environment'];
 $database           = $report['database'];
 $post_type_counts   = isset( $report['post_type_counts'] ) ? $report['post_type_counts'] : array();
@@ -29,6 +31,20 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 $active_plugins_count   = is_countable( $active_plugins ) ? count( $active_plugins ) : 0;
 $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_plugins ) : 0;
 
+// Include necessary WordPress file to use get_plugin_data().
+if ( ! function_exists( 'get_plugin_data' ) ) {
+	require_once ABSPATH . 'wp-admin/includes/plugin.php';
+}
+// Define the path to the main WooCommerce plugin file using the correct constant.
+$plugin_path = WP_PLUGIN_DIR . '/woocommerce/woocommerce.php';
+// Initialize the WooCommerce version variable.
+$wc_version = '';
+// Check if the plugin file exists before trying to access it.
+if ( file_exists( $plugin_path ) ) {
+	$plugin_data = get_plugin_data( $plugin_path );
+	$wc_version  = $plugin_data['Version'] ?? ''; // Use null coalescing operator to handle undefined index.
+}
+
 ?>
 <div class="updated woocommerce-message inline">
 	<p>
@@ -36,7 +52,7 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 	</p>
 	<p class="submit">
 		<a href="#" class="button-primary debug-report"><?php esc_html_e( 'Get system report', 'woocommerce' ); ?></a>
-		<a class="button-secondary docs" href="https://woo.com/document/understanding-the-woocommerce-system-status-report/" target="_blank">
+		<a class="button-secondary docs" href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/" target="_blank">
 			<?php esc_html_e( 'Understanding the status report', 'woocommerce' ); ?>
 		</a>
 	</p>
@@ -48,6 +64,9 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 			</button>
 			<button id="copy-for-support" class="button" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>">
 				<?php esc_html_e( 'Copy for support', 'woocommerce' ); ?>
+			</button>
+			<button id="copy-for-github" class="button" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>">
+				<?php esc_html_e( 'Copy for GitHub', 'woocommerce' ); ?>
 			</button>
 		</p>
 		<p class="copy-error hidden">
@@ -75,19 +94,20 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 		<tr>
 			<td data-export-label="WC Version"><?php esc_html_e( 'WooCommerce version', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of WooCommerce installed on your site.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td><?php echo esc_html( $environment['version'] ); ?></td>
+			<td><?php echo esc_html( ! empty( $wc_version ) ? $wc_version : $environment['version'] ); ?></td>
+
 		</tr>
 		<tr>
-			<td data-export-label="REST API Version"><?php esc_html_e( 'WooCommerce REST API package', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce REST API package running on your site.', 'woocommerce' ) ); ?></td>
+			<td data-export-label="Legacy REST API Package Version"><?php esc_html_e( 'WooCommerce Legacy REST API package', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce Legacy REST API plugin running on this site.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
-				$version = wc()->api->get_rest_api_package_version();
-
-				if ( ! is_null( $version ) ) {
+				if ( WC()->legacy_rest_api_is_available() ) {
+					$plugin_path = wc_get_container()->get( \Automattic\WooCommerce\Utilities\PluginUtil::class )->get_wp_plugin_id( 'woocommerce-legacy-rest-api' );
+					$version     = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin_path )['Version'] ?? '';
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( wc()->api->get_rest_api_package_path() ) . '</code></mark> ';
 				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the REST API package.', 'woocommerce' ) . '</mark>';
+					echo '<mark class="info-icon"><span class="dashicons dashicons-info"></span> ' . esc_html__( 'The Legacy REST API plugin is not installed on this site.', 'woocommerce' ) . '</mark>';
 				}
 				?>
 			</td>
@@ -120,8 +140,14 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 				if ( $environment['log_directory_writable'] ) {
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( $environment['log_directory'] ) . '</code></mark> ';
 				} else {
-					/* Translators: %1$s: Log directory, %2$s: Log directory constant */
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( 'To allow logging, make %1$s writable or define a custom %2$s.', 'woocommerce' ), '<code>' . esc_html( $environment['log_directory'] ) . '</code>', '<code>WC_LOG_DIR</code>' ) . '</mark>';
+					printf(
+						'<mark class="error"><span class="dashicons dashicons-warning"></span> %s</mark>',
+						sprintf(
+							// Translators: %s: Log directory path.
+							esc_html__( 'To allow logging, make %s writable.', 'woocommerce' ),
+							'<code>' . esc_html( $environment['log_directory'] ) . '</code>'
+						)
+					);
 				}
 				?>
 			</td>
@@ -224,6 +250,11 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 			<td data-export-label="Server Info"><?php esc_html_e( 'Server info', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Information about the web server that is currently hosting your site.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td><?php echo esc_html( $environment['server_info'] ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Server Architecture"><?php esc_html_e( 'Server architecture', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Information about the operating system your server is running.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td><?php echo esc_html( $environment['server_architecture'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="PHP Version"><?php esc_html_e( 'PHP version', 'woocommerce' ); ?>:</td>
@@ -396,7 +427,12 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 			</td>
 		</tr>
 		<?php
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		/**
+		 * Filters the environment rows to show in the WooCommerce status report.
+		 */
 		$rows = apply_filters( 'woocommerce_system_status_environment_rows', array() );
+		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceVersionComment
 		foreach ( $rows as $row ) {
 			if ( ! empty( $row['success'] ) ) {
 				$css_class = 'yes';
@@ -446,7 +482,7 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 				<?php
 				if ( strlen( $database['database_prefix'] ) > 20 ) {
 					/* Translators: %1$s: Database prefix, %2$s: Docs link. */
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( '%1$s - We recommend using a prefix with less than 20 characters. See: %2$s', 'woocommerce' ), esc_html( $database['database_prefix'] ), '<a href="https://woo.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . esc_html__( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( '%1$s - We recommend using a prefix with less than 20 characters. See: %2$s', 'woocommerce' ), esc_html( $database['database_prefix'] ), '<a href="https://woocommerce.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . esc_html__( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . esc_html( $database['database_prefix'] ) . '</mark>';
 				}
@@ -557,7 +593,7 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 					<mark class="error"><span class="dashicons dashicons-warning"></span>
 					<?php
 					/* Translators: %s: docs link. */
-					echo wp_kses_post( sprintf( __( 'Your store is not using HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://woo.com/document/ssl-and-https/' ) );
+					echo wp_kses_post( sprintf( __( 'Your store is not using HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://woocommerce.com/document/ssl-and-https/' ) );
 					?>
 					</mark>
 				<?php endif; ?>
@@ -664,8 +700,8 @@ if ( 0 < $mu_plugins_count ) :
 	</thead>
 	<tbody>
 		<tr>
-			<td data-export-label="API Enabled"><?php esc_html_e( 'API enabled', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Does your site have REST API enabled?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td data-export-label="Legacy API Enabled"><?php esc_html_e( 'Legacy API enabled', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Does your site have the Legacy REST API enabled?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td><?php echo $settings['api_enabled'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
@@ -725,8 +761,8 @@ if ( 0 < $mu_plugins_count ) :
 			</td>
 		</tr>
 		<tr>
-			<td data-export-label="Connected to Woo.com"><?php esc_html_e( 'Connected to Woo.com', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is your site connected to Woo.com?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td data-export-label="Connected to WooCommerce.com"><?php esc_html_e( 'Connected to WooCommerce.com', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is your site connected to WooCommerce.com?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td><?php echo 'yes' === $settings['woocommerce_com_connected'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
@@ -735,11 +771,6 @@ if ( 0 < $mu_plugins_count ) :
 			<td><?php echo $settings['enforce_approved_download_dirs'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 
-		<tr>
-			<td data-export-label="HPOS feature screen enabled"><?php esc_html_e( 'HPOS feature screen enabled:', 'woocommerce' ); ?></td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is HPOS feature screen enabled?', 'woocommerce' ) ); ?></td>
-			<td><?php echo $settings['HPOS_feature_screen_enabled'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
-		</tr>
 		<tr>
 			<td data-export-label="HPOS feature enabled"><?php esc_html_e( 'HPOS enabled:', 'woocommerce' ); ?></td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is HPOS enabled?', 'woocommerce' ) ); ?></td>
@@ -754,6 +785,12 @@ if ( 0 < $mu_plugins_count ) :
 			<td data-export-label="HPOS data sync enabled"><?php esc_html_e( 'HPOS data sync enabled:', 'woocommerce' ); ?></td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is data sync enabled for HPOS?', 'woocommerce' ) ); ?></td>
 			<td><?php echo $settings['HPOS_sync_enabled'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
+		</tr>
+
+		<tr>
+			<td data-export-label="Enabled Features"><?php esc_html_e( 'Enabled features:', 'woocommerce' ); ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Features that are currently enabled.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( implode( ', ', $settings['enabled_features'] ) ); ?></td>
 		</tr>
 
 	</tbody>
@@ -841,19 +878,44 @@ if ( 0 < $mu_plugins_count ) :
 				/* Translators: %s: docs link. */
 				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . wp_kses_post( sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://wordpress.org/support/article/content-visibility/' ) ) . '</mark>';
 				$found_error = true;
-			} else {
+			} elseif ( $_page['shortcode_required'] || $_page['block_required'] ) {
 				// Shortcode and block check.
-				if ( $_page['shortcode_required'] || $_page['block_required'] ) {
-					if ( ! $_page['shortcode_present'] && ! $_page['block_present'] ) {
-						/* Translators: %1$s: shortcode text, %2$s: block slug. */
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . ( $_page['block_required'] ? sprintf( esc_html__( 'Page does not contain the %1$s shortcode or the %2$s block.', 'woocommerce' ), esc_html( $_page['shortcode'] ), esc_html( $_page['block'] ) ) : sprintf( esc_html__( 'Page does not contain the %s shortcode.', 'woocommerce' ), esc_html( $_page['shortcode'] ) ) ) . '</mark>'; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */
-						$found_error = true;
-					}
+				if ( ! $_page['shortcode_present'] && ! $_page['block_present'] ) {
+					/* Translators: %1$s: shortcode text, %2$s: block slug. */
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . ( $_page['block_required'] ? sprintf( esc_html__( 'Page does not contain the %1$s shortcode or the %2$s block.', 'woocommerce' ), esc_html( $_page['shortcode'] ), esc_html( $_page['block'] ) ) : sprintf( esc_html__( 'Page does not contain the %s shortcode.', 'woocommerce' ), esc_html( $_page['shortcode'] ) ) ) . '</mark>'; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */
+					$found_error = true;
+				}
+
+				// Warn merchants if both the shortcode and block are present, which will be a confusing shopper experience.
+				if ( $_page['shortcode_present'] && $_page['block_present'] ) {
+					/* Translators: %1$s: shortcode text, %2$s: block slug. */
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( 'Page contains both the %1$s shortcode and the %2$s block.', 'woocommerce' ), esc_html( $_page['shortcode'] ), esc_html( $_page['block'] ) ) . '</mark>'; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */
+					$found_error = true;
 				}
 			}
 
 			if ( ! $found_error ) {
-				echo '<mark class="yes">#' . absint( $_page['page_id'] ) . ' - ' . esc_html( str_replace( home_url(), '', get_permalink( $_page['page_id'] ) ) ) . '</mark>';
+
+				$additional_info = '';
+
+				if ( ! empty( $_page['shortcode'] ) || ! empty( $_page['block'] ) ) {
+					// We check first if, in a blocks theme, the template content does not load the page content.
+					if ( CartCheckoutUtils::is_overriden_by_custom_template_content( $_page['block'] ) ) {
+						$additional_info = __( "This page's content is overridden by custom template content", 'woocommerce' );
+					} elseif ( $_page['shortcode_present'] ) {
+						/* Translators: %1$s: shortcode text. */
+						$additional_info = sprintf( __( 'Contains the <strong>%1$s</strong> shortcode', 'woocommerce' ), esc_html( $_page['shortcode'] ) );
+					} elseif ( $_page['block_present'] ) {
+						/* Translators: %1$s: block slug. */
+						$additional_info = sprintf( __( 'Contains the <strong>%1$s</strong> block', 'woocommerce' ), esc_html( $_page['block'] ) );
+					}
+
+					if ( ! empty( $additional_info ) ) {
+						$additional_info = '<mark class="no"> - <span class="dashicons dashicons-info"></span> ' . $additional_info . '</mark>';
+					}
+				}
+
+				echo '<mark class="yes">#' . absint( $_page['page_id'] ) . ' - ' . esc_html( str_replace( home_url(), '', get_permalink( $_page['page_id'] ) ) ) . '</mark>' . $additional_info; /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped */
 			}
 
 			echo '</td></tr>';
@@ -931,6 +993,21 @@ if ( 0 < $mu_plugins_count ) :
 				<td><?php echo esc_html( $theme['parent_author_url'] ); ?></td>
 			</tr>
 		<?php endif ?>
+		<?php if ( isset( $theme['is_block_theme'] ) ) : ?>
+		<tr>
+			<td data-export-label="Theme type"><?php esc_html_e( 'Theme type', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether the current active theme is a block theme or a classic theme.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td>
+				<?php
+				if ( $theme['is_block_theme'] ) {
+					esc_html_e( 'Block theme', 'woocommerce' );
+				} else {
+					esc_html_e( 'Classic theme', 'woocommerce' );
+				}
+				?>
+			</td>
+		</tr>
+		<?php endif ?>
 		<tr>
 			<td data-export-label="WooCommerce Support"><?php esc_html_e( 'WooCommerce support', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether or not the current active theme declares WooCommerce support.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
@@ -946,7 +1023,7 @@ if ( 0 < $mu_plugins_count ) :
 		</tr>
 	</tbody>
 </table>
-<table class="wc_status_table widefat" cellspacing="0">
+<table class="wc_status_table widefat" id="status-table-templates" cellspacing="0">
 	<thead>
 		<tr>
 			<th colspan="3" data-export-label="Templates"><h2><?php esc_html_e( 'Templates', 'woocommerce' ); ?><?php echo wc_help_tip( esc_html__( 'This section shows any files that are overriding the default WooCommerce template pages.', 'woocommerce' ) ); ?></h2></th>
@@ -1006,8 +1083,14 @@ if ( 0 < $mu_plugins_count ) :
 					<mark class="error">
 						<span class="dashicons dashicons-warning"></span>
 					</mark>
-					<a href="https://woo.com/document/fix-outdated-templates-woocommerce/" target="_blank">
+					<a href="https://woocommerce.com/document/fix-outdated-templates-woocommerce/" target="_blank">
 						<?php esc_html_e( 'Learn how to update', 'woocommerce' ); ?>
+					</a> |
+					<mark class="info">
+						<span class="dashicons dashicons-info"></span>
+					</mark>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-status&tab=tools' ) ); ?>">
+						<?php esc_html_e( 'Clear system status theme info cache', 'woocommerce' ); ?>
 					</a>
 				</td>
 			</tr>
@@ -1015,7 +1098,17 @@ if ( 0 < $mu_plugins_count ) :
 	</tbody>
 </table>
 
-<?php do_action( 'woocommerce_system_status_report' ); ?>
+<?php
+	/**
+	 * Action fired when the WooCommerce system status report is rendered.
+	 *
+	 * @since 2.4.0 Introduced hook.
+	 * @since 9.8.0 Made SSR report data available to callbacks.
+	 *
+	 * @param array|WP_Error $report Report data.
+	 */
+	do_action( 'woocommerce_system_status_report', $report );
+?>
 
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>

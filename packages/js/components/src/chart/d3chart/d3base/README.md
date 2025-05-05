@@ -1,6 +1,6 @@
 # D3 Base Component
 
-Integrate React Lifecyle methods with d3.js charts.
+Integrate React Lifecycle methods with d3.js charts.
 
 ### Base Component Responsibilities
 

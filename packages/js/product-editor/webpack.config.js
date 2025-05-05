@@ -2,7 +2,6 @@
  * External dependencies
  */
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const path = require( 'path' );
 const RemoveEmptyScriptsPlugin = require( 'webpack-remove-empty-scripts' );
 const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
@@ -10,7 +9,11 @@ const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
 /**
  * Internal dependencies
  */
-const { webpackConfig } = require( '@woocommerce/internal-style-build' );
+const {
+	webpackConfig,
+	plugin,
+	StyleAssetPlugin,
+} = require( '@woocommerce/internal-style-build' );
 const {
 	blockEntryPoints,
 	getBlockMetaData,
@@ -34,7 +37,7 @@ module.exports = {
 	},
 	plugins: [
 		new RemoveEmptyScriptsPlugin(),
-		new MiniCssExtractPlugin( {
+		new plugin( {
 			filename: ( data ) => {
 				return data.chunk.name.startsWith( '/build/blocks' )
 					? `[name].css`
@@ -69,5 +72,6 @@ module.exports = {
 				},
 			],
 		} ),
+		new StyleAssetPlugin(),
 	],
 };

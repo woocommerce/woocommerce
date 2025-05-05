@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use hasConnectedOwner value to check if jetpack is connected

@@ -8,4 +8,5 @@ export interface RadioBlockAttributes extends BlockAttributes {
 	description: string;
 	property: string;
 	options: [];
+	disabled?: boolean;
 }

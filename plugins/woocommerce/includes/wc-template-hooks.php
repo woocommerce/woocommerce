@@ -54,6 +54,13 @@ add_action( 'woocommerce_before_main_content', 'woocommerce_breadcrumb', 20, 0 )
 add_action( 'woocommerce_sidebar', 'woocommerce_get_sidebar', 10 );
 
 /**
+ * Archive header.
+ *
+ * @see woocommerce_product_taxonomy_archive_header()
+ */
+add_action( 'woocommerce_shop_loop_header', 'woocommerce_product_taxonomy_archive_header' );
+
+/**
  * Archive descriptions.
  *
  * @see woocommerce_taxonomy_archive_description()
@@ -248,7 +255,7 @@ add_action( 'woocommerce_cart_is_empty', 'wc_empty_cart_message', 10 );
  * @see woocommerce_demo_store()
  */
 add_action( 'wp_footer', 'wc_print_js', 25 );
-add_action( 'wp_footer', 'woocommerce_demo_store' );
+add_action( 'wp_body_open', 'woocommerce_demo_store' );
 
 /**
  * Order details.
@@ -312,3 +319,8 @@ add_action( 'woocommerce_before_customer_login_form', 'woocommerce_output_all_no
 add_action( 'woocommerce_before_lost_password_form', 'woocommerce_output_all_notices', 10 );
 add_action( 'before_woocommerce_pay', 'woocommerce_output_all_notices', 10 );
 add_action( 'woocommerce_before_reset_password_form', 'woocommerce_output_all_notices', 10 );
+
+/**
+ * Hooked blocks.
+ */
+add_action( 'after_switch_theme', 'wc_after_switch_theme', 10, 2 );

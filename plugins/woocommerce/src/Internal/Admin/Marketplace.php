@@ -7,18 +7,28 @@ namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use WC_Helper_Options;
+use WC_Helper_Updater;
 
 /**
  * Contains backend logic for the Marketplace feature.
  */
 class Marketplace {
-
 	const MARKETPLACE_TAB_SLUG = 'woo';
 
 	/**
 	 * Class initialization, to be executed when the class is resolved by the container.
+	 *
+	 * @internal
 	 */
 	final public function init() {
+		add_action( 'init', array( $this, 'on_init' ) );
+	}
+
+	/**
+	 * Hook into WordPress on init.
+	 */
+	public function on_init() {
 		if ( false === FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
 			/** Feature controller instance @var FeaturesController $feature_controller */
 			$feature_controller = wc_get_container()->get( FeaturesController::class );
@@ -41,7 +51,8 @@ class Marketplace {
 			return;
 		}
 
-		$marketplace_pages = self::get_marketplace_pages();
+		$marketplace_pages = $this->get_marketplace_pages();
+
 		foreach ( $marketplace_pages as $marketplace_page ) {
 			if ( ! is_null( $marketplace_page ) ) {
 				wc_admin_register_page( $marketplace_page );
@@ -52,13 +63,14 @@ class Marketplace {
 	/**
 	 * Get report pages.
 	 */
-	public static function get_marketplace_pages() {
+	public function get_marketplace_pages() {
 		$marketplace_pages = array(
 			array(
-				'id'     => 'woocommerce-marketplace',
-				'parent' => 'woocommerce',
-				'title'  => __( 'Extensions', 'woocommerce' ),
-				'path'   => '/extensions',
+				'id'         => 'woocommerce-marketplace',
+				'parent'     => 'woocommerce',
+				'title'      => __( 'Extensions', 'woocommerce' ) . $this->badge(),
+				'page_title' => __( 'Extensions', 'woocommerce' ),
+				'path'       => '/extensions',
 			),
 		);
 
@@ -70,6 +82,16 @@ class Marketplace {
 		return apply_filters( 'woocommerce_marketplace_menu_items', $marketplace_pages );
 	}
 
+	private function badge(): string {
+		$option = WC_Helper_Options::get( 'my_subscriptions_tab_loaded' );
+
+		if ( ! $option ) {
+			return WC_Helper_Updater::get_updates_count_html();
+		}
+
+		return '';
+	}
+
 	/**
 	 * Enqueue update script.
 	 *
@@ -79,7 +101,7 @@ class Marketplace {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( 'woocommerce_page_wc-admin' !== $hook_suffix ) {
 			return;
-		};
+		}
 
 		if ( ! isset( $_GET['path'] ) || '/extensions' !== $_GET['path'] ) {
 			return;
@@ -121,6 +143,7 @@ class Marketplace {
 			admin_url( 'admin.php' )
 		);
 
+		wc_admin_record_tracks_event( 'marketplace_plugin_install_woo_clicked' );
 		wp_safe_redirect( $woo_url );
 		exit;
 	}
@@ -147,4 +170,5 @@ class Marketplace {
 		</style>
 		<?php
 	}
+
 }

@@ -9,10 +9,10 @@ import { apiFetch } from '@wordpress/data-controls';
 import { cleanQuery, getUrlParameters, getRestPath, parseId } from './utils';
 import CRUD_ACTIONS from './crud-actions';
 import TYPES from './action-types';
-import { IdType, IdQuery, Item, ItemQuery } from './types';
+import { IdType, IdQuery, Item, ItemQuery, CrudActionOptions } from './types';
 
-type ResolverOptions = {
-	resourceName: string;
+type ResolverOptions< ResourceName extends string > = {
+	resourceName: ResourceName;
 	namespace: string;
 };
 
@@ -35,13 +35,15 @@ export function createItemRequest( query: Partial< ItemQuery > ) {
 export function createItemSuccess(
 	key: IdType,
 	item: Item,
-	query: Partial< ItemQuery >
+	query: Partial< ItemQuery >,
+	options?: CrudActionOptions
 ) {
 	return {
 		type: TYPES.CREATE_ITEM_SUCCESS as const,
 		key,
 		item,
 		query,
+		options,
 	};
 }
 
@@ -172,16 +174,22 @@ export function updateItemSuccess(
 	};
 }
 
-export const createDispatchActions = ( {
+export const createDispatchActions = <
+	ResourceName extends string,
+	ResourceType extends Item
+>( {
 	namespace,
 	resourceName,
-}: ResolverOptions ) => {
-	const createItem = function* ( query: Partial< ItemQuery > ) {
+}: ResolverOptions< ResourceName > ) => {
+	const createItem = function* (
+		query: Partial< ItemQuery >,
+		options?: CrudActionOptions
+	) {
 		yield createItemRequest( query );
 		const urlParameters = getUrlParameters( namespace, query );
 
 		try {
-			const item: Item = yield apiFetch( {
+			const item: ResourceType = yield apiFetch( {
 				path: getRestPath(
 					namespace,
 					cleanQuery( query, namespace ),
@@ -191,7 +199,7 @@ export const createDispatchActions = ( {
 			} );
 			const { key } = parseId( item.id, urlParameters );
 
-			yield createItemSuccess( key, item, query );
+			yield createItemSuccess( key, item, query, options );
 			return item;
 		} catch ( error ) {
 			yield createItemError( query, error );
@@ -205,7 +213,7 @@ export const createDispatchActions = ( {
 		yield deleteItemRequest( key, force );
 
 		try {
-			const item: Item = yield apiFetch( {
+			const item: ResourceType = yield apiFetch( {
 				path: getRestPath(
 					`${ namespace }/${ id }`,
 					{ force },
@@ -231,7 +239,7 @@ export const createDispatchActions = ( {
 		yield updateItemRequest( key, query );
 
 		try {
-			const item: Item = yield apiFetch( {
+			const item: ResourceType = yield apiFetch( {
 				path: getRestPath(
 					`${ namespace }/${ id }`,
 					{},

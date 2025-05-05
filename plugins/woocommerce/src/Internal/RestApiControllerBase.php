@@ -1,16 +1,15 @@
 <?php
 
-namespace Automattic\WooCommerce\Internal\ReceiptRendering;
+namespace Automattic\WooCommerce\Internal;
 
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Utilities\StringUtil;
-use \WP_HTTP_Response;
-use \WP_REST_Request;
-use \WP_REST_Response;
-use \WP_Error;
-use \InvalidArgumentException;
-use \Exception;
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use WP_HTTP_Response;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_Error;
+use InvalidArgumentException;
+use Exception;
 
 /**
  * Base class for REST API controllers defined inside the 'src' directory.
@@ -19,14 +18,13 @@ use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
  * container with the 'share_with_implements_tags' method inside a service provider that inherits from
  * 'AbstractInterfaceServiceProvider'. This ensures that 'register_routes' is invoked.
  *
- * Derived classes must also contain this line:
- * use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+ * Also, the following must be added at the end of the 'init_hooks' method in the 'WooCommerce' class,
+ * otherwise the routes won't be registered:
+ * $container->get( <full class name>::class )->register();
  *
  * Minimal controller example:
  *
  * class FoobarsController extends RestApiControllerBase {
- *
- * use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
  *
  * protected function get_rest_api_namespace(): string {
  *   return 'foobars';
@@ -79,7 +77,6 @@ use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
  * }
  */
 abstract class RestApiControllerBase implements RegisterHooksInterface {
-	use AccessiblePrivateMethods;
 
 	/**
 	 * The root namespace for the JSON REST API endpoints.
@@ -89,37 +86,10 @@ abstract class RestApiControllerBase implements RegisterHooksInterface {
 	protected string $route_namespace = 'wc/v3';
 
 	/**
-	 * Holds authentication error messages for each HTTP verb.
-	 *
-	 * @var array
-	 */
-	protected array $authentication_errors_by_method;
-
-	/**
-	 * Class constructor.
-	 */
-	public function __construct() {
-		$this->authentication_errors_by_method = array(
-			'GET'    => array(
-				'code'    => 'woocommerce_rest_cannot_view',
-				'message' => __( 'Sorry, you cannot view resources.', 'woocommerce' ),
-			),
-			'POST'   => array(
-				'code'    => 'woocommerce_rest_cannot_create',
-				'message' => __( 'Sorry, you cannot create resources.', 'woocommerce' ),
-			),
-			'DELETE' => array(
-				'code'    => 'woocommerce_rest_cannot_delete',
-				'message' => __( 'Sorry, you cannot delete resources.', 'woocommerce' ),
-			),
-		);
-	}
-
-	/**
 	 * Register the hooks used by the class.
 	 */
 	public function register() {
-		static::add_filter( 'woocommerce_rest_api_get_rest_namespaces', array( $this, 'handle_woocommerce_rest_api_get_rest_namespaces' ) );
+		add_filter( 'woocommerce_rest_api_get_rest_namespaces', array( $this, 'handle_woocommerce_rest_api_get_rest_namespaces' ) );
 	}
 
 	/**
@@ -128,8 +98,10 @@ abstract class RestApiControllerBase implements RegisterHooksInterface {
 	 *
 	 * @param array $namespaces The original list of WooCommerce REST API namespaces/controllers.
 	 * @return array The updated list of WooCommerce REST API namespaces/controllers.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	protected function handle_woocommerce_rest_api_get_rest_namespaces( array $namespaces ): array {
+	public function handle_woocommerce_rest_api_get_rest_namespaces( array $namespaces ): array {
 		$namespaces['wc/v3'][ $this->get_rest_api_namespace() ] = static::class;
 		return $namespaces;
 	}
@@ -194,6 +166,31 @@ abstract class RestApiControllerBase implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Returns an authentication error message for a given HTTP verb.
+	 *
+	 * @param string $method HTTP method.
+	 * @return array|null Error information on success, null otherwise.
+	 */
+	protected function get_authentication_error_by_method( string $method ) {
+		$errors = array(
+			'GET'    => array(
+				'code'    => 'woocommerce_rest_cannot_view',
+				'message' => __( 'Sorry, you cannot view resources.', 'woocommerce' ),
+			),
+			'POST'   => array(
+				'code'    => 'woocommerce_rest_cannot_create',
+				'message' => __( 'Sorry, you cannot create resources.', 'woocommerce' ),
+			),
+			'DELETE' => array(
+				'code'    => 'woocommerce_rest_cannot_delete',
+				'message' => __( 'Sorry, you cannot delete resources.', 'woocommerce' ),
+			),
+		);
+
+		return $errors[ $method ] ?? null;
+	}
+
+	/**
 	 * Permission check for REST API endpoints, given the request method.
 	 *
 	 * @param WP_REST_Request $request The request for which the permission is checked.
@@ -202,11 +199,11 @@ abstract class RestApiControllerBase implements RegisterHooksInterface {
 	 * @return bool|WP_Error True if the current user has the capability, otherwise an "Unauthorized" error or False if no error is available for the request method.
 	 */
 	protected function check_permission( WP_REST_Request $request, string $required_capability_name, ...$extra_args ) {
-		if ( current_user_can( $required_capability_name, $extra_args ) ) {
+		if ( current_user_can( $required_capability_name, ...$extra_args ) ) {
 			return true;
 		}
 
-		$error_information = $this->authentication_errors_by_method[ $request->get_method() ] ?? null;
+		$error_information = $this->get_authentication_error_by_method( $request->get_method() );
 		if ( is_null( $error_information ) ) {
 			return false;
 		}

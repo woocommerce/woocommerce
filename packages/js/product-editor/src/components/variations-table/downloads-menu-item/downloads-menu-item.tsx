@@ -33,9 +33,12 @@ export function DownloadsMenuItem( {
 }: VariationActionsMenuItemProps ) {
 	const ids = selection.map( ( { id } ) => id );
 
-	const downloadsIds: number[] = selection[ 0 ].downloads.map(
-		( { id }: ProductDownload ) => Number.parseInt( id, 10 )
-	);
+	const downloadsIds: number[] =
+		selection?.length > 0
+			? selection[ 0 ].downloads.map( ( { id }: ProductDownload ) =>
+					Number.parseInt( id, 10 )
+			  )
+			: [];
 
 	const [ uploadFilesModalOpen, setUploadFilesModalOpen ] = useState( false );
 
@@ -126,17 +129,19 @@ export function DownloadsMenuItem( {
 
 	return (
 		<Dropdown
-			// @ts-expect-error missing prop in types.
 			popoverProps={ {
 				placement: 'right-start',
 			} }
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<MenuItem
 					onClick={ () => {
-						recordEvent( 'product_variations_menu_shipping_click', {
-							source: TRACKS_SOURCE,
-							variation_id: ids,
-						} );
+						recordEvent(
+							'product_variations_menu_downloads_click',
+							{
+								source: TRACKS_SOURCE,
+								variation_id: ids,
+							}
+						);
 						onToggle();
 					} }
 					aria-expanded={ isOpen }
@@ -151,7 +156,6 @@ export function DownloadsMenuItem( {
 					<MenuGroup>
 						<MediaUpload
 							modalClass={ MODAL_CLASS_NAME }
-							// @ts-expect-error multiple also accepts string.
 							multiple={ 'add' }
 							value={ downloadsIds }
 							onSelect={ handleMediaUploadSelect }
@@ -190,7 +194,7 @@ export function DownloadsMenuItem( {
 					</MenuGroup>
 					<VariationQuickUpdateMenuItem.Slot
 						group={ 'downloads' }
-						onChange={ onChange }
+						onChange={ ( value ) => onChange( value ) }
 						onClose={ onClose }
 						selection={ selection }
 						supportsMultipleSelection={ supportsMultipleSelection }

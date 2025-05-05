@@ -7,7 +7,7 @@ Top bar extensions offer supplementary experiences **not vital** to the critical
 
 Each top bar extension has its unique icon in the top navigation bar. Note that when the number of extensions exceeds 4, they're truncated in a dropdown menu.
 
-![Top bar example](https://developer.woo.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-top-bar.png)
+![Top bar example](https://developer.woocommerce.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-top-bar.png)
 
 For example, top bar extensions can be used to:
 

@@ -54,14 +54,10 @@ class NoticeHandler {
 		$errors = new WP_Error();
 
 		if ( 0 === wc_notice_count( 'error' ) ) {
-			wc_clear_notices();
 			return $errors;
 		}
 
 		$error_notices = wc_get_notices( 'error' );
-
-		// Prevent notices from being output later on.
-		wc_clear_notices();
 
 		foreach ( $error_notices as $error_notice ) {
 			$errors->add( $error_code, wp_strip_all_tags( $error_notice['notice'] ) );

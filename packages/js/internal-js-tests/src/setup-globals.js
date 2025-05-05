@@ -5,10 +5,6 @@ import { setLocaleData } from '@wordpress/i18n';
 import { registerStore } from '@wordpress/data';
 import 'regenerator-runtime/runtime';
 
-// Mock the config module to avoid errors like:
-// Core Error: Could not find config value for key ${ key }. Please make sure that if you need it then it has a default value assigned in config/_shared.json.
-jest.mock( '@automattic/calypso-config' );
-
 // Due to the dependency @wordpress/compose which introduces the use of
 // ResizeObserver this global mock is required for some tests to work.
 global.ResizeObserver = require( 'resize-observer-polyfill' );

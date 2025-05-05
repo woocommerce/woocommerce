@@ -6,9 +6,9 @@
 namespace Automattic\WooCommerce\Utilities;
 
 use Automattic\WooCommerce\Caches\OrderCacheController;
+use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Utilities\COTMigrationUtil;
 use WC_Order;
 use WP_Post;
@@ -35,6 +35,15 @@ final class OrderUtil {
 	 */
 	public static function custom_orders_table_usage_is_enabled() : bool {
 		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
+	}
+
+	/**
+	 * Helper function to get whether custom order tables are enabled or not.
+	 *
+	 * @return bool
+	 */
+	public static function custom_orders_table_datastore_cache_enabled(): bool {
+		return wc_get_container()->get( CustomOrdersTableController::class )->hpos_data_caching_is_enabled();
 	}
 
 	/**
@@ -184,5 +193,67 @@ final class OrderUtil {
 	 */
 	public static function get_table_for_order_meta() {
 		return wc_get_container()->get( COTMigrationUtil::class )->get_table_for_order_meta();
+	}
+
+	/**
+	 * Counts number of orders of a given type.
+	 *
+	 * @since 8.7.0
+	 *
+	 * @param string $order_type Order type.
+	 * @return array<string,int> Array of order counts indexed by order type.
+	 */
+	public static function get_count_for_type( $order_type ) {
+		global $wpdb;
+
+		$order_count_cache = new OrderCountCache();
+		$count_per_status  = $order_count_cache->get( $order_type );
+
+		if ( null === $count_per_status ) {
+			if ( self::custom_orders_table_usage_is_enabled() ) {
+				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+				$results = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT `status`, COUNT(*) AS `count` FROM ' . self::get_table_for_orders() . ' WHERE `type` = %s GROUP BY `status`',
+						$order_type
+					),
+					ARRAY_A
+				);
+				// phpcs:enable
+
+				$count_per_status = array_map( 'absint', array_column( $results, 'count', 'status' ) );
+
+			} else {
+				$count_per_status = (array) wp_count_posts( $order_type );
+			}
+
+			// Make sure all order statuses are included just in case.
+			$count_per_status = array_merge(
+				array_fill_keys( $order_count_cache->get_default_statuses(), 0 ),
+				$count_per_status
+			);
+
+			foreach ( $count_per_status as $order_status => $count ) {
+				$order_count_cache->set( $order_type, $order_status, $count );
+			}
+		}
+
+		return $count_per_status;
+	}
+
+	/**
+	 * Removes the 'wc-' prefix from status.
+	 *
+	 * @param string $status The status to remove the prefix from.
+	 *
+	 * @return string The status without the prefix.
+	 * @since 9.2.0
+	 */
+	public static function remove_status_prefix( string $status ): string {
+		if ( strpos( $status, 'wc-' ) === 0 ) {
+			$status = substr( $status, 3 );
+		}
+
+		return $status;
 	}
 }

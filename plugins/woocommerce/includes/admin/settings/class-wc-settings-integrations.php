@@ -30,6 +30,13 @@ if ( ! class_exists( 'WC_Settings_Integrations', false ) ) :
 		}
 
 		/**
+		 * Setting page icon.
+		 *
+		 * @var string
+		 */
+		public $icon = 'plugins';
+
+		/**
 		 * Get own sections.
 		 *
 		 * @return array

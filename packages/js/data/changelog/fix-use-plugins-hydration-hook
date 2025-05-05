@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Rewrite usePluginsHydration hook to not dispatch inside useSelect

@@ -126,10 +126,14 @@
 		top: 57px;
 		z-index: 10;
 		overflow-y: auto;
-		max-height: 350px;
+		max-height: 362px;
 
 		&.is-static {
 			position: static;
+		}
+
+		&.is-virtual {
+			overflow: hidden;
 		}
 	}
 

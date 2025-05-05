@@ -50,8 +50,8 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 	public function test_get_settings_for_default_section() {
 		$sut = new WC_Settings_Tax();
 
-		$settings               = $sut->get_settings_for_section( '' );
-		$settings_ids_and_types = $this->get_ids_and_types( $settings );
+		$settings              = $sut->get_settings_for_section( '' );
+		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
 			'tax_options'                       => array( 'title', 'sectionend' ),
@@ -64,10 +64,10 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_tax_display_cart'      => 'select',
 			'woocommerce_price_display_suffix'  => 'text',
 			'woocommerce_tax_total_display'     => 'select',
-			''                                  => 'conflict_error',
+			''                                  => array( 'conflict_error', 'add_settings_slot' ),
 		);
 
-		$this->assertEquals( $expected, $settings_ids_and_types );
+		$this->assertEquals( $expected, $setting_ids_and_types );
 	}
 
 	/**

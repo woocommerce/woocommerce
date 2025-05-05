@@ -4,10 +4,16 @@
 import { BlockInstance } from '@wordpress/blocks';
 import { Popover } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { createElement, useEffect, useState } from '@wordpress/element';
+import {
+	createElement,
+	useCallback,
+	useEffect,
+	useReducer,
+	useState,
+} from '@wordpress/element';
 import { useResizeObserver } from '@wordpress/compose';
+import { PluginArea } from '@wordpress/plugins';
 import classNames from 'classnames';
-import { isWpVersion } from '@woocommerce/settings';
 import {
 	store as preferencesStore,
 	// @ts-expect-error No types for this exist yet.
@@ -15,7 +21,6 @@ import {
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	BlockEditorProvider,
-	BlockInspector,
 	BlockList,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
@@ -27,6 +32,11 @@ import {
 	// @ts-ignore
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
+// eslint-disable-next-line @woocommerce/dependency-group
+import {
+	ComplementaryArea,
+	// @ts-expect-error No types for this exist yet.
+} from '@wordpress/interface';
 
 /**
  * Internal dependencies
@@ -35,11 +45,52 @@ import { BackButton } from './back-button';
 import { EditorCanvas } from './editor-canvas';
 import { EditorContext } from './context';
 import { HeaderToolbar } from './header-toolbar/header-toolbar';
+import { RegisterStores } from './RegisterStores';
 import { ResizableEditor } from './resizable-editor';
 import { SecondarySidebar } from './secondary-sidebar/secondary-sidebar';
+import { SettingsSidebar } from './sidebar/settings-sidebar';
 import { useEditorHistory } from './hooks/use-editor-history';
-import { store as productEditorUiStore } from '../../store/product-editor-ui';
-import { getGutenbergVersion } from '../../utils/get-gutenberg-version';
+import { wooProductEditorUiStore } from '../../store/product-editor-ui';
+import { SIDEBAR_COMPLEMENTARY_AREA_SCOPE } from './constants';
+import {
+	KeyboardShortcuts,
+	RegisterKeyboardShortcuts,
+} from './keyboard-shortcuts';
+import { areBlocksEmpty } from './utils/are-blocks-empty';
+
+type SidebarState = {
+	isInserterOpened: boolean;
+	isListViewOpened: boolean;
+};
+
+const setIsInserterOpenedAction = 'SET_IS_INSERTER_OPENED';
+const setIsListViewOpenedAction = 'SET_IS_LISTVIEW_OPENED';
+const initialSidebarState: SidebarState = {
+	isInserterOpened: false,
+	isListViewOpened: false,
+};
+function sidebarReducer(
+	state: SidebarState,
+	action: { type: string; value: boolean }
+): SidebarState {
+	switch ( action.type ) {
+		case setIsInserterOpenedAction: {
+			return {
+				...state,
+				isInserterOpened: action.value,
+				isListViewOpened: action.value ? false : state.isListViewOpened,
+			};
+		}
+		case setIsListViewOpenedAction: {
+			return {
+				...state,
+				isListViewOpened: action.value,
+				isInserterOpened: action.value ? false : state.isInserterOpened,
+			};
+		}
+	}
+	return state;
+}
 
 type IframeEditorProps = {
 	initialBlocks?: BlockInstance[];
@@ -48,6 +99,7 @@ type IframeEditorProps = {
 	onInput?: ( blocks: BlockInstance[] ) => void;
 	settings?: Partial< EditorSettings & EditorBlockListSettings > | undefined;
 	showBackButton?: boolean;
+	name: string;
 };
 
 export function IframeEditor( {
@@ -56,6 +108,7 @@ export function IframeEditor( {
 	onInput = () => {},
 	settings: __settings,
 	showBackButton = false,
+	name,
 }: IframeEditorProps ) {
 	const [ resizeObserver ] = useResizeObserver();
 	const [ temporalBlocks, setTemporalBlocks ] = useState< BlockInstance[] >(
@@ -64,26 +117,14 @@ export function IframeEditor( {
 
 	// Pick the blocks from the store.
 	const blocks: BlockInstance[] = useSelect( ( select ) => {
-		return select( productEditorUiStore ).getModalEditorBlocks();
+		return select( wooProductEditorUiStore ).getModalEditorBlocks();
 	}, [] );
 
-	/*
-	 * Set the initial blocks from the store.
-	 * @todo: probably we can get rid of the initialBlocks prop.
-	 */
-	useEffect( () => {
-		setTemporalBlocks( blocks );
-	}, [] ); // eslint-disable-line
-
 	const { setModalEditorBlocks: setBlocks, setModalEditorContentHasChanged } =
-		useDispatch( productEditorUiStore );
-
-	const { appendEdit } = useEditorHistory( {
-		setBlocks,
-	} );
+		useDispatch( wooProductEditorUiStore );
 
 	const {
-		appendEdit: tempAppendEdit,
+		appendEdit: appendToEditorHistory,
 		hasRedo,
 		hasUndo,
 		redo,
@@ -91,23 +132,46 @@ export function IframeEditor( {
 	} = useEditorHistory( {
 		setBlocks: setTemporalBlocks,
 	} );
-	const [ isInserterOpened, setIsInserterOpened ] = useState( false );
-	const [ isListViewOpened, setIsListViewOpened ] = useState( false );
-	const [ isSidebarOpened, setIsSidebarOpened ] = useState( true );
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore This action exists in the block editor store.
+
+	/*
+	 * Set the initial blocks from the store.
+	 * @todo: probably we can get rid of the initialBlocks prop.
+	 */
+	useEffect( () => {
+		appendToEditorHistory( blocks );
+		setTemporalBlocks( blocks );
+	}, [] ); // eslint-disable-line
+
+	const [ { isInserterOpened, isListViewOpened }, dispatch ] = useReducer(
+		sidebarReducer,
+		initialSidebarState
+	);
+
+	const setIsInserterOpened = useCallback( ( value: boolean ) => {
+		dispatch( {
+			type: setIsInserterOpenedAction,
+			value,
+		} );
+	}, [] );
+
+	const setIsListViewOpened = useCallback( ( value: boolean ) => {
+		dispatch( {
+			type: setIsListViewOpenedAction,
+			value,
+		} );
+	}, [] );
+
 	const { clearSelectedBlock, updateSettings } =
 		useDispatch( blockEditorStore );
 
 	const parentEditorSettings = useSelect( ( select ) => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
+		// @ts-expect-error Selector is not typed
 		return select( blockEditorStore ).getSettings();
 	}, [] );
 
 	const { hasFixedToolbar } = useSelect( ( select ) => {
-		// @ts-expect-error These selectors are available in the block data store.
 		const { get: getPreference } = select( preferencesStore );
+
 		return {
 			hasFixedToolbar: getPreference( 'core', 'fixedToolbar' ),
 		};
@@ -120,10 +184,23 @@ export function IframeEditor( {
 		updateSettings( productBlockEditorSettings );
 	}, [] );
 
-	const settings = __settings || parentEditorSettings;
+	const handleBlockEditorProviderOnChange = (
+		updatedBlocks: BlockInstance[]
+	) => {
+		appendToEditorHistory( updatedBlocks );
+		setTemporalBlocks( updatedBlocks );
+		onChange( updatedBlocks );
+	};
 
-	const inlineFixedBlockToolbar =
-		isWpVersion( '6.5', '>=' ) || getGutenbergVersion() > 17.3;
+	const handleBlockEditorProviderOnInput = (
+		updatedBlocks: BlockInstance[]
+	) => {
+		appendToEditorHistory( updatedBlocks );
+		setTemporalBlocks( updatedBlocks );
+		onInput( updatedBlocks );
+	};
+
+	const settings = __settings || parentEditorSettings;
 
 	return (
 		<div className="woocommerce-iframe-editor">
@@ -137,40 +214,36 @@ export function IframeEditor( {
 					setIsInserterOpened,
 					setIsDocumentOverviewOpened: setIsListViewOpened,
 					undo,
-					isSidebarOpened,
-					setIsSidebarOpened,
 				} }
 			>
 				<BlockEditorProvider
 					settings={ {
 						...settings,
-						hasFixedToolbar:
-							hasFixedToolbar || ! inlineFixedBlockToolbar,
+						hasFixedToolbar,
 						templateLock: false,
 					} }
-					value={ blocks }
-					onChange={ ( updatedBlocks: BlockInstance[] ) => {
-						tempAppendEdit( updatedBlocks );
-						setTemporalBlocks( updatedBlocks );
-						onChange( updatedBlocks );
-					} }
-					onInput={ ( updatedBlocks: BlockInstance[] ) => {
-						tempAppendEdit( updatedBlocks );
-						setTemporalBlocks( updatedBlocks );
-						onInput( updatedBlocks );
-					} }
+					value={ temporalBlocks }
+					onChange={ handleBlockEditorProviderOnChange }
+					onInput={ handleBlockEditorProviderOnInput }
 					useSubRegistry={ true }
 				>
+					<RegisterStores />
+
+					<KeyboardShortcuts />
+					<RegisterKeyboardShortcuts />
+
 					<HeaderToolbar
 						onSave={ () => {
-							appendEdit( temporalBlocks );
-							setBlocks( temporalBlocks );
+							setBlocks(
+								areBlocksEmpty( temporalBlocks )
+									? []
+									: temporalBlocks
+							);
 							setModalEditorContentHasChanged( true );
 							onChange( temporalBlocks );
 							onClose?.();
 						} }
 						onCancel={ () => {
-							appendEdit( blocks );
 							setBlocks( blocks );
 							onChange( blocks );
 							setTemporalBlocks( blocks );
@@ -181,11 +254,7 @@ export function IframeEditor( {
 						<SecondarySidebar />
 						<BlockTools
 							className={ classNames(
-								'woocommerce-iframe-editor__content',
-								{
-									'old-fixed-toolbar-shown':
-										! inlineFixedBlockToolbar,
-								}
+								'woocommerce-iframe-editor__content'
 							) }
 							onClick={ (
 								event: React.MouseEvent<
@@ -222,6 +291,7 @@ export function IframeEditor( {
 									{ resizeObserver }
 									<BlockList className="edit-site-block-editor__block-list wp-site-blocks" />
 								</EditorCanvas>
+								{ /* @ts-expect-error name does exist on PopoverSlot see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L555 */ }
 								<Popover.Slot />
 							</ResizableEditor>
 							{ /* This is a hack, but I couldn't find another (easy) way to not
@@ -231,12 +301,12 @@ export function IframeEditor( {
 								 bounds. */ }
 							<div className="woocommerce-iframe-editor__content-inserter-clipper" />
 						</BlockTools>
-						{ isSidebarOpened && (
-							<div className="woocommerce-iframe-editor__sidebar">
-								<BlockInspector />
-							</div>
-						) }
+						<ComplementaryArea.Slot
+							scope={ SIDEBAR_COMPLEMENTARY_AREA_SCOPE }
+						/>
 					</div>
+					<PluginArea scope="woocommerce-product-editor-modal-block-editor" />
+					<SettingsSidebar smallScreenTitle={ name } />
 				</BlockEditorProvider>
 			</EditorContext.Provider>
 		</div>

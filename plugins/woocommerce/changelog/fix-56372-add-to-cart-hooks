@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Add support for extensions that hook into woocommerce_<product_type>_add_to_cart in the new Add to Cart with Options block
+
+

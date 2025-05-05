@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 
 /**
  * Cart class.
@@ -233,21 +234,44 @@ class Cart extends AbstractBlock {
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
 
-		$this->asset_data_registry->add( 'countryData', CartCheckoutUtils::get_country_data(), true );
-		$this->asset_data_registry->add( 'baseLocation', wc_get_base_location(), true );
-		$this->asset_data_registry->add( 'isShippingCalculatorEnabled', filter_var( get_option( 'woocommerce_enable_shipping_calc' ), FILTER_VALIDATE_BOOLEAN ), true );
-		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ), true );
-		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', 'incl' === get_option( 'woocommerce_tax_display_cart' ), true );
-		$this->asset_data_registry->add( 'taxesEnabled', wc_tax_enabled(), true );
-		$this->asset_data_registry->add( 'couponsEnabled', wc_coupons_enabled(), true );
-		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled(), true );
-		$this->asset_data_registry->add( 'hasDarkEditorStyleSupport', current_theme_supports( 'dark-editor-style' ), true );
+		$this->asset_data_registry->add( 'countryData', CartCheckoutUtils::get_country_data() );
+		$this->asset_data_registry->add( 'isShippingCalculatorEnabled', filter_var( get_option( 'woocommerce_enable_shipping_calc' ), FILTER_VALIDATE_BOOLEAN ) );
+		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ) );
+		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', 'incl' === get_option( 'woocommerce_tax_display_cart' ) );
+		$this->asset_data_registry->add( 'taxesEnabled', wc_tax_enabled() );
+		$this->asset_data_registry->add( 'couponsEnabled', wc_coupons_enabled() );
+		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled() );
+		$this->asset_data_registry->add( 'hasDarkEditorStyleSupport', current_theme_supports( 'dark-editor-style' ) );
 		$this->asset_data_registry->register_page_id( isset( $attributes['checkoutPageId'] ) ? $attributes['checkoutPageId'] : 0 );
-		$this->asset_data_registry->add( 'isBlockTheme', wc_current_theme_is_fse_theme(), true );
-		$this->asset_data_registry->add( 'activeShippingZones', CartCheckoutUtils::get_shipping_zones(), true );
+		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
 
-		$pickup_location_settings = get_option( 'woocommerce_pickup_location_settings', [] );
-		$this->asset_data_registry->add( 'localPickupEnabled', wc_string_to_bool( $pickup_location_settings['enabled'] ?? 'no' ), true );
+		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings();
+		$local_pickup_method_ids  = LocalPickupUtils::get_local_pickup_method_ids();
+
+		$this->asset_data_registry->add( 'localPickupEnabled', $pickup_location_settings['enabled'] );
+		$this->asset_data_registry->add( 'collectableMethodIds', $local_pickup_method_ids );
+		$this->asset_data_registry->add( 'shippingMethodsExist', CartCheckoutUtils::shipping_methods_exist() > 0 );
+
+		$is_block_editor = $this->is_block_editor();
+
+		if ( $is_block_editor && ! $this->asset_data_registry->exists( 'localPickupLocations' ) ) {
+			// Locations are passed to the client in admin to show a realistic preview in the editor.
+			$this->asset_data_registry->add(
+				'localPickupLocations',
+				array_filter(
+					array_map(
+						function ( $location ) {
+							if ( ! $location['enabled'] ) {
+								return null;
+							}
+							$location['formatted_address'] = wc()->countries->get_formatted_address( $location['address'], ', ' );
+							return $location;
+						},
+						get_option( 'pickup_location_pickup_locations', array() )
+					)
+				)
+			);
+		}
 
 		// Hydrate the following data depending on admin or frontend context.
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
@@ -285,6 +309,7 @@ class Cart extends AbstractBlock {
 			'Cart',
 			'CartOrderSummaryTaxesBlock',
 			'CartOrderSummarySubtotalBlock',
+			'CartOrderSummaryTotalsBlock',
 			'FilledCartBlock',
 			'EmptyCartBlock',
 			'CartTotalsBlock',

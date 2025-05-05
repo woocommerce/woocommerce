@@ -3,12 +3,21 @@
  * Container class file.
  */
 
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce;
 
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\DependencyManagement\ContainerException;
 use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
+use Automattic\WooCommerce\Internal\DependencyManagement\RuntimeContainer;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AddressProviderServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AdminSettingsServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\CostOfGoodsSoldServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\COTMigrationServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\DownloadPermissionsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AssignDefaultCategoryServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\EmailPreviewServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\EnginesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\FeaturesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\LoggingServiceProvider;
@@ -27,9 +36,15 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\Produc
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductReviewsServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\RestockRefundedItemsAdjusterServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AdminSuggestionsServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\UtilsClassesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\BatchProcessingServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\LayoutTemplatesServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ComingSoonServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\StatsServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ImportExportServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\EmailEditorServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductFiltersServiceProvider;
 
 /**
  * PSR11 compliant dependency injection container for WooCommerce.
@@ -47,44 +62,17 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\Layout
  * Class registration should be done via service providers that inherit from Automattic\WooCommerce\Internal\DependencyManagement
  * and those should go in the `src\Internal\DependencyManagement\ServiceProviders` folder unless there's a good reason
  * to put them elsewhere. All the service provider class names must be in the `SERVICE_PROVIDERS` constant.
+ *
+ * IMPORTANT NOTE: By default an instance of RuntimeContainer will be used as the underlying container,
+ * but it's possible to use the old ExtendedContainer (backed by the PHP League's container package) instead,
+ * see RuntimeContainer::should_use() for configuration instructions.
+ * The League's container, the ExtendedContainer class and the related support code will be removed in WooCommerce 10.0.
  */
 final class Container {
 	/**
-	 * The list of service provider classes to register.
-	 *
-	 * @var string[]
-	 */
-	private $service_providers = array(
-		AssignDefaultCategoryServiceProvider::class,
-		DownloadPermissionsAdjusterServiceProvider::class,
-		OptionSanitizerServiceProvider::class,
-		OrdersDataStoreServiceProvider::class,
-		ProductAttributesLookupServiceProvider::class,
-		ProductDownloadsServiceProvider::class,
-		ProductImageBySKUServiceProvider::class,
-		ProductReviewsServiceProvider::class,
-		ProxiesServiceProvider::class,
-		RestockRefundedItemsAdjusterServiceProvider::class,
-		UtilsClassesServiceProvider::class,
-		COTMigrationServiceProvider::class,
-		OrdersControllersServiceProvider::class,
-		OrderAttributionServiceProvider::class,
-		ObjectCacheServiceProvider::class,
-		BatchProcessingServiceProvider::class,
-		OrderMetaBoxServiceProvider::class,
-		OrderAdminServiceProvider::class,
-		FeaturesServiceProvider::class,
-		MarketingServiceProvider::class,
-		MarketplaceServiceProvider::class,
-		LayoutTemplatesServiceProvider::class,
-		LoggingServiceProvider::class,
-		EnginesServiceProvider::class,
-	);
-
-	/**
 	 * The underlying container.
 	 *
-	 * @var \League\Container\Container
+	 * @var RuntimeContainer
 	 */
 	private $container;
 
@@ -92,6 +80,19 @@ final class Container {
 	 * Class constructor.
 	 */
 	public function __construct() {
+		if ( RuntimeContainer::should_use() ) {
+			// When the League container was in use we allowed to retrieve the container itself
+			// by using 'Psr\Container\ContainerInterface' as the class identifier,
+			// we continue allowing that for compatibility.
+			$this->container = new RuntimeContainer(
+				array(
+					__CLASS__                          => $this,
+					'Psr\Container\ContainerInterface' => $this,
+				)
+			);
+			return;
+		}
+
 		$this->container = new ExtendedContainer();
 
 		// Add ourselves as the shared instance of ContainerInterface,
@@ -99,20 +100,24 @@ final class Container {
 
 		$this->container->share( __CLASS__, $this );
 
-		foreach ( $this->service_providers as $service_provider_class ) {
+		foreach ( $this->get_service_providers() as $service_provider_class ) {
 			$this->container->addServiceProvider( $service_provider_class );
 		}
 	}
 
 	/**
 	 * Finds an entry of the container by its identifier and returns it.
+	 * See the comment about ContainerException in RuntimeContainer::get.
 	 *
-	 * @param string $id Identifier of the entry to look for.
+	 * @template T
+	 * @param string|class-string<T> $id Identifier of the entry to look for.
 	 *
-	 * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
+	 * @return T Resolved entry.
+	 *
+	 * @throws NotFoundExceptionInterface No entry was found for the supplied identifier (only when using ExtendedContainer).
 	 * @throws Psr\Container\ContainerExceptionInterface Error while retrieving the entry.
-	 *
-	 * @return mixed Entry.
+	 * @throws ContainerException Error when resolving the class to an object instance, or (when using RuntimeContainer) class not found.
+	 * @throws \Exception Exception thrown in the constructor or in the 'init' method of one of the resolved classes.
 	 */
 	public function get( string $id ) {
 		return $this->container->get( $id );
@@ -125,11 +130,55 @@ final class Container {
 	 * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
 	 * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
 	 *
-	 * @param string $id Identifier of the entry to look for.
+	 * @param class-string $id Identifier of the entry to look for.
 	 *
 	 * @return bool
 	 */
 	public function has( string $id ): bool {
 		return $this->container->has( $id );
+	}
+
+	/**
+	 * The list of service provider classes to register.
+	 *
+	 * @return array<int,class-string>
+	 */
+	private function get_service_providers(): array {
+		return array(
+			AssignDefaultCategoryServiceProvider::class,
+			DownloadPermissionsAdjusterServiceProvider::class,
+			EmailPreviewServiceProvider::class,
+			OptionSanitizerServiceProvider::class,
+			OrdersDataStoreServiceProvider::class,
+			ProductAttributesLookupServiceProvider::class,
+			ProductDownloadsServiceProvider::class,
+			ProductImageBySKUServiceProvider::class,
+			ProductReviewsServiceProvider::class,
+			ProxiesServiceProvider::class,
+			RestockRefundedItemsAdjusterServiceProvider::class,
+			UtilsClassesServiceProvider::class,
+			COTMigrationServiceProvider::class,
+			OrdersControllersServiceProvider::class,
+			OrderAttributionServiceProvider::class,
+			ObjectCacheServiceProvider::class,
+			BatchProcessingServiceProvider::class,
+			OrderMetaBoxServiceProvider::class,
+			OrderAdminServiceProvider::class,
+			FeaturesServiceProvider::class,
+			MarketingServiceProvider::class,
+			MarketplaceServiceProvider::class,
+			LayoutTemplatesServiceProvider::class,
+			LoggingServiceProvider::class,
+			EnginesServiceProvider::class,
+			ComingSoonServiceProvider::class,
+			StatsServiceProvider::class,
+			ImportExportServiceProvider::class,
+			CostOfGoodsSoldServiceProvider::class,
+			AdminSettingsServiceProvider::class,
+			AdminSuggestionsServiceProvider::class,
+			EmailEditorServiceProvider::class,
+			ProductFiltersServiceProvider::class,
+			AddressProviderServiceProvider::class,
+		);
 	}
 }

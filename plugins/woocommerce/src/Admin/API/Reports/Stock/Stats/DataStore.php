@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
  * API\Reports\Stock\Stats\DataStore.
@@ -17,6 +18,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 	/**
 	 * Get stock counts for the whole store.
+	 *
+	 * @override ReportsDataStore::get_data()
 	 *
 	 * @param array $query Not used for the stock stats data store, but needed for the interface.
 	 * @return array Array of counts.
@@ -32,7 +35,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		} else {
 			$low_stock_count = intval( $low_stock_count );
 		}
-		$report_data['lowstock'] = $low_stock_count;
+		$report_data[ ProductStockStatus::LOW_STOCK ] = $low_stock_count;
 
 		$status_options = wc_get_product_stock_status_options();
 		foreach ( $status_options as $status => $label ) {

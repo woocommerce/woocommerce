@@ -1,5 +1,3 @@
 # Blockified templates
 
-This folder contains the blockified versions of the WooCommerce block templates.
-Currently, the content of these templates is temporary and should be replaced by the actual blockified version
-of each template when it's available.
+This folder contains the blockified versions of the WooCommerce block templates. You can read more about overriding these templates in the [_Theming_ docs for block themes](/docs/block-theme-development/theming-woo-blocks.md#block-templates).

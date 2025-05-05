@@ -7,13 +7,16 @@ import { parse } from 'qs';
 // See https://github.com/ReactTraining/react-router/blob/master/FAQ.md#how-do-i-access-the-history-object-outside-of-components
 // ^ This is a bit outdated but there's no newer documentation - the replacement for this is to use <unstable_HistoryRouter /> https://reactrouter.com/docs/en/v6/routers/history-router
 
+interface WooLocation extends Location {
+	pathname: string;
+}
+
 /**
  * Extension of history.BrowserHistory but also adds { pathname: string } to the location object.
  */
 export interface WooBrowserHistory extends BrowserHistory {
-	location: Location & {
-		pathname: string;
-	};
+	location: WooLocation;
+	readonly __experimentalLocationStack: WooLocation[];
 }
 
 let _history: WooBrowserHistory;
@@ -35,6 +38,31 @@ let _history: WooBrowserHistory;
 function getHistory(): WooBrowserHistory {
 	if ( ! _history ) {
 		const browserHistory = createBrowserHistory();
+		let locationStack: WooLocation[] = [ browserHistory.location ];
+
+		const updateNextLocationStack = (
+			action: WooBrowserHistory[ 'action' ],
+			location: WooBrowserHistory[ 'location' ]
+		) => {
+			switch ( action ) {
+				case 'POP':
+					locationStack = locationStack.slice(
+						0,
+						locationStack.length - 1
+					);
+					break;
+				case 'PUSH':
+					locationStack = [ ...locationStack, location ];
+					break;
+				case 'REPLACE':
+					locationStack = [
+						...locationStack.slice( 0, locationStack.length - 1 ),
+						location,
+					];
+					break;
+			}
+		};
+
 		_history = {
 			get action() {
 				return browserHistory.action;
@@ -65,6 +93,9 @@ function getHistory(): WooBrowserHistory {
 					pathname,
 				};
 			},
+			get __experimentalLocationStack() {
+				return [ ...locationStack ];
+			},
 			createHref: browserHistory.createHref,
 			push: browserHistory.push,
 			replace: browserHistory.replace,
@@ -81,6 +112,10 @@ function getHistory(): WooBrowserHistory {
 				} );
 			},
 		};
+
+		browserHistory.listen( () =>
+			updateNextLocationStack( _history.action, _history.location )
+		);
 	}
 	return _history;
 }

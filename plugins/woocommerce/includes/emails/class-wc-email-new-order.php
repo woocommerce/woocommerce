@@ -5,6 +5,8 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -29,7 +31,6 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		public function __construct() {
 			$this->id             = 'new_order';
 			$this->title          = __( 'New order', 'woocommerce' );
-			$this->description    = __( 'New order emails are sent to chosen recipient(s) when a new order is received.', 'woocommerce' );
 			$this->template_html  = 'emails/admin-new-order.php';
 			$this->template_plain = 'emails/plain/admin-new-order.php';
 			$this->placeholders   = array(
@@ -52,6 +53,11 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 			// Call parent constructor.
 			parent::__construct();
 
+			// Must be after parent's constructor which sets `email_improvements_enabled` property.
+			$this->description = $this->email_improvements_enabled
+				? __( 'Choose who gets notified when a new order is received.', 'woocommerce' )
+				: __( 'New order emails are sent to chosen recipient(s) when a new order is received.', 'woocommerce' );
+
 			// Other settings.
 			$this->recipient = $this->get_option( 'recipient', get_option( 'admin_email' ) );
 		}
@@ -63,7 +69,9 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		 * @return string
 		 */
 		public function get_default_subject() {
-			return __( '[{site_title}]: New order #{order_number}', 'woocommerce' );
+			return $this->email_improvements_enabled
+				? __( '[{site_title}]: Cha-ching! You\'ve got a new order: #{order_number}', 'woocommerce' )
+				: __( '[{site_title}]: New order #{order_number}', 'woocommerce' );
 		}
 
 		/**
@@ -73,7 +81,9 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		 * @return string
 		 */
 		public function get_default_heading() {
-			return __( 'New Order: #{order_number}', 'woocommerce' );
+			return $this->email_improvements_enabled
+				? __( 'New order: #{order_number}', 'woocommerce' )
+				: __( 'New Order: #{order_number}', 'woocommerce' );
 		}
 
 		/**
@@ -109,10 +119,11 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 			}
 
 			if ( $this->is_enabled() && $this->get_recipient() ) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-
-				$order->update_meta_data( '_new_order_email_sent', 'true' );
-				$order->save();
+				$email_sent_successfully = $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+				if ( $email_sent_successfully ) {
+					$order->update_meta_data( '_new_order_email_sent', 'true' );
+					$order->save();
+				}
 			}
 
 			$this->restore_locale();
@@ -156,6 +167,25 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 			);
 		}
 
+
+		/**
+		 * Get block editor email template content.
+		 *
+		 * @return string
+		 */
+		public function get_block_editor_email_template_content() {
+			return wc_get_template_html(
+				$this->template_block_content,
+				array(
+					'order'         => $this->object,
+					'sent_to_admin' => true,
+					'plain_text'    => false,
+					'email'         => $this,
+				)
+			);
+		}
+
+
 		/**
 		 * Default content to show below main email content.
 		 *
@@ -163,24 +193,9 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		 * @return string
 		 */
 		public function get_default_additional_content() {
-			return __( 'Congratulations on the sale.', 'woocommerce' );
-		}
-
-		/**
-		 * Return content from the additional_content field.
-		 *
-		 * Displayed above the footer.
-		 *
-		 * @since 3.7.0
-		 * @return string
-		 */
-		public function get_additional_content() {
-			/**
-			 * This filter is documented in ./class-wc-email.php
-			 *
-			 * @since 7.8.0
-			 */
-			return apply_filters( 'woocommerce_email_additional_content_' . $this->id, $this->format_string( $this->get_option( 'additional_content' ) ), $this->object, $this );
+			return $this->email_improvements_enabled
+				? __( 'Congratulations on the sale!', 'woocommerce' )
+				: __( 'Congratulations on the sale.', 'woocommerce' );
 		}
 
 		/**
@@ -240,6 +255,10 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 					'desc_tip'    => true,
 				),
 			);
+			if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
+				$this->form_fields['cc']  = $this->get_cc_field();
+				$this->form_fields['bcc'] = $this->get_bcc_field();
+			}
 		}
 
 

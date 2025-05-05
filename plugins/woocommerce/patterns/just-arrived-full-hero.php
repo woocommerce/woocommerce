@@ -2,19 +2,17 @@
 /**
  * Title: Just Arrived Full Hero
  * Slug: woocommerce-blocks/just-arrived-full-hero
- * Categories: WooCommerce
+ * Categories: WooCommerce, Intro
  */
 
-use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
-
-$pattern_title       = $content['titles'][0]['default'] ?? '';
-$pattern_description = $content['descriptions'][0]['default'] ?? '';
-$pattern_button      = $content['buttons'][0]['default'] ?? '';
-$pattern_image       = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/man-person-music-black-and-white-white-photography.jpg' );
+$pattern_title       = __( 'Sound like no other', 'woocommerce' );
+$pattern_description = __( 'Experience your music like never before with our latest generation of hi-fidelity headphones.', 'woocommerce' );
+$pattern_button      = __( 'Shop now', 'woocommerce' );
+$pattern_image       = plugins_url( 'assets/images/pattern-placeholders/man-person-music-black-and-white-white-photography.jpg', WC_PLUGIN_FILE );
 ?>
 
-<!-- wp:cover {"url":"<?php echo esc_url( $pattern_image ); ?>","dimRatio":50,"focalPoint":{"x":0.5,"y":0.21},"minHeight":739,"contentPosition":"center right","align":"full","style":{"spacing":{"margin":{"bottom":"80px"}}}} -->
-<div class="wp-block-cover alignfull has-custom-content-position is-position-center-right" style="margin-bottom:80px;min-height:739px">
+<!-- wp:cover {"url":"<?php echo esc_url( $pattern_image ); ?>","dimRatio":50,"focalPoint":{"x":0.5,"y":0.21},"minHeight":739,"contentPosition":"center right","align":"full"} -->
+<div class="wp-block-cover alignfull has-custom-content-position is-position-center-right" style="min-height:739px">
 	<span aria-hidden="true" class="wp-block-cover__background has-background-dim"></span>
 	<img class="wp-block-cover__image-background" alt="" src="<?php echo esc_url( $pattern_image ); ?>" style="object-position:50% 21%" data-object-fit="cover" data-object-position="50% 21%" />
 	<div class="wp-block-cover__inner-container">

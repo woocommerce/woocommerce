@@ -24,7 +24,7 @@ class StyleAttributesUtils {
 	 * @return (string)
 	 */
 	public static function get_color_value( $color_value ) {
-		if ( is_string( $color_value ) && str_contains( $color_value, 'var:preset|color|' ) ) {
+		if ( is_string( $color_value ) && strpos( $color_value, 'var:preset|color|' ) !== false ) {
 			$color_value = str_replace( 'var:preset|color|', '', $color_value );
 			return sprintf( 'var(--wp--preset--color--%s)', $color_value );
 		}
@@ -44,6 +44,22 @@ class StyleAttributesUtils {
 	}
 
 	/**
+	 * Get CSS value for shadow preset. Returns the same value if it's not a preset.
+	 *
+	 * @param string $shadow_name Shadow name.
+	 *
+	 * @return string CSS value for shadow preset.
+	 */
+	public static function get_shadow_value( $shadow_name ) {
+		if ( is_string( $shadow_name ) && strpos( $shadow_name, 'var:preset|shadow|' ) !== false ) {
+			$shadow_name = str_replace( 'var:preset|shadow|', '', $shadow_name );
+			return "var(--wp--preset--shadow--{$shadow_name})";
+		}
+
+		return $shadow_name;
+	}
+
+	/**
 	 * If spacing value is in preset format, convert it to a CSS var. Else return same value
 	 * For example:
 	 * "var:preset|spacing|50" -> "var(--wp--preset--spacing--50)"
@@ -55,7 +71,7 @@ class StyleAttributesUtils {
 	 */
 	public static function get_spacing_value( $spacing_value ) {
 		// Used following code as reference: https://github.com/WordPress/gutenberg/blob/cff6d70d6ff5a26e212958623dc3130569f95685/lib/block-supports/layout.php/#L219-L225.
-		if ( is_string( $spacing_value ) && str_contains( $spacing_value, 'var:preset|spacing|' ) ) {
+		if ( is_string( $spacing_value ) && strpos( $spacing_value, 'var:preset|spacing|' ) !== false ) {
 			$spacing_value = str_replace( 'var:preset|spacing|', '', $spacing_value );
 			return sprintf( 'var(--wp--preset--spacing--%s)', $spacing_value );
 		}
@@ -584,6 +600,25 @@ class StyleAttributesUtils {
 	}
 
 	/**
+	 * Get class and style for shadow from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return array
+	 */
+	public static function get_shadow_class_and_style( $attributes ) {
+		$shadow = $attributes['style']['shadow'] ?? null;
+
+		if ( ! $shadow ) {
+			return self::EMPTY_STYLE;
+		}
+
+		return array(
+			'class' => null,
+			'style' => sprintf( 'box-shadow: %s;', self::get_shadow_value( $shadow ) ),
+		);
+	}
+
+	/**
 	 * Get space-separated style rules from block attributes.
 	 *
 	 * @param array $attributes Block attributes.
@@ -604,13 +639,15 @@ class StyleAttributesUtils {
 	 * @return array
 	 */
 	public static function get_text_align_class_and_style( $attributes ) {
-		if ( isset( $attributes['textAlign'] ) ) {
+		// Check if the text align is set in the attributes manually (legacy) or in the global styles.
+		$text_align = $attributes['textAlign'] ?? $attributes['style']['typography']['textAlign'] ?? null;
+
+		if ( $text_align ) {
 			return array(
-				'class' => 'has-text-align-' . $attributes['textAlign'],
+				'class' => 'has-text-align-' . $text_align,
 				'style' => null,
 			);
 		}
-
 		return self::EMPTY_STYLE;
 	}
 
@@ -688,6 +725,25 @@ class StyleAttributesUtils {
 	}
 
 	/**
+	 * Get extra CSS classes from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return array
+	 */
+	public static function get_classes_from_attributes( $attributes ) {
+
+		$extra_css_classes = $attributes['className'] ?? '';
+
+		if ( '' !== $extra_css_classes ) {
+			return array(
+				'class' => esc_attr( $extra_css_classes ),
+				'style' => null,
+			);
+		}
+		return self::EMPTY_STYLE;
+	}
+
+	/**
 	 * Get classes and styles from attributes.
 	 *
 	 * Excludes link_color and link_hover_color since those should not apply to the container.
@@ -713,10 +769,12 @@ class StyleAttributesUtils {
 			'line_height'      => self::get_line_height_class_and_style( $attributes ),
 			'margin'           => self::get_margin_class_and_style( $attributes ),
 			'padding'          => self::get_padding_class_and_style( $attributes ),
+			'shadow'           => self::get_shadow_class_and_style( $attributes ),
 			'text_align'       => self::get_text_align_class_and_style( $attributes ),
 			'text_color'       => self::get_text_color_class_and_style( $attributes ),
 			'text_decoration'  => self::get_text_decoration_class_and_style( $attributes ),
 			'text_transform'   => self::get_text_transform_class_and_style( $attributes ),
+			'extra_classes'    => self::get_classes_from_attributes( $attributes ),
 		);
 
 		if ( ! empty( $properties ) ) {
@@ -738,14 +796,14 @@ class StyleAttributesUtils {
 		$classes_and_styles = array_filter( $classes_and_styles );
 
 		$classes = array_map(
-			function( $item ) {
+			function ( $item ) {
 				return $item['class'];
 			},
 			$classes_and_styles
 		);
 
 		$styles = array_map(
-			function( $item ) {
+			function ( $item ) {
 				return $item['style'];
 			},
 			// Exclude link color styles from parent to avoid conflict with text color.

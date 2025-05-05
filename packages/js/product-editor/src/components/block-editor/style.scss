@@ -138,6 +138,10 @@
 		margin-bottom: 0;
 	}
 
+	.wp-block-column {
+		word-break: normal;
+	}
+
 	.woocommerce-experimental-select-control__label {
 		text-transform: uppercase;
 		font-size: 11px;
@@ -147,15 +151,38 @@
 
 	.block-editor-block-list__layout {
 		&.is-root-container {
+			padding-left: 0;
+			padding-right: 0;
 			padding-bottom: 128px;
+			margin-left: calc(2 * $gap);
+			margin-right: calc(2 * $gap);
+
+			@include breakpoint(">782px") {
+				max-width: 650px;
+				margin-left: auto;
+				margin-right: auto;
+			}
 		}
 
-		.block-editor-block-list__block:not([contenteditable]):focus:after {
-			display: none; // use important or increase specificity.
-		}
+		.block-editor-block-list__block {
+			/* Remove the outline for the block when it is focused */
+			&:not([contenteditable]):focus {
+				&::after {
+					display: none;
+				}
+			}
 
-		.block-editor-block-list__block fieldset {
-			min-width: 0;
+			/* Address overflow issue */
+			fieldset {
+				min-width: 0;
+			}
+
+			/* Remove the outline for the block when it is editable */
+			&.has-editable-outline {
+				&::after {
+					display: none;
+				}
+			}
 		}
 	}
 }
