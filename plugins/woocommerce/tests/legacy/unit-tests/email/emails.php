@@ -276,7 +276,7 @@ class WC_Tests_WC_Emails extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals(
 			'Partial {test TEST {test_invalid}',
-			$email->format_string( 'Partial {test TEST {test_invalid}' )
+			$email->format_string( 'Partial {test {test} {test_invalid}' )
 		);
 	}
 
