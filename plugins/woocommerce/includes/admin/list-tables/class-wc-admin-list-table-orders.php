@@ -443,7 +443,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		$billing_address  = $order->get_formatted_billing_address();
 		$shipping_address = $order->get_formatted_shipping_address();
 
-		return apply_filters(
+		$order_details = apply_filters(
 			'woocommerce_admin_order_preview_get_order_details',
 			array(
 				'data'                       => $order->get_data(),
@@ -462,6 +462,9 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			),
 			$order
 		);
+
+		$order_details['data'] = array_intersect_key( $order_details['data'], array_flip( array( 'id', 'billing', 'shipping', 'customer_note' ) ) );
+		return $order_details;
 	}
 
 	/**
