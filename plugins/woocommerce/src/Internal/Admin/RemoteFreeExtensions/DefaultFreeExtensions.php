@@ -533,7 +533,7 @@ class DefaultFreeExtensions {
 			'woocommerce-shipping'      => array(
 				'label'            => __( 'Print shipping labels with WooCommerce Shipping', 'woocommerce' ),
 				'image_url'        => self::get_woo_logo(),
-				'description'      => __( 'Print USPS, UPS, and DHL labels directly from your dashboard and save on shipping.', 'woocommerce' ),
+				'description'      => __( 'Buy USPS, UPS, and DHL labels from your dashboard.', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/woocommerce-shipping?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 3,
 			),
