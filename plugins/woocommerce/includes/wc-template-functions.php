@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
@@ -2468,6 +2469,9 @@ if ( ! function_exists( 'woocommerce_widget_shopping_cart_button_view_cart' ) ) 
 	 */
 	function woocommerce_widget_shopping_cart_button_view_cart() {
 		$wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
+		if ( ! CartCheckoutUtils::has_cart_page() ) {
+			echo '';
+		}
 		echo '<a href="' . esc_url( wc_get_cart_url() ) . '" class="button wc-forward' . esc_attr( $wp_button_class ) . '">' . esc_html__( 'View cart', 'woocommerce' ) . '</a>';
 	}
 }
@@ -3667,7 +3671,7 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 			)
 		);
 
-		foreach ( $item->get_all_formatted_meta_data() as $meta_id => $meta ) {
+		foreach ( $item->get_formatted_meta_data() as $meta_id => $meta ) {
 			$value     = $args['autop'] ? wp_kses_post( $meta->display_value ) : wp_kses_post( make_clickable( trim( $meta->display_value ) ) );
 			$strings[] = $args['label_before'] . wp_kses_post( $meta->display_key ) . $args['label_after'] . $value;
 		}

@@ -9,6 +9,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -2300,18 +2301,18 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param  int    $item_id   ID of the item we're checking.
 	 * @param  string $item_type Type of the item we're checking, if not a line_item.
-	 * @return int
+	 * @return float
 	 */
 	public function get_total_refunded_for_item( $item_id, $item_type = 'line_item' ) {
 		$total = 0;
 		foreach ( $this->get_refunds() as $refund ) {
 			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
 				if ( absint( $refunded_item->get_meta( '_refunded_item_id' ) ) === $item_id ) {
-					$total += $refunded_item->get_total();
+					$total += (float) $refunded_item->get_total();
 				}
 			}
 		}
-		return $total * -1;
+		return NumberUtil::round( $total * -1, wc_get_price_decimals() );
 	}
 
 	/**

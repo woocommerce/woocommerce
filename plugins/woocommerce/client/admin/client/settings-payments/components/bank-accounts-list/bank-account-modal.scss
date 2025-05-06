@@ -1,0 +1,24 @@
+.bank-account-modal {
+	width: 512px;
+	max-width: 512px;
+	max-height: 90%;
+
+	&__description {
+		margin-top: 0;
+		margin-bottom: 24px;
+	}
+
+	&__field {
+		margin-bottom: 24px;
+	}
+
+	&__actions {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 16px;
+
+		> .bank-account-modal__save {
+			margin-left: 8px;
+		}
+	}
+}

@@ -2,7 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "woocommerce/product-review-form",
-	"title": "Product Reviews Form",
+	"title": "Reviews Form",
 	"category": "woocommerce",
 	"description": "Display a product's reviews form.",
 	"textdomain": "woocommerce",

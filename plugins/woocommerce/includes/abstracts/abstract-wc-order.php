@@ -942,7 +942,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected function get_values_for_total( $field ) {
 		$items = array_map(
 			function ( $item ) use ( $field ) {
-				return wc_add_number_precision( $item[ $field ], false );
+				return wc_add_number_precision( (float) $item[ $field ], false );
 			},
 			array_values( $this->get_items() )
 		);
