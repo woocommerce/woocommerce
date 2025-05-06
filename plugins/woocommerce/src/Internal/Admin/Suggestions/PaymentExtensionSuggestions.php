@@ -252,6 +252,20 @@ class PaymentExtensionSuggestions {
 			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
+			self::AFFIRM => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.affirm.com/en-gb/business',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.affirm.com/en-gb/terms',
+						),
+					),
+				),
+			),
 			self::CLEARPAY,
 			self::KLARNA          => array(
 				'_merge_on_type' => array(
