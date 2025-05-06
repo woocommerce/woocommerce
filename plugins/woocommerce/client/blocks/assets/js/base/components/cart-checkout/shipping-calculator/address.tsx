@@ -33,15 +33,15 @@ const ShippingCalculatorAddress = ( {
 	const [ address, setAddress ] = useState( initialAddress );
 	const { showAllValidationErrors } = useDispatch( validationStore );
 	const focusReturnRef = useFocusReturn();
-	const { hasValidationErrors, areAddressFieldsForShippingRatesUpdating } =
+	const { hasValidationErrors, isAddressFieldsForShippingRatesUpdating } =
 		useSelect( ( select ) => {
 			return {
 				hasValidationErrors:
 					select( validationStore ).hasValidationErrors(),
-				areAddressFieldsForShippingRatesUpdating:
+				isAddressFieldsForShippingRatesUpdating:
 					select(
 						cartStore
-					).areAddressFieldsForShippingRatesUpdating(),
+					).isAddressFieldsForShippingRatesUpdating(),
 			};
 		}, [] );
 	const { defaultFields } = useCheckoutAddress();
@@ -124,7 +124,7 @@ const ShippingCalculatorAddress = ( {
 			/>
 			<Button
 				className="wc-block-components-shipping-calculator-address__button"
-				disabled={ areAddressFieldsForShippingRatesUpdating }
+				disabled={ isAddressFieldsForShippingRatesUpdating }
 				variant="outlined"
 				onClick={ handleClick }
 				type="submit"

@@ -160,7 +160,7 @@ export const useStoreCart = (
 				! store.hasFinishedResolution( 'getCartData' );
 
 			const isLoadingRates =
-				store.areAddressFieldsForShippingRatesUpdating();
+				store.isAddressFieldsForShippingRatesUpdating();
 			const { receiveCart, receiveCartContents } = dispatch( cartStore );
 
 			const cartFees =

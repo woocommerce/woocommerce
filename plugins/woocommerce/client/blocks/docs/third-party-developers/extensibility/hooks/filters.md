@@ -380,10 +380,10 @@ apply_filters( 'woocommerce_address_fields_for_shipping_rates', array $fields )
 
 ### Description
 
-By default, WooCommerce considers the following shipping fields as essential for shipping rate calculations: `'state'`, `'country'`, `'postcode'`, and `'city'`.
+By default, Store API considers the following shipping fields as essential for shipping rate calculations: `state`, `country`, `postcode`, and `city`.
 This filter allows developers to add new fields to the list above.
 
-The filter is used in the checkout blocks powered checkout process. 
+The filter is used in the blocks-powered checkout process. 
 
 ### Parameters
 
@@ -400,7 +400,7 @@ The filter is used in the checkout blocks powered checkout process.
 ```php
 add_filter( 'woocommerce_address_fields_for_shipping_rates', function( $fields ) {
     // Add a custom field to the list.
-    return ['address_1'];
+    return [ 'address_1' ];
 } );
 ```
 

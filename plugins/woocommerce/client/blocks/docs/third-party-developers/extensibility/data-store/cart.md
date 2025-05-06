@@ -52,7 +52,7 @@
     -   [isItemPendingQuantity( cartItemKey )](#isitempendingquantity-cartitemkey-)
     -   [isItemPendingDelete( cartItemKey )](#isitempendingdelete-cartitemkey-)
     -   [isCustomerDataUpdating](#iscustomerdataupdating)
-    -   [areAddressFieldsForShippingRatesUpdating](#areaddressfieldsforshippingratesupdating)
+    -   [isAddressFieldsForShippingRatesUpdating](#isaddressfieldsforshippingratesspdating)
     -   [isShippingRateBeingSelected](#isshippingratebeingselected)
     -   [getItemsPendingQuantityUpdate](#getitemspendingquantityupdate)
     -   [getItemsPendingDelete](#getitemspendingdelete)
@@ -923,10 +923,10 @@ const store = select( cartStore );
 const isCustomerDataUpdating = store.isCustomerDataUpdating();
 ```
 
-### areAddressFieldsForShippingRatesUpdating
+### isAddressFieldsForShippingRatesUpdating
 
 Queries whether shipping address fields impacting the shipping rates are being updated.
-By default, WooCommerce considers the following shipping fields as essential for shipping rate calculations: `'state'`, `'country'`, `'postcode'`, and `'city'`.
+By default, Store API considers the following shipping fields as essential for shipping rate calculations: `state`, `country`, `postcode`, and `city`.
 This filter `woocommerce_address_fields_for_shipping_rates` allows developers to add new fields to the list above.
 
 #### _Returns_ <!-- omit in toc -->
@@ -937,7 +937,7 @@ This filter `woocommerce_address_fields_for_shipping_rates` allows developers to
 
 ```js
 const store = select( cartStore );
-const areAddressFieldsForShippingRatesUpdating = store.isCustomerDataUpdating();
+const isAddressFieldsForShippingRatesUpdating = store.isCustomerDataUpdating();
 ```
 
 ### isShippingRateBeingSelected

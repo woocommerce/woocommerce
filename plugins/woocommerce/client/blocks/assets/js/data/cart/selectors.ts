@@ -205,7 +205,7 @@ export const isCustomerDataUpdating = ( state: CartState ): boolean => {
  * @return {boolean} address is being applied for shipping only.
  */
 //rename const to the new name based on updatingAddressFieldsForShippingRates
-export const areAddressFieldsForShippingRatesUpdating = (
+export const isAddressFieldsForShippingRatesUpdating = (
 	state: CartState
 ): boolean => {
 	return !! state.metaData.updatingAddressFieldsForShippingRates;
