@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add filter for the personalizer context set for the send preview email

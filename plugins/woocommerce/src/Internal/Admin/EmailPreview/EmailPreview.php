@@ -180,8 +180,12 @@ class EmailPreview {
 
 		if ( in_array( $email_type, self::USER_OBJECT_EMAILS, true ) ) {
 			$object                        = new WP_User( 0 );
-			$this->email->user_email       = 'user_preview@example.com';
-			$this->email->user_login       = 'user_preview';
+			$object->user_email            = 'user_preview@example.com';
+			$object->user_login            = 'user_preview';
+			$object->first_name            = 'John';
+			$object->last_name             = 'Doe';
+			$this->email->user_email       = $object->user_email;
+			$this->email->user_login       = $object->user_login;
 			$this->email->reset_key        = 'reset_key';
 			$this->email->user_id          = 0;
 			$this->email->set_password_url = 'https://example.com/set-password';

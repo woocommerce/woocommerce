@@ -107,6 +107,7 @@ class Integration {
 		add_filter( 'replace_editor', array( $this, 'replace_editor' ), 10, 2 );
 		add_action( 'before_delete_post', array( $this, 'delete_email_template_associated_with_email_editor_post' ), 10, 2 );
 		add_filter( 'woocommerce_email_editor_send_preview_email_rendered_data', array( $this, 'update_send_preview_email_rendered_data' ) );
+		add_filter( 'woocommerce_email_editor_send_preview_email_personalizer_context', array( $this, 'update_send_preview_email_personalizer_context' ) );
 		add_filter( 'woocommerce_email_editor_preview_post_template_html', array( $this, 'update_preview_post_template_html_data' ), 100, 1 );
 	}
 
@@ -274,6 +275,39 @@ class Integration {
 			}
 		}
 		return $data;
+	}
+
+	/**
+	 * Update the personalizer context for the send preview email.
+	 *
+	 * @param array $context The personalizer context.
+	 * @return array The updated personalizer context.
+	 */
+	public function update_send_preview_email_personalizer_context( $context ) {
+		$email_type = WCTransactionalEmailPostsManager::get_instance()->get_email_type_from_post_id( get_the_ID() );
+		if ( $email_type ) {
+			$email_type = 'WC_Email_' . implode( '_', array_map( 'ucfirst', explode( '_', $email_type ) ) );
+		} else {
+			$email_type = EmailPreview::DEFAULT_EMAIL_TYPE;
+		}
+
+		$email_preview = wc_get_container()->get( EmailPreview::class );
+		$email_preview->set_email_type( $email_type );
+
+		$email            = $email_preview->get_email();
+		$context['order'] = $email->object instanceof \WC_Order ? $email->object : null;
+
+		// For emails of type new_user or reset_password we want to set user directly from the object.
+		if ( $email->object instanceof \WP_User ) {
+			$context['wp_user'] = $email->object;
+		} elseif ( $email->object instanceof \WC_Order ) {
+			$context['wp_user'] = $email->object->get_user();
+		} else {
+			$context['wp_user'] = null;
+		}
+		$context['wc_email'] = $email;
+
+		return $context;
 	}
 
 	/**
