@@ -952,17 +952,6 @@ class WC_Checkout {
 
 		if ( WC()->cart->needs_shipping() ) {
 
-			// Verify shipping was posted if needed.
-			if ( empty( $data['shipping_method'] ) ) {
-				// Shipping is needed, but not posted, this would be caused if shipping was hidden from the front-end
-				// due to incorrectly modified checkout fields to make them optional by editing
-				// `woocommerce_checkout_fields`, `woocommerce_shipping_fields` or `woocommerce_billing_fields` and not
-				// updating the locale to reflect that. If the locale is not updated (which is a mistake), extensions
-				// need to manually set the frontend field's required attribute to false, otherwise changes to address
-				// fields will not be posted and shipping fragments will not be shown.
-				$errors->add( 'shipping_method', __( 'Please select a shipping method.', 'woocommerce' ) );
-			}
-
 			$shipping_country = isset( $data['shipping_country'] ) ? $data['shipping_country'] : WC()->customer->get_shipping_country();
 
 			if ( empty( $shipping_country ) ) {
