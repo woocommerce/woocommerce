@@ -155,7 +155,7 @@ class EmailApiController {
 	 * @param string $id - The email ID.
 	 * @return \WC_Email|null - The email object or null if not found.
 	 */
-	private function get_email_by_type( string $id ): ?WC_Email {
+	private function get_email_by_type( ?string $id ): ?WC_Email {
 		foreach ( $this->emails as $email ) {
 			if ( $email->id === $id ) {
 				return $email;
