@@ -18,7 +18,6 @@ import {
 import ProductCollectionPlaceholder from './product-collection-placeholder';
 import ProductCollectionContent from './product-collection-content';
 import CollectionSelectionModal from './collection-selection-modal';
-import './editor.scss';
 import { useProductCollectionUIState } from '../utils';
 import ProductPicker from './ProductPicker';
 import { useTracksLocation } from '../tracks-utils';

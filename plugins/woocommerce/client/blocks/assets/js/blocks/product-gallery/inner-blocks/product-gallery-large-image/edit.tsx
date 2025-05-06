@@ -9,7 +9,6 @@ import { useProductDataContext } from '@woocommerce/shared-context';
  * Internal dependencies
  */
 import largeImageNextPreviousButtonMetadata from '../product-gallery-next-previous-buttons/block.json';
-import './editor.scss';
 
 const getInnerBlocksTemplate = () => [
 	[ largeImageNextPreviousButtonMetadata.name ],

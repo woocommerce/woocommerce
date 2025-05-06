@@ -9,6 +9,7 @@ use WP_Block;
  * ProductTemplate class.
  */
 class ProductTemplate extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
