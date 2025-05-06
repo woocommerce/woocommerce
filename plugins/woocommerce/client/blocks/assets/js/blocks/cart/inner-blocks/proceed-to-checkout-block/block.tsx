@@ -25,7 +25,7 @@ import { defaultButtonLabel } from './constants';
 const Block = ( {
 	checkoutPageId,
 	className,
-	buttonLabel: buttonLabel,
+	buttonLabel,
 }: {
 	checkoutPageId: number;
 	className: string;
