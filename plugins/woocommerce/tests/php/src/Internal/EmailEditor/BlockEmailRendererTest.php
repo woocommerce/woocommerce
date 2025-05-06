@@ -25,7 +25,7 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 	 * @var string $email_post_content
 	 */
 	private $email_post_content = '<!-- wp:paragraph -->
-<p>Test Paragraph. <!--[woocommerce/shopper-email]--></p>
+<p>Test Paragraph. <!--[woocommerce/customer-email]--></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:woo/email-content {"lock":{"move":false,"remove":true}} -->

@@ -5,9 +5,9 @@ $dialog-padding: 20px;
 
 .wc-block-product-gallery-large-image {
 	width: 100%;
-	height: fit-content;
 	position: relative;
 	flex-grow: 1;
+	aspect-ratio: 1 / 1;
 
 	.wc-block-product-gallery-large-image__container {
 		display: flex;
@@ -187,23 +187,6 @@ $dialog-padding: 20px;
 		align-items: center;
 		aspect-ratio: 1 / 1;
 		outline: none;
-
-		&--active {
-			position: relative;
-			pointer-events: none;
-			cursor: default;
-
-			&::after {
-				content: "";
-				position: absolute;
-				top: 0;
-				left: 0;
-				width: 100%;
-				height: 100%;
-				background-color: #111;
-				opacity: 0.2;
-			}
-		}
 	}
 
 	&__thumbnail__image {
@@ -212,6 +195,13 @@ $dialog-padding: 20px;
 		aspect-ratio: 1 / 1;
 		object-fit: cover;
 		outline: none;
+
+		&.is-active {
+			position: relative;
+			pointer-events: none;
+			cursor: default;
+			filter: brightness(0.8);
+		}
 	}
 
 	&.wc-block-product-gallery-thumbnails--overflow {

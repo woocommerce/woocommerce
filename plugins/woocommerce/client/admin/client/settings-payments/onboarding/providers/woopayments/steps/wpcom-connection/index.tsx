@@ -4,6 +4,7 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -14,6 +15,8 @@ import './style.scss';
 
 export const JetpackStep: React.FC = () => {
 	const { currentStep, closeModal } = useOnboardingContext();
+	const [ isConnectButtonLoading, setIsConnectButtonLoading ] =
+		useState( false );
 
 	return (
 		<>
@@ -32,7 +35,10 @@ export const JetpackStep: React.FC = () => {
 					<Button
 						variant="primary"
 						className="settings-payments-onboarding-modal__step--content-jetpack-button"
+						isBusy={ isConnectButtonLoading }
+						disabled={ isConnectButtonLoading }
 						onClick={ () => {
+							setIsConnectButtonLoading( true );
 							window.location.href =
 								currentStep?.actions?.auth?.href ?? '';
 						} }
