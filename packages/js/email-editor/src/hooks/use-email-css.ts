@@ -57,7 +57,7 @@ export function useEmailCss() {
 	const [ styles ] = useGlobalStylesOutputWithConfig( mergedConfig );
 
 	let rootContainerStyles = '';
-	if ( layout ) {
+	if ( layout && deviceType !== 'Mobile' ) {
 		rootContainerStyles = `display:flow-root; width:${ layout?.contentSize }; margin: 0 auto;box-sizing: border-box;`;
 	}
 	const padding = mergedConfig.styles?.spacing?.padding;
@@ -74,9 +74,7 @@ export function useEmailCss() {
 		return [
 			...( ( styles as string[] ) ?? [] ),
 			{
-				css: `.is-root-container{ ${
-					deviceType !== 'Mobile' ? rootContainerStyles : ''
-				} }`,
+				css: `.is-root-container{ ${ rootContainerStyles } }`,
 			},
 			...( editorSettingsStyles ?? [] ),
 		];

@@ -8,17 +8,3 @@
 	// resetting margin fits the notice to the full column width
 	margin: 0;
 }
-
-// Disable focus outline for buttons in the sidebar
-.edit-post-sidebar {
-	.components-button:focus:not(:disabled) {
-		box-shadow: none;
-		outline: none;
-	}
-
-	// Because we use complementary area component from the WP interface package the is visible an unwanted close icon.
-	// This style hides it.
-	.interface-complementary-area-header__small {
-		display: none;
-	}
-}
