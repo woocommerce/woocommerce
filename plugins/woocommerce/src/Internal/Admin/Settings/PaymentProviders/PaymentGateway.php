@@ -365,7 +365,6 @@ class PaymentGateway {
 			return $payment_gateway->get_settings_url();
 		}
 
-		// A comment to force a change.
 		return Utils::wc_payments_settings_url( null, array( 'section' => strtolower( $payment_gateway->id ) ) );
 	}
 
