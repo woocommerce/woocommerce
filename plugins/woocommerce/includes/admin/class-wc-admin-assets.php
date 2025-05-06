@@ -236,7 +236,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'strings'                           => array(
 						'import_products'          => __( 'Import', 'woocommerce' ),
 						'export_products'          => __( 'Export', 'woocommerce' ),
-						// translators: %d: number of selected products
+						// translators: %d: number of selected products.
 						'export_selected_products' => __( 'Export %d selected', 'woocommerce' ),
 					),
 					'nonces'                            => array(
