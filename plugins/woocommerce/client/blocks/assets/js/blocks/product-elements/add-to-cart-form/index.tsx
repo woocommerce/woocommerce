@@ -11,10 +11,6 @@ import type { BlockConfiguration } from '@wordpress/blocks';
 import metadata from './block.json';
 import { QuantitySelectorStyle } from './settings';
 import AddToCartFormEdit from './edit';
-import './style.scss';
-import './editor.scss';
-import '../../../base/components/quantity-selector/style.scss';
-
 export interface Attributes {
 	className?: string;
 	quantitySelectorStyle: QuantitySelectorStyle;

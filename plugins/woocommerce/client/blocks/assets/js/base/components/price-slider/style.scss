@@ -260,7 +260,6 @@
 .rtl {
 	.wc-block-components-price-slider__range-input-progress {
 		--track-background: linear-gradient(to left, transparent var(--low), var(--range-color) 0, var(--range-color) var(--high), transparent 0) no-repeat 0 100% / 100% 100%;
-		--range-color: #{$studio-woocommerce-purple-30};
 		background: var(--track-background);
 	}
 }
@@ -271,9 +270,6 @@
 		background: transparent;
 		border: $border-width solid currentColor;
 		box-sizing: border-box;
-	}
-	.wc-block-components-price-slider__range-input-progress {
-		--range-color: currentColor;
 	}
 	.wc-block-price-filter__range-input {
 		background: transparent;
