@@ -256,12 +256,13 @@ class BlockPatterns {
 			function ( $pattern ) {
 				$pattern['categories'] = array_map(
 					function ( $category ) {
+
 						foreach ( self::CATEGORIES_PREFIXES as $prefix ) {
-							if ( strpos( $category['title'], $prefix ) !== false ) {
-								$parsed_category   = str_replace( $prefix, '', $category['title'] );
-								$parsed_category   = str_replace( '_', ' ', $parsed_category );
-								$category['title'] = ucfirst( $parsed_category );
-							}
+						    if ( isset( $category['title'] ) && is_string( $category['title'] ) && strpos( $category['title'], $prefix ) !== false ) {
+						        $parsed_category   = str_replace( $prefix, '', $category['title'] );
+						        $parsed_category   = str_replace( '_', ' ', $parsed_category );
+						        $category['title'] = ucfirst( $parsed_category );
+						    }
 						}
 
 						return $category;
