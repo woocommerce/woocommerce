@@ -77,6 +77,12 @@ export default function ProductListContent( props: {
 			return;
 		}
 
+		// For compact cards, show all products.
+		if ( props.cardType === ProductCardType.compact ) {
+			setProductsToShow( props.products );
+			return;
+		}
+
 		// If we don't have enough products to fill a row, show all products.
 		if ( props.products.length < columns ) {
 			setProductsToShow( props.products );
@@ -97,7 +103,7 @@ export default function ProductListContent( props: {
 
 		// Slice the products, this will get rid of any rows that are not fully filled.
 		setProductsToShow( props.products.slice( 0, completeRows * columns ) );
-	}, [ columns, props.products, props.productGroup ] );
+	}, [ columns, props.products, props.productGroup, props.cardType ] );
 
 	const bannerPosition = columns * 2 - 1;
 
