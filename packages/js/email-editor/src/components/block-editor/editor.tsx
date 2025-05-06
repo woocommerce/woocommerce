@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	AutosaveMonitor,
 	LocalAutosaveMonitor,
@@ -14,7 +14,6 @@ import {
 import { useMemo, useEffect } from '@wordpress/element';
 import { SlotFillProvider, Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
-import { useDispatch } from '@wordpress/data';
 import { CommandMenu } from '@wordpress/commands';
 
 /**
@@ -61,15 +60,14 @@ export function InnerEditor( {
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 				currentPost.postId
 			);
-			const isFullscreenEnabled =
-				select( storeName ).isFeatureActive( 'fullscreenMode' );
 			return {
 				template:
 					currentPost.postType !== 'wp_template'
 						? getEditedPostTemplate()
 						: null,
 				post: postObject,
-				isFullscreenEnabled,
+				isFullscreenEnabled:
+					select( storeName ).isFeatureActive( 'fullscreenMode' ),
 			};
 		},
 		[ currentPost.postType, currentPost.postId ]
@@ -78,7 +76,7 @@ export function InnerEditor( {
 	const { removeEditorPanel } = useDispatch( editorStore );
 	useEffect( () => {
 		removeEditorPanel( 'post-status' );
-	}, [] );
+	}, [ removeEditorPanel ] );
 
 	const [ styles ] = useEmailCss();
 

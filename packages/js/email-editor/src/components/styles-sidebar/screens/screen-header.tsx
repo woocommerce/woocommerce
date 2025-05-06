@@ -9,7 +9,7 @@ import {
 	__experimentalSpacer as Spacer, // eslint-disable-line
 	__experimentalHeading as Heading, // eslint-disable-line
 	__experimentalView as View, // eslint-disable-line
-	Navigator
+	Navigator,
 } from '@wordpress/components';
 
 type Props = {
