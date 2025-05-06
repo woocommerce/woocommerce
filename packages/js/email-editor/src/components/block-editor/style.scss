@@ -194,6 +194,12 @@
 	display: none;
 }
 
+// Hide the post title.
+// When user disables the template-lock mode we don't want to show the post title.
+.editor-visual-editor__post-title-wrapper {
+	display: none;
+}
+
 // Enforce hidden state.
 // This is used to hide the publish button when there are no email edits.
 .force-hidden {
