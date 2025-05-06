@@ -12,7 +12,7 @@ use InvalidArgumentException;
 use Exception;
 
 /**
- * Base class for REST API controllers defined inside the 'src' directory.
+ * Base class for REST API controllers defined inside the 'src' directory
  *
  * Besides implementing the abstract methods, derived classes must be registered in the dependency injection
  * container with the 'share_with_implements_tags' method inside a service provider that inherits from

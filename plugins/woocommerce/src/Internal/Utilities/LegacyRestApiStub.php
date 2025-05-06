@@ -21,7 +21,7 @@ use Automattic\WooCommerce\Utilities\RestApiUtil;
 class LegacyRestApiStub implements RegisterHooksInterface {
 
 	/**
-	 * The instance of RestApiUtil to use
+	 * The instance of RestApiUtil to use.
 	 *
 	 * @var RestApiUtil
 	 */
