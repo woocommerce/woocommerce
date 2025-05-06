@@ -44,6 +44,9 @@ function enhancePatternWithParsedBlocks( pattern ) {
 }
 
 function regularizedGetEntityRecord( template ) {
+	if ( ! template ) {
+		return null;
+	}
 	return {
 		...template,
 		title: template?.title?.raw || template?.title || '',
@@ -227,7 +230,7 @@ function getTemplate( select, templateId: string ): EmailTemplate {
  * @return {Object?} Post Template.
  */
 export const getEditedPostTemplate = createRegistrySelector(
-	( select ) => (): EmailTemplate => {
+	( select ) => (): EmailTemplate | null => {
 		const currentTemplate =
 			// @ts-expect-error Expected 0 arguments, but got 1.
 			select( editorStore ).getEditedPostAttribute( 'template' );
