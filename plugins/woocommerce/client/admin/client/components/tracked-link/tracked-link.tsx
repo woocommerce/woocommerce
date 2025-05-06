@@ -49,6 +49,7 @@ export const TrackedLink = ( {
 }: TrackedLinkProps ) => {
 	const linkTextMatch = message.match( /{{Link}}(.*?){{\/Link}}/ );
 	const linkText = linkTextMatch ? linkTextMatch[ 1 ] : '';
+	const shouldOpenInNewTab = linkType === 'external' && target === '_blank';
 
 	return (
 		<Text { ...textProps }>
@@ -70,13 +71,9 @@ export const TrackedLink = ( {
 							} }
 							href={ targetUrl }
 							type={ linkType }
-							target={
-								linkType === 'external' && target === '_blank'
-									? '_blank'
-									: undefined
-							}
+							target={ shouldOpenInNewTab ? '_blank' : undefined }
 							aria-label={
-								linkType === 'external' && target === '_blank'
+								shouldOpenInNewTab
 									? `${ linkText } (${ __(
 											'opens in a new tab',
 											'woocommerce'
