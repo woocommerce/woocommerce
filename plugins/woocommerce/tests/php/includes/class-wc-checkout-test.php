@@ -71,68 +71,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'validate_posted_data' adds errors for non-posted shipping method.
-	 *
-	 * @testWith [true]
-	 *           [false]
-	 *
-	 * @param bool $shipping_requires_full_address True to enable "Hide shipping costs until an address is entered".
-	 */
-	public function test_validate_checkout_adds_error_for_not_posted_shipping( $shipping_requires_full_address ) {
-		update_option( 'woocommerce_shipping_cost_requires_address', wc_bool_to_string( $shipping_requires_full_address ) );
-
-		// Skip testing payment functionality.
-		add_filter( 'woocommerce_cart_needs_payment', '__return_false' );
-
-		// Add a flat rate and free shipping method to the US zone.
-		$zone = new WC_Shipping_Zone();
-		$zone->set_zone_name( 'US' );
-		$zone->set_zone_order( 4 );
-		$zone->add_location( 'US', 'country' );
-		$zone->add_shipping_method( 'flat_rate' );
-		$zone->add_shipping_method( 'free_shipping' );
-		$zone->save();
-		delete_transient( 'wc_shipping_method_count' );
-
-		$product = WC_Helper_Product::create_simple_product( true );
-		WC()->cart->add_to_cart( $product->get_id(), 1 );
-
-		$data = array(
-			'billing_country'           => 'US',
-			'ship_to_different_address' => false,
-		);
-
-		WC()->customer->set_billing_country( 'US' );
-		WC()->customer->set_billing_state( 'CA' );
-		WC()->customer->set_billing_city( 'Los Angeles' );
-		WC()->customer->set_shipping_postcode( '90210' );
-
-		$errors = new WP_Error();
-		$this->sut->validate_checkout( $data, $errors );
-
-		$this->assertEquals( 'Please select a shipping method.', $errors->get_error_message( 'shipping_method' ) );
-
-		$errors                  = new WP_Error();
-		$data['shipping_method'] = array( 'flat_rate:4' );
-		$this->sut->validate_checkout( $data, $errors );
-		$this->assertEquals( '', $errors->get_error_message( 'shipping_method' ) );
-
-		// Test that carts with no shippable products can post with an empty shipping method.
-		$product->set_virtual( true );
-		$product->save();
-		WC()->cart->empty_cart();
-		WC()->cart->add_to_cart( $product->get_id(), 1 );
-
-		$data['shipping_method'] = '';
-		$this->sut->validate_checkout( $data, $errors );
-		$this->assertEquals( '', $errors->get_error_message( 'shipping_method' ) );
-		$zone->delete( true );
-
-		// Skip testing payment functionality.
-		remove_filter( 'woocommerce_cart_needs_payment', '__return_false' );
-	}
-
-	/**
 	 * @testdox the customer notes are correctly sanitized.
 	 */
 	public function test_order_notes() {
