@@ -791,7 +791,7 @@
 		wc_order_lock.init();
 	} );
 
-	// Log selected product IDs on change and update Export button
+	// Function to handle selected product export
 	$( function () {
 		const $exportButton = $( 'a.page-title-action[href*="page=product_exporter"]');
 		if ( !$exportButton.length ) {
@@ -801,8 +801,6 @@
 
 		const originalExportHref = $exportButton.attr( 'href' );
 		const originalExportText = $exportButton.text();
-		// Use existing string or fallback text for selected export.
-		const selectedExportText = woocommerce_admin.strings.export_selected_products || 'Export selected';
 
 		// Use event delegation on the form containing the list table
 		$( '#posts-filter' ).on(
@@ -810,8 +808,6 @@
 			'#the-list input[type="checkbox"][name="post[]"], #cb-select-all-1, #cb-select-all-2',
 			function () {
 				// Use a minimal timeout to ensure the checked state is updated in the DOM,
-				// especially after clicking "select all".
-				console.log( 'change event triggered' );
 				setTimeout( function () {
 					const selectedProductIds = $(
 						'#the-list input[type="checkbox"][name="post[]"]:checked'
@@ -821,16 +817,15 @@
 						} )
 						.get(); // .get() converts the jQuery object to a standard array
 
-					console.log( 'Selected Product IDs:', selectedProductIds );
-
 					// Update Export button
 					if ( selectedProductIds.length > 0 ) {
 						const newHref = originalExportHref + '&product_ids=' + selectedProductIds.join(',');
 						// Construct the text with the count
 						const count = selectedProductIds.length;
+						// Use the localized string if available, otherwise fallback to a hardcoded string
 						const buttonText = woocommerce_admin.strings.export_selected_products
-							? woocommerce_admin.strings.export_selected_products.replace( '%d', count ) // Assuming a %d placeholder
-							: 'Export ' + count + ' selected'; // Fallback using string concatenation
+							? woocommerce_admin.strings.export_selected_products.replace( '%d', count )
+							: 'Export ' + count + ' selected';
 						$exportButton.text( buttonText ).attr( 'href', newHref );
 					} else {
 						$exportButton.text( originalExportText ).attr( 'href', originalExportHref );

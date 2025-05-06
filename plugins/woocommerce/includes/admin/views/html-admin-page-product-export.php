@@ -11,25 +11,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 wp_enqueue_script( 'wc-product-export' );
 
-$exporter                = new WC_Product_CSV_Exporter();
+$exporter = new WC_Product_CSV_Exporter();
+
 $product_ids_to_export = array();
 $is_exporting_specific = false;
 
 if ( ! empty( $_GET['product_ids'] ) ) {
-	$ids_raw = explode( ',', sanitize_text_field( wp_unslash( $_GET['product_ids'] ) ) );
+	$ids_raw 			   = explode( ',', sanitize_text_field( wp_unslash( $_GET['product_ids'] ) ) );
 	$product_ids_to_export = array_filter( array_map( 'absint', $ids_raw ) );
+
 	if ( ! empty( $product_ids_to_export ) ) {
 		$is_exporting_specific = true;
 	}
 }
 ?>
+
 <div class="wrap woocommerce">
 	<h1><?php esc_html_e( 'Export Products', 'woocommerce' ); ?></h1>
 
 	<?php
 	if ( $is_exporting_specific ) {
 		$clear_url = remove_query_arg( 'product_ids' );
-		$count = count( $product_ids_to_export );
+		$count 	   = count( $product_ids_to_export );
 		// translators: %1$d: Number of products, %2$s: URL to clear selection.
 		$notice = sprintf(
 			_n(
@@ -142,10 +145,4 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 			</div>
 		</form>
 	</div>
-	<style type="text/css">
-		.woocommerce-exporter-wrapper--specific-ids .woocommerce-exporter-types-field,
-		.woocommerce-exporter-wrapper--specific-ids .woocommerce-exporter-category-field {
-			display: none;
-		}
-	</style>
 </div>

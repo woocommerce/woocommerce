@@ -8260,6 +8260,11 @@ table.bar_chart {
 	}
 }
 
+.woocommerce-exporter-wrapper--specific-ids .woocommerce-exporter-types-field,
+.woocommerce-exporter-wrapper--specific-ids .woocommerce-exporter-category-field {
+	display: none;
+}
+
 .woocommerce-progress-form-wrapper,
 .woocommerce-exporter-wrapper,
 .woocommerce-importer-wrapper {

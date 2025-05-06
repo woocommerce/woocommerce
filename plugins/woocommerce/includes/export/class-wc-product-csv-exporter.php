@@ -109,7 +109,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Specific product IDs to export.
 	 *
 	 * @param array $product_ids List of product IDs to export.
-	 * @since x.x.x // TODO: Update this version tag when releasing
+	 * @since 9.9.0
 	 */
 	public function set_product_ids_to_export( $product_ids ) {
 		$this->product_ids_to_export = array_filter( array_map( 'absint', (array) $product_ids ) );
@@ -206,26 +206,26 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		 * Filter to allow exporting only specific product IDs.
 		 * Takes precedence over IDs set via set_product_ids_to_export().
 		 *
-		 * @since x.x.x
+		 * @since 9.9.0
 		 * @param array $product_ids Array of product IDs to export. Default empty array.
 		 */
-		$hook_provided_ids = apply_filters( 'woocommerce_product_export_product_ids', array() );
+		$hook_provided_ids = apply_filters( 'woocommerce_product_export_specific_product_ids', array() );
 		$hook_provided_ids = array_map( 'absint', $hook_provided_ids );
 
 		if ( ! empty( $hook_provided_ids ) && is_array( $hook_provided_ids ) ) {
 			$ids_for_include = array_map( 'absint', $hook_provided_ids );
 		} elseif ( ! empty( $this->product_ids_to_export ) ) {
 			// Use IDs from the property if the hook didn't provide any.
-			$ids_for_include = $this->product_ids_to_export; // Already sanitized in the setter.
+			$ids_for_include = $this->product_ids_to_export;
 		}
 
 		// Set up query args based on whether specific IDs are being exported.
+		// We ignore type/category initially when specific IDs are provided.
 		if ( ! empty( $ids_for_include ) ) {
 			$args['include'] = $ids_for_include;
-			// Ignore type/category initially when specific IDs are provided.
 		} else {
 			// Use the type and category filters set on the instance.
-			$args['type']     = $this->product_types_to_export;
+			$args['type'] = $this->product_types_to_export;
 			if ( ! empty( $this->product_category_to_export ) ) {
 				$args['category'] = $this->product_category_to_export;
 			}
@@ -239,6 +239,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 		foreach ( $products->products as $product ) {
 			// Check if the product is variable and if either the include or category filter is active.
+			// This is to ensure that product variations are only included if they are being selectively exported or if they are part of a category.
 			if ( $product->is_type( ProductType::VARIABLE ) && ( ! empty( $args['include'] ) || ! empty( $args['category'] ) ) ) {
 				if ( ! in_array( $product->get_id(), $variable_products, true ) ) {
 					$variable_products[] = $product->get_id();
