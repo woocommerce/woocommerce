@@ -139,19 +139,14 @@ export const useStoreCart = (
 		useSelect(
 			( select ) => {
 				const store = select( cartStore );
-				const cartData = store.getCartData();
-				const cartErrors = store.getCartErrors();
-				const cartTotals = store.getCartTotals();
-				const cartIsLoading =
-					// @ts-expect-error `hasFinishedResolution` is not typed in @wordpress/data yet.
-					! store.hasFinishedResolution( 'getCartData' );
-				const isLoadingRates = store.isCustomerDataUpdating();
 				return {
-					cartData,
-					cartErrors,
-					cartTotals,
-					cartIsLoading,
-					isLoadingRates,
+					cartData: store.getCartData(),
+					cartErrors: store.getCartErrors(),
+					cartTotals: store.getCartTotals(),
+					cartIsLoading:
+						// @ts-expect-error `hasFinishedResolution` is not typed in @wordpress/data yet.
+						! store.hasFinishedResolution( 'getCartData' ),
+					isLoadingRates: store.isCustomerDataUpdating(),
 				};
 			},
 			[ shouldSelect ]
