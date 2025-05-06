@@ -54,7 +54,7 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 	}
 	?>
 
-	<div class="woocommerce-exporter-wrapper <?php echo $is_exporting_specific ? 'woocommerce-exporter-wrapper--specific-ids' : ''; ?>">
+	<div class="woocommerce-exporter-wrapper">
 		<form class="woocommerce-exporter">
 			<?php
 			// Add hidden input if exporting specific IDs, so JS can potentially pick it up.
@@ -94,6 +94,7 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 								</select>
 							</td>
 						</tr>
+						<?php if ( ! $is_exporting_specific ) : ?>
 						<tr class="woocommerce-exporter-types-field">
 							<th scope="row">
 								<label for="woocommerce-exporter-types"><?php esc_html_e( 'Which product types should be exported?', 'woocommerce' ); ?></label>
@@ -128,6 +129,7 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 								</select>
 							</td>
 						</tr>
+						<?php endif; ?>
 						<tr>
 							<th scope="row">
 								<label for="woocommerce-exporter-meta"><?php esc_html_e( 'Export custom meta?', 'woocommerce' ); ?></label>
