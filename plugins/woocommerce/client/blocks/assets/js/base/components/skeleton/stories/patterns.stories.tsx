@@ -19,6 +19,7 @@ import { CheckoutShippingSkeletonAdditional } from '../patterns/checkout-shippin
 import { CheckoutPaymentSkeleton } from '../patterns/checkout-payment';
 import { CheckoutOrderSummarySkeleton } from '../patterns/checkout-order-summary';
 import { CheckoutOrderSummaryMobileSkeleton } from '../patterns/checkout-order-summary-mobile';
+
 export default {
 	title: 'Base Components/Skeleton/Patterns',
 	component: Skeleton,
@@ -30,6 +31,10 @@ export default {
 		tag: {
 			control: { type: 'select' },
 			options: [ 'div' ],
+		},
+		isStatic: {
+			control: 'boolean',
+			defaultValue: false,
 		},
 	},
 	parameters: {
@@ -43,8 +48,7 @@ export default {
 } as Meta< SkeletonProps >;
 
 export const ProductShortDescriptionSkeletonStory: StoryObj = {
-	render: () => <ProductShortDescriptionSkeleton />,
-	storyName: 'Product Short Description skeleton',
+	render: ( args ) => <ProductShortDescriptionSkeleton { ...args } />,
 	parameters: {
 		docs: {
 			source: {
