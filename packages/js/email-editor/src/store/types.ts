@@ -179,25 +179,14 @@ export type PersonalizationTag = {
 };
 
 export type State = {
-	inserterSidebar: {
-		isOpened: boolean;
-	};
-	listviewSidebar: {
-		isOpened: boolean;
-	};
-	settingsSidebar: {
-		activeTab: string;
-	};
 	postId: number;
 	editorSettings: EmailEditorSettings;
 	theme: EmailTheme;
 	styles: {
 		globalStylesPostId: number | null;
 	};
-	autosaveInterval: number;
 	urls: EmailEditorUrls;
 	preview: {
-		deviceType: string;
 		toEmail: string;
 		isModalOpened: boolean;
 		isSendingPreviewEmail: boolean;

@@ -69,42 +69,6 @@ export const hasEdits = createRegistrySelector( ( select ) => (): boolean => {
 	);
 } );
 
-export const isEmailLoaded = createRegistrySelector(
-	( select ) => (): boolean => {
-		const postId = select( storeName ).getEmailPostId();
-		return !! select( coreDataStore ).getEntityRecord(
-			'postType',
-			editorCurrentPostType,
-			postId
-		);
-	}
-);
-
-export const isSaving = createRegistrySelector( ( select ) => (): boolean => {
-	const postId = select( storeName ).getEmailPostId();
-	return !! select( coreDataStore ).isSavingEntityRecord(
-		'postType',
-		editorCurrentPostType,
-		postId
-	);
-} );
-
-export const isEmpty = createRegistrySelector( ( select ) => (): boolean => {
-	const postId = select( storeName ).getEmailPostId();
-
-	const post: EmailEditorPostType = select( coreDataStore ).getEntityRecord(
-		'postType',
-		editorCurrentPostType,
-		postId
-	);
-	if ( ! post ) {
-		return true;
-	}
-
-	const { content, title } = post;
-	return ! content.raw && ! title.raw;
-} );
-
 export const hasEmptyContent = createRegistrySelector(
 	( select ) => (): boolean => {
 		const postId = select( storeName ).getEmailPostId();
@@ -351,10 +315,6 @@ export function getEmailPostId( state: State ): number {
 	return state.postId;
 }
 
-export function getSettingsSidebarActiveTab( state: State ): string {
-	return state.settingsSidebar.activeTab;
-}
-
 export function getInitialEditorSettings(
 	state: State
 ): State[ 'editorSettings' ] {
@@ -384,20 +344,8 @@ export function getPersonalizationTagsList(
 	return state.personalizationTags.list;
 }
 
-export const getDeviceType = createRegistrySelector(
-	( select ) => () =>
-		// @ts-expect-error getDeviceType is missing in types.
-		select( editorStore ).getDeviceType() as string
-);
-
 export function getStyles( state: State ): State[ 'theme' ][ 'styles' ] {
 	return state.theme.styles;
-}
-
-export function getAutosaveInterval(
-	state: State
-): State[ 'autosaveInterval' ] {
-	return state.autosaveInterval;
 }
 
 export function getTheme( state: State ): State[ 'theme' ] {
