@@ -28,22 +28,15 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { setValidationErrors } = useDispatch( validationStore );
 
-	const {
-		isApplyingCoupon,
-		isRemovingCoupon,
-	}: Pick< StoreCartCoupon, 'isApplyingCoupon' | 'isRemovingCoupon' > =
-		useSelect( ( select ) => {
-			const store = select( cartStore );
-
-			return {
-				isApplyingCoupon: store.isApplyingCoupon(),
-				isRemovingCoupon: store.isRemovingCoupon(),
-			};
-		} );
+	const [ isApplyingCoupon, isRemovingCoupon ] = useSelect( ( select ) => {
+		const store = select( cartStore );
+		return [ store.isApplyingCoupon(), store.isRemovingCoupon() ];
+	}, [] );
 
 	const { applyCoupon, removeCoupon } = useDispatch( cartStore );
-	const orderId = useSelect( ( select ) =>
-		select( checkoutStore ).getOrderId()
+	const orderId = useSelect(
+		( select ) => select( checkoutStore ).getOrderId(),
+		[]
 	);
 
 	// Return cart, checkout or generic error message.
