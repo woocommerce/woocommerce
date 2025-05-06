@@ -9,6 +9,8 @@ export function EmailStatus() {
 	const [statusValue] = useState('enabled');
 	const status = EMAIL_STATUSES.find((s) => s.value === statusValue) ?? EMAIL_STATUSES[1];
 
+// todo disable when manual
+// todo do not let change to manual
 	return (
 		<PanelRow className='editor-post-panel__row'>
 			<Flex justify={ 'start' }>
@@ -17,7 +19,7 @@ export function EmailStatus() {
 				</FlexItem>
 				<FlexItem>
 					<Dropdown
-						position="bottom left"
+						popoverProps={{ placement: 'bottom' }}
 						renderToggle={ ( { isOpen, onToggle } ) => (
 							<Button
 								variant="tertiary"
