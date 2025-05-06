@@ -234,8 +234,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'mon_decimal_point'                 => wc_get_price_decimal_separator(),
 					'ajax_url'                          => admin_url( 'admin-ajax.php' ),
 					'strings'                           => array(
-						'import_products' 		   => __( 'Import', 'woocommerce' ),
-						'export_products' 		   => __( 'Export', 'woocommerce' ),
+						'import_products'          => __( 'Import', 'woocommerce' ),
+						'export_products'          => __( 'Export', 'woocommerce' ),
 						'export_selected_products' => __( 'Export %d selected', 'woocommerce' ),
 					),
 					'nonces'                            => array(
