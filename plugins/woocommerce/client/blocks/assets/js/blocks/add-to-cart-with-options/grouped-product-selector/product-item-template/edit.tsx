@@ -19,6 +19,7 @@ import {
 import { resolveSelect, useSelect } from '@wordpress/data';
 import type { ProductResponseItem } from '@woocommerce/types';
 import { productsStore } from '@woocommerce/data';
+import { store as coreStore } from '@wordpress/core-data';
 
 interface Attributes {
 	className?: string;
@@ -116,11 +117,11 @@ export default function ProductItemTemplateEdit(
 				query = { ...query, include: groupedProductIds };
 			}
 
-			const fetchedProducts = await resolveSelect(
-				productsStore
-			).getProducts( query );
-
-			setGroupedProducts( fetchedProducts ?? [] );
+			resolveSelect( coreStore )
+				.getEntityRecords( 'postType', 'product', query )
+				.then( ( products ) => {
+					setGroupedProducts( products as ProductResponseItem[] );
+				} );
 		};
 
 		if ( ! groupedProducts ) {
