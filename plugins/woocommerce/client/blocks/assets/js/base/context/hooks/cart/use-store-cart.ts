@@ -187,22 +187,25 @@ export const useStoreCart = (
 			: EMPTY_CART_COUPONS;
 	}, [ JSON.stringify( cartData.coupons ) ] );
 
-	const billingAddress = useMemo( () => {
-		return emptyHiddenAddressFields(
-			decodeValues( cartData.billingAddress )
-		);
-	}, [ JSON.stringify( cartData.billingAddress ) ] );
+	const nextBillingAddress = emptyHiddenAddressFields(
+		decodeValues( cartData.billingAddress )
+	);
 
-	const shippingAddress = useMemo( () => {
-		return cartData.needsShipping
-			? emptyHiddenAddressFields(
-					decodeValues( cartData.shippingAddress )
-			  )
-			: billingAddress;
-	}, [
-		JSON.stringify( cartData.shippingAddress ),
-		JSON.stringify( billingAddress ),
-	] );
+	if ( ! fastDeepEqual( billingAddressRef.current, nextBillingAddress ) ) {
+		billingAddressRef.current = nextBillingAddress;
+	}
+
+	const billingAddress = billingAddressRef.current;
+
+	const nextShippingAddress = cartData.needsShipping
+		? emptyHiddenAddressFields( decodeValues( cartData.shippingAddress ) )
+		: billingAddress;
+
+	if ( ! fastDeepEqual( shippingAddressRef.current, nextShippingAddress ) ) {
+		shippingAddressRef.current = nextShippingAddress;
+	}
+
+	const shippingAddress = shippingAddressRef.current;
 
 	const storeCart: StoreCart = {
 		cartCoupons,
