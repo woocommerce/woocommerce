@@ -150,11 +150,11 @@ export const useEmailStyles = (): EmailStylesData => {
 	const { userTheme, updateUserTheme } = useUserTheme();
 
 	// This is email level styling stored in post meta.
-	const styles = useMemo(
-		() =>
-			cleanupUserStyles( shortenWpPresetVariables( userTheme?.styles ) ),
-		[ userTheme ]
-	);
+	const styles = useMemo( () => {
+		return userTheme
+			? cleanupUserStyles( shortenWpPresetVariables( userTheme?.styles ) )
+			: {};
+	}, [ userTheme ] );
 
 	// Default styles from theme.json.
 	const { styles: defaultStyles } = useSelect( ( select ) => ( {

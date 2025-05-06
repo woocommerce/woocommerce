@@ -304,7 +304,9 @@ export const canUserEditGlobalEmailStyles = createRegistrySelector(
 export const getGlobalEmailStylesPost = createRegistrySelector(
 	( select ) => () => {
 		const { postId, canEdit } = canUserEditGlobalEmailStyles();
-
+		if ( ! postId || ! canEdit ) {
+			return null;
+		}
 		if ( postId ) {
 			if ( canEdit ) {
 				return select( coreDataStore ).getEditedEntityRecord(
@@ -322,7 +324,7 @@ export const getGlobalEmailStylesPost = createRegistrySelector(
 				)
 			) as unknown as Post;
 		}
-		return getEditedPostTemplate();
+		return null;
 	}
 );
 
