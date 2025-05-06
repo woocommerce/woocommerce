@@ -1663,6 +1663,12 @@ class WC_Countries {
 							'hidden'   => true,
 						),
 					),
+					'PK' => array(
+						'state' => array(
+							'required' => false,
+							'hidden'   => true,
+						),
+					),
 				)
 			);
 
