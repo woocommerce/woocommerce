@@ -835,7 +835,6 @@ class WC_Checkout {
 	 * @param  WP_Error $errors Validation error.
 	 */
 	protected function validate_posted_data( &$data, &$errors ) {
-
 		foreach ( $this->get_checkout_fields() as $fieldset_key => $fieldset ) {
 			$validate_fieldset = true;
 			if ( $this->maybe_skip_fieldset( $fieldset_key, $data ) ) {
@@ -951,7 +950,6 @@ class WC_Checkout {
 		}
 
 		if ( WC()->cart->needs_shipping() ) {
-
 			$shipping_country = isset( $data['shipping_country'] ) ? $data['shipping_country'] : WC()->customer->get_shipping_country();
 
 			if ( empty( $shipping_country ) ) {
