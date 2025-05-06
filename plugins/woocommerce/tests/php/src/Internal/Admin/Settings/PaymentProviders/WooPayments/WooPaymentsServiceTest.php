@@ -1,0 +1,5443 @@
+<?php
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentProviders\WooPayments;
+
+use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
+use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\PaymentGateway;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments\WooPaymentsService;
+use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
+use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
+use PHPUnit\Framework\MockObject\MockObject;
+use WC_Unit_Test_Case;
+use WP_Error;
+
+/**
+ * WooPayments settings provider service test.
+ *
+ * @class WooPaymentsService
+ */
+class WooPaymentsServiceTest extends WC_Unit_Test_Case {
+
+	/**
+	 * @var WooPaymentsService
+	 */
+	protected WooPaymentsService $sut;
+
+	/**
+	 * @var PaymentProviders|MockObject
+	 */
+	protected $mock_providers;
+
+	/**
+	 * @var PaymentGateway|MockObject
+	 */
+	protected $mock_provider;
+
+	/**
+	 * @var MockableLegacyProxy|MockObject
+	 */
+	protected $mockable_proxy;
+
+	/**
+	 * @var WPCOM_Connection_Manager|MockObject
+	 */
+	protected $mock_wpcom_connection_manager;
+
+	/**
+	 * @var MockObject
+	 */
+	protected $mock_account_service;
+
+	/**
+	 * The ID of the store admin user.
+	 *
+	 * @var int
+	 */
+	protected $store_admin_id;
+
+	/**
+	 * The current time in seconds.
+	 *
+	 * Use it instead of $this->current_time to avoid using the real time in tests.
+	 *
+	 * @var int
+	 */
+	protected int $current_time;
+
+	/**
+	 * Set up test.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $this->store_admin_id );
+
+		$this->current_time = 1234567890;
+
+		$this->mock_providers = $this->getMockBuilder( PaymentProviders::class )
+									->disableOriginalConstructor()
+									->onlyMethods(
+										array(
+											'get_payment_gateway_provider_instance',
+										)
+									)
+									->getMock();
+
+		$this->mock_provider = $this->getMockBuilder( PaymentGateway::class )
+									->disableOriginalConstructor()
+									->getMock();
+
+		$this->mock_providers
+			->expects( $this->any() )
+			->method( 'get_payment_gateway_provider_instance' )
+			->willReturn( $this->mock_provider );
+
+		$this->mock_wpcom_connection_manager = $this->getMockBuilder( WPCOM_Connection_Manager::class )
+			->disableOriginalConstructor()
+			->onlyMethods(
+				array(
+					'is_connected',
+					'has_connected_owner',
+					'is_connection_owner',
+				)
+			)
+			->getMock();
+
+		$this->mockable_proxy = wc_get_container()->get( LegacyProxy::class );
+
+		$this->mockable_proxy->register_class_mocks(
+			array(
+				WPCOM_Connection_Manager::class => $this->mock_wpcom_connection_manager,
+			)
+		);
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				// Mock the $this->current_time.
+				'time'         => function () {
+					return $this->current_time;
+				},
+				// Everything is callable by default.
+				'is_callable'  => function () {
+					return true;
+				},
+				'class_exists' => function ( $class_to_check ) {
+					// By default, the WooPayments extension is mocked as active.
+					if ( '\WC_Payments' === $class_to_check ) {
+						return true;
+					}
+
+					return false;
+				},
+			),
+		);
+
+		$this->mock_account_service = $this->getMockBuilder( \stdClass::class )
+			->addMethods( array( 'is_stripe_account_valid', 'get_account_status_data' ) )
+			->getMock();
+
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				'\WC_Payments'         => array(
+					'get_gateway'         => function () {
+						return new FakePaymentGateway();
+					},
+					'get_account_service' => function () {
+						return $this->mock_account_service;
+					},
+				),
+				'\WC_Payments_Account' => array(
+					'get_connect_url'       => function () {
+						return 'https://example.com/kyc_fallback';
+					},
+					'get_overview_page_url' => function () {
+						return 'https://example.com/overview_page?from=' . WooPaymentsService::FROM_NOX_IN_CONTEXT;
+					},
+				),
+				'\WC_Payments_Utils'   => array(
+					'supported_countries' => function () {
+						return $this->get_woopayments_supported_countries();
+					},
+				),
+			)
+		);
+
+		$this->sut = new WooPaymentsService();
+		$this->sut->init( $this->mock_providers, $this->mockable_proxy );
+	}
+
+	/**
+	 * Test get onboarding details when the extension is NOT active.
+	 */
+	public function test_get_onboarding_details_throws_when_extension_not_active(): void {
+		$location = 'US';
+
+		// Arrange.
+		// Mock the extension as not active.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'class_exists' => function ( $class_to_check ) {
+					if ( '\WC_Payments' === $class_to_check ) {
+						return false;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Act.
+		try {
+			$this->sut->get_onboarding_details( $location, '/some/path' );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertSame( 'woocommerce_woopayments_onboarding_extension_not_active', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test get onboarding details when the extension is active but the onboarding is locked.
+	 *
+	 * @return void
+	 * @throws \Exception If a request is not mocked.
+	 */
+	public function test_get_onboarding_details_throws_with_onboarding_locked(): void {
+		$location = 'US';
+
+		// Arrange the onboarding locked DB option.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return 'yes';
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		// Act.
+		try {
+			$this->sut->get_onboarding_details( $location, '/some/path' );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertSame( 'woocommerce_woopayments_onboarding_locked', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test get onboarding details - general state.
+	 */
+	public function test_get_onboarding_details_general_state(): void {
+		$location = 'US';
+
+		// Arrange.
+		$expected_state = array(
+			'started'   => true,
+			'completed' => false,
+			'test_mode' => true,
+			'dev_mode'  => false,
+		);
+		$this->mock_provider
+			->expects( $this->atLeastOnce() )
+			->method( 'is_onboarding_started' )
+			->willReturn( $expected_state['started'] );
+		$this->mock_provider
+			->expects( $this->atLeastOnce() )
+			->method( 'is_onboarding_completed' )
+			->willReturn( $expected_state['completed'] );
+		$this->mock_provider
+			->expects( $this->atLeastOnce() )
+			->method( 'is_in_test_mode_onboarding' )
+			->willReturn( $expected_state['test_mode'] );
+		$this->mock_provider
+			->expects( $this->atLeastOnce() )
+			->method( 'is_in_dev_mode' )
+			->willReturn( $expected_state['dev_mode'] );
+
+		// Act.
+		$result = $this->sut->get_onboarding_details( $location, '/some/path' );
+
+		// Assert.
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'state', $result );
+		$this->assertSame( $expected_state, $result['state'] );
+		$this->assertArrayHasKey( 'context', $result );
+		$this->assertSame(
+			array(
+				'urls' => array(
+					'overview_page' => 'https://example.com/overview_page?from=' . WooPaymentsService::FROM_NOX_IN_CONTEXT,
+				),
+			),
+			$result['context']
+		);
+	}
+
+	/**
+	 * Test get onboarding details - steps.
+	 *
+	 * @dataProvider provider_get_onboarding_details_steps
+	 *
+	 * @param array $expected_step_statuses          The expected step statuses.
+	 * @param array $steps_stored_profile            The data stored in the profile for the steps.
+	 * @param array $recommended_pms                 The recommended payment methods.
+	 * @param array $expected_pms_state              The expected payment methods state.
+	 * @param array $wpcom_connection                The WPCOM connection state.
+	 * @param array $expected_wpcom_connection_state The expected WPCOM connection state.
+	 * @param array $account_state                   The account state.
+	 *
+	 * @return void
+	 * @throws \Exception If a request is not mocked.
+	 */
+	public function test_get_onboarding_details_steps(
+		array $expected_step_statuses,
+		array $steps_stored_profile,
+		array $recommended_pms,
+		array $expected_pms_state,
+		array $wpcom_connection,
+		array $expected_wpcom_connection_state,
+		array $account_state
+	): void {
+		$location = 'US';
+
+		// Arrange.
+		$rest_path        = '/rest/path/to/onboarding/';
+		$kyc_fallback_url = 'https://example.com/kyc_fallback';
+
+		$wpcom_connection_return_url = 'https://example.com/payments-settings/return?wpcom_connection_return=1';
+
+		$stored_profile = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => $steps_stored_profile,
+				),
+			),
+		);
+
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		$expected_steps = array(
+			// The payment methods step.
+			array(
+				'id'             => WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS,
+				'path'           => trailingslashit( WooPaymentsService::ONBOARDING_PATH_BASE ) . WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS,
+				'required_steps' => array(),
+				'status'         => $expected_step_statuses[ WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS ] ?? WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				'errors'         => array(),
+				'actions'        => array(
+					'start'  => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS . '/start' ),
+					),
+					'save'   => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS . '/save' ),
+					),
+					'finish' => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS . '/finish' ),
+					),
+				),
+				'context'        => array(
+					'recommended_pms' => $recommended_pms,
+					'pms_state'       => $expected_pms_state,
+				),
+			),
+			// The WPCOM connection step.
+			array(
+				'id'             => WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				'path'           => trailingslashit( WooPaymentsService::ONBOARDING_PATH_BASE ) . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				'required_steps' => array(),
+				'status'         => $expected_step_statuses[ WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION ] ?? WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				'errors'         => array(),
+				'context'        => array(
+					'connection_state' => $expected_wpcom_connection_state,
+				),
+				'actions'        => array(
+					'start' => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/start' ),
+					),
+					'auth'  => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REDIRECT,
+						'href' => 'https://wordpress.com/auth?query=some_query',
+					),
+				),
+			),
+			// The test account step.
+			array(
+				'id'             => WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				'path'           => trailingslashit( WooPaymentsService::ONBOARDING_PATH_BASE ) . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				'required_steps' => array( WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION ),
+				'status'         => $expected_step_statuses[ WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT ] ?? WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				'errors'         => array(),
+				'context'        => array(),
+				'actions'        => array(
+					'start'  => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/start' ),
+					),
+					'init'   => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/init' ),
+					),
+					'check'  => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/check' ),
+					),
+					'finish' => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/finish' ),
+					),
+				),
+			),
+			// The business verification step.
+			array(
+				'id'             => WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				'path'           => trailingslashit( WooPaymentsService::ONBOARDING_PATH_BASE ) . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				'required_steps' => array( WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION ),
+				'status'         => $expected_step_statuses[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ] ?? WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				'errors'         => array(),
+				'context'        => array(
+					// Only with a working WPCOM connection we include the fields.
+					'fields'           => ( $wpcom_connection['is_store_connected'] && $wpcom_connection['has_connected_owner'] ) ? array(
+						'business_types'      => $this->get_mock_onboarding_fields_business_types(),
+						'mccs_display_tree'   => array(
+							array(
+								'id'    => 'most_popular',
+								'type'  => 'group',
+								'title' => 'Most popular',
+								'items' => array(
+									array(
+										'id'       => 'most_popular__software_services',
+										'type'     => 'mcc',
+										'title'    => 'Software',
+										'mcc'      => 7372,
+										'keywords' => array(),
+									),
+									array(
+										'id'       => 'most_popular__clothing_and_apparel',
+										'type'     => 'mcc',
+										'title'    => 'Clothing and accessories',
+										'mcc'      => 5699,
+										'keywords' => array(),
+									),
+								),
+							),
+							array(
+								'id'    => 'food_and_drink',
+								'type'  => 'group',
+								'title' => 'Food and drink',
+								'items' => array(
+									array(
+										'id'       => 'food_and_drink__other_food_and_dining',
+										'type'     => 'mcc',
+										'title'    => 'Other food and dining',
+										'mcc'      => 5819,
+										'keywords' => array(),
+									),
+								),
+							),
+							array(
+								'id'    => 'home_furnishings_and_furniture',
+								'type'  => 'group',
+								'title' => 'Home, furniture and garden',
+								'items' => array(
+									array(
+										'id'       => 'home_furnishings_and_furniture__other_home_furnishings_and_furniture',
+										'type'     => 'mcc',
+										'title'    => 'Other home furnishings and furniture',
+										'mcc'      => 5719,
+										'keywords' => array(),
+									),
+								),
+							),
+						),
+						'industry_to_mcc'     => array(
+							'clothing_and_accessories'  => 'retail__clothing_and_apparel',
+							'health_and_beauty'         => 'retail__beauty_products',
+							'food_and_drink'            => 'food_and_drink__other_food_and_dining',
+							'home_furniture_and_garden' => 'retail__home_furnishings_and_furniture',
+							'education_and_learning'    => 'education__other_educational_services',
+							'electronics_and_computers' => 'digital_products__other_digital_goods',
+						),
+						'available_countries' => $this->get_woopayments_supported_countries(),
+					) : array(),
+					'sub_steps'        => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['sub_steps'] ?? array(),
+					'self_assessment'  => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['self_assessment'] ?? array(),
+					'has_test_account' => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['has_test_account'] ?? false,
+				),
+				'actions'        => array(
+					'start'              => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/start' ),
+					),
+					'save'               => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/save' ),
+					),
+					'kyc_session'        => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/kyc_session' ),
+					),
+					'kyc_session_finish' => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/kyc_session/finish' ),
+					),
+					'kyc_fallback'       => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REDIRECT,
+						'href' => $kyc_fallback_url,
+					),
+					'finish'             => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/finish' ),
+					),
+				),
+			),
+		);
+
+		// Arrange the payment methods step.
+		$this->mock_provider
+			->expects( $this->atLeastOnce() )
+			->method( 'get_recommended_payment_methods' )
+			->willReturn( $recommended_pms );
+
+		// Arrange the WPCOM connection.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( $wpcom_connection['is_store_connected'] );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( $wpcom_connection['has_connected_owner'] );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connection_owner' )
+			->willReturn( $wpcom_connection['is_connection_owner'] );
+		// If the status is completed, we don't expect any actions.
+		if ( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED === $expected_step_statuses[ WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION ] ) {
+			$expected_steps[1]['actions'] = array();
+		}
+
+		// Arrange the account.
+		$this->mock_provider
+			->expects( $this->any() )
+			->method( 'is_account_connected' )
+			->willReturn( $account_state['has_account'] );
+
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'is_stripe_account_valid' )
+			->willReturn( $account_state['has_valid_account'] );
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'get_account_status_data' )
+			->willReturn(
+				array(
+					'status'           => 'complete',
+					// These two are mirror images of each other.
+					'testDrive'        => $account_state['test_account'] ?? false,
+					'isLive'           => ! $account_state['test_account'] ?? true,
+					'paymentsEnabled'  => true,
+					'detailsSubmitted' => true,
+				)
+			);
+
+		// Arrange the test account step.
+		// If the status is completed, we don't expect any actions.
+		if ( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED === $expected_step_statuses[ WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT ] ) {
+			$expected_steps[2]['actions'] = array();
+		}
+
+		// Arrange the business verification step.
+		// If the status is completed, we don't expect any actions.
+		if ( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED === $expected_step_statuses[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ] ) {
+			$expected_steps[3]['actions'] = array();
+		}
+
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class           => array(
+					'wc_payments_settings_url'           => function ( string $path = null, array $query = array() ) use ( $wpcom_connection_return_url ) {
+						if ( WooPaymentsService::ONBOARDING_PATH_BASE === $path && ! empty( $query['wpcom_connection_return'] ) ) {
+							return $wpcom_connection_return_url;
+						}
+
+						return 'https://example.com/payments-settings';
+					},
+					'get_wpcom_connection_authorization' => function ( string $return_url ) use ( $expected_steps, $wpcom_connection_return_url ) {
+						$result = array(
+							'success'      => true,
+							'errors'       => array(),
+							'color_scheme' => 'fresh',
+							'url'          => 'https://wordpress.com/auth?query=some_query',
+						);
+
+						if ( $wpcom_connection_return_url === $return_url && ! empty( $expected_steps[1]['actions']['auth']['href'] ) ) {
+							$result['url'] = $expected_steps[1]['actions']['auth']['href'];
+						}
+
+						return $result;
+					},
+					'rest_endpoint_get_request'          => function ( string $endpoint ) use ( $expected_steps ) {
+						if ( '/wc/v3/payments/onboarding/fields' === $endpoint ) {
+							return array(
+								'data' => $expected_steps[3]['context']['fields'],
+							);
+						}
+
+						throw new \Exception( esc_html( 'GET endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+				'\WC_Payments_Account' => array(
+					'get_connect_url' => function () use ( $kyc_fallback_url ) {
+						return $kyc_fallback_url;
+					},
+				),
+			)
+		);
+
+		// Act.
+		$result = $this->sut->get_onboarding_details( $location, $rest_path );
+
+		// Assert.
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'steps', $result );
+		$this->assertCount( count( $expected_steps ), $result['steps'] );
+		$this->assertEquals( $expected_steps, $result['steps'] );
+	}
+
+	/**
+	 * Data provider for test_get_onboarding_details_steps.
+	 *
+	 * @return array[]
+	 */
+	public function provider_get_onboarding_details_steps(): array {
+		$current_time = 1234567890;
+
+		$default_recommended_pms = array(
+			array(
+				'id'       => 'card',
+				'enabled'  => false,
+				'required' => true,
+			),
+			array(
+				'id'       => 'apple_pay',
+				'enabled'  => true,
+				'required' => false,
+			),
+			array(
+				'id'       => 'google_pay',
+				'enabled'  => false,
+				'required' => false,
+			),
+		);
+		$expected_pms_state      = array(
+			'card'       => true, // Force enabled because it is required.
+			'apple_pay'  => true,
+			'google_pay' => false,
+		);
+
+		$default_wpcom_connection        = array(
+			'is_store_connected'  => false,
+			'has_connected_owner' => false,
+			'is_connection_owner' => false,
+		);
+		$expected_wpcom_connection_state = array(
+			'has_working_connection' => false,
+			'is_store_connected'     => false,
+			'has_connected_owner'    => false,
+			'is_connection_owner'    => false,
+		);
+
+		$default_account_state = array(
+			'has_account'       => false,
+			'has_valid_account' => false,
+			'test_account'      => false,
+		);
+
+		return array(
+			'clean slate'             => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				),
+				// No profile steps stored details.
+				array(),
+				$default_recommended_pms,
+				$expected_pms_state,
+				$default_wpcom_connection,
+				$expected_wpcom_connection_state,
+				$default_account_state,
+			),
+			'stored statuses (started) - no WPCOM connection, no account' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				$default_wpcom_connection,
+				$expected_wpcom_connection_state,
+				$default_account_state,
+			),
+			'stored statuses (completed) - no WPCOM connection, no account' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+					// The completed stored status is ignored due to missing dependency (completed WPCOM connection).
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+					// The completed stored status is ignored due to missing dependency (completed WPCOM connection).
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				$default_wpcom_connection,
+				$expected_wpcom_connection_state,
+				$default_account_state,
+			),
+			'stored statuses (completed) - no WPCOM connection, test account' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+					// The completed stored status is ignored due to unmet dependency (completed WPCOM connection).
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+					// The completed stored status is ignored due to unmet dependency (completed WPCOM connection).
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
+						'statuses'         => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+						'has_test_account' => true,
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				$default_wpcom_connection,
+				$expected_wpcom_connection_state,
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'stored statuses (completed) - no WPCOM connection, live account' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+					// The completed stored status is ignored due to unmet dependency (completed WPCOM connection).
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+					// The completed stored status is ignored due to unmet dependency (completed WPCOM connection).
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				$default_wpcom_connection,
+				$expected_wpcom_connection_state,
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'stored statuses (mixed)' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					// Forced due to the bad WPCOM connection status (requirements).
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					// Forced due to the bad WPCOM connection status (requirements).
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+						),
+					),
+					// Nothing about the WPCOM connection.
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION       => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				$default_wpcom_connection,
+				$expected_wpcom_connection_state,
+				$default_account_state,
+			),
+			'no stored statuses - WPCOM connection: store_connected, no connected owner' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				),
+				array(),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge( $default_wpcom_connection, array( 'is_store_connected' => true ) ),
+				array_merge( $expected_wpcom_connection_state, array( 'is_store_connected' => true ) ),
+				$default_account_state,
+			),
+			'no stored statuses - WPCOM connection: store_connected, connected owner' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					// A working connection with auto-complete the step if no declarative status was stored.
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				),
+				array(),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => true,
+					)
+				),
+				array(
+					'has_working_connection' => true,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => true,
+					'is_connection_owner'    => false,
+				),
+				$default_account_state,
+			),
+			'stored statuses ignored - WPCOM connection: store connected, connected owner' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // A working connection will overwrite the stored status.
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => true,
+					)
+				),
+				array(
+					'has_working_connection' => true,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => true,
+					'is_connection_owner'    => false,
+				),
+				$default_account_state,
+			),
+			'stored statuses respected - WPCOM connection missing' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED, // The stored status is respected.
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				$default_wpcom_connection,
+				$expected_wpcom_connection_state,
+				$default_account_state,
+			),
+			'stored statuses ignored - WPCOM connection broken' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED, // The stored status is ignored.
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => false,
+					)
+				),
+				array(
+					'has_working_connection' => false,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => false,
+					'is_connection_owner'    => false,
+				),
+				$default_account_state,
+			),
+			'stored statuses ignored - Test account completed with requirements met' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // Since we have an account, this step is completed.
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // The connection is required to be completed.
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // The stored status is ignored.
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT          => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
+						'has_test_account' => true,
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => true,
+					)
+				),
+				array(
+					'has_working_connection' => true,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => true,
+					'is_connection_owner'    => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'stored statuses ignored - Test account not completed due to unmet requirements' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // Since we have an account, this step is completed.
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+					// The completed stored status is ignored due to unmet requirements.
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
+						'has_test_account' => true,
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => false,
+					)
+				),
+				array(
+					'has_working_connection' => false,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => false,
+					'is_connection_owner'    => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'stored statuses respected - Test account started with no account' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // The connection is required to be completed.
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED, // The stored status is respected.
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => true,
+					)
+				),
+				array(
+					'has_working_connection' => true,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => true,
+					'is_connection_owner'    => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'stored statuses respected - Test account with live, invalid account' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // The connection is required to be completed.
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // The stored status is respected.
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => true,
+					)
+				),
+				array(
+					'has_working_connection' => true,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => true,
+					'is_connection_owner'    => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'stored statuses respected - Test account with live, valid account' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // Since we have an account, this step is completed.
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // The connection is required to be completed.
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // The stored status is respected.
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => true,
+					)
+				),
+				array(
+					'has_working_connection' => true,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => true,
+					'is_connection_owner'    => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'stored statuses ignored - Business verification completed with requirements met' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // Since we have an account, this step is completed.
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // The connection is required to be completed.
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => true,
+					)
+				),
+				array(
+					'has_working_connection' => true,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => true,
+					'is_connection_owner'    => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'stored statuses ignored - Business verification not completed due to unmet requirements' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // Since we have an account, this step is completed.
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED, // The connection is required to be completed.
+					// The completed stored status is ignored due to unmet requirements.
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+					// The completed stored status is ignored due to unmet requirements.
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => false,
+					)
+				),
+				array(
+					'has_working_connection' => false,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => false,
+					'is_connection_owner'    => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'stored statuses respected - Business verification started with no account' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // The connection is required to be completed.
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED, // The stored status is respected.
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => true,
+					)
+				),
+				array(
+					'has_working_connection' => true,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => true,
+					'is_connection_owner'    => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'stored statuses ignored - Business verification with live, invalid account' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // The connection is required to be completed.
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED, // The stored status is ignored.
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => true,
+					)
+				),
+				array(
+					'has_working_connection' => true,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => true,
+					'is_connection_owner'    => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'stored statuses ignored - Business verification with live, valid account' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // Since we have an account, this step is completed.
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // The connection is required to be completed.
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // The stored status is ignored.
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => true,
+					)
+				),
+				array(
+					'has_working_connection' => true,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => true,
+					'is_connection_owner'    => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Test is_valid_onboarding_step_id.
+	 *
+	 * @return void
+	 */
+	public function test_is_valid_onboarding_step_id() {
+		$valid_steps = array(
+			WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS,
+			WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+			WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+			WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+		);
+
+		foreach ( $valid_steps as $step ) {
+			$this->assertTrue( $this->sut->is_valid_onboarding_step_id( $step ) );
+		}
+
+		$this->assertFalse( $this->sut->is_valid_onboarding_step_id( 'invalid_step' ) );
+	}
+
+	/**
+	 * Test get_onboarding_step_status.
+	 *
+	 * @dataProvider provider_get_onboarding_step_status
+	 *
+	 * @param string $step_id              The step ID.
+	 * @param string $expected_status      The expected status.
+	 * @param array  $step_stored_statuses The stored statuses for the step.
+	 * @param array  $wpcom_connection     The WPCOM connection state.
+	 * @param array  $account_state        The account state.
+	 *
+	 * @return void
+	 * @throws \Exception On invalid mocking.
+	 */
+	public function test_get_onboarding_step_status( string $step_id, string $expected_status, array $step_stored_statuses, array $wpcom_connection, array $account_state ) {
+		$location = 'US';
+
+		// Arrange.
+		$stored_profile = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						$step_id => array(
+							'statuses' => $step_stored_statuses,
+						),
+					),
+				),
+			),
+		);
+
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		// Arrange the WPCOM connection.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( $wpcom_connection['is_store_connected'] );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( $wpcom_connection['has_connected_owner'] );
+
+		// Arrange the account.
+		$this->mock_provider
+			->expects( $this->any() )
+			->method( 'is_account_connected' )
+			->willReturn( $account_state['has_account'] );
+
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'is_stripe_account_valid' )
+			->willReturn( $account_state['has_valid_account'] );
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'get_account_status_data' )
+			->willReturn(
+				array(
+					'status'           => 'complete',
+					// These two are mirror images of each other.
+					'testDrive'        => $account_state['test_account'] ?? false,
+					'isLive'           => ! $account_state['test_account'] ?? true,
+					'paymentsEnabled'  => true,
+					'detailsSubmitted' => true,
+				)
+			);
+
+		// Act.
+		$result = $this->sut->get_onboarding_step_status( $step_id, $location );
+
+		// Assert.
+		$this->assertSame( $expected_status, $result );
+	}
+
+	/**
+	 * Data provider for test_get_onboarding_step_status.
+	 *
+	 * @return array[]
+	 */
+	public function provider_get_onboarding_step_status(): array {
+		$current_time = 1234567890;
+
+		return array(
+			'payment_methods - clean slate'       => array(
+				WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'payment_methods - stored started'    => array(
+				WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'payment_methods - stored completed'  => array(
+				WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'payment_methods - stored started and completed' => array(
+				WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - clean slate'      => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - nothing stored with working connection' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - nothing stored with partial connection' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - stored started with no connection data' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - stored started with working connection' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - stored completed with no connection data' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time, // This will be ignored.
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - stored completed with partial connection' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - stored completed with working connection' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - stored started and completed with no connection data' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - stored started and completed with partial connection data' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - stored started and completed with working connection' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - clean slate'          => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - nothing stored with valid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - nothing stored with valid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - nothing stored with invalid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
+			'test_account - nothing stored with invalid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - nothing stored with valid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored started with no account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored started with no account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored started with valid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored started with valid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored completed with no account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored completed with no account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // We trust the stored status since we can be in progress with switch to live.
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored completed with valid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored completed with valid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored completed with invalid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored completed with invalid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored completed with invalid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored completed with valid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored completed with valid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored started and completed with no account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored started and completed with no account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // We trust the completed stored status since we can be in progress with switch to live.
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored started and completed with valid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored started and completed with valid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored started and completed with invalid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored started and completed with invalid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored started and completed with invalid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored started and completed with invalid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored started and completed with valid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored started and completed with valid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - clean slate' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - nothing stored with valid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - nothing stored with valid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - nothing stored with invalid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - nothing stored with invalid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - nothing stored with invalid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - nothing stored with valid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - nothing stored with valid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started with no account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started with no account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started with valid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored started with valid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored started with invalid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored started with invalid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored started with invalid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started with invalid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started with valid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started with valid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored completed with no account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored completed with no account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored completed with valid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored completed with valid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored completed with invalid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored completed with invalid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored completed with invalid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored completed with invalid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored completed with valid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored completed with valid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started and completed with no account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started and completed with no account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started and completed with valid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored started and completed with valid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored started and completed with invalid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored started and completed with invalid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored started and completed with invalid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started and completed with invalid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started and completed with valid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started and completed with valid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Test set_onboarding_step_started throws exception when extension is not active.
+	 */
+	public function test_set_onboarding_step_started_throws_when_extension_not_active() {
+		$location = 'US';
+
+		// Arrange.
+		// Mock the extension as not active.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'class_exists' => function ( $class_to_check ) {
+					if ( '\WC_Payments' === $class_to_check ) {
+						return false;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		try {
+			$this->sut->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+
+			$this->fail( 'Expected ApiException not thrown' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_extension_not_active', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test set_onboarding_step_started throws exception when onboarding is locked.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_set_onboarding_step_started_throws_with_onboarding_locked() {
+		$location = 'US';
+
+		// Arrange the onboarding locked DB option.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return 'yes';
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		try {
+			$this->sut->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+
+			$this->fail( 'Expected ApiException not thrown' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_locked', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test that set_onboarding_step_started throws an exception when an invalid step ID is provided.
+	 *
+	 * @return void
+	 */
+	public function test_set_onboarding_step_started_throws_on_invalid_step_id() {
+		$location = 'US';
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'Invalid onboarding step ID' );
+
+		$this->sut->set_onboarding_step_started( 'invalid_step_id', $location );
+	}
+
+	/**
+	 * Test that set_onboarding_step_started throws an exception when the requirements are not met for the step.
+	 *
+	 * @return void
+	 */
+	public function test_set_onboarding_step_started_throws_on_unmet_requirements() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( false );
+
+		try {
+			$this->sut->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+
+			$this->fail( 'Expected ApiException not thrown' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_step_requirements_not_met', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test that set_onboarding_step_started does not overwrite the existing step status if the overwrite flag is false.
+	 *
+	 * @return void
+	 */
+	public function test_set_onboarding_step_started_does_not_overwrite() {
+		$location = 'US';
+
+		// Arrange.
+		$step_id                = WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS;
+		$timestamp              = $this->current_time - 100;
+		$stored_profile         = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						$step_id => array(
+							'statuses' => array(
+								WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $timestamp,
+							),
+						),
+					),
+				),
+			),
+		);
+		$updated_stored_profile = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( $stored_profile, &$updated_stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profile = $value;
+
+						// Mimic the behavior of the original function.
+						if ( $value === $stored_profile || maybe_serialize( $value ) === maybe_serialize( $stored_profile ) ) {
+							return false;
+						}
+
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Act.
+		$result = $this->sut->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS, $location, false );
+
+		// Assert.
+		$this->assertTrue( $result );
+		$this->assertEquals( array(), $updated_stored_profile );
+	}
+
+	/**
+	 * Test that set_onboarding_step_started overwrites the existing step status if the overwrite flag is true.
+	 *
+	 * @return void
+	 */
+	public function test_set_onboarding_step_started_overwrites() {
+		$location = 'US';
+
+		// Arrange.
+		$step_id                = WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS;
+		$timestamp              = $this->current_time - 100;
+		$stored_profile         = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						$step_id => array(
+							'statuses' => array(
+								WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $timestamp,
+							),
+						),
+					),
+				),
+			),
+		);
+		$updated_stored_profile = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( $stored_profile, &$updated_stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profile = $value;
+
+						// Mimic the behavior of the original function.
+						if ( $value === $stored_profile || maybe_serialize( $value ) === maybe_serialize( $stored_profile ) ) {
+							return false;
+						}
+
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Act.
+		$result = $this->sut->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS, $location, true );
+
+		// Assert.
+		$this->assertTrue( $result );
+		$this->assertNotEquals( array(), $updated_stored_profile );
+		$this->assertNotEmpty( $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'][ WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED ] );
+		$this->assertNotSame( $timestamp, $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'][ WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED ] );
+	}
+
+	/**
+	 * Test that set_onboarding_step_started stores the step status to started with the current timestamp.
+	 *
+	 * @return void
+	 */
+	public function test_set_onboarding_step_started() {
+		$location = 'US';
+
+		// Arrange.
+		$step_id                = WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS;
+		$stored_profile         = array();
+		$updated_stored_profile = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( $stored_profile, &$updated_stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profile = $value;
+
+						// Mimic the behavior of the original function.
+						if ( $value === $stored_profile || maybe_serialize( $value ) === maybe_serialize( $stored_profile ) ) {
+							return false;
+						}
+
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Act.
+		$result = $this->sut->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS, $location, true );
+
+		// Assert.
+		$this->assertTrue( $result );
+		$this->assertNotEquals( array(), $updated_stored_profile );
+		$this->assertNotEmpty( $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'][ WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED ] );
+		$this->assertSame( $this->current_time, $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'][ WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED ] );
+	}
+
+	/**
+	 * Test set_onboarding_step_completed throws exception when extension is not active.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_set_onboarding_step_completed_throws_when_extension_not_active() {
+		$location = 'US';
+
+		// Arrange.
+		// Mock the extension as not active.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'class_exists' => function ( $class_to_check ) {
+					if ( '\WC_Payments' === $class_to_check ) {
+						return false;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		try {
+			$this->sut->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+
+			$this->fail( 'Expected ApiException not thrown' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_extension_not_active', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test set_onboarding_step_completed throws exception when onboarding is locked.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_set_onboarding_step_completed_throws_with_onboarding_locked() {
+		$location = 'US';
+
+		// Arrange the onboarding locked DB option.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return 'yes';
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		try {
+			$this->sut->set_onboarding_step_completed( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+
+			$this->fail( 'Expected ApiException not thrown' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_locked', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test that set_onboarding_step_completed throws an exception when an invalid step ID is provided.
+	 *
+	 * @return void
+	 */
+	public function test_set_onboarding_step_completed_throws_on_invalid_step_id() {
+		$location = 'US';
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'Invalid onboarding step ID' );
+
+		$this->sut->set_onboarding_step_completed( 'invalid_step_id', $location );
+	}
+
+	/**
+	 * Test that set_onboarding_step_completed throws an exception when the requirements are not met for the step.
+	 *
+	 * @return void
+	 */
+	public function test_set_onboarding_step_completed_throws_on_unmet_requirements() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( false );
+
+		try {
+			$this->sut->set_onboarding_step_completed( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_step_requirements_not_met', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test that set_onboarding_step_completed does not overwrite the existing step status if the overwrite flag is false.
+	 *
+	 * @return void
+	 */
+	public function test_set_onboarding_step_completed_does_not_overwrite() {
+		$location = 'US';
+
+		// Arrange.
+		$step_id                = WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS;
+		$timestamp              = $this->current_time - 100;
+		$stored_profile         = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						$step_id => array(
+							'statuses' => array(
+								WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $timestamp,
+							),
+						),
+					),
+				),
+			),
+		);
+		$updated_stored_profile = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( $stored_profile, &$updated_stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profile = $value;
+
+						// Mimic the behavior of the original function.
+						if ( $value === $stored_profile || maybe_serialize( $value ) === maybe_serialize( $stored_profile ) ) {
+							return false;
+						}
+
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Act.
+		$result = $this->sut->set_onboarding_step_completed( $step_id, $location, false );
+
+		// Assert.
+		$this->assertTrue( $result );
+		$this->assertEquals( array(), $updated_stored_profile );
+	}
+
+	/**
+	 * Test that set_onboarding_step_completed overwrites the existing step status if the overwrite flag is true.
+	 *
+	 * @return void
+	 */
+	public function test_set_onboarding_step_completed_overwrites() {
+		$location = 'US';
+
+		// Arrange.
+		$step_id                = WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS;
+		$timestamp              = $this->current_time - 100;
+		$stored_profile         = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						$step_id => array(
+							'statuses' => array(
+								WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $timestamp,
+							),
+						),
+					),
+				),
+			),
+		);
+		$updated_stored_profile = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( $stored_profile, &$updated_stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profile = $value;
+
+						// Mimic the behavior of the original function.
+						if ( $value === $stored_profile || maybe_serialize( $value ) === maybe_serialize( $stored_profile ) ) {
+							return false;
+						}
+
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Act.
+		$result = $this->sut->set_onboarding_step_completed( $step_id, $location, true );
+
+		// Assert.
+		$this->assertTrue( $result );
+		$this->assertNotEquals( array(), $updated_stored_profile );
+		$this->assertNotEmpty( $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'][ WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED ] );
+		$this->assertNotSame( $timestamp, $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'][ WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED ] );
+	}
+
+	/**
+	 * Test that set_onboarding_step_completed stores the step status to completed with the current timestamp.
+	 *
+	 * @return void
+	 */
+	public function test_set_onboarding_step_completed() {
+		$location = 'US';
+
+		// Arrange.
+		$step_id                = WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS;
+		$stored_profile         = array();
+		$updated_stored_profile = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( $stored_profile, &$updated_stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profile = $value;
+
+						// Mimic the behavior of the original function.
+						if ( $value === $stored_profile || maybe_serialize( $value ) === maybe_serialize( $stored_profile ) ) {
+							return false;
+						}
+
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Act.
+		$result = $this->sut->set_onboarding_step_completed( $step_id, $location, true );
+
+		// Assert.
+		$this->assertTrue( $result );
+		$this->assertNotEquals( array(), $updated_stored_profile );
+		$this->assertNotEmpty( $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'][ WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED ] );
+		$this->assertSame( $this->current_time, $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'][ WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED ] );
+	}
+
+	/**
+	 * Test onboarding_step_save throws exception when extension is not active.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_onboarding_step_save_throws_when_extension_not_active() {
+		$location = 'US';
+
+		// Arrange.
+		// Mock the extension as not active.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'class_exists' => function ( $class_to_check ) {
+					if ( '\WC_Payments' === $class_to_check ) {
+						return false;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		try {
+			$this->sut->onboarding_step_save( WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS, $location, array() );
+
+			$this->fail( 'Expected ApiException not thrown' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_extension_not_active', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test onboarding_step_save throws exception when onboarding is locked.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_onboarding_step_save_throws_with_onboarding_locked() {
+		$location = 'US';
+
+		// Arrange the onboarding locked DB option.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return 'yes';
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		try {
+			$this->sut->onboarding_step_save( WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS, $location, array() );
+
+			$this->fail( 'Expected ApiException not thrown' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_locked', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test that onboarding_step_save throws an exception when an invalid step ID is provided.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_step_save_throws_on_invalid_step_id() {
+		$location = 'US';
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'Invalid onboarding step ID' );
+
+		$this->sut->onboarding_step_save( 'invalid_step_id', $location, array() );
+	}
+
+	/**
+	 * Test that onboarding_step_save throws an exception when receiving invalid data.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_step_save_throws_on_invalid_data() {
+		$location = 'US';
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'Invalid onboarding step data.' );
+
+		$this->sut->onboarding_step_save( WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS, $location, array() );
+	}
+
+	/**
+	 * Test that onboarding_step_save throws an exception when attempting to save for step that doesn't support it.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_step_save_throws_on_step_without_support() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working since it is a dependency for the step.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		try {
+			$this->sut->onboarding_step_save( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location, array() );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_step_action_not_supported', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test that onboarding_step_save stores the step data.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_step_save() {
+		$location = 'US';
+
+		// Arrange.
+		$step_id                = WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS;
+		$payment_methods        = array(
+			'credit_card' => true,
+			'paypal'      => false,
+		);
+		$stored_profile         = array();
+		$updated_stored_profile = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( $stored_profile, &$updated_stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profile = $value;
+
+						// Mimic the behavior of the original function.
+						if ( $value === $stored_profile || maybe_serialize( $value ) === maybe_serialize( $stored_profile ) ) {
+							return false;
+						}
+
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Act.
+		$result = $this->sut->onboarding_step_save(
+			$step_id,
+			$location,
+			array(
+				'payment_methods' => $payment_methods,
+			)
+		);
+
+		// Assert.
+		$this->assertTrue( $result );
+		$this->assertNotEquals( array(), $updated_stored_profile );
+		$this->assertNotEmpty( $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['data']['payment_methods'] );
+		$this->assertEquals( $payment_methods, $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['data']['payment_methods'] );
+	}
+
+	/**
+	 * Test that onboarding_step_save stores the step data.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_step_save_overwrites() {
+		$location = 'US';
+
+		// Arrange.
+		$step_id                = WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS;
+		$payment_methods        = array(
+			'credit_card' => true,
+			'paypal'      => false,
+		);
+		$stored_profile         = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						$step_id => array(
+							'data' => array(
+								'payment_methods' => array(
+									'credit_card' => false,
+									'paypal'      => true,
+								),
+							),
+						),
+					),
+				),
+			),
+		);
+		$updated_stored_profile = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( $stored_profile, &$updated_stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profile = $value;
+
+						// Mimic the behavior of the original function.
+						if ( $value === $stored_profile || maybe_serialize( $value ) === maybe_serialize( $stored_profile ) ) {
+							return false;
+						}
+
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Act.
+		$result = $this->sut->onboarding_step_save(
+			$step_id,
+			$location,
+			array(
+				'payment_methods' => $payment_methods,
+			)
+		);
+
+		// Assert.
+		$this->assertTrue( $result );
+		$this->assertNotEquals( array(), $updated_stored_profile );
+		$this->assertNotEmpty( $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['data']['payment_methods'] );
+		$this->assertEquals( $payment_methods, $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['data']['payment_methods'] );
+	}
+
+	/**
+	 * Test that onboarding_step_save stores the step data with existing profile data and keeps the existing data.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_step_save_with_existing_profile_data() {
+		$location = 'US';
+
+		// Arrange.
+		$step_id                = WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS;
+		$payment_methods        = array(
+			'credit_card' => true,
+			'paypal'      => false,
+		);
+		$stored_profile         = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						$step_id => array(
+							'statuses' => array(
+								WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $this->current_time - 100,
+							),
+							'data'     => array(
+								'some_data' => 'some_value',
+							),
+						),
+					),
+				),
+			),
+		);
+		$expected_profile       = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						$step_id => array(
+							'statuses' => array(
+								WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $this->current_time - 100,
+							),
+							'data'     => array(
+								'some_data'       => 'some_value',
+								'payment_methods' => $payment_methods,
+							),
+						),
+					),
+				),
+			),
+		);
+		$updated_stored_profile = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( $stored_profile, &$updated_stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profile = $value;
+
+						// Mimic the behavior of the original function.
+						if ( $value === $stored_profile || maybe_serialize( $value ) === maybe_serialize( $stored_profile ) ) {
+							return false;
+						}
+
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Act.
+		$result = $this->sut->onboarding_step_save(
+			$step_id,
+			$location,
+			array(
+				'payment_methods' => $payment_methods,
+			)
+		);
+
+		// Assert.
+		$this->assertTrue( $result );
+		$this->assertNotEquals( array(), $updated_stored_profile );
+		$this->assertNotEmpty( $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['data']['payment_methods'] );
+		$this->assertEquals( $payment_methods, $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['data']['payment_methods'] );
+		$this->assertEquals( $expected_profile, $updated_stored_profile );
+	}
+
+	/**
+	 * Test onboarding_step_check throws exception when extension is not active.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_onboarding_step_check_throws_when_extension_not_active() {
+		$location = 'US';
+
+		// Arrange.
+		// Mock the extension as not active.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'class_exists' => function ( $class_to_check ) {
+					if ( '\WC_Payments' === $class_to_check ) {
+						return false;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		try {
+			$this->sut->onboarding_step_check( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+
+			$this->fail( 'Expected ApiException not thrown' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_extension_not_active', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test onboarding_step_check throws excetion when onboarding is locked.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_onboarding_step_check_throws_with_onboarding_locked() {
+		$location = 'US';
+
+		// Arrange the onboarding locked DB option.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return 'yes';
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		try {
+			$this->sut->onboarding_step_check( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+
+			$this->fail( 'Expected ApiException not thrown' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_locked', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test that onboarding_step_check throws an exception when an invalid step ID is provided.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_step_check_throws_on_invalid_step_id() {
+		$location = 'US';
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'Invalid onboarding step ID' );
+
+		$this->sut->onboarding_step_check( 'invalid_step_id', $location );
+	}
+
+	/**
+	 * Test that onboarding_step_check throws an exception when the requirements are not met for the step.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_step_check_throws_on_unmet_requirements() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( false );
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'Onboarding step requirements are not met.' );
+
+		$this->sut->onboarding_step_check( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+	}
+
+	/**
+	 * Test that onboarding_step_check returns the correct status for a step.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_step_check() {
+		$location = 'US';
+
+		// Arrange.
+		$step_id        = WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS;
+		$stored_profile = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						$step_id => array(
+							'statuses' => array(
+								WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $this->current_time - 100,
+							),
+						),
+					),
+				),
+			),
+		);
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		// Act.
+		$result = $this->sut->onboarding_step_check( $step_id, $location );
+
+		// Assert.
+		$this->assertEquals(
+			array(
+				'status' => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+			),
+			$result
+		);
+	}
+
+	/**
+	 * Test that get_onboarding_recommended_payment_methods returns the correct recommended payment methods.
+	 *
+	 * @return void
+	 */
+	public function test_get_onboarding_recommended_payment_methods() {
+		// Arrange.
+		$country_code = 'US';
+		$expected     = array(
+			array(
+				'id'       => 'credit_card',
+				'enabled'  => true,
+				'required' => true,
+			),
+			array(
+				'id'       => 'affirm',
+				'enabled'  => false,
+				'required' => false,
+			),
+		);
+		$this->mock_provider
+			->expects( $this->once() )
+			->method( 'get_recommended_payment_methods' )
+			->with( $this->isInstanceOf( FakePaymentGateway::class ), $country_code )
+			->willReturn( $expected );
+
+		// Act.
+		$result = $this->sut->get_onboarding_recommended_payment_methods( $country_code );
+
+		// Assert.
+		$this->assertEquals( $expected, $result );
+	}
+
+	/**
+	 * Test onboarding_test_account_init with an existing test account.
+	 *
+	 * @return void
+	 * @throws \Exception On POST request not mocked.
+	 */
+	public function test_onboarding_test_account_init_with_existing_test_account() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working since it is a dependency for the step.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the account.
+		$this->mock_provider
+			->expects( $this->any() )
+			->method( 'is_account_connected' )
+			->willReturn( true );
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'is_stripe_account_valid' )
+			->willReturn( false ); // Make it invalid, for good measure.
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'get_account_status_data' )
+			->willReturn(
+				array(
+					'status'           => 'complete',
+					// These two are mirror images of each other.
+					'testDrive'        => true,
+					'isLive'           => false,
+					'paymentsEnabled'  => true,
+					'detailsSubmitted' => true,
+				)
+			);
+
+		// Arrange the REST API requests.
+		$requests_made = array();
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made ) {
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							$requests_made[] = $params;
+							return array(
+								'success' => true,
+							);
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Act.
+		$result = $this->sut->onboarding_test_account_init( $location );
+
+		// Assert.
+		$this->assertEquals(
+			array(
+				'message' => __( 'A test account is already set up.', 'woocommerce' ),
+			),
+			$result
+		);
+		$this->assertCount( 0, $requests_made );
+	}
+
+	/**
+	 * Test onboarding_test_account_init with an existing live account.
+	 *
+	 * @return void
+	 * @throws \Exception On POST request not mocked.
+	 */
+	public function test_onboarding_test_account_init_with_existing_live_account() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working since it is a dependency for the step.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the account.
+		$this->mock_provider
+			->expects( $this->any() )
+			->method( 'is_account_connected' )
+			->willReturn( true );
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'is_stripe_account_valid' )
+			->willReturn( false ); // Make it invalid, for good measure.
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'get_account_status_data' )
+			->willReturn(
+				array(
+					'status'           => 'complete',
+					// These two are mirror images of each other.
+					'testDrive'        => false,
+					'isLive'           => true,
+					'paymentsEnabled'  => true,
+					'detailsSubmitted' => true,
+				)
+			);
+
+		// Arrange the REST API requests.
+		$requests_made = array();
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made ) {
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							$requests_made[] = $params;
+							return array(
+								'success' => true,
+							);
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Act.
+		$result = $this->sut->onboarding_test_account_init( $location );
+
+		// Assert.
+		$this->assertEquals(
+			array(
+				'message' => __( 'An account is already set up. Reset the onboarding first.', 'woocommerce' ),
+			),
+			$result
+		);
+		$this->assertCount( 0, $requests_made );
+	}
+
+	/**
+	 * Test onboarding_test_account_init throws exception when extension is not active.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_onboarding_test_account_init_throws_when_extension_not_active() {
+		$location = 'US';
+
+		// Arrange.
+		// Mock the extension as not active.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'class_exists' => function ( $class_to_check ) {
+					if ( '\WC_Payments' === $class_to_check ) {
+						return false;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		try {
+			$this->sut->onboarding_test_account_init( $location );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_extension_not_active', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test onboarding_test_account_init throws exception when onboarding is locked.
+	 *
+	 * @return void
+	 * @throws \Exception On POST request not mocked.
+	 */
+	public function test_onboarding_test_account_init_throws_with_onboarding_locked() {
+		$location = 'US';
+
+		// Arrange the account.
+		$this->mock_provider
+			->expects( $this->any() )
+			->method( 'is_account_connected' )
+			->willReturn( false );
+
+		// Arrange the onboarding locked DB option.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return 'yes';
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		// Arrange the REST API requests.
+		$requests_made = array();
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made ) {
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							$requests_made[] = $params;
+							return array(
+								'success' => true,
+							);
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Act.
+		try {
+			$this->sut->onboarding_test_account_init( $location );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_locked', $e->getErrorCode() );
+		}
+
+		// Assert.
+		$this->assertCount( 0, $requests_made );
+	}
+
+	/**
+	 * Test onboarding_test_account_init that throws an exception when the step requirements are not met.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_test_account_init_throws_on_unmet_requirements() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it NOT working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( false );
+
+		try {
+			$this->sut->onboarding_test_account_init( $location );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_step_requirements_not_met', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test onboarding_test_account_init that throws an exception when the REST API call fails.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_test_account_init_throws_on_error_response() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the NOX profile.
+		$step_id                 = WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT;
+		$stored_profile          = array();
+		$updated_stored_profiles = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( $stored_profile, &$updated_stored_profiles ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profiles[] = $value;
+
+						// Mimic the behavior of the original function.
+						if ( $value === $stored_profile || maybe_serialize( $value ) === maybe_serialize( $stored_profile ) ) {
+							return false;
+						}
+
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Arrange the REST API requests.
+		$requests_made  = array();
+		$expected_error = array(
+			'code'    => 'error',
+			'message' => 'Error message',
+		);
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_error ) {
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							$requests_made[] = $params;
+							return new WP_Error( $expected_error['code'], $expected_error['message'] );
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Assert.
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( $expected_error['message'] );
+
+		// Act.
+		$this->sut->onboarding_test_account_init( $location );
+	}
+
+	/**
+	 * Test onboarding_test_account_init that throws an exception when the REST API call doesn't return success.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_test_account_init_throws_on_not_successful() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the NOX profile.
+		$step_id                 = WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT;
+		$stored_profile          = array();
+		$updated_stored_profiles = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( $stored_profile, &$updated_stored_profiles ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profiles[] = $value;
+
+						// Mimic the behavior of the original function.
+						if ( $value === $stored_profile || maybe_serialize( $value ) === maybe_serialize( $stored_profile ) ) {
+							return false;
+						}
+
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Arrange the REST API requests.
+		$requests_made = array();
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made ) {
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							$requests_made[] = $params;
+							return array(
+								'success' => false,
+								'error'   => 'Error message',
+							);
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Assert.
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( esc_html__( 'Failed to initialize the test account.', 'woocommerce' ) );
+
+		// Act.
+		$this->sut->onboarding_test_account_init( $location );
+	}
+
+	/**
+	 * Test onboarding_test_account_init.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_test_account_init() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working since it is a dependency for the step.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the NOX profile.
+		$step_id                 = WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT;
+		$started_timestamp       = $this->current_time - 100;
+		$stored_profile          = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						$step_id => array(
+							'statuses' => array(
+								WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $started_timestamp,
+							),
+						),
+					),
+				),
+			),
+		);
+		$updated_stored_profiles = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile, &$updated_stored_profiles ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						// Chain the responses to simulate the sequence of DB updates.
+						return ! empty( $updated_stored_profiles ) ? end( $updated_stored_profiles ) : $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( $stored_profile, &$updated_stored_profiles ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profiles[] = $value;
+
+						// Mimic the behavior of the original function.
+						if ( $value === $stored_profile || maybe_serialize( $value ) === maybe_serialize( $stored_profile ) ) {
+							return false;
+						}
+
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Arrange the REST API requests.
+		$requests_made     = array();
+		$expected_response = array(
+			'success' => true,
+		);
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							$requests_made[] = $params;
+							return $expected_response;
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Act.
+		$result = $this->sut->onboarding_test_account_init( $location );
+
+		// Assert.
+		$this->assertEquals( $expected_response, $result );
+		$this->assertCount( 1, $requests_made );
+		$this->assertCount( 0, $updated_stored_profiles );
+		// There is no automatic completion of the step due to its async nature.
+	}
+
+	/**
+	 * Test get_onboarding_kyc_session throws exception when extension is not active.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_get_onboarding_kyc_session_throws_when_extension_not_active() {
+		$location = 'US';
+
+		// Arrange.
+		// Mock the extension as not active.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'class_exists' => function ( $class_to_check ) {
+					if ( '\WC_Payments' === $class_to_check ) {
+						return false;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		try {
+			$this->sut->get_onboarding_kyc_session( $location );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_extension_not_active', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test get_onboarding_kyc_session throws exception when onboarding is locked.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_get_onboarding_kyc_session_throws_with_onboarding_locked() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working since it is a dependency for the step.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the onboarding locked DB option.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return 'yes';
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		try {
+			$this->sut->get_onboarding_kyc_session( $location );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_locked', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test get_onboarding_kyc_session throws exception when step requirements are not met.
+	 *
+	 * @return void
+	 */
+	public function test_get_onboarding_kyc_session_throws_on_unmet_requirements() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it NOT working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( false );
+
+		try {
+			$this->sut->get_onboarding_kyc_session( $location );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_step_requirements_not_met', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test that get_onboarding_kyc_session throws an exception when the REST API call fails.
+	 *
+	 * @return void
+	 * @throws \Exception On GET request not mocked.
+	 */
+	public function test_get_onboarding_kyc_session_throws_on_error_response() {
+		// Arrange the WPCOM connection.
+		// Make it working since it is a dependency for the step.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the REST API requests.
+		$requests_made  = array();
+		$expected_error = array(
+			'code'    => 'error',
+			'message' => 'Error message',
+		);
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_error ) {
+						if ( '/wc/v3/payments/onboarding/kyc/session' === $endpoint ) {
+							$requests_made[] = $params;
+							return new WP_Error( $expected_error['code'], $expected_error['message'] );
+						}
+
+						throw new \Exception( esc_html( 'GET endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Assert.
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( $expected_error['message'] );
+
+		// Act.
+		$this->sut->get_onboarding_kyc_session( 'US' );
+	}
+
+	/**
+	 * Test that get_onboarding_kyc_session throws an exception when the REST API call doesn't respond properly.
+	 *
+	 * @return void
+	 * @throws \Exception On GET request not mocked.
+	 */
+	public function test_get_onboarding_kyc_session_throws_on_failure() {
+		// Arrange the WPCOM connection.
+		// Make it working since it is a dependency for the step.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the REST API requests.
+		$requests_made = array();
+		// Not an array.
+		$expected_response = '';
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+						if ( '/wc/v3/payments/onboarding/kyc/session' === $endpoint ) {
+							$requests_made[] = $params;
+							return $expected_response;
+						}
+
+						throw new \Exception( esc_html( 'GET endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Act.
+		try {
+			$this->sut->get_onboarding_kyc_session( 'US' );
+		} catch ( ApiException $exception ) {
+			$this->assertSame( 'woocommerce_woopayments_onboarding_client_api_error', $exception->getErrorCode() );
+			$this->assertSame( 'Failed to get the KYC session data.', $exception->getMessage() );
+		}
+	}
+
+	/**
+	 * Test that get_onboarding_kyc_session uses stored data when no data is provided.
+	 *
+	 * @return void
+	 * @throws \Exception On GET request not mocked.
+	 */
+	public function test_get_onboarding_kyc_session_uses_stored_data() {
+		$step_id  = WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION;
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the NOX profile.
+		$self_assessment = array(
+			'business_type' => 'company',
+			'mcc'           => 1234,
+		);
+		$stored_profile  = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						$step_id => array(
+							'data' => array(
+								'self_assessment' => $self_assessment,
+							),
+						),
+					),
+				),
+			),
+		);
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		// Arrange the REST API requests.
+		$requests_made     = array();
+		$expected_payload  = array(
+			'self_assessment' => $self_assessment,
+		);
+		$expected_response = array(
+			'clientSecret'   => 'secret',
+			'expiresAt'      => $this->current_time + 1000,
+			'accountId'      => 'id',
+			'isLive'         => false,
+			'accountCreated' => false,
+			'publishableKey' => 'key',
+		);
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+						if ( '/wc/v3/payments/onboarding/kyc/session' === $endpoint ) {
+							$requests_made[] = $params;
+							return $expected_response;
+						}
+
+						throw new \Exception( esc_html( 'GET endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Act.
+		$result = $this->sut->get_onboarding_kyc_session( $location );
+
+		// Assert.
+		self::assertEquals( $expected_response + array( 'locale' => 'en_US' ), $result );
+		self::assertCount( 1, $requests_made );
+		self::assertEquals( $expected_payload, $requests_made[0] );
+	}
+
+	/**
+	 * Test that get_onboarding_kyc_session uses received data, superseding the stored data.
+	 *
+	 * @return void
+	 * @throws \Exception On GET request not mocked.
+	 */
+	public function test_get_onboarding_kyc_session_uses_received_data() {
+		$step_id         = WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION;
+		$location        = 'US';
+		$self_assessment = array(
+			'business_type' => 'individual',
+			'mcc'           => 4567,
+		);
+
+		// Arrange the WPCOM connection.
+		// Make it working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the NOX profile.
+		$stored_self_assessment = array(
+			'business_type' => 'company',
+			'mcc'           => 1234,
+		);
+		$stored_profile         = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						$step_id => array(
+							'data' => array(
+								'self_assessment' => $stored_self_assessment,
+							),
+						),
+					),
+				),
+			),
+		);
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		// Arrange the REST API requests.
+		$requests_made     = array();
+		$expected_payload  = array(
+			'self_assessment' => $self_assessment,
+		);
+		$expected_response = array(
+			'clientSecret'   => 'secret',
+			'expiresAt'      => $this->current_time + 1000,
+			'accountId'      => 'id',
+			'isLive'         => false,
+			'accountCreated' => false,
+			'publishableKey' => 'key',
+		);
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+						if ( '/wc/v3/payments/onboarding/kyc/session' === $endpoint ) {
+							$requests_made[] = $params;
+							return $expected_response;
+						}
+
+						throw new \Exception( esc_html( 'GET endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Act.
+		$result = $this->sut->get_onboarding_kyc_session(
+			$location,
+			$self_assessment
+		);
+
+		// Assert.
+		self::assertEquals( $expected_response + array( 'locale' => 'en_US' ), $result );
+		self::assertCount( 1, $requests_made );
+		self::assertEquals( $expected_payload, $requests_made[0] );
+	}
+
+	/**
+	 * Test finish_onboarding_kyc_session throws exception when extension is not active.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_finish_onboarding_kyc_session_throws_when_extension_not_active() {
+		$location = 'US';
+
+		// Arrange.
+		// Mock the extension as not active.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'class_exists' => function ( $class_to_check ) {
+					if ( '\WC_Payments' === $class_to_check ) {
+						return false;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		try {
+			$this->sut->finish_onboarding_kyc_session( $location );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			self::assertEquals( 'woocommerce_woopayments_onboarding_extension_not_active', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test finish_onboarding_kyc_session throws exception when onboarding is locked.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_finish_onboarding_kyc_session_throws_with_onboarding_locked() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working since it is a dependency for the step.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the onboarding locked DB option.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return 'yes';
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		try {
+			$this->sut->finish_onboarding_kyc_session( $location );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			self::assertEquals( 'woocommerce_woopayments_onboarding_locked', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test finish_onboarding_kyc_session throws exception when step requirements are not met.
+	 *
+	 * @return void
+	 */
+	public function test_finish_onboarding_kyc_session_throws_on_unmet_requirements() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it NOT working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( false );
+
+		try {
+			$this->sut->finish_onboarding_kyc_session( $location );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_step_requirements_not_met', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test that finish_onboarding_kyc_session throws an exception when the REST API call fails.
+	 *
+	 * @return void
+	 * @throws \Exception On POST request not mocked.
+	 */
+	public function test_finish_onboarding_kyc_session_throws_on_error_response() {
+		// Arrange the WPCOM connection.
+		// Make it working since it is a dependency for the step.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the REST API requests.
+		$requests_made  = array();
+		$expected_error = array(
+			'code'    => 'error',
+			'message' => 'Error message',
+		);
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_error ) {
+						if ( '/wc/v3/payments/onboarding/kyc/finalize' === $endpoint ) {
+							$requests_made[] = $params;
+							return new WP_Error( $expected_error['code'], $expected_error['message'] );
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Assert.
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( $expected_error['message'] );
+
+		// Act.
+		$this->sut->finish_onboarding_kyc_session( 'US' );
+	}
+
+	/**
+	 * Test that finish_onboarding_kyc_session throws an exception when the REST API call doesn't respond properly.
+	 *
+	 * @return void
+	 * @throws \Exception On POST request not mocked.
+	 */
+	public function test_finish_onboarding_kyc_session_throws_on_failure() {
+		// Arrange the WPCOM connection.
+		// Make it working since it is a dependency for the step.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the REST API requests.
+		$requests_made = array();
+		// Not an array.
+		$expected_response = '';
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+						if ( '/wc/v3/payments/onboarding/kyc/finalize' === $endpoint ) {
+							$requests_made[] = $params;
+							return $expected_response;
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Assert.
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( esc_html__( 'Failed to finish the KYC session.', 'woocommerce' ) );
+
+		// Act.
+		$this->sut->finish_onboarding_kyc_session( 'US' );
+	}
+
+	/**
+	 * Test finish_onboarding_kyc_session.
+	 *
+	 * @return void
+	 * @throws \Exception On POST request not mocked.
+	 */
+	public function test_finish_onboarding_kyc_session() {
+		$step_id  = WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION;
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working.
+		// Without this, the step will not be marked as completed due to unmet step requirements.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the NOX profile.
+		$started_timestamp       = $this->current_time - 100;
+		$stored_profile          = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						$step_id => array(
+							'statuses' => array(
+								WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $started_timestamp,
+							),
+						),
+					),
+				),
+			),
+		);
+		$updated_stored_profiles = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( $stored_profile, &$updated_stored_profiles ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profiles[] = $value;
+
+						// Mimic the behavior of the original function.
+						if ( $value === $stored_profile || maybe_serialize( $value ) === maybe_serialize( $stored_profile ) ) {
+							return false;
+						}
+
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Arrange the REST API requests.
+		$requests_made     = array();
+		$expected_payload  = array(
+			'source' => WooPaymentsService::FROM_PAYMENT_SETTINGS,
+			'from'   => WooPaymentsService::FROM_NOX_IN_CONTEXT,
+		);
+		$expected_response = array(
+			'success'           => true,
+			'details_submitted' => true,
+			'account_id'        => 'id',
+			'mode'              => 'test',
+		);
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+						if ( '/wc/v3/payments/onboarding/kyc/finalize' === $endpoint ) {
+							$requests_made[] = $params;
+							return $expected_response;
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Act.
+		$result = $this->sut->finish_onboarding_kyc_session( $location );
+
+		// Assert.
+		self::assertEquals( $expected_response, $result );
+		self::assertCount( 1, $requests_made );
+		self::assertEquals( $expected_payload, $requests_made[0] );
+		$this->assertCount( 1, $updated_stored_profiles );
+		// The step status should have been set to completed.
+		$this->assertEquals(
+			array(
+				'statuses' => array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $started_timestamp,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $this->current_time,
+				),
+			),
+			$updated_stored_profiles[0]['onboarding'][ $location ]['steps'][ $step_id ]
+		);
+	}
+
+	/**
+	 * Test reset_onboarding throws exception when extension is not active.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_reset_onboarding_throws_when_extension_not_active() {
+		// Arrange.
+		// Mock the extension as not active.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'class_exists' => function ( $class_to_check ) {
+					if ( '\WC_Payments' === $class_to_check ) {
+						return false;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		try {
+			$this->sut->reset_onboarding();
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			self::assertEquals( 'woocommerce_woopayments_onboarding_extension_not_active', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test reset_onboarding throws exception when onboarding is locked.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_reset_onboarding_throws_with_onboarding_locked() {
+		// Arrange the WPCOM connection.
+		// Make it working since it is a dependency for the step.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the onboarding locked DB option.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return 'yes';
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		try {
+			$this->sut->reset_onboarding();
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_locked', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test that reset_onboarding throws an exception when the REST API call fails.
+	 *
+	 * @return void
+	 * @throws \Exception On POST request not mocked.
+	 */
+	public function test_reset_onboarding_throws_on_error_response() {
+		// Arrange the REST API requests.
+		$requests_made  = array();
+		$expected_error = array(
+			'code'    => 'error',
+			'message' => 'Error message',
+		);
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_error ) {
+						if ( '/wc/v3/payments/onboarding/reset' === $endpoint ) {
+							$requests_made[] = $params;
+							return new WP_Error( $expected_error['code'], $expected_error['message'] );
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Assert.
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( $expected_error['message'] );
+
+		// Act.
+		$this->sut->reset_onboarding();
+	}
+
+	/**
+	 * Test that reset_onboarding throws an exception when the REST API call doesn't respond properly.
+	 *
+	 * @return void
+	 * @throws \Exception On POST request not mocked.
+	 */
+	public function test_reset_onboarding_throws_on_invalid_response() {
+		// Arrange the REST API requests.
+		$requests_made = array();
+		// Not an array.
+		$expected_response = '';
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+						if ( '/wc/v3/payments/onboarding/reset' === $endpoint ) {
+							$requests_made[] = $params;
+							return $expected_response;
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Assert.
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( esc_html__( 'Failed to reset onboarding.', 'woocommerce' ) );
+
+		// Act.
+		$this->sut->reset_onboarding();
+	}
+
+	/**
+	 * Test that reset_onboarding throws an exception when the REST API call doesn't succeed.
+	 *
+	 * @return void
+	 * @throws \Exception On POST request not mocked.
+	 */
+	public function test_reset_onboarding_throws_on_failure() {
+		// Arrange the REST API requests.
+		$requests_made = array();
+		// Not an array.
+		$expected_response = array( 'success' => false );
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+						if ( '/wc/v3/payments/onboarding/reset' === $endpoint ) {
+							$requests_made[] = $params;
+							return $expected_response;
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Assert.
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( esc_html__( 'Failed to reset onboarding.', 'woocommerce' ) );
+
+		// Act.
+		$this->sut->reset_onboarding();
+	}
+
+	/**
+	 * Test reset_onboarding.
+	 *
+	 * @return void
+	 * @throws \Exception On POST request not mocked.
+	 */
+	public function test_reset_onboarding() {
+		// Arrange the REST API requests.
+		$requests_made     = array();
+		$expected_payload  = array(
+			'from'   => WooPaymentsService::FROM_PAYMENT_SETTINGS,
+			'source' => WooPaymentsService::FROM_PAYMENT_SETTINGS,
+		);
+		$expected_response = array(
+			'success' => true,
+		);
+
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+						if ( '/wc/v3/payments/onboarding/reset' === $endpoint ) {
+							$requests_made[] = $params;
+
+							return $expected_response;
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Act.
+		$result = $this->sut->reset_onboarding();
+
+		// Assert.
+		self::assertEquals( $expected_response, $result );
+		self::assertCount( 1, $requests_made );
+		self::assertEquals( $expected_payload, $requests_made[0] );
+	}
+
+	/**
+	 * Get the mock business types for onboarding fields.
+	 *
+	 * @return array[]
+	 */
+	private function get_mock_onboarding_fields_business_types(): array {
+		return array(
+			array(
+				'key'   => 'US',
+				'name'  => 'United States',
+				'types' => array(
+					array(
+						'key'        => 'individual',
+						'name'       => 'Individual',
+						'structures' => array(),
+					),
+					array(
+						'key'        => 'company',
+						'name'       => 'Company',
+						'structures' => array(
+							array(
+								'key'  => 'sole_proprietorship',
+								'name' => 'Sole proprietorship',
+							),
+							array(
+								'key'  => 'single_member_llc',
+								'name' => 'Single-member LLC',
+							),
+							array(
+								'key'  => 'multi_member_llc',
+								'name' => 'Multi-member LLC',
+							),
+							array(
+								'key'  => 'private_partnership',
+								'name' => 'Private partnership',
+							),
+							array(
+								'key'  => 'private_corporation',
+								'name' => 'Private corporation',
+							),
+							array(
+								'key'  => 'unincorporated_association',
+								'name' => 'Unincorporated association',
+							),
+							array(
+								'key'  => 'public_partnership',
+								'name' => 'Public partnership',
+							),
+							array(
+								'key'  => 'public_corporation',
+								'name' => 'Public corporation',
+							),
+						),
+					),
+					array(
+						'key'        => 'non_profit',
+						'name'       => 'Non-profit',
+						'structures' => array(
+							array(
+								'key'  => 'incorporated_non_profit',
+								'name' => 'Incorporated non-profit',
+							),
+							array(
+								'key'  => 'unincorporated_non_profit',
+								'name' => 'Unincorporated non-profit',
+							),
+						),
+					),
+					array(
+						'key'        => 'government_entity',
+						'name'       => 'Government entity',
+						'structures' => array(
+							array(
+								'key'  => 'governmental_unit',
+								'name' => 'Governmental unit',
+							),
+							array(
+								'key'  => 'government_instrumentality',
+								'name' => 'Government instrumentality',
+							),
+							array(
+								'key'  => 'tax_exempt_government_instrumentality',
+								'name' => 'Tax exempt government instrumentality',
+							),
+						),
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Get the mock WooPayments supported countries.
+	 *
+	 * @return string[]
+	 */
+	private function get_woopayments_supported_countries(): array {
+		return array(
+			'AE' => 'United Arab Emirates',
+			'AT' => 'Austria',
+			'AU' => 'Australia',
+			'BE' => 'Belgium',
+			'BG' => 'Bulgaria',
+			'CA' => 'Canada',
+			'CH' => 'Switzerland',
+			'CY' => 'Cyprus',
+			'CZ' => 'Czech Republic',
+			'DE' => 'Germany',
+			'DK' => 'Denmark',
+			'EE' => 'Estonia',
+			'FI' => 'Finland',
+			'ES' => 'Spain',
+			'FR' => 'France',
+			'HR' => 'Croatia',
+			'JP' => 'Japan',
+			'LU' => 'Luxembourg',
+			'GB' => 'United Kingdom (UK)',
+			'GR' => 'Greece',
+			'HK' => 'Hong Kong',
+			'HU' => 'Hungary',
+			'IE' => 'Ireland',
+			'IT' => 'Italy',
+			'LT' => 'Lithuania',
+			'LV' => 'Latvia',
+			'MT' => 'Malta',
+			'NL' => 'Netherlands',
+			'NO' => 'Norway',
+			'NZ' => 'New Zealand',
+			'PL' => 'Poland',
+			'PT' => 'Portugal',
+			'RO' => 'Romania',
+			'SE' => 'Sweden',
+			'SI' => 'Slovenia',
+			'SK' => 'Slovakia',
+			'SG' => 'Singapore',
+			'US' => 'United States (US)',
+			'PR' => 'Puerto Rico',
+		);
+	}
+}

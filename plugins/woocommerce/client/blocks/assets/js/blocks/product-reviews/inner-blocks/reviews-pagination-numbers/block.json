@@ -2,7 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "woocommerce/product-reviews-pagination-numbers",
-	"title": "Product Reviews Page Numbers",
+	"title": "Reviews Page Numbers",
 	"category": "woocommerce",
 	"ancestor": [ "woocommerce/product-reviews-pagination" ],
 	"description": "Displays a list of page numbers for product reviews pagination.",

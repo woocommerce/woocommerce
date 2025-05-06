@@ -28,7 +28,7 @@
 		display: grid;
 
 		.quantity {
-			display: flex !important;
+			display: inline-flex;
 			align-items: stretch;
 		}
 
@@ -103,7 +103,6 @@ div.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
 	}
 
 	.wc-block-components-quantity-selector {
-		display: inline-flex;
 
 		.input-text {
 			font-size: var(--wp--preset--font-size--small);
