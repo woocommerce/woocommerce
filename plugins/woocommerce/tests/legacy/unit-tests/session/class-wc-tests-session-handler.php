@@ -253,7 +253,7 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 		$handler->set( 'cart', null );
 		$handler->save_data();
 		WC()->cart = null;
-		
+
 		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
 
 		$handler->init_session_cookie();
