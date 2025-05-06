@@ -44,7 +44,7 @@ class PaymentsController {
 		add_action( 'admin_menu', array( $this, 'add_menu' ) );
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
 		add_filter( 'woocommerce_admin_allowed_promo_notes', array( $this, 'add_allowed_promo_notes' ) );
-		add_filter( 'woocommerce_get_sections_checkout', array( $this, 'handle_sections' ) );
+		add_filter( 'woocommerce_get_sections_checkout', array( $this, 'handle_sections' ), 20 );
 	}
 
 	/**
