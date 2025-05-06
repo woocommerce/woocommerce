@@ -17,6 +17,8 @@ $product_ids_to_export = array();
 $is_exporting_specific = false;
 
 if ( ! empty( $_GET['product_ids'] ) ) {
+	check_admin_referer( 'export-selected-products' );
+
 	$ids_raw               = explode( ',', sanitize_text_field( wp_unslash( $_GET['product_ids'] ) ) );
 	$product_ids_to_export = array_filter( array_map( 'absint', $ids_raw ) );
 

@@ -819,7 +819,8 @@
 
 					// Update Export button
 					if ( selectedProductIds.length > 0 ) {
-						const newHref = originalExportHref + '&product_ids=' + selectedProductIds.join(',');
+						let newHref = originalExportHref + '&product_ids=' + selectedProductIds.join(',');
+						newHref += '&_wpnonce=' + woocommerce_admin.nonces.export_selected_products_nonce;
 						// Construct the text with the count
 						const count = selectedProductIds.length;
 						// Use the localized string if available, otherwise fallback to a hardcoded string
