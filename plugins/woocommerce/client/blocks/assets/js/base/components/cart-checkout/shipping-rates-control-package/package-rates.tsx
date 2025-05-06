@@ -34,13 +34,13 @@ const PackageRates = ( {
 	disabled = false,
 	highlightChecked = false,
 }: PackageRates ): JSX.Element => {
-	const selectedRateId = selectedRate?.rate_id || '';
+	const selectedRateId = selectedRate?.rate_id;
 	const previousSelectedRateId = usePrevious( selectedRateId );
 
 	// Store selected rate ID in local state so shipping rates changes are shown in the UI instantly.
-	const [ selectedOption, setSelectedOption ] = useState(
-		selectedRateId ?? ''
-	);
+	const [ selectedOption, setSelectedOption ] = useState<
+		string | undefined
+	>( selectedRateId ?? rates[ 0 ]?.rate_id );
 
 	// Update the selected option if cart state changes in the data store.
 	useEffect( () => {
@@ -54,14 +54,13 @@ const PackageRates = ( {
 	}, [ selectedRateId, selectedOption, previousSelectedRateId ] );
 
 	// Update on mount, we do it every time to:
-	// - set the initial value if selectedOption not set
+	// - sync the initial value with the server
 	// - or reset pending request to change shipping rate that might be coming
 	//   from other components (e.g. local pickup), selectShippingRate thunk in
 	//   the cart store properly handles aborting the previous request if needed
 	useEffect( () => {
-		if ( rates.length > 0 ) {
-			setSelectedOption( selectedOption || rates[ 0 ].rate_id );
-			onSelectRate( selectedOption || rates[ 0 ].rate_id );
+		if ( selectedOption ) {
+			onSelectRate( selectedOption );
 		}
 		// We want this to run on mount only, beware of updating it as it may cause
 		// shipping rate selection to end up in inifite loop
@@ -81,7 +80,7 @@ const PackageRates = ( {
 			} }
 			highlightChecked={ highlightChecked }
 			disabled={ disabled }
-			selected={ selectedOption }
+			selected={ selectedOption ?? '' }
 			options={ rates.map( renderOption ) }
 			descriptionStackingDirection="column"
 		/>

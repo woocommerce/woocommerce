@@ -145,8 +145,12 @@ const Block = () => {
 		);
 	}, [ shippingRates ] );
 
-	const [ selectedOption, setSelectedOption ] = useState< string >(
-		() => pickupLocations.find( ( rate ) => rate.selected )?.rate_id || ''
+	const [ selectedOption, setSelectedOption ] = useState<
+		string | undefined
+	>(
+		() =>
+			pickupLocations.find( ( rate ) => rate.selected )?.rate_id ??
+			pickupLocations[ 0 ]?.rate_id
 	);
 
 	const handleShippingRateChange = useCallback(
@@ -158,15 +162,13 @@ const Block = () => {
 	);
 
 	// Update on mount, we do it every time to:
-	// - set the initial value if selectedOption not set
+	// - sync the initial value with the server
 	// - or reset pending request to change shipping rate that might be coming
 	//   from other components (e.g. shipping options), selectShippingRate thunk
 	//   in the cart store properly handles aborting the previous request if needed
 	useEffect( () => {
-		if ( pickupLocations.length > 0 ) {
-			handleShippingRateChange(
-				selectedOption || pickupLocations[ 0 ].rate_id
-			);
+		if ( selectedOption ) {
+			selectShippingRate( selectedOption );
 		}
 		// We want this to run on mount only, beware of updating it as it may cause
 		// shipping rate selection to end up in inifite loop
@@ -193,7 +195,7 @@ const Block = () => {
 			<ExperimentalOrderLocalPickupPackages>
 				<LocalPickupSelect
 					title={ shippingRates[ 0 ].name }
-					selectedOption={ selectedOption }
+					selectedOption={ selectedOption ?? '' }
 					renderPickupLocation={ renderPickupLocation }
 					pickupLocations={ pickupLocations }
 					packageCount={ getShippingRatesPackageCount(

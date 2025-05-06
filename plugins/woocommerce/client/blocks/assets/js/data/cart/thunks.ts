@@ -438,6 +438,12 @@ export const selectShippingRate =
 			);
 
 		if ( selectedShippingRate?.rate_id === rateId ) {
+			// Early return here signifies that the rate is correctly selected.
+			// We might have some pending requests that will be trying to set it, so
+			// let's abort them just in case.
+			if ( abortController ) {
+				abortController.abort();
+			}
 			return;
 		}
 
