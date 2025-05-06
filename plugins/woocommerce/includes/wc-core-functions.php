@@ -1660,6 +1660,20 @@ function wc_back_link( $label, $url ) {
 }
 
 /**
+ * Outputs a header with "back" link so admin screens can easily jump back a page.
+ *
+ * @param string $title Title of the current page.
+ * @param string $label Label of the page to return to.
+ * @param string $url   URL of the page to return to.
+ */
+function wc_back_header( $title, $label, $url ) {
+	echo '<h2 class="wc-admin-header">';
+	echo '<small><a href="' . esc_url( $url ) . '" aria-label="' . esc_attr( $label ) . '"><span class="dashicons dashicons-arrow-left-alt2"></span></a></small>';
+	echo esc_html( $title );
+	echo '</h2>';
+}
+
+/**
  * Display a WooCommerce help tip.
  *
  * @since  2.5.0

@@ -11,7 +11,6 @@ use Automattic\WooCommerce\StoreApi\Formatters\MoneyFormatter;
 use Automattic\WooCommerce\StoreApi\RoutesController;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
-use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 
 /**
  * StoreApi Main Class.
@@ -39,10 +38,6 @@ final class StoreApi {
 					return;
 				}
 				self::container()->get( Authentication::class )->init();
-
-				$cart_controller = new CartController();
-				$cart_controller->load_cart();
-				$cart_controller->normalize_cart();
 			},
 			11
 		);

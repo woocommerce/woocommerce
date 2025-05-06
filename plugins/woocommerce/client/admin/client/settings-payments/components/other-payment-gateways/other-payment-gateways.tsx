@@ -17,6 +17,7 @@ import { useDebounce } from '@wordpress/compose';
  */
 import { GridItemPlaceholder } from '~/settings-payments/components/grid-item-placeholder';
 import { OfficialBadge } from '../official-badge';
+import { IncentiveStatusBadge } from '~/settings-payments/components/incentive-status-badge';
 
 interface OtherPaymentGatewaysProps {
 	/**
@@ -73,11 +74,7 @@ export const OtherPaymentGateways = ( {
 
 	const hidePopoverDebounced = useDebounce( () => {
 		setCategoryIdWithPopoverVisible( '' );
-	}, 350 );
-	const showPopover = ( categoryId: string ) => {
-		setCategoryIdWithPopoverVisible( categoryId );
-		hidePopoverDebounced.cancel();
-	};
+	}, 1000 );
 
 	// Group suggestions by category.
 	const suggestionsByCategory = useMemo(
@@ -166,7 +163,7 @@ export const OtherPaymentGateways = ( {
 										)
 									}
 									onMouseEnter={ () =>
-										showPopover( category.id )
+										hidePopoverDebounced.cancel()
 									}
 									onMouseLeave={ hidePopoverDebounced }
 									onKeyDown={ ( event ) => {
@@ -231,6 +228,13 @@ export const OtherPaymentGateways = ( {
 										<div className="other-payment-gateways__content__grid-item__content">
 											<span className="other-payment-gateways__content__grid-item__content__title">
 												{ extension.title }
+												{ extension?._incentive && (
+													<IncentiveStatusBadge
+														incentive={
+															extension._incentive
+														}
+													/>
+												) }
 												{ /* All payment extension suggestions are official. */ }
 												<OfficialBadge variant="expanded" />
 											</span>

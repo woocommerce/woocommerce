@@ -627,10 +627,10 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$this->delete_transient_email_settings();
 		$emails      = WC()->mailer()->get_emails();
 		$email_types = array();
-		foreach ( $emails as $type => $email ) {
+		foreach ( $emails as $email ) {
 			$email_types[] = array(
 				'label' => $email->get_title(),
-				'value' => $type,
+				'value' => get_class( $email ),
 			);
 		}
 		?>

@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "9.8.0",
+	"version": "9.8.4",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -708,7 +708,7 @@
 		"uuid": "^9.0.1",
 		"webpack": "5.70.0",
 		"webpack-cli": "3.3.12",
-		"wireit": "0.14.10",
+		"wireit": "0.14.12",
 		"wp-textdomain": "1.0.1"
 	},
 	"engines": {

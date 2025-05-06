@@ -34,18 +34,18 @@ type PaymentGatewayItemProps = {
 	gateway: PaymentGatewayProvider;
 	installingPlugin: string | null;
 	acceptIncentive: ( id: string ) => void;
+	shouldHighlightIncentive: boolean;
 };
 
 export const PaymentGatewayListItem = ( {
 	gateway,
 	installingPlugin,
 	acceptIncentive,
+	shouldHighlightIncentive,
 	...props
 }: PaymentGatewayItemProps ) => {
 	const itemIsWooPayments = isWooPayments( gateway.id );
 	const incentive = hasIncentive( gateway ) ? gateway._incentive : null;
-	const shouldHighlightIncentive =
-		incentive && ! incentive?.promo_id.includes( '-action-' );
 
 	const gatewayHasRecommendedPaymentMethods =
 		( gateway.onboarding.recommended_payment_methods ?? [] ).length > 0;
@@ -86,7 +86,11 @@ export const PaymentGatewayListItem = ( {
 				itemIsWooPayments
 					? `woocommerce-item__woocommerce-payments`
 					: ''
-			} ${ shouldHighlightIncentive ? `has-incentive` : '' }` }
+			} ${
+				hasIncentive( gateway ) && shouldHighlightIncentive
+					? `has-incentive`
+					: ''
+			}` }
 			{ ...props }
 		>
 			<div className="woocommerce-list__item-inner">
@@ -107,6 +111,10 @@ export const PaymentGatewayListItem = ( {
 							<IncentiveStatusBadge incentive={ incentive } />
 						) : (
 							<StatusBadge status={ determineGatewayStatus() } />
+						) }
+						{ /* If the gateway has a matching suggestion, it is an official extension. */ }
+						{ gateway._suggestion_id && (
+							<OfficialBadge variant="expanded" />
 						) }
 						{ gateway.supports?.includes( 'subscriptions' ) && (
 							<Tooltip
@@ -129,10 +137,6 @@ export const PaymentGatewayListItem = ( {
 									/>
 								}
 							/>
-						) }
-						{ /* If the gateway has a matching suggestion, it is an official extension. */ }
-						{ gateway._suggestion_id && (
-							<OfficialBadge variant="expanded" />
 						) }
 					</span>
 					<span

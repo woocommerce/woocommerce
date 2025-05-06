@@ -2556,6 +2556,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		};
 		// phpcs:enable Squiz.Commenting
 
+		// Needed for the fake logger to be used.
+		$this->reset_container_resolutions();
+
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wc_get_logger' => function () use ( $fake_logger ) {

@@ -32,7 +32,7 @@ test.describe( 'Merchant → Mini Cart', () => {
 			await editor.openGlobalBlockInserter();
 
 			await editor.page
-				.getByLabel( 'Search for blocks and patterns' )
+				.getByRole( 'searchbox', { name: 'Search' } )
 				.fill( blockData.slug );
 
 			const miniCartButton = editor.page.getByRole( 'option', {
@@ -57,7 +57,7 @@ test.describe( 'Merchant → Mini Cart', () => {
 			await editor.openGlobalBlockInserter();
 
 			await editor.page
-				.getByLabel( 'Search for blocks and patterns' )
+				.getByRole( 'searchbox', { name: 'Search' } )
 				.fill( blockData.slug );
 
 			const miniCartButton = page.getByRole( 'option', {

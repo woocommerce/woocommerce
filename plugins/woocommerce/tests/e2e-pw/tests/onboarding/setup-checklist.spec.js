@@ -20,6 +20,12 @@ const test = baseTest.extend( {
 
 		// Reset the task list to its initial state.
 		await wcAdminApi.put( 'options', initialTaskListState.data );
+
+		// Make sure the new Payments settings page feature is not enabled.
+		await wcAdminApi.put( 'options', {
+			'woocommerce_feature_reactify-classic-payments-settings_enabled':
+				'no',
+		} );
 	},
 
 	nonSupportedWooPaymentsCountryPage: async ( { page, api }, use ) => {
@@ -37,6 +43,12 @@ const test = baseTest.extend( {
 		// Reset the default country to its initial state.
 		await api.put( 'settings/general/woocommerce_default_country', {
 			value: initialDefaultCountry.data.value,
+		} );
+
+		// Make sure the new Payments settings page feature is not enabled.
+		await api.put( 'options', {
+			'woocommerce_feature_reactify-classic-payments-settings_enabled':
+				'no',
 		} );
 	},
 } );

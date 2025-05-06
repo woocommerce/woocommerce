@@ -437,54 +437,6 @@ class ShippingController {
 	}
 
 	/**
-	 * Checks whether the address is "full" in the sense that it contains all required fields to calculate shipping rates.
-	 *
-	 * @return bool Whether the customer has a full shipping address (address_1, city, state, postcode, country).
-	 * Only required fields are checked.
-	 */
-	public function has_full_shipping_address() {
-		$customer = WC()->customer;
-
-		if ( ! $customer instanceof WC_Customer ) {
-			return false;
-		}
-
-		// These are the important fields required to get the shipping rates.
-		$shipping_address = array(
-			'city'     => $customer->get_shipping_city(),
-			'state'    => $customer->get_shipping_state(),
-			'postcode' => $customer->get_shipping_postcode(),
-			'country'  => $customer->get_shipping_country(),
-		);
-		$address_fields   = WC()->countries->get_country_locale();
-		$locale_key       = ! empty( $shipping_address['country'] ) && array_key_exists( $shipping_address['country'], $address_fields ) ? $shipping_address['country'] : 'default';
-		$default_locale   = $address_fields['default'];
-		$country_locale   = $address_fields[ $locale_key ] ?? array();
-
-		/**
-		 * Checks all shipping address fields against the country's locale settings.
-		 *
-		 * If there's a `required` setting for the field in the country-specific locale, that setting is used, otherwise
-		 * the default locale's setting is used. If the default locale doesn't have a setting either, the field is
-		 * considered optional and therefore valid, even if empty.
-		 */
-		foreach ( $shipping_address as $key => $value ) {
-			// Skip further checks if the field has a value. From this point on $value is empty.
-			if ( ! empty( $value ) ) {
-				continue;
-			}
-
-			$locale_to_check = isset( $country_locale[ $key ]['required'] ) ? $country_locale : $default_locale;
-
-			// If the locale requires the field return false.
-			if ( isset( $locale_to_check[ $key ]['required'] ) && true === wc_string_to_bool( $locale_to_check[ $key ]['required'] ) ) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
 	 * Remove shipping (i.e. delivery, not local pickup) if
 	 * "Hide shipping costs until an address is entered" is enabled,
 	 * and no address has been entered yet.
@@ -500,9 +452,9 @@ class ShippingController {
 			return $packages;
 		}
 
-		$has_full_address = $this->has_full_shipping_address();
+		$customer = WC()->customer;
 
-		if ( $has_full_address ) {
+		if ( $customer instanceof WC_Customer && $customer->has_full_shipping_address() ) {
 			return $packages;
 		}
 

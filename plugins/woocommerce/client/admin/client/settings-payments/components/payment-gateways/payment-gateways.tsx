@@ -38,6 +38,7 @@ interface PaymentGatewaysProps {
 		attachUrl: string | null
 	) => void;
 	acceptIncentive: ( id: string ) => void;
+	shouldHighlightIncentive: boolean;
 	updateOrdering: ( providers: PaymentProvider[] ) => void;
 	isFetching: boolean;
 	businessRegistrationCountry: string | null;
@@ -55,6 +56,7 @@ export const PaymentGateways = ( {
 	installingPlugin,
 	setupPlugin,
 	acceptIncentive,
+	shouldHighlightIncentive,
 	updateOrdering,
 	isFetching,
 	businessRegistrationCountry,
@@ -214,6 +216,7 @@ export const PaymentGateways = ( {
 					installingPlugin={ installingPlugin }
 					setupPlugin={ setupPlugin }
 					acceptIncentive={ acceptIncentive }
+					shouldHighlightIncentive={ shouldHighlightIncentive }
 					updateOrdering={ updateOrdering }
 				/>
 			) }

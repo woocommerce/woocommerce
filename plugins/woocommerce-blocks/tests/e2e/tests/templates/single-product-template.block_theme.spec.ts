@@ -8,6 +8,7 @@ test.describe( 'Single Product template', () => {
 		admin,
 		editor,
 		page,
+		wpCoreVersion,
 	} ) => {
 		const testData = {
 			productName: 'Belt',
@@ -20,7 +21,14 @@ test.describe( 'Single Product template', () => {
 
 		// Create the specific product template.
 		await admin.visitSiteEditor( { path: `/${ testData.templateType }` } );
-		await page.getByLabel( 'Add New Template' ).click();
+
+		await page
+			.getByRole( 'button', {
+				name:
+					wpCoreVersion >= 6.8 ? 'Add Template' : 'Add New Template',
+			} )
+			.click();
+
 		await page
 			.getByRole( 'button', { name: 'Single item: Product' } )
 			.click();

@@ -41,6 +41,13 @@ class FeaturePlugin {
 	protected static $instance = null;
 
 	/**
+	 * Indicates if init has been invoked already.
+	 *
+	 * @var bool
+	 */
+	private bool $initialized = false;
+
+	/**
 	 * Constructor
 	 *
 	 * @return void
@@ -67,6 +74,11 @@ class FeaturePlugin {
 		if ( ! defined( 'WC_ABSPATH' ) ) {
 			return;
 		}
+
+		if ( $this->initialized ) {
+			return;
+		}
+		$this->initialized = true;
 
 		// Load the page controller functions file first to prevent fatal errors when disabling WooCommerce Admin.
 		$this->define_constants();
@@ -132,11 +144,11 @@ class FeaturePlugin {
 		 */
 		if ( ! defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
 			/**
-			  * Define the current WC Admin version.
-			  *
-			  * @deprecated 6.4.0
-			  * @var string
-			  */
+			 * Define the current WC Admin version.
+			 *
+			 * @deprecated 6.4.0
+			 * @var string
+			 */
 			define( 'WC_ADMIN_VERSION_NUMBER', '3.3.0' );
 		}
 	}

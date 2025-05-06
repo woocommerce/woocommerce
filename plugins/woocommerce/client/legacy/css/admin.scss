@@ -4572,7 +4572,7 @@ table {
 }
 
 #wc-shipping-zone-region-picker-root .woocommerce-tree-select-control {
-	
+
 	.components-base-control {
 		padding: 2px 8px;
 		border-radius: 4px;
@@ -5045,6 +5045,19 @@ img.help_tip {
 
 		a {
 			color: var(--wp-admin-theme-color, $woocommerce);
+		}
+	}
+
+	.wc-admin-header {
+		small {
+			margin-right: 0.5em;
+		}
+		a {
+			color: #1d2327;
+			text-decoration: none;
+		}
+		a:hover {
+			color: var(--wp-admin-theme-color, #3858e9);
 		}
 	}
 

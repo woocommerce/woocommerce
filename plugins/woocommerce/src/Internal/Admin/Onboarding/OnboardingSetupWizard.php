@@ -9,6 +9,8 @@ use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
+use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Init;
+use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\ProcessCoreProfilerPluginInstallOptions;
 
 /**
  * Contains backend logic for the onboarding profile and checklist feature.
@@ -35,6 +37,16 @@ class OnboardingSetupWizard {
 	 * Add onboarding actions.
 	 */
 	public function init() {
+		// should be placed before is_admin() check as this hook is triggered in AJAX calls.
+		add_action(
+			'woocommerce_plugins_install_before',
+			function ( $slug, $source ) {
+				$this->install_options_for_core_profiler_plugin_install( $slug, $source );
+			},
+			10,
+			2
+		);
+
 		if ( ! is_admin() ) {
 			return;
 		}
@@ -81,12 +93,14 @@ class OnboardingSetupWizard {
 		}
 
 		// Setup wizard redirect.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		if ( get_transient( '_wc_activation_redirect' ) && apply_filters( 'woocommerce_enable_setup_wizard', true ) ) {
 			$do_redirect        = true;
 			$current_page       = isset( $_GET['page'] ) ? wc_clean( wp_unslash( $_GET['page'] ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification
 			$is_onboarding_path = ! isset( $_GET['path'] ) || '/setup-wizard' === wc_clean( wp_unslash( $_GET['page'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
 
 			// On these pages, or during these events, postpone the redirect.
+			// phpcs:ignore WordPress.WP.Capabilities.Unknown
 			if ( wp_doing_ajax() || is_network_admin() || ! current_user_can( 'manage_woocommerce' ) ) {
 				$do_redirect = false;
 			}
@@ -94,6 +108,7 @@ class OnboardingSetupWizard {
 			// On these pages, or during these events, disable the redirect.
 			if (
 				( 'wc-admin' === $current_page && $is_onboarding_path ) ||
+				// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 				apply_filters( 'woocommerce_prevent_automatic_wizard_redirect', false ) ||
 				isset( $_GET['activate-multi'] ) // phpcs:ignore WordPress.Security.NonceVerification
 			) {
@@ -216,6 +231,7 @@ class OnboardingSetupWizard {
 		// or the current page is one of the WooCommerce Admin pages.
 		if (
 			( ! $this->should_show() && ! count( TaskLists::get_visible() )
+		    // phpcs:ignore Generic.CodeAnalysis.RequireExplicitBooleanOperatorPrecedence.MissingParentheses
 			||
 			! $this->is_woocommerce_page()
 		)
@@ -238,6 +254,7 @@ class OnboardingSetupWizard {
 			$settings['onboarding']['isBlockTheme'] = wc_current_theme_is_fse_theme();
 		}
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		return apply_filters( 'woocommerce_admin_onboarding_preloaded_data', $settings );
 	}
 
@@ -298,5 +315,34 @@ class OnboardingSetupWizard {
 		}
 
 		return 'width=device-width, initial-scale=1.0, maximum-scale=1.0';
+	}
+
+	/**
+	 * Install options for core profiler plugin install.
+	 *
+	 * When a plugin is installed from the core profiler, this method is called to process the install options.
+	 *
+	 * Install options are a list of options that are set for the plugin being installed.
+	 *
+	 * @param string $slug Plugin slug.
+	 * @param string $source Source of the plugin install.
+	 *
+	 * @return void|null
+	 */
+	public function install_options_for_core_profiler_plugin_install( $slug, $source ) {
+		// Only proceed if the plugin install was initiated from the core profiler.
+		if ( 'core-profiler' !== $source ) {
+			return;
+		}
+
+		// Retrieve the core profiler spec.
+		$specs = array_filter( Init::get_specs(), fn( $spec ) => 'obw/core-profiler' === $spec->key );
+
+		if ( ! $specs ) {
+			return null;
+		}
+
+		$install_options = new ProcessCoreProfilerPluginInstallOptions( current( $specs )->plugins, $slug, wc_get_logger() );
+		$install_options->process_install_options();
 	}
 }
