@@ -95,7 +95,7 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 							</td>
 						</tr>
 						<?php if ( ! $is_exporting_specific ) : ?>
-						<tr class="woocommerce-exporter-types-field">
+						<tr>
 							<th scope="row">
 								<label for="woocommerce-exporter-types"><?php esc_html_e( 'Which product types should be exported?', 'woocommerce' ); ?></label>
 							</th>
@@ -109,7 +109,7 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 								</select>
 							</td>
 						</tr>
-						<tr class="woocommerce-exporter-category-field">
+						<tr>
 							<th scope="row">
 								<label for="woocommerce-exporter-category"><?php esc_html_e( 'Which product category should be exported?', 'woocommerce' ); ?></label>
 							</th>
