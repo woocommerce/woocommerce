@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
  */
 class Authentication {
 	/**
-	 * Hook into WP lifecycle events. This is hooked by the StoreAPI class on `rest_api_init`
+	 * Hook into WP lifecycle events. This is hooked by the StoreAPI class on `rest_api_init`.
 	 */
 	public function init() {
 		if ( ! $this->is_request_to_store_api() ) {
