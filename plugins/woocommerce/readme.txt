@@ -169,12 +169,21 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 9.8.3 2025-04-30 =
+= 9.8.0 2025-05-25 =
 
 **WooCommerce**
 
-* Fix - Add static cache and queue search to prevent duplicate scheduling of the wc_delete_related_product_transients_async action in wc_delete_product_transients(). [#57592](https://github.com/woocommerce/woocommerce/pull/57592)
-* Fix - Don't run postcode validation for hidden postcodes. [#57594](https://github.com/woocommerce/woocommerce/pull/57594)
+* Fix - Allow other protocols such as S3 for file paths in CSV importer [#57465](https://github.com/woocommerce/woocommerce/pull/57465)
+* Fix - Apply reactify-payments-settings class to the page body when the feature is active. [#57618](https://github.com/woocommerce/woocommerce/pull/57618)
+* Fix - Fix backward compatibility for individual gateway settings pages/sections to display notices and sections with the new Reactified Payments Settings page. [#57618](https://github.com/woocommerce/woocommerce/pull/57618)
+* Fix - Remove the section navigation for the offline payment methods settings pages. [#57748](https://github.com/woocommerce/woocommerce/pull/57748)
+* Add - Use wc_back_header function for tertiary+ level pages in WooCommerce settings. [#57618](https://github.com/woocommerce/woocommerce/pull/57618)
+* Update - Allow WooPayments to take over Payments menu item only if WooPayments is fully onboarded. [#57618](https://github.com/woocommerce/woocommerce/pull/57618)
+* Update - Improve WooPayments incentive handling. [#57618](https://github.com/woocommerce/woocommerce/pull/57618)
+* Update - Update popover interaction from hover to click [#57618](https://github.com/woocommerce/woocommerce/pull/57618)
+* Update - Update the payments extensions official badge icon. [#57714](https://github.com/woocommerce/woocommerce/pull/57714)
+* Tweak - The new Payments Settings page is now enabled by default for all stores, new and existing. [#57614](https://github.com/woocommerce/woocommerce/pull/57614)
+* Tweak - Update recurring payments icon on the new settings page. [#57618](https://github.com/woocommerce/woocommerce/pull/57618)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
