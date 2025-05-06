@@ -49,6 +49,7 @@ export default {
 
 export const ProductShortDescriptionSkeletonStory: StoryObj = {
 	render: ( args ) => <ProductShortDescriptionSkeleton { ...args } />,
+	storyName: 'Product Short Description skeleton',
 	parameters: {
 		docs: {
 			source: {
