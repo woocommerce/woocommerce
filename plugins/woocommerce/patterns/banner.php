@@ -22,16 +22,16 @@ $second_description = __( 'Get your favorite vinyl at record-breaking prices.', 
 	<div class="wp-block-columns alignwide">
 		<!-- wp:column {"verticalAlignment":"center"} -->
 		<div class="wp-block-column is-vertically-aligned-center">
-			<!-- wp:paragraph {"style":{"typography":{"fontSize":"18px"},"spacing":{"margin":{"top":"0","right":"0","bottom":"0","left":"0"}}}, "textColor":"base"} -->
-			<p class="has-base-color has-text-color" style="margin-top:0;margin-right:0;margin-bottom:0;margin-left:0;font-size:18px"><strong><?php echo esc_html( $first_description ); ?></strong> </p>
+			<!-- wp:paragraph {"style":{"typography":{"fontSize":"18px"},"spacing":{"margin":{"top":"0","right":"0","bottom":"0","left":"0"}}}} -->
+			<p style="margin-top:0;margin-right:0;margin-bottom:0;margin-left:0;font-size:18px"><strong><?php echo esc_html( $first_description ); ?></strong> </p>
 			<!-- /wp:paragraph -->
 
-			<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"48px"}},"textColor":"base"} -->
-			<h3 class="wp-block-heading has-base-color has-text-color" style="font-size:48px"><?php echo esc_html( $banner_title ); ?></h3>
+			<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"48px"}}} -->
+			<h3 class="wp-block-heading" style="font-size:48px"><?php echo esc_html( $banner_title ); ?></h3>
 			<!-- /wp:heading -->
 
-			<!-- wp:paragraph {"style":{"typography":{"fontSize":"24px"},"spacing":{"margin":{"top":"0","right":"0","bottom":"0","left":"0"}}}, "textColor":"base"} -->
-			<p class="has-base-color has-text-color" style="margin-top:0;margin-right:0;margin-bottom:0;margin-left:0;font-size:24px"><?php echo esc_html( $second_description ); ?></p>
+			<!-- wp:paragraph {"style":{"typography":{"fontSize":"24px"},"spacing":{"margin":{"top":"0","right":"0","bottom":"0","left":"0"}}}} -->
+			<p style="margin-top:0;margin-right:0;margin-bottom:0;margin-left:0;font-size:24px"><?php echo esc_html( $second_description ); ?></p>
 			<!-- /wp:paragraph -->
 
 			<!-- wp:buttons {"style":{"spacing":{"blockGap":"0","margin":{"top":"20px","bottom":"0"}}}} -->
