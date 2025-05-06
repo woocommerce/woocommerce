@@ -5,6 +5,7 @@ import { Text } from '@woocommerce/experimental';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 import { recordEvent, ExtraProperties } from '@woocommerce/tracks';
+import { __ } from '@wordpress/i18n';
 
 interface TextProps {
 	/**
@@ -45,34 +46,47 @@ export const TrackedLink = ( {
 	linkType = 'wc-admin',
 	target,
 	onClickCallback,
-}: TrackedLinkProps ) => (
-	<Text { ...textProps }>
-		{ interpolateComponents( {
-			mixedString: message,
-			components: {
-				Link: (
-					<Link
-						onClick={ () => {
-							if ( onClickCallback ) {
-								onClickCallback();
-							} else {
-								recordEvent( eventName, eventProperties );
+}: TrackedLinkProps ) => {
+	const linkTextMatch = message.match( /{{Link}}(.*?){{\/Link}}/ );
+	const linkText = linkTextMatch ? linkTextMatch[ 1 ] : '';
+
+	return (
+		<Text { ...textProps }>
+			{ interpolateComponents( {
+				mixedString: message,
+				components: {
+					Link: (
+						<Link
+							onClick={ () => {
+								if ( onClickCallback ) {
+									onClickCallback();
+								} else {
+									recordEvent( eventName, eventProperties );
+								}
+								if ( linkType !== 'external' ) {
+									window.location.href = targetUrl;
+									return false;
+								}
+							} }
+							href={ targetUrl }
+							type={ linkType }
+							target={
+								linkType === 'external' && target === '_blank'
+									? '_blank'
+									: undefined
 							}
-							if ( linkType !== 'external' ) {
-								window.location.href = targetUrl;
-								return false;
+							aria-label={
+								linkType === 'external' && target === '_blank'
+									? `${ linkText } (${ __(
+											'opens in a new tab',
+											'woocommerce'
+									  ) })`
+									: undefined
 							}
-						} }
-						href={ targetUrl }
-						type={ linkType }
-						target={
-							linkType === 'external' && target === '_blank'
-								? '_blank'
-								: undefined
-						}
-					/>
-				),
-			},
-		} ) }
-	</Text>
-);
+						/>
+					),
+				},
+			} ) }
+		</Text>
+	);
+};

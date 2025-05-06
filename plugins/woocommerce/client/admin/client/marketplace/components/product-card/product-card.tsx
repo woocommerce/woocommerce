@@ -108,6 +108,12 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		queueRecordEvent( event, data );
 	}
 
+	const screenReaderText = (
+		<span className="screen-reader-text">
+			{ __( 'Opens in a new tab', 'woocommerce' ) }
+		</span>
+	);
+
 	const isTheme = type === ProductType.theme;
 	const isBusinessService = type === ProductType.businessService;
 	let productVendor: string | JSX.Element | null = product?.vendorName;
@@ -129,6 +135,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 				} }
 			>
 				{ product.vendorName }
+				{ screenReaderText }
 			</a>
 		);
 	}
@@ -169,6 +176,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 			} }
 		>
 			{ isLoading ? ' ' : product.title }
+			{ screenReaderText }
 		</a>
 	);
 
