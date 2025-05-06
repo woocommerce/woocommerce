@@ -23,8 +23,7 @@ jobs:
               - 'plugins/woocommerce/src/StoreApi/**'
               - 'plugins/woocommerce/src/Admin/API/**'
               - 'plugins/woocommerce/src/Utilities/RestApiUtil.php'
-              - 'plugins/woocommerce/src/Internal/*RestApi**'
-              - 'plugins/woocommerce/src/Internal/Utilities/LegacyRestApiStub.php'
+              - 'plugins/woocommerce/src/Internal/**/*RestApi**'
               - 'plugins/woocommerce/includes/rest-api/**'
               - 'plugins/woocommerce/includes/*-wc-rest-*'
               
