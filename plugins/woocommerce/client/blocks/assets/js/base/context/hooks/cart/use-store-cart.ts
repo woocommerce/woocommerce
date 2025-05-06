@@ -1,5 +1,3 @@
-/** @typedef { import('@woocommerce/type-defs/hooks').StoreCart } StoreCart */
-
 /**
  * External dependencies
  */
@@ -96,10 +94,6 @@ const decodeValues = <
 	) as T;
 };
 
-/**
- * @constant
- * @type  {StoreCart} Object containing cart data.
- */
 export const defaultCartData: StoreCart = {
 	cartCoupons: EMPTY_CART_COUPONS,
 	cartItems: EMPTY_CART_ITEMS,
