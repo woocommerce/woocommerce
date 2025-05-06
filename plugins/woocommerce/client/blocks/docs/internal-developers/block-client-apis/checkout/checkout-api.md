@@ -31,7 +31,7 @@ For more details on the checkout data store, see the [Checkout Data Store](../..
 
 #### Selectors
 
-For a full list of selectors see the [Checkout Data Store](
+For a full list of selectors see the [Checkout Data Store](../../../third-party-developers/extensibility/data-store/checkout.md) docs.
 
 Data can be accessed through the following selectors:
 
@@ -72,6 +72,7 @@ The following actions can be dispatched from the Checkout data store:
 -   `__internalSetShouldCreateAccount( shouldCreateAccount: boolean )`: Set `state.shouldCreateAccount` to `shouldCreateAccount`
 -   `__internalSetOrderNotes( orderNotes: string )`: Set `state.orderNotes` to `orderNotes`
 -   `setExtensionData( namespace: string, extensionData: Record< string, unknown > )`: Set `state.extensionData` to `extensionData`
+-   `disableCheckoutFor( asyncFunc: () => Promise< unknown > )`: A thunk that allows to disable checkout button until promise returned by `asyncFunc` gets resolved. Relies on the same internal state as the one powering the tracking of pending calculations.
 
 ##### Deprecated actions
 
