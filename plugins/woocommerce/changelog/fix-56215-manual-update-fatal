@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Reviews: fix an error during manual plugin update.
