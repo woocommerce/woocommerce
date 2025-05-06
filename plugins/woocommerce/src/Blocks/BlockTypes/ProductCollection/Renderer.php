@@ -253,8 +253,11 @@ class Renderer {
 	 */
 	private function handle_block_dimensions( $p, $block ) {
 		if ( isset( $block['attrs']['dimensions'] ) && isset( $block['attrs']['dimensions']['widthType'] ) ) {
-			if ( 'fixed' === $block['attrs']['dimensions']['widthType'] ) {
+			$width_type = $block['attrs']['dimensions']['widthType'];
+			if ( 'fixed' === $width_type ) {
 				$this->set_fixed_width_style( $p, $block['attrs']['dimensions']['fixedWidth'] );
+			} elseif ( 'fill' === $width_type ) {
+				$p->remove_attribute( 'class', 'alignwide' );
 			}
 		}
 	}

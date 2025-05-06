@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed the Product Collection block overlapping on the page in some classic themes like Hello Elementor.
