@@ -471,19 +471,13 @@ class Checkout extends AbstractBlock {
 		$filtered_fields = apply_filters( 'woocommerce_address_fields_for_shipping_rates', [] );
 
 		if ( is_array( $filtered_fields ) ) {
-			wc_get_logger()->warning(
-				sprintf(
-					__( 'Address fields for shipping rates must be an array of strings.', 'woocommerce' ),
-				),
-				array( 'source' => 'woocommerce_address_fields_for_shipping_rates' )
-			);
 			foreach ( $filtered_fields as $key => $value ) {
 				if ( ! is_string( $value ) ) {
 					wc_get_logger()->warning(
 						sprintf(
-							/* translators: %s: field value */
-							__( 'Address fields for shipping rates values must be strings. Non-string value removed for key: %s', 'woocommerce' ),
-							$key
+							/* translators: %s: address field for shipping rates */
+							__( 'Address fields for shipping rates values must be strings. Non-string value removed: %s', 'woocommerce' ),
+							$value
 						),
 						array( 'source' => 'woocommerce_address_fields_for_shipping_rates' )
 					);
@@ -491,6 +485,11 @@ class Checkout extends AbstractBlock {
 				}
 			}
 			$address_fields_for_shipping_rates = array_merge( $address_fields_for_shipping_rates, $filtered_fields );
+		} else {
+			wc_get_logger()->warning(
+				__( 'Address fields for shipping rates must be an array of strings.', 'woocommerce' ),
+				array( 'source' => 'woocommerce_address_fields_for_shipping_rates' )
+			);
 		}
 
 		$this->asset_data_registry->add( 'addressFieldsForShippingRates', $address_fields_for_shipping_rates );
