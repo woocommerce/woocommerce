@@ -33,8 +33,8 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 	if ( $is_exporting_specific ) {
 		$clear_url = remove_query_arg( 'product_ids' );
 		$count     = count( $product_ids_to_export );
-		// translators: %1$d: Number of products, %2$s: URL to clear selection.
 		$notice = sprintf(
+			// translators: %1$d: Number of products, %2$s: URL to clear selection.
 			_n(
 				'You are exporting the %1$d product you selected in the previous step. <a href="%2$s">Clear selection</a> to export all products.',
 				'You are exporting the %1$d products you selected in the previous step. <a href="%2$s">Clear selection</a> to export all products.',
