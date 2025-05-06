@@ -152,10 +152,6 @@ export const useStoreCart = (
 			[ shouldSelect ]
 		);
 
-	if ( ! shouldSelect ) {
-		return defaultCartData;
-	}
-
 	const cartFees = useMemo( () => {
 		return cartData.fees.length > 0
 			? cartData.fees.map( ( fee: CartResponseFeeItem ) =>
@@ -175,6 +171,10 @@ export const useStoreCart = (
 			  } ) )
 			: EMPTY_CART_COUPONS;
 	}, [ JSON.stringify( cartData.coupons ) ] );
+
+	if ( ! shouldSelect ) {
+		return defaultCartData;
+	}
 
 	const nextBillingAddress = emptyHiddenAddressFields(
 		decodeValues( cartData.billingAddress )
@@ -210,8 +210,8 @@ export const useStoreCart = (
 		cartIsLoading,
 		cartErrors,
 		billingData: billingAddress,
-		billingAddress: billingAddress,
-		shippingAddress: shippingAddress,
+		billingAddress,
+		shippingAddress,
 		extensions: cartData.extensions,
 		shippingRates: cartData.shippingRates,
 		isLoadingRates,
