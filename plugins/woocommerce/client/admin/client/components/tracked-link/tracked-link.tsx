@@ -25,6 +25,7 @@ interface TrackedLinkProps {
 	eventProperties?: ExtraProperties;
 	targetUrl: string;
 	linkType?: 'wc-admin' | 'wp-admin' | 'external';
+	target?: '_blank' | undefined;
 	/**
 	 * Optional callback function to be called when the link is clicked
 	 * If provided, this will be called instead of the default recordEvent behavior
@@ -42,6 +43,7 @@ export const TrackedLink = ( {
 	eventProperties = {},
 	targetUrl,
 	linkType = 'wc-admin',
+	target,
 	onClickCallback,
 }: TrackedLinkProps ) => (
 	<Text { ...textProps }>
@@ -56,11 +58,18 @@ export const TrackedLink = ( {
 							} else {
 								recordEvent( eventName, eventProperties );
 							}
-							window.location.href = targetUrl;
-							return false;
+							if ( linkType !== 'external' ) {
+								window.location.href = targetUrl;
+								return false;
+							}
 						} }
 						href={ targetUrl }
 						type={ linkType }
+						target={
+							linkType === 'external' && target === '_blank'
+								? '_blank'
+								: undefined
+						}
 					/>
 				),
 			},
