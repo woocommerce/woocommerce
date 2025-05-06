@@ -1653,7 +1653,9 @@ class WC_Cart extends WC_Legacy_Cart {
 				 */
 				$state_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_state', true );
 				$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'];
-				if ( $state_enabled && $state_required && ! $this->get_customer()->get_shipping_state() && isset( $checkout_fields['shipping']['shipping_state'] ) ) {
+				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
+				$checkout_state_field_exists = isset( $checkout_fields['shipping']['shipping_state'] );
+				if ( $state_enabled && $state_required && ! $this->get_customer()->get_shipping_state() && $checkout_state_field_exists ) {
 					return false;
 				}
 				/**
@@ -1666,7 +1668,9 @@ class WC_Cart extends WC_Legacy_Cart {
 				 */
 				$postcode_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true );
 				$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'];
-				if ( $postcode_enabled && $postcode_required && '' === $this->get_customer()->get_shipping_postcode() && isset( $checkout_fields['shipping']['shipping_postcode'] ) ) {
+				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
+				$checkout_postcode_field_exists = isset( $checkout_fields['shipping']['shipping_postcode'] );
+				if ( $postcode_enabled && $postcode_required && '' === $this->get_customer()->get_shipping_postcode() && $checkout_postcode_field_exists ) {
 					return false;
 				}
 			}
