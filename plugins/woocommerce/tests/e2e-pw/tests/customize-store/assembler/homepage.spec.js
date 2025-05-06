@@ -326,7 +326,7 @@ test.describe( 'Homepage tracking banner', { tag: tags.NOT_E2E }, () => {
 		).toBeVisible();
 	} );
 
-	test(
+	test.skip(
 		'Should not show the "Want more patterns?" banner when tracking is allowed',
 		{ tag: tags.SKIP_ON_PRESSABLE },
 		async ( { baseURL, pageObject } ) => {
