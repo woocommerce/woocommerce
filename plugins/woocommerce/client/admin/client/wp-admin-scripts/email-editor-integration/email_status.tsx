@@ -3,14 +3,11 @@ import { PanelRow, Button, Flex, FlexItem, Dropdown, Icon } from '@wordpress/com
 import { useState } from '@wordpress/element';
 import { EMAIL_STATUSES } from '../../settings-email/settings-email-listing-status';
 
-// TODO classes and styles
-
 export function EmailStatus() {
 	const [statusValue] = useState('enabled');
 	const status = EMAIL_STATUSES.find((s) => s.value === statusValue) ?? EMAIL_STATUSES[1];
+	const isManual = statusValue === 'manual';
 
-// todo disable when manual
-// todo do not let change to manual
 	return (
 		<PanelRow className='editor-post-panel__row'>
 			<Flex justify={ 'start' }>
@@ -33,6 +30,7 @@ export function EmailStatus() {
 									status.label
 								) }
 								aria-expanded={ isOpen }
+								disabled={isManual}
 							>
 								{ status.label }
 							</Button>
@@ -45,7 +43,11 @@ export function EmailStatus() {
 										variant="tertiary"
 										className="editor-post-status__dropdown-item"
 										icon={option.icon}
-										disabled={option.value === statusValue}
+										disabled={
+											isManual ||
+											(option.value === 'manual' && !isManual) ||
+											option.value === statusValue
+										}
 										style={{ width: '100%', justifyContent: 'flex-start' }}
 									>
 										{option.label}
