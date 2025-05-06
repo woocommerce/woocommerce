@@ -794,8 +794,8 @@
 	// Function to handle selected product export
 	$( function () {
 		const $exportButton = $( 'a.page-title-action[href*="page=product_exporter"]');
+		// added defensive check to ensure the export button is present.
 		if ( !$exportButton.length ) {
-			// Export button might not be present (e.g. blank state)
 			return;
 		}
 
