@@ -120,12 +120,16 @@ class Quote extends Abstract_Block_Renderer {
 		)['declarations'];
 
 		return sprintf(
-			'<!--[if mso | IE]><table align="left" role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%%" style="%1$s"><tr><td style="%2$s" width="100%%"><![endif]-->
-			<blockquote class="email-block-quote %3$s" style="%1$s %2$s">
-				{quote_content}
-				{citation_content}
-			</blockquote>
-			<!--[if mso | IE]></td></tr></table><![endif]-->',
+			'<table class="email-block-quote %3$s" style="%1$s" width="100%%" border="0" cellpadding="0" cellspacing="0" role="presentation">
+				<tbody>
+					<tr>
+						<td class="email-block-quote-content" style="%2$s" width="100%%">
+							{quote_content}
+							{citation_content}
+						</td>
+					</tr>
+				</tbody>
+			</table>',
 			esc_attr( WP_Style_Engine::compile_css( $table_styles, '' ) ),
 			esc_attr( WP_Style_Engine::compile_css( $cell_styles, '' ) ),
 			esc_attr( $original_classname ),
