@@ -79,6 +79,27 @@ class Quote_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function testItContainsQuoteStyles(): void {
 		$parsed_quote          = $this->parsed_quote;
+
+		// Quote block with uniform border styles.
+		$parsed_quote['attrs'] = array(
+			'backgroundColor' => '#abcdef',
+			'borderColor'     => '#012345',
+			'style'           => array(
+				'border'  => array(
+					'width' => '1px',
+					'style' => 'solid',
+					'radius' => '5px',
+				),
+			),
+		);
+		$rendered              = $this->quote_renderer->render( '', $parsed_quote, $this->settings_controller );
+		$this->checkValidHTML( $rendered );
+		$this->assertStringContainsString( 'border-width:1px;', $rendered );
+		$this->assertStringContainsString( 'border-style:solid;', $rendered );
+		$this->assertStringContainsString( 'border-color:#012345;', $rendered );
+		$this->assertStringContainsString( 'border-radius:5px;', $rendered );
+
+		// Quote block with mixed border styles on each side.
 		$parsed_quote['attrs'] = array(
 			'backgroundColor' => '#abcdef',
 			'style'           => array(

@@ -85,10 +85,17 @@ class Quote extends Abstract_Block_Renderer {
 				'style'           => array(),
 				'backgroundColor' => '',
 				'textColor'       => '',
+				'borderColor'     => '',
 			)
 		);
 
 		// Layout, background, borders need to be on the outer table element.
+		$border                 = $block_attributes['style']['border'] ?? array();
+		$border_color_attribute = $block_attributes['borderColor'] ? $settings_controller->translate_slug_to_color( $block_attributes['borderColor'] ) : null;
+		if ( ! isset( $border['color'] ) && ! is_null( $border_color_attribute ) ) {
+			$border['color'] = $border_color_attribute;
+		}
+
 		$table_styles = $this->get_styles_from_block(
 			array(
 				'color'      => array_filter(
@@ -98,7 +105,7 @@ class Quote extends Abstract_Block_Renderer {
 					)
 				),
 				'background' => $block_attributes['style']['background'] ?? array(),
-				'border'     => $block_attributes['style']['border'] ?? array(),
+				'border'     => $border,
 			)
 		)['declarations'];
 
@@ -111,6 +118,7 @@ class Quote extends Abstract_Block_Renderer {
 
 		// Add default background size.
 		$table_styles['background-size'] = empty( $table_styles['background-size'] ) ? 'cover' : $table_styles['background-size'];
+
 
 		// Padding properties need to be added to the table cell.
 		$cell_styles = $this->get_styles_from_block(
