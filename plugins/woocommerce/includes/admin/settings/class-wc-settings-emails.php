@@ -830,6 +830,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		// Check for try-new-templates URL parameter, which is used to force the email improvements feature in preview mode.
 		if ( isset( $_GET['try-new-templates'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$email_improvements_enabled = true;
+			set_transient( EmailPreview::TRANSIENT_PREVIEW_EMAIL_IMPROVEMENTS, 'yes' );
+		} else {
+			delete_transient( EmailPreview::TRANSIENT_PREVIEW_EMAIL_IMPROVEMENTS );
 		}
 		return $email_improvements_enabled;
 	}
