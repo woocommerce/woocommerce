@@ -27,6 +27,12 @@
 		/* stylelint-enable */
 		animation: wc-skeleton-shimmer 1.25s infinite;
 	}
+
+	&--static {
+		&::after {
+			display: none;
+		}
+	}
 }
 
 @keyframes wc-skeleton-shimmer {
