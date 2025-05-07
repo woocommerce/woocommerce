@@ -8,7 +8,7 @@
 
 	.components-modal__header-heading {
 		// decreasing fonr weight as it's not the most important heading in the modal
-		font-weight: 400;
+		font-weight: 500;
 	}
 
 	&__header {
@@ -24,9 +24,11 @@
 		border-radius: 8px;
 	}
 
-	&__header-content h1 {
+	&__header-content h2 {
 		margin: 0;
 		line-height: 1;
+		font-weight: 500;
+		font-size: 1.2rem;
 	}
 
 	&__vendor {

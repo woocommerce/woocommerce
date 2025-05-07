@@ -141,7 +141,7 @@ export default function ProductPreviewModal( {
 				/>
 			) }
 			<div className="woocommerce-marketplace__product-preview-modal__header-content">
-				<h1>{ productTitle }</h1>
+				<h2>{ productTitle }</h2>
 				{ productVendor && (
 					<div className="woocommerce-marketplace__product-preview-modal__vendor">
 						<span>{ __( 'By ', 'woocommerce' ) }</span>
