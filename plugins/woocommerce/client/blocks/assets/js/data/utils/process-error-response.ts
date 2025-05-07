@@ -173,7 +173,6 @@ const getNoticeOptionsForParamError = (
 	// It's also needed to ensure additional fields don't replace each other when there are multiple.
 	if ( objectHasProp( data, 'key' ) && isString( data.key ) ) {
 		additionalFieldId = `${ data.key }__${ id }`;
-		// console.log( 'additionalFieldId', additionalFieldId );
 	}
 
 	return {
