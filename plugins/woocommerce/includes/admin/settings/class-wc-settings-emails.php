@@ -77,9 +77,8 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			'https://woocommerce.com/document/email-faq'
 		);
 
-		$logo_image_width           = null;
-		$header_alignment           = null;
-		$font_family                = null;
+		$block_email_editor_enabled = FeaturesUtil::feature_is_enabled( 'block_email_editor' );
+		$email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
 
 		// These defaults should be chosen by the same logic as the other color option properties.
 		list(
@@ -90,37 +89,8 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			'footer_text_color_default' => $footer_text_color_default,
 		) = EmailColors::get_default_colors();
 
-		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
-			$logo_image_width           = array(
-				'title'    => __( 'Logo width (px)', 'woocommerce' ),
-				'id'       => 'woocommerce_email_header_image_width',
-				'desc_tip' => '',
-				'default'  => '120',
-				'type'     => 'number',
-			);
-			$header_alignment           = array(
-				'title'    => __( 'Header alignment', 'woocommerce' ),
-				'id'       => 'woocommerce_email_header_alignment',
-				'desc_tip' => '',
-				'default'  => 'left',
-				'type'     => 'select',
-				'class'    => 'wc-enhanced-select',
-				'options'  => array(
-					'left'   => __( 'Left', 'woocommerce' ),
-					'center' => __( 'Center', 'woocommerce' ),
-					'right'  => __( 'Right', 'woocommerce' ),
-				),
-			);
 
-			$font_family = array(
-				'title'   => __( 'Font family', 'woocommerce' ),
-				'id'      => 'woocommerce_email_font_family',
-				'default' => 'Helvetica',
-				'type'    => 'email_font_family',
-			);
-		}
-
-		if ( FeaturesUtil::feature_is_enabled( 'block_email_editor' ) ) {
+		if ( $block_email_editor_enabled ) {
 			$email_notifications_field = 'email_notification_block_emails';
 			$email_notifications_desc  = null;
 		} else {
@@ -128,8 +98,6 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			/* translators: %s: help description with link to WP Mail logging and support page. */
 			$email_notifications_desc = sprintf( __( 'Email notifications sent from WooCommerce are listed below. Click on an email to configure it.<br>%s', 'woocommerce' ), $desc_help_text );
 		}
-
-		$block_email_editor_enabled = FeaturesUtil::feature_is_enabled( 'block_email_editor' );
 
 		$settings =
 			array(
@@ -212,11 +180,37 @@ class WC_Settings_Emails extends WC_Settings_Page {
 						'desc_tip'    => true,
 					),
 
-					$logo_image_width,
+					array(
+						'title'     => __( 'Logo width (px)', 'woocommerce' ),
+						'id'        => 'woocommerce_email_header_image_width',
+						'desc_tip'  => '',
+						'default'   => '120',
+						'type'      => 'number',
+						'row_class' => $email_improvements_enabled ? '' : 'disabled',
+					),
 
-					$header_alignment,
+					array(
+						'title'     => __( 'Header alignment', 'woocommerce' ),
+						'id'        => 'woocommerce_email_header_alignment',
+						'desc_tip'  => '',
+						'default'   => 'left',
+						'type'      => 'select',
+						'class'     => 'wc-enhanced-select',
+						'options'   => array(
+							'left'   => __( 'Left', 'woocommerce' ),
+							'center' => __( 'Center', 'woocommerce' ),
+							'right'  => __( 'Right', 'woocommerce' ),
+						),
+						'row_class' => $email_improvements_enabled ? '' : 'disabled',
+					),
 
-					$font_family,
+					array(
+						'title'     => __( 'Font family', 'woocommerce' ),
+						'id'        => 'woocommerce_email_font_family',
+						'default'   => 'Helvetica',
+						'type'      => 'email_font_family',
+						'row_class' => $email_improvements_enabled ? '' : 'disabled',
+					),
 
 					array(
 						'title'       => __( 'Footer text', 'woocommerce' ),
