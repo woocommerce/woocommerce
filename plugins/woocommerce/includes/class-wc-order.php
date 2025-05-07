@@ -2481,4 +2481,27 @@ class WC_Order extends WC_Abstract_Order {
 	public function has_cogs() {
 		return true;
 	}
+
+	/**
+	 * Calculate the Cost of Goods Sold value for this order
+	 * as the base cost minus the cost of the refunded items.
+	 *
+	 * @return float The calculated value.
+	 */
+	protected function calculate_cogs_total_value_core(): float {
+		$value = parent::calculate_cogs_total_value_core();
+
+		$refunds = $this->get_refunds();
+		foreach ( $refunds as $refund ) {
+			$refund_items = $refund->get_items();
+			foreach ( $refund_items as $refund_item ) {
+				if ( $refund_item->has_cogs() ) {
+					$refund_item->calculate_cogs_value();
+					$value -= abs( $refund_item->get_cogs_value() );
+				}
+			}
+		}
+
+		return $value;
+	}
 }
