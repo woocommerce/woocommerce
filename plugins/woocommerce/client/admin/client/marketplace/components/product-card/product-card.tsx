@@ -67,6 +67,21 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		type: '',
 	};
 
+	const isTheme = type === ProductType.theme;
+	const isBusinessService = type === ProductType.businessService;
+	const { iamSettings } = useContext( MarketplaceContext );
+	const shouldShowPreview =
+		iamSettings?.product_previews === 'modal' &&
+		! isTheme &&
+		! isBusinessService;
+
+	const showVendor = ! isCompact && ! isLoading;
+	const showVendorLoading = ! isCompact && isLoading;
+	const showDescription = ! isTheme && ! isCompact;
+	const showCardIcon = ! isTheme || isCompact;
+	const showBigImage = isTheme && ! isCompact;
+	const decodedDescription = decodeEntities( product.description );
+
 	function isSponsored(): boolean {
 		return SPONSORED_PRODUCT_LABEL === product.label;
 	}
@@ -116,8 +131,8 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 
 		queueRecordEvent( event, data );
 	}
-  
-  const screenReaderText = (
+
+	const screenReaderText = (
 		<span className="screen-reader-text">
 			{ __( 'Opens in a new tab', 'woocommerce' ) }
 		</span>
@@ -146,20 +161,6 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 			</a>
 		);
 	};
-
-	const isTheme = type === ProductType.theme;
-	const isBusinessService = type === ProductType.businessService;
-	const { iamSettings } = useContext( MarketplaceContext );
-	const shouldShowPreview =
-		iamSettings?.product_previews === 'modal' &&
-		! isTheme &&
-		! isBusinessService;
-
-	const showVendor = ! isCompact && ! isLoading;
-	const showVendorLoading = ! isCompact && isLoading;
-	const showDescription = ! isTheme && ! isCompact;
-	const showCardIcon = ! isTheme || isCompact;
-	const showBigImage = isTheme && ! isCompact;
 
 	const productVendor = createVendorLink(
 		'marketplace_product_card_vendor_clicked'
@@ -247,12 +248,10 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 				} }
 			>
 				{ isLoading ? ' ' : product.title }
-        { screenReaderText }
+				{ screenReaderText }
 			</a>
 		);
 	};
-
-	const decodedDescription = decodeEntities( product.description );
 
 	const BusinessService = () => {
 		const mainImage = isCompact ? product.icon : product.featuredImage;
