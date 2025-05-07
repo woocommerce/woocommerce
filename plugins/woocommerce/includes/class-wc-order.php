@@ -2297,6 +2297,29 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Get the "refunded cost" (the combined Cost of Goods Sold of the refunded items) for a line item.
+	 *
+	 * @param  int    $item_id   ID of the item we're checking.
+	 * @param  string $item_type Type of the item we're checking, if not a line_item.
+	 * @return float
+	 */
+	public function get_cogs_refunded_for_item( $item_id, $item_type = 'line_item' ) {
+		if ( ! $this->cogs_is_enabled() || ! $this->has_cogs() ) {
+			return 0;
+		}
+
+		$cogs_value = 0;
+		foreach ( $this->get_refunds() as $refund ) {
+			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
+				if ( absint( $refunded_item->get_meta( '_refunded_item_id' ) ) === $item_id ) {
+					$cogs_value += $refunded_item->has_cogs() ? $refunded_item->get_cogs_value() : 0;
+				}
+			}
+		}
+		return $cogs_value;
+	}
+
+	/**
 	 * Get the refunded amount for a line item.
 	 *
 	 * @param  int    $item_id   ID of the item we're checking.
