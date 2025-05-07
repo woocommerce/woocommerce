@@ -12,6 +12,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Mock Session handler class. Required because PHPUnit doesn't allow cookies to be set in the response as it runs tests
  * in a single context.
+ *
+ * @deprecated 9.9.0
  */
 class MockSessionHandler extends WC_Session_Handler {
 
