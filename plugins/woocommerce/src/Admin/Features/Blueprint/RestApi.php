@@ -267,7 +267,7 @@ class RestApi {
 	public function import_step( \WP_REST_Request $request ) {
 		$session_token = $request->get_header( 'X-Blueprint-Import-Session' );
 
-		// If no session token, this is the first step: generate and store a new token
+		// If no session token, this is the first step: generate and store a new token.
 		if ( ! $session_token ) {
 			$session_token = function_exists( 'wp_generate_uuid4' ) ? wp_generate_uuid4() : uniqid( 'bp_', true );
 		}
