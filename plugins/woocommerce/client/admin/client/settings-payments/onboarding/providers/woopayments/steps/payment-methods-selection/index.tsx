@@ -184,20 +184,22 @@ export default function PaymentMethodsSelection() {
 						</div>
 						{ /* Show button only if not expanded and there are initially hidden items */ }
 						{ ! isExpanded && hiddenCount > 0 && (
-							<Button
-								className="settings-payments-methods__show-more"
-								onClick={ () => {
-									setIsExpanded( ! isExpanded );
-								} }
-								tabIndex={ 0 }
-								aria-expanded={ isExpanded }
-							>
-								{ sprintf(
-									/* translators: %s: number of hidden payment methods */
-									__( 'Show more (%s)', 'woocommerce' ),
-									hiddenCount
-								) }
-							</Button>
+							<div className="settings-payments-methods__show-more--wrapper">
+								<Button
+									className="settings-payments-methods__show-more"
+									onClick={ () => {
+										setIsExpanded( ! isExpanded );
+									} }
+									tabIndex={ 0 }
+									aria-expanded={ isExpanded }
+								>
+									{ sprintf(
+										/* translators: %s: number of hidden payment methods */
+										__( 'Show more (%s)', 'woocommerce' ),
+										hiddenCount
+									) }
+								</Button>
+							</div>
 						) }
 					</div>
 				</div>
