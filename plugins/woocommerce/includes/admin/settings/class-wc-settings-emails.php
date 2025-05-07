@@ -81,10 +81,6 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$header_alignment           = null;
 		$font_family                = null;
 
-		/* translators: %s: Available placeholders for use */
-		$footer_text_description = __( 'The text to appear in the footer of all WooCommerce emails.', 'woocommerce' ) . ' ' . sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '{site_title} {site_url}' );
-		$footer_text_default     = '{site_title} &mdash; Built with {WooCommerce}';
-
 		// These defaults should be chosen by the same logic as the other color option properties.
 		list(
 			'base_color_default' => $base_color_default,
@@ -122,10 +118,6 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'default' => 'Helvetica',
 				'type'    => 'email_font_family',
 			);
-
-			/* translators: %s: Available placeholders for use */
-			$footer_text_description = __( 'This text will appear in the footer of all of your WooCommerce emails.', 'woocommerce' ) . ' ' . sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '{site_title} {site_url} {store_address} {store_email}' );
-			$footer_text_default     = '{site_title}<br />{store_address}';
 		}
 
 		if ( FeaturesUtil::feature_is_enabled( 'block_email_editor' ) ) {
@@ -228,12 +220,13 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 					array(
 						'title'       => __( 'Footer text', 'woocommerce' ),
-						'desc'        => $footer_text_description,
+						/* translators: %s: Available placeholders for use */
+						'desc'        => __( 'This text will appear in the footer of all of your WooCommerce emails.', 'woocommerce' ) . ' ' . sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '{site_title} {site_url} {store_address} {store_email}' ),
 						'id'          => 'woocommerce_email_footer_text',
 						'css'         => 'width:400px; height: 75px;',
 						'placeholder' => __( 'N/A', 'woocommerce' ),
 						'type'        => 'textarea',
-						'default'     => $footer_text_default,
+						'default'     => '{site_title}<br />{store_address}',
 						'autoload'    => false,
 						'desc_tip'    => true,
 					),
