@@ -76,30 +76,9 @@ const SettingsPaymentsWooCommercePaymentsChunk = lazy(
 );
 
 /**
- * Hides or displays the WooCommerce navigation tab based on the provided display style.
- */
-const hideWooCommerceNavTab = ( display: string ) => {
-	const externalElement = document.querySelector< HTMLElement >(
-		'.woo-nav-tab-wrapper'
-	);
-
-	// Add the 'hidden' class to hide the element
-	if ( externalElement ) {
-		externalElement.style.display = display;
-	}
-};
-
-/**
  * Renders the main payment settings page with a fallback while loading.
  */
 const SettingsPaymentsMain = () => {
-	const location = useLocation();
-
-	useEffect( () => {
-		if ( location.pathname === '' ) {
-			hideWooCommerceNavTab( 'flex' );
-		}
-	}, [ location ] );
 	return (
 		<>
 			<Suspense
@@ -167,120 +146,6 @@ const SettingsPaymentsMain = () => {
 };
 
 /**
- * Renders the recommended payment methods settings page with a fallback while loading.
- */
-export const SettingsPaymentsMethods = () => {
-	const location = useLocation();
-	const [ paymentMethodsState, setPaymentMethodsState ] = useState< {
-		[ key: string ]: boolean;
-	} >( {} );
-	const [ isCompleted, setIsCompleted ] = useState( false );
-	const { providers } = useSelect( ( select ) => {
-		return {
-			isFetching: select( paymentSettingsStore ).isFetching(),
-			providers:
-				select( paymentSettingsStore ).getPaymentProviders() || [],
-		};
-	}, [] );
-
-	// Retrieve wooPayments gateway
-	const wooPayments = getWooPaymentsFromProviders( providers );
-
-	const onPaymentMethodsContinueClick = useCallback( () => {
-		// Record the event along with payment methods selected
-		recordEvent( 'wcpay_settings_payment_methods_continue', {
-			selected_payment_methods: Object.keys( paymentMethodsState )
-				.filter(
-					( paymentMethod ) => paymentMethodsState[ paymentMethod ]
-				)
-				.join( ', ' ),
-			deselected_payment_methods: Object.keys( paymentMethodsState )
-				.filter(
-					( paymentMethod ) => ! paymentMethodsState[ paymentMethod ]
-				)
-				.join( ', ' ),
-		} );
-
-		setIsCompleted( true );
-
-		// Get the onboarding URL or fallback to the test drive account link
-		const onboardUrl =
-			wooPayments?.onboarding?._links.onboard.href ||
-			getWooPaymentsTestDriveAccountLink();
-
-		// Combine the onboard URL with the query string and redirect to the onboard URL.
-		window.location.href =
-			onboardUrl +
-			'&capabilities=' +
-			encodeURIComponent( JSON.stringify( paymentMethodsState ) );
-	}, [ paymentMethodsState, wooPayments ] );
-
-	useEffect( () => {
-		window.scrollTo( 0, 0 ); // Scrolls to the top-left corner of the page
-
-		if ( location.pathname === '/payment-methods' ) {
-			hideWooCommerceNavTab( 'none' );
-			recordEvent( 'wcpay_settings_payment_methods_pageview' );
-		}
-	}, [ location ] );
-
-	return (
-		<>
-			<div className="woocommerce-layout__header woocommerce-recommended-payment-methods">
-				<div className="woocommerce-layout__header-wrapper">
-					<BackButton
-						href={ getNewPath( {}, '' ) }
-						title={ __( 'Return to gateways', 'woocommerce' ) }
-						isRoute={ true }
-					/>
-					<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align">
-						<span className="woocommerce-settings-payments-header__title">
-							{ __(
-								'Choose your payment methods',
-								'woocommerce'
-							) }
-						</span>
-					</h1>
-					<Button
-						className="components-button is-primary"
-						onClick={ onPaymentMethodsContinueClick }
-						isBusy={ isCompleted }
-						disabled={ isCompleted }
-					>
-						{ __( 'Continue', 'woocommerce' ) }
-					</Button>
-					<div className="woocommerce-settings-payments-header__description">
-						{ __(
-							"Select which payment methods you'd like to offer to your shoppers. You can update these here at any time.",
-							'woocommerce'
-						) }
-					</div>
-				</div>
-			</div>
-			<Suspense
-				fallback={
-					<>
-						<div className="settings-payments-recommended__container">
-							<div className="settings-payment-gateways">
-								<ListPlaceholder
-									rows={ 3 }
-									hasDragIcon={ false }
-								/>
-							</div>
-						</div>
-					</>
-				}
-			>
-				<SettingsPaymentsMethodsChunk
-					paymentMethodsState={ paymentMethodsState }
-					setPaymentMethodsState={ setPaymentMethodsState }
-				/>
-			</Suspense>
-		</>
-	);
-};
-
-/**
  * Wraps the main payment settings and payment methods settings pages.
  */
 export const SettingsPaymentsMainWrapper = () => {
@@ -289,10 +154,6 @@ export const SettingsPaymentsMainWrapper = () => {
 			<Header title={ __( 'Settings', 'woocommerce' ) } />
 			<HistoryRouter history={ getHistory() }>
 				<Routes>
-					<Route
-						path="/payment-methods"
-						element={ <SettingsPaymentsMethods /> }
-					/>
 					<Route path="/*" element={ <SettingsPaymentsMain /> } />
 				</Routes>
 			</HistoryRouter>
