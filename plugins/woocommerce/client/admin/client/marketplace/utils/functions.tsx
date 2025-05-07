@@ -23,6 +23,7 @@ import {
 import { Subscription } from '../components/my-subscriptions/types';
 import {
 	Product,
+	ProductCardType,
 	ProductType,
 	SearchAPIJSONType,
 	SearchAPIProductType,
@@ -39,6 +40,7 @@ interface ProductGroup {
 	url_text: string | null;
 	url_type: 'wc-admin' | 'wp-admin' | 'external' | undefined; // types defined by Link component
 	itemType: ProductType;
+	cardType: ProductCardType;
 }
 
 // The fetchCache stores the results of GET fetch/apiFetch calls from the Marketplace, in RAM, for performance
