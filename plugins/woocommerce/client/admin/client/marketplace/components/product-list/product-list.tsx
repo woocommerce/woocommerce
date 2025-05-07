@@ -3,7 +3,7 @@
  */
 import ProductListContent from '../product-list-content/product-list-content';
 import ProductListHeader from '../product-list-header/product-list-header';
-import { Product, ProductType } from './types';
+import { Product, ProductCardType, ProductType } from './types';
 
 interface ProductListProps {
 	title: string;
@@ -12,6 +12,7 @@ interface ProductListProps {
 	products: Product[];
 	groupURL: string;
 	type: ProductType;
+	cardType?: ProductCardType;
 	groupURLText: string | null;
 	groupURLType: 'wc-admin' | 'wp-admin' | 'external' | undefined; // types defined by Link component
 }
@@ -26,6 +27,7 @@ export default function ProductList( props: ProductListProps ): JSX.Element {
 		productGroup,
 		groupURLText,
 		groupURLType,
+		cardType,
 	} = props;
 
 	return (
@@ -41,6 +43,7 @@ export default function ProductList( props: ProductListProps ): JSX.Element {
 				group={ title }
 				products={ products }
 				type={ type }
+				cardType={ cardType }
 				productGroup={ productGroup }
 			/>
 		</div>

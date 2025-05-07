@@ -81,6 +81,11 @@ export enum ProductType {
 	businessService = 'business-service',
 }
 
+export enum ProductCardType {
+	compact = 'compact',
+	regular = 'regular',
+}
+
 export enum SearchResultType {
 	theme = 'theme',
 	extension = 'extension',
