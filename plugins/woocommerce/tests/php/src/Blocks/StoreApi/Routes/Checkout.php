@@ -34,7 +34,7 @@ class Checkout extends MockeryTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		add_filter('woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ), 10, 4);
+		add_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ), 10, 4 );
 
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
@@ -117,7 +117,7 @@ class Checkout extends MockeryTestCase {
 	protected function tearDown(): void {
 		parent::tearDown();
 
-		remove_filter( 'woocommerce_set_cookie_enabled', [ $this, 'filter_woocommerce_set_cookie_enabled' ] );
+		remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
 
 		remove_all_filters( 'woocommerce_get_country_locale' );
 		remove_all_filters( 'woocommerce_register_shop_order_post_statuses' );
@@ -1106,7 +1106,7 @@ class Checkout extends MockeryTestCase {
 		$status   = $response->get_status();
 		$data     = $response->get_data();
 
-		$this->assertEquals( 200, $status );//, print_r( $data, true ) );
+		$this->assertEquals( 200, $status, print_r( $data, true ) );
 		$this->assertTrue( $data['customer_id'] > 0 );
 
 		$customer = get_user_by( 'id', $data['customer_id'] );

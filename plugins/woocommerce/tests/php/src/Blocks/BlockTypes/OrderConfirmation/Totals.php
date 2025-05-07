@@ -26,7 +26,7 @@ class Totals extends \WP_UnitTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		add_filter('woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ), 10, 4);
+		add_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ), 10, 4 );
 
 		global $wp_rest_server;
 		$wp_rest_server = new \Spy_REST_Server();
@@ -101,7 +101,7 @@ class Totals extends \WP_UnitTestCase {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		remove_filter( 'woocommerce_set_cookie_enabled', [ $this, 'filter_woocommerce_set_cookie_enabled' ] );
+		remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
 		WC()->cart->empty_cart();
 		WC()->session->destroy_session();
 	}
