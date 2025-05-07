@@ -108,7 +108,7 @@ export const removeNoticeForField = ( id: string, context?: string ) => {
 	// At this point we are removing the notice from all WC contexts since we don't know which one it is.
 	containers.forEach( ( container ) => {
 		getNotices( container ).forEach( ( notice ) => {
-			if ( notice.id === id ) {
+			if ( notice.id.startsWith( id ) ) {
 				removeNotice( notice.id, container );
 			}
 		} );
