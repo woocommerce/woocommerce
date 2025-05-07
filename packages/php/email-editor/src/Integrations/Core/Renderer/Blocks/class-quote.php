@@ -119,7 +119,6 @@ class Quote extends Abstract_Block_Renderer {
 		// Add default background size.
 		$table_styles['background-size'] = empty( $table_styles['background-size'] ) ? 'cover' : $table_styles['background-size'];
 
-
 		// Padding properties need to be added to the table cell.
 		$cell_styles = $this->get_styles_from_block(
 			array(
