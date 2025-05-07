@@ -336,7 +336,7 @@
               "menu_title": "Checkout Flow and Events",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/checkout-flow-and-events.md",
-              "hash": "c2c51ae485933b86cfa983f473dec726fca33a0d265e20ca3e6ee11cc9d0429c",
+              "hash": "7b6e6bdc8c7cbe10b0b9dc65777e98d981481914d9e0cb98989d67b9382324b1",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/checkout-flow-and-events.md",
               "id": "499384cbb48ed96a2e12653cd68bd82d123a20a1",
               "links": {
@@ -2000,5 +2000,5 @@
       "categories": []
     }
   ],
-  "hash": "98ee8ca0297b085135bffcc9ad5a9ebb156a24b402a52731b08130d4c4e2e3db"
+  "hash": "ff3f182bc9342b604b0dad580679795bcba44eff9014996c4893c2c3ff7b801b"
 }
