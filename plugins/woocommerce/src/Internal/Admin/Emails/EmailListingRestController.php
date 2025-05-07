@@ -56,7 +56,14 @@ class EmailListingRestController extends RestApiControllerBase {
 	 */
 	public function __construct() {
 		$this->email_template_generator = new WCTransactionalEmailPostsGenerator();
-		add_action( 'woocommerce_init', [ $this->email_template_generator, 'init_default_transactional_emails' ] );
+		add_action( 'woocommerce_init', array( $this, 'perform_init' ) );
+	}
+
+	/**
+	 * Perform the initialization.
+	 */
+	public function perform_init() {
+		$this->email_template_generator->init_default_transactional_emails();
 	}
 
 	/**
@@ -85,7 +92,7 @@ class EmailListingRestController extends RestApiControllerBase {
 	 */
 	private function get_args_for_recreate_email_post() {
 		return array(
-			'emailId'  => array(
+			'emailId' => array(
 				'description'       => __( 'The email ID to recreate the post for.', 'woocommerce' ),
 				'type'              => 'string',
 				'required'          => true,
@@ -173,7 +180,8 @@ class EmailListingRestController extends RestApiControllerBase {
 		} catch ( \Exception $e ) {
 			return new WP_Error(
 				'woocommerce_rest_email_post_generation_failed',
-				__( 'Error generating email post.', 'woocommerce' ),
+				// translators: %s: Error message.
+				sprintf( __( 'Error generating email post. Error: %s.', 'woocommerce' ), $e->getMessage() ),
 				array( 'status' => 500 )
 			);
 		}
@@ -190,6 +198,5 @@ class EmailListingRestController extends RestApiControllerBase {
 			__( 'Error unable to generate email post.', 'woocommerce' ),
 			array( 'status' => 500 )
 		);
-
 	}
 }
