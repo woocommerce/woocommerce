@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2> <?php echo esc_html__( 'Sorry, your order was unsuccessful', 'woocommerce' ); ?> </h2>
+<h2 class="wp-block-heading"> <?php echo esc_html__( 'Sorry, your order was unsuccessful', 'woocommerce' ); ?> </h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
@@ -39,7 +39,7 @@ defined( 'ABSPATH' ) || exit;
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p> 
+<p>
 <?php
 	/* translators: %s: Site title */
 	printf( esc_html__( "If you'd like to continue with your purchase, please return to %s and try a different method of payment.", 'woocommerce' ), '<!--[woocommerce/site-title]-->' )
@@ -56,7 +56,7 @@ defined( 'ABSPATH' ) || exit;
 <!-- /wp:woo/email-content -->
 
 <!-- wp:paragraph -->
-<p> 
+<p>
 <?php
 /* translators: %s: Store admin email */
 printf( esc_html__( 'If you need any help with your order, please contact us at %s.', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );

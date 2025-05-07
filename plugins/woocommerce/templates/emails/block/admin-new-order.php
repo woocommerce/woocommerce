@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2>
+<h2 class="wp-block-heading">
 <?php
 /* translators: %s: order number */
 printf( esc_html__( 'New order: #%s,', 'woocommerce' ), '<!--[woocommerce/order-number]-->' );

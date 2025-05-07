@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2> 
+<h2 class="wp-block-heading">
 <?php
 /* translators: %s: Order number */
 printf( esc_html__( 'Order refunded: %s', 'woocommerce' ), '<!--[woocommerce/order-number]-->' );
@@ -57,7 +57,7 @@ printf( esc_html__( 'Your order from %s has been refunded.', 'woocommerce' ), '<
 <!-- /wp:woo/email-content -->
 
 <!-- wp:paragraph -->
-<p> 
+<p>
 <?php
 /* translators: %s: Store admin email */
 printf( esc_html__( 'If you need any help with your order, please contact us at %s', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );

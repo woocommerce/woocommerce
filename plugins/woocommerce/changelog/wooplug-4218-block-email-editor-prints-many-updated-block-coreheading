@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Updated email block templates to avoid Updated blocks logs in dev console
+
+

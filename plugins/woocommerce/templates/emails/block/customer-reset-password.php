@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2> <?php echo esc_html__( 'Reset your password', 'woocommerce' ); ?> </h2>
+<h2 class="wp-block-heading"> <?php echo esc_html__( 'Reset your password', 'woocommerce' ); ?> </h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
@@ -35,7 +35,7 @@ defined( 'ABSPATH' ) || exit;
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p> 
+<p>
 <?php
 	/* translators: %s: Store name */
 	printf( esc_html__( 'Someone has requested a new password for the following account on %s:', 'woocommerce' ), '<!--[woocommerce/site-title]-->' );
@@ -44,7 +44,7 @@ defined( 'ABSPATH' ) || exit;
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p> 
+<p>
 <?php
 /* translators: %s: Username */
 echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), '<!--[woocommerce/customer-username]-->' ), array( 'b' => array() ) );
@@ -53,7 +53,7 @@ echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), '<!--[woocomm
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p> 
+<p>
 <?php
 	echo esc_html__( 'If you didn’t make this request, just ignore this email. If you’d like to proceed, reset your password via the link below:', 'woocommerce' );
 ?>
