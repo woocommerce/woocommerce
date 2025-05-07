@@ -79,8 +79,6 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			'https://woocommerce.com/document/email-faq'
 		);
 
-		/* translators: %s: Nonced email preview link */
-		$email_template_description = sprintf( __( 'This section lets you customize the WooCommerce emails. <a href="%s" target="_blank">Click here to preview your email template</a>.', 'woocommerce' ), wp_nonce_url( admin_url( '?preview_woocommerce_mail=true' ), 'preview-mail' ) );
 		$logo_image                 = array(
 			'title'       => __( 'Header image', 'woocommerce' ),
 			'desc'        => __( 'Paste the URL of an image you want to show in the email header. Upload images using the media uploader (Media > Add New).', 'woocommerce' ),
@@ -133,7 +131,6 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$color_palette_section_end    = null;
 
 		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
-			$email_template_description = __( 'Customize your WooCommerce email template and preview it below.', 'woocommerce' );
 			$logo_image                 = array(
 				'title'       => __( 'Logo', 'woocommerce' ),
 				'desc'        => __( 'Add your logo to each of your WooCommerce emails. If no logo is uploaded, your site title will be used instead.', 'woocommerce' ),
@@ -356,7 +353,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					array(
 						'title' => __( 'Email template', 'woocommerce' ),
 						'type'  => 'title',
-						'desc'  => $email_template_description,
+						'desc'  => __( 'Customize your WooCommerce email template and preview it below.', 'woocommerce' ),
 						'id'    => 'email_template_options',
 					),
 
