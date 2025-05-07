@@ -9,8 +9,29 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors;
 
 /**
- * Ensures every border with border-width > 0 has a border-style, defaulting to 'solid' if missing, and removes extra border-style properties.
- * Handles all shorthand and longhand border-width cases.
+ * Postprocessor that handles border-style declarations to ensure consistent rendering across email clients.
+ *
+ * This postprocessor addresses two main issues:
+ *
+ * 1. Normalize border-style declarations:
+ *    When using a uniform border-style declaration with non-uniform border-widths,
+ *    some email clients (like Outlook) will incorrectly display borders on all sides
+ *    even when the width is 0. For example:
+ *    `border-color: #000000; border-style: solid; border-width: 0 1px 0 0;`
+ *    would render borders on all sides in Outlook. This postprocessor normalizes
+ *    the border-style declarations to only set styles for sides where border-width > 0:
+ *    `border-color: currentColor; border-width: 0 1px 0 0; border-right-style: solid;`
+ *
+ * 2. Add fallback border styles:
+ *    The block editor provides a default solid style for borders that have a width
+ *    but no style specified. This postprocessor adds the same `border-style: solid`
+ *    fallback to ensure the email rendering matches what users see in the editor.
+ *
+ * The postprocessor handles all border cases including:
+ * - Shorthand border declarations (border: 1px solid black)
+ * - Individual side declarations (border-top, border-right, etc.)
+ * - Individual property declarations (border-width, border-style, etc.)
+ * - Mixed combinations of the above
  */
 class Border_Style_Postprocessor implements Postprocessor {
 	/**
