@@ -65,13 +65,13 @@ The following boolean flags available related to status are:
 
 #### Special States
 
-The following are booleans exposed via the checkout provider that are independent from each other and checkout statuses but can be used in combination to react to various state in the checkout.
+The following are booleans exposed via the checkout provider that are independent from each other and checkout statuses but can be used in combination to react to various states in the checkout.
 
 ##### **isCalculating**
 
 `isCalculating` is true when the total is being re-calculated for the order or when a plugin is intentionally disabling the checkout using the `disableCheckoutFor` action (covered in the next section).
 
-There are numerous things that might trigger a recalculation of the total: coupons being added or removed, shipping rates updated, shipping rate selected etc. Instead of having to check each of those individual states, you can reliably just check if this boolean is true (calculating) or false (not calculating).
+There are numerous things that might trigger a recalculation of the total: coupons being added or removed, shipping rates updated, shipping rate selected, etc. Instead of having to check each of those individual states, you can reliably just check if this boolean is true (calculating) or false (not calculating).
 
 What `isCalculating` affects:
 - Disables the "Place Order" button in the checkout block
@@ -94,7 +94,7 @@ dispatch( checkoutStore ).disableCheckoutFor( async () => {
 } );
 ```
 
-The thunk controls internal state, ensuring that the client won't be able to attempt completing the flow untile the provided promise resolves, regardless of whether it succeeds or fails.
+The thunk controls internal state, ensuring that the client won't be able to attempt completing the flow until the provided promise resolves, regardless of whether it succeeds or fails.
 
 ##### **hasError**
 
