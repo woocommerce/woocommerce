@@ -68,5 +68,7 @@
 		"html": false,
 		"__experimentalLayout": true,
 		"interactivity": true
-	}
+	},
+	"editorStyle": "file:../woocommerce/product-collection-editor.css",
+	"style": "file:../woocommerce/product-collection-style.css"
 }

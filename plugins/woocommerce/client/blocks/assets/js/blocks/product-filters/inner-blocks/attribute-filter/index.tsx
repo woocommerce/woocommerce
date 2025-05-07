@@ -13,7 +13,6 @@ import { __, sprintf } from '@wordpress/i18n';
 import metadata from './block.json';
 import Edit from './edit';
 import Save from './save';
-import './style.scss';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 const defaultAttribute = getSetting< AttributeSetting >(
