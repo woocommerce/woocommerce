@@ -463,13 +463,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		// If the current WP version is greater than 6.9-alpha-60222 the password prompt will be different.
-		// It was changed in https://core.trac.wordpress.org/changeset/60222.
-		$expected = version_compare( get_bloginfo( 'version' ), '6.9-alpha-60222', '>=' )
-			? 'This content is password-protected'
-			: 'This content is password protected';
-
-		$this->assertStringContainsString( $expected, $product_page );
+		$this->assertMatchesRegularExpression( '/This content is password[- ]protected/', $product_page );
 
 		wp_set_current_user( self::$user_contributor );
 
@@ -480,6 +474,6 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertStringContainsString( $expected, $product_page );
+		$this->assertMatchesRegularExpression( '/This content is password[- ]protected/', $product_page );
 	}
 }
