@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Tests\Admin\Features\Blueprint;
 
 use Automattic\WooCommerce\Admin\Features\Blueprint\Init;
