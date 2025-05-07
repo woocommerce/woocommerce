@@ -111,6 +111,7 @@ export default function ProductItemTemplateEdit(
 			// If there is a single product, use the grouped products from the product.
 			if ( productContext.length === 1 ) {
 				groupedProductIds = productContext[ 0 ].grouped_products;
+				query.per_page = productContext[ 0 ].grouped_products.length;
 			}
 
 			if ( groupedProductIds.length ) {
