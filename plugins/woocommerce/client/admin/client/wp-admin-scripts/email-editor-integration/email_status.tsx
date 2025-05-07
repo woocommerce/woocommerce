@@ -4,7 +4,6 @@ import { PanelRow, Button, Flex, FlexItem, Dropdown } from '@wordpress/component
 import { store as coreDataStore, useEntityProp } from '@wordpress/core-data';
 import { EMAIL_STATUSES } from '../../settings-email/settings-email-listing-status';
 
-// todo the dropbox doesn't close after picknig a new status
 // todo test it properly I am not sure if it works, we need to update the status in EmailApiController.php
 // todo lint
 // todo changelog
@@ -71,7 +70,7 @@ export function EmailStatus() {
 								{ status.label }
 							</Button>
 						)}
-						renderContent={ () => (
+						renderContent={ ( { onClose } ) => (
 							<div style={{ minWidth: 160 }}>
 								{EMAIL_STATUSES.map((option) => (
 									<Button
@@ -79,7 +78,10 @@ export function EmailStatus() {
 										variant="tertiary"
 										className="editor-post-status__dropdown-item"
 										icon={option.icon}
-										onClick={() => updateStatus( option.value === 'enabled' )}
+										onClick={() => {
+											updateStatus( option.value === 'enabled' );
+											onClose();
+										}}
 										disabled={
 											isManual ||
 											(option.value === 'manual' && !isManual) ||
