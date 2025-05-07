@@ -27,6 +27,7 @@ use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 class Init {
 	use UseWPFunctions;
 
+	const INSTALLED_WP_ORG_PLUGINS_TRANSIENT = 'woocommerce_blueprint_installed_wp_org_plugins';
 	/**
 	 * Array of initialized exporters.
 	 *
@@ -49,6 +50,9 @@ class Init {
 		);
 
 		add_filter( 'wooblueprint_exporters', array( $this, 'add_woo_exporters' ) );
+
+		add_action( 'upgrader_process_complete', array( $this, 'clear_installed_wp_org_plugins_transient' ), 10, 2 );
+		add_action( 'deleted_plugin', array( $this, 'clear_installed_wp_org_plugins_transient' ), 10, 2 );
 	}
 
 	/**
@@ -108,7 +112,9 @@ class Init {
 	 * @return array|array[] $plugins
 	 */
 	public function get_plugins_for_export_group() {
-		$plugins        = $this->wp_get_plugins();
+		$plugins = $this->get_installed_wp_org_plugins();
+
+		// Get active plugins from WordPress options and transform plugins array into export format.
 		$active_plugins = $this->wp_get_option( 'active_plugins', array() );
 		$plugins        = array_map(
 			function ( $key, $plugin ) use ( $active_plugins ) {
@@ -128,8 +134,14 @@ class Init {
 				return $b['checked'] <=> $a['checked'];
 			}
 		);
-
 		return $plugins;
+	}
+
+	/**
+	 * Clear the installed WordPress.org plugins transient.
+	 */
+	public function clear_installed_wp_org_plugins_transient() {
+		delete_transient( self::INSTALLED_WP_ORG_PLUGINS_TRANSIENT );
 	}
 
 	/**
@@ -225,5 +237,80 @@ class Init {
 		}
 
 		return $settings;
+	}
+
+	/**
+	 * Get all installed WordPress.org plugins.
+	 *
+	 * @return array
+	 */
+	private function get_installed_wp_org_plugins() {
+		// Try to get cached plugin list.
+		$wp_org_plugins = get_transient( self::INSTALLED_WP_ORG_PLUGINS_TRANSIENT );
+		if ( is_array( $wp_org_plugins ) ) {
+			return $wp_org_plugins;
+		}
+
+		// Get all installed plugins.
+		$all_plugins  = $this->wp_get_plugins();
+		$plugin_slugs = array();
+
+		// Build a map of plugin file => slug.
+		foreach ( $all_plugins as $key => $plugin ) {
+			$slug = dirname( $key );
+			/**
+			 * Apply the WP Core "wp_plugin_dependencies_slug" filter to get the correct plugin slug.
+			 */
+			$slug = apply_filters( 'wp_plugin_dependencies_slug', $slug ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+
+			$plugin_slugs[]              = $slug;
+			$all_plugins[ $key ]['slug'] = $slug;
+		}
+
+		$api_response = $this->wp_plugins_api(
+			'plugin_information',
+			array(
+				'fields' => array(
+					'short_description' => false,
+					'sections'          => false,
+					'description'       => false,
+					'tested'            => false,
+					'requires'          => false,
+					'rating'            => false,
+					'ratings'           => false,
+					'downloaded'        => false,
+					'downloadlink'      => false,
+					'last_updated'      => false,
+					'added'             => false,
+					'tags'              => false,
+					'compatibility'     => false,
+					'homepage'          => false,
+					'versions'          => false,
+					'donate_link'       => false,
+					'reviews'           => false,
+					'banners'           => false,
+					'icons'             => false,
+					'active_installs'   => false,
+				),
+				'slugs'  => $plugin_slugs,
+			)
+		);
+
+		// If API fails, return all plugins.
+		if ( is_wp_error( $api_response ) ) {
+			return $all_plugins;
+		}
+
+		// Filter plugins: only keep those with a valid API response (no 'error' for their slug).
+		$wp_org_plugins = array_filter(
+			$all_plugins,
+			function ( $plugin ) use ( $api_response ) {
+				$slug = $plugin['slug'];
+				return isset( $api_response->$slug ) && ! isset( $api_response->{$slug}['error'] );
+			}
+		);
+
+		set_transient( self::INSTALLED_WP_ORG_PLUGINS_TRANSIENT, $wp_org_plugins );
+		return $wp_org_plugins;
 	}
 }
