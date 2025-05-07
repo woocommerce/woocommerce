@@ -84,6 +84,7 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 			window?.wcSettings?.admin?.blueprint_max_step_size_bytes ||
 			50 * 1024 * 1024; // defaults to 50MB
 
+		let sessionToken = '';
 		// Loop through each step and send it to the endpoint
 		for ( const step of steps ) {
 			const stepJson = JSON.stringify( {
@@ -118,6 +119,7 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+					'X-Blueprint-Import-Session': sessionToken,
 				},
 				body: stepJson,
 			} );
@@ -127,6 +129,13 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 					step: step.step,
 					messages: response.messages,
 				} );
+			}
+
+			if (
+				response.sessionToken &&
+				response.sessionToken !== sessionToken
+			) {
+				sessionToken = response.sessionToken;
 			}
 		}
 
