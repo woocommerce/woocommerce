@@ -1,6 +1,7 @@
 import { __, sprintf } from '@wordpress/i18n';
-import { PanelRow, Button, Flex, FlexItem, Dropdown, Icon } from '@wordpress/components';
-import { useEntityProp } from '@wordpress/core-data';
+import { select, dispatch } from '@wordpress/data';
+import { PanelRow, Button, Flex, FlexItem, Dropdown } from '@wordpress/components';
+import { store as coreDataStore, useEntityProp } from '@wordpress/core-data';
 import { EMAIL_STATUSES } from '../../settings-email/settings-email-listing-status';
 
 export function EmailStatus() {
@@ -13,6 +14,28 @@ export function EmailStatus() {
 	const isManual = woocommerce_email_data?.is_manual;
 
 	const status = EMAIL_STATUSES.find((s) => s.value === statusValue) ?? EMAIL_STATUSES[1];
+
+	const updateStatus = ( newValue: boolean ) => {
+		const editedPost = select( coreDataStore ).getEditedEntityRecord(
+			'postType',
+			'woo_email',
+		   window.WooCommerceEmailEditor.current_post_id
+	   );
+
+		// @ts-expect-error Property 'woocommerce_data' does not exist on type 'Updatable<Attachment<any>>'.
+		const woocommerce_data = editedPost?.woocommerce_data || {};
+		void dispatch( coreDataStore ).editEntityRecord(
+		   'postType',
+		   'woo_email',
+		   window.WooCommerceEmailEditor.current_post_id,
+		   {
+			   woocommerce_data: {
+				   ...woocommerce_data,
+				   'enabled': newValue,
+			   },
+		   }
+	   );
+   };
 
 	return (
 		<PanelRow className='editor-post-panel__row'>
@@ -49,6 +72,7 @@ export function EmailStatus() {
 										variant="tertiary"
 										className="editor-post-status__dropdown-item"
 										icon={option.icon}
+										onClick={() => updateStatus( option.value === 'enabled' )}
 										disabled={
 											isManual ||
 											(option.value === 'manual' && !isManual) ||
