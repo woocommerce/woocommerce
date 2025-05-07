@@ -10,6 +10,7 @@ import {
 	checkoutStore as checkoutStoreDescriptor,
 	paymentStore,
 } from '@woocommerce/block-data';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -48,18 +49,29 @@ const PaymentMethodCard = ( {
 		}
 	);
 
+	const allowGuestCheckout = getSetting( 'checkoutAllowsGuest', false );
+
+	// Work out if the customer can save the payment method.
+	const canSavePaymentMethod =
+		// They're already logged in.
+		customerId > 0 ||
+		// They're not logged in, but they're creating an account.
+		createAccount ||
+		// They're not logged in, but they must create an account.
+		! allowGuestCheckout;
+
 	useEffect( () => {
-		if ( ! createAccount && shouldSavePaymentMethod ) {
+		if ( ! canSavePaymentMethod && shouldSavePaymentMethod ) {
 			__internalSetShouldSavePaymentMethod( false );
 		}
-	}, [ shouldSavePaymentMethod, createAccount ] );
+	}, [ shouldSavePaymentMethod, canSavePaymentMethod ] );
 
 	const { __internalSetShouldSavePaymentMethod } =
 		useDispatch( paymentStore );
 	return (
 		<PaymentMethodErrorBoundary isEditor={ isEditor }>
 			{ children }
-			{ ( customerId > 0 || createAccount ) && showSaveOption && (
+			{ canSavePaymentMethod && showSaveOption && (
 				<CheckboxControl
 					className="wc-block-components-payment-methods__save-card-info"
 					label={ __(
