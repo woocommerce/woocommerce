@@ -78,7 +78,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		);
 
 		$block_email_editor_enabled = FeaturesUtil::feature_is_enabled( 'block_email_editor' );
-		$email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
+		$email_improvements_enabled = $this->get_email_improvements_enabled();
 
 		// These defaults should be chosen by the same logic as the other color option properties.
 		list(
@@ -87,8 +87,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			'body_bg_color_default' => $body_bg_color_default,
 			'body_text_color_default' => $body_text_color_default,
 			'footer_text_color_default' => $footer_text_color_default,
-		) = EmailColors::get_default_colors();
-
+		) = EmailColors::get_default_colors( $email_improvements_enabled );
 
 		if ( $block_email_editor_enabled ) {
 			$email_notifications_field = 'email_notification_block_emails';
@@ -763,8 +762,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	 * @param array $value Field value array.
 	 */
 	public function email_color_palette( $value ) {
-		$default_colors = EmailColors::get_default_colors();
-		$auto_sync      = get_option( EmailStyleSync::AUTO_SYNC_OPTION, 'no' );
+		$email_improvements_enabled = $this->get_email_improvements_enabled();
+		$default_colors             = EmailColors::get_default_colors( $email_improvements_enabled );
+		$auto_sync                  = get_option( EmailStyleSync::AUTO_SYNC_OPTION, 'no' );
 
 		?>
 		<hr class="wc-settings-email-color-palette-separator" />
@@ -823,6 +823,15 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				update_option( 'woocommerce_email_improvements_last_disabled_at', $current_date );
 			}
 		}
+	}
+
+	private function get_email_improvements_enabled() {
+		$email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
+		// Check for try-new-templates URL parameter, which is used to force the email improvements feature in preview mode.
+		if ( isset( $_GET['try-new-templates'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$email_improvements_enabled = true;
+		}
+		return $email_improvements_enabled;
 	}
 }
 
