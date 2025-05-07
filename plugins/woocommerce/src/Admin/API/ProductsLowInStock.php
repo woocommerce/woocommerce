@@ -74,14 +74,34 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 		$low_stock_threshold = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 
 		$sidewide_stock_threshold_only = $this->is_using_sitewide_stock_threshold_only();
-		$count_query_string            = $this->get_count_query( $sidewide_stock_threshold_only );
-		$count_query_results           = $wpdb->get_results(
-		// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
-			$wpdb->prepare( $count_query_string, $status, $low_stock_threshold ),
-		);
+		$total_results = 0;
+		if ( $sidewide_stock_threshold_only ) {
+			$count_query_string  = $this->get_count_query( $sidewide_stock_threshold_only );
+			$count_query_results = $wpdb->get_results(
+				// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
+				$wpdb->prepare( $count_query_string, $status, $low_stock_threshold ),
+			);
 
-		$total_results = (int) $count_query_results[0]->total;
-		$response      = rest_ensure_response( array( 'total' => $total_results ) );
+			$total_results = (int) $count_query_results[0]->total;
+		} else {
+			// Split the query into two queries, one for products with a custom stock threshold and one for products without a custom stock threshold.
+			$count_query_with_custom_stock_threshold_string  = $this->get_products_with_custom_stock_threshold_count_query_str();
+			$count_query_without_custom_stock_threshold_string = $this->get_products_without_custom_stock_threshold_count_query_str();
+			error_log( $wpdb->prepare( $count_query_with_custom_stock_threshold_string, $status, $low_stock_threshold ) );
+			error_log( $wpdb->prepare( $count_query_without_custom_stock_threshold_string, $status, $low_stock_threshold ) );
+			$count_query_with_custom_stock_threshold_results = $wpdb->get_results(
+				// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
+				$wpdb->prepare( $count_query_with_custom_stock_threshold_string, $status, $low_stock_threshold ),
+			);
+			$count_query_without_custom_stock_threshold_results = $wpdb->get_results(
+				// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
+				$wpdb->prepare( $count_query_without_custom_stock_threshold_string, $status, $low_stock_threshold ),
+			);
+
+			$total_results = (int) $count_query_with_custom_stock_threshold_results[0]->total + (int) $count_query_without_custom_stock_threshold_results[0]->total;
+		}
+
+		$response = rest_ensure_response( array( 'total' => $total_results ) );
 		$response->header( 'X-WP-Total', $total_results );
 		$response->header( 'X-WP-TotalPages', 0 );
 
@@ -325,6 +345,64 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			      AND wc_product_meta_lookup.stock_quantity <= %d
 			    )
 		    )",
+		);
+
+		return strtr(
+			$query,
+			array(
+				':postmeta_select' => $postmeta['select'],
+				':postmeta_join'   => $postmeta['join'],
+				':postmeta_wheres' => $postmeta['wheres'],
+			)
+		);
+	}
+
+	/**
+	 * Get a query string for products with a custom stock threshold.
+	 *
+	 * @return string
+	 */
+	private function get_products_with_custom_stock_threshold_count_query_str() {
+		global $wpdb;
+		$query = $this->get_base_query(
+			array(
+				':selects'       => 'count(*) as total',
+				':orderAndLimit' => '',
+			)
+		);
+		$postmeta = array(
+			'select' => 'meta.meta_value AS low_stock_amount,',
+			'join'   => "JOIN {$wpdb->postmeta} AS meta ON wp_posts.ID = meta.post_id AND meta.meta_key = '_low_stock_amount' AND meta.meta_value > ''",
+			'wheres' => "AND wc_product_meta_lookup.stock_quantity <= CAST(meta.meta_value AS SIGNED)",
+		);
+
+		return strtr(
+			$query,
+			array(
+				':postmeta_select' => $postmeta['select'],
+				':postmeta_join'   => $postmeta['join'],
+				':postmeta_wheres' => $postmeta['wheres'],
+			)
+		);
+	}
+
+	/**
+	 * Get a query string for products without a custom stock threshold.
+	 *
+	 * @return string
+	 */
+	private function get_products_without_custom_stock_threshold_count_query_str() {
+		global $wpdb;
+		$query = $this->get_base_query(
+			array(
+				':selects'       => 'count(*) as total',
+				':orderAndLimit' => '',
+			)
+		);
+		$postmeta = array(
+			'select' => 'meta.meta_value AS low_stock_amount,',
+			'join'   => "LEFT JOIN {$wpdb->postmeta} AS meta ON wp_posts.ID = meta.post_id AND meta.meta_key = '_low_stock_amount' AND meta.meta_value > ''",
+			'wheres' => "AND meta.post_id IS NULL AND wc_product_meta_lookup.stock_quantity <= %d",
 		);
 
 		return strtr(
