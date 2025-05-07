@@ -96,11 +96,20 @@ class WC_Session_Handler extends WC_Session {
 			$this->_has_cookie         = true;
 
 			/**
-			 * Allows filtering of the session data retrieved from storage during session cookie initialization.
+			 * Filters the session data when restoring from storage during initialization.
 			 *
-			 * @param array $session_data The session data as retrieved from storage.
+			 * This filter allows you to:
+			 * 1. Modify the session data before it's loaded, including adding or removing specific session data entries
+			 * 2. Clear the entire session by returning an empty array
+			 *
+			 * Note: If the filtered data is empty, the session will be destroyed and the
+			 * guest's session cookie will be removed. This can be useful for high-traffic
+			 * sites that prioritize page caching over maintaining all session data.
 			 *
 			 * @since 9.9.0
+			 *
+			 * @param array $session_data The session data loaded from storage.
+			 * @return array Modified session data to be used for initialization.
 			 */
 			$this->_data = apply_filters( 'woocommerce_restored_session_data', $this->get_session_data() );
 
@@ -434,6 +443,7 @@ class WC_Session_Handler extends WC_Session {
 		$this->_data        = array();
 		$this->_dirty       = false;
 		$this->_customer_id = $this->generate_customer_id();
+		$this->_has_cookie  = false;
 	}
 
 	/**
