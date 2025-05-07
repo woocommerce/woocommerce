@@ -91,7 +91,6 @@ const registerSlotFills = () => {
 
 	if ( isFeatureEnabled( 'email_improvements' ) ) {
 		registerSettingsEmailPreviewFill( true );
-		registerSettingsEmailColorPaletteFill();
 	} else {
 		registerSettingsEmailPreviewFill( false );
 	}
@@ -100,6 +99,7 @@ const registerSlotFills = () => {
 		registerSettingsEmailListingFill();
 	}
 
+	registerSettingsEmailColorPaletteFill();
 	registerSettingsEmailFeedbackFill();
 	registerSettingsEmailImageUrlFill();
 };

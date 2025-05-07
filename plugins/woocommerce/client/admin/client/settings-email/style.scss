@@ -333,6 +333,7 @@ $wc-setting-email-width: 634px;
 
 .wc-settings-email-color-palette-separator {
 	border-bottom: none;
+	margin-bottom: 24px;
 	margin-left: 0;
 	max-width: $wc-setting-email-width;
 }
@@ -343,7 +344,7 @@ $wc-setting-email-width: 634px;
 
 .wc-settings-email-color-palette-title {
 	display: inline-block;
-	margin-right: 15px;
+	margin-right: 15px !important;
 }
 
 .wc-settings-email-color-palette-buttons {
