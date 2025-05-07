@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useEditorContext } from '@woocommerce/base-context';
 import { CheckboxControl } from '@woocommerce/blocks-components';
 import { useSelect, useDispatch } from '@wordpress/data';
+import { useEffect } from '@wordpress/element';
 import {
 	checkoutStore as checkoutStoreDescriptor,
 	paymentStore,
@@ -34,21 +35,31 @@ const PaymentMethodCard = ( {
 	showSaveOption,
 }: PaymentMethodCardProps ) => {
 	const { isEditor } = useEditorContext();
-	const { shouldSavePaymentMethod, customerId } = useSelect( ( select ) => {
-		const paymentMethodStore = select( paymentStore );
-		const checkoutStore = select( checkoutStoreDescriptor );
-		return {
-			shouldSavePaymentMethod:
-				paymentMethodStore.getShouldSavePaymentMethod(),
-			customerId: checkoutStore.getCustomerId(),
-		};
-	} );
+	const { shouldSavePaymentMethod, customerId, createAccount } = useSelect(
+		( select ) => {
+			const paymentMethodStore = select( paymentStore );
+			const checkoutStore = select( checkoutStoreDescriptor );
+			return {
+				shouldSavePaymentMethod:
+					paymentMethodStore.getShouldSavePaymentMethod(),
+				customerId: checkoutStore.getCustomerId(),
+				createAccount: checkoutStore.getShouldCreateAccount(),
+			};
+		}
+	);
+
+	useEffect( () => {
+		if ( ! createAccount && shouldSavePaymentMethod ) {
+			__internalSetShouldSavePaymentMethod( false );
+		}
+	}, [ shouldSavePaymentMethod, createAccount ] );
+
 	const { __internalSetShouldSavePaymentMethod } =
 		useDispatch( paymentStore );
 	return (
 		<PaymentMethodErrorBoundary isEditor={ isEditor }>
 			{ children }
-			{ customerId > 0 && showSaveOption && (
+			{ ( customerId > 0 || createAccount ) && showSaveOption && (
 				<CheckboxControl
 					className="wc-block-components-payment-methods__save-card-info"
 					label={ __(
