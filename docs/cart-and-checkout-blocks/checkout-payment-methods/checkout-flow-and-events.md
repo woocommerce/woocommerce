@@ -67,9 +67,20 @@ The following boolean flags available related to status are:
 
 The following are booleans exposed via the checkout provider that are independent from each other and checkout statuses but can be used in combination to react to various state in the checkout.
 
-**isCalculating:** This is true when the total is being re-calculated for the order. There are numerous things that might trigger a recalculation of the total: coupons being added or removed, shipping rates updated, shipping rate selected etc. This flag consolidates all activity that might be occurring (including requests to the server that potentially affect calculation of totals). So instead of having to check each of those individual states you can reliably just check if this boolean is true (calculating) or false (not calculating).
+##### **isCalculating**
 
-You can also programmatically control this state using the `disableCheckoutFor` thunk. This allows you to disable the checkout button while an asynchronous operation completes:
+`isCalculating` is true when the total is being re-calculated for the order or when a plugin is intentionally disabling the checkout using the `disableCheckoutFor` action (covered in the next section).
+
+There are numerous things that might trigger a recalculation of the total: coupons being added or removed, shipping rates updated, shipping rate selected etc. Instead of having to check each of those individual states, you can reliably just check if this boolean is true (calculating) or false (not calculating).
+
+What `isCalculating` affects:
+- Disables the "Place Order" button in the checkout block
+- Disables the "Proceed to Checkout" button in the cart block
+- Shows a loading state for Express Payment methods while calculations are pending
+
+###### Controlling `isCalculating` with `disableCheckoutFor`
+
+You can programmatically control `isCalculating` using the `disableCheckoutFor` thunk:
 
 ```jsx
 const { dispatch } = window.wp.data;
@@ -83,9 +94,11 @@ dispatch( checkoutStore ).disableCheckoutFor( async () => {
 } );
 ```
 
-The thunk handles incrementing and decrementing the internal calculation counter, ensuring the checkout button remains disabled until the promise resolves, regardless of whether it succeeds or fails.
+The thunk controls internal state, ensuring that the client won't be able to attempt completing the flow untile the provided promise resolves, regardless of whether it succeeds or fails.
 
-**hasError:** This is true when anything in the checkout has created an error condition state. This might be validation errors, request errors, coupon application errors, payment processing errors etc.
+##### **hasError**
+
+`hasError` is true when anything in the checkout has created an error condition state. This might be validation errors, request errors, coupon application errors, payment processing errors etc.
 
 ### `ShippingProvider` Exposed Statuses
 
