@@ -1,12 +1,18 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { PanelRow, Button, Flex, FlexItem, Dropdown, Icon } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { useEntityProp } from '@wordpress/core-data';
 import { EMAIL_STATUSES } from '../../settings-email/settings-email-listing-status';
 
 export function EmailStatus() {
-	const [statusValue] = useState('enabled');
+	const [ woocommerce_email_data ] = useEntityProp(
+		'postType',
+		'woo_email',
+ 		'woocommerce_data'
+ 	);
+	const statusValue = woocommerce_email_data?.enabled ? 'enabled' : 'disabled';
+	const isManual = woocommerce_email_data?.is_manual;
+
 	const status = EMAIL_STATUSES.find((s) => s.value === statusValue) ?? EMAIL_STATUSES[1];
-	const isManual = statusValue === 'manual';
 
 	return (
 		<PanelRow className='editor-post-panel__row'>

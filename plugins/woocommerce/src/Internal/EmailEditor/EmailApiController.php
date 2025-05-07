@@ -52,6 +52,8 @@ class EmailApiController {
 		$email       = $this->get_email_by_type( $email_type ?? '' );
 
 		return array(
+			'enabled'         => $post_option['enabled'] === 'yes' ? true : false,
+			'is_manual'       => $email->is_manual(),
 			'subject'         => $post_option['subject'] ?? null,
 			'subject_full'    => $post_option['subject_full'] ?? null, // For customer_refunded_order email type because it has two different subjects.
 			'subject_partial' => $post_option['subject_partial'] ?? null,
