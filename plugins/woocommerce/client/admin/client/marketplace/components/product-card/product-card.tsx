@@ -13,7 +13,12 @@ import { decodeEntities } from '@wordpress/html-entities';
  */
 import './product-card.scss';
 import ProductCardFooter from './product-card-footer';
-import { Product, ProductTracksData, ProductType } from '../product-list/types';
+import {
+	Product,
+	ProductCardType,
+	ProductTracksData,
+	ProductType,
+} from '../product-list/types';
 import { appendURLParams } from '../../utils/functions';
 
 export interface ProductCardProps {
@@ -22,7 +27,7 @@ export interface ProductCardProps {
 	isLoading?: boolean;
 	tracksData: ProductTracksData;
 	small?: boolean;
-	cardType?: 'compact' | 'regular';
+	cardType?: ProductCardType;
 }
 
 function ProductCard( props: ProductCardProps ): JSX.Element {
