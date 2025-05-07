@@ -14,7 +14,6 @@ import { isBoolean } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import './editor.scss';
 import { QuantitySelectorStyle, AddToCartFormSettings } from './settings';
 import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../../add-to-cart-with-options/utils';
 import { UpgradeNotice } from './components/upgrade-notice';
