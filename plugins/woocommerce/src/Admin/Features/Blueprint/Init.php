@@ -306,7 +306,7 @@ class Init {
 			$all_plugins,
 			function ( $plugin ) use ( $api_response ) {
 				$slug = $plugin['slug'];
-				return isset( $api_response->$slug ) && ! isset( $api_response->{$slug}['error'] );
+				return isset( $api_response->{$slug} ) && ! isset( $api_response->{$slug}['error'] );
 			}
 		);
 
