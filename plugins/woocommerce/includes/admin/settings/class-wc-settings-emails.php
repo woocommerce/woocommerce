@@ -770,18 +770,24 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		<hr class="wc-settings-email-color-palette-separator" />
 		<div class="wc-settings-email-color-palette-header">
 			<h2 class="wc-settings-email-color-palette-title"><?php echo esc_html( $value['title'] ); ?></h2>
-			<div
-				class="wc-settings-email-color-palette-buttons"
-				id="wc_settings_email_color_palette_slotfill"
-				data-default-colors="<?php echo esc_attr( wp_json_encode( $default_colors ) ); ?>"
-				<?php echo wp_theme_has_theme_json() ? 'data-has-theme-json' : ''; ?>
-			></div>
-			<input
-				type="hidden"
-				name="woocommerce_email_auto_sync_with_theme"
-				id="woocommerce_email_auto_sync_with_theme"
-				value="<?php echo esc_attr( $auto_sync ); ?>"
-			/>
+			<?php if ( $email_improvements_enabled ) : ?>
+				<div
+					class="wc-settings-email-color-palette-buttons"
+					id="wc_settings_email_color_palette_slotfill"
+					data-default-colors="<?php echo esc_attr( wp_json_encode( $default_colors ) ); ?>"
+					<?php echo wp_theme_has_theme_json() ? 'data-has-theme-json' : ''; ?>
+				></div>
+				<input
+					type="hidden"
+					name="woocommerce_email_auto_sync_with_theme"
+					id="woocommerce_email_auto_sync_with_theme"
+					value="<?php echo esc_attr( $auto_sync ); ?>"
+				/>
+			<?php else : ?>
+				<div class="wc-settings-email-color-palette-buttons">
+					<button disabled type="button" class="components-button is-secondary"><?php esc_html_e( 'Sync with theme', 'woocommerce' ); ?></button>
+				</div>
+			<?php endif; ?>
 		</div>
 		<table class="form-table">
 		<?php
