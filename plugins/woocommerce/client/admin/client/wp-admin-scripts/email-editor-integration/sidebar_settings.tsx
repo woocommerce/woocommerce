@@ -32,10 +32,8 @@ const SidebarSettings = ( { RichTextWithButton } ) => {
 	);
 
 	// Initialize toggle control state
-	const [ addBCC, setAddBCC ] = useState(
-		woocommerce_email_data?.bcc || false
-	);
-	const [ addCC, setAddCC ] = useState( woocommerce_email_data?.cc || false );
+	const [ addBCC, setAddBCC ] = useState( !! woocommerce_email_data?.bcc );
+	const [ addCC, setAddCC ] = useState( !! woocommerce_email_data?.cc );
 
 	const updateWooMailProperty = ( name: string, value: string | boolean ) => {
 		const editedPost = select( coreDataStore ).getEditedEntityRecord(
@@ -179,7 +177,7 @@ const SidebarSettings = ( { RichTextWithButton } ) => {
 								updateWooMailProperty( 'cc', value );
 							} }
 							help={ __(
-								'Separate with commas to add multiple email addresses.',
+								'Add recipients who will receive a copy of the email. Separate multiple addresses with commas.',
 								'woocommerce'
 							) }
 						/>
@@ -213,7 +211,7 @@ const SidebarSettings = ( { RichTextWithButton } ) => {
 								updateWooMailProperty( 'bcc', value );
 							} }
 							help={ __(
-								'Separate with commas to add multiple email addresses.',
+								'Add recipients who will receive a hidden copy of the email. Separate multiple addresses with commas.',
 								'woocommerce'
 							) }
 						/>
