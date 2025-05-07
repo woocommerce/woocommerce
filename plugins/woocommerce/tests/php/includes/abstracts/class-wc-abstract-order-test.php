@@ -591,9 +591,8 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			$initial_status,
 			'Order status in database has been modified but but shouldn\'t have been'
 		);
-		$this->assertSame(
+		$this->assertFalse(
 			$triggered,
-			false,
 			'"woocommerce_order_status_' . $refunded_status . '" action hook has been triggered but shouldn\'t have been'
 		);
 
@@ -628,10 +627,10 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$order_item_id = $order_item->get_id();
 
 		// add an action that will simulate an error while saving WC_Order_Item.
-		$callback = static function ( WC_Order_Item $item ) {
+		$callback = static function () {
 			throw new \RuntimeException( 'Error while saving WC_Order_Item' );
 		};
-		add_action( 'woocommerce_before_order_item_object_save', $callback );
+		add_action( 'woocommerce_before_order_item_object_save', $callback, 10, 0 );
 
 		$order->get_items()[ $order_item_id ]->set_name( 'CHANGED Order Item name' );
 		$order->set_status( $refunded_status );
@@ -644,9 +643,8 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			$initial_order_item_name,
 			'Modified order item name has been saved to database but shouldn\'t have been'
 		);
-		$this->assertSame(
+		$this->assertFalse(
 			$triggered,
-			false,
 			'"woocommerce_order_status_' . $refunded_status . '" action hook has been triggered but shouldn\'t have been'
 		);
 
