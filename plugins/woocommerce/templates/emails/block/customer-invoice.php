@@ -34,7 +34,7 @@ printf( esc_html__( 'Details for order #%s,', 'woocommerce' ), '<!--[woocommerce
 <p>
 <?php
 	/* translators: %s: Customer first name */
-	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/shopper-first-name]-->' );
+	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/customer-first-name]-->' );
 ?>
 </p>
 <!-- /wp:paragraph -->

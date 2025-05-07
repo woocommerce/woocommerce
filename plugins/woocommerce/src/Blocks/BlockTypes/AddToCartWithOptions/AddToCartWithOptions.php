@@ -169,8 +169,12 @@ class AddToCartWithOptions extends AbstractBlock {
 			$context = array(
 				'productId' => $product->get_id(),
 				'quantity'  => $default_quantity,
-				'variation' => array(),
 			);
+
+			if ( $product instanceof \WC_Product && $product->is_type( 'variable' ) ) {
+				$context['variation']           = array();
+				$context['availableVariations'] = $product->get_available_variations();
+			}
 
 			$wrapper_attributes = get_block_wrapper_attributes(
 				array(

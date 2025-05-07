@@ -612,6 +612,7 @@ final class WooCommerce {
 		/**
 		 * Abstract classes.
 		 */
+		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-address-provider.php';
 		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php';
 		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-object-query.php';
 		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-token.php';

@@ -6,9 +6,14 @@ import { store, getContext } from '@wordpress/interactivity';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import type { CartVariationItem } from '@woocommerce/types';
 
-type Context = {
+export type AvailableVariation = {
+	attributes: Record< string, string >;
+};
+
+export type Context = {
 	productId: number;
 	variation: CartVariationItem[];
+	availableVariations: AvailableVariation[];
 	quantity: number;
 	tempQuantity: number;
 };
