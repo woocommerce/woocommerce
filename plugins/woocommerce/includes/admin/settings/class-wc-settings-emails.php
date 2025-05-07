@@ -40,9 +40,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		add_action( 'woocommerce_admin_field_email_font_family', array( $this, 'email_font_family' ) );
 		add_action( 'woocommerce_admin_field_email_color_palette', array( $this, 'email_color_palette' ) );
 		add_action( 'woocommerce_email_settings_after', array( $this, 'email_preview_single' ) );
-		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
-			add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_email_header_image', array( $this, 'sanitize_email_header_image' ), 10, 3 );
-		}
+		add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_email_header_image', array( $this, 'sanitize_email_header_image' ), 10, 3 );
 		add_filter( 'woocommerce_tracks_event_properties', array( $this, 'append_feature_email_improvements_to_tracks' ) );
 		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'track_email_improvements_feature_change' ), 10, 2 );
 		parent::__construct();
@@ -79,17 +77,6 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			'https://woocommerce.com/document/email-faq'
 		);
 
-		$logo_image                 = array(
-			'title'       => __( 'Header image', 'woocommerce' ),
-			'desc'        => __( 'Paste the URL of an image you want to show in the email header. Upload images using the media uploader (Media > Add New).', 'woocommerce' ),
-			'id'          => 'woocommerce_email_header_image',
-			'type'        => 'text',
-			'css'         => 'min-width:400px;',
-			'placeholder' => __( 'N/A', 'woocommerce' ),
-			'default'     => '',
-			'autoload'    => false,
-			'desc_tip'    => true,
-		);
 		$logo_image_width           = null;
 		$header_alignment           = null;
 		$font_family                = null;
@@ -131,17 +118,6 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$color_palette_section_end    = null;
 
 		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
-			$logo_image                 = array(
-				'title'       => __( 'Logo', 'woocommerce' ),
-				'desc'        => __( 'Add your logo to each of your WooCommerce emails. If no logo is uploaded, your site title will be used instead.', 'woocommerce' ),
-				'id'          => 'woocommerce_email_header_image',
-				'type'        => 'email_image_url',
-				'css'         => 'min-width:400px;',
-				'placeholder' => __( 'N/A', 'woocommerce' ),
-				'default'     => '',
-				'autoload'    => false,
-				'desc_tip'    => true,
-			);
 			$logo_image_width           = array(
 				'title'    => __( 'Logo width (px)', 'woocommerce' ),
 				'id'       => 'woocommerce_email_header_image_width',
@@ -357,7 +333,17 @@ class WC_Settings_Emails extends WC_Settings_Page {
 						'id'    => 'email_template_options',
 					),
 
-					$logo_image,
+					array(
+						'title'       => __( 'Logo', 'woocommerce' ),
+						'desc'        => __( 'Add your logo to each of your WooCommerce emails. If no logo is uploaded, your site title will be used instead.', 'woocommerce' ),
+						'id'          => 'woocommerce_email_header_image',
+						'type'        => 'email_image_url',
+						'css'         => 'min-width:400px;',
+						'placeholder' => __( 'N/A', 'woocommerce' ),
+						'default'     => '',
+						'autoload'    => false,
+						'desc_tip'    => true,
+					),
 
 					$logo_image_width,
 
