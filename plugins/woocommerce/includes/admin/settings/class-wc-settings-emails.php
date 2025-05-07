@@ -831,6 +831,13 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		}
 	}
 
+	/**
+	 * Get "email improvements" feature status or force it when enabled via URL parameter.
+	 * Transient is used to force the email improvements feature in email preview, which
+	 * is rendered in iframe.
+	 *
+	 * @return bool
+	 */
 	private function get_email_improvements_enabled() {
 		$email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
 		// Check for try-new-templates URL parameter, which is used to force the email improvements feature in preview mode.
