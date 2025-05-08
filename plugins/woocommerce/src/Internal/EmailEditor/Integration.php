@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\EmailEditor\EmailPatterns\PatternsController
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplatesController;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
+use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplateApiController;
 use Throwable;
 use WP_Post;
@@ -294,20 +295,10 @@ class Integration {
 		$email_preview = wc_get_container()->get( EmailPreview::class );
 		$email_preview->set_email_type( $email_type );
 
-		$email            = $email_preview->get_email();
-		$context['order'] = $email->object instanceof \WC_Order ? $email->object : null;
+		$email        = $email_preview->get_email();
+		$personalizer = wc_get_container()->get( TransactionalEmailPersonalizer::class );
 
-		// For emails of type new_user or reset_password we want to set user directly from the object.
-		if ( $email->object instanceof \WP_User ) {
-			$context['wp_user'] = $email->object;
-		} elseif ( $email->object instanceof \WC_Order ) {
-			$context['wp_user'] = $email->object->get_user();
-		} else {
-			$context['wp_user'] = null;
-		}
-		$context['wc_email'] = $email;
-
-		return $context;
+		return $personalizer->prepare_context_data( $context, $email );
 	}
 
 	/**

@@ -64,7 +64,7 @@ class TransactionalEmailPersonalizer {
 	 * @param \WC_Email $email The WooCommerce email object.
 	 * @return array Context data for personalization
 	 */
-	protected function prepare_context_data( array $context, \WC_Email $email ): array {
+	public function prepare_context_data( array $context, \WC_Email $email ): array {
 		$context['recipient_email'] = $email->get_recipient();
 		$context['order']           = $email->object instanceof \WC_Order ? $email->object : null;
 		// For emails of type new_user or reset_password we want to set user directly from the object.
