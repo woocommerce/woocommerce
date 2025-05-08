@@ -208,7 +208,11 @@ export const BankAccountsList = ( {
 						</div>
 					</SortableItem>
 				) ) }
-				<li className="bank-accounts__list-item action">
+				<li
+					className={ `bank-accounts__list-item${
+						accountsWithIds.length === 0 ? ' first-item' : ''
+					}` }
+				>
 					<Button
 						variant={ 'secondary' }
 						onClick={ () => openModal( null ) }
