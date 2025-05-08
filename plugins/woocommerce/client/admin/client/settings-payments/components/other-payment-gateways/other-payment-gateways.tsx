@@ -10,7 +10,6 @@ import {
 	SuggestedPaymentExtension,
 	SuggestedPaymentExtensionCategory,
 } from '@woocommerce/data';
-import { useDebounce } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -72,9 +71,11 @@ export const OtherPaymentGateways = ( {
 	const [ categoryIdWithPopoverVisible, setCategoryIdWithPopoverVisible ] =
 		useState( '' );
 
-	const hidePopoverDebounced = useDebounce( () => {
-		setCategoryIdWithPopoverVisible( '' );
-	}, 1000 );
+	const togglePopover = ( categoryId: string ) => {
+		setCategoryIdWithPopoverVisible(
+			categoryId === categoryIdWithPopoverVisible ? '' : categoryId
+		);
+	};
 
 	// Group suggestions by category.
 	const suggestionsByCategory = useMemo(
@@ -155,28 +156,14 @@ export const OtherPaymentGateways = ( {
 								<span
 									className="other-payment-gateways__content__title__icon-container"
 									onClick={ () =>
-										setCategoryIdWithPopoverVisible(
-											category.id ===
-												categoryIdWithPopoverVisible
-												? ''
-												: category.id
-										)
+										togglePopover( category.id )
 									}
-									onMouseEnter={ () =>
-										hidePopoverDebounced.cancel()
-									}
-									onMouseLeave={ hidePopoverDebounced }
 									onKeyDown={ ( event ) => {
 										if (
 											event.key === 'Enter' ||
 											event.key === ' '
 										) {
-											setCategoryIdWithPopoverVisible(
-												category.id ===
-													categoryIdWithPopoverVisible
-													? ''
-													: category.id
-											);
+											togglePopover( category.id );
 										}
 									} }
 									tabIndex={ 0 }
@@ -196,7 +183,11 @@ export const OtherPaymentGateways = ( {
 											focusOnMount={ true }
 											noArrow={ true }
 											shift={ true }
-											onClose={ hidePopoverDebounced }
+											onClose={ () =>
+												setCategoryIdWithPopoverVisible(
+													''
+												)
+											}
 										>
 											<div className="components-popover__content-container">
 												<p>
