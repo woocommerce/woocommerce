@@ -23,6 +23,7 @@ import {
 import { enhanceButtonBlock } from './core/button';
 import { enhanceButtonsBlock } from './core/buttons';
 import { alterSupportConfiguration } from './core/general-block-support';
+import { enhanceQuoteBlock } from './core/quote';
 
 export function initBlocks() {
 	deactivateStackOnMobile();
@@ -36,6 +37,7 @@ export function initBlocks() {
 	enhanceColumnBlock();
 	enhanceColumnsBlock();
 	enhancePostContentBlock();
+	enhanceQuoteBlock();
 	extendRichTextFormats();
 	activatePersonalizationTagsReplacing();
 	alterSupportConfiguration();

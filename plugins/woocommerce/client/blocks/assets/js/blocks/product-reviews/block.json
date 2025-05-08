@@ -14,9 +14,7 @@
 		}
 	},
 	"supports": {
-		"interactivity": {
-			"clientNavigation": true
-		},
+		"interactivity": true,
 		"align": [ "wide", "full" ],
 		"html": false,
 		"color": {
@@ -64,5 +62,6 @@
 		"woocommerce/single-product",
 		"woocommerce/product-template",
 		"core/post-template"
-	]
+	],
+	"viewScriptModule": "woocommerce/blockified-product-reviews"
 }
