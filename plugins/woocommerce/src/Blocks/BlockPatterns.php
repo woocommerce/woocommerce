@@ -210,7 +210,7 @@ class BlockPatterns {
 		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
 
 		$patterns = $this->ptk_patterns_store->get_patterns();
-		if ( empty( $patterns ) ) {
+		if ( empty( $patterns ) || ! is_array( $patterns ) ) {
 			// Only log once per day by using a transient.
 			$transient_key = 'wc_ptk_pattern_store_warning';
 			// By only logging when patterns are empty and no fetch is scheduled,
