@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { Popover } from '@wordpress/components';
 import { Link, Pill } from '@woocommerce/components';
 import { createInterpolateElement, useState } from '@wordpress/element';
-import { useDebounce } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -34,9 +33,9 @@ interface OfficialBadgeProps {
 export const OfficialBadge = ( { variant }: OfficialBadgeProps ) => {
 	const [ isPopoverVisible, setPopoverVisible ] = useState( false );
 
-	const hidePopoverDebounced = useDebounce( () => {
-		setPopoverVisible( false );
-	}, 1000 );
+	const togglePopover = () => {
+		setPopoverVisible( ! isPopoverVisible );
+	};
 
 	return (
 		<Pill className={ `woocommerce-official-extension-badge` }>
@@ -44,12 +43,10 @@ export const OfficialBadge = ( { variant }: OfficialBadgeProps ) => {
 				className="woocommerce-official-extension-badge__container"
 				tabIndex={ 0 }
 				role="button"
-				onClick={ () => setPopoverVisible( ! isPopoverVisible ) }
-				onMouseEnter={ () => hidePopoverDebounced.cancel() }
-				onMouseLeave={ hidePopoverDebounced }
+				onClick={ togglePopover }
 				onKeyDown={ ( event ) => {
 					if ( event.key === 'Enter' || event.key === ' ' ) {
-						setPopoverVisible( ! isPopoverVisible );
+						togglePopover();
 					}
 				} }
 			>
@@ -72,7 +69,7 @@ export const OfficialBadge = ( { variant }: OfficialBadgeProps ) => {
 						focusOnMount={ true }
 						noArrow={ true }
 						shift={ true }
-						onClose={ hidePopoverDebounced }
+						onClose={ () => setPopoverVisible( false ) }
 					>
 						<div className="components-popover__content-container">
 							<p>
