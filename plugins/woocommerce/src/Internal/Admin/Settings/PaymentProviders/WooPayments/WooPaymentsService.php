@@ -731,10 +731,22 @@ class WooPaymentsService {
 			);
 		}
 
-		// Nothing to do if there is an account, but it is not a test account.
+		// Nothing to do if there is a connected account, but it is not a test account.
 		if ( $this->has_account() ) {
-			return array(
-				'message' => esc_html__( 'An account is already set up. Reset the onboarding first.', 'woocommerce' ),
+			// Mark the onboarding step as blocked, if it is not already.
+			$this->set_onboarding_step_blocked(
+				self::ONBOARDING_STEP_TEST_ACCOUNT,
+				$location,
+				array(
+					'code'    => 'account_already_exists',
+					'message' => esc_html__( 'An account is already set up. Reset the onboarding first.', 'woocommerce' ),
+				)
+			);
+
+			throw new ApiException(
+				'woocommerce_woopayments_onboarding_action_error',
+				esc_html__( 'An account is already set up. Reset the onboarding first.', 'woocommerce' ),
+				(int) WP_Http::FORBIDDEN
 			);
 		}
 
