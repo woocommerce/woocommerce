@@ -10,7 +10,6 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\NumberUtil;
-use WC_Order_Refund;
 
 defined( 'ABSPATH' ) || exit;
 
