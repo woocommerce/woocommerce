@@ -149,26 +149,6 @@ export const useStoreCart = (
 			};
 		}, [] );
 
-	const cartFees = useMemo( () => {
-		return cartData.fees.length > 0
-			? cartData.fees.map( ( fee: CartResponseFeeItem ) =>
-					decodeValues( fee )
-			  )
-			: EMPTY_CART_FEES;
-	}, [ JSON.stringify( cartData.fees ) ] );
-
-	// Add a text property to the coupon to allow extensions to modify
-	// the text used to display the coupon, without affecting the
-	// functionality when it comes to removing the coupon.
-	const cartCoupons: CartResponseCoupons = useMemo( () => {
-		return cartData.coupons.length > 0
-			? cartData.coupons.map( ( coupon: CartResponseCouponItem ) => ( {
-					...coupon,
-					label: coupon.code,
-			  } ) )
-			: EMPTY_CART_COUPONS;
-	}, [ JSON.stringify( cartData.coupons ) ] );
-
 	if ( ! shouldSelect ) {
 		return defaultCartData;
 	}
@@ -194,10 +174,23 @@ export const useStoreCart = (
 	const shippingAddress = shippingAddressRef.current;
 
 	const storeCart: StoreCart = {
-		cartCoupons,
+		cartCoupons:
+			cartData.coupons.length > 0
+				? cartData.coupons.map(
+						( coupon: CartResponseCouponItem ) => ( {
+							...coupon,
+							label: coupon.code,
+						} )
+				  )
+				: EMPTY_CART_COUPONS,
 		cartItems: cartData.items,
 		crossSellsProducts: cartData.crossSells,
-		cartFees,
+		cartFees:
+			cartData.fees.length > 0
+				? cartData.fees.map( ( fee: CartResponseFeeItem ) =>
+						decodeValues( fee )
+				  )
+				: EMPTY_CART_FEES,
 		cartItemsCount: cartData.itemsCount,
 		cartItemsWeight: cartData.itemsWeight,
 		cartNeedsPayment: cartData.needsPayment,
