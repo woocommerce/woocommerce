@@ -2,7 +2,7 @@
  * External dependencies
  */
 import fastDeepEqual from 'fast-deep-equal/es6';
-import { useRef, useMemo } from '@wordpress/element';
+import { useRef } from '@wordpress/element';
 import {
 	cartStore,
 	EMPTY_CART_COUPONS,
@@ -26,7 +26,6 @@ import type {
 	CartResponseBillingAddress,
 	CartResponseShippingAddress,
 	CartResponseCouponItem,
-	CartResponseCoupons,
 } from '@woocommerce/types';
 import { emptyHiddenAddressFields } from '@woocommerce/base-utils';
 
