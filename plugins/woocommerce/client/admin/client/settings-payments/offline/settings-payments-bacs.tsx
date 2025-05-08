@@ -9,7 +9,7 @@ import {
 	TextareaControl,
 	Button,
 } from '@wordpress/components';
-import { useState, useEffect, useMemo } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import { paymentGatewaysStore, optionsStore } from '@woocommerce/data';
 
 /**
