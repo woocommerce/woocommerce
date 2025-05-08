@@ -38,7 +38,7 @@ class AddressProviderController {
 		$provider_class_names = apply_filters( 'woocommerce_address_providers', array() );
 
 		// The filter returned nothing but an empty array, so we can skip the rest of the function.
-		if ( is_array( $provider_class_names ) && empty( $provider_class_names ) ) {
+		if ( empty( $provider_class_names ) && is_array( $provider_class_names ) ) {
 			return array();
 		}
 
