@@ -179,13 +179,13 @@ class EmailPreview {
 		$object           = null;
 
 		if ( in_array( $email_type, self::USER_OBJECT_EMAILS, true ) ) {
-			$object                        = new WP_User( 0 );
-			$object->user_email            = 'user_preview@example.com';
-			$object->user_login            = 'user_preview';
-			$object->first_name            = 'John';
-			$object->last_name             = 'Doe';
-			$this->email->user_email       = $object->user_email;
-			$this->email->user_login       = $object->user_login;
+			$object                  = new WP_User( 0 );
+			$object->user_email      = 'user_preview@example.com';
+			$object->user_login      = 'user_preview';
+			$object->first_name      = 'John';
+			$object->last_name       = 'Doe';
+			$this->email->user_email = $object->user_email;
+			$this->email->user_login = $object->user_login;
 
 			if ( property_exists( $this->email, 'reset_key' ) ) {
 				$this->email->reset_key = 'reset_key';
