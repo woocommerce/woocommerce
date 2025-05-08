@@ -91,15 +91,12 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
     -   [Adding an endpoint to ExtendSchema](internal-developers/rest-api/extend-rest-api-new-endpoint.md)
     -   [Available Formatters](third-party-developers/extensibility/rest-api/extend-rest-api-formatters.md)
     -   [Updating the cart with the Store API](third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md)
--   Checkout Payment Methods
-    -   [Check out more in the WooCommerce Developer Documentation](https://developer.woocommerce.com/docs/category/cart-and-checkout-blocks/payment-methods/)
 -   Cart and Checkout Blocks
     -   [Blocks Registry](../packages/checkout/blocks-registry/README.md)
     -   [Components](../packages/checkout/components/README.md)
     -   [Filter Registry](../packages/checkout/filter-registry/README.md)
     -   [Slot and Fill](../packages/checkout/slot/README.md)
     -   [Utilities](../packages/checkout/utils/README.md)
-    -   [Check out more in WooCommerce Developer Documentation](https://developer.woocommerce.com/docs/category/cart-and-checkout-blocks/)
 
 ## Designers and theme developers
 
@@ -116,24 +113,6 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
 ### Tools
 
 -   [@woocommerce/extend-cart-checkout-block](https://www.npmjs.com/package/@woocommerce/extend-cart-checkout-block) This is a template to be used with @wordpress/create-block to create a WooCommerce Blocks extension starting point. It also showcases how to use some extensibility points, e.g. registering an inner block in the Checkout Block, applying filters to certain texts such as the place order button, using Slot/Fill and how to change the behaviour of the Store API.
-
-### Articles
-
-The following posts from [developer.woo.com](https://developer.woocommerce.com/category/developer-resources/) provide deeper insights into the WooCommerce Blocks development.
-
--   [Store API is now considered stable](https://developer.woocommerce.com/2022/03/25/store-api-is-now-considered-stable/)
--   [Available Extensibility Interfaces for The Cart and Checkout Blocks](https://developer.woocommerce.com/2021/11/09/available-extensibility-interfaces-for-the-cart-and-checkout-blocks/)
--   [How The Checkout Block Processes An Order](https://developer.woocommerce.com/2022/10/06/how-the-checkout-block-processes-an-order/)
--   [New @wordpress/data stores in WooCommerce Blocks](https://developer.woocommerce.com/2022/10/17/new-wordpress-data-stores-in-woocommerce-blocks/)
-
-### Tutorials
-
-The following tutorials from [developer.woo.com](https://developer.woocommerce.com/) help you with extending the WooCommerce Blocks plugin.
-
--   [📺 Tutorial: Extending the WooCommerce Checkout Block](https://developer.woocommerce.com/2023/08/07/extending-the-woocommerce-checkout-block-to-add-custom-shipping-options/)
--   [Hiding Shipping and Payment Options in the Cart and Checkout Blocks](https://developer.woocommerce.com/2022/05/20/hiding-shipping-and-payment-options-in-the-cart-and-checkout-blocks/)
--   [Integrating your Payment Method with Cart and Checkout Blocks](https://developer.woocommerce.com/2021/03/15/integrating-your-payment-method-with-cart-and-checkout-blocks/)
--   [Exposing Payment Options in the Checkout Block](https://developer.woocommerce.com/2022/07/07/exposing-payment-options-in-the-checkout-block/)
 
 <!-- FEEDBACK -->
 
