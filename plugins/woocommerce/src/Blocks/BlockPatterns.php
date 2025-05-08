@@ -243,16 +243,25 @@ class BlockPatterns {
 	 * @return array The parsed patterns.
 	 */
 	private function parse_categories( array $patterns ) {
-		if ( ! isset( $patterns['categories'] ) || ! is_array( $patterns['categories'] ) ) {
-			return array();
-		}
 
 		return array_map(
 			function ( $pattern ) {
+				if ( ! isset( $pattern['categories'] ) ) {
+					$pattern['categories'] = array();
+				}
+
+				$values = array_values( $pattern['categories'] );
+
+				foreach ( $values as $value ) {
+					if ( ! isset( $value['title'] ) || ! isset( $value['slug'] ) ) {
+						$pattern['categories'] = array();
+					}
+				}
+
 				$pattern['categories'] = array_map(
 					function ( $category ) {
 						foreach ( self::CATEGORIES_PREFIXES as $prefix ) {
-							if ( strpos( $category['title'], $prefix ) !== false ) {
+							if ( strpos( $category['title'] ?? '', $prefix ) !== false ) {
 								$parsed_category   = str_replace( $prefix, '', $category['title'] );
 								$parsed_category   = str_replace( '_', ' ', $parsed_category );
 								$category['title'] = ucfirst( $parsed_category );
