@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { test, expect } from '../../fixtures/fixtures';
-import { getFakeCustomer, getFakeProduct } from '../../utils/data';
+import { getFakeProduct } from '../../utils/data';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { WC_API_PATH, WC_ADMIN_API_PATH } from '../../utils/api-client';
 
@@ -62,7 +62,7 @@ const wcPages = [
 				text: 'Filter by product type',
 			},
 			{
-				name: 'Add New',
+				name: 'Add new product',
 				heading: 'Add New',
 				element: '.duplication',
 				text: 'Copy to a new draft',
@@ -182,7 +182,6 @@ const wcPages = [
 
 for ( const currentPage of wcPages ) {
 	const product = getFakeProduct();
-	const customer = getFakeCustomer();
 	let orderId;
 
 	test.use( { storageState: ADMIN_STATE_PATH } );
@@ -202,6 +201,14 @@ for ( const currentPage of wcPages ) {
 			.post( `${ WC_API_PATH }/products`, product )
 			.then( ( r ) => {
 				product.id = r.data.id;
+			} )
+			.catch( ( e ) => {
+				console.error(
+					`Failed to create product ${
+						e.data ? JSON.stringify( e.data ) : ''
+					}`
+				);
+				throw e;
 			} );
 
 		// create an order
@@ -216,24 +223,42 @@ for ( const currentPage of wcPages ) {
 			} )
 			.then( ( r ) => {
 				orderId = r.data.id;
+			} )
+			.catch( ( e ) => {
+				console.error(
+					`Failed to create order ${
+						e.data ? JSON.stringify( e.data ) : ''
+					}`
+				);
+				throw e;
 			} );
-
-		// create customer
-		await restApi
-			.post( `${ WC_API_PATH }/customers`, customer )
-			.then( ( r ) => ( customer.id = r.data.id ) );
 	} );
 
 	test.afterAll( async ( { restApi } ) => {
-		await restApi.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
-			force: true,
-		} );
-		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
-			force: true,
-		} );
-		await restApi.delete( `${ WC_API_PATH }/customers/${ customer.id }`, {
-			force: true,
-		} );
+		await restApi
+			.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
+				force: true,
+			} )
+			.catch( ( e ) => {
+				console.error(
+					`Failed to delete order ${
+						e.data ? JSON.stringify( e.data ) : ''
+					}`
+				);
+				throw e;
+			} );
+		await restApi
+			.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+				force: true,
+			} )
+			.catch( ( e ) => {
+				console.error(
+					`Failed to delete product ${
+						e.data ? JSON.stringify( e.data ) : ''
+					}`
+				);
+				throw e;
+			} );
 	} );
 
 	for ( let i = 0; i < currentPage.subpages.length; i++ ) {
@@ -241,10 +266,16 @@ for ( const currentPage of wcPages ) {
 			page,
 		} ) => {
 			await page.goto( currentPage.url );
+
+			// needs a Regexp on link name to match exact text and also match the possible counter
+			// E.g. should match "Orders 3" or "Orders", but should not match "Quick Orders"
 			await page
-				.locator(
-					`li.wp-menu-open > ul.wp-submenu > li a:has-text("${ currentPage.subpages[ i ].name }")`
-				)
+				.locator( 'li.wp-menu-open > ul.wp-submenu' )
+				.getByRole( 'link', {
+					name: new RegExp(
+						`^${ currentPage.subpages[ i ].name }( \\d+)?$`
+					),
+				} )
 				.click();
 
 			await expect(
