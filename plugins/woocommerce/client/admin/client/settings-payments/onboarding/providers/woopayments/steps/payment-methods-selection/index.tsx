@@ -54,11 +54,6 @@ export default function PaymentMethodsSelection() {
 		}
 	}, [ contextPaymentMethodsState ] );
 
-	useEffect( () => {
-		// TODO: We may want to replace this with a generic step_view event used in every step of the onboarding.
-		recordEvent( 'wcpay_settings_payment_methods_pageview' );
-	} );
-
 	// Combine state to match combined methods list
 	const combinedState = useMemo(
 		() => combinePaymentMethodsState( paymentMethodsState ),
