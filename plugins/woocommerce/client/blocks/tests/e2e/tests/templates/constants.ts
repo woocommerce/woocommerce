@@ -126,7 +126,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 
 			await page.goto( '/product/wordpress-pennant/' );
 		},
-		templateName: 'External Product Add to Cart + Options',
+		templateName: 'External Product Add To Cart With Options',
 		templatePath: 'external-product-add-to-cart-with-options',
 		templateType: 'wp_template_part',
 		canBeOverriddenByThemes: true,

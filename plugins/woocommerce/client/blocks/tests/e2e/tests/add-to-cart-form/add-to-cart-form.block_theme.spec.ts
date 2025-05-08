@@ -510,7 +510,9 @@ test.describe( `${ blockData.name } Block`, () => {
 		await editor.selectBlocks( addToCartFormBlock );
 
 		await page
-			.getByRole( 'button', { name: 'Upgrade to the blockified' } )
+			.getByRole( 'button', {
+				name: 'Upgrade to the Add to Cart + Options block',
+			} )
 			.click();
 
 		await expect(

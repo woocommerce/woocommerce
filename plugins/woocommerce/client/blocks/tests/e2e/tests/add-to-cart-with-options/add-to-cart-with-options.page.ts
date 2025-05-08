@@ -93,7 +93,9 @@ class AddToCartWithOptionsPage {
 		await this.editor.selectBlocks( addToCartFormBlock );
 
 		await this.page
-			.getByRole( 'button', { name: 'Upgrade to the blockified' } )
+			.getByRole( 'button', {
+				name: 'Upgrade to the Add to Cart + Options block',
+			} )
 			.click();
 	}
 }

@@ -65,7 +65,7 @@ test.describe( `Add to Cart + Options Block (block theme with templates)`, () =>
 
 		await expect(
 			page.getByText(
-				'External Product Add to Cart + Options template loaded from theme'
+				'External Product Add to Cart With Options template loaded from theme'
 			)
 		).toBeVisible();
 	} );
