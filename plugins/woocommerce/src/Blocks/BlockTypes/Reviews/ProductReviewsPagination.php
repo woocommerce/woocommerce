@@ -32,12 +32,22 @@ class ProductReviewsPagination extends AbstractBlock {
 		}
 
 		$classes            = ( isset( $attributes['style']['elements']['link']['color']['text'] ) ) ? 'has-link-color' : '';
-		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => $classes ) );
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class'               => $classes,
+				'data-wp-interactive' => 'woocommerce/blockified-product-reviews',
+			)
+		);
+
+		$p = new \WP_HTML_Tag_Processor( $content );
+		while ( $p->next_tag( 'a' ) ) {
+			$p->set_attribute( 'data-wp-on--click', 'actions.navigate' );
+		}
 
 		return sprintf(
 			'<div %1$s>%2$s</div>',
 			$wrapper_attributes,
-			$content
+			$p->get_updated_html()
 		);
 	}
 
