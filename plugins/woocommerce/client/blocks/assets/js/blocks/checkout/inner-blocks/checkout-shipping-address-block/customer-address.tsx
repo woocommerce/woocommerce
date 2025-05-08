@@ -47,7 +47,7 @@ const CustomerAddress = () => {
 				);
 			} )
 			.filter( Boolean );
-	}, [ JSON.stringify( shippingAddress ), getValidationErrorSelector ] );
+	}, [ shippingAddress, getValidationErrorSelector ] );
 
 	useEffect( () => {
 		if ( invalidProps.length > 0 && editing === false ) {
