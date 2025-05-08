@@ -180,87 +180,87 @@ const wcPages = [
 	},
 ];
 
+const product = getFakeProduct();
+let orderId;
+
+test.use( { storageState: ADMIN_STATE_PATH } );
+
+test.beforeAll( async ( { restApi } ) => {
+	// skip onboarding
+	const response = await restApi.post(
+		`${ WC_ADMIN_API_PATH }/onboarding/profile`,
+		{
+			skipped: true,
+		}
+	);
+	expect( response.statusCode ).toEqual( 200 );
+
+	// create a simple product
+	await restApi
+		.post( `${ WC_API_PATH }/products`, product )
+		.then( ( r ) => {
+			product.id = r.data.id;
+		} )
+		.catch( ( e ) => {
+			console.error(
+				`Failed to create product ${
+					e.data ? JSON.stringify( e.data ) : ''
+				}`
+			);
+			throw e;
+		} );
+
+	// create an order
+	await restApi
+		.post( `${ WC_API_PATH }/orders`, {
+			line_items: [
+				{
+					product_id: product.id,
+					quantity: 1,
+				},
+			],
+		} )
+		.then( ( r ) => {
+			orderId = r.data.id;
+		} )
+		.catch( ( e ) => {
+			console.error(
+				`Failed to create order ${
+					e.data ? JSON.stringify( e.data ) : ''
+				}`
+			);
+			throw e;
+		} );
+} );
+
+test.afterAll( async ( { restApi } ) => {
+	await restApi
+		.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
+			force: true,
+		} )
+		.catch( ( e ) => {
+			console.error(
+				`Failed to delete order ${
+					e.data ? JSON.stringify( e.data ) : ''
+				}`
+			);
+			throw e;
+		} );
+	await restApi
+		.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+			force: true,
+		} )
+		.catch( ( e ) => {
+			console.error(
+				`Failed to delete product ${
+					e.data ? JSON.stringify( e.data ) : ''
+				}`
+			);
+			throw e;
+		} );
+} );
+
 for ( const currentPage of wcPages ) {
-	const product = getFakeProduct();
-	let orderId;
-
-	test.use( { storageState: ADMIN_STATE_PATH } );
-
-	test.beforeAll( async ( { restApi } ) => {
-		// skip onboarding
-		const response = await restApi.post(
-			`${ WC_ADMIN_API_PATH }/onboarding/profile`,
-			{
-				skipped: true,
-			}
-		);
-		expect( response.statusCode ).toEqual( 200 );
-
-		// create a simple product
-		await restApi
-			.post( `${ WC_API_PATH }/products`, product )
-			.then( ( r ) => {
-				product.id = r.data.id;
-			} )
-			.catch( ( e ) => {
-				console.error(
-					`Failed to create product ${
-						e.data ? JSON.stringify( e.data ) : ''
-					}`
-				);
-				throw e;
-			} );
-
-		// create an order
-		await restApi
-			.post( `${ WC_API_PATH }/orders`, {
-				line_items: [
-					{
-						product_id: product.id,
-						quantity: 1,
-					},
-				],
-			} )
-			.then( ( r ) => {
-				orderId = r.data.id;
-			} )
-			.catch( ( e ) => {
-				console.error(
-					`Failed to create order ${
-						e.data ? JSON.stringify( e.data ) : ''
-					}`
-				);
-				throw e;
-			} );
-	} );
-
-	test.afterAll( async ( { restApi } ) => {
-		await restApi
-			.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
-				force: true,
-			} )
-			.catch( ( e ) => {
-				console.error(
-					`Failed to delete order ${
-						e.data ? JSON.stringify( e.data ) : ''
-					}`
-				);
-				throw e;
-			} );
-		await restApi
-			.delete( `${ WC_API_PATH }/products/${ product.id }`, {
-				force: true,
-			} )
-			.catch( ( e ) => {
-				console.error(
-					`Failed to delete product ${
-						e.data ? JSON.stringify( e.data ) : ''
-					}`
-				);
-				throw e;
-			} );
-	} );
-
 	for ( let i = 0; i < currentPage.subpages.length; i++ ) {
 		test( `can load ${ currentPage.name } > ${ currentPage.subpages[ i ].name } page`, async ( {
 			page,
