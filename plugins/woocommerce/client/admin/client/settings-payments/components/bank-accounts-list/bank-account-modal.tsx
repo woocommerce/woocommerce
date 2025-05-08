@@ -148,6 +148,13 @@ export const BankAccountModal = ( {
 			/>
 
 			<TextControl
+				className={ 'bank-account-modal__field' }
+				label={ __( 'Bank Name', 'woocommerce' ) }
+				value={ formData.bank_name }
+				onChange={ ( value ) => updateField( 'bank_name', value ) }
+			/>
+
+			<TextControl
 				className={ 'bank-account-modal__field is-required' }
 				label={ __( 'Account Number', 'woocommerce' ) }
 				required
@@ -160,13 +167,6 @@ export const BankAccountModal = ( {
 						</span>
 					) : undefined
 				}
-			/>
-
-			<TextControl
-				className={ 'bank-account-modal__field' }
-				label={ __( 'Bank Name', 'woocommerce' ) }
-				value={ formData.bank_name }
-				onChange={ ( value ) => updateField( 'bank_name', value ) }
 			/>
 
 			<TextControl
