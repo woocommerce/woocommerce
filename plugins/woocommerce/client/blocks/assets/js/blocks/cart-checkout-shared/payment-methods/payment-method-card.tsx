@@ -36,18 +36,17 @@ const PaymentMethodCard = ( {
 	showSaveOption,
 }: PaymentMethodCardProps ) => {
 	const { isEditor } = useEditorContext();
-	const { shouldSavePaymentMethod, customerId, createAccount } = useSelect(
-		( select ) => {
+	const { shouldSavePaymentMethod, customerId, shouldCreateAccount } =
+		useSelect( ( select ) => {
 			const paymentMethodStore = select( paymentStore );
 			const checkoutStore = select( checkoutStoreDescriptor );
 			return {
 				shouldSavePaymentMethod:
 					paymentMethodStore.getShouldSavePaymentMethod(),
 				customerId: checkoutStore.getCustomerId(),
-				createAccount: checkoutStore.getShouldCreateAccount(),
+				shouldCreateAccount: checkoutStore.getShouldCreateAccount(),
 			};
-		}
-	);
+		}, [] );
 
 	const { __internalSetShouldSavePaymentMethod } =
 		useDispatch( paymentStore );
@@ -59,7 +58,7 @@ const PaymentMethodCard = ( {
 		// They're already logged in.
 		customerId > 0 ||
 		// They're not logged in, but they're creating an account.
-		createAccount ||
+		shouldCreateAccount ||
 		// They're not logged in, but they must create an account.
 		! allowGuestCheckout;
 
