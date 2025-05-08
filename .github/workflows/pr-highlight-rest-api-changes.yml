@@ -24,6 +24,7 @@ jobs:
               - 'plugins/woocommerce/src/Admin/API/**'
               - 'plugins/woocommerce/src/Utilities/RestApiUtil.php'
               - 'plugins/woocommerce/src/Internal/**/*RestApi**'
+              - 'plugins/woocommerce/src/**/*RestController*'
               - 'plugins/woocommerce/includes/rest-api/**'
               - 'plugins/woocommerce/includes/*-wc-rest-*'
               
