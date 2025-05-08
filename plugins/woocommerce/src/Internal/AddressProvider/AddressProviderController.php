@@ -37,6 +37,11 @@ class AddressProviderController {
 		 */
 		$provider_class_names = apply_filters( 'woocommerce_address_providers', array() );
 
+		// The filter returned nothing but an empty array, so we can skip the rest of the function.
+		if ( is_array( $provider_class_names ) && empty( $provider_class_names ) ) {
+			return array();
+		}
+
 		$logger = wc_get_logger();
 
 		if ( ! is_array( $provider_class_names ) ) {
@@ -117,7 +122,7 @@ class AddressProviderController {
 			$providers[] = $provider_instance;
 		}
 
-			// Check if there's a preferred provider set in the settings.
+		// Check if there's a preferred provider set in the settings.
 		$preferred_provider_id = get_option( 'woocommerce_address_autocomplete_provider', '' );
 
 		if ( ! empty( $preferred_provider_id ) && ! empty( $providers ) ) {
