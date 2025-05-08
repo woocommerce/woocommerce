@@ -50,6 +50,20 @@ class WooPaymentsService {
 	 */
 	const ONBOARDING_STEP_STATUS_COMPLETED   = 'completed';
 
+	/**
+	 * Failure generally refers to some error that occurred during a step action.
+	 * Retrying the action should be possible and lead to a different step status.
+	 */
+	const ONBOARDING_STEP_STATUS_FAILED      = 'failed';
+
+	/**
+	 * Blocked generally refers to a step can't progress to a completed state due to some technical requirements
+	 * that are beyond the purview of the Payments Settings page or the WooPayments extension.
+	 * Most of the time, the reasons will be environment-related.
+	 * For example, the store may not use HTTPS, or live onboarding might be prevented due to environment settings.
+	 */
+	const ONBOARDING_STEP_STATUS_BLOCKED     = 'blocked';
+
 	const ACTION_TYPE_REST     = 'REST';
 	const ACTION_TYPE_REDIRECT = 'REDIRECT';
 
@@ -324,6 +338,226 @@ class WooPaymentsService {
 
 		// Store the updated step data.
 		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
+	}
+
+	/**
+	 * Check if an onboarding step has a failed status.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step is failed.
+	 */
+	private function is_onboarding_step_failed( string $step_id, string $location ): bool {
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+
+		return ! empty( $statuses[ self::ONBOARDING_STEP_STATUS_FAILED ] );
+	}
+
+	/**
+	 * Mark an onboarding step as failed.
+	 *
+	 * This is for internal use only as a failed step status should not be the result of a user action.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param array  $error    Optional. An error to be stored for the step to provide context to API consumers.
+	 *                         The error should be an associative array with the following keys:
+	 *                         - 'code': A string representing the error code.
+	 *                         - 'message': A string representing the error message.
+	 *                         - 'context': Optional. An array of additional data related to the error.
+	 *
+	 * @return bool Whether the onboarding step was marked as failed.
+	 */
+	private function set_onboarding_step_failed( string $step_id, string $location, array $error = array() ): bool {
+		// There is no need to do onboarding checks because setting a step as failed should be possible at any time.
+
+		// Record the error for the step, even if it is empty.
+		// This will ensure we only store the most recent error.
+		$this->save_nox_profile_onboarding_step_data_entry( $step_id, $location, 'error', $this->sanitize_onboarding_step_error( $error ) );
+
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+
+		// Mark the step as failed and record the timestamp.
+		$statuses[ self::ONBOARDING_STEP_STATUS_FAILED ] = $this->proxy->call_function( 'time' );
+
+		// Make sure we clear the blocked status if it was set since blocked and failed should be mutually exclusive.
+		unset( $statuses[ self::ONBOARDING_STEP_STATUS_BLOCKED ] );
+
+		// Store the updated step data.
+		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
+	}
+
+	/**
+	 * Clear the failed status of an onboarding step.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step was cleared from failed status.
+	 *              Returns false if the step was not failed.
+	 */
+	private function clear_onboarding_step_failed( string $step_id, string $location ): bool {
+		if ( ! $this->is_onboarding_step_failed( $step_id, $location ) ) {
+			return false;
+		}
+
+		// Clear any error for the step.
+		$this->save_nox_profile_onboarding_step_data_entry( $step_id, $location, 'error', array() );
+
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+
+		// Clear the failed status.
+		unset( $statuses[ self::ONBOARDING_STEP_STATUS_FAILED ] );
+
+		// Store the updated step data.
+		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
+	}
+
+	/**
+	 * Check if an onboarding step has a blocked status.
+	 *
+	 * @param string $step_id The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step is blocked.
+	 */
+	private function is_onboarding_step_blocked( string $step_id, string $location ): bool {
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+
+		return ! empty( $statuses[ self::ONBOARDING_STEP_STATUS_BLOCKED ] );
+	}
+
+	/**
+	 * Mark an onboarding step as blocked.
+	 *
+	 * This is for internal use only as a blocked step status should not be the result of a user action.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param array  $errors   Optional. A list of errors to be stored for the step to provide context to API consumers.
+	 *
+	 * @return bool Whether the onboarding step was marked as blocked.
+	 */
+	private function set_onboarding_step_blocked( string $step_id, string $location, array $errors = array() ): bool {
+		// There is no need to do onboarding checks because setting a step as blocked should be possible at any time.
+
+		// Record the error for the step, even if it is empty.
+		// This will ensure we only store the most recent error.
+		$this->save_nox_profile_onboarding_step_data_entry( $step_id, $location, 'error', $this->sanitize_onboarding_step_error( $errors ) );
+
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+
+		// Mark the step as blocked and record the timestamp.
+		$statuses[ self::ONBOARDING_STEP_STATUS_BLOCKED ] = $this->proxy->call_function( 'time' );
+
+		// Make sure we clear the failed status if it was set since blocked and failed should be mutually exclusive.
+		unset( $statuses[ self::ONBOARDING_STEP_STATUS_FAILED ] );
+
+		// Store the updated step data.
+		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
+	}
+
+	/**
+	 * Clear the blocked status of an onboarding step.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step was cleared from blocked status.
+	 *              Returns false if the step was not blocked.
+	 */
+	private function clear_onboarding_step_blocked( string $step_id, string $location ): bool {
+		if ( ! $this->is_onboarding_step_blocked( $step_id, $location ) ) {
+			return false;
+		}
+
+		// Clear any error for the step.
+		$this->save_nox_profile_onboarding_step_data_entry( $step_id, $location, 'error', array() );
+
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+
+		// Clear the blocked status.
+		unset( $statuses[ self::ONBOARDING_STEP_STATUS_BLOCKED ] );
+
+		// Store the updated step data.
+		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
+	}
+
+	/**
+	 * Get the current stored error for an onboarding step.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return array The error for the onboarding step.
+	 */
+	private function get_onboarding_step_error( string $step_id, string $location ): array {
+		return (array) $this->get_nox_profile_onboarding_step_data_entry( $step_id, $location, 'error', array() );
+	}
+
+	/**
+	 * Sanitize an error for an onboarding step.
+	 *
+	 * @param array $error The error to sanitize.
+	 *
+	 * @return array The sanitized error.
+	 */
+	private function sanitize_onboarding_step_error( array $error ): array {
+		$sanitized_error = array(
+			'code'    => isset( $error['code'] ) ? sanitize_text_field( $error['code'] ) : '',
+			'message' => isset( $error['message'] ) ? sanitize_text_field( $error['message'] ) : '',
+			'context' => array(),
+		);
+
+		if ( isset( $error['context'] ) && ( is_array( $error['context'] ) || is_object( $error['context'] ) ) ) {
+			// Make sure we are dealing with an array.
+			$sanitized_error['context'] = json_decode( wp_json_encode( $error['context'] ), true );
+			if ( ! is_array( $sanitized_error['context'] ) ) {
+				$sanitized_error['context'] = array();
+			}
+
+			// Sanitize the context data.
+			// It can only contain strings or arrays of strings.
+			// Scalar values will be converted to strings. Other types will be ignored.
+			foreach ( $sanitized_error['context'] as $key => $value ) {
+				if ( is_string( $value ) ) {
+					$sanitized_error['context'][ $key ] = sanitize_text_field( $value );
+				} elseif ( is_array( $value ) ) {
+					// Arrays can only contain strings.
+					$sanitized_error['context'][ $key ] = array_map(
+						function( $item ) {
+							if ( is_string( $item ) ) {
+								return sanitize_text_field( $item );
+							} elseif ( is_scalar( $item ) ) {
+								return sanitize_text_field( (string) $item );
+							} else {
+								return '';
+							}
+						},
+						$value
+					);
+					// Remove any empty values from the array.
+					$sanitized_error['context'][ $key ] = array_filter(
+						$sanitized_error['context'][ $key ],
+						function( $item ) {
+							return '' !== $item;
+						}
+					);
+				} else {
+					unset( $sanitized_error['context'][ $key ] );
+				}
+			}
+		}
+
+		return $sanitized_error;
 	}
 
 	/**
