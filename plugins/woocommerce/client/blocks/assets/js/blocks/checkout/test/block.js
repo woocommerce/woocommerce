@@ -164,6 +164,98 @@ describe( 'Testing Checkout', () => {
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 	} );
 
+	it( 'Allows saving payment method if the customer is creating an account or has already logged in', async () => {
+		await act( async () => {
+			const PaymentMethodContent = () => <div>A payment method</div>;
+			registerPaymentMethod( {
+				name: 'test-payment-method',
+				label: 'Payment method with cards',
+				content: <PaymentMethodContent />,
+				edit: <PaymentMethodContent />,
+				icons: null,
+				canMakePayment: () => true,
+				supports: {
+					showSavedCards: true,
+					showSaveOption: true,
+					features: [ 'products' ],
+				},
+				ariaLabel: 'Test Payment Method',
+			} );
+		} );
+
+		const { rerender } = render( <CheckoutBlock /> );
+
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		expect(
+			screen.getByText( /Payment method with cards/i )
+		).toBeInTheDocument();
+
+		expect(
+			screen.getByRole( 'checkbox', {
+				name: 'Save payment information to my account for future purchases.',
+			} )
+		).toBeInTheDocument();
+
+		await act( async () => {
+			dispatch( checkoutStore ).__internalSetCustomerId( 0 );
+		} );
+
+		rerender( <CheckoutBlock /> );
+
+		expect(
+			screen.queryByRole( 'checkbox', {
+				name: 'Save payment information to my account for future purchases.',
+			} )
+		).not.toBeInTheDocument();
+
+		await act( async () => {
+			allSettings.checkoutAllowsGuest = true;
+			allSettings.checkoutAllowsSignup = true;
+			dispatch( checkoutStore ).__internalSetCustomerId( 0 );
+			dispatch( checkoutStore ).__internalSetShouldCreateAccount( true );
+		} );
+
+		rerender( <CheckoutBlock /> );
+
+		expect(
+			screen.getByRole( 'checkbox', {
+				name: 'Save payment information to my account for future purchases.',
+			} )
+		).toBeInTheDocument();
+
+		await act( async () => {
+			dispatch( checkoutStore ).__internalSetShouldCreateAccount( false );
+		} );
+
+		rerender( <CheckoutBlock /> );
+
+		expect(
+			screen.queryByRole( 'checkbox', {
+				name: 'Save payment information to my account for future purchases.',
+			} )
+		).not.toBeInTheDocument();
+
+		await act( async () => {
+			allSettings.checkoutAllowsGuest = false;
+			allSettings.checkoutAllowsSignup = true;
+		} );
+
+		rerender( <CheckoutBlock /> );
+
+		expect(
+			screen.getByRole( 'checkbox', {
+				name: 'Save payment information to my account for future purchases.',
+			} )
+		).toBeInTheDocument();
+
+		// cleanup
+		await act( async () => {
+			allSettings.checkoutAllowsGuest = undefined;
+			allSettings.checkoutAllowsSignup = undefined;
+			dispatch( checkoutStore ).__internalSetCustomerId( 1 );
+		} );
+	} );
+
 	it( 'Renders the shipping address card if the address is filled and the cart contains a shippable product', async () => {
 		act( () => {
 			const cartWithAddress = {
@@ -400,102 +492,6 @@ describe( 'Testing Checkout', () => {
 
 		await act( async () => {
 			// Restore initial settings
-			allSettings.checkoutAllowsGuest = undefined;
-			allSettings.checkoutAllowsSignup = undefined;
-			dispatch( checkoutStore ).__internalSetCustomerId( 1 );
-		} );
-	} );
-
-	it( 'Allows saving payment method if the customer is creating an account or has already logged in', async () => {
-		await act( async () => {
-			const PaymentMethodContent = () => <div>A payment method</div>;
-			registerPaymentMethod( {
-				name: 'test-payment-method',
-				label: 'Payment method with cards',
-				content: <PaymentMethodContent />,
-				edit: <PaymentMethodContent />,
-				icons: null,
-				canMakePayment: () => true,
-				supports: {
-					showSavedCards: true,
-					showSaveOption: true,
-					features: [ 'products' ],
-				},
-				ariaLabel: 'Test Payment Method',
-			} );
-			dispatch( paymentStore ).__internalUpdateAvailablePaymentMethods();
-		} );
-		await act( async () => {
-			dispatch( checkoutStore ).__internalSetCustomerId( 2 );
-		} );
-
-		const { rerender } = render( <CheckoutBlock /> );
-
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
-		expect(
-			screen.getByText( /Payment method with cards/i )
-		).toBeInTheDocument();
-
-		expect(
-			screen.getByRole( 'checkbox', {
-				name: 'Save payment information to my account for future purchases.',
-			} )
-		).toBeInTheDocument();
-
-		await act( async () => {
-			dispatch( checkoutStore ).__internalSetCustomerId( 0 );
-		} );
-
-		rerender( <CheckoutBlock /> );
-
-		expect(
-			screen.queryByRole( 'checkbox', {
-				name: 'Save payment information to my account for future purchases.',
-			} )
-		).not.toBeInTheDocument();
-
-		await act( async () => {
-			allSettings.checkoutAllowsGuest = true;
-			allSettings.checkoutAllowsSignup = true;
-			dispatch( checkoutStore ).__internalSetCustomerId( 0 );
-			dispatch( checkoutStore ).__internalSetShouldCreateAccount( true );
-		} );
-
-		rerender( <CheckoutBlock /> );
-
-		expect(
-			screen.getByRole( 'checkbox', {
-				name: 'Save payment information to my account for future purchases.',
-			} )
-		).toBeInTheDocument();
-
-		await act( async () => {
-			dispatch( checkoutStore ).__internalSetShouldCreateAccount( false );
-		} );
-
-		rerender( <CheckoutBlock /> );
-
-		expect(
-			screen.queryByRole( 'checkbox', {
-				name: 'Save payment information to my account for future purchases.',
-			} )
-		).not.toBeInTheDocument();
-
-		await act( async () => {
-			allSettings.checkoutAllowsGuest = false;
-			allSettings.checkoutAllowsSignup = true;
-		} );
-
-		rerender( <CheckoutBlock /> );
-
-		expect(
-			screen.getByRole( 'checkbox', {
-				name: 'Save payment information to my account for future purchases.',
-			} )
-		).toBeInTheDocument();
-
-		// cleanup
-		await act( async () => {
 			allSettings.checkoutAllowsGuest = undefined;
 			allSettings.checkoutAllowsSignup = undefined;
 			dispatch( checkoutStore ).__internalSetCustomerId( 1 );
