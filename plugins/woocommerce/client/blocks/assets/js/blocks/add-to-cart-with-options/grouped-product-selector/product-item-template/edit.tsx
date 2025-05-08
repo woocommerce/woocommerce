@@ -127,12 +127,7 @@ export default function ProductItemTemplateEdit(
 								.getProducts( { per_page: 3, order: 'desc' } )
 								.then( ( fetchedProducts ) => {
 									if ( fetchedProducts.length > 0 ) {
-										fetchChildProducts(
-											fetchedProducts.map(
-												( prod: ProductResponseItem ) =>
-													prod.id
-											)
-										);
+										setProducts( fetchedProducts );
 									}
 								} );
 						}
