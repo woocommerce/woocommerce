@@ -125,7 +125,7 @@ abstract class WC_Session {
 			return;
 		}
 
-		$this->_dirty                        = true;
+		$this->_dirty        = true;
 		$this->_data[ $key ] = maybe_serialize( $value );
 	}
 
