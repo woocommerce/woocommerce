@@ -300,8 +300,8 @@ const successResponse = { type: 'success' };
 When a success response is returned, the payment method context status will be changed to `SUCCESS`. In addition, including any of the additional properties will result in extra actions:
 
 -   `paymentMethodData`: The contents of this object will be included as the value for `payment_data` when checkout sends a request to the checkout endpoint for processing the order. This is useful if a payment method does additional server side processing.
--   `billingAddress`: This allows payment methods to update any billing data information in the checkout (typically used by Express payment methods) so it's included in the checkout processing request to the server. This data should be in the [shape outlined here](../../../plugins/woocommerce/client/blocks/assets/js/settings/shared/default-fields.ts).
--   `shippingAddress`: This allows payment methods to update any shipping data information for the order (typically used by Express payment methods) so it's included in the checkout processing request to the server. This data should be in the [shape outlined here](../../../plugins/woocommerce/client/blocks/assets/js/settings/shared/default-fields.ts).
+-   `billingAddress`: This allows payment methods to update any billing data information in the checkout (typically used by Express payment methods) so it's included in the checkout processing request to the server. This data should be in the [shape outlined here](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/settings/shared/default-fields.ts).
+-   `shippingAddress`: This allows payment methods to update any shipping data information for the order (typically used by Express payment methods) so it's included in the checkout processing request to the server. This data should be in the [shape outlined here](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/settings/shared/default-fields.ts).
 
 If `billingAddress` or `shippingAddress` properties aren't in the response object, then the state for the data is left alone.
 
