@@ -228,11 +228,10 @@ class Integration {
 	 * @return string The updated preview data with placeholders replaced.
 	 */
 	private function update_email_preview_data( $data, string $email_type ) {
-		$default_type_param = 'WC_Email_Customer_Processing_Order';
-		$type_param         = $default_type_param;
+		$type_param = EmailPreview::DEFAULT_EMAIL_TYPE;
 
 		if ( ! empty( $email_type ) ) {
-			$type_param = 'WC_Email_' . implode( '_', array_map( 'ucfirst', explode( '_', $email_type ) ) );
+			$type_param = WCTransactionalEmailPostsManager::get_instance()->get_email_type_class_name_from_template_name( $email_type );
 		}
 
 		$email_preview = wc_get_container()->get( EmailPreview::class );
@@ -242,7 +241,7 @@ class Integration {
 		} catch ( \InvalidArgumentException $e ) {
 			// If the provided type was invalid, fall back to the default.
 			try {
-				$message = $email_preview->generate_placeholder_content( $default_type_param );
+				$message = $email_preview->generate_placeholder_content( EmailPreview::DEFAULT_EMAIL_TYPE );
 			} catch ( \Throwable $e ) {
 				return $data;
 			}
@@ -285,15 +284,17 @@ class Integration {
 	 * @return array The updated personalizer context.
 	 */
 	public function update_send_preview_email_personalizer_context( $context ) {
-		$email_type = WCTransactionalEmailPostsManager::get_instance()->get_email_type_from_post_id( get_the_ID() );
-		if ( $email_type ) {
-			$email_type = 'WC_Email_' . implode( '_', array_map( 'ucfirst', explode( '_', $email_type ) ) );
-		} else {
-			$email_type = EmailPreview::DEFAULT_EMAIL_TYPE;
-		}
+		$post_manager             = WCTransactionalEmailPostsManager::get_instance();
+		$email_type_template_name = $post_manager->get_email_type_from_post_id( get_the_ID() );
+		$email_type               = $email_type_template_name ? $post_manager->get_email_type_class_name_from_template_name( $email_type_template_name ) : EmailPreview::DEFAULT_EMAIL_TYPE;
+		$email_preview            = wc_get_container()->get( EmailPreview::class );
 
-		$email_preview = wc_get_container()->get( EmailPreview::class );
-		$email_preview->set_email_type( $email_type );
+		try {
+			$email_preview->set_email_type( $email_type );
+		} catch ( \InvalidArgumentException $e ) {
+			// If the email type is invalid, return the context data as is.
+			return $context;
+		}
 
 		$email        = $email_preview->get_email();
 		$personalizer = wc_get_container()->get( TransactionalEmailPersonalizer::class );
