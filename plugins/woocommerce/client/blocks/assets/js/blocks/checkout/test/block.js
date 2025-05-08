@@ -11,6 +11,7 @@ import {
 } from '@woocommerce/block-data';
 import { default as fetchMock } from 'jest-fetch-mock';
 import { allSettings } from '@woocommerce/settings';
+import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies
@@ -40,7 +41,6 @@ import Shipping from '../inner-blocks/checkout-order-summary-shipping/frontend';
 import Taxes from '../inner-blocks/checkout-order-summary-taxes/frontend';
 import { defaultCartState } from '../../../data/cart/default-state';
 import Checkout from '../block';
-import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 
 jest.mock( '@wordpress/data', () => {
 	const wpData = jest.requireActual( 'wordpress-data-wp-6-7' );
