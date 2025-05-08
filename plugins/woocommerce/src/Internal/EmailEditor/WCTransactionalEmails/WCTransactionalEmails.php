@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails;
 
+use Automattic\WooCommerce\Admin\Features\Features;
+
 /**
  * Class WCTransactionalEmails
  *
@@ -63,6 +65,13 @@ class WCTransactionalEmails {
 	 * @return array
 	 */
 	public static function get_transactional_emails() {
+		$emails = self::$core_transactional_emails;
+
+		if ( Features::is_enabled( 'point-of-sale' ) ) {
+			$emails[] = 'customer_pos_completed_order';
+			$emails[] = 'customer_pos_refunded_order';
+		}
+
 		/**
 		 * Filter the transactional emails for the block editor.
 		 *
@@ -70,7 +79,7 @@ class WCTransactionalEmails {
 		 * @return array
 		 * @since 9.9.0
 		 */
-		return apply_filters( 'woocommerce_transactional_emails_for_block_editor', self::$core_transactional_emails );
+		return apply_filters( 'woocommerce_transactional_emails_for_block_editor', $emails );
 	}
 
 	/**
