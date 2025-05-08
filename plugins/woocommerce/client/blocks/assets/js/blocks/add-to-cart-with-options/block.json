@@ -1,6 +1,6 @@
 {
 	"name": "woocommerce/add-to-cart-with-options",
-	"title": "Add to Cart with Options (Experimental)",
+	"title": "Add to Cart + Options (Beta)",
 	"description": "Create an \"Add To Cart\" composition by using blocks",
 	"category": "woocommerce-product-elements",
 	"attributes": {

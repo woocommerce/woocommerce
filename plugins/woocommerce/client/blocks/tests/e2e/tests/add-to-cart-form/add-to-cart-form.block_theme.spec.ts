@@ -488,7 +488,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		} );
 	} );
 
-	test( 'can be migrated to the blockified Add to Cart with Options block', async ( {
+	test( 'can be migrated to the blockified Add to Cart + Options block', async ( {
 		page,
 		editor,
 		blockUtils,
