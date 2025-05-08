@@ -29,17 +29,12 @@ import { useStoreCart } from './use-store-cart';
 export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 	const { cartCoupons, cartIsLoading } = useStoreCart();
 	const { applyCoupon, removeCoupon } = useDispatch( cartStore );
-
-	const isApplyingCoupon = useSelect(
-		( select ) => select( cartStore ).isApplyingCoupon(),
-		[]
-	);
-	const isRemovingCoupon = useSelect(
-		( select ) => select( cartStore ).isRemovingCoupon(),
-		[]
-	);
-	const orderId = useSelect(
-		( select ) => select( checkoutStore ).getOrderId(),
+	const { isApplyingCoupon, isRemovingCoupon, orderId } = useSelect(
+		( select ) => ( {
+			isApplyingCoupon: select( cartStore ).isApplyingCoupon(),
+			isRemovingCoupon: select( cartStore ).isRemovingCoupon(),
+			orderId: select( checkoutStore ).getOrderId(),
+		} ),
 		[]
 	);
 
