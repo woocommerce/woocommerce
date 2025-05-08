@@ -1245,7 +1245,7 @@ class WooPaymentsService {
 				esc_html__( 'There are environment or store setup issues which are blocking progress. Please resolve them to proceed.', 'woocommerce' ),
 				(int) WP_Http::FORBIDDEN,
 				array(
-					'error' => $this->get_onboarding_step_error( $step_id, $location ),
+					'error' => map_deep( $this->get_onboarding_step_error( $step_id, $location ), 'esc_html' ),
 				),
 			);
 		}
