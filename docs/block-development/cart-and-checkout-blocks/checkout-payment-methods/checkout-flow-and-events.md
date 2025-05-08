@@ -67,11 +67,40 @@ The following boolean flags available related to status are:
 
 #### Special States
 
-The following are booleans exposed via the checkout provider that are independent from each other and checkout statuses but can be used in combination to react to various state in the checkout.
+The following are booleans exposed via the checkout provider that are independent from each other and checkout statuses but can be used in combination to react to various states in the checkout.
 
-**isCalculating:** This is true when the total is being re-calculated for the order. There are numerous things that might trigger a recalculation of the total: coupons being added or removed, shipping rates updated, shipping rate selected etc. This flag consolidates all activity that might be occurring (including requests to the server that potentially affect calculation of totals). So instead of having to check each of those individual states you can reliably just check if this boolean is true (calculating) or false (not calculating).
+##### **isCalculating**
 
-**hasError:** This is true when anything in the checkout has created an error condition state. This might be validation errors, request errors, coupon application errors, payment processing errors etc.
+`isCalculating` is true when the total is being re-calculated for the order or when a plugin is intentionally disabling the checkout using the `disableCheckoutFor` action (covered in the next section).
+
+There are numerous things that might trigger a recalculation of the total: coupons being added or removed, shipping rates updated, shipping rate selected, etc. Instead of having to check each of those individual states, you can reliably just check if this boolean is true (calculating) or false (not calculating).
+
+What `isCalculating` affects:
+- Disables the "Place Order" button in the checkout block
+- Disables the "Proceed to Checkout" button in the cart block
+- Shows a loading state for Express Payment methods while calculations are pending
+
+###### Controlling `isCalculating` with `disableCheckoutFor`
+
+You can programmatically control `isCalculating` using the `disableCheckoutFor` thunk:
+
+```jsx
+const { dispatch } = window.wp.data;
+const { checkoutStore } = window.wc.wcBlocksData;
+
+// Example: Disable checkout while performing an async operation
+dispatch( checkoutStore ).disableCheckoutFor( async () => {
+	// Your async operation here, e.g. validating data with an API
+	await myAsyncOperation();
+	// No need to return anything - we only care about the promise resolving
+} );
+```
+
+The thunk controls internal state, ensuring that the client won't be able to attempt completing the flow until the provided promise resolves, regardless of whether it succeeds or fails.
+
+##### **hasError**
+
+`hasError` is true when anything in the checkout has created an error condition state. This might be validation errors, request errors, coupon application errors, payment processing errors etc.
 
 ### `ShippingProvider` Exposed Statuses
 
@@ -97,8 +126,7 @@ const MyComponent = ( props ) => {
 	const isPaymentIdle = select( paymentStore ).isPaymentIdle();
 	const isExpressPaymentStarted =
 		select( paymentStore ).isExpressPaymentStarted();
-	const isPaymentProcessing =
-		select( paymentStore ).isPaymentProcessing();
+	const isPaymentProcessing = select( paymentStore ).isPaymentProcessing();
 	const isPaymentReady = select( paymentStore ).isPaymentReady();
 	const hasPaymentError = select( paymentStore ).hasPaymentError();
 
@@ -163,14 +191,14 @@ There are a bunch of utility methods that can be used related to events. These a
 
 ```jsx
 import {
-  noticeContexts,
-  responseTypes,
-  shouldRetry,
+	noticeContexts,
+	responseTypes,
+	shouldRetry,
 } from '@woocommerce/base-context';
 import {
-  isSuccessResponse,
-  isErrorResponse,
-  isFailResponse,
+	isSuccessResponse,
+	isErrorResponse,
+	isFailResponse,
 } from '@woocommerce/types';
 ```
 
@@ -244,8 +272,8 @@ _For anything else:_
 const { onCheckoutValidation } = wc.blocksCheckoutEvents;
 
 useEffect( () => {
-  const unsubscribe = onCheckoutValidation( () => true );
-  return unsubscribe;
+	const unsubscribe = onCheckoutValidation( () => true );
+	return unsubscribe;
 }, [ onCheckoutValidation ] );
 ```
 
@@ -272,8 +300,8 @@ const successResponse = { type: 'success' };
 When a success response is returned, the payment method context status will be changed to `SUCCESS`. In addition, including any of the additional properties will result in extra actions:
 
 -   `paymentMethodData`: The contents of this object will be included as the value for `payment_data` when checkout sends a request to the checkout endpoint for processing the order. This is useful if a payment method does additional server side processing.
--   `billingAddress`: This allows payment methods to update any billing data information in the checkout (typically used by Express payment methods) so it's included in the checkout processing request to the server. This data should be in the [shape outlined here](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/settings/shared/default-fields.ts).
--   `shippingAddress`: This allows payment methods to update any shipping data information for the order (typically used by Express payment methods) so it's included in the checkout processing request to the server. This data should be in the [shape outlined here](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/settings/shared/default-fields.ts).
+-   `billingAddress`: This allows payment methods to update any billing data information in the checkout (typically used by Express payment methods) so it's included in the checkout processing request to the server. This data should be in the [shape outlined here](../../../plugins/woocommerce/client/blocks/assets/js/settings/shared/default-fields.ts).
+-   `shippingAddress`: This allows payment methods to update any shipping data information for the order (typically used by Express payment methods) so it's included in the checkout processing request to the server. This data should be in the [shape outlined here](../../../plugins/woocommerce/client/blocks/assets/js/settings/shared/default-fields.ts).
 
 If `billingAddress` or `shippingAddress` properties aren't in the response object, then the state for the data is left alone.
 
@@ -422,8 +450,8 @@ _For anything else:_
 const { onCheckoutSuccess } = wc.blocksCheckoutEvents;
 
 useEffect( () => {
-  const unsubscribe = onCheckoutSuccess( () => true );
-  return unsubscribe;
+	const unsubscribe = onCheckoutSuccess( () => true );
+	return unsubscribe;
 }, [ onCheckoutSuccess ] );
 ```
 
@@ -475,8 +503,8 @@ _For anything else:_
 const { onCheckoutFail } = wc.blocksCheckoutEvents;
 
 useEffect( () => {
-  const unsubscribe = onCheckoutFail( () => true );
-  return unsubscribe;
+	const unsubscribe = onCheckoutFail( () => true );
+	return unsubscribe;
 }, [ onCheckoutFail ] );
 ```
 
