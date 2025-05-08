@@ -140,7 +140,7 @@ export const SettingsPaymentsCod = () => {
 							<TextControl
 								label={ __( 'Title', 'woocommerce' ) }
 								help={ __(
-									'This controls the title which the user sees during checkout.',
+									'Payment method name that the customer will see during checkout.',
 									'woocommerce'
 								) }
 								placeholder={ __(
@@ -162,7 +162,7 @@ export const SettingsPaymentsCod = () => {
 							<TextareaControl
 								label={ __( 'Description', 'woocommerce' ) }
 								help={ __(
-									'Payment method description that the customer will see on your checkout.',
+									'Payment method description that the customer will see during checkout.',
 									'woocommerce'
 								) }
 								value={ String( formValues.description ) }
