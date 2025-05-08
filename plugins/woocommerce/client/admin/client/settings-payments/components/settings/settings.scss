@@ -99,6 +99,10 @@
 }
 
 .woocommerce-tree-select-control {
+	&__control {
+		margin-bottom: 0;
+	}
+
 	&__label {
 		font-size: 11px;
 		font-weight: 500;
@@ -111,6 +115,7 @@
 	}
 
 	&__help {
+		margin-top: calc(8px);
 		margin-bottom: 32px;
 	}
 }
