@@ -200,26 +200,18 @@ class WooPaymentsService {
 				}
 				break;
 			case self::ONBOARDING_STEP_WPCOM_CONNECTION:
+				// If we have a working WPCOM connection, report the step as completed.
 				if ( $this->has_working_wpcom_connection() ) {
 					return self::ONBOARDING_STEP_STATUS_COMPLETED;
 				}
+
 				// If we only have a connected blog, but no master owner connected, we at least started the process.
 				if ( $this->wpcom_connection_manager->is_connected() ) {
 					return self::ONBOARDING_STEP_STATUS_STARTED;
 				}
-
-				// If there is no part of the connection set up, we check the stored status.
-				if ( ! $this->wpcom_connection_manager->is_connected() && ! $this->wpcom_connection_manager->has_connected_owner() ) {
-					// We respect the stored started status as it may be in progress.
-					if ( ! empty( $stored_statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] ) ) {
-						return self::ONBOARDING_STEP_STATUS_STARTED;
-					}
-				}
-
-				// We definitely didn't start the onboarding step.
-				return self::ONBOARDING_STEP_STATUS_NOT_STARTED;
+				break;
 			case self::ONBOARDING_STEP_TEST_ACCOUNT:
-				// The step can only be completed if the requirements are met.
+				// The step can only be auto-completed if the requirements are met.
 				if ( $this->check_onboarding_step_requirements( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ) {
 					// If the account is a valid, working test account, the step is completed.
 					if ( $this->has_test_account() && $this->has_valid_account() && $this->has_working_account() ) {
@@ -234,49 +226,31 @@ class WooPaymentsService {
 						return self::ONBOARDING_STEP_STATUS_COMPLETED;
 					}
 				}
-
-				// If we have a test account, we consider the step as started.
-				if ( $this->has_test_account() ) {
-					return self::ONBOARDING_STEP_STATUS_STARTED;
-				}
-
-				// We respect the stored started status.
-				if ( ! empty( $stored_statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] ) ) {
-					return self::ONBOARDING_STEP_STATUS_STARTED;
-				}
-
-				// We definitely didn't start the onboarding step.
-				return self::ONBOARDING_STEP_STATUS_NOT_STARTED;
+				break;
 			case self::ONBOARDING_STEP_BUSINESS_VERIFICATION:
-				// The step can only be completed if the requirements are met.
+				// The step can only be auto-completed if the requirements are met.
 				// If the current account is fully onboarded and is a live account,
-				// we consider the business verification step as completed.
+				// we report the business verification step as completed.
 				if ( $this->check_onboarding_step_requirements( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location ) &&
 					$this->has_valid_account() &&
 					$this->has_live_account() ) {
 					return self::ONBOARDING_STEP_STATUS_COMPLETED;
 				}
-
-				// If we have a live account, we consider the step as started.
-				if ( $this->has_live_account() ) {
-					return self::ONBOARDING_STEP_STATUS_STARTED;
-				}
-
-				// We respect the stored started status.
-				if ( ! empty( $stored_statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] ) ) {
-					return self::ONBOARDING_STEP_STATUS_STARTED;
-				}
-
-				// We definitely didn't start the onboarding step.
-				return self::ONBOARDING_STEP_STATUS_NOT_STARTED;
+				break;
 		}
 
 		// Second, try to determine the status of the onboarding step based on the step's stored data.
-		// We take a waterfall approach, where completed supersedes started.
-		// For completed, we first check if the step requirements are met.
+		// We take a waterfall approach: completed > blocked > failed > started > not started.
+		// For the completed status, we enforce sanity and check if the step requirements are met.
 		if ( $this->check_onboarding_step_requirements( $step_id, $location ) &&
-			! empty( $stored_statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] ) ) {
+			 ! empty( $stored_statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] ) ) {
 			return self::ONBOARDING_STEP_STATUS_COMPLETED;
+		}
+		if ( $this->is_onboarding_step_blocked( $step_id, $location ) ) {
+			return self::ONBOARDING_STEP_STATUS_BLOCKED;
+		}
+		if ( $this->is_onboarding_step_failed( $step_id, $location ) ) {
+			return self::ONBOARDING_STEP_STATUS_FAILED;
 		}
 		if ( ! empty( $stored_statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] ) ) {
 			return self::ONBOARDING_STEP_STATUS_STARTED;
