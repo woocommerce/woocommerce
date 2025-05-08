@@ -18,7 +18,6 @@ import { Link } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import InfoOutline from 'gridicons/dist/info-outline';
 import interpolateComponents from '@automattic/interpolate-components';
-import { useDebounce } from '@wordpress/compose';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -97,12 +96,8 @@ export const PaymentGateways = ( {
 		}
 	);
 
-	const hidePopoverDebounced = useDebounce( () => {
-		setIsPopoverVisible( false );
-	}, 350 );
-	const showPopover = () => {
-		setIsPopoverVisible( true );
-		hidePopoverDebounced.cancel();
+	const togglePopover = () => {
+		setIsPopoverVisible( ! isPopoverVisible );
 	};
 
 	return (
@@ -161,17 +156,13 @@ export const PaymentGateways = ( {
 							className="settings-payment-gateways__header-select-container--indicator"
 							tabIndex={ 0 }
 							role="button"
-							onClick={ () =>
-								setIsPopoverVisible( ! isPopoverVisible )
-							}
-							onMouseEnter={ showPopover }
-							onMouseLeave={ hidePopoverDebounced }
+							onClick={ togglePopover }
 							onKeyDown={ ( event ) => {
 								if (
 									event.key === 'Enter' ||
 									event.key === ' '
 								) {
-									setIsPopoverVisible( ! isPopoverVisible );
+									togglePopover();
 								}
 							} }
 						>
@@ -188,7 +179,9 @@ export const PaymentGateways = ( {
 									focusOnMount={ true }
 									noArrow={ true }
 									shift={ true }
-									onClose={ hidePopoverDebounced }
+									onClose={ () =>
+										setIsPopoverVisible( false )
+									}
 								>
 									<div className="components-popover__content-container">
 										<p>
