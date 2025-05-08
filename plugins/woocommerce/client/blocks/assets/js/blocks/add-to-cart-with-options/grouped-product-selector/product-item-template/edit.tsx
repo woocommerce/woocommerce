@@ -101,7 +101,7 @@ export default function ProductItemTemplateEdit(
 			resolveSelect( coreStore )
 				.getEntityRecords( 'postType', 'product', {
 					include: groupedProductIds,
-					per_page: 10,
+					per_page: groupedProductIds.length,
 				} )
 				.then( ( fetchedProducts ) => {
 					setProducts( fetchedProducts as ProductResponseItem[] );
@@ -110,7 +110,7 @@ export default function ProductItemTemplateEdit(
 
 		if ( ! products ) {
 			if ( product.id !== 0 && product.type === 'grouped' ) {
-				fetchChildProducts( [ product.id ] );
+				fetchChildProducts( product.grouped_products );
 			} else if ( product.id === 0 ) {
 				// If product ID is 0, then we must be editing a template.
 				// Fetch an existing grouped product so template can be edited.
