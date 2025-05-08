@@ -9,7 +9,7 @@
 			margin: em($gap-small) 0;
 		}
 		.wc-block-components-radio-control
-		.wc-block-components-radio-control__input {
+			.wc-block-components-radio-control__input {
 			top: auto;
 			transform: none;
 		}
@@ -65,7 +65,8 @@
 			display: block;
 			@include font-size(regular);
 		}
-		.wc-block-components-radio-control__description + .wc-block-components-radio-control__secondary-description {
+		.wc-block-components-radio-control__description
+			+ .wc-block-components-radio-control__secondary-description {
 			margin-top: em($gap-small);
 		}
 		.wc-block-components-radio-control__description {

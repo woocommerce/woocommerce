@@ -33,7 +33,8 @@
 		padding-bottom: 0;
 	}
 
-	.wc-block-components-radio-control .wc-block-components-radio-control__option-layout {
+	.wc-block-components-radio-control
+		.wc-block-components-radio-control__option-layout {
 		padding-bottom: 0;
 	}
 
@@ -75,7 +76,9 @@
 	padding: 0;
 }
 
-.wc-block-components-shipping-rates-control__package-item:not(:last-child)::after {
+.wc-block-components-shipping-rates-control__package-item:not(
+		:last-child
+	)::after {
 	content: ", ";
 	white-space: pre;
 }

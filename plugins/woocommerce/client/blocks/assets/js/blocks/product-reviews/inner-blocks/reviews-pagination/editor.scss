@@ -1,7 +1,8 @@
 $pagination-margin: 0.5em;
 
 // Center flex items. This has an equivalent in style.scss.
-.wp-block[data-align="center"] > .wp-block-woocommerce-product-reviews-pagination {
+.wp-block[data-align="center"]
+	> .wp-block-woocommerce-product-reviews-pagination {
 	justify-content: center;
 }
 

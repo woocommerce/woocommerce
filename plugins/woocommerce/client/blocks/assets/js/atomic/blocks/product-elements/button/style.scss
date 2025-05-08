@@ -115,8 +115,8 @@
 .theme-twentytwentyone {
 	// Prevent buttons appearing disabled in the editor.
 	.editor-styles-wrapper
-	.wc-block-components-product-button
-	.wp-block-button__link {
+		.wc-block-components-product-button
+		.wp-block-button__link {
 		background-color: var(--button--color-background);
 		color: var(--button--color-text);
 		border-color: var(--button--color-background);

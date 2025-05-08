@@ -6,7 +6,8 @@
 
 .woocommerce-coming-soon-default {
 	// This is default font family when no font family is selected. Users can override this in the block settings.
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+		Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 	min-width: 320px;
 	// Set the background color to the coming soon color since some themes may have a different background color.
 	--cover--color-background: var(--woocommerce-coming-soon-color);
@@ -28,7 +29,8 @@
 
 // Minimal left image template styles
 .woocommerce-coming-soon-minimal-left-image {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+		Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 
 	&__content {
 		.wp-block-columns-is-layout-flex {
@@ -44,7 +46,8 @@
 
 // Split right image template styles
 .woocommerce-coming-soon-split-right-image {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+		Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 
 	.woocommerce-split-right-image-content {
 		width: 100%;
