@@ -213,9 +213,9 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	/**
 	 * Get the count of low in stock products.
 	 *
-	 * @param bool $sidewide_stock_threshold_only
-	 * @param string $status
-	 * @param int $low_stock_threshold
+	 * @param bool   $sidewide_stock_threshold_only Boolean to check if the store is using sitewide stock threshold only.
+	 * @param string $status Post status.
+	 * @param int    $low_stock_threshold Low stock threshold.
 	 *
 	 * @return int
 	 */
