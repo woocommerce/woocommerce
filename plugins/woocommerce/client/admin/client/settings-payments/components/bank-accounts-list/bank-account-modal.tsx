@@ -7,6 +7,7 @@ import {
 	SelectControl,
 	Button,
 } from '@wordpress/components';
+import { decodeEntities } from '@wordpress/html-entities';
 import { useState } from 'react';
 import { __ } from '@wordpress/i18n';
 
@@ -122,7 +123,7 @@ export const BankAccountModal = ( {
 				value={ selectedCountry }
 				options={ Object.entries( countries ).map(
 					( [ code, name ] ) => ( {
-						label: name,
+						label: decodeEntities( name ),
 						value: code,
 					} )
 				) }
