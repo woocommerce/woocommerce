@@ -217,6 +217,9 @@ class Theme_Controller {
 			$css_blocks .= $this->get_theme()->get_styles_for_block( $block_metadata );
 		}
 
+		// Remove `:root :where(...)` selectors since they are not supported in the CSS inliner.
+		$css_blocks = preg_replace( '/:root\s:where\((.*?)\)/', '$1', $css_blocks );
+
 		// Element specific styles.
 		$elements_styles = $this->get_theme()->get_raw_data()['styles']['elements'] ?? array();
 

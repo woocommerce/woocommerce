@@ -577,7 +577,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class           => array(
-					'wc_payments_settings_url'           => function ( string $path = null, array $query = array() ) use ( $wpcom_connection_return_url ) {
+					'wc_payments_settings_url'           => function ( ?string $path = null, array $query = array() ) use ( $wpcom_connection_return_url ) {
 						if ( WooPaymentsService::ONBOARDING_PATH_BASE === $path && ! empty( $query['wpcom_connection_return'] ) ) {
 							return $wpcom_connection_return_url;
 						}

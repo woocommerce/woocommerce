@@ -26,8 +26,8 @@ class WC_Admin_Addons {
 	 */
 	public static function fetch_featured() {
 		$transient_name = 'wc_addons_featured';
-		// Important: WCCOM Extensions API v3.0 is used.
-		$url      = 'https://woocommerce.com/wp-json/wccom-extensions/3.0/featured';
+		// Important: WCCOM Extensions API v4.0 is used.
+		$url      = 'https://woocommerce.com/wp-json/wccom-extensions/4.0/featured';
 		$locale   = get_user_locale();
 		$featured = self::get_locale_data_from_transient( $transient_name, $locale );
 
