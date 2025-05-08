@@ -336,7 +336,7 @@
               "menu_title": "Checkout Flow and Events",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/checkout-flow-and-events.md",
-              "hash": "7b6e6bdc8c7cbe10b0b9dc65777e98d981481914d9e0cb98989d67b9382324b1",
+              "hash": "8756336725b9c410435ec333e6656c7720138605d1fb8af73f024901237391bc",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/checkout-flow-and-events.md",
               "id": "499384cbb48ed96a2e12653cd68bd82d123a20a1",
               "links": {
@@ -757,7 +757,7 @@
           "post_title": "Email HTML - Best Practices",
           "menu_title": "Email HTML - Best Practices",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/emails/email-html-best-practices.md",
-          "hash": "200ad453e137d6886a47e823b2898a84d42f9ec98995b1e9daa6402b29fab464",
+          "hash": "40f2d0a5459bedb4089dcf84bf2aaf162b8b8b4f6d7d67d879ee23481c09cfb8",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/emails/email-html-best-practices.md",
           "id": "79c02f8dcd14aeaa6d93bcc8d2ad5b5c08479bac"
         }
@@ -2000,5 +2000,5 @@
       "categories": []
     }
   ],
-  "hash": "ff3f182bc9342b604b0dad580679795bcba44eff9014996c4893c2c3ff7b801b"
+  "hash": "aa81395232e552fb858fb6f0f21ac9ecc0776919e77997d4814b5111047fc082"
 }
