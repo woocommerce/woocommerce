@@ -341,6 +341,19 @@ class WooPaymentsService {
 	}
 
 	/**
+	 * Check if the onboarding step action is completed.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @throws ApiException On invalid step ID.
+	 */
+	private function is_onboarding_step_completed( string $step_id, string $location ): bool {
+		return self::ONBOARDING_STEP_STATUS_COMPLETED === $this->get_onboarding_step_status( $step_id, $location );
+	}
+
+	/**
 	 * Check if an onboarding step has a failed status.
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
