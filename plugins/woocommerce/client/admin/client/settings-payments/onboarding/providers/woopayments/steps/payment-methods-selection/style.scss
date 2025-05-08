@@ -197,7 +197,10 @@
 			padding: $gap-large;
 			background: $white;
 			flex-shrink: 0;
-			border-top: 1px solid $gray-200;
+
+			&.has-border {
+				border-top: 1px solid $gray-200;
+			}
 
 			@media screen and (max-width: $break-medium) {
 				padding: $gap;
