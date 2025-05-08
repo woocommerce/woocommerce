@@ -40,6 +40,7 @@ test.describe( 'Merchant → Additional Checkout Fields', () => {
 			{},
 			{
 				contact: {
+					'Alternative Email': 'test@test.com',
 					'Enter a gift message to include in the package':
 						'This is for you!',
 					'Is this a personal purchase or a business purchase?':
@@ -180,6 +181,7 @@ test.describe( 'Merchant → Additional Checkout Fields', () => {
 			{},
 			{
 				contact: {
+					'Alternative Email': 'test@test.com',
 					'Enter a gift message to include in the package':
 						'This is for you!',
 					'Is this a personal purchase or a business purchase?':

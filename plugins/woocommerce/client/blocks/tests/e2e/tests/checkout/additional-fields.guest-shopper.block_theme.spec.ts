@@ -42,6 +42,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{},
 				{
 					contact: {
+						'Alternative Email': 'test@test.com',
 						'Enter a gift message to include in the package':
 							'For my non-ascii named friend: niño',
 					},
@@ -125,6 +126,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{},
 				{
 					contact: {
+						'Alternative Email': 'test@test.com',
 						'Enter a gift message to include in the package':
 							'For my non-ascii named friend: niño',
 						'Is this a personal purchase or a business purchase?':

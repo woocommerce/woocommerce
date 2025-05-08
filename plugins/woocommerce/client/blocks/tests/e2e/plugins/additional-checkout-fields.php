@@ -59,10 +59,10 @@ class Additional_Checkout_Fields_Test_Helper {
 				'location'          => 'address',
 				'type'              => 'text',
 				'required'          => true,
-				'sanitize_callback' => function( $field_value ) {
+				'sanitize_callback' => function ( $field_value ) {
 					return str_replace( ' ', '', $field_value );
 				},
-				'validate_callback' => function( $field_value ) {
+				'validate_callback' => function ( $field_value ) {
 					$match = preg_match( '/^[0-9]{5}$/', $field_value );
 					if ( 0 === $match || false === $match ) {
 						return new \WP_Error( 'invalid_government_id', 'Invalid government ID.' );
@@ -72,15 +72,15 @@ class Additional_Checkout_Fields_Test_Helper {
 		);
 		woocommerce_register_additional_checkout_field(
 			array(
-				'id'       => 'first-plugin-namespace/confirm-government-ID',
-				'label'    => 'Confirm government ID',
-				'location' => 'address',
-				'type'     => 'text',
-				'required' => true,
-				'sanitize_callback' => function( $field_value ) {
+				'id'                => 'first-plugin-namespace/confirm-government-ID',
+				'label'             => 'Confirm government ID',
+				'location'          => 'address',
+				'type'              => 'text',
+				'required'          => true,
+				'sanitize_callback' => function ( $field_value ) {
 					return str_replace( ' ', '', $field_value );
 				},
-				'validate_callback' => function( $field_value ) {
+				'validate_callback' => function ( $field_value ) {
 					$match = preg_match( '/^[0-9]{5}$/', $field_value );
 					if ( 0 === $match || false === $match ) {
 						return new \WP_Error( 'invalid_government_id', 'Invalid government ID.' );
@@ -94,6 +94,24 @@ class Additional_Checkout_Fields_Test_Helper {
 				'label'    => 'Can a truck fit down your road?',
 				'location' => 'address',
 				'type'     => 'checkbox',
+			)
+		);
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'                => 'plugin-namespace/alt-email',
+				'label'             => 'Alternative Email',
+				'location'          => 'contact',
+				'type'              => 'text',
+				'required'          => true,
+				'sanitize_callback' => function ( $field_value ) {
+					return sanitize_email( $field_value );
+				},
+				'validate_callback' => function ( $field_value ) {
+					if ( ! is_email( $field_value ) ) {
+						return new \WP_Error( 'invalid_alt_email', 'Please ensure your alternative email matches the correct format.' );
+					}
+				},
 			)
 		);
 
@@ -153,6 +171,12 @@ class Additional_Checkout_Fields_Test_Helper {
 						$errors->add( 'invalid_gov_id', 'Please ensure your government ID matches the correct format.' );
 					}
 				}
+
+				if ( 'plugin-namespace/alt-email' === $field_key ) {
+					if ( ! is_email( $field_value ) ) {
+						$errors->add( 'invalid_alt_email', 'Please ensure your alternative email matches the correct format.' );
+					}
+				}
 			},
 			10,
 			4
@@ -193,16 +217,16 @@ class Additional_Checkout_Fields_Test_Helper {
 				'location' => 'contact',
 				'required' => true,
 				'type'     => 'select',
-				'options'  => [
-					[
+				'options'  => array(
+					array(
 						'label' => 'Personal',
 						'value' => 'personal',
-					],
-					[
+					),
+					array(
 						'label' => 'Business',
 						'value' => 'business',
-					],
-				],
+					),
+				),
 			)
 		);
 
