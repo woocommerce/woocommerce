@@ -19,7 +19,6 @@ import {
 import { resolveSelect, useSelect } from '@wordpress/data';
 import type { ProductResponseItem } from '@woocommerce/types';
 import { productsStore } from '@woocommerce/data';
-import { store as coreStore } from '@wordpress/core-data';
 
 interface Attributes {
 	className?: string;
@@ -98,13 +97,13 @@ export default function ProductItemTemplateEdit(
 				return;
 			}
 
-			resolveSelect( coreStore )
-				.getEntityRecords( 'postType', 'product', {
+			resolveSelect( productsStore )
+				.getProducts( {
 					include: groupedProductIds,
 					per_page: groupedProductIds.length,
 				} )
 				.then( ( fetchedProducts ) => {
-					setProducts( fetchedProducts as ProductResponseItem[] );
+					setProducts( fetchedProducts );
 				} );
 		};
 
