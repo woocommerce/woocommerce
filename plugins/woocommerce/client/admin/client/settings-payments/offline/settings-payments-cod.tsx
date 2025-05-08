@@ -46,6 +46,7 @@ export const SettingsPaymentsCod = () => {
 		Record< string, string | boolean | string[] >
 	>( {} );
 	const [ isSaving, setIsSaving ] = useState( false );
+	const [ hasChanges, setHasChanges ] = useState( false );
 
 	useEffect( () => {
 		if ( codSettings ) {
@@ -60,8 +61,9 @@ export const SettingsPaymentsCod = () => {
 					? codSettings.settings.enable_for_methods.value
 					: [],
 				enable_for_virtual:
-					codSettings.settings.enable_for_virtual.value,
+					codSettings.settings.enable_for_virtual.value === 'yes',
 			} );
+			setHasChanges( false );
 		}
 	}, [ codSettings ] );
 
@@ -78,7 +80,7 @@ export const SettingsPaymentsCod = () => {
 			enable_for_methods: Array.isArray( formValues.enable_for_methods )
 				? formValues.enable_for_methods
 				: [],
-			enable_for_virtual: String( formValues.enable_for_virtual ),
+			enable_for_virtual: formValues.enable_for_virtual ? 'yes' : 'no',
 		};
 
 		updatePaymentGateway( 'cod', {
@@ -92,6 +94,7 @@ export const SettingsPaymentsCod = () => {
 					__( 'Settings updated successfully', 'woocommerce' )
 				);
 				setIsSaving( false );
+				setHasChanges( false );
 			} )
 			.catch( () => {
 				createErrorNotice(
@@ -131,6 +134,7 @@ export const SettingsPaymentsCod = () => {
 										...formValues,
 										enabled: checked,
 									} );
+									setHasChanges( true );
 								} }
 							/>
 						) }
@@ -153,6 +157,7 @@ export const SettingsPaymentsCod = () => {
 										...formValues,
 										title: value,
 									} );
+									setHasChanges( true );
 								} }
 							/>
 						) }
@@ -171,6 +176,7 @@ export const SettingsPaymentsCod = () => {
 										...formValues,
 										description: value,
 									} );
+									setHasChanges( true );
 								} }
 							/>
 						) }
@@ -189,6 +195,7 @@ export const SettingsPaymentsCod = () => {
 										...formValues,
 										instructions: value,
 									} );
+									setHasChanges( true );
 								} }
 							/>
 						) }
@@ -225,6 +232,7 @@ export const SettingsPaymentsCod = () => {
 										...formValues,
 										enable_for_methods: value,
 									} );
+									setHasChanges( true );
 								} }
 								selectAllLabel={ false }
 							/>
@@ -249,6 +257,7 @@ export const SettingsPaymentsCod = () => {
 										...formValues,
 										enable_for_virtual: checked,
 									} );
+									setHasChanges( true );
 								} }
 							/>
 						) }
@@ -258,7 +267,7 @@ export const SettingsPaymentsCod = () => {
 							variant="primary"
 							type="submit"
 							isBusy={ isSaving }
-							disabled={ isSaving }
+							disabled={ isSaving || ! hasChanges }
 						>
 							{ __( 'Save changes', 'woocommerce' ) }
 						</Button>

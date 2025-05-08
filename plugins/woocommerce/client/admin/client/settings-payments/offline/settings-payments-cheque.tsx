@@ -46,6 +46,7 @@ export const SettingsPaymentsCheque = () => {
 		Record< string, string | boolean | string[] >
 	>( {} );
 	const [ isSaving, setIsSaving ] = useState( false );
+	const [ hasChanges, setHasChanges ] = useState( false );
 
 	useEffect( () => {
 		if ( chequeSettings ) {
@@ -81,6 +82,7 @@ export const SettingsPaymentsCheque = () => {
 					__( 'Settings updated successfully', 'woocommerce' )
 				);
 				setIsSaving( false );
+				setHasChanges( false );
 			} )
 			.catch( () => {
 				createErrorNotice(
@@ -120,6 +122,7 @@ export const SettingsPaymentsCheque = () => {
 										...formValues,
 										enabled: checked,
 									} );
+									setHasChanges( true );
 								} }
 							/>
 						) }
@@ -142,6 +145,7 @@ export const SettingsPaymentsCheque = () => {
 										...formValues,
 										title: value,
 									} );
+									setHasChanges( true );
 								} }
 							/>
 						) }
@@ -160,6 +164,7 @@ export const SettingsPaymentsCheque = () => {
 										...formValues,
 										description: value,
 									} );
+									setHasChanges( true );
 								} }
 							/>
 						) }
@@ -178,6 +183,7 @@ export const SettingsPaymentsCheque = () => {
 										...formValues,
 										instructions: value,
 									} );
+									setHasChanges( true );
 								} }
 							/>
 						) }
@@ -187,7 +193,7 @@ export const SettingsPaymentsCheque = () => {
 							variant="primary"
 							type="submit"
 							isBusy={ isSaving }
-							disabled={ isSaving }
+							disabled={ isSaving || ! hasChanges }
 						>
 							{ __( 'Save changes', 'woocommerce' ) }
 						</Button>

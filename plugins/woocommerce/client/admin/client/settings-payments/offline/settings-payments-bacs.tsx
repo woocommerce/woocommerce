@@ -9,7 +9,7 @@ import {
 	TextareaControl,
 	Button,
 } from '@wordpress/components';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useMemo } from '@wordpress/element';
 import { paymentGatewaysStore, optionsStore } from '@woocommerce/data';
 
 /**
@@ -60,7 +60,9 @@ export const SettingsPaymentsBacs = () => {
 	const [ formValues, setFormValues ] = useState<
 		Record< string, string | boolean | string[] >
 	>( {} );
+
 	const [ isSaving, setIsSaving ] = useState( false );
+	const [ hasChanges, setHasChanges ] = useState( false );
 
 	useEffect( () => {
 		if ( bacsSettings ) {
@@ -70,6 +72,7 @@ export const SettingsPaymentsBacs = () => {
 				description: bacsSettings.description,
 				instructions: bacsSettings.settings.instructions.value,
 			} );
+			setHasChanges( false );
 		}
 	}, [ bacsSettings ] );
 
@@ -133,6 +136,7 @@ export const SettingsPaymentsBacs = () => {
 			);
 		} finally {
 			setIsSaving( false );
+			setHasChanges( false );
 		}
 	};
 
@@ -166,6 +170,7 @@ export const SettingsPaymentsBacs = () => {
 										...formValues,
 										enabled: checked,
 									} );
+									setHasChanges( true );
 								} }
 							/>
 						) }
@@ -188,6 +193,7 @@ export const SettingsPaymentsBacs = () => {
 										...formValues,
 										title: value,
 									} );
+									setHasChanges( true );
 								} }
 							/>
 						) }
@@ -206,6 +212,7 @@ export const SettingsPaymentsBacs = () => {
 										...formValues,
 										description: value,
 									} );
+									setHasChanges( true );
 								} }
 							/>
 						) }
@@ -224,6 +231,7 @@ export const SettingsPaymentsBacs = () => {
 										...formValues,
 										instructions: value,
 									} );
+									setHasChanges( true );
 								} }
 							/>
 						) }
@@ -241,7 +249,10 @@ export const SettingsPaymentsBacs = () => {
 						) : (
 							<BankAccountsList
 								accounts={ accounts }
-								onChange={ setAccounts }
+								onChange={ ( bankAccounts ) => {
+									setAccounts( bankAccounts );
+									setHasChanges( true );
+								} }
 								defaultCountry={ storeCountryCode }
 							/>
 						) }
@@ -252,7 +263,7 @@ export const SettingsPaymentsBacs = () => {
 							variant="primary"
 							type="submit"
 							isBusy={ isSaving }
-							disabled={ isSaving }
+							disabled={ isSaving || ! hasChanges }
 						>
 							{ __( 'Save changes', 'woocommerce' ) }
 						</Button>
