@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Remove usage of showSpinner button prop (deprecated)
+
+
