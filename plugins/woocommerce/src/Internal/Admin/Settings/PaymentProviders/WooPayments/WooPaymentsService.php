@@ -722,10 +722,12 @@ class WooPaymentsService {
 	public function onboarding_test_account_init( string $location, string $source = '' ): array {
 		$this->check_if_onboarding_step_action_is_acceptable( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
-		// Nothing to do if we already have a test account.
+		// Nothing to do if we already have a connected test account.
 		if ( $this->has_test_account() ) {
-			return array(
-				'message' => esc_html__( 'A test account is already set up.', 'woocommerce' ),
+			throw new ApiException(
+				'woocommerce_woopayments_onboarding_action_error',
+				esc_html__( 'A test account is already set up.', 'woocommerce' ),
+				(int) WP_Http::FORBIDDEN
 			);
 		}
 
