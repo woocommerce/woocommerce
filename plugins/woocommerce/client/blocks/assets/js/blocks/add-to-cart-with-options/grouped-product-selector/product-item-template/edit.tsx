@@ -88,9 +88,9 @@ export default function ProductItemTemplateEdit(
 	} );
 
 	const { product } = useProductDataContext();
-	const [ groupedProducts, setGroupedProducts ] = useState<
-		ProductResponseItem[] | null
-	>( null );
+	const [ products, setProducts ] = useState< ProductResponseItem[] | null >(
+		null
+	);
 
 	useEffect( () => {
 		const fetchGroupedProducts = async (
@@ -120,12 +120,12 @@ export default function ProductItemTemplateEdit(
 
 			resolveSelect( coreStore )
 				.getEntityRecords( 'postType', 'product', query )
-				.then( ( products ) => {
-					setGroupedProducts( products as ProductResponseItem[] );
+				.then( ( fetchedProducts ) => {
+					setProducts( fetchedProducts as ProductResponseItem[] );
 				} );
 		};
 
-		if ( ! groupedProducts ) {
+		if ( ! products ) {
 			if ( product.id !== 0 && product.type === 'grouped' ) {
 				fetchGroupedProducts( [ product ] );
 			} else if ( product.id === 0 ) {
@@ -133,9 +133,9 @@ export default function ProductItemTemplateEdit(
 				// Fetch an existing grouped product so template can be edited.
 				resolveSelect( productsStore )
 					.getProducts( { type: 'grouped', per_page: 1 } )
-					.then( ( fetchedGroupedProduct ) => {
-						if ( fetchedGroupedProduct.length > 0 ) {
-							fetchGroupedProducts( fetchedGroupedProduct );
+					.then( ( groupedProduct ) => {
+						if ( groupedProduct.length > 0 ) {
+							fetchGroupedProducts( groupedProduct );
 						} else {
 							// If there are no grouped products, query for any three other products.
 							resolveSelect( productsStore )
@@ -149,7 +149,7 @@ export default function ProductItemTemplateEdit(
 					} );
 			}
 		}
-	}, [ groupedProducts, product ] );
+	}, [ products, product ] );
 
 	const { blocks } = useSelect(
 		( select ) => {
@@ -166,7 +166,7 @@ export default function ProductItemTemplateEdit(
 		<div { ...blockProps }>
 			<InnerBlockLayoutContextProvider parentName="woocommerce/add-to-cart-with-options-grouped-product-selector-item">
 				<div role="list">
-					{ groupedProducts?.map( ( productItem ) => (
+					{ products?.map( ( productItem ) => (
 						<ProductItem
 							key={ productItem.id }
 							attributes={ {
@@ -174,8 +174,7 @@ export default function ProductItemTemplateEdit(
 							} }
 							blocks={ blocks }
 							isSelected={
-								( selectedProductItem ||
-									groupedProducts[ 0 ]?.id ) ===
+								( selectedProductItem || products[ 0 ]?.id ) ===
 								productItem.id
 							}
 							onSelect={ () =>
