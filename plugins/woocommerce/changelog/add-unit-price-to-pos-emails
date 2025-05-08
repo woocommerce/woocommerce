@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Display unit price for each order item in POS emails that are enabled in development environment.
