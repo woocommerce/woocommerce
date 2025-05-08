@@ -97,6 +97,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				}
 			} catch ( \Exception $e ) {
 				// If the class is not available, we don't want to show the setting.
+				wc_get_logger()->log( 'error', 'Error getting address provider class: ' . $e->getMessage() );
 				$enable_autocomplete_setting             = array();
 				$autocomplete_preferred_provider_setting = array();
 			}
