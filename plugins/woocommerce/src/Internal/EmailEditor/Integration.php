@@ -296,8 +296,9 @@ class Integration {
 			return $context;
 		}
 
-		$email        = $email_preview->get_email();
-		$personalizer = wc_get_container()->get( TransactionalEmailPersonalizer::class );
+		$email            = $email_preview->get_email();
+		$email->recipient = $context['recipient_email'] ?? '';
+		$personalizer     = wc_get_container()->get( TransactionalEmailPersonalizer::class );
 
 		return $personalizer->prepare_context_data( $context, $email );
 	}

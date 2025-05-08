@@ -186,9 +186,19 @@ class EmailPreview {
 			$object->last_name             = 'Doe';
 			$this->email->user_email       = $object->user_email;
 			$this->email->user_login       = $object->user_login;
-			$this->email->reset_key        = 'reset_key';
-			$this->email->user_id          = 0;
-			$this->email->set_password_url = 'https://example.com/set-password';
+
+			if ( property_exists( $this->email, 'reset_key' ) ) {
+				$this->email->reset_key = 'reset_key';
+			}
+
+			if ( property_exists( $this->email, 'set_password_url' ) ) {
+				$this->email->set_password_url = 'https://example.com/set-password';
+			}
+
+			if ( property_exists( $this->email, 'user_id' ) ) {
+				$this->email->user_id = 0;
+			}
+
 			$this->email->set_object( $object );
 		} else {
 			$object = $this->get_dummy_order();
