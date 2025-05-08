@@ -33,8 +33,21 @@ class WooPaymentsService {
 	const ONBOARDING_STEP_TEST_ACCOUNT          = 'test_account';
 	const ONBOARDING_STEP_BUSINESS_VERIFICATION = 'business_verification';
 
+	/**
+	 * A step is not started if the user has not interacted with it yet.
+	 */
 	const ONBOARDING_STEP_STATUS_NOT_STARTED = 'not_started';
+
+	/**
+	 * A step should be considered started if the user has interacted with it.
+	 * There will be cases where a step may be auto-started based on the current state of the store.
+	 */
 	const ONBOARDING_STEP_STATUS_STARTED     = 'started';
+
+	/**
+	 * A step is completed if the user has successfully completed it.
+	 * This is the final state of a step.
+	 */
 	const ONBOARDING_STEP_STATUS_COMPLETED   = 'completed';
 
 	const ACTION_TYPE_REST     = 'REST';
