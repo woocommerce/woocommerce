@@ -136,21 +136,18 @@ export const useStoreCart = (
 
 	const { receiveCart, receiveCartContents } = useDispatch( cartStore );
 	const { cartData, cartErrors, cartTotals, cartIsLoading, isLoadingRates } =
-		useSelect(
-			( select ) => {
-				const store = select( cartStore );
-				return {
-					cartData: store.getCartData(),
-					cartErrors: store.getCartErrors(),
-					cartTotals: store.getCartTotals(),
-					cartIsLoading:
-						// @ts-expect-error `hasFinishedResolution` is not typed in @wordpress/data yet.
-						! store.hasFinishedResolution( 'getCartData' ),
-					isLoadingRates: store.isCustomerDataUpdating(),
-				};
-			},
-			[ shouldSelect ]
-		);
+		useSelect( ( select ) => {
+			const store = select( cartStore );
+			return {
+				cartData: store.getCartData(),
+				cartErrors: store.getCartErrors(),
+				cartTotals: store.getCartTotals(),
+				cartIsLoading:
+					// @ts-expect-error `hasFinishedResolution` is not typed in @wordpress/data yet.
+					! store.hasFinishedResolution( 'getCartData' ),
+				isLoadingRates: store.isCustomerDataUpdating(),
+			};
+		}, [] );
 
 	const cartFees = useMemo( () => {
 		return cartData.fees.length > 0
