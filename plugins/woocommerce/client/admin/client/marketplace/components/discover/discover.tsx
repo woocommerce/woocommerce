@@ -11,7 +11,7 @@ import ProductList from '../product-list/product-list';
 import { fetchDiscoverPageData, ProductGroup } from '../../utils/functions';
 import ProductLoader from '../product-loader/product-loader';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
-import { ProductType } from '../product-list/types';
+import { ProductCardType, ProductType } from '../product-list/types';
 import './discover.scss';
 import { recordMarketplaceView } from '~/marketplace/utils/tracking';
 
@@ -89,6 +89,7 @@ export default function Discover(): JSX.Element | null {
 					groupURLText={ groups.url_text }
 					groupURLType={ groups.url_type }
 					type={ groups.itemType }
+					cardType={ groups.cardType ?? ProductCardType.regular }
 				/>
 			) ) }
 		</div>
