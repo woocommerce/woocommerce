@@ -514,9 +514,7 @@ test.describe( `${ blockData.name } Block`, () => {
 			.click();
 
 		await expect(
-			editor.canvas.getByLabel(
-				'Block: Quantity Selector (Experimental)'
-			)
+			editor.canvas.getByLabel( 'Block: Product Quantity (Beta)' )
 		).toBeVisible();
 
 		const addToCartWithOptionsBlock = await editor.getBlockByName(
@@ -527,9 +525,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await page.getByRole( 'button', { name: 'Switch back' } ).click();
 
 		await expect(
-			editor.canvas.getByLabel(
-				'Block: Quantity Selector (Experimental)'
-			)
+			editor.canvas.getByLabel( 'Block: Product Quantity (Beta)' )
 		).toBeHidden();
 	} );
 } );

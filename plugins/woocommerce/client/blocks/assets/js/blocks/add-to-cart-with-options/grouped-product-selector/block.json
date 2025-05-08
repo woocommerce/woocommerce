@@ -1,6 +1,6 @@
 {
 	"name": "woocommerce/add-to-cart-with-options-grouped-product-selector",
-	"title": "Grouped Product Selector (Experimental)",
+	"title": "Grouped Product Selector (Beta)",
 	"description": "Display a group of products that can be added to the cart.",
 	"category": "woocommerce-product-elements",
 	"keywords": [ "WooCommerce" ],

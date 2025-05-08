@@ -196,9 +196,7 @@ test.describe( 'Compatibility Layer in Single Product template', () => {
 			.click();
 
 		await expect(
-			editor.canvas.getByLabel(
-				'Block: Quantity Selector (Experimental)'
-			)
+			editor.canvas.getByLabel( 'Block: Product Quantity (Beta)' )
 		).toBeVisible();
 		await editor.saveSiteEditorEntities( {
 			isOnlyCurrentEntityDirty: true,
