@@ -209,7 +209,7 @@ export const BankAccountsList = ( {
 					</SortableItem>
 				) ) }
 				<li
-					className={ `bank-accounts__list-item${
+					className={ `bank-accounts__list-item action${
 						accountsWithIds.length === 0 ? ' first-item' : ''
 					}` }
 				>
