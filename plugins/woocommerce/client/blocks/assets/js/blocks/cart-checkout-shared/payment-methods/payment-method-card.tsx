@@ -49,6 +49,9 @@ const PaymentMethodCard = ( {
 		}
 	);
 
+	const { __internalSetShouldSavePaymentMethod } =
+		useDispatch( paymentStore );
+
 	const allowGuestCheckout = getSetting( 'checkoutAllowsGuest', false );
 
 	// Work out if the customer can save the payment method.
@@ -64,10 +67,12 @@ const PaymentMethodCard = ( {
 		if ( ! canSavePaymentMethod && shouldSavePaymentMethod ) {
 			__internalSetShouldSavePaymentMethod( false );
 		}
-	}, [ shouldSavePaymentMethod, canSavePaymentMethod ] );
+	}, [
+		canSavePaymentMethod,
+		shouldSavePaymentMethod,
+		__internalSetShouldSavePaymentMethod,
+	] );
 
-	const { __internalSetShouldSavePaymentMethod } =
-		useDispatch( paymentStore );
 	return (
 		<PaymentMethodErrorBoundary isEditor={ isEditor }>
 			{ children }
