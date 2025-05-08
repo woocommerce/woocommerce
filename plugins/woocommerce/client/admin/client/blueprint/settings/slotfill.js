@@ -178,7 +178,7 @@ const Blueprint = () => {
 					<h4>{ __( 'Import', 'woocommerce' ) }</h4>
 					<p>
 						{ __(
-							'Import .json file, max size 50 MB. Only one Blueprint can be imported at a time.',
+							'Import a .json file, max size 50 MB. Only one Blueprint can be imported at a time.',
 							'woocommerce'
 						) }
 					</p>
