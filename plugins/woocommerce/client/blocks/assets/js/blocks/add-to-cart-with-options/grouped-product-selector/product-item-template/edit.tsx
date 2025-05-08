@@ -93,33 +93,16 @@ export default function ProductItemTemplateEdit(
 	);
 
 	useEffect( () => {
-		const fetchGroupedProducts = async (
-			productContext: ProductResponseItem[]
-		) => {
-			if ( ! productContext || productContext.length === 0 ) {
+		const fetchChildProducts = async ( groupedProductIds: number[] ) => {
+			if ( ! groupedProductIds || groupedProductIds.length === 0 ) {
 				return;
 			}
 
-			let query: Record< string, unknown > = { per_page: 3 };
-			let groupedProductIds: number[] = [];
-
-			// If there are multiple products, use these as the grouped products.
-			if ( productContext.length > 1 ) {
-				groupedProductIds = productContext.map( ( prod ) => prod.id );
-			}
-
-			// If there is a single product, use the grouped products from the product.
-			if ( productContext.length === 1 ) {
-				groupedProductIds = productContext[ 0 ].grouped_products;
-				query.per_page = productContext[ 0 ].grouped_products.length;
-			}
-
-			if ( groupedProductIds.length ) {
-				query = { ...query, include: groupedProductIds };
-			}
-
 			resolveSelect( coreStore )
-				.getEntityRecords( 'postType', 'product', query )
+				.getEntityRecords( 'postType', 'product', {
+					include: groupedProductIds,
+					per_page: 10,
+				} )
 				.then( ( fetchedProducts ) => {
 					setProducts( fetchedProducts as ProductResponseItem[] );
 				} );
@@ -127,7 +110,7 @@ export default function ProductItemTemplateEdit(
 
 		if ( ! products ) {
 			if ( product.id !== 0 && product.type === 'grouped' ) {
-				fetchGroupedProducts( [ product ] );
+				fetchChildProducts( [ product.id ] );
 			} else if ( product.id === 0 ) {
 				// If product ID is 0, then we must be editing a template.
 				// Fetch an existing grouped product so template can be edited.
@@ -135,14 +118,21 @@ export default function ProductItemTemplateEdit(
 					.getProducts( { type: 'grouped', per_page: 1 } )
 					.then( ( groupedProduct ) => {
 						if ( groupedProduct.length > 0 ) {
-							fetchGroupedProducts( groupedProduct );
+							fetchChildProducts(
+								groupedProduct[ 0 ].grouped_products
+							);
 						} else {
 							// If there are no grouped products, query for any three other products.
 							resolveSelect( productsStore )
 								.getProducts( { per_page: 3, order: 'desc' } )
 								.then( ( fetchedProducts ) => {
 									if ( fetchedProducts.length > 0 ) {
-										fetchGroupedProducts( fetchedProducts );
+										fetchChildProducts(
+											fetchedProducts.map(
+												( prod: ProductResponseItem ) =>
+													prod.id
+											)
+										);
 									}
 								} );
 						}
