@@ -125,7 +125,7 @@ export const OfflinePaymentGatewayList = ( {
 					key={ method.id }
 					className={
 						'woocommerce-list__item' +
-						(index === gateways.length - 1 ? ' is-last' : '')
+						( index === gateways.length - 1 ? ' is-last' : '' )
 					}
 				/>
 			) ) }
