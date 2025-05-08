@@ -69,36 +69,11 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
 	 */
 	public function get_low_in_stock_count( $request ) {
-		global $wpdb;
 		$status              = $request->get_param( 'status' );
 		$low_stock_threshold = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 
 		$sidewide_stock_threshold_only = $this->is_using_sitewide_stock_threshold_only();
-		$total_results                 = 0;
-		if ( $sidewide_stock_threshold_only ) {
-			$count_query_string  = $this->get_count_query( $sidewide_stock_threshold_only );
-			$count_query_results = $wpdb->get_results(
-				// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
-				$wpdb->prepare( $count_query_string, $status, $low_stock_threshold ),
-			);
-
-			$total_results = (int) $count_query_results[0]->total;
-		} else {
-			// Split the query into two queries, one for products with a custom stock threshold and one for products without a custom stock threshold.
-			// Splitting the queries also speeds up the query.
-			$count_query_with_custom_stock_threshold_string    = $this->get_products_with_custom_stock_threshold_count_query_str();
-			$count_query_without_custom_stock_threshold_string = $this->get_products_without_custom_stock_threshold_count_query_str();
-			$count_query_with_custom_stock_threshold_results   = $wpdb->get_results(
-				// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
-				$wpdb->prepare( $count_query_with_custom_stock_threshold_string, $status ),
-			);
-			$count_query_without_custom_stock_threshold_results = $wpdb->get_results(
-				// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
-				$wpdb->prepare( $count_query_without_custom_stock_threshold_string, $status, $low_stock_threshold ),
-			);
-
-			$total_results = (int) $count_query_with_custom_stock_threshold_results[0]->total + (int) $count_query_without_custom_stock_threshold_results[0]->total;
-		}
+		$total_results                 = $this->get_count( $sidewide_stock_threshold_only, $status, $low_stock_threshold );
 
 		$response = rest_ensure_response( array( 'total' => $total_results ) );
 		$response->header( 'X-WP-Total', $total_results );
@@ -226,19 +201,50 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			OBJECT_K
 		);
 
-		$count_query_string  = $this->get_count_query( $sidewide_stock_threshold_only );
-		$count_query_results = $wpdb->get_results(
-		// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
-			$wpdb->prepare( $count_query_string, $status, $low_stock_threshold ),
-		);
-
-		$total_results = $count_query_results[0]->total;
+		$total_results = $this->get_count( $sidewide_stock_threshold_only, $status, $low_stock_threshold );
 
 		return array(
 			'results' => $query_results,
 			'total'   => (int) $total_results,
 			'pages'   => (int) ceil( $total_results / (int) $per_page ),
 		);
+	}
+
+	/**
+	 * Get the count of low in stock products.
+	 *
+	 * @param bool $sidewide_stock_threshold_only
+	 * @param string $status
+	 * @param int $low_stock_threshold
+	 *
+	 * @return int
+	 */
+	protected function get_count( $sidewide_stock_threshold_only, $status, $low_stock_threshold ) {
+		global $wpdb;
+		if ( $sidewide_stock_threshold_only ) {
+			$count_query_string  = $this->get_count_query( $sidewide_stock_threshold_only );
+			$count_query_results = $wpdb->get_results(
+				// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
+				$wpdb->prepare( $count_query_string, $status, $low_stock_threshold ),
+			);
+
+			return (int) $count_query_results[0]->total;
+		}
+
+		// Split the query into two queries, one for products with a custom stock threshold and one for products without a custom stock threshold.
+		// Splitting the queries also speeds up the query.
+		$count_query_with_custom_stock_threshold_string    = $this->get_products_with_custom_stock_threshold_count_query_str();
+		$count_query_without_custom_stock_threshold_string = $this->get_products_without_custom_stock_threshold_count_query_str();
+		$count_query_with_custom_stock_threshold_results   = $wpdb->get_results(
+			// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
+			$wpdb->prepare( $count_query_with_custom_stock_threshold_string, $status ),
+		);
+		$count_query_without_custom_stock_threshold_results = $wpdb->get_results(
+			// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
+			$wpdb->prepare( $count_query_without_custom_stock_threshold_string, $status, $low_stock_threshold ),
+		);
+
+		return (int) $count_query_with_custom_stock_threshold_results[0]->total + (int) $count_query_without_custom_stock_threshold_results[0]->total;
 	}
 
 	/**
