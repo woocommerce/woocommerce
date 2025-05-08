@@ -242,7 +242,8 @@ final class WC_Cart_Session {
 		do_action( 'woocommerce_cart_loaded_from_session', $this->cart );
 
 		if ( $update_cart_session || is_null( WC()->session->get( 'cart_totals', null ) ) ) {
-			WC()->session->set( 'cart', $this->get_cart_for_session() );
+			$cart_for_session = $this->get_cart_for_session();
+			WC()->session->set( 'cart', empty( $cart_for_session ) ? null : $cart_for_session );
 			$this->cart->calculate_totals();
 
 			if ( $merge_saved_cart ) {

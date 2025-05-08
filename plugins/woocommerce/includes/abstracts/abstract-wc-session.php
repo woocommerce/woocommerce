@@ -126,7 +126,7 @@ abstract class WC_Session {
 		}
 
 		$this->_dirty                        = true;
-		$this->_data[ sanitize_key( $key ) ] = maybe_serialize( $value );
+		$this->_data[ $key ] = maybe_serialize( $value );
 	}
 
 	/**
