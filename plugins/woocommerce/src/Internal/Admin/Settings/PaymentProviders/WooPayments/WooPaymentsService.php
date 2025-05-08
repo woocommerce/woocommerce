@@ -42,19 +42,19 @@ class WooPaymentsService {
 	 * A step should be considered started if the user has interacted with it.
 	 * There will be cases where a step may be auto-started based on the current state of the store.
 	 */
-	const ONBOARDING_STEP_STATUS_STARTED     = 'started';
+	const ONBOARDING_STEP_STATUS_STARTED = 'started';
 
 	/**
 	 * A step is completed if the user has successfully completed it.
 	 * This is the final state of a step.
 	 */
-	const ONBOARDING_STEP_STATUS_COMPLETED   = 'completed';
+	const ONBOARDING_STEP_STATUS_COMPLETED = 'completed';
 
 	/**
 	 * Failure generally refers to some error that occurred during a step action.
 	 * Retrying the action should be possible and lead to a different step status.
 	 */
-	const ONBOARDING_STEP_STATUS_FAILED      = 'failed';
+	const ONBOARDING_STEP_STATUS_FAILED = 'failed';
 
 	/**
 	 * Blocked generally refers to a step can't progress to a completed state due to some technical requirements
@@ -62,7 +62,7 @@ class WooPaymentsService {
 	 * Most of the time, the reasons will be environment-related.
 	 * For example, the store may not use HTTPS, or live onboarding might be prevented due to environment settings.
 	 */
-	const ONBOARDING_STEP_STATUS_BLOCKED     = 'blocked';
+	const ONBOARDING_STEP_STATUS_BLOCKED = 'blocked';
 
 	const ACTION_TYPE_REST     = 'REST';
 	const ACTION_TYPE_REDIRECT = 'REDIRECT';
@@ -243,7 +243,7 @@ class WooPaymentsService {
 		// We take a waterfall approach: completed > blocked > failed > started > not started.
 		// For the completed status, we enforce sanity and check if the step requirements are met.
 		if ( $this->check_onboarding_step_requirements( $step_id, $location ) &&
-			 ! empty( $stored_statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] ) ) {
+			! empty( $stored_statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] ) ) {
 			return self::ONBOARDING_STEP_STATUS_COMPLETED;
 		}
 		if ( $this->is_onboarding_step_blocked( $step_id, $location ) ) {
@@ -526,7 +526,7 @@ class WooPaymentsService {
 				} elseif ( is_array( $value ) ) {
 					// Arrays can only contain strings.
 					$sanitized_error['context'][ $key ] = array_map(
-						function( $item ) {
+						function ( $item ) {
 							if ( is_string( $item ) ) {
 								return sanitize_text_field( $item );
 							} elseif ( is_scalar( $item ) ) {
@@ -540,7 +540,7 @@ class WooPaymentsService {
 					// Remove any empty values from the array.
 					$sanitized_error['context'][ $key ] = array_filter(
 						$sanitized_error['context'][ $key ],
-						function( $item ) {
+						function ( $item ) {
 							return '' !== $item;
 						}
 					);
@@ -1242,7 +1242,7 @@ class WooPaymentsService {
 		if ( $this->is_onboarding_step_blocked( $step_id, $location ) ) {
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_step_blocked',
-				esc_html__( 'There are store setup issues which are blocking progress. Please resolve them to proceed.', 'woocommerce' ),
+				esc_html__( 'There are environment or store setup issues which are blocking progress. Please resolve them to proceed.', 'woocommerce' ),
 				(int) WP_Http::FORBIDDEN,
 				array(
 					'error' => $this->get_onboarding_step_error( $step_id, $location ),
