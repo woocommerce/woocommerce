@@ -4,28 +4,28 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
-use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
-use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
 use Automattic\WooCommerce\Blueprint\Steps\RunSql;
 use Automattic\WooCommerce\Blueprint\Steps\SetSiteOptions;
 use Automattic\WooCommerce\Blueprint\Util;
 
 /**
- * Class ExportWCShipping
+ * Class ExportWCSettingsShipping
  *
- * Exports WooCommerce shipping settings and implements the StepExporter interface.
+ * Exports WooCommerce settings on the Shipping page.
  *
  * @package Automattic\WooCommerce\Admin\Features\Blueprint\Exporters
  */
-class ExportWCShipping implements StepExporter, HasAlias {
+class ExportWCSettingsShipping extends ExportWCSettings {
 	/**
 	 * Export WooCommerce shipping settings.
 	 *
 	 * @return array Array of RunSql|SetSiteOptions instances.
 	 */
 	public function export(): array {
+		$shipping_settings = parent::export();
+
 		$steps = array_merge(
-			array(),
+			array( $shipping_settings ),
 			$this->get_steps_for_classes_and_terms(),
 			$this->get_steps_for_zones(),
 			$this->get_steps_for_locations(),
@@ -195,5 +195,14 @@ class ExportWCShipping implements StepExporter, HasAlias {
 	 */
 	public function check_step_capabilities(): bool {
 		return current_user_can( 'manage_woocommerce' );
+	}
+
+	/**
+	 * Get the page ID for the settings page.
+	 *
+	 * @return string
+	 */
+	public function get_page_id(): string {
+		return 'shipping';
 	}
 }

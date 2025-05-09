@@ -10,6 +10,16 @@
 
 	&__field {
 		margin-bottom: 24px;
+
+		&.is-required {
+			label::after {
+				content: " *";
+			}
+		}
+	}
+
+	&__error {
+		color: #c00;
 	}
 
 	&__actions {

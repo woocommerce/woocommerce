@@ -1,0 +1,121 @@
+.settings-layout {
+	margin: 48px 12px 0;
+	display: flex;
+	flex-flow: row;
+
+	@include breakpoint( "<960px" ) {
+		flex-flow: column;
+	}
+
+	// Styling for the form actions in the payment settings section.
+	.form__actions {
+		display: flex;
+		flex-direction: row-reverse;
+	}
+
+	// Fix to remove box shadow from settings cards.
+	.settings-card__wrapper {
+		box-shadow: none;
+	}
+}
+
+.settings-form {
+	width: 80%;
+}
+
+.settings-section {
+	display: flex;
+	align-items: flex-start;
+	flex-flow: row;
+
+	&:not(&:last-child) {
+		margin-bottom: 24px;
+	}
+
+	@include breakpoint( "<782px" ) {
+		flex-flow: column;
+	}
+
+	&__details {
+		flex: 0 0 33%;
+		margin: 0 24px 0 0;
+
+		@include breakpoint( "<782px" ) {
+			margin: 0 0 40px 0;
+			max-width: 328px;
+		}
+
+		h2 {
+			font-size: 16px;
+			line-height: 24px;
+		}
+
+		p {
+			font-size: 13px;
+			line-height: 20px;
+			margin: 12px 0;
+		}
+
+		> :last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	&__icons {
+		> li {
+			display: inline-block;
+			margin: 0 5px 0 0;
+		}
+
+		svg {
+			border-radius: 2px;
+			box-shadow: 0 0 0 1px #ddd;
+			height: auto;
+			width: 38px;
+		}
+	}
+
+	&__controls {
+		margin-top: 6px;	// Ensure visual alignment.
+		flex: 1 1 auto;
+	}
+
+	.form-field:not(:first-child) {
+		margin-top: 24px;
+	}
+}
+
+.components-base-control {
+	margin-bottom: 32px;
+
+	+ .components-base-control__help {
+		margin-top: 0;
+		margin-bottom: 0;
+	}
+
+	&__help {
+		margin-bottom: 32px;
+	}
+}
+
+.woocommerce-tree-select-control {
+	&__control {
+		margin-bottom: 0;
+	}
+
+	&__label {
+		font-size: 11px;
+		font-weight: 500;
+		line-height: 1.4;
+		color: $gray-700;
+		text-transform: uppercase;
+		display: block;
+		margin-bottom: calc(8px);
+		padding: 0;
+	}
+
+	&__help {
+		margin-top: calc(8px);
+		margin-bottom: 32px;
+	}
+}

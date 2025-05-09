@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Add grouped product context to Blockified Add to Cart with Options when block is rendered in the Editor outside of a product.

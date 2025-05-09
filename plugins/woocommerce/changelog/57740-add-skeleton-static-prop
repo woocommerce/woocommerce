@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Fix incorrect loading animation in Add to Cart with Options block by adding isStatic prop to Skeleton component

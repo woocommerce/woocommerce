@@ -4,13 +4,14 @@
 import { Button, MenuGroup, MenuItem, Modal } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { EllipsisMenu } from '@woocommerce/components';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 /**
  * Internal dependencies
  */
 import { BankAccount } from './types';
 import { BankAccountModal } from './bank-account-modal';
+import { generateId } from './utils';
 import {
 	DefaultDragHandle,
 	SortableContainer,
@@ -18,13 +19,8 @@ import {
 } from '~/settings-payments/components/sortable';
 import './bank-account-list.scss';
 
-/**
- * Generates a random string ID for new bank accounts.
- *
- * @return {string} A unique identifier string.
- */
-function generateId() {
-	return Math.random().toString( 36 ).substring( 2, 10 );
+interface BankAccountItem extends BankAccount {
+	id: string;
 }
 
 /**
@@ -32,9 +28,8 @@ function generateId() {
  *
  */
 interface Props {
-	initialAccounts: BankAccount[];
+	accounts: BankAccount[];
 	onChange: ( accounts: BankAccount[] ) => void;
-	updateOrdering: ( accounts: BankAccount[] ) => void;
 	defaultCountry: string;
 }
 
@@ -46,24 +41,39 @@ interface Props {
  * @return {Element} The rendered component.
  */
 export const BankAccountsList = ( {
-	initialAccounts,
+	accounts,
 	onChange,
-	updateOrdering,
 	defaultCountry,
 }: Props ) => {
-	const [ accounts, setAccounts ] = useState( initialAccounts );
+	const [ accountsWithIds, setAccountsWithIds ] = useState<
+		BankAccountItem[]
+	>( () =>
+		accounts.map( ( account ) => ( { ...account, id: generateId() } ) )
+	);
+
+	useEffect( () => {
+		if ( accounts.length && accountsWithIds.length === 0 ) {
+			setAccountsWithIds(
+				accounts.map( ( account ) => ( {
+					...account,
+					id: generateId(),
+				} ) )
+			);
+		}
+	}, [ accounts, accountsWithIds.length ] );
+
 	const [ selectedAccount, setSelectedAccount ] =
-		useState< BankAccount | null >( null );
+		useState< BankAccountItem | null >( null );
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 	const [ accountToDelete, setAccountToDelete ] =
-		useState< BankAccount | null >( null );
+		useState< BankAccountItem | null >( null );
 
 	/**
 	 * Opens the bank account modal for adding or editing an account.
 	 *
-	 * @param {BankAccount | null} account The account to edit, or null to add a new one.
+	 * @param {BankAccountItem | null} account The account to edit, or null to add a new one.
 	 */
-	const openModal = ( account: BankAccount | null = null ) => {
+	const openModal = ( account: BankAccountItem | null = null ) => {
 		setSelectedAccount( account );
 		setIsModalOpen( true );
 	};
@@ -74,13 +84,28 @@ export const BankAccountsList = ( {
 	 * @param {BankAccount} updated The updated or new bank account.
 	 */
 	const handleSave = ( updated: BankAccount ) => {
-		const newAccounts = accounts.some( ( acc ) => acc.id === updated.id )
-			? accounts.map( ( acc ) =>
-					acc.id === updated.id ? updated : acc
-			  )
-			: [ ...accounts, { ...updated, id: generateId() } ];
-		setAccounts( newAccounts );
-		onChange( newAccounts );
+		const existingIndex = accountsWithIds.findIndex(
+			( acc ) => acc.id === selectedAccount?.id
+		);
+
+		let newAccounts;
+		if ( existingIndex !== -1 ) {
+			// Update existing
+			newAccounts = [ ...accountsWithIds ];
+			newAccounts[ existingIndex ] = {
+				...updated,
+				id: selectedAccount?.id || generateId(),
+			};
+		} else {
+			// Add new
+			newAccounts = [
+				...accountsWithIds,
+				{ ...updated, id: generateId() },
+			];
+		}
+
+		setAccountsWithIds( newAccounts );
+		onChange( newAccounts.map( ( { id, ...rest } ) => rest ) );
 		setIsModalOpen( false );
 	};
 
@@ -89,28 +114,28 @@ export const BankAccountsList = ( {
 	 */
 	const confirmDelete = () => {
 		if ( ! accountToDelete ) return;
-		const newAccounts = accounts.filter(
+		const newAccounts = accountsWithIds.filter(
 			( acc ) => acc.id !== accountToDelete.id
 		);
-		setAccounts( newAccounts );
-		onChange( newAccounts );
+		setAccountsWithIds( newAccounts );
+		onChange( newAccounts.map( ( { id, ...rest } ) => rest ) );
 		setAccountToDelete( null );
 	};
 
 	/**
 	 * Updates the ordering of bank accounts after drag-and-drop sorting.
 	 *
-	 * @param {BankAccount[]} newAccounts The reordered list of bank accounts.
+	 * @param {BankAccountItem[]} newAccounts The reordered list of bank accounts.
 	 */
-	const handleUpdateOrdering = ( newAccounts: BankAccount[] ) => {
-		setAccounts( newAccounts );
-		updateOrdering( newAccounts );
+	const handleUpdateOrdering = ( newAccounts: BankAccountItem[] ) => {
+		setAccountsWithIds( newAccounts );
+		onChange( newAccounts.map( ( { id, ...rest } ) => rest ) );
 	};
 
 	return (
 		<>
-			<SortableContainer< BankAccount >
-				items={ accounts }
+			<SortableContainer< BankAccountItem >
+				items={ accountsWithIds }
 				className={ 'bank-accounts__list' }
 				setItems={ handleUpdateOrdering }
 			>
@@ -125,7 +150,7 @@ export const BankAccountsList = ( {
 						<div className="bank-accounts__list-item-after" />
 					</div>
 				</div>
-				{ accounts.map( ( account, index ) => (
+				{ accountsWithIds.map( ( account, index ) => (
 					<SortableItem
 						key={ account.id }
 						id={ account.id }
@@ -146,13 +171,16 @@ export const BankAccountsList = ( {
 								<EllipsisMenu
 									label={ __( 'Options', 'woocommerce' ) }
 									placement={ 'bottom-right' }
-									renderContent={ () => (
+									renderContent={ ( {
+										onClose = () => {},
+									} ) => (
 										<MenuGroup>
 											<MenuItem
-												role={ 'menuitem' }
-												onClick={ () =>
-													openModal( account )
-												}
+												role="menuitem"
+												onClick={ () => {
+													onClose();
+													openModal( account );
+												} }
 											>
 												{ __(
 													'View / edit',
@@ -161,11 +189,12 @@ export const BankAccountsList = ( {
 											</MenuItem>
 											<MenuItem
 												isDestructive
-												onClick={ () =>
+												onClick={ () => {
+													onClose();
 													setAccountToDelete(
 														account
-													)
-												}
+													);
+												} }
 											>
 												{ __(
 													'Delete',
@@ -179,7 +208,11 @@ export const BankAccountsList = ( {
 						</div>
 					</SortableItem>
 				) ) }
-				<li className="bank-accounts__list-item action">
+				<li
+					className={ `bank-accounts__list-item action${
+						accountsWithIds.length === 0 ? ' first-item' : ''
+					}` }
+				>
 					<Button
 						variant={ 'secondary' }
 						onClick={ () => openModal( null ) }
