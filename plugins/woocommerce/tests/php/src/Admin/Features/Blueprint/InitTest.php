@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Tests\Admin\Features\Blueprint;
 
 use Automattic\WooCommerce\Admin\Features\Blueprint\Init;
@@ -7,18 +9,34 @@ use Automattic\WooCommerce\Tests\Admin\Features\Blueprint\stubs\DummyExporter;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 
+/**
+ * Class InitTest
+ *
+ * @package Automattic\WooCommerce\Tests\Admin\Features\Blueprint
+ */
 class InitTest extends MockeryTestCase {
+	/**
+	 * The Init instance.
+	 *
+	 * @var Mockery\MockInterface
+	 */
 	protected $init;
 
+	/**
+	 * Set up the test.
+	 */
 	protected function setUp(): void {
 		parent::setUp();
 
-		// Create a Mockery mock of Init class
+		// Create a Mockery mock of Init class.
 		$this->init = Mockery::mock( Init::class )->makePartial();
 	}
 
+	/**
+	 * Test the get_plugins_for_export_group method.
+	 */
 	public function test_get_plugins_for_export_group() {
-		// Fake plugins list
+		// Fake plugins list.
 		$mock_plugins = array(
 			'plugin-1/plugin.php' => array( 'Name' => 'Plugin One' ),
 			'plugin-2/plugin.php' => array( 'Name' => 'Plugin Two' ),
@@ -26,11 +44,17 @@ class InitTest extends MockeryTestCase {
 
 		$active_plugins = array( 'plugin-1/plugin.php' );
 
-		// Mock methods
+		$plugins_api = (object) array(
+			'plugin-1' => array( 'Name' => 'Plugin One' ),
+			'plugin-2' => array( 'Name' => 'Plugin Two' ),
+		);
+
+		// Mock methods.
 		$this->init->shouldReceive( 'wp_get_plugins' )->andReturn( $mock_plugins );
 		$this->init->shouldReceive( 'wp_get_option' )->andReturn( $active_plugins );
+		$this->init->shouldReceive( 'wp_plugins_api' )->andReturn( $plugins_api );
 
-		// Run the function
+		// Run the function.
 		$result = $this->init->get_plugins_for_export_group();
 
 		$expected = array(
@@ -49,17 +73,20 @@ class InitTest extends MockeryTestCase {
 		$this->assertSame( $expected, $result );
 	}
 
+	/**
+	 * Test the get_themes_for_export_group method.
+	 */
 	public function test_get_themes_for_export_group() {
-		// Create mock themes that mimic WP_Theme
+		// Create mock themes that mimic WP_Theme.
 		$mock_theme_1      = $this->createMockTheme( 'theme-one', 'Theme One' );
 		$mock_theme_2      = $this->createMockTheme( 'theme-two', 'Theme Two' );
 		$mock_active_theme = $this->createMockTheme( 'theme-one', 'Theme One' );
 
-		// Mock methods
+		// Mock methods.
 		$this->init->shouldReceive( 'wp_get_themes' )->andReturn( array( $mock_theme_1, $mock_theme_2 ) );
 		$this->init->shouldReceive( 'wp_get_theme' )->andReturn( $mock_active_theme );
 
-		// Run the function
+		// Run the function.
 		$result = $this->init->get_themes_for_export_group();
 
 		$expected = array(
@@ -78,6 +105,9 @@ class InitTest extends MockeryTestCase {
 		$this->assertSame( $expected, $result );
 	}
 
+	/**
+	 * Test the get_step_groups_for_js method.
+	 */
 	public function test_get_step_groups_for_js() {
 		$this->init->shouldReceive( 'get_woo_exporters' )->andReturn( array( new DummyExporter() ) );
 
@@ -137,6 +167,11 @@ class InitTest extends MockeryTestCase {
 
 	/**
 	 * Helper method to create a mock WP_Theme-like object.
+	 *
+	 * @param string $stylesheet The stylesheet of the theme.
+	 * @param string $name The name of the theme.
+	 *
+	 * @return Mockery\MockInterface The mock WP_Theme object.
 	 */
 	private function createMockTheme( string $stylesheet, string $name ) {
 		$mock_theme = Mockery::mock( 'stdClass' );
@@ -146,8 +181,13 @@ class InitTest extends MockeryTestCase {
 		return $mock_theme;
 	}
 
+	/**
+	 * Tear down the test.
+	 */
 	protected function tearDown(): void {
 		Mockery::close();
 		parent::tearDown();
+
+		delete_transient( $this->init::INSTALLED_WP_ORG_PLUGINS_TRANSIENT );
 	}
 }
