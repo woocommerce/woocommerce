@@ -7,6 +7,16 @@
 	width: 100%;
 	margin: 0;
 	box-sizing: border-box;
+
+	// Hides labels when the spinner is shown.
+	&--loading {
+		.wc-block-components-button__text {
+			visibility: hidden;
+		}
+		.wc-block-components-spinner {
+			visibility: visible;
+		}
+	}
 }
 
 .wc-block-cart {
