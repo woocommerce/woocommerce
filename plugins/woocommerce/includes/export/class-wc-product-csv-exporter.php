@@ -52,7 +52,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Products belonging to what category should be exported.
 	 *
-	 * @var string
+	 * @var array
 	 */
 	protected $product_category_to_export = array();
 
@@ -210,7 +210,6 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		 * @param array $product_ids Array of product IDs to export. Default empty array.
 		 */
 		$hook_provided_ids = apply_filters( 'woocommerce_product_export_specific_product_ids', array() );
-		$hook_provided_ids = array_map( 'absint', $hook_provided_ids );
 
 		if ( ! empty( $hook_provided_ids ) && is_array( $hook_provided_ids ) ) {
 			$ids_for_include = array_map( 'absint', $hook_provided_ids );
@@ -231,7 +230,13 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			}
 		}
 
-		$products = wc_get_products( apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", $args ) );
+		$args = apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", $args );
+
+		if ( ! empty( $args['include'] ) ) {
+			$args['include'] = array_map( 'absint', (array) $args['include'] );
+		}
+
+		$products = wc_get_products( $args );
 
 		$this->total_rows  = $products->total;
 		$this->row_data    = array();
@@ -240,10 +245,10 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		foreach ( $products->products as $product ) {
 			// Check if the product is variable and if either the include or category filter is active.
 			// This is to ensure that product variations are only included if they are being selectively exported or if they are part of a category.
-			if ( $product->is_type( ProductType::VARIABLE ) && ( ! empty( $args['include'] ) || ! empty( $args['category'] ) ) ) {
-				if ( ! in_array( $product->get_id(), $variable_products, true ) ) {
-					$variable_products[] = $product->get_id();
-				}
+			if ( ( ! empty( $args['include'] ) || ! empty( $args['category'] ) ) &&
+				$product->is_type( ProductType::VARIABLE ) &&
+				! in_array( $product->get_id(), $variable_products, true ) ) {
+				$variable_products[] = $product->get_id();
 			}
 
 			$this->row_data[] = $this->generate_row_data( $product );

@@ -14,7 +14,7 @@ wp_enqueue_script( 'wc-product-export' );
 $exporter = new WC_Product_CSV_Exporter();
 
 $product_ids_to_export = array();
-$is_exporting_specific = false;
+$is_exporting_product_ids = false;
 
 if ( ! empty( $_GET['product_ids'] ) ) {
 	check_admin_referer( 'export-selected-products' );
@@ -22,9 +22,7 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 	$ids_raw               = explode( ',', sanitize_text_field( wp_unslash( $_GET['product_ids'] ) ) );
 	$product_ids_to_export = array_filter( array_map( 'absint', $ids_raw ) );
 
-	if ( ! empty( $product_ids_to_export ) ) {
-		$is_exporting_specific = true;
-	}
+	$is_exporting_product_ids = ! empty( $product_ids_to_export ) ? true : false;
 }
 ?>
 
@@ -32,14 +30,14 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 	<h1><?php esc_html_e( 'Export Products', 'woocommerce' ); ?></h1>
 
 	<?php
-	if ( $is_exporting_specific ) {
+	if ( $is_exporting_product_ids ) {
 		$clear_url = remove_query_arg( 'product_ids' );
 		$count     = count( $product_ids_to_export );
 		$notice    = sprintf(
 			// translators: %1$d: Number of products, %2$s: URL to clear selection.
 			_n(
-				'You are exporting the %1$d product you selected in the previous step. <a href="%2$s">Clear selection</a> to export all products.',
-				'You are exporting the %1$d products you selected in the previous step. <a href="%2$s">Clear selection</a> to export all products.',
+				'You are about to export %1$d product. To export all products, <a href="%2$s">clear your selection</a>.',
+				'You are about to export %1$d products. To export all products, <a href="%2$s">clear your selection</a>.',
 				$count,
 				'woocommerce'
 			),
@@ -57,8 +55,8 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 	<div class="woocommerce-exporter-wrapper">
 		<form class="woocommerce-exporter">
 			<?php
-			// Add hidden input if exporting specific IDs, so JS can potentially pick it up.
-			if ( $is_exporting_specific ) {
+			// Add hidden input if exporting product IDs, so JS can potentially pick it up.
+			if ( $is_exporting_product_ids ) {
 				echo '<input type="hidden" name="product_ids" value="' . esc_attr( implode( ',', $product_ids_to_export ) ) . '" />';
 			}
 			?>
@@ -67,7 +65,7 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 				<h2><?php esc_html_e( 'Export products to a CSV file', 'woocommerce' ); ?></h2>
 				<p>
 					<?php
-					if ( $is_exporting_specific ) {
+					if ( $is_exporting_product_ids ) {
 						esc_html_e( 'This tool allows you to generate and download a CSV file containing the selected products.', 'woocommerce' );
 					} else {
 						esc_html_e( 'This tool allows you to generate and download a CSV file containing a list of all products.', 'woocommerce' );
@@ -94,7 +92,7 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 								</select>
 							</td>
 						</tr>
-						<?php if ( ! $is_exporting_specific ) : ?>
+						<?php if ( ! $is_exporting_product_ids ) : ?>
 						<tr>
 							<th scope="row">
 								<label for="woocommerce-exporter-types"><?php esc_html_e( 'Which product types should be exported?', 'woocommerce' ); ?></label>

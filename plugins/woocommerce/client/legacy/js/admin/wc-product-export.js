@@ -41,13 +41,12 @@
 	 * Process the current export step.
 	 */
 	productExportForm.prototype.processStep = function( step, data, columns, filename ) {
-		var $this         = this,
-			selected_columns = $( '.woocommerce-exporter-columns' ).val(),
-			export_meta      = $( '#woocommerce-exporter-meta:checked' ).length ? 1: 0,
-			export_types     = $( '.woocommerce-exporter-types' ).val(),
-			export_category  = $( '.woocommerce-exporter-category' ).val();
-			// Check for specific product IDs from the hidden input.
-			var export_product_ids = $this.$form.find('input[name="product_ids"]').val() || '';
+		var $this              = this,
+			selected_columns   = $( '.woocommerce-exporter-columns' ).val(),
+			export_meta        = $( '#woocommerce-exporter-meta:checked' ).length ? 1: 0,
+			export_types       = $( '.woocommerce-exporter-types' ).val(),
+			export_category    = $( '.woocommerce-exporter-category' ).val(),
+			export_product_ids = $this.$form.find('input[name="product_ids"]').val() || '';
 
 		$.ajax( {
 			type: 'POST',
