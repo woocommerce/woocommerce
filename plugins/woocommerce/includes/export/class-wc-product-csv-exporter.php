@@ -230,6 +230,12 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			}
 		}
 
+		/**
+		 * Filter the query args for the product export.
+		 *
+		 * @since 3.5.0
+		 * @param array $args Arguments to pass to wc_get_products().
+		 */
 		$args = apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", $args );
 
 		if ( ! empty( $args['include'] ) ) {

@@ -160,7 +160,7 @@ class WC_Admin_Exporters {
 
 		// Set specific product IDs if provided.
 		if ( ! empty( $_POST['export_product_ids'] ) ) { // WPCS: input var ok.
-			$ids_raw     = explode( ',', sanitize_text_field( wp_unslash( $_POST['export_product_ids'] ) ) ); // WPCS: input var ok, sanitization ok.
+			$ids_raw = explode( ',', sanitize_text_field( wp_unslash( $_POST['export_product_ids'] ) ) ); // WPCS: input var ok, sanitization ok.
 
 			if ( ! empty( $ids_raw ) ) {
 				$exporter->set_product_ids_to_export( $ids_raw );

@@ -13,7 +13,7 @@ wp_enqueue_script( 'wc-product-export' );
 
 $exporter = new WC_Product_CSV_Exporter();
 
-$product_ids_to_export = array();
+$product_ids_to_export 	  = array();
 $is_exporting_product_ids = false;
 
 if ( ! empty( $_GET['product_ids'] ) ) {
