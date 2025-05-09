@@ -109,13 +109,6 @@ const TestAccountStep = () => {
 	useEffect( () => {
 		// -- Initialization Phase --
 		if ( status === 'idle' ) {
-			const stepHasError = currentStep?.errors?.[ 0 ];
-			if ( stepHasError ) {
-				setErrorMessage( stepHasError );
-				setStatus( 'error' );
-				return;
-			}
-
 			if ( currentStep?.status === 'completed' ) {
 				setStatus( 'success' );
 				setProgress( 100 ); // Show success state immediately
