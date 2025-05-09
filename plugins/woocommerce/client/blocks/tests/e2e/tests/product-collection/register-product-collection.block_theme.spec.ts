@@ -242,8 +242,7 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 				.locator( 'visible=true' );
 			await expect( products ).toHaveCount( 9 );
 
-			// Check if the preview button is visible
-			const previewButtonLocator = block.getByTestId(
+			const previewButtonLocator = editor.canvas.getByTestId(
 				SELECTORS.previewButtonTestID
 			);
 			await expect( previewButtonLocator ).toBeVisible();
@@ -305,10 +304,10 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 					.label
 			);
 
-			// Check if the preview button is visible
-			const previewButtonLocator = block.getByTestId(
+			const previewButtonLocator = editor.canvas.getByTestId(
 				SELECTORS.previewButtonTestID
 			);
+
 			await expect( previewButtonLocator ).toBeVisible();
 
 			// Check if products are visible
@@ -375,8 +374,8 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 					collection.id as Collections
 				);
 
-				const block = editor.canvas.getByLabel( collection.label );
-				const previewButtonLocator = block.getByTestId(
+				// Check if the preview button is visible
+				const previewButtonLocator = editor.canvas.getByTestId(
 					SELECTORS.previewButtonTestID
 				);
 
@@ -392,8 +391,7 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 				collection.id as Collections
 			);
 
-			const block = editor.canvas.getByLabel( collection.label );
-			const previewButtonLocator = block.getByTestId(
+			const previewButtonLocator = editor.canvas.getByTestId(
 				SELECTORS.previewButtonTestID
 			);
 
@@ -408,8 +406,7 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 				collection.id as Collections
 			);
 
-			const block = editor.canvas.getByLabel( collection.label );
-			const previewButtonLocator = block.getByTestId(
+			const previewButtonLocator = editor.canvas.getByTestId(
 				SELECTORS.previewButtonTestID
 			);
 
@@ -565,8 +562,7 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 						collection.id as Collections
 					);
 
-					const block = editor.canvas.getByLabel( collection.label );
-					const previewButtonLocator = block.getByTestId(
+					const previewButtonLocator = editor.canvas.getByTestId(
 						SELECTORS.previewButtonTestID
 					);
 
@@ -604,8 +600,7 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 				await expect( editorProductPicker ).toBeHidden();
 
 				// Check visibility of preview label
-				const block = editor.canvas.getByLabel( collection.label );
-				const previewButtonLocator = block.getByTestId(
+				const previewButtonLocator = editor.canvas.getByTestId(
 					SELECTORS.previewButtonTestID
 				);
 
@@ -620,8 +615,7 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 					collection.id as Collections
 				);
 
-				const block = editor.canvas.getByLabel( collection.label );
-				const previewButtonLocator = block.getByTestId(
+				const previewButtonLocator = editor.canvas.getByTestId(
 					SELECTORS.previewButtonTestID
 				);
 
