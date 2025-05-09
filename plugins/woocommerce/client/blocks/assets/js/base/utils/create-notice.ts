@@ -86,12 +86,12 @@ export const removeNoticesWithContext = ( context: string ) => {
 };
 
 /**
- * Remove a notice by its ID.
+ * Remove notices that have an ID starting with the provided string
  *
- * @param {string} id        - The ID of the notice to remove.
- * @param {string} [context] - The context of the notice to remove.
+ * @param {string} id        - The string to match notice IDs against.
+ * @param {string} [context] - The context of the notice to remove. If not provided, will check all contexts.
  */
-export const removeNoticeForField = ( id: string, context?: string ) => {
+export const removeNoticesForField = ( id: string, context?: string ) => {
 	const { removeNotice } = dispatch( noticesStore );
 
 	if ( context ) {

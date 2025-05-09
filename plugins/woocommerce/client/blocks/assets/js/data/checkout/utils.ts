@@ -28,7 +28,7 @@ import type {
 	OrderForm,
 	OrderFormValues,
 } from '@woocommerce/settings';
-import { removeNoticeForField } from '@woocommerce/base-utils';
+import { removeNoticesForField } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -300,7 +300,7 @@ export const clearFieldErrorNotices = ( data: CheckoutPutData ) => {
 		// If a field is in the success response we can assume it has no errors.
 		const noticeFields = Object.keys( data.additional_fields );
 		noticeFields.forEach( ( field ) => {
-			removeNoticeForField( field );
+			removeNoticesForField( field );
 		} );
 	}
 };
