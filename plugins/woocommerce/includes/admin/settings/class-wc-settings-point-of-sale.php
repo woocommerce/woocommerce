@@ -127,6 +127,10 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 	 * @return string
 	 */
 	private function get_default_store_address() {
+		if ( ! WC() || ! WC()->countries ) {
+			return '';
+		}
+
 		return wp_specialchars_decode(
 			WC()->countries->get_formatted_address(
 				array(
