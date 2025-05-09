@@ -122,7 +122,11 @@ const TestAccountStep = () => {
 				return;
 			}
 
-			if ( currentStep?.status === 'not_started' ) {
+			// If this step is not started or previously failed, try to initialize it
+			if (
+				currentStep?.status === 'not_started' ||
+				currentStep?.status === 'failed'
+			) {
 				setStatus( 'initializing' );
 				apiFetch< { success: boolean; message?: string } >( {
 					url: currentStep?.actions?.init?.href,
