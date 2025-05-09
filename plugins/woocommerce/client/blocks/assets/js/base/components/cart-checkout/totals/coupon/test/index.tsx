@@ -36,8 +36,6 @@ describe( 'TotalsCoupon', () => {
 		} );
 		rerender( <TotalsCoupon instanceId={ 'coupon' } /> );
 
-		// TODO: Fix a recent deprecation of showSpinner prop of Button called in this component.
-		expect( console ).toHaveWarned();
 		expect( screen.getByText( 'Invalid coupon code' ) ).toBeInTheDocument();
 	} );
 } );
