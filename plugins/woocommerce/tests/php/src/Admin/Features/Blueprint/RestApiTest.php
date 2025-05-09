@@ -183,10 +183,10 @@ class RestApiTest extends WP_Test_REST_TestCase {
 		);
 		$request->set_header( 'Content-Type', 'application/json' );
 
-		$response = $this->rest_api->import_step( $request );
-
-		$this->assertTrue( $response['success'], $response['messages'][0]['message'] );
-		$this->assertCount( 1, $response['messages'] );
-		$this->assertStringContainsString( 'woocommerce_store_address has been updated', $response['messages'][0]['message'] );
+		$response      = $this->rest_api->import_step( $request );
+		$response_data = $response->get_data();
+		$this->assertTrue( $response_data['success'], $response_data['messages'][0]['message'] );
+		$this->assertCount( 1, $response_data['messages'] );
+		$this->assertStringContainsString( 'woocommerce_store_address has been updated', $response_data['messages'][0]['message'] );
 	}
 }
