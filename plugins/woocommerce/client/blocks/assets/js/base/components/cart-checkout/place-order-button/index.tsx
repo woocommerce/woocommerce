@@ -6,7 +6,8 @@ import {
 	useCheckoutSubmit,
 	useStoreCart,
 } from '@woocommerce/base-context/hooks';
-import { Icon, check } from '@wordpress/icons';
+import { check } from '@wordpress/icons';
+import { Icon } from '@wordpress/components';
 import Button from '@woocommerce/base-components/button';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
