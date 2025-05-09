@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { AnyInterpreter } from 'xstate';
 
 /**
@@ -9,7 +9,6 @@ import { AnyInterpreter } from 'xstate';
  */
 import { Intro } from '../';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
-import { FlowType } from '~/customize-store/types';
 
 jest.mock( '../../assembler-hub/site-hub', () => ( {
 	SiteHub: jest.fn( () => null ),
@@ -47,13 +46,11 @@ describe( 'Intro Banners', () => {
 							},
 						},
 						customizeStoreTaskCompleted: false,
-						currentThemeIsAiGenerated: false,
 					},
 					themeConfiguration: {},
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
-					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
 					isPTKPatternsAPIAvailable: false,
 					activeThemeHasMods: false,
@@ -65,93 +62,6 @@ describe( 'Intro Banners', () => {
 
 		expect(
 			screen.getByText( /Please check your internet connection./i )
-		).toBeInTheDocument();
-	} );
-
-	it( 'should display the default banner by default', () => {
-		const sendEventMock = jest.fn();
-		( useNetworkStatus as jest.Mock ).mockImplementation( () => false );
-		render(
-			<Intro
-				sendEvent={ sendEventMock }
-				context={ {
-					intro: {
-						hasErrors: false,
-						errorStatus: undefined,
-						activeTheme: '',
-						themeData: {
-							themes: [],
-							_links: {
-								browse_all: {
-									href: '',
-								},
-							},
-						},
-						customizeStoreTaskCompleted: false,
-						currentThemeIsAiGenerated: false,
-					},
-					themeConfiguration: {},
-					transitionalScreen: {
-						hasCompleteSurvey: false,
-					},
-					flowType: FlowType.AIOnline,
-					isFontLibraryAvailable: false,
-					isPTKPatternsAPIAvailable: false,
-					activeThemeHasMods: false,
-				} }
-				currentState={ 'intro' }
-				parentMachine={ null as unknown as AnyInterpreter }
-			/>
-		);
-		expect(
-			screen.getByText( /Use the power of AI to design your store/i )
-		).toBeInTheDocument();
-		const button = screen.getByRole( 'button', {
-			name: /Design with AI/i,
-		} );
-		fireEvent.click( button );
-		expect( sendEventMock ).toHaveBeenCalledWith( {
-			type: 'DESIGN_WITH_AI',
-		} );
-	} );
-
-	it( 'should display the existing ai theme banner when customizeStoreTaskCompleted and currentThemeIsAiGenerated', () => {
-		const sendEventMock = jest.fn();
-		( useNetworkStatus as jest.Mock ).mockImplementation( () => false );
-		render(
-			<Intro
-				sendEvent={ sendEventMock }
-				context={ {
-					intro: {
-						hasErrors: false,
-						errorStatus: undefined,
-						activeTheme: '',
-						themeData: {
-							themes: [],
-							_links: {
-								browse_all: {
-									href: '',
-								},
-							},
-						},
-						customizeStoreTaskCompleted: true,
-						currentThemeIsAiGenerated: true,
-					},
-					themeConfiguration: {},
-					transitionalScreen: {
-						hasCompleteSurvey: false,
-					},
-					flowType: FlowType.AIOnline,
-					isFontLibraryAvailable: false,
-					isPTKPatternsAPIAvailable: false,
-					activeThemeHasMods: false,
-				} }
-				currentState={ 'intro' }
-				parentMachine={ null as unknown as AnyInterpreter }
-			/>
-		);
-		expect(
-			screen.getByText( /Customize your custom theme/i )
 		).toBeInTheDocument();
 	} );
 } );

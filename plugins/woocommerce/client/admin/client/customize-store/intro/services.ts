@@ -2,14 +2,13 @@
  * External dependencies
  */
 import { resolveSelect } from '@wordpress/data';
-import { store as coreStore } from '@wordpress/core-data';
-import { onboardingStore, optionsStore } from '@woocommerce/data';
+import { onboardingStore } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
-import { FlowType, aiStatusResponse } from '../types';
+import { aiStatusResponse } from '../types';
 import { isIframe } from '~/customize-store/utils';
 
 export const fetchAiStatus = async (): Promise< aiStatusResponse > => {
@@ -40,34 +39,15 @@ export const fetchCustomizeStoreCompleted = async () => {
 };
 
 export const fetchIntroData = async () => {
-	const currentTemplatePromise = resolveSelect(
-		coreStore
-	).getDefaultTemplateId( { slug: 'home' } );
-
-	const maybePreviousTemplatePromise = resolveSelect(
-		optionsStore
-	).getOption( 'woocommerce_admin_customize_store_completed_theme_id' );
-
 	const getTaskPromise =
 		resolveSelect( onboardingStore ).getTask( 'customize-store' );
 
 	const themeDataPromise = fetchThemeCards();
 
-	const [ currentTemplateId, maybePreviousTemplate, task, themeData ] =
-		await Promise.all( [
-			currentTemplatePromise,
-			maybePreviousTemplatePromise,
-			getTaskPromise,
-			themeDataPromise,
-		] );
-
-	let currentThemeIsAiGenerated = false;
-	if (
-		maybePreviousTemplate &&
-		currentTemplateId === maybePreviousTemplate
-	) {
-		currentThemeIsAiGenerated = true;
-	}
+	const [ task, themeData ] = await Promise.all( [
+		getTaskPromise,
+		themeDataPromise,
+	] );
 
 	const customizeStoreTaskCompleted = task?.isComplete;
 
@@ -81,7 +61,6 @@ export const fetchIntroData = async () => {
 		customizeStoreTaskCompleted,
 		themeData,
 		activeTheme: theme.stylesheet || '',
-		currentThemeIsAiGenerated,
 	};
 };
 
@@ -141,6 +120,4 @@ export const setFlags = async () => {
 		// all of them to resolve before returning.
 		await Promise.all( Object.values( _featureFlags ) );
 	}
-
-	return FlowType.noAI;
 };

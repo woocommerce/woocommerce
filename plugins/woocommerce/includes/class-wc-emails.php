@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -250,6 +251,11 @@ class WC_Emails {
 		$this->emails['WC_Email_Customer_Note']             = include __DIR__ . '/emails/class-wc-email-customer-note.php';
 		$this->emails['WC_Email_Customer_Reset_Password']   = include __DIR__ . '/emails/class-wc-email-customer-reset-password.php';
 		$this->emails['WC_Email_Customer_New_Account']      = include __DIR__ . '/emails/class-wc-email-customer-new-account.php';
+
+		if ( Features::is_enabled( 'point-of-sale' ) ) {
+			$this->emails['WC_Email_Customer_POS_Completed_Order'] = include __DIR__ . '/emails/class-wc-email-customer-pos-completed-order.php';
+			$this->emails['WC_Email_Customer_POS_Refunded_Order']  = include __DIR__ . '/emails/class-wc-email-customer-pos-refunded-order.php';
+		}
 
 		$this->emails = apply_filters( 'woocommerce_email_classes', $this->emails );
 	}
@@ -707,7 +713,7 @@ class WC_Emails {
 	 *
 	 * @return string
 	 */
-	private function get_store_address() {
+	public function get_store_address() {
 		add_filter(
 			'woocommerce_formatted_address_force_country_display',
 			array( $this, 'get_store_address_force_country_display' ),

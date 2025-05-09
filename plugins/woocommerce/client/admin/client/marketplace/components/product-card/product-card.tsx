@@ -13,7 +13,12 @@ import { decodeEntities } from '@wordpress/html-entities';
  */
 import './product-card.scss';
 import ProductCardFooter from './product-card-footer';
-import { Product, ProductTracksData, ProductType } from '../product-list/types';
+import {
+	Product,
+	ProductCardType,
+	ProductTracksData,
+	ProductType,
+} from '../product-list/types';
 import { appendURLParams } from '../../utils/functions';
 
 export interface ProductCardProps {
@@ -22,13 +27,15 @@ export interface ProductCardProps {
 	isLoading?: boolean;
 	tracksData: ProductTracksData;
 	small?: boolean;
+	cardType?: ProductCardType;
 }
 
 function ProductCard( props: ProductCardProps ): JSX.Element {
 	const SPONSORED_PRODUCT_LABEL = 'promoted'; // what product.label indicates a sponsored placement
 	const SPONSORED_PRODUCT_STRIPE_SIZE = '5px'; // unfortunately can't be defined in CSS - height of "stripe"
 
-	const { isLoading, type } = props;
+	const { isLoading, type, cardType } = props;
+	const isCompact = cardType === 'compact';
 	const query = useQuery();
 	// Get the product if provided; if not provided, render a skeleton loader
 	const product = props.product ?? {
@@ -106,13 +113,20 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		queueRecordEvent( event, data );
 	}
 
+	const screenReaderText = (
+		<span className="screen-reader-text">
+			{ __( 'Opens in a new tab', 'woocommerce' ) }
+		</span>
+	);
+
 	const isTheme = type === ProductType.theme;
 	const isBusinessService = type === ProductType.businessService;
 	let productVendor: string | JSX.Element | null = product?.vendorName;
-	if ( product?.vendorName && product?.vendorUrl ) {
+	if ( ! isCompact && product?.vendorName && product?.vendorUrl ) {
 		productVendor = (
 			<a
 				href={ product.vendorUrl }
+				target="_blank"
 				rel="noopener noreferrer"
 				onClick={ () => {
 					recordTracksEvent(
@@ -126,6 +140,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 				} }
 			>
 				{ product.vendorName }
+				{ screenReaderText }
 			</a>
 		);
 	}
@@ -146,6 +161,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 			'is-loading': isLoading,
 			'is-small': props.small,
 			'is-sponsored': isSponsored(),
+			'is-compact': isCompact,
 		}
 	);
 
@@ -165,34 +181,61 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 			} }
 		>
 			{ isLoading ? ' ' : product.title }
+			{ screenReaderText }
 		</a>
 	);
 
 	const decodedDescription = decodeEntities( product.description );
 
-	const BusinessService = () => (
-		<div className="woocommerce-marketplace__business-card">
-			<div
-				className="woocommerce-marketplace__business-card__header"
-				style={ { backgroundColor: product.color } }
-			>
-				<img src={ `${ product.featuredImage }?h=288` } alt="" />
-			</div>
-			<div className="woocommerce-marketplace__business-card__content">
-				<div className="woocommerce-marketplace__business-card__main-content">
-					<h2>
-						<CardLink />
-					</h2>
-					<p className="woocommerce-marketplace__product-card__description">
-						{ decodedDescription }
-					</p>
+	const BusinessService = () => {
+		const mainImage = isCompact ? product.icon : product.featuredImage;
+		const imageHeight = isCompact ? 96 : 288;
+		return (
+			<div className="woocommerce-marketplace__business-card">
+				<div
+					className="woocommerce-marketplace__business-card__header"
+					style={ { backgroundColor: product.color } }
+				>
+					<img
+						src={ `${
+							mainImage || product.featuredImage
+						}?h=${ imageHeight }` }
+						alt=""
+					/>
 				</div>
-				<div className="woocommerce-marketplace__business-card__badge">
-					<span>{ product.productCategory }</span>
+				<div className="woocommerce-marketplace__business-card__content">
+					<div className="woocommerce-marketplace__business-card__main-content">
+						<h2>
+							<CardLink />
+						</h2>
+						<p className="woocommerce-marketplace__product-card__description">
+							{ decodedDescription }
+						</p>
+					</div>
+					<div className="woocommerce-marketplace__business-card__badge">
+						<span>{ product.productCategory }</span>
+					</div>
 				</div>
 			</div>
-		</div>
-	);
+		);
+	};
+
+	const showVendor = ! isCompact && ! isLoading;
+	const showVendorLoading = ! isCompact && isLoading;
+	const showDescription = ! isTheme && ! isCompact;
+	const showCardIcon = ! isTheme || isCompact;
+	const showBigImage = isTheme && ! isCompact;
+
+	const footer = ! isBusinessService ? (
+		<footer className="woocommerce-marketplace__product-card__footer">
+			{ isLoading && (
+				<div className="woocommerce-marketplace__product-card__price" />
+			) }
+			{ ! isLoading && props.product && (
+				<ProductCardFooter product={ props.product } />
+			) }
+		</footer>
+	) : null;
 
 	return (
 		<Card
@@ -206,7 +249,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 				<BusinessService />
 			) : (
 				<div className="woocommerce-marketplace__product-card__content">
-					{ isTheme && (
+					{ showBigImage && (
 						<div className="woocommerce-marketplace__product-card__image">
 							{ ! isLoading && (
 								<img
@@ -219,7 +262,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 					) }
 					<div className="woocommerce-marketplace__product-card__header">
 						<div className="woocommerce-marketplace__product-card__details">
-							{ ! isTheme && (
+							{ showCardIcon && (
 								<>
 									{ isLoading && (
 										<div className="woocommerce-marketplace__product-card__icon" />
@@ -227,7 +270,9 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 									{ ! isLoading && product.icon && (
 										<img
 											className="woocommerce-marketplace__product-card__icon"
-											src={ product.icon }
+											src={
+												product.icon || product.image
+											}
 											alt={ product.title }
 										/>
 									) }
@@ -237,12 +282,12 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 								<h2 className="woocommerce-marketplace__product-card__title">
 									<CardLink />
 								</h2>
-								{ isLoading && (
+								{ showVendorLoading && (
 									<p className="woocommerce-marketplace__product-card__vendor-details">
 										<span className="woocommerce-marketplace__product-card__vendor" />
 									</p>
 								) }
-								{ ! isLoading && (
+								{ showVendor && (
 									<p className="woocommerce-marketplace__product-card__vendor-details">
 										{ productVendor && (
 											<span className="woocommerce-marketplace__product-card__vendor">
@@ -273,24 +318,16 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 										) }
 									</p>
 								) }
+								{ isCompact && footer }
 							</div>
 						</div>
 					</div>
-					{ ! isTheme && (
+					{ showDescription && (
 						<p className="woocommerce-marketplace__product-card__description">
 							{ ! isLoading && decodedDescription }
 						</p>
 					) }
-					{ ProductType.businessService !== props?.product?.type && (
-						<footer className="woocommerce-marketplace__product-card__footer">
-							{ isLoading && (
-								<div className="woocommerce-marketplace__product-card__price" />
-							) }
-							{ ! isLoading && props.product && (
-								<ProductCardFooter product={ props.product } />
-							) }
-						</footer>
-					) }
+					{ ! isCompact && footer }
 				</div>
 			) }
 		</Card>

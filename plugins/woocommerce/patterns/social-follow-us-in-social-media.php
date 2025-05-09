@@ -5,14 +5,12 @@
  * Categories: WooCommerce, social-media
  */
 
-use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
+$image1 = plugins_url( 'assets/images/pattern-placeholders/drinkware-liquid-tableware-dishware-bottle-fluid.jpg', WC_PLUGIN_FILE );
+$image2 = plugins_url( 'assets/images/pattern-placeholders/watch-hand-brand-jewellery-strap-platinum.jpg', WC_PLUGIN_FILE );
+$image3 = plugins_url( 'assets/images/pattern-placeholders/tree-branch-plant-wood-leaf-flower.jpg', WC_PLUGIN_FILE );
+$image4 = plugins_url( 'assets/images/pattern-placeholders/road-sport-vintage-wheel-retro-old.jpg', WC_PLUGIN_FILE );
 
-$image1 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/drinkware-liquid-tableware-dishware-bottle-fluid.jpg' );
-$image2 = PatternsHelper::get_image_url( $images, 1, 'assets/images/pattern-placeholders/watch-hand-brand-jewellery-strap-platinum.jpg' );
-$image3 = PatternsHelper::get_image_url( $images, 2, 'assets/images/pattern-placeholders/tree-branch-plant-wood-leaf-flower.jpg' );
-$image4 = PatternsHelper::get_image_url( $images, 3, 'assets/images/pattern-placeholders/road-sport-vintage-wheel-retro-old.jpg' );
-
-$social_title = $content['titles'][0]['default'] ?? '';
+$social_title = __( 'Stay in the loop', 'woocommerce' );
 ?>
 
 <!-- wp:group {"metadata":{"name":"Social: Follow us on social media"},"align":"full","style":{"spacing":{"padding":{"top":"calc( 0.5 * var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal)))","bottom":"calc( 0.5 * var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal)))","left":"var(--wp--style--root--padding-left, var(--wp--custom--gap--horizontal))","right":"var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal))"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->

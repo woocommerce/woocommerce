@@ -23,7 +23,6 @@
 
 	&:has(.woocommerce-settings-payments-header__title) {
 		padding: $gap-large 2 * $gap-large;
-		border-bottom: 1px solid #ebebeb;
 
 		.woocommerce-layout__header-heading {
 			height: initial;
@@ -45,11 +44,11 @@
 			}
 		}
 
-		@media screen and ( max-width: 1024px ) {
+		@media screen and ( max-width: $break-xlarge ) {
 			padding: $gap-large;
 		}
 
-		@media screen and ( max-width: 782px ) {
+		@media screen and ( max-width: $break-medium ) {
 			padding: $gap-large $gap;
 		}
 	}
