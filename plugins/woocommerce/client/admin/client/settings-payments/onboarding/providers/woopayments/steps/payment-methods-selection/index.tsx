@@ -301,7 +301,7 @@ export default function PaymentMethodsSelection() {
 										store_country:
 											window.wcSettings?.admin
 												?.woocommerce_payments_nox_profile
-												?.business_country_code ||
+												?.business_country_code ??
 											'unknown',
 									}
 								);

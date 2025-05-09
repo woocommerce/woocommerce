@@ -203,7 +203,7 @@ export const SettingsPaymentsMethods = () => {
 				.join( ', ' ),
 			store_country:
 				window.wcSettings?.admin?.preloadSettings?.general
-					?.woocommerce_default_country,
+					?.woocommerce_default_country ?? 'unknown',
 		} );
 
 		setIsCompleted( true );
