@@ -507,7 +507,10 @@ export const BlueprintUploadDropzone = () => {
 									</span>
 								</p>
 								<p className="blueprint-upload-max-size">
-									{ __( 'Maximum size: 50 MB', 'woocommerce' ) }
+									{ __(
+										'Maximum size: 50 MB',
+										'woocommerce'
+									) }
 								</p>
 								<DropZone
 									onFilesDrop={ ( files ) => {
