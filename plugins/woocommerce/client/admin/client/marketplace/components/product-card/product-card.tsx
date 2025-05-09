@@ -13,7 +13,12 @@ import { decodeEntities } from '@wordpress/html-entities';
  */
 import './product-card.scss';
 import ProductCardFooter from './product-card-footer';
-import { Product, ProductTracksData, ProductType } from '../product-list/types';
+import {
+	Product,
+	ProductCardType,
+	ProductTracksData,
+	ProductType,
+} from '../product-list/types';
 import { appendURLParams } from '../../utils/functions';
 
 export interface ProductCardProps {
@@ -22,7 +27,7 @@ export interface ProductCardProps {
 	isLoading?: boolean;
 	tracksData: ProductTracksData;
 	small?: boolean;
-	cardType?: 'compact' | 'regular';
+	cardType?: ProductCardType;
 }
 
 function ProductCard( props: ProductCardProps ): JSX.Element {
@@ -108,6 +113,12 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		queueRecordEvent( event, data );
 	}
 
+	const screenReaderText = (
+		<span className="screen-reader-text">
+			{ __( 'Opens in a new tab', 'woocommerce' ) }
+		</span>
+	);
+
 	const isTheme = type === ProductType.theme;
 	const isBusinessService = type === ProductType.businessService;
 	let productVendor: string | JSX.Element | null = product?.vendorName;
@@ -115,6 +126,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		productVendor = (
 			<a
 				href={ product.vendorUrl }
+				target="_blank"
 				rel="noopener noreferrer"
 				onClick={ () => {
 					recordTracksEvent(
@@ -128,6 +140,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 				} }
 			>
 				{ product.vendorName }
+				{ screenReaderText }
 			</a>
 		);
 	}
@@ -168,6 +181,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 			} }
 		>
 			{ isLoading ? ' ' : product.title }
+			{ screenReaderText }
 		</a>
 	);
 

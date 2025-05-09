@@ -16,12 +16,13 @@
 	.wc-block-components-button__text {
 		display: block;
 
+		// Prevent runts/widows. Overwrite `balance` with `pretty`, as `pretty` is not supported in all browsers.
+		text-wrap: balance;
+		text-wrap: pretty;
+
 		> svg {
 			fill: currentColor;
 		}
-	}
-	.wc-block-components-spinner + .wc-block-components-button__text {
-		visibility: hidden;
 	}
 
 	&.text {

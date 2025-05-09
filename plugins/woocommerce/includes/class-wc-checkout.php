@@ -953,7 +953,7 @@ class WC_Checkout {
 		if ( WC()->cart->needs_shipping() ) {
 			$shipping_country = isset( $data['shipping_country'] ) ? $data['shipping_country'] : WC()->customer->get_shipping_country();
 
-			if ( empty( $shipping_country ) ) {
+			if ( empty( $shipping_country ) && ! $errors->get_error_data( 'billing_country_required' ) ) {
 				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
 			} elseif ( ! in_array( $shipping_country, array_keys( WC()->countries->get_shipping_countries() ), true ) ) {
 				if ( WC()->countries->country_exists( $shipping_country ) ) {
@@ -1305,8 +1305,15 @@ class WC_Checkout {
 			$errors      = new WP_Error();
 			$posted_data = $this->get_posted_data();
 
-			// Update session for customer and totals.
-			$this->update_session( $posted_data );
+			try {
+				// Update session for customer and totals.
+				$this->update_session( $posted_data );
+			} catch ( WC_Data_Exception $e ) {
+				// Billing email will be validated later down in validate_posted_data. Skip it, throw other errors.
+				if ( 'customer_invalid_billing_email' !== $e->getErrorCode() ) {
+					throw new Exception( $e->getMessage(), $e->getCode(), $e->getPrevious() );
+				}
+			}
 
 			wc_log_order_step( '[Shortcode #2] Session updated with checkout data and totals calculated' );
 

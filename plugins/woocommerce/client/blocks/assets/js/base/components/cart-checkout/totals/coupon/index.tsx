@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { useState, useRef } from '@wordpress/element';
 import Button from '@woocommerce/base-components/button';
@@ -10,6 +11,7 @@ import {
 	ValidationInputError,
 	ValidatedTextInputHandle,
 	Panel,
+	Spinner,
 } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
@@ -49,12 +51,15 @@ export const TotalsCoupon = ( {
 	const [ isCouponFormVisible, setIsCouponFormVisible ] =
 		useState( displayCouponForm );
 	const textInputId = `wc-block-components-totals-coupon__input-${ instanceId }`;
-	const { validationErrorId } = useSelect( ( select ) => {
-		const store = select( validationStore );
-		return {
-			validationErrorId: store.getValidationErrorId( instanceId ),
-		};
-	} );
+	const { validationErrorId } = useSelect(
+		( select ) => {
+			const store = select( validationStore );
+			return {
+				validationErrorId: store.getValidationErrorId( instanceId ),
+			};
+		},
+		[ instanceId ]
+	);
 	const inputRef = useRef< ValidatedTextInputHandle >( null );
 
 	const handleCouponSubmit: MouseEventHandler< HTMLButtonElement > = (
@@ -111,12 +116,18 @@ export const TotalsCoupon = ( {
 							ref={ inputRef }
 						/>
 						<Button
-							className="wc-block-components-totals-coupon__button"
+							className={ clsx(
+								'wc-block-components-totals-coupon__button',
+								{
+									'wc-block-components-totals-coupon__button--loading':
+										isLoading,
+								}
+							) }
 							disabled={ isLoading || ! couponValue }
-							showSpinner={ isLoading }
 							onClick={ handleCouponSubmit }
 							type="submit"
 						>
+							{ isLoading && <Spinner /> }
 							{ __( 'Apply', 'woocommerce' ) }
 						</Button>
 					</form>
