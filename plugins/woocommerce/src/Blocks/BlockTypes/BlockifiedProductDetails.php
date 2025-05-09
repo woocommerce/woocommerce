@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use WP_Block;
 use WP_HTML_Tag_Processor;
-use WP_Block_Supports;
 
 /**
  * BlockifiedProductDetails class.
@@ -65,14 +64,14 @@ class BlockifiedProductDetails extends AbstractBlock {
 
 		add_filter(
 			'hooked_block_types',
-			function ( $hooked_block_types, $relative_position, $anchor_block_type, $context ) use ( $slug ) {
+			function ( $hooked_block_types, $relative_position, $anchor_block_type ) use ( $slug ) {
 				if ( 'woocommerce/accordion-group' === $anchor_block_type && 'last_child' === $relative_position ) {
 					$hooked_block_types[] = $slug;
 				}
 				return $hooked_block_types;
 			},
 			10,
-			4
+			3
 		);
 
 		add_filter(
@@ -82,16 +81,19 @@ class BlockifiedProductDetails extends AbstractBlock {
 				$hooked_block_type,
 				$relative_position,
 				$parsed_anchor_block,
-				$context
 			) use ( $title, $content ) {
 
 				if ( is_null( $parsed_hooked_block ) ) {
 					return $parsed_hooked_block;
 				}
 
-				// TODO: Verify that the anchor Accordion Group block is a child of the Product Details block.
-				if ( 'woocommerce/accordion-group' !== $parsed_anchor_block['blockName'] || $relative_position !== 'last_child' ) {
-					return $parsed_hooked_block;
+				if (
+					'woocommerce/accordion-group' !== $parsed_anchor_block['blockName'] ||
+					$relative_position !== 'last_child' ||
+					! isset( $parsed_anchor_block['attrs']['metadata']['isProductDetailsInnerBlock'] ) ||
+					! $parsed_anchor_block['attrs']['metadata']['isProductDetailsInnerBlock']
+				) {
+					return array();
 				}
 
 				$accordion_item_template = '<!-- wp:woocommerce/accordion-item -->
@@ -109,7 +111,7 @@ class BlockifiedProductDetails extends AbstractBlock {
 				return $accordion_item_block[0];
 			},
 			10,
-			5
+			4
 		);
 	}
 

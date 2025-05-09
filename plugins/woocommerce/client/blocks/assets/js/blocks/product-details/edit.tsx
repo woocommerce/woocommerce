@@ -19,7 +19,11 @@ import { ProductDetailsEditProps } from './types';
 const TEMPLATE: InnerBlockTemplate[] = [
 	[
 		'woocommerce/accordion-group',
-		{},
+		{
+			metadata: {
+				isProductDetailsInnerBlock: true,
+			},
+		},
 		[
 			[
 				'woocommerce/accordion-item',
