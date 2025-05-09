@@ -149,7 +149,10 @@ async function checkShippingRateInCart( page, product, checks ) {
 			input.click();
 			input.fill( zone );
 
-			await page.getByText( zone ).last().click();
+			await page
+				.locator( 'label' )
+				.filter( { hasText: new RegExp( `^${ zone }$` ) } )
+				.click();
 
 			// Close dropdown
 			await page.getByPlaceholder( 'Zone name' ).click();
