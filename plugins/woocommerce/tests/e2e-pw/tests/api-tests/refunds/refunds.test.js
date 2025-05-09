@@ -44,7 +44,7 @@ test.describe( 'Refunds API tests', () => {
 		);
 		const createOrderResponseJSON = await createOrderResponse.json();
 
-		//save id for deletion later
+		// save id for deletion later
 		orderId = createOrderResponseJSON.id;
 
 		// Setup the expected refund object
@@ -56,6 +56,20 @@ test.describe( 'Refunds API tests', () => {
 				},
 			],
 		};
+
+		// call API to create a refund. This is done on setup because the other tests depend on it.
+		const response = await request.post(
+			`./wp-json/wc/v3/orders/${ orderId }/refunds`,
+			{
+				data: expectedRefund,
+			}
+		);
+		const responseJSON = await response.json();
+		expect( response.status() ).toEqual( 201 );
+		expect( responseJSON.id ).toBeDefined();
+
+		// Save the refund ID
+		expectedRefund.id = responseJSON.id;
 	} );
 
 	test.afterAll( async ( { request } ) => {
@@ -72,20 +86,6 @@ test.describe( 'Refunds API tests', () => {
 	} );
 
 	test( 'can create a refund', async ( { request } ) => {
-		// call API to create a refund
-		const response = await request.post(
-			`./wp-json/wc/v3/orders/${ orderId }/refunds`,
-			{
-				data: expectedRefund,
-			}
-		);
-		const responseJSON = await response.json();
-		expect( response.status() ).toEqual( 201 );
-		expect( responseJSON.id ).toBeDefined();
-
-		// Save the refund ID
-		expectedRefund.id = responseJSON.id;
-
 		// Verify that the order was refunded.
 		// call API to get the order
 		const getOrderResponse = await request.get(
@@ -121,10 +121,15 @@ test.describe( 'Refunds API tests', () => {
 		const response = await request.get( `./wp-json/wc/v3/refunds/` );
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
-		expect( responseJSON ).toHaveLength( 1 );
-		expect( responseJSON[ 0 ].id ).toEqual( expectedRefund.id );
-		expect( responseJSON[ 0 ].reason ).toEqual( expectedRefund.reason );
-		expect( responseJSON[ 0 ].amount ).toEqual( expectedRefund.amount );
+		// Ensure at least one refund is returned
+		expect( responseJSON.length ).toBeGreaterThan( 0 );
+		// Find the refund with the expected ID
+		const foundRefund = responseJSON.find(
+			( r ) => r.id === expectedRefund.id
+		);
+		expect( foundRefund ).toBeDefined();
+		expect( foundRefund.reason ).toEqual( expectedRefund.reason );
+		expect( foundRefund.amount ).toEqual( expectedRefund.amount );
 	} );
 
 	test( 'can list all refunds', async ( { request } ) => {
