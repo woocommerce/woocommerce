@@ -124,7 +124,10 @@ export default function ProductItemTemplateEdit(
 						} else {
 							// If there are no grouped products, query for any three other products.
 							resolveSelect( productsStore )
-								.getProducts( { per_page: 3 } )
+								.getProducts( {
+									per_page: 3,
+									_fields: [ 'id' ],
+								} )
 								.then( ( fetchedProducts ) => {
 									if ( fetchedProducts.length > 0 ) {
 										setProducts( fetchedProducts );
