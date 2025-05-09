@@ -63,15 +63,9 @@ export default function ProductPreviewModal( {
 			const link = target.closest( 'a' );
 			if ( link ) {
 				const trackType = link.getAttribute( 'data-iam-tracks' );
-				if ( trackType === 'buy_now' ) {
+				if ( trackType ) {
 					closeModal(
-						'marketplace_product_preview_modal_buy_now_clicked'
-					);
-				}
-
-				if ( trackType === 'see_more' ) {
-					closeModal(
-						'marketplace_product_preview_modal_see_more_clicked'
+						`marketplace_product_preview_modal_${ trackType }_clicked`
 					);
 				}
 			}
@@ -144,7 +138,7 @@ export default function ProductPreviewModal( {
 				<h2>{ productTitle }</h2>
 				{ productVendor && (
 					<div className="woocommerce-marketplace__product-preview-modal__vendor">
-						<span>{ __( 'By ', 'woocommerce' ) }</span>
+						<span>{ __( 'By', 'woocommerce' ) }</span>{ ' ' }
 						{ productVendor }
 					</div>
 				) }
