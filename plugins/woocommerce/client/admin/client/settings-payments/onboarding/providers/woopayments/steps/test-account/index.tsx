@@ -438,33 +438,47 @@ const TestAccountStep = () => {
 			<WooPaymentsStepHeader onClose={ closeModal } />
 
 			{ /* Error Notice */ }
-			{ status === 'error' && errorMessage && (
-				<Notice
-					status="warning"
-					isDismissible={ false }
-					actions={ [
-						{
-							label: __( 'Try Again', 'woocommerce' ),
-							variant: 'primary',
-							onClick: () => {
-								setRetryCounter( ( c ) => c + 1 );
-							},
-						},
-						{
-							label: __( 'Cancel', 'woocommerce' ),
-							variant: 'secondary',
-							className:
-								'woocommerce-payments-test-account-step__error-cancel-button',
-							onClick: closeModal,
-						},
-					] }
-					className="woocommerce-payments-test-account-step__error"
-				>
-					<p className="woocommerce-payments-test-account-step__error-message">
-						{ errorMessage }
-					</p>
-				</Notice>
-			) }
+			{ ( status === 'error' || status === 'blocked' ) &&
+				errorMessage && (
+					<Notice
+						status="warning"
+						isDismissible={ false }
+						actions={
+							// Only show actions if the step is not blocked
+							status !== 'blocked'
+								? [
+										{
+											label: __(
+												'Try Again',
+												'woocommerce'
+											),
+											variant: 'primary',
+											onClick: () => {
+												setRetryCounter(
+													( c ) => c + 1
+												);
+											},
+										},
+										{
+											label: __(
+												'Cancel',
+												'woocommerce'
+											),
+											variant: 'secondary',
+											className:
+												'woocommerce-payments-test-account-step__error-cancel-button',
+											onClick: closeModal,
+										},
+								  ]
+								: []
+						}
+						className="woocommerce-payments-test-account-step__error"
+					>
+						<p className="woocommerce-payments-test-account-step__error-message">
+							{ errorMessage }
+						</p>
+					</Notice>
+				) }
 
 			{ /* Loader - shown during initializing and polling */ }
 			{ ( status === 'initializing' || status === 'polling' ) && (
