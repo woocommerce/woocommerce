@@ -381,21 +381,15 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	);
 
 	const CardWrapper = () => {
-		if ( ! isLoading ) {
-			return (
-				<div
-					className="woocommerce-marketplace__product-card-wrapper"
-					style={ {
-						color: 'inherit',
-						textDecoration: 'none',
-					} }
-				>
-					{ isBusinessService ? <BusinessService /> : cardContent }
-				</div>
-			);
+		if ( isLoading ) {
+			return isBusinessService ? <BusinessService /> : cardContent;
 		}
 
-		return isBusinessService ? <BusinessService /> : cardContent;
+		return (
+			<div className="woocommerce-marketplace__product-card-wrapper">
+				{ isBusinessService ? <BusinessService /> : cardContent }
+			</div>
+		);
 	};
 
 	return (
