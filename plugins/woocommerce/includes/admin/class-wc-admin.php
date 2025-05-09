@@ -26,12 +26,14 @@ class WC_Admin {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'includes' ) );
+		add_action( 'init', array( $this, 'wc_log_missing_locale_filters' ) );
 		add_action( 'current_screen', array( $this, 'conditional_includes' ) );
 		add_action( 'admin_init', array( $this, 'buffer' ), 1 );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
 		add_action( 'admin_init', array( $this, 'preview_email_editor_dummy_content' ) );
 		add_action( 'admin_init', array( $this, 'prevent_admin_access' ) );
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
+		add_action( 'admin_notices', array( $this, 'wc_display_locale_filter_admin_notice' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
 
@@ -287,6 +289,57 @@ class WC_Admin {
 		// phpcs:ignore WordPress.Security.EscapeOutput
 		echo $message;
 		exit;
+	}
+
+	/**
+	 * Log a warning if checkout/shipping/billing field filters are used without locale-aware filters.
+	 */
+	function wc_log_missing_locale_filters() {
+		$uses_checkout_fields = has_filter( 'woocommerce_checkout_fields' );
+		$uses_shipping_fields = has_filter( 'woocommerce_shipping_fields' );
+		$uses_billing_fields  = has_filter( 'woocommerce_billing_fields' );
+
+		$uses_field_filters = $uses_checkout_fields || $uses_shipping_fields || $uses_billing_fields;
+
+		$uses_default_address_fields     = has_filter( 'woocommerce_default_address_fields' );
+		$uses_get_country_locale         = has_filter( 'woocommerce_get_country_locale' );
+		$uses_get_country_locale_default = has_filter( 'woocommerce_get_country_locale_default' );
+
+		$uses_locale_filters = $uses_default_address_fields || $uses_get_country_locale || $uses_get_country_locale_default;
+
+		if ( $uses_field_filters && ! $uses_locale_filters && function_exists( 'wc_get_logger' ) ) {
+			wc_get_logger()->warning(
+				'Detected use of checkout/billing/shipping field filters without corresponding locale filters. This may result in incomplete or misconfigured address fields at checkout. Encourage plugin developers to also use woocommerce_default_address_fields or woocommerce_get_country_locale / woocommerce_get_country_locale_default filters.',
+				[ 'source' => 'woocommerce' ]
+			);
+		}
+	}
+
+	/**
+	 * Display admin notice for developers if locale filters are missing.
+	 */
+	function wc_display_locale_filter_admin_notice() {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		$uses_checkout_fields = has_filter( 'woocommerce_checkout_fields' );
+		$uses_shipping_fields = has_filter( 'woocommerce_shipping_fields' );
+		$uses_billing_fields  = has_filter( 'woocommerce_billing_fields' );
+
+		$uses_field_filters = $uses_checkout_fields || $uses_shipping_fields || $uses_billing_fields;
+
+		$uses_default_address_fields     = has_filter( 'woocommerce_default_address_fields' );
+		$uses_get_country_locale         = has_filter( 'woocommerce_get_country_locale' );
+		$uses_get_country_locale_default = has_filter( 'woocommerce_get_country_locale_default' );
+
+		$uses_locale_filters = $uses_default_address_fields || $uses_get_country_locale || $uses_get_country_locale_default;
+
+		if ( $uses_field_filters && ! $uses_locale_filters ) {
+			echo '<div class="notice notice-warning">';
+			echo '<p><strong>WooCommerce Notice for Developers:</strong> One or more active plugins are customizing checkout, billing, or shipping fields without using required locale filters. This may result in incomplete or misconfigured address fields for some countries. Please ensure the plugins also hook into <code>woocommerce_default_address_fields</code>, <code>woocommerce_get_country_locale</code>, or <code>woocommerce_get_country_locale_default</code>.</p>';
+			echo '</div>';
+		}
 	}
 
 	/**
