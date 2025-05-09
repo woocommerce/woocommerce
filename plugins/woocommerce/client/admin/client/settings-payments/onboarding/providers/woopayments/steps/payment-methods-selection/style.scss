@@ -6,23 +6,25 @@
 	.settings-payments-methods__container {
 		width: 100%;
 
+		.settings-payments-methods__show-more--wrapper {
+			border-top: 1px solid $gray-100;
+		}
+
 		.settings-payments-methods__show-more {
 			display: block;
 			cursor: pointer;
-			margin: $gap $gap-large 0;
+			margin: $gap $gap-large;
 			box-shadow: none;
 			color: var(--wp-admin-theme-color);
 			text-align: left;
 
 			@media screen and (max-width: $break-medium) {
-				margin: $gap $gap 0;
+				margin: $gap $gap;
 			}
 		}
 
 		// Override styles for woocommerce list items.
 		.woocommerce-list {
-			border-bottom: 1px solid $gray-100;
-
 			&__item {
 				padding: 2 * $gap-smaller 4 * $gap-smaller;
 				border-color: $gray-100;
@@ -186,10 +188,6 @@
 				@media screen and (max-width: $break-medium) {
 					padding: 0;
 				}
-
-				.woocommerce-list {
-					margin-bottom: $gap;
-				}
 			}
 		}
 
@@ -199,6 +197,10 @@
 			padding: $gap-large;
 			background: $white;
 			flex-shrink: 0;
+
+			&.has-border {
+				border-top: 1px solid $gray-200;
+			}
 
 			@media screen and (max-width: $break-medium) {
 				padding: $gap;
