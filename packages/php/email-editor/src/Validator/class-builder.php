@@ -63,7 +63,7 @@ class Builder {
 	 *
 	 * @param Schema|null $items Schema of the items in the array.
 	 */
-	public static function array( Schema $items = null ): Array_Schema {
+	public static function array( ?Schema $items = null ): Array_Schema {
 		$array = new Array_Schema();
 		return $items ? $array->items( $items ) : $array;
 	}
@@ -73,7 +73,7 @@ class Builder {
 	 *
 	 * @param array<string, Schema>|null $properties Properties of the object.
 	 */
-	public static function object( array $properties = null ): Object_Schema {
+	public static function object( ?array $properties = null ): Object_Schema {
 		$object = new Object_Schema();
 		return null === $properties ? $object : $object->properties( $properties );
 	}

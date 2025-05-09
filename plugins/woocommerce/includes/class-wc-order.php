@@ -2297,6 +2297,29 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Get the "refunded cost" (the combined Cost of Goods Sold of the refunded items) for a line item.
+	 *
+	 * @param  int    $item_id   ID of the item we're checking.
+	 * @param  string $item_type Type of the item we're checking, if not a line_item.
+	 * @return float
+	 */
+	public function get_cogs_refunded_for_item( $item_id, $item_type = 'line_item' ) {
+		if ( ! $this->cogs_is_enabled() || ! $this->has_cogs() ) {
+			return 0;
+		}
+
+		$cogs_value = 0;
+		foreach ( $this->get_refunds() as $refund ) {
+			foreach ( $refund->get_items( $item_type ) as $refunded_item ) {
+				if ( absint( $refunded_item->get_meta( '_refunded_item_id' ) ) === $item_id ) {
+					$cogs_value += $refunded_item->has_cogs() ? $refunded_item->get_cogs_value() : 0;
+				}
+			}
+		}
+		return $cogs_value;
+	}
+
+	/**
 	 * Get the refunded amount for a line item.
 	 *
 	 * @param  int    $item_id   ID of the item we're checking.
@@ -2480,5 +2503,28 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function has_cogs() {
 		return true;
+	}
+
+	/**
+	 * Calculate the Cost of Goods Sold value for this order
+	 * as the base cost minus the cost of the refunded items.
+	 *
+	 * @return float The calculated value.
+	 */
+	protected function calculate_cogs_total_value_core(): float {
+		$value = parent::calculate_cogs_total_value_core();
+
+		$refunds = $this->get_refunds();
+		foreach ( $refunds as $refund ) {
+			$refund_items = $refund->get_items();
+			foreach ( $refund_items as $refund_item ) {
+				if ( $refund_item->has_cogs() ) {
+					$refund_item->calculate_cogs_value();
+					$value -= abs( $refund_item->get_cogs_value() );
+				}
+			}
+		}
+
+		return $value;
 	}
 }

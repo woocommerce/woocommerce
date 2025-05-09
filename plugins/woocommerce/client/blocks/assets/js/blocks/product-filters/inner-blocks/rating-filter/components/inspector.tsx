@@ -64,12 +64,6 @@ export const Inspector = ( {
 	return (
 		<InspectorControls key="inspector">
 			<PanelBody title={ __( 'Display', 'woocommerce' ) }>
-				<ToggleControl
-					label={ __( 'Display product count', 'woocommerce' ) }
-					checked={ showCounts }
-					onChange={ setCountVisibility }
-					__nextHasNoMarginBottom
-				/>
 				<RadioControl
 					label={ __( 'Minimum rating', 'woocommerce' ) }
 					selected={ minRating }
@@ -117,6 +111,12 @@ export const Inspector = ( {
 						},
 					] }
 					onChange={ setMinRating }
+				/>
+				<ToggleControl
+					label={ __( 'Product counts', 'woocommerce' ) }
+					checked={ showCounts }
+					onChange={ setCountVisibility }
+					__nextHasNoMarginBottom
 				/>
 			</PanelBody>
 		</InspectorControls>
