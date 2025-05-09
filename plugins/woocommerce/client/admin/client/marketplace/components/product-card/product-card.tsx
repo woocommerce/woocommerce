@@ -36,7 +36,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	const SPONSORED_PRODUCT_LABEL = 'promoted'; // what product.label indicates a sponsored placement
 	const SPONSORED_PRODUCT_STRIPE_SIZE = '5px'; // unfortunately can't be defined in CSS - height of "stripe"
 
-	const { isLoading, type, cardType } = props;
+	const { isLoading, cardType } = props;
 	const isCompact = cardType === 'compact';
 	const query = useQuery();
 	const [ isPreviewModalOpen, setIsPreviewModalOpen ] = useState( false );
@@ -66,6 +66,13 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		regularPrice: 0,
 		type: '',
 	};
+
+	// Business service cards can be mixed with extensions. Check product type to properly set the card type.
+	// For extensions and themes, type is not set on product object.
+	const type =
+		product.type === ProductType.businessService
+			? product.type
+			: props.type;
 
 	const isTheme = type === ProductType.theme;
 	const isBusinessService = type === ProductType.businessService;
