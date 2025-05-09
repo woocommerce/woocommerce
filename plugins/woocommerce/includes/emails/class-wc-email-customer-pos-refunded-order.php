@@ -214,20 +214,20 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			$content = wc_get_template_html(
 				$this->template_html,
 				array(
-					'order'                     => $this->object,
-					'refund'                    => $this->refund,
-					'partial_refund'            => $this->partial_refund,
-					'email_heading'             => $this->get_heading(),
-					'additional_content'        => $this->get_additional_content(),
+					'order'              => $this->object,
+					'refund'             => $this->refund,
+					'partial_refund'     => $this->partial_refund,
+					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
 					'pos_store_name'            => $this->get_pos_store_name(),
 					'pos_store_email'           => $this->get_pos_store_email(),
 					'pos_store_phone_number'    => $this->get_pos_store_phone_number(),
 					'pos_store_address'         => $this->get_pos_store_address(),
 					'pos_refund_returns_policy' => $this->get_pos_refund_returns_policy(),
-					'blogname'                  => $this->get_blogname(),
-					'sent_to_admin'             => false,
-					'plain_text'                => false,
-					'email'                     => $this,
+					'blogname'           => $this->get_blogname(),
+					'sent_to_admin'      => false,
+					'plain_text'         => false,
+					'email'              => $this,
 				)
 			);
 			$this->remove_pos_customizations();
@@ -244,20 +244,20 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			$content = wc_get_template_html(
 				$this->template_plain,
 				array(
-					'order'                     => $this->object,
-					'refund'                    => $this->refund,
-					'partial_refund'            => $this->partial_refund,
-					'email_heading'             => $this->get_heading(),
-					'additional_content'        => $this->get_additional_content(),
+					'order'              => $this->object,
+					'refund'             => $this->refund,
+					'partial_refund'     => $this->partial_refund,
+					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
 					'pos_store_name'            => $this->get_pos_store_name(),
 					'pos_store_email'           => $this->get_pos_store_email(),
 					'pos_store_phone_number'    => $this->get_pos_store_phone_number(),
 					'pos_store_address'         => $this->get_pos_store_address(),
 					'pos_refund_returns_policy' => $this->get_pos_refund_returns_policy(),
-					'blogname'                  => $this->get_blogname(),
-					'sent_to_admin'             => false,
-					'plain_text'                => true,
-					'email'                     => $this,
+					'blogname'           => $this->get_blogname(),
+					'sent_to_admin'      => false,
+					'plain_text'         => true,
+					'email'              => $this,
 				)
 			);
 			$this->remove_pos_customizations();
