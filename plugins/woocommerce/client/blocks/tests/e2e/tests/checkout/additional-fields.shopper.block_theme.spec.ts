@@ -575,9 +575,9 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.fill( 'test@' );
 
 			// Blur the field to trigger the validation.
-			await checkoutPageObject.page.evaluate(
-				'document.activeElement.blur()'
-			);
+			await checkoutPageObject.page
+				.getByLabel( 'Alternative Email' )
+				.blur();
 
 			await expect(
 				checkoutPageObject.page
@@ -590,9 +590,9 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.fill( 'test@test.com' );
 
 			// Blur the field to trigger the validation.
-			await checkoutPageObject.page.evaluate(
-				'document.activeElement.blur()'
-			);
+			await checkoutPageObject.page
+				.getByLabel( 'Alternative Email' )
+				.blur();
 
 			await expect(
 				checkoutPageObject.page
