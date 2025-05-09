@@ -199,29 +199,10 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'paginate' => true,
 		);
 
-		// Determine which specific IDs to export, giving priority to the filter hook.
-		$ids_for_include = array();
-
-		/**
-		 * Filter to allow exporting only specific product IDs.
-		 * Takes precedence over IDs set via set_product_ids_to_export().
-		 *
-		 * @since 9.9.0
-		 * @param array $product_ids Array of product IDs to export. Default empty array.
-		 */
-		$hook_provided_ids = apply_filters( 'woocommerce_product_export_specific_product_ids', array() );
-
-		if ( ! empty( $hook_provided_ids ) && is_array( $hook_provided_ids ) ) {
-			$ids_for_include = array_map( 'absint', $hook_provided_ids );
-		} elseif ( ! empty( $this->product_ids_to_export ) ) {
-			// Use IDs from the property if the hook didn't provide any.
-			$ids_for_include = $this->product_ids_to_export;
-		}
-
 		// Set up query args based on whether specific IDs are being exported.
 		// We ignore type/category initially when specific IDs are provided.
-		if ( ! empty( $ids_for_include ) ) {
-			$args['include'] = $ids_for_include;
+		if ( ! empty( $this->product_ids_to_export ) ) {
+			$args['include'] = $this->product_ids_to_export;
 		} else {
 			// Use the type and category filters set on the instance.
 			$args['type'] = $this->product_types_to_export;
