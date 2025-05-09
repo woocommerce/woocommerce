@@ -310,7 +310,7 @@ class WC_Admin {
 		if ( $uses_field_filters && ! $uses_locale_filters && function_exists( 'wc_get_logger' ) ) {
 			wc_get_logger()->warning(
 				'Detected use of checkout/billing/shipping field filters without corresponding locale filters. This may result in incomplete or misconfigured address fields at checkout. Encourage plugin developers to also use woocommerce_default_address_fields or woocommerce_get_country_locale / woocommerce_get_country_locale_default filters.',
-				[ 'source' => 'woocommerce' ]
+				array( 'source' => 'woocommerce' )
 			);
 		}
 	}
