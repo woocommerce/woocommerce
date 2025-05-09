@@ -294,7 +294,7 @@ class WC_Admin {
 	/**
 	 * Log a warning if checkout/shipping/billing field filters are used without locale-aware filters.
 	 */
-	function wc_log_missing_locale_filters() {
+	public function wc_log_missing_locale_filters() {
 		$uses_checkout_fields = has_filter( 'woocommerce_checkout_fields' );
 		$uses_shipping_fields = has_filter( 'woocommerce_shipping_fields' );
 		$uses_billing_fields  = has_filter( 'woocommerce_billing_fields' );
@@ -318,7 +318,7 @@ class WC_Admin {
 	/**
 	 * Display admin notice for developers if locale filters are missing.
 	 */
-	function wc_display_locale_filter_admin_notice() {
+	public function wc_display_locale_filter_admin_notice() {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
