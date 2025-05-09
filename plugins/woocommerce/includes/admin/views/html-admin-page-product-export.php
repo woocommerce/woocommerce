@@ -19,13 +19,11 @@ $is_exporting_product_ids = false;
 if ( ! empty( $_GET['product_ids'] ) ) {
 	check_admin_referer( 'export-selected-products' );
 
-	$ids_raw               = explode( ',', sanitize_text_field( wp_unslash( $_GET['product_ids'] ) ) );
-	$product_ids_to_export = array_filter( array_map( 'absint', $ids_raw ) );
-
+	$ids_raw                  = explode( ',', sanitize_text_field( wp_unslash( $_GET['product_ids'] ) ) );
+	$product_ids_to_export    = array_filter( array_map( 'absint', $ids_raw ) );
 	$is_exporting_product_ids = ! empty( $product_ids_to_export ) ? true : false;
 }
 ?>
-
 <div class="wrap woocommerce">
 	<h1><?php esc_html_e( 'Export Products', 'woocommerce' ); ?></h1>
 
