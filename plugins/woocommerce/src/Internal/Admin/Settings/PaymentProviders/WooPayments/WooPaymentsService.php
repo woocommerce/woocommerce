@@ -272,7 +272,7 @@ class WooPaymentsService {
 	 * @throws ApiArgumentException If the given onboarding step ID is invalid.
 	 * @throws ApiException If the onboarding action can not be performed due to the current state of the site.
 	 */
-	public function set_onboarding_step_started( string $step_id, string $location, bool $overwrite = false ): bool {
+	public function mark_onboarding_step_started( string $step_id, string $location, bool $overwrite = false ): bool {
 		$this->check_if_onboarding_step_action_is_acceptable( $step_id, $location );
 
 		// Clear possible failed status for the step.
@@ -302,7 +302,7 @@ class WooPaymentsService {
 	 * @throws ApiArgumentException If the given onboarding step ID is invalid.
 	 * @throws ApiException If the onboarding action can not be performed due to the current state of the site.
 	 */
-	public function set_onboarding_step_completed( string $step_id, string $location, bool $overwrite = false ): bool {
+	public function mark_onboarding_step_completed( string $step_id, string $location, bool $overwrite = false ): bool {
 		$this->check_if_onboarding_step_action_is_acceptable( $step_id, $location );
 
 		// Clear possible failed status for the step.
@@ -364,7 +364,7 @@ class WooPaymentsService {
 	 *
 	 * @return bool Whether the onboarding step was marked as failed.
 	 */
-	private function set_onboarding_step_failed( string $step_id, string $location, array $error = array() ): bool {
+	private function mark_onboarding_step_failed( string $step_id, string $location, array $error = array() ): bool {
 		// There is no need to do onboarding checks because setting a step as failed should be possible at any time.
 
 		// Record the error for the step, even if it is empty.
@@ -437,7 +437,7 @@ class WooPaymentsService {
 	 *
 	 * @return bool Whether the onboarding step was marked as blocked.
 	 */
-	private function set_onboarding_step_blocked( string $step_id, string $location, array $errors = array() ): bool {
+	private function mark_onboarding_step_blocked( string $step_id, string $location, array $errors = array() ): bool {
 		// There is no need to do onboarding checks because setting a step as blocked should be possible at any time.
 
 		// Record the error for the step, even if it is empty.
@@ -716,7 +716,7 @@ class WooPaymentsService {
 		// Nothing to do if there is a connected account, but it is not a test account.
 		if ( $this->has_account() ) {
 			// Mark the onboarding step as blocked, if it is not already.
-			$this->set_onboarding_step_blocked(
+			$this->mark_onboarding_step_blocked(
 				self::ONBOARDING_STEP_TEST_ACCOUNT,
 				$location,
 				array(
@@ -771,7 +771,7 @@ class WooPaymentsService {
 
 		if ( is_wp_error( $response ) ) {
 			// Mark the onboarding step as failed.
-			$this->set_onboarding_step_failed(
+			$this->mark_onboarding_step_failed(
 				self::ONBOARDING_STEP_TEST_ACCOUNT,
 				$location,
 				array(
@@ -791,7 +791,7 @@ class WooPaymentsService {
 
 		if ( ! is_array( $response ) || empty( $response['success'] ) ) {
 			// Mark the onboarding step as failed.
-			$this->set_onboarding_step_failed(
+			$this->mark_onboarding_step_failed(
 				self::ONBOARDING_STEP_TEST_ACCOUNT,
 				$location,
 				array(
@@ -867,7 +867,7 @@ class WooPaymentsService {
 
 		if ( is_wp_error( $response ) ) {
 			// Mark the onboarding step as failed.
-			$this->set_onboarding_step_failed(
+			$this->mark_onboarding_step_failed(
 				self::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				$location,
 				array(
@@ -887,7 +887,7 @@ class WooPaymentsService {
 
 		if ( ! is_array( $response ) ) {
 			// Mark the onboarding step as failed.
-			$this->set_onboarding_step_failed(
+			$this->mark_onboarding_step_failed(
 				self::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				$location,
 				array(
@@ -912,7 +912,7 @@ class WooPaymentsService {
 		// For sanity, make sure the test account step is blocked if not already completed,
 		// since we are doing live account KYC.
 		if ( ! $this->is_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ) {
-			$this->set_onboarding_step_blocked(
+			$this->mark_onboarding_step_blocked(
 				self::ONBOARDING_STEP_TEST_ACCOUNT,
 				$location,
 				array(
@@ -972,7 +972,7 @@ class WooPaymentsService {
 
 		if ( is_wp_error( $response ) ) {
 			// Mark the onboarding step as failed.
-			$this->set_onboarding_step_failed(
+			$this->mark_onboarding_step_failed(
 				self::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				$location,
 				array(
@@ -992,7 +992,7 @@ class WooPaymentsService {
 
 		if ( ! is_array( $response ) ) {
 			// Mark the onboarding step as failed.
-			$this->set_onboarding_step_failed(
+			$this->mark_onboarding_step_failed(
 				self::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				$location,
 				array(
@@ -1012,12 +1012,12 @@ class WooPaymentsService {
 		}
 
 		// Mark the business verification step as completed.
-		$this->set_onboarding_step_completed( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
+		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
 
 		// For sanity, make sure the test account step is blocked if not already completed,
 		// since we are doing live account KYC.
 		if ( ! $this->is_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ) {
-			$this->set_onboarding_step_blocked(
+			$this->mark_onboarding_step_blocked(
 				self::ONBOARDING_STEP_TEST_ACCOUNT,
 				$location,
 				array(
@@ -1162,10 +1162,10 @@ class WooPaymentsService {
 
 		// For sanity, make sure the payment methods step is marked as completed.
 		// This is to avoid the user being prompted to set up payment methods again.
-		$this->set_onboarding_step_completed( self::ONBOARDING_STEP_PAYMENT_METHODS, $location );
+		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_PAYMENT_METHODS, $location );
 		// For sanity, make sure the test account step is marked as completed and not blocked or failed.
 		// After disabling a test account, the user should be prompted to set up a live account.
-		$this->set_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		$this->clear_onboarding_step_blocked( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 

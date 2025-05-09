@@ -261,7 +261,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->mock_woopayments_service
 			->expects( $this->never() )
-			->method( 'set_onboarding_step_started' );
+			->method( 'mark_onboarding_step_started' );
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/start' );
@@ -286,7 +286,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$expected_http_code = 123;
 		$this->mock_woopayments_service
 			->expects( $this->once() )
-			->method( 'set_onboarding_step_started' )
+			->method( 'mark_onboarding_step_started' )
 			->willThrowException( new ApiException( $expected_code, $expected_message, $expected_http_code ) );
 
 		// Act.
@@ -543,7 +543,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->mock_woopayments_service
 			->expects( $this->never() )
-			->method( 'set_onboarding_step_completed' );
+			->method( 'mark_onboarding_step_completed' );
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/finish' );
@@ -568,7 +568,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$expected_http_code = 123;
 		$this->mock_woopayments_service
 			->expects( $this->once() )
-			->method( 'set_onboarding_step_completed' )
+			->method( 'mark_onboarding_step_completed' )
 			->willThrowException( new ApiException( $expected_code, $expected_message, $expected_http_code ) );
 
 		// Act.
@@ -594,7 +594,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->mock_woopayments_service
 			->expects( $this->once() )
-			->method( 'set_onboarding_step_started' )
+			->method( 'mark_onboarding_step_started' )
 			->with( $step_id, $country_code )
 			->willReturn( true );
 

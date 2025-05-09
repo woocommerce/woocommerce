@@ -387,7 +387,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		try {
 			$previous_status = $this->woopayments->get_onboarding_step_status( $step_id, $location );
 
-			$this->woopayments->set_onboarding_step_started( $step_id, $location );
+			$this->woopayments->mark_onboarding_step_started( $step_id, $location );
 
 			$response = array(
 				'success'         => true,
@@ -473,7 +473,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		try {
 			$previous_status = $this->woopayments->get_onboarding_step_status( $step_id, $location );
 
-			$this->woopayments->set_onboarding_step_completed( $step_id, $location );
+			$this->woopayments->mark_onboarding_step_completed( $step_id, $location );
 
 			$response = array(
 				'success'         => true,
@@ -503,7 +503,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 
 		try {
 			// Mark the step as started, if not already.
-			$this->woopayments->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+			$this->woopayments->mark_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
 			$result = $this->woopayments->onboarding_test_account_init( $location, $request->get_param( 'source' ) ?? '' );
 		} catch ( ApiException $e ) {

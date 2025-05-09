@@ -2826,9 +2826,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test set_onboarding_step_started throws exception when extension is not active.
+	 * Test mark_onboarding_step_started throws exception when extension is not active.
 	 */
-	public function test_set_onboarding_step_started_throws_when_extension_not_active() {
+	public function test_mark_onboarding_step_started_throws_when_extension_not_active() {
 		$location = 'US';
 
 		// Arrange.
@@ -2846,7 +2846,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		try {
-			$this->sut->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+			$this->sut->mark_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
 			$this->fail( 'Expected ApiException not thrown' );
 		} catch ( ApiException $e ) {
@@ -2855,12 +2855,12 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test set_onboarding_step_started throws exception when onboarding is locked.
+	 * Test mark_onboarding_step_started throws exception when onboarding is locked.
 	 *
 	 * @return void
 	 * @throws \Exception When trying to mock uncallable user functions.
 	 */
-	public function test_set_onboarding_step_started_throws_with_onboarding_locked() {
+	public function test_mark_onboarding_step_started_throws_with_onboarding_locked() {
 		$location = 'US';
 
 		// Arrange the onboarding locked DB option.
@@ -2877,7 +2877,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		try {
-			$this->sut->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+			$this->sut->mark_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
 			$this->fail( 'Expected ApiException not thrown' );
 		} catch ( ApiException $e ) {
@@ -2886,25 +2886,25 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that set_onboarding_step_started throws an exception when an invalid step ID is provided.
+	 * Test that mark_onboarding_step_started throws an exception when an invalid step ID is provided.
 	 *
 	 * @return void
 	 */
-	public function test_set_onboarding_step_started_throws_on_invalid_step_id() {
+	public function test_mark_onboarding_step_started_throws_on_invalid_step_id() {
 		$location = 'US';
 
 		$this->expectException( \Exception::class );
 		$this->expectExceptionMessage( 'Invalid onboarding step ID' );
 
-		$this->sut->set_onboarding_step_started( 'invalid_step_id', $location );
+		$this->sut->mark_onboarding_step_started( 'invalid_step_id', $location );
 	}
 
 	/**
-	 * Test that set_onboarding_step_started throws an exception when the requirements are not met for the step.
+	 * Test that mark_onboarding_step_started throws an exception when the requirements are not met for the step.
 	 *
 	 * @return void
 	 */
-	public function test_set_onboarding_step_started_throws_on_unmet_requirements() {
+	public function test_mark_onboarding_step_started_throws_on_unmet_requirements() {
 		$location = 'US';
 
 		// Arrange the WPCOM connection.
@@ -2918,7 +2918,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->willReturn( false );
 
 		try {
-			$this->sut->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+			$this->sut->mark_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
 			$this->fail( 'Expected ApiException not thrown' );
 		} catch ( ApiException $e ) {
@@ -2927,11 +2927,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that set_onboarding_step_started does not overwrite the existing step status if the overwrite flag is false.
+	 * Test that mark_onboarding_step_started does not overwrite the existing step status if the overwrite flag is false.
 	 *
 	 * @return void
 	 */
-	public function test_set_onboarding_step_started_does_not_overwrite() {
+	public function test_mark_onboarding_step_started_does_not_overwrite() {
 		$location = 'US';
 
 		// Arrange.
@@ -2978,7 +2978,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		// Act.
-		$result = $this->sut->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS, $location, false );
+		$result = $this->sut->mark_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS, $location, false );
 
 		// Assert.
 		$this->assertTrue( $result );
@@ -2986,11 +2986,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that set_onboarding_step_started overwrites the existing step status if the overwrite flag is true.
+	 * Test that mark_onboarding_step_started overwrites the existing step status if the overwrite flag is true.
 	 *
 	 * @return void
 	 */
-	public function test_set_onboarding_step_started_overwrites() {
+	public function test_mark_onboarding_step_started_overwrites() {
 		$location = 'US';
 
 		// Arrange.
@@ -3037,7 +3037,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		// Act.
-		$result = $this->sut->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS, $location, true );
+		$result = $this->sut->mark_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS, $location, true );
 
 		// Assert.
 		$this->assertTrue( $result );
@@ -3047,11 +3047,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that set_onboarding_step_started stores the step status to started with the current timestamp.
+	 * Test that mark_onboarding_step_started stores the step status to started with the current timestamp.
 	 *
 	 * @return void
 	 */
-	public function test_set_onboarding_step_started() {
+	public function test_mark_onboarding_step_started() {
 		$location = 'US';
 
 		// Arrange.
@@ -3085,7 +3085,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		// Act.
-		$result = $this->sut->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS, $location, true );
+		$result = $this->sut->mark_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS, $location, true );
 
 		// Assert.
 		$this->assertTrue( $result );
@@ -3095,12 +3095,12 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test set_onboarding_step_completed throws exception when extension is not active.
+	 * Test mark_onboarding_step_completed throws exception when extension is not active.
 	 *
 	 * @return void
 	 * @throws \Exception When trying to mock uncallable user functions.
 	 */
-	public function test_set_onboarding_step_completed_throws_when_extension_not_active() {
+	public function test_mark_onboarding_step_completed_throws_when_extension_not_active() {
 		$location = 'US';
 
 		// Arrange.
@@ -3118,7 +3118,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		try {
-			$this->sut->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+			$this->sut->mark_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
 			$this->fail( 'Expected ApiException not thrown' );
 		} catch ( ApiException $e ) {
@@ -3127,12 +3127,12 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test set_onboarding_step_completed throws exception when onboarding is locked.
+	 * Test mark_onboarding_step_completed throws exception when onboarding is locked.
 	 *
 	 * @return void
 	 * @throws \Exception When trying to mock uncallable user functions.
 	 */
-	public function test_set_onboarding_step_completed_throws_with_onboarding_locked() {
+	public function test_mark_onboarding_step_completed_throws_with_onboarding_locked() {
 		$location = 'US';
 
 		// Arrange the onboarding locked DB option.
@@ -3149,7 +3149,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		try {
-			$this->sut->set_onboarding_step_completed( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+			$this->sut->mark_onboarding_step_completed( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
 			$this->fail( 'Expected ApiException not thrown' );
 		} catch ( ApiException $e ) {
@@ -3158,25 +3158,25 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that set_onboarding_step_completed throws an exception when an invalid step ID is provided.
+	 * Test that mark_onboarding_step_completed throws an exception when an invalid step ID is provided.
 	 *
 	 * @return void
 	 */
-	public function test_set_onboarding_step_completed_throws_on_invalid_step_id() {
+	public function test_mark_onboarding_step_completed_throws_on_invalid_step_id() {
 		$location = 'US';
 
 		$this->expectException( \Exception::class );
 		$this->expectExceptionMessage( 'Invalid onboarding step ID' );
 
-		$this->sut->set_onboarding_step_completed( 'invalid_step_id', $location );
+		$this->sut->mark_onboarding_step_completed( 'invalid_step_id', $location );
 	}
 
 	/**
-	 * Test that set_onboarding_step_completed throws an exception when the requirements are not met for the step.
+	 * Test that mark_onboarding_step_completed throws an exception when the requirements are not met for the step.
 	 *
 	 * @return void
 	 */
-	public function test_set_onboarding_step_completed_throws_on_unmet_requirements() {
+	public function test_mark_onboarding_step_completed_throws_on_unmet_requirements() {
 		$location = 'US';
 
 		// Arrange the WPCOM connection.
@@ -3190,18 +3190,18 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->willReturn( false );
 
 		try {
-			$this->sut->set_onboarding_step_completed( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+			$this->sut->mark_onboarding_step_completed( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		} catch ( ApiException $e ) {
 			$this->assertEquals( 'woocommerce_woopayments_onboarding_step_requirements_not_met', $e->getErrorCode() );
 		}
 	}
 
 	/**
-	 * Test that set_onboarding_step_completed does not overwrite the existing step status if the overwrite flag is false.
+	 * Test that mark_onboarding_step_completed does not overwrite the existing step status if the overwrite flag is false.
 	 *
 	 * @return void
 	 */
-	public function test_set_onboarding_step_completed_does_not_overwrite() {
+	public function test_mark_onboarding_step_completed_does_not_overwrite() {
 		$location = 'US';
 
 		// Arrange.
@@ -3248,7 +3248,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		// Act.
-		$result = $this->sut->set_onboarding_step_completed( $step_id, $location, false );
+		$result = $this->sut->mark_onboarding_step_completed( $step_id, $location, false );
 
 		// Assert.
 		$this->assertTrue( $result );
@@ -3256,11 +3256,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that set_onboarding_step_completed overwrites the existing step status if the overwrite flag is true.
+	 * Test that mark_onboarding_step_completed overwrites the existing step status if the overwrite flag is true.
 	 *
 	 * @return void
 	 */
-	public function test_set_onboarding_step_completed_overwrites() {
+	public function test_mark_onboarding_step_completed_overwrites() {
 		$location = 'US';
 
 		// Arrange.
@@ -3307,7 +3307,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		// Act.
-		$result = $this->sut->set_onboarding_step_completed( $step_id, $location, true );
+		$result = $this->sut->mark_onboarding_step_completed( $step_id, $location, true );
 
 		// Assert.
 		$this->assertTrue( $result );
@@ -3317,11 +3317,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that set_onboarding_step_completed stores the step status to completed with the current timestamp.
+	 * Test that mark_onboarding_step_completed stores the step status to completed with the current timestamp.
 	 *
 	 * @return void
 	 */
-	public function test_set_onboarding_step_completed() {
+	public function test_mark_onboarding_step_completed() {
 		$location = 'US';
 
 		// Arrange.
@@ -3355,7 +3355,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		// Act.
-		$result = $this->sut->set_onboarding_step_completed( $step_id, $location, true );
+		$result = $this->sut->mark_onboarding_step_completed( $step_id, $location, true );
 
 		// Assert.
 		$this->assertTrue( $result );
