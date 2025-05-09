@@ -247,8 +247,9 @@ export default function PaymentMethodsSelection() {
 											.join( ', ' ),
 										store_country:
 											window.wcSettings?.admin
-												?.preloadSettings?.general
-												?.woocommerce_default_country,
+												?.woocommerce_payments_nox_profile
+												?.business_country_code ||
+											'unknown',
 									}
 								);
 								setIsContinueButtonLoading( false );
