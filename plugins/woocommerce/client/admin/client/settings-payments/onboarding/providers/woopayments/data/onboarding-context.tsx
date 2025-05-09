@@ -207,7 +207,7 @@ export const OnboardingProvider: React.FC< {
 				if ( step.type === 'backend' ) {
 					const backendStep = stateStoreSteps.find(
 						( s ) => s.id === step.id
-					);
+					) as WooPaymentsProviderOnboardingStep;
 
 					return Object.assign( {}, step, {
 						status: backendStep?.status || 'not_started',
@@ -215,6 +215,7 @@ export const OnboardingProvider: React.FC< {
 						path: backendStep?.path,
 						context: backendStep?.context,
 						actions: backendStep?.actions,
+						errors: backendStep?.errors,
 					} );
 				}
 
