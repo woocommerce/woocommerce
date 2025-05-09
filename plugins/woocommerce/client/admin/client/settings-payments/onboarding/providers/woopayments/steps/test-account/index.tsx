@@ -4,7 +4,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { Loader } from '@woocommerce/onboarding';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Notice, Button } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
@@ -119,6 +119,21 @@ const TestAccountStep = () => {
 			if ( currentStep?.status === 'completed' ) {
 				setStatus( 'success' );
 				setProgress( 100 ); // Show success state immediately
+				return;
+			}
+
+			if ( currentStep?.status === 'blocked' ) {
+				setErrorMessage(
+					sprintf(
+						/* translators: %s: error message */
+						__(
+							'This step cannot be started until the following issue(s) are resolved: %s',
+							'woocommerce'
+						),
+						currentStep?.errors?.[ 0 ]
+					)
+				);
+				setStatus( 'blocked' );
 				return;
 			}
 
