@@ -63,7 +63,14 @@ const INITIAL_PHASE_INCREMENT = 5; // Increment progress by 20% for the initial 
 const EXTENDED_PHASE_1_INCREMENT = 1; // Increment progress by 1% for the extended phase 1
 
 // Status types for the component
-type Status = 'idle' | 'initializing' | 'polling' | 'success' | 'error';
+type Status =
+	| 'idle'
+	| 'initializing'
+	| 'polling'
+	| 'success'
+	| 'error'
+	| 'blocked'
+	| 'failed';
 
 const TestAccountStep = () => {
 	const { currentStep, navigateToNextStep, closeModal, refreshStoreData } =
