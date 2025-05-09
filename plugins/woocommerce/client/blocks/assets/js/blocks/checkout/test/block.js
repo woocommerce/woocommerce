@@ -4,11 +4,7 @@
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
-import {
-	cartStore,
-	checkoutStore,
-	paymentStore,
-} from '@woocommerce/block-data';
+import { CART_STORE_KEY, checkoutStore } from '@woocommerce/block-data';
 import { default as fetchMock } from 'jest-fetch-mock';
 import { allSettings } from '@woocommerce/settings';
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
