@@ -224,7 +224,7 @@ export default function PaymentMethodsSelection() {
 									'wcpay_settings_payment_methods_continue',
 									{
 										displayed_payment_methods:
-											Object.keys( paymentMethodsState ),
+											Object.keys( paymentMethodsState ).join( ', ' ),
 										selected_payment_methods: Object.keys(
 											paymentMethodsState
 										)
