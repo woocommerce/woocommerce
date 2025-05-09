@@ -29,6 +29,7 @@ export const OverwriteConfirmationModal = ( {
 			) }
 			onRequestClose={ onClose }
 			className="woocommerce-blueprint-overwrite-modal"
+			isDismissible={ ! isImporting }
 		>
 			<p className="woocommerce-blueprint-overwrite-modal__description">
 				{ overwrittenItems.length
@@ -53,6 +54,7 @@ export const OverwriteConfirmationModal = ( {
 					className="woocommerce-blueprint-overwrite-modal__actions-cancel"
 					variant="tertiary"
 					onClick={ onClose }
+					disabled={ isImporting }
 				>
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
