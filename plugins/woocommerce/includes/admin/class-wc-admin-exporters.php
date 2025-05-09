@@ -93,7 +93,7 @@ class WC_Admin_Exporters {
 		$screen = get_current_screen();
 
 		if ( $screen && 'product_page_product_exporter' === $screen->id ) {
-			$submenu_file = 'edit.php?post_type=product'; // WPCS: override ok.
+			$submenu_file = 'edit.php?post_type=product'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 	}
 
