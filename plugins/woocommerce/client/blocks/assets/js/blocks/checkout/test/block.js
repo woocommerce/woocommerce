@@ -165,7 +165,7 @@ describe( 'Testing Checkout', () => {
 	} );
 
 	it( 'Allows saving payment method if the customer is creating an account or has already logged in', async () => {
-		await act( async () => {
+	act( () => {
 			const PaymentMethodContent = () => <div>A payment method</div>;
 			registerPaymentMethod( {
 				name: 'test-payment-method',
@@ -185,9 +185,8 @@ describe( 'Testing Checkout', () => {
 
 		const { rerender } = render( <CheckoutBlock /> );
 
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 		expect(
-			screen.getByText( /Payment method with cards/i )
+			await screen.findByText( /Payment method with cards/i )
 		).toBeInTheDocument();
 
 		expect(
@@ -196,7 +195,7 @@ describe( 'Testing Checkout', () => {
 			} )
 		).toBeInTheDocument();
 
-		await act( async () => {
+		act( () => {
 			dispatch( checkoutStore ).__internalSetCustomerId( 0 );
 		} );
 
@@ -208,7 +207,7 @@ describe( 'Testing Checkout', () => {
 			} )
 		).not.toBeInTheDocument();
 
-		await act( async () => {
+		act( () => {
 			allSettings.checkoutAllowsGuest = true;
 			allSettings.checkoutAllowsSignup = true;
 			dispatch( checkoutStore ).__internalSetCustomerId( 0 );
@@ -223,7 +222,7 @@ describe( 'Testing Checkout', () => {
 			} )
 		).toBeInTheDocument();
 
-		await act( async () => {
+		act( () => {
 			dispatch( checkoutStore ).__internalSetShouldCreateAccount( false );
 		} );
 
@@ -235,7 +234,7 @@ describe( 'Testing Checkout', () => {
 			} )
 		).not.toBeInTheDocument();
 
-		await act( async () => {
+		act( () => {
 			allSettings.checkoutAllowsGuest = false;
 			allSettings.checkoutAllowsSignup = true;
 		} );
@@ -249,7 +248,7 @@ describe( 'Testing Checkout', () => {
 		).toBeInTheDocument();
 
 		// cleanup
-		await act( async () => {
+		act( () => {
 			allSettings.checkoutAllowsGuest = undefined;
 			allSettings.checkoutAllowsSignup = undefined;
 			dispatch( checkoutStore ).__internalSetCustomerId( 1 );
