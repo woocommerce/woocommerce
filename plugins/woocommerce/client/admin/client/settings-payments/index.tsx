@@ -202,8 +202,8 @@ export const SettingsPaymentsMethods = () => {
 				)
 				.join( ', ' ),
 			store_country:
-				window.wcSettings?.admin?.preloadSettings?.general
-					?.woocommerce_default_country ?? 'unknown',
+				window.wcSettings?.admin?.woocommerce_payments_nox_profile
+					?.business_country_code ?? 'unknown',
 		} );
 
 		setIsCompleted( true );
