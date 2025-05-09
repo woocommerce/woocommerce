@@ -2,13 +2,16 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
 import { Icon, info } from '@wordpress/icons';
 import ProductControl from '@woocommerce/editor-components/product-control';
 import type { SelectedOption } from '@woocommerce/block-hocs';
 import { createInterpolateElement } from '@wordpress/element';
 import {
 	Placeholder,
+	// @ts-expect-error Using experimental features
 	__experimentalHStack as HStack,
+	// @ts-expect-error Using experimental features
 	__experimentalText as Text,
 } from '@wordpress/components';
 
@@ -23,6 +26,7 @@ const ProductPicker = (
 		isDeletedProductReference: boolean;
 	}
 ) => {
+	const blockProps = useBlockProps();
 	const { attributes, isDeletedProductReference } = props;
 
 	const collection = getCollectionByName( attributes.collection );
@@ -48,34 +52,36 @@ const ProductPicker = (
 		  );
 
 	return (
-		<Placeholder className="wc-blocks-product-collection__editor-product-picker">
-			<HStack alignment="center">
-				<Icon
-					icon={ info }
-					className="wc-blocks-product-collection__info-icon"
-				/>
-				<Text>{ infoText }</Text>
-			</HStack>
-			<ProductControl
-				selected={
-					attributes.query?.productReference as SelectedOption
-				}
-				onChange={ ( value = [] ) => {
-					const isValidId = ( value[ 0 ]?.id ?? null ) !== null;
-					if ( isValidId ) {
-						props.setAttributes( {
-							query: {
-								...attributes.query,
-								productReference: value[ 0 ].id,
-							},
-						} );
+		<div { ...blockProps }>
+			<Placeholder className="wc-blocks-product-collection__editor-product-picker">
+				<HStack alignment="center">
+					<Icon
+						icon={ info }
+						className="wc-blocks-product-collection__info-icon"
+					/>
+					<Text>{ infoText }</Text>
+				</HStack>
+				<ProductControl
+					selected={
+						attributes.query?.productReference as SelectedOption
 					}
-				} }
-				messages={ {
-					search: __( 'Select a product', 'woocommerce' ),
-				} }
-			/>
-		</Placeholder>
+					onChange={ ( value = [] ) => {
+						const isValidId = ( value[ 0 ]?.id ?? null ) !== null;
+						if ( isValidId ) {
+							props.setAttributes( {
+								query: {
+									...attributes.query,
+									productReference: value[ 0 ].id,
+								},
+							} );
+						}
+					} }
+					messages={ {
+						search: __( 'Select a product', 'woocommerce' ),
+					} }
+				/>
+			</Placeholder>
+		</div>
 	);
 };
 

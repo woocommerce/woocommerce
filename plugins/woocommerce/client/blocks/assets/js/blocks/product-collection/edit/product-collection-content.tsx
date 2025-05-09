@@ -155,7 +155,7 @@ const ProductCollectionContent = ( {
 	}
 
 	return (
-		<>
+		<div { ...blockProps }>
 			{ attributes.__privatePreviewState?.isPreview &&
 				props.isSelected && (
 					<Button
@@ -176,7 +176,7 @@ const ProductCollectionContent = ( {
 			<InspectorAdvancedControls { ...props } />
 			<ToolbarControls { ...props } />
 			<div { ...innerBlocksProps } style={ style } />
-		</>
+		</div>
 	);
 };
 
