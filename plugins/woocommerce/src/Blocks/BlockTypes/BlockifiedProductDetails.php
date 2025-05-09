@@ -38,14 +38,18 @@ class BlockifiedProductDetails extends AbstractBlock {
 		 *
 		 * @hook woocommerce_product_details_hooked_items
 		 *
+		 * @since 10.0.0
 		 * @param {array} $hooked_items The items that are hooked into the Product Details block.
 		 * @return {array} The items that are hooked into the Product Details block.
 		 */
 		$hooked_items = apply_filters( 'woocommerce_product_details_hooked_items', [] );
 
-		$validated_hooked_items = array_filter( $hooked_items, function( $item ) {
-			return isset( $item['title'] ) && isset( $item['content'] ) && is_string( $item['title'] ) && is_string( $item['content'] );
-		} );
+		$validated_hooked_items = array_filter(
+			$hooked_items,
+			function ( $item ) {
+				return isset( $item['title'] ) && isset( $item['content'] ) && is_string( $item['title'] ) && is_string( $item['content'] );
+			}
+		);
 
 		foreach ( $validated_hooked_items as $item ) {
 			$this->register_product_details_item( $item['title'], $item['content'] );
@@ -59,7 +63,7 @@ class BlockifiedProductDetails extends AbstractBlock {
 	 * @param string $content The content of the item.
 	 * @return void
 	 */
-	protected function register_product_details_item($title, $content) {
+	protected function register_product_details_item( $title, $content ) {
 		$slug = sanitize_title( $title );
 
 		add_filter(
@@ -80,8 +84,11 @@ class BlockifiedProductDetails extends AbstractBlock {
 				$parsed_hooked_block,
 				$hooked_block_type,
 				$relative_position,
-				$parsed_anchor_block,
-			) use ( $title, $content ) {
+				$parsed_anchor_block
+			) use (
+				$title,
+				$content
+			) {
 
 				if ( is_null( $parsed_hooked_block ) ) {
 					return $parsed_hooked_block;
@@ -89,7 +96,7 @@ class BlockifiedProductDetails extends AbstractBlock {
 
 				if (
 					'woocommerce/accordion-group' !== $parsed_anchor_block['blockName'] ||
-					$relative_position !== 'last_child' ||
+					'last_child' !== $relative_position ||
 					! isset( $parsed_anchor_block['attrs']['metadata']['isProductDetailsInnerBlock'] ) ||
 					! $parsed_anchor_block['attrs']['metadata']['isProductDetailsInnerBlock']
 				) {
