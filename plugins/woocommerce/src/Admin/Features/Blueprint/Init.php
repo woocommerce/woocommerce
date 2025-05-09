@@ -190,8 +190,8 @@ class Init {
 			),
 			array(
 				'id'          => 'plugins',
-				'description' => __( 'Includes all the installed plugins and extensions.', 'woocommerce' ),
-				'label'       => __( 'Plugins and extensions', 'woocommerce' ),
+				'description' => __( 'Includes all the installed plugins.', 'woocommerce' ),
+				'label'       => __( 'Plugins', 'woocommerce' ),
 				'icon'        => 'plugins',
 				'items'       => $this->get_plugins_for_export_group(),
 			),
