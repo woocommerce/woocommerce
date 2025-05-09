@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add locale filter warning log and admin notice for checkout field customizations
