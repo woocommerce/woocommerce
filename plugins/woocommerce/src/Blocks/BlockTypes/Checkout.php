@@ -165,7 +165,7 @@ class Checkout extends AbstractBlock {
 		}
 
 		$checkout_fields = Package::container()->get( CheckoutFields::class );
-			// Load schema parser asynchronously if we need it.
+		// Load schema parser asynchronously if we need it.
 		if ( Validation::has_field_schema( $checkout_fields->get_additional_fields() ) ) {
 			$dependencies[] = 'wc-schema-parser';
 		}

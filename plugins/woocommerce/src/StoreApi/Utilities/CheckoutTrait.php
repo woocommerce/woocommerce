@@ -7,6 +7,7 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
+use Automattic\WooCommerce\Admin\Features\Features;
 use WC_Customer;
 
 /**
@@ -219,26 +220,28 @@ trait CheckoutTrait {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 */
 	private function persist_additional_fields_for_order( \WP_REST_Request $request ) {
+		if ( Features::is_enabled( 'experimental-blocks' ) ) {
+			$document_object = $this->get_document_object_from_rest_request( $request );
+			$document_object->set_context( 'order' );
+			$additional_fields_order   = $this->additional_fields_controller->get_contextual_fields_for_location( 'order', $document_object );
+			$additional_fields_contact = $this->additional_fields_controller->get_contextual_fields_for_location( 'contact', $document_object );
+			$additional_fields         = array_merge( $additional_fields_order, $additional_fields_contact );
+		} else {
+			$additional_fields_order   = $this->additional_fields_controller->get_fields_for_location( 'order' );
+			$additional_fields_contact = $this->additional_fields_controller->get_fields_for_location( 'contact' );
+			$additional_fields         = array_merge( $additional_fields_order, $additional_fields_contact );
+		}
 
-		$document_object = $this->get_document_object_from_rest_request( $request );
-		$document_object->set_context( 'order' );
-		$additional_fields_order   = $this->additional_fields_controller->get_contextual_fields_for_location( 'order', $document_object );
-		$additional_fields_contact = $this->additional_fields_controller->get_contextual_fields_for_location( 'contact', $document_object );
-		$additional_fields         = array_merge( $additional_fields_order, $additional_fields_contact );
+		$field_values = (array) $request['additional_fields'] ?? [];
 
-		$posted_additional_fields = (array) $request['additional_fields'] ?? [];
-
-		foreach ( $posted_additional_fields as $key => $value ) {
-			if ( isset( $additional_fields[ $key ] ) ) {
-				$this->additional_fields_controller->persist_field_for_order( $key, $posted_additional_fields[ $key ], $this->order, 'other', false );
-			} elseif ( '' === $value ) {
-				// Fields that are hidden (not on $additional_fields) but got posted with an empty value should be removed from the order.
-				$this->additional_fields_controller->persist_field_for_order( $key, '', $this->order, 'other', true );
+		foreach ( $additional_fields as $key => $field ) {
+			if ( isset( $field_values[ $key ] ) ) {
+				$this->additional_fields_controller->persist_field_for_order( $key, $field_values[ $key ], $this->order, 'other', false );
 			}
 		}
 
 		// The above logic sets visible fields, but not hidden fields. Unset the hidden fields here.
-		$other_posted_field_values = array_diff_key( $posted_additional_fields, $additional_fields );
+		$other_posted_field_values = array_diff_key( $field_values, $additional_fields );
 
 		foreach ( $other_posted_field_values as $key => $value ) {
 			if ( $this->additional_fields_controller->is_field( $key ) ) {
