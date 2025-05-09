@@ -42,17 +42,6 @@ const PackageRates = ( {
 		string | undefined
 	>( selectedRateId ?? rates[ 0 ]?.rate_id );
 
-	// Update the selected option if cart state changes in the data store.
-	useEffect( () => {
-		if (
-			selectedRateId &&
-			selectedRateId !== previousSelectedRateId &&
-			selectedRateId !== selectedOption
-		) {
-			setSelectedOption( selectedRateId );
-		}
-	}, [ selectedRateId, selectedOption, previousSelectedRateId ] );
-
 	// Update on mount, we do it every time to:
 	// - sync the initial value with the server
 	// - or reset pending request to change shipping rate that might be coming
@@ -66,6 +55,17 @@ const PackageRates = ( {
 		// shipping rate selection to end up in inifite loop
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
+
+	// Update the selected option if cart state changes in the data store.
+	useEffect( () => {
+		if (
+			selectedRateId &&
+			selectedRateId !== previousSelectedRateId &&
+			selectedRateId !== selectedOption
+		) {
+			setSelectedOption( selectedRateId );
+		}
+	}, [ selectedRateId, selectedOption, previousSelectedRateId ] );
 
 	if ( rates.length === 0 ) {
 		return noResultsMessage;

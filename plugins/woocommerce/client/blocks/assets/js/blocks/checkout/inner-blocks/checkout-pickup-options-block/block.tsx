@@ -175,6 +175,16 @@ const Block = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
 
+	// Update the selected option if cart state changes in the data store.
+	useEffect( () => {
+		const selectedRate = pickupLocations.find( ( rate ) => rate.selected );
+		const selectedRateId = selectedRate?.rate_id;
+
+		if ( selectedRateId && selectedRateId !== selectedOption ) {
+			setSelectedOption( selectedRateId );
+		}
+	}, [ pickupLocations, selectedOption ] );
+
 	// Prepare props to pass to the ExperimentalOrderLocalPickupPackages slot fill.
 	// We need to pluck out receiveCart.
 	// eslint-disable-next-line no-unused-vars
