@@ -4,9 +4,10 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Icon } from '@wordpress/components';
 import { RecommendedPaymentMethod } from '@woocommerce/data';
-import { useState, useEffect, useMemo } from '@wordpress/element';
+import { useState, useEffect, useMemo, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { close } from '@wordpress/icons';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -45,6 +46,9 @@ export default function PaymentMethodsSelection() {
 			? combineRequestMethods( contextPaymentMethods )
 			: [];
 	}, [ contextPaymentMethods ] );
+
+	const scrollRef = useRef< HTMLDivElement | null >( null );
+	const [ hasOverflow, setHasOverflow ] = useState( false );
 
 	// Update the local payment methods state when the context changes
 	useEffect( () => {
@@ -125,6 +129,35 @@ export default function PaymentMethodsSelection() {
 		}
 	};
 
+	// Check if overflow exists for Payment Methods list container.
+	const checkHasOverflow = () => {
+		const pmsContainer = scrollRef.current;
+
+		if ( pmsContainer ) {
+			// Compare scrollHeight and clientHeight to determine overflow.
+			setHasOverflow(
+				pmsContainer.scrollHeight > pmsContainer.clientHeight
+			);
+		}
+	};
+
+	// Check for overflow on initial render and on window resize.
+	useEffect( () => {
+		// Use setTimeout to ensure the DOM is updated before checking for overflow.
+		const timeout = setTimeout( () => {
+			checkHasOverflow();
+		}, 0 ); // Runs after paint
+
+		// Check for overflow on window resize.
+		window.addEventListener( 'resize', checkHasOverflow );
+
+		return () => {
+			// Cleanup the timeout and event listener on unmount.
+			clearTimeout( timeout );
+			window.removeEventListener( 'resize', checkHasOverflow );
+		};
+	}, [] );
+
 	return (
 		<div className="settings-payments-onboarding-modal__step--content">
 			<div className="woocommerce-layout__header woocommerce-recommended-payment-methods">
@@ -152,7 +185,10 @@ export default function PaymentMethodsSelection() {
 					</div>
 				</div>
 				<div className="woocommerce-recommended-payment-methods__list">
-					<div className="settings-payments-methods__container">
+					<div
+						className="settings-payments-methods__container"
+						ref={ scrollRef }
+					>
 						<div className="woocommerce-list">
 							{ recommendedPaymentMethods?.map(
 								( method: RecommendedPaymentMethod ) => (
@@ -184,24 +220,39 @@ export default function PaymentMethodsSelection() {
 						</div>
 						{ /* Show button only if not expanded and there are initially hidden items */ }
 						{ ! isExpanded && hiddenCount > 0 && (
-							<Button
-								className="settings-payments-methods__show-more"
-								onClick={ () => {
-									setIsExpanded( ! isExpanded );
-								} }
-								tabIndex={ 0 }
-								aria-expanded={ isExpanded }
-							>
-								{ sprintf(
-									/* translators: %s: number of hidden payment methods */
-									__( 'Show more (%s)', 'woocommerce' ),
-									hiddenCount
-								) }
-							</Button>
+							<div className="settings-payments-methods__show-more--wrapper">
+								<Button
+									className="settings-payments-methods__show-more"
+									onClick={ () => {
+										setIsExpanded( ! isExpanded );
+
+										// Check for overflow after expanding hidden payment methods.
+										// Use setTimeout to ensure the DOM is updated before checking for overflow.
+										setTimeout( () => {
+											checkHasOverflow();
+										}, 0 );
+									} }
+									tabIndex={ 0 }
+									aria-expanded={ isExpanded }
+								>
+									{ sprintf(
+										/* translators: %s: number of hidden payment methods */
+										__( 'Show more (%s)', 'woocommerce' ),
+										hiddenCount
+									) }
+								</Button>
+							</div>
 						) }
 					</div>
 				</div>
-				<div className="woocommerce-recommended-payment-methods__list_footer">
+				<div
+					className={ clsx(
+						'woocommerce-recommended-payment-methods__list_footer',
+						{
+							'has-border': hasOverflow,
+						}
+					) }
+				>
 					<Button
 						className="components-button is-primary"
 						onClick={ () => {
