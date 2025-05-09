@@ -188,63 +188,70 @@ class WooPaymentsService {
 			);
 		}
 
-		$stored_statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+		$meets_requirements = $this->check_onboarding_step_requirements( $step_id, $location );
 
-		// First, we check the status of the onboarding step based on the current state of the store.
-		switch ( $step_id ) {
-			case self::ONBOARDING_STEP_PAYMENT_METHODS:
-				// If there is already a valid account, report the step as completed
-				// since allowing the user to configure payment methods won't have any effect.
-				if ( $this->has_valid_account() ) {
-					return self::ONBOARDING_STEP_STATUS_COMPLETED;
-				}
-				break;
-			case self::ONBOARDING_STEP_WPCOM_CONNECTION:
-				// If we have a working WPCOM connection, report the step as completed.
-				if ( $this->has_working_wpcom_connection() ) {
-					return self::ONBOARDING_STEP_STATUS_COMPLETED;
-				}
-
-				// If we only have a connected blog, but no master owner connected, we at least started the process.
-				if ( $this->wpcom_connection_manager->is_connected() ) {
-					return self::ONBOARDING_STEP_STATUS_STARTED;
-				}
-				break;
-			case self::ONBOARDING_STEP_TEST_ACCOUNT:
-				// The step can only be auto-completed if the requirements are met.
-				if ( $this->check_onboarding_step_requirements( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ) {
+		// First, determine if the step should be reported as completed based on the current state of the store.
+		// The step can only be auto-completed if the requirements are met.
+		if ( $meets_requirements ) {
+			switch ( $step_id ) {
+				case self::ONBOARDING_STEP_PAYMENT_METHODS:
+					// If there is already a valid account, report the step as completed
+					// since allowing the user to configure payment methods won't have any effect.
+					if ( $this->has_valid_account() ) {
+						return self::ONBOARDING_STEP_STATUS_COMPLETED;
+					}
+					break;
+				case self::ONBOARDING_STEP_WPCOM_CONNECTION:
+					// If we have a working WPCOM connection, report the step as completed.
+					// The step can only be auto-completed if the requirements are met.
+					if ( $this->has_working_wpcom_connection() ) {
+						return self::ONBOARDING_STEP_STATUS_COMPLETED;
+					}
+					break;
+				case self::ONBOARDING_STEP_TEST_ACCOUNT:
 					// If the account is a valid, working test account, the step is completed.
 					if ( $this->has_test_account() && $this->has_valid_account() && $this->has_working_account() ) {
 						return self::ONBOARDING_STEP_STATUS_COMPLETED;
 					}
-
-					// If there is a stored completed status, we respect that IF there is NO invalid test account.
-					// This is the case when the user first creates a test account and then switches to live.
-					if ( ! empty( $stored_statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] ) &&
-						! ( $this->has_test_account() && ! $this->has_valid_account() )
-					) {
+					break;
+				case self::ONBOARDING_STEP_BUSINESS_VERIFICATION:
+					// The step can only be auto-completed if the requirements are met.
+					// If the current account is fully onboarded and is a live account,
+					// we report the business verification step as completed.
+					if ( $this->has_valid_account() && $this->has_live_account() ) {
 						return self::ONBOARDING_STEP_STATUS_COMPLETED;
 					}
-				}
+					break;
+			}
+		}
+
+		// Second, try to determine the status of the onboarding step based on the step's stored statuses.
+		// We take a waterfall approach: completed > blocked > failed > started > not started.
+		// Reporting a completed status involves additional logic.
+		switch ( $step_id ) {
+			case self::ONBOARDING_STEP_WPCOM_CONNECTION:
+				// Ignore any completed stored statuses because of the critical nature of the WPCOM connection.
 				break;
-			case self::ONBOARDING_STEP_BUSINESS_VERIFICATION:
+			case self::ONBOARDING_STEP_TEST_ACCOUNT:
+				// If there is a stored completed status, we respect that IF there is NO invalid test account.
+				// This is the case when the user first creates a test account and then switches to live.
 				// The step can only be auto-completed if the requirements are met.
-				// If the current account is fully onboarded and is a live account,
-				// we report the business verification step as completed.
-				if ( $this->check_onboarding_step_requirements( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location ) &&
-					$this->has_valid_account() &&
-					$this->has_live_account() ) {
+				if ( $meets_requirements &&
+					$this->was_onboarding_step_marked_completed( $step_id, $location ) &&
+					! ( $this->has_test_account() && ! $this->has_valid_account() )
+				) {
 					return self::ONBOARDING_STEP_STATUS_COMPLETED;
 				}
 				break;
-		}
+			case self::ONBOARDING_STEP_PAYMENT_METHODS:
+			case self::ONBOARDING_STEP_BUSINESS_VERIFICATION:
+			default:
+				// The step can only be completed if the requirements are met. Otherwise, ignore the stored completed status.
+				if ( $meets_requirements && $this->was_onboarding_step_marked_completed( $step_id, $location ) ) {
+					return self::ONBOARDING_STEP_STATUS_COMPLETED;
+				}
 
-		// Second, try to determine the status of the onboarding step based on the step's stored data.
-		// We take a waterfall approach: completed > blocked > failed > started > not started.
-		// For the completed status, we enforce sanity and check if the step requirements are met.
-		if ( $this->check_onboarding_step_requirements( $step_id, $location ) &&
-			! empty( $stored_statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] ) ) {
-			return self::ONBOARDING_STEP_STATUS_COMPLETED;
+				break;
 		}
 		if ( $this->is_onboarding_step_blocked( $step_id, $location ) ) {
 			return self::ONBOARDING_STEP_STATUS_BLOCKED;
@@ -252,12 +259,45 @@ class WooPaymentsService {
 		if ( $this->is_onboarding_step_failed( $step_id, $location ) ) {
 			return self::ONBOARDING_STEP_STATUS_FAILED;
 		}
-		if ( ! empty( $stored_statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] ) ) {
+		if ( $this->was_onboarding_step_marked_started( $step_id, $location ) ) {
 			return self::ONBOARDING_STEP_STATUS_STARTED;
 		}
 
 		// Finally, we default to not started.
 		return self::ONBOARDING_STEP_STATUS_NOT_STARTED;
+	}
+
+	/**
+	 * Check if the onboarding step has a started status.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step is started.
+	 * @throws ApiException On invalid step ID.
+	 */
+	private function is_onboarding_step_started( string $step_id, string $location ): bool {
+		return self::ONBOARDING_STEP_STATUS_COMPLETED === $this->get_onboarding_step_status( $step_id, $location );
+	}
+
+	/**
+	 * Check if an onboarding step has been marked as started.
+	 *
+	 * This means that, at some point, the step was marked/recorded as started in the DB.
+	 * This doesn't mean that the current reported status is started. The step status might be different now.
+	 * @see get_onboarding_step_status() for that.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step has been marked as started.
+	 */
+	private function was_onboarding_step_marked_started( string $step_id, string $location ): bool {
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+
+		return ! empty( $statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] );
 	}
 
 	/**
@@ -291,6 +331,39 @@ class WooPaymentsService {
 	}
 
 	/**
+	 * Check if the onboarding step has a completed status.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step is completed.
+	 * @throws ApiException On invalid step ID.
+	 */
+	private function is_onboarding_step_completed( string $step_id, string $location ): bool {
+		return self::ONBOARDING_STEP_STATUS_COMPLETED === $this->get_onboarding_step_status( $step_id, $location );
+	}
+
+	/**
+	 * Check if an onboarding step has been marked as completed.
+	 *
+	 * This means that, at some point, the step was marked/recorded as completed in the DB.
+	 * This doesn't mean that the current reported status is completed. The step status might be different now.
+	 * @see get_onboarding_step_status() for that.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step has been marked as completed.
+	 */
+	private function was_onboarding_step_marked_completed( string $step_id, string $location ): bool {
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+
+		return ! empty( $statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] );
+	}
+
+	/**
 	 * Mark an onboarding step as completed.
 	 *
 	 * @param string $step_id   The ID of the onboarding step.
@@ -318,19 +391,6 @@ class WooPaymentsService {
 
 		// Store the updated step data.
 		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
-	}
-
-	/**
-	 * Check if the onboarding step action is completed.
-	 *
-	 * @param string $step_id  The ID of the onboarding step.
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 *
-	 * @throws ApiException On invalid step ID.
-	 */
-	private function is_onboarding_step_completed( string $step_id, string $location ): bool {
-		return self::ONBOARDING_STEP_STATUS_COMPLETED === $this->get_onboarding_step_status( $step_id, $location );
 	}
 
 	/**
