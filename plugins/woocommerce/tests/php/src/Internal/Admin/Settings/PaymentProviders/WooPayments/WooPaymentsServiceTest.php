@@ -483,7 +483,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					) : array(),
 					'sub_steps'        => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['sub_steps'] ?? array(),
 					'self_assessment'  => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['self_assessment'] ?? array(),
-					'has_test_account' => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['has_test_account'] ?? false,
+					'has_test_account' => $account_state['has_account'] && $account_state['test_account'],
 				),
 				'actions'        => array(
 					'start'              => array(
@@ -767,6 +767,408 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				$expected_wpcom_connection_state,
 				$default_account_state,
 			),
+			'stored statuses (failed) - no WPCOM connection, no account' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
+					// The failed stored status is ignored due to missing dependency (completed WPCOM connection).
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+					// The failed stored status is ignored due to missing dependency (completed WPCOM connection).
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED  => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				$default_wpcom_connection,
+				$expected_wpcom_connection_state,
+				$default_account_state,
+			),
+			'stored statuses (failed) - working WPCOM connection, no account' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED  => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => true,
+					)
+				),
+				array(
+					'has_working_connection' => true,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => true,
+					'is_connection_owner'    => false,
+				),
+				$default_account_state,
+			),
+			'stored statuses (failed) - working WPCOM connection, test account' => array(
+				array(
+					// The PMs step is force-completd on valid accounts.
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED  => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => true,
+					)
+				),
+				array(
+					'has_working_connection' => true,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => true,
+					'is_connection_owner'    => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'stored statuses (failed) - working WPCOM connection, live account' => array(
+				array(
+					// The PMs step is force-completd on valid accounts.
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED  => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => true,
+					)
+				),
+				array(
+					'has_working_connection' => true,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => true,
+					'is_connection_owner'    => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'stored statuses (blocked) - no WPCOM connection, no account' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
+					// The blocked stored status is ignored due to missing dependency (completed WPCOM connection).
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+					// The blocked stored status is ignored due to missing dependency (completed WPCOM connection).
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED  => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				$default_wpcom_connection,
+				$expected_wpcom_connection_state,
+				$default_account_state,
+			),
+			'stored statuses (blocked) - working WPCOM connection, no account' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED  => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => true,
+					)
+				),
+				array(
+					'has_working_connection' => true,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => true,
+					'is_connection_owner'    => false,
+				),
+				$default_account_state,
+			),
+			'stored statuses (blocked) - working WPCOM connection, test account' => array(
+				array(
+					// The PMs step is force-completd on valid accounts.
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED  => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => true,
+					)
+				),
+				array(
+					'has_working_connection' => true,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => true,
+					'is_connection_owner'    => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'stored statuses (blocked) - working WPCOM connection, live account' => array(
+				array(
+					// The PMs step is force-completd on valid accounts.
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED  => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => true,
+					)
+				),
+				array(
+					'has_working_connection' => true,
+					'is_store_connected'     => true,
+					'has_connected_owner'    => true,
+					'is_connection_owner'    => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
 			'stored statuses (completed) - no WPCOM connection, test account' => array(
 				array(
 					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
@@ -796,11 +1198,10 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 						),
 					),
 					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
-						'statuses'         => array(
+						'statuses' => array(
 							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
-						'has_test_account' => true,
 					),
 				),
 				$default_recommended_pms,
@@ -844,6 +1245,104 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
 						'statuses' => array(
 							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				$default_wpcom_connection,
+				$expected_wpcom_connection_state,
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'stored statuses (completed with failed) - no WPCOM connection, test account' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
+					// The completed and failed stored statuses are ignored due to unmet dependency (completed WPCOM connection).
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+					// The completed and failed stored statuses are ignored due to unmet dependency (completed WPCOM connection).
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+				),
+				$default_recommended_pms,
+				$expected_pms_state,
+				$default_wpcom_connection,
+				$expected_wpcom_connection_state,
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'stored statuses (completed with blocked) - no WPCOM connection, live account' => array(
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
+					// The completed and blocked stored statuses are ignored due to unmet dependency (completed WPCOM connection).
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+					// The completed stored and blocked statuses are ignored due to unmet dependency (completed WPCOM connection).
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				),
+				array(
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+						),
+					),
+					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
+						'statuses' => array(
+							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+							WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
 							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
 					),
@@ -1027,9 +1526,6 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 						),
 					),
-					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
-						'has_test_account' => true,
-					),
 				),
 				$default_recommended_pms,
 				$expected_pms_state,
@@ -1066,9 +1562,6 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 							WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 							WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 						),
-					),
-					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => array(
-						'has_test_account' => true,
 					),
 				),
 				$default_recommended_pms,
@@ -1481,7 +1974,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$current_time = 1234567890;
 
 		return array(
-			'payment_methods - clean slate'       => array(
+			'payment_methods - clean slate'                => array(
 				WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(),
@@ -1495,7 +1988,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => false,
 				),
 			),
-			'payment_methods - stored started'    => array(
+			'payment_methods - stored started'             => array(
 				WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
@@ -1511,11 +2004,43 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => false,
 				),
 			),
-			'payment_methods - stored completed'  => array(
+			'payment_methods - stored completed'           => array(
 				WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'payment_methods - stored failed'              => array(
+				WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'payment_methods - stored blocked'             => array(
+				WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
 				),
 				array(
 					'is_store_connected'  => false,
@@ -1544,7 +2069,41 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => false,
 				),
 			),
-			'wpcom_connection - clean slate'      => array(
+			'payment_methods - stored started and failed'  => array(
+				WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'payment_methods - stored started and blocked' => array(
+				WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - clean slate'               => array(
 				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(),
@@ -1602,11 +2161,59 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => false,
 				),
 			),
+			'wpcom_connection - stored failed with no connection data' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
 			'wpcom_connection - stored started with working connection' => array(
 				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - stored failed with working connection' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - stored blocked with working connection' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 10,
 				),
 				array(
 					'is_store_connected'  => true,
@@ -1683,6 +2290,40 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => false,
 				),
 			),
+			'wpcom_connection - stored started and failed with no connection data' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - stored started and failed with partial connection data' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
 			'wpcom_connection - stored started and completed with partial connection data' => array(
 				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
@@ -1693,6 +2334,78 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					'is_store_connected'  => true,
 					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - stored started, failed, and completed with partial connection data' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					// This is ignored.
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - stored started, blocked, and completed with partial connection data' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
+					// This is ignored.
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - stored started and failed with working connection' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'wpcom_connection - stored started and blocked with working connection' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
 				),
 				array(
 					'has_account'       => false,
@@ -1717,7 +2430,25 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => false,
 				),
 			),
-			'test_account - clean slate'          => array(
+			'wpcom_connection - stored started, failed, and completed with working connection' => array(
+				WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - clean slate'                   => array(
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(),
@@ -1865,6 +2596,202 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => true,
 				),
 			),
+			'test_account - stored failed with no account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored failed with no account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored failed with valid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored started and failed with valid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored failed with valid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored started and failed with valid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored blocked with no account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored blocked with no account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored blocked with valid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored started and blocked with valid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored blocked with valid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored started and blocked with valid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
 			'test_account - stored completed with no account, unmet requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
@@ -1897,10 +2824,78 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => false,
 				),
 			),
+			'test_account - stored failed and completed with no account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // We trust the stored status since we can be in progress with switch to live.
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored blocked and completed with no account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // We trust the stored status since we can be in progress with switch to live.
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
 			'test_account - stored completed with valid test account, unmet requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored failed and completed with valid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored blocked and completed with valid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 10,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
@@ -1929,10 +2924,62 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => true,
 				),
 			),
+			'test_account - stored failed and completed with valid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored blocked and completed with valid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
 			'test_account - stored completed with invalid test account, unmet requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored failed, blocked and completed with invalid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
@@ -1961,10 +3008,46 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => false,
 				),
 			),
+			'test_account - stored failed, blocked, and completed with invalid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
 			'test_account - stored completed with invalid live account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored failed, blocked, and completed with invalid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
@@ -1993,10 +3076,78 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => false,
 				),
 			),
+			'test_account - stored failed and completed with valid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored blocked and completed with valid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
 			'test_account - stored completed with valid live account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored failed and completed with valid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored blocked and completed with valid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 10,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
@@ -2026,11 +3177,47 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => false,
 				),
 			),
+			'test_account - stored started, failed, and completed with no account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
 			'test_account - stored started and completed with no account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // We trust the completed stored status since we can be in progress with switch to live.
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored started, failed, and completed with no account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, // We trust the completed stored status since we can be in progress with switch to live.
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
@@ -2060,11 +3247,47 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => true,
 				),
 			),
+			'test_account - stored started, failed, and completed with valid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
 			'test_account - stored started and completed with valid test account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored started, failed, and completed with valid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
@@ -2094,11 +3317,65 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => true,
 				),
 			),
+			'test_account - stored started, failed, and completed with invalid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
 			'test_account - stored started and completed with invalid test account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored started, failed, and completed with invalid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
+			'test_account - stored started, blocked, and completed with invalid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
@@ -2128,11 +3405,65 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => false,
 				),
 			),
+			'test_account - stored started, failed, and completed with invalid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
 			'test_account - stored started and completed with invalid live account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored started, failed, and completed with invalid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'test_account - stored started, blocked, and completed with invalid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
@@ -2162,6 +3493,24 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => false,
 				),
 			),
+			'test_account - stored started, failed, and completed with valid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
 			'test_account - stored started and completed with valid live account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
@@ -2179,7 +3528,25 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => false,
 				),
 			),
-			'business_verification - clean slate' => array(
+			'test_account - stored started, failed, and completed with valid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - clean slate'          => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(),
@@ -2448,6 +3815,198 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				array(
 					'has_account'       => true,
 					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored failed with invalid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored failed with invalid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored failed with valid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored failed with valid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored blocked with invalid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored blocked with invalid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored blocked with valid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored blocked with valid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored failed with no account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored failed with no account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored blocked with no account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored blocked with no account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
 					'test_account'      => false,
 				),
 			),
@@ -2769,6 +4328,366 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started, failed, and completed with no account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started, failed, and completed with no account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started, failed, and completed with valid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored started, failed, and completed with valid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored started, failed, and completed with invalid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored started, failed, and completed with invalid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored started, failed, and completed with invalid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started, failed, and completed with invalid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started, failed, and completed with valid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started, failed, and completed with valid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started, blocked, and completed with no account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started, blocked, and completed with no account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => false,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started, blocked, and completed with valid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored started, blocked, and completed with valid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored started, blocked, and completed with invalid test account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored started, blocked, and completed with invalid test account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => true,
+				),
+			),
+			'business_verification - stored started, blocked, and completed with invalid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started, blocked, and completed with invalid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started, blocked, and completed with valid live account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+				),
+			),
+			'business_verification - stored started, blocked, and completed with valid live account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
 				array(
