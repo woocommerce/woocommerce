@@ -79,10 +79,22 @@ export function MarketplaceContextProvider( props: {
 
 		const url = `${ MARKETPLACE_HOST }${ MARKETPLACE_IAM_SETTINGS_API_PATH }`;
 		fetch( url )
-			.then( ( response ) => response.json() )
+			.then( ( response ) => {
+				if ( ! response.ok ) {
+					throw new Error(
+						`Network response was not ok: ${ response.statusText }`
+					);
+				}
+				return response.json();
+			} )
 			.then( ( data ) => {
 				setIamSettings( data );
 				iamSettingsStorage.setWithExpiry( data );
+			} )
+			.catch( ( error ) => {
+				// eslint-disable-next-line no-console
+				console.error( 'Failed to fetch IAM settings:', error );
+				setIamSettings( {} ); // Fallback to an empty object
 			} );
 	}, [] );
 
