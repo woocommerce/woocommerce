@@ -96,10 +96,10 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 *
 	 * @param  WC_Data $data_object WC_Data instance.
 	 * @return array
-	 *@since  9.9.0
+	 * @since  9.9.0
 	 */
-	protected function get_formatted_item_data( $data_object) {
-		$data = parent::get_formatted_item_data( $data_object);
+	protected function get_formatted_item_data( $data_object ) {
+		$data = parent::get_formatted_item_data( $data_object );
 		if ( ! $this->cogs_is_enabled() ) {
 			return $data;
 		}
