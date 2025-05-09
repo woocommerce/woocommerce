@@ -101,6 +101,7 @@ export default function ProductItemTemplateEdit(
 				.getProducts( {
 					include: groupedProductIds,
 					per_page: groupedProductIds.length,
+					_fields: [ 'id' ],
 				} )
 				.then( ( fetchedProducts ) => {
 					setProducts( fetchedProducts );
