@@ -90,7 +90,7 @@ class WC_Admin_Importers {
 		$screen = get_current_screen();
 
 		if ( $screen && 'product_page_product_importer' === $screen->id ) {
-			$submenu_file = 'edit.php?post_type=product';
+			$submenu_file = 'edit.php?post_type=product'; // WPCS: override ok.
 		}
 	}
 
