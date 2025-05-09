@@ -118,8 +118,8 @@ class InitTest extends MockeryTestCase {
 			),
 			array(
 				'id'          => 'plugins',
-				'description' => 'Includes all the installed plugins and extensions.',
-				'label'       => 'Plugins and extensions',
+				'description' => 'Includes all the installed plugins.',
+				'label'       => 'Plugins',
 				'icon'        => 'plugins',
 				'items'       => $mock_plugins,
 			),
