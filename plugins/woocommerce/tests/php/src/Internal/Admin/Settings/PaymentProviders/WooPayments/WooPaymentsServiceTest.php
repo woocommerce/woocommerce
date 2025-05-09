@@ -3850,7 +3850,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws \Exception On POST request not mocked.
 	 */
-	public function test_onboarding_test_account_init_with_existing_test_account() {
+	public function test_onboarding_test_account_init_with_existing_test_account_throws() {
 		$location = 'US';
 
 		// Arrange the WPCOM connection.
@@ -3906,16 +3906,12 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			)
 		);
 
+		$this->expectException( ApiException::class );
+		$this->expectExceptionMessage( 'A test account is already set up.' );
+
 		// Act.
 		$result = $this->sut->onboarding_test_account_init( $location );
 
-		// Assert.
-		$this->assertEquals(
-			array(
-				'message' => __( 'A test account is already set up.', 'woocommerce' ),
-			),
-			$result
-		);
 		$this->assertCount( 0, $requests_made );
 	}
 
@@ -3925,7 +3921,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws \Exception On POST request not mocked.
 	 */
-	public function test_onboarding_test_account_init_with_existing_live_account() {
+	public function test_onboarding_test_account_init_with_existing_live_account_throws() {
 		$location = 'US';
 
 		// Arrange the WPCOM connection.
@@ -3981,16 +3977,12 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			)
 		);
 
+		$this->expectException( ApiException::class );
+		$this->expectExceptionMessage( 'An account is already set up. Reset the onboarding first.' );
+
 		// Act.
 		$result = $this->sut->onboarding_test_account_init( $location );
 
-		// Assert.
-		$this->assertEquals(
-			array(
-				'message' => __( 'An account is already set up. Reset the onboarding first.', 'woocommerce' ),
-			),
-			$result
-		);
 		$this->assertCount( 0, $requests_made );
 	}
 
