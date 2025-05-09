@@ -295,7 +295,7 @@ export const clearFieldErrorNotices = ( data: CheckoutPutData ) => {
 	}
 
 	// Check if additional fields were updated successfully
-	if ( data?.additional_fields ) {
+	if ( data?.additional_fields && isObject( data.additional_fields ) ) {
 		// Get the fields names that we should remove notices for.
 		// If a field is in the success response we can assume it has no errors.
 		const noticeFields = Object.keys( data.additional_fields );
