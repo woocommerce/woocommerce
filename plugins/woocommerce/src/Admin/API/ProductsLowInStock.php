@@ -251,6 +251,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	 * Check to see if store is using sitewide threshold only. Meaning that it does not have any custom
 	 * stock threshold for a product.
 	 *
+	 * @param int|null $low_stock_threshold Low stock threshold.
 	 * @return bool
 	 */
 	protected function is_using_sitewide_stock_threshold_only( $low_stock_threshold = null ) {
@@ -262,11 +263,12 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			  meta_key='_low_stock_amount'
 			  AND meta_value > ''
 		";
-		$args = array();
+		$args         = array();
 		if ( $low_stock_threshold ) {
-			$query_string .= " AND meta_value != %d";
-			$args[] = $low_stock_threshold;
+			$query_string .= ' AND meta_value != %d';
+			$args[]        = $low_stock_threshold;
 		}
+		// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
 		$count = $wpdb->get_var( $wpdb->prepare( $query_string, $args ) );
 		return 0 === (int) $count;
 	}
