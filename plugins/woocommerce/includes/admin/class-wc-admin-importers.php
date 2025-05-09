@@ -32,6 +32,7 @@ class WC_Admin_Importers {
 		add_action( 'admin_menu', array( $this, 'add_to_menus' ) );
 		add_action( 'admin_init', array( $this, 'register_importers' ) );
 		add_action( 'admin_head', array( $this, 'hide_from_menus' ) );
+		add_action( 'admin_head', array( $this, 'set_active_submenu_for_product_importer' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'wp_ajax_woocommerce_do_ajax_product_import', array( $this, 'do_ajax_product_import' ) );
 		add_action( 'in_admin_footer', array( $this, 'track_importer_exporter_view' ) );
@@ -77,6 +78,19 @@ class WC_Admin_Importers {
 					}
 				}
 			}
+		}
+	}
+
+	/**
+	 * Highlight Products > All Products submenu for Product Importer.
+	 */
+	public function set_active_submenu_for_product_importer() {
+		global $submenu_file;
+
+		$screen = get_current_screen();
+
+		if ( $screen && 'product_page_product_importer' === $screen->id ) {
+			$submenu_file = 'edit.php?post_type=product';
 		}
 	}
 
