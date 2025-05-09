@@ -94,19 +94,19 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 * Get formatted item data.
 	 * Invokes parents and then adds the proper Cost of Goods Sold information.
 	 *
-	 * @since  9.9.0
-	 * @param  WC_Data $object WC_Data instance.
+	 * @param  WC_Data $data_object WC_Data instance.
 	 * @return array
+	 *@since  9.9.0
 	 */
-	protected function get_formatted_item_data( $object ) {
-		$data = parent::get_formatted_item_data( $object );
+	protected function get_formatted_item_data( $data_object) {
+		$data = parent::get_formatted_item_data( $data_object);
 		if ( ! $this->cogs_is_enabled() ) {
 			return $data;
 		}
 
-		if ( $object instanceof WC_Abstract_Order && $object->has_cogs() ) {
+		if ( $data_object instanceof WC_Abstract_Order && $data_object->has_cogs() ) {
 			$data['cost_of_goods_sold'] = array(
-				'value' => $object->get_cogs_total_value(),
+				'value' => $data_object->get_cogs_total_value(),
 			);
 
 			foreach ( $data['line_items'] as $key => $line_item ) {
