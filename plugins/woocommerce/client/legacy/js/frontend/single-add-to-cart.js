@@ -123,7 +123,8 @@
 		}, 1000 );
 	}
 
-	async function addToCart( formData, button ) {
+	async function addToCart( formData, button, options = {} ) {
+		const isGrouped = options.isGrouped || false;
 		const formDataObject = new URLSearchParams();
 		formData.forEach( ( item ) => {
 			formDataObject.append( item.name, item.value );
@@ -157,8 +158,11 @@
 
 			handleButtonState( button, 'added' );
 
-			if ( data.error && data.product_url ) {
-				window.location = data.product_url;
+			if ( data.error ) {
+				window.location =
+					! isGrouped && data.product_url
+						? data.product_url
+						: window.location;
 				return;
 			}
 
@@ -212,7 +216,7 @@
 			}
 		} );
 
-		return addToCart( formData, button );
+		return addToCart( formData, button, { isGrouped: true } );
 	}
 
 	function handleRegularProduct( form, button ) {
@@ -234,7 +238,7 @@
 		handleButtonState( button, 'loading' );
 		triggerEvent( document.body, 'adding_to_cart', [ button, formData ] );
 
-		return addToCart( formData, button );
+		return addToCart( formData, button, { isGrouped: false } );
 	}
 
 	document.querySelectorAll( 'form.grouped_form' ).forEach( ( form ) => {
