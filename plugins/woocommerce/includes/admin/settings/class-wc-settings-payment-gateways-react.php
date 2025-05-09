@@ -202,12 +202,17 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 	}
 
 	/**
-	 * Don't show any section links.
+	 * Get all sections for the current page.
 	 *
-	 * @return array
+	 * Reactified section pages won't have any sections.
+	 * The rest of the settings pages will get the default/own section and those added via
+	 * the `woocommerce_get_sections_checkout` filter.
+	 *
+	 * @return array The sections for this settings page.
 	 */
 	public function get_sections() {
 		global $current_tab, $current_section;
+
 		// We only want to prevent sections on the main WooCommerce Payments settings page and Reactified sections.
 		if ( self::TAB_NAME === $current_tab && $this->should_render_react_section( $this->standardize_section_name( $current_section ) ) ) {
 			return array();
