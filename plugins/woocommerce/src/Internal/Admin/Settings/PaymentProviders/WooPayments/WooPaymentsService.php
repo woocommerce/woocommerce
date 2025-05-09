@@ -235,7 +235,7 @@ class WooPaymentsService {
 			case self::ONBOARDING_STEP_TEST_ACCOUNT:
 				// If there is a stored completed status, we respect that IF there is NO invalid test account.
 				// This is the case when the user first creates a test account and then switches to live.
-				// The step can only be auto-completed if the requirements are met.
+				// The step can only be completed if the requirements are met.
 				if ( $meets_requirements &&
 					$this->was_onboarding_step_marked_completed( $step_id, $location ) &&
 					! ( $this->has_test_account() && ! $this->has_valid_account() )
@@ -253,11 +253,14 @@ class WooPaymentsService {
 
 				break;
 		}
-		if ( $this->is_onboarding_step_blocked( $step_id, $location ) ) {
-			return self::ONBOARDING_STEP_STATUS_BLOCKED;
-		}
-		if ( $this->is_onboarding_step_failed( $step_id, $location ) ) {
-			return self::ONBOARDING_STEP_STATUS_FAILED;
+		// Blocked and failed statuses are only reported if the step's requirements are met.
+		if ( $meets_requirements ) {
+			if ( $this->is_onboarding_step_blocked( $step_id, $location ) ) {
+				return self::ONBOARDING_STEP_STATUS_BLOCKED;
+			}
+			if ( $this->is_onboarding_step_failed( $step_id, $location ) ) {
+				return self::ONBOARDING_STEP_STATUS_FAILED;
+			}
 		}
 		if ( $this->was_onboarding_step_marked_started( $step_id, $location ) ) {
 			return self::ONBOARDING_STEP_STATUS_STARTED;
@@ -286,6 +289,7 @@ class WooPaymentsService {
 	 *
 	 * This means that, at some point, the step was marked/recorded as started in the DB.
 	 * This doesn't mean that the current reported status is started. The step status might be different now.
+	 *
 	 * @see get_onboarding_step_status() for that.
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
@@ -349,6 +353,7 @@ class WooPaymentsService {
 	 *
 	 * This means that, at some point, the step was marked/recorded as completed in the DB.
 	 * This doesn't mean that the current reported status is completed. The step status might be different now.
+	 *
 	 * @see get_onboarding_step_status() for that.
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
