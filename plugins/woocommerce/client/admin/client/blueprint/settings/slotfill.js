@@ -178,7 +178,7 @@ const Blueprint = () => {
 					<h4>{ __( 'Import', 'woocommerce' ) }</h4>
 					<p>
 						{ __(
-							'Import a .json file. You can only import one Blueprint at a time.',
+							'Import a .json file. You can import only one Blueprint at a time.',
 							'woocommerce'
 						) }
 					</p>
