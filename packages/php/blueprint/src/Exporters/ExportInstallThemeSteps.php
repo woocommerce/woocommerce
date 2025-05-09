@@ -39,9 +39,12 @@ class ExportInstallThemeSteps implements StepExporter {
 	 */
 	public function export() {
 		$steps  = array();
-		$themes = array_filter( $this->wp_get_themes(), function( $theme ) {
-			return strpos( $theme->get( 'ThemeURI' ), 'wordpress.org' ) !== false;
-		} );
+		$themes = array_filter(
+			$this->wp_get_themes(),
+			function ( $theme ) {
+				return strpos( $theme->get( 'ThemeURI' ), 'wordpress.org' ) !== false;
+			}
+		);
 		if ( is_callable( $this->filter_callback ) ) {
 			$themes = call_user_func( $this->filter_callback, $themes );
 		}
