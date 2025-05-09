@@ -456,7 +456,7 @@ const TestAccountStep = () => {
 			{ ( status === 'error' || status === 'blocked' ) &&
 				errorMessage && (
 					<Notice
-						status="warning"
+						status={ status === 'blocked' ? 'error' : 'warning' }
 						isDismissible={ false }
 						actions={
 							// Only show actions if the step is not blocked
