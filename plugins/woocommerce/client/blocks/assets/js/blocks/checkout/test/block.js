@@ -4,7 +4,7 @@
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
-import { CART_STORE_KEY, checkoutStore } from '@woocommerce/block-data';
+import { cartStore, checkoutStore } from '@woocommerce/block-data';
 import { default as fetchMock } from 'jest-fetch-mock';
 import { allSettings } from '@woocommerce/settings';
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
@@ -161,7 +161,7 @@ describe( 'Testing Checkout', () => {
 	} );
 
 	it( 'Allows saving payment method if the customer is creating an account or has already logged in', async () => {
-	act( () => {
+		act( () => {
 			const PaymentMethodContent = () => <div>A payment method</div>;
 			registerPaymentMethod( {
 				name: 'test-payment-method',
