@@ -262,7 +262,7 @@ class RestApi {
 	 *
 	 * @param \WP_REST_Request $request The request object.
 	 *
-	 * @return array
+	 * @return \WP_REST_Response|array
 	 */
 	public function import_step( \WP_REST_Request $request ) {
 		$session_token = $request->get_header( 'X-Blueprint-Import-Session' );
@@ -311,11 +311,14 @@ class RestApi {
 		$step_importer   = new ImportStep( $step_definition );
 		$result          = $step_importer->import();
 
-		return array(
-			'success'      => $result->is_success(),
-			'messages'     => $result->get_messages(),
-			'sessionToken' => $session_token,
+		$response = new \WP_REST_Response(
+			array(
+				'success'  => $result->is_success(),
+				'messages' => $result->get_messages(),
+			)
 		);
+		$response->header( 'X-Blueprint-Import-Session', $session_token );
+		return $response;
 	}
 
 	/**

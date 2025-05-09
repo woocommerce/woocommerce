@@ -114,7 +114,7 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 				} );
 				continue; // Skip this step
 			}
-			const response = await apiFetch< BlueprintImportStepResponse >( {
+			const response = await apiFetch< Response >( {
 				path: 'wc-admin/blueprint/import-step',
 				method: 'POST',
 				headers: {
@@ -122,20 +122,21 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 					'X-Blueprint-Import-Session': sessionToken,
 				},
 				body: stepJson,
+				parse: false,
 			} );
 
-			if ( ! response.success ) {
+			const data: BlueprintImportStepResponse = await response.json();
+
+			if ( ! data.success ) {
 				errors.push( {
 					step: step.step,
-					messages: response.messages,
+					messages: data.messages,
 				} );
 			}
 
-			if (
-				response.sessionToken &&
-				response.sessionToken !== sessionToken
-			) {
-				sessionToken = response.sessionToken;
+			if ( ! sessionToken ) {
+				sessionToken =
+					response.headers.get( 'X-Blueprint-Import-Session' ) ?? '';
 			}
 		}
 
