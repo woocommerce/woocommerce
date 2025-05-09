@@ -71,13 +71,10 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject( $partial = false ) {
-			$store_name = $this->get_pos_store_name();
 			if ( $partial ) {
-				/* translators: %1$s: Store name, %2$s: Order number */
-				return sprintf( __( 'Your %1$s order #%2$s has been partially refunded', 'woocommerce' ), esc_html( $store_name ), '{order_number}' );
+				return __( 'Your {site_title} order #{order_number} has been partially refunded', 'woocommerce' );
 			} else {
-				/* translators: %1$s: Store name, %2$s: Order number */
-				return sprintf( __( 'Your %1$s order #%2$s has been refunded', 'woocommerce' ), esc_html( $store_name ), '{order_number}' );
+				return __( 'Your {site_title} order #{order_number} has been refunded', 'woocommerce' );
 			}
 		}
 
@@ -219,11 +216,6 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 					'partial_refund'     => $this->partial_refund,
 					'email_heading'      => $this->get_heading(),
 					'additional_content' => $this->get_additional_content(),
-					'pos_store_name'            => $this->get_pos_store_name(),
-					'pos_store_email'           => $this->get_pos_store_email(),
-					'pos_store_phone_number'    => $this->get_pos_store_phone_number(),
-					'pos_store_address'         => $this->get_pos_store_address(),
-					'pos_refund_returns_policy' => $this->get_pos_refund_returns_policy(),
 					'blogname'           => $this->get_blogname(),
 					'sent_to_admin'      => false,
 					'plain_text'         => false,
@@ -249,11 +241,6 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 					'partial_refund'     => $this->partial_refund,
 					'email_heading'      => $this->get_heading(),
 					'additional_content' => $this->get_additional_content(),
-					'pos_store_name'            => $this->get_pos_store_name(),
-					'pos_store_email'           => $this->get_pos_store_email(),
-					'pos_store_phone_number'    => $this->get_pos_store_phone_number(),
-					'pos_store_address'         => $this->get_pos_store_address(),
-					'pos_refund_returns_policy' => $this->get_pos_refund_returns_policy(),
 					'blogname'           => $this->get_blogname(),
 					'sent_to_admin'      => false,
 					'plain_text'         => true,
@@ -282,6 +269,18 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 					'email'          => $this,
 				)
 			);
+		}
+
+		/**
+		 * Default content to show below main email content.
+		 *
+		 * @since 3.7.0
+		 * @return string
+		 */
+		public function get_default_additional_content() {
+			return $this->email_improvements_enabled
+				? __( 'If you need any help with your order, please contact us at {store_email}.', 'woocommerce' )
+				: __( 'We hope to see you again soon.', 'woocommerce' );
 		}
 
 		/**
@@ -380,61 +379,6 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		public function add_unit_price( $item_id, $item, $order ) {
 			$unit_price = OrderPriceFormatter::get_formatted_item_subtotal( $order, $item, get_option( 'woocommerce_tax_display_cart' ) );
 			echo wp_kses_post( '<br /><small>' . $unit_price . '</small>' );
-		}
-
-		/**
-		 * Get the store name from POS settings.
-		 *
-		 * @return string
-		 */
-		private function get_pos_store_name() {
-			return $this->format_string(
-				get_option( 'woocommerce_pos_store_name' )
-			);
-		}
-
-		/**
-		 * Get the store email from POS settings.
-		 *
-		 * @return string
-		 */
-		private function get_pos_store_email() {
-			return $this->format_string(
-				get_option( 'woocommerce_pos_store_email' )
-			);
-		}
-
-		/**
-		 * Get the store phone number from POS settings.
-		 *
-		 * @return string
-		 */
-		private function get_pos_store_phone_number() {
-			return $this->format_string(
-				get_option( 'woocommerce_pos_store_phone' )
-			);
-		}
-
-		/**
-		 * Get the store address from POS settings.
-		 *
-		 * @return string
-		 */
-		private function get_pos_store_address() {
-			return $this->format_string(
-				get_option( 'woocommerce_pos_store_address' )
-			);
-		}
-
-		/**
-		 * Get the refund and returns policy from POS settings.
-		 *
-		 * @return string
-		 */
-		private function get_pos_refund_returns_policy() {
-			return $this->format_string(
-				get_option( 'woocommerce_pos_refund_returns_policy' )
-			);
 		}
 	}
 
