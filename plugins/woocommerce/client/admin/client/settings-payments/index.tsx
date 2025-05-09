@@ -210,6 +210,8 @@ export const SettingsPaymentsMethods = () => {
 	const onPaymentMethodsContinueClick = useCallback( () => {
 		// Record the event along with payment methods selected
 		recordEvent( 'wcpay_settings_payment_methods_continue', {
+			displayed_payment_methods:
+				Object.keys( paymentMethodsState ).join( ', ' ),
 			selected_payment_methods: Object.keys( paymentMethodsState )
 				.filter(
 					( paymentMethod ) => paymentMethodsState[ paymentMethod ]
@@ -220,6 +222,9 @@ export const SettingsPaymentsMethods = () => {
 					( paymentMethod ) => ! paymentMethodsState[ paymentMethod ]
 				)
 				.join( ', ' ),
+			store_country:
+				window.wcSettings?.admin?.woocommerce_payments_nox_profile
+					?.business_country_code ?? 'unknown',
 		} );
 
 		setIsCompleted( true );
