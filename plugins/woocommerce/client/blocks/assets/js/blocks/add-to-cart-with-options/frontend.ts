@@ -8,11 +8,14 @@ import type { CartVariationItem } from '@woocommerce/types';
 
 export type AvailableVariation = {
 	attributes: Record< string, string >;
+	variation_id: number;
 };
 
 export type Context = {
 	productId: number;
-	variation: CartVariationItem[];
+	productType: string;
+	selectedAttributes: CartVariationItem[];
+	variationId: number | null;
 	availableVariations: AvailableVariation[];
 	quantity: number;
 	tempQuantity: number;
@@ -66,6 +69,46 @@ const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
 	};
 };
 
+const getMatchedVariation = (
+	availableVariations: AvailableVariation[],
+	selectedAttributes: CartVariationItem[]
+) => {
+	if (
+		! Array.isArray( availableVariations ) ||
+		! Array.isArray( selectedAttributes ) ||
+		availableVariations.length === 0 ||
+		selectedAttributes.length === 0
+	) {
+		return null;
+	}
+	return availableVariations.find( ( availableVariation ) => {
+		return Object.entries( availableVariation.attributes ).every(
+			( [ attributeName, attributeValue ] ) => {
+				const attributeMatched = selectedAttributes.some(
+					( variationAttribute ) => {
+						const formattedVariationAttribute =
+							'attribute_' +
+							variationAttribute.attribute.toLowerCase();
+
+						const isSameAttribute =
+							formattedVariationAttribute === attributeName;
+						if ( ! isSameAttribute ) {
+							return false;
+						}
+
+						return (
+							variationAttribute.value === attributeValue ||
+							( variationAttribute.value &&
+								attributeValue === '' )
+						);
+					}
+				);
+
+				return attributeMatched;
+			}
+		);
+	} );
+};
 const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 	const event = new Event( 'change' );
 	inputElement.dispatchEvent( event );
@@ -74,35 +117,51 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 const addToCartWithOptionsStore = store(
 	'woocommerce/add-to-cart-with-options',
 	{
+		state: {
+			get isFormValid() {
+				const { productType, availableVariations, selectedAttributes } =
+					getContext< Context >();
+				if ( productType !== 'variable' ) {
+					return true;
+				}
+				const matchedVariation = getMatchedVariation(
+					availableVariations,
+					selectedAttributes
+				);
+				return !! matchedVariation;
+			},
+		},
 		actions: {
 			setQuantity( value: number ) {
 				const context = getContext< Context >();
 				context.quantity = value;
 			},
 			setAttribute( attribute: string, value: string ) {
-				const context = getContext< Context >();
-				const index = context.variation.findIndex(
-					( variation ) => variation.attribute === attribute
+				const { selectedAttributes } = getContext< Context >();
+				const index = selectedAttributes.findIndex(
+					( selectedAttribute ) =>
+						selectedAttribute.attribute === attribute
 				);
 				if ( index >= 0 ) {
-					context.variation[ index ] = {
+					selectedAttributes[ index ] = {
 						attribute,
 						value,
 					};
 				} else {
-					context.variation.push( {
+					selectedAttributes.push( {
 						attribute,
 						value,
 					} );
 				}
 			},
 			removeAttribute( attribute: string ) {
-				const context = getContext< Context >();
-				const index = context.variation.findIndex(
-					( variation ) => variation.attribute === attribute
+				const { selectedAttributes } = getContext< Context >();
+				const index = selectedAttributes.findIndex(
+					( selectedAttribute ) =>
+						selectedAttribute.attribute === attribute
 				);
 				if ( index >= 0 ) {
-					context.variation.splice( index, 1 );
+					selectedAttributes.splice( index, 1 );
 				}
 			},
 			increaseQuantity: (
@@ -152,7 +211,7 @@ const addToCartWithOptionsStore = store(
 					{ lock: universalLock }
 				);
 
-				const { productId, quantity, variation } =
+				const { productId, quantity, selectedAttributes } =
 					getContext< Context >();
 				const product = wooState.cart?.items.find(
 					( item ) => item.id === productId
@@ -162,7 +221,7 @@ const addToCartWithOptionsStore = store(
 				yield actions.addCartItem( {
 					id: productId,
 					quantity: currentQuantity + quantity,
-					variation,
+					variation: selectedAttributes,
 				} );
 			},
 		},
