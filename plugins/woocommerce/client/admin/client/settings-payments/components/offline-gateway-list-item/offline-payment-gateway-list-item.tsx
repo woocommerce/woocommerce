@@ -23,6 +23,7 @@ type OfflinePaymentGatewayListItemProps = {
 	 * The offline payment gateway to display in the list item.
 	 */
 	gateway: OfflinePaymentMethodProvider;
+	className?: string;
 };
 
 /**
@@ -37,7 +38,10 @@ export const OfflinePaymentGatewayListItem = ( {
 		<SortableItem
 			key={ gateway.id }
 			id={ gateway.id }
-			className="woocommerce-list__item woocommerce-list__item-enter-done"
+			className={
+				'woocommerce-list__item woocommerce-list__item-enter-done' +
+				( props.className ? ` ${ props.className }` : '' )
+			}
 			{ ...props }
 		>
 			<div className="woocommerce-list__item-inner">
@@ -115,10 +119,14 @@ export const OfflinePaymentGatewayList = ( {
 			items={ gateways }
 			setItems={ setGateways }
 		>
-			{ gateways.map( ( method ) => (
+			{ gateways.map( ( method, index ) => (
 				<OfflinePaymentGatewayListItem
 					gateway={ method }
 					key={ method.id }
+					className={
+						'woocommerce-list__item' +
+						( index === gateways.length - 1 ? ' is-last' : '' )
+					}
 				/>
 			) ) }
 		</SortableContainer>
