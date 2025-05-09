@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createElement } from '@wordpress/element';
 import { Popover } from '@wordpress/components';
 
@@ -163,9 +163,23 @@ export const WooPaymentsMethodsLogos = ( {
 } ) => {
 	const [ maxShownElements, setMaxShownElements ] = useState( maxElements );
 	const [ isPopoverVisible, setPopoverVisible ] = useState( false );
+	const buttonRef = useRef< HTMLDivElement >( null );
 
-	const togglePopover = () => {
-		setPopoverVisible( ! isPopoverVisible );
+	const handleClick = ( event: React.MouseEvent | React.KeyboardEvent ) => {
+		const clickedElement = event.target as HTMLElement;
+		const parentDiv = clickedElement.closest(
+			'.woocommerce-woopayments-payment-methods-logos-count'
+		);
+
+		if ( buttonRef.current && parentDiv !== buttonRef.current ) {
+			return;
+		}
+
+		setPopoverVisible( ( prev ) => ! prev );
+	};
+
+	const handleFocusOutside = () => {
+		setPopoverVisible( false );
 	};
 
 	// Reduce the total number of payment methods by one if the store is not eligible for WooPay.
@@ -229,10 +243,11 @@ export const WooPaymentsMethodsLogos = ( {
 					className="woocommerce-woopayments-payment-methods-logos-count"
 					role="button"
 					tabIndex={ 0 }
-					onClick={ togglePopover }
+					ref={ buttonRef }
+					onClick={ handleClick }
 					onKeyDown={ ( event ) => {
 						if ( event.key === 'Enter' || event.key === ' ' ) {
-							togglePopover();
+							handleClick( event );
 						}
 					} }
 				>
@@ -246,7 +261,7 @@ export const WooPaymentsMethodsLogos = ( {
 							focusOnMount={ true }
 							noArrow={ true }
 							shift={ true }
-							onClose={ () => setPopoverVisible( false ) }
+							onFocusOutside={ handleFocusOutside }
 						>
 							<div className="woocommerce-woopayments-payment-methods-logos">
 								{ hiddenPaymentMethods.map(

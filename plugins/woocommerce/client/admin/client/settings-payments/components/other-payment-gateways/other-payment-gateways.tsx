@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
+import React from 'react';
 import { Gridicon } from '@automattic/components';
 import { Button, Popover } from '@wordpress/components';
-import React, { useState, useMemo } from '@wordpress/element';
+import { useState, useMemo, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
@@ -70,11 +71,28 @@ export const OtherPaymentGateways = ( {
 	const [ isExpanded, setIsExpanded ] = useState( initialExpanded );
 	const [ categoryIdWithPopoverVisible, setCategoryIdWithPopoverVisible ] =
 		useState( '' );
+	const buttonRef = useRef< HTMLSpanElement >( null );
 
-	const togglePopover = ( categoryId: string ) => {
+	const handleClick = (
+		event: React.MouseEvent | React.KeyboardEvent,
+		categoryId: string
+	) => {
+		const clickedElement = event.target as HTMLElement;
+		const parentSpan = clickedElement.closest(
+			'.other-payment-gateways__content__title__icon-container'
+		);
+
+		if ( buttonRef.current && parentSpan !== buttonRef.current ) {
+			return;
+		}
+
 		setCategoryIdWithPopoverVisible(
 			categoryId === categoryIdWithPopoverVisible ? '' : categoryId
 		);
+	};
+
+	const handleFocusOutside = () => {
+		setCategoryIdWithPopoverVisible( '' );
 	};
 
 	// Group suggestions by category.
@@ -155,19 +173,20 @@ export const OtherPaymentGateways = ( {
 								</h3>
 								<span
 									className="other-payment-gateways__content__title__icon-container"
-									onClick={ () =>
-										togglePopover( category.id )
+									onClick={ ( event ) =>
+										handleClick( event, category.id )
 									}
 									onKeyDown={ ( event ) => {
 										if (
 											event.key === 'Enter' ||
 											event.key === ' '
 										) {
-											togglePopover( category.id );
+											handleClick( event, category.id );
 										}
 									} }
 									tabIndex={ 0 }
 									role="button"
+									ref={ buttonRef }
 								>
 									<Gridicon
 										icon="info-outline"
@@ -183,10 +202,8 @@ export const OtherPaymentGateways = ( {
 											focusOnMount={ true }
 											noArrow={ true }
 											shift={ true }
-											onClose={ () =>
-												setCategoryIdWithPopoverVisible(
-													''
-												)
+											onFocusOutside={
+												handleFocusOutside
 											}
 										>
 											<div className="components-popover__content-container">

@@ -11,7 +11,7 @@ import {
 	WC_ADMIN_NAMESPACE,
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
-import { useMemo, useState } from '@wordpress/element';
+import { useMemo, useState, useRef } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Popover } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
@@ -69,6 +69,7 @@ export const PaymentGateways = ( {
 	const { invalidateResolution: invalidateWooPaymentsOnboardingStore } =
 		useDispatch( woopaymentsOnboardingStore );
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
+	const buttonRef = useRef< HTMLDivElement >( null );
 	const storeCountryCode = (
 		window.wcSettings?.admin?.preloadSettings?.general
 			?.woocommerce_default_country || 'US'
@@ -96,8 +97,21 @@ export const PaymentGateways = ( {
 		}
 	);
 
-	const togglePopover = () => {
-		setIsPopoverVisible( ! isPopoverVisible );
+	const handleClick = ( event: React.MouseEvent | React.KeyboardEvent ) => {
+		const clickedElement = event.target as HTMLElement;
+		const parentDiv = clickedElement.closest(
+			'.settings-payment-gateways__header-select-container--indicator'
+		);
+
+		if ( buttonRef.current && parentDiv !== buttonRef.current ) {
+			return;
+		}
+
+		setIsPopoverVisible( ( prev ) => ! prev );
+	};
+
+	const handleFocusOutside = () => {
+		setIsPopoverVisible( false );
 	};
 
 	return (
@@ -156,13 +170,14 @@ export const PaymentGateways = ( {
 							className="settings-payment-gateways__header-select-container--indicator"
 							tabIndex={ 0 }
 							role="button"
-							onClick={ togglePopover }
+							ref={ buttonRef }
+							onClick={ handleClick }
 							onKeyDown={ ( event ) => {
 								if (
 									event.key === 'Enter' ||
 									event.key === ' '
 								) {
-									togglePopover();
+									handleClick( event );
 								}
 							} }
 						>
@@ -179,9 +194,7 @@ export const PaymentGateways = ( {
 									focusOnMount={ true }
 									noArrow={ true }
 									shift={ true }
-									onClose={ () =>
-										setIsPopoverVisible( false )
-									}
+									onFocusOutside={ handleFocusOutside }
 								>
 									<div className="components-popover__content-container">
 										<p>
