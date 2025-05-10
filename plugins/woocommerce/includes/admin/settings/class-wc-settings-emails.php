@@ -859,7 +859,10 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			);
 			?>
 			<hr class="wc-settings-email-color-palette-separator" />
-			<a href="<?php echo esc_url( add_query_arg( $disable_feature_args ) ); ?>" class="components-button is-tertiary">
+			<a href="<?php echo esc_url( add_query_arg( $disable_feature_args ) ); ?>"
+				class="components-button is-tertiary"
+				onclick="return confirm('<?php esc_attr_e( 'Would you like to go back to the legacy email templates?', 'woocommerce' ); ?>');"
+			>
 				<?php esc_html_e( 'Revert to legacy template', 'woocommerce' ); ?>
 			</a>
 			<?php
