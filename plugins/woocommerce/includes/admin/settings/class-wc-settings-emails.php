@@ -41,6 +41,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		add_action( 'woocommerce_admin_field_email_color_palette', array( $this, 'email_color_palette' ) );
 		add_action( 'woocommerce_admin_field_previewing_new_templates', array( $this, 'previewing_new_templates' ) );
 		add_action( 'woocommerce_email_settings_after', array( $this, 'email_preview_single' ) );
+		add_action( 'woocommerce_settings_saved', array( $this, 'enable_email_improvements_when_trying_new_templates' ) );
 		add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_email_header_image', array( $this, 'sanitize_email_header_image' ), 10, 3 );
 		add_filter( 'woocommerce_tracks_event_properties', array( $this, 'append_feature_email_improvements_to_tracks' ) );
 		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'track_email_improvements_feature_change' ), 10, 2 );
@@ -862,6 +863,20 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				add_option( 'woocommerce_email_improvements_first_disabled_at', $current_date );
 				update_option( 'woocommerce_email_improvements_last_disabled_at', $current_date );
 			}
+		}
+	}
+
+	/**
+	 * When the email settings are saved, if the user is trying out the new email templates, enable the email improvements feature.
+	 */
+	public function enable_email_improvements_when_trying_new_templates() {
+		if ( $this->is_trying_new_templates() ) {
+			$feature_controller = wc_get_container()->get( FeaturesController::class );
+			$feature_controller->change_feature_enable( 'email_improvements', true );
+
+			// Remove the try-new-templates parameter from the URL.
+			wp_safe_redirect( remove_query_arg( 'try-new-templates' ) );
+			exit;
 		}
 	}
 
