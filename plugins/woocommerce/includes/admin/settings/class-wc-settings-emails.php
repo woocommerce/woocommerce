@@ -39,6 +39,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		add_action( 'woocommerce_admin_field_email_image_url', array( $this, 'email_image_url' ) );
 		add_action( 'woocommerce_admin_field_email_font_family', array( $this, 'email_font_family' ) );
 		add_action( 'woocommerce_admin_field_email_color_palette', array( $this, 'email_color_palette' ) );
+		add_action( 'woocommerce_admin_field_previewing_new_templates', array( $this, 'previewing_new_templates' ) );
 		add_action( 'woocommerce_email_settings_after', array( $this, 'email_preview_single' ) );
 		add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_email_header_image', array( $this, 'sanitize_email_header_image' ), 10, 3 );
 		add_filter( 'woocommerce_tracks_event_properties', array( $this, 'append_feature_email_improvements_to_tracks' ) );
@@ -165,6 +166,12 @@ class WC_Settings_Emails extends WC_Settings_Page {
 						'type'  => 'title',
 						'desc'  => __( 'Customize your WooCommerce email template and preview it below.', 'woocommerce' ),
 						'id'    => 'email_template_options',
+					),
+
+					array(
+						'title' => __( 'Try new templates', 'woocommerce' ),
+						'type'  => 'previewing_new_templates',
+						'id'    => 'previewing_new_templates',
 					),
 
 					array(
@@ -790,6 +797,33 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			<?php endif; ?>
 		</div>
 		<table class="form-table">
+		<?php
+	}
+
+	/**
+	 * Show a notice to the user when they are trying out the new email templates.
+	 */
+	public function previewing_new_templates(): void {
+		if ( ! $this->is_trying_new_templates() ) {
+			return;
+		}
+		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
+			return;
+		}
+		?>
+		<div class="wc-settings-email-color-palette-header submit">
+			<div class="notice notice-info inline">
+				<p><?php esc_html_e( 'Previewing new template designs. You can customize and test your emails and switch to the new template whenever you are ready.', 'woocommerce' ); ?></p>
+				<p>
+					<button name="save" type="submit" class="components-button is-secondary" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>">
+						<?php esc_html_e( 'Switch to new template', 'woocommerce' ); ?>
+					</button>
+					<a href="?page=wc-settings&tab=email" class="components-button is-tertiary">
+						<?php esc_html_e( 'Keep legacy template', 'woocommerce' ); ?>
+					</a>
+				</p>
+			</div>
+		</div>
 		<?php
 	}
 
