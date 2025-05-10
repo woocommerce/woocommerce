@@ -40,6 +40,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		add_action( 'woocommerce_admin_field_email_font_family', array( $this, 'email_font_family' ) );
 		add_action( 'woocommerce_admin_field_email_color_palette', array( $this, 'email_color_palette' ) );
 		add_action( 'woocommerce_admin_field_previewing_new_templates', array( $this, 'previewing_new_templates' ) );
+		add_action( 'woocommerce_admin_field_email_improvements_button', array( $this, 'email_improvements_button' ) );
 		add_action( 'woocommerce_email_settings_after', array( $this, 'email_preview_single' ) );
 		add_action( 'woocommerce_settings_saved', array( $this, 'enable_email_improvements_when_trying_new_templates' ) );
 		add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_email_header_image', array( $this, 'sanitize_email_header_image' ), 10, 3 );
@@ -315,6 +316,12 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					array(
 						'type' => 'sectionend',
 						'id'   => 'email_template_options',
+					),
+
+					array(
+						'title' => __( 'Email improvements button', 'woocommerce' ),
+						'type'  => 'email_improvements_button',
+						'id'    => 'email_improvements_button',
 					),
 
 					array( 'type' => 'email_preview' ),
@@ -825,6 +832,40 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				</p>
 			</div>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Show a button to revert or enable email improvements.
+	 */
+	public function email_improvements_button(): void {
+		$is_feature_enabled   = FeaturesUtil::feature_is_enabled( 'email_improvements' );
+		$trying_new_templates = $this->is_trying_new_templates();
+		if ( ! $is_feature_enabled && ! $trying_new_templates ) {
+			?>
+			<hr class="wc-settings-email-color-palette-separator" />
+			<a href="?page=wc-settings&tab=email&try-new-templates" class="components-button is-tertiary">
+				<?php esc_html_e( 'Try new email templates!', 'woocommerce' ); ?>
+			</a>
+			<?php
+			return;
+		}
+
+		$has_feature_enabled_since_installation = 'yes' === get_option( 'woocommerce_email_improvements_default_enabled', 'no' );
+		if ( $is_feature_enabled && ! $has_feature_enabled_since_installation ) {
+			$disable_feature_args = array(
+				'email_improvements' => '0',
+				'_feature_nonce'     => wp_create_nonce( 'change_feature_enable' ),
+			);
+			?>
+			<hr class="wc-settings-email-color-palette-separator" />
+			<a href="<?php echo esc_url( add_query_arg( $disable_feature_args ) ); ?>" class="components-button is-tertiary">
+				<?php esc_html_e( 'Revert to legacy template', 'woocommerce' ); ?>
+			</a>
+			<?php
+			return;
+		}
+		?>
 		<?php
 	}
 
