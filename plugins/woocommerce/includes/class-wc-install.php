@@ -1092,7 +1092,8 @@ class WC_Install {
 	 * @since 9.8.0
 	 */
 	public static function enable_email_improvements_for_newly_installed() {
-		update_option( 'woocommerce_feature_email_improvements_enabled', 'yes' );
+		$feature_controller = wc_get_container()->get( FeaturesController::class );
+		$feature_controller->change_feature_enable( 'email_improvements', true );
 		update_option( 'woocommerce_email_improvements_default_enabled', 'yes' );
 		update_option( 'woocommerce_email_auto_sync_with_theme', 'yes' );
 		update_option( 'woocommerce_email_improvements_first_enabled_at', gmdate( 'Y-m-d H:i:s' ) );
