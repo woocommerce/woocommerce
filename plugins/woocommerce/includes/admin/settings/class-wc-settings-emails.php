@@ -841,13 +841,29 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	private function get_email_improvements_enabled() {
 		$email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
 		// Check for try-new-templates URL parameter, which is used to force the email improvements feature in preview mode.
-		if ( isset( $_GET['try-new-templates'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( $this->is_trying_new_templates() ) {
 			$email_improvements_enabled = true;
 			set_transient( EmailPreview::TRANSIENT_PREVIEW_EMAIL_IMPROVEMENTS, 'yes' );
 		} else {
 			delete_transient( EmailPreview::TRANSIENT_PREVIEW_EMAIL_IMPROVEMENTS );
 		}
 		return $email_improvements_enabled;
+	}
+
+	/**
+	 * Check if the user is trying out the new email templates.
+	 *
+	 * @return bool
+	 */
+	private function is_trying_new_templates() {
+		global $current_tab;
+		if ( 'email' !== $current_tab ) {
+			return false;
+		}
+		if ( isset( $_GET['section'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return false;
+		}
+		return isset( $_GET['try-new-templates'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 }
 
