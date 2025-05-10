@@ -1646,6 +1646,7 @@ class FeaturesController {
 	 */
 	public function display_email_improvements_feedback_notice( $feature_id, $is_enabled ): void {
 		if ( 'email_improvements' === $feature_id && ! $is_enabled ) {
+			set_transient( 'wc_settings_email_improvements_reverted', 'yes', 15 );
 			add_action(
 				'admin_notices',
 				function () {

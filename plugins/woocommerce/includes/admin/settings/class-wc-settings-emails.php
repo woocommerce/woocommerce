@@ -839,6 +839,11 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	 * Show a button to revert or enable email improvements.
 	 */
 	public function email_improvements_button(): void {
+		if ( 'yes' === get_transient( 'wc_settings_email_improvements_reverted' ) ) {
+			?>
+			<div id="wc_settings_features_email_feedback_slotfill"></div>
+			<?php
+		}
 		$is_feature_enabled   = FeaturesUtil::feature_is_enabled( 'email_improvements' );
 		$trying_new_templates = $this->is_trying_new_templates();
 		if ( ! $is_feature_enabled && ! $trying_new_templates ) {
