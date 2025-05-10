@@ -1494,9 +1494,9 @@ class WC_Tracker {
 	 * Check if any core emails are being overridden by a template override.
 	 *
 	 * @param array $template_overrides Template overrides.
-	 * @return bool True if core emails are being overridden, false otherwise.
+	 * @return array Array with count of core email overrides and the templates that are overriden.
 	 */
-	private static function get_core_email_overrides( $template_overrides ) {
+	private static function get_core_email_overrides( $template_overrides ): array {
 		$core_emails            = self::get_core_emails();
 		$core_email_templates   = array_map(
 			function ( $email ) {
