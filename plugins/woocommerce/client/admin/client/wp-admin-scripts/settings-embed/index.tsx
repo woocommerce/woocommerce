@@ -89,12 +89,6 @@ const registerSlotFills = () => {
 		registerBlueprintSlotfill();
 	}
 
-	if ( isFeatureEnabled( 'email_improvements' ) ) {
-		registerSettingsEmailPreviewFill( true );
-	} else {
-		registerSettingsEmailPreviewFill( false );
-	}
-
 	if ( isFeatureEnabled( 'block_email_editor' ) ) {
 		registerSettingsEmailListingFill();
 	}
@@ -102,6 +96,7 @@ const registerSlotFills = () => {
 	registerSettingsEmailColorPaletteFill();
 	registerSettingsEmailFeedbackFill();
 	registerSettingsEmailImageUrlFill();
+	registerSettingsEmailPreviewFill();
 };
 
 renderPaymentsSettings();

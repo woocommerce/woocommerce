@@ -58,10 +58,6 @@ $wc-setting-email-width: 634px;
 
 #wc_settings_email_preview_slotfill {
 	position: relative;
-
-	&.wc-settings-email-improvements-disabled {
-		padding-bottom: 160px;
-	}
 }
 
 .wc-settings-email-preview-container {
@@ -344,7 +340,9 @@ $wc-setting-email-width: 634px;
 }
 
 .wc-settings-email-color-palette-header {
+	margin: 0 !important;
 	max-width: $wc-setting-email-width;
+	padding: 0 !important;
 }
 
 .wc-settings-email-color-palette-title {
