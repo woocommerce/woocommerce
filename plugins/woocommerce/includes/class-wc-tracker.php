@@ -337,7 +337,7 @@ class WC_Tracker {
 	 *
 	 * @return array
 	 */
-	private static function get_all_plugins() {
+	public static function get_all_plugins() {
 		// Ensure get_plugins function is loaded.
 		if ( ! function_exists( 'get_plugins' ) ) {
 			include ABSPATH . '/wp-admin/includes/plugin.php';
@@ -1015,7 +1015,7 @@ class WC_Tracker {
 	 *
 	 * @return array
 	 */
-	private static function get_all_template_overrides() {
+	public static function get_all_template_overrides() {
 		$override_data = array();
 		/**
 		 * Filter the paths to scan for template overrides.
@@ -1496,7 +1496,7 @@ class WC_Tracker {
 	 * @param array $template_overrides Template overrides.
 	 * @return array Array with count of core email overrides and the templates that are overriden.
 	 */
-	private static function get_core_email_overrides( $template_overrides ): array {
+	public static function get_core_email_overrides( $template_overrides ): array {
 		$core_emails            = self::get_core_emails();
 		$core_email_templates   = array_map(
 			function ( $email ) {
