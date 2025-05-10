@@ -856,8 +856,8 @@ p.demo_store,
 	p.stars {
 		a {
 			position: relative;
-			height: 1em;
-			width: 1em;
+			width: 1.435em;
+			height: 1.435em;
 			text-indent: -999em;
 			display: inline-block;
 			text-decoration: none;
@@ -867,8 +867,7 @@ p.demo_store,
 				position: absolute;
 				top: 0;
 				left: 0;
-				width: 1em;
-				height: 1em;
+				font-size: 1.435em;
 				line-height: 1;
 				font-family: "WooCommerce";
 				content: "\e021";
