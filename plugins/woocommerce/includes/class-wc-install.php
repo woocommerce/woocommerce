@@ -8,7 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\Admin\EmailOverrides\EmailOverrides;
+use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Internal\DataStores\Orders\{ CustomOrdersTableController, DataSynchronizer, OrdersTableDataStore };
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -1119,11 +1119,11 @@ class WC_Install {
 		if ( $manually_disabled_before ) {
 			return;
 		}
-		if ( EmailOverrides::has_email_templates_overridden() ) {
+		if ( EmailImprovements::has_email_templates_overridden() ) {
 			return;
 		}
 
-		if ( EmailOverrides::is_email_customizer_enabled() ) {
+		if ( EmailImprovements::is_email_customizer_enabled() ) {
 			return;
 		}
 

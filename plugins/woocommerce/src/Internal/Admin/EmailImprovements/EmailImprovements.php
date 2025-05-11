@@ -7,7 +7,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Internal\Admin\EmailOverrides;
+namespace Automattic\WooCommerce\Internal\Admin\EmailImprovements;
 
 use WC_Tracker;
 
@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * EmailPreview Class.
  */
-class EmailOverrides {
+class EmailImprovements {
 
 	/**
 	 * Non-exhaustive list of email customizers.
