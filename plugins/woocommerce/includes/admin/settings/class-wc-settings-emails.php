@@ -818,6 +818,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
 			return;
 		}
+		update_option( 'woocommerce_admin_dismissed_try_email_improvements_modal', 'yes' );
 		?>
 		<div class="wc-settings-email-color-palette-header submit">
 			<div class="notice notice-info inline">
