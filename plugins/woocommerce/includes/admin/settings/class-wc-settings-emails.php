@@ -315,7 +315,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 					array(
 						'type' => 'sectionend',
-						'id'   => 'email_template_options',
+						'id'   => 'email_color_palette',
 					),
 
 					array(
