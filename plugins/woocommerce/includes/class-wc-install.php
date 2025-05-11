@@ -1102,31 +1102,15 @@ class WC_Install {
 	}
 
 	/**
-	 * Enable email improvements by default for existing shops if:
-	 * - The feature is not already enabled.
-	 * - The feature was not manually disabled.
-	 * - The email templates are not overridden.
-	 * - The email customizer is not enabled.
+	 * Enable email improvements by default for existing shops if conditions are met.
 	 *
 	 * @since 9.9.0
 	 */
 	public static function enable_email_improvements_for_existing_merchants() {
+		if ( ! EmailImprovements::should_enable_email_improvements_for_existing_stores() ) {
+			return;
+		}
 		$feature_controller = wc_get_container()->get( FeaturesController::class );
-		if ( $feature_controller->feature_is_enabled( 'email_improvements' ) ) {
-			return;
-		}
-		$manually_disabled_before = get_option( 'woocommerce_email_improvements_last_disabled_at' );
-		if ( $manually_disabled_before ) {
-			return;
-		}
-		if ( EmailImprovements::has_email_templates_overridden() ) {
-			return;
-		}
-
-		if ( EmailImprovements::is_email_customizer_enabled() ) {
-			return;
-		}
-
 		$feature_controller->change_feature_enable( 'email_improvements', true );
 		update_option( 'woocommerce_email_improvements_existing_store_enabled', 'yes' );
 		$first_enabled_at = get_option( 'woocommerce_email_improvements_first_enabled_at' );

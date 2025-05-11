@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\EmailImprovements;
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WC_Tracker;
 
 defined( 'ABSPATH' ) || exit;
@@ -62,5 +63,52 @@ class EmailImprovements {
 			array_keys( $active_plugins )
 		);
 		return count( array_intersect( self::EMAIL_CUSTOMIZERS, $plugin_slugs ) ) > 0;
+	}
+
+	/**
+	 * Check if email improvements are enabled for existing stores.
+	 *
+	 * @return bool True if email improvements are enabled for existing stores, false otherwise.
+	 */
+	public static function is_email_improvements_enabled_for_existing_stores() {
+		$is_feature_enabled             = FeaturesUtil::feature_is_enabled( 'email_improvements' );
+		$is_enabled_for_existing_stores = 'yes' === get_option( 'woocommerce_email_improvements_existing_store_enabled' );
+		return $is_feature_enabled && $is_enabled_for_existing_stores;
+	}
+
+	/**
+	 * Check if email improvements should be enabled for existing stores.
+	 * - The feature is not already enabled.
+	 * - The feature was not manually disabled.
+	 * - The email templates are not overridden.
+	 * - The email customizer is not enabled.
+	 *
+	 * @return bool True if email improvements should be enabled for existing stores, false otherwise.
+	 */
+	public static function should_enable_email_improvements_for_existing_stores() {
+		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
+			return false;
+		}
+		$manually_disabled_before = get_option( 'woocommerce_email_improvements_last_disabled_at' );
+		if ( $manually_disabled_before ) {
+			return false;
+		}
+		if ( self::has_email_templates_overridden() ) {
+			return false;
+		}
+
+		if ( self::is_email_customizer_enabled() ) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Check if we should notice the merchant about email improvements.
+	 *
+	 * @return bool True if we should notice the merchant about email improvements, false otherwise.
+	 */
+	public static function should_notify_merchant_about_email_improvements() {
+		return ! FeaturesUtil::feature_is_enabled( 'email_improvements' );
 	}
 }

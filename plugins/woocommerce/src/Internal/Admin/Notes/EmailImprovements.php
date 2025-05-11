@@ -14,8 +14,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\NoteTraits;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
-
+use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements as EmailImprovementsFeature;
 /**
  * EmailImprovements
  */
@@ -33,14 +32,11 @@ class EmailImprovements {
 	 * @return Note|void
 	 */
 	public static function get_note() {
-		$is_feature_enabled             = FeaturesUtil::feature_is_enabled( 'email_improvements' );
-		$is_enabled_for_existing_stores = 'yes' === get_option( 'woocommerce_email_improvements_existing_store_enabled' );
-
-		if ( $is_feature_enabled && $is_enabled_for_existing_stores ) {
+		if ( EmailImprovementsFeature::is_email_improvements_enabled_for_existing_stores() ) {
 			return self::get_email_improvements_enabled_note();
 		}
 
-		if ( ! $is_feature_enabled ) {
+		if ( EmailImprovementsFeature::should_notify_merchant_about_email_improvements() ) {
 			return self::get_try_email_improvements_note();
 		}
 	}
