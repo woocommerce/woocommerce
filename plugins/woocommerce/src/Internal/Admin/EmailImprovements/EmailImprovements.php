@@ -14,9 +14,8 @@ use WC_Tracker;
 
 defined( 'ABSPATH' ) || exit;
 
-
 /**
- * EmailPreview Class.
+ * EmailImprovements Class.
  */
 class EmailImprovements {
 
@@ -35,6 +34,13 @@ class EmailImprovements {
 		'wp-html-mail.php',
 		'yaymail.php',
 	);
+
+	/**
+	 * Hook into WordPress.
+	 */
+	public function __construct() {
+		add_action( 'admin_init', array( __CLASS__, 'add_email_improvements_modal_to_url' ) );
+	}
 
 	/**
 	 * Check if any core emails are being overridden by a template override.
@@ -110,5 +116,31 @@ class EmailImprovements {
 	 */
 	public static function should_notify_merchant_about_email_improvements() {
 		return ! FeaturesUtil::feature_is_enabled( 'email_improvements' );
+	}
+
+	/**
+	 * Add email improvements modal parameter to the URL when loading the WooCommerce Home page.
+	 *
+	 * @return void
+	 */
+	public static function add_email_improvements_modal_to_url() {
+		// Check if we're on the WooCommerce Home page.
+		if ( ! isset( $_GET['page'] ) || 'wc-admin' !== $_GET['page'] || isset( $_GET['path'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+
+		$dismissed_modal = get_option( 'woocommerce_admin_dismissed_email_improvements_modal' );
+		if ( 'yes' !== $dismissed_modal && self::is_email_improvements_enabled_for_existing_stores() ) {
+			update_option( 'woocommerce_admin_dismissed_email_improvements_modal', 'yes' );
+			wp_safe_redirect( add_query_arg( 'emailImprovementsModal', 'enabled' ) );
+			exit;
+		}
+
+		$dismissed_modal = get_option( 'woocommerce_admin_dismissed_try_email_improvements_modal' );
+		if ( 'yes' !== $dismissed_modal && self::should_notify_merchant_about_email_improvements() ) {
+			update_option( 'woocommerce_admin_dismissed_try_email_improvements_modal', 'yes' );
+			wp_safe_redirect( add_query_arg( 'emailImprovementsModal', 'try' ) );
+			exit;
+		}
 	}
 }
