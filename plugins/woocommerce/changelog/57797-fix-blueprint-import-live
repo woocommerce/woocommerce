@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Blueprint imports interrupted if the site state changed from Coming Soon to Live

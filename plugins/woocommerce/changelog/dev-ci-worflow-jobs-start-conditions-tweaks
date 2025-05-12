@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-CI: revisit CI-workflow jobs configuration (refine multiple heavy jobs start conditions).
