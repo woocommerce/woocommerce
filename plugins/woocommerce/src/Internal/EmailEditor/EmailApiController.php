@@ -92,6 +92,10 @@ class EmailApiController {
 		if ( array_key_exists( 'preheader', $data ) ) {
 			$post_option['preheader'] = $data['preheader'];
 		}
+
+		if ( array_key_exists( 'enabled', $data ) ) {
+			$post_option['enabled'] = $data['enabled'] ? 'yes' : 'no';
+		}
 		update_option( $option_name, $post_option );
 	}
 

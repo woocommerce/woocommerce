@@ -17,10 +17,8 @@ import { store as coreDataStore, useEntityProp } from '@wordpress/core-data';
  */
 import { EMAIL_STATUSES } from '../../settings-email/settings-email-listing-status';
 
-// todo test it properly I am not sure if it works, we need to update the status in EmailApiController.php
 // todo changelog
 // todo the UI is a bit wonky, check if we have design prepared for this
-// todo add a confirmation modal when disabling an email maybe
 
 export function EmailStatus() {
 	const [ woocommerce_email_data ] = useEntityProp(
