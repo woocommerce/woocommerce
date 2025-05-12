@@ -8,45 +8,45 @@ import { useShippingData } from '@woocommerce/base-context/hooks';
 /**
  * Internal dependencies
  */
-import { ShippingRatesControlPackage } from './index';
+import { ShippingRatesControlPackage } from '../index';
 import {
 	generateShippingPackage,
 	generateShippingRate,
-} from '../../../../mocks/shipping-package';
+} from '../../../../../mocks/shipping-package';
 
 jest.mock( '@woocommerce/base-context/hooks' );
 
-test( 'renders available shipping rates', async () => {
-	const packageData = generateShippingPackage( {
-		packageId: 0,
-		shippingRates: [
-			generateShippingRate( {
-				rateId: 'flat_rate:1',
-				name: 'Flat rate',
-				price: '1000',
-				instanceID: 1,
-			} ),
-			generateShippingRate( {
-				rateId: 'flat_rate:2',
-				name: 'Flat rate (premium)',
-				price: '1500',
-				instanceID: 5,
-			} ),
-		],
-	} );
+const testPackageData = generateShippingPackage( {
+	packageId: 0,
+	shippingRates: [
+		generateShippingRate( {
+			rateId: 'flat_rate:1',
+			name: 'Flat rate',
+			price: '1000',
+			instanceID: 1,
+		} ),
+		generateShippingRate( {
+			rateId: 'flat_rate:2',
+			name: 'Flat rate (premium)',
+			price: '1500',
+			instanceID: 5,
+		} ),
+	],
+} );
 
+test( 'renders available shipping rates', async () => {
 	( useShippingData as jest.Mock ).mockImplementation( () => {
 		return {
 			selectShippingRate: jest.fn(),
 			isSelectingRate: false,
-			shippingRates: packageData,
+			shippingRates: [ testPackageData ],
 		};
 	} );
 
 	render(
 		<ShippingRatesControlPackage
-			packageData={ packageData }
-			packageId={ packageData.package_id }
+			packageData={ testPackageData }
+			packageId={ testPackageData.package_id }
 			noResultsMessage={
 				<span>No shipping rates available at the moment</span>
 			}
@@ -69,36 +69,18 @@ test( 'renders available shipping rates', async () => {
 test( 'changes rate selection locally and informs API about it', async () => {
 	const selectShippingRate = jest.fn();
 
-	const packageData = generateShippingPackage( {
-		packageId: 0,
-		shippingRates: [
-			generateShippingRate( {
-				rateId: 'flat_rate:1',
-				name: 'Flat rate',
-				price: '1000',
-				instanceID: 1,
-			} ),
-			generateShippingRate( {
-				rateId: 'flat_rate:2',
-				name: 'Flat rate (premium)',
-				price: '1500',
-				instanceID: 5,
-			} ),
-		],
-	} );
-
 	( useShippingData as jest.Mock ).mockImplementation( () => {
 		return {
 			selectShippingRate,
 			isSelectingRate: false,
-			shippingRates: packageData,
+			shippingRates: [ testPackageData ],
 		};
 	} );
 
 	render(
 		<ShippingRatesControlPackage
-			packageData={ packageData }
-			packageId={ packageData.package_id }
+			packageData={ testPackageData }
+			packageId={ testPackageData.package_id }
 			noResultsMessage={
 				<span>No shipping rates available at the moment</span>
 			}
@@ -148,7 +130,7 @@ test( 'upstream rate selection updates are properly reflected in local state', a
 		return {
 			selectShippingRate: jest.fn(),
 			isSelectingRate: false,
-			shippingRates: packageData,
+			shippingRates: [ packageData ],
 		};
 	} );
 

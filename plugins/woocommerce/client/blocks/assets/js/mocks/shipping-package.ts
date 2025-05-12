@@ -11,12 +11,14 @@ export const generateShippingRate = ( {
 	name,
 	price,
 	instanceID,
+	methodID = name.toLowerCase().split( ' ' ).join( '_' ),
 	selected = false,
 }: {
 	rateId: string;
 	name: string;
 	price: string;
 	instanceID: number;
+	methodID?: string;
 	selected?: boolean;
 } ): CartShippingPackageShippingRate => {
 	return {
@@ -27,7 +29,7 @@ export const generateShippingRate = ( {
 		price,
 		taxes: '0',
 		instance_id: instanceID,
-		method_id: name.toLowerCase().split( ' ' ).join( '_' ),
+		method_id: methodID,
 		meta_data: [],
 		selected,
 		currency_code: 'USD',
