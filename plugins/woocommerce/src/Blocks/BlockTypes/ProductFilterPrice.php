@@ -180,7 +180,7 @@ final class ProductFilterPrice extends AbstractBlock {
 
 		if ( $min_range === $max_range || ! $max_range ) {
 			$wrapper_attributes['hidden'] = true;
-			$wrapper_attributes['class']  = 'hidden';
+			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 			return sprintf(
 				'<div %1$s>%2$s</div>',
 				get_block_wrapper_attributes( $wrapper_attributes ),
