@@ -372,10 +372,12 @@ class FilterData {
 	 *
 	 * @param string $key   Transient key.
 	 * @param mix    $value Value to set.
+	 *
+	 * @return bool True if the cache was set, false otherwise.
 	 */
 	private function set_cache( $key, $value ) {
 		if ( ! is_array( $value ) ) {
-			return;
+			return false;
 		}
 
 		$transient_version = WC_Cache_Helper::get_transient_version( CacheController::TRANSIENT_GROUP );
