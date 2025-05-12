@@ -4,8 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Popover } from '@wordpress/components';
 import { Link, Pill } from '@woocommerce/components';
-import { createInterpolateElement, useState } from '@wordpress/element';
-import { useDebounce } from '@wordpress/compose';
+import { createInterpolateElement, useRef, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -33,10 +32,24 @@ interface OfficialBadgeProps {
  */
 export const OfficialBadge = ( { variant }: OfficialBadgeProps ) => {
 	const [ isPopoverVisible, setPopoverVisible ] = useState( false );
+	const buttonRef = useRef< HTMLButtonElement >( null );
 
-	const hidePopoverDebounced = useDebounce( () => {
+	const handleClick = ( event: React.MouseEvent | React.KeyboardEvent ) => {
+		const clickedElement = event.target as HTMLElement;
+		const parentSpan = clickedElement.closest(
+			'.woocommerce-official-extension-badge__container'
+		);
+
+		if ( buttonRef.current && parentSpan !== buttonRef.current ) {
+			return;
+		}
+
+		setPopoverVisible( ( prev ) => ! prev );
+	};
+
+	const handleFocusOutside = () => {
 		setPopoverVisible( false );
-	}, 1000 );
+	};
 
 	return (
 		<Pill className={ `woocommerce-official-extension-badge` }>
@@ -44,12 +57,11 @@ export const OfficialBadge = ( { variant }: OfficialBadgeProps ) => {
 				className="woocommerce-official-extension-badge__container"
 				tabIndex={ 0 }
 				role="button"
-				onClick={ () => setPopoverVisible( ! isPopoverVisible ) }
-				onMouseEnter={ () => hidePopoverDebounced.cancel() }
-				onMouseLeave={ hidePopoverDebounced }
-				onKeyDown={ ( event ) => {
+				ref={ buttonRef }
+				onClick={ handleClick }
+				onKeyDown={ ( event: React.KeyboardEvent ) => {
 					if ( event.key === 'Enter' || event.key === ' ' ) {
-						setPopoverVisible( ! isPopoverVisible );
+						handleClick( event );
 					}
 				} }
 			>
@@ -72,7 +84,7 @@ export const OfficialBadge = ( { variant }: OfficialBadgeProps ) => {
 						focusOnMount={ true }
 						noArrow={ true }
 						shift={ true }
-						onClose={ hidePopoverDebounced }
+						onFocusOutside={ handleFocusOutside }
 					>
 						<div className="components-popover__content-container">
 							<p>
