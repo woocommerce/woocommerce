@@ -1229,7 +1229,7 @@ class QueryBuilder {
 			return $clauses;
 		}
 
-		$is_ascending_order = 'asc' === strtolower( $query_vars['order'] ?? 'asc' );
+		$is_ascending_order = 'asc' === strtolower( $query_vars['order'] ?? false );
 
 		$clauses['orderby'] = $is_ascending_order ?
 			'menu_order ASC, post_title ASC' :
