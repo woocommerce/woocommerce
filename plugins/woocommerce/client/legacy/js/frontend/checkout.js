@@ -848,13 +848,10 @@ jQuery( function( $ ) {
 		show_login_form: function() {
 			var $form = $( 'form.login, form.woocommerce-form--login' );
 			if ($form.is(':visible')) {
-				// If already visible, just scroll to it
-				$('html, body').animate(
-					{
-						scrollTop: $form.offset().top - 50, // adjust offset as needed
-					},
-					300
-				);
+				// If already visible, hide it.
+				$form.slideToggle({
+					duration: 400
+				});
 			} else {
 				// If not visible, show it and then scroll
 				$form.slideToggle({
