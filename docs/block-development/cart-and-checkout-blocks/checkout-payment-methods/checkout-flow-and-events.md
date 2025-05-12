@@ -67,7 +67,7 @@ The following boolean flags available related to status are:
 
 #### Special States
 
-The following are booleans exposed via the checkout provider that are independent from each other and checkout statuses but can be used in combination to react to various states in the checkout.
+The following booleans are exposed via the checkout provider. They are independent from each other and checkout statuses, but can be used in combination to react to various states in the checkout.
 
 ##### **isCalculating**
 
