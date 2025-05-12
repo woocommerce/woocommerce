@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Ensure local pickup cost is displayed on the order confirmation page when a fee is configured. Show pickup location name and merchant-provided details even if the pickup address is incomplete or missing.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Adds test coverage for WC_Email::format_string
-

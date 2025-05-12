@@ -1,5 +1,0 @@
-Significance: patch
-Type: update
-Comment: Don't trigger hooks in Add to Cart with Options block when simple product is not purchasable
-
-
