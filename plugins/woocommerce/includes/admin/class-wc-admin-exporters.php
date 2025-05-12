@@ -3,7 +3,7 @@
  * Init WooCommerce data exporters.
  *
  * @package     WooCommerce\Admin
- * @version     3.1.0
+ * @version     x.x.x
  */
 
 use Automattic\Jetpack\Constants;
@@ -35,6 +35,7 @@ class WC_Admin_Exporters {
 
 		add_action( 'admin_menu', array( $this, 'add_to_menus' ) );
 		add_action( 'admin_head', array( $this, 'hide_from_menus' ) );
+		add_action( 'admin_head', array( $this, 'menu_highlight_for_product_export' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'admin_init', array( $this, 'download_export_file' ) );
 		add_action( 'wp_ajax_woocommerce_do_ajax_product_export', array( $this, 'do_ajax_product_export' ) );
@@ -80,6 +81,19 @@ class WC_Admin_Exporters {
 					}
 				}
 			}
+		}
+	}
+
+	/**
+	 * Highlight Products > All Products submenu for Product Exporter.
+	 */
+	public function menu_highlight_for_product_export() {
+		global $submenu_file;
+
+		$screen = get_current_screen();
+
+		if ( $screen && 'product_page_product_exporter' === $screen->id ) {
+			$submenu_file = 'edit.php?post_type=product'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 	}
 
