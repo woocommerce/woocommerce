@@ -194,6 +194,25 @@ async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
 	}
 }
 
+async function fetchProductPreview(
+	productId: number
+): Promise< { data: { html: string; css: string } } > {
+	let url = `/wc/v1/marketplace/product-preview?product_id=${ productId }`;
+
+	if ( LOCALE.userLocale ) {
+		url = `${ url }&locale=${ LOCALE.userLocale }`;
+	}
+
+	try {
+		const response = await apiFetchWithCache( {
+			path: url.toString(),
+		} );
+		return response as { data: { html: string; css: string } };
+	} catch ( error ) {
+		return { data: { html: '', css: '' } };
+	}
+}
+
 function getProductType( tab: string ): ProductType {
 	switch ( tab ) {
 		case 'themes':
@@ -543,6 +562,7 @@ export {
 	fetchCategories,
 	fetchDiscoverPageData,
 	fetchSearchResults,
+	fetchProductPreview,
 	getProductType,
 	fetchSubscriptions,
 	refreshSubscriptions,

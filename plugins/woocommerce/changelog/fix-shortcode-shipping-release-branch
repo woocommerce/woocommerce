@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent shipping rates remaining hidden when checkout fields filtered to be optional are not filled on classic checkout.

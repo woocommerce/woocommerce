@@ -60,6 +60,7 @@
 		margin-right: 4px;
 		// WooCommerce core styles: https://github.com/woocommerce/woocommerce/blob/c9f62609155825cd817976c7611b9b0415e90f2f/plugins/woocommerce/client/legacy/css/woocommerce.scss/#L111-L112
 		.qty {
+			box-sizing: content-box;
 			width: 3.631em;
 			text-align: center;
 		}
@@ -138,10 +139,6 @@ div.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
 		.wc-block-components-quantity-selector {
 			width: 107px;
 		}
-	}
-	.input-text.qty.text {
-		// WooCommerce core styles: https://github.com/woocommerce/woocommerce/blob/c9f62609155825cd817976c7611b9b0415e90f2f/plugins/woocommerce/client/legacy/css/woocommerce.scss/#L111-L112
-		width: 3.631em;
 	}
 }
 
