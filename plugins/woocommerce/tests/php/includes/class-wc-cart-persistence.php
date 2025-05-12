@@ -165,7 +165,11 @@ class WC_Cart_Persistence_Test extends \WC_Unit_Test_Case {
 			1
 		);
 
-		// Simulate update event.
+		/**
+		 * Simulate update event.
+		 *
+		 * @since 1.0.0
+		 */
 		$cart_updated = apply_filters( 'woocommerce_update_cart_action_cart_updated', false );
 		if ( $cart_updated ) {
 			WC()->cart->calculate_totals();
@@ -179,5 +183,65 @@ class WC_Cart_Persistence_Test extends \WC_Unit_Test_Case {
 			}
 		}
 		$this->assertTrue( $found, 'Custom cart data was not persisted to the saved cart.' );
+	}
+
+	/**
+	 * Saved cart is isolated between users.
+	 */
+	public function test_saved_cart_is_isolated_between_users() {
+		$user1    = wp_create_user( 'persist_user1', 'password', 'persist_user1@example.com' );
+		$user2    = wp_create_user( 'persist_user2', 'password', 'persist_user2@example.com' );
+		$product1 = WC_Helper_Product::create_simple_product();
+		$product2 = WC_Helper_Product::create_simple_product();
+
+		// User 1 adds product1 to cart and saves.
+		wp_set_current_user( $user1 );
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product1->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		$saved1 = SavedCart::get_saved_cart( $user1 );
+		$this->assertNotEmpty( $saved1 );
+
+		// User 2 adds product2 to cart and saves.
+		wp_set_current_user( $user2 );
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product2->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		$saved2 = SavedCart::get_saved_cart( $user2 );
+		$this->assertNotEmpty( $saved2 );
+
+		// Check isolation.
+		$this->assertNotEquals( $saved1, $saved2 );
+		$this->assertEquals( $product1->get_id(), reset( $saved1 )['product_id'] );
+		$this->assertEquals( $product2->get_id(), reset( $saved2 )['product_id'] );
+
+		// Cleanup.
+		SavedCart::delete_saved_cart( $user1 );
+		SavedCart::delete_saved_cart( $user2 );
+		$product1->delete( true );
+		$product2->delete( true );
+	}
+
+	/**
+	 * Test that empty_cart(true) clears the saved cart, and empty_cart(false) does not.
+	 */
+	public function test_empty_cart_clears_or_preserves_saved_cart() {
+		wp_set_current_user( $this->user_id );
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $this->product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		// Confirm saved cart exists.
+		$this->assertNotEmpty( SavedCart::get_saved_cart( $this->user_id ) );
+
+		// empty_cart(false) should NOT clear saved cart.
+		WC()->cart->empty_cart( false );
+		$this->assertNotEmpty( SavedCart::get_saved_cart( $this->user_id ) );
+
+		// Add again, then empty_cart(true) should clear saved cart.
+		WC()->cart->add_to_cart( $this->product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		$this->assertNotEmpty( SavedCart::get_saved_cart( $this->user_id ) );
+		WC()->cart->empty_cart( true );
+		$this->assertEmpty( SavedCart::get_saved_cart( $this->user_id ) );
 	}
 }
