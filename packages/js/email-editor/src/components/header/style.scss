@@ -2,3 +2,11 @@
 .components-dropdown-menu__menu .editor-preview-dropdown__button-external {
 	padding-right: 6px;
 }
+
+// Hide the "Preferences" menu item in the more menu.
+// We don't have any preferences to set in the email editor.
+.more-menu-dropdown__content {
+	.components-menu-group:last-child {
+		display: none;
+	}
+}
