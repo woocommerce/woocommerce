@@ -131,7 +131,7 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_pos_email_includes_additional_rows_in_order_totals_while_regular_email_does_not() {
 		// Initialize WC_Emails to set up actions and filters for order totals where the POS email is different.
-		WC_Emails::instance();
+		$emails = new WC_Emails();
 
 		// Given an order with POS-specific data.
 		$order = OrderHelper::create_order();
