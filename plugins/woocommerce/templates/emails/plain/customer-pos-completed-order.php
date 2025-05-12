@@ -77,7 +77,9 @@ if ( $additional_content ) {
  * Show store information - store details are set in the Point of Sale settings.
  */
 if ( ! empty( $pos_store_email ) || ! empty( $pos_store_phone_number ) || ! empty( $pos_store_address ) ) {
-	echo "\n" . esc_html( $pos_store_name ) . "\n\n";
+	if ( ! empty( $pos_store_name ) ) {
+		echo "\n" . esc_html( $pos_store_name ) . "\n\n";
+	}
 	if ( ! empty( $pos_store_email ) ) {
 		echo esc_html( $pos_store_email ) . "\n";
 	}

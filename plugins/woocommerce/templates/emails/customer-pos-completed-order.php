@@ -88,7 +88,9 @@ if ( $additional_content ) {
  */
 if ( ! empty( $pos_store_email ) || ! empty( $pos_store_phone_number ) || ! empty( $pos_store_address ) ) {
 	echo '<div class="pos-store-information">';
-	echo '<h2>' . esc_html( $pos_store_name ) . '</h2>';
+	if ( ! empty( $pos_store_name ) ) {
+		echo '<h2>' . esc_html( $pos_store_name ) . '</h2>';
+	}
 	if ( ! empty( $pos_store_email ) ) {
 		echo '<p>' . esc_html( $pos_store_email ) . '</p>';
 	}

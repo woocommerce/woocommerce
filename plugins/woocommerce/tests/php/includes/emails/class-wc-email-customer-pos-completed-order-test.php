@@ -208,4 +208,62 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 		// Then POS store name is included in the subject.
 		$this->assertStringContainsString( $store_name, $subject );
 	}
+
+	/**
+	 * @testdox POS email content includes store details when options are set.
+	 */
+	public function test_email_content_includes_store_details_when_options_are_set() {
+		// Given POS store details are set.
+		update_option( 'woocommerce_pos_store_name', 'POS Store' );
+		update_option( 'woocommerce_pos_store_email', 'pos@example.com' );
+		update_option( 'woocommerce_pos_store_phone', '1234567890' );
+		update_option( 'woocommerce_pos_store_address', '134 Main St, Anytown, USA' );
+
+		// When getting content from both email types.
+		$email              = new WC_Email_Customer_POS_Completed_Order();
+		$email->object      = OrderHelper::create_order();
+		$html_content       = $email->get_content_html();
+		$plain_text_content = $email->get_content_plain();
+
+		// Then POS email should include store details.
+		$this->assertStringContainsString( '<h2>POS Store</h2>', $html_content );
+		$this->assertStringContainsString( 'pos@example.com', $html_content );
+		$this->assertStringContainsString( '1234567890', $html_content );
+		$this->assertStringContainsString( '134 Main St, Anytown, USA', $html_content );
+
+		// And plain text email should include store details.
+		$this->assertStringContainsString( 'POS Store', $plain_text_content );
+		$this->assertStringContainsString( 'pos@example.com', $plain_text_content );
+		$this->assertStringContainsString( '1234567890', $plain_text_content );
+		$this->assertStringContainsString( '134 Main St, Anytown, USA', $plain_text_content );
+	}
+
+	/**
+	 * @testdox POS email content includes store details when options are set.
+	 */
+	public function test_email_content_does_not_include_store_details_when_options_are_not_set() {
+		// Given POS store details are not set.
+		delete_option( 'woocommerce_pos_store_name' );
+		delete_option( 'woocommerce_pos_store_email' );
+		delete_option( 'woocommerce_pos_store_phone' );
+		delete_option( 'woocommerce_pos_store_address' );
+
+		// When getting content from both email types.
+		$email              = new WC_Email_Customer_POS_Completed_Order();
+		$email->object      = OrderHelper::create_order();
+		$html_content       = $email->get_content_html();
+		$plain_text_content = $email->get_content_plain();
+
+		// Then POS email should not include store details.
+		$this->assertStringNotContainsString( 'POS Store', $html_content );
+		$this->assertStringNotContainsString( 'pos@example.com', $html_content );
+		$this->assertStringNotContainsString( '1234567890', $html_content );
+		$this->assertStringNotContainsString( '134 Main St, Anytown, USA', $html_content );
+
+		// And plain text email should not include store details.
+		$this->assertStringNotContainsString( 'POS Store', $plain_text_content );
+		$this->assertStringNotContainsString( 'pos@example.com', $plain_text_content );
+		$this->assertStringNotContainsString( '1234567890', $plain_text_content );
+		$this->assertStringNotContainsString( '134 Main St, Anytown, USA', $plain_text_content );
+	}
 }
