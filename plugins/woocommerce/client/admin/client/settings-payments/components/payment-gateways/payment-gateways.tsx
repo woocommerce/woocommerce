@@ -146,6 +146,14 @@ export const PaymentGateways = ( {
 
 								// Update UI.
 								setBusinessRegistrationCountry( value );
+								// Update the window value - this will be updated by the backend on refresh but this keeps state persistent.
+								if (
+									window.wcSettings.admin
+										.woocommerce_payments_nox_profile
+								) {
+									window.wcSettings.admin.woocommerce_payments_nox_profile.business_country_code =
+										value;
+								}
 								invalidateMainStore( 'getPaymentProviders', [
 									value,
 								] );

@@ -12,19 +12,22 @@ import { createRoot } from '@wordpress/element';
  */
 import { isFeatureEnabled } from '~/utils/features';
 import {
+	SettingsPaymentsBacsWrapper,
+	SettingsPaymentsChequeWrapper,
+	SettingsPaymentsCodWrapper,
 	SettingsPaymentsMainWrapper,
 	SettingsPaymentsOfflineWrapper,
 	SettingsPaymentsWooCommercePaymentsWrapper,
-} from '../../settings-payments';
+} from '~/settings-payments';
 
-import { possiblyRenderSettingsSlots } from '../../settings/settings-slots';
-import { registerTaxSettingsConflictErrorFill } from '../../settings/conflict-error-slotfill';
-import { registerPaymentsSettingsBannerFill } from '../../payments/payments-settings-banner-slotfill';
-import { registerSiteVisibilitySlotFill } from '../../launch-your-store';
-import { registerBlueprintSlotfill } from '../../blueprint';
-import { registerSettingsEmailColorPaletteFill } from '../../settings-email/settings-email-color-palette-slotfill';
-import { registerSettingsEmailImageUrlFill } from '../../settings-email/settings-email-image-url-slotfill';
-import { registerSettingsEmailPreviewFill } from '../../settings-email/settings-email-preview-slotfill';
+import { possiblyRenderSettingsSlots } from '~/settings/settings-slots';
+import { registerTaxSettingsConflictErrorFill } from '~/settings/conflict-error-slotfill';
+import { registerPaymentsSettingsBannerFill } from '~/payments/payments-settings-banner-slotfill';
+import { registerSiteVisibilitySlotFill } from '~/launch-your-store';
+import { registerBlueprintSlotfill } from '~/blueprint';
+import { registerSettingsEmailColorPaletteFill } from '~/settings-email/settings-email-color-palette-slotfill';
+import { registerSettingsEmailImageUrlFill } from '~/settings-email/settings-email-image-url-slotfill';
+import { registerSettingsEmailPreviewFill } from '~/settings-email/settings-email-preview-slotfill';
 import { registerSettingsEmailFeedbackFill } from '~/settings-email/settings-email-feedback-slotfill';
 import { registerSettingsEmailListingFill } from '../../settings-email/settings-email-listing-slotfill';
 
@@ -34,42 +37,42 @@ const renderPaymentsSettings = () => {
 		return;
 	}
 
-	const paymentsMainRoot = document.getElementById(
-		'experimental_wc_settings_payments_main'
-	);
-	const paymentsOfflineRoot = document.getElementById(
-		'experimental_wc_settings_payments_offline'
-	);
-	const paymentsWooCommercePaymentsRoot = document.getElementById(
-		'experimental_wc_settings_payments_woocommerce_payments'
-	);
+	const pages = [
+		{
+			id: 'experimental_wc_settings_payments_main',
+			component: <SettingsPaymentsMainWrapper />,
+		},
+		{
+			id: 'experimental_wc_settings_payments_offline',
+			component: <SettingsPaymentsOfflineWrapper />,
+		},
+		{
+			id: 'experimental_wc_settings_payments_bacs',
+			component: <SettingsPaymentsBacsWrapper />,
+		},
+		{
+			id: 'experimental_wc_settings_payments_cheque',
+			component: <SettingsPaymentsChequeWrapper />,
+		},
+		{
+			id: 'experimental_wc_settings_payments_cod',
+			component: <SettingsPaymentsCodWrapper />,
+		},
+		{
+			id: 'experimental_wc_settings_payments_woocommerce_payments',
+			component: <SettingsPaymentsWooCommercePaymentsWrapper />,
+		},
+	];
 
-	if ( paymentsMainRoot ) {
-		createRoot(
-			paymentsMainRoot.insertBefore(
-				document.createElement( 'div' ),
-				null
-			)
-		).render( <SettingsPaymentsMainWrapper /> );
-	}
-
-	if ( paymentsOfflineRoot ) {
-		createRoot(
-			paymentsOfflineRoot.insertBefore(
-				document.createElement( 'div' ),
-				null
-			)
-		).render( <SettingsPaymentsOfflineWrapper /> );
-	}
-
-	if ( paymentsWooCommercePaymentsRoot ) {
-		createRoot(
-			paymentsWooCommercePaymentsRoot.insertBefore(
-				document.createElement( 'div' ),
-				null
-			)
-		).render( <SettingsPaymentsWooCommercePaymentsWrapper /> );
-	}
+	// Render each payment component.
+	pages.forEach( ( { id, component } ) => {
+		const root = document.getElementById( id );
+		if ( root ) {
+			createRoot(
+				root.insertBefore( document.createElement( 'div' ), null )
+			).render( component );
+		}
+	} );
 };
 
 const registerSlotFills = () => {

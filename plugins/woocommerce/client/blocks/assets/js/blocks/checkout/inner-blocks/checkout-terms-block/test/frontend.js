@@ -8,6 +8,7 @@ import {
 	act,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
@@ -30,10 +31,13 @@ jest.mock( '../../../../../data/validation/actions', () => {
 describe( 'FrontendBlock', () => {
 	it( 'Renders a checkbox if the checkbox prop is true', async () => {
 		const { container } = render(
-			<FrontendBlock
-				checkbox={ true }
-				text={ 'I agree to the terms and conditions' }
-			/>
+			<SlotFillProvider>
+				<FrontendBlock
+					checkbox={ true }
+					text={ 'I agree to the terms and conditions' }
+					showSeparator={ false }
+				/>
+			</SlotFillProvider>
 		);
 
 		const checkbox = await findByLabelText(
@@ -46,10 +50,13 @@ describe( 'FrontendBlock', () => {
 
 	it( 'Does not render a checkbox if the checkbox prop is false', async () => {
 		const { container } = render(
-			<FrontendBlock
-				checkbox={ false }
-				text={ 'I agree to the terms and conditions' }
-			/>
+			<SlotFillProvider>
+				<FrontendBlock
+					checkbox={ false }
+					text={ 'I agree to the terms and conditions' }
+					showSeparator={ false }
+				/>
+			</SlotFillProvider>
 		);
 
 		const checkbox = queryByLabelText(
@@ -63,10 +70,13 @@ describe( 'FrontendBlock', () => {
 	it( 'Clears any validation errors when the checkbox is checked', async () => {
 		const user = userEvent.setup();
 		const { container } = render(
-			<FrontendBlock
-				checkbox={ true }
-				text={ 'I agree to the terms and conditions' }
-			/>
+			<SlotFillProvider>
+				<FrontendBlock
+					checkbox={ true }
+					text={ 'I agree to the terms and conditions' }
+					showSeparator={ false }
+				/>
+			</SlotFillProvider>
 		);
 		const checkbox = await findByLabelText(
 			container,

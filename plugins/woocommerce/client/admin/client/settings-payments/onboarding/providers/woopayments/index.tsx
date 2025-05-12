@@ -51,7 +51,14 @@ export default function WooPaymentsModal( {
 				explicitDismiss: false,
 			} );
 		}
-	}, [ location, isOpen, setIsOpen, isJetpackReturn, hasWPComConnection ] );
+	}, [
+		location,
+		isOpen,
+		setIsOpen,
+		isJetpackReturn,
+		hasWPComConnection,
+		createErrorNotice,
+	] );
 
 	// If the modal is open, without an onboarding route, add an onboarding route
 	React.useEffect( () => {
