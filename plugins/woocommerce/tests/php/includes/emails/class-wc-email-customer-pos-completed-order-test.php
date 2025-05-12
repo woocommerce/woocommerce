@@ -160,5 +160,19 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'cash_payment_change_due_amount', $regular_content );
 		$this->assertStringNotContainsString( 'payment_auth_code', $regular_content );
 		$this->assertStringNotContainsString( 'date_paid', $regular_content );
+
+		// When generating plain text emails.
+		$pos_plain_text     = $pos_email->get_content_plain();
+		$regular_plain_text = $regular_email->get_content_plain();
+
+		// Then POS email should include additional rows.
+		$this->assertStringContainsString( __( 'Change due:', 'woocommerce' ), $pos_plain_text );
+		$this->assertStringContainsString( __( 'Auth code:', 'woocommerce' ), $pos_plain_text );
+		$this->assertStringContainsString( __( 'Time of payment:', 'woocommerce' ), $pos_plain_text );
+
+		// And regular email should not include these rows.
+		$this->assertStringNotContainsString( __( 'Change due:', 'woocommerce' ), $regular_plain_text );
+		$this->assertStringNotContainsString( __( 'Auth code:', 'woocommerce' ), $regular_plain_text );
+		$this->assertStringNotContainsString( __( 'Time of payment:', 'woocommerce' ), $regular_plain_text );
 	}
 }
