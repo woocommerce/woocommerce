@@ -23,7 +23,7 @@ import {
 /**
  * Internal dependencies
  */
-import { useCommentQueryArgs, useCommentTree } from './hooks';
+import { useCommentQueryArgs, useCommentList } from './hooks';
 
 interface Comment {
 	commentId: number;
@@ -64,23 +64,11 @@ const getCommentsPlaceholder = ( {
 	perPage,
 	pageComments,
 }: ReviewSettings ) => {
-	const placeholderComments = [ { commentId: -1 } ];
+	const numberOfComments = pageComments ? Math.min( perPage, 3 ) : 3;
 
-	// Add a second comment unless the break comments setting is active and set to less than 2
-	if ( ! pageComments || perPage >= 2 ) {
-		placeholderComments.push( {
-			commentId: -2,
-		} );
-	}
-
-	// Add a third comment unless the break comments setting is active and set to less than 3
-	if ( ! pageComments || perPage >= 3 ) {
-		placeholderComments.push( {
-			commentId: -3,
-		} );
-	}
-
-	return placeholderComments;
+	return Array.from( { length: numberOfComments }, ( _, i ) => ( {
+		commentId: -( i + 1 ),
+	} ) );
 };
 
 const ReviewTemplatePreview = ( {
@@ -191,7 +179,7 @@ export default function ReviewTemplateEdit( {
 		[ clientId, commentQuery ]
 	);
 
-	let commentTree = useCommentTree(
+	let commentTree = useCommentList(
 		// Reverse the order of top comments if needed.
 		commentOrder === 'desc' && topLevelComments
 			? [

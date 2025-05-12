@@ -152,16 +152,15 @@ export const useCommentQueryArgs = ( { postId }: { postId: number } ) => {
 };
 
 /**
- * Generate a tree structure of comment IDs from a list of comment entities.
- * For product reviews, this is a flat list as reviews don't support threading.
+ * Generate a list of IDs from a list of review entities.
  */
-export const useCommentTree = (
+export const useCommentList = (
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	topLevelComments: Array< {
 		id: number;
 	} >
 ) => {
-	const commentTree = useMemo(
+	const commentList = useMemo(
 		() =>
 			topLevelComments?.map( ( { id }: { id: number } ) => {
 				return {
@@ -171,5 +170,5 @@ export const useCommentTree = (
 		[ topLevelComments ]
 	);
 
-	return commentTree;
+	return commentList;
 };
