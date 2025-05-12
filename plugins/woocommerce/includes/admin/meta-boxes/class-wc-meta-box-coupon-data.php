@@ -283,6 +283,7 @@ class WC_Meta_Box_Coupon_Data {
 			<?php do_action( 'woocommerce_coupon_options_usage_restriction', $coupon->get_id(), $coupon ); ?>
 			</div>
 			<div id="usage_limit_coupon_data" class="panel woocommerce_options_panel">
+				<div class="options_group">
 					<?php
 					// Usage limit per coupons.
 					woocommerce_wp_text_input(
