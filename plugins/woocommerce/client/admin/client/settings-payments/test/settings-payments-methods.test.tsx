@@ -47,8 +47,10 @@ describe( 'SettingsPaymentsMethods', () => {
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'wcpay_settings_payment_methods_continue',
 			{
+				displayed_payment_methods: expect.any( String ),
 				selected_payment_methods: expect.any( String ),
 				deselected_payment_methods: expect.any( String ),
+				store_country: expect.any( String ),
 			}
 		);
 	} );

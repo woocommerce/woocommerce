@@ -14,8 +14,6 @@ import metadata from './block.json';
 import AddToCartOptionsEdit from './edit';
 import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from './utils';
 import '../../base/components/quantity-selector/style.scss';
-import './editor.scss';
-import './style.scss';
 import type { Attributes } from './types';
 
 if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {

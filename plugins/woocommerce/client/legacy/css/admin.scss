@@ -2247,6 +2247,25 @@ ul.wc_coupon_list_block {
 	}
 }
 
+#woocommerce-order-items .woocommerce_order_items_wrapper, .wc-order-preview-table-wrapper {
+	small.refunded {
+		display: block;
+		color: red;
+		white-space: nowrap;
+		margin-top: 0.5em;
+
+		&::before {
+			@include icon_dashicons("\f171");
+			position: relative;
+			top: auto;
+			left: auto;
+			margin: -1px 4px 0 0;
+			vertical-align: middle;
+			line-height: 1em;
+		}
+	}
+}
+
 #woocommerce-order-items {
 	.inside {
 		display: block !important;
@@ -2674,23 +2693,6 @@ ul.wc_coupon_list_block {
 
 				&:hover .delete-order-tax {
 					visibility: visible;
-				}
-			}
-
-			small.refunded {
-				display: block;
-				color: $red;
-				white-space: nowrap;
-				margin-top: 0.5em;
-
-				&::before {
-					@include icon_dashicons("\f171");
-					position: relative;
-					top: auto;
-					left: auto;
-					margin: -1px 4px 0 0;
-					vertical-align: middle;
-					line-height: 1em;
 				}
 			}
 		}
@@ -5105,6 +5107,9 @@ img.help_tip {
 
 	table.form-table {
 		margin: 0;
+		&.wc-shipping-zone-settings {
+			margin-top: 8px;
+		}
 		position: relative;
 		table-layout: fixed;
 
@@ -5866,7 +5871,7 @@ img.help_tip {
 }
 
 /**
- * Settings / Advanced / Features
+ * Settings / Advanced / Features / Emails
  */
 .woocommerce_page_wc-settings {
 	.wc-settings-row-woocommerce_custom_orders_table_enabled td.forminp {
@@ -5875,6 +5880,9 @@ img.help_tip {
 
 	.wc-settings-row-woocommerce_custom_orders_table_data_sync_enabled td.forminp {
 		padding-top: 0;
+	}
+	#email_notification_settings-description {
+		margin-top: 16px;
 	}
 }
 
@@ -8256,7 +8264,7 @@ table.bar_chart {
 .woocommerce-exporter-wrapper,
 .woocommerce-importer-wrapper {
 	text-align: center;
-	max-width: 700px;
+	max-width: 710px;
 	margin: 40px auto;
 
 	.error {

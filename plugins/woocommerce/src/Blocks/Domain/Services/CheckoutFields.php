@@ -8,7 +8,6 @@ use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\{
 	DocumentObject, Validation
 };
-use Automattic\WooCommerce\Admin\Features\Features;
 use WC_Customer;
 use WC_Data;
 use WC_Order;
@@ -457,24 +456,21 @@ class CheckoutFields {
 			// Don't return here unlike the other fields because this is not an issue that will prevent registration.
 		}
 
-		// If experimental blocks are enabled, we need to validate schema based rules.
-		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			$rule_fields = [ 'required', 'hidden', 'validation' ];
-			$allow_bool  = [ 'required', 'hidden' ];
+		$rule_fields = [ 'required', 'hidden', 'validation' ];
+		$allow_bool  = [ 'required', 'hidden' ];
 
-			foreach ( $rule_fields as $rule_field ) {
-				if ( ! empty( $options[ $rule_field ] ) ) {
-					if ( in_array( $rule_field, $allow_bool, true ) && is_bool( $options[ $rule_field ] ) ) {
-						continue;
-					}
+		foreach ( $rule_fields as $rule_field ) {
+			if ( ! empty( $options[ $rule_field ] ) ) {
+				if ( in_array( $rule_field, $allow_bool, true ) && is_bool( $options[ $rule_field ] ) ) {
+					continue;
+				}
 
-					$valid = Validation::is_valid_schema( $options[ $rule_field ] );
+				$valid = Validation::is_valid_schema( $options[ $rule_field ] );
 
-					if ( is_wp_error( $valid ) ) {
-						$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], $rule_field . ': ' . $valid->get_error_message() );
-						_doing_it_wrong( 'woocommerce_register_additional_checkout_field', esc_html( $message ), '8.6.0' );
-						return false;
-					}
+				if ( is_wp_error( $valid ) ) {
+					$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], $rule_field . ': ' . $valid->get_error_message() );
+					_doing_it_wrong( 'woocommerce_register_additional_checkout_field', esc_html( $message ), '8.6.0' );
+					return false;
 				}
 			}
 		}
@@ -934,7 +930,7 @@ class CheckoutFields {
 			trigger_error(
 				sprintf(
 					'Field validation for %s encountered an error. %s',
-					esc_html( $field_key ),
+					esc_html( $field['id'] ),
 					esc_html( $e->getMessage() )
 				),
 				E_USER_WARNING

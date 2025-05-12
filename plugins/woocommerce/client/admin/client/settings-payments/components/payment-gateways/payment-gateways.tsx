@@ -7,6 +7,7 @@ import clsx from 'clsx';
 import {
 	PaymentProvider,
 	paymentSettingsStore,
+	woopaymentsOnboardingStore,
 	WC_ADMIN_NAMESPACE,
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
@@ -43,6 +44,7 @@ interface PaymentGatewaysProps {
 	isFetching: boolean;
 	businessRegistrationCountry: string | null;
 	setBusinessRegistrationCountry: ( country: string ) => void;
+	setIsOnboardingModalOpen: ( isOpen: boolean ) => void;
 }
 
 /**
@@ -61,8 +63,12 @@ export const PaymentGateways = ( {
 	isFetching,
 	businessRegistrationCountry,
 	setBusinessRegistrationCountry,
+	setIsOnboardingModalOpen,
 }: PaymentGatewaysProps ) => {
-	const { invalidateResolution } = useDispatch( paymentSettingsStore );
+	const { invalidateResolution: invalidateMainStore } =
+		useDispatch( paymentSettingsStore );
+	const { invalidateResolution: invalidateWooPaymentsOnboardingStore } =
+		useDispatch( woopaymentsOnboardingStore );
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
 	const storeCountryCode = (
 		window.wcSettings?.admin?.preloadSettings?.general
@@ -140,9 +146,21 @@ export const PaymentGateways = ( {
 
 								// Update UI.
 								setBusinessRegistrationCountry( value );
-								invalidateResolution( 'getPaymentProviders', [
+								// Update the window value - this will be updated by the backend on refresh but this keeps state persistent.
+								if (
+									window.wcSettings.admin
+										.woocommerce_payments_nox_profile
+								) {
+									window.wcSettings.admin.woocommerce_payments_nox_profile.business_country_code =
+										value;
+								}
+								invalidateMainStore( 'getPaymentProviders', [
 									value,
 								] );
+								invalidateWooPaymentsOnboardingStore(
+									'getOnboardingData',
+									[]
+								);
 							} );
 						} }
 					/>
@@ -218,6 +236,7 @@ export const PaymentGateways = ( {
 					acceptIncentive={ acceptIncentive }
 					shouldHighlightIncentive={ shouldHighlightIncentive }
 					updateOrdering={ updateOrdering }
+					setIsOnboardingModalOpen={ setIsOnboardingModalOpen }
 				/>
 			) }
 		</div>

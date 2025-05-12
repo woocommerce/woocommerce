@@ -129,16 +129,90 @@ class ShippingController {
 		$details         = $shipping_method->get_meta( 'pickup_details' );
 		$location        = $shipping_method->get_meta( 'pickup_location' );
 		$address         = $shipping_method->get_meta( 'pickup_address' );
+		$cost            = $shipping_method->get_total();
 
-		if ( ! $address ) {
+		$lines = array();
+
+		if ( $location ) {
+			$lines[] = sprintf(
+				// Translators: %s location name.
+				__( 'Collection from <strong>%s</strong>:', 'woocommerce' ),
+				$location
+			);
+		}
+
+		if ( $address ) {
+			$lines[] = nl2br( esc_html( str_replace( ',', ', ', $address ) ) );
+		}
+
+		if ( $details ) {
+			$lines[] = wp_kses_post( $details );
+		}
+
+		if ( $cost > 0 ) {
+			$tax_display = get_option( 'woocommerce_tax_display_cart' );
+			$tax         = $shipping_method->get_total_tax();
+
+			// Format cost with tax handling.
+			if ( 'excl' === $tax_display ) {
+				// Show pickup cost excluding tax.
+				$formatted_cost = wc_price( $cost, array( 'currency' => $order->get_currency() ) );
+				if ( (float) $tax > 0 && $order->get_prices_include_tax() ) {
+					/**
+					 * Hook to add tax label to pickup cost.
+					 *
+					 * @since 6.0.0
+					 * @param string $tax_label Tax label.
+					 * @param \WC_Order $order Order object.
+					 * @param string $tax_display Tax display.
+					 * @return string
+					 */
+					$formatted_cost .= apply_filters(
+						'woocommerce_order_shipping_to_display_tax_label',
+						'&nbsp;<small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>',
+						$order,
+						$tax_display
+					);
+				}
+			} else {
+				// Show pickup cost including tax.
+				$formatted_cost = wc_price(
+					(float) $cost + (float) $tax,
+					array( 'currency' => $order->get_currency() )
+				);
+				if ( (float) $tax > 0 && ! $order->get_prices_include_tax() ) {
+					/**
+					 * Hook to add tax label to pickup cost.
+					 *
+					 * @since 6.0.0
+					 * @param string $tax_label Tax label.
+					 * @param \WC_Order $order Order object.
+					 * @param string $tax_display Tax display.
+					 * @return string
+					 */
+					$formatted_cost .= apply_filters(
+						'woocommerce_order_shipping_to_display_tax_label',
+						'&nbsp;<small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>',
+						$order,
+						$tax_display
+					);
+				}
+			}
+
+			$lines[] = '<br>' . sprintf(
+				// Translators: %s is the formatted price.
+				__( 'Pickup cost: %s', 'woocommerce' ),
+				$formatted_cost
+			);
+		}
+
+		// If nothing is available, return original.
+		if ( empty( $lines ) ) {
 			return $return_value;
 		}
 
-		return sprintf(
-			// Translators: %s location name.
-			__( 'Collection from <strong>%s</strong>:', 'woocommerce' ),
-			$location
-		) . '<br/><address>' . str_replace( ',', ',<br/>', $address ) . '</address><br/>' . $details;
+		// Join all the lines with a <br> separator.
+		return implode( '<br>', $lines );
 	}
 
 	/**
@@ -461,6 +535,10 @@ class ShippingController {
 	 * @return array
 	 */
 	public function remove_shipping_if_no_address( $packages ) {
+		if ( 'shortcode' === WC()->cart->cart_context ) {
+			return $packages;
+		}
+
 		$shipping_cost_requires_address = wc_string_to_bool( get_option( 'woocommerce_shipping_cost_requires_address', 'no' ) );
 
 		// Return early here for a small performance gain if we don't need to hide shipping costs until an address is entered.

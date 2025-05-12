@@ -23,6 +23,7 @@ import {
 import { Subscription } from '../components/my-subscriptions/types';
 import {
 	Product,
+	ProductCardType,
 	ProductType,
 	SearchAPIJSONType,
 	SearchAPIProductType,
@@ -39,6 +40,7 @@ interface ProductGroup {
 	url_text: string | null;
 	url_type: 'wc-admin' | 'wp-admin' | 'external' | undefined; // types defined by Link component
 	itemType: ProductType;
+	cardType: ProductCardType;
 }
 
 // The fetchCache stores the results of GET fetch/apiFetch calls from the Marketplace, in RAM, for performance
@@ -189,6 +191,25 @@ async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
 		} ) ) as Promise< ProductGroup[] >;
 	} catch ( error ) {
 		return [];
+	}
+}
+
+async function fetchProductPreview(
+	productId: number
+): Promise< { data: { html: string; css: string } } > {
+	let url = `/wc/v1/marketplace/product-preview?product_id=${ productId }`;
+
+	if ( LOCALE.userLocale ) {
+		url = `${ url }&locale=${ LOCALE.userLocale }`;
+	}
+
+	try {
+		const response = await apiFetchWithCache( {
+			path: url.toString(),
+		} );
+		return response as { data: { html: string; css: string } };
+	} catch ( error ) {
+		return { data: { html: '', css: '' } };
 	}
 }
 
@@ -541,6 +562,7 @@ export {
 	fetchCategories,
 	fetchDiscoverPageData,
 	fetchSearchResults,
+	fetchProductPreview,
 	getProductType,
 	fetchSubscriptions,
 	refreshSubscriptions,

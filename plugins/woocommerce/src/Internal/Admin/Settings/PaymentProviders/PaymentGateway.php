@@ -19,6 +19,21 @@ defined( 'ABSPATH' ) || exit;
  */
 class PaymentGateway {
 
+	// This is the default onboarding type for all gateways.
+	// It means that the payment extension will handle the onboarding.
+	const ONBOARDING_TYPE_EXTERNAL = 'external';
+
+	// This is the onboarding type for gateways that have a WooCommerce-tailored onboarding flow.
+	// This might mean just having the payment methods select step in the WooCommerce settings.
+	const ONBOARDING_TYPE_NATIVE = 'native';
+
+	// This is the onboarding type for gateways that have a WooCommerce in-context onboarding flow.
+	const ONBOARDING_TYPE_NATIVE_IN_CONTEXT = 'native_in_context';
+
+	// Payment method categories to inform the UI about grouping or the emphasis of payment methods.
+	const PAYMENT_METHOD_CATEGORY_PRIMARY   = 'primary';
+	const PAYMENT_METHOD_CATEGORY_SECONDARY = 'secondary';
+
 	/**
 	 * Extract the payment gateway provider details from the object.
 	 *
@@ -56,6 +71,7 @@ class PaymentGateway {
 				),
 			),
 			'onboarding'  => array(
+				'type'                        => self::ONBOARDING_TYPE_EXTERNAL,
 				'state'                       => array(
 					'started'   => $this->is_onboarding_started( $gateway ),
 					'completed' => $this->is_onboarding_completed( $gateway ),
@@ -349,7 +365,7 @@ class PaymentGateway {
 			return $payment_gateway->get_settings_url();
 		}
 
-		return admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $payment_gateway->id ) );
+		return Utils::wc_payments_settings_url( null, array( 'section' => strtolower( $payment_gateway->id ) ) );
 	}
 
 	/**
@@ -545,11 +561,14 @@ class PaymentGateway {
 		$standard_details = array(
 			'id'          => sanitize_key( $recommended_pm['id'] ),
 			'_order'      => $order,
-			'enabled'     => (bool) ( $recommended_pm['enabled'] ?? true ), // Default to enabled if not explicit.
-			'required'    => (bool) ( $recommended_pm['required'] ?? false ), // Default to not required if not explicit.
+			// Default to enabled if not explicit.
+			'enabled'     => filter_var( $recommended_pm['enabled'] ?? true, FILTER_VALIDATE_BOOLEAN ),
+			// Default to not required if not explicit.
+			'required'    => filter_var( $recommended_pm['required'] ?? false, FILTER_VALIDATE_BOOLEAN ),
 			'title'       => sanitize_text_field( $recommended_pm['title'] ),
 			'description' => '',
 			'icon'        => '',
+			'category'    => self::PAYMENT_METHOD_CATEGORY_PRIMARY, // Default to primary.
 		);
 
 		// If the payment method has a description, sanitize it before use.
@@ -576,6 +595,12 @@ class PaymentGateway {
 		// If the payment method has an icon, try to use it.
 		if ( ! empty( $recommended_pm['icon'] ) && wc_is_valid_url( $recommended_pm['icon'] ) ) {
 			$standard_details['icon'] = sanitize_url( $recommended_pm['icon'] );
+		}
+
+		// If the payment method has a category, use it if it's one of the known categories.
+		if ( ! empty( $recommended_pm['category'] ) &&
+			in_array( $recommended_pm['category'], array( self::PAYMENT_METHOD_CATEGORY_PRIMARY, self::PAYMENT_METHOD_CATEGORY_SECONDARY ), true ) ) {
+			$standard_details['category'] = $recommended_pm['category'];
 		}
 
 		return $standard_details;

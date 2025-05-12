@@ -10,7 +10,6 @@ import { getQuery } from '@woocommerce/navigation';
 
 import { ApiCallLoader, AssembleHubLoader } from './pages/ApiCallLoader';
 
-import { FlowType } from '../types';
 import { DesignWithoutAIStateMachineContext } from './types';
 import { services } from './services';
 import { actions } from './actions';
@@ -105,7 +104,6 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 		},
 		context: {
 			startLoadingTime: null,
-			flowType: FlowType.noAI,
 			apiCallLoader: {
 				hasErrors: false,
 			},

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow other protocols such as S3 for file paths in CSV importer

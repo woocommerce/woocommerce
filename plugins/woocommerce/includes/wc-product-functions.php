@@ -162,19 +162,15 @@ function wc_delete_product_transients( $post_id = 0 ) {
 			// The cache exists ONLY on the current request to prevent searching the DB for every product.
 			static $scheduled = array();
 			$cache_key        = (int) $post_id;
+			$queue            = WC()->queue();
 
 			if ( ! isset( $scheduled[ $cache_key ] ) ) {
-				$queue                   = WC()->queue();
-				$existing                = $queue->search(
-					array(
-						'hook'     => 'wc_delete_related_product_transients_async',
-						'args'     => array( 'post_id' => $post_id ),
-						'status'   => 'pending',
-						'group'    => 'wc_delete_related_product_transients_group',
-						'per_page' => 1,
-					)
+				$existing                = $queue->get_next(
+					'wc_delete_related_product_transients_async',
+					array( 'post_id' => $post_id ),
+					'wc_delete_related_product_transients_group'
 				);
-				$scheduled[ $cache_key ] = ! empty( $existing );
+				$scheduled[ $cache_key ] = null !== $existing;
 			}
 
 			if ( ! $scheduled[ $cache_key ] ) {
