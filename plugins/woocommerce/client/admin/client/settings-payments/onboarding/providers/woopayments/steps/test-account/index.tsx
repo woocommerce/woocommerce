@@ -136,6 +136,26 @@ const TestAccountStep = () => {
 				currentStep?.status === 'failed'
 			) {
 				setStatus( 'initializing' );
+
+				const cleanStepIfNeeded = async () => {
+					// We only need to clean the step if it has been retried.
+					if (
+						currentStep?.actions?.clean?.href &&
+						( retryCounter > 0 || currentStep?.status === 'failed' )
+					) {
+						await apiFetch< {
+							success: boolean;
+							message?: string;
+						} >( {
+							url: currentStep?.actions?.clean?.href,
+							method: 'POST',
+						} );
+					}
+				};
+
+				// This is a quick hack so we can call await.
+				cleanStepIfNeeded();
+
 				apiFetch< { success: boolean; message?: string } >( {
 					url: currentStep?.actions?.init?.href,
 					method: 'POST',
