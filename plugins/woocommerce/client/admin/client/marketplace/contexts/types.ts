@@ -25,6 +25,9 @@ export type MarketplaceContextType = {
 	setSearchResultsCount: (
 		updatedCounts: Partial< SearchResultsCountType >
 	) => void;
+	iamSettings: {
+		product_previews?: 'modal' | 'none';
+	};
 };
 
 export type SubscriptionsContextType = {
