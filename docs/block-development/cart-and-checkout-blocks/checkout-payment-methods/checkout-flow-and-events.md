@@ -73,7 +73,7 @@ The following are booleans exposed via the checkout provider that are independen
 
 `isCalculating` is true when the total is being re-calculated for the order or when a plugin is intentionally disabling the checkout using the `disableCheckoutFor` action (covered in the next section).
 
-There are numerous things that might trigger a recalculation of the total: coupons being added or removed, shipping rates updated, shipping rate selected, etc. Instead of having to check each of those individual states, you can reliably just check if this boolean is true (calculating) or false (not calculating).
+There are numerous things that might trigger a recalculation of the total—coupons being added or removed, shipping rates updating, shipping rates being selected, etc. Instead of having to check each of those individual states, you can reliably check if this boolean is true (calculating) or false (not calculating).
 
 What `isCalculating` affects:
 - Disables the "Place Order" button in the checkout block
