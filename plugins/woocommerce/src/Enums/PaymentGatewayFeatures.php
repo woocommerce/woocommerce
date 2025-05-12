@@ -4,7 +4,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Enums;
 
-class PaymentGatewayFeatures {
+/**
+ * Enum class for all the payment gateway feature's values.
+ */
+final class PaymentGatewayFeatures {
 	/**
 	* Payment gateway supports add payment methods.
 	*
