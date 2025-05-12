@@ -13,19 +13,19 @@ class ProductTaxStatus {
 	 *
 	 * @var string
 	 */
-	const TAXABLE = 'taxable';
+	public const TAXABLE = 'taxable';
 
 	/**
 	 * Indicates that only the shipping cost should be taxed, not the product itself.
 	 *
 	 * @var string
 	 */
-	const SHIPPING = 'shipping';
+	public const SHIPPING = 'shipping';
 
 	/**
 	 * Tax status for products that are not taxable.
 	 *
 	 * @var string
 	 */
-	const NONE = 'none';
+	public const NONE = 'none';
 }
