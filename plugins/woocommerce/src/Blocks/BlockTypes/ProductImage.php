@@ -81,7 +81,7 @@ class ProductImage extends AbstractBlock {
 		 * @param WC_Product $product The product object.
 		 * @return string The filtered sale badge text.
 		 */
-		$sale_text = strip_tags( apply_filters( 'woocommerce_sale_badge_text', __( 'Sale', 'woocommerce' ), $product ) );
+		$sale_text = wp_strip_all_tags( apply_filters( 'woocommerce_sale_badge_text', __( 'Sale', 'woocommerce' ), $product ) );
 
 		$on_sale_badge = sprintf(
 			'
