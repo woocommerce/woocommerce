@@ -23,7 +23,7 @@ export function SendPreview() {
 					togglePreviewModal( true );
 				} }
 			>
-				{ __( 'Send preview', 'woocommerce' ) }
+				{ __( 'Send a test email', 'woocommerce' ) }
 			</PluginPreviewMenuItem>
 			<SendPreviewEmail />
 		</>
