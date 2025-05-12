@@ -17,7 +17,6 @@ import { store as coreDataStore, useEntityProp } from '@wordpress/core-data';
  */
 import { EMAIL_STATUSES } from '../../settings-email/settings-email-listing-status';
 
-// todo changelog
 // todo the UI is a bit wonky, check if we have design prepared for this
 
 export function EmailStatus() {
@@ -26,10 +25,13 @@ export function EmailStatus() {
 		'woo_email',
 		'woocommerce_data'
 	);
-	const statusValue = woocommerce_email_data?.enabled
-		? 'enabled'
-		: 'disabled';
 	const isManual = woocommerce_email_data?.is_manual;
+	let statusValue = 'disabled';
+	if (isManual) {
+		statusValue = 'manual';
+	} else if (woocommerce_email_data?.enabled) {
+		statusValue = 'enabled';
+	}
 
 	const status =
 		EMAIL_STATUSES.find( ( s ) => s.value === statusValue ) ??
