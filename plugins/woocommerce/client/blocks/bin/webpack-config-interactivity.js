@@ -3,11 +3,14 @@
  */
 const path = require( 'path' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
+const { DefinePlugin } = require( 'webpack' );
 
 /**
  * Internal dependencies
  */
 const { sharedOptimizationConfig } = require( './webpack-shared-config' );
+
+const { NODE_ENV: mode = 'development' } = process.env;
 
 // Config to build and incubate the interactivity API within WooCommerce.
 module.exports = {
@@ -48,6 +51,9 @@ module.exports = {
 		new DependencyExtractionWebpackPlugin( {
 			combineAssets: true,
 			combinedOutputFile: './interactivity-api-assets.php',
+		} ),
+		new DefinePlugin( {
+			'globalThis.SCRIPT_DEBUG': JSON.stringify( mode === 'development' ),
 		} ),
 	],
 	module: {
