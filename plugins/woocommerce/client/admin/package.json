@@ -50,6 +50,8 @@
 		"@dnd-kit/modifiers": "^6.0.1",
 		"@dnd-kit/sortable": "^7.0.2",
 		"@react-spring/web": "^9.7.3",
+		"@stripe/connect-js": "^3.3.21",
+		"@stripe/react-connect-js": "^3.3.21",
 		"@woocommerce/api": "workspace:*",
 		"@wordpress/a11y": "wp-6.6",
 		"@wordpress/api-fetch": "wp-6.6",

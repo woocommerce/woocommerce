@@ -9,6 +9,7 @@
  * @version 2.1.0
  */
 
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
@@ -25,6 +26,14 @@ require_once WC_ABSPATH . 'includes/class-wc-cart-session.php';
  * WC_Cart class.
  */
 class WC_Cart extends WC_Legacy_Cart {
+
+	/**
+	 * Cart context, used to determine if the cart is being used in a StoreAPI or shortcode context. This should only
+	 * be used internally.
+	 *
+	 * @var string shortcode|store-api
+	 */
+	public $cart_context = 'shortcode';
 
 	/**
 	 * Contains an array of cart items.
@@ -1193,7 +1202,13 @@ class WC_Cart extends WC_Legacy_Cart {
 					$message         = apply_filters( 'woocommerce_cart_product_cannot_add_another_message', $message, $product_data );
 					$wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
 
-					throw new Exception( sprintf( '%s <a href="%s" class="button wc-forward%s">%s</a>', $message, esc_url( wc_get_cart_url() ), esc_attr( $wp_button_class ), __( 'View cart', 'woocommerce' ) ) );
+					if ( ! CartCheckoutUtils::has_cart_page() ) {
+						$message = sprintf( '%s', esc_html( $message ) );
+					} else {
+						$message = sprintf( '%s <a href="%s" class="button wc-forward%s">%s</a>', $message, esc_url( wc_get_cart_url() ), esc_attr( $wp_button_class ), __( 'View cart', 'woocommerce' ) );
+					}
+
+					throw new Exception( $message );
 				}
 			}
 
@@ -1254,13 +1269,17 @@ class WC_Cart extends WC_Legacy_Cart {
 					$stock_quantity_in_cart = $products_qty_in_cart[ $product_data->get_stock_managed_by_id() ];
 					$wp_button_class        = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
 
-					$message = sprintf(
+					$message = CartCheckoutUtils::has_cart_page() ? sprintf(
 						'%s <a href="%s" class="button wc-forward%s">%s</a>',
 						/* translators: 1: quantity in stock 2: current quantity */
 						sprintf( __( 'You cannot add that amount to the cart &mdash; we have %1$s in stock and you already have %2$s in your cart.', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_quantity, $product_data ), wc_format_stock_quantity_for_display( $stock_quantity_in_cart, $product_data ) ),
 						esc_url( wc_get_cart_url() ),
 						esc_attr( $wp_button_class ),
 						__( 'View cart', 'woocommerce' )
+					) : sprintf(
+						'%s',
+						/* translators: 1: quantity in stock 2: current quantity */
+						sprintf( __( 'You cannot add that amount to the cart &mdash; we have %1$s in stock and you already have %2$s in your cart.', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_quantity, $product_data ), wc_format_stock_quantity_for_display( $stock_quantity_in_cart, $product_data ) )
 					);
 
 					/**
@@ -1614,10 +1633,50 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
-			$customer = $this->get_customer();
+			if ( 'store-api' === $this->cart_context ) {
+				$customer = $this->get_customer();
 
-			if ( ! $customer instanceof \WC_Customer || ! $customer->has_full_shipping_address() ) {
-				return false;
+				if ( ! $customer instanceof \WC_Customer || ! $customer->has_full_shipping_address() ) {
+					return false;
+				}
+			} else {
+				$country = $this->get_customer()->get_shipping_country();
+				if ( ! $country ) {
+					return false;
+				}
+				$country_fields  = WC()->countries->get_address_fields( $country, 'shipping_' );
+				$checkout_fields = WC()->checkout()->get_checkout_fields();
+
+				/**
+				 * Filter to not require shipping state for shipping calculation, even if it is required at checkout.
+				 * This can be used to allow shipping calculations to be done without a state.
+				 *
+				 * @since 8.4.0
+				 *
+				 * @param bool $show_state Whether to use the state field. Default true.
+				 */
+				$state_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_state', true );
+				$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'];
+				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
+				$checkout_state_field_exists = isset( $checkout_fields['shipping']['shipping_state'] );
+				if ( $state_enabled && $state_required && ! $this->get_customer()->get_shipping_state() && $checkout_state_field_exists ) {
+					return false;
+				}
+				/**
+				 * Filter to not require shipping postcode for shipping calculation, even if it is required at checkout.
+				 * This can be used to allow shipping calculations to be done without a postcode.
+				 *
+				 * @since 8.4.0
+				 *
+				 * @param bool $show_postcode Whether to use the postcode field. Default true.
+				 */
+				$postcode_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true );
+				$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'];
+				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
+				$checkout_postcode_field_exists = isset( $checkout_fields['shipping']['shipping_postcode'] );
+				if ( $postcode_enabled && $postcode_required && '' === $this->get_customer()->get_shipping_postcode() && $checkout_postcode_field_exists ) {
+					return false;
+				}
 			}
 		}
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Product Filters: add some data validation and type guard for filter data.

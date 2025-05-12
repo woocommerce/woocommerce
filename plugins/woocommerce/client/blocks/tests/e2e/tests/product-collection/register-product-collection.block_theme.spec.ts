@@ -55,9 +55,45 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 
 	// Activate plugin which registers custom product collections
 	test.beforeEach( async ( { requestUtils } ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-register-product-collection'
-		);
+		// There's been multiple instances of flaky tests due to "socket hang up" errors.
+		// Seems it's more common as I found a similar issue in here:
+		// https://github.com/sillsdev/web-languageforge/issues/1402.
+		// This is a retry mechanism to ensure the plugin is activated and ready.
+		const maxRetries = 3;
+		let retryCount = 0;
+		let lastError;
+
+		while ( retryCount < maxRetries ) {
+			try {
+				await requestUtils.activatePlugin(
+					'woocommerce-blocks-test-register-product-collection'
+				);
+
+				// Verify plugin is active by making a test request
+				try {
+					await requestUtils.rest( {
+						method: 'GET',
+						path: 'wp/v2/plugins',
+					} );
+					return; // If we get here, plugin is ready
+				} catch ( verifyError ) {
+					// If verification fails, continue to retry
+					lastError = verifyError;
+				}
+			} catch ( error ) {
+				lastError = error;
+			}
+
+			retryCount++;
+			if ( retryCount < maxRetries ) {
+				// Exponential backoff for retries
+				await new Promise( ( resolve ) =>
+					setTimeout( resolve, Math.pow( 2, retryCount ) * 200 )
+				);
+			}
+		}
+
+		throw lastError;
 	} );
 
 	test( `Registered collections should be available in Collection chooser`, async ( {

@@ -98,6 +98,13 @@ class PaymentExtensionSuggestions {
 	const TAG_RECOMMENDED = 'recommended'; // For extensions that should be further emphasized.
 
 	/**
+	 * The memoized extensions base details to avoid computing them multiple times during a request.
+	 *
+	 * @var array|null
+	 */
+	private ?array $extensions_base_details_memo = null;
+
+	/**
 	 * The payment extension list for each country.
 	 *
 	 * The order is important as it will be used to determine the priority of the suggestions.
@@ -245,6 +252,20 @@ class PaymentExtensionSuggestions {
 			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
+			self::AFFIRM          => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.affirm.com/en-gb/business',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.affirm.com/en-gb/terms',
+						),
+					),
+				),
+			),
 			self::CLEARPAY,
 			self::KLARNA          => array(
 				'_merge_on_type' => array(
@@ -2356,7 +2377,10 @@ class PaymentExtensionSuggestions {
 	 * @return array[] The base details of all extensions.
 	 */
 	private function get_all_extensions_base_details(): array {
-		return array(
+		if ( isset( $this->extensions_base_details_memo ) ) {
+			return $this->extensions_base_details_memo;
+		}
+		$this->extensions_base_details_memo = array(
 			self::AIRWALLEX         => array(
 				'_type'       => self::TYPE_PSP,
 				'title'       => esc_html__( 'Airwallex Payments', 'woocommerce' ),
@@ -3335,6 +3359,8 @@ class PaymentExtensionSuggestions {
 				),
 			),
 		);
+
+		return $this->extensions_base_details_memo;
 	}
 
 	/**

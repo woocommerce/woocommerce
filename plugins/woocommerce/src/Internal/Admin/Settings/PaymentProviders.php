@@ -153,6 +153,56 @@ class PaymentProviders {
 	}
 
 	/**
+	 * Get the payment gateway provider instance.
+	 *
+	 * @param string $gateway_id The gateway ID.
+	 *
+	 * @return PaymentGateway The payment gateway provider instance.
+	 *                        Will return the general provider of no specific provider is found.
+	 */
+	public function get_payment_gateway_provider_instance( string $gateway_id ): PaymentGateway {
+		if ( isset( $this->instances[ $gateway_id ] ) ) {
+			return $this->instances[ $gateway_id ];
+		}
+
+		/**
+		 * The provider class for the gateway.
+		 *
+		 * @var PaymentGateway|null $provider_class
+		 */
+		$provider_class = null;
+		if ( isset( $this->payment_gateways_providers_class_map[ $gateway_id ] ) ) {
+			$provider_class = $this->payment_gateways_providers_class_map[ $gateway_id ];
+		} else {
+			// Check for wildcard mappings.
+			foreach ( $this->payment_gateways_providers_class_map as $gateway_id_pattern => $mapped_class ) {
+				// Try to see if we have a wildcard mapping and if the gateway ID matches it.
+				// Use the first found match.
+				if ( false !== strpos( $gateway_id_pattern, '*' ) ) {
+					$gateway_id_pattern = str_replace( '*', '.*', $gateway_id_pattern );
+					if ( preg_match( '/^' . $gateway_id_pattern . '$/', $gateway_id ) ) {
+						$provider_class = $mapped_class;
+						break;
+					}
+				}
+			}
+		}
+
+		// If the gateway ID is not mapped to a provider class, return the generic provider.
+		if ( is_null( $provider_class ) ) {
+			if ( ! isset( $this->instances['generic'] ) ) {
+				$this->instances['generic'] = new PaymentGateway();
+			}
+
+			return $this->instances['generic'];
+		}
+
+		$this->instances[ $gateway_id ] = new $provider_class();
+
+		return $this->instances[ $gateway_id ];
+	}
+
+	/**
 	 * Get the payment gateways details.
 	 *
 	 * @param WC_Payment_Gateway $payment_gateway       The payment gateway object.
@@ -181,7 +231,7 @@ class PaymentProviders {
 	 * @return array The payment gateway base details.
 	 */
 	public function get_payment_gateway_base_details( WC_Payment_Gateway $payment_gateway, int $payment_gateway_order, string $country_code = '' ): array {
-		$provider = $this->get_gateway_provider_instance( $payment_gateway->id );
+		$provider = $this->get_payment_gateway_provider_instance( $payment_gateway->id );
 
 		return $provider->get_details( $payment_gateway, $payment_gateway_order, $country_code );
 	}
@@ -194,7 +244,7 @@ class PaymentProviders {
 	 * @return string The plugin slug of the payment gateway.
 	 */
 	public function get_payment_gateway_plugin_slug( WC_Payment_Gateway $payment_gateway ): string {
-		$provider = $this->get_gateway_provider_instance( $payment_gateway->id );
+		$provider = $this->get_payment_gateway_provider_instance( $payment_gateway->id );
 
 		return $provider->get_plugin_slug( $payment_gateway );
 	}
@@ -210,7 +260,7 @@ class PaymentProviders {
 	 * @return string The plugin file corresponding to the payment gateway plugin. Does not include the .php extension.
 	 */
 	public function get_payment_gateway_plugin_file( WC_Payment_Gateway $payment_gateway, string $plugin_slug = '' ): string {
-		$provider = $this->get_gateway_provider_instance( $payment_gateway->id );
+		$provider = $this->get_payment_gateway_provider_instance( $payment_gateway->id );
 
 		return $provider->get_plugin_file( $payment_gateway, $plugin_slug );
 	}
@@ -820,7 +870,7 @@ class PaymentProviders {
 	 * @return array The payment gateways list with the pseudo Mollie gateway added if necessary.
 	 */
 	private function maybe_add_pseudo_mollie_gateway( array $payment_gateways ): array {
-		$mollie_provider = $this->get_gateway_provider_instance( 'mollie' );
+		$mollie_provider = $this->get_payment_gateway_provider_instance( 'mollie' );
 
 		// Do nothing if there is a Mollie gateway registered.
 		if ( $mollie_provider->is_gateway_registered( $payment_gateways ) ) {
@@ -886,6 +936,7 @@ class PaymentProviders {
 					ExtensionSuggestions::AMAZON_PAY,
 					ExtensionSuggestions::SQUARE,
 					ExtensionSuggestions::PAYONEER,
+					ExtensionSuggestions::AIRWALLEX,
 					ExtensionSuggestions::COINBASE, // We don't have suggestion details yet.
 					ExtensionSuggestions::AUTHORIZE_NET, // We don't have suggestion details yet.
 					ExtensionSuggestions::BOLT, // We don't have suggestion details yet.
@@ -1112,55 +1163,5 @@ class PaymentProviders {
 		}
 
 		return Utils::order_map_normalize( $new_order_map );
-	}
-
-	/**
-	 * Get the payment gateway provider instance.
-	 *
-	 * @param string $gateway_id The gateway ID.
-	 *
-	 * @return PaymentGateway The payment gateway provider instance.
-	 *                        Will return the general provider of no specific provider is found.
-	 */
-	private function get_gateway_provider_instance( string $gateway_id ): PaymentGateway {
-		if ( isset( $this->instances[ $gateway_id ] ) ) {
-			return $this->instances[ $gateway_id ];
-		}
-
-		/**
-		 * The provider class for the gateway.
-		 *
-		 * @var PaymentGateway|null $provider_class
-		 */
-		$provider_class = null;
-		if ( isset( $this->payment_gateways_providers_class_map[ $gateway_id ] ) ) {
-			$provider_class = $this->payment_gateways_providers_class_map[ $gateway_id ];
-		} else {
-			// Check for wildcard mappings.
-			foreach ( $this->payment_gateways_providers_class_map as $gateway_id_pattern => $mapped_class ) {
-				// Try to see if we have a wildcard mapping and if the gateway ID matches it.
-				// Use the first found match.
-				if ( false !== strpos( $gateway_id_pattern, '*' ) ) {
-					$gateway_id_pattern = str_replace( '*', '.*', $gateway_id_pattern );
-					if ( preg_match( '/^' . $gateway_id_pattern . '$/', $gateway_id ) ) {
-						$provider_class = $mapped_class;
-						break;
-					}
-				}
-			}
-		}
-
-		// If the gateway ID is not mapped to a provider class, return the generic provider.
-		if ( is_null( $provider_class ) ) {
-			if ( ! isset( $this->instances['generic'] ) ) {
-				$this->instances['generic'] = new PaymentGateway();
-			}
-
-			return $this->instances['generic'];
-		}
-
-		$this->instances[ $gateway_id ] = new $provider_class();
-
-		return $this->instances[ $gateway_id ];
 	}
 }

@@ -38,6 +38,24 @@ export interface WooCommerceSiteLocale {
 export interface WooCommerceSharedSettings {
 	adminUrl: string;
 	countries: Record< string, string > | never[];
+	countryData: Record<
+		string,
+		{
+			allowBilling: boolean;
+			allowShipping: boolean;
+			states: Record< string, string >;
+			locale: Record<
+				string,
+				{
+					hidden?: boolean;
+					required?: boolean;
+					index?: number;
+					label?: string;
+				}
+			>;
+			format: string;
+		}
+	>;
 	currency: WooCommerceSiteCurrency;
 	currentUserId: number;
 	currentUserIsAdmin: boolean;
@@ -46,7 +64,16 @@ export interface WooCommerceSharedSettings {
 	orderStatuses: Record< string, string > | never[];
 	placeholderImgSrc: string;
 	siteTitle: string;
-	storePages: Record< string, string > | never[];
+	storePages:
+		| Record<
+				string,
+				{
+					id: 0;
+					title: '';
+					permalink: '';
+				}
+		  >
+		| never[];
 	wcAssetUrl: string;
 	wcVersion: string;
 	wpLoginUrl: string;
@@ -56,6 +83,7 @@ export interface WooCommerceSharedSettings {
 const defaults: WooCommerceSharedSettings = {
 	adminUrl: '',
 	countries: [],
+	countryData: {},
 	currency: {
 		code: 'USD',
 		precision: 2,
@@ -86,7 +114,9 @@ const defaults: WooCommerceSharedSettings = {
 const globalSharedSettings =
 	typeof window.wcSettings === 'object' ? window.wcSettings : {};
 
-interface AllSettings extends Record< string, unknown > {
+interface AllSettings
+	extends WooCommerceSharedSettings,
+		Record< string, unknown > {
 	currency: WooCommerceSiteCurrency;
 }
 
@@ -103,7 +133,7 @@ allSettings.currency = {
 
 allSettings.locale = {
 	...defaults.locale,
-	...( allSettings.locale as Record< string, unknown > ),
+	...allSettings.locale,
 };
 
 export { allSettings };

@@ -118,9 +118,16 @@ export const Edit = ( {
 						className="wc-block-product-gallery-thumbnails__scrollable"
 					>
 						{ productThumbnails.map( ( { src, alt }, index ) => {
+							const thumbnailClassName = clsx(
+								'wc-block-product-gallery-thumbnails__thumbnail',
+								{
+									'wc-block-product-gallery-thumbnails__thumbnail--active':
+										index === 0,
+								}
+							);
 							return (
 								<div
-									className="wc-block-product-gallery-thumbnails__thumbnail"
+									className={ thumbnailClassName }
 									key={ index }
 								>
 									<img

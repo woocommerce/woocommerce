@@ -371,9 +371,7 @@ final class BlockTypesController {
 	 */
 	protected function get_widget_area_block_types() {
 		return array(
-			'ActiveFilters',
 			'AllReviews',
-			'AttributeFilter',
 			'Breadcrumbs',
 			'CartLink',
 			'CatalogSorting',
@@ -381,16 +379,33 @@ final class BlockTypesController {
 			'CustomerAccount',
 			'FeaturedCategory',
 			'FeaturedProduct',
-			'FilterWrapper',
 			'MiniCart',
-			'PriceFilter',
 			'ProductCategories',
 			'ProductResultsCount',
 			'ProductSearch',
-			'RatingFilter',
 			'ReviewsByCategory',
 			'ReviewsByProduct',
+			'ProductFilters',
+			'ProductFilterStatus',
+			'ProductFilterPrice',
+			'ProductFilterPriceSlider',
+			'ProductFilterAttribute',
+			'ProductFilterRating',
+			'ProductFilterActive',
+			'ProductFilterRemovableChips',
+			'ProductFilterClearButton',
+			'ProductFilterCheckboxList',
+			'ProductFilterChips',
+
+			// Keep hidden legacy filter blocks for backward compatibility.
+			'ActiveFilters',
+			'AttributeFilter',
+			'FilterWrapper',
+			'PriceFilter',
+			'RatingFilter',
 			'StockFilter',
+			// End: legacy filter blocks.
+
 			// Below product grids are hidden from inserter however they could have been used in widgets.
 			// Keep them for backward compatibility.
 			'HandpickedProducts',
@@ -401,6 +416,7 @@ final class BlockTypesController {
 			'ProductsByAttribute',
 			'ProductCategory',
 			'ProductTag',
+			// End: legacy product grids blocks.
 		);
 	}
 
@@ -511,21 +527,17 @@ final class BlockTypesController {
 		// when modifying this list.
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
 			if ( Features::is_enabled( 'blockified-add-to-cart' ) && wp_is_block_theme() ) {
-				$block_types[] = 'AddToCartWithOptions';
-				$block_types[] = 'AddToCartWithOptionsQuantitySelector';
-				$block_types[] = 'AddToCartWithOptionsVariationSelector';
-				$block_types[] = 'AddToCartWithOptionsVariationSelectorItemTemplate';
-				$block_types[] = 'AddToCartWithOptionsVariationSelectorAttributeName';
-				$block_types[] = 'AddToCartWithOptionsVariationSelectorAttributeOptions';
-				$block_types[] = 'AddToCartWithOptionsGroupedProductSelector';
-				$block_types[] = 'AddToCartWithOptionsGroupedProductSelectorItemTemplate';
-				$block_types[] = 'AddToCartWithOptionsGroupedProductSelectorItemCTA';
+				$block_types[] = 'AddToCartWithOptions\AddToCartWithOptions';
+				$block_types[] = 'AddToCartWithOptions\QuantitySelector';
+				$block_types[] = 'AddToCartWithOptions\VariationSelector';
+				$block_types[] = 'AddToCartWithOptions\VariationSelectorItemTemplate';
+				$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeName';
+				$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeOptions';
+				$block_types[] = 'AddToCartWithOptions\GroupedProductSelector';
+				$block_types[] = 'AddToCartWithOptions\GroupedProductSelectorItemTemplate';
+				$block_types[] = 'AddToCartWithOptions\GroupedProductSelectorItemCTA';
 			}
-			// Generic blocks that will be pushed upstream.
-			$block_types[] = 'Accordion\AccordionGroup';
-			$block_types[] = 'Accordion\AccordionItem';
-			$block_types[] = 'Accordion\AccordionPanel';
-			$block_types[] = 'Accordion\AccordionHeader';
+
 			$block_types[] = 'BlockifiedProductDetails';
 			$block_types[] = 'ProductDescription';
 			$block_types[] = 'ProductSpecifications';
@@ -533,6 +545,21 @@ final class BlockTypesController {
 			$block_types[] = 'Reviews\ProductReviewRating';
 			$block_types[] = 'Reviews\ProductReviewsTitle';
 			$block_types[] = 'Reviews\ProductReviewForm';
+			$block_types[] = 'Reviews\ProductReviewDate';
+			$block_types[] = 'Reviews\ProductReviewContent';
+			$block_types[] = 'Reviews\ProductReviewAuthorName';
+			$block_types[] = 'Reviews\ProductReviewsPagination';
+			$block_types[] = 'Reviews\ProductReviewsPaginationNext';
+			$block_types[] = 'Reviews\ProductReviewsPaginationPrevious';
+			$block_types[] = 'Reviews\ProductReviewsPaginationNumbers';
+			$block_types[] = 'Reviews\ProductReviewTemplate';
+
+			// Generic blocks that will be pushed upstream.
+			$block_types[] = 'Accordion\AccordionGroup';
+			$block_types[] = 'Accordion\AccordionItem';
+			$block_types[] = 'Accordion\AccordionPanel';
+			$block_types[] = 'Accordion\AccordionHeader';
+			// End: generic blocks that will be pushed upstream.
 		}
 
 		/**

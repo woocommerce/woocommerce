@@ -9,7 +9,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import {
 	ENTREPRENEUR_FLOW_QUERY_PARAM_VALUE,
 	isEntrepreneurFlow,
-} from '~/customize-store/design-with-ai/entrepreneur-flow';
+} from '../entrepreneur-flow';
 import { isWooExpress } from '~/utils/is-woo-express';
 
 export const trackEvent = (

@@ -30,6 +30,14 @@ interface ActivatePaymentsButtonProps {
 	 * ID of the plugin that is being installed.
 	 */
 	installingPlugin: string | null;
+	/**
+	 * Function to set the onboarding modal open.
+	 */
+	setOnboardingModalOpen: ( isOnboardingModalOpen: boolean ) => void;
+	/**
+	 * The onboarding type for the gateway.
+	 */
+	onboardingType?: string;
 }
 
 /**
@@ -41,6 +49,8 @@ export const ActivatePaymentsButton = ( {
 	installingPlugin,
 	buttonText = __( 'Activate payments', 'woocommerce' ),
 	incentive = null,
+	setOnboardingModalOpen,
+	onboardingType,
 }: ActivatePaymentsButtonProps ) => {
 	const [ isUpdating, setIsUpdating ] = useState( false );
 
@@ -51,7 +61,12 @@ export const ActivatePaymentsButton = ( {
 			acceptIncentive( incentive.promo_id );
 		}
 
-		window.location.href = getWooPaymentsSetupLiveAccountLink();
+		if ( onboardingType === 'native_in_context' ) {
+			// Open the onboarding modal.
+			setOnboardingModalOpen( true );
+		} else {
+			window.location.href = getWooPaymentsSetupLiveAccountLink();
+		}
 	};
 
 	return (

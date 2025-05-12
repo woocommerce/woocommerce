@@ -2,6 +2,19 @@
 	.blueprint-settings-slotfill {
 		min-height: 650px;
 	}
+
+	.components-snackbar .components-snackbar__content-with-icon {
+		padding-left: 0;
+	}
+
+	.components-snackbar .components-snackbar__icon {
+		display: flex;
+		margin-right: $gap-smaller;
+	}
+
+	.components-snackbar__content {
+		align-items: center;
+	}
 }
 
 .blueprint-settings-slotfill {
@@ -160,6 +173,32 @@
 	.blueprint-settings-export-button {
 		margin-top: 14px;
 	}
+
+	.components-notice {
+		padding: 12px;
+
+		button.components-notice__dismiss {
+			align-self: inherit;
+			svg {
+				fill: #1e1e1e;
+				width: 15px;
+			}
+		}
+
+		.components-notice__content,
+		&.is-error .components-notice__content pre {
+			margin: 0;
+			color: $gray-900;
+			line-height: 24px; /* 184.615% */
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+			text-wrap: auto;
+		}
+	}
+
+	.components-notice.is-error {
+		background: #fce2e4;
+		border-left-color: #cc1818;
+	}
 }
 
 // Show the notice at the bottom right of the screen
@@ -229,7 +268,14 @@
 			width: 132px;
 			justify-content: center;
 			align-items: center;
+
+			svg {
+				margin: 0;
+			}
 		}
 	}
 }
 
+.blueprint-export-error {
+	margin: 16px 0;
+}

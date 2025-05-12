@@ -14,5 +14,6 @@
 	"supports": {
 		"inserter": false,
 		"interactivity": true
-	}
+	},
+	"style": "file:../woocommerce/add-to-cart-with-options-grouped-product-selector-item-style.css"
 }
