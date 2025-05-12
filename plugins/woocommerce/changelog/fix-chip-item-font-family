@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Product Filters: fix Chips item font family for theme that doesn't set the font-family for generic button element.
+
+

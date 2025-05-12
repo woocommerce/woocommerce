@@ -23,11 +23,10 @@ import {
 /**
  * Internal dependencies
  */
-import { useCommentQueryArgs, useCommentTree } from './hooks';
+import { useCommentQueryArgs, useCommentList } from './hooks';
 
 interface Comment {
 	commentId: number;
-	children?: Comment[];
 }
 
 interface ReviewTemplateInnerBlocksProps {
@@ -51,8 +50,6 @@ type ReviewTemplateAttributes = {
 
 const TEMPLATE = [
 	[ 'core/avatar' ],
-	[ 'core/comment-reply-link' ],
-	[ 'core/comment-edit-link' ],
 	[ 'woocommerce/product-review-author-name' ],
 	[ 'woocommerce/product-review-date' ],
 	[ 'woocommerce/product-review-content' ],
@@ -61,59 +58,17 @@ const TEMPLATE = [
 interface ReviewSettings {
 	perPage: number;
 	pageComments: boolean;
-	threadComments: boolean;
-	threadCommentsDepth: number;
 }
 
 const getCommentsPlaceholder = ( {
 	perPage,
 	pageComments,
-	threadComments,
-	threadCommentsDepth,
 }: ReviewSettings ) => {
-	// Limit commentsDepth to 3
-	const commentsDepth = ! threadComments
-		? 1
-		: Math.min( threadCommentsDepth, 3 );
+	const numberOfComments = pageComments ? Math.min( perPage, 3 ) : 3;
 
-	const buildChildrenComment = ( commentsLevel: number ): Comment[] => {
-		// Render children comments until commentsDepth is reached
-		if ( commentsLevel < commentsDepth ) {
-			const nextLevel = commentsLevel + 1;
-
-			return [
-				{
-					commentId: -( commentsLevel + 3 ),
-					children: buildChildrenComment( nextLevel ),
-				},
-			];
-		}
-		return [];
-	};
-
-	// Add the first comment and its children
-	const placeholderComments = [
-		{ commentId: -1, children: buildChildrenComment( 1 ) },
-	];
-
-	// Add a second comment unless the break comments setting is active and set to less than 2, and there is one nested comment max
-	if ( ( ! pageComments || perPage >= 2 ) && commentsDepth < 3 ) {
-		placeholderComments.push( {
-			commentId: -2,
-			children: [],
-		} );
-	}
-
-	// Add a third comment unless the break comments setting is active and set to less than 3, and there aren't nested comments
-	if ( ( ! pageComments || perPage >= 3 ) && commentsDepth < 2 ) {
-		placeholderComments.push( {
-			commentId: -3,
-			children: [],
-		} );
-	}
-
-	// In case that the value is set but larger than 3 we truncate it to 3.
-	return placeholderComments;
+	return Array.from( { length: numberOfComments }, ( _, i ) => ( {
+		commentId: -( i + 1 ),
+	} ) );
 };
 
 const ReviewTemplatePreview = ( {
@@ -174,32 +129,6 @@ const ReviewTemplateInnerBlocks = memo( function ReviewTemplateInnerBlocks( {
 					comment.commentId === ( activeCommentId || firstCommentId )
 				}
 			/>
-
-			{ comment?.children && comment.children.length > 0 ? (
-				<ol>
-					{ comment.children.map(
-						(
-							{ commentId, ...childComment }: Comment,
-							index: number
-						) => (
-							<BlockContextProvider
-								key={ commentId || index }
-								value={ {
-									commentId: commentId < 0 ? null : commentId,
-								} }
-							>
-								<ReviewTemplateInnerBlocks
-									comment={ { commentId, ...childComment } }
-									activeCommentId={ activeCommentId }
-									setActiveCommentId={ setActiveCommentId }
-									blocks={ blocks }
-									firstCommentId={ firstCommentId }
-								/>
-							</BlockContextProvider>
-						)
-					) }
-				</ol>
-			) : null }
 		</li>
 	);
 } );
@@ -213,27 +142,22 @@ export default function ReviewTemplateEdit( {
 	const blockProps = useBlockProps();
 
 	const [ activeCommentId, setActiveCommentId ] = useState< number >( 0 );
-	const {
-		commentOrder,
-		threadCommentsDepth,
-		threadComments,
-		commentsPerPage,
-		pageComments,
-	} = useSelect( ( select ) => {
-		const { getSettings } = select( blockEditorStore ) as unknown as {
-			getSettings(): {
-				// eslint-disable-next-line @typescript-eslint/naming-convention
-				__experimentalDiscussionSettings: {
-					commentOrder: string;
-					threadCommentsDepth: number;
-					threadComments: boolean;
-					commentsPerPage: number;
-					pageComments: boolean;
+	const { commentOrder, commentsPerPage, pageComments } = useSelect(
+		( select ) => {
+			const { getSettings } = select( blockEditorStore ) as unknown as {
+				getSettings(): {
+					// eslint-disable-next-line @typescript-eslint/naming-convention
+					__experimentalDiscussionSettings: {
+						commentOrder: string;
+						commentsPerPage: number;
+						pageComments: boolean;
+					};
 				};
 			};
-		};
-		return getSettings().__experimentalDiscussionSettings;
-	}, [] );
+			return getSettings().__experimentalDiscussionSettings;
+		},
+		[]
+	);
 
 	const commentQuery = useCommentQueryArgs( {
 		postId: postId ?? 0,
@@ -246,7 +170,6 @@ export default function ReviewTemplateEdit( {
 				getBlocks( clientId: string ): BlockInstance[];
 			};
 			return {
-				// Request only top-level comments. Replies are embedded.
 				topLevelComments: commentQuery
 					? getEntityRecords( 'root', 'comment', commentQuery )
 					: null,
@@ -256,21 +179,16 @@ export default function ReviewTemplateEdit( {
 		[ clientId, commentQuery ]
 	);
 
-	// Generate a tree structure of comment IDs.
-	let commentTree = useCommentTree(
+	let commentTree = useCommentList(
 		// Reverse the order of top comments if needed.
 		commentOrder === 'desc' && topLevelComments
 			? [
 					...( topLevelComments as Array< {
 						id: number;
-						// eslint-disable-next-line @typescript-eslint/naming-convention
-						_embedded?: { children?: Array< { id: number } > };
 					} > ),
 			  ].reverse()
 			: ( topLevelComments as Array< {
 					id: number;
-					// eslint-disable-next-line @typescript-eslint/naming-convention
-					_embedded?: { children?: Array< { id: number } > };
 			  } > )
 	);
 
@@ -286,8 +204,6 @@ export default function ReviewTemplateEdit( {
 		commentTree = getCommentsPlaceholder( {
 			perPage: commentsPerPage,
 			pageComments,
-			threadComments,
-			threadCommentsDepth,
 		} );
 	}
 
@@ -306,10 +222,8 @@ export default function ReviewTemplateEdit( {
 					(
 						{
 							commentId,
-							...commentData
 						}: {
 							commentId: number;
-							children: Comment[];
 						},
 						index: number
 					) => (
@@ -320,7 +234,7 @@ export default function ReviewTemplateEdit( {
 							} }
 						>
 							<ReviewTemplateInnerBlocks
-								comment={ { commentId, ...commentData } }
+								comment={ { commentId } }
 								activeCommentId={ activeCommentId }
 								setActiveCommentId={ setActiveCommentId }
 								blocks={ blocks }

@@ -211,7 +211,7 @@ final class ProductFilterStatus extends AbstractBlock {
 		foreach ( $counts as $key => $value ) {
 			$data[] = array(
 				'status' => $key,
-				'count'  => $value,
+				'count'  => intval( $value ),
 			);
 		}
 

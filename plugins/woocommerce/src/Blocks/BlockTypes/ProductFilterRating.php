@@ -228,7 +228,7 @@ final class ProductFilterRating extends AbstractBlock {
 		foreach ( $counts as $key => $value ) {
 			$data[] = array(
 				'rating' => $key,
-				'count'  => $value,
+				'count'  => intval( $value ),
 			);
 		}
 

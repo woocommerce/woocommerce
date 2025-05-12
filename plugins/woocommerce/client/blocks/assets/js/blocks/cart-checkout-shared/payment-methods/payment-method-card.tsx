@@ -5,10 +5,12 @@ import { __ } from '@wordpress/i18n';
 import { useEditorContext } from '@woocommerce/base-context';
 import { CheckboxControl } from '@woocommerce/blocks-components';
 import { useSelect, useDispatch } from '@wordpress/data';
+import { useEffect } from '@wordpress/element';
 import {
 	checkoutStore as checkoutStoreDescriptor,
 	paymentStore,
 } from '@woocommerce/block-data';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -34,21 +36,46 @@ const PaymentMethodCard = ( {
 	showSaveOption,
 }: PaymentMethodCardProps ) => {
 	const { isEditor } = useEditorContext();
-	const { shouldSavePaymentMethod, customerId } = useSelect( ( select ) => {
-		const paymentMethodStore = select( paymentStore );
-		const checkoutStore = select( checkoutStoreDescriptor );
-		return {
-			shouldSavePaymentMethod:
-				paymentMethodStore.getShouldSavePaymentMethod(),
-			customerId: checkoutStore.getCustomerId(),
-		};
-	} );
+	const { shouldSavePaymentMethod, customerId, shouldCreateAccount } =
+		useSelect( ( select ) => {
+			const paymentMethodStore = select( paymentStore );
+			const checkoutStore = select( checkoutStoreDescriptor );
+			return {
+				shouldSavePaymentMethod:
+					paymentMethodStore.getShouldSavePaymentMethod(),
+				customerId: checkoutStore.getCustomerId(),
+				shouldCreateAccount: checkoutStore.getShouldCreateAccount(),
+			};
+		}, [] );
+
 	const { __internalSetShouldSavePaymentMethod } =
 		useDispatch( paymentStore );
+
+	const allowGuestCheckout = getSetting( 'checkoutAllowsGuest', false );
+
+	// Work out if the customer can save the payment method.
+	const canSavePaymentMethod =
+		// They're already logged in.
+		customerId > 0 ||
+		// They're not logged in, but they're creating an account.
+		shouldCreateAccount ||
+		// They're not logged in, but they must create an account.
+		! allowGuestCheckout;
+
+	useEffect( () => {
+		if ( ! canSavePaymentMethod && shouldSavePaymentMethod ) {
+			__internalSetShouldSavePaymentMethod( false );
+		}
+	}, [
+		canSavePaymentMethod,
+		shouldSavePaymentMethod,
+		__internalSetShouldSavePaymentMethod,
+	] );
+
 	return (
 		<PaymentMethodErrorBoundary isEditor={ isEditor }>
 			{ children }
-			{ customerId > 0 && showSaveOption && (
+			{ canSavePaymentMethod && showSaveOption && (
 				<CheckboxControl
 					className="wc-block-components-payment-methods__save-card-info"
 					label={ __(

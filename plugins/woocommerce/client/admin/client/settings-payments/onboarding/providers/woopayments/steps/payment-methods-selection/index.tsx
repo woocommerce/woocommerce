@@ -4,9 +4,11 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Icon } from '@wordpress/components';
 import { RecommendedPaymentMethod } from '@woocommerce/data';
-import { useState, useEffect, useMemo } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
+import { useState, useEffect, useMemo, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { close } from '@wordpress/icons';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -14,8 +16,8 @@ import { close } from '@wordpress/icons';
 import { useOnboardingContext } from '../../data/onboarding-context';
 import { PaymentMethodListItem } from '~/settings-payments/components/payment-method-list-item';
 import {
-	combineRequestMethods,
 	combinePaymentMethodsState,
+	combineRequestMethods,
 	decouplePaymentMethodsState,
 	shouldRenderPaymentMethodInMainList,
 } from '~/settings-payments/utils';
@@ -46,6 +48,9 @@ export default function PaymentMethodsSelection() {
 			: [];
 	}, [ contextPaymentMethods ] );
 
+	const scrollRef = useRef< HTMLDivElement | null >( null );
+	const [ hasOverflow, setHasOverflow ] = useState( false );
+
 	// Update the local payment methods state when the context changes
 	useEffect( () => {
 		if ( contextPaymentMethodsState ) {
@@ -73,8 +78,8 @@ export default function PaymentMethodsSelection() {
 		) {
 			// Check if all necessary state keys are present for the current methods in the *combined* state
 			const allKeysPresent = recommendedPaymentMethods.every( ( m ) => {
-				const isPresent = combinedState[ m.id ] !== undefined; // Check in combinedState
-				return isPresent;
+				// Check in combinedState
+				return combinedState[ m.id ] !== undefined;
 			} );
 
 			if ( allKeysPresent ) {
@@ -91,7 +96,7 @@ export default function PaymentMethodsSelection() {
 			}
 		}
 		// Depend on methods and the *combined* state
-	}, [ recommendedPaymentMethods, combinedState ] );
+	}, [ recommendedPaymentMethods, combinedState, initialVisibilityMap ] );
 
 	// Calculate hidden count based on the stored initial visibility (Memoized)
 	const hiddenCount = useMemo( () => {
@@ -125,6 +130,35 @@ export default function PaymentMethodsSelection() {
 		}
 	};
 
+	// Check if overflow exists for Payment Methods list container.
+	const checkHasOverflow = () => {
+		const pmsContainer = scrollRef.current;
+
+		if ( pmsContainer ) {
+			// Compare scrollHeight and clientHeight to determine overflow.
+			setHasOverflow(
+				pmsContainer.scrollHeight > pmsContainer.clientHeight
+			);
+		}
+	};
+
+	// Check for overflow on initial render and on window resize.
+	useEffect( () => {
+		// Use setTimeout to ensure the DOM is updated before checking for overflow.
+		const timeout = setTimeout( () => {
+			checkHasOverflow();
+		}, 0 ); // Runs after paint
+
+		// Check for overflow on window resize.
+		window.addEventListener( 'resize', checkHasOverflow );
+
+		return () => {
+			// Cleanup the timeout and event listener on unmount.
+			clearTimeout( timeout );
+			window.removeEventListener( 'resize', checkHasOverflow );
+		};
+	}, [] );
+
 	return (
 		<div className="settings-payments-onboarding-modal__step--content">
 			<div className="woocommerce-layout__header woocommerce-recommended-payment-methods">
@@ -152,7 +186,10 @@ export default function PaymentMethodsSelection() {
 					</div>
 				</div>
 				<div className="woocommerce-recommended-payment-methods__list">
-					<div className="settings-payments-methods__container">
+					<div
+						className="settings-payments-methods__container"
+						ref={ scrollRef }
+					>
 						<div className="woocommerce-list">
 							{ recommendedPaymentMethods?.map(
 								( method: RecommendedPaymentMethod ) => (
@@ -184,24 +221,39 @@ export default function PaymentMethodsSelection() {
 						</div>
 						{ /* Show button only if not expanded and there are initially hidden items */ }
 						{ ! isExpanded && hiddenCount > 0 && (
-							<Button
-								className="settings-payments-methods__show-more"
-								onClick={ () => {
-									setIsExpanded( ! isExpanded );
-								} }
-								tabIndex={ 0 }
-								aria-expanded={ isExpanded }
-							>
-								{ sprintf(
-									/* translators: %s: number of hidden payment methods */
-									__( 'Show more (%s)', 'woocommerce' ),
-									hiddenCount
-								) }
-							</Button>
+							<div className="settings-payments-methods__show-more--wrapper">
+								<Button
+									className="settings-payments-methods__show-more"
+									onClick={ () => {
+										setIsExpanded( ! isExpanded );
+
+										// Check for overflow after expanding hidden payment methods.
+										// Use setTimeout to ensure the DOM is updated before checking for overflow.
+										setTimeout( () => {
+											checkHasOverflow();
+										}, 0 );
+									} }
+									tabIndex={ 0 }
+									aria-expanded={ isExpanded }
+								>
+									{ sprintf(
+										/* translators: %s: number of hidden payment methods */
+										__( 'Show more (%s)', 'woocommerce' ),
+										hiddenCount
+									) }
+								</Button>
+							</div>
 						) }
 					</div>
 				</div>
-				<div className="woocommerce-recommended-payment-methods__list_footer">
+				<div
+					className={ clsx(
+						'woocommerce-recommended-payment-methods__list_footer',
+						{
+							'has-border': hasOverflow,
+						}
+					) }
+				>
 					<Button
 						className="components-button is-primary"
 						onClick={ () => {
@@ -219,6 +271,40 @@ export default function PaymentMethodsSelection() {
 								url: href,
 								method: 'POST',
 							} ).then( () => {
+								recordEvent(
+									'wcpay_settings_payment_methods_continue',
+									{
+										displayed_payment_methods:
+											Object.keys(
+												paymentMethodsState
+											).join( ', ' ),
+										selected_payment_methods: Object.keys(
+											paymentMethodsState
+										)
+											.filter(
+												( paymentMethod ) =>
+													paymentMethodsState[
+														paymentMethod
+													]
+											)
+											.join( ', ' ),
+										deselected_payment_methods: Object.keys(
+											paymentMethodsState
+										)
+											.filter(
+												( paymentMethod ) =>
+													! paymentMethodsState[
+														paymentMethod
+													]
+											)
+											.join( ', ' ),
+										store_country:
+											window.wcSettings?.admin
+												?.woocommerce_payments_nox_profile
+												?.business_country_code ??
+											'unknown',
+									}
+								);
 								setIsContinueButtonLoading( false );
 								navigateToNextStep();
 							} );

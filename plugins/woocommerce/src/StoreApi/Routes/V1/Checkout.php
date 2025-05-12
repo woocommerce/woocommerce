@@ -8,8 +8,6 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
-use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
-use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * Checkout class.
@@ -253,13 +251,9 @@ class Checkout extends AbstractCartRoute {
 		foreach ( $validate_contexts as $context => $context_data ) {
 			$errors = new \WP_Error();
 
-			if ( Features::is_enabled( 'experimental-blocks' ) ) {
-				$document_object = $this->get_document_object_from_rest_request( $request );
-				$document_object->set_context( $context );
-				$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( $context_data['location'], $document_object );
-			} else {
-				$additional_fields = $this->additional_fields_controller->get_fields_for_location( $context_data['location'] );
-			}
+			$document_object = $this->get_document_object_from_rest_request( $request );
+			$document_object->set_context( $context );
+			$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( $context_data['location'], $document_object );
 
 			// These values are used to validate custom rules and generate the document object.
 			$field_values = (array) $request->get_param( $context_data['param'] ) ?? [];
@@ -759,13 +753,10 @@ class Checkout extends AbstractCartRoute {
 		];
 
 		foreach ( $additional_field_contexts as $context => $context_data ) {
-			if ( Features::is_enabled( 'experimental-blocks' ) ) {
-				$document_object = $this->get_document_object_from_rest_request( $request );
-				$document_object->set_context( $context );
-				$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( $context_data['location'], $document_object );
-			} else {
-				$additional_fields = $this->additional_fields_controller->get_fields_for_location( $context_data['location'] );
-			}
+
+			$document_object = $this->get_document_object_from_rest_request( $request );
+			$document_object->set_context( $context );
+			$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( $context_data['location'], $document_object );
 
 			if ( 'shipping_address' === $context_data['param'] ) {
 				$field_values = (array) $request['shipping_address'] ?? ( $request['billing_address'] ?? [] );

@@ -149,7 +149,8 @@
 		"installer-paths": {
 			"packages/{$name}": [
 				"woocommerce/action-scheduler",
-				"woocommerce/email-editor"
+				"woocommerce/email-editor",
+				"woocommerce/blueprint"
 			]
 		},
 		"scripts-description": {
