@@ -5,6 +5,7 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\Internal\Email\OrderPriceFormatter;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -206,7 +207,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_content_html() {
-			return wc_get_template_html(
+			$this->add_pos_customizations();
+			$content = wc_get_template_html(
 				$this->template_html,
 				array(
 					'order'              => $this->object,
@@ -220,6 +222,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 					'email'              => $this,
 				)
 			);
+			$this->remove_pos_customizations();
+			return $content;
 		}
 
 		/**
@@ -228,7 +232,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_content_plain() {
-			return wc_get_template_html(
+			$this->add_pos_customizations();
+			$content = wc_get_template_html(
 				$this->template_plain,
 				array(
 					'order'              => $this->object,
@@ -242,6 +247,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 					'email'              => $this,
 				)
 			);
+			$this->remove_pos_customizations();
+			return $content;
 		}
 
 		/**
@@ -250,6 +257,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_block_editor_email_template_content() {
+			$this->add_pos_customizations();
 			return wc_get_template_html(
 				$this->template_block_content,
 				array(
@@ -343,6 +351,76 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 				$this->form_fields['cc']  = $this->get_cc_field();
 				$this->form_fields['bcc'] = $this->get_bcc_field();
 			}
+		}
+
+		/**
+		 * Add actions and filters before generating email content.
+		 */
+		private function add_pos_customizations() {
+			// Add action to display unit price in the beginning of the order item meta.
+			add_action( 'woocommerce_order_item_meta_start', array( $this, 'add_unit_price' ), 10, 4 );
+			// Add filter to include additional details in the order item totals table.
+			add_filter( 'woocommerce_get_order_item_totals', array( $this, 'order_item_totals' ), 10, 3 );
+		}
+
+		/**
+		 * Remove actions and filters after generating email content.
+		 */
+		private function remove_pos_customizations() {
+			// Remove actions and filters after generating content to avoid affecting other emails.
+			remove_action( 'woocommerce_order_item_meta_start', array( $this, 'add_unit_price' ), 10 );
+			remove_filter( 'woocommerce_get_order_item_totals', array( $this, 'order_item_totals' ), 10 );
+		}
+
+		/**
+		 * Add unit price to order item meta start position.
+		 *
+		 * @param int      $item_id       Order item ID.
+		 * @param array    $item          Order item data.
+		 * @param WC_Order $order         Order object.
+		 */
+		public function add_unit_price( $item_id, $item, $order ) {
+			$unit_price = OrderPriceFormatter::get_formatted_item_subtotal( $order, $item, get_option( 'woocommerce_tax_display_cart' ) );
+			echo wp_kses_post( '<br /><small>' . $unit_price . '</small>' );
+		}
+
+		/**
+		 * Add additional details to the order item totals table.
+		 *
+		 * @param array    $total_rows Array of total rows.
+		 * @param WC_Order $order      Order object.
+		 * @param string   $tax_display Tax display.
+		 * @return array Modified array of total rows.
+		 */
+		public function order_item_totals( $total_rows, $order, $tax_display ) {
+			$cash_payment_change_due_amount           = $order->get_meta( '_cash_change_amount', true );
+			$formatted_cash_payment_change_due_amount = wc_price( $cash_payment_change_due_amount, array( 'currency' => $order->get_currency() ) );
+			if ( ! empty( $cash_payment_change_due_amount ) ) {
+				$total_rows['cash_payment_change_due_amount'] = array(
+					'type'  => 'cash_payment_change_due_amount',
+					'label' => __( 'Change due:', 'woocommerce' ),
+					'value' => $formatted_cash_payment_change_due_amount,
+				);
+			}
+
+			$auth_code = $order->get_meta( '_charge_id', true );
+			if ( ! empty( $auth_code ) ) {
+				$total_rows['payment_auth_code'] = array(
+					'type'  => 'payment_auth_code',
+					'label' => __( 'Auth code:', 'woocommerce' ),
+					'value' => $auth_code,
+				);
+			}
+
+			if ( $order->get_date_paid() !== null ) {
+				$total_rows['date_paid'] = array(
+					'type'  => 'date_paid',
+					'label' => __( 'Time of payment:', 'woocommerce' ),
+					'value' => wc_format_datetime( $order->get_date_paid(), get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) ),
+				);
+			}
+
+			return $total_rows;
 		}
 	}
 

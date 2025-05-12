@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { test, expect } from '../../fixtures/fixtures';
-import { getFakeCustomer, getFakeProduct } from '../../utils/data';
+import { getFakeProduct } from '../../utils/data';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { WC_API_PATH, WC_ADMIN_API_PATH } from '../../utils/api-client';
 
@@ -62,7 +62,7 @@ const wcPages = [
 				text: 'Filter by product type',
 			},
 			{
-				name: 'Add New',
+				name: 'Add new product',
 				heading: 'Add New',
 				element: '.duplication',
 				text: 'Copy to a new draft',
@@ -180,71 +180,102 @@ const wcPages = [
 	},
 ];
 
+const product = getFakeProduct();
+let orderId;
+
+test.use( { storageState: ADMIN_STATE_PATH } );
+
+test.beforeAll( async ( { restApi } ) => {
+	// skip onboarding
+	const response = await restApi.post(
+		`${ WC_ADMIN_API_PATH }/onboarding/profile`,
+		{
+			skipped: true,
+		}
+	);
+	expect( response.statusCode ).toEqual( 200 );
+
+	// create a simple product
+	await restApi
+		.post( `${ WC_API_PATH }/products`, product )
+		.then( ( r ) => {
+			product.id = r.data.id;
+		} )
+		.catch( ( e ) => {
+			console.error(
+				`Failed to create product ${
+					e.data ? JSON.stringify( e.data ) : ''
+				}`
+			);
+			throw e;
+		} );
+
+	// create an order
+	await restApi
+		.post( `${ WC_API_PATH }/orders`, {
+			line_items: [
+				{
+					product_id: product.id,
+					quantity: 1,
+				},
+			],
+		} )
+		.then( ( r ) => {
+			orderId = r.data.id;
+		} )
+		.catch( ( e ) => {
+			console.error(
+				`Failed to create order ${
+					e.data ? JSON.stringify( e.data ) : ''
+				}`
+			);
+			throw e;
+		} );
+} );
+
+test.afterAll( async ( { restApi } ) => {
+	await restApi
+		.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
+			force: true,
+		} )
+		.catch( ( e ) => {
+			console.error(
+				`Failed to delete order ${
+					e.data ? JSON.stringify( e.data ) : ''
+				}`
+			);
+			throw e;
+		} );
+	await restApi
+		.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+			force: true,
+		} )
+		.catch( ( e ) => {
+			console.error(
+				`Failed to delete product ${
+					e.data ? JSON.stringify( e.data ) : ''
+				}`
+			);
+			throw e;
+		} );
+} );
+
 for ( const currentPage of wcPages ) {
-	const product = getFakeProduct();
-	const customer = getFakeCustomer();
-	let orderId;
-
-	test.use( { storageState: ADMIN_STATE_PATH } );
-
-	test.beforeAll( async ( { restApi } ) => {
-		// skip onboarding
-		const response = await restApi.post(
-			`${ WC_ADMIN_API_PATH }/onboarding/profile`,
-			{
-				skipped: true,
-			}
-		);
-		expect( response.statusCode ).toEqual( 200 );
-
-		// create a simple product
-		await restApi
-			.post( `${ WC_API_PATH }/products`, product )
-			.then( ( r ) => {
-				product.id = r.data.id;
-			} );
-
-		// create an order
-		await restApi
-			.post( `${ WC_API_PATH }/orders`, {
-				line_items: [
-					{
-						product_id: product.id,
-						quantity: 1,
-					},
-				],
-			} )
-			.then( ( r ) => {
-				orderId = r.data.id;
-			} );
-
-		// create customer
-		await restApi
-			.post( `${ WC_API_PATH }/customers`, customer )
-			.then( ( r ) => ( customer.id = r.data.id ) );
-	} );
-
-	test.afterAll( async ( { restApi } ) => {
-		await restApi.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
-			force: true,
-		} );
-		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
-			force: true,
-		} );
-		await restApi.delete( `${ WC_API_PATH }/customers/${ customer.id }`, {
-			force: true,
-		} );
-	} );
-
 	for ( let i = 0; i < currentPage.subpages.length; i++ ) {
 		test( `can load ${ currentPage.name } > ${ currentPage.subpages[ i ].name } page`, async ( {
 			page,
 		} ) => {
 			await page.goto( currentPage.url );
+
+			// needs a Regexp on link name to match exact text and also match the possible counter
+			// E.g. should match "Orders 3" or "Orders", but should not match "Quick Orders"
 			await page
-				.locator(
-					`li.wp-menu-open > ul.wp-submenu > li a:has-text("${ currentPage.subpages[ i ].name }")`
-				)
+				.locator( 'li.wp-menu-open > ul.wp-submenu' )
+				.getByRole( 'link', {
+					name: new RegExp(
+						`^${ currentPage.subpages[ i ].name }( \\d+)?$`
+					),
+				} )
 				.click();
 
 			await expect(
