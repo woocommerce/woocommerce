@@ -158,6 +158,15 @@ class WC_Admin_Exporters {
 			$exporter->set_product_category_to_export( wp_unslash( array_values( $_POST['export_category'] ) ) ); // WPCS: input var ok, sanitization ok.
 		}
 
+		// Set specific product IDs if provided.
+		if ( ! empty( $_POST['export_product_ids'] ) ) { // WPCS: input var ok.
+			$ids_raw = explode( ',', sanitize_text_field( wp_unslash( $_POST['export_product_ids'] ) ) ); // WPCS: input var ok, sanitization ok.
+
+			if ( ! empty( $ids_raw ) ) {
+				$exporter->set_product_ids_to_export( $ids_raw );
+			}
+		}
+
 		if ( ! empty( $_POST['filename'] ) ) { // WPCS: input var ok.
 			$exporter->set_filename( wp_unslash( $_POST['filename'] ) ); // WPCS: input var ok, sanitization ok.
 		}

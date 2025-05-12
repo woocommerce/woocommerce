@@ -142,17 +142,28 @@ class WC_Helper_Admin {
 	}
 
 	/**
-	 * Registers the REST routes for the featured products endpoint.
-	 * This endpoint is used by the WooCommerce > Extensions > Discover
-	 * page.
+	 * Registers the REST routes for the featured products and product
+	 * previews endpoints.
 	 */
 	public static function register_rest_routes() {
+		/* Used by the WooCommerce > Extensions > Discover page. */
 		register_rest_route(
 			'wc/v3',
 			'/marketplace/featured',
 			array(
 				'methods'             => 'GET',
 				'callback'            => array( __CLASS__, 'get_featured' ),
+				'permission_callback' => array( __CLASS__, 'get_permission' ),
+			)
+		);
+
+		/* Used to show previews of products in a modal in in-app marketplace. */
+		register_rest_route(
+			'wc/v1',
+			'/marketplace/product-preview',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'get_product_preview' ),
 				'permission_callback' => array( __CLASS__, 'get_permission' ),
 			)
 		);
@@ -178,6 +189,67 @@ class WC_Helper_Admin {
 		}
 
 		wp_send_json( $featured );
+	}
+
+	/**
+	 * Fetch data for product previews from WooCommerce.com.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 */
+	public static function get_product_preview( $request ) {
+		$product_id = (int) $request->get_param( 'product_id' );
+
+		if ( ! $product_id ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Missing product ID', 'woocommerce' ),
+				),
+				400
+			);
+		}
+
+		$product_preview = WC_Admin_Addons::fetch_product_preview( $product_id );
+
+		if ( ! $product_preview ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'We couldn\'t find a preview for this product.', 'woocommerce' ),
+				),
+				404
+			);
+		}
+
+		if ( is_wp_error( $product_preview ) ) {
+			wp_send_json_error(
+				array(
+					'message' => $product_preview->get_error_message(),
+				)
+			);
+		}
+
+		if (
+			! isset( $product_preview['css'] )
+			|| ! is_string( $product_preview['css'] )
+			|| ! isset( $product_preview['html'] )
+			|| ! is_string( $product_preview['html'] )
+		) {
+			wp_send_json_error(
+				array(
+					'message' => __(
+						'API response is missing required elements, or they are in the wrong form.',
+						'woocommerce'
+					),
+				),
+				500
+			);
+		}
+
+		$sanitized_product_preview = array(
+			'css'  => WC_Helper_Sanitization::sanitize_css( $product_preview['css'] ),
+			'html' => WC_Helper_Sanitization::sanitize_html( $product_preview['html'] ),
+		);
+
+		wp_send_json( $sanitized_product_preview );
 	}
 }
 

@@ -149,7 +149,7 @@ const { state, actions } = store(
 			},
 			get isPillDisabled() {
 				const { name, option } = getContext< PillsContext >();
-				const { variation, availableVariations } =
+				const { selectedAttributes, availableVariations } =
 					getContext< AddToCartWithOptionsStoreContext >(
 						'woocommerce/add-to-cart-with-options'
 					);
@@ -157,7 +157,7 @@ const { state, actions } = store(
 				return ! isAttributeValueValid( {
 					attributeName: name,
 					attributeValue: option.value,
-					selectedAttributes: variation,
+					selectedAttributes,
 					availableVariations,
 				} );
 			},
@@ -220,7 +220,7 @@ const { state, actions } = store(
 					case 'ArrowLeft': {
 						keyWasProcessed = true;
 						const context = getContext< PillsContext >();
-						const { variation, availableVariations } =
+						const { selectedAttributes, availableVariations } =
 							getContext< AddToCartWithOptionsStoreContext >(
 								'woocommerce/add-to-cart-with-options'
 							);
@@ -234,7 +234,7 @@ const { state, actions } = store(
 								isAttributeValueValid( {
 									attributeName: context.name,
 									attributeValue: context.options[ i ].value,
-									selectedAttributes: variation,
+									selectedAttributes,
 									availableVariations,
 								} )
 							) {
@@ -259,7 +259,7 @@ const { state, actions } = store(
 					case 'ArrowRight': {
 						keyWasProcessed = true;
 						const context = getContext< PillsContext >();
-						const { variation, availableVariations } =
+						const { selectedAttributes, availableVariations } =
 							getContext< AddToCartWithOptionsStoreContext >(
 								'woocommerce/add-to-cart-with-options'
 							);
@@ -277,7 +277,7 @@ const { state, actions } = store(
 								isAttributeValueValid( {
 									attributeName: context.name,
 									attributeValue: context.options[ i ].value,
-									selectedAttributes: variation,
+									selectedAttributes,
 									availableVariations,
 								} )
 							) {
@@ -331,7 +331,7 @@ store(
 					return false;
 				}
 
-				const { variation, availableVariations } =
+				const { selectedAttributes, availableVariations } =
 					getContext< AddToCartWithOptionsStoreContext >(
 						'woocommerce/add-to-cart-with-options'
 					);
@@ -339,7 +339,7 @@ store(
 				return ! isAttributeValueValid( {
 					attributeName: name,
 					attributeValue: option.value,
-					selectedAttributes: variation,
+					selectedAttributes,
 					availableVariations,
 				} );
 			},
