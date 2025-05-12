@@ -70,6 +70,10 @@ export interface WooPaymentsProviderOnboardingStep {
 			type?: string;
 			href?: string;
 		};
+		clean?: {
+			type?: string;
+			href?: string;
+		};
 		check?: {
 			type?: string;
 			href?: string;
