@@ -266,4 +266,46 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( '1234567890', $plain_text_content );
 		$this->assertStringNotContainsString( '134 Main St, Anytown, USA', $plain_text_content );
 	}
+
+	/**
+	 * @testdox POS email content includes refund & returns policy when option is set.
+	 */
+	public function test_email_content_includes_refund_returns_policy_when_option_is_set() {
+		// Given option is set.
+		update_option( 'woocommerce_pos_refund_returns_policy', 'Accepted within 30 days of purchase.' );
+
+		// When getting content from both email types.
+		$email              = new WC_Email_Customer_POS_Completed_Order();
+		$email->object      = OrderHelper::create_order();
+		$html_content       = $email->get_content_html();
+		$plain_text_content = $email->get_content_plain();
+
+		// Then POS email should include store details.
+		$this->assertStringContainsString( esc_html__( 'Refund & Returns Policy', 'woocommerce' ), $html_content );
+		$this->assertStringContainsString( 'Accepted within 30 days of purchase.', $html_content );
+
+		// And plain text email should include store details.
+		$this->assertStringContainsString( esc_html__( 'Refund & Returns Policy', 'woocommerce' ), $plain_text_content );
+		$this->assertStringContainsString( 'Accepted within 30 days of purchase.', $plain_text_content );
+	}
+
+	/**
+	 * @testdox POS email content does not include refund & returns policy when option is not set.
+	 */
+	public function test_email_content_does_not_include_refund_returns_policy_when_option_is_not_set() {
+		// Given option is not set.
+		delete_option( 'woocommerce_pos_refund_returns_policy' );
+
+		// When getting content from both email types.
+		$email              = new WC_Email_Customer_POS_Completed_Order();
+		$email->object      = OrderHelper::create_order();
+		$html_content       = $email->get_content_html();
+		$plain_text_content = $email->get_content_plain();
+
+		// Then POS email should not include refund & returns policy.
+		$this->assertStringNotContainsString( esc_html__( 'Refund & Returns Policy', 'woocommerce' ), $html_content );
+
+		// And plain text email should not include refund & returns policy.
+		$this->assertStringNotContainsString( esc_html__( 'Refund & Returns Policy', 'woocommerce' ), $plain_text_content );
+	}
 }
