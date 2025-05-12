@@ -31,6 +31,13 @@ class Checkout extends \WP_UnitTestCase {
 	private $asset_api;
 
 	/**
+	 * Mock logger instance.
+	 *
+	 * @var \WC_Logger_Interface $mock_logger
+	 */
+  	private $mock_logger;
+
+	/**
 	 * Set up the test. Creates a AssetDataRegistryMock.
 	 *
 	 * @return void
@@ -40,6 +47,21 @@ class Checkout extends \WP_UnitTestCase {
 		$this->asset_api            = Package::container()->get( API::class );
 		$this->registry             = new AssetDataRegistryMock( $this->asset_api );
 		$this->integration_registry = new IntegrationRegistry();
+		$this->mock_logger          = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		add_filter(
+			'woocommerce_logging_class',
+			array( $this, 'override_wc_logger' )
+		);
+	}
+
+	/**
+	 * Tear down after test.
+	 *
+	 * @return void
+	 */
+	protected function tearDown(): void {
+		parent::tearDown();
+		remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
 	}
 
 	/**
@@ -109,5 +131,88 @@ class Checkout extends \WP_UnitTestCase {
 		$data_from_registry = $this->registry->get();
 		$this->assertEquals( 'Changed pickup', $data_from_registry['localPickupText'] );
 		wp_delete_post( $page_id );
+	}
+
+	/**
+	 * Test that the shipping fields filter is applied correctly.
+	 *
+	 * @return void
+	 */
+	public function test_valid_shipping_fields_filter() {
+		$checkout = new CheckoutMock( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-mock' );
+
+		// Check that the shipping fields filter does not warn when applied with an array of strings.
+		add_filter(
+			'woocommerce_address_fields_for_shipping_rates',
+			function () {
+				return [ 'address_1', 'address_2' ];
+			}
+		);
+		$checkout->mock_enqueue_data();
+
+		$this->mock_logger->expects( $this->never() )
+							->method( 'warning' );
+		remove_all_filters( 'woocommerce_address_fields_for_shipping_rates' );
+	}
+
+	/**
+	 * Test that the shipping fields filter warns correctly with mixed array of string/non-string.
+	 *
+	 * @return void
+	 */
+	public function test_invalid_mixed_array_shipping_fields_filter() {
+		$checkout = new CheckoutMock( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-mock' );
+
+		// Check that the shipping fields filter does warn when applied with an array of mixed strings non-string.
+		add_filter(
+			'woocommerce_address_fields_for_shipping_rates',
+			function () {
+				return [ 'address_1', 'address_2', [] ];
+			}
+		);
+
+		$this->mock_logger->expects( $this->once() )
+							->method( 'warning' )
+							->with(
+								$this->stringContains( 'Address fields for shipping rates values must be strings. Non-string value removed: Array' )
+							);
+		$checkout->mock_enqueue_data();
+
+		remove_all_filters( 'woocommerce_address_fields_for_shipping_rates' );
+	}
+
+	/**
+	 * Test that the shipping fields filter warns correctly with non-array.
+	 *
+	 * @return void
+	 */
+	public function test_non_array_shipping_fields_filter() {
+		$checkout = new CheckoutMock( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-mock' );
+
+		// Check that the shipping fields filter does warn when applied with an array of mixed strings non-string.
+		add_filter(
+			'woocommerce_address_fields_for_shipping_rates',
+			function () {
+				return 123;
+			}
+		);
+
+		$this->mock_logger->expects( $this->once() )
+							->method( 'warning' )
+							->with(
+								$this->stringContains( 'Address fields for shipping rates must be an array of strings.' )
+							);
+		$checkout->mock_enqueue_data();
+
+		remove_all_filters( 'woocommerce_address_fields_for_shipping_rates' );
+	}
+
+	/**
+	 * Overrides the WC logger.
+	 *
+	 * @return mixed
+	 */
+	public function override_wc_logger() {
+		return $this->mock_logger;
 	}
 }
