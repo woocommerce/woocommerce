@@ -7,7 +7,7 @@
  * @author      WooThemes
  * @category    Admin
  * @package     WooCommerce\Admin\Meta Boxes
- * @version     2.1.0
+ * @version     x.x.x
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -367,7 +367,7 @@ class WC_Meta_Box_Coupon_Data {
 		$exclude_product_categories = isset( $_POST['exclude_product_categories'] ) ? (array) $_POST['exclude_product_categories'] : array();
 
 		$coupon = new WC_Coupon( $post_id );
-		$coupon->set_props(
+		$errors = $coupon->set_props(
 			array(
 				'code'                        => $post->post_title,
 				'discount_type'               => wc_clean( $_POST['discount_type'] ),
@@ -388,6 +388,11 @@ class WC_Meta_Box_Coupon_Data {
 				'email_restrictions'          => array_filter( array_map( 'trim', explode( ',', wc_clean( $_POST['customer_email'] ) ) ) ),
 			)
 		);
+
+		if ( is_wp_error( $errors ) ) {
+			WC_Admin_Meta_Boxes::add_error( $errors->get_error_message() );
+		}
+
 		$coupon->save();
 		do_action( 'woocommerce_coupon_options_save', $post_id, $coupon );
 	}
