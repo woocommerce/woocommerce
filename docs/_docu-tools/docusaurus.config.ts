@@ -61,6 +61,7 @@ const config: Config = {
       logo: {
         alt: 'WooCommerce developer docs',
         src: 'img/woo-dev-site-logo.svg',
+        srcDark: 'img/woo-dev-site-logo-dark.svg',
         href: '/docs',
       },
       items: [

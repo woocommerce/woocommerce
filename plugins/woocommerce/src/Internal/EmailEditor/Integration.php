@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\EmailEditor\EmailPatterns\PatternsController
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplatesController;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
+use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplateApiController;
 use Throwable;
 use WP_Post;
@@ -107,6 +108,7 @@ class Integration {
 		add_filter( 'replace_editor', array( $this, 'replace_editor' ), 10, 2 );
 		add_action( 'before_delete_post', array( $this, 'delete_email_template_associated_with_email_editor_post' ), 10, 2 );
 		add_filter( 'woocommerce_email_editor_send_preview_email_rendered_data', array( $this, 'update_send_preview_email_rendered_data' ) );
+		add_filter( 'woocommerce_email_editor_send_preview_email_personalizer_context', array( $this, 'update_send_preview_email_personalizer_context' ) );
 		add_filter( 'woocommerce_email_editor_preview_post_template_html', array( $this, 'update_preview_post_template_html_data' ), 100, 1 );
 	}
 
@@ -226,11 +228,10 @@ class Integration {
 	 * @return string The updated preview data with placeholders replaced.
 	 */
 	private function update_email_preview_data( $data, string $email_type ) {
-		$default_type_param = 'WC_Email_Customer_Processing_Order';
-		$type_param         = $default_type_param;
+		$type_param = EmailPreview::DEFAULT_EMAIL_TYPE;
 
 		if ( ! empty( $email_type ) ) {
-			$type_param = 'WC_Email_' . implode( '_', array_map( 'ucfirst', explode( '_', $email_type ) ) );
+			$type_param = WCTransactionalEmailPostsManager::get_instance()->get_email_type_class_name_from_template_name( $email_type );
 		}
 
 		$email_preview = wc_get_container()->get( EmailPreview::class );
@@ -240,7 +241,7 @@ class Integration {
 		} catch ( \InvalidArgumentException $e ) {
 			// If the provided type was invalid, fall back to the default.
 			try {
-				$message = $email_preview->generate_placeholder_content( $default_type_param );
+				$message = $email_preview->generate_placeholder_content( EmailPreview::DEFAULT_EMAIL_TYPE );
 			} catch ( \Throwable $e ) {
 				return $data;
 			}
@@ -274,6 +275,32 @@ class Integration {
 			}
 		}
 		return $data;
+	}
+
+	/**
+	 * Update the personalizer context for the send preview email.
+	 *
+	 * @param array $context The personalizer context.
+	 * @return array The updated personalizer context.
+	 */
+	public function update_send_preview_email_personalizer_context( $context ) {
+		$post_manager             = WCTransactionalEmailPostsManager::get_instance();
+		$email_type_template_name = $post_manager->get_email_type_from_post_id( get_the_ID() );
+		$email_type               = $email_type_template_name ? $post_manager->get_email_type_class_name_from_template_name( $email_type_template_name ) : EmailPreview::DEFAULT_EMAIL_TYPE;
+		$email_preview            = wc_get_container()->get( EmailPreview::class );
+
+		try {
+			$email_preview->set_email_type( $email_type );
+		} catch ( \InvalidArgumentException $e ) {
+			// If the email type is invalid, return the context data as is.
+			return $context;
+		}
+
+		$email            = $email_preview->get_email();
+		$email->recipient = $context['recipient_email'] ?? '';
+		$personalizer     = wc_get_container()->get( TransactionalEmailPersonalizer::class );
+
+		return $personalizer->prepare_context_data( $context, $email );
 	}
 
 	/**

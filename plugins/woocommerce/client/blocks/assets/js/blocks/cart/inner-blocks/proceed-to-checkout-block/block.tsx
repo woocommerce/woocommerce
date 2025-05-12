@@ -12,6 +12,7 @@ import { cartStore, checkoutStore } from '@woocommerce/block-data';
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { isErrorResponse } from '@woocommerce/types';
 import { useCartEventsContext } from '@woocommerce/base-context/providers';
+import { Spinner } from '@woocommerce/blocks-components';
 
 /**
  * Internal dependencies
@@ -31,8 +32,9 @@ const Block = ( {
 	buttonLabel: string;
 } ): JSX.Element => {
 	const link = getSetting< string >( 'page-' + checkoutPageId, false );
-	const isCalculating = useSelect( ( select ) =>
-		select( checkoutStore ).isCalculating()
+	const isCalculating = useSelect(
+		( select ) => select( checkoutStore ).isCalculating(),
+		[]
 	);
 
 	const [ positionReferenceElement, positionRelativeToViewport ] =
@@ -62,7 +64,8 @@ const Block = ( {
 	}, [] );
 	const cart = useSelect( ( select ) => {
 		return select( cartStore ).getCartData();
-	} );
+	}, [] );
+
 	const label = applyCheckoutFilter< string >( {
 		filterName: 'proceedToCheckoutButtonLabel',
 		defaultValue: buttonLabel || defaultButtonLabel,
@@ -79,7 +82,9 @@ const Block = ( {
 
 	const submitContainerContents = (
 		<Button
-			className="wc-block-cart__submit-button"
+			className={ clsx( 'wc-block-cart__submit-button', {
+				'wc-block-cart__submit-button--loading': showSpinner,
+			} ) }
 			href={ filteredLink }
 			disabled={ isCalculating }
 			onClick={ ( e ) => {
@@ -91,8 +96,8 @@ const Block = ( {
 					setShowSpinner( true );
 				} );
 			} }
-			showSpinner={ showSpinner }
 		>
+			{ showSpinner && <Spinner /> }
 			{ label }
 		</Button>
 	);
