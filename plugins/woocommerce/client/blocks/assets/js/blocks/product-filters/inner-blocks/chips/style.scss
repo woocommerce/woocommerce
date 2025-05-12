@@ -11,6 +11,7 @@
 	background: transparent;
 	border-radius: 2px;
 	font-size: 0.875em;
+	font-family: inherit;
 	cursor: pointer;
 	color: var(--wc-product-filter-chips-text, currentColor);
 
@@ -52,6 +53,7 @@
 .wc-block-product-filter-chips__show-more {
 	text-decoration: underline;
 	appearance: none;
+	font-family: inherit;
 	background: transparent;
 	border: none;
 	padding: 0;

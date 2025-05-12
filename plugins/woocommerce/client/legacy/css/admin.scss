@@ -5757,6 +5757,43 @@ img.help_tip {
 	}
 }
 
+#usage_restriction_coupon_data.woocommerce_options_panel {
+	.options_group {
+
+		border-bottom: 0px;
+
+		.hr-section {
+			display: flex;
+			flex-basis: 100%;
+			align-items: center;
+			font-size: 10.5px;
+			letter-spacing: 1px;
+			font-weight: 300;
+			text-transform: uppercase;
+			position: relative;
+			top: 8px;
+			padding-bottom: 10px;
+
+			&:before, &:after {
+				content: "";
+				flex-grow: 1;
+				background: #eee;
+				height: 1px;
+				font-size: 0px;
+				line-height: 0px;
+			}
+
+			&:before {
+				margin: 0 16px 0 0;
+			}
+
+			&:after {
+				margin: 0 0 0 16px;
+			}
+		}
+	}
+}
+
 #woocommerce-product-data,
 #woocommerce-coupon-data,
 .woocommerce {

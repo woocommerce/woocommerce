@@ -43,15 +43,15 @@ class FilterData {
 		 *
 		 * @since 9.9.0
 		 *
-		 * @param mixed  $results      The results for current query.
+		 * @param array  $results      The results for current query.
 		 * @param string $filter_type  The type of filter. Accepts price|stock|rating|attribute.
 		 * @param array  $query_vars   The query arguments to calculate the filter data.
 		 * @param array  $extra        Some filter types require extra arguments for calculation, like attribute.
-		 * @return mixed The filtered results or null to continue with default processing.
+		 * @return array The filtered results or null to continue with default processing.
 		 */
 		$pre_filter_counts = apply_filters( 'woocommerce_pre_product_filter_data', null, 'price', $query_vars, array() );
 
-		if ( isset( $pre_filter_counts ) ) {
+		if ( is_array( $pre_filter_counts ) ) {
 			return $pre_filter_counts;
 		}
 
@@ -90,7 +90,7 @@ class FilterData {
 		 * We're using the query as is, same as Core does.
 		 */
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$results = $wpdb->get_row( $price_filter_sql );
+		$results = (array) $wpdb->get_row( $price_filter_sql );
 
 		/**
 		 * Filters the product filter data before it is returned.
@@ -98,11 +98,11 @@ class FilterData {
 		 * @hook woocommerce_product_filter_data
 		 * @since 9.9.0
 		 *
-		 * @param mixed  $results      The results for current query.
+		 * @param array  $results      The results for current query.
 		 * @param string $filter_type  The type of filter. Accepts price|stock|rating|attribute.
 		 * @param array  $query_vars   The query arguments to calculate the filter data.
 		 * @param array  $extra        Some filter types require extra arguments for calculation, like attribute.
-		 * @return mixed The filtered results
+		 * @return array The filtered results
 		 */
 		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'price', $query_vars, array() );
 
@@ -124,7 +124,7 @@ class FilterData {
 		 */
 		$pre_filter_counts = apply_filters( 'woocommerce_pre_product_filter_data', null, 'stock', $query_vars, array() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
-		if ( isset( $pre_filter_counts ) ) {
+		if ( is_array( $pre_filter_counts ) ) {
 			return $pre_filter_counts;
 		}
 
@@ -194,7 +194,7 @@ class FilterData {
 		 */
 		$pre_filter_counts = apply_filters( 'woocommerce_pre_product_filter_data', null, 'rating', $query_vars, array() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
-		if ( isset( $pre_filter_counts ) ) {
+		if ( is_array( $pre_filter_counts ) ) {
 			return $pre_filter_counts;
 		}
 
@@ -262,7 +262,7 @@ class FilterData {
 		 */
 		$pre_filter_counts = apply_filters( 'woocommerce_pre_product_filter_data', null, 'attribute', $query_vars, array( 'taxonomy' => $attribute_to_count ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
-		if ( isset( $pre_filter_counts ) ) {
+		if ( is_array( $pre_filter_counts ) ) {
 			return $pre_filter_counts;
 		}
 
@@ -357,6 +357,7 @@ class FilterData {
 		$transient_version = WC_Cache_Helper::get_transient_version( CacheController::TRANSIENT_GROUP );
 
 		if ( empty( $cache['version'] ) ||
+			! is_array( $cache['value'] ) ||
 			empty( $cache['value'] ) ||
 			$transient_version !== $cache['version']
 		) {
@@ -371,8 +372,14 @@ class FilterData {
 	 *
 	 * @param string $key   Transient key.
 	 * @param mix    $value Value to set.
+	 *
+	 * @return bool True if the cache was set, false otherwise.
 	 */
 	private function set_cache( $key, $value ) {
+		if ( ! is_array( $value ) ) {
+			return false;
+		}
+
 		$transient_version = WC_Cache_Helper::get_transient_version( CacheController::TRANSIENT_GROUP );
 		$transient_value   = array(
 			'version' => $transient_version,

@@ -277,7 +277,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		foreach ( $counts as $key => $value ) {
 			$attribute_counts[] = array(
 				'term'  => $key,
-				'count' => $value,
+				'count' => intval( $value ),
 			);
 		}
 
