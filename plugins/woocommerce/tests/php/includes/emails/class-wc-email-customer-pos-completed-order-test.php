@@ -17,7 +17,9 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 
 		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
 		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email.php';
+		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-completed-order.php';
 		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-pos-completed-order.php';
+		require_once $bootstrap->plugin_dir . '/includes/class-wc-emails.php';
 	}
 
 	/**
@@ -122,5 +124,41 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 
 		// Then date paid is not set.
 		$this->assertArrayNotHasKey( 'date_paid', $totals );
+	}
+
+	/**
+	 * @testdox POS email includes additional rows in order totals that regular completed order email does not.
+	 */
+	public function test_pos_email_includes_additional_rows_in_order_totals_while_regular_email_does_not() {
+		// Initialize WC_Emails to set up actions and filters for order totals where the POS email is different.
+		WC_Emails::instance();
+
+		// Given an order with POS-specific data.
+		$order = OrderHelper::create_order();
+		$order->add_meta_data( '_cash_change_amount', '5.00' );
+		$order->add_meta_data( '_charge_id', 'AUTH134' );
+		$order->set_date_paid( '2023-06-01 12:00:00' );
+		$order->save();
+
+		// When getting content from both email types.
+		$pos_email     = new WC_Email_Customer_POS_Completed_Order();
+		$regular_email = new WC_Email_Customer_Completed_Order();
+
+		// Set the order on both email objects.
+		$pos_email->object     = $order;
+		$regular_email->object = $order;
+
+		$pos_content     = $pos_email->get_content_html();
+		$regular_content = $regular_email->get_content_html();
+
+		// Then POS email should include additional rows.
+		$this->assertStringContainsString( 'cash_payment_change_due_amount', $pos_content );
+		$this->assertStringContainsString( 'payment_auth_code', $pos_content );
+		$this->assertStringContainsString( 'date_paid', $pos_content );
+
+		// And regular email should not include these rows.
+		$this->assertStringNotContainsString( 'cash_payment_change_due_amount', $regular_content );
+		$this->assertStringNotContainsString( 'payment_auth_code', $regular_content );
+		$this->assertStringNotContainsString( 'date_paid', $regular_content );
 	}
 }
