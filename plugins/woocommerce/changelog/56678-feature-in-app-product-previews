@@ -1,0 +1,4 @@
+Significance: major
+Type: add
+
+- Add new `<ProductPreviewModal>` component for use on the Marketplace pages - Add API request to fetch product preview data from WooCommerce.com - Extend existing HTML sanitization utils in WC Admin to allow additional HTML tags for use in the modal - Add unit test for extended sanitization util - Add support for in-app-marketplace settings to marketplace context. This will allow us to control certain Marketplace features by updating the value of an option on WooCommerce.com instead of hard-coding conditions in WooCommerce directly.

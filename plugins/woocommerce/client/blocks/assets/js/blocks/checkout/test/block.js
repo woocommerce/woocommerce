@@ -4,9 +4,10 @@
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
-import { CART_STORE_KEY, checkoutStore } from '@woocommerce/block-data';
+import { cartStore, checkoutStore } from '@woocommerce/block-data';
 import { default as fetchMock } from 'jest-fetch-mock';
 import { allSettings } from '@woocommerce/settings';
+import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies
@@ -90,7 +91,9 @@ jest.mock( '../context', () => {
 	};
 } );
 
-import { useCheckoutBlockContext } from '../context';
+/** @type {jest.Mock} */
+const useCheckoutBlockContext =
+	jest.requireMock( '../context' ).useCheckoutBlockContext;
 
 const CheckoutBlock = () => {
 	return (
@@ -138,8 +141,8 @@ describe( 'Testing Checkout', () => {
 				return Promise.resolve( '' );
 			} );
 			// need to clear the store resolution state between tests.
-			dispatch( CART_STORE_KEY ).invalidateResolutionForStore();
-			dispatch( CART_STORE_KEY ).receiveCart( defaultCartState.cartData );
+			dispatch( cartStore ).invalidateResolutionForStore();
+			dispatch( cartStore ).receiveCart( defaultCartState.cartData );
 		} );
 	} );
 
@@ -155,6 +158,97 @@ describe( 'Testing Checkout', () => {
 		expect( screen.getByText( /Place Order/i ) ).toBeInTheDocument();
 
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'Allows saving payment method if the customer is creating an account or has already logged in', async () => {
+		act( () => {
+			const PaymentMethodContent = () => <div>A payment method</div>;
+			registerPaymentMethod( {
+				name: 'test-payment-method',
+				label: 'Payment method with cards',
+				content: <PaymentMethodContent />,
+				edit: <PaymentMethodContent />,
+				icons: null,
+				canMakePayment: () => true,
+				supports: {
+					showSavedCards: true,
+					showSaveOption: true,
+					features: [ 'products' ],
+				},
+				ariaLabel: 'Test Payment Method',
+			} );
+		} );
+
+		const { rerender } = render( <CheckoutBlock /> );
+
+		expect(
+			await screen.findByText( /Payment method with cards/i )
+		).toBeInTheDocument();
+
+		expect(
+			screen.getByRole( 'checkbox', {
+				name: 'Save payment information to my account for future purchases.',
+			} )
+		).toBeInTheDocument();
+
+		act( () => {
+			dispatch( checkoutStore ).__internalSetCustomerId( 0 );
+		} );
+
+		rerender( <CheckoutBlock /> );
+
+		expect(
+			screen.queryByRole( 'checkbox', {
+				name: 'Save payment information to my account for future purchases.',
+			} )
+		).not.toBeInTheDocument();
+
+		act( () => {
+			allSettings.checkoutAllowsGuest = true;
+			allSettings.checkoutAllowsSignup = true;
+			dispatch( checkoutStore ).__internalSetCustomerId( 0 );
+			dispatch( checkoutStore ).__internalSetShouldCreateAccount( true );
+		} );
+
+		rerender( <CheckoutBlock /> );
+
+		expect(
+			screen.getByRole( 'checkbox', {
+				name: 'Save payment information to my account for future purchases.',
+			} )
+		).toBeInTheDocument();
+
+		act( () => {
+			dispatch( checkoutStore ).__internalSetShouldCreateAccount( false );
+		} );
+
+		rerender( <CheckoutBlock /> );
+
+		expect(
+			screen.queryByRole( 'checkbox', {
+				name: 'Save payment information to my account for future purchases.',
+			} )
+		).not.toBeInTheDocument();
+
+		act( () => {
+			allSettings.checkoutAllowsGuest = false;
+			allSettings.checkoutAllowsSignup = true;
+		} );
+
+		rerender( <CheckoutBlock /> );
+
+		expect(
+			screen.getByRole( 'checkbox', {
+				name: 'Save payment information to my account for future purchases.',
+			} )
+		).toBeInTheDocument();
+
+		// cleanup
+		act( () => {
+			allSettings.checkoutAllowsGuest = undefined;
+			allSettings.checkoutAllowsSignup = undefined;
+			dispatch( checkoutStore ).__internalSetCustomerId( 1 );
+		} );
 	} );
 
 	it( 'Renders the shipping address card if the address is filled and the cart contains a shippable product', async () => {
@@ -210,7 +304,7 @@ describe( 'Testing Checkout', () => {
 
 		// Async is needed here despite the IDE warnings. Testing Library gives a warning if not awaited.
 		await act( () =>
-			dispatch( CART_STORE_KEY ).setShippingAddress( {
+			dispatch( cartStore ).setShippingAddress( {
 				first_name: 'First Name JP',
 				last_name: 'Last Name JP',
 				company: '',
@@ -233,7 +327,7 @@ describe( 'Testing Checkout', () => {
 
 		// Testing the default address format
 		await act( () =>
-			dispatch( CART_STORE_KEY ).setShippingAddress( {
+			dispatch( cartStore ).setShippingAddress( {
 				first_name: 'First Name GB',
 				last_name: 'Last Name GB',
 				company: '',
