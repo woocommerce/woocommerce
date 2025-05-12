@@ -72,12 +72,6 @@ const TEMPLATE: InnerBlockTemplate[] = [
 											fontSize: 'small',
 										},
 									],
-									[
-										'core/comment-edit-link',
-										{
-											fontSize: 'small',
-										},
-									],
 								],
 							],
 							[ 'woocommerce/product-review-content' ],

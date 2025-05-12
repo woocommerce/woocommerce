@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: improve page-loads checks with more robust locators

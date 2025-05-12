@@ -10,9 +10,10 @@ import { REGULAR_PRICED_PRODUCT_NAME } from './constants';
 import { CheckoutPage } from './checkout.page';
 
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
-	checkoutPageObject: async ( { page }, use ) => {
+	checkoutPageObject: async ( { page, requestUtils }, use ) => {
 		const pageObject = new CheckoutPage( {
 			page,
+			requestUtils,
 		} );
 		await use( pageObject );
 	},
@@ -290,6 +291,129 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					} )
 					.getByLabel( 'How wide is your road? (optional)' )
 			).toHaveValue( 'narrow' );
+		} );
+
+		test( 'Fields with JSON schema validation show appropriate error messages', async ( {
+			checkoutPageObject,
+		} ) => {
+			await checkoutPageObject.editShippingDetails();
+
+			// Required setup - get all of the required fields filled properly
+			await checkoutPageObject.fillInCheckoutWithTestData(
+				{},
+				{
+					address: {
+						shipping: {
+							'Government ID': '12345',
+							'Confirm government ID': '12345',
+						},
+					},
+				}
+			);
+
+			// Now specifically target the VAT Number field and set an invalid value
+			const shippingSection = checkoutPageObject.page.getByRole(
+				'group',
+				{
+					name: 'Shipping address',
+				}
+			);
+
+			const vatNumberField = shippingSection.getByLabel(
+				'VAT Number (optional)'
+			);
+			await vatNumberField.fill( 'INVALID' );
+
+			await checkoutPageObject.page
+				.getByLabel( 'Test required checkbox' )
+				.check();
+
+			await checkoutPageObject.waitForCheckoutToFinishUpdating();
+			await checkoutPageObject.placeOrder( false );
+
+			// Test that the VAT validation error message appears
+			await expect(
+				checkoutPageObject.page.getByText(
+					'Please enter a valid VAT number (country code + 8-12 digits)'
+				)
+			).toBeVisible();
+
+			// Fix the VAT number format and try again
+			await vatNumberField.fill( 'GB123456789' );
+
+			await checkoutPageObject.waitForCheckoutToFinishUpdating();
+
+			// The validation error should be gone
+			await expect(
+				checkoutPageObject.page.getByText(
+					'Please enter a valid VAT number (country code + 8-12 digits)'
+				)
+			).toBeHidden();
+		} );
+
+		test( 'Conditional fields are shown/hidden based on cart state', async ( {
+			checkoutPageObject,
+			frontendUtils,
+		} ) => {
+			// The shipping insurance field should be hidden by default (cart total < 2000)
+			await expect(
+				checkoutPageObject.page.getByLabel( 'Add shipping insurance' )
+			).toBeHidden();
+
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
+			await checkoutPageObject.waitForCheckoutToFinishUpdating();
+
+			// The shipping insurance field should now be visible (cart total > 2000)
+			await expect(
+				checkoutPageObject.page.getByLabel( 'Add shipping insurance' )
+			).toBeVisible();
+
+			await checkoutPageObject.waitForCheckoutToFinishUpdating();
+
+			// Fill all other required fields
+			await checkoutPageObject.fillInCheckoutWithTestData(
+				{},
+				{
+					address: {
+						shipping: {
+							'Government ID': '12345',
+							'Confirm government ID': '12345',
+						},
+					},
+				}
+			);
+
+			await checkoutPageObject.page
+				.getByLabel( 'Test required checkbox' )
+				.check();
+
+			await checkoutPageObject.waitForCheckoutToFinishUpdating();
+
+			await checkoutPageObject.placeOrder( false );
+
+			// Should see a required field error for insurance
+			await expect(
+				checkoutPageObject.page.getByText(
+					'Please check this box if you want to proceed.'
+				)
+			).toBeVisible();
+
+			// Check the insurance box
+			await checkoutPageObject.page
+				.getByLabel( 'Add shipping insurance' )
+				.check();
+
+			await checkoutPageObject.waitForCheckoutToFinishUpdating();
+
+			// The error should be gone
+			await expect(
+				checkoutPageObject.page.getByText(
+					'Add shipping insurance is a required field.'
+				)
+			).toBeHidden();
 		} );
 	} );
 } );

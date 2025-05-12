@@ -178,7 +178,7 @@
 		"@wordpress/interactivity": "^6.16.0",
 		"@wordpress/interactivity-router": "^2.17.0",
 		"@wordpress/is-shallow-equal": "4.24.0",
-		"@wordpress/jest-preset-default": "8.5.2",
+		"@wordpress/jest-preset-default": "12.22.0",
 		"@wordpress/postcss-plugins-preset": "1.6.0",
 		"@wordpress/postcss-themes": "1.0.5",
 		"@wordpress/prettier-config": "1.4.0",

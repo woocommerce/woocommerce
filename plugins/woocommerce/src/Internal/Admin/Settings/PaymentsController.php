@@ -5,6 +5,9 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Exception;
+use WC_Gateway_BACS;
+use WC_Gateway_Cheque;
+use WC_Gateway_COD;
 
 defined( 'ABSPATH' ) || exit;
 /**
@@ -43,6 +46,7 @@ class PaymentsController {
 		add_action( 'admin_menu', array( $this, 'add_menu' ) );
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
 		add_filter( 'woocommerce_admin_allowed_promo_notes', array( $this, 'add_allowed_promo_notes' ) );
+		add_filter( 'woocommerce_get_sections_checkout', array( $this, 'handle_sections' ), 20 );
 	}
 
 	/**
@@ -150,6 +154,24 @@ class PaymentsController {
 		}
 
 		return $promo_notes;
+	}
+
+	/**
+	 * Alter the Payments tab sections under certain conditions.
+	 *
+	 * @param array $sections The payments/checkout tab sections.
+	 *
+	 * @return array The filtered sections.
+	 */
+	public function handle_sections( array $sections ): array {
+		global $current_section;
+
+		// For WooPayments and offline payment methods settings pages, we don't want any section navigation.
+		if ( in_array( $current_section, array( 'woocommerce_payments', WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ), true ) ) {
+			return array();
+		}
+
+		return $sections;
 	}
 
 	/**
