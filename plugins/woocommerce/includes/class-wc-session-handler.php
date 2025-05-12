@@ -305,6 +305,15 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
+	 * Checks if the session is expiring.
+	 *
+	 * @return bool Whether session is expiring.
+	 */
+	private function is_session_expiring() {
+		return time() > $this->_session_expiring;
+	}
+
+	/**
 	 * Hooks into the wp action to maybe set the session cookie if the user is on a certain page e.g. a checkout endpoint.
 	 *
 	 * Certain gateways may rely on sessions and this ensures a session is present even if the customer does not have a
