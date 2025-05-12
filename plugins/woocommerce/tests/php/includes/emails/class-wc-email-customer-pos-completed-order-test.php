@@ -175,4 +175,37 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( __( 'Auth code:', 'woocommerce' ), $regular_plain_text );
 		$this->assertStringNotContainsString( __( 'Time of payment:', 'woocommerce' ), $regular_plain_text );
 	}
+
+	/**
+	 * @testdox get_default_subject includes blog name when POS store name is not set.
+	 */
+	public function test_get_default_subject_includes_blog_name_when_pos_store_name_not_set() {
+		// Given POS store name is not set.
+		delete_option( 'woocommerce_pos_store_name' );
+		$blog_name = 'Test Blog Name';
+		update_option( 'blogname', $blog_name );
+
+		// When getting default subject.
+		$email   = new WC_Email_Customer_POS_Completed_Order();
+		$subject = $email->get_default_subject();
+
+		// Then blog name is included in the subject.
+		$this->assertStringContainsString( $blog_name, $subject );
+	}
+
+	/**
+	 * @testdox get_default_subject includes POS store name when option is set.
+	 */
+	public function test_get_default_subject_includes_pos_store_name_when_option_is_set() {
+		// Given POS store name is set.
+		$store_name = 'POS Store';
+		update_option( 'woocommerce_pos_store_name', $store_name );
+
+		// When getting default subject.
+		$email   = new WC_Email_Customer_POS_Completed_Order();
+		$subject = $email->get_default_subject();
+
+		// Then POS store name is included in the subject.
+		$this->assertStringContainsString( $store_name, $subject );
+	}
 }
