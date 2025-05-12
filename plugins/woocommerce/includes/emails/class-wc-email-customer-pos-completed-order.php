@@ -233,7 +233,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		public function order_item_totals( $total_rows, $order, $tax_display ) {
 			$cash_payment_change_due_amount           = $order->get_meta( '_cash_change_amount', true );
 			$formatted_cash_payment_change_due_amount = wc_price( $cash_payment_change_due_amount, array( 'currency' => $order->get_currency() ) );
-			if ( null !== $cash_payment_change_due_amount && '' !== $cash_payment_change_due_amount ) {
+			if ( ! empty( $cash_payment_change_due_amount ) ) {
 				$total_rows['cash_payment_change_due_amount'] = array(
 					'type'  => 'cash_payment_change_due_amount',
 					'label' => __( 'Change due:', 'woocommerce' ),
@@ -242,7 +242,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 			}
 
 			$auth_code = $order->get_meta( '_charge_id', true );
-			if ( null !== $auth_code && '' !== $auth_code ) {
+			if ( ! empty( $auth_code ) ) {
 				$total_rows['payment_auth_code'] = array(
 					'type'  => 'payment_auth_code',
 					'label' => __( 'Auth code:', 'woocommerce' ),
