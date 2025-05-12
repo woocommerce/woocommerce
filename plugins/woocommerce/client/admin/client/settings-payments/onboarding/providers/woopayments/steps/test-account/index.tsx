@@ -275,13 +275,6 @@ const TestAccountStep = () => {
 		};
 	}, [ status, currentStep, retryCounter, pollingPhase ] );
 
-	// Effect to reset state on retry
-	useEffect( () => {
-		if ( retryCounter > 0 ) {
-			resetState();
-		}
-	}, [ retryCounter, resetState ] );
-
 	const getPhaseMessage = ( phase: number ) => {
 		if ( phase === 1 ) {
 			return __(
@@ -446,47 +439,43 @@ const TestAccountStep = () => {
 			<WooPaymentsStepHeader onClose={ closeModal } />
 
 			{ /* Error Notice */ }
-			{ ( status === 'error' || status === 'blocked' ) &&
-				errorMessage && (
-					<Notice
-						status={ status === 'blocked' ? 'error' : 'warning' }
-						isDismissible={ false }
-						actions={
-							// Only show actions if the step is not blocked
-							status !== 'blocked'
-								? [
-										{
-											label: __(
-												'Try Again',
-												'woocommerce'
-											),
-											variant: 'primary',
-											onClick: () => {
-												setRetryCounter(
-													( c ) => c + 1
-												);
-											},
+			{ ( status === 'error' || status === 'blocked' ) && (
+				<Notice
+					status={ status === 'blocked' ? 'error' : 'warning' }
+					isDismissible={ false }
+					actions={
+						// Only show actions if the step is not blocked
+						status !== 'blocked'
+							? [
+									{
+										label: __( 'Try Again', 'woocommerce' ),
+										variant: 'primary',
+										onClick: () => {
+											resetState();
+											setRetryCounter( ( c ) => c + 1 );
 										},
-										{
-											label: __(
-												'Cancel',
-												'woocommerce'
-											),
-											variant: 'secondary',
-											className:
-												'woocommerce-payments-test-account-step__error-cancel-button',
-											onClick: closeModal,
-										},
-								  ]
-								: []
-						}
-						className="woocommerce-payments-test-account-step__error"
-					>
-						<p className="woocommerce-payments-test-account-step__error-message">
-							{ errorMessage }
-						</p>
-					</Notice>
-				) }
+									},
+									{
+										label: __( 'Cancel', 'woocommerce' ),
+										variant: 'secondary',
+										className:
+											'woocommerce-payments-test-account-step__error-cancel-button',
+										onClick: closeModal,
+									},
+							  ]
+							: []
+					}
+					className="woocommerce-payments-test-account-step__error"
+				>
+					<p className="woocommerce-payments-test-account-step__error-message">
+						{ errorMessage ||
+							__(
+								'An error occurred while creating your test account. Please try again.',
+								'woocommerce'
+							) }
+					</p>
+				</Notice>
+			) }
 
 			{ /* Loader - shown during initializing and polling */ }
 			{ ( status === 'initializing' || status === 'polling' ) && (
