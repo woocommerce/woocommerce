@@ -169,16 +169,12 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 9.9.0 2025-05-31 =
+= 9.9.0 2025-06-02 =
 
 **WooCommerce**
 
-* Fix - - Normalize variation selector pill styling by removing uppercase text and updating border styles to use currentColor.
-  - Standardize padding (0.25em 0.75em) across both variation selector pills and product filter chips.
-  - Remove duplicate styles from editor.scss that were already present in style.scss. [#57059](https://github.com/woocommerce/woocommerce/pull/57059)
-* Fix - -   Switched the endpoint of the iAPI's `woocommerce` store to `cart/add-item` and `cart/update-item`.
-  -   Notices are now displayed only in the relevant Product Collection block.
-  -   Now correctly handles errors embedded in successful API responses [#56117](https://github.com/woocommerce/woocommerce/pull/56117)
+* Fix - Improve styling for variation selector pills. [#57059](https://github.com/woocommerce/woocommerce/pull/57059)
+* Fix - Switched the endpoint of the iAPI's `woocommerce` store to `cart/add-item` and `cart/update-item`. [#56117](https://github.com/woocommerce/woocommerce/pull/56117)
 * Fix - Add 'id' attribute for fields of type 'single_select_country'. [#57247](https://github.com/woocommerce/woocommerce/pull/57247)
 * Fix - Add a default fallback spacing to the clear fillter button to ensure its style looks good on every theme. [#56702](https://github.com/woocommerce/woocommerce/pull/56702)
 * Fix - Add blueprint CLI initialization to 'init' hook to prevent premature translation loading in WC_CLI class. [#57291](https://github.com/woocommerce/woocommerce/pull/57291)
