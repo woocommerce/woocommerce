@@ -25,6 +25,13 @@ export function EditorSnackbars( { context = 'email-editor' } ) {
 				content: __( 'Email design updated.', 'woocommerce' ),
 				removeActions: true,
 			},
+			'editor-save': {
+				content: __( 'Email saved.', 'woocommerce' ),
+				removeActions: false,
+				contentCheck: ( notice ) => {
+					return notice.content.includes( __( 'Post updated.' ) );
+				},
+			},
 		};
 	}, [] );
 
@@ -36,9 +43,13 @@ export function EditorSnackbars( { context = 'email-editor' } ) {
 			if ( ! globalNoticeChangeMap[ notice.id ] ) {
 				return notice;
 			}
+			if ( globalNoticeChangeMap[ notice.id ].contentCheck && ! globalNoticeChangeMap[ notice.id ].contentCheck( notice ) ) {
+				return notice;
+			}
 			return {
 				...notice,
 				content: globalNoticeChangeMap[ notice.id ].content,
+				spokenMessage: globalNoticeChangeMap[ notice.id ].content,
 				actions: globalNoticeChangeMap[ notice.id ].removeActions
 					? []
 					: notice.actions,
