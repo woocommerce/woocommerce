@@ -188,7 +188,7 @@ class WC_Brands_Admin {
 			</select>
 			<?php
 				echo wc_help_tip( esc_html__( 'Product must not be associated with these brands for the coupon to remain valid or, for "Product Discounts", products associated with these brands will not be discounted.', 'woocommerce' ) );
-		?>
+			?>
 		</div>
 		<?php
 	}
