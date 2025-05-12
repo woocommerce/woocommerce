@@ -228,6 +228,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		if ( empty( $filter_context['items'] ) ) {
 			$wrapper_attributes['hidden'] = true;
+			$wrapper_attributes['class']  = 'hidden';
 		}
 
 		return sprintf(

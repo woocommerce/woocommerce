@@ -159,6 +159,7 @@ final class ProductFilterRating extends AbstractBlock {
 
 		if ( empty( $filter_options ) ) {
 			$wrapper_attributes['hidden'] = true;
+			$wrapper_attributes['class']  = 'hidden';
 		}
 
 		return sprintf(
