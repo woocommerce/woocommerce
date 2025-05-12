@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix issue in which package item names would show up malformed on Checkout.
