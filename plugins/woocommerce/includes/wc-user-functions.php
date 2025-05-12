@@ -433,7 +433,8 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		$transient_version = WC_Cache_Helper::get_transient_version( 'orders' );
 	}
 
-	$transient_value = get_transient( $transient_name ); // TODO: switch to cache APIs?
+	// Clarify switching to cache APIs instead of transients.
+	$transient_value = get_transient( $transient_name );
 
 	if ( isset( $transient_value['value'], $transient_value['version'] ) && $transient_value['version'] === $transient_version ) {
 		$result = $transient_value['value'];
