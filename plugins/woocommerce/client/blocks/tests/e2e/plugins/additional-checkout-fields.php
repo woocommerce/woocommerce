@@ -95,7 +95,7 @@ class Additional_Checkout_Fields_Test_Helper {
 				'type'     => 'checkbox',
 			)
 		);
-    woocommerce_register_additional_checkout_field(
+		woocommerce_register_additional_checkout_field(
 			array(
 				'id'                => 'plugin-namespace/alt-email',
 				'label'             => 'Alternative Email',
@@ -145,7 +145,7 @@ class Additional_Checkout_Fields_Test_Helper {
 				),
 			)
 		);
-    
+
 		// Field with validation schema.
 		woocommerce_register_additional_checkout_field(
 			array(
