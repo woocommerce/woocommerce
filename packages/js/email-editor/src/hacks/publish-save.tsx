@@ -3,31 +3,24 @@
  */
 import {
 	useEffect,
-	useState,
 	createPortal,
 	useCallback,
 	useRef,
 } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import {
-	store as editorStore,
-	useEntitiesSavedStatesIsDirty,
-} from '@wordpress/editor';
+import { store as editorStore } from '@wordpress/editor';
 
 /**
  * Internal dependencies
  */
 import { SendButton } from '../components/header/send-button';
-import { useContentValidation } from '../hooks';
-
-import { editorCurrentPostType } from '../store';
 
 type NextButtonSlotPropType = {
 	children: React.ReactNode;
 };
 
 function NextPublishSlot( { children }: NextButtonSlotPropType ) {
-	const [ sendButtonPortalEl ] = useState( document.createElement( 'div' ) );
+	const sendButtonPortalEl = useRef( document.createElement( 'div' ) );
 
 	// Place element for rendering send button next to publish button
 	useEffect( () => {
@@ -36,32 +29,30 @@ function NextPublishSlot( { children }: NextButtonSlotPropType ) {
 		)[ 0 ];
 		if ( publishButton ) {
 			publishButton.parentNode?.insertBefore(
-				sendButtonPortalEl,
+				sendButtonPortalEl.current,
 				publishButton.nextSibling
 			);
 		}
 	}, [ sendButtonPortalEl ] );
 
-	return createPortal( <>{ children }</>, sendButtonPortalEl );
+	return createPortal( <>{ children }</>, sendButtonPortalEl.current );
 }
 
 export function PublishSave() {
-	const { validateContent, isInvalid } = useContentValidation();
 	const observerRef = useRef< MutationObserver | null >( null );
-	const { dirtyEntityRecords } = useEntitiesSavedStatesIsDirty();
-	const { status } = useSelect(
+	const { hasNonPostEntityChanges, isEditedPostDirty } = useSelect(
 		( select ) => ( {
-			status: select( editorStore ).getEditedPostAttribute( 'status' ),
+			hasNonPostEntityChanges:
+				select( editorStore ).hasNonPostEntityChanges(),
+			isEditedPostDirty: select( editorStore ).isEditedPostDirty(),
 		} ),
 		[]
 	);
 
 	// Display original button when there are changes to save except for draft
 	// For draft, there is an extra save button to save as draft
-	const displayOriginalPublishButton = dirtyEntityRecords.some(
-		( entity ) =>
-			entity.name !== editorCurrentPostType || status !== 'draft'
-	);
+	const displayOriginalPublishButton =
+		hasNonPostEntityChanges || isEditedPostDirty;
 
 	const toggleElementVisible = useCallback(
 		( element: Element, visible: boolean ) => {
@@ -80,6 +71,10 @@ export function PublishSave() {
 			'editor-post-publish-button__button'
 		)[ 0 ];
 		toggleElementVisible( publishButton, displayOriginalPublishButton );
+
+		if ( ! publishButton ) {
+			return () => observerRef.current?.disconnect();
+		}
 
 		// It may get additionally re-rendered by the editor, so we need to check it again
 		if ( observerRef.current ) {
@@ -100,12 +95,7 @@ export function PublishSave() {
 
 	return (
 		<NextPublishSlot>
-			{ ! displayOriginalPublishButton && (
-				<SendButton
-					validateContent={ validateContent }
-					isContentInvalid={ isInvalid }
-				/>
-			) }
+			{ ! displayOriginalPublishButton && <SendButton /> }
 		</NextPublishSlot>
 	);
 }
