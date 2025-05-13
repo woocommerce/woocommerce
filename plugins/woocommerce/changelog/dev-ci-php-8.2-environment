@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-CI: PHP 8.2 environment for PHP tests.

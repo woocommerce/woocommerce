@@ -72,7 +72,7 @@ test.describe( 'WooCommerce Email Settings', () => {
 		'Email sender options live change in email preview',
 		{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
 		async ( { page, baseURL } ) => {
-			await setFeatureFlag( baseURL, 'yes' );
+			await setFeatureFlag( baseURL, 'no' );
 			await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
 
 			const fromNameElement = '#woocommerce_email_from_name';
@@ -116,7 +116,7 @@ test.describe( 'WooCommerce Email Settings', () => {
 		'Live preview when changing email settings',
 		{ tag: tags.SKIP_ON_EXTERNAL_ENV },
 		async ( { page, baseURL } ) => {
-			await setFeatureFlag( baseURL, 'yes' );
+			await setFeatureFlag( baseURL, 'no' );
 			await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
 
 			// Wait for the iframe content to load
@@ -177,7 +177,7 @@ test.describe( 'WooCommerce Email Settings', () => {
 	);
 
 	test( 'Send email preview', async ( { page, baseURL } ) => {
-		await setFeatureFlag( baseURL, 'yes' );
+		await setFeatureFlag( baseURL, 'no' );
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
 
 		// Click the "Send a test email" button
@@ -293,48 +293,10 @@ test.describe( 'WooCommerce Email Settings', () => {
 		}
 	);
 
-	test(
-		'See email image url field with a feature flag',
-		{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
-		async ( { page, baseURL } ) => {
-			const emailImageUrlElement =
-				'#wc_settings_email_image_url_slotfill .wc-settings-email-select-image';
-			const hasImageUrl = async () => {
-				return (
-					( await page.locator( emailImageUrlElement ).count() ) > 0
-				);
-			};
-			const oldHeaderImageElement =
-				'input[type="text"]#woocommerce_email_header_image';
-			const hasOldImageElement = async () => {
-				return (
-					( await page.locator( oldHeaderImageElement ).count() ) > 0
-				);
-			};
-
-			// Disable the email_improvements feature flag
-			await setFeatureFlag( baseURL, 'no' );
-			await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
-			expect( await hasImageUrl() ).toBeFalsy();
-			expect( await hasOldImageElement() ).toBeTruthy();
-
-			// Enable the email_improvements feature flag
-			await setFeatureFlag( baseURL, 'yes' );
-			await page.reload();
-			expect( await hasImageUrl() ).toBeTruthy();
-			expect( await hasOldImageElement() ).toBeFalsy();
-		}
-	);
-
-	test( 'Choose image in email image url field', async ( {
-		page,
-		baseURL,
-	} ) => {
+	test( 'Choose image in email image url field', async ( { page } ) => {
 		const logoImageElement = '.wc-settings-email-logo-image';
 		const uploadIconElement = '.wc-settings-email-select-image-icon';
 
-		// Enable the email_improvements feature flag
-		await setFeatureFlag( baseURL, 'yes' );
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
 
 		// Pick image
@@ -353,51 +315,10 @@ test.describe( 'WooCommerce Email Settings', () => {
 	} );
 
 	test(
-		'See new color settings with a feature flag',
+		'See color palette settings',
 		{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
-		async ( { page, baseURL } ) => {
-			// Disable the email_improvements feature flag
-			await setFeatureFlag( baseURL, 'no' );
+		async ( { page } ) => {
 			await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
-
-			await expect(
-				page.getByText( 'Color palette', { exact: true } )
-			).toHaveCount( 0 );
-			await expect(
-				page.getByText( 'Accent', { exact: true } )
-			).toHaveCount( 0 );
-			await expect(
-				page.getByText( 'Email background', { exact: true } )
-			).toHaveCount( 0 );
-			await expect(
-				page.getByText( 'Content background', { exact: true } )
-			).toHaveCount( 0 );
-			await expect(
-				page.getByText( 'Heading & text', { exact: true } )
-			).toHaveCount( 0 );
-			await expect(
-				page.getByText( 'Secondary text', { exact: true } )
-			).toHaveCount( 0 );
-
-			await expect(
-				page.getByText( 'Base color', { exact: true } )
-			).toBeVisible();
-			await expect(
-				page.getByText( 'Background color', { exact: true } )
-			).toBeVisible();
-			await expect(
-				page.getByText( 'Body background color', { exact: true } )
-			).toBeVisible();
-			await expect(
-				page.getByText( 'Body text color', { exact: true } )
-			).toBeVisible();
-			await expect(
-				page.getByText( 'Footer text color', { exact: true } )
-			).toBeVisible();
-
-			// Enable the email_improvements feature flag
-			await setFeatureFlag( baseURL, 'yes' );
-			await page.reload();
 
 			await expect(
 				page.getByText( 'Color palette', { exact: true } )
@@ -437,18 +358,10 @@ test.describe( 'WooCommerce Email Settings', () => {
 	);
 
 	test(
-		'See font family setting with a feature flag',
+		'See font family setting',
 		{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
-		async ( { page, baseURL } ) => {
-			// Disable the email_improvements feature flag
-			await setFeatureFlag( baseURL, 'no' );
+		async ( { page } ) => {
 			await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
-
-			await expect( page.getByLabel( 'Font family' ) ).toHaveCount( 0 );
-
-			// Enable the email_improvements feature flag
-			await setFeatureFlag( baseURL, 'yes' );
-			await page.reload();
 
 			const fontFamilyElement = page.getByLabel( 'Font family' );
 			await expect( fontFamilyElement ).toBeVisible();
@@ -461,46 +374,19 @@ test.describe( 'WooCommerce Email Settings', () => {
 		}
 	);
 
-	test( 'See updated footer text field with a feature flag', async ( {
-		page,
-		baseURL,
-	} ) => {
-		let footerTextLabel;
-
-		// Disable the email_improvements feature flag
-		await setFeatureFlag( baseURL, 'no' );
+	test( 'See updated footer text field', async ( { page } ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
-
-		footerTextLabel = page.locator(
+		const footerTextLabel = page.locator(
 			'css=label[for="woocommerce_email_footer_text"]'
 		);
 		await expect( footerTextLabel ).toBeVisible();
 
-		// Old tooltip text
 		const tooltip = footerTextLabel.locator( 'span.woocommerce-help-tip' );
-		await expect( tooltip ).not.toHaveAttribute(
-			'aria-label',
-			'{store_address}'
-		);
-
-		// Enable the email_improvements feature flag
-		await setFeatureFlag( baseURL, 'yes' );
-		await page.reload();
-
-		footerTextLabel = page.locator(
-			'css=label[for="woocommerce_email_footer_text"]'
-		);
-		await expect( footerTextLabel ).toBeVisible();
-
-		// New tooltip text
-		const updatedTooltip = footerTextLabel.locator(
-			'span.woocommerce-help-tip'
-		);
-		await expect( updatedTooltip ).toHaveAttribute(
+		await expect( tooltip ).toHaveAttribute(
 			'aria-label',
 			expect.stringContaining( '{store_address}' )
 		);
-		await expect( updatedTooltip ).toHaveAttribute(
+		await expect( tooltip ).toHaveAttribute(
 			'aria-label',
 			expect.stringContaining( '{store_email}' )
 		);
@@ -512,15 +398,8 @@ test.describe( 'WooCommerce Email Settings', () => {
 	} ) => {
 		const resetButtonElement = '.wc-settings-email-color-palette-buttons';
 
-		// Disable the email_improvements feature flag
-		await setFeatureFlag( baseURL, 'no' );
-		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
-
-		await expect( page.locator( resetButtonElement ) ).toHaveCount( 0 );
-
-		// Enable the email_improvements feature flag
 		await setFeatureFlag( baseURL, 'yes' );
-		await page.reload();
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
 
 		await expect( page.locator( resetButtonElement ) ).toBeVisible();
 

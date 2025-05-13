@@ -89,19 +89,14 @@ const registerSlotFills = () => {
 		registerBlueprintSlotfill();
 	}
 
-	if ( isFeatureEnabled( 'email_improvements' ) ) {
-		registerSettingsEmailPreviewFill( true );
-		registerSettingsEmailColorPaletteFill();
-		registerSettingsEmailImageUrlFill();
-	} else {
-		registerSettingsEmailPreviewFill( false );
-	}
-
 	if ( isFeatureEnabled( 'block_email_editor' ) ) {
 		registerSettingsEmailListingFill();
 	}
 
+	registerSettingsEmailColorPaletteFill();
 	registerSettingsEmailFeedbackFill();
+	registerSettingsEmailImageUrlFill();
+	registerSettingsEmailPreviewFill();
 };
 
 renderPaymentsSettings();

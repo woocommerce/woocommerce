@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Add a composite index to wc_order_product_lookup to improve the response time of some queries
