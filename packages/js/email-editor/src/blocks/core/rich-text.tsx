@@ -64,7 +64,7 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 
 	const { updateBlockAttributes } = useDispatch( 'core/block-editor' );
 
-	// Get the current block content
+	// Get the current block attributes
 	const blockAttributes: object = useSelect( ( select ) => {
 		const attributes =
 			// @ts-expect-error getBlockAttributes expects one argument, but TS thinks it expects none
@@ -157,7 +157,7 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 							`<!--[${ updatedTag }]-->`
 						);
 						updateBlockAttributes( selectedBlockId, {
-							content: updatedContent,
+							[ blockContentKey ]: updatedContent,
 						} );
 					} }
 				/>
