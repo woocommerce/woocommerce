@@ -201,8 +201,18 @@ module.exports = {
 					pkg.dependencies[ '@wordpress/a11y' ] &&
 					pkg.dependencies[ '@wordpress/interactivity' ]
 				) {
-					//  Use the latest from npm
-					pkg.dependencies[ '@wordpress/a11y' ] = '4.22.0';
+					const blocksPackageJsonPath = path.resolve(
+						__dirname,
+						'plugins/woocommerce/client/blocks/package.json'
+					);
+
+					const blocksPackageJson = require( blocksPackageJsonPath );
+					const a11yVersion =
+						blocksPackageJson.dependencies?.[ '@wordpress/a11y' ];
+
+					//  Use the version installed in @woocommerce/block-library, fallback if the version is somehow no longer installed.
+					pkg.dependencies[ '@wordpress/a11y' ] =
+						a11yVersion || '4.22.0';
 
 					// Use the WooCommerce fork
 					pkg.dependencies[ '@wordpress/interactivity' ] =
