@@ -8,7 +8,6 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\Cart\SavedCart;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
