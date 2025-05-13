@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Improve WooPayments onboarding experiment error handling using a transient to store the API response in case of an error.

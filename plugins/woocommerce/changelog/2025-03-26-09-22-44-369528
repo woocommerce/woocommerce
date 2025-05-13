@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add a default fallback spacing to the clear fillter button to ensure its style looks good on every theme.

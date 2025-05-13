@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Filter by Price slider to use the current color in RTL languages instead of a hardcoded purple value.

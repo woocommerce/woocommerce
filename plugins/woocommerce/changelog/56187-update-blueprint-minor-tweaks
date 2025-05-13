@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Blueprint: Reduce layout shift by setting min-height on the slotfill container.
