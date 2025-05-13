@@ -33,11 +33,20 @@ class AddressProviderController {
 	}
 
 	/**
+	 * Get the registered providers.
+	 *
+	 * @return WC_Address_Provider[] array of WC_Address_Providers.
+	 */
+	public function get_providers(): array {
+		return $this->providers;
+	}
+
+	/**
 	 * Get all registered providers.
 	 *
 	 * @return WC_Address_Provider[] array of WC_Address_Providers.
 	 */
-	public function get_registered_providers(): array {
+	private function get_registered_providers(): array {
 		/**
 		 * Filter the registered address providers.
 		 *
