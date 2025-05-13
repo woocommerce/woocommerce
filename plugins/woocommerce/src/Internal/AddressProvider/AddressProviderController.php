@@ -131,13 +131,10 @@ class AddressProviderController {
 			$providers[] = $provider_instance;
 		}
 
-		// Check if there's a preferred provider set in the settings.
-		$preferred_provider_id = get_option( 'woocommerce_address_autocomplete_provider', '' );
-
-		if ( ! empty( $preferred_provider_id ) && ! empty( $providers ) ) {
+		if ( ! empty( $this->preferred_provider_option ) && ! empty( $providers ) ) {
 			// Look for the preferred provider in the array.
 			foreach ( $providers as $key => $provider ) {
-				if ( $provider->id === $preferred_provider_id ) {
+				if ( $provider->id === $this->preferred_provider_option ) {
 					// Found the preferred provider, move it to the beginning of the array.
 					$preferred_provider = $provider;
 					unset( $providers[ $key ] );
@@ -182,10 +179,9 @@ class AddressProviderController {
 			return '';
 		}
 
-		$preferred_provider = get_option( 'woocommerce_address_autocomplete_provider', '' );
 
-		if ( $this->is_provider_available( $preferred_provider ) ) {
-			return $preferred_provider;
+		if ( $this->is_provider_available( $this->preferred_provider_option ) ) {
+			return $this->preferred_provider_option;
 		}
 
 		// Get the first provider's ID by instantiating it.
