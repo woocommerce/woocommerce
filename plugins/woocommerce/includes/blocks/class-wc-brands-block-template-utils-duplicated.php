@@ -249,6 +249,8 @@ class BlockTemplateUtilsDuplicated {
 				return __( 'Product Category', 'woocommerce' );
 			case 'taxonomy-product_tag':
 				return __( 'Product Tag', 'woocommerce' );
+			case 'taxonomy-product_brand':
+				return __( 'Products by Brand', 'woocommerce' );
 			default:
 				// Replace all hyphens and underscores with spaces.
 				return ucwords( preg_replace( '/[\-_]/', ' ', $template_slug ) );

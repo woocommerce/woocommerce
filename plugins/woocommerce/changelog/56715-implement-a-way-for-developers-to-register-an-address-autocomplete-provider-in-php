@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a way for address autocomplete providers to register in PHP.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Skip E2E test which checkes for registered product blocks in the all templates data view
