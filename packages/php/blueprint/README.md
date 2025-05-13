@@ -7,6 +7,60 @@ WordPress sites and supports extensibility, enabling plugins to customize export
 and import functionalities. Manage site configurations, options, and settings
 effortlessly with JSON files.
 
+## Usage
+
+Blueprint lets you export your WordPress site configuration to a JSON file and import it into another site. This can be done via WP-CLI or directly in PHP for advanced automation or integration.
+
+### Exporting a Blueprint
+
+You can export a site configuration using the `ExportSchema` class:
+
+```php
+use Automattic\WooCommerce\Blueprint\ExportSchema;
+
+// Optionally pass custom exporters, or leave empty for built-in exporters.
+$export_schema = new ExportSchema();
+
+// Export all steps:
+$schema = $export_schema->export();
+
+// Export only specific steps:
+// $schema = $export_schema->export(['installPlugin', 'activateTheme']);
+
+// Save to file:
+file_put_contents('blueprint.json', json_encode($schema, JSON_PRETTY_PRINT));
+```
+
+### Importing a Blueprint
+
+You can import a previously exported JSON file using the `ImportSchema` class:
+
+```php
+use Automattic\WooCommerce\Blueprint\ImportSchema;
+
+// Load the JSON file:
+$import_schema = ImportSchema::create_from_file('blueprint.json');
+
+// Run the import:
+$results = $import_schema->import();
+
+// $results is an array of StepProcessorResult objects for each step.
+```
+
+### Importing a Single Step (Advanced)
+
+To import a single step from a JSON definition, use the `ImportStep` class:
+
+```php
+use Automattic\WooCommerce\Blueprint\ImportStep;
+
+$step_definition = json_decode(
+  '{"step":"setSiteOptions","options":{"option1":"value1"}}'
+);
+$import_step = new ImportStep($step_definition);
+$result = $import_step->import();
+```
+
 ## Built-in Steps
 
 Blueprint comes with several built-in steps for common site operations:
@@ -30,8 +84,6 @@ You can extend Blueprint by adding custom exporters, importers, or steps. This a
 |--------------------------|---------------------------------------------|
 | `wooblueprint_exporters` | Add custom exporters to the export process  |
 | `wooblueprint_importers` | Add custom importers to the import process  |
-
----
 
 ## Example: Adding a Custom Exporter
 
@@ -127,8 +179,6 @@ Output:
   }
   ```
 
----
-
 ## Example: Adding a Custom Importer
 
 1. To add a custom importer, implement the `StepProcessor` interface. Importers process step data during import.
@@ -160,8 +210,6 @@ add_filter('wooblueprint_importers', function(array $importers) {
     return $importers;
 });
 ```
-
----
 
 ## Example: Adding a Custom Step
 
