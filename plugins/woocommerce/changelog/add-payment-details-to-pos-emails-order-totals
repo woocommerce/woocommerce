@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Display cash payment change due, card payment authorization code, and time of payment in POS completed and refunded order emails in the order totals section.
