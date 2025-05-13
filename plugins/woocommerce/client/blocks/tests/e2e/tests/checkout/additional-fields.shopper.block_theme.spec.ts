@@ -10,8 +10,9 @@ import { REGULAR_PRICED_PRODUCT_NAME } from './constants';
 import { CheckoutPage } from './checkout.page';
 
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
-	checkoutPageObject: async ( { page }, use ) => {
+	checkoutPageObject: async ( { page, requestUtils }, use ) => {
 		const pageObject = new CheckoutPage( {
+			requestUtils,
 			page,
 		} );
 		await use( pageObject );
