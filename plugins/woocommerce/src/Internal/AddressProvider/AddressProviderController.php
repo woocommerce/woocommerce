@@ -8,20 +8,29 @@ use WC_Address_Provider;
  * Service class for managing address providers.
  */
 class AddressProviderController {
-
 	/**
-	 * Cached provider class names from the last filter call.
-	 *
-	 * @var string[]
-	 */
-	private $cached_provider_class_names = array();
-
-	/**
-	 * Cached provider instances.
+	 * Registered provider instances.
 	 *
 	 * @var WC_Address_Provider[]
 	 */
-	private $cached_providers = array();
+	private $providers = array();
+
+	/**
+	 * Preferred provider from options.
+	 *
+	 * @var string ID of preferred address provider.
+	 */
+	private $preferred_provider_option;
+
+	/**
+	 * Init function runs after this provider was added to DI container.
+	 *
+	 * @internal
+	 */
+	final public function init() {
+		$this->preferred_provider_option = get_option( 'woocommerce_address_autocomplete_provider', '' );
+		$this->providers                 = $this->get_registered_providers();
+	}
 
 	/**
 	 * Get all registered providers.
@@ -137,10 +146,6 @@ class AddressProviderController {
 				}
 			}
 		}
-
-		// Update the cache.
-		$this->cached_provider_class_names = $provider_class_names;
-		$this->cached_providers            = $providers;
 
 		return $providers;
 	}
