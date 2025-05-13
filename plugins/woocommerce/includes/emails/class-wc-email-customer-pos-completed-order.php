@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Automattic\WooCommerce\Internal\Email\OrderPriceFormatter;
 use Automattic\WooCommerce\Internal\Orders\PointOfSaleOrderUtil;
+use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
 
 if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 
@@ -285,9 +286,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @return string
 		 */
 		private function get_pos_store_name() {
-			$store_name = get_option( 'woocommerce_pos_store_name', get_bloginfo( 'name' ) );
 			return $this->format_string(
-				$store_name
+				get_option( 'woocommerce_pos_store_name', PointOfSaleDefaultSettings::get_default_store_name() )
 			);
 		}
 
@@ -298,7 +298,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 */
 		private function get_pos_store_email() {
 			return $this->format_string(
-				get_option( 'woocommerce_pos_store_email' )
+				get_option( 'woocommerce_pos_store_email', PointOfSaleDefaultSettings::get_default_store_email() )
 			);
 		}
 
@@ -320,7 +320,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 */
 		private function get_pos_store_address() {
 			return $this->format_string(
-				get_option( 'woocommerce_pos_store_address' )
+				get_option( 'woocommerce_pos_store_address', PointOfSaleDefaultSettings::get_default_store_address() )
 			);
 		}
 

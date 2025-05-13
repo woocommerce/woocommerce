@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -55,7 +56,7 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 				'title'   => __( 'Store name', 'woocommerce' ),
 				'desc'    => __( 'The name of your physical store.', 'woocommerce' ),
 				'id'      => 'woocommerce_pos_store_name',
-				'default' => $this->get_default_store_name(),
+				'default' => PointOfSaleDefaultSettings::get_default_store_name(),
 				'type'    => 'text',
 				'css'     => 'min-width:300px;',
 			),
@@ -63,7 +64,7 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 			array(
 				'title'    => __( 'Physical address', 'woocommerce' ),
 				'id'       => 'woocommerce_pos_store_address',
-				'default'  => $this->get_default_store_address(),
+				'default'  => PointOfSaleDefaultSettings::get_default_store_address(),
 				'type'     => 'textarea',
 				'css'      => 'min-width:300px; height: 100px;',
 				'desc_tip' => true,
@@ -81,7 +82,7 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 				'title'   => __( 'Email', 'woocommerce' ),
 				'desc'    => __( 'Your store contact email.', 'woocommerce' ),
 				'id'      => 'woocommerce_pos_store_email',
-				'default' => $this->get_default_store_email(),
+				'default' => PointOfSaleDefaultSettings::get_default_store_email(),
 				'type'    => 'email',
 				'css'     => 'min-width:300px;',
 			),
@@ -100,49 +101,6 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 				'type' => 'sectionend',
 				'id'   => 'store_details',
 			),
-		);
-	}
-
-	/**
-	 * Get default store email.
-	 *
-	 * @return string
-	 */
-	private function get_default_store_email() {
-		return get_option( 'admin_email' );
-	}
-
-	/**
-	 * Get default store name.
-	 *
-	 * @return string
-	 */
-	private function get_default_store_name() {
-		return get_bloginfo( 'name' );
-	}
-
-	/**
-	 * Get default store address.
-	 *
-	 * @return string
-	 */
-	private function get_default_store_address() {
-		if ( ! WC() || ! WC()->countries ) {
-			return '';
-		}
-
-		return wp_specialchars_decode(
-			WC()->countries->get_formatted_address(
-				array(
-					'address_1' => WC()->countries->get_base_address(),
-					'address_2' => WC()->countries->get_base_address_2(),
-					'city'      => WC()->countries->get_base_city(),
-					'state'     => WC()->countries->get_base_state(),
-					'postcode'  => WC()->countries->get_base_postcode(),
-					'country'   => WC()->countries->get_base_country(),
-				),
-				"\n"
-			)
 		);
 	}
 }
