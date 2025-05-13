@@ -291,7 +291,10 @@ class BlockifiedProductDetails extends AbstractBlock {
 	 * @return bool True if the block has an accordion, false otherwise.
 	 */
 	private function has_accordion( $parsed_block ) {
-		if ( 'woocommerce/accordion-group' === $parsed_block['blockName'] ) {
+		if (
+			'woocommerce/accordion-group' === $parsed_block['blockName'] &&
+			! empty( $parsed_block['attrs']['metadata']['isProductDetailsInnerBlock'] )
+		) {
 			return true;
 		}
 
