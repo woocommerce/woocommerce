@@ -84,8 +84,6 @@ test( 'renders available shipping rates', async () => {
 
 	render( <CheckoutPickupOptionsBlock /> );
 
-	// Find the radio buttons directly using screen queries
-	// The baseElement option allows us to search within portals
 	const firstRate = await screen.findByRole( 'radio', {
 		name: 'Pickup New York City free',
 	} );
