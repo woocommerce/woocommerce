@@ -48,14 +48,14 @@ final class AssetsController {
 
 		if ( Features::is_enabled( 'experimental-iapi-runtime' ) ) {
 			// Run after the WordPress iAPI runtime has been registered by setting a lower priority.
-			add_filter( 'wp_default_scripts', array( $this, 'deregister_core_iapi_runtime' ), 20 );
+			add_filter( 'wp_default_scripts', array( $this, 'reregister_core_iapi_runtime' ), 20 );
 		}
 	}
 
 	/**
 	 * Re-registers the iAPI runtime registered by WordPress Core/Gutenberg, allowing WooCommerce to register its own version of the iAPI runtime.
 	 */
-	public function deregister_core_iapi_runtime() {
+	public function reregister_core_iapi_runtime() {
 		wp_deregister_script_module( '@wordpress/interactivity' );
 		wp_deregister_script_module( '@wordpress/interactivity-router' );
 
