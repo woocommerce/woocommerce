@@ -1,10 +1,15 @@
 /**
  * External dependencies
  */
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor, act, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { previewCart } from '@woocommerce/resource-previews';
-import { dispatch } from '@wordpress/data';
-import { cartStore, checkoutStore } from '@woocommerce/block-data';
+import { dispatch, select } from '@wordpress/data';
+import {
+	cartStore,
+	checkoutStore,
+	validationStore,
+} from '@woocommerce/block-data';
 import { default as fetchMock } from 'jest-fetch-mock';
 import { allSettings } from '@woocommerce/settings';
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
@@ -99,15 +104,15 @@ const CheckoutBlock = () => {
 	return (
 		<Checkout attributes={ {} }>
 			<Fields>
-				<ShippingAddress />
 				<ExpressPayment />
 				<ContactInformation />
-				<BillingAddress />
 				<ShippingMethod />
 				<PickupOptions />
+				<ShippingAddress />
+				<BillingAddress />
 				<ShippingMethods />
-				<Payment />
 				<AdditionalInformation />
+				<Payment />
 				<OrderNote />
 				<Terms
 					checkbox={ true }
@@ -144,23 +149,7 @@ describe( 'Testing Checkout', () => {
 			dispatch( cartStore ).invalidateResolutionForStore();
 			dispatch( cartStore ).receiveCart( defaultCartState.cartData );
 		} );
-	} );
 
-	afterEach( () => {
-		fetchMock.resetMocks();
-	} );
-
-	it( 'Renders checkout if there are items in the cart', async () => {
-		render( <CheckoutBlock /> );
-
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
-
-		expect( screen.getByText( /Place Order/i ) ).toBeInTheDocument();
-
-		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
-	} );
-
-	it( 'Allows saving payment method if the customer is creating an account or has already logged in', async () => {
 		act( () => {
 			const PaymentMethodContent = () => <div>A payment method</div>;
 			registerPaymentMethod( {
@@ -178,7 +167,23 @@ describe( 'Testing Checkout', () => {
 				ariaLabel: 'Test Payment Method',
 			} );
 		} );
+	} );
 
+	afterEach( () => {
+		fetchMock.resetMocks();
+	} );
+
+	it( 'Renders checkout if there are items in the cart', async () => {
+		render( <CheckoutBlock /> );
+
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+
+		expect( screen.getByText( /Place Order/i ) ).toBeInTheDocument();
+
+		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'Allows saving payment method if the customer is creating an account or has already logged in', async () => {
 		const { rerender } = render( <CheckoutBlock /> );
 
 		expect(
@@ -396,9 +401,6 @@ describe( 'Testing Checkout', () => {
 		// Render the CheckoutBlock
 		render( <CheckoutBlock /> );
 
-		// Wait for the component to fully load, assuming fetch calls or state updates
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
-
 		// Query for all checkboxes
 		const checkboxes = screen.getAllByRole( 'checkbox' );
 
@@ -456,7 +458,7 @@ describe( 'Testing Checkout', () => {
 	} );
 
 	it( 'Shows guest checkout text', async () => {
-		await act( async () => {
+		act( () => {
 			allSettings.checkoutAllowsGuest = true;
 			allSettings.checkoutAllowsSignup = true;
 			dispatch( checkoutStore ).__internalSetCustomerId( 0 );
@@ -473,7 +475,7 @@ describe( 'Testing Checkout', () => {
 			queryByText( /You are currently checking out as a guest./i )
 		).toBeInTheDocument();
 
-		await act( async () => {
+		act( () => {
 			allSettings.checkoutAllowsGuest = true;
 			allSettings.checkoutAllowsSignup = true;
 			dispatch( checkoutStore ).__internalSetCustomerId( 1 );
@@ -485,11 +487,112 @@ describe( 'Testing Checkout', () => {
 			queryByText( /You are currently checking out as a guest./i )
 		).not.toBeInTheDocument();
 
-		await act( async () => {
+		act( () => {
 			// Restore initial settings
 			allSettings.checkoutAllowsGuest = undefined;
 			allSettings.checkoutAllowsSignup = undefined;
 			dispatch( checkoutStore ).__internalSetCustomerId( 1 );
 		} );
+	} );
+
+	it.only( "Ensures hidden postcode fields don't block Checkout", async () => {
+		const user = userEvent.setup();
+		render( <CheckoutBlock /> );
+
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+
+		const shippingForm = screen.getByRole( 'group', {
+			name: /shipping address/i,
+		} );
+		const countrySelect =
+			within( shippingForm ).getByLabelText( /Country\/Region/i );
+
+		await act( async () => {
+			await user.selectOptions( countrySelect, 'Austria' );
+		} );
+
+		expect(
+			await within( shippingForm ).findByLabelText( /Postal code/i )
+		).toBeInTheDocument();
+
+		await act( async () => {
+			await user.selectOptions( countrySelect, 'Spain' );
+		} );
+
+		expect(
+			within( shippingForm ).queryByLabelText( /Postal code/i )
+		).not.toBeInTheDocument();
+
+		// Currently visible fields
+		const fields = {
+			email: screen.getByLabelText(
+				/Email address/i
+			) as HTMLInputElement,
+			firstName: within( shippingForm ).getByLabelText(
+				/First name/i
+			) as HTMLInputElement,
+			lastName: within( shippingForm ).getByLabelText(
+				/Last name/i
+			) as HTMLInputElement,
+			address1: within( shippingForm ).getByLabelText(
+				'Address'
+			) as HTMLInputElement,
+			city: within( shippingForm ).getByLabelText(
+				/City/i
+			) as HTMLInputElement,
+			state: within( shippingForm ).getByLabelText(
+				/Province/i
+			) as HTMLSelectElement,
+			terms: screen.getByRole( 'checkbox', {
+				name: /terms and conditions/i,
+			} ) as HTMLInputElement,
+		};
+
+		const fieldValues: Record< keyof typeof fields, string | boolean > = {
+			email: 'test@test.com',
+			firstName: 'John',
+			lastName: 'Doe',
+			address1: '123 Main St',
+			city: 'BCN',
+			state: 'Barcelona',
+			terms: true,
+		};
+
+		// Fill the fields
+		await act( async () => {
+			for ( const [ key, value ] of Object.entries( fieldValues ) ) {
+				switch ( key ) {
+					case 'terms':
+						if ( fields.terms.checked !== value ) {
+							await user.click( fields.terms );
+						}
+						break;
+					case 'state':
+						await user.selectOptions(
+							fields.state,
+							value as string
+						);
+						break;
+					default:
+						await user.type(
+							fields[ key as keyof typeof fields ],
+							value as string
+						);
+				}
+			}
+		} );
+
+		// wait for fetch to be called
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+
+		// Submit the form
+		await act( async () => {
+			await user.click(
+				screen.getByRole( 'button', { name: /Place order/i } )
+			);
+		} );
+
+		// Given we're checking for invisible errors here, reaching to the data store is a good option.
+		expect( select( validationStore ).hasValidationErrors() ).toBe( false );
 	} );
 } );

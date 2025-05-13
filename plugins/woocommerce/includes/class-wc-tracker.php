@@ -337,7 +337,7 @@ class WC_Tracker {
 	 *
 	 * @return array
 	 */
-	private static function get_all_plugins() {
+	public static function get_all_plugins() {
 		// Ensure get_plugins function is loaded.
 		if ( ! function_exists( 'get_plugins' ) ) {
 			include ABSPATH . '/wp-admin/includes/plugin.php';
@@ -1015,7 +1015,7 @@ class WC_Tracker {
 	 *
 	 * @return array
 	 */
-	private static function get_all_template_overrides() {
+	public static function get_all_template_overrides() {
 		$override_data = array();
 		/**
 		 * Filter the paths to scan for template overrides.
@@ -1452,6 +1452,7 @@ class WC_Tracker {
 		return array(
 			'enabled'                        => get_option( 'woocommerce_feature_email_improvements_enabled', 'no' ),
 			'default_enabled'                => get_option( 'woocommerce_email_improvements_default_enabled', 'no' ),
+			'existing_store_enabled'         => get_option( 'woocommerce_email_improvements_existing_store_enabled', 'no' ),
 			'auto_sync_enabled'              => get_option( 'woocommerce_email_auto_sync_with_theme', 'no' ),
 			'first_enabled_at'               => get_option( 'woocommerce_email_improvements_first_enabled_at', null ),
 			'last_enabled_at'                => get_option( 'woocommerce_email_improvements_last_enabled_at', null ),
@@ -1494,9 +1495,9 @@ class WC_Tracker {
 	 * Check if any core emails are being overridden by a template override.
 	 *
 	 * @param array $template_overrides Template overrides.
-	 * @return bool True if core emails are being overridden, false otherwise.
+	 * @return array Array with count of core email overrides and the templates that are overriden.
 	 */
-	private static function get_core_email_overrides( $template_overrides ) {
+	public static function get_core_email_overrides( $template_overrides ): array {
 		$core_emails            = self::get_core_emails();
 		$core_email_templates   = array_map(
 			function ( $email ) {
