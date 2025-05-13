@@ -14,7 +14,7 @@ import {
 import './settings-payments-offline.scss';
 import './settings-payments-body.scss';
 import { ListPlaceholder } from '~/settings-payments/components/list-placeholder';
-import { OfflinePaymentGatewayList } from '~/settings-payments/components/offline-gateway-list';
+import { OfflinePaymentGatewayList } from '~/settings-payments/components/offline-payment-gateway-list';
 
 /**
  * A component for managing offline payment gateways in WooCommerce.
