@@ -28,4 +28,16 @@ the root autoloader.
 
 1. Add package to the `require` section of both the `lib/composer.json` and root `composer.json` file instead of `require-dev`
 2. Add package slug to `extra/mozart/excluded-packages` section of `composer.json`
-3. Run `composer run-script build-lib` from the root directory (You **should not** see the package in `packages/VendorName/PackageName` or `classes`)
+3. Run `composer run-script build-lib` from the root directory (You **should not** see the package in `packages/VendorName/PackageName` or `classes`) - see the note about MobileDetect below.
+
+### A note about the MobileDetect library
+
+The `lib/packages/Detection/MobileDetect.php` file
+[got manual changes to prevent deprecation warnings in PHP 8](https://github.com/woocommerce/woocommerce/pull/53526).
+These fixes are already present in newer versions of the package, but we can't update to any of these versions
+because they all require PHP 8. The package version currently in use is the newest one supporting PHP 7.4.
+
+Therefore, as long as WooCommerce runs in PHP 7.4 and no alternative solution is found for this, 
+the changes in `lib/packages/Detection/MobileDetect.php` must be manually reverted after running
+`composer run-script build-lib`. This can be accomplished from the command line by running
+`git restore ./plugins/woocommerce/lib/packages/Detection/MobileDetect.php` from the root of the repository.
