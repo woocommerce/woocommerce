@@ -263,12 +263,7 @@ test.describe(
 				'.woocommerce-customize-store_global-styles-variations_item'
 			);
 
-			await expect
-				.poll( async () => {
-					const count = await fontPickers.count();
-					return count === 10;
-				} )
-				.toBeTruthy();
+			await expect.poll( () => fontPickers.count() ).toEqual( 10 );
 
 			await assembler
 				.locator(
