@@ -8,7 +8,8 @@ use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
-use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Blocks\Utils\AddToCartUtils;
+
 use WC_Shortcode_Checkout;
 use WC_Frontend_Scripts;
 
@@ -51,19 +52,9 @@ class ClassicTemplate extends AbstractDynamicBlock {
 	protected function enqueue_assets( array $attributes, $content, $block ) {
 		parent::enqueue_assets( $attributes, $content, $block );
 
-		if (
-			is_product() &&
-			'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart_product_pages' ) &&
-			'yes' !== get_option( 'woocommerce_cart_redirect_after_add' )
-		) {
+		if ( is_product() ) {
 			$product = wc_get_product( get_the_ID() );
-
-			if ( $product instanceof \WC_Product ) {
-				$is_not_purchasable = ProductType::SIMPLE === $product->get_type() && ( ! $product->is_purchasable() || ! $product->is_in_stock() );
-				if ( ProductType::EXTERNAL !== $product->get_type() && ! $is_not_purchasable ) {
-					wp_enqueue_script( 'wc-single-add-to-cart' );
-				}
-			}
+			AddToCartUtils::conditionally_enqueue_single_add_to_cart_script( $product );
 		}
 	}
 
