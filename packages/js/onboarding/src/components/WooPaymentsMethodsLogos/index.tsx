@@ -1,10 +1,9 @@
 /**
  * External dependencies
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createElement } from '@wordpress/element';
 import { Popover } from '@wordpress/components';
-import { useDebounce } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -164,13 +163,23 @@ export const WooPaymentsMethodsLogos = ( {
 } ) => {
 	const [ maxShownElements, setMaxShownElements ] = useState( maxElements );
 	const [ isPopoverVisible, setPopoverVisible ] = useState( false );
+	const buttonRef = useRef< HTMLDivElement >( null );
 
-	const hidePopoverDebounced = useDebounce( () => {
+	const handleClick = ( event: React.MouseEvent | React.KeyboardEvent ) => {
+		const clickedElement = event.target as HTMLElement;
+		const parentDiv = clickedElement.closest(
+			'.woocommerce-woopayments-payment-methods-logos-count'
+		);
+
+		if ( buttonRef.current && parentDiv !== buttonRef.current ) {
+			return;
+		}
+
+		setPopoverVisible( ( prev ) => ! prev );
+	};
+
+	const handleFocusOutside = () => {
 		setPopoverVisible( false );
-	}, 350 );
-	const showPopover = () => {
-		setPopoverVisible( true );
-		hidePopoverDebounced.cancel();
 	};
 
 	// Reduce the total number of payment methods by one if the store is not eligible for WooPay.
@@ -234,24 +243,25 @@ export const WooPaymentsMethodsLogos = ( {
 					className="woocommerce-woopayments-payment-methods-logos-count"
 					role="button"
 					tabIndex={ 0 }
-					onClick={ () => setPopoverVisible( ! isPopoverVisible ) }
-					onMouseEnter={ showPopover }
-					onMouseLeave={ hidePopoverDebounced }
+					ref={ buttonRef }
+					onClick={ handleClick }
 					onKeyDown={ ( event ) => {
 						if ( event.key === 'Enter' || event.key === ' ' ) {
-							setPopoverVisible( ! isPopoverVisible );
+							handleClick( event );
 						}
 					} }
 				>
 					+ { maxSupportedPaymentMethods - maxShownElements }
 					{ isPopoverVisible && (
 						<Popover
-							placement="top-start"
 							className="woocommerce-woopayments-payment-methods-logos-popover"
-							focusOnMount={ false }
+							placement="top-start"
+							offset={ 4 }
+							variant="unstyled"
+							focusOnMount={ true }
 							noArrow={ true }
 							shift={ true }
-							onClose={ hidePopoverDebounced }
+							onFocusOutside={ handleFocusOutside }
 						>
 							<div className="woocommerce-woopayments-payment-methods-logos">
 								{ hiddenPaymentMethods.map(

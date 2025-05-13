@@ -42,7 +42,7 @@ The initial state of the checkout store is:
 
 ## Observers
 
-Extensions can register "observers" which will respond to specific events in the Checkout flow. More information on these can be found in the [checkout flow and events documentation](../../internal-developers/block-client-apis/checkout/checkout-flow-and-events.md). That documentation also contains information about the general flow of the checkout system, whereas this documentation only describes how the data is affected during checkout.
+Extensions can register "observers" which will respond to specific events in the Checkout flow. More information on these can be found in the [checkout flow and events documentation](https://developer.woocommerce.com/docs/cart-and-checkout-checkout-flow-and-events/). That documentation also contains information about the general flow of the checkout system, whereas this documentation only describes how the data is affected during checkout.
 
 ## Status changes
 

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix logic bugs in additional fields validation and persisting logic.

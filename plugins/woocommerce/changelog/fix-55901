@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Login/Register forms by submitting them after pressing the Enter key

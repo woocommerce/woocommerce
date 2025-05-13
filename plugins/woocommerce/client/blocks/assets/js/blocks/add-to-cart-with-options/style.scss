@@ -57,6 +57,8 @@
 	}
 }
 
-.wc-block-add-to-cart-with-options.is-invalid .wp-block-woocommerce-product-button .add_to_cart_button {
+.wc-block-add-to-cart-with-options.is-invalid
+	.wp-block-woocommerce-product-button
+	.add_to_cart_button {
 	cursor: not-allowed;
 }

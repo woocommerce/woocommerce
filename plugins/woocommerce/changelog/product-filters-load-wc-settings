@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Ensure wc-settings is enqueued for for Product Filters block.
-

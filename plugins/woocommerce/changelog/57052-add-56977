@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add support for filtering orders by "created_via" in the GET /orders endpoint.

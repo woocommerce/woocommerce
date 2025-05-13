@@ -15,7 +15,8 @@
 	.wc-block-components-main {
 		box-sizing: border-box;
 		margin: 0;
-		padding-right: math.percentage(math.div($gap-largest, 1060px)); // ~1060px is the default width of the content area in Storefront.
+		// ~1060px is the default width of the content area in Storefront.
+		padding-right: math.percentage(math.div($gap-largest, 1060px));
 		width: 65%;
 	}
 }

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useCallback, useEffect } from '@wordpress/element';
+import { useCallback, useEffect, useMemo } from '@wordpress/element';
 import { Form } from '@woocommerce/base-components/cart-checkout';
 import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
 import type { AddressFormValues } from '@woocommerce/settings';
@@ -27,24 +27,27 @@ const CustomerAddress = () => {
 	const { dispatchCheckoutEvent } = useStoreEvents();
 
 	// Forces editing state if store has errors.
-	const { hasValidationErrors, invalidProps } = useSelect(
+	const { hasValidationErrors, getValidationErrorSelector } = useSelect(
 		( select ) => {
 			const store = select( validationStore );
 			return {
 				hasValidationErrors: store.hasValidationErrors(),
-				invalidProps: Object.keys( billingAddress )
-					.filter( ( key ) => {
-						return (
-							key !== 'email' &&
-							store.getValidationError( 'billing_' + key ) !==
-								undefined
-						);
-					} )
-					.filter( Boolean ),
+				getValidationErrorSelector: store.getValidationError,
 			};
 		},
-		[ billingAddress ]
+		[]
 	);
+
+	const invalidProps = useMemo( () => {
+		return Object.keys( billingAddress )
+			.filter( ( key ) => {
+				return (
+					key !== 'email' &&
+					getValidationErrorSelector( 'billing_' + key ) !== undefined
+				);
+			} )
+			.filter( Boolean );
+	}, [ billingAddress, getValidationErrorSelector ] );
 
 	useEffect( () => {
 		if ( invalidProps.length > 0 && editing === false ) {

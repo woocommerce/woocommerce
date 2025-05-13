@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Update sitewide stock query to account for empty string and values that are same as sitewide threshold.

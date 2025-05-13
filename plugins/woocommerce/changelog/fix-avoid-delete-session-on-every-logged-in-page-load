@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Avoid attempting to delete a non-existent session while logged in.
