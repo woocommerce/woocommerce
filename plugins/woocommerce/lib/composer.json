@@ -7,7 +7,6 @@
 		"php": ">=7.4"
 	},
 	"require-dev": {
-		"league/container": "3.3.5",
 		"mobiledetect/mobiledetectlib": "^3.74",
 		"psr/container": "^1.1"
 	},
@@ -29,9 +28,8 @@
 			"dep_namespace": "Automattic\\WooCommerce\\Vendor\\",
 			"dep_directory": "/packages/",
 			"packages": [
-				"league/container",
-				"mobiledetect/mobiledetectlib",
-				"psr/container"
+				"psr/container",
+				"mobiledetect/mobiledetectlib"
 			],
 			"excluded_packages": [
 			],

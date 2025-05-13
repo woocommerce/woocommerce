@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement;
 use Automattic\WooCommerce\Blocks\Assets\Api as BlocksAssetsApi;
 use Automattic\WooCommerce\Blocks\Package as BlocksPackage;
 use Automattic\WooCommerce\Internal\DependencyManagement\ContainerException;
-use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
 use Automattic\WooCommerce\Internal\DependencyManagement\RuntimeContainer;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\StoreApi;
@@ -34,7 +33,7 @@ class RuntimeContainerTest extends \WC_Unit_Test_Case {
 	/**
 	 * The system under test.
 	 *
-	 * @var ExtendedContainer
+	 * @var RuntimeContainer
 	 */
 	private $sut;
 

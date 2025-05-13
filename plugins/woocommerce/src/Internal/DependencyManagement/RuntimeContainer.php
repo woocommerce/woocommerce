@@ -197,29 +197,4 @@ class RuntimeContainer {
 	protected function is_class_allowed( string $class_name ): bool {
 		return StringUtil::starts_with( $class_name, self::WOOCOMMERCE_NAMESPACE, false );
 	}
-
-	/**
-	 * Tells if this class should be used as the core WooCommerce dependency injection container (or if the old ExtendedContainer should be used instead).
-	 *
-	 * By default, this returns true, to have it return false you can:
-	 *
-	 * 1. Define the WOOCOMMERCE_USE_OLD_DI_CONTAINER constant with a value of true; or
-	 * 2. Hook on the 'woocommerce_use_old_di_container' filter and have it return false (it receives the value of WOOCOMMERCE_USE_OLD_DI_CONTAINER, or false if the constant doesn't exist).
-	 *
-	 * @return bool True if this class should be used as the core WooCommerce dependency injection container, false if ExtendedContainer should be used instead.
-	 */
-	public static function should_use(): bool {
-		$should_use = ! defined( 'WOOCOMMERCE_USE_OLD_DI_CONTAINER' ) || true !== WOOCOMMERCE_USE_OLD_DI_CONTAINER;
-
-		/**
-		 * Hook to decide if the old ExtendedContainer class (instead of RuntimeContainer) should be used as the underlying WooCommerce dependency injection container.
-		 *
-		 * NOTE: This hook will be removed in WooCommerce 9.5.
-		 *
-		 * @param bool $should_use Value of the WOOCOMMERCE_USE_OLD_DI_CONTAINER constant, false if the constant doesn't exist.
-		 *
-		 * @since 9.5.0
-		 */
-		return apply_filters( 'woocommerce_use_old_di_container', $should_use );
-	}
 }
