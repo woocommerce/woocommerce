@@ -149,9 +149,8 @@ class AddressProviderController {
 	 * @return bool
 	 */
 	public function is_provider_available( string $provider_id ): bool {
-		$providers = $this->get_registered_providers();
 
-		foreach ( $providers as $provider ) {
+		foreach ( $this->providers as $provider ) {
 			if ( $provider->id === $provider_id ) {
 				return true;
 			}
@@ -168,18 +167,12 @@ class AddressProviderController {
 	 * @return string
 	 */
 	public function get_preferred_provider(): string {
-		$providers = $this->get_registered_providers();
-
-		if ( empty( $providers ) ) {
-			return '';
-		}
-
 
 		if ( $this->is_provider_available( $this->preferred_provider_option ) ) {
 			return $this->preferred_provider_option;
 		}
 
 		// Get the first provider's ID by instantiating it.
-		return $providers[0]->id ?? '';
+		return $this->providers[0]->id ?? '';
 	}
 }

@@ -58,7 +58,7 @@ class WC_Settings_General extends WC_Settings_Page {
 			// If it fails, these settings should not be shown as the feature is not available.
 			try {
 				$address_provider_class         = wc_get_container()->get( AddressProviderController::class );
-				$address_autocomplete_providers = $address_provider_class->get_registered_providers();
+				$address_autocomplete_providers = $address_provider_class->get_providers();
 				$address_autocomplete_available = ! empty( $address_autocomplete_providers );
 
 				if ( ! $address_autocomplete_available ) {
