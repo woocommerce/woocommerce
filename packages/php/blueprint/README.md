@@ -1,11 +1,7 @@
 <!-- markdownlint-disable MD029 -->
 # Blueprint
 
-This PHP Composer package facilitates exporting and importing WordPress Blueprint
-compatible JSON formats. It offers a solid framework for seamless integration with
-WordPress sites and supports extensibility, enabling plugins to customize export
-and import functionalities. Manage site configurations, options, and settings
-effortlessly with JSON files.
+This PHP Composer package facilitates exporting and importing WordPress Blueprint compatible JSON formats. It offers a solid framework for seamless integration with WordPress sites and supports extensibility, enabling plugins to customize export and import functionalities. Manage site configurations, options, and settings effortlessly with JSON files.
 
 ## Usage
 
@@ -63,6 +59,8 @@ $result = $import_step->import();
 
 ## Built-in Steps
 
+A **step** is a single, self-contained action or operation that can be exported to or imported from a Blueprint JSON file. Steps are the building blocks of the Blueprint export/import process.
+
 Blueprint comes with several built-in steps for common site operations:
 
 | Step             | Description                        |
@@ -74,9 +72,35 @@ Blueprint comes with several built-in steps for common site operations:
 | `setSiteOptions` | Set WordPress site options         |
 | `runSql`         | Run custom SQL queries             |
 
+
+### Example: SetSiteOptions Step
+
+*PHP (creating a step):*
+
+```php
+use Automattic\WooCommerce\Blueprint\Steps\SetSiteOptions;
+
+$step = new SetSiteOptions([
+    'option1' => 'value1',
+    'option2' => 'value2',
+]);
+```
+
+*JSON (as exported):*
+
+```json
+{
+  "step": "setSiteOptions",
+  "options": {
+    "option1": "value1",
+    "option2": "value2"
+  }
+}
+```
+
 ## Extending Blueprint
 
-You can extend Blueprint by adding custom exporters, importers, or steps. This allows you to support new data types or custom site logic.
+You can extend Blueprint by adding custom exporters, importers, or steps. This allows you to support new data types or custom site logic. For example, you can add a custom exporter to export your plugin configuration.
 
 ### Hooks
 
@@ -180,6 +204,8 @@ Output:
   ```
 
 ## Example: Adding a Custom Importer
+
+In most cases, the default importers will be sufficient. However, if you need to import data not supported by the default importers, creating a custom importer might be necessary. Keep in mind that this could result in a blueprint file that is not compatible with the standard WordPress Blueprint format.
 
 1. To add a custom importer, implement the `StepProcessor` interface. Importers process step data during import.
 
