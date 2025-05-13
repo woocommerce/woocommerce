@@ -67,6 +67,34 @@ class RuntimeContainerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'get' throws 'ContainerException' when trying to resolve a class that has a private or protected constructor.
+	 *
+	 * @testWith ["ClassWithPrivateConstructor"]
+	 *           ["ClassWithProtectedConstructor"]
+	 *
+	 * @param string $class_name The name of the class to try to instantiate, without the namespace.
+	 */
+	public function test_exception_when_trying_to_resolve_class_with_private_constructor( string $class_name ) {
+		$class_name = "Automattic\\WooCommerce\\Internal\\DependencyManagement\\ExampleClasses\\$class_name";
+		$this->expectException( ContainerException::class );
+		$this->expectExceptionMessage( "Error resolving '$class_name': the class doesn't have a public constructor." );
+
+		$this->sut->get( $class_name );
+	}
+
+	/**
+	 * @testdox 'get' throws 'ContainerException' when trying to resolve a class that has a constructor with arguments.
+	 *
+	 */
+	public function test_exception_when_trying_to_resolve_class_with_constructor_with_arguments() {
+		$class_name = 'Automattic\\WooCommerce\\Internal\\DependencyManagement\\ExampleClasses\\ClassWithConstructorWithParameters';
+		$this->expectException( ContainerException::class );
+		$this->expectExceptionMessage( "Error resolving '$class_name': the class constructor has arguments." );
+
+		$this->sut->get( $class_name );
+	}
+
+	/**
 	 * @testdox 'get' can resolve classes passed to the constructor in the initial resolve cache.
 	 */
 	public function test_can_get_instance_included_in_initial_resolved_cache() {

@@ -139,7 +139,7 @@ function wc_function_that_needs_service_1() {
 
 This is also the recommended approach when moving code from `includes` to `src` while keeping the existing entry points for the old code in place for compatibility.
 
-Worth noting: the container will throw a `ContainerException` when receiving a request for retrieving a class that doesn't exist or is not in the `Automattic\Woocommerce` namespace. You can use the container `has` method to verify that a given class can actually be retrieved.
+Worth noting: the container will throw a `ContainerException` when receiving a request for retrieving a class that doesn't exist or is not in the `Automattic\Woocommerce` namespace, or when there's an error preventing the instantiation (for example the class doesn't have a public constructor). You can use the container `has` method to verify that a given class can actually be retrieved, but this method will only verify that the class exists and is in the correct namespace.
 
 #### A note on legacy classes
 

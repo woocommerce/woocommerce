@@ -55,10 +55,9 @@ final class Container {
 	 * Returns an instance of the specified class.
 	 * See the comment about ContainerException in RuntimeContainer::get.
 	 *
-	 * @template T
-	 * @param string|class-string<T> $id Class name.
+	 * @param string $id Class name.
 	 *
-	 * @return T Resolved entry.
+	 * @return object Object instance.
 	 *
 	 * @throws ContainerException Error when resolving the class to an object instance, or class not found.
 	 * @throws \Exception Exception thrown in the constructor or in the 'init' method of one of the resolved classes.
@@ -68,8 +67,8 @@ final class Container {
 	}
 
 	/**
-	 * Returns true if the container can return an instance of the given class.
-	 * Returns false otherwise.
+	 * Returns true if the container can return an instance of the given class or false otherwise.
+	 * See the comment in RuntimeContainer::has.
 	 *
 	 * @param class-string $id Class name.
 	 *

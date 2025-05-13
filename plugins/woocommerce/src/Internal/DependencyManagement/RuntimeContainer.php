@@ -125,6 +125,7 @@ class RuntimeContainer {
 		return $instance;
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 	/**
 	 * Get an instance of a class using reflection.
 	 * This method recursively calls 'get_core' (which in turn calls this method) for each of the arguments
@@ -139,7 +140,20 @@ class RuntimeContainer {
 	 */
 	private function instantiate_class_using_reflection( string $class_name, array &$resolve_chain ): object {
 		$ref_class = new \ReflectionClass( $class_name );
-		$instance  = $ref_class->newInstance();
+
+		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+
+		$constructor = $ref_class->getConstructor();
+		if ( ! is_null( $constructor ) ) {
+			if ( ! $constructor->isPublic() ) {
+				throw new ContainerException( "Error resolving '$class_name': the class doesn't have a public constructor." );
+			}
+			if ( ! empty( $constructor->getParameters() ) ) {
+				throw new ContainerException( "Error resolving '$class_name': the class constructor has arguments." );
+			}
+		}
+
+		$instance = $ref_class->newInstance();
 		if ( ! $ref_class->hasMethod( 'init' ) ) {
 			return $instance;
 		}
@@ -148,8 +162,6 @@ class RuntimeContainer {
 		if ( ! $init_method->isPublic() || $init_method->isStatic() ) {
 			return $instance;
 		}
-
-		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 
 		$init_args          = $init_method->getParameters();
 		$init_arg_instances = array_map(
@@ -175,9 +187,13 @@ class RuntimeContainer {
 
 		return $instance;
 	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Tells if the 'get' method can be used to resolve a given class.
+	 *
+	 * Note that 'get' can throw an exception even if this method returns true,
+	 * for example for classes that are in the correct namespace but don't have a public constructor.
 	 *
 	 * @param string $class_name The class name.
 	 * @return bool True if the class with the supplied name can be resolved with 'get'.
