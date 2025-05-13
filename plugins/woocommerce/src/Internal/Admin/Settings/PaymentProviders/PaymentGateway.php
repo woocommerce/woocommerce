@@ -439,7 +439,7 @@ class PaymentGateway {
 		// If the payment gateway object has a `plugin_file` property, use it.
 		// This is useful for testing.
 		if ( isset( $payment_gateway->plugin_file ) ) {
-			$plugin_file = $payment_gateway->plugin_file;
+			$plugin_file = (string) $payment_gateway->plugin_file;
 			// Remove the .php extension from the file path. The WP API expects it without it.
 			if ( ! empty( $plugin_file ) && str_ends_with( $plugin_file, '.php' ) ) {
 				$plugin_file = substr( $plugin_file, 0, - 4 );
@@ -457,7 +457,7 @@ class PaymentGateway {
 			return '';
 		}
 
-		$plugin_file = PluginsHelper::get_plugin_path_from_slug( $plugin_slug );
+		$plugin_file = (string) PluginsHelper::get_plugin_path_from_slug( $plugin_slug );
 		// Remove the .php extension from the file path. The WP API expects it without it.
 		if ( ! empty( $plugin_file ) && str_ends_with( $plugin_file, '.php' ) ) {
 			$plugin_file = substr( $plugin_file, 0, - 4 );
