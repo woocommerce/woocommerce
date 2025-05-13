@@ -105,7 +105,18 @@ export class Editor extends CoreEditor {
 		await this.page
 			.getByRole( 'menuitem', { name: /Reset|Delete/ } )
 			.click();
+
 		await this.page.getByRole( 'button', { name: /Reset|Delete/ } ).click();
+
+		await this.page.waitForResponse(
+			( response ) =>
+				( response.url().includes( 'wp-json/wp/v2/templates' ) ||
+					response
+						.url()
+						.includes( 'wp-json/wp/v2/template-parts' ) ) &&
+				response.status() === 200 &&
+				response.request().method() === 'POST'
+		);
 
 		await this.page
 			.getByLabel( 'Dismiss this notice' )
