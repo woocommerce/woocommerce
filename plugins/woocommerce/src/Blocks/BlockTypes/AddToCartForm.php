@@ -50,12 +50,9 @@ class AddToCartForm extends AbstractBlock {
 		$product = wc_get_product( $post_id );
 
 		if (
-			is_product() &&
 			'yes' === get_option( 'woocommerce_enable_ajax_add_to_cart_product_pages' ) &&
 			'yes' !== get_option( 'woocommerce_cart_redirect_after_add' )
 		) {
-			$product = wc_get_product( get_the_ID() );
-
 			if ( $product instanceof \WC_Product ) {
 				$is_not_purchasable = ProductType::SIMPLE === $product->get_type() && ( ! $product->is_purchasable() || ! $product->is_in_stock() );
 				if ( ProductType::EXTERNAL !== $product->get_type() && ! $is_not_purchasable ) {
