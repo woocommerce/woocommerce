@@ -10,8 +10,9 @@ import { REGULAR_PRICED_PRODUCT_NAME } from './constants';
 import { CheckoutPage } from './checkout.page';
 
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
-	checkoutPageObject: async ( { page }, use ) => {
+	checkoutPageObject: async ( { page, requestUtils }, use ) => {
 		const pageObject = new CheckoutPage( {
+			requestUtils,
 			page,
 		} );
 		await use( pageObject );
@@ -43,6 +44,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{},
 				{
 					contact: {
+						'Alternative Email': 'test@test.com',
 						'Enter a gift message to include in the package':
 							'This is for you!',
 						'Is this a personal purchase or a business purchase?':
@@ -217,6 +219,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{},
 				{
 					contact: {
+						'Alternative Email': 'test@test.com',
 						'Enter a gift message to include in the package':
 							'This is for you!',
 						'Is this a personal purchase or a business purchase?':
@@ -295,6 +298,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{},
 				{
 					contact: {
+						'Alternative Email': 'test@test.com',
 						'Enter a gift message to include in the package':
 							'This is for you, from me!',
 						'Is this a personal purchase or a business purchase?':
@@ -374,6 +378,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{},
 				{
 					contact: {
+						'Alternative Email': 'test@test.com',
 						'Enter a gift message to include in the package':
 							'This is for you!',
 						'Is this a personal purchase or a business purchase?':
@@ -567,6 +572,40 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			);
 
 			await checkoutPageObject.page
+				.getByLabel( 'Alternative Email' )
+				.fill( 'test@' );
+
+			// Blur the field to trigger the validation.
+			await checkoutPageObject.page
+				.getByLabel( 'Alternative Email' )
+				.blur();
+
+			await expect(
+				checkoutPageObject.page
+					.locator( '.wc-block-components-notices' )
+					.getByText(
+						'Please ensure your alternative email matches the correct format.'
+					)
+			).toBeVisible();
+
+			await checkoutPageObject.page
+				.getByLabel( 'Alternative Email' )
+				.fill( 'test@test.com' );
+
+			// Blur the field to trigger the validation.
+			await checkoutPageObject.page
+				.getByLabel( 'Alternative Email' )
+				.blur();
+
+			await expect(
+				checkoutPageObject.page
+					.locator( '.wc-block-components-notices' )
+					.getByText(
+						'Please ensure your alternative email matches the correct format.'
+					)
+			).not.toBeVisible();
+
+			await checkoutPageObject.page
 				.getByLabel( 'Test required checkbox' )
 				.check();
 
@@ -606,6 +645,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{},
 				{
 					contact: {
+						'Alternative Email': 'test@test.com',
 						'Is this a personal purchase or a business purchase?':
 							'business',
 					},
@@ -648,6 +688,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{},
 				{
 					contact: {
+						'Alternative Email': 'test@test.com',
 						'Enter a gift message to include in the package (optional)':
 							'This is a nice gift',
 						'Is this a personal purchase or a business purchase?':
@@ -918,6 +959,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{},
 				{
 					contact: {
+						'Alternative Email': 'test@test.com',
 						'Enter a gift message to include in the package':
 							'Happy Birthday!',
 						'Is this a personal purchase or a business purchase?':

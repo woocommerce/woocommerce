@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-PTK Pattern: Ensure that fatal is not triggered if categories is null.

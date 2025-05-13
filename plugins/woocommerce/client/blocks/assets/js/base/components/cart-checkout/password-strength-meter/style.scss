@@ -60,19 +60,23 @@
 		}
 	}
 	.wc-block-components-password-strength__meter[value="1"],
-	.wc-block-components-password-strength__meter[value="1"] + .wc-block-components-password-strength__result {
+	.wc-block-components-password-strength__meter[value="1"]
+		+ .wc-block-components-password-strength__result {
 		color: $alert-red;
 	}
 	.wc-block-components-password-strength__meter[value="2"],
-	.wc-block-components-password-strength__meter[value="2"] + .wc-block-components-password-strength__result {
+	.wc-block-components-password-strength__meter[value="2"]
+		+ .wc-block-components-password-strength__result {
 		color: $alert-red;
 	}
 	.wc-block-components-password-strength__meter[value="3"],
-	.wc-block-components-password-strength__meter[value="3"] + .wc-block-components-password-strength__result {
+	.wc-block-components-password-strength__meter[value="3"]
+		+ .wc-block-components-password-strength__result {
 		color: $alert-yellow;
 	}
 	.wc-block-components-password-strength__meter[value="4"],
-	.wc-block-components-password-strength__meter[value="4"] + .wc-block-components-password-strength__result {
+	.wc-block-components-password-strength__meter[value="4"]
+		+ .wc-block-components-password-strength__result {
 		color: $alert-green;
 	}
 }

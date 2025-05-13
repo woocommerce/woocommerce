@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2> <?php echo esc_html__( 'Thank you for your order', 'woocommerce' ); ?> </h2>
+<h2 class="wp-block-heading"> <?php echo esc_html__( 'Thank you for your order', 'woocommerce' ); ?> </h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->

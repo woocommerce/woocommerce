@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Remove concept of `isExperimental` from blocks `webpack-entries`.
