@@ -32,7 +32,8 @@ export default function AddToCartWithOptionsVariationSelectorEdit(
 		templateLock: 'all',
 	} );
 
-	// If valid product has been provided but it's not a variable product, then don't render anything.
+	// If a valid product has been provided but it's not a
+	// variable product, then don't render anything.
 	if ( product.id !== 0 && productType !== 'variable' ) {
 		return null;
 	}
