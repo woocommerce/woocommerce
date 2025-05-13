@@ -129,7 +129,11 @@ class PaymentGateway {
 	 * @return string The provider description of the payment gateway.
 	 */
 	public function get_description( WC_Payment_Gateway $payment_gateway ): string {
-		$description = wp_strip_all_tags( html_entity_decode( $payment_gateway->get_method_description() ?? '' ), true );
+		$description = $payment_gateway->get_method_description() ?? '';
+		if ( ! is_string( $description ) ) {
+			return '';
+		}
+		$description = wp_strip_all_tags( html_entity_decode( $description ), true );
 
 		// Truncate the description.
 		return Utils::truncate_with_words( $description, 130, '…' );
