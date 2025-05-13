@@ -1418,3 +1418,6 @@ Options: product_slug, product_name, auto_renew, expires_on, expired, sites_max,
 
 - `--steps` - name of steps to export.
 
+Default: all steps
+
+Options: installPlugin, activateTheme, setWCSettingsGeneral, setWCSettingsProducts, setWCSettingsTax, setWCSettingsShipping, setWCSettingsAccount, setWCSettingsEmails, setWCSettingsAdvanced, setWCSettingsIntegrations, setWCSettingsSiteVisibility, setWCTaskOptions, setWCCoreProfilerOptions, wcPaymentGateways
