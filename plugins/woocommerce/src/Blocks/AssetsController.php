@@ -53,7 +53,7 @@ final class AssetsController {
 	}
 
 	/**
-	 * De-register the iAPI runtime registered by WordPress core/Gutenberg, wllowing us to register our own version of the iAPI runtime.
+	 * Re-registers the iAPI runtime registered by WordPress Core/Gutenberg, allowing WooCommerce to register its own version of the iAPI runtime.
 	 */
 	public function deregister_core_iapi_runtime() {
 		wp_deregister_script_module( '@wordpress/interactivity' );
