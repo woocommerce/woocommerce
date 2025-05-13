@@ -37,11 +37,6 @@ export const OfflinePaymentGateways = ( {
 }: OfflinePaymentGatewaysProps ) => {
 	return (
 		<div className="settings-payment-gateways">
-			<div className="settings-payment-gateways__header">
-				<div className="settings-payment-gateways__header-title">
-					{ __( 'Payment methods', 'woocommerce' ) }
-				</div>
-			</div>
 			{ isFetching ? (
 				<ListPlaceholder rows={ 3 } />
 			) : (
