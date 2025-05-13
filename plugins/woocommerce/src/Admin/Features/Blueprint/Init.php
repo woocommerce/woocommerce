@@ -355,7 +355,6 @@ class Init {
 				)
 			);
 
-
 			if ( ! is_wp_error( $api_response ) ) {
 				$wp_org_themes[ $slug ] = $theme;
 			}
