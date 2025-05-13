@@ -107,8 +107,8 @@ class PaymentGateway {
 	 * @return string The provider title of the payment gateway.
 	 */
 	public function get_title( WC_Payment_Gateway $payment_gateway ): string {
-		$title = $payment_gateway->get_method_title() ?? '';
-		if ( ! is_string( $title ) ) {
+		$title = $payment_gateway->get_method_title();
+		if ( ! is_string( $title ) || empty( $title ) ) {
 			return esc_html__( 'Unknown', 'woocommerce' );
 		}
 		$title = wp_strip_all_tags( html_entity_decode( $title ), true );
@@ -129,8 +129,8 @@ class PaymentGateway {
 	 * @return string The provider description of the payment gateway.
 	 */
 	public function get_description( WC_Payment_Gateway $payment_gateway ): string {
-		$description = $payment_gateway->get_method_description() ?? '';
-		if ( ! is_string( $description ) ) {
+		$description = $payment_gateway->get_method_description();
+		if ( ! is_string( $description ) || empty( $description ) ) {
 			return '';
 		}
 		$description = wp_strip_all_tags( html_entity_decode( $description ), true );
@@ -151,7 +151,7 @@ class PaymentGateway {
 	 */
 	public function get_icon( WC_Payment_Gateway $payment_gateway ): string {
 		$icon_url = $payment_gateway->icon ?? '';
-		if ( ! is_string( $icon_url ) ) {
+		if ( ! is_string( $icon_url ) || empty( $icon_url ) ) {
 			$icon_url = '';
 		}
 
@@ -370,7 +370,7 @@ class PaymentGateway {
 	 */
 	public function get_settings_url( WC_Payment_Gateway $payment_gateway ): string {
 		if ( is_callable( array( $payment_gateway, 'get_settings_url' ) ) ) {
-			return $payment_gateway->get_settings_url();
+			return (string) $payment_gateway->get_settings_url();
 		}
 
 		return Utils::wc_payments_settings_url( null, array( 'section' => strtolower( $payment_gateway->id ) ) );
@@ -392,7 +392,7 @@ class PaymentGateway {
 			// If we received no return URL, we will set the WC Payments Settings page as the return URL.
 			$return_url = ! empty( $return_url ) ? $return_url : admin_url( 'admin.php?page=wc-settings&tab=checkout' );
 
-			return $payment_gateway->get_connection_url( $return_url );
+			return (string) $payment_gateway->get_connection_url( $return_url );
 		}
 
 		// Fall back to pointing users to the payment gateway settings page to handle onboarding.
