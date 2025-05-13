@@ -426,14 +426,21 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 
 	if ( $use_lookup_tables ) {
 		// Lookup tables get refreshed along with the `woocommerce_reports` transient version.
+		// Sync is taking place async, hence we bound to the transient version.
+		// With high orders placement rate, this caching here will be short-lived (suboptimal for BFCM/Christmas and busy stores in general).
 		$cache_version = WC_Cache_Helper::get_transient_version( 'woocommerce_reports' );
 	} else {
-		// Create, update, and delete operations on orders clears caches and refresh `orders` transient version.
-		$cache_version = WC_Cache_Helper::get_transient_version( 'orders' );
+		if ( '' === $customer_email && $user_id ) {
+			// Optimized: for specific customers rely on orders count (customer meta under the hood with in-memory caching in the way to it).
+			// Best-case scenario for caching here, as it only depends on the customer orders placement.
+			$cache_version = wc_get_customer_order_count( $user_id );
+		} else {
+			// Fallback: create, update, and delete operations on orders clears caches and refresh `orders` transient version.
+			// With high orders placement rate, this caching here will be short-lived (suboptimal for BFCM/Christmas and busy stores in general).
+			$cache_version = WC_Cache_Helper::get_transient_version('orders');
+		}
 	}
 
-	// Note: the caching is getting ineffective as orders placement/modification frequency increases, as the
-	// previously obtained versions will be changing frequently - the versioning approach should be revisited.
 	$cache_group = 'orders';
 	$cache_key   = 'wc_customer_bought_product_' . md5( $customer_email . '-' . $user_id . '-' . $use_lookup_tables );
 	$cache_value = wp_cache_get( $cache_key, $cache_group );
