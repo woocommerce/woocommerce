@@ -32,6 +32,7 @@ class AddressProviderControllerTest extends MockeryTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 		$this->sut = new AddressProviderController();
+		$this->sut->init();
 
 		// Setup mock logger.
 		$this->mock_logger = $this->getMockBuilder( 'WC_Logger_Interface' )->getMock();
@@ -60,7 +61,7 @@ class AddressProviderControllerTest extends MockeryTestCase {
 	 * Test getting providers when none are registered.
 	 */
 	public function test_get_providers_empty() {
-		$providers = $this->sut->get_registered_providers();
+		$providers = $this->sut->get_providers();
 		$this->assertEmpty( $providers );
 	}
 
@@ -105,7 +106,8 @@ class AddressProviderControllerTest extends MockeryTestCase {
 			}
 		);
 
-		$registered_providers = $this->sut->get_registered_providers();
+		$this->sut->init();
+		$registered_providers = $this->sut->get_providers();
 
 		// Test that we have two provider instances registered.
 		$this->assertCount( 2, $registered_providers );
@@ -145,6 +147,9 @@ class AddressProviderControllerTest extends MockeryTestCase {
 				return $providers;
 			}
 		);
+
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
 
 		// Check if the provider is available.
 		$this->assertTrue( $this->sut->is_provider_available( 'test-provider' ) );
@@ -201,7 +206,8 @@ class AddressProviderControllerTest extends MockeryTestCase {
 			20
 		);
 
-		$registered_providers = $this->sut->get_registered_providers();
+		$this->sut->init();
+		$registered_providers = $this->sut->get_providers();
 
 		// Test that we have two provider instances registered.
 		$this->assertCount( 2, $registered_providers );
@@ -246,7 +252,8 @@ class AddressProviderControllerTest extends MockeryTestCase {
 			}
 		);
 
-		$registered_providers = $this->sut->get_registered_providers();
+		$this->sut->init();
+		$registered_providers = $this->sut->get_providers();
 
 		// Only the valid provider should be registered.
 		$this->assertCount( 1, $registered_providers );
@@ -293,118 +300,14 @@ class AddressProviderControllerTest extends MockeryTestCase {
 			}
 		);
 
-		$registered_providers = $this->sut->get_registered_providers();
+		$this->sut->init();
+		$registered_providers = $this->sut->get_providers();
 
 		// Only the valid provider should be registered.
 		$this->assertCount( 1, $registered_providers );
 		$this->assertEquals( 'valid-provider', $registered_providers[0]->id );
 		$this->assertEquals( 'Valid Provider', $registered_providers[0]->name );
 	}
-
-	/**
-	 * Test that providers are cached and not reinstantiated when the filter returns the same classes.
-	 */
-	public function test_provider_caching() {
-		$instantiation_count = 0;
-
-		// Define a test provider class that tracks instantiation.
-		$provider_class = new class() extends WC_Address_Provider {
-			/**
-			 * @var int Count of instances created.
-			 */
-			public static $instance_count = 0;
-
-			/**
-			 * Constructor for test provider.
-			 */
-			public function __construct() {
-				++self::$instance_count;
-				$this->id   = 'test-provider';
-				$this->name = 'Test Provider';
-			}
-		};
-
-		$provider_class_name = get_class( $provider_class );
-
-		add_filter(
-			'woocommerce_address_providers',
-			function ( $providers ) use ( $provider_class_name ) {
-				$providers[] = $provider_class_name;
-				return $providers;
-			}
-		);
-
-		// First call should instantiate the provider.
-		$providers1    = $this->sut->get_registered_providers();
-		$initial_count = $provider_class::$instance_count;
-
-		// Second call should use cached instance.
-		$providers2 = $this->sut->get_registered_providers();
-
-		// Verify the instance count hasn't increased.
-		$this->assertEquals( $initial_count, $provider_class::$instance_count );
-
-		// Verify we got the same instance both times.
-		$this->assertSame( $providers1[0], $providers2[0] );
-	}
-
-	/**
-	 * Test that providers are reinstantiated when the filter returns different classes.
-	 */
-	public function test_provider_cache_invalidation() {
-		// Define first test provider class.
-		$provider1_class = new class() extends WC_Address_Provider {
-			/**
-			 * Constructor for test provider 1.
-			 */
-			public function __construct() {
-				$this->id   = 'provider-1';
-				$this->name = 'Provider One';
-			}
-		};
-
-		// Define second test provider class.
-		$provider2_class = new class() extends WC_Address_Provider {
-			/**
-			 * Constructor for test provider 2.
-			 */
-			public function __construct() {
-				$this->id   = 'provider-2';
-				$this->name = 'Provider Two';
-			}
-		};
-
-		$provider1_class_name = get_class( $provider1_class );
-		$provider2_class_name = get_class( $provider2_class );
-
-		// First, register provider1.
-		add_filter(
-			'woocommerce_address_providers',
-			function ( $providers ) use ( $provider1_class_name ) {
-				$providers[] = $provider1_class_name;
-				return $providers;
-			}
-		);
-
-		$first_result = $this->sut->get_registered_providers();
-		$this->assertCount( 1, $first_result );
-		$this->assertEquals( 'provider-1', $first_result[0]->id );
-
-		// Now change the filter to return provider2.
-		remove_all_filters( 'woocommerce_address_providers' );
-		add_filter(
-			'woocommerce_address_providers',
-			function ( $providers ) use ( $provider2_class_name ) {
-				$providers[] = $provider2_class_name;
-				return $providers;
-			}
-		);
-
-		$second_result = $this->sut->get_registered_providers();
-		$this->assertCount( 1, $second_result );
-		$this->assertEquals( 'provider-2', $second_result[0]->id );
-	}
-
 
 	/**
 	 * Test settings when no providers are registered.
@@ -463,6 +366,9 @@ class AddressProviderControllerTest extends MockeryTestCase {
 				return $providers;
 			}
 		);
+
+		// Getting sut from container because the settings page uses that, not the instance we make in the test.
+		$this->sut = wc_get_container()->get( AddressProviderController::class )->init();
 
 		// Do it this way to simulate the actual settings page with the filter.
 		$settings_class = new \WC_Settings_General();
@@ -541,6 +447,9 @@ class AddressProviderControllerTest extends MockeryTestCase {
 				return $providers;
 			}
 		);
+
+		// Getting sut from container because the settings page uses that, not the instance we make in the test.
+		$this->sut = wc_get_container()->get( AddressProviderController::class )->init();
 
 		// Do it this way to simulate the actual settings page with the filter.
 		$settings_class = new \WC_Settings_General();
@@ -632,6 +541,9 @@ class AddressProviderControllerTest extends MockeryTestCase {
 
 		update_option( 'woocommerce_address_autocomplete_provider', 'provider-2' );
 
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
 		$preferred_provider = $this->sut->get_preferred_provider();
 		$this->assertEquals( 'provider-2', $preferred_provider );
 	}
@@ -677,6 +589,9 @@ class AddressProviderControllerTest extends MockeryTestCase {
 		);
 
 		delete_option( 'woocommerce_address_autocomplete_provider' );
+
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
 
 		$preferred_provider = $this->sut->get_preferred_provider();
 		$this->assertEquals( 'provider-1', $preferred_provider );
@@ -724,6 +639,9 @@ class AddressProviderControllerTest extends MockeryTestCase {
 
 		update_option( 'woocommerce_address_autocomplete_provider', 'provider-3' );
 
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
 		$preferred_provider = $this->sut->get_preferred_provider();
 		$this->assertEquals( 'provider-1', $preferred_provider );
 	}
@@ -734,53 +652,6 @@ class AddressProviderControllerTest extends MockeryTestCase {
 	public function test_get_preferred_provider_no_providers() {
 		$preferred_provider = $this->sut->get_preferred_provider();
 		$this->assertEmpty( $preferred_provider );
-	}
-
-	/**
-	 * Test that providers are not reinstantiated when the filter returns the same class names in a new array.
-	 */
-	public function test_provider_caching_with_new_array() {
-		// Create a provider class that tracks instantiations.
-		$tracking_provider = new class() extends WC_Address_Provider {
-			/**
-			 * @var int Count of instances created.
-			 */
-			public static $instance_count = 0;
-
-			/**
-			 * Constructor for test provider.
-			 */
-			public function __construct() {
-				++self::$instance_count;
-				$this->id   = 'test-provider';
-				$this->name = 'Test Provider';
-			}
-		};
-
-		$provider_class_name = get_class( $tracking_provider );
-
-		// Reset the static counter before starting the test.
-		$provider_class_name::$instance_count = 0;
-
-		// First filter call.
-		add_filter(
-			'woocommerce_address_providers',
-			function () use ( $provider_class_name ) {
-				// Return a new array each time.
-				return array( $provider_class_name );
-			}
-		);
-
-		// First call should instantiate the provider.
-		$providers1 = $this->sut->get_registered_providers();
-		$this->assertEquals( 1, $provider_class_name::$instance_count, 'Provider should be instantiated once' );
-
-		// Second call should use cached instance even though filter returns a new array.
-		$providers2 = $this->sut->get_registered_providers();
-		$this->assertEquals( 1, $provider_class_name::$instance_count, 'Provider should not be instantiated again' );
-
-		// Verify we got the same instance both times.
-		$this->assertSame( $providers1[0], $providers2[0] );
 	}
 
 	/**
@@ -802,7 +673,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 				array( 'context' => 'address_provider_service' )
 			);
 
-		$providers = $this->sut->get_registered_providers();
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
 		$this->assertEmpty( $providers );
 	}
 
@@ -825,7 +699,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 				array( 'context' => 'address_provider_service' )
 			);
 
-		$providers = $this->sut->get_registered_providers();
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
 		$this->assertEmpty( $providers );
 	}
 
@@ -848,7 +725,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 				array( 'context' => 'address_provider_service' )
 			);
 
-		$providers = $this->sut->get_registered_providers();
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
 		$this->assertEmpty( $providers );
 	}
 
@@ -875,7 +755,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 				array( 'context' => 'address_provider_service' )
 			);
 
-		$providers = $this->sut->get_registered_providers();
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
 		$this->assertEmpty( $providers );
 	}
 
@@ -916,7 +799,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 				)
 			);
 
-		$providers = $this->sut->get_registered_providers();
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
 		$this->assertEmpty( $providers );
 	}
 
@@ -968,7 +854,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 				array( 'context' => 'address_provider_service' )
 			);
 
-		$providers = $this->sut->get_registered_providers();
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
 
 		// Only the first provider should be registered.
 		$this->assertCount( 1, $providers );
@@ -1016,7 +905,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 			->expects( $this->never() )
 			->method( 'error' );
 
-		$providers = $this->sut->get_registered_providers();
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
 
 		// Both providers should be registered.
 		$this->assertCount( 2, $providers );
@@ -1076,7 +968,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 		// Delete any existing preferred provider setting.
 		delete_option( 'woocommerce_address_autocomplete_provider' );
 
-		$providers = $this->sut->get_registered_providers();
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
 
 		// Verify providers are in registration order.
 		$this->assertCount( 3, $providers );
@@ -1135,7 +1030,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 		// Set provider-2 as the preferred provider.
 		update_option( 'woocommerce_address_autocomplete_provider', 'provider-2' );
 
-		$providers = $this->sut->get_registered_providers();
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
 
 		// Verify provider-2 is first, and others maintain their relative order.
 		$this->assertCount( 3, $providers );
@@ -1194,7 +1092,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 		// Set provider-3 (the last one) as the preferred provider.
 		update_option( 'woocommerce_address_autocomplete_provider', 'provider-3' );
 
-		$providers = $this->sut->get_registered_providers();
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
 
 		// Verify provider-3 is first, and others maintain their relative order.
 		$this->assertCount( 3, $providers );
@@ -1242,7 +1143,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 		// Set a non-existent provider as preferred.
 		update_option( 'woocommerce_address_autocomplete_provider', 'provider-nonexistent' );
 
-		$providers = $this->sut->get_registered_providers();
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
 
 		// Verify original order is maintained.
 		$this->assertCount( 2, $providers );
@@ -1286,10 +1190,13 @@ class AddressProviderControllerTest extends MockeryTestCase {
 			}
 		);
 
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
 		// Set the first provider as preferred.
 		update_option( 'woocommerce_address_autocomplete_provider', 'provider-1' );
 
-		$providers = $this->sut->get_registered_providers();
+		$providers = $this->sut->get_providers();
 
 		// Verify original order is maintained.
 		$this->assertCount( 2, $providers );
