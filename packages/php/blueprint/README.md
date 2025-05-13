@@ -3,37 +3,6 @@
 
 This PHP Composer package facilitates exporting and importing WordPress Blueprint compatible JSON formats. It offers a solid framework for seamless integration with WordPress sites and supports extensibility, enabling plugins to customize export and import functionalities. Manage site configurations, options, and settings effortlessly with JSON files.
 
-## Data Format
-
-A Blueprint JSON file contains all the information needed to configure a WordPress or WooCommerce site. The format is fully compatible with [WordPress Blueprint data format](https://wordpress.github.io/wordpress-playground/blueprints/data-format/).
-
-The following is an example of a Blueprint JSON file:
-
-```json
-{
-  "landingPage": "/wp-admin/admin.php?page=wc-admin",
-  "steps": [
-    {
-      "step": "setSiteOptions",
-      "options": {
-        "woocommerce_store_address": "123 Main St",
-        "woocommerce_store_address_2": "Suite 100",
-        "woocommerce_store_city": "Sample City",
-        "woocommerce_default_country": "US:CA",
-        "woocommerce_store_postcode": "90001",
-        "woocommerce_all_except_countries": [],
-        "woocommerce_specific_allowed_countries": [],
-        "woocommerce_specific_ship_to_countries": [],
-        "woocommerce_calc_taxes": "yes"
-      }
-    }
-  ]
-}
-```
-
-You can include as many steps as needed, each representing a different part of your WooCommerce or WordPress configuration. This is the format you get when exporting, and what you provide when importing a Blueprint.
-
-
 ## Usage
 
 Blueprint lets you export your WordPress site configuration to a JSON file and import it into another site. This can be done via WP-CLI or directly in PHP for advanced automation or integration.
@@ -87,6 +56,37 @@ $step_definition = json_decode(
 $import_step = new ImportStep($step_definition);
 $result = $import_step->import();
 ```
+
+## Data Format
+
+A Blueprint JSON file contains all the information needed to configure a WordPress or WooCommerce site. The format is fully compatible with [WordPress Blueprint data format](https://wordpress.github.io/wordpress-playground/blueprints/data-format/).
+
+The following is an example of a Blueprint JSON file:
+
+```json
+{
+  "landingPage": "/wp-admin/admin.php?page=wc-admin",
+  "steps": [
+    {
+      "step": "setSiteOptions",
+      "options": {
+        "woocommerce_store_address": "123 Main St",
+        "woocommerce_store_address_2": "Suite 100",
+        "woocommerce_store_city": "Sample City",
+        "woocommerce_default_country": "US:CA",
+        "woocommerce_store_postcode": "90001",
+        "woocommerce_all_except_countries": [],
+        "woocommerce_specific_allowed_countries": [],
+        "woocommerce_specific_ship_to_countries": [],
+        "woocommerce_calc_taxes": "yes"
+      }
+    }
+  ]
+}
+```
+
+You can include as many steps as needed, each representing a different part of your WooCommerce or WordPress configuration. This is the format you get when exporting, and what you provide when importing a Blueprint.
+
 
 ## Built-in Steps
 
