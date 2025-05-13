@@ -34,92 +34,37 @@ class BlockifiedProductDetails extends AbstractBlock {
 		parent::initialize();
 
 		/**
-		 * Filter the items that are hooked into the Product Details block.
+		 * Filter the blocks that are hooked into the Product Details block.
 		 *
-		 * @hook woocommerce_product_details_hooked_items
+		 * @hook woocommerce_product_details_hooked_blocks
 		 *
 		 * @since 10.0.0
-		 * @param {array} $hooked_items The items that are hooked into the Product Details block.
-		 * @return {array} The items that are hooked into the Product Details block.
+		 * @param {array} $hooked_blocks The blocks that are hooked into the Product Details block.
+		 * @return {array} The blocks that are hooked into the Product Details block.
 		 */
-		$hooked_items = apply_filters( 'woocommerce_product_details_hooked_items', [] );
+		$hooked_blocks = apply_filters( 'woocommerce_product_details_hooked_blocks', [] );
 
-		$validated_hooked_items = array_filter(
-			$hooked_items,
-			function ( $item ) {
-				return isset( $item['title'] ) && isset( $item['content'] ) && is_string( $item['title'] ) && is_string( $item['content'] );
+		$validated_hooked_blocks = array_filter(
+			$hooked_blocks,
+			function ( $block ) {
+				return isset( $block['title'] ) && isset( $block['content'] ) && is_string( $block['title'] ) && is_string( $block['content'] );
 			}
 		);
 
-		foreach ( $validated_hooked_items as $item ) {
-			$this->register_product_details_item( $item['title'], $item['content'] );
+		foreach ( $validated_hooked_blocks as $block ) {
+			$this->register_hooked_blocks( $block['title'], $block['content'] );
 		}
 	}
 
 	/**
-	 * Register a product details item using Block Hooks API.
+	 * Get the frontend script handle for this block type.
 	 *
-	 * @param string $title The title of the item.
-	 * @param string $content The content of the item.
-	 * @return void
+	 * @see $this->register_block_type()
+	 * @param string $key Data to get, or default to everything.
+	 * @return array|string|null
 	 */
-	protected function register_product_details_item( $title, $content ) {
-		$slug = sanitize_title( $title );
-
-		add_filter(
-			'hooked_block_types',
-			function ( $hooked_block_types, $relative_position, $anchor_block_type ) use ( $slug ) {
-				if ( 'woocommerce/accordion-group' === $anchor_block_type && 'last_child' === $relative_position ) {
-					$hooked_block_types[] = $slug;
-				}
-				return $hooked_block_types;
-			},
-			10,
-			3
-		);
-
-		add_filter(
-			"hooked_block_{$slug}",
-			function (
-				$parsed_hooked_block,
-				$hooked_block_type,
-				$relative_position,
-				$parsed_anchor_block
-			) use (
-				$title,
-				$content
-			) {
-
-				if ( is_null( $parsed_hooked_block ) ) {
-					return $parsed_hooked_block;
-				}
-
-				if (
-					'woocommerce/accordion-group' !== $parsed_anchor_block['blockName'] ||
-					'last_child' !== $relative_position ||
-					! isset( $parsed_anchor_block['attrs']['metadata']['isProductDetailsInnerBlock'] ) ||
-					! $parsed_anchor_block['attrs']['metadata']['isProductDetailsInnerBlock']
-				) {
-					return array();
-				}
-
-				$accordion_item_template = '<!-- wp:woocommerce/accordion-item -->
-				<div class="wp-block-woocommerce-accordion-item"><!-- wp:woocommerce/accordion-header -->
-				<h3 class="wp-block-woocommerce-accordion-header accordion-item__heading"><button class="accordion-item__toggle"><span>%1$s</span><span class="accordion-item__toggle-icon has-icon-plus" style="width:1.2em;height:1.2em"><svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M11 12.5V17.5H12.5V12.5H17.5V11H12.5V6H11V11H6V12.5H11Z" fill="currentColor"></path></svg></span></button></h3>
-				<!-- /wp:woocommerce/accordion-header -->
-
-				<!-- wp:woocommerce/accordion-panel -->
-				<div class="wp-block-woocommerce-accordion-panel"><div class="accordion-content__wrapper">%2$s</div></div>
-				<!-- /wp:woocommerce/accordion-panel --></div>
-				<!-- /wp:woocommerce/accordion-item -->';
-
-				$accordion_item_block = parse_blocks( sprintf( $accordion_item_template, $title, $content ) );
-
-				return $accordion_item_block[0];
-			},
-			10,
-			4
-		);
+	protected function get_block_type_script( $key = null ) {
+		return null;
 	}
 
 	/**
@@ -360,13 +305,68 @@ class BlockifiedProductDetails extends AbstractBlock {
 	}
 
 	/**
-	 * Get the frontend script handle for this block type.
+	 * Register a product details item using Block Hooks API.
 	 *
-	 * @see $this->register_block_type()
-	 * @param string $key Data to get, or default to everything.
-	 * @return array|string|null
+	 * @param string $title The title of the item.
+	 * @param string $content The content of the item.
+	 * @return void
 	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
+	private function register_hooked_blocks( $title, $content ) {
+		$slug = sanitize_title( $title );
+
+		add_filter(
+			'hooked_block_types',
+			function ( $hooked_block_types, $relative_position, $anchor_block_type ) use ( $slug ) {
+				if ( 'woocommerce/accordion-group' === $anchor_block_type && 'last_child' === $relative_position ) {
+					$hooked_block_types[] = $slug;
+				}
+				return $hooked_block_types;
+			},
+			10,
+			3
+		);
+
+		add_filter(
+			"hooked_block_{$slug}",
+			function (
+				$parsed_hooked_block,
+				$hooked_block_type,
+				$relative_position,
+				$parsed_anchor_block
+			) use (
+				$title,
+				$content
+			) {
+
+				if ( is_null( $parsed_hooked_block ) ) {
+					return $parsed_hooked_block;
+				}
+
+				if (
+					'woocommerce/accordion-group' !== $parsed_anchor_block['blockName'] ||
+					'last_child' !== $relative_position ||
+					! isset( $parsed_anchor_block['attrs']['metadata']['isProductDetailsInnerBlock'] ) ||
+					! $parsed_anchor_block['attrs']['metadata']['isProductDetailsInnerBlock']
+				) {
+					return array();
+				}
+
+				$accordion_item_template = '<!-- wp:woocommerce/accordion-item -->
+				<div class="wp-block-woocommerce-accordion-item"><!-- wp:woocommerce/accordion-header -->
+				<h3 class="wp-block-woocommerce-accordion-header accordion-item__heading"><button class="accordion-item__toggle"><span>%1$s</span><span class="accordion-item__toggle-icon has-icon-plus" style="width:1.2em;height:1.2em"><svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M11 12.5V17.5H12.5V12.5H17.5V11H12.5V6H11V11H6V12.5H11Z" fill="currentColor"></path></svg></span></button></h3>
+				<!-- /wp:woocommerce/accordion-header -->
+
+				<!-- wp:woocommerce/accordion-panel -->
+				<div class="wp-block-woocommerce-accordion-panel"><div class="accordion-content__wrapper">%2$s</div></div>
+				<!-- /wp:woocommerce/accordion-panel --></div>
+				<!-- /wp:woocommerce/accordion-item -->';
+
+				$accordion_item_block = parse_blocks( sprintf( $accordion_item_template, $title, $content ) );
+
+				return $accordion_item_block[0];
+			},
+			10,
+			4
+		);
 	}
 }
