@@ -216,7 +216,7 @@ module.exports = {
 
 					// Use the WooCommerce fork
 					pkg.dependencies[ '@wordpress/interactivity' ] =
-						'github:woocommerce/gutenberg#interactivity-api&path:/packages/interactivity';
+						'github:woocommerce/gutenberg#interactivity-api-001&path:/packages/interactivity';
 				}
 			}
 
