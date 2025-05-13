@@ -510,6 +510,10 @@ class PaymentGateway {
 			array( $payment_gateway, 'get_recommended_payment_methods' ),
 			array( 'country_code' => $country_code ),
 		);
+		if ( ! is_array( $recommended_pms ) ) {
+			// Bail if the recommended payment methods are not an array.
+			return array();
+		}
 
 		// Validate the received list items.
 		$recommended_pms = array_filter(
