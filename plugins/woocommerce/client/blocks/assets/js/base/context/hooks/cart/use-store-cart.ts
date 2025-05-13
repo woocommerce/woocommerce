@@ -1,5 +1,3 @@
-/** @typedef { import('@woocommerce/type-defs/hooks').StoreCart } StoreCart */
-
 /**
  * External dependencies
  */
@@ -19,7 +17,7 @@ import {
 	EMPTY_PAYMENT_REQUIREMENTS,
 	EMPTY_EXTENSIONS,
 } from '@woocommerce/block-data';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { decodeEntities } from '@wordpress/html-entities';
 import type {
 	StoreCart,
@@ -28,7 +26,6 @@ import type {
 	CartResponseBillingAddress,
 	CartResponseShippingAddress,
 	CartResponseCouponItem,
-	CartResponseCoupons,
 } from '@woocommerce/types';
 import { emptyHiddenAddressFields } from '@woocommerce/base-utils';
 
@@ -80,7 +77,12 @@ const defaultCartTotals: CartResponseTotals = {
 	currency_suffix: '',
 };
 
-const decodeValues = < T extends Record< string, unknown > >(
+const decodeValues = <
+	T extends
+		| Record< string, unknown >
+		| CartResponseBillingAddress
+		| CartResponseShippingAddress
+>(
 	object: T
 ): T => {
 	return Object.fromEntries(
@@ -91,10 +93,6 @@ const decodeValues = < T extends Record< string, unknown > >(
 	) as T;
 };
 
-/**
- * @constant
- * @type  {StoreCart} Object containing cart data.
- */
 export const defaultCartData: StoreCart = {
 	cartCoupons: EMPTY_CART_COUPONS,
 	cartItems: EMPTY_CART_ITEMS,
@@ -122,122 +120,103 @@ export const defaultCartData: StoreCart = {
 };
 
 /**
- * This is a custom hook that is wired up to the `wc/store/cart` data
- * store.
- *
- * @param {Object}  options              An object declaring the various
- *                                       collection arguments.
- * @param {boolean} options.shouldSelect If false, the previous results will be
- *                                       returned and internal selects will not
- *                                       fire.
- *
- * @return {StoreCart} Object containing cart data.
+ * This is a custom hook that is wired up to the `wc/store/cart` data store.
  */
-
 export const useStoreCart = (
 	options: { shouldSelect: boolean } = { shouldSelect: true }
 ): StoreCart => {
 	const { shouldSelect } = options;
-	const currentResults = useRef();
+	const currentStoreCart = useRef< StoreCart >();
 	const billingAddressRef = useRef( defaultBillingAddress );
 	const shippingAddressRef = useRef( defaultShippingAddress );
 
 	// This will keep track of jQuery and DOM events that invalidate the store resolution.
 	useStoreCartEventListeners();
 
-	const results: StoreCart = useSelect(
-		( select, { dispatch } ) => {
-			if ( ! shouldSelect ) {
-				return defaultCartData;
-			}
-
+	const { receiveCart, receiveCartContents } = useDispatch( cartStore );
+	const { cartData, cartErrors, cartTotals, cartIsLoading, isLoadingRates } =
+		useSelect( ( select ) => {
 			const store = select( cartStore );
-			const cartData = store.getCartData();
-			const cartErrors = store.getCartErrors();
-			const cartTotals = store.getCartTotals();
-			const cartIsLoading =
-				// @ts-expect-error `hasFinishedResolution` is not typed in @wordpress/data yet.
-				! store.hasFinishedResolution( 'getCartData' );
-
-			const isLoadingRates = store.isCustomerDataUpdating();
-			const { receiveCart, receiveCartContents } = dispatch( cartStore );
-
-			const cartFees =
-				cartData.fees.length > 0
-					? cartData.fees.map( ( fee: CartResponseFeeItem ) =>
-							decodeValues( fee )
-					  )
-					: EMPTY_CART_FEES;
-
-			// Add a text property to the coupon to allow extensions to modify
-			// the text used to display the coupon, without affecting the
-			// functionality when it comes to removing the coupon.
-			const cartCoupons: CartResponseCoupons =
-				cartData.coupons.length > 0
-					? cartData.coupons.map(
-							( coupon: CartResponseCouponItem ) => ( {
-								...coupon,
-								label: coupon.code,
-							} )
-					  )
-					: EMPTY_CART_COUPONS;
-
-			// Update refs to keep the hook stable.
-			const billingAddress = emptyHiddenAddressFields(
-				decodeValues( cartData.billingAddress )
-			);
-			const shippingAddress = cartData.needsShipping
-				? emptyHiddenAddressFields(
-						decodeValues( cartData.shippingAddress )
-				  )
-				: billingAddress;
-
-			if (
-				! fastDeepEqual( billingAddress, billingAddressRef.current )
-			) {
-				billingAddressRef.current = billingAddress;
-			}
-
-			if (
-				! fastDeepEqual( shippingAddress, shippingAddressRef.current )
-			) {
-				shippingAddressRef.current = shippingAddress;
-			}
-
 			return {
-				cartCoupons,
-				cartItems: cartData.items,
-				crossSellsProducts: cartData.crossSells,
-				cartFees,
-				cartItemsCount: cartData.itemsCount,
-				cartItemsWeight: cartData.itemsWeight,
-				cartNeedsPayment: cartData.needsPayment,
-				cartNeedsShipping: cartData.needsShipping,
-				cartItemErrors: cartData.errors,
-				cartTotals,
-				cartIsLoading,
-				cartErrors,
-				billingData: billingAddressRef.current,
-				billingAddress: billingAddressRef.current,
-				shippingAddress: shippingAddressRef.current,
-				extensions: cartData.extensions,
-				shippingRates: cartData.shippingRates,
-				isLoadingRates,
-				cartHasCalculatedShipping: cartData.hasCalculatedShipping,
-				paymentRequirements: cartData.paymentRequirements,
-				receiveCart,
-				receiveCartContents,
+				cartData: store.getCartData(),
+				cartErrors: store.getCartErrors(),
+				cartTotals: store.getCartTotals(),
+				cartIsLoading:
+					// @ts-expect-error `hasFinishedResolution` is not typed in @wordpress/data yet.
+					! store.hasFinishedResolution( 'getCartData' ),
+				isLoadingRates: store.isCustomerDataUpdating(),
 			};
-		},
-		[ shouldSelect ]
-	);
+		}, [] );
 
-	if (
-		! currentResults.current ||
-		! fastDeepEqual( currentResults.current, results )
-	) {
-		currentResults.current = results;
+	if ( ! shouldSelect ) {
+		return defaultCartData;
 	}
 
-	return currentResults.current;
+	const nextBillingAddress = emptyHiddenAddressFields(
+		decodeValues( cartData.billingAddress )
+	);
+
+	if ( ! fastDeepEqual( billingAddressRef.current, nextBillingAddress ) ) {
+		billingAddressRef.current = nextBillingAddress;
+	}
+
+	const billingAddress = billingAddressRef.current;
+
+	const nextShippingAddress = cartData.needsShipping
+		? emptyHiddenAddressFields( decodeValues( cartData.shippingAddress ) )
+		: billingAddress;
+
+	if ( ! fastDeepEqual( shippingAddressRef.current, nextShippingAddress ) ) {
+		shippingAddressRef.current = nextShippingAddress;
+	}
+
+	const shippingAddress = shippingAddressRef.current;
+
+	const storeCart: StoreCart = {
+		cartCoupons:
+			cartData.coupons.length > 0
+				? cartData.coupons.map(
+						( coupon: CartResponseCouponItem ) => ( {
+							...coupon,
+							label: coupon.code,
+						} )
+				  )
+				: EMPTY_CART_COUPONS,
+		cartItems: cartData.items,
+		crossSellsProducts: cartData.crossSells,
+		cartFees:
+			cartData.fees.length > 0
+				? cartData.fees.map( ( fee: CartResponseFeeItem ) =>
+						decodeValues( fee )
+				  )
+				: EMPTY_CART_FEES,
+		cartItemsCount: cartData.itemsCount,
+		cartItemsWeight: cartData.itemsWeight,
+		cartNeedsPayment: cartData.needsPayment,
+		cartNeedsShipping: cartData.needsShipping,
+		cartItemErrors: cartData.errors,
+		cartTotals,
+		cartIsLoading,
+		cartErrors,
+		billingData: billingAddress,
+		billingAddress,
+		shippingAddress,
+		extensions: cartData.extensions,
+		shippingRates: cartData.shippingRates,
+		isLoadingRates,
+		cartHasCalculatedShipping: cartData.hasCalculatedShipping,
+		paymentRequirements: cartData.paymentRequirements,
+		paymentMethods: cartData.paymentMethods,
+		receiveCart,
+		receiveCartContents,
+	};
+
+	if (
+		! currentStoreCart.current ||
+		! fastDeepEqual( currentStoreCart.current, storeCart )
+	) {
+		currentStoreCart.current = storeCart;
+	}
+
+	return currentStoreCart.current;
 };

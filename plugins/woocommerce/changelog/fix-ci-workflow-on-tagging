@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-CI: fix CI-workflow failures on tagging caused by wp-env overrides.
