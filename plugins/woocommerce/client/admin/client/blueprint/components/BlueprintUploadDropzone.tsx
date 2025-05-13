@@ -9,7 +9,7 @@ import {
 	Button,
 	Icon,
 } from '@wordpress/components';
-import { closeSmall, upload } from '@wordpress/icons';
+import { closeSmall, upload, check, warning } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
 import { useMachine } from '@xstate5/react';
 import {
@@ -84,6 +84,7 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 			window?.wcSettings?.admin?.blueprint_max_step_size_bytes ||
 			50 * 1024 * 1024; // defaults to 50MB
 
+		let sessionToken = '';
 		// Loop through each step and send it to the endpoint
 		for ( const step of steps ) {
 			const stepJson = JSON.stringify( {
@@ -113,36 +114,52 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 				} );
 				continue; // Skip this step
 			}
-			const response = await apiFetch< BlueprintImportStepResponse >( {
+			const response = await apiFetch< Response >( {
 				path: 'wc-admin/blueprint/import-step',
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+					'X-Blueprint-Import-Session': sessionToken,
 				},
 				body: stepJson,
+				parse: false,
 			} );
 
-			if ( ! response.success ) {
+			const data: BlueprintImportStepResponse = await response.json();
+
+			if ( ! data.success ) {
 				errors.push( {
 					step: step.step,
-					messages: response.messages,
+					messages: data.messages,
 				} );
+			}
+
+			if ( ! sessionToken ) {
+				sessionToken =
+					response.headers.get( 'X-Blueprint-Import-Session' ) ?? '';
 			}
 		}
 
-		let errorMessage;
 		if ( errors.length > 0 ) {
-			errorMessage = `${ __(
-				'Your Blueprint has been imported, but there were some errors. Please check the messages.',
-				'woocommerce'
-			) }`;
+			dispatch( 'core/notices' ).createWarningNotice(
+				`${ __(
+					'Your Blueprint has been imported, but there were some errors. Please check the messages.',
+					'woocommerce'
+				) }`,
+				{
+					icon: <Icon icon={ warning } size={ 24 } fill="#d63638" />,
+					explicitDismiss: true,
+				}
+			);
 		} else {
-			errorMessage = `${ __(
-				'Your Blueprint has been imported!',
-				'woocommerce'
-			) }`;
+			dispatch( 'core/notices' ).createSuccessNotice(
+				`${ __( 'Your Blueprint has been imported!', 'woocommerce' ) }`,
+				{
+					icon: <Icon icon={ check } size={ 24 } fill="#1ed15A" />,
+					explicitDismiss: true,
+				}
+			);
 		}
-		dispatch( 'core/notices' ).createSuccessNotice( errorMessage );
 		return errors;
 	} catch ( e ) {
 		throw e;
@@ -479,7 +496,7 @@ export const BlueprintUploadDropzone = () => {
 				( state.matches( 'idle' ) ||
 					state.matches( 'error' ) ||
 					state.matches( 'parsingSteps' ) ) && (
-					<div className="blueprint-upload-form">
+					<div className="blueprint-upload-form wc-settings-prevent-change-event">
 						<FormFileUpload
 							className="blueprint-upload-field"
 							accept="application/json, application/zip"
@@ -498,6 +515,12 @@ export const BlueprintUploadDropzone = () => {
 									<span>
 										{ __( 'choose a file', 'woocommerce' ) }
 									</span>
+								</p>
+								<p className="blueprint-upload-max-size">
+									{ __(
+										'Maximum size: 50 MB',
+										'woocommerce'
+									) }
 								</p>
 								<DropZone
 									onFilesDrop={ ( files ) => {

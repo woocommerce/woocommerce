@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix `is_cart` being false negative if global $page was loaded early.

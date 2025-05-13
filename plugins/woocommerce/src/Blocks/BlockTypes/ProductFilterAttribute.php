@@ -118,9 +118,10 @@ final class ProductFilterAttribute extends AbstractBlock {
 		);
 
 		foreach ( $active_product_attributes as $product_attribute ) {
-			if ( empty( $params[ "filter_{$product_attribute}" ] ) ) {
+			if ( empty( $params[ "filter_{$product_attribute}" ] ) || ! is_string( $params[ "filter_{$product_attribute}" ] ) ) {
 				continue;
 			}
+
 			$terms                = explode( ',', $params[ "filter_{$product_attribute}" ] );
 			$attribute_label      = wc_attribute_label( "pa_{$product_attribute}" );
 			$attribute_query_type = $params[ "query_type_{$product_attribute}" ] ?? 'or';
@@ -183,7 +184,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		$filter_params    = $block->context['filterParams'] ?? array();
 		$selected_terms   = array();
 
-		if ( $filter_params && ! empty( $filter_params[ $filter_param_key ] ) ) {
+		if ( $filter_params && ! empty( $filter_params[ $filter_param_key ] ) && is_string( $filter_params[ $filter_param_key ] ) ) {
 			$selected_terms = array_filter( explode( ',', $filter_params[ $filter_param_key ] ) );
 		}
 
@@ -227,6 +228,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		if ( empty( $filter_context['items'] ) ) {
 			$wrapper_attributes['hidden'] = true;
+			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 		}
 
 		return sprintf(
@@ -276,7 +278,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		foreach ( $counts as $key => $value ) {
 			$attribute_counts[] = array(
 				'term'  => $key,
-				'count' => $value,
+				'count' => intval( $value ),
 			);
 		}
 

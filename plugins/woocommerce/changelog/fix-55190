@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add 'id' attribute for fields of type 'single_select_country'.

@@ -243,4 +243,16 @@ class WC_Order_Refund extends WC_Abstract_Order {
 		wc_deprecated_function( 'get_refund_reason', '3.0', 'get_reason' );
 		return $this->get_reason();
 	}
+
+	/**
+	 * Indicates if the current order has an associated Cost of Goods Sold value.
+	 * For refunds the cost will be sum of the cost of the refunded items.
+	 *
+	 * @since 9.9.0
+	 *
+	 * @return bool True if this order has an associated Cost of Goods Sold value.
+	 */
+	public function has_cogs() {
+		return true;
+	}
 }

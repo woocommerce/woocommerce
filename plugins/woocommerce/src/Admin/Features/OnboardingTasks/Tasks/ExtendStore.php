@@ -23,7 +23,7 @@ class ExtendStore extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Power up your store with business-critical features', 'woocommerce' );
+		return __( 'Enhance your store with extensions', 'woocommerce' );
 	}
 
 	/**
@@ -41,10 +41,7 @@ class ExtendStore extends Task {
 	 * @return string
 	 */
 	public function get_additional_info() {
-		return __(
-			'Visit the Official WooCommerce Marketplace to access hundreds of vetted products and services',
-			'woocommerce'
-		);
+		return '';
 	}
 
 	/**

@@ -159,3 +159,8 @@
 		}
 	}
 }
+
+// We don't want zero specificity for this style.
+.wc-block-product-filter--hidden {
+	display: none;
+}

@@ -56,6 +56,34 @@ class Content_Renderer {
 	private Css_Inliner $css_inliner;
 
 	/**
+	 * Property to store the backup of the current template content.
+	 *
+	 * @var string|null
+	 */
+	private $backup_template_content;
+
+	/**
+	 * Property to store the backup of the current template ID.
+	 *
+	 * @var int|null
+	 */
+	private $backup_template_id;
+
+	/**
+	 * Property to store the backup of the current post.
+	 *
+	 * @var WP_Post|null
+	 */
+	private $backup_post;
+
+	/**
+	 * Property to store the backup of the current query.
+	 *
+	 * @var \WP_Query|null
+	 */
+	private $backup_query;
+
+	/**
 	 * Content_Renderer constructor.
 	 *
 	 * @param Process_Manager     $preprocess_manager Preprocess manager.
@@ -145,15 +173,24 @@ class Content_Renderer {
 	/**
 	 * Set template globals
 	 *
-	 * @param WP_Post           $post Post object.
+	 * @param WP_Post           $email_post Post object.
 	 * @param WP_Block_Template $template Block template.
 	 * @return void
 	 */
-	private function set_template_globals( WP_Post $post, WP_Block_Template $template ) {
-		global $_wp_current_template_content, $_wp_current_template_id;
+	private function set_template_globals( WP_Post $email_post, WP_Block_Template $template ) {
+		global $_wp_current_template_content, $_wp_current_template_id, $wp_query, $post;
+
+		// Backup current values of globals.
+		// Because overriding the globals can affect rendering of the page itself, we need to backup the current values.
+		$this->backup_template_content = $_wp_current_template_content;
+		$this->backup_template_id      = $_wp_current_template_id;
+		$this->backup_query            = $wp_query;
+		$this->backup_post             = $email_post;
+
 		$_wp_current_template_id      = $template->id;
 		$_wp_current_template_content = $template->content;
-		$GLOBALS['post']              = $post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- I have not found a better way to set the post object for the block renderer.
+		$wp_query                     = new \WP_Query( array( 'p' => $email_post->ID ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- We need to set the query for correct rendering the blocks.
+		$post                         = $email_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- We need to set the post for correct rendering the blocks.
 	}
 
 	/**
@@ -165,6 +202,14 @@ class Content_Renderer {
 		remove_filter( 'render_block', array( $this, 'render_block' ) );
 		remove_filter( 'block_parser_class', array( $this, 'block_parser' ) );
 		remove_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
+
+		// Restore globals to their original values.
+		global $_wp_current_template_content, $_wp_current_template_id, $wp_query, $post;
+
+		$_wp_current_template_content = $this->backup_template_content;
+		$_wp_current_template_id      = $this->backup_template_id;
+		$wp_query                     = $this->backup_query;  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring of the query.
+		$post                         = $this->backup_post;  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring of the post.
 	}
 
 	/**

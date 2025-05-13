@@ -14,7 +14,7 @@ import { STORE_KEY as CHECKOUT_STORE_KEY } from './constants';
 import { STORE_KEY as PAYMENT_STORE_KEY } from '../payment/constants';
 import { processErrorResponse } from '../utils';
 import { CheckoutPutData } from './types';
-import { validateAdditionalFields } from './utils';
+import { hasValidationError, validateAdditionalFields } from './utils';
 
 // This is used to track and cache the local state of push changes.
 const localState = {
@@ -83,14 +83,30 @@ const updateCheckoutData = (): void => {
 		localState.doingPush = false;
 		return;
 	}
-
 	// Figure out which additional fields have changed and only send those to the server
 	const changedFields = Object.keys( newCheckoutData.additionalFields )
 		.filter( ( key ) => {
-			return (
-				localState.checkoutData.additionalFields[ key ] !==
+			// Fields with errors should be ignored
+			if ( hasValidationError( key ) ) {
+				return false;
+			}
+
+			// Fields that are not present in the original checkout data and have an empty value should be ignored (happens when a field is hidden on mount).
+			if (
+				! ( key in localState.checkoutData.additionalFields ) &&
+				newCheckoutData.additionalFields[ key ] === ''
+			) {
+				return false;
+			}
+
+			// Fields that have not changed should be ignored
+			if (
+				localState.checkoutData.additionalFields[ key ] ===
 				newCheckoutData.additionalFields[ key ]
-			);
+			) {
+				return false;
+			}
+			return true;
 		} )
 		.reduce( ( acc: AdditionalValues, key ) => {
 			acc[ key ] = newCheckoutData.additionalFields[ key ];

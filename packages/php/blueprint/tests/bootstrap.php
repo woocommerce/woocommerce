@@ -22,3 +22,6 @@ require "{$_tests_dir}/includes/bootstrap.php";
 
 
 define( 'WOO_BLUEPRINT_TESTS', true );
+
+// Stubs.
+require_once __DIR__ . '/stubs/stubs.php';
