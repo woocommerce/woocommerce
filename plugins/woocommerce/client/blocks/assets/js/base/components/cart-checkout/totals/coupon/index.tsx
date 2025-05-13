@@ -106,7 +106,7 @@ export const TotalsCoupon = ( {
 							className="wc-block-components-totals-coupon__input"
 							label={ __( 'Enter code', 'woocommerce' ) }
 							value={ couponValue }
-							ariaDescribedBy={ validationErrorId }
+							ariaDescribedBy={ validationErrorId || '' }
 							onChange={ ( newCouponValue ) => {
 								setCouponValue( newCouponValue );
 							} }

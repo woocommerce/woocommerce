@@ -78,7 +78,7 @@ export const getErrorDetails = (
 									message: decodeEntities(
 										additionalError.message
 									),
-									data,
+									data: additionalError.data,
 								},
 							];
 							if ( typeof additionalError.data !== 'undefined' ) {
@@ -156,6 +156,7 @@ const getNoticeOptionsForParamError = (
 	context?: string
 ) => {
 	let additionalFieldContext: string | undefined = '';
+	let additionalFieldId: string | undefined = '';
 	// Check if this error response comes from an additional field.
 	if (
 		isObject( data ) &&
@@ -168,8 +169,14 @@ const getNoticeOptionsForParamError = (
 		);
 	}
 
+	// If the error response comes from an additional field we need to use the key as the ID so we can remove it later.
+	// It's also needed to ensure additional fields don't replace each other when there are multiple.
+	if ( objectHasProp( data, 'key' ) && isString( data.key ) ) {
+		additionalFieldId = `${ data.key }__${ id }`;
+	}
+
 	return {
-		id,
+		id: additionalFieldId || id,
 		context:
 			context ||
 			additionalFieldContext ||

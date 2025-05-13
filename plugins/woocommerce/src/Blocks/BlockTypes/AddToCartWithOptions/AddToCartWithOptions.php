@@ -167,25 +167,27 @@ class AddToCartWithOptions extends AbstractBlock {
 			$default_quantity = apply_filters( 'woocommerce_add_to_cart_quantity', 1, $product->get_id() );
 
 			$context = array(
-				'productId' => $product->get_id(),
-				'quantity'  => $default_quantity,
+				'productId'   => $product->get_id(),
+				'productType' => $product->get_type(),
+				'quantity'    => $default_quantity,
 			);
 
-			if ( $product instanceof \WC_Product && $product->is_type( 'variable' ) ) {
-				$context['variation']           = array();
+			if ( $product->is_type( 'variable' ) ) {
+				$context['selectedAttributes']  = array();
 				$context['availableVariations'] = $product->get_available_variations();
 			}
 
 			$wrapper_attributes = get_block_wrapper_attributes(
 				array(
-					'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
-					'data-wp-context'     => wp_json_encode(
+					'data-wp-interactive'       => 'woocommerce/add-to-cart-with-options',
+					'data-wp-context'           => wp_json_encode(
 						$context,
 						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 					),
-					'data-wp-on--submit'  => 'actions.handleSubmit',
-					'class'               => $classes,
-					'style'               => esc_attr( $classes_and_styles['styles'] ),
+					'data-wp-on--submit'        => 'actions.handleSubmit',
+					'data-wp-class--is-invalid' => '!state.isFormValid',
+					'class'                     => $classes,
+					'style'                     => esc_attr( $classes_and_styles['styles'] ),
 				)
 			);
 

@@ -32,4 +32,5 @@ export type BlueprintImportStepResponse = {
 		type: string;
 		message: string;
 	}[];
+	sessionToken?: string;
 };

@@ -127,7 +127,7 @@ class PaymentExtensionSuggestionsTest extends WC_Unit_Test_Case {
 		$country_suggestions_count = array(
 			'CA' => 9,
 			'US' => 10,
-			'GB' => 12,
+			'GB' => 13,
 			'AT' => 11,
 			'BE' => 10,
 			'BG' => 6,
@@ -360,7 +360,7 @@ class PaymentExtensionSuggestionsTest extends WC_Unit_Test_Case {
 		$country_suggestions_count = array(
 			'CA' => 9,
 			'US' => 10,
-			'GB' => 12,
+			'GB' => 13,
 			'AT' => 11,
 			'BE' => 10,
 			'BG' => 6,

@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Use as_has_scheduled_action() if function exists when scheduling DraftOrders clean up.

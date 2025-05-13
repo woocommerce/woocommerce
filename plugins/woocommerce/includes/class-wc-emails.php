@@ -313,20 +313,6 @@ class WC_Emails {
 	public function replace_placeholders( $string ) {
 		$domain = wp_parse_url( home_url(), PHP_URL_HOST );
 
-		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
-			$string = str_replace(
-				array(
-					'{store_address}',
-					'{store_email}',
-				),
-				array(
-					$this->get_store_address(),
-					$this->get_from_address(),
-				),
-				$string
-			);
-		}
-
 		return str_replace(
 			array(
 				'{site_title}',
@@ -334,6 +320,8 @@ class WC_Emails {
 				'{site_url}',
 				'{woocommerce}',
 				'{WooCommerce}',
+				'{store_address}',
+				'{store_email}',
 			),
 			array(
 				$this->get_blogname(),
@@ -341,6 +329,8 @@ class WC_Emails {
 				$domain,
 				'<a href="https://woocommerce.com">WooCommerce</a>',
 				'<a href="https://woocommerce.com">WooCommerce</a>',
+				$this->get_store_address(),
+				$this->get_from_address(),
 			),
 			$string
 		);

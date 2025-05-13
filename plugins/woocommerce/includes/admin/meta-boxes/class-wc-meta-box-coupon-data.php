@@ -7,7 +7,7 @@
  * @author      WooThemes
  * @category    Admin
  * @package     WooCommerce\Admin\Meta Boxes
- * @version     2.1.0
+ * @version     x.x.x
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -182,7 +182,7 @@ class WC_Meta_Box_Coupon_Data {
 					)
 				);
 
-				echo '</div><div class="options_group">';
+				echo '</div><div class="options_group"><div class="hr-section hr-section-coupon_restrictions">' . esc_html__( 'And', 'woocommerce' ) . '</div>';
 
 				// Product ids.
 				?>
@@ -222,7 +222,7 @@ class WC_Meta_Box_Coupon_Data {
 				</p>
 				<?php
 
-				echo '</div><div class="options_group">';
+				echo '</div><div class="options_group"><div class="hr-section hr-section-coupon_restrictions">' . esc_html__( 'And', 'woocommerce' ) . '</div>';
 
 				// Categories.
 				?>
@@ -260,7 +260,7 @@ class WC_Meta_Box_Coupon_Data {
 					<?php echo wc_help_tip( __( 'Product categories that the coupon will not be applied to, or that cannot be in the cart in order for the "Fixed cart discount" to be applied.', 'woocommerce' ) ); ?>
 				</p>
 			</div>
-			<div class="options_group">
+			<div class="options_group"><div class="hr-section hr-section-coupon_restrictions"><?php echo esc_html__( 'And', 'woocommerce' ); ?></div>
 				<?php
 				// Customers.
 				woocommerce_wp_text_input(

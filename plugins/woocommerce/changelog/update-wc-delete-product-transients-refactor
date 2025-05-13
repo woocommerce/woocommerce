@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Refactored action scheduler to use get_next() instead of search() to find next scheduled action for deleting product transients
