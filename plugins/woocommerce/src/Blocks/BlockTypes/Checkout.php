@@ -473,9 +473,7 @@ class Checkout extends AbstractBlock {
 					wc_get_logger()->warning(
 						sprintf(
 							/* translators: %s: address field for shipping rates */
-							__( 'Address fields for shipping rates values must be strings. Non-string value removed: %s', 'woocommerce' ),
-							print_r( $value, true )
-						),
+							__( 'Address fields for shipping rates values must be strings. Non-string value removed: %s', 'woocommerce' ), $value ),
 						array( 'source' => 'woocommerce_address_fields_for_shipping_rates' )
 					);
 					unset( $filtered_fields[ $key ] );
