@@ -63,11 +63,6 @@ class AddressProviderController {
 			return array();
 		}
 
-		// If the class names haven't changed, return the cached instances.
-		if ( $this->cached_provider_class_names === $provider_class_names && ! empty( $this->cached_providers ) ) {
-			return $this->cached_providers;
-		}
-
 		$providers = array();
 		$seen_ids  = array();
 
