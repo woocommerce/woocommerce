@@ -410,7 +410,7 @@ class PaymentGateway {
 		// If the payment gateway object has a `plugin_slug` property, use it.
 		// This is useful for testing.
 		if ( isset( $payment_gateway->plugin_slug ) ) {
-			return $payment_gateway->plugin_slug;
+			return (string) $payment_gateway->plugin_slug;
 		}
 
 		try {
