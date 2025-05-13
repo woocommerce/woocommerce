@@ -438,6 +438,12 @@ export const selectShippingRate =
 			);
 
 		if ( selectedShippingRate?.rate_id === rateId ) {
+			// Early return here signifies that the rate is correctly selected.
+			// We might have some pending requests that will be trying to set it, so
+			// let's abort them just in case.
+			if ( abortController ) {
+				abortController.abort();
+			}
 			return;
 		}
 
@@ -478,12 +484,13 @@ export const selectShippingRate =
 
 			dispatch.receiveCart( rest );
 			dispatch.shippingRatesBeingSelected( false );
-
 			return response as CartResponse;
 		} catch ( error ) {
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
 			dispatch.shippingRatesBeingSelected( false );
 			return Promise.reject( error );
+		} finally {
+			abortController = null;
 		}
 	};
 
