@@ -9,7 +9,7 @@ import {
 	Flex,
 	FlexItem,
 	Dropdown,
-	RadioControl
+	RadioControl,
 } from '@wordpress/components';
 import { closeSmall } from '@wordpress/icons';
 import { store as coreDataStore, useEntityProp } from '@wordpress/core-data';
@@ -19,17 +19,29 @@ import { store as coreDataStore, useEntityProp } from '@wordpress/core-data';
  */
 import { EMAIL_STATUSES } from '../../settings-email/settings-email-listing-status';
 
-export function EmailStatus() {
+interface EmailStatusProps {
+	className?: string;
+}
+
+/**
+ * EmailStatus component displays and allows changing the status of a transactional email.
+ * It shows whether the email is enabled, disabled, or manually sent.
+ *
+ * @param {EmailStatusProps} props - Component props.
+ * @return {JSX.Element} Rendered component.
+ */
+export function EmailStatus( { className }: EmailStatusProps ): JSX.Element {
 	const [ woocommerce_email_data ] = useEntityProp(
 		'postType',
 		'woo_email',
 		'woocommerce_data'
 	);
+
 	const isManual = woocommerce_email_data?.is_manual;
 	let statusValue = 'disabled';
-	if (isManual) {
+	if ( isManual ) {
 		statusValue = 'manual';
-	} else if (woocommerce_email_data?.enabled) {
+	} else if ( woocommerce_email_data?.enabled ) {
 		statusValue = 'enabled';
 	}
 
@@ -37,7 +49,7 @@ export function EmailStatus() {
 		EMAIL_STATUSES.find( ( s ) => s.value === statusValue ) ??
 		EMAIL_STATUSES[ 1 ];
 
-	const updateStatus = ( newValue: boolean ) => {
+	const updateStatus = ( newValue: boolean ): void => {
 		const editedPost = select( coreDataStore ).getEditedEntityRecord(
 			'postType',
 			'woo_email',
@@ -59,9 +71,54 @@ export function EmailStatus() {
 		);
 	};
 
+	const renderDropdownContent = ( {
+		onClose,
+	}: {
+		onClose: () => void;
+	} ): JSX.Element => (
+		<div style={ { minWidth: 230 } }>
+			<Flex
+				justify="space-between"
+				align="center"
+				style={ {
+					padding: '8px 0',
+				} }
+			>
+				<h2
+					className="block-editor-inspector-popover-header__heading"
+					style={ { margin: 0 } }
+				>
+					{ __( 'Status', 'woocommerce' ) }
+				</h2>
+				<Button
+					size="small"
+					className="block-editor-inspector-popover-header__action"
+					label={ __( 'Close', 'woocommerce' ) }
+					icon={ closeSmall }
+					onClick={ onClose }
+				/>
+			</Flex>
+			<RadioControl
+				selected={ statusValue }
+				options={ EMAIL_STATUSES.filter(
+					( option ) => option.value !== 'manual'
+				).map( ( option ) => ( {
+					label: option.label,
+					value: option.value,
+					description: option.description,
+				} ) ) }
+				onChange={ ( value ) => {
+					updateStatus( value === 'enabled' );
+					onClose();
+				} }
+				disabled={ isManual }
+			/>
+		</div>
+	);
+
 	return (
-		<PanelRow className="editor-post-panel__row">
-			<Flex justify={ 'start' }>
+		<PanelRow className={ className }>
+			<Flex justify="start">
 				<FlexItem className="editor-post-panel__row-label">
 					{ __( 'Email Status', 'woocommerce' ) }
 				</FlexItem>
@@ -70,7 +127,7 @@ export function EmailStatus() {
 						popoverProps={ {
 							placement: 'bottom-start',
 							offset: 0,
-							shift: true
+							shift: true,
 						} }
 						renderToggle={ ( { isOpen, onToggle } ) => (
 							<Button
@@ -90,42 +147,7 @@ export function EmailStatus() {
 								{ status.label }
 							</Button>
 						) }
-						renderContent={ ( { onClose } ) => (
-							<div style={ { minWidth: 230 } }>
-								<Flex
-									justify="space-between"
-									align="center"
-									style={ {
-										padding: '8px 16px',
-										borderBottom: '1px solid #e2e4e7'
-									} }
-								>
-									<h2 className="block-editor-inspector-popover-header__heading" style={ { margin: 0 } }>
-										{ __( 'Status', 'woocommerce' ) }
-									</h2>
-									<Button
-										size="small"
-										className="block-editor-inspector-popover-header__action"
-										label={ __( 'Close' ) }
-										icon={ closeSmall }
-										onClick={ onClose }
-									/>
-								</Flex>
-								<RadioControl
-									selected={ statusValue }
-									options={ EMAIL_STATUSES.filter( option => option.value !== 'manual' ).map( option => ( {
-										label: option.label,
-										value: option.value,
-										description: option.description
-									} ) ) }
-									onChange={ ( value ) => {
-										updateStatus( value === 'enabled' );
-										onClose();
-									} }
-									disabled={ isManual }
-								/>
-							</div>
-						) }
+						renderContent={ renderDropdownContent }
 					/>
 				</FlexItem>
 			</Flex>
