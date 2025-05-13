@@ -51,7 +51,7 @@ class WC_Session_Handler extends WC_Session {
 	protected $_has_cookie = false; // phpcs:ignore PSR2.Classes.PropertyDeclaration.Underscore
 
 	/**
-	 * Table name for session data.
+	 * Table name for guest session data.
 	 *
 	 * @var string Custom session table name
 	 */
@@ -90,7 +90,13 @@ class WC_Session_Handler extends WC_Session {
 		add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
 		add_action( 'wp', array( $this, 'maybe_set_customer_session_cookie' ), 99 );
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
-		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
+		add_action( 'wp_logout', array( $this, 'forget_session' ) );
+
+		if ( did_action( 'wp_loaded' ) ) {
+			$this->init_session_cookie();
+		} else {
+			add_action( 'wp_loaded', array( $this, 'init_session_cookie' ), 9 ); // Use priority 9 run before WC_Cart_Session::get_cart_from_session()
+		}
 
 		if ( ! is_user_logged_in() ) {
 			add_filter( 'nonce_user_logged_out', array( $this, 'maybe_update_nonce_user_logged_out' ), 10, 2 );
@@ -415,6 +421,9 @@ class WC_Session_Handler extends WC_Session {
 
 	/**
 	 * Set session expiration.
+	 *
+	 * For logged in users sessions renew daily and expire in a week. This is to keep carts persistent for logged in users.
+	 * For guests, sessions expire in 48 hours.
 	 */
 	public function set_session_expiration() {
 		$expiring_seconds   = DAY_IN_SECONDS;

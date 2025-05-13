@@ -75,6 +75,9 @@ final class WC_Cart_Session {
 		// Cart is loaded from session on wp_loaded. By this time the session is already initialized.
 		add_action( 'wp_loaded', array( $this, 'get_cart_from_session' ) );
 
+		// Filter the data to be merged into the user session after logging in.
+		add_filter( 'woocommerce_migrate_guest_session_to_user_session', array( $this, 'migrate_guest_session_to_user_session' ), 10, 2 );
+
 		// Destroy cart session on cart emptied.
 		add_action( 'woocommerce_cart_emptied', array( $this, 'destroy_cart_session' ) );
 
@@ -83,13 +86,26 @@ final class WC_Cart_Session {
 		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_removed_coupon', array( $this, 'set_session' ) );
 
-		// Persistent cart stored to usermeta.
-		add_action( 'woocommerce_cart_updated', array( $this, 'persistent_cart_update' ) );
-
 		// Cookie events - cart cookies need to be set before headers are sent.
 		add_action( 'woocommerce_add_to_cart', array( $this, 'maybe_set_cart_cookies' ) );
 		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 );
 		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 );
+	}
+
+	/**
+	 * Filters the data to be merged into the user session.
+	 *
+	 * @since 9.10.0
+	 *
+	 * @param array $data The updated session data.
+	 * @param array $user_session_data The user session data that will be overridden.
+	 * @return array The updated session data.
+	 */
+	public function migrate_guest_session_to_user_session( $data, $user_session_data ) {
+		if ( empty( $data['cart'] ) ) {
+			$data['cart'] = $user_session_data['cart'];
+		}
+		return $data;
 	}
 
 	/**
@@ -119,12 +135,6 @@ final class WC_Cart_Session {
 
 		// Flag to indicate whether this is a re-order.
 		$is_order_again_request = false;
-
-		// If the guest session has been converted to a user session, merge the saved cart if the cart is empty.
-		if ( did_action( 'woocommerce_guest_session_to_user_id' ) && empty( $cart ) ) {
-			$cart                = SavedCart::get_saved_cart( get_current_user_id() );
-			$update_cart_session = true;
-		}
 
 		// Populate cart from order.
 		if ( isset( $_GET['order_again'], $_GET['_wpnonce'] ) && is_user_logged_in() && wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'woocommerce-order_again' ) ) { // WPCS: input var ok, sanitization ok.
@@ -442,20 +452,20 @@ final class WC_Cart_Session {
 
 	/**
 	 * Save the persistent cart when the cart is updated.
+	 *
+	 * @deprecated 9.10.0 Data persists in the session table for longer instead of syncing to meta.
 	 */
 	public function persistent_cart_update() {
-		if ( get_current_user_id() ) {
-			SavedCart::update_saved_cart( get_current_user_id(), $this->get_cart_for_session() );
-		}
+		wc_deprecated_function( 'persistent_cart_update', '9.10.0', 'Data persists in the session table for longer instead of syncing to meta.' );
 	}
 
 	/**
 	 * Delete the persistent cart permanently.
+	 *
+	 * @deprecated 9.10.0 Data persists in the session table for longer instead of syncing to meta.
 	 */
 	public function persistent_cart_destroy() {
-		if ( get_current_user_id() ) {
-			SavedCart::delete_saved_cart( get_current_user_id() );
-		}
+		wc_deprecated_function( 'persistent_cart_destroy', '9.10.0', 'Data persists in the session table for longer instead of syncing to meta.' );
 	}
 
 	/**

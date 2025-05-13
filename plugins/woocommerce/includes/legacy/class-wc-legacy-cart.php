@@ -276,8 +276,8 @@ abstract class WC_Legacy_Cart {
 	public function maybe_set_cart_cookies() { $this->session->maybe_set_cart_cookies(); }
 	public function set_session() { $this->session->set_session(); }
 	public function get_cart_for_session() { return $this->session->get_cart_for_session(); }
-	public function persistent_cart_update() { $this->session->persistent_cart_update(); }
-	public function persistent_cart_destroy() { $this->session->persistent_cart_destroy(); }
+	public function persistent_cart_update() {}
+	public function persistent_cart_destroy() {}
 
 	/**
 	 * Get the total of all cart discounts.
