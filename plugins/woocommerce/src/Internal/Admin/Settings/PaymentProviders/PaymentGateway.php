@@ -421,6 +421,11 @@ class PaymentGateway {
 		}
 
 		$gateway_class_filename = $reflector->getFileName();
+		if ( ! is_string( $gateway_class_filename ) ) {
+			// Bail if we can't get the class filename.
+			return '';
+		}
+
 		// Determine the gateway's plugin directory from the class path.
 		$gateway_class_path = trim( dirname( plugin_basename( $gateway_class_filename ) ), DIRECTORY_SEPARATOR );
 		if ( false === strpos( $gateway_class_path, DIRECTORY_SEPARATOR ) ) {
