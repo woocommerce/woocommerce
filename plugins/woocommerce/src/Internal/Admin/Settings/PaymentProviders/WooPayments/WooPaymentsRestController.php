@@ -927,6 +927,13 @@ class WooPaymentsRestController extends RestApiControllerBase {
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
+								'clean'              => array(
+									'type'        => 'object',
+									'description' => esc_html__( 'Action to clean the step progress.', 'woocommerce' ),
+									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
 								'auth'               => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to authorize the WPCOM connection.', 'woocommerce' ),

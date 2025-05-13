@@ -1479,6 +1479,10 @@ class WooPaymentsService {
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/finish' ),
 				),
+				'clean'  => array(
+					'type' => self::ACTION_TYPE_REST,
+					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/clean' ),
+				),
 			);
 		}
 
