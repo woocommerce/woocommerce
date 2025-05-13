@@ -180,6 +180,27 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			),
 			$override
 		);
+		register_rest_route(
+			$this->route_namespace,
+			'/' . $this->rest_base . '/onboarding/step/(?P<step>[a-zA-Z0-9_-]+)/clean',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_step_clean' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => array(
+						'location' => array(
+							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
+							'type'              => 'string',
+							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'required'          => false,
+							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
+						),
+					),
+				),
+			),
+			$override
+		);
 		// Onboarding step specific routes.
 		register_rest_route(
 			$this->route_namespace,
@@ -474,6 +495,39 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$previous_status = $this->woopayments->get_onboarding_step_status( $step_id, $location );
 
 			$this->woopayments->mark_onboarding_step_completed( $step_id, $location );
+
+			$response = array(
+				'success'         => true,
+				'previous_status' => $previous_status,
+				'current_status'  => $this->woopayments->get_onboarding_step_status( $step_id, $location ),
+			);
+		} catch ( ApiException $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Handle the onboarding step clean action.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_Error|WP_REST_Response The response or error.
+	 */
+	protected function handle_onboarding_step_clean( WP_REST_Request $request ) {
+		$step_id = $request->get_param( 'step' ) ?? '';
+
+		$location = $request->get_param( 'location' );
+		if ( empty( $location ) ) {
+			// Fall back to the providers country if no location is provided.
+			$location = $this->payments->get_country();
+		}
+
+		try {
+			$previous_status = $this->woopayments->get_onboarding_step_status( $step_id, $location );
+
+			$this->woopayments->clean_onboarding_step_progress( $step_id, $location );
 
 			$response = array(
 				'success'         => true,

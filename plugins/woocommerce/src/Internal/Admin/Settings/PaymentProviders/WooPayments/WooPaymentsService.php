@@ -399,6 +399,28 @@ class WooPaymentsService {
 	}
 
 	/**
+	 * Cleans an onboarding step progress.
+	 *
+	 * @param string $step_id   The ID of the onboarding step.
+	 * @param string $location  The location for which we are onboarding.
+	 *                          This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step was cleaned.
+	 * @throws ApiArgumentException If the given onboarding step ID is invalid.
+	 * @throws ApiException If the onboarding action can not be performed due to the current state of the site.
+	 */
+	public function clean_onboarding_step_progress( string $step_id, string $location ): bool {
+		$this->check_if_onboarding_step_action_is_acceptable( $step_id, $location );
+
+		// Clear possible failed or blocked status for the step.
+		$this->clear_onboarding_step_failed( $step_id, $location );
+		$this->clear_onboarding_step_blocked( $step_id, $location );
+
+		// Reset the stored step statuses.
+		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', array() );
+	}
+
+	/**
 	 * Check if an onboarding step has a failed status.
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
