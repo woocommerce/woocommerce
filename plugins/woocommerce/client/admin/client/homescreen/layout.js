@@ -32,6 +32,7 @@ import StatsOverview from './stats-overview';
 import { StoreManagementLinks } from '../store-management-links';
 import { TasksPlaceholder, ProgressTitle } from '../task-lists';
 import { MobileAppModal } from './mobile-app-modal';
+import { EmailImprovementsModal } from './email-improvements-modal';
 import './style.scss';
 import '../dashboard/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
@@ -91,6 +92,10 @@ export const Layout = ( {
 
 	const shouldStickColumns = isWideViewport.current && twoColumns;
 	const shouldShowMobileAppModal = query.mobileAppModal ?? false;
+	const shouldShowEmailImprovementsModal =
+		query.emailImprovementsModal ?? false;
+	const emailImprovementsType =
+		shouldShowEmailImprovementsModal === 'enabled' ? 'enabled' : 'try';
 
 	const renderTaskList = () => {
 		return (
@@ -149,6 +154,9 @@ export const Layout = ( {
 			>
 				{ isDashboardShown ? renderColumns() : renderTaskList() }
 				{ shouldShowMobileAppModal && <MobileAppModal /> }
+				{ shouldShowEmailImprovementsModal && (
+					<EmailImprovementsModal type={ emailImprovementsType } />
+				) }
 			</div>
 		</>
 	);

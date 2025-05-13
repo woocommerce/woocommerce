@@ -162,6 +162,7 @@ final class ProductFilterStatus extends AbstractBlock {
 
 		if ( empty( $filter_options ) ) {
 			$wrapper_attributes['hidden'] = true;
+			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 		}
 
 		return sprintf(
@@ -211,7 +212,7 @@ final class ProductFilterStatus extends AbstractBlock {
 		foreach ( $counts as $key => $value ) {
 			$data[] = array(
 				'status' => $key,
-				'count'  => $value,
+				'count'  => intval( $value ),
 			);
 		}
 

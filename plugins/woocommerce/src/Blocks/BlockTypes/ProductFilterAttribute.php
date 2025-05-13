@@ -228,6 +228,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		if ( empty( $filter_context['items'] ) ) {
 			$wrapper_attributes['hidden'] = true;
+			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 		}
 
 		return sprintf(
@@ -277,7 +278,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		foreach ( $counts as $key => $value ) {
 			$attribute_counts[] = array(
 				'term'  => $key,
-				'count' => $value,
+				'count' => intval( $value ),
 			);
 		}
 

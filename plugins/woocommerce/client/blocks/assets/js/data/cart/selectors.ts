@@ -10,6 +10,7 @@ import type {
 	ApiErrorResponse,
 } from '@woocommerce/types';
 import { BillingAddress, ShippingAddress } from '@woocommerce/settings';
+import { createSelector } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -26,17 +27,21 @@ export const getCartData = ( state: CartState ): Cart => {
 	return state.cartData;
 };
 
-export const getCustomerData = (
-	state: CartState
-): {
-	shippingAddress: ShippingAddress;
-	billingAddress: BillingAddress;
-} => {
-	return {
-		shippingAddress: state.cartData.shippingAddress,
-		billingAddress: state.cartData.billingAddress,
-	};
-};
+export const getCustomerData = createSelector(
+	(
+		state: CartState
+	): {
+		shippingAddress: ShippingAddress;
+		billingAddress: BillingAddress;
+	} => {
+		return {
+			shippingAddress: state.cartData
+				.shippingAddress as unknown as ShippingAddress,
+			billingAddress: state.cartData
+				.billingAddress as unknown as BillingAddress,
+		};
+	}
+);
 
 /**
  * Retrieves shipping rates from state.

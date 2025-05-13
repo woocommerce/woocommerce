@@ -53,7 +53,8 @@
 		}
 	}
 
-	.wc-blocks-components-form-token-field-wrapper .components-form-token-field__input-container {
+	.wc-blocks-components-form-token-field-wrapper
+		.components-form-token-field__input-container {
 		@include reset-color();
 		@include reset-typography();
 		border: 0;
@@ -99,15 +100,17 @@
 	}
 }
 
-.wc-blocks-components-form-token-field-wrapper:not(.single-selection) .components-form-token-field__input-container {
-	padding: $gap-smallest 30px $gap-smallest  $gap-smaller;
+.wc-blocks-components-form-token-field-wrapper:not(.single-selection)
+	.components-form-token-field__input-container {
+	padding: $gap-smallest 30px $gap-smallest $gap-smaller;
 
 	.components-form-token-field__token-text {
 		background-color: $white;
 		border: 1px solid;
 		border-right: 0;
 		border-radius: 25px 0 0 25px;
-		padding: em($gap-smallest) em($gap-smaller) em($gap-smallest) em($gap-small);
+		padding: em($gap-smallest) em($gap-smaller) em($gap-smallest)
+			em($gap-small);
 		line-height: 22px;
 	}
 
@@ -155,7 +158,9 @@
 	}
 
 	// The specificity here is needed to overwrite the margin-top that is inherited on WC block template pages such as Shop.
-	button[type="submit"]:not(.wp-block-search__button).wc-block-components-filter-submit-button {
+	button[type="submit"]:not(
+			.wp-block-search__button
+		).wc-block-components-filter-submit-button {
 		margin-left: 0;
 		margin-top: 0;
 		@include font-size(small);

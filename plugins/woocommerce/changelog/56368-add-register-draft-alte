@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Harden draft order registration so it's always required for payment.

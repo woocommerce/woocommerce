@@ -18,17 +18,21 @@ export const useValidation = (): ValidationData => {
 
 	const prefix = 'extensions-errors';
 
-	const { hasValidationErrors, getValidationError } = useSelect(
+	const { hasValidationErrors, getValidationErrorSelector } = useSelect(
 		( mapSelect ) => {
 			const store = mapSelect( validationStore );
 			return {
 				hasValidationErrors: store.hasValidationErrors(),
-				getValidationError: ( validationErrorId: string ) =>
-					store.getValidationError(
-						`${ prefix }-${ validationErrorId }`
-					),
+				getValidationErrorSelector: store.getValidationError,
 			};
-		}
+		},
+		[]
+	);
+
+	const getValidationError = useCallback(
+		( validationErrorId: string ) =>
+			getValidationErrorSelector( `${ prefix }-${ validationErrorId }` ),
+		[ getValidationErrorSelector, prefix ]
 	);
 
 	return {

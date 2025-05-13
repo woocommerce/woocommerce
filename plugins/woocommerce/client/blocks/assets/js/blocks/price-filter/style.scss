@@ -42,7 +42,8 @@
 	}
 }
 
-.editor-styles-wrapper .wc-block-price-filter__button.wc-block-components-price-slider__button,
+.editor-styles-wrapper
+	.wc-block-price-filter__button.wc-block-components-price-slider__button,
 .wc-block-price-filter__button.wc-block-components-price-slider__button {
 	padding: em($gap-smaller) em($gap);
 	@include font-size(small);

@@ -1517,7 +1517,7 @@ WHERE
 	}
 
 	/**
-	 * Helper function to get posts data for an order in bullk. We use to this to compute posts object in bulk so that we can compare it with COT data.
+	 * Helper function to get posts data for an order in bulk. We use to this to compute posts object in bulk so that we can compare it with COT data.
 	 *
 	 * @param array $orders    List of orders mapped by $order_id.
 	 *

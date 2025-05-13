@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Monorepo: add changes linting on git-push in order to reduce a bit pressure on CI.

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { registerBlockType } from '@wordpress/blocks';
+import { registerProductBlockType } from '@woocommerce/atomic-utils';
 import { percent, Icon } from '@wordpress/icons';
 
 /**
@@ -11,7 +11,8 @@ import save from '../save';
 import edit from './edit';
 import metadata from './block.json';
 
-registerBlockType( metadata, {
+const blockConfig = {
+	...metadata,
 	icon: (
 		<Icon
 			icon={ percent }
@@ -20,4 +21,8 @@ registerBlockType( metadata, {
 	),
 	edit,
 	save,
+};
+
+registerProductBlockType( blockConfig, {
+	isAvailableOnPostEditor: true,
 } );

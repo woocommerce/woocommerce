@@ -2,7 +2,8 @@
 	border-radius: inherit;
 	border-color: inherit;
 
-	.wc-block-price-filter__range-input-wrapper .wc-block-price-filter__range-input {
+	.wc-block-price-filter__range-input-wrapper
+		.wc-block-price-filter__range-input {
 		&::-webkit-slider-thumb {
 			pointer-events: none;
 		}

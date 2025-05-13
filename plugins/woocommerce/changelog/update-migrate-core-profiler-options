@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Update core-profiler to eliminate the use of option store and eliminate the outdated fields from the onboarding API
