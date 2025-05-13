@@ -74,9 +74,6 @@ final class WC_Cart_Session {
 		// Cart is loaded from session on wp_loaded. By this time the session is already initialized.
 		add_action( 'wp_loaded', array( $this, 'get_cart_from_session' ) );
 
-		// Filter the data to be merged into the user session after logging in.
-		add_filter( 'woocommerce_migrate_guest_session_to_user_session', array( $this, 'migrate_guest_session_to_user_session' ), 10, 2 );
-
 		// Destroy cart session on cart emptied.
 		add_action( 'woocommerce_cart_emptied', array( $this, 'destroy_cart_session' ) );
 
@@ -89,22 +86,6 @@ final class WC_Cart_Session {
 		add_action( 'woocommerce_add_to_cart', array( $this, 'maybe_set_cart_cookies' ) );
 		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 );
 		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 );
-	}
-
-	/**
-	 * Filters the data to be merged into the user session.
-	 *
-	 * @since 9.10.0
-	 *
-	 * @param array $data The updated session data.
-	 * @param array $user_session_data The user session data that will be overridden.
-	 * @return array The updated session data.
-	 */
-	public function migrate_guest_session_to_user_session( array $data, array $user_session_data ) {
-		if ( empty( $data['cart'] ) && ! empty( $user_session_data['cart'] ) ) {
-			$data['cart'] = $user_session_data['cart'];
-		}
-		return $data;
 	}
 
 	/**
