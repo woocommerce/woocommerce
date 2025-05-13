@@ -436,6 +436,7 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	} else {
 		// Fallback: create, update, and delete operations on orders clears caches and refresh `orders` transient version.
 		// With high orders placement rate, this caching here will be short-lived (suboptimal for BFCM/Christmas and busy stores in general).
+		// Though, no case for the core itself but possible for themes/extensions using this function.
 		$cache_version = WC_Cache_Helper::get_transient_version( 'orders' );
 	}
 
