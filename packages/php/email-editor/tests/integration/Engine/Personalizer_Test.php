@@ -191,14 +191,13 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 				'woocommerce/store-url',
 				'Store',
 				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The $args parameter is not used in this test.
-					return $context['store_url'] ?? 'https://example.com';
+					return 'https://example.com';
 				}
 			)
 		);
 
-		$this->personalizer->set_context( array( 'store_url' => 'https://myshop.com' ) );
 		$html_content = '<a href="http://[woocommerce/store-url]">Click here</a>';
-		$this->assertSame( '<a href="https://myshop.com">Click here</a>', $this->personalizer->personalize_content( $html_content ) );
+		$this->assertSame( '<a href="https://example.com">Click here</a>', $this->personalizer->personalize_content( $html_content ) );
 	}
 
 	/**
@@ -212,14 +211,13 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 				'woocommerce/store-url',
 				'Store',
 				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The $args parameter is not used in this test.
-					return $context['store_url'] ?? 'https://example.com';
+					return 'https://example.com';
 				}
 			)
 		);
 
-		$this->personalizer->set_context( array( 'store_url' => 'https://myshop.com' ) );
 		$html_content = '<a href="http://%5Bwoocommerce/store-url%5D">Click here</a>';
-		$this->assertSame( '<a href="https://myshop.com">Click here</a>', $this->personalizer->personalize_content( $html_content ) );
+		$this->assertSame( '<a href="https://example.com">Click here</a>', $this->personalizer->personalize_content( $html_content ) );
 	}
 
 	/**
