@@ -4996,7 +4996,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		try {
-			$this->sut->mark_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+			$this->sut->mark_onboarding_step_completed( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
 			$this->fail( 'Expected ApiException not thrown' );
 		} catch ( ApiException $e ) {
@@ -5071,6 +5071,69 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			$this->sut->mark_onboarding_step_completed( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		} catch ( ApiException $e ) {
 			$this->assertEquals( 'woocommerce_woopayments_onboarding_step_requirements_not_met', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test that mark_onboarding_step_completed throws an exception when the step is blocked.
+	 *
+	 * @return void
+	 */
+	public function test_mark_onboarding_step_completed_throws_when_blocked() {
+		$location = 'US';
+
+		// Arrange.
+		$step_id                = WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS;
+		$stored_profile         = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						$step_id => array(
+							'statuses' => array(
+								WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED   => $this->current_time - 200,
+								WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED    => $this->current_time - 150,
+								WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED   => $this->current_time - 100,
+								WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $this->current_time - 10,
+							),
+							'data'     => array(
+								'error' => array( 'some error' => 'some error' ),
+							),
+						),
+					),
+				),
+			),
+		);
+		$updated_stored_profile = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( $stored_profile, &$updated_stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profile = $value;
+
+						// Mimic the behavior of the original function.
+						if ( $value === $stored_profile || maybe_serialize( $value ) === maybe_serialize( $stored_profile ) ) {
+							return false;
+						}
+
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		try {
+			$this->sut->mark_onboarding_step_completed( $step_id, $location );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_step_blocked', $e->getErrorCode() );
 		}
 	}
 
@@ -5240,6 +5303,239 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->assertNotEquals( array(), $updated_stored_profile );
 		$this->assertNotEmpty( $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'][ WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED ] );
 		$this->assertSame( $this->current_time, $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'][ WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED ] );
+	}
+
+	/**
+	 * Test clean_onboarding_step_progress throws exception when extension is not active.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_clean_onboarding_step_progress_throws_when_extension_not_active() {
+		$location = 'US';
+
+		// Arrange.
+		// Mock the extension as not active.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'class_exists' => function ( $class_to_check ) {
+					if ( '\WC_Payments' === $class_to_check ) {
+						return false;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		try {
+			$this->sut->clean_onboarding_step_progress( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+
+			$this->fail( 'Expected ApiException not thrown' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_extension_not_active', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test clean_onboarding_step_progress throws exception when onboarding is locked.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_clean_onboarding_step_progress_throws_with_onboarding_locked() {
+		$location = 'US';
+
+		// Arrange the onboarding locked DB option.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return 'yes';
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		try {
+			$this->sut->clean_onboarding_step_progress( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+
+			$this->fail( 'Expected ApiException not thrown' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_locked', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test that clean_onboarding_step_progress throws an exception when an invalid step ID is provided.
+	 *
+	 * @return void
+	 */
+	public function test_clean_onboarding_step_progress_throws_on_invalid_step_id() {
+		$location = 'US';
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'Invalid onboarding step ID' );
+
+		$this->sut->clean_onboarding_step_progress( 'invalid_step_id', $location );
+	}
+
+	/**
+	 * Test that clean_onboarding_step_progress throws an exception when the requirements are not met for the step.
+	 *
+	 * @return void
+	 */
+	public function test_clean_onboarding_step_progress_throws_on_unmet_requirements() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( false );
+
+		try {
+			$this->sut->clean_onboarding_step_progress( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_step_requirements_not_met', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test that clean_onboarding_step_progress throws an exception when the step is blocked.
+	 *
+	 * @return void
+	 */
+	public function test_clean_onboarding_step_progress_throws_when_blocked() {
+		$location = 'US';
+
+		// Arrange.
+		$step_id                = WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS;
+		$stored_profile         = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						$step_id => array(
+							'statuses' => array(
+								WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED   => $this->current_time - 200,
+								WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED    => $this->current_time - 150,
+								WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED   => $this->current_time - 100,
+								WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $this->current_time - 10,
+							),
+							'data'     => array(
+								'error' => array( 'some error' => 'some error' ),
+							),
+						),
+					),
+				),
+			),
+		);
+		$updated_stored_profile = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( $stored_profile, &$updated_stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profile = $value;
+
+						// Mimic the behavior of the original function.
+						if ( $value === $stored_profile || maybe_serialize( $value ) === maybe_serialize( $stored_profile ) ) {
+							return false;
+						}
+
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		try {
+			$this->sut->clean_onboarding_step_progress( $step_id, $location );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_step_blocked', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test that clean_onboarding_step_progress clears the statuses and errors.
+	 *
+	 * @return void
+	 */
+	public function test_clean_onboarding_step_progress() {
+		$location = 'US';
+
+		// Arrange.
+		$step_id                = WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS;
+		$stored_profile         = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						$step_id => array(
+							'statuses' => array(
+								WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $this->current_time - 200,
+								WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $this->current_time - 150,
+								WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $this->current_time - 10,
+							),
+							'data'     => array(
+								'error' => array( 'some error' => 'some error' ),
+							),
+						),
+					),
+				),
+			),
+		);
+		$updated_stored_profile = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( &$stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( &$stored_profile, &$updated_stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profile = $value;
+
+						// Mimic the behavior of the original function.
+						if ( $value === $stored_profile || maybe_serialize( $value ) === maybe_serialize( $stored_profile ) ) {
+							return false;
+						}
+
+						// Update the stored profile to the latest set value.
+						$stored_profile = $value;
+
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Act.
+		$result = $this->sut->clean_onboarding_step_progress( $step_id, $location );
+
+		// Assert.
+		$this->assertTrue( $result );
+		$this->assertNotEquals( array(), $updated_stored_profile );
+		$this->assertEmpty( $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses'] );
+		$this->assertEmpty( $updated_stored_profile['onboarding'][ $location ]['steps'][ $step_id ]['data']['error'] );
 	}
 
 	/**
