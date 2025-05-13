@@ -53,7 +53,8 @@
 				"@wordpress/style-engine",
 				"@wordpress/stylelint-config",
 				"@wordpress/url",
-				"eslint*"
+				"eslint*",
+				"stylelint"
 			],
 			"packages": [
 				"@woocommerce/block-library"

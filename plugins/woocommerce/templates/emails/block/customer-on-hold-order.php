@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2> <?php echo esc_html__( 'Thank you for your order', 'woocommerce' ); ?> </h2>
+<h2 class="wp-block-heading"> <?php echo esc_html__( 'Thank you for your order', 'woocommerce' ); ?> </h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
@@ -47,7 +47,7 @@ defined( 'ABSPATH' ) || exit;
 <!-- /wp:woo/email-content -->
 
 <!-- wp:paragraph -->
-<p> 
+<p>
 <?php
 /* translators: %s: Store admin email */
 	printf( esc_html__( 'Thanks again! If you need any help with your order, please contact us at %s,', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );
