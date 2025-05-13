@@ -582,7 +582,9 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			await expect(
 				checkoutPageObject.page
 					.locator( '.wc-block-components-notices' )
-					.getByText( 'Alternative Email is required' )
+					.getByText(
+						'Please ensure your alternative email matches the correct format.'
+					)
 			).toBeVisible();
 
 			await checkoutPageObject.page
@@ -597,7 +599,9 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			await expect(
 				checkoutPageObject.page
 					.locator( '.wc-block-components-notices' )
-					.getByText( 'Alternative Email is required' )
+					.getByText(
+						'Please ensure your alternative email matches the correct format.'
+					)
 			).not.toBeVisible();
 
 			await checkoutPageObject.page
