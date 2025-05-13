@@ -100,8 +100,8 @@ final class WC_Cart_Session {
 	 * @param array $user_session_data The user session data that will be overridden.
 	 * @return array The updated session data.
 	 */
-	public function migrate_guest_session_to_user_session( $data, $user_session_data ) {
-		if ( empty( $data['cart'] ) ) {
+	public function migrate_guest_session_to_user_session( array $data, array $user_session_data ) {
+		if ( empty( $data['cart'] ) && ! empty( $user_session_data['cart'] ) ) {
 			$data['cart'] = $user_session_data['cart'];
 		}
 		return $data;
