@@ -138,7 +138,7 @@ const TestAccountStep = () => {
 				setStatus( 'initializing' );
 
 				const cleanStepIfNeeded = async () => {
-					// We only need to clean the step if it has been retried.
+					// We only need to clean the step if it has been retried or failed.
 					if (
 						currentStep?.actions?.clean?.href &&
 						( retryCounter > 0 || currentStep?.status === 'failed' )
