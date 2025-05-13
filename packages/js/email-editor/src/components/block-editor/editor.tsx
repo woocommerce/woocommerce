@@ -34,6 +34,7 @@ import { SettingsPanel } from '../sidebar/settings-panel';
 import { TemplateSettingsPanel } from '../sidebar/template-settings-panel';
 import { PublishSave } from '../../hacks/publish-save';
 import { EditorNotices } from '../notices';
+import { BlockCompatibilityWarnings } from '../sidebar';
 
 export function InnerEditor( {
 	postId: initialPostId,
@@ -139,6 +140,7 @@ export function InnerEditor( {
 					) }
 					<PublishSave />
 					<EditorNotices />
+					<BlockCompatibilityWarnings />
 				</Editor>
 			</ErrorBoundary>
 		</SlotFillProvider>
