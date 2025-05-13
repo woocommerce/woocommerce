@@ -430,7 +430,7 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		// With high orders placement rate, this caching here will be short-lived (suboptimal for BFCM/Christmas and busy stores in general).
 		$cache_version = WC_Cache_Helper::get_transient_version( 'woocommerce_reports' );
 	} elseif ( '' === $customer_email && $user_id ) {
-		// Optimized: for specific customers rely on orders count (customer meta under the hood with in-memory caching in the way to it).
+		// Optimized: for specific customers we rely on orders count (customer meta under the hood with in-memory caching in the way to it).
 		// Best-case scenario for caching here, as it only depends on the customer orders placement.
 		$cache_version = wc_get_customer_order_count( $user_id );
 	} else {
