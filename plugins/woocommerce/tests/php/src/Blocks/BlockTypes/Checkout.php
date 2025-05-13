@@ -35,7 +35,7 @@ class Checkout extends \WP_UnitTestCase {
 	 *
 	 * @var \WC_Logger_Interface $mock_logger
 	 */
-  	private $mock_logger;
+private $mock_logger;
 
 	/**
 	 * Set up the test. Creates a AssetDataRegistryMock.
