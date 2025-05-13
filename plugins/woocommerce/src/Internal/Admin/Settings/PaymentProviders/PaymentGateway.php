@@ -107,7 +107,11 @@ class PaymentGateway {
 	 * @return string The provider title of the payment gateway.
 	 */
 	public function get_title( WC_Payment_Gateway $payment_gateway ): string {
-		$title = wp_strip_all_tags( html_entity_decode( $payment_gateway->get_method_title() ?? '' ), true );
+		$title = $payment_gateway->get_method_title() ?? '';
+		if ( ! is_string( $title ) ) {
+			return esc_html__( 'Unknown', 'woocommerce' );
+		}
+		$title = wp_strip_all_tags( html_entity_decode( $title ), true );
 
 		// Truncate the title.
 		return Utils::truncate_with_words( $title, 75 );
