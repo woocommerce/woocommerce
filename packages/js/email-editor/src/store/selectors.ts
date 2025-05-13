@@ -268,7 +268,7 @@ export const canUserEditGlobalEmailStyles = createRegistrySelector(
 export const getGlobalEmailStylesPost = createRegistrySelector(
 	( select ) => () => {
 		const { postId, canEdit } = canUserEditGlobalEmailStyles();
-		if ( ! postId || ! canEdit ) {
+		if ( ! postId || canEdit === undefined ) {
 			return null;
 		}
 		if ( postId ) {
