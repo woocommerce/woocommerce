@@ -191,7 +191,6 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			}
 			$this->setup_locale();
 			$this->partial_refund = $partial_refund;
-			$this->id             = $this->partial_refund ? 'pos_customer_partially_refunded_order' : 'pos_customer_refunded_order';
 
 			$this->object                         = $order;
 			$this->recipient                      = $this->object->get_billing_email();
