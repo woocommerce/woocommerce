@@ -95,7 +95,7 @@ class WC_Session_Handler extends WC_Session {
 		if ( did_action( 'wp_loaded' ) ) {
 			$this->init_session_cookie();
 		} else {
-			add_action( 'wp_loaded', array( $this, 'init_session_cookie' ), 9 ); // Use priority 9 run before WC_Cart_Session::get_cart_from_session()
+			add_action( 'wp_loaded', array( $this, 'init_session_cookie' ), 9 ); // Use priority 9 run before WC_Cart_Session::get_cart_from_session.
 		}
 
 		if ( ! is_user_logged_in() ) {
@@ -427,7 +427,7 @@ class WC_Session_Handler extends WC_Session {
 	 */
 	public function set_session_expiration() {
 		$expiring_seconds   = DAY_IN_SECONDS;
-		$expiration_seconds = 2 * DAY_IN_SECONDS;
+		$expiration_seconds = is_user_logged_in() ? WEEK_IN_SECONDS : 2 * DAY_IN_SECONDS;
 
 		/**
 		 * Filters the session expiration.
