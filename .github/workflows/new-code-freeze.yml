@@ -1,4 +1,4 @@
-name: New Code Freeze
+name: 'Release: Enforce Code Freeze'
 on:
   workflow_dispatch:
 
@@ -91,7 +91,7 @@ jobs:
             echo "::error::Release branch already exists."
             exit 1
           fi
-        
+
           git checkout trunk
           git checkout -b ${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}
           git push origin ${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}

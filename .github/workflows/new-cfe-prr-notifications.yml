@@ -1,4 +1,4 @@
-name: New CFE/PRR workflow notifications
+name: 'Release: CFE and PRR issue validation'
 on:
   issues:
     types: [labeled]
@@ -81,7 +81,7 @@ jobs:
             core.setOutput('PR_BASE_REF', '');
 
             console.log(`PR base ref: ${baseRefName}`);
-           
+
             if (!baseRefName.startsWith('release/')) {
               core.setFailed('The PR base_ref must start with release/.');
 
@@ -139,7 +139,7 @@ jobs:
 
             const releaseNumber = baseRef.split('/')[1];
             console.log("releaseNumber:", releaseNumber);
-          
+
             const releaseRegex = /([0-9]+\.[0-9]+)/;
             const match = releaseNumber.match(releaseRegex);
             if (match && match[1]) {
@@ -223,11 +223,11 @@ jobs:
             const labelName = event.label?.name;
             const issueTitle = event.issue.title;
             const issueUrl = event.issue.html_url;
-            
+
             const slackMessage = `:arrow_right: ${labelName === 'code freeze exception' ? ':ice_cube: New Code Freeze Exception request' : ':release: New Point Release Request'}: ${issueTitle} ${issueUrl}`;
 
             const githubComment = `IMPORTANT: Your request for a ${labelName === 'code freeze exception' ? 'Code Freeze Exception' : 'Point Release'} has been successfully created and is pending approval from @woocommerce/solaris.\n\nPlease be aware that you are targeting your fix for WC version: **${process.env.RELEASE_NUMBER}**, based on the base branch of your PR you entered with the request.`;
-            
+
             // Set the message as a core output
             core.setOutput('SLACK_MESSAGE', slackMessage);
             core.setOutput('GITHUB_COMMENT', githubComment);
