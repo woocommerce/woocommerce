@@ -3,6 +3,37 @@
 
 This PHP Composer package facilitates exporting and importing WordPress Blueprint compatible JSON formats. It offers a solid framework for seamless integration with WordPress sites and supports extensibility, enabling plugins to customize export and import functionalities. Manage site configurations, options, and settings effortlessly with JSON files.
 
+## Data Format
+
+A Blueprint JSON file contains all the information needed to configure a WordPress or WooCommerce site. The format is fully compatible with [WordPress Blueprint data format](https://wordpress.github.io/wordpress-playground/blueprints/data-format/).
+
+The following is an example of a Blueprint JSON file:
+
+```json
+{
+  "landingPage": "/wp-admin/admin.php?page=wc-admin",
+  "steps": [
+    {
+      "step": "setSiteOptions",
+      "options": {
+        "woocommerce_store_address": "123 Main St",
+        "woocommerce_store_address_2": "Suite 100",
+        "woocommerce_store_city": "Sample City",
+        "woocommerce_default_country": "US:CA",
+        "woocommerce_store_postcode": "90001",
+        "woocommerce_all_except_countries": [],
+        "woocommerce_specific_allowed_countries": [],
+        "woocommerce_specific_ship_to_countries": [],
+        "woocommerce_calc_taxes": "yes"
+      }
+    }
+  ]
+}
+```
+
+You can include as many steps as needed, each representing a different part of your WooCommerce or WordPress configuration. This is the format you get when exporting, and what you provide when importing a Blueprint.
+
+
 ## Usage
 
 Blueprint lets you export your WordPress site configuration to a JSON file and import it into another site. This can be done via WP-CLI or directly in PHP for advanced automation or integration.
@@ -203,76 +234,6 @@ Output:
   }
   ```
 
-## Example: Adding a Custom Importer
-
-In most cases, the default importers will be sufficient. However, if you need to import data not supported by the default importers, creating a custom importer might be necessary. Keep in mind that this could result in a blueprint file that is not compatible with the standard WordPress Blueprint format.
-
-1. To add a custom importer, implement the `StepProcessor` interface. Importers process step data during import.
-
-```php
-use Automattic\WooCommerce\Blueprint\StepProcessor;
-use Automattic\WooCommerce\Blueprint\StepProcessorResult;
-use Automattic\WooCommerce\Blueprint\Steps\SetSiteOptions;
-
-class MyCustomImporter implements StepProcessor {
-    public function process($schema): StepProcessorResult {
-        // Your import logic here
-        return StepProcessorResult::success(SetSiteOptions::get_step_name());
-    }
-    public function get_step_class(): string {
-        return SetSiteOptions::class;
-    }
-    public function check_step_capabilities($schema): bool {
-        return current_user_can('manage_options');
-    }
-}
-```
-
-2. Register your importer using the `wooblueprint_importers` filter:
-
-```php
-add_filter('wooblueprint_importers', function(array $importers) {
-    $importers[] = new MyCustomImporter();
-    return $importers;
-});
-```
-
-## Example: Adding a Custom Step
-
-To define a new step, extend the abstract `Step` class. Steps represent actions that can be exported/imported.
-
-```php
-use Automattic\WooCommerce\Blueprint\Steps\Step;
-
-class MyCustomStep extends Step {
-    private $my_data;
-    public function __construct($my_data) {
-        $this->my_data = $my_data;
-    }
-    public static function get_step_name(): string {
-        return 'myCustomStep';
-    }
-    public static function get_schema(int $version = 1): array {
-        return [
-            'type' => 'object',
-            'properties' => [
-                'step' => [ 'type' => 'string', 'enum' => [static::get_step_name()] ],
-                'myData' => [ 'type' => 'string' ],
-            ],
-            'required' => ['step', 'myData'],
-        ];
-    }
-    public function prepare_json_array(): array {
-        return [
-            'step' => static::get_step_name(),
-            'myData' => $this->my_data,
-        ];
-    }
-}
-```
-
----
-
 ## Example: Aliasing a Custom Exporter
 
 If you have multiple exporters for the same step type, implement the `HasAlias` interface to give each exporter a unique alias. This helps distinguish them in the export UI or API.
@@ -304,7 +265,70 @@ You can now use the alias to export the step:
 wp wc blueprint export wc-blueprint.json --steps=profilerOptions
 ```
 
----
+## Example: Adding a Custom Importer
+
+In most cases, the default importers will be sufficient. However, if you need to import data not supported by the default importers, creating a custom importer might be necessary. Keep in mind that this could result in a blueprint file that is not compatible with the standard WordPress Blueprint format.
+
+1. To add a custom importer, you need to define a new step first. Extend the abstract `Step` class. Steps represent actions that can be exported/imported.
+
+```php
+use Automattic\WooCommerce\Blueprint\Steps\Step;
+
+class MyCustomStep extends Step {
+    private $my_data;
+    public function __construct($my_data) {
+        $this->my_data = $my_data;
+    }
+    public static function get_step_name(): string {
+        return 'myCustomStep';
+    }
+    public static function get_schema(int $version = 1): array {
+        return [
+            'type' => 'object',
+            'properties' => [
+                'step' => [ 'type' => 'string', 'enum' => [static::get_step_name()] ],
+                'myData' => [ 'type' => 'string' ],
+            ],
+            'required' => ['step', 'myData'],
+        ];
+    }
+    public function prepare_json_array(): array {
+        return [
+            'step' => static::get_step_name(),
+            'myData' => $this->my_data,
+        ];
+    }
+}
+```
+
+2. Then, you need to implement the `StepProcessor` interface. Importers process step data during import.
+
+```php
+use Automattic\WooCommerce\Blueprint\StepProcessor;
+use Automattic\WooCommerce\Blueprint\StepProcessorResult;
+
+class MyCustomImporter implements StepProcessor {
+    public function process($schema): StepProcessorResult {
+        // Your import logic here
+        return StepProcessorResult::success(MyCustomStep::get_step_name());
+    }
+    public function get_step_class(): string {
+        return MyCustomStep::class;
+    }
+    public function check_step_capabilities($schema): bool {
+        return current_user_can('manage_options');
+    }
+}
+```
+
+2. Register your importer using the `wooblueprint_importers` filter:
+
+```php
+add_filter('wooblueprint_importers', function(array $importers) {
+    $importers[] = new MyCustomImporter();
+    return $importers;
+});
+```
 
 ## Need More?
 
