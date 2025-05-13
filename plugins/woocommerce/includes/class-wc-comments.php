@@ -473,7 +473,6 @@ class WC_Comments {
 			// When possible, narrow down wc_customer_bought_product inputs for better performance.
 			$email    = $comment->user_id ? '' : $comment->comment_author_email;
 			$verified = wc_customer_bought_product( $email, $comment->user_id, $comment->comment_post_ID );
-
 			add_comment_meta( $comment_id, 'verified', (int) $verified, true );
 		}
 		return $verified;
