@@ -616,8 +616,8 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 						'title'   => 'WooPay',
 					),
 					array(
-						// No title.
 						'id'          => 'woopay',
+						// No title.
 						'_order'      => 0,
 						'enabled'     => false,
 						'description' => 'WooPay express checkout',
@@ -638,17 +638,17 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 			array(
 				array(
 					'id'          => 'good_id',
-					'_order'      => 0,
 					// Changed to 0.
+					'_order'      => 0,
 					'enabled'     => true,
 					'required'    => true,
 					'title'       => 'WooPay',
-					'description' => '<a href="#">WooPay</a> <b>express</b> <em>checkout</em>',
 					// The h1 tag should be stripped.
-					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+					'description' => '<a href="#">WooPay</a> <b>express</b> <em>checkout</em>',
 					// Default category.
-					'icon'        => '',
+					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
 					// No icon.
+					'icon'        => '',
 				),
 			),
 			$this->sut->get_recommended_payment_methods( $fake_gateway )
