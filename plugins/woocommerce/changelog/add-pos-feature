@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add point-of-sale feature flag for mobile Point of Sale feature that is only enabled in development environment.
