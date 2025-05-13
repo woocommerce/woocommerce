@@ -144,12 +144,12 @@ class Checkout extends \WP_UnitTestCase {
 
 		$data_from_registry = $this->registry->get();
 		$this->assertArrayHasKey( 'addressFieldsForShippingRates', $data_from_registry );
-		// assert that this contains the following fields needed for shipping rates
+		// Assert that this contains the following fields needed for shipping rates.
 		$this->assertContains( 'state', $data_from_registry['addressFieldsForShippingRates'] );
 		$this->assertContains( 'country', $data_from_registry['addressFieldsForShippingRates'] );
 		$this->assertContains( 'postcode', $data_from_registry['addressFieldsForShippingRates'] );
 		$this->assertContains( 'city', $data_from_registry['addressFieldsForShippingRates'] );
-		// assert that this not contains the following fields not needed for shipping rates
+		// Assert that this not contains the following fields not needed for shipping rates.
 		$this->assertNotContains( 'address_1', $data_from_registry['addressFieldsForShippingRates'] );
 		$this->assertNotContains( 'address_2', $data_from_registry['addressFieldsForShippingRates'] );
 		$this->assertNotContains( 'first_name', $data_from_registry['addressFieldsForShippingRates'] );
@@ -175,11 +175,11 @@ class Checkout extends \WP_UnitTestCase {
 		);
 		$checkout->mock_enqueue_data();
 
-		// Verify no warnings were logged
+		// Verify no warnings were logged.
 		$this->mock_logger->expects( $this->never() )
 							->method( 'warning' );
 
-		// Verify the data was added to the registry
+		// Verify the data was added to the registry.
 		$data_from_registry = $this->registry->get();
 		$this->assertArrayHasKey( 'addressFieldsForShippingRates', $data_from_registry );
 		$this->assertContains( 'address_1', $data_from_registry['addressFieldsForShippingRates'] );
@@ -199,7 +199,7 @@ class Checkout extends \WP_UnitTestCase {
 	public function test_invalid_mixed_array_shipping_fields_filter() {
 		$checkout = new CheckoutMock( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-mock' );
 
-		// Check that the shipping fields filter does warn when applied with an array of mixed strings non-string.
+		// Check that the shipping fields filter does warn when applied with an array of mixed strings and non-strings..
 		add_filter(
 			'woocommerce_address_fields_for_shipping_rates',
 			function () {
@@ -207,7 +207,7 @@ class Checkout extends \WP_UnitTestCase {
 			}
 		);
 
-		// Verify warning was logged for non-string value
+		// Verify warning was logged for non-string value.
 		$this->mock_logger->expects( $this->once() )
 							->method( 'warning' )
 							->with(
@@ -216,7 +216,7 @@ class Checkout extends \WP_UnitTestCase {
 
 		$checkout->mock_enqueue_data();
 
-		// Verify only valid strings were added to the registry
+		// Verify only valid strings were added to the registry.
 		$data_from_registry = $this->registry->get();
 		$this->assertArrayHasKey( 'addressFieldsForShippingRates', $data_from_registry );
 		$this->assertContains( 'address_1', $data_from_registry['addressFieldsForShippingRates'] );
@@ -237,7 +237,7 @@ class Checkout extends \WP_UnitTestCase {
 	public function test_non_array_filter_value_keeps_default_fields() {
 		$checkout = new CheckoutMock( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-mock' );
 
-		// Add filter with non-array value
+		// Add filter with non-array value.
 		add_filter(
 			'woocommerce_address_fields_for_shipping_rates',
 			function () {
@@ -253,7 +253,7 @@ class Checkout extends \WP_UnitTestCase {
 
 		$checkout->mock_enqueue_data();
 
-		// Verify only default shipping fields are present
+		// Verify only default shipping fields are present.
 		$data_from_registry = $this->registry->get();
 		$this->assertArrayHasKey( 'addressFieldsForShippingRates', $data_from_registry );
 		$this->assertContains( 'state', $data_from_registry['addressFieldsForShippingRates'] );
