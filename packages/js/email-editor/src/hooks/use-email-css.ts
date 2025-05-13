@@ -9,7 +9,7 @@ import deepmerge from 'deepmerge';
 /**
  * Internal dependencies
  */
-import { EmailStyles, storeName } from '../store';
+import { EmailTheme, EmailBuiltStyles, storeName } from '../store';
 import { useUserTheme } from './use-user-theme';
 import { useGlobalStylesOutputWithConfig } from '../private-apis';
 
@@ -50,7 +50,7 @@ export function useEmailCss() {
 				{},
 				editorTheme || {},
 				userTheme || {},
-			] ) as EmailStyles,
+			] ) as EmailTheme,
 		[ editorTheme, userTheme ]
 	);
 
@@ -72,7 +72,7 @@ export function useEmailCss() {
 
 	const finalStyles = useMemo( () => {
 		return [
-			...( ( styles as string[] ) ?? [] ),
+			...( ( styles as EmailBuiltStyles[] ) ?? [] ),
 			{
 				css: `.is-root-container{ ${ rootContainerStyles } }`,
 			},

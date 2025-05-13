@@ -2,19 +2,22 @@
  * External dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
+import { useMemo, useEffect } from '@wordpress/element';
+import { SlotFillProvider, Spinner } from '@wordpress/components';
+import { store as coreStore } from '@wordpress/core-data';
+import { CommandMenu } from '@wordpress/commands';
+// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	AutosaveMonitor,
+	// @ts-expect-error Type is missing in @types/wordpress__editor
 	LocalAutosaveMonitor,
 	UnsavedChangesWarning,
+	// @ts-expect-error Type is missing in @types/wordpress__editor
 	EditorKeyboardShortcutsRegister,
 	ErrorBoundary,
 	PostLockedModal,
 	store as editorStore,
 } from '@wordpress/editor';
-import { useMemo, useEffect } from '@wordpress/element';
-import { SlotFillProvider, Spinner } from '@wordpress/components';
-import { store as coreStore } from '@wordpress/core-data';
-import { CommandMenu } from '@wordpress/commands';
 
 /**
  * Internal dependencies
@@ -55,9 +58,7 @@ export function InnerEditor( {
 			const { getEditedPostTemplate } = select( storeName );
 			const postObject = getEntityRecord(
 				'postType',
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 				currentPost.postType,
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 				currentPost.postId
 			);
 			return {
@@ -73,6 +74,7 @@ export function InnerEditor( {
 		[ currentPost.postType, currentPost.postId ]
 	);
 
+	// @ts-expect-error Type is missing in @types/wordpress__editor
 	const { removeEditorPanel } = useDispatch( editorStore );
 	useEffect( () => {
 		removeEditorPanel( 'post-status' );
@@ -110,6 +112,7 @@ export function InnerEditor( {
 
 	return (
 		<SlotFillProvider>
+			{ /* @ts-expect-error canCopyContent is missing in @types/wordpress__editor */ }
 			<ErrorBoundary canCopyContent>
 				<CommandMenu />
 				<Editor

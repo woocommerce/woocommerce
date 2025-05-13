@@ -43,6 +43,7 @@ export function PublishSave() {
 	const { hasNonPostEntityChanges, isEditedPostDirty } = useSelect(
 		( select ) => ( {
 			hasNonPostEntityChanges:
+				// @ts-expect-error hasNonPostEntityChanges is not typed in @types/wordpress__editor
 				select( editorStore ).hasNonPostEntityChanges(),
 			isEditedPostDirty: select( editorStore ).isEditedPostDirty(),
 		} ),

@@ -3,10 +3,20 @@
  */
 import { memo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { PluginSidebar, PluginSidebarMoreMenuItem } from '@wordpress/editor';
 import { useSelect } from '@wordpress/data';
 import { styles } from '@wordpress/icons';
-import { Navigator } from '@wordpress/components';
+// eslint-disable-next-line @woocommerce/dependency-group
+import {
+	// @ts-expect-error Type for Navigator is missing in @types/wordpress__editor
+	Navigator,
+} from '@wordpress/components';
+// eslint-disable-next-line @woocommerce/dependency-group
+import {
+	// @ts-expect-error Type for PluginSidebar is missing in @types/wordpress__editor
+	PluginSidebar,
+	// @ts-expect-error Type for PluginSidebarMoreMenuItem is missing in @types/wordpress__editor
+	PluginSidebarMoreMenuItem,
+} from '@wordpress/editor';
 
 /**
  * Internal dependencies

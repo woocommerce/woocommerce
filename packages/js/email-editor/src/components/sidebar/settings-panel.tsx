@@ -1,9 +1,13 @@
 /**
  * External dependencies
  */
-import { PluginDocumentSettingPanel } from '@wordpress/editor';
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
+// eslint-disable-next-line @woocommerce/dependency-group
+import {
+	// @ts-expect-error Type for PluginDocumentSettingPanel is missing in @types/wordpress__editor
+	PluginDocumentSettingPanel,
+} from '@wordpress/editor';
 
 /**
  * Internal dependencies

@@ -160,6 +160,10 @@ export type EmailStyles = {
 	};
 };
 
+export type EmailBuiltStyles = {
+	css: string;
+};
+
 export type EmailEditorLayout = {
 	type: string;
 	contentSize: string;
@@ -179,7 +183,7 @@ export type PersonalizationTag = {
 };
 
 export type State = {
-	postId: number;
+	postId: number | string; // Template use strings
 	editorSettings: EmailEditorSettings;
 	theme: EmailTheme;
 	styles: {

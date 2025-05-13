@@ -29,7 +29,8 @@ export function EditorSnackbars( { context = 'email-editor' } ) {
 				content: __( 'Email saved.', 'woocommerce' ),
 				removeActions: false,
 				contentCheck: ( notice ) => {
-					return notice.content.includes( __( 'Post updated.' ) );
+					// eslint-disable-next-line @wordpress/i18n-text-domain
+					return notice.content.includes( __( 'Post updated.' ) ); // It is intentionally without domain to match core translation
 				},
 			},
 		};
@@ -43,7 +44,10 @@ export function EditorSnackbars( { context = 'email-editor' } ) {
 			if ( ! globalNoticeChangeMap[ notice.id ] ) {
 				return notice;
 			}
-			if ( globalNoticeChangeMap[ notice.id ].contentCheck && ! globalNoticeChangeMap[ notice.id ].contentCheck( notice ) ) {
+			if (
+				globalNoticeChangeMap[ notice.id ].contentCheck &&
+				! globalNoticeChangeMap[ notice.id ].contentCheck( notice )
+			) {
 				return notice;
 			}
 			return {

@@ -311,7 +311,7 @@ export const getEmailTemplates = createRegistrySelector(
 			)
 );
 
-export function getEmailPostId( state: State ): number {
+export function getEmailPostId( state: State ): number | string {
 	return state.postId;
 }
 

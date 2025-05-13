@@ -17,7 +17,7 @@ import { storeName } from '../../store';
 import { recordEvent } from '../../events';
 import { useContentValidation } from '../../hooks/use-content-validation';
 
-export function SendButton () {
+export function SendButton() {
 	const { isDirty } = useEntitiesSavedStatesIsDirty();
 	const { validateContent, isInvalid } = useContentValidation();
 
@@ -36,8 +36,7 @@ export function SendButton () {
 		}
 	}
 
-	const isDisabled =
-		hasEmptyContent || isEmailSent || isInvalid || isDirty;
+	const isDisabled = hasEmptyContent || isEmailSent || isInvalid || isDirty;
 
 	const label = applyFilters(
 		'woocommerce_email_editor_send_button_label',
