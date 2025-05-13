@@ -1,4 +1,4 @@
 Significance: minor
 Type: dev
 
-Dequeue the bundled `@wordpress/interactivity` and `interactivity-router` modules and bundle our own within WooCommerce.
+Behind a feature flag de-register the bundled `@wordpress/interactivity` and `interactivity-router` modules and register/bundle our own within WooCommerce.
