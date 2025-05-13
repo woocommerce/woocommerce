@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\Accordion;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
+use Automattic\WooCommerce\Blocks\Utils\BlockUtils;
 /**
  * AccordionItem class.
  */
@@ -75,5 +76,26 @@ class AccordionItem extends AbstractBlock {
 		}
 
 		return $content;
+	}
+
+	public static function create_block( $attrs, $inner_blocks = array() ) {
+		$block_type_name = 'woocommerce/accordion-item';
+
+		$attrs = BlockUtils::filter_block_attributes( $block_type_name, $attrs );
+
+		$block = array(
+			'blockName'   => $block_type_name,
+			'attrs'       => $attrs,
+			'innerBlocks' => $inner_blocks,
+		);
+
+		$block_wrapper_attributes = BlockUtils::get_block_wrapper_attributes( $block );
+
+		$block['innerContent'] = array_merge(
+			array( "<div $block_wrapper_attributes>" ),
+			array_fill( 0, count( $inner_blocks ), null ),
+			array( "</div>" )
+		);
+		return $block;
 	}
 }
