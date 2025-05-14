@@ -83,7 +83,7 @@ class PaymentsRestController extends RestApiControllerBase {
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
 						'location' => array(
-							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
 							'type'              => 'string',
 							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
 							'required'          => false,
@@ -105,7 +105,7 @@ class PaymentsRestController extends RestApiControllerBase {
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
 						'order_map' => array(
-							'description'       => __( 'A map of provider ID to integer values representing the sort order.', 'woocommerce' ),
+							'description'       => esc_html__( 'A map of provider ID to integer values representing the sort order.', 'woocommerce' ),
 							'type'              => 'object',
 							'required'          => true,
 							'validate_callback' => fn( $value ) => $this->check_providers_order_map_arg( $value ),
@@ -150,7 +150,7 @@ class PaymentsRestController extends RestApiControllerBase {
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
 						'context' => array(
-							'description'       => __( 'The context ID for which to dismiss the incentive. If not provided, will dismiss the incentive for all contexts.', 'woocommerce' ),
+							'description'       => esc_html__( 'The context ID for which to dismiss the incentive. If not provided, will dismiss the incentive for all contexts.', 'woocommerce' ),
 							'type'              => 'string',
 							'required'          => false,
 							'sanitize_callback' => 'sanitize_key',
@@ -649,7 +649,7 @@ class PaymentsRestController extends RestApiControllerBase {
 					'readonly'    => true,
 				),
 				'supports'       => array(
-					'description' => __( 'Supported features for this provider.', 'woocommerce' ),
+					'description' => esc_html__( 'Supported features for this provider.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -707,7 +707,7 @@ class PaymentsRestController extends RestApiControllerBase {
 				),
 				'links'          => array(
 					'type'        => 'array',
-					'description' => __( 'Links for the provider.', 'woocommerce' ),
+					'description' => esc_html__( 'Links for the provider.', 'woocommerce' ),
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 					'items'       => array(

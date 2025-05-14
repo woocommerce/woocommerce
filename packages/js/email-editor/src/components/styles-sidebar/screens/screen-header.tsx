@@ -9,7 +9,8 @@ import {
 	__experimentalSpacer as Spacer, // eslint-disable-line
 	__experimentalHeading as Heading, // eslint-disable-line
 	__experimentalView as View, // eslint-disable-line
-	__experimentalNavigatorToParentButton as NavigatorToParentButton, // eslint-disable-line
+	// @ts-expect-error Type for Navigator is missing in @types/wordpress__editor
+	Navigator,
 } from '@wordpress/components';
 
 type Props = {
@@ -33,7 +34,7 @@ export function ScreenHeader( { title, description, onBack }: Props ) {
 			<View>
 				<Spacer marginBottom={ 0 } paddingX={ 4 } paddingY={ 3 }>
 					<HStack spacing={ 2 }>
-						<NavigatorToParentButton
+						<Navigator.BackButton
 							style={ { minWidth: 24, padding: 0 } }
 							icon={ chevronLeft }
 							size="small"
