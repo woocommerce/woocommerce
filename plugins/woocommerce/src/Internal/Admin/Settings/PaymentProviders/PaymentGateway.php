@@ -413,33 +413,49 @@ class PaymentGateway {
 			return (string) $payment_gateway->plugin_slug;
 		}
 
-		try {
-			$reflector = new \ReflectionClass( get_class( $payment_gateway ) );
-		} catch ( \ReflectionException $e ) {
-			// Bail if we can't get the class details.
-			return '';
-		}
-
-		$gateway_class_filename = $reflector->getFileName();
-		if ( ! is_string( $gateway_class_filename ) ) {
-			// Bail if we can't get the class filename.
-			return '';
-		}
-
-		// Determine the gateway's plugin directory from the class path.
-		$gateway_class_path = trim( dirname( plugin_basename( $gateway_class_filename ) ), DIRECTORY_SEPARATOR );
-		if ( false === strpos( $gateway_class_path, DIRECTORY_SEPARATOR ) ) {
-			// The gateway class file is in the root of the plugin's directory.
-			$plugin_slug = $gateway_class_path;
+		// If the payment gateway object has a `class_filename` property, use it.
+		// It is only used in development environments (including when running tests).
+		if ( isset( $payment_gateway->class_filename ) && in_array( wp_get_environment_type(), array( 'local', 'development' ), true ) ) {
+			$gateway_class_filename = $payment_gateway->class_filename;
 		} else {
-			$plugin_slug = explode( DIRECTORY_SEPARATOR, $gateway_class_path )[0];
+			try {
+				$reflector              = new \ReflectionClass( get_class( $payment_gateway ) );
+				$gateway_class_filename = $reflector->getFileName();
+			} catch ( \Exception $e ) {
+				// Bail if we couldn't get the gateway class filename.
+				return '';
+			}
 		}
 
-		return $plugin_slug;
+		// Bail if we couldn't get the gateway class filename.
+		if ( ! is_string( $gateway_class_filename ) ) {
+			return '';
+		}
+
+		// Extract the relative path of the class file to the plugins directory.
+		$gateway_class_plugins_path = trim( plugin_basename( $gateway_class_filename ), DIRECTORY_SEPARATOR );
+		if ( $gateway_class_plugins_path === trim( $gateway_class_filename, DIRECTORY_SEPARATOR ) ) {
+			// The class file is not in a plugin directory. Bail.
+			return '';
+		}
+
+		// If the gateway class file is in the root of the plugins directory, use the file name as the slug.
+		if ( false === strpos( $gateway_class_plugins_path, DIRECTORY_SEPARATOR ) ) {
+			return Utils::trim_php_file_extension( $gateway_class_plugins_path );
+		}
+
+		// Use the top-level directory as the plugin slug.
+		$parts = explode( DIRECTORY_SEPARATOR, $gateway_class_plugins_path );
+		// Bail if we couldn't get the parts.
+		if ( ! is_array( $parts ) ) {
+			return '';
+		}
+
+		return reset( $parts );
 	}
 
 	/**
-	 * Get the plugin file of payment gateway, without the .php extension.
+	 * Get the corresponding plugin file of the payment gateway, without the .php extension.
 	 *
 	 * This is useful for the WP API, which expects the plugin file without the .php extension.
 	 *
