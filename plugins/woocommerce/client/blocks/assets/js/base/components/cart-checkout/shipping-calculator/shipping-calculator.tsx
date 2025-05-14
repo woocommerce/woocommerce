@@ -52,7 +52,8 @@ export const ShippingCalculator = ( {
 					{
 						shipping_address: newAddress,
 					},
-					false
+					false,
+					true // address fields for shipping rates changed
 				)
 				.then( () => {
 					removeNoticesWithContext( noticeContext );

@@ -15,9 +15,11 @@ import {
  */
 import { storeName } from '../../store';
 import { recordEvent } from '../../events';
+import { useContentValidation } from '../../hooks/use-content-validation';
 
-export function SendButton( { validateContent, isContentInvalid } ) {
+export function SendButton() {
 	const { isDirty } = useEntitiesSavedStatesIsDirty();
+	const { validateContent, isInvalid } = useContentValidation();
 
 	const { hasEmptyContent, isEmailSent, urls } = useSelect(
 		( select ) => ( {
@@ -34,8 +36,7 @@ export function SendButton( { validateContent, isContentInvalid } ) {
 		}
 	}
 
-	const isDisabled =
-		hasEmptyContent || isEmailSent || isContentInvalid || isDirty;
+	const isDisabled = hasEmptyContent || isEmailSent || isInvalid || isDirty;
 
 	const label = applyFilters(
 		'woocommerce_email_editor_send_button_label',
@@ -45,6 +46,7 @@ export function SendButton( { validateContent, isContentInvalid } ) {
 	return (
 		<Button
 			variant="primary"
+			size="compact"
 			onClick={ () => {
 				recordEvent( 'header_send_button_clicked' );
 				if ( validateContent() ) {

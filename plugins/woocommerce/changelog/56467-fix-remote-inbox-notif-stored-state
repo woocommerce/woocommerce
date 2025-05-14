@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Remote Specs stored_state in StoredStateSetupForProducts where the stored value is not an object.
