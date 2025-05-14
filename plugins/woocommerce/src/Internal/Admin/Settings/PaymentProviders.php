@@ -1074,11 +1074,13 @@ class PaymentProviders {
 				if ( PluginsHelper::is_plugin_installed( $plugin_slug ) ) {
 					// Make sure we put in the actual slug and file path that we found.
 					$extension['plugin']['slug'] = $plugin_slug;
-					$extension['plugin']['file'] = (string) PluginsHelper::get_plugin_path_from_slug( $plugin_slug );
-					// Remove the .php extension from the file path. The WP API expects it without it.
-					if ( ! empty( $extension['plugin']['file'] ) && str_ends_with( $extension['plugin']['file'], '.php' ) ) {
-						$extension['plugin']['file'] = substr( $extension['plugin']['file'], 0, -4 );
+					$extension['plugin']['file'] = PluginsHelper::get_plugin_path_from_slug( $plugin_slug );
+					// Sanity check.
+					if ( ! is_string( $extension['plugin']['file'] ) ) {
+						$extension['plugin']['file'] = '';
 					}
+					// Remove the .php extension from the file path. The WP API expects it without it.
+					$extension['plugin']['file'] = Utils::trim_php_file_extension( $extension['plugin']['file'] );
 
 					$extension['plugin']['status'] = self::EXTENSION_INSTALLED;
 					if ( PluginsHelper::is_plugin_active( $plugin_slug ) ) {
