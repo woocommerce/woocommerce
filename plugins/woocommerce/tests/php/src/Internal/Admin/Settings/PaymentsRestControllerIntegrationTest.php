@@ -526,9 +526,9 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		// because the WooPayments extension would be identified as active.
 		$this->assertSame(
 			array(
-				PaymentProviders::SUGGESTION_ORDERING_PREFIX . PaymentExtensionSuggestions::PAYPAL_FULL_STACK, // Preferred suggestion.
 				PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
 				WC_Gateway_Paypal::ID,
+				PaymentProviders::SUGGESTION_ORDERING_PREFIX . PaymentExtensionSuggestions::PAYPAL_FULL_STACK, // Preferred suggestion.
 				PaymentProviders::SUGGESTION_ORDERING_PREFIX . PaymentExtensionSuggestions::WOOPAYMENTS, // The WooPayments suggestion.
 				'woocommerce_payments', // The fake WooPayments gateway.
 			),
@@ -680,7 +680,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( '_links', $provider, 'Provider (gateway) `_links` entry is missing' );
 
 		// Assert that the offline payment methods group has all the details.
-		$offline_pms_group = $data['providers'][1];
+		$offline_pms_group = $data['providers'][0];
 		$this->assertArrayHasKey( 'id', $offline_pms_group, 'Provider (offline payment methods group) `id` entry is missing' );
 		$this->assertSame( PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP, $offline_pms_group['id'] );
 		$this->assertArrayHasKey( '_type', $offline_pms_group, 'Provider (offline payment methods group) `_type` entry is missing' );
@@ -702,7 +702,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( PaymentProviders::EXTENSION_ACTIVE, $offline_pms_group['plugin']['status'] );
 
 		// Assert that the PayPal gateway is returned as enabled.
-		$provider = $data['providers'][2];
+		$provider = $data['providers'][1];
 		$this->assertTrue( $provider['state']['enabled'] );
 		// Assert that the PayPal gateway has all the details.
 		$this->assertArrayHasKey( 'id', $provider, 'Provider (gateway) `id` entry is missing' );
@@ -995,17 +995,6 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		$data = $response->get_data();
 
-		$this->assertSame(
-			array(
-				PaymentProviders::SUGGESTION_ORDERING_PREFIX . PaymentExtensionSuggestions::PAYPAL_FULL_STACK, // Preferred suggestion.
-				PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
-				WC_Gateway_Paypal::ID,
-				PaymentProviders::SUGGESTION_ORDERING_PREFIX . PaymentExtensionSuggestions::WOOPAYMENTS, // The WooPayments suggestion.
-				'woocommerce_payments', // The fake WooPayments gateway.
-			),
-			array_column( $data['providers'], 'id' )
-		);
-
 		// Assert that the incentive is not in the WooPayments suggestion anymore.
 		$suggestion = $data['providers'][3];
 		$this->assertArrayNotHasKey( '_incentive', $suggestion );
@@ -1077,17 +1066,6 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 
 		$data = $response->get_data();
-
-		$this->assertSame(
-			array(
-				PaymentProviders::SUGGESTION_ORDERING_PREFIX . PaymentExtensionSuggestions::PAYPAL_FULL_STACK, // Preferred suggestion.
-				PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
-				WC_Gateway_Paypal::ID,
-				PaymentProviders::SUGGESTION_ORDERING_PREFIX . PaymentExtensionSuggestions::WOOPAYMENTS, // The WooPayments suggestion.
-				'woocommerce_payments', // The fake WooPayments gateway.
-			),
-			array_column( $data['providers'], 'id' )
-		);
 
 		// Assert that the incentive is in the WooPayments suggestion with the right dismissals list.
 		$suggestion = $data['providers'][3];
