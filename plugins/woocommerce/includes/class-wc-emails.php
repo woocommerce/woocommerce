@@ -346,20 +346,6 @@ class WC_Emails {
 	public function replace_placeholders( $text ) {
 		$domain = wp_parse_url( home_url(), PHP_URL_HOST );
 
-		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
-			$text = str_replace(
-				array(
-					'{store_address}',
-					'{store_email}',
-				),
-				array(
-					$this->get_store_address(),
-					$this->get_from_address(),
-				),
-				$text
-			);
-		}
-
 		return str_replace(
 			array(
 				'{site_title}',
