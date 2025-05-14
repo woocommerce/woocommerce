@@ -8,6 +8,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Admin\Notes\Note;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -19,6 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The main entry-point for all things related to the Helper.
  */
 class WC_Helper {
+	const NOTE_NAME = 'wccom-api-failed';
+
 	/**
 	 * A log object returned by wc_get_logger().
 	 *
@@ -51,6 +54,71 @@ class WC_Helper {
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 
 		do_action( 'woocommerce_helper_loaded' );
+	}
+
+	/**
+	 * Remove all notes signaling an error with the WCCOM API, when the request was successful.
+	 */
+	protected static function remove_api_error_notice() {
+		try {
+			$data_store = \WC_Data_Store::load( 'admin-note' );
+		} catch ( Exception $e ) {
+			return;
+		}
+
+		$note_ids = $data_store->get_notes_with_name( self::NOTE_NAME );
+
+		if ( ! empty( $note_ids ) ) {
+			foreach ( $note_ids as $note_id ) {
+				$note = new Note( $note_id );
+				if ( $note->get_id() ) {
+					$data_store->delete( $note );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Adds at most one note signaling that there was an error with the WCCOM API.
+	 */
+	protected static function add_api_error_notice() {
+		try {
+			$data_store = \WC_Data_Store::load( 'admin-note' );
+		} catch ( Exception $e ) {
+			return;
+		}
+
+		$note_ids = $data_store->get_notes_with_name( self::NOTE_NAME );
+
+		if ( ! empty( $note_ids ) ) {
+			$current_notice_id = array_shift( $note_ids );
+
+			foreach ( $note_ids as $note_id ) {
+				$note = new Note( $note_id );
+				if ( $note->get_id() ) {
+					$data_store->delete( $note );
+				}
+			}
+
+			$note = new Note( $current_notice_id );
+		} else {
+			$note = new Note();
+		}
+
+		$note->set_props(
+			array(
+				'title'        => __( 'WooCommerce.com API failure', 'woocommerce' ),
+				'content'      => __( 'A request to the WooCommerce.com API has failed - subscriptions may not be listed correctly. Please retry in a few minutes by refreshing this page.', 'woocommerce' ),
+				'type'         => Note::E_WC_ADMIN_NOTE_UPDATE,
+				'name'         => self::NOTE_NAME,
+				'content_data' => (object) array(),
+				'source'       => 'woocommerce-admin',
+				'status'       => Note::E_WC_ADMIN_NOTE_UNACTIONED,
+				'is_deleted'   => false,
+			)
+		);
+
+		$note->save();
 	}
 
 	/**
@@ -1807,11 +1875,14 @@ class WC_Helper {
 			}
 
 			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+			self::remove_api_error_notice();
 			return $data;
 		} catch ( Exception $e ) {
 			self::log( 'Error getting subscriptions: ' . $e->getMessage(), 'error' );
-			throw $e;
+			self::add_api_error_notice();
 		}
+
+		return array();
 	}
 
 	/**
