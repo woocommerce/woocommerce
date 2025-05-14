@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2>
+<h2 class="wp-block-heading">
 <?php
 esc_html_e( 'Default block content', 'woocommerce' );
 ?>
