@@ -23,6 +23,7 @@ if [ $PROTECTED_BRANCH = $CURRENT_BRANCH ]; then
 	exit 1
 fi
 
+# Ensure the checks are running only when pushing a new branch or there are commits to push.
 matchingRemoteBranches=$(git ls-remote --heads origin refs/heads/$CURRENT_BRANCH)
 if [ -n "$matchingRemoteBranches" ]; then
 	commitsToPush=$(git log origin/$CURRENT_BRANCH..$CURRENT_BRANCH)
