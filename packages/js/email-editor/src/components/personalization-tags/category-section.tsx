@@ -52,7 +52,7 @@ const CategorySection = ( {
 						<div className="woocommerce-personalization-tags-modal-category-group">
 							{ items.map( ( item ) => {
 								// TODO: Improve logic for detecting URL tags.
-								const isURLTag = /\Wurl\W/.test( item.token );
+								const isURLTag = /\burl\b/.test( item.token );
 
 								return (
 									<div
