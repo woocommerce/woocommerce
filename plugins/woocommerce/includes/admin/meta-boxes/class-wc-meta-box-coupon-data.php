@@ -390,7 +390,9 @@ class WC_Meta_Box_Coupon_Data {
 		);
 
 		if ( is_wp_error( $errors ) ) {
-			WC_Admin_Meta_Boxes::add_error( $errors->get_error_message() );
+			foreach ( $errors->get_error_messages() as $error_message ) {
+				WC_Admin_Meta_Boxes::add_error( $error_message );
+			}
 		}
 
 		$coupon->save();
