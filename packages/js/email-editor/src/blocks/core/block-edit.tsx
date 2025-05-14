@@ -16,7 +16,7 @@ const setUrlAttribute =
 		const { setAttributes } = props;
 		const wrappedSetAttributes = useCallback(
 			( attributes: UrlAttributes ) => {
-				// Remove the `http://` prefix that is being set automaticlaly by the link control.
+				// Remove the `http://` prefix that is being set automatically by the link control.
 				if (
 					attributes?.url &&
 					attributes.url?.startsWith( 'http://[' )
