@@ -211,7 +211,7 @@ class Checkout extends \WP_UnitTestCase {
 		$this->mock_logger->expects( $this->once() )
 							->method( 'warning' )
 							->with(
-								$this->stringContains( 'Address fields for shipping rates values must be strings. Non-string value removed: Array' )
+								$this->stringContains( 'Address fields for shipping rates values must be strings. Non-string value removed: Array at index 2' )
 							);
 
 		$checkout->mock_enqueue_data();
