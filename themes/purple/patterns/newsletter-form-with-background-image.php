@@ -18,7 +18,7 @@
 <div class="wp-block-group"><!-- wp:jetpack/contact-form {"className":"is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"0","bottom":"0"}}}} -->
 <div class="wp-block-jetpack-contact-form is-style-default" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0">
 <!-- wp:jetpack/field-email {"label":"","required":true,"requiredText":"","placeholder":"Your email","borderRadius":100,"borderWidth":1,"labelFontSize":"14px"} /-->
-<!-- wp:jetpack/button {"element":"button","text":"Subscribe","textColor":"theme-5","backgroundColor":"theme-1","width":"100%","lock":{"move":true,"remove":true},"className":"is-style-fill","fontFamily":"manrope"} /-->
+<!-- wp:jetpack/button {"element":"button","text":"Subscribe","textColor":"theme-5","backgroundColor":"theme-1","width":"100%","lock":{"move":true,"remove":true},"className":"is-style-fill"} /-->
 </div>
 <!-- /wp:jetpack/contact-form --></div>
 <!-- /wp:group --></div></div>
