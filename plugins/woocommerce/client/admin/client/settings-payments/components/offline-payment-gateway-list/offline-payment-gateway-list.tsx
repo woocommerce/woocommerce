@@ -17,6 +17,7 @@ import {
 	EnableGatewayButton,
 	SettingsButton,
 } from '~/settings-payments/components/buttons';
+import './offline-payment-gateway-list.scss';
 
 type OfflinePaymentGatewayListItemProps = {
 	/**
