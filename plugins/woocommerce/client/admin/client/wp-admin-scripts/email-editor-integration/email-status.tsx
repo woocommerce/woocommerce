@@ -38,11 +38,11 @@ export function EmailStatus( { className }: EmailStatusProps ): JSX.Element {
 	);
 
 	const isManual = woocommerce_email_data?.is_manual;
-	let statusValue = 'disabled';
+	let statusValue = 'enabled';
 	if ( isManual ) {
 		statusValue = 'manual';
-	} else if ( woocommerce_email_data?.enabled ) {
-		statusValue = 'enabled';
+	} else if ( ! woocommerce_email_data?.enabled ) {
+		statusValue = 'disabled';
 	}
 
 	const status =
