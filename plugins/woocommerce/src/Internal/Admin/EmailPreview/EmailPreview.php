@@ -30,6 +30,8 @@ class EmailPreview {
 		'WC_Email_Customer_Reset_Password',
 	);
 
+	const TRANSIENT_PREVIEW_EMAIL_IMPROVEMENTS = 'woocommerce_preview_email_improvements';
+
 	/**
 	 * All fields IDs that can customize email styles in Settings.
 	 *

@@ -84,3 +84,33 @@ export const removeNoticesWithContext = ( context: string ) => {
 		removeNotice( notice.id, context );
 	} );
 };
+
+/**
+ * Remove notices that have an ID starting with the provided string
+ *
+ * @param {string} id        - The string to match notice IDs against.
+ * @param {string} [context] - The context of the notice to remove. If not provided, will check all contexts.
+ */
+export const removeNoticesForField = ( id: string, context?: string ) => {
+	const { removeNotice } = dispatch( noticesStore );
+
+	if ( context ) {
+		removeNotice( id, context );
+		return;
+	}
+
+	const selectors = select(
+		'wc/store/store-notices'
+	) as CurriedSelectorsOf< StoreNoticesStoreDescriptor >;
+	const containers = selectors.getRegisteredContainers();
+	const { getNotices } = select( noticesStore );
+
+	// At this point we are removing the notice from all WC contexts since we don't know which one it is.
+	containers.forEach( ( container ) => {
+		getNotices( container ).forEach( ( notice ) => {
+			if ( notice.id.startsWith( id ) ) {
+				removeNotice( notice.id, container );
+			}
+		} );
+	} );
+};

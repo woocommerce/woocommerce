@@ -9,7 +9,9 @@
 
 	textarea,
 	input:where(:not([type="submit"]):not([type="checkbox"])) {
-		padding: calc(0.667em + 2px); // The extra 2px is added to match outline buttons.
+		padding: calc(
+			0.667em + 2px
+		); // The extra 2px is added to match outline buttons.
 	}
 }
 

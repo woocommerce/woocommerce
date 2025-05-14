@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix get_last_modified method in ProductQuery to return 0 when query returns null.

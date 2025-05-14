@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Replaced incorrect ".zip" reference with ".json".

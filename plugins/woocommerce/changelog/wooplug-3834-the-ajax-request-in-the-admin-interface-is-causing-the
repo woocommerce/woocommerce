@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Split low stock count query for custom stock into two queries to improve performance.

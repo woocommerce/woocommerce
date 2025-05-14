@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Remove deprecated Note type 'email' and merchant note email mechanism.
