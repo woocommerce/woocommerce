@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\CheckoutMock;
@@ -31,12 +30,6 @@ class Checkout extends \WP_UnitTestCase {
 	 */
 	private $asset_api;
 
-
-	/**
-	 * @var BlocksSharedState
-	 */
-	private $shared_blocks_state;
-
 	/**
 	 * Set up the test. Creates a AssetDataRegistryMock.
 	 *
@@ -47,7 +40,6 @@ class Checkout extends \WP_UnitTestCase {
 		$this->asset_api            = Package::container()->get( API::class );
 		$this->registry             = new AssetDataRegistryMock( $this->asset_api );
 		$this->integration_registry = new IntegrationRegistry();
-		$this->shared_blocks_state  = new BlocksSharedState();
 	}
 
 	/**
@@ -111,7 +103,7 @@ class Checkout extends \WP_UnitTestCase {
 		);
 
 		// Create a new Checkout block class with the mocked AssetDataRegistry. This is so we can inspect it after the change.
-		$checkout = new CheckoutMock( $this->asset_api, $this->registry, $this->integration_registry, $this->shared_blocks_state, 'checkout-mock' );
+		$checkout = new CheckoutMock( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-mock' );
 		$checkout->mock_enqueue_data();
 
 		$data_from_registry = $this->registry->get();

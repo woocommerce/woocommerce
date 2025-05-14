@@ -37,7 +37,7 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 use Automattic\WooCommerce\Blocks\TemplateOptions;
-use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
+
 
 /**
  * Takes care of bootstrapping the plugin.
@@ -237,10 +237,9 @@ class Bootstrap {
 		$this->container->register(
 			BlockTypesController::class,
 			function ( Container $container ) {
-				$asset_api                = $container->get( AssetApi::class );
-				$asset_data_registry      = $container->get( AssetDataRegistry::class );
-				$interactivity_api_config = $container->get( BlocksSharedState::class );
-				return new BlockTypesController( $asset_api, $asset_data_registry, $interactivity_api_config );
+				$asset_api           = $container->get( AssetApi::class );
+				$asset_data_registry = $container->get( AssetDataRegistry::class );
+				return new BlockTypesController( $asset_api, $asset_data_registry );
 			}
 		);
 		$this->container->register(
@@ -402,12 +401,6 @@ class Bootstrap {
 			BlockTemplatesController::class,
 			function () {
 				return new BlockTemplatesController();
-			}
-		);
-		$this->container->register(
-			BlocksSharedState::class,
-			function () {
-				return new BlocksSharedState();
 			}
 		);
 	}

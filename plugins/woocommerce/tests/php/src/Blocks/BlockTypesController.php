@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\BlockTypesController as TestedBlockTypesController;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 
 /**
  * Unit tests for the PatternRegistry class.
@@ -31,8 +30,7 @@ class BlockTypesController extends \WP_UnitTestCase {
 		parent::setUp();
 		$this->block_types_controller = new TestedBlockTypesController(
 			Package::container()->get( Api::class ),
-			new AssetDataRegistryMock( Package::container()->get( API::class ) ),
-			new BlocksSharedState()
+			new AssetDataRegistryMock( Package::container()->get( API::class ) )
 		);
 	}
 

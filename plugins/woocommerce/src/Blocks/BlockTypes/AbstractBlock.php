@@ -1,13 +1,12 @@
 <?php
-
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use WP_Block;
+use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 
 /**
  * AbstractBlock class.
@@ -57,26 +56,17 @@ abstract class AbstractBlock {
 	protected $integration_registry;
 
 	/**
-	 * Instance of the shared state class.
-	 *
-	 * @var BlocksSharedState
-	 */
-	protected $blocks_shared_state;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi            $asset_api Instance of the asset API.
 	 * @param AssetDataRegistry   $asset_data_registry Instance of the asset data registry.
 	 * @param IntegrationRegistry $integration_registry Instance of the integration registry.
-	 * @param BlocksSharedState   $blocks_shared_state Instance of the shared state class.
 	 * @param string              $block_name Optionally set block name during construct.
 	 */
-	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry, IntegrationRegistry $integration_registry, BlocksSharedState $blocks_shared_state, $block_name = '' ) {
+	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry, IntegrationRegistry $integration_registry, $block_name = '' ) {
 		$this->asset_api            = $asset_api;
 		$this->asset_data_registry  = $asset_data_registry;
 		$this->integration_registry = $integration_registry;
-		$this->blocks_shared_state  = $blocks_shared_state;
 		$this->block_name           = $block_name ? $block_name : $this->block_name;
 		$this->initialize();
 	}

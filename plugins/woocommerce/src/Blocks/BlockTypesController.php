@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
-use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Blocks\BlockTypes\Cart;
 use Automattic\WooCommerce\Blocks\BlockTypes\Checkout;
 use Automattic\WooCommerce\Blocks\BlockTypes\MiniCartContents;
@@ -42,23 +41,14 @@ final class BlockTypesController {
 	private $registered_blocks_with_woocommerce_parents;
 
 	/**
-	 * Instance of the shared state class.
-	 *
-	 * @var BlocksSharedState
-	 */
-	protected $blocks_shared_state;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi          $asset_api Instance of the asset API.
 	 * @param AssetDataRegistry $asset_data_registry Instance of the asset data registry.
-	 * @param BlocksSharedState $blocks_shared_state Instance of shared state class.
 	 */
-	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry, BlocksSharedState $blocks_shared_state ) {
+	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry ) {
 		$this->asset_api           = $asset_api;
 		$this->asset_data_registry = $asset_data_registry;
-		$this->blocks_shared_state = $blocks_shared_state;
 		$this->init();
 	}
 
@@ -124,7 +114,7 @@ final class BlockTypesController {
 		foreach ( $block_types as $block_type ) {
 			$block_type_class = __NAMESPACE__ . '\\BlockTypes\\' . $block_type;
 
-			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry(), $this->blocks_shared_state );
+			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
 		}
 	}
 

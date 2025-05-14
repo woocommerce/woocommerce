@@ -8,7 +8,6 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
-use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 
 /**
  * AddToCartWithOptionsGroupedProductSelectorMock used to test GroupedProductSelector block functions.
@@ -22,7 +21,6 @@ class AddToCartWithOptionsGroupedProductSelectorMock extends GroupedProductSelec
 			Package::container()->get( API::class ),
 			Package::container()->get( AssetDataRegistry::class ),
 			new IntegrationRegistry(),
-			new BlocksSharedState()
 		);
 	}
 }
