@@ -347,12 +347,13 @@ class PaymentProviders {
 					continue;
 				}
 
-				// If the suggestion is offline preferred, add it to the preferred list.
-				if ( empty( $preferred_offline_psp ) && ExtensionSuggestions::SQUARE === $extension['id'] ) {
-					$preferred_offline_psp = $extension;
+				// If we don't have a preferred PSP and the suggestion is a preferred PSP, add it to the preferred list.
+				if ( empty( $preferred_psp ) && ExtensionSuggestions::TYPE_PSP === $extension['_type'] ) {
+					$preferred_psp = $extension;
 					continue;
 				}
 
+				// If we don't have a preferred APM and the suggestion is a preferred APM, add it to the preferred list.
 				// In the preferred APM slot we might surface APMs but also Express Checkouts (PayPal Wallet).
 				if ( empty( $preferred_apm ) &&
 					in_array( $extension['_type'], array( ExtensionSuggestions::TYPE_APM, ExtensionSuggestions::TYPE_EXPRESS_CHECKOUT ), true ) ) {
@@ -426,7 +427,7 @@ class PaymentProviders {
 			'preferred' => array_values(
 				array_filter(
 					array(
-						// The PSP should naturally have a higher priority than the APM.
+						// The PSP should naturally have a higher priority than the APM, with the preferred offline PSP last.
 						// No need to impose a specific order here.
 						$preferred_psp,
 						$preferred_apm,
