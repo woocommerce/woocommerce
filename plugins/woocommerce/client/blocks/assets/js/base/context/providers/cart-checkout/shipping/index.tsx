@@ -44,7 +44,7 @@ export const useShippingDataContext = (): ShippingDataContextType => {
 export const ShippingDataProvider = ( {
 	children,
 }: ShippingDataProviderProps ) => {
-	const { __internalIncrementCalculating, __internalDecrementCalculating } =
+	const { __internalStartCalculation, __internalFinishCalculation } =
 		useDispatch( checkoutStore );
 	const { shippingRates, isLoadingRates, cartErrors } = useStoreCart();
 	const { selectedRates, isSelectingRate } = useShippingData();
@@ -75,26 +75,26 @@ export const ShippingDataProvider = ( {
 	// increment/decrement checkout calculating counts when shipping is loading.
 	useEffect( () => {
 		if ( isLoadingRates ) {
-			__internalIncrementCalculating();
+			__internalStartCalculation();
 		} else {
-			__internalDecrementCalculating();
+			__internalFinishCalculation();
 		}
 	}, [
 		isLoadingRates,
-		__internalIncrementCalculating,
-		__internalDecrementCalculating,
+		__internalStartCalculation,
+		__internalFinishCalculation,
 	] );
 
 	// increment/decrement checkout calculating counts when shipping rates are being selected.
 	useEffect( () => {
 		if ( isSelectingRate ) {
-			__internalIncrementCalculating();
+			__internalStartCalculation();
 		} else {
-			__internalDecrementCalculating();
+			__internalFinishCalculation();
 		}
 	}, [
-		__internalIncrementCalculating,
-		__internalDecrementCalculating,
+		__internalStartCalculation,
+		__internalFinishCalculation,
 		isSelectingRate,
 	] );
 

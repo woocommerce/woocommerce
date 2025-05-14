@@ -2570,9 +2570,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float The calculated value.
 	 */
 	protected function calculate_cogs_total_value_core(): float {
-		if ( ! $this->has_cogs() || ! $this->cogs_is_enabled( __METHOD__ ) ) {
-			return 0;
-		}
 
 		$value = 0;
 		foreach ( array_keys( $this->item_types_to_group ) as $item_type ) {

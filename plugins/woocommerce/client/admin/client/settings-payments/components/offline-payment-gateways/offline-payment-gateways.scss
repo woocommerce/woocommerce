@@ -3,7 +3,10 @@
 
 	.woocommerce-list__item {
 		padding: 0 48px;
-		border-bottom: 1px solid $gray-200;
+
+		&.is-last {
+			border-bottom: 1px solid $gray-200;
+		}
 
 		&.clickable-list-item:hover {
 			background-color: rgba(0, 0, 0, 0.02); /* Light overlay effect */

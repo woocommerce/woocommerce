@@ -151,6 +151,14 @@
 				text-decoration: none;
 			}
 
+			&:focus {
+				box-shadow: none;
+			}
+
+			&:focus-visible {
+				box-shadow: 0 0 0 2px #2271b1;
+			}
+
 			/* Use the ::after trick to make the whole card clickable: */
 			&::after {
 				bottom: 0;

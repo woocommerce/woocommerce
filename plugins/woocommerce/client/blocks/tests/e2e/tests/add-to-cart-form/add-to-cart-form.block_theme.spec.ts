@@ -488,7 +488,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		} );
 	} );
 
-	test( 'can be migrated to the blockified Add to Cart with Options block', async ( {
+	test( 'can be migrated to the blockified Add to Cart + Options block', async ( {
 		page,
 		editor,
 		blockUtils,
@@ -510,13 +510,13 @@ test.describe( `${ blockData.name } Block`, () => {
 		await editor.selectBlocks( addToCartFormBlock );
 
 		await page
-			.getByRole( 'button', { name: 'Upgrade to the blockified' } )
+			.getByRole( 'button', {
+				name: 'Upgrade to the Add to Cart + Options block',
+			} )
 			.click();
 
 		await expect(
-			editor.canvas.getByLabel(
-				'Block: Quantity Selector (Experimental)'
-			)
+			editor.canvas.getByLabel( 'Block: Product Quantity (Beta)' )
 		).toBeVisible();
 
 		const addToCartWithOptionsBlock = await editor.getBlockByName(
@@ -527,9 +527,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await page.getByRole( 'button', { name: 'Switch back' } ).click();
 
 		await expect(
-			editor.canvas.getByLabel(
-				'Block: Quantity Selector (Experimental)'
-			)
+			editor.canvas.getByLabel( 'Block: Product Quantity (Beta)' )
 		).toBeHidden();
 	} );
 } );

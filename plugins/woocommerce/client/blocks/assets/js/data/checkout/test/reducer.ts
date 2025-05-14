@@ -141,7 +141,7 @@ describe.only( 'Checkout Store Reducer', () => {
 		};
 
 		expect(
-			reducer( defaultState, actions.__internalIncrementCalculating() )
+			reducer( defaultState, actions.__internalStartCalculation() )
 		).toEqual( expectedState );
 	} );
 
@@ -157,8 +157,41 @@ describe.only( 'Checkout Store Reducer', () => {
 		};
 
 		expect(
+			reducer( initialState, actions.__internalFinishCalculation() )
+		).toEqual( expectedState );
+	} );
+
+	it( 'should handle INCREMENT_CALCULATING using deprecated action', () => {
+		const expectedState = {
+			...defaultState,
+			calculatingCount: 1,
+		};
+
+		expect(
+			reducer( defaultState, actions.__internalIncrementCalculating() )
+		).toEqual( expectedState );
+		expect( console ).toHaveWarnedWith(
+			'__internalIncrementCalculating is deprecated and will be removed from WooCommerce in version 9.9.0. Please use disableCheckoutFor instead.'
+		);
+	} );
+
+	it( 'should handle DECREMENT_CALCULATING using deprecated action', () => {
+		const initialState = {
+			...defaultState,
+			calculatingCount: 1,
+		};
+
+		const expectedState = {
+			...defaultState,
+			calculatingCount: 0,
+		};
+
+		expect(
 			reducer( initialState, actions.__internalDecrementCalculating() )
 		).toEqual( expectedState );
+		expect( console ).toHaveWarnedWith(
+			'__internalDecrementCalculating is deprecated and will be removed from WooCommerce in version 9.9.0. Please use disableCheckoutFor instead.'
+		);
 	} );
 
 	it( 'should handle SET_CUSTOMER_ID', () => {
@@ -285,9 +318,6 @@ describe.only( 'Checkout Store Reducer', () => {
 			expect( secondState ).toEqual( expectedState );
 		} );
 		it( 'should work with deprecated __internalSetExtensionData and show deprecation warning', () => {
-			const consoleSpy = jest
-				.spyOn( console, 'warn' )
-				.mockImplementation();
 			const mockExtensionData = {
 				extensionNamespace: {
 					testKey: 'test-value',
@@ -307,11 +337,9 @@ describe.only( 'Checkout Store Reducer', () => {
 			);
 
 			expect( state ).toEqual( expectedState );
-			expect( consoleSpy ).toHaveBeenCalledWith(
-				'__internalSetExtensionData is deprecated. Please use setExtensionData instead.'
+			expect( console ).toHaveWarnedWith(
+				'__internalSetExtensionData is deprecated and will be removed from WooCommerce in version 9.9.0. Please use setExtensionData instead.'
 			);
-
-			consoleSpy.mockRestore();
 		} );
 	} );
 } );

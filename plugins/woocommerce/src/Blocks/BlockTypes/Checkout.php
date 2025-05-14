@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
@@ -165,12 +164,10 @@ class Checkout extends AbstractBlock {
 			$dependencies[] = 'zxcvbn-async';
 		}
 
-		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			$checkout_fields = Package::container()->get( CheckoutFields::class );
-			// Load schema parser asynchronously if we need it.
-			if ( Validation::has_field_schema( $checkout_fields->get_additional_fields() ) ) {
-				$dependencies[] = 'wc-schema-parser';
-			}
+		$checkout_fields = Package::container()->get( CheckoutFields::class );
+		// Load schema parser asynchronously if we need it.
+		if ( Validation::has_field_schema( $checkout_fields->get_additional_fields() ) ) {
+			$dependencies[] = 'wc-schema-parser';
 		}
 
 		$script = [
@@ -452,6 +449,48 @@ class Checkout extends AbstractBlock {
 		$this->asset_data_registry->add( 'localPickupCost', $pickup_location_settings['cost'] );
 		$this->asset_data_registry->add( 'collectableMethodIds', $local_pickup_method_ids );
 		$this->asset_data_registry->add( 'shippingMethodsExist', CartCheckoutUtils::shipping_methods_exist() > 0 );
+
+		/**
+		 * This section handles the shipping address fields that trigger shipping rate recalculation.
+		 * The address_fields_for_shipping_rates array contains the default fields that affect shipping rates.
+		 * Additional fields names can be added via the 'woocommerce_essential_shipping_data' filter.
+		 * The filtered array is validated to ensure all entries are strings before being registered.
+		 */
+
+		$address_fields_for_shipping_rates = [ 'state', 'country', 'postcode', 'city' ];
+		/**
+		 * Filter the address fields for shipping rates.
+		 *
+		 * @param array $address_fields The address fields for shipping rates.
+		 * @since 9.9.0
+		 * @return array
+		 */
+		$filtered_fields = apply_filters( 'woocommerce_address_fields_for_shipping_rates', [] );
+
+		if ( is_array( $filtered_fields ) ) {
+			foreach ( $filtered_fields as $key => $value ) {
+				if ( ! is_string( $value ) ) {
+					wc_get_logger()->warning(
+						sprintf(
+							/* translators: %1$s: address field for shipping rates, %2$s index of item in array (number) */
+							__( 'Address fields for shipping rates values must be strings. Non-string value removed: %1$s at index %2$s', 'woocommerce' ),
+							gettype( $value ),
+							$key
+						),
+						array( 'source' => 'woocommerce_address_fields_for_shipping_rates' )
+					);
+					unset( $filtered_fields[ $key ] );
+				}
+			}
+			$address_fields_for_shipping_rates = array_merge( $address_fields_for_shipping_rates, $filtered_fields );
+		} else {
+			wc_get_logger()->warning(
+				__( 'Address fields for shipping rates must be an array of strings.', 'woocommerce' ),
+				array( 'source' => 'woocommerce_address_fields_for_shipping_rates' )
+			);
+		}
+
+		$this->asset_data_registry->add( 'addressFieldsForShippingRates', $address_fields_for_shipping_rates );
 
 		$is_block_editor = $this->is_block_editor();
 

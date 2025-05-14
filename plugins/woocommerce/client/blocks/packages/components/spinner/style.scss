@@ -6,6 +6,8 @@
 	box-sizing: content-box;
 	text-align: center;
 	font-size: 1.25em;
+	left: 0;
+	top: 0;
 	&::after {
 		content: " ";
 		position: absolute;

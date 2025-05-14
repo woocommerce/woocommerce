@@ -52,9 +52,16 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Products belonging to what category should be exported.
 	 *
-	 * @var string
+	 * @var array
 	 */
 	protected $product_category_to_export = array();
+
+	/**
+	 * Specific product IDs to export, overriding other filters if hook is not used.
+	 *
+	 * @var array
+	 */
+	protected $product_ids_to_export = array();
 
 	/**
 	 * Constructor.
@@ -96,6 +103,16 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 */
 	public function set_product_category_to_export( $product_category_to_export ) {
 		$this->product_category_to_export = array_map( 'sanitize_title_with_dashes', $product_category_to_export );
+	}
+
+	/**
+	 * Specific product IDs to export.
+	 *
+	 * @param array $product_ids List of product IDs to export.
+	 * @since 9.9.0
+	 */
+	public function set_product_ids_to_export( $product_ids ) {
+		$this->product_ids_to_export = array_filter( array_map( 'absint', (array) $product_ids ) );
 	}
 
 	/**
@@ -173,7 +190,6 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	public function prepare_data_to_export() {
 		$args = array(
 			'status'   => array( ProductStatus::PRIVATE, ProductStatus::PUBLISH, ProductStatus::DRAFT, ProductStatus::FUTURE, ProductStatus::PENDING ),
-			'type'     => $this->product_types_to_export,
 			'limit'    => $this->get_limit(),
 			'page'     => $this->get_page(),
 			'orderby'  => array(
@@ -183,25 +199,49 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'paginate' => true,
 		);
 
-		if ( ! empty( $this->product_category_to_export ) ) {
-			$args['category'] = $this->product_category_to_export;
+		// Set up query args based on whether specific IDs are being exported.
+		// We ignore type/category initially when specific IDs are provided.
+		if ( ! empty( $this->product_ids_to_export ) ) {
+			$args['include'] = $this->product_ids_to_export;
+		} else {
+			// Use the type and category filters set on the instance.
+			$args['type'] = $this->product_types_to_export;
+			if ( ! empty( $this->product_category_to_export ) ) {
+				$args['category'] = $this->product_category_to_export;
+			}
 		}
-		$products = wc_get_products( apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", $args ) );
+
+		/**
+		 * Filter the query args for the product export.
+		 *
+		 * @since 3.5.0
+		 * @param array $args Arguments to pass to wc_get_products().
+		 */
+		$args = apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", $args );
+
+		if ( ! empty( $args['include'] ) ) {
+			$args['include'] = array_map( 'absint', (array) $args['include'] );
+		}
+
+		$products = wc_get_products( $args );
 
 		$this->total_rows  = $products->total;
 		$this->row_data    = array();
 		$variable_products = array();
 
 		foreach ( $products->products as $product ) {
-			// Check if the category is set, this means we need to fetch variations separately as they are not tied to a category.
-			if ( ! empty( $args['category'] ) && $product->is_type( ProductType::VARIABLE ) ) {
+			// Check if the product is variable and if either the include or category filter is active.
+			// This is to ensure that product variations are only included if they are being selectively exported or if they are part of a category.
+			if ( ( ! empty( $args['include'] ) || ! empty( $args['category'] ) ) &&
+				$product->is_type( ProductType::VARIABLE ) &&
+				! in_array( $product->get_id(), $variable_products, true ) ) {
 				$variable_products[] = $product->get_id();
 			}
 
 			$this->row_data[] = $this->generate_row_data( $product );
 		}
 
-		// If a category was selected we loop through the variations as they are not tied to a category so will be excluded by default.
+		// If variable products were identified (either through include or category filters), fetch their variations.
 		if ( ! empty( $variable_products ) ) {
 			foreach ( $variable_products as $parent_id ) {
 				$products = wc_get_products(

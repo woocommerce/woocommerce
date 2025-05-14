@@ -8,7 +8,7 @@ import { apiFetch } from '@wordpress/data-controls';
  */
 import { ACTION_TYPES } from './action-types';
 import { API_NAMESPACE } from './constants';
-import { PaymentGateway } from './types';
+import { PaymentGateway, PaymentGatewayUpdatePayload } from './types';
 
 export function getPaymentGatewaysRequest(): {
 	type: ACTION_TYPES.GET_PAYMENT_GATEWAYS_REQUEST;
@@ -100,7 +100,7 @@ type DeepPartial< T > = {
 };
 export function* updatePaymentGateway(
 	id: string,
-	data: DeepPartial< PaymentGateway >
+	data: DeepPartial< PaymentGatewayUpdatePayload >
 ) {
 	try {
 		yield updatePaymentGatewayRequest();

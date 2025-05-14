@@ -251,6 +251,21 @@ class Utils {
 	}
 
 	/**
+	 * Trim the .php file extension from a path.
+	 *
+	 * @param string $path The path to trim.
+	 *
+	 * @return string The trimmed path. If the path does not end with .php, it will be returned as is.
+	 */
+	public static function trim_php_file_extension( string $path ): string {
+		if ( ! empty( $path ) && str_ends_with( $path, '.php' ) ) {
+			$path = substr( $path, 0, - 4 );
+		}
+
+		return $path;
+	}
+
+	/**
 	 * Truncate a text to a target character length while preserving whole words.
 	 *
 	 * We take a greedy approach: if some characters of a word fit in the target length, the whole word is included.

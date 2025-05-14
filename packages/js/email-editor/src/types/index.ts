@@ -4,7 +4,6 @@
 import { FontSize } from '@wordpress/components/build-types/font-size-picker/types';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as keyboardShortutsStore } from '@wordpress/keyboard-shortcuts';
-import { store as interfaceStore } from '@wordpress/interface';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { store as noticesStore } from '@wordpress/notices';
 import {
@@ -107,7 +106,6 @@ declare module '@wordpress/data' {
 	interface StoreMap {
 		[ blockEditorStore.name ]: typeof blockEditorStore;
 		[ keyboardShortutsStore.name ]: typeof keyboardShortutsStore;
-		[ interfaceStore.name ]: typeof interfaceStore;
 		[ preferencesStore.name ]: typeof preferencesStore;
 		[ noticesStore.name ]: typeof noticesStore;
 	}
