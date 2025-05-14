@@ -11,7 +11,7 @@ use InvalidArgumentException;
  * Initialization only happens on the first call to initialize_shared_config.
  * Intended to be used as a singleton.
  */
-class BlocksSharedState {
+trait BlocksSharedState {
 
 	/**
 	 * The consent statement for using private APIs of this class.
@@ -32,14 +32,14 @@ class BlocksSharedState {
 	 *
 	 * @var boolean
 	 */
-	private $core_config_registered = false;
+	private static $core_config_registered = false;
 
 	/**
 	 * Cart state.
 	 *
 	 * @var mixed
 	 */
-	private $cart;
+	private static $cart;
 
 	/**
 	 * Check that the consent statement was passed.
@@ -64,11 +64,11 @@ class BlocksSharedState {
 	public function initialize_shared_config( $consent_statement ) {
 		$this->check_consent( $consent_statement );
 
-		if ( $this->core_config_registered ) {
+		if ( self::$core_config_registered ) {
 			return;
 		}
 
-		$this->core_config_registered = true;
+		self::$core_config_registered = true;
 
 		wp_interactivity_config( $this->settings_namespace, $this->get_currency_data() );
 		wp_interactivity_config( $this->settings_namespace, $this->get_locale_data() );
@@ -84,15 +84,15 @@ class BlocksSharedState {
 	public function initialize_shared_state( $consent_statement ) {
 		$this->check_consent( $consent_statement );
 
-		if ( null === $this->cart ) {
-			$cart = isset( WC()->cart )
+		if ( null === self::$cart ) {
+			self::$cart = isset( WC()->cart )
 				? rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) )->data
 				: array();
 
 			wp_interactivity_state(
 				'woocommerce',
 				array(
-					'cart'     => $cart,
+					'cart'     => self::$cart,
 					'nonce'    => wp_create_nonce( 'wc_store_api' ),
 					'noticeId' => '',
 					'restUrl'  => get_rest_url(),

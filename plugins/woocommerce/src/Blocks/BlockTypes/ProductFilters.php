@@ -4,10 +4,14 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
+
 /**
  * ProductFilters class.
  */
 class ProductFilters extends AbstractBlock {
+	use BlocksSharedState;
+
 	/**
 	 * Block name.
 	 *
@@ -40,7 +44,7 @@ class ProductFilters extends AbstractBlock {
 			$canonical_url_no_pagination = get_permalink();
 		}
 
-		$this->blocks_shared_state->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+		$this->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
 		wp_interactivity_config(
 			$this->get_full_block_name(),

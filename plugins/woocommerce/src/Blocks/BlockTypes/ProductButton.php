@@ -6,12 +6,14 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
+use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 
 /**
  * ProductButton class.
  */
 class ProductButton extends AbstractBlock {
 	use EnableBlockJsonAssetsTrait;
+	use BlocksSharedState;
 
 	/**
 	 * Block name.
@@ -94,7 +96,7 @@ class ProductButton extends AbstractBlock {
 			return '';
 		}
 
-		$this->blocks_shared_state->initialize_shared_state( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+		$this->initialize_shared_state( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
 		wp_interactivity_state(
 			'woocommerce/product-button',
