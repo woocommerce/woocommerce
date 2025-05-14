@@ -93,9 +93,10 @@ class PaymentExtensionSuggestions {
 	 * These are used to categorize the extensions and provide additional information to the system.
 	 * Some tags may carry special meaning and will be used to influence the suggestions' behavior.
 	 */
-	const TAG_PREFERRED   = 'preferred';
-	const TAG_MADE_IN_WOO = 'made_in_woo'; // For extensions developed by Woo.
-	const TAG_RECOMMENDED = 'recommended'; // For extensions that should be further emphasized.
+	const TAG_PREFERRED         = 'preferred';
+	const TAG_PREFERRED_OFFLINE = 'preferred_offline'; // For extensions that are preferred for offline payments.
+	const TAG_MADE_IN_WOO       = 'made_in_woo'; // For extensions developed by Woo.
+	const TAG_RECOMMENDED       = 'recommended'; // For extensions that should be further emphasized.
 
 	/**
 	 * The memoized extensions base details to avoid computing them multiple times during a request.
