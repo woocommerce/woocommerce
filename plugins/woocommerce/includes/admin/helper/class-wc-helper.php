@@ -1732,11 +1732,14 @@ class WC_Helper {
 			}
 
 			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+			self::remove_api_error_notice();
 			return $data;
 		} catch ( Exception $e ) {
 			self::log( 'Error getting product usage notice rules: ' . $e->getMessage(), 'error' );
-			throw $e;
+			self::add_api_error_notice();
 		}
+
+		return array();
 	}
 
 	/**
