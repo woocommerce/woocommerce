@@ -54,9 +54,10 @@ jQuery( function ( $ ) {
 			// Inputs/selects which update totals
 			this.$checkout_form.on(
 				'change',
+				// eslint-disable-next-line max-len
 				'select.shipping_method, input[name^="shipping_method"], #ship-to-different-address input, .update_totals_on_change select, .update_totals_on_change input[type="radio"], .update_totals_on_change input[type="checkbox"]',
 				this.trigger_update_checkout
-			); // eslint-disable-line max-len
+			);
 			this.$checkout_form.on(
 				'change',
 				'.address-field select',
@@ -66,12 +67,12 @@ jQuery( function ( $ ) {
 				'change',
 				'.address-field input.input-text, .update_totals_on_change input.input-text',
 				this.maybe_input_changed
-			); // eslint-disable-line max-len
+			);
 			this.$checkout_form.on(
 				'keydown',
 				'.address-field input.input-text, .update_totals_on_change input.input-text',
 				this.queue_update_checkout
-			); // eslint-disable-line max-len
+			);
 
 			// Address fields
 			this.$checkout_form.on(
@@ -278,8 +279,9 @@ jQuery( function ( $ ) {
 					.removeAttr( 'aria-describedby' );
 				$parent.find( '.checkout-inline-error-message' ).remove();
 				$parent.removeClass(
+					// eslint-disable-next-line max-len
 					'woocommerce-invalid woocommerce-invalid-required-field woocommerce-invalid-email woocommerce-invalid-phone woocommerce-validated'
-				); // eslint-disable-line max-len
+				);
 			}
 
 			if (
@@ -307,6 +309,7 @@ jQuery( function ( $ ) {
 					if ( $this.val() ) {
 						/* https://stackoverflow.com/questions/2855865/jquery-validate-e-mail-address-regex */
 						pattern = new RegExp(
+							// eslint-disable-next-line max-len
 							/^([a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+(\.[a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)*|"((([ \t]*\r\n)?[ \t]+)?([\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*(([ \t]*\r\n)?[ \t]+)?")@(([a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.)+([a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[0-9a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.?$/i
 						); // eslint-disable-line max-len
 
@@ -434,8 +437,8 @@ jQuery( function ( $ ) {
 			if ( false !== args.update_shipping_method ) {
 				var shipping_methods = {};
 
-				// eslint-disable-next-line max-len
 				$(
+					// eslint-disable-next-line max-len
 					'select.shipping_method, input[name^="shipping_method"][type="radio"]:checked, input[name^="shipping_method"][type="hidden"]'
 				).each( function () {
 					shipping_methods[ $( this ).data( 'index' ) ] =
@@ -644,7 +647,6 @@ jQuery( function ( $ ) {
 			}
 
 			// Trigger a handler to let gateways manipulate the checkout if needed
-			// eslint-disable-next-line max-len
 			if (
 				$form.triggerHandler( 'checkout_place_order', [
 					wc_checkout_form,
