@@ -434,7 +434,7 @@ class PaymentGateway {
 
 		// Extract the relative path of the class file to the plugins directory.
 		$gateway_class_plugins_path = trim( plugin_basename( $gateway_class_filename ), DIRECTORY_SEPARATOR );
-		if ( $gateway_class_plugins_path === trim( $gateway_class_filename, DIRECTORY_SEPARATOR ) ) {
+		if ( trim( $gateway_class_filename, DIRECTORY_SEPARATOR ) === $gateway_class_plugins_path ) {
 			// The class file is not in a plugin directory. Bail.
 			return '';
 		}
