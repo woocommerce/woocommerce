@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 class ProductSaleBadge extends \WP_UnitTestCase {
 
 	/**
-	 * Tests that the product sale badge block is rendered correctly on the Single Product Block
+	 * Tests that the Product Sale Badge block is rendered correctly on the Single Product Block
 	 */
 	public function test_product_sale_badge_render_single_product_block() {
 		global $product;
@@ -20,7 +20,6 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 		$product_id = $product->save();
 		$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/product-sale-badge /--><!-- /wp:woocommerce/single-product -->' );
 
-		// Single Products contain the Add to Cart button and the quantity selector blocks.
 		$this->assertStringContainsString( 'wp-block-woocommerce-product-sale-badge', $markup, 'The Single Product Block contains the Product Sale Badge block.' );
 		$this->assertStringContainsString( 'Sale', $markup, 'The Product Sale Badge block contains the sale text.' );
 	}
