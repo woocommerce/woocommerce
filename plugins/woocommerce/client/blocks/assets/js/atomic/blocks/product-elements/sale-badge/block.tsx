@@ -11,6 +11,8 @@ import {
 import { useStyleProps } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import type { HTMLAttributes } from 'react';
+import { store as coreStore } from '@wordpress/editor';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -27,7 +29,19 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 
-	if ( ! product.id || ! product.on_sale ) {
+	const isTemplate = useSelect( ( select ) => {
+		const { getCurrentPostType } = select( coreStore );
+
+		const template = getCurrentPostType() === 'wp_template';
+
+		return template;
+	}, [] );
+
+	/**
+	 * Only show sale badge for products that are on sale.
+	 * Always show in templates for preview purposes.
+	 */
+	if ( ( ! product.id || ! product.on_sale ) && ! isTemplate ) {
 		return null;
 	}
 
