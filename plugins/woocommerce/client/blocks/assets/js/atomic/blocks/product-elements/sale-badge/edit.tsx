@@ -4,7 +4,6 @@
 import { useBlockProps } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
-import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
