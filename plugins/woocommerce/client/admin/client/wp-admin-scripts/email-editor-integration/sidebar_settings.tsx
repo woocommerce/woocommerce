@@ -11,7 +11,7 @@ import clsx from 'clsx';
  * Internal dependencies
  */
 import { NAME_SPACE } from './constants';
-import { EmailStatus } from './email_status';
+import { EmailStatus } from './email-status';
 
 const previewTextMaxLength = 150;
 const previewTextRecommendedLength = 80;
