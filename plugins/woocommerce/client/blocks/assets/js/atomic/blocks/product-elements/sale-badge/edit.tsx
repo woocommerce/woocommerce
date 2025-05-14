@@ -4,14 +4,13 @@
 import { useBlockProps } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
-import { store as editorStore } from '@wordpress/editor';
-import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
 import type { BlockAttributes } from './types';
+import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
 
 const Edit = ( {
 	attributes,
@@ -19,13 +18,8 @@ const Edit = ( {
 }: BlockEditProps< BlockAttributes > & { context: Context } ): JSX.Element => {
 	const blockProps = useBlockProps();
 
-	const isTemplate = useSelect( ( select ) => {
-		const { getCurrentPostType } = select( editorStore );
-
-		const template = getCurrentPostType() === 'wp_template';
-
-		return template;
-	}, [] );
+	const { isDescendentOfSingleProductTemplate } =
+		useIsDescendentOfSingleProductTemplate();
 
 	const blockAttrs = {
 		...attributes,
@@ -34,7 +28,12 @@ const Edit = ( {
 
 	return (
 		<div { ...blockProps }>
-			<Block { ...blockAttrs } isTemplate={ isTemplate } />
+			<Block
+				{ ...blockAttrs }
+				isDescendentOfSingleProductTemplate={
+					isDescendentOfSingleProductTemplate
+				}
+			/>
 		</div>
 	);
 };

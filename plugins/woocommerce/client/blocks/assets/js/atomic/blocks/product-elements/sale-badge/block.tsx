@@ -19,10 +19,13 @@ import './style.scss';
 import type { BlockAttributes } from './types';
 
 type Props = BlockAttributes &
-	HTMLAttributes< HTMLDivElement > & { align: boolean; isTemplate: boolean };
+	HTMLAttributes< HTMLDivElement > & {
+		align: boolean;
+		isDescendentOfSingleProductTemplate: boolean;
+	};
 
 export const Block = ( props: Props ): JSX.Element | null => {
-	const { className, align, isTemplate } = props;
+	const { className, align, isDescendentOfSingleProductTemplate } = props;
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
@@ -31,7 +34,10 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	 * Only show sale badge for products that are on sale.
 	 * Always show in templates for preview purposes.
 	 */
-	if ( ( ! product.id || ! product.on_sale ) && ! isTemplate ) {
+	if (
+		( ! product.id || ! product.on_sale ) &&
+		! isDescendentOfSingleProductTemplate
+	) {
 		return null;
 	}
 
