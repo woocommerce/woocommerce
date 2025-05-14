@@ -494,11 +494,7 @@ class PaymentGateway {
 		}
 
 		// Remove the .php extension from the file path. The WP API expects it without it.
-		if ( str_ends_with( $plugin_file, '.php' ) ) {
-			$plugin_file = substr( $plugin_file, 0, - 4 );
-		}
-
-		return $plugin_file;
+		return Utils::trim_php_file_extension( $plugin_file );
 	}
 
 	/**
