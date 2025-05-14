@@ -5,7 +5,7 @@
  * Important: For internal use only by the Automattic\WooCommerce\Internal\Brands package.
  *
  * @package WooCommerce\Admin
- * @version 9.4.0
+ * @version x.x.x
  */
 
 declare( strict_types = 1);
@@ -143,6 +143,7 @@ class WC_Brands_Admin {
 		global $post;
 		// Brands.
 		?>
+		<div class="options_group"><div class="hr-section hr-section-coupon_restrictions"><?php echo esc_html__( 'And', 'woocommerce' ); ?></div>
 		<p class="form-field"><label for="product_brands"><?php esc_html_e( 'Product brands', 'woocommerce' ); ?></label>
 			<select id="product_brands" name="product_brands[]" style="width: 50%;"  class="wc-enhanced-select" multiple="multiple" data-placeholder="<?php esc_attr_e( 'Any brand', 'woocommerce' ); ?>">
 				<?php
@@ -187,6 +188,9 @@ class WC_Brands_Admin {
 			</select>
 			<?php
 				echo wc_help_tip( esc_html__( 'Product must not be associated with these brands for the coupon to remain valid or, for "Product Discounts", products associated with these brands will not be discounted.', 'woocommerce' ) );
+			?>
+		</div>
+		<?php
 	}
 
 	/**

@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add POS completed/refunded order email templates based on the non-POS versions, not yet included in core email settings.
