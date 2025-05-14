@@ -6,14 +6,14 @@ import { Panel } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { DetailsPanel } from './details-panel';
+import { SettingsPanel } from './settings-panel';
 import { EmailTypeInfo } from './email-type-info';
 
 export function EmailSettings() {
 	return (
 		<Panel>
 			<EmailTypeInfo />
-			<DetailsPanel />
+			<SettingsPanel />
 		</Panel>
 	);
 }

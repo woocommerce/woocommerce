@@ -118,6 +118,65 @@ export class ProductGalleryPage {
 		return this.editor.getBlockByName( blockName );
 	}
 
+	// Playwright doesn't have a locator for "carousel" images as all of them
+	// are visible from its POV. So we need to use a custom function to get the visible image id.
+	async getVisibleLargeImageId() {
+		const largeImageBlockLocator = await this.getMainImageBlock( {
+			page: 'frontend',
+		} );
+
+		// Find the scrollable container
+		const container = await largeImageBlockLocator
+			.locator( '.wc-block-product-gallery-large-image__container' )
+			.elementHandle();
+		if ( ! container ) {
+			return null;
+		}
+
+		// Get all images inside the container
+		const images = await largeImageBlockLocator
+			.locator( 'img' )
+			.elementHandles();
+
+		for ( const imgHandle of images ) {
+			const isInContainerViewport = await imgHandle.evaluate(
+				( img, containerEl ) => {
+					const imgRect = (
+						img as HTMLElement
+					 ).getBoundingClientRect();
+					const containerRect = (
+						containerEl as HTMLElement
+					 ).getBoundingClientRect();
+
+					// Check if the image is fully or mostly visible within the container
+					const visibleWidth =
+						Math.min( imgRect.right, containerRect.right ) -
+						Math.max( imgRect.left, containerRect.left );
+					const visibleHeight =
+						Math.min( imgRect.bottom, containerRect.bottom ) -
+						Math.max( imgRect.top, containerRect.top );
+
+					const isVisible =
+						visibleWidth > 0 &&
+						visibleHeight > 0 &&
+						visibleWidth >= imgRect.width * 0.8 && // at least 80% visible horizontally
+						visibleHeight >= imgRect.height * 0.8; // at least 80% visible vertically
+
+					return isVisible;
+				},
+				container
+			);
+
+			if ( isInContainerViewport ) {
+				const dataImageId = await imgHandle.getAttribute(
+					'data-image-id'
+				);
+				return dataImageId ?? null;
+			}
+		}
+		return null;
+	}
+
 	async getThumbnailsBlock( { page }: { page: 'frontend' | 'editor' } ) {
 		const blockName = 'woocommerce/product-gallery-thumbnails';
 		if ( page === 'frontend' ) {
@@ -145,6 +204,22 @@ export class ProductGalleryPage {
 			} );
 		}
 		return this.editor.getBlockByName( blockName );
+	}
+
+	async clickNextButton() {
+		await this.page.getByRole( 'button', { name: 'Next image' } ).click();
+		// Wait for the transition to change
+		// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
+		await this.page.waitForTimeout( 400 );
+	}
+
+	async clickPreviousButton() {
+		await this.page
+			.getByRole( 'button', { name: 'Previous image' } )
+			.click();
+		// Wait for the transition to change
+		// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
+		await this.page.waitForTimeout( 400 );
 	}
 
 	async getBlock( { page }: { page: 'frontend' | 'editor' } ) {

@@ -2,7 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "woocommerce/product-reviews-pagination",
-	"title": "Product Reviews Pagination",
+	"title": "Reviews Pagination",
 	"category": "woocommerce",
 	"ancestor": [ "woocommerce/blockified-product-reviews" ],
 	"allowedBlocks": [

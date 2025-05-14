@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2>
+<h2 class="wp-block-heading">
 <?php
 /* translators: %s: Site title*/
 printf( esc_html__( 'Welcome to %s', 'woocommerce' ), '<!--[woocommerce/site-title]-->' );
@@ -34,7 +34,7 @@ printf( esc_html__( 'Welcome to %s', 'woocommerce' ), '<!--[woocommerce/site-tit
 <p>
 <?php
 	/* translators: %s: Customer first name */
-	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/shopper-first-name]-->' );
+	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/customer-first-name]-->' );
 ?>
 </p>
 <!-- /wp:paragraph -->
@@ -52,7 +52,7 @@ printf( esc_html__( 'Welcome to %s', 'woocommerce' ), '<!--[woocommerce/site-tit
 <p>
 <?php
 /* translators: %s: Username */
-echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), '<!--[woocommerce/shopper-username]-->' ), array( 'b' => array() ) );
+echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), '<!--[woocommerce/customer-username]-->' ), array( 'b' => array() ) );
 ?>
 </p>
 <!-- /wp:paragraph -->

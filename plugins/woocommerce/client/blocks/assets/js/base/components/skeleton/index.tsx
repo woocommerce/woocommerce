@@ -15,6 +15,7 @@ export interface SkeletonProps {
 	borderRadius?: string;
 	className?: string;
 	maxWidth?: string;
+	isStatic?: boolean;
 }
 
 export const Skeleton = ( {
@@ -24,11 +25,15 @@ export const Skeleton = ( {
 	maxWidth = '',
 	className = '',
 	borderRadius = '',
+	isStatic = false,
 }: SkeletonProps ): JSX.Element => {
 	return (
 		<Tag
 			className={ clsx(
 				'wc-block-components-skeleton__element',
+				{
+					'wc-block-components-skeleton__element--static': isStatic,
+				},
 				className
 			) }
 			aria-hidden="true"

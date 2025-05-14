@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Consolidate the `isBlockTheme` setting to replace `isBlockThemeEnabled`.

@@ -3,64 +3,37 @@
  */
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 /**
  * Internal dependencies
  */
 import LocalPickupSelect from '..';
+import { generateShippingRate } from '../../../../../mocks/shipping-package';
 
 describe( 'LocalPickupSelect', () => {
 	const TestComponent = ( {
-		selectedOptionOverride = null,
-		onSelectRateOverride = null,
+		onChange,
 	}: {
-		selectedOptionOverride?: null | ( ( value: string ) => void );
-		onSelectRateOverride?: null | ( ( value: string ) => void );
+		onChange?: ( value: string ) => void;
 	} ) => (
 		<LocalPickupSelect
 			title="Package 1"
-			setSelectedOption={ selectedOptionOverride || jest.fn() }
+			onChange={ onChange ?? jest.fn() }
 			selectedOption=""
 			pickupLocations={ [
-				{
-					rate_id: '1',
-					currency_code: 'USD',
-					currency_decimal_separator: '.',
-					currency_minor_unit: 2,
-					currency_prefix: '$',
-					currency_suffix: '',
-					currency_thousand_separator: ',',
-					currency_symbol: '$',
+				generateShippingRate( {
+					rateId: '1',
 					name: 'Store 1',
-					description: 'Store 1 description',
-					delivery_time: '1 day',
+					instanceID: 1,
 					price: '0',
-					taxes: '0',
-					instance_id: 1,
-					method_id: 'test_shipping:0',
-					meta_data: [],
-					selected: false,
-				},
-				{
-					rate_id: '2',
-					currency_code: 'USD',
-					currency_decimal_separator: '.',
-					currency_minor_unit: 2,
-					currency_prefix: '$',
-					currency_suffix: '',
-					currency_thousand_separator: ',',
-					currency_symbol: '$',
+				} ),
+				generateShippingRate( {
+					rateId: '2',
 					name: 'Store 2',
-					description: 'Store 2 description',
-					delivery_time: '2 days',
+					instanceID: 1,
 					price: '0',
-					taxes: '0',
-					instance_id: 1,
-					method_id: 'test_shipping:1',
-					meta_data: [],
-					selected: false,
-				},
+				} ),
 			] }
-			onSelectRate={ onSelectRateOverride || jest.fn() }
 			packageCount={ 1 }
 			renderPickupLocation={ ( location ) => {
 				return {
@@ -103,19 +76,14 @@ describe( 'LocalPickupSelect', () => {
 		expect( screen.getByText( 'Package 1' ) ).toBeInTheDocument();
 	} );
 	it( 'Calls the correct functions when changing selected option', async () => {
-		const setSelectedOption = jest.fn();
-		const onSelectRate = jest.fn();
-		render(
-			<TestComponent
-				selectedOptionOverride={ setSelectedOption }
-				onSelectRateOverride={ onSelectRate }
-			/>
-		);
-		await userEvent.click( screen.getByText( 'Store 2' ) );
-		expect( setSelectedOption ).toHaveBeenLastCalledWith( '2' );
-		expect( onSelectRate ).toHaveBeenLastCalledWith( '2' );
-		await userEvent.click( screen.getByText( 'Store 1' ) );
-		expect( setSelectedOption ).toHaveBeenLastCalledWith( '1' );
-		expect( onSelectRate ).toHaveBeenLastCalledWith( '1' );
+		const user = userEvent.setup();
+		const onChange = jest.fn();
+		render( <TestComponent onChange={ onChange } /> );
+
+		await user.click( screen.getByText( 'Store 2' ) );
+		expect( onChange ).toHaveBeenLastCalledWith( '2' );
+
+		await user.click( screen.getByText( 'Store 1' ) );
+		expect( onChange ).toHaveBeenLastCalledWith( '1' );
 	} );
 } );

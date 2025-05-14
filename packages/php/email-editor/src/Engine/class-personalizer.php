@@ -70,6 +70,19 @@ class Personalizer {
 	}
 
 	/**
+	 * Get the current context.
+	 *
+	 * The `context` is an associative array containing recipient-specific or
+	 * campaign-specific data. This data is used to resolve personalization tags
+	 * and provide input for tag callbacks during email content processing.
+	 *
+	 * @return array<string, mixed> The current context.
+	 */
+	public function get_context(): array {
+		return $this->context;
+	}
+
+	/**
 	 * Personalize the content by replacing the personalization tags with their values.
 	 *
 	 * @param string $content The content to personalize.

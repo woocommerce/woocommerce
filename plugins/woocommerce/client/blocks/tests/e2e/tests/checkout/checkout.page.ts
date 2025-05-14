@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { expect } from '@woocommerce/e2e-utils';
+import { expect, RequestUtils } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -14,8 +14,8 @@ import {
 } from './constants';
 
 export class CheckoutPage {
-	private BLOCK_NAME = 'woocommerce/checkout';
 	public page: Page;
+	public requestUtils: RequestUtils;
 	private testData = {
 		...{
 			firstname: 'John',
@@ -32,8 +32,15 @@ export class CheckoutPage {
 		},
 	};
 
-	constructor( { page }: { page: Page } ) {
+	constructor( {
+		page,
+		requestUtils,
+	}: {
+		page: Page;
+		requestUtils: RequestUtils;
+	} ) {
 		this.page = page;
+		this.requestUtils = requestUtils;
 	}
 
 	async isShippingRateSelected(

@@ -8,7 +8,6 @@ use Exception;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
-use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init as WCPayPromotion;
 
 /**
  * Controller for the REST endpoints to service the Payments settings page.
@@ -42,7 +41,7 @@ class PaymentsRestController extends RestApiControllerBase {
 	 * @return string
 	 */
 	protected function get_rest_api_namespace(): string {
-		return 'wc-admin';
+		return 'wc-admin-settings-payments';
 	}
 
 	/**
@@ -51,18 +50,6 @@ class PaymentsRestController extends RestApiControllerBase {
 	 * @param bool $override Whether to override the existing routes. Useful for testing.
 	 */
 	public function register_routes( bool $override = false ) {
-		register_rest_route(
-			$this->route_namespace,
-			'/' . $this->rest_base . '/woopay-eligibility',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => fn( $request ) => $this->run( $request, 'get_woopay_eligibility' ),
-					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
-				),
-			),
-			$override
-		);
 		register_rest_route(
 			$this->route_namespace,
 			'/' . $this->rest_base . '/country',
@@ -808,30 +795,16 @@ class PaymentsRestController extends RestApiControllerBase {
 					'type'        => 'object',
 					'description' => esc_html__( 'Onboarding-related details for the provider.', 'woocommerce' ),
 					'properties'  => array(
+						'type'                        => array(
+							'type'        => 'string',
+							'description' => esc_html__( 'The type of onboarding process the provider supports.', 'woocommerce' ),
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
 						'state'                       => array(
 							'type'        => 'object',
 							'description' => esc_html__( 'The state of the onboarding process.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
-							'properties'  => array(
-								'started'   => array(
-									'type'        => 'boolean',
-									'description' => esc_html__( 'Whether the onboarding process has been started.', 'woocommerce' ),
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
-								),
-								'completed' => array(
-									'type'        => 'boolean',
-									'description' => esc_html__( 'Whether the onboarding process has been completed.', 'woocommerce' ),
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
-								),
-								'test_mode' => array(
-									'type'        => 'boolean',
-									'description' => esc_html__( 'Whether the onboarding process happens in test mode (aka sandbox or test-drive).', 'woocommerce' ),
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
-								),
-							),
 						),
 						'_links'                      => array(
 							'type'       => 'object',
@@ -1216,19 +1189,6 @@ class PaymentsRestController extends RestApiControllerBase {
 					),
 				),
 			),
-		);
-	}
-
-	/**
-	 * Get WooPay eligibility status.
-	 *
-	 * @return array The WooPay eligibility status.
-	 */
-	protected function get_woopay_eligibility() {
-		return rest_ensure_response(
-			array(
-				'is_eligible' => WCPayPromotion::is_woopay_eligible(),
-			)
 		);
 	}
 }

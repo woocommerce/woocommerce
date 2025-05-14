@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\PaymentGateway;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestions as ExtensionSuggestions;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
@@ -105,10 +106,11 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				'recommended_payment_methods' => array(
 					// Basic PM.
 					array(
-						'id'      => 'basic',
+						'id'       => 'basic',
 						// No order, should be last.
-						'enabled' => true,
-						'title'   => 'Title',
+						'enabled'  => true,
+						'title'    => 'Title',
+						'category' => PaymentGateway::PAYMENT_METHOD_CATEGORY_SECONDARY,
 					),
 					// Basic PM with priority instead of order.
 					array(
@@ -116,6 +118,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 						'priority' => 30,
 						'enabled'  => false,
 						'title'    => 'Title',
+						'category' => 'unknown', // This should be ignored and replaced with the default category (primary).
 					),
 					array(
 						'id'          => 'card',
@@ -126,6 +129,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 						// Paragraphs and line breaks should be stripped.
 						'description' => '<p><strong>Accepts</strong> <b>all major</b></br><em>credit</em> and <a href="#" target="_blank">debit cards</a>.</p>',
 						'icon'        => 'https://example.com/card-icon.png',
+						// No category means it should be primary (default category).
 					),
 					array(
 						'id'          => 'woopay',
@@ -135,6 +139,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 						'description' => 'WooPay express checkout',
 						// Not a good URL.
 						'icon'        => 'not_good_url/icon.svg',
+						'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
 					),
 					// Invalid PM, should be ignored. No data.
 					array(),
@@ -199,6 +204,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'title'       => 'WooPay',
 					'description' => 'WooPay express checkout',
 					'icon'        => '', // The icon with an invalid URL is ignored.
+					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
 				),
 				array(
 					'id'          => 'card',
@@ -208,6 +214,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'title'       => 'Credit/debit card (required)',
 					'description' => '<strong>Accepts</strong> <b>all major</b><em>credit</em> and <a href="#" target="_blank">debit cards</a>.',
 					'icon'        => 'https://example.com/card-icon.png',
+					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
 				),
 				array(
 					'id'          => 'basic2',
@@ -217,6 +224,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'title'       => 'Title',
 					'description' => '',
 					'icon'        => '',
+					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
 				),
 				array(
 					'id'          => 'basic',
@@ -226,6 +234,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'title'       => 'Title',
 					'description' => '',
 					'icon'        => '',
+					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_SECONDARY,
 				),
 			),
 			$gateway_details['onboarding']['recommended_payment_methods']

@@ -6,11 +6,13 @@ namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailPatterns\PatternsController;
+use Automattic\WooCommerce\Internal\EmailEditor\EmailApiController;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplateApiController;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplatesController;
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 use Automattic\WooCommerce\Internal\EmailEditor\PageRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\PersonalizationTagManager;
+use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
 use Automattic\WooCommerce\Internal\EmailEditor\WooContentProcessor;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 
@@ -34,6 +36,8 @@ class EmailEditorServiceProvider extends AbstractInterfaceServiceProvider {
 		BlockEmailRenderer::class,
 		TemplateApiController::class,
 		WCTransactionalEmails::class,
+		EmailApiController::class,
+		TransactionalEmailPersonalizer::class,
 	);
 
 	/**
@@ -49,5 +53,7 @@ class EmailEditorServiceProvider extends AbstractInterfaceServiceProvider {
 		$this->share( BlockEmailRenderer::class )->addArgument( WooContentProcessor::class );
 		$this->share( WCTransactionalEmails::class );
 		$this->share( TemplateApiController::class );
+		$this->share( EmailApiController::class );
+		$this->share( TransactionalEmailPersonalizer::class );
 	}
 }

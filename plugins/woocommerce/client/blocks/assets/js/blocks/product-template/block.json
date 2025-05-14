@@ -46,5 +46,7 @@
 				"fontSize": true
 			}
 		}
-	}
+	},
+	"editorStyle": "file:../woocommerce/product-template-editor.css",
+	"style": "file:../woocommerce/product-template-style.css"
 }

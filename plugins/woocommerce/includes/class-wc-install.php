@@ -7,13 +7,12 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Internal\DataStores\Orders\{ CustomOrdersTableController, DataSynchronizer, OrdersTableDataStore };
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
-use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
@@ -284,6 +283,9 @@ class WC_Install {
 		'9.8.0' => array(
 			'wc_update_980_remove_order_attribution_install_banner_dismissed_option',
 		),
+		'9.8.5' => array(
+			'wc_update_985_enable_new_payments_settings_page_feature',
+		),
 		'9.9.0' => array(
 			'wc_update_990_update_primary_key_to_composite_in_order_product_lookup_table',
 			'wc_update_990_add_old_refunded_order_items_to_product_lookup_table',
@@ -321,9 +323,8 @@ class WC_Install {
 		add_action( 'init', array( __CLASS__, 'manual_database_update' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'maybe_enable_hpos' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'add_coming_soon_option' ), 20 );
-		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_email_improvements' ), 20 );
-		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_new_payments_settings_page' ), 20 );
-		add_action( 'woocommerce_updated', array( __CLASS__, 'maybe_enable_new_payments_settings_page' ), 20 );
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_email_improvements_for_newly_installed' ), 20 );
+		add_action( 'woocommerce_updated', array( __CLASS__, 'enable_email_improvements_for_existing_merchants' ), 20 );
 		add_action( 'admin_init', array( __CLASS__, 'wc_admin_db_update_notice' ) );
 		add_action( 'admin_init', array( __CLASS__, 'add_admin_note_after_page_created' ) );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
@@ -1090,8 +1091,9 @@ class WC_Install {
 	 *
 	 * @since 9.8.0
 	 */
-	public static function enable_email_improvements() {
-		update_option( 'woocommerce_feature_email_improvements_enabled', 'yes' );
+	public static function enable_email_improvements_for_newly_installed() {
+		$feature_controller = wc_get_container()->get( FeaturesController::class );
+		$feature_controller->change_feature_enable( 'email_improvements', true );
 		update_option( 'woocommerce_email_improvements_default_enabled', 'yes' );
 		update_option( 'woocommerce_email_auto_sync_with_theme', 'yes' );
 		update_option( 'woocommerce_email_improvements_first_enabled_at', gmdate( 'Y-m-d H:i:s' ) );
@@ -1100,49 +1102,30 @@ class WC_Install {
 	}
 
 	/**
-	 * Enable the new Payments Settings page by default for new shops.
+	 * Enable email improvements by default for existing shops if conditions are met.
 	 *
-	 * @since 9.8.2
+	 * @since 9.9.0
 	 */
-	public static function enable_new_payments_settings_page() {
-		update_option( 'woocommerce_feature_reactify-classic-payments-settings_enabled', 'yes' );
-	}
-
-	/**
-	 * Enable the new Payments Settings page by default for existing shops, under certain circumstances.
-	 *
-	 * @since 9.8.2
-	 */
-	public static function maybe_enable_new_payments_settings_page() {
-		$option_name = 'woocommerce_feature_reactify-classic-payments-settings_enabled';
-
-		// First, migrate the WCAdmin feature flag to the new feature flag.
-		// If there is a value saved for the old feature flag, we will respect it.
-		$wc_admin_helper_features = get_option( 'wc_admin_helper_feature_values', array() );
-		foreach ( $wc_admin_helper_features as $feature => $value ) {
-			if ( 'reactify-classic-payments-settings' === $feature ) {
-				update_option( $option_name, filter_var( $value, FILTER_VALIDATE_BOOLEAN ) ? 'yes' : 'no' );
-
-				// Remove the old feature flag value to avoid further migrations.
-				unset( $wc_admin_helper_features[ $feature ] );
-				update_option( 'wc_admin_helper_feature_values', $wc_admin_helper_features );
-				return;
-			}
+	public static function enable_email_improvements_for_existing_merchants() {
+		if ( ! EmailImprovements::should_enable_email_improvements_for_existing_stores() ) {
+			return;
 		}
-
-		$wc_initial_installed_version = get_option( \WC_Install::INITIAL_INSTALLED_VERSION, '0.0.0' );
-		// If the WooCommerce installed version is 9.7+, we enable it.
-		if ( version_compare( $wc_initial_installed_version, '9.7.0', '>=' ) ) {
-			update_option( $option_name, 'yes' );
+		$feature_controller = wc_get_container()->get( FeaturesController::class );
+		$feature_controller->change_feature_enable( 'email_improvements', true );
+		update_option( 'woocommerce_email_improvements_existing_store_enabled', 'yes' );
+		$first_enabled_at = get_option( 'woocommerce_email_improvements_first_enabled_at' );
+		if ( ! $first_enabled_at ) {
+			update_option( 'woocommerce_email_improvements_first_enabled_at', gmdate( 'Y-m-d H:i:s' ) );
+		}
+		$last_enabled_at = get_option( 'woocommerce_email_improvements_last_enabled_at' );
+		if ( ! $last_enabled_at ) {
+			update_option( 'woocommerce_email_improvements_last_enabled_at', gmdate( 'Y-m-d H:i:s' ) );
+		}
+		$enabled_count = get_option( 'woocommerce_email_improvements_enabled_count' );
+		if ( ! $enabled_count ) {
+			update_option( 'woocommerce_email_improvements_enabled_count', 1 );
 		} else {
-			// For stores created pre-9.7, we check 9.7 experiment group first.
-			$experiment_transient = get_transient( 'abtest_variation_woocommerce_payment_settings_2025_v1' );
-			if ( 'treatment' === $experiment_transient ) {
-				// If the user is in the experiment treatment group and he didn't interact with the WCAdmin feature flag
-				// we will enable it by default.
-				update_option( $option_name, 'yes' );
-				delete_transient( 'abtest_variation_woocommerce_payment_settings_2025_v1' );
-			}
+			update_option( 'woocommerce_email_improvements_enabled_count', (int) $enabled_count + 1 );
 		}
 	}
 

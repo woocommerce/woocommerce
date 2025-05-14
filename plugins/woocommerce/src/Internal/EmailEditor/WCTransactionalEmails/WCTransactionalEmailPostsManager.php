@@ -155,4 +155,14 @@ class WCTransactionalEmailPostsManager {
 			$option_name
 		);
 	}
+
+	/**
+	 * Gets the email type class name from the template name.
+	 *
+	 * @param string $email_template_name The template name of the email type.
+	 * @return string The email type class name.
+	 */
+	public function get_email_type_class_name_from_template_name( $email_template_name ) {
+		return 'WC_Email_' . implode( '_', array_map( 'ucfirst', explode( '_', $email_template_name ) ) );
+	}
 }

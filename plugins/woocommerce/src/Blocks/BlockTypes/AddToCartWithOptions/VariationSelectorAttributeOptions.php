@@ -147,14 +147,15 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				'<div %s>%s</div>',
 				$this->get_normalized_attributes(
 					array(
-						'role'                       => 'radio',
-						'class'                      => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill',
-						'data-wp-bind--tabindex'     => 'state.pillTabIndex',
-						'data-wp-bind--aria-checked' => 'state.isPillSelected',
-						'data-wp-watch'              => 'callbacks.watchSelected',
-						'data-wp-on--click'          => 'actions.toggleSelected',
-						'data-wp-on--keydown'        => 'actions.handleKeyDown',
-						'data-wp-context'            => array(
+						'role'                        => 'radio',
+						'class'                       => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill',
+						'data-wp-bind--tabindex'      => 'state.pillTabIndex',
+						'data-wp-bind--aria-checked'  => 'state.isPillSelected',
+						'data-wp-bind--aria-disabled' => 'state.isPillDisabled',
+						'data-wp-watch'               => 'callbacks.watchSelected',
+						'data-wp-on--click'           => 'actions.toggleSelected',
+						'data-wp-on--keydown'         => 'actions.handleKeyDown',
+						'data-wp-context'             => array(
 							'option' => $attribute_term,
 						),
 					),
@@ -214,10 +215,12 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				'<option %s>%s</option>',
 				$this->get_normalized_attributes(
 					array(
-						'value'           => $attribute_term['value'],
-						'selected'        => $attribute_term['isSelected'] ? 'selected' : null,
-						'data-wp-context' => array(
-							'option' => $attribute_term,
+						'value'                  => $attribute_term['value'],
+						'data-wp-bind--disabled' => 'state.isOptionDisabled',
+						'data-wp-context'        => array(
+							'option'  => $attribute_term,
+							'name'    => $attribute_name,
+							'options' => $attribute_terms,
 						),
 					),
 				),

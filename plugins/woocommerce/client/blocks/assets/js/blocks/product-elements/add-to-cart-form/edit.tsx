@@ -14,7 +14,6 @@ import { isBoolean } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import './editor.scss';
 import { QuantitySelectorStyle, AddToCartFormSettings } from './settings';
 import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../../add-to-cart-with-options/utils';
 import { UpgradeNotice } from './components/upgrade-notice';
@@ -75,7 +74,7 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 					position="bottom right"
 				>
 					<div className="wc-block-editor-add-to-cart-form-container">
-						<ProductShortDescriptionSkeleton />
+						<ProductShortDescriptionSkeleton isStatic={ true } />
 						<Disabled>
 							{ ( props.attributes.quantitySelectorStyle ===
 								QuantitySelectorStyle.Input ||

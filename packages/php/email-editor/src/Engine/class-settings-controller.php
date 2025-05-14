@@ -16,14 +16,15 @@ class Settings_Controller {
 	const ALLOWED_BLOCK_TYPES = array(
 		'core/button',
 		'core/buttons',
-		'core/paragraph',
-		'core/heading',
 		'core/column',
 		'core/columns',
+		'core/group',
+		'core/heading',
 		'core/image',
 		'core/list',
 		'core/list-item',
-		'core/group',
+		'core/paragraph',
+		'core/quote',
 		'core/spacer',
 	);
 

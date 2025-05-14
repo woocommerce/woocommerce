@@ -112,7 +112,7 @@
 	margin-top: 9px;
 }
 
-.woocommerce-email-editor-settings-panel {
+.woocommerce-email-editor__settings-panel {
 	.woocommerce-settings-panel-richtext {
 		border: 1px solid var(--wp-components-color-gray-600, #949494);
 		border-radius: 2px;
@@ -125,6 +125,7 @@
 
 	.woocommerce-settings-panel-personalization-tags-button.components-button.has-icon {
 		display: inline-block;
+		float: right;
 		height: 14px;
 		line-height: 14px;
 		padding: 0 5px;

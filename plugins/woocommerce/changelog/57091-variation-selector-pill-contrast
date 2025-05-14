@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Comment: [Experimental] Fix visibility of selected pills in Variation Selector by dynamically detecting and applying theme colors for proper contrast.

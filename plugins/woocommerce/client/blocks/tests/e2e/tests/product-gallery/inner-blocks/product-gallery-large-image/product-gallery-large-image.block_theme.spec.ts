@@ -183,16 +183,7 @@ test.describe( `${ blockData.name }`, () => {
 
 		await page.goto( blockData.productPage );
 
-		const largeImageBlockOnFrontend = await pageObject.getMainImageBlock( {
-			page: 'frontend',
-		} );
-
-		const largeImageElement = largeImageBlockOnFrontend.locator(
-			'.wc-block-woocommerce-product-gallery-large-image__image--active-image-slide'
-		);
-
-		const imageSourceForLargeImageElement =
-			await largeImageElement.getAttribute( 'src' );
+		const initialImageId = await pageObject.getVisibleLargeImageId();
 
 		const addToCartWithOptionsBlock =
 			await pageObject.getAddToCartWithOptionsBlock( {
@@ -206,26 +197,11 @@ test.describe( `${ blockData.name }`, () => {
 		await addToCartWithOptionsColorSelector.selectOption( 'Green' );
 		await addToCartWithOptionsSizeSelector.selectOption( 'No' );
 
-		// We trigger img srcs to be set after the mutation observer is triggered.
-		// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
-		await page.waitForTimeout( 500 );
+		await expect( async () => {
+			const variationImageId = await pageObject.getVisibleLargeImageId();
 
-		const largeImageElementAfterSelectingVariation =
-			largeImageBlockOnFrontend.locator(
-				'.wc-block-woocommerce-product-gallery-large-image__image--active-image-slide'
-			);
-
-		const imageSourceForLargeImageElementAfterSelectingVariation =
-			await largeImageElementAfterSelectingVariation.getAttribute(
-				'src'
-			);
-
-		expect( imageSourceForLargeImageElement ).not.toEqual(
-			imageSourceForLargeImageElementAfterSelectingVariation
-		);
-		expect(
-			imageSourceForLargeImageElementAfterSelectingVariation
-		).toContain( 'hoodie-green-1' );
+			expect( initialImageId ).not.toEqual( variationImageId );
+		} ).toPass( { timeout: 1_000 } );
 	} );
 
 	test.describe( 'Swipe to navigate', () => {
@@ -248,18 +224,15 @@ test.describe( `${ blockData.name }`, () => {
 				width: 390, // iPhone 12 Pro
 			} );
 
-			const blockFrontend = await pageObject.getMainImageBlock( {
+			const largeImageBlockLocator = await pageObject.getMainImageBlock( {
 				page: 'frontend',
 			} );
+			const largeImage = largeImageBlockLocator.locator( 'img' ).first();
 
-			await expect( blockFrontend ).toBeVisible();
-
-			const largeImageElement = blockFrontend.locator(
-				'.wc-block-woocommerce-product-gallery-large-image__image--active-image-slide'
-			);
+			const initialImageId = await pageObject.getVisibleLargeImageId();
 
 			// Get the element's bounding box
-			const box = await largeImageElement.boundingBox();
+			const box = await largeImage.boundingBox();
 			if ( ! box ) {
 				return;
 			}
@@ -270,12 +243,8 @@ test.describe( `${ blockData.name }`, () => {
 			const swipeEndX = swipeStartX - 200; // swipe left by 200px
 			const swipeEndY = swipeStartY;
 
-			const initialImageSrc = await largeImageElement.getAttribute(
-				'src'
-			);
-
 			// Dispatch touch events to simulate swipe
-			await largeImageElement.evaluate(
+			await largeImage.evaluate(
 				( element, { startX, startY, endX, endY } ) => {
 					const touchStart = new TouchEvent( 'touchstart', {
 						bubbles: true,
@@ -325,19 +294,12 @@ test.describe( `${ blockData.name }`, () => {
 			const dialog = page.locator( '.wc-block-product-gallery-dialog' );
 			await expect( dialog ).toBeHidden();
 
-			// Timeout is needed to allow the image animation to finish.
-			// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
-			await page.waitForTimeout( 1000 );
+			await expect( async () => {
+				// Verify the next image is shown
+				const nextImageId = await pageObject.getVisibleLargeImageId();
 
-			// Verify the next image is shown
-			const nextImage = blockFrontend.locator(
-				'.wc-block-woocommerce-product-gallery-large-image__image--active-image-slide'
-			);
-			const nextImageSrc = await nextImage.getAttribute( 'src' );
-
-			// The next image should be visible and have a different src
-			await expect( nextImage ).toBeVisible();
-			expect( nextImageSrc ).not.toEqual( initialImageSrc );
+				expect( nextImageId ).not.toEqual( initialImageId );
+			} ).toPass( { timeout: 1_000 } );
 		} );
 	} );
 } );

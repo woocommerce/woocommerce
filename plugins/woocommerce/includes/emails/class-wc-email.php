@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
+use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Pelago\Emogrifier\CssInliner;
 use Pelago\Emogrifier\HtmlProcessor\CssToAttributeConverter;
@@ -265,6 +266,15 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public $block_email_editor_enabled;
 
+
+
+	/**
+	 * Personalizer instance for converting Personalization tags.
+	 *
+	 * @var TransactionalEmailPersonalizer
+	 */
+	public $personalizer;
+
 	/**
 	 * Block content template path.
 	 *
@@ -306,6 +316,9 @@ class WC_Email extends WC_Settings_API {
 			$this->bcc = $this->get_option( 'bcc' );
 		}
 
+		if ( $this->block_email_editor_enabled ) {
+			$this->personalizer = wc_get_container()->get( TransactionalEmailPersonalizer::class );
+		}
 		add_action( 'phpmailer_init', array( $this, 'handle_multipart' ) );
 		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
 	}
@@ -479,7 +492,36 @@ class WC_Email extends WC_Settings_API {
 		 * @param object|bool $object  The object (ie, product or order) this email relates to, if any.
 		 * @param WC_Email    $email   WC_Email instance managing the email.
 		 */
-		return apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->get_option_or_transient( 'subject', $this->get_default_subject() ) ), $this->object, $this );
+		$subject = apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->get_option_or_transient( 'subject', $this->get_default_subject() ) ), $this->object, $this );
+		if ( $this->block_email_editor_enabled ) {
+			// Because the new email editor uses rich-text component for subject editing, to be ensure that the subject is always in plain text, we need to strip all tags.
+			$subject = wp_strip_all_tags( $this->personalizer->personalize_transactional_content( $subject, $this ) );
+		}
+		return $subject;
+	}
+
+
+
+	/**
+	 * Get email preheader.
+	 *
+	 * @return string
+	 */
+	public function get_preheader() {
+		/**
+		 * Provides an opportunity to inspect and modify preheader for the email.
+		 *
+		 * @since 9.9.0
+		 *
+		 * @param string      $preheader Preheader of the email.
+		 * @param object|bool $object  The object (ie, product or order) this email relates to, if any.
+		 * @param WC_Email    $email   WC_Email instance managing the email.
+		 */
+		$preheader = apply_filters( 'woocommerce_email_preheader' . $this->id, $this->format_string( $this->get_option_or_transient( 'preheader', '' ) ), $this->object, $this );
+		if ( $this->block_email_editor_enabled ) {
+			$preheader = $this->personalizer->personalize_transactional_content( $preheader, $this );
+		}
+		return $preheader;
 	}
 
 	/**
@@ -794,7 +836,11 @@ class WC_Email extends WC_Settings_API {
 
 					$dom_document = $css_inliner->getDomDocument();
 
-					HtmlPruner::fromDomDocument( $dom_document )->removeElementsWithDisplayNone();
+					// When the email is rendered in the block editor, we don't want to remove the elements with display: none.
+					// The main reason is using preview text in the email body which is hidden by default.
+					if ( ! $this->block_email_editor_enabled ) {
+						HtmlPruner::fromDomDocument( $dom_document )->removeElementsWithDisplayNone();
+					}
 					$content = CssToAttributeConverter::fromDomDocument( $dom_document )
 						->convertCssToVisualAttributes()
 						->render();
