@@ -2262,88 +2262,6 @@ class PaymentExtensionSuggestions {
 	}
 
 	/**
-	 * Based on the WC onboarding profile, determine if the merchant is selling online.
-	 *
-	 * If the user skipped the profiler (no data points provided), we assume they are selling online.
-	 *
-	 * @return bool True if the merchant is selling online, false otherwise.
-	 */
-	private function is_merchant_selling_online(): bool {
-		/*
-		 * We consider a merchant to be selling online if:
-		 * - The profiler was skipped (no data points provided).
-		 *   OR
-		 * - The merchant answered 'Which one of these best describes you?' with 'I’m already selling' AND:
-		 *   - Didn't answer to the 'Are you selling online?' question.
-		 *      OR
-		 *   - Answered the 'Are you selling online?' question with either:
-		 *     - 'Yes, I’m selling online'.
-		 *        OR
-		 *     - 'I’m selling both online and offline'.
-		 *
-		 * @see plugins/woocommerce/client/admin/client/core-profiler/pages/UserProfile.tsx for the values.
-		 */
-		$onboarding_profile = get_option( OnboardingProfile::DATA_OPTION, array() );
-		if (
-			! isset( $onboarding_profile['business_choice'] ) ||
-			(
-				'im_already_selling' === $onboarding_profile['business_choice'] &&
-				(
-					! isset( $onboarding_profile['selling_online_answer'] ) ||
-					(
-						'yes_im_selling_online' === $onboarding_profile['selling_online_answer'] ||
-						'im_selling_both_online_and_offline' === $onboarding_profile['selling_online_answer']
-					)
-				)
-			)
-		) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Based on the WC onboarding profile, determine if the merchant is selling offline.
-	 *
-	 * If the user skipped the profiler (no data points provided), we assume they are NOT selling offline.
-	 *
-	 * @return bool True if the merchant is selling offline, false otherwise.
-	 */
-	private function is_merchant_selling_offline(): bool {
-		/*
-		 * We consider a merchant to be selling offline if:
-		 * - The profiler was NOT skipped (data points provided).
-		 *   AND
-		 * - The merchant answered 'Which one of these best describes you?' with 'I’m already selling' AND:
-		 *   - Answered the 'Are you selling online?' question with either:
-		 *     - 'No, I’m selling offline'.
-		 *        OR
-		 *     - 'I’m selling both online and offline'.
-		 *
-		 * @see plugins/woocommerce/client/admin/client/core-profiler/pages/UserProfile.tsx for the values.
-		 */
-		$onboarding_profile = get_option( OnboardingProfile::DATA_OPTION, array() );
-		if (
-			isset( $onboarding_profile['business_choice'] ) &&
-			(
-				'im_already_selling' === $onboarding_profile['business_choice'] &&
-				(
-					isset( $onboarding_profile['selling_online_answer'] ) &&
-					(
-						'no_im_selling_offline' === $onboarding_profile['selling_online_answer'] ||
-						'im_selling_both_online_and_offline' === $onboarding_profile['selling_online_answer']
-					)
-				)
-			)
-		) {
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Get the incentive details for a given extension and country, if any.
 	 *
 	 * @param string $extension_id The extension ID.
@@ -3440,5 +3358,87 @@ class PaymentExtensionSuggestions {
 		$standardized['_incentive']  = $extension_details['_incentive'] ?? null;
 
 		return $standardized;
+	}
+
+	/**
+	 * Based on the WC onboarding profile, determine if the merchant is selling online.
+	 *
+	 * If the user skipped the profiler (no data points provided), we assume they are selling online.
+	 *
+	 * @return bool True if the merchant is selling online, false otherwise.
+	 */
+	private function is_merchant_selling_online(): bool {
+		/*
+		 * We consider a merchant to be selling online if:
+		 * - The profiler was skipped (no data points provided).
+		 *   OR
+		 * - The merchant answered 'Which one of these best describes you?' with 'I’m already selling' AND:
+		 *   - Didn't answer to the 'Are you selling online?' question.
+		 *      OR
+		 *   - Answered the 'Are you selling online?' question with either:
+		 *     - 'Yes, I’m selling online'.
+		 *        OR
+		 *     - 'I’m selling both online and offline'.
+		 *
+		 * @see plugins/woocommerce/client/admin/client/core-profiler/pages/UserProfile.tsx for the values.
+		 */
+		$onboarding_profile = get_option( OnboardingProfile::DATA_OPTION, array() );
+		if (
+			! isset( $onboarding_profile['business_choice'] ) ||
+			(
+				'im_already_selling' === $onboarding_profile['business_choice'] &&
+				(
+					! isset( $onboarding_profile['selling_online_answer'] ) ||
+					(
+						'yes_im_selling_online' === $onboarding_profile['selling_online_answer'] ||
+						'im_selling_both_online_and_offline' === $onboarding_profile['selling_online_answer']
+					)
+				)
+			)
+		) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Based on the WC onboarding profile, determine if the merchant is selling offline.
+	 *
+	 * If the user skipped the profiler (no data points provided), we assume they are NOT selling offline.
+	 *
+	 * @return bool True if the merchant is selling offline, false otherwise.
+	 */
+	private function is_merchant_selling_offline(): bool {
+		/*
+		 * We consider a merchant to be selling offline if:
+		 * - The profiler was NOT skipped (data points provided).
+		 *   AND
+		 * - The merchant answered 'Which one of these best describes you?' with 'I’m already selling' AND:
+		 *   - Answered the 'Are you selling online?' question with either:
+		 *     - 'No, I’m selling offline'.
+		 *        OR
+		 *     - 'I’m selling both online and offline'.
+		 *
+		 * @see plugins/woocommerce/client/admin/client/core-profiler/pages/UserProfile.tsx for the values.
+		 */
+		$onboarding_profile = get_option( OnboardingProfile::DATA_OPTION, array() );
+		if (
+			isset( $onboarding_profile['business_choice'] ) &&
+			(
+				'im_already_selling' === $onboarding_profile['business_choice'] &&
+				(
+					isset( $onboarding_profile['selling_online_answer'] ) &&
+					(
+						'no_im_selling_offline' === $onboarding_profile['selling_online_answer'] ||
+						'im_selling_both_online_and_offline' === $onboarding_profile['selling_online_answer']
+					)
+				)
+			)
+		) {
+			return true;
+		}
+
+		return false;
 	}
 }
