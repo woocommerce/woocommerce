@@ -2243,7 +2243,8 @@ class PaymentExtensionSuggestions {
 	 * The store's state refers to various aspects of the store's configuration, collected data,
 	 * store setup/launch process, onboarding task completion, etc.
 	 *
-	 * @param array $extension_details The extension details.
+	 * @param string $extension_id      The extension ID.
+	 * @param array  $extension_details The extension details.
 	 *
 	 * @return array The modified extension details.
 	 */

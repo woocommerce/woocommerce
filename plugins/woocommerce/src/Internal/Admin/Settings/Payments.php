@@ -85,7 +85,7 @@ class Payments {
 						// If the last preferred order is less than the current one, we need to update it.
 						$last_preferred_order = $providers_order_map[ $suggestion_order_map_id ];
 					}
-				} else if ( $last_preferred_order < $providers_order_map[ $suggestion_order_map_id ] ) {
+				} elseif ( $last_preferred_order < $providers_order_map[ $suggestion_order_map_id ] ) {
 					// Save the preferred provider's order to know where we should be inserting next.
 					// But only if the last preferred order is less than the current one.
 					$last_preferred_order = $providers_order_map[ $suggestion_order_map_id ];

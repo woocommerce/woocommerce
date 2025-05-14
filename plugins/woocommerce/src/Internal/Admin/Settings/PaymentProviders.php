@@ -338,7 +338,7 @@ class PaymentProviders {
 			if ( ! $is_hidden && $is_preferred ) {
 				// If we don't have a preferred offline payments PSP and the suggestion is an offline payments preferred PSP,
 				// add it to the preferred list.
-				// Check this first so we don't inadvertently "fill" the preferred PSP slot
+				// Check this first so we don't inadvertently "fill" the preferred PSP slot.
 				if ( empty( $preferred_offline_psp ) &&
 					ExtensionSuggestions::TYPE_PSP === $extension['_type'] &&
 					in_array( ExtensionSuggestions::TAG_PREFERRED_OFFLINE, $extension['tags'], true ) ) {
