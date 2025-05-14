@@ -250,14 +250,14 @@ class WC_Brands {
 		$base_slug     = $shop_page_id > 0 && get_page( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop';
 		$category_base = get_option( 'woocommerce_prepend_shop_page_to_urls' ) === 'yes' ? trailingslashit( $base_slug ) : '';
 
-		$slug = $category_base . __( 'brand', 'woocommerce' );
+		$slug = $category_base . 'brand';
 		if ( '' === $category_base ) {
 			$slug = get_option( 'woocommerce_brand_permalink', '' );
 		}
 
 		// Can't provide transatable string as get_option default.
 		if ( '' === $slug ) {
-			$slug = __( 'brand', 'woocommerce' );
+			$slug = 'brand';
 		}
 
 		register_taxonomy(
