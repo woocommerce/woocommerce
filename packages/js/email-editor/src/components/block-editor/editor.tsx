@@ -1,31 +1,45 @@
 /**
  * External dependencies
  */
-import { useSelect } from '@wordpress/data';
-import {
-	ErrorBoundary,
-	PostLockedModal,
-	EditorProvider,
-} from '@wordpress/editor';
-import { useMemo } from '@wordpress/element';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { useMemo, useEffect } from '@wordpress/element';
 import { SlotFillProvider, Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
-import { Post } from '@wordpress/core-data/build-types/entity-types/post';
+import { CommandMenu } from '@wordpress/commands';
+// eslint-disable-next-line @woocommerce/dependency-group
+import {
+	AutosaveMonitor,
+	// @ts-expect-error Type is missing in @types/wordpress__editor
+	LocalAutosaveMonitor,
+	UnsavedChangesWarning,
+	// @ts-expect-error Type is missing in @types/wordpress__editor
+	EditorKeyboardShortcutsRegister,
+	ErrorBoundary,
+	PostLockedModal,
+	store as editorStore,
+} from '@wordpress/editor';
 
 /**
  * Internal dependencies
  */
 import { storeName } from '../../store';
-import { Layout } from './layout';
 import { useNavigateToEntityRecord } from '../../hooks/use-navigate-to-entity-record';
-import { unlockPatternsRelatedSelectorsFromCoreStore } from '../../private-apis';
+import { Editor, FullscreenMode } from '../../private-apis';
+import { useEmailCss } from '../../hooks';
+import { TemplateSelection } from '../template-select';
+import { StylesSidebar } from '../styles-sidebar';
+import { SendPreview } from '../preview';
+import { MoreMenu } from '../more-menu';
+import { SettingsPanel } from '../sidebar/settings-panel';
+import { TemplateSettingsPanel } from '../sidebar/template-settings-panel';
+import { PublishSave } from '../../hacks/publish-save';
+import { EditorNotices } from '../notices';
+import { BlockCompatibilityWarnings } from '../sidebar';
 
 export function InnerEditor( {
 	postId: initialPostId,
 	postType: initialPostType,
 	settings,
-	initialEdits,
-	...props
 } ) {
 	const {
 		currentPost,
@@ -39,15 +53,13 @@ export function InnerEditor( {
 		'post-only'
 	);
 
-	const { post, template } = useSelect(
+	const { post, template, isFullscreenEnabled } = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( coreStore );
 			const { getEditedPostTemplate } = select( storeName );
 			const postObject = getEntityRecord(
 				'postType',
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 				currentPost.postType,
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 				currentPost.postId
 			);
 			return {
@@ -56,29 +68,20 @@ export function InnerEditor( {
 						? getEditedPostTemplate()
 						: null,
 				post: postObject,
+				isFullscreenEnabled:
+					select( storeName ).isFeatureActive( 'fullscreenMode' ),
 			};
 		},
 		[ currentPost.postType, currentPost.postId ]
 	);
 
-	/*
-	 * We need to fetch patterns ourselves. Automatic fetching of patterns is currently a private functionality
-	 * that is not available in EditorProvider but only in the ExperimentalBlockEditorProvider which
-	 * is not exported in the public components nor private components.
-	 */
-	const blockPatterns = useSelect(
-		( select ) => {
-			const { hasFinishedResolution, getBlockPatternsForPostType } =
-				unlockPatternsRelatedSelectorsFromCoreStore( select );
-			const patterns = getBlockPatternsForPostType(
-				currentPost.postType
-			) as Post[];
-			return hasFinishedResolution( 'getBlockPatterns' )
-				? patterns
-				: undefined;
-		},
-		[ currentPost.postType ]
-	);
+	// @ts-expect-error Type is missing in @types/wordpress__editor
+	const { removeEditorPanel } = useDispatch( editorStore );
+	useEffect( () => {
+		removeEditorPanel( 'post-status' );
+	}, [ removeEditorPanel ] );
+
+	const [ styles ] = useEmailCss();
 
 	const editorSettings = useMemo(
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -91,13 +94,11 @@ export function InnerEditor( {
 					? 'post-only'
 					: 'template-locked',
 			supportsTemplateMode: true,
-			__experimentalBlockPatterns: blockPatterns, // eslint-disable-line
 		} ),
 		[
 			settings,
 			onNavigateToEntityRecord,
 			onNavigateToPreviousEntityRecord,
-			blockPatterns,
 			currentPost.postType,
 		]
 	);
@@ -112,21 +113,36 @@ export function InnerEditor( {
 
 	return (
 		<SlotFillProvider>
-			<EditorProvider
-				settings={ editorSettings }
-				post={ post }
-				initialEdits={ initialEdits }
-				useSubRegistry={ false }
-				// @ts-expect-error __unstableTemplate is not in the EditorProvider props in the installed version of packages
-				__unstableTemplate={ template }
-				{ ...props }
-			>
-				{ /* @ts-expect-error ErrorBoundary type is incorrect there is no onError */ }
-				<ErrorBoundary>
-					<Layout />
+			{ /* @ts-expect-error canCopyContent is missing in @types/wordpress__editor */ }
+			<ErrorBoundary canCopyContent>
+				<CommandMenu />
+				<Editor
+					postId={ currentPost.postId }
+					postType={ currentPost.postType }
+					settings={ editorSettings }
+					templateId={ template && template.id }
+					styles={ styles }
+				>
+					<AutosaveMonitor />
+					<LocalAutosaveMonitor />
+					<UnsavedChangesWarning />
+					<EditorKeyboardShortcutsRegister />
 					<PostLockedModal />
-				</ErrorBoundary>
-			</EditorProvider>
+					<TemplateSelection />
+					<StylesSidebar />
+					<SendPreview />
+					<FullscreenMode isActive={ isFullscreenEnabled } />
+					<MoreMenu />
+					{ currentPost.postType === 'wp_template' ? (
+						<TemplateSettingsPanel />
+					) : (
+						<SettingsPanel />
+					) }
+					<PublishSave />
+					<EditorNotices />
+					<BlockCompatibilityWarnings />
+				</Editor>
+			</ErrorBoundary>
 		</SlotFillProvider>
 	);
 }

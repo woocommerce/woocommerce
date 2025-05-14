@@ -11,6 +11,10 @@ import { useCallback, useMemo } from '@wordpress/element';
 import { storeName, TypographyProperties } from '../store';
 import { useUserTheme } from './use-user-theme';
 
+// Shared reference to an empty object for cases where it is important to avoid
+// returning a new object reference on every invocation
+const EMPTY_OBJECT = {};
+
 interface ElementProperties {
 	typography: TypographyProperties;
 }
@@ -150,11 +154,11 @@ export const useEmailStyles = (): EmailStylesData => {
 	const { userTheme, updateUserTheme } = useUserTheme();
 
 	// This is email level styling stored in post meta.
-	const styles = useMemo(
-		() =>
-			cleanupUserStyles( shortenWpPresetVariables( userTheme?.styles ) ),
-		[ userTheme ]
-	);
+	const styles = useMemo( () => {
+		return userTheme
+			? cleanupUserStyles( shortenWpPresetVariables( userTheme?.styles ) )
+			: EMPTY_OBJECT;
+	}, [ userTheme ] );
 
 	// Default styles from theme.json.
 	const { styles: defaultStyles } = useSelect( ( select ) => ( {
@@ -186,8 +190,18 @@ export const useEmailStyles = (): EmailStylesData => {
 		[ updateUserTheme, userTheme ]
 	);
 
+	const mergedStyles = useMemo( () => {
+		if ( ! defaultStyles ) {
+			return EMPTY_OBJECT;
+		}
+		if ( ! styles ) {
+			return defaultStyles;
+		}
+		return deepmerge.all( [ defaultStyles, styles ] );
+	}, [ defaultStyles, styles ] );
+
 	return {
-		styles: deepmerge.all( [ defaultStyles || {}, styles || {} ] ), // Merged styles
+		styles: mergedStyles,
 		userStyles: userTheme?.styles, // Styles defined by user
 		defaultStyles, // Default styles from editors theme.json
 		updateStyleProp,

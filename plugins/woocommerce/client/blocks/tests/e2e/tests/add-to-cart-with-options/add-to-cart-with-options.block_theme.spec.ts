@@ -20,7 +20,7 @@ const test = base.extend< { pageObject: AddToCartWithOptionsPage } >( {
 	},
 } );
 
-test.describe( 'Add to Cart with Options Block', () => {
+test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows modifying the template parts', async ( {
 		page,
 		pageObject,
@@ -38,7 +38,7 @@ test.describe( 'Add to Cart with Options Block', () => {
 		await editor.insertBlock( { name: pageObject.BLOCK_SLUG } );
 
 		await pageObject.insertParagraphInTemplatePart(
-			'This is a test paragraph added to the Add to Cart with Options template part.'
+			'This is a test paragraph added to the Add to Cart + Options template part.'
 		);
 
 		await editor.saveSiteEditorEntities();
@@ -47,7 +47,7 @@ test.describe( 'Add to Cart with Options Block', () => {
 
 		await expect(
 			page.getByText(
-				'This is a test paragraph added to the Add to Cart with Options template part.'
+				'This is a test paragraph added to the Add to Cart + Options template part.'
 			)
 		).toBeVisible();
 	} );

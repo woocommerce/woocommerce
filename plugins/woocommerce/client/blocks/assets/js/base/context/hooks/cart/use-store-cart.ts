@@ -144,7 +144,7 @@ export const useStoreCart = (
 				cartIsLoading:
 					// @ts-expect-error `hasFinishedResolution` is not typed in @wordpress/data yet.
 					! store.hasFinishedResolution( 'getCartData' ),
-				isLoadingRates: store.isCustomerDataUpdating(),
+				isLoadingRates: store.isAddressFieldsForShippingRatesUpdating(),
 			};
 		}, [] );
 
