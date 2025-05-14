@@ -300,9 +300,10 @@ class PaymentProviders {
 	 * @throws Exception If there are malformed or invalid suggestions.
 	 */
 	public function get_extension_suggestions( string $location, string $context = '' ): array {
-		$preferred_psp = null;
-		$preferred_apm = null;
-		$other         = array();
+		$preferred_psp         = null;
+		$preferred_apm         = null;
+		$preferred_offline_psp = null;
+		$other                 = array();
 
 		$extensions = $this->extension_suggestions->get_country_extensions( $location, $context );
 		// Sort them by _priority.
@@ -329,7 +330,9 @@ class PaymentProviders {
 			}
 
 			// Determine if the suggestion is preferred or not by looking at its tags.
-			$is_preferred = in_array( ExtensionSuggestions::TAG_PREFERRED, $extension['tags'], true );
+			$is_preferred = in_array( ExtensionSuggestions::TAG_PREFERRED, $extension['tags'], true ) || 
+				$this->extension_suggestions->is_pes_offline_suggestion_selling_offline( $extension['id'] );
+
 			// Determine if the suggestion is hidden (from the preferred locations).
 			$is_hidden = $this->is_payment_extension_suggestion_hidden( $extension );
 
@@ -337,6 +340,12 @@ class PaymentProviders {
 				// If the suggestion is preferred, add it to the preferred list.
 				if ( empty( $preferred_psp ) && ExtensionSuggestions::TYPE_PSP === $extension['_type'] ) {
 					$preferred_psp = $extension;
+					continue;
+				}
+
+				// If the suggestion is offline preferred, add it to the preferred list.
+				if ( empty( $preferred_offline_psp ) && ExtensionSuggestions::SQUARE === $extension['id'] ) {
+					$preferred_offline_psp = $extension;
 					continue;
 				}
 
@@ -417,6 +426,7 @@ class PaymentProviders {
 						// No need to impose a specific order here.
 						$preferred_psp,
 						$preferred_apm,
+						$preferred_offline_psp,
 					)
 				)
 			),
@@ -712,6 +722,7 @@ class PaymentProviders {
 				$suggestion_order_map_id = $this->get_suggestion_order_map_id( $suggestion_id );
 
 				if ( isset( $order_map[ $suggestion_order_map_id ] ) ) {
+					var_dump( $suggestion_order_map_id );
 					// Determine the offset for placing missing PGs after this suggestion.
 					if ( ! isset( $suggestion_order_map_id_to_offset_map[ $suggestion_order_map_id ] ) ) {
 						$suggestion_order_map_id_to_offset_map[ $suggestion_order_map_id ] = 0;

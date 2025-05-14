@@ -2094,6 +2094,20 @@ class PaymentExtensionSuggestions {
 		return $this->suggestion_incentives->dismiss_incentive( $incentive_id, $suggestion_id, $context );
 	}
 
+	/**
+	 * Check if a payment extension is a PES offline suggestion and the merchant is selling offline.
+	 *
+	 * @param string $extension_id The extension ID.
+	 *
+	 * @return bool True if the extension is a PES offline provider and the merchant is selling offline.
+	 */
+	public function is_pes_offline_suggestion_selling_offline( string $extension_id ): bool {
+		$pes_offline_providers = array(
+			self::SQUARE,
+		);
+
+		return in_array( $extension_id, $pes_offline_providers, true ) && $this->is_merchant_selling_offline();
+	}
 
 	/**
 	 * Determine if a payment extension is allowed to be suggested.
