@@ -171,10 +171,13 @@ function RawSendPreviewEmail() {
 						);
 					}
 				} }
+				className="woocommerce-send-preview-email__send-to-field"
 				value={ previewToEmail }
 				type="email"
 				ref={ sendToRef }
 				required
+				__next40pxDefaultSize
+				__nextHasNoMarginBottom
 			/>
 			{ sendingPreviewStatus === SendingPreviewStatus.SUCCESS ? (
 				<p className="woocommerce-send-preview-modal-notice-success">
