@@ -4663,10 +4663,10 @@ importers:
         version: 7.0.2(react@18.3.1)
       '@wordpress/scripts':
         specifier: 30.13.0
-        version: 30.13.0(@playwright/test@1.50.1)(@swc/core@1.3.100)(@types/eslint@8.44.8)(@types/node@20.17.8)(@types/webpack@4.41.38)(babel-plugin-macros@3.1.0)(esbuild@0.18.20)(eslint-import-resolver-typescript@3.6.1)(eslint-import-resolver-webpack@0.13.2)(file-loader@6.2.0(webpack@5.97.1))(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint-scss@6.11.1(stylelint@14.16.1))(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@20.17.8)(typescript@5.7.2))(type-fest@3.13.1)(typescript@5.7.2)(webpack-hot-middleware@2.25.4)
+        version: 30.13.0(@playwright/test@1.50.1)(@swc/core@1.3.100)(@types/eslint@8.44.8)(@types/node@20.17.8)(@types/webpack@4.41.38)(babel-plugin-macros@3.1.0)(esbuild@0.18.20)(eslint-import-resolver-typescript@3.6.1)(eslint-import-resolver-webpack@0.13.2)(file-loader@6.2.0(webpack@5.97.1))(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint-scss@6.11.1(stylelint@16.11.0(typescript@5.7.2)))(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@20.17.8)(typescript@5.7.2))(type-fest@3.13.1)(typescript@5.7.2)(webpack-hot-middleware@2.25.4)
       '@wordpress/stylelint-config':
-        specifier: ^21.36.0
-        version: 21.36.0(postcss@8.4.49)(stylelint@14.16.1)
+        specifier: ^23.14.0
+        version: 23.14.0(postcss@8.4.49)(stylelint-scss@6.11.1(stylelint@16.11.0(typescript@5.7.2)))(stylelint@16.11.0(typescript@5.7.2))
       ajv-cli:
         specifier: 3.3.x
         version: 3.3.0
@@ -4836,8 +4836,11 @@ importers:
         specifier: 1.2.44
         version: 1.2.44(@storybook/addons@7.5.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@storybook/components@7.6.19(@types/react-dom@18.3.0)(@types/react@18.3.16)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@storybook/core-events@7.6.19)(react@18.3.1)
       stylelint:
-        specifier: ^14.16.1
-        version: 14.16.1
+        specifier: ^16.8.2
+        version: 16.11.0(typescript@5.7.2)
+      stylelint-scss:
+        specifier: ^6.4.0
+        version: 6.11.1(stylelint@16.11.0(typescript@5.7.2))
       typescript:
         specifier: 5.7.x
         version: 5.7.2
@@ -27849,9 +27852,9 @@ snapshots:
     dependencies:
       postcss-selector-parser: 6.0.13
 
-  '@csstools/selector-specificity@5.0.0(postcss-selector-parser@7.0.0)':
+  '@csstools/selector-specificity@5.0.0(postcss-selector-parser@7.1.0)':
     dependencies:
-      postcss-selector-parser: 7.0.0
+      postcss-selector-parser: 7.1.0
 
   '@discoveryjs/json-ext@0.5.7': {}
 
@@ -29135,7 +29138,10 @@ snapshots:
       jest-runner: 25.5.4
       jest-runtime: 25.5.4
     transitivePeerDependencies:
+      - bufferutil
+      - canvas
       - supports-color
+      - utf-8-validate
 
   '@jest/test-sequencer@26.6.3':
     dependencies:
@@ -40099,7 +40105,7 @@ snapshots:
       - webpack-hot-middleware
       - webpack-plugin-serve
 
-  '@wordpress/scripts@30.13.0(@playwright/test@1.50.1)(@swc/core@1.3.100)(@types/eslint@8.44.8)(@types/node@20.17.8)(@types/webpack@4.41.38)(babel-plugin-macros@3.1.0)(esbuild@0.18.20)(eslint-import-resolver-typescript@3.6.1)(eslint-import-resolver-webpack@0.13.2)(file-loader@6.2.0(webpack@5.97.1))(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint-scss@6.11.1(stylelint@14.16.1))(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@20.17.8)(typescript@5.7.2))(type-fest@3.13.1)(typescript@5.7.2)(webpack-hot-middleware@2.25.4)':
+  '@wordpress/scripts@30.13.0(@playwright/test@1.50.1)(@swc/core@1.3.100)(@types/eslint@8.44.8)(@types/node@20.17.8)(@types/webpack@4.41.38)(babel-plugin-macros@3.1.0)(esbuild@0.18.20)(eslint-import-resolver-typescript@3.6.1)(eslint-import-resolver-webpack@0.13.2)(file-loader@6.2.0(webpack@5.97.1))(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint-scss@6.11.1(stylelint@16.11.0(typescript@5.7.2)))(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@20.17.8)(typescript@5.7.2))(type-fest@3.13.1)(typescript@5.7.2)(webpack-hot-middleware@2.25.4)':
     dependencies:
       '@babel/core': 7.25.7
       '@playwright/test': 1.50.1
@@ -40114,7 +40120,7 @@ snapshots:
       '@wordpress/npm-package-json-lint-config': 5.22.0(npm-package-json-lint@6.4.0(typescript@5.7.2))
       '@wordpress/postcss-plugins-preset': 5.22.0(postcss@8.4.49)
       '@wordpress/prettier-config': 4.22.0(wp-prettier@3.0.3)
-      '@wordpress/stylelint-config': 23.14.0(postcss@8.4.49)(stylelint-scss@6.11.1(stylelint@14.16.1))(stylelint@16.11.0(typescript@5.7.2))
+      '@wordpress/stylelint-config': 23.14.0(postcss@8.4.49)(stylelint-scss@6.11.1(stylelint@16.11.0(typescript@5.7.2)))(stylelint@16.11.0(typescript@5.7.2))
       adm-zip: 0.5.10
       babel-jest: 29.7.0(@babel/core@7.25.7)
       babel-loader: 9.2.1(@babel/core@7.25.7)(webpack@5.97.1(@swc/core@1.3.100))
@@ -40418,13 +40424,13 @@ snapshots:
     transitivePeerDependencies:
       - postcss
 
-  '@wordpress/stylelint-config@23.14.0(postcss@8.4.49)(stylelint-scss@6.11.1(stylelint@14.16.1))(stylelint@16.11.0(typescript@5.7.2))':
+  '@wordpress/stylelint-config@23.14.0(postcss@8.4.49)(stylelint-scss@6.11.1(stylelint@16.11.0(typescript@5.7.2)))(stylelint@16.11.0(typescript@5.7.2))':
     dependencies:
       '@stylistic/stylelint-plugin': 3.1.2(stylelint@16.11.0(typescript@5.7.2))
       stylelint: 16.11.0(typescript@5.7.2)
       stylelint-config-recommended: 14.0.1(stylelint@16.11.0(typescript@5.7.2))
       stylelint-config-recommended-scss: 14.1.0(postcss@8.4.49)(stylelint@16.11.0(typescript@5.7.2))
-      stylelint-scss: 6.11.1(stylelint@14.16.1)
+      stylelint-scss: 6.11.1(stylelint@16.11.0(typescript@5.7.2))
     transitivePeerDependencies:
       - postcss
 
@@ -53299,13 +53305,13 @@ snapshots:
   postcss-calc@8.2.4(postcss@8.4.32):
     dependencies:
       postcss: 8.4.32
-      postcss-selector-parser: 6.0.13
+      postcss-selector-parser: 6.1.2
       postcss-value-parser: 4.2.0
 
   postcss-calc@8.2.4(postcss@8.4.49):
     dependencies:
       postcss: 8.4.49
-      postcss-selector-parser: 6.0.13
+      postcss-selector-parser: 6.1.2
       postcss-value-parser: 4.2.0
 
   postcss-calc@9.0.1(postcss@8.4.32):
@@ -53607,7 +53613,7 @@ snapshots:
       caniuse-api: 3.0.0
       cssnano-utils: 3.1.0(postcss@8.4.32)
       postcss: 8.4.32
-      postcss-selector-parser: 6.0.13
+      postcss-selector-parser: 6.1.2
 
   postcss-merge-rules@5.1.4(postcss@8.4.49):
     dependencies:
@@ -53615,7 +53621,7 @@ snapshots:
       caniuse-api: 3.0.0
       cssnano-utils: 3.1.0(postcss@8.4.49)
       postcss: 8.4.49
-      postcss-selector-parser: 6.0.13
+      postcss-selector-parser: 6.1.2
 
   postcss-merge-rules@6.1.1(postcss@8.4.32):
     dependencies:
@@ -53742,12 +53748,12 @@ snapshots:
   postcss-minify-selectors@5.2.1(postcss@8.4.32):
     dependencies:
       postcss: 8.4.32
-      postcss-selector-parser: 6.0.13
+      postcss-selector-parser: 6.1.2
 
   postcss-minify-selectors@5.2.1(postcss@8.4.49):
     dependencies:
       postcss: 8.4.49
-      postcss-selector-parser: 6.0.13
+      postcss-selector-parser: 6.1.2
 
   postcss-minify-selectors@6.0.4(postcss@8.4.32):
     dependencies:
@@ -54255,12 +54261,12 @@ snapshots:
   postcss-unique-selectors@5.1.1(postcss@8.4.32):
     dependencies:
       postcss: 8.4.32
-      postcss-selector-parser: 6.0.13
+      postcss-selector-parser: 6.1.2
 
   postcss-unique-selectors@5.1.1(postcss@8.4.49):
     dependencies:
       postcss: 8.4.49
-      postcss-selector-parser: 6.0.13
+      postcss-selector-parser: 6.1.2
 
   postcss-unique-selectors@6.0.4(postcss@8.4.32):
     dependencies:
@@ -57128,38 +57134,26 @@ snapshots:
     dependencies:
       lodash: 4.17.21
       postcss-media-query-parser: 0.2.3
-      postcss-resolve-nested-selector: 0.1.1
-      postcss-selector-parser: 6.0.13
+      postcss-resolve-nested-selector: 0.1.6
+      postcss-selector-parser: 6.1.2
       postcss-value-parser: 4.2.0
       stylelint: 13.13.1
 
   stylelint-scss@4.7.0(stylelint@14.16.1):
     dependencies:
       postcss-media-query-parser: 0.2.3
-      postcss-resolve-nested-selector: 0.1.1
-      postcss-selector-parser: 6.0.13
+      postcss-resolve-nested-selector: 0.1.6
+      postcss-selector-parser: 6.1.2
       postcss-value-parser: 4.2.0
       stylelint: 14.16.1
 
   stylelint-scss@4.7.0(stylelint@16.11.0(typescript@5.7.2)):
     dependencies:
       postcss-media-query-parser: 0.2.3
-      postcss-resolve-nested-selector: 0.1.1
-      postcss-selector-parser: 6.0.13
+      postcss-resolve-nested-selector: 0.1.6
+      postcss-selector-parser: 6.1.2
       postcss-value-parser: 4.2.0
       stylelint: 16.11.0(typescript@5.7.2)
-
-  stylelint-scss@6.11.1(stylelint@14.16.1):
-    dependencies:
-      css-tree: 3.1.0
-      is-plain-object: 5.0.0
-      known-css-properties: 0.35.0
-      mdn-data: 2.21.0
-      postcss-media-query-parser: 0.2.3
-      postcss-resolve-nested-selector: 0.1.6
-      postcss-selector-parser: 7.1.0
-      postcss-value-parser: 4.2.0
-      stylelint: 14.16.1
 
   stylelint-scss@6.11.1(stylelint@16.11.0(typescript@5.7.2)):
     dependencies:
@@ -57276,14 +57270,14 @@ snapshots:
       '@csstools/css-parser-algorithms': 3.0.4(@csstools/css-tokenizer@3.0.3)
       '@csstools/css-tokenizer': 3.0.3
       '@csstools/media-query-list-parser': 4.0.2(@csstools/css-parser-algorithms@3.0.4(@csstools/css-tokenizer@3.0.3))(@csstools/css-tokenizer@3.0.3)
-      '@csstools/selector-specificity': 5.0.0(postcss-selector-parser@7.0.0)
+      '@csstools/selector-specificity': 5.0.0(postcss-selector-parser@7.1.0)
       '@dual-bundle/import-meta-resolve': 4.1.0
       balanced-match: 2.0.0
       colord: 2.9.3
       cosmiconfig: 9.0.0(typescript@5.7.2)
       css-functions-list: 3.2.3
       css-tree: 3.1.0
-      debug: 4.3.7
+      debug: 4.4.0
       fast-glob: 3.3.2
       fastest-levenshtein: 1.0.16
       file-entry-cache: 9.1.0
@@ -57303,7 +57297,7 @@ snapshots:
       postcss: 8.4.49
       postcss-resolve-nested-selector: 0.1.6
       postcss-safe-parser: 7.0.1(postcss@8.4.49)
-      postcss-selector-parser: 7.0.0
+      postcss-selector-parser: 7.1.0
       postcss-value-parser: 4.2.0
       resolve-from: 5.0.0
       string-width: 4.2.3
