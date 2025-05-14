@@ -56,7 +56,7 @@ const Wrapper = ( {
 renderParentBlock( {
 	Block,
 	blockName,
-	selector: '.wp-block-woocommerce-checkout',
+	selector: '.wp-block-woocommerce-checkout:first-of-type',
 	getProps,
 	blockMap: getRegisteredBlockComponents( blockName ) as Record<
 		string,
