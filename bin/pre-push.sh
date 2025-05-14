@@ -23,6 +23,15 @@ if [ $PROTECTED_BRANCH = $CURRENT_BRANCH ]; then
 	exit 1
 fi
 
+matchingRemoteBranches=$(git ls-remote --heads origin refs/heads/$CURRENT_BRANCH)
+if [ -n "$matchingRemoteBranches" ]; then
+	commitsToPush=$(git log origin/$CURRENT_BRANCH..$CURRENT_BRANCH)
+	if [ -z "$commitsToPush" ]; then
+		echo 'pre-push: Everything up-to-date, skipping validation and linting'
+		exit 0
+	fi
+fi
+
 changedFiles=$(git diff $(git merge-base HEAD origin/trunk) --relative --name-only --diff-filter=d -- '.syncpackrc' 'package.json' '*/package.json')
 if [ -n "$changedFiles" ]; then
 	echo -n 'pre-push: validating syncpack mismatches '
