@@ -9,6 +9,7 @@ import { percent, Icon } from '@wordpress/icons';
  */
 import edit from './edit';
 import metadata from './block.json';
+import deprecated from './deprecated';
 
 const blockConfig = {
 	...metadata,
@@ -20,6 +21,7 @@ const blockConfig = {
 	),
 	edit,
 	save: () => null,
+	deprecated,
 };
 
 registerProductBlockType( blockConfig, {
