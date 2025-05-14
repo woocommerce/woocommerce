@@ -18,14 +18,14 @@ trait BlocksSharedState {
 	 *
 	 * @var string
 	 */
-	private $consent_statement = 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
+	private static $consent_statement = 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
 
 	/**
 	 * The namespace for the config.
 	 *
 	 * @var string
 	 */
-	private $settings_namespace = 'woocommerce';
+	private static $settings_namespace = 'woocommerce';
 
 	/**
 	 * Whether the core config has been registered.
@@ -39,7 +39,7 @@ trait BlocksSharedState {
 	 *
 	 * @var mixed
 	 */
-	private static $cart;
+	private static $blocks_shared_cart_state;
 
 	/**
 	 * Check that the consent statement was passed.
@@ -48,8 +48,8 @@ trait BlocksSharedState {
 	 * @return true
 	 * @throws \InvalidArgumentException - If the statement does not match the class consent statement string.
 	 */
-	private function check_consent( $consent_statement ) {
-		if ( $consent_statement !== $this->consent_statement ) {
+	private static function check_consent( $consent_statement ) {
+		if ( $consent_statement !== self::$consent_statement ) {
 			throw new \InvalidArgumentException( 'This method cannot be called without consenting the API may change.' );
 		}
 
@@ -62,7 +62,7 @@ trait BlocksSharedState {
 	 * @param string $consent_statement - The consent statement string.
 	 */
 	public function initialize_shared_config( $consent_statement ) {
-		$this->check_consent( $consent_statement );
+		self::check_consent( $consent_statement );
 
 		if ( self::$core_config_registered ) {
 			return;
@@ -70,9 +70,9 @@ trait BlocksSharedState {
 
 		self::$core_config_registered = true;
 
-		wp_interactivity_config( $this->settings_namespace, $this->get_currency_data() );
-		wp_interactivity_config( $this->settings_namespace, $this->get_locale_data() );
-		wp_interactivity_config( $this->settings_namespace, $this->get_core_data() );
+		wp_interactivity_config( self::$settings_namespace, self::get_currency_data() );
+		wp_interactivity_config( self::$settings_namespace, self::get_locale_data() );
+		wp_interactivity_config( self::$settings_namespace, self::get_core_data() );
 	}
 
 	/**
@@ -82,17 +82,17 @@ trait BlocksSharedState {
 	 * @return void
 	 */
 	public function initialize_shared_state( $consent_statement ) {
-		$this->check_consent( $consent_statement );
+		self::check_consent( $consent_statement );
 
-		if ( null === self::$cart ) {
-			self::$cart = isset( WC()->cart )
+		if ( null === self::$blocks_shared_cart_state ) {
+			self::$blocks_shared_cart_state = isset( WC()->cart )
 				? rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) )->data
 				: array();
 
 			wp_interactivity_state(
 				'woocommerce',
 				array(
-					'cart'     => self::$cart,
+					'cart'     => self::$blocks_shared_cart_state,
 					'nonce'    => wp_create_nonce( 'wc_store_api' ),
 					'noticeId' => '',
 					'restUrl'  => get_rest_url(),
@@ -106,7 +106,7 @@ trait BlocksSharedState {
 	 *
 	 * @return array
 	 */
-	protected function get_core_data() {
+	private static function get_core_data() {
 		return [
 			'isBlockTheme' => wp_is_block_theme(),
 		];
@@ -117,7 +117,7 @@ trait BlocksSharedState {
 	 *
 	 * @return array
 	 */
-	protected function get_currency_data() {
+	private static function get_currency_data() {
 		$currency = get_woocommerce_currency();
 
 		return [
@@ -138,7 +138,7 @@ trait BlocksSharedState {
 	 *
 	 * @return array
 	 */
-	protected function get_locale_data() {
+	private static function get_locale_data() {
 		global $wp_locale;
 
 		return [
