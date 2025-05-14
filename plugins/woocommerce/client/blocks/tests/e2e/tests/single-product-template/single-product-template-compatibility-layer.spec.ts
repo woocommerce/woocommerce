@@ -172,13 +172,13 @@ test.describe( 'Compatibility Layer in Single Product template', () => {
 		}
 	} );
 
-	test( 'hooks are attached to the page when using the Add to Cart with Options block', async ( {
+	test( 'hooks are attached to the page when using the Add to Cart + Options block', async ( {
 		page,
 		admin,
 		editor,
 		requestUtils,
 	} ) => {
-		/* Switch to the blockified Add to Cart with Options block to be able to test all hooks */
+		/* Switch to the blockified Add to Cart + Options block to be able to test all hooks */
 		await requestUtils.setFeatureFlag( 'experimental-blocks', true );
 		await requestUtils.setFeatureFlag( 'blockified-add-to-cart', true );
 		await admin.visitSiteEditor( {
@@ -192,13 +192,13 @@ test.describe( 'Compatibility Layer in Single Product template', () => {
 		await editor.selectBlocks( addToCartFormBlock );
 
 		await page
-			.getByRole( 'button', { name: 'Upgrade to the blockified' } )
+			.getByRole( 'button', {
+				name: 'Upgrade to the Add to Cart + Options block',
+			} )
 			.click();
 
 		await expect(
-			editor.canvas.getByLabel(
-				'Block: Quantity Selector (Experimental)'
-			)
+			editor.canvas.getByLabel( 'Block: Product Quantity (Beta)' )
 		).toBeVisible();
 		await editor.saveSiteEditorEntities( {
 			isOnlyCurrentEntityDirty: true,

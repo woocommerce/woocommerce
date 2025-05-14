@@ -17,7 +17,11 @@
 	user-select: none;
 
 	&:hover {
-		background-color: color-mix(in srgb, var(--wp--preset--color--contrast) 10%, transparent);
+		background-color: color-mix(
+			in srgb,
+			var(--wp--preset--color--contrast) 10%,
+			transparent
+		);
 	}
 
 	&:focus {
@@ -27,7 +31,11 @@
 
 	&[aria-checked="true"] {
 		&:hover {
-			background-color: color-mix(in srgb, var(--wp--preset--color--contrast) 85%, transparent);
+			background-color: color-mix(
+				in srgb,
+				var(--wp--preset--color--contrast) 85%,
+				transparent
+			);
 		}
 	}
 

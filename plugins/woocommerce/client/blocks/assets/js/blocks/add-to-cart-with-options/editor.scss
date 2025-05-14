@@ -23,7 +23,8 @@
 	color: $studio-woocommerce-purple-50;
 }
 
-.block-editor-list-view-leaf.is-selected .block-editor-list-view-block-contents {
+.block-editor-list-view-leaf.is-selected
+	.block-editor-list-view-block-contents {
 	.wp-block-woocommerce-add-to-cart-with-options__block-icon {
 		color: inherit;
 	}

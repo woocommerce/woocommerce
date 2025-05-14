@@ -262,7 +262,8 @@ test.describe(
 			const fontPickers = assembler.locator(
 				'.woocommerce-customize-store_global-styles-variations_item'
 			);
-			await expect( fontPickers ).toHaveCount( 10 );
+
+			await expect.poll( () => fontPickers.count() ).toEqual( 10 );
 
 			await assembler
 				.locator(

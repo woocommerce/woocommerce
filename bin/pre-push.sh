@@ -23,6 +23,16 @@ if [ $PROTECTED_BRANCH = $CURRENT_BRANCH ]; then
 	exit 1
 fi
 
+# Ensure the checks are running only when pushing a new branch or there are commits to push.
+matchingRemoteBranches=$(git ls-remote --heads origin refs/heads/$CURRENT_BRANCH)
+if [ -n "$matchingRemoteBranches" ]; then
+	commitsToPush=$(git log origin/$CURRENT_BRANCH..$CURRENT_BRANCH)
+	if [ -z "$commitsToPush" ]; then
+		echo 'pre-push: Everything up-to-date, skipping validation and linting'
+		exit 0
+	fi
+fi
+
 changedFiles=$(git diff $(git merge-base HEAD origin/trunk) --relative --name-only --diff-filter=d -- '.syncpackrc' 'package.json' '*/package.json')
 if [ -n "$changedFiles" ]; then
 	echo -n 'pre-push: validating syncpack mismatches '
@@ -39,8 +49,16 @@ fi
 changedFiles=$(git diff $(git merge-base HEAD origin/trunk) --relative --name-only --diff-filter=d -- '*.php' '*.js' '*.jsx' '*.ts' '*.tsx')
 if [ -n "$changedFiles" ]; then
 	echo 'pre-push: linting changes (if unrelated linting occurs, please sync the branch with trunk)'
+
 	# This pre-push check aims to reduce CI load, hence we mimic CI matrix generation and pick linting jobs identical to CI environment.
-    ciJobs=$(CI=1 pnpm utils ci-jobs --base-ref origin/trunk --event 'pull_request' 2>&1)
+	if [ -n "$matchingRemoteBranches" ]; then
+		# The remote branch exists: lint incremental changes only
+		ciJobs=$(CI=1 pnpm utils ci-jobs --base-ref origin/$CURRENT_BRANCH --event 'pull_request' 2>&1)
+	else
+		# The remote branch doesn't exists yes: lint all branch changes
+		ciJobs=$(CI=1 pnpm utils ci-jobs --base-ref origin/trunk --event 'pull_request' 2>&1)
+	fi
+
     lintingJobs=$(echo $ciJobs | sed 's/::set-output/\n::set-output/g' | grep '::set-output name=lint-jobs::' | sed 's/::set-output name=lint-jobs:://g')
 	# Slightly complicated trailing thru linting jobs provided in JSON-format.
     iteration=1
