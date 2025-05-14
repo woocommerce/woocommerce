@@ -39,17 +39,14 @@ endif;
 
 if ( $registration_at_checkout || $login_reminder_at_checkout ) :
 
-	$hide_form = true;
 	// Always show the form after a login attempt.
-	if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['login'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$hide_form = false;
-	}
+	$show_form = isset( $_POST['login'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 	woocommerce_login_form(
 		array(
 			'message'  => esc_html__( 'If you have shopped with us before, please enter your details below. If you are a new customer, please proceed to the Billing section.', 'woocommerce' ),
 			'redirect' => wc_get_checkout_url(),
-			'hidden'   => $hide_form,
+			'hidden'   => $show_form,
 		)
 	);
 endif;
