@@ -721,7 +721,7 @@ class PaymentProviders {
 				$suggestion_id           = $payment_gateways_to_suggestions_map[ $id ]['id'];
 				$suggestion_order_map_id = $this->get_suggestion_order_map_id( $suggestion_id );
 
-				if ( isset( $order_map[ $suggestion_order_map_id ] ) ) {			
+				if ( isset( $order_map[ $suggestion_order_map_id ] ) ) {
 					// Determine the offset for placing missing PGs after this suggestion.
 					if ( ! isset( $suggestion_order_map_id_to_offset_map[ $suggestion_order_map_id ] ) ) {
 						$suggestion_order_map_id_to_offset_map[ $suggestion_order_map_id ] = 0;
