@@ -4,6 +4,8 @@
 import { useBlockProps } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
+import { store as editorStore } from '@wordpress/editor';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -17,6 +19,14 @@ const Edit = ( {
 }: BlockEditProps< BlockAttributes > & { context: Context } ): JSX.Element => {
 	const blockProps = useBlockProps();
 
+	const isTemplate = useSelect( ( select ) => {
+		const { getCurrentPostType } = select( editorStore );
+
+		const template = getCurrentPostType() === 'wp_template';
+
+		return template;
+	}, [] );
+
 	const blockAttrs = {
 		...attributes,
 		...context,
@@ -24,7 +34,7 @@ const Edit = ( {
 
 	return (
 		<div { ...blockProps }>
-			<Block { ...blockAttrs } />
+			<Block { ...blockAttrs } isTemplate={ isTemplate } />
 		</div>
 	);
 };

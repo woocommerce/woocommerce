@@ -11,8 +11,6 @@ import {
 import { useStyleProps } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import type { HTMLAttributes } from 'react';
-import { store as coreStore } from '@wordpress/editor';
-import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -21,21 +19,13 @@ import './style.scss';
 import type { BlockAttributes } from './types';
 
 type Props = BlockAttributes &
-	HTMLAttributes< HTMLDivElement > & { align: boolean };
+	HTMLAttributes< HTMLDivElement > & { align: boolean; isTemplate: boolean };
 
 export const Block = ( props: Props ): JSX.Element | null => {
-	const { className, align } = props;
+	const { className, align, isTemplate } = props;
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
-
-	const isTemplate = useSelect( ( select ) => {
-		const { getCurrentPostType } = select( coreStore );
-
-		const template = getCurrentPostType() === 'wp_template';
-
-		return template;
-	}, [] );
 
 	/**
 	 * Only show sale badge for products that are on sale.
