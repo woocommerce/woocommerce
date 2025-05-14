@@ -1426,16 +1426,12 @@ class WC_Helper {
 				return $installed_subscriptions;
 			}
 
-			try {
-				$installed_subscriptions = array_filter(
-					self::get_subscriptions(),
-					function ( $subscription ) use ( $site_id ) {
-						return in_array( $site_id, $subscription['connections'], true );
-					}
-				);
-			} catch ( Exception $e ) {
-				$installed_subscriptions = array();
-			}
+			$installed_subscriptions = array_filter(
+				self::get_subscriptions(),
+				function ( $subscription ) use ( $site_id ) {
+					return in_array( $site_id, $subscription['connections'], true );
+				}
+			);
 		}
 
 		return $installed_subscriptions;
@@ -1458,16 +1454,12 @@ class WC_Helper {
 				return $unconnected_subscriptions;
 			}
 
-			try {
-				$unconnected_subscriptions = array_filter(
-					self::get_subscriptions(),
-					function ( $subscription ) use ( $site_id ) {
-						return empty( $subscription['connections'] );
-					}
-				);
-			} catch ( Exception $e ) {
-				$unconnected_subscriptions = array();
-			}
+			$unconnected_subscriptions = array_filter(
+				self::get_subscriptions(),
+				function ( $subscription ) use ( $site_id ) {
+					return empty( $subscription['connections'] );
+				}
+			);
 		}
 
 		return $unconnected_subscriptions;
@@ -1510,15 +1502,12 @@ class WC_Helper {
 	 * @return array|bool The array containing sub data or false.
 	 */
 	private static function _get_subscriptions_from_product_id( $product_id, $single = true ) {
-		try {
-			$subscriptions = wp_list_filter( self::get_subscriptions(), array( 'product_id' => $product_id ) );
-		} catch ( Exception $e ) {
-			return false;
-		}
+		$subscriptions = wp_list_filter( self::get_subscriptions(), array( 'product_id' => $product_id ) );
 
 		if ( ! empty( $subscriptions ) ) {
 			return $single ? array_shift( $subscriptions ) : $subscriptions;
 		}
+
 		return false;
 	}
 
@@ -1693,7 +1682,6 @@ class WC_Helper {
 	 * Get rules for displaying notice regarding marketplace product usage.
 	 *
 	 * @return array
-	 * @throws Exception If there is an error getting product usage notice rules.
 	 */
 	public static function get_product_usage_notice_rules() {
 		$cache_key = '_woocommerce_helper_product_usage_notice_rules';
@@ -1732,6 +1720,8 @@ class WC_Helper {
 			}
 
 			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+
+			// Remove notice after successful API call as it's no longer applicable.
 			self::remove_api_error_notice();
 			return $data;
 		} catch ( Exception $e ) {
@@ -1822,7 +1812,6 @@ class WC_Helper {
 	 * Get the connected user's subscriptions.
 	 *
 	 * @return array
-	 * @throws Exception If there is an error getting subscriptions.
 	 */
 	public static function get_subscriptions() {
 		$cache_key = '_woocommerce_helper_subscriptions';
@@ -1878,6 +1867,8 @@ class WC_Helper {
 			}
 
 			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+
+			// Remove notice after successful API call as it's no longer applicable.
 			self::remove_api_error_notice();
 			return $data;
 		} catch ( Exception $e ) {
@@ -1895,14 +1886,10 @@ class WC_Helper {
 	 * @return array|bool The array containing sub data or false.
 	 */
 	public static function get_subscription( $product_key ) {
-		try {
-			$subscriptions = wp_list_filter(
-				self::get_subscriptions(),
-				array( 'product_key' => $product_key )
-			);
-		} catch ( Exception $e ) {
-			return false;
-		}
+		$subscriptions = wp_list_filter(
+			self::get_subscriptions(),
+			array( 'product_key' => $product_key )
+		);
 
 		if ( empty( $subscriptions ) ) {
 			return false;
@@ -1924,11 +1911,7 @@ class WC_Helper {
 	 */
 	public static function get_subscription_list_data() {
 		// First, connected subscriptions.
-		try {
-			$subscriptions = self::get_subscriptions();
-		} catch ( Exception $e ) {
-			$subscriptions = array();
-		}
+		$subscriptions = self::get_subscriptions();
 
 		// Then, installed plugins and themes, with or without an active subscription.
 		$woo_plugins = self::get_local_woo_plugins();
