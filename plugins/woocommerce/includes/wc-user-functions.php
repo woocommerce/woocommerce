@@ -425,18 +425,17 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	$use_lookup_tables = apply_filters( 'woocommerce_customer_bought_product_use_lookup_tables', false, $customer_email, $user_id, $product_id );
 
 	if ( $use_lookup_tables ) {
-		// Lookup tables get refreshed along with the `woocommerce_reports` transient version.
-		// Sync is taking place async, hence we bound to the transient version.
+		// Lookup tables get refreshed along with the `woocommerce_reports` transient version (due to async processing).
 		// With high orders placement rate, this caching here will be short-lived (suboptimal for BFCM/Christmas and busy stores in general).
 		$cache_version = WC_Cache_Helper::get_transient_version( 'woocommerce_reports' );
 	} elseif ( '' === $customer_email && $user_id ) {
-		// Optimized: for specific customers we rely on orders count (customer meta under the hood with in-memory caching in the way to it).
-		// Best-case scenario for caching here, as it only depends on the customer orders placement.
+		// Optimized: for specific customers version with orders count (it's a user meta from in-memory populated datasets).
+		// Best-case scenario for caching here, as it only depends on the customer orders placement rate.
 		$cache_version = wc_get_customer_order_count( $user_id );
 	} else {
-		// Fallback: create, update, and delete operations on orders clears caches and refresh `orders` transient version.
+		// Fallback: create, update, and delete operations on orders clears caches and refreshes `orders` transient version.
 		// With high orders placement rate, this caching here will be short-lived (suboptimal for BFCM/Christmas and busy stores in general).
-		// Though, no case for the core itself but possible for themes/extensions using this function.
+		// For the core, no use-cases for this branch. Themes/extensions are still valid use-cases.
 		$cache_version = WC_Cache_Helper::get_transient_version( 'orders' );
 	}
 
