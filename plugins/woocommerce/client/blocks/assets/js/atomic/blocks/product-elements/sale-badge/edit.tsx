@@ -11,11 +11,9 @@ import { useEffect } from '@wordpress/element';
  */
 import Block from './block';
 import type { BlockAttributes } from './types';
-import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
 
 const Edit = ( {
 	attributes,
-	setAttributes,
 	context,
 }: BlockEditProps< BlockAttributes > & { context: Context } ): JSX.Element => {
 	const blockProps = useBlockProps();
@@ -24,23 +22,6 @@ const Edit = ( {
 		...attributes,
 		...context,
 	};
-	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
-
-	const { isDescendentOfSingleProductTemplate } =
-		useIsDescendentOfSingleProductTemplate();
-
-	useEffect(
-		() =>
-			setAttributes( {
-				isDescendentOfQueryLoop,
-				isDescendentOfSingleProductTemplate,
-			} ),
-		[
-			setAttributes,
-			isDescendentOfQueryLoop,
-			isDescendentOfSingleProductTemplate,
-		]
-	);
 
 	return (
 		<div { ...blockProps }>
