@@ -1682,6 +1682,7 @@ class WC_Helper {
 	 * Get rules for displaying notice regarding marketplace product usage.
 	 *
 	 * @return array
+	 * @throws Exception If there is an error getting product usage notice rules.
 	 */
 	public static function get_product_usage_notice_rules() {
 		$cache_key = '_woocommerce_helper_product_usage_notice_rules';
@@ -1812,6 +1813,7 @@ class WC_Helper {
 	 * Get the connected user's subscriptions.
 	 *
 	 * @return array
+	 * @throws Exception If there is an error getting subscriptions.
 	 */
 	public static function get_subscriptions() {
 		$cache_key = '_woocommerce_helper_subscriptions';
