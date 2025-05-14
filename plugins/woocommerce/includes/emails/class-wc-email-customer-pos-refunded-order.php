@@ -158,6 +158,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 *
 		 * @param int $order_id Order ID.
 		 * @param int $refund_id Refund ID.
+		 * 
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function trigger_full( $order_id, $refund_id = null ) {
 			$this->trigger( $order_id, false, $refund_id );
@@ -168,6 +170,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 *
 		 * @param int $order_id Order ID.
 		 * @param int $refund_id Refund ID.
+		 * 
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function trigger_partial( $order_id, $refund_id = null ) {
 			$this->trigger( $order_id, true, $refund_id );
@@ -180,7 +184,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @param bool $partial_refund Whether it is a partial refund or a full refund.
 		 * @param int  $refund_id Refund ID.
 		 */
-		public function trigger( $order_id, $partial_refund = false, $refund_id = null ) {
+		private function trigger( $order_id, $partial_refund = false, $refund_id = null ) {
 			if ( ! $order_id ) {
 				return;
 			}
@@ -413,6 +417,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @param WC_Order|null $order   The order object.
 		 * @param WC_Email|null $email   The email object.
 		 * @return bool
+		 * 
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function disable_default_refund_email_for_pos_orders( $enabled, $order, $email ) {
 			if ( $order && PointOfSaleOrderUtil::is_pos_order( $order ) ) {
