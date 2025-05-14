@@ -158,7 +158,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 *
 		 * @param int $order_id Order ID.
 		 * @param int $refund_id Refund ID.
-		 * 
+		 *
 		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function trigger_full( $order_id, $refund_id = null ) {
@@ -170,7 +170,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 *
 		 * @param int $order_id Order ID.
 		 * @param int $refund_id Refund ID.
-		 * 
+		 *
 		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function trigger_partial( $order_id, $refund_id = null ) {
@@ -417,7 +417,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @param WC_Order|null $order   The order object.
 		 * @param WC_Email|null $email   The email object.
 		 * @return bool
-		 * 
+		 *
 		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function disable_default_refund_email_for_pos_orders( $enabled, $order, $email ) {
