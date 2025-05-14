@@ -330,8 +330,7 @@ class PaymentProviders {
 			}
 
 			// Determine if the suggestion is preferred or not by looking at its tags.
-			$is_preferred = in_array( ExtensionSuggestions::TAG_PREFERRED, $extension['tags'], true ) || 
-				$this->extension_suggestions->is_pes_offline_suggestion_selling_offline( $extension['id'] );
+			$is_preferred = in_array( ExtensionSuggestions::TAG_PREFERRED, $extension['tags'], true );
 
 			// Determine if the suggestion is hidden (from the preferred locations).
 			$is_hidden = $this->is_payment_extension_suggestion_hidden( $extension );
