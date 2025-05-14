@@ -530,6 +530,86 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		// Test with wrong type.
 		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'plugin_slug' => false ) );
 		$this->assertEquals( '', $this->sut->get_plugin_slug( $fake_gateway ) );
+
+		// Test with class filename in the plugins directory.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'plugin_slug'    => null,
+				'class_filename' => trailingslashit( WP_PLUGIN_DIR ) . 'woocommerce-payments/some-dir/gateways/class-fake-gateway.php',
+			)
+		);
+		$this->assertEquals( 'woocommerce-payments', $this->sut->get_plugin_slug( $fake_gateway ) );
+
+		// Test with class filename in the plugins directory, only one level deep.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'plugin_slug'    => null,
+				'class_filename' => trailingslashit( WP_PLUGIN_DIR ) . 'woocommerce-payments/class-fake-gateway.php',
+			)
+		);
+		$this->assertEquals( 'woocommerce-payments', $this->sut->get_plugin_slug( $fake_gateway ) );
+
+		// Test with class filename in the root of the plugins directory.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'plugin_slug'    => null,
+				'class_filename' => trailingslashit( WP_PLUGIN_DIR ) . 'fake-gateway.php',
+			)
+		);
+		$this->assertEquals( 'fake-gateway', $this->sut->get_plugin_slug( $fake_gateway ) );
+
+		// Test with class filename in the mu-plugins directory.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'plugin_slug'    => null,
+				'class_filename' => trailingslashit( WPMU_PLUGIN_DIR ) . 'woocommerce-payments/some-dir/gateways/class-fake-gateway.php',
+			)
+		);
+		$this->assertEquals( 'woocommerce-payments', $this->sut->get_plugin_slug( $fake_gateway ) );
+
+		// Test with class filename in the mu-plugins directory, only one level deep.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'plugin_slug'    => null,
+				'class_filename' => trailingslashit( WPMU_PLUGIN_DIR ) . 'woocommerce-payments/class-fake-gateway.php',
+			)
+		);
+		$this->assertEquals( 'woocommerce-payments', $this->sut->get_plugin_slug( $fake_gateway ) );
+
+		// Test with class filename in the root of the mu-plugins directory.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'plugin_slug'    => null,
+				'class_filename' => trailingslashit( WPMU_PLUGIN_DIR ) . 'fake-gateway.php',
+			)
+		);
+		$this->assertEquals( 'fake-gateway', $this->sut->get_plugin_slug( $fake_gateway ) );
+
+		// Test with class filename in the themes directory.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'plugin_slug'    => null,
+				'class_filename' => trailingslashit( get_template_directory() ) . 'some-theme/some-dir/gateways/class-fake-gateway.php',
+			)
+		);
+		$this->assertEquals( '', $this->sut->get_plugin_slug( $fake_gateway ) );
+
+		// Test with class filename in a random directory.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'plugin_slug'    => null,
+				'class_filename' => '/var/www/something/woocommerce-payments/some-dir/gateways/class-fake-gateway.php',
+			)
+		);
+		$this->assertEquals( '', $this->sut->get_plugin_slug( $fake_gateway ) );
 	}
 
 	/**
