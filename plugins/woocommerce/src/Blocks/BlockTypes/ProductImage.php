@@ -69,11 +69,13 @@ class ProductImage extends AbstractBlock {
 			return '';
 		}
 
+		$align = $attributes['saleBadgeAlign'] ?? 'right';
+
 		$block = new \WP_Block(
 			array(
 				'blockName' => 'woocommerce/product-sale-badge',
 				'attrs'     => array(
-					'align' => $attributes['saleBadgeAlign'],
+					'align' => $align,
 				),
 			),
 			array(
