@@ -17,6 +17,10 @@ const EMPTY_OBJECT = {};
 
 interface ElementProperties {
 	typography: TypographyProperties;
+	color?: {
+		background: string;
+		text: string;
+	};
 }
 export interface StyleProperties {
 	spacing?: {

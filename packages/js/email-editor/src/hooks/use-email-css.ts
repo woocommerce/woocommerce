@@ -12,13 +12,10 @@ import deepmerge from 'deepmerge';
 import { EmailTheme, EmailBuiltStyles, storeName } from '../store';
 import { useUserTheme } from './use-user-theme';
 import { useGlobalStylesOutputWithConfig } from '../private-apis';
+import { unwrapCompressedPresetStyleVariable } from '../style-variables';
 
-// Utility to normalize spacing value to --wp--preset--spacing--<value> format
-function normalizeSpacingValue( value: string ): string {
-	if ( typeof value !== 'string' ) return value;
-	const match = value.match( /^var:preset\|spacing\|([a-zA-Z0-9-]+)$/ );
-	return match ? `var(--wp--preset--spacing--${ match[ 1 ] })` : value;
-}
+// Empty array to avoid re-rendering the component when the array is empty
+const EMPTY_ARRAY = [];
 
 export function useEmailCss() {
 	const { userTheme } = useUserTheme();
@@ -62,10 +59,10 @@ export function useEmailCss() {
 	}
 	const padding = mergedConfig.styles?.spacing?.padding;
 	if ( padding ) {
-		rootContainerStyles += `padding-left:${ normalizeSpacingValue(
+		rootContainerStyles += `padding-left:${ unwrapCompressedPresetStyleVariable(
 			padding.left
 		) };`;
-		rootContainerStyles += `padding-right:${ normalizeSpacingValue(
+		rootContainerStyles += `padding-right:${ unwrapCompressedPresetStyleVariable(
 			padding.right
 		) };`;
 	}
@@ -81,5 +78,5 @@ export function useEmailCss() {
 	}, [ styles, editorSettingsStyles, rootContainerStyles ] );
 
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-	return [ finalStyles || [] ];
+	return [ finalStyles || EMPTY_ARRAY ];
 }

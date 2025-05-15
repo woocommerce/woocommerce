@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
-import { useState } from '@wordpress/element';
+import { useState, useMemo } from '@wordpress/element';
 import {
 	__experimentalHStack as HStack, // eslint-disable-line
 	__experimentalVStack as VStack, // eslint-disable-line
@@ -13,6 +13,8 @@ import {
  * Internal dependencies
  */
 import { storeName } from '../../../store';
+import { useEmailStyles } from '../../../hooks';
+import { getCompressedVariableValue } from '../../../style-variables';
 
 const firstFrame = {
 	start: {
@@ -56,7 +58,7 @@ type Props = {
 
 /**
  * Component to render the styles preview based on the component from the site editor:
- * https://github.com/WordPress/gutenberg/blob/trunk/packages/edit-site/src/components/global-styles/preview.js
+ * https://github.com/WordPress/gutenberg/blob/5c7c4e7751df5e05fc70a354cd0d81414ac9c7e7/packages/edit-site/src/components/global-styles/preview-styles.js
  *
  * @param root0
  * @param root0.label
@@ -68,23 +70,41 @@ export function Preview( {
 	isFocused,
 	withHoverView,
 }: Props ): JSX.Element {
-	const { styles, colors } = useSelect(
+	const { colors } = useSelect(
 		( select ) => ( {
-			styles: select( storeName ).getStyles(),
 			colors: select( storeName ).getPaletteColors(),
 		} ),
 		[]
 	);
 
-	const backgroundColor = styles?.color?.background || '#ffffff';
-	const headingFontFamily =
-		styles?.elements?.heading?.typography?.fontFamily || 'inherit';
-	const headingColor = styles?.elements?.heading?.color?.text || 'inherit';
+	const { styles } = useEmailStyles();
+
+	const backgroundColor = useMemo(
+		() =>
+			getCompressedVariableValue( styles?.color?.background ) ||
+			'#ffffff',
+		[ styles ]
+	);
+	const textColor = useMemo(
+		() => getCompressedVariableValue( styles?.color?.text ) || 'inherit',
+		[ styles ]
+	);
+	const headingColor = useMemo(
+		() =>
+			getCompressedVariableValue(
+				styles?.elements?.heading?.color?.text
+			) || textColor,
+		[ styles, textColor ]
+	);
+
 	const headingFontWeight =
 		styles?.elements?.heading?.typography?.fontWeight || 'inherit';
+	const headingFontFamily =
+		styles?.elements?.heading?.typography?.fontFamily || 'inherit';
 
-	const paletteColors = colors.theme.concat( colors.theme );
+	const paletteColors = colors.theme.concat( colors.default );
 
+	// We pick the first two colors that are not the background or the heading color
 	// https://github.com/WordPress/gutenberg/blob/7fa03fafeb421ab4c3604564211ce6007cc38e84/packages/edit-site/src/components/global-styles/hooks.js#L68-L73
 	const highlightedColors = paletteColors
 		.filter(
