@@ -4,7 +4,6 @@
 import { render, screen, within } from '@testing-library/react';
 import ShippingAddress from '@woocommerce/base-components/cart-checkout/totals/shipping/shipping-address';
 import { cartStore, checkoutStore } from '@woocommerce/block-data';
-import { ShippingCalculatorContext } from '@woocommerce/base-components/cart-checkout';
 import { dispatch } from '@wordpress/data';
 import { previewCart } from '@woocommerce/resource-previews';
 import * as baseContextHooks from '@woocommerce/base-context/hooks';
@@ -80,18 +79,7 @@ baseContextHooks.useStoreCart.mockReturnValue( {
 
 describe( 'ShippingAddress', () => {
 	it( 'Renders shipping address if user does not prefer collection', () => {
-		render(
-			<ShippingCalculatorContext.Provider
-				value={ {
-					showCalculator: true,
-					isShippingCalculatorOpen: false,
-					setIsShippingCalculatorOpen: jest.fn(),
-					shippingCalculatorID: 'shipping-calculator-form-wrapper',
-				} }
-			>
-				<ShippingAddress />
-			</ShippingCalculatorContext.Provider>
-		);
+		render( <ShippingAddress /> );
 
 		const panel = screen.getByRole( 'button' );
 		const paragraph = within( panel ).getByRole( 'paragraph' );
@@ -131,18 +119,7 @@ describe( 'ShippingAddress', () => {
 
 		dispatch( cartStore ).receiveCart( previewCart );
 
-		render(
-			<ShippingCalculatorContext.Provider
-				value={ {
-					showCalculator: true,
-					isShippingCalculatorOpen: false,
-					setIsShippingCalculatorOpen: jest.fn(),
-					shippingCalculatorID: 'shipping-calculator-form-wrapper',
-				} }
-			>
-				<ShippingAddress />
-			</ShippingCalculatorContext.Provider>
-		);
+		render( <ShippingAddress /> );
 
 		const panel = screen.getByRole( 'button' );
 		const paragraph = within( panel ).getByRole( 'paragraph' );
@@ -176,18 +153,7 @@ describe( 'ShippingAddress', () => {
 
 		dispatch( cartStore ).receiveCart( previewCart );
 
-		render(
-			<ShippingCalculatorContext.Provider
-				value={ {
-					showCalculator: true,
-					isShippingCalculatorOpen: false,
-					setIsShippingCalculatorOpen: jest.fn(),
-					shippingCalculatorID: 'shipping-calculator-form-wrapper',
-				} }
-			>
-				<ShippingAddress />
-			</ShippingCalculatorContext.Provider>
-		);
+		render( <ShippingAddress /> );
 
 		const panel = screen.getByRole( 'button' );
 		const paragraph = within( panel ).getByRole( 'paragraph' );

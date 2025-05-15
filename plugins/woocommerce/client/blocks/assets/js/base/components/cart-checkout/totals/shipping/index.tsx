@@ -11,7 +11,6 @@ import { useStoreCart } from '@woocommerce/base-context';
  * Internal dependencies
  */
 import { ShippingVia } from './shipping-via';
-import { ShippingAddress } from './shipping-address';
 import { renderShippingTotalValue } from './utils';
 import './style.scss';
 
@@ -40,7 +39,6 @@ export const TotalsShipping = ( {
 				description={
 					<>
 						{ !! hasRates && <ShippingVia /> }
-						<ShippingAddress />
 						{ collaterals && (
 							<div className="wc-block-components-totals-shipping__collaterals">
 								{ collaterals }
