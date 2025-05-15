@@ -81,7 +81,7 @@ trait BlocksSharedState {
 	 * @param string $consent_statement - The consent statement string.
 	 * @return void
 	 */
-	public function initialize_shared_state( $consent_statement ) {
+	public function register_cart_interactivity( $consent_statement ) {
 		self::check_consent( $consent_statement );
 
 		if ( null === self::$blocks_shared_cart_state ) {

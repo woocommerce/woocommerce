@@ -96,7 +96,7 @@ class ProductButton extends AbstractBlock {
 			return '';
 		}
 
-		$this->initialize_shared_state( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
 		wp_interactivity_state(
 			'woocommerce/product-button',
