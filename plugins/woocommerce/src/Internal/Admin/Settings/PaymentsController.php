@@ -50,6 +50,7 @@ class PaymentsController {
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
 		add_filter( 'woocommerce_admin_allowed_promo_notes', array( $this, 'add_allowed_promo_notes' ) );
 		add_filter( 'woocommerce_get_sections_checkout', array( $this, 'handle_sections' ), 20 );
+		add_action( 'woocommerce_admin_payments_extension_suggestion_incentive_dismissed', array( $this, 'handle_incentive_dismissed' ) );
 	}
 
 	/**
@@ -184,6 +185,16 @@ class PaymentsController {
 		}
 
 		return $sections;
+	}
+
+	/**
+	 * Handle the payments extension suggestion incentive dismissed event.
+	 *
+	 * @return void
+	 */
+	public function handle_incentive_dismissed(): void {
+		// Just clear the transient to force a new check for providers with an incentive.
+		delete_transient( self::TRANSIENT_HAS_PROVIDERS_WITH_INCENTIVE_KEY );
 	}
 
 	/**
