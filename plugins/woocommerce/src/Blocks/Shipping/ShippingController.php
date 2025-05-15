@@ -81,7 +81,6 @@ class ShippingController {
 		add_filter( 'woocommerce_shipping_packages', array( $this, 'filter_shipping_packages' ) );
 		add_filter( 'pre_update_option_woocommerce_pickup_location_settings', array( $this, 'flush_cache' ) );
 		add_filter( 'pre_update_option_pickup_location_pickup_locations', array( $this, 'flush_cache' ) );
-		add_filter( 'woocommerce_shipping_packages', array( $this, 'remove_shipping_if_no_address' ), 11 );
 		add_filter( 'woocommerce_order_shipping_to_display', array( $this, 'show_local_pickup_details' ), 10, 2 );
 
 		// This is required to short circuit `show_shipping` from class-wc-cart.php - without it, that function
@@ -526,46 +525,6 @@ class ShippingController {
 		return $packages;
 	}
 
-	/**
-	 * Remove shipping (i.e. delivery, not local pickup) if
-	 * "Hide shipping costs until an address is entered" is enabled,
-	 * and no address has been entered yet.
-	 *
-	 * @param array $packages Array of shipping packages.
-	 * @return array
-	 */
-	public function remove_shipping_if_no_address( $packages ) {
-		if ( 'shortcode' === WC()->cart->cart_context ) {
-			return $packages;
-		}
-
-		$shipping_cost_requires_address = wc_string_to_bool( get_option( 'woocommerce_shipping_cost_requires_address', 'no' ) );
-
-		// Return early here for a small performance gain if we don't need to hide shipping costs until an address is entered.
-		if ( ! $shipping_cost_requires_address ) {
-			return $packages;
-		}
-
-		$customer = WC()->customer;
-
-		if ( $customer instanceof WC_Customer && $customer->has_full_shipping_address() ) {
-			return $packages;
-		}
-
-		return array_map(
-			function ( $package ) {
-				// Package rates is always an array due to a check in core.
-				$package['rates'] = array_filter(
-					$package['rates'],
-					function ( $rate ) {
-						return $rate instanceof WC_Shipping_Rate && in_array( $rate->get_method_id(), LocalPickupUtils::get_local_pickup_method_ids(), true );
-					}
-				);
-				return $package;
-			},
-			$packages
-		);
-	}
 	/**
 	 * Track local pickup settings changes via Store API
 	 *

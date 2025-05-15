@@ -1632,51 +1632,49 @@ class WC_Cart extends WC_Legacy_Cart {
 			return false;
 		}
 
-		if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
-			if ( 'store-api' === $this->cart_context ) {
-				$customer = $this->get_customer();
+		if ( 'store-api' === $this->cart_context ) {
+			$customer = $this->get_customer();
 
-				if ( ! $customer instanceof \WC_Customer || ! $customer->has_full_shipping_address() ) {
-					return false;
-				}
-			} else {
-				$country = $this->get_customer()->get_shipping_country();
-				if ( ! $country ) {
-					return false;
-				}
-				$country_fields  = WC()->countries->get_address_fields( $country, 'shipping_' );
-				$checkout_fields = WC()->checkout()->get_checkout_fields();
+			if ( ! $customer instanceof \WC_Customer || ! $customer->has_full_shipping_address() ) {
+				return false;
+			}
+		} elseif ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
+			$country = $this->get_customer()->get_shipping_country();
+			if ( ! $country ) {
+				return false;
+			}
+			$country_fields  = WC()->countries->get_address_fields( $country, 'shipping_' );
+			$checkout_fields = WC()->checkout()->get_checkout_fields();
 
-				/**
-				 * Filter to not require shipping state for shipping calculation, even if it is required at checkout.
-				 * This can be used to allow shipping calculations to be done without a state.
-				 *
-				 * @since 8.4.0
-				 *
-				 * @param bool $show_state Whether to use the state field. Default true.
-				 */
-				$state_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_state', true );
-				$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'];
-				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
-				$checkout_state_field_exists = isset( $checkout_fields['shipping']['shipping_state'] );
-				if ( $state_enabled && $state_required && ! $this->get_customer()->get_shipping_state() && $checkout_state_field_exists ) {
-					return false;
-				}
-				/**
-				 * Filter to not require shipping postcode for shipping calculation, even if it is required at checkout.
-				 * This can be used to allow shipping calculations to be done without a postcode.
-				 *
-				 * @since 8.4.0
-				 *
-				 * @param bool $show_postcode Whether to use the postcode field. Default true.
-				 */
-				$postcode_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true );
-				$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'];
-				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
-				$checkout_postcode_field_exists = isset( $checkout_fields['shipping']['shipping_postcode'] );
-				if ( $postcode_enabled && $postcode_required && '' === $this->get_customer()->get_shipping_postcode() && $checkout_postcode_field_exists ) {
-					return false;
-				}
+			/**
+			 * Filter to not require shipping state for shipping calculation, even if it is required at checkout.
+			 * This can be used to allow shipping calculations to be done without a state.
+			 *
+			 * @since 8.4.0
+			 *
+			 * @param bool $show_state Whether to use the state field. Default true.
+			 */
+			$state_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_state', true );
+			$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'];
+			// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
+			$checkout_state_field_exists = isset( $checkout_fields['shipping']['shipping_state'] );
+			if ( $state_enabled && $state_required && ! $this->get_customer()->get_shipping_state() && $checkout_state_field_exists ) {
+				return false;
+			}
+			/**
+			 * Filter to not require shipping postcode for shipping calculation, even if it is required at checkout.
+			 * This can be used to allow shipping calculations to be done without a postcode.
+			 *
+			 * @since 8.4.0
+			 *
+			 * @param bool $show_postcode Whether to use the postcode field. Default true.
+			 */
+			$postcode_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true );
+			$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'];
+			// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
+			$checkout_postcode_field_exists = isset( $checkout_fields['shipping']['shipping_postcode'] );
+			if ( $postcode_enabled && $postcode_required && '' === $this->get_customer()->get_shipping_postcode() && $checkout_postcode_field_exists ) {
+				return false;
 			}
 		}
 
