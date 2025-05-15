@@ -27,6 +27,7 @@ const FrontendBlock = ( {
 				<TotalsFooterItem
 					currency={ totalsCurrency }
 					values={ cartTotals }
+					estimated={ true }
 				/>
 			</div>
 			<OrderMetaSlotFill />
