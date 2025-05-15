@@ -77,7 +77,7 @@ class ProductSaleBadge extends AbstractBlock {
 		 * Filters the product sale badge text.
 		 *
 		 * @hook woocommerce_sale_badge_text
-		 * @since 9.9.0
+		 * @since 10.0.0
 		 *
 		 * @param string $sale_text The sale badge text.
 		 * @param WC_Product $product The product object.
