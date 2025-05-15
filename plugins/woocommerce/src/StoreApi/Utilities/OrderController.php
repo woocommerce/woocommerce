@@ -485,7 +485,7 @@ class OrderController {
 
 		foreach ( $current_locale as $address_field_key => $address_field ) {
 			// Skip validation if field is not required or hidden.
-			if ( true !== $address_field['required'] || true === $address_field['hidden'] ) {
+			if ( true !== $address_field['required'] || true === wc_string_to_bool( $address_field['hidden'] ?? false ) ) {
 				continue;
 			}
 
