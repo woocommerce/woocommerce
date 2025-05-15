@@ -1717,7 +1717,7 @@ class WC_Helper {
 			if ( ! is_array( $data ) ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ) );
+				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ), 422 );
 			}
 
 			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
@@ -1870,7 +1870,7 @@ class WC_Helper {
 			if ( ! is_array( $data ) ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ) );
+				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ), 422 );
 			}
 
 			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
