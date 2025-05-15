@@ -107,8 +107,8 @@ class WC_Helper {
 
 		$note->set_props(
 			array(
-				'title'        => __( 'WooCommerce.com API failure', 'woocommerce' ),
-				'content'      => __( 'A request to the WooCommerce.com API has failed - subscriptions may not be listed correctly. Please retry in a few minutes by refreshing this page.', 'woocommerce' ),
+				'title'        => __( 'We’re having trouble connecting to WooCommerce.com', 'woocommerce' ),
+				'content'      => __( 'Some subscription data may be temporarily unavailable. Please refresh the page in a few minutes to try again.', 'woocommerce' ),
 				'type'         => Note::E_WC_ADMIN_NOTE_UPDATE,
 				'name'         => self::NOTE_NAME,
 				'content_data' => (object) array(),
