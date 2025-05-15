@@ -312,8 +312,8 @@ class WC_Email extends WC_Settings_API {
 		$this->email_type = $this->get_option( 'email_type' );
 		$this->enabled    = $this->get_option( 'enabled' );
 		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
-			$this->cc  = $this->get_option( 'cc' );
-			$this->bcc = $this->get_option( 'bcc' );
+			$this->cc  = $this->get_option( 'cc', '' );
+			$this->bcc = $this->get_option( 'bcc', '' );
 		}
 
 		if ( $this->block_email_editor_enabled ) {
@@ -578,7 +578,7 @@ class WC_Email extends WC_Settings_API {
 		 * @param WC_Email $email  WC_Email instance managing the email.
 		 */
 		$cc  = apply_filters( 'woocommerce_email_cc_recipient_' . $this->id, $this->cc, $this->object, $this );
-		$ccs = array_map( 'trim', explode( ',', $cc ) );
+		$ccs = array_map( 'trim', explode( ',', $cc ?? '' ) );
 		$ccs = array_filter( $ccs, 'is_email' );
 		$ccs = array_map( 'sanitize_email', $ccs );
 		return implode( ', ', $ccs );
@@ -599,7 +599,7 @@ class WC_Email extends WC_Settings_API {
 		 * @param WC_Email $email  WC_Email instance managing the email.
 		 */
 		$bcc  = apply_filters( 'woocommerce_email_bcc_recipient_' . $this->id, $this->bcc, $this->object, $this );
-		$bccs = array_map( 'trim', explode( ',', $bcc ) );
+		$bccs = array_map( 'trim', explode( ',', $bcc ?? '' ) );
 		$bccs = array_filter( $bccs, 'is_email' );
 		$bccs = array_map( 'sanitize_email', $bccs );
 		return implode( ', ', $bccs );
