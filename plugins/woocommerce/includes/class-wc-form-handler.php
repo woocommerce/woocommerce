@@ -6,7 +6,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Enums\PaymentGatewayFeatures;
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
 
 defined( 'ABSPATH' ) || exit;
@@ -552,7 +552,7 @@ class WC_Form_Handler {
 			if ( isset( $available_gateways[ $payment_method_id ] ) ) {
 				$gateway = $available_gateways[ $payment_method_id ];
 
-				if ( ! $gateway->supports( PaymentGatewayFeatures::ADD_PAYMENT_METHODS ) && ! $gateway->supports( PaymentGatewayFeatures::TOKENIZATION ) ) {
+				if ( ! $gateway->supports( PaymentGatewayFeature::ADD_PAYMENT_METHODS ) && ! $gateway->supports( PaymentGatewayFeature::TOKENIZATION ) ) {
 					wc_add_notice( __( 'Invalid payment gateway.', 'woocommerce' ), 'error' );
 					return;
 				}

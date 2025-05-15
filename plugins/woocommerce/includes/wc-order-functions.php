@@ -11,7 +11,7 @@
 use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
-use Automattic\WooCommerce\Enums\PaymentGatewayFeatures;
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Utilities\Users;
@@ -769,7 +769,7 @@ function wc_refund_payment( $order, $amount, $reason = '' ) {
 			throw new Exception( __( 'The payment gateway for this order does not exist.', 'woocommerce' ) );
 		}
 
-		if ( ! $gateway->supports( PaymentGatewayFeatures::REFUNDS ) ) {
+		if ( ! $gateway->supports( PaymentGatewayFeature::REFUNDS ) ) {
 			throw new Exception( __( 'The payment gateway for this order does not support automatic refunds.', 'woocommerce' ) );
 		}
 

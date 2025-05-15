@@ -7,7 +7,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\WCPayPromotion;
 
-use Automattic\WooCommerce\Enums\PaymentGatewayFeatures;
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -47,22 +47,22 @@ class WCPaymentGatewayPreInstallWCPayPromotion extends \WC_Payment_Gateway {
 			// We include all features here, even if some of them are behind settings, since this is for info only.
 			$this->supports = array(
 				// Regular features.
-				PaymentGatewayFeatures::PRODUCTS,
-				PaymentGatewayFeatures::REFUNDS,
+				PaymentGatewayFeature::PRODUCTS,
+				PaymentGatewayFeature::REFUNDS,
 				// Subscriptions features.
-				PaymentGatewayFeatures::SUBSCRIPTIONS,
-				PaymentGatewayFeatures::MULTIPLE_SUBSCRIPTIONS,
-				PaymentGatewayFeatures::SUBSCRIPTION_CANCELLATION,
-				PaymentGatewayFeatures::SUBSCRIPTION_REACTIVATION,
-				PaymentGatewayFeatures::SUBSCRIPTION_SUSPENSION,
-				PaymentGatewayFeatures::SUBSCRIPTION_AMOUNT_CHANGES,
-				PaymentGatewayFeatures::SUBSCRIPTION_DATE_CHANGES,
-				PaymentGatewayFeatures::SUBSCRIPTION_PAYMENT_METHOD_CHANGE_ADMIN,
-				PaymentGatewayFeatures::SUBSCRIPTION_PAYMENT_METHOD_CHANGE_CUSTOMER,
-				PaymentGatewayFeatures::SUBSCRIPTION_PAYMENT_METHOD_CHANGE,
+				PaymentGatewayFeature::SUBSCRIPTIONS,
+				PaymentGatewayFeature::MULTIPLE_SUBSCRIPTIONS,
+				PaymentGatewayFeature::SUBSCRIPTION_CANCELLATION,
+				PaymentGatewayFeature::SUBSCRIPTION_REACTIVATION,
+				PaymentGatewayFeature::SUBSCRIPTION_SUSPENSION,
+				PaymentGatewayFeature::SUBSCRIPTION_AMOUNT_CHANGES,
+				PaymentGatewayFeature::SUBSCRIPTION_DATE_CHANGES,
+				PaymentGatewayFeature::SUBSCRIPTION_PAYMENT_METHOD_CHANGE_ADMIN,
+				PaymentGatewayFeature::SUBSCRIPTION_PAYMENT_METHOD_CHANGE_CUSTOMER,
+				PaymentGatewayFeature::SUBSCRIPTION_PAYMENT_METHOD_CHANGE,
 				// Saved cards features.
-				PaymentGatewayFeatures::TOKENIZATION,
-				PaymentGatewayFeatures::ADD_PAYMENT_METHODS,
+				PaymentGatewayFeature::TOKENIZATION,
+				PaymentGatewayFeature::ADD_PAYMENT_METHODS,
 			);
 		}
 

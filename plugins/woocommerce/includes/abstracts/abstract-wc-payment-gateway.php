@@ -10,7 +10,7 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Enums\PaymentGatewayFeatures;
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -162,7 +162,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			return $this->tokens;
 		}
 
-		if ( is_user_logged_in() && $this->supports( PaymentGatewayFeatures::TOKENIZATION ) ) {
+		if ( is_user_logged_in() && $this->supports( PaymentGatewayFeature::TOKENIZATION ) ) {
 			$this->tokens = WC_Payment_Tokens::get_customer_tokens( get_current_user_id(), $this->id );
 		}
 
@@ -478,7 +478,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			echo wpautop( wptexturize( $description ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 
-		if ( $this->supports( PaymentGatewayFeatures::DEFAULT_CREDIT_CARD_FORM ) ) {
+		if ( $this->supports( PaymentGatewayFeature::DEFAULT_CREDIT_CARD_FORM ) ) {
 			$this->credit_card_form(); // Deprecated, will be removed in a future version.
 		}
 	}
@@ -515,7 +515,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return bool If false, the automatic refund button is hidden in the UI.
 	 */
 	public function can_refund_order( $order ) {
-		return $order && $this->supports( PaymentGatewayFeatures::REFUNDS );
+		return $order && $this->supports( PaymentGatewayFeature::REFUNDS );
 	}
 
 	/**
