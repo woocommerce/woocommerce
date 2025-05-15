@@ -1149,7 +1149,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * @dataProvider provider_testing_preferred_offline_provider_visibility
-	 * 
+	 *
 	 * @param string $selling_context The selling context.
 	 * @param bool   $expected_preferred_visible The expected visibility of the preferred provider.
 	 */
