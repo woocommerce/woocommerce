@@ -1,26 +1,11 @@
 @import "settings-payments-main.scss";
 
 .settings-payments-offline__container {
-	// Temporarily copy styles while things are under construction.
 	@extend .settings-payments-main__container;
 
 	.settings-payment-gateways {
 		border: 0;
 		box-shadow: none;
-	}
-
-	.settings-payment-gateways__header {
-		padding: $gap-large 2 * $gap-large;
-		margin: 0;
-		border: 0;
-
-		@media screen and ( max-width: 1024px ) {
-			padding: $gap-large;
-		}
-
-		@media screen and ( max-width: 782px ) {
-			padding: $gap-large;
-		}
 	}
 }
 

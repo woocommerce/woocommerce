@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\PaymentGateway;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
+use stdClass;
 use WC_Unit_Test_Case;
 
 /**
@@ -204,6 +205,22 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 	public function test_get_title() {
 		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'method_title' => 'WooPayments' ) );
 		$this->assertEquals( 'WooPayments', $this->sut->get_title( $fake_gateway ) );
+
+		// Test title with HTML tags.
+		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'method_title' => '<h1><a href="#">WooPayments</a></h1> <a href="#">Some link</a> ' ) );
+		$this->assertEquals( 'WooPayments Some link', $this->sut->get_title( $fake_gateway ) );
+
+		// Test title with encoded HTML entitites.
+		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'method_title' => htmlentities( '<h1><a href="#">WooPayments</a></h1> <a href="#">Some link</a> ' ) ) );
+		$this->assertEquals( 'WooPayments Some link', $this->sut->get_title( $fake_gateway ) );
+
+		// Test title with wrong type.
+		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'method_title' => true ) );
+		$this->assertEquals( 'Unknown', $this->sut->get_title( $fake_gateway ) );
+
+		// Test title empty.
+		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'method_title' => '' ) );
+		$this->assertEquals( 'Unknown', $this->sut->get_title( $fake_gateway ) );
 	}
 
 	/**
@@ -212,6 +229,22 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 	public function test_get_description() {
 		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'method_description' => 'Accept payments with WooPayments.' ) );
 		$this->assertEquals( 'Accept payments with WooPayments.', $this->sut->get_description( $fake_gateway ) );
+
+		// Test description with HTML tags.
+		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'method_description' => '<a href="#">Accept</a> <b>payments</b> <strong><span>with</span> WooPayments. </strong><h1></h1> ' ) );
+		$this->assertEquals( 'Accept payments with WooPayments.', $this->sut->get_description( $fake_gateway ) );
+
+		// Test description with encoded HTML entitites.
+		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'method_description' => htmlentities( '<a href="#">Accept</a> <b>payments</b> <strong><span>with</span> WooPayments. </strong><h1></h1> ' ) ) );
+		$this->assertEquals( 'Accept payments with WooPayments.', $this->sut->get_description( $fake_gateway ) );
+
+		// Test description with wrong type.
+		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'method_description' => true ) );
+		$this->assertEquals( '', $this->sut->get_description( $fake_gateway ) );
+
+		// Test description empty.
+		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'method_description' => '' ) );
+		$this->assertEquals( '', $this->sut->get_description( $fake_gateway ) );
 	}
 
 	/**
@@ -227,6 +260,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 
 		// Test empty icon falls back to default icon.
 		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'icon' => '' ) );
+		$this->assertStringContainsString( 'wp-content/plugins/woocommerce/assets/images/icons/default-payments.svg', $this->sut->get_icon( $fake_gateway ) );
+
+		// Test wrong type icon falls back to default icon.
+		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'icon' => true ) );
+		$this->assertStringContainsString( 'wp-content/plugins/woocommerce/assets/images/icons/default-payments.svg', $this->sut->get_icon( $fake_gateway ) );
+		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'icon' => array( 'some-icon' ) ) );
 		$this->assertStringContainsString( 'wp-content/plugins/woocommerce/assets/images/icons/default-payments.svg', $this->sut->get_icon( $fake_gateway ) );
 
 		// Test missing icon falls back to default icon.
@@ -271,6 +310,14 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 			),
 			$this->sut->get_supports_list( $fake_gateway )
 		);
+
+		// Test with wrong type.
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'supports' => 'products' ) );
+		$this->assertEquals( array(), $this->sut->get_supports_list( $fake_gateway ) );
+
+		// Test undefined.
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array() );
+		$this->assertEquals( array( 'products' ), $this->sut->get_supports_list( $fake_gateway ) );
 	}
 
 	/**
@@ -281,6 +328,17 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $this->sut->is_enabled( $fake_gateway ) );
 
 		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'enabled' => false ) );
+		$this->assertFalse( $this->sut->is_enabled( $fake_gateway ) );
+
+		// Test with string value.
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'enabled' => 'yes' ) );
+		$this->assertTrue( $this->sut->is_enabled( $fake_gateway ) );
+
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'enabled' => 'no' ) );
+		$this->assertFalse( $this->sut->is_enabled( $fake_gateway ) );
+
+		// Test with wrong type.
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'enabled' => array() ) );
 		$this->assertFalse( $this->sut->is_enabled( $fake_gateway ) );
 	}
 
@@ -293,6 +351,17 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 
 		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'needs_setup' => false ) );
 		$this->assertFalse( $this->sut->needs_setup( $fake_gateway ) );
+
+		// Test with string value.
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'needs_setup' => 'yes' ) );
+		$this->assertTrue( $this->sut->needs_setup( $fake_gateway ) );
+
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'needs_setup' => 'no' ) );
+		$this->assertFalse( $this->sut->needs_setup( $fake_gateway ) );
+
+		// Test with wrong type.
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'needs_setup' => array() ) );
+		$this->assertFalse( $this->sut->needs_setup( $fake_gateway ) );
 	}
 
 	/**
@@ -303,6 +372,10 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $this->sut->is_in_test_mode( $fake_gateway ) );
 
 		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'test_mode' => false ) );
+		$this->assertFalse( $this->sut->is_in_test_mode( $fake_gateway ) );
+
+		// Test with wrong type.
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'test_mode' => array() ) );
 		$this->assertFalse( $this->sut->is_in_test_mode( $fake_gateway ) );
 	}
 
@@ -315,6 +388,105 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 
 		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'dev_mode' => false ) );
 		$this->assertFalse( $this->sut->is_in_dev_mode( $fake_gateway ) );
+
+		// Test with wrong type.
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'dev_mode' => array() ) );
+		$this->assertFalse( $this->sut->is_in_dev_mode( $fake_gateway ) );
+	}
+
+	/**
+	 * Test is_account_connected.
+	 */
+	public function test_is_account_connected() {
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'account_connected' => true ) );
+		$this->assertTrue( $this->sut->is_account_connected( $fake_gateway ) );
+
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'account_connected' => false ) );
+		$this->assertFalse( $this->sut->is_account_connected( $fake_gateway ) );
+
+		// Test with wrong type.
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'account_connected' => array() ) );
+		$this->assertFalse( $this->sut->is_account_connected( $fake_gateway ) );
+
+		// Test undefined.
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array() );
+		$this->assertTrue( $this->sut->is_account_connected( $fake_gateway ) );
+	}
+
+	/**
+	 * Test is_onboarding_started.
+	 */
+	public function test_is_onboarding_started() {
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'onboarding_started' => true ) );
+		$this->assertTrue( $this->sut->is_onboarding_started( $fake_gateway ) );
+
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'onboarding_started' => false ) );
+		$this->assertFalse( $this->sut->is_onboarding_started( $fake_gateway ) );
+
+		// Test with wrong type.
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'onboarding_started' => array() ) );
+		$this->assertFalse( $this->sut->is_onboarding_started( $fake_gateway ) );
+	}
+
+	/**
+	 * Test is_onboarding_completed.
+	 */
+	public function test_is_onboarding_completed() {
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'onboarding_started'   => true,
+				'onboarding_completed' => true,
+			)
+		);
+		$this->assertTrue( $this->sut->is_onboarding_completed( $fake_gateway ) );
+
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'onboarding_started'   => true,
+				'onboarding_completed' => false,
+			)
+		);
+		$this->assertFalse( $this->sut->is_onboarding_completed( $fake_gateway ) );
+
+		// Test without onboarding started.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'onboarding_started'   => false,
+				'onboarding_completed' => true,
+			)
+		);
+		$this->assertFalse( $this->sut->is_onboarding_completed( $fake_gateway ) );
+
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'onboarding_completed' => true ) );
+		$this->assertFalse( $this->sut->is_onboarding_completed( $fake_gateway ) );
+
+		// Test with wrong type.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'onboarding_started'   => true,
+				'onboarding_completed' => array(),
+			)
+		);
+		$this->assertFalse( $this->sut->is_onboarding_completed( $fake_gateway ) );
+	}
+
+	/**
+	 * Test is_in_test_mode_onboarding.
+	 */
+	public function test_is_in_test_mode_onboarding() {
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'test_mode_onboarding' => true ) );
+		$this->assertTrue( $this->sut->is_in_test_mode_onboarding( $fake_gateway ) );
+
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'test_mode_onboarding' => false ) );
+		$this->assertFalse( $this->sut->is_in_test_mode_onboarding( $fake_gateway ) );
+
+		// Test with wrong type.
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'test_mode_onboarding' => array() ) );
+		$this->assertFalse( $this->sut->is_in_test_mode_onboarding( $fake_gateway ) );
 	}
 
 	/**
@@ -326,17 +498,26 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 
 		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'settings_url' => 'https://example.com/settings-url' ) );
 		$this->assertEquals( 'https://example.com/settings-url', $this->sut->get_settings_url( $fake_gateway ) );
+
+		// Test with wrong type.
+		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'settings_url' => false ) );
+		$this->assertEquals( '', $this->sut->get_settings_url( $fake_gateway ) );
 	}
 
 	/**
 	 * Test get_onboarding_url.
 	 */
 	public function test_get_onboarding_url() {
+		// Test with no onboarding URL.
 		$fake_gateway = new FakePaymentGateway( 'gateway1' );
 		$this->assertEquals( 'https://example.com/connection-url', $this->sut->get_onboarding_url( $fake_gateway ) );
 
 		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'connection_url' => 'https://example.com/onboarding-url' ) );
 		$this->assertEquals( 'https://example.com/onboarding-url', $this->sut->get_onboarding_url( $fake_gateway ) );
+
+		// Test with wrong type.
+		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'connection_url' => false ) );
+		$this->assertEquals( '', $this->sut->get_onboarding_url( $fake_gateway ) );
 	}
 
 	/**
@@ -345,6 +526,90 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 	public function test_get_plugin_slug() {
 		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'plugin_slug' => 'woocommerce-payments' ) );
 		$this->assertEquals( 'woocommerce-payments', $this->sut->get_plugin_slug( $fake_gateway ) );
+
+		// Test with wrong type.
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'plugin_slug' => false ) );
+		$this->assertEquals( '', $this->sut->get_plugin_slug( $fake_gateway ) );
+
+		// Test with class filename in the plugins directory.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'plugin_slug'    => null,
+				'class_filename' => trailingslashit( WP_PLUGIN_DIR ) . 'woocommerce-payments/some-dir/gateways/class-fake-gateway.php',
+			)
+		);
+		$this->assertEquals( 'woocommerce-payments', $this->sut->get_plugin_slug( $fake_gateway ) );
+
+		// Test with class filename in the plugins directory, only one level deep.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'plugin_slug'    => null,
+				'class_filename' => trailingslashit( WP_PLUGIN_DIR ) . 'woocommerce-payments/class-fake-gateway.php',
+			)
+		);
+		$this->assertEquals( 'woocommerce-payments', $this->sut->get_plugin_slug( $fake_gateway ) );
+
+		// Test with class filename in the root of the plugins directory.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'plugin_slug'    => null,
+				'class_filename' => trailingslashit( WP_PLUGIN_DIR ) . 'fake-gateway.php',
+			)
+		);
+		$this->assertEquals( 'fake-gateway', $this->sut->get_plugin_slug( $fake_gateway ) );
+
+		// Test with class filename in the mu-plugins directory.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'plugin_slug'    => null,
+				'class_filename' => trailingslashit( WPMU_PLUGIN_DIR ) . 'woocommerce-payments/some-dir/gateways/class-fake-gateway.php',
+			)
+		);
+		$this->assertEquals( 'woocommerce-payments', $this->sut->get_plugin_slug( $fake_gateway ) );
+
+		// Test with class filename in the mu-plugins directory, only one level deep.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'plugin_slug'    => null,
+				'class_filename' => trailingslashit( WPMU_PLUGIN_DIR ) . 'woocommerce-payments/class-fake-gateway.php',
+			)
+		);
+		$this->assertEquals( 'woocommerce-payments', $this->sut->get_plugin_slug( $fake_gateway ) );
+
+		// Test with class filename in the root of the mu-plugins directory.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'plugin_slug'    => null,
+				'class_filename' => trailingslashit( WPMU_PLUGIN_DIR ) . 'fake-gateway.php',
+			)
+		);
+		$this->assertEquals( 'fake-gateway', $this->sut->get_plugin_slug( $fake_gateway ) );
+
+		// Test with class filename in the themes directory.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'plugin_slug'    => null,
+				'class_filename' => trailingslashit( get_template_directory() ) . 'some-theme/some-dir/gateways/class-fake-gateway.php',
+			)
+		);
+		$this->assertEquals( '', $this->sut->get_plugin_slug( $fake_gateway ) );
+
+		// Test with class filename in a random directory.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'plugin_slug'    => null,
+				'class_filename' => '/var/www/something/woocommerce-payments/some-dir/gateways/class-fake-gateway.php',
+			)
+		);
+		$this->assertEquals( '', $this->sut->get_plugin_slug( $fake_gateway ) );
 	}
 
 	/**
@@ -353,6 +618,10 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 	public function test_get_plugin_file() {
 		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'plugin_file' => 'woocommerce-payments/woocommerce-payments.php' ) );
 		$this->assertEquals( 'woocommerce-payments/woocommerce-payments', $this->sut->get_plugin_file( $fake_gateway ) );
+
+		// Test with wrong type.
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'plugin_file' => false ) );
+		$this->assertEquals( '', $this->sut->get_plugin_file( $fake_gateway ) );
 	}
 
 	/**
@@ -408,6 +677,72 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
 				),
 			),
+			$this->sut->get_recommended_payment_methods( $fake_gateway )
+		);
+
+		// Test validation.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'recommended_payment_methods' => array(
+					false,
+					'something',
+					123,
+					new stdClass(),
+					array(
+						// No id.
+						'_order'  => 0,
+						'enabled' => false,
+						'title'   => 'WooPay',
+					),
+					array(
+						'id'          => 'woopay',
+						// No title.
+						'_order'      => 0,
+						'enabled'     => false,
+						'description' => 'WooPay express checkout',
+					),
+					array(
+						// Should validate.
+						'id'          => 'good_id',
+						'_order'      => 1,
+						'enabled'     => true,
+						'required'    => true,
+						'title'       => 'WooPay',
+						'description' => '<a href="#"><h1>WooPay</h1></a> <b>express</b> <em>checkout</em>',
+					),
+				),
+			)
+		);
+		$this->assertEquals(
+			array(
+				array(
+					'id'          => 'good_id',
+					// Changed to 0.
+					'_order'      => 0,
+					'enabled'     => true,
+					'required'    => true,
+					'title'       => 'WooPay',
+					// The h1 tag should be stripped.
+					'description' => '<a href="#">WooPay</a> <b>express</b> <em>checkout</em>',
+					// Default category.
+					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+					// No icon.
+					'icon'        => '',
+				),
+			),
+			$this->sut->get_recommended_payment_methods( $fake_gateway )
+		);
+
+		// Test with wrong type.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'recommended_payment_methods' => 'woopay',
+			)
+		);
+		$this->assertEquals(
+			array(),
 			$this->sut->get_recommended_payment_methods( $fake_gateway )
 		);
 	}
