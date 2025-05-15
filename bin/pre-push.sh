@@ -61,10 +61,19 @@ if [ -n "$changedFiles" ]; then
 		ciJobs=$(CI=1 pnpm utils ci-jobs --base-ref origin/trunk --event 'pull_request' 2>&1)
 	fi
 
-    lintingJobs=$(echo $ciJobs | sed 's/::set-output/\n::set-output/g' | grep '::set-output name=lint-jobs::' | sed 's/::set-output name=lint-jobs:://g')
 	# Slightly complicated trailing thru linting jobs provided in JSON-format.
+    lintingJobs=$(echo $ciJobs | sed 's/::set-output/\n::set-output/g' | grep '::set-output name=lint-jobs::' | sed 's/::set-output name=lint-jobs:://g')
     iteration=1
     iterations=$( echo $lintingJobs | jq length )
+    #iterations=45
+
+    # Failsafe: running full-scale repo linting might occur occasionally - not clear why, hence this failsafe.
+    if [ $iterations -ge 45 ]; then
+    	echo "-> Looks like we were about to lint the whole monorepo, it might take a while so we are skipping this step [SKIP]"
+    	echo "   Note: that's not necessary related to the changes - possibly we are behind the changes on remote."
+    	exit 0
+	fi
+
     while read job; do
 		command=$(echo $job | jq --raw-output '( "pnpm --filter=" + .projectName + " " + .command )')
 		echo -n "-> Executing '$command' ($iteration of $iterations) "
