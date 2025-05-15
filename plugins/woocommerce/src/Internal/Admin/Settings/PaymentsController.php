@@ -147,7 +147,13 @@ class PaymentsController {
 		} catch ( Throwable $e ) {
 			// Catch everything since we don't want to break all the WP admin pages.
 			// Log so we can investigate.
-			SafeGlobalFunctionProxy::wc_get_logger()->error( 'Failed to get payment providers: ' . $e->getMessage(), array( 'source' => 'settings-payments', 'error' => $e ) );
+			SafeGlobalFunctionProxy::wc_get_logger()->error(
+				'Failed to get payment providers: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+					'error'  => $e,
+				)
+			);
 
 			return $promo_notes;
 		}
@@ -214,7 +220,13 @@ class PaymentsController {
 		} catch ( Throwable $e ) {
 			// Catch everything since we don't want to break all the WP admin pages.
 			// Log so we can investigate.
-			SafeGlobalFunctionProxy::wc_get_logger()->error( 'Failed to get payment providers: ' . $e->getMessage(), array( 'source' => 'settings-payments', 'error' => $e ) );
+			SafeGlobalFunctionProxy::wc_get_logger()->error(
+				'Failed to get payment providers: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+					'error'  => $e,
+				)
+			);
 
 			// In case of an error, default to false.
 			set_transient( self::TRANSIENT_HAS_PROVIDERS_WITH_INCENTIVE_KEY, 'no', HOUR_IN_SECONDS );
