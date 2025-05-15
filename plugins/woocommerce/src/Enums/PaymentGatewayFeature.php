@@ -9,10 +9,10 @@ namespace Automattic\WooCommerce\Enums;
  */
 final class PaymentGatewayFeature {
 	/**
-	* Payment gateway supports add payment methods.
-	*
-	* @var string
-	*/
+	 * Payment gateway supports add payment methods.
+	 *
+	 * @var string
+	 */
 	public const ADD_PAYMENT_METHODS = 'add_payment_methods';
 
 	/**
@@ -30,17 +30,17 @@ final class PaymentGatewayFeature {
 	public const DEFAULT_CREDIT_CARD_FORM = 'default_credit_card_form';
 
 	/**
-	* Payment gateway supports deposits.
-	*
-	* @var string
-	*/
+	 * Payment gateway supports deposits.
+	 *
+	 * @var string
+	 */
 	public const DEPOSITS = 'deposits';
 
 	/**
-	* Payment gateway supports multiple subscriptions.
-	*
-	* @var string
-	*/
+	 * Payment gateway supports multiple subscriptions.
+	 *
+	 * @var string
+	 */
 	public const MULTIPLE_SUBSCRIPTIONS = 'multiple_subscriptions';
 
 	/**
@@ -51,93 +51,93 @@ final class PaymentGatewayFeature {
 	public const PAY_BUTTON = 'pay_button';
 
 	/**
-	* Payment gateway supports pre-orders.
-	*
-	* @var string
-	*/
+	 * Payment gateway supports pre-orders.
+	 *
+	 * @var string
+	 */
 	public const PRE_ORDERS = 'pre-orders';
 
 	/**
-	* Payment gateway supports products.
-	*
-	* @var string
-	*/
+	 * Payment gateway supports products.
+	 *
+	 * @var string
+	 */
 	public const PRODUCTS = 'products';
 
 	/**
-	* Payment gateway supports refunds.
-	*
-	* @var string
-	*/
+	 * Payment gateway supports refunds.
+	 *
+	 * @var string
+	 */
 	public const REFUNDS = 'refunds';
 
 	/**
-	* Payment gateway supports subscription amount changes.
-	*
-	* @var string
-	*/
+	 * Payment gateway supports subscription amount changes.
+	 *
+	 * @var string
+	 */
 	public const SUBSCRIPTION_AMOUNT_CHANGES = 'subscription_amount_changes';
 
 	/**
-	* Payment gateway supports subscription cancellation.
-	*
-	* @var string
-	*/
+	 * Payment gateway supports subscription cancellation.
+	 *
+	 * @var string
+	 */
 	public const SUBSCRIPTION_CANCELLATION = 'subscription_cancellation';
 
 	/**
-	* Payment gateway supports subscription date changes.
-	*
-	* @var string
-	*/
+	 * Payment gateway supports subscription date changes.
+	 *
+	 * @var string
+	 */
 	public const SUBSCRIPTION_DATE_CHANGES = 'subscription_date_changes';
 
 	/**
-	* Payment gateway supports subscription payment method changes.
-	*
-	* @var string
-	*/
+	 * Payment gateway supports subscription payment method changes.
+	 *
+	 * @var string
+	 */
 	public const SUBSCRIPTION_PAYMENT_METHOD_CHANGE = 'subscription_payment_method_change';
 
 	/**
-	* Payment gateway supports subscription payment method changes by admin.
-	*
-	* @var string
-	*/
+	 * Payment gateway supports subscription payment method changes by admin.
+	 *
+	 * @var string
+	 */
 	public const SUBSCRIPTION_PAYMENT_METHOD_CHANGE_ADMIN = 'subscription_payment_method_change_admin';
 
 	/**
-	* Payment gateway supports subscription payment method changes by customer or admin.
-	*
-	* @var string
-	*/
+	 * Payment gateway supports subscription payment method changes by customer or admin.
+	 *
+	 * @var string
+	 */
 	public const SUBSCRIPTION_PAYMENT_METHOD_CHANGE_CUSTOMER = 'subscription_payment_method_change_customer';
 
 	/**
-	* Payment gateway supports subscription reactivation.
-	*
-	* @var string
-	*/
+	 * Payment gateway supports subscription reactivation.
+	 *
+	 * @var string
+	 */
 	public const SUBSCRIPTION_REACTIVATION = 'subscription_reactivation';
 
 	/**
-	* Payment gateway supports subscription suspension.
-	*
-	* @var string
-	*/
+	 * Payment gateway supports subscription suspension.
+	 *
+	 * @var string
+	 */
 	public const SUBSCRIPTION_SUSPENSION = 'subscription_suspension';
 
 	/**
-	* Payment gateway supports subscriptions.
-	*
-	* @var string
-	*/
+	 * Payment gateway supports subscriptions.
+	 *
+	 * @var string
+	 */
 	public const SUBSCRIPTIONS = 'subscriptions';
 
 	/**
-	* Payment gateway supports tokenization.
-	*
-	* @var string
-	*/
+	 * Payment gateway supports tokenization.
+	 *
+	 * @var string
+	 */
 	public const TOKENIZATION = 'tokenization';
 }
