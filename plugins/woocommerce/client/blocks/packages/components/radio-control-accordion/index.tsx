@@ -9,6 +9,7 @@ import { useMemo } from '@wordpress/element';
  * Internal dependencies
  */
 import { RadioControlOption } from '../radio-control';
+import './style.scss';
 
 export interface RadioControlAccordionProps {
 	className?: string;
