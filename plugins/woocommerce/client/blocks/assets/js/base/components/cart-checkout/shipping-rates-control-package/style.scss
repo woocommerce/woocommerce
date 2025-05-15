@@ -33,7 +33,8 @@
 		padding-bottom: 0;
 	}
 
-	.wc-block-components-radio-control .wc-block-components-radio-control__option-layout {
+	.wc-block-components-radio-control
+		.wc-block-components-radio-control__option-layout {
 		padding-bottom: 0;
 	}
 
@@ -73,9 +74,15 @@
 	display: inline-block;
 	margin: 0;
 	padding: 0;
+	> div {
+		// Usage of RawHTML component from WordPress always adds a div wrapper.
+		display: inline;
+	}
 }
 
-.wc-block-components-shipping-rates-control__package-item:not(:last-child)::after {
+.wc-block-components-shipping-rates-control__package-item:not(
+		:last-child
+	) > div::after { // Usage of RawHTML component from WordPress always adds a div wrapper.
 	content: ", ";
 	white-space: pre;
 }

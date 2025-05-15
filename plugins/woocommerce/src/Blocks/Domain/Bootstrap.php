@@ -14,7 +14,6 @@ use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 use Automattic\WooCommerce\Blocks\QueryFilters;
-use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
 use Automattic\WooCommerce\Blocks\Domain\Services\Notices;
 use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
 use Automattic\WooCommerce\Blocks\Domain\Services\GoogleAnalytics;
@@ -129,7 +128,6 @@ class Bootstrap {
 		// Load and init assets.
 		$this->container->get( PaymentsApi::class )->init();
 		$this->container->get( DraftOrders::class )->init();
-		$this->container->get( CreateAccount::class )->init();
 		$this->container->get( ShippingController::class )->init();
 		$this->container->get( CheckoutFields::class )->init();
 
@@ -253,12 +251,6 @@ class Bootstrap {
 			DraftOrders::class,
 			function ( Container $container ) {
 				return new DraftOrders( $container->get( Package::class ) );
-			}
-		);
-		$this->container->register(
-			CreateAccount::class,
-			function ( Container $container ) {
-				return new CreateAccount( $container->get( Package::class ) );
 			}
 		);
 		$this->container->register(

@@ -1,7 +1,8 @@
 $component-background: color-mix(in srgb, currentColor 6%, transparent);
 $component-background-hover: color-mix(in srgb, currentColor 12%, transparent);
 
-.wc-block-checkout__shipping-method .wc-block-checkout__shipping-method-container {
+.wc-block-checkout__shipping-method
+	.wc-block-checkout__shipping-method-container {
 	width: 100%;
 	display: flex;
 	justify-content: space-between;
