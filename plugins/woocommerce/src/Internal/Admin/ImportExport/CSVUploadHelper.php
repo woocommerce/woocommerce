@@ -196,10 +196,10 @@ class CSVUploadHelper {
 			// $mimes here is the context-specific list of mimes for the current upload.
 			$filename_check = wp_check_filetype( $filename, $mimes );
 
-			$expected_ext_from_filename   = $filename_check['ext'];
-			$expected_type_from_filename  = $filename_check['type'];
+			$expected_ext_from_filename  = $filename_check['ext'];
+			$expected_type_from_filename = $filename_check['type'];
 
-			if ( ('csv' === $expected_ext_from_filename && 'text/csv' === $expected_type_from_filename ) ) {
+			if ( ( 'csv' === $expected_ext_from_filename && 'text/csv' === $expected_type_from_filename ) ) {
 				$data['ext']  = 'csv';
 				$data['type'] = 'text/csv';
 			}
