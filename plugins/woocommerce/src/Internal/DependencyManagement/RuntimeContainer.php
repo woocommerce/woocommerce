@@ -148,8 +148,11 @@ class RuntimeContainer {
 			if ( ! $constructor->isPublic() ) {
 				throw new ContainerException( "Error resolving '$class_name': the class doesn't have a public constructor." );
 			}
-			if ( ! empty( $constructor->getParameters() ) ) {
-				throw new ContainerException( "Error resolving '$class_name': the class constructor has arguments." );
+			$constructor_arguments = $constructor->getParameters();
+			foreach ( $constructor_arguments as $argument ) {
+				if ( ! $argument->isOptional() ) {
+					throw new ContainerException( "Error resolving '$class_name': the class constructor has non-optional arguments." );
+				}
 			}
 		}
 
