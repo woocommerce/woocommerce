@@ -33,6 +33,7 @@ if [ -n "$matchingRemoteBranches" ]; then
 	fi
 fi
 
+git fetch origin trunk >/dev/null 2>&1
 changedFiles=$(git diff $(git merge-base HEAD origin/trunk) --relative --name-only --diff-filter=d -- '.syncpackrc' 'package.json' '*/package.json')
 if [ -n "$changedFiles" ]; then
 	echo -n 'pre-push: validating syncpack mismatches '
@@ -53,6 +54,7 @@ if [ -n "$changedFiles" ]; then
 	# This pre-push check aims to reduce CI load, hence we mimic CI matrix generation and pick linting jobs identical to CI environment.
 	if [ -n "$matchingRemoteBranches" ]; then
 		# The remote branch exists: lint incremental changes only
+		git fetch origin $CURRENT_BRANCH >/dev/null 2>&1
 		ciJobs=$(CI=1 pnpm utils ci-jobs --base-ref origin/$CURRENT_BRANCH --event 'pull_request' 2>&1)
 	else
 		# The remote branch doesn't exists yes: lint all branch changes
