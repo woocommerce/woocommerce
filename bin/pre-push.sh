@@ -65,7 +65,7 @@ if [ -n "$changedFiles" ]; then
     lintingJobs=$(echo $ciJobs | sed 's/::set-output/\n::set-output/g' | grep '::set-output name=lint-jobs::' | sed 's/::set-output name=lint-jobs:://g')
     iteration=1
     iterations=$( echo $lintingJobs | jq length )
-    #iterations=45
+    # iterations=45
 
     # Failsafe: running full-scale repo linting might occur occasionally - not clear why, hence this failsafe.
     if [ $iterations -ge 45 ]; then
