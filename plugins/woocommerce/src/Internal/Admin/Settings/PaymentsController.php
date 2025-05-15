@@ -92,7 +92,7 @@ class PaymentsController {
 			56, // Position after WooCommerce Product menu item.
 		);
 
-		// If there are providers with active incentive, add a notice badge to the Payments menu item.
+		// If there are providers with an active incentive, add a notice badge to the Payments menu item.
 		if ( $this->store_has_providers_with_incentive() ) {
 			$badge = ' <span class="wcpay-menu-badge awaiting-mod count-1"><span class="plugin-count">1</span></span>';
 			foreach ( $menu as $index => $menu_item ) {
@@ -211,8 +211,13 @@ class PaymentsController {
 
 		try {
 			$providers = $this->payments->get_payment_providers( $this->payments->get_country() );
-		} catch ( Exception $e ) {
-			// In case of an error, just return false.
+		} catch ( Throwable $e ) {
+			// Catch everything since we don't want to break all the WP admin pages.
+			// Log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->error( 'Failed to get payment providers: ' . $e->getMessage(), array( 'source' => 'settings-payments', 'error' => $e ) );
+
+			// In case of an error, default to false.
+			set_transient( self::TRANSIENT_HAS_PROVIDERS_WITH_INCENTIVE_KEY, 'no', HOUR_IN_SECONDS );
 			return false;
 		}
 
