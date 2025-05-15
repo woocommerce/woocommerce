@@ -26,7 +26,7 @@ class WC_Admin {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'includes' ) );
-		add_action( 'init', array( $this, 'wc_log_missing_locale_filters' ) );
+		add_action( 'wp_loaded', array( $this, 'wc_log_missing_locale_filters' ) );
 		add_action( 'current_screen', array( $this, 'conditional_includes' ) );
 		add_action( 'admin_init', array( $this, 'buffer' ), 1 );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
@@ -341,10 +341,11 @@ class WC_Admin {
 			echo wp_kses_post(
 				sprintf(
 					/* translators: %1$s, %2$s, %3$s are code references to WooCommerce filters */
-					__( 'One or more active plugins are customizing checkout, billing, or shipping fields without using required locale filters. This may result in incomplete or misconfigured address fields for some countries. Please ensure the plugins also hook into %1$s, %2$s, or %3$s.', 'woocommerce' ),
+					__( 'One or more active plugins are customizing checkout, billing, or shipping fields without using required locale filters. This may result in incomplete or misconfigured address fields for some countries. Please ensure the plugins also hook into %1$s, %2$s, or %3$s. <a href="%4$s" target="_blank">Refer to the documentation for more info</a>.', 'woocommerce' ),
 					'<code>woocommerce_default_address_fields</code>',
 					'<code>woocommerce_get_country_locale</code>',
-					'<code>woocommerce_get_country_locale_default</code>'
+					'<code>woocommerce_get_country_locale_default</code>',
+					esc_url( 'https://developer.woocommerce.com/2025/05/13/developer-advisory-update-locale-with-checkout-field-changes/' )
 				)
 			);
 			echo '</p>';
