@@ -48,7 +48,7 @@ class OrderControllerTests extends TestCase {
 	public function tearDown(): void {
 		parent::tearDown();
 		WC()->countries->locale = null;
-		$this->sut = null;
+		$this->sut              = null;
 	}
 
 	/**
