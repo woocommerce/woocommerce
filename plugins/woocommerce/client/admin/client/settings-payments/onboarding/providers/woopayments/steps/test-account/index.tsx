@@ -4,7 +4,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { Loader } from '@woocommerce/onboarding';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Notice, Button } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
@@ -117,14 +117,11 @@ const TestAccountStep = () => {
 
 			if ( currentStep?.status === 'blocked' ) {
 				setErrorMessage(
-					sprintf(
-						/* translators: %s: error message */
+					currentStep?.errors?.[ 0 ] ||
 						__(
-							'This step cannot be started until the following issue(s) are resolved: %s',
+							'There are environment or store setup issues which are blocking progress. Please resolve them to proceed.',
 							'woocommerce'
-						),
-						currentStep?.errors?.[ 0 ]
-					)
+						)
 				);
 				setStatus( 'blocked' );
 				return;
