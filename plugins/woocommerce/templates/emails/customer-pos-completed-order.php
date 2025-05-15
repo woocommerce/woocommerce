@@ -42,7 +42,7 @@ if ( ! empty( $order->get_billing_first_name() ) ) {
 }
 ?>
 </p>
-<p><?php esc_html_e( 'Here’s a reminder of what you’ve ordered:', 'woocommerce' ); ?></p>
+<p><?php esc_html_e( 'Here’s a reminder of what you’ve bought:', 'woocommerce' ); ?></p>
 </div>
 
 <?php
