@@ -155,9 +155,16 @@ class MockSessionHandler extends WC_Session_Handler {
 	 */
 	public function set_customer_session_cookie( $set ) {
 		if ( $set ) {
-			$to_hash           = $this->_customer_id . '|' . $this->_session_expiration;
+			$delimiter = apply_filters('woocommerce_session_cookie_delimiter', '||');
+			$to_hash           = $this->_customer_id . $delimiter . $this->_session_expiration;
 			$cookie_hash       = hash_hmac( 'md5', $to_hash, wp_hash( $to_hash ) );
-			$cookie_value      = $this->_customer_id . '||' . $this->_session_expiration . '||' . $this->_session_expiring . '||' . $cookie_hash;
+			$cookie_value = implode($delimiter, [
+				$this->_customer_id,
+				$this->_session_expiration,
+				$this->_session_expiring,
+				$cookie_hash
+			]);
+
 			$this->_has_cookie = true;
 
 			if ( ! isset( $_COOKIE[ $this->_cookie ] ) || $_COOKIE[ $this->_cookie ] !== $cookie_value ) {
@@ -325,4 +332,13 @@ class MockSessionHandler extends WC_Session_Handler {
 			)
 		);
 	}
+	/**
+	 * Get the cookie name.
+	 *
+	 * @return string
+	 */
+	public function get_cookie_name() {
+		return $this->_cookie;
+	}
+
 }
