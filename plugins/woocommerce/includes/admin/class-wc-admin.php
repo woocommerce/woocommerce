@@ -33,6 +33,7 @@ class WC_Admin {
 		add_action( 'admin_init', array( $this, 'preview_email_editor_dummy_content' ) );
 		add_action( 'admin_init', array( $this, 'prevent_admin_access' ) );
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
+		add_action( 'admin_init', array( $this, 'dismiss_locale_filter_notice' ) );
 		add_action( 'admin_notices', array( $this, 'wc_display_locale_filter_admin_notice' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
@@ -319,7 +320,7 @@ class WC_Admin {
 	 * Display admin notice for developers if locale filters are missing.
 	 */
 	public function wc_display_locale_filter_admin_notice() {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) || get_user_meta( get_current_user_id(), '_dismissed_wc_locale_notice', true ) ) {
 			return;
 		}
 
@@ -336,7 +337,7 @@ class WC_Admin {
 		$uses_locale_filters = $uses_default_address_fields || $uses_get_country_locale || $uses_get_country_locale_default;
 
 		if ( $uses_field_filters && ! $uses_locale_filters ) {
-			echo '<div class="notice notice-warning">';
+			echo '<div class="notice notice-warning is-dismissible">';
 			echo '<p><strong>' . esc_html__( 'WooCommerce Notice for Developers:', 'woocommerce' ) . '</strong> ';
 			echo wp_kses_post(
 				sprintf(
@@ -349,7 +350,19 @@ class WC_Admin {
 				)
 			);
 			echo '</p>';
+			echo '<p><a href="' . esc_url( add_query_arg( 'dismiss_wc_locale_notice', '1' ) ) . '">' . esc_html__( 'Dismiss', 'woocommerce' ) . '</a></p>';
 			echo '</div>';
+		}
+	}
+
+	/**
+	 * Dismiss notice for wc_display_locale_filter_admin_notice.
+	 */
+	public function dismiss_locale_filter_notice() {
+		if ( isset( $_GET['dismiss_wc_locale_notice'] ) && current_user_can( 'manage_woocommerce' ) ) {
+			update_user_meta( get_current_user_id(), '_dismissed_wc_locale_notice', true );
+			wp_safe_redirect( remove_query_arg( 'dismiss_wc_locale_notice' ) );
+			exit;
 		}
 	}
 
