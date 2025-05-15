@@ -474,7 +474,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$parent_order = null;
 
 		// When changing the order status to "Refunded", the refund order's type will be full refund, and the order items will be empty.
-		// We need to get the parent order items, and exclude the items that is already being patially refunded.
+		// We need to get the parent order items, and exclude the items that is already being partially refunded.
 		if (
 			'shop_order_refund' === $order->get_type() &&
 			'full' === $refund_type &&

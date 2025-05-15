@@ -133,7 +133,7 @@ class OrderCountCacheService {
 	}
 
 	/**
-	 * Update the cache whenver an order status changes.
+	 * Update the cache whenever an order status changes.
 	 *
 	 * @param int      $order_id Order id.
 	 * @param string   $previous_status the old WooCommerce order status.

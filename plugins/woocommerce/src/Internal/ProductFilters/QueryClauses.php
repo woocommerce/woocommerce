@@ -221,7 +221,7 @@ class QueryClauses implements QueryClausesGenerator {
 	/**
 	 * Get all the term for current attribute.
 	 *
-	 * @param \WP_Term[] $all_terms      Aggreated terms array.
+	 * @param \WP_Term[] $all_terms      Aggregated terms array.
 	 * @param string     $taxonomy       Attribute taxonomy name.
 	 * @param int        $taxonomy_count Taxonomy count. If there is only one
 	 *                                   taxonomy, return all terms.

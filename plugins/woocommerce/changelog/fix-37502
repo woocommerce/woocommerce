@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Corrects multiple spelling errors in code comments across various files in plugins/woocommerce/includes and plugins/woocommerce/src directory.

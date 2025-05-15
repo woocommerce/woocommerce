@@ -201,7 +201,7 @@ class CustomOrdersTableController {
 	/**
 	 * Is caching of data within the CustomerOrdersTable datastores enabled?
 	 *
-	 * @return bool True if the caching is enabled within the CustomeOrderTable Datastores.
+	 * @return bool True if the caching is enabled within the CustomerOrdersTable Datastores.
 	 */
 	public function hpos_data_caching_is_enabled(): bool {
 		return get_option( self::HPOS_DATASTORE_CACHING_ENABLED_OPTION ) === 'yes' &&

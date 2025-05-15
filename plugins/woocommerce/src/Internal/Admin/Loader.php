@@ -182,7 +182,7 @@ class Loader {
 
 		/**
 		 * Some routes or features like onboarding hide the wp-admin navigation and masterbar.
-		 * Setting `woocommerce_admin_is_loading` to true allows us to premeptively hide these
+		 * Setting `woocommerce_admin_is_loading` to true allows us to preemptively hide these
 		 * elements while the JS app loads.
 		 * This class needs to be removed by those feature components (like <ProfileWizard />).
 		 *

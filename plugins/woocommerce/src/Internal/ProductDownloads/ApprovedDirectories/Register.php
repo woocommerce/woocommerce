@@ -407,7 +407,7 @@ class Register {
 	}
 
 	/**
-	 * Delete the approved directory identitied by the supplied ID.
+	 * Delete the approved directory identified by the supplied ID.
 	 *
 	 * @param int $id The ID of the rule to be deleted.
 	 *
@@ -433,7 +433,7 @@ class Register {
 	}
 
 	/**
-	 * Enable the approved directory identitied by the supplied ID.
+	 * Enable the approved directory identified by the supplied ID.
 	 *
 	 * @param int $id The ID of the rule to be deleted.
 	 *
@@ -446,7 +446,7 @@ class Register {
 	}
 
 	/**
-	 * Disable the approved directory identitied by the supplied ID.
+	 * Disable the approved directory identified by the supplied ID.
 	 *
 	 * @param int $id The ID of the rule to be deleted.
 	 *

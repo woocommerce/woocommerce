@@ -548,7 +548,7 @@ WHERE
 	}
 
 	/**
-	 * Helper method to sanitize soure meta data.
+	 * Helper method to sanitize source meta data.
 	 *
 	 * @param array $sanitized_entity_data Array containing sanitized data for insertion.
 	 * @param array $error_records Error records.

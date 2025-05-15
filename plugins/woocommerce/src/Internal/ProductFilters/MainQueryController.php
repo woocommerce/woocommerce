@@ -39,7 +39,7 @@ class MainQueryController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Filter the posts clauses of the main query to suport global filters.
+	 * Filter the posts clauses of the main query to support global filters.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 *

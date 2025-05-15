@@ -328,7 +328,7 @@ class CheckoutFieldsFrontend {
 		$persist_fields = [];
 		$errors         = new \WP_Error();
 
-		// Validate individual fields agains the document object. Errors are added to the $errors object, and each field is validated regardless of other field errors.
+		// Validate individual fields against the document object. Errors are added to the $errors object, and each field is validated regardless of other field errors.
 		foreach ( $fields as $field_key => $field ) {
 			$field_value = $field_values[ $field_key ];
 

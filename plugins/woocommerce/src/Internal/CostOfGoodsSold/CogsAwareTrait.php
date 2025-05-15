@@ -13,7 +13,7 @@ trait CogsAwareTrait {
 	/**
 	 * Check if the Cost of Goods Sold feature is enabled.
 	 *
-	 * @param string|null $doing_it_wrong_function_name If not null, a "doing it wrong" error will be thrown with this function name if the deature is disabled.
+	 * @param string|null $doing_it_wrong_function_name If not null, a "doing it wrong" error will be thrown with this function name if the feature is disabled.
 	 *
 	 * @return bool True if the feature is enabled.
 	 */

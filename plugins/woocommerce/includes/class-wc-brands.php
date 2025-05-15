@@ -333,7 +333,7 @@ class WC_Brands {
 	 * Handles template usage so that we can use our own templates instead of the themes.
 	 *
 	 * Templates are in the 'templates' folder. woocommerce looks for theme
-	 * overides in /theme/woocommerce/ by default
+	 * overrides in /theme/woocommerce/ by default
 	 *
 	 * For beginners, it also looks for a woocommerce.php template first. If the user adds
 	 * this to the theme (containing a woocommerce() inside) this will be used for all
