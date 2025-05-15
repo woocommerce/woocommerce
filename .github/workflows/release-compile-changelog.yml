@@ -1,4 +1,4 @@
-name: Pre build step - Compile changelog file
+name: 'Release: Compile changelog'
 on:
   workflow_dispatch:
     inputs:

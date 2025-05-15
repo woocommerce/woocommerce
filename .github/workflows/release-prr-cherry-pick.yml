@@ -1,5 +1,5 @@
 # This workflow is used to cherry pick PRs into a frozen release branch.
-name: New PRR workflow - Cherry pick
+name: 'Release: PRR workflow'
 on:
     pull_request:
         types: [closed]
@@ -47,7 +47,7 @@ jobs:
                   core.setOutput('base_ref', prDetails.data.base.ref);
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
+
             - name: check
               id: check
               uses: actions/github-script@v7
@@ -94,7 +94,7 @@ jobs:
 
                       // Split the version to get major and minor parts
                       let [major, minor] = version.split('.').map(Number)
-                    
+
                       // Check if minor version is 9, increment major and reset minor
                       if (minor === 9) {
                           major += 1
@@ -103,16 +103,16 @@ jobs:
                           // Otherwise, just increment the minor version
                           minor += 1
                       }
-                        
+
                       // Create the frozen release branch name
                       const frozenRelease = `release/${major}.${minor}`
-                        
+
                       // Output the values
                       console.log('releaseBranch:', releaseBranch)
                       console.log('version:', version)
                       console.log('pr:', pr)
                       console.log('frozenRelease:', frozenRelease)
-                        
+
                       core.setOutput('pr', pr)
                       core.setOutput('version', version)
                       core.setOutput('release', releaseBranch)

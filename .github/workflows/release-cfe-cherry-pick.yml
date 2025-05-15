@@ -1,10 +1,8 @@
 # This workflow is used to cherry pick PRs from release branch into trunk.
-name: New CFE workflow - Cherry pick
+name: 'Release: CFE workflow'
 on:
     pull_request:
         types: [closed]
-        branches-ignore:
-          - 'release/9.8'
     workflow_dispatch:
         inputs:
             skipSlackPing:
@@ -81,8 +79,10 @@ jobs:
         if: needs.verify.outputs.run == 'true'
         needs: verify
         outputs:
-            release: ${{ steps.prep-inputs.outputs.release }}
             pr: ${{ steps.prep-inputs.outputs.pr }}
+            prTitle: ${{ steps.prep-inputs.outputs.prTitle }}
+            prURL: ${{ steps.prep-inputs.outputs.prURL }}
+            release: ${{ steps.prep-inputs.outputs.release }}
             version: ${{ steps.prep-inputs.outputs.version }}
         steps:
             - name: Prep inputs
@@ -90,18 +90,14 @@ jobs:
               uses: actions/github-script@v7
               with:
                   script: |
-                      const event = ${{ toJSON( github.event ) }}
+                      const pull_request = ${{ toJSON( github.event.pull_request ) }}
 
                       const releaseBranch = process.env.BASE_REF
                       const version = releaseBranch.replace( 'release/', '' )
-                      const pr = event.pull_request.number
 
-                      // Output the values
-                      console.log( 'releaseBranch:', releaseBranch )
-                      console.log( 'version:', version )
-                      console.log( 'pr:', pr )
-
-                      core.setOutput( 'pr', pr )
+                      core.setOutput( 'pr', pull_request.number )
+                      core.setOutput( 'prTitle', pull_request.title )
+                      core.setOutput( 'prURL', pull_request.html_url )
                       core.setOutput( 'version', version )
                       core.setOutput( 'release', releaseBranch )
               env:
@@ -188,14 +184,14 @@ jobs:
                       const prNumber = process.env.PR;
                       const releaseBranch = process.env.RELEASE_BRANCH;
 
-                      let cherryPickPRBody = "This PR cherry-picks the following PRs into the trunk branch:\n";
+                      let cherryPickPRBody = "This PR cherry-picks the following PR into the `trunk` branch:\n";
 
                       cherryPickPRBody = `${cherryPickPRBody}` + `* #${prNumber}` + "\n";
 
                       const pr = await github.rest.pulls.create({
                         owner: context.repo.owner,
                         repo: context.repo.repo,
-                        title: `Cherry pick ${prNumber} into trunk`,
+                        title: `Cherry pick #${prNumber} into \`trunk\``,
                         head: `cherry-pick-${releaseBranch}/${prNumber}`,
                         base: "trunk",
                         body: cherryPickPRBody
@@ -222,24 +218,20 @@ jobs:
               with:
                   slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
                   slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
+                  slack-optional-unfurl_links: false
+                  slack-optional-unfurl_media: false
                   slack-text: |
-                      :warning-8c: CFE cherry pick failed for '${{ needs.prep.outputs.release }}'
-
-                      An attempt to cherry pick PR(s) into outgoing trunk for `${{ needs.prep.outputs.release }}` has failed. This could be due to a merge conflict or something else that requires manual attention. Please check: https://github.com/woocommerce/woocommerce/pull/${{ needs.prep.outputs.pr }}
-
+                      :warning: *Cherry pick <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|failed> (${{ needs.prep.outputs.version }} → `trunk`)* Please resolve before releasing. Source PR: _<${{ needs.prep.outputs.prURL }}|#${{ needs.prep.outputs.pr }} - ${{ needs.prep.outputs.prTitle }}>_.
             - name: Notify Slack on success
               if: ${{ success() && inputs.skipSlackPing != true }}
               uses: archive/github-actions-slack@v2.0.0
               with:
                   slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
                   slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
+                  slack-optional-unfurl_links: false
+                  slack-optional-unfurl_media: false
                   slack-text: |
-                      :info: CFE cherry pick succeeded for `${{ needs.prep.outputs.release }}`
-
-                      Please merge the following PR :pr: into `trunk`:
-
-                      ${{ steps.cherry-pick-pr.outputs.cherry-pick-pr }}
-
+                      :info: *Cherry pick <${{ steps.cherry-pick-pr.outputs.cherry-pick-pr }}|created> (${{ needs.prep.outputs.version }} → `trunk`)* Please ensure <${{ steps.cherry-pick-pr.outputs.cherry-pick-pr }}|this cherry pick> is merged before releasing. Source PR: _<${{ needs.prep.outputs.prURL }}|#${{ needs.prep.outputs.pr }} - ${{ needs.prep.outputs.prTitle }}>_.
             - name: Apply label "cherry pick failed" using the newly created PR url
               if: ${{ failure() }}
               run: |
