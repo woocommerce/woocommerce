@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 use Automattic\WooCommerce\Internal\Email\OrderPriceFormatter;
 use Automattic\WooCommerce\Internal\Orders\PointOfSaleOrderUtil;
 use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 
@@ -186,6 +187,54 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 			$this->enable_email_template_for_pos_orders();
 			// Enable send email when requested.
 			add_action( 'woocommerce_rest_order_actions_email_send', array( $this, 'trigger' ), 10, 2 );
+		}
+
+		/**
+		 * Override settings form fields to remove the enbaled/disabled field as the email is manually sent.
+		 */
+		public function init_form_fields() {
+			/* translators: %s: list of placeholders */
+			$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . esc_html( implode( '</code>, <code>', array_keys( $this->placeholders ) ) ) . '</code>' );
+			$this->form_fields = array(
+				'subject'            => array(
+					'title'       => __( 'Subject', 'woocommerce' ),
+					'type'        => 'text',
+					'desc_tip'    => true,
+					'description' => $placeholder_text,
+					'placeholder' => $this->get_default_subject(),
+					'default'     => '',
+				),
+				'heading'            => array(
+					'title'       => __( 'Email heading', 'woocommerce' ),
+					'type'        => 'text',
+					'desc_tip'    => true,
+					'description' => $placeholder_text,
+					'placeholder' => $this->get_default_heading(),
+					'default'     => '',
+				),
+				'additional_content' => array(
+					'title'       => __( 'Additional content', 'woocommerce' ),
+					'description' => __( 'Text to appear below the main email content.', 'woocommerce' ) . ' ' . $placeholder_text,
+					'css'         => 'width:400px; height: 75px;',
+					'placeholder' => __( 'N/A', 'woocommerce' ),
+					'type'        => 'textarea',
+					'default'     => $this->get_default_additional_content(),
+					'desc_tip'    => true,
+				),
+				'email_type'         => array(
+					'title'       => __( 'Email type', 'woocommerce' ),
+					'type'        => 'select',
+					'description' => __( 'Choose which format of email to send.', 'woocommerce' ),
+					'default'     => 'html',
+					'class'       => 'email_type wc-enhanced-select',
+					'options'     => $this->get_email_type_options(),
+					'desc_tip'    => true,
+				),
+			);
+			if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
+				$this->form_fields['cc']  = $this->get_cc_field();
+				$this->form_fields['bcc'] = $this->get_bcc_field();
+			}
 		}
 
 		/**
