@@ -15,6 +15,42 @@ use Yoast\PHPUnitPolyfills\TestCases\TestCase;
  */
 class OrderControllerTests extends TestCase {
 	/**
+	 * The system under test.
+	 *
+	 * @var OrderController
+	 */
+	private $sut;
+
+	/**
+	 * Set up before test.
+	 *
+	 * @return void
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->sut = new class() extends OrderController {
+			/**
+			 * Check all required address fields are set and return errors if not. Parent is protected.
+			 *
+			 * @param \WC_Order $order Order object.
+			 * @param string    $address_type billing or shipping address, used in error messages.
+			 * @param \WP_Error $errors Error object.
+			 */
+			public function validate_address_fields( \WC_Order $order, $address_type, \WP_Error $errors ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
+				parent::validate_address_fields( $order, $address_type, $errors );
+			}
+		};
+	}
+
+	/**
+	 * Tear down after test.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		$this->sut = null;
+	}
+
+	/**
 	 * test_validate_existing_order_before_payment_valid_data.
 	 */
 	public function test_validate_existing_order_before_payment_valid_data() {
