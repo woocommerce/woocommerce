@@ -276,8 +276,9 @@ class OrderControllerTests extends TestCase {
 	 * Helper method to set shipping address on an order.
 	 *
 	 * @param \WC_Order $order Order object.
+	 * @param array     $override_data Optional data to override the default shipping address.
 	 */
-	private function set_shipping_address( \WC_Order $order ) {
+	private function set_shipping_address( \WC_Order $order, $override_data = [] ) {
 		$order->set_shipping_country( 'US' );
 		$order->set_shipping_first_name( 'John' );
 		$order->set_shipping_last_name( 'Doe' );
@@ -285,5 +286,9 @@ class OrderControllerTests extends TestCase {
 		$order->set_shipping_city( 'Test City' );
 		$order->set_shipping_state( 'CA' );
 		$order->set_shipping_postcode( '12345' );
+
+		foreach ( $override_data as $key => $value ) {
+			$order->{"set_shipping_$key"}( $value );
+		}
 	}
 }
