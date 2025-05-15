@@ -18,6 +18,8 @@ defined( 'ABSPATH' ) || exit;
  */
 class PaymentsController {
 
+	const TRANSIENT_HAS_PROVIDERS_WITH_INCENTIVE_KEY = 'woocommerce_settings_payments_has_providers_with_incentive';
+
 	/**
 	 * The payment service.
 	 *
@@ -201,6 +203,12 @@ class PaymentsController {
 	 * @return bool True if the store has providers with an active incentive.
 	 */
 	private function store_has_providers_with_incentive(): bool {
+		// First, try to use the transient value.
+		$transient = get_transient( self::TRANSIENT_HAS_PROVIDERS_WITH_INCENTIVE_KEY );
+		if ( false !== $transient ) {
+			return filter_var( $transient, FILTER_VALIDATE_BOOLEAN );
+		}
+
 		try {
 			$providers = $this->payments->get_payment_providers( $this->payments->get_country() );
 		} catch ( Exception $e ) {
@@ -208,6 +216,7 @@ class PaymentsController {
 			return false;
 		}
 
+		$has_providers_with_incentive = false;
 		// Go through the providers and check if any of them have a "prominently" visible incentive (i.e., modal or banner).
 		foreach ( $providers as $provider ) {
 			if ( empty( $provider['_incentive'] ) ) {
@@ -218,7 +227,8 @@ class PaymentsController {
 
 			// If there are no dismissals at all, the incentive is prominently visible.
 			if ( empty( $dismissals ) ) {
-				return true;
+				$has_providers_with_incentive = true;
+				break;
 			}
 
 			// First, we check to see if the incentive was dismissed in the banner context.
@@ -249,7 +259,8 @@ class PaymentsController {
 			);
 			// If there are no modal dismissals, the incentive is still visible.
 			if ( ! $is_dismissed_modal ) {
-				return true;
+				$has_providers_with_incentive = true;
+				break;
 			}
 
 			$is_dismissed_modal_more_than_30_days_ago = ! empty(
@@ -268,10 +279,15 @@ class PaymentsController {
 			}
 
 			// The modal was dismissed more than 30 days ago, so the banner is visible.
-			return true;
+			$has_providers_with_incentive = true;
+			break;
 		}
 
-		return false;
+		// Save the value in a transient to avoid unnecessary processing throughout the WP admin.
+		// Incentives don't change frequently, so it is safe to cache the value for 1 hour.
+		set_transient( self::TRANSIENT_HAS_PROVIDERS_WITH_INCENTIVE_KEY, $has_providers_with_incentive ? 'yes' : 'no', HOUR_IN_SECONDS );
+
+		return $has_providers_with_incentive;
 	}
 
 	/**
