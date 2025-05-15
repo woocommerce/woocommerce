@@ -292,8 +292,8 @@ class WC_Discounts {
 	 * @return int
 	 */
 	protected function sort_by_price( $a, $b ) {
-		$price_1 = $a->price * $a->quantity;
-		$price_2 = $b->price * $b->quantity;
+		$price_1 = $a->product->get_price();
+		$price_2 = $b->product->get_price();
 		if ( $price_1 === $price_2 ) {
 			return 0;
 		}
