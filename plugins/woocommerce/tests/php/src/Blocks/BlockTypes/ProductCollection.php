@@ -1294,9 +1294,9 @@ class ProductCollection extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that products with same menu_order are sorted alphabetically by title.
+	 * Tests alphabetical sorting by title for products with identical menu_order values in frontend context.
 	 */
-	public function test_menu_order_sorting_with_title_fallback() {
+	public function test_frontend_menu_order_sorting_with_title_fallback() {
 		$product1 = WC_Helper_Product::create_simple_product();
 		$product1->set_menu_order( 10 );
 		$product1->set_name( 'Pennant' );
@@ -1335,15 +1335,33 @@ class ProductCollection extends \WP_UnitTestCase {
 		// Product2 (Album) should come before Product1 (Pennant) when menu_order is same.
 		$this->assertLessThan( $pos_product1, $pos_product2 );
 
+		// Test descending order.
+		$parsed_block['attrs']['query']['order'] = 'desc';
+		$merged_query                            = $this->initialize_merged_query( $parsed_block );
+		$query                                   = new WP_Query( $merged_query );
+
+		$ordered_product_ids_desc = wp_list_pluck( $query->posts, 'ID' );
+
+		$pos_product1_desc = array_search( $product1->get_id(), $ordered_product_ids_desc, true );
+		$pos_product2_desc = array_search( $product2->get_id(), $ordered_product_ids_desc, true );
+		$pos_product3_desc = array_search( $product3->get_id(), $ordered_product_ids_desc, true );
+
+		// Product3 (menu_order 5) should come after the others in DESC order.
+		$this->assertGreaterThan( $pos_product1_desc, $pos_product3_desc );
+		$this->assertGreaterThan( $pos_product2_desc, $pos_product3_desc );
+
+		// Between products with same menu_order (10), Pennant should come before Album in DESC.
+		$this->assertLessThan( $pos_product2_desc, $pos_product1_desc );
+
 		$product1->delete();
 		$product2->delete();
 		$product3->delete();
 	}
 
 	/**
-	 * Test menu_order sorting in the editor context.
+	 * Tests that editor REST API queries correctly implement title fallback with menu_order sorting.
 	 */
-	public function test_menu_order_sorting_with_title_fallback_ediotor() {
+	public function test_editor_menu_order_sorting_with_title_fallback() {
 		$product1 = WC_Helper_Product::create_simple_product();
 		$product1->set_name( 'Pennant' );
 		$product1->set_menu_order( 10 );
@@ -1447,9 +1465,9 @@ class ProductCollection extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests if menu_order sorting is correctly applied in editor context.
+	 * Tests that menu_order REST query parameters are correctly processed in editor context.
 	 */
-	public function test_menu_order_sorting_editor_context() {
+	public function test_editor_menu_order_query_parameters() {
 		$initial_query = array(
 			'order' => 'desc',
 		);
@@ -1478,9 +1496,9 @@ class ProductCollection extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test menu order sorting with default order parameter (ASC).
+	 * Tests that menu_order sorting generates correct SQL clauses with title fallback.
 	 */
-	public function test_menu_order_sorting_default_order() {
+	public function test_menu_order_sql_clauses_with_title_fallback() {
 		$parsed_block                              = $this->get_base_parsed_block();
 		$parsed_block['attrs']['query']['orderBy'] = 'menu_order';
 		unset( $parsed_block['attrs']['query']['order'] );
@@ -1489,6 +1507,13 @@ class ProductCollection extends \WP_UnitTestCase {
 		$query        = new WP_Query( $merged_query );
 
 		$this->assertStringContainsString( 'menu_order ASC, post_title ASC', $query->request );
+
+		// Test descending order SQL clause.
+		$parsed_block['attrs']['query']['order'] = 'desc';
+		$merged_query                            = $this->initialize_merged_query( $parsed_block );
+		$query                                   = new WP_Query( $merged_query );
+
+		$this->assertStringContainsString( 'menu_order DESC, post_title DESC', $query->request );
 	}
 
 	/**
