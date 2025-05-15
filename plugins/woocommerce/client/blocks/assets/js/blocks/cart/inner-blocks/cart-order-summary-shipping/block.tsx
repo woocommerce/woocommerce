@@ -5,13 +5,13 @@ import { __ } from '@wordpress/i18n';
 import { TotalsShipping } from '@woocommerce/base-components/cart-checkout';
 import { useStoreCart } from '@woocommerce/base-context';
 import { TotalsWrapper } from '@woocommerce/blocks-checkout';
-import { hasShippingRate } from '@woocommerce/base-utils';
+import { hasSelectedShippingRate } from '@woocommerce/base-utils';
 
 const Block = ( { className }: { className: string } ): JSX.Element | null => {
 	const { cartNeedsShipping, shippingRates } = useStoreCart();
-	const hasRates = hasShippingRate( shippingRates );
+	const hasSelectedRates = hasSelectedShippingRate( shippingRates );
 
-	if ( ! cartNeedsShipping || ! hasRates ) {
+	if ( ! cartNeedsShipping || ! hasSelectedRates ) {
 		return null;
 	}
 

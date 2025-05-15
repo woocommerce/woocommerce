@@ -76,6 +76,20 @@ export const hasShippingRate = (
 	);
 };
 
+export const hasSelectedShippingRate = (
+	shippingRates: CartShippingRate[]
+): boolean => {
+	if ( ! hasShippingRate( shippingRates ) ) {
+		return false;
+	}
+	return shippingRates.some(
+		( shippingRatesPackage ) =>
+			!! shippingRatesPackage.shipping_rates.find(
+				( rate ) => rate.selected
+			)
+	);
+};
+
 /**
  * Filters an array of packages/rates based on the shopper's preference for collection.
  */

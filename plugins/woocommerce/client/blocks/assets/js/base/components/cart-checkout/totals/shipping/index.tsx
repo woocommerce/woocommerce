@@ -5,11 +5,10 @@ import { __ } from '@wordpress/i18n';
 import { TotalsItem } from '@woocommerce/blocks-components';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
-	hasShippingRate,
+	hasSelectedShippingRate,
 	getSelectedShippingRateNames,
 } from '@woocommerce/base-utils';
 import { useStoreCart } from '@woocommerce/base-context';
-import { CartShippingRate } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -30,17 +29,18 @@ export const TotalsShipping = ( {
 	collaterals = null,
 }: TotalShippingProps ): JSX.Element | null => {
 	const { cartTotals, shippingRates } = useStoreCart();
-	const hasRates = hasShippingRate( shippingRates );
+	const hasSelectedRates = hasSelectedShippingRate( shippingRates );
 	const rateNames = getSelectedShippingRateNames( shippingRates );
 	const hasMultipleRates = rateNames.length > 1;
-	const rowLabel = ! hasRates || hasMultipleRates ? label : rateNames[ 0 ];
+	const rowLabel =
+		! hasSelectedRates || hasMultipleRates ? label : rateNames[ 0 ];
 
 	return (
 		<div className="wc-block-components-totals-shipping">
 			<TotalsItem
 				label={ rowLabel }
 				value={
-					hasRates
+					hasSelectedRates
 						? renderShippingTotalValue( cartTotals )
 						: placeholder
 				}
