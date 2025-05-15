@@ -110,108 +110,117 @@ export const BankAccountModal = ( {
 			onRequestClose={ onClose }
 			shouldCloseOnClickOutside={ false }
 		>
-			<p className={ 'bank-account-modal__description' }>
-				{ account
-					? __( 'Edit your bank account details.', 'woocommerce' )
-					: __( 'Add your bank account details.', 'woocommerce' ) }
-			</p>
+			<div className={ 'bank-account-modal__content' }>
+				<p className={ 'bank-account-modal__description' }>
+					{ account
+						? __( 'Edit your bank account details.', 'woocommerce' )
+						: __(
+								'Add your bank account details.',
+								'woocommerce'
+						  ) }
+				</p>
 
-			<SelectControl
-				className="bank-account-modal__field is-required"
-				label={ __( 'Country', 'woocommerce' ) }
-				required
-				value={ selectedCountry }
-				options={ Object.entries( countries ).map(
-					( [ code, name ] ) => ( {
-						label: decodeEntities( name ),
-						value: code,
-					} )
-				) }
-				onChange={ ( value ) => {
-					setSelectedCountry( value );
-					updateField( 'country_code', value );
-				} }
-			/>
+				<SelectControl
+					className="bank-account-modal__field is-required"
+					label={ __( 'Country', 'woocommerce' ) }
+					required
+					value={ selectedCountry }
+					options={ Object.entries( countries ).map(
+						( [ code, name ] ) => ( {
+							label: decodeEntities( name ),
+							value: code,
+						} )
+					) }
+					onChange={ ( value ) => {
+						setSelectedCountry( value );
+						updateField( 'country_code', value );
+					} }
+				/>
 
-			<TextControl
-				className={ 'bank-account-modal__field is-required' }
-				label={ __( 'Account Name', 'woocommerce' ) }
-				required
-				value={ formData.account_name }
-				onChange={ ( value ) => updateField( 'account_name', value ) }
-				help={
-					errors.account_name ? (
-						<span className="bank-account-modal__error">
-							{ errors.account_name }
-						</span>
-					) : undefined
-				}
-			/>
+				<TextControl
+					className={ 'bank-account-modal__field is-required' }
+					label={ __( 'Account Name', 'woocommerce' ) }
+					required
+					value={ formData.account_name }
+					onChange={ ( value ) =>
+						updateField( 'account_name', value )
+					}
+					help={
+						errors.account_name ? (
+							<span className="bank-account-modal__error">
+								{ errors.account_name }
+							</span>
+						) : undefined
+					}
+				/>
 
-			<TextControl
-				className={ 'bank-account-modal__field' }
-				label={ __( 'Bank Name', 'woocommerce' ) }
-				value={ formData.bank_name }
-				onChange={ ( value ) => updateField( 'bank_name', value ) }
-			/>
+				<TextControl
+					className={ 'bank-account-modal__field' }
+					label={ __( 'Bank Name', 'woocommerce' ) }
+					value={ formData.bank_name }
+					onChange={ ( value ) => updateField( 'bank_name', value ) }
+				/>
 
-			<TextControl
-				className={ 'bank-account-modal__field is-required' }
-				label={ __( 'Account Number', 'woocommerce' ) }
-				required
-				value={ formData.account_number }
-				onChange={ ( value ) => updateField( 'account_number', value ) }
-				help={
-					errors.account_number ? (
-						<span className="bank-account-modal__error">
-							{ errors.account_number }
-						</span>
-					) : undefined
-				}
-			/>
+				<TextControl
+					className={ 'bank-account-modal__field is-required' }
+					label={ __( 'Account Number', 'woocommerce' ) }
+					required
+					value={ formData.account_number }
+					onChange={ ( value ) =>
+						updateField( 'account_number', value )
+					}
+					help={
+						errors.account_number ? (
+							<span className="bank-account-modal__error">
+								{ errors.account_number }
+							</span>
+						) : undefined
+					}
+				/>
 
-			<TextControl
-				className={ 'bank-account-modal__field is-required' }
-				label={ getSortcodeLabel( selectedCountry ) }
-				required
-				value={ formData.sort_code }
-				onChange={ ( value ) => updateField( 'sort_code', value ) }
-				help={
-					errors.sort_code ? (
-						<span className="bank-account-modal__error">
-							{ errors.sort_code }
-						</span>
-					) : undefined
-				}
-			/>
+				<TextControl
+					className={ 'bank-account-modal__field is-required' }
+					label={ getSortcodeLabel( selectedCountry ) }
+					required
+					value={ formData.sort_code }
+					onChange={ ( value ) => updateField( 'sort_code', value ) }
+					help={
+						errors.sort_code ? (
+							<span className="bank-account-modal__error">
+								{ errors.sort_code }
+							</span>
+						) : undefined
+					}
+				/>
 
-			<TextControl
-				className={ 'bank-account-modal__field' }
-				label={ __( 'IBAN', 'woocommerce' ) }
-				value={ formData.iban }
-				onChange={ ( value ) => updateField( 'iban', value ) }
-				help={
-					errors.iban ? (
-						<span className="bank-account-modal__error">
-							{ errors.iban }
-						</span>
-					) : undefined
-				}
-			/>
+				<TextControl
+					className={ 'bank-account-modal__field' }
+					label={ __( 'IBAN', 'woocommerce' ) }
+					value={ formData.iban }
+					onChange={ ( value ) => updateField( 'iban', value ) }
+					help={
+						errors.iban ? (
+							<span className="bank-account-modal__error">
+								{ errors.iban }
+							</span>
+						) : undefined
+					}
+				/>
 
-			<TextControl
-				className={ 'bank-account-modal__field' }
-				label={ __( 'BIC / SWIFT', 'woocommerce' ) }
-				value={ formData.bic }
-				onChange={ ( value ) => updateField( 'bic', value ) }
-				help={
-					errors.bic ? (
-						<span className="bank-account-modal__error">
-							{ errors.bic }
-						</span>
-					) : undefined
-				}
-			/>
+				<TextControl
+					className={ 'bank-account-modal__field' }
+					label={ __( 'BIC / SWIFT', 'woocommerce' ) }
+					value={ formData.bic }
+					onChange={ ( value ) => updateField( 'bic', value ) }
+					help={
+						errors.bic ? (
+							<span className="bank-account-modal__error">
+								{ errors.bic }
+							</span>
+						) : undefined
+					}
+				/>
+			</div>
 
 			<div className={ 'bank-account-modal__actions' }>
 				<Button variant={ 'tertiary' } onClick={ onClose }>
