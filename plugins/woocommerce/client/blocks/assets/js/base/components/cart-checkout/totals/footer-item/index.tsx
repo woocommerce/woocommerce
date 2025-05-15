@@ -25,7 +25,6 @@ import { formatPrice } from '@woocommerce/price-format';
  * Internal dependencies
  */
 import './style.scss';
-import { hasShippingRate } from '../../../../utils';
 
 export interface TotalsFooterItemProps {
 	/**
@@ -118,8 +117,6 @@ const TotalsFooterItem = ( {
 			  )
 			: __( 'Includes <TaxAmount/> in taxes', 'woocommerce' );
 
-	const hasShipping = hasShippingRate( cart.shippingRates );
-
 	return (
 		<TotalsItem
 			className={ clsx(
@@ -144,7 +141,7 @@ const TotalsFooterItem = ( {
 							} ) }
 						</p>
 					) }
-					{ ! hasShipping && estimated && (
+					{ estimated && (
 						<p className="wc-block-components-totals-footer-item-shipping">
 							{ __(
 								'Shipping will be calculated at checkout',
