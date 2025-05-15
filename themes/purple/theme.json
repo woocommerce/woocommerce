@@ -14,28 +14,38 @@
 			"palette": [
 				{
 					"color": "#FFFFFF",
-					"name": "Background",
+					"name": "Color 1",
 					"slug": "theme-1"
 				},
 				{
 					"color": "#111111",
-					"name": "Primary",
+					"name": "Color 2",
 					"slug": "theme-2"
 				},
 				{
 					"color": "#243DC8",
-					"name": "Accent",
+					"name": "Color 3",
 					"slug": "theme-3"
 				},
 				{
 					"color": "#686868",
-					"name": "Primary",
+					"name": "Color 4",
 					"slug": "theme-4"
 				},
 				{
 					"color": "rgba(17, 17, 17, 0.2)",
-					"name": "Opacity 20%",
+					"name": "Color 5",
 					"slug": "theme-5"
+				},
+				{
+					"color": "#F7F7F7",
+					"name": "Color 6",
+					"slug": "theme-6"
+				},
+				{
+					"color": "#DC352F",
+					"name": "Color 7",
+					"slug": "theme-7"
 				}
 			],
 			"duotone": [
