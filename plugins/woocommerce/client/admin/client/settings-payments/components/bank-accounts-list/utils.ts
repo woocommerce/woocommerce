@@ -1,4 +1,4 @@
-/**
+pn/**
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
@@ -58,7 +58,7 @@ export const shouldDisplaySortCode = ( country: string ): boolean => {
 		default:
 			return false;
 	}
-}
+};
 
 /**
  * Format the sort code based on the country.
