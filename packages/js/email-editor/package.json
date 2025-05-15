@@ -63,6 +63,7 @@
 		"@wordpress/block-editor": "wp-6.6",
 		"@wordpress/block-library": "wp-6.6",
 		"@wordpress/blocks": "wp-6.6",
+		"@wordpress/commands": "wp-6.6",
 		"@wordpress/components": "wp-6.6",
 		"@wordpress/compose": "wp-6.6",
 		"@wordpress/core-data": "wp-6.6",

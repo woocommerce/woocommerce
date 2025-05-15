@@ -39,13 +39,6 @@ class ProductFilters extends AbstractBlock {
 		$this->asset_data_registry->add( 'isProductArchive', is_shop() || is_product_taxonomy() );
 		$this->asset_data_registry->add( 'isSiteEditor', 'site-editor.php' === $pagenow );
 		$this->asset_data_registry->add( 'isWidgetEditor', 'widgets.php' === $pagenow || 'customize.php' === $pagenow );
-
-		$canonical_url_no_pagination = get_pagenum_link( 1 );
-		if ( is_singular() ) {
-			$canonical_url_no_pagination = get_permalink();
-		}
-
-		$this->asset_data_registry->add( 'canonicalUrl', html_entity_decode( $canonical_url_no_pagination ) );
 	}
 
 	/**
@@ -61,6 +54,9 @@ class ProductFilters extends AbstractBlock {
 
 		$query_id      = $block->context['queryId'] ?? 0;
 		$filter_params = $this->get_filter_params( $query_id );
+
+		$this->asset_data_registry->add( 'canonicalUrl', $this->get_canonical_url_no_pagination( $filter_params ) );
+
 		/**
 		 * Filter hook to modify the selected filter items.
 		 *
@@ -269,5 +265,53 @@ class ProductFilters extends AbstractBlock {
 	 */
 	protected function get_block_type_script( $key = null ) {
 		return null;
+	}
+
+	/**
+	 * Get the canonical URL without pagination.
+	 *
+	 * @param array $filter_params Filter parameters.
+	 * @return string Canonical URL without pagination.
+	 */
+	private function get_canonical_url_no_pagination( $filter_params ) {
+		$canonical_url_no_pagination = is_singular() ? get_permalink() : get_pagenum_link( 1 );
+
+		if ( empty( $filter_params ) ) {
+			return $canonical_url_no_pagination;
+		}
+
+		$parsed_url = wp_parse_url( html_entity_decode( $canonical_url_no_pagination ) );
+
+		foreach ( array_keys( $filter_params ) as $key ) {
+			$parsed_url['query'] = remove_query_arg( $key, $parsed_url['query'] );
+		}
+
+		$url = '';
+
+		if ( isset( $parsed_url['scheme'] ) ) {
+			$url .= $parsed_url['scheme'] . '://';
+		}
+
+		if ( isset( $parsed_url['host'] ) ) {
+			$url .= $parsed_url['host'];
+		}
+
+		if ( isset( $parsed_url['port'] ) ) {
+			$url .= ':' . $parsed_url['port'];
+		}
+
+		if ( isset( $parsed_url['path'] ) ) {
+			$url .= $parsed_url['path'];
+		}
+
+		if ( ! empty( $parsed_url['query'] ) ) {
+			$url .= '?' . $parsed_url['query'];
+		}
+
+		if ( isset( $parsed_url['fragment'] ) ) {
+			$url .= '#' . $parsed_url['fragment'];
+		}
+
+		return $url;
 	}
 }

@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/add-to-cart-with-options-variation-selector-attribute-name",
-	"title": "Variation Selector Attribute Name (Experimental)",
-	"description": "The name of a given variable product attribute.",
+	"title": "Variation Selector: Attribute Name (Beta)",
+	"description": "Format the name of an attribute associated with a variable product.",
 	"category": "woocommerce-product-elements",
 	"keywords": [ "WooCommerce" ],
 	"ancestor": [

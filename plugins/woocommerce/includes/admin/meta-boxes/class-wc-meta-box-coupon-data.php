@@ -117,7 +117,7 @@ class WC_Meta_Box_Coupon_Data {
 						'id'                => 'expiry_date',
 						'value'             => esc_attr( $expiry_date ),
 						'label'             => __( 'Coupon expiry date', 'woocommerce' ),
-						'placeholder'       => 'YYYY-MM-DD',
+						'placeholder'       => _x( 'YYYY-MM-DD', 'coupon expiry date placeholder', 'woocommerce' ),
 						'description'       => __( 'The coupon will expire at 00:00:00 of this date.', 'woocommerce' ),
 						'desc_tip'          => true,
 						'class'             => 'date-picker',
@@ -367,7 +367,7 @@ class WC_Meta_Box_Coupon_Data {
 		$exclude_product_categories = isset( $_POST['exclude_product_categories'] ) ? (array) $_POST['exclude_product_categories'] : array();
 
 		$coupon = new WC_Coupon( $post_id );
-		$coupon->set_props(
+		$errors = $coupon->set_props(
 			array(
 				'code'                        => $post->post_title,
 				'discount_type'               => wc_clean( $_POST['discount_type'] ),
@@ -388,6 +388,13 @@ class WC_Meta_Box_Coupon_Data {
 				'email_restrictions'          => array_filter( array_map( 'trim', explode( ',', wc_clean( $_POST['customer_email'] ) ) ) ),
 			)
 		);
+
+		if ( is_wp_error( $errors ) ) {
+			foreach ( $errors->get_error_messages() as $error_message ) {
+				WC_Admin_Meta_Boxes::add_error( $error_message );
+			}
+		}
+
 		$coupon->save();
 		do_action( 'woocommerce_coupon_options_save', $post_id, $coupon );
 	}

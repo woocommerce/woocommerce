@@ -66,12 +66,14 @@ class PageRenderer {
 		$post_type   = $template_id ? 'wp_template' : Integration::EMAIL_POST_TYPE;
 		$post_id     = $template_id ? $template_id : $post_id;
 
-		if ( ! $this->can_edit_post_in_email_editor( $post_id, $post_type ) ) {
+		$edited_item = $this->get_edited_item( $post_id, $post_type );
+
+		if ( ! $edited_item ) {
 			return;
 		}
 
 		// Load the email editor assets.
-		$this->load_editor_assets( $post_id, $post_type );
+		$this->load_editor_assets( $edited_item );
 
 		// Load CSS from Post Editor.
 		wp_enqueue_style( 'wp-edit-post' );
@@ -90,10 +92,11 @@ class PageRenderer {
 	/**
 	 * Load editor assets.
 	 *
-	 * @param int|string $post_id  The post ID.
-	 * @param string     $post_type The post type.
+	 * @param \WP_Post|\WP_Block_Template $edited_item  The edited post or template.
 	 */
-	private function load_editor_assets( $post_id, string $post_type ): void {
+	private function load_editor_assets( $edited_item ): void {
+		$post_type = $edited_item instanceof \WP_Post ? $edited_item->post_type : 'wp_template';
+		$post_id   = $edited_item instanceof \WP_Post ? $edited_item->ID : $edited_item->id;
 		// Load the email editor integration script.
 		// The JS file is located in plugins/woocommerce/client/admin/client/wp-admin-scripts/email-editor-integration/index.ts.
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'email-editor-integration', true );
@@ -220,25 +223,25 @@ class PageRenderer {
 	 *
 	 * @param int|string $id   The post ID.
 	 * @param string     $type The post type.
-	 * @return bool True if the post can be edited, false otherwise.
+	 * @return \WP_Post|\WP_Block_Template|null Edited item or null if the item is not found.
 	 */
-	private function can_edit_post_in_email_editor( $id, string $type ): bool {
+	private function get_edited_item( $id, string $type ) {
 		// When we pass template we need to verify that the template is registered in the email template registry.
 		if ( 'wp_template' === $type ) {
 			$wp_template = get_block_template( $id );
 			if ( ! $wp_template ) {
-				return false;
+				return null;
 			}
 			$email_template = $this->template_registry->get_by_slug( $wp_template->slug );
-			return $email_template instanceof Template;
+			return $email_template instanceof Template ? $wp_template : null;
 		}
 
 		// For post we need to verify that the post is of the email type.
 		$post = get_post( $id );
 		if ( $post instanceof \WP_Post && $type === $post->post_type ) {
-			return true;
+			return $post;
 		}
 
-		return false;
+		return null;
 	}
 }
