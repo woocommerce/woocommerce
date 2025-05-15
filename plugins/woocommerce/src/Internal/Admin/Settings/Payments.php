@@ -120,8 +120,8 @@ class Payments {
 				'id'          => PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
 				'_type'       => PaymentProviders::TYPE_OFFLINE_PMS_GROUP,
 				'_order'      => $providers_order_map[ PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP ],
-				'title'       => __( 'Take offline payments', 'woocommerce' ),
-				'description' => __( 'Accept payments offline using multiple different methods. These can also be used to test purchases.', 'woocommerce' ),
+				'title'       => esc_html__( 'Take offline payments', 'woocommerce' ),
+				'description' => esc_html__( 'Accept payments offline using multiple different methods. These can also be used to test purchases.', 'woocommerce' ),
 				'icon'        => plugins_url( 'assets/images/payment_methods/cod.svg', WC_PLUGIN_FILE ),
 				// The offline PMs (and their group) are obviously from WooCommerce, and WC is always active.
 				'plugin'      => array(

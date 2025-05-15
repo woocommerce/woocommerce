@@ -4,7 +4,6 @@
 import { useBlockProps } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
-import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -15,36 +14,26 @@ import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descend
 
 const Edit = ( {
 	attributes,
-	setAttributes,
 	context,
 }: BlockEditProps< BlockAttributes > & { context: Context } ): JSX.Element => {
 	const blockProps = useBlockProps();
+
+	const { isDescendentOfSingleProductTemplate } =
+		useIsDescendentOfSingleProductTemplate();
 
 	const blockAttrs = {
 		...attributes,
 		...context,
 	};
-	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
-
-	const { isDescendentOfSingleProductTemplate } =
-		useIsDescendentOfSingleProductTemplate();
-
-	useEffect(
-		() =>
-			setAttributes( {
-				isDescendentOfQueryLoop,
-				isDescendentOfSingleProductTemplate,
-			} ),
-		[
-			setAttributes,
-			isDescendentOfQueryLoop,
-			isDescendentOfSingleProductTemplate,
-		]
-	);
 
 	return (
 		<div { ...blockProps }>
-			<Block { ...blockAttrs } />
+			<Block
+				{ ...blockAttrs }
+				isDescendentOfSingleProductTemplate={
+					isDescendentOfSingleProductTemplate
+				}
+			/>
 		</div>
 	);
 };

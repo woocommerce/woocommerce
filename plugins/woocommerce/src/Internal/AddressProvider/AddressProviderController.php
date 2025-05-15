@@ -8,27 +8,45 @@ use WC_Address_Provider;
  * Service class for managing address providers.
  */
 class AddressProviderController {
-
 	/**
-	 * Cached provider class names from the last filter call.
-	 *
-	 * @var string[]
-	 */
-	private $cached_provider_class_names = array();
-
-	/**
-	 * Cached provider instances.
+	 * Registered provider instances.
 	 *
 	 * @var WC_Address_Provider[]
 	 */
-	private $cached_providers = array();
+	private $providers = array();
+
+	/**
+	 * Preferred provider from options.
+	 *
+	 * @var string ID of preferred address provider.
+	 */
+	private $preferred_provider_option;
+
+	/**
+	 * Init function runs after this provider was added to DI container.
+	 *
+	 * @internal
+	 */
+	final public function init() {
+		$this->preferred_provider_option = get_option( 'woocommerce_address_autocomplete_provider', '' );
+		$this->providers                 = $this->get_registered_providers();
+	}
+
+	/**
+	 * Get the registered providers.
+	 *
+	 * @return WC_Address_Provider[] array of WC_Address_Providers.
+	 */
+	public function get_providers(): array {
+		return $this->providers;
+	}
 
 	/**
 	 * Get all registered providers.
 	 *
 	 * @return WC_Address_Provider[] array of WC_Address_Providers.
 	 */
-	public function get_registered_providers(): array {
+	private function get_registered_providers(): array {
 		/**
 		 * Filter the registered address providers.
 		 *
@@ -36,6 +54,11 @@ class AddressProviderController {
 		 * @param WC_Address_Provider[] $providers Array of fully qualified class names that extend WC_Address_Provider.
 		 */
 		$provider_class_names = apply_filters( 'woocommerce_address_providers', array() );
+
+		// The filter returned nothing but an empty array, so we can skip the rest of the function.
+		if ( empty( $provider_class_names ) && is_array( $provider_class_names ) ) {
+			return array();
+		}
 
 		$logger = wc_get_logger();
 
@@ -47,11 +70,6 @@ class AddressProviderController {
 				)
 			);
 			return array();
-		}
-
-		// If the class names haven't changed, return the cached instances.
-		if ( $this->cached_provider_class_names === $provider_class_names && ! empty( $this->cached_providers ) ) {
-			return $this->cached_providers;
 		}
 
 		$providers = array();
@@ -117,9 +135,18 @@ class AddressProviderController {
 			$providers[] = $provider_instance;
 		}
 
-		// Update the cache.
-		$this->cached_provider_class_names = $provider_class_names;
-		$this->cached_providers            = $providers;
+		if ( ! empty( $this->preferred_provider_option ) && ! empty( $providers ) ) {
+			// Look for the preferred provider in the array.
+			foreach ( $providers as $key => $provider ) {
+				if ( $provider->id === $this->preferred_provider_option ) {
+					// Found the preferred provider, move it to the beginning of the array.
+					$preferred_provider = $provider;
+					unset( $providers[ $key ] );
+					array_unshift( $providers, $preferred_provider );
+					break;
+				}
+			}
+		}
 
 		return $providers;
 	}
@@ -131,14 +158,30 @@ class AddressProviderController {
 	 * @return bool
 	 */
 	public function is_provider_available( string $provider_id ): bool {
-		$providers = $this->get_registered_providers();
 
-		foreach ( $providers as $provider ) {
+		foreach ( $this->providers as $provider ) {
 			if ( $provider->id === $provider_id ) {
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get the preferred provider; this is what was selected in the WooCommerce "preferred provider" setting *or* the
+	 * first registered provider if no preference was set. If the provider selected in WC Settings is not registered
+	 * anymore, it will fall back to the first registered provider. Any other case will return an empty string.
+	 *
+	 * @return string
+	 */
+	public function get_preferred_provider(): string {
+
+		if ( $this->is_provider_available( $this->preferred_provider_option ) ) {
+			return $this->preferred_provider_option;
+		}
+
+		// Get the first provider's ID by instantiating it.
+		return $this->providers[0]->id ?? '';
 	}
 }
