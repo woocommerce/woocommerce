@@ -15,7 +15,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { BankAccount } from './types';
-import { getSortcodeLabel } from './utils';
+import { formatSortCode, getSortCodeLabel } from './utils';
 import { validateRequiredField, validateNumericField } from './validation';
 import './bank-account-modal.scss';
 
@@ -180,10 +180,26 @@ export const BankAccountModal = ( {
 
 				<TextControl
 					className={ 'bank-account-modal__field is-required' }
-					label={ getSortcodeLabel( selectedCountry ) }
+					label={ getSortCodeLabel( selectedCountry ) }
 					required
-					value={ formData.sort_code }
-					onChange={ ( value ) => updateField( 'sort_code', value ) }
+					value={ formatSortCode(
+						formData.sort_code,
+						selectedCountry
+					) }
+					onChange={ ( value ) => {
+						// Strip all non-digit characters to get the raw value
+						if (
+							selectedCountry === 'GB' ||
+							selectedCountry === 'IE'
+						) {
+							value = value
+								.replace( /\D/g, '' )
+								.substring( 0, 6 );
+						}
+
+						// Store or pass the raw value:
+						updateField( 'sort_code', value );
+					} }
 					help={
 						errors.sort_code ? (
 							<span className="bank-account-modal__error">
