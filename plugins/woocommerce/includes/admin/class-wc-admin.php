@@ -337,18 +337,18 @@ class WC_Admin {
 
 		if ( $uses_field_filters && ! $uses_locale_filters ) {
 			echo '<div class="notice notice-warning">';
-		    echo '<p><strong>' . esc_html__( 'WooCommerce Notice for Developers:', 'woocommerce' ) . '</strong> ';
-		    echo wp_kses_post(
-		        sprintf(
-		            /* translators: %1$s, %2$s, %3$s are code references to WooCommerce filters */
-		            __( 'One or more active plugins are customizing checkout, billing, or shipping fields without using required locale filters. This may result in incomplete or misconfigured address fields for some countries. Please ensure the plugins also hook into %1$s, %2$s, or %3$s.', 'woocommerce' ),
-		            '<code>woocommerce_default_address_fields</code>',
-		            '<code>woocommerce_get_country_locale</code>',
-		            '<code>woocommerce_get_country_locale_default</code>'
-		        )
-		    );
-		    echo '</p>';
-		    echo '</div>';
+			echo '<p><strong>' . esc_html__( 'WooCommerce Notice for Developers:', 'woocommerce' ) . '</strong> ';
+			echo wp_kses_post(
+				sprintf(
+					/* translators: %1$s, %2$s, %3$s are code references to WooCommerce filters */
+					__( 'One or more active plugins are customizing checkout, billing, or shipping fields without using required locale filters. This may result in incomplete or misconfigured address fields for some countries. Please ensure the plugins also hook into %1$s, %2$s, or %3$s.', 'woocommerce' ),
+					'<code>woocommerce_default_address_fields</code>',
+					'<code>woocommerce_get_country_locale</code>',
+					'<code>woocommerce_get_country_locale_default</code>'
+				)
+			);
+			echo '</p>';
+			echo '</div>';
 		}
 	}
 
