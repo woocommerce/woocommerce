@@ -37,7 +37,16 @@ class BlockifiedProductDetails extends AbstractBlock {
 	protected function render( $attributes, $content, $block ) {
 		$parsed_block = $block->parsed_block;
 		$parsed_block = $this->hide_empty_accordion_items( $parsed_block, $block->context );
-		$parsed_block = $this->inject_compatible_tabs( $parsed_block );
+
+		/**
+		 * Filter to disable the compatibility layer for the blockified templates.
+		 *
+		 * @see AddToCartWithOptions::render() for full documentation.
+		 * @since 7.6.0
+		 */
+		if ( ! apply_filters( 'woocommerce_disable_compatibility_layer', false ) ) {
+			$parsed_block = $this->inject_compatible_tabs( $parsed_block );
+		}
 
 		$inner_content = array_reduce(
 			$parsed_block['innerBlocks'],
@@ -122,42 +131,24 @@ class BlockifiedProductDetails extends AbstractBlock {
 	 * @return array Accordion item.
 	 */
 	private function create_accordion_item_block( $title, $content ) {
-		$template = parse_blocks(
-			'<!-- wp:woocommerce/accordion-item -->
+		$template = '<!-- wp:woocommerce/accordion-item -->
 			<div class="wp-block-woocommerce-accordion-item"><!-- wp:woocommerce/accordion-header -->
-			<h3 class="wp-block-woocommerce-accordion-header accordion-item__heading"><button class="accordion-item__toggle"><span>{{title}}</span><span class="accordion-item__toggle-icon has-icon-plus" style="width:1.2em;height:1.2em"><svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M11 12.5V17.5H12.5V12.5H17.5V11H12.5V6H11V11H6V12.5H11Z" fill="currentColor"></path></svg></span></button></h3>
+			<h3 class="wp-block-woocommerce-accordion-header accordion-item__heading">
+			<button class="accordion-item__toggle">
+			<span>%1$s</span>
+			<span class="accordion-item__toggle-icon has-icon-plus" style="width:1.2em;height:1.2em"><svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M11 12.5V17.5H12.5V12.5H17.5V11H12.5V6H11V11H6V12.5H11Z" fill="currentColor"></path></svg></span>
+			</button>
+			</h3>
 			<!-- /wp:woocommerce/accordion-header -->
 
 			<!-- wp:woocommerce/accordion-panel -->
 			<div class="wp-block-woocommerce-accordion-panel"><div class="accordion-content__wrapper">
-			<!-- wp:paragraph --><p>{{content}}</p><!-- /wp:paragraph -->
+			%2$s
 			</div></div>
 			<!-- /wp:woocommerce/accordion-panel --></div>
-			<!-- /wp:woocommerce/accordion-item -->'
-		)[0];
+			<!-- /wp:woocommerce/accordion-item -->';
 
-		foreach ( $template['innerBlocks'] as &$block ) {
-			if ( 'woocommerce/accordion-header' === $block['blockName'] ) {
-				$block['innerContent'] = array_map(
-					function ( $inner_content ) use ( $title ) {
-						return str_replace( '{{title}}', $title, $inner_content );
-					},
-					$block['innerContent']
-				);
-			}
-			if ( 'woocommerce/accordion-panel' === $block['blockName'] ) {
-				$block['innerBlocks']  = parse_blocks( $content );
-				$openning_tag          = reset( $block['innerContent'] );
-				$closing_tag           = end( $block['innerContent'] );
-				$block['innerContent'] = array_merge(
-					array( $openning_tag ),
-					array_fill( 0, count( $block['innerBlocks'] ), null ),
-					array( $closing_tag )
-				);
-			}
-		}
-
-		return $template;
+		return parse_blocks( sprintf( $template, $title, $content ) )[0];
 	}
 
 	/**
@@ -172,10 +163,10 @@ class BlockifiedProductDetails extends AbstractBlock {
 		if ( 'woocommerce/accordion-group' === $parsed_block['blockName'] ) {
 			$parsed_block['innerBlocks']  = array_merge( $parsed_block['innerBlocks'], $accordion_blocks );
 			$parsed_block['innerBlocks']  = array_values( array_filter( $parsed_block['innerBlocks'] ) );
-			$openning_tag                 = reset( $parsed_block['innerContent'] );
+			$opening_tag                  = reset( $parsed_block['innerContent'] );
 			$closing_tag                  = end( $parsed_block['innerContent'] );
 			$parsed_block['innerContent'] = array_merge(
-				array( $openning_tag ),
+				array( $opening_tag ),
 				array_fill( 0, count( $parsed_block['innerBlocks'] ), null ),
 				array( $closing_tag )
 			);
@@ -207,10 +198,10 @@ class BlockifiedProductDetails extends AbstractBlock {
 				$parsed_block['innerBlocks'][ $key ] = $this->mark_accordion_item_hidden( $inner_block, $context );
 			}
 			$parsed_block['innerBlocks']  = array_values( array_filter( $parsed_block['innerBlocks'] ) );
-			$openning_tag                 = reset( $parsed_block['innerContent'] );
+			$opening_tag                  = reset( $parsed_block['innerContent'] );
 			$closing_tag                  = end( $parsed_block['innerContent'] );
 			$parsed_block['innerContent'] = array_merge(
-				array( $openning_tag ),
+				array( $opening_tag ),
 				array_fill( 0, count( $parsed_block['innerBlocks'] ), null ),
 				array( $closing_tag )
 			);
