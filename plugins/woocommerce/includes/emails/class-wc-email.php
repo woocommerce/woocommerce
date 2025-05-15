@@ -569,7 +569,6 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_cc_recipient() {
-		$cc = $this->cc;
 		/**
 		 * Filter the Cc recipient for the email.
 		 *
@@ -578,7 +577,7 @@ class WC_Email extends WC_Settings_API {
 		 * @param object   $object The object (ie, product or order) this email relates to, if any.
 		 * @param WC_Email $email  WC_Email instance managing the email.
 		 */
-		$cc  = apply_filters( 'woocommerce_email_cc_recipient_' . $this->id, $cc, $this->object, $this );
+		$cc  = apply_filters( 'woocommerce_email_cc_recipient_' . $this->id, $this->cc, $this->object, $this );
 		$ccs = array_map( 'trim', explode( ',', $cc ) );
 		$ccs = array_filter( $ccs, 'is_email' );
 		$ccs = array_map( 'sanitize_email', $ccs );
@@ -591,16 +590,15 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_bcc_recipient() {
-		$bcc = $this->bcc;
 		/**
 		 * Filter the Bcc recipient for the email.
 		 *
 		 * @since 9.8.0
-		 * @param string   $bcc    CC recipient.
+		 * @param string   $bcc    Bcc recipient.
 		 * @param object   $object The object (ie, product or order) this email relates to, if any.
 		 * @param WC_Email $email  WC_Email instance managing the email.
 		 */
-		$bcc  = apply_filters( 'woocommerce_email_bcc_recipient_' . $this->id, $bcc, $this->object, $this );
+		$bcc  = apply_filters( 'woocommerce_email_bcc_recipient_' . $this->id, $this->bcc, $this->object, $this );
 		$bccs = array_map( 'trim', explode( ',', $bcc ) );
 		$bccs = array_filter( $bccs, 'is_email' );
 		$bccs = array_map( 'sanitize_email', $bccs );
