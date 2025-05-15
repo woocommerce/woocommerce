@@ -36,6 +36,31 @@ export const getSortCodeLabel = ( country: string ): string => {
 };
 
 /**
+ * Determines whether to display the sort code field based on the country.
+ *
+ * @param  country The country code (e.g., 'AU', 'CA', etc.).
+ *
+ * @return {boolean} True if the sort code field should be displayed, false otherwise.
+ */
+export const shouldDisplaySortCode = ( country: string ): boolean => {
+	switch ( country ) {
+		case 'AU':
+		case 'CA':
+		case 'IN':
+		case 'IT':
+		case 'NZ':
+		case 'SE':
+		case 'US':
+		case 'ZA':
+		case 'GB':
+		case 'IE':
+			return true;
+		default:
+			return false;
+	}
+}
+
+/**
  * Format the sort code based on the country.
  *
  * @param  sortCode The sort code to format.

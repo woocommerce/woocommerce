@@ -15,7 +15,11 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { BankAccount } from './types';
-import { formatSortCode, getSortCodeLabel } from './utils';
+import {
+	formatSortCode,
+	getSortCodeLabel,
+	shouldDisplaySortCode,
+} from './utils';
 import { validateRequiredField, validateNumericField } from './validation';
 import './bank-account-modal.scss';
 
@@ -79,7 +83,9 @@ export const BankAccountModal = ( {
 			validateRequiredField( formData.account_number ) ||
 			validateNumericField( formData.account_number );
 
-		newErrors.sort_code = validateRequiredField( formData.sort_code );
+		if ( shouldDisplaySortCode( selectedCountry ) ) {
+			newErrors.sort_code = validateRequiredField( formData.sort_code );
+		}
 
 		const filteredErrors = Object.fromEntries(
 			Object.entries( newErrors ).filter( ( [ , v ] ) => v )
@@ -134,6 +140,8 @@ export const BankAccountModal = ( {
 					onChange={ ( value ) => {
 						setSelectedCountry( value );
 						updateField( 'country_code', value );
+						// Clear the because sort codes have different formats in different countries.
+						updateField( 'sort_code', '' );
 					} }
 				/>
 
@@ -178,36 +186,38 @@ export const BankAccountModal = ( {
 					}
 				/>
 
-				<TextControl
-					className={ 'bank-account-modal__field is-required' }
-					label={ getSortCodeLabel( selectedCountry ) }
-					required
-					value={ formatSortCode(
-						formData.sort_code,
-						selectedCountry
-					) }
-					onChange={ ( value ) => {
-						// Strip all non-digit characters to get the raw value
-						if (
-							selectedCountry === 'GB' ||
-							selectedCountry === 'IE'
-						) {
-							value = value
-								.replace( /\D/g, '' )
-								.substring( 0, 6 );
-						}
+				{ shouldDisplaySortCode( selectedCountry ) && (
+					<TextControl
+						className={ 'bank-account-modal__field is-required' }
+						label={ getSortCodeLabel( selectedCountry ) }
+						required
+						value={ formatSortCode(
+							formData.sort_code || '',
+							selectedCountry
+						) }
+						onChange={ ( value ) => {
+							// Strip all non-digit characters to get the raw value
+							if (
+								selectedCountry === 'GB' ||
+								selectedCountry === 'IE'
+							) {
+								value = value
+									.replace( /\D/g, '' )
+									.substring( 0, 6 );
+							}
 
-						// Store or pass the raw value:
-						updateField( 'sort_code', value );
-					} }
-					help={
-						errors.sort_code ? (
-							<span className="bank-account-modal__error">
-								{ errors.sort_code }
-							</span>
-						) : undefined
-					}
-				/>
+							// Store or pass the raw value:
+							updateField( 'sort_code', value );
+						} }
+						help={
+							errors.sort_code ? (
+								<span className="bank-account-modal__error">
+									{ errors.sort_code }
+								</span>
+							) : undefined
+						}
+					/>
+				) }
 
 				<TextControl
 					className={ 'bank-account-modal__field' }
