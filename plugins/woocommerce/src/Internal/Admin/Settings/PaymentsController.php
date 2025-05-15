@@ -3,8 +3,9 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
+use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use Exception;
+use Throwable;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
@@ -141,8 +142,11 @@ class PaymentsController {
 	public function add_allowed_promo_notes( array $promo_notes = array() ): array {
 		try {
 			$providers = $this->payments->get_payment_providers( $this->payments->get_country() );
-		} catch ( Exception $e ) {
-			// In case of an error, bail.
+		} catch ( Throwable $e ) {
+			// Catch everything since we don't want to break all the WP admin pages.
+			// Log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->error( 'Failed to get payment providers: ' . $e->getMessage(), array( 'source' => 'settings-payments', 'error' => $e ) );
+
 			return $promo_notes;
 		}
 
