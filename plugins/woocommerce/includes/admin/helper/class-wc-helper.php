@@ -1703,7 +1703,7 @@ class WC_Helper {
 			if ( is_wp_error( $request ) ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( $request->get_error_message(), $request->get_error_data() );
+				throw new Exception( $request->get_error_message(), (int) $request->get_error_data() );
 			}
 
 			$code = wp_remote_retrieve_response_code( $request );
@@ -1856,7 +1856,7 @@ class WC_Helper {
 			if ( is_wp_error( $request ) ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( $request->get_error_message(), $request->get_error_data() );
+				throw new Exception( $request->get_error_message(), (int) $request->get_error_data() );
 			}
 
 			$code = wp_remote_retrieve_response_code( $request );
