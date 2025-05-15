@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\Incentives\Incentive;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestions;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
@@ -1144,5 +1145,65 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		WC()->payment_gateways()->init();
 
 		$this->providers_service->reset_memo();
+	}
+
+	/**
+	 * @dataProvider provider_testing_preferred_offline_provider_visibility
+	 */
+	public function test_preferred_provider_visibility_based_on_selling_context( $selling_context, $expected_preferred_visible ) {
+		// Arrange
+		$this->enable_core_paypal_pg();
+		update_option(
+			OnboardingProfile::DATA_OPTION,
+			array(
+				'business_choice'       => 'im_already_selling',
+				'selling_online_answer' => $selling_context,
+			)
+		);
+
+		// Act
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request->set_param( 'location', 'US' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+
+		$preferred_found = false;
+		foreach ( $data['providers'] as $provider ) {
+			if ( isset( $provider['tags'] ) && in_array( PaymentExtensionSuggestions::TAG_PREFERRED_OFFLINE, $provider['tags'], true ) ) {
+				$preferred_found = true;
+				break;
+			}
+		}
+
+		if ( $expected_preferred_visible ) {
+			$this->assertTrue( $preferred_found );
+		} else {
+			$this->assertFalse( $preferred_found );
+		}
+	}
+
+	/**
+	 * Provides different merchant selling scenarios based on WC onboarding profile and expected preferred provider visibility.
+	 *
+	 * @return array[]
+	 */
+	public function provider_testing_preferred_offline_provider_visibility() {
+		return [
+			'Offline only' => [
+				'no_im_selling_offline',
+				true,
+			],
+			'Online and offline' => [
+				'im_selling_both_online_and_offline',
+				true,
+			],
+			'Online only' => [
+				'yes_im_selling_online',
+				false,
+			],
+		];
 	}
 }
