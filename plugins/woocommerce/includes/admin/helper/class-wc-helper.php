@@ -1710,7 +1710,7 @@ class WC_Helper {
 			if ( 200 !== $code ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( self::get_message_for_response_code( $code ) );
+				throw new Exception( self::get_message_for_response_code( $code ), $code );
 			}
 
 			$data = json_decode( wp_remote_retrieve_body( $request ), true );
@@ -1726,10 +1726,10 @@ class WC_Helper {
 			self::remove_api_error_notice();
 			return $data;
 		} catch ( Exception $e ) {
-			// Don't show this error for unauthenticated users, since they don't care about usage rules anyway.
-			if ( 401 === $e->getCode() ) {
+			if ( $e->getCode() < 404 ) {
 				self::remove_api_error_notice();
 			} else {
+				// Only show error notice in case there is no proper communication with WCCOM
 				self::log( 'Error getting product usage notice rules: ' . $e->getMessage(), 'error' );
 				self::add_api_error_notice();
 			}
@@ -1863,7 +1863,7 @@ class WC_Helper {
 			if ( 200 !== $code ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( self::get_message_for_response_code( $code ) );
+				throw new Exception( self::get_message_for_response_code( $code ), $code );
 			}
 
 			$data = json_decode( wp_remote_retrieve_body( $request ), true );
@@ -1879,10 +1879,10 @@ class WC_Helper {
 			self::remove_api_error_notice();
 			return $data;
 		} catch ( Exception $e ) {
-			// Don't show this error for unauthenticated users, since they don't care about subscriptions anyway.
-			if ( 401 === $e->getCode() ) {
+			if ( $e->getCode() < 404 ) {
 				self::remove_api_error_notice();
 			} else {
+				// Only show error notice in case there is no proper communication with WCCOM
 				self::log( 'Error getting subscriptions: ' . $e->getMessage(), 'error' );
 				self::add_api_error_notice();
 			}
