@@ -10,7 +10,7 @@
     ],
     "styles": {
         "color": {
-            "background": "var(--wp--preset--color--theme-5)",
+            "background": "var(--wp--preset--color--theme-4)",
             "text": "var(--wp--preset--color--theme-1)"
         },
         "blocks": {
@@ -24,12 +24,12 @@
             "button": {
                 "color": {
                     "background": "var(--wp--preset--color--theme-1)",
-                    "text": "var(--wp--preset--color--theme-5)"
+                    "text": "var(--wp--preset--color--theme-4)"
                 },
                 ":hover": {
                     "color": {
                         "background": "color-mix(in srgb, var(--wp--preset--color--theme-1) 85%, #000)",
-                        "text": "var(--wp--preset--color--theme-5)"
+                        "text": "var(--wp--preset--color--theme-4)"
                     }
                 }
             }

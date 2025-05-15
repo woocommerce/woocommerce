@@ -12,6 +12,13 @@
         "color": {
             "background": "var(--wp--preset--color--theme-2)",
             "text": "var(--wp--preset--color--theme-5)"
+        },
+        "blocks": {
+            "core/separator": {
+                "color": {
+                    "text": "color-mix(in srgb, currentColor 25%, transparent)"
+                }
+            }
         }
     }
 }
