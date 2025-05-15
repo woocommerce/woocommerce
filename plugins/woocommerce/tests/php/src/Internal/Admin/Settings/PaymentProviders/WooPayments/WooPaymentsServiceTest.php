@@ -355,6 +355,14 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS . '/finish' ),
 					),
+					'check'  => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS . '/check' ),
+					),
+					'clean'  => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS . '/clean' ),
+					),
 				),
 				'context'        => array(
 					'recommended_pms' => $recommended_pms,
@@ -380,6 +388,14 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 						'type' => WooPaymentsService::ACTION_TYPE_REDIRECT,
 						'href' => 'https://wordpress.com/auth?query=some_query',
 					),
+					'check' => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/check' ),
+					),
+					'clean' => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/clean' ),
+					),
 				),
 			),
 			// The test account step.
@@ -399,13 +415,17 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/init' ),
 					),
+					'finish' => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/finish' ),
+					),
 					'check'  => array(
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/check' ),
 					),
-					'finish' => array(
+					'clean'  => array(
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
-						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/finish' ),
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/clean' ),
 					),
 				),
 			),
@@ -510,6 +530,14 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/finish' ),
 					),
+					'check'              => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/check' ),
+					),
+					'clean'              => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/clean' ),
+					),
 				),
 			),
 		);
@@ -533,9 +561,18 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->expects( $this->any() )
 			->method( 'is_connection_owner' )
 			->willReturn( $wpcom_connection['is_connection_owner'] );
-		// If the status is completed, we don't expect any actions.
+		// If the status is completed, we expect only the general actions.
 		if ( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED === $expected_step_statuses[ WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION ] ) {
-			$expected_steps[1]['actions'] = array();
+			$expected_steps[1]['actions'] = array(
+				'check' => array(
+					'type' => WooPaymentsService::ACTION_TYPE_REST,
+					'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/check' ),
+				),
+				'clean' => array(
+					'type' => WooPaymentsService::ACTION_TYPE_REST,
+					'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/clean' ),
+				),
+			);
 		}
 
 		// Arrange the account.
@@ -563,15 +600,33 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			);
 
 		// Arrange the test account step.
-		// If the status is completed, we don't expect any actions.
+		// If the status is completed, we expect only the general actions.
 		if ( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED === $expected_step_statuses[ WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT ] ) {
-			$expected_steps[2]['actions'] = array();
+			$expected_steps[2]['actions'] = array(
+				'check' => array(
+					'type' => WooPaymentsService::ACTION_TYPE_REST,
+					'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/check' ),
+				),
+				'clean' => array(
+					'type' => WooPaymentsService::ACTION_TYPE_REST,
+					'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/clean' ),
+				),
+			);
 		}
 
 		// Arrange the business verification step.
-		// If the status is completed, we don't expect any actions.
+		// If the status is completed, we expect only the general actions.
 		if ( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED === $expected_step_statuses[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ] ) {
-			$expected_steps[3]['actions'] = array();
+			$expected_steps[3]['actions'] = array(
+				'check' => array(
+					'type' => WooPaymentsService::ACTION_TYPE_REST,
+					'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/check' ),
+				),
+				'clean' => array(
+					'type' => WooPaymentsService::ACTION_TYPE_REST,
+					'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/clean' ),
+				),
+			);
 		}
 
 		$this->mockable_proxy->register_static_mocks(
