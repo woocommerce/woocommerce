@@ -1729,7 +1729,7 @@ class WC_Helper {
 			if ( $e->getCode() < 404 ) {
 				self::remove_api_error_notice();
 			} else {
-				// Only show error notice in case there is no proper communication with WCCOM
+				// Only show error notice in case there is no proper communication with WCCOM.
 				self::log( 'Error getting product usage notice rules: ' . $e->getMessage(), 'error' );
 				self::add_api_error_notice();
 			}
@@ -1882,7 +1882,7 @@ class WC_Helper {
 			if ( $e->getCode() < 404 ) {
 				self::remove_api_error_notice();
 			} else {
-				// Only show error notice in case there is no proper communication with WCCOM
+				// Only show error notice in case there is no proper communication with WCCOM.
 				self::log( 'Error getting subscriptions: ' . $e->getMessage(), 'error' );
 				self::add_api_error_notice();
 			}
