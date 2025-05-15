@@ -25,6 +25,7 @@ import { formatPrice } from '@woocommerce/price-format';
  * Internal dependencies
  */
 import './style.scss';
+import { hasShippingRate } from '../../../../utils';
 
 export interface TotalsFooterItemProps {
 	/**
@@ -39,6 +40,7 @@ export interface TotalsFooterItemProps {
 	 */
 	values: LooselyMustHave< CartResponseTotals, 'total_price' | 'total_tax' >;
 	className?: string;
+	estimated?: boolean;
 }
 
 /**
@@ -52,6 +54,7 @@ const TotalsFooterItem = ( {
 	currency,
 	values,
 	className,
+	estimated = false,
 }: TotalsFooterItemProps ): JSX.Element => {
 	const SHOW_TAXES =
 		getSetting< boolean >( 'taxesEnabled', true ) &&
@@ -70,7 +73,9 @@ const TotalsFooterItem = ( {
 
 	const label = applyCheckoutFilter( {
 		filterName: 'totalLabel',
-		defaultValue: __( 'Total', 'woocommerce' ),
+		defaultValue: estimated
+			? __( 'Estimated total', 'woocommerce' )
+			: __( 'Total', 'woocommerce' ),
 		extensions: cart.extensions,
 		arg: { cart },
 	} );
@@ -101,7 +106,7 @@ const TotalsFooterItem = ( {
 		taxLines && taxLines.length > 0
 			? sprintf(
 					/* translators: %s is a list of tax rates */
-					__( 'Including %s', 'woocommerce' ),
+					__( 'Includes %s', 'woocommerce' ),
 					taxLines
 						.map( ( { name, price } ) => {
 							return `${ formatPrice(
@@ -111,7 +116,9 @@ const TotalsFooterItem = ( {
 						} )
 						.join( ', ' )
 			  )
-			: __( 'Including <TaxAmount/> in taxes', 'woocommerce' );
+			: __( 'Includes <TaxAmount/> in taxes', 'woocommerce' );
+
+	const hasShipping = hasShippingRate( cart.shippingRates );
 
 	return (
 		<TotalsItem
@@ -123,20 +130,29 @@ const TotalsFooterItem = ( {
 			label={ label }
 			value={ value }
 			description={
-				SHOW_TAXES &&
-				parsedTaxValue !== 0 && (
-					<p className="wc-block-components-totals-footer-item-tax">
-						{ createInterpolateElement( description, {
-							TaxAmount: (
-								<FormattedMonetaryAmount
-									className="wc-block-components-totals-footer-item-tax-value"
-									currency={ currency }
-									value={ parsedTaxValue }
-								/>
-							),
-						} ) }
-					</p>
-				)
+				<>
+					{ SHOW_TAXES && parsedTaxValue !== 0 && (
+						<p className="wc-block-components-totals-footer-item-tax">
+							{ createInterpolateElement( description, {
+								TaxAmount: (
+									<FormattedMonetaryAmount
+										className="wc-block-components-totals-footer-item-tax-value"
+										currency={ currency }
+										value={ parsedTaxValue }
+									/>
+								),
+							} ) }
+						</p>
+					) }
+					{ ! hasShipping && estimated && (
+						<p className="wc-block-components-totals-footer-item-shipping">
+							{ __(
+								'Shipping will be calculated at checkout',
+								'woocommerce'
+							) }
+						</p>
+					) }
+				</>
 			}
 		/>
 	);
