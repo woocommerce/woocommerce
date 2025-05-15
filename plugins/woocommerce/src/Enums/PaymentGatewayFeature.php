@@ -44,6 +44,13 @@ final class PaymentGatewayFeature {
 	public const MULTIPLE_SUBSCRIPTIONS = 'multiple_subscriptions';
 
 	/**
+	 * Payment gateway supports pay button.
+	 *
+	 * @var string
+	 */
+	public const PAY_BUTTON = 'pay_button';
+
+	/**
 	* Payment gateway supports pre-orders.
 	*
 	* @var string
