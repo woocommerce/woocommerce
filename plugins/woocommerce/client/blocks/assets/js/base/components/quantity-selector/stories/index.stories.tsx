@@ -15,6 +15,7 @@ export default {
 	args: {
 		itemName: 'widgets',
 		quantity: 1,
+		maximum: 10,
 	},
 } as Meta< QuantitySelectorProps >;
 
@@ -30,9 +31,28 @@ const Template: Story< QuantitySelectorProps > = ( args ) => {
 };
 
 export const Default = Template.bind( {} );
-Default.args = {};
+Default.args = {
+	editable: true,
+};
+
+export const NonEditable = Template.bind( {} );
+NonEditable.args = {
+	editable: false,
+};
 
 export const Disabled = Template.bind( {} );
 Disabled.args = {
 	disabled: true,
+};
+
+export const WithMinimum = Template.bind( {} );
+WithMinimum.args = {
+	minimum: 2,
+	quantity: 2,
+};
+
+export const WithMaximum = Template.bind( {} );
+WithMaximum.args = {
+	maximum: 5,
+	quantity: 3,
 };
