@@ -276,7 +276,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						id: 'email_customer_new_account',
 						label: 'New account',
 						description:
-							'Customer "new account" emails are sent to the customer when a customer signs up via checkout or account pages.',
+							'“New Account” emails are sent when a customer signs up via the checkout flow.',
 						parent_id: 'email',
 						sub_groups: expect.arrayContaining( [] ),
 					} ),

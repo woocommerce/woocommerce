@@ -3,7 +3,6 @@
  */
 import { createRegistrySelector, createSelector } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
-import { store as interfaceStore } from '@wordpress/interface';
 import { store as editorStore } from '@wordpress/editor';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { serialize, parse } from '@wordpress/blocks';
@@ -45,6 +44,9 @@ function enhancePatternWithParsedBlocks( pattern ) {
 }
 
 function regularizedGetEntityRecord( template ) {
+	if ( ! template ) {
+		return null;
+	}
 	return {
 		...template,
 		title: template?.title?.raw || template?.title || '',
@@ -58,11 +60,6 @@ export const isFeatureActive = createRegistrySelector(
 			!! select( preferencesStore ).get( storeName, feature )
 );
 
-export const isSidebarOpened = createRegistrySelector(
-	( select ) => (): boolean =>
-		!! select( interfaceStore ).getActiveComplementaryArea( storeName )
-);
-
 export const hasEdits = createRegistrySelector( ( select ) => (): boolean => {
 	const postId = select( storeName ).getEmailPostId();
 	return !! select( coreDataStore ).hasEditsForEntityRecord(
@@ -70,42 +67,6 @@ export const hasEdits = createRegistrySelector( ( select ) => (): boolean => {
 		editorCurrentPostType,
 		postId
 	);
-} );
-
-export const isEmailLoaded = createRegistrySelector(
-	( select ) => (): boolean => {
-		const postId = select( storeName ).getEmailPostId();
-		return !! select( coreDataStore ).getEntityRecord(
-			'postType',
-			editorCurrentPostType,
-			postId
-		);
-	}
-);
-
-export const isSaving = createRegistrySelector( ( select ) => (): boolean => {
-	const postId = select( storeName ).getEmailPostId();
-	return !! select( coreDataStore ).isSavingEntityRecord(
-		'postType',
-		editorCurrentPostType,
-		postId
-	);
-} );
-
-export const isEmpty = createRegistrySelector( ( select ) => (): boolean => {
-	const postId = select( storeName ).getEmailPostId();
-
-	const post: EmailEditorPostType = select( coreDataStore ).getEntityRecord(
-		'postType',
-		editorCurrentPostType,
-		postId
-	);
-	if ( ! post ) {
-		return true;
-	}
-
-	const { content, title } = post;
-	return ! content.raw && ! title.raw;
 } );
 
 export const hasEmptyContent = createRegistrySelector(
@@ -233,7 +194,7 @@ function getTemplate( select, templateId: string ): EmailTemplate {
  * @return {Object?} Post Template.
  */
 export const getEditedPostTemplate = createRegistrySelector(
-	( select ) => (): EmailTemplate => {
+	( select ) => (): EmailTemplate | null => {
 		const currentTemplate =
 			// @ts-expect-error Expected 0 arguments, but got 1.
 			select( editorStore ).getEditedPostAttribute( 'template' );
@@ -307,7 +268,9 @@ export const canUserEditGlobalEmailStyles = createRegistrySelector(
 export const getGlobalEmailStylesPost = createRegistrySelector(
 	( select ) => () => {
 		const { postId, canEdit } = canUserEditGlobalEmailStyles();
-
+		if ( ! postId || canEdit === undefined ) {
+			return null;
+		}
 		if ( postId ) {
 			if ( canEdit ) {
 				return select( coreDataStore ).getEditedEntityRecord(
@@ -325,7 +288,7 @@ export const getGlobalEmailStylesPost = createRegistrySelector(
 				)
 			) as unknown as Post;
 		}
-		return getEditedPostTemplate();
+		return null;
 	}
 );
 
@@ -348,12 +311,8 @@ export const getEmailTemplates = createRegistrySelector(
 			)
 );
 
-export function getEmailPostId( state: State ): number {
+export function getEmailPostId( state: State ): number | string {
 	return state.postId;
-}
-
-export function getSettingsSidebarActiveTab( state: State ): string {
-	return state.settingsSidebar.activeTab;
 }
 
 export function getInitialEditorSettings(
@@ -385,20 +344,8 @@ export function getPersonalizationTagsList(
 	return state.personalizationTags.list;
 }
 
-export const getDeviceType = createRegistrySelector(
-	( select ) => () =>
-		// @ts-expect-error getDeviceType is missing in types.
-		select( editorStore ).getDeviceType() as string
-);
-
 export function getStyles( state: State ): State[ 'theme' ][ 'styles' ] {
 	return state.theme.styles;
-}
-
-export function getAutosaveInterval(
-	state: State
-): State[ 'autosaveInterval' ] {
-	return state.autosaveInterval;
 }
 
 export function getTheme( state: State ): State[ 'theme' ] {

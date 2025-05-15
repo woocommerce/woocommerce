@@ -4,18 +4,24 @@
 import { memo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-import { ComplementaryArea } from '@wordpress/interface';
-import { ComponentProps } from 'react';
 import { styles } from '@wordpress/icons';
+// eslint-disable-next-line @woocommerce/dependency-group
 import {
-	__experimentalNavigatorProvider as NavigatorProvider,
-	__experimentalNavigatorScreen as NavigatorScreen,
+	// @ts-expect-error Type for Navigator is missing in @types/wordpress__editor
+	Navigator,
 } from '@wordpress/components';
+// eslint-disable-next-line @woocommerce/dependency-group
+import {
+	// @ts-expect-error Type for PluginSidebar is missing in @types/wordpress__editor
+	PluginSidebar,
+	// @ts-expect-error Type for PluginSidebarMoreMenuItem is missing in @types/wordpress__editor
+	PluginSidebarMoreMenuItem,
+} from '@wordpress/editor';
 
 /**
  * Internal dependencies
  */
-import { storeName, stylesSidebarId } from '../../store';
+import { storeName } from '../../store';
 import {
 	ScreenTypography,
 	ScreenTypographyElement,
@@ -24,9 +30,7 @@ import {
 	ScreenColors,
 } from './screens';
 
-type Props = ComponentProps< typeof ComplementaryArea >;
-
-export function RawStylesSidebar( props: Props ): JSX.Element {
+export function RawStylesSidebar(): JSX.Element {
 	const { userCanEditGlobalStyles } = useSelect( ( select ) => {
 		const { canEdit } = select( storeName ).canUserEditGlobalEmailStyles();
 		return {
@@ -36,49 +40,55 @@ export function RawStylesSidebar( props: Props ): JSX.Element {
 
 	return (
 		userCanEditGlobalStyles && (
-			<ComplementaryArea
-				identifier={ stylesSidebarId }
-				className="woocommerce-email-editor-styles-panel"
-				header={ __( 'Styles', 'woocommerce' ) }
-				closeLabel={ __( 'Close styles sidebar', 'woocommerce' ) }
-				icon={ styles }
-				scope={ storeName }
-				{ ...props }
-			>
-				<NavigatorProvider initialPath="/">
-					<NavigatorScreen path="/">
-						<ScreenRoot />
-					</NavigatorScreen>
+			<>
+				<PluginSidebarMoreMenuItem
+					target="email-styles-sidebar"
+					icon={ styles }
+				>
+					{ __( 'Email styles', 'woocommerce' ) }
+				</PluginSidebarMoreMenuItem>
+				<PluginSidebar
+					name="email-styles-sidebar"
+					icon={ styles }
+					title={ __( 'Styles', 'woocommerce' ) }
+					className="woocommerce-email-editor-styles-panel"
+					header={ __( 'Styles', 'woocommerce' ) }
+				>
+					<Navigator initialPath="/">
+						<Navigator.Screen path="/">
+							<ScreenRoot />
+						</Navigator.Screen>
 
-					<NavigatorScreen path="/typography">
-						<ScreenTypography />
-					</NavigatorScreen>
+						<Navigator.Screen path="/typography">
+							<ScreenTypography />
+						</Navigator.Screen>
 
-					<NavigatorScreen path="/typography/text">
-						<ScreenTypographyElement element="text" />
-					</NavigatorScreen>
+						<Navigator.Screen path="/typography/text">
+							<ScreenTypographyElement element="text" />
+						</Navigator.Screen>
 
-					<NavigatorScreen path="/typography/link">
-						<ScreenTypographyElement element="link" />
-					</NavigatorScreen>
+						<Navigator.Screen path="/typography/link">
+							<ScreenTypographyElement element="link" />
+						</Navigator.Screen>
 
-					<NavigatorScreen path="/typography/heading">
-						<ScreenTypographyElement element="heading" />
-					</NavigatorScreen>
+						<Navigator.Screen path="/typography/heading">
+							<ScreenTypographyElement element="heading" />
+						</Navigator.Screen>
 
-					<NavigatorScreen path="/typography/button">
-						<ScreenTypographyElement element="button" />
-					</NavigatorScreen>
+						<Navigator.Screen path="/typography/button">
+							<ScreenTypographyElement element="button" />
+						</Navigator.Screen>
 
-					<NavigatorScreen path="/colors">
-						<ScreenColors />
-					</NavigatorScreen>
+						<Navigator.Screen path="/colors">
+							<ScreenColors />
+						</Navigator.Screen>
 
-					<NavigatorScreen path="/layout">
-						<ScreenLayout />
-					</NavigatorScreen>
-				</NavigatorProvider>
-			</ComplementaryArea>
+						<Navigator.Screen path="/layout">
+							<ScreenLayout />
+						</Navigator.Screen>
+					</Navigator>
+				</PluginSidebar>
+			</>
 		)
 	);
 }
