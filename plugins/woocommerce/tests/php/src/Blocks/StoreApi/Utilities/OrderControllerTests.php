@@ -58,19 +58,16 @@ class OrderControllerTests extends TestCase {
 		$this->set_shipping_address( $order );
 		$order->save();
 
-		$class = new OrderController();
-		$this->assertNull( $class->validate_existing_order_before_payment( $order ) );
+		$this->assertNull( $this->sut->validate_existing_order_before_payment( $order ) );
 	}
 
 	/**
 	 * test_validate_selected_shipping_methods_throws
 	 */
 	public function test_validate_selected_shipping_methods_throws() {
-		$class = new OrderController();
-
 		$this->expectException( RouteException::class );
-		$class->validate_selected_shipping_methods( true, array( false ) );
-		$class->validate_selected_shipping_methods( true, null );
+		$this->sut->validate_selected_shipping_methods( true, array( false ) );
+		$this->sut->validate_selected_shipping_methods( true, null );
 	}
 
 	/**
@@ -83,13 +80,11 @@ class OrderControllerTests extends TestCase {
 		$default_zone->add_shipping_method( $flat_rate->id );
 		$default_zone->save();
 
-		$class = new OrderController();
-
 		$registered_methods = \WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods();
 		$valid_method       = array_shift( $registered_methods );
 
-		$this->assertNull( $class->validate_selected_shipping_methods( true, array( $valid_method->id . ':' . $valid_method->instance_id ) ) );
-		$this->assertNull( $class->validate_selected_shipping_methods( false, array( 'free-shipping' ) ) );
+		$this->assertNull( $this->sut->validate_selected_shipping_methods( true, array( $valid_method->id . ':' . $valid_method->instance_id ) ) );
+		$this->assertNull( $this->sut->validate_selected_shipping_methods( false, array( 'free-shipping' ) ) );
 	}
 
 	/**
@@ -112,9 +107,8 @@ class OrderControllerTests extends TestCase {
 		$order->apply_coupon( $coupon );
 		$order->save();
 
-		$class = new OrderController();
 		try {
-			$class->validate_order_before_payment( $order );
+			$this->sut->validate_order_before_payment( $order );
 		} finally {
 			$this->assertEmpty( $order->get_coupon_codes() );
 		}
@@ -156,9 +150,8 @@ class OrderControllerTests extends TestCase {
 		$order->save();
 		$this->assertEquals( array( 'fake-coupon' ), $order->get_coupon_codes() );
 
-		$class = new OrderController();
 		try {
-			$class->validate_existing_order_before_payment( $order );
+			$this->sut->validate_existing_order_before_payment( $order );
 		} finally {
 			$this->assertEmpty( $order->get_coupon_codes() );
 		}
@@ -176,8 +169,7 @@ class OrderControllerTests extends TestCase {
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
-		$class = new OrderController();
-		$class->validate_order_before_payment( $order );
+		$this->sut->validate_order_before_payment( $order );
 	}
 
 	/**
@@ -193,13 +185,13 @@ class OrderControllerTests extends TestCase {
 		$order->save();
 
 		/** @var \WC_Order_Item_Product $item */
-		$item = reset( $order->get_items() );
+		$array = $order->get_items();
+		$item  = reset( $array );
 		$this->assertInstanceOf( \WC_Order_Item_Product::class, $item );
 
 		WC()->cart->add_to_cart( $item->get_product()->get_id() );
 
-		$class = new OrderController();
-		$class->validate_order_before_payment( $order );
+		$this->sut->validate_order_before_payment( $order );
 	}
 
 	/**
@@ -215,8 +207,7 @@ class OrderControllerTests extends TestCase {
 		$order->save();
 
 		// There is no need to update the cart here, we just check the order.
-		$class = new OrderController();
-		$class->validate_existing_order_before_payment( $order );
+		$this->sut->validate_existing_order_before_payment( $order );
 	}
 
 	/**
@@ -232,8 +223,7 @@ class OrderControllerTests extends TestCase {
 		$this->set_shipping_address( $order );
 		$order->save();
 
-		$class = new OrderController();
-		$class->validate_order_before_payment( $order );
+		$this->sut->validate_order_before_payment( $order );
 	}
 
 	/**
@@ -251,8 +241,7 @@ class OrderControllerTests extends TestCase {
 		$this->set_shipping_address( $order );
 		$order->save();
 
-		$class = new OrderController();
-		$class->validate_order_before_payment( $order );
+		$this->sut->validate_order_before_payment( $order );
 	}
 
 	/**
@@ -267,8 +256,7 @@ class OrderControllerTests extends TestCase {
 		$order->apply_coupon( $coupon );
 		$order->save();
 
-		$class = new OrderController();
-		$class->validate_order_before_payment( $order );
+		$this->sut->validate_order_before_payment( $order );
 		$this->assertEquals( array( 'valid-coupon' ), $order->get_coupon_codes() );
 	}
 
