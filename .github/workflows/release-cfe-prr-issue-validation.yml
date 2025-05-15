@@ -1,4 +1,4 @@
-name: New CFE/PRR workflow notifications
+name: 'Release: CFE and PRR issue validation'
 on:
   issues:
     types: [labeled]
@@ -81,13 +81,13 @@ jobs:
             core.setOutput('PR_BASE_REF', '');
 
             console.log(`PR base ref: ${baseRefName}`);
-           
+
             if (!baseRefName.startsWith('release/')) {
               core.setFailed('The PR base_ref must start with release/.');
 
               core.setOutput(
                   'SLACK_MESSAGE',
-                  `:x: We did not process your ${labelName === 'code freeze exception' ? 'Code Freeze Exception' : 'Point Release Request'} because the PR associated with the request does not originate from the release branch. Please update the PR base to the release branch and submit a new request. The current base branch is: \`${baseRefName}\`.\n\n${issueTitle} ${issueUrl}`
+                  `:x: *${labelName === 'code freeze exception' ? 'Code Freeze Exception' : 'Point Release Request'} was not processed:* target branch (\`${baseRefName}\`) is not a release branch. Source request: _<${issueUrl}|${issueTitle}>_.`
               );
 
               core.setOutput(
@@ -108,7 +108,7 @@ jobs:
 
                 core.setOutput(
                   'SLACK_MESSAGE',
-                  `:x: We did not process your ${labelName === 'code freeze exception' ? 'Code Freeze Exception' : 'Point Release Request'} because the release branch does not exist. Please check if your PR base originates from the target release branch. The current release branch is: \`${baseRefName}\`.\n\n${issueTitle} ${issueUrl}`
+                  `:x: *${labelName === 'code freeze exception' ? 'Code Freeze Exception' : 'Point Release Request'} was not processed:* target branch (\`${baseRefName}\`) does not exist. Source request: _<${issueUrl}|${issueTitle}>_.`
                 );
 
                 core.setOutput(
@@ -139,7 +139,7 @@ jobs:
 
             const releaseNumber = baseRef.split('/')[1];
             console.log("releaseNumber:", releaseNumber);
-          
+
             const releaseRegex = /([0-9]+\.[0-9]+)/;
             const match = releaseNumber.match(releaseRegex);
             if (match && match[1]) {
@@ -150,7 +150,7 @@ jobs:
 
               core.setOutput(
                 'SLACK_MESSAGE',
-                `:x: We did not process your ${labelName === 'code freeze exception' ? 'Code Freeze Exception' : 'Point Release Request'} because the release number doesn't seem to be correct. Please check if your PR base originates from the target release branch. The current release branch is: \`${baseRef}\`.\n\n${issueTitle} ${issueUrl}`
+                `:x: *${labelName === 'code freeze exception' ? 'Code Freeze Exception' : 'Point Release Request'} was not processed:* PR base (\`${baseRef}\`) is not a valid release branch. Source request: _<${issueUrl}|${issueTitle}>_.`
               );
 
               core.setOutput(
@@ -223,11 +223,12 @@ jobs:
             const labelName = event.label?.name;
             const issueTitle = event.issue.title;
             const issueUrl = event.issue.html_url;
-            
-            const slackMessage = `:arrow_right: ${labelName === 'code freeze exception' ? ':ice_cube: New Code Freeze Exception request' : ':release: New Point Release Request'}: ${issueTitle} ${issueUrl}`;
+            const releaseNumber = process.env.RELEASE_NUMBER;
 
-            const githubComment = `IMPORTANT: Your request for a ${labelName === 'code freeze exception' ? 'Code Freeze Exception' : 'Point Release'} has been successfully created and is pending approval from @woocommerce/solaris.\n\nPlease be aware that you are targeting your fix for WC version: **${process.env.RELEASE_NUMBER}**, based on the base branch of your PR you entered with the request.`;
-            
+            const slackMessage = `*${labelName === 'code freeze exception' ? ':ice_cube: Code Freeze Exception request' : ':release: Point Release Request'} (${releaseNumber})*: _<${issueUrl}|${issueTitle}>_`;
+
+            const githubComment = `Your request for a ${labelName === 'code freeze exception' ? 'Code Freeze Exception' : 'Point Release'} targeting WC version **${releaseNumber}** has been successfully created and is pending approval from @woocommerce/flux.`;
+
             // Set the message as a core output
             core.setOutput('SLACK_MESSAGE', slackMessage);
             core.setOutput('GITHUB_COMMENT', githubComment);
@@ -296,7 +297,7 @@ jobs:
             const event = context.payload;
             const issueTitle = event.issue.title;
             const issueUrl = event.issue.html_url;
-            const message = `:white_check_mark: Request approved: ${issueTitle} ${issueUrl}`;
+            const message = `:done-3: *CFE/PRR request approved:* _<${issueUrl}|${issueTitle}>_`;
 
             core.setOutput('SLACK_MESSAGE', message);
 
@@ -333,7 +334,7 @@ jobs:
             const issueTitle = event.issue.title;
             const issueUrl = event.issue.html_url;
 
-            const message = `:x: Request rejected: ${issueTitle} ${issueUrl}`;
+            const message = `:x: *CFE/PRR request rejected:* _<${issueUrl}|${issueTitle}>_`;
 
             core.setOutput('SLACK_MESSAGE', message);
 

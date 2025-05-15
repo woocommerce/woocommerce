@@ -52,6 +52,8 @@ class EmailApiController {
 		$email       = $this->get_email_by_type( $email_type ?? '' );
 
 		return array(
+			'enabled'         => $email->is_enabled(),
+			'is_manual'       => $email->is_manual(),
 			'subject'         => $post_option['subject'] ?? null,
 			'subject_full'    => $post_option['subject_full'] ?? null, // For customer_refunded_order email type because it has two different subjects.
 			'subject_partial' => $post_option['subject_partial'] ?? null,
@@ -89,6 +91,10 @@ class EmailApiController {
 
 		if ( array_key_exists( 'preheader', $data ) ) {
 			$post_option['preheader'] = $data['preheader'];
+		}
+
+		if ( array_key_exists( 'enabled', $data ) ) {
+			$post_option['enabled'] = $data['enabled'] ? 'yes' : 'no';
 		}
 		update_option( $option_name, $post_option );
 	}
