@@ -453,7 +453,7 @@ class Checkout extends AbstractBlock {
 		/**
 		 * This section handles the shipping address fields that trigger shipping rate recalculation.
 		 * The address_fields_for_shipping_rates array contains the default fields that affect shipping rates.
-		 * Additional fields names can be added via the 'woocommerce_essential_shipping_data' filter.
+		 * Additional fields names can be added via the 'woocommerce_address_fields_for_shipping_rates' filter.
 		 * The filtered array is validated to ensure all entries are strings before being registered.
 		 */
 
