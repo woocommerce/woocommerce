@@ -1407,7 +1407,8 @@ class WooPaymentsService {
 					),
 				),
 			),
-			$location
+			$location,
+			$rest_path
 		);
 
 		// Add the WPCOM connection onboarding step details.
@@ -1418,13 +1419,14 @@ class WooPaymentsService {
 					'connection_state' => $this->get_wpcom_connection_state(),
 				),
 			),
-			$location
+			$location,
+			$rest_path
 		);
 
 		// If the WPCOM connection is already set up, we don't need to add anything more.
 		if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $wpcom_step['status'] ) {
 			// Craft the return URL.
-			// By default, we return to the onboarding modal.
+			// By default, we return the user to the onboarding modal.
 			$return_url = $this->proxy->call_static(
 				Utils::class,
 				'wc_payments_settings_url',
@@ -1457,7 +1459,8 @@ class WooPaymentsService {
 			array(
 				'id' => self::ONBOARDING_STEP_TEST_ACCOUNT,
 			),
-			$location
+			$location,
+			$rest_path
 		);
 
 		// If the step is not completed, we need to add the actions.
@@ -1471,17 +1474,9 @@ class WooPaymentsService {
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/init' ),
 				),
-				'check'  => array(
-					'type' => self::ACTION_TYPE_REST,
-					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/check' ),
-				),
 				'finish' => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/finish' ),
-				),
-				'clean'  => array(
-					'type' => self::ACTION_TYPE_REST,
-					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/clean' ),
 				),
 			);
 		}
@@ -1499,7 +1494,8 @@ class WooPaymentsService {
 					'has_test_account' => $this->has_test_account(),
 				),
 			),
-			$location
+			$location,
+			$rest_path
 		);
 
 		// Try to get the pre-KYC fields, but only if the required step is completed.
@@ -1548,20 +1544,21 @@ class WooPaymentsService {
 		$steps[] = $business_verification_step;
 
 		// Do a complete list standardization, for safety.
-		return $this->standardize_onboarding_steps_details( $steps, $location );
+		return $this->standardize_onboarding_steps_details( $steps, $location, $rest_path );
 	}
 
 	/**
 	 * Standardize (and sanity check) the onboarding step details.
 	 *
 	 * @param array  $step_details The onboarding step details to standardize.
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param string $location     The location for which we are onboarding.
+	 *                             This is a ISO 3166-1 alpha-2 country code.
+	 * @param string $rest_path    The REST API path to use for constructing REST API URLs.
 	 *
 	 * @return array The standardized onboarding step details.
 	 * @throws Exception If the onboarding step details are missing required entries or if the step ID is invalid.
 	 */
-	private function standardize_onboarding_step_details( array $step_details, string $location ): array {
+	private function standardize_onboarding_step_details( array $step_details, string $location, string $rest_path ): array {
 		// If the required keys are not present, throw.
 		if ( ! isset( $step_details['id'] ) ) {
 			/* translators: %s: The required key that is missing. */
@@ -1589,13 +1586,32 @@ class WooPaymentsService {
 			}
 		}
 
+		// Ensure that any step has the general actions.
+		if ( empty( $step_details['actions'] ) ) {
+			$step_details['actions'] = array();
+		}
+		// Any step can be checked for its status.
+		if ( empty( $step_details['actions']['check'] ) ) {
+			$step_details['actions']['check'] = array(
+				'type' => self::ACTION_TYPE_REST,
+				'href' => rest_url( trailingslashit( $rest_path ) . $step_details['id'] . '/check' ),
+			);
+		}
+		// Any step can be cleaned of its progress.
+		if ( empty( $step_details['actions']['clean'] ) ) {
+			$step_details['actions']['clean'] = array(
+				'type' => self::ACTION_TYPE_REST,
+				'href' => rest_url( trailingslashit( $rest_path ) . $step_details['id'] . '/clean' ),
+			);
+		}
+
 		return array(
 			'id'             => $step_details['id'],
 			'path'           => $step_details['path'] ?? trailingslashit( self::ONBOARDING_PATH_BASE ) . $step_details['id'],
 			'required_steps' => $step_details['required_steps'] ?? $this->get_onboarding_step_required_steps( $step_details['id'] ),
 			'status'         => $step_details['status'],
 			'errors'         => $step_details['errors'],
-			'actions'        => $step_details['actions'] ?? array(),
+			'actions'        => $step_details['actions'],
 			'context'        => $step_details['context'] ?? array(),
 		);
 	}
@@ -1606,14 +1622,15 @@ class WooPaymentsService {
 	 * @param array  $steps The onboarding steps list to standardize.
 	 * @param string $location The location for which we are onboarding.
 	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param string $rest_path The REST API path to use for constructing REST API URLs.
 	 *
 	 * @return array The standardized onboarding steps list.
 	 * @throws Exception If some onboarding steps are missing required entries or if invalid step IDs are present.
 	 */
-	private function standardize_onboarding_steps_details( array $steps, string $location ): array {
+	private function standardize_onboarding_steps_details( array $steps, string $location, string $rest_path ): array {
 		$standardized_steps = array();
 		foreach ( $steps as $step ) {
-			$standardized_steps[] = $this->standardize_onboarding_step_details( $step, $location );
+			$standardized_steps[] = $this->standardize_onboarding_step_details( $step, $location, $rest_path );
 		}
 
 		return $standardized_steps;
