@@ -337,7 +337,12 @@ class WC_Admin {
 		$uses_locale_filters = $uses_default_address_fields || $uses_get_country_locale || $uses_get_country_locale_default;
 
 		if ( $uses_field_filters && ! $uses_locale_filters ) {
-			$dismiss_url = add_query_arg( array( 'dismiss_wc_locale_notice' => '1', '_wc_notice_nonce' => wp_create_nonce( 'dismiss_wc_locale_notice' ) ) );
+			$dismiss_url = add_query_arg(
+				array(
+					'dismiss_wc_locale_notice' => '1',
+					'_wc_notice_nonce'         => wp_create_nonce( 'dismiss_wc_locale_notice' ),
+				)
+			);
 
 			echo '<div class="notice notice-warning is-dismissible">';
 			echo '<p><strong>' . esc_html__( 'WooCommerce Notice for Developers:', 'woocommerce' ) . '</strong> ';
