@@ -106,9 +106,7 @@ export class Editor extends CoreEditor {
 			.getByRole( 'menuitem', { name: /Reset|Delete/ } )
 			.click();
 
-		await this.page.getByRole( 'button', { name: /Reset|Delete/ } ).click();
-
-		await this.page.waitForResponse(
+		const responsePromise = this.page.waitForResponse(
 			( response ) =>
 				( response.url().includes( 'wp-json/wp/v2/templates' ) ||
 					response
@@ -117,6 +115,10 @@ export class Editor extends CoreEditor {
 				response.status() === 200 &&
 				response.request().method() === 'POST'
 		);
+
+		await this.page.getByRole( 'button', { name: /Reset|Delete/ } ).click();
+
+		await responsePromise;
 
 		await this.page
 			.getByLabel( 'Dismiss this notice' )
