@@ -67,7 +67,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 
 			$this->setup_locale();
 
-			if ( $order_id && ! is_a( $order, 'WC_Order' ) ) {
+			if ( $order_id ) {
 				$order = wc_get_order( $order_id );
 			}
 
