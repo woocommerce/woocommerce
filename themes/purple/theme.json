@@ -18,23 +18,23 @@
 					"slug": "theme-1"
 				},
 				{
-					"color": "#F7F7F7",
-					"name": "Tertiary",
+					"color": "#111111",
+					"name": "Primary",
 					"slug": "theme-2"
 				},
 				{
-					"color": "#686868",
-					"name": "Secondary",
+					"color": "#243DC8",
+					"name": "Accent",
 					"slug": "theme-3"
+				},
+				{
+					"color": "#686868",
+					"name": "Primary",
+					"slug": "theme-4"
 				},
 				{
 					"color": "rgba(17, 17, 17, 0.2)",
 					"name": "Opacity 20%",
-					"slug": "theme-4"
-				},
-				{
-					"color": "#111111",
-					"name": "Primary",
 					"slug": "theme-5"
 				}
 			],
@@ -302,7 +302,7 @@
 					}
 				},
 				"color": {
-					"text": "var(--wp--preset--color--theme-5)"
+					"text": "var(--wp--preset--color--theme-4)"
 				}
 			},
 			"core/site-title": {
@@ -346,21 +346,21 @@
 		},
 		"color": {
 			"background": "var(--wp--preset--color--theme-1)",
-			"text": "var(--wp--preset--color--theme-5)"
+			"text": "var(--wp--preset--color--theme-4)"
 		},
 		"css": "",
 		"elements": {
 			"button": {
 				":hover": {
 					"color": {
-						"background": "color-mix(in srgb, var(--wp--preset--color--theme-5) 85%, #FFF)"
+						"background": "color-mix(in srgb, var(--wp--preset--color--theme-4) 85%, #FFF)"
 					}
 				},
 				"border": {
 					"radius": "999px"
 				},
 				"color": {
-					"background": "var(--wp--preset--color--theme-5)",
+					"background": "var(--wp--preset--color--theme-4)",
 					"text": "var(--wp--preset--color--theme-1)"
 				},
 				"spacing": {
