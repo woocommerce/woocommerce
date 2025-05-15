@@ -5,8 +5,8 @@
  * Categories: About
  */
 ?>
-<!-- wp:group {"metadata":{"name":"Two columns highlights sections "},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"}}},"backgroundColor":"theme-4","layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignfull has-theme-4-background-color has-background" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50)"><!-- wp:columns {"align":"wide"} -->
+<!-- wp:group {"metadata":{"name":"Two columns highlights sections "},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"}}},"backgroundColor":"theme-2","layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull has-theme-2-background-color has-background" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50)"><!-- wp:columns {"align":"wide"} -->
 <div class="wp-block-columns alignwide"><!-- wp:column -->
 <div class="wp-block-column"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-glasses.webp","dimRatio":50,"customOverlayColor":"#4a443d","isUserOverlayColor":false,"contentPosition":"bottom left","sizeSlug":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50","left":"var:preset|spacing|50","right":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-cover has-custom-content-position is-position-bottom-left" style="padding-top:var(--wp--preset--spacing--50);padding-right:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50);padding-left:var(--wp--preset--spacing--50)"><img class="wp-block-cover__image-background size-full" alt="" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-glasses.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim" style="background-color:#4a443d"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"left","placeholder":"Write title…","style":{"typography":{"textTransform":"uppercase","letterSpacing":"0.1em"}},"fontSize":"small"} -->
@@ -18,8 +18,8 @@
 <!-- /wp:heading -->
 
 <!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button {"backgroundColor":"theme-1","textColor":"theme-4","style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"fontSize":"medium"} -->
-<div class="wp-block-button"><a class="wp-block-button__link has-theme-4-color has-theme-1-background-color has-text-color has-background has-link-color has-medium-font-size has-custom-font-size wp-element-button"><?php esc_html_e('Learn more', 'woostarter');?></a></div>
+<div class="wp-block-buttons"><!-- wp:button {"backgroundColor":"theme-1","textColor":"theme-2","style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"fontSize":"medium"} -->
+<div class="wp-block-button"><a class="wp-block-button__link has-theme-2-color has-theme-1-background-color has-text-color has-background has-link-color has-medium-font-size has-custom-font-size wp-element-button"><?php esc_html_e('Learn more', 'woostarter');?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover --></div>
@@ -36,8 +36,8 @@
 <!-- /wp:heading -->
 
 <!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button {"backgroundColor":"theme-1","textColor":"theme-4","style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"fontSize":"medium"} -->
-<div class="wp-block-button"><a class="wp-block-button__link has-theme-4-color has-theme-1-background-color has-text-color has-background has-link-color has-medium-font-size has-custom-font-size wp-element-button"><?php esc_html_e('Learn more', 'woostarter');?></a></div>
+<div class="wp-block-buttons"><!-- wp:button {"backgroundColor":"theme-1","textColor":"theme-2","style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"fontSize":"medium"} -->
+<div class="wp-block-button"><a class="wp-block-button__link has-theme-2-color has-theme-1-background-color has-text-color has-background has-link-color has-medium-font-size has-custom-font-size wp-element-button"><?php esc_html_e('Learn more', 'woostarter');?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover --></div>
