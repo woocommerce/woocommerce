@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class PaymentsController {
 
-	const TRANSIENT_HAS_PROVIDERS_WITH_INCENTIVE_KEY = 'woocommerce_settings_payments_has_providers_with_incentive';
+	const TRANSIENT_HAS_PROVIDERS_WITH_INCENTIVE_KEY = 'woocommerce_admin_settings_payments_has_providers_with_incentive';
 
 	/**
 	 * The payment service.
