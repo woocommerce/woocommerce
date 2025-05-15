@@ -1703,7 +1703,7 @@ class WC_Helper {
 			if ( is_wp_error( $request ) ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( $request->get_error_message() );
+				throw new Exception( $request->get_error_message(), $request->get_error_code() );
 			}
 
 			$code = wp_remote_retrieve_response_code( $request );
@@ -1726,8 +1726,13 @@ class WC_Helper {
 			self::remove_api_error_notice();
 			return $data;
 		} catch ( Exception $e ) {
-			self::log( 'Error getting product usage notice rules: ' . $e->getMessage(), 'error' );
-			self::add_api_error_notice();
+			// Don't show this error for unauthenticated users, since they don't care about usage rules anyway.
+			if ( 401 === $e->getCode() ) {
+				self::remove_api_error_notice();
+			} else {
+				self::log( 'Error getting product usage notice rules: ' . $e->getMessage(), 'error' );
+				self::add_api_error_notice();
+			}
 		}
 
 		return array();
@@ -1851,7 +1856,7 @@ class WC_Helper {
 			if ( is_wp_error( $request ) ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( $request->get_error_message() );
+				throw new Exception( $request->get_error_message(), $request->get_error_code() );
 			}
 
 			$code = wp_remote_retrieve_response_code( $request );
@@ -1874,8 +1879,13 @@ class WC_Helper {
 			self::remove_api_error_notice();
 			return $data;
 		} catch ( Exception $e ) {
-			self::log( 'Error getting subscriptions: ' . $e->getMessage(), 'error' );
-			self::add_api_error_notice();
+			// Don't show this error for unauthenticated users, since they don't care about subscriptions anyway.
+			if ( 401 === $e->getCode() ) {
+				self::remove_api_error_notice();
+			} else {
+				self::log( 'Error getting subscriptions: ' . $e->getMessage(), 'error' );
+				self::add_api_error_notice();
+			}
 		}
 
 		return array();
