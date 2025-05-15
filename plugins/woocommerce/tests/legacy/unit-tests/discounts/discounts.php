@@ -144,7 +144,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$discounts->set_items_from_cart( WC()->cart );
 		$items = $discounts->get_items();
 		$this->assertEquals( 2, count( $items ) );
-		
+
 		// Get sorted items.
 		$first_item  = array_values( $items )[0];
 		$second_item = array_values( $items )[1];
