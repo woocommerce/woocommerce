@@ -484,8 +484,11 @@ class OrderController {
 		$address = array_merge( $address, $additional_fields );
 
 		foreach ( $current_locale as $address_field_key => $address_field ) {
-			// Skip validation if field is not required or hidden.
-			if ( true !== $address_field['required'] || true === wc_string_to_bool( $address_field['hidden'] ?? false ) ) {
+			// Skip validation if field is not required or if it is hidden.
+			if (
+				true !== wc_string_to_bool( $address_field['required'] ?? false ) ||
+				true === wc_string_to_bool( $address_field['hidden'] ?? false )
+			) {
 				continue;
 			}
 
