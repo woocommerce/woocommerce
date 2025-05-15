@@ -366,7 +366,11 @@ class WC_Admin {
 	 * Dismiss notice for wc_display_locale_filter_admin_notice.
 	 */
 	public function dismiss_locale_filter_notice() {
-		if ( current_user_can( 'manage_woocommerce' ) && isset( $_GET['dismiss_wc_locale_notice'] ) && $_GET['_wc_notice_nonce'] && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wc_notice_nonce'] ) ), 'dismiss_wc_locale_notice' ) ) {
+		if (
+			current_user_can( 'manage_woocommerce' ) &&
+			isset( $_GET['dismiss_wc_locale_notice'], $_GET['_wc_notice_nonce'] ) &&
+			wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wc_notice_nonce'] ) ), 'dismiss_wc_locale_notice' )
+		) {
 			update_user_meta( get_current_user_id(), '_dismissed_wc_locale_notice', true );
 			wp_safe_redirect( remove_query_arg( array( 'dismiss_wc_locale_notice', '_wc_notice_nonce' ) ) );
 			exit;
