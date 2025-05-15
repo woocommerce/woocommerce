@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Prevent Payments Providers fatal errors from crashing the entire WP admin area.
+
+
