@@ -320,8 +320,8 @@ All at %6$s
 	 * Get available gateways for checkout.
 	 *
 	 * This should be used when displaying the available gateways/payment methods to the user,
-	 * not in the backend or REST API contexts.
-	 * This is because logic that hooks into the available gateways filter
+	 * not in the WP admin or REST API contexts where there is no WC session.
+	 * This is because the logic that hooks into the available gateways filter
 	 * may try to rely on the existence of a WC session - a valid thing to do,
 	 * and cause fatal errors when the session is not available.
 	 *
