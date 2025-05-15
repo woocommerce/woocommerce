@@ -153,13 +153,17 @@ const TestAccountStep = () => {
 					}
 				};
 
-				// This is a quick hack so we can call await.
-				cleanStepIfNeeded();
-
-				apiFetch< { success: boolean; message?: string } >( {
-					url: currentStep?.actions?.init?.href,
-					method: 'POST',
-				} )
+				// First clean the step if needed, then initialize
+				cleanStepIfNeeded()
+					.then( () => {
+						return apiFetch< {
+							success: boolean;
+							message?: string;
+						} >( {
+							url: currentStep?.actions?.init?.href,
+							method: 'POST',
+						} );
+					} )
 					.then( ( response ) => {
 						if ( response?.success ) {
 							// Start polling immediately after successful init
