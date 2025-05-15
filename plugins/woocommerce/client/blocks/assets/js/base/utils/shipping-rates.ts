@@ -122,11 +122,15 @@ export const getTotalShippingValue = ( values: {
 export const getSelectedShippingRateNames = (
 	shippingRates: CartShippingRate[]
 ): string[] => {
-	return shippingRates.flatMap( ( shippingPackage ) => {
-		return shippingPackage.shipping_rates
-			.filter( ( rate ) => rate.selected )
-			.flatMap( ( rate ) => rate.name );
-	} );
+	return Array.from(
+		new Set(
+			shippingRates.flatMap( ( shippingPackage ) => {
+				return shippingPackage.shipping_rates
+					.filter( ( rate ) => rate.selected )
+					.map( ( rate ) => rate.name );
+			} )
+		)
+	);
 };
 
 export const selectedRatesAreCollectable = (
