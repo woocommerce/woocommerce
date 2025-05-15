@@ -47,6 +47,7 @@ class OrderControllerTests extends TestCase {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
+		WC()->countries->locale = null;
 		$this->sut = null;
 	}
 
@@ -258,6 +259,70 @@ class OrderControllerTests extends TestCase {
 
 		$this->sut->validate_order_before_payment( $order );
 		$this->assertEquals( array( 'valid-coupon' ), $order->get_coupon_codes() );
+	}
+
+	/**
+	 * test_validate_address_fields_valid_address.
+	 */
+	public function test_validate_address_fields_valid_address() {
+		$order = WC_Helper_Order::create_order();
+		$this->set_shipping_address( $order );
+		$order->save();
+
+		$errors = new \WP_Error();
+		$this->sut->validate_address_fields( $order, 'shipping', $errors );
+
+		$this->assertEmpty( $errors->get_error_messages() );
+	}
+
+	/**
+	 * test_validate_address_fields_invalid_address.
+	 */
+	public function test_validate_address_fields_invalid_address() {
+		$order = WC_Helper_Order::create_order();
+		$this->set_shipping_address(
+			$order,
+			[
+				'postcode' => '',
+			]
+		);
+		$order->save();
+
+		$errors = new \WP_Error();
+		$this->sut->validate_address_fields( $order, 'shipping', $errors );
+		$this->assertEquals( 'ZIP Code is required', $errors->get_error_message() );
+	}
+	/**
+	 * test_validate_address_fields_invalid_address.
+	 */
+	public function test_validate_address_fields_required_hidden_fields_not_validates() {
+		$order = WC_Helper_Order::create_order();
+		$this->set_shipping_address(
+			$order,
+			[
+				'postcode' => '',
+			]
+		);
+		$order->save();
+
+		/**
+		 * Hide the postcode field for US locale.
+		 *
+		 * @param array $locales All country locales.
+		 *
+		 * @return array
+		 */
+		$hide_postcode = function ( $locales ) {
+			$locales['US']['postcode']['hidden'] = true;
+			return $locales;
+		};
+
+		add_filter( 'woocommerce_get_country_locale', $hide_postcode );
+
+		$errors = new \WP_Error();
+		$this->sut->validate_address_fields( $order, 'shipping', $errors );
+		$this->assertEmpty( $errors->get_error_messages() );
+		remove_filter( 'woocommerce_get_country_locale', $hide_postcode );
 	}
 
 	/**
