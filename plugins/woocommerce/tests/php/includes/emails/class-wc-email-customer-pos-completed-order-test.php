@@ -28,7 +28,7 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 	public function test_order_item_totals_adds_formatted_cash_change_due_amount_to_order_totals() {
 		// Given order with cash payment change amount.
 		$order = OrderHelper::create_order();
-		$order->add_meta_data( '_cash_change_amount', '5.00' );
+		$order->add_meta_data( '_cash_change_amount', '0' );
 		$order->save();
 		$email = new WC_Email_Customer_POS_Completed_Order();
 
@@ -37,7 +37,7 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 
 		// Then cash payment change due amount is set and formatted correctly.
 		$this->assertArrayHasKey( 'cash_payment_change_due_amount', $totals );
-		$this->assertEquals( wc_price( '5.00', array( 'currency' => $order->get_currency() ) ), $totals['cash_payment_change_due_amount']['value'] );
+		$this->assertEquals( wc_price( '0', array( 'currency' => $order->get_currency() ) ), $totals['cash_payment_change_due_amount']['value'] );
 	}
 
 	/**
