@@ -1149,9 +1149,12 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * @dataProvider provider_testing_preferred_offline_provider_visibility
+	 * 
+	 * @param string $selling_context The selling context.
+	 * @param bool   $expected_preferred_visible The expected visibility of the preferred provider.
 	 */
 	public function test_preferred_provider_visibility_based_on_selling_context( $selling_context, $expected_preferred_visible ) {
-		// Arrange
+		// Arrange.
 		$this->enable_core_paypal_pg();
 		update_option(
 			OnboardingProfile::DATA_OPTION,
@@ -1161,12 +1164,12 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		// Act
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		// Act.
+		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
 
-		// Assert
+		// Assert.
 		$this->assertSame( 200, $response->get_status() );
 		$data = $response->get_data();
 
@@ -1191,19 +1194,19 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	 * @return array[]
 	 */
 	public function provider_testing_preferred_offline_provider_visibility() {
-		return [
-			'Offline only' => [
+		return array(
+			'Offline only'       => array(
 				'no_im_selling_offline',
 				true,
-			],
-			'Online and offline' => [
+			),
+			'Online and offline' => array(
 				'im_selling_both_online_and_offline',
 				true,
-			],
-			'Online only' => [
+			),
+			'Online only'        => array(
 				'yes_im_selling_online',
 				false,
-			],
-		];
+			),
+		);
 	}
 }
