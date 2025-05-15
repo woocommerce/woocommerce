@@ -337,6 +337,8 @@ class WC_Admin {
 		$uses_locale_filters = $uses_default_address_fields || $uses_get_country_locale || $uses_get_country_locale_default;
 
 		if ( $uses_field_filters && ! $uses_locale_filters ) {
+			$dismiss_url = add_query_arg( array( 'dismiss_wc_locale_notice' => '1', '_wc_notice_nonce' => wp_create_nonce( 'dismiss_wc_locale_notice' ) ) );
+
 			echo '<div class="notice notice-warning is-dismissible">';
 			echo '<p><strong>' . esc_html__( 'WooCommerce Notice for Developers:', 'woocommerce' ) . '</strong> ';
 			echo wp_kses_post(
@@ -350,7 +352,7 @@ class WC_Admin {
 				)
 			);
 			echo '</p>';
-			echo '<p><a href="' . esc_url( add_query_arg( 'dismiss_wc_locale_notice', '1' ) ) . '">' . esc_html__( 'Dismiss', 'woocommerce' ) . '</a></p>';
+			echo '<p><a href="' . esc_url( $dismiss_url ) . '">' . esc_html__( 'Dismiss', 'woocommerce' ) . '</a></p>';
 			echo '</div>';
 		}
 	}
@@ -359,9 +361,9 @@ class WC_Admin {
 	 * Dismiss notice for wc_display_locale_filter_admin_notice.
 	 */
 	public function dismiss_locale_filter_notice() {
-		if ( isset( $_GET['dismiss_wc_locale_notice'] ) && current_user_can( 'manage_woocommerce' ) ) {
+		if ( current_user_can( 'manage_woocommerce' ) && isset( $_GET['dismiss_wc_locale_notice'] ) && $_GET['_wc_notice_nonce'] && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wc_notice_nonce'] ) ), 'dismiss_wc_locale_notice' ) ) {
 			update_user_meta( get_current_user_id(), '_dismissed_wc_locale_notice', true );
-			wp_safe_redirect( remove_query_arg( 'dismiss_wc_locale_notice' ) );
+			wp_safe_redirect( remove_query_arg( array( 'dismiss_wc_locale_notice', '_wc_notice_nonce' ) ) );
 			exit;
 		}
 	}
