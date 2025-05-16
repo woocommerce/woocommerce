@@ -67,13 +67,13 @@
 				}
 			]
 		},
-		"custom": {
-			"spacing-increment": "2.2",
-			"spacing-unit": "10"
-		},
+        "custom": {
+            "spacing-increment": "1",
+            "spacing-unit": "10"
+        },
 		"layout": {
-			"contentSize": "645px",
-			"wideSize": "1340px"
+			"contentSize": "40.3125rem",
+			"wideSize": "90rem"
 		},
 		"spacing": {
 			"defaultSpacingSizes": false,
@@ -83,37 +83,37 @@
 			"spacingSizes": [
 				{
 					"name": "2X-Small",
-					"size": "clamp(4px, 1vw, 10px)",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 2.5 * 1px), calc(var(--wp--custom--spacing-increment) * 2.5 * 1vw))",
 					"slug": "20"
 				},
 				{
 					"name": "X-Small",
-					"size": "clamp(10px, 2vw, 20px)",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 3.5 * 1px), calc(var(--wp--custom--spacing-increment) * 3.5 * 1vw))",
 					"slug": "30"
 				},
 				{
 					"name": "Small",
-					"size": "clamp(20px, 3vw, 30px)",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 4.5 * 1px), calc(var(--wp--custom--spacing-increment) * 4.5 * 1vw))",
 					"slug": "40"
 				},
 				{
 					"name": "Regular",
-					"size": "clamp(30px, 5vw, 50px)",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 5 * 1px), calc(var(--wp--custom--spacing-increment) * 5 * 1vw))",
 					"slug": "50"
 				},
 				{
 					"name": "Large",
-					"size": "clamp(30px, 7vw, 70px)",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 7.5 * 1px), calc(var(--wp--custom--spacing-increment) * 7.5 * 1vw))",
 					"slug": "60"
 				},
 				{
 					"name": "Extra Large",
-					"size": "clamp(50px, 7vw, 90px)",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 12 * 1px), calc(var(--wp--custom--spacing-increment) * 12 * 1vw))",
 					"slug": "70"
 				},
 				{
 					"name": "2X Large",
-					"size": "clamp(70px, 10vw, 140px)",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 17 * 1px), calc(var(--wp--custom--spacing-increment) * 17 * 1vw))",
 					"slug": "80"
 				}
 			]
