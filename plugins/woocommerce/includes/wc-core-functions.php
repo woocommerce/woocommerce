@@ -1381,6 +1381,11 @@ function wc_get_customer_default_location() {
 		$default_location = wc_get_customer_geolocation( $default_location );
 	}
 
+	// If only one country is valid, preselect it.
+	if ( 1 === count( $allowed_countries ) ) {
+		$default_location['country'] = key( $allowed_countries );
+	}
+
 	/**
 	 * Filter the customer default location after geolocation.
 	 *
