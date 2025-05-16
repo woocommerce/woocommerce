@@ -44,10 +44,32 @@ class BlockifiedProductDetails extends AbstractBlock {
 		 */
 		$hooked_blocks = apply_filters( 'woocommerce_product_details_hooked_blocks', [] );
 
+		$logger = wc_get_logger();
+
 		$validated_hooked_blocks = array_filter(
 			$hooked_blocks,
-			function ( $block ) {
-				return isset( $block['title'] ) && isset( $block['content'] ) && is_string( $block['title'] ) && is_string( $block['content'] );
+			function ( $block ) use ( $logger ) {
+				$invalid = ! is_array( $block ) ||
+				! isset( $block['title'] ) ||
+				! isset( $block['content'] ) ||
+				! is_string( $block['title'] ) ||
+				! is_string( $block['content'] );
+
+				$parsed_content = parse_blocks( $block['content'] );
+
+				foreach ( $parsed_content as $content_block ) {
+					if ( ! isset( $content_block['blockName'] ) ) {
+						$invalid = true;
+						break;
+					}
+				}
+
+				if ( $invalid ) {
+					$logger->error( 'Invalid hooked block data. Expected array with `title` and `content` keys with string values. Content must be valid block markup.', $block );
+					return false;
+				}
+
+				return true;
 			}
 		);
 
