@@ -105,3 +105,13 @@
 		}
 	}
 }
+
+.wc-blocks-components-select.wc-blocks-components-select--readonly {
+	.wc-blocks-components-select__select {
+		pointer-events: none;
+	}
+
+	.wc-blocks-components-select__expand {
+		display: none;
+	}
+}
