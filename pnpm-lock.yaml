@@ -253,7 +253,7 @@ importers:
         version: 10.5.0(sass@1.69.5)(webpack@5.97.1)
       ts-jest:
         specifier: 29.1.x
-        version: 29.1.1(@babel/core@7.25.7)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.25.7))(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2)))(typescript@5.7.2)
+        version: 29.1.1(@babel/core@7.26.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.26.0))(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2)))(typescript@5.7.2)
       typescript:
         specifier: 5.7.x
         version: 5.7.2
@@ -263,148 +263,6 @@ importers:
       webpack-cli:
         specifier: 5.1.x
         version: 5.1.4(webpack@5.97.1)
-      wireit:
-        specifier: 0.14.12
-        version: 0.14.12
-
-  packages/js/ai:
-    dependencies:
-      '@wordpress/api-fetch':
-        specifier: wp-6.6
-        version: 7.0.1
-      '@wordpress/compose':
-        specifier: wp-6.6
-        version: 7.0.1(react@18.3.1)
-      '@wordpress/core-data':
-        specifier: wp-6.6
-        version: 7.0.7(@emotion/is-prop-valid@1.2.1)(@types/react-dom@18.3.0)(@types/react@18.3.16)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@wordpress/data':
-        specifier: wp-6.6
-        version: 10.0.2(patch_hash=xjmezqav3jkhcz5453svqnw2p4)(react@18.3.1)
-      '@wordpress/element':
-        specifier: wp-6.6
-        version: 6.0.1
-      classnames:
-        specifier: ^2.3.2
-        version: 2.3.2
-      debug:
-        specifier: ^4.3.4
-        version: 4.3.4(supports-color@9.4.0)
-      dompurify:
-        specifier: ^2.5.7
-        version: 2.5.7
-      prop-types:
-        specifier: ^15.8.1
-        version: 15.8.1
-      react-router-dom:
-        specifier: ~6.3.0
-        version: 6.3.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-    devDependencies:
-      '@babel/core':
-        specifier: 7.25.7
-        version: 7.25.7
-      '@babel/runtime':
-        specifier: 7.25.7
-        version: 7.25.7
-      '@testing-library/dom':
-        specifier: ^10.4.x
-        version: 10.4.0
-      '@testing-library/jest-dom':
-        specifier: ^6.x.x
-        version: 6.4.5(@jest/globals@29.7.0)(@types/jest@27.5.2)(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2)))
-      '@testing-library/react':
-        specifier: ^16.x.x
-        version: 16.1.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.16)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@testing-library/react-hooks':
-        specifier: 8.0.1
-        version: 8.0.1(@types/react@18.3.16)(react-dom@18.3.1(react@18.3.1))(react-test-renderer@17.0.2(react@18.3.1))(react@18.3.1)
-      '@testing-library/user-event':
-        specifier: 13.5.0
-        version: 13.5.0(@testing-library/dom@10.4.0)
-      '@types/debug':
-        specifier: ^4.1.12
-        version: 4.1.12
-      '@types/dompurify':
-        specifier: ^2.4.0
-        version: 2.4.0
-      '@types/jest':
-        specifier: 27.5.x
-        version: 27.5.2
-      '@types/react':
-        specifier: 18.3.x
-        version: 18.3.16
-      '@types/testing-library__jest-dom':
-        specifier: ^5.14.9
-        version: 5.14.9
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
-      '@woocommerce/internal-js-tests':
-        specifier: workspace:*
-        version: link:../internal-js-tests
-      '@woocommerce/internal-style-build':
-        specifier: workspace:*
-        version: link:../internal-style-build
-      '@wordpress/browserslist-config':
-        specifier: next
-        version: 6.13.1-next.a9f418477.0
-      concurrently:
-        specifier: ^7.6.0
-        version: 7.6.0
-      copy-webpack-plugin:
-        specifier: 13.0.x
-        version: 13.0.0(webpack@5.97.1)
-      css-loader:
-        specifier: 6.11.x
-        version: 6.11.0(webpack@5.97.1)
-      eslint:
-        specifier: ^8.55.0
-        version: 8.55.0
-      jest:
-        specifier: 27.5.x
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
-      jest-cli:
-        specifier: 27.5.x
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
-      mini-css-extract-plugin:
-        specifier: 2.9.x
-        version: 2.9.2(webpack@5.97.1)
-      postcss:
-        specifier: 8.4.x
-        version: 8.4.49
-      postcss-loader:
-        specifier: 4.3.x
-        version: 4.3.0(postcss@8.4.49)(webpack@5.97.1)
-      react:
-        specifier: 18.3.x
-        version: 18.3.1
-      react-dom:
-        specifier: 18.3.x
-        version: 18.3.1(react@18.3.1)
-      react-hooks^8.0.1:
-        specifier: link:@testing-library/react-hooks^8.0.1
-        version: link:@testing-library/react-hooks^8.0.1
-      rimraf:
-        specifier: 5.0.5
-        version: 5.0.5
-      sass-loader:
-        specifier: 10.5.x
-        version: 10.5.0(sass@1.69.5)(webpack@5.97.1)
-      ts-jest:
-        specifier: 29.1.x
-        version: 29.1.1(@babel/core@7.25.7)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.25.7))(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2)))(typescript@5.7.2)
-      typescript:
-        specifier: 5.7.x
-        version: 5.7.2
-      webpack:
-        specifier: 5.97.x
-        version: 5.97.1(@swc/core@1.3.100)(webpack-cli@5.1.4)
-      webpack-cli:
-        specifier: 5.1.x
-        version: 5.1.4(webpack@5.97.1)
-      webpack-rtl-plugin:
-        specifier: 2.0.x
-        version: 2.0.0
       wireit:
         specifier: 0.14.12
         version: 0.14.12
@@ -3860,9 +3718,6 @@ importers:
       '@woocommerce/admin-layout':
         specifier: workspace:*
         version: link:../../../../packages/js/admin-layout
-      '@woocommerce/ai':
-        specifier: workspace:*
-        version: link:../../../../packages/js/ai
       '@woocommerce/block-templates':
         specifier: workspace:*
         version: link:../../../../packages/js/block-templates
@@ -4747,7 +4602,7 @@ importers:
         version: 20.17.8
       '@wordpress/stylelint-config':
         specifier: ^21.36.0
-        version: 21.36.0(postcss@8.4.49)(stylelint@14.16.1)
+        version: 21.36.0(postcss@8.4.32)(stylelint@14.16.1)
       autoprefixer:
         specifier: 9.8.6
         version: 9.8.6
@@ -28955,7 +28810,10 @@ snapshots:
       jest-runner: 25.5.4
       jest-runtime: 25.5.4
     transitivePeerDependencies:
+      - bufferutil
+      - canvas
       - supports-color
+      - utf-8-validate
 
   '@jest/test-sequencer@26.6.3':
     dependencies:
@@ -29940,7 +29798,7 @@ snapshots:
       react-refresh: 0.14.2
       schema-utils: 3.3.0
       source-map: 0.7.4
-      webpack: 5.97.1(@swc/core@1.3.100)(webpack-cli@5.1.4)
+      webpack: 5.97.1(@swc/core@1.3.100)(esbuild@0.18.20)(webpack-cli@5.1.4)
     optionalDependencies:
       '@types/webpack': 4.41.38
       type-fest: 3.13.1
@@ -33800,16 +33658,6 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.3.16
       react-dom: 17.0.2(react@18.3.1)
-      react-test-renderer: 17.0.2(react@18.3.1)
-
-  '@testing-library/react-hooks@8.0.1(@types/react@18.3.16)(react-dom@18.3.1(react@18.3.1))(react-test-renderer@17.0.2(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@babel/runtime': 7.25.7
-      react: 18.3.1
-      react-error-boundary: 3.1.4(react@18.3.1)
-    optionalDependencies:
-      '@types/react': 18.3.16
-      react-dom: 18.3.1(react@18.3.1)
       react-test-renderer: 17.0.2(react@18.3.1)
 
   '@testing-library/react-hooks@8.0.1(@types/react@18.3.16)(react-dom@18.3.1(react@18.3.1))(react-test-renderer@18.3.1(react@18.3.1))(react@18.3.1)':
@@ -42271,7 +42119,7 @@ snapshots:
     dependencies:
       '@types/webpack': 4.41.38
       del: 4.1.1
-      webpack: 5.97.1(@swc/core@1.3.100)(webpack-cli@5.1.4)
+      webpack: 5.97.1(@swc/core@1.3.100)(esbuild@0.18.20)(webpack-cli@5.1.4)
 
   cli-boxes@1.0.0: {}
 
@@ -42703,7 +42551,7 @@ snapshots:
       normalize-path: 3.0.0
       schema-utils: 4.2.0
       serialize-javascript: 6.0.1
-      webpack: 5.97.1(@swc/core@1.3.100)(webpack-cli@5.1.4)
+      webpack: 5.97.1(@swc/core@1.3.100)(esbuild@0.18.20)(webpack-cli@5.1.4)
 
   copy-webpack-plugin@13.0.0(webpack@5.97.1(@swc/core@1.3.100)):
     dependencies:
@@ -45533,7 +45381,7 @@ snapshots:
     dependencies:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
-      webpack: 5.97.1(@swc/core@1.3.100)(webpack-cli@5.1.4)
+      webpack: 5.97.1(@swc/core@1.3.100)(esbuild@0.18.20)(webpack-cli@5.1.4)
     optional: true
 
   file-sync-cmp@0.1.1: {}
@@ -56150,7 +55998,7 @@ snapshots:
       abab: 2.0.6
       iconv-lite: 0.6.3
       source-map-js: 1.0.2
-      webpack: 5.97.1(@swc/core@1.3.100)(webpack-cli@5.1.4)
+      webpack: 5.97.1(@swc/core@1.3.100)(esbuild@0.18.20)(webpack-cli@5.1.4)
 
   source-map-resolve@0.5.3:
     dependencies:
@@ -57544,6 +57392,23 @@ snapshots:
       '@jest/types': 29.6.3
       babel-jest: 29.7.0(@babel/core@7.26.0)
 
+  ts-jest@29.1.1(@babel/core@7.26.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.26.0))(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2)))(typescript@5.7.2):
+    dependencies:
+      bs-logger: 0.2.6
+      fast-json-stable-stringify: 2.1.0
+      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
+      jest-util: 29.7.0
+      json5: 2.2.3
+      lodash.memoize: 4.1.2
+      make-error: 1.3.6
+      semver: 7.6.3
+      typescript: 5.7.2
+      yargs-parser: 21.1.1
+    optionalDependencies:
+      '@babel/core': 7.26.0
+      '@jest/types': 29.6.3
+      babel-jest: 29.7.0(@babel/core@7.26.0)
+
   ts-loader@9.5.1(typescript@5.7.2)(webpack@5.89.0):
     dependencies:
       chalk: 4.1.2
@@ -58003,7 +57868,7 @@ snapshots:
       loader-utils: 2.0.4
       mime-types: 2.1.35
       schema-utils: 3.3.0
-      webpack: 5.97.1(@swc/core@1.3.100)(webpack-cli@5.1.4)
+      webpack: 5.97.1(@swc/core@1.3.100)(esbuild@0.18.20)(webpack-cli@5.1.4)
     optionalDependencies:
       file-loader: 6.2.0(webpack@5.97.1)
 

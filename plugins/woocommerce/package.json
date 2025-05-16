@@ -53,6 +53,7 @@
 		"test": "pnpm test:unit",
 		"test:api": "pnpm test:e2e:default --project=api --workers 4",
 		"test:api:hpos": "pnpm test:e2e:with-env default-hpos-disabled --project=api-hpos-disabled --workers 4",
+		"test:api:object-cache": "pnpm test:e2e:with-env default-object-cache --project=api --workers 4",
 		"test:e2e": "pnpm test:e2e:default --project=e2e",
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
 		"test:e2e:install": "pnpm playwright install chromium",
@@ -507,6 +508,39 @@
 					},
 					"report": {
 						"resultsBlobName": "core-api-report-hpos-disabled",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Core API tests (with object cache plugin)",
+					"testType": "api",
+					"command": "test:api:object-cache",
+					"optional": false,
+					"changes": [
+						"composer.json",
+						"composer.lock",
+						"i18n/**/*.php",
+						"includes/**/*.php",
+						"src/**/*.php",
+						"tests/e2e-pw/bin/**",
+						"tests/e2e-pw/tests/api-tests/**",
+						"tests/e2e-pw/*.js",
+						"tests/e2e-pw/*.sh",
+						".wp-env.json",
+						"woocommerce.php",
+						"uninstall.php"
+					],
+					"onlyForDependencies": [],
+					"events": [
+						"push",
+						"core-api-object-cache"
+					],
+					"testEnv": {
+						"start": "env:test"
+					},
+					"report": {
+						"resultsBlobName": "core-api-report-object-cache",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
