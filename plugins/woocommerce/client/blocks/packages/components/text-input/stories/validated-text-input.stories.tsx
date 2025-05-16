@@ -5,6 +5,7 @@ import type { StoryFn, Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { useArgs } from '@storybook/client-api';
 import { useDispatch } from '@wordpress/data';
+import { validationStore } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -13,7 +14,6 @@ import ValidatedTextInput from '../validated-text-input';
 import '../style.scss';
 import '../../validation-input-error/style.scss';
 import { ValidatedTextInputProps } from '../types';
-import { validationStore } from '@woocommerce/block-data';
 
 export default {
 	title: 'External Components/ValidatedTextInput',
