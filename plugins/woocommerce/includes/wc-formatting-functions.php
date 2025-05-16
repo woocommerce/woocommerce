@@ -1341,7 +1341,7 @@ function wc_format_sale_price( $regular_price, $sale_price ) {
  */
 function wc_format_price_range( $from, $to ) {
 	/* translators: 1: price from 2: price to */
-	$price = sprintf( _x( '%1$s <span aria-hidden="true">&ndash;</span> %2$s', 'Price range: from-to', 'woocommerce' ), is_numeric( $from ) ? wc_price( $from, array( 'aria-hidden' => true ) ) : $from, is_numeric( $to ) ? wc_price( $to, array( 'aria-hidden' => true ) ) : $to );
+	$price  = sprintf( _x( '%1$s <span aria-hidden="true">&ndash;</span> %2$s', 'Price range: from-to', 'woocommerce' ), is_numeric( $from ) ? wc_price( $from, array( 'aria-hidden' => true ) ) : $from, is_numeric( $to ) ? wc_price( $to, array( 'aria-hidden' => true ) ) : $to );
 	$price .= '<span class="screen-reader-text">';
 	$price .= sprintf(
 		/* translators: 1: price from 2: price to */
