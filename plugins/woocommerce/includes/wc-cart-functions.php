@@ -471,7 +471,8 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
  * @return string
  */
 function wc_get_default_shipping_method_for_package( $key, $package, $chosen_method ) {
-	$rate_keys = array_keys( $package['rates'] );
+	$rate_keys               = array_keys( $package['rates'] );
+	$local_pickup_method_ids = LocalPickupUtils::get_local_pickup_method_ids();
 
 	if ( 'shortcode' === WC()->cart->cart_context ) {
 		$default = current( $rate_keys );
@@ -480,8 +481,6 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 		$default = '';
 
 		// Default to the first method in the package that isn't a local pickup method.
-		$local_pickup_method_ids = LocalPickupUtils::get_local_pickup_method_ids();
-
 		foreach ( $rate_keys as $rate_key ) {
 			$rate_method_id = current( explode( ':', $rate_key ) );
 			if ( ! in_array( $rate_method_id, $local_pickup_method_ids, true ) ) {
