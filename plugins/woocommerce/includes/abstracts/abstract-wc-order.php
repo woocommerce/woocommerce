@@ -74,7 +74,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Order items will be stored here, sometimes before they persist in the DB.
 	 *
 	 * @since 3.0.0
-	 * @var array
+	 * @var array<string, array<int, \WC_Order_Item>>
 	 */
 	protected $items = array();
 
@@ -82,7 +82,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Order items that need deleting are stored here.
 	 *
 	 * @since 3.0.0
-	 * @var array
+	 * @var array<\WC_Order_Item>
 	 */
 	protected $items_to_delete = array();
 
