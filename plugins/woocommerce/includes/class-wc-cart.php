@@ -1511,8 +1511,8 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 		}
 
-		$this->set_shipping_total( array_sum( $shipping_costs ) );
-		$this->set_shipping_tax( array_sum( $merged_taxes ) );
+		$this->set_shipping_total( array_sum( array_filter( $shipping_costs ) ) );
+		$this->set_shipping_tax( array_sum( array_filter( $merged_taxes ) ) );
 		$this->set_shipping_taxes( $merged_taxes );
 
 		return $this->shipping_methods;
