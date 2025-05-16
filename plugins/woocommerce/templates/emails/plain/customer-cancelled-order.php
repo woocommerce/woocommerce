@@ -26,10 +26,10 @@ echo esc_html( wp_strip_all_tags( $email_heading ) );
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
 /* translators: %1$s: Order number */
-$text = __( 'We\'re sorry to let you know that your order #%1$s has been cancelled.', 'woocommerce' );
+$text = __( 'We’re sorry to let you know that your order #%1$s has been cancelled.', 'woocommerce' );
 if ( $email_improvements_enabled ) {
 	/* translators: %1$s: Order number */
-	$text = __( 'We\'re getting in touch to let you know that your order #%1$s has been cancelled.', 'woocommerce' );
+	$text = __( 'We’re getting in touch to let you know that your order #%1$s has been cancelled.', 'woocommerce' );
 }
 echo sprintf( esc_html( $text ), esc_html( $order->get_order_number() ) ) . "\n\n";
 
