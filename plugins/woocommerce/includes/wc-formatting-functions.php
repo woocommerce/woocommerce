@@ -1342,10 +1342,10 @@ function wc_format_sale_price( $regular_price, $sale_price ) {
 function wc_format_price_range( $from, $to ) {
 	/* translators: 1: price from 2: price to */
 	$price = sprintf( _x( '%1$s <span aria-hidden="true">&ndash;</span> %2$s', 'Price range: from-to', 'woocommerce' ), is_numeric( $from ) ? wc_price( $from, array( 'aria-hidden' => true ) ) : $from, is_numeric( $to ) ? wc_price( $to, array( 'aria-hidden' => true ) ) : $to );
-	// Add the screen reader text for price range
 	$price .= '<span class="screen-reader-text">';
-	// translators: %1$s is the from price, %2$s is the to price
-	$price .= sprintf( __( 'Price range: %1$s through %2$s', 'woocommerce' ), 
+	/* translators: 1: price from 2: price to */
+	$price .= sprintf( 
+		__( 'Price range: %1$s through %2$s', 'woocommerce' ),
 		is_numeric( $from ) ? wp_strip_all_tags( wc_price( $from ) ) : wp_strip_all_tags( $from ),
 		is_numeric( $to ) ? wp_strip_all_tags( wc_price( $to ) ) : wp_strip_all_tags( $to )
 	);
