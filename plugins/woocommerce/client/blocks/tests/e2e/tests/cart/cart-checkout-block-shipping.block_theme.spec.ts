@@ -20,19 +20,13 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Merchant → Shipping', () => {
-	test( 'Merchant can enable shipping calculator and hide shipping costs before address is entered', async ( {
+	test( 'Merchant can hide shipping costs before address is entered', async ( {
 		page,
 		shippingUtils,
 		localPickupUtils,
 	} ) => {
 		await localPickupUtils.disableLocalPickup();
-
-		await shippingUtils.enableShippingCalculator();
 		await shippingUtils.enableShippingCostsRequireAddress();
-
-		await expect(
-			page.getByLabel( 'Enable the shipping calculator on the cart page' )
-		).toBeChecked();
 
 		await expect(
 			page.getByLabel( 'Hide shipping costs until an address is entered' )

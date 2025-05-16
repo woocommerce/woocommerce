@@ -8,13 +8,6 @@
 	margin: 0;
 	box-sizing: border-box;
 
-	.wc-block-components-button__text {
-		display: flex !important;
-		align-items: center;
-		justify-content: center;
-		gap: $gap-smallest;
-	}
-
 	// Hides labels when the spinner is shown.
 	&--loading {
 		.wc-block-components-button__text {
