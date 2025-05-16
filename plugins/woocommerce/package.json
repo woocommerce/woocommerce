@@ -513,7 +513,7 @@
 					}
 				},
 				{
-					"name": "Core API tests (object cache plugin)",
+					"name": "Core API tests (with object cache plugin)",
 					"testType": "api",
 					"command": "test:api:object-cache",
 					"optional": false,
@@ -533,7 +533,6 @@
 					],
 					"onlyForDependencies": [],
 					"events": [
-						"pull_request",
 						"push",
 						"core-api-object-cache"
 					],
