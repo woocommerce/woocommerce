@@ -31,7 +31,7 @@ class WC_Admin {
 		// menus logic is run, including the enqueuing of assets via \Automattic\WooCommerce\Internal\Admin\WCAdminAssets.
 		// While it may not sound like it, the admin_menu action is triggered quite early,
 		// before the admin_init or admin_enqueue_scripts  action.
-		// @see https://developer.wordpress.org/apis/hooks/action-reference/#actions-run-during-an-admin-page-request
+		// @see https://developer.wordpress.org/apis/hooks/action-reference/#actions-run-during-an-admin-page-request.
 		add_action( 'admin_menu', array( $this, 'init_page_controller' ), 1 );
 
 		add_action( 'current_screen', array( $this, 'conditional_includes' ) );
