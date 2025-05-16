@@ -84,7 +84,7 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 				max={ maxValue }
 				step={ 1 }
 				size="default"
-				__next36pxDefaultSize
+				__next40pxDefaultSize
 				help={ __(
 					'Choose the size of each thumbnail in respect to the product image. If thumbnails container size gets bigger than the product image, thumbnails will turn to slider.',
 					'woocommerce'
