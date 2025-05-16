@@ -2033,9 +2033,10 @@ function wc_add_number_precision( ?float $value, bool $round = true ) {
 		return 0.0;
 	}
 
-	$cent_precision = pow( 10, wc_get_price_decimals() );
-	$value          = $value * $cent_precision;
-	return $round ? NumberUtil::round( $value, wc_get_rounding_precision() - wc_get_price_decimals() ) : $value;
+	$result          = $value * pow( 10, wc_get_price_decimals() );
+	$round_precision = $round ? wc_get_rounding_precision() - wc_get_price_decimals() : wc_get_rounding_precision();
+
+	return NumberUtil::round( $result, $round_precision );
 }
 
 /**
@@ -2068,6 +2069,10 @@ function wc_add_number_precision_deep( $value, $round = true ) {
 	}
 
 	foreach ( $value as $key => $sub_value ) {
+		if ( 18.775 === $sub_value ) {
+			//var_dump( 'wc_add_number_precision_deep', $sub_value, $round, wc_add_number_precision_deep( $sub_value, $round ) );
+		}
+
 		$value[ $key ] = wc_add_number_precision_deep( $sub_value, $round );
 	}
 
