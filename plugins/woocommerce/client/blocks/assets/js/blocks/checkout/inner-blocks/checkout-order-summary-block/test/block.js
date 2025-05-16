@@ -523,9 +523,7 @@ describe( 'Checkout Order Summary', () => {
 		expect(
 			await findByText(
 				container,
-				textContentMatcherAcrossSiblings(
-					'Delivery $40.00 Free shipping'
-				)
+				textContentMatcherAcrossSiblings( 'Free shipping $40.00' )
 			)
 		).toBeInTheDocument();
 	} );
