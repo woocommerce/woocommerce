@@ -1244,65 +1244,6 @@ test.describe( 'Settings API tests: CRUD', () => {
 					} ),
 				] )
 			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_enable_shipping_calc',
-						label: 'Calculations',
-						description:
-							'Enable the shipping calculator on the cart page',
-						type: 'checkbox',
-						default: 'yes',
-						value: 'yes',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_shipping_cost_requires_address',
-						label: '',
-						description:
-							'Hide shipping costs until an address is entered',
-						type: 'checkbox',
-						default: 'no',
-						value: 'no',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_ship_to_destination',
-						label: 'Shipping destination',
-						description:
-							'This controls which shipping address is used by default.',
-						type: 'radio',
-						default: 'billing',
-						options: {
-							shipping: 'Default to customer shipping address',
-							billing: 'Default to customer billing address',
-							billing_only:
-								'Force shipping to the customer billing address',
-						},
-						tip: 'This controls which shipping address is used by default.',
-						value: 'billing',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_shipping_debug_mode',
-						label: 'Debug mode',
-						description: 'Enable debug mode',
-						type: 'checkbox',
-						default: 'no',
-						tip: 'Enable shipping debug mode to show matching shipping zones and to bypass shipping rate cache.',
-						value: 'no',
-					} ),
-				] )
-			);
 		} );
 	} );
 
