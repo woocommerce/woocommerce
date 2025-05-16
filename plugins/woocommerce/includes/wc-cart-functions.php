@@ -477,8 +477,8 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 	if ( 'shortcode' === WC()->cart->cart_context ) {
 		$default = current( $rate_keys );
 	} else {
-		// No default means that when you enter block checkout, shipping is chosen rather than pickup.
-		$default = '';
+		// No default means that when you enter block checkout, shipping is chosen rather than pickup. We should only do this if there are shipping methods available other than local pickup.
+		$default = CartCheckoutUtils::shipping_methods_exist() ? '' : current( $rate_keys );
 
 		// Default to the first method in the package that isn't a local pickup method.
 		foreach ( $rate_keys as $rate_key ) {
