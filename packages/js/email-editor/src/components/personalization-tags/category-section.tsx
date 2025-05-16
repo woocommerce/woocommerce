@@ -50,7 +50,8 @@ const CategorySection = ( {
 						</div>
 						<div className="woocommerce-personalization-tags-modal-category-group">
 							{ items.map( ( item ) => {
-								// TODO: Improve logic for detecting URL tags.
+								// Detects if the personalization tag is expected to return a URL by checking the token name,
+								// since personalization tags lack explicit return type definitions.
 								const isURLTag = /\burl\b/.test( item.token );
 
 								return (
