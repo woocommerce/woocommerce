@@ -44,6 +44,8 @@ declare module '@wordpress/data' {
 
 	type TKey = keyof StoreMap;
 	type TStore< T > = T extends keyof StoreMap ? StoreMap[ T ] : never;
+	// Store names whose selectors are already in their final form (without state parameter)
+	// as they are imported from `@types/wordpress__*` packages.
 	type SpecialStoreName =
 		| 'core/block-editor'
 		| 'core/editor'
