@@ -56,15 +56,16 @@ final class AssetsController {
 	 * Re-registers the iAPI runtime registered by WordPress Core/Gutenberg, allowing WooCommerce to register its own version of the iAPI runtime.
 	 */
 	public function reregister_core_iapi_runtime() {
-		wp_deregister_script_module( '@wordpress/interactivity' );
-		wp_deregister_script_module( '@wordpress/interactivity-router' );
-
 		$interactivity_api_asset_data = $this->api->get_asset_data(
 			$this->api->get_block_asset_build_path( 'interactivity-api-assets', 'php' )
 		);
 
 		foreach ( $interactivity_api_asset_data as $handle => $data ) {
 			$handle_without_js = str_replace( '.js', '', $handle );
+			if ( '@wordpress/interactivity' === $handle_without_js || '@wordpress/interactivity-router' === $handle_without_js ) {
+				wp_deregister_script_module( $handle_without_js );
+			}
+
 			wp_register_script_module( $handle_without_js, plugins_url( $this->api->get_block_asset_build_path( $handle_without_js ), dirname( __DIR__ ) ), $data['dependencies'], $data['version'] );
 		}
 	}
