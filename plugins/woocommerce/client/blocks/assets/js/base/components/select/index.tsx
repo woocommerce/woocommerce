@@ -28,7 +28,7 @@ export type SelectProps = Omit<
 	options: SelectOption[];
 	label: string;
 	onChange: ( newVal: string ) => void;
-	errorId?: string;
+	errorId?: string | undefined;
 	required?: boolean | undefined;
 	errorMessage?: string | undefined;
 	placeholder?: string | undefined;
