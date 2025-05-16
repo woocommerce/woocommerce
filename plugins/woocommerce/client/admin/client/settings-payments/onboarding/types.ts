@@ -51,7 +51,7 @@ export interface WooPaymentsProviderOnboardingStep {
 	label: string;
 	path?: string;
 	order: number;
-	status?: 'not_started' | 'in_progress' | 'completed';
+	status?: 'not_started' | 'in_progress' | 'completed' | 'failed' | 'blocked';
 	dependencies?: string[];
 	actions?: {
 		save?: {
@@ -67,6 +67,10 @@ export interface WooPaymentsProviderOnboardingStep {
 			href?: string;
 		};
 		init?: {
+			type?: string;
+			href?: string;
+		};
+		clean?: {
 			type?: string;
 			href?: string;
 		};
@@ -111,7 +115,10 @@ export interface WooPaymentsProviderOnboardingStep {
 		>;
 		has_test_account?: boolean;
 	};
-	errors?: string[];
+	errors?: {
+		message: string;
+		code: string;
+	}[];
 }
 
 /**
