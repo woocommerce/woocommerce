@@ -433,7 +433,7 @@ jQuery( function ( $ ) {
 				this.input_changed
 			);
 			$( document ).on(
-				'blur change input',
+				'change input',
 				'#coupon_code',
 				this.remove_coupon_error
 			);
