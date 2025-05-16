@@ -136,6 +136,7 @@ export const getTotalShippingValue = ( values: {
 export const getSelectedShippingRateNames = (
 	shippingRates: CartShippingRate[]
 ): string[] => {
+	// This is to ensure we don't have duplicate rate names in the array.
 	return Array.from(
 		new Set(
 			shippingRates.flatMap( ( shippingPackage ) => {
