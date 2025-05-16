@@ -87,7 +87,7 @@ const shippingRates = [
 						value: 'Test product &times; 1',
 					},
 				],
-				selected: false,
+				selected: true,
 				currency_code: 'USD',
 				currency_symbol: '$',
 				currency_minor_unit: 2,
