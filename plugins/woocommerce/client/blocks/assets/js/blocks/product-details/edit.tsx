@@ -21,7 +21,7 @@ const TEMPLATE: InnerBlockTemplate[] = [
 		'woocommerce/accordion-group',
 		{
 			metadata: {
-				isProductDetailsInnerBlock: true,
+				isDescendantOfProductDetails: true,
 			},
 		},
 		[

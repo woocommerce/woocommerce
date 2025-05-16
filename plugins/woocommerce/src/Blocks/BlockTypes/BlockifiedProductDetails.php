@@ -293,7 +293,7 @@ class BlockifiedProductDetails extends AbstractBlock {
 	private function has_accordion( $parsed_block ) {
 		if (
 			'woocommerce/accordion-group' === $parsed_block['blockName'] &&
-			! empty( $parsed_block['attrs']['metadata']['isProductDetailsInnerBlock'] )
+			! empty( $parsed_block['attrs']['metadata']['isDescendantOfProductDetails'] )
 		) {
 			return true;
 		}
@@ -348,8 +348,7 @@ class BlockifiedProductDetails extends AbstractBlock {
 				if (
 					'woocommerce/accordion-group' !== $parsed_anchor_block['blockName'] ||
 					'last_child' !== $relative_position ||
-					! isset( $parsed_anchor_block['attrs']['metadata']['isProductDetailsInnerBlock'] ) ||
-					! $parsed_anchor_block['attrs']['metadata']['isProductDetailsInnerBlock']
+					empty( $parsed_anchor_block['attrs']['metadata']['isDescendantOfProductDetails'] )
 				) {
 					return array();
 				}
