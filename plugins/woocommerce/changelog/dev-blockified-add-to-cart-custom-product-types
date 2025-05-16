@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Introduce "__experimental_woocommerce_{$product_type}_add_to_cart_with_options_block_template_part" filter for front end rendering of custom product types in the add to cart with options block.

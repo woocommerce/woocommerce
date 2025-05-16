@@ -4,13 +4,11 @@
 import { FontSize } from '@wordpress/components/build-types/font-size-picker/types';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as keyboardShortutsStore } from '@wordpress/keyboard-shortcuts';
-import { store as interfaceStore } from '@wordpress/interface';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { store as noticesStore } from '@wordpress/notices';
 import {
 	ActionCreatorsOf,
 	ConfigOf,
-	CurriedSelectorsOf,
 	DataRegistry,
 	StoreDescriptor as GenericStoreDescriptor,
 	UseSelectReturn,
@@ -45,11 +43,11 @@ declare module '@wordpress/data' {
 
 	type TKey = keyof StoreMap;
 	type TStore< T > = T extends keyof StoreMap ? StoreMap[ T ] : never;
-	type TSelectors< T > = CurriedSelectorsOf< TStore< T > >;
+	type TSelectors< T > = ConfigOf< TStore< T > >[ 'selectors' ];
 	type TActions< T > = ActionCreatorsOf< ConfigOf< TStore< T > > >;
 	type TSelectFunction = < T extends TKey | StoreDescriptor >(
 		store: T
-	) => T extends TKey ? TSelectors< T > : CurriedSelectorsOf< T >;
+	) => T extends TKey ? TSelectors< T > : ConfigOf< T >[ 'selectors' ];
 	type TMapSelect = (
 		select: TSelectFunction,
 		registry: DataRegistry
@@ -61,7 +59,7 @@ declare module '@wordpress/data' {
 	// fix return type for select(storeDescriptor)
 	export function select< T extends GenericStoreDescriptor< any > >(
 		store: T
-	): CurriedSelectorsOf< T >;
+	): ConfigOf< T >[ 'selectors' ];
 
 	// dispatch('store-name')
 	function dispatch< T extends string >( store: T ): TActions< T >;
@@ -107,7 +105,6 @@ declare module '@wordpress/data' {
 	interface StoreMap {
 		[ blockEditorStore.name ]: typeof blockEditorStore;
 		[ keyboardShortutsStore.name ]: typeof keyboardShortutsStore;
-		[ interfaceStore.name ]: typeof interfaceStore;
 		[ preferencesStore.name ]: typeof preferencesStore;
 		[ noticesStore.name ]: typeof noticesStore;
 	}

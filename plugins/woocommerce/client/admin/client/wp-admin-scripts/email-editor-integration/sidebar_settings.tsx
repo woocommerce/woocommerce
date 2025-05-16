@@ -11,6 +11,7 @@ import clsx from 'clsx';
  * Internal dependencies
  */
 import { NAME_SPACE } from './constants';
+import { EmailStatus } from './email-status';
 
 const previewTextMaxLength = 150;
 const previewTextRecommendedLength = 80;
@@ -113,6 +114,11 @@ const SidebarSettings = ( { RichTextWithButton } ) => {
 };
 
 export function modifySidebar() {
+	addFilter(
+		'woocommerce_email_editor_setting_sidebar_email_status_component',
+		NAME_SPACE,
+		() => EmailStatus
+	);
 	addFilter(
 		'woocommerce_email_editor_setting_sidebar_extension_component',
 		NAME_SPACE,

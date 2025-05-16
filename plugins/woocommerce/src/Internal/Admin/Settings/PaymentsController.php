@@ -3,8 +3,9 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
+use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use Exception;
+use Throwable;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
@@ -16,6 +17,8 @@ defined( 'ABSPATH' ) || exit;
  * Use this class for hooks and actions related to the Payments settings page.
  */
 class PaymentsController {
+
+	const TRANSIENT_HAS_PROVIDERS_WITH_INCENTIVE_KEY = 'woocommerce_admin_settings_payments_has_providers_with_incentive';
 
 	/**
 	 * The payment service.
@@ -47,6 +50,7 @@ class PaymentsController {
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
 		add_filter( 'woocommerce_admin_allowed_promo_notes', array( $this, 'add_allowed_promo_notes' ) );
 		add_filter( 'woocommerce_get_sections_checkout', array( $this, 'handle_sections' ), 20 );
+		add_action( 'woocommerce_admin_payments_extension_suggestion_incentive_dismissed', array( $this, 'handle_incentive_dismissed' ) );
 	}
 
 	/**
@@ -89,7 +93,7 @@ class PaymentsController {
 			56, // Position after WooCommerce Product menu item.
 		);
 
-		// If there are providers with active incentive, add a notice badge to the Payments menu item.
+		// If there are providers with an active incentive, add a notice badge to the Payments menu item.
 		if ( $this->store_has_providers_with_incentive() ) {
 			$badge = ' <span class="wcpay-menu-badge awaiting-mod count-1"><span class="plugin-count">1</span></span>';
 			foreach ( $menu as $index => $menu_item ) {
@@ -141,8 +145,17 @@ class PaymentsController {
 	public function add_allowed_promo_notes( array $promo_notes = array() ): array {
 		try {
 			$providers = $this->payments->get_payment_providers( $this->payments->get_country() );
-		} catch ( Exception $e ) {
-			// In case of an error, bail.
+		} catch ( Throwable $e ) {
+			// Catch everything since we don't want to break all the WP admin pages.
+			// Log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->error(
+				'Failed to get payment providers: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+					'error'  => $e,
+				)
+			);
+
 			return $promo_notes;
 		}
 
@@ -175,6 +188,16 @@ class PaymentsController {
 	}
 
 	/**
+	 * Handle the payments extension suggestion incentive dismissed event.
+	 *
+	 * @return void
+	 */
+	public function handle_incentive_dismissed(): void {
+		// Just clear the transient to force a new check for providers with an incentive.
+		delete_transient( self::TRANSIENT_HAS_PROVIDERS_WITH_INCENTIVE_KEY );
+	}
+
+	/**
 	 * Check if the store has any enabled gateways (including offline payment methods).
 	 *
 	 * @return bool True if the store has any enabled gateways, false otherwise.
@@ -197,13 +220,31 @@ class PaymentsController {
 	 * @return bool True if the store has providers with an active incentive.
 	 */
 	private function store_has_providers_with_incentive(): bool {
+		// First, try to use the transient value.
+		$transient = get_transient( self::TRANSIENT_HAS_PROVIDERS_WITH_INCENTIVE_KEY );
+		if ( false !== $transient ) {
+			return filter_var( $transient, FILTER_VALIDATE_BOOLEAN );
+		}
+
 		try {
 			$providers = $this->payments->get_payment_providers( $this->payments->get_country() );
-		} catch ( Exception $e ) {
-			// In case of an error, just return false.
+		} catch ( Throwable $e ) {
+			// Catch everything since we don't want to break all the WP admin pages.
+			// Log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->error(
+				'Failed to get payment providers: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+					'error'  => $e,
+				)
+			);
+
+			// In case of an error, default to false.
+			set_transient( self::TRANSIENT_HAS_PROVIDERS_WITH_INCENTIVE_KEY, 'no', HOUR_IN_SECONDS );
 			return false;
 		}
 
+		$has_providers_with_incentive = false;
 		// Go through the providers and check if any of them have a "prominently" visible incentive (i.e., modal or banner).
 		foreach ( $providers as $provider ) {
 			if ( empty( $provider['_incentive'] ) ) {
@@ -214,7 +255,8 @@ class PaymentsController {
 
 			// If there are no dismissals at all, the incentive is prominently visible.
 			if ( empty( $dismissals ) ) {
-				return true;
+				$has_providers_with_incentive = true;
+				break;
 			}
 
 			// First, we check to see if the incentive was dismissed in the banner context.
@@ -245,7 +287,8 @@ class PaymentsController {
 			);
 			// If there are no modal dismissals, the incentive is still visible.
 			if ( ! $is_dismissed_modal ) {
-				return true;
+				$has_providers_with_incentive = true;
+				break;
 			}
 
 			$is_dismissed_modal_more_than_30_days_ago = ! empty(
@@ -264,10 +307,15 @@ class PaymentsController {
 			}
 
 			// The modal was dismissed more than 30 days ago, so the banner is visible.
-			return true;
+			$has_providers_with_incentive = true;
+			break;
 		}
 
-		return false;
+		// Save the value in a transient to avoid unnecessary processing throughout the WP admin.
+		// Incentives don't change frequently, so it is safe to cache the value for 1 hour.
+		set_transient( self::TRANSIENT_HAS_PROVIDERS_WITH_INCENTIVE_KEY, $has_providers_with_incentive ? 'yes' : 'no', HOUR_IN_SECONDS );
+
+		return $has_providers_with_incentive;
 	}
 
 	/**

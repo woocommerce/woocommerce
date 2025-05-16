@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-- Updates the TrackedLink component to support opening external links in a new tab - Adds screen reader text for external links that open in a new tab - Update marketplace banner, footer and vendor links to open in a new tab

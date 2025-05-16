@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Send POS refund email and disable core refund email for POS orders.

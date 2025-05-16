@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Email\OrderPriceFormatter;
+use Automattic\WooCommerce\Internal\Orders\PointOfSaleOrderUtil;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -61,6 +62,9 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			$this->description = $this->email_improvements_enabled
 				? __( 'Let shoppers know when a full or partial refund is on its way to them for their POS order.', 'woocommerce' )
 				: __( 'Order refunded emails are sent to customers when their POS orders are refunded.', 'woocommerce' );
+
+			$this->disable_default_refund_emails_for_pos_orders();
+			$this->register_refund_email_triggers();
 		}
 
 		/**
@@ -154,6 +158,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 *
 		 * @param int $order_id Order ID.
 		 * @param int $refund_id Refund ID.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function trigger_full( $order_id, $refund_id = null ) {
 			$this->trigger( $order_id, false, $refund_id );
@@ -164,6 +170,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 *
 		 * @param int $order_id Order ID.
 		 * @param int $refund_id Refund ID.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function trigger_partial( $order_id, $refund_id = null ) {
 			$this->trigger( $order_id, true, $refund_id );
@@ -176,17 +184,22 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @param bool $partial_refund Whether it is a partial refund or a full refund.
 		 * @param int  $refund_id Refund ID.
 		 */
-		public function trigger( $order_id, $partial_refund = false, $refund_id = null ) {
+		private function trigger( $order_id, $partial_refund = false, $refund_id = null ) {
+			if ( ! $order_id ) {
+				return;
+			}
+			// Only trigger for POS orders.
+			$order = wc_get_order( $order_id );
+			if ( ! $order || ! PointOfSaleOrderUtil::is_pos_order( $order ) ) {
+				return;
+			}
 			$this->setup_locale();
 			$this->partial_refund = $partial_refund;
-			$this->id             = $this->partial_refund ? 'customer_partially_refunded_order' : 'customer_refunded_order';
 
-			if ( $order_id ) {
-				$this->object                         = wc_get_order( $order_id );
-				$this->recipient                      = $this->object->get_billing_email();
-				$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
-				$this->placeholders['{order_number}'] = $this->object->get_order_number();
-			}
+			$this->object                         = $order;
+			$this->recipient                      = $this->object->get_billing_email();
+			$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
+			$this->placeholders['{order_number}'] = $this->object->get_order_number();
 
 			if ( ! empty( $refund_id ) ) {
 				$this->refund = wc_get_order( $refund_id );
@@ -359,6 +372,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		private function add_pos_customizations() {
 			// Add action to display unit price in the beginning of the order item meta.
 			add_action( 'woocommerce_order_item_meta_start', array( $this, 'add_unit_price' ), 10, 4 );
+			// Add filter to include additional details in the order item totals table.
+			add_filter( 'woocommerce_get_order_item_totals', array( $this, 'order_item_totals' ), 10, 3 );
 		}
 
 		/**
@@ -367,6 +382,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		private function remove_pos_customizations() {
 			// Remove actions and filters after generating content to avoid affecting other emails.
 			remove_action( 'woocommerce_order_item_meta_start', array( $this, 'add_unit_price' ), 10 );
+			remove_filter( 'woocommerce_get_order_item_totals', array( $this, 'order_item_totals' ), 10 );
 		}
 
 		/**
@@ -379,6 +395,86 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		public function add_unit_price( $item_id, $item, $order ) {
 			$unit_price = OrderPriceFormatter::get_formatted_item_subtotal( $order, $item, get_option( 'woocommerce_tax_display_cart' ) );
 			echo wp_kses_post( '<br /><small>' . $unit_price . '</small>' );
+		}
+
+		/**
+		 * Disable default WooCommerce refund emails for POS orders.
+		 * The core refund email IDs are in WC_Email_Customer_Refunded_Order's trigger method.
+		 *
+		 * This method adds filters to prevent the default WooCommerce refund emails
+		 * from being sent for orders created through the Point of Sale system.
+		 * Instead, the POS-specific refund emails will be used.
+		 */
+		private function disable_default_refund_emails_for_pos_orders() {
+			add_filter( 'woocommerce_email_enabled_customer_partially_refunded_order', array( $this, 'disable_default_refund_email_for_pos_orders' ), 10, 3 );
+			add_filter( 'woocommerce_email_enabled_customer_refunded_order', array( $this, 'disable_default_refund_email_for_pos_orders' ), 10, 3 );
+		}
+
+		/**
+		 * Disable the default WooCommerce refund email for POS orders.
+		 *
+		 * @param bool          $enabled Whether the email is enabled.
+		 * @param WC_Order|null $order   The order object.
+		 * @param WC_Email|null $email   The email object.
+		 * @return bool
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+		 */
+		public function disable_default_refund_email_for_pos_orders( $enabled, $order, $email ) {
+			if ( $order && PointOfSaleOrderUtil::is_pos_order( $order ) ) {
+				return false;
+			}
+			return $enabled;
+		}
+
+		/**
+		 * Register triggers for POS refund emails.
+		 *
+		 * This method adds actions to trigger the refund emails for POS orders.
+		 * It ensures that the emails are sent correctly when a full or partial refund is made.
+		 */
+		private function register_refund_email_triggers() {
+			add_action( 'woocommerce_order_fully_refunded_notification', array( $this, 'trigger_full' ), 10, 2 );
+			add_action( 'woocommerce_order_partially_refunded_notification', array( $this, 'trigger_partial' ), 10, 2 );
+		}
+
+		/**
+		 * Add additional details to the order item totals table.
+		 *
+		 * @param array    $total_rows Array of total rows.
+		 * @param WC_Order $order      Order object.
+		 * @param string   $tax_display Tax display.
+		 * @return array Modified array of total rows.
+		 */
+		public function order_item_totals( $total_rows, $order, $tax_display ) {
+			$cash_payment_change_due_amount           = $order->get_meta( '_cash_change_amount', true );
+			$formatted_cash_payment_change_due_amount = wc_price( $cash_payment_change_due_amount, array( 'currency' => $order->get_currency() ) );
+			if ( ! empty( $cash_payment_change_due_amount ) ) {
+				$total_rows['cash_payment_change_due_amount'] = array(
+					'type'  => 'cash_payment_change_due_amount',
+					'label' => __( 'Change due:', 'woocommerce' ),
+					'value' => $formatted_cash_payment_change_due_amount,
+				);
+			}
+
+			$auth_code = $order->get_meta( '_charge_id', true );
+			if ( ! empty( $auth_code ) ) {
+				$total_rows['payment_auth_code'] = array(
+					'type'  => 'payment_auth_code',
+					'label' => __( 'Auth code:', 'woocommerce' ),
+					'value' => $auth_code,
+				);
+			}
+
+			if ( $order->get_date_paid() !== null ) {
+				$total_rows['date_paid'] = array(
+					'type'  => 'date_paid',
+					'label' => __( 'Time of payment:', 'woocommerce' ),
+					'value' => wc_format_datetime( $order->get_date_paid(), get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) ),
+				);
+			}
+
+			return $total_rows;
 		}
 	}
 

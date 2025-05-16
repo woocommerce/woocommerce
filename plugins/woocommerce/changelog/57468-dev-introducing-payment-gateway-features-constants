@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Introduces and implements payment gateway features' constants in the WooCommerce plugin codebase.

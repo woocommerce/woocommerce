@@ -12,7 +12,6 @@ module.exports = {
 	],
 	settings: {
 		'import/core-modules': [
-			'@woocommerce/ai',
 			'@woocommerce/admin-layout',
 			'@woocommerce/components',
 			'@woocommerce/customer-effort-score',

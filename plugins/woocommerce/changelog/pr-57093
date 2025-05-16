@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix: DOING_AJAX being set when wc-ajax is empty after sanitized
