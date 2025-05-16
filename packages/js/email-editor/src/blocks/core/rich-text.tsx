@@ -64,13 +64,23 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 
 	const { updateBlockAttributes } = useDispatch( 'core/block-editor' );
 
-	// Get the current block content
-	const blockContent: string = useSelect( ( select ) => {
+	// Get the current block attributes
+	const blockAttributes: object = useSelect( ( select ) => {
 		const attributes =
 			// @ts-expect-error getBlockAttributes expects one argument, but TS thinks it expects none
 			select( 'core/block-editor' ).getBlockAttributes( selectedBlockId );
-		return attributes?.content?.originalHTML || attributes?.content || ''; // After first saving the content does not have property originalHTML, so we need to check for content as well
+
+		return attributes;
 	} );
+
+	// Some blocks, such as the Button block, store the content in `text` attribute.
+	const blockContentKey = 'text' in blockAttributes ? 'text' : 'content';
+
+	// After first saving the content does not have property originalHTML, so we need to check for content as well
+	const blockContent =
+		blockAttributes?.[ blockContentKey ]?.originalHTML ||
+		blockAttributes?.[ blockContentKey ] ||
+		'';
 
 	const handleInsert = useCallback(
 		( tag: string, linkText: string | null ) => {
@@ -113,10 +123,16 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 			}
 
 			updateBlockAttributes( selectedBlockId, {
-				content: updatedContent,
+				[ blockContentKey ]: updatedContent,
 			} );
 		},
-		[ blockContent, contentRef, selectedBlockId, updateBlockAttributes ]
+		[
+			blockContent,
+			blockContentKey,
+			contentRef,
+			selectedBlockId,
+			updateBlockAttributes,
+		]
 	);
 
 	return (
@@ -141,7 +157,7 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 							`<!--[${ updatedTag }]-->`
 						);
 						updateBlockAttributes( selectedBlockId, {
-							content: updatedContent,
+							[ blockContentKey ]: updatedContent,
 						} );
 					} }
 				/>

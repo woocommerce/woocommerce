@@ -4,10 +4,14 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
+
 /**
  * ProductFilters class.
  */
 class ProductFilters extends AbstractBlock {
+	use BlocksSharedState;
+
 	/**
 	 * Block name.
 	 *
@@ -35,10 +39,14 @@ class ProductFilters extends AbstractBlock {
 		global $pagenow;
 		parent::enqueue_data( $attributes );
 
-		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
-		$this->asset_data_registry->add( 'isProductArchive', is_shop() || is_product_taxonomy() );
-		$this->asset_data_registry->add( 'isSiteEditor', 'site-editor.php' === $pagenow );
-		$this->asset_data_registry->add( 'isWidgetEditor', 'widgets.php' === $pagenow || 'customize.php' === $pagenow );
+		$this->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+
+		wp_interactivity_config(
+			$this->get_full_block_name(),
+			[
+				'isProductArchive' => is_shop() || is_product_taxonomy() || ( is_search() && 'product' === get_post_type() ),
+			]
+		);
 	}
 
 	/**
@@ -55,7 +63,7 @@ class ProductFilters extends AbstractBlock {
 		$query_id      = $block->context['queryId'] ?? 0;
 		$filter_params = $this->get_filter_params( $query_id );
 
-		$this->asset_data_registry->add( 'canonicalUrl', $this->get_canonical_url_no_pagination( $filter_params ) );
+		wp_interactivity_config( $this->get_full_block_name(), [ 'canonicalUrl' => $this->get_canonical_url_no_pagination( $filter_params ) ] );
 
 		/**
 		 * Filter hook to modify the selected filter items.

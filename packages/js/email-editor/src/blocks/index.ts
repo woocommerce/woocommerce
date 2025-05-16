@@ -24,8 +24,10 @@ import { enhanceButtonBlock } from './core/button';
 import { enhanceButtonsBlock } from './core/buttons';
 import { alterSupportConfiguration } from './core/general-block-support';
 import { enhanceQuoteBlock } from './core/quote';
+import { filterSetUrlAttribute } from './core/block-edit';
 
 export function initBlocks() {
+	filterSetUrlAttribute();
 	deactivateStackOnMobile();
 	hideExpandOnClick();
 	disableImageFilter();
