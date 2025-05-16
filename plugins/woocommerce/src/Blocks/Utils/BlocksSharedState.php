@@ -50,7 +50,7 @@ trait BlocksSharedState {
 	 */
 	private static function check_consent( $consent_statement ) {
 		if ( $consent_statement !== self::$consent_statement ) {
-			throw new \InvalidArgumentException( 'This method cannot be called without consenting the API may change.' );
+			throw new InvalidArgumentException( 'This method cannot be called without consenting the API may change.' );
 		}
 
 		return true;
