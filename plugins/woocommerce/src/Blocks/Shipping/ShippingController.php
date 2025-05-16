@@ -206,9 +206,9 @@ class ShippingController {
 		if ( CartCheckoutUtils::is_cart_block_default() ) {
 			foreach ( $settings as $index => $setting ) {
 				if ( 'woocommerce_enable_shipping_calc' === $setting['id'] ) {
-					$settings[ $index ]['desc'] = sprintf(
+					$settings[ $index ]['desc_tip'] = sprintf(
 					/* translators: %s: URL to the documentation. */
-						__( 'Enable the shipping calculator on the cart page. This feature is not available when using the <a href="%s">Cart block</a>.', 'woocommerce' ),
+						__( 'This feature is not available when using the <a href="%s">Cart and checkout blocks</a>. Shipping will be calculated at checkout.', 'woocommerce' ),
 						'https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/'
 					);
 					$settings[ $index ]['disabled'] = true;
