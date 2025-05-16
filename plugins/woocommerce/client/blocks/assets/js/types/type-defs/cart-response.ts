@@ -66,7 +66,7 @@ export interface CartResponseShippingPackageShippingRate
 	selected: boolean;
 }
 
-export interface CartResponseShippingRate extends CartShippingRate {}
+export type CartResponseShippingRate = CartShippingRate;
 
 export interface CartResponseShippingAddress
 	extends ResponseBaseAddress,
