@@ -31,7 +31,6 @@ const CategorySection = ( {
 		select( blockEditorStore ).getSelectedBlockClientId()
 	);
 	const selectedBlock = useSelect( ( select ) =>
-		// @ts-expect-error getBlock expects one argument, but TS thinks it expects none
 		select( blockEditorStore ).getBlock( selectedBlockId )
 	);
 	const canSetURL = [ 'core/button' ].includes( selectedBlock?.name );
