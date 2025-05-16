@@ -33,13 +33,9 @@ class ProductReviewTemplate extends AbstractBlock {
 	 *
 	 * @param WP_Comment[] $comments        The array of comments.
 	 * @param WP_Block     $block           Block instance.
-	 * @param int          $current_depth   Current depth of comments, defaults to 1.
 	 * @return string
 	 */
-	protected function block_product_review_template_render_comments( $comments, $block, $current_depth = 1 ) {
-		$thread_comments       = get_option( 'thread_comments' );
-		$thread_comments_depth = get_option( 'thread_comments_depth' );
-
+	protected function block_product_review_template_render_comments( $comments, $block ) {
 		$content = '';
 		foreach ( $comments as $comment ) {
 			$comment_id           = $comment->comment_ID;
@@ -66,37 +62,7 @@ class ProductReviewTemplate extends AbstractBlock {
 
 			remove_filter( 'render_block_context', $filter_block_context, 1 );
 
-			$children = $comment->get_children();
-
-			/*
-			* We need to create the CSS classes BEFORE recursing into the children.
-			* This is because comment_class() uses globals like `$comment_alt`
-			* and `$comment_thread_alt` which are order-sensitive.
-			*
-			* The `false` parameter at the end means that we do NOT want the function
-			* to `echo` the output but to return a string.
-			* See https://developer.wordpress.org/reference/functions/comment_class/#parameters.
-			*/
 			$comment_classes = comment_class( '', $comment->comment_ID, $comment->comment_post_ID, false );
-
-			// If the comment has children, recurse to create the HTML for the nested
-			// comments.
-			if ( ! empty( $children ) && ! empty( $thread_comments ) ) {
-				if ( $current_depth < $thread_comments_depth ) {
-					$inner_content  = $this->block_product_review_template_render_comments(
-						$children,
-						$block,
-						$current_depth + 1
-					);
-					$block_content .= sprintf( '<ol>%1$s</ol>', $inner_content );
-				} else {
-					$block_content .= $this->block_product_review_template_render_comments(
-						$children,
-						$block,
-						$current_depth
-					);
-				}
-			}
 
 			$content .= sprintf( '<li id="comment-%1$s" %2$s>%3$s</li>', $comment->comment_ID, $comment_classes, $block_content );
 		}

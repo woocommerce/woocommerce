@@ -262,10 +262,17 @@ class RestApi {
 	 *
 	 * @param \WP_REST_Request $request The request object.
 	 *
-	 * @return array
+	 * @return \WP_REST_Response|array
 	 */
 	public function import_step( \WP_REST_Request $request ) {
-		if ( ! $this->can_import_blueprint() ) {
+		$session_token = $request->get_header( 'X-Blueprint-Import-Session' );
+
+		// If no session token, this is the first step: generate and store a new token.
+		if ( ! $session_token ) {
+			$session_token = function_exists( 'wp_generate_uuid4' ) ? wp_generate_uuid4() : uniqid( 'bp_', true );
+		}
+
+		if ( ! $this->can_import_blueprint( $session_token ) ) {
 			return array(
 				'success'  => false,
 				'messages' => array(
@@ -276,6 +283,11 @@ class RestApi {
 				),
 			);
 		}
+
+		if ( false === get_transient( 'blueprint_import_session_' . $session_token ) ) {
+			set_transient( 'blueprint_import_session_' . $session_token, true, 10 * MINUTE_IN_SECONDS );
+		}
+
 		// Get the raw body size.
 		$body_size = strlen( $request->get_body() );
 		if ( $body_size > $this->get_max_file_size() ) {
@@ -299,19 +311,28 @@ class RestApi {
 		$step_importer   = new ImportStep( $step_definition );
 		$result          = $step_importer->import();
 
-		return array(
-			'success'  => $result->is_success(),
-			'messages' => $result->get_messages(),
+		$response = new \WP_REST_Response(
+			array(
+				'success'  => $result->is_success(),
+				'messages' => $result->get_messages(),
+			)
 		);
+		$response->header( 'X-Blueprint-Import-Session', $session_token );
+		return $response;
 	}
 
-
 	/**
-	 * Check if blueprint imports are allowed based on site status and configuration.
+	 * Check if blueprint imports are allowed based on site status, configuration, and session token.
 	 *
+	 * @param string|null $session_token Optional session token for import session.
 	 * @return bool Returns true if imports are allowed, false otherwise.
 	 */
-	private function can_import_blueprint() {
+	private function can_import_blueprint( $session_token = null ) {
+		// Allow import if a valid session token is present so when a site is turned into live during the import process, the import can continue.
+		if ( $session_token && get_transient( 'blueprint_import_session_' . $session_token ) ) {
+			return true;
+		}
+
 		// Check if override constant is defined and true.
 		if ( defined( 'ALLOW_BLUEPRINT_IMPORT_IN_LIVE_MODE' ) && ALLOW_BLUEPRINT_IMPORT_IN_LIVE_MODE ) {
 			return true;

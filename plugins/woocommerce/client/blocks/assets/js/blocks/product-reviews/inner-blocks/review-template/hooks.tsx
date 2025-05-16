@@ -22,7 +22,6 @@ export const useCommentQueryArgs = ( { postId }: { postId: number } ) => {
 			order: 'asc',
 			context: 'embed',
 			parent: 0,
-			_embed: 'children',
 			type: 'review',
 		} ),
 		[]
@@ -153,41 +152,23 @@ export const useCommentQueryArgs = ( { postId }: { postId: number } ) => {
 };
 
 /**
- * Generate a tree structure of comment IDs from a list of comment entities. The
- * children of each comment are obtained from `_embedded`.
+ * Generate a list of IDs from a list of review entities.
  */
-export const useCommentTree = (
+export const useCommentList = (
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	topLevelComments: Array< {
 		id: number;
-		// eslint-disable-next-line @typescript-eslint/naming-convention
-		_embedded?: { children?: Array< { id: number } > };
 	} >
 ) => {
-	const commentTree = useMemo(
+	const commentList = useMemo(
 		() =>
-			topLevelComments?.map(
-				( {
-					id,
-					_embedded,
-				}: {
-					id: number;
-					// eslint-disable-next-line @typescript-eslint/naming-convention
-					_embedded?: { children?: Array< { id: number } > };
-				} ) => {
-					const [ children ] = _embedded?.children || [ [] ];
-					return {
-						commentId: id,
-						children: Array.isArray( children )
-							? children.map( ( child: { id: number } ) => ( {
-									commentId: child.id,
-							  } ) )
-							: [],
-					};
-				}
-			),
+			topLevelComments?.map( ( { id }: { id: number } ) => {
+				return {
+					commentId: id,
+				};
+			} ),
 		[ topLevelComments ]
 	);
 
-	return commentTree;
+	return commentList;
 };

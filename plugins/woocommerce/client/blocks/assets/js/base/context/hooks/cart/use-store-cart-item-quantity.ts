@@ -56,7 +56,7 @@ export const useStoreCartItemQuantity = (
 	const { key: cartItemKey = '', quantity: cartItemQuantity = 1 } =
 		verifiedCartItem;
 	const { cartErrors } = useStoreCart();
-	const { __internalIncrementCalculating, __internalDecrementCalculating } =
+	const { __internalStartCalculation, __internalFinishCalculation } =
 		useDispatch( checkoutStore );
 
 	// Store quantity in hook state. This is used to keep the UI updated while server request is updated.
@@ -119,35 +119,35 @@ export const useStoreCartItemQuantity = (
 
 	useEffect( () => {
 		if ( isPending.delete ) {
-			__internalIncrementCalculating();
+			__internalStartCalculation();
 		} else {
-			__internalDecrementCalculating();
+			__internalFinishCalculation();
 		}
 		return () => {
 			if ( isPending.delete ) {
-				__internalDecrementCalculating();
+				__internalFinishCalculation();
 			}
 		};
 	}, [
-		__internalDecrementCalculating,
-		__internalIncrementCalculating,
+		__internalFinishCalculation,
+		__internalStartCalculation,
 		isPending.delete,
 	] );
 
 	useEffect( () => {
 		if ( isPending.quantity || debouncedQuantity !== quantity ) {
-			__internalIncrementCalculating();
+			__internalStartCalculation();
 		} else {
-			__internalDecrementCalculating();
+			__internalFinishCalculation();
 		}
 		return () => {
 			if ( isPending.quantity || debouncedQuantity !== quantity ) {
-				__internalDecrementCalculating();
+				__internalFinishCalculation();
 			}
 		};
 	}, [
-		__internalIncrementCalculating,
-		__internalDecrementCalculating,
+		__internalStartCalculation,
+		__internalFinishCalculation,
 		isPending.quantity,
 		debouncedQuantity,
 		quantity,

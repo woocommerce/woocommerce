@@ -167,8 +167,8 @@ export default function Edit( {
 	);
 
 	const productTitle = isSiteEditor
-		? __( '"Product Title"', 'woocommerce' )
-		: `"${ rawTitle }"`;
+		? __( 'Product Title', 'woocommerce' )
+		: rawTitle;
 
 	const placeholder = getProductReviewsTitle(
 		showReviewsCount,

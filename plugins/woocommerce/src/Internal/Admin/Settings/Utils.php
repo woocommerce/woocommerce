@@ -251,20 +251,35 @@ class Utils {
 	}
 
 	/**
+	 * Trim the .php file extension from a path.
+	 *
+	 * @param string $path The path to trim.
+	 *
+	 * @return string The trimmed path. If the path does not end with .php, it will be returned as is.
+	 */
+	public static function trim_php_file_extension( string $path ): string {
+		if ( ! empty( $path ) && str_ends_with( $path, '.php' ) ) {
+			$path = substr( $path, 0, - 4 );
+		}
+
+		return $path;
+	}
+
+	/**
 	 * Truncate a text to a target character length while preserving whole words.
 	 *
 	 * We take a greedy approach: if some characters of a word fit in the target length, the whole word is included.
 	 * This means we might exceed the target length by a few characters.
 	 * The append string length is not included in the character count.
 	 *
-	 * @param string      $text          The text to truncate.
-	 *                                   It will not be sanitized, stripped of HTML tags, or modified in any way before truncation.
-	 * @param int         $target_length The target character length of the truncated text.
-	 * @param string|null $append        Optional. The string to append to the truncated text, if there is any truncation.
+	 * @param string $text          The text to truncate.
+	 *                              It will not be sanitized, stripped of HTML tags, or modified in any way before truncation.
+	 * @param int    $target_length The target character length of the truncated text.
+	 * @param string $append        Optional. The string to append to the truncated text, if there is any truncation.
 	 *
 	 * @return string The truncated text.
 	 */
-	public static function truncate_with_words( string $text, int $target_length, string $append = null ): string {
+	public static function truncate_with_words( string $text, int $target_length, string $append = '' ): string {
 		// First, deal with locale that doesn't have words separated by spaces, but instead deals with characters.
 		// Borrowed from wp_trim_words().
 		if ( str_starts_with( wp_get_word_count_type(), 'characters' ) && preg_match( '/^utf\-?8$/i', get_option( 'blog_charset' ) ) ) {
@@ -278,7 +293,7 @@ class Utils {
 
 			$words_array = array_slice( $words_array[0], 0, $target_length );
 			$truncated   = implode( '', $words_array );
-			if ( null !== $append ) {
+			if ( $append ) {
 				$truncated .= $append;
 			}
 
@@ -321,7 +336,7 @@ class Utils {
 	 *
 	 * @return string       Fully qualified URL pointing to the desired path.
 	 */
-	public static function wc_payments_settings_url( string $path = null, array $query = array() ): string {
+	public static function wc_payments_settings_url( ?string $path = null, array $query = array() ): string {
 		$path = $path ? '&path=' . $path : '';
 
 		$query_string = '';

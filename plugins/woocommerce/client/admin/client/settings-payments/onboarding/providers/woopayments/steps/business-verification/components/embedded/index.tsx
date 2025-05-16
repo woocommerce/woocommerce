@@ -12,6 +12,7 @@ import {
 	ConnectAccountOnboarding,
 	ConnectComponentsProvider,
 } from '@stripe/react-connect-js';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -64,7 +65,10 @@ const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
 
 				if ( ! publishableKey ) {
 					throw new Error(
-						'Missing publishable key in session response'
+						__(
+							'Unable to start onboarding. If this problem persists, please contact support.',
+							'woocommerce'
+						)
 					);
 				}
 
@@ -81,7 +85,12 @@ const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
 				setStripeConnectInstance( instance );
 			} catch ( err ) {
 				setInitializationError(
-					err instanceof Error ? err.message : 'Unknown error'
+					err instanceof Error
+						? err.message
+						: __(
+								'Unable to start onboarding. If this problem persists, please contact support.',
+								'woocommerce'
+						  )
 				);
 			} finally {
 				setLoading( false );

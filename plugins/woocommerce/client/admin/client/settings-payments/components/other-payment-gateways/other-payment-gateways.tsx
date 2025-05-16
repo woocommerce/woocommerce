@@ -1,16 +1,16 @@
 /**
  * External dependencies
  */
+import React from 'react';
 import { Gridicon } from '@automattic/components';
 import { Button, Popover } from '@wordpress/components';
-import React, { useState, useMemo } from '@wordpress/element';
+import { useState, useMemo, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
 	SuggestedPaymentExtension,
 	SuggestedPaymentExtensionCategory,
 } from '@woocommerce/data';
-import { useDebounce } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -71,10 +71,29 @@ export const OtherPaymentGateways = ( {
 	const [ isExpanded, setIsExpanded ] = useState( initialExpanded );
 	const [ categoryIdWithPopoverVisible, setCategoryIdWithPopoverVisible ] =
 		useState( '' );
+	const buttonRef = useRef< HTMLSpanElement >( null );
 
-	const hidePopoverDebounced = useDebounce( () => {
+	const handleClick = (
+		event: React.MouseEvent | React.KeyboardEvent,
+		categoryId: string
+	) => {
+		const clickedElement = event.target as HTMLElement;
+		const parentSpan = clickedElement.closest(
+			'.other-payment-gateways__content__title__icon-container'
+		);
+
+		if ( buttonRef.current && parentSpan !== buttonRef.current ) {
+			return;
+		}
+
+		setCategoryIdWithPopoverVisible(
+			categoryId === categoryIdWithPopoverVisible ? '' : categoryId
+		);
+	};
+
+	const handleFocusOutside = () => {
 		setCategoryIdWithPopoverVisible( '' );
-	}, 1000 );
+	};
 
 	// Group suggestions by category.
 	const suggestionsByCategory = useMemo(
@@ -154,33 +173,20 @@ export const OtherPaymentGateways = ( {
 								</h3>
 								<span
 									className="other-payment-gateways__content__title__icon-container"
-									onClick={ () =>
-										setCategoryIdWithPopoverVisible(
-											category.id ===
-												categoryIdWithPopoverVisible
-												? ''
-												: category.id
-										)
+									onClick={ ( event ) =>
+										handleClick( event, category.id )
 									}
-									onMouseEnter={ () =>
-										hidePopoverDebounced.cancel()
-									}
-									onMouseLeave={ hidePopoverDebounced }
 									onKeyDown={ ( event ) => {
 										if (
 											event.key === 'Enter' ||
 											event.key === ' '
 										) {
-											setCategoryIdWithPopoverVisible(
-												category.id ===
-													categoryIdWithPopoverVisible
-													? ''
-													: category.id
-											);
+											handleClick( event, category.id );
 										}
 									} }
 									tabIndex={ 0 }
 									role="button"
+									ref={ buttonRef }
 								>
 									<Gridicon
 										icon="info-outline"
@@ -196,7 +202,9 @@ export const OtherPaymentGateways = ( {
 											focusOnMount={ true }
 											noArrow={ true }
 											shift={ true }
-											onClose={ hidePopoverDebounced }
+											onFocusOutside={
+												handleFocusOutside
+											}
 										>
 											<div className="components-popover__content-container">
 												<p>
