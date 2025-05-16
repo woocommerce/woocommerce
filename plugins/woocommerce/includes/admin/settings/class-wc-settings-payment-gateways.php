@@ -1,25 +1,24 @@
 <?php
-declare( strict_types = 1 );
-
-// @codingStandardsIgnoreLine.
 /**
  * WooCommerce Checkout Settings
  *
  * @package WooCommerce\Admin
  */
 
+declare( strict_types = 1 );
+
 use Automattic\WooCommerce\Internal\Admin\Loader;
 
 defined( 'ABSPATH' ) || exit;
 
-if ( class_exists( 'WC_Settings_Payment_Gateways_React', false ) ) {
-	return new WC_Settings_Payment_Gateways_React();
+if ( class_exists( 'WC_Settings_Payment_Gateways', false ) ) {
+	return new WC_Settings_Payment_Gateways();
 }
 
 /**
- * WC_Settings_Payment_Gateways_React.
+ * WC_Settings_Payment_Gateways.
  */
-class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
+class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 	const TAB_NAME = 'checkout';
 
@@ -384,4 +383,4 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 	}
 }
 
-return new WC_Settings_Payment_Gateways_React();
+return new WC_Settings_Payment_Gateways();
