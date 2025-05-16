@@ -325,7 +325,7 @@ class WC_Shop_Customizer {
 		$options = apply_filters(
 			'woocommerce_default_catalog_orderby_options',
 			array(
-				'menu_order' => __( 'Manual (menu order + name)', 'woocommerce' ),
+				'menu_order' => __( 'Default sorting (custom ordering + name)', 'woocommerce' ),
 				'popularity' => __( 'Popularity (sales)', 'woocommerce' ),
 				'rating'     => __( 'Average rating', 'woocommerce' ),
 				'date'       => __( 'Sort by most recent', 'woocommerce' ),
@@ -496,7 +496,7 @@ class WC_Shop_Customizer {
 				'choices'     => apply_filters(
 					'woocommerce_default_catalog_orderby_options',
 					array(
-						'menu_order' => __( 'Manual (menu order + name)', 'woocommerce' ),
+						'menu_order' => __( 'Default sorting (custom ordering + name)', 'woocommerce' ),
 						'popularity' => __( 'Popularity (sales)', 'woocommerce' ),
 						'rating'     => __( 'Average rating', 'woocommerce' ),
 						'date'       => __( 'Sort by most recent', 'woocommerce' ),
