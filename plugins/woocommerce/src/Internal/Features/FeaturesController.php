@@ -421,16 +421,6 @@ class FeaturesController {
 				'is_legacy'          => true,
 				'is_experimental'    => false,
 			),
-			'reactify-classic-payments-settings' => array(
-				'name'               => __( 'Payments Settings (beta)', 'woocommerce' ),
-				'description'        => __(
-					'Enable the new payments settings experience',
-					'woocommerce'
-				),
-				'enabled_by_default' => true,
-				'disable_ui'         => false,
-				'is_experimental'    => false,
-			),
 			'block_email_editor'                 => array(
 				'name'               => __( 'Block Email Editor (alpha)', 'woocommerce' ),
 				'description'        => __(
