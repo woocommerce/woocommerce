@@ -205,7 +205,7 @@ test.describe( 'Shopper → Local pickup', () => {
 		await page
 			.getByRole( 'radio', { name: 'Pickup', exact: true } )
 			.click();
-		await expect( page.getByText( 'Pickup( fdsf )' ) ).toBeVisible();
+		await expect( page.getByText( 'Pickup (Testing)' ) ).toBeVisible();
 
 		await checkoutPageObject.placeOrder();
 
