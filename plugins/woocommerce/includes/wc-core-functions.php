@@ -2069,10 +2069,6 @@ function wc_add_number_precision_deep( $value, $round = true ) {
 	}
 
 	foreach ( $value as $key => $sub_value ) {
-		if ( 18.775 === $sub_value ) {
-			//var_dump( 'wc_add_number_precision_deep', $sub_value, $round, wc_add_number_precision_deep( $sub_value, $round ) );
-		}
-
 		$value[ $key ] = wc_add_number_precision_deep( $sub_value, $round );
 	}
 
