@@ -143,7 +143,6 @@
 		"@typescript-eslint/parser": "^5.62.0",
 		"@woocommerce/admin-e2e-tests": "workspace:*",
 		"@woocommerce/admin-layout": "workspace:*",
-		"@woocommerce/ai": "workspace:*",
 		"@woocommerce/block-templates": "workspace:*",
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/csv-export": "workspace:*",
