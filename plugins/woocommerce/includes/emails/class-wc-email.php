@@ -558,7 +558,7 @@ class WC_Email extends WC_Settings_API {
 		 * @param WC_Email $email     WC_Email instance managing the email.
 		 */
 		$recipient  = apply_filters( 'woocommerce_email_recipient_' . $this->id, $this->recipient, $this->object, $this );
-		$recipients = array_map( 'trim', explode( ',', $recipient ) );
+		$recipients = array_map( 'trim', explode( ',', $recipient ?? '' ) );
 		$recipients = array_filter( $recipients, 'is_email' );
 		return implode( ', ', $recipients );
 	}
