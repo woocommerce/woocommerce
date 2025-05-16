@@ -192,8 +192,10 @@ const productFiltersStore = {
 			}
 
 			const sharedSettings = getConfig( 'woocommerce' );
+			const productFilterSettings = getConfig( BLOCK_NAME );
 			const isBlockTheme = sharedSettings?.isBlockTheme || false;
-			const isProductArchive = sharedSettings?.isProductArchive || false;
+			const isProductArchive =
+				productFilterSettings?.isProductArchive || false;
 			const needsRefreshForInteractivityAPI =
 				sharedSettings?.needsRefreshForInteractivityAPI || false;
 
