@@ -14,7 +14,6 @@ import { initializeLayout } from './layouts/flex-email';
 import { InnerEditor } from './components/block-editor';
 import { createStore, storeName, editorCurrentPostType } from './store';
 import { initHooks } from './editor-hooks';
-import { KeyboardShortcuts } from './components/keybord-shortcuts';
 import { initEventCollector } from './events';
 import './style.scss';
 
@@ -29,9 +28,7 @@ function Editor() {
 
 	return (
 		<StrictMode>
-			<KeyboardShortcuts />
 			<InnerEditor
-				initialEdits={ [] }
 				postId={ postId }
 				postType={ editorCurrentPostType }
 				settings={ settings }

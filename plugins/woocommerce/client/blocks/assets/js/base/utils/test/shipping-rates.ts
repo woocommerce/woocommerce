@@ -17,6 +17,7 @@ import {
 	getLocalPickupPrices,
 	getShippingPrices,
 } from '../../../blocks/checkout/inner-blocks/checkout-shipping-method-block/shared/helpers';
+import { generateShippingRate } from '../../../mocks/shipping-package';
 
 jest.mock( '@woocommerce/settings', () => {
 	return {
@@ -39,35 +40,6 @@ jest.mock( '@woocommerce/block-settings', () => ( {
 } ) );
 const blockSettingsMock = jest.requireMock( '@woocommerce/block-settings' );
 
-// Returns a rate object with the given values
-const generateRate = (
-	rateId: string,
-	name: string,
-	price: string,
-	instanceID: number,
-	selected = false
-): ( typeof testPackage.shipping_rates )[ 0 ] => {
-	return {
-		rate_id: rateId,
-		name,
-		description: '',
-		delivery_time: '',
-		price,
-		taxes: '0',
-		instance_id: instanceID,
-		method_id: name.toLowerCase().split( ' ' ).join( '_' ),
-		meta_data: [],
-		selected,
-		currency_code: 'USD',
-		currency_symbol: '$',
-		currency_minor_unit: 2,
-		currency_decimal_separator: '.',
-		currency_thousand_separator: ',',
-		currency_prefix: '$',
-		currency_suffix: '',
-	};
-};
-
 // A test package with 5 shipping rates
 const testPackage: CartShippingRate = {
 	package_id: 0,
@@ -82,25 +54,69 @@ const testPackage: CartShippingRate = {
 	},
 	items: [],
 	shipping_rates: [
-		generateRate( 'flat_rate:1', 'Flat rate', '10', 1 ),
-		generateRate( 'local_pickup:1', 'Local pickup', '0', 2 ),
-		generateRate( 'local_pickup:2', 'Local pickup', '10', 3 ),
-		generateRate( 'local_pickup:3', 'Local pickup', '50', 4 ),
-		generateRate( 'flat_rate:2', 'Flat rate', '50', 5 ),
+		generateShippingRate( {
+			rateId: 'flat_rate:1',
+			name: 'Flat rate',
+			price: '10',
+			instanceID: 1,
+		} ),
+		generateShippingRate( {
+			rateId: 'local_pickup:1',
+			name: 'Local pickup',
+			price: '0',
+			instanceID: 2,
+		} ),
+		generateShippingRate( {
+			rateId: 'local_pickup:2',
+			name: 'Local pickup',
+			price: '10',
+			instanceID: 3,
+		} ),
+		generateShippingRate( {
+			rateId: 'local_pickup:3',
+			name: 'Local pickup',
+			price: '50',
+			instanceID: 4,
+		} ),
+		generateShippingRate( {
+			rateId: 'flat_rate:2',
+			name: 'Flat rate',
+			price: '50',
+			instanceID: 5,
+		} ),
 	],
 };
 describe( 'Test Min and Max rates', () => {
 	it( 'returns the lowest and highest rates when local pickup method is used', () => {
 		expect( getLocalPickupPrices( testPackage.shipping_rates ) ).toEqual( {
-			min: generateRate( 'local_pickup:1', 'Local pickup', '0', 2 ),
-
-			max: generateRate( 'local_pickup:3', 'Local pickup', '50', 4 ),
+			min: generateShippingRate( {
+				rateId: 'local_pickup:1',
+				name: 'Local pickup',
+				price: '0',
+				instanceID: 2,
+			} ),
+			max: generateShippingRate( {
+				rateId: 'local_pickup:3',
+				name: 'Local pickup',
+				price: '50',
+				instanceID: 4,
+			} ),
 		} );
 	} );
 	it( 'returns the lowest and highest rates when flat rate shipping method is used', () => {
 		expect( getShippingPrices( testPackage.shipping_rates ) ).toEqual( {
-			min: generateRate( 'flat_rate:1', 'Flat rate', '10', 1 ),
-			max: generateRate( 'flat_rate:2', 'Flat rate', '50', 5 ),
+			min: generateShippingRate( {
+				rateId: 'flat_rate:1',
+				name: 'Flat rate',
+				price: '10',
+				instanceID: 1,
+			} ),
+			max: generateShippingRate( {
+				rateId: 'flat_rate:2',
+				name: 'Flat rate',
+				price: '50',
+				instanceID: 5,
+			} ),
 		} );
 	} );
 	it( 'returns undefined as lowest and highest rates when shipping rates are not available', () => {

@@ -123,13 +123,13 @@ class Integration {
 			'name' => self::EMAIL_POST_TYPE,
 			'args' => array(
 				'labels'   => array(
-					'name'          => __( 'Woo Emails', 'woocommerce' ),
-					'singular_name' => __( 'Woo Email', 'woocommerce' ),
-					'add_new_item'  => __( 'Add New Woo Email', 'woocommerce' ),
-					'edit_item'     => __( 'Edit Woo Email', 'woocommerce' ),
-					'new_item'      => __( 'New Woo Email', 'woocommerce' ),
-					'view_item'     => __( 'View Woo Email', 'woocommerce' ),
-					'search_items'  => __( 'Search Woo Emails', 'woocommerce' ),
+					'name'          => __( 'Emails', 'woocommerce' ),
+					'singular_name' => __( 'Email', 'woocommerce' ),
+					'add_new_item'  => __( 'Add Email', 'woocommerce' ),
+					'edit_item'     => __( 'Edit Email', 'woocommerce' ),
+					'new_item'      => __( 'New Email', 'woocommerce' ),
+					'view_item'     => __( 'View Email', 'woocommerce' ),
+					'search_items'  => __( 'Search Emails', 'woocommerce' ),
 				),
 				'rewrite'  => array( 'slug' => self::EMAIL_POST_TYPE ),
 				'supports' => array(

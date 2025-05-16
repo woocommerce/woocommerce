@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-E2E test: Use a different selector based on the WordPress version.

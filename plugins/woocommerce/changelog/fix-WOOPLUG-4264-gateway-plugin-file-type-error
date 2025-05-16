@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Better gateway details error handling in the new Payments Settings page.

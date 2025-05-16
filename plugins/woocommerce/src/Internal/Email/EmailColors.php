@@ -19,16 +19,21 @@ class EmailColors {
 	/**
 	 * Get default colors for emails.
 	 *
+	 * @param bool|null $email_improvements_enabled Whether the email improvements feature is enabled.
 	 * @return array Array of default email colors.
 	 */
-	public static function get_default_colors() {
+	public static function get_default_colors( ?bool $email_improvements_enabled = null ) {
+		if ( null === $email_improvements_enabled ) {
+			$email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
+		}
+
 		$base_color_default        = '#720eec';
 		$bg_color_default          = '#f7f7f7';
 		$body_bg_color_default     = '#ffffff';
 		$body_text_color_default   = '#3c3c3c';
 		$footer_text_color_default = '#3c3c3c';
 
-		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
+		if ( $email_improvements_enabled ) {
 			$base_color_default        = '#8526ff';
 			$bg_color_default          = '#ffffff';
 			$body_bg_color_default     = '#ffffff';
