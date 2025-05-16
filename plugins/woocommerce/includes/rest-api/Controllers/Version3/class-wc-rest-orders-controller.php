@@ -253,6 +253,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	 * @return WC_Data|WP_Error
 	 */
 	protected function save_object( $request, $creating = false ) {
+		$object = null;
 		try {
 			$object = $this->prepare_object_for_database( $request, $creating );
 
@@ -307,9 +308,23 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 			return $this->get_object( $object->get_id() );
 		} catch ( WC_Data_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
-		} catch ( WC_REST_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			$data = $e->getErrorData();
+
+			if ( $creating && $object && $object->get_id() ) {
+				try {
+					$object->set_status( 'checkout-draft' );
+					$object->save();
+					// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				} catch ( Exception $_ ) {
+					// We don't want a failure in changing the order status
+					// to throw on itself, but we don't have anything meaningful
+					// to do with this failure either.
+				}
+
+				$data['new_draft_order_id'] = $object->get_id();
+			}
+
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $data );
 		}
 	}
 
