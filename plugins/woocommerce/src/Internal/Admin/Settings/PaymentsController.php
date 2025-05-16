@@ -31,21 +31,6 @@ class PaymentsController {
 	 * Register hooks.
 	 */
 	public function register() {
-		// Because we gate the hooking based on a feature flag,
-		// we need to delay the registration until the 'woocommerce_init' hook.
-		// Otherwise, we end up in an infinite loop.
-		add_action( 'woocommerce_init', array( $this, 'delayed_register' ) );
-	}
-
-	/**
-	 * Delayed hook registration.
-	 */
-	public function delayed_register() {
-		// Don't do anything if the feature is not enabled.
-		if ( ! FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
-			return;
-		}
-
 		add_action( 'admin_menu', array( $this, 'add_menu' ) );
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
 		add_filter( 'woocommerce_admin_allowed_promo_notes', array( $this, 'add_allowed_promo_notes' ) );
