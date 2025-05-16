@@ -2863,7 +2863,7 @@ class PaymentExtensionSuggestions {
 					),
 					array(
 						'_type' => self::LINK_TYPE_ABOUT,
-						'url'   => 'https://woocommerce.com/products/viva-wallet-for-woocommerce/',
+						'url'   => 'https://woocommerce.com/products/viva-com-smart-for-woocommerce/',
 					),
 					array(
 						'_type' => self::LINK_TYPE_TERMS,
@@ -2871,11 +2871,11 @@ class PaymentExtensionSuggestions {
 					),
 					array(
 						'_type' => self::LINK_TYPE_DOCS,
-						'url'   => 'https://woocommerce.com/document/viva-wallet-for-woocommerce/',
+						'url'   => 'https://woocommerce.com/document/viva-com-smart-for-woocommerce/',
 					),
 					array(
 						'_type' => self::LINK_TYPE_SUPPORT,
-						'url'   => 'https://woocommerce.com/document/viva-wallet-standard-checkout/#section-26',
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=viva-com-smart-for-woocommerce',
 					),
 				),
 			),
