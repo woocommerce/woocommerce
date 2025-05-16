@@ -83,37 +83,37 @@
 			"spacingSizes": [
 				{
 					"name": "2X-Small",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 2.5 * 1px), calc(var(--wp--custom--spacing-increment) * 2.5 * 1vw))",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 1 * 1px), calc(var(--wp--custom--spacing-increment) * 2.42 * 1vw))",
 					"slug": "20"
 				},
 				{
 					"name": "X-Small",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 3.5 * 1px), calc(var(--wp--custom--spacing-increment) * 3.5 * 1vw))",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 2 * 1px), calc(var(--wp--custom--spacing-increment) * 3.38 * 1vw))",
 					"slug": "30"
 				},
 				{
 					"name": "Small",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 4.5 * 1px), calc(var(--wp--custom--spacing-increment) * 4.5 * 1vw))",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 3 * 1px), calc(var(--wp--custom--spacing-increment) * 4.35 * 1vw))",
 					"slug": "40"
 				},
 				{
 					"name": "Regular",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 5 * 1px), calc(var(--wp--custom--spacing-increment) * 5 * 1vw))",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 5 * 1px), calc(var(--wp--custom--spacing-increment) * 4.83 * 1vw))",
 					"slug": "50"
 				},
 				{
 					"name": "Large",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 7.5 * 1px), calc(var(--wp--custom--spacing-increment) * 7.5 * 1vw))",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 7 * 1px), calc(var(--wp--custom--spacing-increment) * 7.25 * 1vw))",
 					"slug": "60"
 				},
 				{
 					"name": "Extra Large",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 12 * 1px), calc(var(--wp--custom--spacing-increment) * 12 * 1vw))",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 9 * 1px), calc(var(--wp--custom--spacing-increment) * 12.08 * 1vw))",
 					"slug": "70"
 				},
 				{
 					"name": "2X Large",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 17 * 1px), calc(var(--wp--custom--spacing-increment) * 17 * 1vw))",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 14 * 1px), calc(var(--wp--custom--spacing-increment) * 16.91 * 1vw))",
 					"slug": "80"
 				}
 			]
@@ -199,7 +199,7 @@
 		"blocks": {
 			"core/button": {
 				"border": {
-					"radius": "999px"
+					"radius": "0"
 				},
 				"variations": {
 					"outline": {
@@ -207,13 +207,13 @@
 							"color": "currentColor",
 							"width": "1px"
 						},
-						"css": ".wp-block-button__link:not(.has-background):hover {background-color:color-mix(in srgb, var(--wp--preset--color--contrast) 5%, transparent);}",
+						"css": ".wp-block-button__link:not(.has-background):hover {background-color:color-mix(in srgb, currentColor 5%, transparent);}",
 						"spacing": {
 							"padding": {
-								"bottom": "calc(1rem - 1px)",
-								"left": "calc(2.25rem - 1px)",
-								"right": "calc(2.25rem - 1px)",
-								"top": "calc(1rem - 1px)"
+								"bottom": "calc(0.75em - 1px)",
+								"left": "calc(1.25em - 1px)",
+								"right": "calc(1.25em - 1px)",
+								"top": "calc(0.75em - 1px)"
 							}
 						}
 					}
@@ -371,11 +371,11 @@
 			"button": {
 				":hover": {
 					"color": {
-						"background": "color-mix(in srgb, var(--wp--preset--color--theme-3) 85%, #FFF)"
+						"background": "color-mix(in srgb, var(--wp--preset--color--theme-3) 90%, #FFF)"
 					}
 				},
 				"border": {
-					"radius": "999px"
+					"radius": "0"
 				},
 				"color": {
 					"background": "var(--wp--preset--color--theme-3)",
@@ -383,10 +383,10 @@
 				},
 				"spacing": {
 					"padding": {
-						"bottom": "16px",
-						"left": "24px",
-						"right": "24px",
-						"top": "16px"
+						"bottom": "0.75rem",
+						"left": "var(--wp--preset--spacing--30)",
+						"right": "var(--wp--preset--spacing--30)",
+						"top": "0.75rem"
 					}
 				},
 				"typography": {

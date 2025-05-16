@@ -24,12 +24,11 @@
             "button": {
                 "color": {
                     "background": "var(--wp--preset--color--theme-1)",
-                    "text": "var(--wp--preset--color--theme-4)"
+                    "text": "var(--wp--preset--color--theme-2)"
                 },
                 ":hover": {
                     "color": {
-                        "background": "color-mix(in srgb, var(--wp--preset--color--theme-1) 85%, #000)",
-                        "text": "var(--wp--preset--color--theme-4)"
+                        "background": "color-mix(in srgb, var(--wp--preset--color--theme-1) 85%, #000)"
                     }
                 }
             }
