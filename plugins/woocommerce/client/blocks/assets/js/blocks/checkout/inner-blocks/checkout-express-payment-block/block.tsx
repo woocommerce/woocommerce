@@ -2,15 +2,34 @@
  * External dependencies
  */
 import { useStoreCart } from '@woocommerce/base-context/hooks';
-
+import { paymentStore } from '@woocommerce/block-data';
+import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
 import { CheckoutExpressPayment } from '../../../cart-checkout-shared/payment-methods';
+import { CheckoutExpressPaymentsSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-express-payments';
 
 const Block = ( { className }: { className?: string } ): JSX.Element | null => {
-	const { cartNeedsPayment } = useStoreCart();
-	if ( ! cartNeedsPayment ) {
+	const { cartNeedsPayment, cartIsLoading } = useStoreCart();
+	const {
+		paymentMethodsInitialized,
+		availablePaymentMethods,
+		savedPaymentMethods,
+	} = useSelect( ( select ) => {
+		const store = select( paymentStore );
+		return {
+			paymentMethodsInitialized: store.paymentMethodsInitialized(),
+			availablePaymentMethods: store.getAvailablePaymentMethods(),
+			savedPaymentMethods: store.getSavedPaymentMethods(),
+		};
+	} );
+
+	if ( ! paymentMethodsInitialized ) {
+		return <CheckoutExpressPaymentsSkeleton />;
+	}
+
+	if ( ! cartNeedsPayment && ! cartIsLoading ) {
 		return null;
 	}
 

@@ -12,6 +12,7 @@ import { paymentStore } from '@woocommerce/block-data';
 import NoPaymentMethods from './no-payment-methods';
 import PaymentMethodOptions from './payment-method-options';
 import SavedPaymentMethodOptions from './saved-payment-method-options';
+import { CheckoutPaymentSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-payment';
 import './style.scss';
 
 /**
@@ -40,6 +41,10 @@ const PaymentMethods = ( {
 		Object.keys( availablePaymentMethods ).length === 0
 	) {
 		return noPaymentMethods;
+	}
+
+	if ( ! paymentMethodsInitialized ) {
+		return <CheckoutPaymentSkeleton />;
 	}
 
 	return (

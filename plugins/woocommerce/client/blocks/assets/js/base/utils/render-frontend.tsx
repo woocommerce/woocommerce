@@ -64,16 +64,35 @@ export const renderBlock = <
 }: RenderBlockParams< TProps, TAttributes > ): Root => {
 	const BlockWrapper = () => {
 		useEffect( () => {
+			console.log( '>>>> container', 'FIRST_RENDER' );
+			// parent checkout container
 			if ( container.classList ) {
 				container.classList.remove( 'is-loading' );
 			}
 		}, [] );
 
+		if ( attributes.blockName === 'woocommerce/checkout' ) {
+			return (
+				<BlockErrorBoundary { ...errorBoundaryProps }>
+					{ Block && (
+						<Block { ...props } attributes={ attributes } />
+					) }
+				</BlockErrorBoundary>
+			);
+		}
 		return (
 			<BlockErrorBoundary { ...errorBoundaryProps }>
 				<Suspense
 					fallback={
-						<div className="wc-block-placeholder">Loading...</div>
+						<div
+							className="wc-block-placeholder"
+							style={ {
+								height: '300px',
+								background: 'black',
+							} }
+						>
+							Loading...
+						</div>
 					}
 				>
 					{ Block && (

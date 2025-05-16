@@ -14,6 +14,7 @@ import { useSelect } from '@wordpress/data';
  */
 import ExpressPaymentMethods from '../express-payment-methods';
 import './style.scss';
+import { CheckoutExpressPaymentsSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-express-payments';
 
 const CheckoutExpressPayment = () => {
 	const {
@@ -74,14 +75,14 @@ const CheckoutExpressPayment = () => {
 		isBeforeProcessing ||
 		( isComplete && ! hasError );
 
+	if ( isCalculating ) {
+		return <CheckoutExpressPaymentsSkeleton />;
+	}
+
 	return (
 		<>
 			<LoadingMask
-				isLoading={
-					isCalculating ||
-					checkoutProcessing ||
-					isExpressPaymentMethodActive
-				}
+				isLoading={ checkoutProcessing || isExpressPaymentMethodActive }
 			>
 				<div className="wc-block-components-express-payment wc-block-components-express-payment--checkout">
 					<div className="wc-block-components-express-payment__title-container">

@@ -26,6 +26,16 @@ const OrderSummary = ( {
 		return null;
 	}
 
+	console.log( '>>>> cartItems in order summary', cartItems );
+
+	if ( cartItems.length === 0 ) {
+		return (
+			<div style={ { background: 'black', height: '200px' } }>
+				No items in cart
+			</div>
+		);
+	}
+
 	return (
 		<div
 			className={ clsx( 'wc-block-components-order-summary', {

@@ -25,6 +25,7 @@ import type { CartResponseBillingAddress } from '@woocommerce/types';
  * Internal dependencies
  */
 import CustomerAddress from './customer-address';
+import { CheckoutShippingSkeletonPrimary } from '@woocommerce/base-components/skeleton/patterns/checkout-shipping-primary';
 
 const Block = (): JSX.Element => {
 	const {
@@ -99,11 +100,16 @@ const Block = (): JSX.Element => {
 		};
 	} );
 
+	// if ( ! cartDataLoaded ) {
+	// 	return <CheckoutShippingSkeletonPrimary />;
+	// }
+
 	return (
 		<>
 			<StoreNoticesContainer context={ noticeContext } />
 			<WrapperComponent>
-				{ cartDataLoaded ? <CustomerAddress /> : null }
+				{ /* // isshippingneeded */ }
+				<CustomerAddress />
 			</WrapperComponent>
 			<CheckboxControl
 				className="wc-block-checkout__use-address-for-billing"

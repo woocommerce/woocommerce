@@ -23,6 +23,7 @@ import { isObject } from '@woocommerce/types';
  */
 import ShippingRatesControlPackage from '../shipping-rates-control-package';
 import { speakFoundShippingOptions } from './utils';
+import { CheckoutShippingSkeletonPrimary } from '@woocommerce/base-components/skeleton/patterns/checkout-shipping-primary';
 import type { PackagesProps, ShippingRatesControlProps } from './types';
 
 /**
@@ -132,6 +133,10 @@ const ShippingRatesControl = ( {
 	const allPackagesHaveSameRate = selectedRateIds.every( ( rate: string ) => {
 		return rate === selectedRateIds[ 0 ];
 	} );
+
+	if ( isLoadingRates ) {
+		return <CheckoutShippingSkeletonPrimary />;
+	}
 
 	return (
 		<LoadingMask

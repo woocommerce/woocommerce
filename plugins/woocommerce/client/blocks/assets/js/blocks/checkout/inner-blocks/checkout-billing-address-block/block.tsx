@@ -13,6 +13,7 @@ import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { cartStore } from '@woocommerce/block-data';
 import { ShippingAddress } from '@woocommerce/settings';
+import { CheckoutShippingSkeletonAdditional } from '@woocommerce/base-components/skeleton/patterns/checkout-shipping-additional';
 
 /**
  * Internal dependencies
@@ -60,11 +61,16 @@ const Block = (): JSX.Element => {
 		};
 	} );
 
+	if ( ! cartDataLoaded ) {
+		return <CheckoutShippingSkeletonAdditional />;
+	}
+
 	return (
 		<>
 			<StoreNoticesContainer context={ noticeContext } />
 			<WrapperComponent>
-				{ cartDataLoaded ? <CustomerAddress /> : null }
+				{ /* { cartDataLoaded ? <CustomerAddress /> : null } */ }
+				<CustomerAddress />
 			</WrapperComponent>
 		</>
 	);

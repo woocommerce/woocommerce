@@ -16,6 +16,8 @@ import {
 } from '@woocommerce/blocks-checkout';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import type { ReactRootWithContainer } from '@woocommerce/base-utils';
+import { CheckoutPaymentSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-payment';
+import { CheckoutExpressPaymentsSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-express-payments';
 
 /**
  * This file contains logic used on the frontend to convert DOM elements (saved by the block editor) to React
@@ -60,6 +62,7 @@ const renderForcedBlocks = (
 	// Wrapper for inner components.
 	blockWrapper?: React.ElementType
 ) => {
+	// console.log( '>>>>>>>>>>>>>>>>>>>> render forced blocks', block );
 	if ( ! hasInnerBlocks( block ) ) {
 		return null;
 	}
@@ -81,7 +84,6 @@ const renderForcedBlocks = (
 
 	// This will wrap inner blocks with the provided wrapper. If no wrapper is provided, we default to Fragment.
 	const InnerBlockComponentWrapper = blockWrapper ? blockWrapper : Fragment;
-
 	return (
 		<>
 			{ forcedBlocks.map(
@@ -124,6 +126,14 @@ interface renderInnerBlocksProps {
 	depth?: number;
 }
 
+// Add this mapping near the top of your file, after imports:
+const blockFallbackComponents: Record< string, React.ReactNode > = {
+	'woocommerce/checkout-payment-block': <CheckoutPaymentSkeleton />,
+	'woocommerce/checkout-express-payment-block': (
+		<CheckoutExpressPaymentsSkeleton />
+	),
+};
+
 /**
  * Recursively replace block markup in the DOM with React Components.
  */
@@ -142,6 +152,7 @@ const renderInnerBlocks = ( {
 	if ( ! children || children.length === 0 ) {
 		return null;
 	}
+	// console.log( '>>>>>>>>>>>>>>>>>>>> render inner blocks', block );
 	return Array.from( children ).map( ( node: Node, index: number ) => {
 		/**
 		 * This will grab the blockName from the data- attributes stored in block markup. Without a blockName, we cannot
@@ -216,10 +227,62 @@ const renderInnerBlocks = ( {
 			? blockWrapper
 			: Fragment;
 
+		if ( block === 'woocommerce/checkout' ) {
+			return (
+				<BlockErrorBoundary
+					key={ `${ block }_${ depth }_${ index }_suspense` }
+					text={ `Unexpected error in: ${ blockName }` }
+					showErrorBlock={ CURRENT_USER_IS_ADMIN as boolean }
+				>
+					<InnerBlockComponentWrapper>
+						<InnerBlockComponent
+							key={ componentKey }
+							{ ...componentProps }
+						>
+							{
+								/**
+								 * Within this Inner Block Component we also need to recursively render its children. This
+								 * is done here with a depth+1. The same block map and parent is used, but we pass new
+								 * children from this element.
+								 */
+								renderInnerBlocks( {
+									block,
+									blockMap,
+									children: node.childNodes,
+									depth: depth + 1,
+									blockWrapper,
+								} )
+							}
+							{
+								/**
+								 * In addition to the inner blocks, we may also need to render FORCED blocks which have not
+								 * yet been added to the inner block template. We do this by comparing the current children
+								 * to the list of registered forced blocks.
+								 *
+								 * @see registerCheckoutBlock
+								 */
+								renderForcedBlocks(
+									blockName,
+									blockMap,
+									node.childNodes,
+									blockWrapper
+								)
+							}
+						</InnerBlockComponent>
+					</InnerBlockComponentWrapper>
+				</BlockErrorBoundary>
+			);
+		}
+
 		return (
 			<Suspense
 				key={ `${ block }_${ depth }_${ index }_suspense` }
-				fallback={ <div className="wc-block-placeholder" /> }
+				fallback={
+					<div
+						className="wc-block-placeholder"
+						style={ { height: '350px', background: 'blue' } }
+					/>
+				}
 			>
 				{ /* Prevent third party components from breaking the entire checkout */ }
 				<BlockErrorBoundary
@@ -313,6 +376,7 @@ export const renderParentBlock = ( {
 		} );
 		return { ...getProps( element, i ), children };
 	};
+	// console.log( '>>>>>>>>>>>>>>>>>>>> render parent block' );
 	/**
 	 * The only difference between using renderParentBlock and renderFrontend is that here we provide children.
 	 */

@@ -27,7 +27,7 @@ import type {
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import type { ReactElement } from 'react';
 import { useMemo } from '@wordpress/element';
-
+import { CheckoutShippingSkeletonPrimary } from '@woocommerce/base-components/skeleton/patterns/checkout-shipping-primary';
 /**
  * Renders a shipping rate control option.
  *
@@ -112,6 +112,10 @@ const Block = ( {
 
 	if ( ! needsShipping ) {
 		return null;
+	}
+
+	if ( isLoadingRates ) {
+		return <CheckoutShippingSkeletonPrimary />;
 	}
 
 	const shippingRatesPackageCount =
