@@ -944,7 +944,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_price_range() {
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>10.00</bdi></span> <span aria-hidden="true">&ndash;</span> <span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>5.00</bdi></span><span class="screen-reader-text">Price range: &#36;10.00 through &#36;5.00.</span>', wc_format_price_range( '10', '5' ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>10.00</bdi></span> <span aria-hidden="true">&ndash;</span> <span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>5.00</bdi></span><span class="screen-reader-text">Price range: &#36;10.00 through &#36;5.00</span>', wc_format_price_range( '10', '5' ) );
 	}
 
 	/**
