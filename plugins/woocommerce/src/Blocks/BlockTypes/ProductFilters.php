@@ -44,7 +44,7 @@ class ProductFilters extends AbstractBlock {
 		wp_interactivity_config(
 			$this->get_full_block_name(),
 			[
-				'isProductArchive' => is_shop() || is_product_taxonomy(),
+				'isProductArchive' => is_shop() || is_product_taxonomy() || ( is_search() && 'product' === get_post_type() ),
 			]
 		);
 	}
