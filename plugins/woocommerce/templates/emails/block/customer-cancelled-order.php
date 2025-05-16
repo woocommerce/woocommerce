@@ -50,7 +50,7 @@ printf( esc_html__( 'Your order #%s has been cancelled.', 'woocommerce' ), '<!--
 <p>
 <?php
 /* translators: %s: Store admin email */
-printf( esc_html__( 'If you need any help with your order, please contact us at %s.', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );
+printf( esc_html__( 'We hope to see you again soon.', 'woocommerce' ) );
 ?>
 </p>
 <!-- /wp:paragraph -->
