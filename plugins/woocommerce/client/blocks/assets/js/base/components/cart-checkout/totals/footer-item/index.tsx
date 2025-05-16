@@ -39,7 +39,7 @@ export interface TotalsFooterItemProps {
 	 */
 	values: LooselyMustHave< CartResponseTotals, 'total_price' | 'total_tax' >;
 	className?: string;
-	estimated?: boolean;
+	isCart?: boolean;
 }
 
 /**
@@ -53,7 +53,7 @@ const TotalsFooterItem = ( {
 	currency,
 	values,
 	className,
-	estimated = false,
+	isCart = false,
 }: TotalsFooterItemProps ): JSX.Element => {
 	const SHOW_TAXES =
 		getSetting< boolean >( 'taxesEnabled', true ) &&
@@ -72,7 +72,7 @@ const TotalsFooterItem = ( {
 
 	const label = applyCheckoutFilter( {
 		filterName: 'totalLabel',
-		defaultValue: estimated
+		defaultValue: isCart
 			? __( 'Estimated total', 'woocommerce' )
 			: __( 'Total', 'woocommerce' ),
 		extensions: cart.extensions,
@@ -141,7 +141,7 @@ const TotalsFooterItem = ( {
 							} ) }
 						</p>
 					) }
-					{ estimated && (
+					{ isCart && (
 						<p className="wc-block-components-totals-footer-item-shipping">
 							{ __(
 								'Shipping will be calculated at checkout',
