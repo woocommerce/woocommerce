@@ -91,6 +91,7 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 				) }
 			/>
 			<SelectControl
+				__next40pxDefaultSize
 				multiple={ false }
 				value={ aspectRatio }
 				options={ aspectRatioOptions }
