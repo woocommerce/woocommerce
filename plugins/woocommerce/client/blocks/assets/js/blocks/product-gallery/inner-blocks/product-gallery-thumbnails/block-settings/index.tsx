@@ -63,7 +63,7 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 	];
 
 	return (
-		<PanelBody className="wc-block-product-gallery-thumbnails__tools-panel">
+		<PanelBody>
 			<UnitControl
 				label={ __( 'Thumbnail Size', 'woocommerce' ) }
 				value={ thumbnailSize }
