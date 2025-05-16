@@ -7,7 +7,7 @@ import { useStoreCart } from '@woocommerce/base-context';
 import { TotalsWrapper } from '@woocommerce/blocks-checkout';
 import { hasSelectedShippingRate } from '@woocommerce/base-utils';
 
-const Block = ( { className }: { className: string } ): JSX.Element | null => {
+const Block = ( { className }: { className: string } ) => {
 	const { cartNeedsShipping, shippingRates } = useStoreCart();
 	const hasSelectedRates = hasSelectedShippingRate( shippingRates );
 
