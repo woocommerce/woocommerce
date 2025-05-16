@@ -77,7 +77,7 @@ exports[`TotalsFooterItem Shows the "including %s TAX LABEL" line with single ta
       <p
         class="wc-block-components-totals-footer-item-tax"
       >
-        Including £1.00 10% VAT
+        Includes £1.00 10% VAT
       </p>
     </div>
   </div>
@@ -109,7 +109,7 @@ exports[`TotalsFooterItem Shows the "including %s TAX LABELS" line with multiple
       <p
         class="wc-block-components-totals-footer-item-tax"
       >
-        Including £0.50 10% VAT, £0.50 5% VAT
+        Includes £0.50 10% VAT, £0.50 5% VAT
       </p>
     </div>
   </div>
@@ -141,7 +141,7 @@ exports[`TotalsFooterItem Shows the "including %s of tax" line if tax is greater
       <p
         class="wc-block-components-totals-footer-item-tax"
       >
-        Including 
+        Includes 
         <span
           class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
         >
