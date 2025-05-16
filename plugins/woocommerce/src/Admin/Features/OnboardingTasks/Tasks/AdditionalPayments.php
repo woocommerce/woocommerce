@@ -88,41 +88,16 @@ class AdditionalPayments extends Payments {
 	 * @return bool
 	 */
 	public function can_view() {
-		// Go ahead if either of the features are enabled.
-		// If the payment-gateway-suggestions are disabled,
-		// we are still good to go because we can use the default suggestions.
-		if ( ! FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) &&
-			! Features::is_enabled( 'payment-gateway-suggestions' ) ) {
-			// Hide task if both features are not enabled.
-			return false;
-		}
-
 		if ( null !== $this->can_view_result ) {
 			return $this->can_view_result;
 		}
 
-		// Always show task if the React-based Payments settings page is enabled and
-		// there are any gateways enabled (i.e. the Payments task is complete).
-		if ( FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) &&
-			self::has_gateways() ) {
-			return true;
+		// Always show task if there are any gateways enabled (i.e. the Payments task is complete).
+		if ( self::has_gateways() ) {
+			$this->can_view_result = true;
+		} else {
+			$this->can_view_result = false;
 		}
-
-		// Show task if WooPayments is connected or if there are any suggested gateways in other category enabled.
-		// Note: For now, we rely on the old Payment Gateways Suggestions lists to determine the visibility of this task.
-		// This will need to be updated to use the new Payment Extension Suggestions/ Payments Providers system.
-		$this->can_view_result = (
-			WooCommercePayments::is_connected() ||
-			self::has_enabled_other_category_gateways()
-		);
-
-		// Early return if task is not visible.
-		if ( ! $this->can_view_result ) {
-			return false;
-		}
-
-		// Show task if there are any suggested gateways in additional category.
-		$this->can_view_result = ! empty( self::get_suggestion_gateways( 'category_additional' ) );
 
 		return $this->can_view_result;
 	}
