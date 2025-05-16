@@ -122,6 +122,25 @@ class Personalizer {
 					$content_processor->remove_attribute( 'data-link-href' );
 					$content_processor->remove_attribute( 'contenteditable' );
 				}
+			} elseif ( $content_processor->get_token_type() === '#tag' && $content_processor->get_tag() === 'A' ) {
+				$href = $content_processor->get_attribute( 'href' );
+
+				if ( ! $href || ! preg_match( '/\[[a-z-\/]+\]/', urldecode( $href ), $matches ) ) {
+					continue;
+				}
+
+				$token = $this->parse_token( $matches[0] );
+				$tag   = $this->tags_registry->get_by_token( $token['token'] );
+
+				if ( ! $tag ) {
+					continue;
+				}
+
+				$value = $tag->execute_callback( $this->context, $token['arguments'] );
+
+				if ( $value ) {
+					$content_processor->set_attribute( 'href', $value );
+				}
 			}
 		}
 
