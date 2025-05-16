@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { screen, render, within } from '@testing-library/react';
+import { screen, render } from '@testing-library/react';
 import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 import * as wpData from '@wordpress/data';
 import { CartShippingRate } from '@woocommerce/types';
