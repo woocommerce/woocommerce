@@ -141,7 +141,7 @@
 					]
 				},
 				{
-					"name": "PHP WP: latest - 1",
+					"name": "PHP: 7.4 WP: latest - 1",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
@@ -160,17 +160,18 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
+							"phpVersion": "7.4",
 							"wpVersion": "latest-1"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-wp-latest-1"
+						"php-unit-php-7.4-wp-latest-1"
 					]
 				},
 				{
-					"name": "PHP WP: prerelease",
+					"name": "PHP: 7.4 WP: prerelease",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
@@ -189,13 +190,14 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
+							"phpVersion": "7.4",
 							"wpVersion": "prerelease"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-wp-nightly"
+						"php-unit-php-7.4-wp-prerelease"
 					]
 				},
 				{
