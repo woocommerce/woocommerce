@@ -219,20 +219,9 @@
 					}
 				}
 			},
-			"core/buttons": {
-				"spacing": {
-					"blockGap": "16px",
-					"margin": {
-						"top": "calc( var(--wp--style--block-gap) * 1.5)"
-					}
-				}
-			},
 			"core/columns": {
                 "spacing": {
-                    "blockGap": {
-                        "left": "var(--wp--preset--spacing--40)",
-                        "top": "var(--wp--preset--spacing--30)"
-                    }
+                    "blockGap": "var(--wp--preset--spacing--50)"
                 }
             },
 			"core/navigation": {
@@ -252,7 +241,7 @@
 					}
 				},
 				"spacing": {
-					"blockGap": "var(--wp--preset--spacing--30)"
+					"blockGap": "var(--wp--preset--spacing--40)"
 				}
 			},
 			"core/post-content": {
@@ -479,7 +468,7 @@
 			}
 		},
 		"spacing": {
-			"blockGap": "var(--wp--preset--spacing--30)",
+			"blockGap": "var(--wp--preset--spacing--20)",
 			"padding": {
 				"left": "var(--wp--preset--spacing--50)",
 				"right": "var(--wp--preset--spacing--50)"
