@@ -43,6 +43,7 @@ export const CountryInput = ( {
 			value={ value }
 			required={ required }
 			autoComplete={ autoComplete }
+			readonly={ options.length === 1 && !! value }
 		/>
 	);
 };

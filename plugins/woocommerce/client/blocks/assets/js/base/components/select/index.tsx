@@ -32,6 +32,7 @@ export type SelectProps = Omit<
 	required?: boolean | undefined;
 	errorMessage?: string | undefined;
 	placeholder?: string | undefined;
+	readonly?: boolean;
 };
 
 export const Select = ( props: SelectProps ) => {
@@ -46,6 +47,7 @@ export const Select = ( props: SelectProps ) => {
 		required,
 		errorMessage = __( 'Please select a valid option', 'woocommerce' ),
 		placeholder,
+		readonly,
 		...restOfProps
 	} = props;
 	const selectOnChange = useCallback(
@@ -134,7 +136,11 @@ export const Select = ( props: SelectProps ) => {
 				'has-error': ! validationError.hidden,
 			} ) }
 		>
-			<div className="wc-blocks-components-select">
+			<div
+				className={ clsx( 'wc-blocks-components-select', {
+					'wc-blocks-components-select--readonly': readonly,
+				} ) }
+			>
 				<div className="wc-blocks-components-select__container">
 					<label
 						htmlFor={ inputId }
@@ -148,6 +154,7 @@ export const Select = ( props: SelectProps ) => {
 						size={ size !== undefined ? size : 1 }
 						onChange={ selectOnChange }
 						value={ value }
+						aria-disabled={ readonly }
 						aria-invalid={
 							error?.message && ! error?.hidden ? true : false
 						}
