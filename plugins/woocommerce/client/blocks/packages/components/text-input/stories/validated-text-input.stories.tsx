@@ -4,6 +4,7 @@
 import type { StoryFn, Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { useArgs } from '@storybook/client-api';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -12,6 +13,7 @@ import ValidatedTextInput from '../validated-text-input';
 import '../style.scss';
 import '../../validation-input-error/style.scss';
 import { ValidatedTextInputProps } from '../types';
+import { validationStore } from '@woocommerce/block-data';
 
 export default {
 	title: 'External Components/ValidatedTextInput',
@@ -214,9 +216,35 @@ export default {
 const Template: StoryFn< ValidatedTextInputProps > = ( args ) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [ _, updateArgs ] = useArgs();
+	const { setValidationErrors, showValidationError } =
+		useDispatch( validationStore );
+
 	const onChange = ( value: string ) => {
 		action( 'change' )( value || '' );
 		updateArgs( { value } );
+
+		// Always show error for WithError story.
+		if ( args.id === 'with-error-id' ) {
+			setValidationErrors( {
+				[ args.id ]: {
+					message: 'This field cannot be empty',
+					hidden: true,
+				},
+			} );
+			showValidationError( args.id );
+			return;
+		}
+
+		// Default: only show error if input is empty and showError is true.
+		if ( args.showError && ! value.trim() && args.id !== 'with-error-id' ) {
+			setValidationErrors( {
+				[ args.id || 'unique-id' ]: {
+					message: 'This field cannot be empty',
+					hidden: true,
+				},
+			} );
+			showValidationError( args.id || 'unique-id' );
+		}
 	};
 
 	return <ValidatedTextInput { ...args } onChange={ onChange } />;
@@ -233,11 +261,11 @@ export const WithError: StoryFn< ValidatedTextInputProps > = Template.bind(
 	{}
 );
 WithError.args = {
-	id: 'unique-id',
-	showError: true,
-	errorMessage: 'This is an error message',
+	id: 'with-error-id',
 	label: 'Enter your value',
-	value: 'Lorem ipsum',
+	value: '',
+	errorMessage: 'This is an error message',
+	showError: true,
 };
 
 export const WithCustomFormatter: StoryFn< ValidatedTextInputProps > =
