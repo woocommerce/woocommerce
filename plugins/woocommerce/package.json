@@ -513,7 +513,7 @@
 					}
 				},
 				{
-					"name": "Core API tests (HPOS:off)",
+					"name": "Core API tests (object cache plugin)",
 					"testType": "api",
 					"command": "test:api:object-cache",
 					"optional": false,
