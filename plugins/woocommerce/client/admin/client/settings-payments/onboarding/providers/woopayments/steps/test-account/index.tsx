@@ -117,7 +117,7 @@ const TestAccountStep = () => {
 
 			if ( currentStep?.status === 'blocked' ) {
 				setErrorMessage(
-					currentStep?.errors?.[ 0 ] ||
+					currentStep?.errors?.[ 0 ]?.message ||
 						__(
 							'There are environment or store setup issues which are blocking progress. Please resolve them to proceed.',
 							'woocommerce'

@@ -115,7 +115,10 @@ export interface WooPaymentsProviderOnboardingStep {
 		>;
 		has_test_account?: boolean;
 	};
-	errors?: string[];
+	errors?: {
+		message: string;
+		code: string;
+	}[];
 }
 
 /**
