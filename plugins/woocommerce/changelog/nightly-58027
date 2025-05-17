@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Improve the nightly build process to generate weekly tagged releases, each with a changelog and archived ZIP.
