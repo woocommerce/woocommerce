@@ -1,15 +1,14 @@
 name: 'Nightly builds'
+
 on:
   schedule:
-    - cron: '0 0 * * *' # Run at 12 AM UTC.
+    - cron: '0 0 * * 1'  # Run every Monday at 00:00 UTC
   workflow_dispatch:
 
 env:
   SOURCE_REF: trunk
-  TARGET_REF: nightly
-  RELEASE_ID: 25945111
 
-permissions: { }
+permissions: {}
 
 jobs:
   build:
@@ -19,29 +18,36 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
-      - name: 'Update nightly tag commit ref'
-        uses: 'actions/github-script@v7'
+      - name: 'Checkout trunk'
+        uses: actions/checkout@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const sourceRef = process.env.SOURCE_REF;
-            const targetRef = process.env.TARGET_REF;
-            const branchData = await github.rest.repos.getBranch({
-              ...context.repo,
-              branch: sourceRef,
-            });
+          ref: ${{ env.SOURCE_REF }}
+          fetch-depth: 0
 
-            await github.rest.git.updateRef({
-              ...context.repo,
-              ref: `tags/${ targetRef }`,
-              sha: branchData.data.commit.sha,
-            });
+      - name: 'Set current date'
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
-      - name: 'Checkout ref'
-        uses: 'actions/checkout@v4'
-        with:
-          ref: ${{ env.TARGET_REF }}
+      - name: 'Find last nightly tag'
+        id: last_tag
+        run: |
+          last_tag=$(git tag --list "nightly-*" --sort=-creatordate | tail -n 1)
+          echo "last_tag=$last_tag" >> $GITHUB_OUTPUT
+
+      - name: 'Generate changelog'
+        run: |
+          DATE="${{ steps.date.outputs.date }}"
+          LAST_TAG="${{ steps.last_tag.outputs.last_tag }}"
+          echo "## Nightly build for $DATE" > changelog.md
+
+          if [ -z "$LAST_TAG" ]; then
+            echo "No previous nightly found. Showing last 20 commits." >> changelog.md
+            git log --pretty=format:'- %s (%h)' -n 20 >> changelog.md
+          else
+            git log "$LAST_TAG"..HEAD --pretty=format:'- %s (%h)' >> changelog.md
+          fi
 
       - name: 'Setup WooCommerce Monorepo'
         uses: './.github/actions/setup-woocommerce-monorepo'
@@ -52,13 +58,20 @@ jobs:
         working-directory: plugins/woocommerce
         run: bash bin/build-zip.sh
 
-      - name: 'Upload nightly build'
-        uses: 'WebFreak001/deploy-nightly@46ecbabd7fad70d3e7d2c97fe8cd54e7a52e215b' #v3.2.0
+      - name: 'Create new nightly tag'
+        run: |
+          DATE="${{ steps.date.outputs.date }}"
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag nightly-$DATE
+          git push origin nightly-$DATE
+
+      - name: 'Create GitHub Release'
+        uses: softprops/action-gh-release@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets{?name,label}
-          release_id: ${{ env.RELEASE_ID }}
-          asset_path: plugins/woocommerce/woocommerce.zip
-          asset_name: woocommerce-${{ env.SOURCE_REF }}-nightly.zip
-          asset_content_type: application/zip
-          max_releases: 1
+          tag_name: nightly-${{ steps.date.outputs.date }}
+          name: Nightly – ${{ steps.date.outputs.date }}
+          body_path: changelog.md
+          files: plugins/woocommerce/woocommerce.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
