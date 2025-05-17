@@ -23,7 +23,7 @@
 		},
 		"aspectRatio": {
 			"type": "string",
-			"default": "auto"
+			"default": "1"
 		}
 	},
 	"supports": {
