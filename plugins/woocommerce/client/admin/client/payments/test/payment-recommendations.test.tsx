@@ -9,7 +9,6 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import PaymentRecommendations from '../payment-recommendations';
-import { PaymentRecommendations as PaymentRecommendationsWrapper } from '../payment-recommendations-wrapper';
 import { isWCPaySupported } from '../../task-lists/fills/PaymentGatewaySuggestions/components/WCPay';
 import { createNoticesFromResponse } from '../../lib/notices';
 
