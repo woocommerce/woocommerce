@@ -67,7 +67,6 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 	// Get the current block attributes
 	const blockAttributes: object = useSelect( ( select ) => {
 		const attributes =
-			// @ts-expect-error getBlockAttributes expects one argument, but TS thinks it expects none
 			select( 'core/block-editor' ).getBlockAttributes( selectedBlockId );
 
 		return attributes;
