@@ -240,7 +240,7 @@ class WooCommercePayments extends Task {
 	 * @return \WC_Payments|null
 	 */
 	private static function get_gateway() {
-		$payment_gateways = WC()->payment_gateways()->payment_gateways;
+		$payment_gateways = WC()->payment_gateways()->payment_gateways();
 		if ( isset( $payment_gateways['woocommerce_payments'] ) ) {
 			return $payment_gateways['woocommerce_payments'];
 		}
