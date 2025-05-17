@@ -44,36 +44,7 @@ class BlockifiedProductDetails extends AbstractBlock {
 		 */
 		$hooked_blocks = apply_filters( 'woocommerce_product_details_hooked_blocks', [] );
 
-		$logger = wc_get_logger();
-
-		$validated_hooked_blocks = array_filter(
-			$hooked_blocks,
-			function ( $block ) use ( $logger ) {
-				$invalid = ! is_array( $block ) ||
-				! isset( $block['title'] ) ||
-				! isset( $block['content'] ) ||
-				! is_string( $block['title'] ) ||
-				! is_string( $block['content'] );
-
-				$parsed_content = parse_blocks( $block['content'] );
-
-				foreach ( $parsed_content as $content_block ) {
-					if ( ! isset( $content_block['blockName'] ) ) {
-						$invalid = true;
-						break;
-					}
-				}
-
-				if ( $invalid ) {
-					$logger->error( 'Invalid hooked block data. Expected array with `title` and `content` keys with string values. Content must be valid block markup.', $block );
-					return false;
-				}
-
-				return true;
-			}
-		);
-
-		foreach ( $validated_hooked_blocks as $block ) {
+		foreach ( $this->validate_hooked_blocks( $hooked_blocks ) as $block ) {
 			$this->register_hooked_blocks( $block['title'], $block['content'] );
 		}
 	}
@@ -330,6 +301,58 @@ class BlockifiedProductDetails extends AbstractBlock {
 	}
 
 	/**
+	 * Validate hooked blocks data. Remove duplicated entries with the same title
+	 * and invalid entries with invalid content. Log errors to the WC logger.
+	 *
+	 * @param array $hooked_blocks { Hooked blocks data.
+	 *   @type string $title Title of the hooked block.
+	 *   @type string $content Content of the hooked block, as block markup.
+	 * }
+	 *
+	 * @return array Validated hooked blocks.
+	 */
+	private function validate_hooked_blocks( $hooked_blocks ) {
+		$logger                  = wc_get_logger();
+		$validated_hooked_blocks = [];
+
+		foreach ( $hooked_blocks as $block ) {
+			$invalid = ! is_array( $block ) ||
+			! isset( $block['title'] ) ||
+			! isset( $block['content'] ) ||
+			! is_string( $block['title'] ) ||
+			! is_string( $block['content'] );
+
+			$parsed_content = parse_blocks( $block['content'] );
+
+			foreach ( $parsed_content as $content_block ) {
+				if ( ! isset( $content_block['blockName'] ) ) {
+					$invalid = true;
+					break;
+				}
+			}
+
+			if ( $invalid ) {
+				$logger->error( 'Invalid hooked block data. Expected array with `title` and `content` keys with string values. Content must be valid block markup.', $block );
+				continue;
+			}
+
+			if ( array_filter(
+				$validated_hooked_blocks,
+				function ( $hooked_block ) use ( $block ) {
+					return $hooked_block['title'] === $block['title'];
+				}
+			) ) {
+				$logger->error( 'Duplicate hooked block data. Hooked block with title `' . $block['title'] . '` is already registered.', $block );
+				continue;
+			}
+
+			$validated_hooked_blocks[] = $block;
+		}
+
+		return $validated_hooked_blocks;
+	}
+
+	/**
 	 * Register a product details item using Block Hooks API.
 	 *
 	 * @param string $title The title of the item.
@@ -342,7 +365,11 @@ class BlockifiedProductDetails extends AbstractBlock {
 		add_filter(
 			'hooked_block_types',
 			function ( $hooked_block_types, $relative_position, $anchor_block_type ) use ( $slug ) {
-				if ( 'woocommerce/accordion-group' === $anchor_block_type && 'last_child' === $relative_position ) {
+				if (
+					'woocommerce/accordion-group' === $anchor_block_type &&
+					'last_child' === $relative_position &&
+					! in_array( $slug, $hooked_block_types, true )
+				) {
 					$hooked_block_types[] = $slug;
 				}
 				return $hooked_block_types;
@@ -372,7 +399,7 @@ class BlockifiedProductDetails extends AbstractBlock {
 					'last_child' !== $relative_position ||
 					empty( $parsed_anchor_block['attrs']['metadata']['isDescendantOfProductDetails'] )
 				) {
-					return array();
+					return null;
 				}
 
 				return $this->create_accordion_item_block( $title, $content );
