@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { InspectorControls } from '@wordpress/block-editor';
+import { InspectorControls, BlockControls } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
 import { registerBlockVariation } from '@wordpress/blocks';
-import type { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
+import type { Block, InnerBlockTemplate } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 
 // Add support for top social networks
@@ -73,6 +73,7 @@ function registerCustomSocialLinksBlockVariation() {
 	// This variation is used to display the social links in the email editor by automatically adding some preset social links
 	const socialLinksVariations: InnerBlockTemplate[] = [
 		{
+			// @ts-expect-error Type not complete.
 			name: 'core/social-link',
 			attributes: {
 				service: 'wordpress',
@@ -80,6 +81,7 @@ function registerCustomSocialLinksBlockVariation() {
 			},
 		},
 		{
+			// @ts-expect-error Type not complete.
 			name: 'core/social-link',
 			attributes: {
 				service: 'facebook',
@@ -87,6 +89,7 @@ function registerCustomSocialLinksBlockVariation() {
 			},
 		},
 		{
+			// @ts-expect-error Type not complete.
 			name: 'core/social-link',
 			attributes: {
 				service: 'twitter',
@@ -109,8 +112,7 @@ function registerCustomSocialLinksBlockVariation() {
 }
 
 const disableIconColor =
-	( BlockEdit: React.ElementType ) =>
-	( props: BlockEditProps< unknown > ) => {
+	( BlockEdit: React.ElementType ) => ( props: Block< unknown > ) => {
 		if ( props.name !== 'core/social-links' ) {
 			return <BlockEdit { ...props } />;
 		}
@@ -123,12 +125,23 @@ const disableIconColor =
 			display: none !important;
 		}
 		`;
+
+		// eslint-disable-next-line @wordpress/i18n-text-domain -- using core label.
+		const blockControlsLabelText = __( 'Size' );
+		const customControlsCss = `
+		.components-toolbar-group:has([aria-label="${ blockControlsLabelText }"]) {
+			display: none !important;
+		}`;
+
 		return (
 			<>
 				<BlockEdit { ...props } />
 				<InspectorControls group="color">
 					<style>{ customCss }</style>
 				</InspectorControls>
+				<BlockControls group="other">
+					<style>{ customControlsCss }</style>
+				</BlockControls>
 			</>
 		);
 	};

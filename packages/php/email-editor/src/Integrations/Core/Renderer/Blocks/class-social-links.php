@@ -72,7 +72,7 @@ class Social_Links extends Abstract_Block_Renderer {
 		$is_logos_only = strpos( $parent_block_attrs['className'] ?? '', 'is-style-logos-only' ) !== false;
 		$is_pill_shape = strpos( $parent_block_attrs['className'] ?? '', 'is-style-pill-shape' ) !== false;
 
-		if ( !$is_logos_only && Social_Links_Helper::detect_whiteish_color( $icon_color_value ) && ( Social_Links_Helper::detect_whiteish_color( $icon_background_color_value ) || empty( $icon_background_color_value ) ) ) {
+		if ( ! $is_logos_only && Social_Links_Helper::detect_whiteish_color( $icon_color_value ) && ( Social_Links_Helper::detect_whiteish_color( $icon_background_color_value ) || empty( $icon_background_color_value ) ) ) {
 			$icon_background_color_value = '#000'; // using black as default background color for now. Aim to use service brand color.
 		}
 
@@ -95,13 +95,13 @@ class Social_Links extends Abstract_Block_Renderer {
 			'text-decoration'  => 'none',
 			'text-transform'   => 'none',
 			'padding'          => '10px',
-			'border-radius'  => '9999px',
+			'border-radius'    => '9999px',
 		);
 		if ( $is_pill_shape ) {
 			$anchor_style['padding-left']  = '17px';
 			$anchor_style['padding-right'] = '17px';
 		}
-		$anchor_html  = sprintf( ' style="%s" ', esc_attr( $this->compile_css( $anchor_style ) ) );
+		$anchor_html = sprintf( ' style="%s" ', esc_attr( $this->compile_css( $anchor_style ) ) );
 		if ( $open_in_new_tab ) {
 			$anchor_html .= ' rel="noopener nofollow" target="_blank"';
 		}
