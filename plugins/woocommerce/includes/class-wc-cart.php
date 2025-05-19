@@ -667,7 +667,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->totals                     = $this->default_totals;
 
 		if ( $clear_persistent_cart ) {
-			$this->session->persistent_cart_destroy();
+			$this->session->persistent_cart_update();
 		}
 
 		$this->fees_api->remove_all_fees();
