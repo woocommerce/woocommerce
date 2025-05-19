@@ -190,7 +190,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		}
 
 		/**
-		 * Override settings form fields to remove the enbaled/disabled field as the email is manually sent.
+		 * Override settings form fields to remove the enabled/disabled field as the email is manually sent.
 		 */
 		public function init_form_fields() {
 			/* translators: %s: list of placeholders */
