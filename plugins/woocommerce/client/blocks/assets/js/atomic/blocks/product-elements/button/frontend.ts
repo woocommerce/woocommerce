@@ -177,6 +177,8 @@ const { state } = store< Store >(
 				}
 			},
 			syncProductId() {
+				// This is intentionally not typed as we don't know if the block
+				// is inside the Add to Cart Form + Options block.
 				const addToCartContext = getContextFn(
 					'woocommerce/add-to-cart-with-options'
 				);
