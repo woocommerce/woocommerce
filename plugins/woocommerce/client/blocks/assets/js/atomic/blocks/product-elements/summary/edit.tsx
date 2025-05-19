@@ -89,7 +89,7 @@ const MaxWordCountControl = ( {
 				} }
 				min={ 0 }
 				max={ 200 }
-				step={ 10 }
+				step={ 1 }
 			/>
 		</ToolsPanelItem>
 	);
