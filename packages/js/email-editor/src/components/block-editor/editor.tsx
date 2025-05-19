@@ -35,6 +35,7 @@ import { TemplateSettingsPanel } from '../sidebar/template-settings-panel';
 import { PublishSave } from '../../hacks/publish-save';
 import { EditorNotices } from '../notices';
 import { BlockCompatibilityWarnings } from '../sidebar';
+import { BackButtonContent } from '../header/back-button-content';
 
 export function InnerEditor( {
 	postId: initialPostId,
@@ -132,6 +133,7 @@ export function InnerEditor( {
 					<StylesSidebar />
 					<SendPreview />
 					<FullscreenMode isActive={ isFullscreenEnabled } />
+					<BackButtonContent />
 					<MoreMenu />
 					{ currentPost.postType === 'wp_template' ? (
 						<TemplateSettingsPanel />
