@@ -8,6 +8,11 @@ import {
 } from '@wordpress/interactivity';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 
+/**
+ * Internal dependencies
+ */
+import type { Context as AddToCartWithOptionsContext } from '../../../../blocks/add-to-cart-with-options/frontend';
+
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
@@ -177,20 +182,12 @@ const { state } = store< Store >(
 				}
 			},
 			syncProductId() {
-				// This is intentionally not typed as we don't know if the block
-				// is inside the Add to Cart Form + Options block.
-				const addToCartContext = getContextFn(
-					'woocommerce/add-to-cart-with-options'
-				);
+				const addToCartContext =
+					getContextFn< AddToCartWithOptionsContext >(
+						'woocommerce/add-to-cart-with-options'
+					) as AddToCartWithOptionsContext | undefined; // Product Button may not be nested inside Add To Cart + Options block.
 
-				if (
-					! addToCartContext ||
-					! ( 'productId' in addToCartContext ) ||
-					! ( 'variationId' in addToCartContext ) ||
-					typeof addToCartContext.productId !== 'number' ||
-					typeof addToCartContext.variationId !== 'number' ||
-					! addToCartContext.productId
-				) {
+				if ( ! addToCartContext ) {
 					return;
 				}
 
@@ -199,7 +196,7 @@ const { state } = store< Store >(
 
 				// The `variationId` is only available when the product is a
 				// variable product and the user has selected a variation.
-				if ( variationId > 0 ) {
+				if ( variationId ) {
 					context.productId = variationId;
 				} else {
 					context.productId = productId;
