@@ -69,7 +69,7 @@ export function InnerEditor( {
 						? getEditedPostTemplate()
 						: null,
 				post: postObject,
-				isFullscreenEnabled: true,
+				isFullscreenEnabled: settings.fullScreen,
 			};
 		},
 		[ currentPost.postType, currentPost.postId ]
