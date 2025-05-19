@@ -23,21 +23,20 @@ class WC_Email_Customer_POS_Refunded_Order_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox order_item_totals adds custom rows for cash change.
+	 * @testdox order_item_totals does not add custom rows for cash change even when cash change is set to avoid confusion in UX.
 	 */
 	public function test_order_item_totals_adds_formatted_cash_change_due_amount_to_order_totals() {
 		// Given order with cash payment change amount.
 		$order = OrderHelper::create_order();
-		$order->add_meta_data( '_cash_change_amount', '0' );
+		$order->add_meta_data( '_cash_change_amount', '5.00' );
 		$order->save();
 		$email = new WC_Email_Customer_POS_Refunded_Order();
 
 		// When overriding order item totals.
 		$totals = $email->order_item_totals( array(), $order, 'incl' );
 
-		// Then cash payment change due amount is set and formatted correctly.
-		$this->assertArrayHasKey( 'cash_payment_change_due_amount', $totals );
-		$this->assertEquals( wc_price( '0', array( 'currency' => $order->get_currency() ) ), $totals['cash_payment_change_due_amount']['value'] );
+		// Then cash payment change due amount is not set.
+		$this->assertArrayNotHasKey( 'cash_payment_change_due_amount', $totals );
 	}
 
 	/**
@@ -135,7 +134,6 @@ class WC_Email_Customer_POS_Refunded_Order_Test extends \WC_Unit_Test_Case {
 
 		// Given an order with POS-specific data.
 		$order = OrderHelper::create_order();
-		$order->add_meta_data( '_cash_change_amount', '5.00' );
 		$order->add_meta_data( '_charge_id', 'AUTH134' );
 		$order->set_date_paid( '2023-06-01 12:00:00' );
 		$order->save();
@@ -152,12 +150,10 @@ class WC_Email_Customer_POS_Refunded_Order_Test extends \WC_Unit_Test_Case {
 		$regular_content = $regular_email->get_content_html();
 
 		// Then POS email should include additional rows.
-		$this->assertStringContainsString( 'cash_payment_change_due_amount', $pos_content );
 		$this->assertStringContainsString( 'payment_auth_code', $pos_content );
 		$this->assertStringContainsString( 'date_paid', $pos_content );
 
 		// And regular email should not include these rows.
-		$this->assertStringNotContainsString( 'cash_payment_change_due_amount', $regular_content );
 		$this->assertStringNotContainsString( 'payment_auth_code', $regular_content );
 		$this->assertStringNotContainsString( 'date_paid', $regular_content );
 
@@ -166,12 +162,10 @@ class WC_Email_Customer_POS_Refunded_Order_Test extends \WC_Unit_Test_Case {
 		$regular_plain_text = $regular_email->get_content_plain();
 
 		// Then POS email should include additional rows.
-		$this->assertStringContainsString( __( 'Change due:', 'woocommerce' ), $pos_plain_text );
 		$this->assertStringContainsString( __( 'Auth code:', 'woocommerce' ), $pos_plain_text );
 		$this->assertStringContainsString( __( 'Time of payment:', 'woocommerce' ), $pos_plain_text );
 
 		// And regular email should not include these rows.
-		$this->assertStringNotContainsString( __( 'Change due:', 'woocommerce' ), $regular_plain_text );
 		$this->assertStringNotContainsString( __( 'Auth code:', 'woocommerce' ), $regular_plain_text );
 		$this->assertStringNotContainsString( __( 'Time of payment:', 'woocommerce' ), $regular_plain_text );
 	}

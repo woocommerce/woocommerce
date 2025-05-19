@@ -449,16 +449,6 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @return array Modified array of total rows.
 		 */
 		public function order_item_totals( $total_rows, $order, $tax_display ) {
-			$cash_payment_change_due_amount = $order->get_meta( '_cash_change_amount', true );
-			if ( '' !== $cash_payment_change_due_amount ) {
-				$formatted_cash_payment_change_due_amount     = wc_price( $cash_payment_change_due_amount, array( 'currency' => $order->get_currency() ) );
-				$total_rows['cash_payment_change_due_amount'] = array(
-					'type'  => 'cash_payment_change_due_amount',
-					'label' => __( 'Change due:', 'woocommerce' ),
-					'value' => $formatted_cash_payment_change_due_amount,
-				);
-			}
-
 			$auth_code = $order->get_meta( '_charge_id', true );
 			if ( ! empty( $auth_code ) ) {
 				$total_rows['payment_auth_code'] = array(
