@@ -227,9 +227,8 @@ class ProductButton extends AbstractBlock {
 			data-wp-class--wc-block-slide-in="state.slideInAnimation"
 			data-wp-class--wc-block-slide-out="state.slideOutAnimation"
 			data-wp-on--animationend="actions.handleAnimationEnd"
-			data-wp-watch--start-animation="callbacks.startAnimation"
+			data-wp-watch="callbacks.startAnimation"
 			data-wp-run="callbacks.syncTempQuantityOnLoad"
-			data-wp-watch--sync-product-id="callbacks.syncProductId"
 		';
 
 		$wrapper_attributes = get_block_wrapper_attributes(

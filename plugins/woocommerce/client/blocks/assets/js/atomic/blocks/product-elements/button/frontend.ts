@@ -31,6 +31,7 @@ enum AnimationStatus {
 interface Store {
 	state: {
 		inTheCartText: string;
+		productId: number;
 		quantity: number;
 		hasCartLoaded: boolean;
 		slideInAnimation: boolean;
@@ -47,7 +48,6 @@ interface Store {
 	callbacks: {
 		startAnimation: () => void;
 		syncTempQuantityOnLoad: () => void;
-		syncProductId: () => void;
 	};
 }
 
@@ -61,10 +61,17 @@ const { state } = store< Store >(
 	'woocommerce/product-button',
 	{
 		state: {
-			get quantity() {
+			get productId() {
 				const { productId } = getContext< Context >();
+				const { variationId } =
+					getContext< AddToCartWithOptionsContext >(
+						'woocommerce/add-to-cart-with-options'
+					);
+				return variationId || productId;
+			},
+			get quantity(): number {
 				const product = wooState.cart?.items.find(
-					( item ) => item.id === productId
+					( item ) => item.id === state.productId
 				);
 				return product?.quantity || 0;
 			},
@@ -105,7 +112,6 @@ const { state } = store< Store >(
 		actions: {
 			*addCartItem() {
 				const context = getContext< Context >();
-				const { productId, quantityToAdd } = context;
 
 				// Todo: Use the module exports instead of `store()` once the
 				// woocommerce store is public.
@@ -118,8 +124,8 @@ const { state } = store< Store >(
 				);
 
 				yield actions.addCartItem( {
-					id: productId,
-					quantity: state.quantity + quantityToAdd,
+					id: state.productId,
+					quantity: state.quantity + context.quantityToAdd,
 				} );
 
 				context.displayViewCart = true;
@@ -173,27 +179,6 @@ const { state } = store< Store >(
 					context.animationStatus === AnimationStatus.IDLE
 				) {
 					context.animationStatus = AnimationStatus.SLIDE_OUT;
-				}
-			},
-			syncProductId() {
-				const addToCartContext =
-					getContext< AddToCartWithOptionsContext >(
-						'woocommerce/add-to-cart-with-options'
-					) as AddToCartWithOptionsContext | undefined; // Product Button may not be nested inside Add To Cart + Options block.
-
-				if ( ! addToCartContext ) {
-					return;
-				}
-
-				const context = getContext< Context >();
-				const { productId, variationId } = addToCartContext;
-
-				// The `variationId` is only available when the product is a
-				// variable product and the user has selected a variation.
-				if ( variationId ) {
-					context.productId = variationId;
-				} else {
-					context.productId = productId;
 				}
 			},
 		},
