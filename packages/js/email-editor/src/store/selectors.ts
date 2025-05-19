@@ -54,12 +54,6 @@ function regularizedGetEntityRecord( template ) {
 	};
 }
 
-export const isFeatureActive = createRegistrySelector(
-	( select ) =>
-		( _, feature: Feature ): boolean =>
-			!! select( preferencesStore ).get( storeName, feature )
-);
-
 export const hasEdits = createRegistrySelector( ( select ) => (): boolean => {
 	const postId = select( storeName ).getEmailPostId();
 	return !! select( coreDataStore ).hasEditsForEntityRecord(
