@@ -39,8 +39,6 @@ jobs:
                 <${{ github.event.pull_request.html_url }}|#${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}>
                 ${{ github.event.pull_request.milestone && github.event.pull_request.milestone.html_url && github.event.pull_request.milestone.title && format('*Milestone:* <{0}|{1}>', github.event.pull_request.milestone.html_url, github.event.pull_request.milestone.title) || '' }}
                 *Changed files:*
-                ```
-                ${{ join(fromJson(steps.filter.outputs.changed_files), '\n') }}
-                ```
+                ```${{ join(fromJson(steps.filter.outputs.changed_files), '\n') }}```
             slack-optional-unfurl_links: false
             slack-optional-unfurl_media: false
