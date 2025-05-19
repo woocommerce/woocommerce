@@ -10,7 +10,7 @@ use WP_REST_Request;
 use WP_REST_Server;
 
 /**
- * Controller for the REST endpoint to add order statuses to the WooCommerce REST API
+ * Controller for the REST endpoint to add order statuses to the WooCommerce REST API.
  */
 class OrderStatusRestController extends RestApiControllerBase {
 
