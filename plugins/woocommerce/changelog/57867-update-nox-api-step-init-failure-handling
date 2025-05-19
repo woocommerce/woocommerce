@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Introduce a new /clean endpoint and update the server implementation for other steps.

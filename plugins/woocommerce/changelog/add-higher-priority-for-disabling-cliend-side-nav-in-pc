@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Product Collection: change priority of filter disabling client-side-navigation in the frontend from 10 to 5

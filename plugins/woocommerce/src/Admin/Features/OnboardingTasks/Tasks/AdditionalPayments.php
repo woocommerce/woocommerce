@@ -183,7 +183,7 @@ class AdditionalPayments extends Payments {
 	 * @return bool
 	 */
 	private static function has_enabled_gateways( $filter = null ) {
-		$gateways         = WC()->payment_gateways->get_available_payment_gateways();
+		$gateways         = WC()->payment_gateways()->payment_gateways;
 		$enabled_gateways = array_filter(
 			$gateways,
 			function( $gateway ) use ( $filter ) {

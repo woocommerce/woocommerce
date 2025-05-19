@@ -196,7 +196,6 @@ function getTemplate( select, templateId: string ): EmailTemplate {
 export const getEditedPostTemplate = createRegistrySelector(
 	( select ) => (): EmailTemplate | null => {
 		const currentTemplate =
-			// @ts-expect-error Expected 0 arguments, but got 1.
 			select( editorStore ).getEditedPostAttribute( 'template' );
 
 		if ( currentTemplate ) {
