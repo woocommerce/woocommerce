@@ -343,7 +343,7 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - PHP 8.1",
+					"name": "Core e2e tests - PHP 8.4",
 					"testType": "e2e",
 					"command": "test:e2e",
 					"shardingArguments": [
@@ -362,17 +362,17 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.1"
+							"phpVersion": "8.4"
 						}
 					},
 					"events": [
 						"pull_request",
 						"nightly-checks",
 						"release-checks",
-						"core-e2e-php-8.1"
+						"core-e2e-php-8.4"
 					],
 					"report": {
-						"resultsBlobName": "core-e2e-report-php-8.1",
+						"resultsBlobName": "core-e2e-report-php-8.4",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
