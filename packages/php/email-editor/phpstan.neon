@@ -1,0 +1,24 @@
+parameters:
+	bootstrapFiles:
+		- vendor/autoload.php
+		- vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
+		- vendor/php-stubs/woocommerce-stubs/woocommerce-packages-stubs.php
+
+	level: 9
+	
+	# Paths to analyze
+	paths:
+		- src
+
+	# PHP version
+	phpVersion: 80100  # PHP 8.1
+	
+	# Treat PHPDoc types as certain
+	treatPhpDocTypesAsCertain: false
+
+	excludePaths:
+		analyseAndScan:
+			- vendor/php-stubs/wordpress-stubs/wordpress-stubs.php # does not yet offer support for PHP 8.1
+
+includes:
+	- vendor/szepeviktor/phpstan-wordpress/extension.neon
