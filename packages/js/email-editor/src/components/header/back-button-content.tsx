@@ -43,7 +43,7 @@ export const BackButtonContent = () => {
 			{ ( { length } ) =>
 				length <= 1 && (
 					<motion.div
-						className="edit-site-editor__view-mode-toggle"
+						className="woocommerce-email-editor__view-mode-toggle"
 						transition={ {
 							duration: 0.2,
 						} }
@@ -53,8 +53,7 @@ export const BackButtonContent = () => {
 						whileTap="tap"
 					>
 						<Button
-							__next40pxDefaultSize
-							label={ __( 'Open Navigation', 'woocommerce' ) }
+							label={ __( 'Close editor', 'woocommerce' ) }
 							showTooltip
 							tooltipPosition="middle right"
 							onClick={ () => {
@@ -62,9 +61,9 @@ export const BackButtonContent = () => {
 							} }
 						>
 							<motion.div variants={ siteIconVariants }>
-								<div className="edit-site-editor__view-mode-toggle-icon edit-site-site-icon">
+								<div className="woocommerce-email-editor__view-mode-toggle-icon">
 									<Icon
-										className="edit-site-site-icon__icon"
+										className="woocommerce-email-editor-icon__icon"
 										icon={ wordpress }
 										size={ 48 }
 									/>
@@ -72,7 +71,7 @@ export const BackButtonContent = () => {
 							</motion.div>
 						</Button>
 						<motion.div
-							className="edit-site-editor__back-icon"
+							className="woocommerce-email-editor-icon"
 							variants={ toggleHomeIconVariants }
 						>
 							<Icon icon={ arrowLeft } />
