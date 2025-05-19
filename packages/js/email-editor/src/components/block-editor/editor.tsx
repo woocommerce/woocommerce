@@ -72,7 +72,7 @@ export function InnerEditor( {
 				isFullscreenEnabled: settings.fullScreen,
 			};
 		},
-		[ currentPost.postType, currentPost.postId ]
+		[ currentPost.postType, currentPost.postId, settings.fullScreen ]
 	);
 
 	// @ts-expect-error Type is missing in @types/wordpress__editor
