@@ -9,9 +9,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import PaymentRecommendations from '../payment-recommendations';
-import { PaymentRecommendations as PaymentRecommendationsWrapper } from '../payment-recommendations-wrapper';
 import { isWCPaySupported } from '../../task-lists/fills/PaymentGatewaySuggestions/components/WCPay';
-import { isFeatureEnabled } from '~/utils/features';
 import { createNoticesFromResponse } from '../../lib/notices';
 
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
@@ -78,18 +76,6 @@ declare global {
 }
 
 describe( 'Payment recommendations', () => {
-	( isFeatureEnabled as jest.Mock ).mockReturnValue( false );
-
-	it( 'should not render paymentGatewaySuggestions if reactify-classic-payments-settings feature flag is on', () => {
-		( isFeatureEnabled as jest.Mock ).mockReturnValue( true );
-
-		const { container } = render(
-			<PaymentRecommendationsWrapper page="wc-settings" tab="checkout" />
-		);
-
-		expect( container.firstChild ).toBeNull();
-	} );
-
 	it( 'should render nothing with no paymentGatewaySuggestions and country not defined', () => {
 		( useSelect as jest.Mock ).mockReturnValue( {
 			installedPaymentGateways: {},

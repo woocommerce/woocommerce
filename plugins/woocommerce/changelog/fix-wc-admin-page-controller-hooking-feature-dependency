@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix degraded settings pages UI when certain features are disabled.
