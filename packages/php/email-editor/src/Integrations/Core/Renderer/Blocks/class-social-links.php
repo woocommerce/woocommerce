@@ -9,7 +9,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
-
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Social_Links_Helper;
 /**
  * Renders the social links block.
  */
@@ -66,12 +66,16 @@ class Social_Links extends Abstract_Block_Renderer {
 		$open_in_new_tab = $parent_block_attrs['openInNewTab'] ?? false;
 		$show_labels     = $parent_block_attrs['showLabels'] ?? false;
 
-		$icon_color_value            = $parent_block_attrs['iconColorValue'] ?? '';
+		$icon_color_value            = $parent_block_attrs['iconColorValue'] ?? '#ffffff'; // use white as default icon color.
 		$icon_background_color_value = $parent_block_attrs['iconBackgroundColorValue'] ?? '';
+
+		if ( Social_Links_Helper::detect_whiteish_color( $icon_color_value ) && ( Social_Links_Helper::detect_whiteish_color( $icon_background_color_value ) || empty( $icon_background_color_value ) ) ) {
+			$icon_background_color_value = '#000'; // using black as default background color for now. Aim to use service brand color.
+		}
 
 		$is_logos_only = strpos( $parent_block_attrs['className'] ?? '', 'is-style-logos-only' ) !== false;
 
-		$service_icon_url     = self::get_service_icon_url( $service_name, $is_logos_only ? 'brand' : 'white' );
+		$service_icon_url = $this->get_service_icon_url( $service_name, $is_logos_only ? 'brand' : 'white' );
 
 		$label_html = '';
 		if ( $show_labels ) {
@@ -152,7 +156,7 @@ class Social_Links extends Abstract_Block_Renderer {
 	 * @param string $image_type The image type. e.g 'white', 'brand', 'svg'.
 	 * @return string The service icon URL.
 	 */
-	public static function get_service_icon_url( $service, $image_type = '' ) {
+	public function get_service_icon_url( $service, $image_type = '' ) {
 		if ( empty( self::$core_social_link_services_cache ) ) {
 			self::$core_social_link_services_cache = block_core_social_link_services();
 		}
@@ -163,9 +167,9 @@ class Social_Links extends Abstract_Block_Renderer {
 		}
 
 		// Get URL to icons/service.png.
-		$service_icon_url = self::get_service_png_url( $service, $image_type );
+		$service_icon_url = $this->get_service_png_url( $service, $image_type );
 
-		if ( $service_icon_url && ! file_exists( self::get_service_png_path( $service, $image_type ) ) ) {
+		if ( $service_icon_url && ! file_exists( $this->get_service_png_path( $service, $image_type ) ) ) {
 			// The image file does not exist.
 			return '';
 		}
@@ -180,8 +184,8 @@ class Social_Links extends Abstract_Block_Renderer {
 	 * @param string $image_type The image type. e.g 'white', 'brand', 'black'.
 	 * @return string The service PNG URL.
 	 */
-	public static function get_service_png_url( $service, $image_type = 'white' ) {
-		$file_name      = "/icons/{$service}/{$service}-{$image_type}.png";
+	public function get_service_png_url( $service, $image_type = 'white' ) {
+		$file_name = "/icons/{$service}/{$service}-{$image_type}.png";
 		return plugins_url( $file_name, __FILE__ );
 	}
 
@@ -192,8 +196,8 @@ class Social_Links extends Abstract_Block_Renderer {
 	 * @param string $image_type The image type. e.g 'white', 'brand', 'black'.
 	 * @return string The service PNG path.
 	 */
-	public static function get_service_png_path( $service, $image_type = 'white' ) {
-		$file_name      = "/icons/{$service}/{$service}-{$image_type}.png";
+	public function get_service_png_path( $service, $image_type = 'white' ) {
+		$file_name = "/icons/{$service}/{$service}-{$image_type}.png";
 		return __DIR__ . $file_name;
 	}
 }
