@@ -11,7 +11,7 @@ concurrency:
 jobs:
   send-notification-for-rest-api-changes:
     name: Send Notification for Rest API Changes
-    # if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == false
     runs-on: ubuntu-latest
     steps:
       - uses: 'dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36'
