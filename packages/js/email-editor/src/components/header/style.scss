@@ -12,7 +12,9 @@
 }
 
 .woocommerce-email-editor__view-mode-toggle {
+	/* stylelint-disable -- Disable reason: View Transitions not supported properly by stylelint. */
 	view-transition-name: toggle;
+	/* stylelint-enable */
 	top: 0;
 	left: 0;
 	height: 60px;
