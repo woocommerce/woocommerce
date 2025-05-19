@@ -2,7 +2,7 @@ name: Highlight Rest API Changes
 
 on:
   pull_request:
-    types: [closed]
+    types: [closed, synchronize]
 
 concurrency:
   group: highlight-rest-api-changes-${{ github.event.pull_request.number }}
@@ -11,7 +11,7 @@ concurrency:
 jobs:
   send-notification-for-rest-api-changes:
     name: Send Notification for Rest API Changes
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - uses: 'dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36'
@@ -27,6 +27,7 @@ jobs:
               - 'plugins/woocommerce/src/**/*RestController*'
               - 'plugins/woocommerce/includes/rest-api/**'
               - 'plugins/woocommerce/includes/*-wc-rest-*'
+              - '**/pr-highlight-rest-api-changes.yml'
               
       - name: Send notification
         if: steps.filter.outputs.rest == 'true'
