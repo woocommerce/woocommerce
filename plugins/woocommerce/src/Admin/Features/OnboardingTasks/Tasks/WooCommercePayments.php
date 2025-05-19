@@ -253,7 +253,7 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public static function has_other_ecommerce_gateways(): bool {
-		$gateways         = WC()->payment_gateways->get_available_payment_gateways();
+		$gateways         = WC()->payment_gateways()->payment_gateways;
 		$enabled_gateways = array_filter(
 			$gateways,
 			function ( $gateway ) {
