@@ -85,6 +85,7 @@ abstract class WC_Session {
 	 * @param mixed $key Key to unset.
 	 */
 	public function __unset( $key ) {
+		$key = sanitize_key( $key );
 		if ( isset( $this->_data[ $key ] ) ) {
 			unset( $this->_data[ $key ] );
 			$this->_dirty = true;
@@ -110,10 +111,22 @@ abstract class WC_Session {
 	 * @param mixed  $value Value to set.
 	 */
 	public function set( $key, $value ) {
-		if ( $value !== $this->get( $key ) ) {
-			$this->_data[ sanitize_key( $key ) ] = maybe_serialize( $value );
-			$this->_dirty                        = true;
+		if ( null === $value ) {
+			$this->__unset( $key );
+
+			return;
 		}
+
+		$key                       = sanitize_key( $key );
+		$serialized_original_value = $this->_data[ $key ] ?? null;
+		$serialized_value          = maybe_serialize( $value );
+
+		if ( $serialized_original_value === $serialized_value || maybe_unserialize( $serialized_original_value ) === $value ) {
+			return;
+		}
+
+		$this->_dirty        = true;
+		$this->_data[ $key ] = $serialized_value;
 	}
 
 	/**

@@ -67,9 +67,6 @@
 'plugin: woocommerce beta tester':
   - plugins/woocommerce-beta-tester/**/*
 
-'plugin: woo-ai':
-  - plugins/woo-ai/**/*
-
 'focus: performance tests':
   - plugins/woocommerce/tests/performance/**/*
   - plugins/woocommerce/tests/metrics/**/*

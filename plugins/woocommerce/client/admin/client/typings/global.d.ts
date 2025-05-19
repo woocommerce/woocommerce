@@ -80,7 +80,6 @@ declare global {
 			'shipping-setting-tour': boolean;
 			'launch-your-store': boolean;
 			blueprint: boolean;
-			'reactify-classic-payments-settings': boolean;
 			'add-to-cart-with-options-stepper-layout': boolean;
 		};
 		wp: {
