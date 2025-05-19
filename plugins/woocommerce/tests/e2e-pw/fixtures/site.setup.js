@@ -5,7 +5,6 @@ import { test as setup } from './fixtures';
 import { setComingSoon } from '../utils/coming-soon';
 import { skipOnboardingWizard } from '../utils/onboarding';
 import { WC_API_PATH } from '../utils/api-client';
-import { setNewPaymentsSettingsPage } from '../utils/payments-settings';
 
 setup( 'configure HPOS', async ( { restApi } ) => {
 	const { DISABLE_HPOS } = process.env;
@@ -68,10 +67,6 @@ setup( 'disable coming soon', async ( { baseURL } ) => {
 
 setup( 'disable onboarding wizard', async () => {
 	await skipOnboardingWizard();
-} );
-
-setup( 'disable new payments settings page', async ( { baseURL } ) => {
-	await setNewPaymentsSettingsPage( { baseURL, enabled: 'no' } );
 } );
 
 setup( 'determine if multisite', async ( { restApi } ) => {
