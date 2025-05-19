@@ -155,11 +155,21 @@ class AddToCartForm extends AbstractBlock {
 		ob_start();
 
 		/**
+		 * Manage variations in the same way as simple products.
+		 */
+		add_action( 'woocommerce_variation_add_to_cart', 'woocommerce_simple_add_to_cart', 10 );
+
+		/**
 		 * Trigger the single product add to cart action for each product type.
 		 *
 		 * @since 9.7.0
 		 */
 		do_action( 'woocommerce_' . $product->get_type() . '_add_to_cart' );
+
+		/**
+		 * Remove the hook to prevent potential conflicts with existing code and extensions.
+		 */
+		remove_action( 'woocommerce_variation_add_to_cart', 'woocommerce_simple_add_to_cart', 10 );
 
 		$product_html = ob_get_clean();
 
