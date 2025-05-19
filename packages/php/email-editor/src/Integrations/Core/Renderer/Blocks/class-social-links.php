@@ -69,11 +69,16 @@ class Social_Links extends Abstract_Block_Renderer {
 		$icon_color_value            = $parent_block_attrs['iconColorValue'] ?? '#ffffff'; // use white as default icon color.
 		$icon_background_color_value = $parent_block_attrs['iconBackgroundColorValue'] ?? '';
 
-		if ( Social_Links_Helper::detect_whiteish_color( $icon_color_value ) && ( Social_Links_Helper::detect_whiteish_color( $icon_background_color_value ) || empty( $icon_background_color_value ) ) ) {
+		$is_logos_only = strpos( $parent_block_attrs['className'] ?? '', 'is-style-logos-only' ) !== false;
+		$is_pill_shape = strpos( $parent_block_attrs['className'] ?? '', 'is-style-pill-shape' ) !== false;
+
+		if ( !$is_logos_only && Social_Links_Helper::detect_whiteish_color( $icon_color_value ) && ( Social_Links_Helper::detect_whiteish_color( $icon_background_color_value ) || empty( $icon_background_color_value ) ) ) {
 			$icon_background_color_value = '#000'; // using black as default background color for now. Aim to use service brand color.
 		}
 
-		$is_logos_only = strpos( $parent_block_attrs['className'] ?? '', 'is-style-logos-only' ) !== false;
+		if ( $is_logos_only ) {
+			$icon_color_value = '#000'; // using black as default icon color for logos only. Will set to brand color in the future.
+		}
 
 		$service_icon_url = $this->get_service_icon_url( $service_name, $is_logos_only ? 'brand' : 'white' );
 
@@ -90,13 +95,23 @@ class Social_Links extends Abstract_Block_Renderer {
 			'text-decoration'  => 'none',
 			'text-transform'   => 'none',
 			'padding'          => '10px',
+			'border-radius'  => '9999px',
 		);
+		if ( $is_pill_shape ) {
+			$anchor_style['padding-left']  = '17px';
+			$anchor_style['padding-right'] = '17px';
+		}
 		$anchor_html  = sprintf( ' style="%s" ', esc_attr( $this->compile_css( $anchor_style ) ) );
 		if ( $open_in_new_tab ) {
 			$anchor_html .= ' rel="noopener nofollow" target="_blank"';
 		}
 
-		$td_styles = array();
+		$td_styles = array(
+			'vertical-align' => 'middle',
+			'text-align'     => 'center',
+			'padding'        => '10px',
+
+		);
 
 		$td_attributes = sprintf( 'class="wp-social-link wp-social-link-%1$s wp-block-social-link"', esc_attr( $service_name ) );
 		if ( ! empty( $td_styles ) ) {
@@ -106,7 +121,7 @@ class Social_Links extends Abstract_Block_Renderer {
 		return sprintf(
 			'<td %1$s role="presentation" valign="middle">
 				<a %2$s href="%3$s" class="wp-block-social-link-anchor">
-					<img src="%4$s" alt="%6$s" width="24" height="24">
+					<img src="%4$s" alt="%6$s" width="17" height="17">
 					%5$s
 				</a>
 			</td>',
