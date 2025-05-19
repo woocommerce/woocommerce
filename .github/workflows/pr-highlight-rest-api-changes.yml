@@ -36,7 +36,7 @@ jobs:
             slack-bot-user-oauth-access-token: ${{ secrets.TEST_ASSISTANCE_BOT_TOKEN }}
             slack-channel: ${{ secrets.WOO_CORE_REST_API_CHANGES_SLACK_CHANNEL }}
             slack-text: |
-                <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>
-                *Milestone:* ${{ github.event.pull_request.milestone && github.event.pull_request.milestone.html_url && github.event.pull_request.milestone.title && format('<{0}|{1}>', github.event.pull_request.milestone.html_url, github.event.pull_request.milestone.title) || 'not found' }}
+                <${{ github.event.pull_request.html_url }}|#${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}>
+                ${{ github.event.pull_request.milestone && github.event.pull_request.milestone.html_url && github.event.pull_request.milestone.title && format('*Milestone:* <{0}|{1}>', github.event.pull_request.milestone.html_url, github.event.pull_request.milestone.title) || '' }}
             slack-optional-unfurl_links: false
             slack-optional-unfurl_media: false
