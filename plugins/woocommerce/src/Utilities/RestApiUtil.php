@@ -3,7 +3,7 @@
 namespace Automattic\WooCommerce\Utilities;
 
 /**
- * Utility methods related to the REST API
+ * Utility methods related to the REST API.
  */
 class RestApiUtil {
 
