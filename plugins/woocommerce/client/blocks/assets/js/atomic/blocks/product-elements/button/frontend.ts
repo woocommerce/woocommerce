@@ -1,11 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	store,
-	getContext as getContextFn,
-	useLayoutEffect,
-} from '@wordpress/interactivity';
+import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 
 /**
@@ -55,8 +51,6 @@ interface Store {
 	};
 }
 
-const getContext = () => getContextFn< Context >();
-
 const { state: wooState } = store< WooCommerce >(
 	'woocommerce',
 	{},
@@ -68,23 +62,23 @@ const { state } = store< Store >(
 	{
 		state: {
 			get quantity() {
-				const { productId } = getContext();
+				const { productId } = getContext< Context >();
 				const product = wooState.cart?.items.find(
 					( item ) => item.id === productId
 				);
 				return product?.quantity || 0;
 			},
 			get slideInAnimation() {
-				const { animationStatus } = getContext();
+				const { animationStatus } = getContext< Context >();
 				return animationStatus === AnimationStatus.SLIDE_IN;
 			},
 			get slideOutAnimation() {
-				const { animationStatus } = getContext();
+				const { animationStatus } = getContext< Context >();
 				return animationStatus === AnimationStatus.SLIDE_OUT;
 			},
 			get addToCartText(): string {
 				const { animationStatus, tempQuantity, addToCartText } =
-					getContext();
+					getContext< Context >();
 
 				// We use the temporary quantity when there's no animation, or
 				// when the second part of the animation hasn't started yet.
@@ -103,14 +97,14 @@ const { state } = store< Store >(
 				);
 			},
 			get displayViewCart(): boolean {
-				const { displayViewCart } = getContext();
+				const { displayViewCart } = getContext< Context >();
 				if ( ! displayViewCart ) return false;
 				return state.quantity > 0;
 			},
 		},
 		actions: {
 			*addCartItem() {
-				const context = getContext();
+				const context = getContext< Context >();
 				const { productId, quantityToAdd } = context;
 
 				// Todo: Use the module exports instead of `store()` once the
@@ -142,7 +136,7 @@ const { state } = store< Store >(
 				actions.refreshCartItems();
 			},
 			handleAnimationEnd( event: AnimationEvent ) {
-				const context = getContext();
+				const context = getContext< Context >();
 				if ( event.animationName === 'slideOut' ) {
 					// When the first part of the animation (slide-out) ends, we move
 					// to the second part (slide-in).
@@ -158,7 +152,7 @@ const { state } = store< Store >(
 		},
 		callbacks: {
 			syncTempQuantityOnLoad() {
-				const context = getContext();
+				const context = getContext< Context >();
 				// When we instantiate this element, we sync the temporary
 				// quantity with the quantity in the cart to avoid triggering
 				// the animation. We do this only once, and we use
@@ -170,7 +164,7 @@ const { state } = store< Store >(
 				}, [] );
 			},
 			startAnimation() {
-				const context = getContext();
+				const context = getContext< Context >();
 				// We start the animation if the temporary quantity is out of
 				// sync with the quantity in the cart and the animation hasn't
 				// started yet.
@@ -183,7 +177,7 @@ const { state } = store< Store >(
 			},
 			syncProductId() {
 				const addToCartContext =
-					getContextFn< AddToCartWithOptionsContext >(
+					getContext< AddToCartWithOptionsContext >(
 						'woocommerce/add-to-cart-with-options'
 					) as AddToCartWithOptionsContext | undefined; // Product Button may not be nested inside Add To Cart + Options block.
 
@@ -191,7 +185,7 @@ const { state } = store< Store >(
 					return;
 				}
 
-				const context = getContext();
+				const context = getContext< Context >();
 				const { productId, variationId } = addToCartContext;
 
 				// The `variationId` is only available when the product is a
