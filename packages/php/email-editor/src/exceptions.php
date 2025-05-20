@@ -39,7 +39,10 @@ abstract class Exception extends \Exception {
     return $this;
   }
 
-  /** @return static */
+  /**
+   * @param string[] $errors
+   * @return static
+   */
   public function withErrors(array $errors) {
     $this->errors = $errors;
     return $this;
@@ -51,6 +54,9 @@ abstract class Exception extends \Exception {
     return $this;
   }
 
+  /**
+   * @return string[]
+   */
   public function getErrors(): array {
     return $this->errors;
   }
