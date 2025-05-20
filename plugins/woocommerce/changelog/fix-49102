@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed the rendering issue with rtl currency symbols which was causing the product price UI to break.
