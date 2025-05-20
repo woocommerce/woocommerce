@@ -39,7 +39,7 @@ const config: Config = {
 				docs: {
 					sidebarPath: './sidebars.ts',
 					path: '../',
-					exclude: [ '_docu-tools/**', 'README.md' ],
+					exclude: [ '_docu-tools/**' ],
 					// Please change this to your repo.
 					// Remove this to remove the "edit this page" links.
 					editUrl:

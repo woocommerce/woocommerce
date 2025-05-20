@@ -56,6 +56,12 @@ html[data-theme='dark'] .automattic-logo-light {
   display: none;
 }
 
+/* Hide the pagination nav */
 .pagination-nav {
   display: none;
+}
+
+/* Utility hidden link */
+.hidden {
+display: none !important;
 }
