@@ -29,7 +29,11 @@ const Template: StoryFn< RemovableChipProps > = ( args ) => {
 	};
 
 	if ( ! isVisible ) {
-		return <></>;
+		return (
+			<button onClick={ () => setIsVisible( true ) }>
+				<em>Chip was removed, click to reset</em>
+			</button>
+		);
 	}
 
 	return <RemovableChip { ...args } onRemove={ handleRemove } />;
