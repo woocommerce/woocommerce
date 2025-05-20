@@ -34,14 +34,14 @@ const { registerPlugin } = wp.plugins;
 const { ExperimentalOrderMeta } = wc.blocksCheckout;
 
 const MyCustomComponent = ( { cart, extensions } ) => {
-	return &lt;div className="my-component"&gt;Hello WooCommerce&lt;/div&gt;;
+	return <div className="my-component">Hello WooCommerce</div>;
 };
 
 const render = () => {
 	return (
-		&lt;ExperimentalOrderMeta&gt;
-			&lt;MyCustomComponent /&gt;
-		&lt;/ExperimentalOrderMeta&gt;
+		<ExperimentalOrderMeta>
+			<MyCustomComponent />
+		</ExperimentalOrderMeta>
 	);
 };
 

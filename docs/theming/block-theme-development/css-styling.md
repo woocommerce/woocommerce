@@ -44,10 +44,10 @@ Those classes are:
 
 Container width | Class name
 ----------------|------------
-\&gt;700px         | `is-large`
+\>700px         | `is-large`
 521px-700px     | `is-medium`
 401px-520px     | `is-small`
-&lt;=400px         | `is-mobile`
+<=400px         | `is-mobile`
 
 As an example, if we wanted to do the Checkout font size 10% larger when the container has a width of 521px or wider, we could do so with this code:
 
@@ -60,9 +60,9 @@ As an example, if we wanted to do the Checkout font size 10% larger when the con
 
 ## WC Blocks _vs._ theme style conflicts for semantic elements
 
-WooCommerce Blocks uses HTML elements according to their semantic meaning, not their default layout. That means that some times blocks might use an anchor link (`&lt;a&gt;`) but display it as a button. Or the other way around, a `&lt;button&gt;` might be displayed as a text link. Similarly, headings might be displayed as regular text.
+WooCommerce Blocks uses HTML elements according to their semantic meaning, not their default layout. That means that some times blocks might use an anchor link (`<a>`) but display it as a button. Or the other way around, a `<button>` might be displayed as a text link. Similarly, headings might be displayed as regular text.
 
-In these cases, Blocks include some CSS resets to undo most default styles introduced by themes. A `&lt;button&gt;` that is displayed as a text link will probably have resets for the background, border, etc. That will solve most conflicts out-of-the-box but in some occasions those CSS resets might not have effect if the theme has a specific CSS selector with higher specificity. When that happens, we really encourage theme developers to decrease their selectors specificity so Blocks styles have preference, if that's not possible, themes can write CSS resets on top.
+In these cases, Blocks include some CSS resets to undo most default styles introduced by themes. A `<button>` that is displayed as a text link will probably have resets for the background, border, etc. That will solve most conflicts out-of-the-box but in some occasions those CSS resets might not have effect if the theme has a specific CSS selector with higher specificity. When that happens, we really encourage theme developers to decrease their selectors specificity so Blocks styles have preference, if that's not possible, themes can write CSS resets on top.
 
 ## Hidden elements
 

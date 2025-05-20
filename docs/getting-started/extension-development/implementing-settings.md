@@ -229,19 +229,19 @@ public function generate_button_html( $key, $data ) {
 
 	ob_start();
 	?>
-	&lt;tr valign="top"&gt;
-		&lt;th scope="row" class="titledesc"&gt;
-			&lt;label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?>&lt;/label&gt;
+	<tr valign="top">
+		<th scope="row" class="titledesc">
+			<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 			<?php echo $this->get_tooltip_html( $data ); ?>
-		&lt;/th&gt;
-		&lt;td class="forminp"&gt;
-			&lt;fieldset&lt;
-				&lt;legend class="screen-reader-text"&gt;&lt;span&gt;<?php echo wp_kses_post( $data['title'] ); ?&gt;&lt;/span&gt;&lt;/legend&gt;
-				&lt;button class="<?php echo esc_attr( $data['class'] ); ?>" type="button" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php echo $this->get_custom_attribute_html( $data ); ?>&gt;<?php echo wp_kses_post( $data['title'] ); ?>&lt;/button&gt;
+		</th>
+		<td class="forminp">
+			<fieldset<
+				<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
+				<button class="<?php echo esc_attr( $data['class'] ); ?>" type="button" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php echo $this->get_custom_attribute_html( $data ); ?>><?php echo wp_kses_post( $data['title'] ); ?></button>
 				<?php echo $this->get_description_html( $data ); ?>
-			&lt;/fieldset&gt;
-		&lt;/td&gt;
-	&lt;/tr&gt;
+			</fieldset>
+		</td>
+	</tr>
 	<?php
 	return ob_get_clean();
 }

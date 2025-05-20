@@ -21,10 +21,10 @@ Email design and development require a different approach than traditional web d
 ### Use older, simpler HTML standards
 
 - Use HTML 4.01 or XHTML 1.0 - Many email clients use outdated rendering engines and don't support modern HTML5 features.
-- Avoid HTML5 elements in the main structure - Elements like `&lt;section&gt;`, `&lt;article&gt;`, and `&lt;aside&gt;` aren't supported in all email clients.
+- Avoid HTML5 elements in the main structure - Elements like `<section>`, `<article>`, and `<aside>` aren't supported in all email clients.
 - Always use lowercase for tags and attributes - This ensures maximum compatibility and prevents rendering issues in strict clients.
 - Always use quotes for attribute values - Unquoted attributes can cause parsing errors in some email clients.
-- Close all tags, even self-closing ones with a trailing slash (`&lt;br /&gt;`) - This prevents rendering issues in clients that expect XHTML-style syntax.
+- Close all tags, even self-closing ones with a trailing slash (`<br />`) - This prevents rendering issues in clients that expect XHTML-style syntax.
 
 ### Tables as the foundation
 
@@ -34,13 +34,13 @@ Email design and development require a different approach than traditional web d
 - Use `align` and `valign` attributes instead of CSS equivalents - These HTML attributes have better support than CSS positioning in email clients.
 
 ```html
-&lt;table border="0" cellpadding="0" cellspacing="0" width="100%"&gt;
-    &lt;tr&gt;
-        &lt;td align="center" valign="top"&gt;
-            &lt;!-- Content here --&gt;
-        &lt;/td&gt;
-    &lt;/tr&gt;
-&lt;/table&gt;
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+        <td align="center" valign="top">
+            <!-- Content here -->
+        </td>
+    </tr>
+</table>
 ```
 
 ### Avoid problematic elements
@@ -55,7 +55,7 @@ Email design and development require a different approach than traditional web d
 
 ### CSS Support Limitations
 
-- Use inline CSS for everything critical - Many email clients strip `&lt;style&gt;` tags or ignore them entirely.
+- Use inline CSS for everything critical - Many email clients strip `<style>` tags or ignore them entirely.
 - Avoid CSS shorthand properties (use `margin-top` instead of `margin`) - Some email clients only recognize individual properties, not shorthand.
 - Avoid CSS positioning properties (`position`, `float`, `clear`) - These are poorly supported and can cause layout issues.
 - Avoid advanced selectors (stick to element, class, and ID selectors) - Complex selectors often fail in email clients with limited CSS support.
@@ -63,16 +63,16 @@ Email design and development require a different approach than traditional web d
 ### Always use inline styles
 
 ```html
-&lt;p style="font-family: Arial, sans-serif; font-size: 16px; line-height: 24px; color: #333333;"&gt;
+<p style="font-family: Arial, sans-serif; font-size: 16px; line-height: 24px; color: #333333;">
     Your content here
-&lt;/p&gt;
+</p>
 ```
 
 ### Limited use of style tags
 
 - Use for email client-specific hacks only
 - Be careful with media queries (support varies)
-- Always include the type attribute: `&lt;style type="text/css"&gt;`
+- Always include the type attribute: `<style type="text/css">`
 
 ### Supported vs unsupported CSS
 
@@ -101,16 +101,16 @@ Email design and development require a different approach than traditional web d
 ### Multi-column layouts with tables
 
 ```html
-&lt;table border="0" cellpadding="0" cellspacing="0" width="600"&gt;
-    &lt;tr&gt;
-        &lt;td width="300" valign="top"&gt;
-            &lt;!-- Column 1 content --&gt;
-        &lt;/td&gt;
-        &lt;td width="300" valign="top"&gt;
-            &lt;!-- Column 2 content --&gt;
-        &lt;/td&gt;
-    &lt;/tr&gt;
-&lt;/table&gt;
+<table border="0" cellpadding="0" cellspacing="0" width="600">
+    <tr>
+        <td width="300" valign="top">
+            <!-- Column 1 content -->
+        </td>
+        <td width="300" valign="top">
+            <!-- Column 2 content -->
+        </td>
+    </tr>
+</table>
 ```
 
 ### Column stacking techniques
@@ -120,17 +120,17 @@ Email design and development require a different approach than traditional web d
 - Consider hybrid/spongy approach for clients without media query support - This technique creates layouts that adapt reasonably even without media query support.
 
 ```html
-&lt;!--[if mso]&gt;
-&lt;table border="0" cellpadding="0" cellspacing="0" width="600"&gt;
-&lt;tr&gt;&lt;td width="300" valign="top"&gt;&lt;![endif]--&gt;
-&lt;div style="display: inline-block; width: 300px; vertical-align: top;"&gt;
-    &lt;!-- Column 1 content --&gt;
-&lt;/div&gt;
-&lt;!--[if mso]&gt;&lt;/td&gt;&lt;td width="300" valign="top"&gt;&lt;![endif]--&gt;
-&lt;div style="display: inline-block; width: 300px; vertical-align: top;"&gt;
-    &lt;!-- Column 2 content --&gt;
-&lt;/div&gt;
-&lt;!--[if mso]&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;![endif]--&gt;
+<!--[if mso]>
+<table border="0" cellpadding="0" cellspacing="0" width="600">
+<tr><td width="300" valign="top"><![endif]-->
+<div style="display: inline-block; width: 300px; vertical-align: top;">
+    <!-- Column 1 content -->
+</div>
+<!--[if mso]></td><td width="300" valign="top"><![endif]-->
+<div style="display: inline-block; width: 300px; vertical-align: top;">
+    <!-- Column 2 content -->
+</div>
+<!--[if mso]></td></tr></table><![endif]-->
 ```
 
 ## Responsiveness
@@ -147,7 +147,7 @@ Email design and development require a different approach than traditional web d
 Limited but important support:
 
 ```html
-&lt;style type="text/css"&gt;
+<style type="text/css">
     @media screen and (max-width: 480px) {
         .mobile-full-width {
             width: 100% !important;
@@ -158,7 +158,7 @@ Limited but important support:
             font-size: 16px !important;
         }
     }
-&lt;/style&gt;
+</style>
 ```
 
 ### Fluid hybrid approach
@@ -166,15 +166,15 @@ Limited but important support:
 Uses max-width and MSO conditionals to work across clients with or without media query support:
 
 ```html
-&lt;!--[if mso]&gt;
-&lt;table width="600" cellpadding="0" cellspacing="0" border="0"&gt;&lt;tr&gt;&lt;td&gt;
-&lt;![endif]--&gt;
-&lt;div style="width:100%; max-width:600px; margin:0 auto;"&gt;
-    &lt;!-- Content --&gt;
-&lt;/div&gt;
-&lt;!--[if mso]&gt;
-&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;![endif]--&gt;
+<!--[if mso]>
+<table width="600" cellpadding="0" cellspacing="0" border="0"><tr><td>
+<![endif]-->
+<div style="width:100%; max-width:600px; margin:0 auto;">
+    <!-- Content -->
+</div>
+<!--[if mso]>
+</td></tr></table>
+<![endif]-->
 ```
 
 ## Typography
@@ -199,11 +199,11 @@ font-family: 'Courier New', Courier, monospace;
 - Outlook, Gmail, and Yahoo! often don't support web fonts - These popular clients will display your fallback fonts instead.
 
 ```html
-&lt;style&gt;
+<style>
     @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
-&lt;/style&gt;
+</style>
 
-&lt;p style="font-family: 'Open Sans', Arial, sans-serif;"&gt;Your text&lt;/p&gt;
+<p style="font-family: 'Open Sans', Arial, sans-serif;">Your text</p>
 ```
 
 ### Text formatting best practices
@@ -224,7 +224,7 @@ font-family: 'Courier New', Courier, monospace;
 - Consider what happens when images are blocked - Many email clients block images by default, so your email should still make sense without them.
 
 ```html
-&lt;img src="https://example.com/image.jpg" alt="Description of image" width="600" height="400" style="display: block; width: 100%; max-width: 600px; height: auto;" border="0"&gt;
+<img src="https://example.com/image.jpg" alt="Description of image" width="600" height="400" style="display: block; width: 100%; max-width: 600px; height: auto;" border="0">
 ```
 
 ### Background images
@@ -232,13 +232,13 @@ font-family: 'Courier New', Courier, monospace;
 Limited support; always provide a fallback bgcolor:
 
 ```html
-&lt;table background="https://example.com/bg.jpg" bgcolor="#f7f7f7" width="600" cellpadding="0" cellspacing="0" border="0"&gt;
-    &lt;tr&gt;
-        &lt;td&gt;
+<table background="https://example.com/bg.jpg" bgcolor="#f7f7f7" width="600" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+        <td>
             Content
-        &lt;/td&gt;
-    &lt;/tr&gt;
-&lt;/table&gt;
+        </td>
+    </tr>
+</table>
 ```
 
 ## Email Client Specifics
@@ -250,9 +250,9 @@ Limited support; always provide a fallback bgcolor:
 - Use MSO conditional comments for Outlook-specific code - These allow you to target Outlook versions specifically.
 
 ```html
-&lt;!--[if mso]&gt;
+<!--[if mso]>
     Outlook-specific content here
-&lt;![endif]--&gt;
+<![endif]-->
 ```
 
 ### Gmail
@@ -278,7 +278,7 @@ Limited support; always provide a fallback bgcolor:
 - Use `aria-hidden="true"` for decorative elements - This prevents screen readers from announcing purely visual elements.
 
 ```html
-&lt;table role="presentation" border="0" cellpadding="0" cellspacing="0"&gt;
+<table role="presentation" border="0" cellpadding="0" cellspacing="0">
 ```
 
 ### Text alternatives

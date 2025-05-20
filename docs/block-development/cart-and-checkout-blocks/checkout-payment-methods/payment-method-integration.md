@@ -117,7 +117,7 @@ if ( typeof buttonAttributes !== 'undefined' ) {
 }
 ...
 
-return &lt;button style={height: `${height}px`, borderRadius: `${borderRadius}px`} /&gt;
+return <button style={height: `${height}px`, borderRadius: `${borderRadius}px`} />
 ```
 
 ## Payment Methods

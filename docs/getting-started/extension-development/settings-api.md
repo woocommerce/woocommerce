@@ -72,10 +72,10 @@ Create a method called `admin_options` containing the following:
 ```php
 function admin_options() {
 	?>
-	&lt;h2&gt;<?php esc_html_e( 'Your plugin name', 'your-text-domain' ); ?>&lt;/h2&gt;
-	&lt;table class="form-table"&gt;
+	<h2><?php esc_html_e( 'Your plugin name', 'your-text-domain' ); ?></h2>
+	<table class="form-table">
 		<?php $this->generate_settings_html(); ?>
-	&lt;/table&gt;
+	</table>
 	<?php
 }
 ```

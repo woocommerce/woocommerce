@@ -345,11 +345,11 @@ This results in the following address form (the billing form will be the same):
 The rendered markup looks like this:
 
 ```html
-	&lt;input type="text" id="shipping-namespace-gov-id" autocapitalize="off"
+	<input type="text" id="shipping-namespace-gov-id" autocapitalize="off"
        autocomplete="government-id" aria-label="custom aria label"
        aria-describedby="some-element" required="" aria-invalid="true"
        title="Title to show on hover" pattern="[A-Z0-9]{5}"
-       data-custom="custom data" value="" &gt;
+       data-custom="custom data" value="">
 ```
 
 ### Rendering a checkbox field

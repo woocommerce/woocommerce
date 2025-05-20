@@ -24,11 +24,11 @@ const { ExperimentalOrderMeta } = window.wc.blocksCheckout;
 
 const render = () => {
 	return (
-		&lt;ExperimentalOrderMeta&gt;
-			&lt;div class="wc-block-components-totals-wrapper"&gt;
+		<ExperimentalOrderMeta>
+			<div class="wc-block-components-totals-wrapper">
 				{ __( 'Yearly recurring total ...', 'YOUR-TEXTDOMAIN' ) }
-			&lt;/div&gt;
-		&lt;/ExperimentalOrderMeta&gt;
+			</div>
+		</ExperimentalOrderMeta>
 	);
 };
 
@@ -63,9 +63,9 @@ const { ExperimentalOrderShippingPackages } = window.wc.blocksCheckout;
 
 const render = () => {
 	return (
-		&lt;ExperimentalOrderShippingPackages&gt;
-			&lt;div&gt;{ __( 'Express Shipping', 'YOUR-TEXTDOMAIN' ) }&lt;/div&gt;
-		&lt;/ExperimentalOrderShippingPackages&gt;
+		<ExperimentalOrderShippingPackages>
+			<div>{ __( 'Express Shipping', 'YOUR-TEXTDOMAIN' ) }</div>
+		</ExperimentalOrderShippingPackages>
 	);
 };
 
@@ -106,14 +106,14 @@ const { ExperimentalOrderLocalPickupPackages } = window.wc.blocksCheckout;
 
 const render = () => {
 	return (
-		&lt;ExperimentalOrderLocalPickupPackages&gt;
-			&lt;div&gt;
+		<ExperimentalOrderLocalPickupPackages>
+			<div>
 				{ __(
 					'By using our convenient local pickup option, you can come to our store and pick up your order. We will send you and email when your order is ready for pickup.',
 					'YOUR-TEXTDOMAIN'
 				) }
-			&lt;/div&gt;
-		&lt;/ExperimentalOrderLocalPickupPackages&gt;
+			</div>
+		</ExperimentalOrderLocalPickupPackages>
 	);
 };
 
@@ -145,11 +145,11 @@ const { ExperimentalDiscountsMeta } = window.wc.blocksCheckout;
 
 const render = () => {
 	return (
-		&lt;ExperimentalDiscountsMeta&gt;
-			&lt;div class="wc-block-components-totals-wrapper"&gt;
+		<ExperimentalDiscountsMeta>
+			<div class="wc-block-components-totals-wrapper">
 				{ __( 'You have 98683 coins to spend ...', 'YOUR-TEXTDOMAIN' ) }
-			&lt;/div&gt;
-		&lt;/ExperimentalDiscountsMeta&gt;
+			</div>
+		</ExperimentalDiscountsMeta>
 	);
 };
 

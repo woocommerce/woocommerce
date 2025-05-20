@@ -61,7 +61,7 @@ For our Woo extension, we'll be appending our field right at the end with `wooco
 Let's get started with creating a new class which will hold the code for the field. Add a new file with the name `class-product-fields.php` to the `/includes/admin/` folder. Within the class, we add our namespace, an abort if anyone tries to call the file directly and a \_\_construct method which calls the `hooks()` method:
 
 ```php
-&lt;?php
+<?php
 
 namespace WooProductField\Admin;
 
@@ -70,7 +70,7 @@ defined( 'ABSPATH' ) || exit;
 class ProductFields {
 
     public function __construct() {
-		$this-&gt;hooks();
+		$this->hooks();
     }
 
     private function hooks() {}
@@ -95,19 +95,19 @@ With the class set up and being called, we can create a function to add the cust
 ```php
 public function add_field() {
 	global $product_object;
-	?&gt;
-	&lt;div class="inventory_new_stock_information options_group show_if_simple show_if_variable"&gt;
-		&lt;?php woocommerce_wp_text_input(
+	?>
+	<div class="inventory_new_stock_information options_group show_if_simple show_if_variable">
+		<?php woocommerce_wp_text_input(
 			array(
-				'id'      	=&gt; '_new_stock_information',
-				'label'   	=&gt; __( 'New Stock', 'woo_product_field' ),
-				'description' =&gt; __( 'Information shown in store', 'woo_product_field' ),
-				'desc_tip'	=&gt; true,
-				'value' =&gt; $product_object-&gt;get_meta( '_new_stock_information' )
+				'id'      	=> '_new_stock_information',
+				'label'   	=> __( 'New Stock', 'woo_product_field' ),
+				'description' => __( 'Information shown in store', 'woo_product_field' ),
+				'desc_tip'	=> true,
+				'value' => $product_object->get_meta( '_new_stock_information' )
 			)
-		); ?&gt;
-	&lt;/div&gt;
-	&lt;?php
+		); ?>
+	</div>
+	<?php
 }
 ```
 
@@ -121,8 +121,8 @@ Now that we have our field, we need to save it. For this, we can hook into wooco
 public function save_field( $post_id, $post ) {
 	if ( isset( $_POST['_new_stock_information'] ) ) {
 		$product = wc_get_product( intval( $post_id ) );
-		$product-&gt;update_meta_data( '_new_stock_information', sanitize_text_field( $_POST['_new_stock_information'] ) );
-		$product-&gt;save_meta_data();
+		$product->update_meta_data( '_new_stock_information', sanitize_text_field( $_POST['_new_stock_information'] ) );
+		$product->save_meta_data();
 	}
 }
 ```
@@ -144,12 +144,12 @@ If we add data and save the product, then the new meta data is inserted into the
 
 At this point you have a working extension that saves a custom field for a product as product meta.
 Showing the field in the store
-If we want to display the new field in our store, then we can do this with the `get_meta()` method of the Woo product class: `$product-&gt;get_meta( '\_new_stock_information' )`
+If we want to display the new field in our store, then we can do this with the `get_meta()` method of the Woo product class: `$product->get_meta( '\_new_stock_information' )`
 
 Let's get started by creating a new file /includes/class-product.php. You may have noticed that this is outside the `/admin/` folder as this code will run in the front. So when we set up the class, we also adjust the namespace accordingly:
 
 ```php
-&lt;?php
+<?php
 
 namespace WooProductField;
 
@@ -157,7 +157,7 @@ defined( 'ABSPATH' ) || exit;
 
 class Product {
     public function __construct() {
-		$this-&gt;hooks();
+		$this->hooks();
     }
 
     private function hooks() { }
@@ -192,9 +192,9 @@ In our function we output the stock information with the [appropriate escape fun
 ```php
 public function add_stock_info() {
 	global $product;
-	?&gt;
-	&lt;p&gt;&lt;?php echo esc_html( $product-&gt;get_meta( '_new_stock_information' ) ); ?&gt; &lt;/p&gt;
-	&lt;?php
+	?>
+	<p><?php echo esc_html( $product->get_meta( '_new_stock_information' ) ); ?> </p>
+	<?php
 
     }
 ```
@@ -225,14 +225,14 @@ The setup is very similar to simple products, the main difference is that we nee
 
 ```php
 public function add_variation_field( $loop, $variation_data, $variation ) {
-	$variation_product = wc_get_product( $variation-&gt;ID );
+	$variation_product = wc_get_product( $variation->ID );
 
 	woocommerce_wp_text_input(
 		array(
-			'id' =&gt; '\_new_stock_information' . '[' . $loop . ']',
-			'label' =&gt; \_\_( 'New Stock Information', 'woo_product_field' ),
-			'wrapper_class' =&gt; 'form-row form-row-full',
-			'value' =&gt; $variation_product-&gt;get_meta( '\_new_stock_information' )
+			'id' => '\_new_stock_information' . '[' . $loop . ']',
+			'label' => \_\_( 'New Stock Information', 'woo_product_field' ),
+			'wrapper_class' => 'form-row form-row-full',
+			'value' => $variation_product->get_meta( '\_new_stock_information' )
 		)
 	);
 }
@@ -244,8 +244,8 @@ For saving we use:
 public function save_variation_field( $variation_id, $i  ) {
 	if ( isset( $_POST['_new_stock_information'][$i] ) ) {
 		$variation_product = wc_get_product( $variation_id );
-		$variation_product-&gt;update_meta_data( '_new_stock_information', sanitize_text_field( $_POST['_new_stock_information'][$i] ) );
-		$variation_product-&gt;save_meta_data();
+		$variation_product->update_meta_data( '_new_stock_information', sanitize_text_field( $_POST['_new_stock_information'][$i] ) );
+		$variation_product->save_meta_data();
 	}
 }
 ```

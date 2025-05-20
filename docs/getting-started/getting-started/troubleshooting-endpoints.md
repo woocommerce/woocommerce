@@ -20,24 +20,24 @@ For more information, learn how to [Customize Endpoints](./customizing-endpoint-
 On Windows servers, the **web.config** file may not be set correctly to allow for the endpoints to work correctly. In this case, clicking on endpoint links (e.g. /edit-account/ or /customer-logout/) may appear to do nothing except refresh the page. In order to resolve this, try simplifying the **web.config** file on your Windows server. Here's a sample file configuration:
 
 ```xml
-&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;configuration&gt;
-  &lt;system.webServer&gt;
-    &lt;handlers accessPolicy="Read, Execute, Script" /&gt;
-    &lt;rewrite&gt;
-    &lt;rules&gt;
-      &lt;rule name="wordpress" patternSyntax="Wildcard"&gt;
-        &lt;match url="*" /&gt;
-        &lt;conditions&gt;
-          &lt;add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" /&gt;
-          &lt;add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" /&gt;
-        &lt;/conditions&gt;
-        &lt;action type="Rewrite" url="index.php" /&gt;
-      &lt;/rule&gt;
-    &lt;/rules&gt;
-    &lt;/rewrite&gt;
-  &lt;/system.webServer&gt;
-&lt;/configuration&gt;
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <system.webServer>
+    <handlers accessPolicy="Read, Execute, Script" />
+    <rewrite>
+    <rules>
+      <rule name="wordpress" patternSyntax="Wildcard">
+        <match url="*" />
+        <conditions>
+          <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+          <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+        </conditions>
+        <action type="Rewrite" url="index.php" />
+      </rule>
+    </rules>
+    </rewrite>
+  </system.webServer>
+</configuration>
 ```
 
 ## Pages direct to wrong place

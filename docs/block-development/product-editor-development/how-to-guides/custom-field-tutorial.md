@@ -62,7 +62,7 @@ In React:
 import { registerBlockType } from '@wordpress/blocks';
 
 function Edit() {
-	return &lt;p&gt;Hello World (from the editor).&lt;/p&gt;;
+	return <p>Hello World (from the editor).</p>;
 }
 
 registerBlockType( 'tutorial/new-product-form-field', {
@@ -217,8 +217,8 @@ function Edit( { attributes } ) {
 
 	const blockProps = useWooBlockProps( attributes );
 	return (
-		&lt;div { ...blockProps }&gt;
-			&lt;ComboboxControl
+		<div { ...blockProps }>
+			<ComboboxControl
 				label="Example dropdown"
 				value={ value }
 				onChange={ setValue }
@@ -232,8 +232,8 @@ function Edit( { attributes } ) {
 						)
 					)
 				}
-			/&gt;
-		&lt;/div&gt;
+			/>
+		</div>
 	);
 }
 ```
