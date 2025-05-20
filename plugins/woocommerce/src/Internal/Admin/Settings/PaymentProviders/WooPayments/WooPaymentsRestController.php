@@ -180,6 +180,27 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			),
 			$override
 		);
+		register_rest_route(
+			$this->route_namespace,
+			'/' . $this->rest_base . '/onboarding/step/(?P<step>[a-zA-Z0-9_-]+)/clean',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_step_clean' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => array(
+						'location' => array(
+							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
+							'type'              => 'string',
+							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'required'          => false,
+							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
+						),
+					),
+				),
+			),
+			$override
+		);
 		// Onboarding step specific routes.
 		register_rest_route(
 			$this->route_namespace,
@@ -387,7 +408,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		try {
 			$previous_status = $this->woopayments->get_onboarding_step_status( $step_id, $location );
 
-			$this->woopayments->set_onboarding_step_started( $step_id, $location );
+			$this->woopayments->mark_onboarding_step_started( $step_id, $location );
 
 			$response = array(
 				'success'         => true,
@@ -473,7 +494,40 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		try {
 			$previous_status = $this->woopayments->get_onboarding_step_status( $step_id, $location );
 
-			$this->woopayments->set_onboarding_step_completed( $step_id, $location );
+			$this->woopayments->mark_onboarding_step_completed( $step_id, $location );
+
+			$response = array(
+				'success'         => true,
+				'previous_status' => $previous_status,
+				'current_status'  => $this->woopayments->get_onboarding_step_status( $step_id, $location ),
+			);
+		} catch ( ApiException $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Handle the onboarding step clean action.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_Error|WP_REST_Response The response or error.
+	 */
+	protected function handle_onboarding_step_clean( WP_REST_Request $request ) {
+		$step_id = $request->get_param( 'step' ) ?? '';
+
+		$location = $request->get_param( 'location' );
+		if ( empty( $location ) ) {
+			// Fall back to the providers country if no location is provided.
+			$location = $this->payments->get_country();
+		}
+
+		try {
+			$previous_status = $this->woopayments->get_onboarding_step_status( $step_id, $location );
+
+			$this->woopayments->clean_onboarding_step_progress( $step_id, $location );
 
 			$response = array(
 				'success'         => true,
@@ -503,7 +557,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 
 		try {
 			// Mark the step as started, if not already.
-			$this->woopayments->set_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+			$this->woopayments->mark_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
 			$result = $this->woopayments->onboarding_test_account_init( $location, $request->get_param( 'source' ) ?? '' );
 		} catch ( ApiException $e ) {
@@ -629,12 +683,19 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response The response.
 	 */
 	protected function get_woopay_eligibility() {
+		// We use the Payments Settings stored business location to determine the eligibility.
+		$location = $this->payments->get_country();
+
+		$woopay_eligible_countries = array( 'US' );
+		$is_eligible               = in_array( $location, $woopay_eligible_countries, true );
+
 		return rest_ensure_response(
 			array(
-				'is_eligible' => WCPayPromotion::is_woopay_eligible(),
+				'is_eligible' => $is_eligible,
 			)
 		);
 	}
+
 
 	/**
 	 * General permissions check for WooPayments settings REST API endpoint.
@@ -869,6 +930,13 @@ class WooPaymentsRestController extends RestApiControllerBase {
 								'finish'             => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to signal the step completion.', 'woocommerce' ),
+									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+								'clean'              => array(
+									'type'        => 'object',
+									'description' => esc_html__( 'Action to clean the step progress.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,

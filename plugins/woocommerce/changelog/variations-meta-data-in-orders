@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix: display variation meta data in emails and on pages only when are not a part of the product name

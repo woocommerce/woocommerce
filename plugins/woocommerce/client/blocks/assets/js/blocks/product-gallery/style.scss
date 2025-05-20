@@ -39,7 +39,6 @@ $dialog-padding: 20px;
 		margin-left: auto;
 	}
 
-
 	img {
 		display: block;
 		position: relative;
@@ -209,8 +208,10 @@ $dialog-padding: 20px;
 		$gradient-mid-step-size: 6%;
 		$gradient-mid-step: rgba(0, 0, 0, 0.3);
 
-		$gradient: transparent 0,  $gradient-mid-step $gradient-mid-step-size, rgb(0, 0, 0) $gradient-size;
-		$gradient-end: rgb(0, 0, 0) calc(100% - $gradient-size), $gradient-mid-step calc(100% - $gradient-mid-step-size), transparent;
+		$gradient: transparent 0, $gradient-mid-step $gradient-mid-step-size,
+			rgb(0, 0, 0) $gradient-size;
+		$gradient-end: rgb(0, 0, 0) calc(100% - $gradient-size),
+			$gradient-mid-step calc(100% - $gradient-mid-step-size), transparent;
 
 		&-top {
 			mask-image: linear-gradient(to bottom, $gradient);

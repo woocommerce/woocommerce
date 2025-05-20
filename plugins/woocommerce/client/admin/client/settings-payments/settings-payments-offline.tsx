@@ -13,7 +13,8 @@ import {
  */
 import './settings-payments-offline.scss';
 import './settings-payments-body.scss';
-import { OfflinePaymentGateways } from './components/offline-payment-gateways';
+import { ListPlaceholder } from '~/settings-payments/components/list-placeholder';
+import { OfflinePaymentGatewayList } from '~/settings-payments/components/offline-payment-gateway-list';
 
 /**
  * A component for managing offline payment gateways in WooCommerce.
@@ -66,13 +67,16 @@ export const SettingsPaymentsOffline = () => {
 
 	return (
 		<div className="settings-payments-offline__container">
-			<OfflinePaymentGateways
-				isFetching={ isFetching }
-				updateOrdering={ handleOrderingUpdate }
-				offlinePaymentGateways={
-					sortedOfflinePaymentGateways || offlinePaymentGateways
-				}
-			/>
+			{ isFetching ? (
+				<ListPlaceholder rows={ 3 } />
+			) : (
+				<OfflinePaymentGatewayList
+					gateways={
+						sortedOfflinePaymentGateways || offlinePaymentGateways
+					}
+					setGateways={ handleOrderingUpdate }
+				/>
+			) }
 		</div>
 	);
 };

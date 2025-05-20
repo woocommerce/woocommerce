@@ -63,7 +63,14 @@ const INITIAL_PHASE_INCREMENT = 5; // Increment progress by 20% for the initial 
 const EXTENDED_PHASE_1_INCREMENT = 1; // Increment progress by 1% for the extended phase 1
 
 // Status types for the component
-type Status = 'idle' | 'initializing' | 'polling' | 'success' | 'error';
+type Status =
+	| 'idle'
+	| 'initializing'
+	| 'polling'
+	| 'success'
+	| 'error'
+	| 'blocked'
+	| 'failed';
 
 const TestAccountStep = () => {
 	const { currentStep, navigateToNextStep, closeModal, refreshStoreData } =
@@ -102,25 +109,58 @@ const TestAccountStep = () => {
 	useEffect( () => {
 		// -- Initialization Phase --
 		if ( status === 'idle' ) {
-			const stepHasError = currentStep?.errors?.[ 0 ];
-			if ( stepHasError ) {
-				setErrorMessage( stepHasError );
-				setStatus( 'error' );
-				return;
-			}
-
 			if ( currentStep?.status === 'completed' ) {
 				setStatus( 'success' );
 				setProgress( 100 ); // Show success state immediately
 				return;
 			}
 
-			if ( currentStep?.status === 'not_started' ) {
+			if ( currentStep?.status === 'blocked' ) {
+				setErrorMessage(
+					currentStep?.errors?.[ 0 ]?.message ||
+						__(
+							'There are environment or store setup issues which are blocking progress. Please resolve them to proceed.',
+							'woocommerce'
+						)
+				);
+				setStatus( 'blocked' );
+				return;
+			}
+
+			// If this step is not started or previously failed, try to initialize it
+			if (
+				currentStep?.status === 'not_started' ||
+				currentStep?.status === 'failed'
+			) {
 				setStatus( 'initializing' );
-				apiFetch< { success: boolean; message?: string } >( {
-					url: currentStep?.actions?.init?.href,
-					method: 'POST',
-				} )
+
+				const cleanStepIfNeeded = async () => {
+					// We only need to clean the step if it has been retried or failed.
+					if (
+						currentStep?.actions?.clean?.href &&
+						( retryCounter > 0 || currentStep?.status === 'failed' )
+					) {
+						await apiFetch< {
+							success: boolean;
+							message?: string;
+						} >( {
+							url: currentStep?.actions?.clean?.href,
+							method: 'POST',
+						} );
+					}
+				};
+
+				// First clean the step if needed, then initialize
+				cleanStepIfNeeded()
+					.then( () => {
+						return apiFetch< {
+							success: boolean;
+							message?: string;
+						} >( {
+							url: currentStep?.actions?.init?.href,
+							method: 'POST',
+						} );
+					} )
 					.then( ( response ) => {
 						if ( response?.success ) {
 							// Start polling immediately after successful init
@@ -255,13 +295,6 @@ const TestAccountStep = () => {
 			clearTimers(); // Clear any pending timeouts
 		};
 	}, [ status, currentStep, retryCounter, pollingPhase ] );
-
-	// Effect to reset state on retry
-	useEffect( () => {
-		if ( retryCounter > 0 ) {
-			resetState();
-		}
-	}, [ retryCounter, resetState ] );
 
 	const getPhaseMessage = ( phase: number ) => {
 		if ( phase === 1 ) {
@@ -427,30 +460,40 @@ const TestAccountStep = () => {
 			<WooPaymentsStepHeader onClose={ closeModal } />
 
 			{ /* Error Notice */ }
-			{ status === 'error' && errorMessage && (
+			{ ( status === 'error' || status === 'blocked' ) && (
 				<Notice
-					status="warning"
+					status={ status === 'blocked' ? 'error' : 'warning' }
 					isDismissible={ false }
-					actions={ [
-						{
-							label: __( 'Try Again', 'woocommerce' ),
-							variant: 'primary',
-							onClick: () => {
-								setRetryCounter( ( c ) => c + 1 );
-							},
-						},
-						{
-							label: __( 'Cancel', 'woocommerce' ),
-							variant: 'secondary',
-							className:
-								'woocommerce-payments-test-account-step__error-cancel-button',
-							onClick: closeModal,
-						},
-					] }
+					actions={
+						// Only show actions if the step is not blocked
+						status !== 'blocked'
+							? [
+									{
+										label: __( 'Try Again', 'woocommerce' ),
+										variant: 'primary',
+										onClick: () => {
+											resetState();
+											setRetryCounter( ( c ) => c + 1 );
+										},
+									},
+									{
+										label: __( 'Cancel', 'woocommerce' ),
+										variant: 'secondary',
+										className:
+											'woocommerce-payments-test-account-step__error-cancel-button',
+										onClick: closeModal,
+									},
+							  ]
+							: []
+					}
 					className="woocommerce-payments-test-account-step__error"
 				>
 					<p className="woocommerce-payments-test-account-step__error-message">
-						{ errorMessage }
+						{ errorMessage ||
+							__(
+								'An error occurred while creating your test account. Please try again.',
+								'woocommerce'
+							) }
 					</p>
 				</Notice>
 			) }
