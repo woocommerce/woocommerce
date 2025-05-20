@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-CI: PHP 8.3 environment for CI testing PHPUnit jobs.
