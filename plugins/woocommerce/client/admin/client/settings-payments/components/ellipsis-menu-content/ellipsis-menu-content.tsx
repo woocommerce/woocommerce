@@ -272,7 +272,8 @@ export const EllipsisMenuContent = ( {
 						className={ 'components-button__danger' }
 						onClick={ deactivateGateway }
 						isBusy={ isDeactivating }
-						disabled={ isDeactivating }
+						// If the plugin file is not available, the button should be disabled.
+						disabled={ ! pluginFile || isDeactivating }
 					>
 						{ __( 'Deactivate', 'woocommerce' ) }
 					</Button>
