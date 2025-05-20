@@ -164,11 +164,15 @@ class RelatedProducts extends AbstractBlock {
 
 		$product = wc_get_product( $post->ID );
 
+		if ( ! $product instanceof \WC_Product ) {
+			return array();
+		}
+
 		$related_products = array_filter( array_map( 'wc_get_product', wc_get_related_products( $product->get_id(), $product_per_page, $product->get_upsell_ids() ) ), 'wc_products_array_filter_visible' );
 		$related_products = wc_products_array_orderby( $related_products, 'rand', 'desc' );
 
 		$related_product_ids = array_map(
-			function( $product ) {
+			function ( $product ) {
 				return $product->get_id();
 			},
 			$related_products
@@ -176,5 +180,4 @@ class RelatedProducts extends AbstractBlock {
 
 		return $related_product_ids;
 	}
-
 }

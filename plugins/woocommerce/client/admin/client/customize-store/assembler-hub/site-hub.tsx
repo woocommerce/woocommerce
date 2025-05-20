@@ -24,8 +24,8 @@ import WordPressLogo from '~/lib/wordpress-logo';
 /**
  * Internal dependencies
  */
-import { isEntrepreneurFlow } from '~/customize-store/design-with-ai/entrepreneur-flow';
 import './gutenberg-styles/site-hub.scss';
+import { isEntrepreneurFlow } from '../entrepreneur-flow';
 
 const HUB_ANIMATION_DURATION = 0.3;
 

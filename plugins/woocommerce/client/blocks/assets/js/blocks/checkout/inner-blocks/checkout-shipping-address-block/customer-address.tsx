@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useCallback, useEffect } from '@wordpress/element';
+import { useCallback, useEffect, useMemo } from '@wordpress/element';
 import { Form } from '@woocommerce/base-components/cart-checkout';
 import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
 import type { ShippingAddress } from '@woocommerce/settings';
@@ -27,23 +27,27 @@ const CustomerAddress = () => {
 	const { dispatchCheckoutEvent } = useStoreEvents();
 
 	// Forces editing state if store has errors.
-	const { hasValidationErrors, invalidProps } = useSelect(
+	const { hasValidationErrors, getValidationErrorSelector } = useSelect(
 		( select ) => {
 			const store = select( validationStore );
 			return {
 				hasValidationErrors: store.hasValidationErrors(),
-				invalidProps: Object.keys( shippingAddress )
-					.filter( ( key ) => {
-						return (
-							store.getValidationError( 'shipping_' + key ) !==
-							undefined
-						);
-					} )
-					.filter( Boolean ),
+				getValidationErrorSelector: store.getValidationError,
 			};
 		},
-		[ shippingAddress ]
+		[]
 	);
+
+	const invalidProps = useMemo( () => {
+		return Object.keys( shippingAddress )
+			.filter( ( key ) => {
+				return (
+					getValidationErrorSelector( 'shipping_' + key ) !==
+					undefined
+				);
+			} )
+			.filter( Boolean );
+	}, [ shippingAddress, getValidationErrorSelector ] );
 
 	useEffect( () => {
 		if ( invalidProps.length > 0 && editing === false ) {
@@ -68,39 +72,29 @@ const CustomerAddress = () => {
 		]
 	);
 
-	const renderAddressCardComponent = useCallback(
-		() => (
-			<AddressCard
-				address={ shippingAddress }
-				target="shipping"
-				onEdit={ () => {
-					setEditing( true );
-				} }
-				isExpanded={ editing }
-			/>
-		),
-		[ shippingAddress, editing, setEditing ]
-	);
-
-	const renderAddressFormComponent = useCallback(
-		() => (
-			<Form< ShippingAddress >
-				id="shipping"
-				addressType="shipping"
-				onChange={ onChangeAddress }
-				values={ shippingAddress }
-				fields={ ADDRESS_FORM_KEYS }
-				isEditing={ editing }
-			/>
-		),
-		[ onChangeAddress, shippingAddress, editing ]
-	);
-
 	return (
 		<AddressWrapper
 			isEditing={ editing }
-			addressCard={ renderAddressCardComponent }
-			addressForm={ renderAddressFormComponent }
+			addressCard={
+				<AddressCard
+					address={ shippingAddress }
+					target="shipping"
+					onEdit={ () => {
+						setEditing( true );
+					} }
+					isExpanded={ editing }
+				/>
+			}
+			addressForm={
+				<Form< ShippingAddress >
+					id="shipping"
+					addressType="shipping"
+					onChange={ onChangeAddress }
+					values={ shippingAddress }
+					fields={ ADDRESS_FORM_KEYS }
+					isEditing={ editing }
+				/>
+			}
 		/>
 	);
 };

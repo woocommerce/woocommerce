@@ -1,0 +1,9 @@
+/*.md export-ignore
+/changelog export-ignore
+/docs* export-ignore
+/phpcs.* export-ignore
+/phpunit.* export-ignore
+/package.json export-ignore
+/node_modules* export-ignore
+/tests export-ignore
+

@@ -105,6 +105,7 @@ class ListTable extends WP_List_Table {
 		add_filter( 'set_screen_option_edit_' . $this->order_type . '_per_page', array( $this, 'set_items_per_page' ), 10, 3 );
 		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
 		add_action( 'admin_footer', array( $this, 'enqueue_scripts' ) );
+		add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'created_via_filter' ) );
 		add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'customers_filter' ) );
 
 		$this->items_per_page();
@@ -392,6 +393,7 @@ class ListTable extends WP_List_Table {
 		$this->set_date_args();
 		$this->set_customer_args();
 		$this->set_search_args();
+		$this->set_created_via_args();
 
 		/**
 		 * Provides an opportunity to modify the query arguments used in the (Custom Order Table-powered) order list
@@ -563,6 +565,49 @@ class ListTable extends WP_List_Table {
 		if ( ! empty( $filter ) ) {
 			$this->order_query_args['search_filter'] = $filter;
 		}
+	}
+
+	/**
+	 * Implements filtering of orders by created_via value.
+	 */
+	private function set_created_via_args(): void {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$created_via = sanitize_text_field( wp_unslash( $_GET['_created_via'] ?? '' ) );
+
+		if ( empty( $created_via ) ) {
+			return;
+		}
+
+		$this->order_query_args['created_via'] = array_map( 'trim', explode( ',', $created_via ) );
+
+		$this->has_filter = true;
+	}
+
+	/**
+	 * Render the created_via filter dropdown.
+	 *
+	 * @return void
+	 */
+	public function created_via_filter() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$current_created_via = isset( $_GET['_created_via'] ) ? sanitize_text_field( wp_unslash( $_GET['_created_via'] ) ) : '';
+
+		$created_via_options = array(
+			''                   => __( 'All sales channels', 'woocommerce' ),
+			'admin'              => __( 'Admin', 'woocommerce' ),
+			'checkout,store-api' => __( 'Checkout', 'woocommerce' ),
+			'pos-rest-api'       => __( 'Point of Sale', 'woocommerce' ),
+		);
+		?>
+
+		<select name="_created_via" id="filter-by-created-via">
+			<?php foreach ( $created_via_options as $value => $label ) : ?>
+				<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, $current_created_via ); ?>>
+					<?php echo esc_html( $label ); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
+		<?php
 	}
 
 	/**

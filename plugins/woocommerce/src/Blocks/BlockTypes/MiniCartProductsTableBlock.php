@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  * MiniCartProductsTableBlock class.
  */
 class MiniCartProductsTableBlock extends AbstractInnerBlock {
+
 	/**
 	 * Block name.
 	 *

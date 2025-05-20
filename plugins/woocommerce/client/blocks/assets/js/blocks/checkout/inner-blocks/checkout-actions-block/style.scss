@@ -14,18 +14,20 @@
 					width: 100%;
 				}
 
-				// Keeps the text in the DOM but not visible, so it doesn't cause the button to resize while showing the spinner.
-				.wc-block-components-checkout-place-order-button__text--visually-hidden {
-					visibility: hidden;
+				// Hides labels when the spinner is shown.
+				&--loading {
+					.wc-block-components-button__text {
+						visibility: hidden;
+					}
+					.wc-block-components-spinner,
+					.wc-block-components-checkout-place-order-button__icon {
+						visibility: visible;
+					}
 				}
 
 				.wc-block-components-checkout-place-order-button__text {
 					display: flex;
 					align-items: center;
-
-					// Prevent runts/widows. Overwrite `balance` with `pretty`, as `pretty` is not supported in all browsers.
-					text-wrap: balance;
-					text-wrap: pretty;
 				}
 
 				.wc-block-components-checkout-place-order-button__separator {

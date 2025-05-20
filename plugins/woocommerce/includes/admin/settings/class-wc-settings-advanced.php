@@ -448,10 +448,6 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 		$settings =
 			array(
 				array(
-					'title' => '',
-					'type'  => 'title',
-				),
-				array(
 					'id'   => 'wc_settings_blueprint_slotfill',
 					'type' => 'slotfill_placeholder',
 				),

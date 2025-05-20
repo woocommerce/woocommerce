@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-E2E tests: enhance email settings test to verify success message after saving settings

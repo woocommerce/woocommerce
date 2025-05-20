@@ -17,7 +17,7 @@ export interface FieldProps {
 	label: string;
 	autoCapitalize: string | undefined;
 	autoComplete: string | undefined;
-	errorMessage: string | undefined;
+	errorMessage?: string;
 	required: boolean;
 	placeholder: string | undefined;
 	className: string;
@@ -33,7 +33,7 @@ export const createFieldProps = (
 	label: ( field?.required ? field?.label : field?.optionalLabel ) || '',
 	autoCapitalize: field?.autocapitalize,
 	autoComplete: field?.autocomplete,
-	errorMessage: field?.errorMessage,
+	errorMessage: field?.errorMessage || '',
 	required: field?.required,
 	placeholder: field?.placeholder,
 	className: `wc-block-components-address-form__${ field?.key }`.replaceAll(

@@ -11,8 +11,6 @@ import metadata from './block.json';
 import AddToCartWithOptionsVariationSelectorEdit from './edit';
 import AddToCartWithOptionsVariationSelectorSave from './save';
 import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../utils';
-import './style.scss';
-import './editor.scss';
 
 if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
 	registerBlockType( metadata, {

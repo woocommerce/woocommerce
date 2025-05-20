@@ -78,6 +78,15 @@ class WC_Unit_Tests_Bootstrap {
 		// Set up WC-Admin config.
 		tests_add_filter( 'woocommerce_admin_get_feature_config', array( $this, 'add_development_features' ) );
 
+		// Speed things up by turning down the password hashing cost.
+		tests_add_filter(
+			'wp_hash_password_options',
+			function ( $options ) {
+				$options['cost'] = 4;
+				return $options;
+			}
+		);
+
 		/*
 		* Load PHPUnit Polyfills for the WP testing suite.
 		* @see https://github.com/WordPress/wordpress-develop/pull/1563/

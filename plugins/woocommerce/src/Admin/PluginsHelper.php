@@ -228,7 +228,7 @@ class PluginsHelper {
 	 *
 	 * @return array
 	 */
-	public static function install_plugins( $plugins, ?PluginsInstallLogger $logger = null, string $source = null ) {
+	public static function install_plugins( $plugins, ?PluginsInstallLogger $logger = null, ?string $source = null ) {
 		/**
 		 * Filter the list of plugins to install.
 		 *
@@ -409,7 +409,7 @@ class PluginsHelper {
 	 *
 	 * @return bool
 	 */
-	public static function install_and_activate_plugins_async_callback( array $plugins, string $job_id, string $source = null ) {
+	public static function install_and_activate_plugins_async_callback( array $plugins, string $job_id, ?string $source = null ) {
 		$option_name = 'woocommerce_onboarding_plugins_install_and_activate_async_' . $job_id;
 		$logger      = new AsyncPluginsInstallLogger( $option_name );
 		self::install_plugins( $plugins, $logger, $source );
@@ -767,7 +767,7 @@ class PluginsHelper {
 	 * @param int    $total total subscription count.
 	 * @param array  $messages message.
 	 * @param string $type type of notice, whether it is for expiring or expired subscription.
-	 * @return array notice data to return. Contains type, parsed_message and product_id.
+	 * @return array notice data to return. Contains type, parsed_message and product_id (can be a single value or an array).
 	 */
 	public static function get_subscriptions_notice_data( array $all_subs, array $subs_to_show, int $total, array $messages, string $type ) {
 		$utm_campaign = 'expired' === $type ?
@@ -802,7 +802,7 @@ class PluginsHelper {
 			return array(
 				'type'           => 'different_subscriptions',
 				'parsed_message' => $parsed_message,
-				'product_ids'    => $product_ids,
+				'product_id'     => $product_ids,
 			);
 		}
 
@@ -1001,7 +1001,7 @@ class PluginsHelper {
 
 		$button_link = add_query_arg(
 			array(
-				'add-to-cart'  => $notice_data['product_ids'],
+				'add-to-cart'  => $notice_data['product_id'],
 				'utm_source'   => 'pu',
 				'utm_campaign' => $allowed_link ? 'pu_settings_screen_renew' : 'pu_in_apps_screen_renew',
 			),
@@ -1079,7 +1079,7 @@ class PluginsHelper {
 
 		$button_link = add_query_arg(
 			array(
-				'add-to-cart'  => $notice_data['product_ids'],
+				'add-to-cart'  => $notice_data['product_id'],
 				'utm_source'   => 'pu',
 				'utm_campaign' => 'pu_in_apps_screen_purchase',
 			),

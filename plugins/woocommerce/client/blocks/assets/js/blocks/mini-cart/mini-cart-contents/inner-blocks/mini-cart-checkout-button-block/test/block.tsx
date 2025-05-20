@@ -39,7 +39,7 @@ describe( 'Mini Cart Checkout Button Block', () => {
 		const button = screen.getByText( 'Proceed to Checkout' );
 
 		// Forcibly set the button URL to # to prevent JSDOM error: `["Error: Not implemented: navigation (except hash changes)`
-		button.parentElement?.removeAttribute( 'href' );
+		button.closest( 'a' )?.removeAttribute( 'href' );
 		button.click();
 		await waitFor( () => {
 			expect( mockObserver ).toHaveBeenCalled();

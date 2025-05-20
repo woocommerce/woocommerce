@@ -122,11 +122,15 @@ const restrictedImports = [
 ];
 
 const coreModules = [
+	'@woocommerce/base-context',
+	'@woocommerce/base-components',
+	'@woocommerce/base-components/cart-checkout',
 	'@woocommerce/block-data',
 	'@woocommerce/blocks-checkout',
 	'@woocommerce/blocks-checkout-events',
 	'@woocommerce/blocks-components',
 	'@woocommerce/blocks-registry',
+	'@woocommerce/block-settings',
 	'@woocommerce/price-format',
 	'@woocommerce/settings',
 	'@woocommerce/shared-context',

@@ -8,7 +8,6 @@ use Exception;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
-use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init as WCPayPromotion;
 
 /**
  * Controller for the REST endpoints to service the Payments settings page.
@@ -42,7 +41,7 @@ class PaymentsRestController extends RestApiControllerBase {
 	 * @return string
 	 */
 	protected function get_rest_api_namespace(): string {
-		return 'wc-admin';
+		return 'wc-admin-settings-payments';
 	}
 
 	/**
@@ -51,18 +50,6 @@ class PaymentsRestController extends RestApiControllerBase {
 	 * @param bool $override Whether to override the existing routes. Useful for testing.
 	 */
 	public function register_routes( bool $override = false ) {
-		register_rest_route(
-			$this->route_namespace,
-			'/' . $this->rest_base . '/woopay-eligibility',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => fn( $request ) => $this->run( $request, 'get_woopay_eligibility' ),
-					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
-				),
-			),
-			$override
-		);
 		register_rest_route(
 			$this->route_namespace,
 			'/' . $this->rest_base . '/country',
@@ -96,7 +83,7 @@ class PaymentsRestController extends RestApiControllerBase {
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
 						'location' => array(
-							'description'       => __( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
+							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to WooCommerce\'s base location country.', 'woocommerce' ),
 							'type'              => 'string',
 							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
 							'required'          => false,
@@ -118,7 +105,7 @@ class PaymentsRestController extends RestApiControllerBase {
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
 						'order_map' => array(
-							'description'       => __( 'A map of provider ID to integer values representing the sort order.', 'woocommerce' ),
+							'description'       => esc_html__( 'A map of provider ID to integer values representing the sort order.', 'woocommerce' ),
 							'type'              => 'object',
 							'required'          => true,
 							'validate_callback' => fn( $value ) => $this->check_providers_order_map_arg( $value ),
@@ -163,7 +150,7 @@ class PaymentsRestController extends RestApiControllerBase {
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
 						'context' => array(
-							'description'       => __( 'The context ID for which to dismiss the incentive. If not provided, will dismiss the incentive for all contexts.', 'woocommerce' ),
+							'description'       => esc_html__( 'The context ID for which to dismiss the incentive. If not provided, will dismiss the incentive for all contexts.', 'woocommerce' ),
 							'type'              => 'string',
 							'required'          => false,
 							'sanitize_callback' => 'sanitize_key',
@@ -662,7 +649,7 @@ class PaymentsRestController extends RestApiControllerBase {
 					'readonly'    => true,
 				),
 				'supports'       => array(
-					'description' => __( 'Supported features for this provider.', 'woocommerce' ),
+					'description' => esc_html__( 'Supported features for this provider.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -720,7 +707,7 @@ class PaymentsRestController extends RestApiControllerBase {
 				),
 				'links'          => array(
 					'type'        => 'array',
-					'description' => __( 'Links for the provider.', 'woocommerce' ),
+					'description' => esc_html__( 'Links for the provider.', 'woocommerce' ),
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 					'items'       => array(
@@ -808,30 +795,16 @@ class PaymentsRestController extends RestApiControllerBase {
 					'type'        => 'object',
 					'description' => esc_html__( 'Onboarding-related details for the provider.', 'woocommerce' ),
 					'properties'  => array(
+						'type'                        => array(
+							'type'        => 'string',
+							'description' => esc_html__( 'The type of onboarding process the provider supports.', 'woocommerce' ),
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
 						'state'                       => array(
 							'type'        => 'object',
 							'description' => esc_html__( 'The state of the onboarding process.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
-							'properties'  => array(
-								'started'   => array(
-									'type'        => 'boolean',
-									'description' => esc_html__( 'Whether the onboarding process has been started.', 'woocommerce' ),
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
-								),
-								'completed' => array(
-									'type'        => 'boolean',
-									'description' => esc_html__( 'Whether the onboarding process has been completed.', 'woocommerce' ),
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
-								),
-								'test_mode' => array(
-									'type'        => 'boolean',
-									'description' => esc_html__( 'Whether the onboarding process happens in test mode (aka sandbox or test-drive).', 'woocommerce' ),
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
-								),
-							),
 						),
 						'_links'                      => array(
 							'type'       => 'object',
@@ -1216,19 +1189,6 @@ class PaymentsRestController extends RestApiControllerBase {
 					),
 				),
 			),
-		);
-	}
-
-	/**
-	 * Get WooPay eligibility status.
-	 *
-	 * @return array The WooPay eligibility status.
-	 */
-	protected function get_woopay_eligibility() {
-		return rest_ensure_response(
-			array(
-				'is_eligible' => WCPayPromotion::is_woopay_eligible(),
-			)
 		);
 	}
 }

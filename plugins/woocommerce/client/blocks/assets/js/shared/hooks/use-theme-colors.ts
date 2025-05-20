@@ -11,10 +11,10 @@ export interface EditorColors {
 /**
  * Hook to inject a <style> element in the Site Editor using theme background and foreground colors.
  *
- * @param styleId         - ID of the style tag to create and append.
+ * @param styleId         - The ID of the style element to inject.
  * @param getStyleContent - Callback that receives editor colors and returns CSS to inject.
  */
-export const useApplyEditorStyles = (
+export const useThemeColors = (
 	styleId: string,
 	getStyleContent: ( colors: EditorColors ) => string
 ): void => {
@@ -55,23 +55,37 @@ export const useApplyEditorStyles = (
 		const editorBackgroundColor = computedStyles?.backgroundColor;
 		const editorColor = computedStyles?.color;
 
+		if ( ! editorBackgroundColor || ! editorColor ) {
+			return;
+		}
+
+		const styleElementId = `${ styleId }-editor-theme-colors`;
+
 		const alreadyInjected = editorStylesWrapper.querySelector(
-			`#${ styleId }`
+			`#${ styleElementId }`
 		);
 
-		// Inject a new <style> tag only if not already added and colors are available.
-		if ( ! alreadyInjected && editorBackgroundColor && editorColor ) {
-			const styleElement = document.createElement( 'style' );
-			styleElement.id = styleId;
-			styleElement.appendChild(
-				document.createTextNode(
-					getStyleContent( {
-						editorBackgroundColor,
-						editorColor,
-					} )
-				)
-			);
-			editorStylesWrapper.appendChild( styleElement );
+		// Check if we've already injected a style with this id.
+		if ( alreadyInjected ) {
+			return;
 		}
-	}, [ styleId, getStyleContent ] );
+
+		// Generate the content for this style.
+		const styleContent = getStyleContent( {
+			editorBackgroundColor,
+			editorColor,
+		} );
+
+		// Create and inject the style element with the specific ID.
+		const styleElement = document.createElement( 'style' );
+		styleElement.id = styleElementId;
+		styleElement.appendChild( document.createTextNode( styleContent ) );
+		editorStylesWrapper.appendChild( styleElement );
+
+		/**
+		 * We are intentionally not cleaning up the style element here, because
+		 * blocks might be remounted many times, so this way we avoid removing
+		 * and appending the style element many times.
+		 */
+	}, [ getStyleContent, styleId ] );
 };

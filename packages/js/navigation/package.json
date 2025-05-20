@@ -85,7 +85,7 @@
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"config": {
 		"ci": {

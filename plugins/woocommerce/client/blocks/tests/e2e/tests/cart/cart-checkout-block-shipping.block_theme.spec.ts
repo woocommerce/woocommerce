@@ -50,9 +50,7 @@ test.describe( 'Shopper → Shipping', () => {
 		await admin.page
 			.getByLabel( 'Default customer location' )
 			.selectOption( 'No location by default' );
-		await admin.page
-			.getByRole( 'button', { name: 'Save changes' } )
-			.click();
+		await admin.saveAdminPage();
 
 		await admin.visitAdminPage(
 			'admin.php?page=wc-settings&tab=shipping&zone_id=new'
@@ -64,9 +62,7 @@ test.describe( 'Shopper → Shipping', () => {
 		await admin.page
 			.getByRole( 'checkbox', { name: 'United Kingdom (UK)' } )
 			.click(); // .check() won't work here as the input disappears immediately after checking.
-		await admin.page
-			.getByRole( 'button', { name: 'Save changes' } )
-			.click();
+		await admin.saveAdminPage();
 		await admin.page
 			.getByRole( 'button', { name: 'Add shipping method' } )
 			.click();
@@ -81,9 +77,7 @@ test.describe( 'Shopper → Shipping', () => {
 				.getByRole( 'button', { name: 'Save changes' } )
 				.isDisabled() )
 		) {
-			await admin.page
-				.getByRole( 'button', { name: 'Save changes' } )
-				.click();
+			await admin.saveAdminPage();
 		}
 		await expect(
 			admin.page.getByRole( 'button', { name: 'Save changes' } )
@@ -266,9 +260,7 @@ test.describe( 'Shopper → Shipping', () => {
 		await admin.page
 			.getByLabel( 'Default customer location' )
 			.selectOption( 'No location by default' );
-		await admin.page
-			.getByRole( 'button', { name: 'Save changes' } )
-			.click();
+		await admin.saveAdminPage();
 
 		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
 
@@ -281,9 +273,7 @@ test.describe( 'Shopper → Shipping', () => {
 		// Then only one "name: yes" remains, making it the first, even though it's the second rate.
 		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
 		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
-		await admin.page
-			.getByRole( 'button', { name: 'Save changes' } )
-			.click();
+		await admin.saveAdminPage();
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
@@ -364,9 +354,7 @@ test.describe( 'Shopper → Shipping', () => {
 		// Then only one "name: yes" remains, making it the first, even though it's the second rate.
 		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
 		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
-		await admin.page
-			.getByRole( 'button', { name: 'Save changes' } )
-			.click();
+		await admin.saveAdminPage();
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
@@ -426,9 +414,7 @@ test.describe( 'Shopper → Shipping', () => {
 		// Then only one "name: yes" remains, making it the first, even though it's the second rate.
 		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
 		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
-		await admin.page
-			.getByRole( 'button', { name: 'Save changes' } )
-			.click();
+		await admin.saveAdminPage();
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
@@ -573,9 +559,7 @@ test.describe( 'Shopper → Shipping', () => {
 		// Then only one "name: yes" remains, making it the first, even though it's the second rate.
 		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
 		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
-		await admin.page
-			.getByRole( 'button', { name: 'Save changes' } )
-			.click();
+		await admin.saveAdminPage();
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );

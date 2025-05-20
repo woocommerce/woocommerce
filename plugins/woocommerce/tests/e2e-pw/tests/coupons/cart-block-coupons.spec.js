@@ -262,7 +262,9 @@ test.describe(
 				await expect(
 					page
 						.getByRole( 'alert' )
-						.getByText( 'Coupon usage limit has been reached.' )
+						.getByText(
+							`Usage limit for coupon "${ couponLimitedCode }" has been reached.`
+						)
 				).toBeVisible();
 			}
 		);

@@ -17,10 +17,16 @@ type NoticeWithId = Notice & {
 	id: string;
 };
 
-const getContext = getContextFn< {
-	notices: NoticeWithId[];
+const getStoreNoticeContext = getContextFn< {
 	notice: NoticeWithId;
 } >;
+
+// Todo: Go back to the Store Notices block context once more than one context
+// can be added to an element (https://github.com/WordPress/gutenberg/discussions/62720).
+const getProductCollectionContext = () =>
+	getContextFn< {
+		notices: NoticeWithId[];
+	} >( 'woocommerce/product-collection' );
 
 type StoreNoticesState = {
 	get role(): string;
@@ -28,6 +34,7 @@ type StoreNoticesState = {
 	get isError(): boolean;
 	get isSuccess(): boolean;
 	get isInfo(): boolean;
+	get notices(): NoticeWithId[];
 };
 
 export type Store = {
@@ -64,7 +71,7 @@ store< Store >(
 	{
 		state: {
 			get role() {
-				const context = getContext();
+				const context = getStoreNoticeContext();
 				if (
 					context.notice.type === 'error' ||
 					context.notice.type === 'success'
@@ -75,26 +82,30 @@ store< Store >(
 				return 'status';
 			},
 			get iconPath() {
-				const context = getContext();
+				const context = getStoreNoticeContext();
 				const noticeType = context.notice.type;
 				return ICON_PATHS[ noticeType ];
 			},
 			get isError() {
-				const { notice } = getContext();
+				const { notice } = getStoreNoticeContext();
 				return notice.type === 'error';
 			},
 			get isSuccess() {
-				const { notice } = getContext();
+				const { notice } = getStoreNoticeContext();
 				return notice.type === 'success';
 			},
 			get isInfo() {
-				const { notice } = getContext();
+				const { notice } = getStoreNoticeContext();
 				return notice.type === 'notice';
+			},
+			get notices() {
+				const { notices } = getProductCollectionContext();
+				return notices;
 			},
 		},
 		actions: {
 			addNotice: ( notice: Notice ) => {
-				const { notices } = getContext();
+				const { notices } = getProductCollectionContext();
 				const noticeId = generateNoticeId();
 				const noticeWithId = {
 					...notice,
@@ -106,11 +117,11 @@ store< Store >(
 			},
 
 			removeNotice: ( noticeId: string | PointerEvent ) => {
-				const { notices } = getContext();
+				const { notices } = getProductCollectionContext();
 				noticeId =
 					typeof noticeId === 'string'
 						? noticeId
-						: getContext().notice.id;
+						: getStoreNoticeContext().notice.id;
 				const index = notices.findIndex(
 					( { id } ) => id === noticeId
 				);
@@ -121,7 +132,7 @@ store< Store >(
 		},
 		callbacks: {
 			renderNoticeContent: () => {
-				const context = getContext();
+				const context = getStoreNoticeContext();
 				const { ref } = getElement();
 
 				if ( ref ) {

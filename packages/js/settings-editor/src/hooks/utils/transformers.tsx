@@ -19,6 +19,7 @@ import { Color } from '../../form-controls/color';
 import { Select } from '../../form-controls/select';
 import { Radio } from '../../form-controls/radio';
 import { SingleSelectPage } from '../../form-controls/single-select-page';
+import { SingleSelectPageWithSearch } from '../../form-controls/single-select-page-with-search';
 
 export type DataItem = Record< string, BaseSettingsField[ 'value' ] >;
 
@@ -168,6 +169,23 @@ export const transformToField = (
 				label,
 				Edit: ( props ) => (
 					<SingleSelectPage { ...props } help={ help } />
+				),
+			};
+		}
+		case 'single_select_page_with_search': {
+			const { label, help } = getLabelAndHelp( setting );
+
+			return {
+				id: setting.id,
+				type: 'text',
+				label,
+				Edit: ( props ) => (
+					<SingleSelectPageWithSearch
+						{ ...props }
+						help={ help }
+						className={ setting.class }
+						exclude={ setting.exclude }
+					/>
 				),
 			};
 		}

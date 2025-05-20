@@ -28,8 +28,6 @@ final class ProductFilterActive extends AbstractBlock {
 			return $content;
 		}
 
-		wp_enqueue_script_module( $this->get_full_block_name() );
-
 		$active_filters = $block->context['activeFilters'];
 
 		$filter_context = array(
@@ -37,6 +35,7 @@ final class ProductFilterActive extends AbstractBlock {
 		);
 
 		$wrapper_attributes = array(
+			'data-wp-interactive'  => 'woocommerce/product-filters',
 			'data-wp-key'          => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'data-wp-context'      => wp_json_encode(
 				array(
@@ -45,11 +44,15 @@ final class ProductFilterActive extends AbstractBlock {
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
 			'data-wp-bind--hidden' => '!state.hasActiveFilters',
+			'data-wp-class--wc-block-product-filter--hidden' => '!state.hasActiveFilters',
 		);
 
-		if ( empty( $active_filters ) ) {
-			$wrapper_attributes['hidden'] = true;
-		}
+		wp_interactivity_state(
+			'woocommerce/product-filters',
+			array(
+				'hasActiveFilters' => ! empty( $active_filters ),
+			),
+		);
 
 		wp_interactivity_config(
 			'woocommerce/product-filters',
@@ -83,10 +86,18 @@ final class ProductFilterActive extends AbstractBlock {
 	}
 
 	/**
-	 * Disable the block type script, this uses script modules.
+	 * Disable the editor style handle for this block type.
 	 *
-	 * @param string|null $key The key.
+	 * @return null
+	 */
+	protected function get_block_type_editor_style() {
+		return null;
+	}
+
+	/**
+	 * Disable the script handle for this block type. We use block.json to load the script.
 	 *
+	 * @param string|null $key The key of the script to get.
 	 * @return null
 	 */
 	protected function get_block_type_script( $key = null ) {

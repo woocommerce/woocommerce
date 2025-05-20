@@ -82,7 +82,7 @@ class LocalPickupUtils {
 				}
 				return $methods;
 			},
-			array()
+			array( 'local_pickup' )
 		);
 
 		// We use array_values because this will be used in JS, so we don't need the (numerical) keys.
@@ -92,5 +92,15 @@ class LocalPickupUtils {
 				$all_methods_supporting_local_pickup
 			)
 		);
+	}
+
+	/**
+	 * Checks if a method is a local pickup method.
+	 *
+	 * @param string $method_id The method id to check.
+	 * @return bool True if the method is a local pickup method.
+	 */
+	public static function is_local_pickup_method( $method_id ) {
+		return in_array( $method_id, self::get_local_pickup_method_ids(), true );
 	}
 }

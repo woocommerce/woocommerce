@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Address PHP 8.4 deprecation warnings.

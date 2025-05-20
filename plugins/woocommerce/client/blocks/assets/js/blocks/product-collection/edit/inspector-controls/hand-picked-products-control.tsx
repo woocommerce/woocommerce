@@ -41,6 +41,9 @@ function useProducts(
 		[]
 	);
 
+	// Flag to check if products are loaded
+	const [ productsLoaded, setProductsLoaded ] = useState( false );
+
 	useEffect( () => {
 		// We take two strategies here because of internal logic of
 		// `getProducts` and `getProductsRequests` that skips request for
@@ -74,10 +77,11 @@ function useProducts(
 
 			setProductsList( results as ProductResponseItem[] );
 			setProductsMap( newProductsMap );
+			setProductsLoaded( true );
 		} );
 	}, [ isLargeCatalog, search, selected ] );
 
-	return { productsMap, productsList };
+	return { productsMap, productsList, productsLoaded };
 }
 
 export const HandPickedProductsControlField = ( {
@@ -88,7 +92,7 @@ export const HandPickedProductsControlField = ( {
 	const isLargeCatalog = ( blocksConfig.productCount || 0 ) > 100;
 	const selectedProductIds = query.woocommerceHandPickedProducts;
 	const [ searchQuery, setSearchQuery ] = useState( '' );
-	const { productsMap, productsList } = useProducts(
+	const { productsMap, productsList, productsLoaded } = useProducts(
 		isLargeCatalog,
 		searchQuery,
 		selectedProductIds
@@ -181,7 +185,7 @@ export const HandPickedProductsControlField = ( {
 				productsMap.has( value )
 			}
 			value={
-				! productsMap.size
+				! productsLoaded
 					? [ __( 'Loading…', 'woocommerce' ) ]
 					: validSelectedProductIds || []
 			}

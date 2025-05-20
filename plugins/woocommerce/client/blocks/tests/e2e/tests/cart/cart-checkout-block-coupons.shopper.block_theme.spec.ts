@@ -103,7 +103,9 @@ test.describe( 'Shopper → Coupon', () => {
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
 
 		await expect(
-			page.getByText( 'Coupon usage limit has been reached.' )
+			page.getByText(
+				'Usage limit for coupon "SINGLE-USE-COUPON" has been reached.'
+			)
 		).toBeVisible();
 	} );
 } );

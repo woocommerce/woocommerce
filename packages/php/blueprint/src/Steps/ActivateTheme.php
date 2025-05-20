@@ -18,7 +18,7 @@ class ActivateTheme extends Step {
 	/**
 	 * ActivateTheme constructor.
 	 *
-	 * @param string $theme_name The name of the theme to be activated.
+	 * @param string $theme_folder_name The name of the theme to be activated.
 	 */
 	public function __construct( $theme_folder_name ) {
 		$this->theme_folder_name = $theme_folder_name;
@@ -43,7 +43,7 @@ class ActivateTheme extends Step {
 		return array(
 			'type'       => 'object',
 			'properties' => array(
-				'step'      => array(
+				'step'            => array(
 					'type' => 'string',
 					'enum' => array( static::get_step_name() ),
 				),
@@ -62,7 +62,7 @@ class ActivateTheme extends Step {
 	 */
 	public function prepare_json_array(): array {
 		return array(
-			'step'      => static::get_step_name(),
+			'step'            => static::get_step_name(),
 			'themeFolderName' => $this->theme_folder_name,
 		);
 	}

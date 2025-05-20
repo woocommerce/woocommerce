@@ -47,6 +47,32 @@ class OrderCountCacheService {
 		add_action( 'woocommerce_order_status_changed', array( $this, 'update_on_order_status_changed' ), 10, 4 );
 		add_action( 'woocommerce_before_trash_order', array( $this, 'update_on_order_trashed' ), 10, 2 );
 		add_action( 'woocommerce_before_delete_order', array( $this, 'update_on_order_deleted' ), 10, 2 );
+		add_action( 'woocommerce_refresh_order_count_cache', array( $this, 'refresh_cache' ) );
+		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'schedule_background_actions' ) );
+	}
+
+	/**
+	 * Refresh the cache for a given order type.
+	 *
+	 * @param string $order_type The order type.
+	 * @return void
+	 */
+	public function refresh_cache( $order_type ) {
+		$this->order_count_cache->remove( $order_type );
+		OrderUtil::get_count_for_type( $order_type );
+	}
+
+	/**
+	 * Register background caching for each order type.
+	 *
+	 * @return void
+	 */
+	public function schedule_background_actions() {
+		$order_types = wc_get_order_types( 'order-count' );
+		$frequency   = HOUR_IN_SECONDS * 12;
+		foreach ( $order_types as $order_type ) {
+			as_schedule_recurring_action( time() + $frequency, $frequency, 'woocommerce_refresh_order_count_cache', array( $order_type ), 'count', true );
+		}
 	}
 
 	/**

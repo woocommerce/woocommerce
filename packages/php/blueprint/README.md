@@ -13,11 +13,10 @@ effortlessly with JSON files.
 |------------------|
 | `installPlugin`  |
 | `activatePlugin` |
-| `deactivatePlugin` |
-| `deletePlugin`   |
 | `installTheme`   |
 | `activateTheme`  |
 | `setSiteOptions` |
+| `runSql`         |
 
 ## Hooks
 

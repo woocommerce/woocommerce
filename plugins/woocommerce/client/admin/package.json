@@ -23,8 +23,8 @@
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:css": "stylelint '**/*.scss' --fix --ip 'storybook/wordpress'",
 		"lint:fix:lang:js": "pnpm lint:lang:js --fix --ext=js,ts,tsx",
-		"lint:lang:css": "stylelint '**/*.scss'",
-		"lint:lang:js": "eslint ./client --ext=js,ts,tsx",
+		"lint:lang:css": "stylelint '**/*.scss' --cache --cache-location=node_modules/.cache/stylelint",
+		"lint:lang:js": "eslint ./client --ext=js,ts,tsx --cache --cache-location=node_modules/.cache/eslint",
 		"test:js": "jest --config client/jest.config.js",
 		"ts:check": "tsc --build",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
@@ -50,6 +50,8 @@
 		"@dnd-kit/modifiers": "^6.0.1",
 		"@dnd-kit/sortable": "^7.0.2",
 		"@react-spring/web": "^9.7.3",
+		"@stripe/connect-js": "^3.3.21",
+		"@stripe/react-connect-js": "^3.3.21",
 		"@woocommerce/api": "workspace:*",
 		"@wordpress/a11y": "wp-6.6",
 		"@wordpress/api-fetch": "wp-6.6",
@@ -141,7 +143,6 @@
 		"@typescript-eslint/parser": "^5.62.0",
 		"@woocommerce/admin-e2e-tests": "workspace:*",
 		"@woocommerce/admin-layout": "workspace:*",
-		"@woocommerce/ai": "workspace:*",
 		"@woocommerce/block-templates": "workspace:*",
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/csv-export": "workspace:*",
@@ -228,7 +229,7 @@
 		"webpack-dev-server": "4.15.x",
 		"webpack-fix-style-only-entries": "^0.6.1",
 		"webpack-rtl-plugin": "2.0.x",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"peerDependencies": {
 		"@wordpress/data": "wp-6.6"
@@ -309,10 +310,6 @@
 				"node_modules/@woocommerce/admin-layout/build-module",
 				"node_modules/@woocommerce/admin-layout/build-style",
 				"node_modules/@woocommerce/admin-layout/build-types",
-				"node_modules/@woocommerce/ai/build",
-				"node_modules/@woocommerce/ai/build-module",
-				"node_modules/@woocommerce/ai/build-style",
-				"node_modules/@woocommerce/ai/build-types",
 				"node_modules/@woocommerce/block-templates/build",
 				"node_modules/@woocommerce/block-templates/build-module",
 				"node_modules/@woocommerce/block-templates/build-style",

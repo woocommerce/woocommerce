@@ -61,7 +61,8 @@ class DraftOrders {
 	 * Maybe create cron events.
 	 */
 	protected function maybe_create_cronjobs() {
-		if ( function_exists( 'as_next_scheduled_action' ) && false === as_next_scheduled_action( 'woocommerce_cleanup_draft_orders' ) ) {
+		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
+		if ( false === call_user_func( $has_scheduled_action, 'woocommerce_cleanup_draft_orders' ) ) {
 			as_schedule_recurring_action( strtotime( 'midnight tonight' ), DAY_IN_SECONDS, 'woocommerce_cleanup_draft_orders' );
 		}
 	}

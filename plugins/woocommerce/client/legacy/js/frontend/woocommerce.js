@@ -225,17 +225,19 @@ function focus_populate_live_region() {
  */
 function refresh_sorted_by_live_region() {
 	var sorted_by_live_region = document.querySelector(
-		'.woocommerce-result-count[data-is-sorted-by="true"]'
+		'.woocommerce-result-count'
 	);
 
 	if ( sorted_by_live_region ) {
 		var text = sorted_by_live_region.innerHTML;
-
+		sorted_by_live_region.setAttribute('aria-hidden', 'true');
+		
 		var sorted_by_live_region_id = setTimeout( function () {
+			sorted_by_live_region.setAttribute('aria-hidden', 'false');
 			sorted_by_live_region.innerHTML = '';
 			sorted_by_live_region.innerHTML = text;
 			clearTimeout( sorted_by_live_region_id );
-		}, 1000 );
+		}, 2000 );
 	}
 }
 

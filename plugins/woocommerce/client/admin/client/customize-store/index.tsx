@@ -29,7 +29,6 @@ import {
 	services as introServices,
 	actions as introActions,
 } from './intro';
-import { DesignWithAi, events as designWithAiEvents } from './design-with-ai';
 import { DesignWithoutAi } from './design-without-ai';
 
 import { AssemblerHub, events as assemblerHubEvents } from './assembler-hub';
@@ -43,7 +42,6 @@ import {
 	CustomizeStoreComponentMeta,
 	CustomizeStoreComponent,
 	customizeStoreStateMachineContext,
-	FlowType,
 } from './types';
 import { ThemeCard } from './intro/types';
 import './style.scss';
@@ -54,10 +52,8 @@ import { useXStateInspect } from '~/xstate';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
-	| designWithAiEvents
 	| assemblerHubEvents
 	| transitionalEvents
-	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }
 	| { type: 'EXTERNAL_URL_UPDATE' }
 	| { type: 'INSTALL_FONTS' }
 	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } }
@@ -215,12 +211,10 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 			activeTheme: '',
 			customizeStoreTaskCompleted: false,
-			currentThemeIsAiGenerated: false,
 		},
 		transitionalScreen: {
 			hasCompleteSurvey: false,
 		},
-		flowType: FlowType.noAI,
 		isFontLibraryAvailable: null,
 		isPTKPatternsAPIAvailable: null,
 		activeThemeHasMods: undefined,
@@ -229,20 +223,12 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		src: 'browserPopstateHandler',
 	},
 	on: {
-		GO_BACK_TO_DESIGN_WITH_AI: {
-			target: 'designWithAi',
-			actions: [ { type: 'updateQueryStep', step: 'design-with-ai' } ],
-		},
 		GO_BACK_TO_DESIGN_WITHOUT_AI: {
 			target: 'intro',
 			actions: [ { type: 'updateQueryStep', step: 'intro' } ],
 		},
 		EXTERNAL_URL_UPDATE: {
 			target: 'navigate',
-		},
-		AI_WIZARD_CLOSED_BEFORE_COMPLETION: {
-			target: 'intro',
-			actions: [ { type: 'updateQueryStep', step: 'intro' } ],
 		},
 		NO_AI_FLOW_ERROR: {
 			target: 'intro',
@@ -272,13 +258,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					cond: {
 						type: 'hasStepInUrl',
 						step: 'intro',
-					},
-				},
-				{
-					target: 'designWithAi',
-					cond: {
-						type: 'hasStepInUrl',
-						step: 'design-with-ai',
 					},
 				},
 				{
@@ -346,10 +325,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				CLICKED_ON_BREADCRUMB: {
 					actions: 'goBack',
 				},
-				DESIGN_WITH_AI: {
-					actions: [ 'recordTracksDesignWithAIClicked' ],
-					target: 'designWithAi',
-				},
 				DESIGN_WITHOUT_AI: {
 					actions: [ 'recordTracksDesignWithoutAIClicked' ],
 					target: 'designWithoutAi',
@@ -407,29 +382,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					meta: {
 						component: DesignWithoutAi,
 					},
-				},
-			},
-		},
-		designWithAi: {
-			initial: 'preDesignWithAi',
-			states: {
-				preDesignWithAi: {
-					always: {
-						target: 'designWithAi',
-					},
-				},
-				designWithAi: {
-					meta: {
-						component: DesignWithAi,
-					},
-					entry: [
-						{ type: 'updateQueryStep', step: 'design-with-ai' },
-					],
-				},
-			},
-			on: {
-				THEME_SUGGESTED: {
-					target: 'assemblerHub',
 				},
 			},
 		},
@@ -601,12 +553,6 @@ export const CustomizeStoreController = ( {
 						pathFragments[ 2 ] === // [0] '', [1] 'customize-store', [2] step slug
 						( cond as { step: string | undefined } ).step
 					);
-				},
-				isAiOnline: ( _ctx ) => {
-					return _ctx.flowType === FlowType.AIOnline;
-				},
-				isAiOffline: ( _ctx ) => {
-					return _ctx.flowType === FlowType.AIOffline;
 				},
 				activeThemeHasMods: ( _ctx ) => {
 					return !! _ctx.activeThemeHasMods;

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add a check in get_refunds() to ensure only `WC_Order_Refund` objects are returned

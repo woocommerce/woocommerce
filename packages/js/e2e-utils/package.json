@@ -49,7 +49,7 @@
 		"@wordpress/browserslist-config": "next",
 		"eslint": "^8.55.0",
 		"eslint-plugin-jest": "23.20.0",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"peerDependencies": {
 		"@woocommerce/api": "^0.2.0"

@@ -38,7 +38,7 @@ class PickupLocation extends WC_Shipping_Method {
 	 */
 	public function init() {
 		$this->enabled          = $this->get_option( 'enabled' );
-		$this->title            = $this->get_option( 'title' );
+		$this->title            = $this->get_option( 'title', __( 'Pickup', 'woocommerce' ) );
 		$this->tax_status       = $this->get_option( 'tax_status' );
 		$this->cost             = $this->get_option( 'cost' );
 		$this->supports         = [ 'settings', 'local-pickup' ];

@@ -78,7 +78,6 @@ test.describe( `${ blockData.slug } Block`, () => {
 			frontendUtils,
 			pageObject,
 		} ) => {
-			await editor.insertBlock( { name: blockData.slug } );
 			await pageObject.insertAccordionGroup( [
 				{
 					title: 'Accordion title 1',

@@ -1,8 +1,3 @@
-/**
- * External dependencies
- */
-import { SVG } from '@wordpress/primitives';
-
 export const Icon = () => (
 	<svg
 		width="18"
@@ -20,104 +15,36 @@ export const Icon = () => (
 	</svg>
 );
 
-export const NextButton = () => (
-	<SVG
+export const PrevIcon = ( { className }: { className: string } ) => (
+	<svg
 		xmlns="http://www.w3.org/2000/svg"
-		width="49"
-		height="48"
-		viewBox="0 0 49 48"
+		width="8"
+		height="12"
 		fill="none"
-		className={ `wc-block-product-gallery-large-image-next-previous-right` }
+		className={ className }
 	>
-		<g filter="url(#filter0_b_397_11354)">
-			<rect
-				x="0.5"
-				width="48"
-				height="48"
-				rx="5"
-				fill="black"
-				fillOpacity="0.5"
-			/>
-			<path
-				d="M21.7001 12L19.3 14L28.5 24L19.3 34L21.7001 36L32.5 24L21.7001 12Z"
-				fill="white"
-			/>
-		</g>
-		<defs>
-			<filter
-				id="filter0_b_397_11354"
-				x="-9.5"
-				y="-10"
-				width="68"
-				height="68"
-				filterUnits="userSpaceOnUse"
-				colorInterpolationFilters="sRGB"
-			>
-				<feFlood floodOpacity="0" result="BackgroundImageFix" />
-				<feGaussianBlur in="BackgroundImageFix" stdDeviation="5" />
-				<feComposite
-					in2="SourceAlpha"
-					operator="in"
-					result="effect1_backgroundBlur_397_11354"
-				/>
-				<feBlend
-					mode="normal"
-					in="SourceGraphic"
-					in2="effect1_backgroundBlur_397_11354"
-					result="shape"
-				/>
-			</filter>
-		</defs>
-	</SVG>
+		<path
+			fill="currentColor"
+			fillRule="evenodd"
+			d="M6.445 12.005.986 6 6.445-.005l1.11 1.01L3.014 6l4.54 4.995-1.109 1.01Z"
+			clipRule="evenodd"
+		/>
+	</svg>
 );
 
-export const PrevButton = () => (
-	<SVG
+export const NextIcon = ( { className }: { className: string } ) => (
+	<svg
 		xmlns="http://www.w3.org/2000/svg"
-		width="49"
-		height="48"
-		viewBox="0 0 49 48"
+		width="8"
+		height="12"
 		fill="none"
-		className={ `wc-block-product-gallery-large-image-next-previous-left` }
+		className={ className }
 	>
-		<g filter="url(#filter0_b_397_11356)">
-			<rect
-				x="0.5"
-				width="48"
-				height="48"
-				rx="5"
-				fill="black"
-				fillOpacity="0.5"
-			/>
-			<path
-				d="M28.1 12L30.5 14L21.3 24L30.5 34L28.1 36L17.3 24L28.1 12Z"
-				fill="white"
-			/>
-		</g>
-		<defs>
-			<filter
-				id="filter0_b_397_11356"
-				x="-9.5"
-				y="-10"
-				width="68"
-				height="68"
-				filterUnits="userSpaceOnUse"
-				colorInterpolationFilters="sRGB"
-			>
-				<feFlood floodOpacity="0" result="BackgroundImageFix" />
-				<feGaussianBlur in="BackgroundImageFix" stdDeviation="5" />
-				<feComposite
-					in2="SourceAlpha"
-					operator="in"
-					result="effect1_backgroundBlur_397_11356"
-				/>
-				<feBlend
-					mode="normal"
-					in="SourceGraphic"
-					in2="effect1_backgroundBlur_397_11356"
-					result="shape"
-				/>
-			</filter>
-		</defs>
-	</SVG>
+		<path
+			fill="currentColor"
+			fillRule="evenodd"
+			d="M1.555-.004 7.014 6l-5.459 6.005-1.11-1.01L4.986 6 .446 1.005l1.109-1.01Z"
+			clipRule="evenodd"
+		/>
+	</svg>
 );

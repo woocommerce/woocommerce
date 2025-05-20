@@ -13,6 +13,8 @@ use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
  */
 final class ProductFilterPrice extends AbstractBlock {
 
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -120,8 +122,6 @@ final class ProductFilterPrice extends AbstractBlock {
 			return '';
 		}
 
-		wp_enqueue_script_module( $this->get_full_block_name() );
-
 		$price_range   = $this->get_filtered_price( $block );
 		$min_range     = $price_range['min_price'] ?? 0;
 		$max_range     = $price_range['max_price'] ?? 0;
@@ -142,8 +142,9 @@ final class ProductFilterPrice extends AbstractBlock {
 		);
 
 		$wrapper_attributes = array(
-			'data-wp-key'     => wp_unique_prefixed_id( $this->get_full_block_name() ),
-			'data-wp-context' => wp_json_encode(
+			'data-wp-interactive' => 'woocommerce/product-filters',
+			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
+			'data-wp-context'     => wp_json_encode(
 				array(
 					'filterType' => 'price',
 					'minRange'   => $min_range,
@@ -178,8 +179,10 @@ final class ProductFilterPrice extends AbstractBlock {
 		);
 
 		if ( $min_range === $max_range || ! $max_range ) {
+			$wrapper_attributes['hidden'] = true;
+			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 			return sprintf(
-				'<div %1$s hidden>%2$s</div>',
+				'<div %1$s>%2$s</div>',
 				get_block_wrapper_attributes( $wrapper_attributes ),
 				array_reduce(
 					$block->parsed_block['innerBlocks'],
@@ -232,19 +235,8 @@ final class ProductFilterPrice extends AbstractBlock {
 		$price_results = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) )->get_filtered_price( $query_vars );
 
 		return array(
-			'min_price' => intval( floor( floatval( $price_results->min_price ?? 0 ) ) ),
-			'max_price' => intval( ceil( floatval( $price_results->max_price ?? 0 ) ) ),
+			'min_price' => intval( floor( floatval( $price_results['min_price'] ?? 0 ) ) ),
+			'max_price' => intval( ceil( floatval( $price_results['max_price'] ?? 0 ) ) ),
 		);
-	}
-
-	/**
-	 * Disable the block type script, this uses script modules.
-	 *
-	 * @param string|null $key The key.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
 	}
 }
