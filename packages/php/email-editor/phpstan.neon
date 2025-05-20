@@ -7,6 +7,10 @@ parameters:
 		- vendor/php-stubs/woocommerce-stubs/woocommerce-packages-stubs.php
 		- vendor/php-stubs/wordpress-tests-stubs/wordpress-tests-stubs.php
 
+	paths:
+		- src
+		- tests
+
 	# Treat PHPDoc types as certain
 	treatPhpDocTypesAsCertain: false
 
@@ -14,7 +18,7 @@ parameters:
 	ignoreErrors:
 		- # Container class from Woo Stubs returns mixed
 			message: '#^Cannot call method init\(\) on mixed\.$#'
-			path: src/class-email-editor-container.php 
+			path: src/class-email-editor-container.php
 			count: 1
 		- # There is incorrect type hint for WP_HTML_Tag_Processor in the WP Stubs
 			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor::next_tag\(\) expects array{tag_name\?: string\|null, match_offset\?: int\|null, class_name\?: string\|null, tag_closers\?: string\|null\}\|null, string given\.$#'

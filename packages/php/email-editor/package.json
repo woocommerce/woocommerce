@@ -7,6 +7,7 @@
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:php": "composer run-script phpcbf",
 		"lint:lang:php": "composer run-script phpcs",
+		"phpstan": "composer run phpstan",
 		"postinstall": "XDEBUG_MODE=off composer install --quiet",
 		"env:test": "pnpm env:dev",
 		"env:dev": "pnpm wp-env start --update",
@@ -25,6 +26,16 @@
 				"command": "lint",
 				"changes": [
 					"src/**/*.php"
+				]
+			},
+			"phpstan": {
+				"command": "phpstan",
+				"changes": [
+					"**/*.php"
+				],
+				"events": [
+					"pull_request",
+					"push"
 				]
 			},
 			"tests": [

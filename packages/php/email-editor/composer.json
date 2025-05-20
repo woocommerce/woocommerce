@@ -47,7 +47,7 @@
 		"test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/email-editor ./vendor/bin/phpunit --configuration phpunit-integration.xml.dist",
 		"phpcs": "phpcs -s -p",
 		"phpcbf": "phpcbf -p",
-		"phpstan": "php ./tasks/run-phpstan.php"
+		"phpstan": "vendor/bin/phpstan analyse -c phpstan.neon"
 	},
 	"extra": {
 		"changelogger": {
