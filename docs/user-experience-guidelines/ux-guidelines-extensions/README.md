@@ -1,5 +1,5 @@
 ---
-category_title: Extension Guidelines
+sidebar_label: Extension Guidelines
 category_slug: user-experience-extensions
 post_title: Extension Guidelines
 ---

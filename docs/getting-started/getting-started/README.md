@@ -1,5 +1,5 @@
 ---
-category_title: Getting Started 
+sidebar_label: Getting Started 
 category_slug: getting-started
 post_title: Getting started
 ---

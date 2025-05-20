@@ -1,5 +1,5 @@
 ---
-category_title: Emails
+sidebar_label: Emails
 category_slug: emails
 post_title: Emails in WooCommerce
 ---

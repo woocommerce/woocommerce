@@ -1,5 +1,5 @@
 ---
-category_title: Contribute to Docs 
+sidebar_label: Contribute to Docs 
 category_slug: contributing-docs
 post_title: Contribute to Docs
 ---

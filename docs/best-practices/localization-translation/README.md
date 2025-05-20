@@ -1,7 +1,7 @@
 ---
-category_title: Localization and Translation
+sidebar_label: Localization and translation
 category_slug: localization-translation
-post_title: Localizatiion and Translation
+post_title: Localizatiion and translation
 ---
 
 # Localizatiion and Translation

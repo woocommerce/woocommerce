@@ -1,5 +1,5 @@
 ---
-category_title: Reporting 
+sidebar_label: Reporting 
 category_slug: reporting
 post_title: Reporting
 ---

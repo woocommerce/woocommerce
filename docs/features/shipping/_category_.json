@@ -1,0 +1,10 @@
+{
+    "position": 1,
+    "label": "Shipping Method API",
+    "collapsible": true,
+    "collapsed": true,
+    "link": {
+      "type": "doc",
+      "id": "shipping-method-api"
+    }
+}

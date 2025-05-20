@@ -1,5 +1,5 @@
 ---
-category_title: WooCommerce CLI
+sidebar_label: WooCommerce CLI
 category_slug: wc-cli
 post_title: WooCommerce CLI Overview
 ---

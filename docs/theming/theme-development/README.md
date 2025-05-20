@@ -1,5 +1,5 @@
 ---
-category_title: Classic Theme Development 
+sidebar_label: Classic Theme Development 
 category_slug: theme-development
 post_title: Classic theme development
 ---

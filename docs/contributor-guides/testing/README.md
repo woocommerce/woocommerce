@@ -1,5 +1,5 @@
 ---
-category_title: Testing
+sidebar_label: Testing
 category_slug: testing
 post_title: Testing
 ---

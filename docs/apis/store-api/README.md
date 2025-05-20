@@ -1,5 +1,5 @@
 ---
-category_title: Store API 
+sidebar_label: Store API 
 category_slug: store-api
 post_title: Store API
 ---

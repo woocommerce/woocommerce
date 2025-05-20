@@ -1,7 +1,7 @@
 ---
-category_title: Review Guidelines  
+sidebar_label: Review guidelines  
 category_slug: review-guidelines
-post_title: Review Guidelines
+post_title: Review guidelines
 ---
 
 # Review Guidelines

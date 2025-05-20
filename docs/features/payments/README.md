@@ -1,5 +1,5 @@
 ---
-category_title: Payments
+sidebar_label: Payments
 category_slug: payments
 post_title: Payments
 ---

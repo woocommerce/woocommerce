@@ -1,5 +1,5 @@
 ---
-category_title: Security 
+sidebar_label: Security 
 category_slug: security
 post_title: Security
 ---

@@ -102,7 +102,7 @@ Similarly to pages, a category's metadata is set using Front Matter. At the top 
 
 ```yaml
 ---
-category_title: Your Category Name
+sidebar_label: Your Category Name
 category_slug: this-should-match-your-folders-name
 sidebar_label: This should match your category_title
 ---

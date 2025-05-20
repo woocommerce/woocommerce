@@ -1,7 +1,7 @@
 ---
-category_title: Data Management
+sidebar_label: Data management
 category_slug: data-management
-post_title: Data Management
+post_title: Data management
 ---
 
 # Data Management

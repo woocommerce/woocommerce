@@ -1,5 +1,5 @@
 ---
-category_title: Product Editor
+sidebar_label: Product Editor
 category_slug: product-editor
 post_title: Product Editor
 ---

@@ -1,5 +1,5 @@
 ---
-category_title: Building a Woo Store 
+sidebar_label: Building a Woo Store 
 category_slug: building-a-woo-store
 post_title: Building a Woo Store
 ---

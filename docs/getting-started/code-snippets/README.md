@@ -1,5 +1,5 @@
 ---
-category_title: Code Snippets
+sidebar_label: Code Snippets
 category_slug: code-snippets
 post_title: Code Snippets
 ---

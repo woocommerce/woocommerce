@@ -1,5 +1,5 @@
 ---
-category_title: Performance
+sidebar_label: Performance
 category_slug: performance
 post_title: Performance
 ---

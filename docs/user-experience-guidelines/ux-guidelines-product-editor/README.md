@@ -1,5 +1,5 @@
 ---
-category_title: Product Editor Guidelines
+sidebar_label: Product Editor Guidelines
 category_slug: user-experience-product-editor
 post_title: Product Editor Guidelines
 ---

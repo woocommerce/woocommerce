@@ -1,6 +1,6 @@
 ---
-post_title: Email HTML - Best Practices
-menu_title: Email HTML - Best Practices
+post_title: HTML best practices
+sidebar_label: HTML best practices
 ---
 
 <!-- markdownlint-disable MD024 -->

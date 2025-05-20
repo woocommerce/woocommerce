@@ -1,5 +1,5 @@
 ---
-category_title: Extension Development 
+sidebar_label: Extension Development 
 category_slug: extension-development
 post_title: Extension development
 ---

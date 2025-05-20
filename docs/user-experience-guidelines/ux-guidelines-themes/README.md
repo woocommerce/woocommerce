@@ -1,5 +1,5 @@
 ---
-category_title: Theme Design Guidelines
+sidebar_label: Theme Design Guidelines
 category_slug: user-experience-themes
 post_title: Theme Design Guidelines
 ---

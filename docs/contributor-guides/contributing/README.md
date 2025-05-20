@@ -1,5 +1,5 @@
 ---
-category_title: Contribute to Woo 
+sidebar_label: Contribute to Woo 
 category_slug: contributing
 post_title: Contribute to Woo
 ---
