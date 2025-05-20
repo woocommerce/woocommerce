@@ -55,3 +55,7 @@ html[data-theme='light'] .automattic-logo-dark {
 html[data-theme='dark'] .automattic-logo-light {
   display: none;
 }
+
+.pagination-nav {
+  display: none;
+}
