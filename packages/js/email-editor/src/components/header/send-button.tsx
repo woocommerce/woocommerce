@@ -19,7 +19,7 @@ import { useContentValidation } from '../../hooks/use-content-validation';
 
 export function SendButton() {
 	const { isDirty } = useEntitiesSavedStatesIsDirty();
-	const { validateContent, isInvalid } = useContentValidation();
+	const { isInvalid } = useContentValidation();
 
 	const { hasEmptyContent, isEmailSent, urls } = useSelect(
 		( select ) => ( {
@@ -49,13 +49,11 @@ export function SendButton() {
 			size="compact"
 			onClick={ () => {
 				recordEvent( 'header_send_button_clicked' );
-				if ( validateContent() ) {
-					const action = applyFilters(
-						'woocommerce_email_editor_send_action_callback',
-						sendAction
-					) as () => void;
-					action();
-				}
+				const action = applyFilters(
+					'woocommerce_email_editor_send_action_callback',
+					sendAction
+				) as () => void;
+				action();
 			} }
 			disabled={ isDisabled }
 			data-automation-id="email_editor_send_button"
