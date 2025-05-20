@@ -3,6 +3,8 @@ post_title: Email HTML - Best Practices
 menu_title: Email HTML - Best Practices
 ---
 
+# Email HTML - Best Practices
+
 <!-- markdownlint-disable MD024 -->
 
 ## Overview
