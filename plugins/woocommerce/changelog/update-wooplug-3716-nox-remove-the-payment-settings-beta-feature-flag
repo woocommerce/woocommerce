@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Remove the feature flag and bake in the new Payments Settings page.

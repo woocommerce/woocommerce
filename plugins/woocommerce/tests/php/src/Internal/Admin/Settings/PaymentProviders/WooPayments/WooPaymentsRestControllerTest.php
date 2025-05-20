@@ -261,7 +261,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->mock_woopayments_service
 			->expects( $this->never() )
-			->method( 'set_onboarding_step_started' );
+			->method( 'mark_onboarding_step_started' );
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/start' );
@@ -286,7 +286,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$expected_http_code = 123;
 		$this->mock_woopayments_service
 			->expects( $this->once() )
-			->method( 'set_onboarding_step_started' )
+			->method( 'mark_onboarding_step_started' )
 			->willThrowException( new ApiException( $expected_code, $expected_message, $expected_http_code ) );
 
 		// Act.
@@ -543,7 +543,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->mock_woopayments_service
 			->expects( $this->never() )
-			->method( 'set_onboarding_step_completed' );
+			->method( 'mark_onboarding_step_completed' );
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/finish' );
@@ -568,11 +568,101 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$expected_http_code = 123;
 		$this->mock_woopayments_service
 			->expects( $this->once() )
-			->method( 'set_onboarding_step_completed' )
+			->method( 'mark_onboarding_step_completed' )
 			->willThrowException( new ApiException( $expected_code, $expected_message, $expected_http_code ) );
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/finish' );
+		$request->set_param( 'location', $country_code );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( $expected_code, $response->get_data()['code'] );
+		$this->assertSame( $expected_message, $response->get_data()['message'] );
+		$this->assertSame( $expected_http_code, $response->get_status() );
+	}
+
+	/**
+	 * Test handling onboarding step clean.
+	 */
+	public function test_onboarding_step_clean() {
+		// Arrange.
+		$step_id      = 'step1';
+		$country_code = 'US';
+		$this->mock_onboarding_details( $country_code );
+
+		$this->mock_woopayments_service
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_onboarding_step_status' )
+			->with( $step_id, $country_code )
+			->willReturnOnConsecutiveCalls(
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED
+			);
+
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/clean' );
+		$request->set_param( 'location', $country_code );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertArrayHasKey( 'success', $data );
+		$this->assertTrue( $data['success'] );
+		$this->assertArrayHasKey( 'previous_status', $data );
+		$this->assertSame( WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED, $data['previous_status'] );
+		$this->assertArrayHasKey( 'current_status', $data );
+		$this->assertSame( WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED, $data['current_status'] );
+	}
+
+	/**
+	 * Test handling onboarding step clean with invalid location.
+	 *
+	 * @dataProvider provider_invalid_location_provider
+	 *
+	 * @param string $location The location to test.
+	 */
+	public function test_onboarding_step_clean_with_invalid_location( string $location ) {
+		// Arrange.
+		$step_id      = 'step1';
+		$country_code = 'US';
+		$this->mock_onboarding_details( $country_code );
+
+		$this->mock_woopayments_service
+			->expects( $this->never() )
+			->method( 'clean_onboarding_step_progress' );
+
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/clean' );
+		$request->set_param( 'location', $location );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 400, $response->get_status() );
+	}
+
+	/**
+	 * Test handling onboarding step clean with exception.
+	 */
+	public function test_onboarding_step_clean_with_exception() {
+		// Arrange.
+		$step_id      = 'step1';
+		$country_code = 'US';
+		$this->mock_onboarding_details( $country_code );
+
+		$expected_code      = 'test_exception';
+		$expected_message   = 'Test exception message.';
+		$expected_http_code = 123;
+		$this->mock_woopayments_service
+			->expects( $this->once() )
+			->method( 'clean_onboarding_step_progress' )
+			->willThrowException( new ApiException( $expected_code, $expected_message, $expected_http_code ) );
+
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . $step_id . '/clean' );
 		$request->set_param( 'location', $country_code );
 		$response = $this->server->dispatch( $request );
 
@@ -594,7 +684,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->mock_woopayments_service
 			->expects( $this->once() )
-			->method( 'set_onboarding_step_started' )
+			->method( 'mark_onboarding_step_started' )
 			->with( $step_id, $country_code )
 			->willReturn( true );
 
