@@ -38,7 +38,14 @@ class PaymentProviders {
 	public const EXTENSION_INSTALLED     = 'installed';
 	public const EXTENSION_ACTIVE        = 'active';
 
-	public const EXTENSION_TYPE_WPORG = 'wporg';
+	// For providers that are delivered through a plugin available on the WordPress.org repository.
+	public const EXTENSION_TYPE_WPORG     = 'wporg';
+	// For providers that are delivered through a must-use plugin.
+	public const EXTENSION_TYPE_MU_PLUGIN = 'mu_plugin';
+	// For providers that are delivered through a theme.
+	public const EXTENSION_TYPE_THEME     = 'theme';
+	// For providers that are delivered through an unknown mechanism.
+	public const EXTENSION_TYPE_UNKNOWN   = 'unknown';
 
 	public const PROVIDERS_ORDER_OPTION         = 'woocommerce_gateway_order';
 	public const SUGGESTION_ORDERING_PREFIX     = '_wc_pes_';
