@@ -6,6 +6,7 @@ import { action } from '@storybook/addon-actions';
 import { useArgs } from '@storybook/client-api';
 import { useDispatch } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
+import { useState, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -216,12 +217,32 @@ export default {
 const Template: StoryFn< ValidatedTextInputProps > = ( args ) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [ _, updateArgs ] = useArgs();
+	const getFormattedValue = ( val: string | number | readonly string[] | undefined ) => {
+		const stringVal = typeof val === 'string' ? val : String(val || '');
+		return args.customFormatter
+			? args.customFormatter( stringVal )
+			: stringVal;
+	};
+
+	const [ inputValue, setInputValue ] = useState(
+		getFormattedValue( args.value )
+	);
 	const { setValidationErrors, showValidationError } =
 		useDispatch( validationStore );
 
-	const onChange = ( value: string ) => {
-		action( 'change' )( value || '' );
-		updateArgs( { value } );
+	useEffect( () => {
+		setInputValue( getFormattedValue( args.value ) );
+	}, [ args.value, args.customFormatter ] );
+
+	const onChange = ( newValue: string ) => {
+		const formattedValue = args.customFormatter
+			? args.customFormatter( newValue )
+			: newValue;
+
+		setInputValue( formattedValue );
+
+		action( 'change' )( newValue || '' );
+		updateArgs( { value: newValue } );
 
 		// Always show error for WithError story.
 		if ( args.id === 'with-error-id' ) {
@@ -236,7 +257,11 @@ const Template: StoryFn< ValidatedTextInputProps > = ( args ) => {
 		}
 
 		// Default: only show error if input is empty and showError is true.
-		if ( args.showError && ! value.trim() && args.id !== 'with-error-id' ) {
+		if (
+			args.showError &&
+			! newValue.trim() &&
+			args.id !== 'with-error-id'
+		) {
 			setValidationErrors( {
 				[ args.id || 'unique-id' ]: {
 					message: 'This field cannot be empty',
@@ -247,7 +272,13 @@ const Template: StoryFn< ValidatedTextInputProps > = ( args ) => {
 		}
 	};
 
-	return <ValidatedTextInput { ...args } onChange={ onChange } />;
+	return (
+		<ValidatedTextInput
+			{ ...args }
+			value={ inputValue }
+			onChange={ onChange }
+		/>
+	);
 };
 
 export const Default: StoryFn< ValidatedTextInputProps > = Template.bind( {} );
