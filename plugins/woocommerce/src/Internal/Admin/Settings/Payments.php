@@ -73,14 +73,22 @@ class Payments {
 					return $a['_priority'] <=> $b['_priority'];
 				}
 			);
-			$added_to_top = 0;
+			$last_preferred_order = -1;
 			foreach ( $suggestions['preferred'] as $suggestion ) {
 				$suggestion_order_map_id = $this->providers->get_suggestion_order_map_id( $suggestion['id'] );
 				// Determine the suggestion's order value.
-				// If we don't have an order for it, add it to the top but keep the relative order (PSP first, APM second).
+				// If we don't have an order for it, add it to the top but keep the relative order:
+				// PSP first, APM after PSP, offline PSP after PSP and APM.
 				if ( ! isset( $providers_order_map[ $suggestion_order_map_id ] ) ) {
-					$providers_order_map = Utils::order_map_add_at_order( $providers_order_map, $suggestion_order_map_id, $added_to_top );
-					++$added_to_top;
+					$providers_order_map = Utils::order_map_add_at_order( $providers_order_map, $suggestion_order_map_id, $last_preferred_order + 1 );
+					if ( $last_preferred_order < $providers_order_map[ $suggestion_order_map_id ] ) {
+						// If the last preferred order is less than the current one, we need to update it.
+						$last_preferred_order = $providers_order_map[ $suggestion_order_map_id ];
+					}
+				} elseif ( $last_preferred_order < $providers_order_map[ $suggestion_order_map_id ] ) {
+					// Save the preferred provider's order to know where we should be inserting next.
+					// But only if the last preferred order is less than the current one.
+					$last_preferred_order = $providers_order_map[ $suggestion_order_map_id ];
 				}
 
 				// Change suggestion details to align it with a regular payment gateway.
