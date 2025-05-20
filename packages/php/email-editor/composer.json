@@ -21,13 +21,15 @@
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "3.3.0",
-		"phpunit/phpunit": "^9.6",
 		"pelago/emogrifier": "^7.3",
-		"yoast/phpunit-polyfills": "^4.0",
-		"woocommerce/woocommerce-sniffs": "1.0.0",
+		"php-stubs/woocommerce-stubs": "^9.8",
+		"php-stubs/wordpress-tests-stubs": "^6.8",
 		"phpstan/phpstan": "^2.1",
+		"phpstan/phpstan-phpunit": "^2.0",
+		"phpunit/phpunit": "^9.6",
 		"szepeviktor/phpstan-wordpress": "^2.0",
-		"php-stubs/woocommerce-stubs": "^9.8"
+		"woocommerce/woocommerce-sniffs": "1.0.0",
+		"yoast/phpunit-polyfills": "^4.0"
 	},
 	"config": {
 		"platform": {
