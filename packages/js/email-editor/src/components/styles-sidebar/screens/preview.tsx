@@ -76,41 +76,67 @@ export function Preview( {
 		} ),
 		[]
 	);
-
+	const paletteColors = useMemo(
+		() => colors.theme.concat( colors.default ),
+		[ colors ]
+	);
 	const { styles } = useEmailStyles();
 
-	const backgroundColor = useMemo(
-		() =>
-			getCompressedVariableValue( styles?.color?.background ) ||
-			'#ffffff',
-		[ styles ]
-	);
-	const textColor = useMemo(
-		() => getCompressedVariableValue( styles?.color?.text ) || 'inherit',
-		[ styles ]
-	);
-	const headingColor = useMemo(
-		() =>
+	const {
+		backgroundColor,
+		headingColor,
+		textColorPaletteObject,
+		buttonBackgroundColorPaletteObject,
+	} = useMemo( () => {
+		const backgroundCol =
+			getCompressedVariableValue( styles?.color?.background ) || 'white';
+		const textCol =
+			getCompressedVariableValue( styles?.color?.text ) || 'black';
+		const headingCol =
+			getCompressedVariableValue( styles?.elements?.h1?.color?.text ) ||
+			textCol;
+		const linkColor =
+			getCompressedVariableValue( styles?.elements?.link?.color?.text ) ||
+			headingCol;
+		const buttonBackgroundCol =
 			getCompressedVariableValue(
-				styles?.elements?.heading?.color?.text
-			) || textColor,
-		[ styles, textColor ]
-	);
+				styles?.elements?.button?.color?.background
+			) || linkColor;
+
+		const textColorPaletteObj = paletteColors.find(
+			( { color } ) => color.toLowerCase() === textCol.toLowerCase()
+		);
+		const buttonBackgroundColorPaletteObj = paletteColors.find(
+			( { color } ) =>
+				color.toLowerCase() === buttonBackgroundCol.toLowerCase()
+		);
+
+		return {
+			backgroundColor: backgroundCol,
+			headingColor: headingCol,
+			buttonBackgroundColor: buttonBackgroundCol,
+			textColorPaletteObject: textColorPaletteObj,
+			buttonBackgroundColorPaletteObject: buttonBackgroundColorPaletteObj,
+		};
+	}, [ styles, paletteColors ] );
 
 	const headingFontWeight =
 		styles?.elements?.heading?.typography?.fontWeight || 'inherit';
 	const headingFontFamily =
 		styles?.elements?.heading?.typography?.fontFamily || 'inherit';
 
-	const paletteColors = colors.theme.concat( colors.default );
-
-	// We pick the first two colors that are not the background or the heading color
-	// https://github.com/WordPress/gutenberg/blob/7fa03fafeb421ab4c3604564211ce6007cc38e84/packages/edit-site/src/components/global-styles/hooks.js#L68-L73
-	const highlightedColors = paletteColors
+	// We pick the colors for the highlighted colors the same way as the site editor
+	// https://github.com/WordPress/gutenberg/blob/7b3850b6a39ce45948f09efe750451c6323a4613/packages/edit-site/src/components/global-styles/hooks.js#L83-L95
+	const highlightedColors = [
+		...( textColorPaletteObject ? [ textColorPaletteObject ] : [] ),
+		...( buttonBackgroundColorPaletteObject
+			? [ buttonBackgroundColorPaletteObject ]
+			: [] ),
+		...paletteColors,
+	]
 		.filter(
 			( { color } ) =>
-				color.toLowerCase() !== backgroundColor.toLowerCase() &&
-				color.toLowerCase() !== headingColor.toLowerCase()
+				color.toLowerCase() !== backgroundColor.toLowerCase()
 		)
 		.slice( 0, 2 );
 
