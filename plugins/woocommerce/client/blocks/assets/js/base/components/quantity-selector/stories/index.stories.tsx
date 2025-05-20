@@ -15,7 +15,6 @@ export default {
 	args: {
 		itemName: 'widgets',
 		quantity: 1,
-		maximum: 10,
 	},
 } as Meta< QuantitySelectorProps >;
 
