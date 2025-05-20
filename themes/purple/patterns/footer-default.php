@@ -4,9 +4,7 @@
  * Slug: woostarter/default-footer
  * Categories: footer
  * Block Types: core/template-part/footer
- *
  */
-
 ?>
 <!-- wp:group {"metadata":{"name":"Default Footer"},"align":"full","className":"is-style-section-1","style":{"spacing":{"padding":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull is-style-section-1" style="padding-top:0;padding-bottom:0"><!-- wp:spacer {"height":"var:preset|spacing|50"} -->
