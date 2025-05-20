@@ -482,7 +482,7 @@ class CartController {
 		remove_action( 'woocommerce_check_cart_items', array( $cart, 'check_cart_coupons' ), 1 );
 
 		// Before running actions, store notices.
-		$previous_notices = WC()->session->get( 'wc_notices', array() );
+		$previous_notices = WC()->session->get( 'wc_notices' );
 
 		/**
 		 * Fires when cart items are being validated.
