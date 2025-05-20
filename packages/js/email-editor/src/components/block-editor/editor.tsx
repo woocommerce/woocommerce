@@ -133,7 +133,7 @@ export function InnerEditor( {
 					<SendPreview />
 					<FullscreenMode isActive={ isFullscreenEnabled } />
 					{ isFullscreenEnabled && <BackButtonContent /> }
-					<MoreMenu />
+					{ ! isFullscreenEnabled && <MoreMenu /> }
 					{ currentPost.postType === 'wp_template' ? (
 						<TemplateSettingsPanel />
 					) : (

@@ -37,7 +37,6 @@ const siteIconVariants = {
 /**
  * TODO: Add on click event
  * TODO: validation on Save
- * TODO: remove the more menu if full screen settings is enabled
  * TODO: remove the save button if full screen settings is enabled
  * TODO: add the close button if full screen settings is disabled, but user toggled full screen
  */
