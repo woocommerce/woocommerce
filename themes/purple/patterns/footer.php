@@ -13,10 +13,12 @@
 
 <!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|50","left":"var:preset|spacing|50"}}}} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"width":"40%"} -->
-<div class="wp-block-column" style="flex-basis:40%"><!-- wp:site-title /-->
+<div class="wp-block-column" style="flex-basis:40%"><!-- wp:site-title {"level":0} /-->
 
 <!-- wp:paragraph {"align":"left","style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-3"}}}},"textColor":"theme-3","fontSize":"small"} -->
-<p class="has-text-align-left has-theme-3-color has-text-color has-link-color has-small-font-size"><?php esc_html_e('Bold knitwear designed with care—for you and the planet.', 'woostarter');?></p>
+<p class="has-text-align-left has-theme-3-color has-text-color has-link-color has-small-font-size"><?php echo wp_kses_post(
+    __('Bold knitwear designed with care<br>—for you and the planet.', 'woostarter')
+);?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:column -->
 
@@ -30,21 +32,17 @@
 <!-- /wp:heading -->
 
 <!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"flex","orientation":"vertical"}} -->
-<div class="wp-block-group"><!-- wp:paragraph {"align":"left"} -->
-<p class="has-text-align-left"><?php esc_html_e('Ceramics', 'woostarter');?></p>
-<!-- /wp:paragraph -->
+<div class="wp-block-group">
+<!-- wp:navigation {"overlayMenu":"never","layout":{"type":"flex","orientation":"vertical"}} -->
+<!-- wp:navigation-link {"label":"<?php esc_html_e('Ceramics', 'woostarter');?>","url":"#"} /-->
 
-<!-- wp:paragraph -->
-<p><?php esc_html_e('Furniture', 'woostarter');?></p>
-<!-- /wp:paragraph -->
+<!-- wp:navigation-link {"label":"<?php esc_html_e('Furniture', 'woostarter');?>","url":"#"} /-->
 
-<!-- wp:paragraph -->
-<p><?php esc_html_e('Accessories', 'woostarter');?></p>
-<!-- /wp:paragraph -->
+<!-- wp:navigation-link {"label":"<?php esc_html_e('Accessories', 'woostarter');?>","url":"#"} /-->
 
-<!-- wp:paragraph -->
-<p><?php esc_html_e('Clothing', 'woostarter');?></p>
-<!-- /wp:paragraph --></div>
+<!-- wp:navigation-link {"label":"<?php esc_html_e('Clothing', 'woostarter');?>","url":"#"} /-->
+<!-- /wp:navigation -->
+</div>
 <!-- /wp:group --></div>
 <!-- /wp:column -->
 
@@ -54,21 +52,17 @@
 <!-- /wp:heading -->
 
 <!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"flex","orientation":"vertical"}} -->
-<div class="wp-block-group"><!-- wp:paragraph {"align":"left"} -->
-<p class="has-text-align-left"><?php esc_html_e('About', 'woostarter');?></p>
-<!-- /wp:paragraph -->
+<div class="wp-block-group">
+<!-- wp:navigation {"overlayMenu":"never","layout":{"type":"flex","orientation":"vertical"}} -->
+<!-- wp:navigation-link {"label":"<?php esc_html_e('About', 'woostarter');?>","url":"#"} /-->
 
-<!-- wp:paragraph -->
-<p><?php esc_html_e('Contact us', 'woostarter');?></p>
-<!-- /wp:paragraph -->
+<!-- wp:navigation-link {"label":"<?php esc_html_e('Contact us', 'woostarter');?>","url":"#"} /-->
 
-<!-- wp:paragraph -->
-<p><?php esc_html_e('FAQs', 'woostarter');?></p>
-<!-- /wp:paragraph -->
+<!-- wp:navigation-link {"label":"<?php esc_html_e('FAQs', 'woostarter');?>","url":"#"} /-->
 
-<!-- wp:paragraph -->
-<p><?php esc_html_e('Blog', 'woostarter');?></p>
-<!-- /wp:paragraph --></div>
+<!-- wp:navigation-link {"label":"<?php esc_html_e('Blog', 'woostarter');?>","url":"#"} /-->
+<!-- /wp:navigation -->
+</div>
 <!-- /wp:group --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
