@@ -669,7 +669,7 @@ class PaymentsRestController extends RestApiControllerBase {
 								PaymentProviders::EXTENSION_TYPE_WPORG,
 								PaymentProviders::EXTENSION_TYPE_MU_PLUGIN,
 								PaymentProviders::EXTENSION_TYPE_THEME,
-								PaymentProviders::EXTENSION_TYPE_UNKNOWN
+								PaymentProviders::EXTENSION_TYPE_UNKNOWN,
 							),
 							'description' => esc_html__( 'The type of the containing entity. Generally this is a regular plugin but it can also be a non-standard entity like a theme or a must-user plugin.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),

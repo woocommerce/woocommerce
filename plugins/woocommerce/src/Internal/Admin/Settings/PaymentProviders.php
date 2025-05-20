@@ -39,13 +39,13 @@ class PaymentProviders {
 	public const EXTENSION_ACTIVE        = 'active';
 
 	// For providers that are delivered through a plugin available on the WordPress.org repository.
-	public const EXTENSION_TYPE_WPORG     = 'wporg';
+	public const EXTENSION_TYPE_WPORG = 'wporg';
 	// For providers that are delivered through a must-use plugin.
 	public const EXTENSION_TYPE_MU_PLUGIN = 'mu_plugin';
 	// For providers that are delivered through a theme.
-	public const EXTENSION_TYPE_THEME     = 'theme';
+	public const EXTENSION_TYPE_THEME = 'theme';
 	// For providers that are delivered through an unknown mechanism.
-	public const EXTENSION_TYPE_UNKNOWN   = 'unknown';
+	public const EXTENSION_TYPE_UNKNOWN = 'unknown';
 
 	public const PROVIDERS_ORDER_OPTION         = 'woocommerce_gateway_order';
 	public const SUGGESTION_ORDERING_PREFIX     = '_wc_pes_';
@@ -250,7 +250,6 @@ class PaymentProviders {
 	 *
 	 * @return string The plugin slug of the payment gateway.
 	 *                Empty string if a plugin slug could not be determined.
-	 *
 	 */
 	public function get_payment_gateway_plugin_slug( WC_Payment_Gateway $payment_gateway ): string {
 		$provider = $this->get_payment_gateway_provider_instance( $payment_gateway->id );

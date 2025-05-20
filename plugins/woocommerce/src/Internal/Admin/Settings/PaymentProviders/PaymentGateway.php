@@ -667,7 +667,7 @@ class PaymentGateway {
 			$class_filename = $payment_gateway->class_filename;
 		} else {
 			try {
-				$reflector              = new \ReflectionClass( get_class( $payment_gateway ) );
+				$reflector      = new \ReflectionClass( get_class( $payment_gateway ) );
 				$class_filename = $reflector->getFileName();
 			} catch ( Throwable $e ) {
 				// Bail if we couldn't get the gateway class filename.
@@ -697,11 +697,15 @@ class PaymentGateway {
 		// This is useful for testing.
 		if ( isset( $payment_gateway->extension_type ) ) {
 			// Validate the extension type.
-			if ( ! in_array( $payment_gateway->extension_type, array(
-				PaymentProviders::EXTENSION_TYPE_WPORG,
-				PaymentProviders::EXTENSION_TYPE_MU_PLUGIN,
-				PaymentProviders::EXTENSION_TYPE_THEME,
-			), true ) ) {
+			if ( ! in_array(
+				$payment_gateway->extension_type,
+				array(
+					PaymentProviders::EXTENSION_TYPE_WPORG,
+					PaymentProviders::EXTENSION_TYPE_MU_PLUGIN,
+					PaymentProviders::EXTENSION_TYPE_THEME,
+				),
+				true
+			) ) {
 				return PaymentProviders::EXTENSION_TYPE_UNKNOWN;
 			}
 
