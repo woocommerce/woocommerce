@@ -85,7 +85,13 @@
 <p class="has-text-align-left has-theme-3-color has-text-color has-link-color has-small-font-size"><?php esc_html_e('© 2025 ELKE. Designed with WordPress', 'woostarter');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:navigation {"overlayMenu":"never","style":{"typography":{"textDecoration":"underline"}},"fontSize":"small","layout":{"type":"flex","orientation":"horizontal"}} /--></div>
+<!-- wp:navigation {"overlayMenu":"never","style":{"typography":{"textDecoration":"underline"}},"fontSize":"small","layout":{"type":"flex","orientation":"horizontal"}} -->
+<!-- wp:navigation-link {"label":"<?php esc_html_e('Shipping', 'woostarter');?>","url":"#"} /-->
+
+<!-- wp:navigation-link {"label":"<?php esc_html_e('Return Policy', 'woostarter');?>","url":"#"} /-->
+
+<!-- wp:navigation-link {"label":"<?php esc_html_e('Terms & Conditions', 'woostarter');?>","url":"#"} /-->
+<!-- /wp:navigation --></div>
 <!-- /wp:group -->
 
 <!-- wp:spacer {"height":"var:preset|spacing|40","style":{"layout":[]}} -->
