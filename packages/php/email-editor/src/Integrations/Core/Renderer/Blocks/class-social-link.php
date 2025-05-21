@@ -24,7 +24,7 @@ class Social_Link extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
-		// Not using this for now.
+		// We are not using this for now.
 		return $block_content;
 	}
 }

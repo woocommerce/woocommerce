@@ -63,6 +63,22 @@ class Social_Links extends Abstract_Block_Renderer {
 			return '';
 		}
 
+		/**
+		 * Prepend emails with `mailto:` if not set.
+		 * The `is_email` returns false for emails with schema.
+		 */
+		if ( is_email( $service_url ) ) {
+			$service_url = 'mailto:' . antispambot( $service_url );
+		}
+
+		/**
+		 * Prepend URL with https:// if it doesn't appear to contain a scheme
+		 * and it's not a relative link or a fragment.
+		 */
+		if ( ! wp_parse_url( $service_url, PHP_URL_SCHEME ) && ! str_starts_with( $service_url, '//' ) && ! str_starts_with( $service_url, '#' ) ) {
+			$service_url = 'https://' . $service_url;
+		}
+
 		$open_in_new_tab = $parent_block_attrs['openInNewTab'] ?? false;
 		$show_labels     = $parent_block_attrs['showLabels'] ?? false;
 
@@ -76,13 +92,13 @@ class Social_Links extends Abstract_Block_Renderer {
 
 		if ( ! $is_logos_only && Social_Links_Helper::detect_whiteish_color( $icon_color_value ) && ( Social_Links_Helper::detect_whiteish_color( $icon_background_color_value ) || empty( $icon_background_color_value ) ) ) {
 			// If the icon color is white and the background color is white or empty, use the service brand color for the icon background color.
-			$icon_background_color_value = $service_brand_color ?? '#000';
+			$icon_background_color_value = ! empty( $service_brand_color ) ? $service_brand_color : '#000';
 		}
 
 		if ( $is_logos_only ) {
 			// logos only mode does not need background color. We also don't really need the icon color (we can't change png image color anyways).
 			// We set it so that the label text color will reflect the service brand color.
-			$icon_color_value = $service_brand_color ?? '#000';
+			$icon_color_value = ! empty( $service_brand_color ) ? $service_brand_color : '#000';
 		}
 
 		$service_icon_url = $this->get_service_icon_url( $service_name, $is_logos_only ? 'brand' : 'white' );
