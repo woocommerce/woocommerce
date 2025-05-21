@@ -18,12 +18,12 @@ abstract class Exception extends \Exception {
   /** @var string[] */
   private $errors = [];
 
-  final public function __construct(string $message = '', int $code = 0, \Throwable $previous = null) {
+  final public function __construct(string $message = '', int $code = 0, ?\Throwable $previous = null) {
     parent::__construct($message, $code, $previous);
   }
 
   /** @return static */
-  public static function create(\Throwable $previous = null) {
+  public static function create(?\Throwable $previous = null) {
     return new static('', 0, $previous);
   }
 
