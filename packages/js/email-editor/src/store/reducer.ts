@@ -18,14 +18,6 @@ export function reducer( state: State, action ): State {
 					...action.state,
 				},
 			};
-		case 'TOGGLE_SETTINGS_SIDEBAR_ACTIVE_TAB':
-			return {
-				...state,
-				settingsSidebar: {
-					...state.settingsSidebar,
-					activeTab: action.state.activeTab,
-				},
-			};
 		case 'SET_PERSONALIZATION_TAGS':
 			return {
 				...state,

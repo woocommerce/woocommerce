@@ -29,14 +29,9 @@ import { registerSettingsEmailColorPaletteFill } from '~/settings-email/settings
 import { registerSettingsEmailImageUrlFill } from '~/settings-email/settings-email-image-url-slotfill';
 import { registerSettingsEmailPreviewFill } from '~/settings-email/settings-email-preview-slotfill';
 import { registerSettingsEmailFeedbackFill } from '~/settings-email/settings-email-feedback-slotfill';
-import { registerSettingsEmailListingFill } from '../../settings-email/settings-email-listing-slotfill';
+import { registerSettingsEmailListingFill } from '~/settings-email/settings-email-listing-slotfill';
 
 const renderPaymentsSettings = () => {
-	if ( ! isFeatureEnabled( 'reactify-classic-payments-settings' ) ) {
-		// Render the payment settings components only if the feature flag is enabled.
-		return;
-	}
-
 	const pages = [
 		{
 			id: 'experimental_wc_settings_payments_main',

@@ -38,6 +38,8 @@ const OnboardingContext = createContext< OnboardingContextType >( {
 	getStepByKey: () => undefined,
 	refreshStoreData: () => undefined,
 	closeModal: () => undefined,
+	justCompletedStepId: null,
+	setJustCompletedStepId: () => undefined,
 } );
 
 export const useOnboardingContext = () => useContext( OnboardingContext );
@@ -57,6 +59,15 @@ export const OnboardingProvider: React.FC< {
 	const [ allSteps, setAllSteps ] = useState<
 		WooPaymentsProviderOnboardingStep[]
 	>( [] );
+
+	// New state for tracking just completed step
+	const [ justCompletedStepId, setStepId ] = useState< string | null >(
+		null
+	);
+
+	const setJustCompletedStepId = useCallback( ( stepId: string | null ) => {
+		setStepId( stepId );
+	}, [] );
 
 	const {
 		invalidateResolutionForStoreSelector: invalidateWooPaymentsOnboarding,
@@ -181,6 +192,7 @@ export const OnboardingProvider: React.FC< {
 	const resetLocalState = () => {
 		setStateStoreSteps( [] );
 		setIsStateStoreLoading( true );
+		setJustCompletedStepId( null );
 		setAllSteps( [] );
 	};
 
@@ -224,7 +236,7 @@ export const OnboardingProvider: React.FC< {
 				if ( step.type === 'backend' ) {
 					const backendStep = stateStoreSteps.find(
 						( s ) => s.id === step.id
-					);
+					) as WooPaymentsProviderOnboardingStep;
 
 					return Object.assign( {}, step, {
 						status: backendStep?.status || 'not_started',
@@ -232,6 +244,7 @@ export const OnboardingProvider: React.FC< {
 						path: backendStep?.path,
 						context: backendStep?.context,
 						actions: backendStep?.actions,
+						errors: backendStep?.errors,
 					} );
 				}
 
@@ -285,6 +298,8 @@ export const OnboardingProvider: React.FC< {
 					// This is important to ensure that the payment providers buttons are up to date.
 					invalidatePaymentProviders( 'getPaymentProviders' );
 				},
+				justCompletedStepId,
+				setJustCompletedStepId,
 			} }
 		>
 			{ children }

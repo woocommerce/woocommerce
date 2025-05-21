@@ -16,8 +16,13 @@ import { useOnboardingContext } from '../../data/onboarding-context';
  * WooPaymentsOnboarding component for the WooPayments onboarding modal.
  */
 export default function WooPaymentsOnboarding(): React.ReactNode {
-	const { steps, isLoading, currentStep, navigateToStep } =
-		useOnboardingContext();
+	const {
+		steps,
+		isLoading,
+		currentStep,
+		navigateToStep,
+		justCompletedStepId,
+	} = useOnboardingContext();
 
 	const location = useLocation();
 
@@ -51,6 +56,7 @@ export default function WooPaymentsOnboarding(): React.ReactNode {
 							<Stepper
 								steps={ steps }
 								active={ currentStep?.id ?? '' }
+								justCompletedStepId={ justCompletedStepId }
 								includeSidebar
 								sidebarTitle={ __(
 									'Set up WooPayments',
