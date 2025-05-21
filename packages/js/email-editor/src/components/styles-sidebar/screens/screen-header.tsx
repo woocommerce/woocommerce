@@ -9,9 +9,12 @@ import {
 	__experimentalSpacer as Spacer, // eslint-disable-line
 	__experimentalHeading as Heading, // eslint-disable-line
 	__experimentalView as View, // eslint-disable-line
-	// @ts-expect-error Type for Navigator is missing in @types/wordpress__editor
-	Navigator,
 } from '@wordpress/components';
+
+/**
+ * Internal dependencies
+ */
+import { Navigator } from '../navigator';
 
 type Props = {
 	title: string;

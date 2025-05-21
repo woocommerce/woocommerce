@@ -683,12 +683,19 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response The response.
 	 */
 	protected function get_woopay_eligibility() {
+		// We use the Payments Settings stored business location to determine the eligibility.
+		$location = $this->payments->get_country();
+
+		$woopay_eligible_countries = array( 'US' );
+		$is_eligible               = in_array( $location, $woopay_eligible_countries, true );
+
 		return rest_ensure_response(
 			array(
-				'is_eligible' => WCPayPromotion::is_woopay_eligible(),
+				'is_eligible' => $is_eligible,
 			)
 		);
 	}
+
 
 	/**
 	 * General permissions check for WooPayments settings REST API endpoint.

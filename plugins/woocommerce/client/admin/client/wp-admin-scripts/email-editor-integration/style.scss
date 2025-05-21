@@ -4,6 +4,9 @@
 			text-align: right;
 		}
 	}
+	.woocommerce-settings-panel-preheader-text .components-base-control__help {
+		text-align: right;
+	}
 	.woocommerce-settings-panel__preview-text-length {
 		color: #000;
 		display: inline-block;
@@ -15,5 +18,12 @@
 	}
 	.woocommerce-settings-panel__preview-text-length-error {
 		color: #cc1818;
+	}
+	.woocommerce-email-editor-recipients-help {
+		color: $gray-700;
+		font-size: 12px;
+		font-style: normal;
+		margin-bottom: 0;
+		margin-top: calc(8px);
 	}
 }

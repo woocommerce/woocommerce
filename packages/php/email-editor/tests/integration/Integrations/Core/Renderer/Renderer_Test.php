@@ -104,17 +104,45 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test it inlines paragraph colors
 	 */
 	public function testItInlinesParagraphColors() {
+		// Both background and text are defined as custom colors.
+		$paragraph_1 = '<!-- wp:paragraph {"style":{"color":{"text":"#ff6900", "background": "#000"}}} --><p class="test1">Hello</p><!-- /wp:paragraph -->';
+		// Text is defined as custom color background is preset.
+		$paragraph_2 = '<!-- wp:paragraph {"style":{"color":{"text":"#ff6900"}, "backgroundColor":"black"}} --><p class="test2 has-black-background-color">Hello</p><!-- /wp:paragraph -->';
+		// Text is preset color background is custom.
+		$paragraph_3 = '<!-- wp:paragraph {"style":{"color":{"background":"#000"}, "textColor":"luminous-vivid-orange"}} --><p class="test3 has-luminous-vivid-orange-color">Hello</p><!-- /wp:paragraph -->';
+		// Text and background are both preset.
+		$paragraph_4 = '<!-- wp:paragraph {"style":{"textColor":"luminous-vivid-orange", "backgroundColor":"black"}} --><p class="test4 has-luminous-vivid-orange-color has-black-background-color">Hello</p><!-- /wp:paragraph -->';
+		// No text defined - fallback to email styles color text #1e1e1e.
+		$paragraph_5 = '<!-- wp:paragraph {"style":{} --><p class="test5">Hello</p><!-- /wp:paragraph -->';
+
 		$email_post_id = $this->factory->post->create(
 			array(
-				'post_content' => '<!-- wp:paragraph {style":{"color":{"background":"black", "text":"luminous-vivid-orange"}}} --><p class="has-luminous-vivid-orange-color has-black-background-color">Hello</p><!-- /wp:paragraph -->',
+				'post_content' => $paragraph_1 . $paragraph_2 . $paragraph_3 . $paragraph_4 . $paragraph_5,
 			)
 		);
 		$email_post    = get_post( $email_post_id );
 
-		$rendered                = $this->renderer->render( $email_post, 'Subject', '', 'en' );
-		$paragraph_wrapper_style = $this->extractBlockStyle( $rendered['html'], 'has-luminous-vivid-orange-color', 'td' );
-		$this->assertStringContainsString( 'color: #ff6900', $paragraph_wrapper_style ); // luminous-vivid-orange is #ff6900.
-		$this->assertStringContainsString( 'background-color: #000', $paragraph_wrapper_style ); // black is #000.
+		$rendered                  = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+		$paragraph_1_wrapper_style = $this->extractBlockStyle( $rendered['html'], 'test1', 'td' );
+		$this->assertStringContainsString( 'color: #ff6900', $paragraph_1_wrapper_style );
+		$this->assertStringContainsString( 'background-color: #000', $paragraph_1_wrapper_style );
+
+		$paragraph_2_wrapper_style = $this->extractBlockStyle( $rendered['html'], 'test2', 'td' );
+		$this->assertStringContainsString( 'color: #ff6900', $paragraph_2_wrapper_style );
+		$this->assertStringContainsString( 'background-color: #000', $paragraph_2_wrapper_style );
+
+		$paragraph_3_wrapper_style          = $this->extractBlockStyle( $rendered['html'], 'test3', 'td' );
+		$paragraph_3_nested_paragraph_style = $this->extractBlockStyle( $rendered['html'], 'test3', 'p' );
+		$this->assertStringContainsString( 'color: #ff6900', $paragraph_3_nested_paragraph_style );
+		$this->assertStringContainsString( 'background-color: #000', $paragraph_3_wrapper_style );
+
+		$paragraph_4_wrapper_style          = $this->extractBlockStyle( $rendered['html'], 'test4', 'td' );
+		$paragraph_4_nested_paragraph_style = $this->extractBlockStyle( $rendered['html'], 'test4', 'p' );
+		$this->assertStringContainsString( 'color: #ff6900', $paragraph_4_nested_paragraph_style );
+		$this->assertStringContainsString( 'background-color: #000', $paragraph_4_wrapper_style );
+
+		$paragraph_5_wrapper_style = $this->extractBlockStyle( $rendered['html'], 'test5', 'td' );
+		$this->assertStringContainsString( 'color: #1e1e1e', $paragraph_5_wrapper_style );
 	}
 
 	/**

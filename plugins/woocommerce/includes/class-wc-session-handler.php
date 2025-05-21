@@ -94,9 +94,36 @@ class WC_Session_Handler extends WC_Session {
 			$this->_session_expiration = $cookie[1];
 			$this->_session_expiring   = $cookie[2];
 			$this->_has_cookie         = true;
-			$this->_data               = $this->get_session_data();
+
+			/**
+			 * Filters the session data when restoring from storage during initialization.
+			 *
+			 * This filter allows you to:
+			 * 1. Modify the session data before it's loaded, including adding or removing specific session data entries
+			 * 2. Clear the entire session by returning an empty array
+			 *
+			 * Note: If the filtered data is empty, the session will be destroyed and the
+			 * guest's session cookie will be removed. This can be useful for high-traffic
+			 * sites that prioritize page caching over maintaining all session data.
+			 *
+			 * @since 9.9.0
+			 *
+			 * @param array $session_data The session data loaded from storage.
+			 * @return array Modified session data to be used for initialization.
+			 */
+			$this->_data = apply_filters( 'woocommerce_restored_session_data', $this->get_session_data() );
 
 			if ( ! $this->is_session_cookie_valid() ) {
+				$this->destroy_session();
+				$this->set_session_expiration();
+			} elseif ( empty( $this->_data ) && ! isset( WC()->cart ) ) {
+				/**
+				 * Only destroy an empty session if the cart has not been previously initialized.
+				 * We cannot always safely remove the session cookie and destroy the session if the cart is already
+				 * initialized as $this->forget_session() calls `wc_empty_cart()` and can't be removed without potentially
+				 * breaking backward compatibility in cases where another extension already loaded and modified the cart
+				 * before the session.
+				 */
 				$this->destroy_session();
 				$this->set_session_expiration();
 			}
@@ -419,6 +446,7 @@ class WC_Session_Handler extends WC_Session {
 		$this->_data        = array();
 		$this->_dirty       = false;
 		$this->_customer_id = $this->generate_customer_id();
+		$this->_has_cookie  = false;
 	}
 
 	/**
