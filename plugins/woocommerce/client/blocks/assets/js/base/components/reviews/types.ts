@@ -17,6 +17,7 @@ export type Review =
 			product_image: {
 				alt: string;
 				thumbnail: string;
+				gallery_thumbnail: string;
 				name: string;
 				sizes: string;
 				src: string;

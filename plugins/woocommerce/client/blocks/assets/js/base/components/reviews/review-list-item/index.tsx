@@ -31,7 +31,7 @@ function getReviewImage(
 				<img
 					aria-hidden="true"
 					alt={ review.product_image?.alt || '' }
-					src={ review.product_image?.thumbnail || '' }
+					src={ review.product_image?.gallery_thumbnail || '' }
 				/>
 			) : (
 				// The alt text is left empty on purpose, as it's considered a decorative image.
