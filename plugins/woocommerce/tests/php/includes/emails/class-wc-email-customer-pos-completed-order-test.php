@@ -41,6 +41,24 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox order_item_totals adds custom rows for cash change when amount is zero.
+	 */
+	public function test_order_item_totals_adds_formatted_cash_change_due_amount_to_order_totals_when_amount_is_zero() {
+		// Given order with cash payment change amount.
+		$order = OrderHelper::create_order();
+		$order->add_meta_data( '_cash_change_amount', '0' );
+		$order->save();
+		$email = new WC_Email_Customer_POS_Completed_Order();
+
+		// When overriding order item totals.
+		$totals = $email->order_item_totals( array(), $order, 'incl' );
+
+		// Then cash payment change due amount is set and formatted correctly.
+		$this->assertArrayHasKey( 'cash_payment_change_due_amount', $totals );
+		$this->assertEquals( wc_price( '0', array( 'currency' => $order->get_currency() ) ), $totals['cash_payment_change_due_amount']['value'] );
+	}
+
+	/**
 	 * @testdox order_item_totals adds payment_auth_code row to order totals.
 	 */
 	public function test_order_item_totals_adds_payment_auth_code_to_order_totals() {

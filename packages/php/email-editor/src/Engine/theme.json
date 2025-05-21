@@ -241,9 +241,6 @@
           "fontWeight": "400",
           "fontStyle": "normal",
           "lineHeight": "1.5"
-        },
-        "color": {
-          "text": "#000000"
         }
       },
       "h1": {
