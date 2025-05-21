@@ -21,6 +21,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $id_suffix = wp_unique_id();
 
+$background_color = '';
+
+// Get colors from block theme global styles.
+if ( wp_is_block_theme() && function_exists( 'wp_get_global_styles' ) ) {
+	$global_styles = wp_get_global_styles();
+	if ( ! empty( $global_styles['color']['background'] ) ) {
+		$background_color = $global_styles['color']['background'];
+	}
+}
+
+$select_style = $background_color ? 'background-color: ' . esc_attr( $background_color ) . ';' : '';
+
 ?>
 <form class="woocommerce-ordering" method="get">
 	<?php if ( $use_label ) : ?>
@@ -29,6 +41,7 @@ $id_suffix = wp_unique_id();
 	<select
 		name="orderby"
 		class="orderby"
+		style="<?php echo esc_attr( $select_style ); ?>"
 		<?php if ( $use_label ) : ?>
 			id="woocommerce-orderby-<?php echo esc_attr( $id_suffix ); ?>"
 		<?php else : ?>
