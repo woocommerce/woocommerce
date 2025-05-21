@@ -39,7 +39,7 @@ const OnboardingContext = createContext< OnboardingContextType >( {
 	refreshStoreData: () => undefined,
 	closeModal: () => undefined,
 	justCompletedStepId: null,
-	setJustCompletedStepId: ( stepId: string ) => void,
+	setJustCompletedStepId: () => undefined,
 } );
 
 export const useOnboardingContext = () => useContext( OnboardingContext );
