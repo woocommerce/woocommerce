@@ -2033,7 +2033,7 @@ function wc_add_number_precision( ?float $value, bool $round = true ) {
 		return 0.0;
 	}
 
-	// When no rounding was requested, we apply standard rounding precision in order to cover rounding changes in PHP 8.4.
+	// Fallback to standard rounding precision in order to cover rounding changes in PHP 8.4.
 	$result          = $value * pow( 10, wc_get_price_decimals() );
 	$round_precision = $round ? wc_get_rounding_precision() - wc_get_price_decimals() : wc_get_rounding_precision();
 
