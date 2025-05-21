@@ -39,10 +39,6 @@ const siteIconVariants = {
 };
 
 /**
- * TODO: add the close button if full screen settings is disabled, but user toggled full screen
- */
-
-/**
  * Back button content component with animation effects.
  */
 export const BackButtonContent = () => {

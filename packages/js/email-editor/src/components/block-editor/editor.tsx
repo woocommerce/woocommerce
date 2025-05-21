@@ -54,30 +54,35 @@ export function InnerEditor( {
 		'post-only'
 	);
 
-	const { post, template, isFullScreenForced } = useSelect(
-		( select ) => {
-			const { getEntityRecord } = select( coreStore );
-			const { getEditedPostTemplate } = select( storeName );
-			const postObject = getEntityRecord(
-				'postType',
+	// isFullScreenForced – comes from settings and cannot be changed by the user
+	// isFullscreenEnabled – indicates if a user has enabled fullscreen mode
+	const { post, template, isFullScreenForced, isFullscreenEnabled } =
+		useSelect(
+			( select ) => {
+				const { getEntityRecord } = select( coreStore );
+				const { getEditedPostTemplate } = select( storeName );
+				const postObject = getEntityRecord(
+					'postType',
+					currentPost.postType,
+					currentPost.postId
+				);
+				return {
+					template:
+						currentPost.postType !== 'wp_template'
+							? getEditedPostTemplate()
+							: null,
+					post: postObject,
+					isFullscreenEnabled:
+						select( storeName ).isFeatureActive( 'fullscreenMode' ),
+					isFullScreenForced: settings.isFullScreenForced,
+				};
+			},
+			[
 				currentPost.postType,
-				currentPost.postId
-			);
-			return {
-				template:
-					currentPost.postType !== 'wp_template'
-						? getEditedPostTemplate()
-						: null,
-				post: postObject,
-				isFullScreenForced: settings.isFullScreenForced,
-			};
-		},
-		[
-			currentPost.postType,
-			currentPost.postId,
-			settings.isFullScreenForced,
-		]
-	);
+				currentPost.postId,
+				settings.isFullScreenForced,
+			]
+		);
 
 	// @ts-expect-error Type is missing in @types/wordpress__editor
 	const { removeEditorPanel } = useDispatch( editorStore );
@@ -135,7 +140,9 @@ export function InnerEditor( {
 					<TemplateSelection />
 					<StylesSidebar />
 					<SendPreview />
-					<FullscreenMode isActive={ isFullScreenForced } />
+					<FullscreenMode
+						isActive={ isFullScreenForced || isFullscreenEnabled }
+					/>
 					{ isFullScreenForced && <BackButtonContent /> }
 					{ ! isFullScreenForced && <MoreMenu /> }
 					{ currentPost.postType === 'wp_template' ? (

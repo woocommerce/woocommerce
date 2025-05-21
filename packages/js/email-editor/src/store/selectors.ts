@@ -4,6 +4,7 @@
 import { createRegistrySelector, createSelector } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
 import { store as editorStore } from '@wordpress/editor';
+import { store as preferencesStore } from '@wordpress/preferences';
 import { serialize, parse } from '@wordpress/blocks';
 import { BlockInstance } from '@wordpress/blocks/index';
 import { Post } from '@wordpress/core-data/build-types/entity-types/post';
@@ -12,7 +13,7 @@ import { Post } from '@wordpress/core-data/build-types/entity-types/post';
  * Internal dependencies
  */
 import { storeName, editorCurrentPostType } from './constants';
-import { State, EmailTemplate, EmailEditorPostType } from './types';
+import { State, EmailTemplate, EmailEditorPostType, Feature } from './types';
 
 function getContentFromEntity( entity ): string {
 	if ( entity?.content && typeof entity.content === 'function' ) {
@@ -52,6 +53,12 @@ function regularizedGetEntityRecord( template ) {
 		content: template?.content?.raw || template?.content || '',
 	};
 }
+
+export const isFeatureActive = createRegistrySelector(
+	( select ) =>
+		( _, feature: Feature ): boolean =>
+			!! select( preferencesStore ).get( storeName, feature )
+);
 
 export const hasEdits = createRegistrySelector( ( select ) => (): boolean => {
 	const postId = select( storeName ).getEmailPostId();
