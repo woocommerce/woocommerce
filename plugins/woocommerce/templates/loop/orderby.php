@@ -22,6 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 $id_suffix = wp_unique_id();
 
 $background_color = '';
+$text_color       = '';
 
 // Get colors from block theme global styles.
 if ( wp_is_block_theme() && function_exists( 'wp_get_global_styles' ) ) {
@@ -29,9 +30,13 @@ if ( wp_is_block_theme() && function_exists( 'wp_get_global_styles' ) ) {
 	if ( ! empty( $global_styles['color']['background'] ) ) {
 		$background_color = $global_styles['color']['background'];
 	}
+	if ( ! empty( $global_styles['color']['text'] ) ) {
+		$text_color = $global_styles['color']['text'];
+	}
 }
 
-$select_style = $background_color ? 'background-color: ' . esc_attr( $background_color ) . ';' : '';
+$select_style  = $background_color ? 'background-color: ' . esc_attr( $background_color ) . ';' : '';
+$select_style .= $text_color ? ' color: ' . esc_attr( $text_color ) . ';' : '';
 
 ?>
 <form class="woocommerce-ordering" method="get">
