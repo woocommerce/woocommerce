@@ -54,7 +54,7 @@ export function InnerEditor( {
 		'post-only'
 	);
 
-	const { post, template, isFullscreenEnabled } = useSelect(
+	const { post, template, isFullScreenForced } = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( coreStore );
 			const { getEditedPostTemplate } = select( storeName );
@@ -69,10 +69,14 @@ export function InnerEditor( {
 						? getEditedPostTemplate()
 						: null,
 				post: postObject,
-				isFullscreenEnabled: settings.fullScreen,
+				isFullScreenForced: settings.isFullScreenForced,
 			};
 		},
-		[ currentPost.postType, currentPost.postId, settings.fullScreen ]
+		[
+			currentPost.postType,
+			currentPost.postId,
+			settings.isFullScreenForced,
+		]
 	);
 
 	// @ts-expect-error Type is missing in @types/wordpress__editor
@@ -131,15 +135,15 @@ export function InnerEditor( {
 					<TemplateSelection />
 					<StylesSidebar />
 					<SendPreview />
-					<FullscreenMode isActive={ isFullscreenEnabled } />
-					{ isFullscreenEnabled && <BackButtonContent /> }
-					{ ! isFullscreenEnabled && <MoreMenu /> }
+					<FullscreenMode isActive={ isFullScreenForced } />
+					{ isFullScreenForced && <BackButtonContent /> }
+					{ ! isFullScreenForced && <MoreMenu /> }
 					{ currentPost.postType === 'wp_template' ? (
 						<TemplateSettingsPanel />
 					) : (
 						<SettingsPanel />
 					) }
-					{ ! isFullscreenEnabled && <PublishSave /> }
+					{ ! isFullScreenForced && <PublishSave /> }
 					<EditorNotices />
 					<BlockCompatibilityWarnings />
 				</Editor>

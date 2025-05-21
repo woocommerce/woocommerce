@@ -166,7 +166,7 @@ class PageRenderer {
 				'current_wp_user_email' => esc_js( $current_user_email ),
 				'editor_settings'       => array(
 					...$this->settings_controller->get_settings(),
-					'fullScreen' => true,
+					'isFullScreenForced' => true,
 				),
 				'editor_theme'          => $this->theme_controller->get_base_theme()->get_raw_data(),
 				'user_theme_post_id'    => $this->user_theme->get_user_theme_post()->ID,
