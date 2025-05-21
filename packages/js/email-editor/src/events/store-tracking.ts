@@ -25,12 +25,27 @@ const trackDeleteEntityRecord = ( _entity, type, id ) => {
 	}
 };
 
+const trackSetIsInserterOpened = ( isOpened: boolean ) => {
+	recordEvent(
+		`header_inserter_sidebar_${ isOpened ? 'opened' : 'closed' }`
+	);
+};
+
+const trackSetIsListViewOpened = ( isOpened: boolean ) => {
+	recordEvent(
+		`header_listview_sidebar_${ isOpened ? 'opened' : 'closed' }`
+	);
+};
+
 /**
  * List of store actions to be tracked.
  */
 const TRACKED_STORE_EVENTS = {
 	'core/editor': {
+		autosave: 'editor_content_auto_saved',
 		setDeviceType: trackSetDeviceType,
+		setIsInserterOpened: trackSetIsInserterOpened,
+		setIsListViewOpened: trackSetIsListViewOpened,
 	},
 	core: {
 		deleteEntityRecord: trackDeleteEntityRecord,
