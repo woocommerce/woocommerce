@@ -104,4 +104,45 @@ class Social_Links_Helper {
 		);
 		return $service_brand_color[ $service_name ] ?? '';
 	}
+
+	/**
+	 * Gets the default social link size.
+	 *
+	 * @return string The default social link size.
+	 */
+	public static function get_default_social_link_size() {
+		return 'has-normal-icon-size';
+	}
+
+	/**
+	 * Gets the social link size options.
+	 * Source: https://github.com/WordPress/gutenberg/blob/ca36a468e3ff2c564bdecbfbb5abd5ab6e603d68/packages/block-library/src/social-links/edit.js#L39-L44
+	 *
+	 * @return array The social link size options.
+	 */
+	public static function get_social_link_size_options() {
+		return array(
+			'has-small-icon-size'  => __( 'Small' ),
+			'has-normal-icon-size' => __( 'Normal' ),
+			'has-large-icon-size'  => __( 'Large' ),
+			'has-huge-icon-size'   => __( 'Huge' ),
+		);
+	}
+
+	/**
+	 * Gets the size option value for a given size.
+	 * Source: https://github.com/WordPress/gutenberg/blob/c7c09cfe16c78f9a949956e5d0088cd4c747bdca/packages/block-library/src/social-links/style.scss#L36-L56
+	 *
+	 * @param string $size The size.
+	 * @return string The size option value.
+	 */
+	public static function get_social_link_size_option_value( $size ) {
+		$options = array(
+			'has-small-icon-size'  => '16px',
+			'has-normal-icon-size' => '24px',
+			'has-large-icon-size'  => '36px',
+			'has-huge-icon-size'   => '48px',
+		);
+		return $options[ $size ] ?? '24px'; // default to normal size.
+	}
 }

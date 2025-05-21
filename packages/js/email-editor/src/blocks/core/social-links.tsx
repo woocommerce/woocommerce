@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { InspectorControls, BlockControls } from '@wordpress/block-editor';
+import { InspectorControls } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
 import { registerBlockVariation } from '@wordpress/blocks';
 import type { Block, InnerBlockTemplate } from '@wordpress/blocks';
@@ -122,22 +122,12 @@ const disableIconColor =
 		}
 		`;
 
-		// eslint-disable-next-line @wordpress/i18n-text-domain -- using core label.
-		const blockControlsLabelText = __( 'Size' );
-		const customControlsCss = `
-		.components-toolbar-group:has([aria-label="${ blockControlsLabelText }"]) {
-			display: none !important;
-		}`;
-
 		return (
 			<>
 				<BlockEdit { ...props } />
 				<InspectorControls group="color">
 					<style>{ customCss }</style>
 				</InspectorControls>
-				<BlockControls group="other">
-					<style>{ customControlsCss }</style>
-				</BlockControls>
 			</>
 		);
 	};

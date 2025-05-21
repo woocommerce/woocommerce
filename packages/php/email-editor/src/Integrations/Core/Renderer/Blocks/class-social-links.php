@@ -81,6 +81,7 @@ class Social_Links extends Abstract_Block_Renderer {
 
 		$open_in_new_tab = $parent_block_attrs['openInNewTab'] ?? false;
 		$show_labels     = $parent_block_attrs['showLabels'] ?? false;
+		$size            = $parent_block_attrs['size'] ?? Social_Links_Helper::get_default_social_link_size();
 
 		$service_brand_color = Social_Links_Helper::get_service_brand_color( $service_name );
 
@@ -101,6 +102,8 @@ class Social_Links extends Abstract_Block_Renderer {
 			$icon_color_value = ! empty( $service_brand_color ) ? $service_brand_color : '#000';
 		}
 
+		$icon_size = Social_Links_Helper::get_social_link_size_option_value( $size );
+
 		$service_icon_url = $this->get_service_icon_url( $service_name, $is_logos_only ? 'brand' : 'white' );
 
 		$service_label = '';
@@ -118,11 +121,14 @@ class Social_Links extends Abstract_Block_Renderer {
 			)
 		);
 
+		// divide the icon value by 2 to get the font size.
+		$font_size     = rtrim( $icon_size, 'px' ) / 2; // inline with core styles.
 		$anchor_styles = $this->compile_css(
 			array(
 				'color'           => $icon_color_value,
 				'text-decoration' => 'none',
 				'text-transform'  => 'none',
+				'font-size'       => "{$font_size}px",
 			)
 		);
 
@@ -152,7 +158,7 @@ class Social_Links extends Abstract_Block_Renderer {
 				  <tbody><tr>
 					<td style="vertical-align:middle;">
 					  <a href="%2$s" %5$s class="wp-block-social-link-anchor">
-						<img height="24px" src="%3$s" style="display:block;" width="24px" alt="%4$s">
+						<img height="%8$s" src="%3$s" style="display:block;" width="%8$s" alt="%4$s">
 					  </a>
 					</td>
 				  </tr>
@@ -170,8 +176,9 @@ class Social_Links extends Abstract_Block_Renderer {
 			// translators: %s is the social service name.
 			sprintf( __( '%s icon', 'woocommerce' ), $service_name ), // %4$s -> The Img alt.
 			$anchor_html, // %5$s -> The a styles plus rel and target attributes.
-			esc_html( $service_label ), // %6$s -> The a text.
-			esc_attr( $row_container_styles ), // %7$s -> The row container styles.
+			esc_html( $service_label ), // %6$s -> The a text (label).
+			esc_attr( $row_container_styles ), // %7$s -> The tr row container styles.
+			esc_attr( $icon_size ), // %8$s -> The icon size.
 		);
 	}
 
