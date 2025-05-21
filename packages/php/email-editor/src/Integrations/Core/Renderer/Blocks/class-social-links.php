@@ -87,45 +87,75 @@ class Social_Links extends Abstract_Block_Renderer {
 
 		$service_icon_url = $this->get_service_icon_url( $service_name, $is_logos_only ? 'brand' : 'white' );
 
-		$label_html = '';
+		$service_label = '';
 		if ( $show_labels ) {
-			$text       = ! empty( $label ) ? trim( $label ) : '';
-			$text       = $text ? $text : block_core_social_link_get_name( $service_name );
-			$label_html = sprintf( '<span class="wp-block-social-link-label">%s</span>', esc_html( $text ) );
+			$text          = ! empty( $label ) ? trim( $label ) : '';
+			$service_label = $text ? $text : block_core_social_link_get_name( $service_name );
 		}
 
-		$anchor_style = array(
-			'color'            => $icon_color_value,
-			'background-color' => $icon_background_color_value,
-			'text-decoration'  => 'none',
-			'text-transform'   => 'none',
-			'padding'          => '10px',
-			'border-radius'    => '9999px',
-			'margin-right'     => '10px',
-			'text-align'       => 'center',
+		$main_table_styles = $this->compile_css(
+			array(
+				'background-color' => $icon_background_color_value,
+				'border-radius'    => '9999px',
+				'display'          => 'inline-table',
+				'float'            => 'none',
+			)
 		);
-		if ( $is_pill_shape ) {
-			$anchor_style['padding-left']  = '17px';
-			$anchor_style['padding-right'] = '17px';
-		}
-		$anchor_html = sprintf( ' style="%s" ', esc_attr( $this->compile_css( $anchor_style ) ) );
+
+		$anchor_styles = $this->compile_css(
+			array(
+				'color'           => $icon_color_value,
+				'text-decoration' => 'none',
+				'text-transform'  => 'none',
+			)
+		);
+
+		$anchor_html = sprintf( ' style="%s" ', esc_attr( $anchor_styles ) );
 		if ( $open_in_new_tab ) {
-			$anchor_html .= ' rel="noopener nofollow" target="_blank"';
+			$anchor_html .= ' rel="noopener nofollow" target="_blank" ';
 		}
 
+		$row_container_styles = array(
+			'display' => 'block',
+			'padding' => '5px',
+		);
+
+		if ( $is_pill_shape ) {
+			$row_container_styles['padding-left']  = '17px';
+			$row_container_styles['padding-right'] = '17px';
+		}
+		$row_container_styles = $this->compile_css( $row_container_styles );
+
+		// rendering inspired by mjml social. https://documentation.mjml.io/#mj-social.
 		return sprintf(
 			'
-				<a %1$s href="%2$s" class="wp-block-social-link-anchor">
-					<img src="%3$s" alt="%4$s" width="17" height="17">
-					%5$s
-				</a>
+			<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="%1$s">
+			<tbody><tr style="%7$s">
+			  <td style="vertical-align:middle;">
+				<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="">
+				  <tbody><tr>
+					<td style="vertical-align:middle;">
+					  <a href="%2$s" %5$s class="wp-block-social-link-anchor">
+						<img height="24px" src="%3$s" style="display:block;" width="24px" alt="%4$s">
+					  </a>
+					</td>
+				  </tr>
+				</tbody></table>
+			  </td>
+			  <td style="vertical-align:middle; ' . ( $service_label ? 'padding-left:5px;padding-right:5px;' : '' ) . '">
+				<a href="%2$s" %5$s class="wp-block-social-link-anchor"> %6$s </a>
+			  </td>
+			</tr>
+		  </tbody></table>
 			',
-			$anchor_html, // The a target and rel attributes.
-			esc_url( $service_url ), // The a href link.
-			esc_url( $service_icon_url ), // The Img src.
+			esc_attr( $main_table_styles ), // %1$s -> The main table styles.
+			esc_url( $service_url ), // %2$s -> The a href link.
+			esc_url( $service_icon_url ), // %3$s -> The Img src.
 			// translators: %s is the social service name.
-			sprintf( __( '%s icon', 'woocommerce' ), $service_name ), // The Img alt.
-			$label_html, // The Label.
+			sprintf( __( '%s icon', 'woocommerce' ), $service_name ), // %4$s -> The Img alt.
+			$anchor_html, // %5$s -> The a styles plus rel and target attributes.
+			esc_html( $service_label ), // %6$s -> The a text.
+			esc_attr( $row_container_styles ), // %7$s -> The row container styles.
 		);
 	}
 
@@ -146,7 +176,7 @@ class Social_Links extends Abstract_Block_Renderer {
 		$align           = $content['align'];
 
 		return sprintf(
-			'<table class="wp-block-social-links" style="%1$s" border="0" width="100%%" cellpadding="0" cellspacing="0" role="presentation">
+			'<table class="wp-block-social-links" style="%1$s vertical-align:top;" border="0" width="100%%" cellpadding="0" cellspacing="0" role="presentation">
 					<tr  role="presentation">
 						<td class="%2$s" style="%3$s"  align="%4$s" role="presentation">
 							%5$s
@@ -205,6 +235,7 @@ class Social_Links extends Abstract_Block_Renderer {
 		$styles = array(
 			'min-width'      => '100%', // prevent Gmail App from shrinking the table on mobile devices.
 			'vertical-align' => 'middle',
+			'word-break'     => 'break-word',
 		);
 
 		$styles['text-align'] = 'left';
