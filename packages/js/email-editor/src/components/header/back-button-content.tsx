@@ -4,11 +4,15 @@
 import { Button, __unstableMotion as motion } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { Icon, arrowLeft, wordpress } from '@wordpress/icons';
+import { applyFilters } from '@wordpress/hooks';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { BackButton } from '../../private-apis';
+import { recordEvent } from '../../events';
+import { storeName } from '../../store';
 
 const toggleHomeIconVariants = {
 	edit: {
@@ -35,7 +39,6 @@ const siteIconVariants = {
 };
 
 /**
- * TODO: Add on click event
  * TODO: add the close button if full screen settings is disabled, but user toggled full screen
  */
 
@@ -43,6 +46,19 @@ const siteIconVariants = {
  * Back button content component with animation effects.
  */
 export const BackButtonContent = () => {
+	const { urls } = useSelect(
+		( select ) => ( {
+			urls: select( storeName ).getUrls(),
+		} ),
+		[]
+	);
+
+	function sendAction() {
+		if ( urls.listings ) {
+			window.location.href = urls.listings;
+		}
+	}
+
 	return (
 		<BackButton>
 			{ ( { length } ) =>
@@ -62,7 +78,12 @@ export const BackButtonContent = () => {
 							showTooltip
 							tooltipPosition="middle right"
 							onClick={ () => {
-								// TODO add action to navigate away from here
+								recordEvent( 'header_close_button_clicked' );
+								const action = applyFilters(
+									'woocommerce_email_editor_close_action_callback',
+									sendAction
+								) as () => void;
+								action();
 							} }
 						>
 							<motion.div variants={ siteIconVariants }>
