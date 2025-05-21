@@ -6,11 +6,11 @@ sidebar_label: Add a section to a settings tab
 
 # How to add a section to a settings tab
 
-When you're adding building an extension for WooCommerce that requires settings of some kind, it's important to ask yourself:  **Where do they belong?**  If your extension just has a couple of simple settings, do you really need to create a new tab specifically for it? Most likely the answer is no.
+When you're building an extension for WooCommerce that requires settings of some kind, it's important to ask yourself:  **Where do they belong?**  If your extension just has a couple of simple settings, do you really need to create a new tab specifically for it? Most likely the answer is no.
 
 ## When to Create a Section
 
-Let's say we had an extension that adds a slider to a single product page. This extension doesn't have many options, just a couple:
+Let's say we had an extension that adds a slider to a single product page. This extension only has a few options:
 
 -   Auto-insert into single product page (checkbox)
 -   Slider Title (text field)
