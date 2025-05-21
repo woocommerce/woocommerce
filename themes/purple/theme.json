@@ -67,10 +67,10 @@
 				}
 			]
 		},
-        "custom": {
-            "spacing-increment": "1",
-            "spacing-unit": "10"
-        },
+		"custom": {
+			"spacing-increment": "1",
+			"spacing-unit": "10"
+		},
 		"layout": {
 			"contentSize": "40.3125rem",
 			"wideSize": "90rem"
