@@ -48,7 +48,7 @@ const Edit = ( {
 		height,
 		scale,
 	} = attributes;
-	const blockProps = useBlockProps( { style: { width, height } } );
+	const blockProps = useBlockProps();
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
 	const isBlockTheme = getSettingWithCoercion(
 		'isBlockTheme',
