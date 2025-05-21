@@ -128,8 +128,7 @@
 <div style="height:calc( 0.25 * var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal)))" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer --></div>
 <!-- /wp:group -->
-
-<!-- wp:woocommerce/product-new {"columns":4,"rows":1} /--></div>
+</div>
 <!-- /wp:woocommerce/empty-cart-block --></div>
 <!-- /wp:woocommerce/cart --></div>
 <!-- /wp:group --></main>
