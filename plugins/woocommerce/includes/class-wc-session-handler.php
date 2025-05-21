@@ -103,6 +103,7 @@ class WC_Session_Handler extends WC_Session {
 	private function init_session() {
 		if ( ! $this->init_session_from_request() && ! $this->init_session_from_cookie() ) {
 			$this->_customer_id = $this->generate_customer_id();
+			$this->_data        = $this->get_session_data();
 		}
 	}
 
