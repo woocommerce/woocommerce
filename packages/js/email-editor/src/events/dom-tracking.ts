@@ -9,9 +9,22 @@ import { applyFilters } from '@wordpress/hooks';
 import { recordEvent } from '.';
 
 const EVENTS_TO_TRACK = [
+	// Header preview dropdown preview in new tab selected
 	{
-		trackName: 'header_preview_dropdown_preview_in_new_tab_selected',
-		selector: `.editor-preview-dropdown__button-external`,
+		track: 'header_preview_dropdown_preview_in_new_tab_selected',
+		selector: '.editor-preview-dropdown__button-external',
+	},
+	// Header toggle block tools
+	{
+		track: () => {
+			const isBlockToolsCollapsed = ! document.getElementsByClassName(
+				'is-collapsed editor-collapsible-block-toolbar'
+			).length;
+			recordEvent( 'header_blocks_tool_button_clicked', {
+				isBlockToolsCollapsed,
+			} );
+		},
+		selector: '.editor-collapsible-block-toolbar__toggle',
 	},
 ];
 
@@ -22,11 +35,16 @@ function trackMatchingEvents( event: Event ) {
 	const matchedEvents = EVENTS_TO_TRACK.filter( ( candidate ) => {
 		return (
 			event.target &&
-			( event.target as Element )?.matches?.( candidate.selector )
+			( ( event.target as Element )?.matches?.( candidate.selector ) ||
+				( event.target as Element )?.closest?.( candidate.selector ) )
 		);
 	} );
-	matchedEvents.forEach( ( event ) => {
-		recordEvent( event.trackName );
+	matchedEvents.forEach( ( matched ) => {
+		if ( typeof matched.track === 'function' ) {
+			matched.track( event );
+		} else {
+			recordEvent( matched.track );
+		}
 	} );
 }
 
