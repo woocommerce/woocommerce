@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
-import { use } from '@wordpress/data';
+import { use, select } from '@wordpress/data';
 import { applyFilters } from '@wordpress/hooks';
-
+import { store as preferencesStore } from '@wordpress/preferences';
+import { store as editorStore } from '@wordpress/editor';
 /**
  * Internal dependencies
  */
@@ -26,15 +27,44 @@ const trackDeleteEntityRecord = ( _entity, type, id ) => {
 };
 
 const trackSetIsInserterOpened = ( isOpened: boolean ) => {
+	// @ts-expect-error - isInserterOpened is not in editor types
+	const isInserterOpened = select( editorStore ).isInserterOpened();
+	if ( isInserterOpened === isOpened ) {
+		return;
+	}
 	recordEvent(
 		`header_inserter_sidebar_${ isOpened ? 'opened' : 'closed' }`
 	);
 };
 
 const trackSetIsListViewOpened = ( isOpened: boolean ) => {
+	// @ts-expect-error - isListViewOpened is not in editor types
+	const isListViewOpened = select( editorStore ).isListViewOpened();
+	if ( isListViewOpened === isOpened ) {
+		return;
+	}
 	recordEvent(
 		`header_listview_sidebar_${ isOpened ? 'opened' : 'closed' }`
 	);
+};
+
+const trackSetPreference = ( scope, name, value ) => {
+	const valueBeforeToggle = select( preferencesStore ).get(
+		scope,
+		name
+	);
+	if ( valueBeforeToggle === value ) {
+		return;
+	}
+	const trackedPreferences = {
+		focusMode: 'focus_mode_toggle',
+		fullscreenMode: 'full_screen_mode_toggle',
+		distractionFree: 'distraction_free_toggle',
+		fixedToolbar: 'fixed_toolbar_toggle',
+	};
+	if ( trackedPreferences[ name ] ) {
+		recordEvent( trackedPreferences[ name ], { isEnabled: value } );
+	}
 };
 
 /**
@@ -49,6 +79,9 @@ const TRACKED_STORE_EVENTS = {
 	},
 	core: {
 		deleteEntityRecord: trackDeleteEntityRecord,
+	},
+	'core/preferences': {
+		set: trackSetPreference,
 	},
 };
 
