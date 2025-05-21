@@ -92,9 +92,6 @@ const Blueprint = () => {
 				window.URL.revokeObjectURL( url );
 			}
 
-			// Clears the unsaved changes warning more reliably
-			window.onbeforeunload = null;
-
 			recordEvent( 'blueprint_export_success', {
 				has_plugins: _steps.plugins?.length > 0,
 				has_themes: _steps.themes?.length > 0,
