@@ -1,39 +1,49 @@
 {
-  "name": "woocommerce/email-editor",
-  "description": "Email editor based on WordPress Gutenberg package.",
+	"name": "woocommerce/email-editor",
+	"description": "Email editor based on WordPress Gutenberg package.",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
 	"prefer-stable": true,
 	"minimum-stability": "dev",
-  "autoload": {
-    "classmap": [
-      "src/"
-    ]
-  },
-  "autoload-dev": {
-    "classmap": [
-      "tests/unit/"
-    ]
-  },
-  "require": {
-    "php": ">=7.4",
-    "soundasleep/html2text": "^2.1"
-  },
-	"require-dev": {
-		"automattic/jetpack-changelogger": "3.3.0"
+	"autoload": {
+		"classmap": [
+			"src/"
+		]
 	},
-  "config": {
-    "platform": {
-      "php": "7.4"
-    }
-  },
-  "scripts": {
-    "unit-test": "../../../tests_env/vendor/bin/codecept run unit",
-    "integration-test": "cd ../../../tests_env/docker && COMPOSE_HTTP_TIMEOUT=200 docker compose run -e SKIP_DEPS=1 -e SKIP_PLUGINS=1 -e PACKAGE_NAME=email-editor codeception_integration",
-    "code-style": "../../../mailpoet/tasks/code_sniffer/vendor/bin/phpcs -ps",
-    "code-style-fix": "../../../mailpoet/tasks/code_sniffer/vendor/bin/phpcbf -p",
-    "phpstan": "php ./tasks/run-phpstan.php"
-  },
+	"autoload-dev": {
+		"classmap": [
+			"tests/unit/"
+		]
+	},
+	"require": {
+		"php": ">=7.4",
+		"soundasleep/html2text": "^2.1"
+	},
+	"require-dev": {
+		"automattic/jetpack-changelogger": "3.3.0",
+		"phpunit/phpunit": "^9.6",
+		"pelago/emogrifier": "^7.3",
+		"yoast/phpunit-polyfills": "^4.0",
+		"woocommerce/woocommerce-sniffs": "1.0.0"
+	},
+	"config": {
+		"platform": {
+			"php": "7.4"
+		},
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	},
+	"scripts": {
+		"env:destroy": "wp-env destroy",
+		"env:stop": "wp-env stop",
+		"env:start": "wp-env start",
+		"test:unit": "wp-env run tests-cli --env-cwd=wp-content/plugins/email-editor ./vendor/bin/phpunit",
+		"test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/email-editor ./vendor/bin/phpunit --configuration phpunit-integration.xml.dist",
+		"phpcs": "phpcs -s -p",
+		"phpcbf": "phpcbf -p",
+		"phpstan": "php ./tasks/run-phpstan.php"
+	},
 	"extra": {
 		"changelogger": {
 			"formatter": {

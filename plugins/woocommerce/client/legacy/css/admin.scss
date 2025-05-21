@@ -20,6 +20,7 @@
 
 $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 "Helvetica Neue", sans-serif;
+$font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 
 .wc-addons-wrap {
 	.marketplace-header {
@@ -2188,6 +2189,10 @@ ul.wc_coupon_list_block {
 			}
 		}
 
+		.cost-total {
+			opacity: 50%;
+		}
+
 		.refunded-total {
 			color: $red;
 		}
@@ -2238,6 +2243,25 @@ ul.wc_coupon_list_block {
 		.button-primary {
 			float: none;
 			margin-right: 0;
+		}
+	}
+}
+
+#woocommerce-order-items .woocommerce_order_items_wrapper, .wc-order-preview-table-wrapper {
+	small.refunded {
+		display: block;
+		color: red;
+		white-space: nowrap;
+		margin-top: 0.5em;
+
+		&::before {
+			@include icon_dashicons("\f171");
+			position: relative;
+			top: auto;
+			left: auto;
+			margin: -1px 4px 0 0;
+			vertical-align: middle;
+			line-height: 1em;
 		}
 	}
 }
@@ -2389,12 +2413,19 @@ ul.wc_coupon_list_block {
 				text-align: center;
 			}
 
+			.item_cost_of_goods {
+				.view {
+					opacity: 50%;
+				}
+			}
+
 			.cost,
 			.tax,
 			.quantity,
 			.line_cost,
 			.line_tax,
 			.tax_class,
+			.item_cost_of_goods,
 			.item_cost {
 				text-align: right;
 
@@ -2664,23 +2695,6 @@ ul.wc_coupon_list_block {
 					visibility: visible;
 				}
 			}
-
-			small.refunded {
-				display: block;
-				color: $red;
-				white-space: nowrap;
-				margin-top: 0.5em;
-
-				&::before {
-					@include icon_dashicons("\f171");
-					position: relative;
-					top: auto;
-					left: auto;
-					margin: -1px 4px 0 0;
-					vertical-align: middle;
-					line-height: 1em;
-				}
-			}
 		}
 	}
 
@@ -2798,6 +2812,10 @@ ul.wc_coupon_list_block {
 	.submit {
 		border: 0 none;
 		float: none;
+	}
+
+	.select2-container {
+		margin: 8px;
 	}
 }
 
@@ -3910,6 +3928,7 @@ table.wc_input_table {
 		background-color: #fefbcc;
 	}
 
+	.item_cost_of_goods,
 	.item_cost,
 	.cost {
 		text-align: right;
@@ -4572,7 +4591,7 @@ table {
 }
 
 #wc-shipping-zone-region-picker-root .woocommerce-tree-select-control {
-	
+
 	.components-base-control {
 		padding: 2px 8px;
 		border-radius: 4px;
@@ -5048,6 +5067,19 @@ img.help_tip {
 		}
 	}
 
+	.wc-admin-header {
+		small {
+			margin-right: 0.5em;
+		}
+		a {
+			color: #1d2327;
+			text-decoration: none;
+		}
+		a:hover {
+			color: var(--wp-admin-theme-color, #3858e9);
+		}
+	}
+
 	#template div {
 		margin: 0;
 
@@ -5075,6 +5107,9 @@ img.help_tip {
 
 	table.form-table {
 		margin: 0;
+		&.wc-shipping-zone-settings {
+			margin-top: 8px;
+		}
 		position: relative;
 		table-layout: fixed;
 
@@ -5722,6 +5757,43 @@ img.help_tip {
 	}
 }
 
+#usage_restriction_coupon_data.woocommerce_options_panel {
+	.options_group {
+
+		border-bottom: 0px;
+
+		.hr-section {
+			display: flex;
+			flex-basis: 100%;
+			align-items: center;
+			font-size: 10.5px;
+			letter-spacing: 1px;
+			font-weight: 300;
+			text-transform: uppercase;
+			position: relative;
+			top: 8px;
+			padding-bottom: 10px;
+
+			&:before, &:after {
+				content: "";
+				flex-grow: 1;
+				background: #eee;
+				height: 1px;
+				font-size: 0px;
+				line-height: 0px;
+			}
+
+			&:before {
+				margin: 0 16px 0 0;
+			}
+
+			&:after {
+				margin: 0 0 0 16px;
+			}
+		}
+	}
+}
+
 #woocommerce-product-data,
 #woocommerce-coupon-data,
 .woocommerce {
@@ -5836,7 +5908,7 @@ img.help_tip {
 }
 
 /**
- * Settings / Advanced / Features
+ * Settings / Advanced / Features / Emails
  */
 .woocommerce_page_wc-settings {
 	.wc-settings-row-woocommerce_custom_orders_table_enabled td.forminp {
@@ -5845,6 +5917,9 @@ img.help_tip {
 
 	.wc-settings-row-woocommerce_custom_orders_table_data_sync_enabled td.forminp {
 		padding-top: 0;
+	}
+	#email_notification_settings-description {
+		margin-top: 16px;
 	}
 }
 
@@ -8226,7 +8301,7 @@ table.bar_chart {
 .woocommerce-exporter-wrapper,
 .woocommerce-importer-wrapper {
 	text-align: center;
-	max-width: 700px;
+	max-width: 710px;
 	margin: 40px auto;
 
 	.error {
@@ -8834,3 +8909,134 @@ html:has(#status-table-templates){
 .woocommerce-admin-page #postbox-container-2 {
 	clear: left;
 }
+
+body.woocommerce_page_wc-settings {
+	.woocommerce-layout {
+		.woocommerce-store-alerts {
+			margin-top: 5px;
+		}
+	}
+
+	#wpcontent {
+		background: #f0f0f1;
+	}
+	#wpbody-content {
+		background: #fff;
+		padding-bottom: 0px;
+	}
+
+	p.submit {
+		margin-bottom: 0;
+	}
+
+	.woocommerce-layout__primary {
+		@media screen and (max-width: 782px) {
+			padding-top: 0 !important;
+		}
+	}
+
+	.woocommerce-layout__header-heading {
+		padding: 0 0 0 30px;
+		font-weight: 590;
+		font-size: 16px;
+		color: #070707;
+	}
+
+	#wpbody .woocommerce-layout,
+	.woocommerce-layout__notice-list-hide + .wrap {
+		padding: 0;
+	}
+
+	#mainform {
+		nav {
+			margin: 0 -30px 24px -30px;
+		}
+		padding: 0 30px;
+		background: #f0f0f1;
+		h2 {
+			margin: 0;
+		}
+
+		.subsubsub {
+			margin-bottom: 24px;
+			li {
+				color: #2271b1;
+				&:first-child a{
+					padding: 0;
+				}
+				a {
+					margin: 0 4px 0 4px;
+				}
+				&:first-child {
+					a {
+						margin-left: 0;
+					}
+				}
+				&:last-child {
+					a {
+						margin-right: 0;
+					}
+				}
+			}
+		}
+	}
+
+	.wrap {
+		padding: 0;
+	}
+
+	.nav-tab-wrapper {
+		display: flex;
+		flex-wrap: wrap;
+		list-style: none;
+		padding-left: 30px;
+		gap: 24px;
+		a {
+			float: none;
+			font-family: $font-sf-pro-display;
+			margin-left: 0;
+			border: 0;
+			background: none;
+			font-weight: 510;
+			font-size: 14px;
+			line-height: 20px;
+			color: #505050;
+			padding: 0 0 10px 0;
+			text-decoration: none;
+			&:focus, &:hover, &:active {
+				outline: none;
+				box-shadow: none;
+			}
+		}
+		margin: 0;
+		background: #FFF;
+		border-bottom: 1px solid #EBEBEB;
+
+		.nav-tab-active, .nav-tab-active:focus, .nav-tab-active:focus:active, .nav-tab-active:hover {
+			border-bottom: 2px solid var(--wp-admin-theme-color, #3858e9);
+			color: #070707;
+		}
+
+		.nav-tab:hover,
+		.nav-tab:focus {
+			color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+		}
+
+		@media screen and (max-width: 500px) {
+			overflow: auto;
+			flex-wrap: nowrap;
+			a {
+				font-size: 16px;
+			}
+		}
+	}
+
+	.woocommerce-embedded-layout__primary {
+		background-color: #f0f0f1;
+		padding: 0 30px;
+		.woocommerce-dismissable-list {
+			margin-bottom: 0;
+		}
+	}
+}
+

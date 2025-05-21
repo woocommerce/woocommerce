@@ -1,16 +1,16 @@
 <?php
 /**
- * This file is part of the MailPoet Email Editor package.
+ * This file is part of the WooCommerce Email Editor package.
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
 
-namespace MailPoet\EmailEditor\Engine;
+namespace Automattic\WooCommerce\EmailEditor\Engine;
 
-use MailPoet\EmailEditor\Engine\PersonalizationTags\HTML_Tag_Processor;
-use MailPoet\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\HTML_Tag_Processor;
+use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 
 /**
  * Class for replacing personalization tags with their values in the email content.
@@ -70,6 +70,19 @@ class Personalizer {
 	}
 
 	/**
+	 * Get the current context.
+	 *
+	 * The `context` is an associative array containing recipient-specific or
+	 * campaign-specific data. This data is used to resolve personalization tags
+	 * and provide input for tag callbacks during email content processing.
+	 *
+	 * @return array<string, mixed> The current context.
+	 */
+	public function get_context(): array {
+		return $this->context;
+	}
+
+	/**
 	 * Personalize the content by replacing the personalization tags with their values.
 	 *
 	 * @param string $content The content to personalize.
@@ -108,6 +121,25 @@ class Personalizer {
 					$content_processor->set_attribute( 'href', $value );
 					$content_processor->remove_attribute( 'data-link-href' );
 					$content_processor->remove_attribute( 'contenteditable' );
+				}
+			} elseif ( $content_processor->get_token_type() === '#tag' && $content_processor->get_tag() === 'A' ) {
+				$href = $content_processor->get_attribute( 'href' );
+
+				if ( ! $href || ! preg_match( '/\[[a-z-\/]+\]/', urldecode( $href ), $matches ) ) {
+					continue;
+				}
+
+				$token = $this->parse_token( $matches[0] );
+				$tag   = $this->tags_registry->get_by_token( $token['token'] );
+
+				if ( ! $tag ) {
+					continue;
+				}
+
+				$value = $tag->execute_callback( $this->context, $token['arguments'] );
+
+				if ( $value ) {
+					$content_processor->set_attribute( 'href', $value );
 				}
 			}
 		}

@@ -4,10 +4,7 @@
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { getAdminLink } from '@woocommerce/settings';
-import {
-	PAYMENT_SETTINGS_STORE_NAME,
-	type PaymentSettingsSelectors,
-} from '@woocommerce/data';
+import { paymentSettingsStore } from '@woocommerce/data';
 import {
 	WCPayBanner,
 	WCPayBannerBody,
@@ -34,9 +31,7 @@ const WCPaySettingBanner = () => {
 	);
 
 	const isWooPayEligible = useSelect( ( select ) => {
-		const store = select(
-			PAYMENT_SETTINGS_STORE_NAME
-		) as PaymentSettingsSelectors;
+		const store = select( paymentSettingsStore );
 		return store.getIsWooPayEligible();
 	}, [] );
 

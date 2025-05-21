@@ -665,7 +665,9 @@ export class Shipping extends Component {
 						'woocommerce'
 					) }
 					eventName="tasklist_shipping_visit_marketplace_click"
-					targetUrl="admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment"
+					targetUrl={ getAdminLink(
+						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
+					) }
 				/>
 			</div>
 		);

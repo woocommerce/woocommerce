@@ -49,7 +49,7 @@ class WC_Helper_API {
 
 		if ( ! empty( $args['authenticated'] ) ) {
 			if ( ! self::_authenticate( $url, $args ) ) {
-				return new WP_Error( 'authentication', 'Authentication failed.' );
+				return new WP_Error( 'authentication', __( 'Authentication failed. Please try again after a few minutes. If the issue persists, disconnect your store from WooCommerce.com and reconnect.', 'woocommerce' ), 401 );
 			}
 		}
 

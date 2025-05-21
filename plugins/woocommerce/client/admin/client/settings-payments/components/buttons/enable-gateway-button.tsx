@@ -7,7 +7,7 @@ import { useState } from '@wordpress/element';
 import { dispatch, useDispatch } from '@wordpress/data';
 import {
 	EnableGatewayResponse,
-	PAYMENT_SETTINGS_STORE_NAME,
+	paymentSettingsStore,
 	PaymentIncentive,
 	PaymentProviderState,
 } from '@woocommerce/data';
@@ -57,6 +57,14 @@ interface EnableGatewayButtonProps {
 	 * Incentive data. If provided, the incentive will be accepted when the button is clicked.
 	 */
 	incentive?: PaymentIncentive | null;
+	/**
+	 * Function to set the onboarding modal open.
+	 */
+	setOnboardingModalOpen?: ( isOnboardingModalOpen: boolean ) => void;
+	/**
+	 * The onboarding type for the gateway.
+	 */
+	onboardingType?: string;
 }
 
 /**
@@ -75,11 +83,13 @@ export const EnableGatewayButton = ( {
 	installingPlugin,
 	buttonText = __( 'Enable', 'woocommerce' ),
 	incentive = null,
+	setOnboardingModalOpen,
+	onboardingType,
 }: EnableGatewayButtonProps ) => {
 	const [ isUpdating, setIsUpdating ] = useState( false );
 	const { createErrorNotice } = dispatch( 'core/notices' );
 	const { togglePaymentGateway, invalidateResolutionForStoreSelector } =
-		useDispatch( PAYMENT_SETTINGS_STORE_NAME );
+		useDispatch( paymentSettingsStore );
 
 	const throwError = () => {
 		createErrorNotice(
@@ -135,9 +145,13 @@ export const EnableGatewayButton = ( {
 						recordEvent( 'settings_payments_provider_enable', {
 							provider_id: gatewayId,
 						} );
-
-						// Redirect to the recommended payment methods page if available, or the onboarding URL.
-						if ( gatewayHasRecommendedPaymentMethods ) {
+						if (
+							onboardingType === 'native_in_context' &&
+							setOnboardingModalOpen
+						) {
+							setOnboardingModalOpen( true );
+						} else if ( gatewayHasRecommendedPaymentMethods ) {
+							// Redirect to the recommended payment methods page if available, or the onboarding URL.
 							const history = getHistory();
 							history.push(
 								getNewPath( {}, '/payment-methods' )

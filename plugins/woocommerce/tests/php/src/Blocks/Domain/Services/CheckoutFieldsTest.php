@@ -92,31 +92,29 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 				'type'     => 'checkbox',
 			),
 			array(
-				'id'       => 'namespace/vat-number',
-				'label'    => 'VAT Number',
-				'location' => 'address',
-				'required' => true,
-				'rules'    => array(
-					'hidden'     => array(
-						'customer' => array(
-							'properties' => array(
-								'address' => array(
-									'properties' => array(
-										'country' => array(
-											'type' => 'string',
-											'not'  => array(
-												'enum' => array_merge( WC()->countries->get_european_union_countries( 'eu_vat' ), array( 'GB' ) ),
-											),
+				'id'         => 'namespace/vat-number',
+				'label'      => 'VAT Number',
+				'location'   => 'address',
+				'required'   => true,
+				'hidden'     => array(
+					'customer' => array(
+						'properties' => array(
+							'address' => array(
+								'properties' => array(
+									'country' => array(
+										'type' => 'string',
+										'not'  => array(
+											'enum' => array_merge( WC()->countries->get_european_union_countries( 'eu_vat' ), array( 'GB' ) ),
 										),
 									),
 								),
 							),
 						),
 					),
-					'validation' => array(
-						'type'    => 'string',
-						'pattern' => '^[A-Z]{2}[0-9A-Z]{2,12}$',
-					),
+				),
+				'validation' => array(
+					'type'    => 'string',
+					'pattern' => '^[A-Z]{2}[0-9A-Z]{2,12}$',
 				),
 			),
 		);

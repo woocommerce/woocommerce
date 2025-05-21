@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { faker } from '@faker-js/faker';
+import { request } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -11,14 +12,16 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { expect, test as baseTest } from '../../fixtures/fixtures';
 import { admin } from '../../test-data/data';
 import { expectEmail, expectEmailContent } from '../../utils/email';
+import { setOption } from '../../utils/options';
+import { WC_API_PATH } from '../../utils/api-client';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	order: async ( { api }, use ) => {
+	order: async ( { restApi }, use ) => {
 		let order;
 
-		await api
-			.post( 'orders', {
+		await restApi
+			.post( `${ WC_API_PATH }/orders`, {
 				status: 'processing',
 				billing: { email: faker.internet.exampleEmail() },
 			} )
@@ -31,8 +34,19 @@ const test = baseTest.extend( {
 
 		await use( order );
 
-		await api.delete( `orders/${ order.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/orders/${ order.id }`, {
+			force: true,
+		} );
 	},
+} );
+
+test.beforeEach( async ( { baseURL } ) => {
+	await setOption(
+		request,
+		baseURL,
+		'woocommerce_feature_email_improvements_enabled',
+		'no'
+	);
 } );
 
 [
@@ -63,14 +77,14 @@ const test = baseTest.extend( {
 ].forEach( ( { role, status, subject, content } ) => {
 	test( `${ role } receives email for ${ status } order`, async ( {
 		page,
-		api,
+		restApi,
 		order,
 	} ) => {
 		// Inject the order id into the expected subject and make it a regex
 		subject = new RegExp( subject.replace( 'ORDER_ID', `${ order.id }` ) );
 
-		await api
-			.put( `orders/${ order.id }`, {
+		await restApi
+			.put( `${ WC_API_PATH }/orders/${ order.id }`, {
 				status,
 			} )
 			.catch( ( error ) => {
@@ -78,9 +92,11 @@ const test = baseTest.extend( {
 			} );
 
 		let orderStatus;
-		await api.get( `orders/${ order.id }` ).then( ( response ) => {
-			orderStatus = response.data.status;
-		} );
+		await restApi
+			.get( `${ WC_API_PATH }/orders/${ order.id }` )
+			.then( ( response ) => {
+				orderStatus = response.data.status;
+			} );
 
 		await expect( orderStatus ).toEqual( status );
 
@@ -117,6 +133,9 @@ test( 'Merchant can resend order details to customer', async ( {
 		.locator( 'li#actions > select' )
 		.selectOption( 'send_order_details' );
 	await page.locator( 'button.wc-reload' ).click();
+	await expect(
+		page.locator( '#message' ).filter( { hasText: 'Order updated' } )
+	).toBeVisible();
 
 	await expectEmail(
 		page,

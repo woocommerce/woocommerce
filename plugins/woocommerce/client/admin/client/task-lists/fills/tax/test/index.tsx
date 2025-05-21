@@ -134,7 +134,8 @@ it( 'should trigger event tasklist_tax_visit_marketplace_click when clicking the
 	fireEvent.click( screen.getByText( 'Official WooCommerce Marketplace' ) );
 
 	expect( recordEvent ).toHaveBeenCalledWith(
-		'tasklist_tax_visit_marketplace_click'
+		'tasklist_tax_visit_marketplace_click',
+		{}
 	);
 } );
 

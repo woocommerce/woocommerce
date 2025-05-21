@@ -1,20 +1,20 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Integrations\Core\Renderer\Blocks;
+namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use MailPoet\EmailEditor\Engine\Email_Editor;
-use MailPoet\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
 
 /**
  * Integration test for Button class
  */
-class Button_Test extends \MailPoetTest {
+class Button_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Instance of Button class
 	 *
@@ -65,7 +65,8 @@ class Button_Test extends \MailPoetTest {
 	/**
 	 * Set up before each test
 	 */
-	public function _before(): void {
+	public function setUp(): void {
+		parent::setUp();
 		$this->di_container->get( Email_Editor::class )->initialize();
 		$this->button_renderer     = new Button();
 		$this->settings_controller = $this->di_container->get( Settings_Controller::class );
@@ -76,8 +77,8 @@ class Button_Test extends \MailPoetTest {
 	 */
 	public function testItRendersLink(): void {
 		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
-		verify( $output )->stringContainsString( 'href="http://example.com"' );
-		verify( $output )->stringContainsString( 'Button Text' );
+		$this->assertStringContainsString( 'href="http://example.com"', $output );
+		$this->assertStringContainsString( 'Button Text', $output );
 	}
 
 	/**
@@ -91,10 +92,10 @@ class Button_Test extends \MailPoetTest {
 			'bottom' => '40px',
 		);
 		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
-		verify( $output )->stringContainsString( 'padding-left:10px;' );
-		verify( $output )->stringContainsString( 'padding-right:20px;' );
-		verify( $output )->stringContainsString( 'padding-top:30px;' );
-		verify( $output )->stringContainsString( 'padding-bottom:40px;' );
+		$this->assertStringContainsString( 'padding-left:10px;', $output );
+		$this->assertStringContainsString( 'padding-right:20px;', $output, $output );
+		$this->assertStringContainsString( 'padding-top:30px;', $output );
+		$this->assertStringContainsString( 'padding-bottom:40px;', $output );
 	}
 
 	/**
@@ -106,8 +107,8 @@ class Button_Test extends \MailPoetTest {
 			'text'       => '#111111',
 		);
 		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
-		verify( $output )->stringContainsString( 'background-color:#000000;' );
-		verify( $output )->stringContainsString( 'color:#111111;' );
+		$this->assertStringContainsString( 'background-color:#000000;', $output );
+		$this->assertStringContainsString( 'color:#111111;', $output );
 	}
 
 	/**
@@ -119,9 +120,9 @@ class Button_Test extends \MailPoetTest {
 			'color' => '#111111',
 		);
 		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
-		verify( $output )->stringContainsString( 'border-color:#111111;' );
-		verify( $output )->stringContainsString( 'border-width:10px;' );
-		verify( $output )->stringContainsString( 'border-style:solid;' );
+		$this->assertStringContainsString( 'border-color:#111111;', $output );
+		$this->assertStringContainsString( 'border-width:10px;', $output );
+		$this->assertStringContainsString( 'border-style:solid;', $output );
 	}
 
 	/**
@@ -147,19 +148,19 @@ class Button_Test extends \MailPoetTest {
 			),
 		);
 		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
-		verify( $output )->stringContainsString( 'border-top-width:1px;' );
-		verify( $output )->stringContainsString( 'border-top-color:#111111;' );
+		$this->assertStringContainsString( 'border-top-width:1px;', $output );
+		$this->assertStringContainsString( 'border-top-color:#111111;', $output );
 
-		verify( $output )->stringContainsString( 'border-right-width:2px;' );
-		verify( $output )->stringContainsString( 'border-right-color:#222222;' );
+		$this->assertStringContainsString( 'border-right-width:2px;', $output );
+		$this->assertStringContainsString( 'border-right-color:#222222;', $output );
 
-		verify( $output )->stringContainsString( 'border-bottom-width:3px;' );
-		verify( $output )->stringContainsString( 'border-bottom-color:#333333;' );
+		$this->assertStringContainsString( 'border-bottom-width:3px;', $output );
+		$this->assertStringContainsString( 'border-bottom-color:#333333;', $output );
 
-		verify( $output )->stringContainsString( 'border-left-width:4px;' );
-		verify( $output )->stringContainsString( 'border-left-color:#444444;' );
+		$this->assertStringContainsString( 'border-left-width:4px;', $output );
+		$this->assertStringContainsString( 'border-left-color:#444444;', $output );
 
-		verify( $output )->stringContainsString( 'border-style:solid;' );
+		$this->assertStringContainsString( 'border-style:solid;', $output );
 	}
 
 	/**
@@ -170,7 +171,7 @@ class Button_Test extends \MailPoetTest {
 			'radius' => '10px',
 		);
 		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
-		verify( $output )->stringContainsString( 'border-radius:10px;' );
+		$this->assertStringContainsString( 'border-radius:10px;', $output );
 	}
 
 	/**
@@ -179,7 +180,7 @@ class Button_Test extends \MailPoetTest {
 	public function testItRendersFontSize(): void {
 		$this->parsed_button['attrs']['style']['typography']['fontSize'] = '10px';
 		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
-		verify( $output )->stringContainsString( 'font-size:10px;' );
+		$this->assertStringContainsString( 'font-size:10px;', $output );
 	}
 
 	/**
@@ -193,10 +194,10 @@ class Button_Test extends \MailPoetTest {
 			'bottomRight' => '4px',
 		);
 		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
-		verify( $output )->stringContainsString( 'border-top-left-radius:1px;' );
-		verify( $output )->stringContainsString( 'border-top-right-radius:2px;' );
-		verify( $output )->stringContainsString( 'border-bottom-left-radius:3px;' );
-		verify( $output )->stringContainsString( 'border-bottom-right-radius:4px;' );
+		$this->assertStringContainsString( 'border-top-left-radius:1px;', $output );
+		$this->assertStringContainsString( 'border-top-right-radius:2px;', $output );
+		$this->assertStringContainsString( 'border-bottom-left-radius:3px;', $output );
+		$this->assertStringContainsString( 'border-bottom-right-radius:4px;', $output );
 	}
 
 	/**
@@ -209,7 +210,7 @@ class Button_Test extends \MailPoetTest {
 		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
 		// For other blocks this is handled by CSS-inliner, but for button we need to handle it manually
 		// because of special email HTML markup.
-		verify( $output )->stringContainsString( 'background-color:#000000;' );
+		$this->assertStringContainsString( 'background-color:#000000;', $output );
 	}
 
 	/**
@@ -222,6 +223,6 @@ class Button_Test extends \MailPoetTest {
 		$output                                    = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->settings_controller );
 		// For other blocks this is handled by CSS-inliner, but for button we need to handle it manually
 		// because of special email HTML markup.
-		verify( $output )->stringContainsString( 'color:#fff' );
+		$this->assertStringContainsString( 'color:#fff', $output );
 	}
 }

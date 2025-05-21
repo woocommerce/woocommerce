@@ -11,9 +11,9 @@
 ```php
 <?php declare(strict_types = 1);
 
-namespace MailPoet\EmailEditor\Integrations\Core\Renderer\Blocks;
+namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use MailPoet\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
 
 class Heading extends AbstractBlockRenderer {
   protected function renderContent($blockContent, array $parsedBlock, Settings_Controller $settingsController): string {
@@ -24,16 +24,17 @@ class Heading extends AbstractBlockRenderer {
 ```
 
 <!-- markdownlint-disable MD029 -->
-[//]: # (This disabled MD029/ol-prefix Ordered list item prefix [Expected: 1; Actual: 4; Style: 1/1/1])
+
+[//]: # 'This disabled MD029/ol-prefix Ordered list item prefix [Expected: 1; Actual: 4; Style: 1/1/1]'
 
 4. Register the renderer
 
 ```php
 <?php
 
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Blocks_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Blocks_Registry;
 
-add_action('mailpoet_blocks_renderer_initialized', 'register_my_block_email_renderer');
+add_action('woocommerce_blocks_renderer_initialized', 'register_my_block_email_renderer');
 
 function register_my_block_email_renderer(Blocks_Registry $blocksRegistry): void {
   $blocksRegistry->add_block_renderer('core/heading', new Renderer\Blocks\Heading());
@@ -46,11 +47,11 @@ Note: For core blocks this is currently done in `packages/php/email-editor/src/I
 
 ## Tips for adding support for block
 
-- You can take inspiration on block rendering from MJML in the <https://mjml.io/try-it-live>
-- Test the block in different clients [Litmus](https://litmus.com/)
-- You can take some inspirations from the HTML renderer by the old email editor
+-   You can take inspiration on block rendering from MJML in the <https://mjml.io/try-it-live>
+-   Test the block in different clients [Litmus](https://litmus.com/)
+-   You can take some inspirations from the HTML renderer by the old email editor
 
 ## TODO
 
-- add support for all core blocks
-- move the renderer to separate package
+-   add support for all core blocks
+-   move the renderer to separate package

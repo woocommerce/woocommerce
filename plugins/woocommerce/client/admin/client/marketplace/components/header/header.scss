@@ -1,5 +1,11 @@
 @import "../../stylesheets/_variables.scss";
 
+.woocommerce-marketplace__header-container {
+	position: sticky;
+	top: var(--wp-admin--admin-bar--height, 32px);
+	z-index: 1;
+}
+
 .woocommerce-marketplace__header {
 	align-items: center;
 	background: #fff;
@@ -10,9 +16,6 @@
 		"mktpl-tabs mktpl-tabs mktpl-tabs" auto / 1fr 320px 36px;
 	padding: 0 $content-spacing-large;
 	width: 100%;
-	position: sticky;
-	top: var(--wp-admin--admin-bar--height, 32px);
-	z-index: 1;
 
 	// On narrow screens, "stack" header items and hide the bottom border
 	@media screen and (max-width: $breakpoint-medium) {

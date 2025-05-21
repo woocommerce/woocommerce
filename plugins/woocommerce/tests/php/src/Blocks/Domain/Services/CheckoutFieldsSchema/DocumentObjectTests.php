@@ -12,7 +12,7 @@ use WC_Customer;
  */
 class DocumentObjectTests extends TestCase {
 	/**
-	 * test_validate_selected_shipping_methods.
+	 * test_default_document_schema.
 	 */
 	public function test_default_document_schema() {
 		$document_object = new DocumentObject();

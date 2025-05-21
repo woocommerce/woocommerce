@@ -22,8 +22,16 @@ export function EditorSnackbars( { context = 'email-editor' } ) {
 	const globalNoticeChangeMap = useMemo( () => {
 		return {
 			'site-editor-save-success': {
-				content: __( 'Email design updated.', 'mailpoet' ),
+				content: __( 'Email design updated.', 'woocommerce' ),
 				removeActions: true,
+			},
+			'editor-save': {
+				content: __( 'Email saved.', 'woocommerce' ),
+				removeActions: false,
+				contentCheck: ( notice ) => {
+					// eslint-disable-next-line @wordpress/i18n-text-domain
+					return notice.content.includes( __( 'Post updated.' ) ); // It is intentionally without domain to match core translation
+				},
 			},
 		};
 	}, [] );
@@ -36,9 +44,16 @@ export function EditorSnackbars( { context = 'email-editor' } ) {
 			if ( ! globalNoticeChangeMap[ notice.id ] ) {
 				return notice;
 			}
+			if (
+				globalNoticeChangeMap[ notice.id ].contentCheck &&
+				! globalNoticeChangeMap[ notice.id ].contentCheck( notice )
+			) {
+				return notice;
+			}
 			return {
 				...notice,
 				content: globalNoticeChangeMap[ notice.id ].content,
+				spokenMessage: globalNoticeChangeMap[ notice.id ].content,
 				actions: globalNoticeChangeMap[ notice.id ].removeActions
 					? []
 					: notice.actions,

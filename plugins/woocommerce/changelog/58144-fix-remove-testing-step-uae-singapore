@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Remove the testing step if the country is UAE or Singapore in the NOX In-Context. We can not create a test account for those countries.

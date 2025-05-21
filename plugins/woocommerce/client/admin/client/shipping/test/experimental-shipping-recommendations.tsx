@@ -120,7 +120,8 @@ describe( 'ShippingRecommendations', () => {
 		);
 
 		expect( recordEvent ).toHaveBeenCalledWith(
-			'settings_shipping_recommendation_visit_marketplace_click'
+			'settings_shipping_recommendation_visit_marketplace_click',
+			{}
 		);
 	} );
 

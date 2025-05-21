@@ -23,11 +23,3 @@ when:
     assign:
       teams:
         - flux
-  - author:
-      teamIs:
-        - solaris
-      ignore:
-        nameIs:
-    assign:
-      teams:
-        - solaris

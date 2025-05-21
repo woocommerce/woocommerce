@@ -1,21 +1,21 @@
 <?php
 /**
- * This file is part of the MailPoet Email Editor package.
+ * This file is part of the WooCommerce Email Editor package.
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine;
+namespace Automattic\WooCommerce\EmailEditor\Engine;
 
-use MailPoet\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
-use MailPoet\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
+use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 
 /**
  * Integration test for Personalizer class which validate the functionality
  * of Personalizer using Personalization_Tags_Registry.
  */
-class Personalizer_Test extends \MailPoetTest {
+class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Instance of Personalizer created before each test.
 	 *
@@ -32,8 +32,8 @@ class Personalizer_Test extends \MailPoetTest {
 	/**
 	 * Set up before each test.
 	 */
-	protected function _before(): void {
-		parent::_before();
+	public function setUp(): void {
+		parent::setUp();
 		$this->tags_registry = new Personalization_Tags_Registry();
 		$this->personalizer  = new Personalizer( $this->tags_registry );
 	}
@@ -178,5 +178,53 @@ class Personalizer_Test extends \MailPoetTest {
 		',
 			$this->personalizer->personalize_content( $html_content )
 		);
+	}
+
+	/**
+	 * Test personalizing content with a tag in href attribute.
+	 */
+	public function testPersonalizeContentWithHrefTag(): void {
+		// Register a tag in the registry.
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Store URL',
+				'woocommerce/store-url',
+				'Store',
+				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The $args parameter is not used in this test.
+					return 'https://example.com';
+				}
+			)
+		);
+
+		$html_content = '<a href="http://[woocommerce/store-url]">Click here</a>';
+		$this->assertSame( '<a href="https://example.com">Click here</a>', $this->personalizer->personalize_content( $html_content ) );
+	}
+
+	/**
+	 * Test personalizing content with a tag in href attribute with URL encoding.
+	 */
+	public function testPersonalizeContentWithEncodedHrefTag(): void {
+		// Register a tag in the registry.
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Store URL',
+				'woocommerce/store-url',
+				'Store',
+				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The $args parameter is not used in this test.
+					return 'https://example.com';
+				}
+			)
+		);
+
+		$html_content = '<a href="http://%5Bwoocommerce/store-url%5D">Click here</a>';
+		$this->assertSame( '<a href="https://example.com">Click here</a>', $this->personalizer->personalize_content( $html_content ) );
+	}
+
+	/**
+	 * Test personalizing content with a non-existent tag in href attribute.
+	 */
+	public function testPersonalizeContentWithNonExistentHrefTag(): void {
+		$html_content = '<a href="http://[woocommerce/non-existent-tag]">Click here</a>';
+		$this->assertSame( '<a href="http://[woocommerce/non-existent-tag]">Click here</a>', $this->personalizer->personalize_content( $html_content ) );
 	}
 }

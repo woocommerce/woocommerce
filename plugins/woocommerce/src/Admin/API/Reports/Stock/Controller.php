@@ -478,7 +478,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'description' => __( 'Limit result set to items assigned a stock report type.', 'woocommerce' ),
 			'type'        => 'string',
 			'default'     => 'all',
-			'enum'        => array_merge( array( 'all', ProductStockStatus::LOW_STOCK ), array_keys( wc_get_product_stock_status_options() ) ),
+			'enum'        => array_merge( array( 'all', 'lowstock' ), array_keys( wc_get_product_stock_status_options() ) ),
 		);
 
 		return $params;

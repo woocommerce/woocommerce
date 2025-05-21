@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Remove reference to label in aria-describedby attribute on payment radio options

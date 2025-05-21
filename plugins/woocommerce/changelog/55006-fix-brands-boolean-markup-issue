@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Defensive `to array` type conversion.

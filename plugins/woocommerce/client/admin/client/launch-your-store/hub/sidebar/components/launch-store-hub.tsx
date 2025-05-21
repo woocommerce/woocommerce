@@ -33,9 +33,7 @@ import { SidebarContainer } from './sidebar-container';
 import { taskCompleteIcon } from './icons';
 import { SiteHub } from '~/customize-store/assembler-hub/site-hub';
 import { CompletedTaskItem, IncompleteTaskItem } from '../tasklist';
-export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
-	props
-) => {
+export const LaunchYourStoreHubSidebar = ( props: SidebarComponentProps ) => {
 	const {
 		context: {
 			tasklist,
@@ -157,6 +155,7 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 						</div>
 						<ItemGroup className="woocommerce-edit-site-sidebar-navigation-screen-remove-test-data__group">
 							<ToggleControl
+								__nextHasNoMarginBottom
 								label={ sprintf(
 									// translators: %d is the number of test orders
 									__(

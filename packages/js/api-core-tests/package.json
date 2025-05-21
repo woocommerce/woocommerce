@@ -36,7 +36,7 @@
 	"devDependencies": {
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^8.55.0",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"publishConfig": {
 		"access": "public"

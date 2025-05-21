@@ -36,8 +36,17 @@ export const transformExtensionToPlugin = (
 	activePlugins: string[],
 	installedPlugins: string[]
 ): PluginProps => {
-	const { description, image_url, is_built_by_wc, key, manage_url, name } =
-		extension;
+	const {
+		description,
+		image_url,
+		is_built_by_wc,
+		key,
+		manage_url,
+		name,
+		learn_more_link,
+		tags,
+		install_external,
+	} = extension;
 	const slug = getPluginSlug( key );
 	return {
 		description,
@@ -48,6 +57,9 @@ export const transformExtensionToPlugin = (
 		isBuiltByWC: is_built_by_wc,
 		manageUrl: manage_url,
 		name,
+		tags,
+		learnMoreLink: learn_more_link,
+		installExternal: install_external,
 	};
 };
 
@@ -103,7 +115,7 @@ export type MarketingProps = {
 	onComplete: ( option?: { redirectPath: string } ) => void;
 };
 
-const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
+const Marketing = ( { onComplete }: MarketingProps ) => {
 	const [ currentPlugin, setCurrentPlugin ] = useState< string | null >(
 		null
 	);

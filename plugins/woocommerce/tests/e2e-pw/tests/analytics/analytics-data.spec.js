@@ -1,22 +1,26 @@
-const { test: baseTest, expect, tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * Internal dependencies
+ */
+import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
+import { WC_ADMIN_API_PATH, WC_API_PATH } from '../../utils/api-client';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
 
-	page: async ( { page, wcAdminApi }, use ) => {
+	page: async ( { page, restApi }, use ) => {
 		// Disable the task list reminder bar, it can interfere with the quick actions
-		await wcAdminApi.post( 'options', {
+		await restApi.post( `${ WC_ADMIN_API_PATH }/options`, {
 			woocommerce_task_list_reminder_bar_hidden: 'yes',
 		} );
 
 		// Disable the orders report date tour
-		await wcAdminApi.post( 'options', {
+		await restApi.post( `${ WC_ADMIN_API_PATH }/options`, {
 			woocommerce_orders_report_date_tour_shown: 'yes',
 		} );
 
 		// Disable the revenue report date tour
-		await wcAdminApi.post( 'options', {
+		await restApi.post( `${ WC_ADMIN_API_PATH }/options`, {
 			woocommerce_revenue_report_date_tour_shown: 'yes',
 		} );
 
@@ -26,10 +30,10 @@ const test = baseTest.extend( {
 
 let categoryIds, productIds, orderIds, setupPage;
 
-test.beforeAll( async ( { browser, api } ) => {
+test.beforeAll( async ( { browser, restApi } ) => {
 	// create a couple of product categories
-	await api
-		.post( 'products/categories/batch', {
+	await restApi
+		.post( `${ WC_API_PATH }/products/categories/batch`, {
 			create: [ { name: 'Easy' }, { name: 'Complicated' } ],
 		} )
 		.then( ( response ) => {
@@ -104,8 +108,8 @@ test.beforeAll( async ( { browser, api } ) => {
 			],
 		},
 	];
-	await api
-		.post( 'products/batch', {
+	await restApi
+		.post( `${ WC_API_PATH }/products/batch`, {
 			create: productsArray,
 		} )
 		.then( ( response ) => {
@@ -113,9 +117,11 @@ test.beforeAll( async ( { browser, api } ) => {
 		} );
 	// set up the variations on the variable product
 	for ( const key in variations ) {
-		await api
+		await restApi
 			.post(
-				`products/${ productIds[ productIds.length - 1 ] }/variations`,
+				`${ WC_API_PATH }/products/${
+					productIds[ productIds.length - 1 ]
+				}/variations`,
 				variations[ key ]
 			)
 			.then( ( response ) => {
@@ -150,12 +156,86 @@ test.beforeAll( async ( { browser, api } ) => {
 		} );
 	}
 	// create the orders
-	await api
-		.post( 'orders/batch', {
+	await restApi
+		.post( `${ WC_API_PATH }/orders/batch`, {
 			create: ordersArray,
 		} )
 		.then( ( response ) => {
 			orderIds = response.data.create.map( ( order ) => order.id );
+		} );
+
+	// Reset Analytics Settings to their default values.
+	// Reset 'Excluded statuses' to default values.
+	await restApi
+		.post(
+			'wc-analytics/settings/wc_admin/woocommerce_excluded_report_order_statuses',
+			{
+				value: [ 'pending', 'cancelled', 'failed' ],
+			}
+		)
+		.then( ( response ) => {
+			expect( response.data.value ).toEqual( [
+				'pending',
+				'cancelled',
+				'failed',
+			] );
+		} )
+		.catch( ( error ) => {
+			throw new Error(
+				`Error occurred while resetting 'Excluded statuses' to defaults.\n${ JSON.stringify(
+					error,
+					null,
+					2
+				) }`
+			);
+		} );
+
+	// Reset 'Actionable statuses' to default values.
+	await restApi
+		.post(
+			'wc-analytics/settings/wc_admin/woocommerce_actionable_order_statuses',
+			{
+				value: [ 'processing', 'on-hold' ],
+			}
+		)
+		.then( ( response ) => {
+			expect( response.data.value ).toEqual( [
+				'processing',
+				'on-hold',
+			] );
+		} )
+		.catch( ( error ) => {
+			throw new Error(
+				`Error occurred while resetting 'Actionable statuses' to defaults.\n${ JSON.stringify(
+					error,
+					null,
+					2
+				) }`
+			);
+		} );
+
+	// Reset 'Default date range' to default values.
+	await restApi
+		.post(
+			'wc-analytics/settings/wc_admin/woocommerce_default_date_range',
+			{
+				value: 'period=month&compare=previous_year',
+			}
+		)
+		.then( ( response ) => {
+			// '&' is encoded as '&amp;' in the response.
+			expect( response.data.value ).toEqual(
+				'period=month&amp;compare=previous_year'
+			);
+		} )
+		.catch( ( error ) => {
+			throw new Error(
+				`Error occurred while resetting 'Default date range' to defaults.\n${ JSON.stringify(
+					error,
+					null,
+					2
+				) }`
+			);
 		} );
 
 	// process the Action Scheduler tasks
@@ -166,15 +246,17 @@ test.beforeAll( async ( { browser, api } ) => {
 	await setupPage.close();
 } );
 
-test.afterAll( async ( { api } ) => {
+test.afterAll( async ( { restApi } ) => {
 	// delete the categories
-	await api.post( 'products/categories/batch', {
+	await restApi.post( `${ WC_API_PATH }/products/categories/batch`, {
 		delete: categoryIds,
 	} );
 	// delete the products
-	await api.post( 'products/batch', { delete: productIds } );
+	await restApi.post( `${ WC_API_PATH }/products/batch`, {
+		delete: productIds,
+	} );
 	// delete the orders
-	await api.post( 'orders/batch', { delete: orderIds } );
+	await restApi.post( `${ WC_API_PATH }/orders/batch`, { delete: orderIds } );
 } );
 
 test(

@@ -1,0 +1,25 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/product-gallery-thumbnails",
+	"title": "Thumbnails",
+	"description": "Display the Thumbnails of a product.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"usesContext": [ "postId", "cropImages" ],
+	"textdomain": "woocommerce",
+	"ancestor": [ "woocommerce/product-gallery" ],
+	"attributes": {
+		"thumbnailSize": {
+			"type": "string",
+			"default": "25%"
+		}
+	},
+	"supports": {
+		"spacing": {
+			"margin": true
+		},
+		"interactivity": true
+	},
+	"editorStyle": "file:../woocommerce/product-gallery-thumbnails-editor.css"
+}

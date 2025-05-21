@@ -1,20 +1,20 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Integrations\Core\Renderer\Blocks;
+namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use MailPoet\EmailEditor\Engine\Email_Editor;
-use MailPoet\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
 
 /**
  * Integration test for Heading class
  */
-class Heading_Test extends \MailPoetTest {
+class Heading_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Text renderer instance
 	 *
@@ -61,7 +61,8 @@ class Heading_Test extends \MailPoetTest {
 	/**
 	 * Set up before each test
 	 */
-	public function _before() {
+	public function setUp(): void {
+		parent::setUp();
 		$this->di_container->get( Email_Editor::class )->initialize();
 		$this->heading_renderer    = new Text();
 		$this->settings_controller = $this->di_container->get( Settings_Controller::class );
@@ -72,10 +73,10 @@ class Heading_Test extends \MailPoetTest {
 	 */
 	public function testItRendersContent(): void {
 		$rendered = $this->heading_renderer->render( '<h1>This is Heading 1</h1>', $this->parsed_heading, $this->settings_controller );
-		verify( $rendered )->stringContainsString( 'This is Heading 1' );
-		verify( $rendered )->stringContainsString( 'width:100%;' );
-		verify( $rendered )->stringContainsString( 'font-size:24px;' );
-		verify( $rendered )->stringNotContainsString( 'width:640px;' );
+		$this->assertStringContainsString( 'This is Heading 1', $rendered );
+		$this->assertStringContainsString( 'width:100%;', $rendered );
+		$this->assertStringContainsString( 'font-size:24px;', $rendered );
+		$this->assertStringNotContainsString( 'width:640px;', $rendered );
 	}
 
 	/**
@@ -83,8 +84,8 @@ class Heading_Test extends \MailPoetTest {
 	 */
 	public function testItRendersBlockAttributes(): void {
 		$rendered = $this->heading_renderer->render( '<h1>This is Heading 1</h1>', $this->parsed_heading, $this->settings_controller );
-		verify( $rendered )->stringContainsString( 'text-transform:lowercase;' );
-		verify( $rendered )->stringContainsString( 'text-align:center;' );
+		$this->assertStringContainsString( 'text-transform:lowercase;', $rendered );
+		$this->assertStringContainsString( 'text-align:center;', $rendered );
 	}
 
 	/**
@@ -94,8 +95,8 @@ class Heading_Test extends \MailPoetTest {
 		$this->parsed_heading['attrs']['style']['color']['background'] = '#000000';
 		$this->parsed_heading['attrs']['style']['color']['text']       = '#ff0000';
 		$rendered = $this->heading_renderer->render( '<h1>This is Heading 1</h1>', $this->parsed_heading, $this->settings_controller );
-		verify( $rendered )->stringContainsString( 'background-color:#000000' );
-		verify( $rendered )->stringContainsString( 'color:#ff0000;' );
+		$this->assertStringContainsString( 'background-color:#000000', $rendered );
+		$this->assertStringContainsString( 'color:#ff0000;', $rendered );
 	}
 
 	/**
@@ -103,6 +104,6 @@ class Heading_Test extends \MailPoetTest {
 	 */
 	public function testItReplacesFluidFontSizeInContent(): void {
 		$rendered = $this->heading_renderer->render( '<h1 style="font-size:clamp(10px, 20px, 24px)">This is Heading 1</h1>', $this->parsed_heading, $this->settings_controller );
-		verify( $rendered )->stringContainsString( 'font-size:24px' );
+		$this->assertStringContainsString( 'font-size:24px', $rendered );
 	}
 }

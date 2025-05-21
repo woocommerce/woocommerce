@@ -34,6 +34,20 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	protected $list_table_type = 'product';
 
 	/**
+	 * Caches the value of the "COGS is enabled" flag.
+	 *
+	 * @var bool
+	 */
+	private bool $cogs_is_enabled;
+
+	/**
+	 * Flag indicating if the COGS value column in the product meta lookup table can be used.
+	 *
+	 * @var bool
+	 */
+	private bool $use_cogs_lookup_column;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -44,6 +58,10 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'get_search_query', array( $this, 'search_label' ) );
 		add_filter( 'posts_clauses', array( $this, 'posts_clauses' ), 10, 2 );
 		add_action( 'manage_product_posts_custom_column', array( $this, 'add_sample_product_badge' ), 9, 2 );
+
+		$cogs_controller              = wc_get_container()->get( CostOfGoodsSoldController::class );
+		$this->cogs_is_enabled        = $cogs_controller->feature_is_enabled();
+		$this->use_cogs_lookup_column = $this->cogs_is_enabled && $cogs_controller->product_meta_lookup_table_cogs_value_columns_exist();
 	}
 
 	/**
@@ -99,6 +117,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			'sku'   => 'sku',
 			'name'  => 'title',
 		);
+
+		if ( $this->use_cogs_lookup_column ) {
+			$custom['cogs_value'] = 'cogs_value';
+		}
+
 		return wp_parse_args( $custom, $columns );
 	}
 
@@ -129,7 +152,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		}
 
 		$show_columns['price'] = __( 'Price', 'woocommerce' );
-		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
+		if ( $this->cogs_is_enabled ) {
 			$show_columns['cogs_value'] = __( 'Cost', 'woocommerce' );
 		}
 		$show_columns['product_cat'] = __( 'Categories', 'woocommerce' );
@@ -182,7 +205,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		get_inline_data( $post );
 
-		$cogs_value_html = wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ?
+		$cogs_value_html = $this->cogs_is_enabled ?
 				'<div class="cogs_value">' . esc_html( $this->object->get_cogs_value() ?? '0' ) . '</div>' :
 				'';
 
@@ -248,7 +271,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		} else {
 			$termlist = array();
 			foreach ( $terms as $term ) {
-				$termlist[] = '<a href="' . esc_url( admin_url( 'edit.php?product_cat=' . $term->slug . '&post_type=product' ) ) . ' ">' . esc_html( $term->name ) . '</a>';
+				$termlist[] = '<a href="' . esc_url( admin_url( 'edit.php?product_cat=' . $term->slug . '&post_type=product' ) ) . '">' . esc_html( $term->name ) . '</a>';
 			}
 
 			echo apply_filters( 'woocommerce_admin_product_term_list', implode( ', ', $termlist ), 'product_cat', $this->object->get_id(), $termlist, $terms ); // WPCS: XSS ok.
@@ -265,7 +288,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		} else {
 			$termlist = array();
 			foreach ( $terms as $term ) {
-				$termlist[] = '<a href="' . esc_url( admin_url( 'edit.php?product_tag=' . $term->slug . '&post_type=product' ) ) . ' ">' . esc_html( $term->name ) . '</a>';
+				$termlist[] = '<a href="' . esc_url( admin_url( 'edit.php?product_tag=' . $term->slug . '&post_type=product' ) ) . '">' . esc_html( $term->name ) . '</a>';
 			}
 
 			echo apply_filters( 'woocommerce_admin_product_term_list', implode( ', ', $termlist ), 'product_tag', $this->object->get_id(), $termlist, $terms ); // WPCS: XSS ok.
@@ -488,6 +511,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$callback = 'DESC' === $order ? 'order_by_sku_desc_post_clauses' : 'order_by_sku_asc_post_clauses';
 				add_filter( 'posts_clauses', array( $this, $callback ) );
 			}
+
+			if ( 'cogs_value' === $orderby && $this->use_cogs_lookup_column ) {
+				$callback = 'DESC' === $order ? 'order_by_cogs_value_desc_post_clauses' : 'order_by_cogs_value_asc_post_clauses';
+				add_filter( 'posts_clauses', array( $this, $callback ) );
+			}
 		}
 
 		// Type filtering.
@@ -554,6 +582,10 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		remove_filter( 'posts_clauses', array( $this, 'filter_downloadable_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'filter_virtual_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'filter_stock_status_post_clauses' ) );
+		if ( $this->use_cogs_lookup_column ) {
+			remove_filter( 'posts_clauses', array( $this, 'order_by_cogs_value_asc_post_clauses' ) );
+			remove_filter( 'posts_clauses', array( $this, 'order_by_cogs_value_desc_post_clauses' ) );
+		}
 		return $posts; // Keeping this here for backward compatibility.
 	}
 
@@ -602,6 +634,30 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	public function order_by_sku_desc_post_clauses( $args ) {
 		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
 		$args['orderby'] = ' wc_product_meta_lookup.sku DESC, wc_product_meta_lookup.product_id DESC ';
+		return $args;
+	}
+
+	/**
+	 * Handle COGS value sorting.
+	 *
+	 * @param array $args Query args.
+	 * @return array
+	 */
+	public function order_by_cogs_value_asc_post_clauses( $args ) {
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['orderby'] = ' wc_product_meta_lookup.cogs_total_value ASC, wc_product_meta_lookup.product_id ASC ';
+		return $args;
+	}
+
+	/**
+	 * Handle COGS value sorting.
+	 *
+	 * @param array $args Query args.
+	 * @return array
+	 */
+	public function order_by_cogs_value_desc_post_clauses( $args ) {
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['orderby'] = ' wc_product_meta_lookup.cogs_total_value DESC, wc_product_meta_lookup.product_id DESC ';
 		return $args;
 	}
 

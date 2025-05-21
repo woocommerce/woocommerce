@@ -108,7 +108,7 @@ export default function ConnectNotice(): JSX.Element | null {
 				variant="primary"
 				onClick={ handleClick }
 			>
-				{ __( 'Connect', 'woocommerce' ) }
+				{ __( 'Connect your store', 'woocommerce' ) }
 			</Button>
 			<Button
 				href="https://woocommerce.com/document/managing-woocommerce-com-subscriptions/#connect-your-site-woocommercecom-account"

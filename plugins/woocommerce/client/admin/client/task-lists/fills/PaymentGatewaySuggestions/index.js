@@ -14,6 +14,7 @@ import { useMemo, useCallback, useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { getNewPath, getQuery } from '@woocommerce/navigation';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -274,7 +275,9 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 						'woocommerce'
 					) }
 					onClickCallback={ trackSeeMore }
-					targetUrl="admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways"
+					targetUrl={ getAdminLink(
+						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
+					) }
 				/>
 			}
 		></List>

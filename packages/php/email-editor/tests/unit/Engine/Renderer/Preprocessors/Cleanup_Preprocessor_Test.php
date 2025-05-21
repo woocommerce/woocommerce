@@ -1,19 +1,19 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine\Renderer\Preprocessors;
+namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\Preprocessors;
 
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Cleanup_Preprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Cleanup_Preprocessor;
 
 /**
  * Unit test for Cleanup_Preprocessor
  */
-class Cleanup_Preprocessor_Test extends \MailPoetUnitTest {
+class Cleanup_Preprocessor_Test extends \Email_Editor_Unit_Test {
 
 	private const PARAGRAPH_BLOCK = array(
 		'blockName' => 'core/paragraph',
@@ -57,8 +57,8 @@ class Cleanup_Preprocessor_Test extends \MailPoetUnitTest {
 	/**
 	 * Set up the test
 	 */
-	public function _before() {
-		parent::_before();
+	protected function setUp(): void {
+		parent::setUp();
 		$this->preprocessor = new Cleanup_Preprocessor();
 		$this->layout       = array( 'contentSize' => '660px' );
 		$this->styles       = array(

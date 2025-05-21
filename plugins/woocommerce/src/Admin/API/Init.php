@@ -73,6 +73,7 @@ class Init {
 				'Automattic\WooCommerce\Admin\API\MarketingCampaigns',
 				'Automattic\WooCommerce\Admin\API\MarketingCampaignTypes',
 				'Automattic\WooCommerce\Admin\API\Options',
+				'Automattic\WooCommerce\Admin\API\Settings',
 				'Automattic\WooCommerce\Admin\API\PaymentGatewaySuggestions',
 				'Automattic\WooCommerce\Admin\API\Themes',
 				'Automattic\WooCommerce\Admin\API\Plugins',
@@ -85,12 +86,6 @@ class Init {
 				'Automattic\WooCommerce\Admin\API\OnboardingProducts',
 				'Automattic\WooCommerce\Admin\API\MobileAppMagicLink',
 				'Automattic\WooCommerce\Admin\API\ShippingPartnerSuggestions',
-				'Automattic\WooCommerce\Admin\API\AI\StoreTitle',
-				'Automattic\WooCommerce\Admin\API\AI\BusinessDescription',
-				'Automattic\WooCommerce\Admin\API\AI\StoreInfo',
-				'Automattic\WooCommerce\Admin\API\AI\Images',
-				'Automattic\WooCommerce\Admin\API\AI\Patterns',
-				'Automattic\WooCommerce\Admin\API\AI\Product',
 			);
 		}
 

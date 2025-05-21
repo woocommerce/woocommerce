@@ -87,13 +87,14 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 
 		if ( ! empty( $attribute_taxonomies ) ) {
 			foreach ( $attribute_taxonomies as $tax ) {
-				if ( taxonomy_exists( wc_attribute_taxonomy_name( $tax->attribute_name ) ) ) {
-					$attribute_array[ $tax->attribute_name ] = $tax->attribute_name;
+				$taxonomy_name = wc_attribute_taxonomy_name( $tax->attribute_name );
+				if ( taxonomy_exists( $taxonomy_name ) ) {
+					$attribute_array[] = $taxonomy_name;
 				}
 			}
 		}
 
-		if ( ! is_post_type_archive( 'product' ) && ! is_tax( array_merge( is_array( $attribute_array ) ? $attribute_array : array(), array( 'product_cat', 'product_tag' ) ) ) ) {
+		if ( ! is_post_type_archive( 'product' ) && ! is_tax( array_merge( $attribute_array, array( 'product_cat', 'product_tag', 'product_brand' ) ) ) ) {
 			return;
 		}
 
@@ -220,8 +221,16 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 			$link = get_term_link( get_query_var( 'product_cat' ), 'product_cat' );
 		} elseif ( is_product_tag() ) {
 			$link = get_term_link( get_query_var( 'product_tag' ), 'product_tag' );
+		} elseif ( is_tax() ) {
+			// Handle any taxonomy archive, including attributes
+			$queried_object = get_queried_object();
+			if ( is_null( $queried_object ) ) {
+				$link = get_post_type_archive_link( 'product' );
+			} else {
+				$link = get_term_link( $queried_object->term_id, $queried_object->taxonomy );
+			}
 		} else {
-			$link = get_term_link( get_query_var( 'term' ), get_query_var( 'taxonomy' ) );
+			$link = get_post_type_archive_link( 'product' );
 		}
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 
@@ -274,8 +283,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 			}
 		}
 
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
-		return esc_url( $link );
+		return $link;
 	}
 
 	/**
@@ -354,7 +362,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 					"
 					jQuery( '.wc-brand-dropdown-layered-nav-" . esc_js( $taxonomy ) . "' ).change( function() {
 						var slug = jQuery( this ).val();
-						location.href = '" . preg_replace( '%\/page\/[0-9]+%', '', str_replace( array( '&amp;', '%2C' ), array( '&', ',' ), esc_js( add_query_arg( 'filtering', '1', $link ) ) ) ) . '&filter_' . esc_js( $taxonomy ) . "=' + jQuery( '.wc-brand-dropdown-layered-nav-" . esc_js( $taxonomy ) . "' ).val();
+						location.href = '" . preg_replace( '%\/page\/[0-9]+%', '', str_replace( array( '&amp;', '%2C' ), array( '&', ',' ), esc_js( add_query_arg( 'filtering', '1', esc_url_raw( $link ) ) ) ) ) . '&filter_' . esc_js( $taxonomy ) . "=' + jQuery( this ).val();
 					});
 				"
 				);
@@ -518,7 +526,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 		}
 
 		if ( ! isset( $cached_counts[ $query_hash ] ) ) {
-			$results                      = $wpdb->get_results( $query, ARRAY_A ); // @codingStandardsIgnoreLine
+			$results                      = $wpdb->get_results( $query, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$counts                       = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
 			$cached_counts[ $query_hash ] = $counts;
 			if ( true === $cache ) {

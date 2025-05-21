@@ -8,7 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-require_once dirname( __FILE__ ) . '/legacy/class-wc-legacy-customer.php';
+require_once __DIR__ . '/legacy/class-wc-legacy-customer.php';
 
 /**
  * Customer class.
@@ -268,8 +268,57 @@ class WC_Customer extends WC_Legacy_Customer {
 				return true;
 			}
 		}
-
 		return false;
+	}
+
+	/**
+	 * Checks whether the address is "full" in the sense that it contains all required fields to calculate shipping rates.
+	 * This method uses the current country's locale to determine if a field is required, or falls back to the default
+	 * locale if there's no country-specific setting for that field.
+	 *
+	 * This method is only used internally by StoreAPI, and not by the classic/shortcode checkout.
+	 *
+	 * @since 9.8.0
+	 * @return bool Whether the customer has a full shipping address (city, state, postcode, country).
+	 * Only required fields are checked based on the country locale.
+	 */
+	public function has_full_shipping_address() {
+		// These are the important fields required to get the shipping rates. Note that while we're respecting the filters
+		// for the shipping calculator below (city, postcode, state), we're not respecting the filter for the country field.
+		// The country field is always required as a bare minimum for shipping.
+		$shipping_address = array(
+			'country'  => $this->get_shipping_country(),
+			'city'     => $this->get_shipping_city(),
+			'state'    => $this->get_shipping_state(),
+			'postcode' => $this->get_shipping_postcode(),
+		);
+
+		$address_fields = WC()->countries->get_country_locale();
+		$locale_key     = ! empty( $shipping_address['country'] ) && array_key_exists( $shipping_address['country'], $address_fields ) ? $shipping_address['country'] : 'default';
+		$default_locale = $address_fields['default'];
+		$country_locale = $address_fields[ $locale_key ] ?? array();
+
+		/**
+		 * Checks all shipping address fields against the country's locale settings.
+		 *
+		 * If there's a `required` setting for the field in the country-specific locale, that setting is used, otherwise
+		 * the default locale's setting is used. If the default locale doesn't have a setting either, the field is
+		 * considered optional and therefore valid, even if empty.
+		 */
+		foreach ( $shipping_address as $key => $value ) {
+			// Skip further checks if the field has a value. From this point on $value is empty.
+			if ( ! empty( $value ) ) {
+				continue;
+			}
+
+			$locale_to_check = isset( $country_locale[ $key ]['required'] ) ? $country_locale : $default_locale;
+
+			// If the locale requires the field return false.
+			if ( isset( $locale_to_check[ $key ]['required'] ) && true === wc_string_to_bool( $locale_to_check[ $key ]['required'] ) ) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**

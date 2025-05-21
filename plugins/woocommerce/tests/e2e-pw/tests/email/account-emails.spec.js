@@ -1,22 +1,42 @@
 /* eslint-disable playwright/expect-expect */
 /**
+ * External dependencies
+ */
+import { request } from '@playwright/test';
+
+/**
  * Internal dependencies
  */
 import { getFakeCustomer } from '../../utils/data';
 import { expect, test as baseTest } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { expectEmail, expectEmailContent } from '../../utils/email';
+import { setOption } from '../../utils/options';
+import { WC_API_PATH } from '../../utils/api-client';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	user: async ( { api }, use ) => {
+	user: async ( { restApi }, use ) => {
 		let user;
-		await api.post( 'customers', getFakeCustomer() ).then( ( response ) => {
-			user = response.data;
-		} );
+		await restApi
+			.post( `${ WC_API_PATH }/customers`, getFakeCustomer() )
+			.then( ( response ) => {
+				user = response.data;
+			} );
 		await use( user );
-		await api.delete( `customers/${ user.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/customers/${ user.id }`, {
+			force: true,
+		} );
 	},
+} );
+
+test.beforeEach( async ( { baseURL } ) => {
+	await setOption(
+		request,
+		baseURL,
+		'woocommerce_feature_email_improvements_enabled',
+		'no'
+	);
 } );
 
 test.skip(

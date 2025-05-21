@@ -45,27 +45,6 @@ declare module '@wordpress/editor' {
 	>;
 }
 
-// there are no @types/wordpress__interface yet
-declare module '@wordpress/interface' {
-	import { StoreDescriptor } from '@wordpress/data/build-types/types';
-	import * as interfaceActions from '@wordpress/interface/src/store/actions';
-
-	export const store: { name: 'core/interface' } & StoreDescriptor< {
-		reducer: () => unknown;
-		actions: typeof interfaceActions;
-		selectors: {
-			getActiveComplementaryArea: (
-				state: unknown,
-				scope: string
-			) => string | undefined | null;
-		};
-	} >;
-	export const ComplementaryArea: any;
-	export const FullscreenMode: any;
-	export const InterfaceSkeleton: any;
-	export const PinnedItems: any;
-}
-
 // there are no @types/wordpress__keyboard-shortcuts yet
 declare module '@wordpress/keyboard-shortcuts' {
 	import { StoreDescriptor } from '@wordpress/data/build-types/types';
@@ -113,11 +92,6 @@ declare module '@wordpress/notices' {
 		type: WPNotice[ 'type' ];
 	};
 
-	// We don't want to use the types from @types/wordpress__notices but the package
-	// is installed anyway as a subdependency of @types/wordpress__components
-	// The ignore comment is needed to allow overriding the store
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	export const store: { name: 'core/notices' } & StoreDescriptor< {
 		reducer: () => unknown;
 		actions: {

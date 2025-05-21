@@ -24,6 +24,11 @@ const getSlotFillName = ( name?: string ) => {
 	return `${ WC_HEADER_SLOT_NAME }/${ name }`;
 };
 
+type WooHeaderItemProps = {
+	order?: number;
+	name?: string;
+} & Omit< React.ComponentProps< typeof Fill >, 'name' >;
+
 /**
  * Create a Fill for extensions to add items to the WooCommerce Admin header.
  *
@@ -43,13 +48,11 @@ const getSlotFillName = ( name?: string ) => {
  * @param {Array}  param0.children - Node children.
  * @param {Array}  param0.order    - Node order.
  */
-export const WooHeaderItem: React.FC< {
-	name?: string;
-	children?: React.ReactNode;
-	order?: number;
-} > & {
-	Slot: React.FC< React.ComponentProps< typeof Slot > & { name?: string } >;
-} = ( { children, order = 1, name = '' } ) => {
+export const WooHeaderItem = ( {
+	children,
+	order = 1,
+	name = '',
+}: WooHeaderItemProps ) => {
 	return (
 		<Fill name={ getSlotFillName( name ) }>
 			{ ( fillProps ) => {
@@ -59,7 +62,12 @@ export const WooHeaderItem: React.FC< {
 	);
 };
 
-WooHeaderItem.Slot = ( { fillProps, name = '' } ) => (
+WooHeaderItem.Slot = ( {
+	fillProps,
+	name = '',
+}: Omit< WooHeaderItemProps, 'order' > & {
+	fillProps?: React.ComponentProps< typeof Slot >[ 'fillProps' ];
+} ) => (
 	<Slot name={ getSlotFillName( name ) } fillProps={ fillProps }>
 		{ sortFillsByOrder }
 	</Slot>

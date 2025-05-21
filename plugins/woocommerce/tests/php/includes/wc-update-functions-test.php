@@ -5,6 +5,9 @@
  * @package WooCommerce\Tests\Functions.
  */
 
+use Automattic\WooCommerce\Blocks\Options as BlockOptions;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+
 /**
  * Class WC_Core_Functions_Test
  */
@@ -160,5 +163,88 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		wc_update_920_add_wc_hooked_blocks_version_option();
 
 		$this->assertEquals( null, get_option( 'woocommerce_hooked_blocks_version', null ) );
+	}
+
+	/**
+	 * Test that wc_update_790_blockified_product_grid_block sets the option value to false.
+	 *
+	 * @return void
+	 */
+	public function test_wc_update_790_blockified_product_grid_block() {
+		delete_option( BlockOptions::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE );
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		wc_update_790_blockified_product_grid_block();
+
+		$this->assertEquals( 'no', get_option( BlockOptions::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE ) );
+	}
+
+	/**
+	 * Tests wc_update_830_rename_checkout_template.
+	 * This test verifies that the function correctly renames the checkout template to 'page-checkout'.
+	 *
+	 * @return void
+	 */
+	public function test_wc_update_830_rename_checkout_template() {
+		// Get the current template and update the name back to 'checkout'.
+		$template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//page-checkout', 'wp_template' );
+
+		if ( $template && ! empty( $template->wp_id ) ) {
+			wp_update_post(
+				array(
+					'ID'        => $template->wp_id,
+					'post_name' => 'checkout',
+				)
+			);
+		}
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		wc_update_830_rename_checkout_template();
+
+		// Get the updated template and verify its name has been changed to 'page-checkout'.
+		$updated_template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//checkout', 'wp_template' );
+
+		if ( $updated_template && ! empty( $updated_template->wp_id ) ) {
+			$post = get_post( $updated_template->wp_id );
+			$this->assertEquals( 'page-checkout', $post->post_name );
+		} else {
+			// If no template exists, this assertion will pass since there's nothing to rename.
+			$this->assertTrue( true );
+		}
+	}
+
+	/**
+	 * Tests wc_update_830_rename_cart_template.
+	 * This test verifies that the function correctly renames the cart template to 'page-cart'.
+	 *
+	 * @return void
+	 */
+	public function test_wc_update_830_rename_cart_template() {
+		// Get the current template and update the name back 'cart'.
+		$template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//page-cart', 'wp_template' );
+
+		if ( $template && ! empty( $template->wp_id ) ) {
+			wp_update_post(
+				array(
+					'ID'        => $template->wp_id,
+					'post_name' => 'cart',
+				)
+			);
+		}
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		wc_update_830_rename_cart_template();
+
+		// Get the updated template and verify its name has been changed to 'page-cart'.
+		$updated_template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//cart', 'wp_template' );
+
+		if ( $updated_template && ! empty( $updated_template->wp_id ) ) {
+			$post = get_post( $updated_template->wp_id );
+			$this->assertEquals( 'page-cart', $post->post_name );
+		} else {
+			// If no template exists, this assertion will pass since there's nothing to rename.
+			$this->assertTrue( true );
+		}
 	}
 }

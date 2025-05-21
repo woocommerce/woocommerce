@@ -16,6 +16,7 @@ import {
 	type PaymentSelectors,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -30,7 +31,7 @@ const WcPayPromotionGateway = document.querySelector(
 	'[data-gateway_id="pre_install_woocommerce_payments_promotion"]'
 );
 
-const PaymentRecommendations: React.FC = () => {
+const PaymentRecommendations = () => {
 	const [ installingPlugin, setInstallingPlugin ] = useState< string | null >(
 		null
 	);
@@ -265,7 +266,9 @@ const PaymentRecommendations: React.FC = () => {
 						'woocommerce'
 					) }
 					eventName="settings_payment_recommendations_visit_marketplace_click"
-					targetUrl="admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways"
+					targetUrl={ getAdminLink(
+						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
+					) }
 				/>
 			</CardFooter>
 		</Card>

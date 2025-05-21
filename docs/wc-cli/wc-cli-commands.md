@@ -8,7 +8,7 @@ tags: reference
 
 This document serves as a comprehensive reference for the WooCommerce Command Line Interface (WC-CLI) commands. It includes syntax, options, and brief descriptions for each command. These commands are applicable for WooCommerce version 3.0.0 and later.
 
-### General Command Structure
+## General Command Structure
 
 The general syntax for WC-CLI commands is:
 
@@ -22,7 +22,7 @@ For detailed help on any specific command, use:
 wp wc [command] --help
 ```
 
-### Commands
+## Commands
 
 ### wc shop_coupon
 
@@ -1407,3 +1407,17 @@ Options: product_slug, product_name, auto_renew, expires_on, expired, sites_max,
 - `--activate` - If set, after installation, the plugin will activate it.
 - `--activate-network` - If set, the plugin will be network activated immediately after installation
 - `--insecure` - Retry downloads without certificate validation if TLS handshake fails. Note: This makes the request vulnerable to a MITM attack.
+
+### wc blueprint
+
+#### wc blueprint import [schema-path]
+
+- `--show-messages` - Show debug messages. Supported log levels: all, error, info, debug.
+
+#### wc blueprint export [save-to-filename]
+
+- `--steps` - name of steps to export.
+
+Default: all steps
+
+Options: installPlugin, activateTheme, setWCSettingsGeneral, setWCSettingsProducts, setWCSettingsTax, setWCSettingsShipping, setWCSettingsAccount, setWCSettingsEmails, setWCSettingsAdvanced, setWCSettingsIntegrations, setWCSettingsSiteVisibility, setWCTaskOptions, setWCCoreProfilerOptions, wcPaymentGateways

@@ -1,22 +1,22 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare( strict_types = 1 );
-namespace MailPoet\EmailEditor\Validator;
+namespace Automattic\WooCommerce\EmailEditor\Validator;
 
-use MailPoet\EmailEditor\Validator\Schema\Any_Of_Schema;
-use MailPoet\EmailEditor\Validator\Schema\Array_Schema;
-use MailPoet\EmailEditor\Validator\Schema\Boolean_Schema;
-use MailPoet\EmailEditor\Validator\Schema\Integer_Schema;
-use MailPoet\EmailEditor\Validator\Schema\Null_Schema;
-use MailPoet\EmailEditor\Validator\Schema\Number_Schema;
-use MailPoet\EmailEditor\Validator\Schema\Object_Schema;
-use MailPoet\EmailEditor\Validator\Schema\One_Of_Schema;
-use MailPoet\EmailEditor\Validator\Schema\String_Schema;
+use Automattic\WooCommerce\EmailEditor\Validator\Schema\Any_Of_Schema;
+use Automattic\WooCommerce\EmailEditor\Validator\Schema\Array_Schema;
+use Automattic\WooCommerce\EmailEditor\Validator\Schema\Boolean_Schema;
+use Automattic\WooCommerce\EmailEditor\Validator\Schema\Integer_Schema;
+use Automattic\WooCommerce\EmailEditor\Validator\Schema\Null_Schema;
+use Automattic\WooCommerce\EmailEditor\Validator\Schema\Number_Schema;
+use Automattic\WooCommerce\EmailEditor\Validator\Schema\Object_Schema;
+use Automattic\WooCommerce\EmailEditor\Validator\Schema\One_Of_Schema;
+use Automattic\WooCommerce\EmailEditor\Validator\Schema\String_Schema;
 
 /**
  * Builder for creating schema objects.
@@ -63,7 +63,7 @@ class Builder {
 	 *
 	 * @param Schema|null $items Schema of the items in the array.
 	 */
-	public static function array( Schema $items = null ): Array_Schema {
+	public static function array( ?Schema $items = null ): Array_Schema {
 		$array = new Array_Schema();
 		return $items ? $array->items( $items ) : $array;
 	}
@@ -73,7 +73,7 @@ class Builder {
 	 *
 	 * @param array<string, Schema>|null $properties Properties of the object.
 	 */
-	public static function object( array $properties = null ): Object_Schema {
+	public static function object( ?array $properties = null ): Object_Schema {
 		$object = new Object_Schema();
 		return null === $properties ? $object : $object->properties( $properties );
 	}

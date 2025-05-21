@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { registerPlugin } from '@wordpress/plugins';
+import { registerPlugin, getPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Button, Card, CardBody, createSlotFill } from '@wordpress/components';
@@ -19,6 +19,7 @@ import warningIcon from './alert-triangle-icon.svg';
 import { SETTINGS_SLOT_FILL_CONSTANT } from './settings-slots';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
+const PLUGIN_ID = 'woocommerce-admin-tax-settings-conflict-warning';
 
 const LearnMore = () => (
 	<Button
@@ -192,7 +193,11 @@ const SettingsErrorFill = () => {
 };
 
 export const registerTaxSettingsConflictErrorFill = () => {
-	registerPlugin( 'woocommerce-admin-tax-settings-conflict-warning', {
+	if ( getPlugin( PLUGIN_ID ) ) {
+		return;
+	}
+
+	registerPlugin( PLUGIN_ID, {
 		scope: 'woocommerce-tax-settings',
 		render: SettingsErrorFill,
 	} );

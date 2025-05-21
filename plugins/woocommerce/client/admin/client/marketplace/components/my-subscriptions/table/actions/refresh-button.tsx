@@ -44,18 +44,9 @@ export function RefreshButton() {
 							'Error refreshing subscriptions: %s',
 							'woocommerce'
 						),
-						error.message
+						error.data.message
 					),
-					NoticeStatus.Error,
-					{
-						actions: [
-							{
-								label: __( 'Try again', 'woocommerce' ),
-								onClick: refresh,
-								url: '',
-							},
-						],
-					}
+					NoticeStatus.Error
 				);
 			} )
 			.finally( () => {

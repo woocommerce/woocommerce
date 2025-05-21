@@ -40,12 +40,12 @@ type WooProductFieldFillProps = {
 
 const DEFAULT_FIELD_ORDER = 20;
 
-const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
+const WooProductFieldFill = ( {
 	fieldName,
 	sectionName,
 	order,
 	children,
-} ) => {
+}: WooProductFieldFillProps ) => {
 	const { registerFill, getFillHelpers } = useSlotContext();
 
 	const fieldId = `product_field/${ sectionName }/${ fieldName }`;
@@ -80,12 +80,11 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 	);
 };
 
-export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
-	Slot: React.FC<
-		Omit< React.ComponentProps< typeof Slot >, 'name' > &
-			WooProductFieldSlotProps
-	>;
-} = ( { children, sections, id } ) => {
+export const WooProductFieldItem = ( {
+	children,
+	sections,
+	id,
+}: WooProductFieldItemProps ) => {
 	return (
 		<>
 			{ sections.map(
@@ -104,7 +103,12 @@ export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
 	);
 };
 
-WooProductFieldItem.Slot = ( { fillProps, section } ) => {
+WooProductFieldItem.Slot = ( {
+	fillProps,
+	section,
+}: WooProductFieldSlotProps & {
+	fillProps?: React.ComponentProps< typeof Slot >[ 'fillProps' ];
+} ) => {
 	// eslint-disable-next-line react-hooks/rules-of-hooks
 	const { filterRegisteredFills } = useSlotContext();
 

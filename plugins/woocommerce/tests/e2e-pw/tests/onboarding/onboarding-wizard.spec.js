@@ -1,8 +1,15 @@
-const { test, expect, request } = require( '@playwright/test' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { setOption } = require( '../../utils/options' );
-const { setComingSoon } = require( '../../utils/coming-soon' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * External dependencies
+ */
+import { request } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import { tags, test, expect } from '../../fixtures/fixtures';
+import { setOption } from '../../utils/options';
+import { setComingSoon } from '../../utils/coming-soon';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 const getPluginLocator = ( page, slug ) => {
 	return page.locator(
@@ -91,12 +98,8 @@ test.describe(
 					.getByRole( 'option', { name: 'Clothing and accessories' } )
 					.click();
 				// select a WooPayments compatible location
-				await page
-					.locator(
-						'form.woocommerce-profiler-business-information-form > div > div > div > div > input'
-					)
-					.last()
-					.click();
+				await page.getByRole( 'combobox' ).last().click();
+				await page.getByRole( 'combobox' ).last().fill( 'Australia' );
 				await page
 					.getByRole( 'option', {
 						name: 'Australia — Northern Territory',
@@ -261,12 +264,8 @@ test.describe(
 					.getByRole( 'option', { name: 'Food and drink' } )
 					.click();
 				// select a WooPayments incompatible location
-				await page
-					.locator(
-						'form.woocommerce-profiler-business-information-form > div > div > div > div > input'
-					)
-					.last()
-					.click();
+				await page.getByRole( 'combobox' ).last().click();
+				await page.getByRole( 'combobox' ).last().fill( 'Afghanistan' );
 				await page
 					.getByRole( 'option', { name: 'Afghanistan' } )
 					.click();
@@ -496,6 +495,9 @@ test.describe(
 				} )
 			).toBeVisible();
 			await page.getByLabel( 'Select country/region' ).click();
+			await page
+				.getByLabel( 'Select country/region' )
+				.fill( 'California' );
 			await page
 				.getByRole( 'option', {
 					name: 'United States (US) — California',

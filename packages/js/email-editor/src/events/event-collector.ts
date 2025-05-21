@@ -13,7 +13,7 @@ import {
 } from './event-pipeline';
 
 const eventListenerHandler = ( eventData ) => {
-	doAction( 'mailpoet_email_editor_events', eventData.detail );
+	doAction( 'woocommerce_email_editor_events', eventData.detail );
 };
 
 const initEventCollector = () => {

@@ -17,7 +17,7 @@ import {
 } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
-import { ordersStore, ITEMS_STORE_NAME } from '@woocommerce/data';
+import { ordersStore, itemsStore } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { CurrencyContext, CurrencyFactory } from '@woocommerce/currency';
 
@@ -274,8 +274,6 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 	} = useSelect( ( select ) => {
 		const { getOrders, hasFinishedResolution, getOrdersError } =
 			select( ordersStore );
-		// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-		const { getItems } = select( ITEMS_STORE_NAME );
 
 		if ( ! orderStatuses.length && unreadOrdersCount === 0 ) {
 			return { isRequesting: false };
@@ -299,6 +297,8 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 				orderStatuses,
 			};
 		}
+
+		const { getItems } = select( itemsStore );
 
 		const customers = getItems( 'customers', {
 			users: actionableOrders

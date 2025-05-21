@@ -4,8 +4,8 @@
 import { Text } from '@woocommerce/experimental';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
-import { getAdminLink } from '@woocommerce/settings';
-import { recordEvent } from '@woocommerce/tracks';
+import { recordEvent, ExtraProperties } from '@woocommerce/tracks';
+import { __ } from '@wordpress/i18n';
 
 interface TextProps {
 	/**
@@ -23,7 +23,10 @@ interface TrackedLinkProps {
 	 */
 	message: string;
 	eventName?: string;
+	eventProperties?: ExtraProperties;
 	targetUrl: string;
+	linkType?: 'wc-admin' | 'wp-admin' | 'external';
+	target?: '_blank' | undefined;
 	/**
 	 * Optional callback function to be called when the link is clicked
 	 * If provided, this will be called instead of the default recordEvent behavior
@@ -34,33 +37,53 @@ interface TrackedLinkProps {
 /**
  * A component that renders a link with tracking capabilities.
  */
-export const TrackedLink: React.FC< TrackedLinkProps > = ( {
+export const TrackedLink = ( {
 	textProps,
 	message,
 	eventName = '',
+	eventProperties = {},
 	targetUrl,
+	linkType = 'wc-admin',
+	target,
 	onClickCallback,
-} ) => (
-	<Text { ...textProps }>
-		{ interpolateComponents( {
-			mixedString: message,
-			components: {
-				Link: (
-					<Link
-						onClick={ () => {
-							if ( onClickCallback ) {
-								onClickCallback();
-							} else {
-								recordEvent( eventName );
+}: TrackedLinkProps ) => {
+	const linkTextMatch = message.match( /{{Link}}(.*?){{\/Link}}/ );
+	const linkText = linkTextMatch ? linkTextMatch[ 1 ] : '';
+	const shouldOpenInNewTab = linkType === 'external' && target === '_blank';
+
+	return (
+		<Text { ...textProps }>
+			{ interpolateComponents( {
+				mixedString: message,
+				components: {
+					Link: (
+						<Link
+							onClick={ () => {
+								if ( onClickCallback ) {
+									onClickCallback();
+								} else {
+									recordEvent( eventName, eventProperties );
+								}
+								if ( linkType !== 'external' ) {
+									window.location.href = targetUrl;
+									return false;
+								}
+							} }
+							href={ targetUrl }
+							type={ linkType }
+							target={ shouldOpenInNewTab ? '_blank' : undefined }
+							aria-label={
+								shouldOpenInNewTab
+									? `${ linkText } (${ __(
+											'opens in a new tab',
+											'woocommerce'
+									  ) })`
+									: undefined
 							}
-							window.location.href = getAdminLink( targetUrl );
-							return false;
-						} }
-						href=""
-						type="wc-admin"
-					/>
-				),
-			},
-		} ) }
-	</Text>
-);
+						/>
+					),
+				},
+			} ) }
+		</Text>
+	);
+};

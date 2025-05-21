@@ -41,16 +41,25 @@ interface PaymentGatewayListProps {
 	setupPlugin: (
 		id: string,
 		slug: string,
-		onboardingUrl: string | null
+		onboardingUrl: string | null,
+		attachUrl: string | null
 	) => void;
 	/**
 	 * Callback to handle accepting an incentive. Receives the incentive ID as a parameter.
 	 */
 	acceptIncentive: ( id: string ) => void;
 	/**
+	 * Indicates whether the incentive should be highlighted.
+	 */
+	shouldHighlightIncentive: boolean;
+	/**
 	 * Callback to update the ordering of payment providers after sorting.
 	 */
 	updateOrdering: ( providers: PaymentProvider[] ) => void;
+	/**
+	 * Callback to open or close the onboarding modal.
+	 */
+	setIsOnboardingModalOpen: ( isOpen: boolean ) => void;
 }
 
 /**
@@ -67,7 +76,9 @@ export const PaymentGatewayList = ( {
 	installingPlugin,
 	setupPlugin,
 	acceptIncentive,
+	shouldHighlightIncentive,
 	updateOrdering,
+	setIsOnboardingModalOpen,
 }: PaymentGatewayListProps ) => {
 	return (
 		<SortableContainer< PaymentProvider >
@@ -95,6 +106,7 @@ export const PaymentGatewayList = ( {
 									setupPlugin,
 									pluginInstalled,
 									acceptIncentive,
+									shouldHighlightIncentive,
 								} ) }
 							</SortableItem>
 						);
@@ -109,6 +121,8 @@ export const PaymentGatewayList = ( {
 									gateway,
 									installingPlugin,
 									acceptIncentive,
+									shouldHighlightIncentive,
+									setIsOnboardingModalOpen,
 								} ) }
 							</SortableItem>
 						);

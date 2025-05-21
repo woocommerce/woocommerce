@@ -1,21 +1,21 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine\Renderer;
+namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer;
 
-use MailPoet\EmailEditor\Engine\Email_Editor;
-use MailPoet\EmailEditor\Engine\Templates\Utils;
-use MailPoet\EmailEditor\Engine\Theme_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Engine\Templates\Utils;
+use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 
 /**
  * Integration test for Renderer
  */
-class Renderer_Test extends \MailPoetTest {
+class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * The renderer.
 	 *
@@ -32,8 +32,8 @@ class Renderer_Test extends \MailPoetTest {
 	/**
 	 * Set up before each test.
 	 */
-	public function _before(): void {
-		parent::_before();
+	public function setUp(): void {
+		parent::setUp();
 		$this->di_container->get( Email_Editor::class )->initialize();
 		$this->renderer  = $this->di_container->get( Renderer::class );
 		$styles          = array(
@@ -63,17 +63,19 @@ class Renderer_Test extends \MailPoetTest {
 		$theme_controller_mock->method( 'get_styles' )->willReturn( $styles );
 		$theme_controller_mock->method( 'get_layout_settings' )->willReturn( array( 'contentSize' => '660px' ) );
 
-		$this->renderer   = $this->getServiceWithOverrides(
+		$this->renderer = $this->getServiceWithOverrides(
 			Renderer::class,
 			array(
 				'theme_controller' => $theme_controller_mock,
 			)
 		);
-		$this->email_post = $this->tester->create_post(
+
+		$email_post_id    = $this->factory->post->create(
 			array(
 				'post_content' => '<!-- wp:paragraph --><p>Hello!</p><!-- /wp:paragraph -->',
 			)
 		);
+		$this->email_post = get_post( $email_post_id );
 	}
 
 	/**
@@ -88,13 +90,13 @@ class Renderer_Test extends \MailPoetTest {
 			'<meta name="robots" content="noindex, nofollow" />'
 		);
 
-		verify( $rendered['html'] )->stringContainsString( 'Subject' );
-		verify( $rendered['html'] )->stringContainsString( 'Preheader content' );
-		verify( $rendered['html'] )->stringContainsString( 'noindex, nofollow' );
-		verify( $rendered['html'] )->stringContainsString( 'Hello!' );
+		$this->assertStringContainsString( 'Subject', $rendered['html'] );
+		$this->assertStringContainsString( 'Preheader content', $rendered['html'] );
+		$this->assertStringContainsString( 'noindex, nofollow', $rendered['html'] );
+		$this->assertStringContainsString( 'Hello!', $rendered['html'] );
 
-		verify( $rendered['text'] )->stringContainsString( 'Preheader content' );
-		verify( $rendered['text'] )->stringContainsString( 'Hello!' );
+		$this->assertStringContainsString( 'Preheader content', $rendered['text'] );
+		$this->assertStringContainsString( 'Hello!', $rendered['text'] );
 	}
 
 	/**
@@ -104,11 +106,11 @@ class Renderer_Test extends \MailPoetTest {
 		$styles_callback = function ( $styles ) {
 			return $styles . 'body { color: pink; }';
 		};
-		add_filter( 'mailpoet_email_renderer_styles', $styles_callback );
+		add_filter( 'woocommerce_email_renderer_styles', $styles_callback );
 		$rendered = $this->renderer->render( $this->email_post, 'Subject', '', 'en' );
 		$style    = $this->getStylesValueForTag( $rendered['html'], array( 'tag_name' => 'body' ) );
-		verify( $style )->stringContainsString( 'color: pink' );
-		remove_filter( 'mailpoet_email_renderer_styles', $styles_callback );
+		$this->assertStringContainsString( 'color: pink', $style );
+		remove_filter( 'woocommerce_email_renderer_styles', $styles_callback );
 	}
 
 	/**
@@ -117,7 +119,7 @@ class Renderer_Test extends \MailPoetTest {
 	public function testItInlinesBodyStyles(): void {
 		$rendered = $this->renderer->render( $this->email_post, 'Subject', '', 'en' );
 		$style    = $this->getStylesValueForTag( $rendered['html'], array( 'tag_name' => 'body' ) );
-		verify( $style )->stringContainsString( 'margin: 0; padding: 0;' );
+		$this->assertStringContainsString( 'margin: 0; padding: 0;', $style );
 	}
 
 	/**
@@ -128,7 +130,7 @@ class Renderer_Test extends \MailPoetTest {
 
 		// Verify body element styles.
 		$style = $this->getStylesValueForTag( $rendered['html'], array( 'tag_name' => 'body' ) );
-		verify( $style )->stringContainsString( 'background-color: #123456' );
+		$this->assertStringContainsString( 'background-color: #123456', $style );
 
 		// Verify layout element styles.
 		$doc = new \DOMDocument();
@@ -141,13 +143,13 @@ class Renderer_Test extends \MailPoetTest {
 		}
 		$this->assertInstanceOf( \DOMElement::class, $wrapper );
 		$style = $wrapper->getAttribute( 'style' );
-		verify( $style )->stringContainsString( 'background-color: #123456' );
-		verify( $style )->stringContainsString( 'font-family: Test Font Family;' );
-		verify( $style )->stringContainsString( 'padding-top: 3px;' );
-		verify( $style )->stringContainsString( 'padding-bottom: 4px;' );
-		verify( $style )->stringContainsString( 'padding-left: 2px;' );
-		verify( $style )->stringContainsString( 'padding-right: 1px;' );
-		verify( $style )->stringContainsString( 'max-width: 660px;' );
+		$this->assertStringContainsString( 'background-color: #123456', $style );
+		$this->assertStringContainsString( 'font-family: Test Font Family;', $style );
+		$this->assertStringContainsString( 'padding-top: 3px;', $style );
+		$this->assertStringContainsString( 'padding-bottom: 4px;', $style );
+		$this->assertStringContainsString( 'padding-left: 2px;', $style );
+		$this->assertStringContainsString( 'padding-right: 1px;', $style );
+		$this->assertStringContainsString( 'max-width: 660px;', $style );
 	}
 
 	/**

@@ -1,17 +1,17 @@
 <?php
 /**
- * This file is part of the MailPoet Email Editor package.
+ * This file is part of the WooCommerce Email Editor package.
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine;
+namespace Automattic\WooCommerce\EmailEditor\Engine;
 
 /**
  * Integration test for User Theme class
  */
-class User_Theme_Test extends \MailPoetTest {
+class User_Theme_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Instance of User_Theme created before each test.
 	 *
@@ -22,8 +22,8 @@ class User_Theme_Test extends \MailPoetTest {
 	/**
 	 * Set up before each test.
 	 */
-	protected function _before(): void {
-		parent::_before();
+	public function setUp(): void {
+		parent::setUp();
 		$this->user_theme = new User_Theme();
 	}
 
@@ -56,8 +56,8 @@ class User_Theme_Test extends \MailPoetTest {
 			),
 		);
 		$post_data   = array(
-			'post_title'   => __( 'Custom Email Styles', 'mailpoet' ),
-			'post_name'    => 'wp-global-styles-mailpoet-email',
+			'post_title'   => __( 'Custom Email Styles', 'woocommerce' ),
+			'post_name'    => 'wp-global-styles-woocommerce-email',
 			'post_content' => (string) wp_json_encode( $styles_data, JSON_FORCE_OBJECT ),
 			'post_status'  => 'publish',
 			'post_type'    => 'wp_global_styles',

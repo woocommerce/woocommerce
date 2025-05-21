@@ -14,11 +14,12 @@ import {
  * Internal dependencies
  */
 import { storeName } from '../../store';
-import { useEditorMode } from '../../hooks';
 import { recordEvent } from '../../events';
+import { useContentValidation } from '../../hooks/use-content-validation';
 
-export function SendButton( { validateContent, isContentInvalid } ) {
+export function SendButton() {
 	const { isDirty } = useEntitiesSavedStatesIsDirty();
+	const { validateContent, isInvalid } = useContentValidation();
 
 	const { hasEmptyContent, isEmailSent, urls } = useSelect(
 		( select ) => ( {
@@ -35,28 +36,22 @@ export function SendButton( { validateContent, isContentInvalid } ) {
 		}
 	}
 
-	const [ editorMode ] = useEditorMode();
-
-	const isDisabled =
-		editorMode === 'template' ||
-		hasEmptyContent ||
-		isEmailSent ||
-		isContentInvalid ||
-		isDirty;
+	const isDisabled = hasEmptyContent || isEmailSent || isInvalid || isDirty;
 
 	const label = applyFilters(
-		'mailpoet_email_editor_send_button_label',
-		__( 'Send', 'mailpoet' )
+		'woocommerce_email_editor_send_button_label',
+		__( 'Send', 'woocommerce' )
 	) as string;
 
 	return (
 		<Button
 			variant="primary"
+			size="compact"
 			onClick={ () => {
 				recordEvent( 'header_send_button_clicked' );
 				if ( validateContent() ) {
 					const action = applyFilters(
-						'mailpoet_email_editor_send_action_callback',
+						'woocommerce_email_editor_send_action_callback',
 						sendAction
 					) as () => void;
 					action();

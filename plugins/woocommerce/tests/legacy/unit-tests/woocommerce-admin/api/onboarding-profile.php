@@ -5,6 +5,8 @@
  * @package WooCommerce\Admin\Tests\API
  */
 
+declare(strict_types=1);
+
 use Automattic\WooCommerce\Admin\API\OnboardingProfile;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\MailchimpScheduler;
 use Automattic\WooCommerce\Internal\Admin\Onboarding;
@@ -59,32 +61,26 @@ class WC_Admin_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 	public function test_update_profile_items() {
 		wp_set_current_user( $this->user );
 
-		// Test updating 2 fields separately.
+		// Test updating multiple fields.
 		$request = new WP_REST_Request( 'POST', $this->endpoint );
 		$request->set_headers( array( 'content-type' => 'application/json' ) );
 		$industry = array( 'health-beauty' );
 		$request->set_body(
 			wp_json_encode(
 				array(
-					'completed'            => true,
-					'skipped'              => false,
-					'industry'             => $industry,
-					'product_types'        => 'physical',
-					'product_count'        => '1-10',
-					'selling_venues'       => 'brick-mortar',
-					'number_employees'     => '<10',
-					'revenue'              => 'none',
-					'other_platform'       => 'shopify',
-					'other_platform_name'  => '',
-					'business_extensions'  => array(
+					'completed'               => true,
+					'skipped'                 => false,
+					'industry'                => $industry,
+					'business_extensions'     => array(
 						'jetpack',
 					),
-					'theme'                => 'Test',
-					'wccom_connected'      => false,
-					'setup_client'         => false,
-					'is_agree_marketing'   => true,
-					'store_email'          => 'user@example.com',
-					'is_store_country_set' => true,
+					'is_agree_marketing'      => true,
+					'store_email'             => 'user@example.com',
+					'is_store_country_set'    => true,
+					'is_plugins_page_skipped' => false,
+					'business_choice'         => 'im_just_starting',
+					'selling_online_answer'   => 'already_selling',
+					'selling_platforms'       => array( 'shopify', 'amazon' ),
 				)
 			)
 		);
@@ -94,30 +90,35 @@ class WC_Admin_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'success', $data['status'] );
 
-		// Test that the update works.
+		// Test updating a single field.
 		$request = new WP_REST_Request( 'POST', $this->endpoint );
 		$request->set_headers( array( 'content-type' => 'application/json' ) );
-		$request->set_body( wp_json_encode( array( 'theme' => 'Storefront' ) ) );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'business_choice' => 'im_selling_something_else',
+				)
+			)
+		);
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'success', $data['status'] );
 
-		// Make sure the original field value wasn't overwritten.
+		// Verify the original fields weren't overwritten.
 		$request  = new WP_REST_Request( 'GET', $this->endpoint );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'health-beauty', $data['industry'][0] );
-		$this->assertEquals( 'storefront', $data['theme'] );
+		$this->assertEquals( 'im_selling_something_else', $data['business_choice'] );
+		$this->assertEquals( array( 'shopify', 'amazon' ), $data['selling_platforms'] );
 	}
 
 	/**
 	 * Test schema.
-	 *
-	 * @since 3.5.0
 	 */
 	public function test_schema() {
 		wp_set_current_user( $this->user );
@@ -127,29 +128,36 @@ class WC_Admin_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertCount( 22, $properties );
-		$this->assertArrayHasKey( 'completed', $properties );
-		$this->assertArrayHasKey( 'skipped', $properties );
-		$this->assertArrayHasKey( 'industry', $properties );
-		$this->assertArrayHasKey( 'product_types', $properties );
-		$this->assertArrayHasKey( 'product_count', $properties );
-		$this->assertArrayHasKey( 'selling_venues', $properties );
-		$this->assertArrayHasKey( 'number_employees', $properties );
-		$this->assertArrayHasKey( 'revenue', $properties );
-		$this->assertArrayHasKey( 'other_platform', $properties );
-		$this->assertArrayHasKey( 'other_platform_name', $properties );
-		$this->assertArrayHasKey( 'business_extensions', $properties );
-		$this->assertArrayHasKey( 'theme', $properties );
-		$this->assertArrayHasKey( 'wccom_connected', $properties );
-		$this->assertArrayHasKey( 'setup_client', $properties );
-		$this->assertArrayHasKey( 'is_agree_marketing', $properties );
-		$this->assertArrayHasKey( 'store_email', $properties );
-		$this->assertArrayHasKey( 'is_store_country_set', $properties );
-		$this->assertArrayHasKey( 'is_plugins_page_skipped', $properties );
-		$this->assertArrayHasKey( 'business_choice', $properties );
-		$this->assertArrayHasKey( 'selling_online_answer', $properties );
-		$this->assertArrayHasKey( 'selling_platforms', $properties );
-		$this->assertArrayHasKey( 'core_profiler_completed_steps', $properties );
+		$expected_properties = array(
+			'completed',
+			'skipped',
+			'industry',
+			'business_extensions',
+			'is_agree_marketing',
+			'store_email',
+			'is_store_country_set',
+			'is_plugins_page_skipped',
+			'business_choice',
+			'selling_online_answer',
+			'selling_platforms',
+		);
+
+		foreach ( $expected_properties as $property ) {
+			$this->assertArrayHasKey( $property, $properties, "Property {$property} should exist in schema" );
+		}
+
+		// Test specific property types and attributes.
+		$this->assertEquals( 'boolean', $properties['completed']['type'] );
+		$this->assertEquals( 'boolean', $properties['skipped']['type'] );
+		$this->assertEquals( 'array', $properties['industry']['type'] );
+		$this->assertEquals( 'array', $properties['business_extensions']['type'] );
+		$this->assertEquals( 'boolean', $properties['is_agree_marketing']['type'] );
+		$this->assertEquals( 'string', $properties['store_email']['type'] );
+		$this->assertEquals( 'boolean', $properties['is_store_country_set']['type'] );
+		$this->assertEquals( 'boolean', $properties['is_plugins_page_skipped']['type'] );
+		$this->assertEquals( 'string', $properties['business_choice']['type'] );
+		$this->assertEquals( 'string', $properties['selling_online_answer']['type'] );
+		$this->assertEquals( array( 'array', 'null' ), $properties['selling_platforms']['type'] );
 	}
 
 	/**
@@ -160,10 +168,10 @@ class WC_Admin_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_rest_onboarding_profile_properties',
-			function( $properties ) {
+			function ( $properties ) {
 				$properties['test_profile_datum'] = array(
 					'type'        => 'array',
-					'description' => __( 'Test onboarding profile extensibility.', 'woocommerce-admin' ),
+					'description' => __( 'Test onboarding profile extensibility.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				);

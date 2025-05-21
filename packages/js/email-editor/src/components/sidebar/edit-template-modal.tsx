@@ -30,8 +30,8 @@ export function EditTemplateModal( { close } ) {
 		<Modal size="medium" onRequestClose={ close } __experimentalHideHeader>
 			<p>
 				{ __(
-					'Note that the same template can be used by multiple emails, so any changes made here may affect other emails on the site. To switch back to editing the page content click the ‘Back’ button in the toolbar.',
-					'mailpoet'
+					'This template is used by multiple emails. Any changes made would affect other emails on the site. Are you sure you want to edit the template?',
+					'woocommerce'
 				) }
 			</p>
 			<Flex justify={ 'end' }>
@@ -45,7 +45,7 @@ export function EditTemplateModal( { close } ) {
 							close();
 						} }
 					>
-						{ __( 'Cancel', 'mailpoet' ) }
+						{ __( 'Cancel', 'woocommerce' ) }
 					</Button>
 				</FlexItem>
 				<FlexItem>
@@ -63,7 +63,7 @@ export function EditTemplateModal( { close } ) {
 						} }
 						disabled={ ! template.id }
 					>
-						{ __( 'Continue', 'mailpoet' ) }
+						{ __( 'Edit template', 'woocommerce' ) }
 					</Button>
 				</FlexItem>
 			</Flex>

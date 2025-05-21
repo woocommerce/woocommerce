@@ -1,6 +1,12 @@
 const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
+const { resetGatewayOrder } = require( '../../../utils/payments-settings' );
+
+const { BASE_URL } = process.env;
 
 test.describe( 'Payment Gateways API tests', () => {
+	test.beforeAll( async () => {
+		await resetGatewayOrder( BASE_URL );
+	} );
 	test( 'can view all payment gateways', async ( { request } ) => {
 		// call API to retrieve the payment gateways
 		const response = await request.get(
@@ -155,7 +161,8 @@ test.describe( 'Payment Gateways API tests', () => {
 								'Any &quot;Free shipping&quot; method',
 						},
 						'Local pickup': {
-							local_pickup: 'Any &quot;Local pickup&quot; method',
+							pickup_location:
+								'Any &quot;Local pickup&quot; method',
 						},
 					} ),
 				},

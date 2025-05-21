@@ -1,0 +1,25 @@
+@import "node_modules/@wordpress/base-styles/colors";
+@import "node_modules/@automattic/color-studio/dist/color-variables";
+
+// Bright colors
+$discount-color: $alert-green;
+
+$input-text-light: #2b2d2f;
+$input-text-dark: #fff;
+$input-placeholder-dark: rgba(255, 255, 255, 0.6);
+$input-border-dark: rgba(255, 255, 255, 0.4);
+$input-background-light: #fff;
+$input-background-dark: rgba(0, 0, 0, 0.1);
+$image-placeholder-border-color: #f2f2f2;
+
+// Universal colors for use on the frontend, currently being applied to checkout blocks.
+// #e7e7e7 on white. Used for low contrast decorative elements such as section borders.
+$universal-border-light: rgba(17, 17, 17, 0.11);
+// Used for radio and checkbox resting state.
+$universal-border-medium: rgba(25, 23, 17, 0.48);
+// #1e1e1e on white. Used for low contrast decorative elements such as input borders.
+$universal-border-strong: rgba(17, 17, 17, 0.8);
+// Used for low emphasis text such as input labels.
+$universal-body-low-emphasis: rgba(17, 17, 17, 0.7);
+// Used for low contrast decorative elements background color.
+$universal-background: rgba(17, 17, 17, 0.02);

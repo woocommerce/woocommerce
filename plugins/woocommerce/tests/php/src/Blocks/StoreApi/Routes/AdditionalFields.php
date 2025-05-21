@@ -1056,7 +1056,7 @@ class AdditionalFields extends MockeryTestCase {
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
 				'woocommerce_register_additional_checkout_field',
-				\esc_html( sprintf( 'The required property for field with id: "%s" must be a boolean, you passed string. The field will not be registered.', $id ) ),
+				\esc_html( sprintf( 'Unable to register field with id: "%s". required: Rules must be defined as an array.', $id ) ),
 			)
 		)->once();
 
@@ -1230,7 +1230,7 @@ class AdditionalFields extends MockeryTestCase {
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
 				'woocommerce_register_additional_checkout_field',
-				\esc_html( sprintf( 'The required property for field with id: "%s" must be a boolean, you passed string. The field will not be registered.', $id ) ),
+				\esc_html( sprintf( 'Unable to register field with id: "%s". required: Rules must be defined as an array.', $id ) ),
 			)
 		)->once();
 
@@ -1554,10 +1554,12 @@ class AdditionalFields extends MockeryTestCase {
 			)
 		);
 
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
+		$response          = rest_get_server()->dispatch( $request );
+		$data              = $response->get_data();
+		$additional_fields = (array) $data['additional_fields'];
+
 		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
-		$this->assertEquals( 'sanitized-value', $data['additional_fields'][ $id ], print_r( $data, true ) );
+		$this->assertEquals( 'sanitized-value', $additional_fields[ $id ], print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
 
@@ -1699,11 +1701,12 @@ class AdditionalFields extends MockeryTestCase {
 			)
 		);
 
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
+		$response          = rest_get_server()->dispatch( $request );
+		$data              = $response->get_data();
+		$additional_fields = (array) $data['additional_fields'];
 
 		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
-		$this->assertEquals( 'sanitized-value', $data['additional_fields'][ $id ], print_r( $data, true ) );
+		$this->assertEquals( 'sanitized-value', $additional_fields[ $id ], print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
 
@@ -2254,14 +2257,15 @@ class AdditionalFields extends MockeryTestCase {
 		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/checkout' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
+		$response          = rest_get_server()->dispatch( $request );
+		$data              = $response->get_data();
+		$additional_fields = (array) $data['additional_fields'];
 
 		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
 		$this->assertEquals( 'billing-saved-gov-id', ( (array) $data['billing_address'] )['plugin-namespace/gov-id'], print_r( $data, true ) );
 		$this->assertEquals( 'shipping-saved-gov-id', ( (array) $data['shipping_address'] )['plugin-namespace/gov-id'], print_r( $data, true ) );
-		$this->assertEquals( 'engineering', ( (array) $data['additional_fields'] )['plugin-namespace/job-function'], print_r( $data, true ) );
-		$this->assertArrayNotHasKey( 'plugin-namespace/leave-on-porch', $data['additional_fields'], print_r( $data, true ) );
+		$this->assertEquals( 'engineering', $additional_fields['plugin-namespace/job-function'], print_r( $data, true ) );
+		$this->assertArrayNotHasKey( 'plugin-namespace/leave-on-porch', $additional_fields, print_r( $data, true ) );
 	}
 
 	/**
@@ -2479,14 +2483,14 @@ class AdditionalFields extends MockeryTestCase {
 	 * Test for errors when providing the wrong rules schema.
 	 */
 	public function test_invalid_rules_schema() {
-		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". The rules must be an array.' );
+		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". validation: Rules must be defined as an array.' );
 		\woocommerce_register_additional_checkout_field(
 			array(
-				'id'       => 'namespace/test-id',
-				'label'    => 'Test Field',
-				'location' => 'address',
-				'required' => true,
-				'rules'    => 'invalid-rules',
+				'id'         => 'namespace/test-id',
+				'label'      => 'Test Field',
+				'location'   => 'address',
+				'required'   => true,
+				'validation' => 'invalid-rules',
 			)
 		);
 		remove_action( 'doing_it_wrong_run', array( $doing_it_wrong_mocker, 'doing_it_wrong_run' ), 10, 2 );
@@ -2499,33 +2503,29 @@ class AdditionalFields extends MockeryTestCase {
 	 * Test for errors when providing the wrong validation rules schema.
 	 */
 	public function test_invalid_validation_rules_schema() {
-		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". The properties must match schema: {properties}' );
+		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". validation: The properties must match schema: {properties}' );
 		\woocommerce_register_additional_checkout_field(
 			array(
-				'id'       => 'namespace/test-id',
-				'label'    => 'Test Field',
-				'location' => 'address',
-				'required' => true,
-				'rules'    => array(
-					'validation' => array(
-						'type'    => 'invalid-type',
-						'pattern' => '^[A-Z]{2}[0-9A-Z]{2,12}$',
-					),
+				'id'         => 'namespace/test-id',
+				'label'      => 'Test Field',
+				'location'   => 'address',
+				'required'   => true,
+				'validation' => array(
+					'type'    => 'invalid-type',
+					'pattern' => '^[A-Z]{2}[0-9A-Z]{2,12}$',
 				),
 			)
 		);
 		remove_action( 'doing_it_wrong_run', array( $doing_it_wrong_mocker, 'doing_it_wrong_run' ), 10, 2 );
 
-		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". The validation rules must be an array.' );
+		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". validation: Rules must be defined as an array.' );
 		\woocommerce_register_additional_checkout_field(
 			array(
-				'id'       => 'namespace/test-id',
-				'label'    => 'Test Field',
-				'location' => 'address',
-				'required' => true,
-				'rules'    => array(
-					'validation' => 'invalid-value',
-				),
+				'id'         => 'namespace/test-id',
+				'label'      => 'Test Field',
+				'location'   => 'address',
+				'required'   => true,
+				'validation' => 'invalid-value',
 			)
 		);
 		remove_action( 'doing_it_wrong_run', array( $doing_it_wrong_mocker, 'doing_it_wrong_run' ), 10, 2 );
@@ -2543,15 +2543,13 @@ class AdditionalFields extends MockeryTestCase {
 		add_action( 'doing_it_wrong_run', array( $doing_it_wrong_mocker, 'doing_it_wrong_run' ), 10, 2 );
 		\woocommerce_register_additional_checkout_field(
 			array(
-				'id'       => 'namespace/test-id',
-				'label'    => 'Test Field',
-				'location' => 'address',
-				'required' => true,
-				'rules'    => array(
-					'validation' => array(
-						'type'    => 'string',
-						'pattern' => '^[A-Z]{2}[0-9A-Z]{2,12}$',
-					),
+				'id'         => 'namespace/test-id',
+				'label'      => 'Test Field',
+				'location'   => 'address',
+				'required'   => true,
+				'validation' => array(
+					'type'    => 'string',
+					'pattern' => '^[A-Z]{2}[0-9A-Z]{2,12}$',
 				),
 			)
 		);
@@ -2563,16 +2561,13 @@ class AdditionalFields extends MockeryTestCase {
 	 * Test for errors when providing the wrong required rules schema.
 	 */
 	public function test_invalid_required_rules_schema() {
-		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". The required rules must be an array.' );
+		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". required: Rules must be defined as an array.' );
 		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => 'namespace/test-id',
 				'label'    => 'Test Field',
 				'location' => 'address',
-				'required' => true,
-				'rules'    => array(
-					'required' => 'invalid-value',
-				),
+				'required' => 'invalid-value',
 			)
 		);
 		remove_action( 'doing_it_wrong_run', array( $doing_it_wrong_mocker, 'doing_it_wrong_run' ), 10, 2 );
@@ -2594,16 +2589,14 @@ class AdditionalFields extends MockeryTestCase {
 				'label'    => 'Test Field',
 				'location' => 'address',
 				'required' => true,
-				'rules'    => array(
-					'required' => array(
-						'customer' => array(
-							'properties' => array(
-								'billing_address' => array(
-									'properties' => array(
-										'country' => array(
-											'type' => 'string',
-											'enum' => 'GB',
-										),
+				'required' => array(
+					'customer' => array(
+						'properties' => array(
+							'billing_address' => array(
+								'properties' => array(
+									'country' => array(
+										'type' => 'string',
+										'enum' => 'GB',
 									),
 								),
 							),
@@ -2633,16 +2626,14 @@ class AdditionalFields extends MockeryTestCase {
 				'location' => 'address',
 				'type'     => 'text',
 				'required' => true,
-				'rules'    => array(
-					'hidden' => array(
-						'customer' => array(
-							'properties' => array(
-								'billing_address' => array(
-									'properties' => array(
-										'country' => array(
-											'type' => 'string',
-											'enum' => array( 'US' ), // Hidden for US.
-										),
+				'hidden'   => array(
+					'customer' => array(
+						'properties' => array(
+							'billing_address' => array(
+								'properties' => array(
+									'country' => array(
+										'type' => 'string',
+										'enum' => array( 'US' ), // Hidden for US.
 									),
 								),
 							),

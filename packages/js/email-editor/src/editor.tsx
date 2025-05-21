@@ -14,9 +14,9 @@ import { initializeLayout } from './layouts/flex-email';
 import { InnerEditor } from './components/block-editor';
 import { createStore, storeName, editorCurrentPostType } from './store';
 import { initHooks } from './editor-hooks';
-import { KeyboardShortcuts } from './components/keybord-shortcuts';
+import { initTextHooks } from './text-hooks';
 import { initEventCollector } from './events';
-import './index.scss';
+import './style.scss';
 
 function Editor() {
 	const { postId, settings } = useSelect(
@@ -29,9 +29,7 @@ function Editor() {
 
 	return (
 		<StrictMode>
-			<KeyboardShortcuts />
 			<InnerEditor
-				initialEdits={ [] }
 				postId={ postId }
 				postType={ editorCurrentPostType }
 				settings={ settings }
@@ -41,7 +39,7 @@ function Editor() {
 }
 
 const WrappedEditor = applyFilters(
-	'mailpoet_email_editor_wrap_editor_component',
+	'woocommerce_email_editor_wrap_editor_component',
 	Editor
 ) as typeof Editor;
 
@@ -55,6 +53,7 @@ export function initialize( elementId: string ) {
 	initializeLayout();
 	initBlocks();
 	initHooks();
+	initTextHooks();
 	const root = createRoot( container );
 	root.render( <WrappedEditor /> );
 }

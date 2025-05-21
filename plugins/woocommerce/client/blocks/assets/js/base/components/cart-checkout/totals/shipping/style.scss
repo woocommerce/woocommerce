@@ -1,0 +1,79 @@
+.wc-block-components-totals-shipping {
+	// Added extra label for specificity.
+	fieldset.wc-block-components-totals-shipping__fieldset {
+		background-color: transparent;
+		margin: 0;
+		padding: 0;
+		border: 0;
+	}
+
+	.wc-block-components-totals-item strong {
+		text-transform: uppercase;
+	}
+
+	.wc-block-components-totals-shipping__delivery-options-notice,
+	.wc-block-components-shipping-address {
+		margin-top: $gap;
+		display: block;
+	}
+
+	.wc-block-components-totals-shipping__options {
+		display: block;
+		margin: 0;
+	}
+
+	.wc-block-components-totals-shipping-address-summary {
+		display: inline-block;
+		margin: 0;
+	}
+
+	.wc-block-components-totals-shipping__options {
+		.wc-block-components-radio-control__label,
+		.wc-block-components-radio-control__description,
+		.wc-block-components-radio-control__secondary-label,
+		.wc-block-components-radio-control__secondary-description {
+			flex-basis: 100%;
+			text-align: left;
+		}
+		margin-top: ($gap-small);
+	}
+
+	.wc-block-components-shipping-rates-control__no-results-notice {
+		margin: 0 0 em($gap-small);
+	}
+
+	.wc-block-components-totals-shipping__change-address__link {
+		color: inherit;
+		font-weight: normal;
+		background: none;
+		border: none;
+		padding: 0;
+		text-decoration: underline;
+		cursor: pointer;
+		text-align: left;
+	}
+	.wc-block-components-totals-shipping__change-address-button {
+		@include link-button();
+
+		&:hover,
+		&:focus,
+		&:active {
+			opacity: 0.8;
+		}
+	}
+
+	.wc-block-components-shipping-placeholder__value {
+		@include font-size(small);
+	}
+
+	.wc-block-components-totals-shipping__via {
+		@include font-size(small);
+		width: 100%;
+	}
+}
+
+// Extra classes for specificity.
+.theme-twentytwentyone.theme-twentytwentyone.theme-twentytwentyone
+	.wc-block-components-totals-shipping__change-address-button {
+	@include link-button();
+}

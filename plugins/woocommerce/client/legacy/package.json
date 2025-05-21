@@ -39,7 +39,7 @@
 		"gruntify-eslint": "5.0.0",
 		"sass": "^1.69.5",
 		"stylelint": "^14.16.1",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"dependencies": {
 		"sourcebuster": "github:woocommerce/sourcebuster-js#v1.2.0"

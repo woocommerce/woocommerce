@@ -8,10 +8,10 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import './index.scss';
+import './style.scss';
 
 const LinkModal = ( { onInsert, isOpened, closeCallback, tag } ) => {
-	const [ linkText, setLinkText ] = useState( __( 'Link', 'mailpoet' ) );
+	const [ linkText, setLinkText ] = useState( __( 'Link', 'woocommerce' ) );
 	if ( ! isOpened ) {
 		return null;
 	}
@@ -19,12 +19,12 @@ const LinkModal = ( { onInsert, isOpened, closeCallback, tag } ) => {
 	return (
 		<Modal
 			size="small"
-			title={ __( 'Insert Link', 'mailpoet' ) }
+			title={ __( 'Insert Link', 'woocommerce' ) }
 			onRequestClose={ closeCallback }
-			className="mailpoet-personalization-tags-modal"
+			className="woocommerce-personalization-tags-modal"
 		>
 			<TextControl
-				label={ __( 'Link Text', 'mailpoet' ) }
+				label={ __( 'Link Text', 'woocommerce' ) }
 				value={ linkText }
 				onChange={ setLinkText }
 			/>
@@ -36,7 +36,7 @@ const LinkModal = ( { onInsert, isOpened, closeCallback, tag } ) => {
 					}
 				} }
 			>
-				{ __( 'Insert', 'mailpoet' ) }
+				{ __( 'Insert', 'woocommerce' ) }
 			</Button>
 		</Modal>
 	);

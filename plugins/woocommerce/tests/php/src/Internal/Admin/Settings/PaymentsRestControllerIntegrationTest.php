@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\Incentives\Incentive;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestions;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
@@ -526,9 +527,9 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		// because the WooPayments extension would be identified as active.
 		$this->assertSame(
 			array(
-				PaymentProviders::SUGGESTION_ORDERING_PREFIX . PaymentExtensionSuggestions::PAYPAL_FULL_STACK, // Preferred suggestion.
 				PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
 				WC_Gateway_Paypal::ID,
+				PaymentProviders::SUGGESTION_ORDERING_PREFIX . PaymentExtensionSuggestions::PAYPAL_FULL_STACK, // Preferred suggestion.
 				PaymentProviders::SUGGESTION_ORDERING_PREFIX . PaymentExtensionSuggestions::WOOPAYMENTS, // The WooPayments suggestion.
 				'woocommerce_payments', // The fake WooPayments gateway.
 			),
@@ -680,7 +681,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( '_links', $provider, 'Provider (gateway) `_links` entry is missing' );
 
 		// Assert that the offline payment methods group has all the details.
-		$offline_pms_group = $data['providers'][1];
+		$offline_pms_group = $data['providers'][0];
 		$this->assertArrayHasKey( 'id', $offline_pms_group, 'Provider (offline payment methods group) `id` entry is missing' );
 		$this->assertSame( PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP, $offline_pms_group['id'] );
 		$this->assertArrayHasKey( '_type', $offline_pms_group, 'Provider (offline payment methods group) `_type` entry is missing' );
@@ -702,7 +703,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( PaymentProviders::EXTENSION_ACTIVE, $offline_pms_group['plugin']['status'] );
 
 		// Assert that the PayPal gateway is returned as enabled.
-		$provider = $data['providers'][2];
+		$provider = $data['providers'][1];
 		$this->assertTrue( $provider['state']['enabled'] );
 		// Assert that the PayPal gateway has all the details.
 		$this->assertArrayHasKey( 'id', $provider, 'Provider (gateway) `id` entry is missing' );
@@ -941,7 +942,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertContains( PaymentExtensionSuggestions::WOOPAYMENTS, array_column( $other_suggestions, 'id' ) );
 
 		// Delete the user meta.
-		delete_user_meta( $this->store_admin_id, Payments::USER_PAYMENTS_NOX_PROFILE_KEY );
+		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
 
 		// Act.
 		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
@@ -994,17 +995,6 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 
 		$data = $response->get_data();
-
-		$this->assertSame(
-			array(
-				PaymentProviders::SUGGESTION_ORDERING_PREFIX . PaymentExtensionSuggestions::PAYPAL_FULL_STACK, // Preferred suggestion.
-				PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
-				WC_Gateway_Paypal::ID,
-				PaymentProviders::SUGGESTION_ORDERING_PREFIX . PaymentExtensionSuggestions::WOOPAYMENTS, // The WooPayments suggestion.
-				'woocommerce_payments', // The fake WooPayments gateway.
-			),
-			array_column( $data['providers'], 'id' )
-		);
 
 		// Assert that the incentive is not in the WooPayments suggestion anymore.
 		$suggestion = $data['providers'][3];
@@ -1078,25 +1068,14 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		$data = $response->get_data();
 
-		$this->assertSame(
-			array(
-				PaymentProviders::SUGGESTION_ORDERING_PREFIX . PaymentExtensionSuggestions::PAYPAL_FULL_STACK, // Preferred suggestion.
-				PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
-				WC_Gateway_Paypal::ID,
-				PaymentProviders::SUGGESTION_ORDERING_PREFIX . PaymentExtensionSuggestions::WOOPAYMENTS, // The WooPayments suggestion.
-				'woocommerce_payments', // The fake WooPayments gateway.
-			),
-			array_column( $data['providers'], 'id' )
-		);
-
 		// Assert that the incentive is in the WooPayments suggestion with the right dismissals list.
 		$suggestion = $data['providers'][3];
 		$this->assertArrayHasKey( '_incentive', $suggestion );
-		$this->assertContains( $context, $suggestion['_incentive']['_dismissals'] );
+		$this->assertEquals( $context, $suggestion['_incentive']['_dismissals'][0]['context'] );
 		// Assert that the incentive is in the WooPayments gateway with the right dismissals list.
 		$gateway = $data['providers'][4];
 		$this->assertArrayHasKey( '_incentive', $gateway );
-		$this->assertContains( $context, $gateway['_incentive']['_dismissals'] );
+		$this->assertEquals( $context, $gateway['_incentive']['_dismissals'][0]['context'] );
 
 		// Clean up.
 		remove_filter( 'user_has_cap', $filter_callback );
@@ -1166,5 +1145,68 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		WC()->payment_gateways()->init();
 
 		$this->providers_service->reset_memo();
+	}
+
+	/**
+	 * @dataProvider provider_testing_preferred_offline_provider_visibility
+	 *
+	 * @param string $selling_context The selling context.
+	 * @param bool   $expected_preferred_visible The expected visibility of the preferred provider.
+	 */
+	public function test_preferred_provider_visibility_based_on_selling_context( $selling_context, $expected_preferred_visible ) {
+		// Arrange.
+		$this->enable_core_paypal_pg();
+		update_option(
+			OnboardingProfile::DATA_OPTION,
+			array(
+				'business_choice'       => 'im_already_selling',
+				'selling_online_answer' => $selling_context,
+			)
+		);
+
+		// Act.
+		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request->set_param( 'location', 'US' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+
+		$preferred_found = false;
+		foreach ( $data['providers'] as $provider ) {
+			if ( isset( $provider['tags'] ) && in_array( PaymentExtensionSuggestions::TAG_PREFERRED_OFFLINE, $provider['tags'], true ) ) {
+				$preferred_found = true;
+				break;
+			}
+		}
+
+		if ( $expected_preferred_visible ) {
+			$this->assertTrue( $preferred_found );
+		} else {
+			$this->assertFalse( $preferred_found );
+		}
+	}
+
+	/**
+	 * Provides different merchant selling scenarios based on WC onboarding profile and expected preferred provider visibility.
+	 *
+	 * @return array[]
+	 */
+	public function provider_testing_preferred_offline_provider_visibility() {
+		return array(
+			'Offline only'       => array(
+				'no_im_selling_offline',
+				true,
+			),
+			'Online and offline' => array(
+				'im_selling_both_online_and_offline',
+				true,
+			),
+			'Online only'        => array(
+				'yes_im_selling_online',
+				false,
+			),
+		);
 	}
 }

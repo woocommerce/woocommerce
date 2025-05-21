@@ -276,7 +276,19 @@ class EmailPreviewRestController extends RestApiControllerBase {
 	 */
 	public function send_email_preview( WP_REST_Request $request ) {
 		$email_address = $request->get_param( 'email' );
-		$email_content = $this->email_preview->render();
+		// Start output buffering to prevent partial renders with PHP notices or warnings.
+		ob_start();
+		try {
+			$email_content = $this->email_preview->render();
+		} catch ( \Throwable $e ) {
+			ob_end_clean();
+			return new WP_Error(
+				'woocommerce_rest_email_preview_not_rendered',
+				__( 'There was an error rendering an email preview.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+		ob_end_clean();
 		$email_subject = $this->email_preview->get_subject();
 		$email         = new \WC_Emails();
 		$sent          = $email->send( $email_address, $email_subject, $email_content );

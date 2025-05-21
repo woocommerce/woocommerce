@@ -64,13 +64,22 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 
 	const { updateBlockAttributes } = useDispatch( 'core/block-editor' );
 
-	// Get the current block content
-	const blockContent: string = useSelect( ( select ) => {
+	// Get the current block attributes
+	const blockAttributes: object = useSelect( ( select ) => {
 		const attributes =
-			// @ts-expect-error getBlockAttributes expects one argument, but TS thinks it expects none
 			select( 'core/block-editor' ).getBlockAttributes( selectedBlockId );
-		return attributes?.content?.originalHTML || attributes?.content || ''; // After first saving the content does not have property originalHTML, so we need to check for content as well
+
+		return attributes;
 	} );
+
+	// Some blocks, such as the Button block, store the content in `text` attribute.
+	const blockContentKey = 'text' in blockAttributes ? 'text' : 'content';
+
+	// After first saving the content does not have property originalHTML, so we need to check for content as well
+	const blockContent =
+		blockAttributes?.[ blockContentKey ]?.originalHTML ||
+		blockAttributes?.[ blockContentKey ] ||
+		'';
 
 	const handleInsert = useCallback(
 		( tag: string, linkText: string | null ) => {
@@ -89,7 +98,7 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 				richTextValue = applyFormat(
 					richTextValue,
 					{
-						type: 'mailpoet-email-editor/link-shortcode',
+						type: 'woocommerce-email-editor/link-shortcode',
 						// @ts-expect-error attributes property is missing in build type for WPFormat type
 						attributes: {
 							'data-link-href': tag,
@@ -113,10 +122,16 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 			}
 
 			updateBlockAttributes( selectedBlockId, {
-				content: updatedContent,
+				[ blockContentKey ]: updatedContent,
 			} );
 		},
-		[ blockContent, contentRef, selectedBlockId, updateBlockAttributes ]
+		[
+			blockContent,
+			blockContentKey,
+			contentRef,
+			selectedBlockId,
+			updateBlockAttributes,
+		]
 	);
 
 	return (
@@ -124,7 +139,7 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 			<ToolbarGroup>
 				<ToolbarButton
 					icon="shortcode"
-					title={ __( 'Personalization Tags', 'mailpoet' ) }
+					title={ __( 'Personalization Tags', 'woocommerce' ) }
 					onClick={ () => {
 						setIsModalOpened( true );
 						recordEvent(
@@ -141,7 +156,7 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 							`<!--[${ updatedTag }]-->`
 						);
 						updateBlockAttributes( selectedBlockId, {
-							content: updatedContent,
+							[ blockContentKey ]: updatedContent,
 						} );
 					} }
 				/>
@@ -188,10 +203,10 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
  * Extend the rich text formats with a button for personalization tags.
  */
 function extendRichTextFormats() {
-	registerFormatType( 'mailpoet-email-editor/shortcode', {
-		name: 'mailpoet-email-editor/shortcode',
-		title: __( 'Personalization Tags', 'mailpoet' ),
-		className: 'mailpoet-email-editor-personalization-tags',
+	registerFormatType( 'woocommerce-email-editor/shortcode', {
+		name: 'woocommerce-email-editor/shortcode',
+		title: __( 'Personalization Tags', 'woocommerce' ),
+		className: 'woocommerce-email-editor-personalization-tags',
 		tagName: 'span',
 		// @ts-expect-error attributes property is missing in build type for WPFormat type
 		attributes: {},
@@ -199,10 +214,10 @@ function extendRichTextFormats() {
 	} );
 
 	// Register format type for using personalization tags as link attributes
-	registerFormatType( 'mailpoet-email-editor/link-shortcode', {
-		name: 'mailpoet-email-editor/link-shortcode',
-		title: __( 'Personalization Tags Link', 'mailpoet' ),
-		className: 'mailpoet-email-editor__personalization-tags-link',
+	registerFormatType( 'woocommerce-email-editor/link-shortcode', {
+		name: 'woocommerce-email-editor/link-shortcode',
+		title: __( 'Personalization Tags Link', 'woocommerce' ),
+		className: 'woocommerce-email-editor-personalization-tags-link',
 		tagName: 'a',
 		// @ts-expect-error attributes property is missing in build type for WPFormat type
 		attributes: {
@@ -283,7 +298,7 @@ const personalizationTagsLiveContentUpdate = createHigherOrderComponent(
 function activatePersonalizationTagsReplacing() {
 	addFilter(
 		'editor.BlockEdit',
-		'mailpoet-email-editor/with-live-content-update',
+		'woocommerce-email-editor/with-live-content-update',
 		personalizationTagsLiveContentUpdate
 	);
 }

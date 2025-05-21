@@ -1,20 +1,20 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Integrations\Core\Renderer\Blocks;
+namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use MailPoet\EmailEditor\Engine\Email_Editor;
-use MailPoet\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
 
 /**
  * Integration test for Columns class
  */
-class Columns_Test extends \MailPoetTest {
+class Columns_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Columns renderer instance
 	 *
@@ -68,7 +68,8 @@ class Columns_Test extends \MailPoetTest {
 	/**
 	 * Set up before each test
 	 */
-	public function _before() {
+	public function setUp(): void {
+		parent::setUp();
 		$this->di_container->get( Email_Editor::class )->initialize();
 		$this->columns_renderer    = new Columns();
 		$this->settings_controller = $this->di_container->get( Settings_Controller::class );
@@ -77,9 +78,9 @@ class Columns_Test extends \MailPoetTest {
 	/**
 	 * Test it renders inner column
 	 */
-	public function testItRendersInnerColumn() {
+	public function testItRendersInnerColumn(): void {
 		$rendered = $this->columns_renderer->render( '', $this->parsed_columns, $this->settings_controller );
-		verify( $rendered )->stringContainsString( 'Column 1' );
+		$this->assertStringContainsString( 'Column 1', $rendered );
 	}
 
 	/**
@@ -108,15 +109,15 @@ class Columns_Test extends \MailPoetTest {
 			),
 		);
 		$rendered                = $this->columns_renderer->render( '', $parsed_columns, $this->settings_controller );
-		verify( $rendered )->stringContainsString( 'background-color:#abcdef;' );
-		verify( $rendered )->stringContainsString( 'border-color:#123456;' );
-		verify( $rendered )->stringContainsString( 'border-radius:10px;' );
-		verify( $rendered )->stringContainsString( 'border-width:2px;' );
-		verify( $rendered )->stringContainsString( 'border-style:solid;' );
-		verify( $rendered )->stringContainsString( 'padding-bottom:5px;' );
-		verify( $rendered )->stringContainsString( 'padding-left:15px;' );
-		verify( $rendered )->stringContainsString( 'padding-right:20px;' );
-		verify( $rendered )->stringContainsString( 'padding-top:10px;' );
+		$this->assertStringContainsString( 'background-color:#abcdef;', $rendered );
+		$this->assertStringContainsString( 'border-color:#123456;', $rendered );
+		$this->assertStringContainsString( 'border-radius:10px;', $rendered );
+		$this->assertStringContainsString( 'border-width:2px;', $rendered );
+		$this->assertStringContainsString( 'border-style:solid;', $rendered );
+		$this->assertStringContainsString( 'padding-bottom:5px;', $rendered );
+		$this->assertStringContainsString( 'padding-left:15px;', $rendered );
+		$this->assertStringContainsString( 'padding-right:20px;', $rendered );
+		$this->assertStringContainsString( 'padding-top:10px;', $rendered );
 	}
 
 	/**

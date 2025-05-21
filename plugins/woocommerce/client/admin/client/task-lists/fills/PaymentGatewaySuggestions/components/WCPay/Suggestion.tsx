@@ -10,10 +10,7 @@ import {
 	WCPayBannerImageCut,
 } from '@woocommerce/onboarding';
 import { useDispatch, useSelect } from '@wordpress/data';
-import {
-	PAYMENT_SETTINGS_STORE_NAME,
-	type PaymentSettingsSelectors,
-} from '@woocommerce/data';
+import { paymentSettingsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -34,10 +31,10 @@ interface SuggestionProps {
 	onSetupCallback?: ( () => void ) | null;
 }
 
-export const Suggestion: React.FC< SuggestionProps > = ( {
+export const Suggestion = ( {
 	paymentGateway,
 	onSetupCallback = null,
-} ) => {
+}: SuggestionProps ) => {
 	const {
 		id,
 		needsSetup,
@@ -47,9 +44,7 @@ export const Suggestion: React.FC< SuggestionProps > = ( {
 	} = paymentGateway;
 
 	const isWooPayEligible = useSelect( ( select ) => {
-		const store = select(
-			PAYMENT_SETTINGS_STORE_NAME
-		) as PaymentSettingsSelectors;
+		const store = select( paymentSettingsStore );
 		return store.getIsWooPayEligible();
 	}, [] );
 

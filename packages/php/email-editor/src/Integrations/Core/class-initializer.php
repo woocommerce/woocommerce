@@ -1,15 +1,15 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare( strict_types = 1 );
-namespace MailPoet\EmailEditor\Integrations\Core;
+namespace Automattic\WooCommerce\EmailEditor\Integrations\Core;
 
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Blocks_Registry;
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Layout\Flex_Layout_Renderer;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Blocks_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Layout\Flex_Layout_Renderer;
 
 /**
  * Initializes the core blocks renderers.
@@ -19,8 +19,8 @@ class Initializer {
 	 * Initializes the core blocks renderers.
 	 */
 	public function initialize(): void {
-		add_action( 'mailpoet_blocks_renderer_initialized', array( $this, 'register_core_blocks_renderers' ), 10, 1 );
-		add_filter( 'mailpoet_email_editor_theme_json', array( $this, 'adjust_theme_json' ), 10, 1 );
+		add_action( 'woocommerce_email_blocks_renderer_initialized', array( $this, 'register_core_blocks_renderers' ), 10, 1 );
+		add_filter( 'woocommerce_email_editor_theme_json', array( $this, 'adjust_theme_json' ), 10, 1 );
 		add_filter( 'safe_style_css', array( $this, 'allow_styles' ) );
 	}
 
@@ -40,6 +40,7 @@ class Initializer {
 		$blocks_registry->add_block_renderer( 'core/buttons', new Renderer\Blocks\Buttons( new Flex_Layout_Renderer() ) );
 		$blocks_registry->add_block_renderer( 'core/button', new Renderer\Blocks\Button() );
 		$blocks_registry->add_block_renderer( 'core/group', new Renderer\Blocks\Group() );
+		$blocks_registry->add_block_renderer( 'core/quote', new Renderer\Blocks\Quote() );
 		// Render used for all other blocks.
 		$blocks_registry->add_fallback_renderer( new Renderer\Blocks\Fallback() );
 	}

@@ -127,7 +127,9 @@ test.describe(
 				logoPickerPageObject.getLogoPickerLocator( assembler )
 			).toBeVisible();
 			await expect(
-				logoPickerPageObject.getLogoLocator( editor )
+				editor
+					.getByRole( 'document', { name: 'Header' } )
+					.locator( 'img.custom-logo' )
 			).toBeVisible();
 
 			await expect( imageWidth ).toBeVisible();

@@ -15,7 +15,7 @@ import { getStoreAgeInWeeks } from '../../utils';
 import { ADMIN_INSTALL_TIMESTAMP_OPTION_NAME } from '../../constants';
 import store from '../../store';
 
-export const CustomerEffortScoreModalContainer: React.FC = () => {
+export const CustomerEffortScoreModalContainer = () => {
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 	const { hideCesModal } = useDispatch( store );
 	const {
@@ -76,6 +76,7 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 	return (
 		<CustomerFeedbackModal
 			title={ visibleCESModalData.title }
+			description={ visibleCESModalData.description }
 			showDescription={ visibleCESModalData.showDescription }
 			firstQuestion={ visibleCESModalData.firstQuestion }
 			secondQuestion={ visibleCESModalData.secondQuestion }

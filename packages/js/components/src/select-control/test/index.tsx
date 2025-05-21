@@ -225,6 +225,85 @@ describe( 'SelectControl', () => {
 		expect( queryByRole( 'option', { selected: true } ) ).toBeNull();
 	} );
 
+	describe( 'virtual scrolling', () => {
+		const manyOptions: Option[] = Array.from(
+			{ length: 100 },
+			( _, i ) => ( {
+				key: `${ i }`,
+				label: `Option ${ i }`,
+				value: { id: `${ i }` },
+			} )
+		);
+
+		it( 'renders with virtualScroll enabled', async () => {
+			const { getByRole, queryByRole } = render(
+				<SelectControl options={ manyOptions } virtualScroll />
+			);
+
+			userEvent.click( getByRole( 'combobox' ) );
+			await waitFor( () => {
+				expect(
+					getByRole( 'option', { name: 'Option 0' } )
+				).toBeInTheDocument();
+			} );
+
+			// Only a subset of options should be in the DOM due to virtualization
+			expect( queryByRole( 'option', { name: 'Option 99' } ) ).toBeNull();
+		} );
+
+		it( 'allows searching with virtualScroll enabled', async () => {
+			const { getByRole, queryByRole } = render(
+				<SelectControl
+					options={ manyOptions }
+					virtualScroll
+					isSearchable
+				/>
+			);
+
+			userEvent.click( getByRole( 'combobox' ) );
+			userEvent.type( getByRole( 'combobox' ), '99' );
+			await waitFor( () => {
+				expect(
+					getByRole( 'option', { name: 'Option 99' } )
+				).toBeInTheDocument();
+			} );
+
+			// Only Option 99 should be visible
+			expect( queryByRole( 'option', { name: 'Option 0' } ) ).toBeNull();
+		} );
+
+		it( 'allows selecting options using keyboard with virtualScroll enabled', async () => {
+			const onChangeMock = jest.fn();
+			const { getByRole } = render(
+				<SelectControl
+					options={ manyOptions }
+					virtualScroll
+					onChange={ onChangeMock }
+				/>
+			);
+
+			getByRole( 'combobox' ).focus();
+			userEvent.click( getByRole( 'combobox' ) );
+			await waitFor( () => {
+				expect(
+					getByRole( 'option', { name: 'Option 0' } )
+				).toBeInTheDocument();
+			} );
+
+			// Navigate and select Option 2
+			userEvent.type(
+				getByRole( 'combobox' ),
+				'{arrowdown}{arrowdown}{arrowdown}'
+			);
+			userEvent.type( getByRole( 'combobox' ), '{enter}' );
+
+			expect( onChangeMock ).toHaveBeenCalledWith(
+				[ { key: '2', label: 'Option 2', value: { id: '2' } } ],
+				''
+			);
+		} );
+	} );
+
 	describe( 'selected value', () => {
 		it( 'should return an array if array', async () => {
 			const onChangeMock = jest.fn();

@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class Payments {
 
-	const USER_PAYMENTS_NOX_PROFILE_KEY = 'woocommerce_payments_nox_profile';
+	const PAYMENTS_NOX_PROFILE_KEY = 'woocommerce_payments_nox_profile';
 
 	const SUGGESTIONS_CONTEXT = 'wc_settings_payments';
 
@@ -73,14 +73,22 @@ class Payments {
 					return $a['_priority'] <=> $b['_priority'];
 				}
 			);
-			$added_to_top = 0;
+			$last_preferred_order = -1;
 			foreach ( $suggestions['preferred'] as $suggestion ) {
 				$suggestion_order_map_id = $this->providers->get_suggestion_order_map_id( $suggestion['id'] );
 				// Determine the suggestion's order value.
-				// If we don't have an order for it, add it to the top but keep the relative order (PSP first, APM second).
+				// If we don't have an order for it, add it to the top but keep the relative order:
+				// PSP first, APM after PSP, offline PSP after PSP and APM.
 				if ( ! isset( $providers_order_map[ $suggestion_order_map_id ] ) ) {
-					$providers_order_map = Utils::order_map_add_at_order( $providers_order_map, $suggestion_order_map_id, $added_to_top );
-					++$added_to_top;
+					$providers_order_map = Utils::order_map_add_at_order( $providers_order_map, $suggestion_order_map_id, $last_preferred_order + 1 );
+					if ( $last_preferred_order < $providers_order_map[ $suggestion_order_map_id ] ) {
+						// If the last preferred order is less than the current one, we need to update it.
+						$last_preferred_order = $providers_order_map[ $suggestion_order_map_id ];
+					}
+				} elseif ( $last_preferred_order < $providers_order_map[ $suggestion_order_map_id ] ) {
+					// Save the preferred provider's order to know where we should be inserting next.
+					// But only if the last preferred order is less than the current one.
+					$last_preferred_order = $providers_order_map[ $suggestion_order_map_id ];
 				}
 
 				// Change suggestion details to align it with a regular payment gateway.
@@ -120,8 +128,8 @@ class Payments {
 				'id'          => PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
 				'_type'       => PaymentProviders::TYPE_OFFLINE_PMS_GROUP,
 				'_order'      => $providers_order_map[ PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP ],
-				'title'       => __( 'Take offline payments', 'woocommerce' ),
-				'description' => __( 'Accept payments offline using multiple different methods. These can also be used to test purchases.', 'woocommerce' ),
+				'title'       => esc_html__( 'Take offline payments', 'woocommerce' ),
+				'description' => esc_html__( 'Accept payments offline using multiple different methods. These can also be used to test purchases.', 'woocommerce' ),
 				'icon'        => plugins_url( 'assets/images/payment_methods/cod.svg', WC_PLUGIN_FILE ),
 				// The offline PMs (and their group) are obviously from WooCommerce, and WC is always active.
 				'plugin'      => array(
@@ -188,7 +196,7 @@ class Payments {
 	 *                If the user didn't set a location, the WC base location country code is used.
 	 */
 	public function get_country(): string {
-		$user_nox_meta = get_user_meta( get_current_user_id(), self::USER_PAYMENTS_NOX_PROFILE_KEY, true );
+		$user_nox_meta = get_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, true );
 		if ( ! empty( $user_nox_meta['business_country_code'] ) ) {
 			return $user_nox_meta['business_country_code'];
 		}
@@ -202,7 +210,7 @@ class Payments {
 	 * @param string $location The country code. This should be a ISO 3166-1 alpha-2 country code.
 	 */
 	public function set_country( string $location ): bool {
-		$user_payments_nox_profile = get_user_meta( get_current_user_id(), self::USER_PAYMENTS_NOX_PROFILE_KEY, true );
+		$user_payments_nox_profile = get_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, true );
 
 		if ( empty( $user_payments_nox_profile ) ) {
 			$user_payments_nox_profile = array();
@@ -211,7 +219,7 @@ class Payments {
 		}
 		$user_payments_nox_profile['business_country_code'] = $location;
 
-		return false !== update_user_meta( get_current_user_id(), self::USER_PAYMENTS_NOX_PROFILE_KEY, $user_payments_nox_profile );
+		return false !== update_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, $user_payments_nox_profile );
 	}
 
 	/**
@@ -223,6 +231,20 @@ class Payments {
 	 */
 	public function update_payment_providers_order_map( array $order_map ): bool {
 		return $this->providers->update_payment_providers_order_map( $order_map );
+	}
+
+	/**
+	 * Attach a payment extension suggestion.
+	 *
+	 * This is only an internal recording of attachment. No actual extension installation or activation happens.
+	 *
+	 * @param string $id The ID of the payment extension suggestion to hide.
+	 *
+	 * @return bool True if the suggestion was successfully marked as attached, false otherwise.
+	 * @throws Exception If the suggestion ID is invalid.
+	 */
+	public function attach_payment_extension_suggestion( string $id ): bool {
+		return $this->providers->attach_extension_suggestion( $id );
 	}
 
 	/**

@@ -284,9 +284,7 @@ final class BlockTypesController {
 	 */
 	public function add_data_attributes( $content, $block ) {
 
-		$content = trim( $content );
-
-		if ( ! $this->block_should_have_data_attributes( $block['blockName'] ) ) {
+		if ( ! is_string( $content ) || ! $this->block_should_have_data_attributes( $block['blockName'] ) ) {
 			return $content;
 		}
 
@@ -296,10 +294,9 @@ final class BlockTypesController {
 		$processor = new \WP_HTML_Tag_Processor( $content );
 
 		if (
-			false === $processor->next_token() ||
-			'DIV' !== $processor->get_token_name() ||
-			$processor->is_tag_closer()
+			false === $processor->next_tag() || $processor->is_tag_closer()
 		) {
+
 			return $content;
 		}
 
@@ -374,9 +371,7 @@ final class BlockTypesController {
 	 */
 	protected function get_widget_area_block_types() {
 		return array(
-			'ActiveFilters',
 			'AllReviews',
-			'AttributeFilter',
 			'Breadcrumbs',
 			'CartLink',
 			'CatalogSorting',
@@ -384,16 +379,33 @@ final class BlockTypesController {
 			'CustomerAccount',
 			'FeaturedCategory',
 			'FeaturedProduct',
-			'FilterWrapper',
 			'MiniCart',
-			'PriceFilter',
 			'ProductCategories',
 			'ProductResultsCount',
 			'ProductSearch',
-			'RatingFilter',
 			'ReviewsByCategory',
 			'ReviewsByProduct',
+			'ProductFilters',
+			'ProductFilterStatus',
+			'ProductFilterPrice',
+			'ProductFilterPriceSlider',
+			'ProductFilterAttribute',
+			'ProductFilterRating',
+			'ProductFilterActive',
+			'ProductFilterRemovableChips',
+			'ProductFilterClearButton',
+			'ProductFilterCheckboxList',
+			'ProductFilterChips',
+
+			// Keep hidden legacy filter blocks for backward compatibility.
+			'ActiveFilters',
+			'AttributeFilter',
+			'FilterWrapper',
+			'PriceFilter',
+			'RatingFilter',
 			'StockFilter',
+			// End: legacy filter blocks.
+
 			// Below product grids are hidden from inserter however they could have been used in widgets.
 			// Keep them for backward compatibility.
 			'HandpickedProducts',
@@ -404,6 +416,7 @@ final class BlockTypesController {
 			'ProductsByAttribute',
 			'ProductCategory',
 			'ProductTag',
+			// End: legacy product grids blocks.
 		);
 	}
 
@@ -441,10 +454,20 @@ final class BlockTypesController {
 			'ProductCategory',
 			'ProductCollection\Controller',
 			'ProductCollection\NoResults',
+			'ProductFilters',
+			'ProductFilterStatus',
+			'ProductFilterPrice',
+			'ProductFilterPriceSlider',
+			'ProductFilterAttribute',
+			'ProductFilterRating',
+			'ProductFilterActive',
+			'ProductFilterRemovableChips',
+			'ProductFilterClearButton',
+			'ProductFilterCheckboxList',
+			'ProductFilterChips',
 			'ProductGallery',
 			'ProductGalleryLargeImage',
 			'ProductGalleryLargeImageNextPrevious',
-			'ProductGalleryPager',
 			'ProductGalleryThumbnails',
 			'ProductImage',
 			'ProductImageGallery',
@@ -500,33 +523,43 @@ final class BlockTypesController {
 			MiniCartContents::get_mini_cart_block_types()
 		);
 
-		// Update plugins/woocommerce-blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
+		// Update plugins/woocommerce/client/blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
 		// when modifying this list.
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			$block_types[] = 'ProductFilters';
-			$block_types[] = 'ProductFilterStatus';
-			$block_types[] = 'ProductFilterPrice';
-			$block_types[] = 'ProductFilterPriceSlider';
-			$block_types[] = 'ProductFilterAttribute';
-			$block_types[] = 'ProductFilterRating';
-			$block_types[] = 'ProductFilterActive';
-			$block_types[] = 'ProductFilterRemovableChips';
-			$block_types[] = 'ProductFilterClearButton';
-			$block_types[] = 'ProductFilterCheckboxList';
-			$block_types[] = 'ProductFilterChips';
-			if ( Features::is_enabled( 'blockified-add-to-cart' ) && wc_current_theme_is_fse_theme() ) {
-				$block_types[] = 'AddToCartWithOptions';
-				$block_types[] = 'AddToCartWithOptionsQuantitySelector';
-				$block_types[] = 'AddToCartWithOptionsVariationSelector';
-				$block_types[] = 'AddToCartWithOptionsGroupedProductSelector';
-				$block_types[] = 'AddToCartWithOptionsGroupedProductSelectorItemTemplate';
+			if ( Features::is_enabled( 'blockified-add-to-cart' ) && wp_is_block_theme() ) {
+				$block_types[] = 'AddToCartWithOptions\AddToCartWithOptions';
+				$block_types[] = 'AddToCartWithOptions\QuantitySelector';
+				$block_types[] = 'AddToCartWithOptions\VariationSelector';
+				$block_types[] = 'AddToCartWithOptions\VariationSelectorItemTemplate';
+				$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeName';
+				$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeOptions';
+				$block_types[] = 'AddToCartWithOptions\GroupedProductSelector';
+				$block_types[] = 'AddToCartWithOptions\GroupedProductSelectorItemTemplate';
+				$block_types[] = 'AddToCartWithOptions\GroupedProductSelectorItemCTA';
 			}
+
+			$block_types[] = 'BlockifiedProductDetails';
+			$block_types[] = 'ProductDescription';
+			$block_types[] = 'ProductSpecifications';
+			$block_types[] = 'Reviews\ProductReviews';
+			$block_types[] = 'Reviews\ProductReviewRating';
+			$block_types[] = 'Reviews\ProductReviewsTitle';
+			$block_types[] = 'Reviews\ProductReviewForm';
+			$block_types[] = 'Reviews\ProductReviewDate';
+			$block_types[] = 'Reviews\ProductReviewContent';
+			$block_types[] = 'Reviews\ProductReviewAuthorName';
+			$block_types[] = 'Reviews\ProductReviewsPagination';
+			$block_types[] = 'Reviews\ProductReviewsPaginationNext';
+			$block_types[] = 'Reviews\ProductReviewsPaginationPrevious';
+			$block_types[] = 'Reviews\ProductReviewsPaginationNumbers';
+			$block_types[] = 'Reviews\ProductReviewTemplate';
+
 			// Generic blocks that will be pushed upstream.
 			$block_types[] = 'Accordion\AccordionGroup';
 			$block_types[] = 'Accordion\AccordionItem';
 			$block_types[] = 'Accordion\AccordionPanel';
 			$block_types[] = 'Accordion\AccordionHeader';
-			$block_types[] = 'BlockifiedProductDetails';
+			// End: generic blocks that will be pushed upstream.
 		}
 
 		/**

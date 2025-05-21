@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Sending correct email when user create an account after placing an order.

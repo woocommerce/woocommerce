@@ -1,12 +1,12 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor;
+namespace Automattic\WooCommerce\EmailEditor;
 
 use Exception;
 use PHPUnit\Framework\TestCase;
@@ -68,7 +68,7 @@ class Container_Test extends TestCase { // phpcs:ignore
 
 		// Attempt to get a non-existing service should throw an exception.
 		$this->expectException( Exception::class );
-		$this->expectExceptionMessage( 'Service not found: MailPoet\EmailEditor\Simple_Service' );
+		$this->expectExceptionMessage( 'Service not found: Automattic\WooCommerce\EmailEditor\Simple_Service' );
 
 		$container->get( Simple_Service::class );
 	}

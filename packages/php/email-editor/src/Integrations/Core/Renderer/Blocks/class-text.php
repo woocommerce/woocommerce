@@ -1,14 +1,14 @@
 <?php
 /**
- * This file is part of the MailPoet Email Editor package.
+ * This file is part of the WooCommerce Email Editor package.
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare( strict_types = 1 );
-namespace MailPoet\EmailEditor\Integrations\Core\Renderer\Blocks;
+namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use MailPoet\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
 
 /**
  * This renderer covers both core/paragraph and core/heading blocks
@@ -50,9 +50,18 @@ class Text extends Abstract_Block_Renderer {
 			$block_content = $html->get_updated_html();
 		}
 
+		// Add fallback text color when no custom text color or preset text color is set.
+		// Color styles are set on $block_attributes['style']['color'] only when custom values are used.
+		// In case of preset they are set on $block_attributes['textColor'] and $block_attributes['backgroundColor'].
+		$color_styles = $block_attributes['style']['color'] ?? array();
+		if ( empty( $color_styles['text'] ) && empty( $block_attributes['textColor'] ) ) {
+			$email_styles         = $settings_controller->get_email_styles();
+			$color_styles['text'] = $email_styles['color']['text'];
+		}
+
 		$block_styles = $this->get_styles_from_block(
 			array(
-				'color'      => $block_attributes['style']['color'] ?? array(),
+				'color'      => $color_styles,
 				'spacing'    => $block_attributes['style']['spacing'] ?? array(),
 				'typography' => $block_attributes['style']['typography'] ?? array(),
 				'border'     => $block_attributes['style']['border'] ?? array(),

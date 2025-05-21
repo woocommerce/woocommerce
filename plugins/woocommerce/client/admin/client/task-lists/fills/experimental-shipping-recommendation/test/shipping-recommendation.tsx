@@ -153,7 +153,8 @@ describe( 'ShippingRecommendation', () => {
 		);
 
 		expect( recordEvent ).toHaveBeenCalledWith(
-			'tasklist_shipping_recommendation_visit_marketplace_click'
+			'tasklist_shipping_recommendation_visit_marketplace_click',
+			{}
 		);
 	} );
 

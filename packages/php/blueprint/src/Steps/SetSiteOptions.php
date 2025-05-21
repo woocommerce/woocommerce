@@ -42,13 +42,13 @@ class SetSiteOptions extends Step {
 		return array(
 			'type'       => 'object',
 			'properties' => array(
-				'step'    => array(
+				'step' => array(
 					'type' => 'string',
 					'enum' => array( static::get_step_name() ),
 				),
 
 			),
-			'required'   => array( 'step'  ),
+			'required'   => array( 'step' ),
 		);
 	}
 

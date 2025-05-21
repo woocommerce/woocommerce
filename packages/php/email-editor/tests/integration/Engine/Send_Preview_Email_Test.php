@@ -1,21 +1,22 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine;
+namespace Automattic\WooCommerce\EmailEditor\Engine;
 
 use Codeception\Stub\Expected;
-use MailPoet\EmailEditor\Engine\Renderer\Renderer;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Renderer;
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use MailPoet\WP\Functions as WPFunctions;
 
 /**
  * Unit test for Send_Preview_Email_Test class.
  */
-class Send_Preview_Email_Test extends \MailPoetTest {
+class Send_Preview_Email_Test extends \Email_Editor_Integration_Test_Case {
 
 	/**
 	 * Instance of Send_Preview_Email
@@ -34,8 +35,8 @@ class Send_Preview_Email_Test extends \MailPoetTest {
 	/**
 	 * Set up before each test
 	 */
-	public function _before() {
-		parent::_before();
+	public function setUp(): void {
+		parent::setUp();
 
 		$this->renderer_mock = $this->createMock( Renderer::class );
 		$this->renderer_mock->method( 'render' )->willReturn(
@@ -57,18 +58,17 @@ class Send_Preview_Email_Test extends \MailPoetTest {
 	 * Test it sends preview email.
 	 */
 	public function testItSendsPreviewEmail(): void {
-		$spe = $this->make(
-			Send_Preview_Email::class,
-			array(
-				'renderer'                => $this->renderer_mock,
-				'send_email'              => Expected::once( true ),
-				'set_personalize_content' => function ( $param ) {
-					return $param;
-				},
-			)
-		);
+		$mock = $this->createPartialMock( Send_Preview_Email::class, array( 'send_email', 'set_personalize_content' ) );
+		$mock->expects( $this->once() )
+			->method( 'send_email' )
+			->willReturn( true );
+		$mock->method( 'set_personalize_content' )
+			->willReturnArgument( 0 );
 
-		$email_post = $this->tester->create_post(
+		$personalizer = $this->createMock( Personalizer::class );
+		$mock->__construct( $this->renderer_mock, $personalizer );
+
+		$email_post_id = $this->factory->post->create(
 			array(
 				'post_content' => '<!-- wp:button --><div class="wp-block-button"><a class="wp-block-button__link has-background wp-element-button">Button</a></div><!-- /wp:button -->',
 			)
@@ -77,12 +77,12 @@ class Send_Preview_Email_Test extends \MailPoetTest {
 		$post_data = array(
 			'newsletterId' => 2,
 			'email'        => 'hello@example.com',
-			'postId'       => $email_post->ID,
+			'postId'       => $email_post_id,
 		);
 
-		$result = $spe->send_preview_email( $post_data );
+		$result = $mock->send_preview_email( $post_data );
 
-		verify( $result )->equals( true );
+		$this->assertTrue( $result );
 	}
 
 	/**
@@ -91,18 +91,18 @@ class Send_Preview_Email_Test extends \MailPoetTest {
 	public function testItReturnsTheStatusOfSendMail(): void {
 		$mailing_status = false;
 
-		$spe = $this->make(
-			Send_Preview_Email::class,
-			array(
-				'renderer'                => $this->renderer_mock,
-				'send_email'              => Expected::once( $mailing_status ),
-				'set_personalize_content' => function ( $param ) {
-					return $param;
-				},
-			)
-		);
+		$mock = $this->createPartialMock( Send_Preview_Email::class, array( 'send_email', 'set_personalize_content' ) );
+		$mock->expects( $this->once() )
+			->method( 'send_email' )
+			->willReturn( $mailing_status );
 
-		$email_post = $this->tester->create_post(
+		$mock->method( 'set_personalize_content' )
+			->willReturnArgument( 0 );
+
+		$personalizer = $this->createMock( Personalizer::class );
+		$mock->__construct( $this->renderer_mock, $personalizer );
+
+		$email_post_id = $this->factory->post->create(
 			array(
 				'post_content' => '<!-- wp:button --><div class="wp-block-button"><a class="wp-block-button__link has-background wp-element-button">Button</a></div><!-- /wp:button -->',
 			)
@@ -111,12 +111,12 @@ class Send_Preview_Email_Test extends \MailPoetTest {
 		$post_data = array(
 			'newsletterId' => 2,
 			'email'        => 'hello@example.com',
-			'postId'       => $email_post->ID,
+			'postId'       => $email_post_id,
 		);
 
-		$result = $spe->send_preview_email( $post_data );
+		$result = $mock->send_preview_email( $post_data );
 
-		verify( $result )->equals( $mailing_status );
+		$this->assertEquals( $mailing_status, $result );
 	}
 
 	/**

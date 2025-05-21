@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Button, Card, CardBody, CardHeader } from '@wordpress/components';
 import { Children } from '@wordpress/element';
 import clsx from 'clsx';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -79,7 +80,9 @@ export const Partners = ( {
 					'woocommerce'
 				) }
 				eventName="tasklist_tax_visit_marketplace_click"
-				targetUrl="admin.php?page=wc-admin&tab=extensions&path=/extensions&category=operations"
+				targetUrl={ getAdminLink(
+					'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=operations'
+				) }
 			/>
 		</>
 	);

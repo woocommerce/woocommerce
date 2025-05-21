@@ -1,19 +1,19 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine\Renderer\Postprocessors;
+namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\Postprocessors;
 
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Highlighting_Postprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Highlighting_Postprocessor;
 
 /**
  * Unit test class for Highlighting_Postprocessor.
  */
-class Highlighting_Postprocessor_Test extends \MailPoetUnitTest {
+class Highlighting_Postprocessor_Test extends \Email_Editor_Unit_Test {
 	/**
 	 * Instance of Highlighting_Postprocessor.
 	 *
@@ -24,8 +24,8 @@ class Highlighting_Postprocessor_Test extends \MailPoetUnitTest {
 	/**
 	 * Set up the test.
 	 */
-	public function _before() {
-		parent::_before();
+	protected function setUp(): void {
+		parent::setUp();
 		$this->postprocessor = new Highlighting_Postprocessor();
 	}
 

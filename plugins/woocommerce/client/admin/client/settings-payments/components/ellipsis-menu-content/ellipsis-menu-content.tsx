@@ -5,7 +5,7 @@ import { Button, CardDivider } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import {
 	pluginsStore,
-	PAYMENT_SETTINGS_STORE_NAME,
+	paymentSettingsStore,
 	PaymentGatewayLink,
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
@@ -86,7 +86,7 @@ export const EllipsisMenuContent = ( {
 		invalidateResolutionForStoreSelector,
 		togglePaymentGateway,
 		hidePaymentExtensionSuggestion,
-	} = useDispatch( PAYMENT_SETTINGS_STORE_NAME );
+	} = useDispatch( paymentSettingsStore );
 	const { createErrorNotice, createSuccessNotice } =
 		useDispatch( 'core/notices' );
 
@@ -99,14 +99,17 @@ export const EllipsisMenuContent = ( {
 	};
 
 	/**
-	 * Deactivates the payment gateway plugin.
+	 * Deactivates the payment gateway containing plugin.
 	 */
 	const deactivateGateway = () => {
 		setIsDeactivating( true );
 		deactivatePlugin( pluginFile )
 			.then( () => {
 				createSuccessNotice(
-					__( 'Plugin was successfully deactivated.', 'woocommerce' )
+					__(
+						'The provider plugin was successfully deactivated.',
+						'woocommerce'
+					)
 				);
 				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
 				setIsDeactivating( false );
@@ -114,7 +117,10 @@ export const EllipsisMenuContent = ( {
 			} )
 			.catch( () => {
 				createErrorNotice(
-					__( 'Failed to deactivate the plugin.', 'woocommerce' )
+					__(
+						'Failed to deactivate the provider plugin.',
+						'woocommerce'
+					)
 				);
 				setIsDeactivating( false );
 				onToggle();
@@ -266,7 +272,8 @@ export const EllipsisMenuContent = ( {
 						className={ 'components-button__danger' }
 						onClick={ deactivateGateway }
 						isBusy={ isDeactivating }
-						disabled={ isDeactivating }
+						// If the plugin file is not available, the button should be disabled.
+						disabled={ ! pluginFile || isDeactivating }
 					>
 						{ __( 'Deactivate', 'woocommerce' ) }
 					</Button>

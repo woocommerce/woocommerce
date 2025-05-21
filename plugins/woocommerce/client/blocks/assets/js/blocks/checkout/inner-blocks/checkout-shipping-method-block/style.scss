@@ -1,0 +1,88 @@
+$component-background: color-mix(in srgb, currentColor 6%, transparent);
+$component-background-hover: color-mix(in srgb, currentColor 12%, transparent);
+
+.wc-block-checkout__shipping-method
+	.wc-block-checkout__shipping-method-container {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	align-items: stretch;
+	flex-direction: row;
+	border-radius: $universal-border-radius * 2;
+	background-color: $component-background;
+	gap: $gap-smallest;
+	padding: $gap-smallest;
+}
+
+.edit-post-visual-editor .wc-block-checkout__shipping-method-option,
+.wc-block-checkout__shipping-method-option {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	flex-wrap: wrap;
+	align-items: center;
+	box-sizing: border-box;
+	flex-basis: 0;
+	gap: 0;
+	cursor: pointer;
+	position: relative; // Add this for pseudo-element positioning
+	padding: $gap-small;
+	border-radius: $universal-border-radius;
+	border: 2px solid transparent;
+	background-color: transparent;
+	color: $input-text-light;
+
+	.has-dark-controls & {
+		color: $input-text-dark;
+	}
+
+	&:hover,
+	&:focus-within {
+		background-color: $component-background-hover;
+		outline: none;
+	}
+
+	&.wc-block-checkout__shipping-method-option--selected {
+		border: 2px solid currentColor;
+		background: $input-background-light;
+
+		.has-dark-controls & {
+			background: $input-background-dark;
+		}
+	}
+}
+
+.wc-block-checkout__shipping-method-option-title-wrapper {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	flex-wrap: nowrap;
+	gap: $gap-smallest;
+}
+
+.wc-block-checkout__shipping-method-option-icon {
+	fill: currentColor;
+	flex-shrink: 0;
+	vertical-align: middle;
+}
+
+.wc-block-checkout__shipping-method-option-title {
+	@include reset-typography();
+	@include font-size(regular, 1rem);
+	font-weight: bold;
+	line-height: 28px; // Match the icon size
+	text-wrap: balance;
+}
+
+.wc-block-checkout__shipping-method-option-price {
+	@include reset-typography();
+	@include font-size(small, 1rem);
+	flex-basis: 100%;
+	text-align: center;
+
+	em {
+		text-transform: uppercase;
+		font-style: inherit;
+	}
+}

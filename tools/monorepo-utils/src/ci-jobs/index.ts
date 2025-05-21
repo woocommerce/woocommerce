@@ -25,7 +25,7 @@ const program = new Command( 'ci-jobs' )
 	)
 	.option(
 		'-p --pr-number <prNumber>',
-		'Base ref to compare the current ref against for change detection. If not specified, all projects will be considered changed.',
+		'PR number for change detection. If specified, fetches the changes list via GitHub client.',
 		''
 	)
 	.option(
@@ -61,7 +61,18 @@ const program = new Command( 'ci-jobs' )
 				options.baseRef,
 				options.prNumber
 			);
+
 			Logger.endTask( true );
+
+			if ( fileChanges ) {
+				Logger.notice(
+					`Changes detected: ${ JSON.stringify(
+						Object.keys( fileChanges )
+					) } `
+				);
+			} else {
+				Logger.notice( 'No changes detected.' );
+			}
 		}
 
 		Logger.startTask( 'Creating Jobs', true );
@@ -77,7 +88,7 @@ const program = new Command( 'ci-jobs' )
 		for ( const job of jobs.test ) {
 			const optional = job.optional ? ' (optional)' : '';
 			job.name = `${ job.name } - ${ job.projectName } [${ job.testType }]${ optional }`;
-			Logger.notice( `-  ${ job.name }` );
+			// Logger.notice( `-  ${ job.name }` );
 		}
 
 		const resultsBlobNames = jobs.test

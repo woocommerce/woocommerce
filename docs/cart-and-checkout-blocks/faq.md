@@ -76,7 +76,7 @@ If you no longer need to react to changes, you can unsubscribe from the data sto
 
 ### How do I dynamically make changes to the cart from the client?
 
-To perform actions on the server based on a client-side action, you'll need to use [`extensionCartUpdate`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md)
+To perform actions on the server based on a client-side action, you'll need to use [`extensionCartUpdate`](../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md)
 
 As an example, to add a "Get 10% off if you sign up to the mailing list" checkbox on your site you can use `extensionCartUpdate` to automatically apply a 10% coupon to the cart.
 
@@ -169,7 +169,7 @@ add_action(
 
 ### How to force-refresh the cart from the server
 
-This can be achieved using [`extensionCartUpdate`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md) which is the preferred way, but it is also possible by executing the `receiveCart` action on the `wc/store/cart` data store with a valid cart object, like so:
+This can be achieved using [`extensionCartUpdate`](../../plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-update-cart.md) which is the preferred way, but it is also possible by executing the `receiveCart` action on the `wc/store/cart` data store with a valid cart object, like so:
 
 ```js
 const { dispatch } = window.wp.data;

@@ -581,6 +581,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$orders_table = $this->sut::get_orders_table_name();
 		$this->assertEquals( OrderStatus::TRASH, $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$orders_table} WHERE id = %d", $order_id ) ) );
 		$this->assertEquals( OrderStatus::TRASH, $wpdb->get_var( $wpdb->prepare( "SELECT post_status FROM {$wpdb->posts} WHERE id = %d", $order_id ) ) );
+		$this->assertNotEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->sut->get_meta_table_name()} WHERE order_id = %d AND meta_key LIKE %s", $order_id, '_wp_trash_meta_%' ) ) );
 
 		$this->sut->read( $order );
 		$this->sut->untrash_order( $order );
@@ -588,7 +589,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( OrderStatus::ON_HOLD, $order->get_status() );
 		$this->assertEquals( OrderInternalStatus::ON_HOLD, get_post_status( $order_id ) );
 
-		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->sut->get_meta_table_name()} WHERE order_id = %d AND meta_key LIKE '_wp_trash_meta_%'", $order_id ) ) );
+		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->sut->get_meta_table_name()} WHERE order_id = %d AND meta_key LIKE %s", $order_id, '_wp_trash_meta_%' ) ) );
 		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key LIKE '_wp_trash_meta_%'", $order_id ) ) );
 		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders
 	}
@@ -1562,9 +1563,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
-	 * Test methods get_total_tax_refunded and get_total_shipping_refunded.
+	 * Test methods get_total_tax_refunded, get_total_shipping_refunded, and get_total_shipping_tax_refunded.
 	 */
-	public function test_get_total_tax_refunded_and_get_total_shipping_refunded() {
+	public function test_get_total_tax_refunded_and_get_total_shipping_refunded_and_get_total_shipping_tax_refunded() {
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
@@ -1628,6 +1629,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$this->assertEquals( 5, $order->get_data_store()->get_total_tax_refunded( $order ) );
 		$this->assertEquals( 10, $order->get_data_store()->get_total_shipping_refunded( $order ) );
+		$this->assertEquals( 3, $order->get_data_store()->get_total_shipping_tax_refunded( $order ) );
 	}
 
 	/**
@@ -2555,6 +2557,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			}
 		};
 		// phpcs:enable Squiz.Commenting
+
+		// Needed for the fake logger to be used.
+		$this->reset_container_resolutions();
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
@@ -3740,5 +3745,43 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$meta_store   = wc_get_container()->get( OrdersTableDataStoreMeta::class );
 		$meta_objects = $meta_store->get_metadata_by_key( $order, '_cogs_total_value' );
 		$this->assertEquals( $expected_saved_value, (float) $meta_objects[0]->meta_value );
+	}
+
+	/**
+	 * @testdox Saving metadata for a non-persisted order doesn't save the order nor the metadata.
+	 */
+	public function test_save_meta_on_non_persisted_order() {
+		global $wpdb;
+
+		$this->toggle_cot_feature_and_usage( true );
+
+		$meta_key   = 'test_meta_key';
+		$meta_value = 'test_meta_value';
+
+		$query = $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$this->sut::get_meta_table_name()} WHERE meta_key = %s AND meta_value = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- variable is a table name.
+			$meta_key,
+			$meta_value
+		);
+
+		// Confirm there's no meta at the start.
+		$this->assertEquals( $wpdb->get_var( $query ), 0 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
+
+		// Confirm there's no meta.
+		$order = new \WC_Order();
+		$order->add_meta_data( $meta_key, $meta_value );
+		$order->save_meta_data();
+
+		// Confirm there's still no meta after calling `save_meta_data()` on an unsaved order.
+		$this->assertEquals( $wpdb->get_var( $query ), 0 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
+
+		// Confirm that saving the order persists everything.
+		$order->save();
+		$this->assertEquals( $wpdb->get_var( $query ), 1 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
+
+		// Calling `save_meta_data()` on an already saved order does update metadata.
+		$order->add_meta_data( $meta_key, $meta_value, false );
+		$order->save_meta_data();
+		$this->assertEquals( $wpdb->get_var( $query ), 2 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
 	}
 }

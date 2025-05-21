@@ -1,20 +1,20 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine\Renderer\Preprocessors;
+namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\Preprocessors;
 
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Typography_Preprocessor;
-use MailPoet\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Typography_Preprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
 
 /**
  * Unit test for Typography_Preprocessor
  */
-class Typography_Preprocessor_Test extends \MailPoetUnitTest {
+class Typography_Preprocessor_Test extends \Email_Editor_Unit_Test {
 
 	/**
 	 * Instance of Typography_Preprocessor
@@ -40,8 +40,8 @@ class Typography_Preprocessor_Test extends \MailPoetUnitTest {
 	/**
 	 * Set up the test
 	 */
-	public function _before() {
-		parent::_before();
+	protected function setUp(): void {
+		parent::setUp();
 		$settings_mock = $this->createMock( Settings_Controller::class );
 		$theme_mock    = $this->createMock( \WP_Theme_JSON::class );
 		$theme_mock->method( 'get_data' )->willReturn(

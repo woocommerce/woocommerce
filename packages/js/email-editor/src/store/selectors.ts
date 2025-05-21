@@ -3,7 +3,6 @@
  */
 import { createRegistrySelector, createSelector } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
-import { store as interfaceStore } from '@wordpress/interface';
 import { store as editorStore } from '@wordpress/editor';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { serialize, parse } from '@wordpress/blocks';
@@ -44,15 +43,21 @@ function enhancePatternWithParsedBlocks( pattern ) {
 	return enhancedPattern;
 }
 
+function regularizedGetEntityRecord( template ) {
+	if ( ! template ) {
+		return null;
+	}
+	return {
+		...template,
+		title: template?.title?.raw || template?.title || '',
+		content: template?.content?.raw || template?.content || '',
+	};
+}
+
 export const isFeatureActive = createRegistrySelector(
 	( select ) =>
 		( _, feature: Feature ): boolean =>
 			!! select( preferencesStore ).get( storeName, feature )
-);
-
-export const isSidebarOpened = createRegistrySelector(
-	( select ) => (): boolean =>
-		!! select( interfaceStore ).getActiveComplementaryArea( storeName )
 );
 
 export const hasEdits = createRegistrySelector( ( select ) => (): boolean => {
@@ -62,42 +67,6 @@ export const hasEdits = createRegistrySelector( ( select ) => (): boolean => {
 		editorCurrentPostType,
 		postId
 	);
-} );
-
-export const isEmailLoaded = createRegistrySelector(
-	( select ) => (): boolean => {
-		const postId = select( storeName ).getEmailPostId();
-		return !! select( coreDataStore ).getEntityRecord(
-			'postType',
-			editorCurrentPostType,
-			postId
-		);
-	}
-);
-
-export const isSaving = createRegistrySelector( ( select ) => (): boolean => {
-	const postId = select( storeName ).getEmailPostId();
-	return !! select( coreDataStore ).isSavingEntityRecord(
-		'postType',
-		editorCurrentPostType,
-		postId
-	);
-} );
-
-export const isEmpty = createRegistrySelector( ( select ) => (): boolean => {
-	const postId = select( storeName ).getEmailPostId();
-
-	const post: EmailEditorPostType = select( coreDataStore ).getEntityRecord(
-		'postType',
-		editorCurrentPostType,
-		postId
-	);
-	if ( ! post ) {
-		return true;
-	}
-
-	const { content, title } = post;
-	return ! content.raw && ! title.raw;
 } );
 
 export const hasEmptyContent = createRegistrySelector(
@@ -190,6 +159,34 @@ export const getBlockPatternsForEmailTemplate = createRegistrySelector(
 		)
 );
 
+export const canUserEditTemplates = createRegistrySelector(
+	( select ) => () => {
+		// @ts-expect-error Selector is not typed
+		return select( coreDataStore ).canUser( 'create', {
+			kind: 'postType',
+			name: 'wp_template',
+		} );
+	}
+);
+
+function getTemplate( select, templateId: string ): EmailTemplate {
+	if ( canUserEditTemplates() ) {
+		return select( coreDataStore ).getEditedEntityRecord(
+			'postType',
+			'wp_template',
+			templateId
+		) as unknown as EmailTemplate;
+	}
+	return regularizedGetEntityRecord(
+		select( coreDataStore ).getEntityRecord(
+			'postType',
+			'wp_template',
+			templateId,
+			{ context: 'view' }
+		)
+	) as unknown as EmailTemplate;
+}
+
 /**
  * COPIED FROM https://github.com/WordPress/gutenberg/blob/9c6d4fe59763b188d27ad937c2f0daa39e4d9341/packages/edit-post/src/store/selectors.js
  * Retrieves the template of the currently edited post.
@@ -197,29 +194,27 @@ export const getBlockPatternsForEmailTemplate = createRegistrySelector(
  * @return {Object?} Post Template.
  */
 export const getEditedPostTemplate = createRegistrySelector(
-	( select ) => (): EmailTemplate => {
+	( select ) => (): EmailTemplate | null => {
 		const currentTemplate =
-			// @ts-expect-error Expected 0 arguments, but got 1.
 			select( editorStore ).getEditedPostAttribute( 'template' );
 
 		if ( currentTemplate ) {
 			const templateWithSameSlug = select( coreDataStore )
-				.getEntityRecords( 'postType', 'wp_template', { per_page: -1 } )
+				.getEntityRecords( 'postType', 'wp_template', {
+					per_page: -1,
+					context: 'view',
+				} )
 				// @ts-expect-error Missing property in type
 				?.find( ( template ) => template.slug === currentTemplate );
 
 			if ( ! templateWithSameSlug ) {
-				return templateWithSameSlug as EmailTemplate;
+				return regularizedGetEntityRecord(
+					templateWithSameSlug
+				) as EmailTemplate;
 			}
 
-			return select( coreDataStore ).getEditedEntityRecord(
-				'postType',
-				'wp_template',
-
-				// @ts-expect-error getEditedPostAttribute
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-				templateWithSameSlug.id
-			) as unknown as EmailTemplate;
+			// @ts-expect-error getEditedPostAttribute
+			return getTemplate( select, templateWithSameSlug.id );
 		}
 
 		const defaultTemplateId = select( coreDataStore ).getDefaultTemplateId(
@@ -228,12 +223,7 @@ export const getEditedPostTemplate = createRegistrySelector(
 			}
 		);
 
-		return select( coreDataStore ).getEditedEntityRecord(
-			'postType',
-			'wp_template',
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-			defaultTemplateId
-		) as unknown as EmailTemplate;
+		return getTemplate( select, defaultTemplateId );
 	}
 );
 
@@ -262,18 +252,42 @@ export const getCurrentTemplateContent = () => {
 	return '';
 };
 
-export const getGlobalEmailStylesPost = createRegistrySelector(
+export const canUserEditGlobalEmailStyles = createRegistrySelector(
 	( select ) => () => {
 		const postId = select( storeName ).getGlobalStylesPostId();
-
+		// @ts-expect-error Selector is not typed
+		const canEdit = select( coreDataStore ).canUser( 'update', {
+			kind: 'root',
+			name: 'globalStyles',
+			id: postId,
+		} );
+		return { postId, canEdit };
+	}
+);
+export const getGlobalEmailStylesPost = createRegistrySelector(
+	( select ) => () => {
+		const { postId, canEdit } = canUserEditGlobalEmailStyles();
+		if ( ! postId || canEdit === undefined ) {
+			return null;
+		}
 		if ( postId ) {
-			return select( coreDataStore ).getEditedEntityRecord(
-				'postType',
-				'wp_global_styles',
-				postId
+			if ( canEdit ) {
+				return select( coreDataStore ).getEditedEntityRecord(
+					'postType',
+					'wp_global_styles',
+					postId
+				) as unknown as Post;
+			}
+			return regularizedGetEntityRecord(
+				select( coreDataStore ).getEntityRecord(
+					'postType',
+					'wp_global_styles',
+					postId,
+					{ context: 'view' }
+				)
 			) as unknown as Post;
 		}
-		return getEditedPostTemplate();
+		return null;
 	}
 );
 
@@ -286,6 +300,7 @@ export const getEmailTemplates = createRegistrySelector(
 			.getEntityRecords( 'postType', 'wp_template', {
 				per_page: -1,
 				post_type: editorCurrentPostType,
+				context: 'view',
 			} )
 			// We still need to filter the templates because, in some cases, the API also returns custom templates
 			// ignoring the post_type filter in the query
@@ -295,12 +310,8 @@ export const getEmailTemplates = createRegistrySelector(
 			)
 );
 
-export function getEmailPostId( state: State ): number {
+export function getEmailPostId( state: State ): number | string {
 	return state.postId;
-}
-
-export function getSettingsSidebarActiveTab( state: State ): string {
-	return state.settingsSidebar.activeTab;
 }
 
 export function getInitialEditorSettings(
@@ -332,20 +343,8 @@ export function getPersonalizationTagsList(
 	return state.personalizationTags.list;
 }
 
-export const getDeviceType = createRegistrySelector(
-	( select ) => () =>
-		// @ts-expect-error getDeviceType is missing in types.
-		select( editorStore ).getDeviceType() as string
-);
-
 export function getStyles( state: State ): State[ 'theme' ][ 'styles' ] {
 	return state.theme.styles;
-}
-
-export function getAutosaveInterval(
-	state: State
-): State[ 'autosaveInterval' ] {
-	return state.autosaveInterval;
 }
 
 export function getTheme( state: State ): State[ 'theme' ] {

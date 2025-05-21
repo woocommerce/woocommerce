@@ -1,20 +1,20 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Integrations\Core\Renderer\Blocks;
+namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use MailPoet\EmailEditor\Engine\Email_Editor;
-use MailPoet\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
 
 /**
  * Integration test for Column class
  */
-class Column_Test extends \MailPoetTest {
+class Column_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Column renderer instance
 	 *
@@ -60,7 +60,8 @@ class Column_Test extends \MailPoetTest {
 	/**
 	 * Set up before each test
 	 */
-	public function _before() {
+	public function setUp(): void {
+		parent::setUp();
 		$this->di_container->get( Email_Editor::class )->initialize();
 		$this->column_renderer     = new Column();
 		$this->settings_controller = $this->di_container->get( Settings_Controller::class );

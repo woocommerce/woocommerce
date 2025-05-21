@@ -1,7 +1,10 @@
-const { test, expect } = require( '@playwright/test' );
-const { variableProducts: utils } = require( '../../utils' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * Internal dependencies
+ */
+import { variableProducts as utils } from '../../utils';
+import { tags, test, expect } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+
 const {
 	createVariableProduct,
 	showVariableProductTour,
@@ -129,7 +132,11 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		} );
 
 		await test.step( 'Expand all variations.', async () => {
-			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+			const expandButton = page
+				.getByRole( 'link', { name: 'Expand' } )
+				.first();
+			await expandButton.waitFor( { state: 'visible' } );
+			await expandButton.click();
 		} );
 
 		await test.step( 'Edit the first variation.', async () => {
@@ -212,7 +219,11 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		} );
 
 		await test.step( 'Expand all variations.', async () => {
-			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+			const expandButton = page
+				.getByRole( 'link', { name: 'Expand' } )
+				.first();
+			await expandButton.waitFor( { state: 'visible' } );
+			await expandButton.click();
 		} );
 
 		await test.step( 'Expect the first variation to be virtual.', async () => {
@@ -309,7 +320,11 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		} );
 
 		await test.step( 'Expand all variations.', async () => {
-			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+			const expandButton = page
+				.getByRole( 'link', { name: 'Expand' } )
+				.first();
+			await expandButton.waitFor( { state: 'visible' } );
+			await expandButton.click();
 		} );
 
 		await test.step( 'Expect all "Downloadable" checkboxes to be checked.', async () => {
@@ -362,7 +377,11 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		} );
 
 		await test.step( 'Expand all variations', async () => {
-			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+			const expandButton = page
+				.getByRole( 'link', { name: 'Expand' } )
+				.first();
+			await expandButton.waitFor( { state: 'visible' } );
+			await expandButton.click();
 		} );
 
 		const variationContainer = page.locator(
@@ -407,10 +426,17 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 
 		await test.step( 'Click "Save changes"', async () => {
 			await page.getByRole( 'button', { name: 'Save changes' } ).click();
+			await page.waitForFunction(
+				() => ! Boolean( document.querySelector( '.blockUI' ) )
+			);
 		} );
 
 		await test.step( 'Expand all variations', async () => {
-			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+			const expandButton = page
+				.getByRole( 'link', { name: 'Expand' } )
+				.first();
+			await expandButton.waitFor( { state: 'visible' } );
+			await expandButton.click();
 		} );
 
 		await test.step( 'Expect the stock quantity to be saved correctly', async () => {

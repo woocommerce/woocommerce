@@ -16,6 +16,7 @@ const DEFAULT_STATE = {
 		updateWccomRequestErrorsMode: {},
 		fakeWooPayments: {},
 		updateWccomBaseUrl: { url: '' },
+		loadTemplateVersion: { template_name: '', version: '' },
 	},
 	status: '',
 	dbUpdateVersions: [],

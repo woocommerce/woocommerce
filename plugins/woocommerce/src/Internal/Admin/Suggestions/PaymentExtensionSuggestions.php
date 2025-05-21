@@ -28,6 +28,7 @@ class PaymentExtensionSuggestions {
 	const PAYPAL_WALLET     = 'paypal_wallet';
 	const PAYONEER          = 'payoneer';
 	const PAYSTACK          = 'paystack';
+	const PAYTRAIL          = 'paytrail';
 	const PAYU_INDIA        = 'payu_india';
 	const RAZORPAY          = 'razorpay';
 	const SQUARE            = 'square';
@@ -40,8 +41,22 @@ class PaymentExtensionSuggestions {
 	const AFTERPAY          = 'afterpay';
 	const CLEARPAY          = 'clearpay';
 	const KLARNA            = 'klarna';
+	const KLARNA_CHECKOUT   = 'klarna_checkout';
 	const HELIOPAY          = 'heliopay';
 	const MONEI             = 'monei';
+	const COINBASE          = 'coinbase';
+	const BILLIE            = 'billie';
+	const BOLT              = 'bolt_checkout';
+	const AUTHORIZE_NET     = 'authorize_net';
+	const DEPAY             = 'depay';
+	const ELAVON            = 'elavon';
+	const EWAY              = 'eway';
+	const FORTISPAY         = 'fortis';
+	const GOCARDLESS        = 'gocardless';
+	const NEXI              = 'nexi';
+	const PAYPAL_ZETTLE     = 'paypal_zettle';
+	const RAPYD             = 'rapyd';
+	const PAYPAL_BRAINTREE  = 'paypal_braintree';
 
 	/*
 	 * The extension types.
@@ -78,9 +93,17 @@ class PaymentExtensionSuggestions {
 	 * These are used to categorize the extensions and provide additional information to the system.
 	 * Some tags may carry special meaning and will be used to influence the suggestions' behavior.
 	 */
-	const TAG_PREFERRED   = 'preferred';
-	const TAG_MADE_IN_WOO = 'made_in_woo'; // For extensions developed by Woo.
-	const TAG_RECOMMENDED = 'recommended'; // For extensions that should be further emphasized.
+	const TAG_PREFERRED         = 'preferred';
+	const TAG_PREFERRED_OFFLINE = 'preferred_offline'; // For extensions that are preferred for offline payments.
+	const TAG_MADE_IN_WOO       = 'made_in_woo'; // For extensions developed by Woo.
+	const TAG_RECOMMENDED       = 'recommended'; // For extensions that should be further emphasized.
+
+	/**
+	 * The memoized extensions base details to avoid computing them multiple times during a request.
+	 *
+	 * @var array|null
+	 */
+	private ?array $extensions_base_details_memo = null;
 
 	/**
 	 * The payment extension list for each country.
@@ -133,7 +156,7 @@ class PaymentExtensionSuggestions {
 			self::WOOPAYMENTS,
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
-			self::SQUARE => array(
+			self::SQUARE     => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -147,10 +170,20 @@ class PaymentExtensionSuggestions {
 					),
 				),
 			),
+			self::GOCARDLESS => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/en-ca/pricing/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 			self::AFFIRM,
 			self::AFTERPAY,
-			self::KLARNA => array(
+			self::KLARNA     => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -173,8 +206,8 @@ class PaymentExtensionSuggestions {
 			),
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
-			self::AIRWALLEX,
 			self::SQUARE, // Use the default details.
+			self::AIRWALLEX,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::AFFIRM,
@@ -187,10 +220,7 @@ class PaymentExtensionSuggestions {
 			self::WOOPAYMENTS,
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
-			self::MOLLIE,
-			self::AIRWALLEX,
-			self::VIVA_WALLET,
-			self::SQUARE => array(
+			self::SQUARE          => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -204,10 +234,41 @@ class PaymentExtensionSuggestions {
 					),
 				),
 			),
+			self::MOLLIE,
+			self::AIRWALLEX,
+			self::VIVA_WALLET,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/uk/business/payment-methods/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/uk/terms-and-conditions/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
+			self::AFFIRM          => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.affirm.com/en-gb/business',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.affirm.com/en-gb/terms',
+						),
+					),
+				),
+			),
 			self::CLEARPAY,
-			self::KLARNA => array(
+			self::KLARNA          => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -230,6 +291,7 @@ class PaymentExtensionSuggestions {
 			),
 		),
 		'AD' => array(
+			self::MONEI,
 			self::PAYPAL_WALLET => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
@@ -243,9 +305,33 @@ class PaymentExtensionSuggestions {
 			self::MOLLIE,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
+			self::GOCARDLESS      => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/en-ie/pricing/',
+						),
+					),
+				),
+			),
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/at/verkaeufer/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/at/agb/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
-			self::KLARNA => array(
+			self::KLARNA          => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -267,9 +353,19 @@ class PaymentExtensionSuggestions {
 			self::MOLLIE,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
+			self::GOCARDLESS => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/en-ie/pricing/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
-			self::KLARNA => array(
+			self::KLARNA     => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -305,6 +401,16 @@ class PaymentExtensionSuggestions {
 			self::STRIPE,
 			self::MOLLIE,
 			self::VIVA_WALLET,
+			self::GOCARDLESS => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/en-ie/pricing/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 		),
 		'CY' => array(
@@ -313,6 +419,16 @@ class PaymentExtensionSuggestions {
 			self::STRIPE,
 			self::MOLLIE,
 			self::VIVA_WALLET,
+			self::GOCARDLESS => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/en-ie/pricing/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 		),
@@ -344,9 +460,33 @@ class PaymentExtensionSuggestions {
 			self::STRIPE,
 			self::MOLLIE,
 			self::VIVA_WALLET,
+			self::GOCARDLESS      => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/da-dk/priser/',
+						),
+					),
+				),
+			),
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/dk/erhverv/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/dk/vilkar/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
-			self::KLARNA => array(
+			self::KLARNA          => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -366,6 +506,16 @@ class PaymentExtensionSuggestions {
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
 			self::MOLLIE,
+			self::GOCARDLESS => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/en-ie/pricing/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 		),
 		'FI' => array(
@@ -374,8 +524,33 @@ class PaymentExtensionSuggestions {
 			self::STRIPE,
 			self::MOLLIE,
 			self::VIVA_WALLET,
+			self::GOCARDLESS      => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/en-ie/pricing/',
+						),
+					),
+				),
+			),
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/fi/yritys/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/fi/ehdot/',
+						),
+					),
+				),
+			),
+			self::PAYTRAIL,
 			self::PAYPAL_WALLET,
-			self::KLARNA => array(
+			self::KLARNA          => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -398,10 +573,7 @@ class PaymentExtensionSuggestions {
 			self::WOOPAYMENTS,
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
-			self::MOLLIE,
-			self::AIRWALLEX,
-			self::VIVA_WALLET,
-			self::SQUARE => array(
+			self::SQUARE     => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -415,9 +587,22 @@ class PaymentExtensionSuggestions {
 					),
 				),
 			),
+			self::MOLLIE,
+			self::AIRWALLEX,
+			self::VIVA_WALLET,
+			self::GOCARDLESS => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/fr-fr/tarifs/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
-			self::KLARNA => array(
+			self::KLARNA     => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -455,9 +640,33 @@ class PaymentExtensionSuggestions {
 			self::MOLLIE,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
+			self::GOCARDLESS      => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/de-de/preise/',
+						),
+					),
+				),
+			),
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/de/verkaeufer/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/de/agb/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
-			self::KLARNA => array(
+			self::KLARNA          => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -537,9 +746,6 @@ class PaymentExtensionSuggestions {
 			self::WOOPAYMENTS,
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
-			self::MOLLIE,
-			self::AIRWALLEX,
-			self::VIVA_WALLET,
 			self::SQUARE => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -554,6 +760,9 @@ class PaymentExtensionSuggestions {
 					),
 				),
 			),
+			self::MOLLIE,
+			self::AIRWALLEX,
+			self::VIVA_WALLET,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::KLARNA => array(
@@ -654,9 +863,23 @@ class PaymentExtensionSuggestions {
 			self::STRIPE,
 			self::MOLLIE,
 			self::VIVA_WALLET,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/nl/zakelijk/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/nl/voorwaarden/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
-			self::KLARNA => array(
+			self::KLARNA          => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -676,8 +899,22 @@ class PaymentExtensionSuggestions {
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
 			self::MOLLIE,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/no/bedrift/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/no/vilkar/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
-			self::KLARNA => array(
+			self::KLARNA          => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -804,10 +1041,6 @@ class PaymentExtensionSuggestions {
 			self::WOOPAYMENTS,
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
-			self::MOLLIE,
-			self::MONEI,
-			self::AIRWALLEX,
-			self::VIVA_WALLET,
 			self::SQUARE => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -822,6 +1055,10 @@ class PaymentExtensionSuggestions {
 					),
 				),
 			),
+			self::MOLLIE,
+			self::MONEI,
+			self::AIRWALLEX,
+			self::VIVA_WALLET,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::KLARNA => array(
@@ -845,6 +1082,20 @@ class PaymentExtensionSuggestions {
 			self::STRIPE,
 			self::MOLLIE,
 			self::VIVA_WALLET,
+			self::KLARNA_CHECKOUT => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.klarna.com/international/enterprise/',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.klarna.com/se/villkor/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 		),
@@ -1249,9 +1500,7 @@ class PaymentExtensionSuggestions {
 			self::WOOPAYMENTS,
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
-			self::AIRWALLEX,
-			self::ANTOM,
-			self::SQUARE => array(
+			self::SQUARE     => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -1265,9 +1514,21 @@ class PaymentExtensionSuggestions {
 					),
 				),
 			),
+			self::AIRWALLEX,
+			self::ANTOM,
+			self::GOCARDLESS => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://gocardless.com/en-au/pricing/',
+						),
+					),
+				),
+			),
 			self::PAYPAL_WALLET,
 			self::AFTERPAY,
-			self::KLARNA => array(
+			self::KLARNA     => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -1340,7 +1601,6 @@ class PaymentExtensionSuggestions {
 			self::WOOPAYMENTS,
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
-			self::ANTOM,
 			self::SQUARE => array(
 				'_merge_on_type' => array(
 					'links' => array(
@@ -1355,6 +1615,7 @@ class PaymentExtensionSuggestions {
 					),
 				),
 			),
+			self::ANTOM,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 		),
@@ -1729,8 +1990,12 @@ class PaymentExtensionSuggestions {
 				continue;
 			}
 
+			// Determine the extension details for the given country.
 			$extension_base_details = $this->get_extension_base_details( $extension_id ) ?? array();
 			$extension_details      = $this->with_country_details( $extension_base_details, $extension_country_details );
+
+			// Apply any changes to the extension details based on the store's state.
+			$extension_details = $this->with_store_state_details( $extension_id, $extension_details );
 
 			// Check if there is an incentive for this extension and attach its details.
 			$incentive = $this->get_extension_incentive( $extension_id, $country_code, $context );
@@ -1784,10 +2049,13 @@ class PaymentExtensionSuggestions {
 	 * @param string $country_code Optional. The two-letter country code for which the extension suggestion should be retrieved.
 	 * @param string $context      Optional. The context ID of where this extension suggestion is being used.
 	 *
-	 * @return array|null The extension details for the given plugin slug. Null if not found.
+	 * @return array|null The extension details for the given plugin slug. Null if not found or the slug is empty.
 	 */
 	public function get_by_plugin_slug( string $plugin_slug, string $country_code = '', string $context = '' ): ?array {
 		$plugin_slug = sanitize_title( $plugin_slug );
+		if ( empty( $plugin_slug ) ) {
+			return null;
+		}
 
 		// If we have a country code, try to find a fully localized extension suggestion.
 		if ( ! empty( $country_code ) ) {
@@ -1834,7 +2102,6 @@ class PaymentExtensionSuggestions {
 		return $this->suggestion_incentives->dismiss_incentive( $incentive_id, $suggestion_id, $context );
 	}
 
-
 	/**
 	 * Determine if a payment extension is allowed to be suggested.
 	 *
@@ -1849,88 +2116,6 @@ class PaymentExtensionSuggestions {
 		// Add per-extension exclusion logic here.
 		// Returning true for now to avoid excluding any extensions.
 		return true;
-	}
-
-	/**
-	 * Based on the WC onboarding profile, determine if the merchant is selling online.
-	 *
-	 * If the user skipped the profiler (no data points provided), we assume they are selling online.
-	 *
-	 * @return bool True if the merchant is selling online, false otherwise.
-	 */
-	private function is_merchant_selling_online(): bool {
-		/*
-		 * We consider a merchant to be selling online if:
-		 * - The profiler was skipped (no data points provided).
-		 *   OR
-		 * - The merchant answered 'Which one of these best describes you?' with 'I’m already selling' AND:
-		 *   - Didn't answer to the 'Are you selling online?' question.
-		 *      OR
-		 *   - Answered the 'Are you selling online?' question with either:
-		 *     - 'Yes, I’m selling online'.
-		 *        OR
-		 *     - 'I’m selling both online and offline'.
-		 *
-		 * @see plugins/woocommerce/client/admin/client/core-profiler/pages/UserProfile.tsx for the values.
-		 */
-		$onboarding_profile = get_option( OnboardingProfile::DATA_OPTION, array() );
-		if (
-			! isset( $onboarding_profile['business_choice'] ) ||
-			(
-				'im_already_selling' === $onboarding_profile['business_choice'] &&
-				(
-					! isset( $onboarding_profile['selling_online_answer'] ) ||
-					(
-						'yes_im_selling_online' === $onboarding_profile['selling_online_answer'] ||
-						'im_selling_both_online_and_offline' === $onboarding_profile['selling_online_answer']
-					)
-				)
-			)
-		) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Based on the WC onboarding profile, determine if the merchant is selling offline.
-	 *
-	 * If the user skipped the profiler (no data points provided), we assume they are NOT selling offline.
-	 *
-	 * @return bool True if the merchant is selling offline, false otherwise.
-	 */
-	private function is_merchant_selling_offline(): bool {
-		/*
-		 * We consider a merchant to be selling offline if:
-		 * - The profiler was NOT skipped (data points provided).
-		 *   AND
-		 * - The merchant answered 'Which one of these best describes you?' with 'I’m already selling' AND:
-		 *   - Answered the 'Are you selling online?' question with either:
-		 *     - 'No, I’m selling offline'.
-		 *        OR
-		 *     - 'I’m selling both online and offline'.
-		 *
-		 * @see plugins/woocommerce/client/admin/client/core-profiler/pages/UserProfile.tsx for the values.
-		 */
-		$onboarding_profile = get_option( OnboardingProfile::DATA_OPTION, array() );
-		if (
-			isset( $onboarding_profile['business_choice'] ) &&
-			(
-				'im_already_selling' === $onboarding_profile['business_choice'] &&
-				(
-					isset( $onboarding_profile['selling_online_answer'] ) &&
-					(
-						'no_im_selling_offline' === $onboarding_profile['selling_online_answer'] ||
-						'im_selling_both_online_and_offline' === $onboarding_profile['selling_online_answer']
-					)
-				)
-			)
-		) {
-			return true;
-		}
-
-		return false;
 	}
 
 	/**
@@ -2055,6 +2240,31 @@ class PaymentExtensionSuggestions {
 	}
 
 	/**
+	 * Apply customizations to the extension details based on the store's state.
+	 *
+	 * The customizations may be general or specific to certain extensions.
+	 * The store's state refers to various aspects of the store's configuration, collected data,
+	 * store setup/launch process, onboarding task completion, etc.
+	 *
+	 * @param string $extension_id      The extension ID.
+	 * @param array  $extension_details The extension details.
+	 *
+	 * @return array The modified extension details.
+	 */
+	private function with_store_state_details( string $extension_id, array $extension_details ): array {
+		// For Square, we add the preferred tags if the merchant self-identified as selling offline via the core profiler.
+		if ( self::SQUARE === $extension_id && $this->is_merchant_selling_offline() ) {
+			if ( empty( $extension_details['tags'] ) ) {
+				$extension_details['tags'] = array();
+			}
+			$extension_details['tags'][] = self::TAG_PREFERRED;
+			$extension_details['tags'][] = self::TAG_PREFERRED_OFFLINE;
+		}
+
+		return $extension_details;
+	}
+
+	/**
 	 * Get the incentive details for a given extension and country, if any.
 	 *
 	 * @param string $extension_id The extension ID.
@@ -2084,7 +2294,7 @@ class PaymentExtensionSuggestions {
 		// Enhance the incentive details.
 		$incentive['_suggestion_id'] = $extension_id;
 		// Add the dismissals list.
-		$incentive['_dismissals'] = array_unique( array_values( $this->suggestion_incentives->get_incentive_dismissals( $incentive['id'], $extension_id ) ) );
+		$incentive['_dismissals'] = $this->suggestion_incentives->get_incentive_dismissals( $incentive['id'], $extension_id );
 
 		return $incentive;
 	}
@@ -2117,7 +2327,10 @@ class PaymentExtensionSuggestions {
 	 * @return array[] The base details of all extensions.
 	 */
 	private function get_all_extensions_base_details(): array {
-		return array(
+		if ( isset( $this->extensions_base_details_memo ) ) {
+			return $this->extensions_base_details_memo;
+		}
+		$this->extensions_base_details_memo = array(
 			self::AIRWALLEX         => array(
 				'_type'       => self::TYPE_PSP,
 				'title'       => esc_html__( 'Airwallex Payments', 'woocommerce' ),
@@ -2438,6 +2651,38 @@ class PaymentExtensionSuggestions {
 					),
 				),
 			),
+			self::PAYTRAIL          => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'Paytrail', 'woocommerce' ),
+				'description' => esc_html__( 'Accept all popular payment methods for Finnish B2C and B2B customers', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/paytrail.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'paytrail-for-woocommerce',
+				),
+				'links'       => array(
+					array(
+						'_type' => self::LINK_TYPE_PRICING,
+						'url'   => 'https://www.paytrail.com/en/pricing',
+					),
+					array(
+						'_type' => self::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/paytrail/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_TERMS,
+						'url'   => 'https://www.paytrail.com/en/terms-conditions',
+					),
+					array(
+						'_type' => self::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/paytrail-for-woocommerce/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_SUPPORT,
+						'url'   => 'https://www.paytrail.com/en/customer-service#merchants',
+					),
+				),
+			),
 			self::PAYU_INDIA        => array(
 				'_type'       => self::TYPE_PSP,
 				'title'       => esc_html__( 'PayU India', 'woocommerce' ),
@@ -2607,12 +2852,12 @@ class PaymentExtensionSuggestions {
 			),
 			self::VIVA_WALLET       => array(
 				'_type'       => self::TYPE_PSP,
-				'title'       => esc_html__( 'Viva.com Standard Checkout', 'woocommerce' ),
-				'description' => esc_html__( 'Viva.com is a European payments solution that allows you to accept payments in 24 countries and multiple currencies.', 'woocommerce' ),
+				'title'       => esc_html__( 'Viva.com Smart Checkout', 'woocommerce' ),
+				'description' => esc_html__( 'A European payments solution that allows you to accept payments in over 25 countries and multiple currencies.', 'woocommerce' ),
 				'icon'        => plugins_url( 'assets/images/onboarding/icons/vivacom.svg', WC_PLUGIN_FILE ),
 				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
-					'slug'  => 'vivawallet-woocommerce-gateway',
+					'slug'  => 'viva-com-smart-for-woocommerce',
 				),
 				'links'       => array(
 					array(
@@ -2621,7 +2866,7 @@ class PaymentExtensionSuggestions {
 					),
 					array(
 						'_type' => self::LINK_TYPE_ABOUT,
-						'url'   => 'https://woocommerce.com/products/viva-wallet-for-woocommerce/',
+						'url'   => 'https://woocommerce.com/products/viva-com-smart-for-woocommerce/',
 					),
 					array(
 						'_type' => self::LINK_TYPE_TERMS,
@@ -2629,11 +2874,11 @@ class PaymentExtensionSuggestions {
 					),
 					array(
 						'_type' => self::LINK_TYPE_DOCS,
-						'url'   => 'https://woocommerce.com/document/viva-wallet-for-woocommerce/',
+						'url'   => 'https://woocommerce.com/document/viva-com-smart-for-woocommerce/',
 					),
 					array(
 						'_type' => self::LINK_TYPE_SUPPORT,
-						'url'   => 'https://woocommerce.com/document/viva-wallet-standard-checkout/#section-26',
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=viva-com-smart-for-woocommerce',
 					),
 				),
 			),
@@ -2837,10 +3082,42 @@ class PaymentExtensionSuggestions {
 					),
 				),
 			),
+			self::KLARNA_CHECKOUT   => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'Klarna Checkout', 'woocommerce' ),
+				'description' => esc_html__( 'A full checkout experience embedded on your site that includes all popular payment methods (Pay Now, Pay Later, Financing, Installments).', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/klarna-checkout.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'klarna-checkout-for-woocommerce',
+				),
+				'links'       => array(
+					array(
+						'_type' => self::LINK_TYPE_PRICING,
+						'url'   => 'https://www.klarna.com/us/business/payment-methods/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/klarna-checkout/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_TERMS,
+						'url'   => 'https://www.klarna.com/us/legal/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/klarna-checkout/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=klarna-checkout',
+					),
+				),
+			),
 			self::HELIOPAY          => array(
 				'_type'       => self::TYPE_CRYPTO,
 				'title'       => esc_html__( 'Helio Pay', 'woocommerce' ),
-				'description' => esc_html__( 'Effortlessly accept cryptocurrency payments in your WooCommerce store with Helio Pay.', 'woocommerce' ),
+				'description' => esc_html__( 'Effortlessly accept cryptocurrency payments in your store.', 'woocommerce' ),
 				'icon'        => plugins_url( 'assets/images/onboarding/icons/heliopay.png', WC_PLUGIN_FILE ),
 				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
@@ -2901,7 +3178,139 @@ class PaymentExtensionSuggestions {
 					),
 				),
 			),
+			self::COINBASE          => array(
+				'_type'  => self::TYPE_CRYPTO,
+				'icon'   => plugins_url( 'assets/images/onboarding/icons/coinbase.svg', WC_PLUGIN_FILE ),
+				'plugin' => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'coinbase-commerce',
+				),
+			),
+			self::AUTHORIZE_NET     => array(
+				'_type'  => self::TYPE_PSP,
+				'icon'   => plugins_url( 'assets/images/onboarding/icons/authorize.svg', WC_PLUGIN_FILE ),
+				'plugin' => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'woocommerce-gateway-authorize-net-cim',
+				),
+			),
+			self::BILLIE            => array(
+				'_type'  => self::TYPE_PSP,
+				'title'       => esc_html__( 'Billie', 'woocommerce' ),
+				'description' => esc_html__( 'Billie is the leading provider of Buy Now, Pay Later payment methods for B2B stores.', 'woocommerce' ),
+				'icon'   => plugins_url( 'assets/images/onboarding/icons/billie.svg', WC_PLUGIN_FILE ),
+				'plugin' => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'billie-for-woocommerce',
+				),
+			),
+			self::BOLT              => array(
+				'_type'  => self::TYPE_PSP,
+				'icon'   => plugins_url( 'assets/images/onboarding/icons/bolt.svg', WC_PLUGIN_FILE ),
+				'plugin' => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'bolt-checkout-woocommerce',
+				),
+			),
+			self::DEPAY             => array(
+				'_type'  => self::TYPE_PSP,
+				'icon'   => plugins_url( 'assets/images/onboarding/icons/depay.svg', WC_PLUGIN_FILE ),
+				'plugin' => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'depay-payments-for-woocommerce',
+				),
+			),
+			self::ELAVON            => array(
+				'_type'  => self::TYPE_PSP,
+				'icon'   => plugins_url( 'assets/images/onboarding/icons/elavon.svg', WC_PLUGIN_FILE ),
+				'plugin' => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'woocommerce-gateway-converge',
+				),
+			),
+			self::EWAY              => array(
+				'_type'  => self::TYPE_PSP,
+				'icon'   => plugins_url( 'assets/images/onboarding/icons/eway.svg', WC_PLUGIN_FILE ),
+				'plugin' => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'woocommerce-gateway-eway',
+				),
+			),
+			self::FORTISPAY         => array(
+				'_type'  => self::TYPE_PSP,
+				'icon'   => plugins_url( 'assets/images/onboarding/icons/fortispay.svg', WC_PLUGIN_FILE ),
+				'plugin' => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'fortis-for-woocommerce',
+				),
+			),
+			self::GOCARDLESS        => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'GoCardless', 'woocommerce' ),
+				'description' => esc_html__( 'Accept Direct Debit, ACH Pull, and open baking payments.', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/gocardless.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'woocommerce-gateway-gocardless',
+				),
+				'links'       => array(
+					array(
+						'_type' => self::LINK_TYPE_PRICING,
+						'url'   => 'https://gocardless.com/pricing/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/gocardless/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_TERMS,
+						'url'   => 'https://gocardless.com/legal/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/gocardless/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=gocardless',
+					),
+				),
+			),
+			self::NEXI              => array(
+				'_type'  => self::TYPE_PSP,
+				'icon'   => plugins_url( 'assets/images/onboarding/icons/nexi.svg', WC_PLUGIN_FILE ),
+				'plugin' => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'dibs-easy-for-woocommerce',
+				),
+			),
+			self::PAYPAL_ZETTLE     => array(
+				'_type'  => self::TYPE_PSP,
+				'icon'   => plugins_url( 'assets/images/onboarding/icons/paypal-zettle.svg', WC_PLUGIN_FILE ),
+				'plugin' => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'zettle-pos-integration',
+				),
+			),
+			self::RAPYD             => array(
+				'_type'  => self::TYPE_PSP,
+				'icon'   => plugins_url( 'assets/images/onboarding/icons/rapyd.svg', WC_PLUGIN_FILE ),
+				'plugin' => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'rapyd-payments-plugin-for-woocommerce',
+				),
+			),
+			self::PAYPAL_BRAINTREE  => array(
+				'_type'  => self::TYPE_PSP,
+				'icon'   => plugins_url( 'assets/images/onboarding/icons/paypal-braintree.svg', WC_PLUGIN_FILE ),
+				'plugin' => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'woocommerce-gateway-paypal-powered-by-braintree',
+				),
+			),
 		);
+
+		return $this->extensions_base_details_memo;
 	}
 
 	/**
@@ -2940,17 +3349,99 @@ class PaymentExtensionSuggestions {
 		$standardized['id']          = $extension_details['id'];
 		$standardized['_priority']   = $extension_details['_priority'];
 		$standardized['_type']       = $extension_details['_type'];
-		$standardized['title']       = $extension_details['title'];
-		$standardized['description'] = $extension_details['description'];
 		$standardized['plugin']      = $extension_details['plugin'];
 
 		// Optional fields.
-		$standardized['image']      = $extension_details['image'] ?? '';
-		$standardized['icon']       = $extension_details['icon'] ?? '';
-		$standardized['links']      = $extension_details['links'] ?? array();
-		$standardized['tags']       = $extension_details['tags'] ?? array();
-		$standardized['_incentive'] = $extension_details['_incentive'] ?? null;
+		$standardized['title']       = $extension_details['title'] ?? '';
+		$standardized['description'] = $extension_details['description'] ?? '';
+		$standardized['image']       = $extension_details['image'] ?? '';
+		$standardized['icon']        = $extension_details['icon'] ?? '';
+		$standardized['links']       = $extension_details['links'] ?? array();
+		$standardized['tags']        = $extension_details['tags'] ?? array();
+		$standardized['_incentive']  = $extension_details['_incentive'] ?? null;
 
 		return $standardized;
+	}
+
+	/**
+	 * Based on the WC onboarding profile, determine if the merchant is selling online.
+	 *
+	 * If the user skipped the profiler (no data points provided), we assume they are selling online.
+	 *
+	 * @return bool True if the merchant is selling online, false otherwise.
+	 */
+	private function is_merchant_selling_online(): bool {
+		/*
+		 * We consider a merchant to be selling online if:
+		 * - The profiler was skipped (no data points provided).
+		 *   OR
+		 * - The merchant answered 'Which one of these best describes you?' with 'I’m already selling' AND:
+		 *   - Didn't answer to the 'Are you selling online?' question.
+		 *      OR
+		 *   - Answered the 'Are you selling online?' question with either:
+		 *     - 'Yes, I’m selling online'.
+		 *        OR
+		 *     - 'I’m selling both online and offline'.
+		 *
+		 * @see plugins/woocommerce/client/admin/client/core-profiler/pages/UserProfile.tsx for the values.
+		 */
+		$onboarding_profile = get_option( OnboardingProfile::DATA_OPTION, array() );
+		if (
+			! isset( $onboarding_profile['business_choice'] ) ||
+			(
+				'im_already_selling' === $onboarding_profile['business_choice'] &&
+				(
+					! isset( $onboarding_profile['selling_online_answer'] ) ||
+					(
+						'yes_im_selling_online' === $onboarding_profile['selling_online_answer'] ||
+						'im_selling_both_online_and_offline' === $onboarding_profile['selling_online_answer']
+					)
+				)
+			)
+		) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Based on the WC onboarding profile, determine if the merchant is selling offline.
+	 *
+	 * If the user skipped the profiler (no data points provided), we assume they are NOT selling offline.
+	 *
+	 * @return bool True if the merchant is selling offline, false otherwise.
+	 */
+	private function is_merchant_selling_offline(): bool {
+		/*
+		 * We consider a merchant to be selling offline if:
+		 * - The profiler was NOT skipped (data points provided).
+		 *   AND
+		 * - The merchant answered 'Which one of these best describes you?' with 'I’m already selling' AND:
+		 *   - Answered the 'Are you selling online?' question with either:
+		 *     - 'No, I’m selling offline'.
+		 *        OR
+		 *     - 'I’m selling both online and offline'.
+		 *
+		 * @see plugins/woocommerce/client/admin/client/core-profiler/pages/UserProfile.tsx for the values.
+		 */
+		$onboarding_profile = get_option( OnboardingProfile::DATA_OPTION, array() );
+		if (
+			isset( $onboarding_profile['business_choice'] ) &&
+			(
+				'im_already_selling' === $onboarding_profile['business_choice'] &&
+				(
+					isset( $onboarding_profile['selling_online_answer'] ) &&
+					(
+						'no_im_selling_offline' === $onboarding_profile['selling_online_answer'] ||
+						'im_selling_both_online_and_offline' === $onboarding_profile['selling_online_answer']
+					)
+				)
+			)
+		) {
+			return true;
+		}
+
+		return false;
 	}
 }

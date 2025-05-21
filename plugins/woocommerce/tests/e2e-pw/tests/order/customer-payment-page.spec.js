@@ -1,7 +1,9 @@
-const { test, expect } = require( '@playwright/test' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+/**
+ * Internal dependencies
+ */
+import { tags, expect, test } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { WC_API_PATH } from '../../utils/api-client';
 
 let productId, orderId;
 const productName = 'Simple Product Name';
@@ -13,16 +15,10 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		test.beforeAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
+		test.beforeAll( async ( { restApi } ) => {
 			// create a simple product
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: productName,
 					type: 'simple',
 					regular_price: productPrice,
@@ -31,8 +27,8 @@ test.describe(
 					productId = response.data.id;
 				} );
 			// create an order
-			await api
-				.post( 'orders', {
+			await restApi
+				.post( `${ WC_API_PATH }/orders`, {
 					line_items: [
 						{
 							product_id: productId,
@@ -44,21 +40,21 @@ test.describe(
 					orderId = response.data.id;
 				} );
 			// enable bank transfer as a payment option
-			await api.put( 'payment_gateways/bacs', {
+			await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
 				enabled: 'true',
 			} );
 		} );
 
-		test.afterAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
+		test.afterAll( async ( { restApi } ) => {
+			await restApi.delete( `${ WC_API_PATH }/products/${ productId }`, {
+				force: true,
 			} );
-			await api.delete( `products/${ productId }`, { force: true } );
-			await api.delete( `orders/${ orderId }`, { force: true } );
-			await api.put( 'payment_gateways/bacs', { enabled: 'false' } );
+			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
+				force: true,
+			} );
+			await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
+				enabled: 'false',
+			} );
 		} );
 
 		test(

@@ -27,3 +27,4 @@
 /vendor/**
 
 /client/admin/** 
+/client/blocks/**

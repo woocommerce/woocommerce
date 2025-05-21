@@ -1,0 +1,24 @@
+{
+	"name": "woocommerce/add-to-cart-form",
+	"title": "Add to Cart with Options",
+	"description": "Display a button that lets customers add a product to their cart. Use the added options to optimize for different product types.",
+	"category": "woocommerce-product-elements",
+	"attributes": {
+		"quantitySelectorStyle": {
+			"type": "string",
+			"enum": [ "input", "stepper" ],
+			"default": "input"
+		}
+	},
+	"keywords": [ "WooCommerce" ],
+	"usesContext": [ "postId" ],
+	"textdomain": "woocommerce",
+	"supports": {
+		"interactivity": true
+	},
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"viewScriptModule": "woocommerce/add-to-cart-form",
+	"style": "file:../woocommerce/add-to-cart-form-style.css",
+	"editorStyle": "file:../woocommerce/add-to-cart-form-editor.css"
+}

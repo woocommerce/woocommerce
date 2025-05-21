@@ -1,12 +1,12 @@
 <?php
 /**
- * This file is part of the MailPoet Email Editor package.
+ * This file is part of the WooCommerce Email Editor package.
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare( strict_types = 1 );
-namespace MailPoet\EmailEditor\Validator;
+namespace Automattic\WooCommerce\EmailEditor\Validator;
 
 use JsonSerializable;
 use stdClass;
@@ -224,7 +224,7 @@ class Validator {
 		return new WP_Error(
 			'rest_invalid_type',
 			// translators: %1$s is the current parameter and %2$s a comma-separated list of the allowed types.
-			sprintf( __( '%1$s is not of type %2$s.', 'mailpoet' ), $param, implode( ',', $type ) ),
+			sprintf( __( '%1$s is not of type %2$s.', 'woocommerce' ), $param, implode( ',', $type ) ),
 			array( 'param' => $param )
 		);
 	}

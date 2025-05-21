@@ -1,0 +1,90 @@
+{
+	"name": "woocommerce/product-button",
+	"title": "Add to Cart Button",
+	"description": "Display a call to action button which either adds the product to the cart, or links to the product page.",
+	"category": "woocommerce-product-elements",
+	"keywords": [ "WooCommerce" ],
+	"usesContext": [
+		"query",
+		"queryId",
+		"postId",
+		"woocommerce/isDescendantOfAddToCartWithOptions"
+	],
+	"textdomain": "woocommerce",
+	"attributes": {
+		"productId": {
+			"type": "number",
+			"default": 0
+		},
+		"textAlign": {
+			"type": "string",
+			"default": ""
+		},
+		"width": {
+			"type": "number"
+		},
+		"isDescendentOfSingleProductBlock": {
+			"type": "boolean",
+			"default": false
+		},
+		"isDescendentOfQueryLoop": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"supports": {
+		"align": [ "wide", "full" ],
+		"color": {
+			"text": true,
+			"background": true,
+			"link": false,
+			"__experimentalSkipSerialization": true
+		},
+		"interactivity": true,
+		"html": false,
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontStyle": true,
+			"__experimentalTextTransform": true,
+			"__experimentalTextDecoration": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalDefaultControls": {
+				"fontSize": true
+			}
+		},
+		"__experimentalBorder": {
+			"radius": true,
+			"__experimentalSkipSerialization": true
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true,
+			"__experimentalSkipSerialization": true
+		},
+		"__experimentalSelector": ".wp-block-button.wc-block-components-product-button .wc-block-components-product-button__button"
+	},
+	"ancestor": [
+		"woocommerce/all-products",
+		"woocommerce/single-product",
+		"core/post-template",
+		"woocommerce/product-template"
+	],
+	"styles": [
+		{
+			"name": "fill",
+			"label": "Fill",
+			"isDefault": true
+		},
+		{
+			"name": "outline",
+			"label": "Outline"
+		}
+	],
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"viewScriptModule": "woocommerce/product-button",
+	"style": "file:../woocommerce/product-button-style.css"
+}

@@ -426,7 +426,10 @@ When adding variations to the cart, the naming of the attribute is important.
 
 For global attributes, the attribute posted to the API should be the slug of the attribute. This should have a `pa_` prefix. For example, if you have an attribute named `Color`, the slug will be `pa_color`.
 
-For product specific attributes, the attribute posted to the API should be the name of the attribute. For example, if you have an attribute named `Size`, the name will be `Size`. This is case-sensitive.
+For product specific attributes, the attribute posted to the API can be one of the following:
+
+- the name of the attribute. For example, if you have an attribute named `Size`, the name will be `Size`. This is case-sensitive.
+- the slug of the attribute. For example, if you have an attribute named `Autograph ✏️`, the name will be `attribute_autograph-%e2%9c%8f%ef%b8%8f`. This is case-sensitive. You can get this slug from the related `select` on the product page.
 
 **Example POST body:**
 
@@ -438,6 +441,10 @@ For product specific attributes, the attribute posted to the API should be the n
 		{
 			"attribute": "pa_color",
 			"value": "blue"
+		},
+		{
+			"attribute": "attribute_autograph-%e2%9c%8f%ef%b8%8f",
+			"value": "Yes"
 		},
 		{
 			"attribute": "Logo",

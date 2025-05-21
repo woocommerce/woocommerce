@@ -1,16 +1,16 @@
 <?php
 /**
- * This file is part of the MailPoet Email Editor package.
+ * This file is part of the WooCommerce Email Editor package.
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine;
+namespace Automattic\WooCommerce\EmailEditor\Engine;
 
-use MailPoet\EmailEditor\Engine\Patterns\Patterns;
-use MailPoet\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
-use MailPoet\EmailEditor\Engine\Templates\Templates;
+use Automattic\WooCommerce\EmailEditor\Engine\Patterns\Patterns;
+use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates;
 use WP_Post;
 use WP_Theme_JSON;
 
@@ -21,7 +21,7 @@ use WP_Theme_JSON;
  * See register_post_type for details about EmailPostType args.
  */
 class Email_Editor {
-	public const MAILPOET_EMAIL_META_THEME_TYPE = 'mailpoet_email_theme';
+	public const WOOCOMMERCE_EMAIL_META_THEME_TYPE = 'woocommerce_email_theme';
 
 	/**
 	 * Property for the email API controller.
@@ -84,19 +84,19 @@ class Email_Editor {
 	 * @return void
 	 */
 	public function initialize(): void {
-		do_action( 'mailpoet_email_editor_initialized' );
-		add_filter( 'mailpoet_email_editor_rendering_theme_styles', array( $this, 'extend_email_theme_styles' ), 10, 2 );
+		do_action( 'woocommerce_email_editor_initialized' );
+		add_filter( 'woocommerce_email_editor_rendering_theme_styles', array( $this, 'extend_email_theme_styles' ), 10, 2 );
 		$this->register_block_patterns();
 		$this->register_email_post_types();
 		$this->register_block_templates();
 		$this->register_email_post_sent_status();
 		$this->register_personalization_tags();
-		$is_editor_page = apply_filters( 'mailpoet_is_email_editor_page', false );
+		$is_editor_page = apply_filters( 'woocommerce_is_email_editor_page', false );
 		if ( $is_editor_page ) {
 			$this->extend_email_post_api();
 		}
 		add_action( 'rest_api_init', array( $this, 'register_email_editor_api_routes' ) );
-		add_filter( 'mailpoet_email_editor_send_preview_email', array( $this->send_preview_email, 'send_preview_email' ), 11, 1 ); // allow for other filter methods to take precedent.
+		add_filter( 'woocommerce_email_editor_send_preview_email', array( $this->send_preview_email, 'send_preview_email' ), 11, 1 ); // allow for other filter methods to take precedent.
 		add_filter( 'single_template', array( $this, 'load_email_preview_template' ) );
 	}
 
@@ -124,7 +124,7 @@ class Email_Editor {
 
 	/**
 	 * Register all custom post types that should be edited via the email editor
-	 * The post types are added via mailpoet_email_editor_post_types filter.
+	 * The post types are added via woocommerce_email_editor_post_types filter.
 	 *
 	 * @return void
 	 */
@@ -139,7 +139,7 @@ class Email_Editor {
 
 	/**
 	 * Register all personalization tags registered via
-	 * the mailpoet_email_editor_register_personalization_tags filter.
+	 * the woocommerce_email_editor_register_personalization_tags filter.
 	 *
 	 * @return void
 	 */
@@ -155,7 +155,7 @@ class Email_Editor {
 	 */
 	private function get_post_types(): array {
 		$post_types = array();
-		return apply_filters( 'mailpoet_email_editor_post_types', $post_types );
+		return apply_filters( 'woocommerce_email_editor_post_types', $post_types );
 	}
 
 	/**
@@ -170,7 +170,13 @@ class Email_Editor {
 			'show_ui'                => true,
 			'show_in_menu'           => false,
 			'show_in_nav_menus'      => false,
-			'supports'               => array( 'editor', 'title', 'custom-fields' ), // 'custom-fields' is required for loading meta fields via API.
+			'supports'               => array(
+				'editor' => array(
+					'default-mode' => 'template-locked',
+				),
+				'title',
+				'custom-fields',
+			), // 'custom-fields' is required for loading meta fields via API.
 			'has_archive'            => true,
 			'show_in_rest'           => true, // Important to enable Gutenberg editor.
 			'default_rendering_mode' => 'template-locked',
@@ -192,7 +198,7 @@ class Email_Editor {
 			'show_in_admin_status_list' => false,
 			'private'                   => true, // required by the preview in new tab feature for sent post (newsletter). Posts are only visible to site admins and editors.
 		);
-		$args         = apply_filters( 'mailpoet_email_editor_post_sent_status_args', $default_args );
+		$args         = apply_filters( 'woocommerce_email_editor_post_sent_status_args', $default_args );
 		register_post_status(
 			'sent',
 			$args
@@ -224,7 +230,7 @@ class Email_Editor {
 	 */
 	public function register_email_editor_api_routes() {
 		register_rest_route(
-			'mailpoet-email-editor/v1',
+			'woocommerce-email-editor/v1',
 			'/send_preview_email',
 			array(
 				'methods'             => 'POST',
@@ -235,7 +241,7 @@ class Email_Editor {
 			)
 		);
 		register_rest_route(
-			'mailpoet-email-editor/v1',
+			'woocommerce-email-editor/v1',
 			'/get_personalization_tags',
 			array(
 				'methods'             => 'GET',
@@ -255,7 +261,7 @@ class Email_Editor {
 	 * @return WP_Theme_JSON
 	 */
 	public function extend_email_theme_styles( WP_Theme_JSON $theme, WP_Post $post ): WP_Theme_JSON {
-		$email_theme = get_post_meta( $post->ID, self::MAILPOET_EMAIL_META_THEME_TYPE, true );
+		$email_theme = get_post_meta( $post->ID, self::WOOCOMMERCE_EMAIL_META_THEME_TYPE, true );
 		if ( $email_theme && is_array( $email_theme ) ) {
 			$theme->merge( new WP_Theme_JSON( $email_theme ) );
 		}
@@ -298,7 +304,7 @@ class Email_Editor {
 		}
 
 		add_filter(
-			'mailpoet_email_editor_preview_post_template_html',
+			'woocommerce_email_editor_preview_post_template_html',
 			function () use ( $post ) {
 				// Generate HTML content for email editor post.
 				return $this->send_preview_email->render_html( $post );

@@ -156,6 +156,18 @@ type Props = {
 	 * On Blur callback.
 	 */
 	onBlur?: () => void;
+	/**
+	 * Enable virtual scrolling for large lists of options.
+	 */
+	virtualScroll?: boolean;
+	/**
+	 * Height in pixels for each virtual item. Required when virtualScroll is true.
+	 */
+	virtualItemHeight?: number;
+	/**
+	 * Maximum height in pixels for the virtualized list. Default is 300.
+	 */
+	virtualListHeight?: number;
 };
 
 type State = {
@@ -196,6 +208,9 @@ export class SelectControl extends Component< Props, State > {
 		hideBeforeSearch: false,
 		staticList: false,
 		autoComplete: 'off',
+		virtualScroll: false,
+		virtualItemHeight: 35,
+		virtualListHeight: 300,
 	};
 
 	node: HTMLDivElement | null = null;
@@ -227,6 +242,13 @@ export class SelectControl extends Component< Props, State > {
 		this.selectOption = this.selectOption.bind( this );
 		this.setExpanded = this.setExpanded.bind( this );
 		this.setNewValue = this.setNewValue.bind( this );
+	}
+
+	componentDidUpdate( prevProps: Props ) {
+		const { selected } = this.props;
+		if ( selected !== prevProps.selected ) {
+			this.reset( selected );
+		}
 	}
 
 	bindNode( node: HTMLDivElement ) {
@@ -518,6 +540,9 @@ export class SelectControl extends Component< Props, State > {
 			instanceId,
 			isSearchable,
 			options,
+			virtualScroll,
+			virtualItemHeight,
+			virtualListHeight,
 		} = this.props;
 		const { isExpanded, isFocused, selectedIndex } = this.state;
 
@@ -604,6 +629,9 @@ export class SelectControl extends Component< Props, State > {
 						decrementSelectedIndex={ this.decrementSelectedIndex }
 						incrementSelectedIndex={ this.incrementSelectedIndex }
 						setExpanded={ this.setExpanded }
+						virtualScroll={ virtualScroll }
+						virtualItemHeight={ virtualItemHeight }
+						virtualListHeight={ virtualListHeight }
 					/>
 				) }
 			</div>

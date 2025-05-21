@@ -559,6 +559,8 @@ function wc_get_price_decimals() {
  *                                      Defaults the result of wc_get_price_decimals().
  *     @type string $price_format       Price format depending on the currency position.
  *                                      Defaults the result of get_woocommerce_price_format().
+ *     @type bool   $in_span            Whether to enclose the formatted price in an HTML <span> element.
+ *                                      Defaults to true.
  * }
  * @return string
  */
@@ -574,6 +576,7 @@ function wc_price( $price, $args = array() ) {
 				'thousand_separator' => wc_get_price_thousand_separator(),
 				'decimals'           => wc_get_price_decimals(),
 				'price_format'       => get_woocommerce_price_format(),
+				'in_span'            => true,
 			)
 		)
 	);
@@ -610,8 +613,13 @@ function wc_price( $price, $args = array() ) {
 		$price = wc_trim_zeros( $price );
 	}
 
-	$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], '<span class="woocommerce-Price-currencySymbol">' . get_woocommerce_currency_symbol( $args['currency'] ) . '</span>', $price );
-	$return          = '<span class="woocommerce-Price-amount amount"><bdi>' . $formatted_price . '</bdi></span>';
+	if ( $args['in_span'] ) {
+		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], '<span class="woocommerce-Price-currencySymbol">' . get_woocommerce_currency_symbol( $args['currency'] ) . '</span>', $price );
+		$return          = '<span class="woocommerce-Price-amount amount"><bdi>' . $formatted_price . '</bdi></span>';
+	} else {
+		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], get_woocommerce_currency_symbol( $args['currency'] ), $price );
+		$return          = $formatted_price;
+	}
 
 	if ( $args['ex_tax_label'] && wc_tax_enabled() ) {
 		$return .= ' <small class="woocommerce-Price-taxLabel tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
@@ -1568,6 +1576,51 @@ function wc_parse_relative_date_option( $raw_value ) {
 function wc_sanitize_endpoint_slug( $raw_value ) {
 	return sanitize_title( $raw_value ?? '' );
 }
+
+/**
+ * Removes useless non-displayable and problematic Unicode characters from a string.
+ *
+ * This function eliminates characters that can cause formatting issues, invisible text,
+ * or unexpected behavior in copy-pasted text. Specifically, it removes:
+ *
+ * - **Soft hyphen (`U+00AD`)** – Invisible unless text is broken across lines.
+ * - **Zero-width spaces & joiners (`U+200B–U+200D`)** – Invisible and can cause copy/paste issues.
+ * - **Directional markers (`U+200E–U+200F`, `U+202A–U+202E`)** – Can affect text rendering.
+ * - **Byte Order Mark (BOM) (`U+FEFF`)** – Can interfere with encoding.
+ * - **Interlinear annotation characters (`U+FFF9–U+FFFB`)** – Rarely used and unnecessary in checkout fields.
+ *
+ * It does **not** remove:
+ *
+ * - **Non-breaking space (`U+00A0`)** – Useful for preventing line breaks in addresses.
+ * - **Word joiner (`U+2060`)** – Sometimes needed for proper text rendering in certain scripts.
+ *
+ * @param string $raw_value The input string to sanitize.
+ *
+ * @return string The sanitized string without problematic characters.
+ * @since 9.9.0
+ */
+function wc_remove_non_displayable_chars( string $raw_value ): string {
+	$remove_chars = array(
+		"\u{00AD}", // Soft Hyphen.
+		"\u{200B}", // Zero Width Space.
+		"\u{200C}", // Zero Width Non-Joiner.
+		"\u{200D}", // Zero Width Joiner.
+		"\u{200E}", // Left-to-Right Mark.
+		"\u{200F}", // Right-to-Left Mark.
+		"\u{202A}", // Left-to-Right Embedding.
+		"\u{202B}", // Right-to-Left Embedding.
+		"\u{202C}", // Pop Directional Formatting.
+		"\u{202D}", // Left-to-Right Override.
+		"\u{202E}", // Right-to-Left Override.
+		"\u{FEFF}", // Byte Order Mark (BOM).
+		"\u{FFF9}", // Interlinear Annotation Anchor.
+		"\u{FFFA}", // Interlinear Annotation Separator.
+		"\u{FFFB}", // Interlinear Annotation Terminator.
+	);
+
+	return str_replace( $remove_chars, '', $raw_value );
+}
+
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_checkout_pay_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_checkout_order_received_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_add_payment_method_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );

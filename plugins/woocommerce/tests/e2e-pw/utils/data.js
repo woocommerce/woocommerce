@@ -37,6 +37,7 @@ function getFakeUser( role ) {
 			state: 'CA',
 			postcode: '94103',
 			country: 'US',
+			phone: '(555) 555-5555',
 		},
 	};
 }
@@ -46,12 +47,14 @@ function getFakeCustomer() {
 }
 
 function getFakeProduct( options = {} ) {
+	const dec = options.dec ?? 2;
+
 	return {
 		name: `${ faker.commerce.productName() }`,
 		description: faker.commerce.productDescription(),
 		regular_price: options.regular_price
 			? options.regular_price
-			: faker.commerce.price(),
+			: faker.commerce.price( { dec } ),
 		type: options.type ? options.type : 'simple',
 	};
 }

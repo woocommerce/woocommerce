@@ -45,7 +45,8 @@ describe( 'Shipping', () => {
 		);
 
 		expect( recordEvent ).toHaveBeenCalledWith(
-			'tasklist_shipping_visit_marketplace_click'
+			'tasklist_shipping_visit_marketplace_click',
+			{}
 		);
 	} );
 

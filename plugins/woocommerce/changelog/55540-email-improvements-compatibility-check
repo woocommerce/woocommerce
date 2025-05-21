@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Skip compatibility check for "Email improvements" feature and remove experimental flag

@@ -94,9 +94,36 @@ class WC_Session_Handler extends WC_Session {
 			$this->_session_expiration = $cookie[1];
 			$this->_session_expiring   = $cookie[2];
 			$this->_has_cookie         = true;
-			$this->_data               = $this->get_session_data();
+
+			/**
+			 * Filters the session data when restoring from storage during initialization.
+			 *
+			 * This filter allows you to:
+			 * 1. Modify the session data before it's loaded, including adding or removing specific session data entries
+			 * 2. Clear the entire session by returning an empty array
+			 *
+			 * Note: If the filtered data is empty, the session will be destroyed and the
+			 * guest's session cookie will be removed. This can be useful for high-traffic
+			 * sites that prioritize page caching over maintaining all session data.
+			 *
+			 * @since 9.9.0
+			 *
+			 * @param array $session_data The session data loaded from storage.
+			 * @return array Modified session data to be used for initialization.
+			 */
+			$this->_data = apply_filters( 'woocommerce_restored_session_data', $this->get_session_data() );
 
 			if ( ! $this->is_session_cookie_valid() ) {
+				$this->destroy_session();
+				$this->set_session_expiration();
+			} elseif ( empty( $this->_data ) && ! isset( WC()->cart ) ) {
+				/**
+				 * Only destroy an empty session if the cart has not been previously initialized.
+				 * We cannot always safely remove the session cookie and destroy the session if the cart is already
+				 * initialized as $this->forget_session() calls `wc_empty_cart()` and can't be removed without potentially
+				 * breaking backward compatibility in cases where another extension already loaded and modified the cart
+				 * before the session.
+				 */
 				$this->destroy_session();
 				$this->set_session_expiration();
 			}
@@ -363,9 +390,11 @@ class WC_Session_Handler extends WC_Session {
 	/**
 	 * Save data and delete guest session.
 	 *
-	 * @param int $old_session_key session ID before user logs in.
+	 * @param string|mixed $old_session_key Optional session ID prior to user log-in.  If $old_session_key is not tied
+	 *                                      to a user, the session will be deleted with the assumption that it was migrated
+	 *                                      to the current session being saved.
 	 */
-	public function save_data( $old_session_key = 0 ) {
+	public function save_data( $old_session_key = '' ) {
 		// Dirty if something changed - prevents saving nothing new.
 		if ( $this->_dirty && $this->has_session() ) {
 			global $wpdb;
@@ -380,10 +409,15 @@ class WC_Session_Handler extends WC_Session {
 					$this->_session_expiration
 				)
 			);
-
 			wp_cache_set( $this->get_cache_prefix() . $this->_customer_id, $this->_data, WC_SESSION_CACHE_GROUP, $this->_session_expiration - time() );
 			$this->_dirty = false;
-			if ( get_current_user_id() != $old_session_key && ! is_object( get_user_by( 'id', $old_session_key ) ) ) {
+
+			/**
+			 * Ideally, the removal of guest session data migrated to a logged-in user would occur within
+			 * self::init_session_cookie() upon user login detection initially occurs. However, since some third-party
+			 * extensions override this method, relocating this logic could break backward compatibility.
+			 */
+			if ( ! empty( $old_session_key ) && $this->_customer_id !== $old_session_key && ! is_object( get_user_by( 'id', $old_session_key ) ) ) {
 				$this->delete_session( $old_session_key );
 			}
 		}
@@ -412,6 +446,7 @@ class WC_Session_Handler extends WC_Session {
 		$this->_data        = array();
 		$this->_dirty       = false;
 		$this->_customer_id = $this->generate_customer_id();
+		$this->_has_cookie  = false;
 	}
 
 	/**

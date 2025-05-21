@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Update product editor blocks to use __experimentalRole if using WP 6.6 or lower. Also prevent summary and descriptions blocks from moving.

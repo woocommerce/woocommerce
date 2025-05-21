@@ -1,21 +1,21 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine\Renderer\Postprocessors;
+namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\Postprocessors;
 
-use MailPoet\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Variables_Postprocessor;
-use MailPoet\EmailEditor\Engine\Theme_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Variables_Postprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * Unit test for Variables_Postprocessor
  */
-class Variables_Postprocessor_Test extends \MailPoetUnitTest {
+class Variables_Postprocessor_Test extends \Email_Editor_Unit_Test {
 	/**
 	 * Instance of Variables_Postprocessor
 	 *
@@ -33,8 +33,8 @@ class Variables_Postprocessor_Test extends \MailPoetUnitTest {
 	/**
 	 * Set up the test
 	 */
-	public function _before() {
-		parent::_before();
+	protected function setUp(): void {
+		parent::setUp();
 		$this->theme_controller_mock = $this->createMock( Theme_Controller::class );
 		$this->postprocessor         = new Variables_Postprocessor( $this->theme_controller_mock );
 	}

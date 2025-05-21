@@ -1,12 +1,12 @@
 <?php
 /**
- * This file is part of the MailPoet Email Editor package.
+ * This file is part of the WooCommerce Email Editor package.
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine\Patterns;
+namespace Automattic\WooCommerce\EmailEditor\Engine\Patterns;
 
 /**
  * Register block patterns.
@@ -30,8 +30,8 @@ class Patterns {
 		$categories = array(
 			array(
 				'name'        => 'email-contents',
-				'label'       => _x( 'Email Contents', 'Block pattern category', 'mailpoet' ),
-				'description' => __( 'A collection of email content layouts.', 'mailpoet' ),
+				'label'       => _x( 'Email Contents', 'Block pattern category', 'woocommerce' ),
+				'description' => __( 'A collection of email content layouts.', 'woocommerce' ),
 			),
 		);
 		foreach ( $categories as $category ) {

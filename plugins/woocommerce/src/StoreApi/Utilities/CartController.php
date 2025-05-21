@@ -36,7 +36,8 @@ class CartController {
 		wc_load_cart();
 
 		// Load cart from session.
-		$cart = $this->get_cart_instance();
+		$cart               = $this->get_cart_instance();
+		$cart->cart_context = 'store-api';
 		$cart->get_cart();
 	}
 
@@ -481,7 +482,7 @@ class CartController {
 		remove_action( 'woocommerce_check_cart_items', array( $cart, 'check_cart_coupons' ), 1 );
 
 		// Before running actions, store notices.
-		$previous_notices = WC()->session->get( 'wc_notices', array() );
+		$previous_notices = WC()->session->get( 'wc_notices' );
 
 		/**
 		 * Fires when cart items are being validated.
@@ -823,7 +824,7 @@ class CartController {
 		$cart = $this->get_cart_instance();
 		return [
 			'line_items' => $cart->get_cart_hash(),
-			'shipping'   => md5( wp_json_encode( $cart->shipping_methods ) ),
+			'shipping'   => md5( wp_json_encode( [ $cart->shipping_methods, wc()->session->get( 'chosen_shipping_methods' ) ] ) ),
 			'fees'       => md5( wp_json_encode( $cart->get_fees() ) ),
 			'coupons'    => md5( wp_json_encode( $cart->get_applied_coupons() ) ),
 			'taxes'      => md5( wp_json_encode( $cart->get_taxes() ) ),
@@ -965,7 +966,7 @@ class CartController {
 		$applied_coupons = $this->get_cart_coupons();
 		$coupon          = new \WC_Coupon( $coupon_code );
 
-		if ( $coupon->get_code() !== $coupon_code ) {
+		if ( ! wc_is_same_coupon( $coupon->get_code(), $coupon_code ) ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_coupon_error',
 				sprintf(
@@ -1374,11 +1375,25 @@ class CartController {
 				continue;
 			}
 
-			$attribute_label           = wc_attribute_label( $attribute['name'] );
-			$lowercase_attribute_label = strtolower( $attribute_label );
-			$variation_attribute_name  = wc_variation_attribute_name( $attribute['name'] );
+			// Sanitized attribute (same as the product page) e.g. attribute_size.
+			$variation_attribute_name = wc_variation_attribute_name( $attribute['name'] );
+			if ( isset( $variation_data[ $variation_attribute_name ] ) ) {
+				$return[ $variation_attribute_name ] =
+					$attribute['is_taxonomy']
+						?
+						sanitize_title( $variation_data[ $variation_attribute_name ] )
+						:
+						html_entity_decode(
+							wc_clean( $variation_data[ $variation_attribute_name ] ),
+							ENT_QUOTES,
+							get_bloginfo( 'charset' )
+						);
+				continue;
+			}
 
 			// Attribute labels e.g. Size.
+			$attribute_label           = wc_attribute_label( $attribute['name'] );
+			$lowercase_attribute_label = strtolower( $attribute_label );
 			if ( isset( $variation_data[ $attribute_label ] ) || isset( $variation_data[ $lowercase_attribute_label ] ) ) {
 
 				// Check both the original and lowercase attribute label.

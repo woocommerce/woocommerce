@@ -1,17 +1,17 @@
 <?php
 /**
- * This file is part of the MailPoet plugin.
+ * This file is part of the WooCommerce Email Editor package
  *
- * @package MailPoet\EmailEditor
+ * @package Automattic\WooCommerce\EmailEditor
  */
 
 declare(strict_types = 1);
-namespace MailPoet\EmailEditor\Engine\Patterns;
+namespace Automattic\WooCommerce\EmailEditor\Engine\Patterns;
 
 /**
  * Integration test for Patterns class
  */
-class Patterns_Test extends \MailPoetTest {
+class Patterns_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Patterns instance
 	 *
@@ -21,8 +21,8 @@ class Patterns_Test extends \MailPoetTest {
 	/**
 	 * Set up before each test
 	 */
-	public function _before() {
-		parent::_before();
+	public function setUp(): void {
+		parent::setUp();
 		$this->patterns = $this->di_container->get( Patterns::class );
 		$this->cleanup_patterns();
 	}

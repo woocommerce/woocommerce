@@ -150,14 +150,19 @@ export type EmailStyles = {
 		text: string;
 	};
 	typography?: TypographyProperties;
-	elements?: {
-		heading: {
-			color: {
-				text: string;
-			};
-			typography: TypographyProperties;
-		};
+	elements?: Record< string, ElementStyleProperties >;
+};
+
+interface ElementStyleProperties {
+	typography: TypographyProperties;
+	color?: {
+		background: string;
+		text: string;
 	};
+}
+
+export type EmailBuiltStyles = {
+	css: string;
 };
 
 export type EmailEditorLayout = {
@@ -179,25 +184,14 @@ export type PersonalizationTag = {
 };
 
 export type State = {
-	inserterSidebar: {
-		isOpened: boolean;
-	};
-	listviewSidebar: {
-		isOpened: boolean;
-	};
-	settingsSidebar: {
-		activeTab: string;
-	};
-	postId: number;
+	postId: number | string; // Template use strings
 	editorSettings: EmailEditorSettings;
 	theme: EmailTheme;
 	styles: {
 		globalStylesPostId: number | null;
 	};
-	autosaveInterval: number;
 	urls: EmailEditorUrls;
 	preview: {
-		deviceType: string;
 		toEmail: string;
 		isModalOpened: boolean;
 		isSendingPreviewEmail: boolean;
@@ -250,14 +244,6 @@ export type Feature =
 	| 'showIconLabels'
 	| 'fixedToolbar'
 	| 'focusMode';
-
-export type MailPoetEmailPostContentExtended = {
-	id?: string;
-	subject: string;
-	preheader: string;
-	preview_url: string;
-	deleted_at?: string;
-};
 
 export type EmailEditorPostType = Omit< Post, 'type' > & {
 	type: string;

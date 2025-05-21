@@ -2,6 +2,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 
 /**
@@ -255,6 +256,84 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that the created_via parameter is properly stored when creating orders.
+	 */
+	public function test_order_created_via_param(): void {
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+
+		$order_params = array(
+			'line_items'  => array(
+				array(
+					'product_id' => $product->get_id(),
+					'quantity'   => 1,
+				),
+			),
+			'created_via' => 'some_value',
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params( $order_params );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+		$data = $response->get_data();
+
+		wp_cache_flush();
+
+		$order = wc_get_order( $data['id'] );
+		$this->assertNotEmpty( $order );
+		$this->assertEquals( $order_params['created_via'], $order->get_created_via() );
+	}
+
+	/**
+	 * Tests that the created_via parameter is set to 'rest-api' when empty.
+	 */
+	public function test_order_empty_created_via_param_is_set_to_rest_api() {
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+
+		$order_params = array(
+			'line_items'  => array(
+				array(
+					'product_id' => $product->get_id(),
+					'quantity'   => 1,
+				),
+			),
+			'created_via' => '',
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params( $order_params );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+		$data = $response->get_data();
+
+		wp_cache_flush();
+
+		$order = wc_get_order( $data['id'] );
+		$this->assertNotEmpty( $order );
+		$this->assertEquals( 'rest-api', $order->get_created_via() );
+	}
+
+	/**
+	 * Tests that the created_via parameter cannot be updated.
+	 */
+	public function test_created_via_cannot_be_updated() {
+		$order = new \WC_Order();
+		$order->set_created_via( 'original_value' );
+		$order->save();
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params( array( 'created_via' => 'updated_value' ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertEquals( 'original_value', $data['created_via'] );
+	}
+
+	/**
 	 * Tests deleting an order.
 	 */
 	public function test_orders_delete(): void {
@@ -433,6 +512,98 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$decoded_data_object = json_decode( $encoded_data_string, false ); // Ensure object instead of associative array.
 
 		$this->assertIsArray( $decoded_data_object[0]->meta_data );
+	}
+
+	/**
+	 * Test that the `created_via` parameter is accepted when "custom orders table" is enabled.
+	 */
+	public function test_created_via_param_is_filters_order_when_cot_is_enabled() {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+
+		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout->set_created_via( 'checkout' );
+		$order_checkout->save();
+
+		$order_admin = WC_Helper_Order::create_order();
+		$order_admin->set_created_via( 'admin' );
+		$order_admin->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_param( 'created_via', array( 'checkout' ) );
+
+		$response = rest_do_request( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertIsArray( $data );
+		$this->assertCount( 1, $data );
+	}
+
+	/**
+	 * Test filtering orders with an invalid `created_via` value when "custom orders table" is enabled.
+	 */
+	public function test_get_orders_by_invalid_created_via_when_cot_is_enabled() {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+
+		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout->set_created_via( 'checkout' );
+		$order_checkout->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_param( 'created_via', array( 'invalid_source' ) );
+
+		$response = rest_do_request( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertEmpty( $data );
+	}
+
+	/**
+	 * Test that the `created_via` parameter is accepted when "custom orders table" is enabled.
+	 */
+	public function test_created_via_param_is_filters_order_when_cot_is_disabled() {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+
+		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout->set_created_via( 'checkout' );
+		$order_checkout->save();
+
+		$order_admin = WC_Helper_Order::create_order();
+		$order_admin->set_created_via( 'admin' );
+		$order_admin->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_param( 'created_via', array( 'checkout' ) );
+
+		$response = rest_do_request( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertIsArray( $data );
+		$this->assertCount( 1, $data );
+	}
+
+	/**
+	 * Test filtering orders with an invalid `created_via` value when "custom orders table" is disabled.
+	 */
+	public function test_get_orders_by_invalid_created_via_when_cot_is_disabled() {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+
+		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout->set_created_via( 'checkout' );
+		$order_checkout->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_param( 'created_via', array( 'invalid_source' ) );
+
+		$response = rest_do_request( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertEmpty( $data );
 	}
 
 	/**
