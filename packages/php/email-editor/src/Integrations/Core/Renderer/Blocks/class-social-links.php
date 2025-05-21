@@ -43,7 +43,7 @@ class Social_Links extends Abstract_Block_Renderer {
 		return str_replace(
 			'{social_links_content}',
 			$content,
-			$this->get_block_wrapper( $attrs )
+			$this->get_block_wrapper( $block_content, $parsed_block )
 		);
 	}
 
@@ -96,6 +96,8 @@ class Social_Links extends Abstract_Block_Renderer {
 			'text-transform'   => 'none',
 			'padding'          => '10px',
 			'border-radius'    => '9999px',
+			'margin-right'     => '10px',
+			'text-align'       => 'center',
 		);
 		if ( $is_pill_shape ) {
 			$anchor_style['padding-left']  = '17px';
@@ -106,62 +108,149 @@ class Social_Links extends Abstract_Block_Renderer {
 			$anchor_html .= ' rel="noopener nofollow" target="_blank"';
 		}
 
-		$td_styles = array(
-			'vertical-align' => 'middle',
-			'text-align'     => 'center',
-			'padding'        => '10px',
-
-		);
-
-		$td_attributes = sprintf( 'class="wp-social-link wp-social-link-%1$s wp-block-social-link"', esc_attr( $service_name ) );
-		if ( ! empty( $td_styles ) ) {
-			$td_attributes .= sprintf( ' style="%s"', esc_attr( $this->compile_css( $td_styles ) ) );
-		}
-
 		return sprintf(
-			'<td %1$s role="presentation" valign="middle">
-				<a %2$s href="%3$s" class="wp-block-social-link-anchor">
-					<img src="%4$s" alt="%6$s" width="17" height="17">
+			'
+				<a %1$s href="%2$s" class="wp-block-social-link-anchor">
+					<img src="%3$s" alt="%4$s" width="17" height="17">
 					%5$s
 				</a>
-			</td>',
-			$td_attributes, // The td attributes.
+			',
 			$anchor_html, // The a target and rel attributes.
 			esc_url( $service_url ), // The a href link.
 			esc_url( $service_icon_url ), // The Img src.
-			$label_html, // The Label.
 			// translators: %s is the social service name.
-			sprintf( __( '%s icon', 'woocommerce' ), $service_name ) // The Img alt.
+			sprintf( __( '%s icon', 'woocommerce' ), $service_name ), // The Img alt.
+			$label_html, // The Label.
 		);
 	}
 
 	/**
 	 * Gets the block wrapper.
 	 *
-	 * @param array $attrs The block attributes.
+	 * @param string $block_content The block content.
+	 * @param array  $parsed_block The parsed block.
 	 * @return string The block wrapper HTML.
 	 */
-	private function get_block_wrapper( $attrs ) {
-		$align      = $attrs['align'] ?? '';
-		$class_name = $attrs['className'] ?? '';
+	private function get_block_wrapper( $block_content, $parsed_block ) {
 
-		if ( ! in_array( $align, array( 'left', 'center', 'right' ), true ) ) {
-			$align = 'left';
-		}
+		$content = $this->adjust_block_content( $block_content, $parsed_block );
+
+		$table_styles    = $content['table_styles'];
+		$classes         = $content['classes'];
+		$compiled_styles = $content['compiled_styles'];
+		$align           = $content['align'];
 
 		return sprintf(
-			'<table class="wp-block-social-links %1$s" width="%2$s" border="0" cellpadding="0" cellspacing="0" role="presentation">
-				<tbody>
-					<tr align="%3$s">
-						%4$s
+			'<table class="wp-block-social-links" style="%1$s" border="0" width="100%%" cellpadding="0" cellspacing="0" role="presentation">
+					<tr  role="presentation">
+						<td class="%2$s" style="%3$s"  align="%4$s" role="presentation">
+							%5$s
+						</td>
 					</tr>
-				</tbody>
         	</table>',
-			esc_attr( $class_name ),
-			'100%', // Width.
+			esc_attr( $table_styles ),
+			esc_attr( $classes ),
+			esc_attr( $compiled_styles ),
 			esc_attr( $align ),
 			'{social_links_content}'
 		);
+	}
+
+	/**
+	 * Adjusts the block content.
+	 * Returns css classes and styles compatible with email clients.
+	 *
+	 * @param string $block_content The block content.
+	 * @param array  $parsed_block The parsed block.
+	 * @return array The adjusted block content.
+	 */
+	private function adjust_block_content( $block_content, $parsed_block ) {
+		$block_content    = $this->adjust_style_attribute( $block_content );
+		$block_attributes = wp_parse_args(
+			$parsed_block['attrs'] ?? array(),
+			array(
+				'textAlign' => 'left',
+				'style'     => array(),
+			)
+		);
+		$html             = new \WP_HTML_Tag_Processor( $block_content );
+		$classes          = 'wp-block-social-links';
+		if ( $html->next_tag() ) {
+			/** @var string $block_classes */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
+			$block_classes = $html->get_attribute( 'class' ) ?? '';
+			$classes      .= ' ' . $block_classes;
+			// remove has-background to prevent double padding applied for wrapper and inner element.
+			$block_classes = str_replace( 'has-background', '', $block_classes );
+			// remove border related classes because we handle border on wrapping table cell.
+			$block_classes = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $block_classes );
+			/** @var string $block_classes */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
+			$html->set_attribute( 'class', trim( $block_classes ) );
+			$block_content = $html->get_updated_html();
+		}
+
+		$block_styles = $this->get_styles_from_block(
+			array(
+				'color'      => $block_attributes['style']['color'] ?? array(),
+				'spacing'    => $block_attributes['style']['spacing'] ?? array(),
+				'typography' => $block_attributes['style']['typography'] ?? array(),
+				'border'     => $block_attributes['style']['border'] ?? array(),
+			)
+		);
+
+		$styles = array(
+			'min-width'      => '100%', // prevent Gmail App from shrinking the table on mobile devices.
+			'vertical-align' => 'middle',
+		);
+
+		$styles['text-align'] = 'left';
+		if ( ! empty( $parsed_block['attrs']['textAlign'] ) ) { // in this case, textAlign needs to be one of 'left', 'center', 'right'.
+			$styles['text-align'] = $parsed_block['attrs']['textAlign'];
+		} elseif ( in_array( $parsed_block['attrs']['align'] ?? null, array( 'left', 'center', 'right' ), true ) ) {
+			$styles['text-align'] = $parsed_block['attrs']['align'];
+		}
+
+		$compiled_styles = $this->compile_css( $block_styles['declarations'], $styles );
+		$table_styles    = 'border-collapse: separate;'; // Needed because of border radius.
+
+		return array(
+			'table_styles'    => $table_styles,
+			'classes'         => $classes,
+			'compiled_styles' => $compiled_styles,
+			'align'           => $styles['text-align'],
+			'block_content'   => $block_content,
+		);
+	}
+
+	/**
+	 * 1) We need to remove padding because we render padding on wrapping table cell
+	 * 2) We also need to replace font-size to avoid clamp() because clamp() is not supported in many email clients.
+	 * The font size values is automatically converted to clamp() when WP site theme is configured to use fluid layouts.
+	 * Currently (WP 6.5), there is no way to disable this behavior.
+	 *
+	 * @param string $block_content Block content.
+	 */
+	private function adjust_style_attribute( string $block_content ): string {
+		$html = new \WP_HTML_Tag_Processor( $block_content );
+
+		if ( $html->next_tag() ) {
+			$element_style_value = $html->get_attribute( 'style' );
+			$element_style       = isset( $element_style_value ) ? strval( $element_style_value ) : '';
+			// Padding may contain value like 10px or variable like var(--spacing-10).
+			$element_style = preg_replace( '/padding[^:]*:.?[0-9a-z-()]+;?/', '', $element_style );
+
+			// Remove border styles. We apply border styles on the wrapping table cell.
+			$element_style = preg_replace( '/border[^:]*:.?[0-9a-z-()#]+;?/', '', strval( $element_style ) );
+
+			// We define the font-size on the wrapper element, but we need to keep font-size definition here
+			// to prevent CSS Inliner from adding a default value and overriding the value set by user, which is on the wrapper element.
+			// The value provided by WP uses clamp() function which is not supported in many email clients.
+			$element_style = preg_replace( '/font-size:[^;]+;?/', 'font-size: inherit;', strval( $element_style ) );
+			/** @var string $element_style */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
+			$html->set_attribute( 'style', esc_attr( $element_style ) );
+			$block_content = $html->get_updated_html();
+		}
+
+		return $block_content;
 	}
 
 	/**
