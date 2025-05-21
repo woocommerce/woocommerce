@@ -10,6 +10,9 @@ import { applyFilters } from '@wordpress/hooks';
 import { recordEvent } from '.';
 import { editorCurrentPostType, editorCurrentPostId } from '../store';
 
+/**
+ * Handler functions for tracking individual events recorder by the listening to store actions.
+ */
 const trackSetDeviceType = ( deviceType: string ) => {
 	recordEvent(
 		`header_preview_dropdown_${ deviceType.toLowerCase() }_selected`
@@ -22,6 +25,9 @@ const trackDeleteEntityRecord = ( _entity, type, id ) => {
 	}
 };
 
+/**
+ * List of store actions to be tracked.
+ */
 const TRACKED_STORE_EVENTS = {
 	'core/editor': {
 		setDeviceType: trackSetDeviceType,
@@ -46,30 +52,27 @@ export const initStoreTracking = () => {
 
 	use( ( registry ) => ( {
 		dispatch: ( namespace ) => {
-			const namespaceName =
+			const storeName =
 				typeof namespace === 'object' ? namespace.name : namespace;
-			const actions = registry.dispatch( namespaceName );
-			const trackers = TRACKED_STORE_EVENTS[ namespaceName ];
+			const actions = registry.dispatch( storeName );
+			const trackers = TRACKED_STORE_EVENTS[ storeName ];
 
 			if ( ! trackers ) {
 				return actions;
 			}
 
 			// Initialize namespace level objects if not yet done.
-			if ( ! rewrittenActions[ namespaceName ] ) {
-				rewrittenActions[ namespaceName ] = {};
+			if ( ! rewrittenActions[ storeName ] ) {
+				rewrittenActions[ storeName ] = {};
 			}
-			if ( ! originalActions[ namespaceName ] ) {
-				originalActions[ namespaceName ] = {};
+			if ( ! originalActions[ storeName ] ) {
+				originalActions[ storeName ] = {};
 			}
 
 			for ( const [ action, event ] of Object.entries( trackers ) ) {
-				if ( ! originalActions[ namespaceName ][ action ] ) {
-					originalActions[ namespaceName ][ action ] =
-						actions[ action ];
-					rewrittenActions[ namespaceName ][ action ] = (
-						...args
-					) => {
+				if ( ! originalActions[ storeName ][ action ] ) {
+					originalActions[ storeName ][ action ] = actions[ action ];
+					rewrittenActions[ storeName ][ action ] = ( ...args ) => {
 						try {
 							if ( typeof event === 'function' ) {
 								event( ...args );
@@ -79,10 +82,10 @@ export const initStoreTracking = () => {
 						} catch ( error ) {
 							console.error( 'Error tracking event', error );
 						}
-						originalActions[ namespaceName ][ action ]( ...args );
+						originalActions[ storeName ][ action ]( ...args );
 					};
 				}
-				actions[ action ] = rewrittenActions[ namespaceName ][ action ];
+				actions[ action ] = rewrittenActions[ storeName ][ action ];
 			}
 
 			return actions;
