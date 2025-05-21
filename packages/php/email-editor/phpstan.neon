@@ -1,5 +1,6 @@
 parameters:
 	level: 9
+	phpVersion: 80400
 	bootstrapFiles:
 		- vendor/autoload.php
 		- tests/unit/stubs.php # The stubs file contains mocks for some WP classes.

@@ -47,7 +47,11 @@
 		"test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/email-editor ./vendor/bin/phpunit --configuration phpunit-integration.xml.dist",
 		"phpcs": "phpcs -s -p",
 		"phpcbf": "phpcbf -p",
-		"phpstan": "vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=2G"
+		"phpstan": "vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=2G",
+		"phpstan:php8": [
+			"@phpstan"
+		],
+		"phpstan:php7": "vendor/bin/phpstan analyse -c phpstan-7.neon --memory-limit=2G"
 	},
 	"extra": {
 		"changelogger": {
