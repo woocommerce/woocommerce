@@ -15,7 +15,11 @@ import { InnerEditor } from './components/block-editor';
 import { createStore, storeName, editorCurrentPostType } from './store';
 import { initHooks } from './editor-hooks';
 import { initTextHooks } from './text-hooks';
-import { initEventCollector, initStoreTracking } from './events';
+import {
+	initEventCollector,
+	initStoreTracking,
+	initDomTracking,
+} from './events';
 import { useContentValidation } from './hooks/use-content-validation';
 import './style.scss';
 
@@ -52,6 +56,7 @@ export function initialize( elementId: string ) {
 	}
 	initEventCollector();
 	initStoreTracking();
+	initDomTracking();
 	createStore();
 	initializeLayout();
 	initBlocks();
