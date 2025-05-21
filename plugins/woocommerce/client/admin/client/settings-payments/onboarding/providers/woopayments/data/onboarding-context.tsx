@@ -64,7 +64,7 @@ export const OnboardingProvider: React.FC< {
 		null
 	);
 
-	const setJustCompletedStepId = useCallback( ( stepId: string ) => {
+	const setJustCompletedStepId = useCallback( ( stepId: string | null ) => {
 		setStepId( stepId );
 	}, [] );
 
@@ -175,6 +175,7 @@ export const OnboardingProvider: React.FC< {
 	const resetLocalState = () => {
 		setStateStoreSteps( [] );
 		setIsStateStoreLoading( true );
+		setJustCompletedStepId( null );
 		setAllSteps( [] );
 	};
 
