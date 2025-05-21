@@ -1454,34 +1454,36 @@ class WooPaymentsService {
 
 		$steps[] = $wpcom_step;
 
-		// Add the test account onboarding step details.
-		$test_account_step = $this->standardize_onboarding_step_details(
-			array(
-				'id' => self::ONBOARDING_STEP_TEST_ACCOUNT,
-			),
-			$location,
-			$rest_path
-		);
-
-		// If the step is not completed, we need to add the actions.
-		if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $test_account_step['status'] ) {
-			$test_account_step['actions'] = array(
-				'start'  => array(
-					'type' => self::ACTION_TYPE_REST,
-					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/start' ),
+		// Test account onboarding step is unavailable in UAE and Singapore.
+		if ( ! in_array( $location, array( 'AE', 'SG' ), true ) ) {
+			$test_account_step = $this->standardize_onboarding_step_details(
+				array(
+					'id' => self::ONBOARDING_STEP_TEST_ACCOUNT,
 				),
-				'init'   => array(
-					'type' => self::ACTION_TYPE_REST,
-					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/init' ),
-				),
-				'finish' => array(
-					'type' => self::ACTION_TYPE_REST,
-					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/finish' ),
-				),
+				$location,
+				$rest_path
 			);
-		}
 
-		$steps[] = $test_account_step;
+			// If the step is not completed, we need to add the actions.
+			if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $test_account_step['status'] ) {
+				$test_account_step['actions'] = array(
+					'start'  => array(
+						'type' => self::ACTION_TYPE_REST,
+						'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/start' ),
+					),
+					'init'   => array(
+						'type' => self::ACTION_TYPE_REST,
+						'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/init' ),
+					),
+					'finish' => array(
+						'type' => self::ACTION_TYPE_REST,
+						'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/finish' ),
+					),
+				);
+			}
+
+			$steps[] = $test_account_step;
+		}
 
 		// Add the live account business verification onboarding step details.
 		$business_verification_step = $this->standardize_onboarding_step_details(

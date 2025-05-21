@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Internal\Email\OrderPriceFormatter;
 use Automattic\WooCommerce\Internal\Orders\PointOfSaleOrderUtil;
+use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -75,10 +76,13 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject( $partial = false ) {
+			$store_name = $this->get_pos_store_name();
 			if ( $partial ) {
-				return __( 'Your {site_title} order #{order_number} has been partially refunded', 'woocommerce' );
+				/* translators: %1$s: Store name, %2$s: Order number */
+				return sprintf( __( 'Your %1$s order #%2$s has been partially refunded', 'woocommerce' ), esc_html( $store_name ), '{order_number}' );
 			} else {
-				return __( 'Your {site_title} order #{order_number} has been refunded', 'woocommerce' );
+				/* translators: %1$s: Store name, %2$s: Order number */
+				return sprintf( __( 'Your %1$s order #%2$s has been refunded', 'woocommerce' ), esc_html( $store_name ), '{order_number}' );
 			}
 		}
 
@@ -224,15 +228,20 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			$content = wc_get_template_html(
 				$this->template_html,
 				array(
-					'order'              => $this->object,
-					'refund'             => $this->refund,
-					'partial_refund'     => $this->partial_refund,
-					'email_heading'      => $this->get_heading(),
-					'additional_content' => $this->get_additional_content(),
-					'blogname'           => $this->get_blogname(),
-					'sent_to_admin'      => false,
-					'plain_text'         => false,
-					'email'              => $this,
+					'order'                     => $this->object,
+					'refund'                    => $this->refund,
+					'partial_refund'            => $this->partial_refund,
+					'email_heading'             => $this->get_heading(),
+					'additional_content'        => $this->get_additional_content(),
+					'pos_store_name'            => $this->get_pos_store_name(),
+					'pos_store_email'           => $this->get_pos_store_email(),
+					'pos_store_phone_number'    => $this->get_pos_store_phone_number(),
+					'pos_store_address'         => $this->get_pos_store_address(),
+					'pos_refund_returns_policy' => $this->get_pos_refund_returns_policy(),
+					'blogname'                  => $this->get_blogname(),
+					'sent_to_admin'             => false,
+					'plain_text'                => false,
+					'email'                     => $this,
 				)
 			);
 			$this->remove_pos_customizations();
@@ -249,15 +258,20 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			$content = wc_get_template_html(
 				$this->template_plain,
 				array(
-					'order'              => $this->object,
-					'refund'             => $this->refund,
-					'partial_refund'     => $this->partial_refund,
-					'email_heading'      => $this->get_heading(),
-					'additional_content' => $this->get_additional_content(),
-					'blogname'           => $this->get_blogname(),
-					'sent_to_admin'      => false,
-					'plain_text'         => true,
-					'email'              => $this,
+					'order'                     => $this->object,
+					'refund'                    => $this->refund,
+					'partial_refund'            => $this->partial_refund,
+					'email_heading'             => $this->get_heading(),
+					'additional_content'        => $this->get_additional_content(),
+					'pos_store_name'            => $this->get_pos_store_name(),
+					'pos_store_email'           => $this->get_pos_store_email(),
+					'pos_store_phone_number'    => $this->get_pos_store_phone_number(),
+					'pos_store_address'         => $this->get_pos_store_address(),
+					'pos_refund_returns_policy' => $this->get_pos_refund_returns_policy(),
+					'blogname'                  => $this->get_blogname(),
+					'sent_to_admin'             => false,
+					'plain_text'                => true,
+					'email'                     => $this,
 				)
 			);
 			$this->remove_pos_customizations();
@@ -282,18 +296,6 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 					'email'          => $this,
 				)
 			);
-		}
-
-		/**
-		 * Default content to show below main email content.
-		 *
-		 * @since 3.7.0
-		 * @return string
-		 */
-		public function get_default_additional_content() {
-			return $this->email_improvements_enabled
-				? __( 'If you need any help with your order, please contact us at {store_email}.', 'woocommerce' )
-				: __( 'We hope to see you again soon.', 'woocommerce' );
 		}
 
 		/**
@@ -447,16 +449,6 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @return array Modified array of total rows.
 		 */
 		public function order_item_totals( $total_rows, $order, $tax_display ) {
-			$cash_payment_change_due_amount           = $order->get_meta( '_cash_change_amount', true );
-			$formatted_cash_payment_change_due_amount = wc_price( $cash_payment_change_due_amount, array( 'currency' => $order->get_currency() ) );
-			if ( ! empty( $cash_payment_change_due_amount ) ) {
-				$total_rows['cash_payment_change_due_amount'] = array(
-					'type'  => 'cash_payment_change_due_amount',
-					'label' => __( 'Change due:', 'woocommerce' ),
-					'value' => $formatted_cash_payment_change_due_amount,
-				);
-			}
-
 			$auth_code = $order->get_meta( '_charge_id', true );
 			if ( ! empty( $auth_code ) ) {
 				$total_rows['payment_auth_code'] = array(
@@ -475,6 +467,61 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			}
 
 			return $total_rows;
+		}
+
+		/**
+		 * Get the store name from POS settings.
+		 *
+		 * @return string
+		 */
+		private function get_pos_store_name() {
+			return $this->format_string(
+				get_option( 'woocommerce_pos_store_name', PointOfSaleDefaultSettings::get_default_store_name() )
+			);
+		}
+
+		/**
+		 * Get the store email from POS settings.
+		 *
+		 * @return string
+		 */
+		private function get_pos_store_email() {
+			return $this->format_string(
+				get_option( 'woocommerce_pos_store_email', PointOfSaleDefaultSettings::get_default_store_email() )
+			);
+		}
+
+		/**
+		 * Get the store phone number from POS settings.
+		 *
+		 * @return string
+		 */
+		private function get_pos_store_phone_number() {
+			return $this->format_string(
+				get_option( 'woocommerce_pos_store_phone' )
+			);
+		}
+
+		/**
+		 * Get the store address from POS settings.
+		 *
+		 * @return string
+		 */
+		private function get_pos_store_address() {
+			return $this->format_string(
+				get_option( 'woocommerce_pos_store_address', PointOfSaleDefaultSettings::get_default_store_address() )
+			);
+		}
+
+		/**
+		 * Get the refund and returns policy from POS settings.
+		 *
+		 * @return string
+		 */
+		private function get_pos_refund_returns_policy() {
+			return $this->format_string(
+				get_option( 'woocommerce_pos_refund_returns_policy' )
+			);
 		}
 	}
 
