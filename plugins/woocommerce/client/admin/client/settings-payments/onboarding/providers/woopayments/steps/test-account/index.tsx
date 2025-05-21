@@ -73,8 +73,13 @@ type Status =
 	| 'failed';
 
 const TestAccountStep = () => {
-	const { currentStep, navigateToNextStep, closeModal, refreshStoreData } =
-		useOnboardingContext();
+	const {
+		currentStep,
+		navigateToNextStep,
+		closeModal,
+		refreshStoreData,
+		setJustCompletedStepId,
+	} = useOnboardingContext();
 
 	// Component State
 	const [ status, setStatus ] = useState< Status >( 'idle' );
@@ -111,6 +116,8 @@ const TestAccountStep = () => {
 		if ( status === 'idle' ) {
 			if ( currentStep?.status === 'completed' ) {
 				setStatus( 'success' );
+				setJustCompletedStepId( currentStep.id );
+
 				setProgress( 100 ); // Show success state immediately
 				return;
 			}
@@ -203,6 +210,9 @@ const TestAccountStep = () => {
 								() => {
 									setStatus( 'success' );
 									setProgress( 100 ); // Visually complete
+									setJustCompletedStepId(
+										currentStep?.id || ''
+									);
 								},
 								1000
 							);
