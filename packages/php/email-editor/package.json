@@ -28,16 +28,6 @@
 					"src/**/*.php"
 				]
 			},
-			"phpstan": {
-				"command": "phpstan",
-				"changes": [
-					"**/*.php"
-				],
-				"events": [
-					"pull_request",
-					"push"
-				]
-			},
 			"tests": [
 				{
 					"name": "PHP: 8.1 WP: latest",
@@ -56,6 +46,18 @@
 							"wpVersion": "latest"
 						}
 					},
+					"events": [
+						"pull_request",
+						"push"
+					]
+				},
+				{
+					"name": "PHPStan",
+					"testType": "static:analysis",
+					"command": "phpstan",
+					"changes": [
+						"**/*.php"
+					],
 					"events": [
 						"pull_request",
 						"push"
