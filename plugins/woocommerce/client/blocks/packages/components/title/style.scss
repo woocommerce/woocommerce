@@ -1,6 +1,7 @@
 // Extra class for specificity to overwrite editor styles.
 .wc-block-components-title.wc-block-components-title {
 	@include reset-box();
+	@include font-size(large);
 	word-break: break-word;
 
 	textarea {
