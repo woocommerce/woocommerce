@@ -139,7 +139,7 @@ export function InnerEditor( {
 					) : (
 						<SettingsPanel />
 					) }
-					<PublishSave />
+					{ ! isFullscreenEnabled && <PublishSave /> }
 					<EditorNotices />
 					<BlockCompatibilityWarnings />
 				</Editor>
