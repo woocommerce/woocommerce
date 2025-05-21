@@ -66,6 +66,8 @@ class Social_Links extends Abstract_Block_Renderer {
 		$open_in_new_tab = $parent_block_attrs['openInNewTab'] ?? false;
 		$show_labels     = $parent_block_attrs['showLabels'] ?? false;
 
+		$service_brand_color = Social_Links_Helper::get_service_brand_color( $service_name );
+
 		$icon_color_value            = $parent_block_attrs['iconColorValue'] ?? '#ffffff'; // use white as default icon color.
 		$icon_background_color_value = $parent_block_attrs['iconBackgroundColorValue'] ?? '';
 
@@ -73,11 +75,14 @@ class Social_Links extends Abstract_Block_Renderer {
 		$is_pill_shape = strpos( $parent_block_attrs['className'] ?? '', 'is-style-pill-shape' ) !== false;
 
 		if ( ! $is_logos_only && Social_Links_Helper::detect_whiteish_color( $icon_color_value ) && ( Social_Links_Helper::detect_whiteish_color( $icon_background_color_value ) || empty( $icon_background_color_value ) ) ) {
-			$icon_background_color_value = '#000'; // using black as default background color for now. Aim to use service brand color.
+			// If the icon color is white and the background color is white or empty, use the service brand color for the icon background color.
+			$icon_background_color_value = $service_brand_color ?? '#000';
 		}
 
 		if ( $is_logos_only ) {
-			$icon_color_value = '#000'; // using black as default icon color for logos only. Will set to brand color in the future.
+			// logos only mode does not need background color. We also don't really need the icon color (we can't change png image color anyways).
+			// We set it so that the label text color will reflect the service brand color.
+			$icon_color_value = $service_brand_color ?? '#000';
 		}
 
 		$service_icon_url = $this->get_service_icon_url( $service_name, $is_logos_only ? 'brand' : 'white' );
