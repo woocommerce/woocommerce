@@ -3,18 +3,31 @@
  */
 import { use } from '@wordpress/data';
 import { applyFilters } from '@wordpress/hooks';
+
 /**
  * Internal dependencies
  */
 import { recordEvent } from '.';
+import { editorCurrentPostType, editorCurrentPostId } from '../store';
 
 const trackSetDeviceType = ( deviceType: string ) => {
-	recordEvent(`header_preview_dropdown_${deviceType.toLowerCase()}_selected`);
+	recordEvent(
+		`header_preview_dropdown_${ deviceType.toLowerCase() }_selected`
+	);
+};
+
+const trackDeleteEntityRecord = ( _entity, type, id ) => {
+	if ( type === editorCurrentPostType && id === editorCurrentPostId ) {
+		recordEvent( 'trash_modal_move_to_trash_button_clicked' );
+	}
 };
 
 const TRACKED_STORE_EVENTS = {
 	'core/editor': {
 		setDeviceType: trackSetDeviceType,
+	},
+	core: {
+		deleteEntityRecord: trackDeleteEntityRecord,
 	},
 };
 
@@ -33,7 +46,8 @@ export const initStoreTracking = () => {
 
 	use( ( registry ) => ( {
 		dispatch: ( namespace ) => {
-			const namespaceName = typeof namespace === 'object' ? namespace.name : namespace;
+			const namespaceName =
+				typeof namespace === 'object' ? namespace.name : namespace;
 			const actions = registry.dispatch( namespaceName );
 			const trackers = TRACKED_STORE_EVENTS[ namespaceName ];
 
@@ -51,8 +65,11 @@ export const initStoreTracking = () => {
 
 			for ( const [ action, event ] of Object.entries( trackers ) ) {
 				if ( ! originalActions[ namespaceName ][ action ] ) {
-					originalActions[ namespaceName ][ action ] = actions[ action ];
-					rewrittenActions[ namespaceName ][ action ] = ( ...args ) => {
+					originalActions[ namespaceName ][ action ] =
+						actions[ action ];
+					rewrittenActions[ namespaceName ][ action ] = (
+						...args
+					) => {
 						try {
 							if ( typeof event === 'function' ) {
 								event( ...args );
@@ -69,7 +86,6 @@ export const initStoreTracking = () => {
 			}
 
 			return actions;
-		}
+		},
 	} ) );
 };
-
