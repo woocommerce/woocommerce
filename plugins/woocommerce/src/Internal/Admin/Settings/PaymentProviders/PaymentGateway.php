@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
-use Automattic\WooCommerce\Internal\Utilities\ArrayUtil;
+use Throwable;
 use WC_HTTPS;
 use WC_Payment_Gateway;
 
@@ -46,9 +46,6 @@ class PaymentGateway {
 	 * @return array The payment gateway provider details.
 	 */
 	public function get_details( WC_Payment_Gateway $gateway, int $order = 0, string $country_code = '' ): array {
-		$plugin_slug = $this->get_plugin_slug( $gateway );
-		$plugin_file = $this->get_plugin_file( $gateway, $plugin_slug );
-
 		return array(
 			'id'          => $gateway->id,
 			'_order'      => $order,
@@ -84,14 +81,7 @@ class PaymentGateway {
 				),
 				'recommended_payment_methods' => $this->get_recommended_payment_methods( $gateway, $country_code ),
 			),
-			'plugin'      => array(
-				// Default to treating the payment gateway plugin as a WordPress.org plugin.
-				'_type'  => PaymentProviders::EXTENSION_TYPE_WPORG,
-				'slug'   => $plugin_slug,
-				'file'   => $plugin_file,
-				// The gateway underlying plugin is obviously active (aka the plugin code is running).
-				'status' => PaymentProviders::EXTENSION_ACTIVE,
-			),
+			'plugin'      => $this->get_plugin_details( $gateway ),
 		);
 	}
 
@@ -107,7 +97,11 @@ class PaymentGateway {
 	 * @return string The provider title of the payment gateway.
 	 */
 	public function get_title( WC_Payment_Gateway $payment_gateway ): string {
-		$title = wp_strip_all_tags( html_entity_decode( $payment_gateway->get_method_title() ?? '' ), true );
+		$title = $payment_gateway->get_method_title();
+		if ( ! is_string( $title ) || empty( $title ) ) {
+			return esc_html__( 'Unknown', 'woocommerce' );
+		}
+		$title = wp_strip_all_tags( html_entity_decode( $title ), true );
 
 		// Truncate the title.
 		return Utils::truncate_with_words( $title, 75 );
@@ -125,7 +119,11 @@ class PaymentGateway {
 	 * @return string The provider description of the payment gateway.
 	 */
 	public function get_description( WC_Payment_Gateway $payment_gateway ): string {
-		$description = wp_strip_all_tags( html_entity_decode( $payment_gateway->get_method_description() ?? '' ), true );
+		$description = $payment_gateway->get_method_description();
+		if ( ! is_string( $description ) || empty( $description ) ) {
+			return '';
+		}
+		$description = wp_strip_all_tags( html_entity_decode( $description ), true );
 
 		// Truncate the description.
 		return Utils::truncate_with_words( $description, 130, '…' );
@@ -143,7 +141,7 @@ class PaymentGateway {
 	 */
 	public function get_icon( WC_Payment_Gateway $payment_gateway ): string {
 		$icon_url = $payment_gateway->icon ?? '';
-		if ( ! is_string( $icon_url ) ) {
+		if ( ! is_string( $icon_url ) || empty( $icon_url ) ) {
 			$icon_url = '';
 		}
 
@@ -362,7 +360,7 @@ class PaymentGateway {
 	 */
 	public function get_settings_url( WC_Payment_Gateway $payment_gateway ): string {
 		if ( is_callable( array( $payment_gateway, 'get_settings_url' ) ) ) {
-			return $payment_gateway->get_settings_url();
+			return (string) $payment_gateway->get_settings_url();
 		}
 
 		return Utils::wc_payments_settings_url( null, array( 'section' => strtolower( $payment_gateway->id ) ) );
@@ -384,7 +382,7 @@ class PaymentGateway {
 			// If we received no return URL, we will set the WC Payments Settings page as the return URL.
 			$return_url = ! empty( $return_url ) ? $return_url : admin_url( 'admin.php?page=wc-settings&tab=checkout' );
 
-			return $payment_gateway->get_connection_url( $return_url );
+			return (string) $payment_gateway->get_connection_url( $return_url );
 		}
 
 		// Fall back to pointing users to the payment gateway settings page to handle onboarding.
@@ -392,60 +390,104 @@ class PaymentGateway {
 	}
 
 	/**
+	 * Get the plugin details for a payment gateway.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
+	 * @return array The plugin details for the payment gateway.
+	 */
+	public function get_plugin_details( WC_Payment_Gateway $payment_gateway ): array {
+		$entity_type = $this->get_containing_entity_type( $payment_gateway );
+
+		return array(
+			'_type'  => $entity_type,
+			'slug'   => $this->get_plugin_slug( $payment_gateway ),
+			// Only include the plugin file if the entity type is a regular plugin.
+			// We don't want to try to change the state of must-use plugins or themes.
+			'file'   => PaymentProviders::EXTENSION_TYPE_WPORG === $entity_type ? $this->get_plugin_file( $payment_gateway ) : '',
+			// The gateway's underlying plugin is obviously active (aka the code is running).
+			'status' => PaymentProviders::EXTENSION_ACTIVE,
+		);
+	}
+
+	/**
 	 * Get the source plugin slug of a payment gateway instance.
+	 *
+	 * It accounts for both regular and must-use plugins.
+	 * If the gateway is registered through a theme, it will return the theme slug.
 	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 *
 	 * @return string The plugin slug of the payment gateway.
+	 *                Empty string if a plugin slug could not be determined.
 	 */
 	public function get_plugin_slug( WC_Payment_Gateway $payment_gateway ): string {
+		global $wp_theme_directories;
+
 		// If the payment gateway object has a `plugin_slug` property, use it.
 		// This is useful for testing.
 		if ( isset( $payment_gateway->plugin_slug ) ) {
-			return $payment_gateway->plugin_slug;
+			return (string) $payment_gateway->plugin_slug;
 		}
 
-		try {
-			$reflector = new \ReflectionClass( get_class( $payment_gateway ) );
-		} catch ( \ReflectionException $e ) {
-			// Bail if we can't get the class details.
+		$gateway_class_filename = $this->get_class_filename( $payment_gateway );
+		// Bail if we couldn't get the gateway class filename.
+		if ( ! is_string( $gateway_class_filename ) ) {
 			return '';
 		}
 
-		$gateway_class_filename = $reflector->getFileName();
-		// Determine the gateway's plugin directory from the class path.
-		$gateway_class_path = trim( dirname( plugin_basename( $gateway_class_filename ) ), DIRECTORY_SEPARATOR );
-		if ( false === strpos( $gateway_class_path, DIRECTORY_SEPARATOR ) ) {
-			// The gateway class file is in the root of the plugin's directory.
-			$plugin_slug = $gateway_class_path;
-		} else {
-			$plugin_slug = explode( DIRECTORY_SEPARATOR, $gateway_class_path )[0];
+		$entity_type = $this->get_containing_entity_type( $payment_gateway );
+		// Bail if we couldn't determine the entity type.
+		if ( PaymentProviders::EXTENSION_TYPE_UNKNOWN === $entity_type ) {
+			return '';
 		}
 
-		return $plugin_slug;
+		if ( PaymentProviders::EXTENSION_TYPE_THEME === $entity_type ) {
+			// Find the theme directory it is part of and extract the slug.
+			// This accounts for both parent and child themes.
+			if ( is_array( $wp_theme_directories ) ) {
+				foreach ( $wp_theme_directories as $dir ) {
+					if ( str_starts_with( $gateway_class_filename, $dir ) ) {
+						return $this->extract_slug_from_path( substr( $gateway_class_filename, strlen( $dir ) ) );
+					}
+				}
+			}
+
+			// Bail if we couldn't find a match.
+			return '';
+		}
+
+		// By this point, we know that the payment gateway is part of a plugin.
+		// Extract the relative path of the class file to the plugins directory.
+		// We account for both regular and must-use plugins.
+		$gateway_class_plugins_path = trim( plugin_basename( $gateway_class_filename ), DIRECTORY_SEPARATOR );
+
+		return $this->extract_slug_from_path( $gateway_class_plugins_path );
 	}
 
 	/**
-	 * Get the plugin file of payment gateway, without the .php extension.
+	 * Get the corresponding plugin file of the payment gateway, without the .php extension.
 	 *
-	 * This is useful for the WP API, which expects the plugin file without the .php extension.
+	 * This is useful for using the WP API to change the state of the plugin (activate or deactivate).
+	 * We remove the .php extension since the WP API expects plugin files without it.
 	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 * @param string             $plugin_slug     Optional. The payment gateway plugin slug to use directly.
 	 *
 	 * @return string The plugin file corresponding to the payment gateway plugin. Does not include the .php extension.
+	 *                In case of failures, it will return an empty string.
 	 */
 	public function get_plugin_file( WC_Payment_Gateway $payment_gateway, string $plugin_slug = '' ): string {
 		// If the payment gateway object has a `plugin_file` property, use it.
 		// This is useful for testing.
 		if ( isset( $payment_gateway->plugin_file ) ) {
 			$plugin_file = $payment_gateway->plugin_file;
-			// Remove the .php extension from the file path. The WP API expects it without it.
-			if ( ! empty( $plugin_file ) && str_ends_with( $plugin_file, '.php' ) ) {
-				$plugin_file = substr( $plugin_file, 0, - 4 );
+			// Sanity check.
+			if ( ! is_string( $plugin_file ) ) {
+				return '';
 			}
-
-			return $plugin_file;
+			// Remove the .php extension from the file path. The WP API expects it without it.
+			return Utils::trim_php_file_extension( $plugin_file );
 		}
 
 		if ( empty( $plugin_slug ) ) {
@@ -458,12 +500,13 @@ class PaymentGateway {
 		}
 
 		$plugin_file = PluginsHelper::get_plugin_path_from_slug( $plugin_slug );
-		// Remove the .php extension from the file path. The WP API expects it without it.
-		if ( ! empty( $plugin_file ) && str_ends_with( $plugin_file, '.php' ) ) {
-			$plugin_file = substr( $plugin_file, 0, - 4 );
+		// Bail if we couldn't determine the plugin file.
+		if ( ! is_string( $plugin_file ) || empty( $plugin_file ) ) {
+			return '';
 		}
 
-		return $plugin_file;
+		// Remove the .php extension from the file path. The WP API expects it without it.
+		return Utils::trim_php_file_extension( $plugin_file );
 	}
 
 	/**
@@ -492,6 +535,10 @@ class PaymentGateway {
 			array( $payment_gateway, 'get_recommended_payment_methods' ),
 			array( 'country_code' => $country_code ),
 		);
+		if ( ! is_array( $recommended_pms ) ) {
+			// Bail if the recommended payment methods are not an array.
+			return array();
+		}
 
 		// Validate the received list items.
 		$recommended_pms = array_filter(
@@ -573,7 +620,7 @@ class PaymentGateway {
 
 		// If the payment method has a description, sanitize it before use.
 		if ( ! empty( $recommended_pm['description'] ) ) {
-			$standard_details['description'] = $recommended_pm['description'];
+			$standard_details['description'] = (string) $recommended_pm['description'];
 			// Make sure that if we have HTML tags, we only allow stylistic tags and anchors.
 			if ( preg_match( '/<[^>]+>/', $standard_details['description'] ) ) {
 				// Only allow stylistic tags with a few modifications.
@@ -604,5 +651,135 @@ class PaymentGateway {
 		}
 
 		return $standard_details;
+	}
+
+	/**
+	 * Get the filename of the payment gateway class.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
+	 * @return string|null The filename of the payment gateway class or null if it cannot be determined.
+	 */
+	private function get_class_filename( WC_Payment_Gateway $payment_gateway ): ?string {
+		// If the payment gateway object has a `class_filename` property, use it.
+		// It is only used in development environments (including when running tests).
+		if ( isset( $payment_gateway->class_filename ) && in_array( wp_get_environment_type(), array( 'local', 'development' ), true ) ) {
+			$class_filename = $payment_gateway->class_filename;
+		} else {
+			try {
+				$reflector      = new \ReflectionClass( get_class( $payment_gateway ) );
+				$class_filename = $reflector->getFileName();
+			} catch ( Throwable $e ) {
+				// Bail if we couldn't get the gateway class filename.
+				return null;
+			}
+		}
+
+		// Bail if we couldn't get the gateway class filename.
+		if ( ! is_string( $class_filename ) ) {
+			return null;
+		}
+
+		return $class_filename;
+	}
+
+	/**
+	 * Get the type of entity the payment gateway class is contained in.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
+	 * @return string The type of extension containing the payment gateway class.
+	 */
+	private function get_containing_entity_type( WC_Payment_Gateway $payment_gateway ): string {
+		global $wp_plugin_paths, $wp_theme_directories;
+
+		// If the payment gateway object has a `extension_type` property, use it.
+		// This is useful for testing.
+		if ( isset( $payment_gateway->extension_type ) ) {
+			// Validate the extension type.
+			if ( ! in_array(
+				$payment_gateway->extension_type,
+				array(
+					PaymentProviders::EXTENSION_TYPE_WPORG,
+					PaymentProviders::EXTENSION_TYPE_MU_PLUGIN,
+					PaymentProviders::EXTENSION_TYPE_THEME,
+				),
+				true
+			) ) {
+				return PaymentProviders::EXTENSION_TYPE_UNKNOWN;
+			}
+
+			return $payment_gateway->extension_type;
+		}
+
+		$gateway_class_filename = $this->get_class_filename( $payment_gateway );
+		// Bail if we couldn't get the gateway class filename.
+		if ( ! is_string( $gateway_class_filename ) ) {
+			return PaymentProviders::EXTENSION_TYPE_UNKNOWN;
+		}
+
+		// Plugin paths logic closely matches the one in plugin_basename().
+		// $wp_plugin_paths contains normalized paths.
+		$file = wp_normalize_path( $gateway_class_filename );
+
+		arsort( $wp_plugin_paths );
+		// Account for symlinks in the plugin paths.
+		foreach ( $wp_plugin_paths as $dir => $realdir ) {
+			if ( str_starts_with( $file, $realdir ) ) {
+				$gateway_class_filename = $dir . substr( $gateway_class_filename, strlen( $realdir ) );
+			}
+		}
+
+		// Test for regular plugins.
+		if ( str_starts_with( $gateway_class_filename, wp_normalize_path( WP_PLUGIN_DIR ) ) ) {
+			// For now, all plugins are considered WordPress.org plugins.
+			return PaymentProviders::EXTENSION_TYPE_WPORG;
+		}
+
+		// Test for must-use plugins.
+		if ( str_starts_with( $gateway_class_filename, wp_normalize_path( WPMU_PLUGIN_DIR ) ) ) {
+			return PaymentProviders::EXTENSION_TYPE_MU_PLUGIN;
+		}
+
+		// Check if it is part of a theme.
+		if ( is_array( $wp_theme_directories ) ) {
+			foreach ( $wp_theme_directories as $dir ) {
+				// Check if the class file is in a theme directory.
+				if ( str_starts_with( $gateway_class_filename, $dir ) ) {
+					return PaymentProviders::EXTENSION_TYPE_THEME;
+				}
+			}
+		}
+
+		// Default to an unknown type.
+		return PaymentProviders::EXTENSION_TYPE_UNKNOWN;
+	}
+
+	/**
+	 * Extract the slug from a given path.
+	 *
+	 * It can be a directory or file path.
+	 * This should be a relative path since the top-level directory or file name will be used as the slug.
+	 *
+	 * @param string $path The path to extract the slug from.
+	 *
+	 * @return string The slug extracted from the path.
+	 */
+	private function extract_slug_from_path( string $path ): string {
+		$path = trim( $path );
+		$path = trim( $path, DIRECTORY_SEPARATOR );
+
+		// If the path is just a file name, use it as the slug.
+		if ( false === strpos( $path, DIRECTORY_SEPARATOR ) ) {
+			return Utils::trim_php_file_extension( $path );
+		}
+
+		$parts = explode( DIRECTORY_SEPARATOR, $path );
+		// Bail if we couldn't get the parts.
+		if ( ! is_array( $parts ) ) {
+			return '';
+		}
+
+		return reset( $parts );
 	}
 }

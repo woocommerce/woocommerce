@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix payments tasks compatibility with extensions filtering the available payment methods.

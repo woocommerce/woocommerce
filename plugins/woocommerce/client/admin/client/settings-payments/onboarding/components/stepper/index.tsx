@@ -15,6 +15,7 @@ import { WooPaymentsProviderOnboardingStep } from '~/settings-payments/onboardin
 export default function Stepper( {
 	active,
 	steps,
+	justCompletedStepId,
 	includeSidebar = false,
 	sidebarTitle,
 }: {
@@ -22,6 +23,11 @@ export default function Stepper( {
 	 * The active step key
 	 */
 	active: string;
+	/**
+	 * The ID of the step that was just completed.
+	 * This can be used by steps to mark themselves as completed but moving to the next step depends on user interaction.
+	 */
+	justCompletedStepId?: string | null;
 	/**
 	 * The steps to render
 	 */
@@ -68,6 +74,7 @@ export default function Stepper( {
 								key={ step.id }
 								label={ step.label }
 								isCompleted={
+									step.id === justCompletedStepId ||
 									step.status === 'completed' ||
 									activeStepIndex === steps.length
 								}
