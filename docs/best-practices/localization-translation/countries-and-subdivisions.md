@@ -12,6 +12,6 @@ Of course, even countries and their subdivisions periodically change. In these c
 
 This approach may not be suitable in all cases, because it can take time for CLDR to accept updates. In such cases, you can still modify the lists of countries and subdivisions by using custom snippets like the following:
 
-- [Snippet to add a country](/docs/getting-started/code-snippets/add-a-country)
-- [Snippet to add or modify states](/docs/getting-started/code-snippets/add-or-modify-states)
+- [Snippet to add a country](/docs/code-snippets/add-a-country)
+- [Snippet to add or modify states](/docs/code-snippets/add-or-modify-states)
 

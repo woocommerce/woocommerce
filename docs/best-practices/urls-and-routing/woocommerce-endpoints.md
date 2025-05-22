@@ -39,4 +39,3 @@ The following endpoints are used for account-related functionality and are appen
 ## Learn more
 
 - [Customizing endpoint URLs](./customizing-endpoint-urls.md)
-- [Troubleshooting endpoints](./troubleshooting-endpoints.md)
