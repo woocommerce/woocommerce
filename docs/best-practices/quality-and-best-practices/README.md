@@ -1,5 +1,5 @@
 ---
-sidebar_label: Quality And best practices  
+sidebar_label: Quality and best practices  
 category_slug: quality-and-best-practices
 post_title: Quality and best practices
 ---
