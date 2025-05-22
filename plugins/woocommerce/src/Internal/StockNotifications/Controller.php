@@ -31,9 +31,9 @@ class Controller {
 	public function init_hooks() {
 
 		add_filter( 'woocommerce_data_stores', array( $this, 'register_data_stores' ) );
-		
+
 		// Settings.
-		add_filter( 'woocommerce_get_settings_pages',  array( $this, 'register_settings' ) );
+		add_filter( 'woocommerce_get_settings_pages', array( $this, 'register_settings' ) );
 
 		$container = wc_get_container();
 		$container->get( TemplatesController::class );

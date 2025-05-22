@@ -105,7 +105,7 @@ class SettingsController extends \WC_Settings_Page {
 					'default'         => 'no',
 					'type'            => 'checkbox',
 					'desc_tip'        => __( 'When enabled, guests will be redirected to a login page to complete the sign-up process.', 'woocommerce' ),
-                    'checkboxgroup'   => 'start',
+					'checkboxgroup'   => 'start',
 					'hide_if_checked' => 'option',
 				),
 
