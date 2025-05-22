@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails;
 
-use Automattic\WooCommerce\Internal\Features\FeaturesUtil;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * Class WCTransactionalEmails
