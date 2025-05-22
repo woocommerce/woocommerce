@@ -27,6 +27,7 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 		$expected = array(
 			'',
 			'inventory',
+			'customer_stock_notifications',
 			'downloadable',
 		);
 

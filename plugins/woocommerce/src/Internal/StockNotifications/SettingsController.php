@@ -58,7 +58,7 @@ class SettingsController extends \WC_Settings_Page {
 	 * @return array New settings.
 	 */
 	public function add_customer_stock_notifications_settings( array $settings, string $section_id ): array {
-		if ( ! 'customer_stock_notifications' === $section_id ) {
+		if ( 'customer_stock_notifications' !== $section_id ) {
 			return $settings;
 		}
 

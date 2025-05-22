@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificat
 use Automattic\WooCommerce\Internal\StockNotifications\TemplatesController;
 use Automattic\WooCommerce\Internal\StockNotifications\EmailsController;
 use Automattic\WooCommerce\Internal\StockNotifications\SettingsController;
+
 /**
  * The controller for the stock notifications.
  */
@@ -55,7 +56,7 @@ class Controller {
 	}
 
 	/**
-	 * Register the stock notifications settings.
+	 * Register the Customer Stock Notifications settings.
 	 *
 	 * @param array $settings Settings.
 	 * @return array
