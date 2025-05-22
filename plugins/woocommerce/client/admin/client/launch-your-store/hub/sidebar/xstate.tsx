@@ -29,6 +29,7 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { LaunchYourStoreHubSidebar } from './components/launch-store-hub';
+import { PaymentsSidebar } from './components/payments-sidebar';
 import type {
 	LaunchYourStoreComponentProps,
 	LaunchYourStoreQueryParams,
@@ -70,7 +71,9 @@ export type SidebarMachineEvents =
 	| { type: 'OPEN_WC_ADMIN_URL_IN_CONTENT_AREA'; url: string }
 	| { type: 'LAUNCH_STORE'; removeTestOrders: boolean }
 	| { type: 'LAUNCH_STORE_SUCCESS' }
-	| { type: 'POP_BROWSER_STACK' };
+	| { type: 'SHOW_PAYMENTS' }
+	| { type: 'POP_BROWSER_STACK' }
+	| { type: 'RETURN_FROM_PAYMENTS' };
 
 const sidebarQueryParamListener = fromCallback( ( { sendBack } ) => {
 	return createQueryParamsListener( 'sidebar', sendBack );
@@ -253,12 +256,25 @@ export const sidebarMachine = setup( {
 			( { context } ) => context.mainContentMachineRef,
 			{ type: 'SHOW_LOADING' }
 		),
+		showSitePreview: sendTo(
+			( { context } ) => context.mainContentMachineRef,
+			{ type: 'EXTERNAL_URL_UPDATE' }
+		),
 		updateQueryParams: ( _, params: LaunchYourStoreQueryParams ) => {
 			updateQueryParams< LaunchYourStoreQueryParams >( params );
 		},
 		taskClicked: ( { event } ) => {
 			if ( event.type === 'TASK_CLICKED' ) {
-				taskClickedAction( event );
+				const result = taskClickedAction( event );
+
+				// If taskClickedAction returns an event object, dispatch it
+				if (
+					result &&
+					typeof result === 'object' &&
+					'type' in result
+				) {
+					return result;
+				}
 			}
 		},
 		openWcAdminUrl: ( { event } ) => {
@@ -285,6 +301,21 @@ export const sidebarMachine = setup( {
 			recordEvent(
 				'launch_your_store_hub_store_launch_cached_content_detected'
 			);
+		},
+		showPaymentsContent: sendTo(
+			( { context } ) => context.mainContentMachineRef,
+			{ type: 'SHOW_PAYMENTS' }
+		),
+		resetHistory: () => {
+			// Reset browser history to a clean state with the correct URL format
+			const cleanUrl =
+				'/wp-admin/admin.php?page=wc-admin&path=%2Flaunch-your-store';
+			window.history.replaceState( null, '', cleanUrl );
+		},
+		navigateToWcAdmin: () => {
+			// Navigate directly to WC Admin home
+			const adminUrl = '/wp-admin/admin.php?page=wc-admin';
+			window.location.href = adminUrl;
 		},
 	},
 	guards: {
@@ -414,6 +445,9 @@ export const sidebarMachine = setup( {
 						LAUNCH_STORE: {
 							target: '#storeLaunching',
 						},
+						POP_BROWSER_STACK: {
+							actions: [ 'navigateToWcAdmin' ],
+						},
 					},
 				},
 			},
@@ -518,21 +552,67 @@ export const sidebarMachine = setup( {
 				} ),
 			],
 		},
+		payments: {
+			id: 'payments',
+			meta: {
+				component: PaymentsSidebar,
+			},
+			entry: [ 'showPaymentsContent' ],
+			on: {
+				POP_BROWSER_STACK: {
+					actions: [
+						{
+							type: 'navigateToWcAdmin',
+						},
+					],
+				},
+				RETURN_FROM_PAYMENTS: {
+					target: '#launchYourStoreHub',
+					actions: [
+						{
+							type: 'updateQueryParams',
+							params: { sidebar: 'hub', content: 'site-preview' },
+						},
+						'resetHistory',
+						// Force the main content to reset completely
+						sendTo(
+							( { context } ) => context.mainContentMachineRef,
+							{ type: 'RETURN_FROM_PAYMENTS' }
+						),
+					],
+				},
+			},
+		},
 	},
 	on: {
 		EXTERNAL_URL_UPDATE: {
 			target: '.navigate',
 		},
-		TASK_CLICKED: {
-			actions: 'taskClicked',
-		},
+		TASK_CLICKED: [
+			{
+				// Direct transition for payments tasks
+				guard: ( { event } ) => {
+					return (
+						event.type === 'TASK_CLICKED' &&
+						( event.task.id === 'payments' ||
+							event.task.id === 'woocommerce-payments' )
+					);
+				},
+				target: '.payments',
+				actions: [ 'showPaymentsContent' ],
+			},
+			{
+				// Default action for other tasks
+				actions: 'taskClicked',
+			},
+		],
 		OPEN_WC_ADMIN_URL: {
 			actions: 'openWcAdminUrl',
 		},
-		POP_BROWSER_STACK: {
-			actions: 'windowHistoryBack',
-		},
 		OPEN_WC_ADMIN_URL_IN_CONTENT_AREA: {},
+		SHOW_PAYMENTS: {
+			target: '.payments',
+		},
 	},
 } );
 export const SidebarContainer = ( {
