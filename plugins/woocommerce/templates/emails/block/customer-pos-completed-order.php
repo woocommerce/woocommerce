@@ -22,21 +22,11 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:paragraph -->
-<p>
-<?php
-	/* translators: %s: Customer first name */
-	printf( esc_html__( 'Hi there,', 'woocommerce' ) );
-?>
-</p>
+<p> <?php echo esc_html__( 'Hi there,', 'woocommerce' ); ?> </p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p>
-<?php
-	/* translators: %s: Site title */
-	printf( esc_html__( 'Here’s a reminder of what you’ve bought:', 'woocommerce' ) );
-?>
-</p>
+<p> <?php echo esc_html__( 'Here’s a reminder of what you’ve bought:', 'woocommerce' ); ?> </p>
 <!-- /wp:paragraph -->
 
 <!-- wp:woo/email-content {"lock":{"move":false,"remove":true}} -->
