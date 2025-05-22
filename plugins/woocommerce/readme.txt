@@ -376,7 +376,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Product Gallery: Display real images in Editor if available [#56561](https://github.com/woocommerce/woocommerce/pull/56561)
 * Add - Product Gallery: force the mobile layout so the Thumbnails are rendered below the main image [#56063](https://github.com/woocommerce/woocommerce/pull/56063)
 * Add - Product Specifications: Add settings to control the visibility of weight/dimensions/attribute. [#57387](https://github.com/woocommerce/woocommerce/pull/57387)
-* Add - Remove core profiler free features fallback system with gradual rollout to ensure efficient partnership changes handling. [#56104](https://github.com/woocommerce/woocommerce/pull/56104)
 * Add - Restrict blueprint imports to coming soon mode [#57344](https://github.com/woocommerce/woocommerce/pull/57344)
 * Add - Show a notification when there is a mismatch in WooCommerce.com connection URL [#56327](https://github.com/woocommerce/woocommerce/pull/56327)
 * Update - Marketplace: update in app banner link targets. [#57771](https://github.com/woocommerce/woocommerce/pull/57771)
