@@ -1,10 +1,10 @@
 ---
-post_title: Extensibility getting started guide
-sidebar_label: Extensibility - Getting started
+post_title: Cart and Checkout extensibility
+sidebar_label: Cart and Checkout extensibility
 
 ---
 
-# Extensibility getting started guide
+# Getting started with Cart and Checkout extensibility
 <!-- markdownlint-disable MD041 -->
 
 This document is a high-level overview of the moving parts required to extend the Cart and Checkout blocks.

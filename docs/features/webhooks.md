@@ -3,9 +3,9 @@ post_title: Working with webhooks in WooCommerce
 sidebar_label: Using webhooks
 ---
 
-# Working with Webhooks in WooCommerce
+# Working with webhooks in WooCommerce
 
-## What are Webhooks?
+## What are webhooks?
 
 A  [Webhook](http://en.wikipedia.org/wiki/Webhook)  is an event notification sent to a URL of your choice. Users can configure them to trigger events on one site to invoke behavior on another.
 
@@ -42,7 +42,7 @@ To create a new webhook:
 - **Delivery URL**: URL where the webhook payload is delivered.
 - **Secret**: The Secret Key generates a hash of the delivered webhook and is provided in the request headers. This defaults to the current API user's consumer secret, if nothing is entered.
 
-4/ **Save Webhook**.
+4/ **Save webhook**.
 
 > **Note**: The first time your webhook is saved with the Activated status, it sends a ping to the Delivery URL.
 
