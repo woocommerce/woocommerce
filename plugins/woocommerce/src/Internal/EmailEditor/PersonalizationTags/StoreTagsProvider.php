@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Internal\EmailEditor\PersonalizationTags;
 
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
-use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
 
 /**
  * Provider for store-related personalization tags.
@@ -93,25 +92,6 @@ class StoreTagsProvider extends AbstractTagProvider {
 						return wptexturize( $context['wc_email']->customer_note );
 					}
 					return '';
-				},
-			)
-		);
-
-		$registry->register(
-			new Personalization_Tag(
-				__( 'Footer text', 'woocommerce' ),
-				'woocommerce/footer-text',
-				__( 'Store', 'woocommerce' ),
-				function ( array $context ): string {
-					if ( isset( $context['wc_email'] ) && ( 'customer_pos_completed_order' === $context['wc_email']->id || 'customer_pos_refunded_order' === $context['wc_email']->id ) ) {
-						$pos_store_name = htmlspecialchars_decode( get_option( 'woocommerce_pos_store_name', PointOfSaleDefaultSettings::get_default_store_name() ) );
-						/* translators: %s: name of the Point of Sale store */
-						return sprintf( __( 'You received this email because you shopped at %s', 'woocommerce' ), $pos_store_name );
-					}
-
-					$site_title = htmlspecialchars_decode( get_bloginfo( 'name' ) );
-					/* translators: %s: site title */
-					return sprintf( __( 'You received this email because you shopped on %s', 'woocommerce' ), $site_title );
 				},
 			)
 		);
