@@ -56,33 +56,28 @@ export function InnerEditor( {
 
 	// isFullScreenForced – comes from settings and cannot be changed by the user
 	// isFullscreenEnabled – indicates if a user has enabled fullscreen mode
-	const { post, template, isFullScreenForced, isFullscreenEnabled } =
-		useSelect(
-			( select ) => {
-				const { getEntityRecord } = select( coreStore );
-				const { getEditedPostTemplate } = select( storeName );
-				const postObject = getEntityRecord(
-					'postType',
-					currentPost.postType,
-					currentPost.postId
-				);
-				return {
-					template:
-						currentPost.postType !== 'wp_template'
-							? getEditedPostTemplate()
-							: null,
-					post: postObject,
-					isFullscreenEnabled:
-						select( storeName ).isFeatureActive( 'fullscreenMode' ),
-					isFullScreenForced: settings.isFullScreenForced,
-				};
-			},
-			[
+	const { post, template, isFullscreenEnabled } = useSelect(
+		( select ) => {
+			const { getEntityRecord } = select( coreStore );
+			const { getEditedPostTemplate } = select( storeName );
+			const postObject = getEntityRecord(
+				'postType',
 				currentPost.postType,
-				currentPost.postId,
-				settings.isFullScreenForced,
-			]
-		);
+				currentPost.postId
+			);
+			return {
+				template:
+					currentPost.postType !== 'wp_template'
+						? getEditedPostTemplate()
+						: null,
+				post: postObject,
+				isFullscreenEnabled:
+					select( storeName ).isFeatureActive( 'fullscreenMode' ),
+			};
+		},
+		[ currentPost.postType, currentPost.postId ]
+	);
+	const { isFullScreenForced } = settings;
 
 	// @ts-expect-error Type is missing in @types/wordpress__editor
 	const { removeEditorPanel } = useDispatch( editorStore );
