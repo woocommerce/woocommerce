@@ -440,7 +440,7 @@ CREATE TABLE $meta_table_name (
 		}
 
 		if ( ! empty( $args['product_id'] ) ) {
-			$product_ids  = array_map( 'absint', is_array( $args['product_id'] ) ? $args['product_id'] : array( $args['product_id'] ) );
+			$product_ids  = array_map( 'absint', (array) $args['product_id'] );
 			$where[]      = 'product_id IN (' . implode( ',', array_fill( 0, count( $product_ids ), '%d' ) ) . ')';
 			$where_values = array_merge( $where_values, $product_ids );
 		}
@@ -476,12 +476,13 @@ CREATE TABLE $meta_table_name (
 		}
 
 		if ( 'objects' === $args['return'] ) {
-			$notifications = array();
-			foreach ( $results as $result ) {
-				$notifications[] = new Notification( $result );
-			}
 
-			return $notifications;
+			return array_map(
+				function ( $result ) {
+					return new Notification( $result );
+				},
+				$results
+			);
 		}
 
 		return array_map(
