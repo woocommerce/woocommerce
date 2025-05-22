@@ -1,7 +1,6 @@
 ---
 post_title: Tools for low-code development
 sidebar_label: Low-code tools
-
 ---
 
 # Tools for low-code development
