@@ -1,7 +1,7 @@
 ---
-sidebar_label: Extension Guidelines
+sidebar_label: Extension guidelines
 category_slug: user-experience-extensions
-post_title: Extension Guidelines
+post_title: Extension guidelines
 ---
 
 # Extension Guidelines
