@@ -145,7 +145,7 @@ const config: Config = {
 						},
 						{
 							label: 'Contribute to WooCommerce',
-							href: '/docs/contributor-guides/contributing',
+							href: '/docs/contribution/contributing',
 						},
 					],
 				},

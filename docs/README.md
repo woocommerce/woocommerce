@@ -20,7 +20,7 @@ WooCommerce is a customizable, open-source eCommerce platform built on WordPress
 
 Begin your WooCommerce development journey here with essential guides and resources tailored for newcomers. Join our thriving community on Slack for support and networking.
 
-Learn more about [getting started](/docs/category/getting-started)
+Learn more about [getting started](/docs/getting-started)
 
 ---
 
@@ -44,7 +44,7 @@ Discover the art of WooCommerce theme development. Learn about theme customizati
 * [Classic theme developer handbook](/docs/theming/theme-development/classic-theme-developer-handbook)
 * [Theme design and user experience guidelines](/docs/theming/theme-development/theme-design-ux-guidelines)
 
-Learn more about [theme development](/docs/category/theming/)
+Learn more about [classic theme development](/docs/theming/theme-development) or [Block theme development](/docs/theming/block-theme-development)
 
 ---
 
@@ -54,9 +54,9 @@ Join our open-source community and contribute to WooCommerce. Explore how you ca
 
 * [Visit the WooCommerce monorepo](https://github.com/woocommerce/woocommerce)
 * [Open Issues on GitHub](https://github.com/woocommerce/woocommerce/issues)
-* [Woo contributor guidelines](/docs/contributor-guides/contributing/)
+* [Woo contributor guidelines](/docs/contribution/contributing/)
 
-Learn more about [contributing](/docs/category/contributor-guides)
+Learn more about [contributing](/docs/contribution/contributing)
 
 ---
 

@@ -1,12 +1,11 @@
 ---
 sidebar_label: Code Snippets
 category_slug: code-snippets
-post_title: Code Snippets
+post_title: Using the Code Snippets Plugin for WooCommerce Customizations
+sidebar_position: 1
 ---
 
-# Code Snippets
-
-# Using the Code Snippets Plugin for WooCommerce Customizations
+# Using the Code Snippets Plugin
 
 ## What is a Code Snippet?  
 
