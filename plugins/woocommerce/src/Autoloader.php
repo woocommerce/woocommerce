@@ -72,4 +72,8 @@ class Autoloader {
 			}
 		);
 	}
+
+	private function foo( object $object = null ) {
+		return $object;
+	}
 }
