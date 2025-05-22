@@ -7,21 +7,21 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Enums;
 /**
  * Notification cancellation source enum.
  */
-class NotificationCancellationSource {
+final class NotificationCancellationSource {
 
 	/**
 	 * Admin cancellation source.
 	 *
 	 * @var string
 	 */
-	const ADMIN = 'admin';
+	public const ADMIN = 'admin';
 
 	/**
 	 * User cancellation source.
 	 *
 	 * @var string
 	 */
-	const USER = 'user';
+	public const USER = 'user';
 
 	/**
 	 * Get valid cancellation sources.
