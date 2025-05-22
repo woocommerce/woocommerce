@@ -63,9 +63,9 @@ const renderPaymentsSettings = () => {
 	pages.forEach( ( { id, component } ) => {
 		const root = document.getElementById( id );
 		if ( root ) {
-			createRoot(
-				root.insertBefore( document.createElement( 'div' ), null )
-			).render( component );
+			const newDiv = document.createElement( 'div' );
+			newDiv.className = 'wc-settings-prevent-change-event';
+			createRoot( root.insertBefore( newDiv, null ) ).render( component );
 		}
 	} );
 };
