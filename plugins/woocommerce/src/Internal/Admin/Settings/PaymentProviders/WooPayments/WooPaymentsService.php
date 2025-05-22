@@ -1858,7 +1858,13 @@ class WooPaymentsService {
 
 		$payment_methods_state = array();
 		foreach ( $recommended_pms as $recommended_pm ) {
-			$pm_id = $recommended_pm['id'];
+			/**
+			 * Combine Apple Pay and Google Pay into a single entry.
+			 * This is because they are both enabled/disabled together.
+			 * We will use the ID 'apple_google' for this entry.
+			 */
+			$pm_id = in_array( $recommended_pm['id'], [ 'apple_pay', 'google_pay' ], true )
+				? 'apple_google' : $recommended_pm['id'];
 
 			// Start with the recommended enabled state.
 			$payment_methods_state[ $pm_id ] = $recommended_pm['enabled'];
