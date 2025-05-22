@@ -96,13 +96,13 @@ class SettingsController extends \WC_Settings_Page {
 				),
 
 				array(
-					'title'           => __( 'Guest sign-up', 'woocommerce' ),
-					'desc'            => __( 'Customers must be logged in to sign up for stock notifications.', 'woocommerce' ),
-					'id'              => 'wc_bis_account_required',
-					'default'         => 'no',
-					'type'            => 'checkbox',
-					'desc_tip'        => __( 'When enabled, guests will be redirected to a login page to complete the sign-up process.', 'woocommerce' ),
-					'checkboxgroup'   => 'start',
+					'title'         => __( 'Guest sign-up', 'woocommerce' ),
+					'desc'          => __( 'Customers must be logged in to sign up for stock notifications.', 'woocommerce' ),
+					'id'            => 'wc_bis_account_required',
+					'default'       => 'no',
+					'type'          => 'checkbox',
+					'desc_tip'      => __( 'When enabled, guests will be redirected to a login page to complete the sign-up process.', 'woocommerce' ),
+					'checkboxgroup' => 'start',
 				),
 
 				array(
