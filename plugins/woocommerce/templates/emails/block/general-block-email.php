@@ -83,30 +83,6 @@ if ( 'customer_reset_password' === $email->id && isset( $reset_key, $user_id ) )
 	<?php
 endif;
 
-if ( 'customer_pos_completed_order' === $email->id || 'customer_pos_refunded_order' === $email->id ) :
-	?>
-	<!-- wp:paragraph -->
-	<p>
-	<?php
-	if ( ! empty( $order->get_billing_first_name() ) ) {
-		/* translators: %s: Customer first name */
-		printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) );
-	} else {
-		echo esc_html__( 'Hi there,', 'woocommerce' );
-	}
-	?>
-	</p>
-	<!-- /wp:paragraph -->
-	<!-- wp:paragraph -->
-	<p>
-	<?php
-		echo esc_html__( 'Here’s a reminder of what you’ve bought:', 'woocommerce' );
-	?>
-	</p>
-	<!-- /wp:paragraph -->
-	<?php
-endif;
-
 $accounts_related_emails = array(
 	'customer_reset_password',
 	'customer_new_account',
