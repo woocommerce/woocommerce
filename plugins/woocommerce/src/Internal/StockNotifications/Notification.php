@@ -216,7 +216,7 @@ class Notification extends \WC_Data {
 	 *
 	 * @param int $product_id Product ID.
 	 */
-	public function set_product_id( $product_id ) {
+	public function set_product_id( int $product_id ) {
 
 		// Reset runtime cache if the product ID has changed.
 		if ( is_a( $this->product, 'WC_Product' ) && $product_id !== $this->product->get_id() ) {
@@ -230,7 +230,7 @@ class Notification extends \WC_Data {
 	 *
 	 * @param int $user_id User ID.
 	 */
-	public function set_user_id( $user_id ) {
+	public function set_user_id( int $user_id ) {
 		$this->set_prop( 'user_id', $user_id );
 	}
 
@@ -239,7 +239,7 @@ class Notification extends \WC_Data {
 	 *
 	 * @param string $user_email User email.
 	 */
-	public function set_user_email( $user_email ) {
+	public function set_user_email( string $user_email ) {
 		$this->set_prop( 'user_email', $user_email );
 	}
 
@@ -248,7 +248,7 @@ class Notification extends \WC_Data {
 	 *
 	 * @param string $status Status.
 	 */
-	public function set_status( $status ) {
+	public function set_status( string $status ) {
 
 		if ( ! in_array( $status, NotificationStatus::get_valid_statuses(), true ) ) {
 			// Default to pending.
@@ -315,9 +315,9 @@ class Notification extends \WC_Data {
 	/**
 	 * Set the cancellation source.
 	 *
-	 * @param string $cancellation_source Cancellation source. Can be null.
+	 * @param string|null $cancellation_source Cancellation source. Can be null.
 	 */
-	public function set_cancellation_source( $cancellation_source ) {
+	public function set_cancellation_source( ?string $cancellation_source ) {
 		if ( $cancellation_source && ! in_array( $cancellation_source, NotificationCancellationSource::get_valid_cancellation_sources(), true ) ) {
 			// Default to user.
 			$cancellation_source = NotificationCancellationSource::USER;
