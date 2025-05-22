@@ -308,8 +308,9 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array[]|WC_Product_Variation[]
 	 */
 	public function get_available_variations( $return = 'array' ) {
-		$variation_ids        = $this->get_children();
-		$available_variations = array();
+		$variation_ids           = $this->get_children();
+		$hide_out_of_stock_items = ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
+		$available_variations    = array();
 
 		if ( is_callable( '_prime_post_caches' ) ) {
 			_prime_post_caches( $variation_ids );
@@ -320,7 +321,7 @@ class WC_Product_Variable extends WC_Product {
 			$variation = wc_get_product( $variation_id );
 
 			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked.
-			if ( ! $variation || ! $variation->exists() || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
+			if ( ! $variation || ! $variation->exists() || ( $hide_out_of_stock_items && ! $variation->is_in_stock() ) ) {
 				continue;
 			}
 
@@ -357,10 +358,11 @@ class WC_Product_Variable extends WC_Product {
 	 * @hint If the function gets updated, make sure to update get_available_variations too, as they share similar logic.
 	 *
 	 * @since  9.9.0
-	 * @return boolean
+	 * @return bool
 	 */
 	public function has_available_variations() {
-		$variation_ids = $this->get_children();
+		$variation_ids           = $this->get_children();
+		$hide_out_of_stock_items = ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
 
 		if ( is_callable( '_prime_post_caches' ) ) {
 			_prime_post_caches( $variation_ids );
@@ -371,7 +373,7 @@ class WC_Product_Variable extends WC_Product {
 			$variation = wc_get_product( $variation_id );
 
 			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked.
-			if ( ! $variation || ! $variation->exists() || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
+			if ( ! $variation || ! $variation->exists() || ( $hide_out_of_stock_items && ! $variation->is_in_stock() ) ) {
 				continue;
 			}
 
