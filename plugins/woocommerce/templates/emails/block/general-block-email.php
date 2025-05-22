@@ -143,7 +143,7 @@ if ( 'customer_pos_completed_order' === $email->id || 'customer_pos_refunded_ord
 
 			<?php if ( ! empty( get_option( 'woocommerce_pos_store_phone' ) ) ) : ?>
 			<!-- wp:paragraph -->
-			<p><?php echo esc_html( get_option( 'woocommerce_	pos_store_phone' ) ); ?></p>
+			<p><?php echo esc_html( get_option( 'woocommerce_pos_store_phone' ) ); ?></p>
 			<!-- /wp:paragraph -->
 			<?php endif; ?>
 
