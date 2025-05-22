@@ -94,7 +94,7 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		);
 
 		$variation_ids = array_map(
-			function( $variation ) {
+			function ( $variation ) {
 				return $variation->get_id();
 			},
 			$variations
@@ -148,7 +148,7 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		);
 
 		$variation_ids = array_map(
-			function( $variation ) {
+			function ( $variation ) {
 				return $variation->get_id();
 			},
 			$variations

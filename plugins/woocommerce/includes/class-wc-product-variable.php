@@ -324,7 +324,13 @@ class WC_Product_Variable extends WC_Product {
 				continue;
 			}
 
-			// Filter 'woocommerce_hide_invisible_variations' to optionally hide invisible variations (disabled variations and variations with empty price).
+			/**
+			 * Filter 'woocommerce_hide_invisible_variations' to optionally hide invisible variations (disabled variations and variations with empty price).
+			 *
+			 * @param  bool                  $hide        Whether to hide invisible variations. Default true.
+			 * @param  int                   $product_id  The ID of the variation.
+			 * @param  WC_Product_Variation  $variation   The variation object.
+			 */
 			if ( apply_filters( 'woocommerce_hide_invisible_variations', true, $this->get_id(), $variation ) && ! $variation->variation_is_visible() ) {
 				continue;
 			}
@@ -352,7 +358,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return boolean
 	 */
 	public function has_available_variations() {
-		$variation_ids        = $this->get_children();
+		$variation_ids = $this->get_children();
 
 		if ( is_callable( '_prime_post_caches' ) ) {
 			_prime_post_caches( $variation_ids );
@@ -367,7 +373,13 @@ class WC_Product_Variable extends WC_Product {
 				continue;
 			}
 
-			// Filter 'woocommerce_hide_invisible_variations' to optionally hide invisible variations (disabled variations and variations with empty price).
+			/**
+			 * Filter 'woocommerce_hide_invisible_variations' to optionally hide invisible variations (disabled variations and variations with empty price).
+			 *
+			 * @param  bool                  $hide        Whether to hide invisible variations. Default true.
+			 * @param  int                   $product_id  The ID of the variation.
+			 * @param  WC_Product_Variation  $variation   The variation object.
+			 */
 			if ( apply_filters( 'woocommerce_hide_invisible_variations', true, $this->get_id(), $variation ) && ! $variation->variation_is_visible() ) {
 				continue;
 			}
