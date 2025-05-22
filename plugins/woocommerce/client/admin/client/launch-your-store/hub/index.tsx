@@ -4,7 +4,6 @@
 import { useMachine } from '@xstate5/react';
 import { useEffect } from 'react';
 import clsx from 'clsx';
-import { Route, Routes } from 'react-router-dom';
 
 /**
  * Internal dependencies
@@ -26,7 +25,7 @@ import {
 	MainContentContainer,
 } from './main-content/xstate';
 import { useXStateInspect } from '~/xstate';
-import { PaymentsModal } from './main-content/pages/payments-modal';
+import { OnboardingProvider } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
 
 export type LaunchYourStoreComponentProps = {
 	sendEventToSidebar: ( arg0: SidebarMachineEvents ) => void;
@@ -36,7 +35,7 @@ export type LaunchYourStoreComponentProps = {
 
 export type LaunchYourStoreQueryParams = {
 	sidebar?: 'hub' | 'launch-success';
-	content?: 'site-preview' | 'launch-store-success';
+	content?: 'site-preview' | 'launch-store-success' | 'payments';
 };
 
 const LaunchStoreController = () => {
@@ -73,36 +72,40 @@ const LaunchStoreController = () => {
 			mainContentMachineService
 		);
 
+	const handlePaymentsClose = () => {
+		// Navigate back to the main flow
+		sendToSidebar( { type: 'RETURN_FROM_PAYMENTS' } );
+	};
 	return (
 		<div className={ 'launch-your-store-layout__container' }>
-			<SidebarContainer
-				className={ clsx( {
-					'is-sidebar-hidden': ! isSidebarVisible,
-				} ) }
+			<OnboardingProvider
+				closeModal={ handlePaymentsClose }
+				source="launch-your-store"
 			>
-				{ CurrentSidebarComponent && (
-					<CurrentSidebarComponent
-						sendEventToSidebar={ sendToSidebar }
-						sendEventToMainContent={ sendToMainContent }
-						context={ sidebarState.context }
-					/>
-				) }
-			</SidebarContainer>
-			<MainContentContainer>
-				{ CurrentMainContentComponent && (
-					<CurrentMainContentComponent
-						sendEventToSidebar={ sendToSidebar }
-						sendEventToMainContent={ sendToMainContent }
-						context={ mainContentState.context }
-					/>
-				) }
-			</MainContentContainer>
-			<Routes>
-				<Route
-					path="/woopayments/onboarding/*"
-					element={ <PaymentsModal /> }
-				/>
-			</Routes>
+				<SidebarContainer
+					className={ clsx( {
+						'is-sidebar-hidden': ! isSidebarVisible,
+					} ) }
+				>
+					{ CurrentSidebarComponent && (
+						<CurrentSidebarComponent
+							sendEventToSidebar={ sendToSidebar }
+							sendEventToMainContent={ sendToMainContent }
+							context={ sidebarState.context }
+						/>
+					) }
+				</SidebarContainer>
+				<MainContentContainer>
+					{ CurrentMainContentComponent && (
+						<CurrentMainContentComponent
+							key={ mainContentState.value.toString() }
+							sendEventToSidebar={ sendToSidebar }
+							sendEventToMainContent={ sendToMainContent }
+							context={ mainContentState.context }
+						/>
+					) }
+				</MainContentContainer>
+			</OnboardingProvider>
 		</div>
 	);
 };
