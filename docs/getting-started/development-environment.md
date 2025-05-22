@@ -61,16 +61,6 @@ Below is a collection of tools to help you manage your environment that are not 
 
 Regardless of the tool you choose for managing your development environment, you should make sure it [meets the server recommendations](https://woocommerce.com/document/server-requirements/?utm_source=wooextdevguide) for WooCommerce as well as the [requirements for running WordPress](https://wordpress.org/about/requirements/).
 
-## Anatomy of a WordPress development environment
-
-While development environments can vary, the basic file structure for a WordPress environment should be consistent.
-
-When developing a WooCommerce extension, you'll usually be doing most of your work within the `public_html/` directory of your local server. Take some time to familiarize yourself with a few key paths:
-
-- `wp-content/debug.log` is the file where WordPress writes the important output such as errors and other messages that can be useful for debugging.
-- `wp-content/plugins/` is the directory on the server where WordPress plugin folders live.
-- `wp-content/themes/` is the directory on the server where WordPress theme folders live.
-
 ## Add WooCommerce Core to your environment
 
 When developing an extension for WooCommerce, it's helpful to install a development version of WooCommerce Core. 
