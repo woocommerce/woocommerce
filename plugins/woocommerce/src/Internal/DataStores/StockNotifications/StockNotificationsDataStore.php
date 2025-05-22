@@ -318,9 +318,11 @@ CREATE TABLE $meta_table_name (
 	public function delete( &$notification, $args = array() ) {
 		global $wpdb;
 
-		$wpdb->delete( $this->get_table_name(), array( 'id' => $notification->get_id() ), array( '%d' ) );
+		$deleted = $wpdb->delete( $this->get_table_name(), array( 'id' => $notification->get_id() ), array( '%d' ) );
 
-		$this->data_store_meta->delete_by_notification_id( $notification->get_id() );
+		if ( is_int( $deleted ) && $deleted > 0 ) {
+			$this->data_store_meta->delete_by_notification_id( $notification->get_id() );
+		}
 	}
 
 	/**
@@ -392,8 +394,8 @@ CREATE TABLE $meta_table_name (
 
 		if ( $should_save ) {
 			$notification->set_date_modified( $current_time );
-			$notification->save();
-			return true;
+			$saved = $notification->save();
+			return is_int( $saved ) && $saved > 0;
 		}
 
 		return false;
