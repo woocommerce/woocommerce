@@ -16,7 +16,7 @@ final class NotificationStatus {
 	 *
 	 * @var string
 	 */
-	const PENDING = 'pending';
+	public const PENDING = 'pending';
 
 	/**
 	 * Status: 'active'.
@@ -26,7 +26,7 @@ final class NotificationStatus {
 	 *
 	 * @var string
 	 */
-	const ACTIVE = 'active';
+	public const ACTIVE = 'active';
 
 	/**
 	 * Status: 'sent'.
@@ -35,7 +35,7 @@ final class NotificationStatus {
 	 *
 	 * @var string
 	 */
-	const SENT = 'sent';
+	public const SENT = 'sent';
 
 	/**
 	 * Status: 'cancelled'.
@@ -44,7 +44,7 @@ final class NotificationStatus {
 	 *
 	 * @var string
 	 */
-	const CANCELLED = 'cancelled';
+	public const CANCELLED = 'cancelled';
 
 	/**
 	 * Get all available notification statuses.
