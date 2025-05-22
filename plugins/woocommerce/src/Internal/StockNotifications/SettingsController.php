@@ -14,9 +14,6 @@ class SettingsController extends \WC_Settings_Page {
 	 */
 	public function __construct() {
 
-		$this->id    = 'stock_notifications_settings';
-		$this->label = __( 'Stock Notifications', 'woocommerce' );
-
 		// Add a 'Customer stock notifications' section to Products settings.
 		add_filter( 'woocommerce_get_sections_products', array( $this, 'add_customer_stock_notifications_section' ), 100, 1 );
 
