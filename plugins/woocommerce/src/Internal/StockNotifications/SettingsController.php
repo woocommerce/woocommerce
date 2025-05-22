@@ -99,21 +99,24 @@ class SettingsController extends \WC_Settings_Page {
 				),
 
 				array(
-					'title'    => __( 'Require account to sign up', 'woocommerce' ),
-					'desc'     => __( 'Customers must be logged in to sign up for stock notifications.', 'woocommerce' ),
-					'id'       => 'wc_bis_account_required',
-					'default'  => 'no',
-					'type'     => 'checkbox',
-					'desc_tip' => __( 'When enabled, guests will be redirected to a login page to complete the sign-up process.', 'woocommerce' ),
+					'title'           => __( 'Guest sign-up', 'woocommerce' ),
+					'desc'            => __( 'Customers must be logged in to sign up for stock notifications.', 'woocommerce' ),
+					'id'              => 'wc_bis_account_required',
+					'default'         => 'no',
+					'type'            => 'checkbox',
+					'desc_tip'        => __( 'When enabled, guests will be redirected to a login page to complete the sign-up process.', 'woocommerce' ),
+                    'checkboxgroup'   => 'start',
+					'hide_if_checked' => 'option',
 				),
 
 				array(
-					'title'   => __( 'Create account on sign-up', 'woocommerce' ),
-					'desc'    => __( 'Create an account when guests sign up for stock notifications.', 'woocommerce' ),
-					'id'      => 'wc_bis_create_new_account_on_registration',
-					'default' => 'no',
-					'type'    => 'checkbox',
-					'class'   => 'account_required_field',
+					'desc'            => __( 'Create an account when guests sign up for stock notifications.', 'woocommerce' ),
+					'id'              => 'wc_bis_create_new_account_on_registration',
+					'default'         => 'no',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => 'end',
+					'hide_if_checked' => 'yes',
+					'autoload'        => true,
 				),
 
 				array(
