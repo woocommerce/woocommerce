@@ -77,7 +77,7 @@ export function InnerEditor( {
 		},
 		[ currentPost.postType, currentPost.postId ]
 	);
-	const { isFullScreenForced } = settings;
+	const { isFullScreenForced, displaySendEmailButton } = settings;
 
 	// @ts-expect-error Type is missing in @types/wordpress__editor
 	const { removeEditorPanel } = useDispatch( editorStore );
@@ -145,7 +145,7 @@ export function InnerEditor( {
 					) : (
 						<SettingsPanel />
 					) }
-					{ ! isFullScreenForced && <PublishSave /> }
+					{ displaySendEmailButton && <PublishSave /> }
 					<EditorNotices />
 					<BlockCompatibilityWarnings />
 				</Editor>
