@@ -13,4 +13,8 @@ body.woocommerce-settings-payments-tab {
 	.woocommerce-layout .woocommerce-store-alerts {
 		margin-top: $gap-large;
 	}
+
+	#wpbody.has-settings-layout {
+		margin-top: 60px !important;
+	}
 }

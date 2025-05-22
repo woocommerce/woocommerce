@@ -38,7 +38,14 @@ class PaymentProviders {
 	public const EXTENSION_INSTALLED     = 'installed';
 	public const EXTENSION_ACTIVE        = 'active';
 
+	// For providers that are delivered through a plugin available on the WordPress.org repository.
 	public const EXTENSION_TYPE_WPORG = 'wporg';
+	// For providers that are delivered through a must-use plugin.
+	public const EXTENSION_TYPE_MU_PLUGIN = 'mu_plugin';
+	// For providers that are delivered through a theme.
+	public const EXTENSION_TYPE_THEME = 'theme';
+	// For providers that are delivered through an unknown mechanism.
+	public const EXTENSION_TYPE_UNKNOWN = 'unknown';
 
 	public const PROVIDERS_ORDER_OPTION         = 'woocommerce_gateway_order';
 	public const SUGGESTION_ORDERING_PREFIX     = '_wc_pes_';
@@ -242,6 +249,7 @@ class PaymentProviders {
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 *
 	 * @return string The plugin slug of the payment gateway.
+	 *                Empty string if a plugin slug could not be determined.
 	 */
 	public function get_payment_gateway_plugin_slug( WC_Payment_Gateway $payment_gateway ): string {
 		$provider = $this->get_payment_gateway_provider_instance( $payment_gateway->id );
@@ -692,6 +700,7 @@ class PaymentProviders {
 		// Get the payment gateways order map.
 		$payment_gateways_order_map = array_flip( array_keys( $payment_gateways ) );
 		// Get the payment gateways to suggestions map.
+		// There will be null entries for payment gateways where we couldn't find a suggestion.
 		$payment_gateways_to_suggestions_map = array_map(
 			fn( $gateway ) => $this->extension_suggestions->get_by_plugin_slug( Utils::normalize_plugin_slug( $this->get_payment_gateway_plugin_slug( $gateway ) ) ),
 			$payment_gateways
