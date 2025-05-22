@@ -2,6 +2,7 @@
 sidebar_label: WooCommerce CLI
 category_slug: wc-cli
 post_title: WooCommerce CLI Overview
+sidebar_position: 1
 ---
 
 # WooCommerce CLI Overview

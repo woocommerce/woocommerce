@@ -1,6 +1,7 @@
 ---
 post_title: How to use WooCommerce CLI
 sidebar_label: Using WooCommerce CLI
+sidebar_position: 2
 
 ---
 

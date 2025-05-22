@@ -1,6 +1,7 @@
 ---
 post_title: WooCommerce CLI frequently asked questions
 sidebar_label: Frequently asked questions
+sidebar_position: 5
 
 ---
 

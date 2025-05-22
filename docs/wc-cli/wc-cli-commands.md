@@ -1,6 +1,7 @@
 ---
 post_title: WooCommerce CLI commands
 sidebar_label: Commands
+sidebar_position: 4
 
 ---
 
