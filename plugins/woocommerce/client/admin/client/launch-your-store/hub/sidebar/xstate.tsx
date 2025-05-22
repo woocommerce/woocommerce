@@ -326,6 +326,10 @@ export const sidebarMachine = setup( {
 			const { sidebar } = getQuery() as LaunchYourStoreQueryParams;
 			return !! sidebar && sidebar === sidebarLocation;
 		},
+		hasPaymentsContent: () => {
+			const { content } = getQuery() as LaunchYourStoreQueryParams;
+			return content === 'payments';
+		},
 		hasWooPayments: ( { context } ) => {
 			return !! context.hasWooPayments;
 		},
@@ -358,6 +362,10 @@ export const sidebarMachine = setup( {
 	states: {
 		navigate: {
 			always: [
+				{
+					guard: { type: 'hasPaymentsContent' },
+					target: 'payments',
+				},
 				{
 					guard: {
 						type: 'hasSidebarLocation',
