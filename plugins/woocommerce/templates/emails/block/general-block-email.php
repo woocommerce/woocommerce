@@ -127,11 +127,11 @@ if ( 'customer_pos_completed_order' === $email->id || 'customer_pos_refunded_ord
 		<div class="wp-block-group">
 			<?php if ( ! empty( get_option( 'woocommerce_pos_store_name', PointOfSaleDefaultSettings::get_default_store_name() ) ) ) : ?>
 			<!-- wp:heading {"level":3} -->
-			<h3><?php echo esc_html( get_option( 'woocommerce_pos_store_name', PointOfSaleDefaultSettings::get_default_store_name() ) ); ?></h3>
+			<h3 class="wp-block-heading"><?php echo esc_html( get_option( 'woocommerce_pos_store_name', PointOfSaleDefaultSettings::get_default_store_name() ) ); ?></h3>
 			<!-- /wp:heading -->
 			<?php else : ?>
 			<!-- wp:heading {"level":3} -->
-			<h3><?php echo esc_html__( 'Store Information', 'woocommerce' ); ?></h3>
+			<h3 class="wp-block-heading"><?php echo esc_html__( 'Store Information', 'woocommerce' ); ?></h3>
 			<!-- /wp:heading -->
 			<?php endif; ?>
 
