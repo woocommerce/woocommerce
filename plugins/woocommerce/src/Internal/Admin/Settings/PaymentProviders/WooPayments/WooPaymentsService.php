@@ -1454,34 +1454,36 @@ class WooPaymentsService {
 
 		$steps[] = $wpcom_step;
 
-		// Add the test account onboarding step details.
-		$test_account_step = $this->standardize_onboarding_step_details(
-			array(
-				'id' => self::ONBOARDING_STEP_TEST_ACCOUNT,
-			),
-			$location,
-			$rest_path
-		);
-
-		// If the step is not completed, we need to add the actions.
-		if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $test_account_step['status'] ) {
-			$test_account_step['actions'] = array(
-				'start'  => array(
-					'type' => self::ACTION_TYPE_REST,
-					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/start' ),
+		// Test account onboarding step is unavailable in UAE and Singapore.
+		if ( ! in_array( $location, array( 'AE', 'SG' ), true ) ) {
+			$test_account_step = $this->standardize_onboarding_step_details(
+				array(
+					'id' => self::ONBOARDING_STEP_TEST_ACCOUNT,
 				),
-				'init'   => array(
-					'type' => self::ACTION_TYPE_REST,
-					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/init' ),
-				),
-				'finish' => array(
-					'type' => self::ACTION_TYPE_REST,
-					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/finish' ),
-				),
+				$location,
+				$rest_path
 			);
-		}
 
-		$steps[] = $test_account_step;
+			// If the step is not completed, we need to add the actions.
+			if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $test_account_step['status'] ) {
+				$test_account_step['actions'] = array(
+					'start'  => array(
+						'type' => self::ACTION_TYPE_REST,
+						'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/start' ),
+					),
+					'init'   => array(
+						'type' => self::ACTION_TYPE_REST,
+						'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/init' ),
+					),
+					'finish' => array(
+						'type' => self::ACTION_TYPE_REST,
+						'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/finish' ),
+					),
+				);
+			}
+
+			$steps[] = $test_account_step;
+		}
 
 		// Add the live account business verification onboarding step details.
 		$business_verification_step = $this->standardize_onboarding_step_details(
@@ -1502,7 +1504,7 @@ class WooPaymentsService {
 		// This is because WooPayments needs a working WPCOM connection to be able to fetch the fields.
 		if ( $this->check_onboarding_step_requirements( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location ) ) {
 			try {
-				$business_verification_step['context']['fields'] = $this->get_onboarding_kyc_fields();
+				$business_verification_step['context']['fields'] = $this->get_onboarding_kyc_fields( $location );
 			} catch ( Exception $e ) {
 				$business_verification_step['errors'][] = array(
 					'code'    => 'fields_error',
@@ -2012,10 +2014,13 @@ class WooPaymentsService {
 	/**
 	 * Get the onboarding fields data for the KYC business verification.
 	 *
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
 	 * @return array The onboarding fields data.
 	 * @throws Exception If the onboarding fields data could not be retrieved or there was an error.
 	 */
-	private function get_onboarding_kyc_fields(): array {
+	private function get_onboarding_kyc_fields( string $location ): array {
 		// Call the WooPayments API to get the onboarding fields.
 		$response = $this->proxy->call_static( Utils::class, 'rest_endpoint_get_request', '/wc/v3/payments/onboarding/fields' );
 
@@ -2033,6 +2038,8 @@ class WooPaymentsService {
 		if ( ! isset( $fields['available_countries'] ) && $this->proxy->call_function( 'is_callable', '\WC_Payments_Utils::supported_countries' ) ) {
 			$fields['available_countries'] = $this->proxy->call_static( '\WC_Payments_Utils', 'supported_countries' );
 		}
+
+		$fields['location'] = $location;
 
 		return $fields;
 	}
