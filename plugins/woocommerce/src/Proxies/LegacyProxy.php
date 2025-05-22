@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Proxies;
 
 use Automattic\WooCommerce\Internal\DependencyManagement\Definition;
 use Automattic\WooCommerce\Utilities\StringUtil;
-use Automattic\WooCommerce\Vendor\Psr\Container\ContainerInterface;
 
 /**
  * Proxy class to access legacy WooCommerce functionality.
@@ -38,7 +37,7 @@ class LegacyProxy {
 		if ( StringUtil::starts_with( $class_name, 'Automattic\\WooCommerce\\' ) ) {
 			throw new \Exception(
 				'The LegacyProxy class is not intended for getting instances of classes whose namespace starts with \'Automattic\\WooCommerce\', please use ' .
-				Definition::INJECTION_METHOD . ' method injection or the instance of ' . ContainerInterface::class . ' for that.'
+				'\'init\' method injection or \'wc_get_container()->get()\' for that.'
 			);
 		}
 
