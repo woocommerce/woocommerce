@@ -15,6 +15,7 @@ import Modal from '~/settings-payments/onboarding/components/modal';
 import WooPaymentsOnboarding from './components/onboarding';
 import { WooPaymentsModalProps } from '~/settings-payments/onboarding/types';
 import { OnboardingProvider } from './data/onboarding-context';
+import { steps } from './steps';
 
 /**
  * Modal component for WooPayments onboarding
@@ -94,6 +95,7 @@ export default function WooPaymentsModal( {
 		<Modal setIsOpen={ handleClose }>
 			<OnboardingProvider
 				closeModal={ handleClose }
+				onboardingSteps={ steps }
 				source="settings-payments"
 			>
 				<WooPaymentsOnboarding />

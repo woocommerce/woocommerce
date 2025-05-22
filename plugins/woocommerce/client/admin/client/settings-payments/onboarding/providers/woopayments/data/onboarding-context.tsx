@@ -23,7 +23,6 @@ import {
 	WooPaymentsProviderOnboardingStep,
 	OnboardingContextType,
 } from '~/settings-payments/onboarding/types';
-import { steps as woopaymentsSteps } from '../steps';
 
 /**
  * Context to manage onboarding steps
@@ -47,8 +46,14 @@ export const useOnboardingContext = () => useContext( OnboardingContext );
 export const OnboardingProvider: React.FC< {
 	children: React.ReactNode;
 	source: 'settings-payments' | 'launch-your-store';
+	onboardingSteps: WooPaymentsProviderOnboardingStep[];
 	closeModal: () => void;
-} > = ( { children, closeModal, source = 'settings-payments' } ) => {
+} > = ( {
+	children,
+	source = 'settings-payments',
+	onboardingSteps,
+	closeModal,
+} ) => {
 	const history = getHistory();
 
 	// Use React state to manage steps and loading state
@@ -218,7 +223,7 @@ export const OnboardingProvider: React.FC< {
 
 	// Update all steps when stateStoreSteps changes
 	useEffect( () => {
-		const mapWooPaymentsSteps = woopaymentsSteps
+		const mapWooPaymentsSteps = onboardingSteps
 			// First, filter out steps that are not returned from the API.
 			// This is to avoid showing steps that are not useful to the user.
 			.filter( ( step ) => {

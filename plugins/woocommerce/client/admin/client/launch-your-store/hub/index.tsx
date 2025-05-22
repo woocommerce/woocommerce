@@ -26,7 +26,7 @@ import {
 } from './main-content/xstate';
 import { useXStateInspect } from '~/xstate';
 import { OnboardingProvider } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
-
+import { LYSPaymentsSteps } from '~/settings-payments/onboarding/providers/woopayments/steps';
 export type LaunchYourStoreComponentProps = {
 	sendEventToSidebar: ( arg0: SidebarMachineEvents ) => void;
 	sendEventToMainContent: ( arg0: MainContentMachineEvents ) => void;
@@ -80,6 +80,7 @@ const LaunchStoreController = () => {
 		<div className={ 'launch-your-store-layout__container' }>
 			<OnboardingProvider
 				closeModal={ handlePaymentsClose }
+				onboardingSteps={ LYSPaymentsSteps }
 				source="launch-your-store"
 			>
 				<SidebarContainer
