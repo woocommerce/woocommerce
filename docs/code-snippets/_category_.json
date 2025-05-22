@@ -2,7 +2,7 @@
     "position": 8,
     "label": "Code Snippets",
     "link": {
-      "type": "generated-index",
-      "title": "Code Snippets"
+      "type": "doc",
+      "id": "README"
     }
 }

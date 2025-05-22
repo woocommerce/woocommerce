@@ -3,7 +3,7 @@
     "label": "Getting started",
     "collapsed": false,
     "link": {
-      "type": "generated-index",
-      "title": "Getting started"
+      "type": "doc",
+      "id": "README"
     }
 }
