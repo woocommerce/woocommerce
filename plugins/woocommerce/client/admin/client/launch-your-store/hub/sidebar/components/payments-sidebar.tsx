@@ -91,6 +91,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 				title={ sidebarTitle }
 				description={ sidebarDescription }
 			>
+				{ /* We are using these classes to inherit the styles from the edit your store styling */ }
 				<div className="woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group-header">
 					<Heading level={ 2 }>
 						{ __( 'Setup your payments', 'woocommerce' ) }
