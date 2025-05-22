@@ -1895,7 +1895,7 @@ class WooPaymentsService {
 		// Combine Apple Pay and Google Pay into a single `apple_google` entry.
 		$apple_google_enabled = $apple_pay_enabled || $google_pay_enabled;
 
-		// Optionally also respect stored state or forced requirements if needed here
+		// Optionally also respect stored state or forced requirements if needed here.
 		$payment_methods_state['apple_google'] = $apple_google_enabled;
 
 		return $payment_methods_state;
