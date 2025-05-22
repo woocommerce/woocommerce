@@ -92,7 +92,7 @@ CREATE TABLE $table_name (
 	date_last_attempt_gmt datetime NULL,
 	date_notified_gmt datetime NULL,
 	date_cancelled_gmt datetime NULL,
-	cancellation_source varchar(255) NULL,
+	cancellation_source varchar(30) NULL,
 	PRIMARY KEY  (id),
 	KEY product_status_attempt (product_id, status, date_last_attempt_gmt, id),
 	KEY user_lookup (user_id, product_id, status),
@@ -266,7 +266,7 @@ CREATE TABLE $meta_table_name (
 
 		if ( array_intersect( array( 'product_id', 'user_id', 'user_email', 'status', 'date_modified', 'date_confirmed', 'date_last_attempt', 'date_notified', 'date_cancelled', 'cancellation_source' ), array_keys( $changes ) ) ) {
 
-			if ( ! in_array( 'date_modified', array_keys( $changes ), true ) ) {
+			if ( array_key_exists( 'date_modified', $changes ) ) {
 				$notification->set_date_modified( time() );
 			}
 
