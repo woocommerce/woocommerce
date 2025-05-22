@@ -1,7 +1,7 @@
 ---
 post_title: Setting up your development environment
-sidebar_label: Development environment setup
-
+sidebar_label: Local Development
+sidebar_position: 2
 ---
 
 # Setting up your development environment
