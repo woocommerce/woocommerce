@@ -132,6 +132,27 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_settings('customer_stock_notifications') should return all the settings for the customer stock notifications section.
+	 */
+	public function test_get_customer_stock_notifications_settings_returns_all_settings() {
+		$sut = new WC_Settings_Products();
+
+		$settings              = $sut->get_settings_for_section( 'customer_stock_notifications' );
+		$setting_ids_and_types = $this->get_ids_and_types( $settings );
+
+		$expected = array(
+			'product_bis_options'                       => array( 'title', 'sectionend' ),
+			'wc_bis_allow_signups'                      => 'checkbox',
+			'wc_bis_double_opt_in_required'             => 'checkbox',
+			'wc_bis_account_required'                   => 'checkbox',
+			'wc_bis_create_new_account_on_registration' => 'checkbox',
+			'wc_bis_stock_threshold'                    => 'number',
+		);
+
+		$this->assertEquals( $expected, $setting_ids_and_types );
+	}
+
+	/**
 	 * @testdox get_settings('downloadable') should return all the settings for the inventory section.
 	 */
 	public function test_get_downloadable_settings_returns_all_settings() {
