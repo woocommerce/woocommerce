@@ -105,6 +105,15 @@ export function taskClickedAction( event: {
 		task: event.task.id,
 	} );
 
+	// For payments tasks, we'll handle this in the state machine
+	if (
+		event.task.id === 'payments' ||
+		event.task.id === 'woocommerce-payments'
+	) {
+		// Return an event object with the correct type
+		return { type: 'SHOW_PAYMENTS' };
+	}
+
 	if ( event.task.actionUrl ) {
 		navigateTo( { url: event.task.actionUrl } );
 	} else if ( event.task.id === 'payments' ) {
