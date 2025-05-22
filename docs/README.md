@@ -20,7 +20,7 @@ WooCommerce is a customizable, open-source eCommerce platform built on WordPress
 
 Begin your WooCommerce development journey here with essential guides and resources tailored for newcomers. Join our thriving community on Slack for support and networking.
 
-Learn more about [getting started](/docs/category/getting-started)
+Learn more about [getting started](/docs/getting-started)
 
 ---
 
