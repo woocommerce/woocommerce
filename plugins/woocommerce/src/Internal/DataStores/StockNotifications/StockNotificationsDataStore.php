@@ -96,7 +96,7 @@ CREATE TABLE $table_name (
 	PRIMARY KEY  (id),
 	KEY product_status_attempt (product_id, status, date_last_attempt_gmt, id),
 	KEY user_lookup (user_id, product_id, status),
-	KEY email_lookup (user_email(100), product_id, status)
+	KEY email_lookup (user_email, product_id, status)
 ) $collate;
 CREATE TABLE $meta_table_name (
 	id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
