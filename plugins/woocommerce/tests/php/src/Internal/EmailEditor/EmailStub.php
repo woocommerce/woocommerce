@@ -34,7 +34,9 @@ class EmailStub extends \WC_Email {
 	 */
 	public function get_form_fields(): array {
 		return array(
-			'recipient' => array(),
+			'recipient' => array(
+				'default' => 'test@example.com',
+			),
 		);
 	}
 
