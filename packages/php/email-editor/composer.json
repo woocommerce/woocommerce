@@ -22,12 +22,7 @@
 	"require-dev": {
 		"automattic/jetpack-changelogger": "3.3.0",
 		"pelago/emogrifier": "^7.3",
-		"php-stubs/woocommerce-stubs": "^9.8",
-		"php-stubs/wordpress-tests-stubs": "^6.8",
-		"phpstan/phpstan": "^2.1",
-		"phpstan/phpstan-phpunit": "^2.0",
 		"phpunit/phpunit": "^9.6",
-		"szepeviktor/phpstan-wordpress": "^2.0",
 		"woocommerce/woocommerce-sniffs": "1.0.0",
 		"yoast/phpunit-polyfills": "^4.0"
 	},
@@ -46,12 +41,7 @@
 		"test:unit": "wp-env run tests-cli --env-cwd=wp-content/plugins/email-editor ./vendor/bin/phpunit",
 		"test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/email-editor ./vendor/bin/phpunit --configuration phpunit-integration.xml.dist",
 		"phpcs": "phpcs -s -p",
-		"phpcbf": "phpcbf -p",
-		"phpstan": "vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=2G",
-		"phpstan:php8": [
-			"@phpstan"
-		],
-		"phpstan:php7": "vendor/bin/phpstan analyse -c phpstan-7.neon --memory-limit=2G"
+		"phpcbf": "phpcbf -p"
 	},
 	"extra": {
 		"changelogger": {
