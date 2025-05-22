@@ -111,7 +111,7 @@
 			},
 			"tests": [
 				{
-					"name": "PHP: 8.2 WP: latest",
+					"name": "PHP: 8.4 WP: latest",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
@@ -130,18 +130,18 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.2",
+							"phpVersion": "8.4",
 							"wpVersion": "latest"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-php-8.2-wp-latest"
+						"php-unit-php-8.4-wp-latest"
 					]
 				},
 				{
-					"name": "PHP WP: latest - 1",
+					"name": "PHP: 7.4 WP: latest - 1",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
@@ -160,17 +160,18 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
+							"phpVersion": "7.4",
 							"wpVersion": "latest-1"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-wp-latest-1"
+						"php-unit-php-7.4-wp-latest-1"
 					]
 				},
 				{
-					"name": "PHP WP: prerelease",
+					"name": "PHP: 7.4 WP: prerelease",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
@@ -189,13 +190,14 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
+							"phpVersion": "7.4",
 							"wpVersion": "prerelease"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-wp-nightly"
+						"php-unit-php-7.4-wp-prerelease"
 					]
 				},
 				{
@@ -341,7 +343,7 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - PHP 8.1",
+					"name": "Core e2e tests - PHP 8.4",
 					"testType": "e2e",
 					"command": "test:e2e",
 					"shardingArguments": [
@@ -360,17 +362,17 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.1"
+							"phpVersion": "8.4"
 						}
 					},
 					"events": [
 						"pull_request",
 						"nightly-checks",
 						"release-checks",
-						"core-e2e-php-8.1"
+						"core-e2e-php-8.4"
 					],
 					"report": {
-						"resultsBlobName": "core-e2e-report-php-8.1",
+						"resultsBlobName": "core-e2e-report-php-8.4",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
