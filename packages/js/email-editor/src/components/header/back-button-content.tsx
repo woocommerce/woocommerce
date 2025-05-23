@@ -49,9 +49,9 @@ export const BackButtonContent = () => {
 		[]
 	);
 
-	function sendAction() {
+	function backAction() {
 		if ( urls.listings ) {
-			window.location.href = urls.listings;
+			window.location.href = urls.back;
 		}
 	}
 
@@ -77,7 +77,7 @@ export const BackButtonContent = () => {
 								recordEvent( 'header_close_button_clicked' );
 								const action = applyFilters(
 									'woocommerce_email_editor_close_action_callback',
-									sendAction
+									backAction
 								) as () => void;
 								action();
 							} }
