@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         This issue provides visibility on the progress of the release process of WooCommerce core RELEASE_VERSION and 
-        centralizes any conversations about it. The ultimate goal of this issue is to keep a reference of the steps, 
+        it centralizes all related discussions and documentation. The ultimate goal of this issue is to keep a reference to the steps,
         resources, work, and conversations associated with this release so it can be helpful for future contributors handling the release of
         a new WooCommerce core version.
 
@@ -46,7 +46,7 @@ body:
         -    [] Create a PR to bump version in source code with `GITHUB_TOKEN=<your_PAT_token> pnpm utils code-freeze version-bump -b release/9.9 9.9.0-rc.1`
         -    [] Review (ensure PR CI-checks are passing) and merge the PR (ensure merge CI-checks are passing)
         -    [] Build zip file ([workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-build-zip-file.yml))
-        -    [] Validate version and stable tag in 'woocommerce.php' and `readme.txt` for the generated zip file
+        -    [] Validate version and stable tag in 'woocommerce.php' and `readme.txt` in the generated zip file
 
         #### Release to WordPress.org
 
