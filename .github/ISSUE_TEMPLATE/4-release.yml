@@ -64,7 +64,7 @@ body:
 
         #### Send comms out
 
-        -    [] Coordinate with the Developer Advocacy team updating the pre-release post on developer.woocommerce.com
+        -    [] Coordinate with the Developer Advocacy team to update the pre-release post on developer.woocommerce.com
         -    [] Notify #woo-core-releases and #woo-announcements Slack channels of the release with a link to the release post
         -    [] Post an update in the internal release P2 (see pf59Ax-2Nt-p2 for reference)
 
