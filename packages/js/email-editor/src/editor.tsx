@@ -16,6 +16,7 @@ import { createStore, storeName, editorCurrentPostType } from './store';
 import { initHooks } from './editor-hooks';
 import { initTextHooks } from './text-hooks';
 import { initEventCollector } from './events';
+import { useContentValidation } from './hooks/use-content-validation';
 import './style.scss';
 
 function Editor() {
@@ -26,6 +27,7 @@ function Editor() {
 		} ),
 		[]
 	);
+	useContentValidation();
 
 	return (
 		<StrictMode>
