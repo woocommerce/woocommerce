@@ -97,22 +97,51 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Fetch and parse files with versions
+      - name: 'Pre-build verification'
         run: |
-            # github.head_ref - branch name
-            # Verify: name as per `release/X.X`
-          
-            # Check: should match (e.g. Stable tag: 9.8.5)
-            branch_stable_version=$( cat plugins/woocommerce/readme.txt |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
-            svn_stable_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt -O /dev/stdout |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
-          
-            # Check: should NOT match (e.g. Version: 9.9.0-beta.1)
-            # Check: branch version should start with X.X as per `release/X.X`
+            branch_name='${{ github.head_ref }}'
+            if  [[ $branch_name != release/* ]] ; then
+                echo "[ERR] Pre-build verification: the branch name is NOT matching 'release/*' pattern (identified as $branch_name)"
+                exit 1
+            else
+                echo "[OK] Pre-build verification: the branch name is matching 'release/*' pattern ($branch_name)"
+            fi
+            version_prefix=${branch_name/"release/"/""}
+
+            # Validate release version related attributions
             branch_plugin_version=$( cat plugins/woocommerce/woocommerce.php |  grep -oP '(?<=Version: )(.+)' | head -n1 )
             svn_plugin_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/woocommerce.php -O /dev/stdout |  grep -oP '(?<=Version: )(.+)' | head -n1 )
+            if [[ $branch_plugin_version != "$version_prefix."* ]] ; then
+                echo "[ERR] Pre-build verification: release version in branch is NOT matching '$version_prefix.*' pattern (identified as $branch_plugin_version)"
+                exit 1
+            else
+                echo "[OK] Pre-build verification: release version in branch is matching '$version_prefix.*' pattern ($branch_plugin_version)"
+            fi
+            if [[ $branch_plugin_version == $svn_plugin_version ]] ; then
+                echo "[ERR] Pre-build verification: release version in branch is matching the one in SVN trunk (identified as $branch_plugin_version)"
+                exit 1
+            else
+                echo "[OK] Pre-build verification: release version in branch is NOT matching the one in SVN trunk ($branch_plugin_version vs $svn_plugin_version)"
+            fi
 
-            # Check: if final release, changelog entry must present (e.g. = 9.8.4 2025-05-06 =)
+            # Validate stable version attribution
+            branch_stable_version=$( cat plugins/woocommerce/readme.txt |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
+            svn_stable_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt -O /dev/stdout |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
+            if [[ $branch_stable_version != $svn_stable_version ]] ; then
+                echo "[ERR] Pre-build verification: stable version in branch is NOT matching the one in SVN trunk (identified as $branch_stable_version)"
+                exit 1
+            else
+                echo "[OK] Pre-build verification: stable version in branch is matching the one in SVN trunk ($branch_stable_version vs $svn_stable_version)"
+            fi
+  
+            # Validate changelog for the target release version
             branch_changelog_version=$( cat changelog.txt | grep -oP '\d\.\d\.\d' | head -n1 )
+            if [[ $branch_plugin_version != *'-'* ]] && [[ $branch_plugin_version != $branch_changelog_version ]]; then
+                echo "[ERR] Pre-build verification: changelog for $branch_plugin_version is missing"
+                exit 1
+            else
+                echo "[OK] Pre-build verification: changelog for $branch_plugin_version is present or not required (the last entry is for $branch_changelog_version)"
+            fi
 
   build:
     name: Build release zip file
