@@ -327,7 +327,13 @@ class WC_Emails {
 	 * @param mixed $email_heading Heading for the email.
 	 */
 	public function email_header( $email_heading ) {
-		wc_get_template( 'emails/email-header.php', array( 'email_heading' => $email_heading ) );
+		wc_get_template(
+			'emails/email-header.php',
+			array(
+				'email_heading' => $email_heading,
+				'store_name'    => get_bloginfo( 'name', 'display' ),
+			)
+		);
 	}
 
 	/**
