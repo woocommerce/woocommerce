@@ -110,10 +110,12 @@ jobs:
             # https://raw.githubusercontent.com/woocommerce/woocommerce/refs/heads/release/9.9/plugins/woocommerce/woocommerce.php - Version: 9.9.0-beta.1
             # https://plugins.svn.wordpress.org/woocommerce/trunk/woocommerce.php                                                  - Version: 9.9.0-beta.1
             # Check: should NOT match
+            branch_plugin_version=$( wget --quiet https://raw.githubusercontent.com/woocommerce/woocommerce/refs/heads/release/9.9/plugins/woocommerce/woocommerce.php -O /dev/stdout |  grep -oP '(?<=Version: )(.+)' | head -n1 )
+            svn_plugin_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/woocommerce.php -O /dev/stdout |  grep -oP '(?<=Version: )(.+)' | head -n1 )
 
             # https://raw.githubusercontent.com/woocommerce/woocommerce/refs/heads/release/9.9/changelog.txt                       - = 9.8.4 2025-05-06 =
             # Check: if final release, changelog entry must present
-          
+            branch_changelog_version=$( wget --quiet https://raw.githubusercontent.com/woocommerce/woocommerce/refs/heads/release/9.9/changelog.txt -O /dev/stdout | grep -oP '\d\.\d\.\d' | head -n1 )
         
 
   build:
