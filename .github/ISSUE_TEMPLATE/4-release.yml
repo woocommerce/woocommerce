@@ -7,7 +7,7 @@ body:
       value: |
         This issue provides visibility on the progress of the release process of WooCommerce core RELEASE_VERSION and 
         centralizes any conversations about it. The ultimate goal of this issue is to keep a reference of the steps, 
-        resources, work, and conversations about this release so it can be helpful for the next contributors releasing 
+        resources, work, and conversations associated with this release so it can be helpful for future contributors handling the release of
         a new WooCommerce core version.
 
         -   WooCommerce core version to release: RELEASE_VERSION ([milestone](https://github.com/woocommerce/woocommerce/milestone/MILESTONE_ID))
