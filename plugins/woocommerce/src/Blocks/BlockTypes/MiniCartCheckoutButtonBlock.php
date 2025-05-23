@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Admin\Features\Features;
+
 /**
  * MiniCartCheckoutButtonBlock class.
  */
@@ -11,4 +13,38 @@ class MiniCartCheckoutButtonBlock extends AbstractInnerBlock {
 	 * @var string
 	 */
 	protected $block_name = 'mini-cart-checkout-button-block';
+
+	/**
+	 * Render experimental iAPI block markup.
+	 *
+	 * @param array    $attributes Block attributes.
+	 * @param string   $content    Block content.
+	 * @param WP_Block $block      Block instance.
+	 * @return string Rendered block type output.
+	 */
+	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
+		ob_start();
+		?>
+		<a href="http://localhost:1234/?page_id=9" class="wc-block-components-button wp-element-button wp-block-woocommerce-mini-cart-checkout-button-block wc-block-mini-cart__footer-checkout contained">
+			<div class="wc-block-components-button__text">Go to checkout</div>
+		</a>
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Render the markup for the Mini-Cart Contents block.
+	 *
+	 * @param array    $attributes Block attributes.
+	 * @param string   $content    Block content.
+	 * @param WP_Block $block      Block instance.
+	 * @return string Rendered block type output.
+	 */
+	protected function render( $attributes, $content, $block ) {
+		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
+			return $this->render_experimental_iapi_markup( $attributes, $content, $block );
+		}
+
+		return $content;
+	}
 }
