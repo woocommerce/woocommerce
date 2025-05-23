@@ -30,7 +30,7 @@ class SiteTagsProvider extends AbstractTagProvider {
 				function ( array $context ): string {
 					if ( isset( $context['order'] ) && PointOfSaleOrderUtil::is_pos_order( $context['order'] ) ) {
 						$store_name = get_option( 'woocommerce_pos_store_name' );
-						return htmlspecialchars_decode( empty( $store_name ) ? PointOfSaleDefaultSettings::get_default_store_name() : $store_name );
+						return htmlspecialchars_decode( empty( $store_name ) ? PointOfSaleDefaultSettings::get_default_store_name() : $store_name, ENT_QUOTES );
 					}
 					return htmlspecialchars_decode( get_bloginfo( 'name' ) );
 				},
