@@ -100,16 +100,16 @@ jobs:
             # github.head_ref - branch name
             # Verify: name as per `release/X.X`
           
-            # https://raw.githubusercontent.com/woocommerce/woocommerce/refs/heads/release/9.9/plugins/woocommerce/woocommerce.php - Version: 9.9.0-beta.1
-            # Check: should start with X.X as per `release/X.X`
-          
             # https://raw.githubusercontent.com/woocommerce/woocommerce/refs/heads/release/9.9/plugins/woocommerce/readme.txt      - Stable tag: 9.8.5
             # https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt                                                       - Stable tag: 9.8.5
             # Check: should match
+            branch_stable_version=$( wget --quiet https://raw.githubusercontent.com/woocommerce/woocommerce/refs/heads/release/9.9/plugins/woocommerce/readme.txt -O /dev/stdout |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
+            svn_stable_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt -O /dev/stdout |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
           
             # https://raw.githubusercontent.com/woocommerce/woocommerce/refs/heads/release/9.9/plugins/woocommerce/woocommerce.php - Version: 9.9.0-beta.1
             # https://plugins.svn.wordpress.org/woocommerce/trunk/woocommerce.php                                                  - Version: 9.9.0-beta.1
             # Check: should NOT match
+            # Check: branch version should start with X.X as per `release/X.X`
             branch_plugin_version=$( wget --quiet https://raw.githubusercontent.com/woocommerce/woocommerce/refs/heads/release/9.9/plugins/woocommerce/woocommerce.php -O /dev/stdout |  grep -oP '(?<=Version: )(.+)' | head -n1 )
             svn_plugin_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/woocommerce.php -O /dev/stdout |  grep -oP '(?<=Version: )(.+)' | head -n1 )
 
