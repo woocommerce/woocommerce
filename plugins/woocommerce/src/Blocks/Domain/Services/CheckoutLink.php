@@ -160,6 +160,18 @@ class CheckoutLink {
 
 		$redirect_url = wc_get_checkout_url();
 
+		// Preserve the query string--pass it to the checkout page.
+		if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
+			$redirect_url = remove_query_arg(
+				[
+					'products',
+					'coupon',
+					'checkout-link',
+				],
+				add_query_arg( wp_unslash( $_SERVER['QUERY_STRING'] ), '', $redirect_url ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			);
+		}
+
 		// If the user is logged in, the session is tied to the user ID. Do not use a cart token.
 		if ( ! is_user_logged_in() ) {
 			$session_token = CartTokenUtils::get_cart_token( wc()->session->get_customer_id() );
