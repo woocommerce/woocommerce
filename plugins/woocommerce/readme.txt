@@ -616,4 +616,5 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Update Quantity Selector and Grouped Product Selector Item CTA blocks to have only Stepper mode. [#57442](https://github.com/woocommerce/woocommerce/pull/57442)
 * Enhancement - Update styles of Download section in order email [#57785](https://github.com/woocommerce/woocommerce/pull/57785)
 
+
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
