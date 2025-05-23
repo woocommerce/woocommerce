@@ -335,6 +335,32 @@ const TestAccountStep = () => {
 			poll();
 		}
 
+		// -- Progress animation during Initializing Phase --
+		if ( status === 'initializing' ) {
+			// Start progress animation from 10% to 30%, increment by 2% every second
+			if ( initializingTimeoutRef.current === null ) {
+				initializingTimeoutRef.current = window.setInterval( () => {
+					setProgress( ( current ) => {
+						if ( current < INIT_PROGRESS_MAX ) {
+							return Math.min(
+								current + INIT_PROGRESS_INCREMENT,
+								INIT_PROGRESS_MAX
+							);
+						}
+						return current;
+					} );
+				}, 1000 );
+			}
+		}
+		// Clear the initializing timer if not in initializing phase
+		if (
+			status !== 'initializing' &&
+			initializingTimeoutRef.current !== null
+		) {
+			clearTimeout( initializingTimeoutRef.current );
+			initializingTimeoutRef.current = null;
+		}
+
 		// Cleanup function for the effect
 		return () => {
 			clearTimers(); // Clear any pending timeouts
