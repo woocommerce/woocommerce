@@ -708,9 +708,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 		);
 		$expected_pms_state      = array(
-			'card'       => true, // Force enabled because it is required.
-			'apple_pay'  => true,
-			'google_pay' => false,
+			'card'         => true, // Force enabled because it is required.
+			'apple_google' => true,
 		);
 
 		$default_wpcom_connection        = array(

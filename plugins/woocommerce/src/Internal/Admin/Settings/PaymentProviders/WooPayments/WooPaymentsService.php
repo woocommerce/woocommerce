@@ -1857,8 +1857,25 @@ class WooPaymentsService {
 		$step_pms_data = (array) $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_PAYMENT_METHODS, $location, 'payment_methods' );
 
 		$payment_methods_state = array();
+		$apple_pay_enabled     = false;
+		$google_pay_enabled    = false;
+
 		foreach ( $recommended_pms as $recommended_pm ) {
 			$pm_id = $recommended_pm['id'];
+
+			/**
+			 * We need to handle Apple Pay and Google Pay separately.
+			 * They are not stored in the same way as the other payment methods.
+			 */
+			if ( 'apple_pay' === $pm_id ) {
+				$apple_pay_enabled = $recommended_pm['enabled'];
+				continue;
+			}
+
+			if ( 'google_pay' === $pm_id ) {
+				$google_pay_enabled = $recommended_pm['enabled'];
+				continue;
+			}
 
 			// Start with the recommended enabled state.
 			$payment_methods_state[ $pm_id ] = $recommended_pm['enabled'];
@@ -1874,6 +1891,12 @@ class WooPaymentsService {
 				$payment_methods_state[ $pm_id ] = filter_var( $step_pms_data[ $pm_id ], FILTER_VALIDATE_BOOLEAN );
 			}
 		}
+
+		// Combine Apple Pay and Google Pay into a single `apple_google` entry.
+		$apple_google_enabled = $apple_pay_enabled || $google_pay_enabled;
+
+		// Optionally also respect stored state or forced requirements if needed here.
+		$payment_methods_state['apple_google'] = $apple_google_enabled;
 
 		return $payment_methods_state;
 	}
