@@ -83,7 +83,7 @@ class SettingsController extends \WC_Settings_Page {
 					'title' => __( 'Customer stock notifications', 'woocommerce' ),
 					'type'  => 'title',
 					'desc'  => '',
-					'id'    => 'product_bis_options',
+					'id'    => 'product_back_in_stock_options',
 				),
 
 				array(
@@ -125,7 +125,7 @@ class SettingsController extends \WC_Settings_Page {
 
 				array(
 					'type' => 'sectionend',
-					'id'   => 'product_bis_options',
+					'id'   => 'product_back_in_stock_options',
 				),
 			)
 		);
