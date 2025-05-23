@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import * as navigation from '@woocommerce/navigation';
-
-/**
  * Internal dependencies
  */
 import { updateLinkHref } from '../controller';
