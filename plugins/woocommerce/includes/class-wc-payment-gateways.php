@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
@@ -176,6 +177,20 @@ class WC_Payment_Gateways {
 			return;
 		}
 
+		try {
+			/** @var PaymentProviders $payment_providers_controller */
+			$payment_providers_controller = wc_get_container()->get( PaymentProviders::class );
+			$payment_provider             = $payment_providers_controller->get_payment_gateway_provider_instance( $gateway->id );
+			if ( ! $payment_provider->is_onboarding_completed( $gateway ) || $payment_provider->is_in_test_mode_onboarding( $gateway ) ) {
+				// The gateway was enabled, but onboarding is not completed or we are doing test mode onboarding.
+				// We don't want to send an email because the gateway is not ready to be used for live payments.
+				return;
+			}
+		} catch ( Throwable $exception ) {
+			// Don't do anything if we can't get the payment provider.
+			// This is to ensure that we don't break the code if the payment provider is not available.
+		}
+
 		// This is a change to a payment gateway's settings and it was just enabled. Let's send an email to the admin.
 		// "untitled" shouldn't happen, but just in case.
 		$this->notify_admin_payment_gateway_enabled( $gateway );
@@ -193,6 +208,7 @@ class WC_Payment_Gateways {
 		$user                 = get_user_by( 'email', $admin_email );
 		$username             = $user ? $user->user_login : $admin_email;
 		$gateway_title        = $gateway->get_method_title();
+		$gateway_id           = $gateway->id;
 		$gateway_settings_url = esc_url_raw( self_admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . $gateway->id ) );
 		$site_name            = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
 		$site_url             = home_url();
@@ -216,7 +232,7 @@ class WC_Payment_Gateways {
 		);
 
 		$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
-		$logger->info( sprintf( 'Payment gateway enabled: "%s"', $gateway_title ) );
+		$logger->info( sprintf( 'Payment gateway enabled: "%1$s" (%2$s)', $gateway_title, $gateway_id ) );
 
 		$email_text = sprintf(
 			/* translators: Payment gateway enabled notification email. 1: Username, 2: Gateway Title, 3: Site URL, 4: Gateway Settings URL, 5: Admin Email, 6: Site Name, 7: Site URL. */
