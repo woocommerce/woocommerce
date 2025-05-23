@@ -174,14 +174,15 @@ class WC_Email_Customer_POS_Refunded_Order_Test extends \WC_Unit_Test_Case {
 	 * @testdox POS email includes POS store name in email header HTML while regular email includes blog name.
 	 */
 	public function test_pos_email_includes_pos_store_name_in_email_header_html_while_regular_email_includes_blog_name() {
+		// Initialize WC_Emails to set up actions and filters for email header in regular emails.
+		$emails = new WC_Emails();
+
 		// Given POS store name and blog name.
 		update_option( 'woocommerce_pos_store_name', 'Physical Store' );
 		update_option( 'blogname', 'Online Store' );
 
-		$emails = new WC_Emails();
-
 		// When getting content from both email classes.
-		$pos_email     = new WC_Email_Customer_POS_Refunded_Order( $emails );
+		$pos_email     = new WC_Email_Customer_POS_Refunded_Order();
 		$regular_email = new WC_Email_Customer_Refunded_Order();
 
 		// Set the order on both email classes.
