@@ -30,7 +30,16 @@ class CheckoutLink {
 	 * Add the checkout link endpoint.
 	 */
 	public function add_checkout_link_endpoint() {
-		add_rewrite_rule( '^checkout-link$', 'index.php?checkout-link=true', 'top' );
+		// get registered rewrite rules.
+		$rules = get_option( 'rewrite_rules', array() );
+		$regex = '^checkout-link$';
+
+		add_rewrite_rule( $regex, 'index.php?checkout-link=true', 'top' );
+
+		// maybe flush rewrite rules if it was not previously in the option.
+		if ( ! isset( $rules[ $regex ] ) ) {
+			flush_rewrite_rules();
+		}
 	}
 
 	/**
@@ -53,8 +62,54 @@ class CheckoutLink {
 		if ( ! get_query_var( 'checkout-link' ) ) {
 			return;
 		}
+
+		if ( ! $this->validate_checkout_link() ) {
+			return;
+		}
+
+		wc()->cart->empty_cart();
 		wp_safe_redirect( $this->get_checkout_link() );
 		exit;
+	}
+
+	/**
+	 * Validate the checkout link.
+	 *
+	 * @return bool True if the checkout link is valid, false otherwise.
+	 */
+	protected function validate_checkout_link() {
+		$products = $this->get_products_from_checkout_link();
+
+		return ! empty( $products );
+	}
+
+	/**
+	 * Get the products from the checkout link.
+	 *
+	 * @return array The products (keys) and their quantities (values).
+	 */
+	protected function get_products_from_checkout_link() {
+		$raw_products = array_filter( explode( ',', wc_clean( wp_unslash( $_GET['products'] ?? '' ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$products     = [];
+
+		foreach ( $raw_products as $product_id_qty ) {
+			if ( strpos( $product_id_qty, ':' ) !== false ) {
+				list( $product_id, $qty ) = explode( ':', $product_id_qty );
+			} else {
+				$product_id = $product_id_qty;
+				$qty        = 1;
+			}
+			$product_id = absint( $product_id );
+			$qty        = absint( $qty );
+
+			if ( ! $product_id || ! $qty ) {
+				continue;
+			}
+
+			$products[ $product_id ] = $qty;
+		}
+
+		return $products;
 	}
 
 	/**
@@ -64,26 +119,14 @@ class CheckoutLink {
 	 */
 	protected function get_checkout_link() {
 		$controller = new CartController();
-		$controller->empty_cart();
+		$products   = $this->get_products_from_checkout_link();
 
-		// Populate cart with products.
-		$products = array_filter( explode( ',', wc_clean( wp_unslash( $_GET['products'] ?? '' ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
-		foreach ( $products as $product_id_qty ) {
-			if ( strpos( $product_id_qty, ':' ) !== false ) {
-				list( $product_id, $qty ) = explode( ':', $product_id_qty );
-			} else {
-				$product_id = $product_id_qty;
-				$qty        = 1;
-			}
-			if ( ! absint( $product_id ) ) {
-				continue;
-			}
+		foreach ( $products as $product_id => $qty ) {
 			try {
 				$controller->add_to_cart(
 					[
-						'id'       => absint( $product_id ),
-						'quantity' => absint( $qty ),
+						'id'       => $product_id,
+						'quantity' => $qty,
 					]
 				);
 			} catch ( \Exception $e ) {
