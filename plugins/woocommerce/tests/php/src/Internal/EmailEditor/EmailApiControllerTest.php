@@ -178,7 +178,7 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 				'data'  => array(
 					'recipient' => 'valid.email@example.com,invalid-email',
 				),
-				'field' => 'recipient2',
+				'field' => 'recipient',
 			),
 			array(
 				'data'  => array(
