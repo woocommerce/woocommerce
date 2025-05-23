@@ -113,11 +113,14 @@ jobs:
 
           set +e  # Don't exit on error for the git command
           COMMIT_COUNT=$(git rev-list --count ${CURRENT_BRANCH} ^${PREVIOUS_BRANCH} 2>&1)
-          EXIT_CODE=$?
+          COMMIT_EXIT_CODE=$?
+
+          CONTRIBUTOR_COUNT=$(git log --format='%ae' ${PREVIOUS_BRANCH}..${CURRENT_BRANCH} | sort -u | wc -l 2>&1)
+          CONTRIBUTOR_EXIT_CODE=$?
           set -e  # Resume exit on error
 
-          if [ $EXIT_CODE -eq 0 ]; then
-            echo "Found ${COMMIT_COUNT} commits between ${PREVIOUS_BRANCH} and ${CURRENT_BRANCH}"
+          if [ $COMMIT_EXIT_CODE -eq 0 ] && [ $CONTRIBUTOR_EXIT_CODE -eq 0 ]; then
+            echo "Found ${COMMIT_COUNT} commits and ${CONTRIBUTOR_COUNT} contributors in the ${{ needs.extract-versions.outputs.current_version }} release"
           else
             echo "Error counting commits: ${COMMIT_COUNT}"
             exit 1
