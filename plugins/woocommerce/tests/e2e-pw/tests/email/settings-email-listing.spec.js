@@ -2,7 +2,8 @@ const { test, expect, request } = require( '@playwright/test' );
 const { setOption } = require( '../../utils/options' );
 const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
 
-const setFeatureFlag = async ( baseURL, name, value ) => await setOption( request, baseURL, name, value );
+const setFeatureFlag = async ( baseURL, name, value ) =>
+	await setOption( request, baseURL, name, value );
 
 test.describe( 'WooCommerce Email Settings List View', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
