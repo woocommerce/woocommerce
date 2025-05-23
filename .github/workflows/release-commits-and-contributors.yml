@@ -149,7 +149,6 @@ jobs:
         working-directory: tools/release-posts
         run: |
           pnpm install
-          # pnpm build
 
       - name: Generate contributors list
         id: generate-contributors-list
