@@ -365,7 +365,13 @@ const TestAccountStep = () => {
 		return () => {
 			clearTimers(); // Clear any pending timeouts
 		};
-	}, [ status, currentStep, retryCounter, pollingPhase ] );
+	}, [
+		status,
+		currentStep,
+		retryCounter,
+		pollingPhase,
+		setJustCompletedStepId,
+	] );
 
 	const getPhaseMessage = ( phase: number ) => {
 		if ( phase === 1 ) {
