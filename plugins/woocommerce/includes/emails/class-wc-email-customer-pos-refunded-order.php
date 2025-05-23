@@ -61,7 +61,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Let shoppers know when a full or partial refund is on its way to them for their POS order.', 'woocommerce' )
+				? __( 'Let customers know when a full or partial refund is on its way to them for their POS order.', 'woocommerce' )
 				: __( 'Order refunded emails are sent to customers when their POS orders are refunded.', 'woocommerce' );
 
 			$this->disable_default_refund_emails_for_pos_orders();
