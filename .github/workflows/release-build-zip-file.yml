@@ -113,7 +113,6 @@ jobs:
 
             # Check: if final release, changelog entry must present (e.g. = 9.8.4 2025-05-06 =)
             branch_changelog_version=$( cat changelog.txt -O /dev/stdout | grep -oP '\d\.\d\.\d' | head -n1 )
-        
 
   build:
     name: Build release zip file
