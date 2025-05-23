@@ -134,17 +134,6 @@ class CheckoutLink {
 			}
 		}
 
-		// Apply coupon if provided.
-		$coupon = wc_format_coupon_code( wp_unslash( $_GET['coupon'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		if ( wc_coupons_enabled() && ! empty( $coupon ) ) {
-			try {
-				$controller->apply_coupon( $coupon );
-			} catch ( \Exception $e ) {
-				wc_add_notice( $e->getMessage(), 'error' );
-			}
-		}
-
 		// Nothing was added to the cart. We need to redirect to the cart page with an error notice. Since guests may not
 		// have a session, add the notice in the query string.
 		if ( wc()->cart->is_empty() ) {
@@ -156,6 +145,17 @@ class CheckoutLink {
 			}
 
 			return wc_get_cart_url();
+		}
+
+		// Apply coupon if provided.
+		$coupon = wc_format_coupon_code( wp_unslash( $_GET['coupon'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		if ( wc_coupons_enabled() && ! empty( $coupon ) ) {
+			try {
+				$controller->apply_coupon( $coupon );
+			} catch ( \Exception $e ) {
+				wc_add_notice( $e->getMessage(), 'error' );
+			}
 		}
 
 		$redirect_url = wc_get_checkout_url();
