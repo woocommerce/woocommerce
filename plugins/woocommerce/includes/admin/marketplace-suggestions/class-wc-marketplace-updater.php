@@ -45,7 +45,8 @@ class WC_Marketplace_Updater {
 
 		$request_data = array();
 
-		if ( class_exists( 'WC_Marketplace_Suggestions' ) && WC_Marketplace_Suggestions::allow_suggestions() ) {
+		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking', 'no' );
+		if ( class_exists( 'WC_Marketplace_Suggestions' ) && WC_Marketplace_Suggestions::allow_suggestions() && $allow_tracking ) {
 			$request_data = self::add_personalization_data( $request_data );
 		}
 
@@ -100,10 +101,7 @@ class WC_Marketplace_Updater {
 	 * @return array
 	 */
 	public static function add_personalization_data( $request_params ) {
-		$country_setting = get_option( 'woocommerce_default_country' );
-		// Extract just the country code from the "COUNTRY:STATE" format.
-		$country_code              = sanitize_text_field( explode( ':', $country_setting )[0] );
-		$request_params['country'] = $country_code;
+		$request_params['country'] = wc_get_base_location()['country'];
 
 		return $request_params;
 	}
