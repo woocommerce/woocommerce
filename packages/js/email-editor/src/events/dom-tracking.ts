@@ -101,6 +101,11 @@ export function initDomTracking() {
 			track: 'header_save_email_button_clicked',
 			selector: '.editor-post-saved-state.is-saving',
 		},
+		// Inserter panel close icon clicked
+		{
+			track: 'inserter_sidebar_library_close_icon_clicked',
+			selector: '.block-editor-inserter__menu .block-editor-tabbed-sidebar__close-button',
+		},
 	];
 
 	document.addEventListener( 'click', trackMatchingEvents );
