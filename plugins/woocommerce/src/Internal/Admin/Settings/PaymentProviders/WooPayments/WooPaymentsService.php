@@ -1504,7 +1504,7 @@ class WooPaymentsService {
 		// This is because WooPayments needs a working WPCOM connection to be able to fetch the fields.
 		if ( $this->check_onboarding_step_requirements( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location ) ) {
 			try {
-				$business_verification_step['context']['fields'] = $this->get_onboarding_kyc_fields();
+				$business_verification_step['context']['fields'] = $this->get_onboarding_kyc_fields( $location );
 			} catch ( Exception $e ) {
 				$business_verification_step['errors'][] = array(
 					'code'    => 'fields_error',
@@ -1857,8 +1857,25 @@ class WooPaymentsService {
 		$step_pms_data = (array) $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_PAYMENT_METHODS, $location, 'payment_methods' );
 
 		$payment_methods_state = array();
+		$apple_pay_enabled     = false;
+		$google_pay_enabled    = false;
+
 		foreach ( $recommended_pms as $recommended_pm ) {
 			$pm_id = $recommended_pm['id'];
+
+			/**
+			 * We need to handle Apple Pay and Google Pay separately.
+			 * They are not stored in the same way as the other payment methods.
+			 */
+			if ( 'apple_pay' === $pm_id ) {
+				$apple_pay_enabled = $recommended_pm['enabled'];
+				continue;
+			}
+
+			if ( 'google_pay' === $pm_id ) {
+				$google_pay_enabled = $recommended_pm['enabled'];
+				continue;
+			}
 
 			// Start with the recommended enabled state.
 			$payment_methods_state[ $pm_id ] = $recommended_pm['enabled'];
@@ -1874,6 +1891,12 @@ class WooPaymentsService {
 				$payment_methods_state[ $pm_id ] = filter_var( $step_pms_data[ $pm_id ], FILTER_VALIDATE_BOOLEAN );
 			}
 		}
+
+		// Combine Apple Pay and Google Pay into a single `apple_google` entry.
+		$apple_google_enabled = $apple_pay_enabled || $google_pay_enabled;
+
+		// Optionally also respect stored state or forced requirements if needed here.
+		$payment_methods_state['apple_google'] = $apple_google_enabled;
 
 		return $payment_methods_state;
 	}
@@ -2014,10 +2037,13 @@ class WooPaymentsService {
 	/**
 	 * Get the onboarding fields data for the KYC business verification.
 	 *
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
 	 * @return array The onboarding fields data.
 	 * @throws Exception If the onboarding fields data could not be retrieved or there was an error.
 	 */
-	private function get_onboarding_kyc_fields(): array {
+	private function get_onboarding_kyc_fields( string $location ): array {
 		// Call the WooPayments API to get the onboarding fields.
 		$response = $this->proxy->call_static( Utils::class, 'rest_endpoint_get_request', '/wc/v3/payments/onboarding/fields' );
 
@@ -2035,6 +2061,8 @@ class WooPaymentsService {
 		if ( ! isset( $fields['available_countries'] ) && $this->proxy->call_function( 'is_callable', '\WC_Payments_Utils::supported_countries' ) ) {
 			$fields['available_countries'] = $this->proxy->call_static( '\WC_Payments_Utils', 'supported_countries' );
 		}
+
+		$fields['location'] = $location;
 
 		return $fields;
 	}
