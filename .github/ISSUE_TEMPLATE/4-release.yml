@@ -66,7 +66,7 @@ body:
 
         -    [] Coordinate with the Developer Advocacy team updating the pre-release post on developer.woocommerce.com
         -    [] Notify #woo-core-releases and #woo-announcements Slack channels with a link to the release post
-        -    [] Post an update in the internal release P2
+        -    [] Post an update in the internal release P2 (see pf59Ax-2Nt-p2 for reference)
 
         #### Post-release monitoring
 
@@ -110,7 +110,7 @@ body:
 
         -    [] Coordinate with the Developer Advocacy team posting the release announcement on developer.woocommerce.com (post guidelines outlined here: Pf59Ax-7F-p2)
         -    [] Notify #woo-core-releases and #woo-announcements Slack channels of the release with a link to the internal release post
-        -    [] Post an update in the internal release post
+        -    [] Post an update in the internal release post (see pf59Ax-2Nt-p2 for reference)
 
         #### Post-release monitoring
 
