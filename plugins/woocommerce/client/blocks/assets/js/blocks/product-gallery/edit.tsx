@@ -28,14 +28,7 @@ const TEMPLATE: InnerBlockTemplate[] = [
 					align: 'right',
 				},
 			],
-			[
-				'woocommerce/product-gallery-large-image-next-previous',
-				{
-					style: {
-						border: { radius: '100%' },
-					},
-				},
-			],
+			[ 'woocommerce/product-gallery-large-image-next-previous' ],
 		],
 	],
 ];

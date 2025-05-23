@@ -23,8 +23,21 @@
 	color: $studio-woocommerce-purple-50;
 }
 
-.block-editor-list-view-leaf.is-selected .block-editor-list-view-block-contents {
+.block-editor-list-view-leaf.is-selected
+	.block-editor-list-view-block-contents {
 	.wp-block-woocommerce-add-to-cart-with-options__block-icon {
 		color: inherit;
+	}
+}
+
+.wc-block-add-to-cart-with-options-grouped-product-selector-item-cta,
+.wc-block-add-to-cart-with-options__quantity-selector {
+	.quantity .qty {
+		// WooCommerce core styles: https://github.com/woocommerce/woocommerce/blob/c9f62609155825cd817976c7611b9b0415e90f2f/plugins/woocommerce/client/legacy/css/woocommerce.scss/#L111-L112
+		width: 3.631em;
+	}
+
+	.wc-block-components-quantity-selector {
+		margin: 0;
 	}
 }

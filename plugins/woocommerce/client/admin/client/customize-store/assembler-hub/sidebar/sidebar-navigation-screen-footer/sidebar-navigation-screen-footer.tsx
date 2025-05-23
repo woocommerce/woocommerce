@@ -25,8 +25,6 @@ import { HighlightedBlockContext } from '../../context/highlighted-block-context
 import { useEditorScroll } from '../../hooks/use-editor-scroll';
 import { useSelectedPattern } from '../../hooks/use-selected-pattern';
 import { findPatternByBlock } from '../utils';
-import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
-import { FlowType } from '~/customize-store/types';
 import { footerTemplateId } from '~/customize-store/data/homepageTemplates';
 
 import './style.scss';
@@ -123,22 +121,12 @@ export const SidebarNavigationScreenFooter = ( {
 		[ blocks, onChange, setSelectedPattern, scroll ]
 	);
 
-	const { context } = useContext( CustomizeStoreContext );
-	const aiOnline = context.flowType === FlowType.AIOnline;
+	const title = __( 'Choose your footer', 'woocommerce' );
 
-	const title = aiOnline
-		? __( 'Change your footer', 'woocommerce' )
-		: __( 'Choose your footer', 'woocommerce' );
-
-	const description = aiOnline
-		? __(
-				"Select a new footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the Editor.",
-				'woocommerce'
-		  )
-		: __(
-				"Select a footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the Editor later.",
-				'woocommerce'
-		  );
+	const description = __(
+		"Select a footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the Editor later.",
+		'woocommerce'
+	);
 
 	return (
 		<SidebarNavigationScreen

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Use .toBeAttached instead of .toBeVisible when asserting product blocks exist in dataviews page

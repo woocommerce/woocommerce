@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Gridicon } from '@automattic/components';
-import { Button, SelectControl } from '@wordpress/components';
+import { Button, Placeholder, SelectControl } from '@wordpress/components';
 import { paymentSettingsStore } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import React, {
@@ -72,6 +72,27 @@ const SettingsPaymentsWooCommercePaymentsChunk = lazy(
 	() =>
 		import(
 			/* webpackChunkName: "settings-payments-woocommerce-payments" */ './settings-payments-woocommerce-payments'
+		)
+);
+
+const SettingsPaymentsBacsChunk = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "settings-payments-bacs" */ './offline/settings-payments-bacs'
+		)
+);
+
+const SettingsPaymentsCodChunk = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "settings-payments-cod" */ './offline/settings-payments-cod'
+		)
+);
+
+const SettingsPaymentsChequeChunk = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "settings-payments-cheque" */ './offline/settings-payments-cheque'
 		)
 );
 
@@ -189,6 +210,8 @@ export const SettingsPaymentsMethods = () => {
 	const onPaymentMethodsContinueClick = useCallback( () => {
 		// Record the event along with payment methods selected
 		recordEvent( 'wcpay_settings_payment_methods_continue', {
+			displayed_payment_methods:
+				Object.keys( paymentMethodsState ).join( ', ' ),
 			selected_payment_methods: Object.keys( paymentMethodsState )
 				.filter(
 					( paymentMethod ) => paymentMethodsState[ paymentMethod ]
@@ -199,6 +222,9 @@ export const SettingsPaymentsMethods = () => {
 					( paymentMethod ) => ! paymentMethodsState[ paymentMethod ]
 				)
 				.join( ', ' ),
+			store_country:
+				window.wcSettings?.admin?.woocommerce_payments_nox_profile
+					?.business_country_code ?? 'unknown',
 		} );
 
 		setIsCompleted( true );
@@ -286,14 +312,14 @@ export const SettingsPaymentsMethods = () => {
 export const SettingsPaymentsMainWrapper = () => {
 	return (
 		<>
-			<Header title={ __( 'WooCommerce Settings', 'woocommerce' ) } />
+			<Header title={ __( 'Settings', 'woocommerce' ) } />
 			<HistoryRouter history={ getHistory() }>
 				<Routes>
-					<Route path="/" element={ <SettingsPaymentsMain /> } />
 					<Route
 						path="/payment-methods"
 						element={ <SettingsPaymentsMethods /> }
 					/>
+					<Route path="/*" element={ <SettingsPaymentsMain /> } />
 				</Routes>
 			</HistoryRouter>
 		</>
@@ -343,9 +369,111 @@ export const SettingsPaymentsOfflineWrapper = () => {
 export const SettingsPaymentsWooCommercePaymentsWrapper = () => {
 	return (
 		<>
-			<Header title={ __( 'WooCommerce Settings', 'woocommerce' ) } />
+			<Header title={ __( 'Settings', 'woocommerce' ) } />
 			<Suspense fallback={ <div>Loading WooPayments settings...</div> }>
 				<SettingsPaymentsWooCommercePaymentsChunk />
+			</Suspense>
+		</>
+	);
+};
+
+export const SettingsPaymentsBacsWrapper = () => {
+	return (
+		<>
+			<Header
+				title={ __( 'Direct bank transfer', 'woocommerce' ) }
+				backLink={ getAdminLink(
+					'admin.php?page=wc-settings&tab=checkout&section=offline'
+				) }
+			/>
+			<Suspense
+				fallback={
+					<>
+						<div className="settings-payments-bacs__container">
+							<div className="settings-payment-gateways">
+								<div className="settings-payment-gateways__header">
+									<div className="settings-payment-gateways__header-title">
+										{ __(
+											'Direct bank transfer',
+											'woocommerce'
+										) }
+									</div>
+								</div>
+								<Placeholder />
+							</div>
+						</div>
+					</>
+				}
+			>
+				<SettingsPaymentsBacsChunk />
+			</Suspense>
+		</>
+	);
+};
+
+export const SettingsPaymentsCodWrapper = () => {
+	return (
+		<>
+			<Header
+				title={ __( 'Cash on delivery', 'woocommerce' ) }
+				backLink={ getAdminLink(
+					'admin.php?page=wc-settings&tab=checkout&section=offline'
+				) }
+			/>
+			<Suspense
+				fallback={
+					<>
+						<div className="settings-payments-cod__container">
+							<div className="settings-payment-gateways">
+								<div className="settings-payment-gateways__header">
+									<div className="settings-payment-gateways__header-title">
+										{ __(
+											'Cash on delivery',
+											'woocommerce'
+										) }
+									</div>
+								</div>
+								<Placeholder />
+							</div>
+						</div>
+					</>
+				}
+			>
+				<SettingsPaymentsCodChunk />
+			</Suspense>
+		</>
+	);
+};
+
+export const SettingsPaymentsChequeWrapper = () => {
+	return (
+		<>
+			<Header
+				title={ __( 'Check payments', 'woocommerce' ) }
+				backLink={ getAdminLink(
+					'admin.php?page=wc-settings&tab=checkout&section=offline'
+				) }
+			/>
+			<Suspense
+				fallback={
+					<>
+						<div className="settings-payments-cheque__container">
+							<div className="settings-payment-gateways">
+								<div className="settings-payment-gateways__header">
+									<div className="settings-payment-gateways__header-title">
+										{ __(
+											'Check payments',
+											'woocommerce'
+										) }
+									</div>
+								</div>
+								<Placeholder />
+							</div>
+						</div>
+					</>
+				}
+			>
+				<SettingsPaymentsChequeChunk />
 			</Suspense>
 		</>
 	);

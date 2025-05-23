@@ -15,16 +15,25 @@ export const EMAIL_STATUSES = [
 		value: 'enabled',
 		label: __( 'Enabled', 'woocommerce' ),
 		icon: published,
+		description: __(
+			'Email would be sent if trigger is met',
+			'woocommerce'
+		),
 	},
 	{
 		value: 'disabled',
 		label: __( 'Disabled', 'woocommerce' ),
 		icon: cancelCircleFilled,
+		description: __( 'Email would not be sent', 'woocommerce' ),
 	},
 	{
 		value: 'manual',
 		label: __( 'Manually sent', 'woocommerce' ),
 		icon: scheduled,
+		description: __(
+			'Email can only be sent manually from the order screen',
+			'woocommerce'
+		),
 	},
 ];
 

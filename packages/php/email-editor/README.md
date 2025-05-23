@@ -9,7 +9,7 @@ You can locate the JS package here `packages/js/email-editor`
 ## Workflow Commands
 
 We use `composer` run scripts to run the commands. You can run them using `composer run <command>`.
-If you don't have `composer` installed globally, you need to install it globally. Please check ho to do it [here](https://getcomposer.org/doc/00-intro.md).
+If you don't have `composer` installed globally, you need to install it globally. [Please check how to install it](https://getcomposer.org/doc/00-intro.md).
 
 ```bash
 composer run env:start                             # start testing environment
@@ -19,6 +19,16 @@ composer run test:unit -- [path_to_tests]          # runs a single unit test or 
 composer run test:integration                      # runs all the integrations tests
 composer run test:integration -- [path_to_tests]   # run a single integration test or a directory of tests
 composer code-style                                # checks the code style
+```
+
+## PHPStan Commands
+
+The following commands are available via pnpm for running PHP static analysis:
+
+```bash
+pnpm run phpstan [--skip-cleanup]                  # PHP static analysis with PHPStan with PHP 8.4. When skip-cleanup is used the command does not delete installed dependencies.
+pnpm run phpstan:php8 [--skip-cleanup]             # Alias for the command `phpstan`
+pnpm run phpstan:php7 [--skip-cleanup]             # PHP static analysis with PHPStan with PHP 7.4
 ```
 
 Example:
@@ -49,7 +59,7 @@ Please avoid using MailPoet-specific services and modules in the Email editor pa
 
 ### Integrations
 
-Please locate MailPoet PHP integrations [here](https://github.com/mailpoet/mailpoet/tree/13bf305aeb29bbadd0695ee02a3735e62cc4f21f/mailpoet/lib/EmailEditor/Integrations/MailPoet)
+[Please locate MailPoet PHP integrations.](https://github.com/mailpoet/mailpoet/tree/13bf305aeb29bbadd0695ee02a3735e62cc4f21f/mailpoet/lib/EmailEditor/Integrations/MailPoet)
 
 ## Known rendering issues
 
@@ -64,21 +74,23 @@ We may add, update and delete any of them.
 
 ### Actions
 
-| Name                                          | Argument         | Description                                                                                                      |
-| --------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `woocommerce_email_editor_initialized`        | `null`           | Called when the Email Editor is initialized                                                                      |
-| `woocommerce_email_blocks_renderer_initialized`     | `BlocksRegistry` | Called when the block content renderer is initialized. You may use this to add a new BlockRenderer               |
-| `woocommerce_email_editor_register_templates` |                  | Called when the basic blank email template is registered. You can add more templates via register_block_template |
+| Name                                            | Argument         | Description                                                                                                      |
+| ----------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `woocommerce_email_editor_initialized`          | `null`           | Called when the Email Editor is initialized                                                                      |
+| `woocommerce_email_blocks_renderer_initialized` | `BlocksRegistry` | Called when the block content renderer is initialized. You may use this to add a new BlockRenderer               |
+| `woocommerce_email_editor_register_templates`   |                  | Called when the basic blank email template is registered. You can add more templates via register_block_template |
 
 ### Filters
 
-| Name                                             | Argument                                  | Return                                                        | Description                                                                                                                                                            |
-| ------------------------------------------------ |-------------------------------------------|---------------------------------------------------------------| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `woocommerce_email_editor_post_types`            | `Array` $postTypes                        | `Array` EmailPostType                                         | Applied to the list of post types used by the `getPostTypes` method                                                                                                    |
-| `woocommerce_email_editor_theme_json`            | `WP_Theme_JSON` $coreThemeData            | `WP_Theme_JSON` $themeJson                                    | Applied to the theme json data. This theme json data is created from the merging of the `WP_Theme_JSON_Resolver::get_core_data` and WooCommerce owns `theme.json` file |
-| `woocommerce_email_renderer_styles`              | `string` $templateStyles, `WP_Post` $post | `string` $templateStyles                                      | Applied to the email editor template styles.                                                                                                                           |
-| `woocommerce_email_content_renderer_styles`      | `string` $contentStyles, `WP_Post` $post  | `string` $contentStyles                                       | Applied to the inline content styles prior to use by the CSS Inliner.                                                                                                  |
-| `woocommerce_is_email_editor_page`               | `boolean` $isEditorPage                   | `boolean`                                                     | Check current page is the email editor page                                                                                                                            |
-| `woocommerce_email_editor_send_preview_email`    | `Array` $postData                         | `boolean` Result of processing. Was email sent successfully?  | Allows override of the send preview mail function. Folks may choose to use custom implementation                                                                       |
-| `woocommerce_email_editor_post_sent_status_args` | `Array` `sent` post status args           | `Array` register_post_status args                             | Allows update of the argument for the sent post status                                                                                                                 |
-| `woocommerce_email_blocks_renderer_parsed_blocks` | `Array` Parsed blocks data  z             | `Array` Parsed blocks data                                    | You can modify the parsed blocks before they are processed by email renderer. |
+| Name                                                               | Argument                                  | Return                                                       | Description                                                                                                                                                            |
+| ------------------------------------------------------------------ | ----------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `woocommerce_email_editor_post_types`                              | `Array` $postTypes                        | `Array` EmailPostType                                        | Applied to the list of post types used by the `getPostTypes` method                                                                                                    |
+| `woocommerce_email_editor_theme_json`                              | `WP_Theme_JSON` $coreThemeData            | `WP_Theme_JSON` $themeJson                                   | Applied to the theme json data. This theme json data is created from the merging of the `WP_Theme_JSON_Resolver::get_core_data` and WooCommerce owns `theme.json` file |
+| `woocommerce_email_renderer_styles`                                | `string` $templateStyles, `WP_Post` $post | `string` $templateStyles                                     | Applied to the email editor template styles.                                                                                                                           |
+| `woocommerce_email_content_renderer_styles`                        | `string` $contentStyles, `WP_Post` $post  | `string` $contentStyles                                      | Applied to the inline content styles prior to use by the CSS Inliner.                                                                                                  |
+| `woocommerce_is_email_editor_page`                                 | `boolean` $isEditorPage                   | `boolean`                                                    | Check current page is the email editor page                                                                                                                            |
+| `woocommerce_email_editor_send_preview_email`                      | `Array` $postData                         | `boolean` Result of processing. Was email sent successfully? | Allows override of the send preview mail function. Folks may choose to use custom implementation                                                                       |
+| `woocommerce_email_editor_post_sent_status_args`                   | `Array` `sent` post status args           | `Array` register_post_status args                            | Allows update of the argument for the sent post status                                                                                                                 |
+| `woocommerce_email_blocks_renderer_parsed_blocks`                  | `Array` Parsed blocks data                | `Array` Parsed blocks data                                   | You can modify the parsed blocks before they are processed by email renderer.                                                                                          |
+| `woocommerce_email_editor_send_preview_email_rendered_data`        | `string` $data Rendered email             | `string` Rendered email                                      | Allows modifying the rendered email when displaying or sending it in preview                                                                                           |
+| `woocommerce_email_editor_send_preview_email_personalizer_context` | `Array` $personalizerContext              | `Array` Personalizer context data                            | Allows modifying the personalizer context data for the send preview email function                                                                                     |

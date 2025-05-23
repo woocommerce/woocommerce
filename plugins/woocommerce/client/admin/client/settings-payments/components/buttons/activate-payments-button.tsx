@@ -9,7 +9,10 @@ import { PaymentIncentive } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { getWooPaymentsSetupLiveAccountLink } from '~/settings-payments/utils';
+import {
+	getWooPaymentsSetupLiveAccountLink,
+	disableWooPaymentsTestMode,
+} from '~/settings-payments/utils';
 
 interface ActivatePaymentsButtonProps {
 	/**
@@ -30,6 +33,14 @@ interface ActivatePaymentsButtonProps {
 	 * ID of the plugin that is being installed.
 	 */
 	installingPlugin: string | null;
+	/**
+	 * Function to set the onboarding modal open.
+	 */
+	setOnboardingModalOpen: ( isOnboardingModalOpen: boolean ) => void;
+	/**
+	 * The onboarding type for the gateway.
+	 */
+	onboardingType?: string;
 }
 
 /**
@@ -41,17 +52,33 @@ export const ActivatePaymentsButton = ( {
 	installingPlugin,
 	buttonText = __( 'Activate payments', 'woocommerce' ),
 	incentive = null,
+	setOnboardingModalOpen,
+	onboardingType,
 }: ActivatePaymentsButtonProps ) => {
 	const [ isUpdating, setIsUpdating ] = useState( false );
 
 	const activatePayments = () => {
 		setIsUpdating( true );
 
-		if ( incentive ) {
-			acceptIncentive( incentive.promo_id );
-		}
+		// Disable test mode and redirect to the live account setup link.
+		disableWooPaymentsTestMode()
+			.then( () => {
+				if ( incentive ) {
+					acceptIncentive( incentive.promo_id );
+				}
 
-		window.location.href = getWooPaymentsSetupLiveAccountLink();
+				if ( onboardingType === 'native_in_context' ) {
+					// Open the onboarding modal.
+					setOnboardingModalOpen( true );
+					setIsUpdating( false );
+				} else {
+					window.location.href = getWooPaymentsSetupLiveAccountLink();
+				}
+			} )
+			.catch( () => {
+				// Handle any errors that occur during the process.
+				setIsUpdating( false );
+			} );
 	};
 
 	return (

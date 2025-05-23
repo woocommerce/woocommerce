@@ -11,6 +11,8 @@
 use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -724,6 +726,9 @@ function wc_create_refund( $args = array() ) {
 		}
 
 		$order->set_date_modified( time() );
+		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() && $order->has_cogs() ) {
+			$order->calculate_cogs_total_value();
+		}
 		$order->save();
 
 		do_action( 'woocommerce_refund_created', $refund->get_id(), $args );
@@ -764,7 +769,7 @@ function wc_refund_payment( $order, $amount, $reason = '' ) {
 			throw new Exception( __( 'The payment gateway for this order does not exist.', 'woocommerce' ) );
 		}
 
-		if ( ! $gateway->supports( 'refunds' ) ) {
+		if ( ! $gateway->supports( PaymentGatewayFeature::REFUNDS ) ) {
 			throw new Exception( __( 'The payment gateway for this order does not support automatic refunds.', 'woocommerce' ) );
 		}
 

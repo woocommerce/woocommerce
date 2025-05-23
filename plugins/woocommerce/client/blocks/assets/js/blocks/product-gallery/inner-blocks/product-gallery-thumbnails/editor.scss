@@ -8,33 +8,4 @@
 	&__thumbnail {
 		pointer-events: none;
 	}
-
-	// Editor uses :after pseudo-element to show outlines on hover or focus.
-	// This is a workaround to ensure the outline is visible even when the element is focused
-	// and we "override" :before pseudo-element so it's used as bottom and right gradient.
-	&::after {
-		opacity: 1 !important;
-		width: 100% !important;
-		height: 100% !important;
-		background: none !important;
-		transition: none;
-	}
-
-	&.wc-block-product-gallery-thumbnails--overflow-right::before {
-		top: 0;
-		right: 0;
-		height: 100%;
-		width: 20%;
-		opacity: 1;
-		background: linear-gradient(to left, var(--wp--preset--color--base) 25%, transparent);
-	}
-
-	&.wc-block-product-gallery-thumbnails--overflow-bottom::before {
-		bottom: 0;
-		left: 0;
-		height: 20%;
-		width: 100%;
-		opacity: 1;
-		background: linear-gradient(to top, var(--wp--preset--color--base) 25%, transparent);
-	}
 }

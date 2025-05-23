@@ -3,13 +3,15 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import {
 	PaymentProviderState,
 	PaymentProviderOnboardingState,
+	woopaymentsOnboardingStore,
 } from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -48,6 +50,14 @@ interface CompleteSetupButtonProps {
 	 * ID of the plugin that is being installed.
 	 */
 	installingPlugin: string | null;
+	/**
+	 * Function to set the onboarding modal open.
+	 */
+	setOnboardingModalOpen: ( isOnboardingModalOpen: boolean ) => void;
+	/**
+	 * The onboarding type for the gateway.
+	 */
+	onboardingType?: string;
 }
 
 /**
@@ -64,12 +74,33 @@ export const CompleteSetupButton = ( {
 	gatewayHasRecommendedPaymentMethods,
 	installingPlugin,
 	buttonText = __( 'Complete setup', 'woocommerce' ),
+	setOnboardingModalOpen,
+	onboardingType,
 }: CompleteSetupButtonProps ) => {
 	const [ isUpdating, setIsUpdating ] = useState( false );
+
+	// Get the store's `select` function to trigger selector resolution later (in useEffect).
+	// We don't need to select data directly here, just the function itself.
+	const { select } = useSelect(
+		( selectFn ) => ( { select: selectFn } ),
+		[]
+	);
 
 	const accountConnected = gatewayState.account_connected;
 	const onboardingStarted = onboardingState.started;
 	const onboardingCompleted = onboardingState.completed;
+
+	useEffect( () => {
+		// Prefetch WooPayments onboarding data if conditions are met
+		if (
+			gatewayId === 'woocommerce_payments' &&
+			onboardingType === 'native_in_context' &&
+			! onboardingCompleted
+		) {
+			// Calling the selector triggers the data fetch
+			select( woopaymentsOnboardingStore ).getOnboardingData();
+		}
+	}, [ gatewayId, onboardingType, onboardingCompleted, select ] );
 
 	const completeSetup = () => {
 		// Record the click of this button.
@@ -82,7 +113,9 @@ export const CompleteSetupButton = ( {
 
 		setIsUpdating( true );
 
-		if ( ! accountConnected || ! onboardingStarted ) {
+		if ( onboardingType === 'native_in_context' ) {
+			setOnboardingModalOpen( true );
+		} else if ( ! accountConnected || ! onboardingStarted ) {
 			if ( gatewayHasRecommendedPaymentMethods ) {
 				const history = getHistory();
 				history.push( getNewPath( {}, '/payment-methods' ) );

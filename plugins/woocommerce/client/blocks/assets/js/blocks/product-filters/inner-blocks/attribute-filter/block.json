@@ -92,5 +92,6 @@
 		"attributes": {
 			"isPreview": true
 		}
-	}
+	},
+	"style": "woocommerce/product-filter-attribute-view-style"
 }

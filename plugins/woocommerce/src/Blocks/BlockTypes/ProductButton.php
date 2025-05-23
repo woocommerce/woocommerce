@@ -3,14 +3,17 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
-use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
+use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 
 /**
  * ProductButton class.
  */
 class ProductButton extends AbstractBlock {
 	use EnableBlockJsonAssetsTrait;
+	use BlocksSharedState;
 
 	/**
 	 * Block name.
@@ -87,13 +90,13 @@ class ProductButton extends AbstractBlock {
 
 		$is_descendent_of_add_to_cart_form = isset( $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] ) ? $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] : false;
 
-		if ( $is_descendent_of_add_to_cart_form && ProductType::SIMPLE === $product->get_type() && ( ! $product->is_in_stock() || ! $product->is_purchasable() ) ) {
+		if ( $is_descendent_of_add_to_cart_form && Utils::is_not_purchasable_simple_product( $product ) ) {
 			$product = $previous_product;
 
 			return '';
 		}
 
-		$this->initialize_cart_state();
+		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
 		wp_interactivity_state(
 			'woocommerce/product-button',
@@ -275,7 +278,7 @@ class ProductButton extends AbstractBlock {
 					'{div_directives}'         => $is_ajax_button ? $div_directives : '',
 					'{button_directives}'      => $is_ajax_button ? $button_directives : $anchor_directive,
 					'{span_button_directives}' => $is_ajax_button ? $span_button_directives : '',
-					'{view_cart_html}'         => $is_ajax_button ? $this->get_view_cart_html() : '',
+					'{view_cart_html}'         => $is_ajax_button && CartCheckoutUtils::has_cart_page() ? $this->get_view_cart_html() : '',
 				)
 			),
 			$product,
@@ -285,27 +288,6 @@ class ProductButton extends AbstractBlock {
 		$product = $previous_product;
 
 		return $html;
-	}
-
-	/**
-	 * Initialize the cart state.
-	 */
-	private function initialize_cart_state() {
-		if ( null === self::$cart ) {
-			$cart = isset( WC()->cart )
-				? rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) )->data
-				: array();
-
-			wp_interactivity_state(
-				'woocommerce',
-				array(
-					'cart'     => $cart,
-					'nonce'    => wp_create_nonce( 'wc_store_api' ),
-					'noticeId' => '',
-					'restUrl'  => get_rest_url(),
-				)
-			);
-		}
 	}
 
 	/**

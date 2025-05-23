@@ -396,12 +396,6 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 				  <!-- wp:html -->%s<!-- /wp:html -->
 				  </div>
 				  <!-- /wp:column -->
-				  <!-- wp:column -->
-				  <div class="wp-block-column">
-					 <!-- wp:post-title {"level": 1, "__woocommerceNamespace":"woocommerce/product-query/product-title"} /-->
-					 <!-- wp:post-excerpt {"__woocommerceNamespace":"woocommerce/product-query/product-summary", "excerptLength":100} /-->
-				  </div>
-				  <!-- /wp:column -->
 			   </div>
 			   <!-- /wp:columns -->
 			</div>

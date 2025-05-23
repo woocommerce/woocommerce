@@ -46,7 +46,7 @@ class ProductGallery extends AbstractBlock {
 		}
 		ob_start();
 		?>
-		<dialog
+			<dialog
 				data-wp-ref
 				data-wp-bind--open="context.isDialogOpen"
 				data-wp-on--close="actions.closeDialog"
@@ -68,9 +68,9 @@ class ProductGallery extends AbstractBlock {
 							<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Output is already escaped by WooCommerce. ?>
 							<?php echo $images_html; ?>
 						</div>
+					</div>
 				</div>
-			</div>
-		</dialog>
+			</dialog>
 		<?php
 		return ob_get_clean();
 	}
@@ -112,12 +112,13 @@ class ProductGallery extends AbstractBlock {
 			return '';
 		}
 
-		$image_src_data         = ProductGalleryUtils::get_product_gallery_image_data( $product );
+		$image_ids              = ProductGalleryUtils::get_all_image_ids( $product );
 		$classname              = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
-		$initial_image_id       = count( $image_src_data['image_ids'] ) > 0 ? $image_src_data['image_ids'][0] : -1;
-		$classname_single_image = count( $image_src_data['image_ids'] ) < 2 ? 'is-single-product-gallery-image' : '';
+		$initial_image_id       = count( $image_ids ) > 0 ? $image_ids[0] : -1;
+		$classname_single_image = count( $image_ids ) < 2 ? 'is-single-product-gallery-image' : '';
 		$product_id             = strval( $product->get_id() );
-		$gallery_with_dialog    = $this->inject_dialog( $content, $this->render_dialog( $image_src_data['images'] ) );
+		$full_image_data        = ProductGalleryUtils::get_image_src_data( $image_ids, 'full' );
+		$gallery_with_dialog    = $this->inject_dialog( $content, $this->render_dialog( $full_image_data ) );
 		$p                      = new \WP_HTML_Tag_Processor( $gallery_with_dialog );
 
 		if ( $p->next_tag() ) {
@@ -126,7 +127,7 @@ class ProductGallery extends AbstractBlock {
 				'data-wp-context',
 				wp_json_encode(
 					array(
-						'imageData'          => $image_src_data,
+						'imageData'          => $image_ids,
 						'isDialogOpen'       => false,
 						'disableLeft'        => true,
 						'disableRight'       => false,
@@ -135,7 +136,6 @@ class ProductGallery extends AbstractBlock {
 						'touchCurrentX'      => 0,
 						'productId'          => $product_id,
 						'selectedImageId'    => $initial_image_id,
-						'userHasInteracted'  => false,
 						'thumbnailsOverflow' => [
 							'top'    => false,
 							'bottom' => false,

@@ -1554,10 +1554,12 @@ class AdditionalFields extends MockeryTestCase {
 			)
 		);
 
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
+		$response          = rest_get_server()->dispatch( $request );
+		$data              = $response->get_data();
+		$additional_fields = (array) $data['additional_fields'];
+
 		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
-		$this->assertEquals( 'sanitized-value', $data['additional_fields'][ $id ], print_r( $data, true ) );
+		$this->assertEquals( 'sanitized-value', $additional_fields[ $id ], print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
 
@@ -1699,11 +1701,12 @@ class AdditionalFields extends MockeryTestCase {
 			)
 		);
 
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
+		$response          = rest_get_server()->dispatch( $request );
+		$data              = $response->get_data();
+		$additional_fields = (array) $data['additional_fields'];
 
 		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
-		$this->assertEquals( 'sanitized-value', $data['additional_fields'][ $id ], print_r( $data, true ) );
+		$this->assertEquals( 'sanitized-value', $additional_fields[ $id ], print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
 
@@ -2254,14 +2257,15 @@ class AdditionalFields extends MockeryTestCase {
 		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/checkout' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
+		$response          = rest_get_server()->dispatch( $request );
+		$data              = $response->get_data();
+		$additional_fields = (array) $data['additional_fields'];
 
 		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
 		$this->assertEquals( 'billing-saved-gov-id', ( (array) $data['billing_address'] )['plugin-namespace/gov-id'], print_r( $data, true ) );
 		$this->assertEquals( 'shipping-saved-gov-id', ( (array) $data['shipping_address'] )['plugin-namespace/gov-id'], print_r( $data, true ) );
-		$this->assertEquals( 'engineering', ( (array) $data['additional_fields'] )['plugin-namespace/job-function'], print_r( $data, true ) );
-		$this->assertArrayNotHasKey( 'plugin-namespace/leave-on-porch', $data['additional_fields'], print_r( $data, true ) );
+		$this->assertEquals( 'engineering', $additional_fields['plugin-namespace/job-function'], print_r( $data, true ) );
+		$this->assertArrayNotHasKey( 'plugin-namespace/leave-on-porch', $additional_fields, print_r( $data, true ) );
 	}
 
 	/**

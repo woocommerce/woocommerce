@@ -66,4 +66,13 @@ class ExportWCCoreProfilerOptions implements StepExporter, HasAlias {
 	public function get_description() {
 		return __( 'Includes onboarding configuration options', 'woocommerce' );
 	}
+
+	/**
+	 * Check if the current user has the required capabilities for this step.
+	 *
+	 * @return bool True if the user has the required capabilities. False otherwise.
+	 */
+	public function check_step_capabilities(): bool {
+		return current_user_can( 'manage_woocommerce' );
+	}
 }

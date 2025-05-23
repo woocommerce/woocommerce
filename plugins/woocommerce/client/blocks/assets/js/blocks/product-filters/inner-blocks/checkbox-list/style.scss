@@ -1,16 +1,17 @@
-:where(.wc-block-product-filter-checkbox-list__list) {
+.wc-block-product-filter-checkbox-list__list {
 	list-style: none outside;
 	margin: 0;
 	padding: 0;
 }
 
-:where(.wc-block-product-filter-checkbox-list__label) {
+.wc-block-product-filter-checkbox-list__label {
 	align-items: center;
 	display: inline-flex;
 	gap: 0.625em;
 }
 
-.wc-block-product-filter-checkbox-list__item .wc-block-product-filter-checkbox-list__label {
+.wc-block-product-filter-checkbox-list__item
+	.wc-block-product-filter-checkbox-list__label {
 	margin-bottom: 0;
 }
 
@@ -36,31 +37,36 @@
 	}
 }
 
-input.wc-block-product-filter-checkbox-list__input {
+input[type="checkbox"].wc-block-product-filter-checkbox-list__input {
 	appearance: none;
 	border-radius: 2px;
-	border: 1px solid var(--wc-product-filter-checkbox-list-option-element-border, transparent);
+	border: 1px solid
+		var(
+			--wc-product-filter-checkbox-list-option-element-border,
+			transparent
+		);
 	color: inherit;
 	display: block;
 	font-size: inherit;
 	height: 1em;
 	margin: 0;
 	width: 1em;
-	background: var(--wc-product-filter-checkbox-list-option-element, transparent);
+	background: var(
+		--wc-product-filter-checkbox-list-option-element,
+		transparent
+	);
 	cursor: pointer;
 }
 
-.wc-block-product-filter-checkbox-list__input:checked + .wc-block-product-filter-checkbox-list__mark {
-	display: block;
-	pointer-events: none;
-}
-
-.wc-block-product-filter-checkbox-list__input:focus {
+input[type="checkbox"].wc-block-product-filter-checkbox-list__input:focus {
 	outline-width: 1px;
-	outline-color: var(--wc-product-filter-checkbox-list-option-element-border, currentColor);
+	outline-color: var(
+		--wc-product-filter-checkbox-list-option-element-border,
+		currentColor
+	);
 }
 
-:where(.wc-block-product-filter-checkbox-list__mark) {
+svg.wc-block-product-filter-checkbox-list__mark {
 	box-sizing: border-box;
 	display: none;
 	height: 1em;
@@ -69,7 +75,22 @@ input.wc-block-product-filter-checkbox-list__input {
 	position: absolute;
 	top: 0;
 	width: 1em;
-	color: var(--wc-product-filter-checkbox-list-option-element-selected, currentColor);
+	color: var(
+		--wc-product-filter-checkbox-list-option-element-selected,
+		currentColor
+	);
+}
+
+input[type="checkbox"].wc-block-product-filter-checkbox-list__input:checked {
+	&::before,
+	&::after {
+		content: none;
+	}
+
+	+ .wc-block-product-filter-checkbox-list__mark {
+		display: block;
+		pointer-events: none;
+	}
 }
 
 :where(.wc-block-product-filter-checkbox-list__text-wrapper) {
@@ -79,11 +100,11 @@ input.wc-block-product-filter-checkbox-list__input {
 	gap: $gap-smallest;
 }
 
-:where(.wc-block-product-filter-checkbox-list__show-more) {
+.wc-block-product-filter-checkbox-list__show-more {
 	text-decoration: underline;
 	appearance: none;
+	font-family: inherit;
 	background: transparent;
 	border: none;
 	padding: 0;
 }
-

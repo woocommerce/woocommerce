@@ -2,12 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	useCallback,
-	useMemo,
-	useEffect,
-	useContext,
-} from '@wordpress/element';
+import { useCallback, useMemo, useEffect } from '@wordpress/element';
 import { Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import { BlockInstance } from '@wordpress/blocks';
@@ -33,8 +28,6 @@ import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { useHomeTemplates } from '../../hooks/use-home-templates';
 import { useSelectedPattern } from '../../hooks/use-selected-pattern';
 import { useEditorScroll } from '../../hooks/use-editor-scroll';
-import { FlowType } from '~/customize-store/types';
-import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import {
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
 	findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate,
@@ -203,21 +196,11 @@ export const SidebarNavigationScreenHomepage = ( {
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
 	}, [ blocks, homePatterns, isLoading, isEditorLoading ] );
 
-	const { context } = useContext( CustomizeStoreContext );
-	const aiOnline = context.flowType === FlowType.AIOnline;
-
-	const title = aiOnline
-		? __( 'Change your homepage', 'woocommerce' )
-		: __( 'Choose your homepage', 'woocommerce' );
-	const sidebarMessage = aiOnline
-		? __(
-				'Based on the most successful stores in your industry and location, our AI tool has recommended this template for your business. Prefer a different layout? Choose from the templates below now, or later via the Editor.',
-				'woocommerce'
-		  )
-		: __(
-				'Create an engaging homepage by selecting one of our pre-designed layouts. You can continue customizing this page, including the content, later via the Editor.',
-				'woocommerce'
-		  );
+	const title = __( 'Choose your homepage', 'woocommerce' );
+	const sidebarMessage = __(
+		'Create an engaging homepage by selecting one of our pre-designed layouts. You can continue customizing this page, including the content, later via the Editor.',
+		'woocommerce'
+	);
 
 	return (
 		<SidebarNavigationScreen

@@ -37,10 +37,10 @@ const orderOptions = [
 		value: 'rating',
 	},
 	{
-		// In WooCommerce, "Manual (menu order)" refers to a custom ordering set by the store owner.
+		// In WooCommerce, "Manual (menu order + name)" refers to a custom ordering set by the store owner.
 		// Products can be manually arranged in the desired order in the WooCommerce admin panel.
 		value: 'menu_order',
-		label: __( 'Manual (menu order)', 'woocommerce' ),
+		label: __( 'Manual (menu order + name)', 'woocommerce' ),
 	},
 ];
 

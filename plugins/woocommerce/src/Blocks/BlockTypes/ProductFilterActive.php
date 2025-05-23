@@ -44,11 +44,15 @@ final class ProductFilterActive extends AbstractBlock {
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
 			'data-wp-bind--hidden' => '!state.hasActiveFilters',
+			'data-wp-class--wc-block-product-filter--hidden' => '!state.hasActiveFilters',
 		);
 
-		if ( empty( $active_filters ) ) {
-			$wrapper_attributes['hidden'] = true;
-		}
+		wp_interactivity_state(
+			'woocommerce/product-filters',
+			array(
+				'hasActiveFilters' => ! empty( $active_filters ),
+			),
+		);
 
 		wp_interactivity_config(
 			'woocommerce/product-filters',

@@ -9,8 +9,8 @@
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
-use Automattic\WooCommerce\Internal\EmailEditor\WooContentProcessor;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -26,6 +26,14 @@ class WC_Admin {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'includes' ) );
+
+		// Hook in early (priority 1) to make sure the PageController's hooks are added before any WC admin pages or
+		// menus logic is run, including the enqueuing of assets via \Automattic\WooCommerce\Internal\Admin\WCAdminAssets.
+		// While it may not sound like it, the admin_menu action is triggered quite early,
+		// before the admin_init or admin_enqueue_scripts  action.
+		// @see https://developer.wordpress.org/apis/hooks/action-reference/#actions-run-during-an-admin-page-request.
+		add_action( 'admin_menu', array( $this, 'init_page_controller' ), 1 );
+
 		add_action( 'current_screen', array( $this, 'conditional_includes' ) );
 		add_action( 'admin_init', array( $this, 'buffer' ), 1 );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
@@ -88,6 +96,14 @@ class WC_Admin {
 		// Marketplace suggestions & related REST API.
 		include_once __DIR__ . '/marketplace-suggestions/class-wc-marketplace-suggestions.php';
 		include_once __DIR__ . '/marketplace-suggestions/class-wc-marketplace-updater.php';
+	}
+
+	/**
+	 * Initialize the admin page controller logic.
+	 */
+	public function init_page_controller() {
+		// We only need to make sure the controller is instantiated since the hooking is done in the constructor.
+		PageController::get_instance();
 	}
 
 	/**
@@ -255,66 +271,38 @@ class WC_Admin {
 	 * Preview email editor placeholder dummy content.
 	 */
 	public function preview_email_editor_dummy_content() {
-		if ( isset( $_GET['preview_woocommerce_mail_editor_content'] ) ) {
-			if ( ! ( isset( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ), 'preview-mail' ) ) ) {
-				die( 'Security check' );
-			}
-
-			/**
-			 * Email preview instance for rendering dummy content.
-			 *
-			 * @var EmailPreview $email_preview - email preview instance
-			 */
-			$email_preview = wc_get_container()->get( EmailPreview::class );
-
-			if ( isset( $_GET['type'] ) ) {
-				$type_param = sanitize_text_field( wp_unslash( $_GET['type'] ) );
-				try {
-					$email_preview->set_email_type( $type_param );
-				} catch ( InvalidArgumentException $e ) {
-					wp_die( esc_html__( 'Invalid email type.', 'woocommerce' ), 400 );
-				}
-			}
-
-			/**
-			 * Woo content processor service.
-			 *
-			 * @var WooContentProcessor $woo_content_processor - service for processing Woo content.
-			 */
-			$woo_content_processor = wc_get_container()->get( WooContentProcessor::class );
-
-			$generate_placeholder_content = function () use ( $email_preview, $woo_content_processor ) {
-				add_filter( 'woocommerce_email_styles', array( $woo_content_processor, 'prepare_css' ), 10, 2 );
-				$content = $woo_content_processor->get_woo_content( $email_preview->get_email() );
-				$content = $email_preview->get_email()->style_inline( $content );
-				$content = $email_preview->ensure_links_open_in_new_tab( $content );
-				return $content;
-			};
-
-			$email_preview->set_up_filters();
-
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				$message = $generate_placeholder_content();
-			} else {
-				// Start output buffering to prevent partial renders with PHP notices or warnings.
-				ob_start();
-				try {
-					$message = $generate_placeholder_content();
-				} catch ( Throwable $e ) {
-					ob_end_clean();
-					wp_die( esc_html__( 'There was an error rendering the email editor placeholder content.', 'woocommerce' ), 404 );
-				}
-				ob_end_clean();
-			}
-
-			$email_preview->clean_up_filters();
-
-			// print the placeholder content.
-			// phpcs:ignore WordPress.Security.EscapeOutput
-			echo $message;
-			// phpcs:enable
-			exit;
+		$message = '';
+		if ( ! isset( $_GET['preview_woocommerce_mail_editor_content'] ) ) {
+			return;
 		}
+
+		if ( ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ), 'preview-mail' ) ) {
+			die( 'Security check' );
+		}
+
+		/**
+		 * Email preview instance for rendering dummy content.
+		 *
+		 * @var EmailPreview $email_preview - email preview instance
+		 */
+		$email_preview = wc_get_container()->get( EmailPreview::class );
+
+		$type_param = EmailPreview::DEFAULT_EMAIL_TYPE;
+		if ( isset( $_GET['type'] ) ) {
+			$type_param = sanitize_text_field( wp_unslash( $_GET['type'] ) );
+		}
+
+		try {
+			$message = $email_preview->generate_placeholder_content( $type_param );
+		} catch ( \Exception $e ) {
+			// Catch other potential errors during content generation.
+			wp_die( esc_html__( 'There was an error rendering the email preview.', 'woocommerce' ), 404 );
+		}
+
+		// Print the placeholder content.
+		// phpcs:ignore WordPress.Security.EscapeOutput
+		echo $message;
+		exit;
 	}
 
 	/**

@@ -20,5 +20,6 @@
 			"margin": true
 		},
 		"interactivity": true
-	}
+	},
+	"editorStyle": "file:../woocommerce/product-gallery-thumbnails-editor.css"
 }

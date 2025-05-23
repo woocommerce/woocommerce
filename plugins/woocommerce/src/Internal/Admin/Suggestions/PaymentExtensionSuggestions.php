@@ -93,9 +93,17 @@ class PaymentExtensionSuggestions {
 	 * These are used to categorize the extensions and provide additional information to the system.
 	 * Some tags may carry special meaning and will be used to influence the suggestions' behavior.
 	 */
-	const TAG_PREFERRED   = 'preferred';
-	const TAG_MADE_IN_WOO = 'made_in_woo'; // For extensions developed by Woo.
-	const TAG_RECOMMENDED = 'recommended'; // For extensions that should be further emphasized.
+	const TAG_PREFERRED         = 'preferred';
+	const TAG_PREFERRED_OFFLINE = 'preferred_offline'; // For extensions that are preferred for offline payments.
+	const TAG_MADE_IN_WOO       = 'made_in_woo'; // For extensions developed by Woo.
+	const TAG_RECOMMENDED       = 'recommended'; // For extensions that should be further emphasized.
+
+	/**
+	 * The memoized extensions base details to avoid computing them multiple times during a request.
+	 *
+	 * @var array|null
+	 */
+	private ?array $extensions_base_details_memo = null;
 
 	/**
 	 * The payment extension list for each country.
@@ -245,6 +253,20 @@ class PaymentExtensionSuggestions {
 			),
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
+			self::AFFIRM          => array(
+				'_merge_on_type' => array(
+					'links' => array(
+						array(
+							'_type' => self::LINK_TYPE_PRICING,
+							'url'   => 'https://www.affirm.com/en-gb/business',
+						),
+						array(
+							'_type' => self::LINK_TYPE_TERMS,
+							'url'   => 'https://www.affirm.com/en-gb/terms',
+						),
+					),
+				),
+			),
 			self::CLEARPAY,
 			self::KLARNA          => array(
 				'_merge_on_type' => array(
@@ -1968,8 +1990,12 @@ class PaymentExtensionSuggestions {
 				continue;
 			}
 
+			// Determine the extension details for the given country.
 			$extension_base_details = $this->get_extension_base_details( $extension_id ) ?? array();
 			$extension_details      = $this->with_country_details( $extension_base_details, $extension_country_details );
+
+			// Apply any changes to the extension details based on the store's state.
+			$extension_details = $this->with_store_state_details( $extension_id, $extension_details );
 
 			// Check if there is an incentive for this extension and attach its details.
 			$incentive = $this->get_extension_incentive( $extension_id, $country_code, $context );
@@ -2023,10 +2049,13 @@ class PaymentExtensionSuggestions {
 	 * @param string $country_code Optional. The two-letter country code for which the extension suggestion should be retrieved.
 	 * @param string $context      Optional. The context ID of where this extension suggestion is being used.
 	 *
-	 * @return array|null The extension details for the given plugin slug. Null if not found.
+	 * @return array|null The extension details for the given plugin slug. Null if not found or the slug is empty.
 	 */
 	public function get_by_plugin_slug( string $plugin_slug, string $country_code = '', string $context = '' ): ?array {
 		$plugin_slug = sanitize_title( $plugin_slug );
+		if ( empty( $plugin_slug ) ) {
+			return null;
+		}
 
 		// If we have a country code, try to find a fully localized extension suggestion.
 		if ( ! empty( $country_code ) ) {
@@ -2073,7 +2102,6 @@ class PaymentExtensionSuggestions {
 		return $this->suggestion_incentives->dismiss_incentive( $incentive_id, $suggestion_id, $context );
 	}
 
-
 	/**
 	 * Determine if a payment extension is allowed to be suggested.
 	 *
@@ -2088,88 +2116,6 @@ class PaymentExtensionSuggestions {
 		// Add per-extension exclusion logic here.
 		// Returning true for now to avoid excluding any extensions.
 		return true;
-	}
-
-	/**
-	 * Based on the WC onboarding profile, determine if the merchant is selling online.
-	 *
-	 * If the user skipped the profiler (no data points provided), we assume they are selling online.
-	 *
-	 * @return bool True if the merchant is selling online, false otherwise.
-	 */
-	private function is_merchant_selling_online(): bool {
-		/*
-		 * We consider a merchant to be selling online if:
-		 * - The profiler was skipped (no data points provided).
-		 *   OR
-		 * - The merchant answered 'Which one of these best describes you?' with 'I’m already selling' AND:
-		 *   - Didn't answer to the 'Are you selling online?' question.
-		 *      OR
-		 *   - Answered the 'Are you selling online?' question with either:
-		 *     - 'Yes, I’m selling online'.
-		 *        OR
-		 *     - 'I’m selling both online and offline'.
-		 *
-		 * @see plugins/woocommerce/client/admin/client/core-profiler/pages/UserProfile.tsx for the values.
-		 */
-		$onboarding_profile = get_option( OnboardingProfile::DATA_OPTION, array() );
-		if (
-			! isset( $onboarding_profile['business_choice'] ) ||
-			(
-				'im_already_selling' === $onboarding_profile['business_choice'] &&
-				(
-					! isset( $onboarding_profile['selling_online_answer'] ) ||
-					(
-						'yes_im_selling_online' === $onboarding_profile['selling_online_answer'] ||
-						'im_selling_both_online_and_offline' === $onboarding_profile['selling_online_answer']
-					)
-				)
-			)
-		) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Based on the WC onboarding profile, determine if the merchant is selling offline.
-	 *
-	 * If the user skipped the profiler (no data points provided), we assume they are NOT selling offline.
-	 *
-	 * @return bool True if the merchant is selling offline, false otherwise.
-	 */
-	private function is_merchant_selling_offline(): bool {
-		/*
-		 * We consider a merchant to be selling offline if:
-		 * - The profiler was NOT skipped (data points provided).
-		 *   AND
-		 * - The merchant answered 'Which one of these best describes you?' with 'I’m already selling' AND:
-		 *   - Answered the 'Are you selling online?' question with either:
-		 *     - 'No, I’m selling offline'.
-		 *        OR
-		 *     - 'I’m selling both online and offline'.
-		 *
-		 * @see plugins/woocommerce/client/admin/client/core-profiler/pages/UserProfile.tsx for the values.
-		 */
-		$onboarding_profile = get_option( OnboardingProfile::DATA_OPTION, array() );
-		if (
-			isset( $onboarding_profile['business_choice'] ) &&
-			(
-				'im_already_selling' === $onboarding_profile['business_choice'] &&
-				(
-					isset( $onboarding_profile['selling_online_answer'] ) &&
-					(
-						'no_im_selling_offline' === $onboarding_profile['selling_online_answer'] ||
-						'im_selling_both_online_and_offline' === $onboarding_profile['selling_online_answer']
-					)
-				)
-			)
-		) {
-			return true;
-		}
-
-		return false;
 	}
 
 	/**
@@ -2294,6 +2240,31 @@ class PaymentExtensionSuggestions {
 	}
 
 	/**
+	 * Apply customizations to the extension details based on the store's state.
+	 *
+	 * The customizations may be general or specific to certain extensions.
+	 * The store's state refers to various aspects of the store's configuration, collected data,
+	 * store setup/launch process, onboarding task completion, etc.
+	 *
+	 * @param string $extension_id      The extension ID.
+	 * @param array  $extension_details The extension details.
+	 *
+	 * @return array The modified extension details.
+	 */
+	private function with_store_state_details( string $extension_id, array $extension_details ): array {
+		// For Square, we add the preferred tags if the merchant self-identified as selling offline via the core profiler.
+		if ( self::SQUARE === $extension_id && $this->is_merchant_selling_offline() ) {
+			if ( empty( $extension_details['tags'] ) ) {
+				$extension_details['tags'] = array();
+			}
+			$extension_details['tags'][] = self::TAG_PREFERRED;
+			$extension_details['tags'][] = self::TAG_PREFERRED_OFFLINE;
+		}
+
+		return $extension_details;
+	}
+
+	/**
 	 * Get the incentive details for a given extension and country, if any.
 	 *
 	 * @param string $extension_id The extension ID.
@@ -2356,7 +2327,10 @@ class PaymentExtensionSuggestions {
 	 * @return array[] The base details of all extensions.
 	 */
 	private function get_all_extensions_base_details(): array {
-		return array(
+		if ( isset( $this->extensions_base_details_memo ) ) {
+			return $this->extensions_base_details_memo;
+		}
+		$this->extensions_base_details_memo = array(
 			self::AIRWALLEX         => array(
 				'_type'       => self::TYPE_PSP,
 				'title'       => esc_html__( 'Airwallex Payments', 'woocommerce' ),
@@ -2892,7 +2866,7 @@ class PaymentExtensionSuggestions {
 					),
 					array(
 						'_type' => self::LINK_TYPE_ABOUT,
-						'url'   => 'https://woocommerce.com/products/viva-wallet-for-woocommerce/',
+						'url'   => 'https://woocommerce.com/products/viva-com-smart-for-woocommerce/',
 					),
 					array(
 						'_type' => self::LINK_TYPE_TERMS,
@@ -2900,11 +2874,11 @@ class PaymentExtensionSuggestions {
 					),
 					array(
 						'_type' => self::LINK_TYPE_DOCS,
-						'url'   => 'https://woocommerce.com/document/viva-wallet-for-woocommerce/',
+						'url'   => 'https://woocommerce.com/document/viva-com-smart-for-woocommerce/',
 					),
 					array(
 						'_type' => self::LINK_TYPE_SUPPORT,
-						'url'   => 'https://woocommerce.com/document/viva-wallet-standard-checkout/#section-26',
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=viva-com-smart-for-woocommerce',
 					),
 				),
 			),
@@ -3335,6 +3309,8 @@ class PaymentExtensionSuggestions {
 				),
 			),
 		);
+
+		return $this->extensions_base_details_memo;
 	}
 
 	/**
@@ -3385,5 +3361,87 @@ class PaymentExtensionSuggestions {
 		$standardized['_incentive']  = $extension_details['_incentive'] ?? null;
 
 		return $standardized;
+	}
+
+	/**
+	 * Based on the WC onboarding profile, determine if the merchant is selling online.
+	 *
+	 * If the user skipped the profiler (no data points provided), we assume they are selling online.
+	 *
+	 * @return bool True if the merchant is selling online, false otherwise.
+	 */
+	private function is_merchant_selling_online(): bool {
+		/*
+		 * We consider a merchant to be selling online if:
+		 * - The profiler was skipped (no data points provided).
+		 *   OR
+		 * - The merchant answered 'Which one of these best describes you?' with 'I’m already selling' AND:
+		 *   - Didn't answer to the 'Are you selling online?' question.
+		 *      OR
+		 *   - Answered the 'Are you selling online?' question with either:
+		 *     - 'Yes, I’m selling online'.
+		 *        OR
+		 *     - 'I’m selling both online and offline'.
+		 *
+		 * @see plugins/woocommerce/client/admin/client/core-profiler/pages/UserProfile.tsx for the values.
+		 */
+		$onboarding_profile = get_option( OnboardingProfile::DATA_OPTION, array() );
+		if (
+			! isset( $onboarding_profile['business_choice'] ) ||
+			(
+				'im_already_selling' === $onboarding_profile['business_choice'] &&
+				(
+					! isset( $onboarding_profile['selling_online_answer'] ) ||
+					(
+						'yes_im_selling_online' === $onboarding_profile['selling_online_answer'] ||
+						'im_selling_both_online_and_offline' === $onboarding_profile['selling_online_answer']
+					)
+				)
+			)
+		) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Based on the WC onboarding profile, determine if the merchant is selling offline.
+	 *
+	 * If the user skipped the profiler (no data points provided), we assume they are NOT selling offline.
+	 *
+	 * @return bool True if the merchant is selling offline, false otherwise.
+	 */
+	private function is_merchant_selling_offline(): bool {
+		/*
+		 * We consider a merchant to be selling offline if:
+		 * - The profiler was NOT skipped (data points provided).
+		 *   AND
+		 * - The merchant answered 'Which one of these best describes you?' with 'I’m already selling' AND:
+		 *   - Answered the 'Are you selling online?' question with either:
+		 *     - 'No, I’m selling offline'.
+		 *        OR
+		 *     - 'I’m selling both online and offline'.
+		 *
+		 * @see plugins/woocommerce/client/admin/client/core-profiler/pages/UserProfile.tsx for the values.
+		 */
+		$onboarding_profile = get_option( OnboardingProfile::DATA_OPTION, array() );
+		if (
+			isset( $onboarding_profile['business_choice'] ) &&
+			(
+				'im_already_selling' === $onboarding_profile['business_choice'] &&
+				(
+					isset( $onboarding_profile['selling_online_answer'] ) &&
+					(
+						'no_im_selling_offline' === $onboarding_profile['selling_online_answer'] ||
+						'im_selling_both_online_and_offline' === $onboarding_profile['selling_online_answer']
+					)
+				)
+			)
+		) {
+			return true;
+		}
+
+		return false;
 	}
 }

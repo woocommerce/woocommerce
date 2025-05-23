@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 9.8.0
+ * @version 9.9.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -40,7 +40,7 @@ if ( ! empty( $order->get_billing_first_name() ) ) {
 ?>
 </p>
 <?php if ( $email_improvements_enabled ) : ?>
-	<p><?php esc_html_e( 'We’ve received your order and will let you know when it’s on its way to you!', 'woocommerce' ); ?></p>
+	<p><?php esc_html_e( 'Just to let you know &mdash; we’ve received your order, and it is now being processed.', 'woocommerce' ); ?></p>
 	<p><?php esc_html_e( 'Here’s a reminder of what you’ve ordered:', 'woocommerce' ); ?></p>
 <?php else : ?>
 	<?php /* translators: %s: Order number */ ?>

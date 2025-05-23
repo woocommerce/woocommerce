@@ -95,9 +95,6 @@ class Dom_Document_Helper {
 		$inner_html = '';
 		$children   = $element->childNodes; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		foreach ( $children as $child ) {
-			if ( ! $child instanceof \DOMNode ) {
-				continue;
-			}
 			$inner_html .= $this->dom->saveHTML( $child );
 		}
 		return $inner_html;

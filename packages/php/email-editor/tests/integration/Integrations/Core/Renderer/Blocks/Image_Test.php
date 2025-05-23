@@ -160,11 +160,13 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 			)
 		);
 		$table_cell_style = $html->get_attribute( 'style' );
+		$this->assertIsString( $table_cell_style );
 		$this->assertStringContainsString( 'border-color:#000001', $table_cell_style );
 		$this->assertStringContainsString( 'border-radius:20px', $table_cell_style );
 		$this->assertStringContainsString( 'border-style:solid;', $table_cell_style );
 		$html->next_tag( array( 'tag_name' => 'img' ) );
 		$img_style = $html->get_attribute( 'style' );
+		$this->assertIsString( $img_style );
 		$this->assertStringNotContainsString( 'border', $img_style );
 	}
 
@@ -190,6 +192,7 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 			)
 		);
 		$table_cell_class = $html->get_attribute( 'class' );
+		$this->assertIsString( $table_cell_class );
 		$this->assertStringContainsString( 'has-border-red-color', $table_cell_class );
 		$this->assertStringContainsString( 'has-border-color', $table_cell_class );
 		$this->assertStringNotContainsString( 'custom-class', $table_cell_class );

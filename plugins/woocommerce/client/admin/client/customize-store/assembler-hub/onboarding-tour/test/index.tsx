@@ -8,7 +8,6 @@ import userEvent from '@testing-library/user-event';
  * Internal dependencies
  */
 import { OnboardingTour } from '../index';
-import { FlowType } from '~/customize-store/types';
 import { trackEvent } from '~/customize-store/tracking';
 
 jest.mock( '~/customize-store/tracking', () => ( { trackEvent: jest.fn() } ) );
@@ -27,7 +26,6 @@ describe( 'OnboardingTour', () => {
 		takeTour: jest.Mock;
 		setShowWelcomeTour: jest.Mock;
 		showWelcomeTour: boolean;
-		flowType: FlowType.AIOnline | FlowType.noAI;
 		setIsResizeHandleVisible: ( isVisible: boolean ) => void;
 	};
 
@@ -39,26 +37,7 @@ describe( 'OnboardingTour', () => {
 			setShowWelcomeTour: jest.fn(),
 			showWelcomeTour: true,
 			setIsResizeHandleVisible: jest.fn(),
-			flowType: FlowType.AIOnline,
 		};
-	} );
-
-	it( 'should render welcome tour mentioning the AI when the flowType is AIOnline', () => {
-		render( <OnboardingTour { ...props } /> );
-
-		expect(
-			screen.getByText( /Welcome to your AI-generated store!/i )
-		).toBeInTheDocument();
-	} );
-
-	it( 'should render welcome tour not mentioning the AI when the flowType is AIOnline', () => {
-		render( <OnboardingTour { ...props } flowType={ FlowType.noAI } /> );
-
-		expect(
-			screen.getByText(
-				/Discover what's possible with the store designer/i
-			)
-		).toBeInTheDocument();
 	} );
 
 	it( 'should render step 1', () => {

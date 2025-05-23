@@ -17,10 +17,9 @@ import { checkOverflow } from './utils';
 const getContext = ( ns?: string ) =>
 	getContextFn< ProductGalleryContext >( ns );
 
-const getArrowsState = ( imageNumber: number, totalImages: number ) => ( {
-	// One-based index so it ranges from 1 to imagesIds.length.
-	disableLeft: imageNumber === 1,
-	disableRight: imageNumber === totalImages,
+const getArrowsState = ( imageIndex: number, totalImages: number ) => ( {
+	disableLeft: imageIndex === 0,
+	disableRight: imageIndex === totalImages - 1,
 } );
 
 /**
@@ -140,30 +139,8 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 	} );
 };
 
-/**
- * Gets the number of the active image.
- *
- * @param {number[]} imageIds        - The IDs of the images.
- * @param {number}   selectedImageId - The ID of the selected image.
- * @return {number} The number of the active image.
- */
-const getSelectedImageNumber = (
-	imageIds: number[],
-	selectedImageId: number
-) => imageIds.indexOf( selectedImageId ) + 1;
-
 const productGallery = {
 	state: {
-		/**
-		 * The number of the active image. Not to be confused with the index of the active image in the imageIds array.
-		 *
-		 * @return {number} The number of the active image.
-		 */
-		get selectedImageNumber(): number {
-			const { imageData, selectedImageId } = getContext();
-			const allImageIds = imageData?.image_ids || [];
-			return getSelectedImageNumber( allImageIds, selectedImageId );
-		},
 		/**
 		 * The index of the active image in the imageIds array.
 		 *
@@ -171,93 +148,25 @@ const productGallery = {
 		 */
 		get imageIndex(): number {
 			const { imageData, selectedImageId } = getContext();
-			const allImageIds = imageData?.image_ids || [];
-			return allImageIds.indexOf( selectedImageId );
-		},
-		/**
-		 * The processed image data.
-		 *
-		 * @return {Object} The processed image data.
-		 */
-		get processedImageData() {
-			// The thumbnail block preloads all required images into cache. Without thumbnails, only the first two images load initially,
-			// as users navigate one at a time, with more loading on interaction. If thumbnails later use smaller, separate images, this
-			// logic will need adjustment, as users could jump to an unloaded image by clicking a thumbnail.
-			const { imageData, userHasInteracted, selectedImageId } =
-				getContext();
-
-			const allImageIds = imageData?.image_ids || [];
-			const selectedImageNumber = getSelectedImageNumber(
-				allImageIds,
-				selectedImageId
-			);
-
-			const processedImageData = allImageIds.map( ( imageId, index ) => {
-				const isActive = selectedImageNumber === index + 1;
-				const tabIndex = isActive ? '0' : '-1';
-				const imageObject = imageData?.images[ imageId ];
-
-				if ( ! userHasInteracted && index >= 2 ) {
-					// Return a copy with empty src and srcSet for images beyond the first two
-					return {
-						...imageObject,
-						isActive,
-						tabIndex,
-						src: '',
-						srcset: '',
-					};
-				}
-				return {
-					...imageObject,
-					isActive,
-					tabIndex,
-				};
-			} );
-
-			return processedImageData;
-		},
-		/**
-		 * The subset of processedImageData that is displayed in the thumbnails block.
-		 *
-		 * @return Array The subset of processed image data.
-		 */
-		get thumbnails() {
-			const { imageData, selectedImageId } = getContext();
-			const allImageIds = imageData?.image_ids || [];
-			// Map the image IDs to the image data. imageData?.images is an object and it's sorted by image ID - which we don't want.
-			return allImageIds.map( ( imageId ) => {
-				const imageObject = imageData?.images[ imageId ];
-				return {
-					...imageObject,
-					isActive: imageId === selectedImageId,
-				};
-			} );
+			return imageData.indexOf( selectedImageId );
 		},
 	},
 	actions: {
-		userHasInteracted: () => {
-			const context = getContext();
-			context.userHasInteracted = true;
-		},
-		selectImage: ( newImageNumber: number ) => {
+		selectImage: ( newImageIndex: number ) => {
 			const context = getContext();
 			const { imageData } = context;
 
-			const allImageIds = imageData?.image_ids || [];
+			const imageId = imageData[ newImageIndex ];
 			const { disableLeft, disableRight } = getArrowsState(
-				newImageNumber,
-				allImageIds.length
+				newImageIndex,
+				imageData.length
 			);
-			actions.userHasInteracted();
+
 			context.disableLeft = disableLeft;
 			context.disableRight = disableRight;
-
-			const imageIndex = newImageNumber - 1;
-			const imageId = allImageIds[ imageIndex ];
-
 			context.selectedImageId = imageId;
 
-			if ( imageIndex !== -1 ) {
+			if ( imageId !== -1 ) {
 				scrollImageIntoView( imageId );
 				scrollThumbnailIntoView( imageId );
 			}
@@ -275,28 +184,23 @@ const productGallery = {
 				return;
 			}
 			const imageId = parseInt( imageIdValue, 10 );
-			const context = getContext();
-			const { imageData } = context;
-			const allImageIds = imageData?.image_ids || [];
-			const newImageNumber = allImageIds.indexOf( imageId ) + 1;
-			actions.selectImage( newImageNumber );
+			const { imageData } = getContext();
+			const newImageIndex = imageData.indexOf( imageId );
+			actions.selectImage( newImageIndex );
 		},
 		selectNextImage: ( event?: MouseEvent ) => {
 			if ( event ) {
 				event.stopPropagation();
 			}
+
 			const { imageData, selectedImageId } = getContext();
-			const allImageIds = imageData?.image_ids || [];
-			const selectedImageNumber = getSelectedImageNumber(
-				allImageIds,
-				selectedImageId
-			);
-			const newImageNumber = Math.min(
-				allImageIds.length,
-				selectedImageNumber + 1
+			const selectedImageIndex = imageData.indexOf( selectedImageId );
+			const newImageIndex = Math.min(
+				imageData.length - 1,
+				selectedImageIndex + 1
 			);
 
-			actions.selectImage( newImageNumber );
+			actions.selectImage( newImageIndex );
 		},
 		selectPreviousImage: ( event?: MouseEvent ) => {
 			if ( event ) {
@@ -304,14 +208,10 @@ const productGallery = {
 			}
 
 			const { imageData, selectedImageId } = getContext();
-			const allImageIds = imageData?.image_ids || [];
-			const selectedImageNumber = getSelectedImageNumber(
-				allImageIds,
-				selectedImageId
-			);
-			const newImageNumber = Math.max( 1, selectedImageNumber - 1 );
+			const selectedImageIndex = imageData.indexOf( selectedImageId );
+			const newImageIndex = Math.max( 0, selectedImageIndex - 1 );
 
-			actions.selectImage( newImageNumber );
+			actions.selectImage( newImageIndex );
 		},
 		onSelectedLargeImageKeyDown: ( event: KeyboardEvent ) => {
 			if (
@@ -428,25 +328,12 @@ const productGallery = {
 			}
 
 			const selectFirstImage = () =>
-				withScope( () => actions.selectImage( 1 ) );
-
-			// Initial mutation is triggered when the page is loaded.
-			// We don't want to set `userHasInteracted` to true on initial mutation
-			let isInitialMutation = true;
+				withScope( () => actions.selectImage( 0 ) );
 
 			const observer = new MutationObserver(
 				withScope( function ( mutations ) {
 					for ( const mutation of mutations ) {
-						if ( ! isInitialMutation ) {
-							actions.userHasInteracted();
-						}
-
-						if ( isInitialMutation ) {
-							isInitialMutation = false;
-						}
-
 						const { imageData } = getContext();
-						const allImageIds = imageData?.image_ids || [];
 
 						const mutationTarget = mutation.target as HTMLElement;
 						const currentImageAttribute =
@@ -457,14 +344,14 @@ const productGallery = {
 						if (
 							mutation.type === 'attributes' &&
 							currentImageId &&
-							allImageIds.includes( currentImageId )
+							imageData.includes( currentImageId )
 						) {
-							const nextImageNumber =
-								allImageIds.indexOf( currentImageId ) + 1;
+							const nextImageIndex =
+								imageData.indexOf( currentImageId );
 
-							actions.selectImage( nextImageNumber );
+							actions.selectImage( nextImageIndex );
 						} else {
-							actions.selectImage( 1 );
+							actions.selectImage( 0 );
 						}
 					}
 				} )
@@ -507,6 +394,24 @@ const productGallery = {
 					} );
 					selectedImage.focus();
 				}
+			}
+		},
+		toggleActiveImageAttributes: () => {
+			const element = getElement()?.ref as HTMLElement;
+			if ( ! element ) return false;
+
+			const imageIdValue = element.getAttribute( 'data-image-id' );
+			if ( ! imageIdValue ) return false;
+
+			const { selectedImageId } = getContext();
+			const imageId = Number( imageIdValue );
+
+			if ( selectedImageId === imageId ) {
+				element.classList.add( 'is-active' );
+				element.setAttribute( 'tabIndex', '0' );
+			} else {
+				element.classList.remove( 'is-active' );
+				element.setAttribute( 'tabIndex', '-1' );
 			}
 		},
 	},

@@ -62,9 +62,9 @@ export const SHIPPING_ENABLED = getSetting< boolean >(
 );
 
 type FieldsLocations = {
-	address: ( keyof AddressForm )[];
-	contact: ( keyof ContactForm )[];
-	order: ( keyof OrderForm )[];
+	address: Array< keyof AddressForm >;
+	contact: Array< keyof ContactForm >;
+	order: Array< keyof OrderForm >;
 };
 
 // Contains country names.
