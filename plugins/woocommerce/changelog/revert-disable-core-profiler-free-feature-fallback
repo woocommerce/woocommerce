@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: This reverts functionality slated for release in 9.9, so it actually removes a changelog entry, and doesn't require its own
-
-
