@@ -40,8 +40,7 @@ body:
 
         -    [] Ensure minimally required WordPress and PHP versions are up-to-date
         -    [] Ensure all [CFEs](https://github.com/woocommerce/woocommerce/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22code%20freeze%20exception%22) for the target release version are addressed and merged
-        -    [] Validate that the stable tag in `readme.txt` in the release branch matches RELEASE_VERSION or update if necessary
-        -    [] Validate that the stable tag in `readme.txt` in the SVN `trunk` matches RELEASE_VERSION ([here](https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt))
+        -    [] Validate that the stable tag in `readme.txt` in the release branch matches the stable tag in `readme.txt` in the SVN `trunk` ([here](https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt))
         -    [] Skip changelog generation (?)
         -    [] Create a PR to bump version in source code with `GITHUB_TOKEN=<your_PAT_token> pnpm utils code-freeze version-bump -b release/9.9 9.9.0-rc.1`
         -    [] Review (ensure PR CI-checks are passing) and merge the PR (ensure merge CI-checks are passing)
@@ -79,8 +78,7 @@ body:
         
         #### Get release artifact ready
         
-        -    [] Validate stable tag in `readme.txt` for the release branch and update if necessary
-        -    [] Validate stable tag in `readme.txt` for the SVN `trunk` ([here](https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt))
+        -    [] Validate that the stable tag in `readme.txt` in the release branch matches the stable tag in `readme.txt` in the SVN `trunk` ([here](https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt))
         -    [] Generate [changelog](https://github.com/woocommerce/woocommerce/blob/trunk/changelog.txt) ([workflow](https://github.com/woocommerce/woocommerce/actions/workflows/new-cfe-prr-pre-build-compile-changelog-file.yml))
         -    [] Create a PR to bump version in source code with `GITHUB_TOKEN=<your_PAT_token> pnpm utils code-freeze version-bump -b release/9.9 9.9.0`
         -    [] Review (ensure PR CI-checks are passing) and merge the PR (ensure merge CI-checks are passing)
