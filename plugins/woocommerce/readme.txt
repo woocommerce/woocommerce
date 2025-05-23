@@ -585,7 +585,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Performance - Use as_has_scheduled_action() if function exists when scheduling DraftOrders clean up. [#56532](https://github.com/woocommerce/woocommerce/pull/56532)
 * Performance - WooCommerce status widget on dashboard now loads async [#56039](https://github.com/woocommerce/woocommerce/pull/56039)
 * Enhancement - List Square as a recommended provider for merchants selling offline in supported regions. [#58070](https://github.com/woocommerce/woocommerce/pull/58070)
-Enhancement - Add "Filter by sales channel" to the admin Orders page. [#57273](https://github.com/woocommerce/woocommerce/pull/57273)
+* Enhancement - Add "Filter by sales channel" to the admin Orders page. [#57273](https://github.com/woocommerce/woocommerce/pull/57273)
 * Enhancement - Add $email_object to the woocommerce_email_preview_placeholders filter [#57272](https://github.com/woocommerce/woocommerce/pull/57272)
 * Enhancement - Add permission validation for import steps [#57294](https://github.com/woocommerce/woocommerce/pull/57294)
 * Enhancement - Adds a filter to customise Core report email labels. [#56391](https://github.com/woocommerce/woocommerce/pull/56391)
