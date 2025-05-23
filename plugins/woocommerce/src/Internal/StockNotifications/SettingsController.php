@@ -96,13 +96,14 @@ class SettingsController extends \WC_Settings_Page {
 				),
 
 				array(
-					'title'         => __( 'Guest sign-up', 'woocommerce' ),
-					'desc'          => __( 'Customers must be logged in to sign up for stock notifications.', 'woocommerce' ),
-					'id'            => 'wc_bis_account_required',
-					'default'       => 'no',
-					'type'          => 'checkbox',
-					'desc_tip'      => __( 'When enabled, guests will be redirected to a login page to complete the sign-up process.', 'woocommerce' ),
-					'checkboxgroup' => 'start',
+					'title'           => __( 'Guest sign-up', 'woocommerce' ),
+					'desc'            => __( 'Customers must be logged in to sign up for stock notifications.', 'woocommerce' ),
+					'id'              => 'wc_bis_account_required',
+					'default'         => 'no',
+					'type'            => 'checkbox',
+					'desc_tip'        => __( 'When enabled, guests will be redirected to a login page to complete the sign-up process.', 'woocommerce' ),
+					'checkboxgroup'   => 'start',
+					'hide_if_checked' => 'option',
 				),
 
 				array(
@@ -113,18 +114,6 @@ class SettingsController extends \WC_Settings_Page {
 					'checkboxgroup'   => 'end',
 					'hide_if_checked' => 'yes',
 					'autoload'        => true,
-				),
-
-				array(
-					'title'             => __( 'Minimum stock quantity', 'woocommerce' ),
-					'desc'              => __( 'Stock quantity required to trigger stock notifications when restocking.', 'woocommerce' ),
-					'id'                => 'wc_bis_stock_threshold',
-					'default'           => 0,
-					'type'              => 'number',
-					'custom_attributes' => array(
-						'min'  => 0,
-						'step' => 1,
-					),
 				),
 
 				array(
@@ -166,7 +155,7 @@ class SettingsController extends \WC_Settings_Page {
 			);
 		}
 
-		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && 'yes' === get_option( 'wc_bis_allow_signups' ) ) {
 			wp_admin_notice(
 				sprintf(
 					/* translators: %s settings page link */
