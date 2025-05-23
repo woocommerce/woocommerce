@@ -335,8 +335,9 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @return string
 		 */
 		private function get_pos_store_name() {
+			$store_name = get_option( 'woocommerce_pos_store_name' );
 			return $this->format_string(
-				get_option( 'woocommerce_pos_store_name', PointOfSaleDefaultSettings::get_default_store_name() )
+				empty( $store_name ) ? PointOfSaleDefaultSettings::get_default_store_name() : $store_name
 			);
 		}
 
