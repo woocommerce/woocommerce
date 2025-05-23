@@ -550,6 +550,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Update Product Brands template name from 'Taxonomy Product Brand' to 'Products by Brand' [#57904](https://github.com/woocommerce/woocommerce/pull/57904)
 * Tweak - Update settings page design  * Lighter background color * Button style changes * Removed activity, finish setup, and help buttons [#55943](https://github.com/woocommerce/woocommerce/pull/55943)
 * Tweak - Update some queries for better linter compliance. [#57691](https://github.com/woocommerce/woocommerce/pull/57691)
+* Performance - Improve how available variations are fetched in ProductAvailabilityUtils and introduce has_available_variations function. [#58185](https://github.com/woocommerce/woocommerce/pull/58185)
 * Performance - Added caching to Tax Onboarding Task. [#56089](https://github.com/woocommerce/woocommerce/pull/56089)
 * Performance - Avoid initializing block pattern PHP classes unnecessarily in the frontend [#56642](https://github.com/woocommerce/woocommerce/pull/56642)
 * Performance - Cache order counts for use in the admin [#54034](https://github.com/woocommerce/woocommerce/pull/54034)
