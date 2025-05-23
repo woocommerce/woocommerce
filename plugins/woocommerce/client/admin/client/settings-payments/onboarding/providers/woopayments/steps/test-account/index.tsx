@@ -174,6 +174,7 @@ const TestAccountStep = () => {
 				currentStep?.status === 'failed'
 			) {
 				setStatus( 'initializing' );
+				setProgress( INIT_PROGRESS_START ); // Start at 10%
 
 				const cleanStepIfNeeded = async () => {
 					// We only need to clean the step if it has been retried or failed.
