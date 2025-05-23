@@ -40,14 +40,22 @@ store( 'woocommerce/mini-cart', {
 		},
 
 		get badgeIsVisible() {
-			const cartItemCount = wooStoreState.cart.items.length;
+			const cartHasItems = wooStoreState.cart.items.length;
 			const { productCountVisibility } = getContext< MiniCartContext >();
 
 			return (
 				productCountVisibility === 'always' ||
 				( productCountVisibility === 'greater_than_zero' &&
-					cartItemCount > 0 ) ||
-				false
+					cartHasItems > 0 )
+			);
+		},
+
+		get cartIsEmpty() {
+			return (
+				wooStoreState.cart.items.reduce(
+					( t, { quantity } ) => t + quantity,
+					0
+				) === 0
 			);
 		},
 

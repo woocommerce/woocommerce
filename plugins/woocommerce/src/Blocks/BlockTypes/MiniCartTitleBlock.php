@@ -45,15 +45,12 @@ class MiniCartTitleBlock extends AbstractInnerBlock {
 
 		ob_start();
 		?>
-		<h2 class="wp-block-woocommerce-mini-cart-title-block wc-block-mini-cart__title">
-			<span class="wp-block-woocommerce-mini-cart-title-label-block">Your cart</span>
-			<span class="wp-block-woocommerce-mini-cart-title-items-counter-block">
-				<?php
-					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					printf( $cart_item_text, $cart_item_count );
-				?>
-			</span>
-		</h2>
+		<div class="wp-block-woocommerce-mini-cart-title-block">
+			<?php
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo $content;
+			?>
+		</div>
 		<?php
 		return ob_get_clean();
 	}

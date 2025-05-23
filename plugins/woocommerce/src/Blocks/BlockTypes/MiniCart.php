@@ -460,7 +460,7 @@ class MiniCart extends AbstractBlock {
 		$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
 		$wrapper_classes          = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
 		$wrapper_styles           = $classes_styles['styles'];
-		$template_part_contents   = $this->get_template_part_contents();
+		$template_part_contents   = $this->get_template_part_contents( 'experimental-iapi-mini-cart' );
 
 		$cart            = $this->get_cart_instance();
 		$cart_item_count = $cart ? $cart->get_cart_contents_count() : 0;
@@ -527,18 +527,18 @@ class MiniCart extends AbstractBlock {
 	 *
 	 * @return string The contents of the template part.
 	 */
-	protected function get_template_part_contents() {
+	protected function get_template_part_contents( $template_name = 'mini-cart' ) {
 		$template_part_contents = '';
 
 		// Determine if we need to load the template part from the DB, the theme or WooCommerce in that order.
-		$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'mini-cart' ), 'wp_template_part' );
+		$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( $template_name ), 'wp_template_part' );
 		if ( is_countable( $templates_from_db ) && count( $templates_from_db ) > 0 ) {
 			$template_slug_to_load = $templates_from_db[0]->theme;
 		} else {
-			$theme_has_mini_cart   = BlockTemplateUtils::theme_has_template_part( 'mini-cart' );
+			$theme_has_mini_cart   = BlockTemplateUtils::theme_has_template_part( $template_name );
 			$template_slug_to_load = $theme_has_mini_cart ? get_stylesheet() : BlockTemplateUtils::PLUGIN_SLUG;
 		}
-		$template_part = get_block_template( $template_slug_to_load . '//mini-cart', 'wp_template_part' );
+		$template_part = get_block_template( $template_slug_to_load . '//' . $template_name, 'wp_template_part' );
 
 		if ( $template_part && ! empty( $template_part->content ) ) {
 			$template_part_contents = do_blocks( $template_part->content );
@@ -547,7 +547,7 @@ class MiniCart extends AbstractBlock {
 		if ( '' === $template_part_contents ) {
 			$template_part_contents = do_blocks(
 				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-				file_get_contents( Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/mini-cart.html' )
+				file_get_contents( Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $template_name . '.html' )
 			);
 		}
 
