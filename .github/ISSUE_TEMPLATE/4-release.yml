@@ -38,6 +38,7 @@ body:
         
         #### Get release artifact ready
 
+        -    [] Ensure minimally required WordPress and PHP versions are up-to-date
         -    [] Ensure all [CFEs](https://github.com/woocommerce/woocommerce/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22code%20freeze%20exception%22) for the target release version are addressed and merged
         -    [] Validate stable tag in `readme.txt` for the release branch and update if necessary
         -    [] Validate stable tag in `readme.txt` for the SVN `trunk` ([here](https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt))
