@@ -30,8 +30,6 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 
 		/**
 		 * Constructor.
-		 *
-		 * @param WC_Emails|null $emails The WC_Emails instance. Used for unit testing.
 		 */
 		public function __construct() {
 			$this->id             = 'customer_pos_completed_order';
