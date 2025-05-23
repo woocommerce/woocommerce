@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Initialize payment gateway logic for WooPayments API actions.

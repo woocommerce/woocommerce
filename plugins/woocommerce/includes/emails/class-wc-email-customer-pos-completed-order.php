@@ -49,7 +49,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Let shoppers know once their POS order is complete.', 'woocommerce' )
+				? __( 'Let customers know once their POS order is complete.', 'woocommerce' )
 				: __( 'Order complete emails are sent to customers when their POS orders are marked completed.', 'woocommerce' );
 
 			$this->manual = true;
@@ -354,8 +354,9 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @return string
 		 */
 		private function get_pos_store_name() {
+			$store_name = get_option( 'woocommerce_pos_store_name' );
 			return $this->format_string(
-				get_option( 'woocommerce_pos_store_name', PointOfSaleDefaultSettings::get_default_store_name() )
+				empty( $store_name ) ? PointOfSaleDefaultSettings::get_default_store_name() : $store_name
 			);
 		}
 
