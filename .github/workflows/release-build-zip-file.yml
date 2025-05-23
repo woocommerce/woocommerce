@@ -94,6 +94,7 @@ jobs:
   verify-release-versions:
     name: 'Verify release and stable tag versions'
     runs-on: ubuntu-latest
+    if: ${{ inputs.skip_verify == 'false' }}
     steps:
       - uses: actions/checkout@v4
 
