@@ -63,12 +63,6 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 			}, new Set< string >() )
 		).map( ( recipient ) => ( { value: recipient, label: recipient } ) );
 
-		// // Add "Customers" as a recipient option.
-		// recipientElements.push( {
-		// 	value: 'customer',
-		// 	label: __( 'Customers', 'woocommerce' ),
-		// } );
-
 		return [
 			{
 				id: 'title',
