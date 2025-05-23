@@ -62,6 +62,9 @@ const MAX_INITIAL_PROGRESS = 90; // Cap progress at 90% for the initial phase
 const MAX_EXTENDED_PHASE_1_PROGRESS = 96; // Cap progress at 96% for the extended phase 1
 const INITIAL_PHASE_INCREMENT = 5; // Increment progress by 20% for the initial phase
 const EXTENDED_PHASE_1_INCREMENT = 1; // Increment progress by 1% for the extended phase 1
+const INIT_PROGRESS_START = 10; // Start progress at 10% during init
+const INIT_PROGRESS_INCREMENT = 2; // Increment by 2% every second during init
+const INIT_PROGRESS_MAX = 30; // Cap progress at 30% during init
 
 // Status types for the component
 type Status =
