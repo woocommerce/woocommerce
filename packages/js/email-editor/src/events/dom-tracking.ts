@@ -96,6 +96,11 @@ export function initDomTracking() {
 			},
 			selector: '.editor-post-publish-button',
 		},
+		// Header save draft button clicked
+		{
+			track: 'header_save_email_button_clicked',
+			selector: '.editor-post-saved-state.is-saving',
+		},
 	];
 
 	document.addEventListener( 'click', trackMatchingEvents );
