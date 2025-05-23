@@ -2,18 +2,18 @@
 
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Internal\StockNotifications;
+namespace Automattic\WooCommerce\Internal\StockNotifications\Emails;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
-use Automattic\WooCommerce\Internal\StockNotifications\Emails\StockNotificationEmail;
-use Automattic\WooCommerce\Internal\StockNotifications\Emails\StockNotificationConfirmEmail;
-use Automattic\WooCommerce\Internal\StockNotifications\Emails\StockNotificationVerifyEmail;
-
+use Automattic\WooCommerce\Internal\StockNotifications\Emails\CustomerStockNotificationEmail;
+use Automattic\WooCommerce\Internal\StockNotifications\Emails\CustomerStockNotificationConfirmEmail;
+use Automattic\WooCommerce\Internal\StockNotifications\Emails\CustomerStockNotificationVerifyEmail;
+use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailTemplatesController;
 /**
  * Emails manager.
  */
-class EmailsController {
+class EmailManager {
 
 	/**
 	 * List of all core email IDs.
@@ -21,9 +21,9 @@ class EmailsController {
 	 * @var array
 	 */
 	public static $email_ids = array(
-		'stock_notification_receive',
-		'stock_notification_confirm',
-		'stock_notification_verify',
+		'customer_stock_notification',
+		'customer_stock_notification_confirm',
+		'customer_stock_notification_verify',
 	);
 
 	/**
@@ -38,6 +38,9 @@ class EmailsController {
 		// Setup email hooks & handlers.
 		add_filter( 'woocommerce_email_classes', array( $this, 'email_classes' ) );
 
+		// Add "transactional" emails.
+		add_action( 'woocommerce_email_actions', array( $this, 'add_transactional_emails' ) );
+
 		// Setup styles.
 		add_filter( 'woocommerce_email_styles', array( $this, 'add_stylesheets' ), 10, 2 );
 
@@ -46,7 +49,11 @@ class EmailsController {
 		add_filter( 'woocommerce_email_preview_email_content_setting_ids', array( $this, 'add_intro_content_to_preview_settings' ), 10, 2 );
 
 		// Restore customer's context while rendering the emails.
-		add_action( 'woocommerce_email_stock_notification_product_before_title', array( $this, 'maybe_restore_customer_data' ), 9 );
+		add_action( 'woocommerce_email_stock_notification_product', array( $this, 'maybe_restore_customer_tax_location_data' ), 9 );
+
+		// Register email templates.
+		$container = wc_get_container();
+		$container->get( EmailTemplatesController::class );
 	}
 
 	/**
@@ -56,11 +63,34 @@ class EmailsController {
 	 * @return array
 	 */
 	public function email_classes( $emails ) {
-		$emails['WC_Email_Stock_Notification_Receive'] = new StockNotificationEmail();
-		$emails['WC_Email_Stock_Notification_Confirm'] = new StockNotificationConfirmEmail();
-		$emails['WC_Email_Stock_Notification_Verify']  = new StockNotificationVerifyEmail();
+		$emails['WC_Email_Customer_Stock_Notification']         = new CustomerStockNotificationEmail();
+		$emails['WC_Email_Customer_Stock_Notification_Verify']  = new CustomerStockNotificationVerifyEmail();
+		$emails['WC_Email_Customer_Stock_Notification_Confirm'] = new CustomerStockNotificationConfirmEmail();
 
 		return $emails;
+	}
+
+	/**
+	 * Adds transactional emails.
+	 *
+	 * Stock notifications are sent via a custom AS job.
+	 * Additionally, two transactional emails are dispatched during the signup and verification processes,
+	 * which need to be included in the actions array to support deferred email functionality.
+	 *
+	 * @hook woocommerce_defer_transactional_emails
+	 *
+	 * @param array $actions The list of actions.
+	 * @return array
+	 */
+	public function add_transactional_emails( $actions ) {
+		if ( ! is_array( $actions ) ) {
+			return $actions;
+		}
+
+		$actions[] = 'woocommerce_customer_stock_notification_confirm';
+		$actions[] = 'woocommerce_customer_stock_notification_verify';
+
+		return $actions;
 	}
 
 	/**
@@ -69,7 +99,7 @@ class EmailsController {
 	 * @param  Notification $notification The notification object.
 	 * @return void
 	 */
-	public function maybe_restore_customer_data( $notification ) {
+	public function maybe_restore_customer_tax_location_data( $notification ) {
 
 		// No need if stores displaying price excluding tax.
 		if ( 'incl' !== get_option( 'woocommerce_tax_display_shop' ) ) {
@@ -247,36 +277,10 @@ class EmailsController {
 	 * @param Notification $notification The notification object.
 	 * @return void
 	 */
-	public function send_stock_notification_email( $notification ) {
+	public function send_stock_notification_email( Notification $notification ) {
 		$emails = WC()->mailer()->get_emails();
 		if ( isset( $emails['WC_Email_Stock_Notification_Receive'] ) ) {
 			$emails['WC_Email_Stock_Notification_Receive']->trigger( $notification );
-		}
-	}
-
-	/**
-	 * Send a stock notification confirm email.
-	 *
-	 * @param Notification $notification The notification object.
-	 * @return void
-	 */
-	public function send_stock_notification_confirm_email( $notification ) {
-		$emails = WC()->mailer()->get_emails();
-		if ( isset( $emails['WC_Email_Stock_Notification_Confirm'] ) ) {
-			$emails['WC_Email_Stock_Notification_Confirm']->trigger( $notification );
-		}
-	}
-
-	/**
-	 * Send a stock notification verify email.
-	 *
-	 * @param Notification $notification The notification object.
-	 * @return void
-	 */
-	public function send_stock_notification_verify_email( $notification ) {
-		$emails = WC()->mailer()->get_emails();
-		if ( isset( $emails['WC_Email_Stock_Notification_Verify'] ) ) {
-			$emails['WC_Email_Stock_Notification_Verify']->trigger( $notification );
 		}
 	}
 }

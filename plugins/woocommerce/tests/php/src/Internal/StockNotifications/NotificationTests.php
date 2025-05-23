@@ -31,4 +31,87 @@ class NotificationTests extends \WC_Unit_Test_Case {
 		$notification_product = $notification->get_product();
 		$this->assertEquals( $product2->get_id(), $notification_product->get_id() );
 	}
+
+	/**
+	 * Test the get_product_formatted_variation_list method.
+	 */
+	public function test_get_product_formatted_variation_list() {
+
+		// A mix of posted and variation attributes similar to how are formatted in WC_Cart::add_to_cart().
+		// "attribute_[name]" for posted variation attributes and "attribute_pa_[name]" for product attributes (any on the variation).
+		$posted_attributes = array(
+			'attribute_size'      => 'small',
+			'attribute_pa_colour' => 'red', // Any attribute on the variation.
+		);
+
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		$variation_id     = $variable_product->get_children()[0]; // This only uses the "size" as variation attribute.
+
+		// 1. Test that the variable parent returns an empty string.
+		$notification = new Notification();
+		$notification->set_product_id( $variable_product->get_id() );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->save();
+		$formatted_variation_attributes = $notification->get_product_formatted_variation_list( true );
+		$this->assertEquals( '', $formatted_variation_attributes );
+
+		// 2. Test that the variation returns the formatted variation attributes.
+		$notification->set_product_id( $variation_id );
+		$notification->save();
+		$formatted_variation_attributes = $notification->get_product_formatted_variation_list( true );
+		$this->assertEquals( 'size: small', $formatted_variation_attributes );
+
+		// 3. Test that the variation returns the formatted variation attributes with posted attributes (any attribute on the variation).
+		$notification->add_meta_data( 'posted_attributes', $posted_attributes );
+		$notification->save();
+		$formatted_variation_attributes = $notification->get_product_formatted_variation_list( true );
+		$this->assertEquals( 'size: small, colour: red', $formatted_variation_attributes );
+		// 3.1 Test that the variation returns the formatted variation attributes with posted attributes (any attribute on the variation) in HTML table.
+		$formatted_variation_attributes = $notification->get_product_formatted_variation_list( false, 'email' );
+		$this->assertEquals( '<table class="variation"><tr><td>size:</td></tr><tr><th>small</th></tr><tr><td>colour:</td></tr><tr><th>red</th></tr></table>', $formatted_variation_attributes );
+	}
+
+	/**
+	 * Test the get_product_permalink method.
+	 */
+	public function test_get_product_permalink() {
+		$product      = \WC_Helper_Product::create_simple_product();
+		$notification = new Notification();
+		$notification->set_product_id( $product->get_id() );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->save();
+
+		$permalink = $notification->get_product_permalink();
+		$this->assertEquals( $product->get_permalink(), $permalink );
+
+		$variable_product  = \WC_Helper_Product::create_variation_product();
+		$variation_id      = $variable_product->get_children()[0]; // This only uses the "size" as variation attribute.
+		$variation_product = wc_get_product( $variation_id );
+		$notification->set_product_id( $variation_id );
+		$notification->save();
+		$permalink = $notification->get_product_permalink();
+		$this->assertEquals( $variation_product->get_permalink(), $permalink );
+	}
+
+	/**
+	 * Test the get_product_name method.
+	 */
+	public function test_get_product_name() {
+		$product      = \WC_Helper_Product::create_simple_product();
+		$notification = new Notification();
+		$notification->set_product_id( $product->get_id() );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->save();
+
+		$product_name = $notification->get_product_name();
+		$this->assertEquals( $product->get_name(), $product_name );
+
+		$variable_product  = \WC_Helper_Product::create_variation_product();
+		$variation_id      = $variable_product->get_children()[0]; // This only uses the "size" as variation attribute.
+		$variation_product = wc_get_product( $variation_id );
+		$notification->set_product_id( $variation_id );
+		$notification->save();
+		$product_name = $notification->get_product_name();
+		$this->assertEquals( $variation_product->get_name(), $product_name );
+	}
 }

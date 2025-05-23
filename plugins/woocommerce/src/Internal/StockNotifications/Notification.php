@@ -370,40 +370,40 @@ class Notification extends \WC_Data {
 	}
 
 	/**
-	 * Get product formatted variation list.
+	 * Wrapper of the `wc_get_formatted_variation` function.
+	 *
+	 * This function retrieves the formatted variation attributes for the notification product in a flat format.
+	 * It is also used to display these attributes in the notification email using an HTML table.
 	 *
 	 * @param  bool   $flat Flatten the list.
 	 * @param  string $context Context.
 	 * @return string
 	 */
-	public function get_product_formatted_variation_list( $flat = false, $context = 'view' ) {
+	public function get_product_formatted_variation_list( bool $flat = false, string $context = 'view' ) {
 
 		$product = $this->get_product();
-		if ( ! $product ) {
-			return false;
+		if ( ! $product || ! $product->is_type( array( 'variation' ) ) ) {
+			return '';
 		}
 
-		$formatted_variation_list = wc_get_formatted_variation( $product, $flat, true, true );
+		// Replace list with custom data.
+		$attributes = $this->get_meta( 'posted_attributes' );
+		if ( ! $attributes ) {
+			$attributes = $product->get_attributes();
+		}
 
-		if ( $product->is_type( 'variation' ) ) {
+		$attrs = array();
+		foreach ( $attributes as $key => $value ) {
 
-			// Replace list with custom data.
-			$attributes = $this->get_meta( 'posted_attributes' );
-			if ( $attributes ) {
-				$attrs = array();
-				foreach ( $attributes as $key => $value ) {
-
-					if ( 0 === strpos( $key, 'attribute_pa_' ) ) {
-						$attrs[ str_replace( 'attribute_', '', $key ) ] = $value;
-					} else {
-						// By pass converting global product attributes.
-						$attrs[ wc_attribute_label( str_replace( 'attribute_', '', $key ), $product ) ] = $value;
-					}
-				}
-
-				$formatted_variation_list = wc_get_formatted_variation( $attrs, $flat, true, true );
+			if ( 0 === strpos( $key, 'attribute_pa_' ) ) {
+				$attrs[ str_replace( 'attribute_', '', $key ) ] = $value;
+			} else {
+				// By pass converting global product attributes.
+				$attrs[ wc_attribute_label( str_replace( 'attribute_', '', $key ), $product ) ] = $value;
 			}
 		}
+
+		$formatted_variation_list = wc_get_formatted_variation( $attrs, $flat, true, true );
 
 		if ( 'email' === $context ) {
 
@@ -433,11 +433,11 @@ class Notification extends \WC_Data {
 
 		$product = $this->get_product();
 		if ( ! $product ) {
-			return false;
+			return '';
 		}
 
 		if ( $product->is_type( 'variation' ) && ! empty( $this->get_meta( 'posted_attributes' ) ) ) {
-			return $product->get_permalink( array( 'variation' => $this->get_meta( 'posted_attributes' ) ) );
+			return $product->get_permalink( array( 'item_meta_array' => $this->get_meta( 'posted_attributes' ) ) );
 		} else {
 			return $product->get_permalink();
 		}
@@ -451,7 +451,7 @@ class Notification extends \WC_Data {
 	public function get_product_name() {
 		$product = $this->get_product();
 		if ( ! $product ) {
-			return false;
+			return '';
 		}
 
 		return $product->get_parent_id() ? $product->get_name() : $product->get_title();

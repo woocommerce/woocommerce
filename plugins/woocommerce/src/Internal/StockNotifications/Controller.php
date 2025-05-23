@@ -5,8 +5,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
-use Automattic\WooCommerce\Internal\StockNotifications\TemplatesController;
-use Automattic\WooCommerce\Internal\StockNotifications\EmailsController;
+use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
+use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailTemplatesController;
 use Automattic\WooCommerce\Internal\StockNotifications\SettingsController;
 
 /**
@@ -36,8 +36,7 @@ class Controller {
 		add_filter( 'woocommerce_get_settings_pages', array( $this, 'register_settings' ) );
 
 		$container = wc_get_container();
-		$container->get( TemplatesController::class );
-		$container->get( EmailsController::class );
+		$container->get( EmailManager::class );
 	}
 
 	/**

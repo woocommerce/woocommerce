@@ -11,20 +11,20 @@ use WC_Email;
 /**
  * Back in stock notification email class.
  */
-class StockNotificationVerifyEmail extends WC_Email {
+class CustomerStockNotificationEmail extends WC_Email {
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id             = 'stock_notification_verify';
+		$this->id             = 'customer_stock_notification';
 		$this->customer_email = true;
 
-		$this->title       = __( 'Back in stock sign-up verification', 'woocommerce' );
-		$this->description = __( 'Verification e-mail sent to customers, as part of the double opt-in sign-up process.', 'woocommerce' );
+		$this->title       = __( 'Back in stock notification', 'woocommerce' );
+		$this->description = __( 'Email sent to signed-up customers when a product is back in stock.', 'woocommerce' );
 
-		$this->template_html  = 'emails/customer-stock-notification-verify.php';
-		$this->template_plain = 'emails/plain/customer-stock-notification-verify.php';
+		$this->template_html  = 'emails/customer-stock-notification.php';
+		$this->template_plain = 'emails/plain/customer-stock-notification.php';
 		$this->placeholders   = array(
 			'{product_name}' => '',
 			'{site_title}'   => '',
@@ -40,7 +40,7 @@ class StockNotificationVerifyEmail extends WC_Email {
 	 * @return string
 	 */
 	public function get_default_subject() {
-		return __( 'Join the "{product_name}" waitlist.', 'woocommerce' );
+		return __( '"{product_name}" is back in stock!', 'woocommerce' );
 	}
 
 	/**
@@ -49,7 +49,7 @@ class StockNotificationVerifyEmail extends WC_Email {
 	 * @return string
 	 */
 	public function get_default_heading() {
-		return __( 'Confirm sign-up', 'woocommerce' );
+		return __( 'It\'s back in stock!', 'woocommerce' );
 	}
 
 	/**
@@ -58,7 +58,7 @@ class StockNotificationVerifyEmail extends WC_Email {
 	 * @return string
 	 */
 	public function get_default_intro_content() {
-		return __( 'Please follow the link below to complete the sign-up process and join the "{product_name}" waitlist.', 'woocommerce' );
+		return __( 'Great news: "{product_name}" is now available for purchase.', 'woocommerce' );
 	}
 
 	/**
@@ -151,20 +151,41 @@ class StockNotificationVerifyEmail extends WC_Email {
 		 * @param Notification $notification The notification object.
 		 * @param WC_Product $product The product object.
 		 */
-		$verification_button_text = apply_filters(
-			'woocommerce_email_stock_notification_verify_button_text',
-			_x( 'Confirm', 'Stock Notification confirm notification', 'woocommerce' ),
+		$button_text = apply_filters( 'woocommerce_email_stock_notification_button_text', _x( 'Shop Now', 'Email notification', 'woocommerce' ), $notification, $product );
+
+		$query_args = array(
+			'utm_source' => 'back-in-stock-notifications',
+			'utm_medium' => 'email',
+		);
+
+		/**
+		 * Filter the button href.
+		 *
+		 * @since 0.0.0
+		 *
+		 * @param string $button_href The button href.
+		 * @param Notification $notification The notification object.
+		 * @param WC_Product $product The product object.
+		 */
+		$button_link = apply_filters(
+			'woocommerce_email_stock_notification_button_link',
+			add_query_arg(
+				$query_args,
+				$notification->get_product_permalink()
+			),
 			$notification,
 			$product
 		);
 
-		$verification_link    = '';
-		$expiration_threshold = '30m';
+		$unsubscribe_link = '';
+		$user             = get_user_by( 'email', $notification->get_user_email() );
+		$is_guest         = ! is_a( $user, 'WP_User' );
 
 		return array(
-			'verification_link'                 => $verification_link,
-			'verification_button_text'          => $verification_button_text,
-			'verification_expiration_threshold' => $expiration_threshold,
+			'button_text'      => $button_text,
+			'button_link'      => $button_link,
+			'unsubscribe_link' => $unsubscribe_link,
+			'is_guest'         => $is_guest,
 		);
 	}
 

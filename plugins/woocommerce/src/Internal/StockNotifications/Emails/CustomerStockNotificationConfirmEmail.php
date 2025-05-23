@@ -11,24 +11,26 @@ use WC_Email;
 /**
  * Back in stock notification email class.
  */
-class StockNotificationEmail extends WC_Email {
+class CustomerStockNotificationConfirmEmail extends WC_Email {
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id             = 'stock_notification_receive';
+		$this->id             = 'customer_stock_notification_confirm';
 		$this->customer_email = true;
 
-		$this->title       = __( 'Back in stock notification', 'woocommerce' );
-		$this->description = __( 'Email sent to signed-up customers when a product is back in stock.', 'woocommerce' );
+		$this->title       = __( 'Back in stock sign-up confirmation', 'woocommerce' );
+		$this->description = __( 'Email sent to customers after completing the sign-up process successfully.', 'woocommerce' );
 
-		$this->template_html  = 'emails/customer-stock-notification.php';
-		$this->template_plain = 'emails/plain/customer-stock-notification.php';
+		$this->template_html  = 'emails/customer-stock-notification-confirm.php';
+		$this->template_plain = 'emails/plain/customer-stock-notification-confirm.php';
 		$this->placeholders   = array(
 			'{product_name}' => '',
 			'{site_title}'   => '',
 		);
+
+		add_action( 'woocommerce_email_stock_notification_confirm_notification', array( $this, 'trigger' ), 10, 1 );
 
 		// Call parent constructor.
 		parent::__construct();
@@ -40,7 +42,7 @@ class StockNotificationEmail extends WC_Email {
 	 * @return string
 	 */
 	public function get_default_subject() {
-		return __( '"{product_name}" is back in stock!', 'woocommerce' );
+		return __( 'You have joined the "{product_name}" waitlist.', 'woocommerce' );
 	}
 
 	/**
@@ -49,7 +51,7 @@ class StockNotificationEmail extends WC_Email {
 	 * @return string
 	 */
 	public function get_default_heading() {
-		return __( 'It\'s back in stock!', 'woocommerce' );
+		return __( 'Sign-up successful', 'woocommerce' );
 	}
 
 	/**
@@ -58,7 +60,7 @@ class StockNotificationEmail extends WC_Email {
 	 * @return string
 	 */
 	public function get_default_intro_content() {
-		return __( 'Great news: "{product_name}" is now available for purchase.', 'woocommerce' );
+		return __( 'Thanks for joining the waitlist! You will hear from us again when "{product_name}" is back in stock.', 'woocommerce' );
 	}
 
 	/**
@@ -138,52 +140,13 @@ class StockNotificationEmail extends WC_Email {
 	 * @return array
 	 */
 	private function get_additional_template_args(): array {
-
 		$notification = $this->object;
-		$product      = $notification->get_product();
-
-		/**
-		 * Filter the button text.
-		 *
-		 * @since 0.0.0
-		 *
-		 * @param string $button_text The button text.
-		 * @param Notification $notification The notification object.
-		 * @param WC_Product $product The product object.
-		 */
-		$button_text = apply_filters( 'woocommerce_email_stock_notification_button_text', _x( 'Shop Now', 'Email notification', 'woocommerce' ), $notification, $product );
-
-		$query_args = array(
-			'utm_source' => 'back-in-stock-notifications',
-			'utm_medium' => 'email',
-		);
-
-		/**
-		 * Filter the button href.
-		 *
-		 * @since 0.0.0
-		 *
-		 * @param string $button_href The button href.
-		 * @param Notification $notification The notification object.
-		 * @param WC_Product $product The product object.
-		 */
-		$button_link = apply_filters(
-			'woocommerce_email_stock_notification_button_link',
-			add_query_arg(
-				$query_args,
-				$notification->get_product_permalink()
-			),
-			$notification,
-			$product
-		);
 
 		$unsubscribe_link = '';
 		$user             = get_user_by( 'email', $notification->get_user_email() );
 		$is_guest         = ! is_a( $user, 'WP_User' );
 
 		return array(
-			'button_text'      => $button_text,
-			'button_link'      => $button_link,
 			'unsubscribe_link' => $unsubscribe_link,
 			'is_guest'         => $is_guest,
 		);

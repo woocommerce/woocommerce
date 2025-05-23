@@ -2,14 +2,14 @@
 
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Internal\StockNotifications;
+namespace Automattic\WooCommerce\Internal\StockNotifications\Emails;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 
 /**
- * Emails controller.
+ * Email templates controller.
  */
-class TemplatesController {
+class EmailTemplatesController {
 
 	/**
 	 * Initialize the class.
@@ -19,13 +19,15 @@ class TemplatesController {
 	 * @return void
 	 */
 	final public function init() {
-		add_action( 'init', array( $this, 'add_email_template_hooks' ) );
+		add_action( 'init', array( $this, 'register_template_hooks' ) );
 	}
 
 	/**
 	 * Add template hooks.
+	 *
+	 * @internal
 	 */
-	public function add_email_template_hooks() {
+	public function register_template_hooks() {
 		add_action( 'woocommerce_email_stock_notification_product', array( $this, 'email_product_image' ), 10, 3 );
 		add_action( 'woocommerce_email_stock_notification_product', array( $this, 'email_product_title' ), 20, 3 );
 		add_action( 'woocommerce_email_stock_notification_product', array( $this, 'email_product_attributes' ), 30, 3 );
