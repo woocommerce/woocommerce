@@ -95,8 +95,8 @@ jobs:
             core.setOutput('current_version', `${major}.${minor}`);
             core.setOutput('previous_version', previousVersion);
 
-  count-commits:
-    name: Count commits between releases
+  count-commits-and-contributors:
+    name: Count commits and contributors between releases
     needs: extract-versions
     runs-on: ubuntu-latest
     steps:
@@ -105,8 +105,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Count commits between releases
-        id: count-commits
+      - name: Count
         run: |
           CURRENT_BRANCH="origin/release/${{ needs.extract-versions.outputs.current_version }}"
           PREVIOUS_BRANCH="origin/release/${{ needs.extract-versions.outputs.previous_version }}"
