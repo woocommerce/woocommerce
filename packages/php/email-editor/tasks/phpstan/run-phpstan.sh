@@ -29,13 +29,18 @@ fi
 echo "▶️ Running PHPStan with config: $CONFIG_FILE"
 vendor/bin/phpstan analyse -c "$CONFIG_FILE" --memory-limit=2G
 
-# Check for --cleanup flag
+# Clean up PHPStan directories by default unless --skip-cleanup is specified
+CLEANUP=true
 for arg in "$@"; do
-  if [ "$arg" = "--cleanup" ]; then
-    echo "🧹 Cleaning up PHPStan directories."
-    rm -rf vendor/ temp/
+  if [ "$arg" = "--skip-cleanup" ]; then
+    CLEANUP=false
     break
   fi
 done
+
+if [ "$CLEANUP" = true ]; then
+  echo "🧹 Cleaning up PHPStan directories."
+  rm -rf vendor/ temp/
+fi
 
 echo "✅ PHPStan completed successfully."

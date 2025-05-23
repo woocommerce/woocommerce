@@ -19,8 +19,16 @@ composer run test:unit -- [path_to_tests]          # runs a single unit test or 
 composer run test:integration                      # runs all the integrations tests
 composer run test:integration -- [path_to_tests]   # run a single integration test or a directory of tests
 composer code-style                                # checks the code style
-composer phpstan:php8                              # PHP static analysis with PHPStan with PHP 8.4
-composer phpstan:php7                              # PHP static analysis with PHPStan with PHP 7.4
+```
+
+## PHPStan Commands
+
+The following commands are available via pnpm for running PHP static analysis:
+
+```bash
+pnpm run phpstan [--skip-cleanup]                  # PHP static analysis with PHPStan with PHP 8.4. When skip-cleanup is used the command does not delete installed dependencies.
+pnpm run phpstan:php8 [--skip-cleanup]             # Alias for the command `phpstan`
+pnpm run phpstan:php7 [--skip-cleanup]             # PHP static analysis with PHPStan with PHP 7.4
 ```
 
 Example:
@@ -42,12 +50,12 @@ Please avoid using MailPoet-specific services and modules in the Email editor pa
 
 #### Content Renderer
 
-- Responsible for rendering saved template + email content to HTML or email clients
-- Flow is Preprocessors > BlocksRenderer > Postprocessors
+-   Responsible for rendering saved template + email content to HTML or email clients
+-   Flow is Preprocessors > BlocksRenderer > Postprocessors
 
 #### Root Renderer.php
 
-- Takes the rendered content html and places it into email HTML template template-canvas.php (We have too many items we call "template" I know 🙁)
+-   Takes the rendered content html and places it into email HTML template template-canvas.php (We have too many items we call "template" I know 🙁)
 
 ### Integrations
 
@@ -55,7 +63,7 @@ Please avoid using MailPoet-specific services and modules in the Email editor pa
 
 ## Known rendering issues
 
-- In some (not all) Outlook versions the width of columns is not respected. The columns will be rendered with the full width.
+-   In some (not all) Outlook versions the width of columns is not respected. The columns will be rendered with the full width.
 
 ## Actions and Filters
 
