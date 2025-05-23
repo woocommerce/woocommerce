@@ -81,6 +81,21 @@ export function initDomTracking() {
 				'Options'
 			) }"]`,
 		},
+		// Header save button clicked
+		{
+			track: ( target ) => {
+				if (
+					// eslint-disable-next-line @wordpress/i18n-text-domain
+					( target.textContent === __( 'Save' ) &&
+						target.getAttribute( 'aria-disabled' ) === 'false' ) ||
+					// eslint-disable-next-line @wordpress/i18n-text-domain
+					target.textContent === __( 'Saving…' )
+				) {
+					recordEvent( 'header_save_all_button_clicked' );
+				}
+			},
+			selector: '.editor-post-publish-button',
+		},
 	];
 
 	document.addEventListener( 'click', trackMatchingEvents );
