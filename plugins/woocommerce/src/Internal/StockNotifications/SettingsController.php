@@ -89,7 +89,7 @@ class SettingsController extends \WC_Settings_Page {
 				array(
 					'title'   => __( 'Allow sign-ups', 'woocommerce' ),
 					'desc'    => __( 'Let customers sign up to be notified when products in your store are restocked.', 'woocommerce' ),
-					'id'      => 'wc_bis_allow_signups',
+					'id'      => 'woocommerce_back_in_stock_allow_signups',
 					'default' => 'no',
 					'type'    => 'checkbox',
 				),
@@ -97,7 +97,7 @@ class SettingsController extends \WC_Settings_Page {
 				array(
 					'title'   => __( 'Require double opt-in to sign up', 'woocommerce' ),
 					'desc'    => __( 'To complete the sign-up process, customers must follow a verification link sent to their e-mail after submitting the sign-up form.', 'woocommerce' ),
-					'id'      => 'wc_bis_double_opt_in_required',
+					'id'      => 'woocommerce_back_in_stock_require_double_opt_in',
 					'default' => 'no',
 					'type'    => 'checkbox',
 				),
@@ -105,7 +105,7 @@ class SettingsController extends \WC_Settings_Page {
 				array(
 					'title'           => __( 'Guest sign-up', 'woocommerce' ),
 					'desc'            => __( 'Customers must be logged in to sign up for stock notifications.', 'woocommerce' ),
-					'id'              => 'wc_bis_account_required',
+					'id'              => 'woocommerce_back_in_stock_require_account',
 					'default'         => 'no',
 					'type'            => 'checkbox',
 					'desc_tip'        => __( 'When enabled, guests will be redirected to a login page to complete the sign-up process.', 'woocommerce' ),
@@ -115,7 +115,7 @@ class SettingsController extends \WC_Settings_Page {
 
 				array(
 					'desc'            => __( 'Create an account when guests sign up for stock notifications.', 'woocommerce' ),
-					'id'              => 'wc_bis_create_new_account_on_registration',
+					'id'              => 'woocommerce_back_in_stock_create_account_on_signup',
 					'default'         => 'no',
 					'type'            => 'checkbox',
 					'checkboxgroup'   => 'end',
@@ -147,7 +147,7 @@ class SettingsController extends \WC_Settings_Page {
 			return;
 		}
 
-		if ( 'no' === get_option( 'woocommerce_registration_generate_password', 'no' ) && 'yes' === get_option( 'wc_bis_create_new_account_on_registration', 'no' ) ) {
+		if ( 'no' === get_option( 'woocommerce_registration_generate_password', 'no' ) && 'yes' === get_option( 'woocommerce_back_in_stock_create_account_on_signup', 'no' ) ) {
 			wp_admin_notice(
 				sprintf(
 					/* translators: %s settings page link */
@@ -162,7 +162,7 @@ class SettingsController extends \WC_Settings_Page {
 			);
 		}
 
-		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && 'yes' === get_option( 'wc_bis_allow_signups' ) ) {
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && 'yes' === get_option( 'woocommerce_back_in_stock_allow_signups' ) ) {
 			wp_admin_notice(
 				sprintf(
 					/* translators: %s settings page link */
