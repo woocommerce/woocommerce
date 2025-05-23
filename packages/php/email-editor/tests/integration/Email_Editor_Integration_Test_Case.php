@@ -76,11 +76,13 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 	/**
 	 * Get a service from the DI container.
 	 *
-	 * @template T
-	 * @param class-string<T> $id The service ID.
-	 * @param array           $overrides The properties to override.
+	 * @template T of object
+	 * @param string $id The service ID.
+	 * @param array  $overrides The properties to override.
+	 * @return T
+	 * @phpstan-param class-string<T> $id The service ID.
 	 */
-	public function getServiceWithOverrides( $id, array $overrides ) {
+	public function getServiceWithOverrides( string $id, array $overrides ): object {
 		$instance = $this->di_container->get( $id );
 
 		foreach ( $overrides as $property => $value ) {

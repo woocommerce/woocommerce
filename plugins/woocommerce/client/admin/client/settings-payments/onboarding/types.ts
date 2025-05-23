@@ -105,6 +105,7 @@ export interface WooPaymentsProviderOnboardingStep {
 			industry_to_mcc: Record< string, string >;
 			mccs_display_tree: MccsDisplayTreeItem;
 			available_countries: Record< string, string >;
+			location: string;
 		};
 		self_assessment: Record< string, string >;
 		sub_steps: Record<
@@ -140,4 +141,6 @@ export interface OnboardingContextType {
 	) => WooPaymentsProviderOnboardingStep | undefined;
 	refreshStoreData: () => void;
 	closeModal: () => void;
+	justCompletedStepId: string | null;
+	setJustCompletedStepId: ( stepId: string ) => void;
 }

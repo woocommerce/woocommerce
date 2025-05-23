@@ -91,3 +91,7 @@ Available READMe files for the WooCommerce Beta Tested plugin:
 - [`Root README`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-beta-tester/README.md)
 - [`src/tools`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-beta-tester/src/tools/README.md)
 - [`userscripts`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-beta-tester/userscripts/README.md)
+
+Available READMe files for the WooCommerce Blueprint package:
+
+- [`Root README`](https://github.com/woocommerce/woocommerce/blob/trunk/packages/php/blueprint/README.md)

@@ -37,14 +37,9 @@ class Templates_Registry {
 	 * @return void
 	 */
 	public function register( Template $template ): void {
-		// The function was added in WordPress 6.7. We can remove this check after we drop support for WordPress 6.6.
-		if ( ! function_exists( 'register_block_template' ) ) {
-			return;
-		}
-
 		if ( ! \WP_Block_Templates_Registry::get_instance()->is_registered( $template->get_name() ) ) {
 			// skip registration if the template was already registered.
-			register_block_template(
+			$result                                   = register_block_template(
 				$template->get_name(),
 				array(
 					'title'       => $template->get_title(),
