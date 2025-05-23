@@ -478,15 +478,6 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 
 		// Replace the href so you can see the url on hover.
 		item.href = href;
-
-		item.onclick = ( e ) => {
-			if ( e.ctrlKey || e.metaKey ) {
-				return;
-			}
-
-			e.preventDefault();
-			getHistory().push( href );
-		};
 	}
 }
 
