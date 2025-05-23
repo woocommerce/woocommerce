@@ -95,7 +95,7 @@ jobs:
     name: 'Verify release and stable tag versions'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Fetch and parse files with versions
         run: |
@@ -103,16 +103,16 @@ jobs:
             # Verify: name as per `release/X.X`
           
             # Check: should match (e.g. Stable tag: 9.8.5)
-            branch_stable_version=$( cat plugins/woocommerce/readme.txt -O /dev/stdout |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
+            branch_stable_version=$( cat plugins/woocommerce/readme.txt |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
             svn_stable_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt -O /dev/stdout |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
           
             # Check: should NOT match (e.g. Version: 9.9.0-beta.1)
             # Check: branch version should start with X.X as per `release/X.X`
-            branch_plugin_version=$( cat plugins/woocommerce/woocommerce.php -O /dev/stdout |  grep -oP '(?<=Version: )(.+)' | head -n1 )
+            branch_plugin_version=$( cat plugins/woocommerce/woocommerce.php |  grep -oP '(?<=Version: )(.+)' | head -n1 )
             svn_plugin_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/woocommerce.php -O /dev/stdout |  grep -oP '(?<=Version: )(.+)' | head -n1 )
 
             # Check: if final release, changelog entry must present (e.g. = 9.8.4 2025-05-06 =)
-            branch_changelog_version=$( cat changelog.txt -O /dev/stdout | grep -oP '\d\.\d\.\d' | head -n1 )
+            branch_changelog_version=$( cat changelog.txt | grep -oP '\d\.\d\.\d' | head -n1 )
 
   build:
     name: Build release zip file
