@@ -30,7 +30,11 @@ class SettingsController extends \WC_Settings_Page {
 	 * @param array $sections Products settings sections.
 	 * @return array New Products settings sections.
 	 */
-	public function add_customer_stock_notifications_section( array $sections ): array {
+	public function add_customer_stock_notifications_section( $sections ) {
+
+		if ( ! is_array( $sections ) ) {
+			return $sections;
+		}
 
 		$section_title = __( 'Customer stock notifications', 'woocommerce' );
 
@@ -54,12 +58,15 @@ class SettingsController extends \WC_Settings_Page {
 	 * @param string $section_id Settings section identifier.
 	 * @return array New settings.
 	 */
-	public function add_customer_stock_notifications_settings( array $settings, string $section_id ): array {
-		if ( 'customer_stock_notifications' !== $section_id ) {
+	public function add_customer_stock_notifications_settings( $settings, $section_id ) {
+
+		if ( ! is_array( $settings ) ) {
 			return $settings;
 		}
 
-		$is_new_shop = \WC_Install::is_new_install();
+		if ( 'customer_stock_notifications' !== $section_id ) {
+			return $settings;
+		}
 
 		/**
 		 * Filter the Customer Stock Notifications settings.
@@ -83,7 +90,7 @@ class SettingsController extends \WC_Settings_Page {
 					'title'   => __( 'Allow sign-ups', 'woocommerce' ),
 					'desc'    => __( 'Let customers sign up to be notified when products in your store are restocked.', 'woocommerce' ),
 					'id'      => 'wc_bis_allow_signups',
-					'default' => $is_new_shop ? 'yes' : 'no',
+					'default' => 'no',
 					'type'    => 'checkbox',
 				),
 
