@@ -64,11 +64,13 @@ class CheckoutLink {
 		}
 
 		if ( ! $this->validate_checkout_link() ) {
-			return;
+			$redirect = wc_get_cart_url();
+		} else {
+			wc()->cart->empty_cart();
+			$redirect = $this->get_checkout_link();
 		}
 
-		wc()->cart->empty_cart();
-		wp_safe_redirect( $this->get_checkout_link() );
+		wp_safe_redirect( $redirect );
 		exit;
 	}
 
@@ -113,6 +115,18 @@ class CheckoutLink {
 	}
 
 	/**
+	 * Add error notices to the cart.
+	 *
+	 * @param \WP_Error $errors The errors.
+	 * @return void
+	 */
+	protected function add_error_notices( \WP_Error $errors ) {
+		foreach ( $errors->get_error_messages() as $message ) {
+			wc_add_notice( $message, 'error' );
+		}
+	}
+
+	/**
 	 * Process the query params and return the checkout link to redirect to complete with session token.
 	 *
 	 * @return string The checkout link.
@@ -120,6 +134,7 @@ class CheckoutLink {
 	protected function get_checkout_link() {
 		$controller = new CartController();
 		$products   = $this->get_products_from_checkout_link();
+		$errors     = new \WP_Error();
 
 		foreach ( $products as $product_id => $qty ) {
 			try {
@@ -130,18 +145,19 @@ class CheckoutLink {
 					]
 				);
 			} catch ( \Exception $e ) {
-				wc_add_notice( $e->getMessage(), 'error' );
+				$errors->add( 'error', $e->getMessage() );
 			}
 		}
 
 		// Nothing was added to the cart. We need to redirect to the cart page with an error notice. Since guests may not
 		// have a session, add the notice in the query string.
 		if ( wc()->cart->is_empty() ) {
-			$empty_cart_notice = __( 'The provided checkout link was out of date or invalid. No products were added to the cart.', 'woocommerce' );
-			wc_add_notice( $empty_cart_notice, 'error' );
+			$errors->add( 'error', __( 'The provided checkout link was out of date or invalid. No products were added to the cart.', 'woocommerce' ) );
 
 			if ( ! wc()->session->has_session() ) {
-				return add_query_arg( 'wc_error', $empty_cart_notice, wc_get_cart_url() );
+				return add_query_arg( 'wc_error', rawurlencode( $errors->get_error_message() ), wc_get_cart_url() );
+			} else {
+				$this->add_error_notices( $errors );
 			}
 
 			return wc_get_cart_url();
@@ -154,9 +170,12 @@ class CheckoutLink {
 			try {
 				$controller->apply_coupon( $coupon );
 			} catch ( \Exception $e ) {
-				wc_add_notice( $e->getMessage(), 'error' );
+				$errors->add( 'error', $e->getMessage() );
 			}
 		}
+
+		// Add error notices to the cart. This requires a session otherwise the notices will not be displayed.
+		$this->add_error_notices( $errors );
 
 		$redirect_url = wc_get_checkout_url();
 
