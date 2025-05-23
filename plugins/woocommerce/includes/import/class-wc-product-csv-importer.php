@@ -3,7 +3,7 @@
  * WooCommerce Product CSV importer
  *
  * @package WooCommerce\Import
- * @version x.x.x
+ * @version 10.0.0
  */
 
 use Automattic\WooCommerce\Enums\ProductStatus;
@@ -693,7 +693,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 *
 	 * @param int $value field value.
 	 *
-	 * @return int
+	 * @return int|string
 	 */
 	public function parse_int_field( $value ) {
 		// Similar to WC_Meta_Box_Product_Data::save, do not cast the empty value to int.
