@@ -52,7 +52,7 @@ body:
 
         -    [] Skip notifying Atomic
         -    [] Using WooRelease, perform a release dry run with e.g., `php woorelease.php wporg:release --product_version=9.9.0-rc.1 --zip_file=ZIP_FILE_PATH --product_path=plugins/woocommerce https://github.com/woocommerce/woocommerce/tree/release/9.9`
-        -    [] Using WooRelease, perform release with e.g., `php woorelease.php wporg:release --product_version=9.9.0-rc.1 --zip_file=ZIP_FILE_PATH --product_path=plugins/woocommerce https://github.com/woocommerce/woocommerce/tree/release/9.9 --release`
+        -    [] Using WooRelease, perform the live release with e.g., `php woorelease.php wporg:release --product_version=9.9.0-rc.1 --zip_file=ZIP_FILE_PATH --product_path=plugins/woocommerce https://github.com/woocommerce/woocommerce/tree/release/9.9 --release`
         -    [] If the release command reports SVN-related timeouts, validate versions on https://wordpress.org/plugins/woocommerce/advanced/ and https://plugins.svn.wordpress.org/woocommerce/tags/ pages and continue if those are correct
         -    [] Upon receiving email `[WordPress Plugin Directory] Pending release for WooCommerce`, confirm the release
         -    [] Verify the new version is listed and downloadable on https://wordpress.org/plugins/woocommerce/advanced/ page
