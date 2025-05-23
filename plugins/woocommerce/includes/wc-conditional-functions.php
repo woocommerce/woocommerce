@@ -500,7 +500,7 @@ function wc_is_file_valid_csv( $file, $check_path = true ) {
 	 */
 	$check_import_file_path = apply_filters( 'woocommerce_csv_importer_check_import_file_path', true, $file );
 
-	if ( $check_path && $check_import_file_path && false !== stripos( $file, '://' ) ) {
+	if ( $check_path && $check_import_file_path && false !== stripos( $file, 'file://' ) ) {
 		return false;
 	}
 
