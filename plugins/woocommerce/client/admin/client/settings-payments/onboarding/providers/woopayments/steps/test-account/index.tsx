@@ -16,6 +16,7 @@ import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import WooPaymentsStepHeader from '../../components/header';
 import { useOnboardingContext } from '../../data/onboarding-context';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
+import { disableWooPaymentsTestMode } from '~/settings-payments/utils';
 import './style.scss';
 
 interface StepCheckResponse {
@@ -98,6 +99,31 @@ const TestAccountStep = () => {
 			clearTimeout( pollingTimeoutRef.current );
 			pollingTimeoutRef.current = null;
 		}
+	};
+
+	const [ isContinueButtonLoading, setIsContinueButtonLoading ] =
+		useState( false );
+
+	const handleContinue = () => {
+		// Set the continue button loading state to true.
+		setIsContinueButtonLoading( true );
+
+		// Disable test mode and redirect to the live account setup link.
+		disableWooPaymentsTestMode()
+			.then( () => {
+				// Set the continue button loading state to false.
+				setIsContinueButtonLoading( false );
+
+				// This will refresh the steps and move the modal to the next step
+				navigateToNextStep();
+
+				// Refresh the store data
+				return refreshStoreData();
+			} )
+			.catch( () => {
+				// Handle any errors that occur during the process.
+				setIsContinueButtonLoading( false );
+			} );
 	};
 
 	// Reset state function
@@ -447,13 +473,9 @@ const TestAccountStep = () => {
 
 							<Button
 								variant="secondary"
-								onClick={ () => {
-									// This will refresh the steps and move the modal to the next step
-									navigateToNextStep();
-
-									// Refresh the store data
-									refreshStoreData();
-								} }
+								isBusy={ isContinueButtonLoading }
+								disabled={ isContinueButtonLoading }
+								onClick={ handleContinue }
 							>
 								{ __( 'Activate payments', 'woocommerce' ) }
 							</Button>
