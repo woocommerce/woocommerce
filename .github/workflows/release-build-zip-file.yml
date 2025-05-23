@@ -14,7 +14,7 @@ on:
 permissions: {}
 
 jobs:
-  verify:
+  verify-prs:
     name: 'Verify if any PR is left open by author:app/github-actions'
     outputs:
       runBuildZipJob: ${{ steps.verify-prs.outputs.runBuildZipJob }}
@@ -91,12 +91,36 @@ jobs:
               slack-optional-unfurl_media: false
           continue-on-error: true
 
+  verify-release-versions:
+    name: 'Verify release and stable tag versions'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch and parse files with versions
+        run: |
+            # github.head_ref - branch name
+            # Verify: name as per `release/X.X`
+          
+            # https://raw.githubusercontent.com/woocommerce/woocommerce/refs/heads/release/9.9/plugins/woocommerce/woocommerce.php - Version: 9.9.0-beta.1
+            # Check: should start with X.X as per `release/X.X`
+          
+            # https://raw.githubusercontent.com/woocommerce/woocommerce/refs/heads/release/9.9/plugins/woocommerce/readme.txt      - Stable tag: 9.8.5
+            # https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt                                                       - Stable tag: 9.8.5
+            # Check: should match
+          
+            # https://raw.githubusercontent.com/woocommerce/woocommerce/refs/heads/release/9.9/plugins/woocommerce/woocommerce.php - Version: 9.9.0-beta.1
+            # https://plugins.svn.wordpress.org/woocommerce/trunk/woocommerce.php                                                  - Version: 9.9.0-beta.1
+            # Check: should NOT match
+
+            # https://raw.githubusercontent.com/woocommerce/woocommerce/refs/heads/release/9.9/changelog.txt                       - = 9.8.4 2025-05-06 =
+            # Check: if final release, changelog entry must present
+          
+        
 
   build:
     name: Build release zip file
     runs-on: ubuntu-latest
-    if: ${{ needs.verify.outputs.runBuildZipJob == 'true' }}
-    needs: verify
+    if: ${{ needs.verify-prs.outputs.runBuildZipJob == 'true' }}
+    needs: [ verify-prs, verify-release-versions ]
     permissions:
       contents: read
     steps:
