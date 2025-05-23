@@ -49,10 +49,7 @@ const trackSetIsListViewOpened = ( isOpened: boolean ) => {
 };
 
 const trackSetPreference = ( scope, name, value ) => {
-	const valueBeforeToggle = select( preferencesStore ).get(
-		scope,
-		name
-	);
+	const valueBeforeToggle = select( preferencesStore ).get( scope, name );
 	if ( valueBeforeToggle === value ) {
 		return;
 	}
@@ -64,6 +61,41 @@ const trackSetPreference = ( scope, name, value ) => {
 	};
 	if ( trackedPreferences[ name ] ) {
 		recordEvent( trackedPreferences[ name ], { isEnabled: value } );
+	}
+};
+
+const trackBlockAndPatternInsertion = ( ...args ) => {
+	// @ts-expect-error - isInserterOpened is not in editor types
+	const inserterPanelOpened = select( editorStore ).isInserterOpened();
+	const insQuickInsertOpened = !! document.getElementsByClassName(
+		'block-editor-inserter__quick-inserter'
+	).length;
+
+	// We are a bit guessing here that user uses inserter panel when it is opened
+	let source = 'other_inserter';
+	if ( inserterPanelOpened ) {
+		source = 'inserter_sidebar';
+	} else if ( insQuickInsertOpened ) {
+		source = 'quick_inserter';
+	}
+	const blockData = args[ 0 ];
+	const meta = args[ 5 ];
+
+	// Single block insertion
+	if (
+		Array.isArray( blockData ) === false &&
+		typeof blockData === 'object'
+	) {
+		recordEvent( `${ source }_library_block_selected`, {
+			blockName: blockData.name,
+		} );
+	}
+
+	// Patter inserted
+	if ( Array.isArray( blockData ) && meta && meta.patternName ) {
+		recordEvent( `${ source }_library_pattern_selected`, {
+			patternName: meta.patternName,
+		} );
 	}
 };
 
@@ -79,6 +111,10 @@ const TRACKED_STORE_EVENTS = {
 	},
 	core: {
 		deleteEntityRecord: trackDeleteEntityRecord,
+	},
+	'core/block-editor': {
+		insertBlock: trackBlockAndPatternInsertion,
+		insertBlocks: trackBlockAndPatternInsertion,
 	},
 	'core/preferences': {
 		set: trackSetPreference,
