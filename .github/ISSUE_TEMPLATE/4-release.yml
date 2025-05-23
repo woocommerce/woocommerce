@@ -109,7 +109,7 @@ body:
         #### Send comms out
 
         -    [] Coordinate with the Developer Advocacy team posting the release announcement on developer.woocommerce.com (post guidelines outlined here: Pf59Ax-7F-p2)
-        -    [] Notify #woo-core-releases and #woo-announcements Slack channels with a link to the internal release post
+        -    [] Notify #woo-core-releases and #woo-announcements Slack channels of the release with a link to the internal release post
         -    [] Post an update in the internal release post
 
         #### Post-release monitoring
