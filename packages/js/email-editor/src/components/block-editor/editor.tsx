@@ -138,7 +138,9 @@ export function InnerEditor( {
 					<FullscreenMode
 						isActive={ isFullScreenForced || isFullscreenEnabled }
 					/>
-					{ isFullScreenForced && <BackButtonContent /> }
+					{ ( isFullScreenForced || isFullscreenEnabled ) && (
+						<BackButtonContent />
+					) }
 					{ ! isFullScreenForced && <MoreMenu /> }
 					{ currentPost.postType === 'wp_template' ? (
 						<TemplateSettingsPanel />
