@@ -30,7 +30,7 @@ setStyles();
 store( 'woocommerce/mini-cart', {
 	state: {
 		get drawerOverlayClass() {
-			const { isOpen } = getContext< { isOpen: boolean } >();
+			const { isOpen } = getContext< MiniCartContext >();
 			const baseClasses =
 				'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out';
 
@@ -40,50 +40,60 @@ store( 'woocommerce/mini-cart', {
 		},
 
 		get badgeIsVisible() {
-			const cartHasItems = wooStoreState.cart.items.length;
+			const cartHasItems = wooStoreState.totalItemsInCart > 0;
 			const { productCountVisibility } = getContext< MiniCartContext >();
 
 			return (
 				productCountVisibility === 'always' ||
 				( productCountVisibility === 'greater_than_zero' &&
-					cartHasItems > 0 )
+					cartHasItems )
 			);
 		},
 
 		get cartIsEmpty() {
-			return (
-				wooStoreState.cart.items.reduce(
-					( t, { quantity } ) => t + quantity,
-					0
-				) === 0
-			);
+			return wooStoreState.totalItemsInCart === 0;
 		},
 
 		get cartItemCount() {
-			return wooStoreState.cart.items.reduce(
-				( t, { quantity } ) => t + quantity,
-				0
-			);
+			return wooStoreState.totalItemsInCart;
 		},
 	},
 
 	callbacks: {
 		openDrawer() {
-			const ctx = getContext< { isOpen: boolean } >();
+			const ctx = getContext< MiniCartContext >();
 			ctx.isOpen = true;
 		},
 
 		closeDrawer() {
-			const ctx = getContext< { isOpen: boolean } >();
+			const ctx = getContext< MiniCartContext >();
 			ctx.isOpen = false;
 		},
 
 		overlayCloseDrawer( e: MouseEvent ) {
 			// Only close the drawer if the overlay itself was clicked.
 			if ( e.target === e.currentTarget ) {
-				const ctx = getContext< { isOpen: boolean } >();
+				const ctx = getContext< MiniCartContext >();
 				ctx.isOpen = false;
 			}
+		},
+	},
+} );
+
+store( 'woocommerce/mini-cart-title-items-counter-block', {
+	state: {
+		get itemsInCartText() {
+			const { singularItemsText, pluralItemsText } = getContext< {
+				singularItemsText: string;
+				pluralItemsText: string;
+			} >();
+
+			const cartItemsCount = wooStoreState.totalItemsInCart;
+
+			const template =
+				cartItemsCount === 1 ? singularItemsText : pluralItemsText;
+
+			return template.replace( '%d', cartItemsCount.toString() );
 		},
 	},
 } );
