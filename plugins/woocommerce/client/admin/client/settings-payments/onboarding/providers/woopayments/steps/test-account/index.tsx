@@ -95,12 +95,17 @@ const TestAccountStep = () => {
 	// Refs for timers and phase tracking
 	const pollingTimeoutRef = useRef< number | null >( null );
 	const phase1StartTimeRef = useRef< number | null >( null );
+	const initializingTimeoutRef = useRef< number | null >( null );
 
 	// Helper to clear timers
 	const clearTimers = () => {
 		if ( pollingTimeoutRef.current !== null ) {
 			clearTimeout( pollingTimeoutRef.current );
 			pollingTimeoutRef.current = null;
+		}
+		if ( initializingTimeoutRef.current !== null ) {
+			clearTimeout( initializingTimeoutRef.current );
+			initializingTimeoutRef.current = null;
 		}
 	};
 
