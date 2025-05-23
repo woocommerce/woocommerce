@@ -89,7 +89,7 @@ body:
 
         #### Release to WordPress.org
 
-        -    [] Notify Atomic (via P2 and Slack) before deploying release
+        -    [] Notify Atomic (via P2 and Slack, see  p9o2xV-5y1-p2 and p1747039405416989-slack-C7YPW6K40 for reference) before deploying release
         -    [] Using WooRelease, perform a release dry run with e.g., `php woorelease.php wporg:release --product_version=9.9.0 --zip_file=ZIP_FILE_PATH --product_path=plugins/woocommerce https://github.com/woocommerce/woocommerce/tree/release/9.9`
         -    [] Using WooRelease, perform release with e.g., `php woorelease.php wporg:release --product_version=9.9.0 --zip_file=ZIP_FILE_PATH --product_path=plugins/woocommerce https://github.com/woocommerce/woocommerce/tree/release/9.9 --release`
         -    [] If the release command reports SVN-related timeouts, validate versions on https://wordpress.org/plugins/woocommerce/advanced/ and https://plugins.svn.wordpress.org/woocommerce/tags/ pages and continue if those are correct
