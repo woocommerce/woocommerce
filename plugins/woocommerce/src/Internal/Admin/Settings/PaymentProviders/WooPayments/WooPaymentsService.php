@@ -824,6 +824,9 @@ class WooPaymentsService {
 
 		$selected_payment_methods = $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_PAYMENT_METHODS, $location, 'payment_methods', array() );
 
+		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
+		WC()->payment_gateways();
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
@@ -922,6 +925,9 @@ class WooPaymentsService {
 
 		// Clear any previous failed status for the step.
 		$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
+
+		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
+		WC()->payment_gateways();
 
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
@@ -1027,6 +1033,9 @@ class WooPaymentsService {
 	public function finish_onboarding_kyc_session( string $location, string $source = '' ): array {
 		$this->check_if_onboarding_step_action_is_acceptable( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
 
+		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
+		WC()->payment_gateways();
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
@@ -1131,6 +1140,9 @@ class WooPaymentsService {
 	public function reset_onboarding( string $from = '', string $source = '' ): array {
 		$this->check_if_onboarding_action_is_acceptable();
 
+		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
+		WC()->payment_gateways();
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
@@ -1199,6 +1211,9 @@ class WooPaymentsService {
 	 */
 	public function disable_test_account( string $location, string $from = '', string $source = '' ): array {
 		$this->check_if_onboarding_action_is_acceptable();
+
+		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
+		WC()->payment_gateways();
 
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
