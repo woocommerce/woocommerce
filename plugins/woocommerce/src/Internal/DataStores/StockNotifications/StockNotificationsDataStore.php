@@ -320,7 +320,7 @@ CREATE TABLE $meta_table_name (
 
 		$deleted = $wpdb->delete( $this->get_table_name(), array( 'id' => $notification->get_id() ), array( '%d' ) );
 
-		if ( is_int( $deleted ) && $deleted > 0 ) {
+		if ( $deleted > 0 ) {
 			$this->data_store_meta->delete_by_notification_id( $notification->get_id() );
 		}
 	}
@@ -395,7 +395,7 @@ CREATE TABLE $meta_table_name (
 		if ( $should_save ) {
 			$notification->set_date_modified( $current_time );
 			$saved = $notification->save();
-			return is_int( $saved ) && $saved > 0;
+			return ! is_wp_error( $saved );
 		}
 
 		return false;
