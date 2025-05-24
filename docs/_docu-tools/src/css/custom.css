@@ -60,3 +60,13 @@ html[data-theme='dark'] .automattic-logo-light {
 .pagination-nav {
   display: none;
 }
+
+/* Show pagination nav in Getting Started */
+html[class*=docs-doc-id-getting-started] .pagination-nav {
+  display: grid;
+}
+
+/* Hide next pagination nav at end of Getting Started */
+html.docs-doc-id-getting-started/version-control-deployment .pagination-nav .pagination-nav__link--next {
+  display: none;
+}
