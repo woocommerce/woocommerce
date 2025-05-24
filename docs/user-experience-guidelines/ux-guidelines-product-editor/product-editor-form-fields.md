@@ -3,7 +3,7 @@ post_title: Fields
 sidebar_label: Fields
 ---
 
-# Product Editor Guidelines - Fields
+# Fields
 
 Fields are the simplest type of extension. They let users add extra product information, replace or manage the visibility of other fields assigned to a specific product type, and control the contents of other fields.
 

@@ -3,7 +3,7 @@ post_title: Understanding WooCommerce endpoints
 sidebar_label: WooCommerce endpoints
 ---
 
-# Understanding WooCommerce Endpoints
+# Understanding WooCommerce endpoints
 
 Endpoints are an extra part in the website URL that is detected to show different content when present.
 
@@ -13,7 +13,7 @@ This allows us to show different content without the need for multiple pages and
 
 Endpoints are located at **WooCommerce > Settings > Advanced**.
 
-## Checkout Endpoints
+## Checkout endpoints
 
 The following endpoints are used for checkout-related functionality and are appended to the URL of the /checkout page:
 
@@ -23,7 +23,7 @@ The following endpoints are used for checkout-related functionality and are appe
 -   Delete payment method - `/delete-payment-method/`
 -   Set default payment method - `/set-default-payment-method/`
 
-## Account Endpoints
+## Account endpoints
 
 The following endpoints are used for account-related functionality and are appended to the URL of the /my-account page:
 

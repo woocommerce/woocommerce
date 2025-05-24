@@ -6,7 +6,7 @@ sidebar_label: Configure caching plugins
 
 # How to configure caching plugins for WooCommerce
 
-## Excluding Pages from the Cache
+## Excluding pages from the cache
 
 Oftentimes if using caching plugins they'll already exclude these pages. Otherwise make sure you exclude the following pages from the cache through your caching systems respective settings.
 
@@ -16,11 +16,11 @@ Oftentimes if using caching plugins they'll already exclude these pages. Otherwi
 
 These pages need to stay dynamic since they display information specific to the current customer and their cart.
 
-## Excluding WooCommerce Session from the Cache
+## Excluding WooCommerce session from the cache
 
 If the caching system you're using offers database caching, it might be helpful to exclude `_wc_session_` from being cached. This will be dependent on the plugin or host caching so refer to the specific instructions or docs for that system.
 
-## Excluding WooCommerce Cookies from the Cache
+## Excluding WooCommerce cookies from the cache
 
 Cookies in WooCommerce help track the products in your customers cart, can keep their cart in the database if they leave the site, and powers the recently viewed widget. Below is a list of the cookies WooCommerce uses for this, which you can exclude from caching.
 
@@ -35,7 +35,7 @@ Cookies in WooCommerce help track the products in your customers cart, can keep 
 
 We're unable to cover all options, but we have added some tips for the popular caching plugins. For more specific support, please reach out to the support team responsible for your caching integration.
 
-### W3 Total Cache Minify Settings
+### W3 total cache minify settings
 
 Ensure you add 'mfunc' to the 'Ignored comment stems' option in the Minify settings.
 

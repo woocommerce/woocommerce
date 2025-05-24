@@ -4,7 +4,7 @@ sidebar_label: Customizing endpoint URLs
 
 ---
 
-# Customizing WooCommerce Endpoint URLs
+# Customizing WooCommerce endpoint URLs
 
 Before you start, check out [WooCommerce Endpoints](./woocommerce-endpoints.md). 
 
@@ -26,7 +26,7 @@ Enter the full URL to the endpoint and then insert that into your menu.
 
 Remember that some endpoints, such as view-order, require an order ID to work. In general, we don't recommend adding these endpoints to your menus. These pages can instead be accessed via the my-account page.
 
-## Using endpoints in Payment Gateway Plugins
+## Using endpoints in payment gateway plugins
 
 WooCommerce provides helper functions in the order class for getting these URLs. They are:
 
@@ -74,7 +74,7 @@ On Windows servers, the **web.config** file may not be set correctly to allow fo
 
 Landing on the wrong page when clicking an endpoint URL is typically caused by incorrect settings. For example, clicking 'Edit address' on your account page takes you to the Shop page instead of the edit address form means you selected the wrong page in settings. Confirm that your pages are correctly configured and that a different page is used for each section.
 
-### How to Remove "Downloads" from My Account
+### How to remove "Downloads" from My Account
 
 Sometimes the "Downloads" endpoint on the "My account" page does not need to be displayed. This can be removed by going to **WooCommerce > Settings > Advanced > Account endpoints** and clearing the Downloads endpoint field.
 

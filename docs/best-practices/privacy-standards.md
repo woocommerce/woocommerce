@@ -4,7 +4,7 @@ sidebar_label: Privacy standards
 
 ---
 
-# Privacy Standards for WooCommerce Extensions
+# Privacy Standards for WooCommerce extensions
 
 Privacy and data protection are becoming increasingly important online, and WooCommerce extensions are no exception. This document outlines the key markers of quality regarding privacy for WooCommerce extensions, the current methods for testing compliance, and the standards developers should adhere to ensure user trust and legal compliance.
 

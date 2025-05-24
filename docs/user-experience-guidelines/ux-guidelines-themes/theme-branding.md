@@ -3,7 +3,7 @@ post_title: Branding
 sidebar_label: Branding
 ---
 
-# WooCommerce Theme Guidelines - Branding
+# Branding
 
 The theme must not contain any branding or references to theme authors in locations that interfere with the normal operation of an online store. Theme authors can include links to their websites on the theme footer. Affiliate linking is not permitted.
 

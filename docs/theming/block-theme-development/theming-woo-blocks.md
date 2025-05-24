@@ -6,13 +6,13 @@ sidebar_label: Theming for Woo blocks
 
 # Theming for Woo blocks
 
-This page includes documentation about theming WooCommerce blocks and block themes.
+---
 
-
-**Note:** this document assumes some previous knowledge about block theme development and some WordPress concepts. If you are completely new to block theme development, please check [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/course/develop-your-first-low-code-block-theme/)
+**Note:** We're assuming you have some previous knowledge about block theme development and some WordPress concepts. If you are completely new to block theme development, please check [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/course/develop-your-first-low-code-block-theme/)
 to learn about block theme development, and explore
-the [Create Block Theme plugin](https://wordpress.org/plugins/create-block-theme/) tool when you're ready to create a
-new theme.
+the [Create Block Theme plugin](https://wordpress.org/plugins/create-block-theme/) tool when you're ready to create a new theme.
+
+---
 
 ## General concepts
 

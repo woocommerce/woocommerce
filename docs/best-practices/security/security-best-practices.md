@@ -6,7 +6,7 @@ sidebar_label: Security best practices
 
 # WooCommerce security best practices
 
-## Introduction to Security Practices
+## Introduction to security practices
 
 Security is extremely important for online stores. A breach can lead to significant financial loss, reputational damage, and erosion of customer trust. Implementing robust security practices is crucial. This guide covers the best practices for securing WooCommerce stores, including hardening WordPress, keeping plugins and themes up to date, implementing secure coding practices, and protecting user data. By following these recommendations, developers can build secure and resilient WooCommerce stores that protect both their business and their customers.
 
@@ -21,7 +21,7 @@ To follow this guide, you should have:
 1. A basic understanding of WordPress and WooCommerce.
 2. Access to a WordPress website with WooCommerce installed and activated.
 
-## Security Standards
+## Security standards
 
 We recommend that you maintain the following standards: 
 
@@ -31,25 +31,25 @@ We recommend that you maintain the following standards:
 
 Understanding and implementing these standards can significantly reduce the risk of security vulnerabilities in your extensions and themes.
 
-### Common Security Pitfalls and How to Avoid Them
+### Common security pitfalls and how to avoid them
 
 Several common security pitfalls can easily be avoided with vigilance and best practices:
 
-- **SQL Injection**: Ensure all database queries are properly sanitized.
-- **Cross-Site Scripting**: Sanitize all user input to prevent malicious code from being executed.
-- **File Inclusions**: Limit file inclusion to prevent unauthorized access to the file system.
+- **SQL injection**: Ensure all database queries are properly sanitized.
+- **Cross-site scripting**: Sanitize all user input to prevent malicious code from being executed.
+- **File inclusions**: Limit file inclusion to prevent unauthorized access to the file system.
 
 Awareness and prevention of these common issues are crucial steps in securing your WooCommerce store. For more resources, we recommend reading the [WordPress security documentation](https://developer.wordpress.org/apis/security/).
 
-## Manual Testing Guidelines
+## Manual testing guidelines
 
 Even without access to automated tools like the [Woo Quality Insights Toolkit (QIT)](https://qit.woo.com), manual testing remains a vital component of securing your WooCommerce store. Here are some guidelines on how developers can manually test their extensions for security vulnerabilities: 
 
-1. **Code Review**: Regularly review your code for security vulnerabilities, focusing on the areas where breaches commonly occur, such as user input fields and database queries. Code reviews should check against the [WordPress security criteria](https://developer.wordpress.org/apis/security/) mentioned above. 
-2. **Use Security Plugins**: Plugins like Wordfence, Sucuri, or iThemes Security provide an interface for manual security checks, including file integrity monitoring and malware scanning. Additionally, tooling like [OWASP Zap](https://www.zaproxy.org/) or [GitHub Security Scanning](https://github.com/features/security/) can be used.
-3. **Testing Environments**: Utilize staging environments to test the security of new features or updates before deploying them live.
+1. **Code review**: Regularly review your code for security vulnerabilities, focusing on the areas where breaches commonly occur, such as user input fields and database queries. Code reviews should check against the [WordPress security criteria](https://developer.wordpress.org/apis/security/) mentioned above. 
+2. **Use security plugins**: Plugins like Wordfence, Sucuri, or iThemes Security provide an interface for manual security checks, including file integrity monitoring and malware scanning. Additionally, tooling like [OWASP Zap](https://www.zaproxy.org/) or [GitHub Security Scanning](https://github.com/features/security/) can be used.
+3. **Testing environments**: Utilize staging environments to test the security of new features or updates before deploying them live.
 
-## Other Security Best Practices
+## Other security best practices
 
 ### Keep WordPress, WooCommerce, and plugins up to date
 

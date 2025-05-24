@@ -3,7 +3,7 @@ post_title: Navigation
 sidebar_label: Navigation
 ---
 
-# WooCommerce Extension Guidelines - Navigation
+# Navigation
 
 **Menu Structure.** Place your product navigation elements within the existing WooCommerce taxonomy.
 

@@ -3,7 +3,7 @@ post_title: Payment button style
 sidebar_label: Payment button style
 ---
 
-# User Experience Guidelines - Payment Button Style
+# Payment Button Style
 
 Use the appropriate button style depending on the site theme.
 

@@ -47,7 +47,7 @@ Offering timely and effective support is crucial for resolving user issues and m
 - **Support - SLA**: Define an SLA for how quickly support requests will be acknowledged and resolved.
 - **Support quality**: Regularly review support interactions to ensure quality, accuracy, and helpfulness.
 
-## Feedback Mechanisms
+## Feedback mechanisms
 
 Feedback is invaluable for continuous improvement of your extension and support services.
 

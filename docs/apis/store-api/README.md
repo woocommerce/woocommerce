@@ -4,7 +4,7 @@ category_slug: store-api
 post_title: Store API
 ---
 
-# Store API
+# WooCommerce Store API
 
 **The Store API provides public Rest API endpoints for the development of customer-facing cart, checkout, and product functionality. It follows many of the patterns used in the [WordPress REST API](https://developer.wordpress.org/rest-api/key-concepts/).**
 

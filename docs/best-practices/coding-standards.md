@@ -9,7 +9,7 @@ sidebar_label: Coding standards
 Adhering to WooCommerce coding standards is essential for maintaining high code quality, ensuring compatibility, and facilitating easier maintenance and updates. This document outlines the recommended coding practices for developers working within the WooCommerce ecosystem, including the use of hooks, function prefixing, translatable texts, and code structure.
 
 
-## Position of Hooks
+## Position of hooks
 
 Position hooks below the function call to align with the common pattern in the WordPress and WooCommerce ecosystem.
 
@@ -75,24 +75,24 @@ if ( ! function_exists( 'YOUR_PREFIX_theme_setup' ) ) {
 add_action( 'after_setup_theme', 'YOUR_PREFIX_theme_setup' );
 ```
 
-## Code Quality Standards
+## Code quality standards
 
 To ensure the highest standards of code quality, developers are encouraged to adhere to the following practices:
 
-### WooCommerce Sniffs and WordPress Code Standards
+### WooCommerce sniffs and WordPress code standards
 
 - **Ensure no code style issues** when code is passed through WooCommerce Sniffs and WordPress Code Standards for PHP_CodeSniffer.
 
-### Automated Testing
+### Automated testing
 
-- **Unit Tests**: Implement automated unit tests to validate code functionality in isolation.
-- **E2E Tests**: Utilize automated end-to-end tests to verify the integrated operation of components within the application.
+- **Unit tests**: Implement automated unit tests to validate code functionality in isolation.
+- **E2E tests**: Utilize automated end-to-end tests to verify the integrated operation of components within the application.
 
-### Tracking and Managing Bugs
+### Tracking and managing bugs
 
 - **Monitor and aim to minimize** the number of open bugs, ensuring a stable and reliable product.
 
-### Code Organization
+### Code organization
 
 - **Organize code in self-contained classes** to avoid creating "god/super classes" that contain all plugin code. This practice promotes modularity and simplifies maintenance.
 

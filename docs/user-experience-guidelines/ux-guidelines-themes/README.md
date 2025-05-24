@@ -1,10 +1,10 @@
 ---
-sidebar_label: Theme Design Guidelines
+sidebar_label: Theme design
 category_slug: user-experience-themes
-post_title: Theme Design Guidelines
+post_title: Theme design guidelines
 ---
 
-# Theme Design Guidelines
+# Theme Design guidelines
 
 This section covers general guidelines and best practices to follow in order to ensure your theme experience aligns with ecommerce industry standards and WooCommerce for providing a great online shopping experience, maximizing sales, ensuring ease of use, seamless integration, and strong UX adoption.
 

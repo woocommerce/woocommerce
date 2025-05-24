@@ -1,10 +1,10 @@
 ---
-post_title: WooCommerce plugin API callbacks
+post_title: WooCommerce Plugin API callbacks
 sidebar_label: Plugin API callbacks
 
 ---
 
-# WooCommerce plugin API callbacks
+# WooCommerce Plugin API callbacks
 
 ## Overview
 

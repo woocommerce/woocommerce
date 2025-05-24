@@ -1,6 +1,6 @@
 ---
 post_title: Compatibility and interoperability for WooCommerce extensions
-sidebar_label: Compatibility best practices
+sidebar_label: Compatibility
 
 ---
 
@@ -24,12 +24,12 @@ Developers should declare their extension's compatibility with the latest versio
 2. **Declaration**: Update the extension's documentation and metadata to reflect its compatibility with these platforms and components.
 3. **Communication**: Inform users of the compatible versions in the extension's change log, website, or repository.
 
-## Manual Compatibility Testing
+## Manual compatibility testing
 
 Manual testing is essential to identify and resolve potential compatibility issues. Follow these steps for effective manual compatibility testing:
 
 1. **Set up a testing environment** that mirrors a typical user setup, including the latest versions of WordPress and WooCommerce.
-2. **Test with Core components**: Verify the extension's functionality with core components like Cart & Checkout blocks, HPOS, Product Editor, and Site Editor.
+2. **Test with core components**: Verify the extension's functionality with core components like Cart & Checkout blocks, HPOS, Product Editor, and Site Editor.
 3. **Cross-plugin compatibility**: Activate your extension alongside other commonly used plugins to check for conflicts.
 4. **Theme compatibility**: Test your extension with several popular themes to ensure it works correctly and maintains a consistent appearance.
 
@@ -47,14 +47,14 @@ Despite thorough testing, compatibility issues may arise. Here are common proble
 - **Diagnosis**: Check for styling or layout issues when your extension is used with different themes.
 - **Resolution**: Use more generic CSS selectors and provide configuration options for better theme integration.
 
-### Updates Breaking Compatibility
+### Updates breaking compatibility
 
-- **Preventive Measures**: Subscribe to the [WooCommerce developer blog](https://developer.woocommerce.com) to stay informed about upcoming changes.
-- **Quick Fixes**: Prepare patches or minor updates to address compatibility issues as soon as possible after a core update.
+- **Preventive measures**: Subscribe to the [WooCommerce developer blog](https://developer.woocommerce.com) to stay informed about upcoming changes.
+- **Quick fixes**: Prepare patches or minor updates to address compatibility issues as soon as possible after a core update.
 
-### No Errors with Multiple Extensions Activated
+### No Errors with multiple extensions activated
 
-- **Best Practice**: Regularly test your extension in a multi-plugin environment to ensure it does not cause or suffer from conflicts.
+- **Best practice**: Regularly test your extension in a multi-plugin environment to ensure it does not cause or suffer from conflicts.
 
 ## Conclusion
 

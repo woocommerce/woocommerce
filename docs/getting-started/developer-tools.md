@@ -1,10 +1,10 @@
 ---
-post_title: WooCommerce developer tools
+post_title: WooComerce developer tools
 sidebar_label: Developer tools
-sidebar_position: 5
+sidebar_position: 3
 ---
 
-# WooCommerce developer tools
+# Developer tools
 
 This guide provides an overview of essential tools and libraries for WooCommerce development. It's intended for developers looking to enhance their WooCommerce projects efficiently.
 

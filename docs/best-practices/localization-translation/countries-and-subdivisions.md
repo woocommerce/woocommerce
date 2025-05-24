@@ -4,7 +4,7 @@ sidebar_label: Countries and subdivisions
 
 ---
 
-# Updating Countries and Subdivisions
+# Updating countries and subdivisions
 
 WooCommerce comes complete with a comprehensive list of countries and subdivisions (such as provinces or states) that are used in various parts of the user interface.
 

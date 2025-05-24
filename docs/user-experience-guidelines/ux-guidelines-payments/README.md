@@ -1,7 +1,7 @@
 ---
-sidebar_label: Payments Guidelines
+sidebar_label: Payments
 category_slug: user-experience-payments
-post_title: Payments Guidelines
+post_title: Payments guidelines
 ---
 
 # Payments Guidelines
