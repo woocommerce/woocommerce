@@ -1,6 +1,7 @@
 ---
 post_title: WooCommerce extension development best practices
 sidebar_label: Best practices
+sidebar_position: 3
 ---
 
 # WooCommerce extension development best practices
@@ -21,7 +22,7 @@ Merchants make use of WooCommerce extensions daily, and should have a unified an
 
 ## Best Practices
 
-1. **Check if WooCommerce is active**. Most WooCommerce plugins do not need to run unless WooCommerce is already active. [Learn how to check if WooCommerce is active](./check-if-woo-is-active.md).
+1. **Check if WooCommerce is active**. Most WooCommerce plugins do not need to run unless WooCommerce is already active. [Learn how to check if WooCommerce is active](/docs/extensions/core-concepts/check-if-woo-is-active).
 2. **The main plugin file should adopt the name of the plugin**. For example: A plugin with the directory name `plugin-name` would have its main file named `plugin-name.php`.
 3. **The text domain should match your plugin directory name**. For example: A plugin with a directory name of `plugin-name` would have the text domain `plugin-name`. Do not use underscores. 
 4. **Internationalization**: Follow guidelines for [Internationalization for WordPress Developers](https://codex.wordpress.org/I18n_for_WordPress_Developers)
@@ -30,8 +31,8 @@ Merchants make use of WooCommerce extensions daily, and should have a unified an
 7. **Avoid creating custom database tables**. Whenever possible, use WordPress [post types](http://codex.wordpress.org/Post_Types#Custom_Post_Types), [taxonomies](http://codex.wordpress.org/Taxonomies), and [options](http://codex.wordpress.org/Creating_Options_Pages). For more, check out our [primer on data storage](/docs/best-practices/data-management/data-storage).
 8. **Prevent Data Leaks** by ensuring you aren't providing direct access to PHP files. [Find out how](/docs/best-practices/security/prevent-data-leaks). 
 9. **All plugins need a [standard WordPress README](http://wordpress.org/plugins/about/readme.txt)**. See an example in the [WordPress plugin README file standard](https://wordpress.org/plugins/readme.txt).
-10. **All plugins need a changelog file.** See an example of a changelog file and different changelog entry types in the [changelog.txt documentation](./changelog-txt).
-11. **Follow our conventions for your Plugin header comment**. View our [example WordPress plugin header comment](/docs/extensions/example-header-plugin-comment) and follow the conventions listed, including: `Author:`,  `Author URI:` , `Developer:`, `Developer URI`, `WC requires at least:`and `WC tested up to:`, and `Plugin URI:`.
+10. **All plugins need a changelog file.** See an example of a changelog file and different changelog entry types in the [changelog.txt documentation](/docs/extensions/core-concepts/changelog-txt).
+11. **Follow our conventions for your Plugin header comment**. View our [example WordPress plugin header comment](/docs/extensions/core-concepts/example-header-plugin-comment) and follow the conventions listed, including: `Author:`,  `Author URI:` , `Developer:`, `Developer URI`, `WC requires at least:`and `WC tested up to:`, and `Plugin URI:`.
 12. **Make it extensible**: use WordPress actions and filters to allow for modification/customization, and if your plugin creates a front-end output, we recommend having a templating engine in place so users can create custom template files in their theme's WooCommerce folder to overwrite the plugin's template files.For more information, check out Pippin's post on [Writing Extensible Plugins with Actions and Filters](http://code.tutsplus.com/tutorials/writing-extensible-plugins-with-actions-and-filters--wp-26759).
 13. **Avoid external libraries**. The use of entire external libraries is typically not suggested as this can open up the product to security vulnerabilities. If an external library is absolutely necessary, developers should be thoughtful about the code used and assume ownership as well as of responsibility for it. Try to  only include the strictly necessary part of the library, or use a WordPress-friendly version or opt to build your own version. For example, if needing to use a text editor such as TinyMCE, we recommend using the WordPress-friendly version, TinyMCE Advanced.
 14. **Avoid third-party systems**: Loading code from documented services is allowed, but communication must be secure. Executing outside code within a plugin is not allowed. Using third-party CDNs for non-service-related JavaScript and CSS is prohibited. Iframes should not be used to connect admin pages.

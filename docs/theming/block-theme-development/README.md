@@ -1,5 +1,5 @@
 ---
-sidebar_label: Block Theme Development 
+sidebar_label: Block theme development 
 category_slug: block-theme-development
 post_title: Block theme development
 ---

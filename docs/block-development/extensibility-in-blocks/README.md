@@ -1,5 +1,5 @@
 ---
-sidebar_label: Extensibility in Blocks
+sidebar_label: Extensibility in blocks
 category_slug: extensibility-in-blocks
 post_title: Extensibility in blocks
 ---

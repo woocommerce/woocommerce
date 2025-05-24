@@ -1,6 +1,7 @@
 ---
 post_title: Creating custom settings for WooCommerce extensions
 sidebar_label: Creating custom settings
+sidebar_position: 1
 
 ---
 

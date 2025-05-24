@@ -1,5 +1,5 @@
 ---
-sidebar_label: Product Collection Block
+sidebar_label: Product Collection block
 category_slug: product-collection
 post_title: Product collection block
 ---

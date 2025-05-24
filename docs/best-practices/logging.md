@@ -1,5 +1,6 @@
 ---
 post_title: Logging in WooCommerce
+sidebar_label: Logging
 ---
 
 # Logging in WooCommerce

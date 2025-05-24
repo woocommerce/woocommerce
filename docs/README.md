@@ -20,7 +20,7 @@ WooCommerce is a customizable, open-source eCommerce platform built on WordPress
 
 Begin your WooCommerce development journey here with essential guides and resources tailored for newcomers. Join our thriving community on Slack for support and networking.
 
-Learn more about [getting started](/docs/getting-started)
+Learn more about [getting started](/docs/category/getting-started)
 
 ---
 
@@ -28,11 +28,11 @@ Learn more about [getting started](/docs/getting-started)
 
 Explore comprehensive guides and resources to build and enhance WooCommerce extensions. Dive into development best practices and innovative techniques for creating powerful extensions.
 
-* [How to build your first extension](/docs/extensions/building-your-first-extension)
-* [Designing a simple extension](/docs/extensions/how-to-design-a-simple-extension)
-* [Extension development best practices](/docs/extensions/extension-development-best-practices)
+* [How to build your first extension](/docs/extensions/getting-started-extensions/building-your-first-extension)
+* [Designing a simple extension](/docs/extensions/getting-started-extensions/how-to-design-a-simple-extension)
+* [Extension development best practices](/docs/extensions/getting-started-extensions/extension-development-best-practices)
 
-Learn more about [extension development](/docs/extensions/)
+Learn more about [extension development](/docs/category/getting-started)
 
 ---
 

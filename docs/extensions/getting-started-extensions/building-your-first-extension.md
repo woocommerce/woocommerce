@@ -1,7 +1,7 @@
 ---
 post_title: How to build your first extension
 sidebar_label: Build your first extension
-
+sidebar_position: 2
 ---
 
 # How to build your first extension
