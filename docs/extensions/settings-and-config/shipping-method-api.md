@@ -1,6 +1,6 @@
 ---
-post_title: Shipping method API
-sidebar_label: Shipping method API
+post_title: Shipping Method API
+sidebar_label: Shipping Method API
 
 ---
 

@@ -8,15 +8,15 @@ sidebar_label: Payment Token API
 
 WooCommerce 2.6 introduced an API for storing and managing payment tokens for gateways. Users can also manage these tokens from their account settings and choose from saved payment tokens on checkout.
 
-This guide offers a few useful tutorials for using the new API as well as all the various methods available to you.
+This guide offers a few useful tutorials for using the API as well as all the various methods available to you.
 
 ## Tutorials
 
-### Adding Payment Token API Support To Your Gateway
+### Adding Payment Token API support to your gateway
 
 We'll use the Simplify Commerce gateway in some of these examples.
 
-#### Step 0: Extending The Correct Gateway Base
+#### Step 0: Extending the correct gateway base
 
 WooCommerce ships with two base classes for gateways. These classes were introduced along with the Token API in 2.6. They  are `WC_Payment_Gateway_CC` (for credit card based tokens) and `WC_Payment_Gateway_eCheck` (for eCheck based tokens). They contain some useful code for generating payment forms on checkout and should hopefully cover most cases.
 
@@ -26,7 +26,7 @@ Since Simplify deals with credit cards, we extend the credit card gateway.
 
 `class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway_CC`
 
-#### Step 1: 'Supports' Array
+#### Step 1: 'Supports' array
 
 We need to tell WooCommerce our gateway supports tokenization. Like other gateways features, this is defined in a gateway's `__construct` in an array called `supports`.
 
@@ -44,7 +44,7 @@ $this->supports = array(
 
 Add `tokenization` to this array.
 
-#### Step 2: Define A Method For Adding/Saving New Payment Methods From "My Account"
+#### Step 2: Define a method for adding/saving new payment methods from "My Account"
 
 The form handler that is run when adding a new payment method from the "my accounts" section will call your gateway's `add_payment_method` method.
 
@@ -80,7 +80,7 @@ Finally, we can save our token to the database once the token object is built.
 
 Save will return `true` if the token was successfully saved, and `false` if an error occurred (like a missing field).
 
-#### Step 3: Save Methods On Checkout
+#### Step 3: Save methods on checkout
 
 WooCommerce also allows customers to save a new payment token during the checkout process in addition to "my account". You'll need to add some code to your gateways `process_payment` function to make this work correctly.
 
@@ -92,7 +92,7 @@ If you have previously saved tokens being offered to the user, you can also look
 
 Once you have found out that a token should be saved you can save a token in the same way you did in Step 2, using the `set_` and `save` methods.
 
-#### Step 4: Retrieve The Token When Processing Payments
+#### Step 4: Retrieve the token When processing payments
 
 You will need to retrieve a saved token when processing a payment in your gateway if a user selects one. This should also be done in your `process_payment` method.
 
@@ -122,11 +122,11 @@ if ( $token->get_user_id() !== get_current_user_id() ) {
 Once you have loaded the token and done any necessary checks, you can get the actual token string (to pass to your payment provider) by using
 `$token->get_token()`.
 
-### Creating A New Token Type
+### Creating A new token type
 
 You can extend the abstract WC_Payment_Token class and create a new token type If the provided eCheck and CC token types do not satisfy your requirements. There are a few things you need to include if you do this.
 
-#### Step 0: Extend WC_Payment_Token And Name Your Type
+#### Step 0: Extend WC_Payment_Token and name your type
 
 Start by extending WC_Payment_Token and providing a name for the new type. We'll look at how the eCheck token class is built since it is the most basic token type shipped in WooCommerce core.
 
@@ -143,7 +143,7 @@ class WC_Payment_Token_eCheck extends WC_Payment_Token {
 
 The name for this token type is 'eCheck'. The value provided in `$type` needs to match the class name (i.e: `WC_Payment_Token_$type`).
 
-#### Step 1: Provide A Validate Method
+#### Step 1: Provide a validate method
 
 Some basic validation is performed on a token before it is saved to the database. `WC_Payment_Token` checks to make sure the actual token value is set, as well as the `$type` defined above. If you want to validate the existence of other data (eChecks require the last 4 digits for example) or length (an expiry month should be 2 characters), you can provide your own `validate()` method.
 
@@ -173,7 +173,7 @@ Finally, return true if we make it to the end of the `validate()` method.
 }
 ```
 
-#### Step 2: Provide get\_ And set\_ Methods For Extra Data
+#### Step 2: Provide get\_ and set\_ methods for extra data
 
 You can now add your own methods for each piece of data you would like to expose. Handy functions are provided to you to make storing and retrieving data easy. All data is stored in a meta table so you do not need to make your own table or add new fields to an existing one.
 
@@ -191,7 +191,7 @@ public function set_last4( $last4 ) {
 
 That's it! These meta functions are provided by [WC_Data](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/includes/abstracts/abstract-wc-data.php).
 
-#### Step 3: Use Your New Token Type
+#### Step 3: Use your new token type
 
 You can now use your new token type, either directly when building a new token
 
