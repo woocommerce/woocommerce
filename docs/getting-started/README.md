@@ -1,65 +1,63 @@
 ---
 slug: /
 sidebar_position: 0
-sidebar_label: 'Getting Started'
+sidebar_label: 'Getting started'
 ---
 
 # Getting started
 
-WooCommerce is a customizable, open-source eCommerce platform built on WordPress. It empowers businesses worldwide to sell anything from physical products and digital downloads to subscriptions, content, and even appointments.
+WooCommerce is the leading open-source ecommerce platform. As a developer, you can build extensions, customize themes, and contribute to the platform that millions of merchants rely on.
 
-* Get familiar with [WordPress Plugin Development](https://developer.wordpress.org/plugins/).
-* Take a moment to familiarize yourself with our [Developer Resources](https://developer.wordpress.org/plugins/plugin-basics/).
-* Join the [Woo Community Slack](https://woo.com/community-slack/)
+<details>
+<summary><strong>🌱 I'm completely new to WooCommerce development</strong></summary>
 
----
-
-## Build WooCommerce extensions
-
-Explore comprehensive guides and resources to build and enhance WooCommerce extensions. Dive into development best practices and innovative techniques for creating powerful extensions.
+Start here! Build your first extension in 30 minutes:
 
 * [How to build your first extension](/docs/extensions/getting-started-extensions/building-your-first-extension)
 * [Designing a simple extension](/docs/extensions/getting-started-extensions/how-to-design-a-simple-extension)
 * [Extension development best practices](/docs/extensions/getting-started-extensions/extension-development-best-practices)
 
-Learn more about [extension development](/docs/category/getting-started)
+Get familiar with [WordPress Plugin Development](https://developer.wordpress.org/plugins/) if you haven't already.
 
----
+</details>
 
-## Build WooCommerce themes
+<details>
+<summary><strong>🎨 I build custom sites for clients</strong></summary>
 
-Discover the art of WooCommerce theme development. Learn about theme customization, design principles, and enhancing user experience to create visually appealing and functional themes.
+Focus on theme development to create custom shopping experiences:
 
 * [How to set up and use a child theme](/docs/theming/theme-development/set-up-a-child-theme)
 * [Classic theme developer handbook](/docs/theming/theme-development/classic-theme-developer-handbook)
 * [Theme design and user experience guidelines](/docs/theming/theme-development/theme-design-ux-guidelines)
 
-Learn more about [classic theme development](/docs/theming/theme-development/classic-theme-developer-handbook) or [Block theme development](/docs/theming/block-theme-development/theming-woo-blocks)
+Choose between [classic theme development](/docs/theming/theme-development/classic-theme-developer-handbook) or [block theme development](/docs/theming/block-theme-development/theming-woo-blocks).
 
----
+</details>
 
-## Contribute to WooCommerce
+<details>
+<summary><strong>❤️  I want to contribute to WooCommerce</strong></summary>
 
-Join our open-source community and contribute to WooCommerce. Explore how you can make a difference by tackling open issues and enhancing the WooCommerce ecosystem.
+Join our open-source community. Fix bugs, add features, and help make WooCommerce better for millions of users:
 
 * [Visit the WooCommerce monorepo](https://github.com/woocommerce/woocommerce)
-* [Open Issues on GitHub](https://github.com/woocommerce/woocommerce/issues)
-* [Woo contributor guidelines](/docs/contribution/contributing/)
+* [Browse open issues on GitHub](https://github.com/woocommerce/woocommerce/issues)
+* [Read our contributor guidelines](/docs/contribution/contributing/)
 
-Learn more about [contributing](/docs/contribution/contributing)
+</details>
 
----
+<details>
+<summary><strong>💬 I want to connect with other developers</strong></summary>
 
-## Additional resources
+Get connected with the WooCommerce community:
 
-- [WooCommerce Official Website](https://woocommerce.com/)
-- [Woo Marketplace](https://woocommerce.com/marketplace)
-- All [WooCommerce Repositories on GitHub](https://woocommerce.github.io/)
+- Join the [Woo Community Slack](https://woo.com/community-slack/) - ask questions and connect with other developers
+- Browse the [Woo Marketplace](https://woocommerce.com/marketplace) to see what successful extensions look like
+- Check out [all WooCommerce repositories on GitHub](https://woocommerce.github.io/)
 
----
+</details>
 
 ## Not a developer?
 
-This documentation site is intended for developers. If you're a merchant or are new to WooCommerce, please check out [woocommerce.com](https://woocommerce.com/) for our merchant-facing docs.
+This site is for developers building with WooCommerce. If you're a merchant looking for help using WooCommerce, visit [woocommerce.com](https://woocommerce.com/) instead.
 
-[View Merchant Documentation](https://woocommerce.com/documentation/)
+[View merchant documentation](https://woocommerce.com/documentation/)
