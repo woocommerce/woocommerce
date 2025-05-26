@@ -117,6 +117,20 @@ export function initDomTracking() {
 			},
 			selector: '.editor-preview-dropdown__toggle',
 		},
+		// Email tab in the sidebar clicked
+		{
+			track: () => {
+				recordEvent( 'sidebar_tab_selected', { tab: 'document' } );
+			},
+			selector: '[data-tab-id="edit-post/document"]',
+		},
+		// Block tab in the sidebar clicked
+		{
+			track: () => {
+				recordEvent( 'sidebar_tab_selected', { tab: 'block' } );
+			},
+			selector: '[data-tab-id="edit-post/block"]',
+		},
 	];
 
 	document.addEventListener( 'click', trackMatchingEvents );
