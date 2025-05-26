@@ -107,7 +107,11 @@ class Email_Editor {
 	 */
 	private function register_block_templates(): void {
 		// Since we cannot currently disable blocks in the editor for specific templates, disable templates when viewing site editor. @see https://github.com/WordPress/gutenberg/issues/41062.
-		if ( strstr( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), 'site-editor.php' ) === false ) {
+		$request_uri = '';
+		if ( isset( $_SERVER['REQUEST_URI'] ) && is_string( $_SERVER['REQUEST_URI'] ) ) {
+			$request_uri = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		}
+		if ( strstr( $request_uri, 'site-editor.php' ) === false ) {
 			$post_types = array_column( $this->get_post_types(), 'name' );
 			$this->templates->initialize( $post_types );
 		}
@@ -275,7 +279,11 @@ class Email_Editor {
 	 */
 	public function get_current_post() {
 		if ( isset( $_GET['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$current_post = get_post( intval( $_GET['post'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- data valid
+			$post_id = 0;
+			if ( is_string( $_GET['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- data valid
+				$post_id = intval( $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- data valid
+			}
+			$current_post = get_post( $post_id );
 		} else {
 			$current_post = $GLOBALS['post'];
 		}

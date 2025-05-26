@@ -258,7 +258,9 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	private function getFlexItemsFromOutput( string $output ): array {
 		$matches = array();
 		preg_match_all( '/<td class="layout-flex-item" style="(.*)">/', $output, $matches );
-		return explode( '><', $matches[0][0] ?? array() );
+		$match = $matches[0][0];
+		$this->assertIsString( $match );
+		return explode( '><', $match );
 	}
 
 	/**
