@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix the default country in the business step to match the selected one in NOX

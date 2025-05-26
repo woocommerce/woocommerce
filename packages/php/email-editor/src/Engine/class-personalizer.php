@@ -92,8 +92,9 @@ class Personalizer {
 		$content_processor = new HTML_Tag_Processor( $content );
 		while ( $content_processor->next_token() ) {
 			if ( $content_processor->get_token_type() === '#comment' ) {
-				$token = $this->parse_token( $content_processor->get_modifiable_text() );
-				$tag   = $this->tags_registry->get_by_token( $token['token'] );
+				$modifiable_text = $content_processor->get_modifiable_text();
+				$token           = $this->parse_token( $modifiable_text );
+				$tag             = $this->tags_registry->get_by_token( $token['token'] );
 				if ( ! $tag ) {
 					continue;
 				}
@@ -103,12 +104,13 @@ class Personalizer {
 
 			} elseif ( $content_processor->get_token_type() === '#tag' && $content_processor->get_tag() === 'TITLE' ) {
 				// The title tag contains the subject of the email which should be personalized. HTML_Tag_Processor does parse the header tags.
-				$title = $this->personalize_content( $content_processor->get_modifiable_text() );
+				$modifiable_text = $content_processor->get_modifiable_text();
+				$title           = $this->personalize_content( $modifiable_text );
 				$content_processor->set_modifiable_text( $title );
 
 			} elseif ( $content_processor->get_token_type() === '#tag' && $content_processor->get_tag() === 'A' && $content_processor->get_attribute( 'data-link-href' ) ) {
 				// The anchor tag contains the data-link-href attribute which should be personalized.
-				$href  = $content_processor->get_attribute( 'data-link-href' );
+				$href  = (string) $content_processor->get_attribute( 'data-link-href' );
 				$token = $this->parse_token( $href );
 				$tag   = $this->tags_registry->get_by_token( $token['token'] );
 				if ( ! $tag ) {
@@ -124,6 +126,9 @@ class Personalizer {
 				}
 			} elseif ( $content_processor->get_token_type() === '#tag' && $content_processor->get_tag() === 'A' ) {
 				$href = $content_processor->get_attribute( 'href' );
+				if ( ! is_string( $href ) ) {
+					continue;
+				}
 
 				if ( ! $href || ! preg_match( '/\[[a-z-\/]+\]/', urldecode( $href ), $matches ) ) {
 					continue;

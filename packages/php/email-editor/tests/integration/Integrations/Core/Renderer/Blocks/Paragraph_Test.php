@@ -111,18 +111,22 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 		$html->next_tag( array( 'tag_name' => 'table' ) );
 		$table_style = $html->get_attribute( 'style' );
 		// Table needs to have border-collapse: separate to make border-radius work.
+		$this->assertIsString( $table_style );
 		$this->assertStringContainsString( 'border-collapse: separate', $table_style );
 		$html->next_tag( array( 'tag_name' => 'td' ) );
 		$table_cell_style = $html->get_attribute( 'style' );
 		// Border styles are applied to the table cell.
+		$this->assertIsString( $table_cell_style );
 		$this->assertStringContainsString( 'border-color:#000001', $table_cell_style );
 		$this->assertStringContainsString( 'border-radius:20px', $table_cell_style );
 		$this->assertStringContainsString( 'border-width:10px', $table_cell_style );
 		$table_cell_classes = $html->get_attribute( 'class' );
+		$this->assertIsString( $table_cell_classes );
 		$this->assertStringContainsString( 'has-border-color test-class has-red-border-color', $table_cell_classes );
 		$html->next_tag( array( 'tag_name' => 'p' ) );
 		// There are no border styles on the paragraph.
 		$paragraph_style = $html->get_attribute( 'style' );
+		$this->assertIsString( $paragraph_style );
 		$this->assertStringNotContainsString( 'border', $paragraph_style );
 	}
 
