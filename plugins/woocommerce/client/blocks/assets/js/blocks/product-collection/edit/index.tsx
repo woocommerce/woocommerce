@@ -1,10 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	store as blockEditorStore,
-	useBlockProps,
-} from '@wordpress/block-editor';
+import { store as blockEditorStore } from '@wordpress/block-editor';
 import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { useGetLocation } from '@woocommerce/blocks/product-template/utils';
@@ -29,8 +26,6 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 	const { clientId, attributes, context } = props;
 	const location = useGetLocation( context, clientId );
 	const tracksLocation = useTracksLocation( context.templateSlug );
-
-	const blockProps = useBlockProps();
 
 	const [ isSelectionModalOpen, setIsSelectionModalOpen ] = useState( false );
 	const hasInnerBlocks = useSelect(

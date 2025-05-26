@@ -11,13 +11,13 @@ import {
 	__experimentalHStack as HStack,
 	__experimentalText as Text,
 } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
 import type { ProductCollectionEditComponentProps } from '../types';
 import { getCollectionByName } from '../collections';
-import { useBlockProps } from '@wordpress/block-editor';
 
 const ProductPicker = (
 	props: ProductCollectionEditComponentProps & {
