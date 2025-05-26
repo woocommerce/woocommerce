@@ -47,9 +47,8 @@ class EmailApiController {
 	 * @return array - The email data.
 	 */
 	public function get_email_data( $post_data ): array {
-		$email_type  = $this->post_manager->get_email_type_from_post_id( $post_data['id'] );
-		$post_option = get_option( "woocommerce_{$email_type}_settings" );
-		$email       = $this->get_email_by_type( $email_type ?? '' );
+		$email_type = $this->post_manager->get_email_type_from_post_id( $post_data['id'] );
+		$email      = $this->get_email_by_type( $email_type ?? '' );
 
 		// When the email type is not found, it means that the email type is not supported.
 		if ( ! $email ) {
@@ -93,39 +92,37 @@ class EmailApiController {
 		if ( ! array_key_exists( 'subject', $data ) && ! array_key_exists( 'preheader', $data ) ) {
 			return;
 		}
-		$email_type  = $this->post_manager->get_email_type_from_post_id( $post->ID );
-		$option_name = "woocommerce_{$email_type}_settings";
-		$post_option = get_option( $option_name );
+		$email_type = $this->post_manager->get_email_type_from_post_id( $post->ID );
+		$email      = $this->get_email_by_type( $email_type ?? '' );
 
 		// Handle customer_refunded_order email type because it has two different subjects.
 		if ( 'customer_refunded_order' === $email_type ) {
 			if ( array_key_exists( 'subject_full', $data ) ) {
-				$post_option['subject_full'] = $data['subject_full'];
+				$email->update_option( 'subject_full', $data['subject_full'] );
 			}
 			if ( array_key_exists( 'subject_partial', $data ) ) {
-				$post_option['subject_partial'] = $data['subject_partial'];
+				$email->update_option( 'subject_partial', $data['subject_partial'] );
 			}
 		} elseif ( array_key_exists( 'subject', $data ) ) {
-			$post_option['subject'] = $data['subject'];
+			$email->update_option( 'subject', $data['subject'] );
 		}
 
 		if ( array_key_exists( 'preheader', $data ) ) {
-			$post_option['preheader'] = $data['preheader'];
+			$email->update_option( 'preheader', $data['preheader'] );
 		}
 
 		if ( array_key_exists( 'enabled', $data ) ) {
-			$post_option['enabled'] = $data['enabled'] ? 'yes' : 'no';
+			$email->update_option( $data['enabled'] ? 'yes' : 'no' );
 		}
 		if ( array_key_exists( 'recipient', $data ) ) {
-			$post_option['recipient'] = $data['recipient'];
+			$email->update_option( 'recipient', $data['recipient'] );
 		}
 		if ( array_key_exists( 'cc', $data ) ) {
-			$post_option['cc'] = $data['cc'];
+			$email->update_option( 'cc', $data['cc'] );
 		}
 		if ( array_key_exists( 'bcc', $data ) ) {
-			$post_option['bcc'] = $data['bcc'];
+			$email->update_option( 'bcc', $data['bcc'] );
 		}
-		update_option( $option_name, $post_option );
 	}
 
 	/**

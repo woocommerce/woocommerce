@@ -665,14 +665,19 @@ class PaymentsRestController extends RestApiControllerBase {
 					'properties'  => array(
 						'_type'  => array(
 							'type'        => 'string',
-							'enum'        => array( PaymentProviders::EXTENSION_TYPE_WPORG ),
-							'description' => esc_html__( 'The type of the plugin.', 'woocommerce' ),
+							'enum'        => array(
+								PaymentProviders::EXTENSION_TYPE_WPORG,
+								PaymentProviders::EXTENSION_TYPE_MU_PLUGIN,
+								PaymentProviders::EXTENSION_TYPE_THEME,
+								PaymentProviders::EXTENSION_TYPE_UNKNOWN,
+							),
+							'description' => esc_html__( 'The type of the containing entity. Generally this is a regular plugin but it can also be a non-standard entity like a theme or a must-user plugin.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
 						'slug'   => array(
 							'type'        => 'string',
-							'description' => esc_html__( 'The slug of the plugin.', 'woocommerce' ),
+							'description' => esc_html__( 'The slug of the containing entity.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
@@ -689,7 +694,7 @@ class PaymentsRestController extends RestApiControllerBase {
 								PaymentProviders::EXTENSION_INSTALLED,
 								PaymentProviders::EXTENSION_ACTIVE,
 							),
-							'description' => esc_html__( 'The status of the plugin.', 'woocommerce' ),
+							'description' => esc_html__( 'The status of the containing entity.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
