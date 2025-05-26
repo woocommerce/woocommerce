@@ -1,7 +1,7 @@
 ---
 post_title: How to set up and use a child theme
 sidebar_label: Set up and use a child theme
-tags: [how-to]
+
 ---
 
 # How to set up and use a child theme

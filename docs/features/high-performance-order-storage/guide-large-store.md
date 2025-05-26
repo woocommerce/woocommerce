@@ -1,7 +1,7 @@
 ---
 post_title: A large store's guide to enable HPOS on WooCommerce
 sidebar_label: Enable HPOS for large stores
-tags: [how-to]
+
 ---
 
 # A large store's guide to enable HPOS on WooCommerce

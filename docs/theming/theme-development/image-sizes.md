@@ -1,7 +1,7 @@
 ---
 post_title: Image sizing for theme developers
 sidebar_label: Image sizing
-tags: [reference]
+
 ---
 
 # Image sizing for theme developers

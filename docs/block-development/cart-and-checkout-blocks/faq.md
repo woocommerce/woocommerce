@@ -1,7 +1,7 @@
 ---
-post_title: Cart and Checkout - Frequently Asked Questions
-sidebar_label: Frequently Asked Questions
-tags: [reference]
+post_title: Frequently asked questions
+sidebar_label: Frequently asked questions
+
 ---
 
 # Frequently Asked Questions

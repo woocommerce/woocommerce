@@ -6,5 +6,8 @@
     "link": {
       "type": "generated-index",
       "title": "APIs"
+    },
+    "customProps" : {
+      "id" : "apis"
     }
 }

@@ -1,6 +1,6 @@
 ---
 post_title: HPOS order querying APIs
-tags: [reference]
+
 ---
 
 # HPOS order querying APIs

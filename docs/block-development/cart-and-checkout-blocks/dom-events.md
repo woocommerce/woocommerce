@@ -1,7 +1,7 @@
 ---
-post_title: Cart and Checkout - DOM events
+post_title: DOM events
 sidebar_label: DOM Events
-tags: [reference]
+
 ---
 
 # DOM events

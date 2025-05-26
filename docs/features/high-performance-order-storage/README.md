@@ -1,5 +1,5 @@
 ---
-category_title: High Performance Order Storage
+sidebar_label: High Performance Order Storage
 category_slug: hpos
 post_title: High Performance Order Storage (HPOS)
 ---

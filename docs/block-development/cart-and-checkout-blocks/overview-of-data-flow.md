@@ -1,7 +1,7 @@
 ---
-post_title: Cart and Checkout - Overview of data flow between client and server
+post_title: Overview of data flow between client and server
 sidebar_label: Data flow overview
-tags: [reference]
+
 ---
 
 # Overview of data flow between client and server

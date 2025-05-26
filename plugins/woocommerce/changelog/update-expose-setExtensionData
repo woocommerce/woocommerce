@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Deprecate __internalSetExtensionData in favor of setExtensionData

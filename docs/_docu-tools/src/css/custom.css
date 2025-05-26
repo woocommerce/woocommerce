@@ -29,3 +29,34 @@
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 }
+.footer__copyright {
+  padding-top: 20px;
+  font-size: 12px;
+}
+
+
+.docusaurus-footer-for-automattic {
+  padding-top: 10px;
+
+  a {
+    text-decoration: none;
+  }
+  img {
+    height: 10px;
+  }
+}
+
+/* Hide dark mode logo in light mode */
+html[data-theme='light'] .automattic-logo-dark {
+  display: none;
+}
+
+/* Hide light mode logo in dark mode */
+html[data-theme='dark'] .automattic-logo-light {
+  display: none;
+}
+
+/* Hide the pagination nav */
+.pagination-nav {
+  display: none;
+}

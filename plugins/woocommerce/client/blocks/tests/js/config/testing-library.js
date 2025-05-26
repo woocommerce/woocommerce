@@ -2,7 +2,6 @@
  * External dependencies
  */
 require( '@testing-library/jest-dom' );
-require( '@wordpress/jest-console' );
 
 /**
  * Ignore messages that match the pattern `Store ".*" is already registered.`

@@ -1,10 +1,10 @@
 ---
 post_title: DOM Events sent from product collection block
-sidebar_label: DOM Events
-tags: [how-to]
+sidebar_label: DOM events
+
 ---
 
-# DOM Events sent from product collection block
+# DOM events sent from product collection block
 
 ## `wc-blocks_product_list_rendered`
 

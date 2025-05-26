@@ -1,18 +1,18 @@
 ---
 post_title: Theming for Woo blocks
-sidebar_label: Theming for Woo Blocks
-tags: [reference]
+sidebar_label: Theming for Woo blocks
+
 ---
 
 # Theming for Woo blocks
 
-This page includes documentation about theming WooCommerce blocks and block themes.
+---
 
-
-**Note:** this document assumes some previous knowledge about block theme development and some WordPress concepts. If you are completely new to block theme development, please check [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/course/develop-your-first-low-code-block-theme/)
+**Note:** We're assuming you have some previous knowledge about block theme development and some WordPress concepts. If you are completely new to block theme development, please check [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/course/develop-your-first-low-code-block-theme/)
 to learn about block theme development, and explore
-the [Create Block Theme plugin](https://wordpress.org/plugins/create-block-theme/) tool when you're ready to create a
-new theme.
+the [Create Block Theme plugin](https://wordpress.org/plugins/create-block-theme/) tool when you're ready to create a new theme.
+
+---
 
 ## General concepts
 
@@ -84,4 +84,4 @@ Before                                                                          
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 <img src="https://github.com/woocommerce/woocommerce/assets/3616980/fbc11b83-f47b-4b25-bdeb-df798b251cce" width="210" alt="Product Collection block showing the Product Price block with default styles" /> | <img src="https://github.com/woocommerce/woocommerce/assets/3616980/c9730445-b9df-4e96-8204-a10896ac2c5a" width="210" alt="Product Collection block showing the Product Price styled with background and text colors and italic and bold typography" /> <!-- markdownlint-disable-line no-inline-html -->
 
-You can find more [documentation on global styles](https://developer.wordpress.org/themes/global-settings-and-styles/styles/) in developer.wordpress.org. You can also find the [list of WooCommerce blocks and their names in the docs](/docs/getting-started/building-a-woo-store/block-references).
+You can find more [documentation on global styles](https://developer.wordpress.org/themes/global-settings-and-styles/styles/) in developer.wordpress.org. You can also find the [list of WooCommerce blocks and their names in the docs](/docs/block-development/block-references).

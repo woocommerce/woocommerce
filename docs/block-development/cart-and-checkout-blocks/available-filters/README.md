@@ -1,5 +1,5 @@
 ---
-category_title: Available Filters
+sidebar_label: Available Filters
 category_slug: cart-and-checkout-available-filters
 post_title: Cart and Checkout - Available Filters
 ---
@@ -83,7 +83,7 @@ const modifyCartItemClass = ( defaultValue, extensions, args ) => {
 
 const modifyCartItemPrice = ( defaultValue, extensions, args ) => {
 	if ( isOrderSummaryContext( args ) ) {
-		return '&lt;price/&gt; for all items';
+		return '<price/> for all items';
 	}
 	return defaultValue;
 };
@@ -97,7 +97,7 @@ const modifyItemName = ( defaultValue, extensions, args ) => {
 
 const modifySubtotalPriceFormat = ( defaultValue, extensions, args ) => {
 	if ( isOrderSummaryContext( args ) ) {
-		return '&lt;price/&gt; per item';
+		return '<price/> per item';
 	}
 	return defaultValue;
 };

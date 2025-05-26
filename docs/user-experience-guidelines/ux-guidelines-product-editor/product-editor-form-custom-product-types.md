@@ -1,9 +1,9 @@
 ---
-post_title: Product Editor Guidelines - Custom Product Types
-sidebar_label: Custom Product Types
+post_title: Custom product types
+sidebar_label: Custom product types
 ---
 
-# Product Editor Guidelines - Custom Product Types
+# Custom Product Types
 
 Custom product types allow you to design a custom form and completely control its structure. They are convenient for extensions that enable merchants to create products from start to finish.
 

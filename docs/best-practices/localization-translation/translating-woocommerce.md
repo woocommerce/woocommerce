@@ -1,7 +1,7 @@
 ---
 post_title: How to translate WooCommerce
 sidebar_label: Translating WooCommerce
-tags: [how-to]
+
 ---
 
 # How to translate WooCommerce

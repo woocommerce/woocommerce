@@ -1,7 +1,7 @@
 ---
-post_title: Cart and Checkout - Hook support and common extensibility paths
+post_title: Hook support and common extensibility paths
 sidebar_label: Hook alternatives
-tags: [reference]
+
 ---
 
 # Hook support and common extensibility paths

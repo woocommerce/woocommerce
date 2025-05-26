@@ -1,7 +1,7 @@
 ---
-post_title: Cart and checkout blocks theming 
-sidebar_label: Cart and Checkout Blocks Theming 
-tags: [reference]
+post_title: Cart and Checkout blocks theming 
+sidebar_label: Cart and Checkout blocks theming 
+
 ---
 
 # Cart and checkout blocks theming 

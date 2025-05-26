@@ -1,6 +1,6 @@
 ---
 post_title: WooCommerce payment gateway plugin base
-tags: [code-snippet]
+
 ---
 
 # WooCommerce payment gateway plugin base

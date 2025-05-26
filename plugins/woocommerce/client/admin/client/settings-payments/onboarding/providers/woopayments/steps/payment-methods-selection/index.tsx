@@ -4,6 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Icon } from '@wordpress/components';
 import { RecommendedPaymentMethod } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 import { useState, useEffect, useMemo, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { close } from '@wordpress/icons';
@@ -15,8 +16,8 @@ import clsx from 'clsx';
 import { useOnboardingContext } from '../../data/onboarding-context';
 import { PaymentMethodListItem } from '~/settings-payments/components/payment-method-list-item';
 import {
-	combineRequestMethods,
 	combinePaymentMethodsState,
+	combineRequestMethods,
 	decouplePaymentMethodsState,
 	shouldRenderPaymentMethodInMainList,
 } from '~/settings-payments/utils';
@@ -77,8 +78,8 @@ export default function PaymentMethodsSelection() {
 		) {
 			// Check if all necessary state keys are present for the current methods in the *combined* state
 			const allKeysPresent = recommendedPaymentMethods.every( ( m ) => {
-				const isPresent = combinedState[ m.id ] !== undefined; // Check in combinedState
-				return isPresent;
+				// Check in combinedState
+				return combinedState[ m.id ] !== undefined;
 			} );
 
 			if ( allKeysPresent ) {
@@ -95,7 +96,7 @@ export default function PaymentMethodsSelection() {
 			}
 		}
 		// Depend on methods and the *combined* state
-	}, [ recommendedPaymentMethods, combinedState ] );
+	}, [ recommendedPaymentMethods, combinedState, initialVisibilityMap ] );
 
 	// Calculate hidden count based on the stored initial visibility (Memoized)
 	const hiddenCount = useMemo( () => {
@@ -270,6 +271,40 @@ export default function PaymentMethodsSelection() {
 								url: href,
 								method: 'POST',
 							} ).then( () => {
+								recordEvent(
+									'wcpay_settings_payment_methods_continue',
+									{
+										displayed_payment_methods:
+											Object.keys(
+												paymentMethodsState
+											).join( ', ' ),
+										selected_payment_methods: Object.keys(
+											paymentMethodsState
+										)
+											.filter(
+												( paymentMethod ) =>
+													paymentMethodsState[
+														paymentMethod
+													]
+											)
+											.join( ', ' ),
+										deselected_payment_methods: Object.keys(
+											paymentMethodsState
+										)
+											.filter(
+												( paymentMethod ) =>
+													! paymentMethodsState[
+														paymentMethod
+													]
+											)
+											.join( ', ' ),
+										store_country:
+											window.wcSettings?.admin
+												?.woocommerce_payments_nox_profile
+												?.business_country_code ??
+											'unknown',
+									}
+								);
 								setIsContinueButtonLoading( false );
 								navigateToNextStep();
 							} );

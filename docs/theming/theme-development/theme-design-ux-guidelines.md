@@ -1,7 +1,7 @@
 ---
 post_title: Theme design and user experience guidelines
 sidebar_label: Theme design and user experience guidelines
-tags: [reference]
+
 ---
 
 # Theme design and user experience guidelines

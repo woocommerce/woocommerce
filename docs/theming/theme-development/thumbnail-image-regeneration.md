@@ -1,6 +1,6 @@
 ---
 post_title: Thumbnail image regeneration
-tags: [reference]
+
 ---
 
 # Thumbnail image regeneration

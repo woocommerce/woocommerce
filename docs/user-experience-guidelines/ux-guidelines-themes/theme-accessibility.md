@@ -1,9 +1,9 @@
 ---
-post_title: WooCommerce Theme Guidelines - Accessibility
+post_title: Accessibility
 sidebar_label: Accessibility
 ---
 
-# WooCommerce Theme Guidelines - Accessibility
+# Accessibility
 
 Your theme must meet the [WordPress Accessibility Coding Standards](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/accessibility/) 
 

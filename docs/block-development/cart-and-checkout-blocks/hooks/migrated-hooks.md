@@ -1,7 +1,7 @@
 ---
-post_title: Cart and Checkout - Legacy hooks
-sidebar_label: Legacy Hooks
-tags: [reference]
+post_title: Legacy hooks
+sidebar_label: Legacy hooks
+
 ---
 
 # Legacy hooks

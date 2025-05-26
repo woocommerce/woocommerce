@@ -1,7 +1,7 @@
 ---
-post_title: Cart and Checkout - Handling scripts, styles, and data
-sidebar_label: Script, Styles, and Data Handling
-tags: [how-to]
+post_title: Handling scripts, styles, and data
+sidebar_label: Script, styles, and data handling
+
 ---
 
 # Handling scripts, styles, and data

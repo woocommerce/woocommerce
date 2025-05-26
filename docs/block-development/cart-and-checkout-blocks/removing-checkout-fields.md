@@ -1,7 +1,7 @@
 ---
-post_title: Cart and Checkout - Removing checkout fields
+post_title: Removing checkout fields
 sidebar_label: Removing checkout fields
-tags: [reference]
+
 ---
 
 # Removing checkout fields

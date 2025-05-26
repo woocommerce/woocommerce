@@ -1,10 +1,4 @@
 {
-    "position": 5,
-    "label": "Block development",
-    "collapsible": false,
-    "collapsed": false,
-    "link": {
-      "type": "generated-index",
-      "title": "Block development"
-    }
+    "position": 4,
+    "label": "Block development"
 }

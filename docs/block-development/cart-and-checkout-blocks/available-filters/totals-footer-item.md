@@ -1,7 +1,7 @@
 ---
-post_title: Cart and Checkout Filters - Totals footer item
-sidebar_label: Totals Footer Item
-tags: [reference]
+post_title: Totals footer item
+sidebar_label: Totals footer item
+
 ---
 
 # Totals footer item
@@ -73,11 +73,11 @@ The `totalValue` filter allows to format the total price in the footer of the Ca
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
     -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
--   _validation_ `boolean` - Checks if the return value contains the substring `&lt;price/&gt;`.
+-   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
 
 ### Returns <!-- omit in toc -->
 
--   `string` - The modified format of the total price, which must contain the substring `&lt;price/&gt;`, or the original price format.
+-   `string` - The modified format of the total price, which must contain the substring `<price/>`, or the original price format.
 
 ### Code example <!-- omit in toc -->
 
@@ -85,7 +85,7 @@ The `totalValue` filter allows to format the total price in the footer of the Ca
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyTotalsPrice = ( defaultValue, extensions, args, validation ) => {
-	return 'Pay &lt;price/&gt; now';
+	return 'Pay <price/> now';
 };
 
 registerCheckoutFilters( 'my-extension', {

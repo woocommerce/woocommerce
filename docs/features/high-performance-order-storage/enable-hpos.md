@@ -1,7 +1,7 @@
 ---
 post_title: How to enable High Performance Order Storage
 sidebar_label: Enable HPOS
-tags: [how-to]
+
 ---
 
 # How to enable High Performance Order Storage

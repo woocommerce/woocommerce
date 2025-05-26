@@ -1,7 +1,7 @@
 ---
 post_title: Conditional tags in WooCommerce
 sidebar_label: Conditional tags
-tags: [reference]
+
 ---
 
 # Conditional tags in WooCommerce

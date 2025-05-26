@@ -1,10 +1,10 @@
 ---
-post_title: Product Editor Guidelines - Example Use-Cases
-sidebar_label: Example Use-Cases
-tags: [reference]
+post_title: Example use-cases
+sidebar_label: Example use-cases
+
 ---
 
-# Product Editor Guidelines - Example Use-Cases
+# Example Use-Cases
 
 Depending on the type of your extension (and your use case), you can pick the interface location that best suits how users will interact with it.
 

@@ -1,7 +1,7 @@
 ---
 post_title: Managing the lifecycle of WooCommerce block templates
 sidebar_label: Block template lifecycle
-tags: [reference]
+
 ---
 
 # Managing the lifecycle of WooCommerce block templates

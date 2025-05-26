@@ -1,10 +1,10 @@
 ---
-category_title: Product Editor Guidelines
+sidebar_label: Product Editor
 category_slug: user-experience-product-editor
-post_title: Product Editor Guidelines
+post_title: Product Editor guidelines
 ---
 
-# Product Editor Guidelines
+# Product Editor guidelines
 
 Our research shows that merchants think in terms of tasks and goals while creating new products in Woo. For example, adding or editing a product price is a separate task from uploading images or managing inventory.
 

@@ -1,9 +1,9 @@
 ---
-post_title: Product Editor Guidelines - Sections
+post_title: Sections
 sidebar_label: Sections
 ---
 
-# Product Editor Guidelines - Sections
+# Sections
 
 Sections are significant parts of the form that may consist of multiple subsections and fields. They should be used sparsely throughout the form, so merchants are not overwhelmed with options while filling out the information about their products.
 

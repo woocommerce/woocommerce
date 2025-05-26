@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Features;
 
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController;
+use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use WC_Tracks;
 use WC_Site_Tracking;
 use Automattic\Jetpack\Constants;
@@ -389,26 +389,26 @@ class FeaturesController {
 					'woocommerce'
 				),
 
-					/*
-					 * This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
-					 * but as this feature doesn't affect all extensions, and the rollout is fairly short,
-					 * we'll skip the compatibility check by marking this as legacy. This is a workaround until
-					 * we can implement a more sophisticated compatibility checking system.
-					 *
-					 * @see https://github.com/woocommerce/woocommerce/issues/39147
-					 * @see https://github.com/woocommerce/woocommerce/issues/55540
-					 */
-					'is_legacy'       => true,
-					'is_experimental' => false,
+				/*
+				 * This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
+				 * but as this feature doesn't affect all extensions, and the rollout is fairly short,
+				 * we'll skip the compatibility check by marking this as legacy. This is a workaround until
+				 * we can implement a more sophisticated compatibility checking system.
+				 *
+				 * @see https://github.com/woocommerce/woocommerce/issues/39147
+				 * @see https://github.com/woocommerce/woocommerce/issues/55540
+				 */
+				'is_legacy'       => true,
+				'is_experimental' => false,
+			),
+			'blueprint'                          => array(
+				'name'               => __( 'Blueprint (beta)', 'woocommerce' ),
+				'description'        => __(
+					'Enable blueprint to import and export settings in bulk',
+					'woocommerce'
 				),
-				'blueprint'                          => array(
-					'name'               => __( 'Blueprint (beta)', 'woocommerce' ),
-					'description'        => __(
-						'Enable blueprint to import and export settings in bulk',
-						'woocommerce'
-					),
-					'enabled_by_default' => true,
-					'disable_ui'         => false,
+				'enabled_by_default' => true,
+				'disable_ui'         => false,
 
 				/*
 				* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
@@ -427,7 +427,7 @@ class FeaturesController {
 					'Enable the new payments settings experience',
 					'woocommerce'
 				),
-				'enabled_by_default' => false,
+				'enabled_by_default' => true,
 				'disable_ui'         => false,
 				'is_experimental'    => false,
 			),
@@ -600,6 +600,10 @@ class FeaturesController {
 	public function feature_is_enabled( string $feature_id ): bool {
 		if ( ! $this->feature_exists( $feature_id ) ) {
 			return false;
+		}
+
+		if ( $this->is_preview_email_improvements_enabled( $feature_id ) ) {
+			return true;
 		}
 
 		$default_value = $this->feature_is_enabled_by_default( $feature_id ) ? 'yes' : 'no';
@@ -1642,6 +1646,7 @@ class FeaturesController {
 	 */
 	public function display_email_improvements_feedback_notice( $feature_id, $is_enabled ): void {
 		if ( 'email_improvements' === $feature_id && ! $is_enabled ) {
+			set_transient( 'wc_settings_email_improvements_reverted', 'yes', 15 );
 			add_action(
 				'admin_notices',
 				function () {
@@ -1649,5 +1654,29 @@ class FeaturesController {
 				}
 			);
 		}
+	}
+
+	/**
+	 * Check if the email improvements feature is enabled in preview mode in Settings > Emails.
+	 * This is used to force the email improvements feature without affecting shoppers.
+	 *
+	 * @param string $feature_id The feature id.
+	 * @return bool Whether the email improvements feature is enabled in preview mode.
+	 */
+	private function is_preview_email_improvements_enabled( string $feature_id ): bool {
+		if ( 'email_improvements' !== $feature_id ) {
+			return false;
+		}
+		/**
+		 * This filter is documented in templates/emails/email-styles.php
+		 *
+		 * @since 9.9.0
+		 * @param bool $is_email_preview Whether the email is being previewed.
+		 */
+		$is_email_preview = apply_filters( 'woocommerce_is_email_preview', false );
+		if ( $is_email_preview ) {
+			return get_transient( EmailPreview::TRANSIENT_PREVIEW_EMAIL_IMPROVEMENTS ) === 'yes';
+		}
+		return false;
 	}
 }

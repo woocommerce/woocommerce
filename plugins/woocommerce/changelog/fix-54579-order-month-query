@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Use a simplified query to generate the options in the months filter dropdown on the Orders list table.

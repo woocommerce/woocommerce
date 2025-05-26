@@ -1,7 +1,7 @@
 ---
 post_title: Developing using WooCommerce CRUD objects
 sidebar_label: Using CRUD objects
-tags: [reference]
+
 ---
 
 # Developing using WooCommerce CRUD objects

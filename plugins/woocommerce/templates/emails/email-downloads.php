@@ -12,18 +12,30 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 9.7.0
+ * @version 9.9.0
  */
+
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
-?><h2 class="woocommerce-order-downloads__title"><?php esc_html_e( 'Downloads', 'woocommerce' ); ?></h2>
+$email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
 
-<table class="td font-family" cellspacing="0" cellpadding="6" style="width: 100%; margin-bottom: 40px;" border="1">
+?><h2 class="woocommerce-order-downloads__title<?php echo $email_improvements_enabled ? ' email-order-detail-heading' : ''; ?>"><?php esc_html_e( 'Downloads', 'woocommerce' ); ?></h2>
+
+<table
+	class="td font-family<?php echo $email_improvements_enabled ? ' email-order-details' : ''; ?>"
+	cellspacing="0"
+	cellpadding="<?php echo $email_improvements_enabled ? '0' : '6'; ?>"
+	style="width: 100%; margin-bottom: 40px;"
+	border="<?php echo $email_improvements_enabled ? '0' : '1'; ?>"
+>
 	<thead>
 		<tr>
 			<?php foreach ( $columns as $column_id => $column_name ) : ?>
-				<th class="td text-align-left" scope="col"><?php echo esc_html( $column_name ); ?></th>
+				<th class="td <?php echo $email_improvements_enabled && array_key_last( $columns ) === $column_id ? 'text-align-right' : 'text-align-left'; ?>" scope="col">
+					<?php echo esc_html( $column_name ); ?>
+				</th>
 			<?php endforeach; ?>
 		</tr>
 	</thead>
@@ -31,7 +43,7 @@ defined( 'ABSPATH' ) || exit;
 	<?php foreach ( $downloads as $download ) : ?>
 		<tr>
 			<?php foreach ( $columns as $column_id => $column_name ) : ?>
-				<td class="td text-align-left">
+				<td class="td <?php echo $email_improvements_enabled && array_key_last( $columns ) === $column_id ? 'text-align-right' : 'text-align-left'; ?>">
 					<?php
 					if ( has_action( 'woocommerce_email_downloads_column_' . $column_id ) ) {
 						do_action( 'woocommerce_email_downloads_column_' . $column_id, $download, $plain_text );

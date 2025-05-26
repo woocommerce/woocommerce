@@ -1,6 +1,6 @@
 ---
 post_title: HPOS extension recipe book
-tags: [how-to]
+
 ---
 
 # HPOS extension recipe book

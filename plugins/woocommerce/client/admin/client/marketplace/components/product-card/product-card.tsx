@@ -7,6 +7,7 @@ import clsx from 'clsx';
 import { ExtraProperties, queueRecordEvent } from '@woocommerce/tracks';
 import { useQuery } from '@woocommerce/navigation';
 import { decodeEntities } from '@wordpress/html-entities';
+import { useState, useContext, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -20,7 +21,8 @@ import {
 	ProductType,
 } from '../product-list/types';
 import { appendURLParams } from '../../utils/functions';
-
+import ProductPreviewModal from '../product-preview-modal/product-preview-modal';
+import { MarketplaceContext } from '../../contexts/marketplace-context';
 export interface ProductCardProps {
 	type?: string;
 	product?: Product;
@@ -34,9 +36,11 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	const SPONSORED_PRODUCT_LABEL = 'promoted'; // what product.label indicates a sponsored placement
 	const SPONSORED_PRODUCT_STRIPE_SIZE = '5px'; // unfortunately can't be defined in CSS - height of "stripe"
 
-	const { isLoading, type, cardType } = props;
+	const { isLoading, cardType } = props;
 	const isCompact = cardType === 'compact';
 	const query = useQuery();
+	const [ isPreviewModalOpen, setIsPreviewModalOpen ] = useState( false );
+	const linkRef = useRef< HTMLAnchorElement >( null );
 	// Get the product if provided; if not provided, render a skeleton loader
 	const product = props.product ?? {
 		id: null,
@@ -62,6 +66,28 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		regularPrice: 0,
 		type: '',
 	};
+
+	// Business service cards can be mixed with extensions. Check product type to properly set the card type.
+	// For extensions and themes, type is not set on product object.
+	const type =
+		product.type === ProductType.businessService
+			? product.type
+			: props.type;
+
+	const isTheme = type === ProductType.theme;
+	const isBusinessService = type === ProductType.businessService;
+	const { iamSettings } = useContext( MarketplaceContext );
+	const shouldShowPreview =
+		iamSettings?.product_previews === 'modal' &&
+		! isTheme &&
+		! isBusinessService;
+
+	const showVendor = ! isCompact && ! isLoading;
+	const showVendorLoading = ! isCompact && isLoading;
+	const showDescription = ! isTheme && ! isCompact;
+	const showCardIcon = ! isTheme || isCompact;
+	const showBigImage = isTheme && ! isCompact;
+	const decodedDescription = decodeEntities( product.description );
 
 	function isSponsored(): boolean {
 		return SPONSORED_PRODUCT_LABEL === product.label;
@@ -119,31 +145,33 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		</span>
 	);
 
-	const isTheme = type === ProductType.theme;
-	const isBusinessService = type === ProductType.businessService;
-	let productVendor: string | JSX.Element | null = product?.vendorName;
-	if ( ! isCompact && product?.vendorName && product?.vendorUrl ) {
-		productVendor = (
+	const createVendorLink = ( eventName: string ) => {
+		if ( ! product?.vendorName || ! product?.vendorUrl ) {
+			return product?.vendorName || null;
+		}
+
+		return (
 			<a
 				href={ product.vendorUrl }
-				target="_blank"
 				rel="noopener noreferrer"
+				target="_blank"
 				onClick={ () => {
-					recordTracksEvent(
-						'marketplace_product_card_vendor_clicked',
-						{
-							product: product.title,
-							vendor: product.vendorName,
-							product_type: type,
-						}
-					);
+					recordTracksEvent( eventName, {
+						product: product.title,
+						vendor: product.vendorName,
+						product_type: type,
+					} );
 				} }
 			>
 				{ product.vendorName }
 				{ screenReaderText }
 			</a>
 		);
-	}
+	};
+
+	const productVendor = createVendorLink(
+		'marketplace_product_card_vendor_clicked'
+	);
 
 	const productUrl = () => {
 		if ( query.ref ) {
@@ -152,6 +180,45 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 			] );
 		}
 		return product.url;
+	};
+
+	const handleCardClick = () => {
+		recordTracksEvent( 'marketplace_product_card_clicked', {
+			product_id: product.id,
+			product_name: product.title,
+			vendor: product.vendorName,
+			product_type: type,
+		} );
+
+		if ( shouldShowPreview ) {
+			setIsPreviewModalOpen( true );
+		}
+	};
+
+	const handleModalOpen = () => {
+		const data: ExtraProperties = {
+			product_id: product.id,
+			product_name: product.title,
+			vendor: product.vendorName,
+			product_type: type,
+		};
+
+		recordTracksEvent( 'marketplace_product_preview_modal_opened', data );
+	};
+
+	const handleModalClose = ( closeType?: string ) => {
+		const data: ExtraProperties = {
+			product_id: product.id,
+			product_name: product.title,
+			vendor: product.vendorName,
+			product_type: type,
+		};
+
+		const tracksEvent =
+			closeType || 'marketplace_product_preview_modal_dismissed';
+
+		recordTracksEvent( tracksEvent, data );
+		setIsPreviewModalOpen( false );
 	};
 
 	const classNames = clsx(
@@ -165,27 +232,33 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		}
 	);
 
-	const CardLink = () => (
-		<a
-			className="woocommerce-marketplace__product-card__link"
-			href={ productUrl() }
-			rel="noopener noreferrer"
-			target="_blank"
-			onClick={ () => {
-				recordTracksEvent( 'marketplace_product_card_clicked', {
-					product_id: product.id,
-					product_name: product.title,
-					vendor: product.vendorName,
-					product_type: type,
-				} );
-			} }
-		>
-			{ isLoading ? ' ' : product.title }
-			{ screenReaderText }
-		</a>
-	);
-
-	const decodedDescription = decodeEntities( product.description );
+	const CardLink = () => {
+		return (
+			<a
+				ref={ linkRef }
+				className="woocommerce-marketplace__product-card__link"
+				href={ productUrl() }
+				rel="noopener noreferrer"
+				target="_blank"
+				onClick={ ( e ) => {
+					if ( shouldShowPreview ) {
+						e.preventDefault();
+						handleCardClick();
+					} else {
+						recordTracksEvent( 'marketplace_product_card_clicked', {
+							product_id: product.id,
+							product_name: product.title,
+							vendor: product.vendorName,
+							product_type: type,
+						} );
+					}
+				} }
+			>
+				{ isLoading ? ' ' : product.title }
+				{ screenReaderText }
+			</a>
+		);
+	};
 
 	const BusinessService = () => {
 		const mainImage = isCompact ? product.icon : product.featuredImage;
@@ -220,12 +293,6 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		);
 	};
 
-	const showVendor = ! isCompact && ! isLoading;
-	const showVendorLoading = ! isCompact && isLoading;
-	const showDescription = ! isTheme && ! isCompact;
-	const showCardIcon = ! isTheme || isCompact;
-	const showBigImage = isTheme && ! isCompact;
-
 	const footer = ! isBusinessService ? (
 		<footer className="woocommerce-marketplace__product-card__footer">
 			{ isLoading && (
@@ -237,100 +304,120 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		</footer>
 	) : null;
 
-	return (
-		<Card
-			className={ classNames }
-			id={ `product-${ product.id }` }
-			tabIndex={ -1 }
-			aria-hidden={ isLoading }
-			style={ inlineCss() }
-		>
-			{ isBusinessService ? (
-				<BusinessService />
-			) : (
-				<div className="woocommerce-marketplace__product-card__content">
-					{ showBigImage && (
-						<div className="woocommerce-marketplace__product-card__image">
-							{ ! isLoading && (
+	const cardContent = (
+		<div className="woocommerce-marketplace__product-card__content">
+			{ showBigImage && (
+				<div className="woocommerce-marketplace__product-card__image">
+					{ ! isLoading && (
+						<img
+							className="woocommerce-marketplace__product-card__image-inner"
+							src={ product.image }
+							alt={ product.title }
+						/>
+					) }
+				</div>
+			) }
+			<div className="woocommerce-marketplace__product-card__header">
+				<div className="woocommerce-marketplace__product-card__details">
+					{ showCardIcon && (
+						<>
+							{ isLoading && (
+								<div className="woocommerce-marketplace__product-card__icon" />
+							) }
+							{ ! isLoading && product.icon && (
 								<img
-									className="woocommerce-marketplace__product-card__image-inner"
-									src={ product.image }
+									className="woocommerce-marketplace__product-card__icon"
+									src={ product.icon || product.image }
 									alt={ product.title }
 								/>
 							) }
-						</div>
+						</>
 					) }
-					<div className="woocommerce-marketplace__product-card__header">
-						<div className="woocommerce-marketplace__product-card__details">
-							{ showCardIcon && (
-								<>
-									{ isLoading && (
-										<div className="woocommerce-marketplace__product-card__icon" />
-									) }
-									{ ! isLoading && product.icon && (
-										<img
-											className="woocommerce-marketplace__product-card__icon"
-											src={
-												product.icon || product.image
-											}
-											alt={ product.title }
-										/>
-									) }
-								</>
-							) }
-							<div className="woocommerce-marketplace__product-card__meta">
-								<h2 className="woocommerce-marketplace__product-card__title">
-									<CardLink />
-								</h2>
-								{ showVendorLoading && (
-									<p className="woocommerce-marketplace__product-card__vendor-details">
-										<span className="woocommerce-marketplace__product-card__vendor" />
-									</p>
+					<div className="woocommerce-marketplace__product-card__meta">
+						<h2 className="woocommerce-marketplace__product-card__title">
+							<CardLink />
+						</h2>
+						{ showVendorLoading && (
+							<p className="woocommerce-marketplace__product-card__vendor-details">
+								<span className="woocommerce-marketplace__product-card__vendor" />
+							</p>
+						) }
+						{ showVendor && (
+							<p className="woocommerce-marketplace__product-card__vendor-details">
+								{ productVendor && (
+									<span className="woocommerce-marketplace__product-card__vendor">
+										<span>
+											{ __( 'By ', 'woocommerce' ) }
+										</span>
+										{ productVendor }
+									</span>
 								) }
-								{ showVendor && (
-									<p className="woocommerce-marketplace__product-card__vendor-details">
-										{ productVendor && (
-											<span className="woocommerce-marketplace__product-card__vendor">
-												<span>
-													{ __(
-														'By ',
-														'woocommerce'
-													) }
-												</span>
-												{ productVendor }
-											</span>
-										) }
-										{ productVendor && isSponsored() && (
-											<span
-												aria-hidden="true"
-												className="woocommerce-marketplace__product-card__vendor-details__separator"
-											>
-												·
-											</span>
-										) }
-										{ isSponsored() && (
-											<span className="woocommerce-marketplace__product-card__sponsored-label">
-												{ __(
-													'Sponsored',
-													'woocommerce'
-												) }
-											</span>
-										) }
-									</p>
+								{ productVendor && isSponsored() && (
+									<span
+										aria-hidden="true"
+										className="woocommerce-marketplace__product-card__vendor-details__separator"
+									>
+										·
+									</span>
 								) }
-								{ isCompact && footer }
-							</div>
-						</div>
+								{ isSponsored() && (
+									<span className="woocommerce-marketplace__product-card__sponsored-label">
+										{ __( 'Sponsored', 'woocommerce' ) }
+									</span>
+								) }
+							</p>
+						) }
+						{ isCompact && footer }
 					</div>
-					{ showDescription && (
-						<p className="woocommerce-marketplace__product-card__description">
-							{ ! isLoading && decodedDescription }
-						</p>
-					) }
-					{ ! isCompact && footer }
 				</div>
+			</div>
+			{ showDescription && (
+				<p className="woocommerce-marketplace__product-card__description">
+					{ ! isLoading && decodedDescription }
+				</p>
 			) }
-		</Card>
+			{ ! isCompact && footer }
+		</div>
+	);
+
+	const CardWrapper = () => {
+		if ( isLoading ) {
+			return isBusinessService ? <BusinessService /> : cardContent;
+		}
+
+		return (
+			<div className="woocommerce-marketplace__product-card-wrapper">
+				{ isBusinessService ? <BusinessService /> : cardContent }
+			</div>
+		);
+	};
+
+	return (
+		<>
+			<Card
+				className={ classNames }
+				id={ `product-${ product.id }` }
+				tabIndex={ -1 }
+				aria-hidden={ isLoading }
+				style={ inlineCss() }
+			>
+				<CardWrapper />
+			</Card>
+
+			{ shouldShowPreview && isPreviewModalOpen && product && (
+				<ProductPreviewModal
+					productTitle={ product.title }
+					productVendor={ createVendorLink(
+						'marketplace_product_preview_vendor_clicked'
+					) }
+					productIcon={ product.icon || '' }
+					onOpen={ handleModalOpen }
+					onClose={ handleModalClose }
+					productId={ product.id as number }
+					triggerRef={ linkRef }
+				/>
+			) }
+		</>
 	);
 }
 
