@@ -9,7 +9,11 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
 	test.afterAll( async ( { baseURL } ) => {
-		await setFeatureFlag( baseURL, 'no' );
+		await setFeatureFlag(
+			baseURL,
+			'woocommerce_feature_block_email_editor_enabled',
+			'no'
+		);
 	} );
 
 	test( 'Email settings list view renders correctly and allows to edit email status and search', async ( {
