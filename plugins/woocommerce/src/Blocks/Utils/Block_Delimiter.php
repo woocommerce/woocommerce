@@ -449,7 +449,7 @@ class Block_Delimiter {
 		$match_at     = 0;
 		$match_length = 0;
 
-		while ( null !== ( $delimiter = self::next_delimiter( $text, $at, $match_at, $match_length ) ) ) {
+		while ( null !== ( $delimiter = self::next_delimiter( $text, $at, $match_at, $match_length ) ) ) { // phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 			// Handle top-level text as freeform blocks.
 			if ( 0 === $depth && $match_at > $at && 'visit' === $freeform_blocks ) {
 				list( $text_opener, $text_closer ) = static::freeform_pair( $text, $at, $match_at - $at );
@@ -713,13 +713,6 @@ class Block_Delimiter {
 	 * for efficiently interacting with the JSON attributes.
 	 *
 	 * @throws Exception This function is not yet implemented.
-	 *
-	 * @todo Create a lazy JSON wrapper so specific attributes can be
-	 *       efficiently queried without parsing everything and loading
-	 *       the entire object into memory.
-	 * @todo After realistic benchmarking, see if JsonStreamingParser\Parser
-	 *       could be used — it would need to be fast enough for the reduction
-	 *       in memory use to be worth it, compared to {@see \json_decode}.
 	 *
 	 * @see \JsonStreamingParser\Parser
 	 *
