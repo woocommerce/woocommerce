@@ -35,6 +35,18 @@ class EmailImprovements {
 		'yaymail.php',
 	);
 
+	private const EMAIL_TEMPLATE_PARTS = array(
+		'email-addresses.php',
+		'email-customer-details.php',
+		'email-downloads.php',
+		'email-footer.php',
+		'email-header.php',
+		'email-mobile-messaging.php',
+		'email-order-details.php',
+		'email-order-items.php',
+		'email-styles.php',
+	);
+
 	/**
 	 * Hook into WordPress.
 	 */
@@ -172,6 +184,7 @@ class EmailImprovements {
 			},
 			$core_emails
 		);
-		return array_intersect( $core_email_templates, $template_overrides );
+		$all_email_templates  = array_merge( $core_email_templates, self::EMAIL_TEMPLATE_PARTS );
+		return array_intersect( $all_email_templates, $template_overrides );
 	}
 }
