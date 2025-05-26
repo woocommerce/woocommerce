@@ -2049,10 +2049,13 @@ class PaymentExtensionSuggestions {
 	 * @param string $country_code Optional. The two-letter country code for which the extension suggestion should be retrieved.
 	 * @param string $context      Optional. The context ID of where this extension suggestion is being used.
 	 *
-	 * @return array|null The extension details for the given plugin slug. Null if not found.
+	 * @return array|null The extension details for the given plugin slug. Null if not found or the slug is empty.
 	 */
 	public function get_by_plugin_slug( string $plugin_slug, string $country_code = '', string $context = '' ): ?array {
 		$plugin_slug = sanitize_title( $plugin_slug );
+		if ( empty( $plugin_slug ) ) {
+			return null;
+		}
 
 		// If we have a country code, try to find a fully localized extension suggestion.
 		if ( ! empty( $country_code ) ) {
@@ -2863,7 +2866,7 @@ class PaymentExtensionSuggestions {
 					),
 					array(
 						'_type' => self::LINK_TYPE_ABOUT,
-						'url'   => 'https://woocommerce.com/products/viva-wallet-for-woocommerce/',
+						'url'   => 'https://woocommerce.com/products/viva-com-smart-for-woocommerce/',
 					),
 					array(
 						'_type' => self::LINK_TYPE_TERMS,
@@ -2871,11 +2874,11 @@ class PaymentExtensionSuggestions {
 					),
 					array(
 						'_type' => self::LINK_TYPE_DOCS,
-						'url'   => 'https://woocommerce.com/document/viva-wallet-for-woocommerce/',
+						'url'   => 'https://woocommerce.com/document/viva-com-smart-for-woocommerce/',
 					),
 					array(
 						'_type' => self::LINK_TYPE_SUPPORT,
-						'url'   => 'https://woocommerce.com/document/viva-wallet-standard-checkout/#section-26',
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=viva-com-smart-for-woocommerce',
 					),
 				),
 			),
