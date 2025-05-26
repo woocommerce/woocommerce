@@ -2,12 +2,12 @@
 
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Internal\StockNotifications;
+namespace Automattic\WooCommerce\Internal\StockNotifications\Admin;
 
 /**
- * Settings controller.
+ * Settings controller for Customer Stock Notifications.
  */
-class SettingsController extends \WC_Settings_Page {
+class SettingsController{
 
 	/**
 	 * Constructor.
@@ -31,11 +31,10 @@ class SettingsController extends \WC_Settings_Page {
 	 * @return array New Products settings sections.
 	 */
 	public function add_customer_stock_notifications_section( $sections ) {
-
 		if ( ! is_array( $sections ) ) {
 			return $sections;
 		}
-
+		
 		$section_title = __( 'Customer stock notifications', 'woocommerce' );
 
 		// Add 'Customer stock notifications' section to the Products tab, after Inventory.
@@ -47,7 +46,7 @@ class SettingsController extends \WC_Settings_Page {
 		} else {
 			$sections['customer_stock_notifications'] = $section_title;
 		}
-
+		
 		return $sections;
 	}
 

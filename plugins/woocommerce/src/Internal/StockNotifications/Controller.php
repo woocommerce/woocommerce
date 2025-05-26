@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications;
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailTemplatesController;
-use Automattic\WooCommerce\Internal\StockNotifications\SettingsController;
+use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
 
 /**
  * The controller for the stock notifications.
@@ -32,11 +32,11 @@ class Controller {
 
 		add_filter( 'woocommerce_data_stores', array( $this, 'register_data_stores' ) );
 
-		// Settings.
-		add_filter( 'woocommerce_get_settings_pages', array( $this, 'register_settings' ) );
-
 		$container = wc_get_container();
 		$container->get( EmailManager::class );
+
+		// TO-DO: Maybe run this only if the user is an administrator.
+		$container->get( SettingsController::class );
 	}
 
 	/**
@@ -52,18 +52,5 @@ class Controller {
 
 		$data_stores['stock_notification'] = wc_get_container()->get( StockNotificationsDataStore::class );
 		return $data_stores;
-	}
-
-	/**
-	 * Register the Customer Stock Notifications settings.
-	 *
-	 * @param array $settings Settings.
-	 * @return array
-	 */
-	public function register_settings( $settings ) {
-
-		$settings[] = wc_get_container()->get( SettingsController::class );
-
-		return $settings;
 	}
 }
