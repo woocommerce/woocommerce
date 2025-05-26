@@ -1720,7 +1720,7 @@ class WC_Helper {
 				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ), 422 );
 			}
 
-			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+			set_transient( $cache_key, $data, DAY_IN_SECONDS );
 
 			// Remove notice after successful API call as it's no longer applicable.
 			self::remove_api_error_notice();
@@ -1873,7 +1873,7 @@ class WC_Helper {
 				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ), 422 );
 			}
 
-			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+			set_transient( $cache_key, $data, 3 * HOUR_IN_SECONDS );
 
 			// Remove notice after successful API call as it's no longer applicable.
 			self::remove_api_error_notice();
