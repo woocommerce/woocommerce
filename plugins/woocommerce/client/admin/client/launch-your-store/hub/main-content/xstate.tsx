@@ -108,6 +108,15 @@ export const mainContentMachine = setup( {
 			const { content } = getQuery() as LaunchYourStoreQueryParams;
 			return !! content && content === contentLocation;
 		},
+		hasWooPaymentsOnboardingPath: () => {
+			const query = getQuery() as LaunchYourStoreQueryParams & {
+				path?: string;
+			};
+			return (
+				!! query.path &&
+				query.path.includes( '/woopayments/onboarding' )
+			);
+		},
 	},
 	actors: {
 		contentQueryParamListener,
@@ -133,6 +142,10 @@ export const mainContentMachine = setup( {
 	states: {
 		navigate: {
 			always: [
+				{
+					guard: { type: 'hasWooPaymentsOnboardingPath' },
+					target: 'payments',
+				},
 				{
 					guard: {
 						type: 'hasContentLocation',

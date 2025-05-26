@@ -330,6 +330,15 @@ export const sidebarMachine = setup( {
 			const { content } = getQuery() as LaunchYourStoreQueryParams;
 			return content === 'payments';
 		},
+		hasWooPaymentsOnboardingPath: () => {
+			const query = getQuery() as LaunchYourStoreQueryParams & {
+				path?: string;
+			};
+			return (
+				!! query.path &&
+				query.path.includes( '/woopayments/onboarding' )
+			);
+		},
 		hasWooPayments: ( { context } ) => {
 			return !! context.hasWooPayments;
 		},
@@ -362,6 +371,10 @@ export const sidebarMachine = setup( {
 	states: {
 		navigate: {
 			always: [
+				{
+					guard: { type: 'hasWooPaymentsOnboardingPath' },
+					target: 'payments',
+				},
 				{
 					guard: { type: 'hasPaymentsContent' },
 					target: 'payments',
@@ -565,7 +578,13 @@ export const sidebarMachine = setup( {
 			meta: {
 				component: PaymentsSidebar,
 			},
-			entry: [ 'showPaymentsContent' ],
+			entry: [
+				'showPaymentsContent',
+				{
+					type: 'updateQueryParams',
+					params: { sidebar: 'hub', content: 'payments' },
+				},
+			],
 			on: {
 				POP_BROWSER_STACK: {
 					actions: [
