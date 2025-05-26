@@ -117,9 +117,9 @@ class WC_Order extends WC_Abstract_Order {
 	 * Refunds for an order. Use {@see get_refunds()} instead.
 	 *
 	 * @deprecated 2.2.0
-	 * @var stdClass|WC_Order[]
+	 * @var WC_Order_Refund[]
 	 */
-	public $refunds;
+	public $refunds = array();
 
 	/**
 	 * When a payment is complete this function is called.
@@ -416,10 +416,18 @@ class WC_Order extends WC_Abstract_Order {
 	protected function status_transition() {
 		$status_transition = $this->status_transition;
 
+		$order_persisted       = array() === $this->changes;
+		$order_items_persisted = array() === $this->items_to_delete && array() === array_filter(
+			$this->get_items(),
+			static function ( $item ) {
+				return array() !== $item->get_changes();
+			},
+		);
+
 		// Reset status transition variable.
 		$this->status_transition = false;
 
-		if ( $status_transition ) {
+		if ( $status_transition && $order_persisted && $order_items_persisted ) {
 			try {
 				/**
 				 * Fires when order status is changed.
@@ -2120,28 +2128,39 @@ class WC_Order extends WC_Abstract_Order {
 	*/
 
 	/**
-	 * Get order refunds.
+	 * Returns an array of WC_Order_Refund objects for the order.
 	 *
+	 * Utilizes object cache to store refunds to avoid extra DB calls.
+	 *
+	 * @see WC_Order_Data_Store_CPT::prime_refund_caches_for_order()
 	 * @since 2.2
-	 * @return array of WC_Order_Refund objects
+	 *
+	 * @return WC_Order_Refund[]
 	 */
 	public function get_refunds() {
-		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $this->get_id();
-		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $this->get_id();
+		$refunds   = wp_cache_get( $cache_key, $this->cache_group );
 
-		if ( false !== $cached_data ) {
-			return $cached_data;
+		if ( false === $refunds ) {
+			$refunds = wc_get_orders(
+				array(
+					'type'   => 'shop_order_refund',
+					'parent' => $this->get_id(),
+					'limit'  => -1,
+				)
+			);
+			wp_cache_set( $cache_key, $refunds, $this->cache_group );
 		}
 
-		$this->refunds = wc_get_orders(
-			array(
-				'type'   => 'shop_order_refund',
-				'parent' => $this->get_id(),
-				'limit'  => -1,
-			)
-		);
+		$this->refunds = array();
 
-		wp_cache_set( $cache_key, $this->refunds, $this->cache_group );
+		if ( ! empty( $refunds ) && is_array( $refunds ) ) {
+			foreach ( $refunds as $refund ) {
+				if ( $refund instanceof WC_Order_Refund ) {
+					$this->refunds[] = $refund;
+				}
+			}
+		}
 
 		return $this->refunds;
 	}

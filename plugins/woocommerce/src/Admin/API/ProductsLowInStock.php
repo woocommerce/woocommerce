@@ -72,7 +72,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 		$status              = $request->get_param( 'status' );
 		$low_stock_threshold = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 
-		$sidewide_stock_threshold_only = $this->is_using_sitewide_stock_threshold_only();
+		$sidewide_stock_threshold_only = $this->is_using_sitewide_stock_threshold_only( $low_stock_threshold );
 		$total_results                 = $this->get_count( $sidewide_stock_threshold_only, $status, $low_stock_threshold );
 
 		$response = rest_ensure_response( array( 'total' => $total_results ) );
@@ -191,7 +191,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 		$offset              = ( $page - 1 ) * $per_page;
 		$low_stock_threshold = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 
-		$sidewide_stock_threshold_only = $this->is_using_sitewide_stock_threshold_only();
+		$sidewide_stock_threshold_only = $this->is_using_sitewide_stock_threshold_only( $low_stock_threshold );
 
 		$query_string = $this->get_query( $sidewide_stock_threshold_only );
 
@@ -251,11 +251,25 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	 * Check to see if store is using sitewide threshold only. Meaning that it does not have any custom
 	 * stock threshold for a product.
 	 *
+	 * @param int|null $low_stock_threshold Low stock threshold.
 	 * @return bool
 	 */
-	protected function is_using_sitewide_stock_threshold_only() {
+	protected function is_using_sitewide_stock_threshold_only( $low_stock_threshold = null ) {
 		global $wpdb;
-		$count = $wpdb->get_var( "select count(*) as total from {$wpdb->postmeta} where meta_key='_low_stock_amount'" );
+		$query_string = "
+			select count(*) as total
+			from {$wpdb->postmeta}
+			where 
+			  meta_key='_low_stock_amount'
+			  AND meta_value > ''
+		";
+		$args         = array();
+		if ( $low_stock_threshold ) {
+			$query_string .= ' AND meta_value != %d';
+			$args[]        = $low_stock_threshold;
+		}
+		// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
+		$count = $wpdb->get_var( $wpdb->prepare( $query_string, $args ) );
 		return 0 === (int) $count;
 	}
 

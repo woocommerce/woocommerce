@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent "woocommerce_order_status_X' hooks to be called when Order save() action is cancelled

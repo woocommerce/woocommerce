@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes the issue where padding/margin was being applied to the parent element instead of the required element of woocommerce/product-sale-badge block when using the Editor to edit margin/padding.

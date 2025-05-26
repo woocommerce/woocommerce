@@ -7,6 +7,9 @@
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:php": "composer run-script phpcbf",
 		"lint:lang:php": "composer run-script phpcs",
+		"phpstan": "cd tasks/phpstan && ./run-phpstan.sh",
+		"phpstan:php8": "cd tasks/phpstan && ./run-phpstan.sh",
+		"phpstan:php7": "cd tasks/phpstan && ./run-phpstan.sh php7",
 		"postinstall": "XDEBUG_MODE=off composer install --quiet",
 		"env:test": "pnpm env:dev",
 		"env:dev": "pnpm wp-env start --update",
@@ -45,6 +48,30 @@
 							"wpVersion": "latest"
 						}
 					},
+					"events": [
+						"pull_request",
+						"push"
+					]
+				},
+				{
+					"name": "PHPStan: PHP 7.4",
+					"testType": "static:analysis",
+					"command": "phpstan:php7",
+					"changes": [
+						"**/*.php"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				},
+				{
+					"name": "PHPStan: PHP 8.4",
+					"testType": "static:analysis",
+					"command": "phpstan:php8",
+					"changes": [
+						"**/*.php"
+					],
 					"events": [
 						"pull_request",
 						"push"

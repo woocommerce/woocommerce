@@ -8,6 +8,7 @@
  * @package WooCommerce\Classes\Payment
  */
 
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
@@ -316,9 +317,15 @@ All at %6$s
 	}
 
 	/**
-	 * Get available gateways.
+	 * Get available gateways for checkout.
 	 *
-	 * @return array
+	 * This should be used when displaying the available gateways/payment methods to the user,
+	 * not in the WP admin or REST API contexts where there is no WC session.
+	 * This is because the logic that hooks into the available gateways filter
+	 * may try to rely on the existence of a WC session - a valid thing to do,
+	 * and cause fatal errors when the session is not available.
+	 *
+	 * @return array The available payment gateways.
 	 */
 	public function get_available_payment_gateways() {
 		$_available_gateways = array();
@@ -327,7 +334,7 @@ All at %6$s
 			if ( $gateway->is_available() ) {
 				if ( ! is_add_payment_method_page() ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
-				} elseif ( $gateway->supports( 'add_payment_method' ) || $gateway->supports( 'tokenization' ) ) {
+				} elseif ( $gateway->supports( PaymentGatewayFeature::ADD_PAYMENT_METHODS ) || $gateway->supports( PaymentGatewayFeature::TOKENIZATION ) ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
 				}
 			}

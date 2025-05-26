@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/add-to-cart-with-options-quantity-selector",
-	"title": "Quantity Selector (Experimental)",
-	"description": "Display an input field with stepper to select the number of products to add to cart.",
+	"title": "Product Quantity (Beta)",
+	"description": "Display an input field customers can use to select the number of products to add to their cart. ",
 	"category": "woocommerce-product-elements",
 	"keywords": [ "WooCommerce" ],
 	"usesContext": [ "postId" ],
