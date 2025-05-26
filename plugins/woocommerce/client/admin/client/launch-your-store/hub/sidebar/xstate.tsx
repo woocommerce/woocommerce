@@ -306,16 +306,6 @@ export const sidebarMachine = setup( {
 			( { context } ) => context.mainContentMachineRef,
 			{ type: 'SHOW_PAYMENTS' }
 		),
-		cleanupPaymentsHistory: () => {
-			// Clean up any URL parameters related to payments without page refresh
-			const url = new URL( window.location.href );
-			url.searchParams.set( 'sidebar', 'hub' );
-			url.searchParams.delete( 'content' );
-			// Remove any payments-related path parameters
-			if ( url.searchParams.get( 'path' )?.includes( 'woopayments' ) ) {
-				url.searchParams.set( 'path', '/launch-your-store' );
-			}
-			window.history.replaceState( null, '', url.toString() );
 		},
 		navigateToWcAdmin: () => {
 			// Navigate directly to WC Admin home
