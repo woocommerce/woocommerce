@@ -133,7 +133,7 @@ const recipientValidationRule =
 		'recipient',
 		// translators: %s will be replaced by comma-separated email addresses. For example, "invalidemail1@example.com,invalidemail2@example.com".
 		__(
-			'One or more Recipient email addresses are invalid: "%s". Please enter valid email addresses separated by commas.',
+			'One or more Recipient email addresses are invalid: “%s”. Please enter valid email addresses separated by commas.',
 			'woocommerce'
 		)
 	);
@@ -142,7 +142,7 @@ const ccValidationRule = createValidationRuleForCommaSeparatedEmailsField(
 	'cc',
 	// translators: %s will be replaced by comma-separated email addresses. For example, "invalidemail1@example.com,invalidemail2@example.com".
 	__(
-		'One or more CC email addresses are invalid: "%s". Please enter valid email addresses separated by commas.',
+		'One or more CC email addresses are invalid: “%s”. Please enter valid email addresses separated by commas.',
 		'woocommerce'
 	)
 );
@@ -151,7 +151,7 @@ const bccValidationRule = createValidationRuleForCommaSeparatedEmailsField(
 	'bcc',
 	// translators: %s will be replaced by comma-separated email addresses. For example, "invalidemail1@example.com,invalidemail2@example.com".
 	__(
-		'One or more BCC email addresses are invalid: "%s". Please enter valid email addresses separated by commas.',
+		'One or more BCC email addresses are invalid: “%s”. Please enter valid email addresses separated by commas.',
 		'woocommerce'
 	)
 );

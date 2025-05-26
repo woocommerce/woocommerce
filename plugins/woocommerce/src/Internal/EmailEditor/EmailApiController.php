@@ -148,7 +148,7 @@ class EmailApiController {
 		if ( ! empty( $invalid_recipients ) ) {
 			$error_message = sprintf(
 				// translators: %s will be replaced by comma-separated email addresses. For example, "invalidemail1@example.com,invalidemail2@example.com".
-				__( 'One or more Recipient email addresses are invalid: "%s". Please enter valid email addresses separated by commas.', 'woocommerce' ),
+				__( 'One or more Recipient email addresses are invalid: “%s”. Please enter valid email addresses separated by commas.', 'woocommerce' ),
 				implode( ',', $invalid_recipients )
 			);
 			$error->add( 'invalid_recipient_email_address', $error_message );
@@ -159,7 +159,7 @@ class EmailApiController {
 		if ( ! empty( $invalid_cc ) ) {
 			$error_message = sprintf(
 				// translators: %s will be replaced by comma-separated email addresses. For example, "invalidemail1@example.com,invalidemail2@example.com".
-				__( 'One or more CC email addresses are invalid: "%s". Please enter valid email addresses separated by commas.', 'woocommerce' ),
+				__( 'One or more CC email addresses are invalid: “%s”. Please enter valid email addresses separated by commas.', 'woocommerce' ),
 				implode( ',', $invalid_cc )
 			);
 			$error->add( 'invalid_cc_email_address', $error_message );
@@ -170,7 +170,7 @@ class EmailApiController {
 		if ( ! empty( $invalid_bcc ) ) {
 			$error_message = sprintf(
 				// translators: %s will be replaced by comma-separated email addresses. For example, "invalidemail1@example.com,invalidemail2@example.com".
-				__( 'One or more BCC email addresses are invalid: "%s". Please enter valid email addresses separated by commas.', 'woocommerce' ),
+				__( 'One or more BCC email addresses are invalid: “%s”. Please enter valid email addresses separated by commas.', 'woocommerce' ),
 				implode( ',', $invalid_bcc )
 			);
 			$error->add( 'invalid_bcc_email_address', $error_message );
