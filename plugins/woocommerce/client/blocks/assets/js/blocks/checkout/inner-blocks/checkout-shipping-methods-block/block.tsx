@@ -10,7 +10,7 @@ import { ShippingRatesControl } from '@woocommerce/base-components/cart-checkout
 import {
 	getShippingRatesPackageCount,
 	hasCollectableRate,
-	hasAllFieldsForShippingRates,
+	isAddressComplete,
 } from '@woocommerce/base-utils';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
@@ -120,7 +120,7 @@ const Block = ( {
 	if ( ! hasCalculatedShipping && ! shippingRatesPackageCount ) {
 		return <NoShippingAddressMessage />;
 	}
-	const addressComplete = hasAllFieldsForShippingRates( shippingAddress );
+	const addressComplete = isAddressComplete( shippingAddress );
 
 	return (
 		<>

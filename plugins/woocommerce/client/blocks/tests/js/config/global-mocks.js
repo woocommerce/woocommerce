@@ -283,7 +283,6 @@ global.wcSettings = {
 		order_number: '100',
 		customer_id: 1,
 	},
-	addressFieldsForShippingRates: [ 'country', 'state', 'postcode', 'city' ],
 };
 
 global.jQuery = () => ( {

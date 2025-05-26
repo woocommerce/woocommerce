@@ -9,7 +9,7 @@ import { useSelect } from '@wordpress/data';
 import { checkoutStore } from '@woocommerce/block-data';
 import {
 	filterShippingRatesByPrefersCollection,
-	hasAllFieldsForShippingRates,
+	isAddressComplete,
 	selectedRatesAreCollectable,
 } from '@woocommerce/base-utils';
 
@@ -35,7 +35,13 @@ const Block = ( {
 		)
 	);
 
-	const hasCompleteAddress = hasAllFieldsForShippingRates( shippingAddress );
+	const hasCompleteAddress = isAddressComplete( shippingAddress, [
+		'state',
+		'country',
+		'postcode',
+		'city',
+	] );
+
 	return (
 		<TotalsWrapper className={ className }>
 			<TotalsShipping
