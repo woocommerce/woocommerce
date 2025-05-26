@@ -5,6 +5,9 @@ namespace Automattic\WooCommerce\Blocks\Utils;
 use Exception;
 
 /**
+ * Important: This class is a direct copy of the Block_Delimiter class in the WordPress.com.
+ * Some linting rules have been disabled to allow for the copy and make future migration easier.
+ *
  * Class for efficiently working with block structure.
  *
  * This class follows design values of the HTML API:
