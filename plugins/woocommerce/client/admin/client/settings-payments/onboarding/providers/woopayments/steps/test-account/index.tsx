@@ -62,6 +62,9 @@ const MAX_INITIAL_PROGRESS = 90; // Cap progress at 90% for the initial phase
 const MAX_EXTENDED_PHASE_1_PROGRESS = 96; // Cap progress at 96% for the extended phase 1
 const INITIAL_PHASE_INCREMENT = 5; // Increment progress by 20% for the initial phase
 const EXTENDED_PHASE_1_INCREMENT = 1; // Increment progress by 1% for the extended phase 1
+const INIT_PROGRESS_START = 10; // Start progress at 10% during init
+const INIT_PROGRESS_INCREMENT = 2; // Increment by 2% every second during init
+const INIT_PROGRESS_MAX = 30; // Cap progress at 30% during init
 
 // Status types for the component
 type Status =
@@ -92,12 +95,17 @@ const TestAccountStep = () => {
 	// Refs for timers and phase tracking
 	const pollingTimeoutRef = useRef< number | null >( null );
 	const phase1StartTimeRef = useRef< number | null >( null );
+	const initializingTimeoutRef = useRef< number | null >( null );
 
 	// Helper to clear timers
 	const clearTimers = () => {
 		if ( pollingTimeoutRef.current !== null ) {
 			clearTimeout( pollingTimeoutRef.current );
 			pollingTimeoutRef.current = null;
+		}
+		if ( initializingTimeoutRef.current !== null ) {
+			clearTimeout( initializingTimeoutRef.current );
+			initializingTimeoutRef.current = null;
 		}
 	};
 
@@ -166,6 +174,7 @@ const TestAccountStep = () => {
 				currentStep?.status === 'failed'
 			) {
 				setStatus( 'initializing' );
+				setProgress( INIT_PROGRESS_START ); // Start at 10%
 
 				const cleanStepIfNeeded = async () => {
 					// We only need to clean the step if it has been retried or failed.
@@ -326,11 +335,43 @@ const TestAccountStep = () => {
 			poll();
 		}
 
+		// -- Progress animation during Initializing Phase --
+		if ( status === 'initializing' ) {
+			// Start progress animation from 10% to 30%, increment by 2% every second
+			if ( initializingTimeoutRef.current === null ) {
+				initializingTimeoutRef.current = window.setInterval( () => {
+					setProgress( ( current ) => {
+						if ( current < INIT_PROGRESS_MAX ) {
+							return Math.min(
+								current + INIT_PROGRESS_INCREMENT,
+								INIT_PROGRESS_MAX
+							);
+						}
+						return current;
+					} );
+				}, 1000 );
+			}
+		}
+		// Clear the initializing timer if not in initializing phase
+		if (
+			status !== 'initializing' &&
+			initializingTimeoutRef.current !== null
+		) {
+			clearTimeout( initializingTimeoutRef.current );
+			initializingTimeoutRef.current = null;
+		}
+
 		// Cleanup function for the effect
 		return () => {
 			clearTimers(); // Clear any pending timeouts
 		};
-	}, [ status, currentStep, retryCounter, pollingPhase ] );
+	}, [
+		status,
+		currentStep,
+		retryCounter,
+		pollingPhase,
+		setJustCompletedStepId,
+	] );
 
 	const getPhaseMessage = ( phase: number ) => {
 		if ( phase === 1 ) {
