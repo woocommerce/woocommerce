@@ -13,10 +13,3 @@ If, during this period, no regression has been found, we release the release can
 On the technical side of the release process, we rely on release branches (named `release/*.*`) for code freeze and
 stabilization. In those branches, we tag release candidates, fix regressions (via CFEs), and tag final releases in isolation 
 from ongoing development for greater release stability. 
-
-
-
-
-
-
-
