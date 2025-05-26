@@ -110,18 +110,12 @@ export function taskClickedAction( event: {
 		event.task.id === 'payments' ||
 		event.task.id === 'woocommerce-payments'
 	) {
-		// Return an event object with the correct type
+		// Return an event object with the correct type and stop execution
 		return { type: 'SHOW_PAYMENTS' };
 	}
 
 	if ( event.task.actionUrl ) {
 		navigateTo( { url: event.task.actionUrl } );
-	} else if ( event.task.id === 'payments' ) {
-		navigateTo( {
-			url: getAdminLink(
-				'admin.php?page=wc-admin&path=/launch-your-store/woopayments/onboarding'
-			),
-		} );
 	} else {
 		navigateTo( {
 			url: getNewPath( { task: event.task.id }, '/', {} ),
