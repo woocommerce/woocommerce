@@ -147,6 +147,15 @@ export function initDomTracking() {
 			},
 			selector: '.editor-document-tools__document-overview-toggle',
 		},
+		// Command in command bar selected
+		{
+			track: ( target ) => {
+				recordEvent( 'command_bar_command_clicked', {
+					command: target.dataset?.value,
+				} );
+			},
+			selector: '.commands-command-menu__container [role="option"]',
+		},
 	];
 
 	document.addEventListener( 'click', trackMatchingEvents );

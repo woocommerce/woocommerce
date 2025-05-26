@@ -102,6 +102,21 @@ test.describe( 'WooCommerce Email Editor Tracking Selectors', () => {
 			.locator( '.editor-preview-dropdown__toggle' )
 			.click();
 
+		// Check command bar button
+		await editorLocator.locator( '.editor-document-bar' ).click();
+		// Fill command bar input with 'a' to get some results
+		await page
+			.locator( '.commands-command-menu__header input' )
+			.fill( 'a' );
+		// Check command selected selector
+		await expect(
+			page.locator(
+				'.commands-command-menu__container [role="option"]:first-child'
+			)
+		).toBeVisible();
+		// Press Escape key to close command bar
+		await page.keyboard.press( 'Escape' );
+
 		// Check header block tools toggle button
 		// Enable header block tools
 		await editorLocator

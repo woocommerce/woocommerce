@@ -95,6 +95,10 @@ const TRACKED_STORE_EVENTS = {
 	'core/preferences': {
 		set: trackSetPreference,
 	},
+	'core/commands': {
+		open: 'command_menu_opened',
+		close: 'command_menu_closed',
+	},
 };
 
 const rewrittenActions = {};
@@ -140,6 +144,7 @@ export const initStoreTracking = () => {
 								recordEvent( event );
 							}
 						} catch ( error ) {
+							// eslint-disable-next-line no-console
 							console.error( 'Error tracking event', error );
 						}
 						originalActions[ storeName ][ action ]( ...args );
