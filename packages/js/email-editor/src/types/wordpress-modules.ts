@@ -52,7 +52,10 @@ declare module '@wordpress/keyboard-shortcuts' {
 	export const store: { name: 'core/keyboard-shortcuts' } & StoreDescriptor< {
 		reducer: () => unknown;
 		selectors: {
-			getShortcutRepresentation: ( scope: string ) => unknown;
+			getShortcutRepresentation: (
+				state: unknown,
+				scope: string
+			) => unknown;
 		};
 		actions: {
 			registerShortcut: ( options: any ) => object;
@@ -69,7 +72,7 @@ declare module '@wordpress/preferences' {
 	export const store: { name: 'core/preferences' } & StoreDescriptor< {
 		reducer: () => unknown;
 		selectors: {
-			get: < T >( scope: string, name: string ) => T;
+			get: < T >( state: unknown, scope: string, name: string ) => T;
 		};
 	} >;
 	export const PreferenceToggleMenuItem: any;
@@ -102,7 +105,7 @@ declare module '@wordpress/notices' {
 			) => void;
 		};
 		selectors: {
-			getNotices: ( context?: string ) => Notice[];
+			getNotices: ( state: unknown, context?: string ) => Notice[];
 			removeNotice: ( id: string, context?: string ) => void;
 		};
 	} >;

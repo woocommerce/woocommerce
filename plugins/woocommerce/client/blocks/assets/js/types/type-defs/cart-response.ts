@@ -163,6 +163,11 @@ export interface CartResponseExtensionItem {
 	[ key: string ]: unknown;
 }
 
+export interface ShippingAddressFieldsForShippingRates
+	extends Omit< ResponseBaseAddress, 'address_1' | 'address_2' > {
+	[ key: string ]: string;
+}
+
 export interface CartResponse {
 	coupons: Array< CartResponseCouponItem >;
 	shipping_rates: Array< CartResponseShippingRate >;

@@ -36,8 +36,7 @@ if ( ! $tab_exists ) {
 	exit;
 }
 
-$hide_nav = FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) &&
-	( 'checkout' === $current_tab && in_array( $current_section, array( 'offline', 'bacs', 'cheque', 'cod' ), true ) );
+$hide_nav = 'checkout' === $current_tab && in_array( $current_section, array( 'offline', 'bacs', 'cheque', 'cod' ), true );
 
 // Move 'Advanced' to the last.
 if ( array_key_exists( 'advanced', $tabs ) ) {

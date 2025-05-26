@@ -252,6 +252,8 @@ class Cart extends AbstractBlock {
 		$this->asset_data_registry->add( 'collectableMethodIds', $local_pickup_method_ids );
 		$this->asset_data_registry->add( 'shippingMethodsExist', CartCheckoutUtils::shipping_methods_exist() > 0 );
 
+		$this->asset_data_registry->add( 'addressFieldsForShippingRates', [ 'state', 'country', 'postcode', 'city' ] );
+
 		$is_block_editor = $this->is_block_editor();
 
 		if ( $is_block_editor && ! $this->asset_data_registry->exists( 'localPickupLocations' ) ) {

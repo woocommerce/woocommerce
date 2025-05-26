@@ -2033,9 +2033,11 @@ function wc_add_number_precision( ?float $value, bool $round = true ) {
 		return 0.0;
 	}
 
-	$cent_precision = pow( 10, wc_get_price_decimals() );
-	$value          = $value * $cent_precision;
-	return $round ? NumberUtil::round( $value, wc_get_rounding_precision() - wc_get_price_decimals() ) : $value;
+	// Fallback to standard rounding precision in order to cover rounding changes in PHP 8.4.
+	$result          = $value * pow( 10, wc_get_price_decimals() );
+	$round_precision = $round ? wc_get_rounding_precision() - wc_get_price_decimals() : wc_get_rounding_precision();
+
+	return NumberUtil::round( $result, $round_precision );
 }
 
 /**

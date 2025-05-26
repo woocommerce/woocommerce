@@ -30,7 +30,7 @@ class Patterns_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test that the pattern categories are registered in WP_Block_Patterns_Registry
 	 */
-	public function testItRegistersPatternCategories() {
+	public function testItRegistersPatternCategories(): void {
 		$this->patterns->initialize();
 		$categories = \WP_Block_Pattern_Categories_Registry::get_instance()->get_all_registered();
 		/** @var array{name: string, label: string, description: string} $category */ // phpcs:ignore
@@ -43,7 +43,7 @@ class Patterns_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Clean registered patterns and categories
 	 */
-	private function cleanup_patterns() {
+	private function cleanup_patterns(): void {
 		$categories_registry = \WP_Block_Pattern_Categories_Registry::get_instance();
 		$categories          = $categories_registry->get_all_registered();
 		foreach ( $categories as $category ) {
