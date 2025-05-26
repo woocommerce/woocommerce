@@ -97,7 +97,6 @@ export default function WooPaymentsModal( {
 			<OnboardingProvider
 				closeModal={ handleClose }
 				onboardingSteps={ steps }
-				source="settings-payments"
 			>
 				<WooPaymentsOnboarding />
 			</OnboardingProvider>
