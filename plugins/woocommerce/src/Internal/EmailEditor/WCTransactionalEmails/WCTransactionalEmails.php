@@ -21,6 +21,7 @@ class WCTransactionalEmails {
 	 */
 	public static $core_transactional_emails = array(
 		'cancelled_order',
+		'customer_cancelled_order',
 		'customer_completed_order',
 		'customer_failed_order',
 		'customer_invoice',
