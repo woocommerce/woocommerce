@@ -88,8 +88,8 @@ function registerCustomSocialLinksBlockVariation() {
 			// @ts-expect-error Type not complete.
 			name: 'core/social-link',
 			attributes: {
-				service: 'twitter',
-				url: 'https://twitter.com/WordPress',
+				service: 'x',
+				url: 'https://x.com/WordPress',
 			},
 		},
 	];
