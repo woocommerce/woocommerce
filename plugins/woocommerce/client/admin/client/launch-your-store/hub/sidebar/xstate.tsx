@@ -595,7 +595,6 @@ export const sidebarMachine = setup( {
 							type: 'updateQueryParams',
 							params: { sidebar: 'hub', content: 'site-preview' },
 						},
-						// 'cleanupPaymentsHistory',
 						// Force the main content to reset completely
 						sendTo(
 							( { context } ) => context.mainContentMachineRef,
