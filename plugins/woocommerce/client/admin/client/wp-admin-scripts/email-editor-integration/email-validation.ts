@@ -15,7 +15,7 @@ import { NAME_SPACE } from './constants';
 type EmailContentValidationRule = {
 	id: string;
 	testContent: ( emailContent: string ) => boolean;
-	message: string | ( () => string );
+	message: string;
 	actions: [];
 };
 
@@ -100,7 +100,7 @@ function createValidationRuleForCommaSeparatedEmailsField(
 
 			return invalidEmails.length > 0;
 		},
-		message: () => {
+		get message() {
 			const invalidEmails = getInvalidCommaSeparatedEmails(
 				getWooCommerceData()[ fieldName ] ?? ''
 			);

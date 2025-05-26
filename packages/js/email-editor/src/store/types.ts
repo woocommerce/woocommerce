@@ -258,6 +258,6 @@ export type EmailContentValidationAction = {
 export type EmailContentValidationRule = {
 	id: string;
 	testContent: ( emailContent: string ) => boolean;
-	message: string | ( () => string );
+	message: string;
 	actions: EmailContentValidationAction[];
 };

@@ -35,7 +35,7 @@ export const validateEmailContent = (
 	}: {
 		addValidationNotice: (
 			id: string,
-			message: string | ( () => string ),
+			message: string,
 			actions: unknown[]
 		) => void;
 		hasValidationNotice: ( id?: string ) => boolean;
@@ -51,11 +51,7 @@ export const validateEmailContent = (
 	rules.forEach( ( { id, testContent, message, actions } ) => {
 		// Check both content and template content for the rule.
 		if ( testContent( content + templateContent ) ) {
-			addValidationNotice(
-				id,
-				typeof message === 'function' ? message() : message,
-				actions
-			);
+			addValidationNotice( id, message, actions );
 			isValid = false;
 		} else if ( hasValidationNotice( id ) ) {
 			removeValidationNotice( id );
