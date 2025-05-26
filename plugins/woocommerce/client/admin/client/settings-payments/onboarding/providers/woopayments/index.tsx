@@ -4,7 +4,7 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { useLocation } from 'react-router-dom';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { getHistory, getNewPath, getQuery } from '@woocommerce/navigation';
 import { getQueryArg } from '@wordpress/url';
 import { dispatch } from '@wordpress/data';
 
@@ -34,10 +34,15 @@ export default function WooPaymentsModal( {
 	const hasWPComConnection =
 		providerData?.onboarding?.state?.wpcom_has_working_connection || false;
 
-	// Open modal when on an onboarding route
+	// Handle modal and URL synchronization
 	React.useEffect( () => {
+		const query = getQuery() as { path?: string };
+		const isOnOnboardingPath =
+			query.path && query.path.includes( wooPaymentsOnboardingPath );
+
+		// Open modal when on an onboarding route
 		if (
-			location.pathname.endsWith( wooPaymentsOnboardingPath ) &&
+			isOnOnboardingPath &&
 			! isOpen &&
 			// Prevent the onboarding modal from reopening if the WPCom connection remains unestablished and the user has returned from Jetpack.
 			! ( ! hasWPComConnection && isJetpackReturn )
