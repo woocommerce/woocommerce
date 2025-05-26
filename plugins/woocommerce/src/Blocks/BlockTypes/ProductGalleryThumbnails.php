@@ -39,7 +39,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_uses_context() {
-		return array( 'postId', 'mode', 'cropImages' );
+		return array( 'postId' );
 	}
 
 	/**
