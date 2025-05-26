@@ -451,6 +451,7 @@ class MiniCart extends AbstractBlock {
 	protected function render_experimental_iapi_mini_cart( $attributes, $content, $block ) {
 		wp_enqueue_script_module( $this->get_full_block_name() );
 		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+		$this->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
 		$classes_styles           = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_weight', 'font_family', 'extra_classes' ) );
 		$icon_color               = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';

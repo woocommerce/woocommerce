@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store, getContext } from '@wordpress/interactivity';
+import { store, getContext, getConfig } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/cart';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 
@@ -9,6 +9,10 @@ import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart'
  * Internal dependencies
  */
 import setStyles from './utils/set-styles';
+import {
+	formatPriceWithCurrency,
+	normalizeCurrencyResponse,
+} from '../../../../packages/prices/utils/currency';
 
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
@@ -94,6 +98,30 @@ store( 'woocommerce/mini-cart-title-items-counter-block', {
 				cartItemsCount === 1 ? singularItemsText : pluralItemsText;
 
 			return template.replace( '%d', cartItemsCount.toString() );
+		},
+	},
+} );
+
+store( 'woocommerce/mini-cart-footer-block', {
+	state: {
+		get formattedSubtotal(): string {
+			const { displayCartPriceIncludingTax } = getContext< {
+				displayCartPriceIncludingTax: boolean;
+			} >();
+
+			const { currency } = getConfig( 'woocommerce' );
+
+			const subtotal = displayCartPriceIncludingTax
+				? parseInt( wooStoreState.cart.totals.total_items, 10 ) +
+				  parseInt( wooStoreState.cart.totals.total_items_tax, 10 )
+				: parseInt( wooStoreState.cart.totals.total_items, 10 );
+
+			const normalizedCurrency = normalizeCurrencyResponse(
+				wooStoreState.cart.totals,
+				currency
+			);
+
+			return formatPriceWithCurrency( subtotal, normalizedCurrency );
 		},
 	},
 } );

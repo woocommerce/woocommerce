@@ -14,6 +14,7 @@ import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
  * Internal dependencies
  */
 import { triggerAddedToCartEvent } from './legacy-events';
+import { formatPrice } from '../../../blocks/product-filters/utils/price-currency';
 
 export type OptimisticCartItem = {
 	key?: string;
@@ -30,6 +31,7 @@ export type Store = {
 			items: ( OptimisticCartItem | CartItem )[];
 		};
 		totalItemsInCart: number;
+		formattedSubtotal: string;
 	};
 	actions: {
 		addCartItem: ( args: OptimisticCartItem ) => void;
