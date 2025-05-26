@@ -4,6 +4,7 @@
 import { useMachine } from '@xstate5/react';
 import { useEffect } from 'react';
 import clsx from 'clsx';
+import { getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -76,12 +77,36 @@ const LaunchStoreController = () => {
 		// Navigate back to the main flow
 		sendToSidebar( { type: 'RETURN_FROM_PAYMENTS' } );
 	};
+
+	// Custom URL strategy for LYS that preserves sidebar and content params when navigation is forced by the OnboardingProvider.
+	const lysUrlStrategy = {
+		buildStepURL: (
+			stepPath: string,
+			preservedParams: Record< string, string > = {}
+		) => {
+			return getNewPath(
+				{
+					path: stepPath,
+					...preservedParams,
+				},
+				'/launch-your-store' + stepPath,
+				{
+					page: 'wc-admin',
+					path: '/launch-your-store/woopayments/onboarding',
+					sidebar: 'hub',
+					content: 'payments',
+				}
+			);
+		},
+		preserveParams: [ 'sidebar', 'content' ],
+	};
+
 	return (
 		<div className={ 'launch-your-store-layout__container' }>
 			<OnboardingProvider
 				closeModal={ handlePaymentsClose }
 				onboardingSteps={ LYSPaymentsSteps }
-				source="launch-your-store"
+				urlStrategy={ lysUrlStrategy }
 			>
 				<SidebarContainer
 					className={ clsx( {
