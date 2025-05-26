@@ -17,15 +17,15 @@ test.describe( 'WooCommerce Email Settings', () => {
 
 	const storeName = 'WooCommerce Core E2E Test Suite';
 
-	test.beforeEach(async ({ baseURL }) => {
+	test.beforeEach( async ( { baseURL } ) => {
 		await setFeatureFlag(
 			baseURL,
 			'woocommerce_feature_point_of_sale_enabled',
 			'no'
 		);
-	});
+	} );
 
-	test.afterAll(async ({ baseURL }) => {
+	test.afterAll( async ( { baseURL } ) => {
 		await setFeatureFlag(
 			baseURL,
 			'woocommerce_feature_email_improvements_enabled',
