@@ -104,7 +104,18 @@ export function initDomTracking() {
 		// Inserter panel close icon clicked
 		{
 			track: 'inserter_sidebar_library_close_icon_clicked',
-			selector: '.block-editor-inserter__menu .block-editor-tabbed-sidebar__close-button',
+			selector:
+				'.block-editor-inserter__menu .block-editor-tabbed-sidebar__close-button',
+		},
+		// Preview dropdown toggle clicked
+		{
+			track: ( target ) => {
+				const isOpened = target.classList.contains( 'is-opened' );
+				recordEvent( 'header_preview_dropdown_clicked', {
+					isOpened,
+				} );
+			},
+			selector: '.editor-preview-dropdown__toggle',
 		},
 	];
 
