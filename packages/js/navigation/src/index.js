@@ -23,7 +23,8 @@ export * from './filters';
 export { useConfirmUnsavedChanges } from './hooks/use-confirm-unsaved-changes';
 
 const TIME_EXCLUDED_SCREENS_FILTER = 'woocommerce_admin_time_excluded_screens';
-const TIME_EXCLUDED_SCREENS_URL_UPDATE_FILTER = 'woocommerce_admin_time_excluded_screens_url_update';
+const TIME_EXCLUDED_SCREENS_URL_UPDATE_FILTER =
+	'woocommerce_admin_time_excluded_screens_url_update';
 
 /**
  * Get the current path from history.
@@ -111,9 +112,7 @@ export const getQueryExcludedScreens = () =>
  * @return {Array} Array containing list of screens
  */
 export const getQueryExcludedScreensUrlUpdate = () =>
-	applyFilters( TIME_EXCLUDED_SCREENS_URL_UPDATE_FILTER, [
-		'extensions',
-	] );
+	applyFilters( TIME_EXCLUDED_SCREENS_URL_UPDATE_FILTER, [ 'extensions' ] );
 
 /**
  * Retrieve a string 'name' representing the current screen
