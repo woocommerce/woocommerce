@@ -91,7 +91,7 @@ export function initDomTracking() {
 					// eslint-disable-next-line @wordpress/i18n-text-domain
 					target.textContent === __( 'Saving…' )
 				) {
-					recordEvent( 'header_save_all_button_clicked' );
+					recordEvent( 'header_save_button_clicked' );
 				}
 			},
 			selector: '.editor-post-publish-button',
