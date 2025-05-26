@@ -50,6 +50,19 @@ export default function WooPaymentsModal( {
 			setIsOpen( true );
 		}
 
+		// If modal is open but we're not on an onboarding route, navigate to onboarding
+		if ( isOpen && ! isOnOnboardingPath ) {
+			const newPath = getNewPath(
+				{ path: wooPaymentsOnboardingPath },
+				wooPaymentsOnboardingPath,
+				{
+					page: 'wc-settings',
+					tab: 'checkout',
+				}
+			);
+			history.push( newPath );
+		}
+
 		// Trigger a snackbar error notification when the user aborts the WPCom connection process.
 		if ( ! hasWPComConnection && isJetpackReturn ) {
 			createErrorNotice( __( 'Setup was cancelled!', 'woocommerce' ), {
@@ -64,25 +77,8 @@ export default function WooPaymentsModal( {
 		isJetpackReturn,
 		hasWPComConnection,
 		createErrorNotice,
+		history,
 	] );
-
-	// If the modal is open, without an onboarding route, add an onboarding route
-	React.useEffect( () => {
-		if (
-			isOpen &&
-			! location.pathname.endsWith( wooPaymentsOnboardingPath )
-		) {
-			const newPath = getNewPath(
-				{ path: wooPaymentsOnboardingPath },
-				wooPaymentsOnboardingPath,
-				{
-					page: 'wc-settings',
-					tab: 'checkout',
-				}
-			);
-			history.push( newPath );
-		}
-	}, [ isOpen, location.pathname, history ] );
 
 	// Handle modal close by navigating away from onboarding routes
 	const handleClose = () => {
