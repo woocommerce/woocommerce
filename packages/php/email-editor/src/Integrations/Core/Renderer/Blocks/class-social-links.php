@@ -122,7 +122,7 @@ class Social_Links extends Abstract_Block_Renderer {
 		);
 
 		// divide the icon value by 2 to get the font size.
-		$font_size     = rtrim( $icon_size, 'px' ) / 2; // inline with core styles.
+		$font_size     = ( rtrim( $icon_size, 'px' ) / 2 ) + 1; // inline with core styles.
 		$anchor_styles = $this->compile_css(
 			array(
 				'color'           => $icon_color_value,
@@ -139,7 +139,7 @@ class Social_Links extends Abstract_Block_Renderer {
 
 		$row_container_styles = array(
 			'display' => 'block',
-			'padding' => '5px',
+			'padding' => '0.25em',
 		);
 
 		if ( $is_pill_shape ) {
@@ -164,9 +164,13 @@ class Social_Links extends Abstract_Block_Renderer {
 				  </tr>
 				</tbody></table>
 			  </td>
-			  <td style="vertical-align:middle; ' . ( $service_label ? 'padding-left:5px;padding-right:5px;' : '' ) . '">
-				<a href="%2$s" %5$s class="wp-block-social-link-anchor"> %6$s </a>
+			  ' . ( $service_label ? '
+			  <td style="vertical-align:middle;padding-left:6px;padding-right:6px;">
+				<a href="%2$s" %5$s class="wp-block-social-link-anchor">
+					<span style="margin-left:.5em;margin-right:.5em"> %6$s </span>
+				</a>
 			  </td>
+			  ' : '' ) . '
 			</tr>
 		  </tbody></table>
 			',

@@ -117,8 +117,13 @@ const disableIconColor =
 		// eslint-disable-next-line @wordpress/i18n-text-domain -- using core label.
 		const labelText = __( 'Icon color' );
 		const customCss = `
-		.block-editor-panel-color-gradient-settings__dropdown:has([title="${ labelText }"]) {
+		.block-editor-tools-panel-color-gradient-settings__item:has([title="${ labelText }"]) {
 			display: none !important;
+		}
+		.block-editor-tools-panel-color-gradient-settings__item:nth-child(2 of .block-editor-tools-panel-color-gradient-settings__item){
+			border-top:1px solid #ddd;
+			border-top-left-radius:2px;
+			border-top-right-radius:2px;
 		}
 		`;
 
