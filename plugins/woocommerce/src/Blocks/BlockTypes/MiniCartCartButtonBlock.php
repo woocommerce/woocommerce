@@ -23,11 +23,12 @@ class MiniCartCartButtonBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
+		$view_cart_text = __( 'View my cart', 'woocommerce' );
 		ob_start();
 		?>
 		<a href="http://localhost:1234/?page_id=8" class="wc-block-components-button wp-element-button wp-block-woocommerce-mini-cart-cart-button-block wc-block-mini-cart__footer-cart outlined">
 			<div class="wc-block-components-button__text">
-				View my cart
+				<?php echo esc_html( $view_cart_text ); ?>
 			</div>
 		</a>
 		<?php

@@ -23,10 +23,13 @@ class MiniCartCheckoutButtonBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
+		$go_to_checkout_text = __( 'Go to checkout', 'woocommerce' );
 		ob_start();
 		?>
 		<a href="http://localhost:1234/?page_id=9" class="wc-block-components-button wp-element-button wp-block-woocommerce-mini-cart-checkout-button-block wc-block-mini-cart__footer-checkout contained">
-			<div class="wc-block-components-button__text">Go to checkout</div>
+			<div class="wc-block-components-button__text">
+				<?php echo esc_html( $go_to_checkout_text ); ?>
+			</div>
 		</a>
 		<?php
 		return ob_get_clean();

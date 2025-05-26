@@ -25,8 +25,12 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 	protected function render_experimental_iapi_mini_cart_footer( $attributes, $content, $block ) {
 		ob_start();
 
-		$subtotal_label    = __( 'Subtotal', 'woocommerce' );
-		$other_costs_label = __( 'Shipping, taxes, and discounts calculated at checkout.', 'woocommerce' );
+		$cart                             = $this->get_cart_instance();
+		$subtotal_label                   = __( 'Subtotal', 'woocommerce' );
+		$other_costs_label                = __( 'Shipping, taxes, and discounts calculated at checkout.', 'woocommerce' );
+		$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === 'incl';
+		$subtotal                         = $display_cart_price_including_tax ? $cart->get_subtotal_tax() : $cart->get_subtotal();
+		$formatted_amount                 = wc_price( $subtotal );
 
 		?>
 		<div class="wp-block-woocommerce-mini-cart-footer-block wc-block-mini-cart__footer">
@@ -35,7 +39,10 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 					<?php echo esc_html( $subtotal_label ); ?>
 				</span>
 				<span class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value">
-					$86.00
+					<?php
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						echo $formatted_amount;
+					?>
 				</span>
 				<div class="wc-block-components-totals-item__description">
 					<?php echo esc_html( $other_costs_label ); ?>
@@ -50,6 +57,21 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Return the main instance of WC_Cart class.
+	 *
+	 * @return \WC_Cart CartController class instance.
+	 */
+	protected function get_cart_instance() {
+		$cart = WC()->cart;
+
+		if ( $cart && $cart instanceof \WC_Cart ) {
+			return $cart;
+		}
+
+		return null;
 	}
 
 	/**
