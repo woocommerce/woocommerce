@@ -73,7 +73,8 @@ export type SidebarMachineEvents =
 	| { type: 'LAUNCH_STORE_SUCCESS' }
 	| { type: 'SHOW_PAYMENTS' }
 	| { type: 'POP_BROWSER_STACK' }
-	| { type: 'RETURN_FROM_PAYMENTS' };
+	| { type: 'RETURN_FROM_PAYMENTS' }
+	| { type: 'REFRESH_TASKLIST' };
 
 const sidebarQueryParamListener = fromCallback( ( { sendBack } ) => {
 	return createQueryParamsListener( 'sidebar', sendBack );
@@ -306,6 +307,9 @@ export const sidebarMachine = setup( {
 			( { context } ) => context.mainContentMachineRef,
 			{ type: 'SHOW_PAYMENTS' }
 		),
+		triggerTasklistRefresh: ( { self } ) => {
+			// Send refresh event to self to trigger background data refresh
+			self.send( { type: 'REFRESH_TASKLIST' } );
 		},
 		navigateToWcAdmin: () => {
 			// Navigate directly to WC Admin home
@@ -464,6 +468,107 @@ export const sidebarMachine = setup( {
 						POP_BROWSER_STACK: {
 							actions: [ 'navigateToWcAdmin' ],
 						},
+						REFRESH_TASKLIST: {
+							// Stay in current state but trigger background refresh
+							target: 'backgroundRefresh',
+						},
+					},
+				},
+				backgroundRefresh: {
+					id: 'backgroundRefresh',
+					tags: 'sidebar-visible',
+					meta: {
+						component: LaunchYourStoreHubSidebar,
+					},
+					invoke: [
+						{
+							src: 'getTasklist',
+							onDone: {
+								actions: assign( {
+									tasklist: ( { event } ) => event.output,
+								} ),
+								target: 'backgroundCheckWooPayments',
+							},
+							onError: {
+								// If refresh fails, just stay in the hub with old data
+								target: 'launchYourStoreHub',
+							},
+						},
+					],
+					on: {
+						LAUNCH_STORE: {
+							target: '#storeLaunching',
+						},
+						POP_BROWSER_STACK: {
+							actions: [ 'navigateToWcAdmin' ],
+						},
+					},
+				},
+				backgroundCheckWooPayments: {
+					tags: 'sidebar-visible',
+					meta: {
+						component: LaunchYourStoreHubSidebar,
+					},
+					invoke: {
+						src: 'getWooPaymentsStatus',
+						onDone: {
+							actions: assign( {
+								hasWooPayments: ( { event } ) => event.output,
+							} ),
+							target: 'backgroundMaybeCountTestOrders',
+						},
+						onError: {
+							target: 'backgroundMaybeCountTestOrders',
+						},
+					},
+					on: {
+						LAUNCH_STORE: {
+							target: '#storeLaunching',
+						},
+						POP_BROWSER_STACK: {
+							actions: [ 'navigateToWcAdmin' ],
+						},
+					},
+				},
+				backgroundMaybeCountTestOrders: {
+					tags: 'sidebar-visible',
+					meta: {
+						component: LaunchYourStoreHubSidebar,
+					},
+					always: [
+						{
+							guard: 'hasWooPayments',
+							target: 'backgroundCountTestOrders',
+						},
+						{
+							target: 'launchYourStoreHub',
+						},
+					],
+				},
+				backgroundCountTestOrders: {
+					tags: 'sidebar-visible',
+					meta: {
+						component: LaunchYourStoreHubSidebar,
+					},
+					invoke: {
+						src: 'getTestOrderCount',
+						onDone: {
+							actions: assign( {
+								testOrderCount: ( { event } ) => event.output,
+							} ),
+							target: 'launchYourStoreHub',
+						},
+						onError: {
+							target: 'launchYourStoreHub',
+						},
+					},
+					on: {
+						LAUNCH_STORE: {
+							target: '#storeLaunching',
+						},
+						POP_BROWSER_STACK: {
+							actions: [ 'navigateToWcAdmin' ],
+						},
 					},
 				},
 			},
@@ -600,6 +705,8 @@ export const sidebarMachine = setup( {
 							( { context } ) => context.mainContentMachineRef,
 							{ type: 'RETURN_FROM_PAYMENTS' }
 						),
+						// Trigger background refresh of tasklist data
+						'triggerTasklistRefresh',
 					],
 				},
 			},
