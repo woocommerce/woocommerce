@@ -1,8 +1,8 @@
 Release candidates are pre-release WooCommerce versions made available for testing by plugin authors and users.
 They are versioned incrementally, starting with `-rc.1`, then `-rc.2`, and so on (released if any regressions have been discovered).
 
-The date of the very first release candidate is announced along with the final release date as part of the published release checklist
-and release schedule https://developer.woocommerce.com/release-calendar/.
+The date of the very first release candidate is announced along with the final release date as part of the published release 
+checklist and [release schedule](https://developer.woocommerce.com/release-calendar/).
 
 > Note 1: The very first release candidate can be released after all [CFEs](https://github.com/woocommerce/woocommerce/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22code%20freeze%20exception%22) 
 > for the target release version are addressed and merged.
