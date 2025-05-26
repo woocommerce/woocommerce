@@ -1499,6 +1499,19 @@
       ]
     },
     {
+      "category_slug": "release",
+      "category_title": "Release",
+      "posts": [
+        {
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/release/rc.md",
+          "hash": "abf4055d5e4f0c576d23c4811d976f8abcdf51f3c961bbef582f18c9e2399569",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/release/rc.md",
+          "id": "db6ebbc37ebc0601b080ebf50d3ac5678403c198"
+        }
+      ],
+      "categories": []
+    },
+    {
       "content": "\nUnderstand Woo's reporting capabilities. Learn to generate, understand, and optimize reports to make informed decisions about your WooCommerce projects.\n",
       "category_slug": "reporting",
       "category_title": "Reporting",
@@ -2000,5 +2013,5 @@
       "categories": []
     }
   ],
-  "hash": "2ece70c4199ed2d1c83128b150a4ab77d83bb5c25afc454630e6e6b47df43cc5"
+  "hash": "b11a5785b59798bf20059d57f944ed80416590a18f17cf5722bdf66073d04665"
 }
