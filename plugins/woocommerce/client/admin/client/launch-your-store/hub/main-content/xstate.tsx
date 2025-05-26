@@ -66,11 +66,16 @@ export const mainContentMachine = setup( {
 		updateQueryParams: ( _, params: LaunchYourStoreQueryParams ) => {
 			updateQueryParams< LaunchYourStoreQueryParams >( params );
 		},
-		forceRefresh: () => {
-			// Force a re-render by updating the URL and then navigating back
-			const currentUrl = window.location.href;
-			window.history.pushState( null, '', currentUrl + '#refresh' );
-			window.history.pushState( null, '', currentUrl );
+		cleanupPaymentsUrl: () => {
+			// Clean up URL without causing page refresh
+			const url = new URL( window.location.href );
+			url.searchParams.delete( 'content' );
+
+			// Remove any payments-related path parameters
+			if ( url.searchParams.get( 'path' )?.includes( 'woopayments' ) ) {
+				url.searchParams.set( 'path', '/launch-your-store' );
+			}
+			window.history.replaceState( null, '', url.toString() );
 		},
 		assignSiteCachedStatus: assign( {
 			siteIsShowingCachedContent: true,
@@ -299,7 +304,7 @@ export const mainContentMachine = setup( {
 				assign( {
 					siteIsShowingCachedContent: undefined,
 				} ),
-				'forceRefresh',
+				'cleanupPaymentsUrl',
 			],
 			target: '#sitePreview',
 		},
