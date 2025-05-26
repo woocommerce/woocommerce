@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 'Notify in the #woo-core-releases and #woo-announcement channel that a new release is published'
+      - name: 'Notify to Slack when a new release is published'
         uses: archive/github-actions-slack@v2.10.0
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
