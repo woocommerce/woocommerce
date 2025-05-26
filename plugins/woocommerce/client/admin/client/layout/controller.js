@@ -467,7 +467,7 @@ export function updateLinkHref(
 	item,
 	nextQuery,
 	excludedScreens,
-	excludedScreensUrlUpdate
+	excludedScreensUrlUpdate = []
 ) {
 	if ( isWCAdmin( item.href ) ) {
 		const search = last( item.href.split( '?' ) );
