@@ -36,7 +36,12 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 
 	// Store the initial uncompleted step IDs on first render
 	const initialUncompletedStepIds = React.useRef< string[] | null >( null );
-	if ( initialUncompletedStepIds.current === null ) {
+
+	// Only set the initial uncompleted step IDs if there are backend steps.
+	if (
+		initialUncompletedStepIds.current === null &&
+		allSteps?.some( ( step ) => step.type === 'backend' )
+	) {
 		initialUncompletedStepIds.current = allSteps
 			.filter( ( step ) => step.status !== 'completed' )
 			.map( ( step ) => step.id );
