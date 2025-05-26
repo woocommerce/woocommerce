@@ -19,16 +19,6 @@ type EmailContentValidationRule = {
 	actions: [];
 };
 
-type WooCommerceData = {
-	sender_settings?: {
-		from_address?: string;
-		from_name?: string;
-	};
-	recipient?: string;
-	cc?: string;
-	bcc?: string;
-};
-
 /**
  * Get the WooCommerce data for the current post.
  *
@@ -39,7 +29,7 @@ function getWooCommerceData() {
 		'postType',
 		window.WooCommerceEmailEditor.current_post_type,
 		window.WooCommerceEmailEditor.current_post_id
-	)?.woocommerce_data as WooCommerceData;
+	)?.woocommerce_data as EntityWooCommerceData;
 }
 
 /**
