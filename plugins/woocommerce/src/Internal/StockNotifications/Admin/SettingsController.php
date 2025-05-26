@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Admin;
 /**
  * Settings controller for Customer Stock Notifications.
  */
-class SettingsController{
+class SettingsController {
 
 	/**
 	 * Constructor.
