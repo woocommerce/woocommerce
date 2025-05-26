@@ -21,8 +21,8 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
-			'product_back_in_stock_options'           => array( 'title', 'sectionend' ),
-			'woocommerce_back_in_stock_allow_signups' => 'checkbox',
+			'product_back_in_stock_options'             => array( 'title', 'sectionend' ),
+			'woocommerce_back_in_stock_allow_signups'   => 'checkbox',
 			'woocommerce_back_in_stock_require_double_opt_in' => 'checkbox',
 			'woocommerce_back_in_stock_require_account' => 'checkbox',
 			'woocommerce_back_in_stock_create_account_on_signup' => 'checkbox',
