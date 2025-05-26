@@ -14,7 +14,7 @@ import {
 	WooPaymentsOnboardingStepContent,
 	paymentSettingsStore,
 } from '@woocommerce/data';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { getHistory, getNewPath, getQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -23,6 +23,29 @@ import {
 	WooPaymentsProviderOnboardingStep,
 	OnboardingContextType,
 } from '~/settings-payments/onboarding/types';
+
+/**
+ * URL Strategy interface for handling navigation in different contexts
+ */
+interface URLStrategy {
+	buildStepURL: (
+		stepPath: string,
+		currentParams?: Record< string, string >
+	) => string;
+	preserveParams?: string[]; // params to preserve when navigating
+}
+
+/**
+ * Default URL strategy for settings-payments (backward compatibility)
+ */
+const defaultURLStrategy: URLStrategy = {
+	buildStepURL: ( stepPath: string ) => {
+		return getNewPath( { path: stepPath }, stepPath, {
+			page: 'wc-settings',
+			tab: 'checkout',
+		} );
+	},
+};
 
 /**
  * Context to manage onboarding steps
@@ -45,15 +68,10 @@ export const useOnboardingContext = () => useContext( OnboardingContext );
 
 export const OnboardingProvider: React.FC< {
 	children: React.ReactNode;
-	source: 'settings-payments' | 'launch-your-store';
 	onboardingSteps: WooPaymentsProviderOnboardingStep[];
 	closeModal: () => void;
-} > = ( {
-	children,
-	source = 'settings-payments',
-	onboardingSteps,
-	closeModal,
-} ) => {
+	urlStrategy?: URLStrategy;
+} > = ( { children, onboardingSteps, closeModal, urlStrategy } ) => {
 	const history = getHistory();
 
 	// Use React state to manage steps and loading state
@@ -126,30 +144,32 @@ export const OnboardingProvider: React.FC< {
 		( stepKey: string ) => {
 			const step = getStepByKey( stepKey );
 			if ( step?.path ) {
-				if ( source === 'settings-payments' ) {
-					const newPath = getNewPath(
-						{ path: step.path },
-						step.path,
-						{
-							page: 'wc-settings',
-							tab: 'checkout',
-						}
-					);
-					history.push( newPath );
-				} else if ( source === 'launch-your-store' ) {
-					const newPath = getNewPath(
-						{ path: step.path },
-						'/launch-your-store' + step.path,
-						{
-							page: 'wc-admin',
-							path: '/launch-your-store/woopayments/onboarding',
-						}
-					);
-					history.push( newPath );
-				}
+				// Use provided urlStrategy or fall back to default
+				const strategy = urlStrategy || defaultURLStrategy;
+
+				// Get current query params if strategy wants to preserve some
+				const currentParams = strategy.preserveParams
+					? ( getQuery() as Record< string, string > )
+					: {};
+				const preservedParams =
+					strategy.preserveParams?.reduce(
+						( acc: Record< string, string >, param: string ) => {
+							if ( currentParams[ param ] ) {
+								acc[ param ] = currentParams[ param ];
+							}
+							return acc;
+						},
+						{} as Record< string, string >
+					) || {};
+
+				const newPath = strategy.buildStepURL(
+					step.path,
+					preservedParams
+				);
+				history.push( newPath );
 			}
 		},
-		[ getStepByKey, history ]
+		[ getStepByKey, history, urlStrategy ]
 	);
 
 	// Find the first incomplete step with completed dependencies
