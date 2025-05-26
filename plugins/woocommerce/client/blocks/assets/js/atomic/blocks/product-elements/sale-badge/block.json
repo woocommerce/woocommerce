@@ -50,7 +50,6 @@
 		"__experimentalSelector": ".wc-block-components-product-sale-badge"
 	},
 	"ancestor": [
-		"woocommerce/all-products",
 		"woocommerce/single-product",
 		"woocommerce/product-template",
 		"core/post-template",

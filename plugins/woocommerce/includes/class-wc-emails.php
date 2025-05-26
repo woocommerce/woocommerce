@@ -268,6 +268,7 @@ class WC_Emails {
 
 		$this->emails['WC_Email_New_Order']                 = include __DIR__ . '/emails/class-wc-email-new-order.php';
 		$this->emails['WC_Email_Cancelled_Order']           = include __DIR__ . '/emails/class-wc-email-cancelled-order.php';
+		$this->emails['WC_Email_Customer_Cancelled_Order']  = include __DIR__ . '/emails/class-wc-email-customer-cancelled-order.php';
 		$this->emails['WC_Email_Failed_Order']              = include __DIR__ . '/emails/class-wc-email-failed-order.php';
 		$this->emails['WC_Email_Customer_Failed_Order']     = include __DIR__ . '/emails/class-wc-email-customer-failed-order.php';
 		$this->emails['WC_Email_Customer_On_Hold_Order']    = include __DIR__ . '/emails/class-wc-email-customer-on-hold-order.php';
@@ -326,7 +327,13 @@ class WC_Emails {
 	 * @param mixed $email_heading Heading for the email.
 	 */
 	public function email_header( $email_heading ) {
-		wc_get_template( 'emails/email-header.php', array( 'email_heading' => $email_heading ) );
+		wc_get_template(
+			'emails/email-header.php',
+			array(
+				'email_heading' => $email_heading,
+				'store_name'    => get_bloginfo( 'name', 'display' ),
+			)
+		);
 	}
 
 	/**

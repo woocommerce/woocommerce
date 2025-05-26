@@ -11,6 +11,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -4164,7 +4165,7 @@ function wc_get_pay_buttons() {
 	$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 
 	foreach ( $available_gateways as $gateway ) {
-		if ( $gateway->supports( 'pay_button' ) ) {
+		if ( $gateway->supports( PaymentGatewayFeature::PAY_BUTTON ) ) {
 			$supported_gateways[] = $gateway->get_pay_button_id();
 		}
 	}
