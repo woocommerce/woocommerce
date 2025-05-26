@@ -10,7 +10,7 @@ post_id=$(wp post create \
 	--post_author=1 \
 	--post_title='Shop' \
 )
-wp option update woocommerce_shop_page_id $post_id
+wp option update woocommerce_shop_page_id $post_id &
 
 post_id=$(wp post create \
 	--porcelain \
@@ -21,7 +21,7 @@ post_id=$(wp post create \
 	--post_title='Cart' \
 	${script_dir}/cart.html
 )
-wp option update woocommerce_cart_page_id $post_id
+wp option update woocommerce_cart_page_id $post_id &
 
 post_id=$(wp post create \
 	--porcelain \
@@ -32,7 +32,7 @@ post_id=$(wp post create \
 	--post_title='Checkout' \
 	${script_dir}/checkout.html
 )
-wp option update woocommerce_checkout_page_id $post_id
+wp option update woocommerce_checkout_page_id $post_id &
 
 post_id=$(wp post create \
 	--porcelain \
@@ -43,7 +43,7 @@ post_id=$(wp post create \
 	--post_title='My Account' \
 	${script_dir}/my-account.html
 )
-wp option update woocommerce_myaccount_page_id $post_id
+wp option update woocommerce_myaccount_page_id $post_id &
 
 post_id=$(wp post create \
 	--porcelain \
@@ -52,7 +52,7 @@ post_id=$(wp post create \
 	--post_status=publish \
 	--post_author=1 \
 	--post_title='Terms')
-wp option update woocommerce_terms_page_id $post_id
+wp option update woocommerce_terms_page_id $post_id &
 
 post_id=$(wp post create \
 	--porcelain \
@@ -62,7 +62,7 @@ post_id=$(wp post create \
 	--post_author=1 \
 	--post_title='Privacy'
 )
-wp option update wp_page_for_privacy_policy $post_id
+wp option update wp_page_for_privacy_policy $post_id &
 
 post_id=$(wp post create \
 	--porcelain \

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+CI: add drop-in object cache to blocks E2E tests environment
