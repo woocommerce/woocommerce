@@ -44,13 +44,6 @@ const { state: wooState } = store< WooCommerce >(
 
 const productButtonStore = {
 	state: {
-		get productId() {
-			const { productId } = getContext< Context >();
-			const { variationId } = getContext< AddToCartWithOptionsContext >(
-				'woocommerce/add-to-cart-with-options'
-			);
-			return variationId || productId;
-		},
 		get quantity(): number {
 			const product = wooState.cart?.items.find(
 				( item ) => item.id === state.productId
@@ -86,6 +79,16 @@ const productButtonStore = {
 			const { displayViewCart } = getContext< Context >();
 			if ( ! displayViewCart ) return false;
 			return state.quantity > 0;
+		},
+		get productId() {
+			const addToCartWithOptionsContext =
+				getContext< AddToCartWithOptionsContext >(
+					'woocommerce/add-to-cart-with-options'
+				);
+			return (
+				addToCartWithOptionsContext?.variationId ||
+				getContext< Context >().productId
+			);
 		},
 	},
 	actions: {
