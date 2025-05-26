@@ -29,6 +29,7 @@ class StockNotificationsServiceProvider extends AbstractServiceProvider {
 		Controller::class,
 		EmailManager::class,
 		EmailTemplatesController::class,
+		SettingsController::class,
 		StockNotificationsDataStore::class,
 		StockNotificationsMetaDataStore::class,
 	);
@@ -41,5 +42,6 @@ class StockNotificationsServiceProvider extends AbstractServiceProvider {
 		$this->share( Controller::class );
 		$this->share( EmailManager::class );
 		$this->share( EmailTemplatesController::class );
+		$this->share( SettingsController::class );
 	}
 }
