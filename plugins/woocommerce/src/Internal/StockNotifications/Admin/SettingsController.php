@@ -34,7 +34,7 @@ class SettingsController {
 		if ( ! is_array( $sections ) ) {
 			return $sections;
 		}
-		
+
 		$section_title = __( 'Customer stock notifications', 'woocommerce' );
 
 		// Add 'Customer stock notifications' section to the Products tab, after Inventory.
@@ -46,7 +46,7 @@ class SettingsController {
 		} else {
 			$sections['customer_stock_notifications'] = $section_title;
 		}
-		
+
 		return $sections;
 	}
 
