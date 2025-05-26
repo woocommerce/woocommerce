@@ -69,12 +69,7 @@ test.describe( 'Email Style Sync', () => {
 		await expect( autoSyncToggle ).toBeHidden();
 
 		// Sync color palette with theme
-		const syncButton = page.getByRole( 'button', {
-			name: 'Sync with theme',
-		} );
-		await syncButton.waitFor( { state: 'visible' } );
-		await syncButton.scrollIntoViewIfNeeded();
-		await syncButton.click();
+		await page.getByRole( 'button', { name: 'Sync with theme' } ).click();
 
 		// Check initial state (should be enabled by default)
 		await expect( autoSyncToggle ).toBeVisible();
