@@ -131,6 +131,22 @@ export function initDomTracking() {
 			},
 			selector: '[data-tab-id="edit-post/block"]',
 		},
+		// Header inserter sidebar toggle clicked
+		{
+			track: ( target ) => {
+				const isOpened = target.classList.contains( 'is-pressed' );
+				recordEvent( 'header_inserter_sidebar_clicked', { isOpened } );
+			},
+			selector: '.editor-document-tools__inserter-toggle',
+		},
+		// Header listview sidebar toggle clicked
+		{
+			track: ( target ) => {
+				const isOpened = target.classList.contains( 'is-pressed' );
+				recordEvent( 'header_listview_sidebar_clicked', { isOpened } );
+			},
+			selector: '.editor-document-tools__document-overview-toggle',
+		},
 	];
 
 	document.addEventListener( 'click', trackMatchingEvents );

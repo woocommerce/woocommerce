@@ -26,28 +26,6 @@ const trackDeleteEntityRecord = ( _entity, type, id ) => {
 	}
 };
 
-const trackSetIsInserterOpened = ( isOpened: boolean ) => {
-	// @ts-expect-error - isInserterOpened is not in editor types
-	const isInserterOpened = select( editorStore ).isInserterOpened();
-	if ( isInserterOpened === isOpened ) {
-		return;
-	}
-	recordEvent(
-		`header_inserter_sidebar_${ isOpened ? 'opened' : 'closed' }`
-	);
-};
-
-const trackSetIsListViewOpened = ( isOpened: boolean ) => {
-	// @ts-expect-error - isListViewOpened is not in editor types
-	const isListViewOpened = select( editorStore ).isListViewOpened();
-	if ( isListViewOpened === isOpened ) {
-		return;
-	}
-	recordEvent(
-		`header_listview_sidebar_${ isOpened ? 'opened' : 'closed' }`
-	);
-};
-
 const trackSetPreference = ( scope, name, value ) => {
 	const valueBeforeToggle = select( preferencesStore ).get( scope, name );
 	if ( valueBeforeToggle === value ) {
@@ -106,8 +84,6 @@ const TRACKED_STORE_EVENTS = {
 	'core/editor': {
 		autosave: 'editor_content_auto_saved',
 		setDeviceType: trackSetDeviceType,
-		setIsInserterOpened: trackSetIsInserterOpened,
-		setIsListViewOpened: trackSetIsListViewOpened,
 	},
 	core: {
 		deleteEntityRecord: trackDeleteEntityRecord,
