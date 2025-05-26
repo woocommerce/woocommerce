@@ -438,6 +438,12 @@ export const selectShippingRate =
 			);
 
 		if ( selectedShippingRate?.rate_id === rateId ) {
+			// Early return here signifies that the rate is correctly selected.
+			// We might have some pending requests that will be trying to set it, so
+			// let's abort them just in case.
+			if ( abortController ) {
+				abortController.abort();
+			}
 			return;
 		}
 
@@ -478,12 +484,13 @@ export const selectShippingRate =
 
 			dispatch.receiveCart( rest );
 			dispatch.shippingRatesBeingSelected( false );
-
 			return response as CartResponse;
 		} catch ( error ) {
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
 			dispatch.shippingRatesBeingSelected( false );
 			return Promise.reject( error );
+		} finally {
+			abortController = null;
 		}
 	};
 
@@ -495,11 +502,20 @@ export const updateCustomerData =
 		// Address data to be updated; can contain both billing_address and shipping_address.
 		customerData: Partial< BillingAddressShippingAddress >,
 		// If the address is being edited, we don't update the customer data in the store from the response.
-		editing = true
+		editing = true,
+		haveAddressFieldsForShippingRatesChanged = false
 	) =>
 	async ( { dispatch }: CartThunkArgs ) => {
 		try {
 			dispatch.updatingCustomerData( true );
+			// Signal that the fields needed for shipping rate calculations have changed
+			if (
+				'shipping_address' in customerData &&
+				haveAddressFieldsForShippingRatesChanged
+			) {
+				dispatch.updatingAddressFieldsForShippingRates( true );
+			}
+
 			const { response } = await apiFetchWithHeaders< {
 				response: CartResponse;
 			} >( {
@@ -521,6 +537,7 @@ export const updateCustomerData =
 			return Promise.reject( error );
 		} finally {
 			dispatch.updatingCustomerData( false );
+			dispatch.updatingAddressFieldsForShippingRates( false );
 		}
 	};
 

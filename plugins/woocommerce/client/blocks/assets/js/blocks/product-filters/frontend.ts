@@ -3,8 +3,9 @@
  */
 import * as iAPI from '@wordpress/interactivity';
 
-const { getContext, store, getServerContext } = iAPI;
-const getSetting = window.wc.wcSettings.getSetting;
+const { getContext, store, getServerContext, getConfig } = iAPI;
+
+const BLOCK_NAME = 'woocommerce/product-filters';
 
 function selectFilter() {
 	const context = getContext< ProductFiltersContext >();
@@ -174,7 +175,7 @@ const productFiltersStore = {
 				? getServerContext< ProductFiltersContext >()
 				: getContext< ProductFiltersContext >();
 
-			const canonicalUrl = getSetting( 'canonicalUrl' );
+			const canonicalUrl = getConfig( BLOCK_NAME ).canonicalUrl;
 			const url = new URL( canonicalUrl );
 			const { searchParams } = url;
 
@@ -190,12 +191,13 @@ const productFiltersStore = {
 				return;
 			}
 
-			const isBlockTheme = getSetting( 'isBlockTheme' );
-			const isProductArchive = getSetting( 'isProductArchive' );
-			const needsRefreshForInteractivityAPI = getSetting(
-				'needsRefreshForInteractivityAPI',
-				false
-			);
+			const sharedSettings = getConfig( 'woocommerce' );
+			const productFilterSettings = getConfig( BLOCK_NAME );
+			const isBlockTheme = sharedSettings?.isBlockTheme || false;
+			const isProductArchive =
+				productFilterSettings?.isProductArchive || false;
+			const needsRefreshForInteractivityAPI =
+				sharedSettings?.needsRefreshForInteractivityAPI || false;
 
 			if (
 				needsRefreshForInteractivityAPI ||
@@ -225,6 +227,6 @@ const productFiltersStore = {
 export type ProductFiltersStore = typeof productFiltersStore;
 
 const { state, actions } = store< ProductFiltersStore >(
-	'woocommerce/product-filters',
+	BLOCK_NAME,
 	productFiltersStore
 );

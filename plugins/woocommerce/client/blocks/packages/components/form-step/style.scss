@@ -18,7 +18,7 @@
 		// This media query is required because on themes where the Checkout block is rendered alongside something else,
 		// e.g. Storefront using the "Default Template" (which has a sidebar) the checkout block can get the `.is-small`
 		// class, but the screen itself is larger than 400px.
-		@include breakpoint( "<600px" ) {
+		@include breakpoint("<600px") {
 			padding-top: $gap-larger;
 
 			// Remove padding from the first checkout step. First of type is required here as the first-child is the express payment methods block.
@@ -67,7 +67,9 @@
 		margin-bottom: 0;
 	}
 }
-.wc-block-components-checkout-step--with-step-number .wc-block-components-checkout-step__content > :last-child {
+.wc-block-components-checkout-step--with-step-number
+	.wc-block-components-checkout-step__content
+	> :last-child {
 	margin-bottom: 0;
 }
 .wc-block-checkout__contact-fields .wc-block-components-checkout-step__heading {
@@ -77,13 +79,15 @@
 	margin: 0 0 $gap-smaller;
 	position: relative;
 
-	.wc-block-components-express-payment-continue-rule + .wc-block-components-checkout-step & {
+	.wc-block-components-express-payment-continue-rule
+		+ .wc-block-components-checkout-step
+		& {
 		margin-top: 0;
 	}
-
 }
 
-.wc-block-components-checkout-step:first-child .wc-block-components-checkout-step__heading {
+.wc-block-components-checkout-step:first-child
+	.wc-block-components-checkout-step__heading {
 	margin-top: 0;
 }
 
@@ -119,8 +123,8 @@
 			@include reset-box();
 			background: transparent;
 			counter-increment: checkout-step;
-			content: "\00a0" counter(checkout-step) ".";
-			content: "\00a0" counter(checkout-step) "." / "";
+			content: "\00a0"counter(checkout-step) ".";
+			content: "\00a0"counter(checkout-step) "." / "";
 			position: absolute;
 			left: -$gap-large;
 			top: 0;
@@ -135,7 +139,7 @@
 				left: auto;
 				top: auto;
 				content: counter(checkout-step) ".\00a0";
-				content: counter(checkout-step) ".\00a0" / "";
+				content: counter(checkout-step) ".\00a0"/ "";
 			}
 		}
 
@@ -156,7 +160,7 @@
 				left: auto;
 				top: auto;
 				content: counter(checkout-step) ".\00a0";
-				content: counter(checkout-step) ".\00a0" / "";
+				content: counter(checkout-step) ".\00a0"/ "";
 			}
 
 			.wc-block-components-checkout-step__container::after {

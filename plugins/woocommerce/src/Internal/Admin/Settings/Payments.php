@@ -73,14 +73,22 @@ class Payments {
 					return $a['_priority'] <=> $b['_priority'];
 				}
 			);
-			$added_to_top = 0;
+			$last_preferred_order = -1;
 			foreach ( $suggestions['preferred'] as $suggestion ) {
 				$suggestion_order_map_id = $this->providers->get_suggestion_order_map_id( $suggestion['id'] );
 				// Determine the suggestion's order value.
-				// If we don't have an order for it, add it to the top but keep the relative order (PSP first, APM second).
+				// If we don't have an order for it, add it to the top but keep the relative order:
+				// PSP first, APM after PSP, offline PSP after PSP and APM.
 				if ( ! isset( $providers_order_map[ $suggestion_order_map_id ] ) ) {
-					$providers_order_map = Utils::order_map_add_at_order( $providers_order_map, $suggestion_order_map_id, $added_to_top );
-					++$added_to_top;
+					$providers_order_map = Utils::order_map_add_at_order( $providers_order_map, $suggestion_order_map_id, $last_preferred_order + 1 );
+					if ( $last_preferred_order < $providers_order_map[ $suggestion_order_map_id ] ) {
+						// If the last preferred order is less than the current one, we need to update it.
+						$last_preferred_order = $providers_order_map[ $suggestion_order_map_id ];
+					}
+				} elseif ( $last_preferred_order < $providers_order_map[ $suggestion_order_map_id ] ) {
+					// Save the preferred provider's order to know where we should be inserting next.
+					// But only if the last preferred order is less than the current one.
+					$last_preferred_order = $providers_order_map[ $suggestion_order_map_id ];
 				}
 
 				// Change suggestion details to align it with a regular payment gateway.
@@ -120,8 +128,8 @@ class Payments {
 				'id'          => PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
 				'_type'       => PaymentProviders::TYPE_OFFLINE_PMS_GROUP,
 				'_order'      => $providers_order_map[ PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP ],
-				'title'       => __( 'Take offline payments', 'woocommerce' ),
-				'description' => __( 'Accept payments offline using multiple different methods. These can also be used to test purchases.', 'woocommerce' ),
+				'title'       => esc_html__( 'Take offline payments', 'woocommerce' ),
+				'description' => esc_html__( 'Accept payments offline using multiple different methods. These can also be used to test purchases.', 'woocommerce' ),
 				'icon'        => plugins_url( 'assets/images/payment_methods/cod.svg', WC_PLUGIN_FILE ),
 				// The offline PMs (and their group) are obviously from WooCommerce, and WC is always active.
 				'plugin'      => array(

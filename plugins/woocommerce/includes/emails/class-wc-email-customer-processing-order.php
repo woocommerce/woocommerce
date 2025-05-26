@@ -49,7 +49,7 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Let your shoppers know that you’re processing their order following successful payment.', 'woocommerce' )
+				? __( 'Let your customers know that you’re processing their order following successful payment.', 'woocommerce' )
 				: __( 'This is an order notification sent to customers containing order details after payment.', 'woocommerce' );
 		}
 

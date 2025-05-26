@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useRef } from '@wordpress/element';
+import { useRef, useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { snakeCaseKeys } from '@woocommerce/base-utils';
 import type {
@@ -26,96 +26,117 @@ const useDocumentObject = < T extends FormType | 'global' >(
 		customer: {},
 	} );
 
-	const data: DocumentObject< T > = useSelect(
-		( select ) => {
-			const cartDataStore = select( cartStore );
-			const checkoutDataStore = select( checkoutStore );
-			const paymentDataStore = select( paymentStore );
-			const cartData = cartDataStore.getCartData();
+	const {
+		cartData,
+		prefersCollection,
+		shouldCreateAccount,
+		orderNotes,
+		additionalFields,
+		activePaymentMethod,
+		customerId,
+	} = useSelect( ( select ) => {
+		const cartDataStore = select( cartStore );
+		const checkoutDataStore = select( checkoutStore );
+		const paymentDataStore = select( paymentStore );
+		return {
+			cartData: cartDataStore.getCartData(),
+			prefersCollection: checkoutDataStore.prefersCollection(),
+			shouldCreateAccount: checkoutDataStore.getShouldCreateAccount(),
+			orderNotes: checkoutDataStore.getOrderNotes(),
+			additionalFields: checkoutDataStore.getAdditionalFields(),
+			activePaymentMethod: paymentDataStore.getActivePaymentMethod(),
+			customerId: checkoutDataStore.getCustomerId(),
+		};
+	}, [] );
 
-			const {
-				coupons,
-				shippingRates,
-				shippingAddress,
-				billingAddress,
-				items,
+	const data = useMemo( () => {
+		const {
+			coupons,
+			shippingRates,
+			shippingAddress,
+			billingAddress,
+			items,
+			itemsCount,
+			itemsWeight,
+			needsShipping,
+			totals,
+			extensions,
+		} = cartData;
+
+		const documentObject = {
+			cart: {
+				coupons: coupons.map( ( coupon ) => coupon.code ),
+				shippingRates: [
+					...new Set(
+						shippingRates
+							.map(
+								( shippingPackage ) =>
+									shippingPackage.shipping_rates.find(
+										( rate ) => rate.selected
+									)?.rate_id
+							)
+							.filter( Boolean )
+					),
+				],
+				items: items
+					.map( ( item ) => Array( item.quantity ).fill( item.id ) )
+					.flat(),
+				itemsType: [ ...new Set( items.map( ( item ) => item.type ) ) ],
 				itemsCount,
 				itemsWeight,
 				needsShipping,
-				totals,
-			} = cartData;
-			const documentObject = {
-				cart: {
-					coupons: coupons.map( ( coupon ) => coupon.code ),
-					shippingRates: [
-						...new Set(
-							shippingRates
-								.map(
-									( shippingPackage ) =>
-										shippingPackage.shipping_rates.find(
-											( rate ) => rate.selected
-										)?.rate_id
-								)
-								.filter( Boolean )
-						),
-					],
-					items: items
-						.map( ( item ) =>
-							Array( item.quantity ).fill( item.id )
-						)
-						.flat(),
-					itemsType: [
-						...new Set( items.map( ( item ) => item.type ) ),
-					],
-					itemsCount,
-					itemsWeight,
-					needsShipping,
-					prefersCollection:
-						typeof checkoutDataStore.prefersCollection() ===
-						'boolean'
-							? checkoutDataStore.prefersCollection()
-							: false,
-					totals: {
-						totalPrice: Number( totals.total_price ),
-						totalTax: Number( totals.total_tax ),
-					},
-					extensions: cartData.extensions,
+				prefersCollection:
+					typeof prefersCollection === 'boolean'
+						? prefersCollection
+						: false,
+				totals: {
+					totalPrice: Number( totals.total_price ),
+					totalTax: Number( totals.total_tax ),
 				},
-				checkout: {
-					createAccount: checkoutDataStore.getShouldCreateAccount(),
-					customerNote: checkoutDataStore.getOrderNotes(),
-					additionalFields: checkoutDataStore.getAdditionalFields(),
-					paymentMethod: paymentDataStore.getActivePaymentMethod(),
-				},
-				customer: {
-					id: checkoutDataStore.getCustomerId(),
-					billingAddress,
-					shippingAddress,
-					...( formType === 'billing' || formType === 'shipping'
-						? {
-								address:
-									formType === 'billing'
-										? billingAddress
-										: shippingAddress,
-						  }
-						: {} ),
-				},
-			};
+				extensions,
+			},
+			checkout: {
+				createAccount: shouldCreateAccount,
+				customerNote: orderNotes,
+				additionalFields,
+				paymentMethod: activePaymentMethod,
+			},
+			customer: {
+				id: customerId,
+				billingAddress,
+				shippingAddress,
+				...( formType === 'billing' || formType === 'shipping'
+					? {
+							address:
+								formType === 'billing'
+									? billingAddress
+									: shippingAddress,
+					  }
+					: {} ),
+			},
+		};
 
-			return {
-				cart: snakeCaseKeys( documentObject.cart ) as DocumentObject<
-					typeof formType
-				>[ 'cart' ],
-				checkout: snakeCaseKeys(
-					documentObject.checkout
-				) as DocumentObject< typeof formType >[ 'checkout' ],
-				customer: snakeCaseKeys(
-					documentObject.customer
-				) as DocumentObject< typeof formType >[ 'customer' ],
-			};
-		},
-		[ formType ]
-	);
+		return {
+			cart: snakeCaseKeys( documentObject.cart ) as DocumentObject<
+				typeof formType
+			>[ 'cart' ],
+			checkout: snakeCaseKeys(
+				documentObject.checkout
+			) as DocumentObject< typeof formType >[ 'checkout' ],
+			customer: snakeCaseKeys(
+				documentObject.customer
+			) as DocumentObject< typeof formType >[ 'customer' ],
+		};
+	}, [
+		cartData,
+		prefersCollection,
+		shouldCreateAccount,
+		orderNotes,
+		additionalFields,
+		activePaymentMethod,
+		customerId,
+		formType,
+	] );
 
 	if (
 		! currentResults.current ||
