@@ -113,7 +113,6 @@ class TaskLists {
 			'StoreDetails',
 			'Products',
 			'Appearance',
-			'WooCommercePayments',
 			'Payments',
 			'Tax',
 			'Shipping',
@@ -132,14 +131,6 @@ class TaskLists {
 		$store_customisation_task_index = array_search( $task_to_remove, $tasks, true );
 		if ( false !== $store_customisation_task_index ) {
 			unset( $tasks[ $store_customisation_task_index ] );
-		}
-
-		// If the React-based Payments settings page is enabled, we don't need the dedicated WooPayments task.
-		if ( FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
-			$key = array_search( 'WooCommercePayments', $tasks, true );
-			if ( false !== $key ) {
-				unset( $tasks[ $key ] );
-			}
 		}
 
 		self::add_list(

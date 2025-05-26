@@ -7,11 +7,6 @@ import { useSelect } from '@wordpress/data';
 import { styles } from '@wordpress/icons';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
-	// @ts-expect-error Type for Navigator is missing in @types/wordpress__editor
-	Navigator,
-} from '@wordpress/components';
-// eslint-disable-next-line @woocommerce/dependency-group
-import {
 	// @ts-expect-error Type for PluginSidebar is missing in @types/wordpress__editor
 	PluginSidebar,
 	// @ts-expect-error Type for PluginSidebarMoreMenuItem is missing in @types/wordpress__editor
@@ -29,6 +24,7 @@ import {
 	ScreenRoot,
 	ScreenColors,
 } from './screens';
+import { Navigator } from './navigator';
 
 export function RawStylesSidebar(): JSX.Element {
 	const { userCanEditGlobalStyles } = useSelect( ( select ) => {

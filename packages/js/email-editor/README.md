@@ -19,7 +19,7 @@ pnpm run lint:css                           # runs stylelint on all .scss files
 pnpm run lint:css-fix                       # fixes errors reported by `pnpm run lint:css`
 pnpm run lint:js                            # runs eslint on all js and ts files (including the .jsx and .tsx versions)
 pnpm run lint:js-fix                        # fixes errors reported by `pnpm run lint:js`
-pnpm run check-types                        # runs type check on all typescript files
+pnpm run lint:lang:types                    # runs type check on all typescript files
 pnpm run format                             # runs prettier on files. This uses WordPress coding standards.
 ```
 
@@ -99,7 +99,7 @@ We may add, update and delete any of them.
 ### Filters
 
 | Name                                                               | Argument                         | Return                                     | Description                                                                                                         |
-|--------------------------------------------------------------------|----------------------------------|--------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
+| ------------------------------------------------------------------ | -------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
 | `woocommerce_email_editor_events_tracking_enabled`                 | `boolean` (false-default)        | `boolean`                                  | Used to enable the email editor events tracking and collection                                                      |
 | `woocommerce_email_editor_wrap_editor_component`                   | `JSX.Element` Editor             | `JSX.Element` Editor                       | The main editor component. Custom component can wrap the editor and provide additional functionality                |
 | `woocommerce_email_editor_send_button_label`                       | `string` 'Send'                  | `string` 'Send' (default)                  | Email editor send button label. The `Send` text can be updated using this filter                                    |
@@ -107,7 +107,7 @@ We may add, update and delete any of them.
 | `woocommerce_email_editor_content_validation_rules`                | `array` rules                    | `EmailContentValidationRule[]` rules       | Email editor content validation rules. The validation is done on `send btton` click and revalidated on `save draft` |
 | `woocommerce_email_editor_check_sending_method_configuration_link` | `string` link                    | `string` link                              | Edit or remove the sending configuration link message                                                               |
 | `woocommerce_email_editor_setting_sidebar_extension_component`     | `JSX.Element` RichTextWithButton | `JSX.Element` Sidebar extension component  | Add components to the Email settings sidebar                                                                        |
-| `woocommerce_email_editor_setting_sidebar_email_status_component`  | `JSX.Element` EmailStatus        | `JSX.Element` Email status component        | Add a custom email status component to the Email settings sidebar                                                   |
+| `woocommerce_email_editor_setting_sidebar_email_status_component`  | `JSX.Element` EmailStatus        | `JSX.Element` Email status component       | Add a custom email status component to the Email settings sidebar                                                   |
 | `woocommerce_email_editor_preferred_template_title`                | `string` '', `Post` post         | `string` custom (preferred) template title | Custom title for Email preset template selector                                                                     |
 | `woocommerce_email_editor_sidebar_email_type_info_icon`            | none                             | `JSX.Element` icon component               | Return an icon from @wordpress/icons e.g. () => <Icon icon={ postContent } />                                       |
 | `woocommerce_email_editor_sidebar_email_type_info_content`         | none                             | `JSX.Element` info content                 | Return a React component containing information about the current template or content                               |
