@@ -1,66 +1,43 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
 import { createBlock } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import metadata from './block.json';
-import { BlockAttributesV1 } from './types';
+import { BlockAttributes } from './types';
+import save from '../save';
+import { isTryingToDisplayLegacySaleBadge } from './utils';
 
-// In v2, we removed the `showSaleBadge` attribute and converted it to an inner block.
+// In v2, we're migrating the `showSaleBadge` attribute to an inner block.
 const v1 = {
-	attributes: {
-		...metadata.attributes,
-		showSaleBadge: {
-			type: 'boolean',
-			default: true,
-		},
-		saleBadgeAlign: {
-			type: 'string',
-			default: 'right',
-		},
-	},
-	save( { attributes }: { attributes: BlockAttributesV1 } ) {
-		if (
-			attributes.isDescendentOfQueryLoop ||
-			attributes.isDescendentOfSingleProductBlock
-		) {
-			return null;
+	save,
+	attributes: metadata.attributes,
+	isEligible: ( { showSaleBadge }: BlockAttributes ) =>
+		isTryingToDisplayLegacySaleBadge( showSaleBadge ),
+	migrate: ( attributes: BlockAttributes ) => {
+		const { showSaleBadge, saleBadgeAlign } = attributes;
+
+		// If showSaleBadge is false, it means that the sale badge was explicitly set to false.
+		if ( showSaleBadge === false ) {
+			return [ attributes ];
 		}
-
-		return <div className={ clsx( 'is-loading', attributes.className ) } />;
-	},
-	isEligible: ( attributes: BlockAttributesV1 ) =>
-		attributes.showSaleBadge !== undefined,
-	migrate: ( attributes: BlockAttributesV1 ) => {
-		const { showSaleBadge, saleBadgeAlign, ...rest } = attributes;
-		if ( ! showSaleBadge ) {
-			return [ rest ];
-		}
-
-		let justifyContent = 'flex-end';
-		if ( saleBadgeAlign === 'left' ) {
-			justifyContent = 'flex-start';
-		} else if ( saleBadgeAlign === 'center' ) {
-			justifyContent = 'center';
-		}
-
-		const layoutProps = {
-			justifyContent,
-			type: 'flex',
-		};
-
-		const newAttributes = {
-			...rest,
-			layout: layoutProps,
-		};
+		// Otherwise, it's either:
+		// - true explicitly or
+		// - undefined (implicit true by default).
 
 		return [
-			newAttributes,
-			[ createBlock( 'woocommerce/product-sale-badge' ) ],
+			{
+				...attributes,
+				showSaleBadge: false,
+			},
+			[
+				createBlock( 'woocommerce/product-sale-badge', {
+					align: saleBadgeAlign,
+				} ),
+			],
 		];
 	},
 };

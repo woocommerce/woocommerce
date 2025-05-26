@@ -14,13 +14,20 @@ import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
 import type { HTMLAttributes } from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
-import { isString, objectHasProp } from '@woocommerce/types';
+import {
+	isString,
+	objectHasProp,
+	isEmpty,
+	ProductResponseItem,
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
+import ProductSaleBadge from '../sale-badge/block';
 import './style.scss';
 import { BlockAttributes, ImageSizing } from './types';
+import { isTryingToDisplayLegacySaleBadge } from './utils';
 
 const ImagePlaceholder = ( props ): JSX.Element => {
 	return (
@@ -101,6 +108,24 @@ const Image = ( {
 type Props = BlockAttributes &
 	HTMLAttributes< HTMLDivElement > & { style?: Record< string, unknown > };
 
+type LegacyProps = Props & {
+	product?: ProductResponseItem;
+};
+
+// props.product is not listed in the BlockAttributes explicitly,
+// but it is implicitly passed from the All Products block.
+// This is what distinguishes this block from the other usage of the Product Image component.
+const displayLegacySaleBadge = ( props: LegacyProps ) => {
+	const { product } = props;
+	const isInAllProducts = ! isEmpty( product );
+
+	if ( isInAllProducts ) {
+		return isTryingToDisplayLegacySaleBadge( props.showSaleBadge );
+	}
+
+	return false;
+};
+
 export const Block = ( props: Props ): JSX.Element | null => {
 	const {
 		aspectRatio,
@@ -112,6 +137,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		showProductLink = true,
 		style,
 		width,
+		...restProps
 	} = props;
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
@@ -171,6 +197,13 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				) }
 				style={ styleProps.style }
 			>
+				{ /* For backwards compatibility in All Products blocks. */ }
+				{ displayLegacySaleBadge( props ) && (
+					<ProductSaleBadge
+						align={ props.saleBadgeAlign || 'right' }
+						{ ...restProps }
+					/>
+				) }
 				<ParentComponent { ...( showProductLink && anchorProps ) }>
 					<Image
 						fallbackAlt={ decodeEntities( product.name ) }

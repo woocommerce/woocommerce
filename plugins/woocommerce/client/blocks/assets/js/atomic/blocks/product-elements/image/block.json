@@ -5,6 +5,8 @@
 	"category": "woocommerce-product-elements",
 	"attributes": {
 		"showProductLink": { "type": "boolean", "default": true },
+		"showSaleBadge": { "type": "boolean", "default": true },
+		"saleBadgeAlign": { "type": "string", "default": "right" },
 		"imageSizing": { "type": "string", "default": "single" },
 		"productId": { "type": "number", "default": 0 },
 		"isDescendentOfQueryLoop": { "type": "boolean", "default": false },
@@ -31,7 +33,6 @@
 			"__experimentalSkipSerialization": true
 		},
 		"spacing": {
-			"blockGap": true,
 			"margin": true,
 			"padding": true
 		},

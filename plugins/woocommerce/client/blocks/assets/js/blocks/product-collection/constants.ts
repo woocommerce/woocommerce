@@ -127,6 +127,14 @@ export const INNER_BLOCKS_PRODUCT_TEMPLATE: InnerBlockTemplate = [
 			{
 				imageSizing: ImageSizing.THUMBNAIL,
 			},
+			[
+				[
+					'woocommerce/product-sale-badge',
+					{
+						align: 'right',
+					},
+				],
+			],
 		],
 		[
 			'core/post-title',

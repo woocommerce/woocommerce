@@ -10,6 +10,10 @@ export interface BlockAttributes {
 	className?: string | undefined;
 	// Whether or not to display a link to the product page.
 	showProductLink: boolean;
+	// Whether or not to display the on sale badge.
+	showSaleBadge: boolean;
+	// How should the sale badge be aligned if displayed.
+	saleBadgeAlign: 'left' | 'center' | 'right';
 	// Size of image to use.
 	imageSizing: ImageSizing;
 	// Whether or not the block is within the context of a Query Loop Block.
@@ -24,10 +28,4 @@ export interface BlockAttributes {
 	scale: 'cover' | 'contain' | 'fill';
 	// Aspect ratio of the image.
 	aspectRatio: string;
-}
-export interface BlockAttributesV1 extends BlockAttributes {
-	// Whether or not to display the on sale badge.
-	showSaleBadge: boolean;
-	// How should the sale badge be aligned if displayed.
-	saleBadgeAlign: 'left' | 'center' | 'right';
 }
