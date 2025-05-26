@@ -266,10 +266,10 @@ class WC_Helper_Admin {
 	 */
 	public static function register_cache_clear_tool( $debug_tools ) {
 		$debug_tools[ self::CACHE_TOOL_ID ] = array(
-			'name'     => __( 'Clear helper cache', 'woocommerce' ),
+			'name'     => __( 'Clear WooCommerce.com cache', 'woocommerce' ),
 			'button'   => __( 'Clear', 'woocommerce' ),
 			'desc'     => sprintf(
-				__( 'This tool will reset the cached values used in WooCommerce Extensions.', 'woocommerce' ),
+				__( 'This tool will empty the WooCommerce.com data cache, used in WooCommerce Extensions.', 'woocommerce' ),
 			),
 			'callback' => array( __CLASS__, 'run_clear_cache_tool' ),
 		);
