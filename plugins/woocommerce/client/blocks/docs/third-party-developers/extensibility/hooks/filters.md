@@ -18,7 +18,6 @@
 - [woocommerce_add_to_cart_quantity](#woocommerce_add_to_cart_quantity)
 - [woocommerce_add_to_cart_sold_individually_quantity](#woocommerce_add_to_cart_sold_individually_quantity)
 - [woocommerce_add_to_cart_validation](#woocommerce_add_to_cart_validation)
-- [woocommerce_address_fields_for_shipping_rates](#woocommerce_address_fields_for_shipping_rates)
 - [woocommerce_adjust_non_base_location_prices](#woocommerce_adjust_non_base_location_prices)
 - [woocommerce_apply_base_tax_for_local_pickup](#woocommerce_apply_base_tax_for_local_pickup)
 - [woocommerce_apply_individual_use_coupon](#woocommerce_apply_individual_use_coupon)
@@ -367,51 +366,6 @@ Allow 3rd parties to validate if an item can be added to the cart. This is a leg
 
 
 - [StoreApi/Utilities/CartController.php](../../../../../woocommerce/src/StoreApi/Utilities/CartController.php)
-
----
-
-## woocommerce_address_fields_for_shipping_rates
-
-Filters the shipping address fields that trigger shipping rate recalculation.
-
-```php
-apply_filters( 'woocommerce_address_fields_for_shipping_rates', array $fields )
-```
-
-### Description
-
-By default, Store API considers the following shipping fields as essential for shipping rate calculations: `state`, `country`, `postcode`, and `city`.
-This filter allows developers to add new fields to the list above.
-
-The filter is used in the blocks-powered checkout process. 
-
-### Parameters
-
-| Argument | Type  | Description                                                                                                                                                                           |
-| -------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| $fields  | array | An array of address field names (strings) that should trigger shipping rate recalculation. Defaults to an empty array, which means only the core fields are used unless you add more. |
-
-### Returns
-
-`array` The updated list of address field names that should trigger shipping rate recalculation.
-
-### Example
-
-```php
-add_filter( 'woocommerce_address_fields_for_shipping_rates', function( $fields ) {
-    // Add a custom field to the list.
-    return [ 'address_1' ];
-} );
-```
-
-### Notes
-
--   This filter is useful if you have custom address fields that should affect shipping rates
--   The filtered array is validated to ensure all entries are strings before being registered.
-
-### Source
-
--   [Checkout.php](../../../../../woocommerce/src/Blocks/BlockTypes/Checkout.php)
 
 ---
 

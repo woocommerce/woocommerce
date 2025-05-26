@@ -927,7 +927,6 @@ const isCustomerDataUpdating = store.isCustomerDataUpdating();
 
 Queries whether shipping address fields impacting the shipping rates are being updated.
 By default, Store API considers the following shipping fields as essential for shipping rate calculations: `state`, `country`, `postcode`, and `city`.
-This filter `woocommerce_address_fields_for_shipping_rates` allows developers to add new fields to the list above.
 
 #### _Returns_ <!-- omit in toc -->
 
