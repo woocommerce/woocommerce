@@ -1443,7 +1443,7 @@ class WooPaymentsService {
 		// If the WPCOM connection is already set up, we don't need to add anything more.
 		if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $wpcom_step['status'] ) {
 			// Craft the return URL.
-			switch($source) {
+			switch ( $source ) {
 				case 'launch-your-store':
 					// If the source is 'launch-your-store', we return the user to the Launch Your Store flow.
 					$return_url = $this->proxy->call_function(
