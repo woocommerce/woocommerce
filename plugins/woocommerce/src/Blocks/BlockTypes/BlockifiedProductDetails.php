@@ -317,10 +317,10 @@ class BlockifiedProductDetails extends AbstractBlock {
 
 		foreach ( $hooked_blocks as $block ) {
 			$invalid = ! is_array( $block ) ||
-			! isset( $block['title'] ) ||
-			! isset( $block['content'] ) ||
-			! is_string( $block['title'] ) ||
-			! is_string( $block['content'] );
+					! isset( $block['title'] ) ||
+					! isset( $block['content'] ) ||
+					! is_string( $block['title'] ) ||
+					! is_string( $block['content'] );
 
 			$parsed_content = parse_blocks( $block['content'] );
 
