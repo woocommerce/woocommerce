@@ -102,7 +102,6 @@ body:
         -    [] Using WooRelease, perform the stable tag bump with e.g., `php woorelease.php update-stable --product_path=plugins/woocommerce https://github.com/woocommerce/woocommerce/tree/trunk 9.9.0 --update`
         -    [] Review (ensure PR CI-checks are passing) and merge additional PR (ensure merge CI-checks are passing) created on the previous step to sync stable tag with the source code
         -    [] Manually create a release entry on https://github.com/woocommerce/woocommerce/releases (use version as tag, upload the generated zip, and pick the proper release branch)
-        -    [] Verify new PRs created by `github-actions` and merge ones related to the release
 
         #### Send comms out
 
