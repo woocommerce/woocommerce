@@ -105,6 +105,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'is_connected',
 					'has_connected_owner',
 					'is_connection_owner',
+					'try_registration',
 				)
 			)
 			->getMock();
@@ -7305,6 +7306,143 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				),
 			),
 			$updated_stored_profiles[0]['onboarding'][ $location ]['steps'][ $step_id ]
+		);
+	}
+
+	/**
+	 * Test onboarding_preload throws exception when onboarding is locked.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_onboarding_preload_throws_with_onboarding_locked() {
+		// Arrange.
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it not connected.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( false );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( false );
+
+		// Arrange the onboarding locked DB option.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return 'yes';
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		// Act.
+		try {
+			$this->sut->onboarding_preload( $location );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_locked', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test that onboarding_preload throws an exception when the WPCOM connection registration fails.
+	 *
+	 * @return void
+	 * @throws \Exception On POST request not mocked.
+	 */
+	public function test_onboarding_preload_throws_on_error_response() {
+		// Arrange.
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		$expected_error = array(
+			'code'    => 'error',
+			'message' => 'Error message',
+		);
+		// Make it not connected.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( false );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->once() )
+			->method( 'try_registration' )
+			->willReturn( new WP_Error( $expected_error['code'], $expected_error['message'] ) );
+
+		// Arrange the onboarding locked DB option.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return 'no';
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		// Assert.
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( $expected_error['message'] );
+
+		// Act.
+		$this->sut->onboarding_preload( $location );
+	}
+
+	/**
+	 * Test onboarding_preload.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_onboarding_preload() {
+		// Arrange.
+		$location                           = 'US';
+		$expected_wpcom_registration_result = false;
+
+		// Arrange the WPCOM connection.
+		// Make it not connected.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( false );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->once() )
+			->method( 'try_registration' )
+			->willReturn( $expected_wpcom_registration_result );
+
+		// Arrange the onboarding locked DB option.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return 'no';
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		// Act.
+		$result = $this->sut->onboarding_preload( $location );
+
+		// Assert.
+		self::assertEquals(
+			array(
+				'success' => $expected_wpcom_registration_result,
+			),
+			$result
 		);
 	}
 
