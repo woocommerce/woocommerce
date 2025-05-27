@@ -139,39 +139,39 @@ export const PaymentGateways = ( {
 							) ?? { key: 'US', name: 'United States (US)' }
 						}
 						options={ countryOptions }
-						onChange={ ( value: string ) => {
+						onChange={ ( currentSelectedCountry: string ) => {
 							// Save selected country and refresh the store by invalidating getPaymentProviders.
 							apiFetch( {
 								path:
 									WC_ADMIN_NAMESPACE +
 									'/settings/payments/country',
 								method: 'POST',
-								data: { location: value },
+								data: { location: currentSelectedCountry },
 							} ).then( () => {
 								// Record the event when the country is changed.
-								const previouslySelectedCountry =
-									businessRegistrationCountry;
-								const currentSelectedCountry = value;
 								recordEvent(
 									'settings_payments_business_location_update',
 									{
-										old_location: previouslySelectedCountry,
+										old_location:
+											businessRegistrationCountry,
 										new_location: currentSelectedCountry,
 									}
 								);
 
 								// Update UI.
-								setBusinessRegistrationCountry( value );
+								setBusinessRegistrationCountry(
+									currentSelectedCountry
+								);
 								// Update the window value - this will be updated by the backend on refresh but this keeps state persistent.
 								if (
 									window.wcSettings.admin
 										.woocommerce_payments_nox_profile
 								) {
 									window.wcSettings.admin.woocommerce_payments_nox_profile.business_country_code =
-										value;
+										currentSelectedCountry;
 								}
 								invalidateMainStore( 'getPaymentProviders', [
-									value,
+									currentSelectedCountry,
 								] );
 								invalidateWooPaymentsOnboardingStore(
 									'getOnboardingData',
