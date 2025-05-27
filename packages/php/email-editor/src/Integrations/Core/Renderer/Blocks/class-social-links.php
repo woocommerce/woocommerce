@@ -18,7 +18,7 @@ class Social_Links extends Abstract_Block_Renderer {
 	/**
 	 * Cache of the core social link services.
 	 *
-	 * @var array
+	 * @var array<string, array>
 	 */
 	private static $core_social_link_services_cache = array();
 
@@ -75,7 +75,7 @@ class Social_Links extends Abstract_Block_Renderer {
 		 * Prepend URL with https:// if it doesn't appear to contain a scheme
 		 * and it's not a relative link or a fragment.
 		 */
-		if ( ! wp_parse_url( $service_url, PHP_URL_SCHEME ) && ! str_starts_with( $service_url, '//' ) && ! str_starts_with( $service_url, '#' ) ) {
+		if ( ! wp_parse_url( $service_url, PHP_URL_SCHEME ) && ! Social_Links_Helper::str_starts_with( $service_url, '//' ) && ! Social_Links_Helper::str_starts_with( $service_url, '#' ) ) {
 			$service_url = 'https://' . $service_url;
 		}
 
@@ -122,8 +122,9 @@ class Social_Links extends Abstract_Block_Renderer {
 		);
 
 		// divide the icon value by 2 to get the font size.
-		$font_size     = ( rtrim( $icon_size, 'px' ) / 2 ) + 1; // inline with core styles.
-		$anchor_styles = $this->compile_css(
+		$font_size_value = (int) rtrim( $icon_size, 'px' );
+		$font_size       = ( $font_size_value / 2 ) + 1; // inline with core styles.
+		$anchor_styles   = $this->compile_css(
 			array(
 				'color'           => $icon_color_value,
 				'text-decoration' => 'none',
@@ -331,7 +332,8 @@ class Social_Links extends Abstract_Block_Renderer {
 	 */
 	public function get_service_icon_url( $service, $image_type = '' ) {
 		if ( empty( self::$core_social_link_services_cache ) ) {
-			self::$core_social_link_services_cache = block_core_social_link_services();
+			$services                              = block_core_social_link_services();
+			self::$core_social_link_services_cache = is_array( $services ) ? $services : array();
 		}
 
 		if ( ! isset( self::$core_social_link_services_cache[ $service ] ) ) {
