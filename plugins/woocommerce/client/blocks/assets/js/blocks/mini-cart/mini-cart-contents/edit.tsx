@@ -62,7 +62,7 @@ const Edit = ( {
 
 	// Apply the Mini-Cart Contents block base styles based on Site Editor's background and text colors.
 	useThemeColors(
-		'mini-cart-content',
+		'mini-cart-contents',
 		( { editorBackgroundColor, editorColor } ) => `
 				:where(.wp-block-woocommerce-mini-cart-contents) {
 					background-color: ${ editorBackgroundColor };
