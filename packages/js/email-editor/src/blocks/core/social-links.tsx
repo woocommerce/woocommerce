@@ -100,7 +100,8 @@ function registerCustomSocialLinksBlockVariation() {
 		attributes: {
 			openInNewTab: true,
 			showLabels: false,
-			iconBackgroundColorValue: '#720eec', // woocommerce primary color
+			align: 'center',
+			className: 'is-style-logos-only', // use logo-only style as the default because it's the most common use case and it looks nice on all email clients.
 		},
 		isDefault: true, // set this as the default variation
 		innerBlocks: socialLinksVariations,
