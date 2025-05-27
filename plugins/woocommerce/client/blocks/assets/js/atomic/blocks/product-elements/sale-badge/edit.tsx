@@ -28,31 +28,6 @@ const Edit = ( {
 		...attributes,
 		...context,
 	};
-  
-	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
-
-	const { isDescendentOfSingleProductTemplate } =
-		useIsDescendentOfSingleProductTemplate();
-
-	const { isDescendentOfSingleProductBlock } =
-		useIsDescendentOfSingleProductBlock( {
-			blockClientId: blockProps?.id,
-		} );
-
-	useEffect(
-		() =>
-			setAttributes( {
-				isDescendentOfQueryLoop,
-				isDescendentOfSingleProductBlock,
-				isDescendentOfSingleProductTemplate,
-			} ),
-		[
-			setAttributes,
-			isDescendentOfQueryLoop,
-			isDescendentOfSingleProductBlock,
-			isDescendentOfSingleProductTemplate,
-		]
-	);
 
 	return (
 		<div { ...wrapperProps }>
