@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificat
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailTemplatesController;
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
+use Automattic\WooCommerce\Internal\StockNotifications\Admin\MenusController;
 
 /**
  * The controller for the stock notifications.
@@ -37,6 +38,7 @@ class Controller {
 
 		// TO-DO: Maybe run this only if the user is an administrator.
 		$container->get( SettingsController::class );
+		$container->get( MenusController::class );
 	}
 
 	/**
