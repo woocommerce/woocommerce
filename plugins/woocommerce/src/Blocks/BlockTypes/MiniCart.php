@@ -460,8 +460,8 @@ class MiniCart extends AbstractBlock {
 		$icon                     = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
 		$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
 		$wrapper_classes          = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
-
-		$template_part_contents = $this->get_template_part_contents();
+		$wrapper_styles           = $classes_styles['styles'];
+		$template_part_contents   = $this->get_template_part_contents();
 
 		ob_start();
 		?>
