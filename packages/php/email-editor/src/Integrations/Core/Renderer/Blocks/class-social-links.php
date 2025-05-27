@@ -20,7 +20,14 @@ class Social_Links extends Abstract_Block_Renderer {
 	 *
 	 * @var array<string, array>
 	 */
-	private static $core_social_link_services_cache = array();
+	private $core_social_link_services_cache = array();
+
+	/**
+	 * Supported image types.
+	 *
+	 * @var array<string>
+	 */
+	private $supported_image_types = array( 'white', 'brand' );
 
 	/**
 	 * Renders the block content.
@@ -326,18 +333,27 @@ class Social_Links extends Abstract_Block_Renderer {
 	/**
 	 * Gets the service icon URL.
 	 *
+	 * Default image type is 'white'.
+	 *
 	 * @param string $service The service name.
-	 * @param string $image_type The image type. e.g 'white', 'brand', 'svg'.
+	 * @param string $image_type The image type. e.g 'white', 'brand'.
 	 * @return string The service icon URL.
 	 */
 	public function get_service_icon_url( $service, $image_type = '' ) {
-		if ( empty( self::$core_social_link_services_cache ) ) {
+		$image_type = empty( $image_type ) ? 'white' : $image_type;
+		$service    = empty( $service ) ? '' : strtolower( $service );
+
+		if ( empty( $this->core_social_link_services_cache ) ) {
 			$services                              = block_core_social_link_services();
-			self::$core_social_link_services_cache = is_array( $services ) ? $services : array();
+			$this->core_social_link_services_cache = is_array( $services ) ? $services : array();
 		}
 
-		if ( ! isset( self::$core_social_link_services_cache[ $service ] ) ) {
+		if ( ! isset( $this->core_social_link_services_cache[ $service ] ) ) {
 			// not in the list of core services.
+			return '';
+		}
+
+		if ( ! in_array( $image_type, $this->supported_image_types, true ) ) {
 			return '';
 		}
 
@@ -356,11 +372,16 @@ class Social_Links extends Abstract_Block_Renderer {
 	 * Gets the service PNG URL.
 	 *
 	 * @param string $service The service name.
-	 * @param string $image_type The image type. e.g 'white', 'brand', 'black'.
+	 * @param string $image_type The image type. e.g 'white', 'brand'.
 	 * @return string The service PNG URL.
 	 */
 	public function get_service_png_url( $service, $image_type = 'white' ) {
-		$file_name = "/icons/{$service}/{$service}-{$image_type}.png";
+		if ( empty( $service ) ) {
+			return '';
+		}
+
+		$image_type = empty( $image_type ) ? 'white' : $image_type;
+		$file_name  = "/icons/{$service}/{$service}-{$image_type}.png";
 		return plugins_url( $file_name, __FILE__ );
 	}
 
@@ -368,11 +389,16 @@ class Social_Links extends Abstract_Block_Renderer {
 	 * Gets the service PNG path.
 	 *
 	 * @param string $service The service name.
-	 * @param string $image_type The image type. e.g 'white', 'brand', 'black'.
+	 * @param string $image_type The image type. e.g 'white', 'brand'.
 	 * @return string The service PNG path.
 	 */
 	public function get_service_png_path( $service, $image_type = 'white' ) {
-		$file_name = "/icons/{$service}/{$service}-{$image_type}.png";
+		if ( empty( $service ) ) {
+			return '';
+		}
+
+		$image_type = empty( $image_type ) ? 'white' : $image_type;
+		$file_name  = "/icons/{$service}/{$service}-{$image_type}.png";
 		return __DIR__ . $file_name;
 	}
 }

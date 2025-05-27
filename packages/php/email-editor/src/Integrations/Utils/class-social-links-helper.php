@@ -51,6 +51,8 @@ class Social_Links_Helper {
 	/**
 	 * Gets the brand color for a given service.
 	 *
+	 * From core: https://github.com/WordPress/gutenberg/blob/edbd36057d3d25b7140af9e90a2adcca02a9201c/packages/block-library/src/social-link/socials-without-bg.scss
+	 *
 	 * @param string $service_name The name of the service.
 	 * @return string The brand color for the service.
 	 */
