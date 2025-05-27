@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
 import {
 	PaymentExtensionSuggestionProvider,
-	PaymentEntity,
+	PaymentsEntity,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -43,7 +43,7 @@ type PaymentExtensionSuggestionListItemProps = {
 	 * @param attachUrl     Extension attach URL (if available).
 	 */
 	setUpPlugin: (
-		provider: PaymentEntity,
+		provider: PaymentsEntity,
 		onboardingUrl: string | null,
 		attachUrl: string | null
 	) => void;

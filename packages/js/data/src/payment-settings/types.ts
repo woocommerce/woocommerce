@@ -79,8 +79,8 @@ export type PaymentProviderOnboardingState = {
 	wpcom_is_connection_owner?: boolean;
 };
 
-// Represents a payment entity, which can be a payment provider or a suggested payment extension outside providers.
-export type PaymentEntity = {
+// Represents a payments entity, which can be a payment provider or a suggested payment extension outside providers.
+export type PaymentsEntity = {
 	id: string;
 	title: string;
 	description: string;
@@ -96,7 +96,7 @@ export type PaymentEntity = {
 };
 
 // Represents a payment provider for the main providers list.
-export type PaymentProvider = PaymentEntity & {
+export type PaymentProvider = PaymentsEntity & {
 	_type: PaymentProviderType;
 	_order: number; // Used for sorting the providers in the UI.
 	image?: string;
@@ -170,7 +170,7 @@ export type PaymentExtensionSuggestionProvider = PaymentProvider & {
 };
 
 // Represents a suggested payment extension outside the main providers list.
-export type SuggestedPaymentExtension = PaymentEntity & {
+export type SuggestedPaymentExtension = PaymentsEntity & {
 	_type: string;
 	_priority: number;
 	category: string;

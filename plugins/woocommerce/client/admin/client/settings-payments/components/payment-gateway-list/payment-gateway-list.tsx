@@ -2,7 +2,7 @@
  * External dependencies
  */
 import {
-	PaymentEntity,
+	PaymentsEntity,
 	PaymentProvider,
 	PaymentProviderType,
 	PaymentGatewayProvider,
@@ -44,7 +44,7 @@ interface PaymentGatewayListProps {
 	 * @param attachUrl     Extension attach URL (if available).
 	 */
 	setUpPlugin: (
-		provider: PaymentEntity,
+		provider: PaymentsEntity,
 		onboardingUrl: string | null,
 		attachUrl: string | null
 	) => void;

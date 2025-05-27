@@ -8,7 +8,7 @@ import { useState, useMemo, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
-	PaymentEntity,
+	PaymentsEntity,
 	SuggestedPaymentExtension,
 	SuggestedPaymentExtensionCategory,
 } from '@woocommerce/data';
@@ -41,7 +41,7 @@ interface OtherPaymentGatewaysProps {
 	 * @param attachUrl     Extension attach URL (if available).
 	 */
 	setUpPlugin: (
-		provider: PaymentEntity,
+		provider: PaymentsEntity,
 		onboardingUrl: string | null,
 		attachUrl: string | null
 	) => void;
