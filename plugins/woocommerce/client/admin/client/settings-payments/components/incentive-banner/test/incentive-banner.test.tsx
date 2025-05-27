@@ -52,6 +52,7 @@ const testProvider: PaymentProvider = {
 		file: 'test-plugin-file',
 		status: 'active',
 	} as PluginData,
+	_links: {},
 };
 
 describe( 'IncentiveBanner', () => {
