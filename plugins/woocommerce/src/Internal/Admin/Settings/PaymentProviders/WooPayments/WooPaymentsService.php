@@ -1132,15 +1132,12 @@ class WooPaymentsService {
 	 * This method is used to run the heavier logic required for onboarding ahead of time,
 	 * so that we can be quicker to respond to the user when they start the onboarding process.
 	 *
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 *
 	 * @return array An array containing the success status and any errors encountered during the preload.
 	 *               'success' => true if the preload was successful, false otherwise.
 	 *               'errors'  => An array of error messages if any errors occurred, empty if no errors.
 	 * @throws ApiException If the onboarding preload failed or the onboarding is locked.
 	 */
-	public function onboarding_preload( string $location ): array {
+	public function onboarding_preload(): array {
 		// If the onboarding is locked, we shouldn't do anything.
 		if ( $this->is_onboarding_locked() ) {
 			throw new ApiException(
