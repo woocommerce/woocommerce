@@ -1443,15 +1443,27 @@ class WooPaymentsService {
 		// If the WPCOM connection is already set up, we don't need to add anything more.
 		if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $wpcom_step['status'] ) {
 			// Craft the return URL.
-			// By default, we return the user to the onboarding modal.
-			$return_url = $this->proxy->call_static(
-				Utils::class,
-				'wc_payments_settings_url',
-				self::ONBOARDING_PATH_BASE,
-				array(
-					'wpcom_connection_return' => '1', // URL query flag so we can properly identify when the user returns.
-				)
-			);
+			switch($source) {
+				case 'launch-your-store':
+					// If the source is 'launch-your-store', we return the user to the Launch Your Store flow.
+					$return_url = $this->proxy->call_function(
+						'admin_url',
+						'admin.php?page=wc-admin&path=/launch-your-store' . self::ONBOARDING_PATH_BASE . '&sidebar=hub&content=payments&wpcom_connection_return=1'
+					);
+					break;
+				default:
+					// By default, we return the user to the onboarding modal in the Settings > Payments page.
+					$return_url = $this->proxy->call_static(
+						Utils::class,
+						'wc_payments_settings_url',
+						self::ONBOARDING_PATH_BASE,
+						array(
+							'wpcom_connection_return' => '1', // URL query flag so we can properly identify when the user returns.
+						)
+					);
+					break;
+			}
+
 			// Try to generate the authorization URL.
 			$wpcom_connection = $this->get_wpcom_connection_authorization( $return_url );
 			if ( ! $wpcom_connection['success'] ) {
