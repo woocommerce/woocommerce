@@ -9,7 +9,6 @@ import {
 } from '@wordpress/block-editor';
 import { EditorProvider } from '@woocommerce/base-context';
 import type { TemplateArray } from '@wordpress/blocks';
-import { useEffect } from '@wordpress/element';
 import type { FocusEvent, ReactElement } from 'react';
 import { __ } from '@wordpress/i18n';
 import {
