@@ -143,25 +143,26 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 
 		$pills = '';
 		foreach ( $attribute_terms as $attribute_term ) {
-			$pills .= sprintf(
-				'<div %s>%s</div>',
+			$input = sprintf(
+				'<input type="radio" %s/>',
 				$this->get_normalized_attributes(
 					array(
-						'role'                        => 'radio',
-						'class'                       => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill',
-						'data-wp-bind--tabindex'      => 'state.pillTabIndex',
-						'data-wp-bind--aria-checked'  => 'state.isPillSelected',
-						'data-wp-bind--aria-disabled' => 'state.isPillDisabled',
-						'data-wp-watch'               => 'callbacks.watchSelected',
-						'data-wp-on--click'           => 'actions.toggleSelected',
-						'data-wp-on--keydown'         => 'actions.handleKeyDown',
-						'data-wp-context'             => array(
+						'name'                   => 'attribute_' . $attribute_name,
+						'value'                  => $attribute_term['value'],
+						'data-wp-bind--checked'  => 'state.isPillSelected',
+						'data-wp-bind--disabled' => 'state.isPillDisabled',
+						'data-wp-watch'          => 'callbacks.watchSelected',
+						'data-wp-on--click'      => 'actions.toggleSelected',
+						'data-wp-on--keydown'    => 'actions.handleKeyDown',
+						'data-wp-context'        => array(
 							'option' => $attribute_term,
 						),
 					),
 				),
 				$attribute_term['label']
 			);
+
+			$pills .= '<label class="wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill">' . $input . $attribute_term['label'] . '</label>';
 		}
 
 		return sprintf(
