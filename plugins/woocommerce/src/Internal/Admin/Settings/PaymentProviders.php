@@ -1115,54 +1115,54 @@ class PaymentProviders {
 	/**
 	 * Enhance a payment extension suggestion with additional information.
 	 *
-	 * @param array $extension The extension suggestion.
+	 * @param array $extension_suggestion The extension suggestion.
 	 *
 	 * @return array The enhanced payment extension suggestion.
 	 */
-	private function enhance_extension_suggestion( array $extension ): array {
+	private function enhance_extension_suggestion( array $extension_suggestion ): array {
 		// Determine the category of the extension.
-		switch ( $extension['_type'] ) {
+		switch ( $extension_suggestion['_type'] ) {
 			case ExtensionSuggestions::TYPE_PSP:
-				$extension['category'] = self::CATEGORY_PSP;
+				$extension_suggestion['category'] = self::CATEGORY_PSP;
 				break;
 			case ExtensionSuggestions::TYPE_EXPRESS_CHECKOUT:
-				$extension['category'] = self::CATEGORY_EXPRESS_CHECKOUT;
+				$extension_suggestion['category'] = self::CATEGORY_EXPRESS_CHECKOUT;
 				break;
 			case ExtensionSuggestions::TYPE_BNPL:
-				$extension['category'] = self::CATEGORY_BNPL;
+				$extension_suggestion['category'] = self::CATEGORY_BNPL;
 				break;
 			case ExtensionSuggestions::TYPE_CRYPTO:
-				$extension['category'] = self::CATEGORY_CRYPTO;
+				$extension_suggestion['category'] = self::CATEGORY_CRYPTO;
 				break;
 			default:
-				$extension['category'] = '';
+				$extension_suggestion['category'] = '';
 				break;
 		}
 
 		// Determine the PES's plugin status.
 		// Default to not installed.
-		$extension['plugin']['status'] = self::EXTENSION_NOT_INSTALLED;
+		$extension_suggestion['plugin']['status'] = self::EXTENSION_NOT_INSTALLED;
 		// Put in the default plugin file.
-		$extension['plugin']['file'] = '';
-		if ( ! empty( $extension['plugin']['slug'] ) ) {
+		$extension_suggestion['plugin']['file'] = '';
+		if ( ! empty( $extension_suggestion['plugin']['slug'] ) ) {
 			// This is a best-effort approach, as the plugin might be sitting under a directory (slug) that we can't handle.
 			// Always try the official plugin slug first, then the testing variations.
-			$plugin_slug_variations = Utils::generate_testing_plugin_slugs( $extension['plugin']['slug'], true );
+			$plugin_slug_variations = Utils::generate_testing_plugin_slugs( $extension_suggestion['plugin']['slug'], true );
 			foreach ( $plugin_slug_variations as $plugin_slug ) {
 				if ( PluginsHelper::is_plugin_installed( $plugin_slug ) ) {
 					// Make sure we put in the actual slug and file path that we found.
-					$extension['plugin']['slug'] = $plugin_slug;
-					$extension['plugin']['file'] = PluginsHelper::get_plugin_path_from_slug( $plugin_slug );
+					$extension_suggestion['plugin']['slug'] = $plugin_slug;
+					$extension_suggestion['plugin']['file'] = PluginsHelper::get_plugin_path_from_slug( $plugin_slug );
 					// Sanity check.
-					if ( ! is_string( $extension['plugin']['file'] ) ) {
-						$extension['plugin']['file'] = '';
+					if ( ! is_string( $extension_suggestion['plugin']['file'] ) ) {
+						$extension_suggestion['plugin']['file'] = '';
 					}
 					// Remove the .php extension from the file path. The WP API expects it without it.
-					$extension['plugin']['file'] = Utils::trim_php_file_extension( $extension['plugin']['file'] );
+					$extension_suggestion['plugin']['file'] = Utils::trim_php_file_extension( $extension_suggestion['plugin']['file'] );
 
-					$extension['plugin']['status'] = self::EXTENSION_INSTALLED;
+					$extension_suggestion['plugin']['status'] = self::EXTENSION_INSTALLED;
 					if ( PluginsHelper::is_plugin_active( $plugin_slug ) ) {
-						$extension['plugin']['status'] = self::EXTENSION_ACTIVE;
+						$extension_suggestion['plugin']['status'] = self::EXTENSION_ACTIVE;
 					}
 					break;
 				}
