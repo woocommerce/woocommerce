@@ -137,6 +137,7 @@ class Integration {
 					'editor' => array(
 						'default-mode' => 'template-locked',
 					),
+					'excerpt',
 				),
 			),
 		);
