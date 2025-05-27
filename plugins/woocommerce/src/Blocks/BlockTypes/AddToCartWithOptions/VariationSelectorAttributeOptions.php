@@ -242,6 +242,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 					),
 					'data-wp-init'        => 'callbacks.setDefaultSelectedAttribute',
 					'data-wp-on--change'  => 'actions.handleChange',
+					'name'                => 'attribute_' . $attribute_name,
 				),
 			),
 			$options,
