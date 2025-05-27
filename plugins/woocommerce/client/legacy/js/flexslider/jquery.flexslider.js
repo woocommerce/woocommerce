@@ -69,7 +69,7 @@
         eventType = "click touchend keyup flexslider-click",
         watchedEvent = "",
         watchedEventClearTimer,
-        easing = easings[slider.vars.easing] || "ease",
+        easing = easings[slider.vars.easing] || easings["swing"],
         vertical = slider.vars.direction === "vertical",
         reverse = slider.vars.reverse,
         carousel = (slider.vars.itemWidth > 0),
@@ -106,7 +106,7 @@
         slider.started = false;
         slider.startTimeout = null;
         // TOUCH/USECSS:
-        slider.transforms = slider.transitions = !slider.vars.video && !fade && slider.vars.useCSS;
+        slider.transforms = slider.transitions = !slider.vars.video && !fade && slider.vars.useCSS; // TODO: Delete "slider.transitions", this variable name is only kept for backwards compatibility
         if (slider.transforms) slider.prop = "transform";
         slider.isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
         slider.ensureAnimationEnd = '';
@@ -814,11 +814,10 @@
 
       dur = (dur !== undefined) ? (dur/1000) + "s" : "0s";
       slider.container.css("transition-duration", dur);
+      slider.container.css("transition-timing-function", slider.transforms ? "ease" : easing); // jQuery easing methods only when NOT using CSS3 3D Transforms
 
       if (slider.transforms) {
         target = (vertical) ? "translate3d(0," + target + ",0)" : "translate3d(" + (parseInt(target)+'px') + ",0,0)";
-      } else {
-        slider.container.css("transition-timing-function", easing);
       }
 
       slider.args[slider.prop] = target;
