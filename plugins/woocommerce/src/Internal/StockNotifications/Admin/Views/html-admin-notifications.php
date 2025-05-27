@@ -1,4 +1,3 @@
-
 <?php
 /**
  * Admin View: Stock Notifications list
@@ -7,7 +6,9 @@
  * @since    0.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
+ declare( strict_types = 1 );
+
+ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
@@ -18,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<hr class="wp-header-end">
 	<?php
-	if ( false && $table->total_items > 0 || $table->has_stock_notifications ) {
+	if ( $table->total_items > 0 || $table->has_stock_notifications ) {
 		$table->views();
 		?>
 

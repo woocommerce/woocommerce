@@ -66,14 +66,14 @@ class NotificationsListTable extends \WP_List_Table {
 		$this->total_items             = $this->data_store->query( array( 'return' => 'count' ) );
 		$this->has_stock_notifications = $this->total_items > 0 ? true : false;
 
-		// TODO: Check if this is needed.
-		// error_log( print_r( $this->total_items, true ) );
-		// $this->total_queued_items      = wc_get_container()->get( NotificationsDB::class )->query(
-		// 	array(
-		// 		'count'     => true,
-		// 		'is_queued' => 'on',
-		// 	)
-		// );
+// TODO: Check if this is needed.
+// error_log( print_r( $this->total_items, true ) );
+// $this->total_queued_items      = wc_get_container()->get( NotificationsDB::class )->query(
+// 	array(
+// 		'count'     => true,
+// 		'is_queued' => 'on',
+// 	)
+// );
 		$this->total_active_items   = $this->data_store->query(
 			array(
 				'return'    => 'count',
@@ -81,12 +81,12 @@ class NotificationsListTable extends \WP_List_Table {
 			)
 		);
 
-		// $this->total_inactive_items = wc_get_container()->get( NotificationsDB::class )->query(
-		// 	array(
-		// 		'count'     => true,
-		// 		'is_active' => 'off',
-		// 	)
-		// );
+// $this->total_inactive_items = wc_get_container()->get( NotificationsDB::class )->query(
+// 	array(
+// 		'count'     => true,
+// 		'is_active' => 'off',
+// 	)
+// );
 
 		parent::__construct(
 			array(
@@ -176,21 +176,21 @@ class NotificationsListTable extends \WP_List_Table {
 		// Build tooltip.
 		$tooltip = '';
 
-		// TODO: Add statuses.
-		// if ( ! $notification->is_verified() && $notification->is_pending() ) {
-		// 	$status  = 'cancelled';
-		// 	$label   = __( 'Pending', 'woocommerce' );
-		// 	$tooltip = __( 'Awaiting verification', 'woocommerce' );
-		// } elseif ( $notification->is_queued() ) {
-		// 	$status = 'on-hold';
-		// 	$label  = __( 'Queued', 'woocommerce' );
-		// } elseif ( ! $notification->is_active() ) {
-		// 	$status = 'cancelled';
-		// 	$label  = __( 'Inactive', 'woocommerce' );
-		// } else {
-		// 	$status = 'completed';
-		// 	$label  = __( 'Active', 'woocommerce' );
-		// }
+// TODO: Add statuses.
+// if ( ! $notification->is_verified() && $notification->is_pending() ) {
+// 	$status  = 'cancelled';
+// 	$label   = __( 'Pending', 'woocommerce' );
+// 	$tooltip = __( 'Awaiting verification', 'woocommerce' );
+// } elseif ( $notification->is_queued() ) {
+// 	$status = 'on-hold';
+// 	$label  = __( 'Queued', 'woocommerce' );
+// } elseif ( ! $notification->is_active() ) {
+// 	$status = 'cancelled';
+// 	$label  = __( 'Inactive', 'woocommerce' );
+// } else {
+// 	$status = 'completed';
+// 	$label  = __( 'Active', 'woocommerce' );
+// }
 
 		$status = 'completed';
 		$label  = __( 'Active', 'woocommerce' );
@@ -298,24 +298,24 @@ class NotificationsListTable extends \WP_List_Table {
 	 * @return void
 	 */
 	public function column_waiting_since( $notification ) {
-		// TODO: Is this needed?
-		// if ( empty( $notification->get_subscribe_date() ) || $notification->is_delivered() || ! $notification->is_active() ) {
-		// 	$t_time    = __( '&mdash;', 'woocommerce' );
-		// 	$h_time    = $t_time;
-		// 	$time_diff = 0;
-		// } else {
-		// 	$t_time    = date_i18n( _x( 'Y/m/d g:i:s a', 'list table date hover format', 'woocommerce' ), $notification->get_subscribe_date() );
-		// 	$time_diff = time() - $notification->get_subscribe_date();
+// TODO: Is this needed?
+// if ( empty( $notification->get_subscribe_date() ) || $notification->is_delivered() || ! $notification->is_active() ) {
+// 	$t_time    = __( '&mdash;', 'woocommerce' );
+// 	$h_time    = $t_time;
+// 	$time_diff = 0;
+// } else {
+// 	$t_time    = date_i18n( _x( 'Y/m/d g:i:s a', 'list table date hover format', 'woocommerce' ), $notification->get_subscribe_date() );
+// 	$time_diff = time() - $notification->get_subscribe_date();
 
-		// 	if ( $time_diff > 0 && $time_diff < DAY_IN_SECONDS ) {
-		// 		/* translators: %s: human time diff */
-		// 		$h_time = wp_kses_post( human_time_diff( $notification->get_subscribe_date() ) );
-		// 	} else {
-		// 		$h_time = date_i18n( wc_date_format(), $notification->get_subscribe_date() );
-		// 	}
-		// }
+// 	if ( $time_diff > 0 && $time_diff < DAY_IN_SECONDS ) {
+// 		/* translators: %s: human time diff */
+// 		$h_time = wp_kses_post( human_time_diff( $notification->get_subscribe_date() ) );
+// 	} else {
+// 		$h_time = date_i18n( wc_date_format(), $notification->get_subscribe_date() );
+// 	}
+// }
 
-		// echo '<span title="' . esc_attr( $t_time ) . '">' . esc_html( $h_time ) . '</span>';
+// echo '<span title="' . esc_attr( $t_time ) . '">' . esc_html( $h_time ) . '</span>';
 	}
 
 	/**
