@@ -64,7 +64,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 				} );
 			} }
 		>
-			{ __( 'Get paid', 'woocommerce' ) }
+			{ __( 'Set up WooPayments', 'woocommerce' ) }
 		</Button>
 	);
 
