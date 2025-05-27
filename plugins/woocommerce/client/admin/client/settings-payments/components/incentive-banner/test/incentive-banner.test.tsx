@@ -5,7 +5,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { render, fireEvent } from '@testing-library/react';
 import {
 	PaymentIncentive,
-	PaymentProvider,
+	PaymentsProvider,
 	PaymentProviderType,
 	PluginData,
 } from '@woocommerce/data';
@@ -36,7 +36,7 @@ const testIncentive: PaymentIncentive = {
 	},
 };
 
-const testProvider: PaymentProvider = {
+const testProvider: PaymentsProvider = {
 	id: 'test-provider',
 	_order: 1,
 	_type: PaymentProviderType.Gateway, // or any valid PaymentProviderType

@@ -8,7 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { ACTION_TYPES } from './action-types';
 import {
-	PaymentProvider,
+	PaymentsProvider,
 	OfflinePaymentMethodProvider,
 	OrderMap,
 	SuggestedPaymentExtension,
@@ -26,13 +26,13 @@ export function getPaymentProvidersRequest(): {
 }
 
 export function getPaymentProvidersSuccess(
-	providers: PaymentProvider[],
+	providers: PaymentsProvider[],
 	offlinePaymentGateways: OfflinePaymentMethodProvider[],
 	suggestions: SuggestedPaymentExtension[],
 	suggestionCategories: SuggestedPaymentExtensionCategory[]
 ): {
 	type: ACTION_TYPES.GET_PAYMENT_PROVIDERS_SUCCESS;
-	providers: PaymentProvider[];
+	providers: PaymentsProvider[];
 	offlinePaymentGateways: OfflinePaymentMethodProvider[];
 	suggestions: SuggestedPaymentExtension[];
 	suggestionCategories: SuggestedPaymentExtensionCategory[];

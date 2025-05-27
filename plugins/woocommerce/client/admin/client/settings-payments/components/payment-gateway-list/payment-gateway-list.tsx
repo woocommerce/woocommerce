@@ -3,7 +3,7 @@
  */
 import {
 	PaymentsEntity,
-	PaymentProvider,
+	PaymentsProvider,
 	PaymentProviderType,
 	PaymentGatewayProvider,
 	OfflinePmsGroupProvider,
@@ -25,9 +25,9 @@ import './payment-gateway-list.scss';
 
 interface PaymentGatewayListProps {
 	/**
-	 * List of payment providers to display.
+	 * List of payments providers to display.
 	 */
-	providers: PaymentProvider[];
+	providers: PaymentsProvider[];
 	/**
 	 * Array of slugs for installed plugins.
 	 */
@@ -57,9 +57,9 @@ interface PaymentGatewayListProps {
 	 */
 	shouldHighlightIncentive: boolean;
 	/**
-	 * Callback to update the ordering of payment providers after sorting.
+	 * Callback to update the ordering of payments providers after sorting.
 	 */
-	updateOrdering: ( providers: PaymentProvider[] ) => void;
+	updateOrdering: ( providers: PaymentsProvider[] ) => void;
 	/**
 	 * Callback to open or close the onboarding modal.
 	 */
@@ -85,12 +85,12 @@ export const PaymentGatewayList = ( {
 	setIsOnboardingModalOpen,
 }: PaymentGatewayListProps ) => {
 	return (
-		<SortableContainer< PaymentProvider >
+		<SortableContainer< PaymentsProvider >
 			items={ providers }
 			className={ 'settings-payment-gateways__list' }
 			setItems={ updateOrdering }
 		>
-			{ providers.map( ( provider: PaymentProvider ) => {
+			{ providers.map( ( provider: PaymentsProvider ) => {
 				switch ( provider._type ) {
 					// Return different components wrapped into SortableItem depending on the provider type.
 					case PaymentProviderType.Suggestion:

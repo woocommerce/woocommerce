@@ -6,7 +6,7 @@ import apiFetch from '@wordpress/api-fetch';
 import clsx from 'clsx';
 import {
 	PaymentsEntity,
-	PaymentProvider,
+	PaymentsProvider,
 	paymentSettingsStore,
 	WC_ADMIN_NAMESPACE,
 	woopaymentsOnboardingStore,
@@ -29,7 +29,7 @@ import { ListPlaceholder } from '~/settings-payments/components/list-placeholder
 import { PaymentGatewayList } from '~/settings-payments/components/payment-gateway-list';
 
 interface PaymentGatewaysProps {
-	providers: PaymentProvider[];
+	providers: PaymentsProvider[];
 	installedPluginSlugs: string[];
 	installingPlugin: string | null;
 	/**
@@ -46,7 +46,7 @@ interface PaymentGatewaysProps {
 	) => void;
 	acceptIncentive: ( id: string ) => void;
 	shouldHighlightIncentive: boolean;
-	updateOrdering: ( providers: PaymentProvider[] ) => void;
+	updateOrdering: ( providers: PaymentsProvider[] ) => void;
 	isFetching: boolean;
 	businessRegistrationCountry: string | null;
 	setBusinessRegistrationCountry: ( country: string ) => void;

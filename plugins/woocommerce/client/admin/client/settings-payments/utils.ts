@@ -2,7 +2,7 @@
  * External dependencies
  */
 import {
-	PaymentProvider,
+	PaymentsProvider,
 	PaymentIncentive,
 	RecommendedPaymentMethod,
 } from '@woocommerce/data';
@@ -17,7 +17,7 @@ import { getAdminSetting } from '~/utils/admin-settings';
 /**
  * Checks whether a payment provider has an incentive.
  */
-export const hasIncentive = ( extension: PaymentProvider ) => {
+export const hasIncentive = ( extension: PaymentsProvider ) => {
 	return !! extension._incentive;
 };
 
@@ -101,7 +101,7 @@ export const isWooPayments = ( id: string ) => {
 /**
  * Checks whether a provider is WooPayments and that it is eligible for WooPay.
  */
-export const isWooPayEligible = ( provider: PaymentProvider ) => {
+export const isWooPayEligible = ( provider: PaymentsProvider ) => {
 	return (
 		isWooPayments( provider.id ) &&
 		( provider.tags?.includes( 'woopay_eligible' ) || false )
@@ -162,7 +162,7 @@ export const getPaymentMethodById =
  * @param providers payment providers
  */
 export const providersContainWooPaymentsInTestMode = (
-	providers: PaymentProvider[]
+	providers: PaymentsProvider[]
 ): boolean => {
 	const wooPayments = providers.find( ( obj ) => isWooPayments( obj.id ) );
 	return (
@@ -176,7 +176,7 @@ export const providersContainWooPaymentsInTestMode = (
  * @param providers Payment providers
  */
 export const providersContainWooPaymentsNeedsSetup = (
-	providers: PaymentProvider[]
+	providers: PaymentsProvider[]
 ): boolean => {
 	const wooPayments = providers.find( ( obj ) => isWooPayments( obj.id ) );
 	return wooPayments?.state?.needs_setup || false;
@@ -188,22 +188,22 @@ export const providersContainWooPaymentsNeedsSetup = (
  * @param providers payment providers
  */
 export const getWooPaymentsFromProviders = (
-	providers: PaymentProvider[]
-): PaymentProvider | null => {
+	providers: PaymentsProvider[]
+): PaymentsProvider | null => {
 	return providers.find( ( obj ) => isWooPayments( obj.id ) ) ?? null;
 };
 
 /**
  * Retrieves updated recommended payment methods for WooPayments.
  *
- * @param {PaymentProvider[]} providers Array of updated payment providers.
+ * @param {PaymentsProvider[]} providers Array of updated payment providers.
  * @return {RecommendedPaymentMethod[]} List of recommended payment methods.
  */
 export const getRecommendedPaymentMethods = (
-	providers: PaymentProvider[]
+	providers: PaymentsProvider[]
 ): RecommendedPaymentMethod[] => {
 	const updatedWooPaymentsProvider = providers.find(
-		( provider: PaymentProvider ) => isWooPayments( provider.id )
+		( provider: PaymentsProvider ) => isWooPayments( provider.id )
 	);
 
 	return (
@@ -218,7 +218,7 @@ export const getRecommendedPaymentMethods = (
  * @param providers payment providers
  */
 export const providersContainWooPaymentsInDevMode = (
-	providers: PaymentProvider[]
+	providers: PaymentsProvider[]
 ): boolean => {
 	const wooPayments = providers.find( ( obj ) => isWooPayments( obj.id ) );
 	return !! wooPayments?.state?.dev_mode;

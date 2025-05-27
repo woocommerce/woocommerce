@@ -14,7 +14,7 @@ import { createInterpolateElement, useState } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import {
 	PaymentIncentive,
-	PaymentProvider,
+	PaymentsProvider,
 	PaymentsEntity,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -33,9 +33,9 @@ interface IncentiveModalProps {
 	 */
 	incentive: PaymentIncentive;
 	/**
-	 * Payment provider.
+	 * Payments provider.
 	 */
-	provider: PaymentProvider;
+	provider: PaymentsProvider;
 	/**
 	 * Onboarding URL (if available).
 	 */

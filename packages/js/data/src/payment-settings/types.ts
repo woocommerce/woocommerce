@@ -95,8 +95,8 @@ export type PaymentsEntity = {
 	_links: Record< string, LinkData >;
 };
 
-// Represents a payment provider for the main providers list.
-export type PaymentProvider = PaymentsEntity & {
+// Represents a payments provider for the main providers list.
+export type PaymentsProvider = PaymentsEntity & {
 	_type: PaymentProviderType;
 	_order: number; // Used for sorting the providers in the UI.
 	image?: string;
@@ -118,7 +118,7 @@ export type PaymentProvider = PaymentsEntity & {
 };
 
 // Represents a payment gateway in the main providers list.
-export type PaymentGatewayProvider = PaymentProvider & {
+export type PaymentGatewayProvider = PaymentsProvider & {
 	_order: number;
 	supports: string[];
 	management: ManagementData;
@@ -134,7 +134,7 @@ export type PaymentGatewayProvider = PaymentProvider & {
 };
 
 // Represents an offline payment method provider in the main providers list.
-export type OfflinePaymentMethodProvider = PaymentProvider & {
+export type OfflinePaymentMethodProvider = PaymentsProvider & {
 	_order: number;
 	supports: string[];
 	management: ManagementData;
@@ -148,13 +148,13 @@ export type OfflinePaymentMethodProvider = PaymentProvider & {
 };
 
 // Represents an offline payment methods group provider in the main providers list.
-export type OfflinePmsGroupProvider = PaymentProvider & {
+export type OfflinePmsGroupProvider = PaymentsProvider & {
 	_order: number;
 	management: ManagementData;
 };
 
 // Represents a payment extension suggestion provider in the main providers list.
-export type PaymentExtensionSuggestionProvider = PaymentProvider & {
+export type PaymentExtensionSuggestionProvider = PaymentsProvider & {
 	_order: number;
 	onboarding: {
 		state: PaymentProviderOnboardingState;
@@ -189,7 +189,7 @@ export type SuggestedPaymentExtensionCategory = {
 };
 
 export type PaymentSettingsState = {
-	providers: PaymentProvider[];
+	providers: PaymentsProvider[];
 	offlinePaymentGateways: OfflinePaymentMethodProvider[];
 	suggestions: SuggestedPaymentExtension[];
 	suggestionCategories: SuggestedPaymentExtensionCategory[];
@@ -201,7 +201,7 @@ export type PaymentSettingsState = {
 export type OrderMap = Record< string, number >;
 
 export type PaymentProvidersResponse = {
-	providers: PaymentProvider[];
+	providers: PaymentsProvider[];
 	offline_payment_methods: OfflinePaymentMethodProvider[];
 	suggestions: SuggestedPaymentExtension[];
 	suggestion_categories: SuggestedPaymentExtensionCategory[];

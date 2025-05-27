@@ -31,7 +31,7 @@ export { EXPERIMENTAL_TAX_CLASSES_STORE_NAME } from './tax-classes';
 export { PaymentGateway } from './payment-gateways/types';
 export {
 	PaymentsEntity,
-	PaymentProvider,
+	PaymentsProvider,
 	PaymentProviderType,
 	PaymentProviderState,
 	PaymentProviderOnboardingState,

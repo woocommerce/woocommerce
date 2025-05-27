@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import {
-	PaymentProvider,
+	PaymentsProvider,
 	OfflinePaymentMethodProvider,
 	PaymentSettingsState,
 	SuggestedPaymentExtension,
@@ -14,7 +14,7 @@ export function getPaymentProviders(
 	state: PaymentSettingsState,
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	location?: string | null
-): Array< PaymentProvider > {
+): Array< PaymentsProvider > {
 	return state.providers;
 }
 

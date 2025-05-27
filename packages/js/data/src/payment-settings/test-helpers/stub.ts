@@ -3,13 +3,13 @@
  */
 import {
 	OfflinePaymentMethodProvider,
-	PaymentProvider,
+	PaymentsProvider,
 	PaymentProviderType,
 	SuggestedPaymentExtension,
 	SuggestedPaymentExtensionCategory,
 } from '../types';
 
-export const providersStub: PaymentProvider[] = [
+export const providersStub: PaymentsProvider[] = [
 	{
 		id: '_wc_pes_paypal_full_stack',
 		_order: 2,
@@ -17,7 +17,6 @@ export const providersStub: PaymentProvider[] = [
 		title: 'PayPal Payments',
 		description:
 			'Safe and secure payments using credit cards or your customer&#039;s PayPal account.',
-		short_description: '',
 		image: 'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/onboarding/paypal.png',
 		icon: 'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/payment_methods/72x72/paypal.png',
 		links: [

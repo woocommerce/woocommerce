@@ -6,7 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import {
 	pluginsStore,
 	paymentSettingsStore,
-	PaymentProvider,
+	PaymentsProvider,
 	PaymentsEntity,
 } from '@woocommerce/data';
 import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
@@ -53,7 +53,7 @@ export const SettingsPaymentsMain = () => {
 	);
 	// State to hold the sorted providers in case of changing the order, otherwise it will be null
 	const [ sortedProviders, setSortedProviders ] = useState<
-		PaymentProvider[] | null
+		PaymentsProvider[] | null
 	>( null );
 	const { installAndActivatePlugins } = useDispatch( pluginsStore );
 	const { updateProviderOrdering, attachPaymentExtensionSuggestion } =
@@ -177,7 +177,7 @@ export const SettingsPaymentsMain = () => {
 		setSortedProviders( null );
 	}, [ providers ] );
 
-	function handleOrderingUpdate( sorted: PaymentProvider[] ) {
+	function handleOrderingUpdate( sorted: PaymentsProvider[] ) {
 		// Extract the existing _order values in the sorted order
 		const updatedOrderValues = sorted
 			.map( ( provider ) => provider._order )
@@ -196,7 +196,7 @@ export const SettingsPaymentsMain = () => {
 	}
 
 	const incentiveProvider = providers.find(
-		( provider: PaymentProvider ) => '_incentive' in provider
+		( provider: PaymentsProvider ) => '_incentive' in provider
 	);
 	const incentive = incentiveProvider ? incentiveProvider._incentive : null;
 
@@ -351,7 +351,7 @@ export const SettingsPaymentsMain = () => {
 
 					// Find the matching provider in the updated list.
 					const updatedPaymentsEntity = updatedProviders.find(
-						( current: PaymentProvider ) =>
+						( current: PaymentsProvider ) =>
 							current.id === paymentEntity.id ||
 							current?._suggestion_id === paymentEntity.id || // For suggestions that were replaced by a gateway.
 							current.plugin.slug === paymentEntity.plugin.slug // Last resort to find the provider.
@@ -537,7 +537,7 @@ export const SettingsPaymentsMain = () => {
 					setIsOpen={ setIsOnboardingModalOpen }
 					providerData={
 						getWooPaymentsFromProviders( providers ) ||
-						( {} as PaymentProvider )
+						( {} as PaymentsProvider )
 					}
 				/>
 			) }
