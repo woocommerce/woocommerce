@@ -13,7 +13,7 @@ const config: Config = {
 	url: 'https://developer.woocommerce.com',
 	// Set the /<baseUrl>/ pathname under which your site is served
 	// For GitHub pages deployment, it is often '/<projectName>/'
-	baseUrl: '/',
+	baseUrl: '/docs/',
 
 	// GitHub pages deployment config.
 	// If you aren't using GitHub pages, you don't need these.
@@ -44,8 +44,8 @@ const config: Config = {
 					// Please change this to your repo.
 					// Remove this to remove the "edit this page" links.
 					editUrl:
-						'https://github.com/woocommerce/woocommerce/tree/docusaurus-docs-prep/docs/docs/',
-					routeBasePath: 'docs',
+						'https://github.com/woocommerce/woocommerce/tree/trunk/docs/docs/',
+					routeBasePath: '/',
 
 					// Custom sidebar filter to remove some items from the docs sidebar.
 					async sidebarItemsGenerator({defaultSidebarItemsGenerator, ...args}) {					
@@ -69,7 +69,7 @@ const config: Config = {
 			logo: {
 				alt: 'WooCommerce developer docs',
 				src: 'img/woo-dev-site-logo.svg',
-				srcDark: 'img/woo-dev-site-logo-dark.svg',
+				// srcDark: 'img/woo-dev-site-logo-dark.svg',
 				href: '/docs',
 			},
 			items: [
@@ -181,18 +181,20 @@ const config: Config = {
 			],
 			copyright: `Copyright © ${ new Date().getFullYear() } Built with Docusaurus. Documentation is licensed under <a href="https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/license.txt/">GPLv3</a> and can be modified in the <a href="https://github.com/woocommerce/woocommerce/">WooCommerce Monorepo</a>.
 				<div class="docusaurus-footer-for-automattic">
-					<a href="https://automattic.com/">
-						An
-						<img src="/img/automattic.svg" alt="Automattic" class="automattic-logo automattic-logo-light" />
-						<img src="/img/automattic_dark.svg" alt="Automattic" class="automattic-logo automattic-logo-dark" /> 
-						Creation</a>
+					<a href="https://automattic.com/">An Automattic Creation</a>
 				</div>`,
 		},
 		prism: {
 			theme: prismThemes.github,
-			darkTheme: prismThemes.dracula,
+			// darkTheme: prismThemes.dracula,
 			additionalLanguages: [ 'php' ],
 		},
+		colorMode: {
+			defaultMode: 'light',
+			disableSwitch: true,
+			respectPrefersColorScheme: false,
+		},
+
 		// algolia: {
 		// 	// The application ID provided by Algolia
 		// 	appId: 'DGCTEY3UZR',
