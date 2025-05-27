@@ -125,10 +125,10 @@
 
 	.woocommerce-recommended-payment-methods {
 		// Width to fill available space.
-		width: 100%;
-		width: -webkit-fill-available; /* Mozilla-based browsers will ignore this. */
-		width: fill-available;
-		width: -moz-available; /* WebKit-based browsers will ignore this. */
+		width: 100% !important;
+		width: -webkit-fill-available !important; /* Mozilla-based browsers will ignore this. */
+		width: fill-available !important;
+		width: -moz-available !important; /* WebKit-based browsers will ignore this. */
 		margin-right: $gap-small + $gap-smallest;
 		display: flex;
 		flex-direction: column;
