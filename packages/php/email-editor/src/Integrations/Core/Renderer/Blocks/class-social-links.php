@@ -151,28 +151,30 @@ class Social_Links extends Abstract_Block_Renderer {
 		// rendering inspired by mjml social. https://documentation.mjml.io/#mj-social.
 		return sprintf(
 			'
-			<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="%1$s">
-			<tbody><tr style="%7$s">
-			  <td style="vertical-align:middle;">
-				<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="">
-				  <tbody><tr>
-					<td style="vertical-align:middle;">
-					  <a href="%2$s" %5$s class="wp-block-social-link-anchor">
-						<img height="%8$s" src="%3$s" style="display:block;" width="%8$s" alt="%4$s">
-					  </a>
-					</td>
-				  </tr>
-				</tbody></table>
-			  </td>
-			  ' . ( $service_label ? '
-			  <td style="vertical-align:middle;padding-left:6px;padding-right:6px;">
-				<a href="%2$s" %5$s class="wp-block-social-link-anchor">
-					<span style="margin-left:.5em;margin-right:.5em"> %6$s </span>
-				</a>
-			  </td>
-			  ' : '' ) . '
-			</tr>
-		  </tbody></table>
+			<!--[if mso | IE]><td><![endif]-->
+				<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="%1$s">
+				<tbody><tr style="%7$s">
+				<td style="vertical-align:middle;">
+					<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="">
+					<tbody><tr>
+						<td style="vertical-align:middle;">
+						<a href="%2$s" %5$s class="wp-block-social-link-anchor">
+							<img height="%8$s" src="%3$s" style="display:block;" width="%8$s" alt="%4$s">
+						</a>
+						</td>
+					</tr>
+					</tbody></table>
+				</td>
+				' . ( $service_label ? '
+				<td style="vertical-align:middle;padding-left:6px;padding-right:6px;">
+					<a href="%2$s" %5$s class="wp-block-social-link-anchor">
+						<span style="margin-left:.5em;margin-right:.5em"> %6$s </span>
+					</a>
+				</td>
+				' : '' ) . '
+				</tr>
+			</tbody></table>
+		  <!--[if mso | IE]></td><![endif]-->
 			',
 			esc_attr( $main_table_styles ), // %1$s -> The main table styles.
 			esc_url( $service_url ), // %2$s -> The a href link.
@@ -203,13 +205,17 @@ class Social_Links extends Abstract_Block_Renderer {
 		$align           = $content['align'];
 
 		return sprintf(
-			'<table class="wp-block-social-links" style="%1$s vertical-align:top;" border="0" width="100%%" cellpadding="0" cellspacing="0" role="presentation">
-					<tr  role="presentation">
-						<td class="%2$s" style="%3$s"  align="%4$s" role="presentation">
-							%5$s
-						</td>
-					</tr>
-        	</table>',
+			'<!--[if mso | IE]><table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" ><tr><td><![endif]-->
+				<table class="wp-block-social-links" style="%1$s vertical-align:top;" border="0" width="100%%" cellpadding="0" cellspacing="0" role="presentation">
+						<tr  role="presentation">
+							<td class="%2$s" style="%3$s"  align="%4$s" role="presentation">
+								<!--[if mso | IE]><table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" ><tr><![endif]-->
+									%5$s
+								<!--[if mso | IE]></tr></table><![endif]-->
+							</td>
+						</tr>
+				</table>
+			<!--[if mso | IE]></td></tr></table><![endif]-->',
 			esc_attr( $table_styles ),
 			esc_attr( $classes ),
 			esc_attr( $compiled_styles ),
