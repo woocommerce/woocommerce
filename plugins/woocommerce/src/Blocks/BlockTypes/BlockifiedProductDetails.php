@@ -44,8 +44,8 @@ class BlockifiedProductDetails extends AbstractBlock {
 		 */
 		$hooked_blocks = apply_filters( 'woocommerce_product_details_hooked_blocks', [] );
 
-		foreach ( $this->validate_hooked_blocks( $hooked_blocks ) as $block ) {
-			$this->register_hooked_blocks( $block['title'], $block['content'] );
+		foreach ( $this->validate_hooked_blocks( $hooked_blocks ) as $slug => $block ) {
+			$this->register_hooked_block( $slug, $block );
 		}
 	}
 
@@ -336,17 +336,19 @@ class BlockifiedProductDetails extends AbstractBlock {
 				continue;
 			}
 
-			if ( array_filter(
-				$validated_hooked_blocks,
-				function ( $hooked_block ) use ( $block ) {
-					return $hooked_block['title'] === $block['title'];
-				}
-			) ) {
-				$logger->error( 'Duplicate hooked block data. Hooked block with title `' . $block['title'] . '` is already registered.', $block );
+			$slug = sanitize_title( $block['title'] );
+
+			/**
+			 * If the block is already registered, replace the block. We use the
+			 * last registered block for the same slug. This makes overriding
+			 * hooked block easier.
+			 */
+			if ( isset( $validated_hooked_blocks[ $slug ] ) ) {
+				$validated_hooked_blocks[ $slug ] = $block;
 				continue;
 			}
 
-			$validated_hooked_blocks[] = $block;
+			$validated_hooked_blocks[ $slug ] = $block;
 		}
 
 		return $validated_hooked_blocks;
@@ -355,13 +357,11 @@ class BlockifiedProductDetails extends AbstractBlock {
 	/**
 	 * Register a product details item using Block Hooks API.
 	 *
-	 * @param string $title The title of the item.
-	 * @param string $content The content of the item.
+	 * @param string $slug The slug of the item.
+	 * @param array  $block The block data.
 	 * @return void
 	 */
-	private function register_hooked_blocks( $title, $content ) {
-		$slug = sanitize_title( $title );
-
+	private function register_hooked_block( $slug, $block ) {
 		add_filter(
 			'hooked_block_types',
 			function ( $hooked_block_types, $relative_position, $anchor_block_type ) use ( $slug ) {
@@ -380,21 +380,9 @@ class BlockifiedProductDetails extends AbstractBlock {
 
 		add_filter(
 			"hooked_block_{$slug}",
-			function (
-				$parsed_hooked_block,
-				$hooked_block_type,
-				$relative_position,
-				$parsed_anchor_block
-			) use (
-				$title,
-				$content
-			) {
-
-				if ( is_null( $parsed_hooked_block ) ) {
-					return $parsed_hooked_block;
-				}
-
+			function ( $parsed_hooked_block, $hooked_block_type, $relative_position, $parsed_anchor_block ) use ( $block ) {
 				if (
+					is_null( $parsed_hooked_block ) ||
 					'woocommerce/accordion-group' !== $parsed_anchor_block['blockName'] ||
 					'last_child' !== $relative_position ||
 					empty( $parsed_anchor_block['attrs']['metadata']['isDescendantOfProductDetails'] )
@@ -402,7 +390,7 @@ class BlockifiedProductDetails extends AbstractBlock {
 					return null;
 				}
 
-				return $this->create_accordion_item_block( $title, $content );
+				return $this->create_accordion_item_block( $block['title'], $block['content'] );
 			},
 			10,
 			4
