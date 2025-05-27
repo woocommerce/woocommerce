@@ -287,25 +287,6 @@ export const combinePaymentMethodsState = (
 };
 
 /**
- * Decouples Apple Pay and Google Pay into two separate states.
- *
- * If an id of `apple_google` exists in the list of payment methods, it is split into two separate states: `apple_pay` and `google_pay`.
- */
-export const decouplePaymentMethodsState = (
-	paymentMethodsState: Record< string, boolean >
-) => {
-	return Object.keys( paymentMethodsState ).reduce( ( acc, key ) => {
-		if ( key === 'apple_google' ) {
-			acc.apple_pay = paymentMethodsState[ key ];
-			acc.google_pay = paymentMethodsState[ key ];
-		} else {
-			acc[ key ] = paymentMethodsState[ key ];
-		}
-		return acc;
-	}, {} as Record< string, boolean > );
-};
-
-/**
  * Checks whether a payment method should be rendered.
  */
 export const shouldRenderPaymentMethodInMainList = (
