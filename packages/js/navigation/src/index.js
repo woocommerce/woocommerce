@@ -23,6 +23,8 @@ export * from './filters';
 export { useConfirmUnsavedChanges } from './hooks/use-confirm-unsaved-changes';
 
 const TIME_EXCLUDED_SCREENS_FILTER = 'woocommerce_admin_time_excluded_screens';
+const NAVIGATION_UPDATE_EXCLUDED_SCREENS_FILTER =
+	'woocommerce_admin_nav_update_excluded_screens';
 
 /**
  * Get the current path from history.
@@ -103,6 +105,14 @@ export const getQueryExcludedScreens = () =>
 		'customers',
 		'homescreen',
 	] );
+
+/**
+ * Get array of screens that should ignore nav menu URL updates.
+ *
+ * @return {Array} Array containing list of screens
+ */
+export const getQueryExcludedScreensUrlUpdate = () =>
+	applyFilters( NAVIGATION_UPDATE_EXCLUDED_SCREENS_FILTER, [ 'extensions' ] );
 
 /**
  * Retrieve a string 'name' representing the current screen
