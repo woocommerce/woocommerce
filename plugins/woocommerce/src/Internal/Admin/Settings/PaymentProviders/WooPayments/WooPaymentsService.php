@@ -120,15 +120,16 @@ class WooPaymentsService {
 	/**
 	 * Get the onboarding details for the settings page.
 	 *
-	 * @param string $location  The location for which we are onboarding.
-	 *                          This is a ISO 3166-1 alpha-2 country code.
-	 * @param string $rest_path The REST API path to use for constructing REST API URLs.
+	 * @param string      $location  The location for which we are onboarding.
+	 *                               This is a ISO 3166-1 alpha-2 country code.
+	 * @param string      $rest_path The REST API path to use for constructing REST API URLs.
+	 * @param string|null $source    Optional. The source for the onboarding flow.
 	 *
 	 * @return array The onboarding details.
 	 * @throws ApiException If the onboarding action can not be performed due to the current state of the site.
 	 * @throws Exception If there were errors when generating the onboarding details.
 	 */
-	public function get_onboarding_details( string $location, string $rest_path ): array {
+	public function get_onboarding_details( string $location, string $rest_path, ?string $source = null ): array {
 		// Since getting the onboarding details is not idempotent, we will check it as an action.
 		$this->check_if_onboarding_action_is_acceptable();
 
@@ -140,7 +141,7 @@ class WooPaymentsService {
 				'test_mode' => $this->provider->is_in_test_mode_onboarding( $this->get_payment_gateway() ),
 				'dev_mode'  => $this->provider->is_in_dev_mode( $this->get_payment_gateway() ),
 			),
-			'steps'   => $this->get_onboarding_steps( $location, trailingslashit( $rest_path ) . 'step' ),
+			'steps'   => $this->get_onboarding_steps( $location, trailingslashit( $rest_path ) . 'step', $source ),
 			'context' => array(
 				'urls' => array(
 					'overview_page' => $this->get_overview_page_url(),
@@ -1389,14 +1390,15 @@ class WooPaymentsService {
 	/**
 	 * Get the onboarding details for each step.
 	 *
-	 * @param string $location  The location for which we are onboarding.
-	 *                          This is a ISO 3166-1 alpha-2 country code.
-	 * @param string $rest_path The REST API path to use for constructing REST API URLs.
+	 * @param string      $location  The location for which we are onboarding.
+	 *                               This is a ISO 3166-1 alpha-2 country code.
+	 * @param string      $rest_path The REST API path to use for constructing REST API URLs.
+	 * @param string|null $source    Optional. The source for the onboarding flow.
 	 *
 	 * @return array[] The list of onboarding steps details.
 	 * @throws Exception If there was an error generating the onboarding steps details.
 	 */
-	private function get_onboarding_steps( string $location, string $rest_path ): array {
+	private function get_onboarding_steps( string $location, string $rest_path, ?string $source = null ): array {
 		$steps = array();
 
 		// Add the payment methods onboarding step details.
