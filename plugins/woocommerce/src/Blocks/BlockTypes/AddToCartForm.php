@@ -76,9 +76,20 @@ class AddToCartForm extends AbstractBlock {
 	private function add_steppers( $product_html, $product_name ) {
 		// Regex pattern to match the <input> element with id starting with 'quantity_'.
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
+
+		// Get the initial value and min value from the input.
+		preg_match( '/value="([^"]*)"/', $product_html, $value_matches );
+		preg_match( '/min="([^"]*)"/', $product_html, $min_matches );
+
+		$initial_value = isset( $value_matches[1] ) ? intval( $value_matches[1] ) : 1;
+		$min_value     = isset( $min_matches[1] ) ? intval( $min_matches[1] ) : 1;
+
+		// Add disabled attribute if initial value equals min value.
+		$minus_disabled = $initial_value <= $min_value ? ' disabled' : '';
+
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '"type="button" data-wp-on--click="actions.removeQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>';
+		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.removeQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus"' . $minus_disabled . '>-</button>';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
 		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.addQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';

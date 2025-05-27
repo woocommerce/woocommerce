@@ -114,6 +114,34 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 	inputElement.dispatchEvent( event );
 };
 
+const updateButtonStates = ( inputElement: HTMLInputElement ) => {
+	const { currentValue, minValue, maxValue, step } =
+		getInputData( {
+			target: inputElement,
+		} as HTMLElementEvent< HTMLButtonElement > ) || {};
+
+	if ( ! currentValue || ! minValue || ! step ) {
+		return;
+	}
+
+	const minusButton = inputElement.parentElement?.querySelector(
+		'.wc-block-components-quantity-selector__button--minus'
+	) as HTMLButtonElement | null;
+
+	const plusButton = inputElement.parentElement?.querySelector(
+		'.wc-block-components-quantity-selector__button--plus'
+	) as HTMLButtonElement | null;
+
+	if ( minusButton ) {
+		minusButton.disabled = currentValue - step < minValue;
+	}
+
+	if ( plusButton ) {
+		plusButton.disabled =
+			maxValue !== undefined && currentValue + step > maxValue;
+	}
+};
+
 const addToCartWithOptionsStore = store(
 	'woocommerce/add-to-cart-with-options',
 	{
@@ -179,6 +207,7 @@ const addToCartWithOptionsStore = store(
 					addToCartWithOptionsStore.actions.setQuantity( newValue );
 					inputElement.value = newValue.toString();
 					dispatchChangeEvent( inputElement );
+					updateButtonStates( inputElement );
 				}
 			},
 			decreaseQuantity: (
@@ -196,6 +225,7 @@ const addToCartWithOptionsStore = store(
 					addToCartWithOptionsStore.actions.setQuantity( newValue );
 					inputElement.value = newValue.toString();
 					dispatchChangeEvent( inputElement );
+					updateButtonStates( inputElement );
 				}
 			},
 			*handleSubmit( event: FormEvent< HTMLFormElement > ) {
@@ -223,6 +253,17 @@ const addToCartWithOptionsStore = store(
 					quantity: currentQuantity + quantity,
 					variation: selectedAttributes,
 				} );
+			},
+		},
+		callbacks: {
+			init: () => {
+				const inputElement = document.querySelector(
+					'.wc-block-components-quantity-selector__input'
+				) as HTMLInputElement | null;
+
+				if ( inputElement ) {
+					updateButtonStates( inputElement );
+				}
 			},
 		},
 	},

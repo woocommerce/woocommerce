@@ -48,6 +48,50 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 	inputElement.dispatchEvent( event );
 };
 
+const updateButtonStates = ( inputElement: HTMLInputElement ) => {
+	const getDataFromInput = ( input: HTMLInputElement ) => {
+		const mockEvent = {
+			target: {
+				parentElement: input.parentElement,
+			},
+		} as HTMLElementEvent< HTMLButtonElement >;
+		const data = getInputData( mockEvent );
+		return (
+			data || {
+				currentValue: 0,
+				minValue: 1,
+				maxValue: undefined,
+				step: 1,
+				inputElement: input,
+			}
+		);
+	};
+
+	const { currentValue, minValue, maxValue, step } =
+		getDataFromInput( inputElement );
+
+	if ( ! currentValue || ! minValue || ! step ) {
+		return;
+	}
+
+	const minusButton = inputElement.parentElement?.querySelector(
+		'.wc-block-components-quantity-selector__button--minus'
+	) as HTMLButtonElement | null;
+
+	const plusButton = inputElement.parentElement?.querySelector(
+		'.wc-block-components-quantity-selector__button--plus'
+	) as HTMLButtonElement | null;
+
+	if ( minusButton ) {
+		minusButton.disabled = currentValue - step < minValue;
+	}
+
+	if ( plusButton ) {
+		plusButton.disabled =
+			maxValue !== undefined && currentValue + step > maxValue;
+	}
+};
+
 store( 'woocommerce/add-to-cart-form', {
 	state: {},
 	actions: {
@@ -62,6 +106,7 @@ store( 'woocommerce/add-to-cart-form', {
 			if ( maxValue === undefined || newValue <= maxValue ) {
 				inputElement.value = newValue.toString();
 				dispatchChangeEvent( inputElement );
+				updateButtonStates( inputElement );
 			}
 		},
 		removeQuantity: ( event: HTMLElementEvent< HTMLButtonElement > ) => {
@@ -75,6 +120,18 @@ store( 'woocommerce/add-to-cart-form', {
 			if ( newValue >= minValue ) {
 				inputElement.value = newValue.toString();
 				dispatchChangeEvent( inputElement );
+				updateButtonStates( inputElement );
+			}
+		},
+	},
+	callbacks: {
+		init: () => {
+			const inputElement = document.querySelector(
+				'.wc-block-components-quantity-selector__input'
+			) as HTMLInputElement | null;
+
+			if ( inputElement ) {
+				updateButtonStates( inputElement );
 			}
 		},
 	},
