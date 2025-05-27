@@ -1169,7 +1169,11 @@ class PaymentProviders {
 			}
 		}
 
-		return $extension;
+		// Finally, allow the extension suggestion's matching provider to add further details.
+		$gateway_provider     = $this->get_payment_extension_suggestion_provider_instance( $extension_suggestion['id'] );
+		$extension_suggestion = $gateway_provider->enhance_extension_suggestion( $extension_suggestion );
+
+		return $extension_suggestion;
 	}
 
 	/**
