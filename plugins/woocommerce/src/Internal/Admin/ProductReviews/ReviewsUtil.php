@@ -17,15 +17,15 @@ class ReviewsUtil {
 	public static function modify_product_review_moderation_urls( $message, $comment_id ) {
 		$comment = get_comment( $comment_id );
 
-		// Only modify URLs for product reviews
+		// Only modify URLs for product reviews.
 		if ( ! $comment || get_post_type( $comment->comment_post_ID ) !== 'product' ) {
 			return $message;
 		}
 
-		// Replace the WordPress comment moderation URLs with WooCommerce product review URLs
+		// Replace the WordPress comment moderation URLs with WooCommerce product review URLs.
 		$product_reviews_url = admin_url( 'edit.php?post_type=product&page=product-reviews' );
 
-		// Replace the moderation panel URL (this is the "show all reviews pending" link)
+		// Replace the moderation panel URL (this is the "show all reviews pending" link).
 		$message = str_replace(
 			admin_url( 'edit-comments.php?comment_status=moderated#wpbody-content' ),
 			$product_reviews_url . '&comment_status=moderated',
@@ -35,7 +35,12 @@ class ReviewsUtil {
 		return $message;
 	}
 
-	public static function init() {
+	/**
+	 * Initialize hooks for modifying product review moderation URLs.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	final public static function init() {
 		add_filter( 'comment_moderation_text', array( __CLASS__, 'modify_product_review_moderation_urls' ), 10, 2 );
 	}
 
