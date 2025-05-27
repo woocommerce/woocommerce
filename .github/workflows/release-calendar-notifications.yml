@@ -1,0 +1,119 @@
+name: 'Release: Daily Release Calendar Notifications'
+on:
+  # schedule:
+    # - cron: '0 9 * * *' # Every day at 9 AM UTC
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  check-todays-releases:
+    runs-on: ubuntu-latest
+    outputs:
+      has-events: ${{ steps.today-check.outputs.has-events }}
+      release-events: ${{ steps.today-check.outputs.release-events }}
+      has-rc-events: ${{ steps.rc-check.outputs.has-rc-events }}
+      release-rc-events: ${{ steps.rc-check.outputs.release-rc-events }}
+    steps:
+      - name: Check for release events today
+        id: today-check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const today = new Date();
+            const todayStart = new Date(today.setUTCHours(0, 0, 0, 0)).toISOString();
+            const todayEnd = new Date(today.setUTCHours(23, 59, 59, 999)).toISOString();
+            
+            console.log('Checking for release events today in the calendar...');
+            try {
+              const todayUrl = `https://www.googleapis.com/calendar/v3/calendars/${{ secrets.CALENDAR_ID }}/events?key=${{ secrets.GOOGLE_API_KEY }}&timeMin=${todayStart}&timeMax=${todayEnd}&singleEvents=true&orderBy=startTime`;
+              const todayResponse = await fetch(todayUrl);
+              const todayData = await todayResponse.json();
+              
+              let releaseEvents = [];
+              if (todayData.items) {
+                console.log(`Found ${todayData.items.length} events for today`);
+                for (const event of todayData.items) {
+                  releaseEvents.push(event.summary);
+                  console.log(`Found event: ${event.summary}`);
+                }
+              } else {
+                console.log('No events found for today');
+              }
+              
+              core.setOutput('has-events', (releaseEvents.length > 0).toString());
+              core.setOutput('release-events', JSON.stringify(releaseEvents));
+            } catch (error) {
+              console.error('Error fetching calendar events:', error);
+              core.setFailed(`Failed to fetch calendar events: ${error.message}`);
+            }
+
+      - name: Check for RC events in 2 weeks
+        id: rc-check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const today = new Date();
+            const twoWeeksFromNow = new Date();
+            twoWeeksFromNow.setDate(today.getDate() + 14);
+            const rcStart = new Date(twoWeeksFromNow.setUTCHours(0, 0, 0, 0)).toISOString();
+            const rcEnd = new Date(twoWeeksFromNow.setUTCHours(23, 59, 59, 999)).toISOString();
+            
+            console.log('Checking for RC events in 2 weeks...');
+            try {
+              const rcUrl = `https://www.googleapis.com/calendar/v3/calendars/${{ secrets.CALENDAR_ID }}/events?key=${{ secrets.GOOGLE_API_KEY }}&timeMin=${rcStart}&timeMax=${rcEnd}&singleEvents=true&orderBy=startTime`;
+              const rcResponse = await fetch(rcUrl);
+              const rcData = await rcResponse.json();
+              
+              let rcEvents = [];
+              if (rcData.items) {
+                console.log(`Found ${rcData.items.length} events for 2 weeks from now`);
+                for (const event of rcData.items) {
+                  if (event.summary && event.summary.toLowerCase().includes('rc')) {
+                    rcEvents.push(event.summary);
+                    console.log(`Found RC event: ${event.summary}`);
+                  }
+                }
+              } else {
+                console.log('No events found for 2 weeks from now');
+              }
+              
+              core.setOutput('has-rc-events', (rcEvents.length > 0).toString());
+              core.setOutput('release-rc-events', JSON.stringify(rcEvents));
+            } catch (error) {
+              console.error('Error fetching calendar events:', error);
+              core.setFailed(`Failed to fetch calendar events: ${error.message}`);
+            }
+
+  notify-todays-releases:
+    needs: check-todays-releases
+    if: needs.check-todays-releases.outputs.has-events == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        event: ${{ fromJson(needs.check-todays-releases.outputs.release-events) }}
+    steps:
+      - name: Send notification for release event
+        uses: archive/github-actions-slack@v2.10.0
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
+          slack-optional-unfurl_links: false
+          slack-text: ':calendar: *${{ matrix.event }}* is scheduled for today! :rocket:'
+
+  notify-upcoming-rc:
+    needs: check-todays-releases
+    if: needs.check-todays-releases.outputs.has-rc-events == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        event: ${{ fromJson(needs.check-todays-releases.outputs.release-rc-events) }}
+    steps:
+      - name: Send RC reminder notification
+        uses: archive/github-actions-slack@v2.10.0
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
+          slack-optional-unfurl_links: false
+          slack-text: |
+            :warning: *Reminder:* *${{ matrix.event }}* is scheduled for 2 weeks from now!
+            
+            Contributors, please start preparing your feature highlights! :memo:
