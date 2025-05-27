@@ -20,6 +20,7 @@ import {
 	LooselyMustHave,
 } from '@woocommerce/types';
 import { formatPrice } from '@woocommerce/price-format';
+import { hasSelectedShippingRate } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -120,6 +121,8 @@ const TotalsFooterItem = ( {
 			  )
 			: __( 'Including <TaxAmount/> in taxes', 'woocommerce' );
 
+	const hasSelectedRates = hasSelectedShippingRate( cart.shippingRates );
+
 	return (
 		<TotalsItem
 			className={ clsx(
@@ -144,7 +147,7 @@ const TotalsFooterItem = ( {
 							} ) }
 						</p>
 					) }
-					{ isEstimate && (
+					{ isEstimate && ! hasSelectedRates && (
 						<p className="wc-block-components-totals-footer-item-shipping">
 							{ __(
 								'Shipping will be calculated at checkout',
