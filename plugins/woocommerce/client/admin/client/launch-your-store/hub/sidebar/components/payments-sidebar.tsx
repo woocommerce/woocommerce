@@ -68,11 +68,6 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 		</Button>
 	);
 
-	const sidebarDescription = __(
-		'Set up WooPayments to start accepting payments in your store.',
-		'woocommerce'
-	);
-
 	return (
 		<div
 			className={ clsx(
@@ -92,10 +87,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 					className="woocommerce-edit-site-layout__hub"
 				/>
 			</motion.div>
-			<SidebarContainer
-				title={ sidebarTitle }
-				description={ sidebarDescription }
-			>
+			<SidebarContainer title={ sidebarTitle }>
 				{ /* We are using these classes to inherit the styles from the edit your store styling */ }
 				<div className="woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group-header">
 					<Heading level={ 2 }>
