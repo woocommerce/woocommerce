@@ -11,7 +11,6 @@ import { ProductQueryContext as Context } from '@woocommerce/blocks/product-quer
 import Block from './block';
 import type { BlockAttributes } from './types';
 import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
-import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
 
 const Edit = ( {
 	attributes,
