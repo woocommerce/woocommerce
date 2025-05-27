@@ -30,7 +30,7 @@
 			-moz-appearance: textfield;
 			border: unset;
 			text-align: center;
-			order: 1;
+			order: 2;
 			font-weight: 600;
 			background-color: transparent;
 			color: currentColor;
@@ -53,6 +53,14 @@
 		input[type="number"]::-webkit-outer-spin-button {
 			-webkit-appearance: none;
 			margin: 0;
+		}
+
+		.wc-block-components-quantity-selector__button--minus {
+			order: 1;
+		}
+
+		.wc-block-components-quantity-selector__button--plus {
+			order: 3;
 		}
 	}
 }
