@@ -46,9 +46,20 @@ test.describe(
 			} );
 
 			await test.step( 'go to Linked Products', async () => {
-				await page
-					.getByRole( 'link', { name: 'Linked Products' } )
-					.click();
+				await expect( async () => {
+					await page
+						.getByRole( 'link', { name: 'Linked Products' } )
+						.click();
+
+					// Sometimes the click on link is too fast and the initial tab (General) is still visible
+					// so we need to wait make sure the upsell textbox is visible.
+					const upsellTextBoxLocator = page
+						.locator( 'p' )
+						.filter( { hasText: 'Upsells' } )
+						.getByRole( 'textbox' );
+
+					await expect( upsellTextBoxLocator ).toBeVisible();
+				} ).toPass( { timeout: 3_000 } );
 			} );
 		}
 
