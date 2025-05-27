@@ -34,7 +34,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        ### RC release
+        ### RC release (reset the list as starting RC 2 ... RC N)
         
         #### Get release artifact ready
 
