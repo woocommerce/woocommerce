@@ -27,10 +27,15 @@ import { formatPrice } from '@woocommerce/price-format';
 import './style.scss';
 
 export interface TotalsFooterItemProps {
+	className?: string;
 	/**
 	 * The currency object with which to display the item
 	 */
 	currency: Currency;
+	/**
+	 * Whether the totals are estimated e.g. in the cart.
+	 */
+	isEstimate?: boolean;
 	/**
 	 * An object containing the total price and the total tax
 	 *
@@ -38,8 +43,6 @@ export interface TotalsFooterItemProps {
 	 * convenience, but will use only these two properties.
 	 */
 	values: LooselyMustHave< CartResponseTotals, 'total_price' | 'total_tax' >;
-	className?: string;
-	isCart?: boolean;
 }
 
 /**
@@ -53,7 +56,7 @@ const TotalsFooterItem = ( {
 	currency,
 	values,
 	className,
-	isCart = false,
+	isEstimate = false,
 }: TotalsFooterItemProps ): JSX.Element => {
 	const SHOW_TAXES =
 		getSetting< boolean >( 'taxesEnabled', true ) &&
@@ -72,7 +75,7 @@ const TotalsFooterItem = ( {
 
 	const label = applyCheckoutFilter( {
 		filterName: 'totalLabel',
-		defaultValue: isCart
+		defaultValue: isEstimate
 			? __( 'Estimated total', 'woocommerce' )
 			: __( 'Total', 'woocommerce' ),
 		extensions: cart.extensions,
@@ -141,7 +144,7 @@ const TotalsFooterItem = ( {
 							} ) }
 						</p>
 					) }
-					{ isCart && (
+					{ isEstimate && (
 						<p className="wc-block-components-totals-footer-item-shipping">
 							{ __(
 								'Shipping will be calculated at checkout',
