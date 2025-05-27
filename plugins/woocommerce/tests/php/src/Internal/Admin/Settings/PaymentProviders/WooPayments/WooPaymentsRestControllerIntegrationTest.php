@@ -339,7 +339,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( \WP_Http::BAD_REQUEST, $response->get_status() );
 	}
 
 	/**
@@ -385,7 +385,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( \WP_Http::BAD_REQUEST, $response->get_status() );
 	}
 
 	/**
@@ -499,7 +499,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( \WP_Http::BAD_REQUEST, $response->get_status() );
 	}
 
 	/**
@@ -566,7 +566,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( \WP_Http::BAD_REQUEST, $response->get_status() );
 	}
 
 	/**
@@ -629,7 +629,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( \WP_Http::BAD_REQUEST, $response->get_status() );
 	}
 
 	/**
@@ -710,7 +710,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( \WP_Http::BAD_REQUEST, $response->get_status() );
 	}
 
 	/**
@@ -796,7 +796,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( \WP_Http::BAD_REQUEST, $response->get_status() );
 	}
 
 	/**
@@ -873,7 +873,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( \WP_Http::BAD_REQUEST, $response->get_status() );
 	}
 
 	/**
@@ -948,7 +948,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( \WP_Http::BAD_REQUEST, $response->get_status() );
 	}
 
 	/**
