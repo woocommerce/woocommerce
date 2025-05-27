@@ -184,7 +184,7 @@ class WooPaymentsService {
 			throw new ApiArgumentException(
 				'woocommerce_woopayments_onboarding_invalid_step_id',
 				esc_html__( 'Invalid onboarding step ID.', 'woocommerce' ),
-				(int) WP_Http::NOT_ACCEPTABLE
+				(int) WP_Http::BAD_REQUEST
 			);
 		}
 
@@ -661,7 +661,7 @@ class WooPaymentsService {
 			throw new ApiArgumentException(
 				'woocommerce_woopayments_onboarding_invalid_step_data',
 				esc_html__( 'Invalid onboarding step data.', 'woocommerce' ),
-				(int) WP_Http::NOT_ACCEPTABLE
+				(int) WP_Http::BAD_REQUEST
 			);
 		}
 
