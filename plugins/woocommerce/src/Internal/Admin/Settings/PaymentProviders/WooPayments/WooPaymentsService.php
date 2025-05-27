@@ -1127,6 +1127,52 @@ class WooPaymentsService {
 	}
 
 	/**
+	 * Preload the onboarding process.
+	 *
+	 * This method is used to run the heavier logic required for onboarding ahead of time,
+	 * so that we can be quicker to respond to the user when they start the onboarding process.
+	 *
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return array An array containing the success status and any errors encountered during the preload.
+	 *               'success' => true if the preload was successful, false otherwise.
+	 *               'errors'  => An array of error messages if any errors occurred, empty if no errors.
+	 * @throws ApiException If the onboarding preload failed or the onboarding is locked.
+	 */
+	public function onboarding_preload( string $location ): array {
+		// If the onboarding is locked, we shouldn't do anything.
+		if ( $this->is_onboarding_locked() ) {
+			throw new ApiException(
+				'woocommerce_woopayments_onboarding_locked',
+				esc_html__( 'Another onboarding action is already in progress. Please wait for it to finish.', 'woocommerce' ),
+				(int) WP_Http::CONFLICT
+			);
+		}
+
+		$result = true;
+
+		// Register the site to WPCOM if it is not already registered.
+		// This sets up the site for connection. For new sites, this tends to take a while.
+		// It is a prerequisite to generating the WPCOM/Jetpack authorization URL.
+		if ( ! $this->wpcom_connection_manager->is_connected() ) {
+			$result = $this->wpcom_connection_manager->try_registration();
+			if ( is_wp_error( $result ) ) {
+				throw new ApiException(
+					'woocommerce_woopayments_onboarding_action_error',
+					esc_html( $result->get_error_message() ),
+					(int) WP_Http::INTERNAL_SERVER_ERROR,
+					map_deep( (array) $result->get_error_data(), 'esc_html' )
+				);
+			}
+		}
+
+		return array(
+			'success' => $result,
+		);
+	}
+
+	/**
 	 * Reset onboarding.
 	 *
 	 * @param string $from   Optional. Where in the UI the request is coming from.
