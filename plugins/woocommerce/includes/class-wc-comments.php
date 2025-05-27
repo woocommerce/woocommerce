@@ -59,6 +59,9 @@ class WC_Comments {
 		// Exclude product reviews from general comments.
 		add_filter( 'comments_clauses', array( ReviewsUtil::class, 'comments_clauses_without_product_reviews' ), 10, 2 );
 
+		// Initialize ReviewsUtil hooks.
+		ReviewsUtil::init();
+
 		// Count comments.
 		add_filter( 'wp_count_comments', array( __CLASS__, 'wp_count_comments' ), 10, 2 );
 
