@@ -100,12 +100,14 @@ const FormattedMonetaryAmount = ( {
 	const renderTextWithRtlStyles = ( val: string ) => {
 		// Apply the rtlPrefixStyles to the element returned by renderText.
 		const element = props.renderText ? props.renderText( val ) : null;
-		if ( ! isValidElement( element ) ) return null;
+		if ( ! isValidElement( element ) ) {
+			return null;
+		}
 
 		return cloneElement( element as ReactElement, {
 			style: {
-				...rtlPrefixStyles,
 				...( element as ReactElement ).props.style,
+				...rtlPrefixStyles,
 			},
 		} );
 	};
