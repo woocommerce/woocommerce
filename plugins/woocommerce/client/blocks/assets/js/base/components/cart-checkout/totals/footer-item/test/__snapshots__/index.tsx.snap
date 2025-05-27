@@ -141,7 +141,7 @@ exports[`TotalsFooterItem Shows the "including %s of tax" line if tax is greater
       <p
         class="wc-block-components-totals-footer-item-tax"
       >
-        Including
+        Including 
         <span
           class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
         >
