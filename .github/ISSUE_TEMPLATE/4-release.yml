@@ -59,7 +59,6 @@ body:
         #### Stage and bump stable tag
 
         -    [] Manually create a pre-release entry on https://github.com/woocommerce/woocommerce/releases (use the version as tag, upload the generated zip, and pick the proper release branch)
-        -    [] Verify new PRs created by `github-actions` and merge ones related to the release
 
         #### Send comms out
 
