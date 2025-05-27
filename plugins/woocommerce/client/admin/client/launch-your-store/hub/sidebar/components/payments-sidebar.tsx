@@ -11,8 +11,6 @@ import clsx from 'clsx';
 import {
 	Button,
 	// @ts-ignore No types for this exist yet.
-	__experimentalHeading as Heading,
-	// @ts-ignore No types for this exist yet.
 	__experimentalItemGroup as ItemGroup,
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
@@ -89,11 +87,6 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 			</motion.div>
 			<SidebarContainer title={ sidebarTitle }>
 				{ /* We are using these classes to inherit the styles from the edit your store styling */ }
-				<div className="woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group-header">
-					<Heading level={ 2 }>
-						{ __( 'Setup your payments', 'woocommerce' ) }
-					</Heading>
-				</div>
 				<ItemGroup className="woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group">
 					{ stepsToDisplay.map( ( step ) => (
 						<SidebarNavigationItem
