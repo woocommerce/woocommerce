@@ -9,7 +9,7 @@ You can locate the JS package here `packages/js/email-editor`
 ## Workflow Commands
 
 We use `composer` run scripts to run the commands. You can run them using `composer run <command>`.
-If you don't have `composer` installed globally, you need to install it globally. Please check ho to do it [here](https://getcomposer.org/doc/00-intro.md).
+If you don't have `composer` installed globally, you need to install it globally. [Please check how to install it](https://getcomposer.org/doc/00-intro.md).
 
 ```bash
 composer run env:start                             # start testing environment
@@ -19,6 +19,16 @@ composer run test:unit -- [path_to_tests]          # runs a single unit test or 
 composer run test:integration                      # runs all the integrations tests
 composer run test:integration -- [path_to_tests]   # run a single integration test or a directory of tests
 composer code-style                                # checks the code style
+```
+
+## PHPStan Commands
+
+The following commands are available via pnpm for running PHP static analysis:
+
+```bash
+pnpm run phpstan [--skip-cleanup]                  # PHP static analysis with PHPStan with PHP 8.4. When skip-cleanup is used the command does not delete installed dependencies.
+pnpm run phpstan:php8 [--skip-cleanup]             # Alias for the command `phpstan`
+pnpm run phpstan:php7 [--skip-cleanup]             # PHP static analysis with PHPStan with PHP 7.4
 ```
 
 Example:
@@ -49,7 +59,7 @@ Please avoid using MailPoet-specific services and modules in the Email editor pa
 
 ### Integrations
 
-Please locate MailPoet PHP integrations [here](https://github.com/mailpoet/mailpoet/tree/13bf305aeb29bbadd0695ee02a3735e62cc4f21f/mailpoet/lib/EmailEditor/Integrations/MailPoet)
+[Please locate MailPoet PHP integrations.](https://github.com/mailpoet/mailpoet/tree/13bf305aeb29bbadd0695ee02a3735e62cc4f21f/mailpoet/lib/EmailEditor/Integrations/MailPoet)
 
 ## Known rendering issues
 
