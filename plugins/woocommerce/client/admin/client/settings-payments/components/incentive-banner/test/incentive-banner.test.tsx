@@ -63,7 +63,7 @@ describe( 'IncentiveBanner', () => {
 				onboardingUrl="https://example.com"
 				onAccept={ jest.fn() }
 				onDismiss={ jest.fn() }
-				setupPlugin={ jest.fn() }
+				setUpPlugin={ jest.fn() }
 			/>
 		);
 
@@ -86,7 +86,7 @@ describe( 'IncentiveBanner', () => {
 				onboardingUrl="https://example.com"
 				onAccept={ onAccept }
 				onDismiss={ jest.fn() }
-				setupPlugin={ jest.fn() }
+				setUpPlugin={ jest.fn() }
 			/>
 		);
 
@@ -111,7 +111,7 @@ describe( 'IncentiveBanner', () => {
 				onboardingUrl="https://example.com"
 				onAccept={ onAccept }
 				onDismiss={ jest.fn() }
-				setupPlugin={ jest.fn() }
+				setUpPlugin={ jest.fn() }
 			/>
 		);
 

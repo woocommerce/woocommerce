@@ -5,7 +5,10 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
-import { PaymentExtensionSuggestionProvider } from '@woocommerce/data';
+import {
+	PaymentExtensionSuggestionProvider,
+	PaymentEntity,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -33,11 +36,14 @@ type PaymentExtensionSuggestionListItemProps = {
 	 */
 	installingPlugin: string | null;
 	/**
-	 * Callback function to handle the setup of the plugin. Receives the plugin ID, slug, and onboarding URL (if available).
+	 * Callback to set up the plugin.
+	 *
+	 * @param provider      Extension provider.
+	 * @param onboardingUrl Extension onboarding URL (if available).
+	 * @param attachUrl     Extension attach URL (if available).
 	 */
-	setupPlugin: (
-		id: string,
-		slug: string,
+	setUpPlugin: (
+		provider: PaymentEntity,
 		onboardingUrl: string | null,
 		attachUrl: string | null
 	) => void;
@@ -63,7 +69,7 @@ type PaymentExtensionSuggestionListItemProps = {
 export const PaymentExtensionSuggestionListItem = ( {
 	extension,
 	installingPlugin,
-	setupPlugin,
+	setUpPlugin,
 	pluginInstalled,
 	acceptIncentive,
 	shouldHighlightIncentive,
@@ -147,11 +153,10 @@ export const PaymentExtensionSuggestionListItem = ( {
 									acceptIncentive( incentive.promo_id );
 								}
 
-								setupPlugin(
-									extension.id,
-									extension.plugin.slug,
-									extension.onboarding?._links.onboard.href ??
-										null,
+								setUpPlugin(
+									extension,
+									extension.onboarding?._links?.onboard
+										?.href ?? null,
 									pluginInstalled
 										? null
 										: extension._links?.attach?.href ?? null
@@ -168,7 +173,7 @@ export const PaymentExtensionSuggestionListItem = ( {
 					<div className="woocommerce-list__item-after__actions">
 						<EllipsisMenu
 							label={ __(
-								'Payment Provider Options',
+								'Payment provider actions',
 								'woocommerce'
 							) }
 							provider={ extension }

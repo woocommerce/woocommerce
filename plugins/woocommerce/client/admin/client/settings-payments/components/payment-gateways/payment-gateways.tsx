@@ -5,13 +5,14 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import clsx from 'clsx';
 import {
+	PaymentEntity,
 	PaymentProvider,
 	paymentSettingsStore,
-	woopaymentsOnboardingStore,
 	WC_ADMIN_NAMESPACE,
+	woopaymentsOnboardingStore,
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
-import { useMemo, useState, useRef } from '@wordpress/element';
+import { useMemo, useRef, useState } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Popover } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
@@ -31,9 +32,15 @@ interface PaymentGatewaysProps {
 	providers: PaymentProvider[];
 	installedPluginSlugs: string[];
 	installingPlugin: string | null;
-	setupPlugin: (
-		id: string,
-		slug: string,
+	/**
+	 * Callback to set up the plugin.
+	 *
+	 * @param provider      Extension provider.
+	 * @param onboardingUrl Extension onboarding URL (if available).
+	 * @param attachUrl     Extension attach URL (if available).
+	 */
+	setUpPlugin: (
+		provider: PaymentEntity,
 		onboardingUrl: string | null,
 		attachUrl: string | null
 	) => void;
@@ -55,7 +62,7 @@ export const PaymentGateways = ( {
 	providers,
 	installedPluginSlugs,
 	installingPlugin,
-	setupPlugin,
+	setUpPlugin,
 	acceptIncentive,
 	shouldHighlightIncentive,
 	updateOrdering,
@@ -238,7 +245,7 @@ export const PaymentGateways = ( {
 					providers={ providers }
 					installedPluginSlugs={ installedPluginSlugs }
 					installingPlugin={ installingPlugin }
-					setupPlugin={ setupPlugin }
+					setUpPlugin={ setUpPlugin }
 					acceptIncentive={ acceptIncentive }
 					shouldHighlightIncentive={ shouldHighlightIncentive }
 					updateOrdering={ updateOrdering }

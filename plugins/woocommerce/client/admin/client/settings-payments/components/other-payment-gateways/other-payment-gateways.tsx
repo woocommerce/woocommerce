@@ -8,6 +8,7 @@ import { useState, useMemo, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
+	PaymentEntity,
 	SuggestedPaymentExtension,
 	SuggestedPaymentExtensionCategory,
 } from '@woocommerce/data';
@@ -33,11 +34,14 @@ interface OtherPaymentGatewaysProps {
 	 */
 	installingPlugin: string | null;
 	/**
-	 * Callback to handle plugin setup. Accepts the plugin ID, slug, and onboarding URL (if available).
+	 * Callback to set up the plugin.
+	 *
+	 * @param provider      Extension provider.
+	 * @param onboardingUrl Extension onboarding URL (if available).
+	 * @param attachUrl     Extension attach URL (if available).
 	 */
-	setupPlugin: (
-		id: string,
-		slug: string,
+	setUpPlugin: (
+		provider: PaymentEntity,
 		onboardingUrl: string | null,
 		attachUrl: string | null
 	) => void;
@@ -60,7 +64,7 @@ export const OtherPaymentGateways = ( {
 	suggestions,
 	suggestionCategories,
 	installingPlugin,
-	setupPlugin,
+	setUpPlugin,
 	isFetching,
 	morePaymentOptionsLink,
 }: OtherPaymentGatewaysProps ) => {
@@ -255,10 +259,8 @@ export const OtherPaymentGateways = ( {
 												<Button
 													variant="link"
 													onClick={ () =>
-														setupPlugin(
-															extension.id,
-															extension.plugin
-																.slug,
+														setUpPlugin(
+															extension,
 															null, // Suggested gateways won't have an onboarding URL.
 															// Only provide the attach link if not already installed.
 															extension.plugin
@@ -304,7 +306,7 @@ export const OtherPaymentGateways = ( {
 	}, [
 		suggestionsByCategory,
 		installingPlugin,
-		setupPlugin,
+		setUpPlugin,
 		isFetching,
 		categoryIdWithPopoverVisible,
 	] );
