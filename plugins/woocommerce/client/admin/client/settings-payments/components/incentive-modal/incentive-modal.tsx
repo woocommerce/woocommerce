@@ -15,7 +15,7 @@ import { Link } from '@woocommerce/components';
 import {
 	PaymentIncentive,
 	PaymentProvider,
-	PaymentEntity,
+	PaymentsEntity,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -61,7 +61,7 @@ interface IncentiveModalProps {
 	 * @param attachUrl     Extension attach URL (if available).
 	 */
 	setUpPlugin: (
-		provider: PaymentEntity,
+		provider: PaymentsEntity,
 		onboardingUrl: string | null,
 		attachUrl: string | null
 	) => void;

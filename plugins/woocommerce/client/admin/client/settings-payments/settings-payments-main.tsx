@@ -7,7 +7,7 @@ import {
 	pluginsStore,
 	paymentSettingsStore,
 	PaymentProvider,
-	PaymentEntity,
+	PaymentsEntity,
 } from '@woocommerce/data';
 import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
 import React, { useState, useEffect } from '@wordpress/element';
@@ -299,7 +299,7 @@ export const SettingsPaymentsMain = () => {
 
 	const setUpPlugin = useCallback(
 		(
-			paymentEntity: PaymentEntity,
+			paymentEntity: PaymentsEntity,
 			onboardingUrl: string | null,
 			attachUrl: string | null
 		) => {
@@ -350,7 +350,7 @@ export const SettingsPaymentsMain = () => {
 					).getPaymentProviders( storeCountry );
 
 					// Find the matching provider in the updated list.
-					const updatedPaymentEntity = updatedProviders.find(
+					const updatedPaymentsEntity = updatedProviders.find(
 						( current: PaymentProvider ) =>
 							current.id === paymentEntity.id ||
 							current?._suggestion_id === paymentEntity.id || // For suggestions that were replaced by a gateway.
@@ -367,7 +367,7 @@ export const SettingsPaymentsMain = () => {
 					 * Otherwise, we redirect to the onboarding URL or the payment methods page.
 					 */
 					if (
-						updatedPaymentEntity?.onboarding?.type ===
+						updatedPaymentsEntity?.onboarding?.type ===
 						'native_in_context'
 					) {
 						setIsOnboardingModalOpen( true );
@@ -377,7 +377,7 @@ export const SettingsPaymentsMain = () => {
 						// redirect to the payment methods page.
 						if (
 							(
-								updatedPaymentEntity?.onboarding
+								updatedPaymentsEntity?.onboarding
 									?.recommended_payment_methods ?? []
 							).length > 0
 						) {
