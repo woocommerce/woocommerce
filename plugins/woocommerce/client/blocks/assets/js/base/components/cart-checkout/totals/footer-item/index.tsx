@@ -108,7 +108,7 @@ const TotalsFooterItem = ( {
 		taxLines && taxLines.length > 0
 			? sprintf(
 					/* translators: %s is a list of tax rates */
-					__( 'Includes %s', 'woocommerce' ),
+					__( 'Including %s', 'woocommerce' ),
 					taxLines
 						.map( ( { name, price } ) => {
 							return `${ formatPrice(
@@ -118,7 +118,7 @@ const TotalsFooterItem = ( {
 						} )
 						.join( ', ' )
 			  )
-			: __( 'Includes <TaxAmount/> in taxes', 'woocommerce' );
+			: __( 'Including <TaxAmount/> in taxes', 'woocommerce' );
 
 	return (
 		<TotalsItem
