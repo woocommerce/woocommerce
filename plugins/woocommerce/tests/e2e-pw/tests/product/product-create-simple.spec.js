@@ -328,12 +328,7 @@ for ( const productType of Object.keys( productData ) ) {
 				await page
 					.getByRole( 'button', { name: 'Add to cart' } )
 					.click();
-
-				await expect(
-					page.getByRole( 'button' ).getByText( '1 in cart' )
-				).toBeVisible();
-
-				await page.goto( 'cart/' );
+				await page.getByRole( 'link', { name: 'View cart' } ).click();
 
 				await checkCartContent(
 					false,

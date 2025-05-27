@@ -766,8 +766,8 @@ test.describe( 'Settings API tests: CRUD', () => {
 						description:
 							'Enable AJAX add to cart buttons on product pages',
 						type: 'checkbox',
-						default: 'yes',
-						value: 'yes',
+						default: 'no',
+						value: 'no',
 					} ),
 				] )
 			);
