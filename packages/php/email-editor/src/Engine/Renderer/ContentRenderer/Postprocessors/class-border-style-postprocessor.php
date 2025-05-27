@@ -172,37 +172,41 @@ class Border_Style_Postprocessor implements Postprocessor {
 	 */
 	private function expand_shorthand_value( string $value ): array {
 		$values = preg_split( '/\s+/', trim( $value ) );
+		if ( ! is_array( $values ) ) {
+			return array();
+		}
 
-		if ( count( $values ) === 4 ) {
+		$count = count( $values );
+		if ( 4 === $count ) {
 			return array(
-				'top'    => $values[0],
-				'right'  => $values[1],
-				'bottom' => $values[2],
-				'left'   => $values[3],
+				'top'    => $values[0] ?? '',
+				'right'  => $values[1] ?? '',
+				'bottom' => $values[2] ?? '',
+				'left'   => $values[3] ?? '',
 			);
 		}
-		if ( count( $values ) === 3 ) {
+		if ( 3 === $count ) {
 			return array(
-				'top'    => $values[0],
-				'right'  => $values[1],
-				'bottom' => $values[2],
-				'left'   => $values[1],
+				'top'    => $values[0] ?? '',
+				'right'  => $values[1] ?? '',
+				'bottom' => $values[2] ?? '',
+				'left'   => $values[1] ?? '',
 			);
 		}
-		if ( count( $values ) === 2 ) {
+		if ( 2 === $count ) {
 			return array(
-				'top'    => $values[0],
-				'right'  => $values[1],
-				'bottom' => $values[0],
-				'left'   => $values[1],
+				'top'    => $values[0] ?? '',
+				'right'  => $values[1] ?? '',
+				'bottom' => $values[0] ?? '',
+				'left'   => $values[1] ?? '',
 			);
 		}
-		if ( count( $values ) === 1 ) {
+		if ( 1 === $count ) {
 			return array(
-				'top'    => $values[0],
-				'right'  => $values[0],
-				'bottom' => $values[0],
-				'left'   => $values[0],
+				'top'    => $values[0] ?? '',
+				'right'  => $values[0] ?? '',
+				'bottom' => $values[0] ?? '',
+				'left'   => $values[0] ?? '',
 			);
 		}
 
@@ -217,6 +221,10 @@ class Border_Style_Postprocessor implements Postprocessor {
 	 */
 	private function extract_width_from_shorthand_value( string $value ): ?string {
 		$parts = preg_split( '/\s+/', trim( $value ) );
+
+		if ( ! is_array( $parts ) ) {
+			return null;
+		}
 
 		foreach ( $parts as $part ) {
 			if ( preg_match( '/^\d+([a-z%]+)?$/', $part ) ) {
@@ -235,6 +243,10 @@ class Border_Style_Postprocessor implements Postprocessor {
 	 */
 	private function extract_style_from_shorthand_value( string $value ): ?string {
 		$parts = preg_split( '/\s+/', trim( $value ) );
+
+		if ( ! is_array( $parts ) ) {
+			return null;
+		}
 
 		foreach ( $parts as $part ) {
 			if ( in_array( $part, array( 'none', 'hidden', 'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 'inset', 'outset' ), true ) ) {

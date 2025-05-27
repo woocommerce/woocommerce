@@ -43,6 +43,8 @@ defined( 'ABSPATH' ) || exit;
 class Email_Editor_Container {
 	/**
 	 * Init method.
+	 *
+	 * @return void
 	 */
 	public static function init() {
 		self::container()->get( Bootstrap::class )->init();
@@ -55,7 +57,7 @@ class Email_Editor_Container {
 	 * with a different compatible container.
 	 *
 	 * @param boolean $reset Used to reset the container to a fresh instance. Note: this means all dependencies will be reconstructed.
-	 * @return mixed
+	 * @return Container
 	 */
 	public static function container( $reset = false ) {
 		static $container;
