@@ -4,8 +4,7 @@
 	"plugins": [ "." ],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
-		"WP_DEBUG": true,
-		"WP_DEBUG_LOG": "wp-content/plugins/woocommerce/debug.log",
+		"WP_DEBUG_LOG": true,
 		"WP_DEBUG_DISPLAY": true,
 		"ALTERNATE_WP_CRON": true
 	},
@@ -29,9 +28,7 @@
 			"themes": [],
 			"config": {
 				"WP_TESTS_DOMAIN": "localhost",
-				"ALTERNATE_WP_CRON": false,
-				"WP_DEBUG": true,
-				"WP_DEBUG_LOG": "wp-content/plugins/woocommerce/debug.log"
+				"ALTERNATE_WP_CRON": false
 			},
 			"mappings": {
 				"wp-cli.yml": "./tests/wp-cli.yml",
