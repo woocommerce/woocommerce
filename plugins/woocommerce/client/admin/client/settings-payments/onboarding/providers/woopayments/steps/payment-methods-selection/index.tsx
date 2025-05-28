@@ -297,7 +297,7 @@ export default function PaymentMethodsSelection() {
 													]
 											)
 											.join( ', ' ),
-										store_country:
+										business_country:
 											window.wcSettings?.admin
 												?.woocommerce_payments_nox_profile
 												?.business_country_code ??

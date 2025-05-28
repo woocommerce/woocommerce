@@ -222,7 +222,7 @@ export const SettingsPaymentsMethods = () => {
 					( paymentMethod ) => ! paymentMethodsState[ paymentMethod ]
 				)
 				.join( ', ' ),
-			store_country:
+			business_country:
 				window.wcSettings?.admin?.woocommerce_payments_nox_profile
 					?.business_country_code ?? 'unknown',
 		} );
