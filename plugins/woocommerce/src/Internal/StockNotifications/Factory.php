@@ -22,7 +22,7 @@ class Factory {
 	 * @param  int $notification_id Notification ID to get.
 	 * @return Notification|bool
 	 */
-	public static function get_notification( $notification_id ) {
+	public static function get_notification( int $notification_id ) {
 
 		if ( ! $notification_id ) {
 			return false;
@@ -42,7 +42,7 @@ class Factory {
 	 *
 	 * @return Notification
 	 */
-	public static function create_dummy_notification() {
+	public static function create_dummy_notification(): Notification {
 		$notification = new Notification();
 
 		// Create a dummy product.

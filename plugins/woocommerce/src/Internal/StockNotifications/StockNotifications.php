@@ -6,13 +6,11 @@ namespace Automattic\WooCommerce\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
-use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailTemplatesController;
-use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
 
 /**
  * The controller for the stock notifications.
  */
-class Controller {
+class StockNotifications {
 
 	/**
 	 * Initialize the controller.
