@@ -73,7 +73,7 @@ export const OtherPaymentGateways = ( {
 		useState( '' );
 	const buttonRef = useRef< HTMLSpanElement >( null );
 
-	const handleClick = (
+	const handleInfoIconClick = (
 		event: React.MouseEvent | React.KeyboardEvent,
 		categoryId: string
 	) => {
@@ -91,7 +91,7 @@ export const OtherPaymentGateways = ( {
 		);
 	};
 
-	const handleFocusOutside = () => {
+	const handleFocusOutsidePopover = () => {
 		setCategoryIdWithPopoverVisible( '' );
 	};
 
@@ -174,14 +174,20 @@ export const OtherPaymentGateways = ( {
 								<span
 									className="other-payment-gateways__content__title__icon-container"
 									onClick={ ( event ) =>
-										handleClick( event, category.id )
+										handleInfoIconClick(
+											event,
+											category.id
+										)
 									}
 									onKeyDown={ ( event ) => {
 										if (
 											event.key === 'Enter' ||
 											event.key === ' '
 										) {
-											handleClick( event, category.id );
+											handleInfoIconClick(
+												event,
+												category.id
+											);
 										}
 									} }
 									tabIndex={ 0 }
@@ -203,7 +209,7 @@ export const OtherPaymentGateways = ( {
 											noArrow={ true }
 											shift={ true }
 											onFocusOutside={
-												handleFocusOutside
+												handleFocusOutsidePopover
 											}
 										>
 											<div className="components-popover__content-container">
