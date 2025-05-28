@@ -12,7 +12,8 @@ body:
 
         -   WooCommerce core version to release: RELEASE_VERSION ([milestone](https://github.com/woocommerce/woocommerce/milestone/MILESTONE_ID))
         -   Release lead: RELEASE_LEAD
-        -   RC release date: RC1_RELEASE_DATE (RELEASE_VERSION-rc.1)
+        -   RC1 release date: RC1_RELEASE_DATE
+        -   RC2 release date: RC2_RELEASE_DATE
         -   Final release date: RELEASE_DATE
         -   WooCommerce core change log: [here](https://github.com/woocommerce/woocommerce/blob/trunk/changelog.txt)
 
