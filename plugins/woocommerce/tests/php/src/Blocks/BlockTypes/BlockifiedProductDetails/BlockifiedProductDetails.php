@@ -211,7 +211,7 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 		$this->assertSame( 1, $hooked_block_types_introspection->get_call_count() );
 
 		$args = $hooked_block_types_introspection->get_args();
-		$this->assertSame( array( $test_block['slug'] ), $args[0][1] );
+		$this->assertSame( array( $test_block['slug'] ), $args[0][0] );
 	}
 
 	/**
