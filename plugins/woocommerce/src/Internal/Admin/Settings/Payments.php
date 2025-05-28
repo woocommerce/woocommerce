@@ -263,7 +263,19 @@ class Payments {
 	 * @throws Exception If the suggestion ID is invalid.
 	 */
 	public function attach_payment_extension_suggestion( string $id ): bool {
-		return $this->providers->attach_extension_suggestion( $id );
+		$result = $this->providers->attach_extension_suggestion( $id );
+
+		if ( $result ) {
+			// Record an event that the suggestion was attached.
+			$this->record_event(
+				'extension_suggestion_attached',
+				array(
+					'suggestion_id' => $id,
+				)
+			);
+		}
+
+		return $result;
 	}
 
 	/**
