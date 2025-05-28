@@ -135,8 +135,7 @@ class WooPayments extends Incentive {
 			// WooCommerce store active for duration in seconds.
 			'active_for'   => WCAdminHelper::get_wcadmin_active_for_in_seconds(),
 			'has_orders'   => $this->has_orders(),
-			// Whether the store has at least one payment gateway enabled.
-			'has_payments' => ! empty( WC()->payment_gateways()->get_available_payment_gateways() ),
+			'has_payments' => $this->has_enabled_payment_gateways(),
 			'has_wcpay'    => $this->has_wcpay(),
 		);
 
@@ -335,6 +334,26 @@ class WooPayments extends Incentive {
 		set_transient( $this->store_has_orders_transient_name, $has_orders ? 'yes' : 'no', $expiration );
 
 		return $has_orders;
+	}
+
+	/**
+	 * Check if the store has at least one enabled payment gateway.
+	 *
+	 * @return boolean Whether the store has any enabled payment gateways.
+	 */
+	private function has_enabled_payment_gateways(): bool {
+		$payment_gateways = WC()->payment_gateways()->payment_gateways;
+		if ( empty( $payment_gateways ) || ! is_array( $payment_gateways ) ) {
+			return false;
+		}
+
+		foreach ( $payment_gateways as $payment_gateway ) {
+			if ( filter_var( $payment_gateway->enabled, FILTER_VALIDATE_BOOLEAN ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

@@ -38,7 +38,14 @@ class PaymentProviders {
 	public const EXTENSION_INSTALLED     = 'installed';
 	public const EXTENSION_ACTIVE        = 'active';
 
+	// For providers that are delivered through a plugin available on the WordPress.org repository.
 	public const EXTENSION_TYPE_WPORG = 'wporg';
+	// For providers that are delivered through a must-use plugin.
+	public const EXTENSION_TYPE_MU_PLUGIN = 'mu_plugin';
+	// For providers that are delivered through a theme.
+	public const EXTENSION_TYPE_THEME = 'theme';
+	// For providers that are delivered through an unknown mechanism.
+	public const EXTENSION_TYPE_UNKNOWN = 'unknown';
 
 	public const PROVIDERS_ORDER_OPTION         = 'woocommerce_gateway_order';
 	public const SUGGESTION_ORDERING_PREFIX     = '_wc_pes_';
@@ -242,6 +249,7 @@ class PaymentProviders {
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 *
 	 * @return string The plugin slug of the payment gateway.
+	 *                Empty string if a plugin slug could not be determined.
 	 */
 	public function get_payment_gateway_plugin_slug( WC_Payment_Gateway $payment_gateway ): string {
 		$provider = $this->get_payment_gateway_provider_instance( $payment_gateway->id );
@@ -300,9 +308,10 @@ class PaymentProviders {
 	 * @throws Exception If there are malformed or invalid suggestions.
 	 */
 	public function get_extension_suggestions( string $location, string $context = '' ): array {
-		$preferred_psp = null;
-		$preferred_apm = null;
-		$other         = array();
+		$preferred_psp         = null;
+		$preferred_apm         = null;
+		$preferred_offline_psp = null;
+		$other                 = array();
 
 		$extensions = $this->extension_suggestions->get_country_extensions( $location, $context );
 		// Sort them by _priority.
@@ -330,16 +339,29 @@ class PaymentProviders {
 
 			// Determine if the suggestion is preferred or not by looking at its tags.
 			$is_preferred = in_array( ExtensionSuggestions::TAG_PREFERRED, $extension['tags'], true );
+
 			// Determine if the suggestion is hidden (from the preferred locations).
 			$is_hidden = $this->is_payment_extension_suggestion_hidden( $extension );
 
 			if ( ! $is_hidden && $is_preferred ) {
-				// If the suggestion is preferred, add it to the preferred list.
+				// If we don't have a preferred offline payments PSP and the suggestion is an offline payments preferred PSP,
+				// add it to the preferred list.
+				// Check this first so we don't inadvertently "fill" the preferred PSP slot.
+				if ( empty( $preferred_offline_psp ) &&
+					ExtensionSuggestions::TYPE_PSP === $extension['_type'] &&
+					in_array( ExtensionSuggestions::TAG_PREFERRED_OFFLINE, $extension['tags'], true ) ) {
+
+					$preferred_offline_psp = $extension;
+					continue;
+				}
+
+				// If we don't have a preferred PSP and the suggestion is a preferred PSP, add it to the preferred list.
 				if ( empty( $preferred_psp ) && ExtensionSuggestions::TYPE_PSP === $extension['_type'] ) {
 					$preferred_psp = $extension;
 					continue;
 				}
 
+				// If we don't have a preferred APM and the suggestion is a preferred APM, add it to the preferred list.
 				// In the preferred APM slot we might surface APMs but also Express Checkouts (PayPal Wallet).
 				if ( empty( $preferred_apm ) &&
 					in_array( $extension['_type'], array( ExtensionSuggestions::TYPE_APM, ExtensionSuggestions::TYPE_EXPRESS_CHECKOUT ), true ) ) {
@@ -413,10 +435,11 @@ class PaymentProviders {
 			'preferred' => array_values(
 				array_filter(
 					array(
-						// The PSP should naturally have a higher priority than the APM.
+						// The PSP should naturally have a higher priority than the APM, with the preferred offline PSP last.
 						// No need to impose a specific order here.
 						$preferred_psp,
 						$preferred_apm,
+						$preferred_offline_psp,
 					)
 				)
 			),
@@ -677,6 +700,7 @@ class PaymentProviders {
 		// Get the payment gateways order map.
 		$payment_gateways_order_map = array_flip( array_keys( $payment_gateways ) );
 		// Get the payment gateways to suggestions map.
+		// There will be null entries for payment gateways where we couldn't find a suggestion.
 		$payment_gateways_to_suggestions_map = array_map(
 			fn( $gateway ) => $this->extension_suggestions->get_by_plugin_slug( Utils::normalize_plugin_slug( $this->get_payment_gateway_plugin_slug( $gateway ) ) ),
 			$payment_gateways
@@ -1075,10 +1099,12 @@ class PaymentProviders {
 					// Make sure we put in the actual slug and file path that we found.
 					$extension['plugin']['slug'] = $plugin_slug;
 					$extension['plugin']['file'] = PluginsHelper::get_plugin_path_from_slug( $plugin_slug );
-					// Remove the .php extension from the file path. The WP API expects it without it.
-					if ( ! empty( $extension['plugin']['file'] ) && str_ends_with( $extension['plugin']['file'], '.php' ) ) {
-						$extension['plugin']['file'] = substr( $extension['plugin']['file'], 0, -4 );
+					// Sanity check.
+					if ( ! is_string( $extension['plugin']['file'] ) ) {
+						$extension['plugin']['file'] = '';
 					}
+					// Remove the .php extension from the file path. The WP API expects it without it.
+					$extension['plugin']['file'] = Utils::trim_php_file_extension( $extension['plugin']['file'] );
 
 					$extension['plugin']['status'] = self::EXTENSION_INSTALLED;
 					if ( PluginsHelper::is_plugin_active( $plugin_slug ) ) {

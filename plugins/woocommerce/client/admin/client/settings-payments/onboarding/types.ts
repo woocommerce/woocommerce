@@ -51,7 +51,7 @@ export interface WooPaymentsProviderOnboardingStep {
 	label: string;
 	path?: string;
 	order: number;
-	status?: 'not_started' | 'in_progress' | 'completed';
+	status?: 'not_started' | 'in_progress' | 'completed' | 'failed' | 'blocked';
 	dependencies?: string[];
 	actions?: {
 		save?: {
@@ -67,6 +67,10 @@ export interface WooPaymentsProviderOnboardingStep {
 			href?: string;
 		};
 		init?: {
+			type?: string;
+			href?: string;
+		};
+		clean?: {
 			type?: string;
 			href?: string;
 		};
@@ -101,6 +105,7 @@ export interface WooPaymentsProviderOnboardingStep {
 			industry_to_mcc: Record< string, string >;
 			mccs_display_tree: MccsDisplayTreeItem;
 			available_countries: Record< string, string >;
+			location: string;
 		};
 		self_assessment: Record< string, string >;
 		sub_steps: Record<
@@ -111,7 +116,10 @@ export interface WooPaymentsProviderOnboardingStep {
 		>;
 		has_test_account?: boolean;
 	};
-	errors?: string[];
+	errors?: {
+		message: string;
+		code: string;
+	}[];
 }
 
 /**
@@ -133,4 +141,6 @@ export interface OnboardingContextType {
 	) => WooPaymentsProviderOnboardingStep | undefined;
 	refreshStoreData: () => void;
 	closeModal: () => void;
+	justCompletedStepId: string | null;
+	setJustCompletedStepId: ( stepId: string ) => void;
 }

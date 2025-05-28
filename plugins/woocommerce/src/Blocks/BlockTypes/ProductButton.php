@@ -6,12 +6,14 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
+use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 
 /**
  * ProductButton class.
  */
 class ProductButton extends AbstractBlock {
 	use EnableBlockJsonAssetsTrait;
+	use BlocksSharedState;
 
 	/**
 	 * Block name.
@@ -94,7 +96,7 @@ class ProductButton extends AbstractBlock {
 			return '';
 		}
 
-		$this->initialize_cart_state();
+		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
 		wp_interactivity_state(
 			'woocommerce/product-button',
@@ -286,27 +288,6 @@ class ProductButton extends AbstractBlock {
 		$product = $previous_product;
 
 		return $html;
-	}
-
-	/**
-	 * Initialize the cart state.
-	 */
-	private function initialize_cart_state() {
-		if ( null === self::$cart ) {
-			$cart = isset( WC()->cart )
-				? rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) )->data
-				: array();
-
-			wp_interactivity_state(
-				'woocommerce',
-				array(
-					'cart'     => $cart,
-					'nonce'    => wp_create_nonce( 'wc_store_api' ),
-					'noticeId' => '',
-					'restUrl'  => get_rest_url(),
-				)
-			);
-		}
 	}
 
 	/**

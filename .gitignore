@@ -114,3 +114,5 @@ changes.json
 # Cursor related files
 .cursorignore
 .cursorindexingignore
+.cursor/rules/custom-*
+.cursor/rules/local-*
