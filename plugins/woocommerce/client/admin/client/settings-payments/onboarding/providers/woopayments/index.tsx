@@ -46,6 +46,10 @@ export default function WooPaymentsModal( {
 
 		// Trigger a snackbar error notification when the user aborts the WPCom connection process.
 		if ( ! hasWPComConnection && isJetpackReturn ) {
+			recordPaymentsOnboardingEvent(
+				'woopayments_onboarding_wpcom_connection_cancelled'
+			);
+
 			createErrorNotice( __( 'Setup was cancelled!', 'woocommerce' ), {
 				type: 'snackbar',
 				explicitDismiss: false,
