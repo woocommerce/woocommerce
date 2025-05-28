@@ -53,6 +53,7 @@ const defaultURLStrategy: URLStrategy = {
 const OnboardingContext = createContext< OnboardingContextType >( {
 	steps: [],
 	isLoading: true,
+	isStoreLoading: true,
 	currentStep: undefined,
 	context: {},
 	navigateToStep: () => undefined,
@@ -62,6 +63,7 @@ const OnboardingContext = createContext< OnboardingContextType >( {
 	closeModal: () => undefined,
 	justCompletedStepId: null,
 	setJustCompletedStepId: () => undefined,
+	storeError: null,
 } );
 
 export const useOnboardingContext = () => useContext( OnboardingContext );
@@ -100,12 +102,13 @@ export const OnboardingProvider: React.FC< {
 		useDispatch( paymentSettingsStore );
 
 	// Initial data fetch from store
-	const { storeData, isStoreLoading } = useSelect(
+	const { storeData, isStoreLoading, storeError } = useSelect(
 		( select ) => ( {
 			storeData: select( woopaymentsOnboardingStore ).getOnboardingData(),
 			isStoreLoading: select(
 				woopaymentsOnboardingStore
 			).isOnboardingDataRequestPending(),
+			storeError: select( woopaymentsOnboardingStore ).getOnboardingDataError(),
 		} ),
 		[]
 	);
@@ -311,6 +314,7 @@ export const OnboardingProvider: React.FC< {
 				steps: allSteps,
 				context: storeData.context,
 				isLoading: isStateStoreLoading,
+				isStoreLoading,
 				currentStep,
 				navigateToStep,
 				navigateToNextStep,
@@ -325,6 +329,7 @@ export const OnboardingProvider: React.FC< {
 				},
 				justCompletedStepId,
 				setJustCompletedStepId,
+				storeError,
 			} }
 		>
 			{ children }

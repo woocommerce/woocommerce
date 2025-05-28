@@ -133,6 +133,7 @@ export interface OnboardingContextType {
 		};
 	};
 	isLoading: boolean;
+	isStoreLoading: boolean;
 	currentStep: WooPaymentsProviderOnboardingStep | undefined;
 	navigateToStep: ( stepKey: string ) => void;
 	navigateToNextStep: () => void;
@@ -143,4 +144,5 @@ export interface OnboardingContextType {
 	closeModal: () => void;
 	justCompletedStepId: string | null;
 	setJustCompletedStepId: ( stepId: string ) => void;
+	storeError: unknown | null;
 }
