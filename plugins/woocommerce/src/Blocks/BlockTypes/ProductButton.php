@@ -88,9 +88,9 @@ class ProductButton extends AbstractBlock {
 			return '';
 		}
 
-		$is_descendent_of_add_to_cart_form = isset( $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] ) ? $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] : false;
+		$is_descendant_of_add_to_cart_form = isset( $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] ) ? $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] : false;
 
-		if ( $is_descendent_of_add_to_cart_form && Utils::is_not_purchasable_simple_product( $product ) ) {
+		if ( $is_descendant_of_add_to_cart_form && Utils::is_not_purchasable_simple_product( $product ) ) {
 			$product = $previous_product;
 
 			return '';
@@ -144,11 +144,11 @@ class ProductButton extends AbstractBlock {
 			)
 		);
 
-		$is_descendent_of_add_to_cart_form = isset( $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] ) ? $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] : false;
+		$is_descendant_of_add_to_cart_form = isset( $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] ) ? $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] : false;
 
 		$default_quantity = 1;
 
-		if ( ! $is_descendent_of_add_to_cart_form ) {
+		if ( ! $is_descendant_of_add_to_cart_form ) {
 			/**
 			 * Filters the change the quantity to add to cart.
 			 *
@@ -161,7 +161,7 @@ class ProductButton extends AbstractBlock {
 
 		$add_to_cart_text = null !== $product->add_to_cart_text() ? $product->add_to_cart_text() : __( 'Add to cart', 'woocommerce' );
 
-		if ( $is_descendent_of_add_to_cart_form && null !== $product->single_add_to_cart_text() ) {
+		if ( $is_descendant_of_add_to_cart_form && null !== $product->single_add_to_cart_text() ) {
 			$add_to_cart_text = $product->single_add_to_cart_text();
 		}
 
@@ -174,7 +174,7 @@ class ProductButton extends AbstractBlock {
 		);
 
 		$attributes = array(
-			'type' => $is_descendent_of_add_to_cart_form ? 'submit' : 'button',
+			'type' => $is_descendant_of_add_to_cart_form ? 'submit' : 'button',
 		);
 
 		if ( 'a' === $html_element ) {
@@ -219,7 +219,7 @@ class ProductButton extends AbstractBlock {
 			data-wp-init="actions.refreshCartItems"
 		';
 
-		$button_directives = $is_descendent_of_add_to_cart_form ? '' : 'data-wp-on--click="actions.addCartItem"';
+		$button_directives = $is_descendant_of_add_to_cart_form ? '' : 'data-wp-on--click="actions.addCartItem"';
 		$anchor_directive  = 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"';
 
 		$span_button_directives = '

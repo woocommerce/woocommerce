@@ -4,7 +4,7 @@
  * Description: Resets WooCommerce site to testing start state.
  * Version: 1.5.1
  * Author: Solaris Team
- * Requires at least: 6.6
+ * Requires at least: 6.7
  * Requires PHP: 7.4
  * @package WooCommerceCleanup
  *

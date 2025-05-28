@@ -75,10 +75,10 @@ export const EXTENDED_ALLOWED_ATTR = [
  * Also allows passing custom allow lists in a config object.
  * Useful for rich content areas that need more formatting options.
  *
- * @param {string} html The HTML to sanitize.
- * @param {Object} config Optional configuration to extend/override defaults.
- * @param {string[]} config.allowedTags Array of allowed HTML tags.
- * @param {Object} config.allowedAttributes Object of allowed attributes by tag.
+ * @param {string}   html                     The HTML to sanitize.
+ * @param {Object}   config                   Optional configuration to extend/override defaults.
+ * @param {string[]} config.allowedTags       Array of allowed HTML tags.
+ * @param {Object}   config.allowedAttributes Object of allowed attributes by tag.
  * @return {Object} Object with sanitized HTML in _html property.
  */
 export default function sanitizeHtmlExtended( html, config = {} ) {
