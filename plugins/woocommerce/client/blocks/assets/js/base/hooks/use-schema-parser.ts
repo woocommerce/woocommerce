@@ -79,7 +79,9 @@ const useDocumentObject = < T extends FormType | 'global' >(
 					),
 				],
 				items: items
-					.map( ( item ) => Array( item.quantity ).fill( item.id ) )
+					.map( ( item ) =>
+						Array( Math.round( item.quantity ) ).fill( item.id )
+					)
 					.flat(),
 				itemsType: [ ...new Set( items.map( ( item ) => item.type ) ) ],
 				itemsCount,
