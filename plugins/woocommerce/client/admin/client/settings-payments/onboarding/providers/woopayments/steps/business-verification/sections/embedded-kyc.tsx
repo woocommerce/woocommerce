@@ -12,7 +12,7 @@ import { useOnboardingContext } from '../../../data/onboarding-context';
 import StripeSpinner from '../../../components/stripe-spinner';
 import BannerNotice from '../../../components/banner-notice';
 import { useBusinessVerificationContext } from '../data/business-verification-context';
-import { finalizeOnboarding } from '../utils/actions';
+import { finalizeEmbeddedKycSession } from '../utils/actions';
 import { EmbeddedAccountOnboarding } from '../components/embedded';
 
 interface Props {
@@ -25,7 +25,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 } ) => {
 	const { data } = useBusinessVerificationContext();
 	const { currentStep, navigateToNextStep } = useOnboardingContext();
-	const [ finalizingAccount, setFinalizingAccount ] = useState( false );
+	const [ finalizingSession, setFinalizingSession ] = useState( false );
 	const [ loading, setLoading ] = useState( true );
 	const [ loadError, setLoadError ] = useState< LoadError | null >( null );
 	const fallbackUrl = currentStep?.actions?.kyc_fallback?.href ?? '';
@@ -35,10 +35,10 @@ const EmbeddedKyc: React.FC< Props > = ( {
 	};
 
 	const handleOnExit = async () => {
-		setFinalizingAccount( true );
+		setFinalizingSession( true );
 
 		try {
-			const response = await finalizeOnboarding(
+			const response = await finalizeEmbeddedKycSession(
 				currentStep?.actions?.kyc_session_finish?.href ?? ''
 			);
 
@@ -97,7 +97,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 					<StripeSpinner />
 				</div>
 			) }
-			{ finalizingAccount && (
+			{ finalizingSession && (
 				<div className="embedded-kyc-loader-wrapper">
 					<StripeSpinner />
 				</div>

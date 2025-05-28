@@ -8,8 +8,8 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import {
 	OnboardingFields,
-	FinalizeOnboardingResponse,
-	AccountKycResult,
+	FinalizeEmbeddedKycSessionResponse,
+	EmbeddedKycSessionCreateResult,
 } from '../types';
 import { fromDotNotation } from './';
 
@@ -18,8 +18,8 @@ import { fromDotNotation } from './';
  *
  * @param apiUrl The API URL.
  */
-export const finalizeOnboarding = async ( apiUrl: string ) => {
-	return await apiFetch< FinalizeOnboardingResponse >( {
+export const finalizeEmbeddedKycSession = async ( apiUrl: string ) => {
+	return await apiFetch< FinalizeEmbeddedKycSessionResponse >( {
 		url: apiUrl,
 		method: 'POST',
 		data: {},
@@ -66,10 +66,10 @@ export const completeSubStep = (
  * @param data   The form data.
  * @param apiUrl The API URL.
  */
-export const createKycAccountSession = async (
+export const createEmbeddedKycSession = async (
 	data: OnboardingFields,
 	apiUrl: string
-): Promise< AccountKycResult > => {
+): Promise< EmbeddedKycSessionCreateResult > => {
 	const selfAssessmentData = fromDotNotation( data );
 	const requestData: Record< string, unknown > = {};
 
@@ -78,7 +78,7 @@ export const createKycAccountSession = async (
 		requestData.self_assessment = selfAssessmentData;
 	}
 
-	return await apiFetch< AccountKycResult >( {
+	return await apiFetch< EmbeddedKycSessionCreateResult >( {
 		url: apiUrl,
 		method: 'POST',
 		data: requestData,
