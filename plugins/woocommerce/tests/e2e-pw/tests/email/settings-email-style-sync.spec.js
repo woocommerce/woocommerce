@@ -61,12 +61,37 @@ test.describe( 'Email Style Sync', () => {
 		// Navigate to WooCommerce email settings
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
 
+		// Disable the customer effort score modal (registerSettingsEmailFeedbackFill)
+		await page.evaluate( () => {
+			const element = document.getElementById(
+				'wc_settings_features_email_feedback_slotfill'
+			);
+			element.remove();
+		} );
+
 		const autoSyncToggle = page.locator(
 			'.wc-settings-email-color-palette-auto-sync input[type="checkbox"]'
 		);
 
 		// Auto-sync is not available when theme is not in sync
 		await expect( autoSyncToggle ).toBeHidden();
+
+		// Check if a modal is visible and close it if needed
+		const modal = page.locator( '.components-modal__screen-overlay' );
+		// eslint-disable-next-line playwright/no-conditional-in-test
+		if ( await modal.isVisible() ) {
+			// Try to close the modal by clicking the close button
+			const closeButton = modal.locator(
+				'button[aria-label="Close dialog"]'
+			);
+			// eslint-disable-next-line playwright/no-conditional-in-test
+			if ( await closeButton.isVisible() ) {
+				await closeButton.click();
+			} else {
+				// If no close button, try pressing Escape
+				await page.keyboard.press( 'Escape' );
+			}
+		}
 
 		// Sync color palette with theme
 		await page.getByRole( 'button', { name: 'Sync with theme' } ).click();
