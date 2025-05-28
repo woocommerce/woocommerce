@@ -134,31 +134,6 @@ class Checkout extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the default shipping defining address fields are included in the registry data.
-	 *
-	 * @return void
-	 */
-	public function test_default_shipping_fields_in_registry() {
-		$checkout = new CheckoutMock( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-mock' );
-		$checkout->mock_enqueue_data();
-
-		$data_from_registry = $this->registry->get();
-		$this->assertArrayHasKey( 'addressFieldsForShippingRates', $data_from_registry );
-		// Assert that this contains the following fields needed for shipping rates.
-		$this->assertContains( 'state', $data_from_registry['addressFieldsForShippingRates'] );
-		$this->assertContains( 'country', $data_from_registry['addressFieldsForShippingRates'] );
-		$this->assertContains( 'postcode', $data_from_registry['addressFieldsForShippingRates'] );
-		$this->assertContains( 'city', $data_from_registry['addressFieldsForShippingRates'] );
-		// Assert that this not contains the following fields not needed for shipping rates.
-		$this->assertNotContains( 'address_1', $data_from_registry['addressFieldsForShippingRates'] );
-		$this->assertNotContains( 'address_2', $data_from_registry['addressFieldsForShippingRates'] );
-		$this->assertNotContains( 'first_name', $data_from_registry['addressFieldsForShippingRates'] );
-		$this->assertNotContains( 'last_name', $data_from_registry['addressFieldsForShippingRates'] );
-		$this->assertNotContains( 'company', $data_from_registry['addressFieldsForShippingRates'] );
-		$this->assertNotContains( 'phone', $data_from_registry['addressFieldsForShippingRates'] );
-	}
-
-	/**
 	 * Overrides the WC logger.
 	 *
 	 * @return mixed

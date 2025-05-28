@@ -37,6 +37,10 @@ export interface ResponseBaseAddress {
 	country: string;
 }
 
+export type AddressFieldsForShippingRates = Array<
+	Exclude< keyof ResponseBaseAddress, 'address_1' | 'address_2' >
+>;
+
 export interface ShippingRateItem {
 	key: string;
 	name: string;
@@ -161,11 +165,6 @@ export interface CartResponseErrorItem {
 
 export interface CartResponseExtensionItem {
 	[ key: string ]: unknown;
-}
-
-export interface ShippingAddressFieldsForShippingRates
-	extends Omit< ResponseBaseAddress, 'address_1' | 'address_2' > {
-	[ key: string ]: string;
 }
 
 export interface CartResponse {

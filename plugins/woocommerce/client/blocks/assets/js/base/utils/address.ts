@@ -12,19 +12,18 @@ import {
 	BillingAddress,
 	defaultFields,
 	ShippingAddress,
-	getSetting,
 } from '@woocommerce/settings';
 import {
 	isObject,
 	isString,
 	type CartResponseBillingAddress,
 	type CartResponseShippingAddress,
-	type ShippingAddressFieldsForShippingRates,
+	type AddressFieldsForShippingRates as AddressFieldsForShippingRatesType,
 } from '@woocommerce/types';
 import { decodeEntities } from '@wordpress/html-entities';
 
-const addressFieldsForShippingRates: ShippingAddressFieldsForShippingRates =
-	getSetting( 'addressFieldsForShippingRates', [] );
+export const addressFieldsForShippingRates: AddressFieldsForShippingRatesType =
+	[ 'state', 'country', 'postcode', 'city' ];
 
 /**
  * Compare two addresses and see if they are the same.
@@ -148,7 +147,7 @@ export const formatShippingAddress = (
 
 /**
  * Checks if all required shipping address fields are completed.
- * Only validates fields that are defined in addressFieldsForShippingRates setting.
+ * Only validates fields that are defined in addressFieldsForShippingRates.
  *
  * @param {CartResponseShippingAddress} address The shipping address to validate.
  * @return {boolean} True if all required shipping fields are filled, false otherwise.
