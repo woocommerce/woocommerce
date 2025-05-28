@@ -8,7 +8,6 @@ import {
 import { CartBillingAddress, CartShippingAddress } from '@woocommerce/types';
 import { select, dispatch } from '@wordpress/data';
 import isShallowEqual from '@wordpress/is-shallow-equal';
-import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies

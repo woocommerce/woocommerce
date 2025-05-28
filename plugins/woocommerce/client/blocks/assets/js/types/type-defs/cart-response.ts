@@ -37,10 +37,6 @@ export interface ResponseBaseAddress {
 	country: string;
 }
 
-export type AddressFieldsForShippingRates = Array<
-	Exclude< keyof ResponseBaseAddress, 'address_1' | 'address_2' >
->;
-
 export interface ShippingRateItem {
 	key: string;
 	name: string;
