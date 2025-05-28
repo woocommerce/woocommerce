@@ -6,7 +6,6 @@ import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
 import { PaymentExtensionSuggestionProvider } from '@woocommerce/data';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -17,6 +16,7 @@ import {
 	isWooPayments,
 	hasIncentive,
 	isWooPayEligible,
+	recordPaymentsEvent,
 } from '~/settings-payments/utils';
 import { DefaultDragHandle } from '~/settings-payments/components/sortable';
 import { StatusBadge } from '~/settings-payments/components/status-badge';
@@ -135,10 +135,11 @@ export const PaymentExtensionSuggestionListItem = ( {
 							onClick={ () => {
 								if ( pluginInstalled ) {
 									// Record the event when user clicks on a gateway's enable button.
-									recordEvent(
-										'settings_payments_provider_enable_click',
+									recordPaymentsEvent(
+										'provider_enable_click',
 										{
-											provider_id: extension.id,
+											provider_id: suggestion.id,
+											suggestion_id: suggestion.id,
 										}
 									);
 								}

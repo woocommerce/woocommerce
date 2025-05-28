@@ -10,12 +10,12 @@ import {
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import './ellipsis-menu-content.scss';
+import { recordPaymentsEvent } from '~/settings-payments/utils';
 
 interface EllipsisMenuContentProps {
 	/**
@@ -69,7 +69,7 @@ export const EllipsisMenuContent = ( {
 	providerId,
 	pluginFile,
 	isSuggestion,
-	suggestionId,
+	suggestionId = '',
 	suggestionHideUrl = '',
 	onToggle,
 	links = [],
@@ -132,8 +132,9 @@ export const EllipsisMenuContent = ( {
 	 */
 	const disableGateway = () => {
 		// Record the event when user clicks on a gateway's disable button.
-		recordEvent( 'settings_payments_provider_disable_click', {
+		recordPaymentsEvent( 'provider_disable_click', {
 			provider_id: providerId,
+			suggestion_id: suggestionId,
 		} );
 
 		const gatewayToggleNonce =
@@ -153,8 +154,9 @@ export const EllipsisMenuContent = ( {
 		)
 			.then( () => {
 				// Record the event when user successfully disables a gateway.
-				recordEvent( 'settings_payments_provider_disable', {
+				recordPaymentsEvent( 'provider_disable', {
 					provider_id: providerId,
+					suggestion_id: suggestionId,
 				} );
 
 				invalidateResolutionForStoreSelector( 'getPaymentProviders' );

@@ -10,12 +10,12 @@ import {
 	woopaymentsOnboardingStore,
 } from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { recordEvent } from '@woocommerce/tracks';
 import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
+import { recordPaymentsEvent } from '~/settings-payments/utils';
 
 interface CompleteSetupButtonProps {
 	/**
@@ -104,7 +104,7 @@ export const CompleteSetupButton = ( {
 
 	const completeSetup = () => {
 		// Record the click of this button.
-		recordEvent( 'settings_payments_provider_complete_setup_click', {
+		recordPaymentsEvent( 'provider_complete_setup_click', {
 			provider_id: gatewayId,
 			onboarding_started: onboardingState.started,
 			onboarding_completed: onboardingState.completed,

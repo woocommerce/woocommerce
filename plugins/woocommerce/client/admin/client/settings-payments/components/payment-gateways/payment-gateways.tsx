@@ -18,7 +18,6 @@ import { Link } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import InfoOutline from 'gridicons/dist/info-outline';
 import interpolateComponents from '@automattic/interpolate-components';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -26,6 +25,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { CountrySelector } from '~/settings-payments/components/country-selector';
 import { ListPlaceholder } from '~/settings-payments/components/list-placeholder';
 import { PaymentGatewayList } from '~/settings-payments/components/payment-gateway-list';
+import { recordPaymentsEvent } from '~/settings-payments/utils';
 
 interface PaymentGatewaysProps {
 	providers: PaymentProvider[];
