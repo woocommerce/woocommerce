@@ -24,8 +24,8 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
-			'product_customer_stock_notifications_options'             => array( 'title', 'sectionend' ),
-			'woocommerce_customer_stock_notifications_allow_signups'   => 'checkbox',
+			'product_customer_stock_notifications_options' => array( 'title', 'sectionend' ),
+			'woocommerce_customer_stock_notifications_allow_signups' => 'checkbox',
 			'woocommerce_customer_stock_notifications_require_double_opt_in' => 'checkbox',
 			'woocommerce_customer_stock_notifications_require_account' => 'checkbox',
 			'woocommerce_customer_stock_notifications_create_account_on_signup' => 'checkbox',
