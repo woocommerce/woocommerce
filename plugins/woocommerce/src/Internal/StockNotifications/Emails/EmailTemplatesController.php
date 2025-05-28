@@ -92,9 +92,27 @@ class EmailTemplatesController {
 			return;
 		}
 
+		$formatted_variation_list = $notification->get_product_formatted_variation_list( false );
+		if ( empty( $formatted_variation_list ) ) {
+			return;
+		}
+
+		// Convert list to HTML table for better rendering.
+		$formatted_variation_list = strtr(
+			$formatted_variation_list,
+			array(
+				'<dl' => '<table',
+				'<dd' => '<tr><th',
+				'<dt' => '<tr><td',
+				'dl>' => 'table>',
+				'dd>' => 'th></tr>',
+				'dt>' => 'td></tr>',
+			)
+		);
+
 		ob_start();
 		?>
-		<div id="notification__product__attributes"><?php echo wp_kses_post( $notification->get_product_formatted_variation_list( false, 'email' ) ); ?></div>
+			<div id="notification__product__attributes"><?php echo wp_kses_post( $formatted_variation_list ); ?></div>
 		<?php
 		$html = ob_get_clean();
 		echo wp_kses_post( $html );

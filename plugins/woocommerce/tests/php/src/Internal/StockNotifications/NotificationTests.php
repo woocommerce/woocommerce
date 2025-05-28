@@ -66,9 +66,8 @@ class NotificationTests extends \WC_Unit_Test_Case {
 		$notification->save();
 		$formatted_variation_attributes = $notification->get_product_formatted_variation_list( true );
 		$this->assertEquals( 'size: small, colour: red', $formatted_variation_attributes );
-		// 3.1 Test that the variation returns the formatted variation attributes with posted attributes (any attribute on the variation) in HTML table.
-		$formatted_variation_attributes = $notification->get_product_formatted_variation_list( false, 'email' );
-		$this->assertEquals( '<table class="variation"><tr><td>size:</td></tr><tr><th>small</th></tr><tr><td>colour:</td></tr><tr><th>red</th></tr></table>', $formatted_variation_attributes );
+		$formatted_variation_attributes = $notification->get_product_formatted_variation_list( false );
+		$this->assertEquals( '<dl class="variation"><dt>size:</dt><dd>small</dd><dt>colour:</dt><dd>red</dd></dl>', $formatted_variation_attributes );
 	}
 
 	/**

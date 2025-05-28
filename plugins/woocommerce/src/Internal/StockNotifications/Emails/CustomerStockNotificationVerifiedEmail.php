@@ -11,26 +11,26 @@ use WC_Email;
 /**
  * Back in stock notification email class.
  */
-class CustomerStockNotificationConfirmEmail extends WC_Email {
+class CustomerStockNotificationVerifiedEmail extends WC_Email {
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id             = 'customer_stock_notification_confirm';
+		$this->id             = 'customer_stock_notification_verified';
 		$this->customer_email = true;
 
 		$this->title       = __( 'Back in stock sign-up confirmation', 'woocommerce' );
 		$this->description = __( 'Email sent to customers after completing the sign-up process successfully.', 'woocommerce' );
 
-		$this->template_html  = 'emails/customer-stock-notification-confirm.php';
-		$this->template_plain = 'emails/plain/customer-stock-notification-confirm.php';
+		$this->template_html  = 'emails/customer-stock-notification-verified.php';
+		$this->template_plain = 'emails/plain/customer-stock-notification-verified.php';
 		$this->placeholders   = array(
 			'{product_name}' => '',
 			'{site_title}'   => '',
 		);
 
-		add_action( 'woocommerce_email_stock_notification_confirm_notification', array( $this, 'trigger' ), 10, 1 );
+		add_action( 'woocommerce_email_stock_notification_verified_notification', array( $this, 'trigger' ), 10, 1 );
 
 		// Call parent constructor.
 		parent::__construct();

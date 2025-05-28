@@ -492,10 +492,10 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 				'offset' => 1,
 			)
 		);
-		$this->assertCount( 2, $notifications );
 
-		$this->assertEquals( 2, $notifications[0]->get_id() );
-		$this->assertEquals( 3, $notifications[1]->get_id() );
+		$this->assertCount( 2, $notifications );
+		$this->assertEquals( 2, $notifications[0] );
+		$this->assertEquals( 3, $notifications[1] );
 	}
 
 	/**
@@ -519,5 +519,63 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->assertEquals( 2, $count );
+	}
+
+	/**
+	 * Test querying notifications with a return type of ids.
+	 */
+	public function test_query_notifications_with_return_type_ids() {
+
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_id( 1 );
+		$notification->save();
+
+		// Check the default return type is ids.
+		$notifications = $this->data_store->query(
+			array(
+				'product_id' => 1,
+				'user_id'    => 1,
+			)
+		);
+
+		$this->assertCount( 1, $notifications );
+		$this->assertEquals( 1, $notifications[0] );
+
+		// Check the return type is ids.
+		$notifications = $this->data_store->query(
+			array(
+				'product_id' => 1,
+				'user_id'    => 1,
+				'return'     => 'ids',
+			)
+		);
+		$this->assertCount( 1, $notifications );
+		$this->assertEquals( 1, $notifications[0] );
+	}
+
+	/**
+	 * Test querying notifications with a return type of objects.
+	 */
+	public function test_query_notifications_with_return_type_objects() {
+
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_id( 1 );
+		$notification->set_user_email( 'test@test.com' );
+		$notification->save();
+
+		$notifications = $this->data_store->query(
+			array(
+				'product_id' => 1,
+				'user_id'    => 1,
+				'user_email' => 'test@test.com',
+				'return'     => 'objects',
+			)
+		);
+
+		$this->assertCount( 1, $notifications );
+		$this->assertInstanceOf( Notification::class, $notifications[0] );
+		$this->assertEquals( 'test@test.com', $notifications[0]->get_user_email() );
 	}
 }
