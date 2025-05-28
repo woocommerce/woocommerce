@@ -16,6 +16,8 @@ class Payments {
 
 	const SUGGESTIONS_CONTEXT = 'wc_settings_payments';
 
+	const EVENT_PREFIX = 'settings_payments_';
+
 	const FROM_PAYMENTS_SETTINGS        = 'WCADMIN_PAYMENT_SETTINGS';
 	const FROM_PAYMENTS_MENU_ITEM       = 'PAYMENTS_MENU_ITEM';
 	const FROM_PAYMENTS_TASK            = 'WCADMIN_PAYMENT_TASK';
@@ -216,6 +218,8 @@ class Payments {
 	 * @param string $location The country code. This should be a ISO 3166-1 alpha-2 country code.
 	 */
 	public function set_country( string $location ): bool {
+		$previous_country = $this->get_country();
+
 		$user_payments_nox_profile = get_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, true );
 
 		if ( empty( $user_payments_nox_profile ) ) {
@@ -249,7 +253,19 @@ class Payments {
 	 * @return bool True if the payment providers ordering was successfully updated, false otherwise.
 	 */
 	public function update_payment_providers_order_map( array $order_map ): bool {
-		return $this->providers->update_payment_providers_order_map( $order_map );
+		$result = $this->providers->update_payment_providers_order_map( $order_map );
+
+		if ( $result ) {
+			// Record an event that the payment providers order map was updated.
+			$this->record_event(
+				'payment_providers_order_map_updated',
+				array(
+					'order_map' => implode( ', ', array_keys( $this->providers->get_order_map() ) ),
+				)
+			);
+		}
+
+		return $result;
 	}
 
 	/**
