@@ -122,6 +122,7 @@ const TotalsFooterItem = ( {
 			: __( 'Including <TaxAmount/> in taxes', 'woocommerce' );
 
 	const hasSelectedRates = hasSelectedShippingRate( cart.shippingRates );
+	const cartNeedsShipping = cart.cartNeedsShipping;
 
 	return (
 		<TotalsItem
@@ -147,7 +148,7 @@ const TotalsFooterItem = ( {
 							} ) }
 						</p>
 					) }
-					{ isEstimate && ! hasSelectedRates && (
+					{ isEstimate && ! hasSelectedRates && cartNeedsShipping && (
 						<p className="wc-block-components-totals-footer-item-shipping">
 							{ __(
 								'Shipping will be calculated at checkout',
