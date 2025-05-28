@@ -6,29 +6,9 @@ const { test, expect, request } = require( '@playwright/test' );
 /**
  * Internal dependencies
  */
-import { setOption, deleteOption } from '../../utils/options';
+import { setOption } from '../../utils/options';
+import { setFeatureEmailImprovementsFlag } from './helpers/set-email-improvements-feature-flag';
 const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-
-/**
- * Set the email improvements feature flag.
- *
- * @param {string} baseURL The base URL.
- * @param {string} value   The value to set ('yes' or 'no').
- * @return {Promise<void>}
- */
-const setFeatureFlag = async ( baseURL, value ) => {
-	await setOption(
-		request,
-		baseURL,
-		'woocommerce_feature_email_improvements_enabled',
-		value
-	);
-	await deleteOption(
-		request,
-		baseURL,
-		'_transient_wc_settings_email_improvements_reverted'
-	);
-};
 
 /**
  * Set the email auto-sync feature flag.
@@ -50,7 +30,7 @@ test.describe( 'Email Style Sync', () => {
 
 	test.beforeEach( async ( { baseURL } ) => {
 		// Enable email improvements feature
-		await setFeatureFlag( baseURL, 'yes' );
+		await setFeatureEmailImprovementsFlag( baseURL, 'yes' );
 		// Ensure auto-sync is enabled by default
 		await setAutoSyncFlag( baseURL, 'yes' );
 		// Ensure color palette is not synced with theme
@@ -64,7 +44,7 @@ test.describe( 'Email Style Sync', () => {
 
 	test.afterAll( async ( { baseURL } ) => {
 		// Reset feature flags after tests
-		await setFeatureFlag( baseURL, 'no' );
+		await setFeatureEmailImprovementsFlag( baseURL, 'no' );
 		await setAutoSyncFlag( baseURL, 'no' );
 	} );
 
