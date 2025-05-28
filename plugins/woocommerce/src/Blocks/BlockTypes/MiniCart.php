@@ -507,7 +507,7 @@ class MiniCart extends AbstractBlock {
 				</span>
 			</button>
 			<div data-wp-on--click="callbacks.overlayCloseDrawer" data-wp-bind--class="state.drawerOverlayClass" class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden">
-				<div class="wc-block-mini-cart__drawer wc-block-components-drawer">
+				<div class="wc-block-mini-cart__drawer wc-block-components-drawer is-mobile">
 					<div class="wc-block-components-drawer__content">
 						<div class="wc-block-mini-cart__template-part">
 							<?php
