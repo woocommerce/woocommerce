@@ -128,18 +128,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await page.goto( '/hoodie' );
 
-		const logoNoOption = page.getByRole( 'radio', {
-			name: 'No',
-			exact: true,
-		} );
-		const colorBlueOption = page.getByRole( 'radio', {
-			name: 'Blue',
-			exact: true,
-		} );
-		const colorGreenOption = page.getByRole( 'radio', {
-			name: 'Green',
-			exact: true,
-		} );
+		const logoNoOption = page.locator( 'label:has-text("No")' );
+		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
+		const colorGreenOption = page.locator( 'label:has-text("Green")' );
 		const addToCartButton = page.getByText( 'Add to cart' ).first();
 
 		await logoNoOption.click();
@@ -172,14 +163,8 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await page.goto( '/hoodie' );
 
-		const logoYesOption = page.getByRole( 'radio', {
-			name: 'Yes',
-			exact: true,
-		} );
-		const colorGreenOption = page.getByRole( 'radio', {
-			name: 'Green',
-			exact: true,
-		} );
+		const logoYesOption = page.locator( 'label:has-text("Yes")' );
+		const colorGreenOption = page.locator( 'label:has-text("Green")' );
 
 		await expect( colorGreenOption ).toBeEnabled();
 
