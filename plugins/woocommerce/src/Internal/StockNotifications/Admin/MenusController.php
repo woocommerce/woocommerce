@@ -74,9 +74,9 @@ class MenusController {
 	/**
 	 * Save screen options.
 	 *
-	 * @param int $status The status of the screen option.
+	 * @param int    $status The status of the screen option.
 	 * @param string $option The option name.
-	 * @param int $value The value of the screen option.
+	 * @param int    $value The value of the screen option.
 	 *
 	 * @return int
 	 */
