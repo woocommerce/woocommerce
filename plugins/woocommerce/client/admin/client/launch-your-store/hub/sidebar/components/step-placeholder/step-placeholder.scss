@@ -45,19 +45,10 @@
 
 		// Shimmer effect for loading animation - seamless continuous loop
 		.step-placeholder__shimmer {
-			background: linear-gradient(
-				90deg,
-				$gray-200 0%,
-				$gray-200 20%,
-				$gray-100 40%,
-				$gray-100 50%,
-				$gray-100 60%,
-				$gray-200 80%,
-				$gray-200 100%
-			);
+			background: linear-gradient(90deg, $gray-200 0%, $gray-200 20%, $gray-100 40%, $gray-100 50%, $gray-100 60%, $gray-200 80%, $gray-200 100%);
 			background-size: 400px 100%;
 			animation: shimmer 2s infinite linear;
 			overflow: hidden;
 		}
 	}
-} 
+}
