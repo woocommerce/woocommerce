@@ -2,10 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useSelect } from '@wordpress/data';
 import {
 	InspectorControls,
 	useBlockProps,
 	useInnerBlocksProps,
+	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import {
 	createInterpolateElement,
@@ -53,19 +55,27 @@ const Edit = ( {
 	attributes,
 	setAttributes,
 	context,
+	clientId,
 }: BlockEditProps< BlockAttributes > & { context: Context } ): JSX.Element => {
 	const { showProductLink, imageSizing, width, height, scale } = attributes;
 
 	const ref = useRef< HTMLDivElement >( null );
 
 	const blockProps = useBlockProps( { style: { width, height } } );
+	const wasBlockJustInserted = useSelect(
+		( select ) =>
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore method exists but not typed
+			select( blockEditorStore ).wasBlockJustInserted( clientId ),
+		[ clientId ]
+	);
 	const innerBlockProps = useInnerBlocksProps(
 		{
 			className: 'wc-block-components-product-image__inner-container',
 		},
 		{
 			dropZoneElement: ref.current,
-			template: TEMPLATE,
+			template: wasBlockJustInserted ? TEMPLATE : undefined,
 		}
 	);
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
