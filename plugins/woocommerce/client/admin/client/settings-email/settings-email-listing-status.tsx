@@ -13,7 +13,7 @@ import { __experimentalHStack as HStack, Icon } from '@wordpress/components';
 export const EMAIL_STATUSES = [
 	{
 		value: 'enabled',
-		label: __( 'Active', 'woocommerce' ),
+		label: __( 'Enabled', 'woocommerce' ),
 		icon: published,
 		description: __(
 			'Email would be sent if trigger is met',
@@ -22,7 +22,7 @@ export const EMAIL_STATUSES = [
 	},
 	{
 		value: 'disabled',
-		label: __( 'Draft', 'woocommerce' ),
+		label: __( 'Disabled', 'woocommerce' ),
 		icon: cancelCircleFilled,
 		description: __( 'Email would not be sent', 'woocommerce' ),
 	},

@@ -60,7 +60,7 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 		// Check that first row shows Active status
 		const firstRow = listViewLocator.locator( 'tr' ).nth( 1 ); // nth(1) because nth(0) is header row
 		await expect( firstRow.locator( 'td' ).nth( 2 ) ).toHaveText(
-			'Active'
+			'Enabled'
 		);
 
 		// Open the first row more actions menu
@@ -73,7 +73,9 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 		await page.getByRole( 'menuitem', { name: 'Disable email' } ).click();
 
 		// Check that the email status is now Draft
-		await expect( firstRow.locator( 'td' ).nth( 2 ) ).toHaveText( 'Draft' );
+		await expect( firstRow.locator( 'td' ).nth( 2 ) ).toHaveText(
+			'Disabled'
+		);
 
 		// Open the first row more actions menu again
 		await firstRow.locator( '.dataviews-all-actions-button' ).click();
@@ -86,7 +88,7 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 
 		// Check that the email status is now Active again
 		await expect( firstRow.locator( 'td' ).nth( 2 ) ).toHaveText(
-			'Active'
+			'Enabled'
 		);
 
 		// I want to check that search works
