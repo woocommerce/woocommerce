@@ -121,7 +121,7 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 					.first();
 
 				await expect( expandButton ).toBeVisible();
-			} ).toPass( { timeout: 3_000 } );
+			} ).toPass();
 		} );
 	}
 
