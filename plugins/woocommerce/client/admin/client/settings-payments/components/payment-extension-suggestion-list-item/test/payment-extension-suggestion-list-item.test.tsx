@@ -21,7 +21,7 @@ describe( 'PaymentExtensionSuggestionListItem', () => {
 	it( 'should record settings_payments_provider_enable_click event on click of the Enable button', () => {
 		const { getByRole } = render(
 			<PaymentExtensionSuggestionListItem
-				extension={
+				suggestion={
 					{
 						id: 'test-gateway',
 						title: 'Test Gateway',
