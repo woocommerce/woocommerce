@@ -14,7 +14,7 @@ on:
 permissions: {}
 
 jobs:
-  verify:
+  verify-prs:
     name: 'Verify if any PR is left open by author:app/github-actions'
     outputs:
       runBuildZipJob: ${{ steps.verify-prs.outputs.runBuildZipJob }}
@@ -91,16 +91,68 @@ jobs:
               slack-optional-unfurl_media: false
           continue-on-error: true
 
+  verify-release-versions:
+    name: 'Verify release and stable tag versions'
+    runs-on: ubuntu-latest
+    if: ${{ inputs.skip_verify == 'false' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 'Pre-build verification'
+        run: |
+            branch_name="${GITHUB_REF#refs/heads/}"
+            if  [[ $branch_name != release/* ]] ; then
+                echo "[ERR] Pre-build verification: the branch name is NOT matching 'release/*' pattern (identified as $branch_name)"
+                exit 1
+            else
+                echo "[OK] Pre-build verification: the branch name is matching 'release/*' pattern ($branch_name)"
+            fi
+            version_prefix=${branch_name/"release/"/""}
+
+            # Validate release version related attributions
+            branch_plugin_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+            svn_plugin_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/woocommerce.php -O /dev/stdout |  grep -oP '(?<=Version: )(.+)' | head -n1 )
+            if [[ $branch_plugin_version != "$version_prefix."* ]] ; then
+                echo "[ERR] Pre-build verification: release version in branch is NOT matching '$version_prefix.*' pattern (identified as $branch_plugin_version)"
+                exit 1
+            else
+                echo "[OK] Pre-build verification: release version in branch is matching '$version_prefix.*' pattern ($branch_plugin_version)"
+            fi
+            if [[ $branch_plugin_version == $svn_plugin_version ]] ; then
+                echo "[ERR] Pre-build verification: release version in branch is matching the one in SVN trunk (identified as $branch_plugin_version)"
+                exit 1
+            else
+                echo "[OK] Pre-build verification: release version in branch is NOT matching the one in SVN trunk ($branch_plugin_version vs $svn_plugin_version)"
+            fi
+
+            # Validate stable version attribution
+            branch_stable_version=$( cat plugins/woocommerce/readme.txt | grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
+            svn_stable_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt -O /dev/stdout |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
+            if [[ $branch_stable_version != $svn_stable_version ]] ; then
+                echo "[ERR] Pre-build verification: stable version in branch is NOT matching the one in SVN trunk (identified as $branch_stable_version)"
+                exit 1
+            else
+                echo "[OK] Pre-build verification: stable version in branch is matching the one in SVN trunk ($branch_stable_version vs $svn_stable_version)"
+            fi
+  
+            # Validate changelog for the target release version
+            branch_changelog_version=$( cat changelog.txt | grep -oP '\d+\.\d+\.\d+ '| tail -n +1 | head -n1 )
+            if [[ $branch_plugin_version != *'-'* ]] && [[ $branch_plugin_version != $branch_changelog_version ]]; then
+                echo "[ERR] Pre-build verification: changelog for $branch_plugin_version is missing"
+                exit 1
+            else
+                echo "[OK] Pre-build verification: changelog for $branch_plugin_version is present or not required (the last entry is for $branch_changelog_version)"
+            fi
 
   build:
     name: Build release zip file
     runs-on: ubuntu-latest
-    if: ${{ needs.verify.outputs.runBuildZipJob == 'true' }}
-    needs: verify
+    if: ${{ needs.verify-prs.outputs.runBuildZipJob == 'true' }}
+    needs: [ verify-prs, verify-release-versions ]
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup WooCommerce Monorepo
         uses: ./.github/actions/setup-woocommerce-monorepo
