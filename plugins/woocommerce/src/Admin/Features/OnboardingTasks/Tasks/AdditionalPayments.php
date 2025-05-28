@@ -106,7 +106,7 @@ class AdditionalPayments extends Payments {
 	 */
 	public function get_action_url(): string {
 		// We auto-expand the "Other" section to show the additional payment methods.
-		return admin_url( 'admin.php?page=wc-settings&tab=checkout&other_pes_section=expanded' );
+		return admin_url( 'admin.php?page=wc-settings&tab=checkout&other_pes_section=expanded&from=' . SettingsPaymentsService::FROM_ADDITIONAL_PAYMENTS_TASK );
 	}
 
 	/**

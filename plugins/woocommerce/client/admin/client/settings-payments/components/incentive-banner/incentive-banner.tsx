@@ -7,7 +7,6 @@ import { __ } from '@wordpress/i18n';
 import { createInterpolateElement, useState } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { PaymentIncentive, PaymentProvider } from '@woocommerce/data';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -15,7 +14,10 @@ import { recordEvent } from '@woocommerce/tracks';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
 import './incentive-banner.scss';
 import { StatusBadge } from '~/settings-payments/components/status-badge';
-import { isIncentiveDismissedInContext } from '~/settings-payments/utils';
+import {
+	isIncentiveDismissedInContext,
+	recordPaymentsEvent,
+} from '~/settings-payments/utils';
 
 interface IncentiveBannerProps {
 	/**
@@ -41,10 +43,15 @@ interface IncentiveBannerProps {
 	 *
 	 * @param dismissUrl Dismiss URL.
 	 * @param context    The context in which the incentive is dismissed. (e.g. whether it was in a modal or banner).
+	 * @param doNotTrack Optional. If true, the dismissal should not be tracked.
 	 */
-	onDismiss: ( dismissUrl: string, context: string ) => void;
+	onDismiss: (
+		dismissUrl: string,
+		context: string,
+		doNotTrack?: boolean
+	) => void;
 	/**
-	 * Callback to setup the plugin.
+	 * Callback to set up the plugin.
 	 *
 	 * @param id            Extension ID.
 	 * @param slug          Extension slug.
@@ -79,12 +86,13 @@ export const IncentiveBanner = ( {
 
 	useEffect( () => {
 		// Record the event when the incentive is shown.
-		recordEvent( 'settings_payments_incentive_show', {
+		recordPaymentsEvent( 'incentive_show', {
 			incentive_id: incentive.promo_id,
 			provider_id: provider.id,
+			suggestion_id: provider._suggestion_id ?? '',
 			display_context: context,
 		} );
-	}, [ incentive.promo_id, provider.id ] );
+	}, [ incentive, provider ] );
 
 	/**
 	 * Handles accepting the incentive.
@@ -92,16 +100,19 @@ export const IncentiveBanner = ( {
 	 */
 	const handleAccept = () => {
 		// Record the event when the user accepts the incentive.
-		recordEvent( 'settings_payments_incentive_accept', {
+		recordPaymentsEvent( 'incentive_accept', {
 			incentive_id: incentive.promo_id,
 			provider_id: provider.id,
+			suggestion_id: provider._suggestion_id ?? '',
 			display_context: context,
 		} );
 
-		// Accept the incentive and setup the plugin.
+		// Accept the incentive and set up the plugin.
 		setIsBusy( true );
 		onAccept( incentive.promo_id );
-		onDismiss( incentive._links.dismiss.href, context ); // We also dismiss the incentive when it is accepted.
+		// We also dismiss the incentive when it is accepted.
+		// But do not track this since it is not a true dismissal.
+		onDismiss( incentive._links.dismiss.href, context, true );
 		setIsSubmitted( true );
 		setupPlugin(
 			provider.id,
@@ -119,14 +130,7 @@ export const IncentiveBanner = ( {
 	 * Triggers the onDismiss callback and hides the banner.
 	 */
 	const handleDismiss = () => {
-		// Record the event when the user dismisses the incentive.
-		recordEvent( 'settings_payments_incentive_dismiss', {
-			incentive_id: incentive.promo_id,
-			provider_id: provider.id,
-			display_context: context,
-		} );
-
-		// Dimiss the incentive.
+		// Dismiss the incentive.
 		setIsBusy( true );
 		onDismiss( incentive._links.dismiss.href, context );
 		setIsBusy( false );

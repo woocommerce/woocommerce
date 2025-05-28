@@ -16,6 +16,14 @@ class Payments {
 
 	const SUGGESTIONS_CONTEXT = 'wc_settings_payments';
 
+	const EVENT_PREFIX = 'settings_payments_';
+
+	const FROM_PAYMENTS_SETTINGS        = 'WCADMIN_PAYMENT_SETTINGS';
+	const FROM_PAYMENTS_MENU_ITEM       = 'PAYMENTS_MENU_ITEM';
+	const FROM_PAYMENTS_TASK            = 'WCADMIN_PAYMENT_TASK';
+	const FROM_ADDITIONAL_PAYMENTS_TASK = 'WCADMIN_ADDITIONAL_PAYMENT_TASK';
+	const FROM_PROVIDER_ONBOARDING      = 'PROVIDER_ONBOARDING';
+
 	/**
 	 * The payment providers service.
 	 *
@@ -210,6 +218,8 @@ class Payments {
 	 * @param string $location The country code. This should be a ISO 3166-1 alpha-2 country code.
 	 */
 	public function set_country( string $location ): bool {
+		$previous_country = $this->get_country();
+
 		$user_payments_nox_profile = get_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, true );
 
 		if ( empty( $user_payments_nox_profile ) ) {
@@ -219,7 +229,20 @@ class Payments {
 		}
 		$user_payments_nox_profile['business_country_code'] = $location;
 
-		return false !== update_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, $user_payments_nox_profile );
+		$result = false !== update_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, $user_payments_nox_profile );
+
+		if ( $result && $previous_country !== $location ) {
+			// Record an event that the business location (registration country code) was changed.
+			$this->record_event(
+				'business_location_update',
+				array(
+					'business_country'          => $location,
+					'previous_business_country' => $previous_country,
+				)
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -230,7 +253,19 @@ class Payments {
 	 * @return bool True if the payment providers ordering was successfully updated, false otherwise.
 	 */
 	public function update_payment_providers_order_map( array $order_map ): bool {
-		return $this->providers->update_payment_providers_order_map( $order_map );
+		$result = $this->providers->update_payment_providers_order_map( $order_map );
+
+		if ( $result ) {
+			// Record an event that the payment providers order map was updated.
+			$this->record_event(
+				'payment_providers_order_map_updated',
+				array(
+					'order_map' => implode( ', ', array_keys( $this->providers->get_order_map() ) ),
+				)
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -238,13 +273,25 @@ class Payments {
 	 *
 	 * This is only an internal recording of attachment. No actual extension installation or activation happens.
 	 *
-	 * @param string $id The ID of the payment extension suggestion to hide.
+	 * @param string $id The ID of the payment extension suggestion to attach.
 	 *
 	 * @return bool True if the suggestion was successfully marked as attached, false otherwise.
 	 * @throws Exception If the suggestion ID is invalid.
 	 */
 	public function attach_payment_extension_suggestion( string $id ): bool {
-		return $this->providers->attach_extension_suggestion( $id );
+		$result = $this->providers->attach_extension_suggestion( $id );
+
+		if ( $result ) {
+			// Record an event that the suggestion was attached.
+			$this->record_event(
+				'extension_suggestion_attached',
+				array(
+					'suggestion_id' => $id,
+				)
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -256,7 +303,19 @@ class Payments {
 	 * @throws Exception If the suggestion ID is invalid.
 	 */
 	public function hide_payment_extension_suggestion( string $id ): bool {
-		return $this->providers->hide_extension_suggestion( $id );
+		$result = $this->providers->hide_extension_suggestion( $id );
+
+		if ( $result ) {
+			// Record an event that the suggestion was hidden.
+			$this->record_event(
+				'extension_suggestion_hidden',
+				array(
+					'suggestion_id' => $id,
+				)
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -266,12 +325,67 @@ class Payments {
 	 * @param string $incentive_id  The incentive ID.
 	 * @param string $context       Optional. The context in which the incentive should be dismissed.
 	 *                              Default is to dismiss the incentive in all contexts.
+	 * @param bool   $do_not_track  Optional. If true, the incentive dismissal will not be tracked.
 	 *
 	 * @return bool True if the incentive was not previously dismissed and now it is.
 	 *              False if the incentive was already dismissed or could not be dismissed.
 	 * @throws Exception If the incentive could not be dismissed due to an error.
 	 */
-	public function dismiss_extension_suggestion_incentive( string $suggestion_id, string $incentive_id, string $context = 'all' ): bool {
-		return $this->extension_suggestions->dismiss_incentive( $incentive_id, $suggestion_id, $context );
+	public function dismiss_extension_suggestion_incentive( string $suggestion_id, string $incentive_id, string $context = 'all', bool $do_not_track = false ): bool {
+		$result = $this->extension_suggestions->dismiss_incentive( $incentive_id, $suggestion_id, $context );
+
+		if ( ! $do_not_track && $result ) {
+			// Record an event that the incentive was dismissed.
+			$this->record_event(
+				'incentive_dismiss',
+				array(
+					'suggestion_id'   => $suggestion_id,
+					'incentive_id'    => $incentive_id,
+					'display_context' => $context,
+				)
+			);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Send a Tracks event.
+	 *
+	 * By default, Woo adds `url`, `blog_lang`, `blog_id`, `store_id`, `products_count`, and `wc_version`
+	 * properties to every event.
+	 *
+	 * @param string $name The event name.
+	 *                     If it is not prefixed with self::EVENT_PREFIX, it will be prefixed with it.
+	 * @param array  $properties Optional. The event custom properties.
+	 *                           These properties will be merged with the default properties.
+	 *                           Default properties values take precedence over the provided ones.
+	 *
+	 * @return void
+	 */
+	private function record_event( string $name, array $properties = array() ) {
+		if ( ! function_exists( 'wc_admin_record_tracks_event' ) ) {
+			return;
+		}
+
+		// If the event name is empty, we don't record it.
+		if ( empty( $name ) ) {
+			return;
+		}
+
+		// If the event name is not prefixed with `settings_payments_`, we prefix it.
+		if ( ! str_starts_with( $name, self::EVENT_PREFIX ) ) {
+			$name = self::EVENT_PREFIX . $name;
+		}
+
+		// Add default properties to every event and overwrite custom properties with the same keys.
+		$properties = array_merge(
+			$properties,
+			array(
+				'business_country' => $this->get_country(),
+			),
+		);
+
+		wc_admin_record_tracks_event( $name, $properties );
 	}
 }

@@ -3,7 +3,6 @@
  * External dependencies
  */
 import { faker } from '@faker-js/faker';
-import { request } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -12,8 +11,8 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { expect, test as baseTest } from '../../fixtures/fixtures';
 import { admin } from '../../test-data/data';
 import { expectEmail, expectEmailContent } from '../../utils/email';
-import { setOption } from '../../utils/options';
 import { WC_API_PATH } from '../../utils/api-client';
+import { setFeatureEmailImprovementsFlag } from './helpers/set-email-improvements-feature-flag';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
@@ -41,12 +40,7 @@ const test = baseTest.extend( {
 } );
 
 test.beforeEach( async ( { baseURL } ) => {
-	await setOption(
-		request,
-		baseURL,
-		'woocommerce_feature_email_improvements_enabled',
-		'no'
-	);
+	await setFeatureEmailImprovementsFlag( baseURL, 'no' );
 } );
 
 [
