@@ -228,7 +228,7 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox POS email replaces placeholders with POS store details in email footer HTML while regular email does not.
 	 */
-	public function test_pos_email_replaces_placeholders_with_pos_store_details_in_email_footer_html_while_regular_email_does_not() {
+	public function test_pos_email_replaces_placeholders_with_pos_store_details_in_email_footer_while_regular_email_does_not() {
 		// Initialize WC_Emails to set up actions and filters for email header in regular emails.
 		$emails = new WC_Emails();
 

@@ -281,7 +281,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		}
 
 		/**
-		 * Get the email header.
+		 * Get the email footer.
 		 *
 		 * @param mixed $email Email object.
 		 *
