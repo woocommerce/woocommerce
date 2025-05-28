@@ -12,8 +12,7 @@ body:
 
         -   WooCommerce core version to release: RELEASE_VERSION ([milestone](https://github.com/woocommerce/woocommerce/milestone/MILESTONE_ID))
         -   Release lead: RELEASE_LEAD
-        -   RC1 release date: RC1_RELEASE_DATE
-        -   RC2 release date: RC2_RELEASE_DATE
+        -   RC release date: RC1_RELEASE_DATE
         -   Final release date: RELEASE_DATE
         -   WooCommerce core change log: [here](https://github.com/woocommerce/woocommerce/blob/trunk/changelog.txt)
 
@@ -66,10 +65,6 @@ body:
         -    [] Coordinate with the Developer Advocacy team to update the pre-release post on developer.woocommerce.com
         -    [] Notify #woo-announcements Slack channels of the release with a link to the release post (automation will notify #woo-core-releases)
         -    [] Post an update in the internal release P2 (see pf59Ax-2Nt-p2 for reference)
-
-        #### Post-release monitoring
-
-        -    [] Follow post-release monitoring guidelines
 
   - type: markdown
     attributes:
