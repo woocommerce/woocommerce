@@ -42,6 +42,7 @@ describe( 'CompleteSetupButton', () => {
 				onboardingHref={ '' }
 				gatewayHasRecommendedPaymentMethods={ false }
 				installingPlugin={ null }
+				setOnboardingModalOpen={ jest.fn() }
 			/>
 		);
 
