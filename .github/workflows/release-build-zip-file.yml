@@ -112,7 +112,7 @@ jobs:
             version_prefix=${branch_name/"release/"/""}
 
             # Validate release version related attributions
-            branch_plugin_version=$( cat plugins/woocommerce/woocommerce.php |  grep -oP '(?<=Version: )(.+)' | head -n1 )
+            branch_plugin_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
             svn_plugin_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/woocommerce.php -O /dev/stdout |  grep -oP '(?<=Version: )(.+)' | head -n1 )
             if [[ $branch_plugin_version != "$version_prefix."* ]] ; then
                 echo "[ERR] Pre-build verification: release version in branch is NOT matching '$version_prefix.*' pattern (identified as $branch_plugin_version)"
@@ -128,7 +128,7 @@ jobs:
             fi
 
             # Validate stable version attribution
-            branch_stable_version=$( cat plugins/woocommerce/readme.txt |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
+            branch_stable_version=$( cat plugins/woocommerce/readme.txt | grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
             svn_stable_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt -O /dev/stdout |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
             if [[ $branch_stable_version != $svn_stable_version ]] ; then
                 echo "[ERR] Pre-build verification: stable version in branch is NOT matching the one in SVN trunk (identified as $branch_stable_version)"
