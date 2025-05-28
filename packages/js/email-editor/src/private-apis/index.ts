@@ -30,7 +30,7 @@ const { useGlobalStylesOutputWithConfig } = unlock( blockEditorPrivateApis );
 /**
  * The Editor is the main component for the email editor.
  */
-const { Editor, FullscreenMode, ViewMoreMenuGroup } =
+const { Editor, FullscreenMode, ViewMoreMenuGroup, BackButton } =
 	unlock( editorPrivateApis );
 
 export {
@@ -39,4 +39,5 @@ export {
 	Editor,
 	FullscreenMode,
 	ViewMoreMenuGroup,
+	BackButton,
 };

@@ -525,6 +525,8 @@ class MiniCart extends AbstractBlock {
 	/**
 	 * Get the mini cart template part contents to render inside the drawer.
 	 *
+	 * @param string $template_name  The name of the template part to get the contents of.
+	 *
 	 * @return string The contents of the template part.
 	 */
 	protected function get_template_part_contents( $template_name = 'mini-cart' ) {

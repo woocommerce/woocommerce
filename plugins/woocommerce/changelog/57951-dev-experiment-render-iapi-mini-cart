@@ -1,4 +1,3 @@
-Significance: minor
+Significance: patch
 Type: update
-
-[Experimental] render POC interactivity API powered mini cart behind a feature flag.
+Comment: Render POC interactivity API powered mini cart behind a feature flag.
