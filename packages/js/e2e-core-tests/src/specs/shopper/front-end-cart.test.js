@@ -77,20 +77,20 @@ const runCartPageTest = () => {
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage( productId );
 
-			await page.hover('.site-header-cart');
+			await page.hover( '.site-header-cart' );
 			await uiUnblocked();
 
-			const removeSelector = '.remove_from_cart_button';			
-			const removeRole = await page.$eval(removeSelector, el => el.getAttribute('role'));
-			expect(removeRole).toBe('button');
+			const removeSelector = '.remove_from_cart_button';
+			const removeRole = await page.$eval( removeSelector, el => el.getAttribute( 'role' ) );
+			expect( removeRole ).toBe( 'button' );
 
-			await page.focus(removeSelector);
-			await page.keyboard.press('Space');
+			await page.focus( removeSelector );
+			await page.keyboard.press( 'Space' );
 			await uiUnblocked();
 
-			await expect(page).toMatchElement('.woocommerce-mini-cart__empty-message', {
+			await expect( page ).toMatchElement( '.woocommerce-mini-cart__empty-message', {
 				text: 'No products in the cart.',
-			});
+			} );
 		} );
 
 		it( 'should update subtotal in cart totals when adding product to the cart', async () => {
