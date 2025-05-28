@@ -69,18 +69,24 @@ const Edit = ( {
 		isBoolean
 	);
 
-	useEffect(
-		() =>
+	useEffect( () => {
+		if ( isDescendentOfQueryLoop || isDescendentOfSingleProductBlock ) {
 			setAttributes( {
 				isDescendentOfQueryLoop,
 				isDescendentOfSingleProductBlock,
-			} ),
-		[
-			isDescendentOfQueryLoop,
-			isDescendentOfSingleProductBlock,
-			setAttributes,
-		]
-	);
+				showSaleBadge: false,
+			} );
+		} else {
+			setAttributes( {
+				isDescendentOfQueryLoop,
+				isDescendentOfSingleProductBlock,
+			} );
+		}
+	}, [
+		isDescendentOfQueryLoop,
+		isDescendentOfSingleProductBlock,
+		setAttributes,
+	] );
 
 	return (
 		<div { ...blockProps }>
