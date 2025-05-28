@@ -50,7 +50,9 @@ describe( 'PaymentExtensionSuggestionListItem', () => {
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_provider_enable_click',
 			{
+				business_country: expect.any( String ),
 				provider_id: 'test-gateway',
+				suggestion_id: 'test-gateway',
 			}
 		);
 	} );

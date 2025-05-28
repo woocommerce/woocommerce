@@ -52,7 +52,7 @@ type PaymentExtensionSuggestionListItemProps = {
 	/**
 	 * Indicates whether the incentive should be highlighted.
 	 */
-	shouldHighlightIncentive: boolean;
+	shouldHighlightIncentive?: boolean;
 };
 
 /**
@@ -66,7 +66,7 @@ export const PaymentExtensionSuggestionListItem = ( {
 	setupPlugin,
 	pluginInstalled,
 	acceptIncentive,
-	shouldHighlightIncentive,
+	shouldHighlightIncentive = false,
 	...props
 }: PaymentExtensionSuggestionListItemProps ) => {
 	const incentive = hasIncentive( suggestion ) ? suggestion._incentive : null;

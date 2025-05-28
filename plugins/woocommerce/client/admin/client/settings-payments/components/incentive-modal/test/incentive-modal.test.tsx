@@ -71,6 +71,7 @@ describe( 'IncentiveModal', () => {
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_incentive_show',
 			{
+				business_country: expect.any( String ),
 				display_context: 'wc_settings_payments__modal',
 				incentive_id: 'test-promo-id',
 				provider_id: 'test-provider',
@@ -97,6 +98,7 @@ describe( 'IncentiveModal', () => {
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_incentive_accept',
 			{
+				business_country: expect.any( String ),
 				display_context: 'wc_settings_payments__modal',
 				incentive_id: 'test-promo-id',
 				provider_id: 'test-provider',
