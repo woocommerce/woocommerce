@@ -129,6 +129,9 @@ class ProductButton extends AbstractBlock {
 			$children = $product->get_children();
 			foreach ( $children as $child ) {
 				$child_product = wc_get_product( $child );
+				if ( ! $child_product instanceof \WC_Product ) {
+					continue;
+				}
 				if ( $child_product->is_purchasable() && $child_product->is_in_stock() ) {
 					$is_product_purchasable = true;
 					break;
