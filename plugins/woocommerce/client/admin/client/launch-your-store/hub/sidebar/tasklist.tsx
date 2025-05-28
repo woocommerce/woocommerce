@@ -21,6 +21,7 @@ import {
 	createStorageUtils,
 } from '@woocommerce/onboarding';
 import { getAdminLink } from '@woocommerce/settings';
+import { isWCPaySupported } from '~/task-lists/fills/PaymentGatewaySuggestions/components/WCPay/utils';
 
 const SEVEN_DAYS_IN_SECONDS = 60 * 60 * 24 * 7;
 export const LYS_RECENTLY_ACTIONED_TASKS_KEY = 'lys_recently_actioned_tasks';
@@ -118,9 +119,13 @@ export function taskClickedAction( event: {
 
 	// For payments tasks, we'll handle this in the state machine
 	if ( event.task.id === 'payments' ) {
-		// Return an event object with the correct type and stop execution
-		// If WooPayments is enabled, we'll show the payments modal.
-		if ( isWooPaymentsEnabled() ) {
+		const storeCountryCode = (
+			window.wcSettings?.admin?.preloadSettings?.general
+				?.woocommerce_default_country || 'US'
+		).split( ':' )[ 0 ];
+
+		// If WooPayments is enabled, or the user is in a supported country, we'll show the payments sub-steps.
+		if ( isWooPaymentsEnabled() || isWCPaySupported( storeCountryCode ) ) {
 			return { type: 'SHOW_PAYMENTS' };
 		}
 
