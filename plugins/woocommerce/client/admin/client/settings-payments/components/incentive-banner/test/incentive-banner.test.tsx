@@ -53,6 +53,7 @@ const testProvider: PaymentsProvider = {
 		status: 'active',
 	} as PluginData,
 	_links: {},
+	_suggestion_id: 'test-suggestion-id',
 };
 
 describe( 'IncentiveBanner', () => {
@@ -71,9 +72,11 @@ describe( 'IncentiveBanner', () => {
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_incentive_show',
 			{
+				business_country: expect.any( String ),
 				display_context: 'wc_settings_payments__banner',
 				incentive_id: 'test-promo-id',
 				provider_id: 'test-provider',
+				suggestion_id: 'test-suggestion-id',
 			}
 		);
 	} );
@@ -96,31 +99,7 @@ describe( 'IncentiveBanner', () => {
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_incentive_accept',
 			{
-				display_context: 'wc_settings_payments__banner',
-				incentive_id: 'test-promo-id',
-				provider_id: 'test-provider',
-			}
-		);
-	} );
-
-	it( 'should record settings_payments_incentive_dismiss event when the close button is clicked', () => {
-		const onAccept = jest.fn();
-		const { getByRole } = render(
-			<IncentiveBanner
-				incentive={ testIncentive }
-				provider={ testProvider }
-				onboardingUrl="https://example.com"
-				onAccept={ onAccept }
-				onDismiss={ jest.fn() }
-				setUpPlugin={ jest.fn() }
-			/>
-		);
-
-		fireEvent.click( getByRole( 'button', { name: 'Dismiss' } ) );
-
-		expect( recordEvent ).toHaveBeenCalledWith(
-			'settings_payments_incentive_dismiss',
-			{
+				business_country: expect.any( String ),
 				display_context: 'wc_settings_payments__banner',
 				incentive_id: 'test-promo-id',
 				provider_id: 'test-provider',

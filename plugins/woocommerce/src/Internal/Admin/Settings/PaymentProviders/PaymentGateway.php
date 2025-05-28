@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Throwable;
 use WC_HTTPS;
@@ -122,7 +123,7 @@ class PaymentGateway {
 		if ( ! is_string( $title ) || empty( $title ) ) {
 			return esc_html__( 'Unknown', 'woocommerce' );
 		}
-		$title = wp_strip_all_tags( html_entity_decode( $title ), true );
+		$title = wp_strip_all_tags( html_entity_decode( $title, ENT_QUOTES | ENT_SUBSTITUTE ), true );
 
 		// Truncate the title.
 		return Utils::truncate_with_words( $title, 75 );
@@ -144,7 +145,7 @@ class PaymentGateway {
 		if ( ! is_string( $description ) || empty( $description ) ) {
 			return '';
 		}
-		$description = wp_strip_all_tags( html_entity_decode( $description ), true );
+		$description = wp_strip_all_tags( html_entity_decode( $description, ENT_QUOTES | ENT_SUBSTITUTE ), true );
 
 		// Truncate the description.
 		return Utils::truncate_with_words( $description, 130, '…' );
@@ -384,7 +385,13 @@ class PaymentGateway {
 			return (string) $payment_gateway->get_settings_url();
 		}
 
-		return Utils::wc_payments_settings_url( null, array( 'section' => strtolower( $payment_gateway->id ) ) );
+		return Utils::wc_payments_settings_url(
+			null,
+			array(
+				'section' => strtolower( $payment_gateway->id ),
+				'from'    => Payments::FROM_PAYMENTS_SETTINGS,
+			)
+		);
 	}
 
 	/**
@@ -401,7 +408,7 @@ class PaymentGateway {
 	public function get_onboarding_url( WC_Payment_Gateway $payment_gateway, string $return_url = '' ): string {
 		if ( is_callable( array( $payment_gateway, 'get_connection_url' ) ) ) {
 			// If we received no return URL, we will set the WC Payments Settings page as the return URL.
-			$return_url = ! empty( $return_url ) ? $return_url : admin_url( 'admin.php?page=wc-settings&tab=checkout' );
+			$return_url = ! empty( $return_url ) ? $return_url : admin_url( 'admin.php?page=wc-settings&tab=checkout&from=' . Payments::FROM_PROVIDER_ONBOARDING );
 
 			return (string) $payment_gateway->get_connection_url( $return_url );
 		}

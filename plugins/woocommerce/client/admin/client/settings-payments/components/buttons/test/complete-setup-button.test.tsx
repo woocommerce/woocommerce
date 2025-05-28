@@ -42,6 +42,7 @@ describe( 'CompleteSetupButton', () => {
 				onboardingHref={ '' }
 				gatewayHasRecommendedPaymentMethods={ false }
 				installingPlugin={ null }
+				setOnboardingModalOpen={ jest.fn() }
 			/>
 		);
 
@@ -50,6 +51,7 @@ describe( 'CompleteSetupButton', () => {
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_provider_complete_setup_click',
 			{
+				business_country: expect.any( String ),
 				provider_id: 'test-gateway',
 				onboarding_started: true,
 				onboarding_completed: false,

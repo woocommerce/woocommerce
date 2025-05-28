@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments\WooPaymentsRestController;
+use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use WC_Abstract_Order;
@@ -62,7 +63,7 @@ class WooPayments extends PaymentGateway {
 		// Provide the native, in-context onboarding URL instead of the external one.
 		// This is a catch-all URL that should start or continue the onboarding process.
 		$details['onboarding']['_links']['onboard'] = array(
-			'href' => Utils::wc_payments_settings_url( '/woopayments/onboarding' ),
+			'href' => Utils::wc_payments_settings_url( '/woopayments/onboarding', array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ) ),
 		);
 
 		return $details;

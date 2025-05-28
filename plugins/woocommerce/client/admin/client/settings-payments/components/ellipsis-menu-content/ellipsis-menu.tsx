@@ -53,11 +53,7 @@ export const EllipsisMenuWrapper = ( {
 						providerId={ provider.id }
 						pluginFile={ provider.plugin.file }
 						isSuggestion={ provider._type === 'suggestion' }
-						suggestionId={
-							provider._type === 'suggestion'
-								? provider._suggestion_id
-								: undefined
-						}
+						suggestionId={ provider._suggestion_id || '' }
 						suggestionHideUrl={
 							provider._type === 'suggestion'
 								? provider._links?.hide?.href
