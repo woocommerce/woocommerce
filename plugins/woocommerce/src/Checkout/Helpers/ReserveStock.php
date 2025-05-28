@@ -43,9 +43,9 @@ final class ReserveStock {
 	 * Query for any existing holds on stock for this item.
 	 *
 	 * @param \WC_Product $product Product to get reserved stock for.
-	 * @param integer     $exclude_order_id Optional order to exclude from the results.
+	 * @param int         $exclude_order_id Optional order to exclude from the results.
 	 *
-	 * @return integer Amount of stock already reserved.
+	 * @return int|float Amount of stock already reserved.
 	 */
 	public function get_reserved_stock( $product, $exclude_order_id = 0 ) {
 		global $wpdb;
@@ -55,7 +55,7 @@ final class ReserveStock {
 		}
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-		return (int) $wpdb->get_var( $this->get_query_for_reserved_stock( $product->get_stock_managed_by_id(), $exclude_order_id ) );
+		return $wpdb->get_var( $this->get_query_for_reserved_stock( $product->get_stock_managed_by_id(), $exclude_order_id ) ) + 0;
 	}
 
 	/**
@@ -238,8 +238,8 @@ final class ReserveStock {
 	/**
 	 * Returns query statement for getting reserved stock of a product.
 	 *
-	 * @param int     $product_id Product ID.
-	 * @param integer $exclude_order_id Optional order to exclude from the results.
+	 * @param int $product_id Product ID.
+	 * @param int $exclude_order_id Optional order to exclude from the results.
 	 * @return string|void Query statement.
 	 */
 	private function get_query_for_reserved_stock( $product_id, $exclude_order_id = 0 ) {

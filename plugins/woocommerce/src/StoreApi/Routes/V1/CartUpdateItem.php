@@ -48,7 +48,7 @@ class CartUpdateItem extends AbstractCartRoute {
 					],
 					'quantity' => [
 						'description' => __( 'New quantity of the item in the cart.', 'woocommerce' ),
-						'type'        => 'integer',
+						'type'        => 'number',
 					],
 				],
 			],
