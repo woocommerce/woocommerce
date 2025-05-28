@@ -1508,16 +1508,16 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$request_original_product = new WP_REST_Request( 'POST', '/wc/v3/products' );
 		$request_original_product->set_body_params(
 			array(
-				'name'   => 'Original Trashed Product',
-				'sku'    => $original_product_sku,
-				'images' => array(
-					array(
-						'src' => $shared_image_src,
-						'alt' => 'Original Image'
-					),
-				),
+				'name'          => 'Original Trashed Product',
+				'sku'           => $original_product_sku,
 				'type'          => 'simple',
 				'regular_price' => '10',
+				'images'        => array(
+					array(
+						'src' => $shared_image_src,
+						'alt' => 'Original Image',
+					),
+				),
 			)
 		);
 		$response_original_product = $this->server->dispatch( $request_original_product );
@@ -1541,14 +1541,16 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$create_request_for_failure = new WP_REST_Request( 'POST', '/wc/v3/products' );
 		$create_request_for_failure->set_body_params(
 			array(
-				'name'   => 'New Product Attempt That Fails',
-				'sku'    => $original_product_sku, // Duplicate SKU
-				'images' => array(
-					// Using the same image URL is fine, it would create a new attachment if successful.
-					array( 'src' => $shared_image_src, 'alt' => 'New Image To Be Cleaned Up' ),
-				),
+				'name'          => 'New Product Attempt That Fails',
+				'sku'           => $original_product_sku, // Duplicate SKU.
 				'type'          => 'simple',
 				'regular_price' => '20',
+				'images'        => array(
+					array(
+						'src' => $shared_image_src,
+						'alt' => 'New Image To Be Cleaned Up',
+					),
+				),
 			)
 		);
 		$failed_creation_response = $this->server->dispatch( $create_request_for_failure );
