@@ -9,6 +9,8 @@ import clsx from 'clsx';
  * Internal dependencies
  */
 import OrderSummaryItem from './order-summary-item';
+import { CartLineItemsSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
+
 import './style.scss';
 
 interface OrderSummaryProps {
@@ -22,18 +24,16 @@ const OrderSummary = ( {
 }: OrderSummaryProps ): null | JSX.Element => {
 	const { isLarge, hasContainerWidth } = useContainerWidthContext();
 
-	if ( ! hasContainerWidth ) {
-		return null;
-	}
-
-	console.log( '>>>> cartItems in order summary', cartItems );
-
 	if ( cartItems.length === 0 ) {
 		return (
 			<div style={ { background: 'black', height: '200px' } }>
 				No items in cart
 			</div>
 		);
+	}
+
+	if ( ! hasContainerWidth ) {
+		return <CartLineItemsSkeleton rows={ cartItems.length } />;
 	}
 
 	return (
