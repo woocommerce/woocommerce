@@ -197,7 +197,7 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 
 		// Create a new BlockifiedProductDetails block class with the mocked AssetDataRegistry.
 		// This will add the `woocommerce_product_details_hooked_blocks` filter defined above.
-		$block_instance = new Automattic\WooCommerce\Blocks\BlockTypes\BlockifiedProductDetails(
+		$block_instance = new \Automattic\WooCommerce\Blocks\BlockTypes\BlockifiedProductDetails(
 			$this->asset_api,
 			$this->registry,
 			$this->integration_registry,
