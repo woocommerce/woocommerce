@@ -71,8 +71,7 @@ class WC_Helper_Admin {
 			$installed_products
 		);
 
-		$woo_connect_notice_type = WC_Helper_Updater::get_woo_connect_notice_type();
-		$blog_name               = get_bloginfo( 'name' );
+		$blog_name = get_bloginfo( 'name' );
 
 		$settings['wccomHelper'] = array(
 			'isConnected'                => WC_Helper::is_site_connected(),
@@ -89,20 +88,26 @@ class WC_Helper_Admin {
 			'wooUpdateManagerActive'     => WC_Woo_Update_Manager_Plugin::is_plugin_active(),
 			'wooUpdateManagerInstallUrl' => WC_Woo_Update_Manager_Plugin::generate_install_url(),
 			'wooUpdateManagerPluginSlug' => WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG,
-			'wooUpdateCount'             => WC_Helper_Updater::get_updates_count_based_on_site_status(),
-			'woocomConnectNoticeType'    => $woo_connect_notice_type,
 			'dismissNoticeNonce'         => wp_create_nonce( 'dismiss_notice' ),
-			'connected_notice'           => PluginsHelper::get_wccom_connected_notice( $auth_user_email ),
 		);
 
-		if ( WC_Helper::is_site_connected() ) {
-			$settings['wccomHelper']['subscription_expired_notice']  = PluginsHelper::get_expired_subscription_notice( false );
-			$settings['wccomHelper']['subscription_expiring_notice'] = PluginsHelper::get_expiring_subscription_notice( false );
-			$settings['wccomHelper']['subscription_missing_notice']  = PluginsHelper::get_missing_subscription_notice();
-			$settings['wccomHelper']['connection_url_notice']        = WC_Woo_Helper_Connection::get_connection_url_notice();
-			$settings['wccomHelper']['has_host_plan_orders']         = WC_Woo_Helper_Connection::has_host_plan_orders();
-		} else {
-			$settings['wccomHelper']['disconnected_notice'] = PluginsHelper::get_wccom_disconnected_notice();
+		// This data is only used in the `Extensions` screen, so only populate it there.
+		// More specifically, it's used in `My Subscriptions`, however, switching tabs doesn't require
+		// a page reload, so we just check for `path` (/extensions), rather than `tab` (my-subscriptions).
+		if ( ! empty( $_GET['path'] ) && '/extensions' === $_GET['path'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$settings['wccomHelper']['wooUpdateCount']          = WC_Helper_Updater::get_updates_count_based_on_site_status();
+			$settings['wccomHelper']['connected_notice']        = PluginsHelper::get_wccom_connected_notice( $auth_user_email );
+			$settings['wccomHelper']['woocomConnectNoticeType'] = WC_Helper_Updater::get_woo_connect_notice_type();
+
+			if ( WC_Helper::is_site_connected() ) {
+				$settings['wccomHelper']['subscription_expired_notice']  = PluginsHelper::get_expired_subscription_notice( false );
+				$settings['wccomHelper']['subscription_expiring_notice'] = PluginsHelper::get_expiring_subscription_notice( false );
+				$settings['wccomHelper']['subscription_missing_notice']  = PluginsHelper::get_missing_subscription_notice();
+				$settings['wccomHelper']['connection_url_notice']        = WC_Woo_Helper_Connection::get_connection_url_notice();
+				$settings['wccomHelper']['has_host_plan_orders']         = WC_Woo_Helper_Connection::has_host_plan_orders();
+			} else {
+				$settings['wccomHelper']['disconnected_notice'] = PluginsHelper::get_wccom_disconnected_notice();
+			}
 		}
 
 		return $settings;
