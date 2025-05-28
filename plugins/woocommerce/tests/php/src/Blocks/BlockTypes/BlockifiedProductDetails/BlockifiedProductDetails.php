@@ -5,6 +5,11 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\BlockifiedProductDetail
 
 use WC_Helper_Product;
 
+use Automattic\WooCommerce\Blocks\Assets\Api;
+use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
+
 /**
  * Tests for the BlockifiedProductDetails block type
  */
@@ -25,6 +30,28 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 	private static $product;
 
 	/**
+	 * @var AssetDataRegistryMock The asset data registry mock.
+	 */
+	private $registry;
+
+	/**
+	 * @var IntegrationRegistry The integration registry, not used, but required to set up a BlockifiedProductDetails block.
+	 */
+	private $integration_registry;
+
+	/**
+	 * @var Api The asset API, not used, but required to set up a BlockifiedProductDetails block.
+	 */
+	private $asset_api;
+
+	/**
+	 * Mock logger instance.
+	 *
+	 * @var \WC_Logger_Interface $mock_logger
+	 */
+	private $mock_logger;
+
+	/**
 	 * Create Simple Product and Page
 	 */
 	public static function setUpBeforeClass(): void {
@@ -43,7 +70,7 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 		);
 	}
 	/**
-	 * Set up product and page for each test
+	 * Set up product and page for each test, and create an AssetDataRegistryMock.
 	 *
 	 * @return void
 	 */
@@ -55,6 +82,15 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 		setup_postdata( $post );
 		$product            = self::$product;
 		$GLOBALS['product'] = $product;
+
+		$this->asset_api            = Package::container()->get( API::class );
+		$this->registry             = new AssetDataRegistryMock( $this->asset_api );
+		$this->integration_registry = new IntegrationRegistry();
+		$this->mock_logger          = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		add_filter(
+			'woocommerce_logging_class',
+			array( $this, 'override_wc_logger' )
+		);
 	}
 
 	/**
@@ -136,5 +172,48 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 		$expected_serialized_blocks_without_whitespace = wp_strip_all_tags( $expected_serialized_blocks, true );
 
 		$this->assertEquals( $serialized_blocks_without_whitespace, $expected_serialized_blocks_without_whitespace, '' );
+	}
+
+	public function test_hooked_block() {
+		$test_block = [
+			"slug" => "custom-info",
+			"title" => "Custom Info",
+			"content" =>
+				"<!-- wp:paragraph --><p>This is the content for the custom info tab.</p><!-- /wp:paragraph -->"
+		];
+
+		remove_all_filters( 'hooked_block_types' );
+		remove_all_filters( 'hooked_block_' . $test_block['slug'] );
+
+		add_filter( 'woocommerce_product_details_hooked_blocks', function ( $hooked_blocks ) use ( $test_block ) {
+			$hooked_blocks[] = $test_block;
+			return $hooked_blocks;
+		} );
+
+		$hooked_block_types_introspection = new MockAction();
+		add_filter( 'hooked_block_types', array( $hooked_block_types_introspection, 'filter' ), 20, 4 );
+
+		// Create a new BlockifiedProductDetails block class with the mocked AssetDataRegistry.
+		// This will apply the `woocommerce_product_details_hooked_blocks` filter defined above.
+		$block_instance = new BlockifiedProductDetails(
+			$this->asset_api,
+			$this->registry,
+			$this->integration_registry,
+			'blockified-product-details-mock'
+		);
+
+		$this->assertSame( 1, $hooked_block_types_introspection->get_call_count() );
+
+		$args = $hooked_block_types_introspection->get_args();
+		$this->assertSame( array( $test_block['slug'] ), $args[0][1] );
+	}
+
+	/**
+	 * Overrides the WC logger.
+	 *
+	 * @return mixed
+	 */
+	public function override_wc_logger() {
+		return $this->mock_logger;
 	}
 }
