@@ -7,6 +7,7 @@ import type {
 	CartItem,
 	CartVariationItem,
 	ApiErrorResponse,
+	CartResponseTotals,
 } from '@woocommerce/types';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 
@@ -29,6 +30,7 @@ export type Store = {
 		nonce: string;
 		cart: Omit< Cart, 'items' > & {
 			items: ( OptimisticCartItem | CartItem )[];
+			totals: CartResponseTotals;
 		};
 		totalItemsInCart: number;
 		formattedSubtotal: string;
