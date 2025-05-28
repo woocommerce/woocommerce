@@ -31,6 +31,9 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 					[
 						'woocommerce/product-image',
 						{
+							// Keep the attribute as false explicitly because we're using the inner block template
+							// that includes the product-sale-badge block.
+							showSaleBadge: false,
 							isDescendentOfSingleProductBlock: true,
 							imageSizing: ImageSizing.SINGLE,
 						},

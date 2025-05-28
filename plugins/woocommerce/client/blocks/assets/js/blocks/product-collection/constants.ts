@@ -126,6 +126,7 @@ export const INNER_BLOCKS_PRODUCT_TEMPLATE: InnerBlockTemplate = [
 			'woocommerce/product-image',
 			{
 				imageSizing: ImageSizing.THUMBNAIL,
+				showSaleBadge: false,
 			},
 			[
 				[
