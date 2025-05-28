@@ -961,7 +961,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_woopayments_service
 			->expects( $this->once() )
 			->method( 'reset_onboarding' )
-			->with( $from, $source )
+			->with( $location, $from, $source )
 			->willReturn( array( 'success' => true ) );
 
 		// Act.
