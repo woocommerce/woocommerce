@@ -91,13 +91,28 @@ class Email_Editor {
 		$this->register_block_templates();
 		$this->register_email_post_sent_status();
 		$this->register_personalization_tags();
+		add_action( 'enqueue_block_editor_assets', array( $this, 'initialize_block_editor' ) );
+		add_action( 'rest_api_init', array( $this, 'register_email_editor_api_routes' ) );
+		add_filter( 'single_template', array( $this, 'load_email_preview_template' ) );
+		$is_editor_page = apply_filters( 'woocommerce_is_email_editor_page', false );
+		if ( $is_editor_page ) {
+			// The renderer doesn't support block styles, let's remove them from the editor.
+			remove_action( 'enqueue_block_editor_assets', 'enqueue_editor_block_styles_assets' );
+		}
+	}
+
+	/**
+	 * Initialize the email editor assets.
+	 *
+	 * @return void
+	 */
+	public function initialize_block_editor(): void {
+		do_action( 'woocommerce_email_editor_assets_initialized' );
 		$is_editor_page = apply_filters( 'woocommerce_is_email_editor_page', false );
 		if ( $is_editor_page ) {
 			$this->extend_email_post_api();
 		}
-		add_action( 'rest_api_init', array( $this, 'register_email_editor_api_routes' ) );
 		add_filter( 'woocommerce_email_editor_send_preview_email', array( $this->send_preview_email, 'send_preview_email' ), 11, 1 ); // allow for other filter methods to take precedent.
-		add_filter( 'single_template', array( $this, 'load_email_preview_template' ) );
 	}
 
 	/**

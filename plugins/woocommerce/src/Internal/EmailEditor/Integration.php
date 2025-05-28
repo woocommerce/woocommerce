@@ -105,7 +105,7 @@ class Integration {
 	public function register_hooks() {
 		add_filter( 'woocommerce_email_editor_post_types', array( $this, 'add_email_post_type' ) );
 		add_filter( 'woocommerce_is_email_editor_page', array( $this, 'is_editor_page' ), 10, 1 );
-		add_filter( 'replace_editor', array( $this, 'replace_editor' ), 10, 2 );
+		add_filter( 'woocommerce_email_editor_assets_initialized', array( $this, 'initialize_editor_assets' ), 10, 2 );
 		add_action( 'before_delete_post', array( $this, 'delete_email_template_associated_with_email_editor_post' ), 10, 2 );
 		add_filter( 'woocommerce_email_editor_send_preview_email_rendered_data', array( $this, 'update_send_preview_email_rendered_data' ) );
 		add_filter( 'woocommerce_email_editor_send_preview_email_personalizer_context', array( $this, 'update_send_preview_email_personalizer_context' ) );
@@ -178,6 +178,10 @@ class Integration {
 			return true;
 		}
 		return $replace;
+	}
+
+	public function initialize_editor_assets() {
+		$this->editor_page_renderer->initialize_editor_assets();
 	}
 
 	/**

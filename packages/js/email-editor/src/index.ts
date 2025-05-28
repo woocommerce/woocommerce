@@ -1,8 +1,6 @@
 /**
  * Internal dependencies
  */
-import { initialize } from './editor';
+import { initializeEmailEditorPlugin } from './editor-plugin';
 
-window.addEventListener( 'DOMContentLoaded', () => {
-	initialize( 'woocommerce-email-editor' );
-} );
+initializeEmailEditorPlugin();
