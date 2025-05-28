@@ -18,7 +18,6 @@ import { PaymentMethodListItem } from '~/settings-payments/components/payment-me
 import {
 	combinePaymentMethodsState,
 	combineRequestMethods,
-	decouplePaymentMethodsState,
 	shouldRenderPaymentMethodInMainList,
 } from '~/settings-payments/utils';
 import './style.scss';
@@ -124,7 +123,7 @@ export default function PaymentMethodsSelection() {
 				url: href,
 				method: 'POST',
 				data: {
-					payment_methods: decouplePaymentMethodsState( state ),
+					payment_methods: state,
 				},
 			} );
 		}

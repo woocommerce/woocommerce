@@ -24,9 +24,13 @@ class MiniCartCartButtonBlock extends AbstractInnerBlock {
 	 */
 	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
 		$view_cart_text = __( 'View my cart', 'woocommerce' );
+		$cart_page_id   = wc_get_page_id( 'cart' );
+		$cart_page_url  = get_permalink( $cart_page_id );
+
 		ob_start();
+
 		?>
-		<a href="http://localhost:1234/?page_id=8" class="wc-block-components-button wp-element-button wp-block-woocommerce-mini-cart-cart-button-block wc-block-mini-cart__footer-cart outlined">
+		<a href="<?php echo esc_url( $cart_page_url ); ?>" class="wc-block-components-button wp-element-button wp-block-woocommerce-mini-cart-cart-button-block wc-block-mini-cart__footer-cart outlined">
 			<div class="wc-block-components-button__text">
 				<?php echo esc_html( $view_cart_text ); ?>
 			</div>

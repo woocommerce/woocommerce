@@ -496,7 +496,7 @@ class MiniCart extends AbstractBlock {
 						echo $icon;
 					?>
 					<?php if ( 'never' !== $product_count_visibility ) : ?>
-						<span data-wp-bind--hidden="!state.badgeIsVisible" data-wp-text="state.cartItemCount" class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
+						<span hidden data-wp-bind--hidden="!state.badgeIsVisible" data-wp-text="state.cartItemCount" class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
 							<?php echo esc_html( $cart_item_text ); ?>
 						</span>
 					<?php endif; ?>
@@ -525,6 +525,8 @@ class MiniCart extends AbstractBlock {
 
 	/**
 	 * Get the mini cart template part contents to render inside the drawer.
+	 *
+	 * @param string $template_name  The name of the template part to get the contents of.
 	 *
 	 * @return string The contents of the template part.
 	 */

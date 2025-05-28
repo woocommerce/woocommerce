@@ -36,13 +36,16 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->di_container->get( Email_Editor::class )->initialize();
-		$this->renderer   = $this->di_container->get( Content_Renderer::class );
-		$email_post_id    = $this->factory->post->create(
+		$this->renderer = $this->di_container->get( Content_Renderer::class );
+		$email_post_id  = $this->factory->post->create(
 			array(
 				'post_content' => '<!-- wp:paragraph --><p>Hello!</p><!-- /wp:paragraph -->',
 			)
 		);
-		$this->email_post = get_post( $email_post_id );
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( \WP_Post::class, $email_post );
+		$this->email_post = $email_post;
 	}
 
 	/**
@@ -68,6 +71,7 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$template->content = '<!-- wp:core/post-content /-->';
 		$rendered          = $this->renderer->render( $this->email_post, $template );
 		$paragraph_styles  = $this->getStylesValueForTag( $rendered, 'p' );
+		$this->assertIsString( $paragraph_styles );
 		$this->assertStringContainsString( 'margin: 0', $paragraph_styles );
 		$this->assertStringContainsString( 'display: block', $paragraph_styles );
 	}
@@ -135,7 +139,8 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	private function getStylesValueForTag( $html, $tag ): ?string {
 		$html = new \WP_HTML_Tag_Processor( $html );
 		if ( $html->next_tag( $tag ) ) {
-			return $html->get_attribute( 'style' );
+			$attribute = $html->get_attribute( 'style' );
+			return is_string( $attribute ) ? $attribute : null;
 		}
 		return null;
 	}

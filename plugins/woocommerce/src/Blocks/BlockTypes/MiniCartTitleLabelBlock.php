@@ -38,14 +38,13 @@ class MiniCartTitleLabelBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render_experimental_iapi_title_label_block( $attributes, $content, $block ) {
-		// $cart            = $this->get_cart_instance();
-		// $cart_item_count = $cart ? $cart->get_cart_contents_count() : 0;
-		// // translators: %d number of items in the cart.
-		// $cart_item_text = _n( '(%d item)', '(%d items)', $cart_item_count, 'woocommerce' );
+		$cart_label = __( 'Your cart', 'woocommerce' );
 
 		ob_start();
 		?>
-		<span class="wp-block-woocommerce-mini-cart-title-label-block">Your cart</span>
+		<span class="wp-block-woocommerce-mini-cart-title-label-block">
+			<?php echo esc_html( $cart_label ); ?>
+		</span>
 		<?php
 		return ob_get_clean();
 	}
