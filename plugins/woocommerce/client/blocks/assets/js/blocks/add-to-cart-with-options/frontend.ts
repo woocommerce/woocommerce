@@ -120,17 +120,11 @@ const addToCartWithOptionsStore = store(
 		state: {
 			get isFormValid() {
 				const context = getContext< Context >();
-				const { productType, availableVariations, selectedAttributes } =
-					context;
+				const { productType } = context;
 				if ( productType !== 'variable' ) {
 					return true;
 				}
-				const matchedVariation = getMatchedVariation(
-					availableVariations,
-					selectedAttributes
-				);
-				context.variationId = matchedVariation?.variation_id || null;
-				return !! matchedVariation;
+				return !! context?.variationId;
 			},
 		},
 		actions: {
@@ -139,7 +133,8 @@ const addToCartWithOptionsStore = store(
 				context.quantity = value;
 			},
 			setAttribute( attribute: string, value: string ) {
-				const { selectedAttributes } = getContext< Context >();
+				const context = getContext< Context >();
+				const { availableVariations, selectedAttributes } = context;
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
 						selectedAttribute.attribute === attribute
@@ -155,9 +150,16 @@ const addToCartWithOptionsStore = store(
 						value,
 					} );
 				}
+
+				const matchedVariation = getMatchedVariation(
+					availableVariations,
+					selectedAttributes
+				);
+				context.variationId = matchedVariation?.variation_id || null;
 			},
 			removeAttribute( attribute: string ) {
-				const { selectedAttributes } = getContext< Context >();
+				const context = getContext< Context >();
+				const { availableVariations, selectedAttributes } = context;
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
 						selectedAttribute.attribute === attribute
@@ -165,6 +167,12 @@ const addToCartWithOptionsStore = store(
 				if ( index >= 0 ) {
 					selectedAttributes.splice( index, 1 );
 				}
+
+				const matchedVariation = getMatchedVariation(
+					availableVariations,
+					selectedAttributes
+				);
+				context.variationId = matchedVariation?.variation_id || null;
 			},
 			increaseQuantity: (
 				event: HTMLElementEvent< HTMLButtonElement >
