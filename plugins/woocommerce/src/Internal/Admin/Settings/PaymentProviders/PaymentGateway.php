@@ -102,7 +102,7 @@ class PaymentGateway {
 		if ( ! is_string( $title ) || empty( $title ) ) {
 			return esc_html__( 'Unknown', 'woocommerce' );
 		}
-		$title = wp_strip_all_tags( html_entity_decode( $title ), true );
+		$title = wp_strip_all_tags( html_entity_decode( $title, ENT_QUOTES | ENT_SUBSTITUTE ), true );
 
 		// Truncate the title.
 		return Utils::truncate_with_words( $title, 75 );
@@ -124,7 +124,7 @@ class PaymentGateway {
 		if ( ! is_string( $description ) || empty( $description ) ) {
 			return '';
 		}
-		$description = wp_strip_all_tags( html_entity_decode( $description ), true );
+		$description = wp_strip_all_tags( html_entity_decode( $description, ENT_QUOTES | ENT_SUBSTITUTE ), true );
 
 		// Truncate the description.
 		return Utils::truncate_with_words( $description, 130, '…' );
