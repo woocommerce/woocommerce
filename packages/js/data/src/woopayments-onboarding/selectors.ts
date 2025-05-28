@@ -11,8 +11,8 @@ export const isOnboardingDataRequestPending = (
 	state: OnboardingState
 ): boolean => state.isFetching;
 
-export const getOnboardingDataError = ( state: OnboardingState ): unknown =>
-	state.errors.getOnboardingData;
+export const getOnboardingDataError = ( state: OnboardingState ): unknown | null =>
+	state.errors.getOnboardingData || null;
 
 export type WooPaymentsOnboardingSelectors = {
 	getOnboardingData: WPDataSelector< typeof getOnboardingData >;

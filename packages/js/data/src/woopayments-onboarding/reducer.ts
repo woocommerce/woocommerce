@@ -24,6 +24,7 @@ const reducer = ( state = initialState, action: Action ): OnboardingState => {
 				steps: action.steps,
 				context: action.context,
 				isFetching: false,
+				errors: {}, // Reset errors on success
 			};
 		case 'GET_WOOPAYMENTS_ONBOARDING_DATA_ERROR':
 			return {
