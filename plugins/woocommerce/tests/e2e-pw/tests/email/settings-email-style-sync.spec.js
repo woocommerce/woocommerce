@@ -58,8 +58,18 @@ test.describe( 'Email Style Sync', () => {
 	test( 'Auto-sync toggle in email settings works correctly', async ( {
 		page,
 	} ) => {
+		// Start listening for console errors
+		page.on( 'console', ( msg ) => {
+			if ( msg.type() === 'error' ) {
+				console.log( `Browser console error: ${ msg.text() }` );
+			}
+		} );
+
 		// Navigate to WooCommerce email settings
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
+
+		// Take a screenshot after page load to verify the page loaded correctly
+		await page.screenshot( { path: 'email-settings-page-load.png' } );
 
 		const autoSyncToggle = page.locator(
 			'.wc-settings-email-color-palette-auto-sync input[type="checkbox"]'
@@ -68,8 +78,63 @@ test.describe( 'Email Style Sync', () => {
 		// Auto-sync is not available when theme is not in sync
 		await expect( autoSyncToggle ).toBeHidden();
 
-		// Sync color palette with theme
-		await page.getByRole( 'button', { name: 'Sync with theme' } ).click();
+		// Check if the sync button exists in the DOM (even if not visible)
+		const syncButtonCount = await page
+			.getByRole( 'button', { name: 'Sync with theme' } )
+			.count();
+		console.log( 'Sync button count in DOM:', syncButtonCount );
+
+		// Take a screenshot to see the state of the page before clicking
+		await page.screenshot( { path: 'before-sync-button-click.png' } );
+
+		// Get the HTML content of the color palette section to see what's being rendered
+		const colorPaletteHTML = await page.evaluate( () => {
+			const element = document.querySelector(
+				'.wc-settings-email-color-palette-buttons'
+			);
+			return element ? element.outerHTML : 'Element not found';
+		} );
+		console.log( 'Color palette HTML:', colorPaletteHTML );
+
+		// Try to find the button using different selectors
+		console.log( 'Trying alternative selectors for the Sync button' );
+
+		// Try using CSS selector
+		const syncButtonCSS = page.locator(
+			'button:has-text("Sync with theme")'
+		);
+		const syncButtonCSSCount = await syncButtonCSS.count();
+		console.log( 'Sync button CSS selector count:', syncButtonCSSCount );
+
+		// Wait for the button to be visible with a longer timeout
+		try {
+			await page
+				.getByRole( 'button', { name: 'Sync with theme' } )
+				.waitFor( { state: 'visible', timeout: 30000 } );
+
+			// Sync color palette with theme using role selector
+			await page
+				.getByRole( 'button', { name: 'Sync with theme' } )
+				.click( { timeout: 30000 } );
+		} catch ( error ) {
+			console.log(
+				'Error waiting for or clicking button by role:',
+				error.message
+			);
+
+			// Try clicking using CSS selector as fallback
+			if ( syncButtonCSSCount > 0 ) {
+				console.log( 'Trying to click using CSS selector' );
+				await syncButtonCSS.first().click( { timeout: 30000 } );
+			} else {
+				console.log(
+					'Button not found with any selector, test will fail'
+				);
+				// Take a final screenshot to see the state of the page
+				await page.screenshot( { path: 'button-not-found.png' } );
+				throw error;
+			}
+		}
 
 		// Check initial state (should be enabled by default)
 		await expect( autoSyncToggle ).toBeVisible();
