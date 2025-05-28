@@ -5,7 +5,8 @@
 		"product-block-editor": true,
 		"product-data-views": false,
 		"experimental-blocks": true,
-		"experimental-iapi-runtime": true,
+		"experimental-iapi-mini-cart": false,
+		"experimental-iapi-runtime": false,
 		"coming-soon-newsletter-template": false,
 		"coupons": true,
 		"core-profiler": true,
@@ -43,7 +44,6 @@
 		"use-wp-horizon": false,
 		"add-to-cart-with-options-stepper-layout": true,
 		"blockified-add-to-cart": true,
-		"disable-core-profiler-fallback": true,
-		"reactify-classic-payments-settings": true
+		"disable-core-profiler-fallback": true
 	}
 }

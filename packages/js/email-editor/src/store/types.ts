@@ -150,15 +150,16 @@ export type EmailStyles = {
 		text: string;
 	};
 	typography?: TypographyProperties;
-	elements?: {
-		heading: {
-			color: {
-				text: string;
-			};
-			typography: TypographyProperties;
-		};
-	};
+	elements?: Record< string, ElementStyleProperties >;
 };
+
+interface ElementStyleProperties {
+	typography: TypographyProperties;
+	color?: {
+		background: string;
+		text: string;
+	};
+}
 
 export type EmailBuiltStyles = {
 	css: string;
@@ -170,6 +171,7 @@ export type EmailEditorLayout = {
 };
 
 export type EmailEditorUrls = {
+	back: string;
 	send?: string;
 	listings: string;
 };
