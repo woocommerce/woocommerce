@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StockNotifications\Admin;
 
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
+use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 
 /**
  * Notifications list table for Customer Stock Notifications.
@@ -16,7 +17,7 @@ class NotificationsListTable extends \WP_List_Table {
 	 *
 	 * @const PAGE_URL
 	 */
-	const PAGE_URL = 'admin.php?page=back_in_stock_notifications';
+	const PAGE_URL = 'admin.php?page=customerstock_notifications';
 
 	/**
 	 * Total view records.
@@ -40,19 +41,17 @@ class NotificationsListTable extends \WP_List_Table {
 	public $total_inactive_items = 0;
 
 	/**
-	 * Total queued records.
-	 *
-	 * @var int
-	 */
-	public $total_queued_items = 0;
-
-	/**
 	 * Are there any notifications in the DB?.
 	 *
 	 * @var int
 	 */
 	public $has_stock_notifications = false;
 
+	/**
+	 * Data store.
+	 *
+	 * @var StockNotificationsDataStore
+	 */
 	public $data_store;
 
 	/**
@@ -61,32 +60,25 @@ class NotificationsListTable extends \WP_List_Table {
 	public function __construct() {
 		global $status, $page;
 
-		$this->data_store = \WC_Data_Store::load( 'stock_notification' );
-
+		$this->data_store              = \WC_Data_Store::load( 'stock_notification' );
 		$this->total_items             = $this->data_store->query( array( 'return' => 'count' ) );
 		$this->has_stock_notifications = $this->total_items > 0 ? true : false;
-
-// TODO: Check if this is needed.
-// error_log( print_r( $this->total_items, true ) );
-// $this->total_queued_items      = wc_get_container()->get( NotificationsDB::class )->query(
-// 	array(
-// 		'count'     => true,
-// 		'is_queued' => 'on',
-// 	)
-// );
-		$this->total_active_items   = $this->data_store->query(
+		
+        // Count active notifications.
+        $this->total_active_items = $this->data_store->query(
 			array(
 				'return'    => 'count',
-				'is_active' => 'on',
+				'status'    => NotificationStatus::ACTIVE,
 			)
 		);
 
-// $this->total_inactive_items = wc_get_container()->get( NotificationsDB::class )->query(
-// 	array(
-// 		'count'     => true,
-// 		'is_active' => 'off',
-// 	)
-// );
+        // Count inactive notifications.
+        $this->total_inactive_items = $this->data_store->query(
+            array(
+                'return'    => 'count',
+                'status'    => NotificationStatus::SENT || NotificationStatus::CANCELLED || NotificationStatus::PENDING,
+            )
+        );
 
 		parent::__construct(
 			array(
@@ -97,38 +89,9 @@ class NotificationsListTable extends \WP_List_Table {
 	}
 
 	/**
-	 * This is a default column renderer
-	 *
-	 * @param $notification - row (key, value array)
-	 * @param $column_name - string (key)
-	 * @return string
-	 */
-	public function column_default( $notification, $column_name ) {
-	
-		$notification_data = $notification->get_data();
-
-		if ( isset( $notification_data[ $column_name ] ) ) {
-
-			echo wp_kses_post( $notification_data[ $column_name ] );
-
-		} else {
-
-			/**
-			 * Fires in each custom column in the Back In Stock list table.
-			 *
-			 * This hook only fires if the current column_name is not set inside the $notification's keys.
-			 *
-			 * @param string $column_name The name of the column to display.
-			 * @param array  $notification
-			 */
-			do_action( 'manage_bis_notifications_custom_column', $column_name, $notification );
-		}
-	}
-
-	/**
 	 * Handles the checkbox column output.
 	 *
-	 * @param WC_BIS_Notification_Data $notification The notification object.
+	 * @param Notification $notification The notification object.
 	 * @return void
 	 */
 	public function column_cb( $notification ) {
@@ -145,20 +108,20 @@ class NotificationsListTable extends \WP_List_Table {
 	/**
 	 * Handles the title column output.
 	 *
-	 * @param WC_BIS_Notification_Data $notification The notification object.
+	 * @param Notification $notification The notification object.
 	 * @return void
 	 */
 	public function column_id( $notification ) {
 		$actions = array(
-			'edit'   => sprintf( '<a href="' . admin_url( 'admin.php?page=bis_notifications&section=edit&notification=%d' ) . '">%s</a>', $notification->get_id(), __( 'Edit', 'woocommerce' ) ),
-			'delete' => sprintf( '<a href="' . wp_nonce_url( admin_url( 'admin.php?page=bis_notifications&section=delete&notification=%d' ), 'delete_notification' ) . '">%s</a>', $notification->get_id(), __( 'Delete', 'woocommerce' ) ),
+			'edit'   => sprintf( '<a href="' . admin_url( 'admin.php?page=customer_stock_notifications&section=edit&notification=%d' ) . '">%s</a>', $notification->get_id(), __( 'Edit', 'woocommerce' ) ),
+			'delete' => sprintf( '<a href="' . wp_nonce_url( admin_url( 'admin.php?page=customer_stock_notifications&section=delete&notification=%d' ), 'delete_notification' ) . '">%s</a>', $notification->get_id(), __( 'Delete', 'woocommerce' ) ),
 		);
 
 		$title = $notification->get_id();
 
 		printf(
 			'<a class="row-title" href="%s" aria-label="%s">#%s</a>%s',
-			esc_url( admin_url( 'admin.php?page=bis_notifications&section=edit&notification=' . $notification->get_id() ) ),
+			esc_url( admin_url( 'admin.php?page=customer_stock_notifications&section=edit&notification=' . $notification->get_id() ) ),
 			/* translators: %s: Notification code */
 			sprintf( esc_attr__( '&#8220;%s&#8221; (Edit)', 'woocommerce' ), esc_attr( $title ) ),
 			esc_html( $title ),
@@ -169,31 +132,24 @@ class NotificationsListTable extends \WP_List_Table {
 	/**
 	 * Handles the status column output.
 	 *
-	 * @param WC_BIS_Notification_Data $notification The notification object.
+	 * @param Notification $notification The notification object.
 	 * @return void
 	 */
 	public function column_status( $notification ) {
 		// Build tooltip.
 		$tooltip = '';
 
-// TODO: Add statuses.
-// if ( ! $notification->is_verified() && $notification->is_pending() ) {
-// 	$status  = 'cancelled';
-// 	$label   = __( 'Pending', 'woocommerce' );
-// 	$tooltip = __( 'Awaiting verification', 'woocommerce' );
-// } elseif ( $notification->is_queued() ) {
-// 	$status = 'on-hold';
-// 	$label  = __( 'Queued', 'woocommerce' );
-// } elseif ( ! $notification->is_active() ) {
-// 	$status = 'cancelled';
-// 	$label  = __( 'Inactive', 'woocommerce' );
-// } else {
-// 	$status = 'completed';
-// 	$label  = __( 'Active', 'woocommerce' );
-// }
-
-		$status = 'completed';
-		$label  = __( 'Active', 'woocommerce' );
+        if ( $notification->get_status() === NotificationStatus::PENDING ) {
+        	$status  = 'cancelled';
+        	$label   = __( 'Pending', 'woocommerce' );
+        	$tooltip = __( 'Awaiting verification', 'woocommerce' );
+        } elseif ( $notification->get_status() !== NotificationStatus::ACTIVE ) {
+        	$status = 'cancelled';
+        	$label  = __( 'Inactive', 'woocommerce' );
+        } else {
+        	$status = 'completed';
+        	$label  = __( 'Active', 'woocommerce' );
+        }
 
 		if ( ! empty( $tooltip ) ) {
 			printf( '<mark class="order-status %s tips" data-tip="%s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $status ) ), wp_kses_post( $tooltip ), esc_html( $label ) );
@@ -205,7 +161,7 @@ class NotificationsListTable extends \WP_List_Table {
 	/**
 	 * Handles the redeemed user column output.
 	 *
-	 * @param WC_BIS_Notification_Data $notification The notification object.
+	 * @param Notification $notification The notification object.
 	 * @return void
 	 */
 	public function column_user( $notification ) {
@@ -223,14 +179,13 @@ class NotificationsListTable extends \WP_List_Table {
 	/**
 	 * Handles the product column output.
 	 *
-	 * @param WC_BIS_Notification_Data $notification The notification object.
+	 * @param Notification $notification The notification object.
 	 * @return void
 	 */
 	public function column_product( $notification ) {
 		$product = $notification->get_product();
 		if ( is_a( $product, 'WC_Product' ) ) {
 
-			// TODO: Make this a function?
 			$name                     = $product->get_name();
 			$formatted_variation_list = $this->get_product_formatted_variation_list( true );
 
@@ -254,7 +209,7 @@ class NotificationsListTable extends \WP_List_Table {
 	/**
 	 * Handles the product SKU output.
 	 *
-	 * @param WC_BIS_Notification_Data $notification The notification object.
+	 * @param Notification $notification The notification object.
 	 * @return void
 	 */
 	public function column_sku( $notification ) {
@@ -275,7 +230,7 @@ class NotificationsListTable extends \WP_List_Table {
 	/**
 	 * Handles the notification date column output.
 	 *
-	 * @param WC_BIS_Notification_Data $notification The notification object.
+	 * @param Notification $notification The notification object.
 	 * @return void
 	 */
 	public function column_date_subscribed( $notification ) {
@@ -294,28 +249,29 @@ class NotificationsListTable extends \WP_List_Table {
 	/**
 	 * Handles the waiting since column output.
 	 *
-	 * @param WC_BIS_Notification_Data $notification The notification object.
+	 * @param Notification $notification The notification object.
 	 * @return void
 	 */
 	public function column_waiting_since( $notification ) {
-// TODO: Is this needed?
-// if ( empty( $notification->get_subscribe_date() ) || $notification->is_delivered() || ! $notification->is_active() ) {
-// 	$t_time    = __( '&mdash;', 'woocommerce' );
-// 	$h_time    = $t_time;
-// 	$time_diff = 0;
-// } else {
-// 	$t_time    = date_i18n( _x( 'Y/m/d g:i:s a', 'list table date hover format', 'woocommerce' ), $notification->get_subscribe_date() );
-// 	$time_diff = time() - $notification->get_subscribe_date();
 
-// 	if ( $time_diff > 0 && $time_diff < DAY_IN_SECONDS ) {
-// 		/* translators: %s: human time diff */
-// 		$h_time = wp_kses_post( human_time_diff( $notification->get_subscribe_date() ) );
-// 	} else {
-// 		$h_time = date_i18n( wc_date_format(), $notification->get_subscribe_date() );
-// 	}
-// }
+        if ( empty( $notification->get_date_created() ) || $notification->get_status() !== 'active' ) {
+            $t_time    = __( '&mdash;', 'woocommerce' );
+            $h_time    = $t_time;
+            $time_diff = 0;
+        } else {
+            $date_created_timestamp = $notification->get_date_created()->getTimestamp();
+            $t_time    = date_i18n( _x( 'Y/m/d g:i:s a', 'list table date hover format', 'woocommerce' ), $date_created_timestamp );
+            $time_diff = time() - $date_created_timestamp;
 
-// echo '<span title="' . esc_attr( $t_time ) . '">' . esc_html( $h_time ) . '</span>';
+            if ( $time_diff > 0 && $time_diff < DAY_IN_SECONDS ) {
+                /* translators: %s: human time diff */
+                $h_time = wp_kses_post( human_time_diff( $date_created_timestamp ) );
+            } else {
+                $h_time = date_i18n( wc_date_format(), $date_created_timestamp );
+            }
+        }
+
+        echo '<span title="' . esc_attr( $t_time ) . '">' . esc_html( $h_time ) . '</span>';
 	}
 
 	/**
@@ -347,15 +303,7 @@ class NotificationsListTable extends \WP_List_Table {
 		$columns['date_subscribed'] = _x( 'Signed Up', 'column_name', 'woocommerce' );
 		$columns['waiting_since']   = _x( 'Waiting', 'column_name', 'woocommerce' );
 
-		// TODO: Maybe remove filter?
-		/**
-		 * Filters the columns displayed in the Back In Stock list table.
-		 *
-		 * @since 9.9.0
-		 *
-		 * @param array $columns An associative array of column headings.
-		 */
-		return apply_filters( 'manage_bis_notifications_columns', $columns );
+        return $columns;
 	}
 
 	/**
@@ -390,7 +338,6 @@ class NotificationsListTable extends \WP_List_Table {
 	 * @return void
 	 */
 	public function prepare_items() {
-
 		$per_page = (int) get_user_meta( get_current_user_id(), 'stock_notifications_per_page', true ) ?: 10;
 
 		// Table columns.
@@ -403,7 +350,6 @@ class NotificationsListTable extends \WP_List_Table {
 		// TODO: Create bulk actions.
 		// Process actions.
 		//$this->process_bulk_action();
-		//$this->process_clear_queue_action();
 
 		// Setup params.
 		$paged   = isset( $_REQUEST['paged'] ) ? max( 0, (int) wp_unslash( $_REQUEST['paged'] ) - 1 ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -423,12 +369,10 @@ class NotificationsListTable extends \WP_List_Table {
 		}
 
 		// Views.
-		if ( ! empty( $_REQUEST['status'] ) && 'active_bis_notifications' === $_REQUEST['status'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$query_args['is_active'] = 'on';
-		} elseif ( ! empty( $_REQUEST['status'] ) && 'inactive_bis_notifications' === $_REQUEST['status'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$query_args['is_active'] = 'off';
-		} elseif ( ! empty( $_REQUEST['status'] ) && 'queued_bis_notifications' === $_REQUEST['status'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$query_args['is_queued'] = 'on';
+		if ( ! empty( $_REQUEST['status'] ) && 'active_customer_stock_notifications' === $_REQUEST['status'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$query_args['status'] = NotificationStatus::ACTIVE;
+		} elseif ( ! empty( $_REQUEST['status'] ) && 'inactive_customer_stock_notifications' === $_REQUEST['status'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$query_args['status'] = NotificationStatus::SENT || NotificationStatus::CANCELLED || NotificationStatus::PENDING;
 		}
 
 		// Filters.
@@ -448,14 +392,14 @@ class NotificationsListTable extends \WP_List_Table {
 			$has_filters = true;
 		}
 
-		if ( ! empty( $_GET['bis_product_filter'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$filter                   = absint( wp_unslash( $_GET['bis_product_filter'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $_GET['customer_stock_notifications_product_filter'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$filter                   = absint( wp_unslash( $_GET['customer_stock_notifications_product_filter'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$query_args['product_id'] = array( $filter );
 			$has_filters              = true;
 		}
 
-		if ( ! empty( $_GET['bis_customer_filter'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$filter                = absint( wp_unslash( $_GET['bis_customer_filter'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $_GET['customer_stock_notifications_customer_filter'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$filter                = absint( wp_unslash( $_GET['customer_stock_notifications_customer_filter'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$query_args['user_id'] = array( $filter );
 			$has_filters           = true;
 		}
@@ -474,15 +418,11 @@ class NotificationsListTable extends \WP_List_Table {
 		// If has filter, re-calc the views numbers.
 		if ( $has_filters ) {
 			// Count active.
-			$query_args['is_active']  = 'on';
+			$query_args['status']  = NotificationStatus::ACTIVE;
 			$this->total_active_items = $this->data_store->query( $query_args );
 			// Count inactive.
-			$query_args['is_active']    = 'off';
+			$query_args['status']    = NotificationStatus::SENT || NotificationStatus::CANCELLED || NotificationStatus::PENDING;
 			$this->total_inactive_items = $this->data_store->query( $query_args );
-			// Count queued.
-			$query_args['is_active']  = null;
-			$query_args['is_queued']  = 'on';
-			$this->total_queued_items = $this->data_store->query( $query_args );
 		}
 
 		// Configure pagination.
@@ -495,7 +435,7 @@ class NotificationsListTable extends \WP_List_Table {
 		);
 	}
 
-		/**
+	/**
 	 * Display table extra nav.
 	 *
 	 * @param string $which top|bottom.
@@ -508,11 +448,6 @@ class NotificationsListTable extends \WP_List_Table {
 				<?php
 				$this->render_filters();
 				submit_button( __( 'Filter', 'woocommerce' ), '', 'filter_action', false, array( 'id' => 'post-query-submit' ) );
-				if ( 0 < $this->total_queued_items ) {
-					?>
-					<a href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'bis_clear_queued_items' => 1 ), admin_url( 'admin.php?page=bis_notifications' ) ), 'wc_bis_abort_all_queued_notifications' ) ); ?>" class="button"><?php esc_html_e( 'Abort Queued', 'woocommerce' ); ?></a>
-					<?php
-				}
 				?>
 			</div>
 			<?php
@@ -539,8 +474,8 @@ class NotificationsListTable extends \WP_List_Table {
 		$product_string = '';
 		$product_id     = '';
 
-		if ( ! empty( $_GET['bis_product_filter'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$product_id = wc_clean( wp_unslash( $_GET['bis_product_filter'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $_GET['customer_stock_notifications_product_filter'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$product_id = wc_clean( wp_unslash( $_GET['customer_stock_notifications_product_filter'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$product    = wc_get_product( absint( $product_id ) );
 
 			if ( $product ) {
@@ -553,7 +488,7 @@ class NotificationsListTable extends \WP_List_Table {
 			}
 		}
 		?>
-		<select class="wc-product-search" name="bis_product_filter" data-placeholder="<?php esc_attr_e( 'Select product&hellip;', 'woocommerce' ); ?>" data-allow_clear="true" id="bis_product_filter">
+		<select class="wc-product-search" name="customer_stock_notifications_product_filter" data-placeholder="<?php esc_attr_e( 'Select product&hellip;', 'woocommerce' ); ?>" data-allow_clear="true" id="customer_stock_notifications_product_filter">
 			<?php if ( $product_string && $product_id ) { ?>
 				<option value="<?php echo esc_attr( $product_id ); ?>" selected="selected"><?php echo wp_kses_post( htmlspecialchars( $product_string, ENT_COMPAT ) ); ?><option>
 			<?php } ?>
@@ -570,8 +505,8 @@ class NotificationsListTable extends \WP_List_Table {
 		$user_string = '';
 		$user_id     = '';
 
-		if ( ! empty( $_GET['bis_customer_filter'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$user_id = wc_clean( wp_unslash( $_GET['bis_customer_filter'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $_GET['customer_stock_notifications_customer_filter'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$user_id = wc_clean( wp_unslash( $_GET['customer_stock_notifications_customer_filter'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$user    = get_user_by( 'id', absint( $user_id ) );
 
 			if ( $user ) {
@@ -585,12 +520,105 @@ class NotificationsListTable extends \WP_List_Table {
 			}
 		}
 		?>
-		<select class="wc-customer-search" name="bis_customer_filter" data-placeholder="<?php esc_attr_e( 'Select customer&hellip;', 'woocommerce' ); ?>" data-allow_clear="true" id="bis_customer_filter">
+		<select class="wc-customer-search" name="customer_stock_notifications_customer_filter" data-placeholder="<?php esc_attr_e( 'Select customer&hellip;', 'woocommerce' ); ?>" data-allow_clear="true" id="customer_stock_notifications_customer_filter">
 			<?php if ( $user_string && $user_id ) { ?>
 				<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo wp_kses_post( htmlspecialchars( $user_string, ENT_COMPAT ) ); ?><option>
 			<?php } ?>
 		</select>
 		<?php
+	}
+
+    /**
+	 * Items of the `subsubsub` status menu.
+	 *
+	 * @return array
+	 */
+	protected function get_views() {
+		$status_links = array();
+
+		// All view.
+		$class          = ! empty( $_REQUEST['status'] ) && 'all_customer_stock_notifications' === $_REQUEST['status'] ? 'current' : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$all_inner_html = sprintf(
+			/* translators: %s: Notifications count */
+			_nx(
+				'All <span class="count">(%s)</span>',
+				'All <span class="count">(%s)</span>',
+				$this->total_items,
+				'notifications_status',
+				'woocommerce'
+			),
+			number_format_i18n( $this->total_items )
+		);
+
+		$status_links['all'] = $this->get_link( array( 'status' => 'all_customer_stock_notifications' ), $all_inner_html, $class );
+
+		// Active view.
+		$class             = ! empty( $_REQUEST['status'] ) && 'active_customer_stock_notifications' === $_REQUEST['status'] ? 'current' : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$active_inner_html = sprintf(
+			/* translators: %s: Notifications count */
+			_nx(
+				'Active <span class="count">(%s)</span>',
+				'Active <span class="count">(%s)</span>',
+				$this->total_active_items,
+				'notifications_status',
+				'woocommerce'
+			),
+			number_format_i18n( $this->total_active_items )
+		);
+
+		$status_links['active'] = $this->get_link( array( 'status' => 'active_customer_stock_notifications' ), $active_inner_html, $class );
+
+		// Inactive view.
+		$class               = ! empty( $_REQUEST['status'] ) && 'inactive_customer_stock_notifications' === $_REQUEST['status'] ? 'current' : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$inactive_inner_html = sprintf(
+			/* translators: %s: Notifications count */
+			_nx(
+				'Inactive <span class="count">(%s)</span>',
+				'Inactive <span class="count">(%s)</span>',
+				$this->total_inactive_items,
+				'notifications_status',
+				'woocommerce'
+			),
+			number_format_i18n( $this->total_inactive_items )
+		);
+
+		$status_links['inactive'] = $this->get_link( array( 'status' => 'inactive_customer_stock_notifications' ), $inactive_inner_html, $class );
+
+		return $status_links;
+	}
+
+	/**
+	 * Construct a link string from args.
+	 *
+	 * @param array  $args Arguments for the link.
+	 * @param string $label Link label.
+	 * @param string $css_class CSS class.
+	 * @return string
+	 */
+	protected function get_link( $args, $label, $css_class = '' ) {
+		$base_url = admin_url( self::PAGE_URL );
+		$url      = add_query_arg( $args, $base_url );
+
+		$class_html   = '';
+		$aria_current = '';
+		if ( ! empty( $css_class ) ) {
+			$class_html = sprintf(
+				' class="%s"',
+				esc_attr( $css_class )
+			);
+
+			if ( 'current' === $css_class ) {
+				$aria_current = ' aria-current="page"';
+			}
+		}
+
+		return sprintf(
+			'<a href="%s"%s%s>%s</a>',
+			esc_url( $url ),
+			$class_html,
+			$aria_current,
+			$label
+		);
 	}
 
 	/**

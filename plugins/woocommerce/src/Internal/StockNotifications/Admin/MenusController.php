@@ -20,10 +20,9 @@ class MenusController {
 		add_action( 'admin_menu', array( $this, 'add_menu' ), 10 );
 
 		// Integrate WooCommerce breadcrumb bar.
-		add_action( 'admin_menu', array( $this, 'wc_admin_connect_bis_pages' ) );
+		add_action( 'admin_menu', array( $this, 'wc_admin_connect_customer_stock_notifications_pages' ) );
 		add_filter( 'woocommerce_navigation_pages_with_tabs', array( $this, 'wc_admin_navigation_pages_with_tabs' ) );
-		add_filter( 'woocommerce_navigation_page_tab_sections', array( $this, 'wc_admin_navigation_page_tab_sections' ) );
-		add_filter( 'woocommerce_navigation_screen_ids', array( $this, 'wc_admin_navigation_screen_ids' ) );
+		add_filter( 'woocommerce_screen_ids', array( $this, 'wc_admin_navigation_screen_ids' ) );
 		add_filter( 'set-screen-option', array( $this, 'set_screen_option' ), 10, 3 );
 	}
 
@@ -41,9 +40,9 @@ class MenusController {
 		$dashboard_page = add_submenu_page(
 			'woocommerce',
 			__( 'Stock Notifications', 'woocommerce' ),
-			__( 'Stock Notifications', 'woocommerce' ),
+			__( 'Notifications', 'woocommerce' ),
 			'manage_woocommerce',
-			'back_in_stock_notifications',
+			'customer_stock_notifications',
 			array( $this, 'notifications_page' )
 		);
 
@@ -100,18 +99,18 @@ class MenusController {
 	 *
 	 * @return void
 	 */
-	public function wc_admin_connect_bis_pages() {
+	public function wc_admin_connect_customer_stock_notifications_pages() {
 
 		if ( function_exists( 'wc_admin_connect_page' ) ) {
 
 			wc_admin_connect_page(
 				array(
-					'id'        => 'woocommerce-back_in_stock_notifications',
-					'screen_id' => 'woocommerce_page_back_in_stock_notifications-notifications',
+					'id'        => 'woocommerce-customer_stock_notifications',
+					'screen_id' => 'woocommerce_page_customer_stock_notifications-notifications',
 					'title'     => __( 'Stock Notifications', 'woocommerce' ),
 					'path'      => add_query_arg(
 						array(
-							'page' => 'back_in_stock_notifications',
+							'page' => 'customer_stock_notifications',
 						),
 						'admin.php'
 					),
@@ -120,13 +119,13 @@ class MenusController {
 
 			wc_admin_connect_page(
 				array(
-					'id'        => 'woocommerce-back_in_stock_notifications-create',
-					'parent'    => 'woocommerce-back_in_stock_notifications',
-					'screen_id' => 'woocommerce_page_back_in_stock_notifications-notifications-create',
+					'id'        => 'woocommerce-customer_stock_notifications-create',
+					'parent'    => 'woocommerce-customer_stock_notifications',
+					'screen_id' => 'woocommerce_page_customer_stock_notifications-notifications-create',
 					'title'     => __( 'Add Notification', 'woocommerce' ),
 					'path'      => add_query_arg(
 						array(
-							'page'         => 'back_in_stock_notifications',
+							'page'         => 'customer_stock_notifications',
 							'section'      => 'create',
 							'notification' => 1,
 						),
@@ -137,13 +136,13 @@ class MenusController {
 
 			wc_admin_connect_page(
 				array(
-					'id'        => 'woocommerce-back_in_stock_notifications-edit',
-					'parent'    => 'back_in_stock_notifications',
-					'screen_id' => 'woocommerce_page_back_in_stock_notifications-notifications-edit',
+					'id'        => 'woocommerce-customer_stock_notifications-edit',
+					'parent'    => 'woocommerce-customer_stock_notifications',
+					'screen_id' => 'woocommerce_page_customer_stock_notifications-notifications-edit',
 					'title'     => __( 'Edit Notification', 'woocommerce' ),
 					'path'      => add_query_arg(
 						array(
-							'page'         => 'back_in_stock_notifications',
+							'page'         => 'customer_stock_notifications',
 							'section'      => 'edit',
 							'notification' => 1,
 						),
@@ -156,38 +155,25 @@ class MenusController {
 	}
 
 	/**
-	 * Configure back in stock page sections.
+	 * Configure Customer Stock Notifications page sections.
 	 *
 	 * @param array $pages Array of pages with their tab identifiers.
 	 * @return array
 	 */
 	public function wc_admin_navigation_pages_with_tabs( $pages ) {
-		$pages['back_in_stock_notifications'] = 'notifications';
-		return $pages;
-	}
-
-	/**
-	 * Configure back in stock tabs.
-	 *
-	 * @param array $pages Array of pages with their tab sections.
-	 * @return array
-	 */
-	public function wc_admin_navigation_page_tab_sections( $pages ) {
-		$pages['notifications'] = array( 'edit' );
+		$pages['customer_stock_notifications'] = 'notifications';
 		return $pages;
 	}
 
 	/**
 	 * Add screen id to WooCommerce.
 	 *
-	 * @since 9.9.0
+	 * @since 0.0.0
 	 * @param array $screen_ids List of screen IDs.
 	 * @return array
 	 */
 	public static function wc_admin_navigation_screen_ids( $screen_ids ) {
-		// TODO: Add screen ids.
-		//$screen_ids = array_merge( $screen_ids, WC_BIS()->get_screen_ids() );
-		//$screens[] = $prefix . '_page_bis_notifications';
+        $screen_ids[] = 'woocommerce_page_customer_stock_notifications';
 		return $screen_ids;
 	}
 }
