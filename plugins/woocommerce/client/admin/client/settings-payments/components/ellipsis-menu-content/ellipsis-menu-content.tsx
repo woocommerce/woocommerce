@@ -178,10 +178,6 @@ export const EllipsisMenuContent = ( {
 	const hideSuggestion = () => {
 		setIsHidingSuggestion( true );
 
-		// Record the event before hiding the suggestion.
-		recordEvent( 'settings_payments_recommendations_dismiss', {
-			pes_id: suggestionId,
-		} );
 		hidePaymentExtensionSuggestion( suggestionHideUrl )
 			.then( () => {
 				invalidateResolutionForStoreSelector( 'getPaymentProviders' );

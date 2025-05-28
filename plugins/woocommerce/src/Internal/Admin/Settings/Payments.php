@@ -269,7 +269,19 @@ class Payments {
 	 * @throws Exception If the suggestion ID is invalid.
 	 */
 	public function hide_payment_extension_suggestion( string $id ): bool {
-		return $this->providers->hide_extension_suggestion( $id );
+		$result = $this->providers->hide_extension_suggestion( $id );
+
+		if ( $result ) {
+			// Record an event that the suggestion was hidden.
+			$this->record_event(
+				'extension_suggestion_hidden',
+				array(
+					'suggestion_id' => $id,
+				)
+			);
+		}
+
+		return $result;
 	}
 
 	/**
