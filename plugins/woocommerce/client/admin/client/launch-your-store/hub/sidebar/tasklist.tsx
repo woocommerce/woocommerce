@@ -21,7 +21,6 @@ import {
 	createStorageUtils,
 } from '@woocommerce/onboarding';
 import { getAdminLink } from '@woocommerce/settings';
-import { getCountryCode } from '~/dashboard/utils';
 
 const SEVEN_DAYS_IN_SECONDS = 60 * 60 * 24 * 7;
 export const LYS_RECENTLY_ACTIONED_TASKS_KEY = 'lys_recently_actioned_tasks';
