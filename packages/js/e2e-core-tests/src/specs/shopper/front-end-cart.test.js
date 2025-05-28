@@ -81,16 +81,21 @@ const runCartPageTest = () => {
 			await uiUnblocked();
 
 			const removeSelector = '.remove_from_cart_button';
-			const removeRole = await page.$eval( removeSelector, el => el.getAttribute( 'role' ) );
+			const removeRole = await page.$eval( removeSelector, ( el ) =>
+				el.getAttribute( 'role' )
+			);
 			expect( removeRole ).toBe( 'button' );
 
 			await page.focus( removeSelector );
 			await page.keyboard.press( 'Space' );
 			await uiUnblocked();
 
-			await expect( page ).toMatchElement( '.woocommerce-mini-cart__empty-message', {
-				text: 'No products in the cart.',
-			} );
+			await expect( page ).toMatchElement(
+				'.woocommerce-mini-cart__empty-message',
+				{
+					text: 'No products in the cart.',
+				}
+			);
 		} );
 
 		it( 'should update subtotal in cart totals when adding product to the cart', async () => {
