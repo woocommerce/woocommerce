@@ -1,6 +1,16 @@
 .wc-block-checkout__form {
 	margin: 0;
 	max-width: 100%;
+
+	.wc-blocks-components-select {
+		margin-top: $gap;
+	}
+
+	.wc-block-components-address-form__country {
+		.wc-blocks-components-select {
+			margin-top: 0;
+		}
+	}
 }
 .is-mobile,
 .is-small,
@@ -28,6 +38,7 @@
 
 				&:first-child {
 					margin-top: 0;
+					background-color: blue;
 				}
 
 				&:first-child + .wc-block-components-text-input {
