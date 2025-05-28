@@ -11,7 +11,6 @@ import {
 	PaymentProvider,
 	PaymentsEntity,
 } from '@woocommerce/data';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
