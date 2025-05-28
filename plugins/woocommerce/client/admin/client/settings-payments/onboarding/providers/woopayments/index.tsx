@@ -15,6 +15,7 @@ import Modal from '~/settings-payments/onboarding/components/modal';
 import WooPaymentsOnboarding from './components/onboarding';
 import { WooPaymentsModalProps } from '~/settings-payments/onboarding/types';
 import { OnboardingProvider } from './data/onboarding-context';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 
 /**
  * Modal component for WooPayments onboarding
@@ -41,6 +42,10 @@ export default function WooPaymentsModal( {
 			// Prevent the onboarding modal from reopening if the WPCom connection remains unestablished and the user has returned from Jetpack.
 			! ( ! hasWPComConnection && isJetpackReturn )
 		) {
+			recordPaymentsOnboardingEvent(
+				'woopayments_onboarding_modal_opened'
+			);
+
 			setIsOpen( true );
 		}
 
@@ -84,6 +89,8 @@ export default function WooPaymentsModal( {
 
 	// Handle modal close by navigating away from onboarding routes
 	const handleClose = () => {
+		recordPaymentsOnboardingEvent( 'woopayments_onboarding_modal_closed' );
+
 		const newPath = getNewPath( {}, '/wp-admin/admin.php', {
 			page: 'wc-settings',
 			tab: 'checkout',
