@@ -52,6 +52,11 @@ Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerc
 <!-- Mention any analysis performed, such as assessing potential impacts on environment attributes and other plugins, performance profiling, or LLM/AI-based analysis. -->
 <!-- Within the testing details you provide, please ensure that no sensitive information (such as API keys, passwords, user data, etc.) is included in this public pull request. -->
 
+
+
+<!-- If this PR includes changes in any block that uses the Interactivity API, please make sure you have tested it with the new Interactivity API runtime by activating its experimental feature flag, even if no changes have been made to the interactivity code. -->
+-   [ ] Tested with the new Interactivity API runtime.
+
 ### Changelog entry
 
 <!-- You can optionally choose to enter a changelog entry by checking the box below and supplying data. -->
