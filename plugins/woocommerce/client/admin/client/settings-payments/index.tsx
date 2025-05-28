@@ -68,10 +68,10 @@ const SettingsPaymentsOfflineChunk = lazy(
 /**
  * Lazy-loaded chunk for the WooPayments settings page.
  */
-const SettingsPaymentsWooCommercePaymentsChunk = lazy(
+const SettingsPaymentsWooPaymentsChunk = lazy(
 	() =>
 		import(
-			/* webpackChunkName: "settings-payments-woocommerce-payments" */ './settings-payments-woocommerce-payments'
+			/* webpackChunkName: "settings-payments-woocommerce-payments" */ './settings-payments-woopayments'
 		)
 );
 
@@ -366,12 +366,12 @@ export const SettingsPaymentsOfflineWrapper = () => {
 /**
  * Wraps the WooPayments settings page.
  */
-export const SettingsPaymentsWooCommercePaymentsWrapper = () => {
+export const SettingsPaymentsWooPaymentsWrapper = () => {
 	return (
 		<>
 			<Header title={ __( 'Settings', 'woocommerce' ) } />
 			<Suspense fallback={ <div>Loading WooPayments settings...</div> }>
-				<SettingsPaymentsWooCommercePaymentsChunk />
+				<SettingsPaymentsWooPaymentsChunk />
 			</Suspense>
 		</>
 	);
