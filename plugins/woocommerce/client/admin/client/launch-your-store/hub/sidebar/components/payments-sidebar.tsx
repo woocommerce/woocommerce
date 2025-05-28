@@ -24,12 +24,14 @@ import type { SidebarComponentProps } from '../xstate';
 import { SidebarContainer } from './sidebar-container';
 import { SiteHub } from '~/customize-store/assembler-hub/site-hub';
 import { taskIcons } from './icons';
+import { StepPlaceholder } from './step-placeholder';
 
 export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 	const {
 		steps: allSteps,
 		currentStep,
 		justCompletedStepId,
+		isLoading,
 	} = useOnboardingContext();
 
 	// Store the initial uncompleted step IDs on first render
@@ -88,30 +90,32 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 			<SidebarContainer title={ sidebarTitle }>
 				{ /* We are using these classes to inherit the styles from the edit your store styling */ }
 				<ItemGroup className="woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group">
-					{ stepsToDisplay.map( ( step ) => (
-						<SidebarNavigationItem
-							key={ step.id }
-							className={ clsx( step.id, {
-								active: currentStep?.id === step.id,
-								'payment-step': true,
-								'payment-step--active':
-									currentStep?.id === step.id,
-								'payment-step--disabled':
-									currentStep?.id !== step.id,
-							} ) }
-							icon={
-								step.id === justCompletedStepId ||
-								step.status === 'completed' ||
-								currentStepIndex === allSteps.length
-									? taskIcons.completedPaymentStep
-									: taskIcons.activePaymentStep
-							}
-							disabled={ true }
-							showChevron={ false }
-						>
-							{ step.label }
-						</SidebarNavigationItem>
-					) ) }
+					{ isLoading && <StepPlaceholder rows={ 3 } /> }
+					{ ! isLoading &&
+						stepsToDisplay.map( ( step ) => (
+							<SidebarNavigationItem
+								key={ step.id }
+								className={ clsx( step.id, {
+									active: currentStep?.id === step.id,
+									'payment-step': true,
+									'payment-step--active':
+										currentStep?.id === step.id,
+									'payment-step--disabled':
+										currentStep?.id !== step.id,
+								} ) }
+								icon={
+									step.id === justCompletedStepId ||
+									step.status === 'completed' ||
+									currentStepIndex === allSteps.length
+										? taskIcons.completedPaymentStep
+										: taskIcons.activePaymentStep
+								}
+								disabled={ true }
+								showChevron={ false }
+							>
+								{ step.label }
+							</SidebarNavigationItem>
+						) ) }
 				</ItemGroup>
 			</SidebarContainer>
 		</div>
