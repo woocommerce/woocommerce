@@ -101,7 +101,7 @@ jobs:
 
       - name: 'Pre-build verification'
         run: |
-            branch_name="$GITHUB_REF"
+            branch_name="${GITHUB_REF#refs/heads/}"
             if  [[ $branch_name != release/* ]] ; then
                 echo "[ERR] Pre-build verification: the branch name is NOT matching 'release/*' pattern (identified as $branch_name)"
                 exit 1
