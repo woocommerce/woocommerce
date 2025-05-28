@@ -257,7 +257,7 @@ class Payments {
 	 *
 	 * This is only an internal recording of attachment. No actual extension installation or activation happens.
 	 *
-	 * @param string $id The ID of the payment extension suggestion to hide.
+	 * @param string $id The ID of the payment extension suggestion to attach.
 	 *
 	 * @return bool True if the suggestion was successfully marked as attached, false otherwise.
 	 * @throws Exception If the suggestion ID is invalid.
