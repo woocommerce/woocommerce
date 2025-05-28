@@ -40,6 +40,15 @@ import { title, description } from './block.json';
 import { BlockAttributes, ImageSizing } from './types';
 import { ImageSizeSettings } from './image-size-settings';
 
+const TEMPLATE = [
+	[
+		'woocommerce/product-sale-badge',
+		{
+			align: 'right',
+		},
+	],
+];
+
 const Edit = ( {
 	attributes,
 	setAttributes,
@@ -56,6 +65,7 @@ const Edit = ( {
 		},
 		{
 			dropZoneElement: ref.current,
+			template: TEMPLATE,
 		}
 	);
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
