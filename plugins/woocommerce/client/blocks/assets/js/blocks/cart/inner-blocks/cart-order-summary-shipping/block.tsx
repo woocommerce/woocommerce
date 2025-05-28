@@ -9,9 +9,14 @@ import { hasSelectedShippingRate } from '@woocommerce/base-utils';
 
 const Block = ( { className }: { className: string } ) => {
 	const { cartNeedsShipping, shippingRates } = useStoreCart();
+
+	if ( ! cartNeedsShipping ) {
+		return null;
+	}
+
 	const hasSelectedRates = hasSelectedShippingRate( shippingRates );
 
-	if ( ! cartNeedsShipping || ! hasSelectedRates ) {
+	if ( ! hasSelectedRates ) {
 		return null;
 	}
 
