@@ -27,6 +27,9 @@ const entries = {
 	...styleEntries,
 	...editorStyleEntries,
 
+	// Experimental mini cart frontend modules, only enqueued when experimental-iapi-mini-cart feature flag is enabled.
+	'woocommerce/mini-cart': './assets/js/blocks/mini-cart/iapi-frontend.ts',
+
 	// Other
 	'@woocommerce/stores/woocommerce/cart':
 		'./assets/js/base/stores/woocommerce/cart.ts',
