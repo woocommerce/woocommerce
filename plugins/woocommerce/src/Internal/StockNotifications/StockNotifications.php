@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificat
 /**
  * The controller for the stock notifications.
  */
-class Controller {
+class StockNotifications {
 
 	/**
 	 * Initialize the controller.
