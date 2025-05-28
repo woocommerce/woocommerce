@@ -1,15 +1,21 @@
 const { test, expect, request } = require( '@playwright/test' );
-const { setOption } = require( '../../utils/options' );
+const { setOption, deleteOption } = require( '../../utils/options' );
 const { tags } = require( '../../fixtures/fixtures' );
 const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
 
-const setFeatureFlag = async ( baseURL, value ) =>
+const setFeatureFlag = async ( baseURL, value ) => {
 	await setOption(
 		request,
 		baseURL,
 		'woocommerce_feature_email_improvements_enabled',
 		value
 	);
+	await deleteOption(
+		request,
+		baseURL,
+		'_transient_wc_settings_email_improvements_reverted'
+	);
+};
 
 const pickImageFromLibrary = async ( page, imageName ) => {
 	await page.getByRole( 'tab', { name: 'Media Library' } ).click();

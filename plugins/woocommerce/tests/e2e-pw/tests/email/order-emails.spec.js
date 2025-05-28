@@ -12,7 +12,7 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { expect, test as baseTest } from '../../fixtures/fixtures';
 import { admin } from '../../test-data/data';
 import { expectEmail, expectEmailContent } from '../../utils/email';
-import { setOption } from '../../utils/options';
+import { setOption, deleteOption } from '../../utils/options';
 import { WC_API_PATH } from '../../utils/api-client';
 
 const test = baseTest.extend( {
@@ -46,6 +46,11 @@ test.beforeEach( async ( { baseURL } ) => {
 		baseURL,
 		'woocommerce_feature_email_improvements_enabled',
 		'no'
+	);
+	await deleteOption(
+		request,
+		baseURL,
+		'_transient_wc_settings_email_improvements_reverted'
 	);
 } );
 

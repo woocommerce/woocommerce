@@ -1,5 +1,12 @@
+/**
+ * External dependencies
+ */
 const { test, expect, request } = require( '@playwright/test' );
-const { setOption } = require( '../../utils/options' );
+
+/**
+ * Internal dependencies
+ */
+import { setOption, deleteOption } from '../../utils/options';
 const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
 
 /**
@@ -9,13 +16,19 @@ const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
  * @param {string} value   The value to set ('yes' or 'no').
  * @return {Promise<void>}
  */
-const setFeatureFlag = async ( baseURL, value ) =>
+const setFeatureFlag = async ( baseURL, value ) => {
 	await setOption(
 		request,
 		baseURL,
 		'woocommerce_feature_email_improvements_enabled',
 		value
 	);
+	await deleteOption(
+		request,
+		baseURL,
+		'_transient_wc_settings_email_improvements_reverted'
+	);
+};
 
 /**
  * Set the email auto-sync feature flag.
