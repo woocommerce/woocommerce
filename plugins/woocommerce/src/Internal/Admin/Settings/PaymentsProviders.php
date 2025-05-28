@@ -4,15 +4,15 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Admin\PluginsHelper;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\AmazonPay;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\MercadoPago;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\Mollie;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\PaymentGateway;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\PayPal;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\Stripe;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WCCore;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments;
-use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestions as ExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AmazonPay;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\MercadoPago;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mollie;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PayPal;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Stripe;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WCCore;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
+use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
 use Exception;
 use WC_Payment_Gateway;
 use WC_Gateway_BACS;
@@ -23,9 +23,9 @@ use WC_Gateway_Paypal;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Payment Providers class.
+ * Payments Providers class.
  */
-class PaymentProviders {
+class PaymentsProviders {
 
 	public const TYPE_GATEWAY           = 'gateway';
 	public const TYPE_OFFLINE_PM        = 'offline_pm';

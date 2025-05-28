@@ -9,16 +9,16 @@ use Automattic\WooCommerce\Internal\Admin\Suggestions\Incentives\WooPayments;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Partner payment extension incentives provider class.
+ * Partner payments extension suggestion incentives provider class.
  */
-class PaymentExtensionSuggestionIncentives {
+class PaymentsExtensionSuggestionIncentives {
 	/**
 	 * The map of suggestion IDs to their respective incentives provider classes.
 	 *
 	 * @var array|\class-string[]
 	 */
 	private array $suggestion_incentives_class_map = array(
-		PaymentExtensionSuggestions::WOOPAYMENTS => WooPayments::class,
+		PaymentsExtensionSuggestions::WOOPAYMENTS => WooPayments::class,
 	);
 
 	/**

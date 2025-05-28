@@ -1,18 +1,18 @@
 <?php
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 
 use WC_Payment_Gateway;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * PayPal payment gateway provider class.
+ * AmazonPay payment gateway provider class.
  *
- * This class handles all the custom logic for the PayPal payment gateway provider.
+ * This class handles all the custom logic for the AmazonPay payment gateway provider.
  */
-class PayPal extends PaymentGateway {
+class AmazonPay extends PaymentGateway {
 
 	/**
 	 * Try to determine if the payment gateway is in test mode.
@@ -25,7 +25,7 @@ class PayPal extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode, false otherwise.
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_paypal_in_sandbox_mode();
+		$is_in_sandbox_mode = $this->is_amazon_pay_in_sandbox_mode();
 		if ( ! is_null( $is_in_sandbox_mode ) ) {
 			return $is_in_sandbox_mode;
 		}
@@ -44,7 +44,7 @@ class PayPal extends PaymentGateway {
 	 * @return bool True if the payment gateway is in dev mode, false otherwise.
 	 */
 	public function is_in_dev_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_paypal_in_sandbox_mode();
+		$is_in_sandbox_mode = $this->is_amazon_pay_in_sandbox_mode();
 		if ( ! is_null( $is_in_sandbox_mode ) ) {
 			return $is_in_sandbox_mode;
 		}
@@ -61,7 +61,7 @@ class PayPal extends PaymentGateway {
 	 *              If the payment gateway does not provide the information, it will return true.
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_onboarded = $this->is_paypal_onboarded();
+		$is_onboarded = $this->is_amazon_pay_onboarded();
 		if ( ! is_null( $is_onboarded ) ) {
 			return $is_onboarded;
 		}
@@ -79,7 +79,7 @@ class PayPal extends PaymentGateway {
 	 *              it will infer it from having a connected account.
 	 */
 	public function is_onboarding_completed( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_onboarded = $this->is_paypal_onboarded();
+		$is_onboarded = $this->is_amazon_pay_onboarded();
 		if ( ! is_null( $is_onboarded ) ) {
 			return $is_onboarded;
 		}
@@ -98,7 +98,7 @@ class PayPal extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_paypal_in_sandbox_mode();
+		$is_in_sandbox_mode = $this->is_amazon_pay_in_sandbox_mode();
 		if ( ! is_null( $is_in_sandbox_mode ) ) {
 			return $is_in_sandbox_mode;
 		}
@@ -107,35 +107,21 @@ class PayPal extends PaymentGateway {
 	}
 
 	/**
-	 * Check if the PayPal payment gateway is in sandbox mode.
+	 * Check if the AmazonPay payment gateway is in sandbox mode.
 	 *
-	 * For PayPal, there are two different environments: sandbox and production.
+	 * For AmazonPay, there are two different environments: sandbox and production.
 	 *
 	 * @return ?bool True if the payment gateway is in sandbox mode, false otherwise.
 	 *               Null if the environment could not be determined.
 	 */
-	private function is_paypal_in_sandbox_mode(): ?bool {
-		if ( class_exists( '\WooCommerce\PayPalCommerce\PPCP' ) &&
-			is_callable( '\WooCommerce\PayPalCommerce\PPCP::container' ) ) {
-			try {
-				$container = \WooCommerce\PayPalCommerce\PPCP::container();
+	private function is_amazon_pay_in_sandbox_mode(): ?bool {
+		if ( class_exists( '\WC_Amazon_Payments_Advanced_API' ) &&
+			is_callable( '\WC_Amazon_Payments_Advanced_API::get_settings' ) ) {
 
-				if ( $container->has( 'settings.connection-state' ) ) {
-					$state = $container->get( 'settings.connection-state' );
+			$settings = \WC_Amazon_Payments_Advanced_API::get_settings();
 
-					return $state->is_sandbox();
-				}
-
-				// Backwards compatibility with pre 3.0.0 (deprecated).
-				if ( $container->has( 'onboarding.environment' ) &&
-					defined( '\WooCommerce\PayPalCommerce\Onboarding\Environment::SANDBOX' ) ) {
-					$environment         = $container->get( 'onboarding.environment' );
-					$current_environment = $environment->current_environment();
-
-					return \WooCommerce\PayPalCommerce\Onboarding\Environment::SANDBOX === $current_environment;
-				}
-			} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-				// Ignore any exceptions.
+			if ( isset( $settings['sandbox'] ) ) {
+				return filter_var( $settings['sandbox'], FILTER_VALIDATE_BOOLEAN );
 			}
 		}
 
@@ -144,33 +130,18 @@ class PayPal extends PaymentGateway {
 	}
 
 	/**
-	 * Check if the PayPal payment gateway is onboarded.
+	 * Check if the AmazonPay payment gateway is onboarded.
+	 *
+	 * For AmazonPay, there are two different environments: sandbox and production.
 	 *
 	 * @return ?bool True if the payment gateway is onboarded, false otherwise.
 	 *               Null if we failed to determine the onboarding status.
 	 */
-	private function is_paypal_onboarded(): ?bool {
-		if ( class_exists( '\WooCommerce\PayPalCommerce\PPCP' ) &&
-			is_callable( '\WooCommerce\PayPalCommerce\PPCP::container' ) ) {
-			try {
-				$container = \WooCommerce\PayPalCommerce\PPCP::container();
+	private function is_amazon_pay_onboarded(): ?bool {
+		if ( class_exists( '\WC_Amazon_Payments_Advanced_API' ) &&
+			is_callable( '\WC_Amazon_Payments_Advanced_API::validate_api_settings' ) ) {
 
-				if ( $container->has( 'settings.connection-state' ) ) {
-					$state = $container->get( 'settings.connection-state' );
-
-					return $state->is_connected();
-				}
-
-				// Backwards compatibility with pre 3.0.0 (deprecated).
-				if ( $container->has( 'onboarding.state' ) &&
-					defined( '\WooCommerce\PayPalCommerce\Onboarding\State::STATE_ONBOARDED' ) ) {
-					$state = $container->get( 'onboarding.state' );
-
-					return $state->current_state() >= \WooCommerce\PayPalCommerce\Onboarding\State::STATE_ONBOARDED;
-				}
-			} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-				// Ignore any exceptions.
-			}
+			return true === \WC_Amazon_Payments_Advanced_API::validate_api_settings();
 		}
 
 		// Let the caller know that we couldn't determine the onboarding status.

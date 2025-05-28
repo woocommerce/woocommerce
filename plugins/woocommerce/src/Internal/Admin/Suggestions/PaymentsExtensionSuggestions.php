@@ -10,9 +10,9 @@ use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Utilities\ArrayUtil;
 
 /**
- * Partner payment extensions provider class.
+ * Partner payments extension suggestions provider class.
  */
-class PaymentExtensionSuggestions {
+class PaymentsExtensionSuggestions {
 	/*
 	 * The unique IDs for the payment extension suggestions.
 	 *
@@ -1935,18 +1935,18 @@ class PaymentExtensionSuggestions {
 	/**
 	 * The suggestion incentives provider.
 	 *
-	 * @var PaymentExtensionSuggestionIncentives
+	 * @var PaymentsExtensionSuggestionIncentives
 	 */
-	private PaymentExtensionSuggestionIncentives $suggestion_incentives;
+	private PaymentsExtensionSuggestionIncentives $suggestion_incentives;
 
 	/**
 	 * Initialize the class instance.
 	 *
-	 * @param PaymentExtensionSuggestionIncentives $suggestion_incentives The suggestion incentives provider.
+	 * @param PaymentsExtensionSuggestionIncentives $suggestion_incentives The suggestion incentives provider.
 	 *
 	 * @internal
 	 */
-	final public function init( PaymentExtensionSuggestionIncentives $suggestion_incentives ) {
+	final public function init( PaymentsExtensionSuggestionIncentives $suggestion_incentives ) {
 		$this->suggestion_incentives = $suggestion_incentives;
 	}
 

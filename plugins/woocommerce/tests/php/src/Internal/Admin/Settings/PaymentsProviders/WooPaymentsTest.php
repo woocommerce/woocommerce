@@ -4,9 +4,9 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentProviders;
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\PaymentGateway;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use WC_Unit_Test_Case;
@@ -103,7 +103,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		);
 
 		// Arrange the version constant to meet the minimum requirements for the native in-context onboarding.
-		Constants::set_constant( 'WCPAY_VERSION_NUMBER', PaymentProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION );
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', PaymentsProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION );
 
 		// Act.
 		$gateway_details = $this->sut->get_details( $fake_gateway, 999 );
@@ -132,10 +132,10 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 					),
 				),
 				'plugin'      => array(
-					'_type'  => PaymentProviders::EXTENSION_TYPE_WPORG,
+					'_type'  => PaymentsProviders::EXTENSION_TYPE_WPORG,
 					'slug'   => 'woocommerce-payments',
 					'file'   => 'woocommerce-payments/woocommerce-payments',
-					'status' => PaymentProviders::EXTENSION_ACTIVE,
+					'status' => PaymentsProviders::EXTENSION_ACTIVE,
 				),
 				'onboarding'  => array(
 					'type'                        => PaymentGateway::ONBOARDING_TYPE_NATIVE_IN_CONTEXT,

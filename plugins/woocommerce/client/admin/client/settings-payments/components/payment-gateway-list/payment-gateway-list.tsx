@@ -4,10 +4,10 @@
 import {
 	PaymentsEntity,
 	PaymentsProvider,
-	PaymentProviderType,
+	PaymentsProviderType,
 	PaymentGatewayProvider,
 	OfflinePmsGroupProvider,
-	PaymentExtensionSuggestionProvider,
+	PaymentsExtensionSuggestionProvider,
 } from '@woocommerce/data';
 import { Gridicon } from '@automattic/components';
 
@@ -93,9 +93,9 @@ export const PaymentGatewayList = ( {
 			{ providers.map( ( provider: PaymentsProvider ) => {
 				switch ( provider._type ) {
 					// Return different components wrapped into SortableItem depending on the provider type.
-					case PaymentProviderType.Suggestion:
+					case PaymentsProviderType.Suggestion:
 						const suggestion =
-							provider as PaymentExtensionSuggestionProvider;
+							provider as PaymentsExtensionSuggestionProvider;
 						const pluginInstalled = installedPluginSlugs.includes(
 							provider.plugin.slug
 						);
@@ -114,7 +114,7 @@ export const PaymentGatewayList = ( {
 								} ) }
 							</SortableItem>
 						);
-					case PaymentProviderType.Gateway:
+					case PaymentsProviderType.Gateway:
 						const gateway = provider as PaymentGatewayProvider;
 						return (
 							<SortableItem
@@ -130,7 +130,7 @@ export const PaymentGatewayList = ( {
 								} ) }
 							</SortableItem>
 						);
-					case PaymentProviderType.OfflinePmsGroup:
+					case PaymentsProviderType.OfflinePmsGroup:
 						// Offline payments item logic is described below.
 						const offlinePmsGroup =
 							provider as OfflinePmsGroupProvider;

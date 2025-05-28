@@ -1,10 +1,10 @@
 <?php
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 
 use Automattic\WooCommerce\Admin\PluginsHelper;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Throwable;
@@ -432,9 +432,9 @@ class PaymentGateway {
 			'slug'   => $this->get_plugin_slug( $payment_gateway ),
 			// Only include the plugin file if the entity type is a regular plugin.
 			// We don't want to try to change the state of must-use plugins or themes.
-			'file'   => PaymentProviders::EXTENSION_TYPE_WPORG === $entity_type ? $this->get_plugin_file( $payment_gateway ) : '',
+			'file'   => PaymentsProviders::EXTENSION_TYPE_WPORG === $entity_type ? $this->get_plugin_file( $payment_gateway ) : '',
 			// The gateway's underlying plugin is obviously active (aka the code is running).
-			'status' => PaymentProviders::EXTENSION_ACTIVE,
+			'status' => PaymentsProviders::EXTENSION_ACTIVE,
 		);
 	}
 
@@ -466,11 +466,11 @@ class PaymentGateway {
 
 		$entity_type = $this->get_containing_entity_type( $payment_gateway );
 		// Bail if we couldn't determine the entity type.
-		if ( PaymentProviders::EXTENSION_TYPE_UNKNOWN === $entity_type ) {
+		if ( PaymentsProviders::EXTENSION_TYPE_UNKNOWN === $entity_type ) {
 			return '';
 		}
 
-		if ( PaymentProviders::EXTENSION_TYPE_THEME === $entity_type ) {
+		if ( PaymentsProviders::EXTENSION_TYPE_THEME === $entity_type ) {
 			// Find the theme directory it is part of and extract the slug.
 			// This accounts for both parent and child themes.
 			if ( is_array( $wp_theme_directories ) ) {
@@ -728,13 +728,13 @@ class PaymentGateway {
 			if ( ! in_array(
 				$payment_gateway->extension_type,
 				array(
-					PaymentProviders::EXTENSION_TYPE_WPORG,
-					PaymentProviders::EXTENSION_TYPE_MU_PLUGIN,
-					PaymentProviders::EXTENSION_TYPE_THEME,
+					PaymentsProviders::EXTENSION_TYPE_WPORG,
+					PaymentsProviders::EXTENSION_TYPE_MU_PLUGIN,
+					PaymentsProviders::EXTENSION_TYPE_THEME,
 				),
 				true
 			) ) {
-				return PaymentProviders::EXTENSION_TYPE_UNKNOWN;
+				return PaymentsProviders::EXTENSION_TYPE_UNKNOWN;
 			}
 
 			return $payment_gateway->extension_type;
@@ -743,7 +743,7 @@ class PaymentGateway {
 		$gateway_class_filename = $this->get_class_filename( $payment_gateway );
 		// Bail if we couldn't get the gateway class filename.
 		if ( ! is_string( $gateway_class_filename ) ) {
-			return PaymentProviders::EXTENSION_TYPE_UNKNOWN;
+			return PaymentsProviders::EXTENSION_TYPE_UNKNOWN;
 		}
 
 		// Plugin paths logic closely matches the one in plugin_basename().
@@ -761,12 +761,12 @@ class PaymentGateway {
 		// Test for regular plugins.
 		if ( str_starts_with( $gateway_class_filename, wp_normalize_path( WP_PLUGIN_DIR ) ) ) {
 			// For now, all plugins are considered WordPress.org plugins.
-			return PaymentProviders::EXTENSION_TYPE_WPORG;
+			return PaymentsProviders::EXTENSION_TYPE_WPORG;
 		}
 
 		// Test for must-use plugins.
 		if ( str_starts_with( $gateway_class_filename, wp_normalize_path( WPMU_PLUGIN_DIR ) ) ) {
-			return PaymentProviders::EXTENSION_TYPE_MU_PLUGIN;
+			return PaymentsProviders::EXTENSION_TYPE_MU_PLUGIN;
 		}
 
 		// Check if it is part of a theme.
@@ -774,13 +774,13 @@ class PaymentGateway {
 			foreach ( $wp_theme_directories as $dir ) {
 				// Check if the class file is in a theme directory.
 				if ( str_starts_with( $gateway_class_filename, $dir ) ) {
-					return PaymentProviders::EXTENSION_TYPE_THEME;
+					return PaymentsProviders::EXTENSION_TYPE_THEME;
 				}
 			}
 		}
 
 		// Default to an unknown type.
-		return PaymentProviders::EXTENSION_TYPE_UNKNOWN;
+		return PaymentsProviders::EXTENSION_TYPE_UNKNOWN;
 	}
 
 	/**
