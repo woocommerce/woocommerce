@@ -250,7 +250,12 @@ export const OtherPaymentGateways = ( {
 													/>
 												) }
 												{ /* All payment extension suggestions are official. */ }
-												<OfficialBadge variant="expanded" />
+												<OfficialBadge
+													variant="expanded"
+													suggestionId={
+														extension.id
+													}
+												/>
 											</span>
 											<span className="other-payment-gateways__content__grid-item__content__description">
 												{ decodeEntities(
