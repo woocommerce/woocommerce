@@ -59,7 +59,7 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test that get_setting() should use cache.
+	 * @testdox Test that get_session should use cache.
 	 */
 	public function test_get_session_should_use_cache() {
 		$session = $this->handler->get_session( $this->session_key );
@@ -67,16 +67,16 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test that get_setting() shouldn't use cache.
+	 * @testdox Test that get_session loads properly on cache miss.
 	 */
-	public function test_get_session_should_not_use_cache() {
+	public function test_get_session_loads_on_cache_miss() {
 		wp_cache_delete( $this->cache_prefix . $this->session_key, WC_SESSION_CACHE_GROUP );
 		$session = $this->handler->get_session( $this->session_key );
 		$this->assertEquals( array( 'cart' => 'fake cart' ), $session );
 	}
 
 	/**
-	 * @testdox Test that get_setting() should return default value.
+	 * @testdox Test that get_session should return default value.
 	 */
 	public function test_get_session_should_return_default_value() {
 		$default_session = array( 'session' => 'default' );
@@ -208,7 +208,6 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 
 		wp_set_current_user( $customer->get_id() );
 
-		$handler->init();
 		$handler->set( 'cart', 'fake cart' );
 		$handler->save_data();
 
@@ -227,6 +226,42 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 		$this->assertFalse( wp_cache_get( $this->cache_prefix . $customer_id, WC_SESSION_CACHE_GROUP ) );
 		$this->assertNull( $this->get_session_from_db( $customer_id ) );
 		$this->assertNotNull( $this->get_session_from_db( '1' ) );
+	}
+
+	/**
+	 * @testdox Test that session is destroyed if the session data is empty and the cart is not yet initialized.
+	 */
+	public function test_destroy_session_data_is_empty() {
+		$customer_id        = (string) get_current_user_id();
+		$session_expiration = time() + 50000;
+		$session_expiring   = time() + 5000;
+		$cookie_hash        = '';
+
+		$handler = $this
+			->getMockBuilder( WC_Session_Handler::class )
+			->setMethods( array( 'get_session_cookie' ) )
+			->getMock();
+
+		$handler
+			->method( 'get_session_cookie' )
+			->willReturn( array( $customer_id, $session_expiration, $session_expiring, $cookie_hash ) );
+
+		$handler->init();
+		// Verify that we loaded the session from $this->create_session() properly.
+		$this->assertEquals( 'fake cart', $handler->get( 'cart' ) );
+		// Empty the only session data before initializing.
+		$handler->set( 'cart', null );
+		$handler->save_data();
+		WC()->cart = null;
+
+		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		$handler->init_session_cookie();
+
+		remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		$this->assertFalse( wp_cache_get( $this->cache_prefix . $this->session_key, WC_SESSION_CACHE_GROUP ) );
+		$this->assertNull( $this->get_session_from_db( $this->session_key ) );
 	}
 
 	/**

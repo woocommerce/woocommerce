@@ -67,7 +67,7 @@ if [ -n "$changedFiles" ]; then
     iterations=$( echo $lintingJobs | jq length )
 
     # Failsafe: running full-scale repo linting might occur occasionally - not clear why, hence this failsafe.
-    if [ $iterations -ge 45 ]; then
+    if [ $iterations -ge 43 ]; then
     	echo "-> Looks like we were about to lint the whole monorepo, it might take a while so we are skipping this step [SKIP]"
     	echo "   Note: that's not necessary related to the changes - possibly we are behind the changes on remote."
     	exit 0

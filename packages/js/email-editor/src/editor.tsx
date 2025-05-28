@@ -14,7 +14,9 @@ import { initializeLayout } from './layouts/flex-email';
 import { InnerEditor } from './components/block-editor';
 import { createStore, storeName, editorCurrentPostType } from './store';
 import { initHooks } from './editor-hooks';
+import { initTextHooks } from './text-hooks';
 import { initEventCollector } from './events';
+import { useContentValidation } from './hooks/use-content-validation';
 import './style.scss';
 
 function Editor() {
@@ -25,6 +27,7 @@ function Editor() {
 		} ),
 		[]
 	);
+	useContentValidation();
 
 	return (
 		<StrictMode>
@@ -52,6 +55,7 @@ export function initialize( elementId: string ) {
 	initializeLayout();
 	initBlocks();
 	initHooks();
+	initTextHooks();
 	const root = createRoot( container );
 	root.render( <WrappedEditor /> );
 }

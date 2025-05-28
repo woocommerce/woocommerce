@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Perform WCCOM requests only when it's really necessary
