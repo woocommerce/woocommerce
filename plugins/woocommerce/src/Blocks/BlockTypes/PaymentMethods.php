@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use WP_Block;
+use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 
 /**
  * PaymentMethods class.
@@ -44,25 +45,41 @@ class PaymentMethods extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$payment_methods = $attributes['formattedPaymentMethods'];
+		$payment_methods_from_server = PaymentUtils::get_enabled_payment_gateways();
+		$formatted_payment_methods = array_reduce(
+			$payment_methods_from_server,
+			function ( $acc, $method ) {
+				if ( $method->get_title() === 'Cards' ) {
+					//var_dump( $method );
+				}
+				$acc[] = [
+					'id'          => $method->id,
+					'title'       => $method->get_title() !== '' ? $method->get_title() : $method->get_method_title(),
+					'icon'       => $method->get_icon(),
+				];
+				return $acc;
+			},
+			[]
+		);
+
+		//$payment_methods = $attributes['formattedPaymentMethods'];
 		$output = '';
 		$show_as_icons = isset( $attributes['showAsIcons'] ) ? $attributes['showAsIcons'] : false;
 
-		if ( ! empty( $payment_methods ) ) {
+		if ( ! empty( $formatted_payment_methods ) ) {
 			$wrapper_attributes = get_block_wrapper_attributes( [ 'class' => 'wc-block-payment-methods' ] );
 			$output .= sprintf( '<div %s>', $wrapper_attributes );
 			$output .= '<ul class="wc-block-payment-methods__list">';
-			foreach ( $payment_methods as $method ) {
-				if ( $show_as_icons && ! empty( $method['icons'] ) && isset( $method['icons'][0] ) ) {
+			foreach ( $formatted_payment_methods as $method ) {
+				if ( $show_as_icons && ! empty( $method['icon'] ) ) {
 					$output .= sprintf(
-						'<li class="wc-block-payment-methods__list-item"><img src="%s" alt="%s" class="wc-block-payment-methods__list-item-icon"></li>',
-						esc_url( $method['icons'][0] ),
-						esc_attr( $method['ariaLabel'] )
+						'<li class="wc-block-payment-methods__list-item">%s</li>',
+						$method['icon']
 					);
 				} else {
 					$output .= sprintf(
 						'<li class="wc-block-payment-methods__list-item">%s</li>',
-						esc_html( $method['ariaLabel'] )
+						esc_html( $method['title'] )
 					);
 				}
 			}
