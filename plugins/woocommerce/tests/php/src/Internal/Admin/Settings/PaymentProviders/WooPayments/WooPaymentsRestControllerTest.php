@@ -1190,6 +1190,10 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 							'type' => WooPaymentsService::ACTION_TYPE_REDIRECT,
 							'href' => 'https://example.com/kyc_fallback',
 						),
+						'clean' 			=> array(
+							'type' => WooPaymentsService::ACTION_TYPE_REST,
+							'href' => rest_url( self::ENDPOINT . '/step1/clean' ),
+						),
 					),
 					'context'        => array(),
 				),
@@ -1222,6 +1226,10 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 						// No kyc_session step for this step.
 						// No kyc_session_finish step for this step.
 						// No kyc_fallback step for this step.
+						'clean' => array(
+							'type' => WooPaymentsService::ACTION_TYPE_REST,
+							'href' => rest_url( self::ENDPOINT . '/step2/clean' ),
+						),
 					),
 					'context'        => array(),
 				),
