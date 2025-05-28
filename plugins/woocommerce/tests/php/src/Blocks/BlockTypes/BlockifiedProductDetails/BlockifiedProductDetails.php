@@ -190,7 +190,7 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 			return $hooked_blocks;
 		} );
 
-		$hooked_block_types_introspection = new MockAction();
+		$hooked_block_types_introspection = new \MockAction();
 		add_filter( 'hooked_block_types', array( $hooked_block_types_introspection, 'filter' ), 20, 4 );
 
 		// Create a new BlockifiedProductDetails block class with the mocked AssetDataRegistry.
