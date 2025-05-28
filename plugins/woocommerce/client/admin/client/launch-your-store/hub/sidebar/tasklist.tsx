@@ -21,6 +21,7 @@ import {
 	createStorageUtils,
 } from '@woocommerce/onboarding';
 import { getAdminLink } from '@woocommerce/settings';
+import { getCountryCode } from '~/dashboard/utils';
 
 const SEVEN_DAYS_IN_SECONDS = 60 * 60 * 24 * 7;
 export const LYS_RECENTLY_ACTIONED_TASKS_KEY = 'lys_recently_actioned_tasks';
@@ -32,6 +33,17 @@ export const {
 	LYS_RECENTLY_ACTIONED_TASKS_KEY,
 	SEVEN_DAYS_IN_SECONDS
 );
+
+/**
+ * Check if WooPayments plugin is active
+ */
+const isWooPaymentsEnabled = () => {
+	return (
+		window?.wcSettings?.admin?.plugins?.activePlugins?.includes(
+			'woocommerce-payments'
+		) === true
+	);
+};
 
 export const getLysTasklist = async () => {
 	const LYS_TASKS_WHITELIST = [
@@ -106,12 +118,14 @@ export function taskClickedAction( event: {
 	} );
 
 	// For payments tasks, we'll handle this in the state machine
-	if (
-		event.task.id === 'payments' ||
-		event.task.id === 'woocommerce-payments'
-	) {
+	if ( event.task.id === 'payments' ) {
 		// Return an event object with the correct type and stop execution
-		return { type: 'SHOW_PAYMENTS' };
+		// If WooPayments is enabled, we'll show the payments modal.
+		if ( isWooPaymentsEnabled() ) {
+			return { type: 'SHOW_PAYMENTS' };
+		}
+
+		// If not, the execution will continue and we'll default to the actionUrl.
 	}
 
 	if ( event.task.actionUrl ) {
