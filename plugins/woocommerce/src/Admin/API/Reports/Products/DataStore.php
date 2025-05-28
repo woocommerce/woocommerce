@@ -443,7 +443,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			// Skip line items without changes to product quantity.
 			if ( ! $product_qty ) {
-				$num_updated++;
+				++$num_updated;
 				continue;
 			}
 
