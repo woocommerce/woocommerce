@@ -16,7 +16,6 @@ permissions: {}
 jobs:
   verify-prs:
     name: 'Verify if any PR is left open by author:app/github-actions'
-    if: ${{ 'false' }}
     outputs:
       runBuildZipJob: ${{ steps.verify-prs.outputs.runBuildZipJob }}
     runs-on: ubuntu-latest
@@ -101,8 +100,7 @@ jobs:
 
       - name: 'Pre-build verification'
         run: |
-            #branch_name="${GITHUB_REF#refs/heads/}"
-            branch_name="release/10.0"
+            branch_name="${GITHUB_REF#refs/heads/}"
             if  [[ $branch_name != release/* ]] ; then
                 echo "[ERR] Pre-build verification: the branch name is NOT matching 'release/*' pattern (identified as $branch_name)"
                 exit 1
@@ -149,7 +147,7 @@ jobs:
   build:
     name: Build release zip file
     runs-on: ubuntu-latest
-    if: ${{ 'false' && needs.verify-prs.outputs.runBuildZipJob == 'true' }}
+    if: ${{ needs.verify-prs.outputs.runBuildZipJob == 'true' }}
     needs: [ verify-prs, verify-release-versions ]
     permissions:
       contents: read
