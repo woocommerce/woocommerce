@@ -64,7 +64,7 @@ class CheckoutLink {
 		}
 
 		if ( ! $this->validate_checkout_link() ) {
-			$redirect = wc_get_cart_url();
+			$redirect = add_query_arg( 'wc_error', rawurlencode( __( 'The provided checkout link was out of date or invalid. No products were added to the cart.', 'woocommerce' ) ), wc_get_cart_url() );
 		} else {
 			wc()->cart->empty_cart();
 			$redirect = $this->get_checkout_link();

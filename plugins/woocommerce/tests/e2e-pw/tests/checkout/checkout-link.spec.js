@@ -135,6 +135,30 @@ test.describe( 'Checkout Link Endpoint', () => {
 			// Assert error notice is shown for invalid product
 			await expect(
 				page.getByText(
+					'Product with ID "999999" was not found and cannot be added to the cart.'
+				)
+			).toBeVisible();
+
+			// Cart should be empty
+			await expect(
+				page.getByText( 'Your cart is currently empty!' )
+			).toBeVisible();
+		}
+	);
+	test(
+		'Guest user sees error when invalid link is provided',
+		{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
+		async ( { page, baseURL } ) => {
+			// Visit checkout-link with invalid product ID only.
+			const checkoutLink = `${ baseURL }/checkout-link?products=abc`;
+			await page.goto( checkoutLink );
+
+			// Should redirect to cart if cart is empty.
+			await expect( page ).toHaveURL( /\/cart/ );
+
+			// Assert error notice is shown for invalid product
+			await expect(
+				page.getByText(
 					'The provided checkout link was out of date or invalid. No products were added to the cart.'
 				)
 			).toBeVisible();
