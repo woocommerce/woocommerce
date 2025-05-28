@@ -35,6 +35,8 @@ body:
       value: |
         ### RC release
         
+        <!-- Note: Feel free to duplicate the checklist for new RCs if this is aligned with the current process. -->
+        
         #### Get release artifact ready
 
         -    [] Ensure [GitHub services](https://www.githubstatus.com/) are fully operational
@@ -70,6 +72,8 @@ body:
     attributes:
       value: |
         ### Final and dot-releases
+        
+        <!-- Note: Feel free to duplicate the checklist for new dot-releases if this is aligned with the current process. -->
         
         #### Get release artifact ready
         
