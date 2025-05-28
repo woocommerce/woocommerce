@@ -17,7 +17,7 @@ import { useOnboardingContext } from '../../data/onboarding-context';
 import { PaymentMethodListItem } from '~/settings-payments/components/payment-method-list-item';
 import {
 	combinePaymentMethodsState,
-	combineRequestMethods,
+	combineRequestMethods, recordPaymentsOnboardingEvent,
 	shouldRenderPaymentMethodInMainList,
 } from '~/settings-payments/utils';
 import './style.scss';
@@ -224,6 +224,15 @@ export default function PaymentMethodsSelection() {
 								<Button
 									className="settings-payments-methods__show-more"
 									onClick={ () => {
+										recordPaymentsOnboardingEvent(
+											'woopayments_onboarding_modal_click',
+											{
+												step: currentStep?.id || '',
+												action: 'show_more',
+												hidden_count: hiddenCount,
+											}
+										);
+
 										setIsExpanded( ! isExpanded );
 
 										// Check for overflow after expanding hidden payment methods.
