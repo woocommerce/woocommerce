@@ -2189,31 +2189,6 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get the total shipping tax refunded.
-	 *
-	 * @since  9.9.0
-	 * @return float
-	 */
-	public function get_total_shipping_tax_refunded() {
-		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'total_shipping_tax_refunded' . $this->get_id();
-		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
-
-		if ( false !== $cached_data ) {
-			return $cached_data;
-		}
-
-		$total_shipping_tax_refunded = 0;
-
-		if ( method_exists( $this->data_store, 'get_total_shipping_tax_refunded' ) ) {
-			$total_shipping_tax_refunded = $this->data_store->get_total_shipping_tax_refunded( $this );
-		}
-
-		wp_cache_set( $cache_key, $total_shipping_tax_refunded, $this->cache_group );
-
-		return $total_shipping_tax_refunded;
-	}
-
-	/**
 	 * Get the total shipping refunded.
 	 *
 	 * @since  2.4
