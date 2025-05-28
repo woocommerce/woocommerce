@@ -74,7 +74,7 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 
 		// Check that the email status is now Draft
 		await expect( firstRow.locator( 'td' ).nth( 2 ) ).toHaveText(
-			'Disabled'
+			'Inactive'
 		);
 
 		// Open the first row more actions menu again

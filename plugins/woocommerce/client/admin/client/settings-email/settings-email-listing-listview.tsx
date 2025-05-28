@@ -35,8 +35,35 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 		view
 	);
 
-	const fields = useMemo(
-		() => [
+	const fields = useMemo( () => {
+		const recipientElements = Array.from(
+			emailTypes.reduce( ( acc, email ) => {
+				const recipients = [
+					...( email.recipients.to
+						? email.recipients.to
+								.split( ',' )
+								.map( ( r ) => r.trim() )
+								.filter( Boolean )
+						: [] ),
+					...( email.recipients.cc
+						? email.recipients.cc
+								.split( ',' )
+								.map( ( r ) => r.trim() )
+								.filter( Boolean )
+						: [] ),
+					...( email.recipients.bcc
+						? email.recipients.bcc
+								.split( ',' )
+								.map( ( r ) => r.trim() )
+								.filter( Boolean )
+						: [] ),
+				];
+				recipients.forEach( ( recipient ) => acc.add( recipient ) );
+				return acc;
+			}, new Set< string >() )
+		).map( ( recipient ) => ( { value: recipient, label: recipient } ) );
+
+		return [
 			{
 				id: 'title',
 				label: __( 'Title', 'woocommerce' ),
@@ -56,8 +83,11 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 			{
 				id: 'recipients',
 				label: __( 'Recipient(s)', 'woocommerce' ),
-				enableSorting: false,
-				enableHiding: false,
+				enableHiding: true,
+				filterBy: {
+					operators: [ 'isAny' ],
+				},
+				elements: recipientElements,
 				render: ( row: { item: EmailType } ) => {
 					return (
 						<RecipientsList recipients={ row.item.recipients } />
@@ -76,9 +106,8 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				},
 				elements: EMAIL_STATUSES,
 			},
-		],
-		[]
-	);
+		];
+	}, [ emailTypes ] );
 
 	const actions = useMemo(
 		() => [

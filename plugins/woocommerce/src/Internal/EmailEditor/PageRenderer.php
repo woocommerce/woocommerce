@@ -83,6 +83,10 @@ class PageRenderer {
 		// Enqueue media library scripts.
 		wp_enqueue_media();
 
+		// Enqueue CSS containing --wp--preset variables.
+		// They are needed for usage outside of the iframed email canvas (e.g. in the styles preview).
+		wp_enqueue_global_styles_css_custom_properties();
+
 		$this->preload_rest_api_data( $post_id, $post_type );
 
 		require_once ABSPATH . 'wp-admin/admin-header.php';
@@ -160,12 +164,17 @@ class PageRenderer {
 				'current_post_type'     => esc_js( $post_type ),
 				'current_post_id'       => $post_id,
 				'current_wp_user_email' => esc_js( $current_user_email ),
-				'editor_settings'       => $this->settings_controller->get_settings(),
+				'editor_settings'       => array(
+					...$this->settings_controller->get_settings(),
+					'isFullScreenForced'     => true,
+					'displaySendEmailButton' => false,
+				),
 				'editor_theme'          => $this->theme_controller->get_base_theme()->get_raw_data(),
 				'user_theme_post_id'    => $this->user_theme->get_user_theme_post()->ID,
 				'urls'                  => array(
 					'listings' => admin_url( 'admin.php?page=wc-settings&tab=email' ),
 					'send'     => admin_url( 'admin.php?page=wc-settings&tab=email' ),
+					'back'     => admin_url( 'admin.php?page=wc-settings&tab=email' ),
 				),
 				'email_types'           => $email_types,
 				'block_preview_url'     => esc_url( wp_nonce_url( admin_url( '?preview_woocommerce_mail_editor_content=true' ), 'preview-mail' ) ),

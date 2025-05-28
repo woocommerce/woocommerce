@@ -3,7 +3,7 @@
     {
       "post_title": "WooCommerce developer documentation",
       "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/README.md",
-      "hash": "f6c49a9bd5838c85a648be084ff5d65326f3394b5c7927a65dd7f0c8bf073c5e",
+      "hash": "9c69dd50103f34c35b8e7b35cfc094dc78db10694a76e8be46a90b907ff6b830",
       "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/README.md",
       "id": "65f434b31529b2793f7f7adcadfec487c797bdd2",
       "links": {
@@ -757,7 +757,7 @@
           "post_title": "Email HTML - Best Practices",
           "menu_title": "Email HTML - Best Practices",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/emails/email-html-best-practices.md",
-          "hash": "40f2d0a5459bedb4089dcf84bf2aaf162b8b8b4f6d7d67d879ee23481c09cfb8",
+          "hash": "200ad453e137d6886a47e823b2898a84d42f9ec98995b1e9daa6402b29fab464",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/emails/email-html-best-practices.md",
           "id": "79c02f8dcd14aeaa6d93bcc8d2ad5b5c08479bac"
         }
@@ -1971,7 +1971,7 @@
           "menu_title": "Commands",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/wc-cli/wc-cli-commands.md",
-          "hash": "35af242ac3398790af3fb3148cbc92f9494fa687436441693795cd7c189ef885",
+          "hash": "a6ab7ba67caade7119967514aeeffe6e770335f3dc6abf962ad837f712cb6931",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/wc-cli/wc-cli-commands.md",
           "id": "73d6bc6468d23a9e93d16d574399105b143e43af"
         },
@@ -2000,5 +2000,5 @@
       "categories": []
     }
   ],
-  "hash": "aa81395232e552fb858fb6f0f21ac9ecc0776919e77997d4814b5111047fc082"
+  "hash": "2ece70c4199ed2d1c83128b150a4ab77d83bb5c25afc454630e6e6b47df43cc5"
 }

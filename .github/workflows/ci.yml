@@ -21,10 +21,6 @@ on:
         required: true
         default: 'default'
         type: string
-      wc-version:
-        description: 'Specific WooCommerce version to install by the test jobs supporting it'
-        required: false
-        type: string
       refName:
         description: 'The ref name to run tests on. It needs to have a corresponding release published.'
         required: false
@@ -246,7 +242,6 @@ jobs:
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
           LAST_FAILED_RUN: ${{ vars.LAST_FAILED_RUN }}
           GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          WC_VERSION: ${{ inputs.wc-version }}
           PLUGIN_SLUG: ${{ inputs.refName == 'nightly' && 'woocommerce-trunk-nightly' || '' }} # required by test:plugincheck
         run: |
           lastRunFile="${{ steps.download-last-run-info.outputs.download-path }}/last-run__${{ strategy.job-index }}/.last-run.json"
