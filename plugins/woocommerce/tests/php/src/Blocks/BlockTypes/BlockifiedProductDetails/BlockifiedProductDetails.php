@@ -175,20 +175,22 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 	}
 
 	public function test_hooked_block() {
-		$test_block = [
-			"slug" => "custom-info",
-			"title" => "Custom Info",
-			"content" =>
-				"<!-- wp:paragraph --><p>This is the content for the custom info tab.</p><!-- /wp:paragraph -->"
-		];
+		$test_block = array(
+			'slug'    => 'custom-info',
+			'title'   => 'Custom Info',
+			'content' => '<!-- wp:paragraph --><p>This is the content for the custom info tab.</p><!-- /wp:paragraph -->',
+		);
 
 		remove_all_filters( 'hooked_block_types' );
 		remove_all_filters( 'hooked_block_' . $test_block['slug'] );
 
-		add_filter( 'woocommerce_product_details_hooked_blocks', function ( $hooked_blocks ) use ( $test_block ) {
-			$hooked_blocks[] = $test_block;
-			return $hooked_blocks;
-		} );
+		add_filter(
+			'woocommerce_product_details_hooked_blocks',
+			function ( $hooked_blocks ) use ( $test_block ) {
+				$hooked_blocks[] = $test_block;
+				return $hooked_blocks;
+			}
+		);
 
 		$hooked_block_types_introspection = new \MockAction();
 		add_filter( 'hooked_block_types', array( $hooked_block_types_introspection, 'filter' ), 20, 4 );
