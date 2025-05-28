@@ -200,7 +200,7 @@ test(
 			// await closeTourModal( { page, timeout: 2000 } );
 			await page.getByRole( 'button', { name: 'Advanced' } ).click();
 			await expect(
-				page.getByLabel( 'Limit purchases to 1 item per order' )
+				page.getByLabel( 'Limit purchases to a single item per order' )
 			).not.toBeChecked();
 		} );
 
@@ -229,7 +229,7 @@ test(
 		await test.step( 'enable limit purchases', async () => {
 			await page.getByRole( 'button', { name: 'Advanced' } ).click();
 			await page
-				.getByLabel( 'Limit purchases to 1 item per order' )
+				.getByLabel( 'Limit purchases to a single item per order' )
 				.check();
 		} );
 
