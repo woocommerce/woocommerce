@@ -83,7 +83,8 @@ class Settings_Controller {
 
 		$settings['autosaveInterval'] = 60;
 		// Disable code editing in the email editor. We manipulate HTML in renderer so it doesn't make sense to have it enabled.
-		$settings['codeEditingEnabled'] = false;
+		$settings['codeEditingEnabled']   = false;
+		$settings['supportsTemplateMode'] = true;
 
 		$settings['__experimentalFeatures'] = $theme_settings;
 		// Controls which alignment options are available for blocks.

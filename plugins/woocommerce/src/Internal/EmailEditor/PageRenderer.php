@@ -203,6 +203,10 @@ class PageRenderer {
 	}
 
 	public function block_editor_settings( $settings, $post ) {
+		//return $settings;
+		// var_dump( json_encode( $settings ) );
+		// var_dump( json_encode( $this->settings_controller->get_settings() ) );
+		// die();
 		return $this->settings_controller->get_settings();
 	}
 

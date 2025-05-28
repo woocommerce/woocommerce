@@ -1,10 +1,11 @@
 /**
  * External dependencies
  */
-import { useMemo } from '@wordpress/element';
+import { useMemo, useRef } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 import deepmerge from 'deepmerge';
+import fastDeepEqual from 'fast-deep-equal/es6';
 
 /**
  * Internal dependencies
@@ -18,16 +19,17 @@ import { unwrapCompressedPresetStyleVariable } from '../style-variables';
 const EMPTY_ARRAY = [];
 
 export function useEmailCss() {
+	const stylesRef = useRef< EmailBuiltStyles[] >( EMPTY_ARRAY );
 	const { userTheme } = useUserTheme();
 	const { editorTheme, layout, deviceType, editorSettingsStyles } = useSelect(
 		( select ) => {
 			const {
-				getEditorSettings,
 				// @ts-expect-error getDeviceType is not in types.
 				getDeviceType,
 			} = select( editorStore );
 
-			const editorSettings = getEditorSettings();
+			const editorSettings =
+				select( storeName ).getInitialEditorSettings();
 
 			return {
 				editorTheme: select( storeName ).getTheme(),
@@ -67,16 +69,18 @@ export function useEmailCss() {
 		) };`;
 	}
 
-	const finalStyles = useMemo( () => {
-		return [
-			...( ( styles as EmailBuiltStyles[] ) ?? [] ),
-			{
-				css: `.is-root-container{ ${ rootContainerStyles } }`,
-			},
-			...( editorSettingsStyles ?? [] ),
-		];
-	}, [ styles, editorSettingsStyles, rootContainerStyles ] );
+	const finalStyles = [
+		...( ( styles as EmailBuiltStyles[] ) ?? [] ),
+		{
+			css: `.is-root-container{ ${ rootContainerStyles } }`,
+		},
+		...( editorSettingsStyles ?? [] ),
+	];
+
+	if ( ! fastDeepEqual( stylesRef.current, finalStyles ) ) {
+		stylesRef.current = finalStyles;
+	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-	return [ finalStyles || EMPTY_ARRAY ];
+	return [ stylesRef.current || EMPTY_ARRAY ];
 }
