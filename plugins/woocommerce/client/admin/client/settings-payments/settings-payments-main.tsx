@@ -12,7 +12,6 @@ import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
 import React, { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { recordEvent } from '@woocommerce/tracks';
 import { Button } from '@wordpress/components';
 
 /**
@@ -36,6 +35,7 @@ import {
 	getWooPaymentsTestDriveAccountLink,
 	isIncentiveDismissedEarlierThanTimestamp,
 	isActionIncentive,
+	recordPaymentsEvent,
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
 import WooPaymentsModal from '~/settings-payments/onboarding/providers/woopayments';
@@ -74,8 +74,8 @@ export const SettingsPaymentsMain = () => {
 	const assetUrl = getAdminSetting( 'wcAdminAssetUrl' );
 
 	useEffect( () => {
-		// Record the page view event
-		recordEvent( 'settings_payments_pageview' );
+		// Record the page view event.
+		recordPaymentsEvent( 'pageview' );
 
 		// Handle URL parameters and display messages or modals.
 		const urlParams = new URLSearchParams( window.location.search );
@@ -294,7 +294,7 @@ export const SettingsPaymentsMain = () => {
 				}
 			} );
 
-		recordEvent( 'settings_payments_recommendations_pageview', eventProps );
+		recordPaymentsEvent( 'recommendations_pageview', eventProps );
 	}, [ suggestions, providers, isFetching ] );
 
 	const setupPlugin = useCallback(
@@ -315,7 +315,7 @@ export const SettingsPaymentsMain = () => {
 			}
 
 			setInstallingPlugin( id );
-			recordEvent( 'settings_payments_recommendations_setup', {
+			recordPaymentsEvent( 'recommendations_setup', {
 				extension_selected: slug,
 			} );
 			installAndActivatePlugins( [ slug ] )
@@ -330,7 +330,7 @@ export const SettingsPaymentsMain = () => {
 					);
 
 					// Record the plugin installation event.
-					recordEvent( 'settings_payments_provider_installed', {
+					recordPaymentsEvent( 'provider_installed', {
 						provider_id: id,
 					} );
 
@@ -348,7 +348,7 @@ export const SettingsPaymentsMain = () => {
 					);
 
 					// Record the event when user successfully enables a gateway.
-					recordEvent( 'settings_payments_provider_enable', {
+					recordPaymentsEvent( 'provider_enable', {
 						provider_id: id,
 					} );
 
@@ -429,7 +429,7 @@ export const SettingsPaymentsMain = () => {
 
 		const uniquePaymentsOptions = [ ...new Set( paymentOptionsList ) ];
 
-		recordEvent( 'settings_payments_recommendations_other_options', {
+		recordPaymentsEvent( 'recommendations_other_options', {
 			available_payment_methods: uniquePaymentsOptions.join( ', ' ),
 		} );
 	};
