@@ -153,7 +153,7 @@ export const IncentiveModal = ( {
 			display_context: context,
 		} );
 
-		// Dimiss the incentive.
+		// Dismiss the incentive.
 		onDismiss( incentive._links.dismiss.href, context );
 		handleClose();
 	};

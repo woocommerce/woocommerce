@@ -137,7 +137,7 @@ export const IncentiveBanner = ( {
 			display_context: context,
 		} );
 
-		// Dimiss the incentive.
+		// Dismiss the incentive.
 		setIsBusy( true );
 		onDismiss( incentive._links.dismiss.href, context );
 		setIsBusy( false );

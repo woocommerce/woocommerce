@@ -220,7 +220,7 @@ export const SettingsPaymentsMain = () => {
 			) {
 				const referenceTimestamp = new Date();
 				referenceTimestamp.setDate( referenceTimestamp.getDate() - 30 );
-				// If the merchant dismissed the switcher incentive modal more than 30 days ago,
+				// If the merchant dismissed the Switch incentive modal more than 30 days ago,
 				// show the banner instead of just highlighting the incentive.
 				// @see its server brother in plugins/woocommerce/src/Internal/Admin/Settings/PaymentsController::store_has_providers_with_incentive()
 				// for the admin menu red dot notice logic.
@@ -266,6 +266,7 @@ export const SettingsPaymentsMain = () => {
 		// Set the ref to true to prevent multiple pageview events.
 		triggeredPageViewRef.current = true;
 
+		// This prop is for historical data uniformity. WooPayments will also be recorded as a suggestion.
 		const eventProps: { [ key: string ]: boolean } = {
 			woocommerce_payments_displayed: providers.some( ( provider ) =>
 				isWooPayments( provider.id )
@@ -338,7 +339,7 @@ export const SettingsPaymentsMain = () => {
 						paymentSettingsStore
 					).getPaymentProviders( storeCountry );
 
-					// Find the matching provider the updated list.
+					// Find the matching provider in the updated list.
 					const updatedProvider = updatedProviders.find(
 						( provider: PaymentProvider ) =>
 							provider.id === id ||

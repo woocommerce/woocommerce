@@ -33,7 +33,7 @@ export default function WooPaymentsModal( {
 	const hasWPComConnection =
 		providerData?.onboarding?.state?.wpcom_has_working_connection || false;
 
-	// Open modal when on an onboarding route
+	// Open modal when on an onboarding route.
 	React.useEffect( () => {
 		if (
 			location.pathname.startsWith( wooPaymentsOnboardingPath ) &&
@@ -60,7 +60,7 @@ export default function WooPaymentsModal( {
 		createErrorNotice,
 	] );
 
-	// If the modal is open, without an onboarding route, add an onboarding route
+	// If the modal is open, without an onboarding route, add an onboarding route.
 	React.useEffect( () => {
 		if (
 			isOpen &&
