@@ -82,11 +82,8 @@ export const hasSelectedShippingRate = (
 	if ( ! hasShippingRate( shippingRates ) ) {
 		return false;
 	}
-	return shippingRates.some(
-		( shippingRatesPackage ) =>
-			!! shippingRatesPackage.shipping_rates.find(
-				( rate ) => rate.selected
-			)
+	return shippingRates.some( ( shippingRatesPackage ) =>
+		shippingRatesPackage.shipping_rates.some( ( rate ) => rate.selected )
 	);
 };
 
