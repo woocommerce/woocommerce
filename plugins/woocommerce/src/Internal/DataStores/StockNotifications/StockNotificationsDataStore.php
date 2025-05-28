@@ -92,19 +92,11 @@ CREATE TABLE $table_name (
 	date_last_attempt_gmt datetime NULL,
 	date_notified_gmt datetime NULL,
 	date_cancelled_gmt datetime NULL,
-<<<<<<< HEAD
-	cancellation_source varchar(255) NULL,
-	PRIMARY KEY  (id),
-	KEY product_status_attempt (product_id, status, date_last_attempt_gmt, id),
-	KEY user_lookup (user_id, product_id, status),
-	KEY email_lookup (user_email(100), product_id, status)
-=======
 	cancellation_source varchar(30) NULL,
 	PRIMARY KEY  (id),
 	KEY product_status_attempt (product_id, status, date_last_attempt_gmt, id),
 	KEY user_lookup (user_id, product_id, status),
 	KEY email_lookup (user_email, product_id, status)
->>>>>>> mic/back-in-stock-notifications
 ) $collate;
 CREATE TABLE $meta_table_name (
 	id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
