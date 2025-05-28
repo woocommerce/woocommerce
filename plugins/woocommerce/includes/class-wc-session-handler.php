@@ -51,6 +51,13 @@ class WC_Session_Handler extends WC_Session {
 	protected $_has_cookie = false; // phpcs:ignore PSR2.Classes.PropertyDeclaration.Underscore
 
 	/**
+	 * True when the token exists.
+	 *
+	 * @var bool Based on whether a token exists.
+	 */
+	protected $_has_token = false; // phpcs:ignore PSR2.Classes.PropertyDeclaration.Underscore
+
+	/**
 	 * Table name for session data.
 	 *
 	 * @var string Custom session table name
@@ -130,6 +137,13 @@ class WC_Session_Handler extends WC_Session {
 			return false;
 		}
 
+		// Check if the session already exists as a cookie. If so, return so the cookie can be initialized instead.
+		$cookie = $this->get_session_cookie();
+		if ( $cookie && $cookie[0] === $payload['user_id'] ) {
+			return false;
+		}
+
+		$this->_has_token   = true;
 		$this->_customer_id = $payload['user_id'];
 		$this->restore_session_data();
 
@@ -233,6 +247,13 @@ class WC_Session_Handler extends WC_Session {
 	 * @since 10.0.0
 	 */
 	private function restore_session_data() {
+		$session_data = $this->get_session_data();
+
+		// When restoring from token, exclude customer details for privacy reasons.
+		if ( $this->_has_token ) {
+			$session_data = array_diff_key( $session_data, array( 'customer' => true ) );
+		}
+
 		/**
 		 * Filters the session data when restoring from storage during initialization.
 		 *
@@ -249,7 +270,7 @@ class WC_Session_Handler extends WC_Session {
 		 * @param array $session_data The session data loaded from storage.
 		 * @return array Modified session data to be used for initialization.
 		 */
-		$this->_data = apply_filters( 'woocommerce_restored_session_data', $this->get_session_data() );
+		$this->_data = apply_filters( 'woocommerce_restored_session_data', $session_data );
 	}
 
 	/**
@@ -364,7 +385,7 @@ class WC_Session_Handler extends WC_Session {
 	 * @return bool
 	 */
 	public function has_session() {
-		return isset( $_COOKIE[ $this->_cookie ] ) || $this->_has_cookie || is_user_logged_in();
+		return isset( $_COOKIE[ $this->_cookie ] ) || $this->_has_cookie || $this->_has_token || is_user_logged_in();
 	}
 
 	/**
