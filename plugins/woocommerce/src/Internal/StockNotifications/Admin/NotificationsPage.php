@@ -16,7 +16,7 @@ class NotificationsPage {
 	 */
 	public static function output() {
 		$search = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$table = new NotificationsListTable();
+		$table  = new NotificationsListTable();
 		$table->prepare_items();
 		include __DIR__ . '/Views/html-admin-notifications.php';
 	}

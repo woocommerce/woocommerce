@@ -15,7 +15,7 @@ class MenusController {
 	 * Constructor.
 	 */
 	public function __construct() {
-		
+
 		// Add Stock Notifications menu item.
 		add_action( 'admin_menu', array( $this, 'add_menu' ), 10 );
 
@@ -47,7 +47,6 @@ class MenusController {
 		);
 
 		add_action( "load-$dashboard_page", array( $this, 'add_screen_options' ) );
-
 	}
 
 	/**
@@ -57,11 +56,11 @@ class MenusController {
 	 */
 	public function add_screen_options() {
 		$screen = get_current_screen();
-	
+
 		if ( ! $screen ) {
 			return;
 		}
-	
+
 		add_screen_option(
 			'per_page',
 			array(
@@ -69,16 +68,20 @@ class MenusController {
 				'default' => 10,
 				'option'  => 'stock_notifications_per_page',
 			)
-		);    
+		);
 	}
 
 	/**
 	 * Save screen options.
+     *
+     * @param int $status The status of the screen option.
+     * @param string $option The option name.
+     * @param int $value The value of the screen option.
 	 *
-	 * @return void
+	 * @return int
 	 */
 	public function set_screen_option( $status, $option, $value ) {
-		if ( $option === 'stock_notifications_per_page' ) {
+		if ( 'stock_notifications_per_page' === $option ) {
 			return (int) $value;
 		}
 		return $status;
@@ -173,7 +176,7 @@ class MenusController {
 	 * @return array
 	 */
 	public static function wc_admin_navigation_screen_ids( $screen_ids ) {
-        $screen_ids[] = 'woocommerce_page_customer_stock_notifications';
+		$screen_ids[] = 'woocommerce_page_customer_stock_notifications';
 		return $screen_ids;
 	}
 }

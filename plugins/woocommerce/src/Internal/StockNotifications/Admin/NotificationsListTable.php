@@ -63,22 +63,22 @@ class NotificationsListTable extends \WP_List_Table {
 		$this->data_store              = \WC_Data_Store::load( 'stock_notification' );
 		$this->total_items             = $this->data_store->query( array( 'return' => 'count' ) );
 		$this->has_stock_notifications = $this->total_items > 0 ? true : false;
-		
-        // Count active notifications.
-        $this->total_active_items = $this->data_store->query(
+
+		// Count active notifications.
+		$this->total_active_items = $this->data_store->query(
 			array(
-				'return'    => 'count',
-				'status'    => NotificationStatus::ACTIVE,
+				'return' => 'count',
+				'status' => NotificationStatus::ACTIVE,
 			)
 		);
 
-        // Count inactive notifications.
-        $this->total_inactive_items = $this->data_store->query(
-            array(
-                'return'    => 'count',
-                'status'    => NotificationStatus::SENT || NotificationStatus::CANCELLED || NotificationStatus::PENDING,
-            )
-        );
+		// Count inactive notifications.
+		$this->total_inactive_items = $this->data_store->query(
+			array(
+				'return' => 'count',
+				'status' => NotificationStatus::SENT || NotificationStatus::CANCELLED || NotificationStatus::PENDING,
+			)
+		);
 
 		parent::__construct(
 			array(
@@ -139,17 +139,17 @@ class NotificationsListTable extends \WP_List_Table {
 		// Build tooltip.
 		$tooltip = '';
 
-        if ( $notification->get_status() === NotificationStatus::PENDING ) {
-        	$status  = 'cancelled';
-        	$label   = __( 'Pending', 'woocommerce' );
-        	$tooltip = __( 'Awaiting verification', 'woocommerce' );
-        } elseif ( $notification->get_status() !== NotificationStatus::ACTIVE ) {
-        	$status = 'cancelled';
-        	$label  = __( 'Inactive', 'woocommerce' );
-        } else {
-        	$status = 'completed';
-        	$label  = __( 'Active', 'woocommerce' );
-        }
+		if ( $notification->get_status() === NotificationStatus::PENDING ) {
+			$status  = 'cancelled';
+			$label   = __( 'Pending', 'woocommerce' );
+			$tooltip = __( 'Awaiting verification', 'woocommerce' );
+		} elseif ( $notification->get_status() !== NotificationStatus::ACTIVE ) {
+			$status = 'cancelled';
+			$label  = __( 'Inactive', 'woocommerce' );
+		} else {
+			$status = 'completed';
+			$label  = __( 'Active', 'woocommerce' );
+		}
 
 		if ( ! empty( $tooltip ) ) {
 			printf( '<mark class="order-status %s tips" data-tip="%s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $status ) ), wp_kses_post( $tooltip ), esc_html( $label ) );
@@ -254,24 +254,24 @@ class NotificationsListTable extends \WP_List_Table {
 	 */
 	public function column_waiting_since( $notification ) {
 
-        if ( empty( $notification->get_date_created() ) || $notification->get_status() !== 'active' ) {
-            $t_time    = __( '&mdash;', 'woocommerce' );
-            $h_time    = $t_time;
-            $time_diff = 0;
-        } else {
-            $date_created_timestamp = $notification->get_date_created()->getTimestamp();
-            $t_time    = date_i18n( _x( 'Y/m/d g:i:s a', 'list table date hover format', 'woocommerce' ), $date_created_timestamp );
-            $time_diff = time() - $date_created_timestamp;
+		if ( empty( $notification->get_date_created() ) || $notification->get_status() !== 'active' ) {
+			$t_time    = __( '&mdash;', 'woocommerce' );
+			$h_time    = $t_time;
+			$time_diff = 0;
+		} else {
+			$date_created_timestamp = $notification->get_date_created()->getTimestamp();
+			$t_time                 = date_i18n( _x( 'Y/m/d g:i:s a', 'list table date hover format', 'woocommerce' ), $date_created_timestamp );
+			$time_diff              = time() - $date_created_timestamp;
 
-            if ( $time_diff > 0 && $time_diff < DAY_IN_SECONDS ) {
-                /* translators: %s: human time diff */
-                $h_time = wp_kses_post( human_time_diff( $date_created_timestamp ) );
-            } else {
-                $h_time = date_i18n( wc_date_format(), $date_created_timestamp );
-            }
-        }
+			if ( $time_diff > 0 && $time_diff < DAY_IN_SECONDS ) {
+				/* translators: %s: human time diff */
+				$h_time = wp_kses_post( human_time_diff( $date_created_timestamp ) );
+			} else {
+				$h_time = date_i18n( wc_date_format(), $date_created_timestamp );
+			}
+		}
 
-        echo '<span title="' . esc_attr( $t_time ) . '">' . esc_html( $h_time ) . '</span>';
+		echo '<span title="' . esc_attr( $t_time ) . '">' . esc_html( $h_time ) . '</span>';
 	}
 
 	/**
@@ -303,7 +303,7 @@ class NotificationsListTable extends \WP_List_Table {
 		$columns['date_subscribed'] = _x( 'Signed Up', 'column_name', 'woocommerce' );
 		$columns['waiting_since']   = _x( 'Waiting', 'column_name', 'woocommerce' );
 
-        return $columns;
+		return $columns;
 	}
 
 	/**
@@ -338,7 +338,8 @@ class NotificationsListTable extends \WP_List_Table {
 	 * @return void
 	 */
 	public function prepare_items() {
-		$per_page = (int) get_user_meta( get_current_user_id(), 'stock_notifications_per_page', true ) ?: 10;
+		$per_page = (int) get_user_meta( get_current_user_id(), 'stock_notifications_per_page', true );
+		$per_page = $per_page > 0 ? $per_page : 10;
 
 		// Table columns.
 		$columns               = $this->get_columns();
@@ -349,7 +350,7 @@ class NotificationsListTable extends \WP_List_Table {
 
 		// TODO: Create bulk actions.
 		// Process actions.
-		//$this->process_bulk_action();
+		// $this->process_bulk_action();.
 
 		// Setup params.
 		$paged   = isset( $_REQUEST['paged'] ) ? max( 0, (int) wp_unslash( $_REQUEST['paged'] ) - 1 ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -418,10 +419,10 @@ class NotificationsListTable extends \WP_List_Table {
 		// If has filter, re-calc the views numbers.
 		if ( $has_filters ) {
 			// Count active.
-			$query_args['status']  = NotificationStatus::ACTIVE;
+			$query_args['status']     = NotificationStatus::ACTIVE;
 			$this->total_active_items = $this->data_store->query( $query_args );
 			// Count inactive.
-			$query_args['status']    = NotificationStatus::SENT || NotificationStatus::CANCELLED || NotificationStatus::PENDING;
+			$query_args['status']       = NotificationStatus::SENT || NotificationStatus::CANCELLED || NotificationStatus::PENDING;
 			$this->total_inactive_items = $this->data_store->query( $query_args );
 		}
 
@@ -460,7 +461,7 @@ class NotificationsListTable extends \WP_List_Table {
 	 * @return void
 	 */
 	protected function render_filters() {
-		//$this->display_months_dropdown();
+		// $this->display_months_dropdown();.
 		$this->display_customer_dropdown();
 		$this->display_product_dropdown();
 	}
@@ -528,7 +529,7 @@ class NotificationsListTable extends \WP_List_Table {
 		<?php
 	}
 
-    /**
+	/**
 	 * Items of the `subsubsub` status menu.
 	 *
 	 * @return array
