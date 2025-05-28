@@ -4,7 +4,7 @@
  * External dependencies
  */
 import React from 'react';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 // @ts-ignore No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
 import clsx from 'clsx';
@@ -32,6 +32,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 		steps: allSteps,
 		currentStep,
 		justCompletedStepId,
+		storeError,
 	} = useOnboardingContext();
 
 	// Store the initial uncompleted step IDs on first render
@@ -103,6 +104,27 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 					</Heading>
 				</div>
 				<ItemGroup className="woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group">
+					{ /* In case of an error, we show the install WooPayments step, otherwise we show the steps */ }
+					{ !! storeError && (
+						<SidebarNavigationItem
+							key={ 'install_woopayments' }
+							className={ clsx( 'install_woopayments', {
+								'payment-step': true,
+							} ) }
+							icon={ taskIcons.activePaymentStep }
+							disabled={ true }
+							showChevron={ false }
+						>
+							{ sprintf(
+								/* translators: %1$s: WooPayments */
+								__(
+									'Install %1$s',
+									'woocommerce'
+								),
+								'WooPayments'
+							)}
+						</SidebarNavigationItem>
+					) }
 					{ stepsToDisplay.map( ( step ) => (
 						<SidebarNavigationItem
 							key={ step.id }
