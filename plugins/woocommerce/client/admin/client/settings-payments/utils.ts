@@ -3,7 +3,7 @@
  */
 import {
 	PaymentsProvider,
-	PaymentIncentive,
+	PaymentsProviderIncentive,
 	RecommendedPaymentMethod,
 } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
@@ -26,7 +26,7 @@ export const hasIncentive = ( extension: PaymentsProvider ) => {
  * Checks whether an incentive is an action incentive.
  */
 export const isActionIncentive = (
-	incentive: PaymentIncentive | undefined
+	incentive: PaymentsProviderIncentive | undefined
 ) => {
 	if ( ! incentive ) {
 		return false;
@@ -39,7 +39,7 @@ export const isActionIncentive = (
  * Checks whether an incentive is a switch incentive.
  */
 export const isSwitchIncentive = (
-	incentive: PaymentIncentive | undefined
+	incentive: PaymentsProviderIncentive | undefined
 ) => {
 	if ( ! incentive ) {
 		return false;
@@ -52,7 +52,7 @@ export const isSwitchIncentive = (
  * Checks whether an incentive is dismissed in a given context.
  */
 export const isIncentiveDismissedInContext = (
-	incentive: PaymentIncentive | undefined,
+	incentive: PaymentsProviderIncentive | undefined,
 	context: string
 ) => {
 	if ( ! incentive || ! Array.isArray( incentive._dismissals ) ) {
@@ -69,7 +69,7 @@ export const isIncentiveDismissedInContext = (
  * Checks whether an incentive is dismissed in a given context and if it was dismissed before a given reference timestamp.
  */
 export const isIncentiveDismissedEarlierThanTimestamp = (
-	incentive: PaymentIncentive | undefined,
+	incentive: PaymentsProviderIncentive | undefined,
 	context: string,
 	referenceTimestampMs: number // UNIX timestamp in milliseconds.
 ): boolean => {
@@ -119,11 +119,10 @@ export const getWooPaymentsTestDriveAccountLink = () => {
 
 export const resetWooPaymentsAccount = async () => {
 	try {
-		const response = await apiFetch( {
+		return await apiFetch( {
 			url: '/wp-json/wc-admin/settings/payments/woopayments/onboarding/reset',
 			method: 'POST',
 		} );
-		return response;
 	} catch ( error ) {
 		throw error;
 	}
@@ -134,11 +133,10 @@ export const resetWooPaymentsAccount = async () => {
  */
 export const disableWooPaymentsTestMode = async () => {
 	try {
-		const response = await apiFetch( {
+		return await apiFetch( {
 			url: '/wp-json/wc-admin/settings/payments/woopayments/onboarding/test_account/disable',
 			method: 'POST',
 		} );
-		return response;
 	} catch ( error ) {
 		throw error;
 	}

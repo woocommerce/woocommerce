@@ -13,7 +13,7 @@ import { __ } from '@wordpress/i18n';
 import { createInterpolateElement, useState } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import {
-	PaymentIncentive,
+	PaymentsProviderIncentive,
 	PaymentsProvider,
 	PaymentsEntity,
 } from '@woocommerce/data';
@@ -33,7 +33,7 @@ interface IncentiveModalProps {
 	/**
 	 * Incentive data.
 	 */
-	incentive: PaymentIncentive;
+	incentive: PaymentsProviderIncentive;
 	/**
 	 * Payments provider.
 	 */
