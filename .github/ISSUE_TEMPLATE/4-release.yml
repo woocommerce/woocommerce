@@ -69,7 +69,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        ### Final release
+        ### Final and dot-releases
         
         #### Get release artifact ready
         
@@ -98,7 +98,7 @@ body:
         #### Staging with Atomic
 
         -    [] Update the Atomic comms threads about the release completion        
-        -    [] For the next 4 hours, monitor the release staging (monitoring as per p1745322404770529/1745322371.115259-slack-C01DT6U03HC and updates in the Atomic comms threads).
+        -    [] For the next 4 hours (2 hours for dot-releases), monitor the release staging (monitoring as per p1745322404770529/1745322371.115259-slack-C01DT6U03HC and updates in the Atomic comms threads).
         
         #### Bump stable tag and release to GitHub
 
