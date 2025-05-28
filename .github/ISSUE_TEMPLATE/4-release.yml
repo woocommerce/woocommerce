@@ -43,6 +43,7 @@ body:
         -    [] Generate [changelog](https://github.com/woocommerce/woocommerce/blob/trunk/changelog.txt) ([workflow](https://github.com/woocommerce/woocommerce/actions/workflows/new-cfe-prr-pre-build-compile-changelog-file.yml))
         -    [] Create a PR to bump version in source code with `GITHUB_TOKEN=<your_PAT_token> pnpm utils code-freeze version-bump -b release/9.9 9.9.0-rc.1`
         -    [] Review (ensure PR CI-checks are passing) and merge the PR (ensure merge CI-checks are passing)
+        -    [] If CI fails due to E2E tests or infrastructure issues, coordinate with other teams to resolve the failures
         -    [] Build zip file ([workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-build-zip-file.yml))
         -    [] Validate version and stable tag in 'woocommerce.php' and `readme.txt` in the generated zip file
 
@@ -79,6 +80,7 @@ body:
         -    [] Generate [changelog](https://github.com/woocommerce/woocommerce/blob/trunk/changelog.txt) ([workflow](https://github.com/woocommerce/woocommerce/actions/workflows/new-cfe-prr-pre-build-compile-changelog-file.yml))
         -    [] Create a PR to bump version in source code with `GITHUB_TOKEN=<your_PAT_token> pnpm utils code-freeze version-bump -b release/9.9 9.9.0`
         -    [] Review (ensure PR CI-checks are passing) and merge the PR (ensure merge CI-checks are passing)
+        -    [] If CI fails due to E2E tests or infrastructure issues, coordinate with other teams to resolve the failures
         -    [] Build zip file ([workflow](https://github.com/woocommerce/woocommerce/actions/workflows/build-release-zip-file.yml))
         -    [] Validate version and stable tag in 'woocommerce.php' and `readme.txt` for the generated zip file
 
