@@ -173,7 +173,7 @@ export const PaymentExtensionSuggestionListItem = ( {
 					<div className="woocommerce-list__item-after__actions">
 						<EllipsisMenu
 							label={ __(
-								'Payment Provider Options',
+								'Payment provider options',
 								'woocommerce'
 							) }
 							provider={ suggestion }
