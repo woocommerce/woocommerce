@@ -69,6 +69,8 @@ class PageRenderer {
 			return;
 		}
 
+		add_filter( 'block_editor_settings_all', [$this, 'block_editor_settings'], 10, 2 );
+
 		// Load the email editor assets.
 		$this->load_editor_assets( $edited_item );
 
@@ -198,6 +200,10 @@ class PageRenderer {
 				'block_preview_url'     => esc_url( wp_nonce_url( admin_url( '?preview_woocommerce_mail_editor_content=true' ), 'preview-mail' ) ),
 			)
 		);
+	}
+
+	public function block_editor_settings( $settings, $post ) {
+		return $this->settings_controller->get_settings();
 	}
 
 	/**
