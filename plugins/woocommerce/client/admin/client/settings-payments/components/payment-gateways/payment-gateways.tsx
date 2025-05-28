@@ -141,18 +141,6 @@ export const PaymentGateways = ( {
 								method: 'POST',
 								data: { location: value },
 							} ).then( () => {
-								// Record the event when the country is changed.
-								const previouslySelectedCountry =
-									businessRegistrationCountry;
-								const currentSelectedCountry = value;
-								recordEvent(
-									'settings_payments_business_location_update',
-									{
-										old_location: previouslySelectedCountry,
-										new_location: currentSelectedCountry,
-									}
-								);
-
 								// Update UI.
 								setBusinessRegistrationCountry( value );
 								// Update the window value - this will be updated by the backend on refresh but this keeps state persistent.

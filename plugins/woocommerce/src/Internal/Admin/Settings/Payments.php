@@ -219,7 +219,20 @@ class Payments {
 		}
 		$user_payments_nox_profile['business_country_code'] = $location;
 
-		return false !== update_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, $user_payments_nox_profile );
+		$result = false !== update_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, $user_payments_nox_profile );
+
+		if ( $result && $previous_country !== $location ) {
+			// Record an event that the business location (registration country code) was changed.
+			$this->record_event(
+				'business_location_update',
+				array(
+					'business_country'          => $location,
+					'previous_business_country' => $previous_country,
+				)
+			);
+		}
+
+		return $result;
 	}
 
 	/**
