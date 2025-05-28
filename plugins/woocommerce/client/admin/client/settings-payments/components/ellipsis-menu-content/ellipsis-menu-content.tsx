@@ -102,9 +102,21 @@ export const EllipsisMenuContent = ( {
 	 * Deactivates the payment gateway containing plugin.
 	 */
 	const deactivateGateway = () => {
+		// Record the event when user clicks on a gateway's deactivate button.
+		recordPaymentsEvent( 'provider_deactivate_click', {
+			provider_id: providerId,
+			suggestion_id: suggestionId,
+		} );
+
 		setIsDeactivating( true );
 		deactivatePlugin( pluginFile )
 			.then( () => {
+				// Record the event when user successfully deactivates a gateway.
+				recordPaymentsEvent( 'provider_deactivate', {
+					provider_id: providerId,
+					suggestion_id: suggestionId,
+				} );
+
 				createSuccessNotice(
 					__(
 						'The provider plugin was successfully deactivated.',
@@ -224,7 +236,21 @@ export const EllipsisMenuContent = ( {
 						className="woocommerce-ellipsis-menu__content__item"
 						key={ link._type }
 					>
-						<Button target="_blank" href={ link.url }>
+						<Button
+							target="_blank"
+							href={ link.url }
+							onClick={ () => {
+								// Record the event when user clicks on a gateway's context link.
+								recordPaymentsEvent(
+									'provider_context_link_click',
+									{
+										provider_id: providerId,
+										suggestion_id: suggestionId,
+										link_type: link._type,
+									}
+								);
+							} }
+						>
 							{ displayName }
 						</Button>
 					</div>
