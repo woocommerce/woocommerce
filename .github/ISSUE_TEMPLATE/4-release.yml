@@ -48,7 +48,6 @@ body:
 
         #### Release to WordPress.org
 
-        -    [] Skip notifying Atomic
         -    [] Using WooRelease, perform a release dry run with e.g., `php woorelease.php wporg:release --product_version=9.9.0-rc.1 --zip_file=ZIP_FILE_PATH --product_path=plugins/woocommerce https://github.com/woocommerce/woocommerce/tree/release/9.9`
         -    [] Using WooRelease, perform the live release with e.g., `php woorelease.php wporg:release --product_version=9.9.0-rc.1 --zip_file=ZIP_FILE_PATH --product_path=plugins/woocommerce https://github.com/woocommerce/woocommerce/tree/release/9.9 --release`
         -    [] If the release command reports SVN-related timeouts, validate versions on https://wordpress.org/plugins/woocommerce/advanced/ and https://plugins.svn.wordpress.org/woocommerce/tags/ pages and continue if those are correct
@@ -83,19 +82,26 @@ body:
         -    [] Build zip file ([workflow](https://github.com/woocommerce/woocommerce/actions/workflows/build-release-zip-file.yml))
         -    [] Validate version and stable tag in 'woocommerce.php' and `readme.txt` for the generated zip file
 
+        #### Sync with Atomic on the upcoming release
+        
+        -    [] Ensure releasing to WordPress.org is completed by ~12:00 or ~17:00 UTC (to hit one of the deployment windows)
+        -    [] Notify Atomic that a release is about to be made (via P2 and Slack, see  p9o2xV-5y1-p2 and p1747039405416989-slack-C7YPW6K40 for reference) before deploying release
+
         #### Release to WordPress.org
 
-        -    [] Notify Atomic that a release is about to be made (via P2 and Slack, see  p9o2xV-5y1-p2 and p1747039405416989-slack-C7YPW6K40 for reference) before deploying release
         -    [] Using WooRelease, perform a release dry run with e.g., `php woorelease.php wporg:release --product_version=9.9.0 --zip_file=ZIP_FILE_PATH --product_path=plugins/woocommerce https://github.com/woocommerce/woocommerce/tree/release/9.9`
         -    [] Using WooRelease, perform release with e.g., `php woorelease.php wporg:release --product_version=9.9.0 --zip_file=ZIP_FILE_PATH --product_path=plugins/woocommerce https://github.com/woocommerce/woocommerce/tree/release/9.9 --release`
         -    [] If the release command reports SVN-related timeouts, validate versions on https://wordpress.org/plugins/woocommerce/advanced/ and https://plugins.svn.wordpress.org/woocommerce/tags/ pages and continue if those are correct
         -    [] Upon receiving the email `[WordPress Plugin Directory] Pending release for WooCommerce`, confirm the release
         -    [] Verify the new version is listed and downloadable on https://wordpress.org/plugins/woocommerce/ page
+
+        #### Staging with Atomic
+
         -    [] Update the Atomic comms threads about the release completion        
-
-        #### Stage and bump stable tag
-
         -    [] For the next 4 hours, monitor the release staging (monitoring as per p1745322404770529/1745322371.115259-slack-C01DT6U03HC and updates in the Atomic comms threads).
+        
+        #### Bump stable tag
+
         -    [] Using WooRelease, perform the stable tag bump dry run with e.g., `php woorelease.php update-stable --product_path=plugins/woocommerce https://github.com/woocommerce/woocommerce/tree/trunk 9.9.0`
         -    [] Using WooRelease, perform the stable tag bump with e.g., `php woorelease.php update-stable --product_path=plugins/woocommerce https://github.com/woocommerce/woocommerce/tree/trunk 9.9.0 --update`
         -    [] Review (ensure PR CI-checks are passing) and merge additional PR (ensure merge CI-checks are passing) created on the previous step to sync stable tag with the source code
