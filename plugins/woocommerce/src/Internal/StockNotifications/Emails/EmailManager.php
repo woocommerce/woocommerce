@@ -7,13 +7,8 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Emails;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\CustomerStockNotificationEmail;
-<<<<<<< HEAD
-use Automattic\WooCommerce\Internal\StockNotifications\Emails\CustomerStockNotificationConfirmEmail;
-use Automattic\WooCommerce\Internal\StockNotifications\Emails\CustomerStockNotificationVerifyEmail;
-=======
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\CustomerStockNotificationVerifyEmail;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\CustomerStockNotificationVerifiedEmail;
->>>>>>> mic/back-in-stock-notifications
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailTemplatesController;
 /**
  * Emails manager.
@@ -27,13 +22,8 @@ class EmailManager {
 	 */
 	public static $email_ids = array(
 		'customer_stock_notification',
-<<<<<<< HEAD
-		'customer_stock_notification_confirm',
-		'customer_stock_notification_verify',
-=======
 		'customer_stock_notification_verify',
 		'customer_stock_notification_verified',
->>>>>>> mic/back-in-stock-notifications
 	);
 
 	/**
@@ -73,15 +63,9 @@ class EmailManager {
 	 * @return array
 	 */
 	public function email_classes( $emails ) {
-<<<<<<< HEAD
-		$emails['WC_Email_Customer_Stock_Notification']         = new CustomerStockNotificationEmail();
-		$emails['WC_Email_Customer_Stock_Notification_Verify']  = new CustomerStockNotificationVerifyEmail();
-		$emails['WC_Email_Customer_Stock_Notification_Confirm'] = new CustomerStockNotificationConfirmEmail();
-=======
 		$emails['WC_Email_Customer_Stock_Notification']          = new CustomerStockNotificationEmail();
 		$emails['WC_Email_Customer_Stock_Notification_Verify']   = new CustomerStockNotificationVerifyEmail();
 		$emails['WC_Email_Customer_Stock_Notification_Verified'] = new CustomerStockNotificationVerifiedEmail();
->>>>>>> mic/back-in-stock-notifications
 
 		return $emails;
 	}
@@ -103,24 +87,15 @@ class EmailManager {
 			return $actions;
 		}
 
-<<<<<<< HEAD
-		$actions[] = 'woocommerce_customer_stock_notification_confirm';
-		$actions[] = 'woocommerce_customer_stock_notification_verify';
-=======
 		$actions[] = 'woocommerce_customer_stock_notification_verify';
 		$actions[] = 'woocommerce_customer_stock_notification_verified';
->>>>>>> mic/back-in-stock-notifications
 
 		return $actions;
 	}
 
 	/**
-<<<<<<< HEAD
-	 * Restore customer data from notification's metadata, if applicable.
-=======
 	 * Restore customer tax location data from notification's metadata
 	 * to display product prices in emails using the customer's tax location, if applicable.
->>>>>>> mic/back-in-stock-notifications
 	 *
 	 * @param  Notification $notification The notification object.
 	 * @return void
@@ -305,13 +280,8 @@ class EmailManager {
 	 */
 	public function send_stock_notification_email( Notification $notification ) {
 		$emails = WC()->mailer()->get_emails();
-<<<<<<< HEAD
-		if ( isset( $emails['WC_Email_Stock_Notification_Receive'] ) ) {
-			$emails['WC_Email_Stock_Notification_Receive']->trigger( $notification );
-=======
 		if ( isset( $emails['WC_Email_Customer_Stock_Notification'] ) ) {
 			$emails['WC_Email_Customer_Stock_Notification']->trigger( $notification );
->>>>>>> mic/back-in-stock-notifications
 		}
 	}
 }
