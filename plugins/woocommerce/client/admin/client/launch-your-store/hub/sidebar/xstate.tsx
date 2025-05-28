@@ -264,17 +264,20 @@ export const sidebarMachine = setup( {
 		updateQueryParams: ( _, params: LaunchYourStoreQueryParams ) => {
 			updateQueryParams< LaunchYourStoreQueryParams >( params );
 		},
-		taskClicked: ( { event } ) => {
+		taskClicked: ( { event, self } ) => {
 			if ( event.type === 'TASK_CLICKED' ) {
 				const result = taskClickedAction( event );
 
-				// If taskClickedAction returns an event object, dispatch it
+				// If taskClickedAction returns an event object, handle it
 				if (
 					result &&
 					typeof result === 'object' &&
 					'type' in result
 				) {
-					return result;
+					// If SHOW_PAYMENTS is returned, transition to the payments sub-steps
+					if ( result.type === 'SHOW_PAYMENTS' ) {
+						self.send( { type: 'SHOW_PAYMENTS' } );
+					}
 				}
 			}
 		},
@@ -716,24 +719,9 @@ export const sidebarMachine = setup( {
 		EXTERNAL_URL_UPDATE: {
 			target: '.navigate',
 		},
-		TASK_CLICKED: [
-			{
-				// Direct transition for payments tasks
-				guard: ( { event } ) => {
-					return (
-						event.type === 'TASK_CLICKED' &&
-						( event.task.id === 'payments' ||
-							event.task.id === 'woocommerce-payments' )
-					);
-				},
-				target: '.payments',
-				actions: [ 'showPaymentsContent' ],
-			},
-			{
-				// Default action for other tasks
-				actions: 'taskClicked',
-			},
-		],
+		TASK_CLICKED: {
+			actions: 'taskClicked',
+		},
 		OPEN_WC_ADMIN_URL: {
 			actions: 'openWcAdminUrl',
 		},
