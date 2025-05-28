@@ -63,6 +63,9 @@ class Notification extends \WC_Data {
 			$this->set_id( $read->get_id() );
 		} elseif ( ! empty( $read->ID ) ) {
 			$this->set_id( absint( $read->ID ) );
+		} elseif ( is_array( $read ) && ! empty( $read['id'] ) ) {
+			$this->set_props( $read );
+			$this->set_object_read( true );
 		} else {
 			$this->set_object_read( true );
 		}
@@ -213,7 +216,7 @@ class Notification extends \WC_Data {
 	 *
 	 * @param int $product_id Product ID.
 	 */
-	public function set_product_id( $product_id ) {
+	public function set_product_id( int $product_id ) {
 
 		// Reset runtime cache if the product ID has changed.
 		if ( is_a( $this->product, 'WC_Product' ) && $product_id !== $this->product->get_id() ) {
@@ -227,7 +230,7 @@ class Notification extends \WC_Data {
 	 *
 	 * @param int $user_id User ID.
 	 */
-	public function set_user_id( $user_id ) {
+	public function set_user_id( int $user_id ) {
 		$this->set_prop( 'user_id', $user_id );
 	}
 
@@ -236,7 +239,7 @@ class Notification extends \WC_Data {
 	 *
 	 * @param string $user_email User email.
 	 */
-	public function set_user_email( $user_email ) {
+	public function set_user_email( string $user_email ) {
 		$this->set_prop( 'user_email', $user_email );
 	}
 
@@ -245,7 +248,7 @@ class Notification extends \WC_Data {
 	 *
 	 * @param string $status Status.
 	 */
-	public function set_status( $status ) {
+	public function set_status( string $status ) {
 
 		if ( ! in_array( $status, NotificationStatus::get_valid_statuses(), true ) ) {
 			// Default to pending.
@@ -258,7 +261,7 @@ class Notification extends \WC_Data {
 	/**
 	 * Set the date created.
 	 *
-	 * @param string $date_created Date created.
+	 * @param string|int $date_created Date created.
 	 */
 	public function set_date_created( $date_created ) {
 		$this->set_date_prop( 'date_created', $date_created );
@@ -267,7 +270,7 @@ class Notification extends \WC_Data {
 	/**
 	 * Set the date modified.
 	 *
-	 * @param string $date_modified Date modified.
+	 * @param string|int $date_modified Date modified.
 	 */
 	public function set_date_modified( $date_modified ) {
 		$this->set_date_prop( 'date_modified', $date_modified );
@@ -276,7 +279,7 @@ class Notification extends \WC_Data {
 	/**
 	 * Set the date confirmed.
 	 *
-	 * @param string $date_confirmed Date confirmed.
+	 * @param string|int $date_confirmed Date confirmed.
 	 */
 	public function set_date_confirmed( $date_confirmed ) {
 		$this->set_date_prop( 'date_confirmed', $date_confirmed );
@@ -285,7 +288,7 @@ class Notification extends \WC_Data {
 	/**
 	 * Set the date last attempt.
 	 *
-	 * @param string $date_last_attempt Date last attempt.
+	 * @param string|int $date_last_attempt Date last attempt.
 	 */
 	public function set_date_last_attempt( $date_last_attempt ) {
 		$this->set_date_prop( 'date_last_attempt', $date_last_attempt );
@@ -294,7 +297,7 @@ class Notification extends \WC_Data {
 	/**
 	 * Set the date notified.
 	 *
-	 * @param string $date_notified Date notified.
+	 * @param string|int $date_notified Date notified.
 	 */
 	public function set_date_notified( $date_notified ) {
 		$this->set_date_prop( 'date_notified', $date_notified );
@@ -303,7 +306,7 @@ class Notification extends \WC_Data {
 	/**
 	 * Set the date cancelled.
 	 *
-	 * @param string $date_cancelled Date cancelled.
+	 * @param string|int $date_cancelled Date cancelled.
 	 */
 	public function set_date_cancelled( $date_cancelled ) {
 		$this->set_date_prop( 'date_cancelled', $date_cancelled );
@@ -312,9 +315,9 @@ class Notification extends \WC_Data {
 	/**
 	 * Set the cancellation source.
 	 *
-	 * @param string $cancellation_source Cancellation source. Can be null.
+	 * @param string|null $cancellation_source Cancellation source. Can be null.
 	 */
-	public function set_cancellation_source( $cancellation_source ) {
+	public function set_cancellation_source( ?string $cancellation_source ) {
 		if ( $cancellation_source && ! in_array( $cancellation_source, NotificationCancellationSource::get_valid_cancellation_sources(), true ) ) {
 			// Default to user.
 			$cancellation_source = NotificationCancellationSource::USER;

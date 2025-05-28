@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsMetaDataStore;
-use Automattic\WooCommerce\Internal\StockNotifications\Controller;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailTemplatesController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
@@ -26,19 +26,19 @@ class StockNotificationsServiceProvider extends AbstractServiceProvider {
 	 * @var array
 	 */
 	protected $provides = array(
-		Controller::class,
-		EmailManager::class,
-		EmailTemplatesController::class,
+		StockNotifications::class,
 		StockNotificationsDataStore::class,
 		StockNotificationsMetaDataStore::class,
+		EmailManager::class,
+		EmailTemplatesController::class,
 	);
 
 	/**
 	 * Register the classes.
 	 */
 	public function register() {
-		$this->share( StockNotificationsDataStore::class )->addArguments( array( StockNotificationsMetaDataStore::class, StockNotificationsActivityLogsDataStore::class, DatabaseUtil::class ) );
-		$this->share( Controller::class );
+		$this->share( StockNotificationsDataStore::class )->addArguments( array( StockNotificationsMetaDataStore::class, DatabaseUtil::class ) );
+		$this->share( StockNotifications::class );
 		$this->share( EmailManager::class );
 		$this->share( EmailTemplatesController::class );
 	}

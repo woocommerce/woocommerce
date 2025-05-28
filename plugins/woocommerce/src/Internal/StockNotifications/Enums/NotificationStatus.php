@@ -8,33 +8,43 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Enums;
  * Enum class for all the notification statuses.
  */
 final class NotificationStatus {
-	/**
-	 * The notification has been created but not yet confirmed.
-	 *
-	 * @var string
-	 */
-	const PENDING = 'pending';
 
 	/**
-	 * The notification has been created and confirmed.
+	 * Status: 'pending'.
+	 * Initial state when Double Opt-In (DOI) is active, awaiting user email verification.
+	 * Not eligible for "back in stock" notifications until confirmed.
 	 *
 	 * @var string
 	 */
-	const ACTIVE = 'active';
+	public const PENDING = 'pending';
 
 	/**
-	 * The notification has been sent.
+	 * Status: 'active'.
+	 * User's subscription is confirmed and they are waiting for a "back in stock" alert.
+	 * This is the default for new subscriptions if DOI is disabled, or after DOI confirmation.
+	 * Notifications in this state are processed when the product is available.
 	 *
 	 * @var string
 	 */
-	const SENT = 'sent';
+	public const ACTIVE = 'active';
 
 	/**
-	 * The notification has been cancelled.
+	 * Status: 'sent'.
+	 * The "back in stock" notification email has been successfully dispatched.
+	 * Typically a final state for that notification event.
 	 *
 	 * @var string
 	 */
-	const CANCELLED = 'cancelled';
+	public const SENT = 'sent';
+
+	/**
+	 * Status: 'cancelled'.
+	 * The notification is no longer active and will not be sent.
+	 * The reason for cancellation should be in the `cancellation_source` field.
+	 *
+	 * @var string
+	 */
+	public const CANCELLED = 'cancelled';
 
 	/**
 	 * Get all available notification statuses.
