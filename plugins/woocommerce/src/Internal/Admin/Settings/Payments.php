@@ -16,6 +16,12 @@ class Payments {
 
 	const SUGGESTIONS_CONTEXT = 'wc_settings_payments';
 
+	const FROM_PAYMENTS_SETTINGS        = 'WCADMIN_PAYMENT_SETTINGS';
+	const FROM_PAYMENTS_MENU_ITEM       = 'PAYMENTS_MENU_ITEM';
+	const FROM_PAYMENTS_TASK            = 'WCADMIN_PAYMENT_TASK';
+	const FROM_ADDITIONAL_PAYMENTS_TASK = 'WCADMIN_ADDITIONAL_PAYMENT_TASK';
+	const FROM_PROVIDER_ONBOARDING      = 'PROVIDER_ONBOARDING';
+
 	/**
 	 * The payment providers service.
 	 *

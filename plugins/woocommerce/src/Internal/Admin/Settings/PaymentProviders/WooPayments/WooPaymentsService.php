@@ -72,6 +72,7 @@ class WooPaymentsService {
 
 	const FROM_PAYMENT_SETTINGS = 'WCADMIN_PAYMENT_SETTINGS';
 	const FROM_NOX_IN_CONTEXT   = 'WCADMIN_NOX_IN_CONTEXT';
+	const FROM_KYC              = 'KYC';
 
 	/**
 	 * The PaymentProviders instance.
@@ -780,7 +781,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $location The location for which we are onboarding.
 	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 * @param string $source   Optional. The source for the KYC session.
+	 * @param string $source   Optional. The source for the current onboarding flow.
 	 *                         If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return array The result of the test account initialization.
@@ -830,6 +831,11 @@ class WooPaymentsService {
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
+		if ( empty( $source ) ) {
+			// The default source is the WC Admin Payments settings.
+			$source = self::FROM_PAYMENT_SETTINGS;
+		}
+
 		try {
 			// Call the WooPayments API to initialize the test account.
 			$response = $this->proxy->call_static(
@@ -839,7 +845,7 @@ class WooPaymentsService {
 				array(
 					'country'      => $location,
 					'capabilities' => $selected_payment_methods,
-					'source'       => ! empty( $source ) ? $source : self::FROM_NOX_IN_CONTEXT,
+					'source'       => $source,
 					'from'         => self::FROM_NOX_IN_CONTEXT,
 				)
 			);
@@ -910,12 +916,14 @@ class WooPaymentsService {
 	 *                                This is a ISO 3166-1 alpha-2 country code.
 	 * @param array  $self_assessment Optional. The self-assessment data.
 	 *                                If not provided, the stored data will be used.
+	 * @param string $source          Optional. The source for the current onboarding flow.
+	 *                                If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return array The KYC account session data.
 	 * @throws ApiException If the extension is not active, step requirements are not met, or
 	 *                      the KYC session data could not be retrieved.
 	 */
-	public function get_onboarding_kyc_session( string $location, array $self_assessment = array() ): array {
+	public function get_onboarding_kyc_session( string $location, array $self_assessment = array(), string $source = '' ): array {
 		$this->check_if_onboarding_step_action_is_acceptable( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
 
 		if ( empty( $self_assessment ) ) {
@@ -931,6 +939,11 @@ class WooPaymentsService {
 
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
+
+		if ( empty( $source ) ) {
+			// The default source is the WC Admin Payments settings.
+			$source = self::FROM_PAYMENT_SETTINGS;
+		}
 
 		try {
 			// Call the WooPayments API to get the KYC session.
@@ -1023,7 +1036,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $location The location for which we are onboarding.
 	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 * @param string $source   Optional. The source for the KYC session.
+	 * @param string $source   Optional. The source for the current onboarding flow.
 	 *                         If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return array The response from the WooPayments API.
@@ -1039,6 +1052,11 @@ class WooPaymentsService {
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
+		if ( empty( $source ) ) {
+			// The default source is the WC Admin Payments settings.
+			$source = self::FROM_PAYMENT_SETTINGS;
+		}
+
 		try {
 			// Call the WooPayments API to finalize the KYC session.
 			$response = $this->proxy->call_static(
@@ -1046,7 +1064,7 @@ class WooPaymentsService {
 				'rest_endpoint_post_request',
 				'/wc/v3/payments/onboarding/kyc/finalize',
 				array(
-					'source' => ! empty( $source ) ? $source : self::FROM_PAYMENT_SETTINGS,
+					'source' => $source,
 					'from'   => self::FROM_NOX_IN_CONTEXT,
 				)
 			);
@@ -1146,6 +1164,11 @@ class WooPaymentsService {
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
+		// If no source is provided, default to the WC Admin Payments settings.
+		if ( empty( $source ) ) {
+			$source = self::FROM_PAYMENT_SETTINGS;
+		}
+
 		try {
 			// Call the WooPayments API to reset onboarding.
 			$response = $this->proxy->call_static(
@@ -1154,7 +1177,7 @@ class WooPaymentsService {
 				'/wc/v3/payments/onboarding/reset',
 				array(
 					'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
-					'source' => ! empty( $source ) ? esc_attr( $source ) : self::FROM_PAYMENT_SETTINGS,
+					'source' => $source,
 				)
 			);
 		} catch ( Exception $e ) {
@@ -1218,6 +1241,11 @@ class WooPaymentsService {
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
+		// If no source is provided, default to the WC Admin Payments settings.
+		if ( empty( $source ) ) {
+			$source = self::FROM_PAYMENT_SETTINGS;
+		}
+
 		try {
 			// Call the WooPayments API to disable the test account and prepare for the switch to live.
 			$response = $this->proxy->call_static(
@@ -1226,7 +1254,7 @@ class WooPaymentsService {
 				'/wc/v3/payments/onboarding/test_drive_account/disable',
 				array(
 					'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
-					'source' => ! empty( $source ) ? esc_attr( $source ) : self::FROM_PAYMENT_SETTINGS,
+					'source' => $source,
 				)
 			);
 		} catch ( Exception $e ) {
@@ -2093,7 +2121,10 @@ class WooPaymentsService {
 		}
 
 		// Fall back to the provider onboarding URL.
-		return $this->provider->get_onboarding_url( $this->get_payment_gateway(), Utils::wc_payments_settings_url( self::ONBOARDING_PATH_BASE ) );
+		return $this->provider->get_onboarding_url(
+			$this->get_payment_gateway(),
+			Utils::wc_payments_settings_url( self::ONBOARDING_PATH_BASE, array( 'from' => self::FROM_KYC ) )
+		);
 	}
 
 	/**

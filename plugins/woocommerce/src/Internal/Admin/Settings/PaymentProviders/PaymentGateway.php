@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Throwable;
 use WC_HTTPS;
@@ -363,7 +364,13 @@ class PaymentGateway {
 			return (string) $payment_gateway->get_settings_url();
 		}
 
-		return Utils::wc_payments_settings_url( null, array( 'section' => strtolower( $payment_gateway->id ) ) );
+		return Utils::wc_payments_settings_url(
+			null,
+			array(
+				'section' => strtolower( $payment_gateway->id ),
+				'from'    => Payments::FROM_PAYMENTS_SETTINGS,
+			)
+		);
 	}
 
 	/**
@@ -380,7 +387,7 @@ class PaymentGateway {
 	public function get_onboarding_url( WC_Payment_Gateway $payment_gateway, string $return_url = '' ): string {
 		if ( is_callable( array( $payment_gateway, 'get_connection_url' ) ) ) {
 			// If we received no return URL, we will set the WC Payments Settings page as the return URL.
-			$return_url = ! empty( $return_url ) ? $return_url : admin_url( 'admin.php?page=wc-settings&tab=checkout' );
+			$return_url = ! empty( $return_url ) ? $return_url : admin_url( 'admin.php?page=wc-settings&tab=checkout&from=' . Payments::FROM_PROVIDER_ONBOARDING );
 
 			return (string) $payment_gateway->get_connection_url( $return_url );
 		}
