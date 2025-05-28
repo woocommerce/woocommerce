@@ -17,7 +17,8 @@ import { useOnboardingContext } from '../../data/onboarding-context';
 import { PaymentMethodListItem } from '~/settings-payments/components/payment-method-list-item';
 import {
 	combinePaymentMethodsState,
-	combineRequestMethods, recordPaymentsOnboardingEvent,
+	combineRequestMethods,
+	recordPaymentsOnboardingEvent,
 	shouldRenderPaymentMethodInMainList,
 } from '~/settings-payments/utils';
 import './style.scss';

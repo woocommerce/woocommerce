@@ -101,7 +101,7 @@ export const PaymentGatewayList = ( {
 								id={ suggestion.id }
 							>
 								{ PaymentExtensionSuggestionListItem( {
-									suggestion: suggestion,
+									suggestion,
 									installingPlugin,
 									setupPlugin,
 									pluginInstalled,
