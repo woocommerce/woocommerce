@@ -954,8 +954,14 @@ jQuery( function ( $ ) {
 				text: msg,
 			} ).appendTo( $target );
 		},
-		remove_coupon_error: function ( evt ) {
-			$( evt.currentTarget )
+		remove_coupon_error: function () {
+			var $coupon_field = $( '#coupon_code' );
+
+			if ( $coupon_field.length === 0 ) {
+				return;
+			}
+
+			$coupon_field
 				.removeClass( 'has-error' )
 				.removeAttr( 'aria-invalid' )
 				.removeAttr( 'aria-describedby' )
@@ -966,6 +972,8 @@ jQuery( function ( $ ) {
 			var $form = $( evt.currentTarget );
 			var $coupon_field = $form.find( '#coupon_code' );
 			var self = this;
+
+			self.remove_coupon_error();
 
 			if ( $form.is( '.processing' ) ) {
 				return false;
