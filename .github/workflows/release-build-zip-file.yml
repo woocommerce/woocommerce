@@ -16,6 +16,7 @@ permissions: {}
 jobs:
   verify-prs:
     name: 'Verify if any PR is left open by author:app/github-actions'
+    if: ${{ 'false' }}
     outputs:
       runBuildZipJob: ${{ steps.verify-prs.outputs.runBuildZipJob }}
     runs-on: ubuntu-latest
@@ -147,7 +148,7 @@ jobs:
   build:
     name: Build release zip file
     runs-on: ubuntu-latest
-    if: ${{ needs.verify-prs.outputs.runBuildZipJob == 'true' }}
+    if: ${{ 'false' && needs.verify-prs.outputs.runBuildZipJob == 'true' }}
     needs: [ verify-prs, verify-release-versions ]
     permissions:
       contents: read
