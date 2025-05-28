@@ -35,6 +35,7 @@ import { TemplateSettingsPanel } from '../sidebar/template-settings-panel';
 import { PublishSave } from '../../hacks/publish-save';
 import { EditorNotices } from '../notices';
 import { BlockCompatibilityWarnings } from '../sidebar';
+import { BackButtonContent } from '../header/back-button-content';
 
 export function InnerEditor( {
 	postId: initialPostId,
@@ -53,6 +54,8 @@ export function InnerEditor( {
 		'post-only'
 	);
 
+	// isFullScreenForced – comes from settings and cannot be changed by the user
+	// isFullscreenEnabled – indicates if a user has enabled fullscreen mode
 	const { post, template, isFullscreenEnabled } = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( coreStore );
@@ -74,6 +77,7 @@ export function InnerEditor( {
 		},
 		[ currentPost.postType, currentPost.postId ]
 	);
+	const { isFullScreenForced, displaySendEmailButton } = settings;
 
 	// @ts-expect-error Type is missing in @types/wordpress__editor
 	const { removeEditorPanel } = useDispatch( editorStore );
@@ -131,14 +135,19 @@ export function InnerEditor( {
 					<TemplateSelection />
 					<StylesSidebar />
 					<SendPreview />
-					<FullscreenMode isActive={ isFullscreenEnabled } />
-					<MoreMenu />
+					<FullscreenMode
+						isActive={ isFullScreenForced || isFullscreenEnabled }
+					/>
+					{ ( isFullScreenForced || isFullscreenEnabled ) && (
+						<BackButtonContent />
+					) }
+					{ ! isFullScreenForced && <MoreMenu /> }
 					{ currentPost.postType === 'wp_template' ? (
 						<TemplateSettingsPanel />
 					) : (
 						<SettingsPanel />
 					) }
-					<PublishSave />
+					{ displaySendEmailButton && <PublishSave /> }
 					<EditorNotices />
 					<BlockCompatibilityWarnings />
 				</Editor>

@@ -41,6 +41,24 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox order_item_totals adds custom rows for cash change when amount is zero.
+	 */
+	public function test_order_item_totals_adds_formatted_cash_change_due_amount_to_order_totals_when_amount_is_zero() {
+		// Given order with cash payment change amount.
+		$order = OrderHelper::create_order();
+		$order->add_meta_data( '_cash_change_amount', '0' );
+		$order->save();
+		$email = new WC_Email_Customer_POS_Completed_Order();
+
+		// When overriding order item totals.
+		$totals = $email->order_item_totals( array(), $order, 'incl' );
+
+		// Then cash payment change due amount is set and formatted correctly.
+		$this->assertArrayHasKey( 'cash_payment_change_due_amount', $totals );
+		$this->assertEquals( wc_price( '0', array( 'currency' => $order->get_currency() ) ), $totals['cash_payment_change_due_amount']['value'] );
+	}
+
+	/**
 	 * @testdox order_item_totals adds payment_auth_code row to order totals.
 	 */
 	public function test_order_item_totals_adds_payment_auth_code_to_order_totals() {
@@ -174,6 +192,57 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( __( 'Change due:', 'woocommerce' ), $regular_plain_text );
 		$this->assertStringNotContainsString( __( 'Auth code:', 'woocommerce' ), $regular_plain_text );
 		$this->assertStringNotContainsString( __( 'Time of payment:', 'woocommerce' ), $regular_plain_text );
+	}
+
+	/**
+	 * @testdox POS email includes POS store name in email header HTML while regular email includes blog name.
+	 */
+	public function test_pos_email_includes_pos_store_name_in_email_header_html_while_regular_email_includes_blog_name() {
+		// Initialize WC_Emails to set up actions and filters for email header in regular emails.
+		$emails = new WC_Emails();
+
+		// Given POS store name and blog name.
+		update_option( 'woocommerce_pos_store_name', 'Physical Store' );
+		update_option( 'blogname', 'Online Store' );
+
+		// When getting content from both email classes.
+		$pos_email     = new WC_Email_Customer_POS_Completed_Order();
+		$regular_email = new WC_Email_Customer_Completed_Order();
+
+		// Set the order on both email classes.
+		$pos_email->object     = OrderHelper::create_order();
+		$regular_email->object = OrderHelper::create_order();
+
+		$pos_content     = $pos_email->get_content_html();
+		$regular_content = $regular_email->get_content_html();
+
+		// Then POS email should include POS store name.
+		$this->assertStringContainsString( '<title>Physical Store</title>', $pos_content );
+		$this->assertStringNotContainsString( '<title>Online Store</title>', $pos_content );
+
+		// And regular email should include blog name.
+		$this->assertStringNotContainsString( '<title>Physical Store</title>', $regular_content );
+		$this->assertStringContainsString( '<title>Online Store</title>', $regular_content );
+	}
+
+	/**
+	 * @testdox POS email includes blog name in email header HTML when POS store name is not set.
+	 */
+	public function test_pos_email_header_html_includes_blog_name_when_pos_store_name_is_not_set() {
+		// Given POS store name is not set.
+		delete_option( 'woocommerce_pos_store_name' );
+		update_option( 'blogname', 'Online Store' );
+
+		// When getting content from POS email.
+		$email = new WC_Email_Customer_POS_Completed_Order();
+
+		// Set the order on the email.
+		$email->object = OrderHelper::create_order();
+
+		$content = $email->get_content_html();
+
+		// Then POS email should include blog name.
+		$this->assertStringContainsString( '<title>Online Store</title>', $content );
 	}
 
 	/**

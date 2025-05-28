@@ -47,7 +47,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Manually send an email to your shoppers containing their order information and payment links.', 'woocommerce' )
+				? __( 'Manually send an email to your customers containing their order information and payment links', 'woocommerce' )
 				: __( 'Order detail emails can be sent to customers containing their order information and payment links.', 'woocommerce' );
 
 			$this->manual = true;
