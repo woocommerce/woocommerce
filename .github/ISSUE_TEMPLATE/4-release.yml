@@ -55,7 +55,7 @@ body:
         -    [] Upon receiving email `[WordPress Plugin Directory] Pending release for WooCommerce`, confirm the release
         -    [] Verify the new version is listed and downloadable on https://wordpress.org/plugins/woocommerce/advanced/ page
 
-        #### Stage and bump stable tag
+        #### Release to GitHub
 
         -    [] Manually create a pre-release entry on https://github.com/woocommerce/woocommerce/releases (use the version as tag, upload the generated zip, and pick the proper release branch)
 
@@ -102,7 +102,7 @@ body:
         -    [] Update the Atomic comms threads about the release completion        
         -    [] For the next 4 hours, monitor the release staging (monitoring as per p1745322404770529/1745322371.115259-slack-C01DT6U03HC and updates in the Atomic comms threads).
         
-        #### Bump stable tag
+        #### Bump stable tag and release to GitHub
 
         -    [] Using WooRelease, perform the stable tag bump dry run with e.g., `php woorelease.php update-stable --product_path=plugins/woocommerce https://github.com/woocommerce/woocommerce/tree/trunk 9.9.0`
         -    [] Using WooRelease, perform the stable tag bump with e.g., `php woorelease.php update-stable --product_path=plugins/woocommerce https://github.com/woocommerce/woocommerce/tree/trunk 9.9.0 --update`
