@@ -17,6 +17,7 @@ import {
 	getPersistedQuery,
 	getHistory,
 	getQueryExcludedScreens,
+	getQueryExcludedScreensUrlUpdate,
 	getScreenFromPath,
 	isWCAdmin,
 } from '@woocommerce/navigation';
@@ -457,11 +458,17 @@ export const Controller = ( { ...props } ) => {
  * Update an anchor's link in sidebar to include persisted queries. Leave excluded screens
  * as is.
  *
- * @param {HTMLElement} item            - Sidebar anchor link.
- * @param {Object}      nextQuery       - A query object to be added to updated hrefs.
- * @param {Array}       excludedScreens - wc-admin screens to avoid updating.
+ * @param {HTMLElement} item                     - Sidebar anchor link.
+ * @param {Object}      nextQuery                - A query object to be added to updated hrefs.
+ * @param {Array}       excludedScreens          - wc-admin screens to avoid updating.
+ * @param {Array}       excludedScreensUrlUpdate - wc-admin screens to avoid updating URL.
  */
-export function updateLinkHref( item, nextQuery, excludedScreens ) {
+export function updateLinkHref(
+	item,
+	nextQuery,
+	excludedScreens,
+	excludedScreensUrlUpdate = []
+) {
 	if ( isWCAdmin( item.href ) ) {
 		const search = last( item.href.split( '?' ) );
 		const query = parse( search );
@@ -479,14 +486,19 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 		// Replace the href so you can see the url on hover.
 		item.href = href;
 
-		item.onclick = ( e ) => {
-			if ( e.ctrlKey || e.metaKey ) {
-				return;
-			}
+		const isExcludedScreenUrlUpdate =
+			excludedScreensUrlUpdate.includes( screen );
 
-			e.preventDefault();
-			getHistory().push( href );
-		};
+		if ( ! isExcludedScreenUrlUpdate ) {
+			item.onclick = ( e ) => {
+				if ( e.ctrlKey || e.metaKey ) {
+					return;
+				}
+
+				e.preventDefault();
+				getHistory().push( href );
+			};
+		}
 	}
 }
 
@@ -494,10 +506,16 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 window.wpNavMenuUrlUpdate = function ( query ) {
 	const nextQuery = getPersistedQuery( query );
 	const excludedScreens = getQueryExcludedScreens();
+	const excludedScreensUrlUpdate = getQueryExcludedScreensUrlUpdate();
 	const anchors = document.querySelectorAll( '#adminmenu a' );
 
 	Array.from( anchors ).forEach( ( item ) =>
-		updateLinkHref( item, nextQuery, excludedScreens )
+		updateLinkHref(
+			item,
+			nextQuery,
+			excludedScreens,
+			excludedScreensUrlUpdate
+		)
 	);
 };
 

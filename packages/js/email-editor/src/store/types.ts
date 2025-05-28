@@ -171,6 +171,7 @@ export type EmailEditorLayout = {
 };
 
 export type EmailEditorUrls = {
+	back: string;
 	send?: string;
 	listings: string;
 };
