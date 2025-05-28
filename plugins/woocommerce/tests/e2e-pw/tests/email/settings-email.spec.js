@@ -1,5 +1,6 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { setOption } = require( '../../utils/options' );
+const { setFilterValue } = require( '../../utils/filters' );
 const { tags } = require( '../../fixtures/fixtures' );
 const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
 
@@ -178,6 +179,19 @@ test.describe( 'WooCommerce Email Settings', () => {
 
 	test( 'Send email preview', async ( { page, baseURL } ) => {
 		await setFeatureFlag( baseURL, 'no' );
+		// ensure we don't show the email improvements feedback notice
+		await setOption(
+			request,
+			baseURL,
+			'_transient_wc_settings_email_improvements_reverted',
+			'no'
+		);
+		await setFilterValue(
+			page,
+			'woocommerce_display_email_improvements_feedback_notice',
+			false
+		);
+
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
 
 		// Click the "Send a test email" button

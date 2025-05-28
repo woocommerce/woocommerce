@@ -1639,7 +1639,15 @@ class FeaturesController {
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function display_email_improvements_feedback_notice( $feature_id, $is_enabled ): void {
-		if ( 'email_improvements' === $feature_id && ! $is_enabled ) {
+		/**
+		 * Filter to display the email improvements feedback notice.
+		 *
+		 * @since 10.0.0
+		 * @param bool $display_notice Whether the email improvements feedback notice should be displayed.
+		 */
+		$display_notice = (bool) apply_filters( 'woocommerce_display_email_improvements_feedback_notice', true );
+
+		if ( 'email_improvements' === $feature_id && ! $is_enabled && $display_notice ) {
 			set_transient( 'wc_settings_email_improvements_reverted', 'yes', 15 );
 			add_action(
 				'admin_notices',

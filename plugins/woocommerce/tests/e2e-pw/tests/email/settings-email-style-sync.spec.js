@@ -1,5 +1,6 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { setOption } = require( '../../utils/options' );
+const { setFilterValue } = require( '../../utils/filters' );
 const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
 
 /**
@@ -57,7 +58,21 @@ test.describe( 'Email Style Sync', () => {
 
 	test( 'Auto-sync toggle in email settings works correctly', async ( {
 		page,
+		baseURL,
 	} ) => {
+		// ensure we don't show the email improvements feedback notice
+		await setOption(
+			request,
+			baseURL,
+			'_transient_wc_settings_email_improvements_reverted',
+			'no'
+		);
+		await setFilterValue(
+			page,
+			'woocommerce_display_email_improvements_feedback_notice',
+			false
+		);
+
 		// Navigate to WooCommerce email settings
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
 
