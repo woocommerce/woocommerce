@@ -37,8 +37,8 @@ class StockNotificationsServiceProvider extends AbstractServiceProvider {
 	 * Register the classes.
 	 */
 	public function register() {
-		$this->share( StockNotificationsDataStore::class )->addArguments( array( StockNotificationsMetaDataStore::class, DatabaseUtil::class ) );
 		$this->share( StockNotifications::class );
+		$this->share( StockNotificationsDataStore::class )->addArguments( array( StockNotificationsMetaDataStore::class, DatabaseUtil::class ) );
 		$this->share( EmailManager::class );
 		$this->share( EmailTemplatesController::class );
 	}
