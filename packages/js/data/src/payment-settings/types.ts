@@ -70,9 +70,9 @@ export type RecommendedPaymentMethod = {
 };
 
 export type PaymentProviderOnboardingState = {
-	started?: boolean;
-	completed?: boolean;
-	test_mode?: boolean;
+	started: boolean;
+	completed: boolean;
+	test_mode: boolean;
 	wpcom_has_working_connection?: boolean;
 	wpcom_is_store_connected?: boolean;
 	wpcom_has_connected_owner?: boolean;
