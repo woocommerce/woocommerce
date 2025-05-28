@@ -149,13 +149,14 @@ export const SettingsPaymentsMain = () => {
 	);
 
 	const dismissIncentive = useCallback(
-		( dismissHref: string, context: string ) => {
+		( dismissHref: string, context: string, doNotTrack = false ) => {
 			// The dismissHref is the full URL to dismiss the incentive.
 			apiFetch( {
 				url: dismissHref,
 				method: 'POST',
 				data: {
 					context,
+					do_not_track: doNotTrack,
 				},
 			} );
 		},

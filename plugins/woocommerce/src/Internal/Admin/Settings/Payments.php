@@ -266,12 +266,67 @@ class Payments {
 	 * @param string $incentive_id  The incentive ID.
 	 * @param string $context       Optional. The context in which the incentive should be dismissed.
 	 *                              Default is to dismiss the incentive in all contexts.
+	 * @param bool   $do_not_track  Optional. If true, the incentive dismissal will not be tracked.
 	 *
 	 * @return bool True if the incentive was not previously dismissed and now it is.
 	 *              False if the incentive was already dismissed or could not be dismissed.
 	 * @throws Exception If the incentive could not be dismissed due to an error.
 	 */
-	public function dismiss_extension_suggestion_incentive( string $suggestion_id, string $incentive_id, string $context = 'all' ): bool {
-		return $this->extension_suggestions->dismiss_incentive( $incentive_id, $suggestion_id, $context );
+	public function dismiss_extension_suggestion_incentive( string $suggestion_id, string $incentive_id, string $context = 'all', bool $do_not_track = false ): bool {
+		$result = $this->extension_suggestions->dismiss_incentive( $incentive_id, $suggestion_id, $context );
+
+		if ( ! $do_not_track && $result ) {
+			// Record an event that the incentive was dismissed.
+			$this->record_event(
+				'incentive_dismiss',
+				array(
+					'suggestion_id'   => $suggestion_id,
+					'incentive_id'    => $incentive_id,
+					'display_context' => $context,
+				)
+			);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Send a Tracks event.
+	 *
+	 * By default, Woo adds `url`, `blog_lang`, `blog_id`, `store_id`, `products_count`, and `wc_version`
+	 * properties to every event.
+	 *
+	 * @param string $name The event name.
+	 *                     If it is not prefixed with self::EVENT_PREFIX, it will be prefixed with it.
+	 * @param array  $properties Optional. The event custom properties.
+	 *                           These properties will be merged with the default properties.
+	 *                           Default properties values take precedence over the provided ones.
+	 *
+	 * @return void
+	 */
+	private function record_event( string $name, array $properties = array() ) {
+		if ( ! function_exists( 'wc_admin_record_tracks_event' ) ) {
+			return;
+		}
+
+		// If the event name is empty, we don't record it.
+		if ( empty( $name ) ) {
+			return;
+		}
+
+		// If the event name is not prefixed with `settings_payments_`, we prefix it.
+		if ( ! str_starts_with( $name, self::EVENT_PREFIX ) ) {
+			$name = self::EVENT_PREFIX . $name;
+		}
+
+		// Add default properties to every event and overwrite custom properties with the same keys.
+		$properties = array_merge(
+			$properties,
+			array(
+				'business_country' => $this->get_country(),
+			),
+		);
+
+		wc_admin_record_tracks_event( $name, $properties );
 	}
 }

@@ -146,13 +146,6 @@ export const IncentiveModal = ( {
 	 * Triggers the onDismiss callback and hides the modal.
 	 */
 	const handleDismiss = () => {
-		// Record the event when the user dismisses the incentive.
-		recordEvent( 'settings_payments_incentive_dismiss', {
-			incentive_id: incentive.promo_id,
-			provider_id: provider.id,
-			display_context: context,
-		} );
-
 		// Dismiss the incentive.
 		onDismiss( incentive._links.dismiss.href, context );
 		handleClose();
