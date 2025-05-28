@@ -8,6 +8,7 @@
 // phpcs:ignore Squiz.Commenting.FileComment.Missing
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
+use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
 
 require_once __DIR__ . '/class-wc-settings-unit-test-case.php';
 
@@ -20,6 +21,9 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 	 * @testdox get_sections should get all the existing sections.
 	 */
 	public function test_get_sections() {
+		// Get customer stock notification settings.
+		wc_get_container()->get( SettingsController::class );
+
 		$sut = new WC_Settings_Products();
 
 		$section_names = array_keys( $sut->get_sections() );

@@ -82,13 +82,13 @@ class SettingsController {
 					'title' => __( 'Customer stock notifications', 'woocommerce' ),
 					'type'  => 'title',
 					'desc'  => '',
-					'id'    => 'product_back_in_stock_options',
+					'id'    => 'product_customer_stock_notifications_options',
 				),
 
 				array(
 					'title'   => __( 'Allow sign-ups', 'woocommerce' ),
 					'desc'    => __( 'Let customers sign up to be notified when products in your store are restocked.', 'woocommerce' ),
-					'id'      => 'woocommerce_back_in_stock_allow_signups',
+					'id'      => 'woocommerce_customer_stock_notifications_allow_signups',
 					'default' => 'no',
 					'type'    => 'checkbox',
 				),
@@ -96,7 +96,7 @@ class SettingsController {
 				array(
 					'title'   => __( 'Require double opt-in to sign up', 'woocommerce' ),
 					'desc'    => __( 'To complete the sign-up process, customers must follow a verification link sent to their e-mail after submitting the sign-up form.', 'woocommerce' ),
-					'id'      => 'woocommerce_back_in_stock_require_double_opt_in',
+					'id'      => 'woocommerce_customer_stock_notifications_require_double_opt_in',
 					'default' => 'no',
 					'type'    => 'checkbox',
 				),
@@ -104,7 +104,7 @@ class SettingsController {
 				array(
 					'title'           => __( 'Guest sign-up', 'woocommerce' ),
 					'desc'            => __( 'Customers must be logged in to sign up for stock notifications.', 'woocommerce' ),
-					'id'              => 'woocommerce_back_in_stock_require_account',
+					'id'              => 'woocommerce_customer_stock_notifications_require_account',
 					'default'         => 'no',
 					'type'            => 'checkbox',
 					'desc_tip'        => __( 'When enabled, guests will be redirected to a login page to complete the sign-up process.', 'woocommerce' ),
@@ -114,7 +114,7 @@ class SettingsController {
 
 				array(
 					'desc'            => __( 'Create an account when guests sign up for stock notifications.', 'woocommerce' ),
-					'id'              => 'woocommerce_back_in_stock_create_account_on_signup',
+					'id'              => 'woocommerce_customer_stock_notifications_create_account_on_signup',
 					'default'         => 'no',
 					'type'            => 'checkbox',
 					'checkboxgroup'   => 'end',
@@ -124,7 +124,7 @@ class SettingsController {
 
 				array(
 					'type' => 'sectionend',
-					'id'   => 'product_back_in_stock_options',
+					'id'   => 'product_customer_stock_notifications_options',
 				),
 			)
 		);
@@ -146,7 +146,7 @@ class SettingsController {
 			return;
 		}
 
-		if ( 'no' === get_option( 'woocommerce_registration_generate_password', 'no' ) && 'yes' === get_option( 'woocommerce_back_in_stock_create_account_on_signup', 'no' ) ) {
+		if ( 'no' === get_option( 'woocommerce_registration_generate_password', 'no' ) && 'yes' === get_option( 'woocommerce_customer_stock_notifications_create_account_on_signup', 'no' ) ) {
 			wp_admin_notice(
 				sprintf(
 					/* translators: %s settings page link */
@@ -161,7 +161,7 @@ class SettingsController {
 			);
 		}
 
-		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && 'yes' === get_option( 'woocommerce_back_in_stock_allow_signups' ) ) {
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && 'yes' === get_option( 'woocommerce_customer_stock_notifications_allow_signups' ) ) {
 			wp_admin_notice(
 				sprintf(
 					/* translators: %s settings page link */

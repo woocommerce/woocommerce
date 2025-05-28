@@ -35,9 +35,10 @@ class StockNotifications {
 		$container = wc_get_container();
 		$container->get( EmailManager::class );
 
-		// TO-DO: Maybe run this only if the user is an administrator.
-		$container->get( SettingsController::class );
-		$container->get( MenusController::class );
+		if ( is_admin() ) {
+			$container->get( SettingsController::class );
+			$container->get( MenusController::class );
+		}
 	}
 
 	/**
