@@ -31,7 +31,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
-use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 
 /**
  * Main WooCommerce Class.
