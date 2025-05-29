@@ -250,4 +250,33 @@ store( 'woocommerce/mini-cart-items-block', {
 			return ctx.cartItem.images[ 0 ]?.thumbnail || '';
 		},
 	},
+	actions: {
+		*incrementQuantity(): Generator< unknown, void > {
+			const { cartItem } = getContext< CartItemContext >();
+			const { actions } = store< WooCommerce >(
+				'woocommerce',
+				{},
+				{ lock: universalLock }
+			);
+
+			yield actions.addCartItem( {
+				id: cartItem.id,
+				quantity: cartItem.quantity + 1,
+			} );
+		},
+
+		*decrementQuantity(): Generator< unknown, void > {
+			const { cartItem } = getContext< CartItemContext >();
+			const { actions } = store< WooCommerce >(
+				'woocommerce',
+				{},
+				{ lock: universalLock }
+			);
+
+			yield actions.addCartItem( {
+				id: cartItem.id,
+				quantity: cartItem.quantity - 1,
+			} );
+		},
+	},
 } );

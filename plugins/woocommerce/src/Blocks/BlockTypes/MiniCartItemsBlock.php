@@ -31,18 +31,6 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 	}
 
 	/**
-	 * Render experimental iAPI block markup.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
-	 * @return string Rendered block type output.
-	 */
-	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
-		return $this->get_mini_cart_items_markup();
-	}
-
-	/**
 	 * Return the main instance of WC_Cart class.
 	 *
 	 * @return \WC_Cart CartController class instance.
@@ -57,8 +45,15 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 		return null;
 	}
 
-
-	protected function get_mini_cart_items_markup() {
+	/**
+	 * Render experimental iAPI block markup.
+	 *
+	 * @param array    $attributes Block attributes.
+	 * @param string   $content    Block content.
+	 * @param WP_Block $block      Block instance.
+	 * @return string Rendered block type output.
+	 */
+	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
 		$cart               = $this->get_cart_instance();
 		$cart_items         = $cart->get_cart();
 		$screen_reader_text = __( 'Products in cart', 'woocommerce' );
@@ -119,8 +114,8 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 										<div class="wc-block-cart-item__quantity">
 											<div class="wc-block-components-quantity-selector">
 												<input data-wp-bind--aria-label="state.quantityDescriptionLabel" data-wp-bind--value="context.cartItem.quantity" class="wc-block-components-quantity-selector__input" type="number" step="1" min="1" max="9999" >
-												<button data-wp-bind--aria-label="state.reduceQuantityLabel" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
-												<button data-wp-bind--aria-label="state.increaseQuantityLabel" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
+												<button data-wp-on--click="actions.decrementQuantity" data-wp-bind--aria-label="state.reduceQuantityLabel" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
+												<button data-wp-on--click="actions.incrementQuantity" data-wp-bind--aria-label="state.increaseQuantityLabel" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
 											</div>
 											<button data-wp-bind--aria-label="state.removeFromCartLabel" class="wc-block-cart-item__remove-link" >
 												<?php echo esc_html( $remove_item_label ); ?>
