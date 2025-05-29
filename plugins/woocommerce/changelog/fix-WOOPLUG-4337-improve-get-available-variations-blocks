@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Improve how available variations are fetched in ProductAvailabilityUtils and introduce has_available_variations function.

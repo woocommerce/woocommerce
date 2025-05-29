@@ -18,7 +18,6 @@ import { Link } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import InfoOutline from 'gridicons/dist/info-outline';
 import interpolateComponents from '@automattic/interpolate-components';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -26,6 +25,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { CountrySelector } from '~/settings-payments/components/country-selector';
 import { ListPlaceholder } from '~/settings-payments/components/list-placeholder';
 import { PaymentGatewayList } from '~/settings-payments/components/payment-gateway-list';
+import { recordPaymentsEvent } from '~/settings-payments/utils';
 
 interface PaymentGatewaysProps {
 	providers: PaymentProvider[];
@@ -97,7 +97,9 @@ export const PaymentGateways = ( {
 		}
 	);
 
-	const handleClick = ( event: React.MouseEvent | React.KeyboardEvent ) => {
+	const handleBusinessLocationIndicatorClick = (
+		event: React.MouseEvent | React.KeyboardEvent
+	) => {
 		const clickedElement = event.target as HTMLElement;
 		const parentDiv = clickedElement.closest(
 			'.settings-payment-gateways__header-select-container--indicator'
@@ -106,6 +108,12 @@ export const PaymentGateways = ( {
 		if ( buttonRef.current && parentDiv !== buttonRef.current ) {
 			return;
 		}
+
+		// Record the event when user clicks on the business location indicator.
+		recordPaymentsEvent( 'business_location_indicator_click', {
+			store_country: storeCountryCode,
+			business_country: businessRegistrationCountry || '',
+		} );
 
 		setIsPopoverVisible( ( prev ) => ! prev );
 	};
@@ -141,18 +149,6 @@ export const PaymentGateways = ( {
 								method: 'POST',
 								data: { location: value },
 							} ).then( () => {
-								// Record the event when the country is changed.
-								const previouslySelectedCountry =
-									businessRegistrationCountry;
-								const currentSelectedCountry = value;
-								recordEvent(
-									'settings_payments_business_location_update',
-									{
-										old_location: previouslySelectedCountry,
-										new_location: currentSelectedCountry,
-									}
-								);
-
 								// Update UI.
 								setBusinessRegistrationCountry( value );
 								// Update the window value - this will be updated by the backend on refresh but this keeps state persistent.
@@ -179,13 +175,15 @@ export const PaymentGateways = ( {
 							tabIndex={ 0 }
 							role="button"
 							ref={ buttonRef }
-							onClick={ handleClick }
+							onClick={ handleBusinessLocationIndicatorClick }
 							onKeyDown={ ( event ) => {
 								if (
 									event.key === 'Enter' ||
 									event.key === ' '
 								) {
-									handleClick( event );
+									handleBusinessLocationIndicatorClick(
+										event
+									);
 								}
 							} }
 						>
@@ -219,6 +217,19 @@ export const PaymentGateways = ( {
 															) }
 															target="_blank"
 															type="external"
+															onClick={ () => {
+																// Record the event when user clicks on the edit store location link.
+																recordPaymentsEvent(
+																	'business_location_popover_edit_store_location_click',
+																	{
+																		store_country:
+																			storeCountryCode,
+																		business_country:
+																			businessRegistrationCountry ||
+																			'',
+																	}
+																);
+															} }
 														/>
 													),
 												},

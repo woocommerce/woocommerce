@@ -708,9 +708,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 		);
 		$expected_pms_state      = array(
-			'card'       => true, // Force enabled because it is required.
-			'apple_pay'  => true,
-			'google_pay' => false,
+			'card'         => true, // Force enabled because it is required.
+			'apple_google' => true,
 		);
 
 		$default_wpcom_connection        = array(
@@ -7317,6 +7316,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 */
 	public function test_reset_onboarding_throws_when_extension_not_active() {
 		// Arrange.
+		$location = 'US';
 		// Mock the extension as not active.
 		$this->mockable_proxy->register_function_mocks(
 			array(
@@ -7331,7 +7331,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		try {
-			$this->sut->reset_onboarding();
+			$this->sut->reset_onboarding( $location );
 
 			$this->fail( 'Expected ApiException not thrown.' );
 		} catch ( ApiException $e ) {
@@ -7346,6 +7346,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 * @throws \Exception When trying to mock uncallable user functions.
 	 */
 	public function test_reset_onboarding_throws_with_onboarding_locked() {
+		// Arrange.
+		$location = 'US';
 		// Arrange the WPCOM connection.
 		// Make it working since it is a dependency for the step.
 		$this->mock_wpcom_connection_manager
@@ -7371,7 +7373,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		try {
-			$this->sut->reset_onboarding();
+			$this->sut->reset_onboarding( $location );
 
 			$this->fail( 'Expected ApiException not thrown.' );
 		} catch ( ApiException $e ) {
@@ -7386,6 +7388,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 * @throws \Exception On POST request not mocked.
 	 */
 	public function test_reset_onboarding_throws_on_error_response() {
+		// Arrange.
+		$location = 'US';
+
 		// Arrange the REST API requests.
 		$requests_made  = array();
 		$expected_error = array(
@@ -7412,7 +7417,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->expectExceptionMessage( $expected_error['message'] );
 
 		// Act.
-		$this->sut->reset_onboarding();
+		$this->sut->reset_onboarding( $location );
 	}
 
 	/**
@@ -7422,6 +7427,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 * @throws \Exception On POST request not mocked.
 	 */
 	public function test_reset_onboarding_throws_on_invalid_response() {
+		// Arrange.
+		$location = 'US';
+
 		// Arrange the REST API requests.
 		$requests_made = array();
 		// Not an array.
@@ -7446,7 +7454,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->expectExceptionMessage( esc_html__( 'Failed to reset onboarding.', 'woocommerce' ) );
 
 		// Act.
-		$this->sut->reset_onboarding();
+		$this->sut->reset_onboarding( $location );
 	}
 
 	/**
@@ -7456,6 +7464,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 * @throws \Exception On POST request not mocked.
 	 */
 	public function test_reset_onboarding_throws_on_failure() {
+		// Arrange.
+		$location = 'US';
+
 		// Arrange the REST API requests.
 		$requests_made = array();
 		// Not an array.
@@ -7480,7 +7491,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->expectExceptionMessage( esc_html__( 'Failed to reset onboarding.', 'woocommerce' ) );
 
 		// Act.
-		$this->sut->reset_onboarding();
+		$this->sut->reset_onboarding( $location );
 	}
 
 	/**
@@ -7490,6 +7501,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 * @throws \Exception On POST request not mocked.
 	 */
 	public function test_reset_onboarding() {
+		// Arrange.
+		$location = 'US';
+
 		// Arrange the REST API requests.
 		$requests_made     = array();
 		$expected_payload  = array(
@@ -7517,7 +7531,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		// Act.
-		$result = $this->sut->reset_onboarding();
+		$result = $this->sut->reset_onboarding( $location );
 
 		// Assert.
 		self::assertEquals( $expected_response, $result );

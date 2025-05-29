@@ -21,10 +21,10 @@
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "3.3.0",
-		"phpunit/phpunit": "^9.6",
 		"pelago/emogrifier": "^7.3",
-		"yoast/phpunit-polyfills": "^4.0",
-		"woocommerce/woocommerce-sniffs": "1.0.0"
+		"phpunit/phpunit": "^9.6",
+		"woocommerce/woocommerce-sniffs": "1.0.0",
+		"yoast/phpunit-polyfills": "^4.0"
 	},
 	"config": {
 		"platform": {
@@ -41,8 +41,7 @@
 		"test:unit": "wp-env run tests-cli --env-cwd=wp-content/plugins/email-editor ./vendor/bin/phpunit",
 		"test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/email-editor ./vendor/bin/phpunit --configuration phpunit-integration.xml.dist",
 		"phpcs": "phpcs -s -p",
-		"phpcbf": "phpcbf -p",
-		"phpstan": "php ./tasks/run-phpstan.php"
+		"phpcbf": "phpcbf -p"
 	},
 	"extra": {
 		"changelogger": {

@@ -72,6 +72,9 @@ class WooPaymentsService {
 
 	const FROM_PAYMENT_SETTINGS = 'WCADMIN_PAYMENT_SETTINGS';
 	const FROM_NOX_IN_CONTEXT   = 'WCADMIN_NOX_IN_CONTEXT';
+	const FROM_KYC              = 'KYC';
+
+	const EVENT_PREFIX = 'settings_payments_woopayments_';
 
 	/**
 	 * The PaymentProviders instance.
@@ -331,7 +334,20 @@ class WooPaymentsService {
 		$statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] = $this->proxy->call_function( 'time' );
 
 		// Store the updated step data.
-		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
+		$result = $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
+
+		if ( $result ) {
+			// Record an event for the step being started.
+			$this->record_event(
+				self::EVENT_PREFIX . 'onboarding_step_started',
+				$location,
+				array(
+					'step_id' => $step_id,
+				)
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -395,7 +411,20 @@ class WooPaymentsService {
 		$statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] = $this->proxy->call_function( 'time' );
 
 		// Store the updated step data.
-		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
+		$result = $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
+
+		if ( $result ) {
+			// Record an event for the step being completed.
+			$this->record_event(
+				self::EVENT_PREFIX . 'onboarding_step_completed',
+				$location,
+				array(
+					'step_id' => $step_id,
+				)
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -417,7 +446,20 @@ class WooPaymentsService {
 		$this->clear_onboarding_step_blocked( $step_id, $location );
 
 		// Reset the stored step statuses.
-		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', array() );
+		$result = $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', array() );
+
+		if ( $result ) {
+			// Record an event for the step being cleaned.
+			$this->record_event(
+				self::EVENT_PREFIX . 'onboarding_step_progress_reset',
+				$location,
+				array(
+					'step_id' => $step_id,
+				)
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -467,7 +509,21 @@ class WooPaymentsService {
 		unset( $statuses[ self::ONBOARDING_STEP_STATUS_BLOCKED ] );
 
 		// Store the updated step data.
-		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
+		$result = $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
+
+		if ( $result ) {
+			// Record an event for the step being failed.
+			$this->record_event(
+				self::EVENT_PREFIX . 'onboarding_step_failed',
+				$location,
+				array(
+					'step_id'    => $step_id,
+					'error_code' => ! empty( $error['code'] ) ? $error['code'] : '',
+				)
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -780,7 +836,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $location The location for which we are onboarding.
 	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 * @param string $source   Optional. The source for the KYC session.
+	 * @param string $source   Optional. The source for the current onboarding flow.
 	 *                         If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return array The result of the test account initialization.
@@ -824,8 +880,16 @@ class WooPaymentsService {
 
 		$selected_payment_methods = $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_PAYMENT_METHODS, $location, 'payment_methods', array() );
 
+		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
+		WC()->payment_gateways();
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
+
+		if ( empty( $source ) ) {
+			// The default source is the WC Admin Payments settings.
+			$source = self::FROM_PAYMENT_SETTINGS;
+		}
 
 		try {
 			// Call the WooPayments API to initialize the test account.
@@ -836,7 +900,7 @@ class WooPaymentsService {
 				array(
 					'country'      => $location,
 					'capabilities' => $selected_payment_methods,
-					'source'       => ! empty( $source ) ? $source : self::FROM_NOX_IN_CONTEXT,
+					'source'       => $source,
 					'from'         => self::FROM_NOX_IN_CONTEXT,
 				)
 			);
@@ -897,6 +961,15 @@ class WooPaymentsService {
 			);
 		}
 
+		// Record an event for the test account being initialized.
+		$this->record_event(
+			self::EVENT_PREFIX . 'onboarding_test_account_init',
+			$location,
+			array(
+				'source' => $source,
+			)
+		);
+
 		return $response;
 	}
 
@@ -907,12 +980,14 @@ class WooPaymentsService {
 	 *                                This is a ISO 3166-1 alpha-2 country code.
 	 * @param array  $self_assessment Optional. The self-assessment data.
 	 *                                If not provided, the stored data will be used.
+	 * @param string $source          Optional. The source for the current onboarding flow.
+	 *                                If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return array The KYC account session data.
 	 * @throws ApiException If the extension is not active, step requirements are not met, or
 	 *                      the KYC session data could not be retrieved.
 	 */
-	public function get_onboarding_kyc_session( string $location, array $self_assessment = array() ): array {
+	public function get_onboarding_kyc_session( string $location, array $self_assessment = array(), string $source = '' ): array {
 		$this->check_if_onboarding_step_action_is_acceptable( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
 
 		if ( empty( $self_assessment ) ) {
@@ -923,8 +998,16 @@ class WooPaymentsService {
 		// Clear any previous failed status for the step.
 		$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
 
+		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
+		WC()->payment_gateways();
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
+
+		if ( empty( $source ) ) {
+			// The default source is the WC Admin Payments settings.
+			$source = self::FROM_PAYMENT_SETTINGS;
+		}
 
 		try {
 			// Call the WooPayments API to get the KYC session.
@@ -1009,6 +1092,15 @@ class WooPaymentsService {
 			);
 		}
 
+		// Record an event for the KYC session being created.
+		$this->record_event(
+			self::EVENT_PREFIX . 'onboarding_kyc_session_created',
+			$location,
+			array(
+				'source' => $source,
+			)
+		);
+
 		return $response;
 	}
 
@@ -1017,7 +1109,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $location The location for which we are onboarding.
 	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 * @param string $source   Optional. The source for the KYC session.
+	 * @param string $source   Optional. The source for the current onboarding flow.
 	 *                         If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return array The response from the WooPayments API.
@@ -1027,8 +1119,16 @@ class WooPaymentsService {
 	public function finish_onboarding_kyc_session( string $location, string $source = '' ): array {
 		$this->check_if_onboarding_step_action_is_acceptable( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
 
+		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
+		WC()->payment_gateways();
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
+
+		if ( empty( $source ) ) {
+			// The default source is the WC Admin Payments settings.
+			$source = self::FROM_PAYMENT_SETTINGS;
+		}
 
 		try {
 			// Call the WooPayments API to finalize the KYC session.
@@ -1037,7 +1137,7 @@ class WooPaymentsService {
 				'rest_endpoint_post_request',
 				'/wc/v3/payments/onboarding/kyc/finalize',
 				array(
-					'source' => ! empty( $source ) ? $source : self::FROM_PAYMENT_SETTINGS,
+					'source' => $source,
 					'from'   => self::FROM_NOX_IN_CONTEXT,
 				)
 			);
@@ -1098,6 +1198,15 @@ class WooPaymentsService {
 			);
 		}
 
+		// Record an event for the KYC session being finished.
+		$this->record_event(
+			self::EVENT_PREFIX . 'onboarding_kyc_session_finished',
+			$location,
+			array(
+				'source' => $source,
+			)
+		);
+
 		// Mark the business verification step as completed.
 		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
 
@@ -1120,19 +1229,29 @@ class WooPaymentsService {
 	/**
 	 * Reset onboarding.
 	 *
-	 * @param string $from   Optional. Where in the UI the request is coming from.
-	 *                       If not provided, it will identify the origin as the WC Admin Payments settings.
-	 * @param string $source Optional. The source for the current onboarding flow.
-	 *                       If not provided, it will identify the source as the WC Admin Payments settings.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param string $from     Optional. Where in the UI the request is coming from.
+	 *                         If not provided, it will identify the origin as the WC Admin Payments settings.
+	 * @param string $source   Optional. The source for the current onboarding flow.
+	 *                         If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return array The response from the WooPayments API.
 	 * @throws ApiException If we could not reset onboarding or there was an error.
 	 */
-	public function reset_onboarding( string $from = '', string $source = '' ): array {
+	public function reset_onboarding( string $location, string $from = '', string $source = '' ): array {
 		$this->check_if_onboarding_action_is_acceptable();
+
+		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
+		WC()->payment_gateways();
 
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
+
+		// If no source is provided, default to the WC Admin Payments settings.
+		if ( empty( $source ) ) {
+			$source = self::FROM_PAYMENT_SETTINGS;
+		}
 
 		try {
 			// Call the WooPayments API to reset onboarding.
@@ -1142,7 +1261,7 @@ class WooPaymentsService {
 				'/wc/v3/payments/onboarding/reset',
 				array(
 					'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
-					'source' => ! empty( $source ) ? esc_attr( $source ) : self::FROM_PAYMENT_SETTINGS,
+					'source' => $source,
 				)
 			);
 		} catch ( Exception $e ) {
@@ -1181,6 +1300,15 @@ class WooPaymentsService {
 		// Clean up any NOX-specific onboarding data.
 		$this->proxy->call_function( 'delete_option', self::NOX_PROFILE_OPTION_KEY );
 
+		// Record an event for the onboarding reset.
+		$this->record_event(
+			self::EVENT_PREFIX . 'onboarding_reset',
+			$location,
+			array(
+				'source' => $source,
+			)
+		);
+
 		return $response;
 	}
 
@@ -1200,8 +1328,16 @@ class WooPaymentsService {
 	public function disable_test_account( string $location, string $from = '', string $source = '' ): array {
 		$this->check_if_onboarding_action_is_acceptable();
 
+		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
+		WC()->payment_gateways();
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
+
+		// If no source is provided, default to the WC Admin Payments settings.
+		if ( empty( $source ) ) {
+			$source = self::FROM_PAYMENT_SETTINGS;
+		}
 
 		try {
 			// Call the WooPayments API to disable the test account and prepare for the switch to live.
@@ -1211,7 +1347,7 @@ class WooPaymentsService {
 				'/wc/v3/payments/onboarding/test_drive_account/disable',
 				array(
 					'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
-					'source' => ! empty( $source ) ? esc_attr( $source ) : self::FROM_PAYMENT_SETTINGS,
+					'source' => $source,
 				)
 			);
 		} catch ( Exception $e ) {
@@ -1255,6 +1391,15 @@ class WooPaymentsService {
 		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		$this->clear_onboarding_step_blocked( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+
+		// Record an event for the test account being disabled.
+		$this->record_event(
+			self::EVENT_PREFIX . 'onboarding_test_account_disabled',
+			$location,
+			array(
+				'source' => $source,
+			)
+		);
 
 		return $response;
 	}
@@ -1857,8 +2002,25 @@ class WooPaymentsService {
 		$step_pms_data = (array) $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_PAYMENT_METHODS, $location, 'payment_methods' );
 
 		$payment_methods_state = array();
+		$apple_pay_enabled     = false;
+		$google_pay_enabled    = false;
+
 		foreach ( $recommended_pms as $recommended_pm ) {
 			$pm_id = $recommended_pm['id'];
+
+			/**
+			 * We need to handle Apple Pay and Google Pay separately.
+			 * They are not stored in the same way as the other payment methods.
+			 */
+			if ( 'apple_pay' === $pm_id ) {
+				$apple_pay_enabled = $recommended_pm['enabled'];
+				continue;
+			}
+
+			if ( 'google_pay' === $pm_id ) {
+				$google_pay_enabled = $recommended_pm['enabled'];
+				continue;
+			}
 
 			// Start with the recommended enabled state.
 			$payment_methods_state[ $pm_id ] = $recommended_pm['enabled'];
@@ -1874,6 +2036,12 @@ class WooPaymentsService {
 				$payment_methods_state[ $pm_id ] = filter_var( $step_pms_data[ $pm_id ], FILTER_VALIDATE_BOOLEAN );
 			}
 		}
+
+		// Combine Apple Pay and Google Pay into a single `apple_google` entry.
+		$apple_google_enabled = $apple_pay_enabled || $google_pay_enabled;
+
+		// Optionally also respect stored state or forced requirements if needed here.
+		$payment_methods_state['apple_google'] = $apple_google_enabled;
 
 		return $payment_methods_state;
 	}
@@ -2055,7 +2223,10 @@ class WooPaymentsService {
 		}
 
 		// Fall back to the provider onboarding URL.
-		return $this->provider->get_onboarding_url( $this->get_payment_gateway(), Utils::wc_payments_settings_url( self::ONBOARDING_PATH_BASE ) );
+		return $this->provider->get_onboarding_url(
+			$this->get_payment_gateway(),
+			Utils::wc_payments_settings_url( self::ONBOARDING_PATH_BASE, array( 'from' => self::FROM_KYC ) )
+		);
 	}
 
 	/**
@@ -2082,5 +2253,62 @@ class WooPaymentsService {
 			),
 			admin_url( 'admin.php' )
 		);
+	}
+
+	/**
+	 * Get the business location country code for the Payments settings.
+	 *
+	 * @return string The ISO 3166-1 alpha-2 country code to use for the overall business location.
+	 *                If the user didn't set a location, the WC base location country code is used.
+	 */
+	private function get_country(): string {
+		$user_nox_meta = get_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, true );
+		if ( ! empty( $user_nox_meta['business_country_code'] ) ) {
+			return $user_nox_meta['business_country_code'];
+		}
+
+		return WC()->countries->get_base_country();
+	}
+
+	/**
+	 * Send a Tracks event.
+	 *
+	 * By default, Woo adds `url`, `blog_lang`, `blog_id`, `store_id`, `products_count`, and `wc_version`
+	 * properties to every event.
+	 *
+	 * @param string $name              The event name.
+	 *                                  If it is not prefixed with self::EVENT_PREFIX, it will be prefixed with it.
+	 * @param string $business_country  The business registration country code as set in the WooCommerce Payments settings.
+	 *                                  This is a ISO 3166-1 alpha-2 country code.
+	 * @param array  $properties        Optional. The event custom properties.
+	 *                                  These properties will be merged with the default properties.
+	 *                                  Default properties values take precedence over the provided ones.
+	 *
+	 * @return void
+	 */
+	private function record_event( string $name, string $business_country, array $properties = array() ) {
+		if ( ! function_exists( 'wc_admin_record_tracks_event' ) ) {
+			return;
+		}
+
+		// If the event name is empty, we don't record it.
+		if ( empty( $name ) ) {
+			return;
+		}
+
+		// If the event name is not prefixed with `settings_payments_`, we prefix it.
+		if ( ! str_starts_with( $name, self::EVENT_PREFIX ) ) {
+			$name = self::EVENT_PREFIX . $name;
+		}
+
+		// Add default properties to every event and overwrite custom properties with the same keys.
+		$properties = array_merge(
+			$properties,
+			array(
+				'business_country' => $business_country,
+			),
+		);
+
+		wc_admin_record_tracks_event( $name, $properties );
 	}
 }
