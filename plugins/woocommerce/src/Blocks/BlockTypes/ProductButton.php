@@ -136,15 +136,6 @@ class ProductButton extends AbstractBlock {
 					break;
 				}
 			}
-
-			$number_of_items_in_cart = array_sum(
-				array_map(
-					function ( $child_product_id ) {
-						return $this->get_cart_item_quantities_by_product_id( (int) $child_product_id );
-					},
-					$grouped_product_ids
-				)
-			);
 		}
 
 		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
@@ -327,6 +318,20 @@ class ProductButton extends AbstractBlock {
 	private function get_cart_item_quantities_by_product_id( $product_id ) {
 		if ( ! isset( WC()->cart ) ) {
 			return 0;
+		}
+
+		$product = wc_get_product( $product_id );
+
+		if ( $product->is_type( 'grouped' ) ) {
+			$grouped_product_ids = $product->get_children();
+			return array_sum(
+				array_map(
+					function ( $child_product_id ) {
+						return $this->get_cart_item_quantities_by_product_id( (int) $child_product_id );
+					},
+					$grouped_product_ids
+				)
+			);
 		}
 
 		$cart = WC()->cart->get_cart_item_quantities();
