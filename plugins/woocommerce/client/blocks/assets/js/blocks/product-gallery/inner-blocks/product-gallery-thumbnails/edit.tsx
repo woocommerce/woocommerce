@@ -131,7 +131,6 @@ export const Edit = ( {
 								<div
 									className="wc-block-product-gallery-thumbnails__thumbnail"
 									key={ index }
-									style={ imageStyles }
 								>
 									<img
 										className={ imageClassName }
