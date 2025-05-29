@@ -13,7 +13,7 @@ import { Post } from '@wordpress/core-data/build-types/entity-types/post';
  * Internal dependencies
  */
 import { storeName, editorCurrentPostType } from './constants';
-import { State, Feature, EmailTemplate, EmailEditorPostType } from './types';
+import { State, EmailTemplate, EmailEditorPostType, Feature } from './types';
 
 function getContentFromEntity( entity ): string {
 	if ( entity?.content && typeof entity.content === 'function' ) {

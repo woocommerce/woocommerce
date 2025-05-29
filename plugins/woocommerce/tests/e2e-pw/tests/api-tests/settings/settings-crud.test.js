@@ -264,7 +264,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						id: 'email_customer_reset_password',
 						label: 'Reset password',
 						description:
-							'Customer "reset password" emails are sent when customers reset their passwords.',
+							'Send an email to customers notifying them that their password has been reset',
 						parent_id: 'email',
 						sub_groups: expect.arrayContaining( [] ),
 					} ),
@@ -276,7 +276,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						id: 'email_customer_new_account',
 						label: 'New account',
 						description:
-							'“New Account” emails are sent when a customer signs up via the checkout flow.',
+							'Send an email to customers notifying them that they have created an account',
 						parent_id: 'email',
 						sub_groups: expect.arrayContaining( [] ),
 					} ),

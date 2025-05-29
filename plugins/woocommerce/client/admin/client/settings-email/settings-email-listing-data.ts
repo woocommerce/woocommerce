@@ -97,6 +97,53 @@ export const useTransactionalEmails = (
 		return statusFilter.value.includes( email.status );
 	} );
 
+	// Apply Recipient Filter.
+	filteredEmails = filteredEmails.filter( ( email ) => {
+		const recipientFilter = view.filters.find(
+			( filter: View.Filter ) => filter.field === 'recipients'
+		);
+
+		if ( ! recipientFilter || ! recipientFilter.value ) {
+			return true;
+		}
+
+		const selectedRecipients = recipientFilter.value as string[];
+
+		// Check for 'Customers' filter.
+		if (
+			selectedRecipients.includes( 'customer' ) &&
+			( ! email.recipients.to || email.recipients.to.length === 0 )
+		) {
+			return true;
+		}
+
+		// Check for specific email recipients.
+		const emailRecipients = [
+			...( email.recipients.to
+				? email.recipients.to
+						.split( ',' )
+						.map( ( r ) => r.trim() )
+						.filter( Boolean )
+				: [] ),
+			...( email.recipients.cc
+				? email.recipients.cc
+						.split( ',' )
+						.map( ( r ) => r.trim() )
+						.filter( Boolean )
+				: [] ),
+			...( email.recipients.bcc
+				? email.recipients.bcc
+						.split( ',' )
+						.map( ( r ) => r.trim() )
+						.filter( Boolean )
+				: [] ),
+		];
+
+		return selectedRecipients.some( ( filterRecipient ) =>
+			emailRecipients.includes( filterRecipient )
+		);
+	} );
+
 	// Apply pagination
 	const startIndex = ( view.page - 1 ) * view.perPage;
 	const endIndex = startIndex + view.perPage;

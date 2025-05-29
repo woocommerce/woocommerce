@@ -1,12 +1,11 @@
 <?php
-declare( strict_types = 1 );
-
-// @codingStandardsIgnoreLine.
 /**
  * WooCommerce Checkout Settings
  *
  * @package WooCommerce\Admin
  */
+
+declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Internal\Admin\Loader;
 

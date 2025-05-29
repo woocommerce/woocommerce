@@ -11,7 +11,6 @@
 declare( strict_types = 1 );
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -280,7 +279,7 @@ class WC_Emails {
 		$this->emails['WC_Email_Customer_Reset_Password']   = include __DIR__ . '/emails/class-wc-email-customer-reset-password.php';
 		$this->emails['WC_Email_Customer_New_Account']      = include __DIR__ . '/emails/class-wc-email-customer-new-account.php';
 
-		if ( Features::is_enabled( 'point-of-sale' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
 			$this->emails['WC_Email_Customer_POS_Completed_Order'] = include __DIR__ . '/emails/class-wc-email-customer-pos-completed-order.php';
 			$this->emails['WC_Email_Customer_POS_Refunded_Order']  = include __DIR__ . '/emails/class-wc-email-customer-pos-refunded-order.php';
 		}
@@ -327,7 +326,13 @@ class WC_Emails {
 	 * @param mixed $email_heading Heading for the email.
 	 */
 	public function email_header( $email_heading ) {
-		wc_get_template( 'emails/email-header.php', array( 'email_heading' => $email_heading ) );
+		wc_get_template(
+			'emails/email-header.php',
+			array(
+				'email_heading' => $email_heading,
+				'store_name'    => get_bloginfo( 'name', 'display' ),
+			)
+		);
 	}
 
 	/**

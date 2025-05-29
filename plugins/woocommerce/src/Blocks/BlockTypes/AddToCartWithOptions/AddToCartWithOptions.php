@@ -166,6 +166,14 @@ class AddToCartWithOptions extends AbstractBlock {
 			 */
 			$default_quantity = apply_filters( 'woocommerce_add_to_cart_quantity', 1, $product->get_id() );
 
+			wp_interactivity_state(
+				'woocommerce/add-to-cart-with-options',
+				array(
+					'isFormValid' => ! $product->is_type( 'variable' ),
+					'variationId' => null,
+				)
+			);
+
 			$context = array(
 				'productId'   => $product->get_id(),
 				'productType' => $product->get_type(),
@@ -174,22 +182,18 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			if ( $product->is_type( 'variable' ) ) {
 				$context['selectedAttributes']  = array();
-				$context['availableVariations'] = $product->get_available_variations();
+				$available_variations           = $product->get_available_variations();
+				$available_variations_data      = array_map(
+					function ( $variation ) {
+						return array(
+							'variation_id' => $variation['variation_id'],
+							'attributes'   => $variation['attributes'],
+						);
+					},
+					$available_variations
+				);
+				$context['availableVariations'] = $available_variations_data;
 			}
-
-			$wrapper_attributes = get_block_wrapper_attributes(
-				array(
-					'data-wp-interactive'       => 'woocommerce/add-to-cart-with-options',
-					'data-wp-context'           => wp_json_encode(
-						$context,
-						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-					),
-					'data-wp-on--submit'        => 'actions.handleSubmit',
-					'data-wp-class--is-invalid' => '!state.isFormValid',
-					'class'                     => $classes,
-					'style'                     => esc_attr( $classes_and_styles['styles'] ),
-				)
-			);
 
 			$hooks_before = '';
 			$hooks_after  = '';
@@ -288,12 +292,56 @@ class AddToCartWithOptions extends AbstractBlock {
 			$template_part_blocks = do_blocks( $template_part_contents );
 			remove_filter( 'render_block_context', array( $this, 'set_is_descendant_of_add_to_cart_with_options_context' ) );
 
+			$wrapper_attributes = array(
+				'class'               => $classes,
+				'style'               => esc_attr( $classes_and_styles['styles'] ),
+				'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
+				'data-wp-context'     => wp_json_encode(
+					$context,
+					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+				),
+			);
+
+			$cart_redirect_after_add = get_option( 'woocommerce_cart_redirect_after_add' );
+			$form_attributes         = '';
+			$hidden_input            = '';
+			if ( $hooks_before || $hooks_after || 'yes' === $cart_redirect_after_add ) {
+				// If an extension is hoooking into the form or we need to redirect to the cart,
+				// we fall back to a regular HTML form.
+				$form_attributes = array(
+					'action'  => esc_url(
+						/**
+						 * Filter the add to cart form action.
+						 *
+						 * @since 10.0.0
+						 * @param string $permalink The product permalink.
+						 * @return string The add to cart form action.
+						 */
+						apply_filters( 'woocommerce_add_to_cart_form_action', $product->get_permalink() )
+					),
+					'method'  => 'post',
+					'enctype' => 'multipart/form-data',
+				);
+				if ( ProductType::SIMPLE === $product_type ) {
+					$hidden_input = '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '" />';
+				} elseif ( ProductType::GROUPED === $product_type ) {
+					$hidden_input = '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '" />';
+				}
+			} else {
+				// Otherwise, we use the Interactivity API.
+				$form_attributes = array(
+					'data-wp-on--submit'        => 'actions.handleSubmit',
+					'data-wp-class--is-invalid' => '!state.isFormValid',
+				);
+			}
+
 			$form_html = sprintf(
-				'<form %1$s>%2$s%3$s%4$s</form>',
-				$wrapper_attributes,
+				'<form %1$s>%2$s%3$s%4$s%5$s</form>',
+				get_block_wrapper_attributes( array_merge( $wrapper_attributes, $form_attributes ) ),
 				$hooks_before,
 				$template_part_blocks,
 				$hooks_after,
+				$hidden_input
 			);
 
 			ob_start();

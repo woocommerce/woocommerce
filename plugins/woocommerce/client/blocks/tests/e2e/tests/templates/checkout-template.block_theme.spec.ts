@@ -16,11 +16,8 @@ test.describe( 'Test the checkout template', () => {
 			postType: templateType,
 			canvas: 'edit',
 		} );
-		await expect(
-			editor.canvas.getByRole( 'button', {
-				name: 'Place Order',
-			} )
-		).toBeVisible();
+		const block = editor.canvas.getByLabel( 'Block: Checkout' );
+		await expect( block ).toBeVisible();
 	} );
 
 	test( 'Template can be accessed from the page editor', async ( {
