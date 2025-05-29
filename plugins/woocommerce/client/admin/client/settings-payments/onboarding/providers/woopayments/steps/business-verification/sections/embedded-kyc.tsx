@@ -12,8 +12,9 @@ import { useOnboardingContext } from '../../../data/onboarding-context';
 import StripeSpinner from '../../../components/stripe-spinner';
 import BannerNotice from '../../../components/banner-notice';
 import { useBusinessVerificationContext } from '../data/business-verification-context';
-import { finalizeOnboarding } from '../utils/actions';
+import { finalizeEmbeddedKycSession } from '../utils/actions';
 import { EmbeddedAccountOnboarding } from '../components/embedded';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 
 interface Props {
 	continueKyc?: boolean;
@@ -25,20 +26,26 @@ const EmbeddedKyc: React.FC< Props > = ( {
 } ) => {
 	const { data } = useBusinessVerificationContext();
 	const { currentStep, navigateToNextStep } = useOnboardingContext();
-	const [ finalizingAccount, setFinalizingAccount ] = useState( false );
+	const [ finalizingSession, setFinalizingSession ] = useState( false );
 	const [ loading, setLoading ] = useState( true );
 	const [ loadError, setLoadError ] = useState< LoadError | null >( null );
 	const fallbackUrl = currentStep?.actions?.kyc_fallback?.href ?? '';
 
-	const handleStepChange = () => {
-		// To-Do: Track step change.
+	const handleStepChange = ( step: string ) => {
+		recordPaymentsOnboardingEvent(
+			'woopayments_onboarding_modal_kyc_step_change',
+			{
+				kyc_step_id: step, // This is the Stripe Embedded KYC step ID.
+				collect_payout_requirements: collectPayoutRequirements,
+			}
+		);
 	};
 
 	const handleOnExit = async () => {
-		setFinalizingAccount( true );
+		setFinalizingSession( true );
 
 		try {
-			const response = await finalizeOnboarding(
+			const response = await finalizeEmbeddedKycSession(
 				currentStep?.actions?.kyc_session_finish?.href ?? ''
 			);
 
@@ -52,7 +59,27 @@ const EmbeddedKyc: React.FC< Props > = ( {
 		}
 	};
 
+	const handleLoaderStart = () => {
+		recordPaymentsOnboardingEvent(
+			'woopayments_onboarding_modal_kyc_started_loading',
+			{
+				collect_payout_requirements: collectPayoutRequirements,
+			}
+		);
+
+		setLoading( false );
+	};
+
 	const handleLoadError = ( err: LoadError ) => {
+		recordPaymentsOnboardingEvent(
+			'woopayments_onboarding_modal_kyc_load_error',
+			{
+				error_type: err.error.type,
+				error_message: err.error.message || '',
+				collect_payout_requirements: collectPayoutRequirements,
+			}
+		);
+
 		setLoadError( err );
 	};
 
@@ -97,7 +124,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 					<StripeSpinner />
 				</div>
 			) }
-			{ finalizingAccount && (
+			{ finalizingSession && (
 				<div className="embedded-kyc-loader-wrapper">
 					<StripeSpinner />
 				</div>
@@ -106,7 +133,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 				<EmbeddedAccountOnboarding
 					onExit={ handleOnExit }
 					onStepChange={ handleStepChange }
-					onLoaderStart={ () => setLoading( false ) }
+					onLoaderStart={ handleLoaderStart }
 					onLoadError={ handleLoadError }
 					onboardingData={ data }
 					collectPayoutRequirements={ collectPayoutRequirements }
