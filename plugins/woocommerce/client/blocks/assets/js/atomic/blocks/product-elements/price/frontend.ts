@@ -2,40 +2,48 @@
  * External dependencies
  */
 import { getContext, getElement, store } from '@wordpress/interactivity';
+import type { DisplayedProduct } from '@woocommerce/type-defs/product';
+import type { SingleProductTemplateStore } from '@woocommerce/base-stores/single-product-template';
 
-import { DisplayedProduct } from '../types';
+/**
+ * Internal dependencies
+ */
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+const { state: wooState } = store< SingleProductTemplateStore >(
+	'woocommerce',
+	{},
+	{ lock: universalLock }
+);
 
 const productPriceStore = store(
 	'woocommerce/product-price',
 	{
 		callbacks: {
 			renderContent: () => {
+				const element = getElement();
+
+				if ( ! element.ref ) {
+					return;
+				}
+
 				const context = getContext< {
 					displayedProduct: DisplayedProduct;
 				} >( 'woocommerce/single-product' );
 
-				const element = getElement();
-
 				if ( context ) {
 					element.ref.innerHTML = context.displayedProduct.price_html;
-				} else {
-					const { state } = store< WooCommerce >(
-						'woocommerce',
-						{},
-						{ lock: universalLock }
-					);
-
-					if ( state.displayedProduct ) {
-						element.ref.innerHTML =
-							state.displayedProduct.price_html;
-					}
+				} else if ( wooState.displayedProduct ) {
+					element.ref.innerHTML =
+						wooState.displayedProduct.price_html;
 				}
 			},
 		},
 	},
 	{ lock: true }
 );
+
+export type ProductPriceStore = typeof productPriceStore;

@@ -117,6 +117,21 @@ trait BlocksSharedState {
 	}
 
 	/**
+	 * Register interactivity state for single product template that is needed by multiple blocks.
+	 *
+	 * @param \WC_Product $product - The product to register.
+	 * @return void
+	 */
+	public function register_single_product_interactivity( $product ) {
+		wp_interactivity_state(
+			'woocommerce',
+			array(
+				'displayedProduct' => ProductDataUtils::get_product_data( $product ),
+			)
+		);
+	}
+
+	/**
 	 * Get core data to include in settings.
 	 *
 	 * @return array
