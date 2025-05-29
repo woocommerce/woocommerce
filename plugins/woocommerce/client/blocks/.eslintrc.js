@@ -131,6 +131,7 @@ const coreModules = [
 	'@woocommerce/blocks-components',
 	'@woocommerce/blocks-registry',
 	'@woocommerce/block-settings',
+	'@woocommerce/base-stores',
 	'@woocommerce/price-format',
 	'@woocommerce/settings',
 	'@woocommerce/shared-context',

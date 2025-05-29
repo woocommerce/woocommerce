@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
+use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Utils\ProductDataUtils;
 
@@ -11,6 +12,7 @@ use Automattic\WooCommerce\Blocks\Utils\ProductDataUtils;
  * @internal
  */
 class SingleProductTemplate extends AbstractTemplate {
+	use BlocksSharedState;
 
 	/**
 	 * The slug of the template.
@@ -87,12 +89,7 @@ class SingleProductTemplate extends AbstractTemplate {
 
 			$product = wc_get_product( $post->ID );
 
-			wp_interactivity_state(
-				'woocommerce',
-				array(
-					'displayedProduct' => ProductDataUtils::get_product_data( $product ),
-				)
-			);
+			$this->register_single_product_interactivity( $product );
 
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		}

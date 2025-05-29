@@ -5,7 +5,8 @@ import type { FormEvent, HTMLElementEvent } from 'react';
 import { store, getContext } from '@wordpress/interactivity';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import type { CartVariationItem } from '@woocommerce/types';
-import { DisplayedProduct } from 'assets/js/atomic/blocks/product-elements/types';
+import type { DisplayedProduct } from '@woocommerce/type-defs/product';
+import type { SingleProductTemplateStore } from '@woocommerce/base-stores/single-product-template';
 
 export type AvailableVariation = {
 	attributes: Record< string, string >;
@@ -27,7 +28,7 @@ export type Context = {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: wooState } = store< WooCommerce >(
+const { state: wooState } = store< SingleProductTemplateStore >(
 	'woocommerce',
 	{},
 	{ lock: universalLock }
@@ -253,9 +254,7 @@ const addToCartWithOptionsStore = store(
 							price_html: matchedVariation.price_html,
 						};
 					} else {
-						const { state } = store< WooCommerce >( 'woocommerce' );
-
-						state.displayedProduct = {
+						wooState.displayedProduct = {
 							price_html: matchedVariation.price_html,
 						};
 					}

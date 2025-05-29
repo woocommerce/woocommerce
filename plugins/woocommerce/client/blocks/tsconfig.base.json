@@ -59,16 +59,27 @@
 			"@woocommerce/settings": [ "assets/js/settings/shared" ],
 			"@woocommerce/shared-context": [ "assets/js/shared/context" ],
 			"@woocommerce/shared-hocs": [ "assets/js/shared/hocs" ],
-			"@woocommerce/stores/store-notices": [ "assets/js/base/stores/store-notices" ],
-			"@woocommerce/stores/woocommerce/cart": [ "assets/js/base/stores/woocommerce/cart" ],
+			"@woocommerce/stores/store-notices": [
+				"assets/js/base/stores/store-notices"
+			],
+			"@woocommerce/stores/woocommerce/cart": [
+				"assets/js/base/stores/woocommerce/cart"
+			],
 			"@woocommerce/type-defs/*": [ "assets/js/types/type-defs/*" ],
 			"@woocommerce/types": [ "assets/js/types" ],
+			"@woocommerce/base-stores/*": [
+				"assets/js/base/stores/woocommerce/*"
+			],
 			"@woocommerce/storybook-controls": [ "storybook/custom-controls" ],
 			"@woocommerce/utils": [ "assets/js/utils" ],
 			"@woocommerce/e2e-utils": [ "tests/e2e/utils" ],
 			"@woocommerce/templates/*": [ "assets/js/templates/*" ],
-			"@wordpress/interactivity": [ "node_modules/@wordpress/interactivity/src/index.ts" ],
-			"@wordpress/interactivity-router": [ "node_modules/@wordpress/interactivity-router/src/index.ts" ]
+			"@wordpress/interactivity": [
+				"node_modules/@wordpress/interactivity/src/index.ts"
+			],
+			"@wordpress/interactivity-router": [
+				"node_modules/@wordpress/interactivity-router/src/index.ts"
+			]
 		}
 	}
 }

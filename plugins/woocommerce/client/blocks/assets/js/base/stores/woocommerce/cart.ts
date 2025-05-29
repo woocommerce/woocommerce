@@ -29,9 +29,6 @@ export type Store = {
 		cart: Omit< Cart, 'items' > & {
 			items: ( OptimisticCartItem | CartItem )[];
 		};
-		displayedProduct: {
-			price_html: string;
-		};
 	};
 	actions: {
 		addCartItem: ( args: OptimisticCartItem ) => void;
