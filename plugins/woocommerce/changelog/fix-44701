@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed the UI bug where single payment method was shown as an input with radio button.

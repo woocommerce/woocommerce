@@ -66,7 +66,7 @@ class AddToCartWithOptions extends AbstractBlock {
 	}
 
 	/**
-	 * Modifies the block context for product button blocks when inside the Add to Cart with Options block.
+	 * Modifies the block context for product button blocks when inside the Add to Cart + Options block.
 	 *
 	 * @param array $context The block context.
 	 * @param array $block   The parsed block.

@@ -398,8 +398,8 @@ add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
  * Checks if a user (by email or ID or both) has bought an item.
  *
  * @param string $customer_email Customer email to check.
- * @param int    $user_id User ID to check.
- * @param int    $product_id Product ID to check.
+ * @param int    $user_id        User ID to check.
+ * @param int    $product_id     Product ID to check.
  * @return bool
  */
 function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
@@ -424,19 +424,27 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	 */
 	$use_lookup_tables = apply_filters( 'woocommerce_customer_bought_product_use_lookup_tables', false, $customer_email, $user_id, $product_id );
 
-	$transient_name = 'wc_customer_bought_product_' . md5( $customer_email . $user_id . $use_lookup_tables );
-
 	if ( $use_lookup_tables ) {
-		// Lookup tables get refreshed along with the `woocommerce_reports` transient version.
-		$transient_version = WC_Cache_Helper::get_transient_version( 'woocommerce_reports' );
+		// Lookup tables get refreshed along with the `woocommerce_reports` transient version (due to async processing).
+		// With high orders placement rate, this caching here will be short-lived (suboptimal for BFCM/Christmas and busy stores in general).
+		$cache_version = WC_Cache_Helper::get_transient_version( 'woocommerce_reports' );
+	} elseif ( '' === $customer_email && $user_id ) {
+		// Optimized: for specific customers version with orders count (it's a user meta from in-memory populated datasets).
+		// Best-case scenario for caching here, as it only depends on the customer orders placement rate.
+		$cache_version = wc_get_customer_order_count( $user_id );
 	} else {
-		$transient_version = WC_Cache_Helper::get_transient_version( 'orders' );
+		// Fallback: create, update, and delete operations on orders clears caches and refreshes `orders` transient version.
+		// With high orders placement rate, this caching here will be short-lived (suboptimal for BFCM/Christmas and busy stores in general).
+		// For the core, no use-cases for this branch. Themes/extensions are still valid use-cases.
+		$cache_version = WC_Cache_Helper::get_transient_version( 'orders' );
 	}
 
-	$transient_value = get_transient( $transient_name );
+	$cache_group = 'orders';
+	$cache_key   = 'wc_customer_bought_product_' . md5( $customer_email . '-' . $user_id . '-' . $use_lookup_tables );
+	$cache_value = wp_cache_get( $cache_key, $cache_group );
 
-	if ( isset( $transient_value['value'], $transient_value['version'] ) && $transient_value['version'] === $transient_version ) {
-		$result = $transient_value['value'];
+	if ( isset( $cache_value['value'], $cache_value['version'] ) && $cache_value['version'] === $cache_version ) {
+		$result = $cache_value['value'];
 	} else {
 		$customer_data = array( $user_id );
 
@@ -521,7 +529,7 @@ SELECT DISTINCT im.meta_value FROM {$wpdb->posts} AS p
 INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
 INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
 INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
-WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
+WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' ) AND p.post_type = 'shop_order'
 AND pm.meta_key IN ( '_billing_email', '_customer_user' )
 AND im.meta_key IN ( '_product_id', '_variation_id' )
 AND im.meta_value != 0
@@ -532,12 +540,15 @@ AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
 		}
 		$result = array_map( 'absint', $result );
 
-		$transient_value = array(
-			'version' => $transient_version,
-			'value'   => $result,
+		wp_cache_set(
+			$cache_key,
+			array(
+				'version' => $cache_version,
+				'value'   => $result,
+			),
+			$cache_group,
+			MONTH_IN_SECONDS
 		);
-
-		set_transient( $transient_name, $transient_value, DAY_IN_SECONDS * 30 );
 	}
 	return in_array( absint( $product_id ), $result, true );
 }
