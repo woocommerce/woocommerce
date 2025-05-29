@@ -34,24 +34,6 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 		isLoading,
 	} = useOnboardingContext();
 
-	// Store the initial uncompleted step IDs on first render
-	const initialUncompletedStepIds = React.useRef< string[] | null >( null );
-
-	// Only set the initial uncompleted step IDs if there are backend steps.
-	if (
-		initialUncompletedStepIds.current === null &&
-		allSteps?.some( ( step ) => step.type === 'backend' )
-	) {
-		initialUncompletedStepIds.current = allSteps
-			.filter( ( step ) => step.status !== 'completed' )
-			.map( ( step ) => step.id );
-	}
-
-	// Only show steps that were uncompleted on first render
-	const stepsToDisplay = allSteps.filter( ( step ) =>
-		initialUncompletedStepIds.current?.includes( step.id )
-	);
-
 	const currentStepIndex = allSteps.findIndex(
 		( step ) => step.id === currentStep?.id
 	);
@@ -106,7 +88,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 							animate={ { opacity: 1, y: 0 } }
 							transition={ { duration: 0.7, delay: 0.2 } }
 						>
-							{ stepsToDisplay.map( ( step ) => (
+							{ allSteps.map( ( step ) => (
 								<SidebarNavigationItem
 									key={ step.id }
 									className={ clsx( step.id, {
