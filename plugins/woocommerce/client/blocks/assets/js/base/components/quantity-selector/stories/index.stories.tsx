@@ -30,9 +30,7 @@ const Template: Story< QuantitySelectorProps > = ( args ) => {
 };
 
 export const Default = Template.bind( {} );
-Default.args = {
-	editable: true,
-};
+Default.args = {};
 
 export const NonEditable = Template.bind( {} );
 NonEditable.args = {
