@@ -12,6 +12,7 @@ import { useState } from '@wordpress/element';
 import { useOnboardingContext } from '../../data/onboarding-context';
 import WooPaymentsStepHeader from '../../components/header';
 import './style.scss';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 
 export const JetpackStep: React.FC = () => {
 	const { currentStep, closeModal } = useOnboardingContext();
@@ -38,6 +39,14 @@ export const JetpackStep: React.FC = () => {
 						isBusy={ isConnectButtonLoading }
 						disabled={ isConnectButtonLoading }
 						onClick={ () => {
+							recordPaymentsOnboardingEvent(
+								'woopayments_onboarding_modal_click',
+								{
+									step: currentStep?.id || '',
+									action: 'connect_to_wpcom',
+								}
+							);
+
 							setIsConnectButtonLoading( true );
 							window.location.href =
 								currentStep?.actions?.auth?.href ?? '';
