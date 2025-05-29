@@ -28,7 +28,7 @@ class QuantityLimitsTests extends TestCase {
 
 		$product->set_manage_stock( true );
 		$product->set_stock_quantity( 10 );
-		$product->set_backorders( 'no' );
+		$product->set_backorders( 'yes' );
 		$product->save();
 
 		$quantity_limits = new QuantityLimits();
@@ -53,7 +53,7 @@ class QuantityLimitsTests extends TestCase {
 		update_option( 'woocommerce_manage_stock', 'yes' );
 
 		$product->set_stock_quantity( 10 );
-		$product->set_backorders( 'no' );
+		$product->set_backorders( 'yes' );
 		$product->save();
 
 		// Disable stock management.
@@ -81,7 +81,7 @@ class QuantityLimitsTests extends TestCase {
 		update_option( 'woocommerce_manage_stock', 'yes' );
 
 		$product->set_stock_quantity( 10 );
-		$product->set_backorders( 'no' );
+		$product->set_backorders( 'yes' );
 		$product->set_sold_individually( true );
 		$product->save();
 
