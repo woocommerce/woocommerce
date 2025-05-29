@@ -168,7 +168,10 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options',
-				array( 'isFormValid' => ! $product->is_type( 'variable' ) )
+				array(
+					'isFormValid' => ! $product->is_type( 'variable' ),
+					'variationId' => null,
+				)
 			);
 
 			$context = array(
@@ -178,7 +181,6 @@ class AddToCartWithOptions extends AbstractBlock {
 			);
 
 			if ( $product->is_type( 'variable' ) ) {
-				$context['variationId']         = null;
 				$context['selectedAttributes']  = array();
 				$available_variations           = $product->get_available_variations();
 				$available_variations_data      = array_map(

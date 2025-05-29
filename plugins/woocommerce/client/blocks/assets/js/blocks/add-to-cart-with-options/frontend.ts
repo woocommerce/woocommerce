@@ -118,13 +118,24 @@ const addToCartWithOptionsStore = store(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
-			get isFormValid() {
-				const context = getContext< Context >();
-				const { productType } = context;
+			get isFormValid(): boolean {
+				const { productType } = getContext< Context >();
 				if ( productType !== 'variable' ) {
 					return true;
 				}
-				return !! context?.variationId;
+				return !! addToCartWithOptionsStore.state.variationId;
+			},
+			get variationId(): number | null {
+				const context = getContext< Context >();
+				if ( ! context ) {
+					return null;
+				}
+				const { availableVariations, selectedAttributes } = context;
+				const matchedVariation = getMatchedVariation(
+					availableVariations,
+					selectedAttributes
+				);
+				return matchedVariation?.variation_id || null;
 			},
 		},
 		actions: {
@@ -133,8 +144,7 @@ const addToCartWithOptionsStore = store(
 				context.quantity = value;
 			},
 			setAttribute( attribute: string, value: string ) {
-				const context = getContext< Context >();
-				const { availableVariations, selectedAttributes } = context;
+				const { selectedAttributes } = getContext< Context >();
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
 						selectedAttribute.attribute === attribute
@@ -150,16 +160,9 @@ const addToCartWithOptionsStore = store(
 						value,
 					} );
 				}
-
-				const matchedVariation = getMatchedVariation(
-					availableVariations,
-					selectedAttributes
-				);
-				context.variationId = matchedVariation?.variation_id || null;
 			},
 			removeAttribute( attribute: string ) {
-				const context = getContext< Context >();
-				const { availableVariations, selectedAttributes } = context;
+				const { selectedAttributes } = getContext< Context >();
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
 						selectedAttribute.attribute === attribute
@@ -167,12 +170,6 @@ const addToCartWithOptionsStore = store(
 				if ( index >= 0 ) {
 					selectedAttributes.splice( index, 1 );
 				}
-
-				const matchedVariation = getMatchedVariation(
-					availableVariations,
-					selectedAttributes
-				);
-				context.variationId = matchedVariation?.variation_id || null;
 			},
 			increaseQuantity: (
 				event: HTMLElementEvent< HTMLButtonElement >
