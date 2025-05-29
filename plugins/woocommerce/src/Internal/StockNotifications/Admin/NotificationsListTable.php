@@ -431,7 +431,7 @@ class NotificationsListTable extends \WP_List_Table {
 			$this->total_active_items = $this->data_store->query( $query_args );
 
 			// Count inactive.
-			$query_args['status']     = array(
+			$query_args['status']       = array(
 				NotificationStatus::SENT,
 				NotificationStatus::CANCELLED,
 				NotificationStatus::PENDING,
