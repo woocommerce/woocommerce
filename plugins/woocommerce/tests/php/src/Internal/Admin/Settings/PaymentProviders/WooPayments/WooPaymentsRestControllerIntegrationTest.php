@@ -63,6 +63,15 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	protected $store_admin_id;
 
 	/**
+	 * The current time in seconds.
+	 *
+	 * Use it instead of time() to avoid using the real time in tests.
+	 *
+	 * @var int
+	 */
+	protected int $current_time;
+
+	/**
 	 * Gateways mock.
 	 *
 	 * @var callable
@@ -107,6 +116,8 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
+
+		$this->current_time = 1234567890;
 
 		// Arrange the version constant to meet the minimum requirements for the native in-context onboarding.
 		Constants::set_constant( 'WCPAY_VERSION_NUMBER', PaymentProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION );
@@ -196,6 +207,23 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				// Mock the current time.
+				'time'         => function () {
+					return $this->current_time;
+				},
+				'class_exists' => function ( $class_to_check ) {
+					// By default, the WooPayments extension is mocked as active.
+					if ( '\WC_Payments' === $class_to_check ) {
+						return true;
+					}
+
+					return false;
+				},
+			),
+		);
+
 		// Reinitialize the controller with the mocked dependencies.
 		$this->woopayments_provider_service = new WooPaymentsService();
 		$this->woopayments_provider_service->init( $this->providers_service, $this->mockable_proxy );
@@ -266,9 +294,6 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/onboarding' );
 		$request->set_param( 'location', $country_code );
 		$response = $this->server->dispatch( $request );
-
-		// @phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_dump
-		var_dump( $response->get_data() );
 
 		// Assert.
 		$this->assertSame( 200, $response->get_status() );

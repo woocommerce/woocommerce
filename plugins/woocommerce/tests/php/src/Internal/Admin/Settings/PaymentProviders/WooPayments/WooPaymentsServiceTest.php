@@ -64,7 +64,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	/**
 	 * The current time in seconds.
 	 *
-	 * Use it instead of $this->current_time to avoid using the real time in tests.
+	 * Use it instead of time() to avoid using the real time in tests.
 	 *
 	 * @var int
 	 */
@@ -120,7 +120,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 		$this->mockable_proxy->register_function_mocks(
 			array(
-				// Mock the $this->current_time.
+				// Mock the current time.
 				'time'         => function () {
 					return $this->current_time;
 				},
