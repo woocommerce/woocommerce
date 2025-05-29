@@ -126,8 +126,7 @@ class ProductButton extends AbstractBlock {
 		$number_of_items_in_cart = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
 
 		if ( $is_grouped ) {
-			$children = $product->get_children();
-			foreach ( $children as $child ) {
+			foreach ( $grouped_product_ids as $child ) {
 				$child_product = wc_get_product( $child );
 				if ( ! $child_product instanceof \WC_Product ) {
 					continue;
