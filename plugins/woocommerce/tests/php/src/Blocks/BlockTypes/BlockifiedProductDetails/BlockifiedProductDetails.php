@@ -4,12 +4,13 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\BlockifiedProductDetails;
 
 use WC_Helper_Product;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\BlockifiedProductDetailsMock;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
  * Tests for the BlockifiedProductDetails block type
  */
 class BlockifiedProductDetails extends \WP_UnitTestCase {
-
 	/**
 	 * Page ID
 	 *
@@ -42,6 +43,7 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 			true
 		);
 	}
+
 	/**
 	 * Set up product and page for each test
 	 *
@@ -77,7 +79,6 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 		wp_delete_post( self::$page_id, true );
 		WC_Helper_Product::delete_product( self::$product->get_id() );
 	}
-
 
 	/**
 	 * Test Product Details render function when `woocommerce_product_tabs` hook isn't used
@@ -136,5 +137,26 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 		$expected_serialized_blocks_without_whitespace = wp_strip_all_tags( $expected_serialized_blocks, true );
 
 		$this->assertEquals( $serialized_blocks_without_whitespace, $expected_serialized_blocks_without_whitespace, '' );
+	}
+
+	public function test_hooked_block() {
+		$test_block = [
+			"slug" => "custom-info",
+			"title" => "Custom Info",
+			"content" =>
+				"<!-- wp:paragraph --><p>This is the content for the custom info tab.</p><!-- /wp:paragraph -->"
+		];
+
+		add_filter("woocommerce_product_details_hooked_blocks", function ( $hooked_blocks ) use ( $test_block ) {
+			$hooked_blocks[] = $test_block;
+			return $hooked_blocks;
+		});
+
+		new BlockifiedProductDetailsMock();
+
+		$template_object = BlockTemplateUtils::create_new_block_template_object( __DIR__ . '/template.html', 'wp_template', 'single-product' );
+		$template        = BlockTemplateUtils::build_template_result_from_file( $template_object, 'wp_template' );
+
+		$this->assertStringContainsString( 'This is the content for the custom info tab.', $template->content );
 	}
 }
