@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { store, getContext, getConfig } from '@wordpress/interactivity';
+import {
+	store,
+	getContext,
+	getConfig,
+	getElement,
+} from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/cart';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 
@@ -13,6 +18,7 @@ import {
 	formatPriceWithCurrency,
 	normalizeCurrencyResponse,
 } from '../../../../packages/prices/utils/currency';
+import { CartItem } from '../../types';
 
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
@@ -122,6 +128,59 @@ store( 'woocommerce/mini-cart-footer-block', {
 			);
 
 			return formatPriceWithCurrency( subtotal, normalizedCurrency );
+		},
+	},
+} );
+
+// TODO - put the cart item state in this scope to make looping the each simpler.
+
+type CartItemContext = {
+	cartItem: CartItem;
+};
+
+store( 'woocommerce/mini-cart-items-block', {
+	state: {
+		get cartItems() {
+			return wooStoreState.cart.items;
+		},
+
+		// Intended to be used in context of a cart item
+		get itemShortDescription() {
+			const ctx = getContext< CartItemContext >();
+			console.log( { ...ctx.cartItem } );
+			const el = getElement();
+
+			if ( el.ref ) {
+				const innerEl = el.ref.querySelector(
+					'.wc-block-components-product-metadata__description'
+				);
+
+				// A workaround for the lack of dangerous set HTML directive in interactivity API
+				if ( innerEl ) {
+					innerEl.innerHTML = ctx.cartItem.short_description;
+				}
+			}
+		},
+
+		// Expects to be run in context of a cart item.
+		get itemPrice(): string {
+			const ctx = getContext< CartItemContext >();
+			const { currency } = getConfig( 'woocommerce' );
+
+			const normalizedCurrency = normalizeCurrencyResponse(
+				wooStoreState.cart.totals,
+				currency
+			);
+
+			return formatPriceWithCurrency(
+				ctx.cartItem.prices.price,
+				normalizedCurrency
+			);
+		},
+
+		get itemThumbnail(): string {
+			const ctx = getContext< CartItemContext >();
+			return ctx.cartItem.images[ 0 ]?.thumbnail;
 		},
 	},
 } );
