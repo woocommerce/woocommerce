@@ -31,7 +31,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 		steps: allSteps,
 		currentStep,
 		justCompletedStepId,
-		isLoading,
+		isStoreLoading,
 	} = useOnboardingContext();
 
 	const currentStepIndex = allSteps.findIndex(
@@ -72,7 +72,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 			<SidebarContainer title={ sidebarTitle }>
 				{ /* We are using these classes to inherit the styles from the edit your store styling */ }
 				<ItemGroup className="woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group">
-					{ isLoading && (
+					{ isStoreLoading && (
 						<motion.div
 							initial={ { opacity: 0 } }
 							animate={ { opacity: 1 } }
@@ -82,7 +82,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 							<StepPlaceholder rows={ 3 } />
 						</motion.div>
 					) }
-					{ ! isLoading && (
+					{ ! isStoreLoading && (
 						<motion.div
 							initial={ { opacity: 0, y: 0 } }
 							animate={ { opacity: 1, y: 0 } }

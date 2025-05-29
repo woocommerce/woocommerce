@@ -93,9 +93,8 @@ export const OnboardingProvider: React.FC< {
 	);
 
 	// State to track if WooPayments was recently enabled
-	const [ wooPaymentsRecentlyEnabled, setWooPaymentsRecentlyEnabled ] = useState< boolean >(
-		false
-	);
+	const [ wooPaymentsRecentlyEnabled, setWooPaymentsRecentlyEnabled ] =
+		useState< boolean >( false );
 
 	const setJustCompletedStepId = useCallback( ( stepId: string | null ) => {
 		setStepId( stepId );
@@ -117,7 +116,9 @@ export const OnboardingProvider: React.FC< {
 			isStoreLoading: select(
 				woopaymentsOnboardingStore
 			).isOnboardingDataRequestPending(),
-			storeError: select( woopaymentsOnboardingStore ).getOnboardingDataError(),
+			storeError: select(
+				woopaymentsOnboardingStore
+			).getOnboardingDataError(),
 		} ),
 		[ source ]
 	);
@@ -269,7 +270,12 @@ export const OnboardingProvider: React.FC< {
 			// or if WooPayments was recently enabled.
 			// This is to avoid showing the install_woopayments step when WooPayments is already enabled.
 			.filter(
-				step => ! ( ! storeError && ! wooPaymentsRecentlyEnabled && step.id === 'install_woopayments' )
+				( step ) =>
+					! (
+						! storeError &&
+						! wooPaymentsRecentlyEnabled &&
+						step.id === 'install_woopayments'
+					)
 			)
 			// First, filter out steps that are not returned from the API.
 			// This is to avoid showing steps that are not useful to the user.
@@ -325,12 +331,18 @@ export const OnboardingProvider: React.FC< {
 		setAllSteps(
 			stepsWithDependenciesResolved as WooPaymentsProviderOnboardingStep[]
 		);
-	}, [ stateStoreSteps, areStepDependenciesCompleted, storeError, wooPaymentsRecentlyEnabled ] );
+	}, [
+		stateStoreSteps,
+		areStepDependenciesCompleted,
+		storeError,
+		wooPaymentsRecentlyEnabled,
+		onboardingSteps,
+	] );
 
 	useEffect( () => {
 		// Invalidate the getOnboardingData store selector to ensure the latest data is fetched.
 		refreshStoreData();
-	}, [] );
+	}, [ refreshStoreData ] );
 
 	return (
 		<OnboardingContext.Provider
