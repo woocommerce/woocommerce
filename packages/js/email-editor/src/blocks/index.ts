@@ -27,7 +27,7 @@ import { enhanceQuoteBlock } from './core/quote';
 import { filterSetUrlAttribute } from './core/block-edit';
 import { enhanceSocialLinksBlock } from './core/social-links';
 
-export function initBlocks() {
+function init( skipCore = false ) {
 	filterSetUrlAttribute();
 	deactivateStackOnMobile();
 	hideExpandOnClick();
@@ -45,5 +45,15 @@ export function initBlocks() {
 	activatePersonalizationTagsReplacing();
 	alterSupportConfiguration();
 	enhanceSocialLinksBlock();
-	registerCoreBlocks();
+	if ( ! skipCore ) {
+		registerCoreBlocks();
+	}
+}
+
+export function initBlocks() {
+	init();
+}
+
+export function initBlocksForPlugin() {
+	init( true );
 }

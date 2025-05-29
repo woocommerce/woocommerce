@@ -15,6 +15,15 @@ import { StylesSidebar } from './components/styles-sidebar';
 import { TemplateSettingsPanel } from './components/sidebar/template-settings-panel';
 import { SettingsPanel } from './components/sidebar/settings-panel';
 import { BlockCompatibilityWarnings } from './components/sidebar';
+import {
+	initDomTracking,
+	initEventCollector,
+	initStoreTracking,
+} from './events';
+import { initializeLayout } from './layouts/flex-email';
+import { initBlocksForPlugin } from './blocks';
+import { initHooks } from './editor-hooks';
+import { initTextHooks } from './text-hooks';
 
 
 const EmailEditorPlugin = () => {
@@ -65,5 +74,11 @@ export function initializeEmailEditorPlugin() {
 		render: EmailEditorPlugin,
 	} );
 	createStore();
-
+	initEventCollector();
+	initStoreTracking();
+	initDomTracking();
+	initializeLayout();
+	initBlocksForPlugin();
+	initHooks();
+	initTextHooks();
 }
