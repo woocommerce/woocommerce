@@ -174,7 +174,12 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 		$this->assertEquals( $serialized_blocks_without_whitespace, $expected_serialized_blocks_without_whitespace, '' );
 	}
 
-	public function test_hooked_block() {
+	/**
+	 * Test the `woocommerce_product_details_hooked_blocks` hook. This hook allows developers to
+	 * specify a title and block markup that will be automatically wrapped in the required
+	 * Accordion Item block and appended to the Product Details' Accordion Group block.
+	 */
+	public function test_hooked_blocks() {
 		$test_block = array(
 			'slug'    => 'custom-info',
 			'title'   => 'Custom Info',
@@ -203,9 +208,12 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 
 		// Next, we apply the `hooked_block_types` and `hooked_block_{$slug}` filters.
 		// We pretend that we're in the `last_child` position of the `woocommerce/accordion-group` block.
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
 		$hooked_block_types = apply_filters( 'hooked_block_types', array(), 'last_child', 'woocommerce/accordion-group' );
 		$this->assertSame( array( $test_block['slug'] ), $hooked_block_types );
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
 		$hooked_block_custom_info = apply_filters(
 			'hooked_block_' . $test_block['slug'],
 			array(
@@ -221,7 +229,7 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 				'attrs'        => array(
 					'metadata' => array(
 						'isDescendantOfProductDetails' => true,
-					)
+					),
 				),
 				'innerBlocks'  => array(),
 				'innerContent' => array(),
