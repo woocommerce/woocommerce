@@ -41,7 +41,7 @@ class NotificationsPage {
 				case 'not_found':
 					$updated_notice_args['type'] = 'error';
 					wp_admin_notice( __( 'Notification not found.', 'woocommerce' ), $updated_notice_args );
-					break;    
+					break;
 			}
 		}
 
@@ -53,24 +53,26 @@ class NotificationsPage {
 
 	/**
 	 * Delete notification.
+	 *
+	 * @throws \Exception If notification ID is missing.
 	 */
 	public static function delete() {
 
 		check_admin_referer( 'delete_customer_stock_notification' );
 
 		$notification_id = isset( $_GET['notification'] ) ? absint( $_GET['notification'] ) : 0;
-	
+
 		try {
 			if ( ! $notification_id ) {
 				throw new \Exception( 'Missing notification ID.' );
 			}
-	
+
 			$notification = new Notification( $notification_id ); // <- this can throw
 			\WC_Data_Store::load( 'stock_notification' )->delete( $notification );
-	
+
 			wp_safe_redirect( add_query_arg( 'notice', 'deleted', admin_url( self::PAGE_URL ) ) );
 			exit;
-	
+
 		} catch ( \Exception $e ) {
 			wp_safe_redirect( add_query_arg( 'notice', 'not_found', admin_url( self::PAGE_URL ) ) );
 			exit;

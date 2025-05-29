@@ -354,7 +354,7 @@ class NotificationsListTable extends \WP_List_Table {
 		$this->_column_headers = array( $columns, $hidden, $sortable );
 		$has_filters           = false;
 
-		//Process actions.
+		// Process actions.
 		$this->process_bulk_action();
 
 		// Setup params.
@@ -431,7 +431,7 @@ class NotificationsListTable extends \WP_List_Table {
 			$this->total_active_items = $this->data_store->query( $query_args );
 
 			// Count inactive.
-			$query_args['status'] = array(
+			$query_args['status']     = array(
 				NotificationStatus::SENT,
 				NotificationStatus::CANCELLED,
 				NotificationStatus::PENDING,
@@ -468,7 +468,7 @@ class NotificationsListTable extends \WP_List_Table {
 
 			if ( 'enable' === $this->current_action() ) {
 				foreach ( $notifications as $id ) {
-		
+
 					$notification = new Notification( $id );
 					$notification->set_status( NotificationStatus::ACTIVE );
 					$this->data_store->update( $notification );
