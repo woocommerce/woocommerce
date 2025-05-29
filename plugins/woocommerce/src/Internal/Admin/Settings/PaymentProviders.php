@@ -670,9 +670,7 @@ class PaymentProviders {
 		$new_order_map = $this->enhance_order_map( $new_order_map );
 
 		// Save the new order map to the DB.
-		$result = $this->save_order_map( $new_order_map );
-
-		return $result;
+		return $this->save_order_map( $new_order_map );
 	}
 
 	/**

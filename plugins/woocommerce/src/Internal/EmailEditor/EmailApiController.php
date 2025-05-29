@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\EmailEditor;
 use Automattic\WooCommerce\EmailEditor\Validator\Builder;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 use WC_Email;
+use WP_Error;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -87,10 +88,16 @@ class EmailApiController {
 	 *
 	 * @param array    $data - Data that are stored in the wp_options table.
 	 * @param \WP_Post $post - WP_Post object.
+	 * @return \WP_Error|null Returns WP_Error if email validation fails, null otherwise.
 	 */
-	public function save_email_data( array $data, \WP_Post $post ): void {
+	public function save_email_data( array $data, \WP_Post $post ): ?\WP_Error {
+		$error = $this->validate_email_data( $data );
+		if ( is_wp_error( $error ) ) {
+			return new \WP_Error( 'invalid_email_data', implode( ' ', $error->get_error_messages() ), array( 'status' => 400 ) );
+		}
+
 		if ( ! array_key_exists( 'subject', $data ) && ! array_key_exists( 'preheader', $data ) ) {
-			return;
+			return null;
 		}
 		$email_type = $this->post_manager->get_email_type_from_post_id( $post->ID );
 		$email      = $this->get_email_by_type( $email_type ?? '' );
@@ -123,6 +130,79 @@ class EmailApiController {
 		if ( array_key_exists( 'bcc', $data ) ) {
 			$email->update_option( 'bcc', $data['bcc'] );
 		}
+
+		return null;
+	}
+
+	/**
+	 * Validate the email data.
+	 *
+	 * @param array $data - The email data.
+	 * @return \WP_Error|null Returns WP_Error if email validation fails, null otherwise.
+	 */
+	private function validate_email_data( array $data ) {
+		$error = new \WP_Error();
+
+		// Validate 'recipient' email(s) field.
+		$invalid_recipients = $this->filter_invalid_email_addresses( $data['recipient'] ?? '' );
+		if ( ! empty( $invalid_recipients ) ) {
+			$error_message = sprintf(
+				// translators: %s will be replaced by comma-separated email addresses. For example, "invalidemail1@example.com,invalidemail2@example.com".
+				__( 'One or more Recipient email addresses are invalid: “%s”. Please enter valid email addresses separated by commas.', 'woocommerce' ),
+				implode( ',', $invalid_recipients )
+			);
+			$error->add( 'invalid_recipient_email_address', $error_message );
+		}
+
+		// Validate 'cc' email(s) field.
+		$invalid_cc = $this->filter_invalid_email_addresses( $data['cc'] ?? '' );
+		if ( ! empty( $invalid_cc ) ) {
+			$error_message = sprintf(
+				// translators: %s will be replaced by comma-separated email addresses. For example, "invalidemail1@example.com,invalidemail2@example.com".
+				__( 'One or more CC email addresses are invalid: “%s”. Please enter valid email addresses separated by commas.', 'woocommerce' ),
+				implode( ',', $invalid_cc )
+			);
+			$error->add( 'invalid_cc_email_address', $error_message );
+		}
+
+		// Validate 'bcc' email(s) field.
+		$invalid_bcc = $this->filter_invalid_email_addresses( $data['bcc'] ?? '' );
+		if ( ! empty( $invalid_bcc ) ) {
+			$error_message = sprintf(
+				// translators: %s will be replaced by comma-separated email addresses. For example, "invalidemail1@example.com,invalidemail2@example.com".
+				__( 'One or more BCC email addresses are invalid: “%s”. Please enter valid email addresses separated by commas.', 'woocommerce' ),
+				implode( ',', $invalid_bcc )
+			);
+			$error->add( 'invalid_bcc_email_address', $error_message );
+		}
+
+		if ( $error->has_errors() ) {
+			return $error;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Filter in invalid email addresses from a comma-separated string.
+	 *
+	 * @param string $comma_separated_email_addresses - A comma-separated string of email addresses.
+	 * @return array - An array of invalid email addresses.
+	 */
+	private function filter_invalid_email_addresses( $comma_separated_email_addresses ) {
+		$invalid_email_addresses = array();
+
+		if ( empty( trim( $comma_separated_email_addresses ) ) ) {
+			return $invalid_email_addresses;
+		}
+
+		foreach ( explode( ',', $comma_separated_email_addresses ) as $email_address ) {
+			if ( ! filter_var( trim( $email_address ), FILTER_VALIDATE_EMAIL ) ) {
+				$invalid_email_addresses[] = trim( $email_address );
+			}
+		}
+
+		return $invalid_email_addresses;
 	}
 
 	/**
