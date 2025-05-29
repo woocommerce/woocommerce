@@ -336,13 +336,12 @@ export const OnboardingProvider: React.FC< {
 		areStepDependenciesCompleted,
 		storeError,
 		wooPaymentsRecentlyEnabled,
-		onboardingSteps,
 	] );
 
 	useEffect( () => {
 		// Invalidate the getOnboardingData store selector to ensure the latest data is fetched.
 		refreshStoreData();
-	}, [ refreshStoreData ] );
+	}, [] );
 
 	return (
 		<OnboardingContext.Provider
