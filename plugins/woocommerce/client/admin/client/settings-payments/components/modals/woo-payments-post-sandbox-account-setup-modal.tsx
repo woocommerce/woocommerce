@@ -7,13 +7,15 @@ import { Link } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import interpolateComponents from '@automattic/interpolate-components';
 import { useState } from '@wordpress/element';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import './modals.scss';
-import { getWooPaymentsSetupLiveAccountLink } from '~/settings-payments/utils';
+import {
+	getWooPaymentsSetupLiveAccountLink,
+	recordPaymentsEvent,
+} from '~/settings-payments/utils';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
 
 interface WooPaymentsReadyToTestModalProps {
@@ -51,7 +53,7 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 	 */
 	const handleActivatePayments = () => {
 		// Record the event when the user clicks on the "Activate Payments" button.
-		recordEvent( 'settings_payments_switch_to_live_account_click', {
+		recordPaymentsEvent( 'switch_to_live_account_click', {
 			provider_id: 'woocommerce_payments',
 		} );
 
@@ -66,7 +68,7 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 	 */
 	const handleContinueStoreSetup = () => {
 		// Record the event when the user clicks on the "Continue Store Setup" button.
-		recordEvent( 'settings_payments_continue_store_setup_click', {
+		recordPaymentsEvent( 'continue_store_setup_click', {
 			provider_id: 'woocommerce_payments',
 		} );
 

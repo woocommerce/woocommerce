@@ -954,17 +954,19 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_onboarding_reset() {
 		// Arrange.
-		$from   = 'test-from';
-		$source = 'test-source';
+		$location = 'US';
+		$from     = 'test-from';
+		$source   = 'test-source';
 
 		$this->mock_woopayments_service
 			->expects( $this->once() )
 			->method( 'reset_onboarding' )
-			->with( $from, $source )
+			->with( $location, $from, $source )
 			->willReturn( array( 'success' => true ) );
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/reset' );
+		$request->set_param( 'location', $location );
 		$request->set_param( 'from', $from );
 		$request->set_param( 'source', $source );
 		$response = $this->server->dispatch( $request );
@@ -982,8 +984,9 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_onboarding_reset_with_exception() {
 		// Arrange.
-		$from   = 'test-from';
-		$source = 'test-source';
+		$location = 'US';
+		$from     = 'test-from';
+		$source   = 'test-source';
 
 		$expected_code      = 'test_exception';
 		$expected_message   = 'Test exception message.';
@@ -995,6 +998,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/reset' );
+		$request->set_param( 'location', $location );
 		$request->set_param( 'from', $from );
 		$request->set_param( 'source', $source );
 		$response = $this->server->dispatch( $request );
