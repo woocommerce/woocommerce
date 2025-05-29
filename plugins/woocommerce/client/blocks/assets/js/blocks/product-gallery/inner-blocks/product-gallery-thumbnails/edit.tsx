@@ -40,7 +40,7 @@ export const Edit = ( {
 	attributes,
 	setAttributes,
 }: BlockEditProps< ProductGalleryThumbnailsBlockAttributes > ) => {
-	const { thumbnailSize, aspectRatio } = attributes;
+	const { thumbnailSize, aspectRatio, cropImages } = attributes;
 
 	const placeholderSrc = `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-image-gallery.svg`;
 	const productContext = useProductDataContext();
@@ -118,21 +118,23 @@ export const Edit = ( {
 						className="wc-block-product-gallery-thumbnails__scrollable"
 					>
 						{ productThumbnails.map( ( { src, alt }, index ) => {
-							const thumbnailClassName = clsx(
-								'wc-block-product-gallery-thumbnails__thumbnail',
+							const imageClassName = clsx(
+								'wc-block-product-gallery-thumbnails__thumbnail__image',
 								{
-									'wc-block-product-gallery-thumbnails__thumbnail--active':
+									'wc-block-product-gallery-thumbnails__thumbnail__image--is-active':
 										index === 0,
+									'wc-block-product-gallery-thumbnails__thumbnail__image--cropped':
+										cropImages,
 								}
 							);
 							return (
 								<div
-									className={ thumbnailClassName }
+									className="wc-block-product-gallery-thumbnails__thumbnail"
 									key={ index }
 									style={ imageStyles }
 								>
 									<img
-										className="wc-block-product-gallery-thumbnails__thumbnail__image"
+										className={ imageClassName }
 										src={ src }
 										alt={ alt }
 										loading="lazy"
