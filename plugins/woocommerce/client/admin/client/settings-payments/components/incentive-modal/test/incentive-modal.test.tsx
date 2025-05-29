@@ -52,6 +52,7 @@ const testProvider: PaymentProvider = {
 		file: 'test-plugin-file',
 		status: 'active',
 	} as PluginData,
+	_links: {},
 	_suggestion_id: 'test-suggestion-id',
 };
 
@@ -64,7 +65,7 @@ describe( 'IncentiveModal', () => {
 				onboardingUrl="https://example.com"
 				onAccept={ jest.fn() }
 				onDismiss={ jest.fn() }
-				setupPlugin={ jest.fn() }
+				setUpPlugin={ jest.fn() }
 			/>
 		);
 
@@ -89,7 +90,7 @@ describe( 'IncentiveModal', () => {
 				onboardingUrl="https://example.com"
 				onAccept={ onAccept }
 				onDismiss={ jest.fn() }
-				setupPlugin={ jest.fn() }
+				setUpPlugin={ jest.fn() }
 			/>
 		);
 
