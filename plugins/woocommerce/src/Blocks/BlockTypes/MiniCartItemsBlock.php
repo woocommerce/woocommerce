@@ -85,41 +85,8 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 					</thead>
 					<tbody>
 						<template
-							data-wp-each="state.cartItems"
+							data-wp-each="state.cart.items"
 						>
-							<tr class="wc-block-cart-items__row" tabindex="-1">
-								<td class="wc-block-cart-item__image" aria-hidden="true">
-									<a href="http://localhost:1234/?product=hat" tabindex="-1">
-										<img src="http://localhost:1234/wp-content/uploads/2025/03/167113811-0be977aa-edfe-4a09-b36d-a62f02de4a29-324x324.jpeg" alt="Hat">
-									</a>
-								</td>
-								<td class="wc-block-cart-item__product">
-									<div class="wc-block-cart-item__wrap">
-										<a class="wc-block-components-product-name" href="http://localhost:1234/?product=hat">Hat</a>
-										<div class="wc-block-cart-item__prices">
-											<span class="price wc-block-components-product-price">
-												<span class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value">
-													$12.00
-												</span>
-											</span>
-										</div>
-										<div class="wc-block-components-product-metadata">
-											<div class="wc-block-components-product-metadata__description">
-												<p>This is a simple product.</p>
-											</div>
-										</div>
-										<div class="wc-block-cart-item__quantity">
-											<div class="wc-block-components-quantity-selector">
-												<input class="wc-block-components-quantity-selector__input" type="number" step="1" min="1" max="9999" aria-label="Quantity of Hat in your cart." value="3">
-												<button aria-label="Reduce quantity of Hat" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
-												<button aria-label="Increase quantity of Hat" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
-											</div>
-											<button class="wc-block-cart-item__remove-link" aria-label="Remove Hat from cart">Remove item</button>
-										</div>
-									</div>
-								</td>
-						</template>
-						<?php foreach ( $cart_items as $cart_item ) : ?>
 							<tr class="wc-block-cart-items__row" tabindex="-1">
 								<td class="wc-block-cart-item__image" aria-hidden="true">
 									<a href="http://localhost:1234/?product=hat" tabindex="-1">
@@ -161,7 +128,7 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 									</div>
 								</td>
 							</tr>
-						<?php endforeach; ?>
+						</template>
 					</tbody>
 				</table>
 			</div>
