@@ -81,7 +81,7 @@ export const LYSPaymentsSteps: WooPaymentsProviderOnboardingStep[] = [
 	},
 	{
 		id: 'business_verification',
-		order: 4,
+		order: 3,
 		type: 'backend',
 		label: 'Activate Payments',
 		dependencies: [ 'wpcom_connection' ],
