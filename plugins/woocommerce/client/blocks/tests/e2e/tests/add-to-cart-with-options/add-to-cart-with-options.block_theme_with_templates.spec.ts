@@ -24,7 +24,7 @@ const test = base.extend< { pageObject: AddToCartWithOptionsPage } >( {
 	},
 } );
 
-test.describe( `Add to Cart with Options Block (block theme with templates)`, () => {
+test.describe( `Add to Cart + Options Block (block theme with templates)`, () => {
 	test.beforeEach( async ( { requestUtils } ) => {
 		await requestUtils.activateTheme( BLOCK_THEME_WITH_TEMPLATES_SLUG );
 	} );
@@ -50,7 +50,7 @@ test.describe( `Add to Cart with Options Block (block theme with templates)`, ()
 		await pageObject.switchProductType( 'External/Affiliate product' );
 
 		await pageObject.insertParagraphInTemplatePart(
-			'This is a test paragraph added to the Add to Cart with Options template part.'
+			'This is a test paragraph added to the Add to Cart + Options template part.'
 		);
 
 		await editor.saveSiteEditorEntities();
@@ -59,13 +59,13 @@ test.describe( `Add to Cart with Options Block (block theme with templates)`, ()
 
 		await expect(
 			page.getByText(
-				'This is a test paragraph added to the Add to Cart with Options template part.'
+				'This is a test paragraph added to the Add to Cart + Options template part.'
 			)
 		).toBeVisible();
 
 		await expect(
 			page.getByText(
-				'External Product Add to cart with Options template loaded from theme'
+				'External Product Add to Cart With Options template loaded from theme'
 			)
 		).toBeVisible();
 	} );

@@ -7,10 +7,26 @@
 	max-width: 100%;
 	.components-disabled {
 		display: flex;
+
+		// Remove the default block button margin when inside add to cart form in classic themes.
+		// This is required to vertically center the quantity input.
+		.wp-block-button {
+			margin: 0 !important;
+
+			.single_add_to_cart_button {
+				border: none;
+				margin: 0;
+			}
+		}
+
+		.quantity {
+			display: flex;
+			align-items: stretch;
+		}
+
 		> .quantity:not(.wc-block-components-quantity-selector) .qty {
-			padding-top: 0;
-			padding-bottom: 0;
-			height: calc(100% - 4px); // 4px border width
+			padding: 0 5px;
+			margin-right: 0.5em;
 		}
 	}
 }

@@ -55,16 +55,8 @@ const productGalleryLargeImage = {
 				return;
 			}
 
-			const image = target.querySelector(
-				'.wc-block-woocommerce-product-gallery-large-image__image--active-image-slide'
-			) as HTMLElement;
-
-			if ( ! image ) {
-				return;
-			}
-
-			image.style.transform = `scale(1.0)`;
-			image.style.transformOrigin = '';
+			target.style.transform = `scale(1.0)`;
+			target.style.transformOrigin = '';
 		},
 	},
 };

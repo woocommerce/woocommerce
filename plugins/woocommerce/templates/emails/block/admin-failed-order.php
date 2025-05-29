@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2>
+<h2 class="wp-block-heading">
 <?php
 /* translators: %s: order number */
 printf( esc_html__( 'Order failed: #%s,', 'woocommerce' ), '<!--[woocommerce/order-number]-->' );
@@ -35,7 +35,7 @@ printf( esc_html__( 'Order failed: #%s,', 'woocommerce' ), '<!--[woocommerce/ord
 <?php
 	/* translators: %1$s: Order number. %2$s: Customer full name. */
 	$text = __( 'Unfortunately, the payment for order #%1$s from %2$s has failed. The order was as follows:', 'woocommerce' );
-	printf( esc_html( $text ), '<!--[woocommerce/order-number]-->', '<!--[woocommerce/shopper-full-name]-->' );
+	printf( esc_html( $text ), '<!--[woocommerce/order-number]-->', '<!--[woocommerce/customer-full-name]-->' );
 ?>
 </p>
 <!-- /wp:paragraph -->

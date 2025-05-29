@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Adds the public visibility identifier to all constant values of all previously added enum classes.

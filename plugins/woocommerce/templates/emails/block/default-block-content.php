@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2>
+<h2 class="wp-block-heading">
 <?php
 esc_html_e( 'Default block content', 'woocommerce' );
 ?>
@@ -29,7 +29,7 @@ esc_html_e( 'Default block content', 'woocommerce' );
 <p>
 <?php
 	/* translators: %s: Customer first name */
-	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/shopper-first-name]-->' );
+	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/customer-first-name]-->' );
 ?>
 </p>
 <!-- /wp:paragraph -->

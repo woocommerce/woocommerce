@@ -18,7 +18,10 @@ describe( 'SettingsPaymentsMain', () => {
 		render( <SettingsPaymentsMain /> );
 
 		expect( recordEvent ).toHaveBeenCalledWith(
-			'settings_payments_pageview'
+			'settings_payments_pageview',
+			{
+				business_country: expect.any( String ),
+			}
 		);
 	} );
 } );

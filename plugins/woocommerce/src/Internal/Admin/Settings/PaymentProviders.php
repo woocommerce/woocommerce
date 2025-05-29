@@ -38,7 +38,14 @@ class PaymentProviders {
 	public const EXTENSION_INSTALLED     = 'installed';
 	public const EXTENSION_ACTIVE        = 'active';
 
+	// For providers that are delivered through a plugin available on the WordPress.org repository.
 	public const EXTENSION_TYPE_WPORG = 'wporg';
+	// For providers that are delivered through a must-use plugin.
+	public const EXTENSION_TYPE_MU_PLUGIN = 'mu_plugin';
+	// For providers that are delivered through a theme.
+	public const EXTENSION_TYPE_THEME = 'theme';
+	// For providers that are delivered through an unknown mechanism.
+	public const EXTENSION_TYPE_UNKNOWN = 'unknown';
 
 	public const PROVIDERS_ORDER_OPTION         = 'woocommerce_gateway_order';
 	public const SUGGESTION_ORDERING_PREFIX     = '_wc_pes_';
@@ -66,6 +73,23 @@ class PaymentProviders {
 		'mollie_wc_gateway_*'       => Mollie::class, // Target all the Mollie gateways.
 		'amazon_payments_advanced*' => AmazonPay::class,
 		'woo-mercado-pago-*'        => MercadoPago::class,
+	);
+
+	/**
+	 * The map of payment extension suggestion IDs to their respective provider classes.
+	 *
+	 * This is used to instantiate providers to provide details for the payment extension suggestions, pre-attachment.
+	 *
+	 * @var \class-string[]
+	 */
+	private array $payment_extension_suggestions_providers_class_map = array(
+		ExtensionSuggestions::WOOPAYMENTS       => WooPayments::class,
+		ExtensionSuggestions::PAYPAL_FULL_STACK => PayPal::class,
+		ExtensionSuggestions::PAYPAL_WALLET     => PayPal::class,
+		ExtensionSuggestions::STRIPE            => Stripe::class,
+		ExtensionSuggestions::MOLLIE            => Mollie::class,
+		ExtensionSuggestions::AMAZON_PAY        => AmazonPay::class,
+		ExtensionSuggestions::MERCADO_PAGO      => MercadoPago::class,
 	);
 
 	/**
@@ -153,6 +177,93 @@ class PaymentProviders {
 	}
 
 	/**
+	 * Get the payment gateway provider instance.
+	 *
+	 * @param string $gateway_id The gateway ID.
+	 *
+	 * @return PaymentGateway The payment gateway provider instance.
+	 *                        Will return the general provider of no specific provider is found.
+	 */
+	public function get_payment_gateway_provider_instance( string $gateway_id ): PaymentGateway {
+		if ( isset( $this->instances[ $gateway_id ] ) ) {
+			return $this->instances[ $gateway_id ];
+		}
+
+		/**
+		 * The provider class for the gateway.
+		 *
+		 * @var PaymentGateway|null $provider_class
+		 */
+		$provider_class = null;
+		if ( isset( $this->payment_gateways_providers_class_map[ $gateway_id ] ) ) {
+			$provider_class = $this->payment_gateways_providers_class_map[ $gateway_id ];
+		} else {
+			// Check for wildcard mappings.
+			foreach ( $this->payment_gateways_providers_class_map as $gateway_id_pattern => $mapped_class ) {
+				// Try to see if we have a wildcard mapping and if the gateway ID matches it.
+				// Use the first found match.
+				if ( false !== strpos( $gateway_id_pattern, '*' ) ) {
+					$gateway_id_pattern = str_replace( '*', '.*', $gateway_id_pattern );
+					if ( preg_match( '/^' . $gateway_id_pattern . '$/', $gateway_id ) ) {
+						$provider_class = $mapped_class;
+						break;
+					}
+				}
+			}
+		}
+
+		// If the gateway ID is not mapped to a provider class, return the generic provider.
+		if ( is_null( $provider_class ) ) {
+			if ( ! isset( $this->instances['generic'] ) ) {
+				$this->instances['generic'] = new PaymentGateway();
+			}
+
+			return $this->instances['generic'];
+		}
+
+		$this->instances[ $gateway_id ] = new $provider_class();
+
+		return $this->instances[ $gateway_id ];
+	}
+
+	/**
+	 * Get the payment extension suggestion (PES) provider instance.
+	 *
+	 * @param string $pes_id The payment extension suggestion ID.
+	 *
+	 * @return PaymentGateway The payment extension suggestion provider instance.
+	 *                        Will return the general provider of no specific provider is found.
+	 */
+	public function get_payment_extension_suggestion_provider_instance( string $pes_id ): PaymentGateway {
+		if ( isset( $this->instances[ $pes_id ] ) ) {
+			return $this->instances[ $pes_id ];
+		}
+
+		/**
+		 * The provider class for the payment extension suggestion (PES).
+		 *
+		 * @var PaymentGateway|null $provider_class
+		 */
+		$provider_class = null;
+		if ( isset( $this->payment_extension_suggestions_providers_class_map[ $pes_id ] ) ) {
+			$provider_class = $this->payment_extension_suggestions_providers_class_map[ $pes_id ];
+		}
+
+		// If the gateway ID is not mapped to a provider class, return the generic provider.
+		if ( is_null( $provider_class ) ) {
+			if ( ! isset( $this->instances['generic'] ) ) {
+				$this->instances['generic'] = new PaymentGateway();
+			}
+
+			return $this->instances['generic'];
+		}
+
+		$this->instances[ $pes_id ] = new $provider_class();
+
+		return $this->instances[ $pes_id ];
+	}
+
+	/**
 	 * Get the payment gateways details.
 	 *
 	 * @param WC_Payment_Gateway $payment_gateway       The payment gateway object.
@@ -181,7 +292,7 @@ class PaymentProviders {
 	 * @return array The payment gateway base details.
 	 */
 	public function get_payment_gateway_base_details( WC_Payment_Gateway $payment_gateway, int $payment_gateway_order, string $country_code = '' ): array {
-		$provider = $this->get_gateway_provider_instance( $payment_gateway->id );
+		$provider = $this->get_payment_gateway_provider_instance( $payment_gateway->id );
 
 		return $provider->get_details( $payment_gateway, $payment_gateway_order, $country_code );
 	}
@@ -192,9 +303,10 @@ class PaymentProviders {
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 *
 	 * @return string The plugin slug of the payment gateway.
+	 *                Empty string if a plugin slug could not be determined.
 	 */
 	public function get_payment_gateway_plugin_slug( WC_Payment_Gateway $payment_gateway ): string {
-		$provider = $this->get_gateway_provider_instance( $payment_gateway->id );
+		$provider = $this->get_payment_gateway_provider_instance( $payment_gateway->id );
 
 		return $provider->get_plugin_slug( $payment_gateway );
 	}
@@ -210,7 +322,7 @@ class PaymentProviders {
 	 * @return string The plugin file corresponding to the payment gateway plugin. Does not include the .php extension.
 	 */
 	public function get_payment_gateway_plugin_file( WC_Payment_Gateway $payment_gateway, string $plugin_slug = '' ): string {
-		$provider = $this->get_gateway_provider_instance( $payment_gateway->id );
+		$provider = $this->get_payment_gateway_provider_instance( $payment_gateway->id );
 
 		return $provider->get_plugin_file( $payment_gateway, $plugin_slug );
 	}
@@ -250,9 +362,10 @@ class PaymentProviders {
 	 * @throws Exception If there are malformed or invalid suggestions.
 	 */
 	public function get_extension_suggestions( string $location, string $context = '' ): array {
-		$preferred_psp = null;
-		$preferred_apm = null;
-		$other         = array();
+		$preferred_psp         = null;
+		$preferred_apm         = null;
+		$preferred_offline_psp = null;
+		$other                 = array();
 
 		$extensions = $this->extension_suggestions->get_country_extensions( $location, $context );
 		// Sort them by _priority.
@@ -280,16 +393,29 @@ class PaymentProviders {
 
 			// Determine if the suggestion is preferred or not by looking at its tags.
 			$is_preferred = in_array( ExtensionSuggestions::TAG_PREFERRED, $extension['tags'], true );
+
 			// Determine if the suggestion is hidden (from the preferred locations).
 			$is_hidden = $this->is_payment_extension_suggestion_hidden( $extension );
 
 			if ( ! $is_hidden && $is_preferred ) {
-				// If the suggestion is preferred, add it to the preferred list.
+				// If we don't have a preferred offline payments PSP and the suggestion is an offline payments preferred PSP,
+				// add it to the preferred list.
+				// Check this first so we don't inadvertently "fill" the preferred PSP slot.
+				if ( empty( $preferred_offline_psp ) &&
+					ExtensionSuggestions::TYPE_PSP === $extension['_type'] &&
+					in_array( ExtensionSuggestions::TAG_PREFERRED_OFFLINE, $extension['tags'], true ) ) {
+
+					$preferred_offline_psp = $extension;
+					continue;
+				}
+
+				// If we don't have a preferred PSP and the suggestion is a preferred PSP, add it to the preferred list.
 				if ( empty( $preferred_psp ) && ExtensionSuggestions::TYPE_PSP === $extension['_type'] ) {
 					$preferred_psp = $extension;
 					continue;
 				}
 
+				// If we don't have a preferred APM and the suggestion is a preferred APM, add it to the preferred list.
 				// In the preferred APM slot we might surface APMs but also Express Checkouts (PayPal Wallet).
 				if ( empty( $preferred_apm ) &&
 					in_array( $extension['_type'], array( ExtensionSuggestions::TYPE_APM, ExtensionSuggestions::TYPE_EXPRESS_CHECKOUT ), true ) ) {
@@ -363,10 +489,11 @@ class PaymentProviders {
 			'preferred' => array_values(
 				array_filter(
 					array(
-						// The PSP should naturally have a higher priority than the APM.
+						// The PSP should naturally have a higher priority than the APM, with the preferred offline PSP last.
 						// No need to impose a specific order here.
 						$preferred_psp,
 						$preferred_apm,
+						$preferred_offline_psp,
 					)
 				)
 			),
@@ -597,9 +724,7 @@ class PaymentProviders {
 		$new_order_map = $this->enhance_order_map( $new_order_map );
 
 		// Save the new order map to the DB.
-		$result = $this->save_order_map( $new_order_map );
-
-		return $result;
+		return $this->save_order_map( $new_order_map );
 	}
 
 	/**
@@ -627,6 +752,7 @@ class PaymentProviders {
 		// Get the payment gateways order map.
 		$payment_gateways_order_map = array_flip( array_keys( $payment_gateways ) );
 		// Get the payment gateways to suggestions map.
+		// There will be null entries for payment gateways where we couldn't find a suggestion.
 		$payment_gateways_to_suggestions_map = array_map(
 			fn( $gateway ) => $this->extension_suggestions->get_by_plugin_slug( Utils::normalize_plugin_slug( $this->get_payment_gateway_plugin_slug( $gateway ) ) ),
 			$payment_gateways
@@ -820,7 +946,7 @@ class PaymentProviders {
 	 * @return array The payment gateways list with the pseudo Mollie gateway added if necessary.
 	 */
 	private function maybe_add_pseudo_mollie_gateway( array $payment_gateways ): array {
-		$mollie_provider = $this->get_gateway_provider_instance( 'mollie' );
+		$mollie_provider = $this->get_payment_gateway_provider_instance( 'mollie' );
 
 		// Do nothing if there is a Mollie gateway registered.
 		if ( $mollie_provider->is_gateway_registered( $payment_gateways ) ) {
@@ -1025,10 +1151,12 @@ class PaymentProviders {
 					// Make sure we put in the actual slug and file path that we found.
 					$extension['plugin']['slug'] = $plugin_slug;
 					$extension['plugin']['file'] = PluginsHelper::get_plugin_path_from_slug( $plugin_slug );
-					// Remove the .php extension from the file path. The WP API expects it without it.
-					if ( ! empty( $extension['plugin']['file'] ) && str_ends_with( $extension['plugin']['file'], '.php' ) ) {
-						$extension['plugin']['file'] = substr( $extension['plugin']['file'], 0, -4 );
+					// Sanity check.
+					if ( ! is_string( $extension['plugin']['file'] ) ) {
+						$extension['plugin']['file'] = '';
 					}
+					// Remove the .php extension from the file path. The WP API expects it without it.
+					$extension['plugin']['file'] = Utils::trim_php_file_extension( $extension['plugin']['file'] );
 
 					$extension['plugin']['status'] = self::EXTENSION_INSTALLED;
 					if ( PluginsHelper::is_plugin_active( $plugin_slug ) ) {
@@ -1038,6 +1166,10 @@ class PaymentProviders {
 				}
 			}
 		}
+
+		// Finally, allow the extension suggestion's matching provider to add further details.
+		$gateway_provider = $this->get_payment_extension_suggestion_provider_instance( $extension['id'] );
+		$extension        = $gateway_provider->enhance_extension_suggestion( $extension );
 
 		return $extension;
 	}
@@ -1113,55 +1245,5 @@ class PaymentProviders {
 		}
 
 		return Utils::order_map_normalize( $new_order_map );
-	}
-
-	/**
-	 * Get the payment gateway provider instance.
-	 *
-	 * @param string $gateway_id The gateway ID.
-	 *
-	 * @return PaymentGateway The payment gateway provider instance.
-	 *                        Will return the general provider of no specific provider is found.
-	 */
-	private function get_gateway_provider_instance( string $gateway_id ): PaymentGateway {
-		if ( isset( $this->instances[ $gateway_id ] ) ) {
-			return $this->instances[ $gateway_id ];
-		}
-
-		/**
-		 * The provider class for the gateway.
-		 *
-		 * @var PaymentGateway|null $provider_class
-		 */
-		$provider_class = null;
-		if ( isset( $this->payment_gateways_providers_class_map[ $gateway_id ] ) ) {
-			$provider_class = $this->payment_gateways_providers_class_map[ $gateway_id ];
-		} else {
-			// Check for wildcard mappings.
-			foreach ( $this->payment_gateways_providers_class_map as $gateway_id_pattern => $mapped_class ) {
-				// Try to see if we have a wildcard mapping and if the gateway ID matches it.
-				// Use the first found match.
-				if ( false !== strpos( $gateway_id_pattern, '*' ) ) {
-					$gateway_id_pattern = str_replace( '*', '.*', $gateway_id_pattern );
-					if ( preg_match( '/^' . $gateway_id_pattern . '$/', $gateway_id ) ) {
-						$provider_class = $mapped_class;
-						break;
-					}
-				}
-			}
-		}
-
-		// If the gateway ID is not mapped to a provider class, return the generic provider.
-		if ( is_null( $provider_class ) ) {
-			if ( ! isset( $this->instances['generic'] ) ) {
-				$this->instances['generic'] = new PaymentGateway();
-			}
-
-			return $this->instances['generic'];
-		}
-
-		$this->instances[ $gateway_id ] = new $provider_class();
-
-		return $this->instances[ $gateway_id ];
 	}
 }

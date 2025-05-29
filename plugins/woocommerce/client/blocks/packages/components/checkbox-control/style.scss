@@ -130,7 +130,8 @@
 	}
 
 	.wc-block-components-checkbox__input[type="checkbox"]:checked,
-	.has-dark-controls .wc-block-components-checkbox__input[type="checkbox"]:checked {
+	.has-dark-controls
+		.wc-block-components-checkbox__input[type="checkbox"]:checked {
 		background-color: $input-background-light;
 		border-color: var(--form--border-color);
 	}

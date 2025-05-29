@@ -179,7 +179,7 @@ export function useProductAttributes( {
 		).then( ( termData ) => {
 			setAttributes( [
 				...globalAttributes.map( ( attr, index ) =>
-					// @ts-expect-error TODO react-18-upgrade: getProductAttributeTerms type is not correctly typed and was surfaced by https://github.com/woocommerce/woocommerce/pull/54146
+					// @ts-expect-error: termData definition is different from the expected type.
 					enhanceAttribute( attr, termData[ index ] )
 				),
 				...localAttributes,

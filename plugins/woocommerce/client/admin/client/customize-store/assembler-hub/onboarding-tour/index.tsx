@@ -9,7 +9,6 @@ import { TourKit, TourKitTypes } from '@woocommerce/components';
  * Internal dependencies
  */
 export * from './use-onboarding-tour';
-import { FlowType } from '~/customize-store/types';
 import { trackEvent } from '~/customize-store/tracking';
 
 type OnboardingTourProps = {
@@ -18,52 +17,34 @@ type OnboardingTourProps = {
 	takeTour: () => void;
 	showWelcomeTour: boolean;
 	setIsResizeHandleVisible: ( isVisible: boolean ) => void;
-	flowType: FlowType.AIOnline | FlowType.noAI;
 };
 
-const getLabels = ( flowType: FlowType.AIOnline | FlowType.noAI ) => {
-	switch ( flowType ) {
-		case FlowType.AIOnline:
-			return {
-				heading: __(
-					'Welcome to your AI-generated store!',
-					'woocommerce'
-				),
-				descriptions: {
-					desktop: __(
-						'This is where you can start customizing the look and feel of your store, including adding your logo, and changing colors and layouts. Take a quick tour to discover what’s possible.',
-						'woocommerce'
-					),
-				},
-			};
-		case FlowType.noAI:
-			return {
-				heading: __(
-					"Discover what's possible with the store designer",
-					'woocommerce'
-				),
-				descriptions: {
-					desktop: __(
-						"Start designing your store, including adding your logo, changing color schemes, and building your own layouts. Take a quick tour to discover what's possible.",
-						'woocommerce'
-					),
-				},
-			};
-	}
+const getLabels = () => {
+	return {
+		heading: __(
+			"Discover what's possible with the store designer",
+			'woocommerce'
+		),
+		descriptions: {
+			desktop: __(
+				"Start designing your store, including adding your logo, changing color schemes, and building your own layouts. Take a quick tour to discover what's possible.",
+				'woocommerce'
+			),
+		},
+	};
 };
 
 export const OnboardingTour = ( {
 	onClose,
 	skipTour,
 	takeTour,
-	flowType,
 	showWelcomeTour,
 	setIsResizeHandleVisible,
 }: OnboardingTourProps ) => {
 	const [ placement, setPlacement ] =
 		useState< TourKitTypes.WooConfig[ 'placement' ] >( 'left' );
 
-	const { heading, descriptions } = getLabels( flowType );
+	const { heading, descriptions } = getLabels();
 
 	if ( showWelcomeTour ) {
 		return (

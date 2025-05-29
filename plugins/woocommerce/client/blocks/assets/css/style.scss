@@ -33,7 +33,9 @@ body.wc-block-product-gallery-modal-open {
 		}
 	}
 }
-.edit-post-visual-editor .editor-block-list__block .wc-block-grid__product-title,
+.edit-post-visual-editor
+	.editor-block-list__block
+	.wc-block-grid__product-title,
 .editor-styles-wrapper .wc-block-grid__product-title,
 .wc-block-grid__product-title {
 	font-family: inherit;
@@ -93,7 +95,8 @@ body.wc-block-product-gallery-modal-open {
 .has-7-columns,
 .has-8-columns,
 .has-9-columns {
-	.wc-block-grid__product-add-to-cart.wp-block-button .wp-block-button__link::after {
+	.wc-block-grid__product-add-to-cart.wp-block-button
+		.wp-block-button__link::after {
 		content: "";
 		margin: 0;
 	}
@@ -207,7 +210,9 @@ body.wc-block-product-gallery-modal-open {
 	.wc-block-grid__product-onsale,
 	.wc-block-components-product-title,
 	.wc-block-components-product-sale-badge {
-		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+			Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans",
+			"Helvetica Neue", sans-serif;
 	}
 	.wc-block-grid__product-title::before {
 		display: none;
@@ -216,13 +221,16 @@ body.wc-block-product-gallery-modal-open {
 	.wc-block-components-product-sale-badge {
 		line-height: 1;
 	}
-	.editor-styles-wrapper .wp-block-button .wp-block-button__link:not(.has-text-color) {
+	.editor-styles-wrapper
+		.wp-block-button
+		.wp-block-button__link:not(.has-text-color) {
 		color: #fff;
 	}
 }
 
 .theme-twentytwenty {
-	$twentytwenty-headings: -apple-system, blinkmacsystemfont, "Helvetica Neue", helvetica, sans-serif;
+	$twentytwenty-headings: -apple-system, blinkmacsystemfont, "Helvetica Neue",
+		helvetica, sans-serif;
 	$twentytwenty-highlights-color: #cd2653;
 
 	.wc-block-grid__product-link {
@@ -288,12 +296,17 @@ body.wc-block-product-gallery-modal-open {
 	.wc-block-grid__products .wc-block-components-product-sale-badge {
 		position: static;
 	}
-	.wc-block-grid__products .wc-block-grid__product-image .wc-block-components-product-sale-badge {
+	.wc-block-grid__products
+		.wc-block-grid__product-image
+		.wc-block-components-product-sale-badge {
 		position: absolute;
 	}
 
 	// These styles are not applied to the All Products atomic block, so it can be positioned normally.
-	.wc-block-grid__products .wc-block-grid__product-onsale:not(.wc-block-components-product-sale-badge) {
+	.wc-block-grid__products
+		.wc-block-grid__product-onsale:not(
+			.wc-block-components-product-sale-badge
+		) {
 		position: absolute;
 		right: 4px;
 		top: 4px;

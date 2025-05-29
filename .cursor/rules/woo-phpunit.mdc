@@ -1,0 +1,22 @@
+---
+description: 
+globs: plugins/woocommerce/tests/**/*.php
+alwaysApply: false
+---
+# WooCommerce PHPUnit Tests
+
+Rules for running WooCommerce PHPUnit tests.
+
+## Run PHPUnit Tests
+
+Run WooCommerce PHPUnit tests for specific files or directories.
+
+The command to run is
+
+```
+pnpm run test:php:env {relative_path} --verbose
+```
+
+And the command must be run in the `plugins/woocommerce` directory.
+
+

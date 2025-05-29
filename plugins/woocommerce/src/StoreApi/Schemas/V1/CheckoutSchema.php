@@ -149,7 +149,7 @@ class CheckoutSchema extends AbstractSchema {
 				'context'     => [ 'view', 'edit' ],
 				// Validation may be based on cart contents which is not available here; this returns all enabled
 				// gateways. Further validation occurs during the request.
-				'enum'        => array_values( WC()->payment_gateways->get_payment_gateway_ids() ),
+				'enum'        => array_merge( [ '' ], array_values( WC()->payment_gateways->get_payment_gateway_ids() ) ),
 			],
 			'create_account'    => [
 				'description' => __( 'Whether to create a new user account as part of order processing.', 'woocommerce' ),
@@ -243,8 +243,8 @@ class CheckoutSchema extends AbstractSchema {
 			'shipping_address'   => (object) $this->shipping_address_schema->get_item_response( $order ),
 			'payment_method'     => $order->get_payment_method(),
 			'payment_result'     => $payment_result,
-			'additional_fields'  => $this->get_additional_fields_response( $order ),
-			'__experimentalCart' => $cart ? $this->cart_schema->get_item_response( $cart ) : null,
+			'additional_fields'  => (object) $this->get_additional_fields_response( $order ),
+			'__experimentalCart' => $cart ? (object) $this->cart_schema->get_item_response( $cart ) : null,
 			self::EXTENDING_KEY  => $this->get_extended_data( self::IDENTIFIER ),
 		];
 	}
@@ -297,7 +297,7 @@ class CheckoutSchema extends AbstractSchema {
 			}
 		}
 
-		return $fields;
+		return (object) $fields;
 	}
 
 	/**
@@ -336,7 +336,7 @@ class CheckoutSchema extends AbstractSchema {
 					},
 					$field['options']
 				);
-				if ( true !== $field['required'] ) {
+				if ( true !== $field['required'] || $this->additional_fields_controller->is_conditional_field( $field ) ) {
 					$field_schema['enum'][] = '';
 				}
 			}

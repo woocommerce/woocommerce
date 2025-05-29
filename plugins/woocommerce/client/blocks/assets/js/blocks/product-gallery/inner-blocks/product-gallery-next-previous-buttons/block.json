@@ -37,5 +37,6 @@
 		},
 		"__experimentalSelector": ".wc-block-product-gallery-large-image-next-previous__button"
 	},
-	"ancestor": [ "woocommerce/product-gallery-large-image" ]
+	"ancestor": [ "woocommerce/product-gallery-large-image" ],
+	"editorStyle": "file:../woocommerce/product-gallery-large-image-next-previous-editor.css"
 }

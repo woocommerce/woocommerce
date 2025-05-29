@@ -102,6 +102,16 @@ class WCTransactionalEmailPostsManagerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that get_email_type_from_post_id returns the correct email type.
+	 */
+	public function testGetEmailTypeFromPostIdReturnsCorrectEmailType(): void {
+		$post_id = $this->factory->post->create();
+		$this->template_manager->save_email_template_post_id( 'my_test_email', $post_id );
+
+		$this->assertEquals( 'my_test_email', $this->template_manager->get_email_type_from_post_id( $post_id ) );
+	}
+
+	/**
 	 * Cleanup after test.
 	 */
 	public function tearDown(): void {

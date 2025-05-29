@@ -10,10 +10,10 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsDataSourcePoller;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
-use Automattic\WooCommerce\Internal\Admin\Notes\AddFirstProduct;
 use Automattic\WooCommerce\Internal\Admin\Notes\CustomizeStoreWithBlocks;
 use Automattic\WooCommerce\Internal\Admin\Notes\CustomizingProductCatalog;
 use Automattic\WooCommerce\Internal\Admin\Notes\EditProductsOnTheMove;
+use Automattic\WooCommerce\Internal\Admin\Notes\EmailImprovements;
 use Automattic\WooCommerce\Internal\Admin\Notes\EUVATNumber;
 use Automattic\WooCommerce\Internal\Admin\Notes\FirstProduct;
 use Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
@@ -70,6 +70,7 @@ class Events {
 		CustomizeStoreWithBlocks::class,
 		CustomizingProductCatalog::class,
 		EditProductsOnTheMove::class,
+		EmailImprovements::class,
 		EUVATNumber::class,
 		FirstProduct::class,
 		LaunchChecklist::class,

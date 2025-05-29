@@ -55,16 +55,15 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-products.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-tax.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-shipping.php';
-				if ( FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
-					$settings[] = include __DIR__ . '/settings/class-wc-settings-payment-gateways-react.php';
-				} else {
-					$settings[] = include __DIR__ . '/settings/class-wc-settings-payment-gateways.php';
-				}
+				$settings[] = include __DIR__ . '/settings/class-wc-settings-payment-gateways.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-accounts.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-emails.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-integrations.php';
 				if ( \Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'launch-your-store' ) ) {
 					$settings[] = include __DIR__ . '/settings/class-wc-settings-site-visibility.php';
+				}
+				if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
+					$settings[] = include __DIR__ . '/settings/class-wc-settings-point-of-sale.php';
 				}
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-advanced.php';
 

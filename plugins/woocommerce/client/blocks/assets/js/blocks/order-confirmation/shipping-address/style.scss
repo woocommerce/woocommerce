@@ -3,7 +3,9 @@
 .wc-block-order-confirmation-address-wrapper {
 	margin-block-start: $gap-large * 2;
 
-	.wp-block-column:empty {
+	.wp-block-column:empty,
+	// This selector works around white space.
+	.wp-block-column:not(:has(*)) {
 		display: none;
 	}
 }

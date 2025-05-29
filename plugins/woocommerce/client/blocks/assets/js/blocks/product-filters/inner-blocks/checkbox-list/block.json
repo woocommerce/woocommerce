@@ -9,7 +9,8 @@
 	"apiVersion": 3,
 	"ancestor": [
 		"woocommerce/product-filter-attribute",
-		"woocommerce/product-filter-status"
+		"woocommerce/product-filter-status",
+		"woocommerce/product-filter-rating"
 	],
 	"supports": {
 		"color": {

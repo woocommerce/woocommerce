@@ -69,7 +69,7 @@ class WC_CLI {
 	 */
 	public function add_blueprint_cli_hook() {
 		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) && class_exists( \Automattic\WooCommerce\Blueprint\Cli::class ) ) {
-			require_once dirname( WC_PLUGIN_FILE ) . '/vendor/woocommerce/blueprint/src/Cli.php';
+			require_once dirname( WC_PLUGIN_FILE ) . '/packages/blueprint/src/Cli.php';
 			WP_CLI::add_hook( 'after_wp_load', 'Automattic\WooCommerce\Blueprint\Cli::register_commands' );
 		}
 	}

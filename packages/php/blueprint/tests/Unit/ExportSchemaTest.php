@@ -35,7 +35,6 @@ class ExportSchemaTest extends TestCase {
 	 * with the built-in exporters.
 	 */
 	public function test_it_uses_exporters_passed_to_the_constructor() {
-		$this->markTestSkipped( 'Skipping for now as it is failing due to the way the mock is created.' );
 		$empty_exporter     = new EmptySetSiteOptionsExporter();
 		$mock               = Mock( ExportSchema::class, array( array( $empty_exporter ) ) );
 		$built_in_exporters = ( new BuiltInExporters() )->get_all();
@@ -57,7 +56,6 @@ class ExportSchemaTest extends TestCase {
 	 * Test that it correctly sets landingPage value from the filter.
 	 */
 	public function test_wooblueprint_export_landingpage_filter() {
-		$this->markTestSkipped( 'Skipping for now as it is failing due to the way the mock is created.' );
 		$exporter = $this->get_mock( true );
 		$exporter->shouldReceive( 'wp_apply_filters' )
 			->with( 'wooblueprint_exporters', Mockery::any() )
@@ -90,7 +88,6 @@ class ExportSchemaTest extends TestCase {
 	 * @return void
 	 */
 	public function test_it_only_uses_exporters_specified_by_steps_argment() {
-		$this->markTestSkipped( 'Skipping for now as it is failing due to the way the mock is created.' );
 		$mock = Mock(
 			ExportSchema::class,
 			array(
@@ -117,7 +114,6 @@ class ExportSchemaTest extends TestCase {
 	 * @return void
 	 */
 	public function test_it_filters_out_invalid_exporters() {
-		$this->markTestSkipped( 'Skipping for now as it is failing due to the way the mock is created.' );
 		$empty_exporter   = new EmptySetSiteOptionsExporter();
 		$invalid_exporter = new class() {
 			/**

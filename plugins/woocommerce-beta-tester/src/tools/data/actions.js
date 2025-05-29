@@ -258,11 +258,6 @@ export function* resetCustomizeYourStore() {
 			path: API_NAMESPACE + '/tools/reset-cys',
 			method: 'POST',
 		} );
-
-		yield apiFetch( {
-			path: '/wc-admin/ai/patterns',
-			method: 'DELETE',
-		} );
 	} );
 }
 

@@ -10,7 +10,6 @@ import { TaskReferralRecord } from '@woocommerce/onboarding';
 import { customizeStoreStateMachineEvents } from '..';
 import {
 	customizeStoreStateMachineContext,
-	FlowType,
 	RecommendThemesAPIResponse,
 } from '../types';
 import { events } from './';
@@ -64,10 +63,6 @@ export const assignTaskReferral = assign<
 	},
 } );
 
-export const recordTracksDesignWithAIClicked = () => {
-	trackEvent( 'customize_your_store_intro_design_with_ai_click' );
-};
-
 export const recordTracksDesignWithoutAIClicked = () => {
 	trackEvent( 'customize_your_store_intro_design_without_ai_click' );
 };
@@ -109,20 +104,6 @@ export const assignFetchIntroDataError = assign<
 >( {
 	intro: ( context ) => {
 		return { ...context.intro, hasErrors: true };
-	},
-} );
-
-export const assignCurrentThemeIsAiGenerated = assign<
-	customizeStoreStateMachineContext,
-	customizeStoreStateMachineEvents
->( {
-	intro: ( context, event ) => {
-		const currentThemeIsAiGenerated = (
-			event as DoneInvokeEvent< {
-				currentThemeIsAiGenerated: boolean;
-			} >
-		 ).data.currentThemeIsAiGenerated;
-		return { ...context.intro, currentThemeIsAiGenerated };
 	},
 } );
 
@@ -205,9 +186,5 @@ export const assignFlags = assign<
 		const isPTKPatternsAPIAvailable =
 			window.parent.__wcCustomizeStore.isPTKPatternsAPIAvailable || false;
 		return isPTKPatternsAPIAvailable;
-	},
-	flowType: ( _context, event ) => {
-		const flowTypeData = event as DoneInvokeEvent< FlowType >;
-		return flowTypeData.data;
 	},
 } );

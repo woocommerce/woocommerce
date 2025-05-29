@@ -108,12 +108,13 @@ class Send_Preview_Email {
 		$current_user = wp_get_current_user();
 		$subscriber   = ! empty( $current_user->ID ) ? $current_user : null;
 
-		$this->personalizer->set_context(
-			array(
-				'recipient_email' => $subscriber ? $subscriber->user_email : null,
-				'is_user_preview' => true,
-			)
+		$personalizer_context = array(
+			'recipient_email' => $subscriber ? $subscriber->user_email : null,
+			'is_user_preview' => true,
 		);
+		$personalizer_context = apply_filters( 'woocommerce_email_editor_send_preview_email_personalizer_context', $personalizer_context );
+
+		$this->personalizer->set_context( $personalizer_context );
 		return $this->personalizer->personalize_content( $content );
 	}
 
