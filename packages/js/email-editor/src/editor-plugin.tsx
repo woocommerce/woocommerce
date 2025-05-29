@@ -25,6 +25,7 @@ import { initBlocksForPlugin } from './blocks';
 import { initHooks } from './editor-hooks';
 import { initTextHooks } from './text-hooks';
 
+import './style.scss';
 
 const EmailEditorPlugin = () => {
 	const { updateEditorSettings } = useDispatch( editorStore );
