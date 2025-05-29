@@ -74,7 +74,8 @@ export const OnboardingProvider: React.FC< {
 	onboardingSteps: WooPaymentsProviderOnboardingStep[];
 	closeModal: () => void;
 	urlStrategy?: URLStrategy;
-} > = ( { children, onboardingSteps, closeModal, urlStrategy } ) => {
+	source?: string | null;
+} > = ( { children, onboardingSteps, closeModal, urlStrategy, source } ) => {
 	const history = getHistory();
 
 	// Use React state to manage steps and loading state
@@ -107,16 +108,18 @@ export const OnboardingProvider: React.FC< {
 	const { invalidateResolutionForStoreSelector: invalidatePaymentProviders } =
 		useDispatch( paymentSettingsStore );
 
-	// Initial data fetch from store
+	// Initial data fetch from store with source parameter
 	const { storeData, isStoreLoading, storeError } = useSelect(
 		( select ) => ( {
-			storeData: select( woopaymentsOnboardingStore ).getOnboardingData(),
+			storeData: select( woopaymentsOnboardingStore ).getOnboardingData(
+				source
+			),
 			isStoreLoading: select(
 				woopaymentsOnboardingStore
 			).isOnboardingDataRequestPending(),
 			storeError: select( woopaymentsOnboardingStore ).getOnboardingDataError(),
 		} ),
-		[]
+		[ source ]
 	);
 
 	/**

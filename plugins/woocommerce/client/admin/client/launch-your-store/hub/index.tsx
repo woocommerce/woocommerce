@@ -107,6 +107,7 @@ const LaunchStoreController = () => {
 				closeModal={ handlePaymentsClose }
 				onboardingSteps={ LYSPaymentsSteps }
 				urlStrategy={ lysUrlStrategy }
+				source="launch-your-store"
 			>
 				<SidebarContainer
 					className={ clsx( {
