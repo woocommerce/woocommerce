@@ -50,7 +50,7 @@ describe( 'SettingsPaymentsMethods', () => {
 				displayed_payment_methods: expect.any( String ),
 				selected_payment_methods: expect.any( String ),
 				deselected_payment_methods: expect.any( String ),
-				store_country: expect.any( String ),
+				business_country: expect.any( String ),
 			}
 		);
 	} );
