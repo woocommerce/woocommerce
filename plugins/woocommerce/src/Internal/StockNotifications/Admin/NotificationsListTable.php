@@ -406,7 +406,7 @@ class NotificationsListTable extends \WP_List_Table {
 
 		// Only show existing products.
 		$query_args['product_exists'] = true;
-        $query_args['return']         = 'objects';
+		$query_args['return']         = 'objects';
 
 		$this->items = $this->data_store->query( $query_args );
 
