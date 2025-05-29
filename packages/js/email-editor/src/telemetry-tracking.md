@@ -56,6 +56,7 @@ All events are prefixed `email_editor_events_`.
 | `personalization_tags_modal_opened` | `{ openedBy }` | Tracked when the personalization tags modal is opened. The openedBy parameter indicates where it was opened from (e.g., 'block-controls', 'RichTextWithButton-BaseControl') |
 | `personalization_tags_modal_search_control_input_updated` | `{ openedBy }` | Tracked when the search input is updated in the personalization tags modal |
 | `personalization_tags_modal_tag_insert_button_clicked` | `{ insertedTag, activeCategory, openedBy }` | Tracked when a tag insert button is clicked in the personalization tags modal |
+| `preview_dropdown_rendering_mode_changed` | `{ renderingMode }` | Tracked when user toggles "Show template" in preview menu. Values are 'template-locked', 'post-only'. |
 | `rich_text_with_button_input_field_updated` | `{ attributeName }` | Tracked when the input field is updated in a rich text with button component |
 | `rich_text_with_button_personalization_tags_inserted` | `{ attributeName, value }` | Tracked when a personalization tag is inserted in a rich text with button component |
 | `rich_text_with_button_personalization_tags_shortcode_icon_clicked` | `{ attributeName, label }` | Tracked when the personalization tags shortcode icon is clicked in a rich text with button component |

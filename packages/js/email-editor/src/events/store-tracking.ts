@@ -5,6 +5,7 @@ import { use, select } from '@wordpress/data';
 import { applyFilters } from '@wordpress/hooks';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { store as editorStore } from '@wordpress/editor';
+import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
@@ -77,6 +78,25 @@ const trackBlockAndPatternInsertion = ( ...args ) => {
 	}
 };
 
+const trackSetRenderingMode = ( renderingMode: string ) => {
+	// @ts-expect-error - getRenderingMode is not in editor types
+	const currentRenderingMode = select( editorStore ).getRenderingMode();
+	if ( currentRenderingMode === renderingMode ) {
+		return;
+	}
+	const isPreviewDropdownOpened = !! document.querySelector(
+		// eslint-disable-next-line @wordpress/i18n-text-domain
+		`[aria-label="${ __( 'View options' ) }"]`
+	);
+	// We want to track the event only from the dropdown.
+	// The mode might also change when switching between an email content and template.
+	if ( isPreviewDropdownOpened ) {
+		recordEvent( 'preview_dropdown_rendering_mode_changed', {
+			renderingMode,
+		} );
+	}
+};
+
 /**
  * List of store actions to be tracked.
  */
@@ -84,6 +104,7 @@ const TRACKED_STORE_EVENTS = {
 	'core/editor': {
 		autosave: 'editor_content_auto_saved',
 		setDeviceType: trackSetDeviceType,
+		setRenderingMode: trackSetRenderingMode,
 	},
 	core: {
 		deleteEntityRecord: trackDeleteEntityRecord,
