@@ -267,6 +267,9 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'location', $country_code );
 		$response = $this->server->dispatch( $request );
 
+		// @phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_dump
+		var_dump( $response->get_data() );
+
 		// Assert.
 		$this->assertSame( 200, $response->get_status() );
 
