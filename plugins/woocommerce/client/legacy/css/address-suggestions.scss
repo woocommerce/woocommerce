@@ -1,0 +1,47 @@
+.woocommerce-address-suggestions {
+	position: absolute;
+	z-index: 1000;
+	width: 100%;
+	max-width: 100%;
+	margin-top: 2px;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	display: none;
+
+	.suggestions-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		max-height: 200px;
+		overflow-y: auto;
+
+		li {
+			padding: 8px 12px;
+			cursor: pointer;
+			border-bottom: 1px solid #f0f0f0;
+			transition: background-color 0.2s ease;
+
+			&:last-child {
+				border-bottom: none;
+			}
+
+			&:hover,
+			&.active {
+				background-color: #f8f8f8;
+			}
+
+			&:focus {
+				outline: none;
+				background-color: #f0f0f0;
+			}
+		}
+	}
+}
+
+// Ensure the input container has relative positioning
+.woocommerce-billing-fields,
+.woocommerce-shipping-fields {
+	position: relative;
+}

@@ -269,6 +269,11 @@ class WC_Frontend_Scripts {
 				'deps'    => array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ),
 				'version' => $version,
 			),
+			'wc-address-suggestions'     => array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/address-suggestions' . $suffix . '.js' ),
+				'deps'    => array( 'jquery', 'woocommerce', 'wc-address-i18n' ),
+				'version' => $version,
+			),
 			'wc-country-select'          => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/country-select' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
@@ -361,6 +366,12 @@ class WC_Frontend_Scripts {
 				'version' => $version,
 				'has_rtl' => true,
 			),
+			'wc-address-suggestions'      => array(
+				'src'     => self::get_asset_url( 'assets/css/address-suggestions.css' ),
+				'deps'    => array(),
+				'version' => $version,
+				'has_rtl' => false,
+			),
 		);
 		foreach ( $register_styles as $name => $props ) {
 			self::register_style( $name, $props['src'], $props['deps'], $props['version'], 'all', $props['has_rtl'] );
@@ -400,6 +411,8 @@ class WC_Frontend_Scripts {
 		}
 		if ( is_checkout() ) {
 			self::enqueue_script( 'wc-checkout' );
+			self::enqueue_script( 'wc-address-suggestions' );
+			self::enqueue_style( 'wc-address-suggestions' );
 		}
 		if ( is_add_payment_method_page() ) {
 			self::enqueue_script( 'wc-add-payment-method' );
