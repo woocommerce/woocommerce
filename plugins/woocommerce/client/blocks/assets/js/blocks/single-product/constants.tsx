@@ -37,6 +37,14 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 							isDescendentOfSingleProductBlock: true,
 							imageSizing: ImageSizing.SINGLE,
 						},
+						[
+							[
+								'woocommerce/product-sale-badge',
+								{
+									align: 'right',
+								},
+							],
+						],
 					],
 				],
 			],
