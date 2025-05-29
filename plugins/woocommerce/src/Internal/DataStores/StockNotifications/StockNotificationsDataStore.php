@@ -524,15 +524,17 @@ CREATE TABLE $meta_table_name (
 
 		global $wpdb;
 
-		$table_name = esc_sql( $this->get_table_name() );
-		$results    = $wpdb->get_results(
-			"SELECT DISTINCT 
-				YEAR(date_created_gmt) AS year, 
-				MONTH(date_created_gmt) AS month 
-			FROM {$table_name} 
-			ORDER BY year DESC, month DESC"
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT DISTINCT 
+					YEAR(date_created_gmt) AS year, 
+					MONTH(date_created_gmt) AS month 
+				FROM %i
+				ORDER BY year DESC, month DESC',
+				$this->get_table_name()
+			)
 		);
-	
+
 		return $results;
 	}
 }

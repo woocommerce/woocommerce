@@ -76,10 +76,10 @@ class NotificationsListTable extends \WP_List_Table {
 		$this->total_inactive_items = $this->data_store->query(
 			array(
 				'return' => 'count',
-				'status' => array( 
-					NotificationStatus::SENT, 
-					NotificationStatus::CANCELLED, 
-					NotificationStatus::PENDING 
+				'status' => array(
+					NotificationStatus::SENT,
+					NotificationStatus::CANCELLED,
+					NotificationStatus::PENDING,
 				),
 			)
 		);
@@ -371,17 +371,17 @@ class NotificationsListTable extends \WP_List_Table {
 
 		// Search.
 		if ( isset( $_REQUEST['s'] ) && ! empty( $_REQUEST['s'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$query_args['search'] = wc_clean( wp_unslash( $_REQUEST['s'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$query_args['user_email'] = wc_clean( wp_unslash( $_REQUEST['s'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 
 		// Views.
 		if ( ! empty( $_REQUEST['status'] ) && 'active_customer_stock_notifications' === $_REQUEST['status'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$query_args['status'] = NotificationStatus::ACTIVE;
 		} elseif ( ! empty( $_REQUEST['status'] ) && 'inactive_customer_stock_notifications' === $_REQUEST['status'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$query_args['status'] = array( 
+			$query_args['status'] = array(
 				NotificationStatus::SENT,
 				NotificationStatus::CANCELLED,
-				NotificationStatus::PENDING
+				NotificationStatus::PENDING,
 			);
 		}
 
@@ -391,12 +391,12 @@ class NotificationsListTable extends \WP_List_Table {
 			$month  = substr( (string) $filter, 4, 6 );
 			$year   = substr( (string) $filter, 0, 4 ); // This will break at year 10.000 AC :).
 
-			$start_timestamp = mktime( 0, 0, 0, (int) $month, 1, (int) $year );
+			$start_timestamp          = mktime( 0, 0, 0, (int) $month, 1, (int) $year );
 			$query_args['start_date'] = gmdate( 'Y-m-d H:i:s', $start_timestamp );
 
-			$end_timestamp = mktime( 0, 0, 0, (int) $month + 1, 1, (int) $year );
+			$end_timestamp          = mktime( 0, 0, 0, (int) $month + 1, 1, (int) $year );
 			$query_args['end_date'] = gmdate( 'Y-m-d H:i:s', $end_timestamp );
-			
+
 			$has_filters = true;
 		}
 
@@ -429,11 +429,12 @@ class NotificationsListTable extends \WP_List_Table {
 			// Count active.
 			$query_args['status']     = NotificationStatus::ACTIVE;
 			$this->total_active_items = $this->data_store->query( $query_args );
+
 			// Count inactive.
-			$query_args['status']       = array( 
+			$query_args['status'] = array(
 				NotificationStatus::SENT,
 				NotificationStatus::CANCELLED,
-				NotificationStatus::PENDING
+				NotificationStatus::PENDING,
 			);
 			$this->total_inactive_items = $this->data_store->query( $query_args );
 		}
