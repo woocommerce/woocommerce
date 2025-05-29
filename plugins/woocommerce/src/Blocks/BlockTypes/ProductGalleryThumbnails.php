@@ -68,7 +68,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			return '';
 		}
 
-		$show_uncropped_images = 'auto' === $attributes['aspectRatio'];
+		$show_uncropped_images = '1' !== $attributes['aspectRatio'];
 
 		if ( $show_uncropped_images ) {
 			update_option( 'woocommerce_thumbnail_cropping', 'uncropped' );
