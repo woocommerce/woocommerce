@@ -68,8 +68,15 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			return '';
 		}
 
-		$image_size             = true === $attributes['cropImages'] ? 'woocommerce_thumbnail' : 'woocommerce_single';
-		$product_gallery_images = ProductGalleryUtils::get_product_gallery_image_data( $product, $image_size );
+		$show_uncropped_images = 'auto' === $attributes['aspectRatio'];
+
+		if ( $show_uncropped_images ) {
+			update_option( 'woocommerce_thumbnail_cropping', 'uncropped' );
+		} else {
+			update_option( 'woocommerce_thumbnail_cropping', '1:1' );
+		}
+
+		$product_gallery_images = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_thumbnail' );
 		// Don't show the thumbnails block if there is only one image.
 		if ( count( $product_gallery_images ) <= 1 ) {
 			return '';
@@ -79,10 +86,6 @@ class ProductGalleryThumbnails extends AbstractBlock {
 		$thumbnails_class = 'wc-block-product-gallery-thumbnails--thumbnails-size-' . $thumbnail_size;
 
 		$img_class = 'wc-block-product-gallery-thumbnails__thumbnail__image';
-
-		if ( true === $attributes['cropImages'] ) {
-			$img_class .= ' wc-block-product-gallery-thumbnails__thumbnail__image--cropped';
-		}
 
 		ob_start();
 		?>
