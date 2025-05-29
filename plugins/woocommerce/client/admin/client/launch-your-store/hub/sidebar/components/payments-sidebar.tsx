@@ -23,7 +23,7 @@ import { useOnboardingContext } from '~/settings-payments/onboarding/providers/w
 import type { SidebarComponentProps } from '../xstate';
 import { SidebarContainer } from './sidebar-container';
 import { SiteHub } from '~/customize-store/assembler-hub/site-hub';
-import { taskIcons } from './icons';
+import { taskIcons, taskCompleteIcon } from './icons';
 import { StepPlaceholder } from './step-placeholder';
 
 export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
@@ -88,30 +88,35 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 							animate={ { opacity: 1, y: 0 } }
 							transition={ { duration: 0.7, delay: 0.2 } }
 						>
-							{ allSteps.map( ( step ) => (
-								<SidebarNavigationItem
-									key={ step.id }
-									className={ clsx( step.id, {
-										active: currentStep?.id === step.id,
-										'payment-step': true,
-										'payment-step--active':
-											currentStep?.id === step.id,
-										'payment-step--disabled':
-											currentStep?.id !== step.id,
-									} ) }
-									icon={
-										step.id === justCompletedStepId ||
-										step.status === 'completed' ||
-										currentStepIndex === allSteps.length
-											? taskIcons.completedPaymentStep
-											: taskIcons.activePaymentStep
-									}
-									disabled={ true }
-									showChevron={ false }
-								>
-									{ step.label }
-								</SidebarNavigationItem>
-							) ) }
+							{ allSteps.map( ( step ) => {
+								const isStepComplete =
+									step.id === justCompletedStepId ||
+									step.status === 'completed' ||
+									currentStepIndex === allSteps.length;
+								return (
+									<SidebarNavigationItem
+										key={ step.id }
+										className={ clsx( step.id, {
+											active: currentStep?.id === step.id,
+											'payment-step': true,
+											'payment-step--active':
+												currentStep?.id === step.id,
+											'payment-step--disabled':
+												currentStep?.id !== step.id,
+											'is-complete': isStepComplete,
+										} ) }
+										icon={
+											isStepComplete
+												? taskCompleteIcon
+												: taskIcons.activePaymentStep
+										}
+										disabled={ true }
+										showChevron={ false }
+									>
+										{ step.label }
+									</SidebarNavigationItem>
+								);
+							} ) }
 						</motion.div>
 					) }
 				</ItemGroup>
