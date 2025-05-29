@@ -25,15 +25,15 @@ class ProductAvailabilityUtils {
 			return $product_availability;
 		}
 
-		// If the product is a variable product, check if it has any available variations.
-		// We will show a custom availability message if it does.
-		if ( $product->get_type() === ProductType::VARIABLE ) {
+		$product_availability = $product->get_availability();
+		// If the product is a variable product and availability isn't controlled
+		// at the parent product level, check if any of its variations is in stock.
+		// We will show a custom availability message if all variations are out of stock.
+		if ( ! $product_availability && $product->get_type() === ProductType::VARIABLE ) {
 			if ( ! $product->has_available_variations() ) {
 				$product_availability['availability'] = __( 'This product is currently out of stock and unavailable.', 'woocommerce' );
 				$product_availability['class']        = 'out-of-stock';
 			}
-		} else {
-			$product_availability = $product->get_availability();
 		}
 
 		/**
