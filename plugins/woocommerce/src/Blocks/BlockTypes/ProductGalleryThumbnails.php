@@ -99,7 +99,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 				data-wp-init="actions.onScroll"
 				data-wp-on--scroll="actions.onScroll">
 				<?php foreach ( $product_gallery_images as $index => $image ) : ?>
-					<div class="wc-block-product-gallery-thumbnails__thumbnail" style="aspect-ratio: <?php echo esc_attr( $attributes['aspectRatio'] ); ?>">
+					<div class="wc-block-product-gallery-thumbnails__thumbnail">
 						<img
 							class="<?php echo 0 === $index ? esc_attr( $img_class . ' wc-block-product-gallery-thumbnails__thumbnail__image--is-active' ) : esc_attr( $img_class ); ?>"
 							data-image-id="<?php echo esc_attr( $image['id'] ); ?>"
