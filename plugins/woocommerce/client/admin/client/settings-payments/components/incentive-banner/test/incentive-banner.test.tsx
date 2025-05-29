@@ -103,6 +103,7 @@ describe( 'IncentiveBanner', () => {
 				display_context: 'wc_settings_payments__banner',
 				incentive_id: 'test-promo-id',
 				provider_id: 'test-provider',
+				suggestion_id: 'test-suggestion-id',
 			}
 		);
 	} );
