@@ -147,7 +147,9 @@ export const initStoreTracking = () => {
 							// eslint-disable-next-line no-console
 							console.error( 'Error tracking event', error );
 						}
-						originalActions[ storeName ][ action ]( ...args );
+						return originalActions[ storeName ][ action ](
+							...args
+						);
 					};
 				}
 				actions[ action ] = rewrittenActions[ storeName ][ action ];
