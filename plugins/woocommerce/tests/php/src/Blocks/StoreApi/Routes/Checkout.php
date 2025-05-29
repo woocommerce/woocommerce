@@ -1606,6 +1606,58 @@ class Checkout extends MockeryTestCase {
 	}
 
 	/**
+	 * Test that payment methods are not saved to free orders.
+	 */
+	public function test_payment_method_is_cleared_for_free_order() {
+		// Create a simple product and add to cart.
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '0' ); // Make the product free.
+		$product->save();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Verify that the cart total is 0 (free order).
+		$this->assertEquals( 0, WC()->cart->get_total( 'numeric' ), 'Cart total should be 0 for a free order' );
+
+		// Create an order via checkout route.
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'email'                       => 'test@test.com',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'shipping_address' => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'payment_method'   => '',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$order_id = $response->get_data()['order_id'];
+		$order    = wc_get_order( $order_id );
+
+		// Assert payment method is not saved.
+		$this->assertEquals( '', $order->get_payment_method(), 'Payment method should be cleared for free orders.' );
+	}
+
+	/**
 	 * Test that custom status is retained for non-free orders when the custom
 	 * status is not in the valid statuses for payment list.
 	 */
