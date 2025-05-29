@@ -32,7 +32,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'postId', 'hoverZoom', 'fullScreenOnClick', 'cropImages' ];
+		return [ 'postId', 'hoverZoom', 'fullScreenOnClick' ];
 	}
 
 	/**
@@ -114,9 +114,6 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		if ( $context['hoverZoom'] ) {
 			$base_classes .= ' wc-block-woocommerce-product-gallery-large-image__image--hoverZoom';
 		}
-		if ( $context['cropImages'] ) {
-			$base_classes .= ' wc-block-woocommerce-product-gallery-large-image__image--cropped';
-		}
 
 		ob_start();
 		?>
@@ -137,7 +134,6 @@ class ProductGalleryLargeImage extends AbstractBlock {
 							data-wp-on--touchstart="actions.onTouchStart"
 							data-wp-on--touchmove="actions.onTouchMove"
 							data-wp-on--touchend="actions.onTouchEnd"
-							data-wp-watch="callbacks.toggleActiveImageAttributes"
 							<?php if ( $context['hoverZoom'] ) : ?>
 								data-wp-on--mousemove="actions.startZoom"
 								data-wp-on--mouseleave="actions.resetZoom"
