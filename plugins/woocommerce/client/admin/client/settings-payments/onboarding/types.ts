@@ -144,5 +144,6 @@ export interface OnboardingContextType {
 	closeModal: () => void;
 	justCompletedStepId: string | null;
 	setJustCompletedStepId: ( stepId: string ) => void;
-	storeError: unknown | null;
+	isWooPaymentsEnabled: boolean;
+	setWooPaymentsRecentlyEnabled: ( wasEnabled: boolean ) => void;
 }

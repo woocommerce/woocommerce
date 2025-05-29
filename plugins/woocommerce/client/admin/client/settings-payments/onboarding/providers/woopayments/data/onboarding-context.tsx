@@ -63,7 +63,8 @@ const OnboardingContext = createContext< OnboardingContextType >( {
 	closeModal: () => undefined,
 	justCompletedStepId: null,
 	setJustCompletedStepId: () => undefined,
-	storeError: null,
+	isWooPaymentsEnabled: false,
+	setWooPaymentsRecentlyEnabled: () => undefined,
 } );
 
 export const useOnboardingContext = () => useContext( OnboardingContext );
@@ -88,6 +89,11 @@ export const OnboardingProvider: React.FC< {
 	// New state for tracking just completed step
 	const [ justCompletedStepId, setStepId ] = useState< string | null >(
 		null
+	);
+
+	// State to track if WooPayments was recently enabled
+	const [ wooPaymentsRecentlyEnabled, setWooPaymentsRecentlyEnabled ] = useState< boolean >(
+		false
 	);
 
 	const setJustCompletedStepId = useCallback( ( stepId: string | null ) => {
@@ -247,6 +253,15 @@ export const OnboardingProvider: React.FC< {
 	// Update all steps when stateStoreSteps changes
 	useEffect( () => {
 		const mapWooPaymentsSteps = onboardingSteps
+			// Filter out steps that are not relevant based on storeError and wooPaymentsRecentlyEnabled
+			// If storeError is present, it indicates that WooPayments is not enabled.
+			// If wooPaymentsRecentlyEnabled is true, we want to show the install_woopayments step.
+			// If the step is 'install_woopayments', we want to show it only if WooPayments is not enabled
+			// or if WooPayments was recently enabled.
+			// This is to avoid showing the install_woopayments step when WooPayments is already enabled.
+			.filter(
+				step => ! ( ! storeError && ! wooPaymentsRecentlyEnabled && step.id === 'install_woopayments' )
+			)
 			// First, filter out steps that are not returned from the API.
 			// This is to avoid showing steps that are not useful to the user.
 			.filter( ( step ) => {
@@ -301,7 +316,7 @@ export const OnboardingProvider: React.FC< {
 		setAllSteps(
 			stepsWithDependenciesResolved as WooPaymentsProviderOnboardingStep[]
 		);
-	}, [ stateStoreSteps, areStepDependenciesCompleted ] );
+	}, [ stateStoreSteps, areStepDependenciesCompleted, storeError, wooPaymentsRecentlyEnabled ] );
 
 	useEffect( () => {
 		// Invalidate the getOnboardingData store selector to ensure the latest data is fetched.
@@ -329,7 +344,8 @@ export const OnboardingProvider: React.FC< {
 				},
 				justCompletedStepId,
 				setJustCompletedStepId,
-				storeError,
+				isWooPaymentsEnabled: ! storeError, // If storeError is present, it indicates that WooPayments is not enabled.
+				setWooPaymentsRecentlyEnabled,
 			} }
 		>
 			{ children }
