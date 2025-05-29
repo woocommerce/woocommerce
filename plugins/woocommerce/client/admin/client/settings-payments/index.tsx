@@ -68,10 +68,10 @@ const SettingsPaymentsOfflineChunk = lazy(
 /**
  * Lazy-loaded chunk for the WooPayments settings page.
  */
-const SettingsPaymentsWooCommercePaymentsChunk = lazy(
+const SettingsPaymentsWooPaymentsChunk = lazy(
 	() =>
 		import(
-			/* webpackChunkName: "settings-payments-woocommerce-payments" */ './settings-payments-woocommerce-payments'
+			/* webpackChunkName: "settings-payments-woocommerce-payments" */ './settings-payments-woopayments'
 		)
 );
 
@@ -104,7 +104,7 @@ const hideWooCommerceNavTab = ( display: string ) => {
 		'.woo-nav-tab-wrapper'
 	);
 
-	// Add the 'hidden' class to hide the element
+	// Add the 'hidden' class to hide the element.
 	if ( externalElement ) {
 		externalElement.style.display = display;
 	}
@@ -204,11 +204,11 @@ export const SettingsPaymentsMethods = () => {
 		};
 	}, [] );
 
-	// Retrieve wooPayments gateway
+	// Retrieve the WooPayments gateway.
 	const wooPayments = getWooPaymentsFromProviders( providers );
 
 	const onPaymentMethodsContinueClick = useCallback( () => {
-		// Record the event along with payment methods selected
+		// Record the event along with payment methods selected.
 		recordEvent( 'wcpay_settings_payment_methods_continue', {
 			displayed_payment_methods:
 				Object.keys( paymentMethodsState ).join( ', ' ),
@@ -222,14 +222,14 @@ export const SettingsPaymentsMethods = () => {
 					( paymentMethod ) => ! paymentMethodsState[ paymentMethod ]
 				)
 				.join( ', ' ),
-			store_country:
+			business_country:
 				window.wcSettings?.admin?.woocommerce_payments_nox_profile
 					?.business_country_code ?? 'unknown',
 		} );
 
 		setIsCompleted( true );
 
-		// Get the onboarding URL or fallback to the test drive account link
+		// Get the onboarding URL or fallback to the test drive account link.
 		const onboardUrl =
 			wooPayments?.onboarding?._links.onboard.href ||
 			getWooPaymentsTestDriveAccountLink();
@@ -242,7 +242,7 @@ export const SettingsPaymentsMethods = () => {
 	}, [ paymentMethodsState, wooPayments ] );
 
 	useEffect( () => {
-		window.scrollTo( 0, 0 ); // Scrolls to the top-left corner of the page
+		window.scrollTo( 0, 0 ); // Scrolls to the top-left corner of the page.
 
 		if ( location.pathname === '/payment-methods' ) {
 			hideWooCommerceNavTab( 'none' );
@@ -366,12 +366,12 @@ export const SettingsPaymentsOfflineWrapper = () => {
 /**
  * Wraps the WooPayments settings page.
  */
-export const SettingsPaymentsWooCommercePaymentsWrapper = () => {
+export const SettingsPaymentsWooPaymentsWrapper = () => {
 	return (
 		<>
 			<Header title={ __( 'Settings', 'woocommerce' ) } />
 			<Suspense fallback={ <div>Loading WooPayments settings...</div> }>
-				<SettingsPaymentsWooCommercePaymentsChunk />
+				<SettingsPaymentsWooPaymentsChunk />
 			</Suspense>
 		</>
 	);
