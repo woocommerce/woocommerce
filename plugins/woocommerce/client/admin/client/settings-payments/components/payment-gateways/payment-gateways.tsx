@@ -119,7 +119,7 @@ export const PaymentGateways = ( {
 		// Record the event when user clicks on the business location indicator.
 		recordPaymentsEvent( 'business_location_indicator_click', {
 			store_country: storeCountryCode,
-			business_country: businessRegistrationCountry || '',
+			business_country: businessRegistrationCountry || 'unknown',
 		} );
 
 		setIsPopoverVisible( ( prev ) => ! prev );
@@ -235,7 +235,7 @@ export const PaymentGateways = ( {
 																			storeCountryCode,
 																		business_country:
 																			businessRegistrationCountry ||
-																			'',
+																			'unknown',
 																	}
 																);
 															} }

@@ -102,7 +102,7 @@ export const IncentiveModal = ( {
 		recordPaymentsEvent( 'incentive_show', {
 			incentive_id: incentive.promo_id,
 			provider_id: provider.id,
-			suggestion_id: provider._suggestion_id ?? '',
+			suggestion_id: provider._suggestion_id ?? 'unknown',
 			display_context: context,
 		} );
 	}, [ incentive, provider ] );
@@ -123,7 +123,7 @@ export const IncentiveModal = ( {
 		recordPaymentsEvent( 'incentive_accept', {
 			incentive_id: incentive.promo_id,
 			provider_id: provider.id,
-			suggestion_id: provider._suggestion_id ?? '',
+			suggestion_id: provider._suggestion_id ?? 'unknown',
 			display_context: context,
 		} );
 
