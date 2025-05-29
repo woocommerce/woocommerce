@@ -32,6 +32,9 @@ export type Store = {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
 		};
+		displayedProduct: {
+			price_html: string;
+		};
 	};
 	actions: {
 		addCartItem: ( args: OptimisticCartItem ) => void;

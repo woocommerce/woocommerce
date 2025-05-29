@@ -1,10 +1,15 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductDataUtils;
+
 /**
  * SingleProduct class.
  */
 class SingleProduct extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -154,6 +159,40 @@ class SingleProduct extends AbstractBlock {
 				$context['singleProduct'] = true;
 			}
 		}
+	}
+
+	/**
+	 * Render the Single Product block.
+	 *
+	 * @param array    $attributes Block attributes.
+	 * @param string   $content Block content.
+	 * @param WP_Block $block Block instance.
+	 *
+	 * @return string Rendered block type output.
+	 */
+	protected function render( $attributes, $content, $block ) {
+		$product = wc_get_product( $this->product_id );
+
+		if ( ! $product ) {
+			return '';
+		}
+
+		$product_type = $product->get_type();
+
+		$interactivity_context = array(
+			'displayedProduct' => ProductDataUtils::get_product_data( $product ),
+		);
+
+		$wrapper_attributes = array(
+			'data-wp-interactive' => $this->get_full_block_name(),
+			'data-wp-context'     => wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+		);
+
+		return sprintf(
+			'<div %1$s>%2$s</div>',
+			get_block_wrapper_attributes( $wrapper_attributes ),
+			$content
+		);
 	}
 
 	/**
