@@ -24,6 +24,8 @@ import { initializeLayout } from './layouts/flex-email';
 import { initBlocksForPlugin } from './blocks';
 import { initHooks } from './editor-hooks';
 import { initTextHooks } from './text-hooks';
+import { SendPreview } from './components/preview';
+import { TemplateSelection } from './components/template-select';
 
 import './style.scss';
 
@@ -66,6 +68,8 @@ const EmailEditorPlugin = () => {
 				<SettingsPanel />
 			) }
 			<BlockCompatibilityWarnings />
+			<SendPreview />
+			<TemplateSelection />
 		</>
 	);
 };
