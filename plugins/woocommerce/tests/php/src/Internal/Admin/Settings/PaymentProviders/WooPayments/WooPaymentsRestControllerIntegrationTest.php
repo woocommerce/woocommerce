@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentProviders\WooPayments;
 
 use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments\WooPaymentsRestController;
@@ -106,6 +107,9 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
+
+		// Arrange the version constant to meet the minimum requirements for the native in-context onboarding.
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', PaymentProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION );
 
 		$this->providers_service = wc_get_container()->get( PaymentProviders::class );
 
@@ -1046,8 +1050,9 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_disable_test_account() {
 		// Arrange.
-		$from   = 'test-from';
-		$source = 'test-source';
+		$location = 'US';
+		$from     = 'test-from';
+		$source   = 'test-source';
 
 		// Arrange the WPCOM connection.
 		// Make it connected to pass the step requirements.
@@ -1076,6 +1081,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/test_account/disable' );
+		$request->set_param( 'location', $location );
 		$request->set_param( 'from', $from );
 		$request->set_param( 'source', $source );
 		$response = $this->server->dispatch( $request );
@@ -1092,7 +1098,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		// Assert the test account step status.
 		$this->assertSame(
 			WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
-			$this->woopayments_provider_service->get_onboarding_step_status( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, WC()->countries->get_base_country() )
+			$this->woopayments_provider_service->get_onboarding_step_status( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location )
 		);
 	}
 
