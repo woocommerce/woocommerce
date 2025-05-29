@@ -2228,9 +2228,9 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'empty start, move gateways and offline PMs group - gateways | offline PMs | suggestions'    => array(
 				array(),
 				array(
-					'gateway1'                                        => 2,
+					'gateway1'   => 2,
 					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 3,
-					'gateway3_1'                                      => 4,
+					'gateway3_1' => 4,
 				),
 				array(
 					'_wc_pes_suggestion1',
@@ -2334,10 +2334,10 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'empty start, move gateways and offline PMs group - offline PMs | gateways | suggestions'    => array(
 				array(),
 				array(
-					'gateway3_0'                                      => 3,
-					'gateway3_1'                                      => 4,
+					'gateway3_0' => 3,
+					'gateway3_1' => 4,
 					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 5,
-					'gateway2'                                        => 6,
+					'gateway2'   => 6,
 				),
 				array(
 					'_wc_pes_suggestion3',
@@ -3334,7 +3334,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 					'gateway2',
 				),
 				array(
-					'gateway2'                                        => 0,
+					'gateway2' => 0,
 					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
 				),
 				array(

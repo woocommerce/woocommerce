@@ -111,8 +111,7 @@ class WooPaymentsService {
 	 * @param PaymentsProviders $payment_providers The PaymentsProviders instance.
 	 * @param LegacyProxy       $proxy             The LegacyProxy instance.
 	 *
-	 *@internal
-	 *
+	 * @internal
 	 */
 	final public function init( PaymentsProviders $payment_providers, LegacyProxy $proxy ): void {
 		$this->payments_providers = $payment_providers;

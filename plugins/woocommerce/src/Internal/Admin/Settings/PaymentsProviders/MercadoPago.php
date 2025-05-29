@@ -42,7 +42,7 @@ class MercadoPago extends PaymentGateway {
 				break;
 		}
 
-		$title = wp_strip_all_tags( html_entity_decode( $title ), true );
+		$title = wp_strip_all_tags( html_entity_decode( $title, ENT_QUOTES | ENT_SUBSTITUTE ), true );
 
 		// Truncate the title.
 		return Utils::truncate_with_words( $title, 75 );

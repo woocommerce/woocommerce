@@ -513,8 +513,8 @@ class PaymentsRestController extends RestApiControllerBase {
 
 			// If this is a suggestion, add dedicated links.
 			if ( ! empty( $provider['_type'] ) &&
-				 PaymentsProviders::TYPE_SUGGESTION === $provider['_type'] &&
-				 ! empty( $provider['_suggestion_id'] )
+				PaymentsProviders::TYPE_SUGGESTION === $provider['_type'] &&
+				! empty( $provider['_suggestion_id'] )
 			) {
 				$providers[ $key ]['_links']['attach'] = array(
 					'href' => rest_url( sprintf( '/%s/%s/suggestion/%s/attach', $this->route_namespace, $this->rest_base, $provider['_suggestion_id'] ) ),

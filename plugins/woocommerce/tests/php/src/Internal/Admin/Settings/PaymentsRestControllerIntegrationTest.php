@@ -528,7 +528,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 			array(
 				PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 				WC_Gateway_Paypal::ID,
-				PaymentsProviders::SUGGESTION_ORDERING_PREFIX . PaymentsExtensionSuggestions::PAYPAL_FULL_STACK,// Preferred suggestion.
+				PaymentsProviders::SUGGESTION_ORDERING_PREFIX . PaymentsExtensionSuggestions::PAYPAL_FULL_STACK, // Preferred suggestion.
 				PaymentsProviders::SUGGESTION_ORDERING_PREFIX . PaymentsExtensionSuggestions::WOOPAYMENTS,      // The WooPayments suggestion.
 				'woocommerce_payments',                                                                         // The fake WooPayments gateway.
 			),
