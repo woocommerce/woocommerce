@@ -61,7 +61,7 @@ export const LYSPaymentsSteps: WooPaymentsProviderOnboardingStep[] = [
 		order: 1,
 		type: 'frontend',
 		label: 'Install WooPayments',
-		dependencies: [],
+		dependencies: [ 'install_woopayments' ],
 		content: <></>,
 	},
 	{

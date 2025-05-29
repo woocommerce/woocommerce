@@ -143,13 +143,19 @@ export const OnboardingProvider: React.FC< {
 			}
 
 			return step.dependencies.every( ( dependencyId ) => {
+				// Special case for 'install_woopayments' dependency
+				// If WooPayments is enabled, treat it as completed
+				if ( dependencyId === 'install_woopayments' ) {
+					return ! storeError; // If WooPayments is enabled, treat it as completed
+				}
+
 				const dependencyStep = steps.find(
 					( s ) => s.id === dependencyId
 				);
 				return dependencyStep?.status === 'completed';
 			} );
 		},
-		[]
+		[ storeError ]
 	);
 	// Navigation helper
 	const navigateToStep = useCallback(
