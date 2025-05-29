@@ -824,6 +824,20 @@ class PaymentsRestController extends RestApiControllerBase {
 							'context'    => array( 'view', 'edit' ),
 							'readonly'   => true,
 							'properties' => array(
+								'preload' => array(
+									'type'        => 'object',
+									'description' => esc_html__( 'The onboarding preload link for the payment gateway.', 'woocommerce' ),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+									'properties'  => array(
+										'href' => array(
+											'type'        => 'string',
+											'description' => esc_html__( 'The URL to do onboarding preload for the payment gateway.', 'woocommerce' ),
+											'context'     => array( 'view', 'edit' ),
+											'readonly'    => true,
+										),
+									),
+								),
 								'onboard' => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'The start/continue onboarding link for the payment gateway.', 'woocommerce' ),

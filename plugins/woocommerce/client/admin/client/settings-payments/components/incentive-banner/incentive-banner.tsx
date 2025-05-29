@@ -6,7 +6,11 @@ import { Button, Card, CardBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement, useState } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
-import { PaymentIncentive, PaymentProvider } from '@woocommerce/data';
+import {
+	PaymentIncentive,
+	PaymentProvider,
+	PaymentsEntity,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -53,13 +57,12 @@ interface IncentiveBannerProps {
 	/**
 	 * Callback to set up the plugin.
 	 *
-	 * @param id            Extension ID.
-	 * @param slug          Extension slug.
-	 * @param onboardingUrl Onboarding URL (if available).
+	 * @param provider      Extension provider.
+	 * @param onboardingUrl Extension onboarding URL (if available).
+	 * @param attachUrl     Extension attach URL (if available).
 	 */
-	setupPlugin: (
-		id: string,
-		slug: string,
+	setUpPlugin: (
+		provider: PaymentsEntity,
 		onboardingUrl: string | null,
 		attachUrl: string | null
 	) => void;
@@ -76,7 +79,7 @@ export const IncentiveBanner = ( {
 	onboardingUrl,
 	onDismiss,
 	onAccept,
-	setupPlugin,
+	setUpPlugin,
 }: IncentiveBannerProps ) => {
 	const [ isSubmitted, setIsSubmitted ] = useState( false );
 	const [ isDismissed, setIsDismissed ] = useState( false );
@@ -114,9 +117,8 @@ export const IncentiveBanner = ( {
 		// But do not track this since it is not a true dismissal.
 		onDismiss( incentive._links.dismiss.href, context, true );
 		setIsSubmitted( true );
-		setupPlugin(
-			provider.id,
-			provider.plugin.slug,
+		setUpPlugin(
+			provider,
 			onboardingUrl,
 			provider.plugin.status === 'not_installed'
 				? provider._links?.attach?.href ?? null
