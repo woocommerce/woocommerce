@@ -120,23 +120,8 @@ class ProductButton extends AbstractBlock {
 			)
 		);
 
-		$is_grouped              = $product->is_type( 'grouped' );
-		$grouped_product_ids     = $product->get_children();
-		$is_product_purchasable  = $product->is_purchasable();
+		$is_product_purchasable  = $this->is_product_purchasable( $product );
 		$number_of_items_in_cart = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
-
-		if ( $is_grouped ) {
-			foreach ( $grouped_product_ids as $child ) {
-				$child_product = wc_get_product( $child );
-				if ( ! $child_product instanceof \WC_Product ) {
-					continue;
-				}
-				if ( $child_product->is_purchasable() && $child_product->is_in_stock() ) {
-					$is_product_purchasable = true;
-					break;
-				}
-			}
-		}
 
 		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
 		$ajax_add_to_cart_enabled = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
@@ -185,10 +170,9 @@ class ProductButton extends AbstractBlock {
 		$context = array(
 			'quantityToAdd'     => $default_quantity,
 			'productId'         => $product->get_id(),
+			'productType'       => $product->get_type(),
 			'addToCartText'     => $add_to_cart_text,
 			'tempQuantity'      => $number_of_items_in_cart,
-			'isGrouped'         => $is_grouped,
-			'groupedProductIds' => $grouped_product_ids,
 			'animationStatus'   => 'IDLE',
 		);
 
@@ -336,6 +320,31 @@ class ProductButton extends AbstractBlock {
 
 		$cart = WC()->cart->get_cart_item_quantities();
 		return isset( $cart[ $product_id ] ) ? $cart[ $product_id ] : 0;
+	}
+
+	/**
+	 * Check if a product is purchasable.
+	 *
+	 * @param \WC_Product $product The product.
+	 * @return boolean The product is purchasable.
+	 */
+	private function is_product_purchasable( $product ) {
+		$is_product_purchasable = $product->is_purchasable();
+
+		if ( $product->is_type( 'grouped' ) ) {
+			$grouped_product_ids = $product->get_children();
+			foreach ( $grouped_product_ids as $child ) {
+				$child_product = wc_get_product( $child );
+				if ( ! $child_product instanceof \WC_Product ) {
+					continue;
+				}
+				if ( $child_product->is_purchasable() && $child_product->is_in_stock() ) {
+					$is_product_purchasable = true;
+					break;
+				}
+			}
+		}
+		return $is_product_purchasable;
 	}
 
 	/**

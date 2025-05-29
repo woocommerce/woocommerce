@@ -16,11 +16,10 @@ const universalLock =
 interface Context {
 	addToCartText: string;
 	productId: number;
+	productType: string;
 	displayViewCart: boolean;
 	quantityToAdd: number;
 	tempQuantity: number;
-	isGrouped: boolean;
-	groupedProductIds?: number[];
 	animationStatus: AnimationStatus;
 }
 
