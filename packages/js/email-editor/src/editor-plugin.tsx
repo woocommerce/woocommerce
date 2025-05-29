@@ -11,15 +11,28 @@ import { createStore } from './store';
  * Internal dependencies
  */
 import { useEmailCss } from './hooks';
+import { StylesSidebar } from './components/styles-sidebar';
+import { TemplateSettingsPanel } from './components/sidebar/template-settings-panel';
+import { SettingsPanel } from './components/sidebar/settings-panel';
+import { BlockCompatibilityWarnings } from './components/sidebar';
+
 
 const EmailEditorPlugin = () => {
 	const { updateEditorSettings } = useDispatch( editorStore );
 	const [ styles ] = useEmailCss();
-	const { editedPostId } = useSelect( ( sel ) => {
+	const { editedPostId, currentPostType } = useSelect( ( sel ) => {
 		return {
 			editedPostId: sel( editorStore ).getCurrentPostId(),
+			currentPostType: sel( editorStore ).getCurrentPostType(),
 		};
 	} );
+
+	// Remove post status panel. We replace it by our own. The native one needs more customizations.
+	// @ts-expect-error Type is missing in @types/wordpress__editor
+	const { removeEditorPanel } = useDispatch( editorStore );
+	useEffect( () => {
+		removeEditorPanel( 'post-status' );
+	}, [ removeEditorPanel ] );
 
 	// Push email styles to editor settings.
 	// Set styles directly to settings overwriting the automatically loaded theme styles
@@ -34,7 +47,17 @@ const EmailEditorPlugin = () => {
 		} );
 	}, [ styles, editedPostId, updateEditorSettings ] );
 
-	return null;
+	return (
+		<>
+			<StylesSidebar />
+			{ currentPostType === 'wp_template' ? (
+				<TemplateSettingsPanel />
+			) : (
+				<SettingsPanel />
+			) }
+			<BlockCompatibilityWarnings />
+		</>
+	);
 };
 
 export function initializeEmailEditorPlugin() {
