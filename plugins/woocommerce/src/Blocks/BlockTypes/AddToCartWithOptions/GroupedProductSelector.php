@@ -32,7 +32,7 @@ class GroupedProductSelector extends AbstractBlock {
 		global $product;
 
 		if ( $product instanceof \WC_Product && $product->is_type( 'grouped' ) ) {
-			add_filter( 'woocommerce_product_supports', array( $this, 'check_product_supports' ), 10, 3 );
+			add_filter( 'woocommerce_product_supports', array( $this, 'check_product_supports_ajax_add_to_cart' ), 10, 3 );
 
 			return $content;
 		}
@@ -52,7 +52,7 @@ class GroupedProductSelector extends AbstractBlock {
 	 * @return bool True if the product supports the feature, false otherwise.
 	 * @since  9.9.0
 	 */
-	public function check_product_supports( $supports, $feature, $product ) {
+	public function check_product_supports_ajax_add_to_cart( $supports, $feature, $product ) {
 		if ( 'ajax_add_to_cart' === $feature ) {
 			return true;
 		}
