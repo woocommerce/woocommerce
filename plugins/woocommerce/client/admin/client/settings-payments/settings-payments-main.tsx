@@ -301,7 +301,7 @@ export const SettingsPaymentsMain = () => {
 
 	const setUpPlugin = useCallback(
 		(
-			paymentEntity: PaymentsEntity,
+			paymentsEntity: PaymentsEntity,
 			onboardingUrl: string | null,
 			attachUrl: string | null
 		) => {
@@ -309,10 +309,10 @@ export const SettingsPaymentsMain = () => {
 				return;
 			}
 
-			if ( paymentEntity?.onboarding?._links?.preload?.href ) {
+			if ( paymentsEntity?.onboarding?._links?.preload?.href ) {
 				// We are not interested in the response; we just want to trigger the preload.
 				apiFetch( {
-					url: paymentEntity?.onboarding?._links?.preload.href,
+					url: paymentsEntity?.onboarding?._links?.preload.href,
 					method: 'POST',
 					data: {
 						location: storeCountry,
@@ -322,15 +322,15 @@ export const SettingsPaymentsMain = () => {
 
 			// A fail-safe to ensure that the onboarding URL is set for WooPayments.
 			// Note: We should get rid of this sooner rather than later!
-			if ( ! onboardingUrl && isWooPayments( paymentEntity.id ) ) {
+			if ( ! onboardingUrl && isWooPayments( paymentsEntity.id ) ) {
 				onboardingUrl = getWooPaymentsTestDriveAccountLink();
 			}
 
-			setInstallingPlugin( paymentEntity.id );
+			setInstallingPlugin( paymentsEntity.id );
 			recordPaymentsEvent( 'recommendations_setup', {
-				extension_selected: paymentEntity.plugin.slug,
+				extension_selected: paymentsEntity.plugin.slug,
 			} );
-			installAndActivatePlugins( [ paymentEntity.plugin.slug ] )
+			installAndActivatePlugins( [ paymentsEntity.plugin.slug ] )
 				.then( async ( response ) => {
 					if ( attachUrl ) {
 						attachPaymentExtensionSuggestion( attachUrl );
@@ -343,7 +343,7 @@ export const SettingsPaymentsMain = () => {
 
 					// Record the plugin installation event.
 					recordPaymentsEvent( 'provider_installed', {
-						provider_id: paymentEntity.id,
+						provider_id: paymentsEntity.id,
 					} );
 
 					// Wait for the state update and fetch the latest providers.
@@ -354,14 +354,14 @@ export const SettingsPaymentsMain = () => {
 					// Find the matching provider in the updated list.
 					const updatedPaymentsEntity = updatedProviders.find(
 						( current: PaymentProvider ) =>
-							current.id === paymentEntity.id ||
-							current?._suggestion_id === paymentEntity.id || // For suggestions that were replaced by a gateway.
-							current.plugin.slug === paymentEntity.plugin.slug // Last resort to find the provider.
+							current.id === paymentsEntity.id ||
+							current?._suggestion_id === paymentsEntity.id || // For suggestions that were replaced by a gateway.
+							current.plugin.slug === paymentsEntity.plugin.slug // Last resort to find the provider.
 					);
 
 					// Record the event when the user successfully enables a gateway.
 					recordPaymentsEvent( 'provider_enable', {
-						provider_id: paymentEntity.id,
+						provider_id: paymentsEntity.id,
 					} );
 
 					/**
