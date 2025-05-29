@@ -35,6 +35,18 @@ class EmailImprovements {
 		'yaymail.php',
 	);
 
+	private const EMAIL_TEMPLATE_PARTS = array(
+		'email-addresses.php',
+		'email-customer-details.php',
+		'email-downloads.php',
+		'email-footer.php',
+		'email-header.php',
+		'email-mobile-messaging.php',
+		'email-order-details.php',
+		'email-order-items.php',
+		'email-styles.php',
+	);
+
 	/**
 	 * Hook into WordPress.
 	 */
@@ -49,8 +61,8 @@ class EmailImprovements {
 	 */
 	public static function has_email_templates_overridden() {
 		$all_template_overrides = WC_Tracker::get_all_template_overrides();
-		$core_email_overrides   = WC_Tracker::get_core_email_overrides( $all_template_overrides );
-		return $core_email_overrides['count'] > 0;
+		$core_email_overrides   = self::get_core_email_overrides( $all_template_overrides );
+		return count( $core_email_overrides ) > 0;
 	}
 
 	/**
@@ -142,5 +154,37 @@ class EmailImprovements {
 			wp_safe_redirect( add_query_arg( 'emailImprovementsModal', 'try' ) );
 			exit;
 		}
+	}
+
+	/**
+	 * Get all core emails.
+	 *
+	 * @return array Core emails.
+	 */
+	public static function get_core_emails() {
+		return array_filter(
+			WC()->mailer()->get_emails(),
+			function ( $email ) {
+				return strpos( get_class( $email ), 'WC_Email_' ) === 0;
+			}
+		);
+	}
+
+	/**
+	 * Get all core email template overrides.
+	 *
+	 * @param array $template_overrides All template overrides.
+	 * @return array Core email template overrides.
+	 */
+	public static function get_core_email_overrides( $template_overrides ) {
+		$core_emails          = self::get_core_emails();
+		$core_email_templates = array_map(
+			function ( $email ) {
+				return basename( $email->template_html );
+			},
+			$core_emails
+		);
+		$all_email_templates  = array_merge( $core_email_templates, self::EMAIL_TEMPLATE_PARTS );
+		return array_intersect( $all_email_templates, $template_overrides );
 	}
 }

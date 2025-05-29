@@ -164,6 +164,44 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that save_email_data returns WP_Error for invalid email addresses.
+	 */
+	public function test_save_email_data_returns_error_for_invalid_emails(): void {
+		$test_cases = array(
+			array(
+				'data'  => array(
+					'recipient' => 'invalid-email',
+				),
+				'field' => 'recipient',
+			),
+			array(
+				'data'  => array(
+					'recipient' => 'valid.email@example.com,invalid-email',
+				),
+				'field' => 'recipient',
+			),
+			array(
+				'data'  => array(
+					'cc' => 'invalid-email',
+				),
+				'field' => 'cc',
+			),
+			array(
+				'data'  => array(
+					'bcc' => 'invalid-email',
+				),
+				'field' => 'bcc',
+			),
+		);
+
+		foreach ( $test_cases as $test_case ) {
+			$result = $this->email_api_controller->save_email_data( $test_case['data'], $this->email_post );
+			$this->assertTrue( is_wp_error( $result ), "Expected WP_Error for invalid {$test_case['field']}" );
+			$this->assertEquals( 'invalid_email_data', $result->get_error_code(), "Expected invalid_email_address error code for {$test_case['field']}" );
+		}
+	}
+
+	/**
 	 * Test that the recipient is null when not in form fields.
 	 */
 	public function test_get_email_data_recipient_is_null_when_not_in_form_fields(): void {
