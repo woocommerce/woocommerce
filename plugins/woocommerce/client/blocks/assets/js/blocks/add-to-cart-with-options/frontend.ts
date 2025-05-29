@@ -258,19 +258,7 @@ const addToCartWithOptionsStore = store(
 						{ lock: universalLock }
 					);
 
-					// Add each child product to cart
-					for ( const item of addedItems ) {
-						const product = wooState.cart?.items.find(
-							( cartItem ) => cartItem.id === item.id
-						);
-						const currentQuantity = product?.quantity || 0;
-
-						yield actions.addCartItem( {
-							id: item.id,
-							quantity: currentQuantity + item.quantity,
-							variation: item.variation,
-						} );
-					}
+					yield actions.batchAddCartItems( addedItems );
 				} else {
 					const product = wooState.cart?.items.find(
 						( item ) => item.id === productId

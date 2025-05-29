@@ -32,6 +32,7 @@ export type Store = {
 	};
 	actions: {
 		addCartItem: ( args: OptimisticCartItem ) => void;
+		batchAddCartItems: ( items: OptimisticCartItem[] ) => void;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		refreshCartItems: () => void;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => void;
@@ -125,6 +126,102 @@ const { state, actions } = store< Store >(
 
 					// Updates the local cart.
 					state.cart = json;
+
+					// Dispatches a legacy event.
+					triggerAddedToCartEvent( {
+						preserveCartData: true,
+					} );
+
+					// Dispatches the event to sync the @wordpress/data store.
+					emitSyncEvent( { quantityChanges } );
+				} catch ( error ) {
+					// Reverts the optimistic update.
+					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
+					state.cart = JSON.parse( previousCart );
+
+					// Shows the error notice.
+					actions.showNoticeError( error as Error );
+				}
+			},
+			*batchAddCartItems( items: OptimisticCartItem[] ) {
+				const previousCart = JSON.stringify( state.cart );
+				const quantityChanges: QuantityChanges = {};
+
+				// Updates the database.
+				try {
+					const requests = items.map( ( item ) => {
+						const existingItem = state.cart.items.find(
+							( { id: productId } ) => item.id === productId
+						);
+
+						if ( existingItem ) {
+							// Optimistically updates the number of items in the cart.
+							existingItem.quantity = item.quantity;
+							if ( existingItem.key ) {
+								quantityChanges.cartItemsPendingQuantity = [
+									existingItem.key,
+								];
+							}
+							return {
+								method: 'POST',
+								path: `/wc/store/v1/cart/add-item`,
+								headers: {
+									Nonce: state.nonce,
+									'Content-Type': 'application/json',
+								},
+								body: item,
+							};
+						} else {
+							// Add new item
+							item = {
+								id: item.id,
+								quantity: item.quantity,
+								variation: item.variation,
+							} as OptimisticCartItem;
+							state.cart.items.push( item );
+							quantityChanges.productsPendingAdd = [ item.id ];
+							return {
+								method: 'POST',
+								path: `/wc/store/v1/cart/add-item`,
+								headers: {
+									Nonce: state.nonce,
+									'Content-Type': 'application/json',
+								},
+								body: item,
+							};
+						}
+					} );
+
+					const res: Response = yield fetch(
+						`${ state.restUrl }wc/store/v1/batch`,
+						{
+							method: 'POST',
+							headers: {
+								Nonce: state.nonce,
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify( { requests } ),
+						}
+					);
+
+					const json: Cart = yield res.json();
+
+					// Checks if the response contains an error.
+					if ( isApiErrorResponse( res, json ) )
+						throw generateError( json );
+
+					// Checks if the response was successful, but still contains some errors.
+					json.errors?.forEach( ( error ) => {
+						actions.showNoticeError( error );
+					} );
+
+					// Ensure we only get a single cart response
+					const cartResponse = Array.isArray( json.responses )
+						? json.responses[ 0 ].body
+						: json;
+
+					// Updates the local cart.
+					state.cart = cartResponse;
 
 					// Dispatches a legacy event.
 					triggerAddedToCartEvent( {
