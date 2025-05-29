@@ -17,6 +17,7 @@ interface Context {
 	addToCartText: string;
 	productId: number;
 	productType: string;
+	groupedProductIds?: number[];
 	displayViewCart: boolean;
 	quantityToAdd: number;
 	tempQuantity: number;
@@ -60,8 +61,13 @@ const productButtonStore = {
 			return animationStatus === AnimationStatus.SLIDE_OUT;
 		},
 		get addToCartText(): string {
-			const { animationStatus, tempQuantity, addToCartText, productType } =
-				getContext< Context >();
+			const {
+				animationStatus,
+				tempQuantity,
+				addToCartText,
+				productType,
+				groupedProductIds,
+			} = getContext< Context >();
 
 			// We use the temporary quantity when there's no animation, or
 			// when the second part of the animation hasn't started yet.
@@ -72,13 +78,32 @@ const productButtonStore = {
 				? tempQuantity || 0
 				: state.quantity;
 
-			if ( productType !== 'grouped' && quantity === 0 ) return addToCartText;
-
-			if ( productType === 'grouped' && quantity > 0 ) {
-				return state.inTheCartText;
+			if ( productType !== 'grouped' ) {
+				if ( quantity > 0 ) {
+					return state.inTheCartText.replace(
+						'###',
+						quantity.toString()
+					);
+				}
+				return addToCartText;
 			}
 
-			return state.inTheCartText.replace( '###', quantity.toString() );
+			if ( productType === 'grouped' ) {
+				const groupedProductIdsInCart = groupedProductIds?.map(
+					( productId ) => {
+						const product = wooState.cart?.items.find(
+							( item ) => item.id === productId
+						);
+						return product?.quantity || 0;
+					}
+				);
+				if ( groupedProductIdsInCart?.some( ( qty ) => qty > 0 ) ) {
+					return state.inTheCartText;
+				}
+				return addToCartText;
+			}
+
+			return addToCartText;
 		},
 		get displayViewCart(): boolean {
 			const { displayViewCart } = getContext< Context >();

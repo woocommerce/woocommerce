@@ -125,8 +125,19 @@ class ProductButton extends AbstractBlock {
 					$addToCartText = $context['addToCartText'];
 					$productType = $context['productType'];
 
-					if ( $productType === 'grouped' && $quantity > 0 ) {
-						return __( 'Added to cart', 'woocommerce' );
+					if ( $productType === 'grouped' ) {
+						$product = wc_get_product( $context['productId'] );
+						$grouped_product_ids = $product->get_children();
+						$grouped_product_ids_in_cart = array_sum(
+							array_map(
+								function ( $child_product_id ) {
+									return $this->get_cart_item_quantities_by_product_id( (int) $child_product_id );
+								},
+								$grouped_product_ids
+							)
+						);
+
+						return $grouped_product_ids_in_cart > 0 ? __( 'Added to cart', 'woocommerce' ) : $addToCartText;
 					}
 
 					return $quantity > 0 ? sprintf(
@@ -195,6 +206,10 @@ class ProductButton extends AbstractBlock {
 			'tempQuantity'      => $number_of_items_in_cart,
 			'animationStatus'   => 'IDLE',
 		);
+
+		if ( $product->is_type( 'grouped' ) ) {
+			$context['groupedProductIds'] = $product->get_children();
+		}
 
 		$attributes = array(
 			'type' => $is_descendant_of_add_to_cart_form ? 'submit' : 'button',

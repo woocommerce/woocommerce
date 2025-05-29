@@ -169,7 +169,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			$context = array(
 				'productId'         => $product->get_id(),
 				'productType'       => $product->get_type(),
-				'quantity'          => handle_product_quantity( $product->get_id(), $default_quantity ),
+				'quantity'          => $default_quantity,
 			);
 
 			if ( $product->is_type( 'variable' ) ) {
