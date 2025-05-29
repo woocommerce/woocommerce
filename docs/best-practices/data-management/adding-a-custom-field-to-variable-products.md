@@ -48,7 +48,7 @@ composer dump-autoload -o
 
 This generates a new vendor/composer/autoload_classmap.php file containing a list of all our classes in the /includes/ and /includes/admin/ folder. We will need to repeat this command when we add, delete or move class files.
 
-## WooCommerce Hooks
+## WooCommerce hooks
 
 Our aim is to create a new custom text field for WooCommerce products to save new stock information for display in the store. To do this, we need to modify the section of the Woo data in the admin area which holds the stock info.
 

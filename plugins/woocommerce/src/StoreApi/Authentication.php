@@ -20,7 +20,7 @@ class Authentication {
 		add_filter( 'rest_authentication_errors', array( $this, 'check_authentication' ) );
 		add_filter( 'rest_authentication_errors', array( $this, 'opt_in_checkout_endpoint' ), 9, 1 );
 		add_action( 'set_logged_in_cookie', array( $this, 'set_logged_in_cookie' ) );
-		add_filter( 'rest_pre_serve_request', array( $this, 'send_cors_headers' ), 10, 3 );
+		add_filter( 'rest_pre_serve_request', array( $this, 'send_cors_headers' ), 10, 4 );
 		add_filter( 'rest_allowed_cors_headers', array( $this, 'allowed_cors_headers' ) );
 		add_filter( 'rest_exposed_cors_headers', array( $this, 'exposed_cors_headers' ) );
 
@@ -63,12 +63,13 @@ class Authentication {
 	 *
 	 * Users of valid Cart Tokens are also allowed access from any origin.
 	 *
-	 * @param bool             $value  Whether the request has already been served.
-	 * @param \WP_REST_Server  $server The REST server instance.
-	 * @param \WP_REST_Request $request The REST request instance.
+	 * @param bool              $served Whether the request has already been served.
+	 * @param \WP_REST_Response $result The response object.
+	 * @param \WP_REST_Request  $request The request object.
+	 * @param \WP_REST_Server   $server The REST server instance.
 	 * @return bool
 	 */
-	public function send_cors_headers( $value, $server, $request ) {
+	public function send_cors_headers( $served, $result, $request, $server ) {
 		$origin = get_http_origin();
 
 		if ( 'null' !== $origin ) {
@@ -76,7 +77,6 @@ class Authentication {
 		}
 
 		// Send standard CORS headers.
-		$server = rest_get_server();
 		$server->send_header( 'Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, PATCH, DELETE' );
 		$server->send_header( 'Access-Control-Allow-Credentials', 'true' );
 		$server->send_header( 'Vary', 'Origin', false );
@@ -93,7 +93,7 @@ class Authentication {
 			exit;
 		}
 
-		return $value;
+		return $served;
 	}
 
 	/**

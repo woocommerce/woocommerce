@@ -154,7 +154,7 @@ The Cart object of the filters above has the following keys:
     -   _total_tax_ `string` - The total tax.
 -   _crossSellsProducts_ `array` - The cross sells products array with cross sells product objects.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
--   _isLoadingRates_ `boolean` - Whether the cart is loading rates.
+-   _isLoadingRates_ `boolean` - Whether the cart is loading shipping rates.
 -   _paymentRequirements_ `array` - The payment requirements array.
 -   _shippingAddress_ `object` - The shipping address object with the same keys as the `billingAddress` object.
 -   _shippingRates_ `array` - The shipping rates array.

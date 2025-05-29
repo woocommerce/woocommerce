@@ -1,10 +1,11 @@
 ---
+sidebar_position: 7
 sidebar_label: Review guidelines  
 category_slug: review-guidelines
 post_title: Review guidelines
 ---
 
-# Review Guidelines
+# Review guidelines
 
 Reviews are an integral part of the online shopping experience, and people installing software pay attention to them. Prospective users of your extensions will likely consider average ratings when making software choices.
 

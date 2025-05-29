@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Resolved issue where KYC data was not prefilled in the NOX In-Context onboarding flow.

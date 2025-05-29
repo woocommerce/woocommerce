@@ -2,6 +2,7 @@
  * External dependencies
  */
 import {
+	PaymentsEntity,
 	PaymentProvider,
 	PaymentProviderType,
 	PaymentGatewayProvider,
@@ -36,11 +37,14 @@ interface PaymentGatewayListProps {
 	 */
 	installingPlugin: string | null;
 	/**
-	 * Callback to handle the setup of a plugin. Receives the plugin ID, slug, and onboarding URL (if available).
+	 * Callback to set up the plugin.
+	 *
+	 * @param provider      Extension provider.
+	 * @param onboardingUrl Extension onboarding URL (if available).
+	 * @param attachUrl     Extension attach URL (if available).
 	 */
-	setupPlugin: (
-		id: string,
-		slug: string,
+	setUpPlugin: (
+		provider: PaymentsEntity,
 		onboardingUrl: string | null,
 		attachUrl: string | null
 	) => void;
@@ -74,7 +78,7 @@ export const PaymentGatewayList = ( {
 	providers,
 	installedPluginSlugs,
 	installingPlugin,
-	setupPlugin,
+	setUpPlugin,
 	acceptIncentive,
 	shouldHighlightIncentive,
 	updateOrdering,
@@ -101,9 +105,9 @@ export const PaymentGatewayList = ( {
 								id={ suggestion.id }
 							>
 								{ PaymentExtensionSuggestionListItem( {
-									extension: suggestion,
+									suggestion,
 									installingPlugin,
-									setupPlugin,
+									setUpPlugin,
 									pluginInstalled,
 									acceptIncentive,
 									shouldHighlightIncentive,

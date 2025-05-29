@@ -63,7 +63,7 @@
  * For the WYSIWYG experience we don't want to display any margins between blocks in the editor
  */
 .wp-block {
-	clear: both; // for ensuring that floated elements (images) are cleared
+	clear: both;
 }
 
 /*
@@ -114,3 +114,68 @@ ol.has-background {
 	max-width: 100% !important;
 	height: auto !important;
 }
+
+/*
+ * Reset default margin for blocks in template-mode
+ * This was causing the first block to have a margin-top set to block gap.
+ * We control the gab via different css
+ */
+.wp-site-blocks > * {
+	margin-block-start: 0;
+}
+
+/*
+ * Hide the post title.
+ * When user disables the template-lock mode we don't want to show the post title.
+ */
+.editor-visual-editor__post-title-wrapper {
+	display: none;
+}
+
+/*
+ * Temporary styles for Rich Text HTML comments from the PR: https://github.com/WordPress/gutenberg/pull/62128/files
+ */
+[data-rich-text-comment],
+[data-rich-text-format-boundary] {
+	border-radius: 2px;
+}
+
+[data-rich-text-comment] {
+	background-color: var(
+		--wp-components-color-accent,
+		var(--wp-admin-theme-color, #3858e9)
+	);
+
+	span {
+		color: var(--wp-components-color-accent-inverted, #fff);
+		filter: none;
+		padding: 0 2px;
+	}
+}
+
+/**
+ * Override the default gap for social links block in the editor.
+ * This is needed because we do not want to have a gap between the social links and also for a WYSIWYG experience.
+*/
+.wp-block-social-links.is-layout-flex {
+	gap: 16px !important;
+}
+
+/**
+ * Override the default padding for social links block in the editor.
+ * This is needed because we do not want to have a padding for the social links block particularly for a WYSIWYG experience.
+*/
+.wp-block-social-links.has-background {
+	padding-left: 0;
+}
+
+/**
+ * Override the default background color for social links block in the editor.
+ * This is mostly for a WYSIWYG experience. These icons don't have a default background color.
+*/
+:where(.wp-block-social-links:not(.is-style-logos-only)) .wp-social-link-mail,
+:where(.wp-block-social-links:not(.is-style-logos-only)) .wp-social-link-feed,
+:where(.wp-block-social-links:not(.is-style-logos-only)) .wp-social-link-chain {
+	background-color:#000;
+	color:#fff;
+	}

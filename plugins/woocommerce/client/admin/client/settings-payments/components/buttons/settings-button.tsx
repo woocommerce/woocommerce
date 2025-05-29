@@ -3,11 +3,11 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
+import { recordPaymentsEvent } from '~/settings-payments/utils';
 
 interface SettingsButtonProps {
 	/**
@@ -40,7 +40,7 @@ export const SettingsButton = ( {
 	buttonText = __( 'Manage', 'woocommerce' ),
 }: SettingsButtonProps ) => {
 	const recordButtonClickEvent = () => {
-		recordEvent( 'settings_payments_provider_manage_click', {
+		recordPaymentsEvent( 'provider_manage_click', {
 			provider_id: gatewayId,
 		} );
 	};

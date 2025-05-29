@@ -3,7 +3,7 @@ post_title: Subsections
 sidebar_label: Subsections
 ---
 
-# Product Editor Guidelines - Subsections
+# Subsections
 
 Subsections add extra fields to existing form groups. They are small forms with a low to medium level of complexity. This interface location works best for extensions that add extra features that build off an existing Woo functionality.
 

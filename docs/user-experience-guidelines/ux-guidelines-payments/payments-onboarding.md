@@ -3,7 +3,7 @@ post_title: Payments onboarding and setup
 sidebar_label: Payments onboarding and setup
 ---
 
-# User Experience Guidelines - Payments Onboarding and Setup
+# Payments Onboarding and Setup
 
 ## Payments onboarding
 

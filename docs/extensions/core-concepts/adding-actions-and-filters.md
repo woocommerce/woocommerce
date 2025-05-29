@@ -1,6 +1,7 @@
 ---
 post_title: How to add actions and filters
-sidebar_label: Add actions and filters
+sidebar_label: Actions and filters
+sidebar_position: 2
 
 ---
 

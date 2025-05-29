@@ -3,7 +3,7 @@ post_title: Settings
 sidebar_label: Settings
 ---
 
-# WooCommerce Extension Guidelines - Settings
+# Settings
 
 **Make extension settings easy to understand.** Only include settings options that are crucial to the overall functionality of the product.
 

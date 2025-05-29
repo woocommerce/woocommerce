@@ -3,7 +3,7 @@ post_title: Groups
 sidebar_label: Groups
 ---
 
-# Product Editor Guidelines - Groups
+# Groups
 
 The new product form consists of groups currently displayed as tabs. Each is a separate view and may contain any number of sections and subsections. All areas serve a specific purpose, allowing merchants to quickly find the information they're looking for (both in default Woo features and extensions).
 

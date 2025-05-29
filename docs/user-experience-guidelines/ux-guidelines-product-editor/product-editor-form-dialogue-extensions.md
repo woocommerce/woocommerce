@@ -3,7 +3,7 @@ post_title: Dialogue extensions (future feature)
 sidebar_label: Dialogue extensions
 ---
 
-# Product Editor Guidelines - Dialogue Extensions (future feature)
+# Dialogue Extensions (future feature)
 
 Dialog extensions differ from other extensions as they are unrelated to any section or functionality within the product form. They can connect to third-party systems or come with complex interfaces that require a separate, focused experience.
 

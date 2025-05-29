@@ -1,7 +1,7 @@
 ---
 post_title: Resources for debugging
 sidebar_label: Debugging
-sidebar_position: 6
+sidebar_position: 4
 ---
 
 # Resources for debugging
@@ -28,7 +28,7 @@ Alternatively, you can use a plugin like Stop Emails to disable any accidental e
 
 WooCommerce has a logging system that can be very helpful for finding and tracking errors on your site:
 
-* [Logging in WooCommerce](https://github.com/woocommerce/woocommerce/blob/trunk/docs/extension-development/logging.md)
+* [Logging in WooCommerce](/docs/best-practices/data-management/logging)
 
 ### Coming Soon Mode
 

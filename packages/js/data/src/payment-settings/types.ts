@@ -3,6 +3,7 @@ export interface PaymentGatewayLink {
 	url: string;
 }
 
+// Represents the plugin details for a payment provider.
 export interface PluginData {
 	_type?: string;
 	slug: string; // The plugin slug (e.g. 'woocommerce'). This is also the directory name of the plugin.
@@ -73,39 +74,52 @@ export type PaymentProviderOnboardingState = {
 	completed: boolean;
 	test_mode: boolean;
 	wpcom_has_working_connection?: boolean;
+	wpcom_is_store_connected?: boolean;
+	wpcom_has_connected_owner?: boolean;
+	wpcom_is_connection_owner?: boolean;
 };
 
-// General payment provider type.
-export type PaymentProvider = {
+// Represents a payments entity, which can be a payment provider or a suggested payment extension outside providers.
+export type PaymentsEntity = {
 	id: string;
-	_order: number;
-	_type: PaymentProviderType;
 	title: string;
 	description: string;
 	icon: string;
+	plugin: PluginData;
+	onboarding?: {
+		_links?: {
+			preload?: LinkData;
+		};
+		type?: string;
+	};
+	_links: Record< string, LinkData >;
+};
+
+// Represents a payment provider for the main providers list.
+export type PaymentProvider = PaymentsEntity & {
+	_type: PaymentProviderType;
+	_order: number; // Used for sorting the providers in the UI.
 	image?: string;
 	supports?: string[];
-	plugin: PluginData;
-	short_description?: string;
 	management?: ManagementData;
 	state?: PaymentProviderState;
 	links?: PaymentGatewayLink[];
 	onboarding?: {
-		state: PaymentProviderOnboardingState;
-		_links: {
-			onboard: LinkData;
+		state?: PaymentProviderOnboardingState;
+		_links?: {
+			onboard?: LinkData; // For gateways, this is used to start the onboarding flow.
 		};
 		recommended_payment_methods?: RecommendedPaymentMethod[];
 		type?: string;
 	};
 	tags?: string[];
 	_suggestion_id?: string;
-	_links?: Record< string, LinkData >;
 	_incentive?: PaymentIncentive;
 };
 
-// Payment gateway provider type.
+// Represents a payment gateway in the main providers list.
 export type PaymentGatewayProvider = PaymentProvider & {
+	_order: number;
 	supports: string[];
 	management: ManagementData;
 	state: PaymentProviderState;
@@ -119,8 +133,9 @@ export type PaymentGatewayProvider = PaymentProvider & {
 	};
 };
 
-// Offline payment method provider type.
+// Represents an offline payment method provider in the main providers list.
 export type OfflinePaymentMethodProvider = PaymentProvider & {
+	_order: number;
 	supports: string[];
 	management: ManagementData;
 	state: PaymentProviderState;
@@ -132,34 +147,37 @@ export type OfflinePaymentMethodProvider = PaymentProvider & {
 	};
 };
 
-// Offline payment methods group provider type.
+// Represents an offline payment methods group provider in the main providers list.
 export type OfflinePmsGroupProvider = PaymentProvider & {
+	_order: number;
 	management: ManagementData;
-	state: PaymentProviderState;
 };
 
+// Represents a payment extension suggestion provider in the main providers list.
 export type PaymentExtensionSuggestionProvider = PaymentProvider & {
+	_order: number;
+	onboarding: {
+		state: PaymentProviderOnboardingState;
+		_links: {
+			preload?: LinkData;
+		};
+		type?: string;
+	};
 	_suggestion_id: string;
 	_links: {
 		hide: LinkData;
 	};
 };
 
-// Payment extension suggestion outside providers.
-export type SuggestedPaymentExtension = {
-	id: string;
+// Represents a suggested payment extension outside the main providers list.
+export type SuggestedPaymentExtension = PaymentsEntity & {
 	_type: string;
 	_priority: number;
 	category: string;
-	title: string;
-	description: string;
-	icon: string;
 	image: string;
 	short_description: string;
 	tags: string[];
-	plugin: PluginData;
 	links: PaymentGatewayLink[];
-	_links?: Record< string, LinkData >;
 	_incentive?: PaymentIncentive;
 };
 

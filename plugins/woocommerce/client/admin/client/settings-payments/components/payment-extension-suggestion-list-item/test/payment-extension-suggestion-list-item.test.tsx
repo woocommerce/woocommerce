@@ -21,7 +21,7 @@ describe( 'PaymentExtensionSuggestionListItem', () => {
 	it( 'should record settings_payments_provider_enable_click event on click of the Enable button', () => {
 		const { getByRole } = render(
 			<PaymentExtensionSuggestionListItem
-				extension={
+				suggestion={
 					{
 						id: 'test-gateway',
 						title: 'Test Gateway',
@@ -40,9 +40,10 @@ describe( 'PaymentExtensionSuggestionListItem', () => {
 					} as unknown as PaymentExtensionSuggestionProvider
 				}
 				installingPlugin={ null }
-				setupPlugin={ () => {} }
+				setUpPlugin={ () => {} }
 				pluginInstalled={ true }
 				acceptIncentive={ () => {} }
+				shouldHighlightIncentive={ false }
 			/>
 		);
 
@@ -50,7 +51,9 @@ describe( 'PaymentExtensionSuggestionListItem', () => {
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_provider_enable_click',
 			{
+				business_country: expect.any( String ),
 				provider_id: 'test-gateway',
+				suggestion_id: 'test-gateway',
 			}
 		);
 	} );

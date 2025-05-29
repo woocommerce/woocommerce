@@ -6,7 +6,7 @@ sidebar_label: Add link to logged data
 
 # Add link to logged data
 
-[Logging](/docs/best-practices/logging) is a crucial part of any WooCommerce extension. It helps you track errors and debug issues. A common pattern is to have a setting in your extension to enable logging when the user needs to troubleshoot an issue. The following code snippet shows an example of how to add this setting, as well as a link to the log viewer, in the context of the [Settings API](/docs/extensions/settings-and-config/settings-api).
+[Logging](/docs/best-practices/data-management/logging) is a crucial part of any WooCommerce extension. It helps you track errors and debug issues. A common pattern is to have a setting in your extension to enable logging when the user needs to troubleshoot an issue. The following code snippet shows an example of how to add this setting, as well as a link to the log viewer, in the context of the [Settings API](/docs/extensions/settings-and-config/settings-api).
 
 ```php
 use Automattic\WooCommerce\Utilities\LoggingUtil;

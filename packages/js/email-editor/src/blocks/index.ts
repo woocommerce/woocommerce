@@ -24,8 +24,11 @@ import { enhanceButtonBlock } from './core/button';
 import { enhanceButtonsBlock } from './core/buttons';
 import { alterSupportConfiguration } from './core/general-block-support';
 import { enhanceQuoteBlock } from './core/quote';
+import { filterSetUrlAttribute } from './core/block-edit';
+import { enhanceSocialLinksBlock } from './core/social-links';
 
 export function initBlocks() {
+	filterSetUrlAttribute();
 	deactivateStackOnMobile();
 	hideExpandOnClick();
 	disableImageFilter();
@@ -41,5 +44,6 @@ export function initBlocks() {
 	extendRichTextFormats();
 	activatePersonalizationTagsReplacing();
 	alterSupportConfiguration();
+	enhanceSocialLinksBlock();
 	registerCoreBlocks();
 }

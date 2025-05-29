@@ -3,7 +3,7 @@ post_title: Payment button layout
 sidebar_label: Payment button layout
 ---
 
-# User Experience Guidelines - Payment Button Layout
+# sPayment Button Layout
 
 Define the position and alignment of buttons in relationship to their container, with equal hierarchy and consistent spacing between buttons.
 

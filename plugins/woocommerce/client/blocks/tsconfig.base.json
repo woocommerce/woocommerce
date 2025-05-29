@@ -66,7 +66,9 @@
 			"@woocommerce/storybook-controls": [ "storybook/custom-controls" ],
 			"@woocommerce/utils": [ "assets/js/utils" ],
 			"@woocommerce/e2e-utils": [ "tests/e2e/utils" ],
-			"@woocommerce/templates/*": [ "assets/js/templates/*" ]
+			"@woocommerce/templates/*": [ "assets/js/templates/*" ],
+			"@wordpress/interactivity": [ "node_modules/@wordpress/interactivity/src/index.ts" ],
+			"@wordpress/interactivity-router": [ "node_modules/@wordpress/interactivity-router/src/index.ts" ]
 		}
 	}
 }

@@ -1,9 +1,5 @@
 {
     "position": 1,
     "label": "Getting started",
-    "collapsed": false,
-    "link": {
-      "type": "doc",
-      "id": "README"
-    }
+    "collapsed": false
 }

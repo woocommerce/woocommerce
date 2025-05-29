@@ -1,7 +1,7 @@
 import { themes as prismThemes } from 'prism-react-renderer';
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
-import {filterSidebarItems} from "./src/js/sidebar-filters";
+import { filterSidebarItems } from "./src/js/sidebar-filters";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -13,7 +13,7 @@ const config: Config = {
 	url: 'https://developer.woocommerce.com',
 	// Set the /<baseUrl>/ pathname under which your site is served
 	// For GitHub pages deployment, it is often '/<projectName>/'
-	baseUrl: '/',
+	baseUrl: '/docs/',
 
 	// GitHub pages deployment config.
 	// If you aren't using GitHub pages, you don't need these.
@@ -28,7 +28,7 @@ const config: Config = {
 	// may want to replace "en" with "zh-Hans".
 	i18n: {
 		defaultLocale: 'en',
-		locales: [ 'en' ],
+		locales: ['en'],
 	},
 
 	presets: [
@@ -40,15 +40,15 @@ const config: Config = {
 				docs: {
 					sidebarPath: './sidebars.ts',
 					path: '../',
-					exclude: [ '_docu-tools/**' ],
+					exclude: ['_docu-tools/**'],
 					// Please change this to your repo.
 					// Remove this to remove the "edit this page" links.
 					editUrl:
-						'https://github.com/woocommerce/woocommerce/tree/docusaurus-docs-prep/docs/docs/',
-					routeBasePath: 'docs',
+						'https://github.com/woocommerce/woocommerce/tree/trunk/docs/docs/',
+					routeBasePath: '/',
 
 					// Custom sidebar filter to remove some items from the docs sidebar.
-					async sidebarItemsGenerator({defaultSidebarItemsGenerator, ...args}) {					
+					async sidebarItemsGenerator({ defaultSidebarItemsGenerator, ...args }) {
 						let sidebarItems = await defaultSidebarItemsGenerator(args);
 						sidebarItems = filterSidebarItems(sidebarItems);
 						return sidebarItems;
@@ -73,22 +73,22 @@ const config: Config = {
 				href: '/docs',
 			},
 			items: [
-				{          
+				{
 					type: 'docSidebar',
 					sidebarId: 'docsSidebar',
 					label: 'Docs',
 				},
-				{          
+				{
 					type: 'docSidebar',
 					sidebarId: 'extensionsSidebar',
 					label: 'Extensions',
 				},
-				{          
+				{
 					type: 'docSidebar',
 					sidebarId: 'apiSidebar',
 					label: 'API',
 				},
-				{          
+				{
 					type: 'docSidebar',
 					sidebarId: 'cliSidebar',
 					label: 'CLI',
@@ -145,7 +145,7 @@ const config: Config = {
 						},
 						{
 							label: 'Contribute to WooCommerce',
-							href: '/docs/contributor-guides/contributing',
+							href: '/docs/contribution/contributing',
 						},
 					],
 				},
@@ -179,31 +179,34 @@ const config: Config = {
 					],
 				},
 			],
-			copyright: `Copyright © ${ new Date().getFullYear() } Built with Docusaurus. Documentation is licensed under <a href="https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/license.txt/">GPLv3</a> and can be modified in the <a href="https://github.com/woocommerce/woocommerce/">WooCommerce Monorepo</a>.
+			copyright: `Copyright © ${new Date().getFullYear()} Built with Docusaurus. Documentation is licensed under <a href="https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/license.txt/">GPLv3</a> and can be modified in the <a href="https://github.com/woocommerce/woocommerce/">WooCommerce Monorepo</a>.
 				<div class="docusaurus-footer-for-automattic">
 					<a href="https://automattic.com/">
 						An
-						<img src="/img/automattic.svg" alt="Automattic" class="automattic-logo automattic-logo-light" />
-						<img src="/img/automattic_dark.svg" alt="Automattic" class="automattic-logo automattic-logo-dark" /> 
+						<img src="img/automattic.svg" alt="Automattic" class="automattic-logo automattic-logo-light" />
+						<img src="img/automattic_dark.svg" alt="Automattic" class="automattic-logo automattic-logo-dark" /> 
 						Creation</a>
 				</div>`,
 		},
 		prism: {
 			theme: prismThemes.github,
 			darkTheme: prismThemes.dracula,
-			additionalLanguages: [ 'php' ],
+			additionalLanguages: ['php'],
 		},
-		// algolia: {
-		// 	// The application ID provided by Algolia
-		// 	appId: 'DGCTEY3UZR',
-
-		// 	// Public API key: it is safe to commit it
-		// 	apiKey: '8b541e433184605374ff8fb8985b3dc4',
-
-		// 	indexName: 'developer-woocommerce',
-
-		// 	contextualSearch: true,
+		// colorMode: {
+		// 	defaultMode: 'light',
+		// 	disableSwitch: true,
+		// 	respectPrefersColorScheme: false,
 		// },
+
+		algolia: {
+			// The application ID provided by Algolia
+			appId: 'DGCTEY3UZR',
+			// Public API key: it is safe to commit it
+			apiKey: '8b541e433184605374ff8fb8985b3dc4',
+			indexName: 'developer-woocommerce',
+			contextualSearch: true,
+		},
 	} satisfies Preset.ThemeConfig,
 };
 

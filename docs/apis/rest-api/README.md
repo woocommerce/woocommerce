@@ -4,7 +4,7 @@ category_slug: rest-api
 sidebar_label: REST API
 ---
 
-# Getting started with the WooCommerce REST API
+# WooCommerce REST API
 
 The [REST API](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction) is a powerful part of WooCommerce which lets you read and write various parts of WooCommerce data such as orders, products, coupons, customers, and shipping zones.
 
@@ -26,7 +26,7 @@ We'll use both [Postman](https://www.getpostman.com/) and [Insomnia](https://ins
 
 Before proceeding, please read the [REST API docs on authentication which covers the important parts concerning API Keys and Auth](https://woocommerce.github.io/woocommerce-rest-api-docs/#authentication). We're only covering connecting over HTTPS here since it's the simplest and most secure method. You should avoid HTTP if possible.
 
-## Generate Keys
+## Generate keys
 
 To start using REST API, you first need to generate API keys.
 

@@ -3,7 +3,7 @@ post_title: Task list and inbox
 sidebar_label: Task list and inbox
 ---
 
-# WooCommerce Extension Guidelines - Task List and Inbox
+# Task List and Inbox
 
 Plugins should choose between implementing a Task or Inbox note based on the following guidelines. Avoid implementing both Task and Inbox note for the same message, which adds clutter and reduces the impact of the message.
 

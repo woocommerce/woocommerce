@@ -1,6 +1,7 @@
 ---
 post_title: Classes in WooCommerce
-sidebar_label: Classes in WooCommerce
+sidebar_label: Classes
+sidebar_position: 1
 
 ---
 
