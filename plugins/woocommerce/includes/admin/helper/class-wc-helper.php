@@ -1682,7 +1682,8 @@ class WC_Helper {
 	 * Get rules for displaying notice regarding marketplace product usage.
 	 *
 	 * @return array
-	 * @throws Exception If there is an error getting product usage notice rules.
+	 *
+	 * phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
 	 */
 	public static function get_product_usage_notice_rules() {
 		$cache_key = '_woocommerce_helper_product_usage_notice_rules';
@@ -1813,12 +1814,12 @@ class WC_Helper {
 		return $connection_data;
 	}
 
-
 	/**
 	 * Get the connected user's subscriptions.
 	 *
 	 * @return array
-	 * @throws Exception If there is an error getting subscriptions.
+	 *
+	 * phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
 	 */
 	public static function get_subscriptions() {
 		$cache_key = '_woocommerce_helper_subscriptions';
