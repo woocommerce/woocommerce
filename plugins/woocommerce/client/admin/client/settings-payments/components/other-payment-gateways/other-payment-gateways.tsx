@@ -18,6 +18,7 @@ import {
 import { GridItemPlaceholder } from '~/settings-payments/components/grid-item-placeholder';
 import { OfficialBadge } from '../official-badge';
 import { IncentiveStatusBadge } from '~/settings-payments/components/incentive-status-badge';
+import { recordPaymentsEvent } from '~/settings-payments/utils';
 
 interface OtherPaymentGatewaysProps {
 	/**
@@ -73,7 +74,7 @@ export const OtherPaymentGateways = ( {
 		useState( '' );
 	const buttonRef = useRef< HTMLSpanElement >( null );
 
-	const handleClick = (
+	const handleInfoIconClick = (
 		event: React.MouseEvent | React.KeyboardEvent,
 		categoryId: string
 	) => {
@@ -91,8 +92,27 @@ export const OtherPaymentGateways = ( {
 		);
 	};
 
-	const handleFocusOutside = () => {
+	const handleFocusOutsidePopover = () => {
 		setCategoryIdWithPopoverVisible( '' );
+	};
+
+	const handleSectionToggle = () => {
+		const expand = ! isExpanded;
+
+		// Record the event when user clicks on the section.
+		recordPaymentsEvent( 'other_payment_options_section_click', {
+			action: expand ? 'expand' : 'collapse',
+		} );
+
+		setIsExpanded( expand );
+
+		// Update the URL params to reflect the expanded state.
+		urlParams.set( 'other_pes_section', expand ? 'expanded' : 'collapsed' );
+		window.history.replaceState(
+			{},
+			document.title,
+			window.location.pathname + '?' + urlParams.toString()
+		);
 	};
 
 	// Group suggestions by category.
@@ -174,14 +194,20 @@ export const OtherPaymentGateways = ( {
 								<span
 									className="other-payment-gateways__content__title__icon-container"
 									onClick={ ( event ) =>
-										handleClick( event, category.id )
+										handleInfoIconClick(
+											event,
+											category.id
+										)
 									}
 									onKeyDown={ ( event ) => {
 										if (
 											event.key === 'Enter' ||
 											event.key === ' '
 										) {
-											handleClick( event, category.id );
+											handleInfoIconClick(
+												event,
+												category.id
+											);
 										}
 									} }
 									tabIndex={ 0 }
@@ -203,7 +229,7 @@ export const OtherPaymentGateways = ( {
 											noArrow={ true }
 											shift={ true }
 											onFocusOutside={
-												handleFocusOutside
+												handleFocusOutsidePopover
 											}
 										>
 											<div className="components-popover__content-container">
@@ -244,7 +270,12 @@ export const OtherPaymentGateways = ( {
 													/>
 												) }
 												{ /* All payment extension suggestions are official. */ }
-												<OfficialBadge variant="expanded" />
+												<OfficialBadge
+													variant="expanded"
+													suggestionId={
+														extension.id
+													}
+												/>
 											</span>
 											<span className="other-payment-gateways__content__grid-item__content__description">
 												{ decodeEntities(
@@ -317,12 +348,10 @@ export const OtherPaymentGateways = ( {
 		>
 			<div
 				className="other-payment-gateways__header"
-				onClick={ () => {
-					setIsExpanded( ! isExpanded );
-				} }
+				onClick={ handleSectionToggle }
 				onKeyDown={ ( event ) => {
 					if ( event.key === 'Enter' || event.key === ' ' ) {
-						setIsExpanded( ! isExpanded );
+						handleSectionToggle();
 					}
 				} }
 				role="button"
