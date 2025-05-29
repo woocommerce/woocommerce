@@ -78,6 +78,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 							animate={ { opacity: 1 } }
 							exit={ { opacity: 0 } }
 							transition={ { duration: 0.3 } }
+						>
 							<StepPlaceholder rows={ 3 } />
 						</motion.div>
 					) }
