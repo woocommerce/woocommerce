@@ -57,10 +57,6 @@ $dialog-padding: 20px;
 		&.wc-block-woocommerce-product-gallery-large-image__image--hoverZoom {
 			cursor: zoom-in;
 		}
-
-		&.wc-block-woocommerce-product-gallery-large-image__image--cropped {
-			object-fit: cover;
-		}
 	}
 
 	.wc-block-product-gallery-large-image__inner-blocks {
@@ -196,14 +192,17 @@ $dialog-padding: 20px;
 		cursor: pointer;
 		max-width: 100%;
 		aspect-ratio: 1 / 1;
-		object-fit: cover;
+		object-fit: contain;
 		outline: none;
 
-		&.is-active {
-			position: relative;
+		&--is-active {
 			pointer-events: none;
 			cursor: default;
 			filter: brightness(0.8);
+		}
+
+		&--cropped {
+			object-fit: cover;
 		}
 	}
 
