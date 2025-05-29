@@ -192,9 +192,6 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 			}
 		);
 
-		$hooked_block_types_introspection = new \MockAction();
-		add_filter( 'hooked_block_types', array( $hooked_block_types_introspection, 'filter' ), 20, 4 );
-
 		// Create a new BlockifiedProductDetails block class with the mocked AssetDataRegistry.
 		// This will add the `woocommerce_product_details_hooked_blocks` filter defined above.
 		$block_instance = new \Automattic\WooCommerce\Blocks\BlockTypes\BlockifiedProductDetails(
@@ -206,12 +203,9 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 
 		// Next, we apply the `hooked_block_types` filter. We pretend that we're in the `last_child` position
 		// of the `woocommerce/accordion-group` block.
-		apply_filters( 'hooked_block_types', array(), 'last_child', 'woocommerce/accordion-group' );
+		$hooked_block_types = apply_filters( 'hooked_block_types', array(), 'last_child', 'woocommerce/accordion-group' );
 
-		$this->assertSame( 1, $hooked_block_types_introspection->get_call_count() );
-
-		$args = $hooked_block_types_introspection->get_args();
-		$this->assertSame( array( $test_block['slug'] ), $args[0][0] );
+		$this->assertSame( array( $test_block['slug'] ), $hooked_block_types );
 	}
 
 	/**
