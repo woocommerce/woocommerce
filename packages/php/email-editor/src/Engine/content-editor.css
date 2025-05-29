@@ -166,7 +166,7 @@ ol.has-background {
  * This is needed because we do not want to have a padding for the social links block particularly for a WYSIWYG experience.
 */
 .wp-block-social-links.has-background {
-	padding-left: 0 !important;
+	padding-left: 0;
 }
 
 /**
