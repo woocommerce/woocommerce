@@ -33,7 +33,12 @@ class GroupedProductSelectorItemCTA extends AbstractBlock {
 	private function get_quantity_selector_markup( $product ) {
 		ob_start();
 
-		woocommerce_quantity_input( AddToCartWithOptionsUtils::get_quantity_input_args( $product ) );
+		woocommerce_quantity_input(
+			array_merge(
+				AddToCartWithOptionsUtils::get_quantity_input_args( $product ),
+				array( 'input_name' => 'quantity[' . $product->get_id() . ']' )
+			)
+		);
 
 		$quantity_html = ob_get_clean();
 

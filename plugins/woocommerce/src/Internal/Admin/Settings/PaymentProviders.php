@@ -76,6 +76,23 @@ class PaymentProviders {
 	);
 
 	/**
+	 * The map of payment extension suggestion IDs to their respective provider classes.
+	 *
+	 * This is used to instantiate providers to provide details for the payment extension suggestions, pre-attachment.
+	 *
+	 * @var \class-string[]
+	 */
+	private array $payment_extension_suggestions_providers_class_map = array(
+		ExtensionSuggestions::WOOPAYMENTS       => WooPayments::class,
+		ExtensionSuggestions::PAYPAL_FULL_STACK => PayPal::class,
+		ExtensionSuggestions::PAYPAL_WALLET     => PayPal::class,
+		ExtensionSuggestions::STRIPE            => Stripe::class,
+		ExtensionSuggestions::MOLLIE            => Mollie::class,
+		ExtensionSuggestions::AMAZON_PAY        => AmazonPay::class,
+		ExtensionSuggestions::MERCADO_PAGO      => MercadoPago::class,
+	);
+
+	/**
 	 * The instances of the payment providers.
 	 *
 	 * @var PaymentGateway[]
@@ -207,6 +224,43 @@ class PaymentProviders {
 		$this->instances[ $gateway_id ] = new $provider_class();
 
 		return $this->instances[ $gateway_id ];
+	}
+
+	/**
+	 * Get the payment extension suggestion (PES) provider instance.
+	 *
+	 * @param string $pes_id The payment extension suggestion ID.
+	 *
+	 * @return PaymentGateway The payment extension suggestion provider instance.
+	 *                        Will return the general provider of no specific provider is found.
+	 */
+	public function get_payment_extension_suggestion_provider_instance( string $pes_id ): PaymentGateway {
+		if ( isset( $this->instances[ $pes_id ] ) ) {
+			return $this->instances[ $pes_id ];
+		}
+
+		/**
+		 * The provider class for the payment extension suggestion (PES).
+		 *
+		 * @var PaymentGateway|null $provider_class
+		 */
+		$provider_class = null;
+		if ( isset( $this->payment_extension_suggestions_providers_class_map[ $pes_id ] ) ) {
+			$provider_class = $this->payment_extension_suggestions_providers_class_map[ $pes_id ];
+		}
+
+		// If the gateway ID is not mapped to a provider class, return the generic provider.
+		if ( is_null( $provider_class ) ) {
+			if ( ! isset( $this->instances['generic'] ) ) {
+				$this->instances['generic'] = new PaymentGateway();
+			}
+
+			return $this->instances['generic'];
+		}
+
+		$this->instances[ $pes_id ] = new $provider_class();
+
+		return $this->instances[ $pes_id ];
 	}
 
 	/**
@@ -670,9 +724,7 @@ class PaymentProviders {
 		$new_order_map = $this->enhance_order_map( $new_order_map );
 
 		// Save the new order map to the DB.
-		$result = $this->save_order_map( $new_order_map );
-
-		return $result;
+		return $this->save_order_map( $new_order_map );
 	}
 
 	/**
@@ -1114,6 +1166,10 @@ class PaymentProviders {
 				}
 			}
 		}
+
+		// Finally, allow the extension suggestion's matching provider to add further details.
+		$gateway_provider = $this->get_payment_extension_suggestion_provider_instance( $extension['id'] );
+		$extension        = $gateway_provider->enhance_extension_suggestion( $extension );
 
 		return $extension;
 	}
