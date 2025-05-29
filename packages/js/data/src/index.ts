@@ -30,6 +30,7 @@ export { EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME } from './product-variations
 export { EXPERIMENTAL_TAX_CLASSES_STORE_NAME } from './tax-classes';
 export { PaymentGateway } from './payment-gateways/types';
 export {
+	PaymentsEntity,
 	PaymentProvider,
 	PaymentProviderType,
 	PaymentProviderState,

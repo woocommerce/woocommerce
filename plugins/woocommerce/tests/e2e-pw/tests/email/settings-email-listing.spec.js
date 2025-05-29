@@ -2,9 +2,11 @@ const { test, expect, request } = require( '@playwright/test' );
 const { setOption } = require( '../../utils/options' );
 const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
 
-const setFeatureFlag = async ( baseURL, value ) =>
-	await setOption(
-		request,
+const setFeatureFlag = async ( baseURL, name, value ) =>
+	await setOption( request, baseURL, name, value );
+
+const setBlockEmailEditorFeatureFlag = async ( baseURL, value ) =>
+	await setFeatureFlag(
 		baseURL,
 		'woocommerce_feature_block_email_editor_enabled',
 		value
@@ -14,14 +16,19 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
 	test.afterAll( async ( { baseURL } ) => {
-		await setFeatureFlag( baseURL, 'no' );
+		await setBlockEmailEditorFeatureFlag( baseURL, 'no' );
 	} );
 
 	test( 'Email settings list view renders correctly and allows to edit email status and search', async ( {
 		page,
 		baseURL,
 	} ) => {
-		await setFeatureFlag( baseURL, 'yes' );
+		await setBlockEmailEditorFeatureFlag( baseURL, 'yes' );
+		await setFeatureFlag(
+			baseURL,
+			'woocommerce_feature_point_of_sale_enabled',
+			'no'
+		);
 
 		// Navigate to WooCommerce Email Settings page
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );

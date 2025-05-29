@@ -16,7 +16,10 @@ import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import WooPaymentsStepHeader from '../../components/header';
 import { useOnboardingContext } from '../../data/onboarding-context';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
-import { disableWooPaymentsTestMode } from '~/settings-payments/utils';
+import {
+	disableWooPaymentsTestMode,
+	recordPaymentsOnboardingEvent,
+} from '~/settings-payments/utils';
 import './style.scss';
 
 interface StepCheckResponse {
@@ -113,6 +116,11 @@ const TestAccountStep = () => {
 		useState( false );
 
 	const handleContinue = () => {
+		recordPaymentsOnboardingEvent( 'woopayments_onboarding_modal_click', {
+			step: currentStep?.id || '',
+			action: 'activate_payments',
+		} );
+
 		// Set the continue button loading state to true.
 		setIsContinueButtonLoading( true );
 
@@ -496,6 +504,14 @@ const TestAccountStep = () => {
 							<Button
 								variant="primary"
 								onClick={ () => {
+									recordPaymentsOnboardingEvent(
+										'woopayments_onboarding_modal_click',
+										{
+											step: currentStep?.id || '',
+											action: 'continue_store_setup',
+										}
+									);
+
 									// Navigate to wc-admin page
 									navigateTo( {
 										url: getNewPath( {}, '', {
@@ -545,6 +561,15 @@ const TestAccountStep = () => {
 										label: __( 'Try Again', 'woocommerce' ),
 										variant: 'primary',
 										onClick: () => {
+											recordPaymentsOnboardingEvent(
+												'woopayments_onboarding_modal_click',
+												{
+													step: currentStep?.id || '',
+													action: 'try_again_on_error',
+													retries: retryCounter + 1,
+												}
+											);
+
 											resetState();
 											setRetryCounter( ( c ) => c + 1 );
 										},
@@ -554,7 +579,18 @@ const TestAccountStep = () => {
 										variant: 'secondary',
 										className:
 											'woocommerce-payments-test-account-step__error-cancel-button',
-										onClick: closeModal,
+										onClick: () => {
+											recordPaymentsOnboardingEvent(
+												'woopayments_onboarding_modal_click',
+												{
+													step: currentStep?.id || '',
+													action: 'cancel_on_error',
+													retries: retryCounter,
+												}
+											);
+
+											closeModal();
+										},
 									},
 							  ]
 							: []

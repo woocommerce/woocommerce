@@ -149,11 +149,18 @@ class PaymentsRestController extends RestApiControllerBase {
 					'callback'            => fn( $request ) => $this->run( $request, 'dismiss_payment_extension_suggestion_incentive' ),
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 					'args'                => array(
-						'context' => array(
+						'context'      => array(
 							'description'       => esc_html__( 'The context ID for which to dismiss the incentive. If not provided, will dismiss the incentive for all contexts.', 'woocommerce' ),
 							'type'              => 'string',
 							'required'          => false,
 							'sanitize_callback' => 'sanitize_key',
+						),
+						'do_not_track' => array(
+							'description'       => esc_html__( 'If true, the incentive dismissal will be ignored by tracking.', 'woocommerce' ),
+							'type'              => 'boolean',
+							'required'          => false,
+							'default'           => false,
+							'sanitize_callback' => 'rest_sanitize_boolean',
 						),
 					),
 				),
@@ -301,9 +308,10 @@ class PaymentsRestController extends RestApiControllerBase {
 		$suggestion_id = $request->get_param( 'suggestion_id' );
 		$incentive_id  = $request->get_param( 'incentive_id' );
 		$context       = $request->get_param( 'context' ) ?? 'all';
+		$do_not_track  = $request->get_param( 'do_not_track' ) ?? false;
 
 		try {
-			$result = $this->payments->dismiss_extension_suggestion_incentive( $suggestion_id, $incentive_id, $context );
+			$result = $this->payments->dismiss_extension_suggestion_incentive( $suggestion_id, $incentive_id, $context, $do_not_track );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'woocommerce_rest_payment_extension_suggestion_incentive_error', $e->getMessage(), array( 'status' => 400 ) );
 		}
@@ -406,8 +414,8 @@ class PaymentsRestController extends RestApiControllerBase {
 				return new WP_Error( 'rest_invalid_param', esc_html__( 'The ordering argument must be an object with provider IDs as keys and numeric values as values.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
-			if ( sanitize_key( $provider_id ) !== $provider_id ) {
-				return new WP_Error( 'rest_invalid_param', esc_html__( 'The provider ID must be a valid string.', 'woocommerce' ), array( 'status' => 400 ) );
+			if ( $this->sanitize_provider_id( $provider_id ) !== $provider_id ) {
+				return new WP_Error( 'rest_invalid_param', esc_html__( 'The provider ID must be a string with only ASCII letters, digits, underscores, and dashes.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
 			if ( false === filter_var( $order, FILTER_VALIDATE_INT ) ) {
@@ -428,11 +436,36 @@ class PaymentsRestController extends RestApiControllerBase {
 	private function sanitize_providers_order_arg( array $value ): array {
 		// Sanitize the ordering object to ensure that the order values are integers and the provider IDs are safe strings.
 		foreach ( $value as $provider_id => $order ) {
-			$id           = sanitize_key( $provider_id );
+			$id           = $this->sanitize_provider_id( $provider_id );
 			$value[ $id ] = intval( $order );
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Sanitize a provider ID.
+	 *
+	 * This method ensures that the provider ID is a safe string by removing any unwanted characters.
+	 * It strips all HTML tags, removes accents, percent-encoded characters, and HTML entities,
+	 * and allows only lowercase and uppercase letters, digits, underscores, and dashes.
+	 *
+	 * @param string $provider_id The provider ID to sanitize.
+	 *
+	 * @return string The sanitized provider ID.
+	 */
+	private function sanitize_provider_id( string $provider_id ): string {
+		$provider_id = wp_strip_all_tags( $provider_id );
+		$provider_id = remove_accents( $provider_id );
+		// Remove percent-encoded characters.
+		$provider_id = preg_replace( '|%([a-fA-F0-9][a-fA-F0-9])|', '', $provider_id );
+		// Remove HTML entities.
+		$provider_id = preg_replace( '/&.+?;/', '', $provider_id );
+
+		// Only lowercase and uppercase ASCII letters, digits, underscores, and dashes are allowed.
+		$provider_id = preg_replace( '|[^a-z0-9_\-]|i', '', $provider_id );
+
+		return $provider_id;
 	}
 
 	/**
@@ -816,6 +849,20 @@ class PaymentsRestController extends RestApiControllerBase {
 							'context'    => array( 'view', 'edit' ),
 							'readonly'   => true,
 							'properties' => array(
+								'preload' => array(
+									'type'        => 'object',
+									'description' => esc_html__( 'The onboarding preload link for the payment gateway.', 'woocommerce' ),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+									'properties'  => array(
+										'href' => array(
+											'type'        => 'string',
+											'description' => esc_html__( 'The URL to do onboarding preload for the payment gateway.', 'woocommerce' ),
+											'context'     => array( 'view', 'edit' ),
+											'readonly'    => true,
+										),
+									),
+								),
 								'onboard' => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'The start/continue onboarding link for the payment gateway.', 'woocommerce' ),
