@@ -186,6 +186,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					),
 					'data-wp-on--submit'        => 'actions.handleSubmit',
 					'data-wp-class--is-invalid' => '!state.isFormValid',
+					'data-wp-watch'             => 'callbacks.setDisplayedProduct',
 					'class'                     => $classes,
 					'style'                     => esc_attr( $classes_and_styles['styles'] ),
 				)

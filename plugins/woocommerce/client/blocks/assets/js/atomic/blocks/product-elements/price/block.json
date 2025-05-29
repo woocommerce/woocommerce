@@ -22,9 +22,7 @@
 	"apiVersion": 3,
 	"supports": {
 		"html": false,
-		"interactivity": {
-			"clientNavigation": true
-		},
+		"interactivity": true,
 		"color": {
 			"text": true,
 			"background": true,
@@ -52,5 +50,6 @@
 		"woocommerce/product-template",
 		"core/post-template"
 	],
-	"$schema": "https://schemas.wp.org/trunk/block.json"
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"viewScriptModule": "woocommerce/product-price"
 }
