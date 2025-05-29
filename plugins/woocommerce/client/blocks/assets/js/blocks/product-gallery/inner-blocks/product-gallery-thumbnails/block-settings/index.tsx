@@ -9,7 +9,6 @@ import {
 	__experimentalUnitControl as UnitControl,
 	SelectControl,
 	PanelBody,
-	ToggleControl,
 } from '@wordpress/components';
 
 /**
@@ -25,7 +24,7 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 	attributes,
 	setAttributes,
 }: ProductGalleryThumbnailsSettingsProps ) => {
-	const { thumbnailSize, aspectRatio, cropImages } = attributes;
+	const { thumbnailSize, aspectRatio } = attributes;
 
 	const aspectRatioOptions = [
 		{
@@ -110,19 +109,6 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 					'Applies the selected aspect ratio to product thumbnails.',
 					'woocommerce'
 				) }
-			/>
-			<ToggleControl
-				label={ __( 'Crop images to fit', 'woocommerce' ) }
-				help={ __(
-					'Images will be cropped to fit within available space.',
-					'woocommerce'
-				) }
-				checked={ cropImages }
-				onChange={ () =>
-					setAttributes( {
-						cropImages: ! cropImages,
-					} )
-				}
 			/>
 		</PanelBody>
 	);

@@ -17,10 +17,6 @@
 		"aspectRatio": {
 			"type": "string",
 			"default": "1"
-		},
-		"cropImages": {
-			"type": "boolean",
-			"default": true
 		}
 	},
 	"supports": {

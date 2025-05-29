@@ -40,7 +40,7 @@ export const Edit = ( {
 	attributes,
 	setAttributes,
 }: BlockEditProps< ProductGalleryThumbnailsBlockAttributes > ) => {
-	const { thumbnailSize, aspectRatio, cropImages } = attributes;
+	const { thumbnailSize, aspectRatio } = attributes;
 
 	const placeholderSrc = `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-image-gallery.svg`;
 	const productContext = useProductDataContext();
@@ -123,8 +123,6 @@ export const Edit = ( {
 								{
 									'wc-block-product-gallery-thumbnails__thumbnail__image--is-active':
 										index === 0,
-									'wc-block-product-gallery-thumbnails__thumbnail__image--cropped':
-										cropImages,
 								}
 							);
 							return (
