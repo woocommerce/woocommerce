@@ -226,7 +226,9 @@ export function modifySidebar() {
 	addFilter(
 		'woocommerce_email_editor_setting_sidebar_email_status_component',
 		NAME_SPACE,
-		() => EmailStatus
+		( _originalComponent, tracking ) => {
+			return () => <EmailStatus recordEvent={ tracking.recordEvent } />;
+		}
 	);
 	addFilter(
 		'woocommerce_email_editor_setting_sidebar_extension_component',
