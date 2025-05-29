@@ -94,7 +94,7 @@ export const PaymentsContent = ( {} ) => {
 			} )
 			.catch( ( response: { errors: Record< string, string > } ) => {
 				// Handle errors during installation
-				const { errors } = response;
+
 				setIsPluginInstalling( false );
 			} );
 	}, [
