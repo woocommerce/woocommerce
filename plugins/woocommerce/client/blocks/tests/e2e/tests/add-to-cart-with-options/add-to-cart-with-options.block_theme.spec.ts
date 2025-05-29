@@ -128,6 +128,8 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await page.goto( '/hoodie' );
 
+		// The radio input is visually hidden and, thus, not clickable. That's
+		// why we need to select the <label> instead.
 		const logoNoOption = page.locator( 'label:has-text("No")' );
 		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
 		const colorGreenOption = page.locator( 'label:has-text("Green")' );
@@ -163,6 +165,8 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await page.goto( '/hoodie' );
 
+		// The radio input is visually hidden and, thus, not clickable. That's
+		// why we need to select the <label> instead.
 		const logoYesOption = page.locator( 'label:has-text("Yes")' );
 		const colorGreenOption = page.locator( 'label:has-text("Green")' );
 
