@@ -46,23 +46,6 @@ const { state: wooState } = store< WooCommerce >(
 const productButtonStore = {
 	state: {
 		get quantity(): number {
-			const { isGrouped, groupedProductIds } = getContext< Context >();
-
-			if ( isGrouped && groupedProductIds ) {
-				if ( groupedProductIds.length > 0 ) {
-					const totalGroupedQuantityInCart = groupedProductIds.reduce(
-						( total, groupedProductId ) => {
-							const cartItem = wooState.cart?.items.find(
-								( item ) => item.id === groupedProductId
-							);
-							return total + ( cartItem?.quantity || 0 );
-						},
-						0
-					);
-					return totalGroupedQuantityInCart;
-				}
-			}
-
 			const product = wooState.cart?.items.find(
 				( item ) => item.id === state.productId
 			);
@@ -77,7 +60,7 @@ const productButtonStore = {
 			return animationStatus === AnimationStatus.SLIDE_OUT;
 		},
 		get addToCartText(): string {
-			const { animationStatus, tempQuantity, addToCartText } =
+			const { animationStatus, tempQuantity, addToCartText, productType } =
 				getContext< Context >();
 
 			// We use the temporary quantity when there's no animation, or
@@ -89,7 +72,11 @@ const productButtonStore = {
 				? tempQuantity || 0
 				: state.quantity;
 
-			if ( quantity === 0 ) return addToCartText;
+			if ( productType !== 'grouped' && quantity === 0 ) return addToCartText;
+
+			if ( productType === 'grouped' && quantity > 0 ) {
+				return state.inTheCartText;
+			}
 
 			return state.inTheCartText.replace( '###', quantity.toString() );
 		},
