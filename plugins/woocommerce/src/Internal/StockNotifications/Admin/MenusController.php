@@ -93,7 +93,7 @@ class MenusController {
 	public function notifications_page() {
 		wc_get_container()->get( NotificationsPage::class );
 
-        // Select section.
+		// Select section.
 		$section = '';
 
 		// Nonce is checked in NotificationsPage::delete and NotificationsPage::output just displays the page.
@@ -106,7 +106,7 @@ class MenusController {
 				NotificationsPage::delete();
 				break;
 			default:
-                NotificationsPage::output();
+				NotificationsPage::output();
 				break;
 		}
 	}
