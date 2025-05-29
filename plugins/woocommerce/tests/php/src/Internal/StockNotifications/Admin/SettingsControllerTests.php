@@ -3,7 +3,7 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Admin;
 
-use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
+use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController as StockNotificationsSettings;
 use WC_Settings_Products;
 
 /**
@@ -16,7 +16,9 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 	 */
 	public function test_get_customer_stock_notifications_settings_returns_all_settings() {
 		// Get customer stock notification settings.
-		wc_get_container()->get( SettingsController::class );
+		// This is required because this class is loaded only in admin context,
+		// and this test doesn't run with an admin user.
+		wc_get_container()->get( StockNotificationsSettings::class );
 
 		$sut = new WC_Settings_Products();
 
