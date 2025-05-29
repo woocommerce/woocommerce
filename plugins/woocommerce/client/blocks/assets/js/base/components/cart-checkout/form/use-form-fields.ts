@@ -25,7 +25,7 @@ export const useFormFields = < T extends keyof FormFields >(
 	fieldKeys: T[],
 	// Default fields from settings.
 	defaultFields: FormFields,
-	// Form type, can be billing, shipping, contact, order, or calculator.
+	// Form type, can be billing, shipping, contact, order.
 	formType: FormType,
 	// Address country.
 	addressCountry = ''
