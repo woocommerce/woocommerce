@@ -12,7 +12,6 @@ import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
 import React, { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { recordEvent } from '@woocommerce/tracks';
 import { Button } from '@wordpress/components';
 
 /**
@@ -36,6 +35,7 @@ import {
 	getWooPaymentsTestDriveAccountLink,
 	isIncentiveDismissedEarlierThanTimestamp,
 	isActionIncentive,
+	recordPaymentsEvent,
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
 import WooPaymentsModal from '~/settings-payments/onboarding/providers/woopayments';
@@ -74,8 +74,8 @@ export const SettingsPaymentsMain = () => {
 	const assetUrl = getAdminSetting( 'wcAdminAssetUrl' );
 
 	useEffect( () => {
-		// Record the page view event
-		recordEvent( 'settings_payments_pageview' );
+		// Record the page view event.
+		recordPaymentsEvent( 'pageview' );
 
 		// Handle URL parameters and display messages or modals.
 		const urlParams = new URLSearchParams( window.location.search );
@@ -149,13 +149,14 @@ export const SettingsPaymentsMain = () => {
 	);
 
 	const dismissIncentive = useCallback(
-		( dismissHref: string, context: string ) => {
+		( dismissHref: string, context: string, doNotTrack = false ) => {
 			// The dismissHref is the full URL to dismiss the incentive.
 			apiFetch( {
 				url: dismissHref,
 				method: 'POST',
 				data: {
 					context,
+					do_not_track: doNotTrack,
 				},
 			} );
 		},
@@ -220,7 +221,7 @@ export const SettingsPaymentsMain = () => {
 			) {
 				const referenceTimestamp = new Date();
 				referenceTimestamp.setDate( referenceTimestamp.getDate() - 30 );
-				// If the merchant dismissed the switcher incentive modal more than 30 days ago,
+				// If the merchant dismissed the Switch incentive modal more than 30 days ago,
 				// show the banner instead of just highlighting the incentive.
 				// @see its server brother in plugins/woocommerce/src/Internal/Admin/Settings/PaymentsController::store_has_providers_with_incentive()
 				// for the admin menu red dot notice logic.
@@ -266,6 +267,7 @@ export const SettingsPaymentsMain = () => {
 		// Set the ref to true to prevent multiple pageview events.
 		triggeredPageViewRef.current = true;
 
+		// This prop is for historical data uniformity. WooPayments will also be recorded as a suggestion.
 		const eventProps: { [ key: string ]: boolean } = {
 			woocommerce_payments_displayed: providers.some( ( provider ) =>
 				isWooPayments( provider.id )
@@ -293,7 +295,7 @@ export const SettingsPaymentsMain = () => {
 				}
 			} );
 
-		recordEvent( 'settings_payments_recommendations_pageview', eventProps );
+		recordPaymentsEvent( 'recommendations_pageview', eventProps );
 	}, [ suggestions, providers, isFetching ] );
 
 	const setupPlugin = useCallback(
@@ -314,7 +316,7 @@ export const SettingsPaymentsMain = () => {
 			}
 
 			setInstallingPlugin( id );
-			recordEvent( 'settings_payments_recommendations_setup', {
+			recordPaymentsEvent( 'recommendations_setup', {
 				extension_selected: slug,
 			} );
 			installAndActivatePlugins( [ slug ] )
@@ -329,7 +331,7 @@ export const SettingsPaymentsMain = () => {
 					);
 
 					// Record the plugin installation event.
-					recordEvent( 'settings_payments_provider_installed', {
+					recordPaymentsEvent( 'provider_installed', {
 						provider_id: id,
 					} );
 
@@ -338,7 +340,7 @@ export const SettingsPaymentsMain = () => {
 						paymentSettingsStore
 					).getPaymentProviders( storeCountry );
 
-					// Find the matching provider the updated list.
+					// Find the matching provider in the updated list.
 					const updatedProvider = updatedProviders.find(
 						( provider: PaymentProvider ) =>
 							provider.id === id ||
@@ -347,7 +349,7 @@ export const SettingsPaymentsMain = () => {
 					);
 
 					// Record the event when user successfully enables a gateway.
-					recordEvent( 'settings_payments_provider_enable', {
+					recordPaymentsEvent( 'provider_enable', {
 						provider_id: id,
 					} );
 
@@ -428,7 +430,7 @@ export const SettingsPaymentsMain = () => {
 
 		const uniquePaymentsOptions = [ ...new Set( paymentOptionsList ) ];
 
-		recordEvent( 'settings_payments_recommendations_other_options', {
+		recordPaymentsEvent( 'recommendations_other_options', {
 			available_payment_methods: uniquePaymentsOptions.join( ', ' ),
 		} );
 	};
