@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -61,7 +62,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				if ( \Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'launch-your-store' ) ) {
 					$settings[] = include __DIR__ . '/settings/class-wc-settings-site-visibility.php';
 				}
-				$settings[] = include __DIR__ . '/settings/class-wc-settings-point-of-sale.php';
+				if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
+					$settings[] = include __DIR__ . '/settings/class-wc-settings-point-of-sale.php';
+				}
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-advanced.php';
 
 				self::$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
