@@ -23,7 +23,7 @@ const productPriceStore = store(
 	'woocommerce/product-price',
 	{
 		callbacks: {
-			renderContent: () => {
+			setNewPrice: () => {
 				const element = getElement();
 
 				if ( ! element.ref ) {

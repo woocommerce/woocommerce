@@ -74,7 +74,7 @@ class ProductPrice extends AbstractBlock {
 			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
 
 			return sprintf(
-				'<div data-wp-interactive="woocommerce/product-price" data-wp-watch="callbacks.renderContent" class="wp-block-woocommerce-product-price"><div class="wc-block-components-product-price wc-block-grid__product-price %1$s %2$s" style="%3$s">
+				'<div data-wp-interactive="woocommerce/product-price" data-wp-watch="callbacks.setNewPrice" class="wp-block-woocommerce-product-price"><div class="wc-block-components-product-price wc-block-grid__product-price %1$s %2$s" style="%3$s">
 					%4$s
 				</div></div>',
 				esc_attr( $text_align_styles_and_classes['class'] ?? '' ),

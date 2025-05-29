@@ -177,22 +177,20 @@ class SingleProduct extends AbstractBlock {
 			return '';
 		}
 
-		$product_type = $product->get_type();
-
 		$interactivity_context = array(
 			'displayedProduct' => ProductDataUtils::get_product_data( $product ),
 		);
 
-		$wrapper_attributes = array(
-			'data-wp-interactive' => $this->get_full_block_name(),
-			'data-wp-context'     => wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-		);
+		$html = new \WP_HTML_Tag_Processor( $content );
 
-		return sprintf(
-			'<div %1$s>%2$s</div>',
-			get_block_wrapper_attributes( $wrapper_attributes ),
-			$content
-		);
+		if ( $html->next_tag( array( 'tag_name' => 'div' ) ) ) {
+			$html->set_attribute( 'data-wp-interactive', $this->get_full_block_name() );
+			$html->set_attribute( 'data-wp-context', wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+		}
+
+		$content = $html->get_updated_html();
+
+		return $content;
 	}
 
 	/**
