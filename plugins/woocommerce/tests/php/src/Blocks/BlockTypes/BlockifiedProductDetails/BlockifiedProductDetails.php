@@ -201,11 +201,40 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 			'blockified-product-details-mock'
 		);
 
-		// Next, we apply the `hooked_block_types` filter. We pretend that we're in the `last_child` position
-		// of the `woocommerce/accordion-group` block.
+		// Next, we apply the `hooked_block_types` and `hooked_block_{$slug}` filters.
+		// We pretend that we're in the `last_child` position of the `woocommerce/accordion-group` block.
 		$hooked_block_types = apply_filters( 'hooked_block_types', array(), 'last_child', 'woocommerce/accordion-group' );
-
 		$this->assertSame( array( $test_block['slug'] ), $hooked_block_types );
+
+		$hooked_block_custom_info = apply_filters(
+			'hooked_block_' . $test_block['slug'],
+			array(
+				'blockName'    => $test_block['slug'],
+				'attrs'        => array(),
+				'innerBlocks'  => array(),
+				'innerContent' => array(),
+			), // $parsed_hooked_block
+			$test_block['slug'],
+			'last_child',
+			array(
+				'blockName'    => 'woocommerce/accordion-group',
+				'attrs'        => array(
+					'metadata' => array(
+						'isDescendantOfProductDetails' => true,
+					)
+				),
+				'innerBlocks'  => array(),
+				'innerContent' => array(),
+			) // $parsed_anchor_block
+		);
+		$this->assertSame( 'woocommerce/accordion-item', $hooked_block_custom_info['blockName'] );
+		$this->assertCount( 2, $hooked_block_custom_info['innerBlocks'] );
+
+		$this->assertSame( 'woocommerce/accordion-header', $hooked_block_custom_info['innerBlocks'][0]['blockName'] );
+		$this->assertStringContainsString( $test_block['title'], $hooked_block_custom_info['innerBlocks'][0]['innerHTML'] );
+
+		$this->assertSame( 'woocommerce/accordion-panel', $hooked_block_custom_info['innerBlocks'][1]['blockName'] );
+		$this->assertSame( parse_blocks( $test_block['content'] ), $hooked_block_custom_info['innerBlocks'][1]['innerBlocks'] );
 	}
 
 	/**
