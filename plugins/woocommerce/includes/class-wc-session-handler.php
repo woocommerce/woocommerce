@@ -137,8 +137,9 @@ class WC_Session_Handler extends WC_Session {
 			return false;
 		}
 
-		// Check if the session already exists as a cookie. If so, return so the cookie can be initialized instead.
 		$cookie = $this->get_session_cookie();
+
+		// If the session already exists as a cookie, return early so the cookie can be initialized instead.
 		if ( $cookie && $cookie[0] === $payload['user_id'] ) {
 			return false;
 		}
@@ -147,13 +148,14 @@ class WC_Session_Handler extends WC_Session {
 		$this->_customer_id = $payload['user_id'];
 		$this->restore_session_data();
 
-		// If the user is logged in, migrate to user session. Otherwise set the cookie.
+		// If the user is logged in, migrate to user session.
 		if ( is_user_logged_in() ) {
 			$this->migrate_guest_session_to_user_session( get_current_user_id() );
-		} else {
-			$this->set_customer_session_cookie( true );
+			return true;
 		}
 
+		// For guests, set cookies for this token.
+		$this->set_customer_session_cookie( true );
 		return true;
 	}
 
