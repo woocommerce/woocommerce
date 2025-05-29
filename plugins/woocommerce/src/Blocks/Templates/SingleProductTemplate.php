@@ -86,10 +86,10 @@ class SingleProductTemplate extends AbstractTemplate {
 			}
 
 			global $post;
-
 			$product = wc_get_product( $post->ID );
-
-			$this->register_single_product_interactivity( $product );
+			if ( $product ) {
+				$this->register_single_product_interactivity( $product );
+			}
 
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		}

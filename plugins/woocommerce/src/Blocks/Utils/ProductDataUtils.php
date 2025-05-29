@@ -3,8 +3,9 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\Utils;
 
 /**
- * Utility functions for product data.
- * private
+ * Utility class to get product data consumable by the blocks.
+ *
+ * @internal
  */
 class ProductDataUtils {
 
