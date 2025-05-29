@@ -171,25 +171,25 @@ const { state, actions } = store< Store >(
 								},
 								body: item,
 							};
-						} else {
-							// Add new item
-							item = {
-								id: item.id,
-								quantity: item.quantity,
-								variation: item.variation,
-							} as OptimisticCartItem;
-							state.cart.items.push( item );
-							quantityChanges.productsPendingAdd = [ item.id ];
-							return {
-								method: 'POST',
-								path: `/wc/store/v1/cart/add-item`,
-								headers: {
-									Nonce: state.nonce,
-									'Content-Type': 'application/json',
-								},
-								body: item,
-							};
 						}
+
+						// Adds new cart item.
+						item = {
+							id: item.id,
+							quantity: item.quantity,
+							variation: item.variation,
+						} as OptimisticCartItem;
+						state.cart.items.push( item );
+						quantityChanges.productsPendingAdd = [ item.id ];
+						return {
+							method: 'POST',
+							path: `/wc/store/v1/cart/add-item`,
+							headers: {
+								Nonce: state.nonce,
+								'Content-Type': 'application/json',
+							},
+							body: item,
+						};
 					} );
 
 					const res: Response = yield fetch(
