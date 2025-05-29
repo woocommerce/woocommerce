@@ -68,12 +68,12 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			return '';
 		}
 
-		$show_uncropped_images = '1' !== $attributes['aspectRatio'];
-
-		if ( $show_uncropped_images ) {
-			update_option( 'woocommerce_thumbnail_cropping', 'uncropped' );
-		} else {
+		// We crop the images to square only if the aspect ratio is 1:1.
+		// Otherwise, we show the uncropped and use object-fit to crop them.
+		if ( '1' === $attributes['aspectRatio'] ) {
 			update_option( 'woocommerce_thumbnail_cropping', '1:1' );
+		} else {
+			update_option( 'woocommerce_thumbnail_cropping', 'uncropped' );
 		}
 
 		$product_gallery_images = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_thumbnail' );
