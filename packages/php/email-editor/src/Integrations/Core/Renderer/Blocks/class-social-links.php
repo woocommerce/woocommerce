@@ -131,12 +131,13 @@ class Social_Links extends Abstract_Block_Renderer {
 		// divide the icon value by 2 to get the font size.
 		$font_size_value = (int) rtrim( $icon_size, 'px' );
 		$font_size       = ( $font_size_value / 2 ) + 1; // inline with core styles.
+		$text_font_size  =  "{$font_size}px";
 		$anchor_styles   = $this->compile_css(
 			array(
 				'color'           => $icon_color_value,
 				'text-decoration' => 'none',
 				'text-transform'  => 'none',
-				'font-size'       => "{$font_size}px",
+				'font-size'       => $text_font_size,
 			)
 		);
 
@@ -162,7 +163,7 @@ class Social_Links extends Abstract_Block_Renderer {
 			<!--[if mso | IE]><td><![endif]-->
 				<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="%1$s">
 				<tbody><tr style="%7$s">
-				<td style="vertical-align:middle;">
+				<td style="vertical-align:middle;font-size:%9$s">
 					<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="">
 					<tbody><tr>
 						<td style="vertical-align:middle;">
@@ -174,7 +175,7 @@ class Social_Links extends Abstract_Block_Renderer {
 					</tbody></table>
 				</td>
 				' . ( $service_label ? '
-				<td style="vertical-align:middle;padding-left:6px;padding-right:6px;">
+				<td style="vertical-align:middle;padding-left:6px;padding-right:6px;font-size:%9$s">
 					<a href="%2$s" %5$s class="wp-block-social-link-anchor">
 						<span style="margin-left:.5em;margin-right:.5em"> %6$s </span>
 					</a>
@@ -193,6 +194,7 @@ class Social_Links extends Abstract_Block_Renderer {
 			esc_html( $service_label ), // %6$s -> The a text (label).
 			esc_attr( $row_container_styles ), // %7$s -> The tr row container styles.
 			esc_attr( $icon_size ), // %8$s -> The icon size.
+			esc_attr( $text_font_size ) // %9$s -> The text font size.
 		);
 	}
 

@@ -152,3 +152,19 @@ ol.has-background {
 		padding: 0 2px;
 	}
 }
+
+/**
+ * Override the default gap for social links block in the editor.
+ * This is needed because we do not want to have a gap between the social links and also for a WYSIWYG experience.
+*/
+.wp-block-social-links.is-layout-flex {
+	gap: 16px !important;
+}
+
+/**
+ * Override the default padding for social links block in the editor.
+ * This is needed because we do not want to have a padding for the social links block particularly for a WYSIWYG experience.
+*/
+.wp-block-social-links.has-background {
+	padding-left: 0 !important;
+}
