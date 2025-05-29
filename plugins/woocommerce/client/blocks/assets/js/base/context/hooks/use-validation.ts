@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { useCallback } from '@wordpress/element';
 import type {
 	ValidationData,
 	ValidationContextError,
