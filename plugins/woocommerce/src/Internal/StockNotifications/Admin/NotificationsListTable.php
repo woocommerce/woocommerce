@@ -17,7 +17,7 @@ class NotificationsListTable extends \WP_List_Table {
 	 *
 	 * @const PAGE_URL
 	 */
-	const PAGE_URL = 'admin.php?page=customerstock_notifications';
+	const PAGE_URL = 'admin.php?page=customer_stock_notifications';
 
 	/**
 	 * Total view records.
@@ -76,7 +76,11 @@ class NotificationsListTable extends \WP_List_Table {
 		$this->total_inactive_items = $this->data_store->query(
 			array(
 				'return' => 'count',
-				'status' => NotificationStatus::SENT || NotificationStatus::CANCELLED || NotificationStatus::PENDING,
+				'status' => array( 
+					NotificationStatus::SENT, 
+					NotificationStatus::CANCELLED, 
+					NotificationStatus::PENDING 
+				),
 			)
 		);
 
@@ -374,7 +378,11 @@ class NotificationsListTable extends \WP_List_Table {
 		if ( ! empty( $_REQUEST['status'] ) && 'active_customer_stock_notifications' === $_REQUEST['status'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$query_args['status'] = NotificationStatus::ACTIVE;
 		} elseif ( ! empty( $_REQUEST['status'] ) && 'inactive_customer_stock_notifications' === $_REQUEST['status'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$query_args['status'] = NotificationStatus::SENT || NotificationStatus::CANCELLED || NotificationStatus::PENDING;
+			$query_args['status'] = array( 
+				NotificationStatus::SENT,
+				NotificationStatus::CANCELLED,
+				NotificationStatus::PENDING
+			);
 		}
 
 		// Filters.
@@ -422,7 +430,11 @@ class NotificationsListTable extends \WP_List_Table {
 			$query_args['status']     = NotificationStatus::ACTIVE;
 			$this->total_active_items = $this->data_store->query( $query_args );
 			// Count inactive.
-			$query_args['status']       = NotificationStatus::SENT || NotificationStatus::CANCELLED || NotificationStatus::PENDING;
+			$query_args['status']       = array( 
+				NotificationStatus::SENT,
+				NotificationStatus::CANCELLED,
+				NotificationStatus::PENDING
+			);
 			$this->total_inactive_items = $this->data_store->query( $query_args );
 		}
 

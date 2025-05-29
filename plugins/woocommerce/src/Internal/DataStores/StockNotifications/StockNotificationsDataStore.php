@@ -436,9 +436,19 @@ CREATE TABLE $meta_table_name (
 		// WHERE clauses.
 		$where        = array();
 		$where_values = array();
-		if ( $args['status'] ) {
-			$where[]        = 'status = %s';
-			$where_values[] = esc_sql( $args['status'] );
+
+		if ( ! empty( $args['status'] ) ) {
+			if ( is_array( $args['status'] ) ) {
+				$status_items = array_filter( array_map( 'esc_sql', (array) $args['status'] ) ); // Ensure all are strings.
+				if ( ! empty( $status_items ) ) {
+					$placeholders = implode( ', ', array_fill( 0, count( $status_items ), '%s' ) );
+					$where[]      = "status IN ( {$placeholders} )";
+					$where_values = array_merge( $where_values, $status_items );
+				}
+			} else {
+				$where[]        = 'status = %s';
+				$where_values[] = esc_sql( $args['status'] );
+			}
 		}
 
 		if ( ! empty( $args['product_id'] ) ) {
