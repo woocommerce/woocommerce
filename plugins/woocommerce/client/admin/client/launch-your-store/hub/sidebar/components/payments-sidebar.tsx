@@ -32,27 +32,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 		steps: allSteps,
 		currentStep,
 		justCompletedStepId,
-		storeError,
 	} = useOnboardingContext();
-
-	// Store the initial uncompleted step IDs on first render
-	const initialUncompletedStepIds = React.useRef< string[] | null >( null );
-
-	// Only set the initial uncompleted step IDs if there are backend steps.
-	if (
-		initialUncompletedStepIds.current === null &&
-		allSteps?.some( ( step ) => step.type === 'backend' )
-	) {
-		initialUncompletedStepIds.current = allSteps
-			.filter( ( step ) => step.status !== 'completed' )
-			.map( ( step ) => step.id );
-	}
-
-	// Only show steps that were uncompleted on first render
-	const stepsToDisplay = allSteps.filter( ( step ) =>
-		initialUncompletedStepIds.current?.includes( step.id )
-	);
-
 	const currentStepIndex = allSteps.findIndex(
 		( step ) => step.id === currentStep?.id
 	);
@@ -104,28 +84,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 					</Heading>
 				</div>
 				<ItemGroup className="woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group">
-					{ /* In case of an error, we show the install WooPayments step, otherwise we show the steps */ }
-					{ !! storeError && (
-						<SidebarNavigationItem
-							key={ 'install_woopayments' }
-							className={ clsx( 'install_woopayments', {
-								'payment-step': true,
-							} ) }
-							icon={ taskIcons.activePaymentStep }
-							disabled={ true }
-							showChevron={ false }
-						>
-							{ sprintf(
-								/* translators: %1$s: WooPayments */
-								__(
-									'Install %1$s',
-									'woocommerce'
-								),
-								'WooPayments'
-							)}
-						</SidebarNavigationItem>
-					) }
-					{ stepsToDisplay.map( ( step ) => (
+					{ allSteps.map( ( step ) => (
 						<SidebarNavigationItem
 							key={ step.id }
 							className={ clsx( step.id, {
