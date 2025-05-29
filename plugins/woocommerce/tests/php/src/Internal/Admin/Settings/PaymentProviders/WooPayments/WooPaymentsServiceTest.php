@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentProviders\WooPayments;
 
 use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\PaymentGateway;
@@ -138,6 +139,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 		);
 
+		// Arrange the version constant to meet the minimum requirements for the native in-context onboarding.
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', PaymentProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION );
+
 		$this->mock_account_service = $this->getMockBuilder( \stdClass::class )
 			->addMethods( array( 'is_stripe_account_valid', 'get_account_status_data' ) )
 			->getMock();
@@ -199,6 +203,26 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			$this->fail( 'Expected ApiException not thrown.' );
 		} catch ( ApiException $e ) {
 			$this->assertSame( 'woocommerce_woopayments_onboarding_extension_not_active', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test get onboarding details when the extension is NOT at the right version.
+	 */
+	public function test_get_onboarding_details_throws_when_extension_at_wrong_version(): void {
+		// Arrange.
+		$location = 'US';
+
+		// Arrange the version constant to NOT meet the minimum requirements for the native in-context onboarding.
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', '1.0.0' );
+
+		// Act.
+		try {
+			$this->sut->get_onboarding_details( $location, '/some/path' );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertSame( 'woocommerce_woopayments_onboarding_extension_version', $e->getErrorCode() );
 		}
 	}
 
