@@ -206,7 +206,7 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 
 		// Next, we apply the `hooked_block_types` filter. We pretend that we're in the `last_child` position
 		// of the `woocommerce/accordion-group` block.
-		apply_filters( 'hooked_block_types', array(), 'woocommerce/accordion-group', 'last_child' );
+		apply_filters( 'hooked_block_types', array(), 'last_child', 'woocommerce/accordion-group' );
 
 		$this->assertSame( 1, $hooked_block_types_introspection->get_call_count() );
 
