@@ -102,9 +102,9 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 					) }
 					{ ! isLoading && (
 						<motion.div
-							initial={ { opacity: 0, y: 10 } }
+							initial={ { opacity: 0, y: 0 } }
 							animate={ { opacity: 1, y: 0 } }
-							transition={ { duration: 0.4, delay: 0.1 } }
+							transition={ { duration: 0.7, delay: 0.2 } }
 						>
 							{ stepsToDisplay.map( ( step ) => (
 								<SidebarNavigationItem
