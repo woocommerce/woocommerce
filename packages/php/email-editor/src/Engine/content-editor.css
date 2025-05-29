@@ -168,3 +168,14 @@ ol.has-background {
 .wp-block-social-links.has-background {
 	padding-left: 0 !important;
 }
+
+/**
+ * Override the default background color for social links block in the editor.
+ * This is mostly for a WYSIWYG experience. These icons don't have a default background color.
+*/
+:where(.wp-block-social-links:not(.is-style-logos-only)) .wp-social-link-mail,
+:where(.wp-block-social-links:not(.is-style-logos-only)) .wp-social-link-feed,
+:where(.wp-block-social-links:not(.is-style-logos-only)) .wp-social-link-chain {
+	background-color:#000;
+	color:#fff;
+	}
