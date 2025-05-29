@@ -5,11 +5,15 @@ import { registerPlugin } from '@wordpress/plugins';
 import { store as editorStore } from '@wordpress/editor';
 import { select, useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
-import { createStore } from './store';
+import {
+	// @ts-expect-error Type is missing in @types/wordpress__edit-post
+	__experimentalMainDashboardButton as MainDashboardButton,
+} from '@wordpress/edit-post';
 
 /**
  * Internal dependencies
  */
+import { createStore } from './store';
 import { useEmailCss } from './hooks';
 import { StylesSidebar } from './components/styles-sidebar';
 import { TemplateSettingsPanel } from './components/sidebar/template-settings-panel';
@@ -26,6 +30,7 @@ import { initHooks } from './editor-hooks';
 import { initTextHooks } from './text-hooks';
 import { SendPreview } from './components/preview';
 import { TemplateSelection } from './components/template-select';
+import { BackButtonInnerButton } from './components/header/back-button-content';
 
 import './style.scss';
 
@@ -70,6 +75,9 @@ const EmailEditorPlugin = () => {
 			<BlockCompatibilityWarnings />
 			<SendPreview />
 			<TemplateSelection />
+			<MainDashboardButton>
+				<BackButtonInnerButton />
+			</MainDashboardButton>
 		</>
 	);
 };
