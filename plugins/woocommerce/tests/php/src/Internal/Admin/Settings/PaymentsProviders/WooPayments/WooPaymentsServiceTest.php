@@ -140,7 +140,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		// Arrange the version constant to meet the minimum requirements for the native in-context onboarding.
-		Constants::set_constant( 'WCPAY_VERSION_NUMBER', PaymentProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION );
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
 
 		$this->mock_account_service = $this->getMockBuilder( \stdClass::class )
 			->addMethods( array( 'is_stripe_account_valid', 'get_account_status_data' ) )

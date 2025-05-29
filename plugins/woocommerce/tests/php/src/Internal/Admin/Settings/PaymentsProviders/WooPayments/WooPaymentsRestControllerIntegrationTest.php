@@ -120,7 +120,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->current_time = 1234567890;
 
 		// Arrange the version constant to meet the minimum requirements for the native in-context onboarding.
-		Constants::set_constant( 'WCPAY_VERSION_NUMBER', PaymentsProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION );
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
 
 		$this->providers_service = wc_get_container()->get( PaymentsProviders::class );
 
