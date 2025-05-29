@@ -68,7 +68,8 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			return '';
 		}
 
-		$product_gallery_images = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_thumbnail' );
+		$image_size             = true === $attributes['cropImages'] ? 'woocommerce_thumbnail' : 'woocommerce_single';
+		$product_gallery_images = ProductGalleryUtils::get_product_gallery_image_data( $product, $image_size );
 		// Don't show the thumbnails block if there is only one image.
 		if ( count( $product_gallery_images ) <= 1 ) {
 			return '';
@@ -76,6 +77,12 @@ class ProductGalleryThumbnails extends AbstractBlock {
 
 		$thumbnail_size   = str_replace( '%', '', $attributes['thumbnailSize'] ?? '25%' );
 		$thumbnails_class = 'wc-block-product-gallery-thumbnails--thumbnails-size-' . $thumbnail_size;
+
+		$img_class = 'wc-block-product-gallery-thumbnails__thumbnail__image';
+
+		if ( true === $attributes['cropImages'] ) {
+			$img_class .= ' wc-block-product-gallery-thumbnails__thumbnail__image--cropped';
+		}
 
 		ob_start();
 		?>
@@ -94,7 +101,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 				<?php foreach ( $product_gallery_images as $index => $image ) : ?>
 					<div class="wc-block-product-gallery-thumbnails__thumbnail" style="aspect-ratio: <?php echo esc_attr( $attributes['aspectRatio'] ); ?>">
 						<img
-							class="wc-block-product-gallery-thumbnails__thumbnail__image <?php echo 0 === $index ? 'is-active' : ''; ?>"
+							class="<?php echo 0 === $index ? esc_attr( $img_class . ' wc-block-product-gallery-thumbnails__thumbnail__image--is-active' ) : esc_attr( $img_class ); ?>"
 							data-image-id="<?php echo esc_attr( $image['id'] ); ?>"
 							src="<?php echo esc_attr( $image['src'] ); ?>"
 							srcset="<?php echo esc_attr( $image['srcset'] ); ?>"
