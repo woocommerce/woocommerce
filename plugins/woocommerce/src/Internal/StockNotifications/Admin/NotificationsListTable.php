@@ -234,7 +234,8 @@ class NotificationsListTable extends \WP_List_Table {
 	 * @return void
 	 */
 	public function column_date_subscribed( $notification ) {
-		$date_created = $notification->get_date_created();
+		$date_created = $notification->get_date_created()->getTimestamp();
+
 		if ( ! $date_created ) {
 			$t_time = __( 'Unpublished', 'woocommerce' );
 			$h_time = $t_time;
@@ -382,14 +383,12 @@ class NotificationsListTable extends \WP_List_Table {
 			$month  = substr( (string) $filter, 4, 6 );
 			$year   = substr( (string) $filter, 0, 4 ); // This will break at year 10.000 AC :).
 
-			if ( $filter ) {
-				$start_date               = strtotime( "{$year}-{$month}-01" );
-				$query_args['start_date'] = $start_date;
+			$start_timestamp = mktime( 0, 0, 0, (int) $month, 1, (int) $year );
+			$query_args['start_date'] = gmdate( 'Y-m-d H:i:s', $start_timestamp );
 
-				$end_date               = strtotime( '+1 month', $start_date );
-				$query_args['end_date'] = $end_date;
-			}
-
+			$end_timestamp = mktime( 0, 0, 0, (int) $month + 1, 1, (int) $year );
+			$query_args['end_date'] = gmdate( 'Y-m-d H:i:s', $end_timestamp );
+			
 			$has_filters = true;
 		}
 
@@ -407,6 +406,7 @@ class NotificationsListTable extends \WP_List_Table {
 
 		// Only show existing products.
 		$query_args['product_exists'] = true;
+        $query_args['return']         = 'objects';
 
 		$this->items = $this->data_store->query( $query_args );
 
@@ -461,7 +461,7 @@ class NotificationsListTable extends \WP_List_Table {
 	 * @return void
 	 */
 	protected function render_filters() {
-		// $this->display_months_dropdown();.
+		$this->display_months_dropdown();
 		$this->display_customer_dropdown();
 		$this->display_product_dropdown();
 	}
@@ -630,7 +630,7 @@ class NotificationsListTable extends \WP_List_Table {
 	protected function display_months_dropdown() {
 		global $wp_locale;
 
-		$months      = WC_BIS()->db->notifications->get_distinct_dates();
+		$months      = $this->data_store->get_distinct_dates();
 		$month_count = count( $months );
 
 		if ( ! $month_count || ( 1 === $month_count && 0 === (int) $months[0]->month ) ) {

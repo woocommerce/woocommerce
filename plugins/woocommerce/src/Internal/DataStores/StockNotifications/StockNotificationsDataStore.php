@@ -417,6 +417,8 @@ CREATE TABLE $meta_table_name (
 				'product_id' => array(),
 				'user_id'    => 0,
 				'user_email' => '',
+				'start_date' => 0,
+				'end_date'   => 0,
 				'limit'      => -1,
 				'offset'     => 0,
 				'return'     => 'ids', // i.e. 'count', 'ids', 'objects'.
@@ -455,6 +457,16 @@ CREATE TABLE $meta_table_name (
 			$where_values[] = esc_sql( $args['user_email'] );
 		}
 
+		if ( ! empty( $args['start_date'] ) ) {
+			$where[]        = 'date_created_gmt >= %s';
+			$where_values[] = $args['start_date'];
+		}
+
+		if ( ! empty( $args['end_date'] ) ) {
+			$where[]        = 'date_created_gmt < %s';
+			$where_values[] = $args['end_date'];
+		}
+
 		// Assemble the query.
 		$where  = implode( ' AND ', $where );
 		$where  = $where ? ' WHERE ' . $where : '';
@@ -491,5 +503,26 @@ CREATE TABLE $meta_table_name (
 			},
 			$results
 		);
+	}
+
+	/**
+	 * Get distinct notification creation dates.
+	 *
+	 * @return array
+	 */
+	public function get_distinct_dates() {
+
+		global $wpdb;
+
+		$table_name = esc_sql( $this->get_table_name() );
+		$results    = $wpdb->get_results(
+			"SELECT DISTINCT 
+				YEAR(date_created_gmt) AS year, 
+				MONTH(date_created_gmt) AS month 
+			FROM {$table_name} 
+			ORDER BY year DESC, month DESC"
+		);
+	
+		return $results;
 	}
 }
