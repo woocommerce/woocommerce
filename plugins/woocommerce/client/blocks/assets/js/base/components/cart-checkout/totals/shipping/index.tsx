@@ -33,7 +33,7 @@ export const TotalsShipping = ( {
 	const rateNames = getSelectedShippingRateNames( shippingRates );
 	const hasMultipleRates = rateNames.length > 1;
 	const rowLabel =
-		! hasSelectedRates || hasMultipleRates ? label : rateNames[ 0 ];
+		( ! hasSelectedRates || hasMultipleRates ) ? label : rateNames[ 0 ];
 
 	return (
 		<div className="wc-block-components-totals-shipping">
