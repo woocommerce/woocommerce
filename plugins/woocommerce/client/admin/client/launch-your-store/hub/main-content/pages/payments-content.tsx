@@ -71,7 +71,8 @@ export const PaymentsContent = ( {} ) => {
 	const {
 		refreshStoreData,
 		isStoreLoading,
-		storeError,
+		isWooPaymentsEnabled,
+		setWooPaymentsRecentlyEnabled,
 	} = useOnboardingContext();
 
 	const [ isPluginInstalling, setIsPluginInstalling ] = useState< boolean >( false );
@@ -85,6 +86,7 @@ export const PaymentsContent = ( {} ) => {
 			// Install and activate the WooPayments plugin.
 			installAndActivatePlugins( [ 'woocommerce-payments' ] )
 				.then( async () => {
+					setWooPaymentsRecentlyEnabled( true );
 					// Refresh store data after installation.
 					// This will trigger a re-render and initialize the onboarding flow.
 					refreshStoreData();
@@ -109,7 +111,7 @@ export const PaymentsContent = ( {} ) => {
 					<div className="settings-payments-onboarding-modal__loading">
 						<StripeSpinner />
 					</div>
-				) : storeError ? (
+				) : ! isWooPaymentsEnabled ? (
 					<InstallWooPaymentsStep
 						installWooPayments={ installWooPayments }
 						isPluginInstalling={ isPluginInstalling }
