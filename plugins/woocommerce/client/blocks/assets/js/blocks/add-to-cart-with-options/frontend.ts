@@ -118,17 +118,24 @@ const addToCartWithOptionsStore = store(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
-			get isFormValid() {
-				const { productType, availableVariations, selectedAttributes } =
-					getContext< Context >();
+			get isFormValid(): boolean {
+				const { productType } = getContext< Context >();
 				if ( productType !== 'variable' ) {
 					return true;
 				}
+				return !! addToCartWithOptionsStore.state.variationId;
+			},
+			get variationId(): number | null {
+				const context = getContext< Context >();
+				if ( ! context ) {
+					return null;
+				}
+				const { availableVariations, selectedAttributes } = context;
 				const matchedVariation = getMatchedVariation(
 					availableVariations,
 					selectedAttributes
 				);
-				return !! matchedVariation;
+				return matchedVariation?.variation_id || null;
 			},
 		},
 		actions: {
