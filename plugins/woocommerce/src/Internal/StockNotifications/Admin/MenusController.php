@@ -91,10 +91,24 @@ class MenusController {
 	 * Displays the Notifications list table.
 	 */
 	public function notifications_page() {
-		// TO-DO: Add the notifications list table.
 		wc_get_container()->get( NotificationsPage::class );
 
-		NotificationsPage::output();
+        // Select section.
+		$section = '';
+
+		// Nonce is checked in NotificationsPage::delete and NotificationsPage::output just displays the page.
+		if ( isset( $_GET['section'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$section = wc_clean( wp_unslash( $_GET['section'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
+
+		switch ( $section ) {
+			case 'delete':
+				NotificationsPage::delete();
+				break;
+			default:
+                NotificationsPage::output();
+				break;
+		}
 	}
 
 	/**

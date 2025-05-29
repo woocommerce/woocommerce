@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Admin;
 
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 
 /**
  * Notifications list table for Customer Stock Notifications.
@@ -13,7 +14,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 class NotificationsListTable extends \WP_List_Table {
 
 	/**
-	 * Page home URL.
+	 * Page URL.
 	 *
 	 * @const PAGE_URL
 	 */
@@ -118,7 +119,7 @@ class NotificationsListTable extends \WP_List_Table {
 	public function column_id( $notification ) {
 		$actions = array(
 			'edit'   => sprintf( '<a href="' . admin_url( 'admin.php?page=customer_stock_notifications&section=edit&notification=%d' ) . '">%s</a>', $notification->get_id(), __( 'Edit', 'woocommerce' ) ),
-			'delete' => sprintf( '<a href="' . wp_nonce_url( admin_url( 'admin.php?page=customer_stock_notifications&section=delete&notification=%d' ), 'delete_notification' ) . '">%s</a>', $notification->get_id(), __( 'Delete', 'woocommerce' ) ),
+			'delete' => sprintf( '<a href="' . wp_nonce_url( admin_url( 'admin.php?page=customer_stock_notifications&section=delete&notification=%d' ), 'delete_customer_stock_notification' ) . '">%s</a>', $notification->get_id(), __( 'Delete', 'woocommerce' ) ),
 		);
 
 		$title = $notification->get_id();
@@ -353,9 +354,8 @@ class NotificationsListTable extends \WP_List_Table {
 		$this->_column_headers = array( $columns, $hidden, $sortable );
 		$has_filters           = false;
 
-		// TODO: Create bulk actions.
-		// Process actions.
-		// $this->process_bulk_action();.
+		//Process actions.
+		$this->process_bulk_action();
 
 		// Setup params.
 		$paged   = isset( $_REQUEST['paged'] ) ? max( 0, (int) wp_unslash( $_REQUEST['paged'] ) - 1 ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -447,6 +447,69 @@ class NotificationsListTable extends \WP_List_Table {
 				'total_pages' => ceil( $this->total_items / $per_page ), // Calculate pages count.
 			)
 		);
+	}
+
+	/**
+	 * Process bulk actions.
+	 *
+	 * @return void
+	 */
+	private function process_bulk_action() {
+		if ( $this->current_action() ) {
+			check_admin_referer( 'bulk-' . $this->_args['plural'] );
+
+			$notifications = isset( $_GET['notification'] ) && is_array( $_GET['notification'] ) ? array_map( 'absint', $_GET['notification'] ) : array();
+
+			if ( empty( $notifications ) ) {
+				return;
+			}
+
+			$redirect_url = self::PAGE_URL;
+
+			if ( 'enable' === $this->current_action() ) {
+				foreach ( $notifications as $id ) {
+		
+					$notification = new Notification( $id );
+					$notification->set_status( NotificationStatus::ACTIVE );
+					$this->data_store->update( $notification );
+
+				}
+				$redirect_url = add_query_arg(
+					array(
+						'notice' => 'updated',
+					),
+					$redirect_url
+				);
+			} elseif ( 'disable' === $this->current_action() ) {
+				foreach ( $notifications as $id ) {
+					$notification = new Notification( $id );
+					$notification->set_status( NotificationStatus::CANCELLED );
+					$this->data_store->update( $notification );
+				}
+
+				$redirect_url = add_query_arg(
+					array(
+						'notice' => 'updated',
+					),
+					$redirect_url
+				);
+			} elseif ( 'delete' === $this->current_action() ) {
+				foreach ( $notifications as $id ) {
+					$notification = new Notification( $id );
+					$this->data_store->delete( $notification );
+				}
+
+				$redirect_url = add_query_arg(
+					array(
+						'notice' => 'deleted',
+					),
+					$redirect_url
+				);
+			}
+
+			wp_safe_redirect( $redirect_url );
+			exit();
+		}
 	}
 
 	/**
@@ -610,8 +673,7 @@ class NotificationsListTable extends \WP_List_Table {
 	 * @return string
 	 */
 	protected function get_link( $args, $label, $css_class = '' ) {
-		$base_url = admin_url( self::PAGE_URL );
-		$url      = add_query_arg( $args, $base_url );
+		$url = add_query_arg( $args );
 
 		$class_html   = '';
 		$aria_current = '';
