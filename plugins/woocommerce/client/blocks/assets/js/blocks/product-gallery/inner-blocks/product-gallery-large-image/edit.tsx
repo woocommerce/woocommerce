@@ -14,11 +14,7 @@ const getInnerBlocksTemplate = () => [
 	[ largeImageNextPreviousButtonMetadata.name ],
 ];
 
-type ProductImageProps = {
-	image: { src: string; alt: string };
-};
-
-const ProductImage = ( { image }: ProductImageProps ) => {
+const ProductImage = ( { image }: { image: { src: string; alt: string } } ) => {
 	const placeholderSrc = `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-image-gallery.svg`;
 
 	const src = image.src || placeholderSrc;
