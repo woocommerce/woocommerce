@@ -62,10 +62,31 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 		$cart               = $this->get_cart_instance();
 		$cart_items         = $cart->get_cart();
 		$screen_reader_text = __( 'Products in cart', 'woocommerce' );
+		$remove_item_label  = __( 'Remove item', 'woocommerce' );
+
+		// translators: %s is the name of the product in cart.
+		$reduce_quantity_label = __( 'Reduce quantity of %s', 'woocommerce' );
+
+		// translators: %s is the name of the product in cart.
+		$increase_quantity_label = __( 'Increase quantity of %s', 'woocommerce' );
+
+		// translators: %s is the name of the product in cart.
+		$quantity_description_label = __( 'Quantity of %s in your cart', 'woocommerce' );
+
+		// translators: %s is the name of the product in cart.
+		$remove_from_cart_label = __( 'Remove %s from cart', 'woocommerce' );
+
+		$context = array(
+			'reduceQuantityLabel'      => $reduce_quantity_label,
+			'increaseQuantityLabel'    => $increase_quantity_label,
+			'quantityDescriptionLabel' => $quantity_description_label,
+			'removeFromCartLabel'      => $remove_from_cart_label,
+		);
 
 		ob_start();
 		?>
-		<div data-wp-interactive="<?php echo esc_attr( $this->get_full_block_name() ); ?>" class="wp-block-woocommerce-mini-cart-items-block wc-block-mini-cart__items" tabindex="-1">
+		<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+		<div <?php echo wp_interactivity_data_wp_context( $context ); ?> data-wp-interactive="<?php echo esc_attr( $this->get_full_block_name() ); ?>" class="wp-block-woocommerce-mini-cart-items-block wc-block-mini-cart__items" tabindex="-1">
 			<div class="wp-block-woocommerce-mini-cart-products-table-block wc-block-mini-cart__products-table">
 				<table class="wc-block-cart-items wc-block-mini-cart-items" tabindex="-1">
 					<caption class="screen-reader-text">
@@ -97,19 +118,20 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 										</div>
 										<div class="wc-block-cart-item__quantity">
 											<div class="wc-block-components-quantity-selector">
-												<input class="wc-block-components-quantity-selector__input" type="number" step="1" min="1" max="9999" aria-label="Quantity of Hat in your cart." value="3">
-												<button aria-label="Reduce quantity of Hat" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
-												<button aria-label="Increase quantity of Hat" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
+												<input data-wp-bind--aria-label="state.quantityDescriptionLabel" data-wp-bind--value="context.cartItem.quantity" class="wc-block-components-quantity-selector__input" type="number" step="1" min="1" max="9999" >
+												<button data-wp-bind--aria-label="state.reduceQuantityLabel" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
+												<button data-wp-bind--aria-label="state.increaseQuantityLabel" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
 											</div>
-											<button class="wc-block-cart-item__remove-link" aria-label="Remove Hat from cart">Remove item</button>
+											<button data-wp-bind--aria-label="state.removeFromCartLabel" class="wc-block-cart-item__remove-link" >
+												<?php echo esc_html( $remove_item_label ); ?>
+											</button>
 										</div>
 									</div>
 								</td>
 								<td class="wc-block-cart-item__total">
 									<div class="wc-block-cart-item__total-price-and-sale-badge-wrapper">
 										<span class="price wc-block-components-product-price">
-											<span class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value">
-												$36.00
+											<span data-wp-text="state.lineItemTotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value">
 											</span>
 										</span>
 									</div>

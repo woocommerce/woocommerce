@@ -463,9 +463,10 @@ class MiniCart extends AbstractBlock {
 		$wrapper_styles           = $classes_styles['styles'];
 		$template_part_contents   = $this->get_template_part_contents( 'experimental-iapi-mini-cart' );
 
-		$cart            = $this->get_cart_instance();
-		$cart_item_count = $cart ? $cart->get_cart_contents_count() : 0;
-		$cart_item_text  = '';
+		$cart                             = $this->get_cart_instance();
+		$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
+		$cart_item_text                   = '';
+		$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === 'incl';
 
 		if ( 'always' === $product_count_visibility ) {
 			$cart_item_text = $cart_item_count;
@@ -481,8 +482,9 @@ class MiniCart extends AbstractBlock {
 		);
 
 		$context = array(
-			'isOpen'                 => false,
-			'productCountVisibility' => $product_count_visibility,
+			'isOpen'                       => false,
+			'productCountVisibility'       => $product_count_visibility,
+			'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
 		);
 
 		ob_start();

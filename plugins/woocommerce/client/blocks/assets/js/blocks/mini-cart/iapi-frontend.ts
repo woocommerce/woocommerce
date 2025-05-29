@@ -32,6 +32,7 @@ const { state: wooStoreState } = store< WooCommerce >(
 type MiniCartContext = {
 	isOpen: boolean;
 	productCountVisibility: 'never' | 'always' | 'greater_than_zero';
+	displayCartPriceIncludingTax: boolean;
 };
 
 // Inject style tags for badge styles based on background colors of the document.
@@ -113,7 +114,7 @@ store( 'woocommerce/mini-cart-footer-block', {
 		get formattedSubtotal(): string {
 			const { displayCartPriceIncludingTax } = getContext< {
 				displayCartPriceIncludingTax: boolean;
-			} >();
+			} >( 'woocommerce/mini-cart' );
 
 			const { currency } = getConfig( 'woocommerce' );
 
@@ -132,7 +133,7 @@ store( 'woocommerce/mini-cart-footer-block', {
 	},
 } );
 
-// TODO - put the cart item state in this scope to make looping the each simpler.
+// TODO - type this store
 
 type CartItemContext = {
 	cartItem: CartItem;
@@ -140,14 +141,53 @@ type CartItemContext = {
 
 store( 'woocommerce/mini-cart-items-block', {
 	state: {
+		// Intended to be used in context of a cart item in wp-each
+		get reduceQuantityLabel() {
+			const { reduceQuantityLabel } = getContext(
+				'woocommerce/mini-cart-items-block'
+			);
+			const { cartItem } = getContext< CartItemContext >();
+
+			return reduceQuantityLabel.replace( '%s', cartItem.name );
+		},
+
+		// Intended to be used in context of a cart item in wp-each
+		get increaseQuantityLabel() {
+			const { increaseQuantityLabel } = getContext(
+				'woocommerce/mini-cart-items-block'
+			);
+			const { cartItem } = getContext< CartItemContext >();
+
+			return increaseQuantityLabel.replace( '%s', cartItem.name );
+		},
+
+		// Intended to be used in context of a cart item in wp-each
+		get quantityDescriptionLabel() {
+			const { quantityDescriptionLabel } = getContext(
+				'woocommerce/mini-cart-items-block'
+			);
+			const { cartItem } = getContext< CartItemContext >();
+
+			return quantityDescriptionLabel.replace( '%s', cartItem.name );
+		},
+
+		// Intended to be used in context of a cart item in wp-each
+		get removeFromCartLabel() {
+			const { removeFromCartLabel } = getContext(
+				'woocommerce/mini-cart-items-block'
+			);
+			const { cartItem } = getContext< CartItemContext >();
+
+			return removeFromCartLabel.replace( '%s', cartItem.name );
+		},
+
 		get cartItems() {
 			return wooStoreState.cart.items;
 		},
 
-		// Intended to be used in context of a cart item
+		// Intended to be used in context of a cart item in wp-each
 		get itemShortDescription() {
 			const ctx = getContext< CartItemContext >();
-			console.log( { ...ctx.cartItem } );
 			const el = getElement();
 
 			if ( el.ref ) {
@@ -162,7 +202,7 @@ store( 'woocommerce/mini-cart-items-block', {
 			}
 		},
 
-		// Expects to be run in context of a cart item.
+		// Intended to be used in context of a cart item in wp-each
 		get itemPrice(): string {
 			const ctx = getContext< CartItemContext >();
 			const { currency } = getConfig( 'woocommerce' );
@@ -178,9 +218,36 @@ store( 'woocommerce/mini-cart-items-block', {
 			);
 		},
 
+		// Intended to be used in context of a cart item in wp-each
+		get lineItemTotal(): string {
+			const ctx = getContext< CartItemContext >();
+			const { displayCartPriceIncludingTax } = getContext(
+				'woocommerce/mini-cart'
+			);
+			const { currency } = getConfig( 'woocommerce' );
+
+			const normalizedCurrency = normalizeCurrencyResponse(
+				wooStoreState.cart.totals,
+				currency
+			);
+
+			const totals = ctx.cartItem.totals;
+
+			const totalLinePrice = displayCartPriceIncludingTax
+				? parseInt( totals.line_subtotal, 10 ) +
+				  parseInt( totals.line_subtotal_tax, 10 )
+				: parseInt( totals.line_subtotal, 10 );
+
+			return formatPriceWithCurrency(
+				totalLinePrice,
+				normalizedCurrency
+			);
+		},
+
+		// Intended to be used in context of a cart item in wp-each
 		get itemThumbnail(): string {
 			const ctx = getContext< CartItemContext >();
-			return ctx.cartItem.images[ 0 ]?.thumbnail;
+			return ctx.cartItem.images[ 0 ]?.thumbnail || '';
 		},
 	},
 } );

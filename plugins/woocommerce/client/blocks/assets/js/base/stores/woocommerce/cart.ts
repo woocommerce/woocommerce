@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { getConfig, getContext, store } from '@wordpress/interactivity';
+import { store } from '@wordpress/interactivity';
 import type {
 	Cart,
 	CartItem,
@@ -15,10 +15,6 @@ import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
  * Internal dependencies
  */
 import { triggerAddedToCartEvent } from './legacy-events';
-import {
-	formatPriceWithCurrency,
-	normalizeCurrencyResponse,
-} from '../../../../../packages/prices/utils/currency';
 
 export type OptimisticCartItem = {
 	key?: string;
@@ -89,7 +85,6 @@ const { state, actions } = store< Store >(
 	{
 		state: {
 			get totalItemsInCart(): number {
-				console.log( { ...state.cart.items[ 0 ].images } );
 				return state.cart.items.reduce(
 					( total, { quantity } ) => total + quantity,
 					0
