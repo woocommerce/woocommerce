@@ -251,7 +251,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Fix get_permalink method logic in WC_Product_Variation. [#56607](https://github.com/woocommerce/woocommerce/pull/56607)
 * Fix - Fix import CSV products not completing product task [#56389](https://github.com/woocommerce/woocommerce/pull/56389)
 * Fix - Fix incorrect links for managing offline payment methods in payments settings. [#57752](https://github.com/woocommerce/woocommerce/pull/57752)
-* Fix - Fix incorrect net sales in analytics product reports for partial and full refunds [#53019](https://github.com/woocommerce/woocommerce/pull/53019)
 * Fix - Fix incorrect type on woocommerce_email_sent hook [#57435](https://github.com/woocommerce/woocommerce/pull/57435)
 * Fix - Fix issues with Segments Intervals when Order Date Paid is further than Order Date Created [#55926](https://github.com/woocommerce/woocommerce/pull/55926)
 * Fix - Fix is_cart/is_checkout detection when using classic shortcode block [#56167](https://github.com/woocommerce/woocommerce/pull/56167)
