@@ -147,6 +147,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				'<input type="radio" %s/>',
 				$this->get_normalized_attributes(
 					array(
+						'class'                  => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input',
 						'name'                   => 'attribute_' . $attribute_name,
 						'value'                  => $attribute_term['value'],
 						'data-wp-bind--checked'  => 'state.isPillSelected',
