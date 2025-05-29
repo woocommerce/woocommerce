@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<input type="search" placeholder="<?php echo esc_attr__( 'Search by user e-mail', 'woocommerce' ); ?>" value="<?php echo esc_attr( $search ); ?>" name="s" id="customer-stock-notifications-search-input">
 				<input type="submit" value="<?php echo esc_attr__( 'Search', 'woocommerce' ); ?>" class="button" id="search-submit" name="">
 			</p>
-			<input type="hidden" name="page" value="<?php echo isset( $_REQUEST['page'] ) ? esc_attr( wp_unslash( $_REQUEST['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>"/>
+			<input type="hidden" name="page" value="<?php echo isset( $_REQUEST['page'] ) ? esc_attr( wc_clean( wp_unslash( $_REQUEST['page'] ) ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>"/>
 			<?php $table->display(); ?>
 		</form>
 
