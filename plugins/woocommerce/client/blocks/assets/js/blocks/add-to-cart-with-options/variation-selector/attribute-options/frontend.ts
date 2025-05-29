@@ -90,12 +90,8 @@ const isAttributeValueValid = ( {
 	return availableVariations.some( ( availableVariation ) => {
 		// Skip variations that don't match the current attribute value.
 		if (
-			availableVariation.attributes[
-				'attribute_' + attributeName.toLowerCase()
-			] !== attributeValue &&
-			availableVariation.attributes[
-				'attribute_' + attributeName.toLowerCase()
-			] !== '' // "" is used for "any".
+			availableVariation.attributes[ attributeName ] !== attributeValue &&
+			availableVariation.attributes[ attributeName ] !== '' // "" is used for "any".
 		) {
 			return false;
 		}
@@ -105,7 +101,7 @@ const isAttributeValueValid = ( {
 			( selectedAttribute ) => {
 				const availableVariationAttributeValue =
 					availableVariation.attributes[
-						'attribute_' + selectedAttribute.attribute.toLowerCase()
+						selectedAttribute.attribute
 					];
 				// If the current available variation matches the selected
 				// value, count it.
@@ -120,8 +116,7 @@ const isAttributeValueValid = ( {
 				// selection.
 				if ( availableVariationAttributeValue === '' ) {
 					if (
-						selectedAttribute.attribute.toLowerCase() !==
-							attributeName.toLowerCase() ||
+						selectedAttribute.attribute !== attributeName ||
 						attributeValue === selectedAttribute.value
 					) {
 						return true;
