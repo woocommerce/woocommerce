@@ -73,25 +73,4 @@ class Social_Links_Helper_Test extends \Email_Editor_Unit_Test {
 		// Test unknown size.
 		$this->assertEquals( '24px', Social_Links_Helper::get_social_link_size_option_value( 'unknown_size' ) );
 	}
-
-	/**
-	 * Test it checks if string starts with
-	 */
-	public function testItChecksIfStringStartsWith(): void {
-		// Test basic functionality.
-		$this->assertTrue( Social_Links_Helper::str_starts_with( 'Hello World', 'Hello' ) );
-		$this->assertFalse( Social_Links_Helper::str_starts_with( 'Hello World', 'World' ) );
-
-		// Test empty strings.
-		$this->assertTrue( Social_Links_Helper::str_starts_with( 'Hello World', '' ) );
-		$this->assertFalse( Social_Links_Helper::str_starts_with( '', 'Hello' ) );
-
-		// Test case sensitivity.
-		$this->assertFalse( Social_Links_Helper::str_starts_with( 'Hello World', 'hello' ) );
-
-		// Test special characters.
-		$this->assertTrue( Social_Links_Helper::str_starts_with( 'https://example.com', 'https://' ) );
-		$this->assertTrue( Social_Links_Helper::str_starts_with( '//example.com', '//' ) );
-		$this->assertTrue( Social_Links_Helper::str_starts_with( '#section', '#' ) );
-	}
 }

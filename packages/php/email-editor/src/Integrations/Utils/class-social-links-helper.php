@@ -132,23 +132,4 @@ class Social_Links_Helper {
 		);
 		return $options[ $size ] ?? '24px'; // default to normal size.
 	}
-
-	/**
-	 * Polyfill for str_starts_with() function added in PHP 8.0.
-	 *
-	 * @param string $haystack The string to search in.
-	 * @param string $needle The substring to search for.
-	 * @return bool True if $haystack starts with $needle, false otherwise.
-	 */
-	public static function str_starts_with( string $haystack, string $needle ): bool {
-		if ( function_exists( 'str_starts_with' ) ) {
-			return str_starts_with( $haystack, $needle );
-		}
-
-		// Handle empty needle case (matches native behavior).
-		if ( '' === $needle ) {
-			return true;
-		}
-		return strncmp( $haystack, $needle, strlen( $needle ) ) === 0;
-	}
 }

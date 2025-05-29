@@ -82,7 +82,7 @@ class Social_Links extends Abstract_Block_Renderer {
 		 * Prepend URL with https:// if it doesn't appear to contain a scheme
 		 * and it's not a relative link or a fragment.
 		 */
-		if ( ! wp_parse_url( $service_url, PHP_URL_SCHEME ) && ! Social_Links_Helper::str_starts_with( $service_url, '//' ) && ! Social_Links_Helper::str_starts_with( $service_url, '#' ) ) {
+		if ( ! wp_parse_url( $service_url, PHP_URL_SCHEME ) && ! str_starts_with( $service_url, '//' ) && ! str_starts_with( $service_url, '#' ) ) {
 			$service_url = 'https://' . $service_url;
 		}
 
@@ -131,7 +131,7 @@ class Social_Links extends Abstract_Block_Renderer {
 		// divide the icon value by 2 to get the font size.
 		$font_size_value = (int) rtrim( $icon_size, 'px' );
 		$font_size       = ( $font_size_value / 2 ) + 1; // inline with core styles.
-		$text_font_size  =  "{$font_size}px";
+		$text_font_size  = "{$font_size}px";
 		$anchor_styles   = $this->compile_css(
 			array(
 				'color'           => $icon_color_value,
