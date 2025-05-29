@@ -59,7 +59,7 @@ test.describe(
 						.getByRole( 'textbox' );
 
 					await expect( upsellTextBoxLocator ).toBeVisible();
-				} ).toPass( { timeout: 3_000 } );
+				} ).toPass();
 			} );
 		}
 

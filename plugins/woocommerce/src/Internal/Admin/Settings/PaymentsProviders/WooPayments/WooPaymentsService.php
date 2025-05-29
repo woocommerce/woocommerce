@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
 
 use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiArgumentException;
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
@@ -1466,7 +1467,8 @@ class WooPaymentsService {
 		}
 
 		// If the WooPayments installed version is less than the minimum required version, we can't do anything.
-		if ( defined( 'WCPAY_VERSION_NUMBER' ) && version_compare( WCPAY_VERSION_NUMBER, self::EXTENSION_MINIMUM_VERSION, '<' ) ) {
+		if ( Constants::is_defined( 'WCPAY_VERSION_NUMBER' ) &&
+			version_compare( Constants::get_constant( 'WCPAY_VERSION_NUMBER' ), self::EXTENSION_MINIMUM_VERSION, '<' ) ) {
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_extension_version',
 				/* translators: %s: WooPayments. */

@@ -818,16 +818,29 @@ class WC_Install {
 		}
 
 		// After the callbacks finish, update the db version to the current WC version.
+		$success = true;
 		if ( version_compare( $current_db_version, $current_wc_version, '<' ) &&
 			! WC()->queue()->get_next( 'woocommerce_update_db_to_current_version' ) ) {
-			WC()->queue()->schedule_single(
+			$success = WC()->queue()->schedule_single(
 				$scheduled_time + $loop,
 				'woocommerce_update_db_to_current_version',
 				array(
 					'version' => $current_wc_version,
 				),
 				'woocommerce-db-updates'
-			);
+			) > 0;
+		}
+
+		if ( ! $success ) {
+			wc_get_logger()->error( 'There was an error scheduling database updates.', array( 'source' => 'wc-updater' ) );
+
+			// Revert back to nudge so updates are not missed.
+			if ( self::is_db_auto_update_enabled() ) {
+				WC_Admin_Notices::add_notice( 'update', true );
+				WC()->is_wc_admin_active() && new WC_Notes_Run_Db_Update();
+			}
+
+			return;
 		}
 
 		wc_get_logger()->info( 'Database updates scheduled.', array( 'source' => 'wc-updater' ) );
