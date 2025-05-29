@@ -23,11 +23,12 @@ class QuantityLimitsTests extends TestCase {
 			)
 		);
 
-		// Enable stock management.
+		// Enable stock management globally.
+		update_option( 'woocommerce_manage_stock', 'yes' );
+
 		$product->set_manage_stock( true );
-		// Set stock quantity to 10.
 		$product->set_stock_quantity( 10 );
-		// Save the changes.
+		$product->set_backorders( 'no' );
 		$product->save();
 
 		$quantity_limits = new QuantityLimits();
@@ -48,15 +49,15 @@ class QuantityLimitsTests extends TestCase {
 			)
 		);
 
-		// Set stock quantity to 10.
+		// Enable stock management.
+		update_option( 'woocommerce_manage_stock', 'yes' );
+
 		$product->set_stock_quantity( 10 );
-		// Save the changes.
+		$product->set_backorders( 'no' );
 		$product->save();
 
 		// Disable stock management.
-		$product->set_manage_stock( false );
-		// Save the changes.
-		$product->save();
+		update_option( 'woocommerce_manage_stock', 'no' );
 
 		$quantity_limits = new QuantityLimits();
 		$limits          = $quantity_limits->get_add_to_cart_limits( $product );
@@ -76,14 +77,12 @@ class QuantityLimitsTests extends TestCase {
 			)
 		);
 
-		// Set stock quantity to 10.
-		$product->set_stock_quantity( 10 );
-		// Save the changes.
-		$product->save();
+		// Enable stock management globally.
+		update_option( 'woocommerce_manage_stock', 'yes' );
 
-		// Set sold individually to true.
+		$product->set_stock_quantity( 10 );
+		$product->set_backorders( 'no' );
 		$product->set_sold_individually( true );
-		// Save the changes.
 		$product->save();
 
 		$quantity_limits = new QuantityLimits();
