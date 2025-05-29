@@ -11,8 +11,6 @@ import clsx from 'clsx';
 import {
 	Button,
 	// @ts-ignore No types for this exist yet.
-	__experimentalHeading as Heading,
-	// @ts-ignore No types for this exist yet.
 	__experimentalItemGroup as ItemGroup,
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
@@ -25,14 +23,17 @@ import { useOnboardingContext } from '~/settings-payments/onboarding/providers/w
 import type { SidebarComponentProps } from '../xstate';
 import { SidebarContainer } from './sidebar-container';
 import { SiteHub } from '~/customize-store/assembler-hub/site-hub';
-import { taskIcons } from './icons';
+import { taskIcons, taskCompleteIcon } from './icons';
+import { StepPlaceholder } from './step-placeholder';
 
 export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 	const {
 		steps: allSteps,
 		currentStep,
 		justCompletedStepId,
+		isLoading,
 	} = useOnboardingContext();
+
 	const currentStepIndex = allSteps.findIndex(
 		( step ) => step.id === currentStep?.id
 	);
@@ -45,13 +46,8 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 				} );
 			} }
 		>
-			{ __( 'Get paid', 'woocommerce' ) }
+			{ __( 'Set up WooPayments', 'woocommerce' ) }
 		</Button>
-	);
-
-	const sidebarDescription = __(
-		'Set up WooPayments to start accepting payments in your store.',
-		'woocommerce'
 	);
 
 	return (
@@ -73,41 +69,55 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 					className="woocommerce-edit-site-layout__hub"
 				/>
 			</motion.div>
-			<SidebarContainer
-				title={ sidebarTitle }
-				description={ sidebarDescription }
-			>
+			<SidebarContainer title={ sidebarTitle }>
 				{ /* We are using these classes to inherit the styles from the edit your store styling */ }
-				<div className="woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group-header">
-					<Heading level={ 2 }>
-						{ __( 'Setup your payments', 'woocommerce' ) }
-					</Heading>
-				</div>
 				<ItemGroup className="woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group">
-					{ allSteps.map( ( step ) => (
-						<SidebarNavigationItem
-							key={ step.id }
-							className={ clsx( step.id, {
-								active: currentStep?.id === step.id,
-								'payment-step': true,
-								'payment-step--active':
-									currentStep?.id === step.id,
-								'payment-step--disabled':
-									currentStep?.id !== step.id,
-							} ) }
-							icon={
-								step.id === justCompletedStepId ||
-								step.status === 'completed' ||
-								currentStepIndex === allSteps.length
-									? taskIcons.completedPaymentStep
-									: taskIcons.activePaymentStep
-							}
-							disabled={ true }
-							showChevron={ false }
+					{ isLoading && (
+						<motion.div
+							initial={ { opacity: 0 } }
+							animate={ { opacity: 1 } }
+							exit={ { opacity: 0 } }
+							transition={ { duration: 0.3 } }
+							<StepPlaceholder rows={ 3 } />
+						</motion.div>
+					) }
+					{ ! isLoading && (
+						<motion.div
+							initial={ { opacity: 0, y: 0 } }
+							animate={ { opacity: 1, y: 0 } }
+							transition={ { duration: 0.7, delay: 0.2 } }
 						>
-							{ step.label }
-						</SidebarNavigationItem>
-					) ) }
+							{ allSteps.map( ( step ) => {
+								const isStepComplete =
+									step.id === justCompletedStepId ||
+									step.status === 'completed' ||
+									currentStepIndex === allSteps.length;
+								return (
+									<SidebarNavigationItem
+										key={ step.id }
+										className={ clsx( step.id, {
+											active: currentStep?.id === step.id,
+											'payment-step': true,
+											'payment-step--active':
+												currentStep?.id === step.id,
+											'payment-step--disabled':
+												currentStep?.id !== step.id,
+											'is-complete': isStepComplete,
+										} ) }
+										icon={
+											isStepComplete
+												? taskCompleteIcon
+												: taskIcons.activePaymentStep
+										}
+										disabled={ true }
+										showChevron={ false }
+									>
+										{ step.label }
+									</SidebarNavigationItem>
+								);
+							} ) }
+						</motion.div>
+					) }
 				</ItemGroup>
 			</SidebarContainer>
 		</div>
