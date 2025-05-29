@@ -38,7 +38,6 @@ const siteIconVariants = {
 	},
 };
 
-
 export const BackButtonInnerButton = () => {
 	const { urls } = useSelect(
 		( select ) => ( {
@@ -107,5 +106,3 @@ export const BackButtonContent = () => {
 		</BackButton>
 	);
 };
-
-

@@ -13,7 +13,7 @@ import {
 /**
  * Internal dependencies
  */
-import { createStore } from './store';
+import { createStore, storeName } from './store';
 import { useEmailCss } from './hooks';
 import { StylesSidebar } from './components/styles-sidebar';
 import { TemplateSettingsPanel } from './components/sidebar/template-settings-panel';
@@ -31,18 +31,29 @@ import { initTextHooks } from './text-hooks';
 import { SendPreview } from './components/preview';
 import { TemplateSelection } from './components/template-select';
 import { BackButtonInnerButton } from './components/header/back-button-content';
+import { PublishSave } from './hacks/publish-save';
 
 import './style.scss';
 
 const EmailEditorPlugin = () => {
 	const { updateEditorSettings } = useDispatch( editorStore );
 	const [ styles ] = useEmailCss();
-	const { editedPostId, currentPostType } = useSelect( ( sel ) => {
+	const {
+		editedPostId,
+		currentPostType,
+		isFullScreenForced,
+		displaySendEmailButton,
+	} = useSelect( ( sel ) => {
+		const initialEditorSettings =
+			sel( storeName ).getInitialEditorSettings();
 		return {
 			editedPostId: sel( editorStore ).getCurrentPostId(),
 			currentPostType: sel( editorStore ).getCurrentPostType(),
+			isFullScreenForced: initialEditorSettings.isFullScreenForced,
+			displaySendEmailButton:
+				initialEditorSettings.displaySendEmailButton,
 		};
-	} );
+	}, [] );
 
 	// Remove post status panel. We replace it by our own. The native one needs more customizations.
 	// @ts-expect-error Type is missing in @types/wordpress__editor
@@ -75,9 +86,12 @@ const EmailEditorPlugin = () => {
 			<BlockCompatibilityWarnings />
 			<SendPreview />
 			<TemplateSelection />
-			<MainDashboardButton>
-				<BackButtonInnerButton />
-			</MainDashboardButton>
+			{ isFullScreenForced && (
+				<MainDashboardButton>
+					<BackButtonInnerButton />
+				</MainDashboardButton>
+			) }
+			{ displaySendEmailButton && <PublishSave /> }
 		</>
 	);
 };

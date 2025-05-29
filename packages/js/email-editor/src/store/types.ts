@@ -29,7 +29,14 @@ export type ExperimentalSettings = {
 	};
 };
 
-export type EmailEditorSettings = EditorSettings & ExperimentalSettings;
+export type EmailEditorAdditionalSettings = {
+	isFullScreenForced: boolean;
+	displaySendEmailButton: boolean;
+};
+
+export type EmailEditorSettings = EditorSettings &
+	ExperimentalSettings &
+	EmailEditorAdditionalSettings;
 
 export type EmailTheme = {
 	version?: number;
