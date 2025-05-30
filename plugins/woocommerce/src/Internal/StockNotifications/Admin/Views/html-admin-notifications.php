@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<div class="wrap woocommerce woocommerce-customer-stock-notifications">
+<div class="wrap woocommerce-customer-stock-notifications">
 
 	<h1 class="wp-heading-inline"><?php esc_html_e( 'Stock Notifications', 'woocommerce' ); ?></h1>
 	<a href="<?php echo esc_url( add_query_arg( array( 'section' => 'create' ), admin_url( 'customer_stock_notifications' ) ) ); ?>" class="page-title-action"><?php esc_html_e( 'Add New', 'woocommerce' ); ?></a>
