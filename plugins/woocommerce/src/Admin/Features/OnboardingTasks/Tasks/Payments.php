@@ -82,6 +82,33 @@ class Payments extends Task {
 		return true;
 	}
 
+	/**
+	 * The task action URL.
+	 *
+	 * Empty string means the task linking will be handled by the JS logic.
+	 *
+	 * @return string
+	 */
+	public function get_action_url() {
+		if (
+			// Use case 1: Merchant has no payment extensions installed, and their store is in a WooPayments-supported geo
+			( ! $this->has_gateways_other_than_woopayments() && $this->is_store_in_woopayments_supported_geo() ) ||
+			// Use case 2: Merchant has the WooPayments extension installed but they have not completed setup
+			( $this->is_woopayments_active() && ! $this->is_woopayments_configured() ) ||
+			// Use case 3: Merchant has the WooPayments extension installed and configured with a test account
+			( $this->is_woopayments_active() && $this->is_woopayments_test_account() )
+			// Use case 4: Merchant has multiple payment extensions installed but not set up, and the WooPayments extension is one of them
+			// TODO: Add this use case
+		) {
+			// Return empty string for NOX in LYS experience
+			return '';
+		}
+
+		// Use case 2: Merchant has no payment extensions installed, and their store is NOT in a WooPayments-supported geo
+		// Use case 5B: Merchant has multiple payment extensions installed but not set up, and the WooPayments extension is NOT one of them
+		// Default case: Redirect to the Payment settings page (existing LYS behavior)
+		return admin_url( 'admin.php?page=wc-settings&tab=checkout' );
+	}
 
 	/**
 	 * Check if the WooPayments plugin is active.
