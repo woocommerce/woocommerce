@@ -59,7 +59,7 @@ class AddToCartForm extends AbstractBlock {
 	 *                           Note, this will be empty in the editor context when the block is
 	 *                           not in the post content on editor load.
 	 */
-	protected function enqueue_data( array $attributes = [] ) {
+	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
 		$this->asset_data_registry->add( 'isStepperLayoutFeatureEnabled', Features::is_enabled( 'add-to-cart-with-options-stepper-layout' ) );
 		$this->asset_data_registry->add( 'isBlockifiedAddToCart', Features::is_enabled( 'blockified-add-to-cart' ) );
@@ -76,23 +76,12 @@ class AddToCartForm extends AbstractBlock {
 	private function add_steppers( $product_html, $product_name ) {
 		// Regex pattern to match the <input> element with id starting with 'quantity_'.
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
-
-		// Get the initial value and min value from the input.
-		preg_match( '/value="([^"]*)"/', $product_html, $value_matches );
-		preg_match( '/min="([^"]*)"/', $product_html, $min_matches );
-
-		$initial_value = isset( $value_matches[1] ) ? intval( $value_matches[1] ) : 1;
-		$min_value     = isset( $min_matches[1] ) ? intval( $min_matches[1] ) : 1;
-
-		// Add disabled attribute if initial value equals min value.
-		$minus_disabled = $initial_value <= $min_value ? ' disabled' : '';
-
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.removeQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus"' . $minus_disabled . '>-</button>';
+		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.removeQuantity" data-wp-bind--disabled="!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.addQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
+		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.addQuantity" data-wp-bind--disabled="!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
 		$new_html    = preg_replace( $pattern, $plus_button, $product_html );
 		$new_html    = preg_replace( $pattern, $minus_button, $new_html );
 		return $new_html;
@@ -213,9 +202,16 @@ class AddToCartForm extends AbstractBlock {
 		);
 
 		$form = sprintf(
-			'<div %1$s %2$s>%3$s</div>',
+			'<div %1$s %2$s %3$s>%4$s</div>',
 			$wrapper_attributes,
 			$is_stepper_style ? 'data-wp-interactive="woocommerce/add-to-cart-form"' : '',
+			$is_stepper_style ? sprintf(
+				'data-wp-context=\'%s\'',
+				wp_json_encode(
+					array( 'quantity' => apply_filters( 'woocommerce_add_to_cart_quantity', 1, $product->get_id() ) ),
+					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+				)
+			) : '',
 			$product_html
 		);
 
