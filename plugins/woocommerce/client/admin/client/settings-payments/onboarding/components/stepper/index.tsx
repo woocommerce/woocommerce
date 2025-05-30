@@ -60,6 +60,17 @@ export default function Stepper( {
 		);
 	};
 
+	// Sort steps to show completed ones first
+	const sortedSteps = steps.sort( ( a, b ) => {
+		const aCompleted = isStepCompleted( a );
+		const bCompleted = isStepCompleted( b );
+
+		if ( aCompleted === bCompleted ) {
+			return 0;
+		}
+		return aCompleted ? -1 : 1;
+	} );
+
 	// Renders only the active step based on the current step ID.
 	return (
 		<>
