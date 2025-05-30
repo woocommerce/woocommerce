@@ -215,9 +215,9 @@ const { state, actions } = store< Store >(
 						actions.showNoticeError( error );
 					} );
 
-					// Ensure we only get a single cart response
+					// Use the last cart response to update the local cart.
 					const cartResponse = Array.isArray( json.responses )
-						? json.responses[ 0 ].body
+						? json.responses[ json.responses.length - 1 ].body
 						: json;
 
 					// Updates the local cart.
