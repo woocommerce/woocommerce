@@ -14,9 +14,14 @@ exports[`TotalsFooterItem Does not show the "including %s of tax" line if tax is
       class="wc-block-components-totals-item__value"
     >
       <span
-        class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
+        class="wc-block-number-format-container"
       >
-        £85.00
+        <span
+          class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
+          style="unicode-bidi: bidi-override; direction: ltr;"
+        >
+          £85.00
+        </span>
       </span>
     </div>
     <div
@@ -40,9 +45,14 @@ exports[`TotalsFooterItem Does not show the "including %s of tax" line if tax is
       class="wc-block-components-totals-item__value"
     >
       <span
-        class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
+        class="wc-block-number-format-container"
       >
-        £85.00
+        <span
+          class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
+          style="unicode-bidi: bidi-override; direction: ltr;"
+        >
+          £85.00
+        </span>
       </span>
     </div>
     <div
@@ -66,9 +76,14 @@ exports[`TotalsFooterItem Shows the "including %s TAX LABEL" line with single ta
       class="wc-block-components-totals-item__value"
     >
       <span
-        class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
+        class="wc-block-number-format-container"
       >
-        £85.00
+        <span
+          class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
+          style="unicode-bidi: bidi-override; direction: ltr;"
+        >
+          £85.00
+        </span>
       </span>
     </div>
     <div
@@ -98,9 +113,14 @@ exports[`TotalsFooterItem Shows the "including %s TAX LABELS" line with multiple
       class="wc-block-components-totals-item__value"
     >
       <span
-        class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
+        class="wc-block-number-format-container"
       >
-        £85.00
+        <span
+          class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
+          style="unicode-bidi: bidi-override; direction: ltr;"
+        >
+          £85.00
+        </span>
       </span>
     </div>
     <div
@@ -130,9 +150,14 @@ exports[`TotalsFooterItem Shows the "including %s of tax" line if tax is greater
       class="wc-block-components-totals-item__value"
     >
       <span
-        class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
+        class="wc-block-number-format-container"
       >
-        £85.00
+        <span
+          class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
+          style="unicode-bidi: bidi-override; direction: ltr;"
+        >
+          £85.00
+        </span>
       </span>
     </div>
     <div
@@ -143,9 +168,14 @@ exports[`TotalsFooterItem Shows the "including %s of tax" line if tax is greater
       >
         Including 
         <span
-          class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
+          class="wc-block-number-format-container"
         >
-          £1.00
+          <span
+            class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
+            style="unicode-bidi: bidi-override; direction: ltr;"
+          >
+            £1.00
+          </span>
         </span>
          in taxes
       </p>
