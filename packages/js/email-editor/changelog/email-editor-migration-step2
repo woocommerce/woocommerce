@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Migrate email editor to plugin that runs in the post editor
