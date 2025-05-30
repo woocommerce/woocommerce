@@ -92,6 +92,32 @@ class Payments extends Task {
 		return class_exists( '\WC_Payments' );
 	}
 	/**
+	 * Check if WooPayments has a test account.
+	 *
+	 * @return bool
+	 */
+	private function is_woopayments_test_account() {
+		if ( ! $this->is_woopayments_configured() ) {
+			return false;
+		}
+
+		// Manual check for test account
+		if ( function_exists( '\wcpay_get_container' ) && class_exists( 'WC_Payments_Account' ) ) {
+			try {
+				$account = wcpay_get_container()->get( 'WC_Payments_Account' );
+				if ( is_callable( array( $account, 'get_account_status_data' ) ) ) {
+					$account_status = $account->get_account_status_data();
+					return ! empty( $account_status['testDrive'] );
+				}
+			} catch ( \Exception $e ) {
+				return false;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Check if the store is in a WooPayments-supported geography.
 	 *
 	 * @param string $country_code Optional. Country code to check. If not provided, uses store base country.
