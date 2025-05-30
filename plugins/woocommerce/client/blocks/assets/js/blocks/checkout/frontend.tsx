@@ -64,4 +64,7 @@ renderParentBlock( {
 		React.ReactNode
 	>,
 	blockWrapper: Wrapper,
+	options: {
+		multiple: false,
+	},
 } );

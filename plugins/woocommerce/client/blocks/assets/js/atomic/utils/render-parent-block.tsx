@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { renderFrontend } from '@woocommerce/base-utils';
+import { renderFrontend, RenderFrontendOptions } from '@woocommerce/base-utils';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import {
 	Fragment,
@@ -287,6 +287,7 @@ export const renderParentBlock = ( {
 	getProps = () => ( {} ),
 	blockMap,
 	blockWrapper,
+	options,
 }: {
 	// Parent Block Name. Used for inner block component mapping.
 	blockName: string;
@@ -300,6 +301,8 @@ export const renderParentBlock = ( {
 	selector: string;
 	// Function to generate the props object for the block.
 	getProps: ( el: Element, i: number ) => Record< string, unknown >;
+	// Options to control rendering behavior
+	options?: RenderFrontendOptions;
 } ): ReactRootWithContainer[] => {
 	/**
 	 * In addition to getProps, we need to render and return the children. This adds children to props.
@@ -320,5 +323,6 @@ export const renderParentBlock = ( {
 		Block,
 		selector,
 		getProps: getPropsWithChildren,
+		options,
 	} );
 };
