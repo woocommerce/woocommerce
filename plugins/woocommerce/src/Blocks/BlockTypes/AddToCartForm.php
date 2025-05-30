@@ -201,6 +201,15 @@ class AddToCartForm extends AbstractBlock {
 			)
 		);
 
+		/**
+		 * Filters the change the quantity to add to cart.
+		 *
+		 * @since 10.9.0
+		 * @param number $default_quantity The default quantity.
+		 * @param number $product_id The product id.
+		 */
+		$default_quantity = apply_filters( 'woocommerce_add_to_cart_quantity', 1, $product->get_id() );
+
 		$form = sprintf(
 			'<div %1$s %2$s %3$s>%4$s</div>',
 			$wrapper_attributes,
@@ -208,7 +217,7 @@ class AddToCartForm extends AbstractBlock {
 			$is_stepper_style ? sprintf(
 				'data-wp-context=\'%s\'',
 				wp_json_encode(
-					array( 'quantity' => apply_filters( 'woocommerce_add_to_cart_quantity', 1, $product->get_id() ) ),
+					array( 'quantity' => $default_quantity ),
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 				)
 			) : '',
