@@ -36,13 +36,6 @@ class ProductAvailabilityUtils {
 			$product_availability = $product->get_availability();
 		}
 
-		/**
-		 * Filters the product availability information.
-		 *
-		 * @since 9.7.0
-		 * @param array $product_availability The product availability information.
-		 * @param \WC_Product $product Product object.
-		 */
-		return apply_filters( 'woocommerce_product_availability', $product_availability, $product );
+		return $product_availability;
 	}
 }
