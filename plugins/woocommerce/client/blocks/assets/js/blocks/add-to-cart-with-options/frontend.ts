@@ -117,7 +117,7 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 	inputElement.dispatchEvent( event );
 };
 
-let originalVariationPriceHtml = '';
+let originalPriceHtml = '';
 
 const addToCartWithOptionsStore = store(
 	'woocommerce/add-to-cart-with-options',
@@ -250,9 +250,9 @@ const addToCartWithOptionsStore = store(
 					displayedProduct: DisplayedProduct;
 				} >( 'woocommerce/single-product' );
 
-				originalVariationPriceHtml =
-					originalVariationPriceHtml !== ''
-						? originalVariationPriceHtml
+				originalPriceHtml =
+					originalPriceHtml !== ''
+						? originalPriceHtml
 						: context?.displayedProduct.price_html ||
 						  wooState.displayedProduct.price_html;
 
@@ -270,11 +270,9 @@ const addToCartWithOptionsStore = store(
 				}
 
 				if ( context ) {
-					context.displayedProduct.price_html =
-						originalVariationPriceHtml;
+					context.displayedProduct.price_html = originalPriceHtml;
 				} else {
-					wooState.displayedProduct.price_html =
-						originalVariationPriceHtml;
+					wooState.displayedProduct.price_html = originalPriceHtml;
 				}
 			},
 		},
