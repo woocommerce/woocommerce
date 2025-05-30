@@ -90,6 +90,25 @@ class Payments extends Task {
 		return class_exists( '\WC_Payments' );
 	}
 	/**
+	 * Check if the store is in a WooPayments-supported geography.
+	 *
+	 * @param string $country_code Optional. Country code to check. If not provided, uses store base country.
+	 * @return bool
+	 */
+	private function is_store_in_woopayments_supported_geo( $country_code = null ) {
+		$country_code = PaymentsService::get_country_from_user_meta_or_fallback_to_base_country();
+
+		if ( class_exists( '\WC_Payments_Utils' ) ) {
+			$supported_countries = array_keys( \WC_Payments_Utils::supported_countries() );
+			return in_array( $country_code, $supported_countries, true );
+		} else {
+			// WooPayments is not installed, use core's list of supported countries
+			$supported_countries = DefaultPaymentGateways::get_wcpay_countries();
+			return in_array( $country_code, $supported_countries, true );
+		}
+	}
+
+	/**
 	 * Check if the store has any enabled gateways.
 	 *
 	 * @return bool
