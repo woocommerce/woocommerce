@@ -26,7 +26,7 @@ In addition to the software shared above, you'll also want to have some way of s
 
 ### Studio - Recommended Approach
 
-For easy local development environments, we recommend Studio, the local development environment provided by [WordPress.com](http://WordPress.com). Studio includes the ability to manage multiple local website environments, as well as integrations with your code editor and terminal. Studio also features a WordPress-specific AI Assistant, easy imports from WordPress backups, free publis preview sites, and two-way sync with sites hosted on [WordPress.com](http://WordPress.com). Learn more about [Studio](https://developer.wordpress.com/studio/).
+For easy local development environments, we recommend [Studio](https://developer.wordpress.com/studio/), the local development environment provided by [WordPress.com](https://developer.wordpress.com). Studio includes the ability to manage multiple local website environments, as well as integrations with your code editor and terminal. Studio also features a WordPress-specific AI Assistant, easy imports from WordPress backups, free public preview sites, and two-way sync with sites hosted on WordPress.com.
 
 ### WordPress-specific tools
 
