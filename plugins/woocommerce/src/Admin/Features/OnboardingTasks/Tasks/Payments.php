@@ -248,7 +248,7 @@ class Payments extends Task {
 				}
 				
 				// Also exclude gateways that start with 'woocommerce_payments_' as a fallback
-				if ( strpos( $gateway->id, 'woocommerce_payments' ) === 0 ) {
+				if ( str_starts_with( $gateway->id, 'woocommerce_payments' ) ) {
 					return false;
 				}
 				
