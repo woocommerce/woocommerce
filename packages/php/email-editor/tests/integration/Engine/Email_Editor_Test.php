@@ -53,7 +53,7 @@ class Email_Editor_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test if the email register custom post type
 	 */
-	public function testItRegistersCustomPostTypeAddedViaHook() {
+	public function testItRegistersCustomPostTypeAddedViaHook(): void {
 		$post_types = get_post_types();
 		$this->assertArrayHasKey( 'custom_email_type', $post_types );
 	}

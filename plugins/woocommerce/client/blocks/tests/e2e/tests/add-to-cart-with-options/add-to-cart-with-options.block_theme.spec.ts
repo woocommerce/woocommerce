@@ -20,7 +20,7 @@ const test = base.extend< { pageObject: AddToCartWithOptionsPage } >( {
 	},
 } );
 
-test.describe( 'Add to Cart with Options Block', () => {
+test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows modifying the template parts', async ( {
 		page,
 		pageObject,
@@ -38,7 +38,7 @@ test.describe( 'Add to Cart with Options Block', () => {
 		await editor.insertBlock( { name: pageObject.BLOCK_SLUG } );
 
 		await pageObject.insertParagraphInTemplatePart(
-			'This is a test paragraph added to the Add to Cart with Options template part.'
+			'This is a test paragraph added to the Add to Cart + Options template part.'
 		);
 
 		await editor.saveSiteEditorEntities();
@@ -47,7 +47,7 @@ test.describe( 'Add to Cart with Options Block', () => {
 
 		await expect(
 			page.getByText(
-				'This is a test paragraph added to the Add to Cart with Options template part.'
+				'This is a test paragraph added to the Add to Cart + Options template part.'
 			)
 		).toBeVisible();
 	} );
@@ -111,6 +111,50 @@ test.describe( 'Add to Cart with Options Block', () => {
 		await addToCartButton.click();
 
 		await expect( addToCartButton ).toHaveText( '6 in cart' );
+	} );
+
+	test( "'X in cart' text reflects the correct amount in variations", async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await pageObject.setFeatureFlags();
+
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/hoodie' );
+
+		const logoNoOption = page.getByRole( 'radio', {
+			name: 'No',
+			exact: true,
+		} );
+		const colorBlueOption = page.getByRole( 'radio', {
+			name: 'Blue',
+			exact: true,
+		} );
+		const colorGreenOption = page.getByRole( 'radio', {
+			name: 'Green',
+			exact: true,
+		} );
+		const addToCartButton = page.getByText( 'Add to cart' ).first();
+
+		await logoNoOption.click();
+		await colorGreenOption.click();
+		await addToCartButton.click();
+
+		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+
+		await colorBlueOption.click();
+
+		await expect( page.getByText( '1 in cart' ) ).toBeHidden();
+
+		await colorGreenOption.click();
+
+		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
 	} );
 
 	test( "doesn't allow selecting invalid variations in pills mode", async ( {

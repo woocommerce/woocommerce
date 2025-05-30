@@ -50,9 +50,14 @@ class ClassicTemplate extends AbstractDynamicBlock {
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
 
-		// Indicate to interactivity powered components that this block is on the page,
+		// Indicate to interactivity powered components that this block is on the page
 		// and needs refresh to update data.
-		$this->asset_data_registry->add( 'needsRefreshForInteractivityAPI', true );
+		wp_interactivity_config(
+			'woocommerce',
+			[
+				'needsRefreshForInteractivityAPI' => true,
+			]
+		);
 	}
 
 	/**

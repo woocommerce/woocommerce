@@ -35,7 +35,14 @@ class GroupedProductSelectorItemCTA extends AbstractBlock {
 		$args['input_id'] = AddToCartWithOptionsUtils::get_quantity_input_id( $product );
 
 		ob_start();
-		woocommerce_quantity_input( $args );
+
+		woocommerce_quantity_input(
+			array_merge(
+				$args,
+				array( 'input_name' => 'quantity[' . $product->get_id() . ']' )
+			)
+		);
+
 		$quantity_html = ob_get_clean();
 
 		// Remove the label because we are rendering one as a separate block via GroupedProductSelectorItemLabel.

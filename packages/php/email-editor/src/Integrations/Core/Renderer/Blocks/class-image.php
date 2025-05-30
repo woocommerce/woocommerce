@@ -157,7 +157,7 @@ class Image extends Abstract_Block_Renderer {
 			$styles = $html->get_attribute( 'style' ) ?? '';
 			$styles = $settings_controller->parse_styles_to_array( $styles );
 			$height = $styles['height'] ?? null;
-			if ( $height && 'auto' !== $height && is_numeric( $settings_controller->parse_number_from_string_with_pixels( $height ) ) ) {
+			if ( $height && 'auto' !== $height ) {
 				$height = $settings_controller->parse_number_from_string_with_pixels( $height );
 				/* @phpstan-ignore-next-line Wrong annotation for parameter in WP. */
 				$html->set_attribute( 'height', esc_attr( $height ) );

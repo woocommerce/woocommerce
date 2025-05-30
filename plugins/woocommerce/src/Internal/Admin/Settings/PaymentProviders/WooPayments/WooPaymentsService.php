@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments;
 
 use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiArgumentException;
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
@@ -33,9 +34,36 @@ class WooPaymentsService {
 	const ONBOARDING_STEP_TEST_ACCOUNT          = 'test_account';
 	const ONBOARDING_STEP_BUSINESS_VERIFICATION = 'business_verification';
 
+	/**
+	 * A step is not started if the user has not interacted with it yet.
+	 */
 	const ONBOARDING_STEP_STATUS_NOT_STARTED = 'not_started';
-	const ONBOARDING_STEP_STATUS_STARTED     = 'started';
-	const ONBOARDING_STEP_STATUS_COMPLETED   = 'completed';
+
+	/**
+	 * A step should be considered started if the user has interacted with it.
+	 * There will be cases where a step may be auto-started based on the current state of the store.
+	 */
+	const ONBOARDING_STEP_STATUS_STARTED = 'started';
+
+	/**
+	 * A step is completed if the user has successfully completed it.
+	 * This is the final state of a step.
+	 */
+	const ONBOARDING_STEP_STATUS_COMPLETED = 'completed';
+
+	/**
+	 * Failure generally refers to some error that occurred during a step action.
+	 * Retrying the action should be possible and lead to a different step status.
+	 */
+	const ONBOARDING_STEP_STATUS_FAILED = 'failed';
+
+	/**
+	 * Blocked generally refers to a step can't progress to a completed state due to some technical requirements
+	 * that are beyond the purview of the Payments Settings page or the WooPayments extension.
+	 * Most of the time, the reasons will be environment-related.
+	 * For example, the store may not use HTTPS, or live onboarding might be prevented due to environment settings.
+	 */
+	const ONBOARDING_STEP_STATUS_BLOCKED = 'blocked';
 
 	const ACTION_TYPE_REST     = 'REST';
 	const ACTION_TYPE_REDIRECT = 'REDIRECT';
@@ -45,6 +73,9 @@ class WooPaymentsService {
 
 	const FROM_PAYMENT_SETTINGS = 'WCADMIN_PAYMENT_SETTINGS';
 	const FROM_NOX_IN_CONTEXT   = 'WCADMIN_NOX_IN_CONTEXT';
+	const FROM_KYC              = 'KYC';
+
+	const EVENT_PREFIX = 'settings_payments_woopayments_';
 
 	/**
 	 * The PaymentProviders instance.
@@ -157,106 +188,124 @@ class WooPaymentsService {
 			throw new ApiArgumentException(
 				'woocommerce_woopayments_onboarding_invalid_step_id',
 				esc_html__( 'Invalid onboarding step ID.', 'woocommerce' ),
-				(int) WP_Http::NOT_ACCEPTABLE
+				(int) WP_Http::BAD_REQUEST
 			);
 		}
 
-		$stored_statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+		$meets_requirements = $this->check_onboarding_step_requirements( $step_id, $location );
 
-		// First, we check the status of the onboarding step based on the current state of the store.
-		switch ( $step_id ) {
-			case self::ONBOARDING_STEP_PAYMENT_METHODS:
-				// If there is already a valid account, report the step as completed
-				// since allowing the user to configure payment methods won't have any effect.
-				if ( $this->has_valid_account() ) {
-					return self::ONBOARDING_STEP_STATUS_COMPLETED;
-				}
-				break;
-			case self::ONBOARDING_STEP_WPCOM_CONNECTION:
-				if ( $this->has_working_wpcom_connection() ) {
-					return self::ONBOARDING_STEP_STATUS_COMPLETED;
-				}
-				// If we only have a connected blog, but no master owner connected, we at least started the process.
-				if ( $this->wpcom_connection_manager->is_connected() ) {
-					return self::ONBOARDING_STEP_STATUS_STARTED;
-				}
-
-				// If there is no part of the connection set up, we check the stored status.
-				if ( ! $this->wpcom_connection_manager->is_connected() && ! $this->wpcom_connection_manager->has_connected_owner() ) {
-					// We respect the stored started status as it may be in progress.
-					if ( ! empty( $stored_statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] ) ) {
-						return self::ONBOARDING_STEP_STATUS_STARTED;
+		// First, determine if the step should be reported as completed based on the current state of the store.
+		// The step can only be auto-completed if the requirements are met.
+		if ( $meets_requirements ) {
+			switch ( $step_id ) {
+				case self::ONBOARDING_STEP_PAYMENT_METHODS:
+					// If there is already a valid account, report the step as completed
+					// since allowing the user to configure payment methods won't have any effect.
+					if ( $this->has_valid_account() ) {
+						return self::ONBOARDING_STEP_STATUS_COMPLETED;
 					}
-				}
-
-				// We definitely didn't start the onboarding step.
-				return self::ONBOARDING_STEP_STATUS_NOT_STARTED;
-			case self::ONBOARDING_STEP_TEST_ACCOUNT:
-				// The step can only be completed if the requirements are met.
-				if ( $this->check_onboarding_step_requirements( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ) {
+					break;
+				case self::ONBOARDING_STEP_WPCOM_CONNECTION:
+					// If we have a working WPCOM connection, report the step as completed.
+					// The step can only be auto-completed if the requirements are met.
+					if ( $this->has_working_wpcom_connection() ) {
+						return self::ONBOARDING_STEP_STATUS_COMPLETED;
+					}
+					break;
+				case self::ONBOARDING_STEP_TEST_ACCOUNT:
 					// If the account is a valid, working test account, the step is completed.
 					if ( $this->has_test_account() && $this->has_valid_account() && $this->has_working_account() ) {
 						return self::ONBOARDING_STEP_STATUS_COMPLETED;
 					}
-
-					// If there is a stored completed status, we respect that IF there is NO invalid test account.
-					// This is the case when the user first creates a test account and then switches to live.
-					if ( ! empty( $stored_statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] ) &&
-						! ( $this->has_test_account() && ! $this->has_valid_account() )
-					) {
+					break;
+				case self::ONBOARDING_STEP_BUSINESS_VERIFICATION:
+					// The step can only be auto-completed if the requirements are met.
+					// If the current account is fully onboarded and is a live account,
+					// we report the business verification step as completed.
+					if ( $this->has_valid_account() && $this->has_live_account() ) {
 						return self::ONBOARDING_STEP_STATUS_COMPLETED;
 					}
-				}
+					break;
+			}
+		}
 
-				// If we have a test account, we consider the step as started.
-				if ( $this->has_test_account() ) {
-					return self::ONBOARDING_STEP_STATUS_STARTED;
-				}
-
-				// We respect the stored started status.
-				if ( ! empty( $stored_statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] ) ) {
-					return self::ONBOARDING_STEP_STATUS_STARTED;
-				}
-
-				// We definitely didn't start the onboarding step.
-				return self::ONBOARDING_STEP_STATUS_NOT_STARTED;
-			case self::ONBOARDING_STEP_BUSINESS_VERIFICATION:
+		// Second, try to determine the status of the onboarding step based on the step's stored statuses.
+		// We take a waterfall approach: completed > blocked > failed > started > not started.
+		// Reporting a completed status involves additional logic.
+		switch ( $step_id ) {
+			case self::ONBOARDING_STEP_WPCOM_CONNECTION:
+				// Ignore any completed stored statuses because of the critical nature of the WPCOM connection.
+				break;
+			case self::ONBOARDING_STEP_TEST_ACCOUNT:
+				// If there is a stored completed status, we respect that IF there is NO invalid test account.
+				// This is the case when the user first creates a test account and then switches to live.
 				// The step can only be completed if the requirements are met.
-				// If the current account is fully onboarded and is a live account,
-				// we consider the business verification step as completed.
-				if ( $this->check_onboarding_step_requirements( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location ) &&
-					$this->has_valid_account() &&
-					$this->has_live_account() ) {
+				if ( $meets_requirements &&
+					$this->was_onboarding_step_marked_completed( $step_id, $location ) &&
+					! ( $this->has_test_account() && ! $this->has_valid_account() )
+				) {
+					return self::ONBOARDING_STEP_STATUS_COMPLETED;
+				}
+				break;
+			case self::ONBOARDING_STEP_PAYMENT_METHODS:
+			case self::ONBOARDING_STEP_BUSINESS_VERIFICATION:
+			default:
+				// The step can only be completed if the requirements are met. Otherwise, ignore the stored completed status.
+				if ( $meets_requirements && $this->was_onboarding_step_marked_completed( $step_id, $location ) ) {
 					return self::ONBOARDING_STEP_STATUS_COMPLETED;
 				}
 
-				// If we have a live account, we consider the step as started.
-				if ( $this->has_live_account() ) {
-					return self::ONBOARDING_STEP_STATUS_STARTED;
-				}
-
-				// We respect the stored started status.
-				if ( ! empty( $stored_statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] ) ) {
-					return self::ONBOARDING_STEP_STATUS_STARTED;
-				}
-
-				// We definitely didn't start the onboarding step.
-				return self::ONBOARDING_STEP_STATUS_NOT_STARTED;
+				break;
 		}
-
-		// Second, try to determine the status of the onboarding step based on the step's stored data.
-		// We take a waterfall approach, where completed supersedes started.
-		// For completed, we first check if the step requirements are met.
-		if ( $this->check_onboarding_step_requirements( $step_id, $location ) &&
-			! empty( $stored_statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] ) ) {
-			return self::ONBOARDING_STEP_STATUS_COMPLETED;
+		// Blocked and failed statuses are only reported if the step's requirements are met.
+		if ( $meets_requirements ) {
+			if ( $this->is_onboarding_step_blocked( $step_id, $location ) ) {
+				return self::ONBOARDING_STEP_STATUS_BLOCKED;
+			}
+			if ( $this->is_onboarding_step_failed( $step_id, $location ) ) {
+				return self::ONBOARDING_STEP_STATUS_FAILED;
+			}
 		}
-		if ( ! empty( $stored_statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] ) ) {
+		if ( $this->was_onboarding_step_marked_started( $step_id, $location ) ) {
 			return self::ONBOARDING_STEP_STATUS_STARTED;
 		}
 
 		// Finally, we default to not started.
 		return self::ONBOARDING_STEP_STATUS_NOT_STARTED;
+	}
+
+	/**
+	 * Check if the onboarding step has a started status.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step is started.
+	 * @throws ApiException On invalid step ID.
+	 */
+	private function is_onboarding_step_started( string $step_id, string $location ): bool {
+		return self::ONBOARDING_STEP_STATUS_COMPLETED === $this->get_onboarding_step_status( $step_id, $location );
+	}
+
+	/**
+	 * Check if an onboarding step has been marked as started.
+	 *
+	 * This means that, at some point, the step was marked/recorded as started in the DB.
+	 * This doesn't mean that the current reported status is started. The step status might be different now.
+	 *
+	 * @see get_onboarding_step_status() for that.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step has been marked as started.
+	 */
+	private function was_onboarding_step_marked_started( string $step_id, string $location ): bool {
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+
+		return ! empty( $statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] );
 	}
 
 	/**
@@ -271,8 +320,11 @@ class WooPaymentsService {
 	 * @throws ApiArgumentException If the given onboarding step ID is invalid.
 	 * @throws ApiException If the onboarding action can not be performed due to the current state of the site.
 	 */
-	public function set_onboarding_step_started( string $step_id, string $location, bool $overwrite = false ): bool {
+	public function mark_onboarding_step_started( string $step_id, string $location, bool $overwrite = false ): bool {
 		$this->check_if_onboarding_step_action_is_acceptable( $step_id, $location );
+
+		// Clear possible failed status for the step.
+		$this->clear_onboarding_step_failed( $step_id, $location );
 
 		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
 		if ( ! $overwrite && ! empty( $statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] ) ) {
@@ -283,7 +335,54 @@ class WooPaymentsService {
 		$statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] = $this->proxy->call_function( 'time' );
 
 		// Store the updated step data.
-		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
+		$result = $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
+
+		if ( $result ) {
+			// Record an event for the step being started.
+			$this->record_event(
+				self::EVENT_PREFIX . 'onboarding_step_started',
+				$location,
+				array(
+					'step_id' => $step_id,
+				)
+			);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Check if the onboarding step has a completed status.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step is completed.
+	 * @throws ApiException On invalid step ID.
+	 */
+	private function is_onboarding_step_completed( string $step_id, string $location ): bool {
+		return self::ONBOARDING_STEP_STATUS_COMPLETED === $this->get_onboarding_step_status( $step_id, $location );
+	}
+
+	/**
+	 * Check if an onboarding step has been marked as completed.
+	 *
+	 * This means that, at some point, the step was marked/recorded as completed in the DB.
+	 * This doesn't mean that the current reported status is completed. The step status might be different now.
+	 *
+	 * @see get_onboarding_step_status() for that.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step has been marked as completed.
+	 */
+	private function was_onboarding_step_marked_completed( string $step_id, string $location ): bool {
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+
+		return ! empty( $statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] );
 	}
 
 	/**
@@ -298,8 +397,11 @@ class WooPaymentsService {
 	 * @throws ApiArgumentException If the given onboarding step ID is invalid.
 	 * @throws ApiException If the onboarding action can not be performed due to the current state of the site.
 	 */
-	public function set_onboarding_step_completed( string $step_id, string $location, bool $overwrite = false ): bool {
+	public function mark_onboarding_step_completed( string $step_id, string $location, bool $overwrite = false ): bool {
 		$this->check_if_onboarding_step_action_is_acceptable( $step_id, $location );
+
+		// Clear possible failed status for the step.
+		$this->clear_onboarding_step_failed( $step_id, $location );
 
 		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
 		if ( ! $overwrite && ! empty( $statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] ) ) {
@@ -310,7 +412,289 @@ class WooPaymentsService {
 		$statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] = $this->proxy->call_function( 'time' );
 
 		// Store the updated step data.
+		$result = $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
+
+		if ( $result ) {
+			// Record an event for the step being completed.
+			$this->record_event(
+				self::EVENT_PREFIX . 'onboarding_step_completed',
+				$location,
+				array(
+					'step_id' => $step_id,
+				)
+			);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Cleans an onboarding step progress.
+	 *
+	 * @param string $step_id   The ID of the onboarding step.
+	 * @param string $location  The location for which we are onboarding.
+	 *                          This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step was cleaned.
+	 * @throws ApiArgumentException If the given onboarding step ID is invalid.
+	 * @throws ApiException If the onboarding action can not be performed due to the current state of the site.
+	 */
+	public function clean_onboarding_step_progress( string $step_id, string $location ): bool {
+		$this->check_if_onboarding_step_action_is_acceptable( $step_id, $location );
+
+		// Clear possible failed or blocked status for the step.
+		$this->clear_onboarding_step_failed( $step_id, $location );
+		$this->clear_onboarding_step_blocked( $step_id, $location );
+
+		// Reset the stored step statuses.
+		$result = $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', array() );
+
+		if ( $result ) {
+			// Record an event for the step being cleaned.
+			$this->record_event(
+				self::EVENT_PREFIX . 'onboarding_step_progress_reset',
+				$location,
+				array(
+					'step_id' => $step_id,
+				)
+			);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Check if an onboarding step has a failed status.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step is failed.
+	 */
+	private function is_onboarding_step_failed( string $step_id, string $location ): bool {
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+
+		return ! empty( $statuses[ self::ONBOARDING_STEP_STATUS_FAILED ] );
+	}
+
+	/**
+	 * Mark an onboarding step as failed.
+	 *
+	 * This is for internal use only as a failed step status should not be the result of a user action.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param array  $error    Optional. An error to be stored for the step to provide context to API consumers.
+	 *                         The error should be an associative array with the following keys:
+	 *                         - 'code': A string representing the error code.
+	 *                         - 'message': A string representing the error message.
+	 *                         - 'context': Optional. An array of additional data related to the error.
+	 *
+	 * @return bool Whether the onboarding step was marked as failed.
+	 */
+	private function mark_onboarding_step_failed( string $step_id, string $location, array $error = array() ): bool {
+		// There is no need to do onboarding checks because setting a step as failed should be possible at any time.
+
+		// Record the error for the step, even if it is empty.
+		// This will ensure we only store the most recent error.
+		$this->save_nox_profile_onboarding_step_data_entry( $step_id, $location, 'error', $this->sanitize_onboarding_step_error( $error ) );
+
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+
+		// Mark the step as failed and record the timestamp.
+		$statuses[ self::ONBOARDING_STEP_STATUS_FAILED ] = $this->proxy->call_function( 'time' );
+
+		// Make sure we clear the blocked status if it was set since blocked and failed should be mutually exclusive.
+		unset( $statuses[ self::ONBOARDING_STEP_STATUS_BLOCKED ] );
+
+		// Store the updated step data.
+		$result = $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
+
+		if ( $result ) {
+			// Record an event for the step being failed.
+			$this->record_event(
+				self::EVENT_PREFIX . 'onboarding_step_failed',
+				$location,
+				array(
+					'step_id'    => $step_id,
+					'error_code' => ! empty( $error['code'] ) ? $error['code'] : '',
+				)
+			);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Clear the failed status of an onboarding step.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step was cleared from failed status.
+	 *              Returns false if the step was not failed.
+	 */
+	private function clear_onboarding_step_failed( string $step_id, string $location ): bool {
+		if ( ! $this->is_onboarding_step_failed( $step_id, $location ) ) {
+			return false;
+		}
+
+		// Clear any error for the step.
+		$this->save_nox_profile_onboarding_step_data_entry( $step_id, $location, 'error', array() );
+
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+
+		// Clear the failed status.
+		unset( $statuses[ self::ONBOARDING_STEP_STATUS_FAILED ] );
+
+		// Store the updated step data.
 		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
+	}
+
+	/**
+	 * Check if an onboarding step has a blocked status.
+	 *
+	 * @param string $step_id The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step is blocked.
+	 */
+	private function is_onboarding_step_blocked( string $step_id, string $location ): bool {
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+
+		return ! empty( $statuses[ self::ONBOARDING_STEP_STATUS_BLOCKED ] );
+	}
+
+	/**
+	 * Mark an onboarding step as blocked.
+	 *
+	 * This is for internal use only as a blocked step status should not be the result of a user action.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param array  $errors   Optional. A list of errors to be stored for the step to provide context to API consumers.
+	 *
+	 * @return bool Whether the onboarding step was marked as blocked.
+	 */
+	private function mark_onboarding_step_blocked( string $step_id, string $location, array $errors = array() ): bool {
+		// There is no need to do onboarding checks because setting a step as blocked should be possible at any time.
+
+		// Record the error for the step, even if it is empty.
+		// This will ensure we only store the most recent error.
+		$this->save_nox_profile_onboarding_step_data_entry( $step_id, $location, 'error', $this->sanitize_onboarding_step_error( $errors ) );
+
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+
+		// Mark the step as blocked and record the timestamp.
+		$statuses[ self::ONBOARDING_STEP_STATUS_BLOCKED ] = $this->proxy->call_function( 'time' );
+
+		// Make sure we clear the failed status if it was set since blocked and failed should be mutually exclusive.
+		unset( $statuses[ self::ONBOARDING_STEP_STATUS_FAILED ] );
+
+		// Store the updated step data.
+		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
+	}
+
+	/**
+	 * Clear the blocked status of an onboarding step.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step was cleared from blocked status.
+	 *              Returns false if the step was not blocked.
+	 */
+	private function clear_onboarding_step_blocked( string $step_id, string $location ): bool {
+		if ( ! $this->is_onboarding_step_blocked( $step_id, $location ) ) {
+			return false;
+		}
+
+		// Clear any error for the step.
+		$this->save_nox_profile_onboarding_step_data_entry( $step_id, $location, 'error', array() );
+
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+
+		// Clear the blocked status.
+		unset( $statuses[ self::ONBOARDING_STEP_STATUS_BLOCKED ] );
+
+		// Store the updated step data.
+		return $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
+	}
+
+	/**
+	 * Get the current stored error for an onboarding step.
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return array The error for the onboarding step.
+	 */
+	private function get_onboarding_step_error( string $step_id, string $location ): array {
+		return (array) $this->get_nox_profile_onboarding_step_data_entry( $step_id, $location, 'error', array() );
+	}
+
+	/**
+	 * Sanitize an error for an onboarding step.
+	 *
+	 * @param array $error The error to sanitize.
+	 *
+	 * @return array The sanitized error.
+	 */
+	private function sanitize_onboarding_step_error( array $error ): array {
+		$sanitized_error = array(
+			'code'    => isset( $error['code'] ) ? sanitize_text_field( $error['code'] ) : '',
+			'message' => isset( $error['message'] ) ? sanitize_text_field( $error['message'] ) : '',
+			'context' => array(),
+		);
+
+		if ( isset( $error['context'] ) && ( is_array( $error['context'] ) || is_object( $error['context'] ) ) ) {
+			// Make sure we are dealing with an array.
+			$sanitized_error['context'] = json_decode( wp_json_encode( $error['context'] ), true );
+			if ( ! is_array( $sanitized_error['context'] ) ) {
+				$sanitized_error['context'] = array();
+			}
+
+			// Sanitize the context data.
+			// It can only contain strings or arrays of strings.
+			// Scalar values will be converted to strings. Other types will be ignored.
+			foreach ( $sanitized_error['context'] as $key => $value ) {
+				if ( is_string( $value ) ) {
+					$sanitized_error['context'][ $key ] = sanitize_text_field( $value );
+				} elseif ( is_array( $value ) ) {
+					// Arrays can only contain strings.
+					$sanitized_error['context'][ $key ] = array_map(
+						function ( $item ) {
+							if ( is_string( $item ) ) {
+								return sanitize_text_field( $item );
+							} elseif ( is_scalar( $item ) ) {
+								return sanitize_text_field( (string) $item );
+							} else {
+								return '';
+							}
+						},
+						$value
+					);
+					// Remove any empty values from the array.
+					$sanitized_error['context'][ $key ] = array_filter(
+						$sanitized_error['context'][ $key ],
+						function ( $item ) {
+							return '' !== $item;
+						}
+					);
+				} else {
+					unset( $sanitized_error['context'][ $key ] );
+				}
+			}
+		}
+
+		return $sanitized_error;
 	}
 
 	/**
@@ -334,7 +718,7 @@ class WooPaymentsService {
 			throw new ApiArgumentException(
 				'woocommerce_woopayments_onboarding_invalid_step_data',
 				esc_html__( 'Invalid onboarding step data.', 'woocommerce' ),
-				(int) WP_Http::NOT_ACCEPTABLE
+				(int) WP_Http::BAD_REQUEST
 			);
 		}
 
@@ -430,8 +814,10 @@ class WooPaymentsService {
 	public function onboarding_step_check( string $step_id, string $location ): array {
 		$this->check_if_onboarding_step_action_is_acceptable( $step_id, $location );
 
-		// Just return the step status, for now.
-		return array( 'status' => $this->get_onboarding_step_status( $step_id, $location ) );
+		return array(
+			'status' => $this->get_onboarding_step_status( $step_id, $location ),
+			'error'  => $this->get_onboarding_step_error( $step_id, $location ),
+		);
 	}
 
 	/**
@@ -451,7 +837,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $location The location for which we are onboarding.
 	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 * @param string $source   Optional. The source for the KYC session.
+	 * @param string $source   Optional. The source for the current onboarding flow.
 	 *                         If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return array The result of the test account initialization.
@@ -462,24 +848,49 @@ class WooPaymentsService {
 	public function onboarding_test_account_init( string $location, string $source = '' ): array {
 		$this->check_if_onboarding_step_action_is_acceptable( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
-		// Nothing to do if we already have a test account.
+		// Nothing to do if we already have a connected test account.
 		if ( $this->has_test_account() ) {
-			return array(
-				'message' => esc_html__( 'A test account is already set up.', 'woocommerce' ),
+			throw new ApiException(
+				'woocommerce_woopayments_onboarding_action_error',
+				esc_html__( 'A test account is already set up.', 'woocommerce' ),
+				(int) WP_Http::FORBIDDEN
 			);
 		}
 
-		// Nothing to do if there is an account, but it is not a test account.
+		// Nothing to do if there is a connected account, but it is not a test account.
 		if ( $this->has_account() ) {
-			return array(
-				'message' => esc_html__( 'An account is already set up. Reset the onboarding first.', 'woocommerce' ),
+			// Mark the onboarding step as blocked, if it is not already.
+			$this->mark_onboarding_step_blocked(
+				self::ONBOARDING_STEP_TEST_ACCOUNT,
+				$location,
+				array(
+					'code'    => 'account_already_exists',
+					'message' => esc_html__( 'An account is already set up. Reset the onboarding first.', 'woocommerce' ),
+				)
+			);
+
+			throw new ApiException(
+				'woocommerce_woopayments_onboarding_action_error',
+				esc_html__( 'An account is already set up. Reset the onboarding first.', 'woocommerce' ),
+				(int) WP_Http::FORBIDDEN
 			);
 		}
+
+		// Clear any previous failed status for the step.
+		$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
 		$selected_payment_methods = $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_PAYMENT_METHODS, $location, 'payment_methods', array() );
 
+		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
+		WC()->payment_gateways();
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
+
+		if ( empty( $source ) ) {
+			// The default source is the WC Admin Payments settings.
+			$source = self::FROM_PAYMENT_SETTINGS;
+		}
 
 		try {
 			// Call the WooPayments API to initialize the test account.
@@ -490,7 +901,7 @@ class WooPaymentsService {
 				array(
 					'country'      => $location,
 					'capabilities' => $selected_payment_methods,
-					'source'       => ! empty( $source ) ? $source : self::FROM_NOX_IN_CONTEXT,
+					'source'       => $source,
 					'from'         => self::FROM_NOX_IN_CONTEXT,
 				)
 			);
@@ -511,6 +922,17 @@ class WooPaymentsService {
 		$this->clear_onboarding_lock();
 
 		if ( is_wp_error( $response ) ) {
+			// Mark the onboarding step as failed.
+			$this->mark_onboarding_step_failed(
+				self::ONBOARDING_STEP_TEST_ACCOUNT,
+				$location,
+				array(
+					'code'    => $response->get_error_code(),
+					'message' => $response->get_error_message(),
+					'context' => $response->get_error_data(),
+				)
+			);
+
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_client_api_error',
 				esc_html( $response->get_error_message() ),
@@ -520,12 +942,34 @@ class WooPaymentsService {
 		}
 
 		if ( ! is_array( $response ) || empty( $response['success'] ) ) {
+			// Mark the onboarding step as failed.
+			$this->mark_onboarding_step_failed(
+				self::ONBOARDING_STEP_TEST_ACCOUNT,
+				$location,
+				array(
+					'code'    => 'malformed_response',
+					'message' => esc_html__( 'Received an unexpected response from the platform.', 'woocommerce' ),
+					'context' => array(
+						'response' => $response,
+					),
+				)
+			);
+
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_client_api_error',
 				esc_html__( 'Failed to initialize the test account.', 'woocommerce' ),
 				(int) WP_Http::FAILED_DEPENDENCY
 			);
 		}
+
+		// Record an event for the test account being initialized.
+		$this->record_event(
+			self::EVENT_PREFIX . 'onboarding_test_account_init',
+			$location,
+			array(
+				'source' => $source,
+			)
+		);
 
 		return $response;
 	}
@@ -537,12 +981,14 @@ class WooPaymentsService {
 	 *                                This is a ISO 3166-1 alpha-2 country code.
 	 * @param array  $self_assessment Optional. The self-assessment data.
 	 *                                If not provided, the stored data will be used.
+	 * @param string $source          Optional. The source for the current onboarding flow.
+	 *                                If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return array The KYC account session data.
 	 * @throws ApiException If the extension is not active, step requirements are not met, or
 	 *                      the KYC session data could not be retrieved.
 	 */
-	public function get_onboarding_kyc_session( string $location, array $self_assessment = array() ): array {
+	public function get_onboarding_kyc_session( string $location, array $self_assessment = array(), string $source = '' ): array {
 		$this->check_if_onboarding_step_action_is_acceptable( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
 
 		if ( empty( $self_assessment ) ) {
@@ -550,12 +996,23 @@ class WooPaymentsService {
 			$self_assessment = (array) $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'self_assessment' );
 		}
 
+		// Clear any previous failed status for the step.
+		$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
+
+		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
+		WC()->payment_gateways();
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
+		if ( empty( $source ) ) {
+			// The default source is the WC Admin Payments settings.
+			$source = self::FROM_PAYMENT_SETTINGS;
+		}
+
 		try {
 			// Call the WooPayments API to get the KYC session.
-			$account_session = $this->proxy->call_static(
+			$response = $this->proxy->call_static(
 				Utils::class,
 				'rest_endpoint_post_request',
 				'/wc/v3/payments/onboarding/kyc/session',
@@ -579,16 +1036,40 @@ class WooPaymentsService {
 		// Unlock the onboarding after the API call finished or errored.
 		$this->clear_onboarding_lock();
 
-		if ( is_wp_error( $account_session ) ) {
+		if ( is_wp_error( $response ) ) {
+			// Mark the onboarding step as failed.
+			$this->mark_onboarding_step_failed(
+				self::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				$location,
+				array(
+					'code'    => $response->get_error_code(),
+					'message' => $response->get_error_message(),
+					'context' => $response->get_error_data(),
+				)
+			);
+
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_client_api_error',
-				esc_html( $account_session->get_error_message() ),
+				esc_html( $response->get_error_message() ),
 				(int) WP_Http::FAILED_DEPENDENCY,
-				map_deep( (array) $account_session->get_error_data(), 'esc_html' )
+				map_deep( (array) $response->get_error_data(), 'esc_html' )
 			);
 		}
 
-		if ( ! is_array( $account_session ) ) {
+		if ( ! is_array( $response ) ) {
+			// Mark the onboarding step as failed.
+			$this->mark_onboarding_step_failed(
+				self::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				$location,
+				array(
+					'code'    => 'malformed_response',
+					'message' => esc_html__( 'Received an unexpected response from the platform.', 'woocommerce' ),
+					'context' => array(
+						'response' => $response,
+					),
+				)
+			);
+
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_client_api_error',
 				esc_html__( 'Failed to get the KYC session data.', 'woocommerce' ),
@@ -597,9 +1078,31 @@ class WooPaymentsService {
 		}
 
 		// Add the user locale to the account session data to allow for localized KYC sessions.
-		$account_session['locale'] = $this->proxy->call_function( 'get_user_locale' );
+		$response['locale'] = $this->proxy->call_function( 'get_user_locale' );
 
-		return $account_session;
+		// For sanity, make sure the test account step is blocked if not already completed,
+		// since we are doing live account KYC.
+		if ( ! $this->is_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ) {
+			$this->mark_onboarding_step_blocked(
+				self::ONBOARDING_STEP_TEST_ACCOUNT,
+				$location,
+				array(
+					'code'    => 'live_account_kyc_session',
+					'message' => esc_html__( 'A live account is set up. Reset the onboarding first.', 'woocommerce' ),
+				)
+			);
+		}
+
+		// Record an event for the KYC session being created.
+		$this->record_event(
+			self::EVENT_PREFIX . 'onboarding_kyc_session_created',
+			$location,
+			array(
+				'source' => $source,
+			)
+		);
+
+		return $response;
 	}
 
 	/**
@@ -607,7 +1110,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $location The location for which we are onboarding.
 	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 * @param string $source   Optional. The source for the KYC session.
+	 * @param string $source   Optional. The source for the current onboarding flow.
 	 *                         If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return array The response from the WooPayments API.
@@ -617,8 +1120,16 @@ class WooPaymentsService {
 	public function finish_onboarding_kyc_session( string $location, string $source = '' ): array {
 		$this->check_if_onboarding_step_action_is_acceptable( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
 
+		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
+		WC()->payment_gateways();
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
+
+		if ( empty( $source ) ) {
+			// The default source is the WC Admin Payments settings.
+			$source = self::FROM_PAYMENT_SETTINGS;
+		}
 
 		try {
 			// Call the WooPayments API to finalize the KYC session.
@@ -627,7 +1138,7 @@ class WooPaymentsService {
 				'rest_endpoint_post_request',
 				'/wc/v3/payments/onboarding/kyc/finalize',
 				array(
-					'source' => ! empty( $source ) ? $source : self::FROM_PAYMENT_SETTINGS,
+					'source' => $source,
 					'from'   => self::FROM_NOX_IN_CONTEXT,
 				)
 			);
@@ -648,6 +1159,17 @@ class WooPaymentsService {
 		$this->clear_onboarding_lock();
 
 		if ( is_wp_error( $response ) ) {
+			// Mark the onboarding step as failed.
+			$this->mark_onboarding_step_failed(
+				self::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				$location,
+				array(
+					'code'    => $response->get_error_code(),
+					'message' => $response->get_error_message(),
+					'context' => $response->get_error_data(),
+				)
+			);
+
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_client_api_error',
 				esc_html( $response->get_error_message() ),
@@ -657,6 +1179,19 @@ class WooPaymentsService {
 		}
 
 		if ( ! is_array( $response ) ) {
+			// Mark the onboarding step as failed.
+			$this->mark_onboarding_step_failed(
+				self::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				$location,
+				array(
+					'code'    => 'malformed_response',
+					'message' => esc_html__( 'Received an unexpected response from the platform.', 'woocommerce' ),
+					'context' => array(
+						'response' => $response,
+					),
+				)
+			);
+
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_client_api_error',
 				esc_html__( 'Failed to finish the KYC session.', 'woocommerce' ),
@@ -664,28 +1199,103 @@ class WooPaymentsService {
 			);
 		}
 
+		// Record an event for the KYC session being finished.
+		$this->record_event(
+			self::EVENT_PREFIX . 'onboarding_kyc_session_finished',
+			$location,
+			array(
+				'source' => $source,
+			)
+		);
+
 		// Mark the business verification step as completed.
-		$this->set_onboarding_step_completed( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
+		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
+
+		// For sanity, make sure the test account step is blocked if not already completed,
+		// since we are doing live account KYC.
+		if ( ! $this->is_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ) {
+			$this->mark_onboarding_step_blocked(
+				self::ONBOARDING_STEP_TEST_ACCOUNT,
+				$location,
+				array(
+					'code'    => 'live_account_kyc_session',
+					'message' => esc_html__( 'A live account is set up. Reset the onboarding first.', 'woocommerce' ),
+				)
+			);
+		}
 
 		return $response;
 	}
 
 	/**
+	 * Preload the onboarding process.
+	 *
+	 * This method is used to run the heavier logic required for onboarding ahead of time,
+	 * so that we can be quicker to respond to the user when they start the onboarding process.
+	 *
+	 * @return array An array containing the success status and any errors encountered during the preload.
+	 *               'success' => true if the preload was successful, false otherwise.
+	 *               'errors'  => An array of error messages if any errors occurred, empty if no errors.
+	 * @throws ApiException If the onboarding preload failed or the onboarding is locked.
+	 */
+	public function onboarding_preload(): array {
+		// If the onboarding is locked, we shouldn't do anything.
+		if ( $this->is_onboarding_locked() ) {
+			throw new ApiException(
+				'woocommerce_woopayments_onboarding_locked',
+				esc_html__( 'Another onboarding action is already in progress. Please wait for it to finish.', 'woocommerce' ),
+				(int) WP_Http::CONFLICT
+			);
+		}
+
+		$result = true;
+
+		// Register the site to WPCOM if it is not already registered.
+		// This sets up the site for connection. For new sites, this tends to take a while.
+		// It is a prerequisite to generating the WPCOM/Jetpack authorization URL.
+		if ( ! $this->wpcom_connection_manager->is_connected() ) {
+			$result = $this->wpcom_connection_manager->try_registration();
+			if ( is_wp_error( $result ) ) {
+				throw new ApiException(
+					'woocommerce_woopayments_onboarding_action_error',
+					esc_html( $result->get_error_message() ),
+					(int) WP_Http::INTERNAL_SERVER_ERROR,
+					map_deep( (array) $result->get_error_data(), 'esc_html' )
+				);
+			}
+		}
+
+		return array(
+			'success' => $result,
+		);
+	}
+
+	/**
 	 * Reset onboarding.
 	 *
-	 * @param string $from   Optional. Where in the UI the request is coming from.
-	 *                       If not provided, it will identify the origin as the WC Admin Payments settings.
-	 * @param string $source Optional. The source for the current onboarding flow.
-	 *                       If not provided, it will identify the source as the WC Admin Payments settings.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param string $from     Optional. Where in the UI the request is coming from.
+	 *                         If not provided, it will identify the origin as the WC Admin Payments settings.
+	 * @param string $source   Optional. The source for the current onboarding flow.
+	 *                         If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return array The response from the WooPayments API.
 	 * @throws ApiException If we could not reset onboarding or there was an error.
 	 */
-	public function reset_onboarding( string $from = '', string $source = '' ): array {
+	public function reset_onboarding( string $location, string $from = '', string $source = '' ): array {
 		$this->check_if_onboarding_action_is_acceptable();
+
+		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
+		WC()->payment_gateways();
 
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
+
+		// If no source is provided, default to the WC Admin Payments settings.
+		if ( empty( $source ) ) {
+			$source = self::FROM_PAYMENT_SETTINGS;
+		}
 
 		try {
 			// Call the WooPayments API to reset onboarding.
@@ -695,7 +1305,7 @@ class WooPaymentsService {
 				'/wc/v3/payments/onboarding/reset',
 				array(
 					'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
-					'source' => ! empty( $source ) ? esc_attr( $source ) : self::FROM_PAYMENT_SETTINGS,
+					'source' => $source,
 				)
 			);
 		} catch ( Exception $e ) {
@@ -734,6 +1344,15 @@ class WooPaymentsService {
 		// Clean up any NOX-specific onboarding data.
 		$this->proxy->call_function( 'delete_option', self::NOX_PROFILE_OPTION_KEY );
 
+		// Record an event for the onboarding reset.
+		$this->record_event(
+			self::EVENT_PREFIX . 'onboarding_reset',
+			$location,
+			array(
+				'source' => $source,
+			)
+		);
+
 		return $response;
 	}
 
@@ -753,8 +1372,16 @@ class WooPaymentsService {
 	public function disable_test_account( string $location, string $from = '', string $source = '' ): array {
 		$this->check_if_onboarding_action_is_acceptable();
 
+		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
+		WC()->payment_gateways();
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
+
+		// If no source is provided, default to the WC Admin Payments settings.
+		if ( empty( $source ) ) {
+			$source = self::FROM_PAYMENT_SETTINGS;
+		}
 
 		try {
 			// Call the WooPayments API to disable the test account and prepare for the switch to live.
@@ -764,7 +1391,7 @@ class WooPaymentsService {
 				'/wc/v3/payments/onboarding/test_drive_account/disable',
 				array(
 					'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
-					'source' => ! empty( $source ) ? esc_attr( $source ) : self::FROM_PAYMENT_SETTINGS,
+					'source' => $source,
 				)
 			);
 		} catch ( Exception $e ) {
@@ -802,10 +1429,21 @@ class WooPaymentsService {
 
 		// For sanity, make sure the payment methods step is marked as completed.
 		// This is to avoid the user being prompted to set up payment methods again.
-		$this->set_onboarding_step_completed( self::ONBOARDING_STEP_PAYMENT_METHODS, $location );
-		// For sanity, make sure the test account step is marked as completed.
+		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_PAYMENT_METHODS, $location );
+		// For sanity, make sure the test account step is marked as completed and not blocked or failed.
 		// After disabling a test account, the user should be prompted to set up a live account.
-		$this->set_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+		$this->clear_onboarding_step_blocked( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+		$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+
+		// Record an event for the test account being disabled.
+		$this->record_event(
+			self::EVENT_PREFIX . 'onboarding_test_account_disabled',
+			$location,
+			array(
+				'source' => $source,
+			)
+		);
 
 		return $response;
 	}
@@ -828,7 +1466,8 @@ class WooPaymentsService {
 		}
 
 		// If the WooPayments installed version is less than the minimum required version, we can't do anything.
-		if ( defined( 'WCPAY_VERSION_NUMBER' ) && version_compare( WCPAY_VERSION_NUMBER, self::EXTENSION_MINIMUM_VERSION, '<' ) ) {
+		if ( Constants::is_defined( 'WCPAY_VERSION_NUMBER' ) &&
+			version_compare( Constants::get_constant( 'WCPAY_VERSION_NUMBER' ), self::EXTENSION_MINIMUM_VERSION, '<' ) ) {
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_extension_version',
 				/* translators: %s: WooPayments. */
@@ -875,6 +1514,16 @@ class WooPaymentsService {
 				'woocommerce_woopayments_onboarding_step_requirements_not_met',
 				esc_html__( 'Onboarding step requirements are not met.', 'woocommerce' ),
 				(int) WP_Http::FORBIDDEN
+			);
+		}
+		if ( $this->is_onboarding_step_blocked( $step_id, $location ) ) {
+			throw new ApiException(
+				'woocommerce_woopayments_onboarding_step_blocked',
+				esc_html__( 'There are environment or store setup issues which are blocking progress. Please resolve them to proceed.', 'woocommerce' ),
+				(int) WP_Http::FORBIDDEN,
+				array(
+					'error' => map_deep( $this->get_onboarding_step_error( $step_id, $location ), 'esc_html' ),
+				),
 			);
 		}
 	}
@@ -948,7 +1597,8 @@ class WooPaymentsService {
 					),
 				),
 			),
-			$location
+			$location,
+			$rest_path
 		);
 
 		// Add the WPCOM connection onboarding step details.
@@ -959,13 +1609,14 @@ class WooPaymentsService {
 					'connection_state' => $this->get_wpcom_connection_state(),
 				),
 			),
-			$location
+			$location,
+			$rest_path
 		);
 
 		// If the WPCOM connection is already set up, we don't need to add anything more.
 		if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $wpcom_step['status'] ) {
 			// Craft the return URL.
-			// By default, we return to the onboarding modal.
+			// By default, we return the user to the onboarding modal.
 			$return_url = $this->proxy->call_static(
 				Utils::class,
 				'wc_payments_settings_url',
@@ -993,37 +1644,36 @@ class WooPaymentsService {
 
 		$steps[] = $wpcom_step;
 
-		// Add the test account onboarding step details.
-		$test_account_step = $this->standardize_onboarding_step_details(
-			array(
-				'id' => self::ONBOARDING_STEP_TEST_ACCOUNT,
-			),
-			$location
-		);
-
-		// If the step is not completed, we need to add the actions.
-		if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $test_account_step['status'] ) {
-			$test_account_step['actions'] = array(
-				'start'  => array(
-					'type' => self::ACTION_TYPE_REST,
-					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/start' ),
+		// Test account onboarding step is unavailable in UAE and Singapore.
+		if ( ! in_array( $location, array( 'AE', 'SG' ), true ) ) {
+			$test_account_step = $this->standardize_onboarding_step_details(
+				array(
+					'id' => self::ONBOARDING_STEP_TEST_ACCOUNT,
 				),
-				'init'   => array(
-					'type' => self::ACTION_TYPE_REST,
-					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/init' ),
-				),
-				'check'  => array(
-					'type' => self::ACTION_TYPE_REST,
-					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/check' ),
-				),
-				'finish' => array(
-					'type' => self::ACTION_TYPE_REST,
-					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/finish' ),
-				),
+				$location,
+				$rest_path
 			);
-		}
 
-		$steps[] = $test_account_step;
+			// If the step is not completed, we need to add the actions.
+			if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $test_account_step['status'] ) {
+				$test_account_step['actions'] = array(
+					'start'  => array(
+						'type' => self::ACTION_TYPE_REST,
+						'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/start' ),
+					),
+					'init'   => array(
+						'type' => self::ACTION_TYPE_REST,
+						'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/init' ),
+					),
+					'finish' => array(
+						'type' => self::ACTION_TYPE_REST,
+						'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/finish' ),
+					),
+				);
+			}
+
+			$steps[] = $test_account_step;
+		}
 
 		// Add the live account business verification onboarding step details.
 		$business_verification_step = $this->standardize_onboarding_step_details(
@@ -1036,14 +1686,15 @@ class WooPaymentsService {
 					'has_test_account' => $this->has_test_account(),
 				),
 			),
-			$location
+			$location,
+			$rest_path
 		);
 
 		// Try to get the pre-KYC fields, but only if the required step is completed.
 		// This is because WooPayments needs a working WPCOM connection to be able to fetch the fields.
 		if ( $this->check_onboarding_step_requirements( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location ) ) {
 			try {
-				$business_verification_step['context']['fields'] = $this->get_onboarding_kyc_fields();
+				$business_verification_step['context']['fields'] = $this->get_onboarding_kyc_fields( $location );
 			} catch ( Exception $e ) {
 				$business_verification_step['errors'][] = array(
 					'code'    => 'fields_error',
@@ -1085,20 +1736,21 @@ class WooPaymentsService {
 		$steps[] = $business_verification_step;
 
 		// Do a complete list standardization, for safety.
-		return $this->standardize_onboarding_steps_details( $steps, $location );
+		return $this->standardize_onboarding_steps_details( $steps, $location, $rest_path );
 	}
 
 	/**
 	 * Standardize (and sanity check) the onboarding step details.
 	 *
 	 * @param array  $step_details The onboarding step details to standardize.
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param string $location     The location for which we are onboarding.
+	 *                             This is a ISO 3166-1 alpha-2 country code.
+	 * @param string $rest_path    The REST API path to use for constructing REST API URLs.
 	 *
 	 * @return array The standardized onboarding step details.
 	 * @throws Exception If the onboarding step details are missing required entries or if the step ID is invalid.
 	 */
-	private function standardize_onboarding_step_details( array $step_details, string $location ): array {
+	private function standardize_onboarding_step_details( array $step_details, string $location, string $rest_path ): array {
 		// If the required keys are not present, throw.
 		if ( ! isset( $step_details['id'] ) ) {
 			/* translators: %s: The required key that is missing. */
@@ -1110,13 +1762,48 @@ class WooPaymentsService {
 			throw new Exception( sprintf( esc_html__( 'The onboarding step ID is invalid: %s', 'woocommerce' ), esc_attr( $step_details['id'] ) ) );
 		}
 
+		if ( empty( $step_details['status'] ) ) {
+			$step_details['status'] = $this->get_onboarding_step_status( $step_details['id'], $location );
+		}
+
+		if ( empty( $step_details['errors'] ) ) {
+			$step_details['errors'] = array();
+
+			// For blocked or failed steps, we include any stored error.
+			if ( in_array( $step_details['status'], array( self::ONBOARDING_STEP_STATUS_BLOCKED, self::ONBOARDING_STEP_STATUS_FAILED ), true ) ) {
+				$stored_error = $this->get_onboarding_step_error( $step_details['id'], $location );
+				if ( ! empty( $stored_error ) ) {
+					$step_details['errors'] = array( $stored_error );
+				}
+			}
+		}
+
+		// Ensure that any step has the general actions.
+		if ( empty( $step_details['actions'] ) ) {
+			$step_details['actions'] = array();
+		}
+		// Any step can be checked for its status.
+		if ( empty( $step_details['actions']['check'] ) ) {
+			$step_details['actions']['check'] = array(
+				'type' => self::ACTION_TYPE_REST,
+				'href' => rest_url( trailingslashit( $rest_path ) . $step_details['id'] . '/check' ),
+			);
+		}
+		// Any step can be cleaned of its progress.
+		if ( empty( $step_details['actions']['clean'] ) ) {
+			$step_details['actions']['clean'] = array(
+				'type' => self::ACTION_TYPE_REST,
+				'href' => rest_url( trailingslashit( $rest_path ) . $step_details['id'] . '/clean' ),
+			);
+		}
+
 		return array(
 			'id'             => $step_details['id'],
 			'path'           => $step_details['path'] ?? trailingslashit( self::ONBOARDING_PATH_BASE ) . $step_details['id'],
 			'required_steps' => $step_details['required_steps'] ?? $this->get_onboarding_step_required_steps( $step_details['id'] ),
-			'status'         => $step_details['status'] ?? $this->get_onboarding_step_status( $step_details['id'], $location ),
-			'errors'         => $step_details['errors'] ?? array(),
-			'actions'        => $step_details['actions'] ?? array(),
+			'status'         => $step_details['status'],
+			'errors'         => $step_details['errors'],
+			'actions'        => $step_details['actions'],
 			'context'        => $step_details['context'] ?? array(),
 		);
 	}
@@ -1127,14 +1814,15 @@ class WooPaymentsService {
 	 * @param array  $steps The onboarding steps list to standardize.
 	 * @param string $location The location for which we are onboarding.
 	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param string $rest_path The REST API path to use for constructing REST API URLs.
 	 *
 	 * @return array The standardized onboarding steps list.
 	 * @throws Exception If some onboarding steps are missing required entries or if invalid step IDs are present.
 	 */
-	private function standardize_onboarding_steps_details( array $steps, string $location ): array {
+	private function standardize_onboarding_steps_details( array $steps, string $location, string $rest_path ): array {
 		$standardized_steps = array();
 		foreach ( $steps as $step ) {
-			$standardized_steps[] = $this->standardize_onboarding_step_details( $step, $location );
+			$standardized_steps[] = $this->standardize_onboarding_step_details( $step, $location, $rest_path );
 		}
 
 		return $standardized_steps;
@@ -1359,8 +2047,25 @@ class WooPaymentsService {
 		$step_pms_data = (array) $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_PAYMENT_METHODS, $location, 'payment_methods' );
 
 		$payment_methods_state = array();
+		$apple_pay_enabled     = false;
+		$google_pay_enabled    = false;
+
 		foreach ( $recommended_pms as $recommended_pm ) {
 			$pm_id = $recommended_pm['id'];
+
+			/**
+			 * We need to handle Apple Pay and Google Pay separately.
+			 * They are not stored in the same way as the other payment methods.
+			 */
+			if ( 'apple_pay' === $pm_id ) {
+				$apple_pay_enabled = $recommended_pm['enabled'];
+				continue;
+			}
+
+			if ( 'google_pay' === $pm_id ) {
+				$google_pay_enabled = $recommended_pm['enabled'];
+				continue;
+			}
 
 			// Start with the recommended enabled state.
 			$payment_methods_state[ $pm_id ] = $recommended_pm['enabled'];
@@ -1376,6 +2081,12 @@ class WooPaymentsService {
 				$payment_methods_state[ $pm_id ] = filter_var( $step_pms_data[ $pm_id ], FILTER_VALIDATE_BOOLEAN );
 			}
 		}
+
+		// Combine Apple Pay and Google Pay into a single `apple_google` entry.
+		$apple_google_enabled = $apple_pay_enabled || $google_pay_enabled;
+
+		// Optionally also respect stored state or forced requirements if needed here.
+		$payment_methods_state['apple_google'] = $apple_google_enabled;
 
 		return $payment_methods_state;
 	}
@@ -1516,10 +2227,13 @@ class WooPaymentsService {
 	/**
 	 * Get the onboarding fields data for the KYC business verification.
 	 *
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *
 	 * @return array The onboarding fields data.
 	 * @throws Exception If the onboarding fields data could not be retrieved or there was an error.
 	 */
-	private function get_onboarding_kyc_fields(): array {
+	private function get_onboarding_kyc_fields( string $location ): array {
 		// Call the WooPayments API to get the onboarding fields.
 		$response = $this->proxy->call_static( Utils::class, 'rest_endpoint_get_request', '/wc/v3/payments/onboarding/fields' );
 
@@ -1538,6 +2252,8 @@ class WooPaymentsService {
 			$fields['available_countries'] = $this->proxy->call_static( '\WC_Payments_Utils', 'supported_countries' );
 		}
 
+		$fields['location'] = $location;
+
 		return $fields;
 	}
 
@@ -1552,7 +2268,10 @@ class WooPaymentsService {
 		}
 
 		// Fall back to the provider onboarding URL.
-		return $this->provider->get_onboarding_url( $this->get_payment_gateway(), Utils::wc_payments_settings_url( self::ONBOARDING_PATH_BASE ) );
+		return $this->provider->get_onboarding_url(
+			$this->get_payment_gateway(),
+			Utils::wc_payments_settings_url( self::ONBOARDING_PATH_BASE, array( 'from' => self::FROM_KYC ) )
+		);
 	}
 
 	/**
@@ -1579,5 +2298,62 @@ class WooPaymentsService {
 			),
 			admin_url( 'admin.php' )
 		);
+	}
+
+	/**
+	 * Get the business location country code for the Payments settings.
+	 *
+	 * @return string The ISO 3166-1 alpha-2 country code to use for the overall business location.
+	 *                If the user didn't set a location, the WC base location country code is used.
+	 */
+	private function get_country(): string {
+		$user_nox_meta = get_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, true );
+		if ( ! empty( $user_nox_meta['business_country_code'] ) ) {
+			return $user_nox_meta['business_country_code'];
+		}
+
+		return WC()->countries->get_base_country();
+	}
+
+	/**
+	 * Send a Tracks event.
+	 *
+	 * By default, Woo adds `url`, `blog_lang`, `blog_id`, `store_id`, `products_count`, and `wc_version`
+	 * properties to every event.
+	 *
+	 * @param string $name              The event name.
+	 *                                  If it is not prefixed with self::EVENT_PREFIX, it will be prefixed with it.
+	 * @param string $business_country  The business registration country code as set in the WooCommerce Payments settings.
+	 *                                  This is a ISO 3166-1 alpha-2 country code.
+	 * @param array  $properties        Optional. The event custom properties.
+	 *                                  These properties will be merged with the default properties.
+	 *                                  Default properties values take precedence over the provided ones.
+	 *
+	 * @return void
+	 */
+	private function record_event( string $name, string $business_country, array $properties = array() ) {
+		if ( ! function_exists( 'wc_admin_record_tracks_event' ) ) {
+			return;
+		}
+
+		// If the event name is empty, we don't record it.
+		if ( empty( $name ) ) {
+			return;
+		}
+
+		// If the event name is not prefixed with `settings_payments_`, we prefix it.
+		if ( ! str_starts_with( $name, self::EVENT_PREFIX ) ) {
+			$name = self::EVENT_PREFIX . $name;
+		}
+
+		// Add default properties to every event and overwrite custom properties with the same keys.
+		$properties = array_merge(
+			$properties,
+			array(
+				'business_country' => $business_country,
+			),
+		);
+
+		wc_admin_record_tracks_event( $name, $properties );
 	}
 }

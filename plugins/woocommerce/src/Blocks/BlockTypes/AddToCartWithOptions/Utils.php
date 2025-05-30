@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use WP_Block;
 
 /**
- * Utility methods used for the Add to Cart with Options block.
+ * Utility methods used for the Add to Cart + Options block.
  * {@internal This class and its methods are not intended for public use.}
  */
 class Utils {

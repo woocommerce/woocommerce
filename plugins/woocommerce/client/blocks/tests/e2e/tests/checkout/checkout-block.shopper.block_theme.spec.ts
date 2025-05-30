@@ -65,7 +65,8 @@ test.describe( 'Shopper → Account (guest user)', () => {
 		await frontendUtils.goToCheckout();
 	} );
 
-	test( 'Shopper can log in to an existing account and can create an account', async ( {
+	// eslint-disable-next-line playwright/no-skipped-test -- This will be rewritten as a unit/integration test - WOOPLUG-4303
+	test.skip( 'Shopper can log in to an existing account and can create an account', async ( {
 		requestUtils,
 		checkoutPageObject,
 		page,
@@ -164,9 +165,7 @@ test.describe( 'Shopper → Local pickup', () => {
 		await checkoutPageObject.verifyBillingDetails();
 	} );
 
-	// Skipping temporarily as we work on a proper fix for underlying issue
-	// Tracked in https://github.com/woocommerce/woocommerce/issues/57542
-	test.skip( 'Switching between local pickup and shipping does not affect the address and is used for the order', async ( {
+	test( 'Switching between local pickup and shipping does not affect the address and is used for the order', async ( {
 		page,
 		frontendUtils,
 		checkoutPageObject,
@@ -207,6 +206,8 @@ test.describe( 'Shopper → Local pickup', () => {
 		await page
 			.getByRole( 'radio', { name: 'Pickup', exact: true } )
 			.click();
+		await expect( page.getByText( 'Pickup (Testing)' ) ).toBeVisible();
+
 		await checkoutPageObject.placeOrder();
 
 		await expect(
@@ -227,11 +228,9 @@ test.describe( 'Shopper → Local pickup', () => {
 			'page=wc-settings&tab=shipping&section=options'
 		);
 
-		await expect(
-			admin.page.getByLabel(
-				'Hide shipping costs until an address is entered'
-			)
-		).toBeDisabled();
+		await admin.page
+			.getByLabel( 'Hide shipping costs until an address is entered' )
+			.uncheck();
 
 		let saveButton = admin.page.getByRole( 'button', {
 			name: 'Save changes',

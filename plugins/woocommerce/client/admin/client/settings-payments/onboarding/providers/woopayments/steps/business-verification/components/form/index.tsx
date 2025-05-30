@@ -27,6 +27,7 @@ import { completeSubStep } from '../../utils/actions';
 import { useValidation } from '../../utils/validation';
 import strings from '../../strings';
 import './style.scss';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 
 type OnboardingFormProps = {
 	children: React.ReactNode;
@@ -42,7 +43,15 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 
 	const handleContinue = () => {
 		if ( isEmpty( errors ) && isPreKycComplete( data ) ) {
-			// To-Do: Add tracking for the KYC step completion.
+			recordPaymentsOnboardingEvent(
+				'woopayments_onboarding_modal_kyc_sub_step_completed',
+				{
+					sub_step_id: 'business',
+					country: data.country || '',
+					business_type: data.business_type || '',
+					mcc: data.mcc || '',
+				}
+			);
 
 			// Complete business sub step.
 			completeSubStep(
@@ -68,6 +77,16 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 				variant={ 'primary' }
 				type="submit"
 				className="stepper__cta"
+				onClick={ () => {
+					recordPaymentsOnboardingEvent(
+						'woopayments_onboarding_modal_click',
+						{
+							step_id: currentStep?.id ?? '',
+							sub_step_id: 'business',
+							action: 'business_form_continue',
+						}
+					);
+				} }
 			>
 				{ strings.continue }
 			</Button>
