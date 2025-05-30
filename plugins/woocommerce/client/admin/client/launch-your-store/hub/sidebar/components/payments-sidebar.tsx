@@ -4,7 +4,7 @@
  * External dependencies
  */
 import React from 'react';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 // @ts-ignore No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
 import clsx from 'clsx';
@@ -32,6 +32,8 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 		currentStep,
 		justCompletedStepId,
 		isStoreLoading,
+		wooPaymentsRecentlyEnabled,
+		isWooPaymentsEnabled,
 	} = useOnboardingContext();
 
 	const currentStepIndex = allSteps.findIndex(
@@ -49,6 +51,33 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 			{ __( 'Set up WooPayments', 'woocommerce' ) }
 		</Button>
 	);
+
+	const InstallWooPaymentsStep = ( { isStepComplete }: { isStepComplete: boolean } ) => (
+		<SidebarNavigationItem
+			key="install-woopayments"
+			className={ clsx( 'install-woopayments', {
+				active: isStepComplete,
+				'payment-step': true,
+				'payment-step--active':
+					isStepComplete,
+				'payment-step--disabled':
+					isStepComplete,
+				'is-complete': isStepComplete,
+			} ) }
+			icon={
+				isStepComplete
+					? taskCompleteIcon
+					: taskIcons.activePaymentStep
+			}
+			disabled={ true }
+			showChevron={ false }
+		>
+			{
+				/* translators: %s: WooPayments */
+				sprintf( __( 'Install %s', 'woocommerce' ), 'WooPayments' )
+			}
+		</SidebarNavigationItem>
+	)
 
 	return (
 		<div
@@ -88,6 +117,16 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 							animate={ { opacity: 1, y: 0 } }
 							transition={ { duration: 0.7, delay: 0.2 } }
 						>
+							{ ! isWooPaymentsEnabled && (
+								<InstallWooPaymentsStep
+									isStepComplete={ false }
+								/>
+							) }
+							{ wooPaymentsRecentlyEnabled && (
+								<InstallWooPaymentsStep
+									isStepComplete={ true }
+								/>
+							) }
 							{ allSteps.map( ( step ) => {
 								const isStepComplete =
 									step.id === justCompletedStepId ||
