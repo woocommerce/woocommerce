@@ -39,12 +39,12 @@ Below are a couple of tools designed specifically for a WordPress environment:
 
 Below is a collection of tools to help you manage your environment that are not WordPress-specific.
 
-* [MAMP](https://www.mamp.info/en/mac/) \- A local server environment that can be installed on Mac or Windows.  
-* [WAMP](https://www.wampserver.com/en/) \- A Windows web development environment that lets you create applications with Apache2, PHP, and MySQL.  
-* [XAMPP](https://www.apachefriends.org/index.html) \- An easy-to-install Apache distribution containing MariaDB, PHP, and Perl. It's available for Windows, Linux, and OS X.  
-* Laravel Herd / Valet-   
-* Lando  
-* DDEV
+* [MAMP](https://www.mamp.info/en/mac/) - A local server environment that can be installed on Mac or Windows.  
+* [WAMP](https://www.wampserver.com/en/) - A Windows web development environment that lets you create applications with Apache2, PHP, and MySQL.  
+* [XAMPP](https://www.apachefriends.org/index.html) - An easy-to-install Apache distribution containing MariaDB, PHP, and Perl. It's available for Windows, Linux, and OS X.  
+* [Laravel Herd / Valet](https://herd.laravel.com/) - A minimalist and fast development environment for macOS (Valet) and Windows (Herd), optimized for Laravel and other PHP applications.
+* [Lando](https://lando.dev/) - A powerful, Docker-based tool for defining and managing local development services across various languages and frameworks.
+* [DDEV](https://ddev.com/) - An open-source, Docker-based tool for streamlined local web development, supporting many CMS and frameworks like Drupal and WordPress.
 
 ### Minimum server requirements
 
