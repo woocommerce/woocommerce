@@ -20,26 +20,26 @@ class AdminManager {
 	 *
 	 * @return void
 	 */
-    final public function init() {
+	final public function init() {
 
-        // Enqueue scripts.
+		// Enqueue scripts.
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_resources' ), 11 );
 
-        $container = wc_get_container();
+		$container = wc_get_container();
 		$container->get( MenusController::class );
 		$container->get( SettingsController::class );
-    }
+	}
 
-    /**
+	/**
 	 * Admin scripts.
 	 *
 	 * @return void
 	 */
 	public static function admin_resources() {
 
-        $screen    = get_current_screen();
-        $screen_id = $screen ? $screen->id : '';
-        $suffix    = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+		$screen    = get_current_screen();
+		$screen_id = $screen ? $screen->id : '';
+		$suffix    = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 		$version   = Constants::get_constant( 'WC_VERSION' );
 
 		wp_register_script( 'wc-admin-customer-stock-notifications', WC()->plugin_url() . '/assets/js/admin/wc-customer-stock-notifications' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'wp-util', 'sw-admin-select-init', 'wc-backbone-modal' ), $version );
