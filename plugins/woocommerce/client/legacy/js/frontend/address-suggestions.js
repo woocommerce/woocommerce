@@ -39,10 +39,25 @@
 					list.setAttribute( 'aria-label', 'Address suggestions' );
 
 					container.appendChild( list );
-					addressInput.parentNode?.insertBefore(
+					addressInput.parentNode.insertBefore(
 						container,
 						addressInput.nextSibling
 					);
+
+					// Add search icon
+					const searchIcon = document.createElement( 'div' );
+					searchIcon.className = 'address-search-icon';
+					searchIcon.innerHTML =
+						'<svg xmlns="http://www.w3.org/2000/svg" ' +
+						'viewBox="0 0 14 14" ' +
+						'focusable="false" ' +
+						'aria-hidden="true">' +
+						'<circle cx="6" cy="6" r="4"></circle>' +
+						'<path stroke-linecap="round" ' +
+						'stroke-linejoin="round" ' +
+						'd="m9.25 9.25 2.5 2.5"></path>' +
+						'</svg>';
+					addressInput.parentNode.appendChild( searchIcon );
 				}
 
 				addressInputs[ type ] = addressInput;
@@ -62,18 +77,72 @@
 			{
 				id: '01971ca5-35d2-7514-adaf-d4ab97c02c19',
 				label: '10 Downing Street, London, SW1A 2AA, GB',
+				matchedSubstrings: [
+					{
+						length: 19,
+						offset: 0,
+					},
+					{
+						length: 1,
+						offset: 21,
+					},
+				],
 			},
 			{
 				id: '01971ca5-35d2-7514-adaf-da427f3b640f',
 				label: '1600 Amphitheatre Parkway, Mountain View, CA, US',
+				matchedSubstrings: [
+					{
+						length: 19,
+						offset: 5,
+					},
+					{
+						length: 1,
+						offset: 26,
+					},
+				],
 			},
 			{
 				id: '01971ca5-35d2-7514-adaf-dfa0a03f1e49',
 				label: 'Eiffel Tower, Paris, 75007, FR',
+				matchedSubstrings: [
+					{
+						length: 19,
+						offset: 5,
+					},
+					{
+						length: 1,
+						offset: 26,
+					},
+				],
 			},
 			{
 				id: '01971ca5-35d2-7514-adaf-e3bd0086bea9',
 				label: '1 Hacker Way, Menlo Park, CA, US',
+				matchedSubstrings: [
+					{
+						length: 19,
+						offset: 5,
+					},
+					{
+						length: 1,
+						offset: 26,
+					},
+				],
+			},
+			{
+				id: '01971ca5-35d2-7514-adaf-e3bd0086bea6',
+				label: 'Very long address in the middle of the screen, 98000, Menlo Park, CA, US',
+				matchedSubstrings: [
+					{
+						length: 19,
+						offset: 5,
+					},
+					{
+						length: 1,
+						offset: 26,
+					},
+				],
 			},
 		];
 
@@ -100,6 +169,12 @@
 				address1: '1 Hacker Way',
 				city: 'Menlo Park',
 				postcode: '94025',
+				country: 'US',
+			},
+			'01971ca5-35d2-7514-adaf-e3bd0086bea6': {
+				address1: 'Very long address in the middle of the screen',
+				city: 'Menlo Park',
+				postcode: '98000',
 				country: 'US',
 			},
 		};
@@ -129,13 +204,41 @@
 			input.setAttribute( 'autocomplete', 'address-line1' );
 			input.removeAttribute( 'data-1p-ignore' );
 			input.removeAttribute( 'data-lpignore' );
+		}
 
-			// A workaround to make the browser autofill the address fields.
-			const parentElement = input.parentElement;
-			if ( parentElement ) {
-				parentElement.appendChild( input );
-				input.focus();
+		function getHighlightedLabel( label, matches ) {
+			const parts = [];
+			let lastIndex = 0;
+
+			matches.forEach( ( match ) => {
+				// Add text before match
+				if ( match.offset > lastIndex ) {
+					parts.push(
+						document.createTextNode(
+							label.slice( lastIndex, match.offset )
+						)
+					);
+				}
+
+				// Add bold matched text
+				const bold = document.createElement( 'strong' );
+				bold.textContent = label.slice(
+					match.offset,
+					match.offset + match.length
+				);
+				parts.push( bold );
+
+				lastIndex = match.offset + match.length;
+			} );
+
+			// Add remaining text
+			if ( lastIndex < label.length ) {
+				parts.push(
+					document.createTextNode( label.slice( lastIndex ) )
+				);
 			}
+
+			return parts;
 		}
 
 		function displaySuggestions( type, inputValue ) {
@@ -163,7 +266,13 @@
 				li.id = `suggestion-item-${ type }-${ index }`;
 				li.dataset.id = suggestion.id;
 				li.setAttribute( 'tabindex', '-1' );
-				li.textContent = suggestion.label;
+
+				li.textContent = ''; // Clear existing content
+				const labelParts = getHighlightedLabel(
+					suggestion.label,
+					suggestion.matchedSubstrings || []
+				);
+				labelParts.forEach( ( part ) => li.appendChild( part ) );
 
 				li.addEventListener( 'click', function () {
 					selectAddress( type, this.dataset.id );

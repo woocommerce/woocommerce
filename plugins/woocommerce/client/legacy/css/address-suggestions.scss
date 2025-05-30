@@ -3,11 +3,12 @@
 	z-index: 1000;
 	width: 100%;
 	max-width: 100%;
-	margin-top: 2px;
+	margin-top: 4px;
 	background: #fff;
 	border: 1px solid #ddd;
 	border-radius: 4px;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	box-sizing: border-box;
 	display: none;
 
 	.suggestions-list {
@@ -19,9 +20,11 @@
 
 		li {
 			padding: 8px 12px;
+			font-size: 14px;
 			cursor: pointer;
-			border-bottom: 1px solid #f0f0f0;
-			transition: background-color 0.2s ease;
+			text-overflow: ellipsis;
+			overflow: hidden;
+			white-space: nowrap;
 
 			&:last-child {
 				border-bottom: none;
@@ -29,19 +32,39 @@
 
 			&:hover,
 			&.active {
-				background-color: #f8f8f8;
+				background-color: #0073aa;
+				color: #fff;
 			}
 
 			&:focus {
 				outline: none;
-				background-color: #f0f0f0;
+				background-color: #0073aa;
+				color: #fff;
 			}
 		}
 	}
 }
 
 // Ensure the input container has relative positioning
-.woocommerce-billing-fields,
-.woocommerce-shipping-fields {
+.woocommerce-input-wrapper:has(#billing_address_1, #shipping_address_1) {
 	position: relative;
+}
+
+// Search icon styles
+.address-search-icon {
+	position: absolute;
+	inset-inline-end: 16px;
+	top: 50%;
+	transform: translateY(-50%);
+	pointer-events: none;
+	width: 16px;
+	height: 16px;
+	line-height: 16px;
+	z-index: 1;
+
+	svg {
+		fill: none;
+		stroke: var(--wc-form-color-text, #444);
+		stroke-width: 1;
+	}
 }
