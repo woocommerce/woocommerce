@@ -67,8 +67,9 @@ class GroupedProductSelectorItemCTA extends AbstractBlock {
 	 * @return string The quantity input HTML without the label.
 	 */
 	private function remove_quantity_label( $quantity_html ) {
-		// Remove the label from the quantity input.
-		return preg_replace( '/<label[^>]*>.*?<\/label>/s', '', $quantity_html );
+		// Remove the label and aria-label from the quantity input.
+		$quantity_html = preg_replace( '/<label[^>]*>.*?<\/label>/s', '', $quantity_html );
+		return preg_replace( '/\s*aria-label="[^"]*"/', '', $quantity_html );
 	}
 
 	/**
