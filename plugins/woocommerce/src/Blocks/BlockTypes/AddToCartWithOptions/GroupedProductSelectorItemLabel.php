@@ -45,21 +45,12 @@ class GroupedProductSelectorItemLabel extends AbstractBlock {
 					$wrapper_attributes,
 					esc_html( $title )
 				);
-			} elseif ( $product->is_sold_individually() ) {
-				// Button.
+			} else {
+				// Checkbox.
 				$markup = sprintf(
 					'<label %1$s for="%2$s">%3$s</label>',
 					$wrapper_attributes,
 					esc_attr( 'quantity-' . $product->get_id() ),
-					esc_html( $title )
-				);
-			} else {
-				// Checkbox.
-				$input_id = AddToCartWithOptionsUtils::get_quantity_input_id( $product );
-				$markup   = sprintf(
-					'<label %1$s for="%2$s">%3$s</label>',
-					$wrapper_attributes,
-					esc_attr( $input_id ),
 					esc_html( $title )
 				);
 			}
