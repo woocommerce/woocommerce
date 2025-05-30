@@ -82,7 +82,7 @@
 		"@wordpress/keycodes": "wp-6.6",
 		"@wordpress/media-utils": "wp-6.6",
 		"@wordpress/notices": "wp-6.6",
-		"@wordpress/plugins": "^7.0.3",
+		"@wordpress/plugins": "wp-6.6",
 		"@wordpress/preferences": "wp-6.6",
 		"@wordpress/private-apis": "wp-6.6",
 		"@wordpress/rich-text": "wp-6.6",
