@@ -35,11 +35,25 @@ class NotificationsListTable extends \WP_List_Table {
 	public $total_active_items = 0;
 
 	/**
-	 * Total inactive records.
+	 * Total pending records.
 	 *
 	 * @var int
 	 */
-	public $total_inactive_items = 0;
+	public $total_pending_items = 0;
+
+	/**
+	 * Total cancelled records.
+	 *
+	 * @var int
+	 */
+	public $total_cancelled_items = 0;
+
+	/**
+	 * Total sent records.
+	 *
+	 * @var int
+	 */
+	public $total_sent_items = 0;
 
 	/**
 	 * Are there any notifications in the DB?.
@@ -73,15 +87,27 @@ class NotificationsListTable extends \WP_List_Table {
 			)
 		);
 
-		// Count inactive notifications.
-		$this->total_inactive_items = $this->data_store->query(
+		// Count pending notifications.
+		$this->total_pending_items = $this->data_store->query(
 			array(
 				'return' => 'count',
-				'status' => array(
-					NotificationStatus::SENT,
-					NotificationStatus::CANCELLED,
-					NotificationStatus::PENDING,
-				),
+				'status' => NotificationStatus::PENDING,
+			)
+		);
+
+		// Count cancelled notifications.
+		$this->total_cancelled_items = $this->data_store->query(
+			array(
+				'return' => 'count',
+				'status' => NotificationStatus::CANCELLED,
+			)
+		);
+
+		// Count sent notifications.
+		$this->total_sent_items = $this->data_store->query(
+			array(
+				'return' => 'count',
+				'status' => NotificationStatus::SENT,
 			)
 		);
 
@@ -141,26 +167,22 @@ class NotificationsListTable extends \WP_List_Table {
 	 * @return void
 	 */
 	public function column_status( $notification ) {
-		// Build tooltip.
-		$tooltip = '';
 
 		if ( $notification->get_status() === NotificationStatus::PENDING ) {
 			$status  = 'cancelled';
 			$label   = __( 'Pending', 'woocommerce' );
-			$tooltip = __( 'Awaiting verification', 'woocommerce' );
-		} elseif ( $notification->get_status() !== NotificationStatus::ACTIVE ) {
+		} elseif ( $notification->get_status() === NotificationStatus::CANCELLED ) {
 			$status = 'cancelled';
-			$label  = __( 'Inactive', 'woocommerce' );
+			$label  = __( 'Cancelled', 'woocommerce' );
+		} elseif ( $notification->get_status() === NotificationStatus::SENT ) {
+			$status = 'cancelled';
+			$label  = __( 'Sent', 'woocommerce' );
 		} else {
 			$status = 'completed';
 			$label  = __( 'Active', 'woocommerce' );
 		}
 
-		if ( ! empty( $tooltip ) ) {
-			printf( '<mark class="order-status %s tips" data-tip="%s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $status ) ), wp_kses_post( $tooltip ), esc_html( $label ) );
-		} else {
-			printf( '<mark class="order-status %s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $status ) ), esc_html( $label ) );
-		}
+		printf( '<mark class="order-status %s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $status ) ), esc_html( $label ) );
 	}
 
 	/**
@@ -333,7 +355,7 @@ class NotificationsListTable extends \WP_List_Table {
 	protected function get_bulk_actions() {
 		$actions            = array();
 		$actions['enable']  = __( 'Activate', 'woocommerce' );
-		$actions['disable'] = __( 'Deactivate', 'woocommerce' );
+		$actions['cancel']  = __( 'Cancel', 'woocommerce' );
 		$actions['delete']  = __( 'Delete permanently', 'woocommerce' );
 		return $actions;
 	}
@@ -377,12 +399,12 @@ class NotificationsListTable extends \WP_List_Table {
 		// Views.
 		if ( ! empty( $_REQUEST['status'] ) && 'active_customer_stock_notifications' === $_REQUEST['status'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$query_args['status'] = NotificationStatus::ACTIVE;
-		} elseif ( ! empty( $_REQUEST['status'] ) && 'inactive_customer_stock_notifications' === $_REQUEST['status'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$query_args['status'] = array(
-				NotificationStatus::SENT,
-				NotificationStatus::CANCELLED,
-				NotificationStatus::PENDING,
-			);
+		} elseif ( ! empty( $_REQUEST['status'] ) && 'sent_customer_stock_notifications' === $_REQUEST['status'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$query_args['status'] = NotificationStatus::SENT;
+		} elseif ( ! empty( $_REQUEST['status'] ) && 'cancelled_customer_stock_notifications' === $_REQUEST['status'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$query_args['status'] = NotificationStatus::CANCELLED;
+		} elseif ( ! empty( $_REQUEST['status'] ) && 'pending_customer_stock_notifications' === $_REQUEST['status'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$query_args['status'] = NotificationStatus::PENDING;
 		}
 
 		// Filters.
@@ -430,13 +452,17 @@ class NotificationsListTable extends \WP_List_Table {
 			$query_args['status']     = NotificationStatus::ACTIVE;
 			$this->total_active_items = $this->data_store->query( $query_args );
 
-			// Count inactive.
-			$query_args['status']       = array(
-				NotificationStatus::SENT,
-				NotificationStatus::CANCELLED,
-				NotificationStatus::PENDING,
-			);
-			$this->total_inactive_items = $this->data_store->query( $query_args );
+			// Count sent.
+			$query_args['status']   = NotificationStatus::SENT;
+			$this->total_sent_items = $this->data_store->query( $query_args );
+
+			// Count cancelled.
+			$query_args['status']        = NotificationStatus::CANCELLED;
+			$this->total_cancelled_items = $this->data_store->query( $query_args );
+
+			// Count pending.
+			$query_args['status']      = NotificationStatus::PENDING;
+			$this->total_pending_items = $this->data_store->query( $query_args );
 		}
 
 		// Configure pagination.
@@ -480,7 +506,7 @@ class NotificationsListTable extends \WP_List_Table {
 					),
 					$redirect_url
 				);
-			} elseif ( 'disable' === $this->current_action() ) {
+			} elseif ( 'cancel' === $this->current_action() ) {
 				foreach ( $notifications as $id ) {
 					$notification = new Notification( $id );
 					$notification->set_status( NotificationStatus::CANCELLED );
@@ -645,21 +671,53 @@ class NotificationsListTable extends \WP_List_Table {
 
 		$status_links['active'] = $this->get_link( array( 'status' => 'active_customer_stock_notifications' ), $active_inner_html, $class );
 
-		// Inactive view.
-		$class               = ! empty( $_REQUEST['status'] ) && 'inactive_customer_stock_notifications' === $_REQUEST['status'] ? 'current' : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$inactive_inner_html = sprintf(
+		// Sent view.
+		$class           = ! empty( $_REQUEST['status'] ) && 'sent_customer_stock_notifications' === $_REQUEST['status'] ? 'current' : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$sent_inner_html = sprintf(
 			/* translators: %s: Notifications count */
 			_nx(
-				'Inactive <span class="count">(%s)</span>',
-				'Inactive <span class="count">(%s)</span>',
-				$this->total_inactive_items,
+				'Sent <span class="count">(%s)</span>',
+				'Sent <span class="count">(%s)</span>',
+				$this->total_sent_items,
 				'notifications_status',
 				'woocommerce'
 			),
-			number_format_i18n( $this->total_inactive_items )
+			number_format_i18n( $this->total_sent_items )
 		);
 
-		$status_links['inactive'] = $this->get_link( array( 'status' => 'inactive_customer_stock_notifications' ), $inactive_inner_html, $class );
+		$status_links['sent'] = $this->get_link( array( 'status' => 'sent_customer_stock_notifications' ), $sent_inner_html, $class );
+
+		// Cancelled view.
+		$class             = ! empty( $_REQUEST['status'] ) && 'cancelled_customer_stock_notifications' === $_REQUEST['status'] ? 'current' : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$cancelled_inner_html = sprintf(
+			/* translators: %s: Notifications count */
+			_nx(
+				'Cancelled <span class="count">(%s)</span>',
+				'Cancelled <span class="count">(%s)</span>',
+				$this->total_cancelled_items,
+				'notifications_status',
+				'woocommerce'
+			),
+			number_format_i18n( $this->total_cancelled_items )
+		);
+
+		$status_links['cancelled'] = $this->get_link( array( 'status' => 'cancelled_customer_stock_notifications' ), $cancelled_inner_html, $class );
+
+		// Pending view.
+		$class             = ! empty( $_REQUEST['status'] ) && 'pending_customer_stock_notifications' === $_REQUEST['status'] ? 'current' : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$pending_inner_html = sprintf(
+			/* translators: %s: Notifications count */
+			_nx(
+				'Pending <span class="count">(%s)</span>',
+				'Pending <span class="count">(%s)</span>',
+				$this->total_pending_items,
+				'notifications_status',
+				'woocommerce'
+			),
+			number_format_i18n( $this->total_pending_items )
+		);
+
+		$status_links['pending'] = $this->get_link( array( 'status' => 'pending_customer_stock_notifications' ), $pending_inner_html, $class );
 
 		return $status_links;
 	}
