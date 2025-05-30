@@ -91,6 +91,44 @@ class Payments extends Task {
 	private function is_woopayments_active() {
 		return class_exists( '\WC_Payments' );
 	}
+
+	/**
+	 * Check if WooPayments extension is configured.
+	 *
+	 * @return bool
+	 */
+	private function is_woopayments_configured() {
+		if ( ! $this->is_woopayments_active() ) {
+			return false;
+		}
+
+		// Fallback to manual check since WooPaymentsService methods are private
+		if ( function_exists( '\wcpay_get_container' ) && class_exists( 'WC_Payments_Account' ) ) {
+			try {
+				$account = wcpay_get_container()->get( 'WC_Payments_Account' );
+
+				if ( is_callable( array( $account, 'is_connected' ) ) ) {
+					if ( ! $account->is_connected() ) {
+						return false;
+					}
+
+					if ( class_exists( '\WC_Payments' ) && is_callable( array( '\WC_Payments', 'get_account_service' ) ) ) {
+						$account_service = \WC_Payments::get_account_service();
+						if ( is_callable( array( $account_service, 'is_stripe_account_valid' ) ) ) {
+							return $account_service->is_stripe_account_valid();
+						}
+					}
+
+					return true;
+				}
+			} catch ( \Exception $e ) {
+				return false;
+			}
+		}
+
+		return false;
+	}
+
 	/**
 	 * Check if WooPayments has a test account.
 	 *
