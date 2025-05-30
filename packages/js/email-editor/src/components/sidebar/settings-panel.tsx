@@ -14,15 +14,28 @@ import {
  */
 import { RichTextWithButton } from '../personalization-tags/rich-text-with-button';
 import { TemplateSelection } from './template-selection';
+import {
+	recordEvent,
+	recordEventOnce,
+	debouncedRecordEvent,
+} from '../../events';
+
+const tracking = {
+	recordEvent,
+	recordEventOnce,
+	debouncedRecordEvent,
+};
 
 const SidebarExtensionComponent = applyFilters(
 	'woocommerce_email_editor_setting_sidebar_extension_component',
-	RichTextWithButton
+	RichTextWithButton,
+	tracking
 ) as () => JSX.Element;
 
 const EmailStatusComponent = applyFilters(
 	'woocommerce_email_editor_setting_sidebar_email_status_component',
-	() => null
+	() => null,
+	tracking
 ) as () => JSX.Element;
 
 export function SettingsPanel() {
