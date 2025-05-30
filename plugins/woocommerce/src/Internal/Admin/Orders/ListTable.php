@@ -24,6 +24,13 @@ class ListTable extends WP_List_Table {
 	private $order_type;
 
 	/**
+	 * Underlying WordPress post type. Used for checking permissions.
+	 *
+	 * @var WP_Post_Type|null
+	 */
+	private $wp_post_type;
+
+	/**
 	 * Request vars.
 	 *
 	 * @var array
@@ -98,7 +105,8 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function setup( $args = array() ): void {
-		$this->order_type = $args['order_type'] ?? 'shop_order';
+		$this->order_type   = $args['order_type'] ?? 'shop_order';
+		$this->wp_post_type = get_post_type_object( $this->order_type );
 
 		add_action( 'admin_notices', array( $this, 'bulk_action_notices' ) );
 		add_filter( "manage_{$this->screen->id}_columns", array( $this, 'get_columns' ), 0 );
@@ -1067,6 +1075,10 @@ class ListTable extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_cb( $item ) {
+		if ( ! $this->wp_post_type || ! current_user_can( $this->wp_post_type->cap->edit_post, $item->get_id() ) ) {
+			return;
+		}
+
 		ob_start();
 		?>
 		<input id="cb-select-<?php echo esc_attr( $item->get_id() ); ?>" type="checkbox" name="id[]" value="<?php echo esc_attr( $item->get_id() ); ?>" />

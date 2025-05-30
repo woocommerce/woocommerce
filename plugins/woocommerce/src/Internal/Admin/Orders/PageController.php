@@ -148,6 +148,9 @@ class PageController {
 		$this->set_action();
 
 		$page_suffix = ( 'shop_order' === $this->order_type ? '' : '--' . $this->order_type );
+		$page_name   = ( 'shop_order' === $this->order_type && ! current_user_can( 'edit_others_shop_orders' ) ) ? 'admin_page_wc-orders' : 'woocommerce_page_wc-orders' . $page_suffix;
+
+		add_action( "load-{$page_name}", array( $this, 'handle_load_page_action' ) );
 
 		add_action( 'load-woocommerce_page_wc-orders' . $page_suffix, array( $this, 'handle_load_page_action' ) );
 		add_action( 'admin_title', array( $this, 'set_page_title' ) );
@@ -261,7 +264,7 @@ class PageController {
 			$post_type = get_post_type_object( $order_type );
 
 			add_submenu_page(
-				'woocommerce',
+				( 'shop_order' === $order_type && ! current_user_can( 'edit_others_shop_orders' ) ) ? null : 'woocommerce',
 				$post_type->labels->name,
 				$post_type->labels->menu_name,
 				$post_type->cap->edit_posts,
