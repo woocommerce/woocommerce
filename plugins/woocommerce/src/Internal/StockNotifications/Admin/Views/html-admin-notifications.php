@@ -38,7 +38,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<h2 class="woocommerce-BlankState-message">
 				<?php esc_html_e( 'No customers have signed up to receive stock notifications from you just yet.', 'woocommerce' ); ?>
 			</h2>
-			<a class="woocommerce-BlankState-cta button" target="_blank" href="https://woocommerce.com/document/back-in-stock-notifications"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a>
+			<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://woocommerce.com/document/back-in-stock-notifications"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a>
 		</div>
 
 	<?php } ?>
