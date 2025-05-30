@@ -21,7 +21,6 @@ import {
 	createStorageUtils,
 } from '@woocommerce/onboarding';
 import { getAdminLink } from '@woocommerce/settings';
-import { isWCPaySupported } from '~/task-lists/fills/PaymentGatewaySuggestions/components/WCPay/utils';
 
 const SEVEN_DAYS_IN_SECONDS = 60 * 60 * 24 * 7;
 export const LYS_RECENTLY_ACTIONED_TASKS_KEY = 'lys_recently_actioned_tasks';
@@ -33,17 +32,6 @@ export const {
 	LYS_RECENTLY_ACTIONED_TASKS_KEY,
 	SEVEN_DAYS_IN_SECONDS
 );
-
-/**
- * Check if WooPayments plugin is active
- */
-const isWooPaymentsEnabled = () => {
-	return (
-		window?.wcSettings?.admin?.plugins?.activePlugins?.includes(
-			'woocommerce-payments'
-		) === true
-	);
-};
 
 export const getLysTasklist = async () => {
 	const LYS_TASKS_WHITELIST = [
@@ -117,24 +105,15 @@ export function taskClickedAction( event: {
 		task: event.task.id,
 	} );
 
-	// For payments tasks, we'll handle this in the state machine
-	if ( event.task.id === 'payments' ) {
-		const storeCountryCode = (
-			window.wcSettings?.admin?.preloadSettings?.general
-				?.woocommerce_default_country || 'US'
-		).split( ':' )[ 0 ];
-
-		// If WooPayments is enabled, or the user is in a supported country, we'll show the payments sub-steps.
-		if ( isWooPaymentsEnabled() || isWCPaySupported( storeCountryCode ) ) {
-			return { type: 'SHOW_PAYMENTS' };
-		}
-
-		// If not, the execution will continue and we'll default to the actionUrl.
-	}
-
+	// If an actionUrl is provided, we'll navigate to it.
 	if ( event.task.actionUrl ) {
 		navigateTo( { url: event.task.actionUrl } );
 	} else {
+		// If this is the payments task, we'll navigate to the payments sub-steps.
+		if ( event.task.id === 'payments' ) {
+			return { type: 'SHOW_PAYMENTS' };
+		}
+
 		navigateTo( {
 			url: getNewPath( { task: event.task.id }, '/', {} ),
 		} );
