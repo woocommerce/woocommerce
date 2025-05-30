@@ -114,34 +114,6 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 	inputElement.dispatchEvent( event );
 };
 
-const updateButtonStates = ( inputElement: HTMLInputElement ) => {
-	const { currentValue, minValue, maxValue, step } =
-		getInputData( {
-			target: inputElement,
-		} as HTMLElementEvent< HTMLButtonElement > ) || {};
-
-	if ( ! currentValue || ! minValue || ! step ) {
-		return;
-	}
-
-	const minusButton = inputElement.parentElement?.querySelector(
-		'.wc-block-components-quantity-selector__button--minus'
-	) as HTMLButtonElement | null;
-
-	const plusButton = inputElement.parentElement?.querySelector(
-		'.wc-block-components-quantity-selector__button--plus'
-	) as HTMLButtonElement | null;
-
-	if ( minusButton ) {
-		minusButton.disabled = currentValue - step < minValue;
-	}
-
-	if ( plusButton ) {
-		plusButton.disabled =
-			maxValue !== undefined && currentValue + step > maxValue;
-	}
-};
-
 const addToCartWithOptionsStore = store(
 	'woocommerce/add-to-cart-with-options',
 	{
@@ -157,6 +129,46 @@ const addToCartWithOptionsStore = store(
 					selectedAttributes
 				);
 				return !! matchedVariation;
+			},
+			get allowsDecrease() {
+				const inputElement = document.querySelector(
+					'.wc-block-components-quantity-selector__input'
+				) as HTMLInputElement | null;
+
+				if ( ! inputElement ) {
+					return false;
+				}
+
+				const { quantity } = getContext< Context >();
+
+				const parsedMinValue = parseInt( inputElement.min, 10 );
+				const parsedStep = parseInt( inputElement.step, 10 );
+
+				const minValue = isNaN( parsedMinValue ) ? 1 : parsedMinValue;
+				const step = isNaN( parsedStep ) ? 1 : parsedStep;
+
+				return quantity - step >= minValue;
+			},
+			get allowsIncrease() {
+				const inputElement = document.querySelector(
+					'.wc-block-components-quantity-selector__input'
+				) as HTMLInputElement | null;
+
+				if ( ! inputElement ) {
+					return false;
+				}
+
+				const { quantity } = getContext< Context >();
+
+				const parsedMaxValue = parseInt( inputElement.max, 10 );
+				const parsedStep = parseInt( inputElement.step, 10 );
+
+				const maxValue = isNaN( parsedMaxValue )
+					? undefined
+					: parsedMaxValue;
+				const step = isNaN( parsedStep ) ? 1 : parsedStep;
+
+				return maxValue === undefined || quantity + step <= maxValue;
 			},
 		},
 		actions: {
@@ -207,7 +219,6 @@ const addToCartWithOptionsStore = store(
 					addToCartWithOptionsStore.actions.setQuantity( newValue );
 					inputElement.value = newValue.toString();
 					dispatchChangeEvent( inputElement );
-					updateButtonStates( inputElement );
 				}
 			},
 			decreaseQuantity: (
@@ -225,7 +236,6 @@ const addToCartWithOptionsStore = store(
 					addToCartWithOptionsStore.actions.setQuantity( newValue );
 					inputElement.value = newValue.toString();
 					dispatchChangeEvent( inputElement );
-					updateButtonStates( inputElement );
 				}
 			},
 			*handleSubmit( event: FormEvent< HTMLFormElement > ) {
@@ -253,17 +263,6 @@ const addToCartWithOptionsStore = store(
 					quantity: currentQuantity + quantity,
 					variation: selectedAttributes,
 				} );
-			},
-		},
-		callbacks: {
-			init: () => {
-				const inputElement = document.querySelector(
-					'.wc-block-components-quantity-selector__input'
-				) as HTMLInputElement | null;
-
-				if ( inputElement ) {
-					updateButtonStates( inputElement );
-				}
 			},
 		},
 	},

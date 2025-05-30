@@ -21,23 +21,12 @@ class Utils {
 	public static function add_quantity_steppers( $quantity_html, $product_name ) {
 		// Regex pattern to match the <input> element with id starting with 'quantity_'.
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
-
-		// Get the initial value and min value from the input.
-		preg_match( '/value="([^"]*)"/', $quantity_html, $value_matches );
-		preg_match( '/min="([^"]*)"/', $quantity_html, $min_matches );
-
-		$initial_value = isset( $value_matches[1] ) ? intval( $value_matches[1] ) : 1;
-		$min_value     = isset( $min_matches[1] ) ? intval( $min_matches[1] ) : 1;
-
-		// Add disabled attribute if initial value equals min value.
-		$minus_disabled = $initial_value <= $min_value ? ' disabled' : '';
-
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.decreaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus"' . $minus_disabled . '>-</button>';
+		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.decreaseQuantity" data-wp-bind--disabled="!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.increaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
+		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.increaseQuantity" data-wp-bind--disabled="!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
 		$new_html    = preg_replace( $pattern, $plus_button, $quantity_html );
 		$new_html    = preg_replace( $pattern, $minus_button, $new_html );
 		return $new_html;
