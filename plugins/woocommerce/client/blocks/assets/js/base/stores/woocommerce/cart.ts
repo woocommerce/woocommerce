@@ -29,7 +29,6 @@ export type Store = {
 		cart: Omit< Cart, 'items' > & {
 			items: ( OptimisticCartItem | CartItem )[];
 		};
-		totalItemsInCart: number;
 	};
 	actions: {
 		addCartItem: ( args: OptimisticCartItem ) => void;
@@ -80,14 +79,6 @@ function emitSyncEvent( {
 const { state, actions } = store< Store >(
 	'woocommerce',
 	{
-		state: {
-			get totalItemsInCart(): number {
-				return state.cart.items.reduce(
-					( total, { quantity } ) => total + quantity,
-					0
-				);
-			},
-		},
 		actions: {
 			*addCartItem( { id, quantity, variation }: OptimisticCartItem ) {
 				let item = state.cart.items.find(
