@@ -51,6 +51,6 @@ If you'd like to learn more about how our monorepo works, [please check out this
 
 Unless you’re contributing directly to WooCommerce core, you will not edit WordPress or WooCommerce files directly. All modification of functionality is done by creating a custom extension or modifying the `functions.php` file of your active theme. 
 
-To edit the *design* of a WooCommerce store, we recommend modifying or creating a custom theme. Learn more about theming WooCommerce in our Theme Development Handbook\[LINK\].
+To edit the *design* of a WooCommerce store, we recommend modifying or creating a custom theme. Learn more about theming WooCommerce in our [Theme Development Handbook](/docs/theming/theme-development/classic-theme-developer-handbook).
 
-To edit the *functionality* of a WooCommerce store, you have multiple options. First, you can use the WooCommerce marketplace\[LINK\] to find a suitable, pre-made extension that meets your needs. For simple customizations, you can learn more about easy ways to add code snippets\[LINK\] to your store. For more advanced development needs, we recommend building a custom extension (i.e. a WordPress plugin). 
+To edit the *functionality* of a WooCommerce store, you have multiple options. First, you can use the [Woo Marketplace](https://woocommerce.com/marketplace) to find a suitable, pre-made extension that meets your needs. For simple customizations, you can learn more about easy ways to add [code snippets](/docs/code-snippets/) to your store. For more advanced development needs, we recommend building a custom extension (i.e. a WordPress plugin). 

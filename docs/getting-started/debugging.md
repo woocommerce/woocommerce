@@ -1,7 +1,7 @@
 ---
 post_title: Resources for debugging
 sidebar_label: Debugging
-sidebar_position: 4
+sidebar_position: 6
 ---
 
 # Resources for debugging
