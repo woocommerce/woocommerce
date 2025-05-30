@@ -9,6 +9,7 @@ jobs:
 
     steps:
       - name: 'Notify to Slack when a new release is published'
+        if: ${{ !contains(github.event.release.name, 'WooCommerce Beta Tester') }}
         uses: archive/github-actions-slack@v2.10.0
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
