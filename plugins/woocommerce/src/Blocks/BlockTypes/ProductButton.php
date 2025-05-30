@@ -110,16 +110,14 @@ class ProductButton extends AbstractBlock {
 					if ( $productType === 'grouped' ) {
 						$product = wc_get_product( $context['productId'] );
 						$grouped_product_ids = $product->get_children();
-						$grouped_product_ids_in_cart = array_sum(
-							array_map(
-								function ( $child_product_id ) {
-									return $this->get_cart_item_quantities_by_product_id( (int) $child_product_id );
-								},
-								$grouped_product_ids
-							)
-						);
 
-						return $grouped_product_ids_in_cart > 0 ? __( 'Added to cart', 'woocommerce' ) : $add_to_cart_text;
+						foreach ( $grouped_product_ids as $child_product_id ) {
+							if ( $this->get_cart_item_quantities_by_product_id( (int) $child_product_id ) > 0 ) {
+								return __( 'Added to cart', 'woocommerce' );
+							}
+						}
+
+						return $add_to_cart_text;
 					}
 
 					return $quantity > 0 ? sprintf(
