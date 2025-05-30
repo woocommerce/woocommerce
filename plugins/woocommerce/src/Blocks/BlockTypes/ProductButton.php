@@ -98,24 +98,6 @@ class ProductButton extends AbstractBlock {
 
 		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
-		/**
-		 * Get the inTheCartText text.
-		 *
-		 * @param \WC_Product $product The product.
-		 * @return string The inTheCartText string.
-		 */
-		function get_in_the_cart_text( $product ) {
-			if ( $product->is_type( 'grouped' ) ) {
-				return __( 'Added to cart', 'woocommerce' );
-			}
-
-			return sprintf(
-				/* translators: %s: product number. */
-				__( '%s in cart', 'woocommerce' ),
-				'###'
-			);
-		}
-
 		wp_interactivity_state(
 			'woocommerce/product-button',
 			array(
@@ -146,7 +128,7 @@ class ProductButton extends AbstractBlock {
 						$quantity
 					) : $add_to_cart_text;
 				},
-				'inTheCartText' => get_in_the_cart_text( $product ),
+				'inTheCartText' => $this->get_in_the_cart_text( $product ),
 				'noticeId'      => '',
 			)
 		);
@@ -379,6 +361,24 @@ class ProductButton extends AbstractBlock {
 			}
 		}
 		return $is_product_purchasable;
+	}
+
+	/**
+	 * Get the inTheCartText text for a given product.
+	 *
+	 * @param \WC_Product $product The product.
+	 * @return string The inTheCartText string.
+	 */
+	private function get_in_the_cart_text( $product ) {
+		if ( $product->is_type( 'grouped' ) ) {
+			return __( 'Added to cart', 'woocommerce' );
+		}
+
+		return sprintf(
+			/* translators: %s: product number. */
+			__( '%s in cart', 'woocommerce' ),
+			'###'
+		);
 	}
 
 	/**
