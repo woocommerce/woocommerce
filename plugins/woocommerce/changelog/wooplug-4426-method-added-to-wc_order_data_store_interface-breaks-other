@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Reverts #58342 which broke backwards combatibility with the WC_Order_Data_Store_Interface class.
-
-
