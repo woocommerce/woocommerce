@@ -91,15 +91,11 @@ export default function Stepper( {
 						</div>
 					</div>
 					<div className="settings-payments-onboarding-modal__sidebar--list">
-						{ steps.map( ( step ) => (
+						{ sortedSteps.map( ( step ) => (
 							<SidebarItem
 								key={ step.id }
 								label={ step.label }
-								isCompleted={
-									step.id === justCompletedStepId ||
-									step.status === 'completed' ||
-									activeStepIndex === steps.length
-								}
+								isCompleted={ isStepCompleted( step ) }
 								isActive={ step.id === active }
 							/>
 						) ) }
