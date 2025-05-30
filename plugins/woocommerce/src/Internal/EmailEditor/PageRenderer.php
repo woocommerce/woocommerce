@@ -57,26 +57,6 @@ class PageRenderer {
 		$this->template_registry   = $editor_container->get( Templates_Registry::class );
 	}
 
-	public function initialize_editor_assets() {
-		$post_id     = isset( $_GET['post'] ) ? intval( $_GET['post'] ) : 0;  // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- We are not verifying the nonce here because we are not using the nonce in the function and the data is okay in this context (WP-admin errors out gracefully).
-		$template_id = isset( $_GET['template'] ) ? sanitize_text_field( wp_unslash( $_GET['template'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- We are not verifying the nonce here because we are not using the nonce in the function and the data is okay in this context (WP-admin errors out gracefully).
-		$post_type   = $template_id ? 'wp_template' : Integration::EMAIL_POST_TYPE;
-		$post_id     = $template_id ? $template_id : $post_id;
-
-		$edited_item = $this->get_edited_item( $post_id, $post_type );
-
-		if ( ! $edited_item ) {
-			return;
-		}
-
-		add_filter( 'block_editor_settings_all', [$this, 'block_editor_settings'], 10, 2 );
-
-		// Load the email editor assets.
-		$this->load_editor_assets( $edited_item );
-
-		$this->preload_rest_api_data( $post_id, $post_type );
-	}
-
 	/**
 	 * Render the email editor page.
 	 */
@@ -200,14 +180,6 @@ class PageRenderer {
 				'block_preview_url'     => esc_url( wp_nonce_url( admin_url( '?preview_woocommerce_mail_editor_content=true' ), 'preview-mail' ) ),
 			)
 		);
-	}
-
-	public function block_editor_settings( $settings, $post ) {
-		//return $settings;
-		// var_dump( json_encode( $settings ) );
-		// var_dump( json_encode( $this->settings_controller->get_settings() ) );
-		// die();
-		return $this->settings_controller->get_settings();
 	}
 
 	/**
