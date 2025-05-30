@@ -1524,6 +1524,9 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 201, $response_original_product->get_status(), 'Failed to create the initial product with an image.' );
 
+		$original_product_data = $response_original_product->get_data();
+		$original_product_id   = $original_product_data['id'];
+
 		// 2. Move the original product to trash.
 		wp_trash_post( $original_product_id );
 
