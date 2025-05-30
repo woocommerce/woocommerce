@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddTo
 use WP_Block;
 
 /**
- * Block type for the label of grouped product selector items in add to cart with options.
+ * Block type for the label of grouped product selector items in Add to Cart + Options.
  * It's responsible to render the label for each child product.
  */
 class GroupedProductSelectorItemLabel extends AbstractBlock {
