@@ -112,40 +112,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public static function init() {
 		add_action( 'woocommerce_analytics_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 10 );
-		add_action( 'woocommerce_order_partially_refunded', array( __CLASS__, 'add_partial_refund_type_meta' ), 10, 2 );
-		add_action( 'woocommerce_order_fully_refunded', array( __CLASS__, 'add_full_refund_type_meta' ), 10, 2 );
-	}
-
-	/**
-	 * Add a partial refund type meta to the order.
-	 *
-	 * @param int $order_id  Order ID.
-	 * @param int $refund_id Refund ID.
-	 */
-	public static function add_partial_refund_type_meta( $order_id, $refund_id ) {
-		self::add_refund_type_meta( $refund_id, 'partial' );
-	}
-
-	/**
-	 * Add a full refund type meta to the order.
-	 *
-	 * @param int $order_id  Order ID.
-	 * @param int $refund_id Refund ID.
-	 */
-	public static function add_full_refund_type_meta( $order_id, $refund_id ) {
-		self::add_refund_type_meta( $refund_id, 'full' );
-	}
-
-	/**
-	 * Add a refund type meta to the order.
-	 *
-	 * @param int    $refund_id Refund ID.
-	 * @param string $type      Refund type.
-	 */
-	public static function add_refund_type_meta( $refund_id, $type ) {
-		$order = wc_get_order( $refund_id );
-		$order->update_meta_data( '_refund_type', $type );
-		$order->save_meta_data();
 	}
 
 	/**
@@ -467,126 +433,30 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$decimals       = wc_get_price_decimals();
 		$round_tax      = 'no' === get_option( 'woocommerce_tax_round_at_subtotal' );
 
-		$is_full_refund_without_line_items = false;
-		$partial_refund_product_revenue    = array();
-		$refund_type                       = $order->get_meta( '_refund_type' );
-
-		$parent_order = null;
-
-		// When changing the order status to "Refunded", the refund order's type will be full refund, and the order items will be empty.
-		// We need to get the parent order items, and exclude the items that is already being patially refunded.
-		if (
-			'shop_order_refund' === $order->get_type() &&
-			'full' === $refund_type &&
-			empty( $order_items )
-		) {
-			$is_full_refund_without_line_items = true;
-
-			$parent_order_id = $order->get_parent_id();
-			$parent_order    = wc_get_order( $parent_order_id );
-			$order_items     = $parent_order->get_items();
-
-			// Get the partially refunded product and variation IDs along with their sum of product_net_revenue from the parent order.
-			$partial_refund_products = $wpdb->get_results(
-				$wpdb->prepare(
-					"
-						SELECT
-							product_lookup.product_id,
-							product_lookup.variation_id,
-							SUM( product_lookup.product_net_revenue ) AS product_net_revenue
-						FROM %i AS product_lookup
-						INNER JOIN {$wpdb->prefix}wc_order_stats AS order_stats
-							ON order_stats.order_id = product_lookup.order_id
-						WHERE 1 = 1
-							AND order_stats.parent_id = %d
-							AND product_lookup.product_net_revenue < 0
-						GROUP BY product_lookup.product_id, product_lookup.variation_id
-					",
-					$table_name,
-					$parent_order_id
-				)
-			);
-
-			/**
-			 * Create a lookup table for partially refunded products.
-			 * E.g. [
-			 *   '1' => -20,
-			 *   '2' => -40,
-			 *   '51' => -10,
-			 *   '52' => -30,
-			 * ]
-			 */
-			foreach ( $partial_refund_products as $product ) {
-				$id                                    = $product->variation_id ? $product->variation_id : $product->product_id;
-				$partial_refund_product_revenue[ $id ] = (float) $product->product_net_revenue;
-			}
-		}
-
 		foreach ( $order_items as $order_item ) {
 			$order_item_id = $order_item->get_id();
 			unset( $existing_items[ $order_item_id ] );
 			$product_qty         = $order_item->get_quantity( 'edit' );
-			$product_id          = $order_item->get_product_id( 'edit' );
-			$variation_id        = $order_item->get_variation_id( 'edit' );
 			$shipping_amount     = $order->get_item_shipping_amount( $order_item );
 			$shipping_tax_amount = $order->get_item_shipping_tax_amount( $order_item );
 			$coupon_amount       = $order->get_item_coupon_amount( $order_item );
-			$tax_amount          = $order->get_item_cart_tax_amount( $order_item );
-			$net_revenue         = round( $order_item->get_total( 'edit' ), $decimals );
-
-			// If the order is a full refund and there is no order items. The order item here is the parent order item.
-			if ( $is_full_refund_without_line_items ) {
-				$id             = $variation_id ? $variation_id : $product_id;
-				$partial_refund = $partial_refund_product_revenue[ $id ] ?? 0;
-				// If a single line item was refunded 60% then fully refunded after, we need store the difference in the product lookup table.
-				// E.g. A product costs $100, it was previously partially refunded $60, then fully refunded $40.
-				// So it will be -abs( 100 + (-60) ) = -40.
-				$net_revenue = -abs( $net_revenue + $partial_refund );
-
-				// Skip items that have already been fully refunded (single or multiple partial refunds).
-				if ( 0.0 === $net_revenue ) {
-					continue;
-				}
-
-				$product_qty = -abs( $product_qty );
-
-				// Set coupon amount to 0 for full refunds without line items.
-				$coupon_amount = 0;
-
-				if ( $parent_order ) {
-					$remaining_refund_items = $parent_order->get_remaining_refund_items();
-
-					// Calculate the shipping amount to refund from the parent order.
-					$total_shipping_refunded  = $parent_order->get_total_shipping_refunded();
-					$shipping_total           = (float) $parent_order->get_shipping_total();
-					$total_shipping_to_refund = $shipping_total - $total_shipping_refunded;
-
-					if ( $total_shipping_to_refund > 0 ) {
-						$shipping_amount = -abs( $parent_order->get_item_shipping_amount( $order_item, $remaining_refund_items, $total_shipping_to_refund ) );
-					}
-
-					// Calculate the shipping tax amount to refund from the parent order.
-					$shipping_tax                 = (float) $parent_order->get_shipping_tax();
-					$total_shipping_tax_refunded  = $parent_order->get_total_shipping_tax_refunded();
-					$total_shipping_tax_to_refund = $shipping_tax - $total_shipping_tax_refunded;
-
-					if ( $total_shipping_tax_to_refund > 0 ) {
-						$shipping_tax_amount = -abs( $parent_order->get_item_shipping_tax_amount( $order_item, $remaining_refund_items, $total_shipping_tax_to_refund ) );
-					}
-
-					// Calculate cart tax amount of the item from the parent order.
-					$tax_amount = -abs( $parent_order->get_item_cart_tax_amount( $order_item ) );
-				}
-			}
-
-			$is_refund = $net_revenue < 0;
 
 			// Skip line items without changes to product quantity.
-			if ( ! $product_qty && ! $is_refund ) {
+			if ( ! $product_qty ) {
 				++$num_updated;
 				continue;
 			}
 
+			// Tax amount.
+			$tax_amount  = 0;
+			$order_taxes = $order->get_taxes();
+			$tax_data    = $order_item->get_taxes();
+			foreach ( $order_taxes as $tax_item ) {
+				$tax_item_id = $tax_item->get_rate_id();
+				$tax_amount += isset( $tax_data['total'][ $tax_item_id ] ) ? (float) $tax_data['total'][ $tax_item_id ] : 0;
+			}
+
+			$net_revenue = round( $order_item->get_total( 'edit' ), $decimals );
 			if ( $round_tax ) {
 				$tax_amount = round( $tax_amount, $decimals );
 			}
@@ -596,8 +466,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				array(
 					'order_item_id'         => $order_item_id,
 					'order_id'              => $order->get_id(),
-					'product_id'            => $product_id,
-					'variation_id'          => $variation_id,
+					'product_id'            => wc_get_order_item_meta( $order_item_id, '_product_id' ),
+					'variation_id'          => wc_get_order_item_meta( $order_item_id, '_variation_id' ),
 					'customer_id'           => $order->get_report_customer_id(),
 					'product_qty'           => $product_qty,
 					'product_net_revenue'   => $net_revenue,

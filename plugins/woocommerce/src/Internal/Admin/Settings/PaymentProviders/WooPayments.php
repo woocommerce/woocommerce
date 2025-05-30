@@ -4,11 +4,16 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 
 use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
+use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments\WooPaymentsRestController;
+use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
+use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use WC_Abstract_Order;
 use WC_Payment_Gateway;
 use WooCommerce\Admin\Experimental_Abtest;
@@ -42,23 +47,12 @@ class WooPayments extends PaymentGateway {
 		$details['onboarding']['type'] = self::ONBOARDING_TYPE_NATIVE;
 
 		// Add WPCOM/Jetpack connection details to the onboarding state.
-		$wpcom_connection_manager       = new WPCOM_Connection_Manager( 'woocommerce' );
-		$is_connected                   = $wpcom_connection_manager->is_connected();
-		$has_connected_owner            = $wpcom_connection_manager->has_connected_owner();
-		$details['onboarding']['state'] = array_merge(
-			$details['onboarding']['state'],
-			array(
-				'wpcom_has_working_connection' => $is_connected && $has_connected_owner,
-				'wpcom_is_store_connected'     => $is_connected,
-				'wpcom_has_connected_owner'    => $has_connected_owner,
-				'wpcom_is_connection_owner'    => $has_connected_owner && $wpcom_connection_manager->is_connection_owner(),
-			)
-		);
+		$details['onboarding']['state'] = array_merge( $details['onboarding']['state'], $this->get_wpcom_connection_state() );
 
 		// If the WooPayments installed version is less than minimum required version,
 		// we can't use the in-context onboarding flows.
-		if ( defined( 'WCPAY_VERSION_NUMBER' ) &&
-			version_compare( WCPAY_VERSION_NUMBER, PaymentProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION, '<' ) ) {
+		if ( Constants::is_defined( 'WCPAY_VERSION_NUMBER' ) &&
+			version_compare( Constants::get_constant( 'WCPAY_VERSION_NUMBER' ), PaymentProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION, '<' ) ) {
 
 			return $details;
 		}
@@ -69,10 +63,105 @@ class WooPayments extends PaymentGateway {
 		// Provide the native, in-context onboarding URL instead of the external one.
 		// This is a catch-all URL that should start or continue the onboarding process.
 		$details['onboarding']['_links']['onboard'] = array(
-			'href' => Utils::wc_payments_settings_url( '/woopayments/onboarding' ),
+			'href' => Utils::wc_payments_settings_url( '/woopayments/onboarding', array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ) ),
 		);
 
 		return $details;
+	}
+
+	/**
+	 * Enhance this provider's payment extension suggestion with additional information.
+	 *
+	 * The details added do not require the payment extension to be active or a gateway instance.
+	 *
+	 * @param array $extension_suggestion The extension suggestion details.
+	 *
+	 * @return array The enhanced payment extension suggestion details.
+	 */
+	public function enhance_extension_suggestion( array $extension_suggestion ): array {
+		$extension_suggestion = parent::enhance_extension_suggestion( $extension_suggestion );
+
+		// If the extension is installed, we can get the plugin data and act upon it.
+		if ( ! empty( $extension_suggestion['plugin']['file'] ) &&
+			isset( $extension_suggestion['plugin']['status'] ) &&
+			in_array( $extension_suggestion['plugin']['status'], array( PaymentProviders::EXTENSION_INSTALLED, PaymentProviders::EXTENSION_ACTIVE ), true ) ) {
+
+			// Switch to the native in-context onboarding type if the WooPayments extension its version is compatible.
+			// We need to put back the '.php' extension to construct the plugin filename.
+			$plugin_data = PluginsHelper::get_plugin_data( $extension_suggestion['plugin']['file'] . '.php' );
+			if ( $plugin_data && ! empty( $plugin_data['Version'] ) &&
+				version_compare( $plugin_data['Version'], PaymentProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION, '>=' ) ) {
+
+				$extension_suggestion['onboarding']['type'] = self::ONBOARDING_TYPE_NATIVE_IN_CONTEXT;
+			}
+		} else {
+			// We assume the latest version of the WooPayments extension will be installed.
+			$extension_suggestion['onboarding']['type'] = self::ONBOARDING_TYPE_NATIVE_IN_CONTEXT;
+		}
+
+		// Add onboarding state.
+		if ( ! isset( $extension_suggestion['onboarding']['state'] ) || ! is_array( $extension_suggestion['onboarding']['state'] ) ) {
+			$extension_suggestion['onboarding']['state'] = array();
+		}
+		// Add the store's WPCOM/Jetpack connection state to the onboarding state.
+		$extension_suggestion['onboarding']['state'] = array_merge(
+			$extension_suggestion['onboarding']['state'],
+			$this->get_wpcom_connection_state()
+		);
+
+		// Add onboarding links.
+		if ( empty( $extension_suggestion['onboarding']['_links'] ) || ! is_array( $extension_suggestion['onboarding']['_links'] ) ) {
+			$extension_suggestion['onboarding']['_links'] = array();
+		}
+
+		// We only add the preload link if we don't have a working WPCOM connection.
+		// This is because WooPayments onboarding preloading focuses on hydrating the WPCOM connection.
+		if ( ! $extension_suggestion['onboarding']['state']['wpcom_has_working_connection'] ) {
+			try {
+				/**
+				 * The WooPayments REST controller instance.
+				 *
+				 * @var WooPaymentsRestController $rest_controller
+				 */
+				$rest_controller = wc_get_container()->get( WooPaymentsRestController::class );
+
+				// Add the onboarding preload URL.
+				$extension_suggestion['onboarding']['_links']['preload'] = array(
+					'href' => rest_url( $rest_controller->get_rest_url_path( 'onboarding/preload' ) ),
+				);
+			} catch ( \Throwable $e ) {
+				// If the REST controller is not available, we can't preload the onboarding data.
+				// This is not a critical error, so we just ignore it.
+				// Log so we can investigate.
+				SafeGlobalFunctionProxy::wc_get_logger()->error(
+					'Failed to get the WooPayments REST controller instance: ' . $e->getMessage(),
+					array(
+						'source' => 'settings-payments',
+						'error'  => $e,
+					)
+				);
+			}
+		}
+
+		return $extension_suggestion;
+	}
+
+	/**
+	 * Get the current state of the store's WPCOM/Jetpack connection.
+	 *
+	 * @return array The store's WPCOM/Jetpack connection state.
+	 */
+	private function get_wpcom_connection_state(): array {
+		$wpcom_connection_manager = new WPCOM_Connection_Manager( 'woocommerce' );
+		$is_connected             = $wpcom_connection_manager->is_connected();
+		$has_connected_owner      = $wpcom_connection_manager->has_connected_owner();
+
+		return array(
+			'wpcom_has_working_connection' => $is_connected && $has_connected_owner,
+			'wpcom_is_store_connected'     => $is_connected,
+			'wpcom_has_connected_owner'    => $has_connected_owner,
+			'wpcom_is_connection_owner'    => $has_connected_owner && $wpcom_connection_manager->is_connection_owner(),
+		);
 	}
 
 	/**
