@@ -50,7 +50,7 @@ class GroupedProductSelectorItemLabel extends AbstractBlock {
 				$markup = sprintf(
 					'<label %1$s for="%2$s">%3$s</label>',
 					$wrapper_attributes,
-					esc_attr( 'quantity-' . $product->get_id() ),
+					esc_attr( 'quantity_' . $product->get_id() ),
 					esc_html( $title )
 				);
 			}

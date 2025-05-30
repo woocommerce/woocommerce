@@ -38,7 +38,7 @@ class GroupedProductSelectorItemCTA extends AbstractBlock {
 				AddToCartWithOptionsUtils::get_quantity_input_args( $product ),
 				array(
 					'input_name' => 'quantity[' . $product->get_id() . ']',
-					'input_id'   => 'quantity-' . $product->get_id(),
+					'input_id'   => 'quantity_' . $product->get_id(),
 				)
 			)
 		);
@@ -109,7 +109,7 @@ class GroupedProductSelectorItemCTA extends AbstractBlock {
 				esc_html( wp_strip_all_tags( wc_price( $product->get_price() ) ) )
 			);
 		}
-		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity-' . $product->get_id() ) . '" />';
+		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $product->get_id() ) . '" />';
 	}
 
 	/**
