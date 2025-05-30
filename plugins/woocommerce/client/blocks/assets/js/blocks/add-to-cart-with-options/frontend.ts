@@ -17,7 +17,7 @@ export type Context = {
 	selectedAttributes: CartVariationItem[];
 	variationId: number | null;
 	availableVariations: AvailableVariation[];
-	quantity: number;
+	quantity: Record< number, number >;
 	tempQuantity: number;
 	groupedProductIds: number[];
 };
@@ -144,7 +144,7 @@ const addToCartWithOptionsStore = store(
 		actions: {
 			setQuantity( value: number ) {
 				const context = getContext< Context >();
-				context.quantity = value;
+				context.quantity = { [ context.productId ]: value };
 			},
 			setAttribute( attribute: string, value: string ) {
 				const { selectedAttributes } = getContext< Context >();
@@ -227,29 +227,22 @@ const addToCartWithOptionsStore = store(
 					productType === 'grouped' &&
 					groupedProductIds.length > 0
 				) {
-					// Handle grouped products
-					const form = event.target as HTMLFormElement;
-					const quantityInputs = form.querySelectorAll(
-						'.input-text.qty.text'
-					);
 					const addedItems: GroupedCartItem[] = [];
 
-					quantityInputs.forEach( ( input, index ) => {
-						const inputElement = input as HTMLInputElement;
-						const childProductId = groupedProductIds[ index ] || 0;
-						const childQuantity = parseInt(
-							inputElement.value,
-							10
+					for ( const childProductId of groupedProductIds ) {
+						const existingProduct = wooState.cart?.items.find(
+							( item ) => item.id === childProductId
 						);
+						const currentQuantity = existingProduct?.quantity || 0;
 
-						if ( childQuantity > 0 ) {
-							addedItems.push( {
-								id: childProductId,
-								quantity: childQuantity,
-								variation: selectedAttributes,
-							} );
-						}
-					} );
+						addedItems.push( {
+							id: childProductId,
+							quantity:
+								currentQuantity +
+								( quantity[ childProductId ] || 0 ),
+							variation: selectedAttributes,
+						} );
+					}
 
 					if ( addedItems.length === 0 ) {
 						return;
@@ -276,7 +269,8 @@ const addToCartWithOptionsStore = store(
 
 					yield actions.addCartItem( {
 						id: productId,
-						quantity: currentQuantity + quantity,
+						quantity:
+							currentQuantity + ( quantity[ productId ] || 0 ),
 						variation: selectedAttributes,
 					} );
 				}

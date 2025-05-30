@@ -177,7 +177,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			$context = array(
 				'productId'   => $product->get_id(),
 				'productType' => $product->get_type(),
-				'quantity'    => $default_quantity,
+				'quantity'    => array( $product->get_id() => $default_quantity ),
 			);
 
 			if ( $product->is_type( 'variable' ) ) {
@@ -197,6 +197,10 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			if ( $product->is_type( 'grouped' ) ) {
 				$context['groupedProductIds'] = $product->get_children();
+				$context['quantity']          = array_fill_keys(
+					$context['groupedProductIds'],
+					$default_quantity
+				);
 			}
 
 			$hooks_before = '';
