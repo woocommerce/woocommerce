@@ -30,12 +30,20 @@ const productPriceStore = store(
 					return;
 				}
 
-				const context = getContext< {
+				const productCollectionContext = getContext< {
+					displayedProduct: DisplayedProduct;
+				} >( 'woocommerce/product-collection' );
+
+				const singleProductContext = getContext< {
 					displayedProduct: DisplayedProduct;
 				} >( 'woocommerce/single-product' );
 
-				if ( context ) {
-					element.ref.innerHTML = context.displayedProduct.price_html;
+				if ( singleProductContext ) {
+					element.ref.innerHTML =
+						singleProductContext.displayedProduct.price_html;
+				} else if ( productCollectionContext ) {
+					element.ref.innerHTML =
+						productCollectionContext.displayedProduct.price_html;
 				} else if ( wooState.displayedProduct ) {
 					element.ref.innerHTML =
 						wooState.displayedProduct.price_html;
