@@ -64,7 +64,7 @@ class Payments extends Task {
 	 */
 	public function is_complete() {
 		if ( $this->is_complete_result === null ) {
-			$this->is_complete_result = self::has_gateways();
+			$this->is_complete_result = self::has_gateways_other_than_woopayments();
 		}
 
 		return $this->is_complete_result;
