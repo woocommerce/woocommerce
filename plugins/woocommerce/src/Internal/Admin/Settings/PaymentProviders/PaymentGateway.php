@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Throwable;
 use WC_HTTPS;
@@ -86,6 +87,27 @@ class PaymentGateway {
 	}
 
 	/**
+	 * Enhance this provider's payment extension suggestion with additional information.
+	 *
+	 * The details added do not require the payment extension to be active or a gateway instance.
+	 *
+	 * @param array $extension_suggestion The extension suggestion details.
+	 *
+	 * @return array The enhanced payment extension suggestion details.
+	 */
+	public function enhance_extension_suggestion( array $extension_suggestion ): array {
+		if ( empty( $extensionp['onboarding'] ) || ! is_array( $extension_suggestion['onboarding'] ) ) {
+			$extension_suggestion['onboarding'] = array();
+		}
+
+		if ( ! isset( $extension_suggestion['onboarding']['type'] ) ) {
+			$extension_suggestion['onboarding']['type'] = self::ONBOARDING_TYPE_EXTERNAL;
+		}
+
+		return $extension_suggestion;
+	}
+
+	/**
 	 * Get the provider title of the payment gateway.
 	 *
 	 * This is the intended gateway title to use throughout the WC admin. It should be short.
@@ -101,7 +123,7 @@ class PaymentGateway {
 		if ( ! is_string( $title ) || empty( $title ) ) {
 			return esc_html__( 'Unknown', 'woocommerce' );
 		}
-		$title = wp_strip_all_tags( html_entity_decode( $title ), true );
+		$title = wp_strip_all_tags( html_entity_decode( $title, ENT_QUOTES | ENT_SUBSTITUTE ), true );
 
 		// Truncate the title.
 		return Utils::truncate_with_words( $title, 75 );
@@ -123,7 +145,7 @@ class PaymentGateway {
 		if ( ! is_string( $description ) || empty( $description ) ) {
 			return '';
 		}
-		$description = wp_strip_all_tags( html_entity_decode( $description ), true );
+		$description = wp_strip_all_tags( html_entity_decode( $description, ENT_QUOTES | ENT_SUBSTITUTE ), true );
 
 		// Truncate the description.
 		return Utils::truncate_with_words( $description, 130, '…' );
@@ -363,7 +385,13 @@ class PaymentGateway {
 			return (string) $payment_gateway->get_settings_url();
 		}
 
-		return Utils::wc_payments_settings_url( null, array( 'section' => strtolower( $payment_gateway->id ) ) );
+		return Utils::wc_payments_settings_url(
+			null,
+			array(
+				'section' => strtolower( $payment_gateway->id ),
+				'from'    => Payments::FROM_PAYMENTS_SETTINGS,
+			)
+		);
 	}
 
 	/**
@@ -380,7 +408,7 @@ class PaymentGateway {
 	public function get_onboarding_url( WC_Payment_Gateway $payment_gateway, string $return_url = '' ): string {
 		if ( is_callable( array( $payment_gateway, 'get_connection_url' ) ) ) {
 			// If we received no return URL, we will set the WC Payments Settings page as the return URL.
-			$return_url = ! empty( $return_url ) ? $return_url : admin_url( 'admin.php?page=wc-settings&tab=checkout' );
+			$return_url = ! empty( $return_url ) ? $return_url : admin_url( 'admin.php?page=wc-settings&tab=checkout&from=' . Payments::FROM_PROVIDER_ONBOARDING );
 
 			return (string) $payment_gateway->get_connection_url( $return_url );
 		}

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentProviders;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\PaymentGateway;
+use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestions;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use stdClass;
 use WC_Unit_Test_Case;
@@ -196,6 +197,51 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 				),
 			),
 			$gateway_details
+		);
+	}
+
+	/**
+	 * Test enhance_extension_suggestion.
+	 */
+	public function test_enhance_extension_suggestion() {
+		// Arrange.
+		$extension_suggestion = array(
+			'id'          => 'woopayments',
+			'title'       => 'WooPayments',
+			'description' => 'Accept payments with WooPayments.',
+			'icon'        => 'https://example.com/icon.png',
+			'image'       => 'https://example.com/image.png',
+			'category'    => PaymentProviders::CATEGORY_PSP,
+			'links'       => array(
+				'about' => array(
+					'_type' => 'about',
+					'url'   => 'https://example.com/about',
+				),
+			),
+			'plugin'      => array(
+				'_type'  => PaymentProviders::EXTENSION_TYPE_WPORG,
+				'slug'   => 'woocommerce-payments',
+				'file'   => 'woocommerce-payments/woocommerce-payments',
+				'status' => PaymentProviders::EXTENSION_NOT_INSTALLED,
+			),
+			'tags'        => array(
+				'made_in_woo',
+			),
+			'_priority'   => 1,
+			'_type'       => PaymentExtensionSuggestions::TYPE_PSP,
+		);
+
+		// Act.
+		$enhanced_suggestion = $this->sut->enhance_extension_suggestion( $extension_suggestion );
+
+		// Assert.
+		// The onboarding entry should be added.
+		$this->assertArrayHasKey( 'onboarding', $enhanced_suggestion );
+		$this->assertEquals(
+			array(
+				'type' => PaymentGateway::ONBOARDING_TYPE_EXTERNAL,
+			),
+			$enhanced_suggestion['onboarding']
 		);
 	}
 

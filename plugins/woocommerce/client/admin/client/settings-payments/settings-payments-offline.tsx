@@ -33,7 +33,7 @@ export const SettingsPaymentsOffline = () => {
 
 	// Dispatch function to update the ordering of payment gateways.
 	const { updateProviderOrdering } = useDispatch( paymentSettingsStore );
-	// State to hold the sorted gateways in case of changing the order, otherwise it will be null
+	// State to hold the sorted gateways in case of changing the order, otherwise it will be null.
 	const [ sortedOfflinePaymentGateways, setSortedOfflinePaymentGateways ] =
 		useState< OfflinePaymentMethodProvider[] | null >( null );
 
@@ -48,12 +48,12 @@ export const SettingsPaymentsOffline = () => {
 	 * Handles updating the order of offline payment gateways.
 	 */
 	function handleOrderingUpdate( sorted: OfflinePaymentMethodProvider[] ) {
-		// Extract the existing _order values in the sorted order
+		// Extract the existing _order values in the sorted order.
 		const updatedOrderValues = sorted
 			.map( ( gateway ) => gateway._order )
 			.sort( ( a, b ) => a - b );
 
-		// Build the orderMap by assigning the sorted _order values
+		// Build the orderMap by assigning the sorted _order values.
 		const orderMap: Record< string, number > = {};
 		sorted.forEach( ( gateway, index ) => {
 			orderMap[ gateway.id ] = updatedOrderValues[ index ];
@@ -61,7 +61,7 @@ export const SettingsPaymentsOffline = () => {
 
 		updateProviderOrdering( orderMap );
 
-		// Set the sorted providers to the state to give a real-time update
+		// Set the sorted providers to the state to give a real-time update.
 		setSortedOfflinePaymentGateways( sorted );
 	}
 

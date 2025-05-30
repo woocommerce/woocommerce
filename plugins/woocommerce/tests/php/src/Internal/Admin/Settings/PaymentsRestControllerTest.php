@@ -551,7 +551,18 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			array( array( WC_Gateway_Paypal::ID => false ) ),
 			array( array( WC_Gateway_Paypal::ID => 'bogus' ) ),
 			array( array( WC_Gateway_Paypal::ID => '1.0' ) ),
-			array( array( '()/paypal%#' => 1 ) ),
+			array( array( 'pay@pal' => 1 ) ), // Invalid provider ID with not allowed characters.
+			array( array( 'pay/pal' => 1 ) ), // Invalid provider ID with not allowed characters.
+			array( array( 'pay(pal' => 1 ) ), // Invalid provider ID with not allowed characters.
+			array( array( 'pay)pal' => 1 ) ), // Invalid provider ID with not allowed characters.
+			array( array( 'pay&pal' => 1 ) ), // Invalid provider ID with not allowed characters.
+			array( array( 'pay$pal' => 1 ) ), // Invalid provider ID with not allowed characters.
+			array( array( 'pay#pal' => 1 ) ), // Invalid provider ID with not allowed characters.
+			array( array( 'páypäl' => 1 ) ), // Invalid provider ID with accented characters.
+			array( array( '<script></script>paypal<a></a>' => 1 ) ), // Invalid provider ID with HTML tags.
+			array( array( '&nbsp;paypal&lt;' => 1 ) ), // Invalid provider ID with HTML entities.
+			array( array( 'pay&#60;pal' => 1 ) ), // Invalid provider ID with HTML entities.
+			array( array( '%2Fpay%3Apal' => 1 ) ), // Invalid provider ID with percent encoded characters.
 			array(
 				array(
 					WC_Gateway_Paypal::ID     => '1.1',
@@ -605,7 +616,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'order_map' => array(
-					'provider1' => 1,
+					'Provider_01-1_AHA' => 1, // uppercase characters are allowed.
 				),
 			)
 		);

@@ -31,6 +31,7 @@ describe( 'WooPaymentsPostSandboxAccountSetupModal', () => {
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_switch_to_live_account_click',
 			{
+				business_country: expect.any( String ),
 				provider_id: 'woocommerce_payments',
 			}
 		);
@@ -53,6 +54,7 @@ describe( 'WooPaymentsPostSandboxAccountSetupModal', () => {
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_continue_store_setup_click',
 			{
+				business_country: expect.any( String ),
 				provider_id: 'woocommerce_payments',
 			}
 		);

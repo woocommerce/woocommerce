@@ -12,7 +12,11 @@ import {
 	PaymentProviderState,
 } from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { recordEvent } from '@woocommerce/tracks';
+
+/**
+ * Internal dependencies
+ */
+import { recordPaymentsEvent } from '~/settings-payments/utils';
 
 interface EnableGatewayButtonProps {
 	/**
@@ -113,7 +117,7 @@ export const EnableGatewayButton = ( {
 		}
 
 		// Record the event when user clicks on a gateway's enable button.
-		recordEvent( 'settings_payments_provider_enable_click', {
+		recordPaymentsEvent( 'provider_enable_click', {
 			provider_id: gatewayId,
 		} );
 
@@ -142,7 +146,7 @@ export const EnableGatewayButton = ( {
 					// We only need to perform additional logic/redirects if no account connected.
 					if ( ! gatewayState.account_connected ) {
 						// Record the event when user successfully enables a gateway.
-						recordEvent( 'settings_payments_provider_enable', {
+						recordPaymentsEvent( 'provider_enable', {
 							provider_id: gatewayId,
 						} );
 						if (
