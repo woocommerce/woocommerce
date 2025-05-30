@@ -272,20 +272,6 @@ class WooPaymentsService {
 	}
 
 	/**
-	 * Check if the onboarding step has a started status.
-	 *
-	 * @param string $step_id  The ID of the onboarding step.
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 *
-	 * @return bool Whether the onboarding step is started.
-	 * @throws ApiException On invalid step ID.
-	 */
-	private function is_onboarding_step_started( string $step_id, string $location ): bool {
-		return self::ONBOARDING_STEP_STATUS_COMPLETED === $this->get_onboarding_step_status( $step_id, $location );
-	}
-
-	/**
 	 * Check if an onboarding step has been marked as started.
 	 *
 	 * This means that, at some point, the step was marked/recorded as started in the DB.
