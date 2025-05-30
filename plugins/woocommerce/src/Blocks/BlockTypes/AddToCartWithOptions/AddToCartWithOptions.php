@@ -201,6 +201,14 @@ class AddToCartWithOptions extends AbstractBlock {
 					$context['groupedProductIds'],
 					$default_quantity
 				);
+
+				// Add variable product context for grouped products.
+				foreach ( $context['groupedProductIds'] as $child_product_id ) {
+					$child_product = wc_get_product( $child_product_id );
+					if ( $child_product && $child_product->is_type( 'variable' ) ) {
+						$context['groupedVariableProductIds'][] = $child_product_id;
+					}
+				}
 			}
 
 			$hooks_before = '';
