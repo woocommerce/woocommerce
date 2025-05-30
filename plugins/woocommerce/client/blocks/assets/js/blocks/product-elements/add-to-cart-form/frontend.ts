@@ -8,9 +8,12 @@ const getInputElementFromEvent = (
 	event: HTMLElementEvent< HTMLButtonElement >
 ) => {
 	const target = event.target as HTMLButtonElement;
-	return target.parentElement?.querySelector(
+
+	const inputElement = target.parentElement?.querySelector(
 		'.wc-block-components-quantity-selector__input'
 	) as HTMLInputElement | null;
+
+	return inputElement;
 };
 
 const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
