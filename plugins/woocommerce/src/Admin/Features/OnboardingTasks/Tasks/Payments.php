@@ -54,7 +54,7 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '2 minutes', 'woocommerce' );
+		return __( '5 minutes', 'woocommerce' );
 	}
 
 	/**
