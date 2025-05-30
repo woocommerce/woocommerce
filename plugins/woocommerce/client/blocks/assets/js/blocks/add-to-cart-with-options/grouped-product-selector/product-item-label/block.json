@@ -1,6 +1,6 @@
 {
 	"name": "woocommerce/add-to-cart-with-options-grouped-product-selector-item-label",
-	"title": "Product Item Label",
+	"title": "Grouped Product: Item Label (Beta)",
 	"description": "Display the product title as a label or paragraph.",
 	"category": "woocommerce-product-elements",
 	"keywords": [ "WooCommerce" ],
