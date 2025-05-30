@@ -330,7 +330,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				} elseif ( ProductType::VARIABLE === $product_type ) {
 					$hidden_input  = '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '" />';
 					$hidden_input .= '<input type="hidden" name="product_id" value="' . $product->get_id() . '" />';
-					$hidden_input .= '<input type="hidden" name="variation_id" data-wp-interactive="woocommerce/add-to-cart-with-options" data-wp-bind--value="context.variationId" />';
+					$hidden_input .= '<input type="hidden" name="variation_id" data-wp-interactive="woocommerce/add-to-cart-with-options" data-wp-bind--value="state.variationId" />';
 				}
 			} else {
 				// Otherwise, we use the Interactivity API.
