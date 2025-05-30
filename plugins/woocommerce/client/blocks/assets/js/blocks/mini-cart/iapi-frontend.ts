@@ -32,7 +32,6 @@ type MiniCartState = {
 	drawerOverlayClass: string;
 	badgeIsVisible: boolean;
 	cartIsEmpty: boolean;
-	cartItemCount: boolean;
 };
 
 type MiniCart = {
