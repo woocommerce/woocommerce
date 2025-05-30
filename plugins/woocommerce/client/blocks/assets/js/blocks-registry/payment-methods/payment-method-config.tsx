@@ -37,6 +37,7 @@ export default class PaymentMethodConfig
 	public label: ReactNode;
 	public ariaLabel: string;
 	public placeOrderButtonLabel?: string;
+	public placeOrderButton?: () => ReactNode;
 	public savedTokenComponent?: ReactNode | null;
 	public canMakePaymentFromConfig: CanMakePaymentCallback;
 
@@ -46,6 +47,7 @@ export default class PaymentMethodConfig
 		this.name = config.name;
 		this.label = config.label;
 		this.placeOrderButtonLabel = config.placeOrderButtonLabel;
+		this.placeOrderButton = config.placeOrderButton;
 		this.ariaLabel = config.ariaLabel;
 		this.content = config.content;
 		this.savedTokenComponent = config.savedTokenComponent;
@@ -113,6 +115,14 @@ export default class PaymentMethodConfig
 		) {
 			throw new TypeError(
 				'The placeOrderButtonLabel property for the payment method must be a string'
+			);
+		}
+		if (
+			typeof config.placeOrderButton !== 'undefined' &&
+			typeof config.placeOrderButton !== 'function'
+		) {
+			throw new TypeError(
+				'The placeOrderButton property for the payment method must be a function'
 			);
 		}
 		assertValidElementOrString( config.label, 'label' );

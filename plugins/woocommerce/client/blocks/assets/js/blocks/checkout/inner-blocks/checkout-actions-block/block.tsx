@@ -2,6 +2,7 @@
  * External dependencies
  */
 import clsx from 'clsx';
+import type { ReactNode } from 'react';
 import { getSetting } from '@woocommerce/settings';
 import {
 	PlaceOrderButton,
@@ -27,6 +28,15 @@ export type BlockAttributes = {
 	returnToCartButtonLabel: string;
 };
 
+const PaymentMethodPlaceOrderButtonContainer = ( {
+	children,
+}: {
+	children: ReactNode;
+} ) => {
+	// TODO: dynamically change the CSS based on the checkout status. E.g.: when processing, add an overlay.
+	return <div className="wc-block-checkout__actions_row">{ children }</div>;
+};
+
 const Block = ( {
 	cartPageId,
 	showReturnToCart,
@@ -34,13 +44,11 @@ const Block = ( {
 	placeOrderButtonLabel,
 	returnToCartButtonLabel,
 	priceSeparator,
-}: {
-	cartPageId: number;
-	showReturnToCart: boolean;
-	className?: string;
-	placeOrderButtonLabel: string;
-} ): JSX.Element => {
-	const { paymentMethodButtonLabel } = useCheckoutSubmit();
+}: BlockAttributes ): JSX.Element => {
+	const {
+		paymentMethodButtonLabel,
+		paymentMethodPlaceOrderButton: PaymentMethodPlaceOrderButton,
+	} = useCheckoutSubmit();
 
 	const label = applyCheckoutFilter( {
 		filterName: 'placeOrderButtonLabel',
@@ -76,12 +84,18 @@ const Block = ( {
 					}` }
 					</style>
 				) }
-				<PlaceOrderButton
-					label={ label }
-					fullWidth={ ! showReturnToCart }
-					showPrice={ showPrice }
-					priceSeparator={ priceSeparator }
-				/>
+				{ PaymentMethodPlaceOrderButton ? (
+					<PaymentMethodPlaceOrderButtonContainer>
+						<PaymentMethodPlaceOrderButton />
+					</PaymentMethodPlaceOrderButtonContainer>
+				) : (
+					<PlaceOrderButton
+						label={ label }
+						fullWidth={ ! showReturnToCart }
+						showPrice={ showPrice }
+						priceSeparator={ priceSeparator }
+					/>
+				) }
 			</div>
 		</div>
 	);
