@@ -1746,13 +1746,17 @@ class ListTable extends WP_List_Table {
 
 							<?php do_action( 'woocommerce_admin_order_preview_end' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 						</article>
+						<# if ( data.actions_html || data.is_editable ) { #>
 						<footer>
 							<div class="inner">
 								{{{ data.actions_html }}}
 
+								<# if ( data.is_editable ) { #>
 								<a class="button button-primary button-large" aria-label="<?php esc_attr_e( 'Edit this order', 'woocommerce' ); ?>" href="<?php echo $order_edit_url_placeholder; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
+								<# } #>
 							</div>
 						</footer>
+						<# } #>
 					</section>
 				</div>
 			</div>
