@@ -105,9 +105,9 @@ class ProductButton extends AbstractBlock {
 					$context = wp_interactivity_get_context();
 					$quantity = $context['tempQuantity'];
 					$add_to_cart_text = $context['addToCartText'];
-					$productType = $context['productType'];
+					$product_type = $context['productType'];
 
-					if ( $productType === 'grouped' ) {
+					if ( 'grouped' === $product_type ) {
 						$product = wc_get_product( $context['productId'] );
 						$grouped_product_ids = $product->get_children();
 
@@ -132,7 +132,7 @@ class ProductButton extends AbstractBlock {
 		);
 
 		$number_of_items_in_cart  = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
-		$is_product_purchasable = $this->is_product_purchasable( $product );
+		$is_product_purchasable   = $this->is_product_purchasable( $product );
 		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
 		$ajax_add_to_cart_enabled = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
 		$is_ajax_button           = $ajax_add_to_cart_enabled && ! $cart_redirect_after_add && $product->supports( 'ajax_add_to_cart' ) && $is_product_purchasable && $product->is_in_stock();
@@ -180,7 +180,7 @@ class ProductButton extends AbstractBlock {
 		$context = array(
 			'quantityToAdd'   => $default_quantity,
 			'productId'       => $product->get_id(),
-			'productType' => $product->get_type(),
+			'productType'     => $product->get_type(),
 			'addToCartText'   => $add_to_cart_text,
 			'tempQuantity'    => $number_of_items_in_cart,
 			'animationStatus' => 'IDLE',
