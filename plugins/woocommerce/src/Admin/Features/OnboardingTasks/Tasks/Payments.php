@@ -80,6 +80,15 @@ class Payments extends Task {
 		return true;
 	}
 
+
+	/**
+	 * Check if the WooPayments plugin is active.
+	 *
+	 * @return bool
+	 */
+	private function is_woopayments_active() {
+		return class_exists( '\WC_Payments' );
+	}
 	/**
 	 * Check if the store has any enabled gateways.
 	 *
