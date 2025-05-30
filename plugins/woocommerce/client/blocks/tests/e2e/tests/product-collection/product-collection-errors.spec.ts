@@ -48,6 +48,7 @@ const test = base.extend< {
 						`tr[id="tag-${ categoryId }"] .row-actions .delete a`
 					);
 					if ( await deleteLink.isVisible() ) {
+						await deleteLink.scrollIntoViewIfNeeded();
 						await deleteLink.click();
 					}
 				} catch ( error ) {
@@ -69,8 +70,19 @@ const test = base.extend< {
 				waitUntil: 'domcontentloaded',
 			} );
 
+			// Wait for the to be rendered
+			await page
+				.locator( '#woocommerce-product-data' )
+				.waitFor( { timeout: 10000 } );
+
 			await page.getByLabel( 'Product name' ).fill( productName );
-			await page.getByLabel( 'Regular price ($)' ).fill( '29.99' );
+
+			// Wait for the Regular price input to exist before filling
+			await page
+				.locator( '#_regular_price' )
+				.waitFor( { timeout: 10000 } );
+			await page.fill( '#_regular_price', '29.99' );
+
 			await page.getByRole( 'link', { name: 'Inventory' } ).click();
 
 			const manageStock = page.locator( '#_manage_stock' );
@@ -90,15 +102,13 @@ const test = base.extend< {
 			);
 			await categoryCheckbox.check();
 
-			await Promise.all( [
-				page.locator( 'input#publish' ).click(),
-				page.waitForLoadState( 'domcontentloaded', { timeout: 5000 } ),
-			] );
+			await page.locator( 'input#publish' ).click();
 
+			// After publishing, wait for WooCommerce's "Product published." notice
 			const successNotice = page.locator( '#message.notice-success' );
-			await expect( successNotice ).toHaveCount( 1 );
-			await expect( successNotice ).toBeVisible();
+			await expect( successNotice ).toBeVisible( { timeout: 20000 } );
 
+			// (optional) Get product ID from URL safely after publish is complete
 			const currentUrl = page.url();
 			const productIdMatch = currentUrl.match( /post=(\d+)/ );
 			if ( productIdMatch ) {
