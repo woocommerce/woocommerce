@@ -46,7 +46,7 @@ class GroupedProductSelectorItemCTA extends AbstractBlock {
 		$quantity_html = ob_get_clean();
 
 		// Remove the label because we are rendering one as a separate block via GroupedProductSelectorItemLabel.
-		$quantity_html = AddToCartWithOptionsUtils::remove_quantity_label( $quantity_html );
+		$quantity_html = $this->remove_quantity_label( $quantity_html );
 
 		// Modify the quantity input to add stepper buttons.
 		$product_name = $product->get_name();
@@ -58,6 +58,17 @@ class GroupedProductSelectorItemCTA extends AbstractBlock {
 		$quantity_html = AddToCartWithOptionsUtils::make_quantity_input_interactive( $quantity_html );
 
 		return $quantity_html;
+	}
+
+	/**
+	 * Removes the label from quantity input HTML.
+	 *
+	 * @param string $quantity_html The quantity input HTML.
+	 * @return string The quantity input HTML without the label.
+	 */
+	private function remove_quantity_label( $quantity_html ) {
+		// Remove the label from the quantity input.
+		return preg_replace( '/<label[^>]*>.*?<\/label>/s', '', $quantity_html );
 	}
 
 	/**

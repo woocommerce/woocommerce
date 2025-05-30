@@ -164,15 +164,4 @@ class Utils {
 	public static function get_quantity_input_id( $product ) {
 		return 'quantity_' . md5( $product->get_id() . '_' . $product->get_name() );
 	}
-
-	/**
-	 * Removes the label from quantity input HTML.
-	 *
-	 * @param string $quantity_html The quantity input HTML.
-	 * @return string The quantity input HTML without the label.
-	 */
-	public static function remove_quantity_label( $quantity_html ) {
-		// Remove the label from the quantity input.
-		return preg_replace( '/<label[^>]*>.*?<\/label>/s', '', $quantity_html );
-	}
 }
