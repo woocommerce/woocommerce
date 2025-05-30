@@ -54,6 +54,10 @@ const SidebarSettings = ( {
 	const [ addBCC, setAddBCC ] = useState( !! woocommerce_email_data?.bcc );
 	const [ addCC, setAddCC ] = useState( !! woocommerce_email_data?.cc );
 
+	if ( ! woocommerce_email_data ) {
+		return null;
+	}
+
 	const updateWooMailProperty = ( name: string, value: string | boolean ) => {
 		const editedPost = select( coreDataStore ).getEditedEntityRecord(
 			'postType',
