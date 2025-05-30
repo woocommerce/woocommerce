@@ -84,16 +84,6 @@ const productButtonStore = {
 				? tempQuantity || 0
 				: state.quantity;
 
-			if ( productType !== 'grouped' ) {
-				if ( quantity > 0 ) {
-					return state.inTheCartText.replace(
-						'###',
-						quantity.toString()
-					);
-				}
-				return addToCartText;
-			}
-
 			if ( productType === 'grouped' ) {
 				const groupedProductIdsInCart = groupedProductIds?.map(
 					( productId ) => {
@@ -106,7 +96,13 @@ const productButtonStore = {
 				if ( groupedProductIdsInCart?.some( ( qty ) => qty > 0 ) ) {
 					return state.inTheCartText;
 				}
-				return addToCartText;
+			}
+
+			if ( quantity > 0 ) {
+				return state.inTheCartText.replace(
+					'###',
+					quantity.toString()
+				);
 			}
 
 			return addToCartText;
