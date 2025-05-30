@@ -52,22 +52,22 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 		</Button>
 	);
 
-	const InstallWooPaymentsStep = ( { isStepComplete }: { isStepComplete: boolean } ) => (
+	const InstallWooPaymentsStep = ( {
+		isStepComplete,
+	}: {
+		isStepComplete: boolean;
+	} ) => (
 		<SidebarNavigationItem
 			key="install-woopayments"
 			className={ clsx( 'install-woopayments', {
 				active: isStepComplete,
 				'payment-step': true,
-				'payment-step--active':
-					isStepComplete,
-				'payment-step--disabled':
-					isStepComplete,
+				'payment-step--active': isStepComplete,
+				'payment-step--disabled': isStepComplete,
 				'is-complete': isStepComplete,
 			} ) }
 			icon={
-				isStepComplete
-					? taskCompleteIcon
-					: taskIcons.activePaymentStep
+				isStepComplete ? taskCompleteIcon : taskIcons.activePaymentStep
 			}
 			disabled={ true }
 			showChevron={ false }
@@ -77,7 +77,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 				sprintf( __( 'Install %s', 'woocommerce' ), 'WooPayments' )
 			}
 		</SidebarNavigationItem>
-	)
+	);
 
 	return (
 		<div
