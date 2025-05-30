@@ -1,7 +1,12 @@
 /**
  * Internal dependencies
  */
-import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
+import {
+	expect,
+	tags,
+	test as baseTest,
+	guestFile,
+} from '../../fixtures/fixtures';
 import { getFakeProduct } from '../../utils/data';
 import { WC_API_PATH } from '../../utils/api-client';
 
@@ -52,121 +57,253 @@ const test = baseTest.extend( {
 } );
 
 test.describe( 'Checkout Link Endpoint', () => {
-	test(
-		'Guest user redirected to checkout with correct cart',
-		{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
-		async ( { page, baseURL, products, coupon } ) => {
-			// Visit checkout-link
-			const checkoutLink = `${ baseURL }/checkout-link?products=${ products[ 0 ].id },${ products[ 1 ].id }&coupon=${ coupon.code }`;
-			await page.goto( checkoutLink );
+	test.describe( 'Guest user', () => {
+		test.use( { storageState: guestFile } );
 
-			// Should redirect to checkout
-			await expect( page ).toHaveURL( /\/checkout/ );
+		test(
+			'Guest user redirected to checkout with correct cart',
+			{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
+			async ( { page, baseURL, products, coupon } ) => {
+				// Visit checkout-link
+				const checkoutLink = `${ baseURL }/checkout-link?products=${ products[ 0 ].id },${ products[ 1 ].id }&coupon=${ coupon.code }`;
+				await page.goto( checkoutLink );
 
-			// Assert both products are in the cart
-			const cartItems = page.locator(
-				'.wc-block-components-order-summary'
-			);
-			await expect( cartItems ).toContainText( products[ 0 ].name );
-			await expect( cartItems ).toContainText( products[ 1 ].name );
+				// Should redirect to checkout
+				await expect( page ).toHaveURL( /\/checkout/ );
 
-			// Assert coupon is applied
-			await expect( page.getByText( 'Coupon: E2ECOUPON' ) ).toBeVisible();
-		}
-	);
+				// Assert both products are in the cart
+				const cartItems = page.locator(
+					'.wc-block-components-order-summary'
+				);
+				await expect( cartItems ).toContainText( products[ 0 ].name );
+				await expect( cartItems ).toContainText( products[ 1 ].name );
 
-	test(
-		'Guest user sees error when invalid coupon is applied',
-		{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
-		async ( { page, baseURL, products } ) => {
-			// Visit checkout-link with invalid coupon
-			const checkoutLink = `${ baseURL }/checkout-link?products=${ products[ 0 ].id },${ products[ 1 ].id }&coupon=INVALID_COUPON`;
-			await page.goto( checkoutLink );
+				// Assert coupon is applied
+				await expect(
+					page.getByText( 'Coupon: E2ECOUPON' )
+				).toBeVisible();
+			}
+		);
 
-			// Should redirect to checkout
-			await expect( page ).toHaveURL( /\/checkout/ );
+		test(
+			'Guest user sees error when invalid coupon is applied',
+			{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
+			async ( { page, baseURL, products } ) => {
+				// Visit checkout-link with invalid coupon
+				const checkoutLink = `${ baseURL }/checkout-link?products=${ products[ 0 ].id },${ products[ 1 ].id }&coupon=INVALID_COUPON`;
+				await page.goto( checkoutLink );
 
-			// Assert both products are in the cart
-			const cartItems = page.locator(
-				'.wc-block-components-order-summary'
-			);
-			await expect( cartItems ).toContainText( products[ 0 ].name );
-			await expect( cartItems ).toContainText( products[ 1 ].name );
+				// Should redirect to checkout
+				await expect( page ).toHaveURL( /\/checkout/ );
 
-			// Assert error notice is shown for invalid coupon
-			await expect(
-				page.getByText(
-					'Coupon "INVALID_COUPON" cannot be applied because it does not exist.'
-				)
-			).toBeVisible();
-		}
-	);
+				// Assert both products are in the cart
+				const cartItems = page.locator(
+					'.wc-block-components-order-summary'
+				);
+				await expect( cartItems ).toContainText( products[ 0 ].name );
+				await expect( cartItems ).toContainText( products[ 1 ].name );
 
-	test(
-		'Guest user sees error when invalid products are provided',
-		{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
-		async ( { page, baseURL, products } ) => {
-			// Visit checkout-link with invalid product ID in list.
-			const checkoutLink = `${ baseURL }/checkout-link?products=${ products[ 0 ].id },999999`;
-			await page.goto( checkoutLink );
+				// Assert error notice is shown for invalid coupon
+				await expect(
+					page.getByText(
+						'Coupon "INVALID_COUPON" cannot be applied because it does not exist.'
+					)
+				).toBeVisible();
+			}
+		);
 
-			// Should redirect to checkout
-			await expect( page ).toHaveURL( /\/checkout/ );
+		test(
+			'Guest user sees error when invalid products are provided',
+			{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
+			async ( { page, baseURL, products } ) => {
+				// Visit checkout-link with invalid product ID in list.
+				const checkoutLink = `${ baseURL }/checkout-link?products=${ products[ 0 ].id },999999`;
+				await page.goto( checkoutLink );
 
-			// Assert error notice is shown for invalid product
-			await expect(
-				page.getByText(
-					'Product with ID "999999" was not found and cannot be added to the cart.'
-				)
-			).toBeVisible();
-		}
-	);
-	test(
-		'Guest user sees error when invalid product is provided',
-		{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
-		async ( { page, baseURL } ) => {
-			// Visit checkout-link with invalid product ID only.
-			const checkoutLink = `${ baseURL }/checkout-link?products=999999`;
-			await page.goto( checkoutLink );
+				// Should redirect to checkout
+				await expect( page ).toHaveURL( /\/checkout/ );
 
-			// Should redirect to cart if cart is empty.
-			await expect( page ).toHaveURL( /\/cart/ );
+				// Assert error notice is shown for invalid product
+				await expect(
+					page.getByText(
+						'Product with ID "999999" was not found and cannot be added to the cart.'
+					)
+				).toBeVisible();
+			}
+		);
 
-			// Assert error notice is shown for invalid product
-			await expect(
-				page.getByText(
-					'Product with ID "999999" was not found and cannot be added to the cart.'
-				)
-			).toBeVisible();
+		test(
+			'Guest user sees error when invalid product is provided',
+			{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
+			async ( { page, baseURL } ) => {
+				// Visit checkout-link with invalid product ID only.
+				const checkoutLink = `${ baseURL }/checkout-link?products=999999`;
+				await page.goto( checkoutLink );
 
-			// Cart should be empty
-			await expect(
-				page.getByText( 'Your cart is currently empty!' )
-			).toBeVisible();
-		}
-	);
-	test(
-		'Guest user sees error when invalid link is provided',
-		{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
-		async ( { page, baseURL } ) => {
-			// Visit checkout-link with invalid product ID only.
-			const checkoutLink = `${ baseURL }/checkout-link?products=abc`;
-			await page.goto( checkoutLink );
+				// Should redirect to cart if cart is empty.
+				await expect( page ).toHaveURL( /\/cart/ );
 
-			// Should redirect to cart if cart is empty.
-			await expect( page ).toHaveURL( /\/cart/ );
+				// Assert error notice is shown for invalid product
+				await expect(
+					page.getByText(
+						'Product with ID "999999" was not found and cannot be added to the cart.'
+					)
+				).toBeVisible();
 
-			// Assert error notice is shown for invalid product
-			await expect(
-				page.getByText(
-					'The provided checkout link was out of date or invalid. No products were added to the cart.'
-				)
-			).toBeVisible();
+				// Cart should be empty
+				await expect(
+					page.getByText( 'Your cart is currently empty!' )
+				).toBeVisible();
+			}
+		);
 
-			// Cart should be empty
-			await expect(
-				page.getByText( 'Your cart is currently empty!' )
-			).toBeVisible();
-		}
-	);
+		test(
+			'Guest user sees error when invalid link is provided',
+			{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
+			async ( { page, baseURL } ) => {
+				// Visit checkout-link with invalid product ID only.
+				const checkoutLink = `${ baseURL }/checkout-link?products=abc`;
+				await page.goto( checkoutLink );
+
+				// Should redirect to cart if cart is empty.
+				await expect( page ).toHaveURL( /\/cart/ );
+
+				// Assert error notice is shown for invalid product
+				await expect(
+					page.getByText(
+						'The provided checkout link was out of date or invalid. No products were added to the cart.'
+					)
+				).toBeVisible();
+
+				// Cart should be empty
+				await expect(
+					page.getByText( 'Your cart is currently empty!' )
+				).toBeVisible();
+			}
+		);
+	} );
+
+	test.describe( 'Logged-in user', () => {
+		test(
+			'Logged-in user redirected to checkout with correct cart',
+			{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
+			async ( { page, baseURL, products, coupon } ) => {
+				// Visit checkout-link
+				const checkoutLink = `${ baseURL }/checkout-link?products=${ products[ 0 ].id },${ products[ 1 ].id }&coupon=${ coupon.code }`;
+				await page.goto( checkoutLink );
+
+				// Should redirect to checkout
+				await expect( page ).toHaveURL( /\/checkout/ );
+
+				// Assert both products are in the cart
+				const cartItems = page.locator(
+					'.wc-block-components-order-summary'
+				);
+				await expect( cartItems ).toContainText( products[ 0 ].name );
+				await expect( cartItems ).toContainText( products[ 1 ].name );
+
+				// Assert coupon is applied
+				await expect(
+					page.getByText( 'Coupon: E2ECOUPON' )
+				).toBeVisible();
+			}
+		);
+
+		test(
+			'Logged-in user sees error when invalid coupon is applied',
+			{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
+			async ( { page, baseURL, products } ) => {
+				// Visit checkout-link with invalid coupon
+				const checkoutLink = `${ baseURL }/checkout-link?products=${ products[ 0 ].id },${ products[ 1 ].id }&coupon=INVALID_COUPON`;
+				await page.goto( checkoutLink );
+
+				// Should redirect to checkout
+				await expect( page ).toHaveURL( /\/checkout/ );
+
+				// Assert both products are in the cart
+				const cartItems = page.locator(
+					'.wc-block-components-order-summary'
+				);
+				await expect( cartItems ).toContainText( products[ 0 ].name );
+				await expect( cartItems ).toContainText( products[ 1 ].name );
+
+				// Assert error notice is shown for invalid coupon
+				await expect(
+					page.getByText(
+						'Coupon "INVALID_COUPON" cannot be applied because it does not exist.'
+					)
+				).toBeVisible();
+			}
+		);
+
+		test(
+			'Logged-in user sees error when invalid products are provided',
+			{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
+			async ( { page, baseURL, products } ) => {
+				// Visit checkout-link with invalid product ID in list.
+				const checkoutLink = `${ baseURL }/checkout-link?products=${ products[ 0 ].id },999999`;
+				await page.goto( checkoutLink );
+
+				// Should redirect to checkout
+				await expect( page ).toHaveURL( /\/checkout/ );
+
+				// Assert error notice is shown for invalid product
+				await expect(
+					page.getByText(
+						'Product with ID "999999" was not found and cannot be added to the cart.'
+					)
+				).toBeVisible();
+			}
+		);
+
+		test(
+			'Logged-in user sees error when invalid product is provided',
+			{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
+			async ( { page, baseURL } ) => {
+				// Visit checkout-link with invalid product ID only.
+				const checkoutLink = `${ baseURL }/checkout-link?products=999999`;
+				await page.goto( checkoutLink );
+
+				// Should redirect to cart if cart is empty.
+				await expect( page ).toHaveURL( /\/cart/ );
+
+				// Assert error notice is shown for invalid product
+				await expect(
+					page.getByText(
+						'Product with ID "999999" was not found and cannot be added to the cart.'
+					)
+				).toBeVisible();
+
+				// Cart should be empty
+				await expect(
+					page.getByText( 'Your cart is currently empty!' )
+				).toBeVisible();
+			}
+		);
+
+		test(
+			'Logged-in user sees error when invalid link is provided',
+			{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
+			async ( { page, baseURL } ) => {
+				// Visit checkout-link with invalid product ID only.
+				const checkoutLink = `${ baseURL }/checkout-link?products=abc`;
+				await page.goto( checkoutLink );
+
+				// Should redirect to cart if cart is empty.
+				await expect( page ).toHaveURL( /\/cart/ );
+
+				// Assert error notice is shown for invalid product
+				await expect(
+					page.getByText(
+						'The provided checkout link was out of date or invalid. No products were added to the cart.'
+					)
+				).toBeVisible();
+
+				// Cart should be empty
+				await expect(
+					page.getByText( 'Your cart is currently empty!' )
+				).toBeVisible();
+			}
+		);
+	} );
 } );
