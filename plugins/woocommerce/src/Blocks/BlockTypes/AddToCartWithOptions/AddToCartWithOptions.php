@@ -293,10 +293,11 @@ class AddToCartWithOptions extends AbstractBlock {
 			remove_filter( 'render_block_context', array( $this, 'set_is_descendant_of_add_to_cart_with_options_context' ) );
 
 			$wrapper_attributes = array(
-				'class'               => $classes,
-				'style'               => esc_attr( $classes_and_styles['styles'] ),
-				'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
-				'data-wp-context'     => wp_json_encode(
+				'class'                     => $classes,
+				'style'                     => esc_attr( $classes_and_styles['styles'] ),
+				'data-wp-interactive'       => 'woocommerce/add-to-cart-with-options',
+				'data-wp-class--is-invalid' => '!state.isFormValid',
+				'data-wp-context'           => wp_json_encode(
 					$context,
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 				),
@@ -326,12 +327,15 @@ class AddToCartWithOptions extends AbstractBlock {
 					$hidden_input = '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '" />';
 				} elseif ( ProductType::GROUPED === $product_type ) {
 					$hidden_input = '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '" />';
+				} elseif ( ProductType::VARIABLE === $product_type ) {
+					$hidden_input  = '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '" />';
+					$hidden_input .= '<input type="hidden" name="product_id" value="' . $product->get_id() . '" />';
+					$hidden_input .= '<input type="hidden" name="variation_id" data-wp-interactive="woocommerce/add-to-cart-with-options" data-wp-bind--value="state.variationId" />';
 				}
 			} else {
 				// Otherwise, we use the Interactivity API.
 				$form_attributes = array(
-					'data-wp-on--submit'        => 'actions.handleSubmit',
-					'data-wp-class--is-invalid' => '!state.isFormValid',
+					'data-wp-on--submit' => 'actions.handleSubmit',
 				);
 			}
 

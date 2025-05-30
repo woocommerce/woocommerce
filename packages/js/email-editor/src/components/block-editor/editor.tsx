@@ -36,6 +36,7 @@ import { PublishSave } from '../../hacks/publish-save';
 import { EditorNotices } from '../notices';
 import { BlockCompatibilityWarnings } from '../sidebar';
 import { BackButtonContent } from '../header/back-button-content';
+import { recordEventOnce } from '../../events';
 
 export function InnerEditor( {
 	postId: initialPostId,
@@ -114,6 +115,8 @@ export function InnerEditor( {
 			</div>
 		);
 	}
+
+	recordEventOnce( 'editor_layout_loaded' );
 
 	return (
 		<SlotFillProvider>

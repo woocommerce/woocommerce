@@ -86,12 +86,8 @@ const getMatchedVariation = (
 			( [ attributeName, attributeValue ] ) => {
 				const attributeMatched = selectedAttributes.some(
 					( variationAttribute ) => {
-						const formattedVariationAttribute =
-							'attribute_' +
-							variationAttribute.attribute.toLowerCase();
-
 						const isSameAttribute =
-							formattedVariationAttribute === attributeName;
+							variationAttribute.attribute === attributeName;
 						if ( ! isSameAttribute ) {
 							return false;
 						}
