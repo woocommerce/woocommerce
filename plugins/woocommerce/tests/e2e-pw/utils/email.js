@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { expect } from '../fixtures/fixtures';
+import ApiClient, { WP_API_PATH } from './api-client';
 
 /**
  * Check that an email exists in the WP Mail Logging plugin Email Log page. WP Mail Logging plugin must be installed.
@@ -66,4 +67,12 @@ export async function expectEmailContent(
 	await expect( emailContentFrame.locator( 'body' ) ).toContainText(
 		emailContent
 	);
+}
+
+export async function getWooEmails( params ) {
+	const emails = await ApiClient.getInstance().get(
+		`${ WP_API_PATH }/woo_email`,
+		{ ...params }
+	);
+	return emails;
 }

@@ -40,9 +40,10 @@ describe( 'PaymentExtensionSuggestionListItem', () => {
 					} as unknown as PaymentExtensionSuggestionProvider
 				}
 				installingPlugin={ null }
-				setupPlugin={ () => {} }
+				setUpPlugin={ () => {} }
 				pluginInstalled={ true }
 				acceptIncentive={ () => {} }
+				shouldHighlightIncentive={ false }
 			/>
 		);
 

@@ -113,6 +113,43 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect( addToCartButton ).toHaveText( '6 in cart' );
 	} );
 
+	test( "'X in cart' text reflects the correct amount in variations", async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await pageObject.setFeatureFlags();
+
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/hoodie' );
+
+		// The radio input is visually hidden and, thus, not clickable. That's
+		// why we need to select the <label> instead.
+		const logoNoOption = page.locator( 'label:has-text("No")' );
+		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
+		const colorGreenOption = page.locator( 'label:has-text("Green")' );
+		const addToCartButton = page.getByText( 'Add to cart' ).first();
+
+		await logoNoOption.click();
+		await colorGreenOption.click();
+		await addToCartButton.click();
+
+		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+
+		await colorBlueOption.click();
+
+		await expect( page.getByText( '1 in cart' ) ).toBeHidden();
+
+		await colorGreenOption.click();
+
+		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+	} );
+
 	test( "doesn't allow selecting invalid variations in pills mode", async ( {
 		page,
 		pageObject,
@@ -128,14 +165,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await page.goto( '/hoodie' );
 
-		const logoYesOption = page.getByRole( 'radio', {
-			name: 'Yes',
-			exact: true,
-		} );
-		const colorGreenOption = page.getByRole( 'radio', {
-			name: 'Green',
-			exact: true,
-		} );
+		// The radio input is visually hidden and, thus, not clickable. That's
+		// why we need to select the <label> instead.
+		const logoYesOption = page.locator( 'label:has-text("Yes")' );
+		const colorGreenOption = page.locator( 'label:has-text("Green")' );
 
 		await expect( colorGreenOption ).toBeEnabled();
 

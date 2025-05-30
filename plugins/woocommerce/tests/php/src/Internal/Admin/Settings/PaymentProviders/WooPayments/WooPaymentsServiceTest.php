@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentProviders\WooPayments;
 
 use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\PaymentGateway;
@@ -63,7 +64,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	/**
 	 * The current time in seconds.
 	 *
-	 * Use it instead of $this->current_time to avoid using the real time in tests.
+	 * Use it instead of time() to avoid using the real time in tests.
 	 *
 	 * @var int
 	 */
@@ -105,6 +106,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'is_connected',
 					'has_connected_owner',
 					'is_connection_owner',
+					'try_registration',
 				)
 			)
 			->getMock();
@@ -118,7 +120,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 		$this->mockable_proxy->register_function_mocks(
 			array(
-				// Mock the $this->current_time.
+				// Mock the current time.
 				'time'         => function () {
 					return $this->current_time;
 				},
@@ -136,6 +138,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				},
 			),
 		);
+
+		// Arrange the version constant to meet the minimum requirements for the native in-context onboarding.
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', PaymentProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION );
 
 		$this->mock_account_service = $this->getMockBuilder( \stdClass::class )
 			->addMethods( array( 'is_stripe_account_valid', 'get_account_status_data' ) )
@@ -198,6 +203,26 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			$this->fail( 'Expected ApiException not thrown.' );
 		} catch ( ApiException $e ) {
 			$this->assertSame( 'woocommerce_woopayments_onboarding_extension_not_active', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test get onboarding details when the extension is NOT at the right version.
+	 */
+	public function test_get_onboarding_details_throws_when_extension_at_wrong_version(): void {
+		// Arrange.
+		$location = 'US';
+
+		// Arrange the version constant to NOT meet the minimum requirements for the native in-context onboarding.
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', '1.0.0' );
+
+		// Act.
+		try {
+			$this->sut->get_onboarding_details( $location, '/some/path' );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertSame( 'woocommerce_woopayments_onboarding_extension_version', $e->getErrorCode() );
 		}
 	}
 
@@ -7305,6 +7330,143 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				),
 			),
 			$updated_stored_profiles[0]['onboarding'][ $location ]['steps'][ $step_id ]
+		);
+	}
+
+	/**
+	 * Test onboarding_preload throws exception when onboarding is locked.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_onboarding_preload_throws_with_onboarding_locked() {
+		// Arrange.
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it not connected.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( false );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( false );
+
+		// Arrange the onboarding locked DB option.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return 'yes';
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		// Act.
+		try {
+			$this->sut->onboarding_preload( $location );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertEquals( 'woocommerce_woopayments_onboarding_locked', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test that onboarding_preload throws an exception when the WPCOM connection registration fails.
+	 *
+	 * @return void
+	 * @throws \Exception On POST request not mocked.
+	 */
+	public function test_onboarding_preload_throws_on_error_response() {
+		// Arrange.
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		$expected_error = array(
+			'code'    => 'error',
+			'message' => 'Error message',
+		);
+		// Make it not connected.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( false );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->once() )
+			->method( 'try_registration' )
+			->willReturn( new WP_Error( $expected_error['code'], $expected_error['message'] ) );
+
+		// Arrange the onboarding locked DB option.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return 'no';
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		// Assert.
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( $expected_error['message'] );
+
+		// Act.
+		$this->sut->onboarding_preload( $location );
+	}
+
+	/**
+	 * Test onboarding_preload.
+	 *
+	 * @return void
+	 * @throws \Exception When trying to mock uncallable user functions.
+	 */
+	public function test_onboarding_preload() {
+		// Arrange.
+		$location                           = 'US';
+		$expected_wpcom_registration_result = false;
+
+		// Arrange the WPCOM connection.
+		// Make it not connected.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( false );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->once() )
+			->method( 'try_registration' )
+			->willReturn( $expected_wpcom_registration_result );
+
+		// Arrange the onboarding locked DB option.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return 'no';
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		// Act.
+		$result = $this->sut->onboarding_preload( $location );
+
+		// Assert.
+		self::assertEquals(
+			array(
+				'success' => $expected_wpcom_registration_result,
+			),
+			$result
 		);
 	}
 
