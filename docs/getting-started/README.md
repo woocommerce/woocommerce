@@ -61,5 +61,3 @@ Learn more about [contributing](/docs/contribution/contributing)
 ## Not a developer?
 
 This documentation site is intended for developers. If you're a merchant or are new to WooCommerce, please check out [woocommerce.com](https://woocommerce.com/) for our merchant-facing docs.
-
-[View Merchant Documentation](https://woocommerce.com/documentation/)
