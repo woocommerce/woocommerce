@@ -154,6 +154,7 @@ const { state, actions } = store< Store >(
 							( { id: productId } ) => item.id === productId
 						);
 
+						// Updates existing cart item.
 						if ( existingItem ) {
 							// Optimistically updates the number of items in the cart.
 							existingItem.quantity = item.quantity;
@@ -182,6 +183,7 @@ const { state, actions } = store< Store >(
 						} as OptimisticCartItem;
 						state.cart.items.push( item );
 						quantityChanges.productsPendingAdd = [ item.id ];
+
 						return {
 							method: 'POST',
 							path: `/wc/store/v1/cart/add-item`,
