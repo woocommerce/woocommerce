@@ -490,7 +490,7 @@ class MiniCart extends AbstractBlock {
 						echo $icon;
 					?>
 					<?php if ( 'never' !== $product_count_visibility ) : ?>
-						<span hidden data-wp-bind--hidden="!state.badgeIsVisible" data-wp-text="state.totalItemsInCart" class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
+						<span data-wp-bind--hidden="!state.badgeIsVisible" data-wp-text="state.totalItemsInCart" class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
 						</span>
 					<?php endif; ?>
 					<?php
