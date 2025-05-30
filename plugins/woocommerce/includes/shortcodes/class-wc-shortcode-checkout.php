@@ -36,8 +36,6 @@ class WC_Shortcode_Checkout {
 	public static function output( $atts ) {
 		global $wp;
 
-		wc_nocache_headers();
-
 		// Check cart class is loaded or abort.
 		if ( is_null( WC()->cart ) ) {
 			return;

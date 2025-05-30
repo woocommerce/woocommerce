@@ -143,6 +143,36 @@ class WC_Cache_Helper {
 		return apply_filters( 'woocommerce_geolocation_ajax_get_location_hash', $location_hash, $location, $customer );
 	}
 
+	private static function should_prevent_caching() {
+		$page_ids = array_filter( array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ), wc_get_page_id( 'myaccount' ) ) );
+		if ( is_page( $page_ids ) ) {
+			return true;
+		}
+
+		if ( ! is_singular() ) {
+			return false;
+		}
+
+		$post = get_post();
+		if ( ! $post instanceof WP_Post || empty( $post->post_content ) ) {
+			return false;
+		}
+
+		// Prevent caching on pages with checkout, cart or my-account blocks.
+		if ( has_block( 'woocommerce/checkout', $post ) || has_block( 'woocommerce/cart', $post ) || has_block( 'woocommerce/my-account', $post ) ) {
+			return true;
+		}
+
+		// Prevent caching on pages with [woocommerce_checkout], [woocommerce_cart] or [woocommerce_my_account] shortcodes.
+		if ( str_contains( $post->post_content, '[woocommerce_checkout' )
+			|| str_contains( $post->post_content, '[woocommerce_cart' )
+			|| str_contains( $post->post_content, '[woocommerce_my_account' ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
 	/**
 	 * Prevent caching on certain pages
 	 */
@@ -150,9 +180,8 @@ class WC_Cache_Helper {
 		if ( ! is_blog_installed() ) {
 			return;
 		}
-		$page_ids = array_filter( array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ), wc_get_page_id( 'myaccount' ) ) );
 
-		if ( is_page( $page_ids ) ) {
+		if ( self::should_prevent_caching() ) {
 			self::set_nocache_constants();
 			nocache_headers();
 		}
