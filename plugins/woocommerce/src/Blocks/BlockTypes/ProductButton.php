@@ -318,20 +318,6 @@ class ProductButton extends AbstractBlock {
 			return 0;
 		}
 
-		$product = wc_get_product( $product_id );
-
-		if ( $product->is_type( 'grouped' ) ) {
-			$grouped_product_ids = $product->get_children();
-			return array_sum(
-				array_map(
-					function ( $child_product_id ) {
-						return $this->get_cart_item_quantities_by_product_id( (int) $child_product_id );
-					},
-					$grouped_product_ids
-				)
-			);
-		}
-
 		$cart = WC()->cart->get_cart_item_quantities();
 		return isset( $cart[ $product_id ] ) ? $cart[ $product_id ] : 0;
 	}
