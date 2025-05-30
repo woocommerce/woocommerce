@@ -3,9 +3,11 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
- * BlockifiedProductDetails class.
+ * ProductDescription class.
  */
 class ProductDescription extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -70,8 +72,14 @@ class ProductDescription extends AbstractBlock {
 			array( 'class' => 'wc-block-product-description' )
 		);
 
+		$interactivity_context = array(
+			'description' => $description,
+		);
+
 		return sprintf(
-			'<div %1$s>%2$s</div>',
+			'<div data-wp-interactive="%1$s" data-wp-context="%2$s" %3$s><p data-wp-text="state.description">%4$s</p></div>',
+			$this->get_full_block_name(),
+			wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 			$wrapper_attributes,
 			$description
 		);

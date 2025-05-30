@@ -12,6 +12,7 @@ export type AvailableVariation = {
 	attributes: Record< string, string >;
 	variation_id: number;
 	price_html: string;
+	variation_description: string;
 };
 
 export type Context = {
@@ -118,6 +119,7 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 };
 
 let originalPriceHtml = '';
+let originalDescription = '';
 
 const addToCartWithOptionsStore = store(
 	'woocommerce/add-to-cart-with-options',
@@ -256,14 +258,22 @@ const addToCartWithOptionsStore = store(
 						: context?.displayedProduct.price_html ||
 						  wooState.displayedProduct.price_html;
 
+				originalDescription =
+					originalDescription !== ''
+						? originalDescription
+						: context?.displayedProduct.description ||
+						  wooState.displayedProduct.description;
+
 				if ( matchedVariation ) {
 					if ( context ) {
 						context.displayedProduct = {
 							price_html: matchedVariation.price_html,
+							description: matchedVariation.variation_description,
 						};
 					} else {
 						wooState.displayedProduct = {
 							price_html: matchedVariation.price_html,
+							description: matchedVariation.variation_description,
 						};
 					}
 					return;
@@ -271,8 +281,10 @@ const addToCartWithOptionsStore = store(
 
 				if ( context ) {
 					context.displayedProduct.price_html = originalPriceHtml;
+					context.displayedProduct.description = originalDescription;
 				} else {
 					wooState.displayedProduct.price_html = originalPriceHtml;
+					wooState.displayedProduct.description = originalDescription;
 				}
 			},
 		},

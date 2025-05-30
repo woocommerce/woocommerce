@@ -195,7 +195,7 @@ class BlockifiedProductDetails extends AbstractBlock {
 
 		if ( 'woocommerce/accordion-group' === $parsed_block['blockName'] ) {
 			foreach ( $parsed_block['innerBlocks'] as $key => $inner_block ) {
-				$parsed_block['innerBlocks'][ $key ] = $this->mark_accordion_item_hidden( $inner_block, $context );
+				// $parsed_block['innerBlocks'][ $key ] = $this->mark_accordion_item_hidden( $inner_block, $context );
 			}
 			$parsed_block['innerBlocks']  = array_values( array_filter( $parsed_block['innerBlocks'] ) );
 			$opening_tag                  = reset( $parsed_block['innerContent'] );
@@ -224,7 +224,8 @@ class BlockifiedProductDetails extends AbstractBlock {
 	 * @return array Item.
 	 */
 	private function mark_accordion_item_hidden( $item, $context ) {
-		$content_block          = end( $item['innerBlocks'] );
+		$content_block = end( $item['innerBlocks'] );
+
 		$rendered_content_block = ( new WP_Block( $content_block, $context ) )->render();
 		$p                      = new WP_HTML_Tag_Processor( $rendered_content_block );
 

@@ -18,6 +18,7 @@ class ProductDataUtils {
 	public static function get_product_data( $product ) {
 		return array_merge(
 			self::get_product_price_html( $product ),
+			self::get_product_description( $product ),
 		);
 	}
 
@@ -30,6 +31,18 @@ class ProductDataUtils {
 	public static function get_product_price_html( $product ) {
 		return array(
 			'price_html' => $product->get_price_html(),
+		);
+	}
+
+	/**
+	 * Get the product description.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @return string The product description.
+	 */
+	public static function get_product_description( $product ) {
+		return array(
+			'description' => $product->get_description(),
 		);
 	}
 }

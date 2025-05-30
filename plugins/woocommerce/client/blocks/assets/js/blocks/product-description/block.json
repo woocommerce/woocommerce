@@ -13,9 +13,7 @@
 		"core/post-template"
 	],
 	"supports": {
-		"interactivity": {
-			"clientNavigation": true
-		},
+		"interactivity": true,
 		"align": [ "wide", "full" ],
 		"html": false,
 		"layout": true,
@@ -72,5 +70,6 @@
 				"style": true
 			}
 		}
-	}
+	},
+	"viewScriptModule": "woocommerce/product-description"
 }
