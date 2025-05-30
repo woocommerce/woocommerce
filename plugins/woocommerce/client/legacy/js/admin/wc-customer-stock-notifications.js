@@ -18,7 +18,8 @@
 
 			var value = $( '#bulk-action-selector-top' ).val();
 
-			if ( value === 'delete' && ! window.confirm( wc_admin_customer_stock_notifications_params.i18n_wc_bulk_delete_notifications_warning ) ) {
+			if ( value === 'delete' 
+				&& ! window.confirm( wc_admin_customer_stock_notifications_params.i18n_wc_bulk_delete_notifications_warning ) ) {
 				e.preventDefault();
 				return false;
 			}
