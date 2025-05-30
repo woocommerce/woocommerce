@@ -8,7 +8,6 @@ import React, { useState } from '@wordpress/element';
 import { pluginsStore, paymentSettingsStore } from '@woocommerce/data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
-import { createNoticesFromResponse } from '~/lib/notices';
 
 /**
  * Internal dependencies
@@ -17,6 +16,7 @@ import WooPaymentsOnboarding from '~/settings-payments/onboarding/providers/woop
 import { useOnboardingContext } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
 import StripeSpinner from '~/settings-payments/onboarding/providers/woopayments/components//stripe-spinner';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
+import { createNoticesFromResponse } from '~/lib/notices';
 import './payments-content.scss';
 
 const InstallWooPaymentsStep = ( {
