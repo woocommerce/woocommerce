@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+For better compat, use order caps for HPOS placeholder posts.

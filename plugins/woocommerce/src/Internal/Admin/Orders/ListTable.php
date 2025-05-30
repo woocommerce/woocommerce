@@ -254,11 +254,9 @@ class ListTable extends WP_List_Table {
 			$search_label .= '</span>';
 		}
 
-		// delete_others_shop_orders
-
 		// Add new.
 		$add_new_button = '';
-		if ( current_user_can( $post_type->cap->publish_posts ) ) {
+		if ( $post_type && current_user_can( $post_type->cap->publish_posts ) ) {
 			$add_new_button = "<a href='" . esc_url( $new_page_link ) . "' class='page-title-action'>{$add_new}</a>";
 		}
 

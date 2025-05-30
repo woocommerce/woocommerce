@@ -12,6 +12,8 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
@@ -33,6 +35,8 @@ class WC_Post_Types {
 		add_action( 'woocommerce_flush_rewrite_rules', array( __CLASS__, 'flush_rewrite_rules' ) );
 		add_filter( 'gutenberg_can_edit_post_type', array( __CLASS__, 'gutenberg_can_edit_post_type' ), 10, 2 );
 		add_filter( 'use_block_editor_for_post_type', array( __CLASS__, 'gutenberg_can_edit_post_type' ), 10, 2 );
+
+		add_filter( 'map_meta_cap', array( __CLASS__, 'hpos_maybe_translate_placeholder_caps' ), 0, 4 );
 	}
 
 	/**
@@ -780,6 +784,82 @@ class WC_Post_Types {
 		$post_types[] = 'product';
 
 		return $post_types;
+	}
+
+	/**
+	 * Translate capabilities for HPOS orders when sync is not active.
+	 *
+	 * When HPOS is the authoritative source and sync is off, order rows in
+	 * wp_posts are either placeholders (shop_order_placehold) or may not
+	 * exist at all. WordPress's map_meta_cap resolves these to generic 'post'
+	 * capabilities (or 'do_not_allow' when the post is missing), which breaks
+	 * permission checks for roles like Shop Manager that have order-specific
+	 * caps but not generic post caps.
+	 *
+	 * This filter bypasses wp_posts entirely and resolves capabilities based
+	 * on the order type found in the HPOS tables.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param string[] $caps    The resolved primitive capabilities.
+	 * @param string   $cap     The meta capability being checked.
+	 * @param int      $user_id The user ID.
+	 * @param array    $args    Additional arguments (object ID).
+	 * @return string[] Translated capabilities.
+	 */
+	public static function hpos_maybe_translate_placeholder_caps( $caps, $cap, $user_id, $args ) {
+		if ( ! in_array( $cap, array( 'edit_post', 'delete_post', 'read_post' ), true ) || ! isset( $args[0] ) ) {
+			return $caps;
+		}
+
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return $caps;
+		}
+
+		$synchronizer = wc_get_container()->get( DataSynchronizer::class );
+		if ( $synchronizer->data_sync_is_enabled() ) {
+			return $caps;
+		}
+
+		// If it's a real (non-placeholder) post, let WordPress handle it normally.
+		$post_type = get_post_type( $args[0] );
+		if ( $post_type && DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE !== $post_type ) {
+			return $caps;
+		}
+
+		// Check if the ID corresponds to an HPOS order whose post type uses map_meta_cap.
+		$order_type    = OrderUtil::get_order_type( $args[0] );
+		$order_type_ob = $order_type ? get_post_type_object( $order_type ) : null;
+		if ( ! $order_type_ob || ! $order_type_ob->map_meta_cap ) {
+			return $caps;
+		}
+
+		// Build a mapping from generic 'post' caps to the order type's caps.
+		$default_post_type = get_post_type_object( 'post' );
+		if ( ! $default_post_type ) {
+			return $caps;
+		}
+		$default_caps   = $default_post_type->cap;
+		$order_type_cap = $order_type_ob->cap;
+		$cap_map        = array();
+		foreach ( (array) $default_caps as $key => $generic_cap ) {
+			if ( isset( $order_type_cap->$key ) ) {
+				$cap_map[ $generic_cap ] = $order_type_cap->$key;
+			}
+		}
+
+		$new_caps = array_map( fn( $c ) => $cap_map[ $c ] ?? $c, $caps );
+
+		// If WordPress returned 'do_not_allow' (no post found), replace with
+		// the appropriate "others" cap since we confirmed the order exists in HPOS.
+		if ( in_array( 'do_not_allow', $new_caps, true ) ) {
+			$others_cap = 'delete_post' === $cap
+				? $order_type_ob->cap->delete_others_posts
+				: $order_type_ob->cap->edit_others_posts;
+			$new_caps   = array( $others_cap );
+		}
+
+		return $new_caps;
 	}
 }
 
