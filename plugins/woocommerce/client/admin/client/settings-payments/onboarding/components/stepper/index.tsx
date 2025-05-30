@@ -49,6 +49,17 @@ export default function Stepper( {
 	const activeStepIndex =
 		steps.findIndex( ( step ) => step.id === active ) + 1;
 
+	// Helper function to determine if a step is completed
+	const isStepCompleted = (
+		step: WooPaymentsProviderOnboardingStep
+	): boolean => {
+		return (
+			step.id === justCompletedStepId ||
+			step.status === 'completed' ||
+			activeStepIndex === steps.length
+		);
+	};
+
 	// Renders only the active step based on the current step ID.
 	return (
 		<>
