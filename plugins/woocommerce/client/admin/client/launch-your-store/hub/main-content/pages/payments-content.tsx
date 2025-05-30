@@ -8,6 +8,7 @@ import React, { useState } from '@wordpress/element';
 import { pluginsStore, paymentSettingsStore } from '@woocommerce/data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
+import { createNoticesFromResponse } from '~/lib/notices';
 
 /**
  * Internal dependencies
@@ -94,7 +95,7 @@ export const PaymentsContent = ( {} ) => {
 			} )
 			.catch( ( response: { errors: Record< string, string > } ) => {
 				// Handle errors during installation
-
+				createNoticesFromResponse( response );
 				setIsPluginInstalling( false );
 			} );
 	}, [
