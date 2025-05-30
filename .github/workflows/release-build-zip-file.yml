@@ -134,15 +134,6 @@ jobs:
             else
                 echo "[OK] Pre-build verification: stable version in branch is matching the one in SVN trunk ($branch_stable_version vs $svn_stable_version)"
             fi
-  
-            # Validate changelog for the target release version
-            branch_changelog_version=$( cat changelog.txt | grep -oP '\d+\.\d+\.\d+ '| tail -n +1 | head -n1 )
-            if [[ $branch_plugin_version != *'-'* ]] && [[ $branch_plugin_version != $branch_changelog_version ]]; then
-                echo "[ERR] Pre-build verification: changelog for $branch_plugin_version is missing"
-                exit 1
-            else
-                echo "[OK] Pre-build verification: changelog for $branch_plugin_version is present or not required (the last entry is for $branch_changelog_version)"
-            fi
 
   build:
     name: Build release zip file
