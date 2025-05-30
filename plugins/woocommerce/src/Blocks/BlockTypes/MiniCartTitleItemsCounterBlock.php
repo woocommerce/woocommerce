@@ -50,14 +50,17 @@ class MiniCartTitleItemsCounterBlock extends AbstractInnerBlock {
 			'pluralItemsText'   => $plural,
 		);
 
+		wp_interactivity_state(
+			$this->get_full_block_name(),
+			array(
+				'itemsInCartText' => sprintf( $cart_item_text, $cart_item_count ),
+			)
+		);
+
 		ob_start();
 		?>
 		<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-		<span data-wp-text="state.itemsInCartText" data-wp-interactive="woocommerce/mini-cart-title-items-counter-block" <?php echo wp_interactivity_data_wp_context( $context ); ?> class="wp-block-woocommerce-mini-cart-title-items-counter-block">
-					<?php
-						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-						printf( $cart_item_text, $cart_item_count );
-					?>
+		<span <?php echo wp_interactivity_data_wp_context( $context ); ?> data-wp-text="state.itemsInCartText" data-wp-interactive="woocommerce/mini-cart-title-items-counter-block" class="wp-block-woocommerce-mini-cart-title-items-counter-block">					
 		</span>
 		<?php
 		return ob_get_clean();
