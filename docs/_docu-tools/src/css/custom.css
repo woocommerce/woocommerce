@@ -67,6 +67,6 @@ html[class*=docs-doc-id-getting-started] .pagination-nav {
 }
 
 /* Hide next pagination nav at end of Getting Started */
-html.docs-doc-id-getting-started/version-control-deployment .pagination-nav .pagination-nav__link--next {
+html.docs-doc-id-getting-started\/version-control-deployment .pagination-nav .pagination-nav__link--next {
   display: none;
 }
