@@ -30,24 +30,7 @@ export const GROUPED_PRODUCT_ITEM_TEMPLATE: TemplateArray = [
 				},
 				[
 					[
-						'core/group',
-						{
-							layout: {
-								type: 'flex',
-								orientation: 'vertical',
-								justifyContent: 'left',
-							},
-							style: {
-								spacing: {
-									blockGap: '0',
-								},
-							},
-						},
-						[
-							[
-								'woocommerce/add-to-cart-with-options-grouped-product-selector-item-cta',
-							],
-						],
+						'woocommerce/add-to-cart-with-options-grouped-product-selector-item-cta',
 					],
 					[
 						'core/post-title',
