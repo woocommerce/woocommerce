@@ -421,6 +421,7 @@ CREATE TABLE $meta_table_name (
 				'end_date'   => 0,
 				'limit'      => -1,
 				'offset'     => 0,
+				'order_by'   => array( 'id' => 'ASC' ),
 				'return'     => 'ids', // i.e. 'count', 'ids', 'objects'.
 			)
 		);
@@ -437,7 +438,7 @@ CREATE TABLE $meta_table_name (
 		$where        = array();
 		$where_values = array();
 
-		if ( ! empty( $args['status'] ) ) {
+		if ( $args['status'] ) {
 			$where[]        = 'status = %s';
 			$where_values[] = esc_sql( $args['status'] );
 		}
@@ -458,22 +459,35 @@ CREATE TABLE $meta_table_name (
 			$where_values[] = esc_sql( $args['user_email'] );
 		}
 
-		if ( ! empty( $args['start_date'] ) ) {
+		if ( $args['start_date'] ) {
 			$where[]        = 'date_created_gmt >= %s';
 			$where_values[] = $args['start_date'];
 		}
 
-		if ( ! empty( $args['end_date'] ) ) {
+		if ( $args['end_date'] ) {
 			$where[]        = 'date_created_gmt < %s';
 			$where_values[] = $args['end_date'];
 		}
 
+		// ORDER BY clauses.
+		$order_by         = '';
+		$order_by_clauses = array();
+
+		if ( $args['order_by'] && is_array( $args['order_by'] ) ) {
+			foreach ( $args['order_by'] as $what => $how ) {
+				$order_by_clauses[] = $table . '.' . esc_sql( strval( $what ) ) . ' ' . esc_sql( strval( $how ) );
+			}
+		}
+
+		$order_by_clauses = empty( $order_by_clauses ) ? array( $table . '.id, ASC' ) : $order_by_clauses;
+
 		// Assemble the query.
-		$where  = implode( ' AND ', $where );
-		$where  = $where ? ' WHERE ' . $where : '';
-		$limit  = $args['limit'] > 0 ? ' LIMIT ' . absint( $args['limit'] ) : '';
-		$offset = $args['offset'] > 0 ? ' OFFSET ' . absint( $args['offset'] ) : '';
-		$sql    = "SELECT $select FROM $table $where $limit $offset";
+		$where    = implode( ' AND ', $where );
+		$where    = $where ? ' WHERE ' . $where : '';
+		$order_by = ' ORDER BY ' . implode( ', ', $order_by_clauses );
+		$limit    = $args['limit'] > 0 ? ' LIMIT ' . absint( $args['limit'] ) : '';
+		$offset   = $args['offset'] > 0 ? ' OFFSET ' . absint( $args['offset'] ) : '';
+		$sql      = "SELECT $select FROM $table $where $order_by $limit $offset";
 
 		// Prepare the query.
 		$prepared_sql = empty( $where_values ) ? $sql : $wpdb->prepare( $sql, $where_values ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared

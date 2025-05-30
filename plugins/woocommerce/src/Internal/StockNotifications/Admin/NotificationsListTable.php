@@ -260,7 +260,7 @@ class NotificationsListTable extends \WP_List_Table {
 	 * @param Notification $notification The notification object.
 	 * @return void
 	 */
-	public function column_date_subscribed( $notification ) {
+	public function column_date_created_gmt( $notification ) {
 		$date_created = $notification->get_date_created()->getTimestamp();
 
 		if ( ! $date_created ) {
@@ -328,7 +328,7 @@ class NotificationsListTable extends \WP_List_Table {
 		$columns['user']            = _x( 'User/Email', 'column_name', 'woocommerce' );
 		$columns['product']         = _x( 'Product', 'column_name', 'woocommerce' );
 		$columns['sku']             = _x( 'SKU', 'column_name', 'woocommerce' );
-		$columns['date_subscribed'] = _x( 'Signed Up', 'column_name', 'woocommerce' );
+		$columns['date_created_gmt'] = _x( 'Signed Up', 'column_name', 'woocommerce' );
 		$columns['waiting_since']   = _x( 'Waiting', 'column_name', 'woocommerce' );
 
 		return $columns;
@@ -341,7 +341,7 @@ class NotificationsListTable extends \WP_List_Table {
 	 */
 	public function get_sortable_columns() {
 		$sortable_columns = array(
-			'date_subscribed' => array( 'subscribe_date', true ),
+			'date_created_gmt' => array( 'date_created_gmt', true ),
 		);
 
 		return $sortable_columns;
@@ -383,7 +383,7 @@ class NotificationsListTable extends \WP_List_Table {
 		$paged   = isset( $_REQUEST['paged'] ) ? max( 0, (int) wp_unslash( $_REQUEST['paged'] ) - 1 ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$orderby = ( isset( $_REQUEST['orderby'] ) && in_array( wp_unslash( $_REQUEST['orderby'] ), array_keys( $this->get_sortable_columns() ), true ) ) ? wc_clean( wp_unslash( $_REQUEST['orderby'] ) ) : 'id'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$order   = ( isset( $_REQUEST['order'] ) && in_array( wp_unslash( $_REQUEST['order'] ), array( 'asc', 'desc' ), true ) ) ? wc_clean( wp_unslash( $_REQUEST['order'] ) ) : 'desc'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
+		error_log( print_r( $orderby, true ) );
 		// Query args.
 		$query_args = array(
 			'order_by' => array( $orderby => $order ),

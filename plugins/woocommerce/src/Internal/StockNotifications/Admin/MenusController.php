@@ -22,7 +22,7 @@ class MenusController {
 		// Integrate WooCommerce breadcrumb bar.
 		add_action( 'admin_menu', array( $this, 'wc_admin_connect_customer_stock_notifications_pages' ) );
 		add_filter( 'woocommerce_navigation_pages_with_tabs', array( $this, 'wc_admin_navigation_pages_with_tabs' ) );
-		add_filter( 'woocommerce_screen_ids', array( $this, 'wc_admin_navigation_screen_ids' ) );
+		add_filter( 'woocommerce_screen_ids', array( $this, 'wc_admin_stock_notifications_screen_ids' ) );
 		add_filter( 'set-screen-option', array( $this, 'set_screen_option' ), 10, 3 );
 	}
 
@@ -189,7 +189,7 @@ class MenusController {
 	 * @param array $screen_ids List of screen IDs.
 	 * @return array
 	 */
-	public static function wc_admin_navigation_screen_ids( $screen_ids ) {
+	public static function wc_admin_stock_notifications_screen_ids( $screen_ids ) {
 		$screen_ids[] = 'woocommerce_page_customer_stock_notifications';
 		return $screen_ids;
 	}
