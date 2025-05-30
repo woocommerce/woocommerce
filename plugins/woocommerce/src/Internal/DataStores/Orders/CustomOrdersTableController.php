@@ -500,6 +500,13 @@ class CustomOrdersTableController {
 		$this->data_cleanup->toggle_flag( false );
 
 		if ( 'sync-now' === $action ) {
+			if ( ! $this->data_synchronizer->check_orders_table_exists() && ! $this->data_synchronizer->create_database_tables() ) {
+				WC_Admin_Settings::add_error(
+					__( 'Unable to create HPOS tables for synchronization.', 'woocommerce' )
+				);
+				return;
+			}
+
 			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
 		} else {
 			$this->batch_processing_controller->remove_processor( DataSynchronizer::class );
