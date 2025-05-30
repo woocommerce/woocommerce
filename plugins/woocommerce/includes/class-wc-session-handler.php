@@ -480,7 +480,12 @@ class WC_Session_Handler extends WC_Session {
 			return false;
 		}
 
-		$parsed_cookie = explode( '|', $cookie_value );
+		// Check if the cookie value contains '||' instead of '|' to support older versions of the cookie. This can be removed in WC 11.0.0.
+		if ( strpos( $cookie_value, '||' ) !== false ) {
+			$parsed_cookie = explode( '||', $cookie_value );
+		} else {
+			$parsed_cookie = explode( '|', $cookie_value );
+		}
 
 		if ( count( $parsed_cookie ) !== 4 ) {
 			return false;
