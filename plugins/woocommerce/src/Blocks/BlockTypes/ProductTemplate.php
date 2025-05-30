@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
+use Automattic\WooCommerce\Blocks\Utils\ProductDataUtils;
 use WP_Block;
 
 /**
@@ -110,8 +111,13 @@ class ProductTemplate extends AbstractBlock {
 				)
 			)->render( array( 'dynamic' => false ) );
 
+			$product = wc_get_product( $product_id );
+
+			$product_data = ProductDataUtils::get_product_data( $product );
+
 			$context = array(
-				'productId' => $product_id,
+				'productId'        => $product_id,
+				'displayedProduct' => $product_data,
 			);
 
 			$li_directives = '
