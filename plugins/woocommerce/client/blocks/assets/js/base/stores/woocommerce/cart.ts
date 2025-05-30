@@ -156,20 +156,22 @@ const { state, actions } = store< Store >(
 
 						if ( existingItem ) {
 							// Optimistically updates the number of items in the cart.
-							existingItem.quantity = item.quantity;
+							existingItem.quantity =
+								existingItem.quantity + item.quantity;
 							if ( existingItem.key ) {
 								quantityChanges.cartItemsPendingQuantity = [
 									existingItem.key,
 								];
 							}
+
 							return {
 								method: 'POST',
-								path: `/wc/store/v1/cart/add-item`,
+								path: `/wc/store/v1/cart/update-item`,
 								headers: {
 									Nonce: state.nonce,
 									'Content-Type': 'application/json',
 								},
-								body: item,
+								body: existingItem,
 							};
 						}
 
