@@ -52,7 +52,7 @@
     -   [isItemPendingQuantity( cartItemKey )](#isitempendingquantity-cartitemkey-)
     -   [isItemPendingDelete( cartItemKey )](#isitempendingdelete-cartitemkey-)
     -   [isCustomerDataUpdating](#iscustomerdataupdating)
-    -   [isAddressFieldsForShippingRatesUpdating](#isaddressfieldsforshippingratesspdating)
+    -   [isAddressFieldsForShippingRatesUpdating](#isaddressfieldsforshippingratesupdating)
     -   [isShippingRateBeingSelected](#isshippingratebeingselected)
     -   [getItemsPendingQuantityUpdate](#getitemspendingquantityupdate)
     -   [getItemsPendingDelete](#getitemspendingdelete)
