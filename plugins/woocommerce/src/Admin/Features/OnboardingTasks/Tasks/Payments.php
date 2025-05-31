@@ -91,22 +91,22 @@ class Payments extends Task {
 	 */
 	public function get_action_url() {
 		if (
-			// Use case 1: Merchant has no payment extensions installed, and their store is in a WooPayments-supported geo
+			// Use case 1: Merchant has no payment extensions installed, and their store is in a WooPayments-supported geo.
 			( ! $this->has_gateways_other_than_woopayments() && $this->is_store_in_woopayments_supported_geo() ) ||
-			// Use case 2: Merchant has the WooPayments extension installed but they have not completed setup
+			// Use case 2: Merchant has the WooPayments extension installed but they have not completed setup.
 			( $this->is_woopayments_active() && ! $this->is_woopayments_configured() ) ||
-			// Use case 3: Merchant has the WooPayments extension installed and configured with a test account
+			// Use case 3: Merchant has the WooPayments extension installed and configured with a test account.
 			( $this->is_woopayments_active() && $this->is_woopayments_test_account() )
-			// Use case 4: Merchant has multiple payment extensions installed but not set up, and the WooPayments extension is one of them
+			// Use case 4: Merchant has multiple payment extensions installed but not set up, and the WooPayments extension is one of them.
 			// TODO: Add this use case
 		) {
-			// Return empty string for NOX in LYS experience
+			// Return empty string for NOX in LYS experience.
 			return '';
 		}
 
-		// Use case 2: Merchant has no payment extensions installed, and their store is NOT in a WooPayments-supported geo
-		// Use case 5B: Merchant has multiple payment extensions installed but not set up, and the WooPayments extension is NOT one of them
-		// Default case: Redirect to the Payment settings page (existing LYS behavior)
+		// Use case 2: Merchant has no payment extensions installed, and their store is NOT in a WooPayments-supported geo.
+		// Use case 5B: Merchant has multiple payment extensions installed but not set up, and the WooPayments extension is NOT one of them.
+		// Default case: Redirect to the Payment settings page (existing LYS behavior).
 		return admin_url( 'admin.php?page=wc-settings&tab=checkout' );
 	}
 
@@ -231,7 +231,7 @@ class Payments extends Task {
 		if ( class_exists( '\WC_Payments' ) && method_exists( '\WC_Payments', 'get_woopayments_gateway_ids' ) ) {
 			$woopayments_gateway_ids = \WC_Payments::get_woopayments_gateway_ids();
 		} else {
-			// Fallback: WooPayments gateways follow the pattern 'woocommerce_payments' and 'woocommerce_payments_{payment_method}'
+			// Fallback: WooPayments gateways follow the pattern 'woocommerce_payments' and 'woocommerce_payments_{payment_method}'.
 			$woopayments_gateway_ids = array( 'woocommerce_payments' );
 		}
 
@@ -241,17 +241,17 @@ class Payments extends Task {
 				if ( 'yes' !== $gateway->enabled ) {
 					return false;
 				}
-				
-				// Exclude all WooPayments gateways
+
+				// Exclude all WooPayments gateways.
 				if ( in_array( $gateway->id, $woopayments_gateway_ids, true ) ) {
 					return false;
 				}
-				
+
 				// Also exclude gateways that start with 'woocommerce_payments_' as a fallback
 				if ( str_starts_with( $gateway->id, 'woocommerce_payments' ) ) {
 					return false;
 				}
-				
+
 				return true;
 			}
 		);
