@@ -98,7 +98,7 @@ class Payments extends Task {
 			// Use case 3: Merchant has the WooPayments extension installed and configured with a test account.
 			( $this->is_woopayments_active() && $this->is_woopayments_test_account() )
 			// Use case 4: Merchant has multiple payment extensions installed but not set up, and the WooPayments extension is one of them.
-			// TODO: Add this use case
+			// TODO: Add this use case.
 		) {
 			// Return empty string for NOX in LYS experience.
 			return '';
@@ -129,7 +129,7 @@ class Payments extends Task {
 			return false;
 		}
 
-		// Fallback to manual check since WooPaymentsService methods are private
+		// Fallback to manual check since WooPaymentsService methods are private.
 		if ( function_exists( '\wcpay_get_container' ) && class_exists( 'WC_Payments_Account' ) ) {
 			try {
 				$account = wcpay_get_container()->get( 'WC_Payments_Account' );
@@ -166,7 +166,7 @@ class Payments extends Task {
 			return false;
 		}
 
-		// Manual check for test account
+		// Manual check for test account.
 		if ( function_exists( '\wcpay_get_container' ) && class_exists( 'WC_Payments_Account' ) ) {
 			try {
 				$account = wcpay_get_container()->get( 'WC_Payments_Account' );
@@ -195,7 +195,7 @@ class Payments extends Task {
 			$supported_countries = array_keys( \WC_Payments_Utils::supported_countries() );
 			return in_array( $country_code, $supported_countries, true );
 		} else {
-			// WooPayments is not installed, use core's list of supported countries
+			// WooPayments is not installed, use core's list of supported countries.
 			$supported_countries = DefaultPaymentGateways::get_wcpay_countries();
 			return in_array( $country_code, $supported_countries, true );
 		}
@@ -225,8 +225,8 @@ class Payments extends Task {
 	 */
 	public static function has_gateways_other_than_woopayments() {
 		$gateways = WC()->payment_gateways()->payment_gateways;
-		
-		// Get all WooPayments gateway IDs if WooPayments is available
+
+		// Get all WooPayments gateway IDs if WooPayments is available.
 		$woopayments_gateway_ids = array();
 		if ( class_exists( '\WC_Payments' ) && method_exists( '\WC_Payments', 'get_woopayments_gateway_ids' ) ) {
 			$woopayments_gateway_ids = \WC_Payments::get_woopayments_gateway_ids();
@@ -237,7 +237,7 @@ class Payments extends Task {
 
 		$enabled_gateways = array_filter(
 			$gateways,
-			function( $gateway ) use ( $woopayments_gateway_ids ) {
+			function ( $gateway ) use ( $woopayments_gateway_ids ) {
 				if ( 'yes' !== $gateway->enabled ) {
 					return false;
 				}
@@ -247,7 +247,7 @@ class Payments extends Task {
 					return false;
 				}
 
-				// Also exclude gateways that start with 'woocommerce_payments_' as a fallback
+				// Also exclude gateways that start with 'woocommerce_payments_' as a fallback.
 				if ( str_starts_with( $gateway->id, 'woocommerce_payments' ) ) {
 					return false;
 				}
