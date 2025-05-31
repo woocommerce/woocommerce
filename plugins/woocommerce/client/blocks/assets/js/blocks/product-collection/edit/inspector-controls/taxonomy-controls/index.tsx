@@ -176,7 +176,7 @@ export function TaxonomyControlsField( {
 	return (
 		<>
 			{ filteredTaxonomies.map( ( taxonomy: Taxonomy ) => {
-				const { slug, name } = taxonomy;
+				const { slug } = taxonomy;
 				const termIds = taxQuery?.[ slug ] || [];
 				const handleChange = ( newTermIds: number[] ) => {
 					setQueryAttribute( {
