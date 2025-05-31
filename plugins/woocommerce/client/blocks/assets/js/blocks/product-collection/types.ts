@@ -187,6 +187,8 @@ export enum CoreCollectionNames {
 	RELATED = 'woocommerce/product-collection/related',
 	UPSELLS = 'woocommerce/product-collection/upsells',
 	CROSS_SELLS = 'woocommerce/product-collection/cross-sells',
+	BY_CATEGORY = 'woocommerce/product-collection/by-category',
+	BY_TAG = 'woocommerce/product-collection/by-tag',
 }
 
 export enum CoreFilterNames {
