@@ -191,7 +191,7 @@ class Payments extends Task {
 	private function is_store_in_woopayments_supported_geo( $country_code = null ) {
 		$country_code = PaymentsService::get_country_from_user_meta_or_fallback_to_base_country();
 
-		if ( class_exists( '\WC_Payments_Utils' ) ) {
+		if ( class_exists( '\WC_Payments_Utils' ) && is_callable( array( '\WC_Payments_Utils', 'supported_countries' ) ) ) {
 			$supported_countries = array_keys( \WC_Payments_Utils::supported_countries() );
 			return in_array( $country_code, $supported_countries, true );
 		} else {
