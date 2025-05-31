@@ -105,7 +105,6 @@ export function taskClickedAction( event: {
 		task: event.task.id,
 	} );
 
-	// If an actionUrl is provided, we'll navigate to it.
 	if ( event.task.actionUrl ) {
 		navigateTo( { url: event.task.actionUrl } );
 	} else {
