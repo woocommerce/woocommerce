@@ -18,10 +18,7 @@ const collection = {
 	name: CoreCollectionNames.BY_TAG,
 	title: __( 'Products by Tag', 'woocommerce' ),
 	icon: <Icon icon={ tag } />,
-	description: __(
-		'Display products with specific tags.',
-		'woocommerce'
-	),
+	description: __( 'Display products with specific tags.', 'woocommerce' ),
 	keywords: [ 'tag', 'products' ],
 	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
 };
@@ -35,10 +32,7 @@ const attributes = {
 	query: {
 		orderBy: 'post__in',
 	},
-	hideControls: [
-		CoreFilterNames.HAND_PICKED,
-		CoreFilterNames.FILTERABLE,
-	],
+	hideControls: [ CoreFilterNames.HAND_PICKED, CoreFilterNames.FILTERABLE ],
 };
 
 const heading: InnerBlockTemplate = [

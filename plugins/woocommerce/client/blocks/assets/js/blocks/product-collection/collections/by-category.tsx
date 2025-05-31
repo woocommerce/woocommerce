@@ -35,10 +35,7 @@ const attributes = {
 	query: {
 		orderBy: 'post__in',
 	},
-	hideControls: [
-		CoreFilterNames.HAND_PICKED,
-		CoreFilterNames.FILTERABLE,
-	],
+	hideControls: [ CoreFilterNames.HAND_PICKED, CoreFilterNames.FILTERABLE ],
 };
 
 const heading: InnerBlockTemplate = [
