@@ -219,7 +219,7 @@ class QueryBuilder {
 	 * @param array $tax_query Query to filter products by taxonomies.
 	 * @return array Query to filter products by taxonomies.
 	 */
-	private function get_filter_by_taxonomies_query( $tax_query ): array {
+	public function get_filter_by_taxonomies_query( $tax_query ): array {
 		if ( ! is_array( $tax_query ) ) {
 			return array();
 		}
