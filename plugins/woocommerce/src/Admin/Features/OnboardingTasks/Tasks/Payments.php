@@ -96,9 +96,9 @@ class Payments extends Task {
 			// Use case 2: Merchant has the WooPayments extension installed but they have not completed setup.
 			( $this->is_woopayments_active() && ! $this->is_woopayments_configured() ) ||
 			// Use case 3: Merchant has the WooPayments extension installed and configured with a test account.
-			( $this->is_woopayments_active() && $this->is_woopayments_test_account() )
+			( $this->is_woopayments_active() && $this->is_woopayments_test_account() ) ||
 			// Use case 4: Merchant has multiple payment extensions installed but not set up, and the WooPayments extension is one of them.
-			// Add this use case.
+			( $this->is_woopayments_active() && $this->do_other_gateways_need_setup() )
 		) {
 			// Return empty string for NOX in LYS experience.
 			return '';
