@@ -277,4 +277,29 @@ class Payments extends Task {
 		return $woopayments_gateway_ids;
 	}
 
+	/**
+	 * Check if any non-WooPayments gateways need setup.
+	 *
+	 * @return bool
+	 */
+	private function do_other_gateways_need_setup() {
+		$gateways = WC()->payment_gateways()->payment_gateways;
+		$woopayments_gateway_ids = $this->get_woopayments_gateway_ids();
+
+		foreach ( $gateways as $gateway ) {
+			if ( 'yes' !== $gateway->enabled ) {
+				continue;
+			}
+
+			$is_woopayments = in_array( $gateway->id, $woopayments_gateway_ids, true ) || 
+							  str_starts_with( $gateway->id, 'woocommerce_payments' );
+
+			// Check non-WooPayments gateways only.
+			if ( ! $is_woopayments && method_exists( $gateway, 'needs_setup' ) && $gateway->needs_setup() ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 }
