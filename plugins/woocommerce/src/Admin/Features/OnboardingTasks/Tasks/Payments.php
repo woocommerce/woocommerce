@@ -266,7 +266,7 @@ class Payments extends Task {
 	 */
 	private function get_woopayments_gateway_ids() {
 		$woopayments_gateway_ids = array();
-		
+
 		if ( class_exists( '\WC_Payments' ) && is_callable( array( '\WC_Payments', 'get_woopayments_gateway_ids' ) ) ) {
 			$woopayments_gateway_ids = \WC_Payments::get_woopayments_gateway_ids();
 		} else {
@@ -283,7 +283,7 @@ class Payments extends Task {
 	 * @return bool
 	 */
 	private function do_other_gateways_need_setup() {
-		$gateways = WC()->payment_gateways()->payment_gateways;
+		$gateways                = WC()->payment_gateways()->payment_gateways;
 		$woopayments_gateway_ids = $this->get_woopayments_gateway_ids();
 
 		foreach ( $gateways as $gateway ) {
@@ -291,8 +291,7 @@ class Payments extends Task {
 				continue;
 			}
 
-			$is_woopayments = in_array( $gateway->id, $woopayments_gateway_ids, true ) || 
-							  str_starts_with( $gateway->id, 'woocommerce_payments' );
+			$is_woopayments = in_array( $gateway->id, $woopayments_gateway_ids, true ) || str_starts_with( $gateway->id, 'woocommerce_payments' );
 
 			// Check non-WooPayments gateways only.
 			if ( ! $is_woopayments && method_exists( $gateway, 'needs_setup' ) && $gateway->needs_setup() ) {
