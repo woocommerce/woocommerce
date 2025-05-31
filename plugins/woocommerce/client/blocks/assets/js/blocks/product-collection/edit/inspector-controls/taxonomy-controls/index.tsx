@@ -15,7 +15,11 @@ import {
  * Internal dependencies
  */
 import TaxonomyItem from './taxonomy-item';
-import { QueryControlProps, CoreFilterNames } from '../../../types';
+import {
+	QueryControlProps,
+	CoreFilterNames,
+	CoreCollectionNames,
+} from '../../../types';
 
 /**
  * Hook that returns the taxonomies associated with product post type.
@@ -36,35 +40,61 @@ export const useTaxonomies = (): Taxonomy[] => {
 	}, [ taxonomies ] );
 };
 
+/**
+ * Normalize the name so first letter of every word is capitalized.
+ */
+const normalizeName = ( name: string | undefined | null ) => {
+	if ( ! name ) {
+		return '';
+	}
+
+	return name
+		.split( ' ' )
+		.map( ( word ) => word.charAt( 0 ).toUpperCase() + word.slice( 1 ) )
+		.join( ' ' );
+};
+
 function TaxonomyControls( {
 	setQueryAttribute,
 	trackInteraction,
 	query,
-}: QueryControlProps ) {
+	collection,
+}: QueryControlProps & { collection: string | undefined } ) {
 	const { taxQuery } = query;
 
 	const taxonomies = useTaxonomies();
-	if ( ! taxonomies || taxonomies.length === 0 ) {
+
+	const filteredTaxonomies = useMemo( () => {
+		if ( ! taxonomies || taxonomies.length === 0 ) {
+			return [];
+		}
+
+		// For filters panel, show the complementary taxonomy.
+		if ( collection === CoreCollectionNames.BY_CATEGORY ) {
+			return taxonomies.filter(
+				( taxonomy ) => taxonomy.slug === 'product_tag'
+			);
+		}
+		if ( collection === CoreCollectionNames.BY_TAG ) {
+			return taxonomies.filter(
+				( taxonomy ) => taxonomy.slug === 'product_cat'
+			);
+		}
+		// For all other collections, show both taxonomies.
+		return taxonomies;
+	}, [ taxonomies, collection ] );
+
+	if (
+		! taxonomies ||
+		taxonomies.length === 0 ||
+		filteredTaxonomies.length === 0
+	) {
 		return null;
 	}
 
-	/**
-	 * Normalize the name so first letter of every word is capitalized.
-	 */
-	const normalizeName = ( name: string | undefined | null ) => {
-		if ( ! name ) {
-			return '';
-		}
-
-		return name
-			.split( ' ' )
-			.map( ( word ) => word.charAt( 0 ).toUpperCase() + word.slice( 1 ) )
-			.join( ' ' );
-	};
-
 	return (
 		<>
-			{ taxonomies.map( ( taxonomy: Taxonomy ) => {
+			{ filteredTaxonomies.map( ( taxonomy: Taxonomy ) => {
 				const { slug, name } = taxonomy;
 				const termIds = taxQuery?.[ slug ] || [];
 				const handleChange = ( newTermIds: number[] ) => {
@@ -90,7 +120,7 @@ function TaxonomyControls( {
 					<ToolsPanelItem
 						key={ slug }
 						label={ normalizeName( name ) }
-						hasValue={ () => termIds.length }
+						hasValue={ () => termIds.length > 0 }
 						onDeselect={ deselectCallback }
 						resetAllFilter={ deselectCallback }
 					>
@@ -101,6 +131,72 @@ function TaxonomyControls( {
 							onChange={ handleChange }
 						/>
 					</ToolsPanelItem>
+				);
+			} ) }
+		</>
+	);
+}
+
+export function TaxonomyControlsField( {
+	setQueryAttribute,
+	trackInteraction,
+	query,
+	collection,
+}: QueryControlProps & { collection: string | undefined } ) {
+	const { taxQuery } = query;
+
+	const taxonomies = useTaxonomies();
+
+	const filteredTaxonomies = useMemo( () => {
+		if ( ! taxonomies || taxonomies.length === 0 ) {
+			return [];
+		}
+
+		if ( collection === CoreCollectionNames.BY_CATEGORY ) {
+			return taxonomies.filter(
+				( taxonomy ) => taxonomy.slug === 'product_cat'
+			);
+		}
+		if ( collection === CoreCollectionNames.BY_TAG ) {
+			return taxonomies.filter(
+				( taxonomy ) => taxonomy.slug === 'product_tag'
+			);
+		}
+		return [];
+	}, [ taxonomies, collection ] );
+
+	if (
+		! taxonomies ||
+		taxonomies.length === 0 ||
+		filteredTaxonomies.length === 0
+	) {
+		return null;
+	}
+
+	return (
+		<>
+			{ filteredTaxonomies.map( ( taxonomy: Taxonomy ) => {
+				const { slug, name } = taxonomy;
+				const termIds = taxQuery?.[ slug ] || [];
+				const handleChange = ( newTermIds: number[] ) => {
+					setQueryAttribute( {
+						taxQuery: {
+							...taxQuery,
+							[ slug ]: newTermIds,
+						},
+					} );
+					trackInteraction(
+						`${ CoreFilterNames.TAXONOMY }__${ slug }`
+					);
+				};
+
+				return (
+					<TaxonomyItem
+						key={ slug }
+						taxonomy={ taxonomy }
+						termIds={ termIds }
+						onChange={ handleChange }
+					/>
 				);
 			} ) }
 		</>

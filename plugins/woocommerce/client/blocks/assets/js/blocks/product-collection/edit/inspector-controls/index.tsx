@@ -31,6 +31,7 @@ import {
 	ProductCollectionContentProps,
 	CoreFilterNames,
 	FilterName,
+	CoreCollectionNames,
 } from '../../types';
 import { setQueryAttribute, getDefaultSettings } from '../../utils';
 import UpgradeNotice from './upgrade-notice';
@@ -45,7 +46,7 @@ import OnSaleControl from './on-sale-control';
 import StockStatusControl from './stock-status-control';
 import KeywordControl from './keyword-control';
 import AttributesControl from './attributes-control';
-import TaxonomyControls from './taxonomy-controls';
+import TaxonomyControls, { TaxonomyControlsField } from './taxonomy-controls';
 import HandPickedProductsControl, {
 	HandPickedProductsControlField,
 } from './hand-picked-products-control';
@@ -69,7 +70,8 @@ const ProductCollectionInspectorControls = (
 	props: ProductCollectionContentProps
 ) => {
 	const { attributes, context, setAttributes } = props;
-	const { query, hideControls, dimensions, displayLayout } = attributes;
+	const { query, hideControls, dimensions, displayLayout, collection } =
+		attributes;
 
 	const tracksLocation = useTracksLocation( context.templateSlug );
 	const trackInteraction = ( filter: FilterName ) =>
@@ -215,7 +217,10 @@ const ProductCollectionInspectorControls = (
 						<AttributesControl { ...queryControlProps } />
 					) }
 					{ showTaxonomyControls && (
-						<TaxonomyControls { ...queryControlProps } />
+						<TaxonomyControls
+							{ ...queryControlProps }
+							collection={ collection }
+						/>
 					) }
 					{ showFeaturedControl && (
 						<FeaturedProductsControl { ...queryControlProps } />
@@ -318,14 +323,18 @@ const CollectionSpecificControls = (
 		query: props.attributes.query,
 	};
 
+	const isByCategoryOrTag =
+		props.attributes.collection === CoreCollectionNames.BY_CATEGORY ||
+		props.attributes.collection === CoreCollectionNames.BY_TAG;
+
 	return (
 		<InspectorControls>
 			{
 				/**
-				 * Hand-Picked collection-specific controls.
+				 * "Hand-Picked" collection-specific controls.
 				 */
 				props.attributes.collection ===
-					'woocommerce/product-collection/hand-picked' && (
+					CoreCollectionNames.HAND_PICKED && (
 					<PanelBody>
 						<HandPickedProductsControlField
 							{ ...queryControlProps }
@@ -337,9 +346,21 @@ const CollectionSpecificControls = (
 				/**
 				 * "Related Products" collection-specific controls.
 				 */
-				props.attributes.collection ===
-					'woocommerce/product-collection/related' && (
+				props.attributes.collection === CoreCollectionNames.RELATED && (
 					<RelatedByControl { ...queryControlProps } />
+				)
+			}
+			{
+				/**
+				 * "Category and Tag" collection-specific controls.
+				 */
+				isByCategoryOrTag && (
+					<PanelBody>
+						<TaxonomyControlsField
+							{ ...queryControlProps }
+							collection={ props.attributes.collection }
+						/>
+					</PanelBody>
 				)
 			}
 		</InspectorControls>
