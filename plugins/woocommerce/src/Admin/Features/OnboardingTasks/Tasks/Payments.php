@@ -258,4 +258,23 @@ class Payments extends Task {
 
 		return ! empty( $enabled_gateways );
 	}
+
+	/**
+	 * Get WooPayments gateway IDs.
+	 *
+	 * @return array
+	 */
+	private function get_woopayments_gateway_ids() {
+		$woopayments_gateway_ids = array();
+		
+		if ( class_exists( '\WC_Payments' ) && is_callable( array( '\WC_Payments', 'get_woopayments_gateway_ids' ) ) ) {
+			$woopayments_gateway_ids = \WC_Payments::get_woopayments_gateway_ids();
+		} else {
+			// Fallback: WooPayments gateways follow the pattern 'woocommerce_payments'.
+			$woopayments_gateway_ids = array( 'woocommerce_payments' );
+		}
+
+		return $woopayments_gateway_ids;
+	}
+
 }
