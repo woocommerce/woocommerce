@@ -278,7 +278,12 @@ const productGallery = {
 			}
 			const { clientX } = event.touches[ 0 ];
 			context.touchCurrentX = clientX;
-			event.preventDefault();
+
+			// Only prevent default if there's significant horizontal movement
+			const delta = clientX - context.touchStartX;
+			if ( Math.abs( delta ) > 10 ) {
+				event.preventDefault();
+			}
 		},
 		onTouchEnd: () => {
 			const context = getContext();

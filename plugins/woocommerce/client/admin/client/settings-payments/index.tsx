@@ -231,7 +231,7 @@ export const SettingsPaymentsMethods = () => {
 
 		// Get the onboarding URL or fallback to the test drive account link.
 		const onboardUrl =
-			wooPayments?.onboarding?._links.onboard.href ||
+			wooPayments?.onboarding?._links?.onboard?.href ||
 			getWooPaymentsTestDriveAccountLink();
 
 		// Combine the onboard URL with the query string and redirect to the onboard URL.
