@@ -4,7 +4,6 @@
 import { useMachine } from '@xstate5/react';
 import { useEffect } from 'react';
 import clsx from 'clsx';
-import { getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -26,13 +25,12 @@ import {
 	MainContentContainer,
 } from './main-content/xstate';
 import { useXStateInspect } from '~/xstate';
-import { OnboardingProvider } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
-import { LYSPaymentsSteps } from '~/settings-payments/onboarding/providers/woopayments/steps';
 export type LaunchYourStoreComponentProps = {
 	sendEventToSidebar: ( arg0: SidebarMachineEvents ) => void;
 	sendEventToMainContent: ( arg0: MainContentMachineEvents ) => void;
 	className?: string;
 };
+import { InstallationProvider } from '../data/installation-context';
 
 export type LaunchYourStoreQueryParams = {
 	sidebar?: 'hub' | 'launch-success';
@@ -78,37 +76,9 @@ const LaunchStoreController = () => {
 		sendToSidebar( { type: 'RETURN_FROM_PAYMENTS' } );
 	};
 
-	// Custom URL strategy for LYS that preserves sidebar and content params when navigation is forced by the OnboardingProvider.
-	const lysUrlStrategy = {
-		buildStepURL: (
-			stepPath: string,
-			preservedParams: Record< string, string > = {}
-		) => {
-			return getNewPath(
-				{
-					path: stepPath,
-					...preservedParams,
-				},
-				'/launch-your-store' + stepPath,
-				{
-					page: 'wc-admin',
-					path: '/launch-your-store/woopayments/onboarding',
-					sidebar: 'hub',
-					content: 'payments',
-				}
-			);
-		},
-		preserveParams: [ 'sidebar', 'content' ],
-	};
-
 	return (
 		<div className={ 'launch-your-store-layout__container' }>
-			<OnboardingProvider
-				closeModal={ handlePaymentsClose }
-				onboardingSteps={ LYSPaymentsSteps }
-				urlStrategy={ lysUrlStrategy }
-				source="launch-your-store"
-			>
+			<InstallationProvider closeModal={ handlePaymentsClose }>
 				<SidebarContainer
 					className={ clsx( {
 						'is-sidebar-hidden': ! isSidebarVisible,
@@ -132,7 +102,7 @@ const LaunchStoreController = () => {
 						/>
 					) }
 				</MainContentContainer>
-			</OnboardingProvider>
+			</InstallationProvider>
 		</div>
 	);
 };

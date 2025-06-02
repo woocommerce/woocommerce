@@ -14,10 +14,10 @@ import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
  */
 import WooPaymentsOnboarding from '~/settings-payments/onboarding/providers/woopayments/components/onboarding';
 import { useOnboardingContext } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
-import StripeSpinner from '~/settings-payments/onboarding/providers/woopayments/components//stripe-spinner';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
 import { createNoticesFromResponse } from '~/lib/notices';
 import './payments-content.scss';
+import { useInstallationContext } from '~/launch-your-store/data/installation-context';
 
 const InstallWooPaymentsStep = ( {
 	installWooPayments,
@@ -69,12 +69,10 @@ const InstallWooPaymentsStep = ( {
 };
 
 export const PaymentsContent = ( {} ) => {
-	const {
-		refreshStoreData,
-		isStoreLoading,
-		isWooPaymentsEnabled,
-		setWooPaymentsRecentlyEnabled,
-	} = useOnboardingContext();
+	const { isWooPaymentsActive, setWooPaymentsRecentlyActivated } =
+		useInstallationContext();
+
+	const { refreshStoreData } = useOnboardingContext();
 
 	const [ isPluginInstalling, setIsPluginInstalling ] =
 		useState< boolean >( false );
@@ -87,7 +85,7 @@ export const PaymentsContent = ( {} ) => {
 		// Install and activate the WooPayments plugin.
 		installAndActivatePlugins( [ 'woocommerce-payments' ] )
 			.then( async () => {
-				setWooPaymentsRecentlyEnabled( true );
+				setWooPaymentsRecentlyActivated( true );
 				// Refresh store data after installation.
 				// This will trigger a re-render and initialize the onboarding flow.
 				refreshStoreData();
@@ -102,18 +100,13 @@ export const PaymentsContent = ( {} ) => {
 		setIsPluginInstalling,
 		installAndActivatePlugins,
 		refreshStoreData,
-		setWooPaymentsRecentlyEnabled,
+		setWooPaymentsRecentlyActivated,
 	] );
 
 	return (
 		<div className="launch-your-store-payments-content">
 			<div className="launch-your-store-payments-content__canvas">
-				{ isStoreLoading && (
-					<div className="settings-payments-onboarding-modal__loading">
-						<StripeSpinner />
-					</div>
-				) }
-				{ ! isWooPaymentsEnabled ? (
+				{ ! isWooPaymentsActive ? (
 					<InstallWooPaymentsStep
 						installWooPayments={ installWooPayments }
 						isPluginInstalling={ isPluginInstalling }

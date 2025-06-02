@@ -25,15 +25,17 @@ import { SidebarContainer } from './sidebar-container';
 import { SiteHub } from '~/customize-store/assembler-hub/site-hub';
 import { taskIcons, taskCompleteIcon } from './icons';
 import { StepPlaceholder } from './step-placeholder';
+import { useInstallationContext } from '~/launch-your-store/data/installation-context';
 
 export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
+	const { wooPaymentsRecentlyActivated, isWooPaymentsActive } =
+		useInstallationContext();
+
 	const {
 		steps: allSteps,
 		currentStep,
 		justCompletedStepId,
-		isStoreLoading,
-		wooPaymentsRecentlyEnabled,
-		isWooPaymentsEnabled,
+		isLoading,
 	} = useOnboardingContext();
 
 	const currentStepIndex = allSteps.findIndex(
@@ -101,7 +103,16 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 			<SidebarContainer title={ sidebarTitle }>
 				{ /* We are using these classes to inherit the styles from the edit your store styling */ }
 				<ItemGroup className="woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group">
-					{ isStoreLoading && (
+					{ ! isWooPaymentsActive && (
+						<motion.div
+							initial={ { opacity: 0, y: 0 } }
+							animate={ { opacity: 1, y: 0 } }
+							transition={ { duration: 0.7, delay: 0.2 } }
+						>
+							<InstallWooPaymentsStep isStepComplete={ false } />
+						</motion.div>
+					) }
+					{ isWooPaymentsActive && isLoading && (
 						<motion.div
 							initial={ { opacity: 0 } }
 							animate={ { opacity: 1 } }
@@ -111,18 +122,13 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 							<StepPlaceholder rows={ 3 } />
 						</motion.div>
 					) }
-					{ ! isStoreLoading && (
+					{ isWooPaymentsActive && ! isLoading && (
 						<motion.div
 							initial={ { opacity: 0, y: 0 } }
 							animate={ { opacity: 1, y: 0 } }
 							transition={ { duration: 0.7, delay: 0.2 } }
 						>
-							{ ! isWooPaymentsEnabled && (
-								<InstallWooPaymentsStep
-									isStepComplete={ false }
-								/>
-							) }
-							{ wooPaymentsRecentlyEnabled && (
+							{ wooPaymentsRecentlyActivated && (
 								<InstallWooPaymentsStep
 									isStepComplete={ true }
 								/>
