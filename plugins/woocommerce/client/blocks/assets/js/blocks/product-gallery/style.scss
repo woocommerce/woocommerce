@@ -200,6 +200,7 @@ $dialog-padding: 20px;
 		max-height: 100%;
 		outline: none;
 		object-fit: cover;
+		width: fit-content;
 
 		&--is-active {
 			pointer-events: none;
