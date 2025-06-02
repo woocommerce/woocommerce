@@ -16,8 +16,6 @@ import {
 } from '@woocommerce/blocks-checkout';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import type { ReactRootWithContainer } from '@woocommerce/base-utils';
-import { CheckoutPaymentSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-payment';
-import { CheckoutExpressPaymentsSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-express-payments';
 
 /**
  * This file contains logic used on the frontend to convert DOM elements (saved by the block editor) to React
@@ -126,14 +124,6 @@ interface renderInnerBlocksProps {
 	depth?: number;
 }
 
-// Add this mapping near the top of your file, after imports:
-const blockFallbackComponents: Record< string, React.ReactNode > = {
-	'woocommerce/checkout-payment-block': <CheckoutPaymentSkeleton />,
-	'woocommerce/checkout-express-payment-block': (
-		<CheckoutExpressPaymentsSkeleton />
-	),
-};
-
 /**
  * Recursively replace block markup in the DOM with React Components.
  */
@@ -152,7 +142,6 @@ const renderInnerBlocks = ( {
 	if ( ! children || children.length === 0 ) {
 		return null;
 	}
-	// console.log( '>>>>>>>>>>>>>>>>>>>> render inner blocks', block );
 	return Array.from( children ).map( ( node: Node, index: number ) => {
 		/**
 		 * This will grab the blockName from the data- attributes stored in block markup. Without a blockName, we cannot

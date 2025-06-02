@@ -57,11 +57,6 @@ const Checkout = ( {
 
 	const { showFormStepNumbers } = attributes;
 
-	console.log(
-		'>>>>>>>>>>>>>>>>>>>> Checkout > cartIsLoading',
-		cartIsLoading
-	);
-
 	if ( ! cartIsLoading && cartItems.length === 0 ) {
 		return <EmptyCart />;
 	}

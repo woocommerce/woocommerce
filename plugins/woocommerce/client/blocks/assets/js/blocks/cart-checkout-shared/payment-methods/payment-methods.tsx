@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Label } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { paymentStore } from '@woocommerce/block-data';
+import { CheckoutPaymentSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-payment';
 
 /**
  * Internal dependencies
@@ -12,7 +13,6 @@ import { paymentStore } from '@woocommerce/block-data';
 import NoPaymentMethods from './no-payment-methods';
 import PaymentMethodOptions from './payment-method-options';
 import SavedPaymentMethodOptions from './saved-payment-method-options';
-import { CheckoutPaymentSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-payment';
 import './style.scss';
 
 /**

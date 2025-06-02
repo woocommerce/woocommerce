@@ -16,16 +16,12 @@ import {
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { BillingAddress } from '@woocommerce/settings';
 import { getSetting } from '@woocommerce/settings';
-import { useSelect } from '@wordpress/data';
-import { cartStore } from '@woocommerce/block-data';
 import { emptyAddressFields } from '@woocommerce/base-utils';
 import type { CartResponseBillingAddress } from '@woocommerce/types';
-
 /**
  * Internal dependencies
  */
 import CustomerAddress from './customer-address';
-import { CheckoutShippingSkeletonPrimary } from '@woocommerce/base-components/skeleton/patterns/checkout-shipping-primary';
 
 const Block = (): JSX.Element => {
 	const {
@@ -93,12 +89,12 @@ const Block = (): JSX.Element => {
 		? [ noticeContexts.SHIPPING_ADDRESS, noticeContexts.BILLING_ADDRESS ]
 		: [ noticeContexts.SHIPPING_ADDRESS ];
 
-	const { cartDataLoaded } = useSelect( ( select ) => {
-		const store = select( cartStore );
-		return {
-			cartDataLoaded: store.hasFinishedResolution( 'getCartData' ),
-		};
-	} );
+	// const { cartDataLoaded } = useSelect( ( select ) => {
+	// 	const store = select( cartStore );
+	// 	return {
+	// 		cartDataLoaded: store.hasFinishedResolution( 'getCartData' ),
+	// 	};
+	// } );
 
 	// if ( ! cartDataLoaded ) {
 	// 	return <CheckoutShippingSkeletonPrimary />;

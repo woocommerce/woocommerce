@@ -137,8 +137,8 @@ export const useStoreCart = (
 	const { cartData, cartErrors, cartTotals, cartIsLoading, isLoadingRates } =
 		useSelect( ( select ) => {
 			const store = select( cartStore );
-			let cartHasStarted = store.hasStartedResolution( 'getCartData' );
-			let cartHasFinished = store.hasFinishedResolution( 'getCartData' );
+			// let cartHasStarted = store.hasStartedResolution( 'getCartData' );
+			// let cartHasFinished = store.hasFinishedResolution( 'getCartData' );
 			return {
 				cartData: store.getCartData(),
 				cartErrors: store.getCartErrors(),

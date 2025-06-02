@@ -4,19 +4,16 @@
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { paymentStore } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
+import { CheckoutExpressPaymentsSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-express-payments';
+
 /**
  * Internal dependencies
  */
 import { CheckoutExpressPayment } from '../../../cart-checkout-shared/payment-methods';
-import { CheckoutExpressPaymentsSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-express-payments';
 
 const Block = ( { className }: { className?: string } ): JSX.Element | null => {
 	const { cartNeedsPayment, cartIsLoading } = useStoreCart();
-	const {
-		paymentMethodsInitialized,
-		availablePaymentMethods,
-		savedPaymentMethods,
-	} = useSelect( ( select ) => {
+	const { paymentMethodsInitialized } = useSelect( ( select ) => {
 		const store = select( paymentStore );
 		return {
 			paymentMethodsInitialized: store.paymentMethodsInitialized(),

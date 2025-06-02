@@ -64,7 +64,6 @@ export const renderBlock = <
 }: RenderBlockParams< TProps, TAttributes > ): Root => {
 	const BlockWrapper = () => {
 		useEffect( () => {
-			console.log( '>>>> container', 'FIRST_RENDER' );
 			// parent checkout container
 			if ( container.classList ) {
 				container.classList.remove( 'is-loading' );

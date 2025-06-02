@@ -4,12 +4,10 @@
 import { useContainerWidthContext } from '@woocommerce/base-context';
 import type { CartItem } from '@woocommerce/types';
 import clsx from 'clsx';
-
 /**
  * Internal dependencies
  */
 import OrderSummaryItem from './order-summary-item';
-import { CartLineItemsSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
 
 import './style.scss';
 

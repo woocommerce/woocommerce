@@ -17,13 +17,14 @@ import {
 } from '@woocommerce/base-context';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import { isObject } from '@woocommerce/types';
+import { CheckoutShippingSkeletonPrimary } from '@woocommerce/base-components/skeleton/patterns/checkout-shipping-primary';
 
 /**
  * Internal dependencies
  */
 import ShippingRatesControlPackage from '../shipping-rates-control-package';
 import { speakFoundShippingOptions } from './utils';
-import { CheckoutShippingSkeletonPrimary } from '@woocommerce/base-components/skeleton/patterns/checkout-shipping-primary';
+
 import type { PackagesProps, ShippingRatesControlProps } from './types';
 
 /**
