@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { InspectorControls } from '@wordpress/block-editor';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import {
 	Button,
 	PanelBody,
@@ -32,6 +32,8 @@ const ReviewsByProductEditor = ( {
 	setAttributes,
 }: ReviewsByProductEditorProps ) => {
 	const { editMode, productId } = attributes;
+
+	const blockProps = useBlockProps();
 
 	const renderProductControlItem = ( args ) => {
 		const { item = 0 } = args;
@@ -149,7 +151,7 @@ const ReviewsByProductEditor = ( {
 	const buttonTitle = __( 'Edit selected product', 'woocommerce' );
 
 	return (
-		<>
+		<div { ...blockProps }>
 			{ getBlockControls( editMode, setAttributes, buttonTitle ) }
 			{ getInspectorControls() }
 			<EditorContainerBlock
@@ -163,7 +165,7 @@ const ReviewsByProductEditor = ( {
 				name={ __( 'Reviews by Product', 'woocommerce' ) }
 				noReviewsPlaceholder={ NoReviewsPlaceholder }
 			/>
-		</>
+		</div>
 	);
 };
 

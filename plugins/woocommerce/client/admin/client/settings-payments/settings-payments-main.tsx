@@ -7,6 +7,7 @@ import {
 	pluginsStore,
 	paymentSettingsStore,
 	PaymentProvider,
+	PaymentsEntity,
 } from '@woocommerce/data';
 import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
 import React, { useState, useEffect } from '@wordpress/element';
@@ -298,10 +299,9 @@ export const SettingsPaymentsMain = () => {
 		recordPaymentsEvent( 'recommendations_pageview', eventProps );
 	}, [ suggestions, providers, isFetching ] );
 
-	const setupPlugin = useCallback(
+	const setUpPlugin = useCallback(
 		(
-			id: string,
-			slug: string,
+			paymentsEntity: PaymentsEntity,
 			onboardingUrl: string | null,
 			attachUrl: string | null
 		) => {
@@ -309,17 +309,28 @@ export const SettingsPaymentsMain = () => {
 				return;
 			}
 
-			// A fail-safe to ensure that the onboarding URL is set for Woo Payments.
-			// Note: We should get rid this sooner rather than later!
-			if ( ! onboardingUrl && isWooPayments( id ) ) {
+			if ( paymentsEntity?.onboarding?._links?.preload?.href ) {
+				// We are not interested in the response; we just want to trigger the preload.
+				apiFetch( {
+					url: paymentsEntity?.onboarding?._links?.preload.href,
+					method: 'POST',
+					data: {
+						location: storeCountry,
+					},
+				} );
+			}
+
+			// A fail-safe to ensure that the onboarding URL is set for WooPayments.
+			// Note: We should get rid of this sooner rather than later!
+			if ( ! onboardingUrl && isWooPayments( paymentsEntity.id ) ) {
 				onboardingUrl = getWooPaymentsTestDriveAccountLink();
 			}
 
-			setInstallingPlugin( id );
+			setInstallingPlugin( paymentsEntity.id );
 			recordPaymentsEvent( 'recommendations_setup', {
-				extension_selected: slug,
+				extension_selected: paymentsEntity.plugin.slug,
 			} );
-			installAndActivatePlugins( [ slug ] )
+			installAndActivatePlugins( [ paymentsEntity.plugin.slug ] )
 				.then( async ( response ) => {
 					if ( attachUrl ) {
 						attachPaymentExtensionSuggestion( attachUrl );
@@ -332,7 +343,7 @@ export const SettingsPaymentsMain = () => {
 
 					// Record the plugin installation event.
 					recordPaymentsEvent( 'provider_installed', {
-						provider_id: id,
+						provider_id: paymentsEntity.id,
 					} );
 
 					// Wait for the state update and fetch the latest providers.
@@ -341,16 +352,16 @@ export const SettingsPaymentsMain = () => {
 					).getPaymentProviders( storeCountry );
 
 					// Find the matching provider in the updated list.
-					const updatedProvider = updatedProviders.find(
-						( provider: PaymentProvider ) =>
-							provider.id === id ||
-							provider?._suggestion_id === id || // For suggestions that were replaced by a gateway.
-							provider.plugin.slug === slug // Last resort to find the provider.
+					const updatedPaymentsEntity = updatedProviders.find(
+						( current: PaymentProvider ) =>
+							current.id === paymentsEntity.id ||
+							current?._suggestion_id === paymentsEntity.id || // For suggestions that were replaced by a gateway.
+							current.plugin.slug === paymentsEntity.plugin.slug // Last resort to find the provider.
 					);
 
-					// Record the event when user successfully enables a gateway.
+					// Record the event when the user successfully enables a gateway.
 					recordPaymentsEvent( 'provider_enable', {
-						provider_id: id,
+						provider_id: paymentsEntity.id,
 					} );
 
 					/**
@@ -358,7 +369,7 @@ export const SettingsPaymentsMain = () => {
 					 * Otherwise, we redirect to the onboarding URL or the payment methods page.
 					 */
 					if (
-						updatedProvider?.onboarding?.type ===
+						updatedPaymentsEntity?.onboarding?.type ===
 						'native_in_context'
 					) {
 						setIsOnboardingModalOpen( true );
@@ -368,7 +379,7 @@ export const SettingsPaymentsMain = () => {
 						// redirect to the payment methods page.
 						if (
 							(
-								updatedProvider?.onboarding
+								updatedPaymentsEntity?.onboarding
 									?.recommended_payment_methods ?? []
 							).length > 0
 						) {
@@ -455,12 +466,12 @@ export const SettingsPaymentsMain = () => {
 					incentive={ incentive }
 					provider={ incentiveProvider }
 					onboardingUrl={
-						incentiveProvider.onboarding?._links.onboard.href ??
+						incentiveProvider.onboarding?._links?.onboard?.href ??
 						null
 					}
 					onDismiss={ dismissIncentive }
 					onAccept={ acceptIncentive }
-					setupPlugin={ setupPlugin }
+					setUpPlugin={ setUpPlugin }
 				/>
 			) }
 			{ errorMessage && (
@@ -480,12 +491,12 @@ export const SettingsPaymentsMain = () => {
 					incentive={ incentive }
 					provider={ incentiveProvider }
 					onboardingUrl={
-						incentiveProvider.onboarding?._links.onboard.href ??
+						incentiveProvider.onboarding?._links?.onboard?.href ??
 						null
 					}
 					onDismiss={ dismissIncentive }
 					onAccept={ acceptIncentive }
-					setupPlugin={ setupPlugin }
+					setUpPlugin={ setUpPlugin }
 				/>
 			) }
 			<div className="settings-payments-main__container">
@@ -493,7 +504,7 @@ export const SettingsPaymentsMain = () => {
 					providers={ sortedProviders || providers }
 					installedPluginSlugs={ installedPluginSlugs }
 					installingPlugin={ installingPlugin }
-					setupPlugin={ setupPlugin }
+					setUpPlugin={ setUpPlugin }
 					acceptIncentive={ acceptIncentive }
 					shouldHighlightIncentive={ shouldHighlightIncentive }
 					updateOrdering={ handleOrderingUpdate }
@@ -515,7 +526,7 @@ export const SettingsPaymentsMain = () => {
 						suggestions={ suggestions }
 						suggestionCategories={ suggestionCategories }
 						installingPlugin={ installingPlugin }
-						setupPlugin={ setupPlugin }
+						setUpPlugin={ setUpPlugin }
 						isFetching={ isFetching }
 						morePaymentOptionsLink={ morePaymentOptionsLink }
 					/>

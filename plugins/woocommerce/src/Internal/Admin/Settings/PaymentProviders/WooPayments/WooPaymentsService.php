@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments;
 
 use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiArgumentException;
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
@@ -187,7 +188,7 @@ class WooPaymentsService {
 			throw new ApiArgumentException(
 				'woocommerce_woopayments_onboarding_invalid_step_id',
 				esc_html__( 'Invalid onboarding step ID.', 'woocommerce' ),
-				(int) WP_Http::NOT_ACCEPTABLE
+				(int) WP_Http::BAD_REQUEST
 			);
 		}
 
@@ -717,7 +718,7 @@ class WooPaymentsService {
 			throw new ApiArgumentException(
 				'woocommerce_woopayments_onboarding_invalid_step_data',
 				esc_html__( 'Invalid onboarding step data.', 'woocommerce' ),
-				(int) WP_Http::NOT_ACCEPTABLE
+				(int) WP_Http::BAD_REQUEST
 			);
 		}
 
@@ -1227,6 +1228,49 @@ class WooPaymentsService {
 	}
 
 	/**
+	 * Preload the onboarding process.
+	 *
+	 * This method is used to run the heavier logic required for onboarding ahead of time,
+	 * so that we can be quicker to respond to the user when they start the onboarding process.
+	 *
+	 * @return array An array containing the success status and any errors encountered during the preload.
+	 *               'success' => true if the preload was successful, false otherwise.
+	 *               'errors'  => An array of error messages if any errors occurred, empty if no errors.
+	 * @throws ApiException If the onboarding preload failed or the onboarding is locked.
+	 */
+	public function onboarding_preload(): array {
+		// If the onboarding is locked, we shouldn't do anything.
+		if ( $this->is_onboarding_locked() ) {
+			throw new ApiException(
+				'woocommerce_woopayments_onboarding_locked',
+				esc_html__( 'Another onboarding action is already in progress. Please wait for it to finish.', 'woocommerce' ),
+				(int) WP_Http::CONFLICT
+			);
+		}
+
+		$result = true;
+
+		// Register the site to WPCOM if it is not already registered.
+		// This sets up the site for connection. For new sites, this tends to take a while.
+		// It is a prerequisite to generating the WPCOM/Jetpack authorization URL.
+		if ( ! $this->wpcom_connection_manager->is_connected() ) {
+			$result = $this->wpcom_connection_manager->try_registration();
+			if ( is_wp_error( $result ) ) {
+				throw new ApiException(
+					'woocommerce_woopayments_onboarding_action_error',
+					esc_html( $result->get_error_message() ),
+					(int) WP_Http::INTERNAL_SERVER_ERROR,
+					map_deep( (array) $result->get_error_data(), 'esc_html' )
+				);
+			}
+		}
+
+		return array(
+			'success' => $result,
+		);
+	}
+
+	/**
 	 * Reset onboarding.
 	 *
 	 * @param string $location The location for which we are onboarding.
@@ -1422,7 +1466,8 @@ class WooPaymentsService {
 		}
 
 		// If the WooPayments installed version is less than the minimum required version, we can't do anything.
-		if ( defined( 'WCPAY_VERSION_NUMBER' ) && version_compare( WCPAY_VERSION_NUMBER, self::EXTENSION_MINIMUM_VERSION, '<' ) ) {
+		if ( Constants::is_defined( 'WCPAY_VERSION_NUMBER' ) &&
+			version_compare( Constants::get_constant( 'WCPAY_VERSION_NUMBER' ), self::EXTENSION_MINIMUM_VERSION, '<' ) ) {
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_extension_version',
 				/* translators: %s: WooPayments. */

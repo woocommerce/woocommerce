@@ -17,7 +17,6 @@ export const providersStub: PaymentProvider[] = [
 		title: 'PayPal Payments',
 		description:
 			'Safe and secure payments using credit cards or your customer&#039;s PayPal account.',
-		short_description: '',
 		image: 'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/onboarding/paypal.png',
 		icon: 'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/payment_methods/72x72/paypal.png',
 		links: [
@@ -40,6 +39,9 @@ export const providersStub: PaymentProvider[] = [
 			slug: 'woocommerce-paypal-payments',
 			file: 'woocommerce-paypal-payments/woocommerce-paypal-payments',
 			status: 'installed',
+		},
+		onboarding: {
+			type: 'external',
 		},
 		_links: {
 			hide: {
@@ -143,6 +145,7 @@ export const providersStub: PaymentProvider[] = [
 			file: 'woocommerce-payments/woocommerce-payments',
 			status: 'active',
 		},
+		_links: {},
 	},
 	{
 		id: '_wc_offline_payment_methods_group',
@@ -157,6 +160,7 @@ export const providersStub: PaymentProvider[] = [
 			status: 'active',
 		},
 		icon: 'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/payment_methods/cod.svg',
+		_links: {},
 	},
 ];
 
@@ -202,6 +206,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 			file: 'woocommerce/woocommerce',
 			status: 'active',
 		},
+		_links: {},
 	},
 	{
 		id: 'cheque',
@@ -244,6 +249,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 			file: 'woocommerce/woocommerce',
 			status: 'active',
 		},
+		_links: {},
 	},
 	{
 		id: 'cod',
@@ -286,6 +292,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 			file: 'woocommerce/woocommerce',
 			status: 'active',
 		},
+		_links: {},
 	},
 ];
 
@@ -330,6 +337,7 @@ export const suggestionsStub: SuggestedPaymentExtension[] = [
 		],
 		tags: [],
 		category: 'psp',
+		_links: {},
 	},
 	{
 		id: 'square_in_person',
@@ -363,6 +371,7 @@ export const suggestionsStub: SuggestedPaymentExtension[] = [
 		],
 		tags: [ 'made_in_woo' ],
 		category: 'psp',
+		_links: {},
 	},
 ];
 

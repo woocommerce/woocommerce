@@ -89,6 +89,8 @@
 				}
 
 				&.is-completed {
+					text-decoration: line-through;
+
 					&-icon {
 						color: #00a32a;
 					}
