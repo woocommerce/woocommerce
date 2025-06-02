@@ -15,7 +15,6 @@ type CanvasModeSelector = {
 /**
  * Hook to get canvas mode data from the store.
  * Returns true if canvas=edit is in the URL, false otherwise.
- * Store state changes trigger re-renders when URL changes.
  *
  * @return {CanvasModeSelector} The canvas mode data.
  */

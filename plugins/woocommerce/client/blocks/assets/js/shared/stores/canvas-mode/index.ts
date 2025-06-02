@@ -31,37 +31,33 @@ const actions = {
 
 const selectors = {
 	isEditMode() {
-		// Always check the current URL for the most up-to-date state
+		// Always check the current URL for the most up-to-date state.
 		const url = new URL( window.location.href );
 		const canvas = url.searchParams.get( 'canvas' );
 		return canvas === 'edit';
 	},
 };
 
-// Add URL change listeners to trigger store updates for block registration
 if ( typeof window !== 'undefined' ) {
 	const handleUrlChange = async () => {
 		const url = new URL( window.location.href );
 		const canvas = url.searchParams.get( 'canvas' );
 		const isEditMode = canvas === 'edit';
 
-		// Update store state to trigger any subscribed components/systems
+		// Update store state to trigger any subscribed components.
 		const storeDispatch = dispatch( STORE_NAME ) as {
 			setCanvasMode: ( isEditMode: boolean ) => void;
 		};
 
-		// Wait for the next tick to ensure other state updates have completed
 		await Promise.resolve();
 
-		// Update store state - this triggers re-renders and block registration updates
+		// Update store state - this triggers re-renders.
 		storeDispatch.setCanvasMode( isEditMode );
 	};
 
-	// Listen for both popstate (browser back/forward) and pushstate (programmatic navigation)
 	window.addEventListener( 'popstate', () => handleUrlChange() );
 	window.addEventListener( 'pushstate', () => handleUrlChange() );
 
-	// Initial state setup
 	handleUrlChange();
 }
 
