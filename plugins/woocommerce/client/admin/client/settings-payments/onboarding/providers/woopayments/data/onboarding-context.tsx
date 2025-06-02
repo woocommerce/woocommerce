@@ -63,9 +63,6 @@ const OnboardingContext = createContext< OnboardingContextType >( {
 	closeModal: () => undefined,
 	justCompletedStepId: null,
 	setJustCompletedStepId: () => undefined,
-	isWooPaymentsEnabled: false,
-	wooPaymentsRecentlyEnabled: false,
-	setWooPaymentsRecentlyEnabled: () => undefined,
 } );
 
 export const useOnboardingContext = () => useContext( OnboardingContext );
@@ -93,10 +90,6 @@ export const OnboardingProvider: React.FC< {
 		null
 	);
 
-	// State to track if WooPayments was recently enabled
-	const [ wooPaymentsRecentlyEnabled, setWooPaymentsRecentlyEnabled ] =
-		useState< boolean >( false );
-
 	const setJustCompletedStepId = useCallback( ( stepId: string | null ) => {
 		setStepId( stepId );
 	}, [] );
@@ -109,7 +102,7 @@ export const OnboardingProvider: React.FC< {
 		useDispatch( paymentSettingsStore );
 
 	// Initial data fetch from store with source parameter
-	const { storeData, isStoreLoading, storeError } = useSelect(
+	const { storeData, isStoreLoading } = useSelect(
 		( select ) => ( {
 			storeData: select( woopaymentsOnboardingStore ).getOnboardingData(
 				source
@@ -117,9 +110,6 @@ export const OnboardingProvider: React.FC< {
 			isStoreLoading: select(
 				woopaymentsOnboardingStore
 			).isOnboardingDataRequestPending(),
-			storeError: select(
-				woopaymentsOnboardingStore
-			).getOnboardingDataError(),
 		} ),
 		[ source ]
 	);
@@ -340,9 +330,6 @@ export const OnboardingProvider: React.FC< {
 				},
 				justCompletedStepId,
 				setJustCompletedStepId,
-				isWooPaymentsEnabled: ! storeError, // If storeError is present, it indicates that WooPayments is not enabled.
-				wooPaymentsRecentlyEnabled,
-				setWooPaymentsRecentlyEnabled,
 			} }
 		>
 			{ children }
