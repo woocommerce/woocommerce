@@ -32,7 +32,6 @@ const { state: wooStoreState } = store< WooCommerce >(
 type MiniCartContext = {
 	isOpen: boolean;
 	productCountVisibility: 'never' | 'always' | 'greater_than_zero';
-	displayCartPriceIncludingTax: boolean;
 };
 
 // Inject style tags for badge styles based on background colors of the document.
@@ -171,8 +170,6 @@ store(
 	},
 	{ lock: true }
 );
-
-// TODO - type this store
 
 type CartItemContext = {
 	cartItem: CartItem;
