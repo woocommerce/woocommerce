@@ -207,7 +207,7 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 		// We pretend that we're in the `last_child` position of the `woocommerce/accordion-group` block.
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
-		$hooked_block_types = apply_filters( 'hooked_block_types', array(), 'last_child', 'woocommerce/accordion-group' );
+		$hooked_block_types = apply_filters( 'hooked_block_types', array(), 'last_child', 'woocommerce/accordion-group', null );
 		$this->assertSame( array( $test_block['slug'] ), $hooked_block_types );
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
@@ -230,7 +230,8 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 				),
 				'innerBlocks'  => array(),
 				'innerContent' => array(),
-			) // $parsed_anchor_block
+			), // $parsed_anchor_block
+			null
 		);
 		$this->assertSame( 'woocommerce/accordion-item', $hooked_block_custom_info['blockName'] );
 		$this->assertCount( 2, $hooked_block_custom_info['innerBlocks'] );
