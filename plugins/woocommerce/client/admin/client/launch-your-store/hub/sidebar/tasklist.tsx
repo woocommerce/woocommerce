@@ -105,14 +105,34 @@ export function taskClickedAction( event: {
 		task: event.task.id,
 	} );
 
+	if ( event.task.id === 'payments' ) {
+		const {
+			wooPaymentsIsActive,
+			wooPaymentsSettingsCountryIsSupported,
+			wooPaymentsIsOnboarded,
+			wooPaymentsHasTestAccount,
+			wooPaymentsHasOtherProvidersEnabled,
+			wooPaymentsHasOtherProvidersNeedSetup,
+		} = event.task?.additionalData ?? {};
+
+		if (
+			// Use case 1: Merchant has no payment extensions installed, and their store is in a WooPayments-supported geo.
+			( ! wooPaymentsHasOtherProvidersEnabled &&
+				wooPaymentsSettingsCountryIsSupported ) ||
+			// Use case 2: Merchant has the WooPayments extension installed but they have not completed setup.
+			( wooPaymentsIsActive && ! wooPaymentsIsOnboarded ) ||
+			// Use case 3: Merchant has the WooPayments extension installed and configured with a test account.
+			( wooPaymentsIsActive && wooPaymentsHasTestAccount ) ||
+			// Use case 4: Merchant has multiple payment extensions installed but not set up, and the WooPayments extension is one of them.)
+			( wooPaymentsIsActive && wooPaymentsHasOtherProvidersNeedSetup )
+		) {
+			return { type: 'SHOW_PAYMENTS' };
+		}
+	}
+
 	if ( event.task.actionUrl ) {
 		navigateTo( { url: event.task.actionUrl } );
 	} else {
-		// If this is the payments task, we'll navigate to the payments sub-steps.
-		if ( event.task.id === 'payments' ) {
-			return { type: 'SHOW_PAYMENTS' };
-		}
-
 		navigateTo( {
 			url: getNewPath( { task: event.task.id }, '/', {} ),
 		} );
