@@ -10,7 +10,7 @@ use WP_Error;
 use WP_REST_Request;
 
 /**
- * Controller for the REST endpoint to send an email preview.
+ * Controller for the REST endpoint for the new email listing page.
  */
 class EmailListingRestController extends RestApiControllerBase {
 
@@ -92,7 +92,7 @@ class EmailListingRestController extends RestApiControllerBase {
 	 */
 	private function get_args_for_recreate_email_post() {
 		return array(
-			'emailId' => array(
+			'email_id' => array(
 				'description'       => __( 'The email ID to recreate the post for.', 'woocommerce' ),
 				'type'              => 'string',
 				'required'          => true,
@@ -171,7 +171,7 @@ class EmailListingRestController extends RestApiControllerBase {
 	 * @return array|WP_Error Request response or an error.
 	 */
 	public function recreate_email_post( WP_REST_Request $request ) {
-		$email_id = $request->get_param( 'emailId' );
+		$email_id = $request->get_param( 'email_id' );
 
 		$generated_post_id = '';
 

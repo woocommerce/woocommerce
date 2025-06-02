@@ -263,7 +263,7 @@ export const useTransactionalEmails = (
 					await apiFetch( {
 						path: `wc-admin-email/settings/email/listing/recreate-email-post?nonce=${ emailListingNonce() }`,
 						method: 'POST',
-						data: { emailId },
+						data: { email_id: emailId },
 					} );
 				updateEmailPostIdInState( emailId, response?.post_id || '' );
 			} catch ( e ) {
