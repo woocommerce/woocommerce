@@ -76,7 +76,7 @@ export const OtherPaymentGateways = ( {
 	const [ isExpanded, setIsExpanded ] = useState( initialExpanded );
 	const [ categoryIdWithPopoverVisible, setCategoryIdWithPopoverVisible ] =
 		useState( '' );
-	const buttonRefs = useRef<Record<string, HTMLSpanElement | null>>({});
+	const buttonRefs = useRef< Record< string, HTMLSpanElement | null > >( {} );
 
 	const handleInfoIconClick = (
 		event: React.MouseEvent | React.KeyboardEvent,
@@ -217,7 +217,7 @@ export const OtherPaymentGateways = ( {
 									} }
 									tabIndex={ 0 }
 									role="button"
-									ref={ (el) => {
+									ref={ ( el ) => {
 										buttonRefs.current[ category.id ] = el;
 									} }
 								>
