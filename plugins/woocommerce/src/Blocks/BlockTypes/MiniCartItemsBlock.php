@@ -54,8 +54,6 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
-		$cart               = $this->get_cart_instance();
-		$cart_items         = $cart->get_cart();
 		$screen_reader_text = __( 'Products in cart', 'woocommerce' );
 		$remove_item_label  = __( 'Remove item', 'woocommerce' );
 
@@ -71,21 +69,33 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 		// translators: %s is the name of the product in cart.
 		$remove_from_cart_label = __( 'Remove %s from cart', 'woocommerce' );
 
-		$context = array(
-			'reduceQuantityLabel'      => $reduce_quantity_label,
-			'increaseQuantityLabel'    => $increase_quantity_label,
-			'quantityDescriptionLabel' => $quantity_description_label,
-			'removeFromCartLabel'      => $remove_from_cart_label,
+		wp_interactivity_config(
+			$this->get_full_block_name(),
+			array(
+				'reduceQuantityLabel'      => $reduce_quantity_label,
+				'increaseQuantityLabel'    => $increase_quantity_label,
+				'quantityDescriptionLabel' => $quantity_description_label,
+				'removeFromCartLabel'      => $remove_from_cart_label,
+			)
+		);
+
+		wp_interactivity_state(
+			$this->get_full_block_name(),
+			array(
+				'cartItems' => wp_interactivity_state( 'woocommerce' )['cart']['items'] ?? [],
+			)
 		);
 
 		ob_start();
 		?>
 		<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-		<div <?php echo wp_interactivity_data_wp_context( $context ); ?> data-wp-interactive="<?php echo esc_attr( $this->get_full_block_name() ); ?>" class="wp-block-woocommerce-mini-cart-items-block wc-block-mini-cart__items" tabindex="-1">
+		<div data-wp-interactive="<?php echo esc_attr( $this->get_full_block_name() ); ?>" class="wp-block-woocommerce-mini-cart-items-block wc-block-mini-cart__items" tabindex="-1">
 			<div class="wp-block-woocommerce-mini-cart-products-table-block wc-block-mini-cart__products-table">
 				<table class="wc-block-cart-items wc-block-mini-cart-items" tabindex="-1">
 					<caption class="screen-reader-text">
-						<h2><?php echo esc_html( $screen_reader_text ); ?></h2>
+						<h2>
+							<?php echo esc_html( $screen_reader_text ); ?>
+						</h2>
 					</caption>
 					<tbody>
 						<template

@@ -182,7 +182,7 @@ store( 'woocommerce/mini-cart-items-block', {
 	state: {
 		// Intended to be used in context of a cart item in wp-each
 		get reduceQuantityLabel() {
-			const { reduceQuantityLabel } = getContext(
+			const { reduceQuantityLabel } = getConfig(
 				'woocommerce/mini-cart-items-block'
 			);
 			const { cartItem } = getContext< CartItemContext >();
@@ -192,7 +192,7 @@ store( 'woocommerce/mini-cart-items-block', {
 
 		// Intended to be used in context of a cart item in wp-each
 		get increaseQuantityLabel() {
-			const { increaseQuantityLabel } = getContext(
+			const { increaseQuantityLabel } = getConfig(
 				'woocommerce/mini-cart-items-block'
 			);
 			const { cartItem } = getContext< CartItemContext >();
@@ -202,7 +202,7 @@ store( 'woocommerce/mini-cart-items-block', {
 
 		// Intended to be used in context of a cart item in wp-each
 		get quantityDescriptionLabel() {
-			const { quantityDescriptionLabel } = getContext(
+			const { quantityDescriptionLabel } = getConfig(
 				'woocommerce/mini-cart-items-block'
 			);
 			const { cartItem } = getContext< CartItemContext >();
@@ -212,7 +212,7 @@ store( 'woocommerce/mini-cart-items-block', {
 
 		// Intended to be used in context of a cart item in wp-each
 		get removeFromCartLabel() {
-			const { removeFromCartLabel } = getContext(
+			const { removeFromCartLabel } = getConfig(
 				'woocommerce/mini-cart-items-block'
 			);
 			const { cartItem } = getContext< CartItemContext >();
@@ -225,7 +225,7 @@ store( 'woocommerce/mini-cart-items-block', {
 		},
 
 		// Intended to be used in context of a cart item in wp-each
-		get itemShortDescription() {
+		itemShortDescription() {
 			const ctx = getContext< CartItemContext >();
 			const el = getElement();
 
@@ -260,7 +260,7 @@ store( 'woocommerce/mini-cart-items-block', {
 		// Intended to be used in context of a cart item in wp-each
 		get lineItemTotal(): string {
 			const ctx = getContext< CartItemContext >();
-			const { displayCartPriceIncludingTax } = getContext(
+			const { displayCartPriceIncludingTax } = getConfig(
 				'woocommerce/mini-cart'
 			);
 			const { currency } = getConfig( 'woocommerce' );
