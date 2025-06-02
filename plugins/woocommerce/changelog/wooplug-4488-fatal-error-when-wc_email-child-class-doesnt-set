@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix fatal error when WC_Email child class doesn't set template_html
