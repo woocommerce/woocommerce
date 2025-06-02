@@ -463,20 +463,15 @@ class MiniCart extends AbstractBlock {
 		$wrapper_styles           = $classes_styles['styles'];
 		$template_part_contents   = $this->get_template_part_contents( 'experimental-iapi-mini-cart' );
 
-		$cart            = $this->get_cart_instance();
-		$cart_item_count = $cart ? $cart->get_cart_contents_count() : 0;
-		$cart_item_text  = '';
-
-		if ( 'always' === $product_count_visibility ) {
-			$cart_item_text = $cart_item_count;
-		} elseif ( 'never' !== $product_count_visibility && $cart_item_count > 0 ) {
-			$cart_item_text = $cart_item_count;
-		}
+		$cart             = $this->get_cart_instance();
+		$cart_item_count  = $cart ? $cart->get_cart_contents_count() : 0;
+		$badge_is_visible = ( 'always' === $product_count_visibility ) || ( 'never' !== $product_count_visibility && $cart_item_count > 0 );
 
 		wp_interactivity_state(
 			$this->get_full_block_name(),
 			array(
-				'cartItemCount' => $cart_item_count,
+				'totalItemsInCart' => $cart_item_count,
+				'badgeIsVisible'   => $badge_is_visible,
 			)
 		);
 
@@ -496,8 +491,7 @@ class MiniCart extends AbstractBlock {
 						echo $icon;
 					?>
 					<?php if ( 'never' !== $product_count_visibility ) : ?>
-						<span hidden data-wp-bind--hidden="!state.badgeIsVisible" data-wp-text="state.cartItemCount" class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
-							<?php echo esc_html( $cart_item_text ); ?>
+						<span data-wp-bind--hidden="!state.badgeIsVisible" data-wp-text="state.totalItemsInCart" class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
 						</span>
 					<?php endif; ?>
 					<?php

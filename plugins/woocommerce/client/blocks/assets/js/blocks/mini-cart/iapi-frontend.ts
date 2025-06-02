@@ -31,97 +31,136 @@ type MiniCartContext = {
 // Inject style tags for badge styles based on background colors of the document.
 setStyles();
 
-store( 'woocommerce/mini-cart', {
-	state: {
-		get drawerOverlayClass() {
-			const { isOpen } = getContext< MiniCartContext >();
-			const baseClasses =
-				'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out';
+type MiniCartState = {
+	totalItemsInCart: number;
+	drawerOverlayClass: string;
+	badgeIsVisible: boolean;
+	cartIsEmpty: boolean;
+};
 
-			return isOpen
-				? `${ baseClasses } wc-block-components-drawer__screen-overlay--with-slide-in`
-				: `${ baseClasses } wc-block-components-drawer__screen-overlay--is-hidden`;
-		},
-
-		get badgeIsVisible() {
-			const cartHasItems = wooStoreState.totalItemsInCart > 0;
-			const { productCountVisibility } = getContext< MiniCartContext >();
-
-			return (
-				productCountVisibility === 'always' ||
-				( productCountVisibility === 'greater_than_zero' &&
-					cartHasItems )
-			);
-		},
-
-		get cartIsEmpty() {
-			return wooStoreState.totalItemsInCart === 0;
-		},
-
-		get cartItemCount() {
-			return wooStoreState.totalItemsInCart;
-		},
-	},
+type MiniCart = {
+	state: MiniCartState;
 
 	callbacks: {
-		openDrawer() {
-			const ctx = getContext< MiniCartContext >();
-			ctx.isOpen = true;
+		openDrawer: () => void;
+		closeDrawer: () => void;
+		overlayCloseDrawer: ( e: MouseEvent ) => void;
+	};
+};
+
+// Destructure state in an empty call to the store, to ensure that state can be correctly typed.
+const { state: miniCartState } = store< MiniCart >(
+	'woocommerce/mini-cart',
+	{},
+	{ lock: true }
+);
+
+store< MiniCart >(
+	'woocommerce/mini-cart',
+	{
+		state: {
+			get totalItemsInCart() {
+				return wooStoreState.cart.items.reduce< number >(
+					( total, { quantity } ) => total + quantity,
+					0
+				);
+			},
+
+			get drawerOverlayClass() {
+				const { isOpen } = getContext< MiniCartContext >();
+				const baseClasses =
+					'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out';
+
+				return isOpen
+					? `${ baseClasses } wc-block-components-drawer__screen-overlay--with-slide-in`
+					: `${ baseClasses } wc-block-components-drawer__screen-overlay--is-hidden`;
+			},
+
+			get badgeIsVisible() {
+				const cartHasItems = miniCartState.totalItemsInCart > 0;
+				const { productCountVisibility } =
+					getContext< MiniCartContext >();
+
+				return (
+					productCountVisibility === 'always' ||
+					( productCountVisibility === 'greater_than_zero' &&
+						cartHasItems )
+				);
+			},
+
+			get cartIsEmpty() {
+				return miniCartState.totalItemsInCart === 0;
+			},
 		},
 
-		closeDrawer() {
-			const ctx = getContext< MiniCartContext >();
-			ctx.isOpen = false;
-		},
+		callbacks: {
+			openDrawer() {
+				const ctx = getContext< MiniCartContext >();
+				ctx.isOpen = true;
+			},
 
-		overlayCloseDrawer( e: MouseEvent ) {
-			// Only close the drawer if the overlay itself was clicked.
-			if ( e.target === e.currentTarget ) {
+			closeDrawer() {
 				const ctx = getContext< MiniCartContext >();
 				ctx.isOpen = false;
-			}
+			},
+
+			overlayCloseDrawer( e: MouseEvent ) {
+				// Only close the drawer if the overlay itself was clicked.
+				if ( e.target === e.currentTarget ) {
+					const ctx = getContext< MiniCartContext >();
+					ctx.isOpen = false;
+				}
+			},
 		},
 	},
-} );
+	{ lock: universalLock }
+);
 
-store( 'woocommerce/mini-cart-title-items-counter-block', {
-	state: {
-		get itemsInCartText() {
-			const { singularItemsText, pluralItemsText } = getContext< {
-				singularItemsText: string;
-				pluralItemsText: string;
-			} >();
+store(
+	'woocommerce/mini-cart-title-items-counter-block',
+	{
+		state: {
+			get itemsInCartText() {
+				const { singularItemsText, pluralItemsText } = getConfig(
+					'woocommerce/mini-cart-title-items-counter-block'
+				);
 
-			const cartItemsCount = wooStoreState.totalItemsInCart;
+				const cartItemsCount = miniCartState.totalItemsInCart;
 
-			const template =
-				cartItemsCount === 1 ? singularItemsText : pluralItemsText;
+				const template =
+					cartItemsCount === 1 ? singularItemsText : pluralItemsText;
 
-			return template.replace( '%d', cartItemsCount.toString() );
+				return template.replace( '%d', cartItemsCount.toString() );
+			},
 		},
 	},
-} );
+	{ lock: true }
+);
 
-store( 'woocommerce/mini-cart-footer-block', {
-	state: {
-		get formattedSubtotal(): string {
-			const { displayCartPriceIncludingTax } = getConfig(
-				'woocommerce/mini-cart-footer-block'
-			);
+store(
+	'woocommerce/mini-cart-footer-block',
+	{
+		state: {
+			get formattedSubtotal(): string {
+				const { displayCartPriceIncludingTax } = getConfig(
+					'woocommerce/mini-cart-footer-block'
+				);
 
-			const { currency } = getConfig( 'woocommerce' );
+				const { currency } = getConfig( 'woocommerce' );
 
-			const subtotal = displayCartPriceIncludingTax
-				? parseInt( wooStoreState.cart.totals.total_items, 10 ) +
-				  parseInt( wooStoreState.cart.totals.total_items_tax, 10 )
-				: parseInt( wooStoreState.cart.totals.total_items, 10 );
+				const subtotal = displayCartPriceIncludingTax
+					? parseInt( wooStoreState.cart.totals.total_items, 10 ) +
+					  parseInt( wooStoreState.cart.totals.total_items_tax, 10 )
+					: parseInt( wooStoreState.cart.totals.total_items, 10 );
 
-			const normalizedCurrency = normalizeCurrencyResponse(
-				wooStoreState.cart.totals,
-				currency
-			);
+				const normalizedCurrency = normalizeCurrencyResponse(
+					wooStoreState.cart.totals,
+					currency
+				);
 
-			return formatPriceWithCurrency( subtotal, normalizedCurrency );
+				return formatPriceWithCurrency( subtotal, normalizedCurrency );
+			},
 		},
 	},
-} );
+	{ lock: true }
+);
