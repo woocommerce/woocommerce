@@ -33,6 +33,7 @@ export const InstallationProvider: React.FC< {
 	children: React.ReactNode;
 	closeModal: () => void;
 } > = ( { children, closeModal } ) => {
+	// Check if WooPayments is active by looking for the plugin in the active plugins list
 	const isWooPaymentsActive = useSelect(
 		( select ) =>
 			select( pluginsStore )

@@ -315,7 +315,6 @@ export const OnboardingProvider: React.FC< {
 				steps: allSteps,
 				context: storeData.context,
 				isLoading: isStateStoreLoading,
-				isStoreLoading,
 				currentStep,
 				navigateToStep,
 				navigateToNextStep,
