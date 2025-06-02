@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Restore missing webhook filter WC_Comments::exclude_webhook_comments_from_feed_where() callback.
