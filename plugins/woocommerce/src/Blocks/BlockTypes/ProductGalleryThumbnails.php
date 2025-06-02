@@ -99,6 +99,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 							src="<?php echo esc_attr( $image['src'] ); ?>"
 							srcset="<?php echo esc_attr( $image['srcset'] ); ?>"
 							sizes="<?php echo esc_attr( $image['sizes'] ); ?>"
+							alt="<?php echo esc_attr( $image['alt'] ); ?>"
 							data-wp-on--click="actions.selectCurrentImage"
 							data-wp-on--keydown="actions.onThumbnailKeyDown"
 							data-wp-watch="callbacks.toggleActiveImageAttributes"
