@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import { decodeEntities } from '@wordpress/html-entities';
-import type {
-	Currency,
-	CurrencyResponse,
-	CartShippingPackageShippingRate,
-} from '@woocommerce/types';
+import type { Currency, CurrencyResponse } from '@woocommerce/types';
 
 const splitDecimal = (
 	numberString: string
