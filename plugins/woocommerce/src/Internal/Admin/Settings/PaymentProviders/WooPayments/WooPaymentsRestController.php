@@ -284,6 +284,28 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		);
 		register_rest_route(
 			$this->route_namespace,
+			'/' . $this->rest_base . '/onboarding/preload',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_preload' ),
+					'validation_callback' => 'rest_validate_request_arg',
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => array(
+						'location' => array(
+							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
+							'type'              => 'string',
+							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'required'          => false,
+							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
+						),
+					),
+				),
+			),
+			$override
+		);
+		register_rest_route(
+			$this->route_namespace,
 			'/' . $this->rest_base . '/onboarding/reset',
 			array(
 				array(
@@ -313,7 +335,6 @@ class WooPaymentsRestController extends RestApiControllerBase {
 						),
 					),
 				),
-				'schema' => fn() => $this->get_schema_for_get_onboarding_details(),
 			),
 			$override
 		);
@@ -363,6 +384,22 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			),
 			$override
 		);
+	}
+
+	/**
+	 * Get the controller's REST URL path.
+	 *
+	 * @param string $relative_path Optional. Relative path to append to the REST URL.
+	 *
+	 * @return string The REST URL path.
+	 */
+	public function get_rest_url_path( string $relative_path = '' ): string {
+		$path = '/' . trim( $this->route_namespace, '/' ) . '/' . trim( $this->rest_base, '/' );
+		if ( ! empty( $relative_path ) ) {
+			$path .= '/' . ltrim( $relative_path, '/' );
+		}
+
+		return $path;
 	}
 
 	/**
@@ -632,6 +669,34 @@ class WooPaymentsRestController extends RestApiControllerBase {
 
 		try {
 			$response = $this->woopayments->finish_onboarding_kyc_session( $location, $request->get_param( 'source' ) ?? '' );
+		} catch ( ApiException $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+
+		// If there is no success key in the response, we assume the operation was successful.
+		if ( ! isset( $response['success'] ) ) {
+			$response['success'] = true;
+		}
+
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Handle the onboarding preload action.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_Error|WP_REST_Response The response or error.
+	 */
+	protected function handle_onboarding_preload( WP_REST_Request $request ) {
+		$location = $request->get_param( 'location' );
+		if ( empty( $location ) ) {
+			// Fall back to the providers country if no location is provided.
+			$location = $this->payments->get_country();
+		}
+
+		try {
+			$response = $this->woopayments->onboarding_preload( $location );
 		} catch ( ApiException $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -1044,21 +1109,5 @@ class WooPaymentsRestController extends RestApiControllerBase {
 				'readonly'    => true,
 			),
 		);
-	}
-
-	/**
-	 * Get the controller's REST URL path.
-	 *
-	 * @param string $relative_path Optional. Relative path to append to the REST URL.
-	 *
-	 * @return string The REST URL path.
-	 */
-	private function get_rest_url_path( string $relative_path = '' ): string {
-		$path = '/' . trim( $this->route_namespace, '/' ) . '/' . trim( $this->rest_base, '/' );
-		if ( ! empty( $relative_path ) ) {
-			$path .= '/' . ltrim( $relative_path, '/' );
-		}
-
-		return $path;
 	}
 }

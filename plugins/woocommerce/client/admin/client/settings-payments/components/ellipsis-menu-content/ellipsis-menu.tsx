@@ -41,8 +41,8 @@ export const EllipsisMenuWrapper = ( {
 		isWooPayments( provider.id ) &&
 		provider._type === 'gateway' &&
 		provider.state?.account_connected &&
-		( provider.onboarding?.state.test_mode ||
-			! provider.onboarding?.state.completed );
+		( provider.onboarding?.state?.test_mode ||
+			! provider.onboarding?.state?.completed );
 
 	return (
 		<>
@@ -74,7 +74,7 @@ export const EllipsisMenuWrapper = ( {
 			<WooPaymentsResetAccountModal
 				isOpen={ resetAccountModalVisible }
 				onClose={ () => setResetAccountModalVisible( false ) }
-				isTestMode={ provider.onboarding?.state.test_mode }
+				isTestMode={ provider.onboarding?.state?.test_mode }
 			/>
 		</>
 	);

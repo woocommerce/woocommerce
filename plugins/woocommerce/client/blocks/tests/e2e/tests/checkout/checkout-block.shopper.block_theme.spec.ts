@@ -238,11 +238,9 @@ test.describe( 'Shopper → Local pickup', () => {
 			'page=wc-settings&tab=shipping&section=options'
 		);
 
-		await expect(
-			admin.page.getByLabel(
-				'Hide shipping costs until an address is entered'
-			)
-		).toBeDisabled();
+		await admin.page
+			.getByLabel( 'Hide shipping costs until an address is entered' )
+			.uncheck();
 
 		let saveButton = admin.page.getByRole( 'button', {
 			name: 'Save changes',

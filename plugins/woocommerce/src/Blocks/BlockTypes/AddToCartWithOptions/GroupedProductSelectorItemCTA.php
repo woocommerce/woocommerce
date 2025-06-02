@@ -33,9 +33,20 @@ class GroupedProductSelectorItemCTA extends AbstractBlock {
 	private function get_quantity_selector_markup( $product ) {
 		ob_start();
 
-		woocommerce_quantity_input( AddToCartWithOptionsUtils::get_quantity_input_args( $product ) );
+		woocommerce_quantity_input(
+			array_merge(
+				AddToCartWithOptionsUtils::get_quantity_input_args( $product ),
+				array(
+					'input_name' => 'quantity[' . $product->get_id() . ']',
+					'input_id'   => 'quantity_' . $product->get_id(),
+				)
+			)
+		);
 
 		$quantity_html = ob_get_clean();
+
+		// Remove the label because we are rendering one as a separate block via GroupedProductSelectorItemLabel.
+		$quantity_html = $this->remove_quantity_label( $quantity_html );
 
 		// Modify the quantity input to add stepper buttons.
 		$product_name = $product->get_name();
@@ -47,6 +58,18 @@ class GroupedProductSelectorItemCTA extends AbstractBlock {
 		$quantity_html = AddToCartWithOptionsUtils::make_quantity_input_interactive( $quantity_html );
 
 		return $quantity_html;
+	}
+
+	/**
+	 * Removes the label from quantity input HTML.
+	 *
+	 * @param string $quantity_html The quantity input HTML.
+	 * @return string The quantity input HTML without the label.
+	 */
+	private function remove_quantity_label( $quantity_html ) {
+		// Remove the label and aria-label from the quantity input.
+		$quantity_html = preg_replace( '/<label[^>]*>.*?<\/label>/s', '', $quantity_html );
+		return preg_replace( '/\s*aria-label="[^"]*"/', '', $quantity_html );
 	}
 
 	/**
@@ -86,7 +109,7 @@ class GroupedProductSelectorItemCTA extends AbstractBlock {
 				esc_html( wp_strip_all_tags( wc_price( $product->get_price() ) ) )
 			);
 		}
-		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity-' . $product->get_id() ) . '" /><label for="' . esc_attr( 'quantity-' . $product->get_id() ) . '" class="screen-reader-text">' . $label . '</label>';
+		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $product->get_id() ) . '" />';
 	}
 
 	/**

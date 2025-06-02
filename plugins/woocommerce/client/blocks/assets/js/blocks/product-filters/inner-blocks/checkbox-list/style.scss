@@ -100,6 +100,15 @@ input[type="checkbox"].wc-block-product-filter-checkbox-list__input:checked {
 	gap: $gap-smallest;
 }
 
+.wc-block-product-filter-checkbox-list__text {
+	display: contents;
+}
+
+.wc-block-product-filter-checkbox-list__count {
+	display: contents;
+	white-space: nowrap;
+}
+
 .wc-block-product-filter-checkbox-list__show-more {
 	text-decoration: underline;
 	appearance: none;

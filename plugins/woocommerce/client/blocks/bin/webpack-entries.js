@@ -44,6 +44,11 @@ const blocks = {
 		customDir:
 			'add-to-cart-with-options/grouped-product-selector/product-item-cta',
 	},
+
+	'add-to-cart-with-options-grouped-product-selector-item-label': {
+		customDir:
+			'add-to-cart-with-options/grouped-product-selector/product-item-label',
+	},
 	'all-products': {
 		customDir: 'products/all-products',
 	},
