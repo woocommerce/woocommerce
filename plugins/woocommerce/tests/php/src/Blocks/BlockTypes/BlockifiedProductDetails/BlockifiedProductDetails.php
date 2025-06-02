@@ -45,13 +45,6 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 	private $asset_api;
 
 	/**
-	 * Mock logger instance.
-	 *
-	 * @var \WC_Logger_Interface $mock_logger
-	 */
-	private $mock_logger;
-
-	/**
 	 * Create Simple Product and Page
 	 */
 	public static function setUpBeforeClass(): void {
@@ -86,11 +79,6 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 		$this->asset_api            = Package::container()->get( API::class );
 		$this->registry             = new AssetDataRegistryMock( $this->asset_api );
 		$this->integration_registry = new IntegrationRegistry();
-		$this->mock_logger          = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
-		add_filter(
-			'woocommerce_logging_class',
-			array( $this, 'override_wc_logger' )
-		);
 	}
 
 	/**
@@ -241,14 +229,5 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 
 		$this->assertSame( 'woocommerce/accordion-panel', $hooked_block_custom_info['innerBlocks'][1]['blockName'] );
 		$this->assertSame( parse_blocks( $test_block['content'] ), $hooked_block_custom_info['innerBlocks'][1]['innerBlocks'] );
-	}
-
-	/**
-	 * Overrides the WC logger.
-	 *
-	 * @return mixed
-	 */
-	public function override_wc_logger() {
-		return $this->mock_logger;
 	}
 }
