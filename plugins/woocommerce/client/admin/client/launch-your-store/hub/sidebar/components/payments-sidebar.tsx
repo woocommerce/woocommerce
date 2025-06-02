@@ -26,6 +26,7 @@ import { SiteHub } from '~/customize-store/assembler-hub/site-hub';
 import { taskIcons, taskCompleteIcon } from './icons';
 import { StepPlaceholder } from './step-placeholder';
 import { useSetUpPaymentsContext } from '~/launch-your-store/data/setup-payments-context';
+import { WooPaymentsProviderOnboardingStep } from '~/settings-payments/onboarding/types';
 
 export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 	const { wooPaymentsRecentlyActivated, isWooPaymentsActive } =
@@ -41,6 +42,27 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 	const currentStepIndex = allSteps.findIndex(
 		( step ) => step.id === currentStep?.id
 	);
+
+	const isStepCompleted = (
+		step: WooPaymentsProviderOnboardingStep
+	): boolean => {
+		return (
+			step.id === justCompletedStepId ||
+			step.status === 'completed' ||
+			currentStepIndex === allSteps.length
+		);
+	};
+
+	// Sort steps to show completed ones first
+	const sortedSteps = allSteps.sort( ( a, b ) => {
+		const aCompleted = isStepCompleted( a );
+		const bCompleted = isStepCompleted( b );
+
+		if ( aCompleted === bCompleted ) {
+			return 0;
+		}
+		return aCompleted ? -1 : 1;
+	} );
 
 	const sidebarTitle = (
 		<Button
@@ -133,11 +155,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 									isStepComplete={ true }
 								/>
 							) }
-							{ allSteps.map( ( step ) => {
-								const isStepComplete =
-									step.id === justCompletedStepId ||
-									step.status === 'completed' ||
-									currentStepIndex === allSteps.length;
+							{ sortedSteps.map( ( step ) => {
 								return (
 									<SidebarNavigationItem
 										key={ step.id }
@@ -148,10 +166,11 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 												currentStep?.id === step.id,
 											'payment-step--disabled':
 												currentStep?.id !== step.id,
-											'is-complete': isStepComplete,
+											'is-complete':
+												isStepCompleted( step ),
 										} ) }
 										icon={
-											isStepComplete
+											isStepCompleted( step )
 												? taskCompleteIcon
 												: taskIcons.activePaymentStep
 										}
