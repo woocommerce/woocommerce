@@ -70,11 +70,8 @@ class ProductGalleryThumbnails extends AbstractBlock {
 
 		// We crop the images to square only if the aspect ratio is 1:1.
 		// Otherwise, we show the uncropped and use object-fit to crop them.
-		if ( '1' === $attributes['aspectRatio'] ) {
-			$product_gallery_images = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_thumbnail' );
-		} else {
-			$product_gallery_images = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_single' );
-		}
+		$image_size             = '1' === $attributes['aspectRatio'] ? 'woocommerce_thumbnail' : 'woocommerce_single';
+		$product_gallery_images = ProductGalleryUtils::get_product_gallery_image_data( $product, $image_size );
 
 		// Don't show the thumbnails block if there is only one image.
 		if ( count( $product_gallery_images ) <= 1 ) {
