@@ -4,11 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\BlockifiedProductDetails;
 
 use WC_Helper_Product;
-
-use Automattic\WooCommerce\Blocks\Assets\Api;
-use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\BlockifiedProductDetailsMock;
 
 /**
  * Tests for the BlockifiedProductDetails block type
@@ -28,28 +24,6 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 	 * @var @WC_Product
 	 */
 	private static $product;
-
-	/**
-	 * @var AssetDataRegistryMock The asset data registry mock.
-	 */
-	private $registry;
-
-	/**
-	 * @var IntegrationRegistry The integration registry, not used, but required to set up a BlockifiedProductDetails block.
-	 */
-	private $integration_registry;
-
-	/**
-	 * @var Api The asset API, not used, but required to set up a BlockifiedProductDetails block.
-	 */
-	private $asset_api;
-
-	/**
-	 * Mock logger instance.
-	 *
-	 * @var \WC_Logger_Interface $mock_logger
-	 */
-	private $mock_logger;
 
 	/**
 	 * Create Simple Product and Page
@@ -82,15 +56,6 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 		setup_postdata( $post );
 		$product            = self::$product;
 		$GLOBALS['product'] = $product;
-
-		$this->asset_api            = Package::container()->get( API::class );
-		$this->registry             = new AssetDataRegistryMock( $this->asset_api );
-		$this->integration_registry = new IntegrationRegistry();
-		$this->mock_logger          = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
-		add_filter(
-			'woocommerce_logging_class',
-			array( $this, 'override_wc_logger' )
-		);
 	}
 
 	/**
@@ -194,14 +159,7 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 			}
 		);
 
-		// Create a new BlockifiedProductDetails block class with the mocked AssetDataRegistry.
-		// This will add the `woocommerce_product_details_hooked_blocks` filter defined above.
-		$block_instance = new \Automattic\WooCommerce\Blocks\BlockTypes\BlockifiedProductDetails(
-			$this->asset_api,
-			$this->registry,
-			$this->integration_registry,
-			'blockified-product-details-mock'
-		);
+		new BlockifiedProductDetailsMock();
 
 		// Next, we apply the `hooked_block_types` and `hooked_block_{$slug}` filters.
 		// We pretend that we're in the `last_child` position of the `woocommerce/accordion-group` block.
@@ -241,14 +199,5 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 
 		$this->assertSame( 'woocommerce/accordion-panel', $hooked_block_custom_info['innerBlocks'][1]['blockName'] );
 		$this->assertSame( parse_blocks( $test_block['content'] ), $hooked_block_custom_info['innerBlocks'][1]['innerBlocks'] );
-	}
-
-	/**
-	 * Overrides the WC logger.
-	 *
-	 * @return mixed
-	 */
-	public function override_wc_logger() {
-		return $this->mock_logger;
 	}
 }
