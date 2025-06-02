@@ -112,7 +112,7 @@ export const useThemeColors = (
 		// Start observing the editor styles wrapper for style changes.
 		observer.observe( editorStylesWrapper, {
 			attributes: true,
-			attributeFilter: [ 'style', 'class' ],
+			attributeFilter: [ 'class' ],
 		} );
 
 		return () => {
