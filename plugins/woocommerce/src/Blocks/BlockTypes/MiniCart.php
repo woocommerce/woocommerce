@@ -453,31 +453,27 @@ class MiniCart extends AbstractBlock {
 		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 		$this->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
-		$classes_styles           = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_weight', 'font_family', 'extra_classes' ) );
-		$icon_color               = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
-		$product_count_color      = isset( $attributes['productCountColor']['color'] ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
-		$styles                   = $product_count_color ? 'background:' . $product_count_color : '';
-		$icon                     = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
-		$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
-		$wrapper_classes          = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
-		$wrapper_styles           = $classes_styles['styles'];
-		$template_part_contents   = $this->get_template_part_contents( 'experimental-iapi-mini-cart' );
-
+		$classes_styles                   = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_weight', 'font_family', 'extra_classes' ) );
+		$icon_color                       = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
+		$product_count_color              = isset( $attributes['productCountColor']['color'] ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
+		$styles                           = $product_count_color ? 'background:' . $product_count_color : '';
+		$icon                             = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
+		$product_count_visibility         = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
+		$wrapper_classes                  = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
+		$wrapper_styles                   = $classes_styles['styles'];
+		$template_part_contents           = $this->get_template_part_contents( 'experimental-iapi-mini-cart' );
 		$cart                             = $this->get_cart_instance();
 		$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
-		$cart_item_text                   = '';
 		$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === 'incl';
-
-		if ( 'always' === $product_count_visibility ) {
-			$cart_item_text = $cart_item_count;
-		} elseif ( 'never' !== $product_count_visibility && $cart_item_count > 0 ) {
-			$cart_item_text = $cart_item_count;
-		}
+		$cart                             = $this->get_cart_instance();
+		$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
+		$badge_is_visible                 = ( 'always' === $product_count_visibility ) || ( 'never' !== $product_count_visibility && $cart_item_count > 0 );
 
 		wp_interactivity_state(
 			$this->get_full_block_name(),
 			array(
-				'cartItemCount' => $cart_item_count,
+				'totalItemsInCart' => $cart_item_count,
+				'badgeIsVisible'   => $badge_is_visible,
 			)
 		);
 
@@ -498,8 +494,7 @@ class MiniCart extends AbstractBlock {
 						echo $icon;
 					?>
 					<?php if ( 'never' !== $product_count_visibility ) : ?>
-						<span hidden data-wp-bind--hidden="!state.badgeIsVisible" data-wp-text="state.cartItemCount" class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
-							<?php echo esc_html( $cart_item_text ); ?>
+						<span data-wp-bind--hidden="!state.badgeIsVisible" data-wp-text="state.totalItemsInCart" class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
 						</span>
 					<?php endif; ?>
 					<?php

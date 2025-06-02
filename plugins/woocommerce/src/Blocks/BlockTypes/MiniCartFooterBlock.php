@@ -32,6 +32,20 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 		$subtotal                         = $display_cart_price_including_tax ? $cart->get_subtotal_tax() : $cart->get_subtotal();
 		$formatted_amount                 = wc_price( $subtotal );
 
+		wp_interactivity_config(
+			$this->get_full_block_name(),
+			array(
+				'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
+			)
+		);
+
+		wp_interactivity_state(
+			$this->get_full_block_name(),
+			array(
+				'formattedSubtotal' => $formatted_amount,
+			)
+		);
+
 		?>
 		<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		<div data-wp-interactive="woocommerce/mini-cart-footer-block" class="wp-block-woocommerce-mini-cart-footer-block wc-block-mini-cart__footer">
@@ -40,10 +54,6 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 					<?php echo esc_html( $subtotal_label ); ?>
 				</span>
 				<span data-wp-text="state.formattedSubtotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value">
-					<?php
-						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-						echo $formatted_amount;
-					?>
 				</span>
 				<div class="wc-block-components-totals-item__description">
 					<?php echo esc_html( $other_costs_label ); ?>
