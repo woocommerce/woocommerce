@@ -245,18 +245,6 @@ class AddToCartWithOptions extends AbstractBlock {
 					 */
 					do_action( 'woocommerce_before_variations_form' );
 					/**
-					 * Hook: woocommerce_before_add_to_cart_quantity.
-					 *
-					 * @since 2.7.0
-					 */
-					do_action( 'woocommerce_before_add_to_cart_quantity' );
-					/**
-					 * Hook: woocommerce_before_add_to_cart_button.
-					 *
-					 * @since 10.0.0
-					 */
-					do_action( 'woocommerce_before_add_to_cart_button' );
-					/**
 					 * Hook: woocommerce_after_variations_table.
 					 *
 					 * @since 10.0.0
@@ -283,6 +271,18 @@ class AddToCartWithOptions extends AbstractBlock {
 					if ( function_exists( 'woocommerce_single_variation_add_to_cart_button' ) ) {
 						add_action( 'woocommerce_single_variation', 'woocommerce_single_variation_add_to_cart_button', 20 );
 					}
+					/**
+					 * Hook: woocommerce_before_add_to_cart_button.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_before_add_to_cart_button' );
+					/**
+					 * Hook: woocommerce_before_add_to_cart_quantity.
+					 *
+					 * @since 2.7.0
+					 */
+					do_action( 'woocommerce_before_add_to_cart_quantity' );
 				}
 				$hooks_before = ob_get_clean();
 
