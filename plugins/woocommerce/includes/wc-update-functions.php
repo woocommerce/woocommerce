@@ -2994,56 +2994,6 @@ function wc_update_961_migrate_default_email_base_color() {
 }
 
 /**
- * Add old refunded order items to the product_lookup_table.
- */
-function wc_update_990_add_old_refunded_order_items_to_product_lookup_table() {
-	global $wpdb;
-
-	// Get every order ID where:
-	// 1. the total sales is less than 0, and
-	// 2. is not refunded shipping fee only, and
-	// 3. is not refunded tax fee only.
-	$refunded_orders = $wpdb->get_results(
-		"SELECT order_stats.order_id
-		FROM {$wpdb->prefix}wc_order_stats AS order_stats
-		WHERE order_stats.total_sales < 0 # Refunded orders
-			AND order_stats.total_sales != order_stats.shipping_total # Exclude refunded orders that only include a shipping refund
-			AND order_stats.total_sales != order_stats.tax_total # Exclude refunded orders that only include a tax refund"
-	);
-
-	if ( $refunded_orders ) {
-		foreach ( $refunded_orders as $refunded_order ) {
-			$order = wc_get_order( $refunded_order->order_id );
-			wc_get_logger()->info( sprintf( 'order_id: %s', $refunded_order->order_id ) );
-
-			// If the refund order has no line items, mark it as a full refund in orders_meta table.
-			// In the above query we already excluded orders for refunded shipping and tax, so it's safe to assume that the refund order without items is a full refund.
-			// Note that the "full" refund here means it's created by changing the order status to "Refunded", not partially refund all the items in the order.
-			if ( $order && empty( $order->get_items() ) ) {
-				$order->update_meta_data( '_refund_type', 'full' );
-				$order->save_meta_data();
-			}
-
-			/**
-			 * Trigger an action to schedule the data import for old refunded order items.
-			 *
-			 * @param int $order_id The ID of the order to be synced.
-			 * @since 9.9.0
-			 */
-			do_action( 'woocommerce_schedule_import', intval( $refunded_order->order_id ) );
-		}
-	}
-}
-
-/**
- * Update primary key to composite (order_item_id, order_id) in the wc_order_product_lookup table.
- */
-function wc_update_990_update_primary_key_to_composite_in_order_product_lookup_table() {
-	global $wpdb;
-	$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_product_lookup DROP PRIMARY KEY, ADD PRIMARY KEY (order_item_id, order_id)" );
-}
-
-/**
  * Remove the option woocommerce_order_attribution_install_banner_dismissed.
  * This data is now stored in the user meta table in the PR #55715.
  */
