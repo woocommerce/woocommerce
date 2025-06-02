@@ -8,7 +8,7 @@ checklist and [release schedule](https://developer.woocommerce.com/release-calen
 > Note on timeline: The expected timeframe between the RC1 and a final release is three weeks.
 
 > Note on RC1: RC1 can be released without additional consideration, as it aligns with the code freeze timing.
-> 
+
 > Note on RC2: RC2 can be released two weeks after RC1 (and one week before the final release).
 
 On the technical side of the release process, we rely on release branches (named e.g., `release/9.9`) for code freeze and
