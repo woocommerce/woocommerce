@@ -186,9 +186,6 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 			'content' => '<!-- wp:paragraph --><p>This is the content for the custom info tab.</p><!-- /wp:paragraph -->',
 		);
 
-		remove_all_filters( 'hooked_block_types' );
-		remove_all_filters( 'hooked_block_' . $test_block['slug'] );
-
 		add_filter(
 			'woocommerce_product_details_hooked_blocks',
 			function ( $hooked_blocks ) use ( $test_block ) {
