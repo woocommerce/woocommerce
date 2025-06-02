@@ -7,9 +7,10 @@ checklist and [release schedule](https://developer.woocommerce.com/release-calen
 
 > Note on RC1: RC1 can be released without additional consideration, as it aligns with the code freeze timing.
 
-> Note on RC2: RC2 can be released after all [CFEs](https://github.com/woocommerce/woocommerce/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22code%20freeze%20exception%22) for the target release version are addressed and merged.
+> Note on RC2: RC2 can be released after all [CFEs](https://github.com/woocommerce/woocommerce/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22code%20freeze%20exception%22) 
+> for the target release version are addressed and merged, and any of those need testing in public.
 
-> Note on RC3+: In general, RC3+ is not tagged until post-RC2 CFEs need testing in public and fit into the timeframe between RC1 and final releases.
+> Note on RC3+: In general, RC3+ is not tagged until post-RC2 CFEs need testing in public, and fit into the timeframe between RC1 and final releases.
 
 The expected timeframe between a release candidate and a final release is two weeks (to identify and address any regressions).
 If, during this period, no regression has been found, we release the release candidate as final.
