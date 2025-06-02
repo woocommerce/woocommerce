@@ -311,6 +311,16 @@ class WC_Customer extends WC_Legacy_Customer {
 				continue;
 			}
 
+			// If the field is hidden in the country-specific locale, we can skip it.
+			if ( isset( $country_locale[ $key ]['hidden'] ) && true === wc_string_to_bool( $country_locale[ $key ]['hidden'] ) ) {
+				continue;
+			}
+
+			// Check if the field is hidden in the default locale, if so, we can skip too (because it wasn't hidden in country-specific locale).
+			if ( isset( $default_locale[ $key ]['hidden'] ) && true === wc_string_to_bool( $default_locale[ $key ]['hidden'] ) ) {
+				continue;
+			}
+
 			$locale_to_check = isset( $country_locale[ $key ]['required'] ) ? $country_locale : $default_locale;
 
 			// If the locale requires the field return false.
