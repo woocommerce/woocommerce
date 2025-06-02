@@ -11,7 +11,9 @@
 	<!-- wp:woocommerce/product-collection {"query":{"perPage":3,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{},"isProductCollectionBlock":true,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[]},"tagName":"div","dimensions":{"widthType":"fill","fixedWidth":""},"displayLayout":{"type":"flex","columns":3},"align":"wide"} -->
 	<div class="wp-block-woocommerce-product-collection alignwide">
 		<!-- wp:woocommerce/product-template -->
-		<!-- wp:woocommerce/product-image {"aspectRatio":"3/5","imageSizing":"single","isDescendentOfQueryLoop":true} /-->
+		<!-- wp:woocommerce/product-image {"showSaleBadge":false,"aspectRatio":"3/5","imageSizing":"single","isDescendentOfQueryLoop":true} -->
+			<!-- wp:woocommerce/product-sale-badge {"isDescendentOfQueryLoop":true,"align":"right"} /-->
+		<!-- /wp:woocommerce/product-image -->
 
 		<!-- wp:woocommerce/product-rating {"isDescendentOfQueryLoop":true,"textAlign":"center"} /-->
 
