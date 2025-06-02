@@ -56,13 +56,12 @@ class EmailListingRestController extends RestApiControllerBase {
 	 */
 	public function __construct() {
 		$this->email_template_generator = new WCTransactionalEmailPostsGenerator();
-		add_action( 'woocommerce_init', array( $this, 'perform_init' ) );
 	}
 
 	/**
 	 * Perform the initialization.
 	 */
-	public function perform_init() {
+	public function initialize_template_generator() {
 		$this->email_template_generator->init_default_transactional_emails();
 	}
 
@@ -70,6 +69,8 @@ class EmailListingRestController extends RestApiControllerBase {
 	 * Register the REST API endpoints handled by this controller.
 	 */
 	public function register_routes() {
+		$this->initialize_template_generator();
+
 		register_rest_route(
 			$this->route_namespace,
 			'/' . $this->rest_base . '/recreate-email-post',
