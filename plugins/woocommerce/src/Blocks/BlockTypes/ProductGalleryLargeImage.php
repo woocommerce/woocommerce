@@ -115,8 +115,6 @@ class ProductGalleryLargeImage extends AbstractBlock {
 			$base_classes .= ' wc-block-woocommerce-product-gallery-large-image__image--hoverZoom';
 		}
 
-		do_action('qm/debug', $image_data);
-
 		ob_start();
 		?>
 			<ul
