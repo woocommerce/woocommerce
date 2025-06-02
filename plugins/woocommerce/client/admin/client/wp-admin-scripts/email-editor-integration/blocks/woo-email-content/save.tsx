@@ -1,3 +1,3 @@
 export function Save() {
-	return <div>##WOO_CONTENT##</div>;
+	return <div className="wp-block-woo-email-content">##WOO_CONTENT##</div>;
 }
