@@ -12,7 +12,11 @@ import {
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement, useState } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
-import { PaymentIncentive, PaymentProvider } from '@woocommerce/data';
+import {
+	PaymentIncentive,
+	PaymentProvider,
+	PaymentsEntity,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -59,13 +63,12 @@ interface IncentiveModalProps {
 	/**
 	 * Callback to set up the plugin.
 	 *
-	 * @param id            Extension ID.
-	 * @param slug          Extension slug.
-	 * @param onboardingUrl Onboarding URL (if available).
+	 * @param provider      Extension provider.
+	 * @param onboardingUrl Extension onboarding URL (if available).
+	 * @param attachUrl     Extension attach URL (if available).
 	 */
-	setupPlugin: (
-		id: string,
-		slug: string,
+	setUpPlugin: (
+		provider: PaymentsEntity,
 		onboardingUrl: string | null,
 		attachUrl: string | null
 	) => void;
@@ -86,7 +89,7 @@ export const IncentiveModal = ( {
 	onboardingUrl,
 	onAccept,
 	onDismiss,
-	setupPlugin,
+	setUpPlugin,
 }: IncentiveModalProps ) => {
 	const [ isBusy, setIsBusy ] = useState( false );
 	const [ isOpen, setIsOpen ] = useState( true );
@@ -102,7 +105,7 @@ export const IncentiveModal = ( {
 			suggestion_id: provider._suggestion_id ?? '',
 			display_context: context,
 		} );
-	}, [ incentive.promo_id, provider.id ] );
+	}, [ incentive, provider ] );
 
 	/**
 	 * Closes the modal.
@@ -130,9 +133,8 @@ export const IncentiveModal = ( {
 		// We also dismiss the incentive when it is accepted.
 		onDismiss( incentive._links.dismiss.href, context, true );
 		handleClose(); // Close the modal.
-		setupPlugin(
-			provider.id,
-			provider.plugin.slug,
+		setUpPlugin(
+			provider,
 			onboardingUrl,
 			provider.plugin.status === 'not_installed'
 				? provider._links?.attach?.href ?? null

@@ -471,9 +471,24 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
  * @return string
  */
 function wc_get_default_shipping_method_for_package( $key, $package, $chosen_method ) {
-	$chosen_method_id     = current( explode( ':', $chosen_method ) );
-	$rate_keys            = array_keys( $package['rates'] );
-	$chosen_method_exists = in_array( $chosen_method, $rate_keys, true );
+	$rate_keys               = array_keys( $package['rates'] );
+	$local_pickup_method_ids = LocalPickupUtils::get_local_pickup_method_ids();
+
+	if ( 'shortcode' === WC()->cart->cart_context ) {
+		$default = current( $rate_keys );
+	} else {
+		// No default means that when you enter block checkout, shipping is chosen rather than pickup. We should only do this if there are shipping methods available other than local pickup.
+		$default = CartCheckoutUtils::shipping_methods_exist() ? '' : current( $rate_keys );
+
+		// Default to the first method in the package that isn't a local pickup method.
+		foreach ( $rate_keys as $rate_key ) {
+			$rate_method_id = current( explode( ':', $rate_key ) );
+			if ( ! in_array( $rate_method_id, $local_pickup_method_ids, true ) ) {
+				$default = $rate_key;
+				break;
+			}
+		}
+	}
 
 	/**
 	 * If the customer has selected local pickup, keep it selected if it's still in the package. We don't want to auto
@@ -481,11 +496,9 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 	 *
 	 * This is important for block-based checkout where there is an explicit toggle between shipping and pickup.
 	 */
-	$local_pickup_method_ids = LocalPickupUtils::get_local_pickup_method_ids();
-	$is_local_pickup_chosen  = in_array( $chosen_method_id, $local_pickup_method_ids, true );
-
-	// Default to the first method in the package. This can be sorted in the backend by the merchant.
-	$default = current( $rate_keys );
+	$chosen_method_id       = current( explode( ':', $chosen_method ) );
+	$chosen_method_exists   = in_array( $chosen_method, $rate_keys, true );
+	$is_local_pickup_chosen = in_array( $chosen_method_id, $local_pickup_method_ids, true );
 
 	// Default to local pickup if its chosen already.
 	if ( $chosen_method_exists && $is_local_pickup_chosen ) {

@@ -28,12 +28,10 @@ class CartController {
 	 * Makes the cart and sessions available to a route by loading them from core.
 	 */
 	public function load_cart() {
-		if ( did_action( 'woocommerce_load_cart_from_session' ) ) {
-			return;
+		if ( ! did_action( 'woocommerce_load_cart_from_session' ) ) {
+			// Initialize the cart.
+			wc_load_cart();
 		}
-
-		// Initialize the cart.
-		wc_load_cart();
 
 		// Load cart from session.
 		$cart               = $this->get_cart_instance();

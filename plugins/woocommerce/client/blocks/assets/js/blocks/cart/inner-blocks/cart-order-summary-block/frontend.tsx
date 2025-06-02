@@ -16,7 +16,7 @@ const FrontendBlock = ( {
 }: {
 	children?: JSX.Element | JSX.Element[];
 	className?: string;
-} ): JSX.Element | null => {
+} ) => {
 	const { cartTotals } = useStoreCart();
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 
@@ -27,6 +27,7 @@ const FrontendBlock = ( {
 				<TotalsFooterItem
 					currency={ totalsCurrency }
 					values={ cartTotals }
+					isEstimate={ true }
 				/>
 			</div>
 			<OrderMetaSlotFill />
