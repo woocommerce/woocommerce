@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store, getContext } from '@wordpress/interactivity';
+import { store, getContext, getConfig } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/cart';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 
@@ -117,10 +117,9 @@ store(
 	{
 		state: {
 			get itemsInCartText() {
-				const { singularItemsText, pluralItemsText } = getContext< {
-					singularItemsText: string;
-					pluralItemsText: string;
-				} >();
+				const { singularItemsText, pluralItemsText } = getConfig(
+					'woocommerce/mini-cart-title-items-counter-block'
+				);
 
 				const cartItemsCount = miniCartState.totalItemsInCart;
 

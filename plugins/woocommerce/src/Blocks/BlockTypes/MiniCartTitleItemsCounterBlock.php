@@ -45,9 +45,12 @@ class MiniCartTitleItemsCounterBlock extends AbstractInnerBlock {
 		// translators: items is items in a cart.
 		$plural = __( '(%d items)', 'woocommerce' );
 
-		$context = array(
-			'singularItemsText' => $singular,
-			'pluralItemsText'   => $plural,
+		wp_interactivity_config(
+			$this->get_full_block_name(),
+			array(
+				'singularItemsText' => $singular,
+				'pluralItemsText'   => $plural,
+			)
 		);
 
 		wp_interactivity_state(
@@ -59,8 +62,7 @@ class MiniCartTitleItemsCounterBlock extends AbstractInnerBlock {
 
 		ob_start();
 		?>
-		<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-		<span <?php echo wp_interactivity_data_wp_context( $context ); ?> data-wp-text="state.itemsInCartText" data-wp-interactive="woocommerce/mini-cart-title-items-counter-block" class="wp-block-woocommerce-mini-cart-title-items-counter-block">					
+		<span data-wp-text="state.itemsInCartText" data-wp-interactive="woocommerce/mini-cart-title-items-counter-block" class="wp-block-woocommerce-mini-cart-title-items-counter-block">
 		</span>
 		<?php
 		return ob_get_clean();
