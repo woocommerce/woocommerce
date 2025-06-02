@@ -205,23 +205,6 @@ class Payments {
 	}
 
 	/**
-	 * Get the business location country code from user meta (static helper) or fallback to the base country code.
-	 *
-	 * This is a static helper method that can be called from other classes
-	 * to get the user-selected country from the payments NOX profile.
-	 *
-	 * @return string The ISO 3166-1 alpha-2 country code from user meta, or the base country code if not set.
-	 */
-	public static function get_country_from_user_meta_or_fallback_to_base_country(): ?string {
-		$user_nox_meta = get_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, true );
-		if ( ! empty( $user_nox_meta['business_country_code'] ) ) {
-			return $user_nox_meta['business_country_code'];
-		}
-
-		return WC()->countries->get_base_country();
-	}
-
-	/**
 	 * Set the business location country for the Payments settings.
 	 *
 	 * @param string $location The country code. This should be a ISO 3166-1 alpha-2 country code.
