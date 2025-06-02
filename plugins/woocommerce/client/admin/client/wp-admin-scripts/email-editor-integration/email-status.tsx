@@ -53,7 +53,7 @@ export function EmailStatus( {
 		EMAIL_STATUSES.find( ( s ) => s.value === statusValue ) ??
 		EMAIL_STATUSES[ 1 ];
 
-	const updateStatus = ( newValue: boolean ): void => {
+	const updateStatus = async ( newValue: boolean ): Promise< void > => {
 		const editedPost = select( coreDataStore ).getEditedEntityRecord(
 			'postType',
 			'woo_email',
@@ -62,7 +62,7 @@ export function EmailStatus( {
 
 		// @ts-expect-error Property 'woocommerce_data' does not exist on type 'Updatable<Attachment<any>>'.
 		const woocommerce_data = editedPost?.woocommerce_data || {};
-		void dispatch( coreDataStore ).editEntityRecord(
+		await dispatch( coreDataStore ).editEntityRecord(
 			'postType',
 			'woo_email',
 			window.WooCommerceEmailEditor.current_post_id,
@@ -73,6 +73,14 @@ export function EmailStatus( {
 				},
 			}
 		);
+
+		// Save the changes to persist them.
+		await dispatch( coreDataStore ).saveEntityRecord(
+			'postType',
+			'woo_email',
+			window.WooCommerceEmailEditor.current_post_id
+		);
+
 		recordEvent( 'email_status_changed', {
 			status: newValue ? 'active' : 'inactive',
 		} );
@@ -114,8 +122,8 @@ export function EmailStatus( {
 					value: option.value,
 					description: option.description,
 				} ) ) }
-				onChange={ ( value ) => {
-					updateStatus( value === 'enabled' );
+				onChange={ async ( value ) => {
+					await updateStatus( value === 'enabled' );
 					onClose();
 				} }
 				disabled={ isManual }
