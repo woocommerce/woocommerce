@@ -38,7 +38,7 @@ class ProductGalleryUtils {
 	 */
 	public static function get_product_gallery_image_data( $product, $size ) {
 		$all_image_ids = self::get_all_image_ids( $product );
-		return self::get_image_src_data( $all_image_ids, $size );
+		return self::get_image_src_data( $all_image_ids, $size, $product->get_title() );
 	}
 
 	/**
@@ -57,12 +57,13 @@ class ProductGalleryUtils {
 	 *
 	 * @param array  $image_ids The image IDs to retrieve the source data for.
 	 * @param string $size The size of the image to retrieve.
+	 * @param string $product_title The title of the product used for alt fallback.
 	 * @return array An array of image source data.
 	 */
-	public static function get_image_src_data( $image_ids, $size ) {
+	public static function get_image_src_data( $image_ids, $size, $product_title = '' ) {
 		$image_src_data = array();
 
-		foreach ( $image_ids as $image_id ) {
+		foreach ( $image_ids as $index => $image_id ) {
 			if ( 0 === $image_id ) {
 				// Handle placeholder image.
 				$image_src_data[] = array(
@@ -88,7 +89,7 @@ class ProductGalleryUtils {
 				'src'    => $full_src ? $full_src[0] : '',
 				'srcset' => $srcset ? $srcset : '',
 				'sizes'  => $sizes ? $sizes : '',
-				'alt'    => $alt ? $alt : '',
+				'alt'    => $alt ? $alt : sprintf( '%s - Image %d', $product_title, $index + 1 ),
 			);
 		}
 
