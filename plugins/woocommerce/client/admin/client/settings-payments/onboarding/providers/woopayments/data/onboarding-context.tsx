@@ -53,7 +53,6 @@ const defaultURLStrategy: URLStrategy = {
 const OnboardingContext = createContext< OnboardingContextType >( {
 	steps: [],
 	isLoading: true,
-	isStoreLoading: true,
 	currentStep: undefined,
 	context: {},
 	navigateToStep: () => undefined,
