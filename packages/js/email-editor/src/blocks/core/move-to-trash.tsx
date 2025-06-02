@@ -2,32 +2,40 @@
  * External dependencies
  */
 import { addAction } from '@wordpress/hooks';
-import { dispatch } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
 
 /**
  * Internal dependencies
  */
-import { unlock } from '../../private-apis';
+import {
+	registerEntityAction,
+	unregisterEntityAction,
+} from '../../private-apis';
 import trashEmailPost from '../../components/header/trash-email-post';
 
+const removeDefaultMoveToTrashActionAddCustom = ( postType: string ) => {
+	// Remove the default move to trash action.
+	unregisterEntityAction( 'postType', postType, 'move-to-trash' );
+
+	// Add the custom trash email post action.
+	registerEntityAction( 'postType', postType, trashEmailPost );
+};
+
 function modifyMoveToTrashAction() {
+	// Available in WordPress 6.8+
 	addAction(
 		'core.registerPostTypeSchema',
 		'woocommerce-email-editor/modify-move-to-trash-action',
 		( postType ) => {
-			// Remove the default move to trash action.
-			unlock( dispatch( editorStore ) ).unregisterEntityAction(
-				'postType',
-				postType,
-				'move-to-trash'
-			);
-			// Add the custom trash email post action.
-			unlock( dispatch( editorStore ) ).registerEntityAction(
-				'postType',
-				postType,
-				trashEmailPost
-			);
+			removeDefaultMoveToTrashActionAddCustom( postType );
+		}
+	);
+
+	// Support for WordPress 6.7+
+	addAction(
+		'core.registerPostTypeActions',
+		'woocommerce-email-editor/modify-move-to-trash-action',
+		( postType ) => {
+			removeDefaultMoveToTrashActionAddCustom( postType );
 		}
 	);
 }
