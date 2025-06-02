@@ -57,6 +57,8 @@ class ProductDescription extends AbstractBlock {
 
 		// Get the description content.
 		$description = $product->get_description();
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		$description = apply_filters( 'the_content', str_replace( ']]>', ']]&gt;', $description ) );
 		if ( empty( $description ) ) {
 			unset( self::$seen_ids[ $product_id ] );
 			return '';
