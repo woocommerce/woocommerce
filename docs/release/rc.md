@@ -10,6 +10,6 @@ checklist and [release schedule](https://developer.woocommerce.com/release-calen
 The expected timeframe between a release candidate and a final release is one week (to identify and address any regressions).
 If, during this period, no regression has been found, we release the release candidate as final.
 
-On the technical side of the release process, we rely on release branches (named `release/*.*`) for code freeze and
+On the technical side of the release process, we rely on release branches (named e.g., `release/9.9`) for code freeze and
 stabilization. In those branches, we tag release candidates, fix regressions (via CFEs), and tag final releases in isolation 
 from ongoing development for greater release stability. 
