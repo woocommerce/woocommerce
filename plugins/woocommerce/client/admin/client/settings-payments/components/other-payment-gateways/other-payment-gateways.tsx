@@ -76,7 +76,7 @@ export const OtherPaymentGateways = ( {
 	const [ isExpanded, setIsExpanded ] = useState( initialExpanded );
 	const [ categoryIdWithPopoverVisible, setCategoryIdWithPopoverVisible ] =
 		useState( '' );
-	const buttonRef = useRef< HTMLSpanElement >( null );
+	const buttonRefs = useRef< Record< string, HTMLSpanElement | null > >( {} );
 
 	const handleInfoIconClick = (
 		event: React.MouseEvent | React.KeyboardEvent,
@@ -87,7 +87,8 @@ export const OtherPaymentGateways = ( {
 			'.other-payment-gateways__content__title__icon-container'
 		);
 
-		if ( buttonRef.current && parentSpan !== buttonRef.current ) {
+		const targetRef = buttonRefs.current[ categoryId ] ?? null;
+		if ( targetRef && parentSpan !== targetRef ) {
 			return;
 		}
 
@@ -216,7 +217,9 @@ export const OtherPaymentGateways = ( {
 									} }
 									tabIndex={ 0 }
 									role="button"
-									ref={ buttonRef }
+									ref={ ( el ) => {
+										buttonRefs.current[ category.id ] = el;
+									} }
 								>
 									<Gridicon
 										icon="info-outline"

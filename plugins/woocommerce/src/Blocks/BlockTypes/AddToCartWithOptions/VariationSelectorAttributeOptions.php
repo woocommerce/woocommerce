@@ -213,18 +213,24 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 
 		$options = '';
 		foreach ( $attribute_terms as $attribute_term ) {
+			$option_attributes = array(
+				'value'                  => $attribute_term['value'],
+				'data-wp-bind--disabled' => 'state.isOptionDisabled',
+				'data-wp-context'        => array(
+					'option'  => $attribute_term,
+					'name'    => $attribute_slug,
+					'options' => $attribute_terms,
+				),
+			);
+
+			if ( $attribute_term['isSelected'] ) {
+				$option_attributes['selected'] = 'selected';
+			}
+
 			$options .= sprintf(
 				'<option %s>%s</option>',
 				$this->get_normalized_attributes(
-					array(
-						'value'                  => $attribute_term['value'],
-						'data-wp-bind--disabled' => 'state.isOptionDisabled',
-						'data-wp-context'        => array(
-							'option'  => $attribute_term,
-							'name'    => $attribute_slug,
-							'options' => $attribute_terms,
-						),
-					),
+					$option_attributes
 				),
 				$attribute_term['label']
 			);
