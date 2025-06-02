@@ -7,7 +7,7 @@ checklist and [release schedule](https://developer.woocommerce.com/release-calen
 > Note 1: The very first release candidate can be released after all [CFEs](https://github.com/woocommerce/woocommerce/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22code%20freeze%20exception%22) 
 > for the target release version are addressed and merged.
 
-The expected timeframe between a release candidate and a final release is one week (to identify and address any regressions).
+The expected timeframe between a release candidate and a final release is two weeks (to identify and address any regressions).
 If, during this period, no regression has been found, we release the release candidate as final.
 
 On the technical side of the release process, we rely on release branches (named e.g., `release/9.9`) for code freeze and
