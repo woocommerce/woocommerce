@@ -117,7 +117,8 @@ export function taskClickedAction( event: {
 
 		if (
 			// Use case 1: Merchant has no payment extensions installed, and their store is in a WooPayments-supported geo.
-			( ! wooPaymentsHasOtherProvidersEnabled &&
+			( ! wooPaymentsIsActive &&
+				! wooPaymentsHasOtherProvidersEnabled &&
 				wooPaymentsSettingsCountryIsSupported ) ||
 			// Use case 2: Merchant has the WooPayments extension installed but they have not completed setup.
 			( wooPaymentsIsActive && ! wooPaymentsIsOnboarded ) ||
