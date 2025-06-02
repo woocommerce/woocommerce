@@ -82,7 +82,7 @@ class ProductGalleryUtils {
 			// Get srcset and sizes.
 			$srcset = wp_get_attachment_image_srcset( $image_id, $size );
 			$sizes  = wp_get_attachment_image_sizes( $image_id, $size );
-			$alt    = wp_get_attachment_caption( $image_id );
+			$alt    = get_post_meta($image_id, '_wp_attachment_image_alt', true);
 
 			$image_src_data[] = array(
 				'id'     => $image_id,
