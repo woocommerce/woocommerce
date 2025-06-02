@@ -17,7 +17,7 @@ import { useOnboardingContext } from '~/settings-payments/onboarding/providers/w
 import { WC_ASSET_URL } from '~/utils/admin-settings';
 import { createNoticesFromResponse } from '~/lib/notices';
 import './payments-content.scss';
-import { useInstallationContext } from '~/launch-your-store/data/installation-context';
+import { useSetUpPaymentsContext } from '~/launch-your-store/data/setup-payments-context';
 
 const InstallWooPaymentsStep = ( {
 	installWooPayments,
@@ -70,7 +70,7 @@ const InstallWooPaymentsStep = ( {
 
 export const PaymentsContent = ( {} ) => {
 	const { isWooPaymentsActive, setWooPaymentsRecentlyActivated } =
-		useInstallationContext();
+		useSetUpPaymentsContext();
 
 	const { refreshStoreData } = useOnboardingContext();
 

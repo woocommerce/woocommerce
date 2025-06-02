@@ -25,11 +25,11 @@ import { SidebarContainer } from './sidebar-container';
 import { SiteHub } from '~/customize-store/assembler-hub/site-hub';
 import { taskIcons, taskCompleteIcon } from './icons';
 import { StepPlaceholder } from './step-placeholder';
-import { useInstallationContext } from '~/launch-your-store/data/installation-context';
+import { useSetUpPaymentsContext } from '~/launch-your-store/data/setup-payments-context';
 
 export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 	const { wooPaymentsRecentlyActivated, isWooPaymentsActive } =
-		useInstallationContext();
+		useSetUpPaymentsContext();
 
 	const {
 		steps: allSteps,

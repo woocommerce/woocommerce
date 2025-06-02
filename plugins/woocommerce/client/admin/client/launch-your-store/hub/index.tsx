@@ -30,7 +30,7 @@ export type LaunchYourStoreComponentProps = {
 	sendEventToMainContent: ( arg0: MainContentMachineEvents ) => void;
 	className?: string;
 };
-import { InstallationProvider } from '../data/installation-context';
+import { SetUpPaymentsProvider } from '../data/setup-payments-context';
 
 export type LaunchYourStoreQueryParams = {
 	sidebar?: 'hub' | 'launch-success';
@@ -78,7 +78,7 @@ const LaunchStoreController = () => {
 
 	return (
 		<div className={ 'launch-your-store-layout__container' }>
-			<InstallationProvider closeModal={ handlePaymentsClose }>
+			<SetUpPaymentsProvider closeModal={ handlePaymentsClose }>
 				<SidebarContainer
 					className={ clsx( {
 						'is-sidebar-hidden': ! isSidebarVisible,
@@ -102,7 +102,7 @@ const LaunchStoreController = () => {
 						/>
 					) }
 				</MainContentContainer>
-			</InstallationProvider>
+			</SetUpPaymentsProvider>
 		</div>
 	);
 };

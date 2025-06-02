@@ -12,7 +12,7 @@ import { getNewPath } from '@woocommerce/navigation';
 import { LYSPaymentsSteps } from '~/settings-payments/onboarding/providers/woopayments/steps';
 import { OnboardingProvider } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
 
-interface InstallationContextType {
+interface SetUpPaymentsContextType {
 	isWooPaymentsActive: boolean;
 	wooPaymentsRecentlyActivated: boolean;
 	setWooPaymentsRecentlyActivated: ( value: boolean ) => void;
@@ -21,15 +21,15 @@ interface InstallationContextType {
 /**
  * Context to manage onboarding steps
  */
-const InstallationContext = createContext< InstallationContextType >( {
+const SetUpPaymentsContext = createContext< SetUpPaymentsContextType >( {
 	isWooPaymentsActive: false,
 	wooPaymentsRecentlyActivated: false,
 	setWooPaymentsRecentlyActivated: () => undefined,
 } );
 
-export const useInstallationContext = () => useContext( InstallationContext );
+export const useSetUpPaymentsContext = () => useContext( SetUpPaymentsContext );
 
-export const InstallationProvider: React.FC< {
+export const SetUpPaymentsProvider: React.FC< {
 	children: React.ReactNode;
 	closeModal: () => void;
 } > = ( { children, closeModal } ) => {
@@ -70,7 +70,7 @@ export const InstallationProvider: React.FC< {
 	};
 
 	return (
-		<InstallationContext.Provider
+		<SetUpPaymentsContext.Provider
 			value={ {
 				isWooPaymentsActive,
 				wooPaymentsRecentlyActivated,
@@ -88,6 +88,6 @@ export const InstallationProvider: React.FC< {
 				</OnboardingProvider>
 			) }
 			{ ! isWooPaymentsActive && children }
-		</InstallationContext.Provider>
+		</SetUpPaymentsContext.Provider>
 	);
 };
