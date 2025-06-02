@@ -105,9 +105,9 @@ store( 'woocommerce/mini-cart-title-items-counter-block', {
 store( 'woocommerce/mini-cart-footer-block', {
 	state: {
 		get formattedSubtotal(): string {
-			const { displayCartPriceIncludingTax } = getContext< {
-				displayCartPriceIncludingTax: boolean;
-			} >();
+			const { displayCartPriceIncludingTax } = getConfig(
+				'woocommerce/mini-cart-footer-block'
+			);
 
 			const { currency } = getConfig( 'woocommerce' );
 
