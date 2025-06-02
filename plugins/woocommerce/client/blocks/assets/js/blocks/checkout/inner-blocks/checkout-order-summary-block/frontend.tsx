@@ -66,19 +66,14 @@ const FrontendBlock = ( {
 					>
 						{ __( 'Order summary', 'woocommerce' ) }
 					</p>
-					{ ! isLarge && (
-						<>
-							<FormattedMonetaryAmount
-								currency={ totalsCurrency }
-								value={ totalPrice }
-							/>
-
-							<Icon
-								className="wc-block-components-checkout-order-summary__title-icon"
-								icon={ isOpen ? chevronUp : chevronDown }
-							/>
-						</>
-					) }
+					<FormattedMonetaryAmount
+						currency={ totalsCurrency }
+						value={ totalPrice }
+						className="wc-block-components-checkout-order-summary__title-price"
+					/>
+					<span className="wc-block-components-checkout-order-summary__title-icon">
+						<Icon icon={ isOpen ? chevronUp : chevronDown } />
+					</span>
 				</div>
 				<div
 					className={ clsx(
@@ -100,27 +95,25 @@ const FrontendBlock = ( {
 				</div>
 			</div>
 
-			{ ! isLarge && (
-				<CheckoutOrderSummaryFill>
-					<div
-						className={ `${ className } checkout-order-summary-block-fill-wrapper` }
-					>
-						<FormStepHeading>
-							<>{ __( 'Order summary', 'woocommerce' ) }</>
-						</FormStepHeading>
-						<div className="checkout-order-summary-block-fill">
-							{ children }
-							<div className="wc-block-components-totals-wrapper">
-								<TotalsFooterItem
-									currency={ totalsCurrency }
-									values={ cartTotals }
-								/>
-							</div>
-							<OrderMetaSlotFill />
+			<CheckoutOrderSummaryFill>
+				<div
+					className={ `${ className } checkout-order-summary-block-fill-wrapper` }
+				>
+					<FormStepHeading>
+						<>{ __( 'Order summary', 'woocommerce' ) }</>
+					</FormStepHeading>
+					<div className="checkout-order-summary-block-fill">
+						{ children }
+						<div className="wc-block-components-totals-wrapper">
+							<TotalsFooterItem
+								currency={ totalsCurrency }
+								values={ cartTotals }
+							/>
 						</div>
+						<OrderMetaSlotFill />
 					</div>
-				</CheckoutOrderSummaryFill>
-			) }
+				</div>
+			</CheckoutOrderSummaryFill>
 		</>
 	);
 };
