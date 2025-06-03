@@ -8,6 +8,7 @@ import {
 	useRef,
 	useEffect,
 	useMemo,
+	useCallback,
 } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
@@ -27,11 +28,13 @@ type PaymentEventsContextType = {
 	// Event registration callback for registering observers for the payment processing event.
 	onPaymentProcessing: ReturnType< typeof emitterCallback >;
 	onPaymentSetup: ReturnType< typeof emitterCallback >;
+	onPlaceOrderButtonValidation: () => boolean;
 };
 
 const PaymentEventsContext = createContext< PaymentEventsContextType >( {
 	onPaymentProcessing: () => () => () => void null,
 	onPaymentSetup: () => () => () => void null,
+	onPlaceOrderButtonValidation: () => false,
 } );
 
 export const usePaymentEventsContext = () => {
@@ -65,7 +68,7 @@ export const PaymentEventsProvider = ( {
 			isCalculating: store.isCalculating(),
 		};
 	} );
-	const { isPaymentReady } = useSelect( ( select ) => {
+	const { isPaymentReady, hasPaymentError } = useSelect( ( select ) => {
 		const store = select( paymentStore );
 		return {
 			// The PROCESSING status represents before the checkout runs the observers
@@ -74,13 +77,46 @@ export const PaymentEventsProvider = ( {
 			// the READY status represents when the observers have finished processing and payment data
 			// synced with the payment store, ready to be sent to the StoreApi
 			isPaymentReady: store.isPaymentReady(),
+			hasPaymentError: store.hasPaymentError(),
 		};
 	} );
 
-	const { setValidationErrors } = useDispatch( validationStore );
+	const { hasValidationErrors } = useSelect( ( select ) => {
+		const store = select( validationStore );
+		return {
+			hasValidationErrors: store.hasValidationErrors(),
+		};
+	} );
+
+	const { setValidationErrors, showAllValidationErrors } =
+		useDispatch( validationStore );
 	const [ observers, observerDispatch ] = useReducer( emitReducer, {} );
 	const { onPaymentSetup } = useEventEmitters( observerDispatch );
 	const currentObservers = useRef( observers );
+
+	const onPlaceOrderButtonValidation = useCallback( () => {
+		showAllValidationErrors();
+
+		if ( hasValidationErrors ) {
+			return false;
+		}
+
+		if ( hasPaymentError ) {
+			return false;
+		}
+
+		if ( checkoutHasError ) {
+			return false;
+		}
+
+		return ! checkoutIsCalculating;
+	}, [
+		hasValidationErrors,
+		hasPaymentError,
+		checkoutHasError,
+		checkoutIsCalculating,
+		showAllValidationErrors,
+	] );
 
 	// ensure observers are always current.
 	useEffect( () => {
@@ -150,6 +186,7 @@ export const PaymentEventsProvider = ( {
 	const paymentContextData = {
 		onPaymentProcessing,
 		onPaymentSetup,
+		onPlaceOrderButtonValidation,
 	};
 
 	return (

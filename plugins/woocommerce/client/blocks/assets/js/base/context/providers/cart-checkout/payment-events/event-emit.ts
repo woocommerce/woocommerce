@@ -16,6 +16,7 @@ import {
 
 const EMIT_TYPES = {
 	PAYMENT_SETUP: 'payment_setup',
+	PLACE_ORDER_BUTTON_VALIDATION: 'place_order_button_validation',
 };
 
 type EventEmittersType = Record< string, ReturnType< typeof emitterCallback > >;
@@ -38,6 +39,10 @@ const useEventEmitters = (
 		() => ( {
 			onPaymentSetup: emitterCallback(
 				EMIT_TYPES.PAYMENT_SETUP,
+				observerDispatch
+			),
+			onPlaceOrderButtonValidation: emitterCallback(
+				EMIT_TYPES.PLACE_ORDER_BUTTON_VALIDATION,
 				observerDispatch
 			),
 		} ),

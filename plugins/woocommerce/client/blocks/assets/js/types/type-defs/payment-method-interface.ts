@@ -105,6 +105,8 @@ export interface EventRegistrationProps {
 	onPaymentProcessing: ReturnType< typeof emitterCallback >;
 	// Event registration callback for registering observers for the payment setup event.
 	onPaymentSetup: ReturnType< typeof emitterCallback >;
+	// Used to validate whether the place order button should be enabled/disabled. Returns true if valid, false if invalid.
+	onPlaceOrderButtonValidation: () => boolean;
 	// Used to subscribe callbacks that will fire when retrieving shipping rates failed.
 	onShippingRateFail: ReturnType< typeof emitterCallback >;
 	// Used to subscribe callbacks that will fire after selecting a shipping rate unsuccessfully.

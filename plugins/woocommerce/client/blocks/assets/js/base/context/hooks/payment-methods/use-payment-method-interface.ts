@@ -127,7 +127,7 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 
 	const { __internalSetExpressPaymentError } = useDispatch( paymentStore );
 
-	const { onPaymentProcessing, onPaymentSetup } = usePaymentEventsContext();
+	const { onPaymentProcessing, onPaymentSetup, onPlaceOrderButtonValidation } = usePaymentEventsContext();
 	const {
 		shippingErrorStatus,
 		shippingErrorTypes,
@@ -232,6 +232,7 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 			onCheckoutValidation,
 			onPaymentProcessing,
 			onPaymentSetup,
+			onPlaceOrderButtonValidation,
 			onShippingRateFail,
 			onShippingRateSelectFail,
 			onShippingRateSelectSuccess,

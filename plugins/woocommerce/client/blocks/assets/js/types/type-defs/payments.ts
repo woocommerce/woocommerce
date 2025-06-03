@@ -117,7 +117,7 @@ export interface PaymentMethodConfiguration {
 	// Optionally customize the label text for the checkout submit (`Place Order`) button.
 	placeOrderButtonLabel?: string;
 	// A function that renders a custom React component for the place order button.
-	placeOrderButton?: () => ReactNode;
+	placeOrderButton?: ( props: never ) => ReactNode;
 	// A React node that contains logic handling any processing your payment method has to do with saved payment methods if your payment method supports them
 	savedTokenComponent?: ReactNode | null;
 }
@@ -182,7 +182,7 @@ export interface PaymentMethodConfigInstance {
 	label: ReactNode;
 	ariaLabel: string;
 	placeOrderButtonLabel?: string;
-	placeOrderButton?: () => ReactNode;
+	placeOrderButton?: ( props: never ) => ReactNode;
 	savedTokenComponent?: ReactNode | null;
 	canMakePaymentFromConfig: CanMakePaymentCallback;
 	canMakePayment: CanMakePaymentCallback;
