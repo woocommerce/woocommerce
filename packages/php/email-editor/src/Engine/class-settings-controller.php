@@ -26,6 +26,8 @@ class Settings_Controller {
 		'core/paragraph',
 		'core/quote',
 		'core/spacer',
+		'core/social-link',
+		'core/social-links',
 	);
 
 	const DEFAULT_SETTINGS = array(

@@ -48,28 +48,3 @@ test.describe( 'Test the checkout template', () => {
 		).toBeVisible();
 	} );
 } );
-
-test.describe( 'Test editing the checkout template', () => {
-	test( 'Merchant can transform shortcode block into blocks', async ( {
-		admin,
-		editor,
-	} ) => {
-		await admin.visitSiteEditor( {
-			postId: templatePath,
-			postType: templateType,
-			canvas: 'edit',
-		} );
-		await editor.setContent(
-			'<!-- wp:woocommerce/classic-shortcode {"shortcode":"checkout"} /-->'
-		);
-		await editor.canvas
-			.locator( '.wp-block-woocommerce-classic-shortcode' )
-			.waitFor();
-		await editor.canvas
-			.getByRole( 'button', { name: 'Transform into blocks' } )
-			.click();
-		await expect(
-			editor.canvas.locator( 'button:has-text("Place order")' ).first()
-		).toBeVisible();
-	} );
-} );

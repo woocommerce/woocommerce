@@ -39,7 +39,7 @@
 		"automattic/jetpack-a8c-mc-stats": "^3.0.0",
 		"automattic/jetpack-autoloader": "5.0.0",
 		"automattic/jetpack-config": "3.0.0",
-		"automattic/jetpack-connection": "^6.2.0",
+		"automattic/jetpack-connection": "^6.11.1",
 		"automattic/jetpack-constants": "^3.0.1",
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",

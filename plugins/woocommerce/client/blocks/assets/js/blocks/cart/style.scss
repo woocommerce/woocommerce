@@ -1,10 +1,6 @@
 .wc-block-cart {
 	padding-top: $gap;
 
-	.wc-block-components-shipping-calculator {
-		white-space: nowrap;
-	}
-
 	.wc-block-components-address-form {
 		.wc-block-components-text-input,
 		.wc-block-components-country-input,
@@ -24,6 +20,18 @@
 	table.wc-block-cart-items th,
 	table.wc-block-cart-items td {
 		margin: 0 0 $gap * 2.5;
+	}
+
+	.wp-block-woocommerce-cart-order-summary-block {
+		border-bottom: 1px solid $universal-border-light;
+		margin-bottom: $gap;
+
+		.wc-block-components-totals-item,
+		.wc-block-components-panel,
+		.wc-block-components-totals-coupon {
+			padding-left: 0;
+			padding-right: 0;
+		}
 	}
 }
 
@@ -106,10 +114,6 @@
 	table.wc-block-cart-items {
 		margin: 0;
 	}
-	.wc-block-components-shipping-rates-control
-		.wc-block-components-radio-control__option {
-		padding-left: em($gap-huge);
-	}
 }
 
 .is-medium,
@@ -144,27 +148,6 @@
 
 	.wc-block-components-sidebar {
 		margin-top: 0;
-
-		.wc-block-components-shipping-calculator,
-		.wc-block-components-shipping-rates-control__package {
-			padding-left: 0;
-			padding-right: 0;
-		}
-
-		.wc-block-components-totals-item__description.wc-block-components-totals-shipping__via,
-		.wc-block-components-totals-shipping__change-address__link {
-			padding-top: $gap-smallest;
-		}
-
-		.wc-block-components-totals-shipping__options {
-			margin-top: $gap;
-		}
-		.wc-block-components-radio-control > * {
-			margin-bottom: $gap;
-		}
-		.wc-block-components-radio-control > *:last-child {
-			margin-bottom: 0;
-		}
 	}
 
 	.wc-block-cart__payment-options {

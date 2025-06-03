@@ -33,9 +33,8 @@ export const GROUPED_PRODUCT_ITEM_TEMPLATE: TemplateArray = [
 						'woocommerce/add-to-cart-with-options-grouped-product-selector-item-cta',
 					],
 					[
-						'core/post-title',
+						'woocommerce/add-to-cart-with-options-grouped-product-selector-item-label',
 						{
-							level: 2,
 							fontSize: 'medium',
 							style: {
 								layout: {
@@ -51,7 +50,6 @@ export const GROUPED_PRODUCT_ITEM_TEMPLATE: TemplateArray = [
 									fontWeight: 400,
 								},
 							},
-							isLink: true,
 						},
 					],
 					[

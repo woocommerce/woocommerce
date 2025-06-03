@@ -16,8 +16,10 @@ export interface BlockAttributes {
 	saleBadgeAlign: 'left' | 'center' | 'right';
 	// Size of image to use.
 	imageSizing: ImageSizing;
-	// Whether or not be a children of Query Loop Block.
+	// Whether or not the block is within the context of a Query Loop Block.
 	isDescendentOfQueryLoop: boolean;
+	// Whether or not the block is within the context of a Single Product Block.
+	isDescendentOfSingleProductBlock: boolean;
 	// Height of the image.
 	height?: string;
 	// Width of the image.
