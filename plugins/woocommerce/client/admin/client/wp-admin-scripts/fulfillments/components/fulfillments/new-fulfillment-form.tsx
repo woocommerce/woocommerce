@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button, Icon } from '@wordpress/components';
 
@@ -25,9 +25,13 @@ const NewFulfillmentForm: React.FC = () => {
 	const { order, fulfillments, openSection, setOpenSection, isEditing } =
 		useFulfillmentDrawerContext();
 	const [ error, setError ] = useState< string | null >( null );
-	const remainingItems = getItemsNotInAnyFulfillment(
-		fulfillments,
-		order ?? ( { line_items: [] as LineItem[] } as Order )
+	const remainingItems = useMemo(
+		() =>
+			getItemsNotInAnyFulfillment(
+				fulfillments,
+				order ?? ( { line_items: [] as LineItem[] } as Order )
+			),
+		[ fulfillments, order ]
 	);
 	const [ selectedItems, setSelectedItems ] = useState< ItemQuantity[] >(
 		spreadItems( remainingItems )
@@ -45,8 +49,12 @@ const NewFulfillmentForm: React.FC = () => {
 		<div
 			className={ [
 				'woocommerce-fulfillment-new-fulfillment-form',
-				isEditing &&
-					'woocommerce-fulfillment-new-fulfillment-form__disabled',
+				isEditing
+					? 'woocommerce-fulfillment-new-fulfillment-form__disabled'
+					: '',
+				fulfillments.length === 0
+					? 'woocommerce-fulfillment-new-fulfillment-form__first'
+					: '',
 			].join( ' ' ) }
 			onClick={ () => setOpenSection( 'order' ) }
 			onKeyUp={ ( event ) => {

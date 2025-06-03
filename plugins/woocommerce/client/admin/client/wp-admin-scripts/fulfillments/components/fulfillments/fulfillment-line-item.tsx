@@ -135,7 +135,10 @@ export default function FulfillmentLineItem( {
 					</div>
 				) }
 				<div className="woocommerce-fulfillment-item-price">
-					{ getFormattedItemTotal( item.total, currency ) }
+					{ getFormattedItemTotal(
+						parseFloat( item.total ) * ( quantity / item.quantity ),
+						currency
+					) }
 				</div>
 			</div>
 			{ editMode && itemExpanded && (
@@ -186,7 +189,7 @@ export default function FulfillmentLineItem( {
 							</div>
 							<div className="woocommerce-fulfillment-item-price">
 								{ getFormattedItemTotal(
-									parseInt( item.total, 10 ) / quantity,
+									parseInt( item.total, 10 ) / item.quantity,
 									currency
 								) }
 							</div>
