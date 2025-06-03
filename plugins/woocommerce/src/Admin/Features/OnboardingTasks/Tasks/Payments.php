@@ -102,6 +102,23 @@ class Payments extends Task {
 	}
 
 	/**
+	 * Check if the store has any enabled gateways.
+	 *
+	 * @return bool
+	 */
+	public static function has_gateways() {
+		$gateways         = WC()->payment_gateways()->payment_gateways;
+		$enabled_gateways = array_filter(
+			$gateways,
+			function ( $gateway ) {
+				return 'yes' === $gateway->enabled;
+			}
+		);
+
+		return ! empty( $enabled_gateways );
+	}
+
+	/**
 	 * The task action URL.
 	 *
 	 * Empty string means the task linking will be handled by the JS logic.
