@@ -375,6 +375,16 @@ class WC_Frontend_Scripts {
 				'has_rtl' => true,
 			),
 		);
+
+		if ( Features::is_enabled( 'experimental-blocks' ) ) {
+			$register_styles['wc-address-autocomplete'] = array(
+				'src'     => self::get_asset_url( 'assets/css/address-autocomplete.css' ),
+				'deps'    => array(),
+				'version' => $version,
+				'has_rtl' => false,
+			);
+		}
+
 		foreach ( $register_styles as $name => $props ) {
 			self::register_style( $name, $props['src'], $props['deps'], $props['version'], 'all', $props['has_rtl'] );
 		}
@@ -420,6 +430,7 @@ class WC_Frontend_Scripts {
 				$registered_providers = $address_provider_service->get_providers();
 				if ( is_array( $registered_providers ) && count( $registered_providers ) > 0 ) {
 					self::enqueue_script( 'wc-address-autocomplete' );
+					self::enqueue_style( 'wc-address-autocomplete' );
 				}
 			}
 		}
