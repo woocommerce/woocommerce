@@ -458,7 +458,6 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		// Format decimal values.
-		// Need this for fee_lines['taxes'] to be formatted.
 		foreach ( $format_decimal as $key ) {
 			$data[ $key ] = wc_format_decimal( $data[ $key ], $this->request['dp'] );
 		}
