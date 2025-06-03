@@ -185,7 +185,6 @@ $dialog-padding: 20px;
 		justify-content: center;
 		align-items: center;
 		aspect-ratio: 1 / 1;
-		outline: none;
 	}
 
 	&__thumbnail__image {
@@ -193,7 +192,7 @@ $dialog-padding: 20px;
 		max-width: 100%;
 		aspect-ratio: 1 / 1;
 		object-fit: cover;
-		outline: none;
+		outline-offset: -2px;
 
 		&.is-active {
 			position: relative;
