@@ -1500,6 +1500,8 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @testdox The product POST endpoint properly cleans up orphaned images when product creation fails.
 	 */
 	public function test_create_product_with_duplicate_sku_trashed_original_cleans_up_images() {
+		// The manual override is needed because of the way we dispatch the REST request.
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
 		$original_product_sku = 'DUPLICATE_SKU_TEST_TRASHED';
 		// This image `src` is used in other product API tests, using here for consistency.
 		$shared_image_src = 'http://cldup.com/Dr1Bczxq4q.png';
@@ -1515,7 +1517,6 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'images'        => array(
 					array(
 						'src' => $shared_image_src,
-						'alt' => 'Original Image',
 					),
 				),
 			)
@@ -1524,8 +1525,9 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 201, $response_original_product->get_status(), 'Failed to create the initial product with an image.' );
 
-		$original_product_data = $response_original_product->get_data();
-		$original_product_id   = $original_product_data['id'];
+		$original_product_data  = $response_original_product->get_data();
+		$original_product_id    = $original_product_data['id'];
+		$original_attachment_id = $original_product_data['images'][0]['id'];
 
 		// 2. Move the original product to trash.
 		wp_trash_post( $original_product_id );
@@ -1557,9 +1559,10 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 		$failed_creation_response = $this->server->dispatch( $create_request_for_failure );
+		$failed_creation_response_data = $failed_creation_response->get_data();
 
-		$this->assertInstanceOf( 'WP_Error', $failed_creation_response, 'Product creation should fail and return a WP_Error object.' );
 		$this->assertEquals( 400, $failed_creation_response->get_status(), 'Product creation attempt with duplicate SKU should return HTTP 400.' );
+		$this->assertEquals( 'woocommerce_rest_product_not_created', $failed_creation_response_data['code'] );
 
 		$attachments_after_failed_attempt = count(
 			get_posts(
