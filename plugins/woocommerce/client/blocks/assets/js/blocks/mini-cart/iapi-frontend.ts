@@ -27,16 +27,13 @@ type MiniCartContext = {
 // Inject style tags for badge styles based on background colors of the document.
 setStyles();
 
-type MiniCartState = {
-	totalItemsInCart: number;
-	drawerOverlayClass: string;
-	badgeIsVisible: boolean;
-	cartIsEmpty: boolean;
-};
-
 type MiniCart = {
-	state: MiniCartState;
-
+	state: {
+		totalItemsInCart: number;
+		drawerOverlayClass: string;
+		badgeIsVisible: boolean;
+		cartIsEmpty: boolean;
+	};
 	callbacks: {
 		openDrawer: () => void;
 		closeDrawer: () => void;
@@ -44,14 +41,7 @@ type MiniCart = {
 	};
 };
 
-// Destructure state in an empty call to the store, to ensure that state can be correctly typed.
-const { state: miniCartState } = store< MiniCart >(
-	'woocommerce/mini-cart',
-	{},
-	{ lock: true }
-);
-
-store< MiniCart >(
+const { state } = store< MiniCart >(
 	'woocommerce/mini-cart',
 	{
 		state: {
@@ -72,8 +62,8 @@ store< MiniCart >(
 					: `${ baseClasses } wc-block-components-drawer__screen-overlay--is-hidden`;
 			},
 
-			get badgeIsVisible() {
-				const cartHasItems = miniCartState.totalItemsInCart > 0;
+			get badgeIsVisible(): boolean {
+				const cartHasItems = state.totalItemsInCart > 0;
 				const { productCountVisibility } =
 					getContext< MiniCartContext >();
 
@@ -84,8 +74,8 @@ store< MiniCart >(
 				);
 			},
 
-			get cartIsEmpty() {
-				return miniCartState.totalItemsInCart === 0;
+			get cartIsEmpty(): boolean {
+				return state.totalItemsInCart === 0;
 			},
 		},
 
@@ -109,7 +99,7 @@ store< MiniCart >(
 			},
 		},
 	},
-	{ lock: universalLock }
+	{ lock: true }
 );
 
 store(
@@ -121,7 +111,7 @@ store(
 					'woocommerce/mini-cart-title-items-counter-block'
 				);
 
-				const cartItemsCount = miniCartState.totalItemsInCart;
+				const cartItemsCount = state.totalItemsInCart;
 
 				const template =
 					cartItemsCount === 1 ? singularItemsText : pluralItemsText;
