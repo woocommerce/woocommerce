@@ -24,7 +24,8 @@ const EmbeddedKyc: React.FC< Props > = ( {
 	collectPayoutRequirements = false,
 } ) => {
 	const { data } = useBusinessVerificationContext();
-	const { currentStep, navigateToNextStep, source, closeModal } = useOnboardingContext();
+	const { currentStep, navigateToNextStep, source, closeModal } =
+		useOnboardingContext();
 	const [ finalizingAccount, setFinalizingAccount ] = useState( false );
 	const [ loading, setLoading ] = useState( true );
 	const [ loadError, setLoadError ] = useState< LoadError | null >( null );
