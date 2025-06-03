@@ -10,11 +10,9 @@
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
-global $wpdb, $wp_version;
+global $wpdb, $wp_version, $wc_uninstalling_plugin;
 
-if ( ! defined( 'WC_UNINSTALLING_PLUGIN' ) ) {
-	define( 'WC_UNINSTALLING_PLUGIN', true );
-}
+$wc_uninstalling_plugin = true;
 
 wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
 wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
@@ -110,3 +108,5 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Clear any cached data that has been removed.
 	wp_cache_flush();
 }
+
+unset( $wc_uninstalling_plugin );

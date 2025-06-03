@@ -317,7 +317,7 @@ class WC_Install {
 	 * Hook in tabs.
 	 */
 	public static function init() {
-		if ( defined( 'WC_UNINSTALLING_PLUGIN' ) ) {
+		if ( ! empty( $GLOBALS['wc_uninstalling_plugin'] ) ) {
 			return;
 		}
 
