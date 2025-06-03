@@ -1,14 +1,14 @@
 <?php
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentProviders\WooPayments;
+namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentsProviders\WooPayments;
 
 use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\PaymentGateway;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments\WooPaymentsService;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
@@ -30,7 +30,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	protected WooPaymentsService $sut;
 
 	/**
-	 * @var PaymentProviders|MockObject
+	 * @var PaymentsProviders|MockObject
 	 */
 	protected $mock_providers;
 
@@ -81,7 +81,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		$this->current_time = 1234567890;
 
-		$this->mock_providers = $this->getMockBuilder( PaymentProviders::class )
+		$this->mock_providers = $this->getMockBuilder( PaymentsProviders::class )
 									->disableOriginalConstructor()
 									->onlyMethods(
 										array(
@@ -140,7 +140,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		// Arrange the version constant to meet the minimum requirements for the native in-context onboarding.
-		Constants::set_constant( 'WCPAY_VERSION_NUMBER', PaymentProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION );
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
 
 		$this->mock_account_service = $this->getMockBuilder( \stdClass::class )
 			->addMethods( array( 'is_stripe_account_valid', 'get_account_status_data' ) )

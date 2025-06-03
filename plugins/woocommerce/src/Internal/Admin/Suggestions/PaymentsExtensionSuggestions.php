@@ -10,9 +10,9 @@ use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Utilities\ArrayUtil;
 
 /**
- * Partner payment extensions provider class.
+ * Partner payments extension suggestions provider class.
  */
-class PaymentExtensionSuggestions {
+class PaymentsExtensionSuggestions {
 	/*
 	 * The unique IDs for the payment extension suggestions.
 	 *
@@ -1935,18 +1935,18 @@ class PaymentExtensionSuggestions {
 	/**
 	 * The suggestion incentives provider.
 	 *
-	 * @var PaymentExtensionSuggestionIncentives
+	 * @var PaymentsExtensionSuggestionIncentives
 	 */
-	private PaymentExtensionSuggestionIncentives $suggestion_incentives;
+	private PaymentsExtensionSuggestionIncentives $suggestion_incentives;
 
 	/**
 	 * Initialize the class instance.
 	 *
-	 * @param PaymentExtensionSuggestionIncentives $suggestion_incentives The suggestion incentives provider.
+	 * @param PaymentsExtensionSuggestionIncentives $suggestion_incentives The suggestion incentives provider.
 	 *
 	 * @internal
 	 */
-	final public function init( PaymentExtensionSuggestionIncentives $suggestion_incentives ) {
+	final public function init( PaymentsExtensionSuggestionIncentives $suggestion_incentives ) {
 		$this->suggestion_incentives = $suggestion_incentives;
 	}
 
@@ -3195,11 +3195,11 @@ class PaymentExtensionSuggestions {
 				),
 			),
 			self::BILLIE            => array(
-				'_type'  => self::TYPE_PSP,
+				'_type'       => self::TYPE_PSP,
 				'title'       => esc_html__( 'Billie', 'woocommerce' ),
 				'description' => esc_html__( 'Billie is the leading provider of Buy Now, Pay Later payment methods for B2B stores.', 'woocommerce' ),
-				'icon'   => plugins_url( 'assets/images/onboarding/icons/billie.svg', WC_PLUGIN_FILE ),
-				'plugin' => array(
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/billie.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
 					'slug'  => 'billie-for-woocommerce',
 				),
@@ -3346,10 +3346,10 @@ class PaymentExtensionSuggestions {
 		$standardized = array();
 
 		// Required fields.
-		$standardized['id']          = $extension_details['id'];
-		$standardized['_priority']   = $extension_details['_priority'];
-		$standardized['_type']       = $extension_details['_type'];
-		$standardized['plugin']      = $extension_details['plugin'];
+		$standardized['id']        = $extension_details['id'];
+		$standardized['_priority'] = $extension_details['_priority'];
+		$standardized['_type']     = $extension_details['_type'];
+		$standardized['plugin']    = $extension_details['plugin'];
 
 		// Optional fields.
 		$standardized['title']       = $extension_details['title'] ?? '';

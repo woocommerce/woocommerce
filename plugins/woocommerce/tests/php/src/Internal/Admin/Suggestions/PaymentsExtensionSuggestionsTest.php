@@ -4,27 +4,27 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Suggestions;
 
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
-use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestionIncentives;
-use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestionIncentives;
+use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
 use WC_Unit_Test_Case;
 
 /**
- * PaymentExtensionSuggestions provider test.
+ * PaymentsExtensionSuggestions provider test.
  *
- * @class PaymentExtensionSuggestions
+ * @class PaymentsExtensionSuggestions
  */
-class PaymentExtensionSuggestionsTest extends WC_Unit_Test_Case {
+class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	/**
 	 * System under test.
 	 *
-	 * @var PaymentExtensionSuggestions
+	 * @var PaymentsExtensionSuggestions
 	 */
-	protected PaymentExtensionSuggestions $sut;
+	protected PaymentsExtensionSuggestions $sut;
 
 	/**
 	 * The suggestion incentives provider mock.
 	 *
-	 * @var PaymentExtensionSuggestionIncentives
+	 * @var PaymentsExtensionSuggestionIncentives
 	 */
 	protected $suggestion_incentives;
 
@@ -35,9 +35,9 @@ class PaymentExtensionSuggestionsTest extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		// Mock the incentives provider class.
-		$this->suggestion_incentives = $this->getMockBuilder( PaymentExtensionSuggestionIncentives::class )->getMock();
+		$this->suggestion_incentives = $this->getMockBuilder( PaymentsExtensionSuggestionIncentives::class )->getMock();
 
-		$this->sut = new PaymentExtensionSuggestions();
+		$this->sut = new PaymentsExtensionSuggestions();
 		$this->sut->init( $this->suggestion_incentives );
 	}
 
@@ -547,19 +547,19 @@ class PaymentExtensionSuggestionsTest extends WC_Unit_Test_Case {
 		$this->assertCount( 6, $extensions );
 		$this->assertSame(
 			array(
-				PaymentExtensionSuggestions::STRIPE,
-				PaymentExtensionSuggestions::PAYPAL_FULL_STACK,
-				PaymentExtensionSuggestions::MERCADO_PAGO,
-				PaymentExtensionSuggestions::PAYPAL_WALLET,
-				PaymentExtensionSuggestions::KLARNA,
-				PaymentExtensionSuggestions::HELIOPAY,
+				PaymentsExtensionSuggestions::STRIPE,
+				PaymentsExtensionSuggestions::PAYPAL_FULL_STACK,
+				PaymentsExtensionSuggestions::MERCADO_PAGO,
+				PaymentsExtensionSuggestions::PAYPAL_WALLET,
+				PaymentsExtensionSuggestions::KLARNA,
+				PaymentsExtensionSuggestions::HELIOPAY,
 			),
 			array_column( $extensions, 'id' )
 		);
 
 		$stripe = $extensions[0];
 		// It should have the preferred tag.
-		$this->assertContains( PaymentExtensionSuggestions::TAG_PREFERRED, $stripe['tags'] );
+		$this->assertContains( PaymentsExtensionSuggestions::TAG_PREFERRED, $stripe['tags'] );
 
 		$mercado_pago = $extensions[2];
 		// The links should be the expected ones.
@@ -567,31 +567,31 @@ class PaymentExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			array(
 				// These are coming from the per-country details.
 				array(
-					'_type' => PaymentExtensionSuggestions::LINK_TYPE_PRICING,
+					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_PRICING,
 					'url'   => 'https://www.mercadopago.com.mx/costs-section',
 				),
 				array(
-					'_type' => PaymentExtensionSuggestions::LINK_TYPE_TERMS,
+					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_TERMS,
 					'url'   => 'https://www.mercadopago.com.mx/ayuda/terminos-y-politicas_194',
 				),
 				// These are base details for the suggestion.
 				array(
-					'_type' => PaymentExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_ABOUT,
 					'url'   => 'https://woocommerce.com/products/mercado-pago-checkout/',
 				),
 				array(
-					'_type' => PaymentExtensionSuggestions::LINK_TYPE_DOCS,
+					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_DOCS,
 					'url'   => 'https://woocommerce.com/document/mercado-pago/',
 				),
 				array(
-					'_type' => PaymentExtensionSuggestions::LINK_TYPE_SUPPORT,
+					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_SUPPORT,
 					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=mercado-pago-checkout',
 				),
 			),
 			$mercado_pago['links']
 		);
 		// It should not have the preferred tag.
-		$this->assertNotContains( PaymentExtensionSuggestions::TAG_PREFERRED, $mercado_pago['tags'] );
+		$this->assertNotContains( PaymentsExtensionSuggestions::TAG_PREFERRED, $mercado_pago['tags'] );
 
 		$klarna = $extensions[4];
 		// The links should be the expected ones.
@@ -599,24 +599,24 @@ class PaymentExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			array(
 				// These are coming from the per-country details.
 				array(
-					'_type' => PaymentExtensionSuggestions::LINK_TYPE_PRICING,
+					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_PRICING,
 					'url'   => 'https://www.klarna.com/mx/negocios/',
 				),
 				array(
-					'_type' => PaymentExtensionSuggestions::LINK_TYPE_TERMS,
+					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_TERMS,
 					'url'   => 'https://www.klarna.com/mx/terminos-y-condiciones/',
 				),
 				// These are base details for the suggestion.
 				array(
-					'_type' => PaymentExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_ABOUT,
 					'url'   => 'https://woocommerce.com/products/klarna-payments/',
 				),
 				array(
-					'_type' => PaymentExtensionSuggestions::LINK_TYPE_DOCS,
+					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_DOCS,
 					'url'   => 'https://woocommerce.com/document/klarna-payments/',
 				),
 				array(
-					'_type' => PaymentExtensionSuggestions::LINK_TYPE_SUPPORT,
+					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_SUPPORT,
 					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=klarna-payments',
 				),
 			),

@@ -3,10 +3,10 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings;
 
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\PaymentGateway;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
-use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestions as ExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
 use WC_Unit_Test_Case;
@@ -16,14 +16,14 @@ use WC_Gateway_COD;
 use WC_Gateway_Paypal;
 
 /**
- * Payment Providers service test.
+ * Payments Providers service test.
  *
- * @class PaymentProviders
+ * @class PaymentsProviders
  */
-class PaymentProvidersTest extends WC_Unit_Test_Case {
+class PaymentsProvidersTest extends WC_Unit_Test_Case {
 
 	/**
-	 * @var PaymentProviders
+	 * @var PaymentsProviders
 	 */
 	protected $sut;
 
@@ -52,7 +52,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			->disableOriginalConstructor()
 			->getMock();
 
-		$this->sut = new PaymentProviders();
+		$this->sut = new PaymentsProviders();
 		$this->sut->init( $this->mock_extension_suggestions );
 	}
 
@@ -181,7 +181,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'file', $gateway_details['plugin'], 'Gateway `plugin[file]` entry is missing' );
 		$this->assertSame( 'woocommerce-payments/woocommerce-payments', $gateway_details['plugin']['file'] ); // No more .php extension.
 		$this->assertArrayHasKey( 'status', $gateway_details['plugin'], 'Gateway `plugin[status]` entry is missing' );
-		$this->assertSame( PaymentProviders::EXTENSION_ACTIVE, $gateway_details['plugin']['status'] );
+		$this->assertSame( PaymentsProviders::EXTENSION_ACTIVE, $gateway_details['plugin']['status'] );
 		$this->assertArrayHasKey( 'onboarding', $gateway_details, 'Gateway `onboarding` entry is missing' );
 		$this->assertArrayHasKey( 'state', $gateway_details['onboarding'], 'Gateway `onboarding[state]` entry is missing' );
 		$this->assertArrayHasKey( 'started', $gateway_details['onboarding']['state'], 'Gateway `onboarding[state][started]` entry is missing' );
@@ -471,7 +471,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'slug', $pref_suggestion['plugin'], 'Suggestion `plugin[slug]` entry is missing' );
 		$this->assertArrayHasKey( 'status', $pref_suggestion['plugin'], 'Suggestion `plugin[status]` entry is missing' );
 		// The plugin should be not installed.
-		$this->assertSame( PaymentProviders::EXTENSION_NOT_INSTALLED, $pref_suggestion['plugin']['status'] );
+		$this->assertSame( PaymentsProviders::EXTENSION_NOT_INSTALLED, $pref_suggestion['plugin']['status'] );
 		$this->assertArrayHasKey( 'icon', $pref_suggestion, 'Suggestion `icon` entry is missing' );
 		$this->assertArrayHasKey( 'links', $pref_suggestion, 'Suggestion `links` entry is missing' );
 		$this->assertIsArray( $pref_suggestion['links'] );
@@ -483,7 +483,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 		// It should have the recommended tag.
 		$this->assertContains( ExtensionSuggestions::TAG_PREFERRED, $pref_suggestion['tags'] );
 		// The category should be PSP.
-		$this->assertSame( PaymentProviders::CATEGORY_PSP, $pref_suggestion['category'] );
+		$this->assertSame( PaymentsProviders::CATEGORY_PSP, $pref_suggestion['category'] );
 
 		// Ensure we have all the details for the other suggestions.
 		$other_suggestion = $suggestions['other'][0];
@@ -502,7 +502,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'slug', $other_suggestion['plugin'], 'Suggestion `plugin[slug]` entry is missing' );
 		$this->assertArrayHasKey( 'status', $other_suggestion['plugin'], 'Suggestion `plugin[status]` entry is missing' );
 		// The plugin should be not installed.
-		$this->assertSame( PaymentProviders::EXTENSION_NOT_INSTALLED, $other_suggestion['plugin']['status'] );
+		$this->assertSame( PaymentsProviders::EXTENSION_NOT_INSTALLED, $other_suggestion['plugin']['status'] );
 		$this->assertArrayHasKey( 'icon', $other_suggestion, 'Suggestion `icon` entry is missing' );
 		$this->assertArrayHasKey( 'links', $other_suggestion, 'Suggestion `links` entry is missing' );
 		$this->assertIsArray( $other_suggestion['links'] );
@@ -512,7 +512,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'tags', $other_suggestion, 'Suggestion `tags` entry is missing' );
 		$this->assertIsList( $other_suggestion['tags'] );
 		// The category should be PSP.
-		$this->assertSame( PaymentProviders::CATEGORY_PSP, $other_suggestion['category'] );
+		$this->assertSame( PaymentsProviders::CATEGORY_PSP, $other_suggestion['category'] );
 	}
 
 	/**
@@ -1118,7 +1118,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				'_type'  => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
 				'slug'   => 'woocommerce', // Use WooCommerce because it is an installed plugin, obviously.
 				'file'   => 'woocommerce/woocommerce',
-				'status' => PaymentProviders::EXTENSION_INSTALLED,
+				'status' => PaymentsProviders::EXTENSION_INSTALLED,
 			),
 			'image'             => 'http://example.com/image1.png',
 			'icon'              => 'http://example.com/icon1.png',
@@ -1160,7 +1160,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				'_type'  => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
 				'slug'   => $slug,
 				'file'   => 'woocommerce/woocommerce',
-				'status' => PaymentProviders::EXTENSION_INSTALLED,
+				'status' => PaymentsProviders::EXTENSION_INSTALLED,
 			),
 			'image'             => 'http://example.com/image1.png',
 			'icon'              => 'http://example.com/icon1.png',
@@ -1327,7 +1327,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			),
 			'PayPal full-stack prefixed' => array(
 				ExtensionSuggestions::PAYPAL_FULL_STACK,
-				PaymentProviders::SUGGESTION_ORDERING_PREFIX . ExtensionSuggestions::PAYPAL_FULL_STACK,
+				PaymentsProviders::SUGGESTION_ORDERING_PREFIX . ExtensionSuggestions::PAYPAL_FULL_STACK,
 				ExtensionSuggestions::TYPE_PSP,
 			),
 			'PayPal wallet'              => array(
@@ -1337,7 +1337,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			),
 			'PayPal wallet prefixed'     => array(
 				ExtensionSuggestions::PAYPAL_WALLET,
-				PaymentProviders::SUGGESTION_ORDERING_PREFIX . ExtensionSuggestions::PAYPAL_WALLET,
+				PaymentsProviders::SUGGESTION_ORDERING_PREFIX . ExtensionSuggestions::PAYPAL_WALLET,
 				ExtensionSuggestions::TYPE_EXPRESS_CHECKOUT,
 			),
 		);
@@ -1436,7 +1436,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			->with( $suggestion_id )
 			->willReturn( $suggestion_details );
 
-		$order_map_id = PaymentProviders::SUGGESTION_ORDERING_PREFIX . $suggestion_id;
+		$order_map_id = PaymentsProviders::SUGGESTION_ORDERING_PREFIX . $suggestion_id;
 
 		update_user_meta(
 			$this->store_admin_id,
@@ -1541,7 +1541,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 	public function test_hide_extension_suggestion_already_hidden_with_order_map_id() {
 		// Arrange.
 		$suggestion_id  = 'suggestion1';
-		$order_map_id   = PaymentProviders::SUGGESTION_ORDERING_PREFIX . $suggestion_id;
+		$order_map_id   = PaymentsProviders::SUGGESTION_ORDERING_PREFIX . $suggestion_id;
 		$hide_timestamp = 123;
 
 		$suggestion_details = array(
@@ -1740,7 +1740,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 
 		// Set the starting order map.
 		$start_order_map = array_flip( $start_order );
-		update_option( PaymentProviders::PROVIDERS_ORDER_OPTION, $start_order_map );
+		update_option( PaymentsProviders::PROVIDERS_ORDER_OPTION, $start_order_map );
 
 		// Act.
 		$result = $this->sut->update_payment_providers_order_map( $new_order_map );
@@ -1753,7 +1753,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			$result,
 			$expect_option_update ? 'Expected order map option to BE updated but it was not.' : 'Expected order map option to NOT BE updated but it was.'
 		);
-		$this->assertSame( $expected_order_map, get_option( PaymentProviders::PROVIDERS_ORDER_OPTION ) );
+		$this->assertSame( $expected_order_map, get_option( PaymentsProviders::PROVIDERS_ORDER_OPTION ) );
 
 		// Clean up.
 		$this->unmock_payment_gateways();
@@ -1913,7 +1913,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(),
 				array(),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -1929,7 +1929,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway2',
 					'gateway3_0',
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -1941,7 +1941,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(),
 				array(),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -1977,7 +1977,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion3',
 					'gateway3_0',
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -1989,7 +1989,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(),
 				array(),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2016,7 +2016,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion3',
 					'gateway3_0',
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
@@ -2032,7 +2032,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					WC_Gateway_BACS::ID   => 2,
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_BACS::ID,
@@ -2049,10 +2049,10 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			'empty start, move offline PMs group - gateways | offline PMs | no suggestions'    => array(
 				array(),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2067,10 +2067,10 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			'empty start, move offline PMs group - gateways | offline PMs | suggestions'    => array(
 				array(),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2087,10 +2087,10 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			'empty start, move offline PMs group - no gateways | offline PMs | no suggestions'    => array(
 				array(),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP => 10,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 10,
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2101,10 +2101,10 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			'empty start, move offline PMs group - no gateways | offline PMs | suggestions'    => array(
 				array(),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP => 10,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 10,
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2118,7 +2118,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					WC_Gateway_COD::ID => 0,
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_COD::ID,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
@@ -2134,7 +2134,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					WC_Gateway_BACS::ID   => 2,
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_BACS::ID,
@@ -2154,7 +2154,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway1',
 					'gateway2',
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2175,7 +2175,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway3_0',
 					'gateway2',
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2196,7 +2196,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion3',
 					'gateway3_0',
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2217,7 +2217,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway3_1',
 					'gateway2',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2229,13 +2229,13 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(),
 				array(
 					'gateway1'   => 2,
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP => 3,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 3,
 					'gateway3_1' => 4,
 				),
 				array(
 					'_wc_pes_suggestion1',
 					'gateway1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2255,7 +2255,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2278,7 +2278,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway3_0',
 					'_wc_pes_suggestion1',
 					'gateway1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2298,7 +2298,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion3',
 					'gateway3_0',
 					'gateway2',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2321,7 +2321,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway3_0',
 					'gateway3_1',
 					'gateway2',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2336,14 +2336,14 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'gateway3_0' => 3,
 					'gateway3_1' => 4,
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP => 5,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 5,
 					'gateway2'   => 6,
 				),
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2362,7 +2362,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				),
 				array(),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2382,7 +2382,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'non_existent_gateway1',
 					'non_existent_gateway2',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2398,7 +2398,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				),
 				array(),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -2422,7 +2422,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'gateway1',
 					'gateway2',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -2444,7 +2444,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'gateway1',
 					'gateway2',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -2465,7 +2465,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(),
 				array(
 					'gateway1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -2489,7 +2489,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(),
 				array(
 					'gateway1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -2515,7 +2515,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway1',
 					'gateway2',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -2540,7 +2540,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway2',
 					'gateway3_0',
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
@@ -2564,7 +2564,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway3_0',
 					'gateway1',
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
@@ -2580,7 +2580,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				),
 				array(),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -2607,7 +2607,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion1',
 					'gateway1',
 					'gateway2',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -2632,7 +2632,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion1',
 					'gateway1',
 					'gateway2',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -2661,7 +2661,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion3',
 					'gateway3_0',
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -2687,7 +2687,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway3_1',
 					'_wc_pes_suggestion1',
 					'gateway1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2713,7 +2713,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway3_1',
 					'_wc_pes_suggestion1',
 					'gateway1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2733,7 +2733,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'non_existent_gateway1',
 					'non_existent_gateway2',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
@@ -2761,7 +2761,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'non_existent_gateway2',
 					'gateway1',
 					'gateway2',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_BACS::ID,
@@ -2783,7 +2783,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'non_existent_gateway1',
 					'non_existent_gateway2',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
@@ -2814,7 +2814,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion1',
 					'gateway1',
 					'gateway2',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_BACS::ID,
@@ -2847,7 +2847,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway3_0',
 					'gateway2',
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_BACS::ID,
@@ -2875,7 +2875,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway3_0',
 					'gateway2',
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_BACS::ID,
@@ -2907,7 +2907,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway3_1',
 					'non_existent_gateway1',
 					'non_existent_gateway2',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_BACS::ID,
@@ -2936,7 +2936,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion3',
 					'gateway3_1',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2964,7 +2964,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway1',
 					'gateway2',
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -2992,7 +2992,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway2',
 					'_wc_pes_suggestion1',
 					'gateway1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_COD::ID,
@@ -3020,7 +3020,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway3_1',
 					'_wc_pes_suggestion1',
 					'gateway1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3048,7 +3048,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway3_1',
 					'_wc_pes_suggestion1',
 					'gateway1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_COD::ID,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
@@ -3076,7 +3076,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway3_1',
 					'_wc_pes_suggestion1',
 					'gateway1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
@@ -3100,7 +3100,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					WC_Gateway_BACS::ID   => 2,
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_BACS::ID,
@@ -3125,10 +3125,10 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					WC_Gateway_Cheque::ID,
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3153,12 +3153,12 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					WC_Gateway_Cheque::ID,
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
 				),
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3174,7 +3174,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3187,7 +3187,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3204,7 +3204,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'non_existent_gateway1',
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3219,7 +3219,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'non_existent_gateway1',
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3238,7 +3238,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'non_existent_gateway1',
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3255,7 +3255,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'non_existent_gateway1',
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3272,7 +3272,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			'new order with suggestions but no matching gateways, no ordering - gateways | offline PMs | suggestions'       => array(
 				array(
 					'_wc_pes_suggestion3',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3284,7 +3284,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion3',
 					'gateway3_0', // Suggestion matching gateways (via the plugin slug) are added after their suggestion, in order.
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3298,7 +3298,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			'new order with suggestions but no matching gateways, ordering #1 - gateways | offline PMs | suggestions'       => array(
 				array(
 					'_wc_pes_suggestion3',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3313,7 +3313,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion3',
 					'gateway3_0', // Suggestion matching gateways (via the plugin slug) are added after their suggestion, in order.
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3326,7 +3326,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			'new order with suggestions but no matching gateways, ordering #2 - gateways | offline PMs | suggestions'       => array(
 				array(
 					'_wc_pes_suggestion3',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3335,11 +3335,11 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				),
 				array(
 					'gateway2' => 0,
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
 				),
 				array(
 					'gateway2',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3355,7 +3355,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			'new order with suggestions but no matching gateways, ordering #3 - gateways | offline PMs | suggestions'       => array(
 				array(
 					'_wc_pes_suggestion3',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3371,7 +3371,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion3',
 					'gateway3_0', // Suggestion matching gateways (via the plugin slug) are added after their suggestion, in order.
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID, // no-op.
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3385,7 +3385,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			'new order with suggestions but no matching gateways, ordering #4 - gateways | offline PMs | suggestions'       => array(
 				array(
 					'_wc_pes_suggestion3',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3401,7 +3401,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion3',
 					'gateway3_0', // Suggestion matching gateways (via the plugin slug) are added after their suggestion, in order.
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_COD::ID,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
@@ -3415,7 +3415,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			'new order with suggestions but no matching gateways, ordering #5 - gateways | offline PMs | suggestions'       => array(
 				array(
 					'_wc_pes_suggestion3',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID, // This has order 2.
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3431,7 +3431,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion3',
 					'gateway3_0', // Suggestion matching gateways (via the plugin slug) are added after their suggestion, in order.
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_COD::ID,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
@@ -3447,7 +3447,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'non_existent_gateway1',
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3468,7 +3468,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion1',
 					'gateway1',
 					'non_existent_gateway1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3485,7 +3485,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'non_existent_gateway1',
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3505,7 +3505,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway1',
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3521,7 +3521,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3538,7 +3538,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway1',
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3552,7 +3552,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3568,7 +3568,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion3',
 					'gateway3_0',
 					'gateway2',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3583,7 +3583,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID, // This has order 3.
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3598,7 +3598,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3614,7 +3614,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3629,7 +3629,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3645,7 +3645,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3660,7 +3660,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3676,7 +3676,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3691,7 +3691,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3707,7 +3707,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID, // This has order 3.
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3717,12 +3717,12 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway1',
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP => 3,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 3,
 				),
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3738,7 +3738,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID, // This has order 5.
@@ -3748,12 +3748,12 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway1',
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP => 5,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 5,
 				),
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3769,7 +3769,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3779,13 +3779,13 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway1',
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP => 6,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 6,
 				),
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
 					'gateway2',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3800,7 +3800,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3810,14 +3810,14 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway1',
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP => 7,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 7,
 				),
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
 					'gateway2',
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3831,7 +3831,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3841,14 +3841,14 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway1', // This should remain in place because registered PGs have more power than suggestions.
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP => 8,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 8,
 				),
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
 					'gateway2',
 					'gateway3_1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3862,7 +3862,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3872,7 +3872,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway1', // This has order 9.
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP => 9,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 9,
 				),
 				array(
 					'_wc_pes_suggestion3',
@@ -3881,7 +3881,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway3_1',
 					'_wc_pes_suggestion1',
 					'gateway1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3893,7 +3893,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3903,7 +3903,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway1',
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP => 10,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 10,
 				),
 				array(
 					'_wc_pes_suggestion3',
@@ -3912,7 +3912,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'gateway3_1',
 					'_wc_pes_suggestion1',
 					'gateway1',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3924,7 +3924,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID, // This had order 3.
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3939,7 +3939,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -3955,7 +3955,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID, // This had order 4.
 					WC_Gateway_Cheque::ID,
@@ -3970,7 +3970,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_COD::ID,
 					WC_Gateway_BACS::ID, // Because the offline PG was present, the reordering took place only inside the offline PMs group.
 					WC_Gateway_Cheque::ID,
@@ -3986,7 +3986,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID, // This had order 5.
@@ -4001,7 +4001,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_BACS::ID, // Because the offline PG was present, the reordering took place only inside the offline PMs group.
@@ -4017,7 +4017,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4032,7 +4032,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_BACS::ID, // Because the offline PG was present, the reordering took place only inside the offline PMs group.
@@ -4048,7 +4048,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID, // This has order 3.
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4065,7 +4065,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID, // No change here because the ordering was done inside the offline PMs group.
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4081,7 +4081,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4098,7 +4098,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_COD::ID,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
@@ -4114,7 +4114,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4131,7 +4131,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_BACS::ID,
@@ -4147,7 +4147,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID, // This has order 3.
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4164,7 +4164,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4180,7 +4180,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID, // This has order 3.
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4197,7 +4197,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_COD::ID,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_Cheque::ID,
@@ -4213,7 +4213,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID, // This has order 3.
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4230,7 +4230,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_Cheque::ID,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
@@ -4246,7 +4246,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4262,7 +4262,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4279,7 +4279,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4295,7 +4295,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4312,7 +4312,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4328,7 +4328,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4345,7 +4345,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4362,7 +4362,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion3',
 					'gateway3_0',
 					'_wc_pes_suggestion-other',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4378,7 +4378,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4395,7 +4395,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion-other',
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4411,7 +4411,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4428,7 +4428,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion-other',
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4444,7 +4444,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4460,7 +4460,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4477,7 +4477,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4493,7 +4493,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4510,7 +4510,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4526,7 +4526,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'gateway3_0',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4542,7 +4542,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			'new order, move suggestion #1 - no gateways | offline PMs | suggestions'    => array(
 				array(
 					'_wc_pes_suggestion3',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4555,7 +4555,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'_wc_pes_suggestion-other',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4567,7 +4567,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			'new order, move suggestion #2 - no gateways | offline PMs | suggestions'    => array(
 				array(
 					'_wc_pes_suggestion3',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4580,7 +4580,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'_wc_pes_suggestion3',
 					'_wc_pes_suggestion-other',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4592,7 +4592,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			'new order, move suggestion #3 - no gateways | offline PMs | suggestions'    => array(
 				array(
 					'_wc_pes_suggestion3',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID, // This has order 2.
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4604,7 +4604,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				),
 				array(
 					'_wc_pes_suggestion3',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4617,7 +4617,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			'new order, move suggestion lower #1 - no gateways | offline PMs | suggestions'    => array(
 				array(
 					'_wc_pes_suggestion3',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4628,7 +4628,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion3' => 1,
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4642,7 +4642,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			'new order, move suggestion lower #2 - no gateways | offline PMs | suggestions'    => array(
 				array(
 					'_wc_pes_suggestion3',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4654,7 +4654,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 				),
 				array(
 					'_wc_pes_suggestion3',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,
@@ -4667,7 +4667,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 			'new order, move suggestion lower #3 - no gateways | offline PMs | suggestions'    => array(
 				array(
 					'_wc_pes_suggestion3',
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID, // This has order 3.
 					WC_Gateway_Cheque::ID,
@@ -4678,7 +4678,7 @@ class PaymentProvidersTest extends WC_Unit_Test_Case {
 					'_wc_pes_suggestion3' => 3,
 				),
 				array(
-					PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
 					WC_Gateway_COD::ID,
 					WC_Gateway_Cheque::ID,

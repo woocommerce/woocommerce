@@ -1,7 +1,7 @@
 <?php
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 
 use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
 use Automattic\Jetpack\Constants;
@@ -9,8 +9,8 @@ use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments\WooPaymentsRestController;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
@@ -52,7 +52,7 @@ class WooPayments extends PaymentGateway {
 		// If the WooPayments installed version is less than minimum required version,
 		// we can't use the in-context onboarding flows.
 		if ( Constants::is_defined( 'WCPAY_VERSION_NUMBER' ) &&
-			version_compare( Constants::get_constant( 'WCPAY_VERSION_NUMBER' ), PaymentProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION, '<' ) ) {
+			version_compare( Constants::get_constant( 'WCPAY_VERSION_NUMBER' ), PaymentsProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION, '<' ) ) {
 
 			return $details;
 		}
@@ -84,13 +84,13 @@ class WooPayments extends PaymentGateway {
 		// If the extension is installed, we can get the plugin data and act upon it.
 		if ( ! empty( $extension_suggestion['plugin']['file'] ) &&
 			isset( $extension_suggestion['plugin']['status'] ) &&
-			in_array( $extension_suggestion['plugin']['status'], array( PaymentProviders::EXTENSION_INSTALLED, PaymentProviders::EXTENSION_ACTIVE ), true ) ) {
+			in_array( $extension_suggestion['plugin']['status'], array( PaymentsProviders::EXTENSION_INSTALLED, PaymentsProviders::EXTENSION_ACTIVE ), true ) ) {
 
 			// Switch to the native in-context onboarding type if the WooPayments extension its version is compatible.
 			// We need to put back the '.php' extension to construct the plugin filename.
 			$plugin_data = PluginsHelper::get_plugin_data( $extension_suggestion['plugin']['file'] . '.php' );
 			if ( $plugin_data && ! empty( $plugin_data['Version'] ) &&
-				version_compare( $plugin_data['Version'], PaymentProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION, '>=' ) ) {
+				version_compare( $plugin_data['Version'], PaymentsProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION, '>=' ) ) {
 
 				$extension_suggestion['onboarding']['type'] = self::ONBOARDING_TYPE_NATIVE_IN_CONTEXT;
 			}
@@ -442,7 +442,7 @@ class WooPayments extends PaymentGateway {
 				return 'yes' === $gateway->enabled &&
 					! in_array(
 						$gateway->id,
-						array( 'woocommerce_payments', ...PaymentProviders::OFFLINE_METHODS ),
+						array( 'woocommerce_payments', ...PaymentsProviders::OFFLINE_METHODS ),
 						true
 					);
 			}

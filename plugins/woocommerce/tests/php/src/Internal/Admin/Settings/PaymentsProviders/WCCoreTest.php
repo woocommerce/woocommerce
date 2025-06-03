@@ -1,9 +1,9 @@
 <?php
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentProviders;
+namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentsProviders;
 
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WCCore;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WCCore;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use WC_Unit_Test_Case;
 use WC_Gateway_BACS;

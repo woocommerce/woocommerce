@@ -4,15 +4,15 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Admin\PluginsHelper;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\AmazonPay;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\MercadoPago;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\Mollie;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\PaymentGateway;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\PayPal;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\Stripe;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WCCore;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments;
-use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestions as ExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AmazonPay;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\MercadoPago;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mollie;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PayPal;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Stripe;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WCCore;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
+use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
 use Exception;
 use WC_Payment_Gateway;
 use WC_Gateway_BACS;
@@ -23,9 +23,9 @@ use WC_Gateway_Paypal;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Payment Providers class.
+ * Payments Providers class.
  */
-class PaymentProviders {
+class PaymentsProviders {
 
 	public const TYPE_GATEWAY           = 'gateway';
 	public const TYPE_OFFLINE_PM        = 'offline_pm';
@@ -1113,54 +1113,54 @@ class PaymentProviders {
 	/**
 	 * Enhance a payment extension suggestion with additional information.
 	 *
-	 * @param array $extension The extension suggestion.
+	 * @param array $extension_suggestion The extension suggestion.
 	 *
 	 * @return array The enhanced payment extension suggestion.
 	 */
-	private function enhance_extension_suggestion( array $extension ): array {
+	private function enhance_extension_suggestion( array $extension_suggestion ): array {
 		// Determine the category of the extension.
-		switch ( $extension['_type'] ) {
+		switch ( $extension_suggestion['_type'] ) {
 			case ExtensionSuggestions::TYPE_PSP:
-				$extension['category'] = self::CATEGORY_PSP;
+				$extension_suggestion['category'] = self::CATEGORY_PSP;
 				break;
 			case ExtensionSuggestions::TYPE_EXPRESS_CHECKOUT:
-				$extension['category'] = self::CATEGORY_EXPRESS_CHECKOUT;
+				$extension_suggestion['category'] = self::CATEGORY_EXPRESS_CHECKOUT;
 				break;
 			case ExtensionSuggestions::TYPE_BNPL:
-				$extension['category'] = self::CATEGORY_BNPL;
+				$extension_suggestion['category'] = self::CATEGORY_BNPL;
 				break;
 			case ExtensionSuggestions::TYPE_CRYPTO:
-				$extension['category'] = self::CATEGORY_CRYPTO;
+				$extension_suggestion['category'] = self::CATEGORY_CRYPTO;
 				break;
 			default:
-				$extension['category'] = '';
+				$extension_suggestion['category'] = '';
 				break;
 		}
 
 		// Determine the PES's plugin status.
 		// Default to not installed.
-		$extension['plugin']['status'] = self::EXTENSION_NOT_INSTALLED;
+		$extension_suggestion['plugin']['status'] = self::EXTENSION_NOT_INSTALLED;
 		// Put in the default plugin file.
-		$extension['plugin']['file'] = '';
-		if ( ! empty( $extension['plugin']['slug'] ) ) {
+		$extension_suggestion['plugin']['file'] = '';
+		if ( ! empty( $extension_suggestion['plugin']['slug'] ) ) {
 			// This is a best-effort approach, as the plugin might be sitting under a directory (slug) that we can't handle.
 			// Always try the official plugin slug first, then the testing variations.
-			$plugin_slug_variations = Utils::generate_testing_plugin_slugs( $extension['plugin']['slug'], true );
+			$plugin_slug_variations = Utils::generate_testing_plugin_slugs( $extension_suggestion['plugin']['slug'], true );
 			foreach ( $plugin_slug_variations as $plugin_slug ) {
 				if ( PluginsHelper::is_plugin_installed( $plugin_slug ) ) {
 					// Make sure we put in the actual slug and file path that we found.
-					$extension['plugin']['slug'] = $plugin_slug;
-					$extension['plugin']['file'] = PluginsHelper::get_plugin_path_from_slug( $plugin_slug );
+					$extension_suggestion['plugin']['slug'] = $plugin_slug;
+					$extension_suggestion['plugin']['file'] = PluginsHelper::get_plugin_path_from_slug( $plugin_slug );
 					// Sanity check.
-					if ( ! is_string( $extension['plugin']['file'] ) ) {
-						$extension['plugin']['file'] = '';
+					if ( ! is_string( $extension_suggestion['plugin']['file'] ) ) {
+						$extension_suggestion['plugin']['file'] = '';
 					}
 					// Remove the .php extension from the file path. The WP API expects it without it.
-					$extension['plugin']['file'] = Utils::trim_php_file_extension( $extension['plugin']['file'] );
+					$extension_suggestion['plugin']['file'] = Utils::trim_php_file_extension( $extension_suggestion['plugin']['file'] );
 
-					$extension['plugin']['status'] = self::EXTENSION_INSTALLED;
+					$extension_suggestion['plugin']['status'] = self::EXTENSION_INSTALLED;
 					if ( PluginsHelper::is_plugin_active( $plugin_slug ) ) {
-						$extension['plugin']['status'] = self::EXTENSION_ACTIVE;
+						$extension_suggestion['plugin']['status'] = self::EXTENSION_ACTIVE;
 					}
 					break;
 				}
@@ -1168,10 +1168,10 @@ class PaymentProviders {
 		}
 
 		// Finally, allow the extension suggestion's matching provider to add further details.
-		$gateway_provider = $this->get_payment_extension_suggestion_provider_instance( $extension['id'] );
-		$extension        = $gateway_provider->enhance_extension_suggestion( $extension );
+		$gateway_provider     = $this->get_payment_extension_suggestion_provider_instance( $extension_suggestion['id'] );
+		$extension_suggestion = $gateway_provider->enhance_extension_suggestion( $extension_suggestion );
 
-		return $extension;
+		return $extension_suggestion;
 	}
 
 	/**

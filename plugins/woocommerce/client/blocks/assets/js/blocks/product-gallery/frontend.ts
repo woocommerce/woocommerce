@@ -483,10 +483,14 @@ const productGallery = {
 			const imageId = Number( imageIdValue );
 
 			if ( selectedImageId === imageId ) {
-				element.classList.add( 'is-active' );
+				element.classList.add(
+					'wc-block-product-gallery-thumbnails__thumbnail__image--is-active'
+				);
 				element.setAttribute( 'tabIndex', '0' );
 			} else {
-				element.classList.remove( 'is-active' );
+				element.classList.remove(
+					'wc-block-product-gallery-thumbnails__thumbnail__image--is-active'
+				);
 				element.setAttribute( 'tabIndex', '-1' );
 			}
 		},

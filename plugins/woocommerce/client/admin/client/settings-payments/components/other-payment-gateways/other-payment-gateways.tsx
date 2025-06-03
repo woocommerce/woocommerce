@@ -9,8 +9,8 @@ import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
 	PaymentsEntity,
-	SuggestedPaymentExtension,
-	SuggestedPaymentExtensionCategory,
+	SuggestedPaymentsExtension,
+	SuggestedPaymentsExtensionCategory,
 } from '@woocommerce/data';
 
 /**
@@ -25,11 +25,11 @@ interface OtherPaymentGatewaysProps {
 	/**
 	 * Array of suggested payment extensions.
 	 */
-	suggestions: SuggestedPaymentExtension[];
+	suggestions: SuggestedPaymentsExtension[];
 	/**
 	 * Array of categories for the suggested payment extensions.
 	 */
-	suggestionCategories: SuggestedPaymentExtensionCategory[];
+	suggestionCategories: SuggestedPaymentsExtensionCategory[];
 	/**
 	 * The ID of the plugin currently being installed, or `null` if none.
 	 */
@@ -127,8 +127,8 @@ export const OtherPaymentGateways = ( {
 				(
 					category
 				): {
-					category: SuggestedPaymentExtensionCategory;
-					suggestions: SuggestedPaymentExtension[];
+					category: SuggestedPaymentsExtensionCategory;
+					suggestions: SuggestedPaymentsExtension[];
 				} => {
 					return {
 						category,

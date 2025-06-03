@@ -3,19 +3,19 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Suggestions;
 
-use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestionIncentives;
+use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestionIncentives;
 use Automattic\WooCommerce\Tests\Internal\Admin\Suggestions\Mocks\FakeIncentive;
 use PHPUnit\Framework\MockObject\MockObject;
 use WC_Unit_Test_Case;
 
 /**
- * PaymentExtensionSuggestionIncentives provider test.
+ * PaymentsExtensionSuggestionIncentives provider test.
  *
- * @class PaymentExtensionSuggestionIncentives
+ * @class PaymentsExtensionSuggestionIncentives
  */
-class PaymentExtensionSuggestionIncentivesTest extends WC_Unit_Test_Case {
+class PaymentsExtensionSuggestionIncentivesTest extends WC_Unit_Test_Case {
 	/**
-	 * @var PaymentExtensionSuggestionIncentives
+	 * @var PaymentsExtensionSuggestionIncentives
 	 */
 	protected $sut;
 
@@ -36,7 +36,7 @@ class PaymentExtensionSuggestionIncentivesTest extends WC_Unit_Test_Case {
 			->getMock();
 
 		// Mock the get_incentive_instance method.
-		$this->sut = $this->getMockBuilder( PaymentExtensionSuggestionIncentives::class )
+		$this->sut = $this->getMockBuilder( PaymentsExtensionSuggestionIncentives::class )
 			->onlyMethods( array( 'get_incentive_instance' ) )
 			->getMock();
 	}

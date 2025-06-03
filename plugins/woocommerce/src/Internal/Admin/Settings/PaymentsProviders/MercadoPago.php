@@ -1,7 +1,7 @@
 <?php
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use WC_Payment_Gateway;
@@ -42,7 +42,7 @@ class MercadoPago extends PaymentGateway {
 				break;
 		}
 
-		$title = wp_strip_all_tags( html_entity_decode( $title ), true );
+		$title = wp_strip_all_tags( html_entity_decode( $title, ENT_QUOTES | ENT_SUBSTITUTE ), true );
 
 		// Truncate the title.
 		return Utils::truncate_with_words( $title, 75 );

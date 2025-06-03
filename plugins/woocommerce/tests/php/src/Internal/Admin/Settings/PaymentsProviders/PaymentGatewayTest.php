@@ -1,11 +1,11 @@
 <?php
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentProviders;
+namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentsProviders;
 
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\PaymentGateway;
-use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
+use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use stdClass;
 use WC_Unit_Test_Case;
@@ -135,10 +135,10 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 					),
 				),
 				'plugin'      => array(
-					'_type'  => PaymentProviders::EXTENSION_TYPE_WPORG,
+					'_type'  => PaymentsProviders::EXTENSION_TYPE_WPORG,
 					'slug'   => 'woocommerce-payments',
 					'file'   => 'woocommerce-payments/woocommerce-payments',
-					'status' => PaymentProviders::EXTENSION_ACTIVE,
+					'status' => PaymentsProviders::EXTENSION_ACTIVE,
 				),
 				'onboarding'  => array(
 					'type'                        => PaymentGateway::ONBOARDING_TYPE_EXTERNAL,
@@ -211,7 +211,7 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 			'description' => 'Accept payments with WooPayments.',
 			'icon'        => 'https://example.com/icon.png',
 			'image'       => 'https://example.com/image.png',
-			'category'    => PaymentProviders::CATEGORY_PSP,
+			'category'    => PaymentsProviders::CATEGORY_PSP,
 			'links'       => array(
 				'about' => array(
 					'_type' => 'about',
@@ -219,16 +219,16 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 				),
 			),
 			'plugin'      => array(
-				'_type'  => PaymentProviders::EXTENSION_TYPE_WPORG,
+				'_type'  => PaymentsProviders::EXTENSION_TYPE_WPORG,
 				'slug'   => 'woocommerce-payments',
 				'file'   => 'woocommerce-payments/woocommerce-payments',
-				'status' => PaymentProviders::EXTENSION_NOT_INSTALLED,
+				'status' => PaymentsProviders::EXTENSION_NOT_INSTALLED,
 			),
 			'tags'        => array(
 				'made_in_woo',
 			),
 			'_priority'   => 1,
-			'_type'       => PaymentExtensionSuggestions::TYPE_PSP,
+			'_type'       => PaymentsExtensionSuggestions::TYPE_PSP,
 		);
 
 		// Act.
@@ -582,10 +582,10 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals(
 			array(
-				'_type'  => PaymentProviders::EXTENSION_TYPE_WPORG,
+				'_type'  => PaymentsProviders::EXTENSION_TYPE_WPORG,
 				'slug'   => 'woocommerce-payments',
 				'file'   => 'woocommerce-payments/woocommerce-payments',
-				'status' => PaymentProviders::EXTENSION_ACTIVE,
+				'status' => PaymentsProviders::EXTENSION_ACTIVE,
 			),
 			$this->sut->get_plugin_details( $fake_gateway )
 		);
@@ -602,11 +602,11 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals(
 			array(
-				'_type'  => PaymentProviders::EXTENSION_TYPE_MU_PLUGIN,
+				'_type'  => PaymentsProviders::EXTENSION_TYPE_MU_PLUGIN,
 				'slug'   => 'woocommerce-payments',
 				// No plugin file for must-use plugins.
 				'file'   => '',
-				'status' => PaymentProviders::EXTENSION_ACTIVE,
+				'status' => PaymentsProviders::EXTENSION_ACTIVE,
 			),
 			$this->sut->get_plugin_details( $fake_gateway )
 		);
@@ -623,12 +623,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals(
 			array(
-				'_type'  => PaymentProviders::EXTENSION_TYPE_MU_PLUGIN,
+				'_type'  => PaymentsProviders::EXTENSION_TYPE_MU_PLUGIN,
 				// The file name is the slug.
 				'slug'   => 'class-fake-gateway',
 				// No plugin file for must-use plugins.
 				'file'   => '',
-				'status' => PaymentProviders::EXTENSION_ACTIVE,
+				'status' => PaymentsProviders::EXTENSION_ACTIVE,
 			),
 			$this->sut->get_plugin_details( $fake_gateway )
 		);
@@ -645,12 +645,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals(
 			array(
-				'_type'  => PaymentProviders::EXTENSION_TYPE_THEME,
+				'_type'  => PaymentsProviders::EXTENSION_TYPE_THEME,
 				// The theme slug is the slug.
 				'slug'   => 'some-theme',
 				// No plugin file for themes.
 				'file'   => '',
-				'status' => PaymentProviders::EXTENSION_ACTIVE,
+				'status' => PaymentsProviders::EXTENSION_ACTIVE,
 			),
 			$this->sut->get_plugin_details( $fake_gateway )
 		);
@@ -667,12 +667,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals(
 			array(
-				'_type'  => PaymentProviders::EXTENSION_TYPE_UNKNOWN,
+				'_type'  => PaymentsProviders::EXTENSION_TYPE_UNKNOWN,
 				// No slug for unknown location.
 				'slug'   => '',
 				// No plugin file for unknown location.
 				'file'   => '',
-				'status' => PaymentProviders::EXTENSION_ACTIVE,
+				'status' => PaymentsProviders::EXTENSION_ACTIVE,
 			),
 			$this->sut->get_plugin_details( $fake_gateway )
 		);

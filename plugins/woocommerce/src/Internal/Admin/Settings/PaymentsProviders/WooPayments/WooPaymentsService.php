@@ -1,13 +1,13 @@
 <?php
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments;
+namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
 
 use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiArgumentException;
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
@@ -78,11 +78,11 @@ class WooPaymentsService {
 	const EVENT_PREFIX = 'settings_payments_woopayments_';
 
 	/**
-	 * The PaymentProviders instance.
+	 * The PaymentsProviders instance.
 	 *
-	 * @var PaymentProviders
+	 * @var PaymentsProviders
 	 */
-	private PaymentProviders $payment_providers;
+	private PaymentsProviders $payments_providers;
 
 	/**
 	 * The LegacyProxy instance.
@@ -101,24 +101,24 @@ class WooPaymentsService {
 	/**
 	 * The WooPayments provider instance.
 	 *
-	 * @var PaymentProviders\PaymentGateway
+	 * @var PaymentsProviders\PaymentGateway
 	 */
-	private PaymentProviders\PaymentGateway $provider;
+	private PaymentsProviders\PaymentGateway $provider;
 
 	/**
 	 * Initialize the class instance.
 	 *
-	 * @internal
+	 * @param PaymentsProviders $payment_providers The PaymentsProviders instance.
+	 * @param LegacyProxy       $proxy             The LegacyProxy instance.
 	 *
-	 * @param PaymentProviders $payment_providers The PaymentProviders instance.
-	 * @param LegacyProxy      $proxy             The LegacyProxy instance.
+	 * @internal
 	 */
-	final public function init( PaymentProviders $payment_providers, LegacyProxy $proxy ): void {
-		$this->payment_providers = $payment_providers;
-		$this->proxy             = $proxy;
+	final public function init( PaymentsProviders $payment_providers, LegacyProxy $proxy ): void {
+		$this->payments_providers = $payment_providers;
+		$this->proxy              = $proxy;
 
 		$this->wpcom_connection_manager = $this->proxy->get_instance_of( WPCOM_Connection_Manager::class, 'woocommerce' );
-		$this->provider                 = $this->payment_providers->get_payment_gateway_provider_instance( self::GATEWAY_ID );
+		$this->provider                 = $this->payments_providers->get_payment_gateway_provider_instance( self::GATEWAY_ID );
 	}
 
 	/**
