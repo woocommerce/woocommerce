@@ -287,8 +287,6 @@ class WC_Install {
 			'wc_update_985_enable_new_payments_settings_page_feature',
 		),
 		'9.9.0' => array(
-			'wc_update_990_update_primary_key_to_composite_in_order_product_lookup_table',
-			'wc_update_990_add_old_refunded_order_items_to_product_lookup_table',
 			'wc_update_990_remove_wc_count_comments_transient',
 			'wc_update_990_remove_email_notes',
 		),
@@ -818,16 +816,29 @@ class WC_Install {
 		}
 
 		// After the callbacks finish, update the db version to the current WC version.
+		$success = true;
 		if ( version_compare( $current_db_version, $current_wc_version, '<' ) &&
 			! WC()->queue()->get_next( 'woocommerce_update_db_to_current_version' ) ) {
-			WC()->queue()->schedule_single(
+			$success = WC()->queue()->schedule_single(
 				$scheduled_time + $loop,
 				'woocommerce_update_db_to_current_version',
 				array(
 					'version' => $current_wc_version,
 				),
 				'woocommerce-db-updates'
-			);
+			) > 0;
+		}
+
+		if ( ! $success ) {
+			wc_get_logger()->error( 'There was an error scheduling database updates.', array( 'source' => 'wc-updater' ) );
+
+			// Revert back to nudge so updates are not missed.
+			if ( self::is_db_auto_update_enabled() ) {
+				WC_Admin_Notices::add_notice( 'update', true );
+				WC()->is_wc_admin_active() && new WC_Notes_Run_Db_Update();
+			}
+
+			return;
 		}
 
 		wc_get_logger()->info( 'Database updates scheduled.', array( 'source' => 'wc-updater' ) );
@@ -1887,7 +1898,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	tax_amount double DEFAULT 0 NOT NULL,
 	shipping_amount double DEFAULT 0 NOT NULL,
 	shipping_tax_amount double DEFAULT 0 NOT NULL,
-	PRIMARY KEY  (order_item_id, order_id),
+	PRIMARY KEY  (order_item_id),
 	KEY order_id (order_id),
 	KEY product_id (product_id),
 	KEY customer_id (customer_id),

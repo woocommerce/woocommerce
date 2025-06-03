@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fix missing priority in remove filter
+
+

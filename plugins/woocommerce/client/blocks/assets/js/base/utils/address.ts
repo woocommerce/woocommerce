@@ -18,9 +18,12 @@ import {
 	isString,
 	type CartResponseBillingAddress,
 	type CartResponseShippingAddress,
+	type AddressFieldsForShippingRates as AddressFieldsForShippingRatesType,
 } from '@woocommerce/types';
 import { decodeEntities } from '@wordpress/html-entities';
-import { isEmail } from '@wordpress/url';
+
+export const addressFieldsForShippingRates: AddressFieldsForShippingRatesType =
+	[ 'state', 'country', 'postcode', 'city' ];
 
 /**
  * Compare two addresses and see if they are the same.
@@ -33,47 +36,6 @@ export const isSameAddress = < T extends ShippingAddress | BillingAddress >(
 		return address1[ field ] === address2[ field ];
 	} );
 };
-
-/**
- * pluckAddress takes a full address object and returns relevant fields for calculating
- * shipping, so we can track when one of them change to update rates.
- *
- * @param {Object} address          An object containing all address information
- * @param {string} address.country  The country.
- * @param {string} address.state    The state.
- * @param {string} address.city     The city.
- * @param {string} address.postcode The postal code.
- *
- * @return {Object} pluckedAddress  An object containing shipping address that are needed to fetch an address.
- */
-export const pluckAddress = ( {
-	country = '',
-	state = '',
-	city = '',
-	postcode = '',
-}: CartResponseBillingAddress | CartResponseShippingAddress ): {
-	country: string;
-	state: string;
-	city: string;
-	postcode: string;
-} => ( {
-	country: country.trim(),
-	state: state.trim(),
-	city: city.trim(),
-	postcode: postcode ? postcode.replace( ' ', '' ).toUpperCase() : '',
-} );
-
-/**
- * pluckEmail takes a full address object and returns only the email address, if set and valid. Otherwise returns an empty string.
- *
- * @param {Object} address       An object containing all address information
- * @param {string} address.email The email address.
- * @return {string} The email address.
- */
-export const pluckEmail = ( {
-	email = '',
-}: CartResponseBillingAddress ): string =>
-	isEmail( email ) ? email.trim() : '';
 
 /**
  * Type-guard.
@@ -184,32 +146,28 @@ export const formatShippingAddress = (
 };
 
 /**
- * Checks that all required fields in an address are completed based on the settings in countryLocale.
+ * Checks if all required shipping address fields are completed.
+ * Only validates fields that are defined in addressFieldsForShippingRates.
  *
- * @param {Object} address     The address to check.
- * @param {Array}  keysToCheck Optional override to include only specific keys for checking.
- *                             If there are other required fields in the address, but not specified in this arg then
- *                             they will be ignored.
+ * @param {CartResponseShippingAddress} address The shipping address to validate.
+ * @return {boolean} True if all required shipping fields are filled, false otherwise.
  */
-export const isAddressComplete = (
-	address: CartResponseBillingAddress | CartResponseShippingAddress,
-	keysToCheck: ( keyof Partial< AddressForm > )[] = []
+export const hasAllFieldsForShippingRates = (
+	address: CartResponseBillingAddress | CartResponseShippingAddress
 ): boolean => {
 	if ( ! address.country ) {
 		return false;
 	}
-	const addressForm = prepareFormFields(
+
+	const addressFormWithLocale = prepareFormFields(
 		ADDRESS_FORM_KEYS,
 		defaultFields,
 		address.country
 	);
 
-	// Filter the address form so only fields from the keysToCheck arg remain, if that arg is empty, then default to the
-	// full address form.
-	const filteredAddressForm =
-		keysToCheck.length > 0
-			? addressForm.filter( ( { key } ) => keysToCheck.includes( key ) )
-			: addressForm;
+	const filteredAddressForm = addressFormWithLocale.filter( ( { key } ) =>
+		addressFieldsForShippingRates.includes( key )
+	);
 
 	return filteredAddressForm.every( ( { key, hidden, required } ) => {
 		if ( hidden === true || required === false ) {

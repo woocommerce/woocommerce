@@ -126,7 +126,8 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function get_action_url() {
-		return admin_url( 'admin.php?page=wc-settings&tab=checkout' );
+		// Link to the Payments settings page.
+		return admin_url( 'admin.php?page=wc-settings&tab=checkout&from=' . SettingsPaymentsService::FROM_PAYMENTS_TASK );
 	}
 
 	/**
@@ -275,13 +276,11 @@ class Payments extends Task {
 		try {
 			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
-			$country_code = $settings_payments_service->get_country();
+			return $settings_payments_service->get_country();
 		} catch ( \Throwable $e ) {
 			// In case of any error, return the WooCommerce base country.
-			$country_code = WC()->countries->get_base_country();
+			return WC()->countries->get_base_country();
 		}
-
-		return $country_code;
 	}
 
 	/**
@@ -293,13 +292,11 @@ class Payments extends Task {
 		try {
 			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
-			$providers = $settings_payments_service->get_payment_providers( $settings_payments_service->get_country() );
+			return $settings_payments_service->get_payment_providers( $settings_payments_service->get_country() );
 		} catch ( \Throwable $e ) {
 			// In case of any error, return an empty array.
-			$providers = array();
+			return array();
 		}
-
-		return $providers;
 	}
 
 	/**

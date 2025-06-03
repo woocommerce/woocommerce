@@ -23,9 +23,15 @@ const DiscountSlotFill = (): JSX.Element => {
 	return <ExperimentalDiscountsMeta.Slot { ...discountsSlotFillProps } />;
 };
 
-const Block = ( { className }: { className: string } ): JSX.Element => {
+const Block = ( { className }: { className: string } ) => {
 	const { cartTotals, cartCoupons } = useStoreCart();
 	const { removeCoupon, isRemovingCoupon } = useStoreCartCoupons( 'wc/cart' );
+
+	// Hide if there are no coupons to show.
+	if ( ! cartCoupons.length ) {
+		return null;
+	}
+
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 
 	return (
