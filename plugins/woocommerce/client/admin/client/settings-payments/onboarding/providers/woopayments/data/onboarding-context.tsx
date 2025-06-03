@@ -214,8 +214,7 @@ export const OnboardingProvider: React.FC< {
 					areStepDependenciesCompleted( step, allSteps )
 			);
 
-			// If the next step is the same as the current step, it means we are at the last step
-			// and we should call onFinish if provided.
+			// If the current step is the last one, then we should call onFinish if provided.
 			if ( currentStepIndex === allSteps.length - 1 ) {
 				onFinish?.();
 			}
