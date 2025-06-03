@@ -143,5 +143,4 @@ export interface OnboardingContextType {
 	closeModal: () => void;
 	justCompletedStepId: string | null;
 	setJustCompletedStepId: ( stepId: string ) => void;
-	source: string | null | undefined;
 }

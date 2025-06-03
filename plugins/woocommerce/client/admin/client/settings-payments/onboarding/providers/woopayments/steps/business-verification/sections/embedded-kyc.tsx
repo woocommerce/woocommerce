@@ -24,8 +24,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 	collectPayoutRequirements = false,
 } ) => {
 	const { data } = useBusinessVerificationContext();
-	const { currentStep, navigateToNextStep, source, closeModal } =
-		useOnboardingContext();
+	const { currentStep, navigateToNextStep } = useOnboardingContext();
 	const [ finalizingAccount, setFinalizingAccount ] = useState( false );
 	const [ loading, setLoading ] = useState( true );
 	const [ loadError, setLoadError ] = useState< LoadError | null >( null );
@@ -44,13 +43,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 			);
 
 			if ( response.success ) {
-				// If the source is 'launch-your-store', redirect to the LYS hub.
-				// Otherwise, navigate to the next step.
-				if ( source === 'launch-your-store' ) {
-					closeModal();
-				} else {
-					navigateToNextStep();
-				}
+				navigateToNextStep();
 			} else {
 				window.location.href = fallbackUrl;
 			}

@@ -62,7 +62,6 @@ const OnboardingContext = createContext< OnboardingContextType >( {
 	closeModal: () => undefined,
 	justCompletedStepId: null,
 	setJustCompletedStepId: () => undefined,
-	source: null,
 } );
 
 export const useOnboardingContext = () => useContext( OnboardingContext );
@@ -71,9 +70,17 @@ export const OnboardingProvider: React.FC< {
 	children: React.ReactNode;
 	onboardingSteps: WooPaymentsProviderOnboardingStep[];
 	closeModal: () => void;
+	onFinish?: () => void;
 	urlStrategy?: URLStrategy;
 	source?: string | null;
-} > = ( { children, onboardingSteps, closeModal, urlStrategy, source } ) => {
+} > = ( {
+	children,
+	onboardingSteps,
+	closeModal,
+	onFinish,
+	urlStrategy,
+	source,
+} ) => {
 	const history = getHistory();
 
 	// Use React state to manage steps and loading state
@@ -207,6 +214,12 @@ export const OnboardingProvider: React.FC< {
 					areStepDependenciesCompleted( step, allSteps )
 			);
 
+			// If the next step is the same as the current step, it means we are at the last step
+			// and we should call onFinish if provided.
+			if ( currentStepIndex === allSteps.length - 1 ) {
+				onFinish?.();
+			}
+
 			if ( nextStep ) {
 				navigateToStep( nextStep.id );
 			}
@@ -329,7 +342,6 @@ export const OnboardingProvider: React.FC< {
 				},
 				justCompletedStepId,
 				setJustCompletedStepId,
-				source,
 			} }
 		>
 			{ children }
