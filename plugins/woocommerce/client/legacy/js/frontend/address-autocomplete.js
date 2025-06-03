@@ -175,10 +175,21 @@ function setActiveProvider( country, type ) {
 			const countryInput = document.getElementById( `${ type }_country` );
 			if ( countryInput ) {
 				setActiveProvider( countryInput.value, type );
+
+				// Listen for country changes to re-evaluate provider availability
+				countryInput.addEventListener( 'change', function () {
+					setActiveProvider( this.value, type );
+					// Cancel any inflight search and hide suggestions when country changes
+					if ( searchControllers[ type ] ) {
+						searchControllers[ type ].abort();
+						searchControllers[ type ] = null;
+					}
+					if ( addressInputs[ type ] ) {
+						hideSuggestions( type );
+					}
+				} );
 			}
 		} );
-
-		console.log( { activeAddressProvider } );
 
 		const mockAddressData = {
 			'01971ca5-35d2-7514-adaf-d4ab97c02c19': {
