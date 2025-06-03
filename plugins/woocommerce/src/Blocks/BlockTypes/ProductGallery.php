@@ -43,7 +43,7 @@ class ProductGallery extends AbstractBlock {
 			$srcset       = $image['srcset'];
 			$sizes        = $image['sizes'];
 			$alt          = $image['alt'];
-			$images_html .= "<img tabindex='0' data-image-id='{$id}' src='{$src}' srcset='{$srcset}' sizes='{$sizes}' loading='lazy' decoding='async' alt='{$alt}' />";
+			$images_html .= "<img data-image-id='{$id}' src='{$src}' srcset='{$srcset}' sizes='{$sizes}' loading='lazy' decoding='async' alt='{$alt}' />";
 		}
 		ob_start();
 		?>
@@ -57,7 +57,8 @@ class ProductGallery extends AbstractBlock {
 				role="dialog"
 				aria-modal="true"
 				tabindex="-1"
-				aria-label="Product Gallery">
+				aria-label="Product Gallery"
+				data-wp-bind--inert="!context.isDialogOpen">
 				<div class="wc-block-product-gallery-dialog__content">
 					<button class="wc-block-product-gallery-dialog__close-button" data-wp-on--click="actions.closeDialog" aria-label="<?php echo esc_attr__( 'Close dialog', 'woocommerce' ); ?>">
 						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
