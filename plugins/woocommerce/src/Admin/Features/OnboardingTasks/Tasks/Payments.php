@@ -6,6 +6,9 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments as SettingsPaymentsService;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
+use WC_Gateway_BACS;
+use WC_Gateway_Cheque;
+use WC_Gateway_COD;
 
 /**
  * Payments Task
@@ -65,7 +68,7 @@ class Payments extends Task {
 	 */
 	public function is_complete() {
 		if ( null === $this->is_complete_result ) {
-			$this->is_complete_result = ! $this->has_woopayments_test_account() && self::has_gateways();
+			$this->is_complete_result = ! $this->has_woopayments_test_account() && self::has_online_gateways();
 		}
 
 		return $this->is_complete_result;
@@ -82,16 +85,16 @@ class Payments extends Task {
 	}
 
 	/**
-	 * Check if the store has any enabled gateways.
+	 * Check if the store has any enabled online gateways.
 	 *
 	 * @return bool
 	 */
-	public static function has_gateways() {
+	public static function has_online_gateways() {
 		$gateways         = WC()->payment_gateways()->payment_gateways;
 		$enabled_gateways = array_filter(
 			$gateways,
 			function ( $gateway ) {
-				return 'yes' === $gateway->enabled;
+				return 'yes' === $gateway->enabled && ! in_array( $gateway->id, array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ), true );
 			}
 		);
 
