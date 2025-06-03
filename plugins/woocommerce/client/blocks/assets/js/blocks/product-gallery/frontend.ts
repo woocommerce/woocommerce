@@ -249,6 +249,42 @@ const productGallery = {
 			if ( event.code === 'Escape' ) {
 				actions.closeDialog();
 			}
+
+			if ( event.code === 'Tab' ) {
+				const focusableElementsSelectors =
+					'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+				const dialogPopUp = getElement()?.ref as HTMLElement;
+				const focusableElements = dialogPopUp.querySelectorAll(
+					focusableElementsSelectors
+				);
+
+				if ( ! focusableElements.length ) {
+					return;
+				}
+
+				const firstFocusableElement =
+					focusableElements[ 0 ] as HTMLElement;
+				const lastFocusableElement = focusableElements[
+					focusableElements.length - 1
+				] as HTMLElement;
+
+				if (
+					! event.shiftKey &&
+					event.target === lastFocusableElement
+				) {
+					event.preventDefault();
+					firstFocusableElement.focus();
+				}
+
+				if (
+					event.shiftKey &&
+					event.target === firstFocusableElement
+				) {
+					event.preventDefault();
+					lastFocusableElement.focus();
+				}
+			}
 		},
 		openDialog: () => {
 			const context = getContext();
