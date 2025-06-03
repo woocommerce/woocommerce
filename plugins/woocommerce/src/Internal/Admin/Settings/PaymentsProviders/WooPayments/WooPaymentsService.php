@@ -2301,21 +2301,6 @@ class WooPaymentsService {
 	}
 
 	/**
-	 * Get the business location country code for the Payments settings.
-	 *
-	 * @return string The ISO 3166-1 alpha-2 country code to use for the overall business location.
-	 *                If the user didn't set a location, the WC base location country code is used.
-	 */
-	private function get_country(): string {
-		$user_nox_meta = get_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, true );
-		if ( ! empty( $user_nox_meta['business_country_code'] ) ) {
-			return $user_nox_meta['business_country_code'];
-		}
-
-		return WC()->countries->get_base_country();
-	}
-
-	/**
 	 * Send a Tracks event.
 	 *
 	 * By default, Woo adds `url`, `blog_lang`, `blog_id`, `store_id`, `products_count`, and `wc_version`
