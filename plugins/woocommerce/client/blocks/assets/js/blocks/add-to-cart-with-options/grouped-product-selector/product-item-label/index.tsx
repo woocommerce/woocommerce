@@ -6,6 +6,8 @@ import { heading } from '@wordpress/icons';
 import { useBlockProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import type { BlockConfiguration } from '@wordpress/blocks';
+import { useProductDataContext } from '@woocommerce/shared-context';
+import { Spinner } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -18,11 +20,15 @@ if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
 		...metadata,
 		edit: function Edit() {
 			const blockProps = useBlockProps();
+			const { isLoading, product } = useProductDataContext();
 
+			if ( isLoading ) {
+				return <Spinner />;
+			}
 			return (
 				<div { ...blockProps }>
 					<div className="wp-block-woocommerce-add-to-cart-with-options-grouped-product-selector-item-label">
-						{ __( 'Product Title', 'woocommerce' ) }
+						{ product.name }
 					</div>
 				</div>
 			);
