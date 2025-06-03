@@ -4,11 +4,6 @@
 var addressProviders = {};
 
 /**
- * Preferred address provider ID.
- */
-var preferredAddressProviderId = null;
-
-/**
  * Currently selected address provider. It will be used to search for addresses.
  */
 var activeAddressProvider = { billing: null, shipping: null };
@@ -90,20 +85,23 @@ window.wc.addressAutocomplete = {
 };
 
 function setActiveProvider( country, type ) {
-	// Check preferred provider's canSearch first
-	const preferredProvider = addressProviders[ preferredAddressProviderId ];
-	if ( preferredProvider && preferredProvider.canSearch( country ) ) {
-		activeAddressProvider[ type ] = preferredProvider;
-		return;
-	}
-
-	// If preferred provider can't search, find first available provider that can search
-	for ( const provider of Object.values( addressProviders ) ) {
-		if ( provider.canSearch( country ) ) {
+	// Get server providers list (already ordered by preference)
+	const serverProviders =
+		( window &&
+			window.wc_checkout_params &&
+			window.wc_checkout_params.address_providers ) ||
+		[];
+	// Check providers in preference order (server handles preferred provider ordering)
+	for ( const serverProvider of serverProviders ) {
+		const provider = addressProviders[ serverProvider.id ];
+		if ( provider && provider.canSearch( country ) ) {
 			activeAddressProvider[ type ] = provider;
 			return;
 		}
 	}
+
+	// No provider can search for this country
+	activeAddressProvider[ type ] = null;
 }
 
 ( function () {
