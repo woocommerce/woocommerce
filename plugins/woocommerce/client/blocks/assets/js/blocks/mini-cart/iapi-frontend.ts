@@ -178,6 +178,18 @@ type CartItemContext = {
 store( 'woocommerce/mini-cart-items-block', {
 	state: {
 		// Intended to be used in context of a cart item in wp-each
+		get cartItemMinimum() {
+			const { cartItem } = getContext< CartItemContext >();
+			return cartItem.quantity_limits.minimum;
+		},
+
+		// Intended to be used in context of a cart item in wp-each
+		get cartItemMaximum() {
+			const { cartItem } = getContext< CartItemContext >();
+			return cartItem.quantity_limits.maximum;
+		},
+
+		// Intended to be used in context of a cart item in wp-each
 		get minimumReached() {
 			const { cartItem } = getContext< CartItemContext >();
 			return cartItem.quantity - 1 < cartItem.quantity_limits.minimum;

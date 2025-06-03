@@ -108,7 +108,16 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 										</div>
 										<div class="wc-block-cart-item__quantity">
 											<div class="wc-block-components-quantity-selector">
-												<input data-wp-on--input="actions.changeQuantity" data-wp-bind--aria-label="state.quantityDescriptionLabel" data-wp-bind--value="context.cartItem.quantity" class="wc-block-components-quantity-selector__input" type="number" step="1" min="state.cartItemMinimum" max="state.cartItemMaximum" >
+												<input 
+													data-wp-on--input="actions.changeQuantity" 
+													data-wp-bind--aria-label="state.quantityDescriptionLabel" 
+													data-wp-bind--min="state.cartItemMinimum" 
+													data-wp-bind--max="state.cartItemMaximum"
+													data-wp-bind--value="context.cartItem.quantity" 
+													class="wc-block-components-quantity-selector__input" 
+													type="number" 
+													step="1"  
+												>
 												<button data-wp-bind--disabled="state.minimumReached" data-wp-on--click="actions.decrementQuantity" data-wp-bind--aria-label="state.reduceQuantityLabel" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
 												<button data-wp-bind--disabled="state.maximumReached" data-wp-on--click="actions.incrementQuantity" data-wp-bind--aria-label="state.increaseQuantityLabel" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
 											</div>
