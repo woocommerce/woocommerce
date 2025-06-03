@@ -152,9 +152,12 @@ class WooPayments extends PaymentGateway {
 	/**
 	 * Get the onboarding flags.
 	 *
+	 * @param string $country_code Optional. The country code for which the onboarding details are being gathered.
+	 *                             This should be a ISO 3166-1 alpha-2 country code.
+	 *
 	 * @return bool[] A list of onboarding flags and their value for the given location.
 	 */
-	private function get_onboarding_flags( $country_code ): array {
+	private function get_onboarding_flags( string $country_code = '' ): array {
 		try {
 			$woopayments_service = wc_get_container()->get( PaymentsProviders\WooPayments\WooPaymentsService::class );
 

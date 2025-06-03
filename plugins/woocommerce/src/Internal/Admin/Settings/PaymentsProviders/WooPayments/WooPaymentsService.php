@@ -158,10 +158,12 @@ class WooPaymentsService {
 	}
 
 	/**
+	 * Get the onboarding flags for the current onboarding flow.
+	 *
 	 * @param string $location The location for which we are onboarding.
 	 *                         This is a ISO 3166-1 alpha-2 country code.
 	 *
-	 * @return bool[] A list of onboarding flags and their value for the given location.
+	 * @return bool[] A list of onboarding flags and their value.
 	 */
 	public function get_onboarding_flags( string $location ): array {
 		return array(
