@@ -157,6 +157,10 @@ class PageRenderer {
 			)
 		);
 
+		$email_editor_settings                           = $this->settings_controller->get_settings();
+		$email_editor_settings['isFullScreenForced']     = true;
+		$email_editor_settings['displaySendEmailButton'] = false;
+
 		wp_localize_script(
 			'woocommerce_email_editor',
 			'WooCommerceEmailEditor',
@@ -164,11 +168,7 @@ class PageRenderer {
 				'current_post_type'     => esc_js( $post_type ),
 				'current_post_id'       => $post_id,
 				'current_wp_user_email' => esc_js( $current_user_email ),
-				'editor_settings'       => array(
-					...$this->settings_controller->get_settings(),
-					'isFullScreenForced'     => true,
-					'displaySendEmailButton' => false,
-				),
+				'editor_settings'       => $email_editor_settings,
 				'editor_theme'          => $this->theme_controller->get_base_theme()->get_raw_data(),
 				'user_theme_post_id'    => $this->user_theme->get_user_theme_post()->ID,
 				'urls'                  => array(

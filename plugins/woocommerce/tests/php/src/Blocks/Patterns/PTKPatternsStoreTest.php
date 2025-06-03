@@ -41,8 +41,18 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	public function test_get_patterns_should_come_from_the_cache_when_the_transient_is_set() {
 		$expected_patterns = array(
 			array(
-				'title' => 'My pattern',
-				'slug'  => 'my-pattern',
+				'ID'           => 14870,
+				'site_id'      => 174455321,
+				'title'        => 'Review: A quote with scattered images',
+				'name'         => 'review-a-quote-with-scattered-images',
+				'html'         => '<!-- /wp:spacer -->',
+				'dependencies' => [],
+				'categories'   => array(
+					'testimonials' => array(
+						'slug'  => 'testimonials',
+						'title' => 'Testimonials',
+					),
+				),
 			),
 		);
 
@@ -51,6 +61,11 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 		$this->ptk_client
 			->expects( $this->never() )
 			->method( 'fetch_patterns' );
+
+		$this->ptk_client
+			->expects( $this->once() )
+			->method( 'is_valid_schema' )
+			->willReturn( true );
 
 		$patterns = $this->pattern_store->get_patterns();
 
@@ -78,8 +93,19 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	public function test_patterns_cache_is_empty_after_flushing_it() {
 		$expected_patterns = array(
 			array(
-				'title' => 'My pattern',
-				'slug'  => 'my-pattern',
+				'ID'           => 14870,
+				'site_id'      => 174455321,
+				'title'        => 'Review: A quote with scattered images',
+				'name'         => 'review-a-quote-with-scattered-images',
+				'html'         => '<!-- /wp:spacer -->',
+				'dependencies' => [],
+				'categories'   => array(
+					'testimonials' => array(
+						'slug'        => 'testimonials',
+						'title'       => 'Testimonials',
+						'description' => 'Share reviews and feedback about your brand/business.',
+					),
+				),
 			),
 		);
 
@@ -98,8 +124,19 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 		update_option( 'woocommerce_allow_tracking', 'no' );
 		$expected_patterns = array(
 			array(
-				'title' => 'My pattern',
-				'slug'  => 'my-pattern',
+				'ID'           => 14870,
+				'site_id'      => 174455321,
+				'title'        => 'Review: A quote with scattered images',
+				'name'         => 'review-a-quote-with-scattered-images',
+				'html'         => '<!-- /wp:spacer -->',
+				'dependencies' => [],
+				'categories'   => array(
+					'testimonials' => array(
+						'slug'        => 'testimonials',
+						'title'       => 'Testimonials',
+						'description' => 'Share reviews and feedback about your brand/business.',
+					),
+				),
 			),
 		);
 		set_transient( PTKPatternsStore::TRANSIENT_NAME, $expected_patterns );
@@ -117,8 +154,17 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$expected_patterns = array(
 			array(
-				'title' => 'My pattern',
-				'slug'  => 'my-pattern',
+				'ID'         => 14870,
+				'site_id'    => 174455321,
+				'title'      => 'Review: A quote with scattered images',
+				'name'       => 'review-a-quote-with-scattered-images',
+				'html'       => '<!-- /wp:spacer -->',
+				'categories' => array(
+					'reviews' => array(
+						'slug'  => 'reviews',
+						'title' => 'Reviews',
+					),
+				),
 			),
 		);
 		set_transient( PTKPatternsStore::TRANSIENT_NAME, $expected_patterns );
@@ -151,10 +197,21 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$expected_patterns = array(
 			array(
-				'title' => 'My pattern',
-				'slug'  => 'my-pattern',
+				'ID'           => 14870,
+				'site_id'      => 174455321,
+				'title'        => 'Review: A quote with scattered images',
+				'name'         => 'review-a-quote-with-scattered-images',
+				'html'         => '<!-- /wp:spacer -->',
+				'categories'   => array(
+					'reviews' => array(
+						'slug'  => 'reviews',
+						'title' => 'Reviews',
+					),
+				),
+				'dependencies' => [],
 			),
 		);
+
 		$this->ptk_client
 			->expects( $this->once() )
 			->method( 'fetch_patterns' )
@@ -173,27 +230,35 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$ptk_patterns = array(
 			array(
-				'title'      => 'My pattern',
-				'slug'       => 'my-pattern',
-				'categories' => array(
+				'ID'           => 14870,
+				'site_id'      => 174455321,
+				'title'        => 'Review: A quote with scattered images',
+				'name'         => 'review-a-quote-with-scattered-images',
+				'html'         => '<!-- /wp:spacer -->',
+				'categories'   => array(
 					'testimonials' => array(
 						'slug'  => 'testimonials',
 						'title' => 'Testimonials',
 					),
 				),
+				'dependencies' => [],
 			),
 		);
 
 		$expected_patterns = array(
 			array(
-				'title'      => 'My pattern',
-				'slug'       => 'my-pattern',
-				'categories' => array(
+				'ID'           => 14870,
+				'site_id'      => 174455321,
+				'title'        => 'Review: A quote with scattered images',
+				'name'         => 'review-a-quote-with-scattered-images',
+				'html'         => '<!-- /wp:spacer -->',
+				'categories'   => array(
 					'reviews' => array(
 						'slug'  => 'reviews',
 						'title' => 'Reviews',
 					),
 				),
+				'dependencies' => [],
 			),
 		);
 
@@ -220,45 +285,109 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$ptk_patterns = array(
 			array(
-				'ID'    => 1,
-				'title' => 'No deps',
+				'ID'         => 1,
+				'title'      => 'No deps',
+				'name'       => 'review-a-quote-with-scattered-images',
+				'html'       => '<!-- /wp:spacer -->',
+				'categories' => array(
+					'reviews' => array(
+						'slug'  => 'reviews',
+						'title' => 'Reviews',
+					),
+				),
 			),
 			array(
 				'ID'           => 2,
 				'title'        => 'Jetpack dep',
+				'name'         => 'review-a-quote-with-scattered-images',
 				'dependencies' => [ 'jetpack' ],
+				'html'         => '<!-- /wp:spacer -->',
+				'categories'   => array(
+					'reviews' => array(
+						'slug'  => 'reviews',
+						'title' => 'Reviews',
+					),
+				),
 			),
 			array(
 				'ID'           => 3,
 				'title'        => 'Jetpack and WooCommerce dep',
+				'name'         => 'review-a-quote-with-scattered-images',
+				'html'         => '<!-- /wp:spacer -->',
 				'dependencies' => [ 'woocommerce', 'jetpack' ],
+				'categories'   => array(
+					'reviews' => array(
+						'slug'  => 'reviews',
+						'title' => 'Reviews',
+					),
+				),
 			),
 			array(
 				'ID'           => 4,
 				'title'        => 'WooCommerce dep',
+				'name'         => 'review-a-quote-with-scattered-images',
+				'html'         => '<!-- /wp:spacer -->',
 				'dependencies' => [ 'woocommerce' ],
+				'categories'   => array(
+					'reviews' => array(
+						'slug'  => 'reviews',
+						'title' => 'Reviews',
+					),
+				),
 			),
 			array(
 				'ID'           => 5,
 				'title'        => 'Empty deps',
+				'name'         => 'review-a-quote-with-scattered-images',
+				'html'         => '<!-- /wp:spacer -->',
 				'dependencies' => [],
+				'categories'   => array(
+					'reviews' => array(
+						'slug'  => 'reviews',
+						'title' => 'Reviews',
+					),
+				),
 			),
 		);
 
 		$expected_patterns = array(
 			array(
-				'ID'    => 1,
-				'title' => 'No deps',
+				'ID'         => 1,
+				'title'      => 'No deps',
+				'name'       => 'review-a-quote-with-scattered-images',
+				'html'       => '<!-- /wp:spacer -->',
+				'categories' => array(
+					'reviews' => array(
+						'slug'  => 'reviews',
+						'title' => 'Reviews',
+					),
+				),
 			),
 			array(
 				'ID'           => 4,
 				'title'        => 'WooCommerce dep',
+				'name'         => 'review-a-quote-with-scattered-images',
 				'dependencies' => [ 'woocommerce' ],
+				'html'         => '<!-- /wp:spacer -->',
+				'categories'   => array(
+					'reviews' => array(
+						'slug'  => 'reviews',
+						'title' => 'Reviews',
+					),
+				),
 			),
 			array(
 				'ID'           => 5,
 				'title'        => 'Empty deps',
+				'name'         => 'review-a-quote-with-scattered-images',
 				'dependencies' => [],
+				'html'         => '<!-- /wp:spacer -->',
+				'categories'   => array(
+					'reviews' => array(
+						'slug'  => 'reviews',
+						'title' => 'Reviews',
+					),
+				),
 			),
 		);
 
@@ -276,22 +405,5 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 
 		$this->assertEquals( $expected_patterns, $patterns );
 		$this->assertEquals( $expected_patterns, get_transient( PTKPatternsStore::TRANSIENT_NAME ) );
-	}
-
-	/**
-	 * Asserts that the response is an error with the expected error code and message.
-	 *
-	 * @param array|WP_Error $response The response to assert.
-	 * @param string         $expected_error_message The expected error message.
-	 * @return void
-	 */
-	private function assertErrorResponse( $response, $expected_error_message ) {
-		$this->assertInstanceOf( WP_Error::class, $response );
-
-		$error_code = $response->get_error_code();
-		$this->assertEquals( 'patterns_store_error', $error_code );
-
-		$error_message = $response->get_error_message();
-		$this->assertEquals( $expected_error_message, $error_message );
 	}
 }

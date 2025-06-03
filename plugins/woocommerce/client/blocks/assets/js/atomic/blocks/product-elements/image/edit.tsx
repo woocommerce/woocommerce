@@ -2,18 +2,23 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useSelect } from '@wordpress/data';
 import {
 	InspectorControls,
 	useBlockProps,
 	useInnerBlocksProps,
+	store as blockEditorStore,
 } from '@wordpress/block-editor';
-import { createInterpolateElement, useEffect, useRef } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useEffect,
+	useRef,
+} from '@wordpress/element';
 import { getAdminLink, getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean } from '@woocommerce/types';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
 import {
-	Disabled,
 	PanelBody,
 	ToggleControl,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -31,44 +36,78 @@ import {
  */
 import Block from './block';
 import withProductSelector from '../shared/with-product-selector';
+import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
 import { BLOCK_ICON as icon } from './constants';
 import { title, description } from './block.json';
 import { BlockAttributes, ImageSizing } from './types';
 import { ImageSizeSettings } from './image-size-settings';
 
+const TEMPLATE = [
+	[
+		'woocommerce/product-sale-badge',
+		{
+			align: 'right',
+		},
+	],
+];
+
 const Edit = ( {
 	attributes,
 	setAttributes,
 	context,
+	clientId,
 }: BlockEditProps< BlockAttributes > & { context: Context } ): JSX.Element => {
-	const {
-		showProductLink,
-		imageSizing,
-		image,
-		width,
-		height,
-		scale,
-	} = attributes;
+	const { showProductLink, image, imageSizing, width, height, scale } =
+		attributes;
 
-	const ref = useRef<HTMLDivElement>( null );
+	const ref = useRef< HTMLDivElement >( null );
 
 	const blockProps = useBlockProps( { style: { width, height } } );
-	const innerBlockProps = useInnerBlocksProps( {
-		className: 'wc-block-components-product-image__inner-container',
-	}, {
-		dropZoneElement: ref.current,
-	} );
+	const wasBlockJustInserted = useSelect(
+		( select ) =>
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore method exists but not typed
+			select( blockEditorStore ).wasBlockJustInserted( clientId ),
+		[ clientId ]
+	);
+	const innerBlockProps = useInnerBlocksProps(
+		{
+			className: 'wc-block-components-product-image__inner-container',
+		},
+		{
+			dropZoneElement: ref.current,
+			template: wasBlockJustInserted ? TEMPLATE : undefined,
+		}
+	);
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
+	const { isDescendentOfSingleProductBlock } =
+		useIsDescendentOfSingleProductBlock( {
+			blockClientId: blockProps?.id,
+		} );
 	const isBlockTheme = getSettingWithCoercion(
 		'isBlockTheme',
 		false,
 		isBoolean
 	);
 
-	useEffect(
-		() => setAttributes( { isDescendentOfQueryLoop } ),
-		[ setAttributes, isDescendentOfQueryLoop ]
-	);
+	useEffect( () => {
+		if ( isDescendentOfQueryLoop || isDescendentOfSingleProductBlock ) {
+			setAttributes( {
+				isDescendentOfQueryLoop,
+				isDescendentOfSingleProductBlock,
+				showSaleBadge: false,
+			} );
+		} else {
+			setAttributes( {
+				isDescendentOfQueryLoop,
+				isDescendentOfSingleProductBlock,
+			} );
+		}
+	}, [
+		isDescendentOfQueryLoop,
+		isDescendentOfSingleProductBlock,
+		setAttributes,
+	] );
 
 	return (
 		<div { ...blockProps }>
@@ -82,7 +121,10 @@ const Edit = ( {
 				<PanelBody title={ __( 'Content', 'woocommerce' ) }>
 					{ ! image?.src && (
 						<ToggleControl
-							label={ __( 'Link to Product Page', 'woocommerce' ) }
+							label={ __(
+								'Link to Product Page',
+								'woocommerce'
+							) }
 							help={ __(
 								'Links the image to the single product listing.',
 								'woocommerce'

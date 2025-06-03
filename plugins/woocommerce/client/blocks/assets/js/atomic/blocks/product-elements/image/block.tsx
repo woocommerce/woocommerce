@@ -14,7 +14,12 @@ import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
 import type { HTMLAttributes } from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
-import { isString, objectHasProp } from '@woocommerce/types';
+import {
+	isString,
+	objectHasProp,
+	isEmpty,
+	ProductResponseItem,
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -22,6 +27,7 @@ import { isString, objectHasProp } from '@woocommerce/types';
 import ProductSaleBadge from '../sale-badge/block';
 import './style.scss';
 import { BlockAttributes, ImageSizing } from './types';
+import { isTryingToDisplayLegacySaleBadge } from './utils';
 
 const ImagePlaceholder = ( props ): JSX.Element => {
 	return (
@@ -102,6 +108,24 @@ const Image = ( {
 type Props = BlockAttributes &
 	HTMLAttributes< HTMLDivElement > & { style?: Record< string, unknown > };
 
+type LegacyProps = Props & {
+	product?: ProductResponseItem;
+};
+
+// props.product is not listed in the BlockAttributes explicitly,
+// but it is implicitly passed from the All Products block.
+// This is what distinguishes this block from the other usage of the Product Image component.
+const displayLegacySaleBadge = ( props: LegacyProps ) => {
+	const { product } = props;
+	const isInAllProducts = ! isEmpty( product );
+
+	if ( isInAllProducts ) {
+		return isTryingToDisplayLegacySaleBadge( props.showSaleBadge );
+	}
+
+	return false;
+};
+
 export const Block = ( props: Props ): JSX.Element | null => {
 	const {
 		aspectRatio,
@@ -110,10 +134,8 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		height,
 		image,
 		imageSizing = ImageSizing.SINGLE,
-		saleBadgeAlign = 'right',
 		scale,
 		showProductLink = true,
-		showSaleBadge,
 		style,
 		width,
 		...restProps
@@ -123,7 +145,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	const { product, isLoading } = useProductDataContext();
 	const { dispatchStoreEvent } = useStoreEvents();
 
-	const hasImageSrc = !!image?.src;
+	const hasImageSrc = !! image?.src;
 
 	if ( ! hasImageSrc && ! product?.id ) {
 		return (
@@ -147,17 +169,17 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		);
 	}
 
-	let imageToShow: ImageProps['image'] = null;
+	let imageToShow: ImageProps[ 'image' ] = null;
 	let altText = '';
 
 	if ( hasImageSrc ) {
-		imageToShow = { 
+		imageToShow = {
 			alt: '',
 			id: image.id,
 			name: '',
 			sizes: image.sizes,
 			src: image.src,
-			srcset: image.srcset, 
+			srcset: image.srcset,
 			thumbnail: image.src,
 		};
 		altText = 'Product Image Block';
@@ -166,15 +188,16 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		imageToShow = hasProductImages ? product.images[ 0 ] : null;
 		altText = imageToShow?.alt || decodeEntities( product.name );
 	}
-	
-	const ParentComponent = ( hasImageSrc || ! showProductLink ) ? 'a' : Fragment;
-	const anchorLabel = !hasImageSrc && product?.name ? sprintf(
-			__( 'Link to %s', 'woocommerce' ),
-			product.name
-		) : '';
+
+	const ParentComponent = hasImageSrc || ! showProductLink ? 'a' : Fragment;
+	const anchorLabel =
+		! hasImageSrc && product?.name
+			? sprintf( __( 'Link to %s', 'woocommerce' ), product.name )
+			: '';
 	const anchorProps = {
 		href: showProductLink ? product?.permalink : undefined,
-		...( ! imageToShow && showProductLink && { 'aria-label': anchorLabel } ),
+		...( ! imageToShow &&
+			showProductLink && { 'aria-label': anchorLabel } ),
 		...( showProductLink && {
 			onClick: () => {
 				dispatchStoreEvent( 'product-view-link', {
@@ -191,29 +214,25 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					className,
 					'wc-block-components-product-image',
 					{
-						[ `${ parentClassName }__product-image` ]: parentClassName,
+						[ `${ parentClassName }__product-image` ]:
+							parentClassName,
 					},
 					styleProps.className
 				) }
 				style={ styleProps.style }
 			>
+				{ /* For backwards compatibility in All Products blocks. */ }
+				{ displayLegacySaleBadge( props ) && (
+					<ProductSaleBadge
+						align={ props.saleBadgeAlign || 'right' }
+						{ ...restProps }
+					/>
+				) }
 				<ParentComponent { ...( showProductLink && anchorProps ) }>
-					{ 
-						/**
-						 * Sale badge is now supported through the inner blocks. However, for backwards compatibility,
-						 * we still need to show it if the attribute is set.
-						 */
-						! hasImageSrc && !! showSaleBadge && (
-							<ProductSaleBadge
-								align={ saleBadgeAlign }
-								{ ...restProps }
-							/>
-						)
-					}
 					<Image
-						fallbackAlt={ altText }
-						image={ imageToShow }
-						loaded={ !isLoading || hasImageSrc }
+						fallbackAlt={ decodeEntities( product.name ) }
+						image={ image }
+						loaded={ ! isLoading }
 						showFullSize={ imageSizing !== ImageSizing.THUMBNAIL }
 						width={ width }
 						height={ height }

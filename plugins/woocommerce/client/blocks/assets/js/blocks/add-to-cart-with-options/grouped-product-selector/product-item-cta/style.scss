@@ -1,7 +1,7 @@
-.wc-block-add-to-cart-with-options-grouped-product-selector-item-cta {
-	text-align: center;
+@import "../../../../base/components/quantity-selector/style";
 
+.wc-block-add-to-cart-with-options-grouped-product-selector-item-cta {
 	.button {
-		display: block;
+		display: inline-flex;
 	}
 }

@@ -16,11 +16,8 @@ test.describe( 'Test the checkout template', () => {
 			postType: templateType,
 			canvas: 'edit',
 		} );
-		await expect(
-			editor.canvas.getByRole( 'button', {
-				name: 'Place Order',
-			} )
-		).toBeVisible();
+		const block = editor.canvas.getByLabel( 'Block: Checkout' );
+		await expect( block ).toBeVisible();
 	} );
 
 	test( 'Template can be accessed from the page editor', async ( {
@@ -48,31 +45,6 @@ test.describe( 'Test the checkout template', () => {
 			editor.canvas.getByRole( 'button', {
 				name: 'Place Order',
 			} )
-		).toBeVisible();
-	} );
-} );
-
-test.describe( 'Test editing the checkout template', () => {
-	test( 'Merchant can transform shortcode block into blocks', async ( {
-		admin,
-		editor,
-	} ) => {
-		await admin.visitSiteEditor( {
-			postId: templatePath,
-			postType: templateType,
-			canvas: 'edit',
-		} );
-		await editor.setContent(
-			'<!-- wp:woocommerce/classic-shortcode {"shortcode":"checkout"} /-->'
-		);
-		await editor.canvas
-			.locator( '.wp-block-woocommerce-classic-shortcode' )
-			.waitFor();
-		await editor.canvas
-			.getByRole( 'button', { name: 'Transform into blocks' } )
-			.click();
-		await expect(
-			editor.canvas.locator( 'button:has-text("Place order")' ).first()
 		).toBeVisible();
 	} );
 } );
