@@ -48,7 +48,7 @@ class EmailListingRestController extends RestApiControllerBase {
 	 * @return string
 	 */
 	protected function get_rest_api_namespace(): string {
-		return 'wc-admin-email';
+		return 'wc-admin-email-listing';
 	}
 
 	/**
