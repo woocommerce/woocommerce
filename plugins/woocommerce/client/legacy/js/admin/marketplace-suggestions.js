@@ -352,7 +352,11 @@
 			// Extract recommendations count from the first element if it exists
 			var recommendationsCount = 5; // default fallback
 			if ( marketplace_suggestions.suggestions_data && marketplace_suggestions.suggestions_data[0]['recommendations-count'] ) {
-				recommendationsCount = marketplace_suggestions.suggestions_data[0]['recommendations-count'];
+				var apiCount = marketplace_suggestions.suggestions_data[0]['recommendations-count'];
+				// Validate that it's a positive number and within reasonable bounds
+				if ( typeof apiCount === 'number' && apiCount > 0 && apiCount <= 50 ) {
+					recommendationsCount = Math.floor( apiCount );
+				}
 			}
 
 			// iterate over all suggestions containers, rendering promos
