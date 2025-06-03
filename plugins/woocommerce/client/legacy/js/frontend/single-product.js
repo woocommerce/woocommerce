@@ -46,16 +46,16 @@ jQuery( function( $ ) {
 		} )
 		.on( 'keydown', '.wc-tabs li a, ul.tabs li a', function( e ) {
 			var direction = e.key;
-			var next      = 'ArrowRight';
-			var prev      = 'ArrowLeft';
+			var right     = 'ArrowRight';
+			var left      = 'ArrowLeft';
+			var down      = 'ArrowDown';
+			var up        = 'ArrowUp';
 			var home	  = 'Home';
 			var end		  = 'End';
 
-			if ( ! [ next, prev, end, home ].includes( direction ) ) {
+			if ( ! [ right, left, down, up, end, home ].includes( direction ) ) {
 				return;
 			}
-
-			e.preventDefault();
 
 			var $tab          = $( this );
 			var $tabs_wrapper = $tab.closest( '.wc-tabs-wrapper, .woocommerce-tabs' );
@@ -63,14 +63,49 @@ jQuery( function( $ ) {
 			var $tabs         = $tabsList.find( 'a[role="tab"]' );
 			var endIndex	  = $tabs.length - 1;
 			var tabIndex      = $tabs.index( $tab );
-			var targetIndex   = direction === prev ? tabIndex - 1 : tabIndex + 1;
-			
-			if ( ( direction === prev && tabIndex === 0 ) || direction === end ) {
+			var targetIndex   = direction === left || direction === up ? tabIndex - 1 : tabIndex + 1;
+			var orientation   = 'horizontal';
+
+			/**
+			 * We don't know if the tabs are going to be vertical or horizontal,
+			 * so let's try to detect the orientation depending on the position of the tabs.
+			*/
+			if ( $tabs.length >= 2 ) {
+				var firstTab = $tabs[0].getBoundingClientRect();
+				var secondTab = $tabs[1].getBoundingClientRect();
+
+				var orientation = Math.abs( secondTab.top - firstTab.top ) > Math.abs( secondTab.left - firstTab.left )
+					? 'vertical'
+					: 'horizontal';
+			}
+
+			/**
+			 * If the tabs are vertical, we don't need to detect left/right keys
+			 * If the tabs are horizontal, we don't need to detect up/down keys
+			*/
+			if (
+				( orientation === 'vertical' && ( direction === left || direction === right ) ) ||
+				( orientation === 'horizontal' && ( direction === up || direction === down ) )
+			) {
+				return;
+			}
+
+			e.preventDefault();
+
+			if (
+				( direction === left && tabIndex === 0 && orientation === 'horizontal' ) ||
+				( direction === up && tabIndex === 0 && orientation === 'vertical' ) ||
+				direction === end
+			) {
 				targetIndex = endIndex;
-			} else if ( ( next === direction && tabIndex === endIndex ) || direction === home ) {
+			} else if (
+				( right === direction && tabIndex === endIndex && orientation === 'horizontal' ) ||
+				( down === direction && tabIndex === endIndex && orientation === 'vertical' ) ||
+				direction === home
+			) {
 				targetIndex = 0;
 			}
-			
+
 			$tabs.eq( targetIndex ).focus();
 		} )
 		// Review link
