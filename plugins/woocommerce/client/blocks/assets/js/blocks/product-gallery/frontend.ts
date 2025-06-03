@@ -363,15 +363,7 @@ const productGallery = {
 			}
 		},
 		onThumbnailsArrowsKeyDown: ( event: KeyboardEvent ) => {
-			if ( event.code === 'ArrowRight' ) {
-				event.preventDefault();
-				actions.selectNextImage();
-			}
-
-			if ( event.code === 'ArrowLeft' ) {
-				event.preventDefault();
-				actions.selectPreviousImage();
-			}
+			actions.onArrowsKeyDown( event );
 
 			// Find and focus the newly selected image
 			const element = getElement()?.ref as HTMLElement;
