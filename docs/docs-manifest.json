@@ -129,7 +129,7 @@
           "menu_title": "Data flow overview",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/overview-of-data-flow.md",
-          "hash": "26acb354552d747ae8249547c8df7d640cf719a6c6c3e4eccbc97fce29c87bad",
+          "hash": "5f4166eb07de6b9cea6a7100dcd8cb4173f9eea44f2a53db28755cecadd80eaf",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/overview-of-data-flow.md",
           "id": "d2d8cf26967438f16815b129da855324be7a7ef8",
           "links": {
@@ -2000,5 +2000,5 @@
       "categories": []
     }
   ],
-  "hash": "2ece70c4199ed2d1c83128b150a4ab77d83bb5c25afc454630e6e6b47df43cc5"
+  "hash": "438f603d1c0fe71a61300aab65b432e37a1b620ac4464318f6592c8c14c08f9d"
 }

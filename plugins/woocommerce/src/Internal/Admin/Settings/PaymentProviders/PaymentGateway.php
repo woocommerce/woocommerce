@@ -87,6 +87,27 @@ class PaymentGateway {
 	}
 
 	/**
+	 * Enhance this provider's payment extension suggestion with additional information.
+	 *
+	 * The details added do not require the payment extension to be active or a gateway instance.
+	 *
+	 * @param array $extension_suggestion The extension suggestion details.
+	 *
+	 * @return array The enhanced payment extension suggestion details.
+	 */
+	public function enhance_extension_suggestion( array $extension_suggestion ): array {
+		if ( empty( $extensionp['onboarding'] ) || ! is_array( $extension_suggestion['onboarding'] ) ) {
+			$extension_suggestion['onboarding'] = array();
+		}
+
+		if ( ! isset( $extension_suggestion['onboarding']['type'] ) ) {
+			$extension_suggestion['onboarding']['type'] = self::ONBOARDING_TYPE_EXTERNAL;
+		}
+
+		return $extension_suggestion;
+	}
+
+	/**
 	 * Get the provider title of the payment gateway.
 	 *
 	 * This is the intended gateway title to use throughout the WC admin. It should be short.
