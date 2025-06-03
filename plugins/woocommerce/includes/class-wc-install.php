@@ -2292,7 +2292,7 @@ $hpos_table_schema;
 
 		$upload_dir = wp_upload_dir();
 		$source     = WC()->plugin_path() . '/assets/images/placeholder-attachment.png';
-		$filename   = $upload_dir['basedir'] . '/woocommerce-placeholder.png';
+		$filename   = $upload_dir['basedir'] . '/woocommerce-placeholder.webp';
 
 		if ( ! file_exists( $filename ) ) {
 			copy( $source, $filename ); // @codingStandardsIgnoreLine.
