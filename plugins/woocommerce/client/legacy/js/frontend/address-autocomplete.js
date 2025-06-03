@@ -44,7 +44,7 @@ function registerAddressAutocompleteProvider( provider ) {
 			throw new Error( 'Address provider must have a select function' );
 		}
 
-		// Check if provider is registered on server
+		// Check if provider is registered on server.
 		var serverProviders = [];
 		if (
 			window &&
@@ -75,7 +75,7 @@ function registerAddressAutocompleteProvider( provider ) {
 
 		// Freeze and add provider to registry.
 		Object.freeze( provider );
-		wooAddressProviders[ provider.id ] = provider;
+		addressProviders[ provider.id ] = provider;
 		return true;
 	} catch ( error ) {
 		console.error( 'Error registering address provider:', error.message );
