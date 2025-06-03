@@ -98,6 +98,7 @@ class Email_Editor {
 		add_action( 'rest_api_init', array( $this, 'register_email_editor_api_routes' ) );
 		add_filter( 'woocommerce_email_editor_send_preview_email', array( $this->send_preview_email, 'send_preview_email' ), 11, 1 ); // allow for other filter methods to take precedent.
 		add_filter( 'single_template', array( $this, 'load_email_preview_template' ) );
+		add_filter( 'preview_post_link', array( $this, 'update_preview_post_link' ), 10, 2 );
 	}
 
 	/**
@@ -291,6 +292,20 @@ class Email_Editor {
 	}
 
 	/**
+	 * Check if the current post type is an email post type.
+	 *
+	 * @param string $current_post_type The current post type.
+	 * @return bool
+	 */
+	private function current_post_is_email_post_type( $current_post_type ): bool {
+		if ( ! $current_post_type ) {
+			return false;
+		}
+		$email_post_types = array_column( $this->get_post_types(), 'name' );
+		return in_array( $current_post_type, $email_post_types, true );
+	}
+
+	/**
 	 * Use a custom page template for the email editor frontend rendering.
 	 *
 	 * @param string $template post template.
@@ -303,11 +318,7 @@ class Email_Editor {
 			return $template;
 		}
 
-		$current_post_type = $post->post_type;
-
-		$email_post_types = array_column( $this->get_post_types(), 'name' );
-
-		if ( ! in_array( $current_post_type, $email_post_types, true ) ) {
+		if ( ! $this->current_post_is_email_post_type( $post->post_type ) ) {
 			return $template;
 		}
 
@@ -320,5 +331,25 @@ class Email_Editor {
 		);
 
 		return __DIR__ . '/Templates/single-email-post-template.php';
+	}
+
+	/**
+	 * Update the preview post link to remove the preview nonce.
+	 *
+	 * @param string  $preview_link The preview post link.
+	 * @param WP_Post $post The post object.
+	 * @return string
+	 */
+	public function update_preview_post_link( $preview_link, $post ) {
+		if ( ! $post instanceof \WP_Post ) {
+			return $preview_link;
+		}
+
+		if ( ! $this->current_post_is_email_post_type( $post->post_type ) ) {
+			return $preview_link;
+		}
+
+		// Remove preview_nonce from the link.
+		return remove_query_arg( 'preview_nonce', $preview_link );
 	}
 }

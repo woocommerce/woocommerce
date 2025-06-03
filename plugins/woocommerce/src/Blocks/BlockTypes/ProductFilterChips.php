@@ -72,6 +72,7 @@ final class ProductFilterChips extends AbstractBlock {
 						id="<?php echo esc_attr( $item_id ); ?>"
 						class="wc-block-product-filter-chips__item"
 						type="button"
+						role="checkbox"
 						aria-label="<?php echo esc_attr( $item['ariaLabel'] ); ?>"
 						data-wp-on--click="actions.toggleFilter"
 						value="<?php echo esc_attr( $item['value'] ); ?>"

@@ -109,7 +109,8 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function get_action_url() {
-		return admin_url( 'admin.php?page=wc-settings&tab=checkout' );
+		// Link to the Payments settings page.
+		return admin_url( 'admin.php?page=wc-settings&tab=checkout&from=' . SettingsPaymentsService::FROM_PAYMENTS_TASK );
 	}
 
 	/**

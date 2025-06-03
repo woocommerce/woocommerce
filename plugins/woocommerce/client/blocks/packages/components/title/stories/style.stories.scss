@@ -1,0 +1,20 @@
+.wc-block-components-title {
+	&[class*="h1"] {
+		font-size: 2em;
+	}
+	&[class*="h2"] {
+		font-size: 1.5em;
+	}
+	&[class*="h3"] {
+		font-size: 1.17em;
+	}
+	&[class*="h4"] {
+		font-size: 1em;
+	}
+	&[class*="h5"] {
+		font-size: 0.83em;
+	}
+	&[class*="h6"] {
+		font-size: 0.67em;
+	}
+}
