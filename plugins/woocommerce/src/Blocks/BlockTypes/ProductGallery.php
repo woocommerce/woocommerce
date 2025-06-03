@@ -48,17 +48,15 @@ class ProductGallery extends AbstractBlock {
 		ob_start();
 		?>
 			<dialog
-				data-wp-ref
 				data-wp-bind--open="context.isDialogOpen"
+				data-wp-bind--inert="!context.isDialogOpen"
 				data-wp-on--close="actions.closeDialog"
 				data-wp-on--keydown="actions.onDialogKeyDown"
 				data-wp-watch="callbacks.dialogStateChange"
 				class="wc-block-product-gallery-dialog"
 				role="dialog"
 				aria-modal="true"
-				tabindex="-1"
-				aria-label="Product Gallery"
-				data-wp-bind--inert="!context.isDialogOpen">
+				aria-label="Product Gallery">
 				<div class="wc-block-product-gallery-dialog__content">
 					<button class="wc-block-product-gallery-dialog__close-button" data-wp-on--click="actions.closeDialog" aria-label="<?php echo esc_attr__( 'Close dialog', 'woocommerce' ); ?>">
 						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
