@@ -21,7 +21,6 @@ import {
 	initDomTracking,
 } from './events';
 import { useContentValidation } from './hooks/use-content-validation';
-import { updatePreviewInNewTabLink } from './hacks/update-preview-in-new-tab-link';
 import './style.scss';
 
 function Editor() {
@@ -63,7 +62,6 @@ export function initialize( elementId: string ) {
 	initBlocks();
 	initHooks();
 	initTextHooks();
-	updatePreviewInNewTabLink();
 	const root = createRoot( container );
 	root.render( <WrappedEditor /> );
 }
