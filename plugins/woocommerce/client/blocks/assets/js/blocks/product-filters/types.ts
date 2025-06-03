@@ -15,8 +15,8 @@ export type FilterOptionItem = {
 	ariaLabel: string;
 	value: string;
 	selected?: boolean;
+	count: number;
 	type: string;
-	data?: Record< string, unknown >;
 };
 
 export type FilterBlockContext = {
@@ -29,6 +29,7 @@ export type FilterBlockContext = {
 			maxPrice: number;
 			maxRange: number;
 		};
+		showCounts?: boolean;
 	};
 };
 
