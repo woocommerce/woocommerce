@@ -314,8 +314,6 @@ function setActiveProvider( country, type ) {
 			// Create new AbortController for this search
 			searchControllers[ type ] = new AbortController();
 			const controller = searchControllers[ type ];
-
-			suggestionsList.innerHTML = '';
 			
 			try {
 				const filteredSuggestions = await activeAddressProvider[
@@ -331,6 +329,9 @@ function setActiveProvider( country, type ) {
 					hideSuggestions( type );
 					return;
 				}
+
+				// Clear existing suggestions only when we have new results to show
+				suggestionsList.innerHTML = '';
 
 				filteredSuggestions.forEach( ( suggestion, index ) => {
 					const li = document.createElement( 'li' );
@@ -372,12 +373,14 @@ function setActiveProvider( country, type ) {
 				
 			} catch ( error ) {
 				// Handle search errors (including AbortError from cancelled requests)
-				if ( error.name !== 'AbortError' ) {
+				if ( error.name === 'AbortError' ) {
+					// Request was aborted - keep existing suggestions visible
+					// Silently ignore AbortError as it's expected when cancelling requests
+				} else {
 					console.error( 'Address search error:', error );
 					hideSuggestions( type );
 					enableBrowserAutofill( addressInput );
 				}
-				// Silently ignore AbortError as it's expected when cancelling requests
 			} finally {
 				// Clear the controller reference if this was the active request
 				if ( searchControllers[ type ] === controller ) {
