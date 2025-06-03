@@ -82,7 +82,7 @@ class ProductGalleryUtils {
 			// Get srcset and sizes.
 			$srcset = wp_get_attachment_image_srcset( $image_id, $size );
 			$sizes  = wp_get_attachment_image_sizes( $image_id, $size );
-			$alt    = get_post_meta($image_id, '_wp_attachment_image_alt', true);
+			$alt    = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
 
 			$image_src_data[] = array(
 				'id'     => $image_id,
@@ -94,7 +94,7 @@ class ProductGalleryUtils {
 					__( '%1$s - Image %2$d', 'woocommerce' ),
 					$product_title,
 					$index + 1
-				)
+				),
 			);
 		}
 
