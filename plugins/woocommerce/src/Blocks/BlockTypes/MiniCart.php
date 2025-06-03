@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Blocks\Utils\Utils;
 use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 
 /**
  * Mini-Cart class.
@@ -22,6 +23,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
  */
 class MiniCart extends AbstractBlock {
 	use BlockHooksTrait;
+	use BlocksSharedState;
 
 	/**
 	 * Block name.
@@ -448,10 +450,7 @@ class MiniCart extends AbstractBlock {
 	 */
 	protected function render_experimental_iapi_mini_cart( $attributes, $content, $block ) {
 		wp_enqueue_script_module( $this->get_full_block_name() );
-
-		$context = array(
-			'isOpen' => false,
-		);
+		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
 		$classes_styles           = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_weight', 'font_family', 'extra_classes' ) );
 		$icon_color               = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
@@ -461,7 +460,24 @@ class MiniCart extends AbstractBlock {
 		$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
 		$wrapper_classes          = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
 		$wrapper_styles           = $classes_styles['styles'];
-		$template_part_contents   = $this->get_template_part_contents();
+		$template_part_contents   = $this->get_template_part_contents( 'experimental-iapi-mini-cart' );
+
+		$cart             = $this->get_cart_instance();
+		$cart_item_count  = $cart ? $cart->get_cart_contents_count() : 0;
+		$badge_is_visible = ( 'always' === $product_count_visibility ) || ( 'never' !== $product_count_visibility && $cart_item_count > 0 );
+
+		wp_interactivity_state(
+			$this->get_full_block_name(),
+			array(
+				'totalItemsInCart' => $cart_item_count,
+				'badgeIsVisible'   => $badge_is_visible,
+			)
+		);
+
+		$context = array(
+			'isOpen'                 => false,
+			'productCountVisibility' => $product_count_visibility,
+		);
 
 		ob_start();
 		?>
@@ -474,7 +490,8 @@ class MiniCart extends AbstractBlock {
 						echo $icon;
 					?>
 					<?php if ( 'never' !== $product_count_visibility ) : ?>
-						<span class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>"></span>
+						<span data-wp-bind--hidden="!state.badgeIsVisible" data-wp-text="state.totalItemsInCart" class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
+						</span>
 					<?php endif; ?>
 					<?php
 					  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -482,7 +499,7 @@ class MiniCart extends AbstractBlock {
 					?>
 				</span>
 			</button>
-			<div  data-wp-bind--class="state.drawerOverlayClass" class="is-loading wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
+			<div data-wp-on--click="callbacks.overlayCloseDrawer" data-wp-bind--class="state.drawerOverlayClass" class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden">
 				<div class="wc-block-mini-cart__drawer wc-block-components-drawer">
 					<div class="wc-block-components-drawer__content">
 						<div class="wc-block-mini-cart__template-part">
@@ -502,20 +519,22 @@ class MiniCart extends AbstractBlock {
 	/**
 	 * Get the mini cart template part contents to render inside the drawer.
 	 *
+	 * @param string $template_name  The name of the template part to get the contents of.
+	 *
 	 * @return string The contents of the template part.
 	 */
-	protected function get_template_part_contents() {
+	protected function get_template_part_contents( $template_name = 'mini-cart' ) {
 		$template_part_contents = '';
 
 		// Determine if we need to load the template part from the DB, the theme or WooCommerce in that order.
-		$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'mini-cart' ), 'wp_template_part' );
+		$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( $template_name ), 'wp_template_part' );
 		if ( is_countable( $templates_from_db ) && count( $templates_from_db ) > 0 ) {
 			$template_slug_to_load = $templates_from_db[0]->theme;
 		} else {
-			$theme_has_mini_cart   = BlockTemplateUtils::theme_has_template_part( 'mini-cart' );
+			$theme_has_mini_cart   = BlockTemplateUtils::theme_has_template_part( $template_name );
 			$template_slug_to_load = $theme_has_mini_cart ? get_stylesheet() : BlockTemplateUtils::PLUGIN_SLUG;
 		}
-		$template_part = get_block_template( $template_slug_to_load . '//mini-cart', 'wp_template_part' );
+		$template_part = get_block_template( $template_slug_to_load . '//' . $template_name, 'wp_template_part' );
 
 		if ( $template_part && ! empty( $template_part->content ) ) {
 			$template_part_contents = do_blocks( $template_part->content );
@@ -524,7 +543,7 @@ class MiniCart extends AbstractBlock {
 		if ( '' === $template_part_contents ) {
 			$template_part_contents = do_blocks(
 				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-				file_get_contents( Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/mini-cart.html' )
+				file_get_contents( Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $template_name . '.html' )
 			);
 		}
 
