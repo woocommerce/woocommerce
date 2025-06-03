@@ -258,13 +258,11 @@ class Payments extends Task {
 		try {
 			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
-			$country_code = $settings_payments_service->get_country();
+			return $settings_payments_service->get_country();
 		} catch ( \Throwable $e ) {
 			// In case of any error, return the WooCommerce base country.
-			$country_code = WC()->countries->get_base_country();
+			return WC()->countries->get_base_country();
 		}
-
-		return $country_code;
 	}
 
 	/**
@@ -276,13 +274,11 @@ class Payments extends Task {
 		try {
 			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
-			$providers = $settings_payments_service->get_payment_providers( $settings_payments_service->get_country() );
+			return $settings_payments_service->get_payment_providers( $settings_payments_service->get_country() );
 		} catch ( \Throwable $e ) {
 			// In case of any error, return an empty array.
-			$providers = array();
+			return array();
 		}
-
-		return $providers;
 	}
 
 	/**
