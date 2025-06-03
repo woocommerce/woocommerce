@@ -83,6 +83,7 @@ export const SetUpPaymentsProvider: React.FC< {
 					onboardingSteps={ LYSPaymentsSteps }
 					urlStrategy={ lysUrlStrategy }
 					source="launch-your-store"
+					onFinish={ closeModal }
 				>
 					{ children }
 				</OnboardingProvider>
