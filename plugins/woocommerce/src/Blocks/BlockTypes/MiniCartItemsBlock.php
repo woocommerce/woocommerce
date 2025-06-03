@@ -31,21 +31,6 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 	}
 
 	/**
-	 * Return the main instance of WC_Cart class.
-	 *
-	 * @return \WC_Cart CartController class instance.
-	 */
-	protected function get_cart_instance() {
-		$cart = WC()->cart;
-
-		if ( $cart && $cart instanceof \WC_Cart ) {
-			return $cart;
-		}
-
-		return null;
-	}
-
-	/**
 	 * Render experimental iAPI block markup.
 	 *
 	 * @param array    $attributes Block attributes.
