@@ -15,6 +15,7 @@ import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
  * Internal dependencies
  */
 import { triggerAddedToCartEvent } from './legacy-events';
+import { updateCartItemsByKey } from './helpers';
 
 export type OptimisticCartItem = {
 	key?: string;
@@ -33,6 +34,7 @@ export type Store = {
 		};
 	};
 	actions: {
+		removeCartItem: ( key: string ) => void;
 		addCartItem: ( args: OptimisticCartItem ) => void;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		refreshCartItems: () => void;
@@ -82,6 +84,55 @@ const { state, actions } = store< Store >(
 	'woocommerce',
 	{
 		actions: {
+			*removeCartItem( key: string ) {
+				// optimistically update the cart
+				state.cart.items = state.cart.items.filter(
+					( item ) => item.key !== key
+				);
+
+				const previousCart = JSON.stringify( state.cart );
+
+				try {
+					const res: Response = yield fetch(
+						`${ state.restUrl }wc/store/v1/cart/remove-item`,
+						{
+							method: 'POST',
+							headers: {
+								Nonce: state.nonce,
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify( { key } ),
+						}
+					);
+
+					const { items, ...rest }: Cart = yield res.json();
+
+					// @ts-ignore
+					updateCartItemsByKey( state.cart.items, items );
+
+					state.cart = {
+						items: state.cart.items,
+						...rest,
+					};
+				} catch ( error ) {
+					const { items: previousItems, ...rest } =
+						JSON.parse( previousCart );
+
+					updateCartItemsByKey(
+						// @ts-ignore
+						state.cart.items,
+						previousItems
+					);
+
+					state.cart = {
+						items: state.cart.items,
+						...rest,
+					};
+
+					// Shows the error notice.
+					actions.showNoticeError( error as Error );
+				}
+			},
 			*addCartItem( { id, quantity, variation }: OptimisticCartItem ) {
 				let item = state.cart.items.find(
 					( { id: productId } ) => id === productId
@@ -125,8 +176,14 @@ const { state, actions } = store< Store >(
 						actions.showNoticeError( error );
 					} );
 
-					// Updates the local cart.
-					state.cart = json;
+					const { items, ...rest } = json;
+					// @ts-ignore
+					updateCartItemsByKey( state.cart.items, items );
+
+					state.cart = {
+						items: state.cart.items,
+						...rest,
+					};
 
 					// Dispatches a legacy event.
 					triggerAddedToCartEvent( {
@@ -138,7 +195,14 @@ const { state, actions } = store< Store >(
 				} catch ( error ) {
 					// Reverts the optimistic update.
 					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
-					state.cart = JSON.parse( previousCart );
+					const { items, ...rest } = JSON.parse( previousCart );
+					// @ts-ignore
+					updateCartItemsByKey( state.cart.items, items );
+
+					state.cart = {
+						items: state.cart.items,
+						...rest,
+					};
 
 					// Shows the error notice.
 					actions.showNoticeError( error as Error );
@@ -161,8 +225,15 @@ const { state, actions } = store< Store >(
 					if ( isApiErrorResponse( res, json ) )
 						throw generateError( json );
 
-					// Updates the local cart.
-					state.cart = json;
+					const { items, ...rest } = json;
+
+					// @ts-ignore
+					updateCartItemsByKey( state.cart.items, items );
+
+					state.cart = {
+						items: state.cart.items,
+						...rest,
+					};
 
 					// Resets the timeout.
 					refreshTimeout = 3000;

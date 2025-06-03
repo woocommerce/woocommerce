@@ -178,6 +178,18 @@ type CartItemContext = {
 store( 'woocommerce/mini-cart-items-block', {
 	state: {
 		// Intended to be used in context of a cart item in wp-each
+		get minimumReached() {
+			const { cartItem } = getContext< CartItemContext >();
+			return cartItem.quantity - 1 < cartItem.quantity_limits.minimum;
+		},
+
+		// Intended to be used in context of a cart item in wp-each
+		get maximumReached() {
+			const { cartItem } = getContext< CartItemContext >();
+			return cartItem.quantity + 1 > cartItem.quantity_limits.maximum;
+		},
+
+		// Intended to be used in context of a cart item in wp-each
 		get reduceQuantityLabel() {
 			const { reduceQuantityLabel } = getConfig(
 				'woocommerce/mini-cart-items-block'
@@ -287,6 +299,49 @@ store( 'woocommerce/mini-cart-items-block', {
 		},
 	},
 	actions: {
+		*changeQuantity( e: InputEvent ): Generator< unknown, void > {
+			const input = e.target as HTMLInputElement;
+			const qty = input.value;
+
+			const { cartItem } = getContext< CartItemContext >();
+			const { actions } = store< WooCommerce >(
+				'woocommerce',
+				{},
+				{ lock: universalLock }
+			);
+			const { minimum, maximum } = cartItem.quantity_limits;
+			const quantity = parseInt( qty );
+
+			let finalQuantity = quantity;
+
+			if ( quantity < minimum ) {
+				input.value = `${ minimum }`;
+				finalQuantity = minimum;
+			} else if ( quantity > maximum ) {
+				input.value = `${ maximum }`;
+				finalQuantity = maximum;
+			} else if ( qty === '' ) {
+				input.value = `${ minimum }`;
+				finalQuantity = minimum;
+			}
+
+			yield actions.addCartItem( {
+				id: cartItem.id,
+				quantity: finalQuantity,
+			} );
+		},
+
+		*removeItemFromCart(): Generator< unknown, void > {
+			const { cartItem } = getContext< CartItemContext >();
+			const { actions } = store< WooCommerce >(
+				'woocommerce',
+				{},
+				{ lock: universalLock }
+			);
+
+			yield actions.removeCartItem( cartItem.key );
+		},
+
 		*incrementQuantity(): Generator< unknown, void > {
 			const { cartItem } = getContext< CartItemContext >();
 			const { actions } = store< WooCommerce >(
