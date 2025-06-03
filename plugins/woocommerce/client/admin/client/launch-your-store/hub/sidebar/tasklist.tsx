@@ -116,16 +116,18 @@ export function taskClickedAction( event: {
 		} = event.task?.additionalData ?? {};
 
 		if (
+			// Only show the NOX if the store is in a WooPayments-supported geo, and:
+			wooPaymentsSettingsCountryIsSupported &&
 			// Use case 1: Merchant has no payment extensions installed, and their store is in a WooPayments-supported geo.
-			( ! wooPaymentsIsActive &&
-				! wooPaymentsHasOtherProvidersEnabled &&
-				wooPaymentsSettingsCountryIsSupported ) ||
-			// Use case 2: Merchant has the WooPayments extension installed but they have not completed setup.
-			( wooPaymentsIsActive && ! wooPaymentsIsOnboarded ) ||
-			// Use case 3: Merchant has the WooPayments extension installed and configured with a test account.
-			( wooPaymentsIsActive && wooPaymentsHasTestAccount ) ||
-			// Use case 4: Merchant has multiple payment extensions installed but not set up, and the WooPayments extension is one of them.)
-			( wooPaymentsIsActive && wooPaymentsHasOtherProvidersNeedSetup )
+			( ( ! wooPaymentsIsActive &&
+				! wooPaymentsHasOtherProvidersEnabled ) ||
+				// Use case 2: Merchant has the WooPayments extension installed but they have not completed setup.
+				( wooPaymentsIsActive && ! wooPaymentsIsOnboarded ) ||
+				// Use case 3: Merchant has the WooPayments extension installed and configured with a test account.
+				( wooPaymentsIsActive && wooPaymentsHasTestAccount ) ||
+				// Use case 4: Merchant has multiple payment extensions installed but not set up, and the WooPayments extension is one of them.)
+				( wooPaymentsIsActive &&
+					wooPaymentsHasOtherProvidersNeedSetup ) )
 		) {
 			return { type: 'SHOW_PAYMENTS' };
 		}
