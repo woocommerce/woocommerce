@@ -39,7 +39,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'postId', 'mode', 'cropImages' ];
+		return array( 'postId', 'mode', 'cropImages' );
 	}
 
 	/**
@@ -68,14 +68,13 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			return '';
 		}
 
-		$product_gallery_thumbnails_data = ProductGalleryUtils::get_product_gallery_image_data( $product );
-		$product_gallery_images          = $product_gallery_thumbnails_data['images'];
+		$product_gallery_images = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_thumbnail' );
 		// Don't show the thumbnails block if there is only one image.
 		if ( count( $product_gallery_images ) <= 1 ) {
 			return '';
 		}
 
-		$thumbnail_size   = str_replace( '%', '', $attributes['thumbnailSize'] ?? '33%' );
+		$thumbnail_size   = str_replace( '%', '', $attributes['thumbnailSize'] ?? '25%' );
 		$thumbnails_class = 'wc-block-product-gallery-thumbnails--thumbnails-size-' . $thumbnail_size;
 
 		ob_start();
@@ -92,23 +91,24 @@ class ProductGalleryThumbnails extends AbstractBlock {
 				class="wc-block-product-gallery-thumbnails__scrollable"
 				data-wp-init="actions.onScroll"
 				data-wp-on--scroll="actions.onScroll">
-				<template
-					data-wp-each--image="state.thumbnails"
-					data-wp-each-key="context.image.id">
-					<div class="wc-block-product-gallery-thumbnails__thumbnail">
+				<?php foreach ( $product_gallery_images as $index => $image ) : ?>
+					<div class="wc-block-product-gallery-thumbnails__thumbnail" style="aspect-ratio: <?php echo esc_attr( $attributes['aspectRatio'] ); ?>">
 						<img
-							class="wc-block-product-gallery-thumbnails__thumbnail__image"
-							data-wp-bind--data-image-id="context.image.id"
-							data-wp-bind--src="context.image.src"
-							data-wp-bind--srcset="context.image.srcset"
-							data-wp-bind--sizes="context.image.sizes"
+							class="wc-block-product-gallery-thumbnails__thumbnail__image <?php echo 0 === $index ? 'is-active' : ''; ?>"
+							data-image-id="<?php echo esc_attr( $image['id'] ); ?>"
+							src="<?php echo esc_attr( $image['src'] ); ?>"
+							srcset="<?php echo esc_attr( $image['srcset'] ); ?>"
+							sizes="<?php echo esc_attr( $image['sizes'] ); ?>"
 							data-wp-on--click="actions.selectCurrentImage"
 							data-wp-on--keydown="actions.onThumbnailKeyDown"
+							data-wp-watch="callbacks.toggleActiveImageAttributes"
 							decoding="async"
 							tabindex="0"
-							loading="lazy" />
+							draggable="false"
+							loading="lazy"
+							style="aspect-ratio: <?php echo esc_attr( $attributes['aspectRatio'] ); ?>" />
 					</div>
-				</template>
+				<?php endforeach; ?>
 			</div>
 		</div>
 		<?php

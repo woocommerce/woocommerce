@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Removing blueprint ZIP export functionality and related classes.

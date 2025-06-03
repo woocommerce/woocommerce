@@ -53,15 +53,17 @@ const LocalPickupSelector = ( {
 					checked === 'pickup',
 			} ) }
 		>
-			{ showIcon === true && (
-				<Icon
-					icon={ store }
-					size={ 28 }
-					className="wc-block-checkout__shipping-method-option-icon"
-				/>
-			) }
-			<span className="wc-block-checkout__shipping-method-option-title">
-				{ toggleText }
+			<span className="wc-block-checkout__shipping-method-option-title-wrapper">
+				{ showIcon === true && (
+					<Icon
+						icon={ store }
+						size={ 28 }
+						className="wc-block-checkout__shipping-method-option-icon"
+					/>
+				) }
+				<span className="wc-block-checkout__shipping-method-option-title">
+					{ toggleText }
+				</span>
 			</span>
 			{ showPrice === true && (
 				<RatePrice
@@ -140,15 +142,17 @@ const ShippingSelector = ( {
 					checked === 'shipping',
 			} ) }
 		>
-			{ showIcon === true && (
-				<Icon
-					icon={ shipping }
-					size={ 28 }
-					className="wc-block-checkout__shipping-method-option-icon"
-				/>
-			) }
-			<span className="wc-block-checkout__shipping-method-option-title">
-				{ toggleText }
+			<span className="wc-block-checkout__shipping-method-option-title-wrapper">
+				{ showIcon === true && (
+					<Icon
+						icon={ shipping }
+						size={ 28 }
+						className="wc-block-checkout__shipping-method-option-icon"
+					/>
+				) }
+				<span className="wc-block-checkout__shipping-method-option-title">
+					{ toggleText }
+				</span>
 			</span>
 			{ showPrice === true && Price }
 		</Button>

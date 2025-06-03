@@ -2,11 +2,13 @@
 
 namespace Automattic\WooCommerce\Blueprint\Tests\Unit\Importers;
 
+use PHPUnit\Framework\TestCase;
+use Mockery;
+
 use Automattic\WooCommerce\Blueprint\Importers\ImportActivateTheme;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use Automattic\WooCommerce\Blueprint\Steps\ActivateTheme;
-use Mockery;
-use PHPUnit\Framework\TestCase;
+
 
 /**
  * Test the ImportActivateTheme class.
@@ -43,8 +45,12 @@ class ImportActivateThemeTest extends TestCase {
 
 		// Mock the wp_switch_theme method.
 		$import_activate_theme->shouldReceive( 'wp_switch_theme' )
-			->with( $theme_name )
-			->andReturn( true );
+			->with( $theme_name );
+
+		// Mock the wp_get_theme method to return a mock object with a get_stylesheet method.
+		$theme_mock = Mockery::mock();
+		$theme_mock->shouldReceive( 'get_stylesheet' )->andReturn( $theme_name );
+		$import_activate_theme->shouldReceive( 'wp_get_theme' )->andReturn( $theme_mock );
 
 		// Execute the process method.
 		$result = $import_activate_theme->process( $schema );
@@ -81,8 +87,12 @@ class ImportActivateThemeTest extends TestCase {
 
 		// Mock the wp_switch_theme method.
 		$import_activate_theme->shouldReceive( 'wp_switch_theme' )
-			->with( $theme_name )
-			->andReturn( false );
+			->with( $theme_name );
+
+		// Mock the wp_get_theme method to return a mock object with a get_stylesheet method.
+		$theme_mock = Mockery::mock();
+		$theme_mock->shouldReceive( 'get_stylesheet' )->andReturn( 'different-theme' );
+		$import_activate_theme->shouldReceive( 'wp_get_theme' )->andReturn( $theme_mock );
 
 		// Execute the process method.
 		$result = $import_activate_theme->process( $schema );

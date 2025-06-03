@@ -1,11 +1,12 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { useQueryLoopProductContextValidation } from '@woocommerce/base-hooks';
 import { useSelect } from '@wordpress/data';
 import { optionsStore, Product, productsStore } from '@woocommerce/data';
+import { PanelBody, ToggleControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -39,7 +40,10 @@ const getFormattedDimensions = (
 const Edit = ( {
 	context: { postId, postType },
 	clientId,
+	attributes,
+	setAttributes,
 }: ProductSpecificationsEditProps ) => {
+	const { showWeight, showDimensions, showAttributes } = attributes;
 	const blockProps = useBlockProps( {
 		className: 'wc-block-product-specifications',
 	} );
@@ -117,60 +121,108 @@ const Edit = ( {
 		);
 	}
 
-	const productData: Record< string, { label: string; value: string } > = {
-		weight: {
+	const productData: Record< string, { label: string; value: string } > = {};
+
+	if ( showWeight ) {
+		productData.weight = {
 			label: __( 'Weight', 'woocommerce' ),
 			value: '',
-		},
-		dimensions: {
+		};
+
+		if ( isSpecificProductContext ) {
+			productData.weight.value = product.weight
+				? `${ product.weight } ${ weightUnit }`
+				: '';
+		} else {
+			productData.weight.value = `10 ${ weightUnit }`;
+		}
+	}
+
+	if ( showDimensions ) {
+		productData.dimensions = {
 			label: __( 'Dimensions', 'woocommerce' ),
 			value: '',
-		},
-	};
-
-	if ( isSpecificProductContext ) {
-		productData.weight.value = product?.weight
-			? `${ product.weight } ${ weightUnit }`
-			: '';
-		productData.dimensions.value = product?.dimensions
-			? getFormattedDimensions( product.dimensions, dimensionUnit )
-			: '';
-		product?.attributes?.forEach( ( attribute ) => {
-			productData[ attribute.name.toLowerCase() ] = {
-				label: attribute.name,
-				value: attribute.options.join( ', ' ),
-			};
-		} );
-	} else {
-		productData.weight.value = `10 ${ weightUnit }`;
-		productData.dimensions.value = `10 × 10 × 10 ${ dimensionUnit }`;
-		productData.test_attribute = {
-			label: __( 'Test Attribute', 'woocommerce' ),
-			value: __( 'First, Second, Third', 'woocommerce' ),
 		};
+
+		if ( isSpecificProductContext ) {
+			productData.dimensions.value = product.dimensions
+				? getFormattedDimensions( product.dimensions, dimensionUnit )
+				: '';
+		} else {
+			productData.dimensions.value = `10 × 10 × 10 ${ dimensionUnit }`;
+		}
+	}
+
+	if ( showAttributes ) {
+		if ( isSpecificProductContext ) {
+			if ( product.attributes ) {
+				product.attributes.forEach( ( attribute ) => {
+					productData[ attribute.name.toLowerCase() ] = {
+						label: attribute.name,
+						value: attribute.options.join( ', ' ),
+					};
+				} );
+			}
+		} else {
+			productData.test_attribute = {
+				label: __( 'Test Attribute', 'woocommerce' ),
+				value: __( 'First, Second, Third', 'woocommerce' ),
+			};
+		}
 	}
 
 	return (
-		<table { ...blockProps }>
-			<tbody>
-				{ Object.entries( productData ).map(
-					( [ key, data ] ) =>
-						data.value && (
-							<tr
-								key={ key }
-								className={ `wc-block-product-specifications-item wc-block-product-specifications-item__${ key }` }
-							>
-								<th className="wc-block-product-specifications-item__label">
-									{ data.label }
-								</th>
-								<td className="wc-block-product-specifications-item__value">
-									{ data.value }
-								</td>
-							</tr>
-						)
-				) }
-			</tbody>
-		</table>
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
+					<ToggleControl
+						label={ __( 'Show Weight', 'woocommerce' ) }
+						checked={ showWeight }
+						onChange={ () =>
+							setAttributes( { showWeight: ! showWeight } )
+						}
+					/>
+					<ToggleControl
+						label={ __( 'Show Dimensions', 'woocommerce' ) }
+						checked={ showDimensions }
+						onChange={ () =>
+							setAttributes( {
+								showDimensions: ! showDimensions,
+							} )
+						}
+					/>
+					<ToggleControl
+						label={ __( 'Show Attributes', 'woocommerce' ) }
+						checked={ showAttributes }
+						onChange={ () =>
+							setAttributes( {
+								showAttributes: ! showAttributes,
+							} )
+						}
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<table { ...blockProps }>
+				<tbody>
+					{ Object.entries( productData ).map(
+						( [ key, data ] ) =>
+							data.value && (
+								<tr
+									key={ key }
+									className={ `wc-block-product-specifications-item wc-block-product-specifications-item__${ key }` }
+								>
+									<th className="wc-block-product-specifications-item__label">
+										{ data.label }
+									</th>
+									<td className="wc-block-product-specifications-item__value">
+										{ data.value }
+									</td>
+								</tr>
+							)
+					) }
+				</tbody>
+			</table>
+		</>
 	);
 };
 

@@ -16,41 +16,66 @@ import {
  */
 import { ProductDetailsEditProps } from './types';
 
-const createAccordionItem = (
-	title: string,
-	content: InnerBlockTemplate[]
-): InnerBlockTemplate => {
-	return [
-		'woocommerce/accordion-item',
-		{},
-		[
-			[ 'woocommerce/accordion-header', { title }, [] ],
-			[ 'woocommerce/accordion-panel', {}, content ],
-		],
-	];
-};
-
-const descriptionAccordion = createAccordionItem( 'Description', [
-	[ 'woocommerce/product-description', {}, [] ],
-] );
-
-const additionalInformationAccordion = createAccordionItem(
-	'Additional Information',
-	[ [ 'woocommerce/product-specifications', {} ] ]
-);
-
-const reviewsAccordion = createAccordionItem( 'Reviews', [
-	[ 'woocommerce/blockified-product-reviews', {} ],
-] );
-
 const TEMPLATE: InnerBlockTemplate[] = [
 	[
 		'woocommerce/accordion-group',
 		{},
 		[
-			descriptionAccordion,
-			additionalInformationAccordion,
-			reviewsAccordion,
+			[
+				'woocommerce/accordion-item',
+				{
+					openByDefault: true,
+				},
+				[
+					[
+						'woocommerce/accordion-header',
+						{ title: __( 'Description', 'woocommerce' ) },
+						[],
+					],
+					[
+						'woocommerce/accordion-panel',
+						{},
+						[ [ 'woocommerce/product-description', {}, [] ] ],
+					],
+				],
+			],
+			[
+				'woocommerce/accordion-item',
+				{},
+				[
+					[
+						'woocommerce/accordion-header',
+						{
+							title: __(
+								'Additional Information',
+								'woocommerce'
+							),
+						},
+						[],
+					],
+					[
+						'woocommerce/accordion-panel',
+						{},
+						[ [ 'woocommerce/product-specifications', {} ] ],
+					],
+				],
+			],
+			[
+				'woocommerce/accordion-item',
+				{},
+				[
+					[
+						'woocommerce/accordion-header',
+						{ title: __( 'Reviews', 'woocommerce' ) },
+						[],
+					],
+					[
+						'woocommerce/accordion-panel',
+						{},
+						[ [ 'woocommerce/blockified-product-reviews', {} ] ],
+					],
+				],
+			],
 		],
 	],
 ];

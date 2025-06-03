@@ -8,6 +8,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  */
 final class ProductFilterCheckboxList extends AbstractBlock {
 
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -27,8 +29,6 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		if ( empty( $block->context['filterData'] ) ) {
 			return '';
 		}
-
-		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		$block_context = $block->context['filterData'];
 		$items         = $block_context['items'] ?? array();
@@ -127,13 +127,11 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 	}
 
 	/**
-	 * Disable the block type script, this uses script modules.
-	 *
-	 * @param string|null $key The key.
+	 * Disable the style handle for this block type. We use block.json to load the style.
 	 *
 	 * @return null
 	 */
-	protected function get_block_type_script( $key = null ) {
+	protected function get_block_type_style() {
 		return null;
 	}
 }

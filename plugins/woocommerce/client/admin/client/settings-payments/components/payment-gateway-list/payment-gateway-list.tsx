@@ -56,6 +56,10 @@ interface PaymentGatewayListProps {
 	 * Callback to update the ordering of payment providers after sorting.
 	 */
 	updateOrdering: ( providers: PaymentProvider[] ) => void;
+	/**
+	 * Callback to open or close the onboarding modal.
+	 */
+	setIsOnboardingModalOpen: ( isOpen: boolean ) => void;
 }
 
 /**
@@ -74,6 +78,7 @@ export const PaymentGatewayList = ( {
 	acceptIncentive,
 	shouldHighlightIncentive,
 	updateOrdering,
+	setIsOnboardingModalOpen,
 }: PaymentGatewayListProps ) => {
 	return (
 		<SortableContainer< PaymentProvider >
@@ -117,6 +122,7 @@ export const PaymentGatewayList = ( {
 									installingPlugin,
 									acceptIncentive,
 									shouldHighlightIncentive,
+									setIsOnboardingModalOpen,
 								} ) }
 							</SortableItem>
 						);

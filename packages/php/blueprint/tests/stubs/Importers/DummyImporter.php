@@ -28,4 +28,14 @@ class DummyImporter implements StepProcessor {
 	public function get_step_class(): string {
 		return DummyStep::class;
 	}
+
+	/**
+	 * Check the step capabilities.
+	 *
+	 * @param object $schema The schema to check.
+	 * @return bool True if the step capabilities are valid.
+	 */
+	public function check_step_capabilities( $schema ): bool {
+		return true;
+	}
 }

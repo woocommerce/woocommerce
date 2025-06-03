@@ -179,4 +179,52 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 			$this->personalizer->personalize_content( $html_content )
 		);
 	}
+
+	/**
+	 * Test personalizing content with a tag in href attribute.
+	 */
+	public function testPersonalizeContentWithHrefTag(): void {
+		// Register a tag in the registry.
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Store URL',
+				'woocommerce/store-url',
+				'Store',
+				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The $args parameter is not used in this test.
+					return 'https://example.com';
+				}
+			)
+		);
+
+		$html_content = '<a href="http://[woocommerce/store-url]">Click here</a>';
+		$this->assertSame( '<a href="https://example.com">Click here</a>', $this->personalizer->personalize_content( $html_content ) );
+	}
+
+	/**
+	 * Test personalizing content with a tag in href attribute with URL encoding.
+	 */
+	public function testPersonalizeContentWithEncodedHrefTag(): void {
+		// Register a tag in the registry.
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Store URL',
+				'woocommerce/store-url',
+				'Store',
+				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The $args parameter is not used in this test.
+					return 'https://example.com';
+				}
+			)
+		);
+
+		$html_content = '<a href="http://%5Bwoocommerce/store-url%5D">Click here</a>';
+		$this->assertSame( '<a href="https://example.com">Click here</a>', $this->personalizer->personalize_content( $html_content ) );
+	}
+
+	/**
+	 * Test personalizing content with a non-existent tag in href attribute.
+	 */
+	public function testPersonalizeContentWithNonExistentHrefTag(): void {
+		$html_content = '<a href="http://[woocommerce/non-existent-tag]">Click here</a>';
+		$this->assertSame( '<a href="http://[woocommerce/non-existent-tag]">Click here</a>', $this->personalizer->personalize_content( $html_content ) );
+	}
 }

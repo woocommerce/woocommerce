@@ -63,33 +63,24 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 		$variable_product->set_gallery_image_ids( $gallery_image_ids );
 		$variable_product->save();
 
-		$image_data = ProductGalleryUtils::get_product_gallery_image_data( $variable_product );
+		$image_data = ProductGalleryUtils::get_product_gallery_image_data( $variable_product, 'woocommerce_thumbnail' );
 
-		$this->assertArrayHasKey( 'image_ids', $image_data );
-		$this->assertArrayHasKey( 'images', $image_data );
-		$this->assertNotEmpty( $image_data['image_ids'] );
-		$this->assertNotEmpty( $image_data['images'] );
+		// Assert that $image_data is a non-empty array.
+		$this->assertIsArray( $image_data );
+		$this->assertNotEmpty( $image_data );
 
-		// Assert that $image_data['image_ids'] is a flat array of numbers.
-		$this->assertIsArray( $image_data['image_ids'] );
-		$this->assertContainsOnly( 'integer', $image_data['image_ids'] );
-		$this->assertEquals( array_values( $image_data['image_ids'] ), $image_data['image_ids'], 'Array should have no keys' );
-
-		// Assert that the keys of $image_data['images'] are IDs.
-		foreach ( $image_data['images'] as $key => $image ) {
-			$this->assertIsInt( $key );
-		}
-
-		// Assert that each item in $image_data['images'] has required keys.
-		foreach ( $image_data['images'] as $image ) {
+		// Assert that each item in $image_data has required keys and correct types.
+		foreach ( $image_data as $image ) {
+			$this->assertIsArray( $image );
 			$this->assertArrayHasKey( 'id', $image );
 			$this->assertArrayHasKey( 'sizes', $image );
 			$this->assertArrayHasKey( 'srcset', $image );
 			$this->assertArrayHasKey( 'src', $image );
 		}
 
-		// Assert that the child product image is included in the image_ids array.
-		$this->assertContains( $variation_image_id, $image_data['image_ids'] );
+		// Assert that the child product image is included in the image data array.
+		$ids = array_column( $image_data, 'id' );
+		$this->assertContains( $variation_image_id, $ids );
 
 		// Clean up.
 		$variable_product->delete( true );

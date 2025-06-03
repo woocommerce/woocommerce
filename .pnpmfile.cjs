@@ -43,7 +43,7 @@ function updatePackageFile( packagePath, packageFile ) {
 	fs.writeFileSync(
 		path.join( packagePath, 'package.json' ),
 		// Make sure to keep the newline at the end of the file.
-		JSON.stringify( packageFile, null, '\t' ) + "\n",
+		JSON.stringify( packageFile, null, '\t' ) + '\n',
 		'utf8'
 	);
 }
@@ -61,26 +61,50 @@ function updatePackageFile( packagePath, packageFile ) {
  *
  * @return void
  */
-function updateConfig( packageName, packagePath, declaredDependencies, resolvedDependencies, config, context ) {
+function updateConfig(
+	packageName,
+	packagePath,
+	declaredDependencies,
+	resolvedDependencies,
+	config,
+	context
+) {
 	for ( const [ key, value ] of Object.entries( declaredDependencies ) ) {
 		if ( value.startsWith( 'workspace:' ) ) {
-			const normalizedPath = path.join( packagePath, resolvedDependencies[key].replace( 'link:', '' ) );
-			context.log( `[wireit][${ packageName }]    Inspecting workspace dependency: ${ key } (${ normalizedPath })` );
+			const normalizedPath = path.join(
+				packagePath,
+				resolvedDependencies[ key ].replace( 'link:', '' )
+			);
+			context.log(
+				`[wireit][${ packageName }]    Inspecting workspace dependency: ${ key } (${ normalizedPath })`
+			);
 
 			// Actualize output storage with the identified entries.
 			const dependencyFile = loadPackageFile( normalizedPath );
 			if ( dependencyFile.files ) {
 				for ( const entry in dependencyFile.files ) {
-					const entryValue = dependencyFile.files[entry];
+					const entryValue = dependencyFile.files[ entry ];
 					let normalizedValue;
 					if ( entryValue.startsWith( '!' ) ) {
-						normalizedValue = '!' + path.join( 'node_modules', key, entryValue.substring( 1 ) );
+						normalizedValue =
+							'!' +
+							path.join(
+								'node_modules',
+								key,
+								entryValue.substring( 1 )
+							);
 					} else {
-						normalizedValue = path.join( 'node_modules', key, entryValue );
+						normalizedValue = path.join(
+							'node_modules',
+							key,
+							entryValue
+						);
 					}
 					config.files.push( normalizedValue );
 
-					context.log( `[wireit][${ packageName }]        - ${ normalizedValue }` );
+					context.log(
+						`[wireit][${ packageName }]        - ${ normalizedValue }`
+					);
 				}
 			} else {
 				context.log( `[wireit][${ packageName }]        ---` );
@@ -106,12 +130,14 @@ function afterAllResolved( lockfile, context ) {
 	for ( const packagePath in lockfile.importers ) {
 		const packageFile = loadPackageFile( packagePath );
 		if ( packageFile.wireit ) {
-			context.log( `[wireit][${ packageFile.name }] Verifying 'wireit.dependencyOutputs'` );
+			context.log(
+				`[wireit][${ packageFile.name }] Verifying 'wireit.dependencyOutputs'`
+			);
 
 			// Initialize outputs storage and hash it's original state.
-			const config              = {
+			const config = {
 				allowUsuallyExcludedPaths: true, // This is needed so we can reference files in `node_modules`.
-				files: [ "package.json" ],       // The files list will include globs for dependency files that we should fingerprint.
+				files: [ 'package.json' ], // The files list will include globs for dependency files that we should fingerprint.
 			};
 			const originalConfigState = JSON.stringify( config );
 
@@ -125,7 +151,8 @@ function afterAllResolved( lockfile, context ) {
 				},
 				{
 					...( lockfile.importers[ packagePath ].dependencies || {} ),
-					...( lockfile.importers[ packagePath ].devDependencies || {} ),
+					...( lockfile.importers[ packagePath ].devDependencies ||
+						{} ),
 				},
 				config,
 				context
@@ -135,9 +162,13 @@ function afterAllResolved( lockfile, context ) {
 			let updated = false;
 			const newConfigState = JSON.stringify( config );
 			if ( newConfigState !== originalConfigState ) {
-				const loadedConfigState = JSON.stringify( packageFile.wireit?.dependencyOutputs || {} );
+				const loadedConfigState = JSON.stringify(
+					packageFile.wireit?.dependencyOutputs || {}
+				);
 				if ( newConfigState !== loadedConfigState ) {
-					context.log( `[wireit][${ packageFile.name }]    Conclusion: outdated, updating 'wireit.dependencyOutputs'` );
+					context.log(
+						`[wireit][${ packageFile.name }]    Conclusion: outdated, updating 'wireit.dependencyOutputs'`
+					);
 
 					packageFile.wireit.dependencyOutputs = config;
 					updatePackageFile( packagePath, packageFile );
@@ -145,7 +176,9 @@ function afterAllResolved( lockfile, context ) {
 				}
 			}
 			if ( ! updated ) {
-				context.log( `[wireit][${ packageFile.name }]    Conclusion: up to date` );
+				context.log(
+					`[wireit][${ packageFile.name }]    Conclusion: up to date`
+				);
 			}
 		}
 	}
@@ -159,5 +192,35 @@ function afterAllResolved( lockfile, context ) {
 module.exports = {
 	hooks: {
 		afterAllResolved,
+		readPackage( pkg ) {
+			// We resolve @wordpress/interactivity and @wordpress/interactivity-router via pnpm's git sub dir feature
+			// and as a result need to resolve some of their dependencies also via sub dir.
+			if ( pkg.name === '@wordpress/interactivity-router' ) {
+				if (
+					pkg.dependencies &&
+					pkg.dependencies[ '@wordpress/a11y' ] &&
+					pkg.dependencies[ '@wordpress/interactivity' ]
+				) {
+					const blocksPackageJsonPath = path.resolve(
+						__dirname,
+						'plugins/woocommerce/client/blocks/package.json'
+					);
+
+					const blocksPackageJson = require( blocksPackageJsonPath );
+					const a11yVersion =
+						blocksPackageJson.dependencies?.[ '@wordpress/a11y' ];
+
+					//  Use the version installed in @woocommerce/block-library, fallback if the version is somehow no longer installed.
+					pkg.dependencies[ '@wordpress/a11y' ] =
+						a11yVersion || '4.22.0';
+
+					// Use the WooCommerce fork
+					pkg.dependencies[ '@wordpress/interactivity' ] =
+						'github:woocommerce/gutenberg#interactivity-api-001&path:/packages/interactivity';
+				}
+			}
+
+			return pkg;
+		},
 	},
 };

@@ -5,6 +5,7 @@ import { debounce } from '@woocommerce/base-utils';
 import { CartBillingAddress, CartShippingAddress } from '@woocommerce/types';
 import { select, dispatch } from '@wordpress/data';
 import isShallowEqual from '@wordpress/is-shallow-equal';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -30,6 +31,11 @@ const localState = {
 		shippingAddress: [] as BaseAddressKey[],
 	},
 };
+
+const addressFieldsForShippingRates: string[] = getSetting(
+	'addressFieldsForShippingRates',
+	[]
+);
 
 /**
  * Initializes the customer data cache on the first run.
@@ -114,10 +120,13 @@ const updateCustomerData = (): void => {
 	// Get updated list of dirty props by comparing customer data.
 	updateDirtyProps();
 
-	// Do we need to push anything?
-	const needsPush =
-		localState.dirtyProps.billingAddress.length > 0 ||
+	const isBillingAddressDirty =
+		localState.dirtyProps.billingAddress.length > 0;
+	const isShippingAddressDirty =
 		localState.dirtyProps.shippingAddress.length > 0;
+
+	// Do we need to push anything?
+	const needsPush = isBillingAddressDirty || isShippingAddressDirty;
 
 	if ( ! needsPush ) {
 		localState.doingPush = false;
@@ -130,11 +139,24 @@ const updateCustomerData = (): void => {
 		return;
 	}
 
+	const haveAddressFieldsForShippingRatesChanged =
+		localState.dirtyProps.shippingAddress.some( ( field ) =>
+			addressFieldsForShippingRates.includes( field as string )
+		);
+
 	dispatch( cartStore )
-		.updateCustomerData( {
-			billing_address: localState.customerData.billingAddress,
-			shipping_address: localState.customerData.shippingAddress,
-		} )
+		.updateCustomerData(
+			{
+				...( isBillingAddressDirty && {
+					billing_address: localState.customerData.billingAddress,
+				} ),
+				...( isShippingAddressDirty && {
+					shipping_address: localState.customerData.shippingAddress,
+				} ),
+			},
+			true,
+			haveAddressFieldsForShippingRatesChanged
+		)
 		.then( () => {
 			localState.dirtyProps.billingAddress = [];
 			localState.dirtyProps.shippingAddress = [];

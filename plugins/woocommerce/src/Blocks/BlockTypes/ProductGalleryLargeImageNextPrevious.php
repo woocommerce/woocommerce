@@ -51,20 +51,20 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 			return '';
 		}
 
-		$product_gallery_data   = ProductGalleryUtils::get_product_gallery_image_data( $product );
-		$product_gallery_images = $product_gallery_data['images'];
+		$product_gallery_image_count = ProductGalleryUtils::get_product_gallery_image_count( $product );
 
 		// Don't show the arrows block if there is only one image.
-		if ( count( $product_gallery_images ) <= 1 ) {
+		if ( $product_gallery_image_count <= 1 ) {
 			return '';
 		}
 
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'align' ) );
+		$vertical_alignment = StyleAttributesUtils::get_align_class_and_style( $attributes );
 
 		ob_start();
 		?>
 		<div
-			class="wc-block-product-gallery-large-image-next-previous"
+			class="wc-block-product-gallery-large-image-next-previous <?php echo esc_attr( $vertical_alignment['class'] ); ?>"
 			data-wp-interactive="woocommerce/product-gallery"
 		>
 			<button

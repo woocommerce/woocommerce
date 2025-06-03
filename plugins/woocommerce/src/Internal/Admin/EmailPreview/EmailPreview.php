@@ -7,12 +7,15 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\EmailPreview;
 
+use Automattic\WooCommerce\Internal\EmailEditor\WooContentProcessor;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Throwable;
 use WC_Email;
 use WC_Order;
 use WC_Product;
 use WC_Product_Variation;
 use WP_User;
+use WC_Order_Item_Shipping;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -27,6 +30,8 @@ class EmailPreview {
 		'WC_Email_Customer_New_Account',
 		'WC_Email_Customer_Reset_Password',
 	);
+
+	const TRANSIENT_PREVIEW_EMAIL_IMPROVEMENTS = 'woocommerce_preview_email_improvements';
 
 	/**
 	 * All fields IDs that can customize email styles in Settings.
@@ -177,12 +182,26 @@ class EmailPreview {
 		$object           = null;
 
 		if ( in_array( $email_type, self::USER_OBJECT_EMAILS, true ) ) {
-			$object                        = new WP_User( 0 );
-			$this->email->user_email       = 'user_preview@example.com';
-			$this->email->user_login       = 'user_preview';
-			$this->email->reset_key        = 'reset_key';
-			$this->email->user_id          = 0;
-			$this->email->set_password_url = 'https://example.com/set-password';
+			$object                  = new WP_User( 0 );
+			$object->user_email      = 'user_preview@example.com';
+			$object->user_login      = 'user_preview';
+			$object->first_name      = 'John';
+			$object->last_name       = 'Doe';
+			$this->email->user_email = $object->user_email;
+			$this->email->user_login = $object->user_login;
+
+			if ( property_exists( $this->email, 'reset_key' ) ) {
+				$this->email->reset_key = 'reset_key';
+			}
+
+			if ( property_exists( $this->email, 'set_password_url' ) ) {
+				$this->email->set_password_url = 'https://example.com/set-password';
+			}
+
+			if ( property_exists( $this->email, 'user_id' ) ) {
+				$this->email->user_id = 0;
+			}
+
 			$this->email->set_object( $object );
 		} else {
 			$object = $this->get_dummy_order();
@@ -325,7 +344,19 @@ class EmailPreview {
 		$order->set_shipping_total( 5 );
 		$order->set_total( 65 );
 		$order->set_payment_method_title( __( 'Direct bank transfer', 'woocommerce' ) );
-		$order->set_customer_note( __( "This is a customer note. Customers can add a note to their order on checkout.\n\nIt can be multiple lines. If there’s no note, this section is hidden.", 'woocommerce' ) );
+		$order->set_transaction_id( '999999999' );
+		$order->set_customer_note( __( "This is a customer note. Customers can add a note to their order on checkout.\n\nIt can be multiple lines. If there's no note, this section is hidden.", 'woocommerce' ) );
+
+		// Add shipping method.
+		$shipping_item = new WC_Order_Item_Shipping();
+		$shipping_item->set_props(
+			array(
+				'method_title' => __( 'Flat rate', 'woocommerce' ),
+				'method_id'    => 'flat_rate',
+				'total'        => '5.00',
+			)
+		);
+		$order->add_item( $shipping_item );
 
 		$address = $this->get_dummy_address();
 		$order->set_billing_address( $address );
@@ -459,8 +490,6 @@ class EmailPreview {
 		add_filter( 'woocommerce_order_item_product', array( $this, 'get_dummy_product_when_not_set' ), 10, 1 );
 		// Enable email preview mode - this way transient values are fetched for live preview.
 		add_filter( 'woocommerce_is_email_preview', array( $this, 'enable_preview_mode' ) );
-		// Get shipping method without needing to save it in the order.
-		add_filter( 'woocommerce_order_shipping_method', array( $this, 'get_shipping_method' ) );
 		// Use placeholder image included in WooCommerce files.
 		add_filter( 'woocommerce_order_item_thumbnail', array( $this, 'get_placeholder_image' ) );
 	}
@@ -472,17 +501,7 @@ class EmailPreview {
 		remove_filter( 'woocommerce_order_needs_shipping_address', array( $this, 'enable_shipping_address' ) );
 		remove_filter( 'woocommerce_order_item_product', array( $this, 'get_dummy_product_when_not_set' ), 10 );
 		remove_filter( 'woocommerce_is_email_preview', array( $this, 'enable_preview_mode' ) );
-		remove_filter( 'woocommerce_order_shipping_method', array( $this, 'get_shipping_method' ) );
 		remove_filter( 'woocommerce_order_item_thumbnail', array( $this, 'get_placeholder_image' ) );
-	}
-
-	/**
-	 * Get the shipping method for the preview email.
-	 *
-	 * @return string
-	 */
-	public function get_shipping_method() {
-		return __( 'Flat rate', 'woocommerce' );
 	}
 
 	/**
@@ -512,5 +531,57 @@ class EmailPreview {
 	 */
 	public function get_placeholder_image() {
 		return '<img src="' . WC()->plugin_url() . '/assets/images/placeholder.png" width="48" height="48" alt="" />';
+	}
+
+	/**
+	 * Generate placeholder content for a specific email type, typically used in the email editor.
+	 *
+	 * Encapsulates the logic for setting the email type, generating raw content, applying styles,
+	 * ensuring links open in new tabs, and handling errors based on WP_DEBUG.
+	 *
+	 * @param string $email_type_class_name The class name of the WC_Email type (e.g., 'WC_Email_Customer_Processing_Order').
+	 * @return string The generated and styled HTML content.
+	 * @throws \RuntimeException If content generation fails. If rendering fails.
+	 */
+	public function generate_placeholder_content( string $email_type_class_name ): string {
+		// Note: set_email_type can throw InvalidArgumentException.
+		$this->set_email_type( $email_type_class_name );
+
+		$woo_content_processor = wc_get_container()->get( WooContentProcessor::class );
+
+		$generate_content_closure = function () use ( $woo_content_processor ) {
+			// Note: If 'woocommerce_email_styles' filter was intentional and `prepare_css` isn't
+			// the intended callback, adjust accordingly. This assumes `prepare_css` applies styles
+			// needed for the Woo content block.
+			add_filter( 'woocommerce_email_styles', array( $woo_content_processor, 'prepare_css' ), 10, 2 );
+			$content = $woo_content_processor->get_woo_content( $this->get_email() );
+			$content = $this->get_email()->style_inline( $content );
+			$content = $this->ensure_links_open_in_new_tab( $content );
+			return $content;
+		};
+
+		$this->set_up_filters();
+
+		$message = '';
+		try {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				$message = $generate_content_closure();
+			} else {
+				// Use output buffering to prevent partial renders with PHP notices or warnings when WP_DEBUG is off.
+				ob_start();
+				try {
+					$message = $generate_content_closure();
+				} catch ( Throwable $e ) {
+					ob_end_clean();
+					// Let the caller handle the exception.
+					throw new \RuntimeException( esc_html__( 'There was an error rendering the email editor placeholder content.', 'woocommerce' ), 0, $e );
+				}
+				ob_end_clean();
+			}
+		} finally {
+			$this->clean_up_filters();
+		}
+
+		return $message;
 	}
 }

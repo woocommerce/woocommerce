@@ -14,9 +14,17 @@
 		"core/post-template"
 	],
 	"attributes": {
-		"fontSize": {
-			"type": "string",
-			"default": "medium"
+		"showWeight": {
+			"type": "boolean",
+			"default": true
+		},
+		"showDimensions": {
+			"type": "boolean",
+			"default": true
+		},
+		"showAttributes": {
+			"type": "boolean",
+			"default": true
 		}
 	},
 	"usesContext": [ "postId", "postType" ],

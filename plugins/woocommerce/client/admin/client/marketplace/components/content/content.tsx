@@ -130,7 +130,6 @@ export default function Content(): JSX.Element {
 
 				speak( __( 'More products loaded', 'woocommerce' ) );
 				setCurrentPage( ( prevPage ) => prevPage + 1 );
-				setIsLoadingMore( false );
 			} )
 			.catch( () => {
 				speak( __( 'Error loading more products', 'woocommerce' ) );

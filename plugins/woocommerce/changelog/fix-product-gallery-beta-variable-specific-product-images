@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Product Gallery: Ensure loading the "selected variant" image even if it's not added in the product image gallery.

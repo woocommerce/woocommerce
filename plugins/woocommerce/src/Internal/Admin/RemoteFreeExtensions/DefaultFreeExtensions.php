@@ -215,7 +215,7 @@ class DefaultFreeExtensions {
 					array(
 						'type'        => 'option',
 						'option_name' => 'woocommerce_remote_variant_assignment',
-						'value'       => array( 1, 84 ), // 70% segment with klaviyo
+						'value'       => array( 1, 60 ), // 50% segment with klaviyo
 						'default'     => false,
 						'operation'   => 'range',
 					),
@@ -254,7 +254,7 @@ class DefaultFreeExtensions {
 					array(
 						'type'        => 'option',
 						'option_name' => 'woocommerce_remote_variant_assignment',
-						'value'       => array( 85, 120 ), // 30% segment with mailpoet
+						'value'       => array( 61, 120 ), // 50% segment with mailpoet
 						'default'     => false,
 						'operation'   => 'range',
 					),
@@ -531,9 +531,9 @@ class DefaultFreeExtensions {
 				'requires_jpc'     => true,
 			),
 			'woocommerce-shipping'      => array(
-				'label'            => __( 'Print shipping labels with WooCommerce Shipping', 'woocommerce' ),
+				'label'            => __( 'Save on shipping with WooCommerce Shipping', 'woocommerce' ),
 				'image_url'        => self::get_woo_logo(),
-				'description'      => __( 'Print USPS, UPS, and DHL labels directly from your dashboard and save on shipping.', 'woocommerce' ),
+				'description'      => __( 'Print discounted USPS, UPS, and DHL labels', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/woocommerce-shipping?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 3,
 			),

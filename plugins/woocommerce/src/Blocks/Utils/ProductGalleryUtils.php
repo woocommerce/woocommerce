@@ -6,25 +6,16 @@ namespace Automattic\WooCommerce\Blocks\Utils;
  * {@internal This class and its methods are not intended for public use.}
  */
 class ProductGalleryUtils {
-	const CROP_IMAGE_SIZE_NAME = '_woo_blocks_product_gallery_crop_full';
-
 	/**
-	 * Get the product gallery image data.
+	 * Get all image IDs for the product.
 	 *
-	 * @param \WC_Product $product The product object to retrieve the gallery images for.
-	 * @return array An array of image data for the product gallery.
+	 * @param \WC_Product $product The product object.
+	 * @return array An array of image IDs.
 	 */
-	public static function get_product_gallery_image_data( $product ) {
-		$image_data = array(
-			// Image src data.
-			'images'    => array(),
-			// List of image IDs.
-			'image_ids' => array(),
-		);
-
+	public static function get_all_image_ids( $product ) {
 		if ( ! $product instanceof \WC_Product ) {
 			wc_doing_it_wrong( __FUNCTION__, __( 'Invalid product object.', 'woocommerce' ), '9.8.0' );
-			return $image_data;
+			return array();
 		}
 
 		$gallery_image_ids           = self::get_product_gallery_image_ids( $product );
@@ -32,25 +23,43 @@ class ProductGalleryUtils {
 		$all_image_ids               = array_values( array_map( 'intval', array_unique( array_merge( $gallery_image_ids, $product_variation_image_ids ) ) ) );
 
 		if ( empty( $all_image_ids ) ) {
-			return $image_data;
+			return array();
 		}
 
-		$image_data['image_ids'] = $all_image_ids;
-		$image_data['images']    = array_combine(
-			$all_image_ids,
-			self::get_image_src_data( $all_image_ids )
-		);
+		return $all_image_ids;
+	}
 
-		return $image_data;
+	/**
+	 * Get the product gallery image data.
+	 *
+	 * @param \WC_Product $product The product object to retrieve the gallery images for.
+	 * @param string      $size The size of the image to retrieve.
+	 * @return array An array of image data for the product gallery.
+	 */
+	public static function get_product_gallery_image_data( $product, $size ) {
+		$all_image_ids = self::get_all_image_ids( $product );
+		return self::get_image_src_data( $all_image_ids, $size );
+	}
+
+	/**
+	 * Get the product gallery image count.
+	 *
+	 * @param \WC_Product $product The product object to retrieve the gallery images for.
+	 * @return int The number of images in the product gallery.
+	 */
+	public static function get_product_gallery_image_count( $product ) {
+		$all_image_ids = self::get_all_image_ids( $product );
+		return count( $all_image_ids );
 	}
 
 	/**
 	 * Get the image source data.
 	 *
-	 * @param array $image_ids The image IDs to retrieve the source data for.
+	 * @param array  $image_ids The image IDs to retrieve the source data for.
+	 * @param string $size The size of the image to retrieve.
 	 * @return array An array of image source data.
 	 */
-	public static function get_image_src_data( $image_ids ) {
+	public static function get_image_src_data( $image_ids, $size ) {
 		$image_src_data = array();
 
 		foreach ( $image_ids as $image_id ) {
@@ -66,11 +75,11 @@ class ProductGalleryUtils {
 			}
 
 			// Get the image source.
-			$full_src = wp_get_attachment_image_src( $image_id, 'full' );
+			$full_src = wp_get_attachment_image_src( $image_id, $size );
 
 			// Get srcset and sizes.
-			$srcset = wp_get_attachment_image_srcset( $image_id, 'full' );
-			$sizes  = wp_get_attachment_image_sizes( $image_id, 'full' );
+			$srcset = wp_get_attachment_image_srcset( $image_id, $size );
+			$sizes  = wp_get_attachment_image_sizes( $image_id, $size );
 
 			$image_src_data[] = array(
 				'id'     => $image_id,
@@ -121,12 +130,10 @@ class ProductGalleryUtils {
 	/**
 	 * Get the product gallery image IDs.
 	 *
-	 * @param \WC_Product $product                      The product object to retrieve the gallery images for.
-	 * @param int         $max_number_of_visible_images The maximum number of visible images to return. Defaults to 8.
-	 * @param bool        $only_visible                 Whether to return only the visible images. Defaults to false.
+	 * @param \WC_Product $product The product object to retrieve the gallery images for.
 	 * @return array An array of unique image IDs for the product gallery.
 	 */
-	public static function get_product_gallery_image_ids( $product, $max_number_of_visible_images = 8, $only_visible = false ) {
+	public static function get_product_gallery_image_ids( $product ) {
 		$product_image_ids = array();
 
 		// Main product featured image.
@@ -151,10 +158,6 @@ class ProductGalleryUtils {
 
 		foreach ( $product_image_ids as $key => $image_id ) {
 			$product_image_ids[ $key ] = strval( $image_id );
-		}
-
-		if ( count( $product_image_ids ) > $max_number_of_visible_images && $only_visible ) {
-			$product_image_ids = array_slice( $product_image_ids, 0, $max_number_of_visible_images );
 		}
 
 		// Reindex array.

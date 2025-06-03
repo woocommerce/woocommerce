@@ -63,7 +63,7 @@
  * For the WYSIWYG experience we don't want to display any margins between blocks in the editor
  */
 .wp-block {
-	clear: both; // for ensuring that floated elements (images) are cleared
+	clear: both;
 }
 
 /*
@@ -113,4 +113,42 @@ ol.has-background {
 .is-mobile-preview figure > div {
 	max-width: 100% !important;
 	height: auto !important;
+}
+
+/*
+ * Reset default margin for blocks in template-mode
+ * This was causing the first block to have a margin-top set to block gap.
+ * We control the gab via different css
+ */
+.wp-site-blocks > * {
+	margin-block-start: 0;
+}
+
+/*
+ * Hide the post title.
+ * When user disables the template-lock mode we don't want to show the post title.
+ */
+.editor-visual-editor__post-title-wrapper {
+	display: none;
+}
+
+/*
+ * Temporary styles for Rich Text HTML comments from the PR: https://github.com/WordPress/gutenberg/pull/62128/files
+ */
+[data-rich-text-comment],
+[data-rich-text-format-boundary] {
+	border-radius: 2px;
+}
+
+[data-rich-text-comment] {
+	background-color: var(
+		--wp-components-color-accent,
+		var(--wp-admin-theme-color, #3858e9)
+	);
+
+	span {
+		color: var(--wp-components-color-accent-inverted, #fff);
+		filter: none;
+		padding: 0 2px;
+	}
 }

@@ -25,6 +25,7 @@ export const refundPolicyTitle = ( location: string ) => {
 				'30-day {{Link}}money-back guarantee{{/Link}}',
 				'woocommerce'
 			) }
+			target="_blank"
 		/>
 	);
 };
@@ -42,6 +43,7 @@ export const supportTitle = ( location: string ) => {
 				'{{Link}}Get help{{/Link}} when you need it',
 				'woocommerce'
 			) }
+			target="_blank"
 		/>
 	);
 };
@@ -59,6 +61,7 @@ export const paymentTitle = ( location: string ) => {
 				'{{Link}}Products{{/Link}} you can trust',
 				'woocommerce'
 			) }
+			target="_blank"
 		/>
 	);
 };

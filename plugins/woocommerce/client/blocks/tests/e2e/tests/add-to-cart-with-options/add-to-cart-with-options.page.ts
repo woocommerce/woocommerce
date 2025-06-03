@@ -10,7 +10,7 @@ class AddToCartWithOptionsPage {
 	private editor: Editor;
 	private requestUtils: RequestUtils;
 	BLOCK_SLUG = 'woocommerce/add-to-cart-with-options';
-	BLOCK_NAME = 'Add to Cart with Options (Experimental)';
+	BLOCK_NAME = 'Add to Cart + Options (Beta)';
 
 	constructor( {
 		page,
@@ -78,6 +78,25 @@ class AddToCartWithOptionsPage {
 			},
 			{ clientId: parentClientId }
 		);
+	}
+
+	async updateSingleProductTemplate() {
+		await this.admin.visitSiteEditor( {
+			postId: 'woocommerce/woocommerce//single-product',
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+
+		const addToCartFormBlock = await this.editor.getBlockByName(
+			'woocommerce/add-to-cart-form'
+		);
+		await this.editor.selectBlocks( addToCartFormBlock );
+
+		await this.page
+			.getByRole( 'button', {
+				name: 'Upgrade to the Add to Cart + Options block',
+			} )
+			.click();
 	}
 }
 

@@ -354,7 +354,14 @@ body {
 		color: <?php echo esc_attr( $text_lighter_20 ); ?>;
 		border: 1px solid <?php echo esc_attr( $body_darker_10 ); ?>;
 	<?php } ?>
+	word-break: break-all;
 }
+
+<?php if ( $email_improvements_enabled ) : ?>
+#addresses td + td {
+	padding-<?php echo is_rtl() ? 'right' : 'left'; ?>: 10px !important;
+}
+<?php endif; ?>
 
 .additional-fields {
 	padding: 12px 12px 0;

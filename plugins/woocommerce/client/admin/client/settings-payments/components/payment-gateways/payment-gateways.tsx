@@ -7,17 +7,17 @@ import clsx from 'clsx';
 import {
 	PaymentProvider,
 	paymentSettingsStore,
+	woopaymentsOnboardingStore,
 	WC_ADMIN_NAMESPACE,
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
-import { useMemo, useState } from '@wordpress/element';
+import { useMemo, useState, useRef } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Popover } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import InfoOutline from 'gridicons/dist/info-outline';
 import interpolateComponents from '@automattic/interpolate-components';
-import { useDebounce } from '@wordpress/compose';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -43,6 +43,7 @@ interface PaymentGatewaysProps {
 	isFetching: boolean;
 	businessRegistrationCountry: string | null;
 	setBusinessRegistrationCountry: ( country: string ) => void;
+	setIsOnboardingModalOpen: ( isOpen: boolean ) => void;
 }
 
 /**
@@ -61,9 +62,14 @@ export const PaymentGateways = ( {
 	isFetching,
 	businessRegistrationCountry,
 	setBusinessRegistrationCountry,
+	setIsOnboardingModalOpen,
 }: PaymentGatewaysProps ) => {
-	const { invalidateResolution } = useDispatch( paymentSettingsStore );
+	const { invalidateResolution: invalidateMainStore } =
+		useDispatch( paymentSettingsStore );
+	const { invalidateResolution: invalidateWooPaymentsOnboardingStore } =
+		useDispatch( woopaymentsOnboardingStore );
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
+	const buttonRef = useRef< HTMLDivElement >( null );
 	const storeCountryCode = (
 		window.wcSettings?.admin?.preloadSettings?.general
 			?.woocommerce_default_country || 'US'
@@ -91,12 +97,21 @@ export const PaymentGateways = ( {
 		}
 	);
 
-	const hidePopoverDebounced = useDebounce( () => {
+	const handleClick = ( event: React.MouseEvent | React.KeyboardEvent ) => {
+		const clickedElement = event.target as HTMLElement;
+		const parentDiv = clickedElement.closest(
+			'.settings-payment-gateways__header-select-container--indicator'
+		);
+
+		if ( buttonRef.current && parentDiv !== buttonRef.current ) {
+			return;
+		}
+
+		setIsPopoverVisible( ( prev ) => ! prev );
+	};
+
+	const handleFocusOutside = () => {
 		setIsPopoverVisible( false );
-	}, 350 );
-	const showPopover = () => {
-		setIsPopoverVisible( true );
-		hidePopoverDebounced.cancel();
 	};
 
 	return (
@@ -140,9 +155,21 @@ export const PaymentGateways = ( {
 
 								// Update UI.
 								setBusinessRegistrationCountry( value );
-								invalidateResolution( 'getPaymentProviders', [
+								// Update the window value - this will be updated by the backend on refresh but this keeps state persistent.
+								if (
+									window.wcSettings.admin
+										.woocommerce_payments_nox_profile
+								) {
+									window.wcSettings.admin.woocommerce_payments_nox_profile.business_country_code =
+										value;
+								}
+								invalidateMainStore( 'getPaymentProviders', [
 									value,
 								] );
+								invalidateWooPaymentsOnboardingStore(
+									'getOnboardingData',
+									[]
+								);
 							} );
 						} }
 					/>
@@ -151,17 +178,14 @@ export const PaymentGateways = ( {
 							className="settings-payment-gateways__header-select-container--indicator"
 							tabIndex={ 0 }
 							role="button"
-							onClick={ () =>
-								setIsPopoverVisible( ! isPopoverVisible )
-							}
-							onMouseEnter={ showPopover }
-							onMouseLeave={ hidePopoverDebounced }
+							ref={ buttonRef }
+							onClick={ handleClick }
 							onKeyDown={ ( event ) => {
 								if (
 									event.key === 'Enter' ||
 									event.key === ' '
 								) {
-									setIsPopoverVisible( ! isPopoverVisible );
+									handleClick( event );
 								}
 							} }
 						>
@@ -178,7 +202,7 @@ export const PaymentGateways = ( {
 									focusOnMount={ true }
 									noArrow={ true }
 									shift={ true }
-									onClose={ hidePopoverDebounced }
+									onFocusOutside={ handleFocusOutside }
 								>
 									<div className="components-popover__content-container">
 										<p>
@@ -218,6 +242,7 @@ export const PaymentGateways = ( {
 					acceptIncentive={ acceptIncentive }
 					shouldHighlightIncentive={ shouldHighlightIncentive }
 					updateOrdering={ updateOrdering }
+					setIsOnboardingModalOpen={ setIsOnboardingModalOpen }
 				/>
 			) }
 		</div>

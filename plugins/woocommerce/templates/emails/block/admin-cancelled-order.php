@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 9.9.0
+ * @version 10.0.0
  */
 
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2>
+<h2 class="wp-block-heading">
 <?php
 /* translators: %s: order number */
 printf( esc_html__( 'Order cancelled: #%s,', 'woocommerce' ), '<!--[woocommerce/order-number]-->' );
@@ -33,18 +33,9 @@ printf( esc_html__( 'Order cancelled: #%s,', 'woocommerce' ), '<!--[woocommerce/
 <!-- wp:paragraph -->
 <p>
 <?php
-	/* translators: %s: Customer first name */
-	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/shopper-first-name]-->' );
-?>
-</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph -->
-<p>
-<?php
 	/* translators: %1$s: Order number. %2$s: Customer full name */
 	$text = __( 'We’re getting in touch to let you know that order #%1$s from %2$s has been cancelled.', 'woocommerce' );
-	printf( esc_html( $text ), '<!--[woocommerce/order-number]-->', '<!--[woocommerce/shopper-full-name]-->' );
+	printf( esc_html( $text ), '<!--[woocommerce/order-number]-->', '<!--[woocommerce/customer-full-name]-->' );
 ?>
 </p>
 <!-- /wp:paragraph -->

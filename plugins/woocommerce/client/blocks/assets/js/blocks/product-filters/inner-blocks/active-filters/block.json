@@ -33,5 +33,6 @@
 			}
 		}
 	},
-	"usesContext": [ "activeFilters" ]
+	"usesContext": [ "activeFilters" ],
+	"viewScriptModule": "woocommerce/product-filter-active"
 }

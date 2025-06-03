@@ -32,8 +32,8 @@ class ImportSetSiteOptionsTest extends TestCase {
 	public function test_process_updates_options_successfully() {
 		$schema          = Mockery::mock();
 		$schema->options = array(
-			'site_name'   => 'My New Site',
-			'admin_email' => 'admin@example.com',
+			'site_name'                   => 'My New Site',
+			'woocommerce_default_country' => 'JP',
 		);
 
 		$import_set_site_options = Mockery::mock( ImportSetSiteOptions::class )
@@ -45,7 +45,7 @@ class ImportSetSiteOptionsTest extends TestCase {
 			->with( 'site_name', 'My New Site' )
 			->andReturn( true );
 		$import_set_site_options->shouldReceive( 'wp_update_option' )
-			->with( 'admin_email', 'admin@example.com' )
+			->with( 'woocommerce_default_country', 'JP' )
 			->andReturn( true );
 
 		$result = $import_set_site_options->process( $schema );
@@ -55,8 +55,8 @@ class ImportSetSiteOptionsTest extends TestCase {
 
 		$messages = $result->get_messages( 'info' );
 		$this->assertCount( 2, $messages );
-		$this->assertEquals( 'site_name has been updated', $messages[0]['message'] );
-		$this->assertEquals( 'admin_email has been updated', $messages[1]['message'] );
+		$this->assertEquals( 'site_name has been updated.', $messages[0]['message'] );
+		$this->assertEquals( 'woocommerce_default_country has been updated.', $messages[1]['message'] );
 	}
 
 	/**
@@ -92,6 +92,34 @@ class ImportSetSiteOptionsTest extends TestCase {
 		$messages = $result->get_messages( 'info' );
 		$this->assertCount( 1, $messages );
 		$this->assertEquals( 'site_name has not been updated because the current value is already up to date.', $messages[0]['message'] );
+	}
+
+	/**
+	 * Test when restricted options are attempted to be updated.
+	 *
+	 * @return void
+	 */
+	public function test_process_restricted_options() {
+		$schema                  = Mockery::mock();
+		$schema->options         = array(
+			'admin_email'    => 'danger@example.com',
+			'active_plugins' => array( 'fake-plugin/fake-plugin.php' ),
+		);
+		$import_set_site_options = Mockery::mock( ImportSetSiteOptions::class )
+			->makePartial()
+			->shouldAllowMockingProtectedMethods();
+
+		$result = $import_set_site_options->process( $schema );
+
+		$this->assertInstanceOf( StepProcessorResult::class, $result );
+		$this->assertTrue( $result->is_success() );
+
+		$messages = $result->get_messages( 'warn' );
+		$this->assertCount( 2, $messages );
+		$this->assertEquals( "Cannot modify 'admin_email' option: Modifying is restricted for this key.", $messages[0]['message'] );
+		$this->assertEquals( "Cannot modify 'active_plugins' option: Modifying is restricted for this key.", $messages[1]['message'] );
+		$this->assertNotEquals( get_option( 'admin_email' ), 'danger@example.com' );
+		$this->assertNotEquals( get_option( 'active_plugins' ), array( 'fake-plugin/fake-plugin.php' ) );
 	}
 
 	/**

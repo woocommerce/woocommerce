@@ -14,7 +14,7 @@ const OptionLayout = ( {
 	description,
 	secondaryDescription,
 	id,
-	descriptionStackingDirection,
+	descriptionStackingDirection = 'row',
 }: RadioControlOptionLayout ): JSX.Element => {
 	return (
 		<div className="wc-block-components-radio-control__option-layout">
