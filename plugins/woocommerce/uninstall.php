@@ -12,7 +12,9 @@ defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
 global $wpdb, $wp_version;
 
-define( 'WC_UNINSTALLING_PLUGIN', true );
+if ( ! defined( 'WC_UNINSTALLING_PLUGIN' ) ) {
+	define( 'WC_UNINSTALLING_PLUGIN', true );
+}
 
 wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
 wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
