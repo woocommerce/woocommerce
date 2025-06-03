@@ -106,8 +106,6 @@ const { state, actions } = store< Store >(
 					);
 
 					const { items, ...rest }: Cart = yield res.json();
-
-					// @ts-ignore
 					updateCartItemsByKey( state.cart.items, items );
 
 					state.cart = {
@@ -117,12 +115,7 @@ const { state, actions } = store< Store >(
 				} catch ( error ) {
 					const { items: previousItems, ...rest } =
 						JSON.parse( previousCart );
-
-					updateCartItemsByKey(
-						// @ts-ignore
-						state.cart.items,
-						previousItems
-					);
+					updateCartItemsByKey( state.cart.items, previousItems );
 
 					state.cart = {
 						items: state.cart.items,
@@ -177,7 +170,6 @@ const { state, actions } = store< Store >(
 					} );
 
 					const { items, ...rest } = json;
-					// @ts-ignore
 					updateCartItemsByKey( state.cart.items, items );
 
 					state.cart = {
@@ -196,7 +188,6 @@ const { state, actions } = store< Store >(
 					// Reverts the optimistic update.
 					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
 					const { items, ...rest } = JSON.parse( previousCart );
-					// @ts-ignore
 					updateCartItemsByKey( state.cart.items, items );
 
 					state.cart = {
@@ -226,8 +217,6 @@ const { state, actions } = store< Store >(
 						throw generateError( json );
 
 					const { items, ...rest } = json;
-
-					// @ts-ignore
 					updateCartItemsByKey( state.cart.items, items );
 
 					state.cart = {

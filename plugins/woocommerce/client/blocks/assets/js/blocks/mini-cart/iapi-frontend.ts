@@ -310,7 +310,7 @@ store( 'woocommerce/mini-cart-items-block', {
 				{ lock: universalLock }
 			);
 			const { minimum, maximum } = cartItem.quantity_limits;
-			const quantity = parseInt( qty );
+			const quantity = parseInt( qty, 10 );
 
 			let finalQuantity = quantity;
 

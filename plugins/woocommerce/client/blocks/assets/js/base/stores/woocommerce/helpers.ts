@@ -1,4 +1,8 @@
+/**
+ * Internal dependencies
+ */
 import { CartItem } from '../../../types';
+import { OptimisticCartItem } from './cart';
 
 function isPrimitive(
 	val: unknown
@@ -8,14 +12,14 @@ function isPrimitive(
 	);
 }
 
-function deepEqual( a: any, b: any ): boolean {
+function deepEqual( a: unknown, b: unknown ): boolean {
 	// Quick version; replace with fast-deep-equal if needed
 	return JSON.stringify( a ) === JSON.stringify( b );
 }
 
 export function updateCartItemsByKey(
-	currentItems: CartItem[],
-	newItems: CartItem[]
+	currentItems: ( CartItem | OptimisticCartItem )[],
+	newItems: ( CartItem | OptimisticCartItem )[]
 ) {
 	const currentMap = new Map(
 		currentItems.map( ( item ) => [ item.key, item ] )
@@ -30,13 +34,16 @@ export function updateCartItemsByKey(
 				existing
 			) as ( keyof CartItem )[] ) {
 				if (
+					// @ts-expect-error - TODO we need to improve the typing of cart items which is CartItem | OptimisticCartItem making it difficult to type this effectively.
 					isPrimitive( existing[ key ] ) &&
+					// @ts-expect-error - TODO we need to improve the typing of cart items which is CartItem | OptimisticCartItem making it difficult to type this effectively.
 					existing[ key ] !== newItem[ key ]
 				) {
-					// @ts-ignore
+					// @ts-expect-error - TODO we need to improve the typing of cart items which is CartItem | OptimisticCartItem making it difficult to type this effectively.
 					existing[ key ] = newItem[ key ];
+					// @ts-expect-error - TODO we need to improve the typing of cart items which is CartItem | OptimisticCartItem making it difficult to type this effectively.
 				} else if ( ! deepEqual( existing[ key ], newItem[ key ] ) ) {
-					// @ts-ignore
+					// @ts-expect-error - TODO we need to improve the typing of cart items which is CartItem | OptimisticCartItem making it difficult to type this effectively.
 					existing[ key ] = newItem[ key ];
 				}
 			}
