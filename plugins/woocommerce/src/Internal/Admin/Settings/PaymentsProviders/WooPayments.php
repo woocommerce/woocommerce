@@ -49,6 +49,9 @@ class WooPayments extends PaymentGateway {
 		// Add WPCOM/Jetpack connection details to the onboarding state.
 		$details['onboarding']['state'] = array_merge( $details['onboarding']['state'], $this->get_wpcom_connection_state() );
 
+		// Add the WooPayments-specific onboarding flags.
+		$details['onboarding']['flags'] = array_merge( $details['onboarding']['flags'], $this->get_onboarding_flags( $country_code ) );
+
 		// If the WooPayments installed version is less than minimum required version,
 		// we can't use the in-context onboarding flows.
 		if ( Constants::is_defined( 'WCPAY_VERSION_NUMBER' ) &&
@@ -144,6 +147,27 @@ class WooPayments extends PaymentGateway {
 		}
 
 		return $extension_suggestion;
+	}
+
+	/**
+	 * Get the onboarding flags.
+	 *
+	 * @return bool[] A list of onboarding flags and their value for the given location.
+	 */
+	private function get_onboarding_flags( $country_code ): array {
+		try {
+			$woopayments_service = wc_get_container()->get( PaymentsProviders\WooPayments\WooPaymentsService::class );
+
+			if ( empty( $country_code ) ) {
+				$settings_payments_service = wc_get_container()->get( Payments::class );
+				$country_code              = $settings_payments_service->get_country();
+			}
+
+			return $woopayments_service->get_onboarding_flags( $country_code );
+		} catch ( \Throwable $e ) {
+			// In case of any error, return an empty array.
+			return array();
+		}
 	}
 
 	/**
