@@ -317,6 +317,10 @@ class WC_Install {
 	 * Hook in tabs.
 	 */
 	public static function init() {
+		if ( defined( 'WC_UNINSTALLING_PLUGIN' ) ) {
+			return;
+		}
+
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'init', array( __CLASS__, 'manual_database_update' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'maybe_enable_hpos' ), 20 );
@@ -2017,7 +2021,7 @@ $hpos_table_schema;
 			"{$wpdb->prefix}woocommerce_tax_rates",
 			"{$wpdb->prefix}wc_reserved_stock",
 			"{$wpdb->prefix}wc_rate_limits",
-			wc_get_container()->get( DataRegenerator::class )->get_lookup_table_name(),
+			"{$wpdb->prefix}wc_product_attributes_lookup",
 
 			// WCA Tables.
 			"{$wpdb->prefix}wc_order_stats",
