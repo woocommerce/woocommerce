@@ -155,6 +155,13 @@ $dialog-padding: 20px;
 @mixin horizontal-thumbnails {
 	.wc-block-product-gallery-thumbnails__thumbnail {
 		height: 100%;
+		width: auto;
+		flex: 0 0 auto;
+	}
+
+	.wc-block-product-gallery-thumbnails__thumbnail__image {
+		height: 100%;
+		width: auto;
 	}
 
 	.wc-block-product-gallery-thumbnails__scrollable {
@@ -182,21 +189,18 @@ $dialog-padding: 20px;
 
 	&__thumbnail {
 		display: flex;
-		justify-content: center;
-		align-items: center;
-		aspect-ratio: 1 / 1;
 		outline: none;
 	}
 
 	&__thumbnail__image {
 		cursor: pointer;
 		max-width: 100%;
-		aspect-ratio: 1 / 1;
-		object-fit: cover;
+		max-height: 100%;
 		outline: none;
+		object-fit: cover;
+		width: fit-content;
 
-		&.is-active {
-			position: relative;
+		&--is-active {
 			pointer-events: none;
 			cursor: default;
 			filter: brightness(0.8);
