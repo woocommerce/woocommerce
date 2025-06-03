@@ -207,17 +207,18 @@ export const OnboardingProvider: React.FC< {
 				);
 			}
 
+			// If the current step is the last one, then we should call onFinish if provided.
+			if ( currentStepIndex === allSteps.length - 1 ) {
+				onFinish?.();
+				return;
+			}
+
 			// Find the next step that is not completed and has completed dependencies
 			const nextStep = allSteps.find(
 				( step ) =>
 					step.status !== 'completed' &&
 					areStepDependenciesCompleted( step, allSteps )
 			);
-
-			// If the current step is the last one, then we should call onFinish if provided.
-			if ( currentStepIndex === allSteps.length - 1 ) {
-				onFinish?.();
-			}
 
 			if ( nextStep ) {
 				navigateToStep( nextStep.id );
