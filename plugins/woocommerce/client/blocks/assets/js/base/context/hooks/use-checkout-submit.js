@@ -3,14 +3,12 @@
  */
 import { checkoutStore, paymentStore } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
-import { useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { useCheckoutEventsContext } from '../providers';
 import { usePaymentMethods } from './payment-methods/use-payment-methods';
-import { usePaymentMethodInterface } from '@woocommerce/base-context';
 
 /**
  * Returns the submitButtonText, onSubmit interface from the checkout context,
@@ -48,7 +46,6 @@ export const useCheckoutSubmit = () => {
 	);
 
 	const { onSubmit } = useCheckoutEventsContext();
-	const paymentMethodInterface = usePaymentMethodInterface();
 
 	const { paymentMethods = {} } = usePaymentMethods();
 	const paymentMethod = paymentMethods[ activePaymentMethod ] || {};
@@ -57,13 +54,8 @@ export const useCheckoutSubmit = () => {
 	const waitingForRedirect = isComplete && ! hasError;
 	const paymentMethodButtonLabel = paymentMethod.placeOrderButtonLabel;
 
-	const paymentMethodPlaceOrderButton = useMemo( () => {
-		if ( ! paymentMethod.placeOrderButton ) {
-			return null;
-		}
-
-		return () => paymentMethod.placeOrderButton( paymentMethodInterface );
-	}, [paymentMethod.placeOrderButton, paymentMethodInterface] );
+	const paymentMethodPlaceOrderButton =
+		paymentMethod.placeOrderButton || null;
 
 	return {
 		paymentMethodButtonLabel,
