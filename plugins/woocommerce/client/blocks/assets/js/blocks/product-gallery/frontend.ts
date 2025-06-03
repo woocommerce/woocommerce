@@ -275,6 +275,7 @@ const productGallery = {
 				) {
 					event.preventDefault();
 					firstFocusableElement.focus();
+					return;
 				}
 
 				if (
@@ -283,6 +284,12 @@ const productGallery = {
 				) {
 					event.preventDefault();
 					lastFocusableElement.focus();
+					return;
+				}
+
+				if ( event.target === dialogPopUp ) {
+					event.preventDefault();
+					firstFocusableElement.focus();
 				}
 			}
 		},
