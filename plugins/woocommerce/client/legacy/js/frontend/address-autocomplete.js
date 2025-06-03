@@ -114,6 +114,7 @@ function setActiveProvider( country, type ) {
 		const suggestionsContainers = {};
 		const suggestionsLists = {};
 		let activeSuggestionIndices = {};
+		let searchControllers = {}; // Track AbortControllers for search requests
 
 		// Initialize for both billing and shipping.
 		addressTypes.forEach( ( type ) => {
@@ -169,6 +170,7 @@ function setActiveProvider( country, type ) {
 						'.suggestions-list'
 					);
 				activeSuggestionIndices[ type ] = -1;
+				searchControllers[ type ] = null;
 			}
 
 			// Get country value and set active address provider based on it.
@@ -297,60 +299,103 @@ function setActiveProvider( country, type ) {
 				return;
 			}
 
-			suggestionsList.innerHTML = '';
-			console.log( { wooAddressProviders: addressProviders } );
-			const filteredSuggestions = await activeAddressProvider[
-				type
-			].search( type, inputValue );
-			console.log( { filteredSuggestions } );
-
-			if ( filteredSuggestions.length === 0 ) {
+			// Check if we have an active provider for this address type
+			if ( ! activeAddressProvider[ type ] ) {
 				hideSuggestions( type );
+				enableBrowserAutofill( addressInput );
 				return;
 			}
 
-			filteredSuggestions.forEach( ( suggestion, index ) => {
-				const li = document.createElement( 'li' );
-				li.setAttribute( 'role', 'option' );
-				li.id = `suggestion-item-${ type }-${ index }`;
-				li.dataset.id = suggestion.id;
-				li.setAttribute( 'tabindex', '-1' );
+			// Cancel any existing search request for this type
+			if ( searchControllers[ type ] ) {
+				searchControllers[ type ].abort();
+			}
 
-				li.textContent = ''; // Clear existing content
-				const labelParts = getHighlightedLabel(
-					suggestion.label,
-					suggestion.matchedSubstrings || []
-				);
-				labelParts.forEach( ( part ) => li.appendChild( part ) );
+			// Create new AbortController for this search
+			searchControllers[ type ] = new AbortController();
+			const controller = searchControllers[ type ];
 
-				li.addEventListener( 'click', function () {
-					selectAddress( type, this.dataset.id );
+			suggestionsList.innerHTML = '';
+			
+			try {
+				const filteredSuggestions = await activeAddressProvider[
+					type
+				].search( type, inputValue );
+				
+				// Check if this request was aborted
+				if ( controller.signal.aborted ) {
+					return;
+				}
+
+				if ( filteredSuggestions.length === 0 ) {
 					hideSuggestions( type );
-					addressInput.focus();
+					return;
+				}
+
+				filteredSuggestions.forEach( ( suggestion, index ) => {
+					const li = document.createElement( 'li' );
+					li.setAttribute( 'role', 'option' );
+					li.id = `suggestion-item-${ type }-${ index }`;
+					li.dataset.id = suggestion.id;
+					li.setAttribute( 'tabindex', '-1' );
+
+					li.textContent = ''; // Clear existing content
+					const labelParts = getHighlightedLabel(
+						suggestion.label,
+						suggestion.matchedSubstrings || []
+					);
+					labelParts.forEach( ( part ) => li.appendChild( part ) );
+
+					li.addEventListener( 'click', async function () {
+						// Hide suggestions immediately for better UX
+						hideSuggestions( type );
+						await selectAddress( type, this.dataset.id );
+						addressInput.focus();
+					} );
+
+					li.addEventListener( 'mouseenter', function () {
+						setActiveSuggestion( type, index );
+					} );
+
+					suggestionsList.appendChild( li );
 				} );
 
-				li.addEventListener( 'mouseenter', function () {
-					setActiveSuggestion( type, index );
-				} );
-
-				suggestionsList.appendChild( li );
-			} );
-
-			disableBrowserAutofill( addressInput );
-			suggestionsContainer.style.display = 'block';
-			addressInput.setAttribute( 'aria-expanded', 'true' );
-			addressInput.setAttribute(
-				'aria-owns',
-				`address_suggestions_${ type }_list`
-			);
-			suggestionsList.id = `address_suggestions_${ type }_list`;
-			setActiveSuggestion( type, 0 );
+				disableBrowserAutofill( addressInput );
+				suggestionsContainer.style.display = 'block';
+				addressInput.setAttribute( 'aria-expanded', 'true' );
+				addressInput.setAttribute(
+					'aria-owns',
+					`address_suggestions_${ type }_list`
+				);
+				suggestionsList.id = `address_suggestions_${ type }_list`;
+				setActiveSuggestion( type, 0 );
+				
+			} catch ( error ) {
+				// Handle search errors (including AbortError from cancelled requests)
+				if ( error.name !== 'AbortError' ) {
+					console.error( 'Address search error:', error );
+					hideSuggestions( type );
+					enableBrowserAutofill( addressInput );
+				}
+				// Silently ignore AbortError as it's expected when cancelling requests
+			} finally {
+				// Clear the controller reference if this was the active request
+				if ( searchControllers[ type ] === controller ) {
+					searchControllers[ type ] = null;
+				}
+			}
 		}
 
 		function hideSuggestions( type ) {
 			const suggestionsList = suggestionsLists[ type ];
 			const suggestionsContainer = suggestionsContainers[ type ];
 			const addressInput = addressInputs[ type ];
+
+			// Cancel any inflight search requests
+			if ( searchControllers[ type ] ) {
+				searchControllers[ type ].abort();
+				searchControllers[ type ] = null;
+			}
 
 			suggestionsList.innerHTML = '';
 			suggestionsContainer.style.display = 'none';
@@ -360,12 +405,15 @@ function setActiveProvider( country, type ) {
 			activeSuggestionIndices[ type ] = -1;
 		}
 
-		function selectAddress( type, addressId ) {
+		async function selectAddress( type, addressId ) {
 			const addressInput = addressInputs[ type ];
-			const addressData = mockAddressData[ addressId ];
-			addressInput.value = addressData.address1;
-			addressInput.dispatchEvent( new Event( 'change' ) );
-			hideSuggestions( type );
+			const addressData = await activeAddressProvider[ type ].select(
+				addressId
+			);
+			if ( addressData ) {
+				addressInput.value = addressData.address1;
+				addressInput.dispatchEvent( new Event( 'change' ) );
+			}
 		}
 
 		function setActiveSuggestion( type, index ) {
@@ -408,7 +456,7 @@ function setActiveProvider( country, type ) {
 					}, 100 );
 				} );
 
-				addressInput.addEventListener( 'keydown', function ( e ) {
+				addressInput.addEventListener( 'keydown', async function ( e ) {
 					const items =
 						suggestionsLists[ type ].querySelectorAll( 'li' );
 					if (
@@ -442,7 +490,12 @@ function setActiveProvider( country, type ) {
 							].querySelector(
 								`li#suggestion-item-${ type }-${ activeSuggestionIndices[ type ] }`
 							);
-							selectAddress( type, selectedItem.dataset.id );
+							// Hide suggestions immediately for better UX
+							hideSuggestions( type );
+							await selectAddress(
+								type,
+								selectedItem.dataset.id
+							);
 						}
 					} else if ( e.key === 'Escape' ) {
 						hideSuggestions( type );
