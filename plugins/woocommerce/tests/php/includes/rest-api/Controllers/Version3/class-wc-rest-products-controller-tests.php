@@ -1502,7 +1502,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_create_product_with_duplicate_sku_trashed_original_cleans_up_images() {
 		// The manual override is needed because of the way we dispatch the REST request.
 		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
-		$original_product_sku = 'DUPLICATE_SKU_TEST_TRASHED';
+		$original_product_sku   = 'DUPLICATE_SKU_TEST_TRASHED';
 		// This image `src` is used in other product API tests, using here for consistency.
 		$shared_image_src = 'http://cldup.com/Dr1Bczxq4q.png';
 
@@ -1558,7 +1558,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 				),
 			)
 		);
-		$failed_creation_response = $this->server->dispatch( $create_request_for_failure );
+		$failed_creation_response      = $this->server->dispatch( $create_request_for_failure );
 		$failed_creation_response_data = $failed_creation_response->get_data();
 
 		$this->assertEquals( 400, $failed_creation_response->get_status(), 'Product creation attempt with duplicate SKU should return HTTP 400.' );
