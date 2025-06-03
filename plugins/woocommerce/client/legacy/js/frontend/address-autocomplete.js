@@ -39,7 +39,8 @@ function registerAddressAutocompleteProvider( provider ) {
 		if (
 			window &&
 			window.wc_checkout_params &&
-			window.wc_checkout_params.address_providers
+			Array.isArray( window.wc_checkout_params.address_providers ) &&
+			window.wc_checkout_params.address_providers.length > 0
 		) {
 			serverProviders = window.wc_checkout_params.address_providers;
 		}
