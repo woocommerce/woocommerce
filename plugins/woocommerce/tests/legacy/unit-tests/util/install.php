@@ -134,7 +134,8 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		// Make WC_Install::get_schema() accessible.
 		$wc_install = new \ReflectionClass( WC_Install::class );
 		$get_schema = $wc_install->getMethod( 'get_schema' );
-		$schema     = $get_schema->invoke( null );
+		$get_schema->setAccessible( true );
+		$schema = $get_schema->invoke( null );
 		preg_match_all( '/CREATE TABLE (.*?)\s*\(/i', $schema, $matches, PREG_PATTERN_ORDER );
 
 		$this->assertNotEmpty( $matches );
