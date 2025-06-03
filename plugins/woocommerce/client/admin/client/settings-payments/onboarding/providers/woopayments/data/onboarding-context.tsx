@@ -62,6 +62,7 @@ const OnboardingContext = createContext< OnboardingContextType >( {
 	closeModal: () => undefined,
 	justCompletedStepId: null,
 	setJustCompletedStepId: () => undefined,
+	source: null,
 } );
 
 export const useOnboardingContext = () => useContext( OnboardingContext );
@@ -328,6 +329,7 @@ export const OnboardingProvider: React.FC< {
 				},
 				justCompletedStepId,
 				setJustCompletedStepId,
+				source,
 			} }
 		>
 			{ children }
