@@ -363,6 +363,17 @@ const productGallery = {
 
 			context.thumbnailsOverflow = overflowState;
 		},
+		onArrowsKeyDown: ( event: KeyboardEvent ) => {
+			if ( event.code === 'ArrowRight' ) {
+				event.preventDefault();
+				actions.selectNextImage();
+			}
+
+			if ( event.code === 'ArrowLeft' ) {
+				event.preventDefault();
+				actions.selectPreviousImage();
+			}
+		},
 	},
 	callbacks: {
 		watchForChangesOnAddToCartForm: () => {
