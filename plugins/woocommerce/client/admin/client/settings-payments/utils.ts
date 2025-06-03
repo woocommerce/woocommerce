@@ -2,12 +2,13 @@
  * External dependencies
  */
 import {
-	PaymentProvider,
-	PaymentIncentive,
+	PaymentsProvider,
+	PaymentsProviderIncentive,
 	RecommendedPaymentMethod,
 } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
 import apiFetch from '@wordpress/api-fetch';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -17,7 +18,7 @@ import { getAdminSetting } from '~/utils/admin-settings';
 /**
  * Checks whether a payment provider has an incentive.
  */
-export const hasIncentive = ( extension: PaymentProvider ) => {
+export const hasIncentive = ( extension: PaymentsProvider ) => {
 	return !! extension._incentive;
 };
 
@@ -25,7 +26,7 @@ export const hasIncentive = ( extension: PaymentProvider ) => {
  * Checks whether an incentive is an action incentive.
  */
 export const isActionIncentive = (
-	incentive: PaymentIncentive | undefined
+	incentive: PaymentsProviderIncentive | undefined
 ) => {
 	if ( ! incentive ) {
 		return false;
@@ -38,7 +39,7 @@ export const isActionIncentive = (
  * Checks whether an incentive is a switch incentive.
  */
 export const isSwitchIncentive = (
-	incentive: PaymentIncentive | undefined
+	incentive: PaymentsProviderIncentive | undefined
 ) => {
 	if ( ! incentive ) {
 		return false;
@@ -51,7 +52,7 @@ export const isSwitchIncentive = (
  * Checks whether an incentive is dismissed in a given context.
  */
 export const isIncentiveDismissedInContext = (
-	incentive: PaymentIncentive | undefined,
+	incentive: PaymentsProviderIncentive | undefined,
 	context: string
 ) => {
 	if ( ! incentive || ! Array.isArray( incentive._dismissals ) ) {
@@ -68,7 +69,7 @@ export const isIncentiveDismissedInContext = (
  * Checks whether an incentive is dismissed in a given context and if it was dismissed before a given reference timestamp.
  */
 export const isIncentiveDismissedEarlierThanTimestamp = (
-	incentive: PaymentIncentive | undefined,
+	incentive: PaymentsProviderIncentive | undefined,
 	context: string,
 	referenceTimestampMs: number // UNIX timestamp in milliseconds.
 ): boolean => {
@@ -101,7 +102,7 @@ export const isWooPayments = ( id: string ) => {
 /**
  * Checks whether a provider is WooPayments and that it is eligible for WooPay.
  */
-export const isWooPayEligible = ( provider: PaymentProvider ) => {
+export const isWooPayEligible = ( provider: PaymentsProvider ) => {
 	return (
 		isWooPayments( provider.id ) &&
 		( provider.tags?.includes( 'woopay_eligible' ) || false )
@@ -118,11 +119,10 @@ export const getWooPaymentsTestDriveAccountLink = () => {
 
 export const resetWooPaymentsAccount = async () => {
 	try {
-		const response = await apiFetch( {
+		return await apiFetch( {
 			url: '/wp-json/wc-admin/settings/payments/woopayments/onboarding/reset',
 			method: 'POST',
 		} );
-		return response;
 	} catch ( error ) {
 		throw error;
 	}
@@ -133,11 +133,10 @@ export const resetWooPaymentsAccount = async () => {
  */
 export const disableWooPaymentsTestMode = async () => {
 	try {
-		const response = await apiFetch( {
+		return await apiFetch( {
 			url: '/wp-json/wc-admin/settings/payments/woopayments/onboarding/test_account/disable',
 			method: 'POST',
 		} );
-		return response;
 	} catch ( error ) {
 		throw error;
 	}
@@ -162,7 +161,7 @@ export const getPaymentMethodById =
  * @param providers payment providers
  */
 export const providersContainWooPaymentsInTestMode = (
-	providers: PaymentProvider[]
+	providers: PaymentsProvider[]
 ): boolean => {
 	const wooPayments = providers.find( ( obj ) => isWooPayments( obj.id ) );
 	return (
@@ -176,7 +175,7 @@ export const providersContainWooPaymentsInTestMode = (
  * @param providers Payment providers
  */
 export const providersContainWooPaymentsNeedsSetup = (
-	providers: PaymentProvider[]
+	providers: PaymentsProvider[]
 ): boolean => {
 	const wooPayments = providers.find( ( obj ) => isWooPayments( obj.id ) );
 	return wooPayments?.state?.needs_setup || false;
@@ -188,22 +187,22 @@ export const providersContainWooPaymentsNeedsSetup = (
  * @param providers payment providers
  */
 export const getWooPaymentsFromProviders = (
-	providers: PaymentProvider[]
-): PaymentProvider | null => {
+	providers: PaymentsProvider[]
+): PaymentsProvider | null => {
 	return providers.find( ( obj ) => isWooPayments( obj.id ) ) ?? null;
 };
 
 /**
  * Retrieves updated recommended payment methods for WooPayments.
  *
- * @param {PaymentProvider[]} providers Array of updated payment providers.
+ * @param {PaymentsProvider[]} providers Array of updated payment providers.
  * @return {RecommendedPaymentMethod[]} List of recommended payment methods.
  */
 export const getRecommendedPaymentMethods = (
-	providers: PaymentProvider[]
+	providers: PaymentsProvider[]
 ): RecommendedPaymentMethod[] => {
 	const updatedWooPaymentsProvider = providers.find(
-		( provider: PaymentProvider ) => isWooPayments( provider.id )
+		( provider: PaymentsProvider ) => isWooPayments( provider.id )
 	);
 
 	return (
@@ -218,7 +217,7 @@ export const getRecommendedPaymentMethods = (
  * @param providers payment providers
  */
 export const providersContainWooPaymentsInDevMode = (
-	providers: PaymentProvider[]
+	providers: PaymentsProvider[]
 ): boolean => {
 	const wooPayments = providers.find( ( obj ) => isWooPayments( obj.id ) );
 	return !! wooPayments?.state?.dev_mode;
@@ -304,4 +303,77 @@ export const shouldRenderPaymentMethodInMainList = (
 	}
 
 	return method_enabled ?? false;
+};
+
+/**
+ * Records a payments-related event with the WooCommerce Tracks system.
+ *
+ * This function ensures that the event name starts with 'settings_payments_'.
+ *
+ * @param eventName The partial name of the event to record.
+ *                  This should be a string that represents the specific event being tracked,
+ *                  such as 'gateway_enabled' or 'incentive_accepted'.
+ *                  Event names should focus on the action or outcome, e.g., 'started' not 'start'.
+ * @param data      An object containing additional data to be sent with the event.
+ */
+export const recordPaymentsEvent = (
+	eventName: string,
+	data: Record< string, string | boolean | number > = {}
+) => {
+	// Ensure the event name starts with 'settings_payments_'.
+	if ( ! eventName.startsWith( 'settings_payments_' ) ) {
+		eventName = `settings_payments_${ eventName }`;
+	}
+
+	// Capture the business registration country code from the WooCommerce settings if not provided.
+	if ( ! data.business_country ) {
+		data.business_country =
+			window.wcSettings?.admin?.woocommerce_payments_nox_profile
+				?.business_country_code ?? 'unknown';
+	}
+
+	recordEvent( eventName, data );
+};
+
+/**
+ * Records a payments onboarding-related event with the WooCommerce Tracks system.
+ *
+ * This function ensures that the event name starts with 'settings_payments_' and attaches contextual data
+ * such as the `source` and `from` parameters from the URL if they are not provided in the data object.
+ *
+ * @param eventName The partial name of the event to record.
+ *                  This should be a string that represents the specific event being tracked,
+ *                  such as 'onboarding_started' or 'gateway_configured'.
+ *                  Event names should focus on the action or outcome, e.g., 'started' not 'start'.
+ *                  Event names are best to include the provider or gateway id, e.g., 'woopayments_onboarding_started'.
+ * @param data      An object containing additional data to be sent with the event.
+ */
+export const recordPaymentsOnboardingEvent = (
+	eventName: string,
+	data: Record< string, string | boolean | number > = {}
+) => {
+	// Ensure the event name starts with 'settings_payments_'.
+	if ( ! eventName.startsWith( 'settings_payments_' ) ) {
+		eventName = `settings_payments_${ eventName }`;
+	}
+
+	// Capture the business registration country code from the WooCommerce settings if not provided.
+	if ( ! data.business_country ) {
+		data.business_country =
+			window.wcSettings?.admin?.woocommerce_payments_nox_profile
+				?.business_country_code ?? 'unknown';
+	}
+
+	// Capture the onboarding flow `source` and `from` from the URL parameters, if not provided.
+	const urlParams = new URLSearchParams( window.location.search );
+	if ( ! data.source ) {
+		data.source =
+			urlParams.get( 'source' )?.replace( /[^\w-]+/g, '' ) || 'unknown';
+	}
+	if ( ! data.from ) {
+		data.from =
+			urlParams.get( 'from' )?.replace( /[^\w-]+/g, '' ) || 'unknown';
+	}
+
+	recordEvent( eventName, data );
 };

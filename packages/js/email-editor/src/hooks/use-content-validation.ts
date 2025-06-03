@@ -4,7 +4,7 @@
 import { useCallback, useEffect } from '@wordpress/element';
 import { useSelect, subscribe } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
-import { applyFilters, addFilter } from '@wordpress/hooks';
+import { applyFilters, addFilter, removeFilter } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -104,15 +104,26 @@ export const useContentValidation = (): ContentValidationData => {
 			'woocommerce/email-editor/validate-content',
 			filterHandler
 		);
+
+		return () => {
+			removeFilter(
+				'editor.preSavePost',
+				'woocommerce/email-editor/validate-content'
+			);
+		};
 	}, [ validateContent ] );
 
 	// Subscribe to updates so notices can be dismissed once resolved.
-	subscribe( () => {
-		if ( ! hasValidationNotice() ) {
-			return;
-		}
-		validateContent();
-	}, coreDataStore );
+	useEffect( () => {
+		const unsubscribe = subscribe( () => {
+			if ( ! hasValidationNotice() ) {
+				return;
+			}
+			validateContent();
+		}, coreDataStore );
+
+		return () => unsubscribe();
+	}, [ hasValidationNotice, validateContent ] );
 
 	return {
 		isInvalid: hasValidationNotice(),

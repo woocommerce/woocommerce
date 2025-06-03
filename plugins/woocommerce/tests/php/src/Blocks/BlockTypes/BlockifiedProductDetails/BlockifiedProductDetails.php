@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\BlockifiedProductDetails;
 
 use WC_Helper_Product;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\BlockifiedProductDetailsMock;
 
 /**
  * Tests for the BlockifiedProductDetails block type
@@ -43,7 +44,7 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 		);
 	}
 	/**
-	 * Set up product and page for each test
+	 * Set up product and page for each test, and create an AssetDataRegistryMock.
 	 *
 	 * @return void
 	 */
@@ -136,5 +137,67 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 		$expected_serialized_blocks_without_whitespace = wp_strip_all_tags( $expected_serialized_blocks, true );
 
 		$this->assertEquals( $serialized_blocks_without_whitespace, $expected_serialized_blocks_without_whitespace, '' );
+	}
+
+	/**
+	 * Test the `woocommerce_product_details_hooked_blocks` hook. This hook allows developers to
+	 * specify a title and block markup that will be automatically wrapped in the required
+	 * Accordion Item block and appended to the Product Details' Accordion Group block.
+	 */
+	public function test_hooked_blocks() {
+		$test_block = array(
+			'slug'    => 'custom-info',
+			'title'   => 'Custom Info',
+			'content' => '<!-- wp:paragraph --><p>This is the content for the custom info tab.</p><!-- /wp:paragraph -->',
+		);
+
+		add_filter(
+			'woocommerce_product_details_hooked_blocks',
+			function ( $hooked_blocks ) use ( $test_block ) {
+				$hooked_blocks[] = $test_block;
+				return $hooked_blocks;
+			}
+		);
+
+		new BlockifiedProductDetailsMock();
+
+		// Next, we apply the `hooked_block_types` and `hooked_block_{$slug}` filters.
+		// We pretend that we're in the `last_child` position of the `woocommerce/accordion-group` block.
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
+		$hooked_block_types = apply_filters( 'hooked_block_types', array(), 'last_child', 'woocommerce/accordion-group', null );
+		$this->assertSame( array( $test_block['slug'] ), $hooked_block_types );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
+		$hooked_block_custom_info = apply_filters(
+			'hooked_block_' . $test_block['slug'],
+			array(
+				'blockName'    => $test_block['slug'],
+				'attrs'        => array(),
+				'innerBlocks'  => array(),
+				'innerContent' => array(),
+			), // $parsed_hooked_block
+			$test_block['slug'],
+			'last_child',
+			array(
+				'blockName'    => 'woocommerce/accordion-group',
+				'attrs'        => array(
+					'metadata' => array(
+						'isDescendantOfProductDetails' => true,
+					),
+				),
+				'innerBlocks'  => array(),
+				'innerContent' => array(),
+			), // $parsed_anchor_block
+			null
+		);
+		$this->assertSame( 'woocommerce/accordion-item', $hooked_block_custom_info['blockName'] );
+		$this->assertCount( 2, $hooked_block_custom_info['innerBlocks'] );
+
+		$this->assertSame( 'woocommerce/accordion-header', $hooked_block_custom_info['innerBlocks'][0]['blockName'] );
+		$this->assertStringContainsString( $test_block['title'], $hooked_block_custom_info['innerBlocks'][0]['innerHTML'] );
+
+		$this->assertSame( 'woocommerce/accordion-panel', $hooked_block_custom_info['innerBlocks'][1]['blockName'] );
+		$this->assertSame( parse_blocks( $test_block['content'] ), $hooked_block_custom_info['innerBlocks'][1]['innerBlocks'] );
 	}
 }

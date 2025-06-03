@@ -355,6 +355,7 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Check if there are available variations for the current product.
 	 *
+	 * @internal
 	 * @hint If the function gets updated, make sure to update get_available_variations too, as they share similar logic.
 	 *
 	 * @since  9.9.0

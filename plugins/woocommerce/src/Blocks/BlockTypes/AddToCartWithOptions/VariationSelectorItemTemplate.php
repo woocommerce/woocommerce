@@ -48,15 +48,14 @@ class VariationSelectorItemTemplate extends AbstractBlock {
 	/**
 	 * Get product row HTML.
 	 *
-	 * @param string   $product_attribute_name Product Attribute Name.
+	 * @param string   $attribute_name Product Attribute Name.
 	 * @param array    $product_attribute_terms Product Attribute Terms.
 	 * @param WP_Block $block The Block.
 	 * @return string Row HTML
 	 */
-	private function get_product_row( $product_attribute_name, $product_attribute_terms, $block ): string {
+	private function get_product_row( $attribute_name, $product_attribute_terms, $block ): string {
 		global $product;
 
-		$attribute_name     = $product_attribute_name;
 		$attribute_terms    = $this->get_terms( $attribute_name, $product_attribute_terms );
 		$product_variations = $product->get_available_variations();
 
@@ -66,8 +65,8 @@ class VariationSelectorItemTemplate extends AbstractBlock {
 			function ( $term ) use ( $product_variations, $attribute_name, $attribute_terms ) {
 				foreach ( $product_variations as $product_variation ) {
 					if (
-						$term['value'] === $product_variation['attributes'][ 'attribute_' . strtolower( $attribute_name ) ] ||
-						'' === $product_variation['attributes'][ 'attribute_' . strtolower( $attribute_name ) ]
+						$term['value'] === $product_variation['attributes'][ wc_variation_attribute_name( $attribute_name ) ] ||
+						'' === $product_variation['attributes'][ wc_variation_attribute_name( $attribute_name ) ]
 					) {
 						return true;
 					}

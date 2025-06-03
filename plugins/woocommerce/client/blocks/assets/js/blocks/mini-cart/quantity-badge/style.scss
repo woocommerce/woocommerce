@@ -25,6 +25,10 @@
 	transform: translateY(-50%);
 	white-space: nowrap;
 	z-index: 1;
+
+	&[hidden] {
+		display: none;
+	}
 }
 
 :where(.wc-block-mini-cart__badge) {

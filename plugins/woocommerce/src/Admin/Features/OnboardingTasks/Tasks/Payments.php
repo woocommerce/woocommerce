@@ -2,9 +2,8 @@
 
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Internal\Admin\Settings\Payments as SettingsPaymentsService;
 
 /**
  * Payments Task
@@ -106,6 +105,6 @@ class Payments extends Task {
 	 */
 	public function get_action_url() {
 		// Link to the Payments settings page.
-		return admin_url( 'admin.php?page=wc-settings&tab=checkout' );
+		return admin_url( 'admin.php?page=wc-settings&tab=checkout&from=' . SettingsPaymentsService::FROM_PAYMENTS_TASK );
 	}
 }
