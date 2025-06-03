@@ -257,6 +257,12 @@ class AddToCartWithOptions extends AbstractBlock {
 					 */
 					do_action( 'woocommerce_before_single_variation' );
 
+					// WooCommerce uses `woocommerce_single_variation` to render
+					// some UI elements like the Add to Cart button for
+					// variations. We need to remove them to avoid those UI
+					// elements being duplicate with the blocks.
+					// We later add these actions back to avoid affecting other
+					// blocks or templates.
 					remove_action( 'woocommerce_single_variation', 'woocommerce_single_variation', 10 );
 					remove_action( 'woocommerce_single_variation', 'woocommerce_single_variation_add_to_cart_button', 20 );
 					/**
