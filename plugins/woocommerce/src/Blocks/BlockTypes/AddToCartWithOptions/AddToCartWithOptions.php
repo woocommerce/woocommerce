@@ -366,6 +366,10 @@ class AddToCartWithOptions extends AbstractBlock {
 			}
 
 			$form_html = $form_html . ob_get_clean();
+
+			if ( ! $legacy_mode ) {
+				$form_html = $this->render_interactivity_notices_region( $form_html );
+			}
 		} else {
 			ob_start();
 
@@ -380,10 +384,6 @@ class AddToCartWithOptions extends AbstractBlock {
 		}
 
 		$product = $previous_product;
-
-		if ( ! $legacy_mode ) {
-			$form_html = $this->render_interactivity_notices_region( $form_html );
-		}
 
 		return $form_html;
 	}
