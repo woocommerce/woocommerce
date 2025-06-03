@@ -2028,6 +2028,12 @@ $hpos_table_schema;
 			"{$wpdb->prefix}wc_admin_note_actions",
 			"{$wpdb->prefix}wc_customer_lookup",
 			"{$wpdb->prefix}wc_category_lookup",
+
+			// HPOS.
+			"{$wpdb->prefix}wc_orders",
+			"{$wpdb->prefix}wc_order_addresses",
+			"{$wpdb->prefix}wc_order_operational_data",
+			"{$wpdb->prefix}wc_orders_meta",
 		);
 
 		/**
