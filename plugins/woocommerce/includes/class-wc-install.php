@@ -2291,7 +2291,7 @@ $hpos_table_schema;
 		}
 
 		$upload_dir = wp_upload_dir();
-		$source     = WC()->plugin_path() . '/assets/images/placeholder-attachment.png';
+		$source     = WC()->plugin_path() . '/assets/images/placeholder-attachment.webp';
 		$filename   = $upload_dir['basedir'] . '/woocommerce-placeholder.webp';
 
 		if ( ! file_exists( $filename ) ) {
