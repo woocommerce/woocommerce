@@ -741,6 +741,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	/**
 	 * Handle the onboarding test mode disable action.
 	 *
+	 * This is the first step in transitioning from a test account to a live account.
+	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
 	 * @return WP_Error|WP_REST_Response The response or error.
@@ -942,6 +944,12 @@ class WooPaymentsRestController extends RestApiControllerBase {
 						'readonly'    => true,
 					),
 				),
+			),
+			'flags'   => array(
+				'type'        => 'object',
+				'description' => esc_html__( 'Various boolean flags set throughout the onboarding process.', 'woocommerce' ),
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
 			),
 			'steps'   => array(
 				'type'        => 'array',
