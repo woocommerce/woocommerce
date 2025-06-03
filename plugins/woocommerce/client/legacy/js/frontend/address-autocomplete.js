@@ -1,7 +1,17 @@
 /**
  * Simple address provider registration for WooCommerce checkout
  */
-var wooAddressProviders = {};
+var addressProviders = {};
+
+/**
+ * Preferred address provider ID.
+ */
+var preferredAddressProviderId = null;
+
+/**
+ * Currently selected address provider. It will be used to search for addresses.
+ */
+var activeAddressProvider = { billing: null, shipping: null };
 
 /**
  * Register an address autocomplete provider
