@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments as SettingsPaymentsService;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
@@ -205,30 +204,6 @@ class Payments extends Task {
 
 		return false;
 	}
-
-	/**
-	 * Check if WooPayments is onboarded and is in the process of transitioning from a test account to a live account.
-	 *
-	 * @return bool
-	 */
-	private function is_woopayments_transitioning_from_test_to_live_account(): bool {
-		if ( ! $this->is_woopayments_active() ) {
-			return false;
-		}
-
-		$woopayments_provider = $this->get_woopayments_provider();
-		// We should have the WooPayments provider, but if not, return false.
-		if ( ! $woopayments_provider ) {
-			return false;
-		}
-
-		if ( ! empty( $woopayments_provider['onboarding']['flags'][ WooPaymentsService::ONBOARDING_FLAG_TRANSITIONING_FROM_TEST_TO_LIVE ] ) ) {
-			return true;
-		}
-
-		return false;
-	}
-
 
 	/**
 	 * Check if the store is in a WooPayments-supported geography.
