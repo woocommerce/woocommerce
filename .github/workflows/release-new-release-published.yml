@@ -6,10 +6,10 @@ on:
 jobs:
   notify-release-published:
     runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.release.tag_name, 'wc-beta-tester') }}
 
     steps:
       - name: 'Notify to release channel'
-        if: ${{ !contains(github.event.release.tag_name, 'wc-beta-tester') }}
         uses: archive/github-actions-slack@v2.10.0
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
@@ -21,7 +21,6 @@ jobs:
             (<!subteam^S086N376UTS> could you publish the release post? :ty2:)
 
       - name: 'Notify to announcements channel'
-        if: ${{ !contains(github.event.release.tag_name, 'wc-beta-tester') }}
         uses: archive/github-actions-slack@v2.10.0
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
