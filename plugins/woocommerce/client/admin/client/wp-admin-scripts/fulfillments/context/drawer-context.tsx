@@ -58,12 +58,10 @@ export const FulfillmentDrawerProvider = ( {
 	const [ fulfillments, setFulfillments ] = useState< Fulfillment[] >();
 	const [ order, setOrder ] = useState< Order | null >();
 
-	const { isLoading } = useSelect(
+	useSelect(
 		( select ) => {
 			if ( ! orderId ) {
-				return {
-					isLoading: true,
-				};
+				return;
 			}
 			const store = select( FulfillmentsStore );
 			const orderData = store.getOrder( orderId );
@@ -77,9 +75,6 @@ export const FulfillmentDrawerProvider = ( {
 					setOpenSection( 'order' );
 				}
 			}
-			return {
-				isLoading: store.isLoading( orderId ),
-			};
 		},
 		[ orderId, fulfillments, order ]
 	);
@@ -101,7 +96,7 @@ export const FulfillmentDrawerProvider = ( {
 				setIsEditing,
 			} }
 		>
-			{ isLoading ? 'Loading order...' : children }
+			{ children }
 		</FulfillmentDrawerContextValue.Provider>
 	);
 };
