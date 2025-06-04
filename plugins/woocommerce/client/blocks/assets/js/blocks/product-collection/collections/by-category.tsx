@@ -22,7 +22,6 @@ const collection = {
 		'Display products from specific categories.',
 		'woocommerce'
 	),
-	keywords: [ 'category', 'products' ],
 	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
 };
 

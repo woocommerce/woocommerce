@@ -19,7 +19,6 @@ const collection = {
 	title: __( 'Products by Tag', 'woocommerce' ),
 	icon: <Icon icon={ tag } />,
 	description: __( 'Display products with specific tags.', 'woocommerce' ),
-	keywords: [ 'tag', 'products' ],
 	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
 };
 
