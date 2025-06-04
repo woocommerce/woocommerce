@@ -92,7 +92,7 @@ class PTKPatternsStore {
 	 * @param int $last_request The last request time.
 	 * @return bool
 	 */
-	private function is_one_day_ago( $last_request ) {
+	private function is_older_than_one_day( $last_request ) {
 		$current_time = time();
 		return abs( $last_request - $current_time ) > DAY_IN_SECONDS;
 	}
@@ -109,7 +109,7 @@ class PTKPatternsStore {
 		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
 
 		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
-		if ( call_user_func( $has_scheduled_action, $action ) || $this->is_one_day_ago( $last_request ) ) {
+		if ( call_user_func( $has_scheduled_action, $action ) || ( is_numeric( $last_request ) && ! $this->is_older_than_one_day( $last_request ) ) ) {
 			return;
 		}
 
