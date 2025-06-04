@@ -15,6 +15,7 @@ let deprecationNoticeShown = false;
 const showDeprecationNotice = () => {
 	if ( ! deprecationNoticeShown ) {
 		deprecated( 'useValidation()', {
+			since: '10.0',
 			alternative: 'the validation data store',
 			plugin: 'WooCommerce',
 			hint: 'Access the validation store directly in your component. \nSee: https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/data-store/validation.md \nSee: https://developer.wordpress.org/block-editor/reference-guides/packages/packages-data/',
