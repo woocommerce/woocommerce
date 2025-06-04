@@ -251,10 +251,7 @@ class BlockPatterns {
 	 * @param array $patterns The patterns to parse.
 	 * @return array The parsed patterns.
 	 */
-	private function parse_categories( $patterns ) {
-		if ( ! is_array( $patterns ) ) {
-			return array();
-		}
+	private function parse_categories( array $patterns ) {
 		return array_map(
 			function ( $pattern ) {
 				if ( ! isset( $pattern['categories'] ) ) {

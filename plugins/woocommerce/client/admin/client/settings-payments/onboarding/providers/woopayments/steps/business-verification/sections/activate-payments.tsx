@@ -23,7 +23,7 @@ const ActivatePayments: React.FC = () => {
 
 	const handleContinue = () => {
 		recordPaymentsOnboardingEvent( 'woopayments_onboarding_modal_click', {
-			step: currentStep?.id || '',
+			step: currentStep?.id || 'unknown',
 			sub_step_id: 'activate',
 			action: 'activate_payments',
 		} );

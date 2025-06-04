@@ -62,7 +62,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				if ( \Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'launch-your-store' ) ) {
 					$settings[] = include __DIR__ . '/settings/class-wc-settings-site-visibility.php';
 				}
-				if ( Features::is_enabled( 'point-of-sale' ) ) {
+				if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
 					$settings[] = include __DIR__ . '/settings/class-wc-settings-point-of-sale.php';
 				}
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-advanced.php';

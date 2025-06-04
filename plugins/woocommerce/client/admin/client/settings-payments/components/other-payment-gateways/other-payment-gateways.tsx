@@ -8,8 +8,9 @@ import { useState, useMemo, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
-	SuggestedPaymentExtension,
-	SuggestedPaymentExtensionCategory,
+	PaymentsEntity,
+	SuggestedPaymentsExtension,
+	SuggestedPaymentsExtensionCategory,
 } from '@woocommerce/data';
 
 /**
@@ -24,21 +25,24 @@ interface OtherPaymentGatewaysProps {
 	/**
 	 * Array of suggested payment extensions.
 	 */
-	suggestions: SuggestedPaymentExtension[];
+	suggestions: SuggestedPaymentsExtension[];
 	/**
 	 * Array of categories for the suggested payment extensions.
 	 */
-	suggestionCategories: SuggestedPaymentExtensionCategory[];
+	suggestionCategories: SuggestedPaymentsExtensionCategory[];
 	/**
 	 * The ID of the plugin currently being installed, or `null` if none.
 	 */
 	installingPlugin: string | null;
 	/**
-	 * Callback to handle plugin setup. Accepts the plugin ID, slug, and onboarding URL (if available).
+	 * Callback to set up the plugin.
+	 *
+	 * @param provider      Extension provider.
+	 * @param onboardingUrl Extension onboarding URL (if available).
+	 * @param attachUrl     Extension attach URL (if available).
 	 */
-	setupPlugin: (
-		id: string,
-		slug: string,
+	setUpPlugin: (
+		provider: PaymentsEntity,
 		onboardingUrl: string | null,
 		attachUrl: string | null
 	) => void;
@@ -61,7 +65,7 @@ export const OtherPaymentGateways = ( {
 	suggestions,
 	suggestionCategories,
 	installingPlugin,
-	setupPlugin,
+	setUpPlugin,
 	isFetching,
 	morePaymentOptionsLink,
 }: OtherPaymentGatewaysProps ) => {
@@ -72,7 +76,7 @@ export const OtherPaymentGateways = ( {
 	const [ isExpanded, setIsExpanded ] = useState( initialExpanded );
 	const [ categoryIdWithPopoverVisible, setCategoryIdWithPopoverVisible ] =
 		useState( '' );
-	const buttonRef = useRef< HTMLSpanElement >( null );
+	const buttonRefs = useRef< Record< string, HTMLSpanElement | null > >( {} );
 
 	const handleInfoIconClick = (
 		event: React.MouseEvent | React.KeyboardEvent,
@@ -83,7 +87,8 @@ export const OtherPaymentGateways = ( {
 			'.other-payment-gateways__content__title__icon-container'
 		);
 
-		if ( buttonRef.current && parentSpan !== buttonRef.current ) {
+		const targetRef = buttonRefs.current[ categoryId ] ?? null;
+		if ( targetRef && parentSpan !== targetRef ) {
 			return;
 		}
 
@@ -122,8 +127,8 @@ export const OtherPaymentGateways = ( {
 				(
 					category
 				): {
-					category: SuggestedPaymentExtensionCategory;
-					suggestions: SuggestedPaymentExtension[];
+					category: SuggestedPaymentsExtensionCategory;
+					suggestions: SuggestedPaymentsExtension[];
 				} => {
 					return {
 						category,
@@ -212,7 +217,9 @@ export const OtherPaymentGateways = ( {
 									} }
 									tabIndex={ 0 }
 									role="button"
-									ref={ buttonRef }
+									ref={ ( el ) => {
+										buttonRefs.current[ category.id ] = el;
+									} }
 								>
 									<Gridicon
 										icon="info-outline"
@@ -286,10 +293,8 @@ export const OtherPaymentGateways = ( {
 												<Button
 													variant="link"
 													onClick={ () =>
-														setupPlugin(
-															extension.id,
-															extension.plugin
-																.slug,
+														setUpPlugin(
+															extension,
 															null, // Suggested gateways won't have an onboarding URL.
 															// Only provide the attach link if not already installed.
 															extension.plugin
@@ -335,7 +340,7 @@ export const OtherPaymentGateways = ( {
 	}, [
 		suggestionsByCategory,
 		installingPlugin,
-		setupPlugin,
+		setUpPlugin,
 		isFetching,
 		categoryIdWithPopoverVisible,
 	] );

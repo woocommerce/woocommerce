@@ -42,20 +42,20 @@ class ProductGallery extends AbstractBlock {
 			$src          = $image['src'];
 			$srcset       = $image['srcset'];
 			$sizes        = $image['sizes'];
-			$images_html .= "<img tabindex='0' data-image-id='{$id}' src='{$src}' srcset='{$srcset}' sizes='{$sizes}' loading='lazy' decoding='async' />";
+			$alt          = $image['alt'];
+			$images_html .= "<img data-image-id='{$id}' src='{$src}' srcset='{$srcset}' sizes='{$sizes}' loading='lazy' decoding='async' alt='{$alt}' />";
 		}
 		ob_start();
 		?>
 			<dialog
-				data-wp-ref
 				data-wp-bind--open="context.isDialogOpen"
+				data-wp-bind--inert="!context.isDialogOpen"
 				data-wp-on--close="actions.closeDialog"
 				data-wp-on--keydown="actions.onDialogKeyDown"
 				data-wp-watch="callbacks.dialogStateChange"
 				class="wc-block-product-gallery-dialog"
 				role="dialog"
 				aria-modal="true"
-				tabindex="-1"
 				aria-label="Product Gallery">
 				<div class="wc-block-product-gallery-dialog__content">
 					<button class="wc-block-product-gallery-dialog__close-button" data-wp-on--click="actions.closeDialog" aria-label="<?php echo esc_attr__( 'Close dialog', 'woocommerce' ); ?>">
@@ -117,8 +117,8 @@ class ProductGallery extends AbstractBlock {
 		$initial_image_id       = count( $image_ids ) > 0 ? $image_ids[0] : -1;
 		$classname_single_image = count( $image_ids ) < 2 ? 'is-single-product-gallery-image' : '';
 		$product_id             = strval( $product->get_id() );
-		$full_image_data        = ProductGalleryUtils::get_image_src_data( $image_ids, 'full' );
-		$gallery_with_dialog    = $this->inject_dialog( $content, $this->render_dialog( $full_image_data ) );
+		$fullsize_image_data    = ProductGalleryUtils::get_image_src_data( $image_ids, 'full', $product->get_title() );
+		$gallery_with_dialog    = $this->inject_dialog( $content, $this->render_dialog( $fullsize_image_data ) );
 		$p                      = new \WP_HTML_Tag_Processor( $gallery_with_dialog );
 
 		if ( $p->next_tag() ) {

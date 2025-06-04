@@ -1,11 +1,13 @@
 /**
  * External dependencies
  */
-import { debounce } from '@woocommerce/base-utils';
+import {
+	debounce,
+	addressFieldsForShippingRates,
+} from '@woocommerce/base-utils';
 import { CartBillingAddress, CartShippingAddress } from '@woocommerce/types';
 import { select, dispatch } from '@wordpress/data';
 import isShallowEqual from '@wordpress/is-shallow-equal';
-import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -31,11 +33,6 @@ const localState = {
 		shippingAddress: [] as BaseAddressKey[],
 	},
 };
-
-const addressFieldsForShippingRates: string[] = getSetting(
-	'addressFieldsForShippingRates',
-	[]
-);
 
 /**
  * Initializes the customer data cache on the first run.

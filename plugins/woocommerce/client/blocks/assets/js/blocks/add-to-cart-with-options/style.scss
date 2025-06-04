@@ -1,5 +1,9 @@
-.wc-block-add-to-cart-with-options__quantity-selector,
-.wc-block-add-to-cart-with-options-grouped-product-selector-item-cta {
+.wc-block-add-to-cart-with-options {
+	.quantity {
+		display: inline-flex;
+		align-items: stretch;
+	}
+
 	/**
 	* This is a base style for the input text element in WooCommerce that prevents inputs from appearing too small.
 	*
@@ -9,7 +13,10 @@
 		font-size: var(--wp--preset--font-size--small);
 		padding: 0.9rem 1.1rem;
 	}
+}
 
+.wc-block-add-to-cart-with-options__quantity-selector,
+.wc-block-add-to-cart-with-options-grouped-product-selector-item-cta {
 	// Stepper CSS
 	.wc-block-components-quantity-selector {
 		&::after {
