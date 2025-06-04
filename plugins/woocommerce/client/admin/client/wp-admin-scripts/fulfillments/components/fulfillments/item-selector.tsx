@@ -4,124 +4,125 @@
 import { CheckboxControl } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Link } from '@woocommerce/components';
-import { useEffect, useState } from 'react';
-import { isEqual } from 'lodash';
 
 /**
  * Internal dependencies
  */
-import {
-	ItemQuantity,
-	areItemsSpread,
-	spreadItems,
-	unspreadItems,
-} from '../../utils/order-utils';
 import FulfillmentLineItem from './fulfillment-line-item';
+import { ItemSelection } from '../../utils/order-utils';
+import { useFulfillmentContext } from '../../context/fulfillment-context';
 
 type ItemSelectorProps = {
-	items: ItemQuantity[];
-	setSelectedItems: ( items: ItemQuantity[] ) => void;
-	currency: string;
 	editMode: boolean;
 };
 
-export default function ItemSelector( {
-	items,
-	setSelectedItems,
-	editMode,
-	currency,
-}: ItemSelectorProps ) {
-	const [ itemsBuffer, setItemsBuffer ] = useState< ItemQuantity[] >( [] );
-	const [ prevItems, setPrevItems ] = useState< ItemQuantity[] >( [] );
+export default function ItemSelector( { editMode }: ItemSelectorProps ) {
+	const { order, selectedItems, setSelectedItems } = useFulfillmentContext();
 
-	// Update the items buffer when the items prop change.
-	if ( ! isEqual( items, prevItems ) ) {
-		setItemsBuffer(
-			areItemsSpread( items ) ? items : spreadItems( items )
-		);
-		setPrevItems( items );
-	}
+	const itemsCount = selectedItems.reduce(
+		( acc, item ) => acc + item.selection.length,
+		0
+	);
 
-	const itemsCount = itemsBuffer.length;
-	const selectedItemsCount = itemsBuffer.filter(
-		( item ) => item.checked
-	).length;
+	const selectedItemsCount = selectedItems.reduce(
+		( acc, item ) =>
+			acc +
+			item.selection.filter( ( selection ) => selection.checked ).length,
+		0
+	);
 
 	const clearSelectedItems = () => {
-		setItemsBuffer(
-			itemsBuffer.map( ( item ) => ( {
+		setSelectedItems(
+			selectedItems.map( ( item ) => ( {
 				...item,
-				checked: false,
+				selection: item.selection.map( ( selection ) => ( {
+					...selection,
+					checked: false,
+				} ) ),
 			} ) )
 		);
 	};
 
 	const selectAllItems = () => {
-		setItemsBuffer(
-			itemsBuffer.map( ( item ) => ( {
+		setSelectedItems(
+			selectedItems.map( ( item ) => ( {
 				...item,
-				checked: true,
+				selection: item.selection.map( ( selection ) => ( {
+					...selection,
+					checked: true,
+				} ) ),
 			} ) )
 		);
 	};
 
-	const handleToggleItem = ( id: string, checked: boolean ) => {
-		const newItemsBuffer = [ ...itemsBuffer ];
-		newItemsBuffer.forEach( ( item ) => {
-			if ( item.item_id === id || item.item_id.startsWith( id + '-' ) ) {
-				item.checked = checked;
-			}
-		} );
-
-		setItemsBuffer( newItemsBuffer );
+	const handleToggleItem = (
+		id: number,
+		index: number,
+		checked: boolean
+	) => {
+		if ( index < 0 ) {
+			// If the index is negative, it means we are trying to toggle the whole item.
+			// We will toggle all selections for this item.
+			setSelectedItems( [
+				...selectedItems.map( ( item ) => {
+					if ( item.item_id === id ) {
+						return {
+							...item,
+							selection: item.selection.map( ( selection ) => ( {
+								...selection,
+								checked,
+							} ) ),
+						};
+					}
+					return item;
+				} ),
+			] );
+			return;
+		}
+		setSelectedItems( [
+			...selectedItems.map( ( item ) => {
+				if ( item.item_id === id ) {
+					item.selection.map( ( selection ) => {
+						if ( selection.index === index ) {
+							selection.checked = checked;
+						}
+						return selection;
+					} );
+				}
+				return item;
+			} ),
+		] );
 	};
 
-	const isChecked = ( id: string ) => {
-		// If the item id is not a split item, we check if all the sub items are checked if any.
-		// If not, we check if the item is checked.
-		const checkedItems = itemsBuffer.filter(
-			( item ) => item.item_id.startsWith( id + '-' ) && item.checked
-		);
-		if ( checkedItems.length > 0 ) {
-			return checkedItems.every( ( item ) => item.checked );
-		}
-		return (
-			itemsBuffer.find( ( item ) => item.item_id === id )?.checked ??
-			false
-		);
-	};
-
-	const isIndeterminate = ( id: string ) => {
-		// Sub items can't be indeterminate.
-		if ( id.includes( '-' ) ) {
-			return false;
-		}
-		// If the item doesn't have any sub items, we return false.
-		const subItems = itemsBuffer.filter( ( item ) =>
-			item.item_id.startsWith( id + '-' )
-		);
-		if ( subItems.length === 0 ) {
-			return false;
-		}
-		const mainItem = items.find( ( __item ) => __item.item_id === id );
-		if ( mainItem ) {
-			const totalQuantity = mainItem.qty;
-			const checkedItemsQuantity = subItems.filter(
-				( item ) => item.checked
-			).length;
-			return (
-				checkedItemsQuantity > 0 && checkedItemsQuantity < totalQuantity
+	const isChecked = ( id: number, index: number ) => {
+		if ( index < 0 ) {
+			// If the index is negative, it means we are trying to determine if the whole item is checked.
+			return selectedItems.some(
+				( item ) =>
+					item.item_id === id &&
+					item.selection.every( ( selection ) => selection.checked )
 			);
 		}
-		return false;
+		const _item = selectedItems.find( ( item ) => item.item_id === id );
+		if ( ! _item ) {
+			return false;
+		}
+		const _selection = _item.selection.find(
+			( selection ) => selection.index === index
+		);
+		return _selection ? _selection.checked : false;
 	};
 
-	// Update the selected items with a callback prop (output) when the items buffer change.
-	useEffect( () => {
-		setSelectedItems(
-			unspreadItems( itemsBuffer.filter( ( item ) => item.checked ) )
-		);
-	}, [ setSelectedItems, itemsBuffer ] );
+	const isIndeterminate = ( id: number ) => {
+		const _item = selectedItems.find( ( item ) => item.item_id === id );
+		if ( ! _item ) {
+			return false;
+		}
+		const checkedCount = _item.selection.filter(
+			( selection ) => selection.checked
+		).length;
+		return checkedCount > 0 && checkedCount < _item.selection.length;
+	};
 
 	return (
 		<ul className="woocommerce-fulfillment-item-list">
@@ -188,13 +189,13 @@ export default function ItemSelector( {
 					) }
 				</div>
 			</li>
-			{ items.map( ( item: ItemQuantity ) => (
+			{ selectedItems.map( ( item: ItemSelection ) => (
 				<li key={ item.item_id }>
 					<FulfillmentLineItem
 						item={ item.item }
-						quantity={ item.qty }
+						quantity={ item.selection.length }
 						editMode={ editMode }
-						currency={ currency }
+						currency={ order?.currency ?? '' }
 						toggleItem={ handleToggleItem }
 						isChecked={ isChecked }
 						isIndeterminate={ isIndeterminate }

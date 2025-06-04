@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button, Icon } from '@wordpress/components';
 
@@ -12,11 +12,7 @@ import { LineItem, Order } from '../../data/types';
 import { FulfillmentProvider } from '../../context/fulfillment-context';
 import SaveAsDraftButton from '../action-buttons/save-draft-button';
 import FulfillItemsButton from '../action-buttons/fulfill-items-button';
-import {
-	ItemQuantity,
-	getItemsNotInAnyFulfillment,
-	spreadItems,
-} from '../../utils/order-utils';
+import { getItemsNotInAnyFulfillment } from '../../utils/order-utils';
 import ItemSelector from './item-selector';
 import { useFulfillmentDrawerContext } from '../../context/drawer-context';
 import ErrorLabel from '../user-interface/error-label';
@@ -27,12 +23,19 @@ const NewFulfillmentForm: React.FC = () => {
 	const { order, fulfillments, openSection, setOpenSection, isEditing } =
 		useFulfillmentDrawerContext();
 	const [ error, setError ] = useState< string | null >( null );
-	const remainingItems = getItemsNotInAnyFulfillment(
-		fulfillments,
-		order ?? ( { line_items: [] as LineItem[] } as Order )
-	);
-	const [ selectedItems, setSelectedItems ] = useState< ItemQuantity[] >(
-		spreadItems( remainingItems )
+	const remainingItems = useMemo(
+		() =>
+			getItemsNotInAnyFulfillment(
+				fulfillments,
+				order ?? ( { line_items: [] as LineItem[] } as Order )
+			).map( ( item ) => ( {
+				...item,
+				selection: item.selection.map( ( selection ) => ( {
+					...selection,
+					checked: true,
+				} ) ),
+			} ) ),
+		[ fulfillments, order ]
 	);
 
 	if ( ! order ) {
@@ -47,8 +50,12 @@ const NewFulfillmentForm: React.FC = () => {
 		<div
 			className={ [
 				'woocommerce-fulfillment-new-fulfillment-form',
-				isEditing &&
-					'woocommerce-fulfillment-new-fulfillment-form__disabled',
+				isEditing
+					? 'woocommerce-fulfillment-new-fulfillment-form__disabled'
+					: '',
+				fulfillments.length === 0
+					? 'woocommerce-fulfillment-new-fulfillment-form__first'
+					: '',
 			].join( ' ' ) }
 			onClick={ () => setOpenSection( 'order' ) }
 			onKeyUp={ ( event ) => {
@@ -84,19 +91,15 @@ const NewFulfillmentForm: React.FC = () => {
 			{ ! isEditing && openSection === 'order' && (
 				<div className="woocommerce-fulfillment-new-fulfillment-form__content">
 					{ error && <ErrorLabel error={ error } /> }
-					<ItemSelector
-						items={ remainingItems }
-						setSelectedItems={ setSelectedItems }
-						currency={ order.currency }
-						editMode={ true }
-					/>
 					<ShipmentFormProvider>
-						<ShipmentForm />
 						<FulfillmentProvider
-							orderId={ order.id }
-							selectedItems={ selectedItems }
+							order={ order }
 							fulfillment={ null }
+							items={ remainingItems }
 						>
+							<ItemSelector editMode={ true } />
+
+							<ShipmentForm />
 							<div className="woocommerce-fulfillment-item-actions">
 								<SaveAsDraftButton setError={ setError } />
 								<FulfillItemsButton setError={ setError } />

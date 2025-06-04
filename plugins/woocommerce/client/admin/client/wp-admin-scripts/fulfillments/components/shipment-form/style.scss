@@ -8,7 +8,6 @@
 		padding: 20px 0;
 		gap: 16px;
 		width: 100%;
-		align-items: center;
 		justify-content: flex-start;
 		border-bottom: 1px solid #e0e0e0;
 		.components-checkbox-control {
@@ -48,7 +47,7 @@
 			flex-direction: row;
 			gap: 12px;
 			width: 100%;
-			align-items: center;
+			align-items: flex-end;
 			justify-content: flex-start;
 			position: relative;
 
@@ -63,7 +62,21 @@
 			.woocommerce-fulfillment-shipment-provider-search-icon {
 				position: absolute;
 				right: 14px;
-				top: 12px;
+				top: 36px;
+			}
+
+			.woocommerce-fulfillment-shipment-provider-icon {
+				width: 16px;
+				height: 16px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				float: left;
+				margin-right: 8px;
+
+				img {
+					height: 16px;
+				}
 			}
 
 			.components-base-control {

@@ -33,7 +33,7 @@ describe( 'SaveAsDraftButton component', () => {
 		// Default mock implementations
 		useDispatch.mockReturnValue( { saveFulfillment: jest.fn() } );
 		useFulfillmentContext.mockReturnValue( {
-			orderId: 123,
+			order: { id: 123 },
 			fulfillment: {
 				id: 456,
 				meta_data: [
@@ -89,7 +89,7 @@ describe( 'SaveAsDraftButton component', () => {
 			],
 		};
 		useFulfillmentContext.mockReturnValue( {
-			orderId: 123,
+			order: { id: 123 },
 			fulfillment: mockFulfillment,
 		} );
 
@@ -107,7 +107,7 @@ describe( 'SaveAsDraftButton component', () => {
 		useDispatch.mockReturnValue( { saveFulfillment: mockSaveFulfillment } );
 
 		useFulfillmentContext.mockReturnValue( {
-			orderId: 123,
+			order: { id: 123 },
 			fulfillment: undefined,
 		} );
 

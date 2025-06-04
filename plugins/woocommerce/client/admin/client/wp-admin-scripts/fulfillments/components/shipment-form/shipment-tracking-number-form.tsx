@@ -2,7 +2,7 @@
  * External dependencies
  */
 
-import { Button, TextControl } from '@wordpress/components';
+import { Button, ExternalLink, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from 'react';
 import { isEmpty } from 'lodash';
@@ -14,6 +14,21 @@ import { useShipmentFormContext } from '../../context/shipment-form-context';
 import ErrorLabel from '../user-interface/error-label';
 import { EditIcon } from '../../utils/icons';
 import { findShipmentProviderName } from '../../utils/fulfillment-utils';
+import ShipmentProviders from '../../data/shipment-providers';
+
+const ShipmentProviderIcon = ( { providerKey }: { providerKey: string } ) => {
+	const provider = ShipmentProviders.find( ( p ) => p.value === providerKey );
+	const icon = provider?.icon;
+	if ( ! provider || ! icon ) {
+		return null;
+	}
+
+	return (
+		<div className="woocommerce-fulfillment-shipment-provider-icon">
+			<img src={ icon } alt={ provider.label } key={ providerKey } />
+		</div>
+	);
+};
 
 export default function ShipmentTrackingNumberForm() {
 	const [ trackingNumberTemp, setTrackingNumberTemp ] = useState( '' );
@@ -36,7 +51,9 @@ export default function ShipmentTrackingNumberForm() {
 			setTrackingNumber( trackingNumberTemp );
 			setShipmentProvider( 'ups' );
 			setProviderName( '' );
-			setTrackingUrl( 'https://www.ups.com/track?tracknum=12345678' );
+			setTrackingUrl(
+				'https://www.ups.com/track?tracknum=12345678&some-other-long-query-string-for-testing-ellipsis'
+			);
 			setEditMode( false );
 		} else {
 			setError(
@@ -64,10 +81,10 @@ export default function ShipmentTrackingNumberForm() {
 			</p>
 			{ editMode ? (
 				<div className="woocommerce-fulfillment-input-container">
-					<h4>{ __( 'Tracking Number', 'woocommerce' ) }</h4>
 					<div className="woocommerce-fulfillment-input-group">
 						<TextControl
 							type="text"
+							label={ __( 'Tracking Number', 'woocommerce' ) }
 							placeholder={ __(
 								'Enter tracking number',
 								'woocommerce'
@@ -106,33 +123,32 @@ export default function ShipmentTrackingNumberForm() {
 					<div className="woocommerce-fulfillment-input-container">
 						<h4>{ __( 'Provider', 'woocommerce' ) }</h4>
 						<div className="woocommerce-fulfillment-input-group">
-							<TextControl
-								disabled
-								type="text"
-								value={ findShipmentProviderName(
-									shipmentProvider
-								) }
-								onChange={ ( value ) => {
-									setShipmentProvider( value );
-								} }
-								__nextHasNoMarginBottom
-								__next40pxDefaultSize
-							/>
+							<div>
+								<ShipmentProviderIcon
+									providerKey={ shipmentProvider }
+								/>
+								<span>
+									{ findShipmentProviderName(
+										shipmentProvider
+									) }
+								</span>
+							</div>
 						</div>
 					</div>
 					<div className="woocommerce-fulfillment-input-container">
 						<h4>{ __( 'Tracking URL', 'woocommerce' ) }</h4>
 						<div className="woocommerce-fulfillment-input-group">
-							<TextControl
-								disabled
-								type="text"
-								value={ trackingUrl }
-								onChange={ ( value ) => {
-									setTrackingUrl( value );
+							<ExternalLink
+								href={ trackingUrl }
+								style={ {
+									width: '100%',
+									textOverflow: 'ellipsis',
+									whiteSpace: 'nowrap',
+									overflow: 'hidden',
 								} }
-								__next40pxDefaultSize
-								__nextHasNoMarginBottom
-							/>
+							>
+								{ trackingUrl }
+							</ExternalLink>
 						</div>
 					</div>
 				</>

@@ -5,9 +5,14 @@
 .woocommerce-fulfillment-new-fulfillment-form {
 	display: flex;
 	flex-direction: column;
+	border-bottom: 1px solid #e0e0e0;
+
 	&.woocommerce-fulfillment-new-fulfillment-form__disabled {
 		opacity: 30%;
 		pointer-events: none !important;
+	}
+	&.woocommerce-fulfillment-new-fulfillment-form__first {
+		border-bottom: none;
 	}
 	.woocommerce-fulfillment-new-fulfillment-form__header {
 		padding: 16px 20px;
@@ -195,7 +200,6 @@
 
 .woocommerce-fulfillment-stored-fulfillments-list {
 	display: flex;
-	border-top: 1px solid #e0e0e0;
 	flex-direction: column;
 	.woocommerce-fulfillment-stored-fulfillment-list-item {
 		display: flex;

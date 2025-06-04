@@ -36,7 +36,7 @@ describe( 'RemoveButton component', () => {
 		} );
 
 		useFulfillmentContext.mockReturnValue( {
-			orderId: 123,
+			order: { id: 123 },
 			fulfillment: { id: 456 },
 		} );
 	} );
@@ -53,7 +53,7 @@ describe( 'RemoveButton component', () => {
 		} );
 
 		useFulfillmentContext.mockReturnValue( {
-			orderId: 123,
+			order: { id: 123 },
 			fulfillment: { id: 456 },
 		} );
 
@@ -71,7 +71,7 @@ describe( 'RemoveButton component', () => {
 		} );
 
 		useFulfillmentContext.mockReturnValue( {
-			orderId: 123,
+			order: { id: 123 },
 			fulfillment: undefined,
 		} );
 
@@ -89,7 +89,7 @@ describe( 'RemoveButton component', () => {
 		} );
 
 		useFulfillmentContext.mockReturnValue( {
-			orderId: 123,
+			order: { id: 123 },
 			fulfillment: {
 				/* no id */
 			},

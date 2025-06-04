@@ -1,14 +1,14 @@
 /**
  * External dependencies
  */
-import React, { createContext, useEffect } from 'react';
+import React, { createContext, useEffect, useMemo, useState } from 'react';
 
 /**
  * Internal dependencies
  */
-import { Fulfillment } from '../data/types';
+import { Fulfillment, Order } from '../data/types';
+import { ItemSelection } from '../utils/order-utils';
 import { useShipmentFormContext } from './shipment-form-context';
-import { ItemQuantity } from '../utils/order-utils';
 import {
 	ITEMS_META_KEY,
 	PROVIDER_NAME_META_KEY,
@@ -21,15 +21,19 @@ import {
 } from '../data/constants';
 
 interface FulfillmentContextProps {
-	orderId: number;
+	order?: Order;
 	fulfillment: Fulfillment | null;
 	setFulfillment: ( fulfillment: Fulfillment | null ) => void;
+	selectedItems: ItemSelection[];
+	setSelectedItems: ( items: ItemSelection[] ) => void;
 }
 
 const defaultContextProps: FulfillmentContextProps = {
-	orderId: 0,
+	order: undefined,
 	fulfillment: null,
 	setFulfillment: () => {},
+	selectedItems: [],
+	setSelectedItems: () => {},
 };
 
 const FulfillmentContextValue =
@@ -46,18 +50,19 @@ export const useFulfillmentContext = () => {
 };
 
 export const FulfillmentProvider = ( {
-	orderId,
+	order,
 	fulfillment,
+	items,
 	children,
-	selectedItems,
 }: {
-	orderId: number;
+	order: Order;
 	fulfillment?: Fulfillment | null;
-	selectedItems: Array< ItemQuantity >;
+	items?: ItemSelection[];
 	children: React.ReactNode;
 } ) => {
 	const [ _fulfillment, _setFulfillment ] =
 		React.useState< Fulfillment | null >( fulfillment ?? null );
+
 	const {
 		selectedOption,
 		trackingNumber,
@@ -66,18 +71,28 @@ export const FulfillmentProvider = ( {
 		providerName,
 	} = useShipmentFormContext();
 
+	const [ selectedItems, setSelectedItems ] = useState< ItemSelection[] >(
+		items ?? []
+	);
+
+	// Refresh the selected items when the items prop changes.
 	useEffect( () => {
-		if ( ! orderId ) {
+		setSelectedItems( items ?? [] );
+	}, [ items ] );
+
+	// Set the fulfillment object based on the order and selected items.
+	useEffect( () => {
+		if ( ! order?.id ) {
 			_setFulfillment( null );
 			return;
 		}
 		_setFulfillment( {
 			id: fulfillment?.id ?? undefined,
 			fulfillment_id: fulfillment?.id ?? undefined,
-			entity_id: String( orderId ),
+			entity_id: String( order.id ),
 			entity_type: WC_ORDER_CLASS,
-			is_fulfilled: false,
-			status: 'unfulfilled',
+			is_fulfilled: fulfillment?.is_fulfilled ?? false,
+			status: fulfillment?.status ?? 'unfulfilled',
 			meta_data: [
 				{
 					id: 0,
@@ -119,34 +134,49 @@ export const FulfillmentProvider = ( {
 				{
 					id: 0,
 					key: ITEMS_META_KEY,
-					value: selectedItems.map( ( item ) => {
-						return {
-							item_id: parseInt( item.item_id, 10 ),
-							qty: item.qty,
-						};
-					} ),
+					value: selectedItems
+						.map( ( item ) => {
+							return {
+								item_id: item.item_id,
+								qty: item.selection.filter(
+									( selection ) => selection.checked
+								).length,
+							};
+						} )
+						.filter( ( item ) => item.qty > 0 ),
 				},
 			],
 		} as Fulfillment );
 	}, [
-		orderId,
+		order,
 		trackingNumber,
 		trackingUrl,
 		shipmentProvider,
 		providerName,
 		selectedOption,
-		fulfillment?.id,
+		fulfillment,
 		selectedItems,
 	] );
 
+	const contextValues = useMemo(
+		() => ( {
+			order,
+			fulfillment: _fulfillment,
+			setFulfillment: _setFulfillment,
+			selectedItems,
+			setSelectedItems,
+		} ),
+		[
+			order,
+			_fulfillment,
+			_setFulfillment,
+			selectedItems,
+			setSelectedItems,
+		]
+	);
+
 	return (
-		<FulfillmentContextValue.Provider
-			value={ {
-				orderId,
-				fulfillment: _fulfillment,
-				setFulfillment: _setFulfillment,
-			} }
-		>
+		<FulfillmentContextValue.Provider value={ contextValues }>
 			{ children }
 		</FulfillmentContextValue.Provider>
 	);

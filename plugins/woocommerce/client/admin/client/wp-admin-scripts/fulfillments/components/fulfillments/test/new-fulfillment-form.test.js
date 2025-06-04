@@ -63,7 +63,13 @@ describe( 'NewFulfillmentForm', () => {
 	it( 'renders the form when there are remaining items', () => {
 		mockContext.order = { id: 1, currency: 'USD', line_items: [] };
 		require( '../../../utils/order-utils' ).getItemsNotInAnyFulfillment.mockReturnValue(
-			[ { id: 1, name: 'Item 1' } ]
+			[
+				{
+					id: 1,
+					name: 'Item 1',
+					selection: [ { index: 0, checked: true } ],
+				},
+			]
 		);
 
 		render( <NewFulfillmentForm /> );

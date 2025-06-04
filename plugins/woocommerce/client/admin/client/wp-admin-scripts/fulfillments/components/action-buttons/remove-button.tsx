@@ -18,20 +18,21 @@ export default function RemoveButton( {
 }: {
 	setError: ( message: string | null ) => void;
 } ) {
-	const { setIsEditing } = useFulfillmentDrawerContext();
-	const { orderId, fulfillment } = useFulfillmentContext();
+	const { setIsEditing, setOpenSection } = useFulfillmentDrawerContext();
+	const { order, fulfillment } = useFulfillmentContext();
 	const [ isExecuting, setIsExecuting ] = useState< boolean >( false );
 	const { deleteFulfillment } = useDispatch( FulfillmentStore );
 
 	const handleFulfillItems = () => {
 		setError( null );
 		setIsExecuting( true );
-		if ( ! fulfillment || ! fulfillment.id ) {
+		if ( ! fulfillment || ! fulfillment.id || ! order || ! order.id ) {
 			setIsExecuting( false );
 			return;
 		}
-		deleteFulfillment( orderId, fulfillment.id )
+		deleteFulfillment( order.id, fulfillment.id )
 			.then( () => {
+				setOpenSection( 'order' );
 				setIsEditing( false );
 			} )
 			.catch( ( error ) => {

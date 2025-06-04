@@ -20,9 +20,9 @@ type FulfillmentItemProps = {
 	quantity: number;
 	currency: string;
 	editMode: boolean;
-	toggleItem: ( id: string, checked: boolean ) => void;
-	isChecked: ( id: string ) => boolean;
-	isIndeterminate: ( id: string ) => boolean;
+	toggleItem: ( id: number, index: number, checked: boolean ) => void;
+	isChecked: ( id: number, index: number ) => boolean;
+	isIndeterminate: ( id: number ) => boolean;
 };
 
 export default function FulfillmentLineItem( {
@@ -84,13 +84,11 @@ export default function FulfillmentLineItem( {
 					<div className="woocommerce-fulfillment-item-checkbox">
 						<CheckboxControl
 							value={ item.id }
-							checked={ isChecked( String( item.id ) ) }
+							checked={ isChecked( item.id, -1 ) }
 							onChange={ ( value ) => {
-								toggleItem( String( item.id ), value );
+								toggleItem( item.id, -1, value );
 							} }
-							indeterminate={ isIndeterminate(
-								String( item.id )
-							) }
+							indeterminate={ isIndeterminate( item.id ) }
 							__nextHasNoMarginBottom
 						/>
 					</div>
@@ -135,7 +133,10 @@ export default function FulfillmentLineItem( {
 					</div>
 				) }
 				<div className="woocommerce-fulfillment-item-price">
-					{ getFormattedItemTotal( item.total, currency ) }
+					{ getFormattedItemTotal(
+						parseFloat( item.total ) * ( quantity / item.quantity ),
+						currency
+					) }
 				</div>
 			</div>
 			{ editMode && itemExpanded && (
@@ -150,14 +151,9 @@ export default function FulfillmentLineItem( {
 									<CheckboxControl
 										name={ `fulfillment-item-${ item.id }-${ index }` }
 										value={ item.id + '-' + index }
-										checked={ isChecked(
-											String( item.id ) + '-' + index
-										) }
+										checked={ isChecked( item.id, index ) }
 										onChange={ ( value ) => {
-											toggleItem(
-												String( item.id ) + '-' + index,
-												value
-											);
+											toggleItem( item.id, index, value );
 										} }
 										__nextHasNoMarginBottom
 									/>
@@ -186,7 +182,7 @@ export default function FulfillmentLineItem( {
 							</div>
 							<div className="woocommerce-fulfillment-item-price">
 								{ getFormattedItemTotal(
-									parseInt( item.total, 10 ) / quantity,
+									parseInt( item.total, 10 ) / item.quantity,
 									currency
 								) }
 							</div>
