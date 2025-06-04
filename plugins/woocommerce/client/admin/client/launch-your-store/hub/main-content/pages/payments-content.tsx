@@ -22,14 +22,31 @@ import { useSetUpPaymentsContext } from '~/launch-your-store/data/setup-payments
 const InstallWooPaymentsStep = ( {
 	installWooPayments,
 	isPluginInstalling,
+	isPluginInstalled,
 }: {
 	installWooPayments: () => void;
 	isPluginInstalling: boolean;
+	isPluginInstalled: boolean;
 } ) => {
 	const isWooPayEligible = useSelect( ( select ) => {
 		const store = select( paymentSettingsStore );
 		return store.getIsWooPayEligible();
 	}, [] );
+
+	let buttonText = __( 'Install', 'woocommerce' );
+
+	if ( isPluginInstalled && ! isPluginInstalling ) {
+		buttonText = __( 'Enable', 'woocommerce' );
+	}
+
+	if ( isPluginInstalled && isPluginInstalling ) {
+		buttonText = __( 'Enabling', 'woocommerce' );
+	}
+
+	if ( ! isPluginInstalled && isPluginInstalling ) {
+		buttonText = __( 'Installing', 'woocommerce' );
+	}
+
 	return (
 		<div className="launch-your-store-payments-content__step--install-woopayments">
 			<div className="launch-your-store-payments-content__step--install-woopayments-logo">
@@ -62,15 +79,18 @@ const InstallWooPaymentsStep = ( {
 				disabled={ isPluginInstalling }
 				variant="primary"
 			>
-				{ __( 'Install', 'woocommerce' ) }
+				{ buttonText }
 			</Button>
 		</div>
 	);
 };
 
 export const PaymentsContent = ( {} ) => {
-	const { isWooPaymentsActive, setWooPaymentsRecentlyActivated } =
-		useSetUpPaymentsContext();
+	const {
+		isWooPaymentsActive,
+		isWooPaymentsInstalled,
+		setWooPaymentsRecentlyActivated,
+	} = useSetUpPaymentsContext();
 
 	const { refreshStoreData } = useOnboardingContext();
 
@@ -109,6 +129,7 @@ export const PaymentsContent = ( {} ) => {
 				{ ! isWooPaymentsActive ? (
 					<InstallWooPaymentsStep
 						installWooPayments={ installWooPayments }
+						isPluginInstalled={ isWooPaymentsInstalled }
 						isPluginInstalling={ isPluginInstalling }
 					/>
 				) : (

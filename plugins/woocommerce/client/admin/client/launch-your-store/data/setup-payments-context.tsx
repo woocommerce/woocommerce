@@ -14,6 +14,7 @@ import { OnboardingProvider } from '~/settings-payments/onboarding/providers/woo
 
 interface SetUpPaymentsContextType {
 	isWooPaymentsActive: boolean;
+	isWooPaymentsInstalled: boolean;
 	wooPaymentsRecentlyActivated: boolean;
 	setWooPaymentsRecentlyActivated: ( value: boolean ) => void;
 }
@@ -23,6 +24,7 @@ interface SetUpPaymentsContextType {
  */
 const SetUpPaymentsContext = createContext< SetUpPaymentsContextType >( {
 	isWooPaymentsActive: false,
+	isWooPaymentsInstalled: false,
 	wooPaymentsRecentlyActivated: false,
 	setWooPaymentsRecentlyActivated: () => undefined,
 } );
@@ -38,6 +40,14 @@ export const SetUpPaymentsProvider: React.FC< {
 		( select ) =>
 			select( pluginsStore )
 				.getActivePlugins()
+				.includes( 'woocommerce-payments' ),
+		[]
+	);
+
+	const isWooPaymentsInstalled = useSelect(
+		( select ) =>
+			select( pluginsStore )
+				.getInstalledPlugins()
 				.includes( 'woocommerce-payments' ),
 		[]
 	);
@@ -73,6 +83,7 @@ export const SetUpPaymentsProvider: React.FC< {
 		<SetUpPaymentsContext.Provider
 			value={ {
 				isWooPaymentsActive,
+				isWooPaymentsInstalled,
 				wooPaymentsRecentlyActivated,
 				setWooPaymentsRecentlyActivated,
 			} }

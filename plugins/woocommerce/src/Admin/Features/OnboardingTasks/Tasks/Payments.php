@@ -391,8 +391,7 @@ class Payments extends Task {
 			if (
 				! empty( $provider['state']['enabled'] ) &&
 				! empty( $provider['id'] ) &&
-				! in_array( $provider['id'], array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ), true ) &&
-				'woocommerce_payments' !== $provider['id']
+				! in_array( $provider['id'], array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ), true )
 			) {
 				return true;
 			}

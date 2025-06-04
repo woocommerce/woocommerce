@@ -37,6 +37,7 @@ export type TaskType = {
 		woocommerceShippingActivated?: boolean;
 		wooPaymentsIncentiveId?: string;
 		wooPaymentsIsActive?: boolean;
+		wooPaymentsIsInstalled?: boolean;
 		wooPaymentsSettingsCountryIsSupported?: boolean;
 		wooPaymentsIsOnboarded?: boolean;
 		wooPaymentsHasTestAccount?: boolean;
