@@ -70,9 +70,17 @@ export const OnboardingProvider: React.FC< {
 	children: React.ReactNode;
 	onboardingSteps: WooPaymentsProviderOnboardingStep[];
 	closeModal: () => void;
+	onFinish?: () => void;
 	urlStrategy?: URLStrategy;
 	source?: string | null;
-} > = ( { children, onboardingSteps, closeModal, urlStrategy, source } ) => {
+} > = ( {
+	children,
+	onboardingSteps,
+	closeModal,
+	onFinish,
+	urlStrategy,
+	source,
+} ) => {
 	const history = getHistory();
 
 	// Use React state to manage steps and loading state
@@ -197,6 +205,12 @@ export const OnboardingProvider: React.FC< {
 							: step
 					)
 				);
+			}
+
+			// If the current step is the last one, then we should call onFinish if provided.
+			if ( currentStepIndex === allSteps.length - 1 ) {
+				onFinish?.();
+				return;
 			}
 
 			// Find the next step that is not completed and has completed dependencies
