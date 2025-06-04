@@ -48,6 +48,10 @@ class DraftOrders {
 		add_action( 'woocommerce_my_account_my_orders_query', [ $this, 'delete_draft_order_post_status_from_args' ] );
 		add_action( self::DRAFT_CLEANUP_EVENT_HOOK, [ $this, 'delete_expired_draft_orders' ] );
 		add_action( 'admin_init', [ $this, 'install' ] );
+
+		if ( defined( 'WC_PLUGIN_BASENAME' ) ) {
+			add_action( 'deactivate_' . WC_PLUGIN_BASENAME, [ $this, 'unschedule_cronjobs' ] );
+		}
 	}
 
 	/**
@@ -57,6 +61,16 @@ class DraftOrders {
 	 */
 	public function install() {
 		$this->maybe_create_cronjobs();
+	}
+
+	/**
+	 * Unschedule recurring actions when plugin is deactivated.
+	 *
+	 * @since 10.0.0
+	 * @internal
+	 */
+	public function unschedule_cronjobs() {
+		WC()->queue()->cancel_all( self::DRAFT_CLEANUP_EVENT_HOOK );
 	}
 
 	/**
