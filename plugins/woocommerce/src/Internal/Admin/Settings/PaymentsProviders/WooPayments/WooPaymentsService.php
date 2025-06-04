@@ -124,15 +124,16 @@ class WooPaymentsService {
 	/**
 	 * Get the onboarding details for the settings page.
 	 *
-	 * @param string $location  The location for which we are onboarding.
-	 *                          This is a ISO 3166-1 alpha-2 country code.
-	 * @param string $rest_path The REST API path to use for constructing REST API URLs.
+	 * @param string      $location  The location for which we are onboarding.
+	 *                               This is a ISO 3166-1 alpha-2 country code.
+	 * @param string      $rest_path The REST API path to use for constructing REST API URLs.
+	 * @param string|null $source    Optional. The source for the onboarding flow.
 	 *
 	 * @return array The onboarding details.
 	 * @throws ApiException If the onboarding action can not be performed due to the current state of the site.
 	 * @throws Exception If there were errors when generating the onboarding details.
 	 */
-	public function get_onboarding_details( string $location, string $rest_path ): array {
+	public function get_onboarding_details( string $location, string $rest_path, ?string $source = null ): array {
 		// Since getting the onboarding details is not idempotent, we will check it as an action.
 		$this->check_if_onboarding_action_is_acceptable();
 
@@ -144,7 +145,7 @@ class WooPaymentsService {
 				'test_mode' => $this->provider->is_in_test_mode_onboarding( $this->get_payment_gateway() ),
 				'dev_mode'  => $this->provider->is_in_dev_mode( $this->get_payment_gateway() ),
 			),
-			'steps'   => $this->get_onboarding_steps( $location, trailingslashit( $rest_path ) . 'step' ),
+			'steps'   => $this->get_onboarding_steps( $location, trailingslashit( $rest_path ) . 'step', $source ),
 			'context' => array(
 				'urls' => array(
 					'overview_page' => $this->get_overview_page_url(),
@@ -272,20 +273,6 @@ class WooPaymentsService {
 
 		// Finally, we default to not started.
 		return self::ONBOARDING_STEP_STATUS_NOT_STARTED;
-	}
-
-	/**
-	 * Check if the onboarding step has a started status.
-	 *
-	 * @param string $step_id  The ID of the onboarding step.
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 *
-	 * @return bool Whether the onboarding step is started.
-	 * @throws ApiException On invalid step ID.
-	 */
-	private function is_onboarding_step_started( string $step_id, string $location ): bool {
-		return self::ONBOARDING_STEP_STATUS_COMPLETED === $this->get_onboarding_step_status( $step_id, $location );
 	}
 
 	/**
@@ -1564,14 +1551,15 @@ class WooPaymentsService {
 	/**
 	 * Get the onboarding details for each step.
 	 *
-	 * @param string $location  The location for which we are onboarding.
-	 *                          This is a ISO 3166-1 alpha-2 country code.
-	 * @param string $rest_path The REST API path to use for constructing REST API URLs.
+	 * @param string      $location  The location for which we are onboarding.
+	 *                               This is a ISO 3166-1 alpha-2 country code.
+	 * @param string      $rest_path The REST API path to use for constructing REST API URLs.
+	 * @param string|null $source    Optional. The source for the onboarding flow.
 	 *
 	 * @return array[] The list of onboarding steps details.
 	 * @throws Exception If there was an error generating the onboarding steps details.
 	 */
-	private function get_onboarding_steps( string $location, string $rest_path ): array {
+	private function get_onboarding_steps( string $location, string $rest_path, ?string $source = null ): array {
 		$steps = array();
 
 		// Add the payment methods onboarding step details.
@@ -1616,15 +1604,27 @@ class WooPaymentsService {
 		// If the WPCOM connection is already set up, we don't need to add anything more.
 		if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $wpcom_step['status'] ) {
 			// Craft the return URL.
-			// By default, we return the user to the onboarding modal.
-			$return_url = $this->proxy->call_static(
-				Utils::class,
-				'wc_payments_settings_url',
-				self::ONBOARDING_PATH_BASE,
-				array(
-					'wpcom_connection_return' => '1', // URL query flag so we can properly identify when the user returns.
-				)
-			);
+			switch ( $source ) {
+				case 'launch-your-store':
+					// If the source is 'launch-your-store', we return the user to the Launch Your Store flow.
+					$return_url = $this->proxy->call_function(
+						'admin_url',
+						'admin.php?page=wc-admin&path=/launch-your-store' . self::ONBOARDING_PATH_BASE . '&sidebar=hub&content=payments&wpcom_connection_return=1'
+					);
+					break;
+				default:
+					// By default, we return the user to the onboarding modal in the Settings > Payments page.
+					$return_url = $this->proxy->call_static(
+						Utils::class,
+						'wc_payments_settings_url',
+						self::ONBOARDING_PATH_BASE,
+						array(
+							'wpcom_connection_return' => '1', // URL query flag so we can properly identify when the user returns.
+						)
+					);
+					break;
+			}
+
 			// Try to generate the authorization URL.
 			$wpcom_connection = $this->get_wpcom_connection_authorization( $return_url );
 			if ( ! $wpcom_connection['success'] ) {
@@ -2298,21 +2298,6 @@ class WooPaymentsService {
 			),
 			admin_url( 'admin.php' )
 		);
-	}
-
-	/**
-	 * Get the business location country code for the Payments settings.
-	 *
-	 * @return string The ISO 3166-1 alpha-2 country code to use for the overall business location.
-	 *                If the user didn't set a location, the WC base location country code is used.
-	 */
-	private function get_country(): string {
-		$user_nox_meta = get_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, true );
-		if ( ! empty( $user_nox_meta['business_country_code'] ) ) {
-			return $user_nox_meta['business_country_code'];
-		}
-
-		return WC()->countries->get_base_country();
 	}
 
 	/**

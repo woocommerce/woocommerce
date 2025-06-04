@@ -95,7 +95,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			data-wp-class--wc-block-product-gallery-thumbnails--overflow-right="context.thumbnailsOverflow.right">
 			<div
 				class="wc-block-product-gallery-thumbnails__scrollable"
-				data-wp-init="actions.onScroll"
+				data-wp-init="callbacks.initResizeObserver"
 				data-wp-on--scroll="actions.onScroll"
 				role="listbox">
 				<?php foreach ( $product_gallery_images as $index => $image ) : ?>
