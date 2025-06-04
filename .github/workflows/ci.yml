@@ -556,6 +556,7 @@ jobs:
       - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         id: target-changes
         with:
+          list-files: shell
           filters: |
             needs-markdown-linting:
               - '!({.github,docs}/**)/**/*.md'
@@ -568,10 +569,12 @@ jobs:
           node-version-file: .nvmrc
 
       - name: 'Setup - markdownlint-cli'
+        if: ${{ steps.target-changes.outputs.needs-markdown-linting }}
         run: |
           npm install -g markdownlint-cli
 
       - name: 'Validate - lint md-files'
+        if: ${{ steps.target-changes.outputs.needs-markdown-linting }}
         shell: bash
         run: |
           added_and_modified_docs="${{ steps.repo-changed-files.outputs.added_files }} ${{ steps.repo-changed-files.outputs.modified_files }}"
@@ -579,3 +582,9 @@ jobs:
             markdownlint $added_and_modified_docs
             exit $?
           fi
+          
+      - name: 'Validate - lint docs-files'
+        if: ${{ steps.target-changes.outputs.needs-docs-linting }}
+        shell: bash
+        run: |
+          echo "Linting docs here"
