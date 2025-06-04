@@ -118,7 +118,7 @@ final class ProductFilterRating extends AbstractBlock {
 		$selected_rating        = array_filter( explode( ',', $rating_query ) );
 
 		$filter_options = array_map(
-			function ( $rating ) use ( $selected_rating, $attributes ) {
+			function ( $rating ) use ( $selected_rating ) {
 				$value = (string) $rating['rating'];
 
 				$aria_label = sprintf(
@@ -126,20 +126,6 @@ final class ProductFilterRating extends AbstractBlock {
 					__( 'Rated %1$d out of 5', 'woocommerce' ),
 					$value,
 				);
-
-				if ( $attributes['showCounts'] ) {
-					$aria_label = sprintf(
-						/* translators: %1$d is referring to rating value, %2$d is the count. */
-						_n(
-							'Rated %1$d out of 5 (%2$d product)',
-							'Rated %1$d out of 5 (%2$d products)',
-							$rating['count'],
-							'woocommerce'
-						),
-						$value,
-						$rating['count']
-					);
-				}
 
 				return array(
 					'label'     => $this->render_rating_label( (int) $value ),
