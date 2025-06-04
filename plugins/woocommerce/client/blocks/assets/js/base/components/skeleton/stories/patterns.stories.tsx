@@ -15,7 +15,7 @@ import { CheckoutExpressPaymentsSkeleton } from '../patterns/checkout-express-pa
 import { CheckoutContactSkeleton } from '../patterns/checkout-contact';
 import { CheckoutDeliverySkeleton } from '../patterns/checkout-delivery';
 import { CheckoutShippingSkeletonPrimary } from '../patterns/checkout-shipping-primary';
-import { CheckoutShippingSkeletonAdditional } from '../patterns/checkout-shipping-additional';
+import { CheckoutShippingSkeletonAdditional } from '../patterns/checkout-shipping';
 import { CheckoutPaymentSkeleton } from '../patterns/checkout-payment';
 import { CheckoutOrderSummarySkeleton } from '../patterns/checkout-order-summary';
 import { CheckoutOrderSummaryMobileSkeleton } from '../patterns/checkout-order-summary-mobile';
