@@ -24,6 +24,8 @@
 			opacity: 0;
 			visibility: hidden;
 			height: 0;
+			// fix content jumping for address card
+			overflow: hidden;
 		}
 		.wc-block-components-address-card-wrapper {
 			opacity: 1;
