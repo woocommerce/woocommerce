@@ -302,6 +302,7 @@ const shouldBeUnmarkedAsConverted = (
 const CollectionSpecificControls = (
 	props: ProductCollectionEditComponentProps
 ) => {
+	const { collection } = props.attributes;
 	const setQueryAttributeBind = useMemo(
 		() => setQueryAttribute.bind( null, props ),
 		[ props ]
@@ -311,7 +312,7 @@ const CollectionSpecificControls = (
 		return recordEvent(
 			'blocks_product_collection_inspector_control_clicked',
 			{
-				collection: props.attributes.collection,
+				collection,
 				location: tracksLocation,
 				filter,
 			}
@@ -324,8 +325,8 @@ const CollectionSpecificControls = (
 	};
 
 	const isByCategoryOrTag =
-		props.attributes.collection === CoreCollectionNames.BY_CATEGORY ||
-		props.attributes.collection === CoreCollectionNames.BY_TAG;
+		collection === CoreCollectionNames.BY_CATEGORY ||
+		collection === CoreCollectionNames.BY_TAG;
 
 	return (
 		<InspectorControls>
@@ -333,7 +334,7 @@ const CollectionSpecificControls = (
 				/**
 				 * "Hand-Picked" collection-specific controls.
 				 */
-				props.attributes.collection ===
+				collection ===
 					CoreCollectionNames.HAND_PICKED && (
 					<PanelBody>
 						<HandPickedProductsControlField
@@ -346,7 +347,7 @@ const CollectionSpecificControls = (
 				/**
 				 * "Related Products" collection-specific controls.
 				 */
-				props.attributes.collection === CoreCollectionNames.RELATED && (
+				collection === CoreCollectionNames.RELATED && (
 					<RelatedByControl { ...queryControlProps } />
 				)
 			}
@@ -358,7 +359,7 @@ const CollectionSpecificControls = (
 					<PanelBody>
 						<TaxonomyControlsField
 							{ ...queryControlProps }
-							collection={ props.attributes.collection }
+							collection={ collection }
 						/>
 					</PanelBody>
 				)
