@@ -35,6 +35,7 @@ describe( 'FulfillItemsButton component', () => {
 		useFulfillmentContext.mockReturnValue( {
 			order: { id: 123 },
 			fulfillment: { id: 456 },
+			notifyCustomer: true,
 		} );
 	} );
 
@@ -71,6 +72,7 @@ describe( 'FulfillItemsButton component', () => {
 		useFulfillmentContext.mockReturnValue( {
 			order: { id: 123 },
 			fulfillment: mockFulfillment,
+			notifyCustomer: true,
 		} );
 
 		render( <FulfillItemsButton setError={ setError } /> );
@@ -80,7 +82,8 @@ describe( 'FulfillItemsButton component', () => {
 		expect( mockFulfillment.status ).toBe( 'fulfilled' );
 		expect( await mockSaveFulfillment ).toHaveBeenCalledWith(
 			123,
-			mockFulfillment
+			mockFulfillment,
+			true
 		);
 	} );
 
@@ -91,6 +94,7 @@ describe( 'FulfillItemsButton component', () => {
 		useFulfillmentContext.mockReturnValue( {
 			order: { id: 123 },
 			fulfillment: undefined,
+			notifyCustomer: true,
 		} );
 
 		render( <FulfillItemsButton setError={ setError } /> );

@@ -37,7 +37,8 @@ describe( 'RemoveButton component', () => {
 
 		useFulfillmentContext.mockReturnValue( {
 			order: { id: 123 },
-			fulfillment: { id: 456 },
+			fulfillment: { id: 456, is_fulfilled: false },
+			notifyCustomer: true,
 		} );
 	} );
 
@@ -54,14 +55,19 @@ describe( 'RemoveButton component', () => {
 
 		useFulfillmentContext.mockReturnValue( {
 			order: { id: 123 },
-			fulfillment: { id: 456 },
+			fulfillment: { id: 456, is_fulfilled: false },
+			notifyCustomer: true,
 		} );
 
 		render( <RemoveButton setError={ setError } /> );
 
 		fireEvent.click( screen.getByText( 'Remove' ) );
 
-		expect( await mockDeleteFulfillment ).toHaveBeenCalledWith( 123, 456 );
+		expect( await mockDeleteFulfillment ).toHaveBeenCalledWith(
+			123,
+			456,
+			true
+		);
 	} );
 
 	it( 'should not call deleteFulfillment when fulfillment is undefined', () => {
@@ -73,6 +79,7 @@ describe( 'RemoveButton component', () => {
 		useFulfillmentContext.mockReturnValue( {
 			order: { id: 123 },
 			fulfillment: undefined,
+			notifyCustomer: true,
 		} );
 
 		render( <RemoveButton setError={ setError } /> );
@@ -92,7 +99,9 @@ describe( 'RemoveButton component', () => {
 			order: { id: 123 },
 			fulfillment: {
 				/* no id */
+				is_fulfilled: false,
 			},
+			notifyCustomer: true,
 		} );
 
 		render( <RemoveButton setError={ setError } /> );

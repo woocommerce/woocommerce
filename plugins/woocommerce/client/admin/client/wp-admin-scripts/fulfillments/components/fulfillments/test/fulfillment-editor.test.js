@@ -49,6 +49,9 @@ jest.mock( '../item-selector', () => () => (
 jest.mock( '../fulfillment-status-badge', () => () => (
 	<div data-testid="fulfillment-status-badge" />
 ) );
+jest.mock( '../../customer-notification-form', () => () => (
+	<div data-testid="fulfillment-customer-notification-form" />
+) );
 
 describe( 'FulfillmentEditor', () => {
 	const mockProps = {

@@ -23,6 +23,15 @@ jest.mock( '../../../utils/icons', () => ( {
 	EnvelopeIcon: () => <div data-testid="envelope-icon" />,
 } ) );
 
+const setValue = jest.fn();
+
+jest.mock( '../../../context/fulfillment-context', () => ( {
+	useFulfillmentContext: jest.fn( () => ( {
+		notifyCustomer: true,
+		setNotifyCustomer: setValue,
+	} ) ),
+} ) );
+
 // Mock ToggleControl to make testing easier
 jest.mock( '@wordpress/components', () => ( {
 	ToggleControl: ( props ) => (
@@ -39,21 +48,17 @@ jest.mock( '@wordpress/components', () => ( {
 
 describe( 'CustomerNotificationBox component', () => {
 	it( 'should render the component with proper title', () => {
-		render(
-			<CustomerNotificationBox value={ false } setValue={ () => {} } />
-		);
+		render( <CustomerNotificationBox type="fulfill" /> );
 
 		// Check title and icon
 		expect(
-			screen.getByText( 'Customer notification' )
+			screen.getByText( 'Fulfillment notification' )
 		).toBeInTheDocument();
 		expect( screen.getByTestId( 'envelope-icon' ) ).toBeInTheDocument();
 	} );
 
 	it( 'should render the description text', () => {
-		render(
-			<CustomerNotificationBox value={ false } setValue={ () => {} } />
-		);
+		render( <CustomerNotificationBox type="fulfill" /> );
 
 		// Check description text
 		expect(
@@ -64,26 +69,18 @@ describe( 'CustomerNotificationBox component', () => {
 	} );
 
 	it( 'should call setValue with the correct value when toggle is changed', () => {
-		const mockSetValue = jest.fn();
-		render(
-			<CustomerNotificationBox
-				value={ false }
-				setValue={ mockSetValue }
-			/>
-		);
+		render( <CustomerNotificationBox type="fulfill" /> );
 
 		// Find and click the toggle input
 		const toggleInput = screen.getByTestId( 'toggle-input' );
 		toggleInput.click();
 
-		// Check that setValue was called with true (toggling from false -> true)
-		expect( mockSetValue ).toHaveBeenCalledWith( true );
+		// Check that setValue was called with true (toggling from true -> false)
+		expect( setValue ).toHaveBeenCalledWith( false );
 	} );
 
 	it( 'should render with toggle in correct state based on value prop', () => {
-		render(
-			<CustomerNotificationBox value={ true } setValue={ () => {} } />
-		);
+		render( <CustomerNotificationBox type="fulfill" /> );
 
 		// Verify toggle is checked
 		const toggleInput = screen.getByTestId( 'toggle-input' );
