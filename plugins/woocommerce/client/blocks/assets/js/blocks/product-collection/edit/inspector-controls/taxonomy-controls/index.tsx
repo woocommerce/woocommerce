@@ -72,12 +72,12 @@ function TaxonomyControls( {
 		// For filters panel, show the complementary taxonomy.
 		if ( collection === CoreCollectionNames.BY_CATEGORY ) {
 			return taxonomies.filter(
-				( taxonomy ) => taxonomy.slug === 'product_tag'
+				( taxonomy ) => taxonomy.slug !== 'product_cat'
 			);
 		}
 		if ( collection === CoreCollectionNames.BY_TAG ) {
 			return taxonomies.filter(
-				( taxonomy ) => taxonomy.slug === 'product_cat'
+				( taxonomy ) => taxonomy.slug !== 'product_tag'
 			);
 		}
 		// For all other collections, show both taxonomies.
