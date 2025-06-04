@@ -81,9 +81,16 @@ function wc_get_page_id( $page ) {
 		$page = 'myaccount';
 	}
 
-	$page = apply_filters( 'woocommerce_get_' . $page . '_page_id', get_option( 'woocommerce_' . $page . '_page_id' ) );
+	$page_id = apply_filters( 'woocommerce_get_' . $page . '_page_id', get_option( 'woocommerce_' . $page . '_page_id' ) );
 
-	return $page ? absint( $page ) : -1;
+	$post = get_post( $page_id );
+	
+	if ( ! $post || 'publish' !== $post->post_status ) {
+		return -1;
+	}
+
+	return absint( $page_id );
+
 }
 
 /**
