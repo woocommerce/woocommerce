@@ -69,7 +69,7 @@ export const getLysTasklist = async () => {
 			let isComplete = false;
 
 			if (
-				// Store has other online gateways enabled.
+				// Store has other online gateways enabled and WooPayments is not onboarded.
 				( task.additionalData?.wooPaymentsHasOnlineGatewaysEnabled &&
 					! task.additionalData?.wooPaymentsIsOnboarded ) ||
 				// WooPayments is onboarded and not in test mode.
