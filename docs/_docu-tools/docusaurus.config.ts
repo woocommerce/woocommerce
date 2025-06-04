@@ -184,7 +184,7 @@ const config: Config = {
 					<a href="https://automattic.com/">
 						An
 						<img src="img/automattic.svg" alt="Automattic" class="automattic-logo automattic-logo-light" />
-						<img src="img/automattic_dark.svg" alt="Automattic" class="automattic-logo automattic-logo-dark" /> 
+						<img src="img/automattic_dark.svg" alt="Automattic" class="automattic-logo automattic-logo-dark" />
 						Creation</a>
 				</div>`,
 		},
@@ -208,6 +208,10 @@ const config: Config = {
 			contextualSearch: true,
 		},
 	} satisfies Preset.ThemeConfig,
+
+	future: {
+		experimental_faster: true,
+	},
 };
 
 export default config;
