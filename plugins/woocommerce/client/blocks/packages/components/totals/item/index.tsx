@@ -5,12 +5,14 @@ import clsx from 'clsx';
 import { isValidElement } from '@wordpress/element';
 import type { ReactElement, ReactNode } from 'react';
 import type { Currency } from '@woocommerce/types';
+import { useStoreCart } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import FormattedMonetaryAmount from '../../formatted-monetary-amount';
+import { Skeleton } from '@woocommerce/base-components/skeleton';
 
 export interface TotalsItemProps {
 	className?: string | undefined;
@@ -49,12 +51,19 @@ const TotalsItem = ( {
 	value,
 	description,
 }: TotalsItemProps ): ReactElement => {
+	const { cartIsLoading } = useStoreCart();
+
 	return (
 		<div className={ clsx( 'wc-block-components-totals-item', className ) }>
 			<span className="wc-block-components-totals-item__label">
 				{ label }
 			</span>
-			<TotalsItemValue value={ value } currency={ currency } />
+			{ cartIsLoading ? (
+				<Skeleton width="45px" height="1em" />
+			) : (
+				<TotalsItemValue value={ value } currency={ currency } />
+			) }
+
 			<div className="wc-block-components-totals-item__description">
 				{ description }
 			</div>
