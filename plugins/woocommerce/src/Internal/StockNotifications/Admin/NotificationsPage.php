@@ -17,7 +17,7 @@ class NotificationsPage {
 	 *
 	 * @const PAGE_URL
 	 */
-	const PAGE_URL = 'admin.php?page=customer_stock_notifications';
+	const PAGE_URL = 'admin.php?page=wc-customer-stock-notifications';
 
 	/**
 	 * Render page.
