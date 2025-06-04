@@ -169,11 +169,12 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 9.9.1 2025-06-02 =
+= 9.9.0 2025-06-23 =
 
 **WooCommerce**
 
-* Fix - Restore missing webhook filter WC_Comments::exclude_webhook_comments_from_feed_where() callback. [#58472](https://github.com/woocommerce/woocommerce/pull/58472)
+* Fix - Fix fatal error when WC_Email child class doesn't set template_html [#58487](https://github.com/woocommerce/woocommerce/pull/58487)
+* Fix - Fix the order count cache refresh hook and scheduling [#58535](https://github.com/woocommerce/woocommerce/pull/58535)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
