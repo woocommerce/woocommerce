@@ -1,5 +1,5 @@
 /* global wc_admin_customer_stock_notifications_params, woocommerce_admin_meta_boxes */
-;( function( $, window, document ) {
+;( function( $, window ) {
 
 	/**
 	 * Document ready.
@@ -32,4 +32,4 @@
 			}
 		} );
     } );
-} )( jQuery, window, document ); 
+} )( jQuery, window );
