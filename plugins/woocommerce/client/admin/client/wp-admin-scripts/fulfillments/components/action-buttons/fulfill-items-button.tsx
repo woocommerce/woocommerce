@@ -20,13 +20,14 @@ export default function FulfillItemsButton( {
 	setError: ( message: string | null ) => void;
 } ) {
 	const { setIsEditing } = useFulfillmentDrawerContext();
-	const { orderId, fulfillment, notifyCustomer } = useFulfillmentContext();
+	const { order, fulfillment, notifyCustomer } = useFulfillmentContext();
 	const [ isExecuting, setIsExecuting ] = useState( false );
 	const { saveFulfillment } = useDispatch( FulfillmentStore );
 
 	const handleFulfillItems = () => {
+		setIsExecuting( true );
 		setError( null );
-		if ( ! fulfillment ) {
+		if ( ! fulfillment || ! order ) {
 			setIsExecuting( false );
 			return;
 		}
@@ -37,7 +38,7 @@ export default function FulfillItemsButton( {
 		}
 		fulfillment.is_fulfilled = true;
 		fulfillment.status = 'fulfilled';
-		saveFulfillment( orderId, fulfillment, notifyCustomer )
+		saveFulfillment( order.id, fulfillment, notifyCustomer )
 			.then( () => {
 				setIsEditing( false );
 			} )
@@ -54,7 +55,7 @@ export default function FulfillItemsButton( {
 			variant="primary"
 			onClick={ handleFulfillItems }
 			__next40pxDefaultSize
-			disabled={ isExecuting }
+			isBusy={ isExecuting }
 		>
 			{ __( 'Fulfill items', 'woocommerce' ) }
 		</Button>

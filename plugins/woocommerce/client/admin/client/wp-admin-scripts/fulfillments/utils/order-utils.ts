@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { range } from 'lodash';
 
 /**
  * Internal dependencies
@@ -9,35 +10,32 @@ import { Fulfillment, LineItem, Order } from '../data/types';
 import { getFulfillmentItems } from './fulfillment-utils';
 
 /**
- * ItemQuantity interface represents an item with its ID, quantity, and checked status.
+ * ItemSelection interface represents an item as a tree, and holds the checked state for each single quantity.
  * It is used to manage the items in the order and fulfillments.
  */
-export interface ItemQuantity {
-	item_id: string;
+export interface ItemSelection {
+	item_id: number;
 	item: LineItem;
-	qty: number;
-	checked: boolean;
+	selection: { index: number; checked: boolean }[];
 }
 
 /**
  * Get the items from the order, with the quantity and checked status.
  *
- * @param order   The order received from the API
- * @param checked Whether the items should be checked or not
- * @return Array<ItemQuantity> The items in the order
+ * @param order The order received from the API
+ * @return Array<ItemSelection> The items in the order
  */
-export const getItemsFromOrder = (
-	order: Order,
-	checked = false
-): ItemQuantity[] => {
-	const items: Array< ItemQuantity > = [];
+export const getItemsFromOrder = ( order: Order ): ItemSelection[] => {
+	const items: ItemSelection[] = [];
 	order.line_items.forEach( ( item: LineItem ) => {
 		items.push( {
-			item_id: String( item.id ),
+			item_id: item.id,
 			item,
-			qty: item.quantity,
-			checked,
-		} as ItemQuantity );
+			selection: range( item.quantity ).map( ( index ) => ( {
+				index,
+				checked: false,
+			} ) ),
+		} as ItemSelection );
 	} );
 	return items;
 };
@@ -47,25 +45,26 @@ export const getItemsFromOrder = (
  *
  * @param order       The order received from the API
  * @param fulfillment The fulfillment received from the API
- * @param checked     Whether the items should be checked or not
- * @return Array<ItemQuantity> The items in the fulfillment
+ * @return Array<ItemSelection> The items in the fulfillment
  */
 export const getItemsFromFulfillment = (
 	order: Order,
-	fulfillment: Fulfillment,
-	checked = false
-): ItemQuantity[] => {
+	fulfillment: Fulfillment
+): ItemSelection[] => {
 	const fulfillmentItems = getFulfillmentItems( fulfillment );
 	return fulfillmentItems.map( ( item ) => {
 		const orderItem = order.line_items.find(
-			( lineItem ) => String( lineItem.id ) === String( item.item_id )
+			( lineItem ) => lineItem.id === item.item_id
 		);
+
 		return {
-			item_id: String( item.item_id ),
+			item_id: item.item_id,
 			item: orderItem ? orderItem : ( {} as LineItem ),
-			qty: item.qty,
-			checked,
-		} as ItemQuantity;
+			selection: range( item.qty ).map( ( index ) => ( {
+				index,
+				checked: true,
+			} ) ),
+		} as ItemSelection;
 	} );
 };
 
@@ -76,25 +75,31 @@ export const getOrderItemsCount = ( order: Order ): number => {
 };
 
 /**
- * Combine two arrays of items, summing the quantities of items with the same ID.
+ * Combine two arrays of items.
  *
  * @param items1 The first array of items
  * @param items2 The second array of items
- * @return Array<ItemQuantity> The combined array of items
+ * @return Array<ItemSelection> The combined array of items
  */
 export const combineItems = (
-	items1: ItemQuantity[],
-	items2: ItemQuantity[]
-): ItemQuantity[] => {
-	const itemMap: Record< string, ItemQuantity > = {};
+	items1: ItemSelection[],
+	items2: ItemSelection[]
+): ItemSelection[] => {
+	const itemMap: Record< string, ItemSelection > = {};
 	items1.forEach( ( item ) => {
-		itemMap[ item.item_id ] = { ...item } as ItemQuantity;
+		itemMap[ item.item_id ] = { ...item };
 	} );
 	items2.forEach( ( item ) => {
 		if ( itemMap[ item.item_id ] ) {
-			itemMap[ item.item_id ].qty += item.qty;
+			itemMap[ item.item_id ].selection = [
+				...itemMap[ item.item_id ].selection,
+				...item.selection,
+			].map( ( selection, index ) => {
+				selection.index = index;
+				return selection;
+			} );
 		} else {
-			itemMap[ item.item_id ] = { ...item } as ItemQuantity;
+			itemMap[ item.item_id ] = { ...item };
 		}
 	} );
 
@@ -107,89 +112,32 @@ export const combineItems = (
  *
  * @param items         The first array of items
  * @param itemsToReduce The second array of items
- * @return Array<ItemQuantity> The reduced array of items
+ * @return Array<ItemSelection> The reduced array of items
  */
-export const reduceItems = (
-	items: ItemQuantity[],
-	itemsToReduce: ItemQuantity[]
-): ItemQuantity[] => {
-	const itemMap: Record< string, ItemQuantity > = {};
+const reduceItems = (
+	items: ItemSelection[],
+	itemsToReduce: ItemSelection[]
+): ItemSelection[] => {
+	const itemMap: Record< string, ItemSelection > = {};
 	items.forEach( ( item ) => {
-		itemMap[ item.item_id ] = { ...item } as ItemQuantity;
+		itemMap[ item.item_id ] = { ...item } as ItemSelection;
 	} );
 	itemsToReduce.forEach( ( item ) => {
 		if ( itemMap[ item.item_id ] ) {
-			itemMap[ item.item_id ].qty -= item.qty;
-			if ( itemMap[ item.item_id ].qty <= 0 ) {
-				delete itemMap[ item.item_id ];
-			}
-		}
-	} );
-
-	return Object.values( itemMap );
-};
-
-/**
- * Check if all items in the array have a quantity of 1.
- *
- * @param items The array of items to check
- * @return boolean True if all items have a quantity of 1, false otherwise
- */
-export const areItemsSpread = ( items: ItemQuantity[] ): boolean => {
-	return ! items.some( ( item ) => {
-		return item.qty > 1;
-	} );
-};
-
-/**
- * Spread the quantities of items in the array, creating a new item for each quantity.
- * For example, if an item has a quantity of 3, it will be split into 3 items with a quantity of 1.
- *
- * @param items The array of items to spread
- * @return Array<ItemQuantity> The spread array of items
- */
-export const spreadItems = ( items: ItemQuantity[] ): ItemQuantity[] => {
-	const itemMap: Record< string, ItemQuantity > = {};
-	items.forEach( ( item ) => {
-		if ( item.qty > 1 ) {
-			for ( let i = 0; i < item.qty; i++ ) {
-				itemMap[ item.item_id + '-' + i ] = {
-					...item,
-					item_id: item.item_id + '-' + i,
-					qty: 1,
-				} as ItemQuantity;
-			}
+			// Reduce the selection count
+			itemMap[ item.item_id ].selection.splice(
+				0,
+				item.selection.length
+			);
+			// Reorder the selection indices
+			itemMap[ item.item_id ].selection = itemMap[
+				item.item_id
+			].selection.map( ( selection, index ) => {
+				selection.index = index;
+				return selection;
+			} );
 		} else {
-			itemMap[ item.item_id ] = {
-				...item,
-				item_id: item.item_id,
-				qty: 1,
-			} as ItemQuantity;
-		}
-	} );
-
-	return Object.values( itemMap );
-};
-
-/**
- * Unspread the quantities of items in the array, combining items with the same ID.
- * For example, if an item has a quantity of 3, it will be combined into 1 item with a quantity of 3.
- *
- * @param items The array of items to unspread
- * @return Array<ItemQuantity> The unspread array of items
- */
-export const unspreadItems = ( items: ItemQuantity[] ): ItemQuantity[] => {
-	const itemMap: Record< string, ItemQuantity > = {};
-	items.forEach( ( item ) => {
-		const itemId = item.item_id.split( '-' )[ 0 ];
-		if ( itemMap[ itemId ] ) {
-			itemMap[ itemId ].qty++;
-		} else {
-			itemMap[ itemId ] = {
-				...item,
-				item_id: itemId,
-				qty: 1,
-			} as ItemQuantity;
+			itemMap[ item.item_id ] = { ...item } as ItemSelection;
 		}
 	} );
 
@@ -202,22 +150,30 @@ export const unspreadItems = ( items: ItemQuantity[] ): ItemQuantity[] => {
  *
  * @param fulfillments The array of fulfillments
  * @param order        The order received from the API
- * @param checked      Whether the items should be checked or not
- * @return Array<ItemQuantity> The items not in any fulfillment
+ * @return Array<ItemSelection> The items not in any fulfillment
  */
 export const getItemsNotInAnyFulfillment = (
 	fulfillments: Fulfillment[],
-	order: Order,
-	checked = false
-): ItemQuantity[] => {
+	order: Order
+): ItemSelection[] => {
+	// If there are no fulfillments, return all items from the order.
 	if ( fulfillments.length === 0 ) {
 		return getItemsFromOrder( order );
 	}
-	const itemsFromFulfillments = fulfillments.reduce( ( acc, fulfillment ) => {
-		const items = getItemsFromFulfillment( order, fulfillment, checked );
-		return combineItems( acc, items );
-	}, [] as ItemQuantity[] );
-	const itemsFromOrder = getItemsFromOrder( order, checked );
 
-	return reduceItems( itemsFromOrder, itemsFromFulfillments );
+	// If there are fulfillments, combine the items from all fulfillments and reduce them from the order items.
+	const itemsFromFulfillments = fulfillments.reduce( ( acc, fulfillment ) => {
+		const items = getItemsFromFulfillment( order, fulfillment );
+		return combineItems( acc, items );
+	}, [] as ItemSelection[] );
+	const itemsFromOrder = getItemsFromOrder( order );
+
+	const itemsNotInAnyFulfillment = reduceItems(
+		itemsFromOrder,
+		itemsFromFulfillments
+	);
+
+	return itemsNotInAnyFulfillment.filter(
+		( item ) => item.selection.length > 0
+	);
 };

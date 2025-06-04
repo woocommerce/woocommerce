@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { createContext } from 'react';
+import React, { createContext, useMemo } from 'react';
 
 /**
  * Internal dependencies
@@ -79,7 +79,7 @@ export const ShipmentFormProvider = ( {
 		defaultContextProps.providerName
 	);
 
-	// fulfillment değiştiğinde state'leri güncelle
+	// Update the context state when the fulfillment changes.
 	React.useEffect( () => {
 		setSelectedOption(
 			getFulfillmentMeta(
@@ -102,21 +102,35 @@ export const ShipmentFormProvider = ( {
 		);
 	}, [ fulfillment ] );
 
+	const contextValues = useMemo(
+		() => ( {
+			selectedOption,
+			setSelectedOption,
+			trackingNumber,
+			setTrackingNumber,
+			shipmentProvider,
+			setShipmentProvider,
+			trackingUrl,
+			setTrackingUrl,
+			providerName,
+			setProviderName,
+		} ),
+		[
+			selectedOption,
+			setSelectedOption,
+			trackingNumber,
+			setTrackingNumber,
+			shipmentProvider,
+			setShipmentProvider,
+			trackingUrl,
+			setTrackingUrl,
+			providerName,
+			setProviderName,
+		]
+	);
+
 	return (
-		<ShipmentFormContextValue.Provider
-			value={ {
-				selectedOption,
-				setSelectedOption,
-				trackingNumber,
-				setTrackingNumber,
-				shipmentProvider,
-				setShipmentProvider,
-				trackingUrl,
-				setTrackingUrl,
-				providerName,
-				setProviderName,
-			} }
-		>
+		<ShipmentFormContextValue.Provider value={ contextValues }>
 			{ children }
 		</ShipmentFormContextValue.Provider>
 	);

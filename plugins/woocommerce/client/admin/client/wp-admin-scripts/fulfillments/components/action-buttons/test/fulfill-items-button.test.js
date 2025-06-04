@@ -33,7 +33,7 @@ describe( 'FulfillItemsButton component', () => {
 		// Default mock implementations
 		useDispatch.mockReturnValue( { saveFulfillment: jest.fn() } );
 		useFulfillmentContext.mockReturnValue( {
-			orderId: 123,
+			order: { id: 123 },
 			fulfillment: { id: 456 },
 		} );
 	} );
@@ -69,7 +69,7 @@ describe( 'FulfillItemsButton component', () => {
 			],
 		};
 		useFulfillmentContext.mockReturnValue( {
-			orderId: 123,
+			order: { id: 123 },
 			fulfillment: mockFulfillment,
 		} );
 
@@ -89,7 +89,7 @@ describe( 'FulfillItemsButton component', () => {
 		useDispatch.mockReturnValue( { saveFulfillment: mockSaveFulfillment } );
 
 		useFulfillmentContext.mockReturnValue( {
-			orderId: 123,
+			order: { id: 123 },
 			fulfillment: undefined,
 		} );
 

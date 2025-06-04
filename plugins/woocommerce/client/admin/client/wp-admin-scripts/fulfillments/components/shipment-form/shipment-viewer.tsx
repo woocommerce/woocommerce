@@ -23,7 +23,8 @@ export default function ShipmentViewer() {
 		selectedOption,
 	} = useShipmentFormContext();
 	const isShipmentInformationProvided =
-		selectedOption !== SHIPMENT_OPTION_NO_INFO;
+		selectedOption !== SHIPMENT_OPTION_NO_INFO &&
+		trackingNumber.trim() !== '';
 
 	const shipmentProviderObject =
 		shipmentProvider !== 'other'

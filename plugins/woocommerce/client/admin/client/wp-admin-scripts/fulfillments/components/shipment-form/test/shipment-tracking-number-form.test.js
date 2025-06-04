@@ -61,7 +61,7 @@ describe( 'ShipmentTrackingNumberForm', () => {
 		mockContext.shipmentProvider = 'ups';
 		render( <ShipmentTrackingNumberForm /> );
 		expect( screen.getByText( '12345678' ) ).toBeInTheDocument();
-		expect( screen.getByDisplayValue( 'UPS' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'UPS' ) ).toBeInTheDocument();
 		expect( screen.getByTestId( 'edit-icon' ) ).toBeInTheDocument();
 	} );
 
@@ -77,7 +77,7 @@ describe( 'ShipmentTrackingNumberForm', () => {
 		);
 		expect( mockContext.setShipmentProvider ).toHaveBeenCalledWith( 'ups' );
 		expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith(
-			'https://www.ups.com/track?tracknum=12345678'
+			'https://www.ups.com/track?tracknum=12345678&some-other-long-query-string-for-testing-ellipsis'
 		);
 		expect(
 			screen.queryByPlaceholderText( 'Enter tracking number' )

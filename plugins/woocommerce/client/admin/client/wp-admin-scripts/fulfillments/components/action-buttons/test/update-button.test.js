@@ -33,7 +33,7 @@ describe( 'UpdateButton component', () => {
 		// Default mock implementations
 		useDispatch.mockReturnValue( { updateFulfillment: jest.fn() } );
 		useFulfillmentContext.mockReturnValue( {
-			orderId: 123,
+			order: { id: 123 },
 			fulfillment: {
 				id: 456,
 				meta_data: [
@@ -91,7 +91,7 @@ describe( 'UpdateButton component', () => {
 			],
 		};
 		useFulfillmentContext.mockReturnValue( {
-			orderId: 123,
+			order: { id: 123 },
 			fulfillment: mockFulfillment,
 		} );
 
@@ -111,7 +111,7 @@ describe( 'UpdateButton component', () => {
 		} );
 
 		useFulfillmentContext.mockReturnValue( {
-			orderId: 123,
+			order: { id: 123 },
 			fulfillment: undefined,
 		} );
 

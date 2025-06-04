@@ -57,9 +57,9 @@ export default function ShipmentManualEntryForm() {
 				) }
 			</p>
 			<div className="woocommerce-fulfillment-input-container">
-				<h4>{ __( 'Tracking Number', 'woocommerce' ) }</h4>
 				<div className="woocommerce-fulfillment-input-group">
 					<TextControl
+						label={ __( 'Tracking Number', 'woocommerce' ) }
 						type="text"
 						placeholder={ __(
 							'Enter tracking number',
@@ -75,14 +75,13 @@ export default function ShipmentManualEntryForm() {
 				</div>
 			</div>
 			<div className="woocommerce-fulfillment-input-container">
-				<h4>{ __( 'Provider', 'woocommerce' ) }</h4>
 				<div className="woocommerce-fulfillment-input-group">
 					<ComboboxControl
+						label={ __( 'Provider', 'woocommerce' ) }
 						__experimentalRenderItem={ ( { item } ) => (
 							<ShippingProviderListItem item={ item } />
 						) }
 						allowReset={ false }
-						hideLabelFromVision
 						__next40pxDefaultSize
 						value={ shipmentProvider }
 						options={ ShipmentProviders }
@@ -98,9 +97,9 @@ export default function ShipmentManualEntryForm() {
 			</div>
 			{ shipmentProvider === 'other' && (
 				<div className="woocommerce-fulfillment-input-container">
-					<h4>{ __( 'Name', 'woocommerce' ) }</h4>
 					<div className="woocommerce-fulfillment-input-group">
 						<TextControl
+							label={ __( 'Provider Name', 'woocommerce' ) }
 							type="text"
 							placeholder={ __(
 								'Enter provider name',
@@ -117,9 +116,9 @@ export default function ShipmentManualEntryForm() {
 				</div>
 			) }
 			<div className="woocommerce-fulfillment-input-container">
-				<h4>{ __( 'Tracking URL', 'woocommerce' ) }</h4>
 				<div className="woocommerce-fulfillment-input-group">
 					<TextControl
+						label={ __( 'Tracking URL', 'woocommerce' ) }
 						type="text"
 						placeholder={ __(
 							'Enter tracking URL',
