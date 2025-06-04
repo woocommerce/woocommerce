@@ -75,7 +75,6 @@ class PaymentGateway {
 					'completed' => $this->is_onboarding_completed( $gateway ),
 					'test_mode' => $this->is_in_test_mode_onboarding( $gateway ),
 				),
-				'flags'                       => array(),
 				'_links'                      => array(
 					'onboard' => array(
 						'href' => $this->get_onboarding_url( $gateway ),
