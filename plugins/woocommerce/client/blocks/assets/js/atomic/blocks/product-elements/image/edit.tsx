@@ -61,7 +61,7 @@ const Edit = ( {
 
 	const ref = useRef< HTMLDivElement >( null );
 
-	const blockProps = useBlockProps( { style: { width, height } } );
+	const blockProps = useBlockProps();
 	const wasBlockJustInserted = useSelect(
 		( select ) =>
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
