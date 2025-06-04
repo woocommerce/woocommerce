@@ -582,5 +582,5 @@ jobs:
         run: |
             npm install -g corepack@latest && corepack enable pnpm
             cd docs/_docu-tools
-            pnpm install --frozen-lockfile
+            pnpm install --frozen-lockfile --dir .
             npm run deploy-build
