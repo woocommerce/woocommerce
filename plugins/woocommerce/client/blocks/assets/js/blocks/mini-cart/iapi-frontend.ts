@@ -241,6 +241,13 @@ store( 'woocommerce/mini-cart-items-block', {
 			return removeFromCartLabel.replace( '%s', cartItem.name );
 		},
 
+		get cartItemName() {
+			const { cartItem } = getContext< CartItemContext >();
+			const txt = document.createElement( 'textarea' );
+			txt.innerHTML = cartItem.name;
+			return txt.value;
+		},
+
 		get cartItems() {
 			return wooStoreState.cart.items;
 		},

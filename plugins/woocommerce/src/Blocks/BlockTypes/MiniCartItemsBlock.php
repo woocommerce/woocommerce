@@ -89,12 +89,12 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 							<tr class="wc-block-cart-items__row" tabindex="-1">
 								<td class="wc-block-cart-item__image" aria-hidden="true">
 									<a data-wp-bind--href="context.cartItem.permalink" tabindex="-1">
-										<img data-wp-bind--src="state.itemThumbnail" data-wp-bind--alt="context.cartItem.name">
+										<img data-wp-bind--src="state.itemThumbnail" data-wp-bind--alt="state.cartItemName">
 									</a>
 								</td>
 								<td class="wc-block-cart-item__product">
 									<div class="wc-block-cart-item__wrap">
-										<a data-wp-text="context.cartItem.name" data-wp-bind--href="context.cartItem.permalink" class="wc-block-components-product-name"></a>
+										<a data-wp-text="state.cartItemName" data-wp-bind--href="context.cartItem.permalink" class="wc-block-components-product-name"></a>
 										<div class="wc-block-cart-item__prices">
 											<span class="price wc-block-components-product-price">
 												<span data-wp-text="state.itemPrice" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value">
