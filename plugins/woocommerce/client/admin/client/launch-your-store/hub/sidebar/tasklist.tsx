@@ -38,7 +38,6 @@ export const getLysTasklist = async () => {
 	const LYS_TASKS_WHITELIST = [
 		'products',
 		'customize-store',
-		'woocommerce-payments',
 		'payments',
 		'shipping',
 		'tax',
