@@ -61,7 +61,6 @@ test.describe( `${ blockData.slug } Block`, () => {
 			await page.click( 'text=Edit product' );
 			await page.getByRole( 'link', { name: 'Inventory' } ).click();
 			await page.getByRole( 'link', { name: 'Advanced' } ).click();
-			await page.waitForSelector( 'text=Enable reviews' );
 			await admin.page
 				.getByRole( 'checkbox', {
 					name: 'Enable reviews',
@@ -79,7 +78,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 
 		await expect(
 			page.locator( '.wc-block-components-product-rating' )
-		).not.toBeVisible();
+		).toBeHidden();
 	} );
 
 	test( 'Product Rating block is not visible if ratings are disabled globally in the store', async ( {
@@ -108,6 +107,6 @@ test.describe( `${ blockData.slug } Block`, () => {
 
 		await expect(
 			page.locator( '.wc-block-components-product-rating' )
-		).not.toBeVisible();
+		).toBeHidden();
 	} );
 } );
