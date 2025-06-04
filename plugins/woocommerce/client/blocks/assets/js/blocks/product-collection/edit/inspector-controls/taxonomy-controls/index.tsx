@@ -54,14 +54,19 @@ const normalizeName = ( name: string | undefined | null ) => {
 		.join( ' ' );
 };
 
-function TaxonomyControls( {
+/**
+ * Shared hook for taxonomy control logic - filters taxonomies based on context and provides common handlers.
+ */
+function useTaxonomyControls( {
 	setQueryAttribute,
 	trackInteraction,
 	query,
 	collection,
-}: QueryControlProps & { collection: string | undefined } ) {
+	isFiltersPanel,
+}: QueryControlProps & { collection: string | undefined } & {
+	isFiltersPanel?: boolean;
+} ) {
 	const { taxQuery } = query;
-
 	const taxonomies = useTaxonomies();
 
 	const filteredTaxonomies = useMemo( () => {
@@ -69,26 +74,71 @@ function TaxonomyControls( {
 			return [];
 		}
 
-		// For filters panel, show the complementary taxonomy.
 		if ( collection === CoreCollectionNames.BY_CATEGORY ) {
-			return taxonomies.filter(
-				( taxonomy ) => taxonomy.slug !== 'product_cat'
+			return taxonomies.filter( ( taxonomy ) =>
+				isFiltersPanel
+					? taxonomy.slug !== 'product_cat'
+					: taxonomy.slug === 'product_cat'
 			);
 		}
 		if ( collection === CoreCollectionNames.BY_TAG ) {
-			return taxonomies.filter(
-				( taxonomy ) => taxonomy.slug !== 'product_tag'
+			return taxonomies.filter( ( taxonomy ) =>
+				isFiltersPanel
+					? taxonomy.slug !== 'product_tag'
+					: taxonomy.slug === 'product_tag'
 			);
 		}
-		// For all other collections, show both taxonomies.
-		return taxonomies;
-	}, [ taxonomies, collection ] );
 
-	if (
-		! taxonomies ||
-		taxonomies.length === 0 ||
-		filteredTaxonomies.length === 0
-	) {
+		return isFiltersPanel ? taxonomies : [];
+	}, [ taxonomies, collection, isFiltersPanel ] );
+
+	const createHandleChange = ( slug: string ) => ( newTermIds: number[] ) => {
+		setQueryAttribute( {
+			taxQuery: {
+				...taxQuery,
+				[ slug ]: newTermIds,
+			},
+		} );
+		trackInteraction( `${ CoreFilterNames.TAXONOMY }__${ slug }` );
+	};
+
+	const createDeselectCallback = ( slug: string ) => () => {
+		createHandleChange( slug )( [] );
+	};
+
+	const shouldShowTaxonomyControl =
+		taxonomies && taxonomies.length > 0 && filteredTaxonomies.length > 0;
+
+	return {
+		filteredTaxonomies,
+		taxQuery,
+		createHandleChange,
+		createDeselectCallback,
+		shouldShowTaxonomyControl,
+	};
+}
+
+function TaxonomyControls( {
+	setQueryAttribute,
+	trackInteraction,
+	query,
+	collection,
+}: QueryControlProps & { collection: string | undefined } ) {
+	const {
+		filteredTaxonomies,
+		taxQuery,
+		createHandleChange,
+		createDeselectCallback,
+		shouldShowTaxonomyControl,
+	} = useTaxonomyControls( {
+		query,
+		collection,
+		setQueryAttribute,
+		trackInteraction,
+		isFiltersPanel: true,
+	} );
+
+	if ( ! shouldShowTaxonomyControl ) {
 		return null;
 	}
 
@@ -97,24 +147,8 @@ function TaxonomyControls( {
 			{ filteredTaxonomies.map( ( taxonomy: Taxonomy ) => {
 				const { slug, name } = taxonomy;
 				const termIds = taxQuery?.[ slug ] || [];
-				const handleChange = ( newTermIds: number[] ) => {
-					setQueryAttribute( {
-						taxQuery: {
-							...taxQuery,
-							[ slug ]: newTermIds,
-						},
-					} );
-					trackInteraction(
-						`${ CoreFilterNames.TAXONOMY }__${ slug }`
-					);
-				};
-
-				const deselectCallback = () => {
-					handleChange( [] );
-					trackInteraction(
-						`${ CoreFilterNames.TAXONOMY }__${ slug }`
-					);
-				};
+				const handleChange = createHandleChange( slug );
+				const deselectCallback = createDeselectCallback( slug );
 
 				return (
 					<ToolsPanelItem
@@ -125,7 +159,6 @@ function TaxonomyControls( {
 						resetAllFilter={ deselectCallback }
 					>
 						<TaxonomyItem
-							key={ slug }
 							taxonomy={ taxonomy }
 							termIds={ termIds }
 							onChange={ handleChange }
@@ -143,33 +176,16 @@ export function TaxonomyControlsField( {
 	query,
 	collection,
 }: QueryControlProps & { collection: string | undefined } ) {
-	const { taxQuery } = query;
+	const { filteredTaxonomies, taxQuery, createHandleChange, shouldShowTaxonomyControl } =
+		useTaxonomyControls( {
+			query,
+			collection,
+			setQueryAttribute,
+			trackInteraction,
+			isFiltersPanel: false,
+		} );
 
-	const taxonomies = useTaxonomies();
-
-	const filteredTaxonomies = useMemo( () => {
-		if ( ! taxonomies || taxonomies.length === 0 ) {
-			return [];
-		}
-
-		if ( collection === CoreCollectionNames.BY_CATEGORY ) {
-			return taxonomies.filter(
-				( taxonomy ) => taxonomy.slug === 'product_cat'
-			);
-		}
-		if ( collection === CoreCollectionNames.BY_TAG ) {
-			return taxonomies.filter(
-				( taxonomy ) => taxonomy.slug === 'product_tag'
-			);
-		}
-		return [];
-	}, [ taxonomies, collection ] );
-
-	if (
-		! taxonomies ||
-		taxonomies.length === 0 ||
-		filteredTaxonomies.length === 0
-	) {
+	if ( ! shouldShowTaxonomyControl ) {
 		return null;
 	}
 
@@ -178,17 +194,7 @@ export function TaxonomyControlsField( {
 			{ filteredTaxonomies.map( ( taxonomy: Taxonomy ) => {
 				const { slug } = taxonomy;
 				const termIds = taxQuery?.[ slug ] || [];
-				const handleChange = ( newTermIds: number[] ) => {
-					setQueryAttribute( {
-						taxQuery: {
-							...taxQuery,
-							[ slug ]: newTermIds,
-						},
-					} );
-					trackInteraction(
-						`${ CoreFilterNames.TAXONOMY }__${ slug }`
-					);
-				};
+				const handleChange = createHandleChange( slug );
 
 				return (
 					<TaxonomyItem
