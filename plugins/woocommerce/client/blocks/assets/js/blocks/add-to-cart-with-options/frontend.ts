@@ -66,12 +66,17 @@ const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
 	const minValue = isNaN( parsedMinValue ) ? 1 : parsedMinValue;
 	const maxValue = isNaN( parsedMaxValue ) ? undefined : parsedMaxValue;
 	const step = isNaN( parsedStep ) ? 1 : parsedStep;
+	const childProductId = parseInt(
+		inputElement.name.match( /\[(\d+)\]/ )?.[ 1 ] ?? '0',
+		10
+	);
 
 	return {
 		currentValue,
 		minValue,
 		maxValue,
 		step,
+		childProductId,
 		inputElement,
 	};
 };
@@ -142,9 +147,14 @@ const addToCartWithOptionsStore = store(
 			},
 		},
 		actions: {
-			setQuantity( value: number ) {
+			setQuantity( value: number, childProductId?: number ) {
 				const context = getContext< Context >();
-				context.quantity = { [ context.productId ]: value };
+				const productId =
+					childProductId && childProductId > 0
+						? childProductId
+						: context.productId;
+
+				context.quantity = { [ productId ]: value };
 			},
 			setAttribute( attribute: string, value: string ) {
 				const { selectedAttributes } = getContext< Context >();
@@ -181,12 +191,20 @@ const addToCartWithOptionsStore = store(
 				if ( ! inputData ) {
 					return;
 				}
-				const { currentValue, maxValue, step, inputElement } =
-					inputData;
+				const {
+					currentValue,
+					maxValue,
+					step,
+					childProductId,
+					inputElement,
+				} = inputData;
 				const newValue = currentValue + step;
 
 				if ( maxValue === undefined || newValue <= maxValue ) {
-					addToCartWithOptionsStore.actions.setQuantity( newValue );
+					addToCartWithOptionsStore.actions.setQuantity(
+						newValue,
+						childProductId
+					);
 					inputElement.value = newValue.toString();
 					dispatchChangeEvent( inputElement );
 				}
@@ -198,12 +216,20 @@ const addToCartWithOptionsStore = store(
 				if ( ! inputData ) {
 					return;
 				}
-				const { currentValue, minValue, step, inputElement } =
-					inputData;
+				const {
+					currentValue,
+					minValue,
+					step,
+					childProductId,
+					inputElement,
+				} = inputData;
 				const newValue = currentValue - step;
 
 				if ( newValue >= minValue ) {
-					addToCartWithOptionsStore.actions.setQuantity( newValue );
+					addToCartWithOptionsStore.actions.setQuantity(
+						newValue,
+						childProductId
+					);
 					inputElement.value = newValue.toString();
 					dispatchChangeEvent( inputElement );
 				}
