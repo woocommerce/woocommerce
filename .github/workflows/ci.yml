@@ -579,8 +579,7 @@ jobs:
       - name: 'Validate - lint docs-files'
         if: ${{ always() && steps.target-changes.outputs.needs-docs-linting }}
         shell: bash
+        working-directory: docs/_docu-tools
         run: |
-            npm install -g corepack@latest && corepack enable pnpm
-            cd docs/_docu-tools
-            pnpm install --frozen-lockfile --dir .
+            npm install
             npm run deploy-build
