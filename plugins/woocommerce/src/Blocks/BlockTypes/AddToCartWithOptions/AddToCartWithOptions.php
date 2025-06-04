@@ -123,6 +123,17 @@ class AddToCartWithOptions extends AbstractBlock {
 			$template_part_path = apply_filters( '__experimental_woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part', false, $product_type );
 		}
 
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
+		$classes            = implode(
+			' ',
+			array_filter(
+				array(
+					'wp-block-add-to-cart-with-options wc-block-add-to-cart-with-options',
+					esc_attr( $classes_and_styles['classes'] ),
+				)
+			)
+		);
+
 		if ( is_string( $template_part_path ) && file_exists( $template_part_path ) ) {
 
 			$template_part_contents = '';
@@ -144,18 +155,6 @@ class AddToCartWithOptions extends AbstractBlock {
 			if ( '' === $template_part_contents ) {
 				$template_part_contents = file_get_contents( $template_part_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			}
-
-			$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
-
-			$classes = implode(
-				' ',
-				array_filter(
-					array(
-						'wp-block-add-to-cart-with-options wc-block-add-to-cart-with-options',
-						esc_attr( $classes_and_styles['classes'] ),
-					)
-				)
-			);
 
 			/**
 			 * Filters the change the quantity to add to cart.
@@ -438,7 +437,13 @@ class AddToCartWithOptions extends AbstractBlock {
 			 */
 			do_action( 'woocommerce_' . $product->get_type() . '_add_to_cart' );
 
+			$wrapper_attributes = array(
+				'class' => $classes,
+				'style' => esc_attr( $classes_and_styles['styles'] ),
+			);
+
 			$form_html = ob_get_clean();
+			$form_html = sprintf( '<div %1$s>%2$s</div>', get_block_wrapper_attributes( $wrapper_attributes ), $form_html );
 		}
 
 		$product = $previous_product;
