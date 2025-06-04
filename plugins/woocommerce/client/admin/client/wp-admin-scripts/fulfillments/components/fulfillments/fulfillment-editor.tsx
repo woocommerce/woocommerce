@@ -143,7 +143,7 @@ export default function FulfillmentEditor( {
 								( ! fulfillment.is_fulfilled &&
 									! editMode ) ) && (
 								<CustomerNotificationBox isUpdate />
-              ) }
+							) }
 							<div className="woocommerce-fulfillment-item-actions">
 								{ ! editMode ? (
 									<>

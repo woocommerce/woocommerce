@@ -37,7 +37,7 @@ const defaultContextProps: FulfillmentContextProps = {
 	selectedItems: [],
 	setSelectedItems: () => {},
 	notifyCustomer: true,
-	setNotifyCustomer: () => {}
+	setNotifyCustomer: () => {},
 };
 
 const FulfillmentContextValue =
@@ -170,8 +170,8 @@ export const FulfillmentProvider = ( {
 			setFulfillment: _setFulfillment,
 			selectedItems,
 			setSelectedItems,
-   		notifyCustomer,
-			setNotifyCustomer
+			notifyCustomer,
+			setNotifyCustomer,
 		} ),
 		[
 			order,

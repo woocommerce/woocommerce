@@ -99,6 +99,7 @@ const NewFulfillmentForm: React.FC = () => {
 							items={ remainingItems }
 						>
 							<ItemSelector editMode={ true } />
+
 							<ShipmentForm />
 							<CustomerNotificationBox />
 							<div className="woocommerce-fulfillment-item-actions">
