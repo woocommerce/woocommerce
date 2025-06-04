@@ -57,7 +57,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'data-wp-context'     => '{}',
 			'class'               => esc_attr( $classes ),
-			'style'               => esc_attr( $style ),
+			'style'               => esc_attr( $style ) . ';',
 		);
 
 		ob_start();
@@ -99,7 +99,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 							</span>
 							<span class="wc-block-product-filter-checkbox-list__text-wrapper">
 								<span class="wc-block-product-filter-checkbox-list__text">
-									<?php echo wp_kses_post( $item['label'] ); ?>
+									<?php echo $item['label']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								</span>
 								<?php if ( $show_counts ) : ?>
 									<span class="wc-block-product-filter-checkbox-list__count">

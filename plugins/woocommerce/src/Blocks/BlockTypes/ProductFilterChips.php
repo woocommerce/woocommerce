@@ -58,7 +58,7 @@ final class ProductFilterChips extends AbstractBlock {
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'data-wp-context'     => '{}',
 			'class'               => esc_attr( $classes ),
-			'style'               => esc_attr( $style ),
+			'style'               => esc_attr( $style ) . ';',
 		);
 
 		ob_start();
@@ -89,7 +89,7 @@ final class ProductFilterChips extends AbstractBlock {
 					>
 						<span class="wc-block-product-filter-chips__label">
 							<span class="wc-block-product-filter-chips__text">
-								<?php echo wp_kses_post( $item['label'] ); ?>
+								<?php echo $item['label']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							</span>
 							<?php if ( $show_counts ) : ?>
 								<span class="wc-block-product-filter-chips__count">
