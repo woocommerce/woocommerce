@@ -58,7 +58,7 @@ class OrderCountCacheService {
 	 * @return void
 	 */
 	public function refresh_cache( $order_type ) {
-		$this->order_count_cache->remove( $order_type );
+		$this->order_count_cache->flush( $order_type );
 		OrderUtil::get_count_for_type( $order_type );
 	}
 
