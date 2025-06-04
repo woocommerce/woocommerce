@@ -64,10 +64,15 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 			$wrapper_attributes['style'] = esc_attr( $style ) . ';';
 		}
 
+		$aria_labelledby = '';
+		if ( ! empty( $block_context['headingId'] ) ) {
+			$aria_labelledby = 'aria-labelledby="' . esc_attr( $block_context['headingId'] ) . '"';
+		}
+
 		ob_start();
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<ul class="wc-block-product-filter-checkbox-list__list" aria-label="<?php echo esc_attr__( 'Filter Options', 'woocommerce' ); ?>">
+			<ul class="wc-block-product-filter-checkbox-list__list" <?php echo $aria_labelledby; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 				<?php foreach ( $items as $item ) { ?>
 					<?php $item_id = $item['type'] . '-' . $item['value']; ?>
 					<li

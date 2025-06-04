@@ -193,6 +193,10 @@ final class ProductFilterAttribute extends AbstractBlock {
 			'items'      => array(),
 		);
 
+		if ( ! empty( $block->context['headingId'] ) ) {
+			$filter_context['headingId'] = $block->context['headingId'];
+		}
+
 		if ( ! empty( $attribute_counts ) ) {
 			$attribute_options = array_map(
 				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute ) {

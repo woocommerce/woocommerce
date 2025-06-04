@@ -144,6 +144,10 @@ final class ProductFilterRating extends AbstractBlock {
 			'showCounts' => $attributes['showCounts'] ?? false,
 		);
 
+		if ( ! empty( $block->context['headingId'] ) ) {
+			$filter_context['headingId'] = $block->context['headingId'];
+		}
+
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filters',
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),

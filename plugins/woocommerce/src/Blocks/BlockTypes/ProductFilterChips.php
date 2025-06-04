@@ -34,6 +34,7 @@ final class ProductFilterChips extends AbstractBlock {
 
 		$items       = $block->context['filterData']['items'] ?? array();
 		$show_counts = $block->context['filterData']['showCounts'] ?? false;
+		$heading_id  = $block->context['filterData']['headingId'] ?? '';
 		$classes     = '';
 		$style       = '';
 
@@ -65,10 +66,15 @@ final class ProductFilterChips extends AbstractBlock {
 			$wrapper_attributes['style'] = esc_attr( $style ) . ';';
 		}
 
+		$aria_labelledby = '';
+		if ( ! empty( $heading_id ) ) {
+			$aria_labelledby = 'role="group" aria-labelledby="' . esc_attr( $heading_id ) . '"';
+		}
+
 		ob_start();
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<div class="wc-block-product-filter-chips__items" aria-label="<?php echo esc_attr__( 'Filter Options', 'woocommerce' ); ?>">
+			<div class="wc-block-product-filter-chips__items" <?php echo $aria_labelledby; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 				<?php foreach ( $items as $item ) { ?>
 					<?php $item_id = $item['type'] . '-' . $item['value']; ?>
 					<button

@@ -79,21 +79,46 @@ class ProductFilters extends AbstractBlock {
 			}
 		);
 
-		$block_context         = array_merge(
+		$block_context = array_merge(
 			$block->context,
 			array(
 				'filterParams'  => $filter_params,
 				'activeFilters' => $active_filters,
 			),
 		);
-		$inner_blocks          = array_reduce(
+		$inner_blocks  = array_reduce(
 			$block->parsed_block['innerBlocks'],
 			function ( $carry, $parsed_block ) use ( $block_context ) {
-				$carry .= ( new \WP_Block( $parsed_block, $block_context ) )->render();
-				return $carry;
+				$heading_id = '';
+
+				if ( 0 === strpos( $parsed_block['blockName'], 'woocommerce/product-filter' ) ) {
+					foreach ( $parsed_block['innerBlocks'] as $key => $inner_block ) {
+						if ( 'core/heading' === $inner_block['blockName'] ) {
+							$p = new \WP_HTML_Tag_Processor( $inner_block['innerContent'][0] );
+							if ( $p->next_tag() && $p->get_attribute( 'id' ) ) {
+								$heading_id = $p->get_attribute( 'id' );
+							} else {
+								$heading_id = wp_unique_prefixed_id( $this->block_name . '-heading-' );
+								$p->set_attribute( 'id', $heading_id );
+								$parsed_block['innerBlocks'][ $key ]['innerContent'][0] = $p->get_updated_html();
+							}
+						}
+					}
+				}
+
+				if ( $heading_id ) {
+					$block_context['headingId'] = $heading_id;
+				}
+
+				$output = ( new \WP_Block( $parsed_block, $block_context ) )->render();
+
+				$p = new \WP_HTML_Tag_Processor( $output );
+
+				return $carry . $p->get_updated_html();
 			},
 			''
 		);
+
 		$interactivity_context = array(
 			'params'        => $filter_params,
 			'activeFilters' => $active_filters,

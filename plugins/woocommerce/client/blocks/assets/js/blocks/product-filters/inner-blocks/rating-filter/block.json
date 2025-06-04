@@ -12,7 +12,7 @@
 		}
 	},
 	"ancestor": [ "woocommerce/product-filters" ],
-	"usesContext": [ "query", "filterParams" ],
+	"usesContext": [ "query", "filterParams", "headingId" ],
 	"attributes": {
 		"className": {
 			"type": "string",

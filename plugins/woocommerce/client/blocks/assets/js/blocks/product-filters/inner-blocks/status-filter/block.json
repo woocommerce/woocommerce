@@ -71,7 +71,7 @@
 			"default": true
 		}
 	},
-	"usesContext": [ "query", "filterParams" ],
+	"usesContext": [ "query", "filterParams", "headingId" ],
 	"example": {
 		"attributes": {
 			"isPreview": true

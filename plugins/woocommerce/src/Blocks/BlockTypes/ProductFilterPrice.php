@@ -48,8 +48,8 @@ final class ProductFilterPrice extends AbstractBlock {
 	public function prepare_selected_filters( $items, $params ) {
 		$min_price           = intval( $params[ self::MIN_PRICE_QUERY_VAR ] ?? 0 );
 		$max_price           = intval( $params[ self::MAX_PRICE_QUERY_VAR ] ?? 0 );
-		$formatted_min_price = $min_price ? html_entity_decode( wp_strip_all_tags( wc_price( $min_price, array( 'decimals' => 0 ) ) ) ) : null;
-		$formatted_max_price = $max_price ? html_entity_decode( wp_strip_all_tags( wc_price( $max_price, array( 'decimals' => 0 ) ) ) ) : null;
+		$formatted_min_price = $min_price ? html_entity_decode( wp_strip_all_tags( wc_price( $min_price, array( 'decimals' => 0 ) ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ) : null;
+		$formatted_max_price = $max_price ? html_entity_decode( wp_strip_all_tags( wc_price( $max_price, array( 'decimals' => 0 ) ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ) : null;
 
 		if ( ! $formatted_min_price && ! $formatted_max_price ) {
 			return $items;
@@ -129,8 +129,8 @@ final class ProductFilterPrice extends AbstractBlock {
 		$min_price     = intval( $filter_params[ self::MIN_PRICE_QUERY_VAR ] ?? $min_range );
 		$max_price     = intval( $filter_params[ self::MAX_PRICE_QUERY_VAR ] ?? $max_range );
 
-		$formatted_min_price = html_entity_decode( wp_strip_all_tags( wc_price( $min_price, array( 'decimals' => 0 ) ) ) );
-		$formatted_max_price = html_entity_decode( wp_strip_all_tags( wc_price( $max_price, array( 'decimals' => 0 ) ) ) );
+		$formatted_min_price = html_entity_decode( wp_strip_all_tags( wc_price( $min_price, array( 'decimals' => 0 ) ) ), ENT_QUOTES, get_bloginfo( 'charset' ) );
+		$formatted_max_price = html_entity_decode( wp_strip_all_tags( wc_price( $max_price, array( 'decimals' => 0 ) ) ), ENT_QUOTES, get_bloginfo( 'charset' ) );
 
 		$filter_context = array(
 			'price' => array(
@@ -140,6 +140,10 @@ final class ProductFilterPrice extends AbstractBlock {
 				'maxRange' => $max_range,
 			),
 		);
+
+		if ( ! empty( $block->context['headingId'] ) ) {
+			$filter_context['headingId'] = $block->context['headingId'];
+		}
 
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filters',

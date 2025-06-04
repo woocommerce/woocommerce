@@ -12,6 +12,6 @@
 		"interactivity": true,
 		"html": false
 	},
-	"usesContext": [ "query", "filterParams" ],
+	"usesContext": [ "query", "filterParams", "headingId" ],
 	"viewScriptModule": "woocommerce/product-filter-price"
 }

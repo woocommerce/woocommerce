@@ -53,7 +53,7 @@
 			}
 		}
 	},
-	"usesContext": [ "query", "filterParams" ],
+	"usesContext": [ "query", "filterParams", "headingId" ],
 	"attributes": {
 		"attributeId": {
 			"type": "number",
