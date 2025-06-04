@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useMemo, useState } from 'react';
 
 /**
  * Internal dependencies
@@ -62,6 +62,7 @@ export const FulfillmentProvider = ( {
 } ) => {
 	const [ _fulfillment, _setFulfillment ] =
 		React.useState< Fulfillment | null >( fulfillment ?? null );
+
 	const {
 		selectedOption,
 		trackingNumber,
@@ -69,6 +70,7 @@ export const FulfillmentProvider = ( {
 		shipmentProvider,
 		providerName,
 	} = useShipmentFormContext();
+
 	const [ selectedItems, setSelectedItems ] = useState< ItemSelection[] >(
 		items ?? []
 	);
@@ -89,8 +91,8 @@ export const FulfillmentProvider = ( {
 			fulfillment_id: fulfillment?.id ?? undefined,
 			entity_id: String( order.id ),
 			entity_type: WC_ORDER_CLASS,
-			is_fulfilled: false,
-			status: 'unfulfilled',
+			is_fulfilled: fulfillment?.is_fulfilled ?? false,
+			status: fulfillment?.status ?? 'unfulfilled',
 			meta_data: [
 				{
 					id: 0,
@@ -146,26 +148,35 @@ export const FulfillmentProvider = ( {
 			],
 		} as Fulfillment );
 	}, [
-		order?.id,
+		order,
 		trackingNumber,
 		trackingUrl,
 		shipmentProvider,
 		providerName,
 		selectedOption,
-		fulfillment?.id,
+		fulfillment,
 		selectedItems,
 	] );
 
+	const contextValues = useMemo(
+		() => ( {
+			order,
+			fulfillment: _fulfillment,
+			setFulfillment: _setFulfillment,
+			selectedItems,
+			setSelectedItems,
+		} ),
+		[
+			order,
+			_fulfillment,
+			_setFulfillment,
+			selectedItems,
+			setSelectedItems,
+		]
+	);
+
 	return (
-		<FulfillmentContextValue.Provider
-			value={ {
-				order,
-				fulfillment: _fulfillment,
-				setFulfillment: _setFulfillment,
-				selectedItems,
-				setSelectedItems,
-			} }
-		>
+		<FulfillmentContextValue.Provider value={ contextValues }>
 			{ children }
 		</FulfillmentContextValue.Provider>
 	);
