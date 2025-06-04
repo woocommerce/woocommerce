@@ -220,30 +220,75 @@ class AddToCartWithOptions extends AbstractBlock {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_button' );
 				} elseif ( ProductType::EXTERNAL === $product_type ) {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_button' );
 				} elseif ( ProductType::GROUPED === $product_type ) {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_button' );
 				} elseif ( ProductType::VARIABLE === $product_type ) {
 					/**
 					 * Hook: woocommerce_before_variations_form.
 					 *
-					 * @since 2.4.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_variations_form' );
+					/**
+					 * Hook: woocommerce_after_variations_table.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_after_variations_table' );
+					/**
+					 * Hook: woocommerce_before_single_variation.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_before_single_variation' );
+
+					// WooCommerce uses `woocommerce_single_variation` to render
+					// some UI elements like the Add to Cart button for
+					// variations. We need to remove them to avoid those UI
+					// elements being duplicate with the blocks.
+					// We later add these actions back to avoid affecting other
+					// blocks or templates.
+					remove_action( 'woocommerce_single_variation', 'woocommerce_single_variation', 10 );
+					remove_action( 'woocommerce_single_variation', 'woocommerce_single_variation_add_to_cart_button', 20 );
+					/**
+					 * Hook: woocommerce_single_variation.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_single_variation' );
+					if ( function_exists( 'woocommerce_single_variation' ) ) {
+						add_action( 'woocommerce_single_variation', 'woocommerce_single_variation', 10 );
+					}
+					if ( function_exists( 'woocommerce_single_variation_add_to_cart_button' ) ) {
+						add_action( 'woocommerce_single_variation', 'woocommerce_single_variation_add_to_cart_button', 20 );
+					}
+					/**
+					 * Hook: woocommerce_before_add_to_cart_button.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_before_add_to_cart_button' );
+					/**
+					 * Hook: woocommerce_before_add_to_cart_quantity.
+					 *
+					 * @since 2.7.0
+					 */
+					do_action( 'woocommerce_before_add_to_cart_quantity' );
 				}
 				$hooks_before = ob_get_clean();
 
@@ -252,34 +297,52 @@ class AddToCartWithOptions extends AbstractBlock {
 					/**
 					 * Hook: woocommerce_after_add_to_cart_quantity.
 					 *
-					 * @since 2.7.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_add_to_cart_quantity' );
 					/**
 					 * Hook: woocommerce_after_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_add_to_cart_button' );
 				} elseif ( ProductType::EXTERNAL === $product_type ) {
 					/**
 					 * Hook: woocommerce_after_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_add_to_cart_button' );
 				} elseif ( ProductType::GROUPED === $product_type ) {
 					/**
 					 * Hook: woocommerce_after_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_add_to_cart_button' );
 				} elseif ( ProductType::VARIABLE === $product_type ) {
 					/**
+					 * Hook: woocommerce_after_add_to_cart_quantity.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_after_add_to_cart_quantity' );
+					/**
+					 * Hook: woocommerce_after_add_to_cart_button.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_after_add_to_cart_button' );
+					/**
+					 * Hook: woocommerce_after_single_variation.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_after_single_variation' );
+					/**
 					 * Hook: woocommerce_after_variations_form.
 					 *
-					 * @since 2.4.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_variations_form' );
 				}

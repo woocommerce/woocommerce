@@ -124,11 +124,12 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 							<Rating
 								key={ rating }
 								rating={ rating }
-								ratedProductsCount={ showCounts ? count : null }
+								ratedProductsCount={ null }
 							/>
 						),
 						value: rating?.toString(),
 						selected: index === 0,
+						count,
 					} ) )
 			: [];
 
@@ -187,6 +188,7 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 								filterData: {
 									items: displayedOptions,
 									isLoading,
+									showCounts,
 								},
 							} }
 						>
