@@ -577,25 +577,9 @@ jobs:
       - name: Validate - lint md-files (packages and co)
         shell: bash
         run: |
-          RED="\e[1;31m"
-          GREEN="\e[1;32m"
-          NC="\e[0m"
-          
           added_and_modified_docs="${{ steps.repo-changed-files.outputs.added_files }} ${{ steps.repo-changed-files.outputs.modified_files }}"
           if [ -n "$added_and_modified_docs" ]; then
-            rc=0
-
-            for file in $added_and_modified_docs; do
-              lint_result=$( { cat "$file" | markdownlint --stdin ; } 2>&1 ) || rc="$?"
-              if [ $rc -ne 0 ]; then
-                echo -e "${RED}[err] $file${NC}"
-                echo $lint_result
-              else
-                echo -e "${GREEN}[ok] $file${NC}"
-              fi
-            done
-
-            exit $rc
+            markdownlint $added_and_modified_docs
+            exit $?
           fi
-          
           echo "Linting completed"
