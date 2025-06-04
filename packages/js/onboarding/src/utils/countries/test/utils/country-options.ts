@@ -6929,327 +6929,327 @@ export const countryStateOptions = [
 	},
 	{
 		key: 'TR:TR01',
-		label: 'Turkey — Adana',
+		label: 'Türkiye — Adana',
 	},
 	{
 		key: 'TR:TR02',
-		label: 'Turkey — Adıyaman',
+		label: 'Türkiye — Adıyaman',
 	},
 	{
 		key: 'TR:TR03',
-		label: 'Turkey — Afyon',
+		label: 'Türkiye — Afyon',
 	},
 	{
 		key: 'TR:TR04',
-		label: 'Turkey — Ağrı',
+		label: 'Türkiye — Ağrı',
 	},
 	{
 		key: 'TR:TR05',
-		label: 'Turkey — Amasya',
+		label: 'Türkiye — Amasya',
 	},
 	{
 		key: 'TR:TR06',
-		label: 'Turkey — Ankara',
+		label: 'Türkiye — Ankara',
 	},
 	{
 		key: 'TR:TR07',
-		label: 'Turkey — Antalya',
+		label: 'Türkiye — Antalya',
 	},
 	{
 		key: 'TR:TR08',
-		label: 'Turkey — Artvin',
+		label: 'Türkiye — Artvin',
 	},
 	{
 		key: 'TR:TR09',
-		label: 'Turkey — Aydın',
+		label: 'Türkiye — Aydın',
 	},
 	{
 		key: 'TR:TR10',
-		label: 'Turkey — Balıkesir',
+		label: 'Türkiye — Balıkesir',
 	},
 	{
 		key: 'TR:TR11',
-		label: 'Turkey — Bilecik',
+		label: 'Türkiye — Bilecik',
 	},
 	{
 		key: 'TR:TR12',
-		label: 'Turkey — Bingöl',
+		label: 'Türkiye — Bingöl',
 	},
 	{
 		key: 'TR:TR13',
-		label: 'Turkey — Bitlis',
+		label: 'Türkiye — Bitlis',
 	},
 	{
 		key: 'TR:TR14',
-		label: 'Turkey — Bolu',
+		label: 'Türkiye — Bolu',
 	},
 	{
 		key: 'TR:TR15',
-		label: 'Turkey — Burdur',
+		label: 'Türkiye — Burdur',
 	},
 	{
 		key: 'TR:TR16',
-		label: 'Turkey — Bursa',
+		label: 'Türkiye — Bursa',
 	},
 	{
 		key: 'TR:TR17',
-		label: 'Turkey — Çanakkale',
+		label: 'Türkiye — Çanakkale',
 	},
 	{
 		key: 'TR:TR18',
-		label: 'Turkey — Çankırı',
+		label: 'Türkiye — Çankırı',
 	},
 	{
 		key: 'TR:TR19',
-		label: 'Turkey — Çorum',
+		label: 'Türkiye — Çorum',
 	},
 	{
 		key: 'TR:TR20',
-		label: 'Turkey — Denizli',
+		label: 'Türkiye — Denizli',
 	},
 	{
 		key: 'TR:TR21',
-		label: 'Turkey — Diyarbakır',
+		label: 'Türkiye — Diyarbakır',
 	},
 	{
 		key: 'TR:TR22',
-		label: 'Turkey — Edirne',
+		label: 'Türkiye — Edirne',
 	},
 	{
 		key: 'TR:TR23',
-		label: 'Turkey — Elazığ',
+		label: 'Türkiye — Elazığ',
 	},
 	{
 		key: 'TR:TR24',
-		label: 'Turkey — Erzincan',
+		label: 'Türkiye — Erzincan',
 	},
 	{
 		key: 'TR:TR25',
-		label: 'Turkey — Erzurum',
+		label: 'Türkiye — Erzurum',
 	},
 	{
 		key: 'TR:TR26',
-		label: 'Turkey — Eskişehir',
+		label: 'Türkiye — Eskişehir',
 	},
 	{
 		key: 'TR:TR27',
-		label: 'Turkey — Gaziantep',
+		label: 'Türkiye — Gaziantep',
 	},
 	{
 		key: 'TR:TR28',
-		label: 'Turkey — Giresun',
+		label: 'Türkiye — Giresun',
 	},
 	{
 		key: 'TR:TR29',
-		label: 'Turkey — Gümüşhane',
+		label: 'Türkiye — Gümüşhane',
 	},
 	{
 		key: 'TR:TR30',
-		label: 'Turkey — Hakkari',
+		label: 'Türkiye — Hakkari',
 	},
 	{
 		key: 'TR:TR31',
-		label: 'Turkey — Hatay',
+		label: 'Türkiye — Hatay',
 	},
 	{
 		key: 'TR:TR32',
-		label: 'Turkey — Isparta',
+		label: 'Türkiye — Isparta',
 	},
 	{
 		key: 'TR:TR33',
-		label: 'Turkey — İçel',
+		label: 'Türkiye — İçel',
 	},
 	{
 		key: 'TR:TR34',
-		label: 'Turkey — İstanbul',
+		label: 'Türkiye — İstanbul',
 	},
 	{
 		key: 'TR:TR35',
-		label: 'Turkey — İzmir',
+		label: 'Türkiye — İzmir',
 	},
 	{
 		key: 'TR:TR36',
-		label: 'Turkey — Kars',
+		label: 'Türkiye — Kars',
 	},
 	{
 		key: 'TR:TR37',
-		label: 'Turkey — Kastamonu',
+		label: 'Türkiye — Kastamonu',
 	},
 	{
 		key: 'TR:TR38',
-		label: 'Turkey — Kayseri',
+		label: 'Türkiye — Kayseri',
 	},
 	{
 		key: 'TR:TR39',
-		label: 'Turkey — Kırklareli',
+		label: 'Türkiye — Kırklareli',
 	},
 	{
 		key: 'TR:TR40',
-		label: 'Turkey — Kırşehir',
+		label: 'Türkiye — Kırşehir',
 	},
 	{
 		key: 'TR:TR41',
-		label: 'Turkey — Kocaeli',
+		label: 'Türkiye — Kocaeli',
 	},
 	{
 		key: 'TR:TR42',
-		label: 'Turkey — Konya',
+		label: 'Türkiye — Konya',
 	},
 	{
 		key: 'TR:TR43',
-		label: 'Turkey — Kütahya',
+		label: 'Türkiye — Kütahya',
 	},
 	{
 		key: 'TR:TR44',
-		label: 'Turkey — Malatya',
+		label: 'Türkiye — Malatya',
 	},
 	{
 		key: 'TR:TR45',
-		label: 'Turkey — Manisa',
+		label: 'Türkiye — Manisa',
 	},
 	{
 		key: 'TR:TR46',
-		label: 'Turkey — Kahramanmaraş',
+		label: 'Türkiye — Kahramanmaraş',
 	},
 	{
 		key: 'TR:TR47',
-		label: 'Turkey — Mardin',
+		label: 'Türkiye — Mardin',
 	},
 	{
 		key: 'TR:TR48',
-		label: 'Turkey — Muğla',
+		label: 'Türkiye — Muğla',
 	},
 	{
 		key: 'TR:TR49',
-		label: 'Turkey — Muş',
+		label: 'Türkiye — Muş',
 	},
 	{
 		key: 'TR:TR50',
-		label: 'Turkey — Nevşehir',
+		label: 'Türkiye — Nevşehir',
 	},
 	{
 		key: 'TR:TR51',
-		label: 'Turkey — Niğde',
+		label: 'Türkiye — Niğde',
 	},
 	{
 		key: 'TR:TR52',
-		label: 'Turkey — Ordu',
+		label: 'Türkiye — Ordu',
 	},
 	{
 		key: 'TR:TR53',
-		label: 'Turkey — Rize',
+		label: 'Türkiye — Rize',
 	},
 	{
 		key: 'TR:TR54',
-		label: 'Turkey — Sakarya',
+		label: 'Türkiye — Sakarya',
 	},
 	{
 		key: 'TR:TR55',
-		label: 'Turkey — Samsun',
+		label: 'Türkiye — Samsun',
 	},
 	{
 		key: 'TR:TR56',
-		label: 'Turkey — Siirt',
+		label: 'Türkiye — Siirt',
 	},
 	{
 		key: 'TR:TR57',
-		label: 'Turkey — Sinop',
+		label: 'Türkiye — Sinop',
 	},
 	{
 		key: 'TR:TR58',
-		label: 'Turkey — Sivas',
+		label: 'Türkiye — Sivas',
 	},
 	{
 		key: 'TR:TR59',
-		label: 'Turkey — Tekirdağ',
+		label: 'Türkiye — Tekirdağ',
 	},
 	{
 		key: 'TR:TR60',
-		label: 'Turkey — Tokat',
+		label: 'Türkiye — Tokat',
 	},
 	{
 		key: 'TR:TR61',
-		label: 'Turkey — Trabzon',
+		label: 'Türkiye — Trabzon',
 	},
 	{
 		key: 'TR:TR62',
-		label: 'Turkey — Tunceli',
+		label: 'Türkiye — Tunceli',
 	},
 	{
 		key: 'TR:TR63',
-		label: 'Turkey — Şanlıurfa',
+		label: 'Türkiye — Şanlıurfa',
 	},
 	{
 		key: 'TR:TR64',
-		label: 'Turkey — Uşak',
+		label: 'Türkiye — Uşak',
 	},
 	{
 		key: 'TR:TR65',
-		label: 'Turkey — Van',
+		label: 'Türkiye — Van',
 	},
 	{
 		key: 'TR:TR66',
-		label: 'Turkey — Yozgat',
+		label: 'Türkiye — Yozgat',
 	},
 	{
 		key: 'TR:TR67',
-		label: 'Turkey — Zonguldak',
+		label: 'Türkiye — Zonguldak',
 	},
 	{
 		key: 'TR:TR68',
-		label: 'Turkey — Aksaray',
+		label: 'Türkiye — Aksaray',
 	},
 	{
 		key: 'TR:TR69',
-		label: 'Turkey — Bayburt',
+		label: 'Türkiye — Bayburt',
 	},
 	{
 		key: 'TR:TR70',
-		label: 'Turkey — Karaman',
+		label: 'Türkiye — Karaman',
 	},
 	{
 		key: 'TR:TR71',
-		label: 'Turkey — Kırıkkale',
+		label: 'Türkiye — Kırıkkale',
 	},
 	{
 		key: 'TR:TR72',
-		label: 'Turkey — Batman',
+		label: 'Türkiye — Batman',
 	},
 	{
 		key: 'TR:TR73',
-		label: 'Turkey — Şırnak',
+		label: 'Türkiye — Şırnak',
 	},
 	{
 		key: 'TR:TR74',
-		label: 'Turkey — Bartın',
+		label: 'Türkiye — Bartın',
 	},
 	{
 		key: 'TR:TR75',
-		label: 'Turkey — Ardahan',
+		label: 'Türkiye — Ardahan',
 	},
 	{
 		key: 'TR:TR76',
-		label: 'Turkey — Iğdır',
+		label: 'Türkiye — Iğdır',
 	},
 	{
 		key: 'TR:TR77',
-		label: 'Turkey — Yalova',
+		label: 'Türkiye — Yalova',
 	},
 	{
 		key: 'TR:TR78',
-		label: 'Turkey — Karabük',
+		label: 'Türkiye — Karabük',
 	},
 	{
 		key: 'TR:TR79',
-		label: 'Turkey — Kilis',
+		label: 'Türkiye — Kilis',
 	},
 	{
 		key: 'TR:TR80',
-		label: 'Turkey — Osmaniye',
+		label: 'Türkiye — Osmaniye',
 	},
 	{
 		key: 'TR:TR81',
-		label: 'Turkey — Düzce',
+		label: 'Türkiye — Düzce',
 	},
 	{
 		key: 'TM',

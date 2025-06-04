@@ -1,11 +1,11 @@
 ---
-post_title: Displaying Custom Fields in Your Theme or Site
-menu_title: Displaying custom fields in theme
-tags: code-snippet
+post_title: Displaying custom fields in your theme or site
+sidebar_label: Displaying custom fields in theme
+
 current wccom url: https://woocommerce.com/document/custom-product-fields/
 ---
 
-## Displaying Custom Fields in Your Theme or Site
+# Displaying custom fields in your theme or site
 
 You can use the metadata from custom fields you add to your products to display the added information within your theme or site.
 
@@ -33,7 +33,7 @@ function woocommerce_custom_field_example() {
     $custom_field_value = get_post_meta( $product->get_id(), 'woo_custom_field', true );
     
     if ( ! empty( $custom_field_value ) ) {
-       echo '&lt;div class="custom-field"&gt;' . esc_html( $custom_field_value ) . '&lt;/div&gt;';
+       echo '<div class="custom-field">' . esc_html( $custom_field_value ) . '</div>';
     }
 }
 

@@ -3,17 +3,17 @@
  */
 import {
 	OfflinePaymentMethodProvider,
-	PaymentProvider,
-	PaymentProviderType,
-	SuggestedPaymentExtension,
-	SuggestedPaymentExtensionCategory,
+	PaymentsProvider,
+	PaymentsProviderType,
+	SuggestedPaymentsExtension,
+	SuggestedPaymentsExtensionCategory,
 } from '../types';
 
-export const providersStub: PaymentProvider[] = [
+export const providersStub: PaymentsProvider[] = [
 	{
 		id: '_wc_pes_paypal_full_stack',
 		_order: 2,
-		_type: PaymentProviderType.Suggestion,
+		_type: PaymentsProviderType.Suggestion,
 		title: 'PayPal Payments',
 		description:
 			'Safe and secure payments using credit cards or your customer&#039;s PayPal account.',
@@ -52,7 +52,7 @@ export const providersStub: PaymentProvider[] = [
 	{
 		id: 'woocommerce_payments',
 		_order: 2,
-		_type: PaymentProviderType.Gateway,
+		_type: PaymentsProviderType.Gateway,
 		title: 'WooPayments',
 		description:
 			'WooPayments gives your store flexibility to accept credit cards, debit cards, and Apple Pay. Enable popular local payment methods and other digital wallets like Google Pay to give customers even more choice.',
@@ -150,7 +150,7 @@ export const providersStub: PaymentProvider[] = [
 	{
 		id: '_wc_offline_payment_methods_group',
 		_order: 3,
-		_type: PaymentProviderType.OfflinePmsGroup,
+		_type: PaymentsProviderType.OfflinePmsGroup,
 		title: 'Offline Payment Methods',
 		description: 'Allow shoppers to pay offline.',
 		plugin: {
@@ -167,7 +167,7 @@ export const providersStub: PaymentProvider[] = [
 export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 	{
 		id: 'bacs',
-		_type: PaymentProviderType.OfflinePm,
+		_type: PaymentsProviderType.OfflinePm,
 		_order: 999,
 		title: 'Direct bank transfer',
 		description:
@@ -210,7 +210,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 	},
 	{
 		id: 'cheque',
-		_type: PaymentProviderType.OfflinePm,
+		_type: PaymentsProviderType.OfflinePm,
 		_order: 1000,
 		title: 'Cheque payments',
 		description:
@@ -253,7 +253,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 	},
 	{
 		id: 'cod',
-		_type: PaymentProviderType.OfflinePm,
+		_type: PaymentsProviderType.OfflinePm,
 		_order: 1001,
 		title: 'Cash on delivery',
 		description:
@@ -296,7 +296,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 	},
 ];
 
-export const suggestionsStub: SuggestedPaymentExtension[] = [
+export const suggestionsStub: SuggestedPaymentsExtension[] = [
 	{
 		id: 'airwallex',
 		_priority: 40,
@@ -375,7 +375,7 @@ export const suggestionsStub: SuggestedPaymentExtension[] = [
 	},
 ];
 
-export const suggestionCategoriesStub: SuggestedPaymentExtensionCategory[] = [
+export const suggestionCategoriesStub: SuggestedPaymentsExtensionCategory[] = [
 	{
 		id: 'express_checkout',
 		_priority: 10,

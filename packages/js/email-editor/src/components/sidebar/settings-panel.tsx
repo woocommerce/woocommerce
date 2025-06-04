@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
+	ErrorBoundary,
 	// @ts-expect-error Type for PluginDocumentSettingPanel is missing in @types/wordpress__editor
 	PluginDocumentSettingPanel,
 } from '@wordpress/editor';
@@ -14,15 +15,28 @@ import {
  */
 import { RichTextWithButton } from '../personalization-tags/rich-text-with-button';
 import { TemplateSelection } from './template-selection';
+import {
+	recordEvent,
+	recordEventOnce,
+	debouncedRecordEvent,
+} from '../../events';
+
+const tracking = {
+	recordEvent,
+	recordEventOnce,
+	debouncedRecordEvent,
+};
 
 const SidebarExtensionComponent = applyFilters(
 	'woocommerce_email_editor_setting_sidebar_extension_component',
-	RichTextWithButton
+	RichTextWithButton,
+	tracking
 ) as () => JSX.Element;
 
 const EmailStatusComponent = applyFilters(
 	'woocommerce_email_editor_setting_sidebar_email_status_component',
-	() => null
+	() => null,
+	tracking
 ) as () => JSX.Element;
 
 export function SettingsPanel() {
@@ -34,7 +48,10 @@ export function SettingsPanel() {
 		>
 			{ <EmailStatusComponent /> }
 			{ <TemplateSelection /> }
-			{ <SidebarExtensionComponent /> }
+			{ /* @ts-expect-error canCopyContent is missing in @types/wordpress__editor */ }
+			<ErrorBoundary canCopyContent>
+				{ <SidebarExtensionComponent /> }
+			</ErrorBoundary>
 		</PluginDocumentSettingPanel>
 	);
 }
