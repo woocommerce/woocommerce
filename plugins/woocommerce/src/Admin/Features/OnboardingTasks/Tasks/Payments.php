@@ -282,6 +282,28 @@ class Payments extends Task {
 	}
 
 	/**
+	 * Check if the store has any enabled online gateways.
+	 *
+	 * @return bool
+	 */
+	private function has_online_gateways(): bool {
+		$providers = $this->get_payments_providers();
+
+		foreach ( $providers as $provider ) {
+			// Check if the provider is enabled and is not WooPayments.
+			if (
+				! empty( $provider['state']['enabled'] ) &&
+				! empty( $provider['id'] ) &&
+				! in_array( $provider['id'], array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ), true )
+			) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Get the store's business registration country/location as it is used on the Payments Settings page.
 	 *
 	 * @return string The business registration country/location code.
@@ -376,27 +398,5 @@ class Payments extends Task {
 		}
 
 		return null;
-	}
-
-	/**
-	 * Check if the store has any enabled online gateways.
-	 *
-	 * @return bool
-	 */
-	private function has_online_gateways(): bool {
-		$providers = $this->get_payments_providers();
-
-		foreach ( $providers as $provider ) {
-			// Check if the provider is enabled and is not WooPayments.
-			if (
-				! empty( $provider['state']['enabled'] ) &&
-				! empty( $provider['id'] ) &&
-				! in_array( $provider['id'], array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ), true )
-			) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 }
