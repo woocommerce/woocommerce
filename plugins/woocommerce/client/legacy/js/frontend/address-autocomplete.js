@@ -121,6 +121,11 @@ function setActiveProvider( country, type ) {
 			const addressInput = document.getElementById(
 				`${ type }_address_1`
 			);
+			const cityInput = document.getElementById( `${ type }_city` );
+			const countryInput = document.getElementById( `${ type }_country` );
+			const postcodeInput = document.getElementById(
+				`${ type }_postcode`
+			);
 
 			if ( addressInput ) {
 				// Create suggestions container if it doesn't exist
@@ -161,7 +166,12 @@ function setActiveProvider( country, type ) {
 					addressInput.parentNode.appendChild( searchIcon );
 				}
 
-				addressInputs[ type ] = addressInput;
+				addressInputs[ type ] = {};
+				addressInputs[ type ][ 'address_1' ] = addressInput;
+				addressInputs[ type ][ 'city' ] = cityInput;
+				addressInputs[ type ][ 'country' ] = countryInput;
+				addressInputs[ type ][ 'postcode' ] = postcodeInput;
+
 				suggestionsContainers[ type ] = document.getElementById(
 					`address_suggestions_${ type }`
 				);
@@ -174,7 +184,6 @@ function setActiveProvider( country, type ) {
 			}
 
 			// Get country value and set active address provider based on it.
-			const countryInput = document.getElementById( `${ type }_country` );
 			if ( countryInput ) {
 				setActiveProvider( countryInput.value, type );
 
@@ -186,7 +195,7 @@ function setActiveProvider( country, type ) {
 						searchControllers[ type ].abort();
 						searchControllers[ type ] = null;
 					}
-					if ( addressInputs[ type ] ) {
+					if ( addressInputs[ type ][ 'address_1' ] ) {
 						hideSuggestions( type );
 					}
 				} );
@@ -289,7 +298,7 @@ function setActiveProvider( country, type ) {
 		}
 
 		async function displaySuggestions( type, inputValue ) {
-			const addressInput = addressInputs[ type ];
+			const addressInput = addressInputs[ type ][ 'address_1' ];
 			const suggestionsList = suggestionsLists[ type ];
 			const suggestionsContainer = suggestionsContainers[ type ];
 
@@ -314,12 +323,12 @@ function setActiveProvider( country, type ) {
 			// Create new AbortController for this search
 			searchControllers[ type ] = new AbortController();
 			const controller = searchControllers[ type ];
-			
+
 			try {
 				const filteredSuggestions = await activeAddressProvider[
 					type
 				].search( type, inputValue );
-				
+
 				// Check if this request was aborted
 				if ( controller.signal.aborted ) {
 					return;
@@ -370,7 +379,6 @@ function setActiveProvider( country, type ) {
 				);
 				suggestionsList.id = `address_suggestions_${ type }_list`;
 				setActiveSuggestion( type, 0 );
-				
 			} catch ( error ) {
 				// Handle search errors (including AbortError from cancelled requests)
 				if ( error.name === 'AbortError' ) {
@@ -392,7 +400,7 @@ function setActiveProvider( country, type ) {
 		function hideSuggestions( type ) {
 			const suggestionsList = suggestionsLists[ type ];
 			const suggestionsContainer = suggestionsContainers[ type ];
-			const addressInput = addressInputs[ type ];
+			const addressInput = addressInputs[ type ][ 'address_1' ];
 
 			// Cancel any inflight search requests
 			if ( searchControllers[ type ] ) {
@@ -409,19 +417,34 @@ function setActiveProvider( country, type ) {
 		}
 
 		async function selectAddress( type, addressId ) {
-			const addressInput = addressInputs[ type ];
+			const addressInput = addressInputs[ type ][ 'address_1' ];
+			const cityInput = addressInputs[ type ][ 'city' ];
+			const countryInput = addressInputs[ type ][ 'country' ];
+			const postcodeInput = addressInputs[ type ][ 'postcode' ];
 			const addressData = await activeAddressProvider[ type ].select(
 				addressId
 			);
-			if ( addressData ) {
+			if ( addressData && addressInput ) {
 				addressInput.value = addressData.address1;
 				addressInput.dispatchEvent( new Event( 'change' ) );
+			}
+			if ( addressData && cityInput ) {
+				cityInput.value = addressData.city;
+				cityInput.dispatchEvent( new Event( 'change' ) );
+			}
+			if ( addressData && countryInput ) {
+				countryInput.value = addressData.country;
+				countryInput.dispatchEvent( new Event( 'change' ) );
+			}
+			if ( addressData && postcodeInput ) {
+				postcodeInput.value = addressData.postcode;
+				postcodeInput.dispatchEvent( new Event( 'change' ) );
 			}
 		}
 
 		function setActiveSuggestion( type, index ) {
 			const suggestionsList = suggestionsLists[ type ];
-			const addressInput = addressInputs[ type ];
+			const addressInput = addressInputs[ type ][ 'address_1' ];
 
 			const activeLi = suggestionsList.querySelector( 'li.active' );
 			if ( activeLi ) {
@@ -446,7 +469,7 @@ function setActiveProvider( country, type ) {
 
 		// Initialize event handlers for each address type
 		addressTypes.forEach( ( type ) => {
-			const addressInput = addressInputs[ type ];
+			const addressInput = addressInputs[ type ][ 'address_1' ];
 			if ( addressInput ) {
 				let inputTimeout;
 
@@ -514,7 +537,7 @@ function setActiveProvider( country, type ) {
 				if (
 					target !== suggestionsContainers[ type ] &&
 					! suggestionsContainers[ type ].contains( target ) &&
-					target !== addressInputs[ type ]
+					target !== addressInputs[ type ][ 'address_1' ]
 				) {
 					hideSuggestions( type );
 				}
