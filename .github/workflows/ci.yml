@@ -560,6 +560,7 @@ jobs:
           filters: |
             needs-markdown-linting:
               - added|modified: '!({.github,docs}/**)/**/*.md'
+              - added|modified: '*.md'
             needs-docs-linting:
               - added|modified: 'docs/**/*.md'
 
