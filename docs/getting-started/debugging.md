@@ -7,7 +7,7 @@ menu_title: Debugging
 
 A good place to start is usually the debugging tools built into WordPress itself:
 
-* [Debugging in WordPress](https://wordpress.org/documentation/article/debugging-in-wordpress/)
+* https://wordpress.org/documentation/article/debugging-in-wordpress/
 
 ## Logging
 
