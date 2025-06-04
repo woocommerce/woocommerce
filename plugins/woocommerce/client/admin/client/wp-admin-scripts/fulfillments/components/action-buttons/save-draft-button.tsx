@@ -20,7 +20,7 @@ export default function SaveAsDraftButton( {
 	setError: ( message: string | null ) => void;
 } ) {
 	const { setIsEditing } = useFulfillmentDrawerContext();
-	const { orderId, fulfillment } = useFulfillmentContext();
+	const { order, fulfillment } = useFulfillmentContext();
 	const [ isExecuting, setIsExecuting ] = useState( false );
 	const { saveFulfillment } = useDispatch( FulfillmentStore );
 
@@ -28,7 +28,7 @@ export default function SaveAsDraftButton( {
 		setError( null );
 		setIsExecuting( true );
 
-		if ( ! fulfillment ) {
+		if ( ! fulfillment || ! order ) {
 			setIsExecuting( false );
 			return;
 		}
@@ -37,7 +37,7 @@ export default function SaveAsDraftButton( {
 			setError( 'Select items to be fulfilled.' );
 			return;
 		}
-		saveFulfillment( orderId, fulfillment )
+		saveFulfillment( order.id, fulfillment )
 			.then( () => {
 				setIsEditing( false );
 			} )
@@ -54,7 +54,7 @@ export default function SaveAsDraftButton( {
 			variant="secondary"
 			onClick={ handleFulfillItems }
 			__next40pxDefaultSize
-			disabled={ isExecuting }
+			isBusy={ isExecuting }
 		>
 			{ __( 'Save as draft', 'woocommerce' ) }
 		</Button>
