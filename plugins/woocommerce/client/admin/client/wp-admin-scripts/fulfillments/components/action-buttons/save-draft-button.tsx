@@ -20,7 +20,7 @@ export default function SaveAsDraftButton( {
 	setError: ( message: string | null ) => void;
 } ) {
 	const { setIsEditing } = useFulfillmentDrawerContext();
-	const { order, fulfillment } = useFulfillmentContext();
+	const { order, fulfillment, notifyCustomer } = useFulfillmentContext();
 	const [ isExecuting, setIsExecuting ] = useState( false );
 	const { saveFulfillment } = useDispatch( FulfillmentStore );
 
@@ -37,7 +37,7 @@ export default function SaveAsDraftButton( {
 			setError( 'Select items to be fulfilled.' );
 			return;
 		}
-		saveFulfillment( order.id, fulfillment )
+		saveFulfillment( order.id, fulfillment, notifyCustomer )
 			.then( () => {
 				setIsEditing( false );
 			} )

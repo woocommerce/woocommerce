@@ -16,11 +16,32 @@ import { useFulfillmentContext } from '../../context/fulfillment-context';
  */
 
 export default function CustomerNotificationBox( {
-	isUpdate = false,
+	type = 'fulfill',
 }: {
-	isUpdate?: boolean;
+	type: 'fulfill' | 'update' | 'remove';
 } ) {
 	const { notifyCustomer, setNotifyCustomer } = useFulfillmentContext();
+
+	const headerStrings = {
+		fulfill: __( 'Fulfillment notification', 'woocommerce' ),
+		remove: __( 'Removal update', 'woocommerce' ),
+		update: __( 'Update notification', 'woocommerce' ),
+	};
+
+	const contentStrings = {
+		fulfill: __(
+			'Automatically send an email to the customer when the selected items are fulfilled.',
+			'woocommerce'
+		),
+		remove: __(
+			'Automatically send an email to the customer notifying that the fulfillment is cancelled.',
+			'woocommerce'
+		),
+		update: __(
+			'Automatically send an email to the customer when the fulfillment is updated.',
+			'woocommerce'
+		),
+	};
 
 	return (
 		<FulfillmentCard
@@ -30,11 +51,7 @@ export default function CustomerNotificationBox( {
 			header={
 				<>
 					<EnvelopeIcon />
-					<h3>
-						{ isUpdate
-							? __( 'Update notification', 'woocommerce' )
-							: __( 'Fulfillment notification', 'woocommerce' ) }
-					</h3>
+					<h3>{ headerStrings[ type ] || headerStrings.fulfill }</h3>
 					<ToggleControl
 						__nextHasNoMarginBottom
 						checked={ notifyCustomer }
@@ -47,15 +64,7 @@ export default function CustomerNotificationBox( {
 			}
 		>
 			<p className="woocommerce-fulfillment-description">
-				{ isUpdate
-					? __(
-							'Automatically send an email to the customer when the fulfillment is updated.',
-							'woocommerce'
-					  )
-					: __(
-							'Automatically send an email to the customer when the selected items are fulfilled.',
-							'woocommerce'
-					  ) }
+				{ contentStrings[ type ] || contentStrings.fulfill }
 			</p>
 		</FulfillmentCard>
 	);

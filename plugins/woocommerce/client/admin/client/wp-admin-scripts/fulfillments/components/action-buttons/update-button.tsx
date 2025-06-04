@@ -58,6 +58,7 @@ export default function UpdateButton( {
 		<Button
 			variant="primary"
 			onClick={ handleUpdateFulfillment }
+			disabled={ isExecuting }
 			isBusy={ isExecuting }
 			__next40pxDefaultSize
 		>

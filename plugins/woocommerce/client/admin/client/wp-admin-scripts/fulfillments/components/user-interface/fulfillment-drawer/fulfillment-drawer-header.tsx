@@ -42,7 +42,7 @@ export default function FulfillmentsDrawerHeader( {
 				</div>
 				<p>
 					{ moment( order.date_created ).format(
-						'MMMM DD, YYYY, H:mma'
+						'MMMM D, YYYY, H:mma'
 					) }
 				</p>
 			</div>

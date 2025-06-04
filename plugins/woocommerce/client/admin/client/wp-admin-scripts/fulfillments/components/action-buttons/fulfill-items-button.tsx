@@ -56,6 +56,7 @@ export default function FulfillItemsButton( {
 			onClick={ handleFulfillItems }
 			__next40pxDefaultSize
 			isBusy={ isExecuting }
+			disabled={ isExecuting }
 		>
 			{ __( 'Fulfill items', 'woocommerce' ) }
 		</Button>

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Button } from '@wordpress/components';
+import { Button, Modal } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { useState } from 'react';
@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { useFulfillmentContext } from '../../context/fulfillment-context';
 import { store as FulfillmentStore } from '../../data/store';
 import { useFulfillmentDrawerContext } from '../../context/drawer-context';
+import CustomerNotificationBox from '../customer-notification-form';
 
 export default function RemoveButton( {
 	setError,
@@ -23,7 +24,11 @@ export default function RemoveButton( {
 	const [ isExecuting, setIsExecuting ] = useState< boolean >( false );
 	const { deleteFulfillment } = useDispatch( FulfillmentStore );
 
-	const handleFulfillItems = () => {
+	const [ isOpen, setOpen ] = useState( false );
+	const openModal = () => setOpen( true );
+	const closeModal = () => setOpen( false );
+
+	const handleDeleteFulfillment = () => {
 		setError( null );
 		setIsExecuting( true );
 		if ( ! fulfillment || ! fulfillment.id || ! order || ! order.id ) {
@@ -43,14 +48,67 @@ export default function RemoveButton( {
 			} );
 	};
 
+	const handleRemoveButtonClick = ( event: React.MouseEvent ) => {
+		event.stopPropagation();
+		event.preventDefault();
+		if ( ! fulfillment || isExecuting ) {
+			return;
+		}
+
+		if ( fulfillment.is_fulfilled ) {
+			openModal();
+		} else {
+			handleDeleteFulfillment();
+		}
+	};
+
 	return (
-		<Button
-			variant="secondary"
-			onClick={ handleFulfillItems }
-			disabled={ isExecuting }
-			__next40pxDefaultSize
-		>
-			{ __( 'Remove', 'woocommerce' ) }
-		</Button>
+		<>
+			<Button
+				variant="secondary"
+				onClick={ handleRemoveButtonClick }
+				isBusy={ isExecuting }
+				__next40pxDefaultSize
+			>
+				{ __( 'Remove', 'woocommerce' ) }
+			</Button>
+			{ isOpen && (
+				<Modal
+					title={ __( 'Remove fulfillment', 'woocommerce' ) }
+					onRequestClose={ closeModal }
+					size="medium"
+					isDismissible={ false }
+					className="woocommerce-fulfillment-modal"
+				>
+					<p className="woocommerce-fulfillment-modal-text">
+						{ __(
+							'Are you sure you want to remove this fulfillment?',
+							'woocommerce'
+						) }
+					</p>
+					<CustomerNotificationBox type="remove" />
+					<div className="woocommerce-fulfillment-modal-actions">
+						<Button
+							variant="link"
+							onClick={ closeModal }
+							__next40pxDefaultSize
+						>
+							{ __( 'Cancel', 'woocommerce' ) }
+						</Button>
+						<Button
+							variant="primary"
+							onClick={ () => {
+								handleDeleteFulfillment();
+								closeModal();
+							} }
+							isBusy={ isExecuting }
+							__next40pxDefaultSize
+						>
+							{ __( 'Remove fulfillment', 'woocommerce' ) }
+						</Button>
+					</div>
+				</Modal>
+			) }
+		</>
 	);
 }

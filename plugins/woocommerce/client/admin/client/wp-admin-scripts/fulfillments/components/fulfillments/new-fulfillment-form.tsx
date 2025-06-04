@@ -101,7 +101,7 @@ const NewFulfillmentForm: React.FC = () => {
 							<ItemSelector editMode={ true } />
 
 							<ShipmentForm />
-							<CustomerNotificationBox />
+							<CustomerNotificationBox type="fulfill" />
 							<div className="woocommerce-fulfillment-item-actions">
 								<SaveAsDraftButton setError={ setError } />
 								<FulfillItemsButton setError={ setError } />
