@@ -20,6 +20,23 @@ import {
 } from '../../../../packages/prices/utils/currency';
 import { CartItem } from '../../types';
 
+const { currency } = getConfig( 'woocommerce' );
+
+const {
+	reduceQuantityLabel,
+	increaseQuantityLabel,
+	quantityDescriptionLabel,
+	removeFromCartLabel,
+} = getConfig( 'woocommerce/mini-cart-items-block' );
+
+const { singularItemsText, pluralItemsText } = getConfig(
+	'woocommerce/mini-cart-title-items-counter-block'
+);
+
+const { displayCartPriceIncludingTax } = getConfig(
+	'woocommerce/mini-cart-footer-block'
+);
+
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
@@ -127,10 +144,6 @@ store(
 	{
 		state: {
 			get itemsInCartText() {
-				const { singularItemsText, pluralItemsText } = getConfig(
-					'woocommerce/mini-cart-title-items-counter-block'
-				);
-
 				const cartItemsCount = miniCartState.totalItemsInCart;
 
 				const template =
@@ -148,12 +161,6 @@ store(
 	{
 		state: {
 			get formattedSubtotal(): string {
-				const { displayCartPriceIncludingTax } = getConfig(
-					'woocommerce/mini-cart-footer-block'
-				);
-
-				const { currency } = getConfig( 'woocommerce' );
-
 				const subtotal = displayCartPriceIncludingTax
 					? parseInt( wooStoreState.cart.totals.total_items, 10 ) +
 					  parseInt( wooStoreState.cart.totals.total_items_tax, 10 )
@@ -183,25 +190,16 @@ const { state } = store( 'woocommerce/mini-cart-items-block', {
 
 		// Intended to be used in context of a cart item in wp-each
 		get reduceQuantityLabel(): string {
-			const { reduceQuantityLabel } = getConfig(
-				'woocommerce/mini-cart-items-block'
-			);
 			return reduceQuantityLabel.replace( '%s', state.cartItem.name );
 		},
 
 		// Intended to be used in context of a cart item in wp-each
 		get increaseQuantityLabel(): string {
-			const { increaseQuantityLabel } = getConfig(
-				'woocommerce/mini-cart-items-block'
-			);
 			return increaseQuantityLabel.replace( '%s', state.cartItem.name );
 		},
 
 		// Intended to be used in context of a cart item in wp-each
 		get quantityDescriptionLabel(): string {
-			const { quantityDescriptionLabel } = getConfig(
-				'woocommerce/mini-cart-items-block'
-			);
 			return quantityDescriptionLabel.replace(
 				'%s',
 				state.cartItem.name
@@ -210,9 +208,6 @@ const { state } = store( 'woocommerce/mini-cart-items-block', {
 
 		// Intended to be used in context of a cart item in wp-each
 		get removeFromCartLabel(): string {
-			const { removeFromCartLabel } = getConfig(
-				'woocommerce/mini-cart-items-block'
-			);
 			return removeFromCartLabel.replace( '%s', state.cartItem.name );
 		},
 
@@ -241,8 +236,6 @@ const { state } = store( 'woocommerce/mini-cart-items-block', {
 
 		// Intended to be used in context of a cart item in wp-each
 		get itemPrice(): string {
-			const { currency } = getConfig( 'woocommerce' );
-
 			const normalizedCurrency = normalizeCurrencyResponse(
 				wooStoreState.cart.totals,
 				currency
@@ -256,11 +249,6 @@ const { state } = store( 'woocommerce/mini-cart-items-block', {
 
 		// Intended to be used in context of a cart item in wp-each
 		get lineItemTotal(): string {
-			const { displayCartPriceIncludingTax } = getConfig(
-				'woocommerce/mini-cart'
-			);
-			const { currency } = getConfig( 'woocommerce' );
-
 			const normalizedCurrency = normalizeCurrencyResponse(
 				wooStoreState.cart.totals,
 				currency
