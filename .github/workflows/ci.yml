@@ -49,7 +49,7 @@ jobs:
       needs-markdown-validation:  ${{ steps.target-changes.outputs.needs-markdown-validation }}
       needs-syncpack-validation:  ${{ steps.target-changes.outputs.needs-syncpack-validation }}
     steps:
-      - uses: 'dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36'
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         id: target-changes
         with:
           filters: |
@@ -551,18 +551,9 @@ jobs:
       contents: read
 
     steps:
-      - name: 'Calculate checkout depth'
-        id: checkout_depth
-        shell: bash
-        run: |
-          fetch_commits=$(( ${{ github.event.pull_request.commits }} + 2 ))
-          echo "fetch_commits=$fetch_commits" >> $GITHUB_OUTPUT
-
       - uses: 'actions/checkout@v4'
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: ${{ steps.checkout_depth.outputs.fetch_commits }}
 
+      # TODO: migrate to dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
       - name: Scan - markdown files from monorepo packages
         id: repo-changed-files
         uses: tj-actions/changed-files@v41
@@ -572,18 +563,14 @@ jobs:
           files_ignore: |
             .github/**/*.md
 
-      - name: Setup - pnpm
-        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
-
       - name: Setup - node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Setup - utility-packages
         run: |
-          pnpm i -g markdownlint-cli
+          npm install -g markdownlint-cli
           npm --prefix .github/workflows/scripts install @actions/core
 
       - name: Validate - changed markdown files from monorepo documentation
