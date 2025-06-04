@@ -553,16 +553,14 @@ jobs:
     steps:
       - uses: 'actions/checkout@v4'
 
-      # TODO: migrate to dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
-      - name: Scan - markdown files from monorepo packages
-        id: repo-changed-files
-        uses: tj-actions/changed-files@v41
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: target-changes
         with:
-          files: |
-            **/*.md
-          files_ignore: |
-            .github/**/*.md
-            docs/**/*.md
+          filters: |
+            needs-markdown-linting:
+              - '!({.github,docs}/**)/**/*.md'
+            needs-docs-linting:
+              - 'docs/**/*.md'
 
       - name: Setup - node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -574,7 +572,7 @@ jobs:
           npm install -g markdownlint-cli
           npm --prefix .github/workflows/scripts install @actions/core
 
-      - name: Validate - lint md-files (packages and co)
+      - name: Validate - lint md-files
         shell: bash
         run: |
           added_and_modified_docs="${{ steps.repo-changed-files.outputs.added_files }} ${{ steps.repo-changed-files.outputs.modified_files }}"
