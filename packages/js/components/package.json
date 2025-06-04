@@ -146,7 +146,6 @@
 		"@types/prop-types": "^15.7.11",
 		"@types/testing-library__jest-dom": "^5.14.9",
 		"@types/uuid": "^8.3.4",
-		"@types/wordpress__data": "6.0.0",
 		"@types/wordpress__media-utils": "3.0.0",
 		"@types/wordpress__viewport": "2.5.4",
 		"@woocommerce/eslint-plugin": "workspace:*",
