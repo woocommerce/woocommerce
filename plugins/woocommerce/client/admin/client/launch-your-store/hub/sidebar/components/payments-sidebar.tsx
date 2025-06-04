@@ -39,6 +39,11 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 		isLoading,
 	} = useOnboardingContext();
 
+	const { context } = props;
+	const payments_task = context.tasklist?.tasks?.find(
+		( task ) => task.id === 'payments'
+	);
+
 	const currentStepIndex = allSteps.findIndex(
 		( step ) => step.id === currentStep?.id
 	);
@@ -96,10 +101,11 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 			disabled={ true }
 			showChevron={ false }
 		>
-			{
-				/* translators: %s: WooPayments */
-				sprintf( __( 'Install %s', 'woocommerce' ), 'WooPayments' )
-			}
+			{ payments_task?.additionalData?.wooPaymentsIsInstalled
+				? /* translators: %s: WooPayments */
+				  sprintf( __( 'Enable %s', 'woocommerce' ), 'WooPayments' )
+				: /* translators: %s: WooPayments */
+				  sprintf( __( 'Install %s', 'woocommerce' ), 'WooPayments' ) }
 		</SidebarNavigationItem>
 	);
 

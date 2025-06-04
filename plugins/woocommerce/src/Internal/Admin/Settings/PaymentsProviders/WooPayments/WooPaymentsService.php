@@ -276,20 +276,6 @@ class WooPaymentsService {
 	}
 
 	/**
-	 * Check if the onboarding step has a started status.
-	 *
-	 * @param string $step_id  The ID of the onboarding step.
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 *
-	 * @return bool Whether the onboarding step is started.
-	 * @throws ApiException On invalid step ID.
-	 */
-	private function is_onboarding_step_started( string $step_id, string $location ): bool {
-		return self::ONBOARDING_STEP_STATUS_COMPLETED === $this->get_onboarding_step_status( $step_id, $location );
-	}
-
-	/**
 	 * Check if an onboarding step has been marked as started.
 	 *
 	 * This means that, at some point, the step was marked/recorded as started in the DB.
@@ -2312,21 +2298,6 @@ class WooPaymentsService {
 			),
 			admin_url( 'admin.php' )
 		);
-	}
-
-	/**
-	 * Get the business location country code for the Payments settings.
-	 *
-	 * @return string The ISO 3166-1 alpha-2 country code to use for the overall business location.
-	 *                If the user didn't set a location, the WC base location country code is used.
-	 */
-	private function get_country(): string {
-		$user_nox_meta = get_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, true );
-		if ( ! empty( $user_nox_meta['business_country_code'] ) ) {
-			return $user_nox_meta['business_country_code'];
-		}
-
-		return WC()->countries->get_base_country();
 	}
 
 	/**
