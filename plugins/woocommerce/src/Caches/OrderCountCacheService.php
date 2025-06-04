@@ -15,6 +15,8 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
  */
 class OrderCountCacheService {
 
+	const BACKGROUND_EVENT_HOOK = 'woocommerce_refresh_order_count_cache';
+
 	/**
 	 * OrderCountCache instance.
 	 *
@@ -47,7 +49,7 @@ class OrderCountCacheService {
 		add_action( 'woocommerce_order_status_changed', array( $this, 'update_on_order_status_changed' ), 10, 4 );
 		add_action( 'woocommerce_before_trash_order', array( $this, 'update_on_order_trashed' ), 10, 2 );
 		add_action( 'woocommerce_before_delete_order', array( $this, 'update_on_order_deleted' ), 10, 2 );
-		add_action( 'woocommerce_refresh_order_count_cache', array( $this, 'refresh_cache' ) );
+		add_action( self::BACKGROUND_EVENT_HOOK, array( $this, 'refresh_cache' ) );
 		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'schedule_background_actions' ) );
 		// This is a temporary fix to ensure the background actions are scheduled.
 		// @todo: Remove this once the Action Scheduler package is updated to >= 3.9.3.
@@ -74,7 +76,7 @@ class OrderCountCacheService {
 		$order_types = wc_get_order_types( 'order-count' );
 		$frequency   = HOUR_IN_SECONDS * 12;
 		foreach ( $order_types as $order_type ) {
-			as_schedule_recurring_action( time() + $frequency, $frequency, 'woocommerce_refresh_order_count_cache', array( $order_type ), 'count', true );
+			as_schedule_recurring_action( time() + $frequency, $frequency, self::BACKGROUND_EVENT_HOOK, array( $order_type ), 'count', true );
 		}
 	}
 

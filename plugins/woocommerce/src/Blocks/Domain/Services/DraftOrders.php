@@ -17,6 +17,8 @@ class DraftOrders {
 	const DB_STATUS = 'wc-checkout-draft';
 	const STATUS    = 'checkout-draft';
 
+	const DRAFT_CLEANUP_EVENT_HOOK = 'woocommerce_cleanup_draft_orders';
+
 	/**
 	 * Holds the Package instance
 	 *
@@ -44,7 +46,7 @@ class DraftOrders {
 		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', [ $this, 'append_draft_order_post_status' ], 999 );
 		// Hook into the query to retrieve My Account orders so draft status is excluded.
 		add_action( 'woocommerce_my_account_my_orders_query', [ $this, 'delete_draft_order_post_status_from_args' ] );
-		add_action( 'woocommerce_cleanup_draft_orders', [ $this, 'delete_expired_draft_orders' ] );
+		add_action( self::DRAFT_CLEANUP_EVENT_HOOK, [ $this, 'delete_expired_draft_orders' ] );
 		add_action( 'admin_init', [ $this, 'install' ] );
 	}
 
@@ -62,8 +64,8 @@ class DraftOrders {
 	 */
 	protected function maybe_create_cronjobs() {
 		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
-		if ( false === call_user_func( $has_scheduled_action, 'woocommerce_cleanup_draft_orders' ) ) {
-			as_schedule_recurring_action( strtotime( 'midnight tonight' ), DAY_IN_SECONDS, 'woocommerce_cleanup_draft_orders' );
+		if ( false === call_user_func( $has_scheduled_action, self::DRAFT_CLEANUP_EVENT_HOOK ) ) {
+			as_schedule_recurring_action( strtotime( 'midnight tonight' ), DAY_IN_SECONDS, self::DRAFT_CLEANUP_EVENT_HOOK );
 		}
 	}
 
@@ -179,7 +181,7 @@ class DraftOrders {
 				}
 			}
 			if ( $batch_size === $count && function_exists( 'as_enqueue_async_action' ) ) {
-				as_enqueue_async_action( 'woocommerce_cleanup_draft_orders' );
+				as_enqueue_async_action( self::DRAFT_CLEANUP_EVENT_HOOK );
 			}
 		} catch ( Exception $error ) {
 			wc_caught_exception( $error, __METHOD__ );
