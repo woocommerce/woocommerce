@@ -107,7 +107,7 @@ $dialog-padding: 20px;
 		background: #fff;
 		outline-offset: -2px;
 
-		&:disabled {
+		&[aria-disabled="true"] {
 			.wc-block-product-gallery-large-image-next-previous__icon {
 				opacity: 30%;
 			}
