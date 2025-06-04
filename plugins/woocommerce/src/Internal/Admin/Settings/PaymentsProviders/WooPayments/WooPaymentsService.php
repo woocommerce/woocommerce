@@ -65,8 +65,6 @@ class WooPaymentsService {
 	 */
 	const ONBOARDING_STEP_STATUS_BLOCKED = 'blocked';
 
-	const ONBOARDING_FLAG_TRANSITIONING_FROM_TEST_TO_LIVE = 'transitioning_from_test_to_live';
-
 	const ACTION_TYPE_REST     = 'REST';
 	const ACTION_TYPE_REDIRECT = 'REDIRECT';
 
@@ -147,26 +145,12 @@ class WooPaymentsService {
 				'test_mode' => $this->provider->is_in_test_mode_onboarding( $this->get_payment_gateway() ),
 				'dev_mode'  => $this->provider->is_in_dev_mode( $this->get_payment_gateway() ),
 			),
-			'flags'   => $this->get_onboarding_flags( $location ),
 			'steps'   => $this->get_onboarding_steps( $location, trailingslashit( $rest_path ) . 'step', $source ),
 			'context' => array(
 				'urls' => array(
 					'overview_page' => $this->get_overview_page_url(),
 				),
 			),
-		);
-	}
-
-	/**
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 *
-	 * @return bool[] A list of onboarding flags and their value for the given location.
-	 */
-	public function get_onboarding_flags( string $location ): array {
-		return array(
-			// This flag is used to indicate that the user is transitioning from a test account to a live account.
-			self::ONBOARDING_FLAG_TRANSITIONING_FROM_TEST_TO_LIVE => $this->is_nox_profile_onboarding_flag_on( self::ONBOARDING_FLAG_TRANSITIONING_FROM_TEST_TO_LIVE, $location ),
 		);
 	}
 
@@ -1227,9 +1211,6 @@ class WooPaymentsService {
 			);
 		}
 
-		// Make sure the onboarding flag to indicate that the user is transitioning from a test account to a live account is off.
-		$this->set_nox_profile_onboarding_flag( self::ONBOARDING_FLAG_TRANSITIONING_FROM_TEST_TO_LIVE, $location, false );
-
 		return $response;
 	}
 
@@ -1365,8 +1346,6 @@ class WooPaymentsService {
 	/**
 	 * Disable test account during the switch-to-live onboarding flow.
 	 *
-	 * This is the first step in the switch-to-live onboarding flow.
-	 *
 	 * @param string $location The location for which we are onboarding.
 	 *                         This is a ISO 3166-1 alpha-2 country code.
 	 * @param string $from     Optional. Where in the UI the request is coming from.
@@ -1443,9 +1422,6 @@ class WooPaymentsService {
 		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		$this->clear_onboarding_step_blocked( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
-
-		// Turn on the onboarding flag to indicate that the user is transitioning from a test account to a live account.
-		$this->set_nox_profile_onboarding_flag( self::ONBOARDING_FLAG_TRANSITIONING_FROM_TEST_TO_LIVE, $location, true );
 
 		// Record an event for the test account being disabled.
 		$this->record_event(
@@ -1867,56 +1843,6 @@ class WooPaymentsService {
 		}
 
 		return $nox_profile;
-	}
-
-	/**
-	 * Check if an onboarding flag is set to on in the NOX profile.
-	 *
-	 * @param string $flag_id  The ID of the onboarding flag.
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 *
-	 * @return bool Whether the onboarding flag is set to on.
-	 *              If the flag is not found, it defaults to false.
-	 */
-	private function is_nox_profile_onboarding_flag_on( string $flag_id, string $location ): bool {
-		$nox_profile = $this->get_nox_profile();
-
-		if ( ! isset( $nox_profile['onboarding'][ $location ]['flags'][ $flag_id ] ) ) {
-			// If the flag is not set, we assume it is off.
-			return false;
-		}
-
-		return filter_var( $nox_profile['onboarding'][ $location ]['flags'][ $flag_id ], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) ?? false;
-	}
-
-	/**
-	 * Set an onboarding flag in the NOX profile.
-	 *
-	 * @param string $flag_id  The ID of the onboarding flag.
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
-	 * @param bool   $on       Whether to set the flag on or off.
-	 *
-	 * @return bool Whether the onboarding data was updated.
-	 */
-	private function set_nox_profile_onboarding_flag( string $flag_id, string $location, bool $on ): bool {
-		$nox_profile = $this->get_nox_profile();
-
-		if ( empty( $nox_profile['onboarding'] ) ) {
-			$nox_profile['onboarding'] = array();
-		}
-		if ( empty( $nox_profile['onboarding'][ $location ] ) ) {
-			$nox_profile['onboarding'][ $location ] = array();
-		}
-		if ( empty( $nox_profile['onboarding'][ $location ]['flags'] ) ) {
-			$nox_profile['onboarding'][ $location ]['flags'] = array();
-		}
-
-		$nox_profile['onboarding'][ $location ]['flags'][ $flag_id ] = $on ? 'on' : 'off';
-
-		// Save the updated NOX profile.
-		return $this->proxy->call_function( 'update_option', self::NOX_PROFILE_OPTION_KEY, $nox_profile, false );
 	}
 
 	/**
