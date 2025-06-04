@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useMemo, useState } from 'react';
 
 /**
  * Internal dependencies
@@ -73,8 +73,8 @@ export const FulfillmentProvider = ( {
 			fulfillment_id: fulfillment?.id ?? undefined,
 			entity_id: String( order.id ),
 			entity_type: WC_ORDER_CLASS,
-			is_fulfilled: false,
-			status: 'unfulfilled',
+			is_fulfilled: fulfillment?.is_fulfilled ?? false,
+			status: fulfillment?.status ?? 'unfulfilled',
 			meta_data: [
 				{
 					id: 0,
@@ -92,18 +92,27 @@ export const FulfillmentProvider = ( {
 				},
 			],
 		} as Fulfillment );
-	}, [ order?.id, selectedItems, fulfillment?.id ] );
+	}, [ order, selectedItems, fulfillment ] );
+
+	const contextValues = useMemo(
+		() => ( {
+			order,
+			fulfillment: _fulfillment,
+			setFulfillment: _setFulfillment,
+			selectedItems,
+			setSelectedItems,
+		} ),
+		[
+			order,
+			_fulfillment,
+			_setFulfillment,
+			selectedItems,
+			setSelectedItems,
+		]
+	);
 
 	return (
-		<FulfillmentContextValue.Provider
-			value={ {
-				order,
-				fulfillment: _fulfillment,
-				setFulfillment: _setFulfillment,
-				selectedItems,
-				setSelectedItems,
-			} }
-		>
+		<FulfillmentContextValue.Provider value={ contextValues }>
 			{ children }
 		</FulfillmentContextValue.Provider>
 	);

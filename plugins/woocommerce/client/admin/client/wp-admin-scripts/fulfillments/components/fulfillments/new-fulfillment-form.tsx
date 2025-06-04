@@ -26,7 +26,13 @@ const NewFulfillmentForm: React.FC = () => {
 			getItemsNotInAnyFulfillment(
 				fulfillments,
 				order ?? ( { line_items: [] as LineItem[] } as Order )
-			),
+			).map( ( item ) => ( {
+				...item,
+				selection: item.selection.map( ( selection ) => ( {
+					...selection,
+					checked: true,
+				} ) ),
+			} ) ),
 		[ fulfillments, order ]
 	);
 
