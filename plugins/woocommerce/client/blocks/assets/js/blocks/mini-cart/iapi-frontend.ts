@@ -175,57 +175,51 @@ type CartItemContext = {
 	cartItem: CartItem;
 };
 
-store( 'woocommerce/mini-cart-items-block', {
+const { state } = store( 'woocommerce/mini-cart-items-block', {
 	state: {
+		get cartItem() {
+			return getContext< CartItemContext >( 'woocommerce' ).cartItem;
+		},
+
 		// Intended to be used in context of a cart item in wp-each
-		get reduceQuantityLabel() {
+		get reduceQuantityLabel(): string {
 			const { reduceQuantityLabel } = getConfig(
 				'woocommerce/mini-cart-items-block'
 			);
-			const { cartItem } = getContext< CartItemContext >( 'woocommerce' );
-
-			return reduceQuantityLabel.replace( '%s', cartItem.name );
+			return reduceQuantityLabel.replace( '%s', state.cartItem.name );
 		},
 
 		// Intended to be used in context of a cart item in wp-each
-		get increaseQuantityLabel() {
+		get increaseQuantityLabel(): string {
 			const { increaseQuantityLabel } = getConfig(
 				'woocommerce/mini-cart-items-block'
 			);
-			const { cartItem } = getContext< CartItemContext >( 'woocommerce' );
-
-			return increaseQuantityLabel.replace( '%s', cartItem.name );
+			return increaseQuantityLabel.replace( '%s', state.cartItem.name );
 		},
 
 		// Intended to be used in context of a cart item in wp-each
-		get quantityDescriptionLabel() {
+		get quantityDescriptionLabel(): string {
 			const { quantityDescriptionLabel } = getConfig(
 				'woocommerce/mini-cart-items-block'
 			);
-			const { cartItem } = getContext< CartItemContext >( 'woocommerce' );
-
-			return quantityDescriptionLabel.replace( '%s', cartItem.name );
+			return quantityDescriptionLabel.replace(
+				'%s',
+				state.cartItem.name
+			);
 		},
 
 		// Intended to be used in context of a cart item in wp-each
-		get removeFromCartLabel() {
+		get removeFromCartLabel(): string {
 			const { removeFromCartLabel } = getConfig(
 				'woocommerce/mini-cart-items-block'
 			);
-			const { cartItem } = getContext< CartItemContext >( 'woocommerce' );
-
-			return removeFromCartLabel.replace( '%s', cartItem.name );
+			return removeFromCartLabel.replace( '%s', state.cartItem.name );
 		},
 
 		get cartItemName() {
-			const { cartItem } = getContext< CartItemContext >( 'woocommerce' );
 			const txt = document.createElement( 'textarea' );
-			txt.innerHTML = cartItem.name;
+			txt.innerHTML = state.cartItem.name;
 			return txt.value;
-		},
-
-		get cartItems() {
-			return wooStoreState.cart.items;
 		},
 
 		// Intended to be used in context of a cart item in wp-each
@@ -247,7 +241,6 @@ store( 'woocommerce/mini-cart-items-block', {
 
 		// Intended to be used in context of a cart item in wp-each
 		get itemPrice(): string {
-			const ctx = getContext< CartItemContext >( 'woocommerce' );
 			const { currency } = getConfig( 'woocommerce' );
 
 			const normalizedCurrency = normalizeCurrencyResponse(
@@ -256,14 +249,13 @@ store( 'woocommerce/mini-cart-items-block', {
 			);
 
 			return formatPriceWithCurrency(
-				ctx.cartItem.prices.price,
+				state.cartItem.prices.price,
 				normalizedCurrency
 			);
 		},
 
 		// Intended to be used in context of a cart item in wp-each
 		get lineItemTotal(): string {
-			const ctx = getContext< CartItemContext >( 'woocommerce' );
 			const { displayCartPriceIncludingTax } = getConfig(
 				'woocommerce/mini-cart'
 			);
@@ -274,7 +266,7 @@ store( 'woocommerce/mini-cart-items-block', {
 				currency
 			);
 
-			const totals = ctx.cartItem.totals;
+			const totals = state.cartItem.totals;
 
 			const totalLinePrice = displayCartPriceIncludingTax
 				? parseInt( totals.line_subtotal, 10 ) +
@@ -289,13 +281,11 @@ store( 'woocommerce/mini-cart-items-block', {
 
 		// Intended to be used in context of a cart item in wp-each
 		get itemThumbnail(): string {
-			const ctx = getContext< CartItemContext >( 'woocommerce' );
-			return ctx.cartItem.images[ 0 ]?.thumbnail || '';
+			return state.cartItem.images[ 0 ]?.thumbnail || '';
 		},
 	},
 	actions: {
 		*incrementQuantity(): Generator< unknown, void > {
-			const { cartItem } = getContext< CartItemContext >( 'woocommerce' );
 			const { actions } = store< WooCommerce >(
 				'woocommerce',
 				{},
@@ -303,13 +293,12 @@ store( 'woocommerce/mini-cart-items-block', {
 			);
 
 			yield actions.addCartItem( {
-				id: cartItem.id,
-				quantity: cartItem.quantity + 1,
+				id: state.cartItem.id,
+				quantity: state.cartItem.quantity + 1,
 			} );
 		},
 
 		*decrementQuantity(): Generator< unknown, void > {
-			const { cartItem } = getContext< CartItemContext >( 'woocommerce' );
 			const { actions } = store< WooCommerce >(
 				'woocommerce',
 				{},
@@ -317,8 +306,8 @@ store( 'woocommerce/mini-cart-items-block', {
 			);
 
 			yield actions.addCartItem( {
-				id: cartItem.id,
-				quantity: cartItem.quantity - 1,
+				id: state.cartItem.id,
+				quantity: state.cartItem.quantity - 1,
 			} );
 		},
 	},
