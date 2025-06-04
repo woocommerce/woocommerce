@@ -6,6 +6,8 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments as SettingsPaymentsService;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
+use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
@@ -123,6 +125,7 @@ class Payments extends Task {
 	public function get_additional_data() {
 		return array(
 			'wooPaymentsIsActive'                   => $this->is_woopayments_active(),
+			'wooPaymentsIsInstalled'                => $this->is_woopayments_installed(),
 			'wooPaymentsSettingsCountryIsSupported' => $this->is_woopayments_supported_country( $this->get_payments_settings_country() ),
 			'wooPaymentsIsOnboarded'                => $this->is_woopayments_onboarded(),
 			'wooPaymentsHasTestAccount'             => $this->has_woopayments_test_account(),
@@ -139,6 +142,33 @@ class Payments extends Task {
 	 */
 	private function is_woopayments_active(): bool {
 		return class_exists( '\WC_Payments' );
+	}
+
+	/**
+	 * Check if the WooPayments plugin is installed.
+	 *
+	 * @return bool
+	 */
+	private function is_woopayments_installed(): bool {
+		if ( $this->is_woopayments_active() ) {
+			// If it is active, it is also installed.
+			return true;
+		}
+
+		$woopayments_suggestion = $this->get_woopayments_suggestion();
+		// We should have the WooPayments suggestion, but if not, return false.
+		if ( ! $woopayments_suggestion ) {
+			return false;
+		}
+
+		// Check if the suggestion has its plugin installed.
+		if ( ! empty( $woopayments_suggestion['plugin']['status'] ) &&
+			PaymentsProviders::EXTENSION_INSTALLED === $woopayments_suggestion['plugin']['status'] ) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -270,6 +300,8 @@ class Payments extends Task {
 	/**
 	 * Get the list of payments providers as it is used on the Payments Settings page.
 	 *
+	 * The list can include payments extension suggestions, the same as on the Payments Settings page.
+	 *
 	 * @return array The list of payments providers.
 	 */
 	private function get_payments_providers(): array {
@@ -277,6 +309,22 @@ class Payments extends Task {
 			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
 			return $settings_payments_service->get_payment_providers( $settings_payments_service->get_country() );
+		} catch ( \Throwable $e ) {
+			// In case of any error, return an empty array.
+			return array();
+		}
+	}
+
+	/**
+	 * Get the list of payments extension suggestions as it is used on the Payments Settings page.
+	 *
+	 * @return array The list of payments extension suggestions.
+	 */
+	private function get_payments_extension_suggestions(): array {
+		try {
+			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
+
+			return $settings_payments_service->get_payment_extension_suggestions( $settings_payments_service->get_country() );
 		} catch ( \Throwable $e ) {
 			// In case of any error, return an empty array.
 			return array();
@@ -293,6 +341,37 @@ class Payments extends Task {
 		foreach ( $providers as $provider ) {
 			if ( ! empty( $provider['id'] ) && 'woocommerce_payments' === $provider['id'] ) {
 				return $provider;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get the WooPayments payments extension suggestion details from the lists used on the Payments Settings page.
+	 *
+	 * @return array|null The WooPayments suggestion details or null if not found.
+	 */
+	private function get_woopayments_suggestion(): ?array {
+		// First, check the payments providers list.
+		$providers = $this->get_payments_providers();
+		foreach ( $providers as $provider ) {
+			if ( ! empty( $provider['_type'] ) &&
+				PaymentsProviders::TYPE_SUGGESTION === $provider['_type'] &&
+				! empty( $provider['_suggestion_id'] ) &&
+				PaymentsExtensionSuggestions::WOOPAYMENTS === $provider['_suggestion_id'] ) {
+
+				return $provider;
+			}
+		}
+
+		// If not found in the main list, check the payments extension suggestions list.
+		$suggestions = $this->get_payments_extension_suggestions();
+		foreach ( $suggestions as $suggestion ) {
+			if ( ! empty( $suggestion['id'] ) &&
+				PaymentsExtensionSuggestions::WOOPAYMENTS === $suggestion['id'] ) {
+
+				return $suggestion;
 			}
 		}
 
