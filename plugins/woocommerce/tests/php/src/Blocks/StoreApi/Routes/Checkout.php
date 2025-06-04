@@ -688,6 +688,7 @@ class Checkout extends MockeryTestCase {
 			function ( $locale ) {
 				$locale['FR']['state']['label']    = 'French state';
 				$locale['FR']['state']['required'] = true;
+				$locale['FR']['state']['hidden']   = false;
 				$locale['DE']['state']['label']    = 'German state';
 				$locale['DE']['state']['required'] = true;
 				return $locale;

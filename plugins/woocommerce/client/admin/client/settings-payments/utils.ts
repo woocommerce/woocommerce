@@ -2,8 +2,8 @@
  * External dependencies
  */
 import {
-	PaymentProvider,
-	PaymentIncentive,
+	PaymentsProvider,
+	PaymentsProviderIncentive,
 	RecommendedPaymentMethod,
 } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
@@ -18,7 +18,7 @@ import { getAdminSetting } from '~/utils/admin-settings';
 /**
  * Checks whether a payment provider has an incentive.
  */
-export const hasIncentive = ( extension: PaymentProvider ) => {
+export const hasIncentive = ( extension: PaymentsProvider ) => {
 	return !! extension._incentive;
 };
 
@@ -26,7 +26,7 @@ export const hasIncentive = ( extension: PaymentProvider ) => {
  * Checks whether an incentive is an action incentive.
  */
 export const isActionIncentive = (
-	incentive: PaymentIncentive | undefined
+	incentive: PaymentsProviderIncentive | undefined
 ) => {
 	if ( ! incentive ) {
 		return false;
@@ -39,7 +39,7 @@ export const isActionIncentive = (
  * Checks whether an incentive is a switch incentive.
  */
 export const isSwitchIncentive = (
-	incentive: PaymentIncentive | undefined
+	incentive: PaymentsProviderIncentive | undefined
 ) => {
 	if ( ! incentive ) {
 		return false;
@@ -52,7 +52,7 @@ export const isSwitchIncentive = (
  * Checks whether an incentive is dismissed in a given context.
  */
 export const isIncentiveDismissedInContext = (
-	incentive: PaymentIncentive | undefined,
+	incentive: PaymentsProviderIncentive | undefined,
 	context: string
 ) => {
 	if ( ! incentive || ! Array.isArray( incentive._dismissals ) ) {
@@ -69,7 +69,7 @@ export const isIncentiveDismissedInContext = (
  * Checks whether an incentive is dismissed in a given context and if it was dismissed before a given reference timestamp.
  */
 export const isIncentiveDismissedEarlierThanTimestamp = (
-	incentive: PaymentIncentive | undefined,
+	incentive: PaymentsProviderIncentive | undefined,
 	context: string,
 	referenceTimestampMs: number // UNIX timestamp in milliseconds.
 ): boolean => {
@@ -102,7 +102,7 @@ export const isWooPayments = ( id: string ) => {
 /**
  * Checks whether a provider is WooPayments and that it is eligible for WooPay.
  */
-export const isWooPayEligible = ( provider: PaymentProvider ) => {
+export const isWooPayEligible = ( provider: PaymentsProvider ) => {
 	return (
 		isWooPayments( provider.id ) &&
 		( provider.tags?.includes( 'woopay_eligible' ) || false )
@@ -119,11 +119,10 @@ export const getWooPaymentsTestDriveAccountLink = () => {
 
 export const resetWooPaymentsAccount = async () => {
 	try {
-		const response = await apiFetch( {
+		return await apiFetch( {
 			url: '/wp-json/wc-admin/settings/payments/woopayments/onboarding/reset',
 			method: 'POST',
 		} );
-		return response;
 	} catch ( error ) {
 		throw error;
 	}
@@ -134,11 +133,10 @@ export const resetWooPaymentsAccount = async () => {
  */
 export const disableWooPaymentsTestMode = async () => {
 	try {
-		const response = await apiFetch( {
+		return await apiFetch( {
 			url: '/wp-json/wc-admin/settings/payments/woopayments/onboarding/test_account/disable',
 			method: 'POST',
 		} );
-		return response;
 	} catch ( error ) {
 		throw error;
 	}
@@ -163,7 +161,7 @@ export const getPaymentMethodById =
  * @param providers payment providers
  */
 export const providersContainWooPaymentsInTestMode = (
-	providers: PaymentProvider[]
+	providers: PaymentsProvider[]
 ): boolean => {
 	const wooPayments = providers.find( ( obj ) => isWooPayments( obj.id ) );
 	return (
@@ -177,7 +175,7 @@ export const providersContainWooPaymentsInTestMode = (
  * @param providers Payment providers
  */
 export const providersContainWooPaymentsNeedsSetup = (
-	providers: PaymentProvider[]
+	providers: PaymentsProvider[]
 ): boolean => {
 	const wooPayments = providers.find( ( obj ) => isWooPayments( obj.id ) );
 	return wooPayments?.state?.needs_setup || false;
@@ -189,22 +187,22 @@ export const providersContainWooPaymentsNeedsSetup = (
  * @param providers payment providers
  */
 export const getWooPaymentsFromProviders = (
-	providers: PaymentProvider[]
-): PaymentProvider | null => {
+	providers: PaymentsProvider[]
+): PaymentsProvider | null => {
 	return providers.find( ( obj ) => isWooPayments( obj.id ) ) ?? null;
 };
 
 /**
  * Retrieves updated recommended payment methods for WooPayments.
  *
- * @param {PaymentProvider[]} providers Array of updated payment providers.
+ * @param {PaymentsProvider[]} providers Array of updated payment providers.
  * @return {RecommendedPaymentMethod[]} List of recommended payment methods.
  */
 export const getRecommendedPaymentMethods = (
-	providers: PaymentProvider[]
+	providers: PaymentsProvider[]
 ): RecommendedPaymentMethod[] => {
 	const updatedWooPaymentsProvider = providers.find(
-		( provider: PaymentProvider ) => isWooPayments( provider.id )
+		( provider: PaymentsProvider ) => isWooPayments( provider.id )
 	);
 
 	return (
@@ -219,7 +217,7 @@ export const getRecommendedPaymentMethods = (
  * @param providers payment providers
  */
 export const providersContainWooPaymentsInDevMode = (
-	providers: PaymentProvider[]
+	providers: PaymentsProvider[]
 ): boolean => {
 	const wooPayments = providers.find( ( obj ) => isWooPayments( obj.id ) );
 	return !! wooPayments?.state?.dev_mode;

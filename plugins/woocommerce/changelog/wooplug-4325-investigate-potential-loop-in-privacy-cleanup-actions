@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix anonymize_refunded_orders args to ignore anonymized orders

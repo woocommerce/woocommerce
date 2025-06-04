@@ -26,6 +26,41 @@ class BlockifiedProductDetails extends AbstractBlock {
 	}
 
 	/**
+	 * Initialize the block type.
+	 *
+	 * @return void
+	 */
+	protected function initialize() {
+		parent::initialize();
+
+		/**
+		 * Filter the blocks that are hooked into the Product Details block.
+		 *
+		 * @hook woocommerce_product_details_hooked_blocks
+		 *
+		 * @since 10.0.0
+		 * @param {array} $hooked_blocks The blocks that are hooked into the Product Details block.
+		 * @return {array} The blocks that are hooked into the Product Details block.
+		 */
+		$hooked_blocks = apply_filters( 'woocommerce_product_details_hooked_blocks', [] );
+
+		foreach ( $this->validate_hooked_blocks( $hooked_blocks ) as $slug => $block ) {
+			$this->register_hooked_block( $slug, $block );
+		}
+	}
+
+	/**
+	 * Get the frontend script handle for this block type.
+	 *
+	 * @see $this->register_block_type()
+	 * @param string $key Data to get, or default to everything.
+	 * @return array|string|null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -263,13 +298,101 @@ class BlockifiedProductDetails extends AbstractBlock {
 	}
 
 	/**
-	 * Get the frontend script handle for this block type.
+	 * Validate hooked blocks data. Remove duplicated entries with the same title
+	 * and invalid entries with invalid content. Log errors to the WC logger.
 	 *
-	 * @see $this->register_block_type()
-	 * @param string $key Data to get, or default to everything.
-	 * @return array|string|null
+	 * @param array $hooked_blocks { Hooked blocks data.
+	 *   @type string $title Title of the hooked block.
+	 *   @type string $content Content of the hooked block, as block markup.
+	 * }
+	 *
+	 * @return array Validated hooked blocks.
 	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
+	private function validate_hooked_blocks( $hooked_blocks ) {
+		$logger                  = wc_get_logger();
+		$validated_hooked_blocks = [];
+
+		foreach ( $hooked_blocks as $block ) {
+			$invalid = ! is_array( $block ) ||
+					! isset( $block['title'] ) ||
+					! isset( $block['content'] ) ||
+					! is_string( $block['title'] ) ||
+					! is_string( $block['content'] );
+
+			if ( ! $invalid ) {
+				$parsed_content = parse_blocks( $block['content'] );
+
+				foreach ( $parsed_content as $content_block ) {
+					if ( ! isset( $content_block['blockName'] ) ) {
+						$invalid = true;
+						break;
+					}
+				}
+			}
+
+			if ( $invalid ) {
+				$logger->error( 'Invalid hooked block data. Expected array with `title` and `content` keys with string values. Content must be valid block markup.', $block );
+				continue;
+			}
+
+			$slug = sanitize_title( $block['title'] );
+
+			/**
+			 * If the block is already registered, replace the block. We use the
+			 * last registered block for the same slug. This makes overriding
+			 * hooked block easier.
+			 */
+			if ( isset( $validated_hooked_blocks[ $slug ] ) ) {
+				$validated_hooked_blocks[ $slug ] = $block;
+				continue;
+			}
+
+			$validated_hooked_blocks[ $slug ] = $block;
+		}
+
+		return $validated_hooked_blocks;
+	}
+
+	/**
+	 * Register a product details item using Block Hooks API.
+	 *
+	 * @param string $slug The slug of the item.
+	 * @param array  $block The block data.
+	 * @return void
+	 */
+	private function register_hooked_block( $slug, $block ) {
+		add_filter(
+			'hooked_block_types',
+			function ( $hooked_block_types, $relative_position, $anchor_block_type ) use ( $slug ) {
+				if (
+					'woocommerce/accordion-group' === $anchor_block_type &&
+					'last_child' === $relative_position &&
+					! in_array( $slug, $hooked_block_types, true )
+				) {
+					$hooked_block_types[] = $slug;
+				}
+				return $hooked_block_types;
+			},
+			10,
+			3
+		);
+
+		add_filter(
+			"hooked_block_{$slug}",
+			function ( $parsed_hooked_block, $hooked_block_type, $relative_position, $parsed_anchor_block ) use ( $block ) {
+				if (
+					is_null( $parsed_hooked_block ) ||
+					'woocommerce/accordion-group' !== $parsed_anchor_block['blockName'] ||
+					'last_child' !== $relative_position ||
+					empty( $parsed_anchor_block['attrs']['metadata']['isDescendantOfProductDetails'] )
+				) {
+					return null;
+				}
+
+				return $this->create_accordion_item_block( $block['title'], $block['content'] );
+			},
+			10,
+			4
+		);
 	}
 }

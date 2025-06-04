@@ -209,10 +209,6 @@ class ProductButton extends AbstractBlock {
 			$args['attributes']['aria-label'] = wp_strip_all_tags( $args['attributes']['aria-label'] );
 		}
 
-		if ( isset( WC()->cart ) && ! WC()->cart->is_empty() ) {
-			$this->prevent_cache();
-		}
-
 		$div_directives = '
 			data-wp-interactive="woocommerce/product-button"
 			data-wp-context=\'' . wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
@@ -220,7 +216,7 @@ class ProductButton extends AbstractBlock {
 		';
 
 		$button_directives = $is_descendant_of_add_to_cart_form ? '' : 'data-wp-on--click="actions.addCartItem"';
-		$anchor_directive  = 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"';
+		$anchor_directive  = $is_descendant_of_add_to_cart_form ? '' : 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"';
 
 		$span_button_directives = '
 			data-wp-text="state.addToCartText"
@@ -303,14 +299,6 @@ class ProductButton extends AbstractBlock {
 
 		$cart = WC()->cart->get_cart_item_quantities();
 		return isset( $cart[ $product_id ] ) ? $cart[ $product_id ] : 0;
-	}
-
-	/**
-	 * Prevent caching on certain pages
-	 */
-	private function prevent_cache() {
-		\WC_Cache_Helper::set_nocache_constants();
-		nocache_headers();
 	}
 
 	/**

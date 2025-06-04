@@ -220,30 +220,75 @@ class AddToCartWithOptions extends AbstractBlock {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_button' );
 				} elseif ( ProductType::EXTERNAL === $product_type ) {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_button' );
 				} elseif ( ProductType::GROUPED === $product_type ) {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_button' );
 				} elseif ( ProductType::VARIABLE === $product_type ) {
 					/**
 					 * Hook: woocommerce_before_variations_form.
 					 *
-					 * @since 2.4.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_variations_form' );
+					/**
+					 * Hook: woocommerce_after_variations_table.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_after_variations_table' );
+					/**
+					 * Hook: woocommerce_before_single_variation.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_before_single_variation' );
+
+					// WooCommerce uses `woocommerce_single_variation` to render
+					// some UI elements like the Add to Cart button for
+					// variations. We need to remove them to avoid those UI
+					// elements being duplicate with the blocks.
+					// We later add these actions back to avoid affecting other
+					// blocks or templates.
+					remove_action( 'woocommerce_single_variation', 'woocommerce_single_variation', 10 );
+					remove_action( 'woocommerce_single_variation', 'woocommerce_single_variation_add_to_cart_button', 20 );
+					/**
+					 * Hook: woocommerce_single_variation.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_single_variation' );
+					if ( function_exists( 'woocommerce_single_variation' ) ) {
+						add_action( 'woocommerce_single_variation', 'woocommerce_single_variation', 10 );
+					}
+					if ( function_exists( 'woocommerce_single_variation_add_to_cart_button' ) ) {
+						add_action( 'woocommerce_single_variation', 'woocommerce_single_variation_add_to_cart_button', 20 );
+					}
+					/**
+					 * Hook: woocommerce_before_add_to_cart_button.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_before_add_to_cart_button' );
+					/**
+					 * Hook: woocommerce_before_add_to_cart_quantity.
+					 *
+					 * @since 2.7.0
+					 */
+					do_action( 'woocommerce_before_add_to_cart_quantity' );
 				}
 				$hooks_before = ob_get_clean();
 
@@ -252,34 +297,52 @@ class AddToCartWithOptions extends AbstractBlock {
 					/**
 					 * Hook: woocommerce_after_add_to_cart_quantity.
 					 *
-					 * @since 2.7.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_add_to_cart_quantity' );
 					/**
 					 * Hook: woocommerce_after_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_add_to_cart_button' );
 				} elseif ( ProductType::EXTERNAL === $product_type ) {
 					/**
 					 * Hook: woocommerce_after_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_add_to_cart_button' );
 				} elseif ( ProductType::GROUPED === $product_type ) {
 					/**
 					 * Hook: woocommerce_after_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_add_to_cart_button' );
 				} elseif ( ProductType::VARIABLE === $product_type ) {
 					/**
+					 * Hook: woocommerce_after_add_to_cart_quantity.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_after_add_to_cart_quantity' );
+					/**
+					 * Hook: woocommerce_after_add_to_cart_button.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_after_add_to_cart_button' );
+					/**
+					 * Hook: woocommerce_after_single_variation.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_after_single_variation' );
+					/**
 					 * Hook: woocommerce_after_variations_form.
 					 *
-					 * @since 2.4.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_variations_form' );
 				}
@@ -293,10 +356,11 @@ class AddToCartWithOptions extends AbstractBlock {
 			remove_filter( 'render_block_context', array( $this, 'set_is_descendant_of_add_to_cart_with_options_context' ) );
 
 			$wrapper_attributes = array(
-				'class'               => $classes,
-				'style'               => esc_attr( $classes_and_styles['styles'] ),
-				'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
-				'data-wp-context'     => wp_json_encode(
+				'class'                     => $classes,
+				'style'                     => esc_attr( $classes_and_styles['styles'] ),
+				'data-wp-interactive'       => 'woocommerce/add-to-cart-with-options',
+				'data-wp-class--is-invalid' => '!state.isFormValid',
+				'data-wp-context'           => wp_json_encode(
 					$context,
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 				),
@@ -326,12 +390,15 @@ class AddToCartWithOptions extends AbstractBlock {
 					$hidden_input = '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '" />';
 				} elseif ( ProductType::GROUPED === $product_type ) {
 					$hidden_input = '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '" />';
+				} elseif ( ProductType::VARIABLE === $product_type ) {
+					$hidden_input  = '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '" />';
+					$hidden_input .= '<input type="hidden" name="product_id" value="' . $product->get_id() . '" />';
+					$hidden_input .= '<input type="hidden" name="variation_id" data-wp-interactive="woocommerce/add-to-cart-with-options" data-wp-bind--value="state.variationId" />';
 				}
 			} else {
 				// Otherwise, we use the Interactivity API.
 				$form_attributes = array(
-					'data-wp-on--submit'        => 'actions.handleSubmit',
-					'data-wp-class--is-invalid' => '!state.isFormValid',
+					'data-wp-on--submit' => 'actions.handleSubmit',
 				);
 			}
 

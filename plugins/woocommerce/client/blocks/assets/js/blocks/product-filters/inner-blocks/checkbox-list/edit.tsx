@@ -46,7 +46,7 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 		customOptionElement,
 	} = attributes;
 	const { filterData } = context;
-	const { isLoading, items } = filterData;
+	const { isLoading, items, showCounts } = filterData;
 
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
 	const blockProps = useBlockProps( {
@@ -111,8 +111,15 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 												icon={ checkMark }
 											/>
 										</span>
-										<span className="wc-block-product-filter-checkbox-list__text">
-											{ item.label }
+										<span className="wc-block-product-filter-checkbox-list__text-wrapper">
+											<span className="wc-block-product-filter-checkbox-list__text">
+												{ item.label }
+											</span>
+											{ showCounts && (
+												<span className="wc-block-product-filter-checkbox-list__count">
+													{ ` (${ item.count })` }
+												</span>
+											) }
 										</span>
 									</label>
 								</li>

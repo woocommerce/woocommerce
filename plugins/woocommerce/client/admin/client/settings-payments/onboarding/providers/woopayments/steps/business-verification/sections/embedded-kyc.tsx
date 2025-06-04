@@ -75,7 +75,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 			'woopayments_onboarding_modal_kyc_load_error',
 			{
 				error_type: err.error.type,
-				error_message: err.error.message || '',
+				error_message: err.error.message || 'no_message',
 				collect_payout_requirements: collectPayoutRequirements,
 			}
 		);
