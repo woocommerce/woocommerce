@@ -176,14 +176,18 @@ export function TaxonomyControlsField( {
 	query,
 	collection,
 }: QueryControlProps & { collection: string | undefined } ) {
-	const { filteredTaxonomies, taxQuery, createHandleChange, shouldShowTaxonomyControl } =
-		useTaxonomyControls( {
-			query,
-			collection,
-			setQueryAttribute,
-			trackInteraction,
-			isFiltersPanel: false,
-		} );
+	const {
+		filteredTaxonomies,
+		taxQuery,
+		createHandleChange,
+		shouldShowTaxonomyControl,
+	} = useTaxonomyControls( {
+		query,
+		collection,
+		setQueryAttribute,
+		trackInteraction,
+		isFiltersPanel: false,
+	} );
 
 	if ( ! shouldShowTaxonomyControl ) {
 		return null;

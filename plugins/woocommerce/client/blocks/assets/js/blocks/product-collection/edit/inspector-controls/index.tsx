@@ -334,8 +334,7 @@ const CollectionSpecificControls = (
 				/**
 				 * "Hand-Picked" collection-specific controls.
 				 */
-				collection ===
-					CoreCollectionNames.HAND_PICKED && (
+				collection === CoreCollectionNames.HAND_PICKED && (
 					<PanelBody>
 						<HandPickedProductsControlField
 							{ ...queryControlProps }
