@@ -30,7 +30,16 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 		$other_costs_label                = __( 'Shipping, taxes, and discounts calculated at checkout.', 'woocommerce' );
 		$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === 'incl';
 		$subtotal                         = $display_cart_price_including_tax ? $cart->get_subtotal_tax() : $cart->get_subtotal();
-		$formatted_amount                 = wc_price( $subtotal );
+		$formatted_subtotal               = '';
+		$html                             = new \WP_HTML_Tag_Processor( wc_price( $subtotal ) );
+
+		if ( $html->next_tag( 'bdi' ) ) {
+			while ( $html->next_token() ) {
+				if ( '#text' === $html->get_token_name() ) {
+						$formatted_subtotal .= $html->get_modifiable_text();
+				}
+			}
+		}
 
 		wp_interactivity_config(
 			$this->get_full_block_name(),
@@ -42,7 +51,7 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 		wp_interactivity_state(
 			$this->get_full_block_name(),
 			array(
-				'formattedSubtotal' => $formatted_amount,
+				'formattedSubtotal' => $formatted_subtotal,
 			)
 		);
 
