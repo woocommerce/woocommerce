@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent orphaned image uploads via REST API when product creation fails due to validation errors (e.g., duplicate SKU with original in trash).

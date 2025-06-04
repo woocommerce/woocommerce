@@ -117,7 +117,7 @@ const TestAccountStep = () => {
 
 	const handleContinue = () => {
 		recordPaymentsOnboardingEvent( 'woopayments_onboarding_modal_click', {
-			step: currentStep?.id || '',
+			step: currentStep?.id || 'unknown',
 			action: 'activate_payments',
 		} );
 
@@ -507,7 +507,7 @@ const TestAccountStep = () => {
 									recordPaymentsOnboardingEvent(
 										'woopayments_onboarding_modal_click',
 										{
-											step: currentStep?.id || '',
+											step: currentStep?.id || 'unknown',
 											action: 'continue_store_setup',
 										}
 									);
@@ -564,7 +564,9 @@ const TestAccountStep = () => {
 											recordPaymentsOnboardingEvent(
 												'woopayments_onboarding_modal_click',
 												{
-													step: currentStep?.id || '',
+													step:
+														currentStep?.id ||
+														'unknown',
 													action: 'try_again_on_error',
 													retries: retryCounter + 1,
 												}
@@ -583,7 +585,9 @@ const TestAccountStep = () => {
 											recordPaymentsOnboardingEvent(
 												'woopayments_onboarding_modal_click',
 												{
-													step: currentStep?.id || '',
+													step:
+														currentStep?.id ||
+														'unknown',
 													action: 'cancel_on_error',
 													retries: retryCounter,
 												}

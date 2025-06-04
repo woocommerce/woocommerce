@@ -58,6 +58,7 @@ export const GROUPED_PRODUCT_ITEM_TEMPLATE: TemplateArray = [
 							layout: {
 								type: 'flex',
 								orientation: 'vertical',
+								justifyContent: 'right',
 							},
 							style: {
 								spacing: {
