@@ -45,8 +45,7 @@ export default function FulfillmentEditor( {
 	order,
 	disabled = false,
 }: FulfillmentEditorProps ) {
-	const [ editMode, setEditMode ] = useState( false );
-	const { setIsEditing } = useFulfillmentDrawerContext();
+	const { isEditing, setIsEditing } = useFulfillmentDrawerContext();
 	const [ error, setError ] = useState< string | null >( null );
 	const itemsInFulfillment = getItemsFromFulfillment( order, fulfillment );
 	const itemsNotInAnyFulfillment = getItemsNotInAnyFulfillment(
@@ -59,7 +58,7 @@ export default function FulfillmentEditor( {
 	);
 
 	const handleChevronClick = () => {
-		if ( editMode ) return;
+		if ( isEditing ) return;
 		if ( ! expanded ) {
 			onExpand();
 		} else {
@@ -94,7 +93,7 @@ export default function FulfillmentEditor( {
 					{
 						// eslint-disable-next-line @wordpress/valid-sprintf
 						sprintf(
-							editMode
+							isEditing
 								? /* translators: %s: Fulfillment ID */
 								  __( 'Editing fulfillment #%s', 'woocommerce' )
 								: /* translators: %s: Fulfillment ID */
@@ -108,7 +107,7 @@ export default function FulfillmentEditor( {
 					<Icon
 						icon={ expanded ? 'arrow-up-alt2' : 'arrow-down-alt2' }
 						size={ 16 }
-						color={ editMode ? '#dddddd' : undefined }
+						color={ isEditing ? '#dddddd' : undefined }
 					/>
 				</Button>
 			</div>
@@ -120,16 +119,15 @@ export default function FulfillmentEditor( {
 						order={ order }
 						fulfillment={ fulfillment }
 						items={
-							editMode ? selectableItems : itemsInFulfillment
+							isEditing ? selectableItems : itemsInFulfillment
 						}
 					>
-						<ItemSelector editMode={ editMode } />
+						<ItemSelector editMode={ isEditing } />
 						<div className="woocommerce-fulfillment-item-actions">
-							{ ! editMode ? (
+							{ ! isEditing ? (
 								<>
 									<EditFulfillmentButton
 										onClick={ () => {
-											setEditMode( true );
 											setIsEditing( true );
 										} }
 									/>
@@ -141,7 +139,6 @@ export default function FulfillmentEditor( {
 										onClick={ () => {
 											setError( null );
 											setIsEditing( false );
-											setEditMode( false );
 										} }
 									/>
 									<RemoveButton
