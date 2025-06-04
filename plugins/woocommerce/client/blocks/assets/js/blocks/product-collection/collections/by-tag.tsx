@@ -11,7 +11,10 @@ import { Icon, tag } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import { INNER_BLOCKS_PRODUCT_TEMPLATE } from '../constants';
+import {
+	INNER_BLOCKS_PRODUCT_TEMPLATE,
+	INNER_BLOCKS_PAGINATION_TEMPLATE,
+} from '../constants';
 import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
@@ -44,20 +47,10 @@ const heading: InnerBlockTemplate = [
 	},
 ];
 
-const pagination: InnerBlockTemplate = [
-	'core/query-pagination',
-	{
-		layout: {
-			type: 'flex',
-			justifyContent: 'center',
-		},
-	},
-];
-
 const innerBlocks: InnerBlockTemplate[] = [
 	heading,
 	INNER_BLOCKS_PRODUCT_TEMPLATE,
-	pagination,
+	INNER_BLOCKS_PAGINATION_TEMPLATE,
 ];
 
 export default {
