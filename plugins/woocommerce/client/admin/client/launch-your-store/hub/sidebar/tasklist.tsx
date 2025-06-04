@@ -21,6 +21,7 @@ import {
 	createStorageUtils,
 } from '@woocommerce/onboarding';
 import { getAdminLink } from '@woocommerce/settings';
+import { __ } from '@wordpress/i18n';
 
 const SEVEN_DAYS_IN_SECONDS = 60 * 60 * 24 * 7;
 export const LYS_RECENTLY_ACTIONED_TASKS_KEY = 'lys_recently_actioned_tasks';
@@ -60,6 +61,18 @@ export const getLysTasklist = async () => {
 	] );
 
 	const recentlyActionedTasks = getRecentlyActionedTasks() ?? [];
+
+	// This is a special case for the payments task.
+	// We need to override the task completion status and title based on the additional data.
+	// This is because LYS and the Home screen share the same task list, but the completion logic is different.
+	tasklist[ 0 ].tasks.forEach( ( task: TaskType ) => {
+		if ( task.id === 'payments' ) {
+			task.isComplete =
+				task.additionalData?.wooPaymentsHasOnlineGatewaysEnabled ??
+				false;
+			task.title = __( 'Set up payments', 'woocommerce' );
+		}
+	} );
 
 	/**
 	 * Show tasks that fulfill all the following conditions:

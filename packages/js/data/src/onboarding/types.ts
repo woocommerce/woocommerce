@@ -42,6 +42,7 @@ export type TaskType = {
 		wooPaymentsHasTestAccount?: boolean;
 		wooPaymentsHasOtherProvidersEnabled?: boolean;
 		wooPaymentsHasOtherProvidersNeedSetup?: boolean;
+		wooPaymentsHasOnlineGatewaysEnabled?: boolean;
 	};
 	// Possibly added in DeprecatedTasks.mergeDeprecatedCallbackFunctions
 	isDeprecated?: boolean;

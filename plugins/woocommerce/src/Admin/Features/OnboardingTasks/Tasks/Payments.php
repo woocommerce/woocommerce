@@ -68,7 +68,7 @@ class Payments extends Task {
 	 */
 	public function is_complete() {
 		if ( null === $this->is_complete_result ) {
-			$this->is_complete_result = ! $this->has_woopayments_test_account() && self::has_online_gateways();
+			$this->is_complete_result = self::has_gateways();
 		}
 
 		return $this->is_complete_result;
@@ -82,23 +82,6 @@ class Payments extends Task {
 	public function can_view() {
 		// The task is always visible.
 		return true;
-	}
-
-	/**
-	 * Check if the store has any enabled online gateways.
-	 *
-	 * @return bool
-	 */
-	public static function has_online_gateways() {
-		$gateways         = WC()->payment_gateways()->payment_gateways;
-		$enabled_gateways = array_filter(
-			$gateways,
-			function ( $gateway ) {
-				return 'yes' === $gateway->enabled && ! in_array( $gateway->id, array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ), true );
-			}
-		);
-
-		return ! empty( $enabled_gateways );
 	}
 
 	/**
@@ -145,6 +128,7 @@ class Payments extends Task {
 			'wooPaymentsHasTestAccount'             => $this->has_woopayments_test_account(),
 			'wooPaymentsHasOtherProvidersEnabled'   => $this->has_providers_enabled_other_than_woopayments(),
 			'wooPaymentsHasOtherProvidersNeedSetup' => $this->has_providers_needing_setup_other_than_woopayments(),
+			'wooPaymentsHasOnlineGatewaysEnabled'   => $this->has_online_gateways(),
 		);
 	}
 
@@ -313,5 +297,28 @@ class Payments extends Task {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Check if the store has any enabled online gateways.
+	 *
+	 * @return bool
+	 */
+	private function has_online_gateways(): bool {
+		$providers = $this->get_payments_providers();
+
+		foreach ( $providers as $provider ) {
+			// Check if the provider is enabled and is not WooPayments.
+			if (
+				! empty( $provider['state']['enabled'] ) &&
+				! empty( $provider['id'] ) &&
+				! in_array( $provider['id'], array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ), true ) &&
+				'woocommerce_payments' !== $provider['id']
+			) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
