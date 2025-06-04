@@ -18,7 +18,7 @@ class NotificationsListTable extends \WP_List_Table {
 	 *
 	 * @const PAGE_URL
 	 */
-	const PAGE_URL = 'admin.php?page=customer_stock_notifications';
+	const PAGE_URL = 'admin.php?page=wc-customer-stock-notifications';
 
 	/**
 	 * Total view records.
@@ -144,15 +144,15 @@ class NotificationsListTable extends \WP_List_Table {
 	 */
 	public function column_id( $notification ) {
 		$actions = array(
-			'edit'   => sprintf( '<a href="' . admin_url( 'admin.php?page=customer_stock_notifications&section=edit&notification=%d' ) . '">%s</a>', $notification->get_id(), __( 'Edit', 'woocommerce' ) ),
-			'delete' => sprintf( '<a href="' . wp_nonce_url( admin_url( 'admin.php?page=customer_stock_notifications&section=delete&notification=%d' ), 'delete_customer_stock_notification' ) . '">%s</a>', $notification->get_id(), __( 'Delete', 'woocommerce' ) ),
+			'edit'   => sprintf( '<a href="' . admin_url( 'admin.php?page=wc-customer-stock-notifications&section=edit&notification=%d' ) . '">%s</a>', $notification->get_id(), __( 'Edit', 'woocommerce' ) ),
+			'delete' => sprintf( '<a href="' . wp_nonce_url( admin_url( 'admin.php?page=wc-customer-stock-notifications&section=delete&notification=%d' ), 'delete_customer_stock_notification' ) . '">%s</a>', $notification->get_id(), __( 'Delete', 'woocommerce' ) ),
 		);
 
 		$title = $notification->get_id();
 
 		printf(
 			'<a class="row-title" href="%s" aria-label="%s">#%s</a>%s',
-			esc_url( admin_url( 'admin.php?page=customer_stock_notifications&section=edit&notification=' . $notification->get_id() ) ),
+			esc_url( admin_url( 'admin.php?page=wc-customer-stock-notifications&section=edit&notification=' . $notification->get_id() ) ),
 			/* translators: %s: Notification code */
 			sprintf( esc_attr__( '&#8220;%s&#8221; (Edit)', 'woocommerce' ), esc_attr( $title ) ),
 			esc_html( $title ),
