@@ -65,7 +65,6 @@ jobs:
         with:
             node-version-file: .nvmrc
             cache: pnpm
-            registry-url: 'https://registry.npmjs.org'
 
       - name: Install prerequisites
         run: |
