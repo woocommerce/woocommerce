@@ -303,7 +303,8 @@ module.exports = {
 				//  of changes needed to fix for example `export *` of packages with only default exports
 				//  we will leave these as warnings for now until those can be fixed.
 				'import/namespace': 'warn',
-				'import/export': 'warn',
+				'import/export': 'error',
+				'react-hooks/exhaustive-deps': 'error',
 			},
 			settings: {
 				'import/parsers': {
