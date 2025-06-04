@@ -182,7 +182,13 @@ const { state, actions } = store< Store >(
 							variation: item.variation,
 						} as OptimisticCartItem;
 						state.cart.items.push( item );
-						quantityChanges.productsPendingAdd = [ item.id ];
+						quantityChanges.productsPendingAdd =
+							quantityChanges.productsPendingAdd
+								? [
+										...quantityChanges.productsPendingAdd,
+										item.id,
+								  ]
+								: [ item.id ];
 
 						return {
 							method: 'POST',
