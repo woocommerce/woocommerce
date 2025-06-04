@@ -20,7 +20,6 @@ export type Context = {
 	quantity: Record< number, number >;
 	tempQuantity: number;
 	groupedProductIds: number[];
-	groupedVariableProductIds: number[];
 };
 
 interface GroupedCartItem {
@@ -222,7 +221,6 @@ const addToCartWithOptionsStore = store(
 					selectedAttributes,
 					productType,
 					groupedProductIds,
-					groupedVariableProductIds,
 				} = getContext< Context >();
 
 				if (
@@ -236,13 +234,6 @@ const addToCartWithOptionsStore = store(
 							( item ) => item.id === childProductId
 						);
 						const currentQuantity = existingProduct?.quantity || 0;
-
-						// Skip adding variable products to the cart when grouped.
-						if (
-							groupedVariableProductIds.includes( childProductId )
-						) {
-							continue;
-						}
 
 						addedItems.push( {
 							id: childProductId,

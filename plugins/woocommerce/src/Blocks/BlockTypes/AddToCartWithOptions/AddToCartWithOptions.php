@@ -81,6 +81,26 @@ class AddToCartWithOptions extends AbstractBlock {
 	}
 
 	/**
+	 * Check if a child product is purchasable.
+	 *
+	 * @param \WC_Product $product The product to check.
+	 * @return bool True if the product is purchasable, false otherwise.
+	 */
+	private function is_child_product_purchasable( \WC_Product $product ) {
+		// Skip variable products.
+		if ( $product->is_type( 'variable' ) ) {
+			return false;
+		}
+
+		// Skip grouped products.
+		if ( $product->is_type( 'grouped' ) ) {
+			return false;
+		}
+
+		return $product->is_purchasable() && $product->is_in_stock();
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -196,19 +216,20 @@ class AddToCartWithOptions extends AbstractBlock {
 			}
 
 			if ( $product->is_type( 'grouped' ) ) {
-				$context['groupedProductIds'] = $product->get_children();
-				$context['quantity']          = array_fill_keys(
+				// Add context for purchasable child products.
+				$context['groupedProductIds'] = array();
+				foreach ( $product->get_children() as $child_product_id ) {
+					$child_product = wc_get_product( $child_product_id );
+					if ( $child_product && $this->is_child_product_purchasable( $child_product ) ) {
+						$context['groupedProductIds'][] = $child_product_id;
+					}
+				}
+
+				// Add quantity context for purchasable child products.
+				$context['quantity'] = array_fill_keys(
 					$context['groupedProductIds'],
 					$default_quantity
 				);
-
-				// Add variable product context for grouped products.
-				foreach ( $context['groupedProductIds'] as $child_product_id ) {
-					$child_product = wc_get_product( $child_product_id );
-					if ( $child_product && $child_product->is_type( 'variable' ) ) {
-						$context['groupedVariableProductIds'][] = $child_product_id;
-					}
-				}
 			}
 
 			$hooks_before = '';
