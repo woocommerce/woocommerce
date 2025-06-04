@@ -9,6 +9,8 @@ import { addAProductToCart } from '@woocommerce/e2e-utils-playwright';
 import { tags, test } from '../../fixtures/fixtures';
 import { WC_API_PATH } from '../../utils/api-client';
 import { checkCartContentInBlocksCart } from '../../utils/cart';
+import { it } from '@jest/globals';
+import { shopper, uiUnblocked } from '@woocommerce/e2e-utils';
 
 const productName = `Cart product test ${ Date.now() }`;
 const productPrice = '13.99';
@@ -89,5 +91,30 @@ test.describe(
 				);
 			}
 		);
+
+		test( 'should remove the item from the min-cart when remove is clicked', async () => {
+			await shopper.goToShop();
+			await shopper.addToCartFromShopPage( productId );
+
+			await page.hover( '.site-header-cart' );
+			await uiUnblocked();
+
+			const removeSelector = '.remove_from_cart_button';
+			const removeRole = await page.$eval( removeSelector, ( el ) =>
+				el.getAttribute( 'role' )
+			);
+			expect( removeRole ).toBe( 'button' );
+
+			await page.focus( removeSelector );
+			await page.keyboard.press( 'Space' );
+			await uiUnblocked();
+
+			await expect( page ).toMatchElement(
+				'.woocommerce-mini-cart__empty-message',
+				{
+					text: 'No products in the cart.',
+				}
+			);
+		} );
 	}
 );
