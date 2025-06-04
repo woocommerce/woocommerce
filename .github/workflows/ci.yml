@@ -562,17 +562,16 @@ jobs:
             needs-docs-linting:
               - 'docs/**/*.md'
 
-      - name: Setup - node
+      - name: 'Setup - node'
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: .nvmrc
 
-      - name: Setup - utility-packages
+      - name: 'Setup - markdownlint-cli'
         run: |
           npm install -g markdownlint-cli
-          npm --prefix .github/workflows/scripts install @actions/core
 
-      - name: Validate - lint md-files
+      - name: 'Validate - lint md-files'
         shell: bash
         run: |
           added_and_modified_docs="${{ steps.repo-changed-files.outputs.added_files }} ${{ steps.repo-changed-files.outputs.modified_files }}"
