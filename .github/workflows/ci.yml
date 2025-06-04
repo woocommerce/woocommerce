@@ -562,7 +562,7 @@ jobs:
               - added|modified: '!({.github,docs}/**)/**/*.md'
               - added|modified: '*.md'
             needs-docs-linting:
-              - added|modified: 'docs/**/*.md'
+              - 'docs/**/*.md'
 
       - name: 'Setup - node'
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -579,5 +579,8 @@ jobs:
       - name: 'Validate - lint docs-files'
         if: ${{ always() && steps.target-changes.outputs.needs-docs-linting }}
         shell: bash
+        working-directory: docs/_docu-tools
         run: |
-          echo "Linting docs here: ${{ steps.target-changes.outputs.needs-docs-linting_files }}"
+            npm install -g corepack@latest && corepack enable pnpm
+            pnpm install --frozen-lockfile
+            npm run deploy-build
