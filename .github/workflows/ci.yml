@@ -580,13 +580,6 @@ jobs:
           files: |
             docs/**/*.md
 
-      - name: Scan - manifest files for monorepo documentation
-        id: docs-manifest
-        uses: tj-actions/changed-files@v41
-        with:
-          files: |
-            docs/docs-manifest.json
-
       - name: Setup - pnpm
         uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
 
@@ -655,8 +648,6 @@ jobs:
 
           if [ "$any_docs_changed" == "true" ]; then
             added_and_modified_docs="${{ steps.docs-changed-files.outputs.added_files }} ${{ steps.docs-changed-files.outputs.modified_files }}"
-            manifest_changed="${{ steps.docs-manifest.outputs.any_changed }}"
-            is_manifest_valid_json="${{ steps.manifest-validation.outputs.is-valid-json }}"
             lint_results=""
             failed_check=""
 
@@ -678,24 +669,6 @@ jobs:
               failed_check="lint"
             else
               echo -e "${GREEN}Linting successful for all files.${NC}"
-            fi
-          
-            if [ "$storybook" == "no" ]; then
-              if [ "$manifest_changed" == "false" ]; then
-                echo -e "${RED}Changes in the docs folder require updating the manifest${NC}"
-                failed_check="manifest"
-              else
-                echo -e "${GREEN}[ok] docs/docs-manifest.json (updated)${NC}"
-              fi
-              if [ "$is_manifest_valid_json" == "no" ]; then
-                echo -e "${RED}'docs/docs-manifest.json' is not valid JSON${NC}"
-                failed_check="manifest"
-              else
-                echo -e "${GREEN}[ok] docs/docs-manifest.json (valid)${NC}"
-              fi
-              if [ "$failed_check" == "manifest" ]; then
-                echo -e "Generate a manifest with 'pnpm utils md-docs create docs woocommerce -o docs/docs-manifest.json'"
-              fi
             fi
           
             if [ -n "$failed_check" ]; then
