@@ -569,20 +569,12 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      - name: 'Setup - markdownlint-cli'
-        if: ${{ steps.target-changes.outputs.needs-markdown-linting }}
-        run: |
-          npm install -g markdownlint-cli
-
       - name: 'Validate - lint md-files'
         if: ${{ steps.target-changes.outputs.needs-markdown-linting }}
         shell: bash
         run: |
-          added_and_modified_docs="${{ steps.target-changes.outputs.needs-markdown-linting_files }}"
-          if [ -n "$added_and_modified_docs" ]; then
-            markdownlint $added_and_modified_docs
-            exit $?
-          fi
+            npm install -g markdownlint-cli
+            markdownlint ${{ steps.target-changes.outputs.needs-markdown-linting_files }}
           
       - name: 'Validate - lint docs-files'
         if: ${{ always() && steps.target-changes.outputs.needs-docs-linting }}
