@@ -38,6 +38,7 @@ describe( 'FulfillmentLineItem', () => {
 		name: 'Test Item',
 		sku: 'SKU123',
 		total: '100',
+		quantity: 1,
 		image: { src: 'image-src' },
 	};
 
@@ -83,7 +84,7 @@ describe( 'FulfillmentLineItem', () => {
 		expect( checkbox ).toBeChecked();
 
 		fireEvent.click( checkbox );
-		expect( mockToggleItem ).toHaveBeenCalledWith( '1', false );
+		expect( mockToggleItem ).toHaveBeenCalledWith( '1', -1, false );
 	} );
 
 	it( 'toggles item expansion when quantity > 1 in edit mode', () => {

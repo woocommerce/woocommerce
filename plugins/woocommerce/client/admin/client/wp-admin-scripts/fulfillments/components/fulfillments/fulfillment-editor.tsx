@@ -10,7 +10,6 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import { Fulfillment, Order } from '../../data/types';
 import {
-	ItemQuantity,
 	combineItems,
 	getItemsFromFulfillment,
 	getItemsNotInAnyFulfillment,
@@ -48,23 +47,15 @@ export default function FulfillmentEditor( {
 }: FulfillmentEditorProps ) {
 	const [ editMode, setEditMode ] = useState( false );
 	const { setIsEditing } = useFulfillmentDrawerContext();
-	const [ selectedItems, setSelectedItems ] = useState< ItemQuantity[] >(
-		[]
-	);
 	const [ error, setError ] = useState< string | null >( null );
-	const itemsInFulfillment = getItemsFromFulfillment(
-		order,
-		fulfillment,
-		true
-	);
+	const itemsInFulfillment = getItemsFromFulfillment( order, fulfillment );
 	const itemsNotInAnyFulfillment = getItemsNotInAnyFulfillment(
 		fulfillments,
-		order,
-		false
+		order
 	);
 	const selectableItems = combineItems(
-		itemsInFulfillment,
-		itemsNotInAnyFulfillment
+		[ ...itemsInFulfillment ],
+		[ ...itemsNotInAnyFulfillment ]
 	);
 
 	const handleChevronClick = () => {
@@ -124,20 +115,15 @@ export default function FulfillmentEditor( {
 			{ expanded && (
 				<div className="woocommerce-fulfillment-stored-fulfillment-list-item-content">
 					{ error && <ErrorLabel error={ error } /> }
-					<ItemSelector
+
+					<FulfillmentProvider
+						order={ order }
+						fulfillment={ fulfillment }
 						items={
 							editMode ? selectableItems : itemsInFulfillment
 						}
-						setSelectedItems={ setSelectedItems }
-						currency={ order.currency }
-						editMode={ editMode }
-					/>
-
-					<FulfillmentProvider
-						fulfillment={ fulfillment }
-						orderId={ order.id }
-						selectedItems={ selectedItems }
 					>
+						<ItemSelector editMode={ editMode } />
 						<div className="woocommerce-fulfillment-item-actions">
 							{ ! editMode ? (
 								<>
