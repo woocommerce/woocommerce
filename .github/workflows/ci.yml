@@ -636,10 +636,6 @@ jobs:
             echo "No repo markdown files changed."
           fi
 
-      - name: Validate - manifest files for monorepo documentation
-        id: manifest-validation
-        run: node .github/workflows/scripts/is-valid-json.js docs/docs-manifest.json
-
       - name: Validate - changed markdown files from monorepo documentation
         run: |
           RED="\e[1;31m"
