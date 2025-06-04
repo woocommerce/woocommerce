@@ -585,7 +585,7 @@ jobs:
           fi
           
       - name: 'Validate - lint docs-files'
-        if: ${{ steps.target-changes.outputs.needs-docs-linting }}
+        if: ${{ always() && steps.target-changes.outputs.needs-docs-linting }}
         shell: bash
         run: |
           echo "Linting docs here: ${{ steps.target-changes.outputs.needs-docs-linting_files }}"
