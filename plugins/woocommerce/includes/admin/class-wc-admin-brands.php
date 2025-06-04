@@ -62,7 +62,7 @@ class WC_Brands_Admin {
 			}
 		);
 
-		// Hiding setting for future depreciation. Only users who have touched this settings should see it.
+		// Hiding setting for future deprecation. Only users who have touched these settings should see it.
 		$setting_value = get_option( 'wc_brands_show_description' );
 		if ( is_string( $setting_value ) ) {
 
@@ -475,10 +475,10 @@ class WC_Brands_Admin {
 	}
 
 	/**
-	 * Description for brand page.
+	 * Brand taxonomy description.
 	 */
 	public function taxonomy_description() {
-		echo wp_kses_post( wpautop( __( 'Brands be added and managed from this screen. You can optionally upload a brand image to display in brand widgets and on brand archives', 'woocommerce' ) ) );
+		echo wp_kses_post( wpautop( __( 'Brands can be added and managed from this screen. You can optionally upload a brand image to display in brand widgets and on brand archives', 'woocommerce' ) ) );
 	}
 
 	/**
@@ -637,10 +637,10 @@ class WC_Brands_Admin {
 	}
 
 	/**
-	 * Save permalnks settings.
+	 * Save permalink settings.
 	 *
 	 * We need to save the options ourselves;
-	 * settings api does not trigger save for the permalinks page.
+	 * settings api does not trigger save for the permalink page.
 	 */
 	public function save_permalink_settings() {
 		if ( ! is_admin() ) {

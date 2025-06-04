@@ -1,0 +1,41 @@
+parameters:
+	level: 9
+	phpVersion: 80400
+	tmpDir: temp
+	bootstrapFiles:
+		- ../../vendor/autoload.php
+		- vendor/autoload.php
+		- ../../tests/unit/stubs.php # The stubs file contains mocks for some WP classes.
+		- vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
+		- vendor/php-stubs/woocommerce-stubs/woocommerce-packages-stubs.php
+		- vendor/php-stubs/wordpress-tests-stubs/wordpress-tests-stubs.php
+
+	paths:
+		- ../../src
+		- ../../tests
+
+	# Treat PHPDoc types as certain
+	treatPhpDocTypesAsCertain: false
+
+	# Ignore specific errors
+	ignoreErrors:
+		- # Container class from Woo Stubs returns mixed
+			message: '#^Cannot call method init\(\) on mixed\.$#'
+			path: ../../src/class-email-editor-container.php
+			count: 1
+		- # There is incorrect type hint for WP_HTML_Tag_Processor in the WP Stubs
+			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor::next_tag\(\) expects array{tag_name\?: string\|null, match_offset\?: int\|null, class_name\?: string\|null, tag_closers\?: string\|null\}\|null, string given\.$#'
+			path: ../../tests/integration/Engine/Renderer/ContentRenderer/Content_Renderer_Test.php
+			count: 1
+		- # We would need to specify all arrays. This matches now more than 100 errors.
+			identifier: missingType.iterableValue
+
+	excludePaths:
+		analyseAndScan:
+			- ../../tests/unit/stubs.php # Contains stubs for WP classes etc.
+			- ../../tests/integration/bootstrap.php
+			- vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
+
+includes:
+	- vendor/szepeviktor/phpstan-wordpress/extension.neon
+	- vendor/phpstan/phpstan-phpunit/extension.neon

@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 use Automattic\WooCommerce\Internal\Email\OrderPriceFormatter;
 use Automattic\WooCommerce\Internal\Orders\PointOfSaleOrderUtil;
 use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 
@@ -48,7 +49,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Let shoppers know once their POS order is complete.', 'woocommerce' )
+				? __( 'Let customers know once their POS order is complete.', 'woocommerce' )
 				: __( 'Order complete emails are sent to customers when their POS orders are marked completed.', 'woocommerce' );
 
 			$this->manual = true;
@@ -67,7 +68,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 
 			$this->setup_locale();
 
-			if ( $order_id && ! is_a( $order, 'WC_Order' ) ) {
+			if ( $order_id ) {
 				$order = wc_get_order( $order_id );
 			}
 
@@ -78,7 +79,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 				$this->placeholders['{order_number}'] = $this->object->get_order_number();
 			}
 
-			if ( $this->is_enabled() && $this->get_recipient() ) {
+			if ( $this->get_recipient() ) {
 				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 			}
 
@@ -114,6 +115,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 */
 		public function get_content_html() {
 			$this->add_pos_customizations();
+			add_action( 'woocommerce_pos_email_header', array( $this, 'email_header' ) );
 			$content = wc_get_template_html(
 				$this->template_html,
 				array(
@@ -131,6 +133,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 				)
 			);
 			$this->remove_pos_customizations();
+			remove_action( 'woocommerce_pos_email_header', array( $this, 'email_header' ) );
 			return $content;
 		}
 
@@ -189,6 +192,54 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		}
 
 		/**
+		 * Override settings form fields to remove the enabled/disabled field as the email is manually sent.
+		 */
+		public function init_form_fields() {
+			/* translators: %s: list of placeholders */
+			$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . esc_html( implode( '</code>, <code>', array_keys( $this->placeholders ) ) ) . '</code>' );
+			$this->form_fields = array(
+				'subject'            => array(
+					'title'       => __( 'Subject', 'woocommerce' ),
+					'type'        => 'text',
+					'desc_tip'    => true,
+					'description' => $placeholder_text,
+					'placeholder' => $this->get_default_subject(),
+					'default'     => '',
+				),
+				'heading'            => array(
+					'title'       => __( 'Email heading', 'woocommerce' ),
+					'type'        => 'text',
+					'desc_tip'    => true,
+					'description' => $placeholder_text,
+					'placeholder' => $this->get_default_heading(),
+					'default'     => '',
+				),
+				'additional_content' => array(
+					'title'       => __( 'Additional content', 'woocommerce' ),
+					'description' => __( 'Text to appear below the main email content.', 'woocommerce' ) . ' ' . $placeholder_text,
+					'css'         => 'width:400px; height: 75px;',
+					'placeholder' => __( 'N/A', 'woocommerce' ),
+					'type'        => 'textarea',
+					'default'     => $this->get_default_additional_content(),
+					'desc_tip'    => true,
+				),
+				'email_type'         => array(
+					'title'       => __( 'Email type', 'woocommerce' ),
+					'type'        => 'select',
+					'description' => __( 'Choose which format of email to send.', 'woocommerce' ),
+					'default'     => 'html',
+					'class'       => 'email_type wc-enhanced-select',
+					'options'     => $this->get_email_type_options(),
+					'desc_tip'    => true,
+				),
+			);
+			if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
+				$this->form_fields['cc']  = $this->get_cc_field();
+				$this->form_fields['bcc'] = $this->get_bcc_field();
+			}
+		}
+
+		/**
 		 * Add actions and filters before generating email content.
 		 */
 		private function add_pos_customizations() {
@@ -205,6 +256,23 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 			// Remove actions and filters after generating content to avoid affecting other emails.
 			remove_action( 'woocommerce_order_item_meta_start', array( $this, 'add_unit_price' ), 10 );
 			remove_filter( 'woocommerce_get_order_item_totals', array( $this, 'order_item_totals' ), 10 );
+		}
+
+		/**
+		 * Get the email header.
+		 *
+		 * @param mixed $email_heading Heading for the email.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+		 */
+		public function email_header( $email_heading ) {
+			wc_get_template(
+				'emails/email-header.php',
+				array(
+					'email_heading' => $email_heading,
+					'store_name'    => $this->get_pos_store_name(),
+				)
+			);
 		}
 
 		/**
@@ -228,9 +296,9 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @return array Modified array of total rows.
 		 */
 		public function order_item_totals( $total_rows, $order, $tax_display ) {
-			$cash_payment_change_due_amount           = $order->get_meta( '_cash_change_amount', true );
-			$formatted_cash_payment_change_due_amount = wc_price( $cash_payment_change_due_amount, array( 'currency' => $order->get_currency() ) );
-			if ( ! empty( $cash_payment_change_due_amount ) ) {
+			$cash_payment_change_due_amount = $order->get_meta( '_cash_change_amount', true );
+			if ( '' !== $cash_payment_change_due_amount ) {
+				$formatted_cash_payment_change_due_amount     = wc_price( $cash_payment_change_due_amount, array( 'currency' => $order->get_currency() ) );
 				$total_rows['cash_payment_change_due_amount'] = array(
 					'type'  => 'cash_payment_change_due_amount',
 					'label' => __( 'Change due:', 'woocommerce' ),
@@ -286,8 +354,9 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @return string
 		 */
 		private function get_pos_store_name() {
+			$store_name = get_option( 'woocommerce_pos_store_name' );
 			return $this->format_string(
-				get_option( 'woocommerce_pos_store_name', PointOfSaleDefaultSettings::get_default_store_name() )
+				empty( $store_name ) ? PointOfSaleDefaultSettings::get_default_store_name() : $store_name
 			);
 		}
 

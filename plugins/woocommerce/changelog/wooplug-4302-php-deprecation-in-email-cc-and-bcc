@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix deprecation warning when passing null to explode()

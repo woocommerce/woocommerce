@@ -15,6 +15,7 @@ import Modal from '~/settings-payments/onboarding/components/modal';
 import WooPaymentsOnboarding from './components/onboarding';
 import { WooPaymentsModalProps } from '~/settings-payments/onboarding/types';
 import { OnboardingProvider } from './data/onboarding-context';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 
 /**
  * Modal component for WooPayments onboarding
@@ -33,7 +34,7 @@ export default function WooPaymentsModal( {
 	const hasWPComConnection =
 		providerData?.onboarding?.state?.wpcom_has_working_connection || false;
 
-	// Open modal when on an onboarding route
+	// Open modal when on an onboarding route.
 	React.useEffect( () => {
 		if (
 			location.pathname.startsWith( wooPaymentsOnboardingPath ) &&
@@ -41,11 +42,19 @@ export default function WooPaymentsModal( {
 			// Prevent the onboarding modal from reopening if the WPCom connection remains unestablished and the user has returned from Jetpack.
 			! ( ! hasWPComConnection && isJetpackReturn )
 		) {
+			recordPaymentsOnboardingEvent(
+				'woopayments_onboarding_modal_opened'
+			);
+
 			setIsOpen( true );
 		}
 
 		// Trigger a snackbar error notification when the user aborts the WPCom connection process.
 		if ( ! hasWPComConnection && isJetpackReturn ) {
+			recordPaymentsOnboardingEvent(
+				'woopayments_onboarding_wpcom_connection_cancelled'
+			);
+
 			createErrorNotice( __( 'Setup was cancelled!', 'woocommerce' ), {
 				type: 'snackbar',
 				explicitDismiss: false,
@@ -60,7 +69,7 @@ export default function WooPaymentsModal( {
 		createErrorNotice,
 	] );
 
-	// If the modal is open, without an onboarding route, add an onboarding route
+	// If the modal is open, without an onboarding route, add an onboarding route.
 	React.useEffect( () => {
 		if (
 			isOpen &&
@@ -80,6 +89,8 @@ export default function WooPaymentsModal( {
 
 	// Handle modal close by navigating away from onboarding routes
 	const handleClose = () => {
+		recordPaymentsOnboardingEvent( 'woopayments_onboarding_modal_closed' );
+
 		const newPath = getNewPath( {}, '/wp-admin/admin.php', {
 			page: 'wc-settings',
 			tab: 'checkout',

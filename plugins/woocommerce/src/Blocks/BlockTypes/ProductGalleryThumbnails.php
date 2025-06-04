@@ -39,7 +39,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'postId', 'mode', 'cropImages' ];
+		return array( 'postId', 'mode', 'cropImages' );
 	}
 
 	/**
@@ -92,7 +92,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 				data-wp-init="actions.onScroll"
 				data-wp-on--scroll="actions.onScroll">
 				<?php foreach ( $product_gallery_images as $index => $image ) : ?>
-					<div class="wc-block-product-gallery-thumbnails__thumbnail">
+					<div class="wc-block-product-gallery-thumbnails__thumbnail" style="aspect-ratio: <?php echo esc_attr( $attributes['aspectRatio'] ); ?>">
 						<img
 							class="wc-block-product-gallery-thumbnails__thumbnail__image <?php echo 0 === $index ? 'is-active' : ''; ?>"
 							data-image-id="<?php echo esc_attr( $image['id'] ); ?>"
@@ -105,7 +105,8 @@ class ProductGalleryThumbnails extends AbstractBlock {
 							decoding="async"
 							tabindex="0"
 							draggable="false"
-							loading="lazy" />
+							loading="lazy"
+							style="aspect-ratio: <?php echo esc_attr( $attributes['aspectRatio'] ); ?>" />
 					</div>
 				<?php endforeach; ?>
 			</div>

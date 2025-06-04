@@ -56,10 +56,11 @@ class Email_Api_Controller {
 	}
 
 	/**
-	 * Sends preview email
+	 * Sends preview email.
 	 *
-	 * @param WP_REST_Request $request route request.
+	 * @param WP_REST_Request $request Route request parameters.
 	 * @return WP_REST_Response
+	 * @phpstan-param WP_REST_Request<array{_locale: string, email: string, postId: int}> $request
 	 */
 	public function send_preview_email_data( WP_REST_Request $request ): WP_REST_Response {
 		/**
@@ -68,6 +69,8 @@ class Email_Api_Controller {
 		 * [_locale] => user
 		 * [email] => Provided email address
 		 * [postId] => POST_ID
+		 *
+		 * @var array{_locale: string, email: string, postId: int} $data
 		 */
 		$data = $request->get_params();
 		try {

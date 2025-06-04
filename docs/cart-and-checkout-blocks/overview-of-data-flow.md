@@ -128,7 +128,3 @@ The items listed in the Checkout section above also apply to the Cart block (bes
 ### Changing item quantity, adding, or removing items
 
 When the shopper updates an item's quantity, removes an item from their cart, or adds an item (e.g. from the Cart cross-sells block) a Store API request is made. The local cart is updated with the response.
-
-### Using the shipping calculator
-
-This behaves the same way as the address forms in the Checkout block, however the address in the shipping calculator is only sent to the server if the postcode is valid, and all required fields have values.

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentProviders;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\PaymentGateway;
+use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestions;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use stdClass;
 use WC_Unit_Test_Case;
@@ -196,6 +197,51 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 				),
 			),
 			$gateway_details
+		);
+	}
+
+	/**
+	 * Test enhance_extension_suggestion.
+	 */
+	public function test_enhance_extension_suggestion() {
+		// Arrange.
+		$extension_suggestion = array(
+			'id'          => 'woopayments',
+			'title'       => 'WooPayments',
+			'description' => 'Accept payments with WooPayments.',
+			'icon'        => 'https://example.com/icon.png',
+			'image'       => 'https://example.com/image.png',
+			'category'    => PaymentProviders::CATEGORY_PSP,
+			'links'       => array(
+				'about' => array(
+					'_type' => 'about',
+					'url'   => 'https://example.com/about',
+				),
+			),
+			'plugin'      => array(
+				'_type'  => PaymentProviders::EXTENSION_TYPE_WPORG,
+				'slug'   => 'woocommerce-payments',
+				'file'   => 'woocommerce-payments/woocommerce-payments',
+				'status' => PaymentProviders::EXTENSION_NOT_INSTALLED,
+			),
+			'tags'        => array(
+				'made_in_woo',
+			),
+			'_priority'   => 1,
+			'_type'       => PaymentExtensionSuggestions::TYPE_PSP,
+		);
+
+		// Act.
+		$enhanced_suggestion = $this->sut->enhance_extension_suggestion( $extension_suggestion );
+
+		// Assert.
+		// The onboarding entry should be added.
+		$this->assertArrayHasKey( 'onboarding', $enhanced_suggestion );
+		$this->assertEquals(
+			array(
+				'type' => PaymentGateway::ONBOARDING_TYPE_EXTERNAL,
+			),
+			$enhanced_suggestion['onboarding']
 		);
 	}
 
@@ -521,6 +567,118 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test get_plugin_details.
+	 */
+	public function test_get_plugin_details() {
+		// Test in regular plugin.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				// This should be determined from the class filename.
+				'plugin_slug'    => null,
+				'plugin_file'    => 'woocommerce-payments/woocommerce-payments.php',
+				'class_filename' => trailingslashit( WP_PLUGIN_DIR ) . 'woocommerce-payments/some-dir/gateways/class-fake-gateway.php',
+			)
+		);
+		$this->assertEquals(
+			array(
+				'_type'  => PaymentProviders::EXTENSION_TYPE_WPORG,
+				'slug'   => 'woocommerce-payments',
+				'file'   => 'woocommerce-payments/woocommerce-payments',
+				'status' => PaymentProviders::EXTENSION_ACTIVE,
+			),
+			$this->sut->get_plugin_details( $fake_gateway )
+		);
+
+		// Test in must-use plugin.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				// This should be determined from the class filename.
+				'plugin_slug'    => null,
+				'plugin_file'    => 'woocommerce-payments/woocommerce-payments.php',
+				'class_filename' => trailingslashit( WPMU_PLUGIN_DIR ) . 'woocommerce-payments/some-dir/gateways/class-fake-gateway.php',
+			)
+		);
+		$this->assertEquals(
+			array(
+				'_type'  => PaymentProviders::EXTENSION_TYPE_MU_PLUGIN,
+				'slug'   => 'woocommerce-payments',
+				// No plugin file for must-use plugins.
+				'file'   => '',
+				'status' => PaymentProviders::EXTENSION_ACTIVE,
+			),
+			$this->sut->get_plugin_details( $fake_gateway )
+		);
+
+		// Test in must-use root plugin.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				// This should be determined from the class filename.
+				'plugin_slug'    => null,
+				'plugin_file'    => null,
+				'class_filename' => trailingslashit( WPMU_PLUGIN_DIR ) . 'class-fake-gateway.php',
+			)
+		);
+		$this->assertEquals(
+			array(
+				'_type'  => PaymentProviders::EXTENSION_TYPE_MU_PLUGIN,
+				// The file name is the slug.
+				'slug'   => 'class-fake-gateway',
+				// No plugin file for must-use plugins.
+				'file'   => '',
+				'status' => PaymentProviders::EXTENSION_ACTIVE,
+			),
+			$this->sut->get_plugin_details( $fake_gateway )
+		);
+
+		// Test in theme.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				// This should be determined from the class filename.
+				'plugin_slug'    => null,
+				'plugin_file'    => null,
+				'class_filename' => trailingslashit( get_theme_root() ) . 'some-theme/some-dir/class-fake-gateway.php',
+			)
+		);
+		$this->assertEquals(
+			array(
+				'_type'  => PaymentProviders::EXTENSION_TYPE_THEME,
+				// The theme slug is the slug.
+				'slug'   => 'some-theme',
+				// No plugin file for themes.
+				'file'   => '',
+				'status' => PaymentProviders::EXTENSION_ACTIVE,
+			),
+			$this->sut->get_plugin_details( $fake_gateway )
+		);
+
+		// Test in other location.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				// This should be determined from the class filename.
+				'plugin_slug'    => null,
+				'plugin_file'    => null,
+				'class_filename' => '/var/some-dir/class-fake-gateway.php',
+			)
+		);
+		$this->assertEquals(
+			array(
+				'_type'  => PaymentProviders::EXTENSION_TYPE_UNKNOWN,
+				// No slug for unknown location.
+				'slug'   => '',
+				// No plugin file for unknown location.
+				'file'   => '',
+				'status' => PaymentProviders::EXTENSION_ACTIVE,
+			),
+			$this->sut->get_plugin_details( $fake_gateway )
+		);
+	}
+
+	/**
 	 * Test get_plugin_slug.
 	 */
 	public function test_get_plugin_slug() {
@@ -596,10 +754,10 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 			'gateway1',
 			array(
 				'plugin_slug'    => null,
-				'class_filename' => trailingslashit( get_template_directory() ) . 'some-theme/some-dir/gateways/class-fake-gateway.php',
+				'class_filename' => trailingslashit( get_theme_root() ) . 'some-theme/some-dir/gateways/class-fake-gateway.php',
 			)
 		);
-		$this->assertEquals( '', $this->sut->get_plugin_slug( $fake_gateway ) );
+		$this->assertEquals( 'some-theme', $this->sut->get_plugin_slug( $fake_gateway ) );
 
 		// Test with class filename in a random directory.
 		$fake_gateway = new FakePaymentGateway(

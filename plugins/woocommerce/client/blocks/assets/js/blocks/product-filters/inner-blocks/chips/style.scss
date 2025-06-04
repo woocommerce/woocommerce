@@ -46,6 +46,15 @@
 	gap: $gap-smallest;
 }
 
+.wc-block-product-filter-chips__text {
+	display: contents;
+}
+
+.wc-block-product-filter-chips__count {
+	display: contents;
+	white-space: nowrap;
+}
+
 .wc-block-product-filter-chips:not(.has-selected-chip-text-color)
 	.wc-block-product-filter-chips__item[aria-checked="true"]
 	> .wc-block-product-filter-chips__label {
