@@ -52,7 +52,7 @@ class AdminManager {
 		/*
 		 * Enqueue specific styles & scripts.
 		 */
-		if ( 'woocommerce_page_customer_stock_notifications' === $screen_id ) {
+		if ( 'woocommerce_page_wc-customer-stock-notifications' === $screen_id ) {
 			wp_enqueue_script( 'wc-admin-customer-stock-notifications' );
 			wp_localize_script( 'wc-admin-customer-stock-notifications', 'wc_admin_customer_stock_notifications_params', $params );
 		}

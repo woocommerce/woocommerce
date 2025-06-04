@@ -42,7 +42,7 @@ class MenusController {
 			__( 'Stock Notifications', 'woocommerce' ),
 			__( 'Notifications', 'woocommerce' ),
 			'manage_woocommerce',
-			'customer_stock_notifications',
+			'wc-customer-stock-notifications',
 			array( $this, 'notifications_page' )
 		);
 
@@ -127,7 +127,7 @@ class MenusController {
 					'title'     => __( 'Stock Notifications', 'woocommerce' ),
 					'path'      => add_query_arg(
 						array(
-							'page' => 'customer_stock_notifications',
+							'page' => 'wc-customer-stock-notifications',
 						),
 						'admin.php'
 					),
@@ -142,7 +142,7 @@ class MenusController {
 					'title'     => __( 'Add Notification', 'woocommerce' ),
 					'path'      => add_query_arg(
 						array(
-							'page'         => 'customer_stock_notifications',
+							'page'         => 'wc-customer-stock-notifications',
 							'section'      => 'create',
 							'notification' => 1,
 						),
@@ -159,7 +159,7 @@ class MenusController {
 					'title'     => __( 'Edit Notification', 'woocommerce' ),
 					'path'      => add_query_arg(
 						array(
-							'page'         => 'customer_stock_notifications',
+							'page'         => 'wc-customer-stock-notifications',
 							'section'      => 'edit',
 							'notification' => 1,
 						),
@@ -190,7 +190,7 @@ class MenusController {
 	 * @return array
 	 */
 	public static function wc_admin_stock_notifications_screen_ids( $screen_ids ) {
-		$screen_ids[] = 'woocommerce_page_customer_stock_notifications';
+		$screen_ids[] = 'woocommerce_page_wc-customer-stock-notifications';
 		return $screen_ids;
 	}
 }
