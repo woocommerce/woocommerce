@@ -1,6 +1,17 @@
 .wc-block-checkout__form {
 	margin: 0;
 	max-width: 100%;
+
+	// Fix content jump for address forms when using select as first input
+	.wc-blocks-components-select {
+		margin-top: $gap;
+	}
+
+	.wc-block-components-address-form__country {
+		.wc-blocks-components-select {
+			margin-top: 0;
+		}
+	}
 }
 .is-mobile,
 .is-small,
