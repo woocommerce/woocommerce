@@ -68,18 +68,13 @@ export const getLysTasklist = async () => {
 		if ( task.id === 'payments' ) {
 			let isComplete = false;
 
-			// Store has other online gateways enabled.
 			if (
-				task.additionalData?.wooPaymentsHasOnlineGatewaysEnabled &&
-				! task.additionalData?.wooPaymentsIsOnboarded
-			) {
-				isComplete = true;
-			}
-
-			// WooPayments is onboarded and not in test mode.
-			if (
-				task.additionalData?.wooPaymentsIsOnboarded &&
-				! task.additionalData?.wooPaymentsHasTestAccount
+				// Store has other online gateways enabled.
+				( task.additionalData?.wooPaymentsHasOnlineGatewaysEnabled &&
+					! task.additionalData?.wooPaymentsIsOnboarded ) ||
+				// WooPayments is onboarded and not in test mode.
+				( task.additionalData?.wooPaymentsIsOnboarded &&
+					! task.additionalData?.wooPaymentsHasTestAccount )
 			) {
 				isComplete = true;
 			}
