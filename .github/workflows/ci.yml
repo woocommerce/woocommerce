@@ -574,36 +574,28 @@ jobs:
           npm install -g markdownlint-cli
           npm --prefix .github/workflows/scripts install @actions/core
 
-      - name: Validate - changed markdown files from monorepo documentation
+      - name: Validate - lint md-files (packages and co)
+        shell: bash
         run: |
           RED="\e[1;31m"
           GREEN="\e[1;32m"
           NC="\e[0m"
-          set -e
-          rc=0
+          
           added_and_modified_docs="${{ steps.repo-changed-files.outputs.added_files }} ${{ steps.repo-changed-files.outputs.modified_files }}"
-
           if [ -n "$added_and_modified_docs" ]; then
-            lint_results=""
+            rc=0
 
             for file in $added_and_modified_docs; do
               lint_result=$( { cat "$file" | markdownlint --stdin ; } 2>&1 ) || rc="$?"
               if [ $rc -ne 0 ]; then
                 echo -e "${RED}[err] $file${NC}"
-                lint_results="$lint_results\n>>>Linting failed for file: $file <<<\n$lint_result\n--------"
+                echo $lint_result
               else
                 echo -e "${GREEN}[ok] $file${NC}"
               fi
             done
 
-            if [ $rc -ne 0 ]; then
-              echo -e "${RED}Linting failed for one or more files${NC}"
-              echo -e "$lint_results"
-              exit 1
-            else
-              echo -e "${GREEN}Linting successful for all files.${NC}"
-            fi
-
-          else
-            echo "No repo markdown files changed."
+            exit $rc
           fi
+          
+          echo "Linting completed"
