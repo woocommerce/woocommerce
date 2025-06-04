@@ -582,4 +582,3 @@ jobs:
             markdownlint $added_and_modified_docs
             exit $?
           fi
-          echo "Linting completed"
