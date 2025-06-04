@@ -11,7 +11,7 @@ use WP_Upgrader;
  * @internal
  */
 class PTKPatternsStore {
-	const TRANSIENT_NAME = 'ptk_patterns';
+	const OPTION_NAME = 'ptk_patterns';
 
 	const CATEGORY_MAPPING = array(
 		'testimonials' => 'reviews',
@@ -87,23 +87,34 @@ class PTKPatternsStore {
 	}
 
 	/**
+	 * Check if the last request was more than one day ago.
+	 *
+	 * @param int $last_request The last request time.
+	 * @return bool
+	 */
+	private function is_one_day_ago( $last_request ) {
+		$current_time = time();
+		return abs( $last_request - $current_time ) > DAY_IN_SECONDS;
+	}
+
+	/**
 	 * Schedule an action if it's not already pending.
 	 *
 	 * @param string $action The action name to schedule.
 	 * @return void
 	 */
 	private function schedule_action_if_not_pending( $action ) {
-		$last_request = get_transient( 'last_fetch_patterns_request' );
+		$last_request = get_option( 'last_fetch_patterns_request' );
 		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
 		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
 
 		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
-		if ( call_user_func( $has_scheduled_action, $action ) || false !== $last_request ) {
+		if ( call_user_func( $has_scheduled_action, $action ) || $this->is_one_day_ago( $last_request ) ) {
 			return;
 		}
 
 		as_schedule_single_action( time(), $action );
-		set_transient( 'last_fetch_patterns_request', time(), HOUR_IN_SECONDS );
+		update_option( 'last_fetch_patterns_request', time(), false );
 	}
 
 	/**
@@ -112,7 +123,7 @@ class PTKPatternsStore {
 	 * @return array
 	 */
 	public function get_patterns() {
-		$patterns = get_transient( self::TRANSIENT_NAME );
+		$patterns = get_option( self::OPTION_NAME );
 
 		// Only if the transient is not set, we schedule fetching the patterns from the PTK.
 		if ( false === $patterns || ! $this->ptk_client->is_valid_schema( $patterns ) ) {
@@ -176,7 +187,7 @@ class PTKPatternsStore {
 	 * @return void
 	 */
 	public function flush_cached_patterns() {
-		delete_transient( self::TRANSIENT_NAME );
+		delete_option( self::OPTION_NAME );
 	}
 
 	/**
@@ -224,7 +235,7 @@ class PTKPatternsStore {
 		$patterns = $this->filter_patterns( $patterns );
 		$patterns = $this->map_categories( $patterns );
 
-		set_transient( self::TRANSIENT_NAME, $patterns );
+		update_option( self::OPTION_NAME, $patterns, false );
 	}
 
 	/**
