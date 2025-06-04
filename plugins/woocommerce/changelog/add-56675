@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Display 'Point of Sale' origin label for POS orders in the order details, and add corresponding unit test coverage.

@@ -135,7 +135,7 @@ class ProductButton extends AbstractBlock {
 		$is_product_purchasable   = $this->is_product_purchasable( $product );
 		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
 		$ajax_add_to_cart_enabled = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
-		$is_ajax_button           = $ajax_add_to_cart_enabled && ! $cart_redirect_after_add && $product->supports( 'ajax_add_to_cart' ) && $is_product_purchasable && $product->is_in_stock();
+		$is_ajax_button           = $ajax_add_to_cart_enabled && ! $cart_redirect_after_add && $product->supports( 'ajax_add_to_cart' ) && $is_product_purchasable;
 		$html_element             = $is_ajax_button || ( $is_descendant_of_add_to_cart_form && 'external' !== $product->get_type() ) ? 'button' : 'a';
 		$styles_and_classes       = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 		$classname                = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
@@ -224,10 +224,6 @@ class ProductButton extends AbstractBlock {
 
 		if ( isset( $args['attributes']['aria-label'] ) ) {
 			$args['attributes']['aria-label'] = wp_strip_all_tags( $args['attributes']['aria-label'] );
-		}
-
-		if ( isset( WC()->cart ) && ! WC()->cart->is_empty() ) {
-			$this->prevent_cache();
 		}
 
 		$div_directives = '
@@ -329,7 +325,7 @@ class ProductButton extends AbstractBlock {
 	 * @return boolean The product is purchasable.
 	 */
 	private function is_product_purchasable( $product ) {
-		$is_product_purchasable = $product->is_purchasable();
+		$is_product_purchasable = $product->is_purchasable() && $product->is_in_stock();
 
 		if ( $product->is_type( 'grouped' ) ) {
 			$grouped_product_ids = $product->get_children();
@@ -344,6 +340,7 @@ class ProductButton extends AbstractBlock {
 				}
 			}
 		}
+
 		return $is_product_purchasable;
 	}
 

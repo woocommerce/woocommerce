@@ -9,9 +9,13 @@ jobs:
 
     steps:
       - name: 'Notify to Slack when a new release is published'
+        if: ${{ !contains(github.event.release.tag_name, 'wc-beta-tester') }}
         uses: archive/github-actions-slack@v2.10.0
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
           slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }},${{ secrets.WOO_ANNOUNCEMENTS_SLACK_CHANNEL }}
           slack-optional-unfurl_links: false
-          slack-text: ':woo-bounce: *<${{ github.event.release.html_url }}|WooCommerce ${{ github.event.release.name }}>* has been released! :rocket:'
+          slack-text: |
+            :woo-bounce: *<${{ github.event.release.html_url }}|WooCommerce ${{ github.event.release.name }}>* has been released! :rocket:
+
+            (<@woo-developer-advocacy-team> could you publish the release post? :ty:)
