@@ -56,6 +56,10 @@
 	}
 }
 
+.editor-styles-wrapper .wc-block-components-product-image__inner-container {
+	justify-content: flex-start;
+}
+
 .is-loading .wc-block-components-product-image {
 	@include placeholder($include-border-radius: false);
 	width: auto;
@@ -63,6 +67,18 @@
 
 .wc-block-components-product-image {
 	margin: 0 0 $gap-small;
+
+	&__inner-container {
+		display: flex;
+		flex-direction: column;
+		padding: $gap-small;
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		top: 0;
+		z-index: 1;
+	}
 }
 
 .wc-block-product-image__tools-panel .components-input-control {
