@@ -32,27 +32,42 @@ const actions = {
 const selectors = {
 	isEditMode() {
 		// Always check the current URL for the most up-to-date state.
-		const url = new URL( window.location.href );
-		const canvas = url.searchParams.get( 'canvas' );
-		return canvas === 'edit';
+		try {
+			const url = new URL( window.location.href );
+			const canvas = url.searchParams.get( 'canvas' );
+			return canvas === 'edit';
+		} catch ( error ) {
+			// If URL parsing fails, return default state.
+			return false;
+		}
 	},
 };
 
 if ( typeof window !== 'undefined' ) {
 	const handleUrlChange = async () => {
-		const url = new URL( window.location.href );
-		const canvas = url.searchParams.get( 'canvas' );
-		const isEditMode = canvas === 'edit';
+		try {
+			const url = new URL( window.location.href );
+			const canvas = url.searchParams.get( 'canvas' );
+			const isEditMode = canvas === 'edit';
 
-		// Update store state to trigger any subscribed components.
-		const storeDispatch = dispatch( STORE_NAME ) as {
-			setCanvasMode: ( isEditMode: boolean ) => void;
-		};
+			// Update store state to trigger any subscribed components.
+			const storeDispatch = dispatch( STORE_NAME ) as {
+				setCanvasMode: ( isEditMode: boolean ) => void;
+			};
 
-		await Promise.resolve();
+			await Promise.resolve();
 
-		// Update store state - this triggers re-renders.
-		storeDispatch.setCanvasMode( isEditMode );
+			// Update store state - this triggers re-renders.
+			storeDispatch.setCanvasMode( isEditMode );
+		} catch ( error ) {
+			// If URL parsing fails, set to default state.
+			const storeDispatch = dispatch( STORE_NAME ) as {
+				setCanvasMode: ( isEditMode: boolean ) => void;
+			};
+
+			await Promise.resolve();
+			storeDispatch.setCanvasMode( false );
+		}
 	};
 
 	window.addEventListener( 'popstate', () => handleUrlChange() );
