@@ -85,12 +85,13 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 					<tbody>
 						<template
 							data-wp-each--cart-item="woocommerce::state.cart.items"
+							data-wp-each-key="state.cartItem.key"
 						>
 							<tr class="wc-block-cart-items__row" tabindex="-1">
 								<td class="wc-block-cart-item__image" aria-hidden="true">
 									<a data-wp-bind--href="state.cartItem.permalink" tabindex="-1">
-										<img data-wp-bind--src="state.itemThumbnail" data-wp-bind--alt="state.cartItemName">
-									</a>
+										<img data-wp-bind--src="state.itemThumbnail" data-wp-bind--alt="state.cartItemName">	
+									</a>									
 								</td>
 								<td class="wc-block-cart-item__product">
 									<div class="wc-block-cart-item__wrap">
@@ -103,7 +104,7 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 										</div>
 										<div class="wc-block-components-product-metadata">
 											<div data-wp-watch="state.itemShortDescription" >
-												<div class="wc-block-components-product-metadata__description" data-wp-ignore></div>
+												<div class="wc-block-components-product-metadata__description"></div>
 											</div>
 										</div>
 										<div class="wc-block-cart-item__quantity">

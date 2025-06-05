@@ -175,55 +175,64 @@ type CartItemContext = {
 	cartItem: CartItem;
 };
 
-store(
+const { state } = store(
 	'woocommerce/mini-cart-items-block',
 	{
 		state: {
+			get cartItem() {
+				return getContext< CartItemContext >( 'woocommerce' ).cartItem;
+			},
+
 			// Intended to be used in context of a cart item in wp-each
-			get reduceQuantityLabel() {
+			get reduceQuantityLabel(): string {
 				const { reduceQuantityLabel } = getConfig(
 					'woocommerce/mini-cart-items-block'
 				);
-				const { cartItem } = getContext< CartItemContext >();
-
-				return reduceQuantityLabel.replace( '%s', cartItem.name );
+				return reduceQuantityLabel.replace( '%s', state.cartItem.name );
 			},
 
 			// Intended to be used in context of a cart item in wp-each
-			get increaseQuantityLabel() {
+			get increaseQuantityLabel(): string {
 				const { increaseQuantityLabel } = getConfig(
 					'woocommerce/mini-cart-items-block'
 				);
-				const { cartItem } = getContext< CartItemContext >();
 
-				return increaseQuantityLabel.replace( '%s', cartItem.name );
+				return increaseQuantityLabel.replace(
+					'%s',
+					state.cartItem.name
+				);
 			},
 
 			// Intended to be used in context of a cart item in wp-each
-			get quantityDescriptionLabel() {
+			get quantityDescriptionLabel(): string {
 				const { quantityDescriptionLabel } = getConfig(
 					'woocommerce/mini-cart-items-block'
 				);
-				const { cartItem } = getContext< CartItemContext >();
 
-				return quantityDescriptionLabel.replace( '%s', cartItem.name );
+				return quantityDescriptionLabel.replace(
+					'%s',
+					state.cartItem.name
+				);
 			},
 
 			// Intended to be used in context of a cart item in wp-each
-			get removeFromCartLabel() {
+			get removeFromCartLabel(): string {
 				const { removeFromCartLabel } = getConfig(
 					'woocommerce/mini-cart-items-block'
 				);
-				const { cartItem } = getContext< CartItemContext >();
 
-				return removeFromCartLabel.replace( '%s', cartItem.name );
+				return removeFromCartLabel.replace( '%s', state.cartItem.name );
 			},
 
 			get cartItemName() {
-				const { cartItem } = getContext< CartItemContext >();
 				const txt = document.createElement( 'textarea' );
-				txt.innerHTML = cartItem.name;
+				txt.innerHTML = state.cartItem.name;
 				return txt.value;
+			},
+
+			// Intended to be used in context of a cart item in wp-each
+			get itemThumbnail(): string {
+				return state.cartItem.images[ 0 ]?.thumbnail || '';
 			},
 
 			get cartItems() {
@@ -232,7 +241,6 @@ store(
 
 			// Intended to be used in context of a cart item in wp-each
 			itemShortDescription() {
-				const ctx = getContext< CartItemContext >();
 				const el = getElement();
 
 				if ( el.ref ) {
@@ -242,14 +250,13 @@ store(
 
 					// A workaround for the lack of dangerous set HTML directive in interactivity API
 					if ( innerEl ) {
-						innerEl.innerHTML = ctx.cartItem.short_description;
+						innerEl.innerHTML = state.cartItem.short_description;
 					}
 				}
 			},
 
 			// Intended to be used in context of a cart item in wp-each
 			get itemPrice(): string {
-				const ctx = getContext< CartItemContext >();
 				const { currency } = getConfig( 'woocommerce' );
 
 				const normalizedCurrency = normalizeCurrencyResponse(
@@ -258,14 +265,13 @@ store(
 				);
 
 				return formatPriceWithCurrency(
-					ctx.cartItem.prices.price,
+					state.cartItem.prices.price,
 					normalizedCurrency
 				);
 			},
 
 			// Intended to be used in context of a cart item in wp-each
 			get lineItemTotal(): string {
-				const ctx = getContext< CartItemContext >();
 				const { displayCartPriceIncludingTax } = getConfig(
 					'woocommerce/mini-cart'
 				);
@@ -276,7 +282,7 @@ store(
 					currency
 				);
 
-				const totals = ctx.cartItem.totals;
+				const totals = state.cartItem.totals;
 
 				const totalLinePrice = displayCartPriceIncludingTax
 					? parseInt( totals.line_subtotal, 10 ) +
@@ -288,16 +294,9 @@ store(
 					normalizedCurrency
 				);
 			},
-
-			// Intended to be used in context of a cart item in wp-each
-			get itemThumbnail(): string {
-				const ctx = getContext< CartItemContext >();
-				return ctx.cartItem.images[ 0 ]?.thumbnail || '';
-			},
 		},
 		actions: {
 			*incrementQuantity(): Generator< unknown, void > {
-				const { cartItem } = getContext< CartItemContext >();
 				const { actions } = store< WooCommerce >(
 					'woocommerce',
 					{},
@@ -305,13 +304,12 @@ store(
 				);
 
 				yield actions.addCartItem( {
-					id: cartItem.id,
-					quantity: cartItem.quantity + 1,
+					id: state.cartItem.id,
+					quantity: state.cartItem.quantity + 1,
 				} );
 			},
 
 			*decrementQuantity(): Generator< unknown, void > {
-				const { cartItem } = getContext< CartItemContext >();
 				const { actions } = store< WooCommerce >(
 					'woocommerce',
 					{},
@@ -319,58 +317,9 @@ store(
 				);
 
 				yield actions.addCartItem( {
-					id: cartItem.id,
-					quantity: cartItem.quantity - 1,
+					id: state.cartItem.id,
+					quantity: state.cartItem.quantity - 1,
 				} );
-			},
-		},
-	},
-	{ lock: true }
-);
-
-store(
-	'woocommerce/mini-cart-title-items-counter-block',
-	{
-		state: {
-			get itemsInCartText() {
-				const { singularItemsText, pluralItemsText } = getConfig(
-					'woocommerce/mini-cart-title-items-counter-block'
-				);
-
-				const cartItemsCount = miniCartState.totalItemsInCart;
-
-				const template =
-					cartItemsCount === 1 ? singularItemsText : pluralItemsText;
-
-				return template.replace( '%d', cartItemsCount.toString() );
-			},
-		},
-	},
-	{ lock: true }
-);
-
-store(
-	'woocommerce/mini-cart-footer-block',
-	{
-		state: {
-			get formattedSubtotal(): string {
-				const { displayCartPriceIncludingTax } = getConfig(
-					'woocommerce/mini-cart-footer-block'
-				);
-
-				const { currency } = getConfig( 'woocommerce' );
-
-				const subtotal = displayCartPriceIncludingTax
-					? parseInt( wooStoreState.cart.totals.total_items, 10 ) +
-					  parseInt( wooStoreState.cart.totals.total_items_tax, 10 )
-					: parseInt( wooStoreState.cart.totals.total_items, 10 );
-
-				const normalizedCurrency = normalizeCurrencyResponse(
-					wooStoreState.cart.totals,
-					currency
-				);
-
-				return formatPriceWithCurrency( subtotal, normalizedCurrency );
 			},
 		},
 	},
