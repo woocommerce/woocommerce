@@ -1,7 +1,7 @@
 {
 	"name": "@woocommerce/e2e-environment",
 	"version": "0.3.0",
-	"description": "WooCommerce End to End Testing Environment Configuration.",
+	"description": "(DEPRECATED) WooCommerce End to End Testing Environment Configuration.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
 	"keywords": [
