@@ -91,7 +91,7 @@ const { state, actions } = store< Store >(
 					( { id: productId } ) => id === productId
 				);
 				const endpoint = item ? 'update-item' : 'add-item';
-				const previousCart = structuredClone( state.cart );
+				const previousCart = JSON.stringify( state.cart );
 				const quantityChanges: QuantityChanges = {};
 
 				// Optimistically updates the number of items in the cart.
@@ -142,7 +142,7 @@ const { state, actions } = store< Store >(
 				} catch ( error ) {
 					// Reverts the optimistic update.
 					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
-					state.cart = previousCart;
+					state.cart = JSON.parse( previousCart );
 
 					// Shows the error notice.
 					actions.showNoticeError( error as Error );
