@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
+	ErrorBoundary,
 	// @ts-expect-error Type for PluginDocumentSettingPanel is missing in @types/wordpress__editor
 	PluginDocumentSettingPanel,
 } from '@wordpress/editor';
@@ -47,7 +48,10 @@ export function SettingsPanel() {
 		>
 			{ <EmailStatusComponent /> }
 			{ <TemplateSelection /> }
-			{ <SidebarExtensionComponent /> }
+			{ /* @ts-expect-error canCopyContent is missing in @types/wordpress__editor */ }
+			<ErrorBoundary canCopyContent>
+				{ <SidebarExtensionComponent /> }
+			</ErrorBoundary>
 		</PluginDocumentSettingPanel>
 	);
 }
