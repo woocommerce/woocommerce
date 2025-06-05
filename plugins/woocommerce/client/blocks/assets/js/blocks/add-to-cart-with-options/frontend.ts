@@ -39,18 +39,26 @@ const { state: wooState } = store< WooCommerce >(
 );
 
 const getInputElementFromEvent = (
-	event: HTMLElementEvent< HTMLButtonElement >
+	event: HTMLElementEvent< HTMLButtonElement, HTMLInputElement >
 ) => {
-	const target = event.target as HTMLButtonElement;
+	let inputElement = null;
 
-	const inputElement = target.parentElement?.querySelector(
-		'.input-text.qty.text'
-	) as HTMLInputElement | null;
+	if ( event.target instanceof HTMLButtonElement ) {
+		inputElement = event.target.parentElement?.querySelector(
+			'.input-text.qty.text'
+		);
+	}
+
+	if ( event.target instanceof HTMLInputElement ) {
+		inputElement = event.target.closest( 'input[type="checkbox"]' );
+	}
 
 	return inputElement;
 };
 
-const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
+const getInputData = (
+	event: HTMLElementEvent< HTMLButtonElement, HTMLInputElement >
+) => {
 	const inputElement = getInputElementFromEvent( event );
 
 	if ( ! inputElement ) {
@@ -154,7 +162,10 @@ const addToCartWithOptionsStore = store(
 						? childProductId
 						: context.productId;
 
-				context.quantity = { [ productId ]: value };
+				context.quantity = {
+					...context.quantity,
+					[ productId ]: value,
+				};
 			},
 			setAttribute( attribute: string, value: string ) {
 				const { selectedAttributes } = getContext< Context >();
@@ -233,6 +244,20 @@ const addToCartWithOptionsStore = store(
 					inputElement.value = newValue.toString();
 					dispatchChangeEvent( inputElement );
 				}
+			},
+			handleCheckboxQuantityChange: (
+				event: HTMLElementEvent< HTMLInputElement >
+			) => {
+				const inputData = getInputData( event );
+				if ( ! inputData ) {
+					return;
+				}
+				const { inputElement, childProductId } = inputData;
+
+				addToCartWithOptionsStore.actions.setQuantity(
+					inputElement.checked ? 1 : 0,
+					childProductId
+				);
 			},
 			*handleSubmit( event: FormEvent< HTMLFormElement > ) {
 				event.preventDefault();

@@ -229,6 +229,14 @@ class AddToCartWithOptions extends AbstractBlock {
 					$context['groupedProductIds'],
 					$default_quantity
 				);
+
+				// Check for any "sold individually" products and set their default quantity to 0.
+				foreach ( $context['groupedProductIds'] as $child_product_id ) {
+					$child_product = wc_get_product( $child_product_id );
+					if ( $child_product && $child_product->is_sold_individually() ) {
+						$context['quantity'][ $child_product_id ] = 0;
+					}
+				}
 			}
 
 			$hooks_before = '';
