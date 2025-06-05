@@ -170,16 +170,16 @@ class NotificationsListTable extends \WP_List_Table {
 
 		if ( $notification->get_status() === NotificationStatus::PENDING ) {
 			$status = 'cancelled';
-			$label  = __( 'Pending', 'woocommerce' );
+			$label  = _x( 'Pending', 'stock notification status', 'woocommerce' );
 		} elseif ( $notification->get_status() === NotificationStatus::CANCELLED ) {
 			$status = 'cancelled';
-			$label  = __( 'Cancelled', 'woocommerce' );
+			$label  = _x( 'Cancelled', 'stock notification status', 'woocommerce' );
 		} elseif ( $notification->get_status() === NotificationStatus::SENT ) {
 			$status = 'cancelled';
-			$label  = __( 'Sent', 'woocommerce' );
+			$label  = _x( 'Sent', 'stock notification status', 'woocommerce' );
 		} else {
 			$status = 'completed';
-			$label  = __( 'Active', 'woocommerce' );
+			$label  = _x( 'Active', 'stock notification status', 'woocommerce' );
 		}
 
 		printf( '<mark class="order-status %s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $status ) ), esc_html( $label ) );
