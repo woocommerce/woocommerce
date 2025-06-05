@@ -7,7 +7,7 @@ import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart'
 /**
  * Internal dependencies
  */
-import type { Context as AddToCartWithOptionsContext } from '../../../../blocks/add-to-cart-with-options/frontend';
+import type { AddToCartWithOptionsStore } from '../../../../blocks/add-to-cart-with-options/frontend';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -38,6 +38,12 @@ type ServerState = {
 
 const { state: wooState } = store< WooCommerce >(
 	'woocommerce',
+	{},
+	{ lock: universalLock }
+);
+
+const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
+	'woocommerce/add-to-cart-with-options',
 	{},
 	{ lock: universalLock }
 );
@@ -81,12 +87,8 @@ const productButtonStore = {
 			return state.quantity > 0;
 		},
 		get productId() {
-			const addToCartWithOptionsContext =
-				getContext< AddToCartWithOptionsContext >(
-					'woocommerce/add-to-cart-with-options'
-				);
 			return (
-				addToCartWithOptionsContext?.variationId ||
+				addToCartWithOptionsState?.variationId ||
 				getContext< Context >().productId
 			);
 		},

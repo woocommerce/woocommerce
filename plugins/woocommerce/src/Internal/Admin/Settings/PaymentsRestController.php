@@ -209,13 +209,13 @@ class PaymentsRestController extends RestApiControllerBase {
 		$offline_payment_providers = array_values(
 			array_filter(
 				$providers,
-				fn( $provider ) => PaymentProviders::TYPE_OFFLINE_PM === $provider['_type']
+				fn( $provider ) => PaymentsProviders::TYPE_OFFLINE_PM === $provider['_type']
 			)
 		);
 		$providers                 = array_values(
 			array_filter(
 				$providers,
-				fn( $provider ) => PaymentProviders::TYPE_OFFLINE_PM !== $provider['_type']
+				fn( $provider ) => PaymentsProviders::TYPE_OFFLINE_PM !== $provider['_type']
 			)
 		);
 
@@ -414,8 +414,8 @@ class PaymentsRestController extends RestApiControllerBase {
 				return new WP_Error( 'rest_invalid_param', esc_html__( 'The ordering argument must be an object with provider IDs as keys and numeric values as values.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
-			if ( sanitize_key( $provider_id ) !== $provider_id ) {
-				return new WP_Error( 'rest_invalid_param', esc_html__( 'The provider ID must be a valid string.', 'woocommerce' ), array( 'status' => 400 ) );
+			if ( $this->sanitize_provider_id( $provider_id ) !== $provider_id ) {
+				return new WP_Error( 'rest_invalid_param', esc_html__( 'The provider ID must be a string with only ASCII letters, digits, underscores, and dashes.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
 			if ( false === filter_var( $order, FILTER_VALIDATE_INT ) ) {
@@ -436,11 +436,36 @@ class PaymentsRestController extends RestApiControllerBase {
 	private function sanitize_providers_order_arg( array $value ): array {
 		// Sanitize the ordering object to ensure that the order values are integers and the provider IDs are safe strings.
 		foreach ( $value as $provider_id => $order ) {
-			$id           = sanitize_key( $provider_id );
+			$id           = $this->sanitize_provider_id( $provider_id );
 			$value[ $id ] = intval( $order );
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Sanitize a provider ID.
+	 *
+	 * This method ensures that the provider ID is a safe string by removing any unwanted characters.
+	 * It strips all HTML tags, removes accents, percent-encoded characters, and HTML entities,
+	 * and allows only lowercase and uppercase letters, digits, underscores, and dashes.
+	 *
+	 * @param string $provider_id The provider ID to sanitize.
+	 *
+	 * @return string The sanitized provider ID.
+	 */
+	private function sanitize_provider_id( string $provider_id ): string {
+		$provider_id = wp_strip_all_tags( $provider_id );
+		$provider_id = remove_accents( $provider_id );
+		// Remove percent-encoded characters.
+		$provider_id = preg_replace( '|%([a-fA-F0-9][a-fA-F0-9])|', '', $provider_id );
+		// Remove HTML entities.
+		$provider_id = preg_replace( '/&.+?;/', '', $provider_id );
+
+		// Only lowercase and uppercase ASCII letters, digits, underscores, and dashes are allowed.
+		$provider_id = preg_replace( '|[^a-z0-9_\-]|i', '', $provider_id );
+
+		return $provider_id;
 	}
 
 	/**
@@ -513,7 +538,7 @@ class PaymentsRestController extends RestApiControllerBase {
 
 			// If this is a suggestion, add dedicated links.
 			if ( ! empty( $provider['_type'] ) &&
-				PaymentProviders::TYPE_SUGGESTION === $provider['_type'] &&
+				PaymentsProviders::TYPE_SUGGESTION === $provider['_type'] &&
 				! empty( $provider['_suggestion_id'] )
 			) {
 				$providers[ $key ]['_links']['attach'] = array(
@@ -674,10 +699,10 @@ class PaymentsRestController extends RestApiControllerBase {
 						'_type'  => array(
 							'type'        => 'string',
 							'enum'        => array(
-								PaymentProviders::EXTENSION_TYPE_WPORG,
-								PaymentProviders::EXTENSION_TYPE_MU_PLUGIN,
-								PaymentProviders::EXTENSION_TYPE_THEME,
-								PaymentProviders::EXTENSION_TYPE_UNKNOWN,
+								PaymentsProviders::EXTENSION_TYPE_WPORG,
+								PaymentsProviders::EXTENSION_TYPE_MU_PLUGIN,
+								PaymentsProviders::EXTENSION_TYPE_THEME,
+								PaymentsProviders::EXTENSION_TYPE_UNKNOWN,
 							),
 							'description' => esc_html__( 'The type of the containing entity. Generally this is a regular plugin but it can also be a non-standard entity like a theme or a must-user plugin.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
@@ -698,9 +723,9 @@ class PaymentsRestController extends RestApiControllerBase {
 						'status' => array(
 							'type'        => 'string',
 							'enum'        => array(
-								PaymentProviders::EXTENSION_NOT_INSTALLED,
-								PaymentProviders::EXTENSION_INSTALLED,
-								PaymentProviders::EXTENSION_ACTIVE,
+								PaymentsProviders::EXTENSION_NOT_INSTALLED,
+								PaymentsProviders::EXTENSION_INSTALLED,
+								PaymentsProviders::EXTENSION_ACTIVE,
 							),
 							'description' => esc_html__( 'The status of the containing entity.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
@@ -824,6 +849,20 @@ class PaymentsRestController extends RestApiControllerBase {
 							'context'    => array( 'view', 'edit' ),
 							'readonly'   => true,
 							'properties' => array(
+								'preload' => array(
+									'type'        => 'object',
+									'description' => esc_html__( 'The onboarding preload link for the payment gateway.', 'woocommerce' ),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+									'properties'  => array(
+										'href' => array(
+											'type'        => 'string',
+											'description' => esc_html__( 'The URL to do onboarding preload for the payment gateway.', 'woocommerce' ),
+											'context'     => array( 'view', 'edit' ),
+											'readonly'    => true,
+										),
+									),
+								),
 								'onboard' => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'The start/continue onboarding link for the payment gateway.', 'woocommerce' ),
@@ -1005,7 +1044,7 @@ class PaymentsRestController extends RestApiControllerBase {
 					'properties' => array(
 						'_type'  => array(
 							'type'        => 'string',
-							'enum'        => array( PaymentProviders::EXTENSION_TYPE_WPORG ),
+							'enum'        => array( PaymentsProviders::EXTENSION_TYPE_WPORG ),
 							'description' => esc_html__( 'The type of the plugin.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
@@ -1019,9 +1058,9 @@ class PaymentsRestController extends RestApiControllerBase {
 						'status' => array(
 							'type'        => 'string',
 							'enum'        => array(
-								PaymentProviders::EXTENSION_NOT_INSTALLED,
-								PaymentProviders::EXTENSION_INSTALLED,
-								PaymentProviders::EXTENSION_ACTIVE,
+								PaymentsProviders::EXTENSION_NOT_INSTALLED,
+								PaymentsProviders::EXTENSION_INSTALLED,
+								PaymentsProviders::EXTENSION_ACTIVE,
 							),
 							'description' => esc_html__( 'The status of the plugin.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
