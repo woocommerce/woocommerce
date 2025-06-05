@@ -4,7 +4,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Throwable;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;

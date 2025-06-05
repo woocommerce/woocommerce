@@ -1,10 +1,12 @@
 ---
 post_title: Free Shipping Customizations
-menu_title: Free shipping customizations
-tags: code-snippets
+sidebar_label: Free shipping customizations
+
 current wccom url: https://woocommerce.com/document/free-shipping/#advanced-settings-customization
 combined with: https://woocommerce.com/document/hide-other-shipping-methods-when-free-shipping-is-available/#use-a-plugin
 ---
+
+# Free Shipping Customizations
 
 ## Free Shipping: Advanced Settings/Customization
 

@@ -129,25 +129,13 @@ final class ProductFilterStatus extends AbstractBlock {
 		$selected_stock_statuses = array_filter( explode( ',', $query ) );
 
 		$filter_options = array_map(
-			function ( $item ) use ( $stock_statuses, $selected_stock_statuses, $attributes ) {
-				$aria_label = $stock_statuses[ $item['status'] ];
-
-				if ( $attributes['showCounts'] ) {
-					$aria_label = sprintf(
-						/* translators: %1$s is the status, %2$d is the count. */
-						_n( '%1$s (%2$d product)', '%1$s (%2$d products)', $item['count'], 'woocommerce' ),
-						$stock_statuses[ $item['status'] ],
-						$item['count']
-					);
-				}
-
+			function ( $item ) use ( $stock_statuses, $selected_stock_statuses ) {
 				return array(
-					'label'     => $stock_statuses[ $item['status'] ],
-					'ariaLabel' => $aria_label,
-					'value'     => $item['status'],
-					'selected'  => in_array( $item['status'], $selected_stock_statuses, true ),
-					'count'     => $item['count'],
-					'type'      => 'status',
+					'label'    => $stock_statuses[ $item['status'] ],
+					'value'    => $item['status'],
+					'selected' => in_array( $item['status'], $selected_stock_statuses, true ),
+					'count'    => $item['count'],
+					'type'     => 'status',
 				);
 			},
 			$stock_status_data
