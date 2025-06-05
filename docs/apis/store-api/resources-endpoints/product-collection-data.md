@@ -17,7 +17,7 @@ GET /products/collection-data?calculate_rating_counts=true
 | `calculate_stock_status_counts` | bool   |    No    | Returns counts of products with each stock status (in stock, out of stock, on backorder). If false, only `null` will be returned.                                                                       |
 
 
-**In addition to the above attributes**, all product list attributes are supported. This allows you to get data for a certain subset of products. See [the products API list products section](products.md#list-products) for the full list.
+**In addition to the above attributes**, all product list attributes are supported. This allows you to get data for a certain subset of products. See [the products API list products section](/docs/apis/store-api/resources-endpoints/products#list-products) for the full list.
 
 ```sh
 curl "https://example-store.com/wp-json/wc/store/v1/products/collection-data?calculate_price_range=true&calculate_attribute_counts=pa_size,pa_color&calculate_rating_counts=true"
