@@ -205,23 +205,6 @@ class PaymentsController {
 	}
 
 	/**
-	 * Check if the store has any enabled gateways (including offline payment methods).
-	 *
-	 * @return bool True if the store has any enabled gateways, false otherwise.
-	 */
-	private function store_has_enabled_gateways(): bool {
-		$gateways         = WC()->payment_gateways->get_available_payment_gateways();
-		$enabled_gateways = array_filter(
-			$gateways,
-			function ( $gateway ) {
-				return 'yes' === $gateway->enabled;
-			}
-		);
-
-		return ! empty( $enabled_gateways );
-	}
-
-	/**
 	 * Check if the store has any payment providers that have an active incentive.
 	 *
 	 * @return bool True if the store has providers with an active incentive.
