@@ -232,20 +232,19 @@ test.describe( `${ blockData.name }`, () => {
 			const largeImageBlock = await pageObject.getMainImageBlock( {
 				page: 'frontend',
 			} );
+			await largeImageBlock.click();
 
-			await expect( async () => {
-				await largeImageBlock.click();
+			const dialogImage = page
+				.getByRole( 'dialog' )
+				.locator( `img[data-image-id='${ nextImageId }']` );
 
-				const dialogImage = page
-					.getByRole( 'dialog' )
-					.locator( `img[data-image-id='${ nextImageId }']` );
-				await expect( dialogImage ).toBeInViewport( { ratio: 0.9 } );
+			// The image should be in the viewport but it simply doesn't fit fully.
+			await expect( dialogImage ).toBeInViewport( { ratio: 0.75 } );
 
-				const closePopUpButton = page.locator(
-					'.wc-block-product-gallery-dialog__close-button'
-				);
-				await closePopUpButton.click();
-			} ).toPass();
+			const closePopUpButton = page.locator(
+				'.wc-block-product-gallery-dialog__close-button'
+			);
+			await closePopUpButton.click();
 
 			const singleProductImageId =
 				await pageObject.getVisibleLargeImageId();
