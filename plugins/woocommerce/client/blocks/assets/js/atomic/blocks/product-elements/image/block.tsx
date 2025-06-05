@@ -171,15 +171,14 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	}
 
 	const image: ProductResponseImageItem = imageId
-		? product?.images.find( ( image ) => image.id === imageId ) ||
+		? product?.images.find( ( img ) => img.id === imageId ) ||
 		  product.images[ 0 ]
 		: product.images[ 0 ];
 
-	console.log( { image } );
-
 	const ParentComponent = showProductLink ? 'a' : Fragment;
 	const anchorLabel = product?.name
-		? sprintf( __( 'Link to %s', 'woocommerce' ), product.name )
+		? // translators: %s is the product name.
+		  sprintf( __( 'Link to %s', 'woocommerce' ), product.name )
 		: '';
 	const anchorProps = {
 		href: showProductLink ? product?.permalink : undefined,
