@@ -35,8 +35,8 @@ class VariationSelectorAttributeName extends AbstractBlock {
 			return '';
 		}
 
-		$attribute_id   = $block->context['woocommerce/attributeId'];
-		$attribute_name = $block->context['woocommerce/attributeName'];
+		$attribute_id   = isset( $block->context['woocommerce/attributeId'] ) ? $block->context['woocommerce/attributeId'] : null;
+		$attribute_name = isset( $block->context['woocommerce/attributeName'] ) ? $block->context['woocommerce/attributeName'] : null;
 
 		if ( ! isset( $attribute_id ) || ! isset( $attribute_name ) ) {
 			return '';

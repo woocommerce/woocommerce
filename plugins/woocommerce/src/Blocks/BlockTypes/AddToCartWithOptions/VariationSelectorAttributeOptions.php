@@ -50,7 +50,8 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 			return '';
 		}
 
-		$attribute_slug = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
+		$attribute_name = isset( $block->context['woocommerce/attributeName'] ) ? $block->context['woocommerce/attributeName'] : null;
+		$attribute_slug = wc_variation_attribute_name( $attribute_name );
 
 		if ( isset( $attribute_slug ) ) {
 
@@ -137,9 +138,10 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	 * @return string The pills.
 	 */
 	protected function render_pills( $attributes, $content, $block ) {
-		$attribute_id    = $block->context['woocommerce/attributeId'];
-		$attribute_slug  = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
-		$attribute_terms = $block->context['woocommerce/attributeTerms'];
+		$attribute_id    = isset( $block->context['woocommerce/attributeId'] ) ? $block->context['woocommerce/attributeId'] : null;
+		$attribute_name  = isset( $block->context['woocommerce/attributeName'] ) ? $block->context['woocommerce/attributeName'] : null;
+		$attribute_slug  = wc_variation_attribute_name( $attribute_name );
+		$attribute_terms = isset( $block->context['woocommerce/attributeTerms'] ) ? $block->context['woocommerce/attributeTerms'] : array();
 
 		$pills = '';
 		foreach ( $attribute_terms as $attribute_term ) {
@@ -197,9 +199,10 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	 * @return string The dropdown.
 	 */
 	protected function render_dropdown( $attributes, $content, $block ) {
-		$attribute_id    = $block->context['woocommerce/attributeId'];
-		$attribute_slug  = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
-		$attribute_terms = $block->context['woocommerce/attributeTerms'];
+		$attribute_id    = isset( $block->context['woocommerce/attributeId'] ) ? $block->context['woocommerce/attributeId'] : null;
+		$attribute_name  = isset( $block->context['woocommerce/attributeName'] ) ? $block->context['woocommerce/attributeName'] : null;
+		$attribute_slug  = wc_variation_attribute_name( $attribute_name );
+		$attribute_terms = isset( $block->context['woocommerce/attributeTerms'] ) ? $block->context['woocommerce/attributeTerms'] : array();
 		$default_option  = array(
 			'label'      => esc_html__( 'Choose an option', 'woocommerce' ),
 			'value'      => '',
