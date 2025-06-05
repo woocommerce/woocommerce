@@ -7,6 +7,7 @@ import type {
 	CartItem,
 	CartVariationItem,
 	ApiErrorResponse,
+	ApiResponse,
 } from '@woocommerce/types';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 
@@ -43,6 +44,10 @@ type QuantityChanges = {
 	cartItemsPendingQuantity?: string[];
 	cartItemsPendingDelete?: string[];
 	productsPendingAdd?: number[];
+};
+
+type BatchResponse = {
+	responses: ApiResponse< Cart >[];
 };
 
 function isApiErrorResponse(
@@ -213,29 +218,39 @@ const { state, actions } = store< Store >(
 						}
 					);
 
-					const json: Cart = yield res.json();
+					const json: BatchResponse = yield res.json();
 
-					// Checks if the response contains an error.
-					if ( isApiErrorResponse( res, json ) )
-						throw generateError( json );
-
-					// Checks if the response was successful, but still contains some errors.
-					json.errors?.forEach( ( error ) => {
-						actions.showNoticeError( error );
+					// Checks if any of the responses contain an error.
+					json.responses?.forEach( ( response ) => {
+						if ( isApiErrorResponse( res, response ) )
+							throw generateError( response );
 					} );
 
-					// Use the last successful cart response to update the local cart.
+					// Gets the last successful response.
 					const successfulResponses = Array.isArray( json.responses )
 						? json.responses.filter(
-								( response ) => response.status === 200
+								( response ) =>
+									response.status >= 200 &&
+									response.status < 300
 						  )
 						: [];
-					const cartResponse =
-						successfulResponses.length > 0
-							? successfulResponses[
-									successfulResponses.length - 1
-							  ].body
-							: json;
+					const lastSuccessfulResponse =
+						successfulResponses[ successfulResponses.length - 1 ];
+
+					// Checks if the last successful response contains some errors.
+					if (
+						lastSuccessfulResponse?.body?.errors &&
+						Array.isArray( lastSuccessfulResponse.body.errors )
+					) {
+						lastSuccessfulResponse.body.errors.forEach(
+							( error ) => {
+								actions.showNoticeError( error );
+							}
+						);
+					}
+
+					// Use the last successful response to update the local cart.
+					const cartResponse = lastSuccessfulResponse?.body as Cart;
 
 					// Updates the local cart.
 					state.cart = cartResponse;
