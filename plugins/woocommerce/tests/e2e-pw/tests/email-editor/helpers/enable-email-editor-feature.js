@@ -64,3 +64,15 @@ export const deleteEmailPost = async ( baseURL, pageId ) => {
 		'_transient_wc_email_editor_initial_templates_generated'
 	);
 };
+
+/**
+ * Reset the WC_Email email settings.
+ *
+ * This will reset the email by deleting the option saved in the DB retuning it back to the default state.
+ *
+ * @param {string} baseURL The base URL.
+ * @param {string} emailId The transactional email ID.
+ * @return {Promise<void>}
+ */
+export const resetWCTransactionalEmail = async ( baseURL, emailId ) =>
+	deleteOption( request, baseURL, `woocommerce_${ emailId }_settings` );

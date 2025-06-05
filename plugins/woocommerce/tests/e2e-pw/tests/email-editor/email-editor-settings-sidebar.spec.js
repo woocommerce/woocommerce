@@ -3,6 +3,7 @@ const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
 const {
 	enableEmailEditor,
 	disableEmailEditor,
+	resetWCTransactionalEmail,
 } = require( './helpers/enable-email-editor-feature' );
 const {
 	accessTheEmailEditor,
@@ -17,6 +18,8 @@ test.describe( 'WooCommerce Email Editor Settings Sidebar Integration', () => {
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
+		await resetWCTransactionalEmail( baseURL, 'customer_note' );
+		await resetWCTransactionalEmail( baseURL, 'new_order' );
 		await disableEmailEditor( baseURL );
 	} );
 
@@ -61,12 +64,9 @@ test.describe( 'WooCommerce Email Editor Settings Sidebar Integration', () => {
 			.click();
 		await ensureEmailEditorSettingsPanelIsOpened( page );
 
-		// clear the form.
-		await page.locator( '[data-automation-id="email_subject"]' ).fill( '' );
-		await page
-			.locator( '[data-automation-id="email_preheader"]' )
-			.fill( '' );
-		await page.getByRole( 'button', { name: 'Save', exact: true } ).click();
+		const randomNum = new Date().getTime().toString();
+		const subject = `hello subject ${ randomNum } `;
+		const preheader = `hello preheader ${ randomNum } `;
 
 		// fill the subject.
 		await expect(
@@ -77,7 +77,7 @@ test.describe( 'WooCommerce Email Editor Settings Sidebar Integration', () => {
 		).toBeVisible();
 		await page
 			.locator( '[data-automation-id="email_subject"]' )
-			.fill( 'hello subject \n\n' );
+			.fill( subject );
 		await page.locator( '[data-automation-id="email_subject"]' ).click(); // put the cursor at the end of the subject.
 		await page
 			.locator(
@@ -103,7 +103,7 @@ test.describe( 'WooCommerce Email Editor Settings Sidebar Integration', () => {
 		// fill the preheader.
 		await page
 			.locator( '[data-automation-id="email_preheader"]' )
-			.fill( 'hello preheader \n\n' );
+			.fill( preheader );
 		await page.locator( '[data-automation-id="email_preheader"]' ).click(); // put the cursor at the end of the preheader.
 		await page
 			.locator(
@@ -127,10 +127,10 @@ test.describe( 'WooCommerce Email Editor Settings Sidebar Integration', () => {
 		await page.getByRole( 'button', { name: 'Save', exact: true } ).click();
 		await expect(
 			page.locator( '[data-automation-id="email_subject"]' )
-		).toContainText( 'hello subject [woocommerce/customer-email]' );
+		).toContainText( `${ subject } [woocommerce/customer-email]` );
 		await expect(
 			page.locator( '[data-automation-id="email_preheader"]' )
-		).toContainText( 'hello preheader [woocommerce/customer-first-name]' );
+		).toContainText( `${ preheader } [woocommerce/customer-first-name]` );
 	} );
 
 	test( 'Can update email recipients', async ( { page } ) => {

@@ -53,14 +53,15 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 		await accessTheEmailEditor( page, 'New order' );
 		await page.getByRole( 'button', { name: 'View', exact: true } ).click();
 
-		const [newPage] = await Promise.all([
-			page.waitForEvent('popup'), // Waits for the new tab to open
+		const [ newPage ] = await Promise.all( [
+			page.waitForEvent( 'popup' ), // Waits for the new tab to open
 			page
-			.getByRole( 'menuitem', { name: 'Preview in new tab' } )
-			.click()
-		  ]);
+				.getByRole( 'menuitem', { name: 'Preview in new tab' } )
+				.click(),
+		] );
 		await newPage.bringToFront();
 		await newPage.waitForLoadState( 'domcontentloaded' );
+		// eslint-disable-next-line playwright/no-wait-for-selector -- wait for the tab to be loaded.
 		await newPage.waitForSelector( '.wp-block-heading' );
 		await page.close(); // close the original tab.
 		await expect( newPage.url() ).toContain( 'preview=true' );
@@ -93,10 +94,11 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 
 	test( 'Can edit and save content', async ( { page } ) => {
 		await accessTheEmailEditor( page, 'New order' );
-		await expect( page
-			.locator( 'iframe[name="editor-canvas"]' )
-			.contentFrame()
-			.getByText( 'Woo! You’ve received a new' )
+		await expect(
+			page
+				.locator( 'iframe[name="editor-canvas"]' )
+				.contentFrame()
+				.getByText( 'Woo! You’ve received a new' )
 		).toBeVisible();
 
 		await page
