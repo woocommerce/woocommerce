@@ -13,7 +13,20 @@
 	font-size: 0.875em;
 	font-family: inherit;
 	cursor: pointer;
-	color: var(--wc-product-filter-chips-text, currentColor);
+	color: currentColor;
+
+	&:focus {
+		outline: 1px solid var(--wp--preset--color--accent-4);
+		outline-offset: 1px;
+	}
+
+	&:hover {
+		background-color: color-mix(
+			in srgb,
+			var(--wp--preset--color--contrast) 10%,
+			transparent
+		);
+	}
 
 	.has-chip-text-color & {
 		color: var(--wc-product-filter-chips-text);
@@ -28,6 +41,14 @@
 
 .wc-block-product-filter-chips__item[aria-checked="true"] {
 	background: currentColor;
+
+	&:hover {
+		background-color: color-mix(
+			in srgb,
+			var(--wp--preset--color--contrast) 85%,
+			transparent
+		);
+	}
 
 	.has-selected-chip-text-color & {
 		color: var(--wc-product-filter-chips-selected-text);
