@@ -31,6 +31,18 @@ const config: Config = {
 		locales: ['en'],
 	},
 
+	plugins: [
+		[
+			'docusaurus-plugin-llms',
+			{
+				generateLLMsTxt: true,
+				docsDir: '../../docs',
+				ignoreFiles: ['node_modules/*'],
+				title: 'WooCommerce Developer Documentation',
+			}
+		]
+	],
+
 	presets: [
 		[
 			'classic',
