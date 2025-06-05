@@ -43,7 +43,7 @@ class ProductGallery extends AbstractBlock {
 			$srcset       = $image['srcset'];
 			$sizes        = $image['sizes'];
 			$alt          = $image['alt'];
-			$loading      = $index === 0 ? 'fetchpriority="high"' : 'loading="lazy"';
+			$loading      = 0 === $index ? 'fetchpriority="high"' : 'loading="lazy"';
 			$images_html .= "<img data-image-id='{$id}' src='{$src}' srcset='{$srcset}' sizes='{$sizes}' loading='{$loading}' decoding='async' alt='{$alt}' />";
 		}
 		ob_start();
