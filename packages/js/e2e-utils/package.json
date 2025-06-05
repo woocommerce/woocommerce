@@ -27,7 +27,7 @@
 		]
 	},
 	"dependencies": {
-		"@automattic/puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
+		"@automattic/puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50fc22d7bd2a4bd69fc172e8a66d958ef2d",
 		"@wordpress/deprecated": "wp-6.6",
 		"@wordpress/e2e-test-utils": "wp-6.6",
 		"config": "3.3.7",

@@ -482,7 +482,7 @@ const TestAccountStep = () => {
 											<p>
 												{ interpolateComponents( {
 													mixedString: __(
-														'Provide some additional details about your business so you can being accepting real payments. {{link}}Learn more{{/link}}',
+														'Provide some additional details about your business so you can begin accepting real payments. {{link}}Learn more{{/link}}',
 														'woocommerce'
 													),
 													components: {
