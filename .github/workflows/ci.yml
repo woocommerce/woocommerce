@@ -582,4 +582,4 @@ jobs:
         working-directory: docs/_docu-tools
         run: |
             npm install
-            npm run deploy-build
+            npm run build -- --config ./utils/docusaurus-faster.deploy.config.js
