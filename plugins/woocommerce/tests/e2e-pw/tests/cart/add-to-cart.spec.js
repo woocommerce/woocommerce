@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { addAProductToCart } from '@woocommerce/e2e-utils-playwright';
+import { shopper, uiUnblocked } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -9,8 +10,6 @@ import { addAProductToCart } from '@woocommerce/e2e-utils-playwright';
 import { tags, test } from '../../fixtures/fixtures';
 import { WC_API_PATH } from '../../utils/api-client';
 import { checkCartContentInBlocksCart } from '../../utils/cart';
-import { it } from '@jest/globals';
-import { shopper, uiUnblocked } from '@woocommerce/e2e-utils';
 
 const productName = `Cart product test ${ Date.now() }`;
 const productPrice = '13.99';
