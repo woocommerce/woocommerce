@@ -101,14 +101,13 @@ class ProductButton extends AbstractBlock {
 		wp_interactivity_state(
 			'woocommerce/product-button',
 			array(
-				'addToCartText' => function () {
+				'addToCartText' => function () use ( $product ) {
 					$context = wp_interactivity_get_context();
 					$quantity = $context['tempQuantity'];
 					$add_to_cart_text = $context['addToCartText'];
 					$product_type = $context['productType'];
 
 					if ( 'grouped' === $product_type ) {
-						$product = wc_get_product( $context['productId'] );
 						$grouped_product_ids = $product->get_children();
 
 						foreach ( $grouped_product_ids as $child_product_id ) {
