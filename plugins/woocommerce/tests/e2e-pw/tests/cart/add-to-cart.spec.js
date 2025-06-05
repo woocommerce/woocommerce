@@ -116,10 +116,14 @@ test.describe(
 
 				await test.step( 'Verify cart is empty', async () => {
 					await expect(
-						page.locator( '.wc-block-mini-cart__empty-cart-wrapper' )
+						page.locator(
+							'.wc-block-mini-cart__empty-cart-wrapper'
+						)
 					).toBeVisible();
 					await expect(
-						page.locator( '.wc-block-mini-cart__empty-cart-wrapper' )
+						page.locator(
+							'.wc-block-mini-cart__empty-cart-wrapper'
+						)
 					).toContainText( 'Your cart is currently empty!' );
 				} );
 			}
