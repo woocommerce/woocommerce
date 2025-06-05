@@ -22,6 +22,7 @@ interface Context {
 	quantityToAdd: number;
 	tempQuantity: number;
 	animationStatus: AnimationStatus;
+	hasPressedButton: boolean;
 }
 
 enum AnimationStatus {
@@ -34,6 +35,7 @@ type ServerState = {
 	state: {
 		inTheCartText: string;
 		addToCartText: string;
+		inTheCartTextGrouped: string;
 		noticeId: string;
 	};
 };
@@ -73,6 +75,7 @@ const productButtonStore = {
 				addToCartText,
 				productType,
 				groupedProductIds,
+				hasPressedButton,
 			} = getContext< Context >();
 
 			// We use the temporary quantity when there's no animation, or
@@ -94,7 +97,9 @@ const productButtonStore = {
 					}
 				);
 				if ( groupedProductIdsInCart?.some( ( qty ) => qty > 0 ) ) {
-					return state.inTheCartText;
+					return hasPressedButton
+						? state.inTheCartTextGrouped
+						: state.inTheCartText;
 				}
 			}
 
@@ -165,6 +170,10 @@ const productButtonStore = {
 				context.animationStatus = AnimationStatus.IDLE;
 			}
 		},
+		handleClick() {
+			const context = getContext< Context >();
+			context.hasPressedButton = true;
+		},
 	},
 	callbacks: {
 		syncTempQuantityOnLoad() {
@@ -176,6 +185,7 @@ const productButtonStore = {
 			// eslint-disable-next-line react-hooks/rules-of-hooks
 			useLayoutEffect( () => {
 				context.tempQuantity = state.quantity;
+				context.hasPressedButton = false;
 				// eslint-disable-next-line react-hooks/exhaustive-deps
 			}, [] );
 		},

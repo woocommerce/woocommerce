@@ -105,19 +105,6 @@ class ProductButton extends AbstractBlock {
 					$context = wp_interactivity_get_context();
 					$quantity = $context['tempQuantity'];
 					$add_to_cart_text = $context['addToCartText'];
-					$product_type = $context['productType'];
-
-					if ( 'grouped' === $product_type ) {
-						$grouped_product_ids = $product->get_children();
-
-						foreach ( $grouped_product_ids as $child_product_id ) {
-							if ( $this->get_cart_item_quantities_by_product_id( (int) $child_product_id ) > 0 ) {
-								return __( 'Added to cart', 'woocommerce' );
-							}
-						}
-
-						return $add_to_cart_text;
-					}
 
 					return $quantity > 0 ? sprintf(
 						/* translators: %s: product number. */
@@ -126,7 +113,9 @@ class ProductButton extends AbstractBlock {
 					) : $add_to_cart_text;
 				},
 				'inTheCartText' => $this->get_in_the_cart_text( $product ),
+				'inTheCartTextGrouped' => __( 'Added to cart', 'woocommerce' ),
 				'noticeId'      => '',
+				'hasPressedButton' => false,
 			)
 		);
 
@@ -241,6 +230,7 @@ class ProductButton extends AbstractBlock {
 			data-wp-on--animationend="actions.handleAnimationEnd"
 			data-wp-watch="callbacks.startAnimation"
 			data-wp-run="callbacks.syncTempQuantityOnLoad"
+			data-wp-on--click="actions.handleClick"
 		';
 
 		$wrapper_attributes = get_block_wrapper_attributes(
@@ -351,7 +341,7 @@ class ProductButton extends AbstractBlock {
 	 */
 	private function get_in_the_cart_text( $product ) {
 		if ( $product->is_type( 'grouped' ) ) {
-			return __( 'Added to cart', 'woocommerce' );
+			return __( 'Add to cart', 'woocommerce' );
 		}
 
 		return sprintf(
