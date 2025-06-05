@@ -91,7 +91,7 @@ const { state, actions } = store< Store >(
 					( { id: productId } ) => id === productId
 				);
 				const endpoint = item ? 'update-item' : 'add-item';
-				const previousCart = JSON.stringify( state.cart );
+				const previousCart = structuredClone( state.cart );
 				const quantityChanges: QuantityChanges = {};
 
 				// Optimistically updates the number of items in the cart.
@@ -142,14 +142,14 @@ const { state, actions } = store< Store >(
 				} catch ( error ) {
 					// Reverts the optimistic update.
 					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
-					state.cart = JSON.parse( previousCart );
+					state.cart = previousCart;
 
 					// Shows the error notice.
 					actions.showNoticeError( error as Error );
 				}
 			},
 			*batchAddCartItems( items: OptimisticCartItem[] ) {
-				const previousCart = JSON.stringify( state.cart );
+				const previousCart = structuredClone( state.cart );
 				const quantityChanges: QuantityChanges = {};
 
 				// Updates the database.
@@ -265,7 +265,7 @@ const { state, actions } = store< Store >(
 				} catch ( error ) {
 					// Reverts the optimistic update.
 					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
-					state.cart = JSON.parse( previousCart );
+					state.cart = previousCart;
 
 					// Shows the error notice.
 					actions.showNoticeError( error as Error );
