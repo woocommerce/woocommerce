@@ -4,8 +4,13 @@
 import { OnboardingState } from './types';
 import { WPDataSelector, WPDataSelectors } from '../types';
 
-export const getOnboardingData = ( state: OnboardingState ): OnboardingState =>
-	state;
+export const getOnboardingData = (
+	state: OnboardingState,
+	// This is only used to get the onboarding data from the store,
+	// and is not used to determine the current step.
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	_source?: string | null
+): OnboardingState => state;
 
 export const isOnboardingDataRequestPending = (
 	state: OnboardingState

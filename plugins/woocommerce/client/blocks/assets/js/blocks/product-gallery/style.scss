@@ -107,7 +107,7 @@ $dialog-padding: 20px;
 		background: #fff;
 		outline-offset: -2px;
 
-		&:disabled {
+		&[aria-disabled="true"] {
 			.wc-block-product-gallery-large-image-next-previous__icon {
 				opacity: 30%;
 			}
@@ -189,16 +189,15 @@ $dialog-padding: 20px;
 
 	&__thumbnail {
 		display: flex;
-		outline: none;
 	}
 
 	&__thumbnail__image {
 		cursor: pointer;
 		max-width: 100%;
 		max-height: 100%;
-		outline: none;
 		object-fit: cover;
 		width: fit-content;
+		outline-offset: -2px;
 
 		&--is-active {
 			pointer-events: none;

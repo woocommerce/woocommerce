@@ -123,6 +123,17 @@ class AddToCartWithOptions extends AbstractBlock {
 			$template_part_path = apply_filters( '__experimental_woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part', false, $product_type );
 		}
 
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
+		$classes            = implode(
+			' ',
+			array_filter(
+				array(
+					'wp-block-add-to-cart-with-options wc-block-add-to-cart-with-options',
+					esc_attr( $classes_and_styles['classes'] ),
+				)
+			)
+		);
+
 		if ( is_string( $template_part_path ) && file_exists( $template_part_path ) ) {
 
 			$template_part_contents = '';
@@ -144,18 +155,6 @@ class AddToCartWithOptions extends AbstractBlock {
 			if ( '' === $template_part_contents ) {
 				$template_part_contents = file_get_contents( $template_part_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			}
-
-			$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
-
-			$classes = implode(
-				' ',
-				array_filter(
-					array(
-						'wp-block-add-to-cart-with-options wc-block-add-to-cart-with-options',
-						esc_attr( $classes_and_styles['classes'] ),
-					)
-				)
-			);
 
 			/**
 			 * Filters the change the quantity to add to cart.
@@ -220,30 +219,75 @@ class AddToCartWithOptions extends AbstractBlock {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_button' );
 				} elseif ( ProductType::EXTERNAL === $product_type ) {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_button' );
 				} elseif ( ProductType::GROUPED === $product_type ) {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_button' );
 				} elseif ( ProductType::VARIABLE === $product_type ) {
 					/**
 					 * Hook: woocommerce_before_variations_form.
 					 *
-					 * @since 2.4.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_variations_form' );
+					/**
+					 * Hook: woocommerce_after_variations_table.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_after_variations_table' );
+					/**
+					 * Hook: woocommerce_before_single_variation.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_before_single_variation' );
+
+					// WooCommerce uses `woocommerce_single_variation` to render
+					// some UI elements like the Add to Cart button for
+					// variations. We need to remove them to avoid those UI
+					// elements being duplicate with the blocks.
+					// We later add these actions back to avoid affecting other
+					// blocks or templates.
+					remove_action( 'woocommerce_single_variation', 'woocommerce_single_variation', 10 );
+					remove_action( 'woocommerce_single_variation', 'woocommerce_single_variation_add_to_cart_button', 20 );
+					/**
+					 * Hook: woocommerce_single_variation.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_single_variation' );
+					if ( function_exists( 'woocommerce_single_variation' ) ) {
+						add_action( 'woocommerce_single_variation', 'woocommerce_single_variation', 10 );
+					}
+					if ( function_exists( 'woocommerce_single_variation_add_to_cart_button' ) ) {
+						add_action( 'woocommerce_single_variation', 'woocommerce_single_variation_add_to_cart_button', 20 );
+					}
+					/**
+					 * Hook: woocommerce_before_add_to_cart_button.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_before_add_to_cart_button' );
+					/**
+					 * Hook: woocommerce_before_add_to_cart_quantity.
+					 *
+					 * @since 2.7.0
+					 */
+					do_action( 'woocommerce_before_add_to_cart_quantity' );
 				}
 				$hooks_before = ob_get_clean();
 
@@ -252,34 +296,52 @@ class AddToCartWithOptions extends AbstractBlock {
 					/**
 					 * Hook: woocommerce_after_add_to_cart_quantity.
 					 *
-					 * @since 2.7.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_add_to_cart_quantity' );
 					/**
 					 * Hook: woocommerce_after_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_add_to_cart_button' );
 				} elseif ( ProductType::EXTERNAL === $product_type ) {
 					/**
 					 * Hook: woocommerce_after_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_add_to_cart_button' );
 				} elseif ( ProductType::GROUPED === $product_type ) {
 					/**
 					 * Hook: woocommerce_after_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_add_to_cart_button' );
 				} elseif ( ProductType::VARIABLE === $product_type ) {
 					/**
+					 * Hook: woocommerce_after_add_to_cart_quantity.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_after_add_to_cart_quantity' );
+					/**
+					 * Hook: woocommerce_after_add_to_cart_button.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_after_add_to_cart_button' );
+					/**
+					 * Hook: woocommerce_after_single_variation.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_after_single_variation' );
+					/**
 					 * Hook: woocommerce_after_variations_form.
 					 *
-					 * @since 2.4.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_variations_form' );
 				}
@@ -375,7 +437,13 @@ class AddToCartWithOptions extends AbstractBlock {
 			 */
 			do_action( 'woocommerce_' . $product->get_type() . '_add_to_cart' );
 
+			$wrapper_attributes = array(
+				'class' => $classes,
+				'style' => esc_attr( $classes_and_styles['styles'] ),
+			);
+
 			$form_html = ob_get_clean();
+			$form_html = sprintf( '<div %1$s>%2$s</div>', get_block_wrapper_attributes( $wrapper_attributes ), $form_html );
 		}
 
 		$product = $previous_product;

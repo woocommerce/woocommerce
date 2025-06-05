@@ -75,7 +75,6 @@
 		"@types/jest": "27.5.x",
 		"@types/react": "18.3.x",
 		"@types/string-similarity": "4.0.0",
-		"@types/wordpress__data": "6.0.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
