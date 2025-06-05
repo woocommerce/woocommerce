@@ -96,21 +96,31 @@ test.describe(
 			async ( { page } ) => {
 				await test.step( 'Add product to cart and open mini cart', async () => {
 					await addAProductToCart( page, productId );
-					const miniCartButton = page.locator( '.wc-block-mini-cart__button' );
+					const miniCartButton = page.locator(
+						'.wc-block-mini-cart__button'
+					);
 					await miniCartButton.click();
-					await expect( page.locator( '.wc-block-mini-cart__drawer' ) ).toBeVisible();
+					await expect(
+						page.locator( '.wc-block-mini-cart__drawer' )
+					).toBeVisible();
 				} );
 
 				await test.step( 'Verify and interact with remove button', async () => {
-					const removeButton = page.locator( '.wc-block-cart-item__remove-link' );
+					const removeButton = page.locator(
+						'.wc-block-cart-item__remove-link'
+					);
 					await expect( removeButton ).toBeVisible();
 					await removeButton.focus();
 					await page.keyboard.press( 'Space' );
 				} );
 
 				await test.step( 'Verify cart is empty', async () => {
-					await expect( page.locator( '.wc-block-mini-cart__empty-cart-wrapper' ) ).toBeVisible();
-					await expect( page.locator( '.wc-block-mini-cart__empty-cart-wrapper' ) ).toContainText( 'Your cart is currently empty!' );
+					await expect(
+						page.locator( '.wc-block-mini-cart__empty-cart-wrapper' )
+					).toBeVisible();
+					await expect(
+						page.locator( '.wc-block-mini-cart__empty-cart-wrapper' )
+					).toContainText( 'Your cart is currently empty!' );
 				} );
 			}
 		);
