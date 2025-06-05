@@ -52,7 +52,7 @@ Use these resources to help take some of the heavy lifting off of fetching and t
 
 ### API Clients
 
-#### [WooCommerce REST API \- JavaScript](https://www.npmjs.com/package/@woocommerce/woocommerce-rest-api)
+#### [WooCommerce REST API - JavaScript](https://www.npmjs.com/package/@woocommerce/woocommerce-rest-api)
 
 The official JavaScript library for working with the WooCommerce REST API.
 
@@ -62,42 +62,42 @@ The Store API provides public Rest API endpoints for the development of customer
 
 In contrast to the WooCommerce REST API, the Store API is unauthenticated and does not provide access to sensitive store data or other customer information.
 
-#### [**wordpress/api-fetch**](https://www.npmjs.com/package/@wordpress/api-fetch)
+#### [wordpress/api-fetch](https://www.npmjs.com/package/@wordpress/api-fetch)
 
 The ⁠@wordpress/api-fetch package is a utility for making AJAX requests to the WordPress REST API, designed to simplify the process of fetching and sending data.  It's a wrapper around `window.fetch` that provides a consistent interface for handling authentication, settings, and errors, allowing developers to easily interact with WordPress backend services. 
 
 ### Components
 
-#### [**WooCommerce Components**](https://www.npmjs.com/package/@woocommerce/components)
+#### [WooCommerce Components](https://www.npmjs.com/package/@woocommerce/components)
 
 This package includes a library of React components that can be used to create pages in the WooCommerce admin area. To preview these components, review the [Woo Storybook](https://woocommerce.github.io/woocommerce/).
 
-#### [**WordPress Components**](https://www.npmjs.com/package/@wordpress/components)
+#### [WordPress Components](https://www.npmjs.com/package/@wordpress/components)
 
 This package includes a library of generic WordPress components that can be used for creating common UI elements shared between screens and features of the WordPress dashboard. To preview these components, review the [Gutenberg Storybook](https://wordpress.github.io/gutenberg/).
 
 ### JavaScript Utility Packages
 
-#### [**CSV Export**](https://www.npmjs.com/package/@woocommerce/csv-export)
+#### [CSV Export](https://www.npmjs.com/package/@woocommerce/csv-export)
 
 A set of functions to convert data into CSV values, and enable a browser download of the CSV data.
 
-#### [**Currency**](https://www.npmjs.com/package/@woocommerce/currency)
+#### [Currency](https://www.npmjs.com/package/@woocommerce/currency)
 
 A collection of utilities to display and work with currency values.
 
-#### [**Data**](https://www.npmjs.com/package/@woocommerce/data)
+#### [Data](https://www.npmjs.com/package/@woocommerce/data)
 
 Utilities for managing the WooCommerce Admin data store.
 
-#### [**Date**](https://www.npmjs.com/package/@woocommerce/date)
+#### [Date](https://www.npmjs.com/package/@woocommerce/date)
 
 A collection of utilities to display and work with date values.
 
-#### [**Navigation**](https://www.npmjs.com/package/@woocommerce/navigation)
+#### [Navigation](https://www.npmjs.com/package/@woocommerce/navigation)
 
 A collection of navigation-related functions for handling query parameter objects, serializing query parameters, updating query parameters, and triggering path changes.
 
-#### [**Number**](https://www.npmjs.com/package/@woocommerce/number)
+#### [Number](https://www.npmjs.com/package/@woocommerce/number)
 
 A collection of utilities to properly localize numerical values in WooCommerce.
