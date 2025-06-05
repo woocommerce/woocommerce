@@ -13,7 +13,6 @@ $dialog-padding: 20px;
 		display: flex;
 		overflow: hidden;
 		scroll-snap-type: x mandatory;
-		scroll-behavior: auto;
 		align-items: center;
 		margin: 0;
 		padding: 0;
@@ -310,22 +309,22 @@ body.wc-block-product-gallery-dialog-open {
 		height: 100%;
 		overflow-y: auto;
 		box-sizing: border-box;
-		padding: 3px 0;
 	}
 
 	&__images {
 		display: flex;
-		flex-direction: column;
+		flex-wrap: wrap;
 		align-items: center;
+		justify-content: center;
+		gap: $dialog-padding;
+		padding: $dialog-padding;
+		max-width: 1600px;
+		margin: 0 auto;
 
 		img {
 			max-width: 100%;
 			height: auto;
-			margin-bottom: 20px;
-
-			&:last-child {
-				margin-bottom: 0;
-			}
+			margin: 0;
 		}
 	}
 }
