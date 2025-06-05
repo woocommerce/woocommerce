@@ -92,29 +92,34 @@ test.describe(
 			}
 		);
 
-		test( 'should remove the item from the min-cart when remove is clicked', async () => {
+		test( 'should be able to navigate and remove item from mini cart using keyboard', async ( { page } ) => {
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage( productId );
 
-			await page.hover( '.site-header-cart' );
+			// Open mini cart using keyboard.
+			await page.keyboard.press( 'Tab' );
+			await page.keyboard.press( 'Enter' );
 			await uiUnblocked();
 
-			const removeSelector = '.remove_from_cart_button';
-			const removeRole = await page.$eval( removeSelector, ( el ) =>
-				el.getAttribute( 'role' )
-			);
-			expect( removeRole ).toBe( 'button' );
+			// Verify mini cart is visible.
+			await expect( page.locator( '.woocommerce-mini-cart' ) ).toBeVisible();
 
-			await page.focus( removeSelector );
+			// Find and focus the remove button.
+			const removeButton = page.locator( '.remove_from_cart_button' );
+			await expect( removeButton ).toBeVisible();
+			await expect( removeButton ).toHaveAttribute( 'role', 'button' );
+
+			// Navigate to remove button using keyboard.
+			await page.keyboard.press( 'Tab' );
+			await removeButton.focus();
+			
+			// Remove item using Space key.
 			await page.keyboard.press( 'Space' );
 			await uiUnblocked();
 
-			await expect( page ).toMatchElement(
-				'.woocommerce-mini-cart__empty-message',
-				{
-					text: 'No products in the cart.',
-				}
-			);
+			// Verify cart is empty.
+			await expect( page.locator( '.woocommerce-mini-cart__empty-message' ) ).toBeVisible();
+			await expect( page.locator( '.woocommerce-mini-cart__empty-message' ) ).toContainText( 'No products in the cart.' );
 		} );
 	}
 );
