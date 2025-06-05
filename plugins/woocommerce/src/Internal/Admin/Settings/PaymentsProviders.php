@@ -147,7 +147,7 @@ class PaymentsProviders {
 	 * @return array The payment gateway objects list.
 	 */
 	public function get_payment_gateways( bool $for_display = true ): array {
-		// If we are asked for a display gateways list, we need to provide actions and filter out "shells".
+		// If we are asked for a display gateways list, we need to fire legacy actions and filter out "shells".
 		if ( $for_display ) {
 			if ( ! is_null( $this->payment_gateways_for_display_memo ) ) {
 				return $this->payment_gateways_for_display_memo;
