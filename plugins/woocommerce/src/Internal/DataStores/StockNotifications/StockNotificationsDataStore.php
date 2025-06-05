@@ -461,12 +461,12 @@ CREATE TABLE $meta_table_name (
 
 		if ( $args['start_date'] ) {
 			$where[]        = 'date_created_gmt >= %s';
-			$where_values[] = $args['start_date'];
+			$where_values[] = esc_sql( $args['start_date'] );
 		}
 
 		if ( $args['end_date'] ) {
 			$where[]        = 'date_created_gmt < %s';
-			$where_values[] = $args['end_date'];
+			$where_values[] = esc_sql( $args['end_date'] );
 		}
 
 		// ORDER BY clauses.
@@ -479,7 +479,7 @@ CREATE TABLE $meta_table_name (
 			}
 		}
 
-		$order_by_clauses = empty( $order_by_clauses ) ? array( $table . '.id, ASC' ) : $order_by_clauses;
+		$order_by_clauses = empty( $order_by_clauses ) ? array( $table . '.id ASC' ) : $order_by_clauses;
 
 		// Assemble the query.
 		$where    = implode( ' AND ', $where );
