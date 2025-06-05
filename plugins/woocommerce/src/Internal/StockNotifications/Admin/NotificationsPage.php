@@ -21,8 +21,12 @@ class NotificationsPage {
 
 	/**
 	 * Init.
+	 *
+	 * @internal
+	 *
+	 * @return void
 	 */
-	public function init() {
+	final public function init() {
 		// Select section.
 		$section = '';
 
