@@ -60,7 +60,7 @@ register( store );
 window.addEventListener( 'load', () => {
 	if (
 		( ! hasCartSession() || persistenceLayer.get() ) &&
-		! isAddingToCart
+		! isAddingToCart()
 	) {
 		wpDispatch( store ).finishResolution( 'getCartData' );
 	}
