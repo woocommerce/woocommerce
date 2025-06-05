@@ -362,14 +362,6 @@ class ProductButton extends AbstractBlock {
 	}
 
 	/**
-	 * Prevent caching on certain pages
-	 */
-	private function prevent_cache() {
-		\WC_Cache_Helper::set_nocache_constants();
-		nocache_headers();
-	}
-
-	/**
 	 * Get the view cart link html.
 	 *
 	 * @return string The view cart html.
