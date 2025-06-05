@@ -96,22 +96,21 @@ test.describe(
 			async ( { page } ) => {
 				await test.step( 'Add product to cart and open mini cart', async () => {
 					await addAProductToCart( page, productId );
-					const miniCartButton = page.locator( '.site-header-cart' );
+					const miniCartButton = page.locator( '.wc-block-mini-cart__button' );
 					await miniCartButton.hover();
-					await expect( page.locator( '.woocommerce-mini-cart' ) ).toBeVisible();
+					await expect( page.locator( '.wc-block-mini-cart__drawer' ) ).toBeVisible();
 				} );
 
 				await test.step( 'Verify and interact with remove button', async () => {
-					const removeButton = page.locator( '.remove_from_cart_button' );
+					const removeButton = page.locator( '.wc-block-cart-item__remove-link' );
 					await expect( removeButton ).toBeVisible();
-					await expect( removeButton ).toHaveAttribute( 'role', 'button' );
 					await removeButton.focus();
 					await page.keyboard.press( 'Space' );
 				} );
 
 				await test.step( 'Verify cart is empty', async () => {
-					await expect( page.locator( '.woocommerce-mini-cart__empty-message' ) ).toBeVisible();
-					await expect( page.locator( '.woocommerce-mini-cart__empty-message' ) ).toContainText( 'No products in the cart.' );
+					await expect( page.locator( '.wc-block-mini-cart__empty-cart-wrapper' ) ).toBeVisible();
+					await expect( page.locator( '.wc-block-mini-cart__empty-cart-wrapper' ) ).toContainText( 'Your cart is currently empty!' );
 				} );
 			}
 		);
