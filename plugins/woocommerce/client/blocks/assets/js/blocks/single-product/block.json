@@ -12,9 +12,6 @@
 		"align": [ "wide", "full" ]
 	},
 	"attributes": {
-		"imageId": {
-			"type": "number"
-		},
 		"isPreview": {
 			"type": "boolean",
 			"default": false
@@ -29,7 +26,6 @@
 		}
 	},
 	"usesContext": [ "postId", "postType", "queryId" ],
-	"providesContext": { "imageId": "imageId" },
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
