@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Filter: Fix group label not associated with its related controls
