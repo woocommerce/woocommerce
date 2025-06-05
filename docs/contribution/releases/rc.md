@@ -3,6 +3,8 @@ post_title: WooCommerce Release Candidates
 sidebar_label: Release Candidates
 ---
 
+# WooCommerce Release Candidates
+
 Release candidates are pre-release WooCommerce versions made available for testing by plugin authors and users.
 They are versioned incrementally, starting with `-rc.1`, then `-rc.2`, and so on (released if any regressions have been
 discovered or any crucial features need to make it into the final release).
