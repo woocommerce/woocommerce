@@ -460,7 +460,6 @@ const productGallery = {
 						behavior: 'auto',
 						block: 'center',
 					} );
-					selectedImage.focus();
 				}
 			}
 		},
