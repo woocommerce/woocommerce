@@ -91,7 +91,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 									id="<?php echo esc_attr( $item_id ); ?>"
 									class="wc-block-product-filter-checkbox-list__input"
 									type="checkbox"
-									aria-label="<?php echo esc_attr( $item['ariaLabel'] ); ?>"
+									aria-label="<?php echo esc_attr( $this->get_aria_label( $item, $show_counts ) ); ?>"
 									data-wp-on--change="actions.toggleFilter"
 									value="<?php echo esc_attr( $item['value'] ); ?>"
 									data-wp-bind--checked="state.isFilterSelected"
@@ -137,5 +137,31 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 	 */
 	protected function get_block_type_style() {
 		return null;
+	}
+
+	/**
+	 * Get aria label for filter item.
+	 *
+	 * @param array $item Filter item.
+	 * @param bool  $show_counts Whether to show counts.
+	 *
+	 * @return string Aria label.
+	 */
+	private function get_aria_label( $item, $show_counts ) {
+		if ( $show_counts ) {
+			return sprintf(
+				/* translators: %1$s: Product filter name, %2$d: Number of products */
+				_n(
+					'%1$s (%2$d product)',
+					'%1$s (%2$d products)',
+					$item['count'],
+					'woocommerce'
+				),
+				$item['ariaLabel'] ?? $item['label'],
+				$item['count']
+			);
+		}
+
+		return $item['ariaLabel'] ?? $item['label'];
 	}
 }

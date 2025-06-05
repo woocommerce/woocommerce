@@ -25,16 +25,16 @@ import {
 	MainContentContainer,
 } from './main-content/xstate';
 import { useXStateInspect } from '~/xstate';
-
 export type LaunchYourStoreComponentProps = {
 	sendEventToSidebar: ( arg0: SidebarMachineEvents ) => void;
 	sendEventToMainContent: ( arg0: MainContentMachineEvents ) => void;
 	className?: string;
 };
+import { SetUpPaymentsProvider } from '../data/setup-payments-context';
 
 export type LaunchYourStoreQueryParams = {
 	sidebar?: 'hub' | 'launch-success';
-	content?: 'site-preview' | 'launch-store-success';
+	content?: 'site-preview' | 'launch-store-success' | 'payments';
 };
 
 const LaunchStoreController = () => {
@@ -71,30 +71,38 @@ const LaunchStoreController = () => {
 			mainContentMachineService
 		);
 
+	const handlePaymentsClose = () => {
+		// Navigate back to the main flow
+		sendToSidebar( { type: 'RETURN_FROM_PAYMENTS' } );
+	};
+
 	return (
 		<div className={ 'launch-your-store-layout__container' }>
-			<SidebarContainer
-				className={ clsx( {
-					'is-sidebar-hidden': ! isSidebarVisible,
-				} ) }
-			>
-				{ CurrentSidebarComponent && (
-					<CurrentSidebarComponent
-						sendEventToSidebar={ sendToSidebar }
-						sendEventToMainContent={ sendToMainContent }
-						context={ sidebarState.context }
-					/>
-				) }
-			</SidebarContainer>
-			<MainContentContainer>
-				{ CurrentMainContentComponent && (
-					<CurrentMainContentComponent
-						sendEventToSidebar={ sendToSidebar }
-						sendEventToMainContent={ sendToMainContent }
-						context={ mainContentState.context }
-					/>
-				) }
-			</MainContentContainer>
+			<SetUpPaymentsProvider closeModal={ handlePaymentsClose }>
+				<SidebarContainer
+					className={ clsx( {
+						'is-sidebar-hidden': ! isSidebarVisible,
+					} ) }
+				>
+					{ CurrentSidebarComponent && (
+						<CurrentSidebarComponent
+							sendEventToSidebar={ sendToSidebar }
+							sendEventToMainContent={ sendToMainContent }
+							context={ sidebarState.context }
+						/>
+					) }
+				</SidebarContainer>
+				<MainContentContainer>
+					{ CurrentMainContentComponent && (
+						<CurrentMainContentComponent
+							key={ mainContentState.value.toString() }
+							sendEventToSidebar={ sendToSidebar }
+							sendEventToMainContent={ sendToMainContent }
+							context={ mainContentState.context }
+						/>
+					) }
+				</MainContentContainer>
+			</SetUpPaymentsProvider>
 		</div>
 	);
 };

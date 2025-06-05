@@ -77,7 +77,7 @@ final class ProductFilterChips extends AbstractBlock {
 						class="wc-block-product-filter-chips__item"
 						type="button"
 						role="checkbox"
-						aria-label="<?php echo esc_attr( $item['ariaLabel'] ); ?>"
+						aria-label="<?php echo esc_attr( $this->get_aria_label( $item, $show_counts ) ); ?>"
 						data-wp-on--click="actions.toggleFilter"
 						value="<?php echo esc_attr( $item['value'] ); ?>"
 						data-wp-bind--aria-checked="state.isFilterSelected"
@@ -117,5 +117,31 @@ final class ProductFilterChips extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Get aria label for filter item.
+	 *
+	 * @param array $item Filter item.
+	 * @param bool  $show_counts Whether to show counts.
+	 *
+	 * @return string Aria label.
+	 */
+	private function get_aria_label( $item, $show_counts ) {
+		if ( $show_counts ) {
+			return sprintf(
+				/* translators: %1$s: Product filter name, %2$d: Number of products */
+				_n(
+					'%1$s (%2$d product)',
+					'%1$s (%2$d products)',
+					$item['count'],
+					'woocommerce'
+				),
+				$item['ariaLabel'] ?? $item['label'],
+				$item['count']
+			);
+		}
+
+		return $item['ariaLabel'] ?? $item['label'];
 	}
 }
