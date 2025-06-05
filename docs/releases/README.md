@@ -1,7 +1,6 @@
 ---
-category_title: Releases
-category_slug: releases
-post_title: Releases
+post_title: Releasing WooCommerce
+sidebar_label: Releases
 ---
 
 The WooCommerce release process is managed by a rotating release lead.  The documentation below outlines the process for managing releases.

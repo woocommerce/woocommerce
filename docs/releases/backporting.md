@@ -1,7 +1,6 @@
 ---
-post_title: WooCommerce Release Backporting
-menu_title: WooCommerce Release Backporting
-tags: reference
+post_title: Backporting in WooCommerce
+sidebar_label: Backporting
 ---
 
 Backporting is the process of applying a change from `trunk` to an open release branch.  When a release branch is created, it is copied from the `trunk` branch at the time of code freeze.  Changes are applied to `trunk` and then backported to the release branch as needed.
