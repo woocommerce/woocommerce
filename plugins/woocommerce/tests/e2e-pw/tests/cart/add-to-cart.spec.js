@@ -2,12 +2,11 @@
  * External dependencies
  */
 import { addAProductToCart } from '@woocommerce/e2e-utils-playwright';
-import { shopper, uiUnblocked } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
-import { tags, test } from '../../fixtures/fixtures';
+import { tags, test, expect } from '../../fixtures/fixtures';
 import { WC_API_PATH } from '../../utils/api-client';
 import { checkCartContentInBlocksCart } from '../../utils/cart';
 
@@ -91,30 +90,30 @@ test.describe(
 			}
 		);
 
-		test( 'should be able to navigate and remove item from mini cart using keyboard', async ( { page } ) => {
-			await shopper.goToShop();
-			await shopper.addToCartFromShopPage( productId );
+		test(
+			'should be able to navigate and remove item from mini cart using keyboard',
+			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
+			async ( { page } ) => {
+				await test.step( 'Add product to cart and open mini cart', async () => {
+					await addAProductToCart( page, productId );
+					const miniCartButton = page.locator( '.site-header-cart' );
+					await miniCartButton.hover();
+					await expect( page.locator( '.woocommerce-mini-cart' ) ).toBeVisible();
+				} );
 
-			const miniCartButton = page.locator( '.site-header-cart' );
-			await miniCartButton.hover();
-			await uiUnblocked();
+				await test.step( 'Verify and interact with remove button', async () => {
+					const removeButton = page.locator( '.remove_from_cart_button' );
+					await expect( removeButton ).toBeVisible();
+					await expect( removeButton ).toHaveAttribute( 'role', 'button' );
+					await removeButton.focus();
+					await page.keyboard.press( 'Space' );
+				} );
 
-			// Verify mini cart is visible
-			await expect( page.locator( '.woocommerce-mini-cart' ) ).toBeVisible();
-
-			// Find and focus the remove button.
-			const removeButton = page.locator( '.remove_from_cart_button' );
-			await expect( removeButton ).toBeVisible();
-			await expect( removeButton ).toHaveAttribute( 'role', 'button' );
-
-			// Navigate to remove button using keyboard.
-			await removeButton.focus();
-			await page.keyboard.press( 'Space' );
-			await uiUnblocked();
-
-			// Verify cart is empty.
-			await expect( page.locator( '.woocommerce-mini-cart__empty-message' ) ).toBeVisible();
-			await expect( page.locator( '.woocommerce-mini-cart__empty-message' ) ).toContainText( 'No products in the cart.' );
-		} );
+				await test.step( 'Verify cart is empty', async () => {
+					await expect( page.locator( '.woocommerce-mini-cart__empty-message' ) ).toBeVisible();
+					await expect( page.locator( '.woocommerce-mini-cart__empty-message' ) ).toContainText( 'No products in the cart.' );
+				} );
+			}
+		);
 	}
 );
