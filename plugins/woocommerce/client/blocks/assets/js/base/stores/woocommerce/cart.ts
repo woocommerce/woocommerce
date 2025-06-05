@@ -226,11 +226,16 @@ const { state, actions } = store< Store >(
 
 					// Use the last successful cart response to update the local cart.
 					const successfulResponses = Array.isArray( json.responses )
-						? json.responses.filter( ( response ) => response.status === 200 )
+						? json.responses.filter(
+								( response ) => response.status === 200
+						  )
 						: [];
-					const cartResponse = successfulResponses.length > 0
-						? successfulResponses[ successfulResponses.length - 1 ].body
-						: json;
+					const cartResponse =
+						successfulResponses.length > 0
+							? successfulResponses[
+									successfulResponses.length - 1
+							  ].body
+							: json;
 
 					// Updates the local cart.
 					state.cart = cartResponse;
