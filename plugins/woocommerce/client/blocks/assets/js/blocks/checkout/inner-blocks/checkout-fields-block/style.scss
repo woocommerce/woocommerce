@@ -13,16 +13,12 @@
 		}
 	}
 }
-.is-mobile,
-.is-small,
-.is-medium {
+@include cart-checkout-not-large-container {
 	.wc-block-checkout__main {
 		order: 1;
 	}
 }
-.is-small,
-.is-medium,
-.is-large {
+@mixin address-form-layout {
 	.wc-block-checkout__shipping-fields,
 	.wc-block-checkout__billing-fields {
 		.wc-block-components-address-form {
@@ -70,6 +66,16 @@
 			}
 		}
 	}
+}
+
+@include cart-checkout-large-container {
+	@include address-form-layout;
+}
+@include cart-checkout-small-container {
+	@include address-form-layout;
+}
+@include cart-checkout-medium-container {
+	@include address-form-layout;
 }
 
 .wc-block-components-address-form__address_2-toggle {
