@@ -160,7 +160,12 @@ test.describe( 'Shopper → Local pickup', () => {
 		await checkoutPageObject.placeOrder();
 
 		await expect(
-			page.getByText( 'Collection from Testing' )
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
+
+		await expect(
+			// The regex pattern matches "Collection from Testing" followed by any characters (.*)
+			page.getByRole( 'cell', { name: /Collection from Testing.*/ } )
 		).toBeVisible();
 		await checkoutPageObject.verifyBillingDetails();
 	} );
@@ -211,7 +216,12 @@ test.describe( 'Shopper → Local pickup', () => {
 		await checkoutPageObject.placeOrder();
 
 		await expect(
-			page.getByText( 'Collection from Testing' )
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
+
+		await expect(
+			// The regex pattern matches "Collection from Testing" followed by any characters (.*)
+			page.getByRole( 'cell', { name: /Collection from Testing.*/ } )
 		).toBeVisible();
 		await checkoutPageObject.verifyBillingDetails();
 	} );
@@ -276,7 +286,12 @@ test.describe( 'Shopper → Local pickup', () => {
 		await checkoutPageObject.placeOrder();
 
 		await expect(
-			page.getByText( 'Collection from Testing' )
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
+
+		await expect(
+			// The regex pattern matches "Collection from Testing" followed by any characters (.*)
+			page.getByRole( 'cell', { name: /Collection from Testing.*/ } )
 		).toBeVisible();
 		await checkoutPageObject.verifyBillingDetails();
 	} );

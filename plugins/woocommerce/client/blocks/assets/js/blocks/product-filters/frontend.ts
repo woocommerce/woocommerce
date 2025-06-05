@@ -15,7 +15,7 @@ function selectFilter() {
 		attributeQueryType: context.item.attributeQueryType,
 		activeLabel: context.activeLabelTemplate.replace(
 			'{{label}}',
-			context.item.ariaLabel
+			context.item?.ariaLabel || context.item.label
 		),
 	};
 	const newActiveFilters = context.activeFilters.filter(
@@ -40,7 +40,7 @@ function unselectFilter() {
 
 type FilterItem = {
 	label: string;
-	ariaLabel: string;
+	ariaLabel?: string;
 	value: string;
 	selected: boolean;
 	count: number;
