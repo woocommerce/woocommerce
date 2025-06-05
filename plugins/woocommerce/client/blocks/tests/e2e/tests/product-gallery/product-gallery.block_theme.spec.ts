@@ -209,8 +209,6 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			await page.reload();
-
 			const initialVisibleLargeImageId =
 				await pageObject.getVisibleLargeImageId();
 
@@ -234,17 +232,20 @@ test.describe( `${ blockData.name }`, () => {
 			const largeImageBlock = await pageObject.getMainImageBlock( {
 				page: 'frontend',
 			} );
-			await largeImageBlock.click();
 
-			const dialogImage = page
-				.getByRole( 'dialog' )
-				.locator( `img[data-image-id='${ nextImageId }']` );
-			await expect( dialogImage ).toBeInViewport( { ratio: 0.9 } );
+			await expect( async () => {
+				await largeImageBlock.click();
 
-			const closePopUpButton = page.locator(
-				'.wc-block-product-gallery-dialog__close-button'
-			);
-			await closePopUpButton.click();
+				const dialogImage = page
+					.getByRole( 'dialog' )
+					.locator( `img[data-image-id='${ nextImageId }']` );
+				await expect( dialogImage ).toBeInViewport( { ratio: 0.9 } );
+
+				const closePopUpButton = page.locator(
+					'.wc-block-product-gallery-dialog__close-button'
+				);
+				await closePopUpButton.click();
+			} ).toPass();
 
 			const singleProductImageId =
 				await pageObject.getVisibleLargeImageId();
