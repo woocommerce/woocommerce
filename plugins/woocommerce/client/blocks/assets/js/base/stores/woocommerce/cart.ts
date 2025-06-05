@@ -224,9 +224,12 @@ const { state, actions } = store< Store >(
 						actions.showNoticeError( error );
 					} );
 
-					// Use the last cart response to update the local cart.
-					const cartResponse = Array.isArray( json.responses )
-						? json.responses[ json.responses.length - 1 ].body
+					// Use the last successful cart response to update the local cart.
+					const successfulResponses = Array.isArray( json.responses )
+						? json.responses.filter( ( response ) => response.status === 200 )
+						: [];
+					const cartResponse = successfulResponses.length > 0
+						? successfulResponses[ successfulResponses.length - 1 ].body
 						: json;
 
 					// Updates the local cart.
