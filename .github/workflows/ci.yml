@@ -561,7 +561,7 @@ jobs:
             needs-markdown-linting:
               - added|modified: '!(.github/**)/**/*.md'
               - added|modified: '*.md'
-            needs-docs-linting:
+            needs-docs-build-validation:
               - 'docs/**/*.md'
 
       - name: 'Setup - node'
@@ -577,7 +577,7 @@ jobs:
             markdownlint ${{ steps.target-changes.outputs.needs-markdown-linting_files }}
           
       - name: 'Validate - lint docs-files'
-        if: ${{ always() && steps.target-changes.outputs.needs-docs-linting }}
+        if: ${{ always() && steps.target-changes.outputs.needs-docs-build-validation }}
         shell: bash
         working-directory: docs/_docu-tools
         run: |
