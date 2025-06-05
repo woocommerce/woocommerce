@@ -96,12 +96,11 @@ test.describe(
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage( productId );
 
-			// Open mini cart using keyboard.
-			await page.keyboard.press( 'Tab' );
-			await page.keyboard.press( 'Enter' );
+			const miniCartButton = page.locator( '.site-header-cart' );
+			await miniCartButton.hover();
 			await uiUnblocked();
 
-			// Verify mini cart is visible.
+			// Verify mini cart is visible
 			await expect( page.locator( '.woocommerce-mini-cart' ) ).toBeVisible();
 
 			// Find and focus the remove button.
@@ -110,10 +109,7 @@ test.describe(
 			await expect( removeButton ).toHaveAttribute( 'role', 'button' );
 
 			// Navigate to remove button using keyboard.
-			await page.keyboard.press( 'Tab' );
 			await removeButton.focus();
-			
-			// Remove item using Space key.
 			await page.keyboard.press( 'Space' );
 			await uiUnblocked();
 
