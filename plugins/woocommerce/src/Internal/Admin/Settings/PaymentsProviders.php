@@ -109,6 +109,8 @@ class PaymentsProviders {
 	/**
 	 * The memoized payment gateways for display to avoid computing the list multiple times during a request.
 	 *
+	 * This is especially important since it avoids triggering the legacy action multiple times during a request.
+	 *
 	 * @var array|null
 	 */
 	private ?array $payment_gateways_for_display_memo = null;
