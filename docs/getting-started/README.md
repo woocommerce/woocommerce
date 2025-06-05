@@ -18,7 +18,7 @@ WooCommerce is a customizable, open-source eCommerce platform built on WordPress
 
 Explore comprehensive guides and resources to build and enhance WooCommerce extensions. Dive into development best practices and innovative techniques for creating powerful extensions.
 
-* [How to build your first extension](/docs/extensions/getting-started-extensions/building-your-first-extension123)
+* [How to build your first extension](/docs/extensions/getting-started-extensions/building-your-first-extension)
 * [Designing a simple extension](/docs/extensions/getting-started-extensions/how-to-design-a-simple-extension)
 * [Extension development best practices](/docs/extensions/best-practices-extensions/extension-development-best-practices)
 

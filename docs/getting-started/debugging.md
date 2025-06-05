@@ -10,7 +10,7 @@ sidebar_position: 6
 
 A good place to start is usually the debugging tools built into WordPress itself:
 
-The documentation for https://wordpress.org/documentation/article/debugging-in-wordpress/ overs a number of environment variables you can set to enable WordPress’s core debugging tools.
+The documentation for [Debugging in WordPress c](https://wordpress.org/documentation/article/debugging-in-wordpress/)overs a number of environment variables you can set to enable WordPress’s core debugging tools.
 
 ### Query Monitor
 
