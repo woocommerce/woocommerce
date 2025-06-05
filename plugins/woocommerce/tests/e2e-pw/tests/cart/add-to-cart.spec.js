@@ -97,7 +97,7 @@ test.describe(
 				await test.step( 'Add product to cart and open mini cart', async () => {
 					await addAProductToCart( page, productId );
 					const miniCartButton = page.locator( '.wc-block-mini-cart__button' );
-					await miniCartButton.hover();
+					await miniCartButton.click();
 					await expect( page.locator( '.wc-block-mini-cart__drawer' ) ).toBeVisible();
 				} );
 
