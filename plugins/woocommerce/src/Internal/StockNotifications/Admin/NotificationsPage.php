@@ -64,7 +64,7 @@ class NotificationsPage {
 
 		try {
 			if ( ! $notification_id ) {
-				throw new \Exception( 'Missing notification ID.' );
+				throw new \Exception( 'Notification not found.' );
 			}
 
 			$notification = new Notification( $notification_id ); // <- this can throw

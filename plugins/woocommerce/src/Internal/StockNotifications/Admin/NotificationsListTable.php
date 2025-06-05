@@ -765,10 +765,15 @@ class NotificationsListTable extends \WP_List_Table {
 	protected function display_months_dropdown() {
 		global $wp_locale;
 
-		$months      = $this->data_store->get_distinct_dates();
+		$months = $this->data_store->get_distinct_dates();
+
+		if ( ! is_array( $months ) ) {
+			return;
+		}
+
 		$month_count = count( $months );
 
-		if ( ! $month_count || ( 1 === $month_count && 0 === (int) $months[0]->month ) ) {
+		if ( $month_count < 1 ) {
 			return;
 		}
 
@@ -779,7 +784,7 @@ class NotificationsListTable extends \WP_List_Table {
 			<option<?php selected( $m, 0 ); ?> value="0"><?php esc_html_e( 'All dates', 'woocommerce' ); ?></option>
 			<?php
 			foreach ( $months as $arc_row ) {
-				if ( 0 === (int) $arc_row->year ) {
+				if ( 0 === (int) $arc_row->year || 0 === (int) $arc_row->month ) {
 					continue;
 				}
 
