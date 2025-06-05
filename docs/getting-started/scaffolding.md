@@ -19,7 +19,7 @@ If you’re designing a WooCommerce store, you have two options for theme develo
 
 Storefront is Woo’s flagship classic theme, available in the [WordPress Theme Directory](https://wordpress.org/themes/). You can either rename and modify the theme itself, or override specific aspects of it using a child theme. 
 
-For more information on building a classic WooCommerce theme, read our classic theme development handbook. For a comprehensive guide on creating a child block theme and understanding the differences between a classic and block theme, please refer to [WooCommerce block theme development](http://../block-theme-development/theming-woo-blocks.md) and [WordPress block child theme development](https://learn.wordpress.org/lesson-plan/create-a-basic-child-theme-for-block-themes/).
+For more information on building a classic WooCommerce theme, read our classic theme development handbook. For a comprehensive guide on creating a child block theme and understanding the differences between a classic and block theme, please refer to [WooCommerce block theme development](/docs/theming/block-theme-development/theming-woo-blocks) and [WordPress block child theme development](https://learn.wordpress.org/lesson-plan/create-a-basic-child-theme-for-block-themes/).
 
 ### Block Starter Themes
 
@@ -39,7 +39,7 @@ Read our full tutorial on using the [create-woo-extension package](/docs/extensi
 
 Inside of the WooCommerce plugin are a set of example extensions that showcase different use-cases for modifying WooCommerce core functionality. Some examples include adding a custom report, a custom payment gateway, and modifying the WooCommerce dashboard.
 
-Read our full tutorial showcaseing [how to extend WooCommerce analytics reports](https://developer.woocommerce.com/docs/how-to-extend-woocommerce-analytics-reports/).
+Read our full tutorial showcasing [how to extend WooCommerce analytics reports](/docs/features/analytics/extending-woocommerce-admin-reports).
 
 ## Relevant WordPress Scaffolds
 
