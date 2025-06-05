@@ -559,7 +559,7 @@ jobs:
           list-files: shell
           filters: |
             needs-markdown-linting:
-              - added|modified: '!({.github,docs}/**)/**/*.md'
+              - added|modified: '!(.github/**)/**/*.md'
               - added|modified: '*.md'
             needs-docs-linting:
               - 'docs/**/*.md'
