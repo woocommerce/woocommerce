@@ -1,10 +1,8 @@
-@include cart-checkout-large-container {
-	.wc-block-components-order-summary {
+.wc-block-components-order-summary {
+	@include cart-checkout-large-container {
 		padding: 0 $gap;
 	}
-}
 
-.wc-block-components-order-summary {
 	.wc-block-components-order-summary__button-text {
 		font-weight: 500;
 	}
