@@ -1,11 +1,4 @@
-# Order API <!-- omit in toc -->
-
-## Table of Contents <!-- omit in toc -->
-
--   [Get Order](#get-order)
--   [Responses](#responses)
-    -   [Order Response](#order-response)
-    -   [Error Response](#error-response)
+# Order API 
 
 The order API returns the pay-for-order order.
 
@@ -243,14 +236,3 @@ If an order action cannot be performed, an error response will be returned. This
 	}
 }
 ```
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./src/StoreApi/docs/order.md)
-
-<!-- /FEEDBACK -->
-

@@ -1,22 +1,8 @@
-# Cart API <!-- omit in toc -->
-
-## Table of Contents <!-- omit in toc -->
-
--   [Get Cart](#get-cart)
--   [Responses](#responses)
-    -   [Cart Response](#cart-response)
-    -   [Error Response](#error-response)
--   [Add Item](#add-item)
--   [Remove Item](#remove-item)
--   [Update Item](#update-item)
--   [Apply Coupon](#apply-coupon)
--   [Remove Coupon](#remove-coupon)
--   [Update Customer](#update-customer)
--   [Select Shipping Rate](#select-shipping-rate)
+# Cart API 
 
 The cart API returns the current state of the cart for the current session or logged in user.
 
-All POST endpoints require a [Nonce Token](nonce-tokens.md) or a [Cart Token](cart-tokens.md) and return the updated state of the full cart once complete.
+All POST endpoints require a [Nonce Token](/docs/apis/store-api/nonce-tokens) or a [Cart Token](/docs/apis/store-api/cart-tokens) and return the updated state of the full cart once complete.
 
 ## Get Cart
 
@@ -391,7 +377,7 @@ This allows the client to remain in sync with the cart data without additional r
 
 Add an item to the cart and return the full cart response, or an error.
 
-This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) or [Cart Token](cart-tokens.md) is provided.
+This endpoint will return an error unless a valid [Nonce Token](/docs/apis/store-api/nonce-tokens) or [Cart Token](/docs/apis/store-api/cart-tokens) is provided.
 
 ```http
 POST /cart/add-item
@@ -501,7 +487,7 @@ The JSON payload for adding multiple items to the cart would look like this:
 
 Remove an item from the cart and return the full cart response, or an error.
 
-This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) or [Cart Token](cart-tokens.md) is provided.
+This endpoint will return an error unless a valid [Nonce Token](/docs/apis/store-api/nonce-tokens) or [Cart Token](/docs/apis/store-api/cart-tokens) is provided.
 
 ```http
 POST /cart/remove-item
@@ -521,7 +507,7 @@ Returns the full [Cart Response](#cart-response) on success, or an [Error Respon
 
 Update an item in the cart and return the full cart response, or an error.
 
-This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) or [Cart Token](cart-tokens.md) is provided.
+This endpoint will return an error unless a valid [Nonce Token](/docs/apis/store-api/nonce-tokens) or [Cart Token](/docs/apis/store-api/cart-tokens) is provided.
 
 ```http
 POST /cart/update-item
@@ -542,7 +528,7 @@ Returns the full [Cart Response](#cart-response) on success, or an [Error Respon
 
 Apply a coupon to the cart and return the full cart response, or an error.
 
-This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) or [Cart Token](cart-tokens.md) is provided.
+This endpoint will return an error unless a valid [Nonce Token](/docs/apis/store-api/nonce-tokens) or [Cart Token](/docs/apis/store-api/cart-tokens) is provided.
 
 ```http
 POST /cart/apply-coupon/
@@ -562,7 +548,7 @@ Returns the full [Cart Response](#cart-response) on success, or an [Error Respon
 
 Remove a coupon from the cart and return the full cart response, or an error.
 
-This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) or [Cart Token](cart-tokens.md) is provided.
+This endpoint will return an error unless a valid [Nonce Token](/docs/apis/store-api/nonce-tokens) or [Cart Token](/docs/apis/store-api/cart-tokens) is provided.
 
 ```http
 POST /cart/remove-coupon/
@@ -582,7 +568,7 @@ Returns the full [Cart Response](#cart-response) on success, or an [Error Respon
 
 Update customer data and return the full cart response, or an error.
 
-This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) or [Cart Token](cart-tokens.md) is provided.
+This endpoint will return an error unless a valid [Nonce Token](/docs/apis/store-api/nonce-tokens) or [Cart Token](/docs/apis/store-api/cart-tokens) is provided.
 
 ```http
 POST /cart/update-customer
@@ -617,7 +603,7 @@ Returns the full [Cart Response](#cart-response) on success, or an [Error Respon
 
 Selects an available shipping rate for a package, then returns the full cart response, or an error.
 
-This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) or [Cart Token](cart-tokens.md) is provided.
+This endpoint will return an error unless a valid [Nonce Token](/docs/apis/store-api/nonce-tokens) or [Cart Token](/docs/apis/store-api/cart-tokens) is provided.
 
 ```http
 POST /cart/select-shipping-rate
@@ -633,13 +619,3 @@ curl --header "Nonce: 12345" --request POST /cart/select-shipping-rate?package_i
 ```
 
 Returns the full [Cart Response](#cart-response) on success, or an [Error Response](#error-response) on failure.
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./src/StoreApi/docs/cart.md)
-
-<!-- /FEEDBACK -->

@@ -1,15 +1,9 @@
-# Rate Limiting for Store API endpoints <!-- omit in toc -->
+---
+sidebar_label: Rate Limiting 
+sidebar_position: 4
+---
 
-## Table of Contents <!-- omit in toc -->
-
--   [Limit information](#limit-information)
--   [Methods restricted by Rate Limiting](#methods-restricted-by-rate-limiting)
--   [Rate Limiting options filter](#rate-limiting-options-filter)
--   [Proxy standard support](#proxy-standard-support)
--   [Limit usage information observability](#limit-usage-information-observability)
-    -   [Response headers example](#response-headers-example)
--   [Tracking limit abuses](#tracking-limit-abuses)
-    -   [Custom tracking usage example](#custom-tracking-usage-example)
+# Rate Limiting for Store API endpoints 
 
 [Rate Limiting](https://github.com/woocommerce/woocommerce-blocks/pull/5962) is available for Store API endpoints. This is optional and disabled by default. It can be enabled by following [these instructions](#rate-limiting-options-filter).
 
@@ -56,9 +50,9 @@ add_filter( 'woocommerce_store_api_rate_limit_options', function() {
 
 If the Store is running behind a proxy, load balancer, cache service, CDNs, etc. keying limits by IP is supported through standard IP forwarding headers, namely:
 
--   `X_REAL_IP`|`CLIENT_IP` _Custom popular implementations that simplify obtaining the origin IP for the request_
--   `X_FORWARDED_FOR` _De-facto standard header for identifying the originating IP, [Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For)_
--   `X_FORWARDED` _[Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded), [RFC 7239](https://datatracker.ietf.org/doc/html/rfc7239)_
+* `X_REAL_IP`|`CLIENT_IP` _Custom popular implementations that simplify obtaining the origin IP for the request_
+* `X_FORWARDED_FOR` _De-facto standard header for identifying the originating IP, [Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For)_
+* `X_FORWARDED` _[Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded), [RFC 7239](https://datatracker.ietf.org/doc/html/rfc7239)_
 
 This is disabled by default.
 
@@ -81,10 +75,10 @@ add_filter( 'woocommerce_store_api_rate_limit_id', function() {
 
 Current limit information can be observed via custom response headers:
 
--   `RateLimit-Limit` _Maximum requests per time frame._
--   `RateLimit-Remaining` _Requests available during current time frame._
--   `RateLimit-Reset` _Unix timestamp of next time frame reset._
--   `RateLimit-Retry-After` _Seconds until requests are unblocked again. Only shown when the limit is reached._
+* `RateLimit-Limit` _Maximum requests per time frame._
+* `RateLimit-Remaining` _Requests available during current time frame._
+* `RateLimit-Reset` _Unix timestamp of next time frame reset._
+* `RateLimit-Retry-After` _Seconds until requests are unblocked again. Only shown when the limit is reached._
 
 ### Response headers example
 
@@ -108,14 +102,3 @@ add_action(
     function ( $offending_ip, $action_id ) { /* Custom tracking implementation */ }
 );
 ```
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./src/StoreApi/docs/rate-limiting.md)
-
-<!-- /FEEDBACK -->
-

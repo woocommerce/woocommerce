@@ -1,9 +1,4 @@
-# Product Categories API <!-- omit in toc -->
-
-## Table of Contents <!-- omit in toc -->
-
--   [List Product Categories](#list-product-categories)
--   [Single Product Category](#single-product-category)
+# Product Categories API 
 
 ## List Product Categories
 
@@ -85,14 +80,3 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/categories/1"
 	"permalink": "https://store.local/product-category/decor/"
 }
 ```
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./src/StoreApi/docs/product-categories.md)
-
-<!-- /FEEDBACK -->
-

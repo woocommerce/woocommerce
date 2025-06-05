@@ -1,11 +1,11 @@
-# Cart Tokens <!-- omit in toc -->
+---
+sidebar_label: Cart Tokens
+sidebar_position: 3
+---
 
-## Table of Contents <!-- omit in toc -->
+# Cart Tokens 
 
-- [Obtaining a Cart Token](#obtaining-a-cart-token)
-- [How to use a Cart-Token](#how-to-use-a-cart-token)
-
-Cart tokens can be used instead of cookies based sessions for headless interaction with carts. When using a `Cart-Token` a  [Nonce Token](nonce-tokens.md) is not required.
+Cart tokens can be used instead of cookies based sessions for headless interaction with carts. When using a `Cart-Token` a  [Nonce Token](/docs/apis/store-api/nonce-tokens) is not required.
 
 ## Obtaining a Cart Token
 
@@ -24,14 +24,3 @@ curl --header "Cart-Token: 12345" --request GET https://example-store.com/wp-jso
 ```
 
 The same method will allow you to checkout using a `Cart-Token` on the `/checkout` route.
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./src/StoreApi/docs/cart-tokens.md)
-
-<!-- /FEEDBACK -->
-

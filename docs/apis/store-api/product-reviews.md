@@ -1,8 +1,4 @@
-# Product Reviews API <!-- omit in toc -->
-
-## Table of Contents <!-- omit in toc -->
-
--   [List Product Reviews](#list-product-reviews)
+# Product Reviews API 
 
 ## List Product Reviews
 
@@ -62,14 +58,3 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/collection-data?cal
 	}
 ]
 ```
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./src/StoreApi/docs/product-reviews.md)
-
-<!-- /FEEDBACK -->
-

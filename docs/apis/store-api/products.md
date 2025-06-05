@@ -1,11 +1,4 @@
-# Products API <!-- omit in toc -->
-
-## Table of Contents <!-- omit in toc -->
-
--   [List Products](#list-products)
--   [Single Product by ID](#single-product-by-id)
--   [Single Product by slug](#single-product-by-slug)
--   [Product Variations](#product-variations)
+# Products API 
 
 The store products API provides public product data so it can be rendered on the client side.
 
@@ -274,14 +267,3 @@ By default, Store API excludes product variations. You can retrieve the variatio
 ```sh
 curl "https://example-store.com/wp-json/wc/store/v1/products?type=variation"
 ```
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./src/StoreApi/docs/products.md)
-
-<!-- /FEEDBACK -->
-

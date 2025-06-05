@@ -1,13 +1,8 @@
-# Checkout order API <!-- omit in toc -->
-
-## Table of Contents <!-- omit in toc -->
-
--   [Process Order and Payment](#process-order-and-payment)
--   [Payment Data](#payment-data)
+# Checkout order API 
 
 The checkout order API facilitates the processing of existing orders and handling payments.
 
-All checkout order endpoints require a [Nonce Token](nonce-tokens.md) or a [Cart Token](cart-tokens.md) otherwise these endpoints will return an error.
+All checkout order endpoints require a [Nonce Token](/docs/apis/store-api/nonce-tokens) or a [Cart Token](/docs/apis/store-api/cart-tokens) otherwise these endpoints will return an error.
 
 ## Process Order and Payment
 
@@ -152,14 +147,3 @@ For further information on generating a `stripe_source` please check [the Stripe
 	]
 }
 ```
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./src/StoreApi/docs/checkout-order.md)
-
-<!-- /FEEDBACK -->
-
