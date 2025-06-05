@@ -136,21 +136,24 @@ class PaymentsProviders {
 	 * @return array The payment gateway objects list.
 	 */
 	public function get_payment_gateways( bool $exclude_shells = true ): array {
+		global $current_tab;
+
 		if ( ! is_null( $this->payment_gateways_memo ) ) {
 			$payment_gateways = $this->payment_gateways_memo;
 		} else {
-
 			// We don't want to output anything from the action. So we buffer it and discard it.
 			// We just want to give the payment extensions a chance to adjust the payment gateways list for the settings page.
 			// This is primarily for backwards compatibility.
-			ob_start();
-			/**
-			 * Fires before the payment gateways settings fields are rendered.
-			 *
-			 * @since 1.5.7
-			 */
-			do_action( 'woocommerce_admin_field_payment_gateways' );
-			ob_end_clean();
+			if ( 'checkout' === $current_tab ) {
+				ob_start();
+				/**
+				 * Fires before the payment gateways settings fields are rendered.
+				 *
+				 * @since 1.5.7
+				 */
+				do_action( 'woocommerce_admin_field_payment_gateways' );
+				ob_end_clean();
+			}
 
 			// Get all payment gateways, ordered by the user.
 			$payment_gateways = WC()->payment_gateways()->payment_gateways;
