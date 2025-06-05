@@ -19,6 +19,7 @@ import {
 	objectHasProp,
 	isEmpty,
 	ProductResponseItem,
+	ProductResponseImageItem,
 } from '@woocommerce/types';
 
 /**
@@ -26,7 +27,7 @@ import {
  */
 import ProductSaleBadge from '../sale-badge/block';
 import './style.scss';
-import { BlockAttributes, ImageSizing } from './types';
+import { BlockAttributes, ImageSizing, ProductImageContext } from './types';
 import { isTryingToDisplayLegacySaleBadge } from './utils';
 
 const ImagePlaceholder = ( props ): JSX.Element => {
@@ -106,6 +107,7 @@ const Image = ( {
 };
 
 type Props = BlockAttributes &
+	Pick< ProductImageContext, 'imageId' > &
 	HTMLAttributes< HTMLDivElement > & { style?: Record< string, unknown > };
 
 type LegacyProps = Props & {
@@ -132,7 +134,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		children,
 		className,
 		height,
-		image,
+		imageId,
 		imageSizing = ImageSizing.SINGLE,
 		scale,
 		showProductLink = true,
@@ -140,14 +142,13 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		width,
 		...restProps
 	} = props;
+
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product, isLoading } = useProductDataContext();
 	const { dispatchStoreEvent } = useStoreEvents();
 
-	const hasImageSrc = !! image?.src;
-
-	if ( ! hasImageSrc && ! product?.id ) {
+	if ( ! product?.id || ! product?.images.length ) {
 		return (
 			<>
 				<div
@@ -169,36 +170,21 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		);
 	}
 
-	let imageToShow: ImageProps[ 'image' ] = null;
-	let altText = '';
+	const image: ProductResponseImageItem = imageId
+		? product?.images.find( ( image ) => image.id === imageId ) ||
+		  product.images[ 0 ]
+		: product.images[ 0 ];
 
-	if ( hasImageSrc ) {
-		imageToShow = {
-			alt: '',
-			id: image.id,
-			name: '',
-			sizes: image.sizes,
-			src: image.src,
-			srcset: image.srcset,
-			thumbnail: image.src,
-		};
-		altText = 'Product Image Block';
-	} else if ( product?.id ) {
-		const hasProductImages = !! product.images.length;
-		imageToShow = hasProductImages ? product.images[ 0 ] : null;
-		altText = imageToShow?.alt || decodeEntities( product.name );
-	}
+	console.log( { image } );
 
-	const ParentComponent = hasImageSrc || ! showProductLink ? 'a' : Fragment;
-	const anchorLabel =
-		! hasImageSrc && product?.name
-			? sprintf( __( 'Link to %s', 'woocommerce' ), product.name )
-			: '';
+	const ParentComponent = showProductLink ? 'a' : Fragment;
+	const anchorLabel = product?.name
+		? sprintf( __( 'Link to %s', 'woocommerce' ), product.name )
+		: '';
 	const anchorProps = {
 		href: showProductLink ? product?.permalink : undefined,
-		...( ! imageToShow &&
-			showProductLink && { 'aria-label': anchorLabel } ),
 		...( showProductLink && {
+			'aria-label': anchorLabel,
 			onClick: () => {
 				dispatchStoreEvent( 'product-view-link', {
 					product,
@@ -231,7 +217,10 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				<ParentComponent { ...( showProductLink && anchorProps ) }>
 					<Image
 						fallbackAlt={ decodeEntities( product.name ) }
-						image={ image }
+						image={ {
+							...image,
+							alt: image.alt || decodeEntities( product.name ),
+						} }
 						loaded={ ! isLoading }
 						showFullSize={ imageSizing !== ImageSizing.THUMBNAIL }
 						width={ width }

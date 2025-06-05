@@ -8,10 +8,6 @@
 		"showSaleBadge": { "type": "boolean", "default": false },
 		"saleBadgeAlign": { "type": "string", "default": "right" },
 		"imageSizing": { "type": "string", "default": "single" },
-		"image": {
-			"type": "object",
-			"default": null
-		},
 		"productId": { "type": "number", "default": 0 },
 		"isDescendentOfQueryLoop": { "type": "boolean", "default": false },
 		"isDescendentOfSingleProductBlock": {
@@ -54,7 +50,7 @@
 		"woocommerce/product-template",
 		"core/post-template"
 	],
-	"usesContext": [ "query", "queryId", "postId" ],
+	"usesContext": [ "imageId", "postId", "query", "queryId" ],
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,

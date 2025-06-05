@@ -1,13 +1,11 @@
+/**
+ * External dependencies
+ */
+import { ProductQueryContext } from '@woocommerce/blocks/product-query/types';
+
 export enum ImageSizing {
 	SINGLE = 'single',
 	THUMBNAIL = 'thumbnail',
-}
-
-export interface ImageDetails {
-	id: number;
-	src: string;
-	srcset?: string;
-	sizes?: string;
 }
 
 export interface BlockAttributes {
@@ -35,6 +33,16 @@ export interface BlockAttributes {
 	scale: 'cover' | 'contain' | 'fill';
 	// Aspect ratio of the image.
 	aspectRatio: string;
-	// Image object.
-	image: ImageDetails | null;
+}
+
+export interface ProductImageContext extends ProductQueryContext {
+	/**
+	 * An `imageId` to display a particular image.
+	 *
+	 * Note: this `imageId` should be of one of the images present in the product context.
+	 * If no product context is present, or the image is not amongst them, this will be ignored.
+	 */
+	imageId?: number;
+	// The post ID of the product.
+	postId?: number;
 }

@@ -57,8 +57,7 @@ const Edit = ( {
 	context,
 	clientId,
 }: BlockEditProps< BlockAttributes > & { context: Context } ): JSX.Element => {
-	const { showProductLink, image, imageSizing, width, height, scale } =
-		attributes;
+	const { showProductLink, imageSizing, width, height, scale } = attributes;
 
 	const ref = useRef< HTMLDivElement >( null );
 
@@ -119,7 +118,8 @@ const Edit = ( {
 					setAttributes={ setAttributes }
 				/>
 				<PanelBody title={ __( 'Content', 'woocommerce' ) }>
-					{ ! image?.src && (
+					{ ( isDescendentOfQueryLoop ||
+						isDescendentOfSingleProductBlock ) && (
 						<ToggleControl
 							label={ __(
 								'Link to Product Page',
