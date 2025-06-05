@@ -234,10 +234,12 @@ test.describe( `${ blockData.name }`, () => {
 			} );
 			await largeImageBlock.click();
 
-			const dialogImage = page
-				.getByRole( 'dialog' )
-				.locator( `img[data-image-id='${ nextImageId }']` );
-			await expect( dialogImage ).toBeInViewport( { ratio: 0.9 } );
+			await expect( async () => {
+				const dialogImage = page
+					.getByRole( 'dialog' )
+					.locator( `img[data-image-id='${ nextImageId }']` );
+				await expect( dialogImage ).toBeInViewport( { ratio: 0.9 } );
+			} ).toPass();
 
 			const closePopUpButton = page.locator(
 				'.wc-block-product-gallery-dialog__close-button'
