@@ -8,7 +8,6 @@ import {
 	useInnerBlocksProps,
 	BlockContextProvider,
 } from '@wordpress/block-editor';
-import Rating from '@woocommerce/base-components/product-rating';
 import {
 	useQueryStateByKey,
 	useQueryStateByContext,
@@ -18,6 +17,7 @@ import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean } from '@woocommerce/types';
 import { useState, useMemo, useEffect } from '@wordpress/element';
 import { withSpokenMessages } from '@wordpress/components';
+import type { BlockEditProps } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -29,8 +29,8 @@ import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
 import { EXCLUDED_BLOCKS } from '../../constants';
 import { Notice } from '../../components/notice';
 import type { Attributes } from './types';
-import './style.scss';
 import { InitialDisabled } from '../../components/initial-disabled';
+import RatingStars from './components/rating-stars';
 
 const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 	const { attributes, setAttributes, clientId } = props;
@@ -120,13 +120,7 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 					.sort( ( a, b ) => b.rating - a.rating )
 					.filter( ( { rating } ) => rating >= minimumRating )
 					.map( ( { rating, count }, index ) => ( {
-						label: (
-							<Rating
-								key={ rating }
-								rating={ rating }
-								ratedProductsCount={ null }
-							/>
-						),
+						label: <RatingStars key={ rating } stars={ rating } />,
 						value: rating?.toString(),
 						selected: index === 0,
 						count,

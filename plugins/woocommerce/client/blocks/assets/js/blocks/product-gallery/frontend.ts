@@ -233,18 +233,6 @@ const productGallery = {
 				actions.selectPreviousImage();
 			}
 		},
-		onThumbnailKeyDown: ( event: KeyboardEvent ) => {
-			if (
-				event.code === 'Enter' ||
-				event.code === 'Space' ||
-				event.code === 'NumpadEnter'
-			) {
-				if ( event.code === 'Space' ) {
-					event.preventDefault();
-				}
-				actions.selectCurrentImage();
-			}
-		},
 		onDialogKeyDown: ( event: KeyboardEvent ) => {
 			if ( event.code === 'Escape' ) {
 				actions.closeDialog();
@@ -363,6 +351,38 @@ const productGallery = {
 
 			context.thumbnailsOverflow = overflowState;
 		},
+		onArrowsKeyDown: ( event: KeyboardEvent ) => {
+			if ( event.code === 'ArrowRight' ) {
+				event.preventDefault();
+				actions.selectNextImage();
+			}
+
+			if ( event.code === 'ArrowLeft' ) {
+				event.preventDefault();
+				actions.selectPreviousImage();
+			}
+		},
+		onThumbnailsArrowsKeyDown: ( event: KeyboardEvent ) => {
+			actions.onArrowsKeyDown( event );
+
+			// Find and focus the newly selected image
+			const element = getElement()?.ref as HTMLElement;
+			const { selectedImageId } = getContext();
+
+			if ( element ) {
+				const galleryContainer = element.closest(
+					'.wp-block-woocommerce-product-gallery'
+				);
+				if ( galleryContainer ) {
+					const selectedImage = galleryContainer.querySelector(
+						`img[data-image-id="${ selectedImageId }"]`
+					) as HTMLElement;
+					if ( selectedImage ) {
+						selectedImage.focus( { preventScroll: true } );
+					}
+				}
+			}
+		},
 	},
 	callbacks: {
 		watchForChangesOnAddToCartForm: () => {
@@ -444,7 +464,7 @@ const productGallery = {
 				}
 			}
 		},
-		toggleActiveImageAttributes: () => {
+		toggleActiveThumbnailAttributes: () => {
 			const element = getElement()?.ref as HTMLElement;
 			if ( ! element ) return false;
 
