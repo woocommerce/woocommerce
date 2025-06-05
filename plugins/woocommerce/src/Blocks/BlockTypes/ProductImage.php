@@ -128,9 +128,10 @@ class ProductImage extends AbstractBlock {
 	 *
 	 * @param \WC_Product $product Product object.
 	 * @param array       $attributes Parsed attributes.
+	 * @param int|null    $image_id Optional image ID from context.
 	 * @return string
 	 */
-	private function render_image( $product, $attributes ) {
+	private function render_image( $product, $attributes, $image_id = null ) {
 		$image_size = 'single' === $attributes['imageSizing'] ? 'woocommerce_single' : 'woocommerce_thumbnail';
 
 		$image_style = 'max-width:none;';
@@ -157,23 +158,27 @@ class ProductImage extends AbstractBlock {
 			$image_style .= sprintf( 'min-height:%s;', $attributes['style']['dimensions']['minHeight'] );
 		}
 
-		$image_id = $product->get_image_id();
-		$alt_text = '';
-		$title    = '';
-		if ( $image_id ) {
-			$alt_text = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
-			$title    = get_the_title( $image_id );
+		$featured_image_id   = (int) $product->get_image_id();
+		$gallery_image_ids   = $product->get_gallery_image_ids();
+		$available_image_ids = array_merge( [ $featured_image_id ], $gallery_image_ids );
+
+		$target_image_id = $image_id && in_array( $image_id, $available_image_ids, true ) ? $image_id : $featured_image_id;
+
+		if ( ! $target_image_id ) {
+			return wc_placeholder_img( $image_size, array( 'style' => $image_style ) );
 		}
 
-		return $product->get_image(
-			$image_size,
-			array(
-				'alt'         => empty( $alt_text ) ? $product->get_title() : $alt_text,
-				'data-testid' => 'product-image',
-				'style'       => $image_style,
-				'title'       => $title,
-			)
+		$alt_text = get_post_meta( $target_image_id, '_wp_attachment_image_alt', true );
+		$title    = get_the_title( $target_image_id );
+
+		$attr = array(
+			'alt'         => empty( $alt_text ) ? $product->get_title() : $alt_text,
+			'data-testid' => 'product-image',
+			'style'       => $image_style,
+			'title'       => $title,
 		);
+
+		return $image_id ? wp_get_attachment_image( $image_id, $image_size, false, $attr ) : $product->get_image( $image_size, $attr );
 	}
 
 	/**
@@ -199,54 +204,9 @@ class ProductImage extends AbstractBlock {
 		$parsed_attributes = $this->parse_attributes( $attributes );
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
-		
-		$has_image_src = isset( $attributes['image'] ) &&  is_array( $attributes['image'] ) && ! empty( $attributes['image']['src'] );
+		$image_id = isset( $block->context['imageId'] ) ? (int) $block->context['imageId'] : null;
 
-		$product = null; // Initialize product as null
-
-		if ( $has_image_src ) {
-			$image_attr = $attributes['image'];
-			$image_id   = isset( $image_attr['id'] ) ? (int) $image_attr['id'] : 0;
-			$alt_text   = $image_id ? get_post_meta( $image_id, '_wp_attachment_image_alt', true ) : '';
-
-			$image_style = 'max-width:none;';
-			// Add style attributes from block settings (height, width, scale, aspectRatio)
-			if ( ! empty( $attributes['height'] ) ) { $image_style .= sprintf( 'height:%s;', esc_attr( $attributes['height'] ) ); }
-			if ( ! empty( $attributes['width'] ) ) { $image_style .= sprintf( 'width:%s;', esc_attr( $attributes['width'] ) ); }
-			if ( ! empty( $attributes['scale'] ) ) { $image_style .= sprintf( 'object-fit:%s;', esc_attr( $attributes['scale'] ) ); }
-			if ( ! empty( $attributes['style']['dimensions']['aspectRatio'] ) ) {
-				$image_style .= sprintf( 'aspect-ratio:%s;', esc_attr( $attributes['style']['dimensions']['aspectRatio'] ) );
-			} elseif ( ! empty( $attributes['aspectRatio'] ) ) {
-				$image_style .= sprintf( 'aspect-ratio:%s;', esc_attr( $attributes['aspectRatio'] ) );
-			}
-			if ( ! empty( $attributes['style']['dimensions']['minHeight'] ) ) { 
-				$image_style .= sprintf( 'min-height:%s;', esc_attr( $attributes['style']['dimensions']['minHeight'] ) ); 
-			}
-
-			$product_image_html = sprintf(
-				'<img src="%1$s" alt="%2$s" %3$s %4$s style="%5$s" data-image-id="%6$s" data-testid="product-image" loading="lazy" decoding="async" />',
-				esc_url( $image_attr['src'] ),
-				esc_attr( $alt_text ),
-				isset( $image_attr['srcset'] ) ? sprintf( 'srcset="%s"', esc_attr( $image_attr['srcset'] ) ) : '',
-				isset( $image_attr['sizes'] ) ? sprintf( 'sizes="%s"', esc_attr( $image_attr['sizes'] ) ) : '',
-				esc_attr( $image_style ),
-				esc_attr( $image_id )
-			);
-
-			// Force is_link to false as we don't have product context for the permalink
-			$attributes['showProductLink'] = false; 
-			// The On Sale Badge is only supported as an inner block when using an image src
-			$on_sale_badge_html = '';
-
-		} else {
-			$product = wc_get_product( $post_id );
-			if ( $product ) {
-				$product_image_html = $this->render_image( $product, $parsed_attributes );
-				$on_sale_badge_html = $this->render_on_sale_badge( $product, $parsed_attributes );
-			} else {
-				return '';
-			}
-		}
+		$product = wc_get_product( $post_id );
 
 		$classes = implode(
 			' ',
@@ -268,7 +228,7 @@ class ProductImage extends AbstractBlock {
 			$inner_content = $this->render_anchor(
 				$product,
 				$this->render_on_sale_badge( $product, $parsed_attributes ),
-				$this->render_image( $product, $parsed_attributes ),
+				$this->render_image( $product, $parsed_attributes, $image_id ),
 				$attributes,
 				$content
 			);
