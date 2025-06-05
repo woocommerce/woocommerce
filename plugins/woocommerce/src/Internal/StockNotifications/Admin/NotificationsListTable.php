@@ -211,26 +211,27 @@ class NotificationsListTable extends \WP_List_Table {
 	 */
 	public function column_product( $notification ) {
 		$product = $notification->get_product();
-		if ( is_a( $product, 'WC_Product' ) ) {
 
-			$name                     = $product->get_name();
-			$formatted_variation_list = $this->get_product_formatted_variation_list( true );
-
-			if ( $formatted_variation_list ) {
-				/* translators: product name, identifier */
-				$name .= '<span class="description">' . $formatted_variation_list . '</span>';
-			}
-
-			echo wp_kses_post(
-				sprintf(
-					'<a target="_blank" href="' . admin_url( 'post.php?post=%d&action=edit' ) . '">%s</a>',
-					$product->get_parent_id() ? absint( $product->get_parent_id() ) : absint( $product->get_id() ),
-					wp_kses_post( $name )
-				)
-			);
-		} else {
+		if ( ! is_a( $product, 'WC_Product' ) ) {
 			echo '&mdash;';
+			return;
 		}
+
+		$name                     = $product->get_name();
+		$formatted_variation_list = $this->get_product_formatted_variation_list( true );
+
+		if ( $formatted_variation_list ) {
+			/* translators: product name, identifier */
+			$name .= '<span class="description">' . $formatted_variation_list . '</span>';
+		}
+
+		echo wp_kses_post(
+			sprintf(
+				'<a target="_blank" href="' . admin_url( 'post.php?post=%d&action=edit' ) . '">%s</a>',
+				$product->get_parent_id() ? absint( $product->get_parent_id() ) : absint( $product->get_id() ),
+				$name
+			)
+		);
 	}
 
 	/**
@@ -261,14 +262,15 @@ class NotificationsListTable extends \WP_List_Table {
 	 * @return void
 	 */
 	public function column_date_created_gmt( $notification ) {
-		$date_created = $notification->get_date_created()->getTimestamp();
+		$date_created = $notification->get_date_created();
 
 		if ( ! $date_created ) {
-			$t_time = __( 'Unpublished', 'woocommerce' );
+			$t_time = __( '&mdash;', 'woocommerce' );
 			$h_time = $t_time;
 		} else {
-			$t_time = date_i18n( _x( 'Y/m/d g:i:s a', 'list table date hover format', 'woocommerce' ), $date_created );
-			$h_time = date_i18n( wc_date_format(), $date_created );
+			$date_created = $date_created->getTimestamp();
+			$t_time       = date_i18n( _x( 'Y/m/d g:i:s a', 'list table date hover format', 'woocommerce' ), $date_created );
+			$h_time       = date_i18n( wc_date_format(), $date_created );
 		}
 
 		echo '<span title="' . esc_attr( $t_time ) . '">' . esc_html( $h_time ) . '</span>';
@@ -282,7 +284,7 @@ class NotificationsListTable extends \WP_List_Table {
 	 */
 	public function column_waiting_since( $notification ) {
 
-		if ( empty( $notification->get_date_created() ) || $notification->get_status() !== 'active' ) {
+		if ( ! $notification->get_date_created() || $notification->get_status() !== 'active' ) {
 			$t_time    = __( '&mdash;', 'woocommerce' );
 			$h_time    = $t_time;
 			$time_diff = 0;
