@@ -1687,7 +1687,7 @@ class ProductCollection extends \WP_UnitTestCase {
 		$this->assertNotContains( $unassigned_product->get_id(), $found_clothing_ids );
 
 		// Test filtering by Clothing category - Editor.
-		$args_clothing = array(
+		$args_clothing    = array(
 			'posts_per_page' => 10,
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			'tax_query'      => array(
@@ -1817,7 +1817,7 @@ class ProductCollection extends \WP_UnitTestCase {
 		$this->assertNotContains( $regular_product->get_id(), $found_sale_ids );
 
 		// Test filtering by Sale tag - Editor.
-		$args_sale = array(
+		$args_sale    = array(
 			'posts_per_page' => 10,
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			'tax_query'      => array(
