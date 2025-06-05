@@ -13,7 +13,7 @@
 	font-size: 0.875em;
 	font-family: inherit;
 	cursor: pointer;
-	color: currentColor;
+	color: inherit;
 
 	&:focus {
 		outline: 1px solid var(--wp--preset--color--accent-4);
@@ -40,7 +40,8 @@
 }
 
 .wc-block-product-filter-chips__item[aria-checked="true"] {
-	background: currentColor;
+	background: var(--wp--preset--color--contrast);
+	color: var(--wp--preset--color--base);
 
 	&:hover {
 		background-color: color-mix(
@@ -74,12 +75,6 @@
 .wc-block-product-filter-chips__count {
 	display: contents;
 	white-space: nowrap;
-}
-
-.wc-block-product-filter-chips:not(.has-selected-chip-text-color)
-	.wc-block-product-filter-chips__item[aria-checked="true"]
-	> .wc-block-product-filter-chips__label {
-	filter: invert(100%);
 }
 
 .wc-block-product-filter-chips__show-more {
