@@ -165,7 +165,7 @@ class EmailImprovements {
 		return array_filter(
 			WC()->mailer()->get_emails(),
 			function ( $email ) {
-				return strpos( get_class( $email ), 'WC_Email_' ) === 0;
+				return strpos( get_class( $email ), 'WC_Email_' ) === 0 && is_string( $email->template_html );
 			}
 		);
 	}

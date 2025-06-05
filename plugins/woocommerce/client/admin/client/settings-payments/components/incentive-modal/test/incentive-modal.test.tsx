@@ -4,9 +4,9 @@
 import { recordEvent } from '@woocommerce/tracks';
 import { render, fireEvent } from '@testing-library/react';
 import {
-	PaymentIncentive,
-	PaymentProvider,
-	PaymentProviderType,
+	PaymentsProviderIncentive,
+	PaymentsProvider,
+	PaymentsProviderType,
 	PluginData,
 } from '@woocommerce/data';
 
@@ -19,7 +19,7 @@ jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
 
-const testIncentive: PaymentIncentive = {
+const testIncentive: PaymentsProviderIncentive = {
 	id: 'test-incentive',
 	description: 'Test Incentive',
 	promo_id: 'test-promo-id',
@@ -36,10 +36,10 @@ const testIncentive: PaymentIncentive = {
 	},
 };
 
-const testProvider: PaymentProvider = {
+const testProvider: PaymentsProvider = {
 	id: 'test-provider',
 	_order: 1,
-	_type: PaymentProviderType.Gateway, // or any valid PaymentProviderType
+	_type: PaymentsProviderType.Gateway, // or any valid PaymentsProviderType
 	title: 'Test Title',
 	description: 'Test Description',
 	icon: 'test-icon',

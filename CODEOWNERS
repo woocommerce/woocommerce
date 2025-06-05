@@ -15,3 +15,6 @@
 /*.* @woocommerce/flux
 /changelog.txt
 /pnpm-lock.yaml
+
+# Docs resources, which gets published to https://developer.woocommerce.com
+/docs/ @woocommerce/developer-advocacy
