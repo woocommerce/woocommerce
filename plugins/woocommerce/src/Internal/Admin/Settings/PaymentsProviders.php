@@ -142,9 +142,13 @@ class PaymentsProviders {
 			$payment_gateways = $this->payment_gateways_memo;
 		} else {
 			// We don't want to output anything from the action. So we buffer it and discard it.
-			// We just want to give the payment extensions a chance to adjust the payment gateways list for the settings page.
+			// We just want to give the payment extensions a chance to adjust the payment gateways list for the settings page:
+			// - Either when we fetch them through our internal APIs
+			// - Or directly when outputting the Payments settings tab and sections.
 			// This is primarily for backwards compatibility.
-			if ( 'checkout' === $current_tab ) {
+			if ( wp_is_serving_rest_request() ||
+				( ! empty( $current_tab ) && \WC_Settings_Payment_Gateways::TAB_NAME === $current_tab ) ) {
+
 				ob_start();
 				/**
 				 * Fires before the payment gateways settings fields are rendered.
