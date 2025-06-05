@@ -249,6 +249,49 @@ const productGallery = {
 			if ( event.code === 'Escape' ) {
 				actions.closeDialog();
 			}
+
+			if ( event.code === 'Tab' ) {
+				const focusableElementsSelectors =
+					'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+				const dialogPopUp = getElement()?.ref as HTMLElement;
+				const focusableElements = dialogPopUp.querySelectorAll(
+					focusableElementsSelectors
+				);
+
+				if ( ! focusableElements.length ) {
+					return;
+				}
+
+				const firstFocusableElement =
+					focusableElements[ 0 ] as HTMLElement;
+				const lastFocusableElement = focusableElements[
+					focusableElements.length - 1
+				] as HTMLElement;
+
+				if (
+					! event.shiftKey &&
+					event.target === lastFocusableElement
+				) {
+					event.preventDefault();
+					firstFocusableElement.focus();
+					return;
+				}
+
+				if (
+					event.shiftKey &&
+					event.target === firstFocusableElement
+				) {
+					event.preventDefault();
+					lastFocusableElement.focus();
+					return;
+				}
+
+				if ( event.target === dialogPopUp ) {
+					event.preventDefault();
+					firstFocusableElement.focus();
+				}
+			}
 		},
 		openDialog: () => {
 			const context = getContext();
@@ -278,7 +321,12 @@ const productGallery = {
 			}
 			const { clientX } = event.touches[ 0 ];
 			context.touchCurrentX = clientX;
-			event.preventDefault();
+
+			// Only prevent default if there's significant horizontal movement
+			const delta = clientX - context.touchStartX;
+			if ( Math.abs( delta ) > 10 ) {
+				event.preventDefault();
+			}
 		},
 		onTouchEnd: () => {
 			const context = getContext();
@@ -407,12 +455,38 @@ const productGallery = {
 			const imageId = Number( imageIdValue );
 
 			if ( selectedImageId === imageId ) {
-				element.classList.add( 'is-active' );
+				element.classList.add(
+					'wc-block-product-gallery-thumbnails__thumbnail__image--is-active'
+				);
 				element.setAttribute( 'tabIndex', '0' );
 			} else {
-				element.classList.remove( 'is-active' );
+				element.classList.remove(
+					'wc-block-product-gallery-thumbnails__thumbnail__image--is-active'
+				);
 				element.setAttribute( 'tabIndex', '-1' );
 			}
+		},
+		initResizeObserver: () => {
+			const scrollableElement = getElement()?.ref;
+			if ( ! scrollableElement ) {
+				return;
+			}
+
+			const context = getContext();
+			const resizeObserver = new ResizeObserver( () => {
+				const overflowState = checkOverflow( scrollableElement );
+				context.thumbnailsOverflow = overflowState;
+			} );
+
+			// Observe both the scrollable element and its parent for size changes
+			resizeObserver.observe( scrollableElement );
+			if ( scrollableElement.parentElement ) {
+				resizeObserver.observe( scrollableElement.parentElement );
+			}
+
+			return () => {
+				resizeObserver.disconnect();
+			};
 		},
 	},
 };

@@ -45,13 +45,12 @@ class ProductImage extends AbstractBlock {
 	private function parse_attributes( $attributes ) {
 		// These should match what's set in JS `registerBlockType`.
 		$defaults = array(
-			'showProductLink'         => true,
-			'showSaleBadge'           => true,
-			'saleBadgeAlign'          => 'right',
-			'imageSizing'             => 'single',
-			'productId'               => 'number',
-			'isDescendentOfQueryLoop' => 'false',
-			'scale'                   => 'cover',
+			'showProductLink'                  => true,
+			'imageSizing'                      => 'single',
+			'productId'                        => 'number',
+			'isDescendentOfQueryLoop'          => 'false',
+			'isDescendentOfSingleProductBlock' => 'false',
+			'scale'                            => 'cover',
 		);
 
 		return wp_parse_args( $attributes, $defaults );
@@ -65,7 +64,11 @@ class ProductImage extends AbstractBlock {
 	 * @return string
 	 */
 	private function render_on_sale_badge( $product, $attributes ) {
-		if ( ! $product->is_on_sale() || false === $attributes['showSaleBadge'] ) {
+		if (
+			! $product->is_on_sale()
+			|| ! isset( $attributes['showSaleBadge'] )
+			|| ( isset( $attributes['showSaleBadge'] ) && false === $attributes['showSaleBadge'] )
+		) {
 			return '';
 		}
 
@@ -93,26 +96,32 @@ class ProductImage extends AbstractBlock {
 	 * @param string      $on_sale_badge Return value from $render_image.
 	 * @param string      $product_image Return value from $render_on_sale_badge.
 	 * @param array       $attributes    Attributes.
+	 * @param string      $inner_blocks_content Rendered HTML of inner blocks.
 	 * @return string
 	 */
-	private function render_anchor( $product, $on_sale_badge, $product_image, $attributes ) {
+	private function render_anchor( $product, $on_sale_badge, $product_image, $attributes, $inner_blocks_content ) {
 		$product_permalink = $product->get_permalink();
 
-		$is_link        = true === $attributes['showProductLink'];
-		$pointer_events = $is_link ? '' : 'pointer-events: none;';
+		$is_link        = isset( $attributes['showProductLink'] ) ? $attributes['showProductLink'] : true;
+		$href_attribute = $is_link ? sprintf( 'href="%s"', esc_url( $product_permalink ) ) : 'href="#" onclick="return false;"';
+		$wrapper_style  = ! $is_link ? 'pointer-events: none; cursor: default;' : '';
 		$directive      = $is_link ? 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"' : '';
 
+		$inner_blocks_container = sprintf(
+			'<div class="wc-block-components-product-image__inner-container">%s</div>',
+			$inner_blocks_content
+		);
+
 		return sprintf(
-			'<a href="%1$s" style="%2$s" %3$s>%4$s %5$s</a>',
-			$product_permalink,
-			$pointer_events,
+			'<a %1$s style="%2$s" %3$s>%4$s%5$s%6$s</a>',
+			$href_attribute,
+			esc_attr( $wrapper_style ),
 			$directive,
 			$on_sale_badge,
-			$product_image
+			$product_image,
+			$inner_blocks_container
 		);
 	}
-
-
 
 	/**
 	 * Render Image.
@@ -178,7 +187,6 @@ class ProductImage extends AbstractBlock {
 		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
 	}
 
-
 	/**
 	 * Include and render the block
 	 *
@@ -188,11 +196,6 @@ class ProductImage extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( ! empty( $content ) ) {
-			parent::register_block_type_assets();
-			$this->register_chunk_translations( [ $this->block_name ] );
-			return $content;
-		}
 		$parsed_attributes = $this->parse_attributes( $attributes );
 
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
@@ -218,19 +221,21 @@ class ProductImage extends AbstractBlock {
 		);
 
 		if ( $product ) {
-			return sprintf(
-				'<div %1$s>
-					%2$s
-				</div>',
-				$wrapper_attributes,
-				$this->render_anchor(
-					$product,
-					$this->render_on_sale_badge( $product, $parsed_attributes ),
-					$this->render_image( $product, $parsed_attributes ),
-					$parsed_attributes
-				)
+			$inner_content = $this->render_anchor(
+				$product,
+				$this->render_on_sale_badge( $product, $parsed_attributes ),
+				$this->render_image( $product, $parsed_attributes ),
+				$attributes,
+				$content
 			);
 
+			return sprintf(
+				'<div %1$s>%2$s</div>',
+				$wrapper_attributes,
+				$inner_content
+			);
 		}
+
+		return '';
 	}
 }

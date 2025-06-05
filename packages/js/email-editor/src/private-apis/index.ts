@@ -1,10 +1,12 @@
 /**
  * External dependencies
  */
+import { dispatch } from '@wordpress/data';
 import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/private-apis';
 import {
 	// @ts-expect-error No types for privateApis.
 	privateApis as editorPrivateApis,
+	store as editorStore,
 } from '@wordpress/editor';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
@@ -33,6 +35,15 @@ const { useGlobalStylesOutputWithConfig } = unlock( blockEditorPrivateApis );
 const { Editor, FullscreenMode, ViewMoreMenuGroup, BackButton } =
 	unlock( editorPrivateApis );
 
+/**
+ * The registerEntityAction and unregisterEntityAction are used to register and unregister entity actions.
+ * This is used in the move-to-trash.tsx file to modify the move to trash action.
+ * Providing us with the ability to remove the default move to trash action and add a custom trash email post action.
+ */
+const { registerEntityAction, unregisterEntityAction } = unlock(
+	dispatch( editorStore )
+);
+
 export {
 	StylesColorPanel,
 	useGlobalStylesOutputWithConfig,
@@ -40,4 +51,6 @@ export {
 	FullscreenMode,
 	ViewMoreMenuGroup,
 	BackButton,
+	registerEntityAction,
+	unregisterEntityAction,
 };
