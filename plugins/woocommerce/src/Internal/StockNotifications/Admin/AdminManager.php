@@ -20,7 +20,7 @@ class AdminManager {
 	 *
 	 * @return void
 	 */
-	final public function init() {
+	final public function __construct() {
 
 		// Enqueue scripts.
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_resources' ), 11 );
@@ -42,7 +42,7 @@ class AdminManager {
 		$suffix    = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 		$version   = Constants::get_constant( 'WC_VERSION' );
 
-		wp_register_script( 'wc-admin-customer-stock-notifications', WC()->plugin_url() . '/assets/js/admin/wc-customer-stock-notifications' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker', 'wp-util', 'sw-admin-select-init', 'wc-backbone-modal' ), $version, true );
+		wp_register_script( 'wc-admin-customer-stock-notifications', WC()->plugin_url() . '/assets/js/admin/wc-customer-stock-notifications' . $suffix . '.js', array( 'jquery' ), $version, true );
 
 		$params = array(
 			'i18n_wc_delete_notification_warning'       => __( 'Delete this notification permanently?', 'woocommerce' ),
@@ -52,9 +52,11 @@ class AdminManager {
 		/*
 		 * Enqueue specific styles & scripts.
 		 */
-		if ( 'woocommerce_page_wc-customer-stock-notifications' === $screen_id ) {
-			wp_enqueue_script( 'wc-admin-customer-stock-notifications' );
-			wp_localize_script( 'wc-admin-customer-stock-notifications', 'wc_admin_customer_stock_notifications_params', $params );
+		if ( 'woocommerce_page_wc-customer-stock-notifications' !== $screen_id ) {
+			return;
 		}
+
+		wp_enqueue_script( 'wc-admin-customer-stock-notifications' );
+		wp_localize_script( 'wc-admin-customer-stock-notifications', 'wc_admin_customer_stock_notifications_params', $params );
 	}
 }
