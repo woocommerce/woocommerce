@@ -122,59 +122,6 @@ store< MiniCart >(
 	{ lock: universalLock }
 );
 
-store(
-	'woocommerce/mini-cart-title-items-counter-block',
-	{
-		state: {
-			get cartItems() {
-				return state.cartItems;
-			},
-
-			get itemsInCartText() {
-				const { singularItemsText, pluralItemsText } = getConfig(
-					'woocommerce/mini-cart-title-items-counter-block'
-				);
-
-				const cartItemsCount = miniCartState.totalItemsInCart;
-
-				const template =
-					cartItemsCount === 1 ? singularItemsText : pluralItemsText;
-
-				return template.replace( '%d', cartItemsCount.toString() );
-			},
-		},
-	},
-	{ lock: true }
-);
-
-store(
-	'woocommerce/mini-cart-footer-block',
-	{
-		state: {
-			get formattedSubtotal(): string {
-				const { displayCartPriceIncludingTax } = getConfig(
-					'woocommerce/mini-cart-footer-block'
-				);
-
-				const { currency } = getConfig( 'woocommerce' );
-
-				const subtotal = displayCartPriceIncludingTax
-					? parseInt( wooStoreState.cart.totals.total_items, 10 ) +
-					  parseInt( wooStoreState.cart.totals.total_items_tax, 10 )
-					: parseInt( wooStoreState.cart.totals.total_items, 10 );
-
-				const normalizedCurrency = normalizeCurrencyResponse(
-					wooStoreState.cart.totals,
-					currency
-				);
-
-				return formatPriceWithCurrency( subtotal, normalizedCurrency );
-			},
-		},
-	},
-	{ lock: true }
-);
-
 type CartItemContext = {
 	cartItem: CartItem;
 };
@@ -302,6 +249,7 @@ const { state } = store(
 				);
 			},
 		},
+
 		actions: {
 			*incrementQuantity(): Generator< unknown, void > {
 				const { cartItem } = getContext< CartItemContext >();
@@ -329,6 +277,59 @@ const { state } = store(
 					id: cartItem.id,
 					quantity: cartItem.quantity - 1,
 				} );
+			},
+		},
+	},
+	{ lock: true }
+);
+
+store(
+	'woocommerce/mini-cart-title-items-counter-block',
+	{
+		state: {
+			get cartItems() {
+				return state.cartItems;
+			},
+
+			get itemsInCartText() {
+				const { singularItemsText, pluralItemsText } = getConfig(
+					'woocommerce/mini-cart-title-items-counter-block'
+				);
+
+				const cartItemsCount = miniCartState.totalItemsInCart;
+
+				const template =
+					cartItemsCount === 1 ? singularItemsText : pluralItemsText;
+
+				return template.replace( '%d', cartItemsCount.toString() );
+			},
+		},
+	},
+	{ lock: true }
+);
+
+store(
+	'woocommerce/mini-cart-footer-block',
+	{
+		state: {
+			get formattedSubtotal(): string {
+				const { displayCartPriceIncludingTax } = getConfig(
+					'woocommerce/mini-cart-footer-block'
+				);
+
+				const { currency } = getConfig( 'woocommerce' );
+
+				const subtotal = displayCartPriceIncludingTax
+					? parseInt( wooStoreState.cart.totals.total_items, 10 ) +
+					  parseInt( wooStoreState.cart.totals.total_items_tax, 10 )
+					: parseInt( wooStoreState.cart.totals.total_items, 10 );
+
+				const normalizedCurrency = normalizeCurrencyResponse(
+					wooStoreState.cart.totals,
+					currency
+				);
+
+				return formatPriceWithCurrency( subtotal, normalizedCurrency );
 			},
 		},
 	},
