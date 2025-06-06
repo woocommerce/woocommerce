@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Add $order argument to woocommerce_email_downloads_columns filter
