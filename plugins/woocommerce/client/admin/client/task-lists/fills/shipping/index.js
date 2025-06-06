@@ -661,7 +661,7 @@ export class Shipping extends Component {
 					} }
 					message={ __(
 						// translators: {{Link}} is a placeholder for a html element.
-						'Visit the {{Link}}Official WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
+						'Visit {{Link}}The WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
 						'woocommerce'
 					) }
 					eventName="tasklist_shipping_visit_marketplace_click"

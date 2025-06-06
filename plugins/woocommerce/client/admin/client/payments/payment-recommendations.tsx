@@ -262,7 +262,7 @@ const PaymentRecommendations = () => {
 				<TrackedLink
 					message={ __(
 						// translators: {{Link}} is a placeholder for a html element.
-						'Visit the {{Link}}Official WooCommerce Marketplace{{/Link}} to find additional payment providers.',
+						'Visit {{Link}}The WooCommerce Marketplace{{/Link}} to find additional payment providers.',
 						'woocommerce'
 					) }
 					eventName="settings_payment_recommendations_visit_marketplace_click"

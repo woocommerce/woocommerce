@@ -401,7 +401,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 
 		fireEvent.click( screen.getByText( 'Other payment providers' ) );
 		fireEvent.click(
-			screen.getByText( 'Official WooCommerce Marketplace' )
+			screen.getByText( 'The WooCommerce Marketplace' )
 		);
 		expect(
 			recordEvent.mock.calls[ recordEvent.mock.calls.length - 1 ]
@@ -445,7 +445,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 		).toEqual( [ 'tasklist_payments_wcpay_bnpl_click' ] );
 	} );
 
-	test( 'should navigate to the marketplace when clicking the Official WooCommerce Marketplace link', async () => {
+	test( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
 		const mockLocation = {
 			href: 'test',
 		};
@@ -459,9 +459,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			<PaymentGatewaySuggestions onComplete={ () => {} } query={ {} } />
 		);
 
-		fireEvent.click(
-			screen.getByText( 'Official WooCommerce Marketplace' )
-		);
+		fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
 		expect( mockLocation.href ).toContain(
 			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
 		);

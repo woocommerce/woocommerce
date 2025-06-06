@@ -37,12 +37,10 @@ describe( 'Shipping', () => {
 		task: { id: 'shipping' } as TaskType,
 	};
 
-	it( 'should trigger event tasklist_shipping_visit_marketplace_click when clicking the Official WooCommerce Marketplace link', () => {
+	it( 'should trigger event tasklist_shipping_visit_marketplace_click when clicking the WooCommerce Marketplace link', () => {
 		render( <Shipping { ...props } /> );
 
-		fireEvent.click(
-			screen.getByText( 'Official WooCommerce Marketplace' )
-		);
+		fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'tasklist_shipping_visit_marketplace_click',
@@ -50,7 +48,7 @@ describe( 'Shipping', () => {
 		);
 	} );
 
-	it( 'should navigate to the marketplace when clicking the Official WooCommerce Marketplace link', async () => {
+	it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
 		const mockLocation = {
 			href: 'test',
 		} as Location;
@@ -62,9 +60,7 @@ describe( 'Shipping', () => {
 
 		render( <Shipping { ...props } /> );
 
-		fireEvent.click(
-			screen.getByText( 'Official WooCommerce Marketplace' )
-		);
+		fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
 
 		expect( mockLocation.href ).toContain(
 			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping'

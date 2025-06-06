@@ -122,7 +122,7 @@ it( 'does not render WooCommerce Tax (powered by WCS&T) if not in a supported co
 	assertWooCommerceTaxIsNotRecommended();
 } );
 
-it( 'should trigger event tasklist_tax_visit_marketplace_click when clicking the Official WooCommerce Marketplace link', () => {
+it( 'should trigger event tasklist_tax_visit_marketplace_click when clicking the WooCommerce Marketplace link', () => {
 	render(
 		<Tax
 			onComplete={ () => {} }
@@ -131,7 +131,7 @@ it( 'should trigger event tasklist_tax_visit_marketplace_click when clicking the
 		/>
 	);
 
-	fireEvent.click( screen.getByText( 'Official WooCommerce Marketplace' ) );
+	fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
 
 	expect( recordEvent ).toHaveBeenCalledWith(
 		'tasklist_tax_visit_marketplace_click',
@@ -139,7 +139,7 @@ it( 'should trigger event tasklist_tax_visit_marketplace_click when clicking the
 	);
 } );
 
-it( 'should navigate to the marketplace when clicking the Official WooCommerce Marketplace link', async () => {
+it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
 	const mockLocation = {
 		href: 'test',
 	} as Location;
@@ -157,7 +157,7 @@ it( 'should navigate to the marketplace when clicking the Official WooCommerce M
 		/>
 	);
 
-	fireEvent.click( screen.getByText( 'Official WooCommerce Marketplace' ) );
+	fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
 
 	expect( mockLocation.href ).toContain(
 		'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=operations'
