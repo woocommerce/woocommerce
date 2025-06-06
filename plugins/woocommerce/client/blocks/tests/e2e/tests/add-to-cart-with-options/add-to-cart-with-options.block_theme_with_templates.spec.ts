@@ -13,12 +13,11 @@ import {
 import AddToCartWithOptionsPage from './add-to-cart-with-options.page';
 
 const test = base.extend< { pageObject: AddToCartWithOptionsPage } >( {
-	pageObject: async ( { page, admin, editor, requestUtils }, use ) => {
+	pageObject: async ( { page, admin, editor }, use ) => {
 		const pageObject = new AddToCartWithOptionsPage( {
 			page,
 			admin,
 			editor,
-			requestUtils,
 		} );
 		await use( pageObject );
 	},
@@ -61,7 +60,7 @@ test.describe( `Add to Cart + Options Block (block theme with templates)`, () =>
 
 		await expect(
 			page.getByText(
-				'External Product Add to Cart With Options template loaded from theme'
+				'External Product Add to Cart + Options template loaded from theme'
 			)
 		).toBeVisible();
 	} );
