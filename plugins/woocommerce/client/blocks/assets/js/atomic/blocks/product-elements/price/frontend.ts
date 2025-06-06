@@ -30,21 +30,14 @@ const productPriceStore = store(
 					return;
 				}
 
-				const productCollectionContext = getContext< {
-					displayedProduct: DisplayedProduct;
-				} >( 'woocommerce/product-collection' );
-
 				const singleProductContext = getContext< {
 					displayedProduct: DisplayedProduct;
 				} >( 'woocommerce/single-product' );
 
-				if ( singleProductContext ) {
+				if ( singleProductContext?.displayedProduct?.price_html ) {
 					element.ref.innerHTML =
 						singleProductContext.displayedProduct.price_html;
-				} else if ( productCollectionContext ) {
-					element.ref.innerHTML =
-						productCollectionContext.displayedProduct.price_html;
-				} else if ( wooState.displayedProduct ) {
+				} else if ( wooState?.displayedProduct?.price_html ) {
 					element.ref.innerHTML =
 						wooState.displayedProduct.price_html;
 				}

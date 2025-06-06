@@ -116,8 +116,7 @@ class ProductTemplate extends AbstractBlock {
 			$product_data = ProductDataUtils::get_product_data( $product );
 
 			$context = array(
-				'productId'        => $product_id,
-				'displayedProduct' => $product_data,
+				'productId' => $product_id,
 			);
 
 			$li_directives = '
