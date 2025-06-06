@@ -85,10 +85,14 @@ class SingleProductTemplate extends AbstractTemplate {
 				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
 			}
 
-			global $post;
 			$product = wc_get_product( $post->ID );
 			if ( $product ) {
-				$this->register_single_product_interactivity( $product );
+				wp_interactivity_state(
+					'woocommerce',
+					array(
+						'displayedProduct' => ProductDataUtils::get_product_data( $product ),
+					)
+				);
 			}
 
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
