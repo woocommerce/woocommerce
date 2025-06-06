@@ -54,14 +54,21 @@ class Payments {
 	/**
 	 * Get the payment provider details list for the settings page.
 	 *
-	 * @param string $location The location for which the providers are being determined.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param string $location    The location for which the providers are being determined.
+	 *                            This is a ISO 3166-1 alpha-2 country code.
+	 * @param bool   $for_display Whether the payment providers list is intended for display purposes or
+	 *                            it is meant to be used for internal business logic.
+	 *                            Primarily, this means that when it is not for display, we will use the raw
+	 *                            payment gateways list (all the registered gateways), not just the ones that
+	 *                            should be shown to the user on the Payments Settings page.
+	 *                            This complication is for backward compatibility as it relates to legacy settings hooks
+	 *                            being fired or not.
 	 *
 	 * @return array The payment providers details list.
 	 * @throws Exception If there are malformed or invalid suggestions.
 	 */
-	public function get_payment_providers( string $location ): array {
-		$payment_gateways = $this->providers->get_payment_gateways();
+	public function get_payment_providers( string $location, bool $for_display = true ): array {
+		$payment_gateways = $this->providers->get_payment_gateways( $for_display );
 		$suggestions      = array();
 
 		$providers_order_map = $this->providers->get_order_map();

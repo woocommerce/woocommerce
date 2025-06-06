@@ -144,6 +144,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 								loading="lazy"
 							<?php endif; ?>
 							tabindex="-1"
+							draggable="false"
 						/>
 					</li>
 				<?php endforeach; ?>
