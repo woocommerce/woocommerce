@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Order Confirmation
+ * Title: WooCommerce Order Confirmation
  * Slug: woostarter/woocommerce-order-confirmation
  * Categories: page
  * Post Types: page, wp_template
