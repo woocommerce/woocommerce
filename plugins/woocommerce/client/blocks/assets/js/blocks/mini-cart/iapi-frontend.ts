@@ -130,9 +130,37 @@ const { state } = store(
 	'woocommerce/mini-cart-items-block',
 	{
 		state: {
-			// get cartItem() {
-			// 	return getContext< CartItemContext >().cartItem;
-			// },
+			get cartItems() {
+				return wooStoreState.cart.items;
+			},
+
+			get cartItemMinimum() {
+				const { cartItem } = getContext< CartItemContext >();
+				return cartItem.quantity_limits.minimum;
+			},
+
+			get cartItemMaximum() {
+				const { cartItem } = getContext< CartItemContext >();
+				return cartItem.quantity_limits.maximum;
+			},
+
+			// Intended to be used in context of a cart item in wp-each
+			get minimumReached() {
+				const { cartItem } = getContext< CartItemContext >();
+				console.log(
+					'minimum: ',
+					cartItem.quantity_limits.minimum,
+					'cart item qty: ',
+					cartItem.quantity
+				);
+				return cartItem.quantity - 1 < cartItem.quantity_limits.minimum;
+			},
+
+			// Intended to be used in context of a cart item in wp-each
+			get maximumReached() {
+				const { cartItem } = getContext< CartItemContext >();
+				return cartItem.quantity + 1 > cartItem.quantity_limits.maximum;
+			},
 
 			// Intended to be used in context of a cart item in wp-each
 			get reduceQuantityLabel(): string {
@@ -251,6 +279,61 @@ const { state } = store(
 		},
 
 		actions: {
+			overrideInvalidQuantity( e ) {
+				const input = e.target as HTMLInputElement;
+				const qty = input.value;
+
+				const { cartItem } = getContext< CartItemContext >();
+				const { actions } = store< WooCommerce >(
+					'woocommerce',
+					{},
+					{ lock: universalLock }
+				);
+				const { minimum, maximum } = cartItem.quantity_limits;
+
+				const quantity = parseInt( qty, 10 );
+
+				let finalQuantity = quantity;
+
+				if ( quantity < minimum ) {
+					// input.value = `${ minimum }`;
+					finalQuantity = minimum;
+				} else if ( quantity > maximum ) {
+					// input.value = `${ maximum }`;
+					finalQuantity = maximum;
+				} else if ( qty === '' ) {
+					// input.value = `${ minimum }`;
+					finalQuantity = minimum;
+				}
+
+				cartItem.quantity = finalQuantity;
+			},
+
+			*changeQuantity( e: InputEvent ): Generator< unknown, void > {
+				const { cartItem } = getContext< CartItemContext >();
+				const { actions } = store< WooCommerce >(
+					'woocommerce',
+					{},
+					{ lock: universalLock }
+				);
+
+				yield actions.addCartItem( {
+					id: cartItem.id,
+					quantity: cartItem.quantity,
+				} );
+			},
+
+			*removeItemFromCart(): Generator< unknown, void > {
+				const { cartItem } = getContext< CartItemContext >();
+				const { actions } = store< WooCommerce >(
+					'woocommerce',
+					{},
+					{ lock: universalLock }
+				);
+
+				yield actions.removeCartItem( cartItem.key );
+			},
+
 			*incrementQuantity(): Generator< unknown, void > {
 				const { cartItem } = getContext< CartItemContext >();
 				const { actions } = store< WooCommerce >(
