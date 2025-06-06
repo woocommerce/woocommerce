@@ -361,7 +361,7 @@ class PaymentsProviders {
 	 */
 	public function get_offline_payment_methods_gateways(): array {
 		return array_filter(
-			$this->get_payment_gateways( false ), // We include the shells to get the global order/index.
+			$this->get_payment_gateways( false ), // We request the raw gateways list to get the global order/index.
 			function ( $gateway ) {
 				return $this->is_offline_payment_method( $gateway->id );
 			}
@@ -766,7 +766,7 @@ class PaymentsProviders {
 	 * @return array The updated payment providers order map.
 	 */
 	public function enhance_order_map( array $order_map ): array {
-		// We don't exclude shells here, because we need to get the order of all the registered payment gateways.
+		// We don't request the display gateways list because we need to get the order of all the registered payment gateways.
 		$payment_gateways = $this->get_payment_gateways( false );
 		// Make it a list keyed by the payment gateway ID.
 		$payment_gateways = array_combine(
@@ -1126,7 +1126,7 @@ class PaymentsProviders {
 	 * @return bool True if the store has any enabled ecommerce gateways, false otherwise.
 	 */
 	private function has_enabled_ecommerce_gateways(): bool {
-		$gateways         = $this->get_payment_gateways();
+		$gateways         = $this->get_payment_gateways( false ); // We want the raw gateways list.
 		$enabled_gateways = array_filter(
 			$gateways,
 			function ( $gateway ) {
