@@ -42,6 +42,15 @@ trait BlocksSharedState {
 	private static $blocks_shared_cart_state;
 
 	/**
+	 * Prevent caching on certain pages
+	 */
+	private static function prevent_cache() {
+		\WC_Cache_Helper::set_nocache_constants();
+		nocache_headers();
+	}
+
+
+	/**
 	 * Check that the consent statement was passed.
 	 *
 	 * @param string $consent_statement - The consent statement string.
@@ -85,9 +94,15 @@ trait BlocksSharedState {
 		self::check_consent( $consent_statement );
 
 		if ( null === self::$blocks_shared_cart_state ) {
-			self::$blocks_shared_cart_state = isset( WC()->cart )
+			$cart_exists                    = isset( WC()->cart );
+			$cart_has_contents              = $cart_exists && ! WC()->cart->is_empty();
+			self::$blocks_shared_cart_state = $cart_exists
 				? rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) )->data
 				: array();
+
+			if ( $cart_has_contents ) {
+				self::prevent_cache();
+			}
 
 			wp_interactivity_state(
 				'woocommerce',

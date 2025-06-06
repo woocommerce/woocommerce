@@ -17,7 +17,7 @@ import {
 	SettingsPaymentsCodWrapper,
 	SettingsPaymentsMainWrapper,
 	SettingsPaymentsOfflineWrapper,
-	SettingsPaymentsWooCommercePaymentsWrapper,
+	SettingsPaymentsWooPaymentsWrapper,
 } from '~/settings-payments';
 
 import { possiblyRenderSettingsSlots } from '~/settings/settings-slots';
@@ -55,7 +55,7 @@ const renderPaymentsSettings = () => {
 		},
 		{
 			id: 'experimental_wc_settings_payments_woocommerce_payments',
-			component: <SettingsPaymentsWooCommercePaymentsWrapper />,
+			component: <SettingsPaymentsWooPaymentsWrapper />,
 		},
 	];
 
@@ -63,9 +63,9 @@ const renderPaymentsSettings = () => {
 	pages.forEach( ( { id, component } ) => {
 		const root = document.getElementById( id );
 		if ( root ) {
-			createRoot(
-				root.insertBefore( document.createElement( 'div' ), null )
-			).render( component );
+			const newDiv = document.createElement( 'div' );
+			newDiv.className = 'wc-settings-prevent-change-event';
+			createRoot( root.insertBefore( newDiv, null ) ).render( component );
 		}
 	} );
 };

@@ -2,11 +2,12 @@
  * External dependencies
  */
 import {
-	PaymentProvider,
-	PaymentProviderType,
+	PaymentsEntity,
+	PaymentsProvider,
+	PaymentsProviderType,
 	PaymentGatewayProvider,
 	OfflinePmsGroupProvider,
-	PaymentExtensionSuggestionProvider,
+	PaymentsExtensionSuggestionProvider,
 } from '@woocommerce/data';
 import { Gridicon } from '@automattic/components';
 
@@ -24,9 +25,9 @@ import './payment-gateway-list.scss';
 
 interface PaymentGatewayListProps {
 	/**
-	 * List of payment providers to display.
+	 * List of payments providers to display.
 	 */
-	providers: PaymentProvider[];
+	providers: PaymentsProvider[];
 	/**
 	 * Array of slugs for installed plugins.
 	 */
@@ -36,11 +37,14 @@ interface PaymentGatewayListProps {
 	 */
 	installingPlugin: string | null;
 	/**
-	 * Callback to handle the setup of a plugin. Receives the plugin ID, slug, and onboarding URL (if available).
+	 * Callback to set up the plugin.
+	 *
+	 * @param provider      Extension provider.
+	 * @param onboardingUrl Extension onboarding URL (if available).
+	 * @param attachUrl     Extension attach URL (if available).
 	 */
-	setupPlugin: (
-		id: string,
-		slug: string,
+	setUpPlugin: (
+		provider: PaymentsEntity,
 		onboardingUrl: string | null,
 		attachUrl: string | null
 	) => void;
@@ -53,9 +57,9 @@ interface PaymentGatewayListProps {
 	 */
 	shouldHighlightIncentive: boolean;
 	/**
-	 * Callback to update the ordering of payment providers after sorting.
+	 * Callback to update the ordering of payments providers after sorting.
 	 */
-	updateOrdering: ( providers: PaymentProvider[] ) => void;
+	updateOrdering: ( providers: PaymentsProvider[] ) => void;
 	/**
 	 * Callback to open or close the onboarding modal.
 	 */
@@ -74,24 +78,24 @@ export const PaymentGatewayList = ( {
 	providers,
 	installedPluginSlugs,
 	installingPlugin,
-	setupPlugin,
+	setUpPlugin,
 	acceptIncentive,
 	shouldHighlightIncentive,
 	updateOrdering,
 	setIsOnboardingModalOpen,
 }: PaymentGatewayListProps ) => {
 	return (
-		<SortableContainer< PaymentProvider >
+		<SortableContainer< PaymentsProvider >
 			items={ providers }
 			className={ 'settings-payment-gateways__list' }
 			setItems={ updateOrdering }
 		>
-			{ providers.map( ( provider: PaymentProvider ) => {
+			{ providers.map( ( provider: PaymentsProvider ) => {
 				switch ( provider._type ) {
 					// Return different components wrapped into SortableItem depending on the provider type.
-					case PaymentProviderType.Suggestion:
+					case PaymentsProviderType.Suggestion:
 						const suggestion =
-							provider as PaymentExtensionSuggestionProvider;
+							provider as PaymentsExtensionSuggestionProvider;
 						const pluginInstalled = installedPluginSlugs.includes(
 							provider.plugin.slug
 						);
@@ -101,16 +105,16 @@ export const PaymentGatewayList = ( {
 								id={ suggestion.id }
 							>
 								{ PaymentExtensionSuggestionListItem( {
-									extension: suggestion,
+									suggestion,
 									installingPlugin,
-									setupPlugin,
+									setUpPlugin,
 									pluginInstalled,
 									acceptIncentive,
 									shouldHighlightIncentive,
 								} ) }
 							</SortableItem>
 						);
-					case PaymentProviderType.Gateway:
+					case PaymentsProviderType.Gateway:
 						const gateway = provider as PaymentGatewayProvider;
 						return (
 							<SortableItem
@@ -126,7 +130,7 @@ export const PaymentGatewayList = ( {
 								} ) }
 							</SortableItem>
 						);
-					case PaymentProviderType.OfflinePmsGroup:
+					case PaymentsProviderType.OfflinePmsGroup:
 						// Offline payments item logic is described below.
 						const offlinePmsGroup =
 							provider as OfflinePmsGroupProvider;

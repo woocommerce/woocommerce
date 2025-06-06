@@ -17,7 +17,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { createKycAccountSession } from '../../utils/actions';
+import { createEmbeddedKycSession } from '../../utils/actions';
 import appearance from './appearance';
 import { OnboardingFields } from '../../types';
 import BannerNotice from '../../../../components/banner-notice';
@@ -54,12 +54,10 @@ const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
 	useEffect( () => {
 		const initializeStripe = async () => {
 			try {
-				const accountSession = await createKycAccountSession(
+				const accountSession = await createEmbeddedKycSession(
 					onboardingData,
 					currentStep?.actions?.kyc_session?.href ?? ''
 				);
-
-				// To-Do: Track the embedded component redirection event.
 
 				const { clientSecret, publishableKey } = accountSession.session;
 

@@ -26,6 +26,8 @@ class Settings_Controller {
 		'core/paragraph',
 		'core/quote',
 		'core/spacer',
+		'core/social-link',
+		'core/social-links',
 	);
 
 	const DEFAULT_SETTINGS = array(
@@ -112,7 +114,8 @@ class Settings_Controller {
 	 *     padding: array{bottom: string, left: string, right: string, top: string}
 	 *   },
 	 *   color: array{
-	 *     background: string
+	 *     background: string,
+	 *     text: string
 	 *   },
 	 *   typography: array{
 	 *     fontFamily: string

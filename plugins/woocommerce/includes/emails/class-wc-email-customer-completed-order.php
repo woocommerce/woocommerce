@@ -45,7 +45,7 @@ if ( ! class_exists( 'WC_Email_Customer_Completed_Order', false ) ) :
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Let shoppers know once their order is complete and is being shipped.', 'woocommerce' )
+				? __( 'Send an email to customers notifying them that their order is complete and has been shipped', 'woocommerce' )
 				: __( 'Order complete emails are sent to customers when their orders are marked completed and usually indicate that their orders have been shipped.', 'woocommerce' );
 		}
 

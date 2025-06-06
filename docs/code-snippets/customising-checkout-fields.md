@@ -1,7 +1,9 @@
 ---
 post_title: Customizing checkout fields using actions and filters
-tags: code-snippet
+
 ---
+
+# Customizing checkout fields using actions and filters
 
 If you are unfamiliar with code and resolving potential conflicts, we have an extension that can help: [WooCommerce Checkout Field Editor](https://woocommerce.com/products/woocommerce-checkout-field-editor/). Installing and activating this extension overrides any code below that you try to implement; and you cannot have custom checkout field code in your functions.php file when the extension is activated.
 
@@ -9,7 +11,7 @@ Custom code should be copied into your child theme's **functions.php** file.
 
 ## Note
 
-Some parts of this document only applies to the shortcode Checkout, for adding fields to the Checkout block, consult [the additional checkout fields documentation](../cart-and-checkout-blocks/additional-checkout-fields.md).
+Some parts of this document only applies to the shortcode Checkout, for adding fields to the Checkout block, consult [the additional checkout fields documentation](/docs/block-development/cart-and-checkout-blocks/additional-checkout-fields).
 
 ## How Are Checkout Fields Loaded to WooCommerce?
 
@@ -295,7 +297,7 @@ function custom_override_checkout_fields( $fields ) {
 add_action( 'woocommerce_admin_order_data_after_shipping_address', 'my_custom_checkout_field_display_admin_order_meta', 10, 1 );
 
 function my_custom_checkout_field_display_admin_order_meta($order){
-    echo '&lt;p&gt;&lt;strong&gt;'. esc_html__( 'Phone From Checkout Form' ) . ':&lt;/strong&gt; ' . esc_html( $order->get_meta( '_shipping_phone', true ) ) . '&lt;/p&gt;';
+    echo '<p><strong>'. esc_html__( 'Phone From Checkout Form' ) . ':</strong> ' . esc_html( $order->get_meta( '_shipping_phone', true ) ) . '</p>';
 }
 ```
 
@@ -317,7 +319,7 @@ add_action( 'woocommerce_after_order_notes', 'my_custom_checkout_field' );
 
 function my_custom_checkout_field( $checkout ) {
 
-    echo '&lt;div id="my_custom_checkout_field"&gt;&lt;h2&gt;' . esc_html__( 'My Field' ) . '&lt;/h2&gt;';
+    echo '<div id="my_custom_checkout_field"><h2>' . esc_html__( 'My Field' ) . '</h2>';
 
     woocommerce_form_field(
         'my_field_name',
@@ -330,7 +332,7 @@ function my_custom_checkout_field( $checkout ) {
         $checkout->get_value( 'my_field_name' )
     );
 
-    echo '&lt;/div&gt;';
+    echo '</div>';
 
 }
 ```
@@ -387,7 +389,7 @@ If you wish to display the custom field value on the admin order edition page, y
 add_action( 'woocommerce_admin_order_data_after_billing_address', 'my_custom_checkout_field_display_admin_order_meta', 10, 1 );
 
 function my_custom_checkout_field_display_admin_order_meta( $order ){
-    echo '&lt;p&gt;&lt;strong&gt;' . esc_html__( 'My Field' ) . ':&lt;/strong&gt; ' . esc_html( $order->get_meta( 'My Field', true ) ) . '&lt;/p&gt;';
+    echo '<p><strong>' . esc_html__( 'My Field' ) . ':</strong> ' . esc_html( $order->get_meta( 'My Field', true ) ) . '</p>';
 }
 ```
 

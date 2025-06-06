@@ -18,7 +18,7 @@ import { PaymentMethodListItem } from '~/settings-payments/components/payment-me
 import {
 	combinePaymentMethodsState,
 	combineRequestMethods,
-	decouplePaymentMethodsState,
+	recordPaymentsOnboardingEvent,
 	shouldRenderPaymentMethodInMainList,
 } from '~/settings-payments/utils';
 import './style.scss';
@@ -124,7 +124,7 @@ export default function PaymentMethodsSelection() {
 				url: href,
 				method: 'POST',
 				data: {
-					payment_methods: decouplePaymentMethodsState( state ),
+					payment_methods: state,
 				},
 			} );
 		}
@@ -225,6 +225,17 @@ export default function PaymentMethodsSelection() {
 								<Button
 									className="settings-payments-methods__show-more"
 									onClick={ () => {
+										recordPaymentsOnboardingEvent(
+											'woopayments_onboarding_modal_click',
+											{
+												step:
+													currentStep?.id ||
+													'unknown',
+												action: 'show_more',
+												hidden_count: hiddenCount,
+											}
+										);
+
 										setIsExpanded( ! isExpanded );
 
 										// Check for overflow after expanding hidden payment methods.
@@ -298,7 +309,7 @@ export default function PaymentMethodsSelection() {
 													]
 											)
 											.join( ', ' ),
-										store_country:
+										business_country:
 											window.wcSettings?.admin
 												?.woocommerce_payments_nox_profile
 												?.business_country_code ??
