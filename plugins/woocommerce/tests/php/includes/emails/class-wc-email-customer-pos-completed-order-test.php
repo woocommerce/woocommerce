@@ -195,6 +195,57 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox POS email includes POS store name in email header HTML while regular email includes blog name.
+	 */
+	public function test_pos_email_includes_pos_store_name_in_email_header_html_while_regular_email_includes_blog_name() {
+		// Initialize WC_Emails to set up actions and filters for email header in regular emails.
+		$emails = new WC_Emails();
+
+		// Given POS store name and blog name.
+		update_option( 'woocommerce_pos_store_name', 'Physical Store' );
+		update_option( 'blogname', 'Online Store' );
+
+		// When getting content from both email classes.
+		$pos_email     = new WC_Email_Customer_POS_Completed_Order();
+		$regular_email = new WC_Email_Customer_Completed_Order();
+
+		// Set the order on both email classes.
+		$pos_email->object     = OrderHelper::create_order();
+		$regular_email->object = OrderHelper::create_order();
+
+		$pos_content     = $pos_email->get_content_html();
+		$regular_content = $regular_email->get_content_html();
+
+		// Then POS email should include POS store name.
+		$this->assertStringContainsString( '<title>Physical Store</title>', $pos_content );
+		$this->assertStringNotContainsString( '<title>Online Store</title>', $pos_content );
+
+		// And regular email should include blog name.
+		$this->assertStringNotContainsString( '<title>Physical Store</title>', $regular_content );
+		$this->assertStringContainsString( '<title>Online Store</title>', $regular_content );
+	}
+
+	/**
+	 * @testdox POS email includes blog name in email header HTML when POS store name is not set.
+	 */
+	public function test_pos_email_header_html_includes_blog_name_when_pos_store_name_is_not_set() {
+		// Given POS store name is not set.
+		delete_option( 'woocommerce_pos_store_name' );
+		update_option( 'blogname', 'Online Store' );
+
+		// When getting content from POS email.
+		$email = new WC_Email_Customer_POS_Completed_Order();
+
+		// Set the order on the email.
+		$email->object = OrderHelper::create_order();
+
+		$content = $email->get_content_html();
+
+		// Then POS email should include blog name.
+		$this->assertStringContainsString( '<title>Online Store</title>', $content );
+	}
+
+	/**
 	 * @testdox get_default_subject includes blog name when POS store name is not set.
 	 */
 	public function test_get_default_subject_includes_blog_name_when_pos_store_name_not_set() {

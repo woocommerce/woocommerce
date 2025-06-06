@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: pin GitHub hosted deps to specific hashes.

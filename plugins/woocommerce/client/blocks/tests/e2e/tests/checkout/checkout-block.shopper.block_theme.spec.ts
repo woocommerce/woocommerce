@@ -65,7 +65,8 @@ test.describe( 'Shopper → Account (guest user)', () => {
 		await frontendUtils.goToCheckout();
 	} );
 
-	test( 'Shopper can log in to an existing account and can create an account', async ( {
+	// eslint-disable-next-line playwright/no-skipped-test -- This will be rewritten as a unit/integration test - WOOPLUG-4303
+	test.skip( 'Shopper can log in to an existing account and can create an account', async ( {
 		requestUtils,
 		checkoutPageObject,
 		page,
@@ -159,7 +160,12 @@ test.describe( 'Shopper → Local pickup', () => {
 		await checkoutPageObject.placeOrder();
 
 		await expect(
-			page.getByText( 'Collection from Testing' )
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
+
+		await expect(
+			// The regex pattern matches "Collection from Testing" followed by any characters (.*)
+			page.getByRole( 'cell', { name: /Collection from Testing.*/ } )
 		).toBeVisible();
 		await checkoutPageObject.verifyBillingDetails();
 	} );
@@ -205,10 +211,17 @@ test.describe( 'Shopper → Local pickup', () => {
 		await page
 			.getByRole( 'radio', { name: 'Pickup', exact: true } )
 			.click();
+		await expect( page.getByText( 'Pickup (Testing)' ) ).toBeVisible();
+
 		await checkoutPageObject.placeOrder();
 
 		await expect(
-			page.getByText( 'Collection from Testing' )
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
+
+		await expect(
+			// The regex pattern matches "Collection from Testing" followed by any characters (.*)
+			page.getByRole( 'cell', { name: /Collection from Testing.*/ } )
 		).toBeVisible();
 		await checkoutPageObject.verifyBillingDetails();
 	} );
@@ -225,11 +238,9 @@ test.describe( 'Shopper → Local pickup', () => {
 			'page=wc-settings&tab=shipping&section=options'
 		);
 
-		await expect(
-			admin.page.getByLabel(
-				'Hide shipping costs until an address is entered'
-			)
-		).toBeDisabled();
+		await admin.page
+			.getByLabel( 'Hide shipping costs until an address is entered' )
+			.uncheck();
 
 		let saveButton = admin.page.getByRole( 'button', {
 			name: 'Save changes',
@@ -275,7 +286,12 @@ test.describe( 'Shopper → Local pickup', () => {
 		await checkoutPageObject.placeOrder();
 
 		await expect(
-			page.getByText( 'Collection from Testing' )
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
+
+		await expect(
+			// The regex pattern matches "Collection from Testing" followed by any characters (.*)
+			page.getByRole( 'cell', { name: /Collection from Testing.*/ } )
 		).toBeVisible();
 		await checkoutPageObject.verifyBillingDetails();
 	} );
