@@ -107,6 +107,15 @@ class PaymentsProviders {
 	private ?array $payment_gateways_memo = null;
 
 	/**
+	 * The memoized payment gateways for display to avoid computing the list multiple times during a request.
+	 *
+	 * This is especially important since it avoids triggering the legacy action multiple times during a request.
+	 *
+	 * @var array|null
+	 */
+	private ?array $payment_gateways_for_display_memo = null;
+
+	/**
 	 * The payment extension suggestions service.
 	 *
 	 * @var ExtensionSuggestions
@@ -130,15 +139,19 @@ class PaymentsProviders {
 	 * We apply the same actions and logic that the non-React Payments settings page uses to get the gateways.
 	 * This way we maintain backwards compatibility.
 	 *
-	 * @param bool $exclude_shells Whether to exclude "shell" gateways that are not intended for display.
-	 *                             Default is true.
+	 * @param bool $for_display Whether the payment gateway list is intended for display purposes.
+	 *                          This triggers the legacy `woocommerce_admin_field_payment_gateways` action and
+	 *                          the exclusion of "shell" gateways.
+	 *                          Default is true.
 	 *
 	 * @return array The payment gateway objects list.
 	 */
-	public function get_payment_gateways( bool $exclude_shells = true ): array {
-		if ( ! is_null( $this->payment_gateways_memo ) ) {
-			$payment_gateways = $this->payment_gateways_memo;
-		} else {
+	public function get_payment_gateways( bool $for_display = true ): array {
+		// If we are asked for a display gateways list, we need to fire legacy actions and filter out "shells".
+		if ( $for_display ) {
+			if ( ! is_null( $this->payment_gateways_for_display_memo ) ) {
+				return $this->payment_gateways_for_display_memo;
+			}
 
 			// We don't want to output anything from the action. So we buffer it and discard it.
 			// We just want to give the payment extensions a chance to adjust the payment gateways list for the settings page.
@@ -158,12 +171,8 @@ class PaymentsProviders {
 			// Handle edge-cases for certain providers.
 			$payment_gateways = $this->handle_non_standard_registration_for_payment_gateways( $payment_gateways );
 
-			// Store the entire payment gateways list for later use.
-			$this->payment_gateways_memo = $payment_gateways;
-		}
-
-		// Remove "shell" gateways - these are not intended for display in the admin UI.
-		if ( $exclude_shells ) {
+			// Remove "shell" gateways that are not intended for display.
+			// We consider a gateway to be a "shell" if it has no WC admin title or description.
 			$grouped_payment_gateways = $this->group_gateways_by_extension( $payment_gateways );
 			$payment_gateways         = array_filter(
 				$payment_gateways,
@@ -200,7 +209,26 @@ class PaymentsProviders {
 					return true;
 				}
 			);
+
+			// Store the entire payment gateways list for display for later use.
+			$this->payment_gateways_for_display_memo = $payment_gateways;
+
+			return $payment_gateways;
 		}
+
+		// We were asked for the raw payment gateways list.
+		if ( ! is_null( $this->payment_gateways_memo ) ) {
+			return $this->payment_gateways_memo;
+		}
+
+		// Get all payment gateways, ordered by the user.
+		$payment_gateways = WC()->payment_gateways()->payment_gateways;
+
+		// Handle edge-cases for certain providers.
+		$payment_gateways = $this->handle_non_standard_registration_for_payment_gateways( $payment_gateways );
+
+		// Store the entire payment gateways list for later use.
+		$this->payment_gateways_memo = $payment_gateways;
 
 		return $payment_gateways;
 	}
@@ -363,7 +391,7 @@ class PaymentsProviders {
 	 */
 	public function get_offline_payment_methods_gateways(): array {
 		return array_filter(
-			$this->get_payment_gateways( false ), // We include the shells to get the global order/index.
+			$this->get_payment_gateways( false ), // We request the raw gateways list to get the global order/index.
 			function ( $gateway ) {
 				return $this->is_offline_payment_method( $gateway->id );
 			}
@@ -782,7 +810,7 @@ class PaymentsProviders {
 	 * @return array The updated payment providers order map.
 	 */
 	public function enhance_order_map( array $order_map ): array {
-		// We don't exclude shells here, because we need to get the order of all the registered payment gateways.
+		// We don't request the display gateways list because we need to get the order of all the registered payment gateways.
 		$payment_gateways = $this->get_payment_gateways( false );
 		// Make it a list keyed by the payment gateway ID.
 		$payment_gateways = array_combine(
@@ -960,7 +988,8 @@ class PaymentsProviders {
 	 * @return void
 	 */
 	public function reset_memo(): void {
-		$this->payment_gateways_memo = null;
+		$this->payment_gateways_memo             = null;
+		$this->payment_gateways_for_display_memo = null;
 	}
 
 	/**
@@ -1141,7 +1170,7 @@ class PaymentsProviders {
 	 * @return bool True if the store has any enabled ecommerce gateways, false otherwise.
 	 */
 	private function has_enabled_ecommerce_gateways(): bool {
-		$gateways         = $this->get_payment_gateways();
+		$gateways         = $this->get_payment_gateways( false ); // We want the raw gateways list.
 		$enabled_gateways = array_filter(
 			$gateways,
 			function ( $gateway ) {
