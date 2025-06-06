@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
+use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Throwable;
 use WC_HTTPS;
 use WC_Payment_Gateway;
@@ -252,25 +253,36 @@ class PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode, false otherwise.
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		// Try various gateway methods to check if the payment gateway is in test mode.
-		if ( is_callable( array( $payment_gateway, 'is_test_mode' ) ) ) {
-			return filter_var( $payment_gateway->is_test_mode(), FILTER_VALIDATE_BOOLEAN );
-		}
-		if ( is_callable( array( $payment_gateway, 'is_in_test_mode' ) ) ) {
-			return filter_var( $payment_gateway->is_in_test_mode(), FILTER_VALIDATE_BOOLEAN );
-		}
-
-		// Try various gateway option entries to check if the payment gateway is in test mode.
-		if ( is_callable( array( $payment_gateway, 'get_option' ) ) ) {
-			$test_mode = filter_var( $payment_gateway->get_option( 'test_mode', 'not_found' ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-			if ( ! is_null( $test_mode ) ) {
-				return $test_mode;
+		try {
+			// Try various gateway methods to check if the payment gateway is in test mode.
+			if ( is_callable( array( $payment_gateway, 'is_test_mode' ) ) ) {
+				return filter_var( $payment_gateway->is_test_mode(), FILTER_VALIDATE_BOOLEAN );
+			}
+			if ( is_callable( array( $payment_gateway, 'is_in_test_mode' ) ) ) {
+				return filter_var( $payment_gateway->is_in_test_mode(), FILTER_VALIDATE_BOOLEAN );
 			}
 
-			$test_mode = filter_var( $payment_gateway->get_option( 'testmode', 'not_found' ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-			if ( ! is_null( $test_mode ) ) {
-				return $test_mode;
+			// Try various gateway option entries to check if the payment gateway is in test mode.
+			if ( is_callable( array( $payment_gateway, 'get_option' ) ) ) {
+				$test_mode = filter_var( $payment_gateway->get_option( 'test_mode', 'not_found' ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+				if ( ! is_null( $test_mode ) ) {
+					return $test_mode;
+				}
+
+				$test_mode = filter_var( $payment_gateway->get_option( 'testmode', 'not_found' ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+				if ( ! is_null( $test_mode ) ) {
+					return $test_mode;
+				}
 			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway is in test mode: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+					'error'  => $e,
+				)
+			);
 		}
 
 		return false;
@@ -287,12 +299,23 @@ class PaymentGateway {
 	 * @return bool True if the payment gateway is in dev mode, false otherwise.
 	 */
 	public function is_in_dev_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		// Try various gateway methods to check if the payment gateway is in dev mode.
-		if ( is_callable( array( $payment_gateway, 'is_dev_mode' ) ) ) {
-			return filter_var( $payment_gateway->is_dev_mode(), FILTER_VALIDATE_BOOLEAN );
-		}
-		if ( is_callable( array( $payment_gateway, 'is_in_dev_mode' ) ) ) {
-			return filter_var( $payment_gateway->is_in_dev_mode(), FILTER_VALIDATE_BOOLEAN );
+		try {
+			// Try various gateway methods to check if the payment gateway is in dev mode.
+			if ( is_callable( array( $payment_gateway, 'is_dev_mode' ) ) ) {
+				return filter_var( $payment_gateway->is_dev_mode(), FILTER_VALIDATE_BOOLEAN );
+			}
+			if ( is_callable( array( $payment_gateway, 'is_in_dev_mode' ) ) ) {
+				return filter_var( $payment_gateway->is_in_dev_mode(), FILTER_VALIDATE_BOOLEAN );
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway is in dev mode: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+					'error'  => $e,
+				)
+			);
 		}
 
 		return false;
@@ -307,12 +330,23 @@ class PaymentGateway {
 	 *              If the payment gateway does not provide the information, it will return true.
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( is_callable( array( $payment_gateway, 'is_account_connected' ) ) ) {
-			return filter_var( $payment_gateway->is_account_connected(), FILTER_VALIDATE_BOOLEAN );
-		}
+		try {
+			if ( is_callable( array( $payment_gateway, 'is_account_connected' ) ) ) {
+				return filter_var( $payment_gateway->is_account_connected(), FILTER_VALIDATE_BOOLEAN );
+			}
 
-		if ( is_callable( array( $payment_gateway, 'is_connected' ) ) ) {
-			return filter_var( $payment_gateway->is_connected(), FILTER_VALIDATE_BOOLEAN );
+			if ( is_callable( array( $payment_gateway, 'is_connected' ) ) ) {
+				return filter_var( $payment_gateway->is_connected(), FILTER_VALIDATE_BOOLEAN );
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway account is connected: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+					'error'  => $e,
+				)
+			);
 		}
 
 		// Fall back to assuming that it is connected. This is the safest option.
@@ -329,8 +363,19 @@ class PaymentGateway {
 	 *              it will infer it from having a connected account.
 	 */
 	public function is_onboarding_started( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( is_callable( array( $payment_gateway, 'is_onboarding_started' ) ) ) {
-			return filter_var( $payment_gateway->is_onboarding_started(), FILTER_VALIDATE_BOOLEAN );
+		try {
+			if ( is_callable( array( $payment_gateway, 'is_onboarding_started' ) ) ) {
+				return filter_var( $payment_gateway->is_onboarding_started(), FILTER_VALIDATE_BOOLEAN );
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway onboarding started: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+					'error'  => $e,
+				)
+			);
 		}
 
 		// Fall back to inferring this from having a connected account.
@@ -352,13 +397,26 @@ class PaymentGateway {
 			return false;
 		}
 
-		if ( is_callable( array( $payment_gateway, 'is_onboarding_completed' ) ) ) {
-			return filter_var( $payment_gateway->is_onboarding_completed(), FILTER_VALIDATE_BOOLEAN );
-		}
+		try {
+			if ( is_callable( array( $payment_gateway, 'is_onboarding_completed' ) ) ) {
+				return filter_var( $payment_gateway->is_onboarding_completed(), FILTER_VALIDATE_BOOLEAN );
+			}
 
-		// Note: This is what WooPayments provides, but it should become standard.
-		if ( is_callable( array( $payment_gateway, 'is_account_partially_onboarded' ) ) ) {
-			return ! filter_var( $payment_gateway->is_account_partially_onboarded(), FILTER_VALIDATE_BOOLEAN );
+			// Note: This is what WooPayments provides, but it should become standard.
+			if ( is_callable( array( $payment_gateway, 'is_account_partially_onboarded' ) ) ) {
+				return ! filter_var( $payment_gateway->is_account_partially_onboarded(), FILTER_VALIDATE_BOOLEAN );
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway onboarding is completed: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+					'error'  => $e,
+				)
+			);
+
+			return false;
 		}
 
 		// Fall back to inferring this from having a connected account.
@@ -376,12 +434,23 @@ class PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
-		// Try various gateway methods to check if the payment gateway is in test mode onboarding.
-		if ( is_callable( array( $payment_gateway, 'is_test_mode_onboarding' ) ) ) {
-			return filter_var( $payment_gateway->is_test_mode_onboarding(), FILTER_VALIDATE_BOOLEAN );
-		}
-		if ( is_callable( array( $payment_gateway, 'is_in_test_mode_onboarding' ) ) ) {
-			return filter_var( $payment_gateway->is_in_test_mode_onboarding(), FILTER_VALIDATE_BOOLEAN );
+		try {
+			// Try various gateway methods to check if the payment gateway is in test mode onboarding.
+			if ( is_callable( array( $payment_gateway, 'is_test_mode_onboarding' ) ) ) {
+				return filter_var( $payment_gateway->is_test_mode_onboarding(), FILTER_VALIDATE_BOOLEAN );
+			}
+			if ( is_callable( array( $payment_gateway, 'is_in_test_mode_onboarding' ) ) ) {
+				return filter_var( $payment_gateway->is_in_test_mode_onboarding(), FILTER_VALIDATE_BOOLEAN );
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway is in test mode onboarding: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+					'error'  => $e,
+				)
+			);
 		}
 
 		return false;
@@ -395,8 +464,19 @@ class PaymentGateway {
 	 * @return string The settings URL for the payment gateway.
 	 */
 	public function get_settings_url( WC_Payment_Gateway $payment_gateway ): string {
-		if ( is_callable( array( $payment_gateway, 'get_settings_url' ) ) ) {
-			return (string) $payment_gateway->get_settings_url();
+		try {
+			if ( is_callable( array( $payment_gateway, 'get_settings_url' ) ) ) {
+				return (string) $payment_gateway->get_settings_url();
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to get gateway settings URL: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+					'error'  => $e,
+				)
+			);
 		}
 
 		return Utils::wc_payments_settings_url(
@@ -420,11 +500,22 @@ class PaymentGateway {
 	 * @return string The onboarding URL for the payment gateway.
 	 */
 	public function get_onboarding_url( WC_Payment_Gateway $payment_gateway, string $return_url = '' ): string {
-		if ( is_callable( array( $payment_gateway, 'get_connection_url' ) ) ) {
-			// If we received no return URL, we will set the WC Payments Settings page as the return URL.
-			$return_url = ! empty( $return_url ) ? $return_url : admin_url( 'admin.php?page=wc-settings&tab=checkout&from=' . Payments::FROM_PROVIDER_ONBOARDING );
+		try {
+			if ( is_callable( array( $payment_gateway, 'get_connection_url' ) ) ) {
+				// If we received no return URL, we will set the WC Payments Settings page as the return URL.
+				$return_url = ! empty( $return_url ) ? $return_url : admin_url( 'admin.php?page=wc-settings&tab=checkout&from=' . Payments::FROM_PROVIDER_ONBOARDING );
 
-			return (string) $payment_gateway->get_connection_url( $return_url );
+				return (string) $payment_gateway->get_connection_url( $return_url );
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to get gateway connection URL: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+					'error'  => $e,
+				)
+			);
 		}
 
 		// Fall back to pointing users to the payment gateway settings page to handle onboarding.
@@ -572,13 +663,26 @@ class PaymentGateway {
 			return array();
 		}
 
-		// Get the "raw" recommended payment methods from the payment gateway.
-		$recommended_pms = call_user_func_array(
-			array( $payment_gateway, 'get_recommended_payment_methods' ),
-			array( 'country_code' => $country_code ),
-		);
-		if ( ! is_array( $recommended_pms ) ) {
-			// Bail if the recommended payment methods are not an array.
+		try {
+			// Get the "raw" recommended payment methods from the payment gateway.
+			$recommended_pms = call_user_func_array(
+				array( $payment_gateway, 'get_recommended_payment_methods' ),
+				array( 'country_code' => $country_code ),
+			);
+			if ( ! is_array( $recommended_pms ) ) {
+				// Bail if the recommended payment methods are not an array.
+				return array();
+			}
+		} catch ( Throwable $e ) {
+			// Log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to get recommended payment methods: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+					'error'  => $e,
+				)
+			);
+
 			return array();
 		}
 
