@@ -4,9 +4,7 @@ sidebar_label: How to add additional conditional fields in checkout
 ---
 # How to Make Your WooCommerce Additional Checkout Fields Conditionally Visible in the Checkout Block
 
-*Published: May 30, 2025*
-
-In our previous post, we covered the basics of adding additional fields to the WooCommerce Checkout Block. Now, let's take it a step further and explore how to make those fields appear and disappear based on customer choices, cart contents, or other dynamic conditions.
+If you've already learned how to [add additional fields to the WooCommerce Checkout Block](https://developer.woocommerce.com//docs/block-development/cart-and-checkout-blocks/how-to-add-additional-fields-guide), let's take it a step further and explore how to make those fields appear and disappear based on customer choices, cart contents, or other dynamic conditions.
 
 Conditional visibility allows you to create smart, adaptive checkout forms that only show relevant fields when needed, reducing form clutter and improving the customer experience.
 
@@ -271,8 +269,6 @@ Now that you've learned how to make your WooCommerce additional checkout fields 
 * Dynamic field values populated from external APIs
 * Integrating with third-party services for enhanced functionality
 
-For more information, refer to the [WooCommerce developer documentation](https://developer.woocommerce.com/docs/block-development/cart-and-checkout-blocks/additional-checkout-fields/).
+For more information, refer to the [Additional Checkout Fields](https://developer.woocommerce.com/docs/block-development/cart-and-checkout-blocks/additional-checkout-fields/) reference document.
 
 ---
-
-*Note: This Markdown file is based on the blog post by Code by Tom. For the original post and more details, visit [Code by Tom's blog](https://codebytom.blog/2025/05/30/how-to-make-your-woocommerce-additional-checkout-fields-conditionally-visible/).*

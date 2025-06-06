@@ -9,6 +9,8 @@ The WooCommerce Checkout Block provides a powerful API for developers to add add
 
 In this post, we’ll walk through the process of adding your own additional fields to your checkout form and show you practical examples you can implement right away.
 
+For a deeper dive on the fields and helper methods referenced in this guide, please head to the [Additional Checkout Fields](https://developer.woocommerce.com/docs/block-development/cart-and-checkout-blocks/additional-checkout-fields) documentation.
+
 ## Table of Contents
 
 * [Getting Started](#getting-started)
@@ -200,9 +202,3 @@ $custom_field_value = $order->get_meta( 'my-plugin/custom-field' );
 ## Next Steps
 
 Now that you've learned how to add additional fields to the WooCommerce Checkout Block, consider exploring more advanced features such as conditional field visibility, dynamic field values, and integrating with third-party services.
-
-For more information, refer to the [WooCommerce developer documentation](https://developer.woocommerce.com/docs/block-development/cart-and-checkout-blocks/additional-checkout-fields/).
-
----
-
-*Note: This Markdown file is based on the blog post by Code by Tom. For the original post and more details, visit [Code by Tom's blog](https://codebytom.blog/2025/05/30/how-to-add-additional-fields-to-the-woocommerce-checkout-block/).*
