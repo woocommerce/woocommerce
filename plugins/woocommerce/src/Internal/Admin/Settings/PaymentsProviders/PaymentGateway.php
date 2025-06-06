@@ -307,7 +307,7 @@ class PaymentGateway {
 			if ( is_callable( array( $payment_gateway, 'is_in_dev_mode' ) ) ) {
 				return filter_var( $payment_gateway->is_in_dev_mode(), FILTER_VALIDATE_BOOLEAN );
 			}
-		}  catch ( Throwable $e ) {
+		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to determine if gateway is in dev mode: ' . $e->getMessage(),
@@ -469,7 +469,7 @@ class PaymentGateway {
 				return (string) $payment_gateway->get_settings_url();
 			}
 		} catch ( Throwable $e ) {
-			// Do nothing but log so we can investigate
+			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to get gateway settings URL: ' . $e->getMessage(),
 				array(
@@ -508,7 +508,7 @@ class PaymentGateway {
 				return (string) $payment_gateway->get_connection_url( $return_url );
 			}
 		} catch ( Throwable $e ) {
-			// Do nothing but log so we can investigate
+			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to get gateway connection URL: ' . $e->getMessage(),
 				array(
