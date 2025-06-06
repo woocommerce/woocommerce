@@ -187,4 +187,65 @@ class EmailImprovements {
 		$all_email_templates  = array_merge( $core_email_templates, self::EMAIL_TEMPLATE_PARTS );
 		return array_intersect( $all_email_templates, $template_overrides );
 	}
+
+	/**
+	 * Get all enabled email IDs.
+	 *
+	 * @return array Enabled email IDs.
+	 */
+	public static function get_enabled_emails() {
+		$enabled_emails = array_filter(
+			WC()->mailer()->get_emails(),
+			function ( $email ) {
+				return $email->is_enabled() && ! $email->is_manual();
+			}
+		);
+		return array_values( array_map( fn( $email ) => get_class( $email ), $enabled_emails ) );
+	}
+
+	/**
+	 * Get all disabled email IDs.
+	 *
+	 * @return array Enabled email IDs.
+	 */
+	public static function get_disabled_emails() {
+		$disabled_emails = array_filter(
+			WC()->mailer()->get_emails(),
+			function ( $email ) {
+				return ! $email->is_enabled() && ! $email->is_manual();
+			}
+		);
+		return array_values( array_map( fn( $email ) => get_class( $email ), $disabled_emails ) );
+	}
+
+	/**
+	 * Get all enabled or manual emails with Cc or Bcc.
+	 *
+	 * @return array Enabled or manual emails with Cc or Bcc.
+	 */
+	public static function get_enabled_or_manual_emails_with_cc_or_bcc() {
+		$enabled_or_manual_emails = array_filter(
+			WC()->mailer()->get_emails(),
+			function ( $email ) {
+				return $email->is_enabled() || $email->is_manual();
+			}
+		);
+
+		$email_ids_with_cc  = array();
+		$email_ids_with_bcc = array();
+
+		foreach ( $enabled_or_manual_emails as $email ) {
+			if ( $email->get_cc_recipient() ) {
+				$email_ids_with_cc[] = get_class( $email );
+			}
+			if ( $email->get_bcc_recipient() ) {
+				$email_ids_with_bcc[] = get_class( $email );
+			}
+		}
+
+		return array(
+			'ccs'  => $email_ids_with_cc,
+			'bccs' => $email_ids_with_bcc,
+		);
+	}
 }
