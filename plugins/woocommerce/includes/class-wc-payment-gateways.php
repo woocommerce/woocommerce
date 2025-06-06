@@ -178,7 +178,11 @@ class WC_Payment_Gateways {
 		}
 
 		try {
-			/** @var PaymentProviders $payment_providers_controller */
+			/**
+			 * Instance of the PaymentProviders controller.
+			 *
+			 * @var PaymentProviders $payment_providers_controller
+			 */
 			$payment_providers_controller = wc_get_container()->get( PaymentProviders::class );
 			$payment_provider             = $payment_providers_controller->get_payment_gateway_provider_instance( $gateway->id );
 			if ( ! $payment_provider->is_onboarding_completed( $gateway ) || $payment_provider->is_in_test_mode_onboarding( $gateway ) ) {
@@ -186,7 +190,7 @@ class WC_Payment_Gateways {
 				// We don't want to send an email because the gateway is not ready to be used for live payments.
 				return;
 			}
-		} catch ( Throwable $exception ) {
+		} catch ( Throwable $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 			// Don't do anything if we can't get the payment provider.
 			// This is to ensure that we don't break the code if the payment provider is not available.
 		}
