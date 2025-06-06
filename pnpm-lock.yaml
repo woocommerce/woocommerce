@@ -1316,8 +1316,8 @@ importers:
   packages/js/e2e-environment:
     dependencies:
       '@automattic/puppeteer-utils':
-        specifier: github:Automattic/puppeteer-utils#0f3ec50
-        version: https://codeload.github.com/Automattic/puppeteer-utils/tar.gz/0f3ec50(react-native@0.73.0(@babel/core@7.25.7)(@babel/preset-env@7.25.7(@babel/core@7.25.7))(encoding@0.1.13)(react@18.3.1))
+        specifier: github:Automattic/puppeteer-utils#0f3ec50fc22d7bd2a4bd69fc172e8a66d958ef2d
+        version: https://codeload.github.com/Automattic/puppeteer-utils/tar.gz/0f3ec50fc22d7bd2a4bd69fc172e8a66d958ef2d(react-native@0.73.0(@babel/core@7.25.7)(@babel/preset-env@7.25.7(@babel/core@7.25.7))(encoding@0.1.13)(react@18.3.1))
       '@jest/test-sequencer':
         specifier: 27.5.x
         version: 27.5.1
@@ -1413,8 +1413,8 @@ importers:
   packages/js/e2e-utils:
     dependencies:
       '@automattic/puppeteer-utils':
-        specifier: github:Automattic/puppeteer-utils#0f3ec50
-        version: https://codeload.github.com/Automattic/puppeteer-utils/tar.gz/0f3ec50(react-native@0.73.0(@babel/core@7.25.7)(@babel/preset-env@7.25.7(@babel/core@7.25.7))(encoding@0.1.13)(react@18.3.1))
+        specifier: github:Automattic/puppeteer-utils#0f3ec50fc22d7bd2a4bd69fc172e8a66d958ef2d
+        version: https://codeload.github.com/Automattic/puppeteer-utils/tar.gz/0f3ec50fc22d7bd2a4bd69fc172e8a66d958ef2d(react-native@0.73.0(@babel/core@7.25.7)(@babel/preset-env@7.25.7(@babel/core@7.25.7))(encoding@0.1.13)(react@18.3.1))
       '@woocommerce/api':
         specifier: ^0.2.0
         version: 0.2.0
@@ -4579,7 +4579,7 @@ importers:
   plugins/woocommerce/client/legacy:
     dependencies:
       sourcebuster:
-        specifier: github:woocommerce/sourcebuster-js#v1.2.0
+        specifier: github:woocommerce/sourcebuster-js#d7f4616d5a17e17db925ca1842457f309379d861
         version: https://codeload.github.com/woocommerce/sourcebuster-js/tar.gz/d7f4616d5a17e17db925ca1842457f309379d861
     devDependencies:
       '@types/node':
@@ -5259,6 +5259,10 @@ packages:
 
   '@automattic/puppeteer-utils@https://codeload.github.com/Automattic/puppeteer-utils/tar.gz/0f3ec50':
     resolution: {tarball: https://codeload.github.com/Automattic/puppeteer-utils/tar.gz/0f3ec50}
+    version: 0.0.1
+
+  '@automattic/puppeteer-utils@https://codeload.github.com/Automattic/puppeteer-utils/tar.gz/0f3ec50fc22d7bd2a4bd69fc172e8a66d958ef2d':
+    resolution: {tarball: https://codeload.github.com/Automattic/puppeteer-utils/tar.gz/0f3ec50fc22d7bd2a4bd69fc172e8a66d958ef2d}
     version: 0.0.1
 
   '@automattic/site-admin@0.0.1':
@@ -25964,7 +25968,26 @@ snapshots:
 
   '@automattic/material-design-icons@1.0.0': {}
 
-  '@automattic/puppeteer-utils@https://codeload.github.com/Automattic/puppeteer-utils/tar.gz/0f3ec50(react-native@0.73.0(@babel/core@7.25.7)(@babel/preset-env@7.25.7(@babel/core@7.25.7))(encoding@0.1.13)(react@18.3.1))':
+  '@automattic/puppeteer-utils@https://codeload.github.com/Automattic/puppeteer-utils/tar.gz/0f3ec50':
+    dependencies:
+      '@babel/cli': 7.25.7(@babel/core@7.25.7)
+      '@babel/core': 7.25.7
+      '@babel/preset-env': 7.25.7(@babel/core@7.25.7)
+      '@slack/web-api': 5.15.0
+      '@wordpress/e2e-test-utils': 3.0.0(jest@24.9.0)(puppeteer@2.1.1)(react-native@0.73.0(@babel/core@7.25.7)(@babel/preset-env@7.25.7(@babel/core@7.25.7))(encoding@0.1.13)(react@18.3.1))
+      config: 3.3.7
+      eslint: 6.7.2
+      jest: 24.9.0
+      prettier: wp-prettier@1.19.1
+      puppeteer: 2.1.1
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - react-native
+      - supports-color
+      - utf-8-validate
+
+  '@automattic/puppeteer-utils@https://codeload.github.com/Automattic/puppeteer-utils/tar.gz/0f3ec50fc22d7bd2a4bd69fc172e8a66d958ef2d(react-native@0.73.0(@babel/core@7.25.7)(@babel/preset-env@7.25.7(@babel/core@7.25.7))(encoding@0.1.13)(react@18.3.1))':
     dependencies:
       '@babel/cli': 7.25.7(@babel/core@7.25.7)
       '@babel/core': 7.25.7
@@ -28576,7 +28599,9 @@ snapshots:
       source-map: 0.6.1
       string-length: 2.0.0
     transitivePeerDependencies:
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@jest/reporters@25.5.1':
     dependencies:
@@ -34485,7 +34510,7 @@ snapshots:
       '@types/node': 20.17.8
     optional: true
 
-  '@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)':
+  '@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)':
     dependencies:
       '@typescript-eslint/experimental-utils': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       '@typescript-eslint/parser': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
@@ -35201,7 +35226,7 @@ snapshots:
 
   '@woocommerce/e2e-environment@0.3.0(@babel/core@7.25.7)(react@18.3.1)':
     dependencies:
-      '@automattic/puppeteer-utils': https://codeload.github.com/Automattic/puppeteer-utils/tar.gz/0f3ec50(react-native@0.73.0(@babel/core@7.25.7)(@babel/preset-env@7.25.7(@babel/core@7.25.7))(encoding@0.1.13)(react@18.3.1))
+      '@automattic/puppeteer-utils': https://codeload.github.com/Automattic/puppeteer-utils/tar.gz/0f3ec50
       '@jest/test-sequencer': 25.5.4
       '@slack/web-api': 6.10.0
       '@woocommerce/api': 0.2.0
@@ -38072,14 +38097,14 @@ snapshots:
   '@wordpress/eslint-plugin@9.3.0(@babel/core@7.25.7)(eslint@7.32.0)(typescript@5.7.2)':
     dependencies:
       '@babel/eslint-parser': 7.23.3(@babel/core@7.25.7)(eslint@7.32.0)
-      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
+      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
       '@typescript-eslint/parser': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       '@wordpress/prettier-config': 1.4.0(wp-prettier@2.2.1-beta-1)
       cosmiconfig: 7.1.0
       eslint: 7.32.0
       eslint-config-prettier: 7.2.0(eslint@7.32.0)
       eslint-plugin-import: 2.29.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)
-      eslint-plugin-jest: 24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
+      eslint-plugin-jest: 24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
       eslint-plugin-jsdoc: 36.1.1(eslint@7.32.0)
       eslint-plugin-jsx-a11y: 6.8.0(eslint@7.32.0)
       eslint-plugin-prettier: 3.4.1(eslint-config-prettier@7.2.0(eslint@7.32.0))(eslint@7.32.0)(wp-prettier@2.2.1-beta-1)
@@ -44393,12 +44418,12 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-jest@24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2):
+  eslint-plugin-jest@24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2):
     dependencies:
       '@typescript-eslint/experimental-utils': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       eslint: 7.32.0
     optionalDependencies:
-      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
+      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -48654,7 +48679,9 @@ snapshots:
       pretty-format: 24.9.0
       throat: 4.1.0
     transitivePeerDependencies:
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   jest-jasmine2@25.5.4:
     dependencies:

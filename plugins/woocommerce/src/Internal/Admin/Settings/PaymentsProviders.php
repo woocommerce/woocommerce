@@ -162,13 +162,42 @@ class PaymentsProviders {
 			$this->payment_gateways_memo = $payment_gateways;
 		}
 
-		// Remove "shell" gateways that are not intended for display.
-		// We consider a gateway to be a "shell" if it has no WC admin title or description.
+		// Remove "shell" gateways - these are not intended for display in the admin UI.
 		if ( $exclude_shells ) {
-			$payment_gateways = array_filter(
+			$grouped_payment_gateways = $this->group_gateways_by_extension( $payment_gateways );
+			$payment_gateways         = array_filter(
 				$payment_gateways,
-				function ( $gateway ) {
-					return ! empty( $gateway->get_method_title() ) || ! empty( $gateway->get_method_description() );
+				function ( $gateway ) use ( $grouped_payment_gateways ) {
+					// If the gateway is a shell, we only remove it if there are other, non-shell gateways from that extension.
+					// This is to avoid removing all the gateways registered by an extension and
+					// preventing user access to the settings page(s) for that extension.
+					if ( $this->is_shell_payment_gateway( $gateway ) ) {
+						$gateway_details = $this->get_payment_gateway_details( $gateway, 0 );
+						// In case we don't have the needed extension details,
+						// we allow the gateway to be displayed (aka better safe than sorry).
+						if ( empty( $gateway_details ) || ! isset( $gateway_details['plugin'] ) || empty( $gateway_details['plugin']['file'] ) ) {
+							return true;
+						}
+
+						if ( empty( $grouped_payment_gateways[ $gateway_details['plugin']['file'] ] ) ||
+							count( $grouped_payment_gateways[ $gateway_details['plugin']['file'] ] ) <= 1 ) {
+							// If there are no other gateways from the same extension, we let the shell gateway be displayed.
+							return true;
+						}
+
+						// Check if there are any other gateways from the same extension that are NOT shells.
+						foreach ( $grouped_payment_gateways[ $gateway_details['plugin']['file'] ] as $extension_gateway ) {
+							if ( ! $this->is_shell_payment_gateway( $extension_gateway ) ) {
+								// If we found a gateway from the same extension that is not a shell,
+								// we hide all shells from that extension.
+								return false;
+							}
+						}
+					}
+
+					// By this point, we know that the gateway is not a shell or that it is a shell
+					// but there are no non-shell gateways from the same extension. Include it.
+					return true;
 				}
 			);
 		}
@@ -350,6 +379,20 @@ class PaymentsProviders {
 	 */
 	public function is_offline_payment_method( string $id ): bool {
 		return in_array( $id, self::OFFLINE_METHODS, true );
+	}
+
+	/**
+	 * Check if a payment gateway is a shell payment gateway.
+	 *
+	 * A shell payment gateway is one that has no method title or description.
+	 * This is used to identify gateways that are not intended for display in the admin UI.
+	 *
+	 * @param WC_Payment_Gateway $gateway The payment gateway object.
+	 *
+	 * @return bool True if the payment gateway is a shell, false otherwise.
+	 */
+	public function is_shell_payment_gateway( WC_Payment_Gateway $gateway ): bool {
+		return empty( $gateway->get_method_title() ) && empty( $gateway->get_method_description() );
 	}
 
 	/**
@@ -1245,5 +1288,41 @@ class PaymentsProviders {
 		}
 
 		return Utils::order_map_normalize( $new_order_map );
+	}
+
+	/**
+	 * Group payment gateways by their plugin extension filename.
+	 *
+	 * @param WC_Payment_Gateway[] $gateways The list of payment gateway instances to group.
+	 *
+	 * @return array The grouped payment gateway instances, keyed by the plugin file.
+	 *               Each group contains an array of payment gateway instances that belong to the same plugin.
+	 *               If a payment gateway does not have a corresponding plugin file,
+	 *               it will be grouped under the 'unknown_extension' key.
+	 */
+	private function group_gateways_by_extension( array $gateways ): array {
+		$grouped = array(
+			// This is the group for gateways that we don't know how to group by extension.
+			// It can be used for gateways that are not registered by a WP plugin.
+			'unknown_extension' => array(),
+		);
+
+		foreach ( $gateways as $gateway ) {
+			// Get the payment gateway details, but use a dummy gateway order since it is inconsequential here.
+			$gateway_details = $this->get_payment_gateway_details( $gateway, 0 );
+			// If we don't have the necessary plugin details, put it in the unknown group.
+			if ( empty( $gateway_details ) || ! isset( $gateway_details['plugin'] ) || empty( $gateway_details['plugin']['file'] ) ) {
+				$grouped['unknown_extension'][] = $gateway;
+				continue;
+			}
+
+			if ( empty( $grouped[ $gateway_details['plugin']['file'] ] ) ) {
+				$grouped[ $gateway_details['plugin']['file'] ] = array();
+			}
+
+			$grouped[ $gateway_details['plugin']['file'] ][] = $gateway;
+		}
+
+		return $grouped;
 	}
 }

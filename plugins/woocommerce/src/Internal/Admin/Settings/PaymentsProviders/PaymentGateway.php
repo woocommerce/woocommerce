@@ -120,9 +120,16 @@ class PaymentGateway {
 	 */
 	public function get_title( WC_Payment_Gateway $payment_gateway ): string {
 		$title = $payment_gateway->get_method_title();
+		// If we still couldn't get the WC admin title, fall back to the main title.
+		if ( ! is_string( $title ) || empty( $title ) ) {
+			$title = $payment_gateway->get_title();
+		}
+		// If we still couldn't get the title, return a default value.
 		if ( ! is_string( $title ) || empty( $title ) ) {
 			return esc_html__( 'Unknown', 'woocommerce' );
 		}
+
+		// No HTML tags allowed in the title.
 		$title = wp_strip_all_tags( html_entity_decode( $title, ENT_QUOTES | ENT_SUBSTITUTE ), true );
 
 		// Truncate the title.
@@ -142,9 +149,16 @@ class PaymentGateway {
 	 */
 	public function get_description( WC_Payment_Gateway $payment_gateway ): string {
 		$description = $payment_gateway->get_method_description();
+		// If we couldn't get the WC admin description, fall back to the main description.
+		if ( ! is_string( $description ) || empty( $description ) ) {
+			$description = $payment_gateway->get_description();
+		}
+		// If we still couldn't get the description, use an empty string since the description is not critical.
 		if ( ! is_string( $description ) || empty( $description ) ) {
 			return '';
 		}
+
+		// No HTML tags allowed in the description.
 		$description = wp_strip_all_tags( html_entity_decode( $description, ENT_QUOTES | ENT_SUBSTITUTE ), true );
 
 		// Truncate the description.
