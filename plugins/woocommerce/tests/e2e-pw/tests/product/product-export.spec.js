@@ -231,6 +231,8 @@ test.describe( 'Product > Export Selected Products', () => {
 		);
 
 		await test.step( 'Verify default export button state and navigate to export page', async () => {
+			// wait for 1 second
+			await page.waitForTimeout( 1000 );
 			await expect( exportButton ).toHaveText( 'Export' );
 			await exportButton.click();
 		} );
