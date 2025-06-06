@@ -34,11 +34,7 @@ test.describe( `Add to Cart + Options Block (block theme with templates)`, () =>
 		pageObject,
 		editor,
 		admin,
-		requestUtils,
 	} ) => {
-		await requestUtils.setFeatureFlag( 'experimental-blocks', true );
-		await requestUtils.setFeatureFlag( 'blockified-add-to-cart', true );
-
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//single-product',
 			postType: 'wp_template',

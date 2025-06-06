@@ -3,6 +3,8 @@
  */
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon, button } from '@wordpress/icons';
+import { isBoolean } from '@woocommerce/types';
+import { getSettingWithCoercion } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -10,9 +12,10 @@ import { Icon, button } from '@wordpress/icons';
 import metadata from './block.json';
 import AttributeItemTemplateEdit from './edit';
 import AttributeItemTemplateSave from './save';
-import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../../utils';
 
-if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
+const isBlockTheme = getSettingWithCoercion( 'isBlockTheme', false, isBoolean );
+
+if ( isBlockTheme ) {
 	registerBlockType( metadata, {
 		edit: AttributeItemTemplateEdit,
 		attributes: metadata.attributes,

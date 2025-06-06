@@ -7,14 +7,17 @@ import { useBlockProps } from '@wordpress/block-editor';
 import type { BlockConfiguration } from '@wordpress/blocks';
 import { useProductDataContext } from '@woocommerce/shared-context';
 import { Spinner } from '@wordpress/components';
+import { isBoolean } from '@woocommerce/types';
+import { getSettingWithCoercion } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import metadata from './block.json';
-import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../../utils';
 
-if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
+const isBlockTheme = getSettingWithCoercion( 'isBlockTheme', false, isBoolean );
+
+if ( isBlockTheme ) {
 	registerBlockType( metadata.name, {
 		...metadata,
 		edit: function Edit() {

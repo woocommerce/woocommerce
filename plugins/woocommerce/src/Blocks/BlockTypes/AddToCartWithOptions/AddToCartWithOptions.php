@@ -34,9 +34,9 @@ class AddToCartWithOptions extends AbstractBlock {
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
-		$this->asset_data_registry->add( 'isBlockifiedAddToCart', Features::is_enabled( 'blockified-add-to-cart' ) );
 		$this->asset_data_registry->add( 'productTypes', wc_get_product_types() );
 		$this->asset_data_registry->add( 'addToCartWithOptionsTemplatePartIds', $this->get_template_part_ids() );
+		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
 	}
 
 	/**

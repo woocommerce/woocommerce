@@ -5,6 +5,8 @@ import { button } from '@wordpress/icons';
 import { getPlugin, registerPlugin } from '@wordpress/plugins';
 import { registerProductBlockType } from '@woocommerce/atomic-utils';
 import type { BlockConfiguration } from '@wordpress/blocks';
+import { isBoolean } from '@woocommerce/types';
+import { getSettingWithCoercion } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -12,11 +14,12 @@ import type { BlockConfiguration } from '@wordpress/blocks';
 import ProductTypeSelectorPlugin from './plugins';
 import metadata from './block.json';
 import AddToCartOptionsEdit from './edit';
-import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from './utils';
 import '../../base/components/quantity-selector/style.scss';
 import type { Attributes } from './types';
 
-if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
+const isBlockTheme = getSettingWithCoercion( 'isBlockTheme', false, isBoolean );
+
+if ( isBlockTheme ) {
 	// Register a plugin that adds a product type selector to the template sidebar.
 	const PLUGIN_NAME = 'document-settings-template-selector-pane';
 	if ( ! getPlugin( PLUGIN_NAME ) ) {

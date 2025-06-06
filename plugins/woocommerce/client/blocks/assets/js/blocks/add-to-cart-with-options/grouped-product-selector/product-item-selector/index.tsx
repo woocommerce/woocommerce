@@ -3,16 +3,19 @@
  */
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon, button } from '@wordpress/icons';
+import { isBoolean } from '@woocommerce/types';
+import { getSettingWithCoercion } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import metadata from './block.json';
 import ProductItemCTAEdit from './edit';
-import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../../utils';
 import './style.scss';
 
-if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
+const isBlockTheme = getSettingWithCoercion( 'isBlockTheme', false, isBoolean );
+
+if ( isBlockTheme ) {
 	registerBlockType( metadata, {
 		edit: ProductItemCTAEdit,
 		attributes: metadata.attributes,
