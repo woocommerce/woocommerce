@@ -14,3 +14,13 @@ interface Window {
 		};
 	};
 }
+
+interface EntityWooCommerceData {
+	sender_settings?: {
+		from_address?: string;
+		from_name?: string;
+	};
+	recipient?: string;
+	cc?: string;
+	bcc?: string;
+}

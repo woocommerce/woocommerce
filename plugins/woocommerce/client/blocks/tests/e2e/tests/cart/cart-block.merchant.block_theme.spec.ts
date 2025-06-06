@@ -11,7 +11,6 @@ const blockData: BlockData = {
 		editor: {
 			block: '.wp-block-woocommerce-cart',
 			insertButton: "//button//span[text()='Cart']",
-			shippingBlock: '.wp-block-woocommerce-shipping-calculator',
 		},
 		frontend: {
 			block: '.wp-block-woocommerce-cart',

@@ -3,21 +3,20 @@
  */
 import {
 	OfflinePaymentMethodProvider,
-	PaymentProvider,
-	PaymentProviderType,
-	SuggestedPaymentExtension,
-	SuggestedPaymentExtensionCategory,
+	PaymentsProvider,
+	PaymentsProviderType,
+	SuggestedPaymentsExtension,
+	SuggestedPaymentsExtensionCategory,
 } from '../types';
 
-export const providersStub: PaymentProvider[] = [
+export const providersStub: PaymentsProvider[] = [
 	{
 		id: '_wc_pes_paypal_full_stack',
 		_order: 2,
-		_type: PaymentProviderType.Suggestion,
+		_type: PaymentsProviderType.Suggestion,
 		title: 'PayPal Payments',
 		description:
 			'Safe and secure payments using credit cards or your customer&#039;s PayPal account.',
-		short_description: '',
 		image: 'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/onboarding/paypal.png',
 		icon: 'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/payment_methods/72x72/paypal.png',
 		links: [
@@ -41,6 +40,9 @@ export const providersStub: PaymentProvider[] = [
 			file: 'woocommerce-paypal-payments/woocommerce-paypal-payments',
 			status: 'installed',
 		},
+		onboarding: {
+			type: 'external',
+		},
 		_links: {
 			hide: {
 				href: 'http://localhost:8082/wp-json/wc-admin/settings/payments/suggestion/paypal_full_stack/hide',
@@ -50,7 +52,7 @@ export const providersStub: PaymentProvider[] = [
 	{
 		id: 'woocommerce_payments',
 		_order: 2,
-		_type: PaymentProviderType.Gateway,
+		_type: PaymentsProviderType.Gateway,
 		title: 'WooPayments',
 		description:
 			'WooPayments gives your store flexibility to accept credit cards, debit cards, and Apple Pay. Enable popular local payment methods and other digital wallets like Google Pay to give customers even more choice.',
@@ -143,11 +145,12 @@ export const providersStub: PaymentProvider[] = [
 			file: 'woocommerce-payments/woocommerce-payments',
 			status: 'active',
 		},
+		_links: {},
 	},
 	{
 		id: '_wc_offline_payment_methods_group',
 		_order: 3,
-		_type: PaymentProviderType.OfflinePmsGroup,
+		_type: PaymentsProviderType.OfflinePmsGroup,
 		title: 'Offline Payment Methods',
 		description: 'Allow shoppers to pay offline.',
 		plugin: {
@@ -157,13 +160,14 @@ export const providersStub: PaymentProvider[] = [
 			status: 'active',
 		},
 		icon: 'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/payment_methods/cod.svg',
+		_links: {},
 	},
 ];
 
 export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 	{
 		id: 'bacs',
-		_type: PaymentProviderType.OfflinePm,
+		_type: PaymentsProviderType.OfflinePm,
 		_order: 999,
 		title: 'Direct bank transfer',
 		description:
@@ -202,10 +206,11 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 			file: 'woocommerce/woocommerce',
 			status: 'active',
 		},
+		_links: {},
 	},
 	{
 		id: 'cheque',
-		_type: PaymentProviderType.OfflinePm,
+		_type: PaymentsProviderType.OfflinePm,
 		_order: 1000,
 		title: 'Cheque payments',
 		description:
@@ -244,10 +249,11 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 			file: 'woocommerce/woocommerce',
 			status: 'active',
 		},
+		_links: {},
 	},
 	{
 		id: 'cod',
-		_type: PaymentProviderType.OfflinePm,
+		_type: PaymentsProviderType.OfflinePm,
 		_order: 1001,
 		title: 'Cash on delivery',
 		description:
@@ -286,10 +292,11 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 			file: 'woocommerce/woocommerce',
 			status: 'active',
 		},
+		_links: {},
 	},
 ];
 
-export const suggestionsStub: SuggestedPaymentExtension[] = [
+export const suggestionsStub: SuggestedPaymentsExtension[] = [
 	{
 		id: 'airwallex',
 		_priority: 40,
@@ -330,6 +337,7 @@ export const suggestionsStub: SuggestedPaymentExtension[] = [
 		],
 		tags: [],
 		category: 'psp',
+		_links: {},
 	},
 	{
 		id: 'square_in_person',
@@ -363,10 +371,11 @@ export const suggestionsStub: SuggestedPaymentExtension[] = [
 		],
 		tags: [ 'made_in_woo' ],
 		category: 'psp',
+		_links: {},
 	},
 ];
 
-export const suggestionCategoriesStub: SuggestedPaymentExtensionCategory[] = [
+export const suggestionCategoriesStub: SuggestedPaymentsExtensionCategory[] = [
 	{
 		id: 'express_checkout',
 		_priority: 10,

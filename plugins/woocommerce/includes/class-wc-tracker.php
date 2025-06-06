@@ -11,6 +11,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\{ FeaturesUtil, OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Internal\Utilities\BlocksUtil;
@@ -1473,7 +1474,7 @@ class WC_Tracker {
 	 * @return array Array with counts of enabled and disabled emails.
 	 */
 	private static function get_core_email_status_counts() {
-		$core_emails = self::get_core_emails();
+		$core_emails = EmailImprovements::get_core_emails();
 		$enabled     = 0;
 		$disabled    = 0;
 
@@ -1498,31 +1499,10 @@ class WC_Tracker {
 	 * @return array Array with count of core email overrides and the templates that are overriden.
 	 */
 	public static function get_core_email_overrides( $template_overrides ): array {
-		$core_emails            = self::get_core_emails();
-		$core_email_templates   = array_map(
-			function ( $email ) {
-				return basename( $email->template_html );
-			},
-			$core_emails
-		);
-		$intersecting_templates = array_intersect( $core_email_templates, $template_overrides );
+		$email_template_overrides = EmailImprovements::get_core_email_overrides( $template_overrides );
 		return array(
-			'count'     => count( $intersecting_templates ),
-			'templates' => $intersecting_templates,
-		);
-	}
-
-	/**
-	 * Get all core emails.
-	 *
-	 * @return array Core emails.
-	 */
-	private static function get_core_emails() {
-		return array_filter(
-			WC()->mailer()->get_emails(),
-			function ( $email ) {
-				return strpos( get_class( $email ), 'WC_Email_' ) === 0;
-			}
+			'count'     => count( $email_template_overrides ),
+			'templates' => $email_template_overrides,
 		);
 	}
 }
