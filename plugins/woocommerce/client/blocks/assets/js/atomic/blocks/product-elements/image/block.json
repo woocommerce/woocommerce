@@ -24,7 +24,6 @@
 			"clientNavigation": true
 		},
 		"html": false,
-		"layout": true,
 		"__experimentalBorder": {
 			"radius": true,
 			"__experimentalSkipSerialization": true
@@ -34,7 +33,6 @@
 			"__experimentalSkipSerialization": true
 		},
 		"spacing": {
-			"blockGap": true,
 			"margin": true,
 			"padding": true
 		},
