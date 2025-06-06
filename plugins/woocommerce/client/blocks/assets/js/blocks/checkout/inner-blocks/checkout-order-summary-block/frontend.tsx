@@ -95,7 +95,8 @@ const FrontendBlock = ( {
 					<OrderMetaSlotFill />
 				</div>
 			</div>
-
+			{ /* Render a second instance of the order summary in a different location for smaller screens
+			This prevents the fill from appearing on desktop before width data is available */ }
 			{ ( isMedium || isSmall || isMobile ) && (
 				<CheckoutOrderSummaryFill>
 					<div
