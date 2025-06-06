@@ -3,7 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
-use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestions as ExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
 use Exception;
 
 defined( 'ABSPATH' ) || exit;
@@ -27,9 +27,9 @@ class Payments {
 	/**
 	 * The payment providers service.
 	 *
-	 * @var PaymentProviders
+	 * @var PaymentsProviders
 	 */
-	private PaymentProviders $providers;
+	private PaymentsProviders $providers;
 
 	/**
 	 * The payment extension suggestions service.
@@ -41,12 +41,12 @@ class Payments {
 	/**
 	 * Initialize the class instance.
 	 *
-	 * @param PaymentProviders     $payment_providers             The payment providers service.
+	 * @param PaymentsProviders    $payment_providers             The payment providers service.
 	 * @param ExtensionSuggestions $payment_extension_suggestions The payment extension suggestions service.
 	 *
 	 * @internal
 	 */
-	final public function init( PaymentProviders $payment_providers, ExtensionSuggestions $payment_extension_suggestions ): void {
+	final public function init( PaymentsProviders $payment_providers, ExtensionSuggestions $payment_extension_suggestions ): void {
 		$this->providers             = $payment_providers;
 		$this->extension_suggestions = $payment_extension_suggestions;
 	}
@@ -102,7 +102,7 @@ class Payments {
 				// Change suggestion details to align it with a regular payment gateway.
 				$suggestion['_suggestion_id'] = $suggestion['id'];
 				$suggestion['id']             = $suggestion_order_map_id;
-				$suggestion['_type']          = PaymentProviders::TYPE_SUGGESTION;
+				$suggestion['_type']          = PaymentsProviders::TYPE_SUGGESTION;
 				$suggestion['_order']         = $providers_order_map[ $suggestion_order_map_id ];
 				unset( $suggestion['_priority'] );
 
@@ -125,17 +125,17 @@ class Payments {
 		}
 
 		// Add offline payment methods group entry if we have offline payment methods.
-		if ( in_array( PaymentProviders::TYPE_OFFLINE_PM, array_column( $payment_providers, '_type' ), true ) ) {
+		if ( in_array( PaymentsProviders::TYPE_OFFLINE_PM, array_column( $payment_providers, '_type' ), true ) ) {
 			// Determine the item's order value.
 			// If we don't have an order for it, add it to the end.
-			if ( ! isset( $providers_order_map[ PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP ] ) ) {
-				$providers_order_map = Utils::order_map_add_at_order( $providers_order_map, PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP, count( $payment_providers ) );
+			if ( ! isset( $providers_order_map[ PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP ] ) ) {
+				$providers_order_map = Utils::order_map_add_at_order( $providers_order_map, PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, count( $payment_providers ) );
 			}
 
 			$payment_providers[] = array(
-				'id'          => PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
-				'_type'       => PaymentProviders::TYPE_OFFLINE_PMS_GROUP,
-				'_order'      => $providers_order_map[ PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP ],
+				'id'          => PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+				'_type'       => PaymentsProviders::TYPE_OFFLINE_PMS_GROUP,
+				'_order'      => $providers_order_map[ PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP ],
 				'title'       => esc_html__( 'Take offline payments', 'woocommerce' ),
 				'description' => esc_html__( 'Accept payments offline using multiple different methods. These can also be used to test purchases.', 'woocommerce' ),
 				'icon'        => plugins_url( 'assets/images/payment_methods/cod.svg', WC_PLUGIN_FILE ),
@@ -144,7 +144,7 @@ class Payments {
 					'_type'  => 'wporg',
 					'slug'   => 'woocommerce',
 					'file'   => '', // This pseudo-provider should have no use for the plugin file.
-					'status' => PaymentProviders::EXTENSION_ACTIVE,
+					'status' => PaymentsProviders::EXTENSION_ACTIVE,
 				),
 				'management'  => array(
 					'_links' => array(

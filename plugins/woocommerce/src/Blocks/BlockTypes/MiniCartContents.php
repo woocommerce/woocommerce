@@ -64,14 +64,6 @@ class MiniCartContents extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render_experimental_iapi_mini_cart_contents( $attributes, $content, $block ) {
-		// As a temporary workaround we remove the wrapping div from the template.
-		$content = preg_replace(
-			'~<div([^>]*\bclass=["\'][^"\']*\bwp-block-woocommerce-mini-cart-contents\b[^"\']*["\'][^>]*)>~',
-			'',
-			$content,
-			1
-		);
-
 		ob_start();
 		?>
 		<div data-wp-interactive="woocommerce/mini-cart-contents" class="wp-block-woocommerce-mini-cart-contents">
