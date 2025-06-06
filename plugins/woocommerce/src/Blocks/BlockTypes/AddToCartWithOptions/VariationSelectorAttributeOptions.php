@@ -46,7 +46,13 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	 * @return string Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ): string {
-		if ( empty( $block->context ) ) {
+		if (
+			! isset(
+				$block->context['woocommerce/attributeName'],
+				$block->context['woocommerce/attributeId'],
+				$block->context['woocommerce/attributeTerms']
+			)
+		) {
 			return '';
 		}
 
