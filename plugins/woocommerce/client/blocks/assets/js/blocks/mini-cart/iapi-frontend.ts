@@ -9,6 +9,10 @@ import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart'
  * Internal dependencies
  */
 import setStyles from './utils/set-styles';
+import {
+	formatPriceWithCurrency,
+	normalizeCurrencyResponse,
+} from '../../../../packages/prices/utils/currency';
 
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
@@ -117,6 +121,34 @@ store(
 					cartItemsCount === 1 ? singularItemsText : pluralItemsText;
 
 				return template.replace( '%d', cartItemsCount.toString() );
+			},
+		},
+	},
+	{ lock: true }
+);
+
+store(
+	'woocommerce/mini-cart-footer-block',
+	{
+		state: {
+			get formattedSubtotal(): string {
+				const { displayCartPriceIncludingTax } = getConfig(
+					'woocommerce/mini-cart-footer-block'
+				);
+
+				const { currency } = getConfig( 'woocommerce' );
+
+				const subtotal = displayCartPriceIncludingTax
+					? parseInt( wooStoreState.cart.totals.total_items, 10 ) +
+					  parseInt( wooStoreState.cart.totals.total_items_tax, 10 )
+					: parseInt( wooStoreState.cart.totals.total_items, 10 );
+
+				const normalizedCurrency = normalizeCurrencyResponse(
+					wooStoreState.cart.totals,
+					currency
+				);
+
+				return formatPriceWithCurrency( subtotal, normalizedCurrency );
 			},
 		},
 	},

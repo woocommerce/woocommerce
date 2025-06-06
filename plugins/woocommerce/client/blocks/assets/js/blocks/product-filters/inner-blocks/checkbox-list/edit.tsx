@@ -38,12 +38,15 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 		setOptionElementSelected,
 		optionElement,
 		setOptionElement,
+		labelElement,
+		setLabelElement,
 	} = props;
 
 	const {
 		customOptionElementBorder,
 		customOptionElementSelected,
 		customOptionElement,
+		customLabelElement,
 	} = attributes;
 	const { filterData } = context;
 	const { isLoading, items, showCounts } = filterData;
@@ -138,6 +141,25 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 						__experimentalIsRenderedInSidebar
 						settings={ [
 							{
+								label: __( 'Label', 'woocommerce' ),
+								colorValue:
+									labelElement.color || customLabelElement,
+								isShownByDefault: true,
+								enableAlpha: true,
+								onColorChange: ( colorValue: string ) => {
+									setLabelElement( colorValue );
+									setAttributes( {
+										customLabelElement: colorValue,
+									} );
+								},
+								resetAllFilter: () => {
+									setLabelElement( '' );
+									setAttributes( {
+										customLabelElement: '',
+									} );
+								},
+							},
+							{
 								label: __(
 									'Option Element Border',
 									'woocommerce'
@@ -216,4 +238,5 @@ export default withColors( {
 	optionElementBorder: 'option-element-border',
 	optionElementSelected: 'option-element-border',
 	optionElement: 'option-element',
+	labelElement: 'label-element',
 } )( CheckboxListEdit );
