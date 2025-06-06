@@ -161,8 +161,9 @@ class ProductImage extends AbstractBlock {
 		$featured_image_id   = (int) $product->get_image_id();
 		$gallery_image_ids   = $product->get_gallery_image_ids();
 		$available_image_ids = array_merge( [ $featured_image_id ], $gallery_image_ids );
+		$provided_image_id_is_valid = $image_id && in_array( $image_id, $available_image_ids, true );
 
-		$target_image_id = $image_id && in_array( $image_id, $available_image_ids, true ) ? $image_id : $featured_image_id;
+		$target_image_id = $provided_image_id_is_valid ? $image_id : $featured_image_id;
 
 		if ( ! $target_image_id ) {
 			return wc_placeholder_img( $image_size, array( 'style' => $image_style ) );
@@ -178,7 +179,7 @@ class ProductImage extends AbstractBlock {
 			'title'       => $title,
 		);
 
-		return $image_id ? wp_get_attachment_image( $image_id, $image_size, false, $attr ) : $product->get_image( $image_size, $attr );
+		return $provided_image_id_is_valid ? wp_get_attachment_image( $image_id, $image_size, false, $attr ) : $product->get_image( $image_size, $attr );
 	}
 
 	/**
