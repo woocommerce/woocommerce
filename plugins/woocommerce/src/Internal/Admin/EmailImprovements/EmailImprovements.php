@@ -163,7 +163,7 @@ class EmailImprovements {
 	 */
 	public static function get_core_emails() {
 		return array_filter(
-			WC()->mailer()->get_emails(),
+			self::get_emails(),
 			function ( $email ) {
 				return strpos( get_class( $email ), 'WC_Email_' ) === 0 && is_string( $email->template_html );
 			}
@@ -195,7 +195,7 @@ class EmailImprovements {
 	 */
 	public static function get_enabled_emails() {
 		$enabled_emails = array_filter(
-			WC()->mailer()->get_emails(),
+			self::get_emails(),
 			function ( $email ) {
 				return $email->is_enabled() && ! $email->is_manual();
 			}
@@ -210,7 +210,7 @@ class EmailImprovements {
 	 */
 	public static function get_disabled_emails() {
 		$disabled_emails = array_filter(
-			WC()->mailer()->get_emails(),
+			self::get_emails(),
 			function ( $email ) {
 				return ! $email->is_enabled() && ! $email->is_manual();
 			}
@@ -225,7 +225,7 @@ class EmailImprovements {
 	 */
 	public static function get_enabled_or_manual_emails_with_cc_or_bcc() {
 		$enabled_or_manual_emails = array_filter(
-			WC()->mailer()->get_emails(),
+			self::get_emails(),
 			function ( $email ) {
 				return $email->is_enabled() || $email->is_manual();
 			}
@@ -246,6 +246,19 @@ class EmailImprovements {
 		return array(
 			'ccs'  => $email_ids_with_cc,
 			'bccs' => $email_ids_with_bcc,
+		);
+	}
+
+	/**
+	 * A helper method to filter out non-WC_Email objects.
+	 *
+	 * @return \WC_Email[] All WC_Email objects.
+	 */
+	private static function get_emails() {
+		$emails = WC()->mailer()->get_emails();
+		return array_filter(
+			$emails,
+			fn( $email ) => is_object( $email ) && $email instanceof \WC_Email
 		);
 	}
 }
