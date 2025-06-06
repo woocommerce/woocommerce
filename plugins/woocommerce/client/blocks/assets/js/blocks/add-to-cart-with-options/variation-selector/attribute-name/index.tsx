@@ -10,6 +10,7 @@ import { Icon, heading } from '@wordpress/icons';
 import metadata from './block.json';
 import AttributeNameEdit from './edit';
 import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../../utils';
+import './style.scss';
 
 if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
 	registerBlockType( metadata, {
