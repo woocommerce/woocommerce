@@ -944,7 +944,8 @@ class PaymentsProviders {
 	 * @return void
 	 */
 	public function reset_memo(): void {
-		$this->payment_gateways_memo = null;
+		$this->payment_gateways_memo             = null;
+		$this->payment_gateways_for_display_memo = null;
 	}
 
 	/**
