@@ -1,6 +1,6 @@
 ---
 post_title: How to Add Additional Fields
-sidebar_label: Additional Fields in Checkout
+sidebar_label: How to add additional fields in checkout
 ---
 
 # How to Add Additional Fields to the WooCommerce Checkout Block
