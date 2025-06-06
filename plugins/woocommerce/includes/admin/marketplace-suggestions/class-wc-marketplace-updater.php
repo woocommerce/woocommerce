@@ -57,6 +57,8 @@ class WC_Marketplace_Updater {
 			$url = add_query_arg( $request_data, $url );
 		}
 
+		$url = add_query_arg( 'no_cache', 1, $url );
+
 		$request = wp_safe_remote_get(
 			$url,
 			array(
