@@ -35,7 +35,7 @@ interface GroupedCartItem {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: wooState } = store< SingleProductTemplateStore >(
+const { state: wooState } = store< WooCommerce & SingleProductTemplateStore >(
 	'woocommerce',
 	{},
 	{ lock: universalLock }
