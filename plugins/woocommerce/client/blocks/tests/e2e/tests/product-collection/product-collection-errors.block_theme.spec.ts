@@ -1,43 +1,85 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-utils';
+import { Page } from '@playwright/test';
+import { test as base, expect, Editor, wpCLI } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
-import ProductCollectionPage from './product-collection.page';
 
-const test = base.extend< { pageObject: ProductCollectionPage } >( {
-	pageObject: async ( { page, admin, editor }, use ) => {
-		const pageObject = new ProductCollectionPage( {
-			page,
-			admin,
-			editor,
-		} );
-		await use( pageObject );
+class BlockUtils {
+	editor: Editor;
+	page: Page;
+
+	constructor( { editor, page }: { editor: Editor; page: Page } ) {
+		this.editor = editor;
+		this.page = page;
+	}
+
+	/**
+	 * Configures the Single Product Block in the editor.
+	 */
+	async configureSingleProductBlock( name?: string ) {
+		const singleProductBlock = await this.editor.getBlockByName(
+			'woocommerce/single-product'
+		);
+
+		if ( name ) {
+			await singleProductBlock
+				.locator( 'input[type="search"]' )
+				.fill( name );
+			await singleProductBlock.getByText( 'Search' ).click();
+			await singleProductBlock.getByText( name ).click();
+		} else {
+			await singleProductBlock
+				.locator( 'input[type="radio"]' )
+				.nth( 0 )
+				.click();
+		}
+
+		await singleProductBlock.getByText( 'Done' ).click();
+	}
+
+	async createManagedStockProduct() {
+		await wpCLI(
+			'wc product create --name="Managed Stock" --regular_price=10 --manage_stock=true --stock_quantity=1 --user=admin'
+		);
+	}
+}
+
+const test = base.extend< { blockUtils: BlockUtils } >( {
+	blockUtils: async ( { editor, page }, use ) => {
+		await use( new BlockUtils( { editor, page } ) );
 	},
 } );
 
-test.describe( 'Product Collection: Collections', () => {
-	test( 'displays error notice when adding out-of-stock product via Product Collection block', async ( {
+test.describe( 'Product Page: error notices when adding out-of-stock products', () => {
+	test( 'displays error notice when attempting to add product beyond stock limit', async ( {
+		admin,
+		editor,
+		blockUtils,
 		page,
-		pageObject,
 	} ) => {
-		await pageObject.createNewPostAndInsertBlock( 'productCatalog' );
+		await blockUtils.createManagedStockProduct();
+		await admin.createNewPost();
+		await editor.insertBlock( { name: 'woocommerce/single-product' } );
 
-		await pageObject.setFilterComboboxValue( 'Stock status', [
-			'Out of stock',
-		] );
+		const productName = 'Managed Stock';
 
-		await expect( pageObject.productTitles ).toHaveText( [
-			'T-Shirt with Logo',
-		] );
+		await blockUtils.configureSingleProductBlock( productName );
 
-		await pageObject.publishAndGoToFrontend();
+		await editor.publishAndVisitPost();
 
-		await page.getByRole( 'link', { name: 'Read More' } ).click();
+		// Add to cart once — succeeds.
+		await page.click( 'text=Add to cart' );
 
-		await page.addToCart( 'T-Shirt with Logo' );
+		// Add to cart again — triggers out-of-stock error.
+		await page.click( 'text=Add to cart' );
+
+		// Verify error notice is displayed.
+		await expect(
+			page.locator( '.wc-block-components-notice-banner.is-error' )
+		).toBeVisible();
 	} );
 } );
