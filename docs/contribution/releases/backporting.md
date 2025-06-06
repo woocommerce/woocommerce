@@ -38,8 +38,8 @@ Before cutting a new RC, you should manually backport any PRs with the respectiv
 
 1. Check out the release branch `git checkout release/x.y`.
 2. Find all the [PRs labeled to be cherry picked](https://github.com/woocommerce/woocommerce/pulls?q=is%3Apr+label%3A%22cherry+pick+to+frozen+release%22) to the release branch.  Filter by the current release milestone (`X.Y.0`) to limit to PRs relevant to this release.
-2. Cherry-pick each PR (in chronological order) using `git cherry-pick [SHA]`.
-3. After cherry-picking all PRs, push to the release branch using `git push`.
-4. Remove the `cherry pick to frozen release` label and update the milestone to the current release for all cherry-picked PRs.
+3. Cherry-pick each PR (in chronological order) using `git cherry-pick [SHA]`.
+4. After cherry-picking all PRs, push to the release branch using `git push`.
+5. Remove the `cherry pick to frozen release` label and update the milestone to the current release for all cherry-picked PRs.
 
 The SHA for a pull request can be found in the pull request activity once the PR has been merged.
