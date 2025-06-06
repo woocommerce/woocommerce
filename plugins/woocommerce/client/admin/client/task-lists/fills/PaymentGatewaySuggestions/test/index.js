@@ -400,9 +400,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 		);
 
 		fireEvent.click( screen.getByText( 'Other payment providers' ) );
-		fireEvent.click(
-			screen.getByText( 'The WooCommerce Marketplace' )
-		);
+		fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
 		expect(
 			recordEvent.mock.calls[ recordEvent.mock.calls.length - 1 ]
 		).toEqual( [ 'tasklist_payment_see_more', {} ] );
