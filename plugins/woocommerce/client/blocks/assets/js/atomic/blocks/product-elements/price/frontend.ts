@@ -1,13 +1,10 @@
 /**
  * External dependencies
  */
+import { sanitize } from 'dompurify';
 import { getContext, getElement, store } from '@wordpress/interactivity';
 import type { ProductData } from '@woocommerce/type-defs/product';
 import type { SingleProductTemplateStore } from '@woocommerce/base-stores/single-product-template';
-
-/**
- * Internal dependencies
- */
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -18,6 +15,29 @@ const { state: wooState } = store< SingleProductTemplateStore >(
 	{},
 	{ lock: universalLock }
 );
+
+const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br', 'span' ];
+const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download' ];
+
+const getProductData = ( key: keyof ProductData ) => {
+	const singleProductContext = getContext< {
+		productData: ProductData;
+	} >( 'woocommerce/single-product' );
+
+	if ( singleProductContext?.productData[ key ] ) {
+		return sanitize( singleProductContext.productData[ key ], {
+			ALLOWED_TAGS,
+			ALLOWED_ATTR,
+		} );
+	} else if ( wooState?.singleProductTemplate.productData[ key ] ) {
+		return sanitize( wooState.singleProductTemplate.productData[ key ], {
+			ALLOWED_TAGS,
+			ALLOWED_ATTR,
+		} );
+	}
+
+	return '';
+};
 
 const productPriceStore = store(
 	'woocommerce/product-price',
@@ -30,18 +50,10 @@ const productPriceStore = store(
 					return;
 				}
 
-				const singleProductContext = getContext< {
-					productData: ProductData;
-				} >( 'woocommerce/single-product' );
+				const newPrice = getProductData( 'price_html' );
 
-				if ( singleProductContext?.productData?.price_html ) {
-					element.ref.innerHTML =
-						singleProductContext.productData.price_html;
-				} else if (
-					wooState?.singleProductTemplate.productData?.price_html
-				) {
-					element.ref.innerHTML =
-						wooState.singleProductTemplate.productData.price_html;
+				if ( newPrice ) {
+					element.ref.innerHTML = newPrice;
 				}
 			},
 		},
