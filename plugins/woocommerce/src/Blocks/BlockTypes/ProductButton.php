@@ -101,7 +101,7 @@ class ProductButton extends AbstractBlock {
 		wp_interactivity_state(
 			'woocommerce/product-button',
 			array(
-				'addToCartText' => function () use ( $product ) {
+				'addToCartText'        => function () use ( $product ) {
 					$context = wp_interactivity_get_context();
 					$quantity = $context['tempQuantity'];
 					$add_to_cart_text = $context['addToCartText'];
@@ -112,10 +112,10 @@ class ProductButton extends AbstractBlock {
 						$quantity
 					) : $add_to_cart_text;
 				},
-				'inTheCartText' => $this->get_in_the_cart_text( $product ),
+				'inTheCartText'        => $this->get_in_the_cart_text( $product ),
 				'inTheCartTextGrouped' => __( 'Added to cart', 'woocommerce' ),
-				'noticeId'      => '',
-				'hasPressedButton' => false,
+				'noticeId'             => '',
+				'hasPressedButton'     => false,
 			)
 		);
 
