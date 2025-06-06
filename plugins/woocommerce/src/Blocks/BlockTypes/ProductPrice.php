@@ -73,10 +73,23 @@ class ProductPrice extends AbstractBlock {
 			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
 
+			$is_descendant_of_product_collection = isset( $block->context['queryId'] );
+
+			$wrapper_attributes =
+				array(
+					'class' => 'wp-block-woocommerce-product-price',
+
+				);
+			if ( ! $is_descendant_of_product_collection ) {
+				$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-price';
+				$wrapper_attributes['data-wp-watch']       = 'callbacks.setNewPrice';
+			}
+
 			return sprintf(
-				'<div data-wp-interactive="woocommerce/product-price" data-wp-watch="callbacks.setNewPrice" class="wp-block-woocommerce-product-price"><div class="wc-block-components-product-price wc-block-grid__product-price %1$s %2$s" style="%3$s">
-					%4$s
+				'<div %1$s><div class="wc-block-components-product-price wc-block-grid__product-price %2$s %3$s" style="%4$s">
+					%5$s
 				</div></div>',
+				get_block_wrapper_attributes( $wrapper_attributes ),
 				esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
 				esc_attr( $styles_and_classes['classes'] ),
 				esc_attr( $styles_and_classes['styles'] ?? '' ),
