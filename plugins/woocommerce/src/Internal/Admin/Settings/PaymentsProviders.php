@@ -174,7 +174,7 @@ class PaymentsProviders {
 			// Remove "shell" gateways that are not intended for display.
 			// We consider a gateway to be a "shell" if it has no WC admin title or description.
 			$grouped_payment_gateways = $this->group_gateways_by_extension( $payment_gateways );
-			$payment_gateways = array_filter(
+			$payment_gateways         = array_filter(
 				$payment_gateways,
 				function ( $gateway ) use ( $grouped_payment_gateways ) {
 					// If the gateway is a shell, we only remove it if there are other, non-shell gateways from that extension.
