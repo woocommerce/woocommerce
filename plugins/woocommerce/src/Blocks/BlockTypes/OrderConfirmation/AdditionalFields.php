@@ -37,6 +37,12 @@ class AdditionalFields extends AbstractOrderConfirmationBlock {
 				array_merge(
 					$controller->get_order_additional_fields_with_values( $order, 'contact', 'other', 'view' ),
 					$controller->get_order_additional_fields_with_values( $order, 'order', 'other', 'view' ),
+				),
+				array(
+					'caller'     => 'AdditionalFields::render_content',
+					'order'      => $order,
+					'permission' => $permission,
+					'attributes' => $attributes,
 				)
 			)
 		);
