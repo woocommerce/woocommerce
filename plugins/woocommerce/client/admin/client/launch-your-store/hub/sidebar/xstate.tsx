@@ -29,6 +29,7 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { LaunchYourStoreHubSidebar } from './components/launch-store-hub';
+import { PaymentsSidebar } from './components/payments-sidebar';
 import type {
 	LaunchYourStoreComponentProps,
 	LaunchYourStoreQueryParams,
@@ -70,7 +71,10 @@ export type SidebarMachineEvents =
 	| { type: 'OPEN_WC_ADMIN_URL_IN_CONTENT_AREA'; url: string }
 	| { type: 'LAUNCH_STORE'; removeTestOrders: boolean }
 	| { type: 'LAUNCH_STORE_SUCCESS' }
-	| { type: 'POP_BROWSER_STACK' };
+	| { type: 'SHOW_PAYMENTS' }
+	| { type: 'POP_BROWSER_STACK' }
+	| { type: 'RETURN_FROM_PAYMENTS' }
+	| { type: 'REFRESH_TASKLIST' };
 
 const sidebarQueryParamListener = fromCallback( ( { sendBack } ) => {
 	return createQueryParamsListener( 'sidebar', sendBack );
@@ -253,12 +257,28 @@ export const sidebarMachine = setup( {
 			( { context } ) => context.mainContentMachineRef,
 			{ type: 'SHOW_LOADING' }
 		),
+		showSitePreview: sendTo(
+			( { context } ) => context.mainContentMachineRef,
+			{ type: 'EXTERNAL_URL_UPDATE' }
+		),
 		updateQueryParams: ( _, params: LaunchYourStoreQueryParams ) => {
 			updateQueryParams< LaunchYourStoreQueryParams >( params );
 		},
-		taskClicked: ( { event } ) => {
+		taskClicked: ( { event, self } ) => {
 			if ( event.type === 'TASK_CLICKED' ) {
-				taskClickedAction( event );
+				const result = taskClickedAction( event );
+
+				// If taskClickedAction returns an event object, handle it
+				if (
+					result &&
+					typeof result === 'object' &&
+					'type' in result
+				) {
+					// If SHOW_PAYMENTS is returned, transition to the payments sub-steps
+					if ( result.type === 'SHOW_PAYMENTS' ) {
+						self.send( { type: 'SHOW_PAYMENTS' } );
+					}
+				}
 			}
 		},
 		openWcAdminUrl: ( { event } ) => {
@@ -286,6 +306,19 @@ export const sidebarMachine = setup( {
 				'launch_your_store_hub_store_launch_cached_content_detected'
 			);
 		},
+		showPaymentsContent: sendTo(
+			( { context } ) => context.mainContentMachineRef,
+			{ type: 'SHOW_PAYMENTS' }
+		),
+		triggerTasklistRefresh: ( { self } ) => {
+			// Send refresh event to self to trigger background data refresh
+			self.send( { type: 'REFRESH_TASKLIST' } );
+		},
+		navigateToWcAdmin: () => {
+			// Navigate directly to WC Admin home
+			const adminUrl = '/wp-admin/admin.php?page=wc-admin';
+			window.location.href = adminUrl;
+		},
 	},
 	guards: {
 		hasSidebarLocation: (
@@ -294,6 +327,19 @@ export const sidebarMachine = setup( {
 		) => {
 			const { sidebar } = getQuery() as LaunchYourStoreQueryParams;
 			return !! sidebar && sidebar === sidebarLocation;
+		},
+		hasPaymentsContent: () => {
+			const { content } = getQuery() as LaunchYourStoreQueryParams;
+			return content === 'payments';
+		},
+		hasWooPaymentsOnboardingPath: () => {
+			const query = getQuery() as LaunchYourStoreQueryParams & {
+				path?: string;
+			};
+			return (
+				!! query.path &&
+				query.path.includes( '/woopayments/onboarding' )
+			);
 		},
 		hasWooPayments: ( { context } ) => {
 			return !! context.hasWooPayments;
@@ -327,6 +373,14 @@ export const sidebarMachine = setup( {
 	states: {
 		navigate: {
 			always: [
+				{
+					guard: { type: 'hasWooPaymentsOnboardingPath' },
+					target: 'payments',
+				},
+				{
+					guard: { type: 'hasPaymentsContent' },
+					target: 'payments',
+				},
 				{
 					guard: {
 						type: 'hasSidebarLocation',
@@ -413,6 +467,110 @@ export const sidebarMachine = setup( {
 					on: {
 						LAUNCH_STORE: {
 							target: '#storeLaunching',
+						},
+						POP_BROWSER_STACK: {
+							actions: [ 'navigateToWcAdmin' ],
+						},
+						REFRESH_TASKLIST: {
+							// Stay in current state but trigger background refresh
+							target: 'backgroundRefresh',
+						},
+					},
+				},
+				backgroundRefresh: {
+					id: 'backgroundRefresh',
+					tags: 'sidebar-visible',
+					meta: {
+						component: LaunchYourStoreHubSidebar,
+					},
+					invoke: [
+						{
+							src: 'getTasklist',
+							onDone: {
+								actions: assign( {
+									tasklist: ( { event } ) => event.output,
+								} ),
+								target: 'backgroundCheckWooPayments',
+							},
+							onError: {
+								// If refresh fails, just stay in the hub with old data
+								target: 'launchYourStoreHub',
+							},
+						},
+					],
+					on: {
+						LAUNCH_STORE: {
+							target: '#storeLaunching',
+						},
+						POP_BROWSER_STACK: {
+							actions: [ 'navigateToWcAdmin' ],
+						},
+					},
+				},
+				backgroundCheckWooPayments: {
+					tags: 'sidebar-visible',
+					meta: {
+						component: LaunchYourStoreHubSidebar,
+					},
+					invoke: {
+						src: 'getWooPaymentsStatus',
+						onDone: {
+							actions: assign( {
+								hasWooPayments: ( { event } ) => event.output,
+							} ),
+							target: 'backgroundMaybeCountTestOrders',
+						},
+						onError: {
+							target: 'backgroundMaybeCountTestOrders',
+						},
+					},
+					on: {
+						LAUNCH_STORE: {
+							target: '#storeLaunching',
+						},
+						POP_BROWSER_STACK: {
+							actions: [ 'navigateToWcAdmin' ],
+						},
+					},
+				},
+				backgroundMaybeCountTestOrders: {
+					tags: 'sidebar-visible',
+					meta: {
+						component: LaunchYourStoreHubSidebar,
+					},
+					always: [
+						{
+							guard: 'hasWooPayments',
+							target: 'backgroundCountTestOrders',
+						},
+						{
+							target: 'launchYourStoreHub',
+						},
+					],
+				},
+				backgroundCountTestOrders: {
+					tags: 'sidebar-visible',
+					meta: {
+						component: LaunchYourStoreHubSidebar,
+					},
+					invoke: {
+						src: 'getTestOrderCount',
+						onDone: {
+							actions: assign( {
+								testOrderCount: ( { event } ) => event.output,
+							} ),
+							target: 'launchYourStoreHub',
+						},
+						onError: {
+							target: 'launchYourStoreHub',
+						},
+					},
+					on: {
+						LAUNCH_STORE: {
+							target: '#storeLaunching',
+						},
+						POP_BROWSER_STACK: {
+							actions: [ 'navigateToWcAdmin' ],
 						},
 					},
 				},
@@ -518,6 +676,44 @@ export const sidebarMachine = setup( {
 				} ),
 			],
 		},
+		payments: {
+			id: 'payments',
+			meta: {
+				component: PaymentsSidebar,
+			},
+			entry: [
+				'showPaymentsContent',
+				{
+					type: 'updateQueryParams',
+					params: { sidebar: 'hub', content: 'payments' },
+				},
+			],
+			on: {
+				POP_BROWSER_STACK: {
+					actions: [
+						{
+							type: 'navigateToWcAdmin',
+						},
+					],
+				},
+				RETURN_FROM_PAYMENTS: {
+					target: '#launchYourStoreHub',
+					actions: [
+						{
+							type: 'updateQueryParams',
+							params: { sidebar: 'hub', content: 'site-preview' },
+						},
+						// Force the main content to reset completely
+						sendTo(
+							( { context } ) => context.mainContentMachineRef,
+							{ type: 'RETURN_FROM_PAYMENTS' }
+						),
+						// Trigger background refresh of tasklist data
+						'triggerTasklistRefresh',
+					],
+				},
+			},
+		},
 	},
 	on: {
 		EXTERNAL_URL_UPDATE: {
@@ -529,10 +725,10 @@ export const sidebarMachine = setup( {
 		OPEN_WC_ADMIN_URL: {
 			actions: 'openWcAdminUrl',
 		},
-		POP_BROWSER_STACK: {
-			actions: 'windowHistoryBack',
-		},
 		OPEN_WC_ADMIN_URL_IN_CONTENT_AREA: {},
+		SHOW_PAYMENTS: {
+			target: '.payments',
+		},
 	},
 } );
 export const SidebarContainer = ( {

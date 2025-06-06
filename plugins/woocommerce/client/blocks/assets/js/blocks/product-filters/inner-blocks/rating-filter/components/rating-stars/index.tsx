@@ -23,7 +23,7 @@ export type RatingStarsProps = {
 export default function RatingStars( {
 	stars = 5,
 	size = 24,
-	color = 'black',
+	color = 'currentColor',
 	gap = 0,
 }: RatingStarsProps ): JSX.Element {
 	const starPath =
