@@ -84,21 +84,21 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 					</caption>
 					<tbody>
 						<template
-							data-wp-each--cart-item="woocommerce::state.cart.items"
-							data-wp-each-key="state.cartItem.key"
+							data-wp-each--cart-item="state.cartItems"
+							data-wp-each-key="context.cartItem.id"
 						>
 							<tr class="wc-block-cart-items__row" tabindex="-1">
 								<td class="wc-block-cart-item__image" aria-hidden="true">
-									<a data-wp-bind--href="state.cartItem.permalink" tabindex="-1">
+									<a data-wp-bind--href="context.cartItem.permalink" tabindex="-1">
 										<img data-wp-bind--src="state.itemThumbnail" data-wp-bind--alt="state.cartItemName">	
 									</a>									
 								</td>
 								<td class="wc-block-cart-item__product">
 									<div class="wc-block-cart-item__wrap">
-										<a data-wp-text="state.cartItemName" data-wp-bind--href="state.cartItem.permalink" class="wc-block-components-product-name"></a>
+										<a data-wp-text="context.cartItemName" data-wp-bind--href="context.cartItem.permalink" class="wc-block-components-product-name"></a>
 										<div class="wc-block-cart-item__prices">
 											<span class="price wc-block-components-product-price">
-												<span data-wp-text="state.itemPrice" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value">
+												<span data-wp-text="context.itemPrice" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value">
 												</span>
 											</span>
 										</div>
@@ -109,7 +109,7 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 										</div>
 										<div class="wc-block-cart-item__quantity">
 											<div class="wc-block-components-quantity-selector">
-												<input data-wp-bind--aria-label="state.quantityDescriptionLabel" data-wp-bind--value="state.cartItem.quantity" class="wc-block-components-quantity-selector__input" type="number" step="1" min="1" max="9999" >
+												<input data-wp-bind--aria-label="state.quantityDescriptionLabel" data-wp-bind--value="context.cartItem.quantity" class="wc-block-components-quantity-selector__input" type="number" step="1" min="1" max="9999" >
 												<button data-wp-on--click="actions.decrementQuantity" data-wp-bind--aria-label="state.reduceQuantityLabel" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
 												<button data-wp-on--click="actions.incrementQuantity" data-wp-bind--aria-label="state.increaseQuantityLabel" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
 											</div>
