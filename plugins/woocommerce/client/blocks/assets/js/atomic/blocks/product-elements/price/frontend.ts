@@ -16,8 +16,27 @@ const { state: wooState } = store< SingleProductTemplateStore >(
 	{ lock: universalLock }
 );
 
-const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br', 'span' ];
-const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download' ];
+const ALLOWED_TAGS = [
+	'a',
+	'b',
+	'em',
+	'i',
+	'strong',
+	'p',
+	'br',
+	'span',
+	'bdi',
+	'del',
+];
+const ALLOWED_ATTR = [
+	'class',
+	'target',
+	'href',
+	'rel',
+	'name',
+	'download',
+	'aria-hidden',
+];
 
 const getProductData = ( key: keyof ProductData ) => {
 	const singleProductContext = getContext< {
