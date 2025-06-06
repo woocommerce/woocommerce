@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { sanitize } from 'dompurify';
 import { getContext, getElement, store } from '@wordpress/interactivity';
 import type { ProductData } from '@woocommerce/type-defs/product';
 import type { SingleProductTemplateStore } from '@woocommerce/base-stores/single-product-template';
+import { sanitize } from 'dompurify'; // eslint-disable-line import/named
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
