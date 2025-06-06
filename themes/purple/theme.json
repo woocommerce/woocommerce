@@ -349,6 +349,24 @@
 					  "bottom": "var(--wp--preset--spacing--30)"
 					}
 				}
+			},
+			"woocommerce/product-sale-badge": {
+				"typography": {
+					"fontSize":  "var(--wp--preset--font-size--small)",
+					"lineHeight": "1.7",
+					"fontWeight": "400",
+					"textTransform": "none"
+				},
+				"color": {
+					"background": "var(--wp--preset--color--theme-7)",
+					"text": "var(--wp--preset--color--theme-1)"
+				},
+				"border": {
+					"radius": "0",
+					"style": "solid",
+					"width": "1px",
+					"color": "var(--wp--preset--color--theme-7)"
+				}
 			}
 		},
 		"color": {
