@@ -36,15 +36,6 @@ class ReviewsUtil {
 	}
 
 	/**
-	 * Initialize hooks for modifying product review moderation URLs.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 */
-	final public static function init() {
-		add_filter( 'comment_moderation_text', array( __CLASS__, 'modify_product_review_moderation_urls' ), 10, 2 );
-	}
-
-	/**
 	 * Removes product reviews from the edit-comments page to fix the "Mine" tab counter.
 	 *
 	 * @param array|mixed       $clauses A compacted array of comment query clauses.
