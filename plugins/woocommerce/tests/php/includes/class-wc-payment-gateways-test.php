@@ -69,7 +69,7 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 			update_option( $gateway->get_option_key(), $gateway->settings );
 
 			// Check that the log entry was created.
-			$this->assertEquals( 'Payment gateway enabled: "' . $gateway->get_method_title() . '" (' . $gateway->id . ' )', end( $fake_logger->infos )['message'] );
+			$this->assertEquals( 'Payment gateway enabled: "' . $gateway->get_method_title() . '" (' . $gateway->id . ')', end( $fake_logger->infos )['message'] );
 
 			// Check that the email was sent correctly.
 			$this->assertStringContainsString( '@', $email_details['to'][0] );
