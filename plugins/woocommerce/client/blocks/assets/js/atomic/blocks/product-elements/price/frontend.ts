@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { getContext, getElement, store } from '@wordpress/interactivity';
-import type { DisplayedProduct } from '@woocommerce/type-defs/product';
+import type { ProductData } from '@woocommerce/type-defs/product';
 import type { SingleProductTemplateStore } from '@woocommerce/base-stores/single-product-template';
 
 /**
@@ -31,15 +31,17 @@ const productPriceStore = store(
 				}
 
 				const singleProductContext = getContext< {
-					displayedProduct: DisplayedProduct;
+					productData: ProductData;
 				} >( 'woocommerce/single-product' );
 
-				if ( singleProductContext?.displayedProduct?.price_html ) {
+				if ( singleProductContext?.productData?.price_html ) {
 					element.ref.innerHTML =
-						singleProductContext.displayedProduct.price_html;
-				} else if ( wooState?.displayedProduct?.price_html ) {
+						singleProductContext.productData.price_html;
+				} else if (
+					wooState?.singleProductTemplate.productData?.price_html
+				) {
 					element.ref.innerHTML =
-						wooState.displayedProduct.price_html;
+						wooState.singleProductTemplate.productData.price_html;
 				}
 			},
 		},

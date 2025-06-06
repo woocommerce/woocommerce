@@ -90,7 +90,9 @@ class SingleProductTemplate extends AbstractTemplate {
 				wp_interactivity_state(
 					'woocommerce',
 					array(
-						'displayedProduct' => ProductDataUtils::get_product_data( $product ),
+						'singleProductTemplate' => array(
+							'productData' => ProductDataUtils::get_product_data( $product ),
+						),
 					)
 				);
 			}

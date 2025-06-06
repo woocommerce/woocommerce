@@ -5,7 +5,7 @@ import type { FormEvent, HTMLElementEvent } from 'react';
 import { store, getContext } from '@wordpress/interactivity';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import type { CartVariationItem } from '@woocommerce/types';
-import type { DisplayedProduct } from '@woocommerce/type-defs/product';
+import type { ProductData } from '@woocommerce/type-defs/product';
 import type { SingleProductTemplateStore } from '@woocommerce/base-stores/single-product-template';
 
 export type AvailableVariation = {
@@ -343,7 +343,7 @@ const addToCartWithOptionsStore = store(
 			},
 		},
 		callbacks: {
-			setDisplayedProduct: () => {
+			setProductData: () => {
 				const { availableVariations, selectedAttributes } =
 					getContext< Context >();
 				const matchedVariation = getMatchedVariation(
@@ -352,22 +352,22 @@ const addToCartWithOptionsStore = store(
 				);
 
 				const context = getContext< {
-					displayedProduct: DisplayedProduct;
+					productData: ProductData;
 				} >( 'woocommerce/single-product' );
 
 				originalPriceHtml =
 					originalPriceHtml !== ''
 						? originalPriceHtml
-						: context?.displayedProduct.price_html ||
-						  wooState.displayedProduct.price_html;
+						: context?.productData.price_html ||
+						  wooState.singleProductTemplate.productData.price_html;
 
 				if ( matchedVariation ) {
 					if ( context ) {
-						context.displayedProduct = {
+						context.productData = {
 							price_html: matchedVariation.price_html,
 						};
 					} else {
-						wooState.displayedProduct = {
+						wooState.singleProductTemplate.productData = {
 							price_html: matchedVariation.price_html,
 						};
 					}
@@ -375,9 +375,10 @@ const addToCartWithOptionsStore = store(
 				}
 
 				if ( context ) {
-					context.displayedProduct.price_html = originalPriceHtml;
+					context.productData.price_html = originalPriceHtml;
 				} else {
-					wooState.displayedProduct.price_html = originalPriceHtml;
+					wooState.singleProductTemplate.productData.price_html =
+						originalPriceHtml;
 				}
 			},
 		},

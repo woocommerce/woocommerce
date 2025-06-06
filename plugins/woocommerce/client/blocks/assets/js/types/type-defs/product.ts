@@ -1,3 +1,3 @@
-export type DisplayedProduct = {
+export type ProductData = {
 	price_html: string;
 };
