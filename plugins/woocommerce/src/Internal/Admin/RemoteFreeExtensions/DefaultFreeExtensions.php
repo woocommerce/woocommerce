@@ -522,7 +522,7 @@ class DefaultFreeExtensions {
 			'jetpack'                   => array(
 				'label'            => __( 'Protect your store and your shoppers with Jetpack', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-jetpack.svg', WC_PLUGIN_FILE ),
-				'description'      => __( 'Save time on content creation — unlock high-quality blog posts and pages using AI.', 'woocommerce' ),
+				'description'      => __( 'Keep your store online with full security and backups', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/jetpack?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 8,
 				'requires_jpc'     => true,
