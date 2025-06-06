@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { recordEvent } from '@woocommerce/tracks';
-import { render } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -22,6 +22,39 @@ describe( 'SettingsPaymentsMain', () => {
 			{
 				business_country: expect.any( String ),
 			}
+		);
+	} );
+
+	it( 'should trigger event recommendations_other_options when clicking the WooCommerce Marketplace link', () => {
+		render( <SettingsPaymentsMain /> );
+
+		fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'settings_payments_recommendations_other_options',
+			{
+				available_payment_methods: expect.any( String ),
+				business_country: expect.any( String ),
+			}
+		);
+	} );
+
+	it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', () => {
+		const mockLocation = {
+			href: 'test',
+		} as Location;
+
+		mockLocation.href = 'test';
+		Object.defineProperty( global.window, 'location', {
+			value: mockLocation,
+		} );
+
+		render( <SettingsPaymentsMain /> );
+
+		fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
+
+		expect( mockLocation.href ).toContain(
+			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
 		);
 	} );
 } );
