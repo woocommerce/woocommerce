@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Avoid sending multiple enablement emails for gateways after NOX onboarding.
