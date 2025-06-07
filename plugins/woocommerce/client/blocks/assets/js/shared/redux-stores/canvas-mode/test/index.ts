@@ -6,19 +6,19 @@ import { register, select, dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { store } from '../index';
+import { store as canvasModeStore } from '../index';
 
 describe( 'Canvas Mode Store', () => {
 	beforeEach( () => {
 		// Reset the store before each test.
-		if ( ! select( 'woocommerce/canvas-mode' ) ) {
-			register( store );
+		if ( ! select( canvasModeStore ) ) {
+			register( canvasModeStore );
 		}
 	} );
 
 	describe( 'Initial State', () => {
 		it( 'should initialize with isEditMode as false', () => {
-			const state = select( 'woocommerce/canvas-mode' ).isEditMode();
+			const state = select( canvasModeStore ).isEditMode();
 			expect( state ).toBe( false );
 		} );
 	} );
@@ -31,7 +31,7 @@ describe( 'Canvas Mode Store', () => {
 				value: new URL( 'http://example.com?canvas=edit' ),
 			} );
 
-			const state = select( 'woocommerce/canvas-mode' ).isEditMode();
+			const state = select( canvasModeStore ).isEditMode();
 			expect( state ).toBe( true );
 
 			// Restore window.location.
@@ -48,7 +48,7 @@ describe( 'Canvas Mode Store', () => {
 				value: new URL( 'http://example.com' ),
 			} );
 
-			const state = select( 'woocommerce/canvas-mode' ).isEditMode();
+			const state = select( canvasModeStore ).isEditMode();
 			expect( state ).toBe( false );
 
 			Object.defineProperty( window, 'location', {
@@ -65,7 +65,7 @@ describe( 'Canvas Mode Store', () => {
 				value: { href: 'invalid-url' } as Location,
 			} );
 
-			const state = select( 'woocommerce/canvas-mode' ).isEditMode();
+			const state = select( canvasModeStore ).isEditMode();
 			expect( state ).toBe( false );
 
 			Object.defineProperty( window, 'location', {
@@ -83,11 +83,7 @@ describe( 'Canvas Mode Store', () => {
 				value: new URL( 'http://example.com' ),
 			} );
 
-			const storeDispatch = dispatch( 'woocommerce/canvas-mode' ) as {
-				setCanvasMode: ( isEditMode: boolean ) => void;
-			};
-
-			storeDispatch.setCanvasMode( true );
+			dispatch( canvasModeStore ).setCanvasMode( true );
 
 			// Verify URL was updated
 			expect( window.location.search ).toBe( '' );
@@ -105,11 +101,7 @@ describe( 'Canvas Mode Store', () => {
 				value: new URL( 'http://example.com?canvas=edit' ),
 			} );
 
-			const storeDispatch = dispatch( 'woocommerce/canvas-mode' ) as {
-				setCanvasMode: ( isEditMode: boolean ) => void;
-			};
-
-			storeDispatch.setCanvasMode( false );
+			dispatch( canvasModeStore ).setCanvasMode( false );
 
 			// Verify URL was updated
 			expect( window.location.search ).toBe( '?canvas=edit' );
