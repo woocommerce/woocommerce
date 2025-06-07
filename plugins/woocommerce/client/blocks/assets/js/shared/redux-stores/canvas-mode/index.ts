@@ -84,8 +84,6 @@ if ( typeof window !== 'undefined' ) {
 
 	window.addEventListener( 'popstate', () => handleUrlChange() );
 	window.addEventListener( 'pushstate', () => handleUrlChange() );
-
-	handleUrlChange();
 }
 
 export { default as useCanvasMode } from '../../hooks/use-canvas-mode';
