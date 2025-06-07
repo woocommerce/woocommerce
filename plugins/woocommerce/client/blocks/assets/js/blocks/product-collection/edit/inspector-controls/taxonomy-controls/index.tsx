@@ -76,6 +76,8 @@ function useTaxonomyControls( {
 
 		if ( collection === CoreCollectionNames.BY_CATEGORY ) {
 			return taxonomies.filter( ( taxonomy ) =>
+				// If it's in filter panel, we want to show everything BUT the category control.
+				// Otherwise, it's a collection specific filter and we want to show ONLY the category control.
 				isFiltersPanel
 					? taxonomy.slug !== 'product_cat'
 					: taxonomy.slug === 'product_cat'
@@ -83,6 +85,8 @@ function useTaxonomyControls( {
 		}
 		if ( collection === CoreCollectionNames.BY_TAG ) {
 			return taxonomies.filter( ( taxonomy ) =>
+				// If it's in filter panel, we want to show everything BUT the tag control.
+				// Otherwise, it's a collection specific filter and we want to show ONLY the tag control.
 				isFiltersPanel
 					? taxonomy.slug !== 'product_tag'
 					: taxonomy.slug === 'product_tag'
