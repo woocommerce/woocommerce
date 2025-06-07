@@ -6,7 +6,7 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { store as canvasModeStore } from './index';
+import { store as canvasModeStore } from '../redux-stores/canvas-mode/index';
 
 type CanvasModeSelector = {
 	isEditMode: boolean;
