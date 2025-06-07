@@ -106,8 +106,7 @@ function useTaxonomyControls( {
 		createHandleChange( slug )( [] );
 	};
 
-	const shouldShowTaxonomyControl =
-		taxonomies && taxonomies.length > 0 && filteredTaxonomies.length > 0;
+	const shouldShowTaxonomyControl = filteredTaxonomies.length > 0;
 
 	return {
 		filteredTaxonomies,
