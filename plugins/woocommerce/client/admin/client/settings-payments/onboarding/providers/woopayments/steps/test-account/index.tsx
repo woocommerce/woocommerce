@@ -117,7 +117,7 @@ const TestAccountStep = () => {
 
 	const handleContinue = () => {
 		recordPaymentsOnboardingEvent( 'woopayments_onboarding_modal_click', {
-			step: currentStep?.id || '',
+			step: currentStep?.id || 'unknown',
 			action: 'activate_payments',
 		} );
 
@@ -482,7 +482,7 @@ const TestAccountStep = () => {
 											<p>
 												{ interpolateComponents( {
 													mixedString: __(
-														'Provide some additional details about your business so you can being accepting real payments. {{link}}Learn more{{/link}}',
+														'Provide some additional details about your business so you can begin accepting real payments. {{link}}Learn more{{/link}}',
 														'woocommerce'
 													),
 													components: {
@@ -507,7 +507,7 @@ const TestAccountStep = () => {
 									recordPaymentsOnboardingEvent(
 										'woopayments_onboarding_modal_click',
 										{
-											step: currentStep?.id || '',
+											step: currentStep?.id || 'unknown',
 											action: 'continue_store_setup',
 										}
 									);
@@ -564,7 +564,9 @@ const TestAccountStep = () => {
 											recordPaymentsOnboardingEvent(
 												'woopayments_onboarding_modal_click',
 												{
-													step: currentStep?.id || '',
+													step:
+														currentStep?.id ||
+														'unknown',
 													action: 'try_again_on_error',
 													retries: retryCounter + 1,
 												}
@@ -583,7 +585,9 @@ const TestAccountStep = () => {
 											recordPaymentsOnboardingEvent(
 												'woopayments_onboarding_modal_click',
 												{
-													step: currentStep?.id || '',
+													step:
+														currentStep?.id ||
+														'unknown',
 													action: 'cancel_on_error',
 													retries: retryCounter,
 												}

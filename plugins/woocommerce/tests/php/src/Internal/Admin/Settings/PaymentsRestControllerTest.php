@@ -3,7 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings;
 
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -219,7 +219,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			array(
 				'_wc_pes_woopayments',
 				'_wc_pes_paypal_full_stack',
-				PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+				PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 				WC_Gateway_Paypal::ID,
 			),
 			array_column( $data['providers'], 'id' )
@@ -293,7 +293,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			array(
 				'_wc_pes_woopayments',
 				'_wc_pes_paypal_full_stack',
-				PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+				PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 				WC_Gateway_Paypal::ID,
 			),
 			array_column( $data['providers'], 'id' )
@@ -389,7 +389,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		// Assert that we have the right providers, in the right order.
 		$this->assertSame(
 			array(
-				PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+				PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 				WC_Gateway_Paypal::ID,
 			),
 			array_column( $data['providers'], 'id' )
@@ -859,7 +859,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			$mock_providers[] = array(
 				'id'                => '_wc_pes_woopayments',
 				'_order'            => $order++,
-				'_type'             => PaymentProviders::TYPE_SUGGESTION,
+				'_type'             => PaymentsProviders::TYPE_SUGGESTION,
 				'title'             => 'Accept payments with Woo',
 				'description'       => 'With WooPayments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.',
 				'short_description' => 'Credit/debit cards, Apple Pay, Google Pay and more.',
@@ -906,7 +906,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			$mock_providers[] = array(
 				'id'                => '_wc_pes_paypal_full_stack',
 				'_order'            => $order++,
-				'_type'             => PaymentProviders::TYPE_SUGGESTION,
+				'_type'             => PaymentsProviders::TYPE_SUGGESTION,
 				'title'             => 'PayPal Payments',
 				'description'       => 'Safe and secure payments using credit cards or your customer&#039;s PayPal account.',
 				'short_description' => '',
@@ -947,7 +947,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			$mock_providers[] = array(
 				'id'          => '_wc_offline_payment_methods_group',
 				'_order'      => $order++,
-				'_type'       => PaymentProviders::TYPE_OFFLINE_PMS_GROUP,
+				'_type'       => PaymentsProviders::TYPE_OFFLINE_PMS_GROUP,
 				'title'       => 'Offline Payment Methods',
 				'description' => 'Allow shoppers to pay offline.',
 				'icon'        => 'http://localhost:8888/wp-content/plugins/woocommerce/assets/images/payment_methods/cod.svg',
@@ -955,7 +955,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			$mock_providers[] = array(
 				'id'          => WC_Gateway_BACS::ID,
 				'_order'      => $order++,
-				'_type'       => PaymentProviders::TYPE_OFFLINE_PM,
+				'_type'       => PaymentsProviders::TYPE_OFFLINE_PM,
 				'title'       => 'Direct bank transfer',
 				'description' => 'Take payments in person via BACS. More commonly known as direct bank/wire transfer.',
 				'supports'    => array(
@@ -991,7 +991,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			$mock_providers[] = array(
 				'id'          => WC_Gateway_Cheque::ID,
 				'_order'      => $order++,
-				'_type'       => PaymentProviders::TYPE_OFFLINE_PM,
+				'_type'       => PaymentsProviders::TYPE_OFFLINE_PM,
 				'title'       => 'Check payments',
 				'description' => 'Take payments in person via checks. This offline gateway can also be useful to test purchases.',
 				'supports'    => array(
@@ -1027,7 +1027,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			$mock_providers[] = array(
 				'id'          => WC_Gateway_COD::ID,
 				'_order'      => $order++,
-				'_type'       => PaymentProviders::TYPE_OFFLINE_PM,
+				'_type'       => PaymentsProviders::TYPE_OFFLINE_PM,
 				'title'       => 'Cash on delivery',
 				'description' => 'Let your shoppers pay upon delivery — by cash or other methods of payment.',
 				'supports'    => array(
@@ -1066,7 +1066,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			$mock_providers[] = array(
 				'id'          => WC_Gateway_Paypal::ID,
 				'_order'      => $order++,
-				'_type'       => PaymentProviders::TYPE_GATEWAY,
+				'_type'       => PaymentsProviders::TYPE_GATEWAY,
 				'title'       => 'PayPal',
 				'description' => 'PayPal',
 				'supports'    => array( 'products' ),

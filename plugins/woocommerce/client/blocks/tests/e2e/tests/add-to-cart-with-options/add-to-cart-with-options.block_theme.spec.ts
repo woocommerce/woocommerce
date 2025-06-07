@@ -113,7 +113,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect( addToCartButton ).toHaveText( '6 in cart' );
 	} );
 
-	test( "'X in cart' text reflects the correct amount in variations", async ( {
+	test( 'allows adding variable products to cart', async ( {
 		page,
 		pageObject,
 		editor,
@@ -128,33 +128,38 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await page.goto( '/hoodie' );
 
-		const logoNoOption = page.getByRole( 'radio', {
-			name: 'No',
-			exact: true,
-		} );
-		const colorBlueOption = page.getByRole( 'radio', {
-			name: 'Blue',
-			exact: true,
-		} );
-		const colorGreenOption = page.getByRole( 'radio', {
-			name: 'Green',
-			exact: true,
-		} );
+		// The radio input is visually hidden and, thus, not clickable. That's
+		// why we need to select the <label> instead.
+		const logoNoOption = page.locator( 'label:has-text("No")' );
+		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
+		const colorGreenOption = page.locator( 'label:has-text("Green")' );
 		const addToCartButton = page.getByText( 'Add to cart' ).first();
 
-		await logoNoOption.click();
-		await colorGreenOption.click();
-		await addToCartButton.click();
+		await test.step( 'displays an error when attributes are not selected', async () => {
+			await addToCartButton.click();
 
-		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+			await expect(
+				page.getByText( ' No matching variation found.' )
+			).toBeVisible();
+		} );
 
-		await colorBlueOption.click();
+		await test.step( 'successfully adds to cart when attributes are selected', async () => {
+			await logoNoOption.click();
+			await colorGreenOption.click();
+			await addToCartButton.click();
 
-		await expect( page.getByText( '1 in cart' ) ).toBeHidden();
+			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+		} );
 
-		await colorGreenOption.click();
+		await test.step( '"X in cart" text reflects the correct amount in variations', async () => {
+			await colorBlueOption.click();
 
-		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+			await expect( page.getByText( '1 in cart' ) ).toBeHidden();
+
+			await colorGreenOption.click();
+
+			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+		} );
 	} );
 
 	test( "doesn't allow selecting invalid variations in pills mode", async ( {
@@ -172,14 +177,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await page.goto( '/hoodie' );
 
-		const logoYesOption = page.getByRole( 'radio', {
-			name: 'Yes',
-			exact: true,
-		} );
-		const colorGreenOption = page.getByRole( 'radio', {
-			name: 'Green',
-			exact: true,
-		} );
+		// The radio input is visually hidden and, thus, not clickable. That's
+		// why we need to select the <label> instead.
+		const logoYesOption = page.locator( 'label:has-text("Yes")' );
+		const colorGreenOption = page.locator( 'label:has-text("Green")' );
 
 		await expect( colorGreenOption ).toBeEnabled();
 

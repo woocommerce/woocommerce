@@ -14,7 +14,7 @@
 	"supports": {
 		"interactivity": true
 	},
-	"usesContext": [ "filterData", "showCounts" ],
+	"usesContext": [ "filterData" ],
 	"attributes": {
 		"chipText": {
 			"type": "string"

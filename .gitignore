@@ -116,3 +116,6 @@ changes.json
 .cursorindexingignore
 .cursor/rules/custom-*
 .cursor/rules/local-*
+
+# Docusaurus
+.docusaurus

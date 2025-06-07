@@ -6,7 +6,7 @@
 	"description": "Display the Large Image of a product.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
-	"usesContext": [ "postId", "hoverZoom", "fullScreenOnClick", "cropImages" ],
+	"usesContext": [ "postId", "hoverZoom", "fullScreenOnClick" ],
 	"supports": {
 		"interactivity": true
 	},

@@ -228,7 +228,9 @@ export default function PaymentMethodsSelection() {
 										recordPaymentsOnboardingEvent(
 											'woopayments_onboarding_modal_click',
 											{
-												step: currentStep?.id || '',
+												step:
+													currentStep?.id ||
+													'unknown',
 												action: 'show_more',
 												hidden_count: hiddenCount,
 											}
