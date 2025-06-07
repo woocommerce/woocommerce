@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createReduxStore, register, select, dispatch } from '@wordpress/data';
+import { createReduxStore, register, dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -43,39 +43,6 @@ const selectors = {
 	},
 };
 
-if ( typeof window !== 'undefined' ) {
-	const handleUrlChange = async () => {
-		try {
-			const url = new URL( window.location.href );
-			const canvas = url.searchParams.get( 'canvas' );
-			const isEditMode = canvas === 'edit';
-
-			// Update store state to trigger any subscribed components.
-			const storeDispatch = dispatch( STORE_NAME ) as {
-				setCanvasMode: ( isEditMode: boolean ) => void;
-			};
-
-			await Promise.resolve();
-
-			// Update store state - this triggers re-renders.
-			storeDispatch.setCanvasMode( isEditMode );
-		} catch ( error ) {
-			// If URL parsing fails, set to default state.
-			const storeDispatch = dispatch( STORE_NAME ) as {
-				setCanvasMode: ( isEditMode: boolean ) => void;
-			};
-
-			await Promise.resolve();
-			storeDispatch.setCanvasMode( false );
-		}
-	};
-
-	window.addEventListener( 'popstate', () => handleUrlChange() );
-	window.addEventListener( 'pushstate', () => handleUrlChange() );
-
-	handleUrlChange();
-}
-
 const reducer = ( state: StoreState = DEFAULT_STATE, action: Actions ) => {
 	switch ( action.type ) {
 		case ACTION_SET_CANVAS_MODE:
@@ -95,9 +62,31 @@ export const store = createReduxStore( STORE_NAME, {
 	selectors,
 } );
 
-if ( ! select( STORE_NAME ) ) {
-	register( store );
+register( store );
+
+if ( typeof window !== 'undefined' ) {
+	const handleUrlChange = async () => {
+		try {
+			const url = new URL( window.location.href );
+			const canvas = url.searchParams.get( 'canvas' );
+			const isEditMode = canvas === 'edit';
+
+			await Promise.resolve();
+
+			// Update store state - this triggers re-renders.
+			dispatch( store ).setCanvasMode( isEditMode );
+		} catch ( error ) {
+			// If URL parsing fails, set to default state.
+			await Promise.resolve();
+			dispatch( store ).setCanvasMode( false );
+		}
+	};
+
+	window.addEventListener( 'popstate', () => handleUrlChange() );
+	window.addEventListener( 'pushstate', () => handleUrlChange() );
+
+	handleUrlChange();
 }
 
-export { default as useCanvasMode } from './use-canvas-mode';
+export { default as useCanvasMode } from '../../hooks/use-canvas-mode';
 export type { CanvasModeState } from './types';
