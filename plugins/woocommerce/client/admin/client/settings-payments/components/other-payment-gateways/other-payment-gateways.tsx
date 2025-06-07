@@ -9,8 +9,8 @@ import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
 	PaymentsEntity,
-	SuggestedPaymentExtension,
-	SuggestedPaymentExtensionCategory,
+	SuggestedPaymentsExtension,
+	SuggestedPaymentsExtensionCategory,
 } from '@woocommerce/data';
 
 /**
@@ -25,11 +25,11 @@ interface OtherPaymentGatewaysProps {
 	/**
 	 * Array of suggested payment extensions.
 	 */
-	suggestions: SuggestedPaymentExtension[];
+	suggestions: SuggestedPaymentsExtension[];
 	/**
 	 * Array of categories for the suggested payment extensions.
 	 */
-	suggestionCategories: SuggestedPaymentExtensionCategory[];
+	suggestionCategories: SuggestedPaymentsExtensionCategory[];
 	/**
 	 * The ID of the plugin currently being installed, or `null` if none.
 	 */
@@ -76,7 +76,7 @@ export const OtherPaymentGateways = ( {
 	const [ isExpanded, setIsExpanded ] = useState( initialExpanded );
 	const [ categoryIdWithPopoverVisible, setCategoryIdWithPopoverVisible ] =
 		useState( '' );
-	const buttonRef = useRef< HTMLSpanElement >( null );
+	const buttonRefs = useRef< Record< string, HTMLSpanElement | null > >( {} );
 
 	const handleInfoIconClick = (
 		event: React.MouseEvent | React.KeyboardEvent,
@@ -87,7 +87,8 @@ export const OtherPaymentGateways = ( {
 			'.other-payment-gateways__content__title__icon-container'
 		);
 
-		if ( buttonRef.current && parentSpan !== buttonRef.current ) {
+		const targetRef = buttonRefs.current[ categoryId ] ?? null;
+		if ( targetRef && parentSpan !== targetRef ) {
 			return;
 		}
 
@@ -126,8 +127,8 @@ export const OtherPaymentGateways = ( {
 				(
 					category
 				): {
-					category: SuggestedPaymentExtensionCategory;
-					suggestions: SuggestedPaymentExtension[];
+					category: SuggestedPaymentsExtensionCategory;
+					suggestions: SuggestedPaymentsExtension[];
 				} => {
 					return {
 						category,
@@ -216,7 +217,9 @@ export const OtherPaymentGateways = ( {
 									} }
 									tabIndex={ 0 }
 									role="button"
-									ref={ buttonRef }
+									ref={ ( el ) => {
+										buttonRefs.current[ category.id ] = el;
+									} }
 								>
 									<Gridicon
 										icon="info-outline"

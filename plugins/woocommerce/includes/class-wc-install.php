@@ -287,8 +287,6 @@ class WC_Install {
 			'wc_update_985_enable_new_payments_settings_page_feature',
 		),
 		'9.9.0' => array(
-			'wc_update_990_update_primary_key_to_composite_in_order_product_lookup_table',
-			'wc_update_990_add_old_refunded_order_items_to_product_lookup_table',
 			'wc_update_990_remove_wc_count_comments_transient',
 			'wc_update_990_remove_email_notes',
 		),
@@ -319,6 +317,10 @@ class WC_Install {
 	 * Hook in tabs.
 	 */
 	public static function init() {
+		if ( ! empty( $GLOBALS['wc_uninstalling_plugin'] ) ) {
+			return;
+		}
+
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'init', array( __CLASS__, 'manual_database_update' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'maybe_enable_hpos' ), 20 );
@@ -1900,7 +1902,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	tax_amount double DEFAULT 0 NOT NULL,
 	shipping_amount double DEFAULT 0 NOT NULL,
 	shipping_tax_amount double DEFAULT 0 NOT NULL,
-	PRIMARY KEY  (order_item_id, order_id),
+	PRIMARY KEY  (order_item_id),
 	KEY order_id (order_id),
 	KEY product_id (product_id),
 	KEY customer_id (customer_id),
@@ -2019,7 +2021,7 @@ $hpos_table_schema;
 			"{$wpdb->prefix}woocommerce_tax_rates",
 			"{$wpdb->prefix}wc_reserved_stock",
 			"{$wpdb->prefix}wc_rate_limits",
-			wc_get_container()->get( DataRegenerator::class )->get_lookup_table_name(),
+			"{$wpdb->prefix}wc_product_attributes_lookup",
 
 			// WCA Tables.
 			"{$wpdb->prefix}wc_order_stats",
@@ -2030,6 +2032,12 @@ $hpos_table_schema;
 			"{$wpdb->prefix}wc_admin_note_actions",
 			"{$wpdb->prefix}wc_customer_lookup",
 			"{$wpdb->prefix}wc_category_lookup",
+
+			// HPOS.
+			"{$wpdb->prefix}wc_orders",
+			"{$wpdb->prefix}wc_order_addresses",
+			"{$wpdb->prefix}wc_order_operational_data",
+			"{$wpdb->prefix}wc_orders_meta",
 		);
 
 		/**
@@ -2293,8 +2301,8 @@ $hpos_table_schema;
 		}
 
 		$upload_dir = wp_upload_dir();
-		$source     = WC()->plugin_path() . '/assets/images/placeholder-attachment.png';
-		$filename   = $upload_dir['basedir'] . '/woocommerce-placeholder.png';
+		$source     = WC()->plugin_path() . '/assets/images/placeholder-attachment.webp';
+		$filename   = $upload_dir['basedir'] . '/woocommerce-placeholder.webp';
 
 		if ( ! file_exists( $filename ) ) {
 			copy( $source, $filename ); // @codingStandardsIgnoreLine.
