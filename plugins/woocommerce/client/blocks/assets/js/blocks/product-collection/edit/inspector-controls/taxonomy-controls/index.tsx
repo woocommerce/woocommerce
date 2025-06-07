@@ -102,17 +102,12 @@ function useTaxonomyControls( {
 		trackInteraction( `${ CoreFilterNames.TAXONOMY }__${ slug }` );
 	};
 
-	const createDeselectCallback = ( slug: string ) => () => {
-		createHandleChange( slug )( [] );
-	};
-
 	const shouldShowTaxonomyControl = filteredTaxonomies.length > 0;
 
 	return {
 		filteredTaxonomies,
 		taxQuery,
 		createHandleChange,
-		createDeselectCallback,
 		shouldShowTaxonomyControl,
 	};
 }
@@ -127,7 +122,6 @@ function TaxonomyControls( {
 		filteredTaxonomies,
 		taxQuery,
 		createHandleChange,
-		createDeselectCallback,
 		shouldShowTaxonomyControl,
 	} = useTaxonomyControls( {
 		query,
@@ -147,7 +141,7 @@ function TaxonomyControls( {
 				const { slug, name } = taxonomy;
 				const termIds = taxQuery?.[ slug ] || [];
 				const handleChange = createHandleChange( slug );
-				const deselectCallback = createDeselectCallback( slug );
+				const deselectCallback = () => handleChange( [] );
 
 				return (
 					<ToolsPanelItem
