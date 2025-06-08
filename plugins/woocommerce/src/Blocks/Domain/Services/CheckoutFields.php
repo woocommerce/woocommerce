@@ -1396,6 +1396,7 @@ class CheckoutFields {
 				 * WC_Email::additional_checkout_fields
 				 * WC_Email::additional_address_fields
 				 * CheckoutFieldsFrontend::render_order_other_fields
+				 * AdditionalFields::render_content
 				 *
 				 * @param bool                    Whether the field should be shown.
 				 * @param array          $field   Field data.
