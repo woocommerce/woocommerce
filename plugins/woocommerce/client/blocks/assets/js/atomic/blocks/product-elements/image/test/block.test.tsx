@@ -187,7 +187,7 @@ describe( 'Product Image Block', () => {
 				</ProductDataContextProvider>
 			);
 
-			const placeholderImage = component.getByAltText( 'Test product' );
+			const placeholderImage = component.getByRole( 'presentation' );
 			expect( placeholderImage.getAttribute( 'src' ) ).toBe(
 				'placeholder.jpg'
 			);
@@ -250,7 +250,7 @@ describe( 'Product Image Block', () => {
 				</ProductDataContextProvider>
 			);
 
-			const placeholderImage = component.getByAltText( 'Test product' );
+			const placeholderImage = component.getByRole( 'presentation' );
 			expect( placeholderImage.getAttribute( 'src' ) ).toBe(
 				'placeholder.jpg'
 			);
@@ -278,7 +278,7 @@ describe( 'Product Image Block', () => {
 				</ProductDataContextProvider>
 			);
 
-			const placeholderImage = component.getByAltText( 'Test product' );
+			const placeholderImage = component.getByRole( 'presentation' );
 			expect( placeholderImage.getAttribute( 'src' ) ).toBe(
 				'placeholder.jpg'
 			);
