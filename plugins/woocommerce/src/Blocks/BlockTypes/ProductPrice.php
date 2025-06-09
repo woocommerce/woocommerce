@@ -82,6 +82,7 @@ class ProductPrice extends AbstractBlock {
 
 				);
 			if ( ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector ) {
+				wp_enqueue_script_module( 'woocommerce/product-price' );
 				$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-price';
 				$wrapper_attributes['data-wp-watch']       = 'callbacks.setNewPrice';
 			}
