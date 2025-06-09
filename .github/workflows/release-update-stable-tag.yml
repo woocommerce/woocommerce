@@ -7,7 +7,7 @@ on:
         required: true
         default: ''
       dry-run:
-        description: 'Do a dry-run of the stable tag update'
+        description: 'Do a dry-run of the stable tag update (if UNCHECKED, it will commit the change!)'
         type: boolean
         required: false
         default: true
@@ -40,7 +40,7 @@ jobs:
           TARGET_VERSION: ${{ github.event.inputs.version }}
         run: |
           echo "Checking out repository..."
-          svn checkout "${{ secrets.SVN_REPO_URL }}" ./svn-woocommerce-repo
+          svn checkout "${{ secrets.SVN_REPO_URL }}" ./svn-woocommerce-repo --username "${{ secrets.SVN_USERNAME }}" --password "${{ secrets.SVN_PASSWORD }}" --non-interactive
           cd ./svn-woocommerce-repo
 
           README_PATH="./trunk/readme.txt"
