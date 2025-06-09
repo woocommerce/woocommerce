@@ -187,7 +187,6 @@ const productButtonStore = {
 			// eslint-disable-next-line react-hooks/rules-of-hooks
 			useLayoutEffect( () => {
 				context.tempQuantity = state.quantity;
-				context.hasPressedButton = false;
 				// eslint-disable-next-line react-hooks/exhaustive-deps
 			}, [] );
 		},
