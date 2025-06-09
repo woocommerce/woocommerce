@@ -5,7 +5,7 @@ sidebar_label: Contributing docs
 
 # Contributing technical documentation
 
-Thanks for helping improve WooCommerce’s developer documentation. Our docs are powered by Docusaurus, and live inside the [`woocommerce/docs/`](https://github.com/woocommerce/woocommerce/tree/trunk/docs) folder of the monorepo.
+Thanks for helping improve WooCommerce's developer documentation. Our docs are powered by Docusaurus, and live inside the [`woocommerce/docs/`](https://github.com/woocommerce/woocommerce/tree/trunk/docs) folder of the monorepo.
 
 This guide walks you through the structure, tooling, and process for contributing effectively.
 
@@ -23,39 +23,44 @@ This guide walks you through the structure, tooling, and process for contributin
 1. Prior to making any changes, ensure your `trunk` branch is up to date with the monorepo's `trunk` [by syncing it](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork).
 2. For each modification you'd like to make, create a new branch off `trunk` in your fork that starts with `docs/`. For example, if you're adding a doc about improving extension performance, you could call your branch `docs/improve-extension-performance`.
 3. Create or edit markdown files inside the appropriate folder under `docs/`.
-4. If needed, update the folder’s `_category_.json` (for sidebar label/position).
+4. If needed, update the folder's `_category_.json` (for sidebar label/position).
 5. Run a build to verify changes and detect broken links (link checking only happens on build):
-    ```bash 
+
+    ```bash
     npm run build
     ```
 
-### Opening a pull request 
+### Opening a pull request
+
 1. Commit and push your changes to your fork.
 2. [Open a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) to woocommerce/woocommerce, targeting the trunk branch.
 3. Use a descriptive title, and fill out the PR template. Include:
-   * Rationale for new files or categories
-   * A note about any sidebar or structure changes
+    * Rationale for new files or categories
+    * A note about any sidebar or structure changes
 4. The WooCommerce Developer Advocacy team will review and merge your changes.
 
 ## Docs folder anatomy
 
 ### Tooling and configuration
-* **Supporting tooling and config** lives in:
-  * [`woocommerce/docs/_docu-tools/`](https://github.com/woocommerce/woocommerce/blob/trunk/docs/_docu-tools/)
-* **Top-level sidebar and navbar** are configured in:
-  * [`sidebars.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/docs/_docu-tools/sidebars.ts)
-  * [`docusaurus.config.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/docs/_docu-tools/docusaurus.config.ts)
 
-### Documentation files 
+* **Supporting tooling and config** lives in:
+    * [`woocommerce/docs/_docu-tools/`](https://github.com/woocommerce/woocommerce/blob/trunk/docs/_docu-tools/)
+* **Top-level sidebar and navbar** are configured in:
+    * [`sidebars.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/docs/_docu-tools/sidebars.ts)
+    * [`docusaurus.config.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/docs/_docu-tools/docusaurus.config.ts)
+
+### Documentation files
+
 * **Docs location**: All documentation lives inside of [`woocommerce/docs/`](https://github.com/woocommerce/woocommerce/blob/trunk/docs/)
 * **Each folder is sidebar or top nav category**, for example: `getting-started`, `code-snippets`, etc.
 * **Sidebar configuration** for each category is managed using a `_category_.json` file inside each category folder:
-  ```json
-  {
-    "position": 7,
-    "label": "Code snippets"
-  }
-  ```
+
+    ```json
+    {
+        "position": 7,
+        "label": "Code snippets"
+    }
+    ```
 
 ## Adding images
 
@@ -67,7 +72,7 @@ docs/_docu-tools/static/img/doc_images/
 
 To include an image in a markdown file, reference it like this:
 
-```md
+```markdown
 ![Alt text](/img/doc_images/your-image-name.png)
 ```
 
@@ -76,16 +81,17 @@ To include an image in a markdown file, reference it like this:
 Before creating a new category, you should consider whether it is truly necessary to do so. Where possible, you should default to creating content in an existing category. If you do need to create a new category, follow these steps:
 
 1. Inside the `/docs` folder, create a sub-folder with a descriptive name. For example, if you wanted to create a `Checkout design guidelines` section, you'd create a folder called `/docs/checkout-design-guidelines`.
-2.Create a `_category_.json` file inside each category folder and give it a position it should have in the sidebar as well as a label:
-  ```json
-  {
-    "position": 10,
-    "label": "Checkout design guidelines"
-  }
-  ```
 
-When creating new categories, please include rationale about why the category was created in your pull request's description. 
+2. Create a `_category_.json` file inside each category folder and give it a position it should have in the sidebar as well as a label:
 
+    ```json
+    {
+        "position": 10,
+        "label": "Checkout design guidelines"
+    }
+    ```
+
+When creating new categories, please include rationale about why the category was created in your pull request's description.
 
 ## Writing guidelines and references
 
