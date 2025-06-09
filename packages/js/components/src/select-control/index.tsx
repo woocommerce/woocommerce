@@ -42,6 +42,10 @@ type Props = {
 	 */
 	controlClassName?: string;
 	/**
+	 * Whether to ignore diacritics when matching search queries.
+	 */
+	diacriticInsensitive?: boolean;
+	/**
 	 * Allow the select options to be disabled.
 	 */
 	disabled?: boolean;
@@ -412,13 +416,16 @@ export class SelectControl extends Component< Props, State > {
 	}
 
 	getOptionsByQuery( options: Option[], query: string | null ) {
-		const { getSearchExpression, maxResults, onFilter } = this.props;
+		const { getSearchExpression, maxResults, onFilter, diacriticInsensitive } = this.props;
 		const filtered = [];
 
 		// Create a regular expression to filter the options.
-		const expression = getSearchExpression!(
-			escapeRegExp( query ? query.trim() : '' )
-		);
+		const baseQuery = query ? query.trim() : '';
+		const normalizedQuery = diacriticInsensitive
+			? baseQuery.normalize( 'NFD' ).replace( /[\u0300-\u036f]/g, '' )
+			: baseQuery;
+
+		const expression = getSearchExpression!( escapeRegExp( normalizedQuery ) )
 		const search = expression ? new RegExp( expression, 'i' ) : /^$/;
 
 		for ( let i = 0; i < options.length; i++ ) {
@@ -430,9 +437,13 @@ export class SelectControl extends Component< Props, State > {
 				keywords = [ ...keywords, option.label ];
 			}
 
-			const isMatch = keywords.some( ( keyword ) =>
-				search.test( keyword )
-			);
+			const isMatch = keywords.some( ( keyword ) => {			
+				const normalizedKeyword = diacriticInsensitive
+					? keyword.normalize( 'NFD' ).replace( /[\u0300-\u036f]/g, '' )
+					: keyword;
+			
+				return search.test( normalizedKeyword );
+			} );
 			if ( ! isMatch ) {
 				continue;
 			}
