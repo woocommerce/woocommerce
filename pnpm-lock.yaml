@@ -1318,7 +1318,7 @@ importers:
         version: 2.17.0(wp-prettier@3.0.3)
       '@wordpress/scripts':
         specifier: wp-6.6
-        version: 28.0.2(@playwright/test@1.50.1)(@swc/core@1.3.100)(@types/eslint@8.44.8)(@types/node@20.17.8)(@types/webpack@4.41.38)(file-loader@6.2.0(webpack@5.97.1))(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@20.17.8)(typescript@5.7.2))(type-fest@3.13.1)(typescript@5.7.2)(webpack-hot-middleware@2.25.4)
+        version: 28.0.2(@playwright/test@1.50.1)(@swc/core@1.3.100)(@types/eslint@8.44.8)(@types/node@20.17.8)(@types/webpack@4.41.38)(encoding@0.1.13)(file-loader@6.2.0(webpack@5.97.1))(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@20.17.8)(typescript@5.7.2))(type-fest@3.13.1)(typescript@5.7.2)(webpack-hot-middleware@2.25.4)
       '@wordpress/stylelint-config':
         specifier: ^21.36.0
         version: 21.36.0(postcss@8.4.49)(stylelint@14.16.1)
@@ -3844,9 +3844,6 @@ importers:
       '@types/jest':
         specifier: 29.5.x
         version: 29.5.14
-      '@types/jest-environment-puppeteer':
-        specifier: 5.0.2
-        version: 5.0.2
       '@types/jquery':
         specifier: 3.5.14
         version: 3.5.14
@@ -3856,9 +3853,6 @@ importers:
       '@types/prop-types':
         specifier: ^15.7.11
         version: 15.7.11
-      '@types/puppeteer':
-        specifier: 5.4.6
-        version: 5.4.6
       '@types/react':
         specifier: 18.3.x
         version: 18.3.16
@@ -4099,9 +4093,6 @@ importers:
       jest-circus:
         specifier: 29.5.x
         version: 29.5.0
-      jest-environment-puppeteer:
-        specifier: 6.1.1
-        version: 6.1.1
       jest-fetch-mock:
         specifier: 3.0.3
         version: 3.0.3(encoding@0.1.13)
@@ -4138,9 +4129,6 @@ importers:
       progress-bar-webpack-plugin:
         specifier: 2.1.x
         version: 2.1.0(webpack@5.97.1)
-      puppeteer:
-        specifier: 17.1.3
-        version: 17.1.3(encoding@0.1.13)
       react-docgen:
         specifier: 5.4.3
         version: 5.4.3
@@ -9142,9 +9130,6 @@ packages:
   '@types/istanbul-reports@3.0.4':
     resolution: {integrity: sha512-pk2B1NWalF9toCRu6gjBzR69syFjP4Od8WRAX+0mmf9lAjCRicLOWc+ZrxZHx/0XRjotgkF9t6iaMJ+aXcOdZQ==}
 
-  '@types/jest-environment-puppeteer@5.0.2':
-    resolution: {integrity: sha512-YCdegQnDou6aIK8wqygDDctHgJZtlXd03fI9Bgbqkdu66EFKnImmt7auiR9OkxkSSiqS9smn0joX2pGpVs7ErA==}
-
   '@types/jest@27.5.2':
     resolution: {integrity: sha512-mpT8LJJ4CMeeahobofYWIjFo0xonRS/HfxnVEPMPFSQdGUt1uHCnoPT7Zhb+sjDU2wz0oKV0OLUR0WzrHNgfeA==}
 
@@ -9261,12 +9246,6 @@ packages:
 
   '@types/prop-types@15.7.11':
     resolution: {integrity: sha512-ga8y9v9uyeiLdpKddhxYQkxNDrfvuPrlFb0N1qnZZByvcElJaXthF1UhvCh9TLWJBEHeNtdnbysW7Y6Uq8CVng==}
-
-  '@types/puppeteer@5.4.6':
-    resolution: {integrity: sha512-98Kghehs7+/GD9b56qryhqdqVCXUTbetTv3PlvDnmFRTHQH0j9DIp1f7rkAW3BAj4U3yoeSEQnKgdW8bDq0Y0Q==}
-
-  '@types/puppeteer@5.4.7':
-    resolution: {integrity: sha512-JdGWZZYL0vKapXF4oQTC5hLVNfOgdPrqeZ1BiQnGk5cB7HeE91EWUiTdVSdQPobRN8rIcdffjiOgCYJ/S8QrnQ==}
 
   '@types/q@1.5.8':
     resolution: {integrity: sha512-hroOstUScF6zhIi+5+x0dzqrHA1EJi+Irri6b1fxolMTqqHIV/Cg77EtnQcZqZCu8hR3mX2BzIxN4/GzI68Kfw==}
@@ -12337,9 +12316,6 @@ packages:
   axios@0.24.0:
     resolution: {integrity: sha512-Q6cWsys88HoPgAaFAVUb0WpPk0O8iTeisR9IMqy9G8AbO4NlpVknrnQS03zzF9PGAWgO3cgletO3VjV/P7VztA==}
 
-  axios@0.25.0:
-    resolution: {integrity: sha512-cD8FOb0tRH3uuEe6+evtAbgJtfxr7ly3fQjYcMcuPlgkwVS9xboaVIpcDV+cYQe+yGykgwZCs1pzjntcGa6l5g==}
-
   axios@1.6.2:
     resolution: {integrity: sha512-7i24Ri4pmDRfJTR7LDBhsOTtcm+9kjX5WiY1X3wIisx6G9So3pfMkEiU7emUBe46oceVImccTEM3k6C5dbVW8A==}
 
@@ -14216,9 +14192,6 @@ packages:
   detect-port@1.5.1:
     resolution: {integrity: sha512-aBzdj76lueB6uUst5iAs7+0H/oOjqI5D16XUWxlWMIMROhcM0rfsNVk93zTngq1dDNpoXRr++Sus7ETAExppAQ==}
     hasBin: true
-
-  devtools-protocol@0.0.1036444:
-    resolution: {integrity: sha512-0y4f/T8H9lsESV9kKP1HDUXgHxCdniFeJh6Erq+FbdOEvp/Ydp9t8kcAAM5gOd17pMrTDlFWntoHtzzeTUWKNw==}
 
   devtools-protocol@0.0.1312386:
     resolution: {integrity: sha512-DPnhUXvmvKT2dFA/j7B+riVLUt9Q6RKJlcppojL5CoRywJJKLDYnRlw0gTFKfgDPHP5E04UoB71SxoJlVZy8FA==}
@@ -17350,9 +17323,6 @@ packages:
   jest-dev-server@5.0.3:
     resolution: {integrity: sha512-aJR3a5KdY18Lsz+VbREKwx2HM3iukiui+J9rlv9o6iYTwZCSsJazSTStcD9K1q0AIF3oA+FqLOKDyo/sc7+fJw==}
 
-  jest-dev-server@6.2.0:
-    resolution: {integrity: sha512-ZWh8CuvxwjhYfvw4tGeftziqIvw/26R6AG3OTgNTQeXul8aZz48RQjDpnlDwnWX53jxJJl9fcigqIdSU5lYZuw==}
-
   jest-dev-server@9.0.2:
     resolution: {integrity: sha512-Zc/JB0IlNNrpXkhBw+h86cGrde/Mey52KvF+FER2eyrtYJTHObOwW7Iarxm3rPyTKby5+3Y2QZtl8pRz/5GCxg==}
     engines: {node: '>=16'}
@@ -17421,9 +17391,6 @@ packages:
   jest-environment-node@29.7.0:
     resolution: {integrity: sha512-DOSwCRqXirTOyheM+4d5YZOrWcdu0LNZ87ewUoywbcb2XR4wKgqiG8vNeYwhjFMbEkfju7wx2GYH0P2gevGvFw==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-
-  jest-environment-puppeteer@6.1.1:
-    resolution: {integrity: sha512-Ces37g8Gdj7QaVxszeoXlvmsZxcEJN9EPUdJt8fGMLA+6ARVFKyVmFgP9xVeGyjTvzsXdtIiJdeOKMLMeD8r2A==}
 
   jest-fetch-mock@3.0.3:
     resolution: {integrity: sha512-Ux1nWprtLrdrH4XwE7O7InRY6psIi3GOsqNESJgMJ+M5cv4A8Lh7SN9d2V2kKRZ8ebAfcd1LNyZguAOb6JiDqw==}
@@ -20749,11 +20716,6 @@ packages:
     resolution: {integrity: sha512-3HZ2/7hdDKZvZQ7dhhITOUg4/wOrDRjyK2ZBllRB0ZCOi9u0cwq1ACHDjBB+nX+7+kltHjQvBRdeY7+W0T+7Gg==}
     engines: {node: '>=18'}
 
-  puppeteer@17.1.3:
-    resolution: {integrity: sha512-tVtvNSOOqlq75rUgwLeDAEQoLIiBqmRg0/zedpI6fuqIocIkuxG23A7FIl1oVSkuSMMLgcOP5kVhNETmsmjvPw==}
-    engines: {node: '>=14.1.0'}
-    deprecated: < 22.8.2 is no longer supported
-
   pure-rand@6.0.4:
     resolution: {integrity: sha512-LA0Y9kxMYv47GIPJy6MI84fqTd2HmYZI83W/kM/SkKfDlajnZYfmXFTxkbY+xSBPkLJxltMa9hIkmdc29eguMA==}
 
@@ -22255,9 +22217,6 @@ packages:
 
   spawnd@5.0.0:
     resolution: {integrity: sha512-28+AJr82moMVWolQvlAIv3JcYDkjkFTEmfDc503wxrF5l2rQ3dFz6DpbXp3kD4zmgGGldfM4xM4v1sFj/ZaIOA==}
-
-  spawnd@6.2.0:
-    resolution: {integrity: sha512-qX/I4lQy4KgVEcNle0kuc4FxFWHISzBhZW1YemPfwmrmQjyZmfTK/OhBKkhrD2ooAaFZEm1maEBLE6/6enwt+g==}
 
   spawnd@9.0.2:
     resolution: {integrity: sha512-nl8DVHEDQ57IcKakzpjanspVChkMpGLuVwMR/eOn9cXE55Qr6luD2Kn06sA0ootRMdgrU4tInN6lA6ohTNvysw==}
@@ -23783,11 +23742,6 @@ packages:
     engines: {node: '>=8.9.0'}
     hasBin: true
 
-  wait-on@6.0.1:
-    resolution: {integrity: sha512-zht+KASY3usTY5u2LgaNqn/Cd8MukxLGjdcZxT2ns5QzDmTFc4XoWBgC+C/na+sMRZTuVygQoMYwdcVjHnYIVw==}
-    engines: {node: '>=10.0.0'}
-    hasBin: true
-
   wait-on@7.2.0:
     resolution: {integrity: sha512-wCQcHkRazgjG5XoAq9jbTMLpNIjoSlZslrJ2+N9MxDsGEv1HnFoVjOCexL0ESva7Y9cu350j+DWADdk54s4AFQ==}
     engines: {node: '>=12.0.0'}
@@ -24293,18 +24247,6 @@ packages:
 
   ws@8.5.0:
     resolution: {integrity: sha512-BWX0SWVgLPzYwF8lTzEy1egjhS4S4OEAHfsO8o65WOVsrnSRGaSiUaa9e0ggGlkMTtBlmOpEXiie9RUcBO86qg==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: ^5.0.2
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-
-  ws@8.8.1:
-    resolution: {integrity: sha512-bGy2JzvzkPowEJV++hF07hAD6niYSr0JzBNo/J29WsB57A2r7Wlc1UFcTR9IzrPvuNVO4B8LGqF8qcpsVOhJCA==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -27283,7 +27225,7 @@ snapshots:
       '@types/istanbul-lib-coverage': 2.0.6
       collect-v8-coverage: 1.0.2
 
-  '@jest/test-sequencer@26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))':
+  '@jest/test-sequencer@26.6.3':
     dependencies:
       '@jest/test-result': 26.6.2
       graceful-fs: 4.2.11
@@ -27291,11 +27233,7 @@ snapshots:
       jest-runner: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
       jest-runtime: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
     transitivePeerDependencies:
-      - bufferutil
-      - canvas
       - supports-color
-      - ts-node
-      - utf-8-validate
 
   '@jest/test-sequencer@27.5.1':
     dependencies:
@@ -32325,12 +32263,6 @@ snapshots:
     dependencies:
       '@types/istanbul-lib-report': 3.0.3
 
-  '@types/jest-environment-puppeteer@5.0.2':
-    dependencies:
-      '@jest/types': 27.5.1
-      '@types/puppeteer': 5.4.7
-      jest-environment-node: 27.5.1
-
   '@types/jest@27.5.2':
     dependencies:
       jest-matcher-utils: 27.5.1
@@ -32443,14 +32375,6 @@ snapshots:
   '@types/pretty-hrtime@1.0.3': {}
 
   '@types/prop-types@15.7.11': {}
-
-  '@types/puppeteer@5.4.6':
-    dependencies:
-      '@types/node': 20.17.8
-
-  '@types/puppeteer@5.4.7':
-    dependencies:
-      '@types/node': 20.17.8
 
   '@types/q@1.5.8': {}
 
@@ -32865,13 +32789,13 @@ snapshots:
       '@types/node': 20.17.8
     optional: true
 
-  '@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@8.55.0)(typescript@5.7.2)':
+  '@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)':
     dependencies:
       '@typescript-eslint/experimental-utils': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       '@typescript-eslint/parser': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       '@typescript-eslint/scope-manager': 4.33.0
       debug: 4.4.0
-      eslint: 8.55.0
+      eslint: 7.32.0
       functional-red-black-tree: 1.0.1
       ignore: 5.3.0
       regexpp: 3.2.0
@@ -36310,7 +36234,7 @@ snapshots:
   '@wordpress/eslint-plugin@9.3.0(@babel/core@7.25.7)(eslint@7.32.0)(typescript@5.7.2)':
     dependencies:
       '@babel/eslint-parser': 7.23.3(@babel/core@7.25.7)(eslint@7.32.0)
-      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@8.55.0)(typescript@5.7.2)
+      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
       '@typescript-eslint/parser': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       '@wordpress/prettier-config': 1.4.0(wp-prettier@2.2.1-beta-1)
       cosmiconfig: 7.1.0
@@ -37609,7 +37533,7 @@ snapshots:
       expect-puppeteer: 4.4.0
       filenamify: 4.3.0
       jest: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
-      jest-circus: 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
+      jest-circus: 26.6.3
       jest-dev-server: 5.0.3
       jest-environment-node: 26.6.2
       markdownlint: 0.23.1
@@ -37660,7 +37584,7 @@ snapshots:
       - utf-8-validate
       - webpack-dev-server
 
-  '@wordpress/scripts@28.0.2(@playwright/test@1.50.1)(@swc/core@1.3.100)(@types/eslint@8.44.8)(@types/node@20.17.8)(@types/webpack@4.41.38)(file-loader@6.2.0(webpack@5.97.1))(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@20.17.8)(typescript@5.7.2))(type-fest@3.13.1)(typescript@5.7.2)(webpack-hot-middleware@2.25.4)':
+  '@wordpress/scripts@28.0.2(@playwright/test@1.50.1)(@swc/core@1.3.100)(@types/eslint@8.44.8)(@types/node@20.17.8)(@types/webpack@4.41.38)(encoding@0.1.13)(file-loader@6.2.0(webpack@5.97.1))(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@20.17.8)(typescript@5.7.2))(type-fest@3.13.1)(typescript@5.7.2)(webpack-hot-middleware@2.25.4)':
     dependencies:
       '@babel/core': 7.25.7
       '@playwright/test': 1.50.1
@@ -37706,7 +37630,7 @@ snapshots:
       postcss: 8.4.49
       postcss-loader: 6.2.1(postcss@8.4.49)(webpack@5.97.1(@swc/core@1.3.100))
       prettier: wp-prettier@3.0.3
-      puppeteer-core: 13.7.0
+      puppeteer-core: 13.7.0(encoding@0.1.13)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-refresh: 0.14.2
@@ -39021,12 +38945,6 @@ snapshots:
   axios@0.24.0:
     dependencies:
       follow-redirects: 1.15.1
-    transitivePeerDependencies:
-      - debug
-
-  axios@0.25.0:
-    dependencies:
-      follow-redirects: 1.15.6(debug@4.3.4)
     transitivePeerDependencies:
       - debug
 
@@ -41620,8 +41538,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  devtools-protocol@0.0.1036444: {}
-
   devtools-protocol@0.0.1312386: {}
 
   devtools-protocol@0.0.1367902: {}
@@ -42465,7 +42381,7 @@ snapshots:
       '@typescript-eslint/experimental-utils': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       eslint: 7.32.0
     optionalDependencies:
-      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@8.55.0)(typescript@5.7.2)
+      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -45609,7 +45525,7 @@ snapshots:
       jest-util: 29.7.0
       p-limit: 3.1.0
 
-  jest-circus@26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2)):
+  jest-circus@26.6.3:
     dependencies:
       '@babel/traverse': 7.25.9
       '@jest/environment': 26.6.2
@@ -45633,11 +45549,7 @@ snapshots:
       stack-utils: 2.0.6
       throat: 5.0.0
     transitivePeerDependencies:
-      - bufferutil
-      - canvas
       - supports-color
-      - ts-node
-      - utf-8-validate
 
   jest-circus@27.5.1:
     dependencies:
@@ -45827,7 +45739,7 @@ snapshots:
   jest-config@26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2)):
     dependencies:
       '@babel/core': 7.25.7
-      '@jest/test-sequencer': 26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
+      '@jest/test-sequencer': 26.6.3
       '@jest/types': 26.6.2
       babel-jest: 26.6.3(@babel/core@7.25.7)
       chalk: 4.1.2
@@ -46039,19 +45951,6 @@ snapshots:
       - debug
       - supports-color
 
-  jest-dev-server@6.2.0:
-    dependencies:
-      chalk: 4.1.2
-      cwd: 0.10.0
-      find-process: 1.4.7
-      prompts: 2.4.2
-      spawnd: 6.2.0
-      tree-kill: 1.2.2
-      wait-on: 6.0.1
-    transitivePeerDependencies:
-      - debug
-      - supports-color
-
   jest-dev-server@9.0.2:
     dependencies:
       chalk: 4.1.2
@@ -46193,17 +46092,6 @@ snapshots:
       '@types/node': 20.17.8
       jest-mock: 29.7.0
       jest-util: 29.7.0
-
-  jest-environment-puppeteer@6.1.1:
-    dependencies:
-      chalk: 4.1.2
-      cwd: 0.10.0
-      jest-dev-server: 6.2.0
-      jest-environment-node: 27.5.1
-      merge-deep: 3.0.3
-    transitivePeerDependencies:
-      - debug
-      - supports-color
 
   jest-fetch-mock@3.0.3(encoding@0.1.13):
     dependencies:
@@ -51088,7 +50976,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  puppeteer-core@13.7.0:
+  puppeteer-core@13.7.0(encoding@0.1.13):
     dependencies:
       cross-fetch: 3.1.5(encoding@0.1.13)
       debug: 4.3.4(supports-color@9.4.0)
@@ -51148,25 +51036,6 @@ snapshots:
       ws: 8.18.0
     transitivePeerDependencies:
       - bufferutil
-      - supports-color
-      - utf-8-validate
-
-  puppeteer@17.1.3(encoding@0.1.13):
-    dependencies:
-      cross-fetch: 3.1.5(encoding@0.1.13)
-      debug: 4.3.4(supports-color@9.4.0)
-      devtools-protocol: 0.0.1036444
-      extract-zip: 2.0.1
-      https-proxy-agent: 5.0.1
-      progress: 2.0.3
-      proxy-from-env: 1.1.0
-      rimraf: 3.0.2
-      tar-fs: 2.1.1
-      unbzip2-stream: 1.4.3
-      ws: 8.8.1
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
       - supports-color
       - utf-8-validate
 
@@ -53044,12 +52913,6 @@ snapshots:
       wait-port: 0.2.14
     transitivePeerDependencies:
       - supports-color
-
-  spawnd@6.2.0:
-    dependencies:
-      exit: 0.1.2
-      signal-exit: 3.0.7
-      tree-kill: 1.2.2
 
   spawnd@9.0.2:
     dependencies:
@@ -55051,16 +54914,6 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  wait-on@6.0.1:
-    dependencies:
-      axios: 0.25.0
-      joi: 17.11.0
-      lodash: 4.17.21
-      minimist: 1.2.8
-      rxjs: 7.8.1
-    transitivePeerDependencies:
-      - debug
-
   wait-on@7.2.0:
     dependencies:
       axios: 1.6.8
@@ -55998,8 +55851,6 @@ snapshots:
   ws@8.18.0: {}
 
   ws@8.5.0: {}
-
-  ws@8.8.1: {}
 
   x-default-browser@0.4.0:
     optionalDependencies:
