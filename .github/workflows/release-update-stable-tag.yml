@@ -14,12 +14,10 @@ jobs:
       - name: Validate release version
         id: extract-version
         uses: actions/github-script@v7
-        env:
-          VERSION: ${{ github.event.inputs.version }}
         with:
           script: |
-            const refName = process.env.VERSION;
-            const versionMatch = refName.match(/^release\/(\d+\.\d+(?:\.\d+)?)$/); // Match either X.Y or X.Y.Z formats
+            const versionInput = ${{ github.event.inputs.version }}
+            const versionMatch = versionInput.match(/^release\/(\d+\.\d+(?:\.\d+)?)$/); // Match either X.Y or X.Y.Z formats
             if (versionMatch) {
               const version = versionMatch[1];
               console.log(`Extracted version: ${version}`);
