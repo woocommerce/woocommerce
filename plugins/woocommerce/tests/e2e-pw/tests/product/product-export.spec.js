@@ -221,6 +221,7 @@ test.describe( 'Product > Export Selected Products', () => {
 
 	test( 'should show the default export screen when no products are selected', async ( {
 		page,
+		// eslint-disable-next-line no-unused-vars
 		productsFixture,
 	} ) => {
 		await test.step( 'Navigate to product list', async () => {
