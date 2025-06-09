@@ -261,12 +261,12 @@ class CartController {
 			$this->throw_default_product_exception( $product );
 		}
 
-		if ( 0 === (int) $request['quantity'] ) {
+		if ( floatval( $request['quantity'] ) <= 0 ) {
 			throw new RouteException(
 				'woocommerce_rest_product_invalid_quantity',
 				sprintf(
 					/* translators: %s: product name */
-					esc_html__( 'You cannot add &quot;%s&quot; with a quantity of 0 to the cart.', 'woocommerce' ),
+					esc_html__( 'You cannot add &quot;%s&quot; with a quantity less than or equal to 0 to the cart.', 'woocommerce' ),
 					esc_html( $product->get_name() )
 				),
 				400
