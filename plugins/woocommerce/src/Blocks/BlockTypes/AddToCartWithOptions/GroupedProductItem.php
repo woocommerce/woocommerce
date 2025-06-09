@@ -63,9 +63,8 @@ class GroupedProductItem extends AbstractBlock {
 		$block_content = AddToCartWithOptionsUtils::render_block_with_context(
 			$block,
 			array(
-				'postType'                             => 'product',
-				'postId'                               => $post->ID,
-				'isDescendantOfGroupedProductSelector' => true,
+				'postType' => 'product',
+				'postId'   => $post->ID,
 			),
 		);
 
