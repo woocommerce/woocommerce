@@ -42,7 +42,7 @@
 		"wireit": "0.14.12"
 	},
 	"dependencies": {
-		"sourcebuster": "github:woocommerce/sourcebuster-js#v1.2.0"
+		"sourcebuster": "github:woocommerce/sourcebuster-js#d7f4616d5a17e17db925ca1842457f309379d861"
 	},
 	"wireit": {
 		"build:project:assets": {
