@@ -99,11 +99,6 @@ class ProductGalleryLargeImage extends AbstractBlock {
 			}
 		}
 
-		// $processor = new \WP_HTML_Tag_Processor( $content );
-		// $processor->next_tag();
-		// $processor->remove_class( 'wp-block-woocommerce-product-gallery-large-image' );
-		// $content = $processor->get_updated_html();
-
 		ob_start();
 		?>
 			<div class="wc-block-product-gallery-large-image wp-block-woocommerce-product-gallery-large-image">
@@ -121,6 +116,50 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	}
 
 	/**
+	 * Update the single image html.
+	 *
+	 * @param string $image_html The image html.
+	 * @param array  $context The block context.
+	 * @param int    $index The index of the image.
+	 * @return string
+	 */
+	private function update_single_image( $image_html, $context, $index ) {
+		$p = new \WP_HTML_Tag_Processor( $image_html );
+		$p->next_tag( 'img' );
+		$p->set_attribute( 'tabindex', '-1' );
+		$p->set_attribute( 'draggable', 'false' );
+		$p->set_attribute( 'data-wp-on--click', 'actions.onSelectedLargeImageClick' );
+		$p->set_attribute( 'data-wp-on--touchstart', 'actions.onTouchStart' );
+		$p->set_attribute( 'data-wp-on--touchmove', 'actions.onTouchMove' );
+		$p->set_attribute( 'data-wp-on--touchend', 'actions.onTouchEnd' );
+
+		if ( 0 === $index ) {
+			$p->set_attribute( 'fetchpriority', 'high' );
+		} else {
+			$p->set_attribute( 'fetchpriority', 'low' );
+			$p->set_attribute( 'loading', 'lazy' );
+		}
+
+		$img_classes = 'wc-block-woocommerce-product-gallery-large-image__image';
+
+		if ( $context['fullScreenOnClick'] ) {
+			$img_classes .= ' wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click';
+
+			$p->set_attribute( 'data-wp-on--click', 'actions.openDialog' );
+		}
+		if ( $context['hoverZoom'] ) {
+			$img_classes .= ' wc-block-woocommerce-product-gallery-large-image__image--hoverZoom';
+
+			$p->set_attribute( 'data-wp-on--mousemove', 'actions.startZoom' );
+			$p->set_attribute( 'data-wp-on--mouseleave', 'actions.resetZoom' );
+		}
+
+		$p->add_class( $img_classes );
+
+		return $p->get_updated_html();
+	}
+
+	/**
 	 * Get the main images html code. The first element of the array contains the HTML of the first image that is visible, the second element contains the HTML of the other images that are hidden.
 	 *
 	 * @param array       $context The block context.
@@ -129,15 +168,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	 * @return array
 	 */
 	private function get_main_images_html( $context, $product, $inner_block ) {
-		$image_data   = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_single' );
-		$base_classes = 'wc-block-woocommerce-product-gallery-large-image__image';
-
-		if ( $context['fullScreenOnClick'] ) {
-			$base_classes .= ' wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click';
-		}
-		if ( $context['hoverZoom'] ) {
-			$base_classes .= ' wc-block-woocommerce-product-gallery-large-image__image--hoverZoom';
-		}
+		$image_data = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_single' );
 
 		ob_start();
 		?>
@@ -150,15 +181,18 @@ class ProductGalleryLargeImage extends AbstractBlock {
 				aria-roledescription="carousel"
 			>
 				<?php foreach ( $image_data as $index => $image ) : ?>
-					<li class="wc-block-product-gallery-large-image__wrapper">
+					<li
+						class="wc-block-product-gallery-large-image__wrapper"
+					>
 						<?php
-						$image_html = (
-							new WP_Block(
-								$inner_block->parsed_block,
-								array_merge( $context, array( 'imageId' => $image['id'] ) )
-							)
-						)->render( array( 'dynamic' => true ) );
-						echo $image_html;
+							$image_html = (
+								new WP_Block(
+									$inner_block->parsed_block,
+									array_merge( $context, array( 'imageId' => $image['id'] ) )
+								)
+							)->render( array( 'dynamic' => true ) );
+
+							echo $this->update_single_image( $image_html, $context, $index );
 						?>
 					</li>
 				<?php endforeach; ?>
