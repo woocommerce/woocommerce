@@ -261,6 +261,18 @@ class CartController {
 			$this->throw_default_product_exception( $product );
 		}
 
+		if ( 0 === (int) $request['quantity'] ) {
+			throw new RouteException(
+				'woocommerce_rest_product_invalid_quantity',
+				sprintf(
+					/* translators: %s: product name */
+					__( 'You cannot add &quot;%s&quot; with a quantity of 0 to the cart.', 'woocommerce' ),
+					$product->get_name()
+				),
+				400
+			);
+		}
+
 		if ( ! $product->is_in_stock() ) {
 			throw new RouteException(
 				'woocommerce_rest_product_out_of_stock',
