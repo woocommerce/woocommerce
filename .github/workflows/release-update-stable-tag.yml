@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version (in X.Y.Z format)'
+        description: 'Version (in X.Y or X.Y.Z format)'
         required: true
         default: ''
 
@@ -17,12 +17,12 @@ jobs:
         with:
           script: |
             const versionInput = '${{ github.event.inputs.version }}';
-            const versionMatch = versionInput.match(/^release\/(\d+\.\d+(?:\.\d+)?)$/); // Match either X.Y or X.Y.Z formats
+              const versionMatch = versionInput.match(/^(\d+\.\d+(?:\.\d+)?)$/); // Match X.Y or X.Y.Z
             if (versionMatch) {
               const version = versionMatch[1];
               console.log(`Extracted version: ${version}`);
               core.setOutput('version', version);
             } else {
-              core.setFailed(`Version ${version} does not match the expected format (X.Y or X.Y.Z)`);
+              core.setFailed(`Version ${versionInput} does not match the expected format (X.Y or X.Y.Z)`);
               process.exit(1);
             }
