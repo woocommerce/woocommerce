@@ -9,22 +9,32 @@ import { existsSync } from 'fs';
 /**
  * Internal dependencies
  */
-import { getEnvVar, isGithubCI } from '../core/environment';
+import { isGithubCI } from '../core/environment';
 import { Logger } from '../core/logger';
 
 // Resolves channel IDs from the SLACK_CHANNELS env variable (comma-separated).
 // Throws if not set or empty.
 export function resolveChannels(): string[] {
 	const value = process.env.SLACK_CHANNELS;
+	const errorMessage =
+		'SLACK_CHANNELS environment variable must be set with comma-separated channel IDs.';
+
 	if ( ! value ) {
-		Logger.error(
-			'SLACK_CHANNELS environment variable must be set with comma-separated channel IDs.'
-		);
+		Logger.error( errorMessage );
+		return null;
 	}
-	return value
+
+	const channels = value
 		.split( ',' )
 		.map( ( v ) => v.trim() )
 		.filter( Boolean );
+
+	if ( channels.length === 0 ) {
+		Logger.error( errorMessage );
+		return null;
+	}
+
+	return channels;
 }
 
 export async function sendMessage(
@@ -104,18 +114,4 @@ export async function sendFile(
 		}
 	}
 	Logger.endTask();
-}
-
-export async function postToSlack( text: string, options ) {
-	const token = getEnvVar( 'SLACK_TOKEN', true );
-	const channels = resolveChannels();
-	const client = new WebClient( token );
-
-	if ( options.file ) {
-		// File upload mode
-		await sendFile( client, text, options.file, channels, options.replyTs );
-	} else {
-		// Message mode
-		await sendMessage( client, text, channels );
-	}
 }
