@@ -150,7 +150,6 @@
 		"@typescript-eslint/parser": "5.56.0",
 		"@woocommerce/customer-effort-score": "workspace:*",
 		"@woocommerce/data": "workspace:*",
-		"@woocommerce/e2e-utils": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/api-fetch": "6.21.0",
 		"@wordpress/babel-preset-default": "next",

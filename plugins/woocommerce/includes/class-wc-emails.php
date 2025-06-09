@@ -525,7 +525,9 @@ class WC_Emails {
 		 * Filter the columns of the order downloads table.
 		 *
 		 * @since 3.2.0
-		 * @param array $columns Array of columns.
+		 * @since 10.0.0 Added $order parameter.
+		 * @param array    $columns Array of columns.
+		 * @param WC_Order $order  Order object.
 		 */
 		$columns = apply_filters(
 			'woocommerce_email_downloads_columns',
@@ -533,7 +535,8 @@ class WC_Emails {
 				'download-product' => __( 'Product', 'woocommerce' ),
 				'download-expires' => __( 'Expires', 'woocommerce' ),
 				'download-file'    => __( 'Download', 'woocommerce' ),
-			)
+			),
+			$order
 		);
 
 		if ( $plain_text ) {
