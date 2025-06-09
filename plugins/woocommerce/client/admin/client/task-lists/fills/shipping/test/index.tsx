@@ -44,7 +44,7 @@ describe( 'Shipping', () => {
 	it( 'should trigger event tasklist_shipping_visit_marketplace_click when clicking the WooCommerce Marketplace link', () => {
 		render( <Shipping { ...props } /> );
 
-		fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
+		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'tasklist_shipping_visit_marketplace_click',
@@ -67,7 +67,7 @@ describe( 'Shipping', () => {
 
 		render( <Shipping { ...props } /> );
 
-		fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
+		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 
 		expect( mockLocation.href ).toContain(
 			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping'

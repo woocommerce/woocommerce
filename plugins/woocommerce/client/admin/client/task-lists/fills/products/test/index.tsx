@@ -284,7 +284,7 @@ describe( 'Products', () => {
 	it( 'should trigger event tasklist_add_product_visit_marketplace_click when clicking the WooCommerce Marketplace link', () => {
 		const { getByText } = render( <Products /> );
 
-		userEvent.click( getByText( 'The WooCommerce Marketplace' ) );
+		userEvent.click( getByText( 'the WooCommerce Marketplace' ) );
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'tasklist_add_product_visit_marketplace_click',
@@ -303,7 +303,7 @@ describe( 'Products', () => {
 
 		const { getByText } = render( <Products /> );
 
-		userEvent.click( getByText( 'The WooCommerce Marketplace' ) );
+		userEvent.click( getByText( 'the WooCommerce Marketplace' ) );
 		expect( mockLocation.href ).toContain(
 			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
 		);

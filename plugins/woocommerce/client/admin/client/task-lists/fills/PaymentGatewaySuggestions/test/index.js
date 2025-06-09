@@ -404,7 +404,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 		);
 
 		fireEvent.click( screen.getByText( 'Other payment providers' ) );
-		fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
+		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 		expect(
 			recordEvent.mock.calls[ recordEvent.mock.calls.length - 1 ]
 		).toEqual( [ 'tasklist_payment_see_more', {} ] );
@@ -464,7 +464,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			<PaymentGatewaySuggestions onComplete={ () => {} } query={ {} } />
 		);
 
-		fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
+		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 		expect( mockLocation.href ).toContain(
 			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
 		);

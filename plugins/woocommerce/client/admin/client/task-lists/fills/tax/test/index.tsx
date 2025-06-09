@@ -135,7 +135,7 @@ it( 'should trigger event tasklist_tax_visit_marketplace_click when clicking the
 		/>
 	);
 
-	fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
+	fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 
 	expect( recordEvent ).toHaveBeenCalledWith(
 		'tasklist_tax_visit_marketplace_click',
@@ -164,7 +164,7 @@ it( 'should navigate to the marketplace when clicking the WooCommerce Marketplac
 		/>
 	);
 
-	fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
+	fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 
 	expect( mockLocation.href ).toContain(
 		'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=operations'

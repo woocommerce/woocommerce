@@ -19,7 +19,7 @@ interface TrackedLinkProps {
 	textProps?: TextProps;
 	/**
 	 * The complete translatable string that includes {{Link}} and {{/Link}} placeholders
-	 * Example: "Visit {{Link}}The WooCommerce Marketplace{{/Link}} to find more tax solutions"
+	 * Example: "Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more tax solutions"
 	 */
 	message: string;
 	eventName?: string;

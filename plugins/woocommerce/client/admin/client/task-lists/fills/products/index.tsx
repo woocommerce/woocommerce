@@ -196,7 +196,7 @@ export const Products = () => {
 					} }
 					message={ __(
 						// translators: {{Link}} is a placeholder for a html element.
-						'Visit {{Link}}The WooCommerce Marketplace{{/Link}} to enhance your store with additional options such as Subscriptions, Gift Cards, and more.',
+						'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to enhance your store with additional options such as Subscriptions, Gift Cards, and more.',
 						'woocommerce'
 					) }
 					eventName="tasklist_add_product_visit_marketplace_click"

@@ -32,7 +32,7 @@ describe( 'SettingsPaymentsMain', () => {
 	it( 'should trigger event recommendations_other_options when clicking the WooCommerce Marketplace link', () => {
 		render( <SettingsPaymentsMain /> );
 
-		fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
+		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_recommendations_other_options',
@@ -58,7 +58,7 @@ describe( 'SettingsPaymentsMain', () => {
 
 		render( <SettingsPaymentsMain /> );
 
-		fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
+		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 
 		expect( mockLocation.href ).toContain(
 			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'

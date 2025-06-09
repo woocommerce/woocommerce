@@ -272,7 +272,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 				<TrackedLink
 					message={ __(
 						// translators: {{Link}} is a placeholder for a html element.
-						'Visit {{Link}}The WooCommerce Marketplace{{/Link}} to find additional payment providers.',
+						'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find additional payment providers.',
 						'woocommerce'
 					) }
 					onClickCallback={ trackSeeMore }

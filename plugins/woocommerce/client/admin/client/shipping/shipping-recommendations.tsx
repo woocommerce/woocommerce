@@ -89,7 +89,7 @@ export const ShippingRecommendationsList = ( {
 			<TrackedLink
 				message={ __(
 					// translators: {{Link}} is a placeholder for a html element.
-					'Visit {{Link}}The WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
+					'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
 					'woocommerce'
 				) }
 				targetUrl={

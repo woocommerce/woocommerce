@@ -77,7 +77,7 @@ export const Partners = ( {
 				} }
 				message={ __(
 					// translators: {{Link}} is a placeholder for a html element.
-					'Visit {{Link}}The WooCommerce Marketplace{{/Link}} to find more tax solutions.',
+					'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more tax solutions.',
 					'woocommerce'
 				) }
 				eventName="tasklist_tax_visit_marketplace_click"

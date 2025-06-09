@@ -183,7 +183,7 @@ describe( 'Payment recommendations', () => {
 		const { container } = render( <PaymentRecommendations /> );
 
 		expect( container.firstChild ).not.toBeNull();
-		fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
+		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payment_recommendations_visit_marketplace_click',
 			{}
@@ -341,7 +341,7 @@ describe( 'Payment recommendations', () => {
 			);
 
 			expect( container.firstChild ).not.toBeNull();
-			fireEvent.click( getByText( 'The WooCommerce Marketplace' ) );
+			fireEvent.click( getByText( 'the WooCommerce Marketplace' ) );
 			expect( mockLocation.href ).toContain(
 				'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
 			);

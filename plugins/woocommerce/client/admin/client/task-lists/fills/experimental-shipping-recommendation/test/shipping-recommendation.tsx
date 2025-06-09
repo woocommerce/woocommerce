@@ -152,7 +152,7 @@ describe( 'ShippingRecommendation', () => {
 	test( 'should trigger event tasklist_shipping_recommendation_visit_marketplace_click when clicking the WooCommerce Marketplace link', () => {
 		render( <ShippingRecommendation /> );
 
-		fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
+		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'tasklist_shipping_recommendation_visit_marketplace_click',
@@ -175,7 +175,7 @@ describe( 'ShippingRecommendation', () => {
 
 		render( <ShippingRecommendation /> );
 
-		fireEvent.click( screen.getByText( 'The WooCommerce Marketplace' ) );
+		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 
 		expect( mockLocation.href ).toContain(
 			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping'
