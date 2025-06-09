@@ -3700,9 +3700,6 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^5.62.0
         version: 5.62.0(eslint@8.55.0)(typescript@5.7.2)
-      '@woocommerce/admin-e2e-tests':
-        specifier: workspace:*
-        version: link:../../../../packages/js/admin-e2e-tests
       '@woocommerce/admin-layout':
         specifier: workspace:*
         version: link:../../../../packages/js/admin-layout
@@ -4266,9 +4263,6 @@ importers:
       '@woocommerce/data':
         specifier: workspace:*
         version: link:../../../../packages/js/data
-      '@woocommerce/e2e-utils':
-        specifier: workspace:*
-        version: link:../../../../packages/js/e2e-utils
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../../../../packages/js/eslint-plugin
@@ -28599,9 +28593,7 @@ snapshots:
       source-map: 0.6.1
       string-length: 2.0.0
     transitivePeerDependencies:
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@jest/reporters@25.5.1':
     dependencies:
@@ -48679,9 +48671,7 @@ snapshots:
       pretty-format: 24.9.0
       throat: 4.1.0
     transitivePeerDependencies:
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   jest-jasmine2@25.5.4:
     dependencies:
