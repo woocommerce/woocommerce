@@ -6877,6 +6877,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 						$step_id => array(
 							'data' => array(
 								'self_assessment' => $self_assessment,
+								'capabilities'    => array(),
 							),
 						),
 					),
@@ -6969,6 +6970,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 						$step_id => array(
 							'data' => array(
 								'self_assessment' => $stored_self_assessment,
+								'capabilities'    => array(),
 							),
 						),
 					),
