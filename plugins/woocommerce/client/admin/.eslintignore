@@ -17,5 +17,4 @@ e2e-environment
 e2e-utils
 
 # These packages don't have their eslint setup, but have many lint errors.
-api-core-tests
 e2e-core-tests

@@ -7,7 +7,6 @@ ignore:
     - '**/test'
     - 'tools/**'
     - 'packages/js/admin-e2e-tests'
-    - 'packages/js/api-core-tests'
     - 'packages/js/create-woo-extension'
     - 'packages/js/e2e-core-tests'
     - 'packages/js/e2e-environment'
