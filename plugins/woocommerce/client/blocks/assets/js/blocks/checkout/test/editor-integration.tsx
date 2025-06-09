@@ -69,12 +69,18 @@ describe( 'Checkout block editor integration', () => {
 			await userEvent.click( orderSummaryAppendButton );
 		} );
 
+		const options = screen.getAllByRole( 'option' );
+		const tableOption = options.find(
+			( element ) => element.textContent === 'Table'
+		);
+		const audioOption = options.find(
+			( element ) => element.textContent === 'Audio'
+		);
+
 		// Verify Table option is available (should be available on all blocks).
-		const tableOption = screen.getByRole( 'option', { name: /Table/i } );
 		expect( tableOption ).toBeInTheDocument();
 
 		// Verify Audio option is available (added only for checkout totals block).
-		const audioOption = screen.getByRole( 'option', { name: /Audio/i } );
 		expect( audioOption ).toBeInTheDocument();
 
 		await act( async () => {

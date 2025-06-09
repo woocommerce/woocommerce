@@ -64,12 +64,18 @@ describe( 'Cart block editor integration', () => {
 			await userEvent.click( orderSummaryAddButton );
 		} );
 
+		const options = screen.getAllByRole( 'option' );
+		const tableOption = options.find(
+			( element ) => element.textContent === 'Table'
+		);
+		const audioOption = options.find(
+			( element ) => element.textContent === 'Audio'
+		);
+
 		// Verify Table option is available (should be available on all blocks).
-		const tableOption = screen.getByRole( 'option', { name: /Table/i } );
 		expect( tableOption ).toBeInTheDocument();
 
 		// Verify Audio option is available (added only for order summary block).
-		const audioOption = screen.getByRole( 'option', { name: /Audio/i } );
 		expect( audioOption ).toBeInTheDocument();
 
 		// Test Filled Cart block - should only have Table option (no block-specific Audio filter).
