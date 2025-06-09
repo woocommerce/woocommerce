@@ -11,7 +11,6 @@ ignore:
     - 'packages/js/create-woo-extension'
     - 'packages/js/e2e-core-tests'
     - 'packages/js/e2e-environment'
-    - 'packages/js/e2e-utils'
     - 'packages/js/eslint-plugin'
     - 'packages/js/internal-e2e-builds'
     - 'packages/js/internal-js-tests'
