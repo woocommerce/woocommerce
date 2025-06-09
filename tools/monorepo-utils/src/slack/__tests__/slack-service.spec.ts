@@ -89,17 +89,19 @@ describe( 'sendMessage', () => {
 	it( 'should send a message to all channels and log notice on success', async () => {
 		client.chat.postMessage.mockResolvedValue( { ok: true, ts: '123' } );
 		const channels = [ 'C1', 'C2' ];
-		await sendMessage( client, 'Hello', channels );
+		await sendMessage( client, 'Hello', channels, undefined );
 		expect( client.chat.postMessage ).toHaveBeenCalledTimes(
 			channels.length
 		);
 		expect( client.chat.postMessage ).toHaveBeenCalledWith( {
 			channel: 'C1',
 			text: 'Hello',
+			thread_ts: null,
 		} );
 		expect( client.chat.postMessage ).toHaveBeenCalledWith( {
 			channel: 'C2',
 			text: 'Hello',
+			thread_ts: null,
 		} );
 	} );
 
@@ -135,7 +137,7 @@ describe( 'sendMessage', () => {
 		},
 	] )( '$desc', async ( { setup, expectedError } ) => {
 		const { text, channels } = setup( client );
-		await sendMessage( client, text, channels );
+		await sendMessage( client, text, channels, undefined );
 		expect( Logger.error ).toHaveBeenCalledWith( expectedError );
 	} );
 } );

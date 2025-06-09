@@ -20,7 +20,7 @@ export async function postToSlack( text: string, options ) {
 		await sendFile( client, text, options.file, channels, options.replyTs );
 	} else {
 		// Message mode
-		await sendMessage( client, text, channels );
+		await sendMessage( client, text, channels, options.replyTs );
 	}
 }
 

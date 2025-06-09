@@ -44,7 +44,8 @@ describe( 'postToSlack', () => {
 			expect( sendMessage ).toHaveBeenCalledWith(
 				expect.any( WebClient ),
 				'Hello Slack :wave:',
-				[ 'C123' ]
+				[ 'C123' ],
+				undefined
 			);
 		} );
 

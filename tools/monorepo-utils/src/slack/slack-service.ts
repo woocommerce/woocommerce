@@ -48,12 +48,14 @@ export function resolveChannels(): string[] {
  * @param {WebClient} client   - An instance of Slack WebClient.
  * @param {string}    text     - The message text to send.
  * @param {string[]}  channels - Array of channel IDs to send the message to.
+ * @param {string}    replyTs  - (Optional) Thread timestamp to reply to (for threading uploads).
  * @return {Promise<void>}
  */
 export async function sendMessage(
 	client: WebClient,
 	text: string,
-	channels: string[]
+	channels: string[],
+	replyTs: string
 ) {
 	if ( ! text ) {
 		Logger.error( 'The text argument is missing.' );
@@ -66,6 +68,7 @@ export async function sendMessage(
 			const response = await client.chat.postMessage( {
 				channel,
 				text: text.replace( /\\n/g, '\n' ),
+				thread_ts: replyTs ? replyTs : null,
 			} );
 			if ( ! response.ok ) {
 				Logger.error(
