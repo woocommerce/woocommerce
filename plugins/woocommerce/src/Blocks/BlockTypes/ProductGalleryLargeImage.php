@@ -80,6 +80,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		}
 
 		$images_html = '';
+		$inner_blocks_html = '';
 
 		foreach ( $block->inner_blocks as $inner_block ) {
 			if ( $inner_block->name === 'woocommerce/product-image' ) {
@@ -94,7 +95,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 					)
 				)->render( array( 'dynamic' => true ) );
 
-				$images_html .= $inner_block_html;
+				$inner_blocks_html .= $inner_block_html;
 			}
 		}
 
@@ -109,9 +110,9 @@ class ProductGalleryLargeImage extends AbstractBlock {
 				<?php // No need to use wp_kses here because the image HTML is built internally. ?>
 				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php echo $images_html; ?>
-				<?php // No need to use wp_kses here because $content is inner blocks which are already escaped. ?>
-				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-				<?php echo $content; ?>
+				<div class="wc-block-product-gallery-large-image__inner-blocks">
+					<?php echo $inner_blocks_html; ?>
+				</div>
 			</div>
 		<?php
 		$html = ob_get_clean();
