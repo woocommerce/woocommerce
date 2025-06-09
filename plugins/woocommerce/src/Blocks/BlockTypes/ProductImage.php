@@ -158,9 +158,9 @@ class ProductImage extends AbstractBlock {
 			$image_style .= sprintf( 'min-height:%s;', $attributes['style']['dimensions']['minHeight'] );
 		}
 
-		$featured_image_id   = (int) $product->get_image_id();
-		$gallery_image_ids   = $product->get_gallery_image_ids();
-		$available_image_ids = array_merge( [ $featured_image_id ], $gallery_image_ids );
+		$featured_image_id          = (int) $product->get_image_id();
+		$gallery_image_ids          = $product->get_gallery_image_ids();
+		$available_image_ids        = array_merge( [ $featured_image_id ], $gallery_image_ids );
 		$provided_image_id_is_valid = $image_id && in_array( $image_id, $available_image_ids, true );
 
 		$target_image_id = $provided_image_id_is_valid ? $image_id : $featured_image_id;
@@ -202,12 +202,11 @@ class ProductImage extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$parsed_attributes = $this->parse_attributes( $attributes );
+		$parsed_attributes  = $this->parse_attributes( $attributes );
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
-		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
-		$image_id = isset( $block->context['imageId'] ) ? (int) $block->context['imageId'] : null;
-
-		$product = wc_get_product( $post_id );
+		$post_id            = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
+		$image_id           = isset( $block->context['imageId'] ) ? (int) $block->context['imageId'] : null;
+		$product            = wc_get_product( $post_id );
 
 		$classes = implode(
 			' ',
@@ -218,6 +217,7 @@ class ProductImage extends AbstractBlock {
 				)
 			)
 		);
+
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'class' => $classes,
