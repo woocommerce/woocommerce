@@ -249,40 +249,6 @@ importers:
         specifier: 0.14.12
         version: 0.14.12
 
-  packages/js/api-core-tests:
-    dependencies:
-      allure-commandline:
-        specifier: ^2.25.0
-        version: 2.25.0
-      dotenv:
-        specifier: ^10.0.0
-        version: 10.0.0
-      jest:
-        specifier: 27.5.x
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2))
-      jest-allure:
-        specifier: ^0.1.3
-        version: 0.1.3
-      jest-runner-groups:
-        specifier: ^2.2.0
-        version: 2.2.0(jest-docblock@29.7.0)(jest-runner@29.7.0)
-      postman-collection:
-        specifier: ^4.3.0
-        version: 4.3.0
-      supertest:
-        specifier: ^6.3.3
-        version: 6.3.3
-    devDependencies:
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
-      eslint:
-        specifier: ^8.55.0
-        version: 8.55.0
-      wireit:
-        specifier: 0.14.12
-        version: 0.14.12
-
   packages/js/block-templates:
     dependencies:
       '@woocommerce/expression-evaluation':
@@ -6312,10 +6278,6 @@ packages:
     resolution: {integrity: sha512-qQfo2mxH5yVom1kacMtZZJFVdW+E70mqHMJvVg6WTLo+VBuQJ4TojZlfWBjK0ve5BdEeNAVxOsl/nvNMpJOaJA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
-  '@faker-js/faker@5.5.3':
-    resolution: {integrity: sha512-R11tGE6yIFwqpaIqcfkcg7AICXzFg14+5h5v0TfF/9+RMDL6jhzCy/pxHVOfbALGdtVYdt6JdR21tuxEgl34dw==}
-    deprecated: Please update to a newer version.
-
   '@faker-js/faker@9.3.0':
     resolution: {integrity: sha512-r0tJ3ZOkMd9xsu3VRfqlFR6cz0V/jFYRswAIpC+m/DIfAUXq7g8N7wTAlhSANySXYGKzGryfDXwtwsY8TxEIDw==}
     engines: {node: '>=18.0.0', npm: '>=9.0.0'}
@@ -9015,9 +8977,6 @@ packages:
     resolution: {integrity: sha512-qaGV9ltJP0EO25YfFUPhxRVK0evXFIAGicsVXuRim4Ed9cjPxYhNnNJ49SFmbeLgtxpslIkX317IgpfcHPVj/A==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
 
-  '@types/allure-js-commons@0.0.0':
-    resolution: {integrity: sha512-LvREMEGmh0oZIQ11d/vt6BSv6CD0w3berVRRFrpgDVkRhAu+UFkreDrRrdl+01PFjf7/J0lJV1UrhVyRS2tOWA==}
-
   '@types/aria-query@4.2.2':
     resolution: {integrity: sha512-HnYpAE1Y6kRyKM/XkEuiRQhTHvkzMBurTHnpFLYLBGPIylZNPs9jJcuOOYWxPLJCSEtmZT0Y8rHDokKN7rRTig==}
 
@@ -9198,9 +9157,6 @@ packages:
   '@types/jest-environment-puppeteer@5.0.2':
     resolution: {integrity: sha512-YCdegQnDou6aIK8wqygDDctHgJZtlXd03fI9Bgbqkdu66EFKnImmt7auiR9OkxkSSiqS9smn0joX2pGpVs7ErA==}
 
-  '@types/jest@22.2.3':
-    resolution: {integrity: sha512-e74sM9W/4qqWB6D4TWV9FQk0WoHtX1X4FJpbjxucMSVJHtFjbQOH3H6yp+xno4br0AKG0wz/kPtaN599GUOvAg==}
-
   '@types/jest@27.5.2':
     resolution: {integrity: sha512-mpT8LJJ4CMeeahobofYWIjFo0xonRS/HfxnVEPMPFSQdGUt1uHCnoPT7Zhb+sjDU2wz0oKV0OLUR0WzrHNgfeA==}
 
@@ -9281,9 +9237,6 @@ packages:
 
   '@types/node-forge@1.3.10':
     resolution: {integrity: sha512-y6PJDYN4xYBxwd22l+OVH35N+1fCYWiuC3aiP2SlXVE6Lo7SS+rSx9r89hLxrP4pn6n1lBGhHJ12pj3F3Mpttw==}
-
-  '@types/node@10.17.60':
-    resolution: {integrity: sha512-F0KIgDJfy2nA3zMLmWGKxcH2ZVEtCZXHHdOQs2gSaQ27+lNeEfGxzkIw90aXswATX7AZ33tahPbzy6KAfUreVw==}
 
   '@types/node@15.14.9':
     resolution: {integrity: sha512-qjd88DrCxupx/kJD5yQgZdcYKZKSIGBVDIBE1/LTGcNm3d2Np/jxojkdePDdfnBHJc5W7vSMpbJ1aB7p/Py69A==}
@@ -9404,9 +9357,6 @@ packages:
 
   '@types/string-similarity@4.0.0':
     resolution: {integrity: sha512-dMS4S07fbtY1AILG/RhuwmptmzK1Ql8scmAebOTJ/8iBtK/KI17NwGwKzu1uipjj8Kk+3mfPxum56kKZE93mzQ==}
-
-  '@types/strip-ansi@3.0.0':
-    resolution: {integrity: sha512-wVhzc+WJ/JNdV25MeaK0skxGdbdOFeqYv1sqY8yPXbsshZ0XwSbWWwfKzj836cPW+e+PpqUNvKoiac9ZqCdyRQ==}
 
   '@types/tapable@1.0.12':
     resolution: {integrity: sha512-bTHG8fcxEqv1M9+TD14P8ok8hjxoOCkfKc8XXLaaD05kI7ohpeI956jtDOD3XHKBQrlyPughUtzm1jtVhHpA5Q==}
@@ -11974,16 +11924,9 @@ packages:
   ajv@8.17.1:
     resolution: {integrity: sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g==}
 
-  allure-commandline@2.25.0:
-    resolution: {integrity: sha512-HYMQwuX/8ySTrXqgr6ZY830c6xgRbSusxVwZIBbDyNTCDb3mqK2b1ENjsD8yhl/7/8S02NZCDAwJFxt3f8qL9Q==}
-    hasBin: true
-
   allure-commandline@2.32.2:
     resolution: {integrity: sha512-+O+a4laukvO/jqWLV/PenQo4an9igZgo+TuAX10D+Do4K03EPyCcmxCel/EXp8NUMb3ExErrrozyX/0o6I8qbA==}
     hasBin: true
-
-  allure-js-commons@1.3.2:
-    resolution: {integrity: sha512-FTmoqP36ZjHFT4iLdYamyCFhyj1jqD6BIdiZ5pBlyafDJrFRV76XIXNxwRqbHpSw40o1vHzYi4vGpmREnhnHVw==}
 
   allure-js-commons@2.9.2:
     resolution: {integrity: sha512-Qvi+zMZQruklqcnqG/zHCnE209v1YiWGhO3H2aPW2aXC8Ockqd01a+w2lP4Qqp3SfC+WQDeAK2+pp+v+eNl8xQ==}
@@ -13036,10 +12979,6 @@ packages:
 
   charenc@0.0.2:
     resolution: {integrity: sha512-yrLQ/yVUFXkzg7EDQsPieE/53+0RlaWTs+wBrvW36cyilJ2SaDWfl4Yj7MtLTXleV9uEKefbAGUPv2/iWSooRA==}
-
-  charset@1.0.1:
-    resolution: {integrity: sha512-6dVyOOYjpfFcL1Y4qChrAoQLRHvj2ziyhcm0QJlhOcAhykL/k1kTUPbeo+87MNRTRdk2OIIsIXbuF3x2wi5EXg==}
-    engines: {node: '>=4.0.0'}
 
   check-node-version@4.2.1:
     resolution: {integrity: sha512-YYmFYHV/X7kSJhuN/QYHUu998n/TRuDe8UenM3+m5NrkiH670lb9ILqHIvBencvJc4SDh+XcbXMR4b+TtubJiw==}
@@ -15419,14 +15358,6 @@ packages:
   file-system-cache@2.3.0:
     resolution: {integrity: sha512-l4DMNdsIPsVnKrgEXbJwDJsA5mB8rGwHYERMgqQx/xAUtChPJMre1bXBzDEqqVbWv9AIbFezXMxeEkZDSrXUOQ==}
 
-  file-type@3.9.0:
-    resolution: {integrity: sha512-RLoqTXE8/vPmMuTI88DAzhMYC99I8BWv7zYP4A1puo5HIjEJ5EX48ighy4ZyKMG9EDXxBgW6e++cn7d1xuFghA==}
-    engines: {node: '>=0.10.0'}
-
-  file-type@7.7.1:
-    resolution: {integrity: sha512-bTrKkzzZI6wH+NXhyD3SOXtb2zXTw2SbwI2RxUlRcXVsnN7jNL5hJzVQLYv7FOQhxFkK4XWdAflEaWFpaLLWpQ==}
-    engines: {node: '>=4'}
-
   file-uri-to-path@1.0.0:
     resolution: {integrity: sha512-0Zt+s3L7Vf1biwWZ29aARiVYLx7iMGnEUl9x33fbB/j3jR81u/O2LbqK+Bm1CDSNDKVtJ/YjwY7TUd5SkeLQLw==}
 
@@ -16565,9 +16496,6 @@ packages:
     resolution: {integrity: sha512-7mz/721AbnJwIVbnaSv1Cz3Am0ZLT/UBwkC92VlxhXv/k/BBQfM2fXElQNC27BVGr0uwUpplYPQM9LnaBMR5NQ==}
     engines: {node: '>=8.0.0'}
 
-  http-reasons@0.1.0:
-    resolution: {integrity: sha512-P6kYh0lKZ+y29T2Gqz+RlC9WBLhKe8kDmcJ+A+611jFfxdPsbMRQ5aNmFRM3lENqFkK+HTTL+tlQviAiv0AbLQ==}
-
   http-signature@1.2.0:
     resolution: {integrity: sha512-CAbnr6Rz4CYQkLYUtSNXxQPUH2gK8f3iWexVlsnMeD+GjlsQ0Xsy1cOX+mN3dtxYomRy21CiOzU8Uhw6OwncEQ==}
     engines: {node: '>=0.8', npm: '>=1.3.7'}
@@ -17347,9 +17275,6 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  jest-allure@0.1.3:
-    resolution: {integrity: sha512-EkO3LmkPx/a4VDg81JKtdy6kFXI0D1rHRIJ5Sa9MZaGtFYpgiCJFa6XwTgIySaVN+3+QBbIt1558CEkIW7FKFA==}
-
   jest-changed-files@26.6.2:
     resolution: {integrity: sha512-fDS7szLcY9sCtIip8Fjry9oGf3I2ht/QT21bAHm5Dmf0mD4X3ReNUf17y+bO6fR8WgbIZTlbyG1ak/53cbRzKQ==}
     engines: {node: '>= 10.14.2'}
@@ -17646,13 +17571,6 @@ packages:
     resolution: {integrity: sha512-IOVhZSrg+UvVAshDSDtHyFCCBUl/Q3AAJv8iZ6ZjnZ74xzvwuzLXid9IIIPgTnY62SJjfuupMKZsZQRsCvxEgA==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
 
-  jest-runner-groups@2.2.0:
-    resolution: {integrity: sha512-Sp/B9ZX0CDAKa9dIkgH0sGyl2eDuScV4SVvOxqhBMxqWpsNAkmol/C58aTFmPWZj+C0ZTW1r1BSu66MTCN+voA==}
-    engines: {node: '>= 10.14.2'}
-    peerDependencies:
-      jest-docblock: '>= 24'
-      jest-runner: '>= 24'
-
   jest-runner@26.6.3:
     resolution: {integrity: sha512-atgKpRHnaA2OvByG/HpGA4g6CSPS/1LK0jK3gATJAoptC1ojltpmVlYC3TYgdmGp+GLuhzpH30Gvs36szSL2JQ==}
     engines: {node: '>= 10.14.2'}
@@ -17828,9 +17746,6 @@ packages:
   js-yaml@4.1.0:
     resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
     hasBin: true
-
-  js2xmlparser@3.0.0:
-    resolution: {integrity: sha512-CSOkdn0/GhRFwxnipmhXfqJ+FG6+wkWBi46kKSsPx6+j65176ZiQcrCYpg6K8x3iLbO4k3zScBnZ7I/L80dAtw==}
 
   jsbn@0.1.1:
     resolution: {integrity: sha512-UVU9dibq2JcFWxQPA6KCqj5O42VOmAY3zQUfEKxU0KpTGXwNoCjkX1e13eHNvw/xPynt6pU0rZ1htjWTNTSXsg==}
@@ -18161,10 +18076,6 @@ packages:
     resolution: {integrity: sha512-GbyK5iWinax5Dfw5obm2g2ccUiZXNGtAS4mCbJ0Lv4rq6iEtfBSjOYdcbOtAIFtM114t0vdpViDDetjVTSd8Vw==}
     engines: {node: ^14.13.1 || >=16.0.0}
     hasBin: true
-
-  liquid-json@0.3.1:
-    resolution: {integrity: sha512-wUayTU8MS827Dam6MxgD72Ui+KOSF+u/eIqpatOtjnvgJ0+mnDq33uC2M7J0tPK+upe/DpUAuK4JUU89iBoNKQ==}
-    engines: {node: '>=4'}
 
   listr2@4.0.5:
     resolution: {integrity: sha512-juGHV1doQdpNT3GSTs9IUN43QJb7KHdF9uqg7Vufs/tG9VTzpFphqF4pm/ICdAABGQxsyNn9CiYA3StkI6jpwA==}
@@ -18796,9 +18707,6 @@ packages:
   mime-db@1.52.0:
     resolution: {integrity: sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==}
     engines: {node: '>= 0.6'}
-
-  mime-format@2.0.1:
-    resolution: {integrity: sha512-XxU3ngPbEnrYnNbIX+lYSaYg0M01v6p2ntd2YaFksTu0vayaw5OJvbdRyWs07EYRlLED5qadUZ+xo+XhOvFhwg==}
 
   mime-types@2.1.35:
     resolution: {integrity: sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==}
@@ -20616,14 +20524,6 @@ packages:
   postcss@8.4.49:
     resolution: {integrity: sha512-OCVPnIObs4N29kxTjzLfUryOkvZEq+pf8jTF0lg8E7uETuWHA+v7j3c/xJmiqpX450191LlmZfUKkXxkTry7nA==}
     engines: {node: ^10 || ^12 || >=14}
-
-  postman-collection@4.3.0:
-    resolution: {integrity: sha512-QpmNOw1JhAVQTFWRz443/qpKs4/3T1MFrKqDZ84RS1akxOzhXXr15kD8+/+jeA877qyy9rfMsrFgLe2W7aCPjw==}
-    engines: {node: '>=10'}
-
-  postman-url-encoder@3.0.5:
-    resolution: {integrity: sha512-jOrdVvzUXBC7C+9gkIkpDJ3HIxOHTIqjpQ4C1EMt1ZGeMvSEpbFCKq23DEfgsj46vMnDgyQf+1ZLp2Wm+bKSsA==}
-    engines: {node: '>=10'}
 
   preact@10.25.1:
     resolution: {integrity: sha512-frxeZV2vhQSohQwJ7FvlqC40ze89+8friponWUFeVEkaCfhC6Eu4V0iND5C9CXz8JLndV07QRDeXzH1+Anz5Og==}
@@ -22800,18 +22700,9 @@ packages:
     engines: {node: '>=6.4.0 <13 || >=14'}
     deprecated: Please upgrade to v9.0.0+ as we have fixed a public vulnerability with formidable dependency. Note that v9.0.0+ requires Node.js v14.18.0+. See https://github.com/ladjs/superagent/pull/1800 for insight. This project is supported and maintained by the team at Forward Email @ https://forwardemail.net
 
-  superagent@8.1.2:
-    resolution: {integrity: sha512-6WTxW1EB6yCxV5VFOIPQruWGHqc3yI7hEmZK6h+pyk69Lk/Ut7rLUY6W/ONF2MjBuGjvmMiIpsrVJ2vjrHlslA==}
-    engines: {node: '>=6.4.0 <13 || >=14'}
-    deprecated: Please upgrade to v9.0.0+ as we have fixed a public vulnerability with formidable dependency. Note that v9.0.0+ requires Node.js v14.18.0+. See https://github.com/ladjs/superagent/pull/1800 for insight. This project is supported and maintained by the team at Forward Email @ https://forwardemail.net
-
   superjson@1.13.3:
     resolution: {integrity: sha512-mJiVjfd2vokfDxsQPOwJ/PtanO87LhpYY88ubI5dUB1Ab58Txbyje3+jpm+/83R/fevaq/107NNhtYBLuoTrFg==}
     engines: {node: '>=10'}
-
-  supertest@6.3.3:
-    resolution: {integrity: sha512-EMCG6G8gDu5qEqRQ3JjjPs6+FYT1a7Hv5ApHvtSghmOFJYtsU5S+pSb6Y2EUeCEY3CmEL3mmQ8YWlPOzQomabA==}
-    engines: {node: '>=6.4.0'}
 
   supports-color@2.0.0:
     resolution: {integrity: sha512-KKNVtd6pCYgPIKU4cp2733HWYCpplQhddZLBUryaAHou723x+FRzQ5Df824Fj+IyyuiQTRoub4SnIFfIcrp70g==}
@@ -24476,9 +24367,6 @@ packages:
 
   xmlchars@2.2.0:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
-
-  xmlcreate@1.0.2:
-    resolution: {integrity: sha512-Mbe56Dvj00onbnSo9J0qj/XlY5bfN9KidsOnpd5tRCsR3ekB3hyyNU9fGrTdqNT5ZNvv4BsA2TcQlignsZyVcw==}
 
   xstate@4.37.1:
     resolution: {integrity: sha512-MuB7s01nV5vG2CzaBg2msXLGz7JuS+x/NBkQuZAwgEYCnWA8iQMiRz2VGxD3pcFjZAOih3fOgDD3kDaFInEx+g==}
@@ -26665,8 +26553,6 @@ snapshots:
       - supports-color
 
   '@eslint/js@8.55.0': {}
-
-  '@faker-js/faker@5.5.3': {}
 
   '@faker-js/faker@9.3.0': {}
 
@@ -32267,8 +32153,6 @@ snapshots:
       '@tufjs/canonical-json': 1.0.0
       minimatch: 9.0.3
 
-  '@types/allure-js-commons@0.0.0': {}
-
   '@types/aria-query@4.2.2': {}
 
   '@types/aria-query@5.0.4': {}
@@ -32472,8 +32356,6 @@ snapshots:
       '@types/puppeteer': 5.4.7
       jest-environment-node: 27.5.1
 
-  '@types/jest@22.2.3': {}
-
   '@types/jest@27.5.2':
     dependencies:
       jest-matcher-utils: 27.5.1
@@ -32554,8 +32436,6 @@ snapshots:
   '@types/node-forge@1.3.10':
     dependencies:
       '@types/node': 20.17.8
-
-  '@types/node@10.17.60': {}
 
   '@types/node@15.14.9': {}
 
@@ -32687,8 +32567,6 @@ snapshots:
   '@types/stack-utils@2.0.3': {}
 
   '@types/string-similarity@4.0.0': {}
-
-  '@types/strip-ansi@3.0.0': {}
 
   '@types/tapable@1.0.12': {}
 
@@ -38734,18 +38612,7 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
-  allure-commandline@2.25.0: {}
-
   allure-commandline@2.32.2: {}
-
-  allure-js-commons@1.3.2:
-    dependencies:
-      file-type: 7.7.1
-      fs-extra: 6.0.1
-      js2xmlparser: 3.0.0
-      mime: 2.6.0
-      object-assign: 4.1.1
-      uuid: 3.4.0
 
   allure-js-commons@2.9.2:
     dependencies:
@@ -40178,8 +40045,6 @@ snapshots:
   chardet@0.7.0: {}
 
   charenc@0.0.2: {}
-
-  charset@1.0.1: {}
 
   check-node-version@4.2.1:
     dependencies:
@@ -43522,10 +43387,6 @@ snapshots:
       fs-extra: 11.1.1
       ramda: 0.29.0
 
-  file-type@3.9.0: {}
-
-  file-type@7.7.1: {}
-
   file-uri-to-path@1.0.0:
     optional: true
 
@@ -44991,8 +44852,6 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  http-reasons@0.1.0: {}
-
   http-signature@1.2.0:
     dependencies:
       assert-plus: 1.0.0
@@ -45760,15 +45619,6 @@ snapshots:
       chalk: 4.1.2
       filelist: 1.0.4
       minimatch: 3.1.2
-
-  jest-allure@0.1.3:
-    dependencies:
-      '@types/allure-js-commons': 0.0.0
-      '@types/jest': 22.2.3
-      '@types/node': 10.17.60
-      '@types/strip-ansi': 3.0.0
-      allure-js-commons: 1.3.2
-      strip-ansi: 4.0.0
 
   jest-changed-files@26.6.2:
     dependencies:
@@ -46665,11 +46515,6 @@ snapshots:
       resolve.exports: 2.0.2
       slash: 3.0.0
 
-  jest-runner-groups@2.2.0(jest-docblock@29.7.0)(jest-runner@29.7.0):
-    dependencies:
-      jest-docblock: 29.7.0
-      jest-runner: 29.7.0
-
   jest-runner@26.6.3(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@22.9.1)(typescript@5.7.2)):
     dependencies:
       '@jest/console': 26.6.2
@@ -47179,10 +47024,6 @@ snapshots:
     dependencies:
       argparse: 2.0.1
 
-  js2xmlparser@3.0.0:
-    dependencies:
-      xmlcreate: 1.0.2
-
   jsbn@0.1.1: {}
 
   jsbn@1.1.0: {}
@@ -47671,8 +47512,6 @@ snapshots:
     transitivePeerDependencies:
       - enquirer
       - supports-color
-
-  liquid-json@0.3.1: {}
 
   listr2@4.0.5(enquirer@2.4.1):
     dependencies:
@@ -48579,10 +48418,6 @@ snapshots:
       brorand: 1.1.0
 
   mime-db@1.52.0: {}
-
-  mime-format@2.0.1:
-    dependencies:
-      charset: 1.0.1
 
   mime-types@2.1.35:
     dependencies:
@@ -51017,24 +50852,6 @@ snapshots:
       nanoid: 3.3.7
       picocolors: 1.1.1
       source-map-js: 1.2.1
-
-  postman-collection@4.3.0:
-    dependencies:
-      '@faker-js/faker': 5.5.3
-      file-type: 3.9.0
-      http-reasons: 0.1.0
-      iconv-lite: 0.6.3
-      liquid-json: 0.3.1
-      lodash: 4.17.21
-      mime-format: 2.0.1
-      mime-types: 2.1.35
-      postman-url-encoder: 3.0.5
-      semver: 7.5.4
-      uuid: 8.3.2
-
-  postman-url-encoder@3.0.5:
-    dependencies:
-      punycode: 2.3.1
 
   preact@10.25.1: {}
 
@@ -53943,31 +53760,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  superagent@8.1.2:
-    dependencies:
-      component-emitter: 1.3.1
-      cookiejar: 2.1.4
-      debug: 4.3.5
-      fast-safe-stringify: 2.1.1
-      form-data: 4.0.0
-      formidable: 2.1.2
-      methods: 1.1.2
-      mime: 2.6.0
-      qs: 6.11.2
-      semver: 7.6.3
-    transitivePeerDependencies:
-      - supports-color
-
   superjson@1.13.3:
     dependencies:
       copy-anything: 3.0.5
-
-  supertest@6.3.3:
-    dependencies:
-      methods: 1.1.2
-      superagent: 8.1.2
-    transitivePeerDependencies:
-      - supports-color
 
   supports-color@2.0.0: {}
 
@@ -56257,8 +56052,6 @@ snapshots:
   xmlbuilder@11.0.1: {}
 
   xmlchars@2.2.0: {}
-
-  xmlcreate@1.0.2: {}
 
   xstate@4.37.1: {}
 
