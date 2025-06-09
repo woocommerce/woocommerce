@@ -3023,7 +3023,7 @@ function wc_update_961_migrate_default_email_base_color() {
 /**
  * Add old refunded order items to the product_lookup_table.
  */
-function wc_update_990_add_old_refunded_order_items_to_product_lookup_table() {
+function wc_update_1000_add_old_refunded_order_items_to_product_lookup_table() {
 	global $wpdb;
 
 	// Get every order ID where:
@@ -3065,7 +3065,7 @@ function wc_update_990_add_old_refunded_order_items_to_product_lookup_table() {
 /**
  * Update primary key to composite (order_item_id, order_id) in the wc_order_product_lookup table.
  */
-function wc_update_990_update_primary_key_to_composite_in_order_product_lookup_table() {
+function wc_update_1000_update_primary_key_to_composite_in_order_product_lookup_table() {
 	global $wpdb;
 	$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_product_lookup DROP PRIMARY KEY, ADD PRIMARY KEY (order_item_id, order_id)" );
 }
