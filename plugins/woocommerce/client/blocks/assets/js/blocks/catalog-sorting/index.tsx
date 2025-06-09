@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { registerBlockType } from '@wordpress/blocks';
+import { registerTemplateRestrictedBlockType } from '@woocommerce/atomic-utils';
 import { Icon } from '@wordpress/icons';
 import { totals } from '@woocommerce/icons';
 
@@ -12,7 +12,8 @@ import metadata from './block.json';
 import edit from './edit';
 import './style.scss';
 
-registerBlockType( metadata, {
+const blockConfig = {
+	...metadata,
 	icon: {
 		src: (
 			<Icon
@@ -21,11 +22,17 @@ registerBlockType( metadata, {
 			/>
 		),
 	},
-	attributes: {
-		...metadata.attributes,
-	},
 	edit,
-	save() {
-		return null;
-	},
+};
+
+registerTemplateRestrictedBlockType( blockConfig, {
+	isAvailableOnPostEditor: true,
+	templates: [
+		'archive-product',
+		'product-search-results',
+		'taxonomy-product_attribute',
+		'taxonomy-product_brand',
+		'taxonomy-product_cat',
+		'taxonomy-product_tag',
+	],
 } );
