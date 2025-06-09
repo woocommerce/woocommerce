@@ -10,7 +10,6 @@ import { existsSync } from 'fs';
 /**
  * Internal dependencies
  */
-import { requestAsync } from '../../../core/util';
 import { getEnvVar, isGithubCI } from '../../../core/environment';
 import { resolveChannels } from './utils';
 import { Logger } from '../../../core/logger';
@@ -81,29 +80,17 @@ const program = new Command( 'slack' )
 			Logger.startTask(
 				`Attempting to send message to ${ channels.length } channels`
 			);
+			const client = new WebClient( token );
 			for ( const channel of channels ) {
-				const requestOptions = {
-					hostname: 'slack.com',
-					path: '/api/chat.postMessage',
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: `Bearer ${ token }`,
-					},
-				};
 				try {
-					const { statusCode, body } = await requestAsync(
-						requestOptions,
-						JSON.stringify( {
-							channel,
-							text: text.replace( /\\n/g, '\n' ),
-						} )
-					);
+					const response = await client.chat.postMessage({
+						channel,
+						text: text.replace( /\\n/g, '\n' ),
+					});
 					Logger.endTask();
-					const response = JSON.parse( body );
-					if ( ! response.ok || statusCode !== 200 ) {
+					if ( ! response.ok ) {
 						Logger.error(
-							`Slack API returned an error: ${ response?.error }, message failed to send.`
+							`Slack API returned an error: ${ response.error }, message failed to send.`
 						);
 					} else {
 						Logger.notice( `Slack message sent successfully` );
