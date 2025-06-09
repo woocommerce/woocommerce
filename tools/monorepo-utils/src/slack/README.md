@@ -12,7 +12,7 @@ You can use the CLI to send messages or upload files to Slack channels:
 
 ### Send a message to Slack
 
-```
+```sh
 pnpm utils slack "Hello from the CLI!"
 ```
 
@@ -20,7 +20,7 @@ This will send the message to all channels specified in the `SLACK_CHANNELS` env
 
 ### Upload a file to Slack
 
-```
+```sh
 pnpm utils slack "Here is a file" --file /path/to/file.txt
 ```
 
@@ -32,6 +32,6 @@ This will upload the file to all channels specified in `SLACK_CHANNELS`, with th
 
 **Example:**
 
-```
+```sh
 pnpm utils slack "Replying with a file" --file /path/to/file.txt --reply-ts 1234567890.123456
 ```
