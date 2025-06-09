@@ -221,6 +221,7 @@ test.describe( 'Product > Export Selected Products', () => {
 
 	test( 'should show the default export screen when no products are selected', async ( {
 		page,
+		productsFixture,
 	} ) => {
 		await test.step( 'Navigate to product list', async () => {
 			await page.goto( 'wp-admin/edit.php?post_type=product' );
@@ -231,8 +232,6 @@ test.describe( 'Product > Export Selected Products', () => {
 		);
 
 		await test.step( 'Verify default export button state and navigate to export page', async () => {
-			// wait for 1 second
-			await page.waitForTimeout( 1000 );
 			await expect( exportButton ).toHaveText( 'Export' );
 			await exportButton.click();
 		} );
