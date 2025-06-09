@@ -83,10 +83,10 @@ const program = new Command( 'slack' )
 			const client = new WebClient( token );
 			for ( const channel of channels ) {
 				try {
-					const response = await client.chat.postMessage({
+					const response = await client.chat.postMessage( {
 						channel,
 						text: text.replace( /\\n/g, '\n' ),
-					});
+					} );
 					Logger.endTask();
 					if ( ! response.ok ) {
 						Logger.error(
