@@ -885,8 +885,11 @@ class Cart extends ControllerTestCase {
 			$request,
 			201,
 			array(
-				'items_count' => 1,
+				'items_count' => 1, // Total number of items in cart (quantity sum).
 				'items'       => function ( $value ) {
+					// The callback function checks that:
+					// 1. There is exactly 1 unique product in the cart
+					// 2. The first (and only) product has a quantity of 1.
 					return 1 === count( $value ) && 1 === $value[0]['quantity'];
 				},
 			)
@@ -905,8 +908,11 @@ class Cart extends ControllerTestCase {
 			$request,
 			201,
 			array(
-				'items_count' => 2,
+				'items_count' => 2, // Total quantity of all items (same product added twice).
 				'items'       => function ( $value ) {
+					// The callback function checks that:
+					// 1. There is still only 1 unique product in the cart
+					// 2. That product now has a quantity of 2 (1 + 1 from second add).
 					return 1 === count( $value ) && 2 === $value[0]['quantity'];
 				},
 			)
