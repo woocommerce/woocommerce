@@ -130,10 +130,6 @@ const { state } = store(
 	'woocommerce/mini-cart-items-block',
 	{
 		state: {
-			get cartItems() {
-				return wooStoreState.cart.items;
-			},
-
 			get cartItemMinimum() {
 				const { cartItem } = getContext< CartItemContext >();
 				return cartItem.quantity_limits.minimum;
