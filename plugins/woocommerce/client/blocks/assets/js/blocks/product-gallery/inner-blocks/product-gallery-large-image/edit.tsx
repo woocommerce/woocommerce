@@ -5,15 +5,6 @@ import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 import { useProductDataContext } from '@woocommerce/shared-context';
 
-/**
- * Internal dependencies
- */
-import largeImageNextPreviousButtonMetadata from '../product-gallery-next-previous-buttons/block.json';
-
-const getInnerBlocksTemplate = () => [
-	[ largeImageNextPreviousButtonMetadata.name ],
-];
-
 const ProductImage = ( { image }: { image: { src: string; alt: string } } ) => {
 	const placeholderSrc = `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-image-gallery.svg`;
 
@@ -40,7 +31,6 @@ export const Edit = () => {
 			className: 'wc-block-product-gallery-large-image__inner-blocks',
 		},
 		{
-			template: getInnerBlocksTemplate(),
 			templateInsertUpdatesSelection: true,
 		}
 	);
