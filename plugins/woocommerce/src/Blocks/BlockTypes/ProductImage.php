@@ -93,33 +93,23 @@ class ProductImage extends AbstractBlock {
 	 * Render anchor.
 	 *
 	 * @param \WC_Product $product       Product object.
-	 * @param string      $on_sale_badge Return value from $render_image.
-	 * @param string      $product_image Return value from $render_on_sale_badge.
 	 * @param array       $attributes    Attributes.
-	 * @param string      $inner_blocks_content Rendered HTML of inner blocks.
+	 * @param string      $inner_content Rendered HTML of inner blocks.
 	 * @return string
 	 */
-	private function render_anchor( $product, $on_sale_badge, $product_image, $attributes, $inner_blocks_content ) {
+	private function render_anchor( $product, $attributes, $inner_content ) {
 		$product_permalink = $product->get_permalink();
 
-		$is_link        = isset( $attributes['showProductLink'] ) ? $attributes['showProductLink'] : true;
-		$href_attribute = $is_link ? sprintf( 'href="%s"', esc_url( $product_permalink ) ) : 'href="#" onclick="return false;"';
-		$wrapper_style  = ! $is_link ? 'pointer-events: none; cursor: default;' : '';
-		$directive      = $is_link ? 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"' : '';
-
-		$inner_blocks_container = sprintf(
-			'<div class="wc-block-components-product-image__inner-container">%s</div>',
-			$inner_blocks_content
-		);
+		$href_attribute = sprintf( 'href="%s"', esc_url( $product_permalink ) );
+		$wrapper_style  = 'pointer-events: none; cursor: default;';
+		$directive      = 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"';
 
 		return sprintf(
-			'<a %1$s style="%2$s" %3$s>%4$s%5$s%6$s</a>',
+			'<a %1$s style="%2$s" %3$s>%4$s</a>',
 			$href_attribute,
 			esc_attr( $wrapper_style ),
 			$directive,
-			$on_sale_badge,
-			$product_image,
-			$inner_blocks_container
+			$inner_content
 		);
 	}
 
@@ -227,13 +217,24 @@ class ProductImage extends AbstractBlock {
 		);
 
 		if ( $product ) {
-			$inner_content = $this->render_anchor(
-				$product,
-				$this->render_on_sale_badge( $product, $parsed_attributes ),
-				$this->render_image( $product, $parsed_attributes, $image_id ),
-				$attributes,
+
+			$is_link = isset( $attributes['showProductLink'] ) ? $attributes['showProductLink'] : true;
+
+			$on_sale_badge = $this->render_on_sale_badge( $product, $parsed_attributes );
+			$product_image = $this->render_image( $product, $parsed_attributes, $image_id );
+			$inner_blocks_container = sprintf(
+				'<div class="wc-block-components-product-image__inner-container">%s</div>',
 				$content
 			);
+			$inner_content = $on_sale_badge . $product_image . $inner_blocks_container;
+
+			if ( $is_link ) {
+				$inner_content = $this->render_anchor(
+					$product,
+					$attributes,
+					$inner_content
+				);
+			}
 
 			return sprintf(
 				'<div %1$s>%2$s</div>',
