@@ -18,9 +18,6 @@
 "packages/js/e2e-utils/**/*":
   - Flux
 
-"packages/js/e2e-environment/**/*":
-  - Flux
-
 "packages/js/api-core-tests/**/*":
   - Flux
 
