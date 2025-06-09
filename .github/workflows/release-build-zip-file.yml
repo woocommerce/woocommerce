@@ -216,7 +216,10 @@ jobs:
           tag_name: ${{ steps.get_version.outputs.version }}
           release_name: v${{ steps.get_version.outputs.version }}
           draft: true
+          # TODO: change to ${{ contains(steps.get_version.outputs.is_prerelease, 'rc') }} if we decide 'rc' is the only valid pre-release going forward.
           prerelease: ${{ steps.get_version.outputs.is_prerelease }}
+          commitish: ${{ github.ref }}
+          body: ''
 
       - name: Upload ZIP to release
         uses: actions/upload-release-asset@v1
