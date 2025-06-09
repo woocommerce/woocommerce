@@ -229,7 +229,7 @@ class ProductButton extends AbstractBlock {
 			data-wp-on--animationend="actions.handleAnimationEnd"
 			data-wp-watch="callbacks.startAnimation"
 			data-wp-run="callbacks.syncTempQuantityOnLoad"
-			data-wp-on--click="actions.handleClick"
+			data-wp-on--click="actions.handlePressedState"
 		';
 
 		$wrapper_attributes = get_block_wrapper_attributes(

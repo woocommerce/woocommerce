@@ -172,7 +172,7 @@ const productButtonStore = {
 				context.animationStatus = AnimationStatus.IDLE;
 			}
 		},
-		handleClick() {
+		handlePressedState() {
 			const context = getContext< Context >();
 			context.hasPressedButton = true;
 		},
