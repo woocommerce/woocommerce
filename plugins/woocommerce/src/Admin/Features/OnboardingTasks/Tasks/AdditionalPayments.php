@@ -1,7 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments as SettingsPaymentsService;
 
 /**
@@ -106,7 +106,7 @@ class AdditionalPayments extends Payments {
 	 */
 	public function get_action_url(): string {
 		// We auto-expand the "Other" section to show the additional payment methods.
-		return admin_url( 'admin.php?page=wc-settings&tab=checkout&other_pes_section=expanded' );
+		return admin_url( 'admin.php?page=wc-settings&tab=checkout&other_pes_section=expanded&from=' . SettingsPaymentsService::FROM_ADDITIONAL_PAYMENTS_TASK );
 	}
 
 	/**
@@ -121,7 +121,7 @@ class AdditionalPayments extends Payments {
 			if (
 				! empty( $provider['state']['enabled'] ) &&
 				! empty( $provider['_suggestion_category_id'] ) &&
-				in_array( $provider['_suggestion_category_id'], array( PaymentProviders::CATEGORY_BNPL, PaymentProviders::CATEGORY_EXPRESS_CHECKOUT, PaymentProviders::CATEGORY_CRYPTO ), true )
+				in_array( $provider['_suggestion_category_id'], array( PaymentsProviders::CATEGORY_BNPL, PaymentsProviders::CATEGORY_EXPRESS_CHECKOUT, PaymentsProviders::CATEGORY_CRYPTO ), true )
 			) {
 				return true;
 			}

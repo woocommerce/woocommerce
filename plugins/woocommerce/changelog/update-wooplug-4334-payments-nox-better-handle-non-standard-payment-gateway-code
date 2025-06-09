@@ -1,5 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: Better handling of gateways contained in non-standard entities like themes or must-use plugins.
-
-

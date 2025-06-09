@@ -1,28 +1,32 @@
 /**
- * External dependencies
+ * Internal dependencies
  */
-
-import Rating from '@woocommerce/base-components/product-rating';
+import RatingStars from './components/rating-stars';
 
 export const previewOptions = [
 	{
-		label: <Rating key={ 5 } rating={ 5 } ratedProductsCount={ null } />,
+		label: <RatingStars stars={ 5 } />,
 		value: '5',
+		count: 35,
 	},
 	{
-		label: <Rating key={ 4 } rating={ 4 } ratedProductsCount={ null } />,
+		label: <RatingStars stars={ 4 } />,
 		value: '4',
+		count: 20,
 	},
 	{
-		label: <Rating key={ 3 } rating={ 3 } ratedProductsCount={ null } />,
+		label: <RatingStars stars={ 3 } />,
 		value: '3',
+		count: 3,
 	},
 	{
-		label: <Rating key={ 2 } rating={ 2 } ratedProductsCount={ null } />,
+		label: <RatingStars stars={ 2 } />,
 		value: '2',
+		count: 6,
 	},
 	{
-		label: <Rating key={ 1 } rating={ 1 } ratedProductsCount={ null } />,
+		label: <RatingStars stars={ 1 } />,
 		value: '1',
+		count: 1,
 	},
 ];

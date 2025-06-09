@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Adds a new helper function to check if the current page is the "payment methods list" under "My Account".

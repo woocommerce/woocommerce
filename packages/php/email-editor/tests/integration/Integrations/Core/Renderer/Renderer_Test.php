@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Renderer;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer;
+use WP_Post;
 
 /**
  * Integration test for Renderer class
@@ -42,9 +43,11 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 				'post_content' => '<!-- wp:button --><div class="wp-block-button"><a class="wp-block-button__link has-background wp-element-button">Button</a></div><!-- /wp:button -->',
 			)
 		);
-		$email_post    = get_post( $email_post_id );
-		$rendered      = $this->renderer->render( $email_post, 'Subject', '', 'en' );
-		$button_html   = $this->extractBlockHtml( $rendered['html'], 'wp-block-button', 'td' );
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
+		$rendered    = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+		$button_html = $this->extractBlockHtml( $rendered['html'], 'wp-block-button', 'td' );
 		$this->assertStringContainsString( 'color: #fff', $button_html );
 		$this->assertStringContainsString( 'padding-bottom: .7em;', $button_html );
 		$this->assertStringContainsString( 'padding-left: 1.4em;', $button_html );
@@ -62,9 +65,11 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 				'post_content' => '<!-- wp:button {"backgroundColor":"white","textColor":"vivid-cyan-blue"} --><div class="wp-block-button"><a class="wp-block-button__link has-background wp-element-button">Button</a></div><!-- /wp:button -->',
 			)
 		);
-		$email_post    = get_post( $email_post_id );
-		$rendered      = $this->renderer->render( $email_post, 'Subject', '', 'en' );
-		$button_html   = $this->extractBlockHtml( $rendered['html'], 'wp-block-button', 'td' );
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
+		$rendered    = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+		$button_html = $this->extractBlockHtml( $rendered['html'], 'wp-block-button', 'td' );
 		$this->assertStringContainsString( 'color: #0693e3', $button_html );
 		$this->assertStringContainsString( 'background-color: #ffffff', $button_html );
 	}
@@ -78,8 +83,10 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 				'post_content' => '<!-- wp:heading {"level":1,"style":{"typography":{"fontSize":"large"}}} --><h1 class="wp-block-heading">Hello</h1><!-- /wp:heading -->',
 			)
 		);
-		$email_post    = get_post( $email_post_id );
-		$rendered      = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
+		$rendered = $this->renderer->render( $email_post, 'Subject', '', 'en' );
 		$this->assertStringContainsString( 'Hello', $rendered['text'] );
 	}
 
@@ -92,8 +99,9 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 				'post_content' => '<!-- wp:heading {"level":1, "backgroundColor":"black", "textColor":"luminous-vivid-orange"} --><h1 class="wp-block-heading has-luminous-vivid-orange-color has-black-background-color">Hello</h1><!-- /wp:heading -->',
 			)
 		);
-		$email_post    = get_post( $email_post_id );
-
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
 		$rendered              = $this->renderer->render( $email_post, 'Subject', '', 'en' );
 		$heading_wrapper_style = $this->extractBlockStyle( $rendered['html'], 'has-luminous-vivid-orange-color', 'td' );
 		$this->assertStringContainsString( 'color: #ff6900', $heading_wrapper_style ); // luminous-vivid-orange is #ff6900.
@@ -103,7 +111,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test it inlines paragraph colors
 	 */
-	public function testItInlinesParagraphColors() {
+	public function testItInlinesParagraphColors(): void {
 		// Both background and text are defined as custom colors.
 		$paragraph_1 = '<!-- wp:paragraph {"style":{"color":{"text":"#ff6900", "background": "#000"}}} --><p class="test1">Hello</p><!-- /wp:paragraph -->';
 		// Text is defined as custom color background is preset.
@@ -120,7 +128,9 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 				'post_content' => $paragraph_1 . $paragraph_2 . $paragraph_3 . $paragraph_4 . $paragraph_5,
 			)
 		);
-		$email_post    = get_post( $email_post_id );
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
 
 		$rendered                  = $this->renderer->render( $email_post, 'Subject', '', 'en' );
 		$paragraph_1_wrapper_style = $this->extractBlockStyle( $rendered['html'], 'test1', 'td' );
@@ -148,7 +158,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test it inlines list colors
 	 */
-	public function testItInlinesListColors() {
+	public function testItInlinesListColors(): void {
 		$email_post_id = $this->factory->post->create(
 			array(
 				'post_content' => '<!-- wp:list {"backgroundColor":"black","textColor":"luminous-vivid-orange","style":{"elements":{"link":{"color":{"text":"var:preset|color|vivid-red"}}}}} -->
@@ -162,8 +172,9 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
         <!-- /wp:list -->',
 			)
 		);
-		$email_post    = get_post( $email_post_id );
-
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
 		$rendered   = $this->renderer->render( $email_post, 'Subject', '', 'en' );
 		$list_style = $this->extractBlockStyle( $rendered['html'], 'has-luminous-vivid-orange-color', 'ul' );
 		$this->assertStringContainsString( 'color: #ff6900', $list_style ); // luminous-vivid-orange is #ff6900.
@@ -181,9 +192,11 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
         <!-- /wp:columns -->',
 			)
 		);
-		$email_post    = get_post( $email_post_id );
-		$rendered      = $this->renderer->render( $email_post, 'Subject', '', 'en' );
-		$style         = $this->extractBlockStyle( $rendered['html'], 'wp-block-columns', 'table' );
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
+		$rendered = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+		$style    = $this->extractBlockStyle( $rendered['html'], 'wp-block-columns', 'table' );
 		$this->assertStringContainsString( 'color: #ff6900', $style ); // luminous-vivid-orange is #ff6900.
 		$this->assertStringContainsString( 'background-color: #000', $style ); // black is #000.
 	}
@@ -199,9 +212,11 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
         <!-- /wp:columns -->',
 			)
 		);
-		$email_post    = get_post( $email_post_id );
-		$rendered      = $this->renderer->render( $email_post, 'Subject', '', 'en' );
-		$style         = $this->extractBlockStyle( $rendered['html'], 'wp-block-columns', 'table' );
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
+		$rendered = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+		$style    = $this->extractBlockStyle( $rendered['html'], 'wp-block-columns', 'table' );
 		$this->assertStringContainsString( 'color: #ff6900', $style ); // luminous-vivid-orange is #ff6900.
 		$this->assertStringContainsString( 'background-color: #000', $style ); // black is #000.
 	}
@@ -209,7 +224,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test it inlines column colors
 	 */
-	public function testItInlinesColumnColors() {
+	public function testItInlinesColumnColors(): void {
 		$email_post_id = $this->factory->post->create(
 			array(
 				'post_content' => '
@@ -218,9 +233,11 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
       <!-- /wp:column -->',
 			)
 		);
-		$email_post    = get_post( $email_post_id );
-		$rendered      = $this->renderer->render( $email_post, 'Subject', '', 'en' );
-		$style         = $this->extractBlockStyle( $rendered['html'], 'wp-block-column-test', 'td' );
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
+		$rendered = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+		$style    = $this->extractBlockStyle( $rendered['html'], 'wp-block-column-test', 'td' );
 		$this->assertStringContainsString( 'color: #ff6900', $style ); // luminous-vivid-orange is #ff6900.
 		$this->assertStringContainsString( 'background-color: #000', $style ); // black is #000.
 	}
