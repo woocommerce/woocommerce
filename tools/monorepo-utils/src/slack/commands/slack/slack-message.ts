@@ -9,7 +9,7 @@ import { setOutput } from '@actions/core';
  */
 import { Logger } from '../../../core/logger';
 import { requestAsync } from '../../../core/util';
-import { isGithubCI } from '../../../core/environment';
+import { isGithubCI, getEnvVar } from '../../../core/environment';
 
 type SlackResponse = {
 	ok: boolean;
@@ -20,10 +20,6 @@ type SlackResponse = {
 
 export const slackMessageCommand = new Command( 'message' )
 	.description( 'Send a plain-text message to a slack channel' )
-	.argument(
-		'<token>',
-		'Slack authentication token bearing required scopes.'
-	)
 	.argument( '<text>', 'Text based message to send to the slack channel.' )
 	.argument(
 		'<channels...>',
@@ -33,11 +29,13 @@ export const slackMessageCommand = new Command( 'message' )
 		'--dont-fail',
 		'Do not fail the command if a message fails to send to any channel.'
 	)
-	.action( async ( token, text, channels, { dontFail } ) => {
+	.action( async ( text, channels, { dontFail } ) => {
+		const token = getEnvVar( 'SLACK_TOKEN', true );
+		if ( ! token ) {
+			process.exit( 1 );
+		}
 		Logger.startTask(
-			`Attempting to send message to Slack for channels: ${ channels.join(
-				','
-			) }`
+			`Attempting to send message to Slack for channels: ${ channels.join( ',' ) }`
 		);
 
 		const shouldFail = ! dontFail;

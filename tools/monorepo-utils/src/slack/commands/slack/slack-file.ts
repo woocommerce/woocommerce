@@ -10,18 +10,16 @@ import { existsSync } from 'fs';
  * Internal dependencies
  */
 import { Logger } from '../../../core/logger';
+import { getEnvVar } from '../../../core/environment';
+import { resolveChannels } from './utils';
 
 export const slackFileCommand = new Command( 'file' )
 	.description( 'Send a file upload message to a slack channel' )
-	.argument(
-		'<token>',
-		'Slack authentication token bearing required scopes.'
-	)
 	.argument( '<text>', 'Text based message to send to the slack channel.' )
 	.argument( '<filePath>', 'File path to upload to the slack channel.' )
-	.argument(
-		'<channelIds...>',
-		'Slack channel IDs to send the message to. Pass as many as you like.'
+	.option(
+		'--channels <envVars>',
+		'Comma-separated list of environment variable names for Slack channel IDs.'
 	)
 	.option(
 		'--dont-fail',
@@ -36,17 +34,13 @@ export const slackFileCommand = new Command( 'file' )
 		'If provided, the filename that will be used for the file on Slack.'
 	)
 	.action(
-		async (
-			token,
-			text,
-			filePath,
-			channels,
-			{ dontFail, replyTs, filename }
-		) => {
+		async ( text, filePath, channels, { dontFail, replyTs, filename } ) => {
+			const token = getEnvVar( 'SLACK_TOKEN', true );
+			if ( ! token ) {
+				process.exit( 1 );
+			}
 			Logger.startTask(
-				`Attempting to send message to Slack for channels: ${ channels.join(
-					','
-				) }`
+				`Attempting to send message to Slack for channels: ${ channels.join( ',' ) }`
 			);
 
 			const shouldFail = ! dontFail;
