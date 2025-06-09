@@ -11,5 +11,4 @@ export const excludedPackages = [
 	'@woocommerce/api',
 	'@woocommerce/api-core-tests',
 	'@woocommerce/e2e-environment',
-	'@woocommerce/e2e-utils',
 ];
