@@ -1,0 +1,90 @@
+/**
+ * External dependencies
+ */
+import { createReduxStore, register, dispatch } from '@wordpress/data';
+
+/**
+ * Internal dependencies
+ */
+import { ACTION_SET_CANVAS_MODE, STORE_NAME } from './constants';
+import type { CanvasModeState } from './types';
+
+type StoreState = CanvasModeState;
+
+type Actions = {
+	type: typeof ACTION_SET_CANVAS_MODE;
+	isEditMode: boolean;
+};
+
+const DEFAULT_STATE: StoreState = {
+	isEditMode: false,
+};
+
+const actions = {
+	setCanvasMode( isEditMode: boolean ) {
+		return {
+			type: ACTION_SET_CANVAS_MODE,
+			isEditMode,
+		};
+	},
+};
+
+const selectors = {
+	isEditMode() {
+		// Always check the current URL for the most up-to-date state.
+		try {
+			const url = new URL( window.location.href );
+			const canvas = url.searchParams.get( 'canvas' );
+			return canvas === 'edit';
+		} catch ( error ) {
+			// If URL parsing fails, return default state.
+			return false;
+		}
+	},
+};
+
+const reducer = ( state: StoreState = DEFAULT_STATE, action: Actions ) => {
+	switch ( action.type ) {
+		case ACTION_SET_CANVAS_MODE:
+			return {
+				...state,
+				isEditMode: action.isEditMode,
+			};
+
+		default:
+			return state;
+	}
+};
+
+export const store = createReduxStore( STORE_NAME, {
+	reducer,
+	actions,
+	selectors,
+} );
+
+register( store );
+
+if ( typeof window !== 'undefined' ) {
+	const handleUrlChange = async () => {
+		try {
+			const url = new URL( window.location.href );
+			const canvas = url.searchParams.get( 'canvas' );
+			const isEditMode = canvas === 'edit';
+
+			await Promise.resolve();
+
+			// Update store state - this triggers re-renders.
+			dispatch( store ).setCanvasMode( isEditMode );
+		} catch ( error ) {
+			// If URL parsing fails, set to default state.
+			await Promise.resolve();
+			dispatch( store ).setCanvasMode( false );
+		}
+	};
+
+	window.addEventListener( 'popstate', () => handleUrlChange() );
+	window.addEventListener( 'pushstate', () => handleUrlChange() );
+}
+
+export { default as useCanvasMode } from '../../hooks/use-canvas-mode';
+export type { CanvasModeState } from './types';
