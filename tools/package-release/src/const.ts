@@ -10,5 +10,4 @@ export const MONOREPO_ROOT = dirname( dirname( dirname( __dirname ) ) );
 export const excludedPackages = [
 	'@woocommerce/api',
 	'@woocommerce/api-core-tests',
-	'@woocommerce/e2e-environment',
 ];
