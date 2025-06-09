@@ -1,0 +1,61 @@
+name: Create Call for Testing Post
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g. 8.3.0)'
+        required: true
+        type: string
+      post_status:
+        description: 'Post status (draft or publish)'
+        required: true
+        default: 'draft'
+        type: choice
+        options:
+          - publish
+          - draft
+      build_zip:
+        description: 'URL to the build zip file'
+        required: true
+        type: string
+
+jobs:
+  create-post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const crypto = require('crypto');
+            
+            const payload = {
+              action: 'rc1',
+              version: inputs.version,
+              build_zip: inputs.build_zip,
+              post_status: inputs.post_status
+            };
+
+            const requestBody = JSON.stringify({
+              payload
+            });
+
+            const hmac = crypto.createHmac('sha256', process.env.WPCOM_WEBHOOK_SECRET);
+            hmac.update(requestBody);
+            const signature = hmac.digest('hex');
+            
+            const response = await fetch(process.env.WPCOM_RELEASE_WEBHOOK_URL, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Hub-Signature-256': `sha256=${signature}`
+              },
+              body: requestBody
+            });
+            
+            if (!response.ok) {
+              core.setFailed(`Request failed with status ${response.status}`);
+            }
+        env:
+          WPCOM_WEBHOOK_SECRET: ${{ secrets.WPCOM_WEBHOOK_SECRET }} 
+          WPCOM_WEBHOOK_URL: ${{ secrets.WPCOM_WEBHOOK_URL }}
