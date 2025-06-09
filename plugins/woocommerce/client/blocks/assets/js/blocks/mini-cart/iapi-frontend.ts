@@ -143,12 +143,6 @@ const { state } = store(
 			// Intended to be used in context of a cart item in wp-each
 			get minimumReached() {
 				const { cartItem } = getContext< CartItemContext >();
-				console.log(
-					'minimum: ',
-					cartItem.quantity_limits.minimum,
-					'cart item qty: ',
-					cartItem.quantity
-				);
 				return cartItem.quantity - 1 < cartItem.quantity_limits.minimum;
 			},
 
