@@ -57,11 +57,6 @@ const runAnalyticsPageLoadsTest = () => {
 			await merchant.login();
 		} );
 
-		deprecated( 'runAnalyticsPageLoadsTest', {
-			alternative:
-				'@woocommerce/admin-e2e-tests `testAdminAnalyticsPages()`',
-		} );
-
 		it.each( pages )(
 			'can see %s page properly',
 			async ( pageTitle, element, elementText ) => {
