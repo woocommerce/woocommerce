@@ -87,8 +87,6 @@ describe( 'Checkout block editor integration', () => {
 			await userEvent.click(
 				screen.getByRole( 'option', { name: /Table/i } )
 			);
-		} );
-		await act( async () => {
 			await userEvent.click( orderSummaryBlock );
 		} );
 
