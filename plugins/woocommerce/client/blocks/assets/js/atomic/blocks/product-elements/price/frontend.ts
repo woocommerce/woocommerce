@@ -43,12 +43,12 @@ const getProductData = ( key: keyof ProductData ) => {
 		productData: ProductData;
 	} >( 'woocommerce/single-product' );
 
-	if ( singleProductContext?.productData[ key ] ) {
+	if ( singleProductContext?.productData?.[ key ] ) {
 		return sanitize( singleProductContext.productData[ key ], {
 			ALLOWED_TAGS,
 			ALLOWED_ATTR,
 		} );
-	} else if ( wooState?.singleProductTemplate.productData[ key ] ) {
+	} else if ( wooState?.singleProductTemplate?.productData?.[ key ] ) {
 		return sanitize( wooState.singleProductTemplate.productData[ key ], {
 			ALLOWED_TAGS,
 			ALLOWED_ATTR,
