@@ -113,7 +113,6 @@ class ProductButton extends AbstractBlock {
 					) : $add_to_cart_text;
 				},
 				'inTheCartText'        => $this->get_in_the_cart_text( $product ),
-				'inTheCartTextGrouped' => __( 'Added to cart', 'woocommerce' ),
 				'noticeId'             => '',
 				'hasPressedButton'     => false,
 			)
@@ -314,7 +313,7 @@ class ProductButton extends AbstractBlock {
 	 * @return boolean The product is purchasable.
 	 */
 	private function is_product_purchasable( $product ) {
-		if ( $product->is_type( 'grouped' ) ) {	
+		if ( $product->is_type( 'grouped' ) ) {
 			$grouped_product_ids = $product->get_children();
 			foreach ( $grouped_product_ids as $child ) {
 				$child_product = wc_get_product( $child );
@@ -328,7 +327,7 @@ class ProductButton extends AbstractBlock {
 
 			return false;
 		}
-		
+
 		return $product->is_purchasable() && $product->is_in_stock();
 	}
 
@@ -340,7 +339,7 @@ class ProductButton extends AbstractBlock {
 	 */
 	private function get_in_the_cart_text( $product ) {
 		if ( $product->is_type( 'grouped' ) ) {
-			return __( 'Add to cart', 'woocommerce' );
+			return __( 'Added to cart', 'woocommerce' );
 		}
 
 		return sprintf(

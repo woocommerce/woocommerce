@@ -35,7 +35,6 @@ type ServerState = {
 	state: {
 		inTheCartText: string;
 		addToCartText: string;
-		inTheCartTextGrouped: string;
 		noticeId: string;
 	};
 };
@@ -96,10 +95,13 @@ const productButtonStore = {
 						return product?.quantity || 0;
 					}
 				);
-				if ( groupedProductIdsInCart?.some( ( qty ) => qty > 0 ) ) {
-					return hasPressedButton
-						? state.inTheCartTextGrouped
-						: state.inTheCartText;
+				if (
+					groupedProductIdsInCart?.some( ( qty ) => qty > 0 ) &&
+					hasPressedButton
+				) {
+					return state.inTheCartText;
+				} else {
+					return addToCartText;
 				}
 			}
 
