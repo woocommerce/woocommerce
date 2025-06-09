@@ -66,7 +66,7 @@ This guide walks you through the structure, tooling, and process for contributin
 
 All documentation images are stored in:
 
-```
+```bash
 docs/_docu-tools/static/img/doc_images/
 ```
 
