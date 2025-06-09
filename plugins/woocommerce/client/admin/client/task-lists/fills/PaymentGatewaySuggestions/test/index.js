@@ -449,7 +449,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 
 	test( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
 		const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
-		( isFeatureEnabled as jest.Mock ).mockReturnValue( true );
+		isFeatureEnabled.mockReturnValue( true );
 
 		const mockLocation = {
 			href: 'test',
