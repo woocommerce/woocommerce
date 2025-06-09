@@ -918,4 +918,52 @@ class Cart extends ControllerTestCase {
 			)
 		);
 	}
+
+	/**
+	 * Test adding item to cart with negative quantity shows an error.
+	 */
+	public function test_add_item_with_negative_quantity_shows_error() {
+		wc_empty_cart();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => -1,
+			)
+		);
+
+		$this->assertAPIResponse(
+			$request,
+			400,
+			array(
+				'code' => 'woocommerce_rest_product_invalid_quantity',
+			)
+		);
+	}
+
+	/**
+	 * Test adding item to cart with negative quantity as string shows an error.
+	 */
+	public function test_add_item_with_string_negative_quantity_shows_error() {
+		wc_empty_cart();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => '-5',
+			)
+		);
+
+		$this->assertAPIResponse(
+			$request,
+			400,
+			array(
+				'code' => 'woocommerce_rest_product_invalid_quantity',
+			)
+		);
+	}
 }
