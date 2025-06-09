@@ -13,7 +13,6 @@ const {
  * External dependencies
  */
 const config = require( 'config' );
-import deprecated from '@wordpress/deprecated';
 const { it, describe } = require( '@jest/globals' );
 
 const shippingZoneNameUS = config.get( 'addresses.customer.shipping.country' );

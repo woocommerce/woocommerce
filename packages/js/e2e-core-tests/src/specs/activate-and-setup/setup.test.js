@@ -3,7 +3,6 @@
  */
 const { HTTPClientFactory } = require( '@woocommerce/api' );
 const { it, describe } = require( '@jest/globals' );
-import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies

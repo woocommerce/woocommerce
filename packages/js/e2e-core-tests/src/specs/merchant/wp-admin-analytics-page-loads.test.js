@@ -11,7 +11,6 @@ const {
  * External dependencies
  */
 const { it, describe, beforeAll } = require( '@jest/globals' );
-import deprecated from '@wordpress/deprecated';
 
 /**
  * Quick check for page title and no data message.
