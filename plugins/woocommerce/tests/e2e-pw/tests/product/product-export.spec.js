@@ -221,9 +221,9 @@ test.describe( 'Product > Export Selected Products', () => {
 
 	test( 'should show the default export screen when no products are selected', async ( {
 		page,
-		// eslint-disable-next-line no-unused-vars
 		productsFixture,
 	} ) => {
+		expect( productsFixture ).toBeDefined();
 		await test.step( 'Navigate to product list', async () => {
 			await page.goto( 'wp-admin/edit.php?post_type=product' );
 		} );
