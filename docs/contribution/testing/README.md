@@ -12,11 +12,11 @@ If you have any questions about testing please reach out to the developer commun
 
 ## Unit Testing
 
-[End-to-end tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw) are powered by `Playwright`. The test site is spun up using `wp-env` ([recommended](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/)), but we will continue to support `e2e-environment` in the meantime, and slowly [deprecate](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md) `Puppeteer` testing. 
+[End-to-end tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw) are powered by `Playwright`. The test site is spun up using `wp-env` ([recommended](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/)). 
 
 ## API Testing
 
-`api-core-tests` is a [package](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/api-core-tests) that contains automated API tests for WooCommerce, based on `Playwright` and `wp-env`. It supersedes the SuperTest based `api-core-tests` package and `e2e-environment` setup, which we will gradually deprecate.
+`api-core-tests` is a [package](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/api-core-tests) that contains automated API tests for WooCommerce, based on `Playwright` and `wp-env`.
 
 ## Calls for Testing
 
