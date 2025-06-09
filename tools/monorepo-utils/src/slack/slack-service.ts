@@ -12,8 +12,12 @@ import { existsSync } from 'fs';
 import { isGithubCI } from '../core/environment';
 import { Logger } from '../core/logger';
 
-// Resolves channel IDs from the SLACK_CHANNELS env variable (comma-separated).
-// Throws if not set or empty.
+/**
+ * Resolves channel IDs from the SLACK_CHANNELS environment variable (comma-separated).
+ * Logs an error and returns null if the variable is not set or contains no valid channels.
+ *
+ * @return {string[] | null} Array of channel IDs, or null if not set/invalid.
+ */
 export function resolveChannels(): string[] {
 	const value = process.env.SLACK_CHANNELS;
 	const errorMessage =
@@ -37,6 +41,15 @@ export function resolveChannels(): string[] {
 	return channels;
 }
 
+/**
+ * Sends a message to one or more Slack channels using the provided WebClient.
+ * Logs errors for missing text, Slack API errors, or exceptions.
+ *
+ * @param {WebClient} client   - An instance of Slack WebClient.
+ * @param {string}    text     - The message text to send.
+ * @param {string[]}  channels - Array of channel IDs to send the message to.
+ * @return {Promise<void>}
+ */
 export async function sendMessage(
 	client: WebClient,
 	text: string,
@@ -71,6 +84,17 @@ export async function sendMessage(
 	Logger.endTask();
 }
 
+/**
+ * Uploads a file to one or more Slack channels using the provided WebClient.
+ * Logs errors for missing files, Slack API errors, or exceptions.
+ *
+ * @param {WebClient} client   - An instance of Slack WebClient.
+ * @param {string}    text     - The initial comment to attach to the file (optional).
+ * @param {string}    filePath - Path to the file to upload.
+ * @param {string[]}  channels - Array of channel IDs to upload the file to.
+ * @param {string}    replyTs  - (Optional) Thread timestamp to reply to (for threading uploads).
+ * @return {Promise<void>}
+ */
 export async function sendFile(
 	client: WebClient,
 	text: string,
