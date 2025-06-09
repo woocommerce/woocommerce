@@ -27,6 +27,7 @@ const ALLOWED_TAGS = [
 	'span',
 	'bdi',
 	'del',
+	'ins',
 ];
 const ALLOWED_ATTR = [
 	'class',
