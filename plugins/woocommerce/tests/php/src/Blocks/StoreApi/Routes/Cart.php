@@ -887,7 +887,7 @@ class Cart extends ControllerTestCase {
 			array(
 				'items_count' => 1,
 				'items'       => function ( $value ) {
-					return count( $value ) === 1 && $value[0]['quantity'] === 1;
+					return 1 === count( $value ) && 1 === $value[0]['quantity'];
 				},
 			)
 		);
@@ -907,7 +907,7 @@ class Cart extends ControllerTestCase {
 			array(
 				'items_count' => 2,
 				'items'       => function ( $value ) {
-					return count( $value ) === 1 && $value[0]['quantity'] === 2;
+					return 1 === count( $value ) && 2 === $value[0]['quantity'];
 				},
 			)
 		);

@@ -266,8 +266,8 @@ class CartController {
 				'woocommerce_rest_product_invalid_quantity',
 				sprintf(
 					/* translators: %s: product name */
-					__( 'You cannot add &quot;%s&quot; with a quantity of 0 to the cart.', 'woocommerce' ),
-					$product->get_name()
+					esc_html__( 'You cannot add &quot;%s&quot; with a quantity of 0 to the cart.', 'woocommerce' ),
+					esc_html( $product->get_name() )
 				),
 				400
 			);
