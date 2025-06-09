@@ -100,9 +100,8 @@ const productButtonStore = {
 					hasPressedButton
 				) {
 					return state.inTheCartText;
-				} else {
-					return addToCartText;
 				}
+				return addToCartText;
 			}
 
 			if ( quantity > 0 ) {
