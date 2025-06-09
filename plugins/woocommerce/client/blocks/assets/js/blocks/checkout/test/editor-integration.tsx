@@ -26,10 +26,9 @@ describe( 'Checkout block editor integration', () => {
 	beforeAll( async () => {
 		// Register a checkout filter to allow `core/table` block in all Checkout inner blocks,
 		// add `core/audio` into the woocommerce/checkout-totals-block specifically
-		await act( async () => {
-			registerCheckoutFilters( 'woo-test-namespace', {
-				// @ts-expect-error - The types for the checkout filters are not defined.
-				additionalCartCheckoutInnerBlockTypes: (
+		registerCheckoutFilters( 'woo-test-namespace', {
+			// @ts-expect-error - The types for the checkout filters are not defined.
+			additionalCartCheckoutInnerBlockTypes: (
 					value: string[],
 					extensions,
 					{ block }: { block: string }
@@ -39,8 +38,7 @@ describe( 'Checkout block editor integration', () => {
 						value.push( 'core/audio' );
 					}
 					return value;
-				},
-			} );
+			},
 		} );
 	} );
 

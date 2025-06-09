@@ -24,24 +24,22 @@ async function setup( attributes: BlockAttributes ) {
 	return initializeEditor( testBlock );
 }
 describe( 'Cart block editor integration', () => {
-	beforeAll( async () => {
+	beforeAll( () => {
 		// Register a checkout filter to allow `core/table` block in all Cart inner blocks,
 		// add `core/audio` into the woocommerce/cart-order-summary-block specifically
-		await act( async () => {
-			registerCheckoutFilters( 'woo-test-namespace', {
-				// @ts-expect-error - The types for the checkout filters are not defined.
-				additionalCartCheckoutInnerBlockTypes: (
-					value: string[],
-					extensions,
-					{ block }: { block: string }
-				) => {
-					value.push( 'core/table' );
-					if ( block === 'woocommerce/cart-order-summary-block' ) {
-						value.push( 'core/audio' );
-					}
-					return value;
-				},
-			} );
+		registerCheckoutFilters( 'woo-test-namespace', {
+			// @ts-expect-error - The types for the checkout filters are not defined.
+			additionalCartCheckoutInnerBlockTypes: (
+				value: string[],
+				extensions,
+				{ block }: { block: string }
+			) => {
+				value.push( 'core/table' );
+				if ( block === 'woocommerce/cart-order-summary-block' ) {
+					value.push( 'core/audio' );
+				}
+				return value;
+			},
 		} );
 	} );
 
