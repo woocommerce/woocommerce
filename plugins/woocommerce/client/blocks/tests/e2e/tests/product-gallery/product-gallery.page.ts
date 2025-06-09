@@ -69,29 +69,6 @@ export class ProductGalleryPage {
 		}
 	}
 
-	/**
-	 * Get the image ID of the active image element.
-	 *
-	 * @param {Object} params      - The parameters object.
-	 * @param {Page}   params.page - The page.
-	 * @return The image element id.
-	 */
-	async getActiveImageElementId( { page }: { page: Page } ) {
-		return page.evaluate( () => {
-			const element = document?.activeElement;
-			if ( ! element ) {
-				return null;
-			}
-
-			const dataImageId = element.getAttribute( 'data-image-id' );
-			if ( dataImageId ) {
-				return dataImageId;
-			}
-
-			return null;
-		} );
-	}
-
 	async toggleZoomWhileHoveringSetting( enable: boolean ) {
 		const button = this.page.locator(
 			selectors.editor.zoomWhileHoveringSetting

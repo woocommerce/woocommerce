@@ -66,9 +66,20 @@ export const getLysTasklist = async () => {
 	// This is because LYS and the Home screen share the same task list, but the completion logic is different.
 	tasklist[ 0 ].tasks.forEach( ( task: TaskType ) => {
 		if ( task.id === 'payments' ) {
-			task.isComplete =
-				task.additionalData?.wooPaymentsHasOnlineGatewaysEnabled ??
-				false;
+			let isComplete = false;
+
+			if (
+				// Store has other online gateways enabled and WooPayments is not onboarded.
+				( task.additionalData?.wooPaymentsHasOnlineGatewaysEnabled &&
+					! task.additionalData?.wooPaymentsIsOnboarded ) ||
+				// WooPayments is onboarded and not in test mode.
+				( task.additionalData?.wooPaymentsIsOnboarded &&
+					! task.additionalData?.wooPaymentsHasTestAccount )
+			) {
+				isComplete = true;
+			}
+
+			task.isComplete = isComplete;
 			task.title = __( 'Set up payments', 'woocommerce' );
 		}
 	} );

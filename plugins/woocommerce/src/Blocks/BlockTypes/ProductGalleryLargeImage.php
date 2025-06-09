@@ -9,22 +9,15 @@ use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
  * ProductGalleryLargeImage class.
  */
 class ProductGalleryLargeImage extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
 	protected $block_name = 'product-gallery-large-image';
-
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
 
 	/**
 	 *  Register the context
@@ -119,8 +112,11 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		?>
 			<ul
 				class="wc-block-product-gallery-large-image__container"
-				tabindex="-1"
 				data-wp-interactive="woocommerce/product-gallery"
+				data-wp-on--keydown="actions.onSelectedLargeImageKeyDown"
+				aria-label="<?php esc_attr_e( 'Product gallery', 'woocommerce' ); ?>"
+				tabindex="0"
+				aria-roledescription="carousel"
 			>
 				<?php foreach ( $image_data as $index => $image ) : ?>
 					<li class="wc-block-product-gallery-large-image__wrapper">
@@ -131,7 +127,6 @@ class ProductGalleryLargeImage extends AbstractBlock {
 							sizes="<?php echo esc_attr( $image['sizes'] ); ?>"
 							data-image-id="<?php echo esc_attr( $image['id'] ); ?>"
 							alt="<?php echo esc_attr( $image['alt'] ); ?>"
-							data-wp-on--keydown="actions.onSelectedLargeImageKeyDown"
 							data-wp-on--touchstart="actions.onTouchStart"
 							data-wp-on--touchmove="actions.onTouchMove"
 							data-wp-on--touchend="actions.onTouchEnd"
@@ -148,7 +143,8 @@ class ProductGalleryLargeImage extends AbstractBlock {
 								fetchpriority="low"
 								loading="lazy"
 							<?php endif; ?>
-							tabindex="0"
+							tabindex="-1"
+							draggable="false"
 						/>
 					</li>
 				<?php endforeach; ?>
