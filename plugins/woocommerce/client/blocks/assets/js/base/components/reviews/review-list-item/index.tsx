@@ -83,7 +83,7 @@ function getReviewProductName(
 		<div className="wc-block-review-list-item__product wc-block-components-review-list-item__product">
 			<a
 				href={ review.product_permalink }
-				aria-describedby={ reviewRatingId }
+				aria-labelledby={ reviewRatingId }
 			>
 				{ decodeEntities( review.product_name ) }
 			</a>
@@ -138,7 +138,7 @@ function getReviewRating(
 	return (
 		<div
 			id={ reviewRatingId }
-			aria-label={ ratingText }
+			aria-label={ `${decodeEntities( review.product_name )} ${ratingText}` }
 			className="wc-block-review-list-item__rating wc-block-components-review-list-item__rating"
 		>
 			<div
