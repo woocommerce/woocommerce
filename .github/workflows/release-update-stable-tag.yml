@@ -1,0 +1,30 @@
+name: 'Release: Update stable tag'
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (in X.Y.Z format)'
+        required: true
+        default: ''
+
+jobs:
+  update-wporg-stable-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate release version
+        id: extract-version
+        uses: actions/github-script@v7
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        with:
+          script: |
+            const refName = process.env.GITHUB_REF_NAME;
+            const versionMatch = refName.match(/^release\/(\d+\.\d+(?:\.\d+)?)$/); // Match either X.Y or X.Y.Z formats
+            if (versionMatch) {
+              const version = versionMatch[1];
+              console.log(`Extracted version: ${version}`);
+              core.setOutput('version', version);
+            } else {
+              core.setFailed(`Branch name ${refName} does not match the expected formats (X.Y or X.Y.Z)`);
+              process.exit(1);
+            }
