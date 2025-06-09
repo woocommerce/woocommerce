@@ -17,12 +17,12 @@ jobs:
         with:
           script: |
             const versionInput = '${{ github.event.inputs.version }}';
-              const versionMatch = versionInput.match(/^(\d+\.\d+(?:\.\d+)?)$/); // Match X.Y or X.Y.Z
+            const versionMatch = versionInput.match(/^(\d+\.\d+\.\d+(?:-[a-z]+)?)$/);
             if (versionMatch) {
               const version = versionMatch[1];
               console.log(`Extracted version: ${version}`);
               core.setOutput('version', version);
             } else {
-              core.setFailed(`Version ${versionInput} does not match the expected format (X.Y or X.Y.Z)`);
+              core.setFailed(`Version ${versionInput} does not match the expected format (X.Y.Z or X.Y.Z-tag)`);
               process.exit(1);
             }
