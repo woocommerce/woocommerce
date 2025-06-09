@@ -10,6 +10,11 @@ on:
         description: 'Skip the PR verification step (default: false) pass true to skip'
         required: false
         default: 'false'
+      create_github_release:
+        description: 'Set to true to create a draft GitHub release and upload the ZIP file as an asset (default: false)'
+        type: boolean
+        required: true
+        default: false
 
 permissions: {}
 
@@ -134,7 +139,7 @@ jobs:
             else
                 echo "[OK] Pre-build verification: stable version in branch is matching the one in SVN trunk ($branch_stable_version vs $svn_stable_version)"
             fi
-  
+
             # Validate changelog for the target release version
             branch_changelog_version=$( cat changelog.txt | grep -oP '\d+\.\d+\.\d+ '| tail -n +1 | head -n1 )
             if [[ $branch_plugin_version != *'-'* ]] && [[ $branch_plugin_version != $branch_changelog_version ]]; then
@@ -174,3 +179,51 @@ jobs:
           name: woocommerce
           path: zipfile
           retention-days: 7
+
+  create-release:
+    name: Create GitHub release
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ inputs.create_github_release }}
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: woocommerce
+          path: zipfile
+
+      - name: Get version from plugin file
+        id: get_version
+        run: |
+          version=$(cat zipfile/plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1)
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+          # Is a pre-release?
+          if echo "$VERSION" | ggrep -Eq -- '-(rc|beta|dev)'; then
+              echo "is_prerelease=1" >> $GITHUB_OUTPUT
+          else
+              echo "is_prerelease=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create draft release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          release_name: v${{ steps.get_version.outputs.version }}
+          draft: true
+          prerelease: ${{ steps.get_version.outputs.is_prerelease }}
+
+      - name: Upload ZIP to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: zipfile/plugins/woocommerce/woocommerce.zip
+          asset_name: woocommerce.zip
+          asset_content_type: application/zip
