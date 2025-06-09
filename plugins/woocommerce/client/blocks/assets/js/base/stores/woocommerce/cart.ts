@@ -228,7 +228,7 @@ const { state, actions } = store< Store >(
 							throw generateError( response );
 					} );
 
-					// Gets the last successful response.
+					// Gets the last successful cart response.
 					const successfulResponses = Array.isArray( json.responses )
 						? json.responses.filter(
 								( response ) =>
@@ -236,15 +236,23 @@ const { state, actions } = store< Store >(
 									response.status < 300
 						  )
 						: [];
-					const lastSuccessfulResponse =
-						successfulResponses[ successfulResponses.length - 1 ];
+					const lastSuccessfulCartResponse = successfulResponses[
+						successfulResponses.length - 1
+					]?.body as Cart;
 
-					// Checks if the last successful response contains some errors.
+					// Checks if the last successful cart response is valid.
+					if ( ! lastSuccessfulCartResponse ) {
+						throw new Error(
+							'No successful cart response received.'
+						);
+					}
+
+					// Checks if the last successful response contains any errors.
 					if (
-						lastSuccessfulResponse?.body?.errors &&
-						Array.isArray( lastSuccessfulResponse.body.errors )
+						lastSuccessfulCartResponse?.errors &&
+						Array.isArray( lastSuccessfulCartResponse.errors )
 					) {
-						lastSuccessfulResponse.body.errors.forEach(
+						lastSuccessfulCartResponse.errors.forEach(
 							( error ) => {
 								actions.showNoticeError( error );
 							}
@@ -252,7 +260,7 @@ const { state, actions } = store< Store >(
 					}
 
 					// Use the last successful response to update the local cart.
-					const cartResponse = lastSuccessfulResponse?.body as Cart;
+					const cartResponse = lastSuccessfulCartResponse;
 
 					// Updates the local cart.
 					state.cart = cartResponse;
