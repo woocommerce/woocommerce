@@ -27,6 +27,7 @@ import { PluginList, PluginListProps } from './PluginList';
 import { PluginProps } from './Plugin';
 import { getPluginSlug } from '../../../utils';
 import { TaskPromo } from './TaskPromo';
+import { isFeatureEnabled } from '~/utils/features';
 
 // We display the list of plugins ordered by this list.
 const ALLOWED_PLUGIN_LISTS = [ 'task-list/grow', 'task-list/reach' ];
@@ -257,9 +258,13 @@ const Marketing = ( { onComplete }: MarketingProps ) => {
 							' the WooCommerce marketplace.',
 						'woocommerce'
 					) }
-					buttonHref={ getAdminLink(
-						'admin.php?page=wc-admin&tab=extensions&path=%2Fextensions&category=marketing-extensions'
-					) }
+					buttonHref={
+						isFeatureEnabled( 'marketplace' )
+							? getAdminLink(
+									'admin.php?page=wc-admin&tab=extensions&path=%2Fextensions&category=marketing-extensions'
+							  )
+							: 'https://woocommerce.com/product-category/woocommerce-extensions/marketing-extensions/'
+					}
 					buttonText={ __( 'Start growing', 'woocommerce' ) }
 					onButtonClick={ trackPromoButtonClick }
 				/>
