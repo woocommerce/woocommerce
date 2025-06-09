@@ -19,7 +19,6 @@ import {
 	objectHasProp,
 	isEmpty,
 	ProductResponseItem,
-	ProductResponseImageItem,
 } from '@woocommerce/types';
 
 /**
