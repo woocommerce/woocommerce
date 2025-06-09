@@ -35,8 +35,10 @@ Example:
 
 ```bash
 # To run test cases defined in tests/integration/Engine/Theme_Controller_Test.php run
-composer run integration-test -- tests/integration/Engine/Theme_Controller_Test.php
+composer run test:integration -- tests/integration/Engine/Theme_Controller_Test.php
 ```
+
+More testing guide at [writing-tests.md](writing-tests.md)
 
 ## Development
 
@@ -44,7 +46,7 @@ The **PHP** package is divided into `engine` and `integrations` subdirectories.
 Engine consist of code for the editor core and integrations are for extending the functionality.
 Anything **WooCommerce** specific should be in the `plugins/woocommerce/src/Internal/EmailEditor` folder.
 
-Please avoid using MailPoet-specific services and modules in the Email editor package.
+More development details at [development.md](development.md)
 
 ### Renderer
 
@@ -60,6 +62,8 @@ Please avoid using MailPoet-specific services and modules in the Email editor pa
 ### Integrations
 
 [Please locate MailPoet PHP integrations.](https://github.com/mailpoet/mailpoet/tree/13bf305aeb29bbadd0695ee02a3735e62cc4f21f/mailpoet/lib/EmailEditor/Integrations/MailPoet)
+
+[WooCommerce Integration](https://github.com/woocommerce/woocommerce/tree/6dfd5f16aecbeee2fae0ec30e0c7ce7036cfeaac/plugins/woocommerce/src/Internal/EmailEditor)
 
 ## Known rendering issues
 

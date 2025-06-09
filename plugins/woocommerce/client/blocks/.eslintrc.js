@@ -153,7 +153,6 @@ const coreModules = [
 	'@wordpress/url',
 	'@wordpress/wordcount',
 	'@woocommerce/blocks-test-utils',
-	'@woocommerce/e2e-utils',
 	'babel-jest',
 	'dotenv',
 	'jest-environment-puppeteer',
