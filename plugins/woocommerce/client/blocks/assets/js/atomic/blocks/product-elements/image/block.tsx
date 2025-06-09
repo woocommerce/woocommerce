@@ -184,6 +184,9 @@ export const Block = ( props: Props ): JSX.Element | null => {
 
 	const image = chooseImage( product, imageId );
 
+	if ( image ) {
+		image.alt = image.alt || decodeEntities( product.name );
+	}
 
 	const ParentComponent = showProductLink ? 'a' : Fragment;
 	const anchorLabel = product?.name
@@ -226,10 +229,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				<ParentComponent { ...( showProductLink && anchorProps ) }>
 					<Image
 						fallbackAlt={ decodeEntities( product.name ) }
-						image={ {
-							...image,
-							alt: image.alt || decodeEntities( product.name ),
-						} }
+						image={ image }
 						loaded={ ! isLoading }
 						showFullSize={ imageSizing !== ImageSizing.THUMBNAIL }
 						width={ width }
