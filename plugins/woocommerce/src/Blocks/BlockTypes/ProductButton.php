@@ -314,9 +314,7 @@ class ProductButton extends AbstractBlock {
 	 * @return boolean The product is purchasable.
 	 */
 	private function is_product_purchasable( $product ) {
-		$is_product_purchasable = $product->is_purchasable() && $product->is_in_stock();
-
-		if ( $product->is_type( 'grouped' ) ) {
+		if ( $product->is_type( 'grouped' ) ) {	
 			$grouped_product_ids = $product->get_children();
 			foreach ( $grouped_product_ids as $child ) {
 				$child_product = wc_get_product( $child );
@@ -324,13 +322,14 @@ class ProductButton extends AbstractBlock {
 					continue;
 				}
 				if ( $child_product->is_purchasable() && $child_product->is_in_stock() ) {
-					$is_product_purchasable = true;
-					break;
+					return true;
 				}
 			}
-		}
 
-		return $is_product_purchasable;
+			return false;
+		}
+		
+		return $product->is_purchasable() && $product->is_in_stock();
 	}
 
 	/**
