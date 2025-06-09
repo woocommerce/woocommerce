@@ -333,8 +333,8 @@ describe( 'Payment recommendations', () => {
 		} );
 
 		it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
-			const { isFeatureEnabled } = require( '~/utils/features' );
-			isFeatureEnabled.mockReturnValue( true );
+			const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
+			( isFeatureEnabled as jest.Mock ).mockReturnValue( true );
 
 			const { container, getByText } = render(
 				<PaymentRecommendations />

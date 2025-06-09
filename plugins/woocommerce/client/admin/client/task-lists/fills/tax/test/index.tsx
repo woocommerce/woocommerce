@@ -144,8 +144,8 @@ it( 'should trigger event tasklist_tax_visit_marketplace_click when clicking the
 } );
 
 it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
-	const { isFeatureEnabled } = require( '~/utils/features' );
-	isFeatureEnabled.mockReturnValue( true );
+	const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
+	( isFeatureEnabled as jest.Mock ).mockReturnValue( true );
 
 	const mockLocation = {
 		href: 'test',
