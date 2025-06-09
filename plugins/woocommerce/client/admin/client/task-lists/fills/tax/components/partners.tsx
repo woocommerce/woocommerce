@@ -13,6 +13,7 @@ import { getAdminLink } from '@woocommerce/settings';
 import { TaxChildProps } from '../utils';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
 import './partners.scss';
+import { isFeatureEnabled } from '~/utils/features';
 
 export const Partners = ( {
 	children,
@@ -80,9 +81,16 @@ export const Partners = ( {
 					'woocommerce'
 				) }
 				eventName="tasklist_tax_visit_marketplace_click"
-				targetUrl={ getAdminLink(
-					'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=operations'
-				) }
+				targetUrl={
+					isFeatureEnabled( 'marketplace' )
+						? getAdminLink(
+								'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=operations'
+						  )
+						: 'https://woocommerce.com/product-category/woocommerce-extensions/operations/'
+				}
+				linkType={
+					isFeatureEnabled( 'marketplace' ) ? 'wc-admin' : 'external'
+				}
 			/>
 		</>
 	);

@@ -40,8 +40,8 @@ import {
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
 import WooPaymentsModal from '~/settings-payments/onboarding/providers/woopayments';
-import { getAdminSetting } from '~/utils/admin-settings';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
+import { isFeatureEnabled } from '~/utils/features';
 
 /**
  * A component that renders the main settings page for managing payment gateways in WooCommerce.
@@ -72,8 +72,6 @@ export const SettingsPaymentsMain = () => {
 
 	const [ isOnboardingModalOpen, setIsOnboardingModalOpen ] =
 		useState( false );
-
-	const assetUrl = getAdminSetting( 'wcAdminAssetUrl' );
 
 	useEffect( () => {
 		// Record the page view event.
@@ -451,13 +449,20 @@ export const SettingsPaymentsMain = () => {
 		<TrackedLink
 			message={ __(
 				// translators: {{Link}} is a placeholder for a html element.
-				'Visit {{Link}}The WooCommerce Marketplace{{/Link}} to find additional payment providers.',
+				'Visit {{Link}}The WooCommerce Marketplace{{/Link}} to find additional payment options.',
 				'woocommerce'
 			) }
 			onClickCallback={ trackMorePaymentsOptionsClicked }
-			targetUrl={ getAdminLink(
-				'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
-			) }
+			targetUrl={
+				isFeatureEnabled( 'marketplace' )
+					? getAdminLink(
+							'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
+					  )
+					: 'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/'
+			}
+			linkType={
+				isFeatureEnabled( 'marketplace' ) ? 'wc-admin' : 'external'
+			}
 		/>
 	);
 
