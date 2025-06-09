@@ -125,6 +125,9 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	 */
 	private function update_single_image( $image_html, $context, $index ) {
 		$p = new \WP_HTML_Tag_Processor( $image_html );
+		$p->next_tag( 'a' );
+		$p->remove_attribute( 'onclick' );
+		$p->remove_attribute( 'style' );
 		$p->next_tag( 'img' );
 		$p->set_attribute( 'tabindex', '-1' );
 		$p->set_attribute( 'draggable', 'false' );
