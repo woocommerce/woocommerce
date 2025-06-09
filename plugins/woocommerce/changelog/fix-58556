@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Remove order status validation for order count cache
