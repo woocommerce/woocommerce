@@ -15,6 +15,7 @@ test.describe( 'Test the checkout template', () => {
 			postId: templatePath,
 			postType: templateType,
 			canvas: 'edit',
+			showWelcomeGuide: false,
 		} );
 		const block = editor.canvas.getByLabel( 'Block: Checkout' );
 		await expect( block ).toBeVisible();
@@ -25,7 +26,10 @@ test.describe( 'Test the checkout template', () => {
 		editor,
 		page,
 	} ) => {
-		await admin.visitSiteEditor( { postType: 'page' } );
+		await admin.visitSiteEditor( {
+			postType: 'page',
+			showWelcomeGuide: false,
+		} );
 		await editor.page
 			.getByRole( 'button', { name: 'Checkout', exact: true } )
 			.click();
