@@ -19,7 +19,7 @@ const blockData = {
 	},
 	urlSearchParamWhenFilterIsApplied: 'max_price=5',
 	endpointAPI: 'max_price=500',
-	placeholderUrl: `${ BASE_URL }/wp-content/plugins/woocommerce/assets/images/placeholder.png`,
+	placeholderUrl: `${ BASE_URL }/wp-content/plugins/woocommerce/assets/images/placeholder.webp`,
 };
 
 const test = base.extend< { templateCompiler: TemplateCompiler } >( {
