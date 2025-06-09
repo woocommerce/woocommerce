@@ -50,7 +50,7 @@ const getInputElementFromEvent = (
 	}
 
 	if ( event.target instanceof HTMLInputElement ) {
-		inputElement = event.target.closest( 'input[type="checkbox"]' );
+		inputElement = event.target;
 	}
 
 	return inputElement;
