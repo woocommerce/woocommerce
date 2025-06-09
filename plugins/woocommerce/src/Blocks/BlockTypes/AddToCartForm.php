@@ -110,6 +110,35 @@ class AddToCartForm extends AbstractBlock {
 		return $html->get_updated_html();
 	}
 
+	/**
+	 * Check if a variation product has all attributes set.
+	 * Returns true if the product is not variation, or if all variation attributes have defined values.
+	 *
+	 * @param WC_Product $product The product to check.
+	 *
+	 * @return bool True if all attributes are set, false otherwise.
+	 */
+	private function has_all_attributes_set( $product ) {
+		// If it's not a variation product, return true.
+		if ( ! $product->is_type( 'variation' ) ) {
+			return true;
+		}
+
+		// Get all variation attributes.
+		$variation_attributes = $product->get_variation_attributes();
+
+		// If there are no variation attributes, return true.
+		if ( empty( $variation_attributes ) ) {
+			return true;
+		}
+
+		// Check if any attribute has an empty value (marked as 'any').
+		if ( in_array( '', array_values( $variation_attributes ), true ) ) {
+			return false;
+		}
+
+		return true;
+	}
 
 	/**
 	 * Render the block.
@@ -134,6 +163,13 @@ class AddToCartForm extends AbstractBlock {
 		$previous_product = $product;
 		$product          = wc_get_product( $post_id );
 		if ( ! $product instanceof \WC_Product ) {
+			$product = $previous_product;
+
+			return '';
+		}
+
+		// Check if all attributes are set for variation product.
+		if ( $product->is_type( 'variation' ) && ! $this->has_all_attributes_set( $product ) ) {
 			$product = $previous_product;
 
 			return '';
