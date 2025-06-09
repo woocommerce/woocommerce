@@ -9,8 +9,8 @@ import { existsSync } from 'fs';
 /**
  * Internal dependencies
  */
-import { getEnvVar, isGithubCI } from '../../../core/environment';
-import { Logger } from '../../../core/logger';
+import { getEnvVar, isGithubCI } from '../core/environment';
+import { Logger } from '../core/logger';
 
 // Resolves channel IDs from the SLACK_CHANNELS env variable (comma-separated).
 // Throws if not set or empty.
