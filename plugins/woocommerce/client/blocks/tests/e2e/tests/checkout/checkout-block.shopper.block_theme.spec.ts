@@ -211,7 +211,6 @@ test.describe( 'Shopper → Local pickup', () => {
 		await page
 			.getByRole( 'radio', { name: 'Pickup', exact: true } )
 			.click();
-		await expect( page.getByText( 'Pickup (Testing)' ) ).toBeVisible();
 
 		// Wait for the shipping rate selection request to complete
 		await page.waitForResponse(
@@ -222,6 +221,8 @@ test.describe( 'Shopper → Local pickup', () => {
 						'wp-json/wc/store/v1/cart/select-shipping-rate'
 					) && response.status() === 200
 		);
+
+		await expect( page.getByText( 'Pickup (Testing)' ) ).toBeVisible();
 
 		await checkoutPageObject.placeOrder();
 
