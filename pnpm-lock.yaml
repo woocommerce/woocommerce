@@ -3082,9 +3082,6 @@ importers:
       '@stripe/react-connect-js':
         specifier: ^3.3.21
         version: 3.3.21(@stripe/connect-js@3.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@woocommerce/api':
-        specifier: workspace:*
-        version: link:../../../../packages/js/api
       '@wordpress/a11y':
         specifier: wp-6.6
         version: 4.0.1
@@ -3299,18 +3296,12 @@ importers:
       '@types/dompurify':
         specifier: ^2.4.0
         version: 2.4.0
-      '@types/expect-puppeteer':
-        specifier: ^4.4.7
-        version: 4.4.7
       '@types/jest':
         specifier: 27.5.x
         version: 27.5.2
       '@types/lodash':
         specifier: ^4.14.202
         version: 4.14.202
-      '@types/puppeteer':
-        specifier: ^4.0.3
-        version: 4.0.3
       '@types/qs':
         specifier: ^6.9.10
         version: 6.9.10
@@ -3551,9 +3542,6 @@ importers:
       prop-types:
         specifier: ^15.8.1
         version: 15.8.1
-      puppeteer:
-        specifier: ^2.1.1
-        version: 2.1.1
       raw-loader:
         specifier: 4.0.x
         version: 4.0.2(webpack@5.97.1)
@@ -9085,9 +9073,6 @@ packages:
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
 
-  '@types/expect-puppeteer@4.4.7':
-    resolution: {integrity: sha512-C5UHvCNTmjiGAVU5XyzR7xmZPRF/+YfpSd746Gd4ytcSpLT+/ke1EzrpDhO0OqqtpExQvr8M4qb0md9tybq7XA==}
-
   '@types/expect@1.20.4':
     resolution: {integrity: sha512-Q5Vn3yjTDyCMV50TB6VRIbQNxSE4OmZR86VSbGaNpfUolm0iePBB4KdEEHmxoY5sT2+2DIvXW0rvMDP2nHZ4Mg==}
 
@@ -9273,9 +9258,6 @@ packages:
 
   '@types/prop-types@15.7.11':
     resolution: {integrity: sha512-ga8y9v9uyeiLdpKddhxYQkxNDrfvuPrlFb0N1qnZZByvcElJaXthF1UhvCh9TLWJBEHeNtdnbysW7Y6Uq8CVng==}
-
-  '@types/puppeteer@4.0.3':
-    resolution: {integrity: sha512-SZp55F61SFKigTtNvHfoArL0T9Q/mqEBg4FvmkeE7KHhKBmBGIjwgYcNDDMkrBWbq78OjAhYXbzABmvhuZxOfw==}
 
   '@types/puppeteer@5.4.6':
     resolution: {integrity: sha512-98Kghehs7+/GD9b56qryhqdqVCXUTbetTv3PlvDnmFRTHQH0j9DIp1f7rkAW3BAj4U3yoeSEQnKgdW8bDq0Y0Q==}
@@ -20767,11 +20749,6 @@ packages:
   puppeteer@17.1.3:
     resolution: {integrity: sha512-tVtvNSOOqlq75rUgwLeDAEQoLIiBqmRg0/zedpI6fuqIocIkuxG23A7FIl1oVSkuSMMLgcOP5kVhNETmsmjvPw==}
     engines: {node: '>=14.1.0'}
-    deprecated: < 22.8.2 is no longer supported
-
-  puppeteer@2.1.1:
-    resolution: {integrity: sha512-LWzaDVQkk1EPiuYeTOj+CZRIjda4k2s5w4MK4xoH2+kgWV/SDlkYHmxatDdtYrciHUKSXTsGgPgPP8ILVdBsxg==}
-    engines: {node: '>=8.16.0'}
     deprecated: < 22.8.2 is no longer supported
 
   pure-rand@6.0.4:
@@ -32273,11 +32250,6 @@ snapshots:
 
   '@types/estree@1.0.6': {}
 
-  '@types/expect-puppeteer@4.4.7':
-    dependencies:
-      '@types/jest': 27.5.2
-      '@types/puppeteer': 5.4.7
-
   '@types/expect@1.20.4': {}
 
   '@types/express-serve-static-core@4.17.41':
@@ -32468,10 +32440,6 @@ snapshots:
   '@types/pretty-hrtime@1.0.3': {}
 
   '@types/prop-types@15.7.11': {}
-
-  '@types/puppeteer@4.0.3':
-    dependencies:
-      '@types/node': 20.17.8
 
   '@types/puppeteer@5.4.6':
     dependencies:
@@ -32894,7 +32862,7 @@ snapshots:
       '@types/node': 20.17.8
     optional: true
 
-  '@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)':
+  '@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)':
     dependencies:
       '@typescript-eslint/experimental-utils': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       '@typescript-eslint/parser': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
@@ -36339,14 +36307,14 @@ snapshots:
   '@wordpress/eslint-plugin@9.3.0(@babel/core@7.25.7)(eslint@7.32.0)(typescript@5.7.2)':
     dependencies:
       '@babel/eslint-parser': 7.23.3(@babel/core@7.25.7)(eslint@7.32.0)
-      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
+      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
       '@typescript-eslint/parser': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       '@wordpress/prettier-config': 1.4.0(wp-prettier@2.2.1-beta-1)
       cosmiconfig: 7.1.0
       eslint: 7.32.0
       eslint-config-prettier: 7.2.0(eslint@7.32.0)
       eslint-plugin-import: 2.29.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)
-      eslint-plugin-jest: 24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
+      eslint-plugin-jest: 24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
       eslint-plugin-jsdoc: 36.1.1(eslint@7.32.0)
       eslint-plugin-jsx-a11y: 6.8.0(eslint@7.32.0)
       eslint-plugin-prettier: 3.4.1(eslint-config-prettier@7.2.0(eslint@7.32.0))(eslint@7.32.0)(wp-prettier@2.2.1-beta-1)
@@ -42489,12 +42457,12 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-jest@24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2):
+  eslint-plugin-jest@24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2):
     dependencies:
       '@typescript-eslint/experimental-utils': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       eslint: 7.32.0
     optionalDependencies:
-      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
+      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -51199,23 +51167,6 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  puppeteer@2.1.1:
-    dependencies:
-      '@types/mime-types': 2.1.4
-      debug: 4.3.5
-      extract-zip: 1.7.0
-      https-proxy-agent: 4.0.0
-      mime: 2.6.0
-      mime-types: 2.1.35
-      progress: 2.0.3
-      proxy-from-env: 1.1.0
-      rimraf: 2.7.1
-      ws: 6.2.2
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-
   pure-rand@6.0.4: {}
 
   q@1.5.1: {}
@@ -56012,6 +55963,7 @@ snapshots:
   ws@6.2.2:
     dependencies:
       async-limiter: 1.0.1
+    optional: true
 
   ws@6.2.3:
     dependencies:
