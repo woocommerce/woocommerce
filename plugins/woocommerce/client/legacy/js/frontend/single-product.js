@@ -45,9 +45,10 @@ jQuery( function( $ ) {
 			$tabs_wrapper.find( '#' + $tab.attr( 'href' ).split( '#' )[1] ).show();
 		} )
 		.on( 'keydown', '.wc-tabs li a, ul.tabs li a', function( e ) {
+			var isRTL     = document.documentElement.dir === 'rtl';
 			var direction = e.key;
-			var right     = 'ArrowRight';
-			var left      = 'ArrowLeft';
+			var right     = isRTL ? 'ArrowLeft' : 'ArrowRight';
+			var left      = isRTL ? 'ArrowRight' : 'ArrowLeft';
 			var down      = 'ArrowDown';
 			var up        = 'ArrowUp';
 			var home	  = 'Home';
