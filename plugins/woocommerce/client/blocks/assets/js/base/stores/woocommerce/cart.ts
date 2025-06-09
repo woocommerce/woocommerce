@@ -154,9 +154,6 @@ const { state, actions } = store< Store >(
 				const previousCart = structuredClone( state.cart );
 				const quantityChanges: QuantityChanges = {};
 
-				// Remove items with quantity 0.
-				items = items.filter( ( item ) => item.quantity > 0 );
-
 				// Updates the database.
 				try {
 					const requests = items.map( ( item ) => {

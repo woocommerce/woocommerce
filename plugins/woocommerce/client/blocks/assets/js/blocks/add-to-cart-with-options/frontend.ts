@@ -125,6 +125,15 @@ const getMatchedVariation = (
 		);
 	} );
 };
+
+const getNewQuantity = ( productId: number, quantity: number ) => {
+	const product = wooState.cart?.items.find(
+		( item ) => item.id === productId
+	);
+	const currentQuantity = product?.quantity || 0;
+	return currentQuantity + quantity;
+};
+
 const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 	const event = new Event( 'change' );
 	inputElement.dispatchEvent( event );
@@ -281,16 +290,18 @@ const addToCartWithOptionsStore = store(
 					const addedItems: GroupedCartItem[] = [];
 
 					for ( const childProductId of groupedProductIds ) {
-						const existingProduct = wooState.cart?.items.find(
-							( item ) => item.id === childProductId
+						const newQuantity = getNewQuantity(
+							childProductId,
+							quantity[ childProductId ]
 						);
-						const currentQuantity = existingProduct?.quantity || 0;
+
+						if ( newQuantity === 0 ) {
+							continue;
+						}
 
 						addedItems.push( {
 							id: childProductId,
-							quantity:
-								currentQuantity +
-								( quantity[ childProductId ] || 0 ),
+							quantity: newQuantity,
 							variation: selectedAttributes,
 						} );
 					}
@@ -307,10 +318,10 @@ const addToCartWithOptionsStore = store(
 
 					yield actions.batchAddCartItems( addedItems );
 				} else {
-					const product = wooState.cart?.items.find(
-						( item ) => item.id === productId
+					const newQuantity = getNewQuantity(
+						productId,
+						quantity[ productId ]
 					);
-					const currentQuantity = product?.quantity || 0;
 
 					const { actions } = store< WooCommerce >(
 						'woocommerce',
@@ -320,8 +331,7 @@ const addToCartWithOptionsStore = store(
 
 					yield actions.addCartItem( {
 						id: productId,
-						quantity:
-							currentQuantity + ( quantity[ productId ] || 0 ),
+						quantity: newQuantity,
 						variation: selectedAttributes,
 					} );
 				}
