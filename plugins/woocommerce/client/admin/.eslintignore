@@ -17,4 +17,3 @@ e2e-environment
 
 # These packages don't have their eslint setup, but have many lint errors.
 api-core-tests
-e2e-core-tests

@@ -25,7 +25,6 @@ README.md
 wp-cli.local.yml
 yarn.lock
 tests
-packages/admin-e2e-tests
 vendor
 config
 node_modules
