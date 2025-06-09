@@ -27,9 +27,6 @@
 "packages/js/e2e-core-tests/**/*":
   - Flux
 
-"packages/js/admin-e2e-tests/**/*":
-  - Flux
-
 "packages/js/components/**/*":
   - Kirigami
 
