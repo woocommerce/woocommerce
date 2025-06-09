@@ -30,6 +30,22 @@ import './style.scss';
 import { BlockAttributes, ImageSizing, ProductImageContext } from './types';
 import { isTryingToDisplayLegacySaleBadge } from './utils';
 
+const chooseImage = ( product: ProductResponseItem, imageId?: number ) => {
+	// Default to placeholder image if no product images are available.
+	if ( ! product.images.length ) {
+		return null;
+	}
+
+	if ( imageId ) {
+		// If an image ID is provided, use that image or fallback to featured image.
+		const image = product.images.find( ( img ) => img.id === imageId );
+		return image || product.images[ 0 ];
+	}
+
+	// If no image ID is provided, use the featured image.
+	return product.images[ 0 ];
+};
+
 const ImagePlaceholder = ( props ): JSX.Element => {
 	return (
 		<img
@@ -148,7 +164,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	const { product, isLoading } = useProductDataContext();
 	const { dispatchStoreEvent } = useStoreEvents();
 
-	if ( ! product?.id || ! product?.images.length ) {
+	if ( ! product?.id ) {
 		return (
 			<>
 				<div
@@ -170,10 +186,8 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		);
 	}
 
-	const image: ProductResponseImageItem = imageId
-		? product?.images.find( ( img ) => img.id === imageId ) ||
-		  product.images[ 0 ]
-		: product.images[ 0 ];
+	const image = chooseImage( product, imageId );
+
 
 	const ParentComponent = showProductLink ? 'a' : Fragment;
 	const anchorLabel = product?.name
