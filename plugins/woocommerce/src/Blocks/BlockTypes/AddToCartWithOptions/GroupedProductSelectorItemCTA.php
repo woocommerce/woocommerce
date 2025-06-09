@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use WP_Block;
 
 /**
@@ -137,10 +136,8 @@ class GroupedProductSelectorItemCTA extends AbstractBlock {
 				$markup = $this->get_quantity_selector_markup( $product );
 			}
 
-			$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
-
 			if ( $markup ) {
-				$markup = '<div class="wp-block-add-to-cart-with-options-grouped-product-selector-item-cta wc-block-add-to-cart-with-options-grouped-product-selector-item-cta' . esc_attr( $classes_and_styles['classes'] ) . '" style="' . esc_attr( $classes_and_styles['styles'] ) . '">' . $markup . '</div>';
+				$markup = '<div class="wp-block-add-to-cart-with-options-grouped-product-selector-item-cta wc-block-add-to-cart-with-options-grouped-product-selector-item-cta">' . $markup . '</div>';
 			}
 		}
 
