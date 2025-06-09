@@ -4,6 +4,10 @@
 import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
 import { getPaymentMethods } from '@woocommerce/blocks-registry';
+import { getIconsFromPaymentMethods } from '@woocommerce/base-utils';
+import { usePaymentMethods } from '@woocommerce/base-context/hooks';
+import PaymentMethodIcons from '@woocommerce/base-components/cart-checkout/payment-method-icons';
+import { PaymentEventsProvider } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
@@ -11,14 +15,28 @@ import { getPaymentMethods } from '@woocommerce/blocks-registry';
 import './style.scss';
 import { getPaymentMethodIcons } from './getPaymentMethodIcons';
 
+const PaymentMethodIconsElement = (): JSX.Element => {
+	const { paymentMethods } = usePaymentMethods();
+	return (
+		<PaymentMethodIcons
+			icons={ getIconsFromPaymentMethods( paymentMethods ) }
+		/>
+	);
+};
+
 const Edit = () => {
-	const paymentMethods = getPaymentMethods();
 	const blockProps = useBlockProps();
-	const paymentMethodIcons = getPaymentMethodIcons( paymentMethods );
+	//const paymentMethods = getPaymentMethods();
+	//const paymentMethodIcons = getPaymentMethodIcons( paymentMethods );
+	const paymentMethods = [];
+	const paymentMethodIcons = [];
 
 	return (
 		<div { ...blockProps }>
 			<div className="wp-block-woocommerce-payment-methods">
+				<PaymentEventsProvider>
+					<PaymentMethodIconsElement />
+				</PaymentEventsProvider>
 				{ Object.keys( paymentMethods ).length === 0 ? (
 					<p>
 						<small>
