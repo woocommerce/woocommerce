@@ -109,7 +109,7 @@ export async function sendFile(
 					'The provided token does not have the required scopes, please add files:write and chat:write to the token.'
 				);
 			} else {
-				Logger.error( e );
+				Logger.error( e.message );
 			}
 		}
 	}
