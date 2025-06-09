@@ -818,4 +818,98 @@ class Cart extends ControllerTestCase {
 			400
 		);
 	}
+
+	/**
+	 * Test adding item to cart with quantity 0 shows an error.
+	 */
+	public function test_add_item_with_zero_quantity_shows_error() {
+		wc_empty_cart();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => 0,
+			)
+		);
+
+		$this->assertAPIResponse(
+			$request,
+			400,
+			array(
+				'code' => 'woocommerce_rest_product_invalid_quantity',
+			)
+		);
+	}
+
+	/**
+	 * Test adding item to cart with quantity "0" as string shows an error.
+	 */
+	public function test_add_item_with_string_zero_quantity_shows_error() {
+		wc_empty_cart();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => '0',
+			)
+		);
+
+		$this->assertAPIResponse(
+			$request,
+			400,
+			array(
+				'code' => 'woocommerce_rest_product_invalid_quantity',
+			)
+		);
+	}
+
+	/**
+	 * Test adding item to cart without quantity adds 1 item.
+	 */
+	public function test_add_item_without_quantity_defaults_to_one() {
+		wc_empty_cart();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id' => $this->products[0]->get_id(),
+			)
+		);
+
+		$this->assertAPIResponse(
+			$request,
+			201,
+			array(
+				'items_count' => 1,
+				'items'       => function ( $value ) {
+					return count( $value ) === 1 && $value[0]['quantity'] === 1;
+				},
+			)
+		);
+
+		// Test adding the same item again without quantity to verify it adds another 1.
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id' => $this->products[0]->get_id(),
+			)
+		);
+
+		$this->assertAPIResponse(
+			$request,
+			201,
+			array(
+				'items_count' => 2,
+				'items'       => function ( $value ) {
+					return count( $value ) === 1 && $value[0]['quantity'] === 2;
+				},
+			)
+		);
+	}
 }
