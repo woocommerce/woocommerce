@@ -70,6 +70,10 @@ jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
 
+jest.mock( '~/utils/features', () => ( {
+	isFeatureEnabled: jest.fn(),
+} ) );
+
 const taskProps: TaskProps = {
 	onComplete: () => {},
 	query: {},
@@ -157,6 +161,9 @@ describe( 'ShippingRecommendation', () => {
 	} );
 
 	test( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
+		const { isFeatureEnabled } = require( '~/utils/features' );
+		isFeatureEnabled.mockReturnValue( true );
+
 		const mockLocation = {
 			href: 'test',
 		} as Location;

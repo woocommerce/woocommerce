@@ -13,6 +13,10 @@ jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
 
+jest.mock( '~/utils/features', () => ( {
+	isFeatureEnabled: jest.fn(),
+} ) );
+
 describe( 'SettingsPaymentsMain', () => {
 	it( 'should record settings_payments_pageview event on load', () => {
 		render( <SettingsPaymentsMain /> );
@@ -40,6 +44,9 @@ describe( 'SettingsPaymentsMain', () => {
 	} );
 
 	it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', () => {
+		const { isFeatureEnabled } = require( '~/utils/features' );
+		isFeatureEnabled.mockReturnValue( true );
+
 		const mockLocation = {
 			href: 'test',
 		} as Location;

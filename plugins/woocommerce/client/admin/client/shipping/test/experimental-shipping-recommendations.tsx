@@ -34,6 +34,9 @@ jest.mock( '@woocommerce/admin-layout', () => {
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
+jest.mock( '~/utils/features', () => ( {
+	isFeatureEnabled: jest.fn(),
+} ) );
 
 const defaultSelectReturn = {
 	getActivePlugins: () => [],
@@ -124,6 +127,9 @@ describe( 'ShippingRecommendations', () => {
 	} );
 
 	it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
+		const { isFeatureEnabled } = require( '~/utils/features' );
+		isFeatureEnabled.mockReturnValue( true );
+
 		const mockLocation = {
 			href: 'test',
 		} as Location;

@@ -20,6 +20,10 @@ jest.mock( '@wordpress/data', () => ( {
 
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
+jest.mock( '~/utils/features', () => ( {
+	isFeatureEnabled: jest.fn(),
+} ) );
+
 const paymentGatewaySuggestions = [
 	{
 		id: 'stripe',
@@ -444,6 +448,9 @@ describe( 'PaymentGatewaySuggestions', () => {
 	} );
 
 	test( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
+		const { isFeatureEnabled } = require( '~/utils/features' );
+		isFeatureEnabled.mockReturnValue( true );
+
 		const mockLocation = {
 			href: 'test',
 		};

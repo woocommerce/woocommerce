@@ -20,6 +20,10 @@ jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
 
+jest.mock( '~/utils/features', () => ( {
+	isFeatureEnabled: jest.fn(),
+} ) );
+
 const fakeTask: {
 	additionalData: {
 		[ key: string ]: boolean | string | string[];
@@ -140,6 +144,9 @@ it( 'should trigger event tasklist_tax_visit_marketplace_click when clicking the
 } );
 
 it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
+	const { isFeatureEnabled } = require( '~/utils/features' );
+	isFeatureEnabled.mockReturnValue( true );
+
 	const mockLocation = {
 		href: 'test',
 	} as Location;

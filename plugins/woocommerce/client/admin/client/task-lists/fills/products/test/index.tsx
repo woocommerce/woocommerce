@@ -49,6 +49,10 @@ jest.mock( '../use-create-product-by-type', () => ( {
 		.mockReturnValue( { createProductByType: jest.fn() } ),
 } ) );
 
+jest.mock( '~/utils/features', () => ( {
+	isFeatureEnabled: jest.fn(),
+} ) );
+
 global.fetch = jest.fn().mockImplementation( () =>
 	Promise.resolve( {
 		json: () => Promise.resolve( {} ),
@@ -289,6 +293,9 @@ describe( 'Products', () => {
 	} );
 
 	it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
+		const { isFeatureEnabled } = require( '~/utils/features' );
+		isFeatureEnabled.mockReturnValue( true );
+
 		mockLocation.href = 'test';
 		Object.defineProperty( global.window, 'location', {
 			value: mockLocation,

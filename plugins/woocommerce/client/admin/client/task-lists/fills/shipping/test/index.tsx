@@ -20,6 +20,10 @@ jest.mock( '@wordpress/data', () => ( {
 	withDispatch: () => ( Component: React.ComponentType ) => Component,
 } ) );
 
+jest.mock( '~/utils/features', () => ( {
+	isFeatureEnabled: jest.fn(),
+} ) );
+
 describe( 'Shipping', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
@@ -49,6 +53,9 @@ describe( 'Shipping', () => {
 	} );
 
 	it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
+		const { isFeatureEnabled } = require( '~/utils/features' );
+		isFeatureEnabled.mockReturnValue( true );
+
 		const mockLocation = {
 			href: 'test',
 		} as Location;
