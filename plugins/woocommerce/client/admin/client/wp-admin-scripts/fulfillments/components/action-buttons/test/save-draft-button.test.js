@@ -91,6 +91,7 @@ describe( 'SaveAsDraftButton component', () => {
 		useFulfillmentContext.mockReturnValue( {
 			order: { id: 123 },
 			fulfillment: mockFulfillment,
+			notifyCustomer: true,
 		} );
 
 		render( <SaveAsDraftButton setError={ setError } /> );
@@ -98,7 +99,8 @@ describe( 'SaveAsDraftButton component', () => {
 
 		expect( mockSaveFulfillment ).toHaveBeenCalledWith(
 			123,
-			mockFulfillment
+			mockFulfillment,
+			true
 		);
 	} );
 

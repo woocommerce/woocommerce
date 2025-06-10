@@ -21,6 +21,7 @@ import FulfillItemsButton from '../action-buttons/fulfill-items-button';
 import CancelLink from '../action-buttons/cancel-link';
 import RemoveButton from '../action-buttons/remove-button';
 import UpdateButton from '../action-buttons/update-button';
+import CustomerNotificationBox from '../customer-notification-form';
 import FulfillmentStatusBadge from './fulfillment-status-badge';
 import ErrorLabel from '../user-interface/error-label';
 import { useFulfillmentDrawerContext } from '../../context/drawer-context';
@@ -137,6 +138,11 @@ export default function FulfillmentEditor( {
 									/>
 								</>
 							) }
+							{ ( ( fulfillment.is_fulfilled && isEditing ) ||
+								( ! fulfillment.is_fulfilled &&
+									! isEditing ) ) && (
+								<CustomerNotificationBox type="update" />
+							) }
 							<div className="woocommerce-fulfillment-item-actions">
 								{ ! isEditing ? (
 									<>
@@ -145,9 +151,11 @@ export default function FulfillmentEditor( {
 												setIsEditing( true );
 											} }
 										/>
-										<FulfillItemsButton
-											setError={ setError }
-										/>
+										{ ! fulfillment.is_fulfilled && (
+											<FulfillItemsButton
+												setError={ setError }
+											/>
+										) }
 									</>
 								) : (
 									<>

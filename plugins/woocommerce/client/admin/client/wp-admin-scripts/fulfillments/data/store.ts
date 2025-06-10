@@ -79,13 +79,17 @@ const internalActions = {
 // --- Public Async Actions
 const publicActions = {
 	saveFulfillment:
-		( orderId: number, fulfillment: Fulfillment ) =>
+		(
+			orderId: number,
+			fulfillment: Fulfillment,
+			notify_customer: boolean
+		) =>
 		async ( { dispatch }: { dispatch: typeof actions } ) => {
 			dispatch.setLoading( orderId, true );
 			dispatch.setError( orderId, null );
 			try {
 				const saved = await apiFetch< ResponseWithFulfillment >( {
-					path: `/wc/v3/orders/${ orderId }/fulfillments`,
+					path: `/wc/v3/orders/${ orderId }/fulfillments?notify_customer=${ notify_customer }`,
 					method: 'POST',
 					data: fulfillment,
 				} );
@@ -107,13 +111,17 @@ const publicActions = {
 		},
 
 	updateFulfillment:
-		( orderId: number, fulfillment: Fulfillment ) =>
+		(
+			orderId: number,
+			fulfillment: Fulfillment,
+			notifyCustomer: boolean
+		) =>
 		async ( { dispatch }: { dispatch: typeof actions } ) => {
 			dispatch.setLoading( orderId, true );
 			dispatch.setError( orderId, null );
 			try {
 				const updated = await apiFetch< ResponseWithFulfillment >( {
-					path: `/wc/v3/orders/${ orderId }/fulfillments/${ fulfillment.id }`,
+					path: `/wc/v3/orders/${ orderId }/fulfillments/${ fulfillment.id }?notify_customer=${ notifyCustomer }`,
 					method: 'PUT',
 					data: fulfillment,
 				} );
@@ -135,13 +143,13 @@ const publicActions = {
 		},
 
 	deleteFulfillment:
-		( orderId: number, fulfillmentId: number ) =>
+		( orderId: number, fulfillmentId: number, notify_customer: boolean ) =>
 		async ( { dispatch }: { dispatch: typeof actions } ) => {
 			dispatch.setLoading( orderId, true );
 			dispatch.setError( orderId, null );
 			try {
 				await apiFetch( {
-					path: `/wc/v3/orders/${ orderId }/fulfillments/${ fulfillmentId }`,
+					path: `/wc/v3/orders/${ orderId }/fulfillments/${ fulfillmentId }?notify_customer=${ notify_customer }`,
 					method: 'DELETE',
 				} );
 				dispatch.deleteFulfillmentRecord( orderId, fulfillmentId );

@@ -650,16 +650,23 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 */
 	private function get_args_for_delete_fulfillment(): array {
 		return array(
-			'order_id'       => array(
+			'order_id'        => array(
 				'description' => __( 'Unique identifier for the order.', 'woocommerce' ),
 				'type'        => 'integer',
 				'required'    => true,
 				'context'     => array( 'view', 'edit' ),
 			),
-			'fulfillment_id' => array(
+			'fulfillment_id'  => array(
 				'description' => __( 'Unique identifier for the fulfillment.', 'woocommerce' ),
 				'type'        => 'integer',
 				'required'    => true,
+				'context'     => array( 'view', 'edit' ),
+			),
+			'notify_customer' => array(
+				'description' => __( 'Whether to notify the customer about the fulfillment update.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'default'     => false,
+				'required'    => false,
 				'context'     => array( 'view', 'edit' ),
 			),
 		);
@@ -969,25 +976,32 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				),
 			) : array(),
 			array(
-				'status'       => array(
+				'status'          => array(
 					'description' => __( 'The status of the fulfillment.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'unfulfilled',
 					'required'    => false,
 					'context'     => array( 'view', 'edit' ),
 				),
-				'is_fulfilled' => array(
+				'is_fulfilled'    => array(
 					'description' => __( 'Whether the fulfillment is fulfilled.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
 					'required'    => false,
 					'context'     => array( 'view', 'edit' ),
 				),
-				'meta_data'    => array(
+				'meta_data'       => array(
 					'description' => __( 'Meta data for the fulfillment.', 'woocommerce' ),
 					'type'        => 'array',
 					'required'    => true,
 					'schema'      => $this->get_schema_for_meta_data(),
+				),
+				'notify_customer' => array(
+					'description' => __( 'Whether to notify the customer about the fulfillment update.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'default'     => false,
+					'required'    => false,
+					'context'     => array( 'view', 'edit' ),
 				),
 			)
 		);

@@ -20,7 +20,7 @@ export default function UpdateButton( {
 	setError: ( message: string | null ) => void;
 } ) {
 	const { setIsEditing } = useFulfillmentDrawerContext();
-	const { order, fulfillment } = useFulfillmentContext();
+	const { order, fulfillment, notifyCustomer } = useFulfillmentContext();
 	const { updateFulfillment } = useDispatch( FulfillmentStore );
 	const [ isExecuting, setIsExecuting ] = useState< boolean >( false );
 
@@ -42,7 +42,7 @@ export default function UpdateButton( {
 			setError( __( 'Select items to be fulfilled.', 'woocommerce' ) );
 			return;
 		}
-		updateFulfillment( order.id, fulfillment )
+		updateFulfillment( order.id, fulfillment, notifyCustomer )
 			.then( () => {
 				setIsEditing( false );
 			} )
@@ -58,6 +58,7 @@ export default function UpdateButton( {
 		<Button
 			variant="primary"
 			onClick={ handleUpdateFulfillment }
+			disabled={ isExecuting }
 			isBusy={ isExecuting }
 			__next40pxDefaultSize
 		>

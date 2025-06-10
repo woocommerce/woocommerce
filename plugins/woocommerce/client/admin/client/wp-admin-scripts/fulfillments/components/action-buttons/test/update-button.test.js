@@ -93,6 +93,7 @@ describe( 'UpdateButton component', () => {
 		useFulfillmentContext.mockReturnValue( {
 			order: { id: 123 },
 			fulfillment: mockFulfillment,
+			notifyCustomer: true,
 		} );
 
 		render( <UpdateButton setError={ setError } /> );
@@ -100,7 +101,8 @@ describe( 'UpdateButton component', () => {
 
 		expect( await mockUpdateFulfillment ).toHaveBeenCalledWith(
 			123,
-			mockFulfillment
+			mockFulfillment,
+			true
 		);
 	} );
 

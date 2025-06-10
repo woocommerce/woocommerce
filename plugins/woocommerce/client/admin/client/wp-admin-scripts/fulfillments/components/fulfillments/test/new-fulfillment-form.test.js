@@ -21,11 +21,19 @@ jest.mock( '../../action-buttons/fulfill-items-button', () => () => (
 jest.mock( '../item-selector', () => () => (
 	<div data-testid="item-selector" />
 ) );
+jest.mock( '../../customer-notification-form', () => () => (
+	<div data-testid="fulfillment-customer-notification-form" />
+) );
 
 jest.mock( '../../../context/fulfillment-context', () => ( {
 	FulfillmentProvider: ( { children } ) => (
 		<div data-testid="fulfillment-provider">{ children }</div>
 	),
+	useFulfillmentContext: jest.fn( () => ( {
+		order: { id: 1, currency: 'USD', line_items: [] },
+		fulfillment: null,
+		notifyCustomer: true,
+	} ) ),
 } ) );
 
 jest.mock( '../../../utils/order-utils', () => ( {
