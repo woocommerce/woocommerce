@@ -93,7 +93,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		 * Includes legacy_get_main_images_html method.
 		 */
 
-		$has_product_image_block = ! empty( array_filter( $block->inner_blocks, function( $inner_block ) {
+		$has_product_image_block = ! empty( array_filter( iterator_to_array( $block->inner_blocks ), function( $inner_block ) {
 			return $inner_block->name === 'woocommerce/product-image';
 		} ) );
 
@@ -108,9 +108,9 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		 */
 
 		foreach ( $block->inner_blocks as $inner_block ) {
-			if ( $has_product_image_block ) {
+			if ( $inner_block->name === 'woocommerce/product-image' ) {
 				// Product Image requires special handling because we need to render it once for each image.
-				$images_html = $this->get_main_images_html( $block->context, $product, $inner_block );
+				$images_html .= $this->get_main_images_html( $block->context, $product, $inner_block );
 			} else {
 				// Render all the inner blocks once each.
 				$inner_block_html = (
