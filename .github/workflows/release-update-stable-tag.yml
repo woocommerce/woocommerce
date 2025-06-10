@@ -100,6 +100,7 @@ jobs:
       - name: Update GitHub stable tag
         env:
           TARGET_VERSION: ${{ needs.validate-release-version.outputs.version }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           README_PATH="plugins/woocommerce/readme.txt"
 
