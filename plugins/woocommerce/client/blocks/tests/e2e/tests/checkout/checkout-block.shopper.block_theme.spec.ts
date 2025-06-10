@@ -160,7 +160,12 @@ test.describe( 'Shopper → Local pickup', () => {
 		await checkoutPageObject.placeOrder();
 
 		await expect(
-			page.getByText( 'Collection from Testing' )
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
+
+		await expect(
+			// The regex pattern matches "Collection from Testing" followed by any characters (.*)
+			page.getByRole( 'cell', { name: /Collection from Testing.*/ } )
 		).toBeVisible();
 		await checkoutPageObject.verifyBillingDetails();
 	} );
@@ -208,10 +213,25 @@ test.describe( 'Shopper → Local pickup', () => {
 			.click();
 		await expect( page.getByText( 'Pickup (Testing)' ) ).toBeVisible();
 
+		// Wait for the shipping rate selection request to complete
+		await page.waitForResponse(
+			( response ) =>
+				response
+					.url()
+					.includes(
+						'wp-json/wc/store/v1/cart/select-shipping-rate'
+					) && response.status() === 200
+		);
+
 		await checkoutPageObject.placeOrder();
 
 		await expect(
-			page.getByText( 'Collection from Testing' )
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
+
+		await expect(
+			// The regex pattern matches "Collection from Testing" followed by any characters (.*)
+			page.getByRole( 'cell', { name: /Collection from Testing.*/ } )
 		).toBeVisible();
 		await checkoutPageObject.verifyBillingDetails();
 	} );
@@ -276,7 +296,12 @@ test.describe( 'Shopper → Local pickup', () => {
 		await checkoutPageObject.placeOrder();
 
 		await expect(
-			page.getByText( 'Collection from Testing' )
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
+
+		await expect(
+			// The regex pattern matches "Collection from Testing" followed by any characters (.*)
+			page.getByRole( 'cell', { name: /Collection from Testing.*/ } )
 		).toBeVisible();
 		await checkoutPageObject.verifyBillingDetails();
 	} );

@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Improve checks for missing context in Variation Selector blocks
+
+
