@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: drop unsupported @woocommerce/admin-e2e-tests package.
