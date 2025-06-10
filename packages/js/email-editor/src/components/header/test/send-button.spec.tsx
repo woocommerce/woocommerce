@@ -1,3 +1,7 @@
+// eslint-disable-next-line @woocommerce/dependency-group -- mocks has to be imported before @wordpress/data
+import '../../__mocks__/setup-shared-mocks';
+/* eslint-disable @woocommerce/dependency-group -- because we import mocks first, we deactivate this rule to avoid es lint errors */
+
 /**
  * External dependencies
  */
@@ -15,28 +19,6 @@ import {
 import { SendButton } from '../send-button';
 import { storeName } from '../../../store';
 import { recordEvent } from '../../../events';
-
-jest.mock( '@wordpress/data', () => ( {
-	useSelect: jest.fn(),
-	createRegistrySelector: jest.fn(),
-} ) );
-
-jest.mock( '@wordpress/core-data', () => ( {
-	createSelector: jest.fn(),
-} ) );
-
-jest.mock( '@wordpress/preferences', () => ( {
-	combineReducers: jest.fn(),
-} ) );
-
-jest.mock( '@wordpress/editor', () => ( {
-	useEntitiesSavedStatesIsDirty: jest.fn(),
-} ) );
-
-jest.mock( '@wordpress/blocks', () => ( {
-	serialize: jest.fn(),
-	parse: jest.fn(),
-} ) );
 
 jest.mock( '@wordpress/hooks', () => ( {
 	applyFilters: jest.fn( ( _, value ) => value ),

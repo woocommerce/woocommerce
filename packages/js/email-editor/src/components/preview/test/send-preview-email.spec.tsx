@@ -1,3 +1,7 @@
+// eslint-disable-next-line @woocommerce/dependency-group -- mocks has to be imported before @wordpress/data
+import '../../__mocks__/setup-shared-mocks';
+/* eslint-disable @woocommerce/dependency-group -- because we import mocks first, we deactivate this rule to avoid es lint errors */
+
 /**
  * External dependencies
  */
@@ -11,30 +15,6 @@ import { forwardRef } from '@wordpress/element';
  */
 import { SendPreviewEmail } from '../send-preview-email';
 import { SendingPreviewStatus } from '../../../store';
-
-jest.mock( '@wordpress/data', () => ( {
-	select: jest.fn(),
-	useDispatch: jest.fn(),
-	useSelect: jest.fn(),
-	createRegistrySelector: jest.fn(),
-} ) );
-
-jest.mock( '@wordpress/core-data', () => ( {
-	store: {},
-} ) );
-
-jest.mock( '@wordpress/blocks', () => ( {
-	serialize: jest.fn(),
-	parse: jest.fn(),
-} ) );
-
-jest.mock( '@wordpress/editor', () => ( {
-	store: {},
-} ) );
-
-jest.mock( '@wordpress/preferences', () => ( {
-	combineReducers: jest.fn(),
-} ) );
 
 jest.mock( '@wordpress/compose', () => ( {
 	useViewportMatch: jest.fn(),
