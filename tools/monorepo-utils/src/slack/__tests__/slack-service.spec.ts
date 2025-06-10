@@ -96,12 +96,14 @@ describe( 'sendMessage', () => {
 		expect( client.chat.postMessage ).toHaveBeenCalledWith( {
 			channel: 'C1',
 			text: 'Hello',
-			thread_ts: null,
+			unfurl_links: false,
+			unfurl_media: false,
 		} );
 		expect( client.chat.postMessage ).toHaveBeenCalledWith( {
 			channel: 'C2',
 			text: 'Hello',
-			thread_ts: null,
+			unfurl_links: false,
+			unfurl_media: false,
 		} );
 	} );
 
