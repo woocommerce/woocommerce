@@ -91,11 +91,11 @@ function setActiveProvider( country, type ) {
 			window.wc_checkout_params &&
 			window.wc_checkout_params.address_providers ) ||
 		[];
-	
+
 	// Check providers in preference order (server handles preferred provider ordering)
 	for ( const serverProvider of serverProviders ) {
 		const provider = addressProviders[ serverProvider.id ];
-		
+
 		if ( provider && provider.canSearch( country ) ) {
 			activeAddressProvider[ type ] = provider;
 			return;
@@ -202,12 +202,14 @@ function setActiveProvider( country, type ) {
 						hideSuggestions( type );
 					}
 				};
-				
+
 				countryInput.addEventListener( 'change', handleCountryChange );
-				
+
 				// Also listen for Select2 change event if jQuery and Select2 are available
 				if ( window.jQuery && window.jQuery( countryInput ).select2 ) {
-					window.jQuery( countryInput ).on( 'select2:select', handleCountryChange );
+					window
+						.jQuery( countryInput )
+						.on( 'select2:select', handleCountryChange );
 				}
 			}
 		} );
@@ -396,30 +398,99 @@ function setActiveProvider( country, type ) {
 			activeSuggestionIndices[ type ] = -1;
 		}
 
+		// Helper function to get field value, accounting for Select2
+		const getFieldValue = ( input ) => {
+			if ( ! input ) {
+				return '';
+			}
+
+			// For Select2 fields, get the value using jQuery if available
+			if (
+				window.jQuery &&
+				window.jQuery( input ).hasClass( 'select2-hidden-accessible' )
+			) {
+				return window.jQuery( input ).val() || '';
+			}
+
+			// For regular inputs, use the standard value property
+			return input.value || '';
+		};
+
+		// Helper function to set field value and trigger events
+		const setFieldValue = ( input, value ) => {
+			if ( input && value ) {
+				input.value = value;
+				input.dispatchEvent( new Event( 'change' ) );
+
+				// Also trigger Select2 update if it's a Select2 field
+				if (
+					window.jQuery &&
+					window
+						.jQuery( input )
+						.hasClass( 'select2-hidden-accessible' )
+				) {
+					window.jQuery( input ).trigger( 'change' );
+				}
+			}
+		};
+
 		async function selectAddress( type, addressId ) {
 			const addressInput = addressInputs[ type ][ 'address_1' ];
 			const cityInput = addressInputs[ type ][ 'city' ];
 			const countryInput = addressInputs[ type ][ 'country' ];
 			const postcodeInput = addressInputs[ type ][ 'postcode' ];
+			const stateInput = document.getElementById( `${ type }_state` );
 			const addressData = await activeAddressProvider[ type ].select(
 				addressId
 			);
-			if ( addressData && addressInput ) {
-				addressInput.value = addressData.address1;
-				addressInput.dispatchEvent( new Event( 'change' ) );
+
+			// First pass - set all available fields immediately
+			if ( addressData ) {
+				setFieldValue( addressInput, addressData.address1 );
+				setFieldValue( cityInput, addressData.city );
+				setFieldValue( countryInput, addressData.country );
+				setFieldValue( postcodeInput, addressData.postcode );
+				setFieldValue( stateInput, addressData.state );
 			}
-			if ( addressData && cityInput ) {
-				cityInput.value = addressData.city;
-				cityInput.dispatchEvent( new Event( 'change' ) );
-			}
-			if ( addressData && countryInput ) {
-				countryInput.value = addressData.country;
-				countryInput.dispatchEvent( new Event( 'change' ) );
-			}
-			if ( addressData && postcodeInput ) {
-				postcodeInput.value = addressData.postcode;
-				postcodeInput.dispatchEvent( new Event( 'change' ) );
-			}
+
+			// Second pass after a delay to verify all fields and fix any that don't match
+			setTimeout( () => {
+				if ( addressData ) {
+					const updatedCityInput = document.getElementById(
+						`${ type }_city`
+					);
+					const updatedPostcodeInput = document.getElementById(
+						`${ type }_postcode`
+					);
+					const updatedStateInput = document.getElementById(
+						`${ type }_state`
+					);
+
+					// Verify and fix any fields that don't match the expected values
+					if (
+						updatedCityInput &&
+						getFieldValue( updatedCityInput ) !== addressData.city
+					) {
+						setFieldValue( updatedCityInput, addressData.city );
+					}
+					if (
+						updatedPostcodeInput &&
+						getFieldValue( updatedPostcodeInput ) !==
+							addressData.postcode
+					) {
+						setFieldValue(
+							updatedPostcodeInput,
+							addressData.postcode
+						);
+					}
+					if (
+						updatedStateInput &&
+						getFieldValue( updatedStateInput ) !== addressData.state
+					) {
+						setFieldValue( updatedStateInput, addressData.state );
+					}
+				}
+			}, 100 );
 		}
 
 		function setActiveSuggestion( type, index ) {
