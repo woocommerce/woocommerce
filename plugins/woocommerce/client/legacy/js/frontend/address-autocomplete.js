@@ -91,9 +91,11 @@ function setActiveProvider( country, type ) {
 			window.wc_checkout_params &&
 			window.wc_checkout_params.address_providers ) ||
 		[];
+	
 	// Check providers in preference order (server handles preferred provider ordering)
 	for ( const serverProvider of serverProviders ) {
 		const provider = addressProviders[ serverProvider.id ];
+		
 		if ( provider && provider.canSearch( country ) ) {
 			activeAddressProvider[ type ] = provider;
 			return;
@@ -188,8 +190,9 @@ function setActiveProvider( country, type ) {
 				setActiveProvider( countryInput.value, type );
 
 				// Listen for country changes to re-evaluate provider availability
-				countryInput.addEventListener( 'change', function () {
-					setActiveProvider( this.value, type );
+				// Handle both regular change events and Select2 events
+				const handleCountryChange = function () {
+					setActiveProvider( countryInput.value, type );
 					// Cancel any inflight search and hide suggestions when country changes
 					if ( searchControllers[ type ] ) {
 						searchControllers[ type ].abort();
@@ -198,7 +201,14 @@ function setActiveProvider( country, type ) {
 					if ( addressInputs[ type ][ 'address_1' ] ) {
 						hideSuggestions( type );
 					}
-				} );
+				};
+				
+				countryInput.addEventListener( 'change', handleCountryChange );
+				
+				// Also listen for Select2 change event if jQuery and Select2 are available
+				if ( window.jQuery && window.jQuery( countryInput ).select2 ) {
+					window.jQuery( countryInput ).on( 'select2:select', handleCountryChange );
+				}
 			}
 		} );
 
