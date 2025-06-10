@@ -24,9 +24,6 @@
 "packages/js/api-core-tests/**/*":
   - Flux
 
-"packages/js/e2e-core-tests/**/*":
-  - Flux
-
 "packages/js/components/**/*":
   - Kirigami
 

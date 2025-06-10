@@ -264,4 +264,4 @@ This will return a string with the latest release URL. Optionally, you can use t
 
 ## Additional information
 
-Refer to [`@woocommerce/e2e-core-tests`](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-core-tests) for some test examples, and [`plugins/woocommerce/tests/e2e`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e) for general information on e2e tests.
+Refer to [`plugins/woocommerce/tests/e2e`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e) for general information on e2e tests.
