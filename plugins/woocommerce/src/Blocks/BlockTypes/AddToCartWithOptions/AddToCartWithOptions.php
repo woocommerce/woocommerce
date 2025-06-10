@@ -410,7 +410,15 @@ class AddToCartWithOptions extends AbstractBlock {
 						$wrapper_attributes,
 						$form_attributes,
 						array(
-							'class' => $wrapper_attributes['class'] . ' ' . $form_attributes['class'],
+							'class' => implode(
+								' ',
+								array_filter(
+									array(
+										isset( $wrapper_attributes['class'] ) ? $wrapper_attributes['class'] : '',
+										isset( $form_attributes['class'] ) ? $form_attributes['class'] : '',
+									)
+								)
+							),
 						)
 					)
 				),
