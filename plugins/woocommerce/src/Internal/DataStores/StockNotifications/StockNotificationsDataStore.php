@@ -519,7 +519,7 @@ CREATE TABLE $meta_table_name (
 		$query_in = '(' . implode( ',', $format ) . ')';
 		$sql      = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 			"SELECT 1 FROM %i WHERE product_id IN $query_in AND status = %s LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			array_merge( array( $table ), $product_ids, array( NotificationStatus::ACTIVE ) )
+			array( $table, ...$product_ids, NotificationStatus::ACTIVE )
 		);
 		return (int) $wpdb->get_var( $sql ) > 0; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
