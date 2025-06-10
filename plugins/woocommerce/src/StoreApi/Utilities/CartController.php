@@ -48,7 +48,7 @@ class CartController {
 
 		foreach ( $cart_items as $cart_item ) {
 			$normalized_qty = $quantity_limits->normalize_cart_item_quantity( $cart_item['quantity'], $cart_item );
-			$cart_qty       = $cart_item['quantity'] + 0;
+			$cart_qty       = wc_stock_amount( $cart_item['quantity'] );
 
 			if ( $normalized_qty !== $cart_qty ) {
 				try {
@@ -147,7 +147,7 @@ class CartController {
 
 		// Normalize quantity.
 		$add_to_cart_limits = $quantity_limits->get_add_to_cart_limits( $product );
-		$request_quantity   = $request['quantity'] + 0;
+		$request_quantity   = wc_stock_amount( $request['quantity'] );
 
 		if ( $add_to_cart_limits['maximum'] ) {
 			$request_quantity = min( $request_quantity, $add_to_cart_limits['maximum'] );
