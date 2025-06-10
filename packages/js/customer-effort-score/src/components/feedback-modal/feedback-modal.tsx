@@ -4,7 +4,7 @@
 import { createElement, useState } from '@wordpress/element';
 import { Button, Modal } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
-import clsx from 'clsx';
+import classnames from 'classnames';
 
 export type FeedbackModalProps = {
 	onSubmit: () => void;
@@ -63,7 +63,7 @@ export function FeedbackModal( {
 
 	return (
 		<Modal
-			className={ clsx( 'woocommerce-feedback-modal', className ) }
+			className={ classnames( 'woocommerce-feedback-modal', className ) }
 			title={ title }
 			onRequestClose={ closeModal }
 			shouldCloseOnClickOutside={ false }

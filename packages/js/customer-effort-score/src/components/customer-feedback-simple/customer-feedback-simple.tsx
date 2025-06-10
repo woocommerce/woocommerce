@@ -5,7 +5,7 @@ import { createElement } from '@wordpress/element';
 import { Button, Tooltip } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
 import { __ } from '@wordpress/i18n';
-import clsx from 'clsx';
+import classNames from 'classnames';
 
 export type CustomerFeedbackSimpleProps = {
 	onSelect: ( score: number ) => void;
@@ -79,7 +79,7 @@ export function CustomerFeedbackSimple( {
 							onClick={ () => {
 								onSelect( option.value );
 							} }
-							className={ clsx( {
+							className={ classNames( {
 								'is-selected': selectedValue === option.value,
 							} ) }
 						>
