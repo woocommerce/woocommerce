@@ -100,7 +100,8 @@
 		"wp-env:config": "echo 'wp-env:config is no more. Use env:start instead.'",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:bundle": "wireit"
+		"watch:build:project:bundle": "wireit",
+		"knip": "WP_EXPERIMENTAL_MODULES=true knip"
 	},
 	"devDependencies": {
 		"@automattic/color-studio": "4.0.0",
@@ -134,6 +135,7 @@
 		"@types/jest-environment-puppeteer": "5.0.2",
 		"@types/jquery": "3.5.14",
 		"@types/lodash": "4.14.182",
+		"@types/node": "20.x.x",
 		"@types/prop-types": "^15.7.11",
 		"@types/puppeteer": "5.4.6",
 		"@types/react": "18.3.x",
@@ -220,6 +222,7 @@
 		"jest-fetch-mock": "3.0.3",
 		"jest-html-reporters": "3.0.10",
 		"json2md": "1.12.0",
+		"knip": "^5.60.2",
 		"lint-staged": "13.2.0",
 		"lodash": "4.17.21",
 		"markdown-it": "13.0.1",
@@ -357,6 +360,16 @@
 				}
 			]
 		}
+	},
+	"knip": {
+		"entry": [
+			"assets/js/**/index.{ts,tsx,jsx,js}!"
+		],
+		"project": [
+			"assets/js/**/*.{ts,tsx,jsx,js}!",
+			"!assets/js/**/test/**/*.{ts,tsx,jsx,js}"
+		],
+		"webpack": true
 	},
 	"wireit": {
 		"build:project:bundle": {
