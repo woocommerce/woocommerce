@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import classNames from 'clsx';
 import {
 	useState,
 	useEffect,
