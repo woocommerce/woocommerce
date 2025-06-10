@@ -6,7 +6,6 @@ ignore:
     - '**/tests'
     - '**/test'
     - 'tools/**'
-    - 'packages/js/api-core-tests'
     - 'packages/js/create-woo-extension'
     - 'packages/js/eslint-plugin'
     - 'packages/js/internal-js-tests'
