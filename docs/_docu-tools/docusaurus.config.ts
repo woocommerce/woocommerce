@@ -32,7 +32,7 @@ const config: Config = {
 	},
 
 	plugins: [
-		'./utils/llms-txt/index.ts'
+		'./llms-txt/index.ts'
 	],
 
 	presets: [

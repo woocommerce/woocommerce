@@ -56,7 +56,9 @@ module.exports = {
         </html>`,
 
     plugins: [
-        ...(baseConfig.plugins || []),
+        ...(baseConfig.plugins || []).map(plugin => 
+            plugin === './llms-txt/index.ts' ? '../llms-txt/index.ts' : plugin
+        ),
         function pluginAssetPrefix() {
             return {
                 name: 'set-deploy-asset-prefix',

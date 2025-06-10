@@ -26,7 +26,7 @@ export default function llmsTxtPlugin(
       try {
         // Use relative path from plugin location to find the docs directory
         const pluginDir = __dirname;
-        const docsDir = path.resolve(pluginDir, '../../..');
+        const docsDir = path.resolve(pluginDir, '../..');
         const buildDir = context.outDir;
         
         console.log(`Scanning docs directory: ${docsDir}`);
