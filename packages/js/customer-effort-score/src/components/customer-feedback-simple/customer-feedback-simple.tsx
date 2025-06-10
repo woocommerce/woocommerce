@@ -5,7 +5,7 @@ import { createElement } from '@wordpress/element';
 import { Button, Tooltip } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 export type CustomerFeedbackSimpleProps = {
 	onSelect: ( score: number ) => void;
