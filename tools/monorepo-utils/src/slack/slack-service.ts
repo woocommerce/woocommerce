@@ -65,11 +65,14 @@ export async function sendMessage(
 	);
 	for ( const channel of channels ) {
 		try {
-			const response = await client.chat.postMessage( {
+			const messagePayload: any = {
 				channel,
 				text: text.replace( /\\n/g, '\n' ),
-				thread_ts: replyTs ? replyTs : null,
-			} );
+			};
+			if ( replyTs ) {
+				messagePayload.thread_ts = replyTs;
+			}
+			const response = await client.chat.postMessage( messagePayload );
 			if ( ! response.ok ) {
 				Logger.error(
 					`Slack client returned an error: ${ response.error }, message failed to send.`
@@ -113,7 +116,7 @@ export async function sendFile(
 	);
 	for ( const channel of channels ) {
 		try {
-			const requestOptions = {
+			const requestOptions: any = {
 				file: filePath,
 				filename: basename( filePath ),
 				channel_id: channel,
@@ -121,8 +124,10 @@ export async function sendFile(
 					? text.replace( /\\n/g, '\n' )
 					: undefined,
 				request_file_info: false,
-				thread_ts: replyTs ? replyTs : null,
 			};
+			if ( replyTs ) {
+				requestOptions.thread_ts = replyTs;
+			}
 			await client.files.uploadV2( requestOptions );
 			Logger.notice( `Successfully uploaded ${ filePath }` );
 		} catch ( e ) {
