@@ -27942,9 +27942,7 @@ snapshots:
       source-map: 0.6.1
       string-length: 2.0.0
     transitivePeerDependencies:
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@jest/reporters@26.6.2':
     dependencies:
@@ -33764,7 +33762,7 @@ snapshots:
       '@types/node': 20.17.8
     optional: true
 
-  '@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)':
+  '@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)':
     dependencies:
       '@typescript-eslint/experimental-utils': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       '@typescript-eslint/parser': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
@@ -37238,14 +37236,14 @@ snapshots:
   '@wordpress/eslint-plugin@9.3.0(@babel/core@7.25.7)(eslint@7.32.0)(typescript@5.7.2)':
     dependencies:
       '@babel/eslint-parser': 7.23.3(@babel/core@7.25.7)(eslint@7.32.0)
-      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
+      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
       '@typescript-eslint/parser': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       '@wordpress/prettier-config': 1.4.0(wp-prettier@2.2.1-beta-1)
       cosmiconfig: 7.1.0
       eslint: 7.32.0
       eslint-config-prettier: 7.2.0(eslint@7.32.0)
       eslint-plugin-import: 2.29.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)
-      eslint-plugin-jest: 24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
+      eslint-plugin-jest: 24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
       eslint-plugin-jsdoc: 36.1.1(eslint@7.32.0)
       eslint-plugin-jsx-a11y: 6.8.0(eslint@7.32.0)
       eslint-plugin-prettier: 3.4.1(eslint-config-prettier@7.2.0(eslint@7.32.0))(eslint@7.32.0)(wp-prettier@2.2.1-beta-1)
@@ -43481,12 +43479,12 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-jest@24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2):
+  eslint-plugin-jest@24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2):
     dependencies:
       '@typescript-eslint/experimental-utils': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       eslint: 7.32.0
     optionalDependencies:
-      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
+      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -47547,9 +47545,7 @@ snapshots:
       pretty-format: 24.9.0
       throat: 4.1.0
     transitivePeerDependencies:
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   jest-jasmine2@26.6.3:
     dependencies:
