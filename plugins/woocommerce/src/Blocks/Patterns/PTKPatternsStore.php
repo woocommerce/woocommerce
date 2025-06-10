@@ -11,7 +11,8 @@ use WP_Upgrader;
  * @internal
  */
 class PTKPatternsStore {
-	const OPTION_NAME = 'ptk_patterns';
+	const OPTION_NAME                             = 'ptk_patterns';
+	const LAST_FETCH_PATTERNS_REQUEST_OPTION_NAME = 'last_fetch_patterns_request';
 
 	const CATEGORY_MAPPING = array(
 		'testimonials' => 'reviews',
@@ -104,7 +105,7 @@ class PTKPatternsStore {
 	 * @return void
 	 */
 	private function schedule_action_if_not_pending( $action ) {
-		$last_request = get_option( 'last_fetch_patterns_request' );
+		$last_request = get_option( self::LAST_FETCH_PATTERNS_REQUEST_OPTION_NAME );
 		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
 		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
 
@@ -114,7 +115,7 @@ class PTKPatternsStore {
 		}
 
 		as_schedule_single_action( time(), $action );
-		update_option( 'last_fetch_patterns_request', time(), false );
+		update_option( self::LAST_FETCH_PATTERNS_REQUEST_OPTION_NAME, time(), false );
 	}
 
 	/**
@@ -188,6 +189,7 @@ class PTKPatternsStore {
 	 */
 	public function flush_cached_patterns() {
 		delete_option( self::OPTION_NAME );
+		delete_option( self::LAST_FETCH_PATTERNS_REQUEST_OPTION_NAME );
 	}
 
 	/**
