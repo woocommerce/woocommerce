@@ -53,7 +53,7 @@ jobs:
           svn checkout "${{ secrets.SVN_REPO_URL }}" ./svn-woocommerce-repo --username "${{ secrets.SVN_USERNAME }}" --password "${{ secrets.SVN_PASSWORD }}" --non-interactive
           cd ./svn-woocommerce-repo
 
-          README_PATH="readme.txt"
+          README_PATH="./trunk/readme.txt"
 
           if [ ! -f "$README_PATH" ]; then
             echo "ERROR: readme.txt not found at $README_PATH"
@@ -101,7 +101,7 @@ jobs:
         env:
           TARGET_VERSION: ${{ needs.validate-release-version.outputs.version }}
         run: |
-          README_PATH="readme.txt"
+          README_PATH="plugins/woocommerce/readme.txt"
 
           if [ ! -f "$README_PATH" ]; then
             echo "ERROR: readme.txt not found at $README_PATH"
