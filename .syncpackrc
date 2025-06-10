@@ -9,6 +9,16 @@
 	},
 	"versionGroups": [
 		{
+			"label": "Banned dependencies: classnames(->clsx)",
+			"dependencies": [
+				"classnames"
+			],
+			"packages": [
+				"**"
+			],
+			"isBanned": true
+		},
+		{
 			"dependencies": [
 				"node"
 			],
@@ -436,12 +446,12 @@
 		},
 		{
 			"dependencies": [
-				"classnames"
+				"clsx"
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^2.3.2"
+			"pinVersion": "2.1.x"
 		},
 		{
 			"dependencies": [
