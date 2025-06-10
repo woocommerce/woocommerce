@@ -107,6 +107,19 @@ describe( 'sendMessage', () => {
 		} );
 	} );
 
+	it( 'should send a message as a reply when replyTs is set', async () => {
+		client.chat.postMessage.mockResolvedValue( { ok: true, ts: '123' } );
+		const channels = [ 'C1' ];
+		await sendMessage( client, 'Hello in thread', channels, 'thread123' );
+		expect( client.chat.postMessage ).toHaveBeenCalledWith( {
+			channel: 'C1',
+			text: 'Hello in thread',
+			unfurl_links: false,
+			unfurl_media: false,
+			thread_ts: 'thread123',
+		} );
+	} );
+
 	it.each( [
 		{
 			desc: 'should error if Slack client returns an error',
