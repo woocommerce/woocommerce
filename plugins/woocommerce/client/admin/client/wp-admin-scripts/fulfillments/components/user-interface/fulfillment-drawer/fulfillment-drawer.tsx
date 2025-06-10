@@ -6,8 +6,12 @@ import React from 'react';
 /**
  * Internal dependencies
  */
+import NewFulfillmentForm from '../../fulfillments/new-fulfillment-form';
 import { ErrorBoundary } from '~/error-boundary';
+import FulfillmentsList from '../../fulfillments/fulfillments-list';
 import FulfillmentsDrawerHeader from './fulfillment-drawer-header';
+import { FulfillmentDrawerProvider } from '../../../context/drawer-context';
+import './fulfillment-drawer.scss';
 
 interface Props {
 	isOpen: boolean;
@@ -29,13 +33,11 @@ const FulfillmentDrawer: React.FC< Props > = ( {
 				].join( ' ' ) }
 			>
 				<ErrorBoundary>
-					<FulfillmentsDrawerHeader
-						orderId={ orderId }
-						onClose={ onClose }
-					/>
-					<div className="drawer-content">
-						{ /* TODO: Add content here */ }
-					</div>
+					<FulfillmentDrawerProvider orderId={ orderId }>
+						<FulfillmentsDrawerHeader onClose={ onClose } />
+						<NewFulfillmentForm />
+						<FulfillmentsList />
+					</FulfillmentDrawerProvider>
 				</ErrorBoundary>
 			</div>
 		</div>

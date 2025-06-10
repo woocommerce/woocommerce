@@ -1,0 +1,109 @@
+/**
+ * External dependencies
+ */
+import { useMemo, useState } from 'react';
+import { __ } from '@wordpress/i18n';
+import { Button, Icon } from '@wordpress/components';
+
+/**
+ * Internal dependencies
+ */
+import { LineItem, Order } from '../../data/types';
+import { FulfillmentProvider } from '../../context/fulfillment-context';
+import SaveAsDraftButton from '../action-buttons/save-draft-button';
+import FulfillItemsButton from '../action-buttons/fulfill-items-button';
+import { getItemsNotInAnyFulfillment } from '../../utils/order-utils';
+import ItemSelector from './item-selector';
+import { useFulfillmentDrawerContext } from '../../context/drawer-context';
+import ErrorLabel from '../user-interface/error-label';
+
+const NewFulfillmentForm: React.FC = () => {
+	const { order, fulfillments, openSection, setOpenSection, isEditing } =
+		useFulfillmentDrawerContext();
+	const [ error, setError ] = useState< string | null >( null );
+	const remainingItems = useMemo(
+		() =>
+			getItemsNotInAnyFulfillment(
+				fulfillments,
+				order ?? ( { line_items: [] as LineItem[] } as Order )
+			).map( ( item ) => ( {
+				...item,
+				selection: item.selection.map( ( selection ) => ( {
+					...selection,
+					checked: true,
+				} ) ),
+			} ) ),
+		[ fulfillments, order ]
+	);
+
+	if ( ! order ) {
+		return null;
+	}
+
+	if ( remainingItems.length === 0 ) {
+		return null;
+	}
+
+	return (
+		<div
+			className={ [
+				'woocommerce-fulfillment-new-fulfillment-form',
+				isEditing
+					? 'woocommerce-fulfillment-new-fulfillment-form__disabled'
+					: '',
+				fulfillments.length === 0
+					? 'woocommerce-fulfillment-new-fulfillment-form__first'
+					: '',
+			].join( ' ' ) }
+			onClick={ () => setOpenSection( 'order' ) }
+			onKeyUp={ ( event ) => {
+				if ( event.key === 'Enter' ) {
+					setOpenSection( 'order' );
+				}
+			} }
+			role="button"
+			tabIndex={ -1 }
+		>
+			<div
+				className={ [
+					'woocommerce-fulfillment-new-fulfillment-form__header',
+					openSection === 'order' ? 'is-open' : '',
+				].join( ' ' ) }
+			>
+				<h3>
+					{ fulfillments.length === 0
+						? __( 'Order Items', 'woocommerce' )
+						: __( 'Pending Items', 'woocommerce' ) }
+				</h3>
+				<Button __next40pxDefaultSize size="small">
+					<Icon
+						icon={
+							openSection === 'order'
+								? 'arrow-up-alt2'
+								: 'arrow-down-alt2'
+						}
+						size={ 16 }
+					/>
+				</Button>
+			</div>
+			{ ! isEditing && openSection === 'order' && (
+				<div className="woocommerce-fulfillment-new-fulfillment-form__content">
+					{ error && <ErrorLabel error={ error } /> }
+					<FulfillmentProvider
+						order={ order }
+						fulfillment={ null }
+						items={ remainingItems }
+					>
+						<ItemSelector editMode={ true } />
+						<div className="woocommerce-fulfillment-item-actions">
+							<SaveAsDraftButton setError={ setError } />
+							<FulfillItemsButton setError={ setError } />
+						</div>
+					</FulfillmentProvider>
+				</div>
+			) }
+		</div>
+	);
+};
+
+export default NewFulfillmentForm;

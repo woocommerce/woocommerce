@@ -2,7 +2,6 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\Fulfillments;
 
-use Automattic\WooCommerce\Container;
 use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
 use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsRenderer;
@@ -50,7 +49,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$fulfillment->set_entity_id( '1' );
 		$fulfillment->add_meta_data( '_tracking_number', '123456789' );
 		$fulfillment->add_meta_data( '_tracking_url', 'https://example.com/track/123456789' );
-		$fulfillment->add_meta_data( '_shipping_provider', 'UPS' );
+		$fulfillment->add_meta_data( '_shipment_provider', 'UPS' );
 		$fulfillment->set_items(
 			array(
 				array(

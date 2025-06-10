@@ -8,7 +8,7 @@ import { createRoot } from '@wordpress/element';
  * Internal dependencies
  */
 import './style.scss';
-import FulfillmentDrawer from './components/fulfillment-drawer/fulfillment-drawer';
+import FulfillmentDrawer from './components/user-interface/fulfillment-drawer/fulfillment-drawer';
 
 function FulfillmentsController() {
 	const [ isOpen, setIsOpen ] = useState( false );

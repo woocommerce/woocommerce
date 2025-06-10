@@ -122,15 +122,15 @@ class FulfillmentsRenderer {
 	}
 
 	/**
-	 * Render the shipment tracking column row data.
+	 * Render the shipment provider column row data.
 	 *
 	 * @param WC_Order $order The order object.
 	 * @param array    $fulfillments The fulfillments.
 	 */
-	private function render_shipment_tracking_column_row_data( WC_Order $order, array $fulfillments ) {
+	private function render_shipment_provider_column_row_data( WC_Order $order, array $fulfillments ) {
 		$providers = array();
 		foreach ( $fulfillments as $fulfillment ) {
-			$providers[] = $fulfillment->get_meta( '_shipping_provider' ) ?? null;
+			$providers[] = $fulfillment->get_meta( '_shipment_provider' ) ?? null;
 		}
 
 		$providers = array_filter(
@@ -150,12 +150,12 @@ class FulfillmentsRenderer {
 	}
 
 	/**
-	 * Render the shipment provider column row data.
+	 * Render the shipment tracking column row data.
 	 *
 	 * @param WC_Order $order The order object.
 	 * @param array    $fulfillments The fulfillments.
 	 */
-	private function render_shipment_provider_column_row_data( WC_Order $order, array $fulfillments ) {
+	private function render_shipment_tracking_column_row_data( WC_Order $order, array $fulfillments ) {
 		$tracking = array();
 		foreach ( $fulfillments as $fulfillment ) {
 			$tracking[] = $fulfillment->get_meta( '_tracking_number' ) ?? null;
