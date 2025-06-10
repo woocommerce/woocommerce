@@ -14,7 +14,7 @@ import {
 	Fragment,
 	useEffect,
 } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { MouseEvent } from 'react';
 import { Button, Popover, ToolbarItem } from '@wordpress/components';
 import PinnedItems from '@wordpress/interface/build-module/components/pinned-items';
@@ -155,7 +155,7 @@ export function HeaderToolbar( {
 				{ hasFixedToolbar && isLargeViewport && (
 					<>
 						<div
-							className={ classnames(
+							className={ clsx(
 								'selected-block-tools-wrapper',
 								{
 									'is-collapsed': isBlockToolsCollapsed,

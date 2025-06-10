@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { DropdownMenu } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -31,7 +31,7 @@ export const MoreMenuDropdown = ( {
 } ) => {
 	return (
 		<DropdownComponent
-			className={ classnames(
+			className={ clsx(
 				'interface-more-menu-dropdown',
 				className
 			) }
@@ -40,7 +40,7 @@ export const MoreMenuDropdown = ( {
 			popoverProps={ {
 				placement: 'bottom-end',
 				...popoverProps,
-				className: classnames(
+				className: clsx(
 					'interface-more-menu-dropdown__content',
 					popoverProps?.className
 				),
