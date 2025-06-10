@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
+import classNames from 'classnames';
 import {
 	useState,
 	useEffect,
@@ -25,7 +25,7 @@ export const Loader = ( {
 } ) => {
 	return (
 		<div
-			className={ clsx(
+			className={ classNames(
 				'woocommerce-onboarding-loader',
 				className
 			) }
@@ -49,13 +49,13 @@ Loader.Layout = ( {
 }: withClassName & withReactChildren ) => {
 	return (
 		<div
-			className={ clsx(
+			className={ classNames(
 				'woocommerce-onboarding-loader-wrapper',
 				className
 			) }
 		>
 			<div
-				className={ clsx(
+				className={ classNames(
 					'woocommerce-onboarding-loader-container',
 					className
 				) }
@@ -76,7 +76,7 @@ Loader.Title = ( {
 }: withClassName & withReactChildren ) => {
 	return (
 		<h1
-			className={ clsx(
+			className={ classNames(
 				'woocommerce-onboarding-loader__title',
 				className
 			) }
@@ -92,7 +92,7 @@ Loader.ProgressBar = ( {
 }: { progress: number } & withClassName ) => {
 	return (
 		<ProgressBar
-			className={ clsx( 'progress-bar', className ) }
+			className={ classNames( 'progress-bar', className ) }
 			percent={ progress ?? 0 }
 			color={ 'var(--wp-admin-theme-color)' }
 			bgcolor={ '#E0E0E0' }
@@ -106,7 +106,7 @@ Loader.Subtext = ( {
 }: withReactChildren & withClassName ) => {
 	return (
 		<p
-			className={ clsx(
+			className={ classNames(
 				'woocommerce-onboarding-loader__paragraph',
 				className
 			) }
