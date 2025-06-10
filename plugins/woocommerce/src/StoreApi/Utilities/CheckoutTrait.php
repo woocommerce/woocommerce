@@ -147,6 +147,8 @@ trait CheckoutTrait {
 			WC()->session->set( 'chosen_payment_method', $payment_method->id );
 			$this->order->set_payment_method( $payment_method->id );
 			$this->order->set_payment_method_title( $payment_method->title );
+		} elseif ( ! $this->order->needs_payment() ) {
+			$this->order->set_payment_method( '' );
 		}
 		wc_log_order_step(
 			'[Store API #5::update_order_from_request] Set customer note and payment method',

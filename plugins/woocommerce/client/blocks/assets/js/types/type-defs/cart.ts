@@ -53,6 +53,10 @@ export interface BaseAddress {
 	country: string;
 }
 
+export type AddressFieldsForShippingRates = Array<
+	Exclude< keyof BaseAddress, 'address_1' | 'address_2' >
+>;
+
 export interface CartShippingPackageShippingRate extends CurrencyInfo {
 	rate_id: string;
 	name: string;
@@ -203,6 +207,7 @@ export interface Cart extends Record< string, unknown > {
 }
 export interface CartMeta {
 	updatingCustomerData: boolean;
+	updatingAddressFieldsForShippingRates: boolean;
 	updatingSelectedRate: boolean;
 	isCartDataStale: boolean;
 	applyingCoupon: string;

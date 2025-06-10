@@ -4,7 +4,7 @@ const FrontendBlock = ( {
 }: {
 	children?: JSX.Element | JSX.Element[];
 	className?: string;
-} ): JSX.Element | null => {
+} ) => {
 	return <div className={ className }>{ children }</div>;
 };
 

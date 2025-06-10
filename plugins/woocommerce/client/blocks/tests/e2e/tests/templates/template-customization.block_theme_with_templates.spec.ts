@@ -13,11 +13,6 @@ import {
 import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 
 test.describe( 'Template customization', () => {
-	test.skip(
-		( { wpCoreVersion } ) => wpCoreVersion <= 6.6,
-		'Skipping on WP 6.6 and below'
-	);
-
 	test.beforeEach( async ( { requestUtils } ) => {
 		await requestUtils.activateTheme( BLOCK_THEME_WITH_TEMPLATES_SLUG );
 	} );

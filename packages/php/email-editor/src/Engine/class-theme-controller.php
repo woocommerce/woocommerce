@@ -61,7 +61,7 @@ class Theme_Controller {
 	}
 
 	/**
-	 * Gets combined theme data from the core and base theme.
+	 * Gets combined theme data from the core and base theme and some handpicked settings from the site theme.
 	 *
 	 * @return WP_Theme_JSON
 	 */
@@ -70,6 +70,18 @@ class Theme_Controller {
 		$theme->merge( $this->core_theme );
 		$theme->merge( $this->base_theme );
 
+		// Extract stuff from the site theme.
+		$filtered_site_theme_data = array(
+			'version'  => 3,
+			'settings' => array(),
+			'styles'   => array(),
+		);
+		$site_theme_settings      = WP_Theme_JSON_Resolver::get_theme_data()->get_settings();
+		if ( $site_theme_settings && isset( $site_theme_settings['color']['palette']['theme'] ) ) {
+			$filtered_site_theme_data['settings']['color']['palette']['theme'] = $site_theme_settings['color']['palette']['theme'];
+		}
+		$site_theme = new WP_Theme_JSON( $filtered_site_theme_data, 'theme' );
+		$theme->merge( $site_theme );
 		return apply_filters( 'woocommerce_email_editor_theme_json', $theme );
 	}
 
@@ -154,13 +166,7 @@ class Theme_Controller {
 	 * @return array
 	 */
 	public function get_settings(): array {
-		$email_editor_theme_settings                              = $this->get_theme()->get_settings();
-		$site_theme_settings                                      = WP_Theme_JSON_Resolver::get_theme_data()->get_settings();
-		$email_editor_theme_settings['color']['palette']['theme'] = array();
-		if ( isset( $site_theme_settings['color']['palette']['theme'] ) ) {
-			$email_editor_theme_settings['color']['palette']['theme'] = $site_theme_settings['color']['palette']['theme'];
-		}
-		return $email_editor_theme_settings;
+		return $this->get_theme()->get_settings();
 	}
 
 	/**
@@ -203,7 +209,7 @@ class Theme_Controller {
 			$css_presets .= ".has-{$font_size['slug']}-font-size { font-size: {$font_size['size']}; } \n";
 		}
 		// Color palette classes.
-		$color_definitions = array_merge( $email_theme_settings['color']['palette']['theme'], $email_theme_settings['color']['palette']['default'] );
+		$color_definitions = array_merge( $email_theme_settings['color']['palette']['theme'] ?? array(), $email_theme_settings['color']['palette']['default'] ?? array() );
 		foreach ( $color_definitions as $color ) {
 			$css_presets .= ".has-{$color['slug']}-color { color: {$color['color']}; } \n";
 			$css_presets .= ".has-{$color['slug']}-background-color { background-color: {$color['color']}; } \n";

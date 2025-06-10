@@ -6,6 +6,10 @@
 	"attributes": {
 		"productId": { "type": "number", "default": 0 },
 		"isDescendentOfQueryLoop": { "type": "boolean", "default": false },
+		"isDescendentOfSingleProductBlock": {
+			"type": "boolean",
+			"default": false
+		},
 		"isDescendentOfSingleProductTemplate": {
 			"type": "boolean",
 			"default": false
@@ -46,7 +50,6 @@
 		"__experimentalSelector": ".wc-block-components-product-sale-badge"
 	},
 	"ancestor": [
-		"woocommerce/all-products",
 		"woocommerce/single-product",
 		"woocommerce/product-template",
 		"core/post-template",

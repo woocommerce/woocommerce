@@ -416,10 +416,18 @@ class WC_Order extends WC_Abstract_Order {
 	protected function status_transition() {
 		$status_transition = $this->status_transition;
 
+		$order_persisted       = array() === $this->changes;
+		$order_items_persisted = array() === $this->items_to_delete && array() === array_filter(
+			$this->get_items(),
+			static function ( $item ) {
+				return array() !== $item->get_changes();
+			},
+		);
+
 		// Reset status transition variable.
 		$this->status_transition = false;
 
-		if ( $status_transition ) {
+		if ( $status_transition && $order_persisted && $order_items_persisted ) {
 			try {
 				/**
 				 * Fires when order status is changed.
@@ -2197,31 +2205,6 @@ class WC_Order extends WC_Abstract_Order {
 		wp_cache_set( $cache_key, $total_refunded, $this->cache_group );
 
 		return $total_refunded;
-	}
-
-	/**
-	 * Get the total shipping tax refunded.
-	 *
-	 * @since  9.9.0
-	 * @return float
-	 */
-	public function get_total_shipping_tax_refunded() {
-		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'total_shipping_tax_refunded' . $this->get_id();
-		$cached_data = wp_cache_get( $cache_key, $this->cache_group );
-
-		if ( false !== $cached_data ) {
-			return $cached_data;
-		}
-
-		$total_shipping_tax_refunded = 0;
-
-		if ( method_exists( $this->data_store, 'get_total_shipping_tax_refunded' ) ) {
-			$total_shipping_tax_refunded = $this->data_store->get_total_shipping_tax_refunded( $this );
-		}
-
-		wp_cache_set( $cache_key, $total_shipping_tax_refunded, $this->cache_group );
-
-		return $total_shipping_tax_refunded;
 	}
 
 	/**

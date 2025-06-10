@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Card, CardBody } from '@wordpress/components';
+import { useEffect } from 'react';
 
 /**
  * Internal dependencies
@@ -15,9 +16,17 @@ type SettingsProps = {
 /**
  * Wraps the full form layout area.
  */
-const Layout = ( { children }: SettingsProps ) => (
-	<div className="settings-layout">{ children }</div>
-);
+const Layout = ( { children }: SettingsProps ) => {
+	// Add a class to the body element when the settings element is mounted.
+	useEffect( () => {
+		const el = document.getElementById( 'wpbody' );
+		if ( el && el.querySelector( '.settings-layout' ) ) {
+			el.classList.add( 'has-settings-layout' );
+		}
+	}, [] );
+
+	return <div className="settings-layout">{ children }</div>;
+};
 
 /**
  * Defines a labeled section with a heading, description, and content.
