@@ -27,6 +27,7 @@ import { useFulfillmentDrawerContext } from '../../context/drawer-context';
 import ShipmentViewer from '../shipment-form/shipment-viewer';
 import ShipmentForm from '../shipment-form';
 import { ShipmentFormProvider } from '../../context/shipment-form-context';
+import MetadataViewer from '../metadata-viewer';
 
 interface FulfillmentEditorProps {
 	index: number;
@@ -128,8 +129,14 @@ export default function FulfillmentEditor( {
 						>
 							<ItemSelector editMode={ isEditing } />
 							{ isEditing && <ShipmentForm /> }
-							{ ! isEditing && <ShipmentViewer /> }
-
+							{ ! isEditing && (
+								<>
+									<ShipmentViewer />
+									<MetadataViewer
+										fulfillment={ fulfillment }
+									/>
+								</>
+							) }
 							<div className="woocommerce-fulfillment-item-actions">
 								{ ! isEditing ? (
 									<>
