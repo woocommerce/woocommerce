@@ -56,7 +56,7 @@ return (
 | `perPage`             | Number   | `null`  | (required) The amount of results that are being displayed per page |
 | `onPerPageChange`     | Function | `noop`  | A function to execute when the per page option is changed          |
 | `total`               | Number   | `null`  | (required) The total number of results                             |
-| `className`           | String   | `null`  | Additional classNames                                              |
+| `className`           | String   | `null`  | Additional clsx                                              |
 | `showPagePicker`      | Boolean  | `true`  | Whether the page picker should be shown.                           |
 | `showPerPagePicker`   | Boolean  | `true`  | Whether the per page picker should shown.                          |
 | `showPageArrowsLabel` | Boolean  | `true`  | Whether the page arrows label should be shown.                     |

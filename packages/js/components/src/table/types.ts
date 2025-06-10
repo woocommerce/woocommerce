@@ -120,9 +120,9 @@ export type TableProps = CommonTableProps & {
 	 */
 	caption?: string;
 	/**
-	 * Additional classnames
+	 * Additional clsx
 	 */
-	classNames?: string | Record< string, string >;
+	clsx?: string | Record< string, string >;
 };
 
 export type TableSummaryProps = {

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -17,7 +17,7 @@ const TimelineGroup = ( {
 	orderBy = 'desc',
 	clockFormat,
 } ) => {
-	const groupClassName = classnames(
+	const groupClassName = clsx(
 		'woocommerce-timeline-group',
 		className
 	);

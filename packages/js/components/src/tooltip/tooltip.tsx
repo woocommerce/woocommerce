@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Button, Popover } from '@wordpress/components';
 import { createElement, Fragment, useState } from '@wordpress/element';
 import { KeyboardEvent } from 'react';
@@ -45,13 +45,13 @@ export const Tooltip = ( {
 	return (
 		<>
 			<div
-				className={ classnames(
+				className={ clsx(
 					'woocommerce-tooltip',
 					uniqueIdentifier
 				) }
 			>
 				<Button
-					className={ classnames(
+					className={ clsx(
 						'woocommerce-tooltip__button',
 						className
 					) }

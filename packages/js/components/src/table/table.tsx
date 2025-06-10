@@ -9,7 +9,7 @@ import {
 	useState,
 	useEffect,
 } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Button } from '@wordpress/components';
 import { find, get, noop } from 'lodash';
 import { withInstanceId } from '@wordpress/compose';
@@ -76,7 +76,7 @@ const Table: React.VFC< TableProps > = ( {
 	emptyMessage,
 	...props
 } ) => {
-	const { classNames } = props;
+	const { clsx } = props;
 	const [ tabIndex, setTabIndex ] = useState< number | undefined >(
 		undefined
 	);
@@ -85,8 +85,8 @@ const Table: React.VFC< TableProps > = ( {
 
 	const container = useRef< HTMLDivElement >( null );
 
-	if ( classNames ) {
-		deprecated( `Table component's classNames prop`, {
+	if ( clsx ) {
+		deprecated( `Table component's clsx prop`, {
 			since: '11.1.0',
 			version: '12.0.0',
 			alternative: 'className',
@@ -94,9 +94,9 @@ const Table: React.VFC< TableProps > = ( {
 		} );
 	}
 
-	const classes = classnames(
+	const classes = clsx(
 		'woocommerce-table__table',
-		classNames,
+		clsx,
 		className,
 		{
 			'is-scrollable-right': isScrollableRight,
@@ -216,7 +216,7 @@ const Table: React.VFC< TableProps > = ( {
 							} = header;
 							const labelId = `header-${ instanceId }-${ i }`;
 							const thProps: { [ key: string ]: string } = {
-								className: classnames(
+								className: clsx(
 									'woocommerce-table__header',
 									cellClassName,
 									{
@@ -326,7 +326,7 @@ const Table: React.VFC< TableProps > = ( {
 									} = headers[ j ];
 									const isHeader = rowHeader === j;
 									const Cell = isHeader ? 'th' : 'td';
-									const cellClasses = classnames(
+									const cellClasses = clsx(
 										'woocommerce-table__item',
 										cellClassName,
 										{

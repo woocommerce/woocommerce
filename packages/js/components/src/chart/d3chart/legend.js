@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { createElement, Component, createRef } from '@wordpress/element';
 import { withInstanceId } from '@wordpress/compose';
 import PropTypes from 'prop-types';
@@ -73,7 +73,7 @@ class D3Legend extends Component {
 
 		return (
 			<div
-				className={ classNames(
+				className={ clsx(
 					'woocommerce-legend',
 					`woocommerce-legend__direction-${ legendDirection }`,
 					{
@@ -90,7 +90,7 @@ class D3Legend extends Component {
 				>
 					{ data.map( ( row ) => (
 						<li
-							className={ classNames(
+							className={ clsx(
 								'woocommerce-legend__item',
 								{
 									'woocommerce-legend__item-checked':
@@ -132,7 +132,7 @@ class D3Legend extends Component {
 							>
 								<div className="woocommerce-legend__item-container">
 									<span
-										className={ classNames(
+										className={ clsx(
 											'woocommerce-legend__item-checkmark',
 											{
 												'woocommerce-legend__item-checkmark-checked':
