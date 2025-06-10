@@ -6,8 +6,8 @@ import { Block } from '@wordpress/blocks/index';
 import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
 
-function Placeholder( { layoutclsx } ) {
-	const blockProps = useBlockProps( { className: layoutclsx } );
+function Placeholder( { layoutClassNames } ) {
+	const blockProps = useBlockProps( { className: layoutClassNames } );
 	return (
 		<div { ...blockProps }>
 			<p>{ __( 'This is the Content block.', 'woocommerce' ) }</p>
@@ -25,7 +25,7 @@ function Placeholder( { layoutclsx } ) {
 function PostContentEdit( OriginalEditComponent ) {
 	return function Edit( {
 		context,
-		__unstableLayoutclsx: layoutclsx,
+		__unstableLayoutClassNames: layoutClassNames,
 	} ) {
 		const { postId: contextPostId, postType: contextPostType } = context;
 		const hasContent = contextPostId && contextPostType;
@@ -35,13 +35,13 @@ function PostContentEdit( OriginalEditComponent ) {
 				<OriginalEditComponent
 					{ ...{
 						context,
-						__unstableLayoutclsx: layoutclsx,
+						__unstableLayoutClassNames: layoutClassNames,
 					} }
 				/>
 			);
 		}
 
-		return <Placeholder layoutclsx={ layoutclsx } />;
+		return <Placeholder layoutClassNames={ layoutClassNames } />;
 	};
 }
 

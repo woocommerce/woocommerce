@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
+import classnames from 'classnames';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { addFilter } from '@wordpress/hooks';
 import { getBlockSupport, hasBlockSupport } from '@wordpress/blocks';
@@ -188,8 +188,8 @@ function BlockWithLayoutStyles( { block: BlockListBlock, props } ) {
 	const justify = ( layout?.justifyContent as string ) || 'left';
 	const justificationClass = `is-content-justification-${ justify }`;
 
-	const layoutclsx = clsx( justificationClass, layoutClasses );
-	return <BlockListBlock { ...props } className={ layoutclsx } />;
+	const layoutClassNames = classnames( justificationClass, layoutClasses );
+	return <BlockListBlock { ...props } className={ layoutClassNames } />;
 }
 
 /**
