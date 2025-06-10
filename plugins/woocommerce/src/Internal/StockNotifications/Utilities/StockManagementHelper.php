@@ -25,7 +25,7 @@ class StockManagementHelper {
 	 * @param WC_Product $product The product to check.
 	 * @return array<int> Array of product IDs that don't manage stock.
 	 */
-	public static function get_variations_without_stock_management( WC_Product $product ): array {
+	public static function get_managed_variations( WC_Product $product ): array {
 
 		if ( ! $product->is_type( ProductType::VARIABLE ) ) {
 			return array();
@@ -40,7 +40,7 @@ class StockManagementHelper {
 
 		$format           = array_fill( 0, count( $children ), '%d' );
 		$query_in         = '(' . implode( ',', $format ) . ')';
-		$managed_children = array_unique( $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN {$query_in}", $children ) ) ); // @codingStandardsIgnoreLine.
+		$managed_children = $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN {$query_in}", $children ) ); // @codingStandardsIgnoreLine.
 
 		return array_map( 'intval', $managed_children );
 	}

@@ -70,7 +70,7 @@ class StockSyncController {
 			$lookup_ids = array( $product_id );
 			// If product is variable, check for the variations that inherit stock management from the parent.
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$children_ids = StockManagementHelper::get_variations_without_stock_management( $product );
+				$children_ids = StockManagementHelper::get_managed_variations( $product );
 				$lookup_ids   = array_merge( $lookup_ids, $children_ids );
 			}
 

@@ -342,7 +342,7 @@ class NotificationsProcessor {
 		// For variable products, check if we're only processing the parent product.
 		// If so, add any variations that inherit stock management from the parent to the cycle state.
 		if ( $product->is_type( ProductType::VARIABLE ) && 1 === count( $cycle_state['product_ids'] ) ) {
-			$cycle_state['product_ids'] = array_merge( $cycle_state['product_ids'], StockManagementHelper::get_variations_without_stock_management( $product ) );
+			$cycle_state['product_ids'] = array_merge( $cycle_state['product_ids'], StockManagementHelper::get_managed_variations( $product ) );
 		}
 
 		// Get notifications.
