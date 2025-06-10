@@ -340,6 +340,8 @@ function setActiveProvider( country, type ) {
 
 				disableBrowserAutofill( addressInput );
 				suggestionsContainer.style.display = 'block';
+				suggestionsContainer.style.marginTop =
+					addressInputs[ type ][ 'address_1' ].offsetHeight + 'px';
 				addressInput.setAttribute( 'aria-expanded', 'true' );
 				addressInput.setAttribute(
 					'aria-owns',
