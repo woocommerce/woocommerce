@@ -129,9 +129,9 @@ final class QuantityLimits {
 		$rounding_function = in_array( $rounding_function, [ 'ceil', 'floor', 'round' ], true ) ? $rounding_function : 'round';
 
 		// Calculate the division result and apply rounding.
-		$division_result = $number / $multiple_of;
+		$division_result  = $number / $multiple_of;
 		$rounded_division = $rounding_function( $division_result );
-		$result = $rounded_division * $multiple_of;
+		$result           = $rounded_division * $multiple_of;
 
 		return wc_stock_amount( $result );
 	}
@@ -306,7 +306,7 @@ final class QuantityLimits {
 
 		// For floats, use division and check if result is close to an integer.
 		$division_result = $number / $multiple_of;
-		$rounded_result = round( $division_result );
+		$rounded_result  = round( $division_result );
 		return abs( $division_result - $rounded_result ) < self::FLOAT_TOLERANCE;
 	}
 }
