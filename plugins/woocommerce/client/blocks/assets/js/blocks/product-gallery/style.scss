@@ -30,22 +30,12 @@ $dialog-padding: 20px;
 		scroll-snap-align: none center;
 	}
 
-	.wc-block-product-gallery-large-image__image-element {
-		width: 100%;
-		overflow: hidden;
-		margin-right: auto;
-		margin-left: auto;
-	}
-
-	img {
+	// This is the code related to Product Image block.
+	.wc-block-woocommerce-product-gallery-large-image__image {
 		display: block;
 		position: relative;
-		margin: 0 auto;
-		z-index: 1;
 		transition: all 0.1s linear;
-		aspect-ratio: 1 / 1;
-		object-fit: contain;
-		width: 100%;
+		z-index: 1;
 
 		// Keep the order in this way. The hoverZoom class should override the full-screen-on-click class when both are applied.
 		&.wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click {
@@ -55,7 +45,28 @@ $dialog-padding: 20px;
 		&.wc-block-woocommerce-product-gallery-large-image__image--hoverZoom {
 			cursor: zoom-in;
 		}
+
+		/**
+		* ============================================================
+		* START TEMPORARY BACKWARDS COMPATIBILITY CODE - TO BE REMOVED
+		* ============================================================
+		*/
+
+		&--legacy {
+			margin: 0 auto;
+			aspect-ratio: 1 / 1;
+			object-fit: contain;
+			width: 100%;
+		}
+
+		/**
+		* ==========================================================
+		* END TEMPORARY BACKWARDS COMPATIBILITY CODE - TO BE REMOVED
+		* ==========================================================
+		*/
 	}
+
+
 
 	.wc-block-product-gallery-large-image__inner-blocks {
 		display: flex;

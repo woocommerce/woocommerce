@@ -231,7 +231,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		return wp_interactivity_process_directives( $template );
 	}
 
-		/**
+	/**
 	 * Get the main images html code. The first element of the array contains the HTML of the first image that is visible, the second element contains the HTML of the other images that are hidden.
 	 *
 	 * @param array       $context The block context.
@@ -241,7 +241,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	 */
 	private function legacy_get_main_images_html( $context, $product ) {
 		$image_data   = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_single' );
-		$base_classes = 'wc-block-woocommerce-product-gallery-large-image__image';
+		$base_classes = 'wc-block-woocommerce-product-gallery-large-image__image wc-block-woocommerce-product-gallery-large-image__image--legacy';
 
 		if ( $context['fullScreenOnClick'] ) {
 			$base_classes .= ' wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click';
