@@ -16,7 +16,7 @@ class Config {
 	/**
 	 * Get the supported product types.
 	 *
-	 * @return array
+	 * @return array<string>
 	 */
 	public static function get_supported_product_types(): array {
 
@@ -40,7 +40,7 @@ class Config {
 	/**
 	 * Get the supported product stock statuses.
 	 *
-	 * @return array
+	 * @return array<string>
 	 */
 	public static function get_supported_product_statuses(): array {
 
@@ -62,7 +62,7 @@ class Config {
 	/**
 	 * Get the eligible stock statuses that trigger sending notifications.
 	 *
-	 * @return array
+	 * @return array<string>
 	 */
 	public static function get_eligible_stock_statuses(): array {
 
