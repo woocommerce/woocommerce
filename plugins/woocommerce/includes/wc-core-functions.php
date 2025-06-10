@@ -2810,13 +2810,3 @@ function _wc_delete_transients( $transients ) {
 		}
 	}
 }
-
-/**
- * Convert a stock amount to a numeric value.
- *
- * @param int|float $value The stock amount.
- * @return int|float The numeric value.
- */
-function wc_stock_amount_numeric( $value ) {
-	return is_numeric( $value ) ? $value + 0 : intval( $value );
-}
