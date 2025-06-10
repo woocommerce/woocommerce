@@ -6,4 +6,5 @@ export type Options = {
 	devRepoPath?: string;
 	commitDirectToBase?: boolean;
 	override?: string;
+	appendChangelog?: boolean;
 };
