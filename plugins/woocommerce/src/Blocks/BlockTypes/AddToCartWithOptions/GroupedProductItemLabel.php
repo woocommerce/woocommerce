@@ -12,7 +12,7 @@ use WP_Block;
  * Block type for the label of grouped product selector items in Add to Cart + Options.
  * It's responsible to render the label for each child product.
  */
-class GroupedProductSelectorItemLabel extends AbstractBlock {
+class GroupedProductItemLabel extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
 
@@ -21,7 +21,7 @@ class GroupedProductSelectorItemLabel extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'add-to-cart-with-options-grouped-product-selector-item-label';
+	protected $block_name = 'add-to-cart-with-options-grouped-product-item-label';
 
 	/**
 	 * Render the block.

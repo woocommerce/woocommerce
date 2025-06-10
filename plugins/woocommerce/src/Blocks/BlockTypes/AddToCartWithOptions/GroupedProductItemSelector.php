@@ -13,7 +13,7 @@ use WP_Block;
  * It's responsible to render the CTA for each child product, that might be a button,
  * a checkbox, or a link.
  */
-class GroupedProductSelectorItemCTA extends AbstractBlock {
+class GroupedProductItemSelector extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
 
@@ -22,7 +22,7 @@ class GroupedProductSelectorItemCTA extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'add-to-cart-with-options-grouped-product-selector-item-cta';
+	protected $block_name = 'add-to-cart-with-options-grouped-product-item-selector';
 
 	/**
 	 * Gets the quantity selector markup for a product.
@@ -45,7 +45,7 @@ class GroupedProductSelectorItemCTA extends AbstractBlock {
 
 		$quantity_html = ob_get_clean();
 
-		// Remove the label because we are rendering one as a separate block via GroupedProductSelectorItemLabel.
+		// Remove the label because we are rendering one as a separate block via GroupedProductItemLabel.
 		$quantity_html = $this->remove_quantity_label( $quantity_html );
 
 		// Modify the quantity input to add stepper buttons.
@@ -137,7 +137,7 @@ class GroupedProductSelectorItemCTA extends AbstractBlock {
 			}
 
 			if ( $markup ) {
-				$markup = '<div class="wp-block-add-to-cart-with-options-grouped-product-selector-item-cta wc-block-add-to-cart-with-options-grouped-product-selector-item-cta">' . $markup . '</div>';
+				$markup = '<div class="wp-block-add-to-cart-with-options-grouped-product-item-selector wc-block-add-to-cart-with-options-grouped-product-item-selector">' . $markup . '</div>';
 			}
 		}
 

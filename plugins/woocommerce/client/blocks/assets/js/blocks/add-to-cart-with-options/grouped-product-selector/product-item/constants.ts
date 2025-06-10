@@ -8,7 +8,7 @@ import type { TemplateArray } from '@wordpress/blocks';
  */
 export const GROUPED_PRODUCT_ITEM_TEMPLATE: TemplateArray = [
 	[
-		'woocommerce/add-to-cart-with-options-grouped-product-selector-item',
+		'woocommerce/add-to-cart-with-options-grouped-product-item',
 		{},
 		[
 			[
@@ -30,10 +30,10 @@ export const GROUPED_PRODUCT_ITEM_TEMPLATE: TemplateArray = [
 				},
 				[
 					[
-						'woocommerce/add-to-cart-with-options-grouped-product-selector-item-cta',
+						'woocommerce/add-to-cart-with-options-grouped-product-item-selector',
 					],
 					[
-						'woocommerce/add-to-cart-with-options-grouped-product-selector-item-label',
+						'woocommerce/add-to-cart-with-options-grouped-product-item-label',
 						{
 							fontSize: 'medium',
 							style: {

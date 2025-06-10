@@ -12,7 +12,7 @@ use WP_Block;
  * Block type for grouped product selector item in add to cart with options.
  * It's responsible to render each child product in a form of a list item.
  */
-class GroupedProductSelectorItemTemplate extends AbstractBlock {
+class GroupedProductItem extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
 
@@ -21,7 +21,7 @@ class GroupedProductSelectorItemTemplate extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'add-to-cart-with-options-grouped-product-selector-item';
+	protected $block_name = 'add-to-cart-with-options-grouped-product-item';
 
 	/**
 	 * Get product row HTML.
