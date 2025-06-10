@@ -1,3 +1,10 @@
+// The post editor has a max-width of 645px, so we need to override it.
+// so we don't render a mobile layout on first render.
+.block-editor-block-list__layout.is-root-container
+	> :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
+	max-width: var(--wp--style--global--wide-size) !important;
+}
+
 .wp-block-woocommerce-checkout {
 	.wc-block-components-sidebar-layout {
 		display: block;
@@ -36,7 +43,7 @@
 		}
 	}
 
-	.is-large {
+	@include cart-checkout-large-container {
 		.wc-block-checkout__sidebar {
 			top: 0;
 		}
@@ -81,5 +88,18 @@ body.wc-lock-selected-block--remove {
 	}
 	.wc-block-components-totals-wrapper {
 		box-sizing: border-box;
+	}
+}
+
+// The editor includes extra markup that impacts the flex layout.
+.wc-block-components-sidebar-layout {
+	> .block-editor-inner-blocks > .block-editor-block-list__layout {
+		display: flex;
+		flex-wrap: wrap;
+		margin: 0 auto $gap;
+		position: relative;
+		&:has(> :last-child.wp-block-woocommerce-checkout-fields-block) {
+			flex-direction: row-reverse;
+		}
 	}
 }

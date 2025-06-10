@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Replace {site_title}, {store_address}, and {store_email} placeholders with Point of Sale (POS) store details from POS settings in POS emails.
