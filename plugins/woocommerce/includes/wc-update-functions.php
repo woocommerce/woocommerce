@@ -2975,7 +2975,7 @@ function wc_update_940_remove_help_panel_highlight_shown() {
 /**
  * Set multisite customer visibility option for existing sites.
  *
- * If WooCommerce is updated from an earlier version to 9.9.1, and if it is a multisite network,
+ * If WooCommerce is updated from an earlier version to 10.0.0, and if it is a multisite network,
  * then set 'woocommerce_network_wide_customers' to 'yes' (but only if it has not already been
  * set).
  *
@@ -2985,7 +2985,7 @@ function wc_update_940_remove_help_panel_highlight_shown() {
  *
  * @return void
  */
-function wc_update_991_multisite_visibility_setting(): void {
+function wc_update_1000_multisite_visibility_setting(): void {
 	if ( ! is_multisite() ) {
 		return;
 	}
