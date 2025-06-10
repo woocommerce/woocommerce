@@ -1389,7 +1389,8 @@ final class WooCommerce {
 	 * which cause the warning in #58364. By initializing the customizer on plugins_loaded,
 	 * we ensure that wp_is_block_theme() is called after theme directories registration.
 	 *
-	 * See https://github.com/woocommerce/woocommerce/issues/58364
+	 * @internal
+	 * @see https://github.com/woocommerce/woocommerce/issues/58364
 	 */
 	public function init_customizer() {
 		global $pagenow;
