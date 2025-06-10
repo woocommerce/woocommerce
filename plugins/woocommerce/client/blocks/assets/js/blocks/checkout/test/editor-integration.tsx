@@ -29,15 +29,15 @@ describe( 'Checkout block editor integration', () => {
 		registerCheckoutFilters( 'woo-test-namespace', {
 			// @ts-expect-error - The types for the checkout filters are not defined.
 			additionalCartCheckoutInnerBlockTypes: (
-					value: string[],
-					extensions,
-					{ block }: { block: string }
-				) => {
-					value.push( 'core/table' );
-					if ( block === 'woocommerce/checkout-totals-block' ) {
-						value.push( 'core/audio' );
-					}
-					return value;
+				value: string[],
+				extensions,
+				{ block }: { block: string }
+			) => {
+				value.push( 'core/table' );
+				if ( block === 'woocommerce/checkout-totals-block' ) {
+					value.push( 'core/audio' );
+				}
+				return value;
 			},
 		} );
 	} );
