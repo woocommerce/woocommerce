@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import {
 	createElement,
 	Component,
@@ -383,7 +383,7 @@ class Chart extends Component {
 							role="menubar"
 						>
 							<Button
-								className={ clsx(
+								className={ classNames(
 									'woocommerce-chart__type-button',
 									{
 										'woocommerce-chart__type-button-selected':
@@ -402,7 +402,7 @@ class Chart extends Component {
 								<LineGraphIcon />
 							</Button>
 							<Button
-								className={ clsx(
+								className={ classNames(
 									'woocommerce-chart__type-button',
 									{
 										'woocommerce-chart__type-button-selected':
@@ -425,7 +425,7 @@ class Chart extends Component {
 				) }
 				<Section component={ false }>
 					<div
-						className={ clsx(
+						className={ classNames(
 							'woocommerce-chart__body',
 							`woocommerce-chart__body-${ chartDirection }`
 						) }

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, CSSProperties, ReactElement } from 'react';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import { Tooltip } from '@wordpress/components';
 
 /**
@@ -37,7 +37,7 @@ export const MenuItem = < ItemType, >( {
 			<li
 				{ ...itemProps }
 				style={ isActive ? activeStyle : itemProps.style }
-				className={ clsx(
+				className={ classNames(
 					'woocommerce-experimental-select-control__menu-item',
 					itemProps.className,
 					className

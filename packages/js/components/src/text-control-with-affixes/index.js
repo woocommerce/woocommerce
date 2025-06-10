@@ -5,7 +5,7 @@ import { createElement, Component } from '@wordpress/element';
 import { compose, withInstanceId } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { BaseControl, withFocusOutside } from '@wordpress/components';
-import clsx from 'clsx';
+import classnames from 'classnames';
 
 /**
  * This component is essentially a wrapper (really a reimplementation) around the
@@ -61,13 +61,13 @@ class TextControlWithAffixes extends Component {
 			describedby.push( `${ id }__suffix` );
 		}
 
-		const baseControlClasses = clsx( className, {
+		const baseControlClasses = classnames( className, {
 			'with-value': value !== '',
 			empty: value === '',
 			active: isFocused && ! disabled,
 		} );
 
-		const affixesClasses = clsx( 'text-control-with-affixes', {
+		const affixesClasses = classnames( 'text-control-with-affixes', {
 			'text-control-with-prefix': prefix,
 			'text-control-with-suffix': suffix,
 			disabled,

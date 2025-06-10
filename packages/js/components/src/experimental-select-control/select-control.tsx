@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
+import classnames from 'classnames';
 import {
 	useCombobox,
 	UseComboboxState,
@@ -287,7 +287,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 		<div
 			id={ instanceId }
 			ref={ selectControlWrapperRef }
-			className={ clsx(
+			className={ classnames(
 				'woocommerce-experimental-select-control',
 				className,
 				{

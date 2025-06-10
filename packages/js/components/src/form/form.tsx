@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
+import classnames from 'classnames';
 import {
 	useState,
 	createElement,
@@ -260,7 +260,7 @@ function FormComponent< Values extends Record< string, any > = any >(
 					onBlurProp();
 				}
 			},
-			className: clsx( classNameProp, {
+			className: classnames( classNameProp, {
 				'has-error': isTouched && inputError,
 			} ),
 			help: isTouched ? ( inputError as string ) : null,

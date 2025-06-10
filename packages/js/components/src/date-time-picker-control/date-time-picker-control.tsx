@@ -14,7 +14,7 @@ import {
 } from '@wordpress/element';
 import { Icon, calendar } from '@wordpress/icons';
 import moment, { Moment } from 'moment';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import { sprintf, __ } from '@wordpress/i18n';
 import { useDebounce, useInstanceId } from '@wordpress/compose';
 import {
@@ -435,7 +435,7 @@ export const DateTimePickerControl = forwardRef(
 
 		return (
 			<Dropdown
-				className={ clsx(
+				className={ classNames(
 					'woocommerce-date-time-picker-control',
 					className
 				) }

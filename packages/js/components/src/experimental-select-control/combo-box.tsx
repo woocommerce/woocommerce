@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, MouseEvent, useRef, forwardRef } from 'react';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import { Icon, chevronDown } from '@wordpress/icons';
 
 type ComboBoxProps = {
@@ -57,7 +57,7 @@ export const ComboBox = ( {
 		// Keyboard users are still able to tab to and interact with elements in the combobox.
 		/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
 		<div
-			className={ clsx(
+			className={ classNames(
 				'woocommerce-experimental-select-control__combo-box-wrapper',
 				{
 					'woocommerce-experimental-select-control__combo-box-wrapper--disabled':

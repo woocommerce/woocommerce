@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
+import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import { createElement, Component, createRef } from '@wordpress/element';
 import { isEqual, throttle } from 'lodash';
@@ -93,7 +93,7 @@ export default class D3Base extends Component {
 		const { className } = this.props;
 		return (
 			<div
-				className={ clsx( 'd3-base', className ) }
+				className={ classNames( 'd3-base', className ) }
 				ref={ this.chartRef }
 				onScroll={ this.delayedScroll() }
 			/>

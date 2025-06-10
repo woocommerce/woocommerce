@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Dropdown } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import { withViewportMatch } from '@wordpress/viewport';
-import clsx from 'clsx';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -133,7 +133,7 @@ class DateRangeFilterPicker extends Component {
 		if ( ! popoverProps.placement ) {
 			popoverProps.placement = 'bottom';
 		}
-		const contentClasses = clsx(
+		const contentClasses = classnames(
 			'woocommerce-filters-date__content',
 			{
 				'is-mobile': isViewportMobile,

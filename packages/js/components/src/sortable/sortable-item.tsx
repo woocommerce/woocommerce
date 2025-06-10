@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { DragEvent, useEffect } from 'react';
-import clsx from 'clsx';
+import classnames from 'classnames';
 import { createElement, useRef, useContext } from '@wordpress/element';
 import { Draggable } from '@wordpress/components';
 
@@ -54,7 +54,7 @@ export const SortableItem = ( {
 		<div
 			{ ...props }
 			aria-selected={ isSelected }
-			className={ clsx( 'woocommerce-sortable__item', className, {
+			className={ classnames( 'woocommerce-sortable__item', className, {
 				'is-dragging': isDragging,
 				'is-selected': isSelected,
 			} ) }

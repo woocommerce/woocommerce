@@ -10,7 +10,7 @@ import {
 } from '@wordpress/element';
 import { TabPanel, Button } from '@wordpress/components';
 import PropTypes from 'prop-types';
-import clsx from 'clsx';
+import classnames from 'classnames';
 import moment from 'moment';
 
 /**
@@ -117,7 +117,7 @@ class DatePickerContent extends Component {
 									/>
 								) }
 								<div
-									className={ clsx(
+									className={ classnames(
 										'woocommerce-filters-date__content-controls',
 										{
 											'is-custom':

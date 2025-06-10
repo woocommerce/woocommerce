@@ -5,7 +5,7 @@ import { Button } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import PropTypes from 'prop-types';
-import clsx from 'clsx';
+import classnames from 'classnames';
 
 /**
  * A button useful for a launcher of a dropdown component. The button is 100% width of its container and displays
@@ -16,7 +16,7 @@ import clsx from 'clsx';
  */
 const DropdownButton = ( props ) => {
 	const { labels, isOpen, ...otherProps } = props;
-	const buttonClasses = clsx( 'woocommerce-dropdown-button', {
+	const buttonClasses = classnames( 'woocommerce-dropdown-button', {
 		'is-open': isOpen,
 		'is-multi-line': labels.length > 1,
 	} );

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import clsx from 'clsx';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -49,7 +49,7 @@ export function Pagination( {
 		} );
 	}
 
-	const classes = clsx( 'woocommerce-pagination', className );
+	const classes = classNames( 'woocommerce-pagination', className );
 
 	if ( pageCount <= 1 ) {
 		return (

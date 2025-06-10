@@ -3,7 +3,7 @@
  */
 import { createElement, Component } from '@wordpress/element';
 import { noop } from 'lodash';
-import clsx from 'clsx';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -204,7 +204,7 @@ export class Search extends Component< SearchProps, SearchState > {
 		return (
 			<div>
 				<SelectControl
-					className={ clsx( 'woocommerce-search', className, {
+					className={ classnames( 'woocommerce-search', className, {
 						'is-static-results': staticResults,
 					} ) }
 					disabled={ disabled }

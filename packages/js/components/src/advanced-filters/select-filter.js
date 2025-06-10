@@ -5,7 +5,7 @@ import { createElement, Component, Fragment } from '@wordpress/element';
 import { SelectControl, Spinner } from '@wordpress/components';
 import { find } from 'lodash';
 import PropTypes from 'prop-types';
-import clsx from 'clsx';
+import classnames from 'classnames';
 import { getDefaultOptionValue } from '@woocommerce/navigation';
 
 /**
@@ -74,7 +74,7 @@ class SelectFilter extends Component {
 			title: <span className={ className } />,
 			rule: (
 				<SelectControl
-					className={ clsx(
+					className={ classnames(
 						className,
 						'woocommerce-filters-advanced__rule'
 					) }
@@ -91,7 +91,7 @@ class SelectFilter extends Component {
 			),
 			filter: options ? (
 				<SelectControl
-					className={ clsx(
+					className={ classnames(
 						className,
 						'woocommerce-filters-advanced__input'
 					) }
@@ -122,7 +122,7 @@ class SelectFilter extends Component {
 					{ labels.add || '' }
 				</legend>
 				<div
-					className={ clsx(
+					className={ classnames(
 						'woocommerce-filters-advanced__fieldset',
 						{
 							'is-english': isEnglish,

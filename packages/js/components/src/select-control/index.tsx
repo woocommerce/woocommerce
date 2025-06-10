@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import clsx from 'clsx';
+import classnames from 'classnames';
 import { Component, createElement } from '@wordpress/element';
 import {
 	debounce,
@@ -558,7 +558,7 @@ export class SelectControl extends Component< Props, State > {
 
 		return (
 			<div
-				className={ clsx(
+				className={ classnames(
 					'woocommerce-select-control',
 					className,
 					{

@@ -8,7 +8,7 @@ import {
 	Fragment,
 	useState,
 } from '@wordpress/element';
-import clsx from 'clsx';
+import classnames from 'classnames';
 import { Button, Popover } from '@wordpress/components';
 import { Icon, closeSmall } from '@wordpress/icons';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -56,7 +56,7 @@ const Tag = forwardRef(
 			return null;
 		}
 		label = decodeEntities( label );
-		const classes = clsx( 'woocommerce-tag', className, {
+		const classes = classnames( 'woocommerce-tag', className, {
 			'has-remove': !! remove,
 		} );
 		const labelTextNode = (

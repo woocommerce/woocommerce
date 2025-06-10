@@ -5,7 +5,7 @@ import { Button, Icon } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { chevronLeft, chevronRight } from '@wordpress/icons';
 import { sprintf, __ } from '@wordpress/i18n';
-import clsx from 'clsx';
+import classNames from 'classnames';
 
 type PageArrowsProps = {
 	currentPage: number;
@@ -43,11 +43,11 @@ export function PageArrows( {
 		return null;
 	}
 
-	const previousLinkClass = clsx( 'woocommerce-pagination__link', {
+	const previousLinkClass = classNames( 'woocommerce-pagination__link', {
 		'is-active': currentPage > 1,
 	} );
 
-	const nextLinkClass = clsx( 'woocommerce-pagination__link', {
+	const nextLinkClass = classNames( 'woocommerce-pagination__link', {
 		'is-active': currentPage < pageCount,
 	} );
 

@@ -3,7 +3,7 @@
  */
 import { createElement } from 'react';
 import { Icon } from '@wordpress/icons';
-import clsx from 'clsx';
+import classNames from 'classnames';
 
 type SuffixIconProps = {
 	icon: JSX.Element;
@@ -13,7 +13,7 @@ type SuffixIconProps = {
 export const SuffixIcon = ( { className = '', icon }: SuffixIconProps ) => {
 	return (
 		<div
-			className={ clsx(
+			className={ classNames(
 				'woocommerce-experimental-select-control__suffix-icon',
 				className
 			) }

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
+import classnames from 'classnames';
 import { createElement, Fragment } from '@wordpress/element';
 import type React from 'react';
 
@@ -60,7 +60,7 @@ export const Stepper = ( {
 	};
 
 	const currentIndex = steps.findIndex( ( s ) => currentStep === s.key );
-	const stepperClassName = clsx( 'woocommerce-stepper', className, {
+	const stepperClassName = classnames( 'woocommerce-stepper', className, {
 		'is-vertical': isVertical,
 	} );
 
@@ -71,7 +71,7 @@ export const Stepper = ( {
 					const { key, label, description, isComplete, onClick } =
 						step;
 					const isCurrentStep = key === currentStep;
-					const stepClassName = clsx(
+					const stepClassName = classnames(
 						'woocommerce-stepper__step',
 						{
 							'is-active': isCurrentStep,

@@ -6,7 +6,7 @@ import { SelectControl } from '@wordpress/components';
 import { getIdsFromQuery } from '@woocommerce/navigation';
 import { find, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
-import clsx from 'clsx';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -106,7 +106,7 @@ class SearchFilter extends Component {
 			title: <span className={ className } />,
 			rule: (
 				<SelectControl
-					className={ clsx(
+					className={ classnames(
 						className,
 						'woocommerce-filters-advanced__rule'
 					) }
@@ -120,7 +120,7 @@ class SearchFilter extends Component {
 			),
 			filter: (
 				<Search
-					className={ clsx(
+					className={ classnames(
 						className,
 						'woocommerce-filters-advanced__input'
 					) }
@@ -147,7 +147,7 @@ class SearchFilter extends Component {
 					{ labels.add || '' }
 				</legend>
 				<div
-					className={ clsx(
+					className={ classnames(
 						'woocommerce-filters-advanced__fieldset',
 						{
 							'is-english': isEnglish,

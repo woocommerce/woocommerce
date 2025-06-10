@@ -4,7 +4,7 @@
 import { createElement, Component, Fragment } from '@wordpress/element';
 import { SelectControl } from '@wordpress/components';
 import { find, partial } from 'lodash';
-import clsx from 'clsx';
+import classnames from 'classnames';
 import { __, _x } from '@wordpress/i18n';
 import { isoDateFormat, toMoment } from '@woocommerce/date';
 import moment from 'moment';
@@ -231,7 +231,7 @@ class DateFilter extends Component {
 			title: <span className={ className } />,
 			rule: (
 				<SelectControl
-					className={ clsx(
+					className={ classnames(
 						className,
 						'woocommerce-filters-advanced__rule'
 					) }
@@ -243,7 +243,7 @@ class DateFilter extends Component {
 			),
 			filter: (
 				<div
-					className={ clsx(
+					className={ classnames(
 						className,
 						'woocommerce-filters-advanced__input-range',
 						{
@@ -265,7 +265,7 @@ class DateFilter extends Component {
 					{ labels.add || '' }
 				</legend>
 				<div
-					className={ clsx(
+					className={ classnames(
 						'woocommerce-filters-advanced__fieldset',
 						{
 							'is-english': isEnglish,

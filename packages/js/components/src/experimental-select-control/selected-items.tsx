@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
+import classnames from 'classnames';
 import {
 	createElement,
 	forwardRef,
@@ -48,7 +48,7 @@ const PrivateSelectedItems = < ItemType, >(
 	}: SelectedItemsProps< ItemType >,
 	ref: React.ForwardedRef< SelectedItemFocusHandle >
 ) => {
-	const classes = clsx(
+	const classes = classnames(
 		'woocommerce-experimental-select-control__selected-items',
 		{
 			'is-read-only': isReadOnly,

@@ -4,7 +4,7 @@
 import { createElement, Component, Fragment } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import { Icon, upload } from '@wordpress/icons';
 
 class ImageUpload extends Component {
@@ -62,7 +62,7 @@ class ImageUpload extends Component {
 			<Fragment>
 				{ !! image && (
 					<div
-						className={ clsx(
+						className={ classNames(
 							'woocommerce-image-upload',
 							'has-image',
 							className
@@ -82,7 +82,7 @@ class ImageUpload extends Component {
 				) }
 				{ ! image && (
 					<div
-						className={ clsx(
+						className={ classNames(
 							'woocommerce-image-upload',
 							'no-image',
 							className

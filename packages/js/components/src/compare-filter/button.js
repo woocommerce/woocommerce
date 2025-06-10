@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
+import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import { Button, Tooltip } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
@@ -40,7 +40,7 @@ const CompareButton = ( {
 		</Tooltip>
 	) : (
 		<Button
-			className={ clsx( 'woocommerce-compare-button', className ) }
+			className={ classnames( 'woocommerce-compare-button', className ) }
 			onClick={ onClick }
 			disabled={ disabled }
 			isSecondary

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import clsx from 'clsx';
+import classnames from 'classnames';
 import {
 	createElement,
 	useCallback,
@@ -230,7 +230,7 @@ export const Sortable = ( {
 		<SortableContext.Provider value={ {} }>
 			<div
 				{ ...props }
-				className={ clsx( 'woocommerce-sortable', className, {
+				className={ classnames( 'woocommerce-sortable', className, {
 					'is-dragging': dragIndex !== null,
 					'is-horizontal': isHorizontal,
 				} ) }
@@ -248,7 +248,7 @@ export const Sortable = ( {
 						return child;
 					}
 
-					const itemClasses = clsx( child.props.className, {
+					const itemClasses = classnames( child.props.className, {
 						'is-dragging-over-after': isDraggingOverAfter(
 							index,
 							dragIndex,

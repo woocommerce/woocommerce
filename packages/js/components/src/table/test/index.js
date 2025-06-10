@@ -244,17 +244,17 @@ describe( 'Table', () => {
 		expect( el ).toHaveClass( 'class-111' );
 	} );
 
-	it( 'should still work with clsx prop and renders it in the HTML output, for backward compatibility reason', () => {
+	it( 'should still work with classNames prop and renders it in the HTML output, for backward compatibility reason', () => {
 		render(
 			<Table
-				clsx="class-222"
-				caption="Table with clsx"
+				classNames="class-222"
+				caption="Table with classNames"
 				headers={ mockHeaders }
 				rows={ mockData }
 			/>
 		);
 
-		const el = screen.getByLabelText( 'Table with clsx' );
+		const el = screen.getByLabelText( 'Table with classNames' );
 
 		expect( el ).toHaveClass( 'class-222' );
 	} );

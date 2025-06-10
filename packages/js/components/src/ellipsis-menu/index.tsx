@@ -3,7 +3,7 @@
  */
 import type { ComponentProps } from 'react';
 import { createElement } from '@wordpress/element';
-import clsx from 'clsx';
+import classnames from 'classnames';
 import { Button, Dropdown, NavigableMenu } from '@wordpress/components';
 import { Icon } from '@wordpress/icons';
 import Ellipsis from 'gridicons/dist/ellipsis';
@@ -73,7 +73,7 @@ const EllipsisMenu = ( {
 		onToggle: toggleHandlerOverride,
 		isOpen,
 	}: CallbackProps ) => {
-		const toggleClassname = clsx(
+		const toggleClassname = classnames(
 			'woocommerce-ellipsis-menu__toggle',
 			{
 				'is-opened': isOpen,
@@ -106,7 +106,7 @@ const EllipsisMenu = ( {
 	);
 
 	return (
-		<div className={ clsx( className, 'woocommerce-ellipsis-menu' ) }>
+		<div className={ classnames( className, 'woocommerce-ellipsis-menu' ) }>
 			<Dropdown
 				contentClassName="woocommerce-ellipsis-menu__popover"
 				popoverProps={ { placement, focusOnMount } }

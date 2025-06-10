@@ -120,7 +120,7 @@ const Tour = ( {
 		],
 		closeHandler: onClose,
 		options: {
-			clsx: [ 'mytour' ],
+			classNames: [ 'mytour' ],
 			...options,
 		},
 	};

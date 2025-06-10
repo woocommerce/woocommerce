@@ -11,7 +11,7 @@ import {
 	useRef,
 	createElement,
 } from '@wordpress/element';
-import clsx from 'clsx';
+import classnames from 'classnames';
 import {
 	__experimentalUseFocusOutside as useFocusOutside,
 	useInstanceId,
@@ -563,7 +563,7 @@ const TreeSelectControl = ( {
 		<div
 			{ ...focusOutside }
 			onKeyDown={ onKeyDown }
-			className={ clsx(
+			className={ classnames(
 				'woocommerce-tree-select-control',
 				className
 			) }

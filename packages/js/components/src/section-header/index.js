@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, Component } from '@wordpress/element';
-import clsx from 'clsx';
+import classnames from 'classnames';
 import PropTypes from 'prop-types';
 
 /**
@@ -18,7 +18,7 @@ import { validateComponent } from '../lib/proptype-validator';
 class SectionHeader extends Component {
 	render() {
 		const { children, menu, title } = this.props;
-		const className = clsx(
+		const className = classnames(
 			'woocommerce-section-header',
 			this.props.className
 		);

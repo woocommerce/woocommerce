@@ -5,7 +5,7 @@ import { Button } from '@wordpress/components';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { chevronLeft, chevronRight } from '@wordpress/icons';
 import { sprintf, __ } from '@wordpress/i18n';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import { uniqueId } from 'lodash';
 
 type PageArrowsWithPickerProps = {
@@ -72,15 +72,15 @@ export function PageArrowsWithPicker( {
 		return null;
 	}
 
-	const previousLinkClass = clsx( 'woocommerce-pagination__link', {
+	const previousLinkClass = classNames( 'woocommerce-pagination__link', {
 		'is-active': currentPage > 1,
 	} );
 
-	const nextLinkClass = clsx( 'woocommerce-pagination__link', {
+	const nextLinkClass = classNames( 'woocommerce-pagination__link', {
 		'is-active': currentPage < pageCount,
 	} );
 	const isError = currentPage < 1 || currentPage > pageCount;
-	const inputClass = clsx(
+	const inputClass = classNames(
 		'woocommerce-pagination__page-arrow-picker-input',
 		{
 			'has-error': isError,

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
+import classnames from 'classnames';
 import { createElement, Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import {
@@ -41,7 +41,7 @@ const TextControl = withFocusOutside(
 
 			return (
 				<BaseComponent
-					className={ clsx(
+					className={ classnames(
 						'muriel-component',
 						'muriel-input-text',
 						className,

@@ -71,7 +71,7 @@ The main API for configuring a tour is the config object. See example usage and 
 -   `referenceElements` (optional): A set of `desktop` & `mobile` selectors to render the step near.
 -   `focusElement` (optional): A set of `desktop` & `mobile` & `iframe` selectors to automatically focus.
 -   `meta`: Arbitrary object that encloses the content we want to render for each step.
--   `clsx` (optional): An array or CSV of CSS classes applied to a step.
+-   `classNames` (optional): An array or CSV of CSS classes applied to a step.
 
 `config.closeHandler`: The callback responsible for closing the tour.
 
@@ -94,7 +94,7 @@ The main API for configuring a tour is the config object. See example usage and 
 
 `config.options` (optional):
 
--   `clsx` (optional): An array or CSV of CSS classes to enclose the main tour frame with.
+-   `classNames` (optional): An array or CSV of CSS classes to enclose the main tour frame with.
 
 -   `effects`: An object to enable/disable/combine various tour effects:
 

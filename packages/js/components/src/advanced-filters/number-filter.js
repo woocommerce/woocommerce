@@ -4,7 +4,7 @@
 import { createElement, Component, Fragment } from '@wordpress/element';
 import { SelectControl, TextControl } from '@wordpress/components';
 import { get, find, isArray } from 'lodash';
-import clsx from 'clsx';
+import classnames from 'classnames';
 import { sprintf, __, _x } from '@wordpress/i18n';
 import { CurrencyFactory } from '@woocommerce/currency';
 
@@ -218,7 +218,7 @@ class NumberFilter extends Component {
 			title: <span className={ className } />,
 			rule: (
 				<SelectControl
-					className={ clsx(
+					className={ classnames(
 						className,
 						'woocommerce-filters-advanced__rule'
 					) }
@@ -232,7 +232,7 @@ class NumberFilter extends Component {
 			),
 			filter: (
 				<div
-					className={ clsx(
+					className={ classnames(
 						className,
 						'woocommerce-filters-advanced__input-range',
 						{
@@ -257,7 +257,7 @@ class NumberFilter extends Component {
 					{ labels.add || '' }
 				</legend>
 				<div
-					className={ clsx(
+					className={ classnames(
 						'woocommerce-filters-advanced__fieldset',
 						{
 							'is-english': isEnglish,

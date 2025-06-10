@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, Component } from '@wordpress/element';
-import clsx from 'clsx';
+import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import { partial, uniqueId } from 'lodash';
 
@@ -18,7 +18,7 @@ class SegmentedSelection extends Component {
 			<fieldset className="woocommerce-segmented-selection">
 				<legend className="screen-reader-text">{ legend }</legend>
 				<div
-					className={ clsx(
+					className={ classnames(
 						className,
 						'woocommerce-segmented-selection__container'
 					) }
