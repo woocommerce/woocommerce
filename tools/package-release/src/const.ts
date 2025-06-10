@@ -8,7 +8,6 @@ export const MONOREPO_ROOT = dirname( dirname( dirname( __dirname ) ) );
 
 // Packages that are not meant to be released by monorepo team for whatever reason.
 export const excludedPackages = [
-	'@woocommerce/admin-e2e-tests',
 	'@woocommerce/api',
 	'@woocommerce/api-core-tests',
 	'@woocommerce/e2e-core-tests',

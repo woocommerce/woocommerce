@@ -3,7 +3,6 @@
  */
 const { HTTPClientFactory } = require( '@woocommerce/api' );
 const { it, describe } = require( '@jest/globals' );
-import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
@@ -29,10 +28,6 @@ const runInitialStoreSettingsTest = () => {
 		} );
 
 		it( 'can enable tax rates and calculations', async () => {
-			deprecated( 'runInitialStoreSettingsTest', {
-				alternative:
-					'@woocommerce/admin-e2e-tests `testAdminBasicSetup()`',
-			} );
 			// Go to general settings page
 			await merchant.openSettings( 'general' );
 
