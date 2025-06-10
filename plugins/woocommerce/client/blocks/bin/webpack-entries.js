@@ -23,8 +23,7 @@ const blocks = {
 		customDir: 'add-to-cart-with-options/variation-selector',
 	},
 	'add-to-cart-with-options-variation-selector-attribute': {
-		customDir:
-			'add-to-cart-with-options/variation-selector/attribute-item-template',
+		customDir: 'add-to-cart-with-options/variation-selector/attribute',
 	},
 	'add-to-cart-with-options-variation-selector-attribute-name': {
 		customDir: 'add-to-cart-with-options/variation-selector/attribute-name',
