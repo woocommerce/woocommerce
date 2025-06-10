@@ -1285,76 +1285,6 @@ importers:
         specifier: 0.14.12
         version: 0.14.12
 
-  packages/js/e2e-utils:
-    dependencies:
-      '@automattic/puppeteer-utils':
-        specifier: github:Automattic/puppeteer-utils#0f3ec50fc22d7bd2a4bd69fc172e8a66d958ef2d
-        version: https://codeload.github.com/Automattic/puppeteer-utils/tar.gz/0f3ec50fc22d7bd2a4bd69fc172e8a66d958ef2d(react-native@0.73.0(@babel/core@7.25.7)(@babel/preset-env@7.25.7(@babel/core@7.25.7))(encoding@0.1.13)(react@18.3.1))
-      '@woocommerce/api':
-        specifier: ^0.2.0
-        version: 0.2.0
-      '@wordpress/deprecated':
-        specifier: wp-6.6
-        version: 4.0.1
-      '@wordpress/e2e-test-utils':
-        specifier: wp-6.6
-        version: 11.0.1(encoding@0.1.13)(jest@24.9.0)(puppeteer-core@23.11.1)
-      config:
-        specifier: 3.3.7
-        version: 3.3.7
-      fishery:
-        specifier: ^1.4.0
-        version: 1.4.0
-    devDependencies:
-      '@babel/cli':
-        specifier: 7.25.7
-        version: 7.25.7(@babel/core@7.25.7)
-      '@babel/core':
-        specifier: 7.25.7
-        version: 7.25.7
-      '@babel/plugin-transform-react-jsx':
-        specifier: 7.25.7
-        version: 7.25.7(@babel/core@7.25.7)
-      '@babel/plugin-transform-runtime':
-        specifier: 7.25.7
-        version: 7.25.7(@babel/core@7.25.7)
-      '@babel/preset-env':
-        specifier: 7.25.7
-        version: 7.25.7(@babel/core@7.25.7)
-      '@typescript-eslint/eslint-plugin':
-        specifier: ^5.62.0
-        version: 5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.55.0)(typescript@5.7.2))(eslint@8.55.0)(typescript@5.7.2)
-      '@typescript-eslint/parser':
-        specifier: ^5.62.0
-        version: 5.62.0(eslint@8.55.0)(typescript@5.7.2)
-      '@woocommerce/e2e-environment':
-        specifier: workspace:*
-        version: link:../e2e-environment
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../eslint-plugin
-      '@woocommerce/internal-e2e-builds':
-        specifier: workspace:*
-        version: link:../internal-e2e-builds
-      '@wordpress/babel-plugin-import-jsx-pragma':
-        specifier: next
-        version: 5.13.1-next.a9f418477.0(@babel/core@7.25.7)
-      '@wordpress/babel-preset-default':
-        specifier: next
-        version: 8.13.1-next.a9f418477.0
-      '@wordpress/browserslist-config':
-        specifier: next
-        version: 6.13.1-next.a9f418477.0
-      eslint:
-        specifier: ^8.55.0
-        version: 8.55.0
-      eslint-plugin-jest:
-        specifier: 23.20.0
-        version: 23.20.0(eslint@8.55.0)(typescript@5.7.2)
-      wireit:
-        specifier: 0.14.12
-        version: 0.14.12
-
   packages/js/e2e-utils-playwright:
     devDependencies:
       '@babel/cli':
@@ -10275,9 +10205,6 @@ packages:
     peerDependencies:
       react: ^17.0.0-0
 
-  '@woocommerce/api@0.2.0':
-    resolution: {integrity: sha512-h7PhFF+KPKZTxhvGASm0vn6N7nY3SFOEx0qJITvqaOwbqh3xvdDbiETSZ9R0BFNY5fD8blYCHblCO4VQ4CO9kA==}
-
   '@woocommerce/settings@1.0.0':
     resolution: {integrity: sha512-BjrT56Cz8XTRHw2JNPmANRkYh2rzdF33wOa56lah1qb/MjHUKuVJ0PTSZ19S5Trb92IkxfcIVB26CSdxXnf5Og==}
 
@@ -10903,13 +10830,6 @@ packages:
     engines: {node: '>=18.12.0', npm: '>=8.19.2'}
     peerDependencies:
       '@playwright/test': '>=1'
-
-  '@wordpress/e2e-test-utils@11.0.1':
-    resolution: {integrity: sha512-b1WZIWNhge2qG1dA85K445yrDDF7fzes82bKu1HKtqa6UofJ1zceVGziq0bY/jAxXPLrYkaFFQbMjoV0kYAGgQ==}
-    engines: {node: '>=18.12.0', npm: '>=8.19.2'}
-    peerDependencies:
-      jest: '>=29'
-      puppeteer-core: '>=11'
 
   '@wordpress/e2e-test-utils@3.0.0':
     resolution: {integrity: sha512-XMdR8DeKyDQRF5jKeUlOzP4pTRtoJuOLsNZRLUFUvnrs9y/7/hH17VmPbWp3TJGvV/eGKzO4+D+wJTsP9nJmIw==}
@@ -12711,10 +12631,6 @@ packages:
     peerDependencies:
       axios: '>= 0.17.0'
 
-  axios@0.19.2:
-    resolution: {integrity: sha512-fjgm5MvRHLhx+osE2xoekY70AhARk3a6hkN+3Io1jc00jtquGvxYlKlsFUhmUET0V5te6CcZI7lcv2Ym61mjHA==}
-    deprecated: Critical security vulnerability fixed in v0.21.1. For more information, see https://github.com/axios/axios/pull/3410
-
   axios@0.21.4:
     resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
 
@@ -14364,14 +14280,6 @@ packages:
       supports-color:
         optional: true
 
-  debug@3.1.0:
-    resolution: {integrity: sha512-OX8XqP7/1a9cqkxYw2yXss15f26NKWBpDXQd0/uK/KPqdQhxbPa994hnzjcE2VqQpDslf55723cKPUOGSmMY3g==}
-    peerDependencies:
-      supports-color: '*'
-    peerDependenciesMeta:
-      supports-color:
-        optional: true
-
   debug@3.2.7:
     resolution: {integrity: sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==}
     peerDependencies:
@@ -15921,9 +15829,6 @@ packages:
     resolution: {integrity: sha512-X8Z+b/0L4lToKYq+lwnKqi9X/Zek0NibLpsJgVsSxpoYq7JtiCtRb5HqKVEjEw/qAb/4AKKRLOwwKHlWNpm2Eg==}
     engines: {node: '>=0.10.0'}
 
-  fishery@1.4.0:
-    resolution: {integrity: sha512-uzPsEWtoHluyqgk9hC/MzMbm42NPWmDWjbdzMRLuJ+jxmAHo+nDbiI3zk2S+HQFXme/VlNnPsNYZQBryrbCTLw==}
-
   flagged-respawn@1.0.1:
     resolution: {integrity: sha512-lNaHNVymajmk0OJMBn8fVUAU1BtDeKIqKoVhk4xAALB57aALg6b4W0MfJ/cUE0g9YBXy5XhSlPIpYIJ7HaY/3Q==}
     engines: {node: '>= 0.10'}
@@ -15984,10 +15889,6 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
-
-  follow-redirects@1.5.10:
-    resolution: {integrity: sha512-0V5l4Cizzvqt5D44aTXbFZz+FtyXV1vrDN6qrelxtfYQKW0KO0W2T/hkE8xvGa/540LkZlkaUjO4ailYTFtHVQ==}
-    engines: {node: '>=4.0'}
 
   for-each@0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -18880,9 +18781,6 @@ packages:
 
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
-
-  lodash.mergewith@4.6.2:
-    resolution: {integrity: sha512-GK3g5RPZWTRSeLSpgP8Xhra+pnjBC56q9FZYe1d5RN3TJ35dbkGy3YqBSMbyCrlbi+CM9Z3Jk5yTL7RCsqboyQ==}
 
   lodash.once@4.1.1:
     resolution: {integrity: sha512-Sb487aTOCr9drQVL8pIxOzVhafOjZN9UU54hiN8PU3uAiSV7lx1yYNpbNmex2PK6dSJoNTSJUUswT651yww3Mg==}
@@ -33864,7 +33762,7 @@ snapshots:
       '@types/node': 20.17.8
     optional: true
 
-  '@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)':
+  '@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)':
     dependencies:
       '@typescript-eslint/experimental-utils': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       '@typescript-eslint/parser': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
@@ -34550,14 +34448,6 @@ snapshots:
       object.fromentries: 2.0.7
       prop-types: 15.8.1
       react: 18.3.1
-
-  '@woocommerce/api@0.2.0':
-    dependencies:
-      axios: 0.19.2
-      create-hmac: 1.1.7
-      oauth-1.0a: 2.2.6
-    transitivePeerDependencies:
-      - supports-color
 
   '@woocommerce/settings@1.0.0':
     dependencies:
@@ -36667,20 +36557,6 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@wordpress/e2e-test-utils@11.0.1(encoding@0.1.13)(jest@24.9.0)(puppeteer-core@23.11.1)':
-    dependencies:
-      '@babel/runtime': 7.26.0
-      '@wordpress/api-fetch': 7.0.1
-      '@wordpress/keycodes': 4.0.1
-      '@wordpress/url': 4.0.1
-      change-case: 4.1.2
-      form-data: 4.0.0
-      jest: 24.9.0
-      node-fetch: 2.7.0(encoding@0.1.13)
-      puppeteer-core: 23.11.1
-    transitivePeerDependencies:
-      - encoding
-
   '@wordpress/e2e-test-utils@3.0.0(jest@24.9.0)(puppeteer@2.1.1)(react-native@0.73.0(@babel/core@7.25.7)(@babel/preset-env@7.25.7(@babel/core@7.25.7))(encoding@0.1.13)(react@18.3.1))':
     dependencies:
       '@babel/runtime': 7.25.7
@@ -37360,14 +37236,14 @@ snapshots:
   '@wordpress/eslint-plugin@9.3.0(@babel/core@7.25.7)(eslint@7.32.0)(typescript@5.7.2)':
     dependencies:
       '@babel/eslint-parser': 7.23.3(@babel/core@7.25.7)(eslint@7.32.0)
-      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
+      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
       '@typescript-eslint/parser': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       '@wordpress/prettier-config': 1.4.0(wp-prettier@2.2.1-beta-1)
       cosmiconfig: 7.1.0
       eslint: 7.32.0
       eslint-config-prettier: 7.2.0(eslint@7.32.0)
       eslint-plugin-import: 2.29.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)
-      eslint-plugin-jest: 24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
+      eslint-plugin-jest: 24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
       eslint-plugin-jsdoc: 36.1.1(eslint@7.32.0)
       eslint-plugin-jsx-a11y: 6.8.0(eslint@7.32.0)
       eslint-plugin-prettier: 3.4.1(eslint-config-prettier@7.2.0(eslint@7.32.0))(eslint@7.32.0)(wp-prettier@2.2.1-beta-1)
@@ -40105,12 +39981,6 @@ snapshots:
       fast-deep-equal: 3.1.3
       is-buffer: 2.0.5
 
-  axios@0.19.2:
-    dependencies:
-      follow-redirects: 1.5.10
-    transitivePeerDependencies:
-      - supports-color
-
   axios@0.21.4:
     dependencies:
       follow-redirects: 1.15.6(debug@4.3.4)
@@ -42514,10 +42384,6 @@ snapshots:
     dependencies:
       ms: 2.0.0
 
-  debug@3.1.0:
-    dependencies:
-      ms: 2.0.0
-
   debug@3.2.7:
     dependencies:
       ms: 2.1.3
@@ -43613,12 +43479,12 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-jest@24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2):
+  eslint-plugin-jest@24.7.0(@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2):
     dependencies:
       '@typescript-eslint/experimental-utils': 4.33.0(eslint@7.32.0)(typescript@5.7.2)
       eslint: 7.32.0
     optionalDependencies:
-      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
+      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.7.2))(eslint@7.32.0)(typescript@5.7.2)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -44730,10 +44596,6 @@ snapshots:
     dependencies:
       readable-stream: 2.3.8
 
-  fishery@1.4.0:
-    dependencies:
-      lodash.mergewith: 4.6.2
-
   flagged-respawn@1.0.1: {}
 
   flat-cache@2.0.1:
@@ -44777,12 +44639,6 @@ snapshots:
   follow-redirects@1.15.6(debug@4.3.4):
     optionalDependencies:
       debug: 4.3.4(supports-color@9.4.0)
-
-  follow-redirects@1.5.10:
-    dependencies:
-      debug: 3.1.0
-    transitivePeerDependencies:
-      - supports-color
 
   for-each@0.3.3:
     dependencies:
@@ -49316,8 +49172,6 @@ snapshots:
   lodash.memoize@4.1.2: {}
 
   lodash.merge@4.6.2: {}
-
-  lodash.mergewith@4.6.2: {}
 
   lodash.once@4.1.1: {}
 
