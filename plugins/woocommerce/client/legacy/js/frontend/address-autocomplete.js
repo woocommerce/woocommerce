@@ -243,23 +243,42 @@ function setActiveProvider( country, type ) {
 		}
 
 		function getHighlightedLabel( label, matches ) {
-			// Security: Sanitize label for display.
+			// Sanitize label for display.
+			const sanitizedLabel = sanitizeForDisplay( label );
 			const parts = [];
 			let lastIndex = 0;
 
-			matches.forEach( ( match ) => {
-				// Add text before match
+			// Validate matches array.
+			if ( ! Array.isArray( matches ) ) {
+				// If matches is invalid, just return plain text.
+				parts.push( document.createTextNode( sanitizedLabel ) );
+				return parts;
+			}
+
+			// Validate matches.
+			const safeMatches = matches.filter(
+				( match ) =>
+					match &&
+					typeof match.offset === 'number' &&
+					typeof match.length === 'number' &&
+					match.offset >= 0 &&
+					match.length > 0 &&
+					match.offset + match.length <= sanitizedLabel.length
+			);
+
+			safeMatches.forEach( ( match ) => {
+				// Add text before match.
 				if ( match.offset > lastIndex ) {
 					parts.push(
 						document.createTextNode(
-							label.slice( lastIndex, match.offset )
+							sanitizedLabel.slice( lastIndex, match.offset )
 						)
 					);
 				}
 
 				// Add bold matched text.
 				const bold = document.createElement( 'strong' );
-				bold.textContent = label.slice(
+				bold.textContent = sanitizedLabel.slice(
 					match.offset,
 					match.offset + match.length
 				);
@@ -268,22 +287,61 @@ function setActiveProvider( country, type ) {
 				lastIndex = match.offset + match.length;
 			} );
 
-			// Add remaining text
-			if ( lastIndex < label.length ) {
+			// Add remaining text.
+			if ( lastIndex < sanitizedLabel.length ) {
 				parts.push(
-					document.createTextNode( label.slice( lastIndex ) )
+					document.createTextNode( sanitizedLabel.slice( lastIndex ) )
 				);
 			}
 
 			return parts;
 		}
 
+		// Sanitize and validate input.
+		const sanitizeInput = ( input ) => {
+			if ( typeof input !== 'string' ) {
+				return '';
+			}
+			// Remove potentially dangerous characters and limit length.
+			return input
+				.replace( /[<>'"&]/g, '' )
+				.trim()
+				.substring( 0, 200 );
+		};
+
+		// Sanitize text content for display (prevent XSS).
+		const sanitizeForDisplay = ( text ) => {
+			if ( typeof text !== 'string' ) {
+				return '';
+			}
+			// Create a temporary textarea to leverage browser's built-in text sanitization.
+			const textarea = document.createElement( 'textarea' );
+			textarea.textContent = text;
+			return textarea.innerHTML;
+		};
+
+		const validateAddressType = ( type ) => {
+			return type === 'billing' || type === 'shipping';
+		};
+
 		async function displaySuggestions( type, inputValue ) {
+			// Validate address type.
+			if ( ! validateAddressType( type ) ) {
+				console.error( 'Invalid address type:', type );
+				return;
+			}
+
+			// Sanitize input value.
+			const sanitizedInput = sanitizeInput( inputValue );
+			if ( sanitizedInput !== inputValue ) {
+				console.warn( 'Input was sanitized for security' );
+			}
+
 			const addressInput = addressInputs[ type ][ 'address_1' ];
 			const suggestionsList = suggestionsLists[ type ];
 			const suggestionsContainer = suggestionsContainers[ type ];
 
-			if ( inputValue.length < 3 ) {
+			if ( sanitizedInput.length < 3 || sanitizedInput.length > 200 ) {
 				hideSuggestions( type );
 				enableBrowserAutofill( addressInput );
 				return;
@@ -308,14 +366,30 @@ function setActiveProvider( country, type ) {
 			try {
 				const filteredSuggestions = await activeAddressProvider[
 					type
-				].search( type, inputValue );
+				].search( type, sanitizedInput );
 
 				// Check if this request was aborted.
 				if ( controller.signal.aborted ) {
 					return;
 				}
 
-				if ( filteredSuggestions.length === 0 ) {
+				// Validate suggestions array.
+				if ( ! Array.isArray( filteredSuggestions ) ) {
+					console.error(
+						'Invalid suggestions response - not an array'
+					);
+					hideSuggestions( type );
+					return;
+				}
+
+				// Limit number of suggestions, API may return many results but we should only show the first 5.
+				const maxSuggestions = 5;
+				const safeSuggestions = filteredSuggestions.slice(
+					0,
+					maxSuggestions
+				);
+
+				if ( safeSuggestions.length === 0 ) {
 					hideSuggestions( type );
 					return;
 				}
@@ -323,7 +397,7 @@ function setActiveProvider( country, type ) {
 				// Clear existing suggestions only when we have new results to show.
 				suggestionsList.innerHTML = '';
 
-				filteredSuggestions.forEach( ( suggestion, index ) => {
+				safeSuggestions.forEach( ( suggestion, index ) => {
 					const li = document.createElement( 'li' );
 					li.setAttribute( 'role', 'option' );
 					li.id = `suggestion-item-${ type }-${ index }`;
@@ -441,6 +515,21 @@ function setActiveProvider( country, type ) {
 		};
 
 		async function selectAddress( type, addressId ) {
+			// Validate inputs
+			if ( ! validateAddressType( type ) ) {
+				console.error( 'Invalid address type for selection:', type );
+				return;
+			}
+
+			if (
+				typeof addressId !== 'string' ||
+				addressId.length === 0 ||
+				addressId.length > 100
+			) {
+				console.error( 'Invalid address ID for selection:', addressId );
+				return;
+			}
+
 			const addressInput = addressInputs[ type ][ 'address_1' ];
 			const cityInput = addressInputs[ type ][ 'city' ];
 			const countryInput = addressInputs[ type ][ 'country' ];
@@ -468,10 +557,13 @@ function setActiveProvider( country, type ) {
 				return; // Exit early if address selection fails.
 			}
 
-			// Validate that we received valid address data
-			if ( ! addressData || typeof addressData !== 'object' ) {
+			if (
+				typeof addressData !== 'object' ||
+				addressData === null ||
+				! addressData
+			) {
 				console.error(
-					'Invalid address data received from provider',
+					'Invalid address data returned by provider',
 					activeProviderId
 				);
 				return;
