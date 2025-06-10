@@ -8,8 +8,17 @@ import React, { createContext, useEffect, useMemo, useState } from 'react';
  */
 import { Fulfillment, Order } from '../data/types';
 import { ItemSelection } from '../utils/order-utils';
-
-const WC_ORDER_CLASS = 'WC_Order';
+import { useShipmentFormContext } from './shipment-form-context';
+import {
+	ITEMS_META_KEY,
+	PROVIDER_NAME_META_KEY,
+	SHIPMENT_OPTION_NO_INFO,
+	SHIPMENT_PROVIDER_META_KEY,
+	SHIPPING_OPTION_META_KEY,
+	TRACKING_NUMBER_META_KEY,
+	TRACKING_URL_META_KEY,
+	WC_ORDER_CLASS,
+} from '../data/constants';
 
 interface FulfillmentContextProps {
 	order?: Order;
@@ -53,6 +62,15 @@ export const FulfillmentProvider = ( {
 } ) => {
 	const [ _fulfillment, _setFulfillment ] =
 		React.useState< Fulfillment | null >( fulfillment ?? null );
+
+	const {
+		selectedOption,
+		trackingNumber,
+		trackingUrl,
+		shipmentProvider,
+		providerName,
+	} = useShipmentFormContext();
+
 	const [ selectedItems, setSelectedItems ] = useState< ItemSelection[] >(
 		items ?? []
 	);
@@ -78,7 +96,44 @@ export const FulfillmentProvider = ( {
 			meta_data: [
 				{
 					id: 0,
-					key: '_items',
+					key: SHIPPING_OPTION_META_KEY,
+					value: selectedOption,
+				},
+				{
+					id: 0,
+					key: TRACKING_NUMBER_META_KEY,
+					value:
+						selectedOption === SHIPMENT_OPTION_NO_INFO
+							? ''
+							: trackingNumber,
+				},
+				{
+					id: 0,
+					key: TRACKING_URL_META_KEY,
+					value:
+						selectedOption === SHIPMENT_OPTION_NO_INFO
+							? ''
+							: trackingUrl,
+				},
+				{
+					id: 0,
+					key: SHIPMENT_PROVIDER_META_KEY,
+					value:
+						selectedOption === SHIPMENT_OPTION_NO_INFO
+							? ''
+							: shipmentProvider,
+				},
+				{
+					id: 0,
+					key: PROVIDER_NAME_META_KEY,
+					value:
+						selectedOption === SHIPMENT_OPTION_NO_INFO
+							? ''
+							: providerName,
+				},
+				{
+					id: 0,
+					key: ITEMS_META_KEY,
 					value: selectedItems
 						.map( ( item ) => {
 							return {
@@ -92,7 +147,16 @@ export const FulfillmentProvider = ( {
 				},
 			],
 		} as Fulfillment );
-	}, [ order, selectedItems, fulfillment ] );
+	}, [
+		order,
+		trackingNumber,
+		trackingUrl,
+		shipmentProvider,
+		providerName,
+		selectedOption,
+		fulfillment,
+		selectedItems,
+	] );
 
 	const contextValues = useMemo(
 		() => ( {

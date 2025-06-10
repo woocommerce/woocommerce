@@ -1,6 +1,7 @@
 /**
  * Internal dependencies
  */
+import ShipmentProviders from '../data/shipment-providers';
 import { Fulfillment, FulfillmentItem } from '../data/types';
 
 export function getFulfillmentMeta< T >(
@@ -25,4 +26,11 @@ export function getFulfillmentItems(
 		'_items',
 		[]
 	) as Array< FulfillmentItem >;
+}
+
+export function findShipmentProviderName( key: string ) {
+	const shipmentProvider = ShipmentProviders.find(
+		( provider ) => provider.value === key
+	);
+	return shipmentProvider ? shipmentProvider.label : '';
 }

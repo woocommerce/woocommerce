@@ -12,15 +12,17 @@ import './card.scss';
 export default function FulfillmentCard( {
 	header,
 	isCollapsable,
+	initialState,
 	size = 'medium',
 	children,
 }: {
 	header: ReactNode;
 	isCollapsable?: boolean;
+	initialState?: 'collapsed' | 'expanded';
 	size?: 'small' | 'medium' | 'large';
 	children: ReactNode;
 } ) {
-	const [ isOpen, setIsOpen ] = useState( isCollapsable ? false : true );
+	const [ isOpen, setIsOpen ] = useState( initialState === 'expanded' );
 	const hasChildren = React.Children.toArray( children ).length > 0;
 
 	return (

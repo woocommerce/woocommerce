@@ -16,6 +16,8 @@ import { getItemsNotInAnyFulfillment } from '../../utils/order-utils';
 import ItemSelector from './item-selector';
 import { useFulfillmentDrawerContext } from '../../context/drawer-context';
 import ErrorLabel from '../user-interface/error-label';
+import { ShipmentFormProvider } from '../../context/shipment-form-context';
+import ShipmentForm from '../shipment-form';
 
 const NewFulfillmentForm: React.FC = () => {
 	const { order, fulfillments, openSection, setOpenSection, isEditing } =
@@ -89,17 +91,21 @@ const NewFulfillmentForm: React.FC = () => {
 			{ ! isEditing && openSection === 'order' && (
 				<div className="woocommerce-fulfillment-new-fulfillment-form__content">
 					{ error && <ErrorLabel error={ error } /> }
-					<FulfillmentProvider
-						order={ order }
-						fulfillment={ null }
-						items={ remainingItems }
-					>
-						<ItemSelector editMode={ true } />
-						<div className="woocommerce-fulfillment-item-actions">
-							<SaveAsDraftButton setError={ setError } />
-							<FulfillItemsButton setError={ setError } />
-						</div>
-					</FulfillmentProvider>
+					<ShipmentFormProvider>
+						<FulfillmentProvider
+							order={ order }
+							fulfillment={ null }
+							items={ remainingItems }
+						>
+							<ItemSelector editMode={ true } />
+
+							<ShipmentForm />
+							<div className="woocommerce-fulfillment-item-actions">
+								<SaveAsDraftButton setError={ setError } />
+								<FulfillItemsButton setError={ setError } />
+							</div>
+						</FulfillmentProvider>
+					</ShipmentFormProvider>
 				</div>
 			) }
 		</div>

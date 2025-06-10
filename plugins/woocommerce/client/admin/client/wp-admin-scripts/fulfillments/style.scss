@@ -261,6 +261,14 @@
 	}
 }
 
+.woocommerce-fulfillment-description {
+	font-size: 11px;
+	line-height: 16px;
+	font-weight: 400;
+	color: var(--wc-admin-subtext, #767676);
+	margin: 0;
+}
+
 .woocommerce-fulfillment-status-badge {
 	display: flex;
 	flex-direction: row;
