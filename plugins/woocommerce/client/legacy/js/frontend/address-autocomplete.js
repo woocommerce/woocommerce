@@ -202,39 +202,6 @@ function setActiveProvider( country, type ) {
 			}
 		} );
 
-		const mockAddressData = {
-			'01971ca5-35d2-7514-adaf-d4ab97c02c19': {
-				address1: '10 Downing Street',
-				city: 'London',
-				postcode: 'SW1A 2AA',
-				country: 'GB',
-			},
-			'01971ca5-35d2-7514-adaf-da427f3b640f': {
-				address1: '1600 Amphitheatre Parkway',
-				city: 'Mountain View',
-				postcode: '94043',
-				country: 'US',
-			},
-			'01971ca5-35d2-7514-adaf-dfa0a03f1e49': {
-				address1: 'Eiffel Tower',
-				city: 'Paris',
-				postcode: '75007',
-				country: 'FR',
-			},
-			'01971ca5-35d2-7514-adaf-e3bd0086bea9': {
-				address1: '1 Hacker Way',
-				city: 'Menlo Park',
-				postcode: '94025',
-				country: 'US',
-			},
-			'01971ca5-35d2-7514-adaf-e3bd0086bea6': {
-				address1: 'Very long address in the middle of the screen',
-				city: 'Menlo Park',
-				postcode: '98000',
-				country: 'US',
-			},
-		};
-
 		function disableBrowserAutofill( input ) {
 			if ( input.getAttribute( 'autocomplete' ) === 'none' ) {
 				return;
