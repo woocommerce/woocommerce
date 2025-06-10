@@ -376,7 +376,7 @@ With that in mind, you might consider using Admin Notes to celebrate a particula
 
 Despite being a part of the new React-powered admin experience in WooCommerce, Admin Notes are available to developers via a standard PHP interface.
 
-The recommended approach for using Admin Notes is to encapsulate your note within its own class that uses the [NoteTraits](https://github.com/woocommerce/woocommerce-admin/blob/831c9ff13a862f22cf53d3ae676daeabbefe90ad/src/Notes/NoteTraits.php) trait included with WooCommerce Admin. Below is a simple example of what this might look like:
+The recommended approach for using Admin Notes is to encapsulate your note within its own class that uses the [NoteTraits](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/Notes/NoteTraits.php) trait included with WooCommerce Admin. Below is a simple example of what this might look like:
 
 ```php
 <?php

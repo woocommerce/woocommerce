@@ -118,19 +118,25 @@ const Edit = ( {
 					setAttributes={ setAttributes }
 				/>
 				<PanelBody title={ __( 'Content', 'woocommerce' ) }>
-					<ToggleControl
-						label={ __( 'Link to Product Page', 'woocommerce' ) }
-						help={ __(
-							'Links the image to the single product listing.',
-							'woocommerce'
-						) }
-						checked={ showProductLink }
-						onChange={ () =>
-							setAttributes( {
-								showProductLink: ! showProductLink,
-							} )
-						}
-					/>
+					{ ( isDescendentOfQueryLoop ||
+						isDescendentOfSingleProductBlock ) && (
+						<ToggleControl
+							label={ __(
+								'Link to Product Page',
+								'woocommerce'
+							) }
+							help={ __(
+								'Links the image to the single product listing.',
+								'woocommerce'
+							) }
+							checked={ showProductLink }
+							onChange={ () =>
+								setAttributes( {
+									showProductLink: ! showProductLink,
+								} )
+							}
+						/>
+					) }
 					<ToggleGroupControl
 						label={ __( 'Image Sizing', 'woocommerce' ) }
 						isBlock

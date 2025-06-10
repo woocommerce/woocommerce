@@ -9,8 +9,10 @@ import { registerBlockType } from '@wordpress/blocks';
  */
 import { Edit, Save } from './edit';
 import './style.scss';
+import metadata from './block.json';
 
 registerBlockType( 'woocommerce/checkout-totals-block', {
+	...metadata,
 	icon: {
 		src: (
 			<Icon
