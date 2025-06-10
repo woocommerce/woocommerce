@@ -11,8 +11,6 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Blocks\Domain\Services\AddressProviderService;
-use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -597,13 +595,17 @@ class WC_Frontend_Scripts {
 					'i18n_checkout_error'       => sprintf( esc_attr__( 'There was an error processing your order. Please check for any charges in your payment method and review your <a href="%s">order history</a> before placing the order again.', 'woocommerce' ), esc_url( wc_get_account_endpoint_url( 'orders' ) ) ),
 				);
 				if ( Features::is_enabled( 'experimental-blocks' ) ) {
-					$providers = wc_get_container()->get( AddressProviderController::class )->get_providers();
-					$params['address_providers'] = array_map( function( $provider ) {
-						return array(
-							'id' => $provider->id,
-							'name' => $provider->name,
-						);
-					}, $providers );
+					$providers                   = wc_get_container()->get( AddressProviderController::class )->get_providers();
+					$params['address_providers'] = array_map(
+						function ( $provider ) {
+							// Sanitize provider data before sending to frontend.
+							return array(
+								'id'   => sanitize_key( $provider->id ),
+								'name' => sanitize_text_field( $provider->name ),
+							);
+						},
+						$providers
+					);
 				}
 				break;
 			case 'wc-address-i18n':
