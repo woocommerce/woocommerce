@@ -27,11 +27,23 @@ $dialog-padding: 20px;
 		width: 100%;
 		display: flex;
 		align-items: center;
+		justify-content: center;
 		scroll-snap-align: none center;
 	}
 
-	.wc-block-grid__product-image {
+	.wc-block-components-product-image {
 		margin: 0;
+		height: 100%;
+
+		a {
+			height: 100%;
+		}
+
+		img {
+			height: 100%;
+			// There's inline style object-fit: cover; that we need to override.
+			object-fit: contain !important;
+		}
 	}
 
 	.wc-block-woocommerce-product-gallery-large-image__image {
