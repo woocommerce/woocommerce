@@ -231,6 +231,9 @@ class WC_Tracker {
 		// Email improvements tracking data.
 		$data['email_improvements'] = self::get_email_improvements_info( $template_overrides );
 
+		// Store email usage.
+		$data['store_emails'] = self::get_store_emails();
+
 		/**
 		 * Filter the data that's sent with the tracker.
 		 *
@@ -1465,6 +1468,28 @@ class WC_Tracker {
 			'core_email_disabled_count'      => $core_email_counts['disabled'],
 			'core_email_overrides_count'     => $core_email_overrides['count'],
 			'core_email_overrides_templates' => array_keys( $core_email_overrides['templates'] ),
+		);
+	}
+
+	/**
+	 * Get store email usage.
+	 *
+	 * @return array Email usage.
+	 */
+	private static function get_store_emails() {
+		$enabled_emails                          = EmailImprovements::get_enabled_emails();
+		$disabled_emails                         = EmailImprovements::get_disabled_emails();
+		$enabled_or_manual_emails_with_cc_or_bcc = EmailImprovements::get_enabled_or_manual_emails_with_cc_or_bcc();
+
+		return array(
+			'enabled_emails'                          => $enabled_emails,
+			'enabled_emails_count'                    => count( $enabled_emails ),
+			'disabled_emails'                         => $disabled_emails,
+			'disabled_emails_count'                   => count( $disabled_emails ),
+			'enabled_or_manual_emails_with_cc'        => $enabled_or_manual_emails_with_cc_or_bcc['ccs'],
+			'enabled_or_manual_emails_with_cc_count'  => count( $enabled_or_manual_emails_with_cc_or_bcc['ccs'] ),
+			'enabled_or_manual_emails_with_bcc'       => $enabled_or_manual_emails_with_cc_or_bcc['bccs'],
+			'enabled_or_manual_emails_with_bcc_count' => count( $enabled_or_manual_emails_with_cc_or_bcc['bccs'] ),
 		);
 	}
 
