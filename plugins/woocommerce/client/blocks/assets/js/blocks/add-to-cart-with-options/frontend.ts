@@ -142,8 +142,6 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 	inputElement.dispatchEvent( event );
 };
 
-let originalPriceHtml = '';
-
 const addToCartWithOptionsStore = store(
 	'woocommerce/add-to-cart-with-options',
 	{
@@ -352,14 +350,8 @@ const addToCartWithOptionsStore = store(
 				);
 
 				const context = getContext< {
-					productData: ProductData;
+					productData: ProductData | null;
 				} >( 'woocommerce/single-product' );
-
-				originalPriceHtml =
-					originalPriceHtml !== ''
-						? originalPriceHtml
-						: context?.productData.price_html ||
-						  wooState.singleProductTemplate.productData.price_html;
 
 				if ( matchedVariation ) {
 					if ( context ) {
@@ -375,10 +367,9 @@ const addToCartWithOptionsStore = store(
 				}
 
 				if ( context ) {
-					context.productData.price_html = originalPriceHtml;
+					context.productData = null;
 				} else {
-					wooState.singleProductTemplate.productData.price_html =
-						originalPriceHtml;
+					wooState.singleProductTemplate.productData = null;
 				}
 			},
 		},

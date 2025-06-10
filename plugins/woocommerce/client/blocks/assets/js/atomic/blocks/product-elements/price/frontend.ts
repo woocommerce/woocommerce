@@ -41,22 +41,25 @@ const ALLOWED_ATTR = [
 
 const getProductData = ( key: keyof ProductData ) => {
 	const singleProductContext = getContext< {
-		productData: ProductData;
+		productData: ProductData | null;
+		originalProductData: ProductData;
 	} >( 'woocommerce/single-product' );
 
-	if ( singleProductContext?.productData?.[ key ] ) {
-		return sanitize( singleProductContext.productData[ key ], {
-			ALLOWED_TAGS,
-			ALLOWED_ATTR,
-		} );
-	} else if ( wooState?.singleProductTemplate?.productData?.[ key ] ) {
-		return sanitize( wooState.singleProductTemplate.productData[ key ], {
-			ALLOWED_TAGS,
-			ALLOWED_ATTR,
-		} );
+	let newValue = '';
+	if ( singleProductContext ) {
+		newValue =
+			singleProductContext?.productData?.[ key ] ||
+			singleProductContext?.originalProductData?.[ key ];
+	} else {
+		newValue =
+			wooState?.singleProductTemplate?.productData?.[ key ] ||
+			wooState?.singleProductTemplate?.originalProductData?.[ key ];
 	}
 
-	return '';
+	return sanitize( newValue, {
+		ALLOWED_TAGS,
+		ALLOWED_ATTR,
+	} );
 };
 
 const productPriceStore = store(

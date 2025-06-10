@@ -91,7 +91,8 @@ class SingleProductTemplate extends AbstractTemplate {
 					'woocommerce',
 					array(
 						'singleProductTemplate' => array(
-							'productData' => ProductDataUtils::get_product_data( $product ),
+							'originalProductData' => ProductDataUtils::get_product_data( $product ),
+							'productData'         => null,
 						),
 					)
 				);
