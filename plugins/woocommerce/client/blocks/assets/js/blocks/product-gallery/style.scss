@@ -30,7 +30,10 @@ $dialog-padding: 20px;
 		scroll-snap-align: none center;
 	}
 
-	// This is the code related to Product Image block.
+	.wc-block-grid__product-image {
+		margin: 0;
+	}
+
 	.wc-block-woocommerce-product-gallery-large-image__image {
 		display: block;
 		position: relative;
@@ -65,8 +68,6 @@ $dialog-padding: 20px;
 		* ==========================================================
 		*/
 	}
-
-
 
 	.wc-block-product-gallery-large-image__inner-blocks {
 		display: flex;
