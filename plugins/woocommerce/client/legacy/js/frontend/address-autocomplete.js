@@ -85,14 +85,14 @@ window.wc.addressAutocomplete = {
 };
 
 function setActiveProvider( country, type ) {
-	// Get server providers list (already ordered by preference)
+	// Get server providers list (already ordered by preference).
 	const serverProviders =
 		( window &&
 			window.wc_checkout_params &&
 			window.wc_checkout_params.address_providers ) ||
 		[];
 
-	// Check providers in preference order (server handles preferred provider ordering)
+	// Check providers in preference order (server handles preferred provider ordering).
 	for ( const serverProvider of serverProviders ) {
 		const provider = addressProviders[ serverProvider.id ];
 
@@ -102,7 +102,7 @@ function setActiveProvider( country, type ) {
 		}
 	}
 
-	// No provider can search for this country
+	// No provider can search for this country.
 	activeAddressProvider[ type ] = null;
 }
 
@@ -116,7 +116,7 @@ function setActiveProvider( country, type ) {
 		const suggestionsContainers = {};
 		const suggestionsLists = {};
 		let activeSuggestionIndices = {};
-		let searchControllers = {}; // Track AbortControllers for search requests
+		let searchControllers = {}; // Track AbortControllers for search requests.
 
 		// Initialize for both billing and shipping.
 		addressTypes.forEach( ( type ) => {
@@ -130,7 +130,7 @@ function setActiveProvider( country, type ) {
 			);
 
 			if ( addressInput ) {
-				// Create suggestions container if it doesn't exist
+				// Create suggestions container if it doesn't exist.
 				if (
 					! document.getElementById( `address_suggestions_${ type }` )
 				) {
@@ -189,11 +189,11 @@ function setActiveProvider( country, type ) {
 			if ( countryInput ) {
 				setActiveProvider( countryInput.value, type );
 
-				// Listen for country changes to re-evaluate provider availability
-				// Handle both regular change events and Select2 events
+				// Listen for country changes to re-evaluate provider availability.
+				// Handle both regular change events and Select2 events.
 				const handleCountryChange = function () {
 					setActiveProvider( countryInput.value, type );
-					// Cancel any inflight search and hide suggestions when country changes
+					// Cancel any inflight search and hide suggestions when country changes.
 					if ( searchControllers[ type ] ) {
 						searchControllers[ type ].abort();
 						searchControllers[ type ] = null;
@@ -205,7 +205,7 @@ function setActiveProvider( country, type ) {
 
 				countryInput.addEventListener( 'change', handleCountryChange );
 
-				// Also listen for Select2 change event if jQuery and Select2 are available
+				// Also listen for Select2 change event if jQuery and Select2 are available.
 				if ( window.jQuery && window.jQuery( countryInput ).select2 ) {
 					window
 						.jQuery( countryInput )
@@ -223,8 +223,8 @@ function setActiveProvider( country, type ) {
 			input.setAttribute( 'data-1p-ignore', 'true' );
 			input.setAttribute( 'data-lpignore', 'true' );
 
-			// To prevent 1Password/LastPass and autocomplete clashes, we need to refocus the element
-			// This is achieved by removing and re-adding the element to trigger browser updates
+			// To prevent 1Password/LastPass and autocomplete clashes, we need to refocus the element.
+			// This is achieved by removing and re-adding the element to trigger browser updates.
 			const parentElement = input.parentElement;
 			if ( parentElement ) {
 				parentElement.appendChild( parentElement.removeChild( input ) );
@@ -243,6 +243,7 @@ function setActiveProvider( country, type ) {
 		}
 
 		function getHighlightedLabel( label, matches ) {
+			// Security: Sanitize label for display.
 			const parts = [];
 			let lastIndex = 0;
 
@@ -256,7 +257,7 @@ function setActiveProvider( country, type ) {
 					);
 				}
 
-				// Add bold matched text
+				// Add bold matched text.
 				const bold = document.createElement( 'strong' );
 				bold.textContent = label.slice(
 					match.offset,
@@ -288,19 +289,19 @@ function setActiveProvider( country, type ) {
 				return;
 			}
 
-			// Check if we have an active provider for this address type
+			// Check if we have an active provider for this address type.
 			if ( ! activeAddressProvider[ type ] ) {
 				hideSuggestions( type );
 				enableBrowserAutofill( addressInput );
 				return;
 			}
 
-			// Cancel any existing search request for this type
+			// Cancel any existing search request for this type.
 			if ( searchControllers[ type ] ) {
 				searchControllers[ type ].abort();
 			}
 
-			// Create new AbortController for this search
+			// Create new AbortController for this search.
 			searchControllers[ type ] = new AbortController();
 			const controller = searchControllers[ type ];
 
@@ -309,7 +310,7 @@ function setActiveProvider( country, type ) {
 					type
 				].search( type, inputValue );
 
-				// Check if this request was aborted
+				// Check if this request was aborted.
 				if ( controller.signal.aborted ) {
 					return;
 				}
@@ -319,7 +320,7 @@ function setActiveProvider( country, type ) {
 					return;
 				}
 
-				// Clear existing suggestions only when we have new results to show
+				// Clear existing suggestions only when we have new results to show.
 				suggestionsList.innerHTML = '';
 
 				filteredSuggestions.forEach( ( suggestion, index ) => {
@@ -329,7 +330,7 @@ function setActiveProvider( country, type ) {
 					li.dataset.id = suggestion.id;
 					li.setAttribute( 'tabindex', '-1' );
 
-					li.textContent = ''; // Clear existing content
+					li.textContent = ''; // Clear existing content.
 					const labelParts = getHighlightedLabel(
 						suggestion.label,
 						suggestion.matchedSubstrings || []
@@ -337,7 +338,7 @@ function setActiveProvider( country, type ) {
 					labelParts.forEach( ( part ) => li.appendChild( part ) );
 
 					li.addEventListener( 'click', async function () {
-						// Hide suggestions immediately for better UX
+						// Hide suggestions immediately for better UX.
 						hideSuggestions( type );
 						await selectAddress( type, this.dataset.id );
 						addressInput.focus();
@@ -362,17 +363,17 @@ function setActiveProvider( country, type ) {
 				suggestionsList.id = `address_suggestions_${ type }_list`;
 				setActiveSuggestion( type, 0 );
 			} catch ( error ) {
-				// Handle search errors (including AbortError from cancelled requests)
+				// Handle search errors (including AbortError from cancelled requests).
 				if ( error.name === 'AbortError' ) {
-					// Request was aborted - keep existing suggestions visible
-					// Silently ignore AbortError as it's expected when cancelling requests
+					// Request was aborted - keep existing suggestions visible.
+					// Silently ignore AbortError as it's expected when cancelling requests.
 				} else {
 					console.error( 'Address search error:', error );
 					hideSuggestions( type );
 					enableBrowserAutofill( addressInput );
 				}
 			} finally {
-				// Clear the controller reference if this was the active request
+				// Clear the controller reference if this was the active request.
 				if ( searchControllers[ type ] === controller ) {
 					searchControllers[ type ] = null;
 				}
@@ -384,7 +385,7 @@ function setActiveProvider( country, type ) {
 			const suggestionsContainer = suggestionsContainers[ type ];
 			const addressInput = addressInputs[ type ][ 'address_1' ];
 
-			// Cancel any inflight search requests
+			// Cancel any inflight search requests.
 			if ( searchControllers[ type ] ) {
 				searchControllers[ type ].abort();
 				searchControllers[ type ] = null;
@@ -398,13 +399,13 @@ function setActiveProvider( country, type ) {
 			activeSuggestionIndices[ type ] = -1;
 		}
 
-		// Helper function to get field value, accounting for Select2
+		// Helper function to get field value, accounting for Select2.
 		const getFieldValue = ( input ) => {
 			if ( ! input ) {
 				return '';
 			}
 
-			// For Select2 fields, get the value using jQuery if available
+			// For Select2 fields, get the value using jQuery if available.
 			if (
 				window.jQuery &&
 				window.jQuery( input ).hasClass( 'select2-hidden-accessible' )
@@ -412,11 +413,11 @@ function setActiveProvider( country, type ) {
 				return window.jQuery( input ).val() || '';
 			}
 
-			// For regular inputs, use the standard value property
+			// For regular inputs, use the standard value property.
 			return input.value || '';
 		};
 
-		// Helper function to set field value and trigger events
+		// Helper function to set field value and trigger events.
 		const setFieldValue = ( input, value ) => {
 			if (
 				input &&
@@ -427,7 +428,7 @@ function setActiveProvider( country, type ) {
 				input.value = value;
 				input.dispatchEvent( new Event( 'change' ) );
 
-				// Also trigger Select2 update if it's a Select2 field
+				// Also trigger Select2 update if it's a Select2 field.
 				if (
 					window.jQuery &&
 					window
@@ -464,7 +465,7 @@ function setActiveProvider( country, type ) {
 					activeProviderId,
 					error
 				);
-				return; // Exit early if address selection fails
+				return; // Exit early if address selection fails.
 			}
 
 			// Validate that we received valid address data
@@ -476,8 +477,8 @@ function setActiveProvider( country, type ) {
 				return;
 			}
 
-			// First pass - set all available fields immediately
-			// Only set fields if the address data property exists and has a value
+			// First pass - set all available fields immediately.
+			// Only set fields if the address data property exists and has a value.
 			if ( addressData.address1 ) {
 				setFieldValue( addressInput, addressData.address1 );
 			}
@@ -494,7 +495,7 @@ function setActiveProvider( country, type ) {
 				setFieldValue( stateInput, addressData.state );
 			}
 
-			// Second pass after a delay to verify all fields and fix any that don't match
+			// Second pass after a delay to verify all fields and fix any that don't match.
 			setTimeout( () => {
 				const updatedAddressInput = document.getElementById(
 					`${ type }_address_1`
@@ -512,7 +513,7 @@ function setActiveProvider( country, type ) {
 					`${ type }_state`
 				);
 
-				// Verify and fix any fields that don't match the expected values
+				// Verify and fix any fields that don't match the expected values.
 				if (
 					updatedAddressInput &&
 					addressData.address1 &&
@@ -578,7 +579,7 @@ function setActiveProvider( country, type ) {
 			}
 		}
 
-		// Initialize event handlers for each address type
+		// Initialize event handlers for each address type.
 		addressTypes.forEach( ( type ) => {
 			const addressInput = addressInputs[ type ][ 'address_1' ];
 			if ( addressInput ) {
@@ -627,7 +628,7 @@ function setActiveProvider( country, type ) {
 							].querySelector(
 								`li#suggestion-item-${ type }-${ activeSuggestionIndices[ type ] }`
 							);
-							// Hide suggestions immediately for better UX
+							// Hide suggestions immediately for better UX.
 							hideSuggestions( type );
 							await selectAddress(
 								type,
@@ -641,7 +642,7 @@ function setActiveProvider( country, type ) {
 			}
 		} );
 
-		// Hide suggestions when clicking outside
+		// Hide suggestions when clicking outside.
 		document.addEventListener( 'click', function ( event ) {
 			addressTypes.forEach( ( type ) => {
 				const target = event.target;
