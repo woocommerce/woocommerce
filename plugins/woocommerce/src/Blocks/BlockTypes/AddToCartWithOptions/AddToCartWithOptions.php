@@ -368,7 +368,8 @@ class AddToCartWithOptions extends AbstractBlock {
 			$cart_redirect_after_add = get_option( 'woocommerce_cart_redirect_after_add' );
 			$form_attributes         = '';
 			$hidden_input            = '';
-			if ( $hooks_before || $hooks_after || 'yes' === $cart_redirect_after_add ) {
+			$legacy_mode             = $hooks_before || $hooks_after || 'yes' === $cart_redirect_after_add;
+			if ( $legacy_mode ) {
 				// If an extension is hoooking into the form or we need to redirect to the cart,
 				// we fall back to a regular HTML form.
 				$form_attributes = array(
@@ -427,6 +428,10 @@ class AddToCartWithOptions extends AbstractBlock {
 			}
 
 			$form_html = $form_html . ob_get_clean();
+
+			if ( ! $legacy_mode ) {
+				$form_html = $this->render_interactivity_notices_region( $form_html );
+			}
 		} else {
 			ob_start();
 
@@ -449,5 +454,53 @@ class AddToCartWithOptions extends AbstractBlock {
 		$product = $previous_product;
 
 		return $form_html;
+	}
+
+	/**
+	 * Render interactivity API powered notices that can be added client-side. This reuses classes
+	 * from the woocommerce/store-notices block to ensure style consistency.
+	 *
+	 * @param string $form_html The form HTML.
+	 * @return string The rendered store notices HTML.
+	 */
+	protected function render_interactivity_notices_region( $form_html ) {
+		$context = array(
+			'notices' => array(),
+		);
+
+		ob_start();
+		?>
+		<div data-wp-interactive="woocommerce/store-notices" class="wc-block-components-notices alignwide" data-wp-context='<?php echo wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ); ?>'>
+			<template data-wp-each--notice="context.notices" data-wp-each-key="context.notice.id">
+				<div
+					class="wc-block-components-notice-banner"
+					data-wp-class--is-error="state.isError"
+					data-wp-class--is-success ="state.isSuccess"
+					data-wp-class--is-info="state.isInfo"
+					data-wp-class--is-dismissible="context.notice.dismissible"
+					data-wp-bind--role="state.role"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+						<path data-wp-bind--d="state.iconPath"></path>
+					</svg>
+					<div class="wc-block-components-notice-banner__content">
+						<span data-wp-init="callbacks.renderNoticeContent"></span>
+					</div>
+					<button
+						data-wp-bind--hidden="!context.notice.dismissible"
+						class="wc-block-components-button wp-element-button wc-block-components-notice-banner__dismiss contained"
+						aria-label="<?php esc_attr_e( 'Dismiss this notice', 'woocommerce' ); ?>"
+						data-wp-on--click="actions.removeNotice"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+							<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z" />
+						</svg>
+					</button>
+				</div>
+			</template>
+			<?php echo $form_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+		</div>
+		<?php
+		return ob_get_clean();
 	}
 }

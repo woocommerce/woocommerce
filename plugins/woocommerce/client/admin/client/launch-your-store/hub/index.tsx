@@ -72,6 +72,10 @@ const LaunchStoreController = () => {
 		);
 
 	const handlePaymentsClose = () => {
+		// Clear session flag to prevent redirect back to payments setup
+		// after exiting the flow and returning to the WC Admin home.
+		window.sessionStorage.setItem( 'lysWaiting', 'no' );
+
 		// Navigate back to the main flow
 		sendToSidebar( { type: 'RETURN_FROM_PAYMENTS' } );
 	};

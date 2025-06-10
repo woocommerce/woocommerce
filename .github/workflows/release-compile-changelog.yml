@@ -6,6 +6,15 @@ on:
         description: 'Version Override (X.Y.Z format). If not provided, it is extracted from the release branch. Ensure branch "release/{version}" exists on remote.'
         required: false
         default: ''
+      append_changelog:
+        description: 'Append changelog entries to the existing changelog file instead of replacing it.'
+        type: boolean
+        required: false
+        default: false
+      release_date:
+        description: 'Release date in YYYY-MM-DD format. If not provided, the current date will be used.'
+        required: false
+        default: ''
 
 env:
     GIT_COMMITTER_NAME: 'WooCommerce Bot'
@@ -89,7 +98,17 @@ jobs:
             VERSION="${{ github.event.inputs.version }}"
           fi
 
+          APPEND_CHANGELOG=""
+          if [[ "${{ github.event.inputs.append_changelog }}" == "true" ]]; then
+            APPEND_CHANGELOG="--append-changelog"
+          fi
+
+          OVERRIDE_DATE=""
+          if [[ -n "${{ github.event.inputs.release_date }}" ]]; then
+            OVERRIDE_DATE="--override ${{ github.event.inputs.release_date }}"
+          fi
+
           # Normalize the version by removing .0 patch if present, as the changelog command does not support it
           VERSION=${VERSION%.0}
 
-          pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v $VERSION $BRANCH_ARG
+          pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v $VERSION $BRANCH_ARG $APPEND_CHANGELOG $OVERRIDE_DATE

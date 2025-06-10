@@ -30,7 +30,7 @@
 		margin-bottom: 0;
 
 		.input-text {
-			font-size: var(--wp--preset--font-size--small);
+			font-size: inherit;
 		}
 
 		input[type="number"].input-text.qty.text {
@@ -42,6 +42,9 @@
 			background-color: transparent;
 			color: currentColor;
 			margin: 0;
+			font-size: 0.8em;
+			height: 1.5em;
+			box-sizing: content-box;
 			/**
 			* This is a base style for the input text element in WooCommerce that prevents inputs from appearing too small.
 			*
@@ -49,7 +52,6 @@
 			*/
 			padding: 0.9rem 0;
 			margin-right: unset;
-			font-size: var(--wp--preset--font-size--small);
 
 			&:focus {
 				border-radius: unset;

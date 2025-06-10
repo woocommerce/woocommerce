@@ -525,7 +525,9 @@ class WC_Emails {
 		 * Filter the columns of the order downloads table.
 		 *
 		 * @since 3.2.0
-		 * @param array $columns Array of columns.
+		 * @since 10.0.0 Added $order parameter.
+		 * @param array    $columns Array of columns.
+		 * @param WC_Order $order  Order object.
 		 */
 		$columns = apply_filters(
 			'woocommerce_email_downloads_columns',
@@ -533,7 +535,8 @@ class WC_Emails {
 				'download-product' => __( 'Product', 'woocommerce' ),
 				'download-expires' => __( 'Expires', 'woocommerce' ),
 				'download-file'    => __( 'Download', 'woocommerce' ),
-			)
+			),
+			$order
 		);
 
 		if ( $plain_text ) {
@@ -1005,9 +1008,12 @@ class WC_Emails {
 			return;
 		}
 
+		$stock_before         = $args['quantity'] + $args['product']->get_stock_quantity();
+		$backordered_quantity = $args['quantity'] - max( 0, $stock_before );
+
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product backorder', 'woocommerce' ) );
-		/* translators: 1: product quantity 2: product name 3: order number */
-		$message = sprintf( __( '%1$s units of %2$s have been backordered in order #%3$s.', 'woocommerce' ), $args['quantity'], html_entity_decode( wp_strip_all_tags( $args['product']->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $order->get_order_number() );
+		/* translators: 1: backordered quantity 2: product name 3: order number */
+		$message = sprintf( __( '%1$s units of %2$s have been backordered in order #%3$s.', 'woocommerce' ), $backordered_quantity, html_entity_decode( wp_strip_all_tags( $args['product']->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $order->get_order_number() );
 
 		wp_mail(
 			/**

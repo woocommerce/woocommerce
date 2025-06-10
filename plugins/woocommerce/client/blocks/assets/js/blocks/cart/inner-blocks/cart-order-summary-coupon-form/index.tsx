@@ -7,9 +7,15 @@ import { registerBlockType } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
+import metadata from './block.json';
+
+/**
+ * Internal dependencies
+ */
 import { Edit, Save } from './edit';
 
 registerBlockType( 'woocommerce/cart-order-summary-coupon-form-block', {
+	...metadata,
 	icon: {
 		src: (
 			<Icon
