@@ -175,13 +175,17 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Created', false ) ) :
 				// If this is a preview, we need to set up a dummy fulfillment object.
 				$this->fulfillment = new Fulfillment();
 				$this->fulfillment->set_items(
-					array(
-						array(
-							'item_id' => array_values( $order->get_items() )[0]->get_id(),
-							'qty'     => 1,
-						),
+					array_map(
+						function ( $item ) {
+							return array(
+								'item_id' => $item->get_id(),
+								'qty'     => 1,
+							);
+						},
+						$order->get_items()
 					)
 				);
+
 				// Some private meta data to simulate a real fulfillment.
 				$this->fulfillment->add_meta_data( '_tracking_number', '123456789' );
 				$this->fulfillment->add_meta_data( '_shipment_provider', 'dhl' );

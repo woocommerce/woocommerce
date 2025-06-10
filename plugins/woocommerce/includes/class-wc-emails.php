@@ -628,7 +628,7 @@ class WC_Emails {
 						 * @since 9.9.0
 						 */
 						$meta_key_translation = apply_filters( 'woocommmerce_fulfillment_translate_meta_key', $field->key );
-						echo esc_attr( $meta_key_translation ) . ': ' . esc_attr( $field->value ) . "\n";
+						echo '<strong>' . esc_attr( $meta_key_translation ) . ':</strong> ' . esc_attr( $field->value ) . "\n";
 					}
 				}
 			} else {
