@@ -12,7 +12,7 @@ import { Icon, check } from '@wordpress/icons';
 import { Button, Tooltip } from '@wordpress/components';
 import NoticeOutline from 'gridicons/dist/notice-outline';
 import { EllipsisMenu } from '@woocommerce/components';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { sanitize } from 'dompurify';
 
 /**
@@ -105,7 +105,7 @@ const OptionalExpansionWrapper = ( {
 		<VerticalCSSTransition
 			timeout={ 500 }
 			in={ expanded }
-			classNames="woocommerce-task-list__item-expandable-content"
+			clsx="woocommerce-task-list__item-expandable-content"
 			defaultStyle={ {
 				transitionProperty: 'max-height, opacity',
 			} }
@@ -141,7 +141,7 @@ export const TaskItem = ( {
 		setTaskExpanded( expanded );
 	}, [ expanded ] );
 
-	const className = classnames( 'woocommerce-task-list__item', {
+	const className = clsx( 'woocommerce-task-list__item', {
 		complete: completed,
 		expanded: isTaskExpanded,
 		'level-2': level === 2 && ! completed,

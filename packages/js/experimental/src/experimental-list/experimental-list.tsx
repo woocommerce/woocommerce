@@ -54,7 +54,7 @@ export const ExperimentalList = ( {
 								in={ inTransition }
 								enter={ enter }
 								exit={ exit }
-								classNames="woocommerce-list__item"
+								clsx="woocommerce-list__item"
 							>
 								{ cloneElement( child, {
 									animation: animationProp,

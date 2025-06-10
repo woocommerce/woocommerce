@@ -5,7 +5,7 @@ This is a wrapper to the [React CSSTransition](https://reactcommunity.org/react-
 ## Usage
 
 ```jsx
-<VerticalCSSTransition timeout={ 500 } in={ true } classNames="my-node" defaultStyle={ transitionProperty: 'max-height, opacity' }>
+<VerticalCSSTransition timeout={ 500 } in={ true } clsx="my-node" defaultStyle={ transitionProperty: 'max-height, opacity' }>
 	<div>some content</div>
 	<div>
 		some more content <br /> line 2 <br /> line 3

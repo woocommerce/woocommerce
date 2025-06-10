@@ -4,7 +4,7 @@
 import { CSSTransition } from 'react-transition-group';
 import { createElement } from '@wordpress/element';
 import { ENTER } from '@wordpress/keycodes';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 function handleKeyDown(
 	event: React.KeyboardEvent< HTMLElement >,
@@ -63,7 +63,7 @@ export const ExperimentalListItem = ( {
 		  }
 		: {};
 
-	const tagClasses = classnames( {
+	const tagClasses = clsx( {
 		'has-action': hasAction,
 		'has-gutters': ! disableGutters,
 		// since there is only one valid animation right now, any other value disables them.
@@ -73,7 +73,7 @@ export const ExperimentalListItem = ( {
 	return (
 		<CSSTransition
 			timeout={ 500 }
-			classNames={ className || 'woocommerce-list__item' }
+			clsx={ className || 'woocommerce-list__item' }
 			in={ transitionIn }
 			exit={ exit }
 			enter={ enter }
