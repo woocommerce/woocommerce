@@ -76,3 +76,34 @@ export async function getWooEmails( params ) {
 	);
 	return emails;
 }
+
+/**
+ * Access the email editor and using the WooCommerce settings page.
+ * Note: Ensure the block email editor feature flag is already enabled.
+ *
+ * @param {import('@playwright/test').Page } page       The Playwright page.
+ * @param {string}                           emailTitle The transactional email title.
+ */
+export async function accessTheEmailEditor( page, emailTitle = 'New order' ) {
+	await page.goto( '/wp-admin/admin.php?page=wc-settings&tab=email' );
+	await page
+		.getByRole( 'row', { name: emailTitle } )
+		.getByLabel( 'Edit' )
+		.click();
+	await expect( page.locator( '#woocommerce-email-editor' ) ).toBeVisible();
+}
+
+export async function ensureEmailEditorSettingsPanelIsOpened( page ) {
+	const status = await page.evaluate( async () => {
+		const elem = document.querySelector(
+			'.woocommerce-email-editor__settings-panel'
+		);
+		return elem?.classList?.contains( 'is-opened' ) || false;
+	} );
+
+	if ( ! status ) {
+		await page
+			.locator( '.woocommerce-email-editor__settings-panel' )
+			.click();
+	}
+}

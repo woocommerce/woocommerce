@@ -10,8 +10,10 @@ import { registerBlockType } from '@wordpress/blocks';
  */
 import { Edit, Save } from './edit';
 import './style.scss';
+import metadata from './block.json';
 
 registerBlockType( 'woocommerce/empty-cart-block', {
+	...metadata,
 	icon: {
 		src: (
 			<Icon
