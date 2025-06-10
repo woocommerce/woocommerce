@@ -3,7 +3,7 @@
  */
 import { createElement, Fragment } from '@wordpress/element';
 import { RadioControl } from '@wordpress/components';
-import clsx from 'clsx';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -20,7 +20,7 @@ export function RadioField( {
 	return (
 		<RadioControl
 			{ ...props }
-			className={ clsx( className, 'woocommerce-radio-field' ) }
+			className={ classNames( className, 'woocommerce-radio-field' ) }
 			label={
 				<>
 					<span className="woocommerce-radio-field__title">

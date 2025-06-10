@@ -4,7 +4,7 @@
 import { Button, DateTimePicker, Modal } from '@wordpress/components';
 import { createElement, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import clsx from 'clsx';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -41,7 +41,7 @@ export function SchedulePublishModal( {
 		<Modal
 			{ ...props }
 			title={ title }
-			className={ clsx(
+			className={ classNames(
 				className,
 				'woocommerce-schedule-publish-modal'
 			) }

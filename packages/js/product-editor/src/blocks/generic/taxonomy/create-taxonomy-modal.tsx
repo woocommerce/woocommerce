@@ -16,7 +16,7 @@ import {
 	TreeItemType as Item,
 } from '@woocommerce/components';
 import { useDebounce, useInstanceId } from '@wordpress/compose';
-import clsx from 'clsx';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -122,7 +122,7 @@ export const CreateTaxonomyModal = ( {
 					id={ id }
 					label={ __( 'Name', 'woocommerce' ) }
 					help={ errorMessage || dialogNameHelpText }
-					className={ clsx( {
+					className={ classNames( {
 						'has-error': errorMessage,
 					} ) }
 				>

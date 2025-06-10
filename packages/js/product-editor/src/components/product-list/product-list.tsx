@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { closeSmall, external } from '@wordpress/icons';
 import { getNewPath } from '@woocommerce/navigation';
 import { Product } from '@woocommerce/data';
-import clsx from 'clsx';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -51,7 +51,7 @@ export function ProductList( {
 	return (
 		<div
 			{ ...props }
-			className={ clsx( 'woocommerce-product-list', className ) }
+			className={ classNames( 'woocommerce-product-list', className ) }
 		>
 			<div role="table">
 				<div role="rowgroup">

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, memo, forwardRef } from '@wordpress/element';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { store as coreStore } from '@wordpress/core-data';
@@ -64,7 +64,7 @@ const SiteHub = memo(
 				<div className="edit-site-site-hub">
 					<HStack justify="flex-start" spacing="0">
 						<div
-							className={ clsx(
+							className={ classNames(
 								'edit-site-site-hub__view-mode-toggle-container',
 								{
 									'has-transparent-background': isTransparent,

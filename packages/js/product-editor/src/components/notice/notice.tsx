@@ -3,7 +3,7 @@
  */
 import { ReactNode } from 'react';
 import { createElement } from '@wordpress/element';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import { Button } from '@wordpress/components';
 import { closeSmall } from '@wordpress/icons';
 
@@ -28,7 +28,7 @@ export function Notice( {
 }: NoticeProps ) {
 	return (
 		<div
-			className={ clsx(
+			className={ classNames(
 				className,
 				type,
 				'woocommerce-product-notice',

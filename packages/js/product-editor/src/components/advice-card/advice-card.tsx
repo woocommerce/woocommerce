@@ -6,7 +6,7 @@ import { createElement, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { close } from '@wordpress/icons';
 import { useUserPreferences } from '@woocommerce/data';
-import clsx from 'clsx';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -62,7 +62,7 @@ export function AdviceCard( {
 		<div
 			role="group"
 			{ ...props }
-			className={ clsx( className, 'woocommerce-advice-card', {
+			className={ classNames( className, 'woocommerce-advice-card', {
 				'is-dismissible': isDismissible,
 			} ) }
 		>

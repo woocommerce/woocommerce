@@ -3,7 +3,7 @@
  */
 import { createElement, Fragment, useContext } from '@wordpress/element';
 import { CurrencyContext } from '@woocommerce/currency';
-import clsx from 'clsx';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -23,7 +23,7 @@ export function FormattedPrice( {
 				Boolean( product.price ) ) && (
 				<span
 					{ ...props }
-					className={ clsx(
+					className={ classNames(
 						'woocommerce-product-formatted-price',
 						className
 					) }
@@ -38,7 +38,7 @@ export function FormattedPrice( {
 
 					{ product.regular_price && (
 						<span
-							className={ clsx( {
+							className={ classNames( {
 								'woocommerce-product-formatted-price--on-sale':
 									product.on_sale,
 							} ) }

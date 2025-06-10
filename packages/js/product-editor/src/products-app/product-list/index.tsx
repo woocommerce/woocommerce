@@ -16,7 +16,7 @@ import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { store as coreStore } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import {
 	__experimentalHeading as Heading,
 	__experimentalText as Text,
@@ -247,7 +247,7 @@ export default function ProductList( {
 		[ postTypeActions, editAction ]
 	);
 
-	const classes = clsx( 'edit-site-page', className );
+	const classes = classNames( 'edit-site-page', className );
 
 	return (
 		<NavigableRegion

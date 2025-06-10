@@ -90,7 +90,7 @@ export const VariableProductTour = () => {
 			},
 		],
 		options: {
-			clsx: [ 'variation-items-product-tour' ],
+			classNames: [ 'variation-items-product-tour' ],
 			// WooTourKit does not handle merging of default options properly,
 			// so we need to duplicate the effects options here.
 			effects: {

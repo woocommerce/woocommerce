@@ -5,7 +5,7 @@ import { Button, Modal } from '@wordpress/components';
 import { createElement, useState, useRef, useEffect } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import type { FocusEvent } from 'react';
 
 /**
@@ -101,7 +101,7 @@ export function EditModal( {
 			{ ...props }
 			title={ renderTitle() }
 			onRequestClose={ onCancel }
-			className={ clsx(
+			className={ classNames(
 				'woocommerce-product-custom-fields__edit-modal',
 				props.className
 			) }
@@ -114,7 +114,7 @@ export function EditModal( {
 				value={ customField.key }
 				onChange={ changeHandler( 'key' ) }
 				onBlur={ blurHandler( 'key' ) }
-				className={ clsx( {
+				className={ classNames( {
 					'has-error': validationError?.key,
 				} ) }
 			/>

@@ -3,7 +3,7 @@
  */
 import { Ref } from 'react';
 import { createElement, forwardRef } from '@wordpress/element';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import { __experimentalInputControl as InputControl } from '@wordpress/components';
 
 /**
@@ -30,7 +30,7 @@ export const TextControl = forwardRef( function ForwardedTextControl(
 		<InputControl
 			{ ...props }
 			ref={ ref }
-			className={ clsx(
+			className={ classNames(
 				'woocommerce-product-text-control',
 				className,
 				{

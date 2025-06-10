@@ -6,7 +6,7 @@ import { createElement, useState, useRef, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { closeSmall } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import type { FocusEvent } from 'react';
 
 /**
@@ -202,7 +202,7 @@ export function CreateModal( {
 			title={ __( 'Add custom fields', 'woocommerce' ) }
 			onRequestClose={ onCancel }
 			{ ...props }
-			className={ clsx(
+			className={ classNames(
 				'woocommerce-product-custom-fields__create-modal',
 				props.className
 			) }
@@ -241,7 +241,7 @@ export function CreateModal( {
 										'key'
 									) }
 									onBlur={ blurHandler( customField, 'key' ) }
-									className={ clsx( {
+									className={ classNames( {
 										'has-error': getValidationError(
 											customField,
 											'key'

@@ -20,7 +20,7 @@ import {
 } from '@wordpress/element';
 import { plus, info, Icon } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
-import clsx from 'clsx';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -148,7 +148,7 @@ export function VariationsTableRow( {
 						</div>
 					) : (
 						<Button
-							className={ clsx(
+							className={ classNames(
 								variation.image
 									? 'woocommerce-product-variations__image-button'
 									: 'woocommerce-product-variations__add-image-button'
@@ -188,7 +188,7 @@ export function VariationsTableRow( {
 					</span>
 				) }
 				<span
-					className={ clsx(
+					className={ classNames(
 						'woocommerce-product-variations__regular-price',
 						{
 							'woocommerce-product-variations__regular-price--on-sale':
@@ -239,7 +239,7 @@ export function VariationsTableRow( {
 		return (
 			<>
 				<span
-					className={ clsx(
+					className={ classNames(
 						'woocommerce-product-variations__status-dot',
 						getProductStockStatusClass( variation )
 					) }
@@ -359,7 +359,7 @@ export function VariationsTableRow( {
 				</div>
 			</div>
 			<div
-				className={ clsx(
+				className={ classNames(
 					'woocommerce-product-variations__price',
 					{
 						'woocommerce-product-variations__price--fade':
@@ -371,7 +371,7 @@ export function VariationsTableRow( {
 				{ renderPriceCellContent() }
 			</div>
 			<div
-				className={ clsx(
+				className={ classNames(
 					'woocommerce-product-variations__quantity',
 					{
 						'woocommerce-product-variations__quantity--fade':

@@ -5,7 +5,7 @@ import { createElement, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { BaseControl, Spinner } from '@wordpress/components';
 import { Product } from '@woocommerce/data';
-import clsx from 'clsx';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -127,7 +127,7 @@ export function ProductSelect( {
 
 	return (
 		<div
-			className={ clsx(
+			className={ classnames(
 				'woocommerce-product-select',
 				{
 					'no-items': ! options.length,

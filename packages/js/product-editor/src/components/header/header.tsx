@@ -17,7 +17,7 @@ import { Button, Tooltip } from '@wordpress/components';
 import { box, chevronLeft, group, Icon } from '@wordpress/icons';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import { Tag } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import PinnedItems from '@wordpress/interface/build-module/components/pinned-items';
@@ -195,7 +195,7 @@ export function Header( {
 				) }
 
 				<div
-					className={ clsx(
+					className={ classNames(
 						'woocommerce-product-header-title-bar',
 						{
 							'is-variation': isVariation,

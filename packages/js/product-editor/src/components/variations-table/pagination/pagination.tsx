@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
+import classNames from 'classnames';
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	PaginationPageSizePicker,
@@ -39,7 +39,7 @@ export function Pagination( {
 
 	return (
 		<div
-			className={ clsx(
+			className={ classNames(
 				className,
 				'woocommerce-product-variations-pagination'
 			) }

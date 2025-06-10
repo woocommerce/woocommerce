@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
+import classNames from 'classnames';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
 import { useInstanceId } from '@wordpress/compose';
@@ -112,7 +112,7 @@ export function Edit( {
 						? regularPriceValidationError
 						: renderHelp()
 				}
-				className={ clsx( {
+				className={ classNames( {
 					'has-error': regularPriceValidationError,
 				} ) }
 			>

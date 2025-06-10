@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { FormEvent } from 'react';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import { useInstanceId } from '@wordpress/compose';
 import { createElement, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
@@ -127,7 +127,7 @@ export function ManageDownloadLimitsModal( {
 		) as string,
 		min: DOWNLOAD_LIMIT_MIN,
 		max: DOWNLOAD_LIMIT_MAX,
-		className: clsx( {
+		className: classNames( {
 			'has-error': errors.downloadLimit,
 		} ),
 		label: __( 'Download limit', 'woocommerce' ),
@@ -153,7 +153,7 @@ export function ManageDownloadLimitsModal( {
 		) as string,
 		min: DOWNLOAD_EXPIRY_MIN,
 		max: DOWNLOAD_EXPIRY_MAX,
-		className: clsx( {
+		className: classNames( {
 			'has-error': errors.downloadExpiry,
 		} ),
 		label: __( 'Expiry period', 'woocommerce' ),

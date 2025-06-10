@@ -3,7 +3,7 @@
  */
 
 import { isRTL, __ } from '@wordpress/i18n';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import { chevronRight, chevronLeft } from '@wordpress/icons';
 import { useSelect } from '@wordpress/data';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
@@ -58,7 +58,7 @@ export default function SidebarNavigationScreen( {
 	return (
 		<>
 			<VStack
-				className={ clsx(
+				className={ classNames(
 					'edit-site-sidebar-navigation-screen__main',
 					{
 						'has-footer': !! footer,

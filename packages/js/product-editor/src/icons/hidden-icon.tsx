@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import clsx from 'clsx';
+import classNames from 'classnames';
 
 export default function HiddenIcon( {
 	width = 24,
@@ -19,7 +19,7 @@ export default function HiddenIcon( {
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
 			aria-hidden="true"
-			className={ clsx( className, 'woocommerce-hidden-icon' ) }
+			className={ classNames( className, 'woocommerce-hidden-icon' ) }
 		>
 			<path
 				fillRule="evenodd"

@@ -11,7 +11,7 @@ import {
 	useLayoutEffect,
 	useRef,
 } from '@wordpress/element';
-import clsx from 'clsx';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -124,7 +124,7 @@ export const ComboboxControl = forwardRef( function ForwardedComboboxControl(
 			options={ options }
 			onChange={ onChange }
 			onFilterValueChange={ onFilterValueChange }
-			className={ clsx(
+			className={ classNames(
 				'woocommerce-combobox-control',
 				currentId,
 				className

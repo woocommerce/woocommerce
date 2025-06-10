@@ -4,7 +4,7 @@
 import type { FormEvent } from 'react';
 import { createElement, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import {
 	Button,
 	__experimentalInputControl as InputControl,
@@ -124,7 +124,7 @@ export function VariationPricingForm( {
 					name="regular_price"
 					label={ __( 'Regular price', 'woocommerce' ) }
 					help={ errors.regular_price }
-					className={ clsx( regularPriceInputProps.className, {
+					className={ classNames( regularPriceInputProps.className, {
 						'has-error': errors.regular_price,
 					} ) }
 					onBlur={ validateRegularPrice }
@@ -135,7 +135,7 @@ export function VariationPricingForm( {
 					name="sale_price"
 					label={ __( 'Sale price', 'woocommerce' ) }
 					help={ errors.sale_price }
-					className={ clsx( salePriceInputProps.className, {
+					className={ classNames( salePriceInputProps.className, {
 						'has-error': errors.sale_price,
 					} ) }
 					onBlur={ validateSalePrice }

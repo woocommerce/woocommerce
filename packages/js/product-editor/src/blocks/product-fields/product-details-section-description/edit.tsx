@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
+import classNames from 'classnames';
 import {
 	Button,
 	Dropdown,
@@ -261,7 +261,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 					iconPosition="left"
 					role="menuitemradio"
 					onClick={ menuItemClickHandler( productTemplate, onClose ) }
-					className={ clsx( {
+					className={ classNames( {
 						'components-menu-item__button--selected': isSelected,
 					} ) }
 				>

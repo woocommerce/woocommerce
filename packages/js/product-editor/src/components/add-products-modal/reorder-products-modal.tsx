@@ -7,7 +7,7 @@ import { createElement, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { dragHandle } from '@wordpress/icons';
 import { Product } from '@woocommerce/data';
-import clsx from 'clsx';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -61,7 +61,7 @@ export function ReorderProductsModal( {
 					{ Boolean( selectedProducts.length ) && (
 						<ul
 							{ ...container }
-							className={ clsx(
+							className={ classNames(
 								'woocommerce-add-products-modal__list',
 								container.className
 							) }

@@ -7,7 +7,7 @@ import { createElement, createInterpolateElement } from '@wordpress/element';
 import { BaseControl } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useInstanceId } from '@wordpress/compose';
-import clsx from 'clsx';
+import classNames from 'classnames';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -115,7 +115,7 @@ export function SummaryBlockEdit( {
 						value={ summary }
 						onChange={ setSummary }
 						data-empty={ Boolean( summary ) }
-						className={ clsx( 'components-summary-control', {
+						className={ classNames( 'components-summary-control', {
 							[ `has-text-align-${ align }` ]: align,
 						} ) }
 						dir={ direction }
