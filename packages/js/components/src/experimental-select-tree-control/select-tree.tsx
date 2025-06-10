@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { chevronDown, chevronUp, closeSmall } from '@wordpress/icons';
-import classNames from 'clsx';
+import clsx from 'clsx';
 import {
 	createElement,
 	useEffect,
@@ -363,7 +363,7 @@ export const SelectTree = function SelectTree( {
 			tabIndex={ -1 }
 		>
 			<div
-				className={ classNames(
+				className={ clsx(
 					'woocommerce-experimental-select-control',
 					{
 						'is-read-only': isReadOnly,
