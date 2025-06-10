@@ -32,15 +32,7 @@ const config: Config = {
 	},
 
 	plugins: [
-		[
-			'docusaurus-plugin-llms',
-			{
-				generateLLMsTxt: true,
-				docsDir: '../../docs',
-				ignoreFiles: ['node_modules/*'],
-				title: 'WooCommerce Developer Documentation',
-			}
-		]
+		'./utils/llms-txt/index.ts'
 	],
 
 	presets: [
