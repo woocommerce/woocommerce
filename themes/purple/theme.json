@@ -343,9 +343,6 @@
 				"typography": {
 					"fontSize":  "var(--wp--preset--font-size--large)",
 					"lineHeight": "1.5"
-				},
-				"color": {
-					"text": "var(--wp--preset--color--theme-3)"
 				}
 			},
 			"woocommerce/product-sale-badge": {
@@ -364,6 +361,20 @@
 					"style": "solid",
 					"width": "1px",
 					"color": "var(--wp--preset--color--theme-7)"
+				}
+			},
+			"woocommerce/product-summary" : {
+				"color": {
+					"text": "var(--wp--preset--color--theme-4)"
+				}
+			},
+			"woocommerce/add-to-cart-with-options-variation-selector-attribute-name" : {
+				"color": {
+					"text": "var(--wp--preset--color--theme-4)"
+				},
+				"typography": {
+					"fontSize":  "var(--wp--preset--font-size--small)",
+					"lineHeight": "1.5"
 				}
 			}
 		},
