@@ -153,6 +153,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		$p->next_tag( 'a' );
 		$p->remove_attribute( 'onclick' );
 		$p->remove_attribute( 'style' );
+		$p->set_attribute( 'tabindex', '-1' );
 		$p->next_tag( 'img' );
 		$p->set_attribute( 'tabindex', '-1' );
 		$p->set_attribute( 'draggable', 'false' );
