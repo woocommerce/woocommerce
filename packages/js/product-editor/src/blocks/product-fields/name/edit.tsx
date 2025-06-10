@@ -14,7 +14,7 @@ import { starEmpty, starFilled } from '@wordpress/icons';
 import { cleanForSlug } from '@wordpress/url';
 import { Product } from '@woocommerce/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import {
 	Button,
 	BaseControl,

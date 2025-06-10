@@ -11,7 +11,7 @@ import {
 	useLayoutEffect,
 	useRef,
 } from '@wordpress/element';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 /**
  * Internal dependencies

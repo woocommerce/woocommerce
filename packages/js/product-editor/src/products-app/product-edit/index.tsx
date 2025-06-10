@@ -8,7 +8,7 @@ import { createElement, useState, useMemo } from '@wordpress/element';
 import { FormEvent } from 'react';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import {
 	__experimentalHeading as Heading,
 	__experimentalText as Text,

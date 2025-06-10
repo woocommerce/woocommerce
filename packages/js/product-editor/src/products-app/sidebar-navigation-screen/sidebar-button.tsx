@@ -3,7 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 import { Button } from '@wordpress/components';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 export default function SidebarButton(
 	props: React.ComponentProps< typeof Button >

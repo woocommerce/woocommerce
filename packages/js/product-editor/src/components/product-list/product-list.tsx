@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { closeSmall, external } from '@wordpress/icons';
 import { getNewPath } from '@woocommerce/navigation';
 import { Product } from '@woocommerce/data';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 /**
  * Internal dependencies

@@ -6,7 +6,7 @@ import { createElement, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { close } from '@wordpress/icons';
 import { useUserPreferences } from '@woocommerce/data';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 /**
  * Internal dependencies

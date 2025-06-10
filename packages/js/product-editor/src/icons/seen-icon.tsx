@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 export default function SeenIcon( {
 	width = 24,

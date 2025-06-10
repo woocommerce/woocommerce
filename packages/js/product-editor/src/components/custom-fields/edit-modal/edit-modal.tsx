@@ -5,7 +5,7 @@ import { Button, Modal } from '@wordpress/components';
 import { createElement, useState, useRef, useEffect } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import type { FocusEvent } from 'react';
 
 /**

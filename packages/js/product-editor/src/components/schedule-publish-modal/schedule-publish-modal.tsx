@@ -4,7 +4,7 @@
 import { Button, DateTimePicker, Modal } from '@wordpress/components';
 import { createElement, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 /**
  * Internal dependencies

@@ -4,7 +4,7 @@
 import { isRTL } from '@wordpress/i18n';
 import { chevronRightSmall, chevronLeftSmall, Icon } from '@wordpress/icons';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import { createElement } from '@wordpress/element';
 import {
 	__experimentalItem as Item,

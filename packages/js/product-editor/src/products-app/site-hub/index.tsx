@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, memo, forwardRef } from '@wordpress/element';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { store as coreStore } from '@wordpress/core-data';

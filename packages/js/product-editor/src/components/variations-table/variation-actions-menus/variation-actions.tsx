@@ -5,7 +5,7 @@ import { MenuGroup, MenuItem } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 /**
  * Internal dependencies

@@ -3,7 +3,7 @@
  */
 import { Ref } from 'react';
 import { createElement, forwardRef } from '@wordpress/element';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import { __experimentalInputControl as InputControl } from '@wordpress/components';
 
 /**

@@ -7,7 +7,7 @@ import { Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { wordpress } from '@wordpress/icons';
 import { store as coreDataStore } from '@wordpress/core-data';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 type SiteIconProps = {
 	className: string;

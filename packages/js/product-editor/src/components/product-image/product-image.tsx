@@ -3,7 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 import { Product } from '@woocommerce/data';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 /**
  * Internal dependencies

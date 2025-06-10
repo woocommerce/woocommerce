@@ -3,7 +3,7 @@
  */
 import { createElement, Fragment } from '@wordpress/element';
 import { RadioControl } from '@wordpress/components';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 /**
  * Internal dependencies

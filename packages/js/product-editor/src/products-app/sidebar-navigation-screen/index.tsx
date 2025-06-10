@@ -3,7 +3,7 @@
  */
 
 import { isRTL, __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import { chevronRight, chevronLeft } from '@wordpress/icons';
 import { useSelect } from '@wordpress/data';
 import { privateApis as routerPrivateApis } from '@wordpress/router';

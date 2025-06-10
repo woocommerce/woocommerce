@@ -16,7 +16,7 @@ import {
 	TreeItemType as Item,
 } from '@woocommerce/components';
 import { useDebounce, useInstanceId } from '@wordpress/compose';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 /**
  * Internal dependencies

@@ -16,7 +16,7 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 import { CurrencyContext } from '@woocommerce/currency';
 import { productsStore, Product } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 /**
  * Internal dependencies

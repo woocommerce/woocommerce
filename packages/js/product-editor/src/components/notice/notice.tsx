@@ -3,7 +3,7 @@
  */
 import { ReactNode } from 'react';
 import { createElement } from '@wordpress/element';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import { Button } from '@wordpress/components';
 import { closeSmall } from '@wordpress/icons';
 

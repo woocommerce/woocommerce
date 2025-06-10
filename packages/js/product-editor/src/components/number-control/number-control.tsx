@@ -11,7 +11,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import { plus, reset } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import type { ForwardedRef } from 'react';

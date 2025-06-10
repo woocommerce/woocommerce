@@ -17,7 +17,7 @@ import { Button, Tooltip } from '@wordpress/components';
 import { box, chevronLeft, group, Icon } from '@wordpress/icons';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import { Tag } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import PinnedItems from '@wordpress/interface/build-module/components/pinned-items';

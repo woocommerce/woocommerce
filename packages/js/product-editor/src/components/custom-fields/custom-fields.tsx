@@ -6,7 +6,7 @@ import { createElement, Fragment, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { closeSmall } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 /**
  * Internal dependencies

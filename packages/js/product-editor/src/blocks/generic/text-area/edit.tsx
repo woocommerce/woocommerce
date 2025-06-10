@@ -8,7 +8,7 @@ import { createElement, useRef } from '@wordpress/element';
 import { BaseControl, TextareaControl } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 import { BlockControls, RichText } from '@wordpress/block-editor';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 /**
  * Internal dependencies

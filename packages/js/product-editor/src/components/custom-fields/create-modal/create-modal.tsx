@@ -6,7 +6,7 @@ import { createElement, useState, useRef, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { closeSmall } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import type { FocusEvent } from 'react';
 
 /**

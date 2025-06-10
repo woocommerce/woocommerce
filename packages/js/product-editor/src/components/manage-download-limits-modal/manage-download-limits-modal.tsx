@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { FormEvent } from 'react';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import { useInstanceId } from '@wordpress/compose';
 import { createElement, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';

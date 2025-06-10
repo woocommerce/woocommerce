@@ -13,7 +13,7 @@ import {
 } from '@wordpress/element';
 import { useResizeObserver } from '@wordpress/compose';
 import { PluginArea } from '@wordpress/plugins';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import {
 	store as preferencesStore,
 	// @ts-expect-error No types for this exist yet.

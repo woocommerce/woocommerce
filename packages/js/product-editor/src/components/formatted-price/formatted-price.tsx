@@ -3,7 +3,7 @@
  */
 import { createElement, Fragment, useContext } from '@wordpress/element';
 import { CurrencyContext } from '@woocommerce/currency';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 /**
  * Internal dependencies

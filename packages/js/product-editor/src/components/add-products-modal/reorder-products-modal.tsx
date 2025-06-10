@@ -7,7 +7,7 @@ import { createElement, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { dragHandle } from '@wordpress/icons';
 import { Product } from '@woocommerce/data';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 /**
  * Internal dependencies
