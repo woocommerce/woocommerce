@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import classNames from 'clsx';
 import PropTypes from 'prop-types';
 import { createElement, Component, createRef } from '@wordpress/element';
 import { isEqual, throttle } from 'lodash';

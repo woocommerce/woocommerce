@@ -3,7 +3,7 @@
  */
 import { createElement, Component, createRef } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import { timeFormat as d3TimeFormat } from 'd3-time-format';
 
 /**

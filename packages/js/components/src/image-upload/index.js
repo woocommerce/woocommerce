@@ -4,7 +4,7 @@
 import { createElement, Component, Fragment } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import { Icon, upload } from '@wordpress/icons';
 
 class ImageUpload extends Component {

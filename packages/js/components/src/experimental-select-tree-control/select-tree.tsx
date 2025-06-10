@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { chevronDown, chevronUp, closeSmall } from '@wordpress/icons';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import {
 	createElement,
 	useEffect,

@@ -3,7 +3,7 @@
  */
 import { Button, Icon } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import { createElement, forwardRef, Fragment, useRef } from 'react';
 import { plus } from '@wordpress/icons';
 import { useMergeRefs } from '@wordpress/compose';

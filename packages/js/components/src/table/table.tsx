@@ -9,7 +9,7 @@ import {
 	useState,
 	useEffect,
 } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Button } from '@wordpress/components';
 import { find, get, noop } from 'lodash';
 import { withInstanceId } from '@wordpress/compose';
@@ -94,7 +94,7 @@ const Table: React.VFC< TableProps > = ( {
 		} );
 	}
 
-	const classes = classnames(
+	const classes = clsx(
 		'woocommerce-table__table',
 		classNames,
 		className,
@@ -216,7 +216,7 @@ const Table: React.VFC< TableProps > = ( {
 							} = header;
 							const labelId = `header-${ instanceId }-${ i }`;
 							const thProps: { [ key: string ]: string } = {
-								className: classnames(
+								className: clsx(
 									'woocommerce-table__header',
 									cellClassName,
 									{
@@ -326,7 +326,7 @@ const Table: React.VFC< TableProps > = ( {
 									} = headers[ j ];
 									const isHeader = rowHeader === j;
 									const Cell = isHeader ? 'th' : 'td';
-									const cellClasses = classnames(
+									const cellClasses = clsx(
 										'woocommerce-table__item',
 										cellClassName,
 										{

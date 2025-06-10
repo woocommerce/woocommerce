@@ -14,7 +14,7 @@ import {
 } from '@wordpress/element';
 import { Icon, calendar } from '@wordpress/icons';
 import moment, { Moment } from 'moment';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import { sprintf, __ } from '@wordpress/i18n';
 import { useDebounce, useInstanceId } from '@wordpress/compose';
 import {

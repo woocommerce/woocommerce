@@ -5,7 +5,7 @@ import { Button, Icon } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { chevronLeft, chevronRight } from '@wordpress/icons';
 import { sprintf, __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 type PageArrowsProps = {
 	currentPage: number;

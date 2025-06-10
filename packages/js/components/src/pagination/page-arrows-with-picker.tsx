@@ -5,7 +5,7 @@ import { Button } from '@wordpress/components';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { chevronLeft, chevronRight } from '@wordpress/icons';
 import { sprintf, __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import { uniqueId } from 'lodash';
 
 type PageArrowsWithPickerProps = {

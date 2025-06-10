@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, CSSProperties, ReactElement } from 'react';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import { Tooltip } from '@wordpress/components';
 
 /**

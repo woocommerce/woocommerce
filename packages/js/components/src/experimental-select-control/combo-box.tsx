@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, MouseEvent, useRef, forwardRef } from 'react';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import { Icon, chevronDown } from '@wordpress/icons';
 
 type ComboBoxProps = {

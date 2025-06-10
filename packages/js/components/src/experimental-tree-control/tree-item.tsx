@@ -4,7 +4,7 @@
 import { Button, CheckboxControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { chevronDown, chevronUp } from '@wordpress/icons';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import { createElement, forwardRef } from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
 

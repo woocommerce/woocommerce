@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 /**
  * Internal dependencies

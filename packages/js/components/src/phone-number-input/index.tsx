@@ -8,7 +8,7 @@ import {
 	useLayoutEffect,
 } from '@wordpress/element';
 import { useSelect } from 'downshift';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 /**
  * Internal dependencies

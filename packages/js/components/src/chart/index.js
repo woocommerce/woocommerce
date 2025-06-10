@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import classNames from 'classnames';
+import classNames from 'clsx';
 import {
 	createElement,
 	Component,

@@ -3,7 +3,7 @@
  */
 import { createElement } from 'react';
 import { Icon } from '@wordpress/icons';
-import classNames from 'classnames';
+import classNames from 'clsx';
 
 type SuffixIconProps = {
 	icon: JSX.Element;
