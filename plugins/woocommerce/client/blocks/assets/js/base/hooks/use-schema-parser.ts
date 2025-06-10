@@ -79,8 +79,9 @@ const useDocumentObject = < T extends FormType | 'global' >(
 					),
 				],
 				items: items
-					.map( ( item ) =>
-						Array( Math.round( item.quantity ) ).fill( item.id )
+					.map(
+						( item ) =>
+							Array( Math.round( item.quantity ) ).fill( item.id ) // Rounds to nearest integer. @todo refactor schema to include quantity as integer rather than repeated items.
 					)
 					.flat(),
 				itemsType: [ ...new Set( items.map( ( item ) => item.type ) ) ],
