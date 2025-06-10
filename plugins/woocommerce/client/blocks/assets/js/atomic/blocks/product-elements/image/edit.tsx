@@ -108,18 +108,22 @@ const Edit = ( {
 		setAttributes,
 	] );
 
+	const showAllControls =
+		isDescendentOfQueryLoop || isDescendentOfSingleProductBlock;
+
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
-				<ImageSizeSettings
-					scale={ scale }
-					width={ width }
-					height={ height }
-					setAttributes={ setAttributes }
-				/>
+				{ showAllControls && (
+					<ImageSizeSettings
+						scale={ scale }
+						width={ width }
+						height={ height }
+						setAttributes={ setAttributes }
+					/>
+				) }
 				<PanelBody title={ __( 'Content', 'woocommerce' ) }>
-					{ ( isDescendentOfQueryLoop ||
-						isDescendentOfSingleProductBlock ) && (
+					{ showAllControls && (
 						<ToggleControl
 							label={ __(
 								'Link to Product Page',
