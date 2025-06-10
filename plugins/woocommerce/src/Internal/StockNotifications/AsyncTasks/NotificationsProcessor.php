@@ -472,10 +472,6 @@ class NotificationsProcessor {
 		$last_notified = $notification->get_date_notified();
 		$is_throttled  = $last_notified instanceof \WC_DateTime && $last_notified->getTimestamp() > ( time() - $threshold );
 
-		if ( $is_throttled ) {
-			return true;
-		}
-
-		return false;
+		return $is_throttled;
 	}
 }
