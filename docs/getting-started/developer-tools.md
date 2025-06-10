@@ -12,6 +12,23 @@ This guide provides an overview of essential tools and libraries for WooCommerce
 
 Use these resources to power up your WooCommerce development workflows.
 
+### AI
+
+#### LLMS.txt Files
+
+To feed the WooCommerce Developer Documentation into your LLM or AI-assisted IDE, you have two options:
+
+1. [`llms.txt`](https://developer.woocommerce.com/docs/llms.txt) - A table of contents that includes the title, URL, and description of each document in the developer docs.
+2. [`llms-full.txt`](https://developer.woocommerce.com/docs/llms-full.txt) - A full Markdown-formatted export of the entire documentation in one file.
+
+If you are using an IDE like Cursor or Windsurf, we recommend adding these links as custom documention so that you can reference them as needed.
+
+**Note** that these do not include the contents of the[ WC REST API documentation](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction) or the [WooCommerce Code Reference](https://woocommerce.github.io/code-reference/). 
+
+#### Copy to Markdown
+
+On every page of the Developer Docs, you'll see a Clipboard icon in the upper-right hand corner. Selecting this icon will copy the current doc in Markdown formatting, which you can paste into your LLM's chat interface.
+
 ### Development
 
 #### [wp-cli](https://wp-cli.org/)
