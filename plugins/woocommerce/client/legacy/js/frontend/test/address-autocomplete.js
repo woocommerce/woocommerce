@@ -95,7 +95,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 		expect( result ).toBe( false );
 		expect( console.error ).toHaveBeenCalledWith(
 			'Error registering address provider:',
-			'Server providers configuration is invalid'
+			'Provider test-provider not registered on server'
 		);
 	} );
 
