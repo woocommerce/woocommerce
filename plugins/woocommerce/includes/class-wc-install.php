@@ -1550,8 +1550,10 @@ class WC_Install {
 			}
 		}
 
-		if ( 2 < $wpdb->get_var( "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$wpdb->prefix}wc_order_product_lookup' AND INDEX_NAME = 'PRIMARY'" ) ) {
-			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_product_lookup DROP PRIMARY KEY, ADD PRIMARY KEY (order_item_id, order_id)" );
+		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}wc_order_product_lookup';" ) ) {
+			if ( 2 < $wpdb->get_var( "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$wpdb->prefix}wc_order_product_lookup' AND INDEX_NAME = 'PRIMARY'" ) ) {
+				$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_product_lookup DROP PRIMARY KEY, ADD PRIMARY KEY (order_item_id, order_id)" );
+			}
 		}
 
 		/**
