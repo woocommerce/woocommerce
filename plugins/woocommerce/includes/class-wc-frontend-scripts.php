@@ -289,6 +289,11 @@ class WC_Frontend_Scripts {
 				'deps'    => array( 'jquery', 'wp-util', 'jquery-blockui' ),
 				'version' => $version,
 			),
+			'wc-back-in-stock-form'      => array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/back-in-stock-form' . $suffix . '.js' ),
+				'deps'    => array( 'jquery' ),
+				'version' => $version,
+			),
 			'wc-geolocation'             => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/geolocation' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
