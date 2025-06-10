@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Engine;
 
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 
 /**
  * Integration test for Personalizer class which validate the functionality
@@ -34,7 +35,7 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->tags_registry = new Personalization_Tags_Registry();
+		$this->tags_registry = new Personalization_Tags_Registry( $this->di_container->get( Email_Editor_Logger::class ) );
 		$this->personalizer  = new Personalizer( $this->tags_registry );
 	}
 
