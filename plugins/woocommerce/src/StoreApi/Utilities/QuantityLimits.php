@@ -10,9 +10,16 @@ use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
  * QuantityLimits class.
  *
  * Returns limits for products and cart items when using the StoreAPI and supporting classes.
+ * Supports both integer and decimal quantities, with integers as the default unless
+ * wc_stock_amount() is customized to support decimals.
  */
 final class QuantityLimits {
 	use DraftOrderTrait;
+
+	/**
+	 * Tolerance for floating point comparisons.
+	 */
+	const FLOAT_TOLERANCE = 0.00001;
 
 	/**
 	 * Get quantity limits (min, max, step/multiple) for a product or cart item.
@@ -77,18 +84,18 @@ final class QuantityLimits {
 	 * @return int|float
 	 */
 	public function normalize_cart_item_quantity( $quantity, array $cart_item ) {
+		if ( ! is_numeric( $quantity ) || $quantity < 0 ) {
+			return 0;
+		}
+
 		$product = $cart_item['data'] ?? false;
 
 		if ( ! $product instanceof \WC_Product ) {
-			return $quantity;
+			return wc_stock_amount( $quantity );
 		}
 
 		$limits       = $this->get_cart_item_quantity_limits( $cart_item );
-		$new_quantity = $quantity;
-
-		if ( fmod( $new_quantity + 0, $limits['multiple_of'] ) > 0.00001 ) {
-			$new_quantity = $this->limit_to_multiple( $new_quantity, $limits['multiple_of'], 'round' );
-		}
+		$new_quantity = $this->limit_to_multiple( $quantity, $limits['multiple_of'], 'round' );
 
 		if ( $new_quantity < $limits['minimum'] ) {
 			$new_quantity = $limits['minimum'];
@@ -98,7 +105,7 @@ final class QuantityLimits {
 			$new_quantity = $limits['maximum'];
 		}
 
-		return $new_quantity;
+		return wc_stock_amount( $new_quantity );
 	}
 
 	/**
@@ -110,11 +117,23 @@ final class QuantityLimits {
 	 * @return int|float
 	 */
 	public function limit_to_multiple( $number, $multiple_of, string $rounding_function = 'round' ) {
-		if ( $multiple_of <= 0 ) {
-			return $number;
+		if ( 0 === $multiple_of ) {
+			return $number; // Avoid division by zero.
 		}
+
+		if ( $this->is_multiple_of( $number, $multiple_of ) ) {
+			return wc_stock_amount( $number );
+		}
+
+		// Ensure valid rounding function.
 		$rounding_function = in_array( $rounding_function, [ 'ceil', 'floor', 'round' ], true ) ? $rounding_function : 'round';
-		return $rounding_function( $number / $multiple_of ) * $multiple_of;
+
+		// Calculate the division result and apply rounding.
+		$division_result = $number / $multiple_of;
+		$rounded_division = $rounding_function( $division_result );
+		$result = $rounded_division * $multiple_of;
+
+		return wc_stock_amount( $result );
 	}
 
 	/**
@@ -147,7 +166,7 @@ final class QuantityLimits {
 			return new \WP_Error( 'invalid_quantity', sprintf( __( 'The maximum quantity of &quot;%1$s&quot; allowed in the cart is %2$s', 'woocommerce' ), $product->get_name(), $limits['maximum'] ) );
 		}
 
-		if ( fmod( $quantity + 0, $limits['multiple_of'] ) > 0.00001 ) {
+		if ( ! $this->is_multiple_of( $quantity, $limits['multiple_of'] ) ) {
 			/* translators: 1: product name 2: multiple of */
 			return new \WP_Error( 'invalid_quantity', sprintf( __( 'The quantity of &quot;%1$s&quot; must be a multiple of %2$s', 'woocommerce' ), $product->get_name(), $limits['multiple_of'] ) );
 		}
@@ -176,21 +195,7 @@ final class QuantityLimits {
 
 		$limit = max( min( array_filter( $limits ) ), $minimum );
 
-		/**
-		 * Filters the quantity limit for a product being added to the cart via the Store API.
-		 *
-		 * Filters the variation option name for custom option slugs.
-		 *
-		 * @since 6.8.0
-		 *
-		 * @param int|float $quantity_limit Quantity limit which defaults to 9999 unless sold individually.
-		 * @param \WC_Product $product Product instance.
-		 * @return int|float
-		 */
-		$filtered_limit = apply_filters( 'woocommerce_store_api_product_quantity_limit', $limit, $product );
-
-		// Only return the filtered limit if it's numeric, otherwise return the original limit.
-		return is_numeric( $filtered_limit ) ? $filtered_limit + 0 : $limit;
+		return $this->filter_numeric_value( $limit, 'limit', $product );
 	}
 
 	/**
@@ -209,11 +214,11 @@ final class QuantityLimits {
 		$reserve_stock  = new ReserveStock();
 		$reserved_stock = $reserve_stock->get_reserved_stock( $product, $this->get_draft_order_id() );
 
-		return $product->get_stock_quantity() - $reserved_stock;
+		return wc_stock_amount( $product->get_stock_quantity() - $reserved_stock );
 	}
 
 	/**
-	 * Get a quantity for a product or cart item by running it through a filter hook.
+	 * Get a numeric value while running it through a filter hook.
 	 *
 	 * @param int|float         $value Value to filter.
 	 * @param string            $value_type Type of value. Used for filter suffix.
@@ -226,8 +231,7 @@ final class QuantityLimits {
 		$cart_item  = $is_product ? null : $cart_item_or_product;
 
 		/**
-		 * Filters the quantity minimum for a cart item in Store API. This allows extensions to control the minimum qty
-		 * of items already within the cart.
+		 * Filters a quantity for a cart item in Store API. This allows extensions to control the qty of items.
 		 *
 		 * The suffix of the hook will vary depending on the value being filtered.
 		 * For example, minimum, maximum, multiple_of, editable.
@@ -239,13 +243,13 @@ final class QuantityLimits {
 		 * @param array|null $cart_item The cart item if the product exists in the cart, or null.
 		 * @return mixed
 		 */
-		$filtered_value = apply_filters( "woocommerce_store_api_product_quantity_{$value_type}", $value, $product, $cart_item );
+		$filtered_value = apply_filters( 'woocommerce_store_api_product_quantity_' . $value_type, $value, $product, $cart_item );
 
-		return is_numeric( $filtered_value ) ? $filtered_value + 0 : $value;
+		return wc_stock_amount( is_numeric( $filtered_value ) ? $filtered_value : $value );
 	}
 
 	/**
-	 * Get a quantity for a product or cart item by running it through a filter hook.
+	 * Get a boolean value while running it through a filter hook.
 	 *
 	 * @param bool              $value Value to filter.
 	 * @param string            $value_type Type of value. Used for filter suffix.
@@ -258,11 +262,9 @@ final class QuantityLimits {
 		$cart_item  = $is_product ? null : $cart_item_or_product;
 
 		/**
-		 * Filters the quantity minimum for a cart item in Store API. This allows extensions to control the minimum qty
-		 * of items already within the cart.
+		 * Filters boolean data for a cart item in Store API.
 		 *
-		 * The suffix of the hook will vary depending on the value being filtered.
-		 * For example, minimum, maximum, multiple_of, editable.
+		 * The suffix of the hook will vary depending on the value being filtered. For example, editable.
 		 *
 		 * @since 6.8.0
 		 *
@@ -271,8 +273,40 @@ final class QuantityLimits {
 		 * @param array|null $cart_item The cart item if the product exists in the cart, or null.
 		 * @return mixed
 		 */
-		$filtered_value = apply_filters( "woocommerce_store_api_product_quantity_{$value_type}", $value, $product, $cart_item );
+		$filtered_value = apply_filters( 'woocommerce_store_api_product_quantity_' . $value_type, $value, $product, $cart_item );
 
-		return is_bool( $filtered_value ) ? (bool) $filtered_value : $value;
+		return boolval( is_bool( $filtered_value ) ? $filtered_value : $value );
+	}
+
+	/**
+	 * Checks if number is a multiple of another number.
+	 *
+	 * @param int|float $number The number to check.
+	 * @param int|float $multiple_of The multiple.
+	 * @return bool
+	 */
+	protected function is_multiple_of( $number, $multiple_of ) {
+		// Handle negative numbers by working with absolute values.
+		$number      = abs( $number );
+		$multiple_of = abs( $multiple_of );
+
+		if ( 0 === $multiple_of ) {
+			return true; // Avoid division by zero.
+		}
+
+		// Handle very small multiples that could cause precision issues.
+		if ( $multiple_of < self::FLOAT_TOLERANCE ) {
+			return true; // Treat as effectively zero.
+		}
+
+		// For integers, use exact modulo comparison.
+		if ( is_int( $number ) && is_int( $multiple_of ) ) {
+			return $number % $multiple_of === 0;
+		}
+
+		// For floats, use division and check if result is close to an integer.
+		$division_result = $number / $multiple_of;
+		$rounded_result = round( $division_result );
+		return abs( $division_result - $rounded_result ) < self::FLOAT_TOLERANCE;
 	}
 }

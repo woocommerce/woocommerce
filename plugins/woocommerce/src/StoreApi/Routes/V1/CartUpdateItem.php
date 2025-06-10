@@ -48,7 +48,7 @@ class CartUpdateItem extends AbstractCartRoute {
 					],
 					'quantity' => [
 						'description' => __( 'New quantity of the item in the cart.', 'woocommerce' ),
-						'type'        => 'number',
+						'type'        => has_filter( 'woocommerce_stock_amount', 'intval' ) ? 'integer' : 'number',
 						'arg_options' => [
 							'sanitize_callback' => 'wc_stock_amount',
 						],

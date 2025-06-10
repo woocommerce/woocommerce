@@ -52,7 +52,7 @@ class CartAddItem extends AbstractCartRoute {
 					],
 					'quantity'  => [
 						'description' => __( 'Quantity of this item to add to the cart.', 'woocommerce' ),
-						'type'        => 'number',
+						'type'        => has_filter( 'woocommerce_stock_amount', 'intval' ) ? 'integer' : 'number',
 						'context'     => [ 'view', 'edit' ],
 						'arg_options' => [
 							'sanitize_callback' => 'wc_stock_amount',

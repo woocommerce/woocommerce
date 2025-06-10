@@ -106,7 +106,7 @@ class CartShippingRateSchema extends AbstractSchema {
 						],
 						'quantity' => [
 							'description' => __( 'Quantity of the item in the current package.', 'woocommerce' ),
-							'type'        => 'number',
+							'type'        => has_filter( 'woocommerce_stock_amount', 'intval' ) ? 'integer' : 'number',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],

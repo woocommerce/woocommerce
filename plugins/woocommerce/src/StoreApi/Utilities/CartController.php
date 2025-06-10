@@ -47,8 +47,8 @@ class CartController {
 		$cart_items      = $this->get_cart_items();
 
 		foreach ( $cart_items as $cart_item ) {
-			$normalized_qty = $quantity_limits->normalize_cart_item_quantity( $cart_item['quantity'], $cart_item );
 			$cart_qty       = wc_stock_amount( $cart_item['quantity'] );
+			$normalized_qty = $quantity_limits->normalize_cart_item_quantity( $cart_qty, $cart_item );
 
 			if ( $normalized_qty !== $cart_qty ) {
 				try {
