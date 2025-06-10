@@ -12,11 +12,9 @@ export type EditProps = BlockEditProps< BlockAttributes >;
 
 export type FilterOptionItem = {
 	label: string;
-	ariaLabel: string;
 	value: string;
 	selected?: boolean;
 	count: number;
-	type: string;
 };
 
 export type FilterBlockContext = {

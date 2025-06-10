@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version override. Default version is fetched from the base branch name, you can override the version but make sure the that the branch release/{version} exists on remote. Format: X.Y (Major.Minor)'
+        description: 'Version Override (X.Y.Z format). If not provided, it is extracted from the release branch. Ensure branch "release/{version}" exists on remote.'
         required: false
         default: ''
 
@@ -28,13 +28,13 @@ jobs:
         with:
           script: |
             const refName = process.env.GITHUB_REF_NAME;
-            const versionMatch = refName.match(/^release\/(\d+\.\d+)$/);
+            const versionMatch = refName.match(/^release\/(\d+\.\d+(?:\.\d+)?)$/); // Match either X.Y or X.Y.Z formats
             if (versionMatch) {
               const version = versionMatch[1];
               console.log(`Extracted version: ${version}`);
               core.setOutput('version', version);
             } else {
-              core.setFailed(`Branch name ${refName} does not match the expected pattern 'release/x.y'`);
+              core.setFailed(`Branch name ${refName} does not match the expected pattern 'release/x.y' or 'release/x.y.z'`);
               process.exit(1);
             }
 
@@ -46,11 +46,12 @@ jobs:
         with:
           script: |
             const version = process.env.VERSION;
-            if (!/^\d+\.\d+$/.test(version)) {
-              core.setFailed('Invalid version format. The version must be in the format X.Y');
-              core.info(`Version you entered: ${version}`);
+            if (!/^\d+\.\d+(?:\.\d+)?$/.test(version)) {
+              core.setFailed('Invalid version format. The version must be in the format X.Y or X.Y.Z');
               process.exit(1);
             }
+
+            console.log(`Version: ${version}`);
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -70,7 +71,7 @@ jobs:
       - name: Install prerequisites
         run: |
             pnpm install --filter monorepo-utils --ignore-scripts
-            # ignore scripts speeds up setup signficantly, but we still need to build monorepo utils
+            # ignore scripts speeds up setup significantly, but we still need to build monorepo utils
             pnpm build
         working-directory: tools/monorepo-utils
 
@@ -78,4 +79,18 @@ jobs:
         id: changelog
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v ${{ github.event.inputs.version || steps.extract-version.outputs.version }}
+        run: |
+          if [[ -z "${{ github.event.inputs.version }}" ]]; then
+            # The version is empty, so we need to extract it from the provided branch name
+            BRANCH_ARG="-b ${{ github.ref_name }}"
+            VERSION="${{ steps.extract-version.outputs.version }}"
+          else
+            # The version is provided, so we use it directly
+            BRANCH_ARG=""
+            VERSION="${{ github.event.inputs.version }}"
+          fi
+
+          # Normalize the version by removing .0 patch if present, as the changelog command does not support it
+          VERSION=${VERSION%.0}
+
+          pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v $VERSION $BRANCH_ARG
