@@ -301,7 +301,6 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				$coupon_meta = $item->get_meta( 'coupon_data', true );
 				if ( $coupon_meta ) {
 					$temp_coupon->set_props( (array) $coupon_meta );
-
 				}
 			}
 
