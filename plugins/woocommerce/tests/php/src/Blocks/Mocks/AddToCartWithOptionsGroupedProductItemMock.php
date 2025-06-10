@@ -10,9 +10,9 @@ use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 
 /**
- * AddToCartWithOptionsGroupedProductSelectorItemTemplateMock used to test GroupedProductItem block functions.
+ * AddToCartWithOptionsGroupedProductItemMock used to test GroupedProductItem block functions.
  */
-class AddToCartWithOptionsGroupedProductSelectorItemTemplateMock extends GroupedProductItem {
+class AddToCartWithOptionsGroupedProductItemMock extends GroupedProductItem {
 	/**
 	 * Initialize our mock class.
 	 */
