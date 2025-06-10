@@ -42,7 +42,6 @@ export interface PackageProps {
 	renderOption?: PackageRateRenderOption | undefined;
 	collapse?: boolean;
 	packageData: PackageData;
-	className?: string;
 	collapsible?: TernaryFlag;
 	noResultsMessage: ReactElement;
 	showItems?: TernaryFlag;
