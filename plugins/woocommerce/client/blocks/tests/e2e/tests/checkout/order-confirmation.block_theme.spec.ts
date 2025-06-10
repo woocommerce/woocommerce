@@ -15,10 +15,11 @@ import {
 	TEST_ADDRESS,
 } from './constants';
 
-const test = base.extend< { pageObject: CheckoutPage } >( {
-	pageObject: async ( { page }, use ) => {
+const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
+	checkoutPageObject: async ( { page, requestUtils }, use ) => {
 		const pageObject = new CheckoutPage( {
 			page,
+			requestUtils,
 		} );
 		await use( pageObject );
 	},
@@ -38,7 +39,7 @@ test.describe( 'Shopper (logged-in) → Order Confirmation', () => {
 
 	test( 'Place order', async ( {
 		frontendUtils,
-		pageObject,
+		checkoutPageObject,
 		page,
 		requestUtils,
 	} ) => {
@@ -47,24 +48,24 @@ test.describe( 'Shopper (logged-in) → Order Confirmation', () => {
 		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 		expect(
-			await pageObject.selectAndVerifyShippingOption(
+			await checkoutPageObject.selectAndVerifyShippingOption(
 				FREE_SHIPPING_NAME,
 				FREE_SHIPPING_PRICE
 			)
 		).toBe( true );
-		await pageObject.fillInCheckoutWithTestData( TEST_ADDRESS );
-		await pageObject.placeOrder();
+		await checkoutPageObject.fillInCheckoutWithTestData( TEST_ADDRESS );
+		await checkoutPageObject.placeOrder();
 
 		// Confirm Order Confirmation Block sections are visible when logged in
 		// order data are visible and correct
-		await pageObject.verifyOrderConfirmationDetails();
+		await checkoutPageObject.verifyOrderConfirmationDetails();
 
 		// Store order received URL to use later
 		const orderReceivedURL = page.url();
 
 		// Confirm downloads section is visible when logged in
 		// Open order we created
-		const orderId = pageObject.getOrderId();
+		const orderId = checkoutPageObject.getOrderId();
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
 		// Update order status to 'Processing'
 		await page.locator( '#order_status' ).selectOption( 'wc-processing' );
@@ -88,7 +89,7 @@ test.describe( 'Shopper (logged-in) → Order Confirmation', () => {
 			)
 		).toBeVisible();
 		// Confirm order details are not visible
-		await pageObject.verifyOrderConfirmationDetails( false );
+		await checkoutPageObject.verifyOrderConfirmationDetails( false );
 
 		// Access page without order ID or key (test visibility of default message)
 		await page.goto( '/checkout/order-received' );
@@ -99,7 +100,7 @@ test.describe( 'Shopper (logged-in) → Order Confirmation', () => {
 			)
 		).toBeVisible();
 		// Confirm order details are not visible
-		await pageObject.verifyOrderConfirmationDetails( false );
+		await checkoutPageObject.verifyOrderConfirmationDetails( false );
 
 		await test.step( 'Logout the user and revisit the order received page to verify that details are displayed when woocommerce_order_received_verify_known_shoppers is disabled', async () => {
 			await requestUtils.activatePlugin(
@@ -115,7 +116,7 @@ test.describe( 'Shopper (logged-in) → Order Confirmation', () => {
 				page.getByRole( 'button', { name: 'Log in' } )
 			).toBeVisible();
 			await page.goto( orderReceivedURL );
-			await pageObject.verifyOrderConfirmationDetails();
+			await checkoutPageObject.verifyOrderConfirmationDetails();
 		} );
 	} );
 } );
@@ -123,7 +124,11 @@ test.describe( 'Shopper (logged-in) → Order Confirmation', () => {
 test.describe( 'Shopper (guest) → Order Confirmation', () => {
 	test.use( { storageState: guestFile } );
 
-	test( 'Place order', async ( { frontendUtils, pageObject, page } ) => {
+	test( 'Place order', async ( {
+		frontendUtils,
+		checkoutPageObject,
+		page,
+	} ) => {
 		await page.goto( '/my-account' );
 
 		await expect(
@@ -136,14 +141,14 @@ test.describe( 'Shopper (guest) → Order Confirmation', () => {
 		await frontendUtils.goToCheckout();
 
 		expect(
-			await pageObject.selectAndVerifyShippingOption(
+			await checkoutPageObject.selectAndVerifyShippingOption(
 				FREE_SHIPPING_NAME,
 				FREE_SHIPPING_PRICE
 			)
 		).toBe( true );
 
-		await pageObject.fillInCheckoutWithTestData( TEST_ADDRESS );
-		await pageObject.placeOrder();
+		await checkoutPageObject.fillInCheckoutWithTestData( TEST_ADDRESS );
+		await checkoutPageObject.placeOrder();
 
 		await expect(
 			page.getByText( 'Thank you. Your order has been received.' )
@@ -154,20 +159,22 @@ test.describe( 'Shopper (guest) → Order Confirmation', () => {
 test.describe( 'Shopper (guest) → Order Confirmation → Create Account', () => {
 	test.use( { storageState: guestFile } );
 
-	test.beforeEach( async ( { frontendUtils, pageObject, requestUtils } ) => {
-		await requestUtils.setFeatureFlag( 'experimental-blocks', true );
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-		expect(
-			await pageObject.selectAndVerifyShippingOption(
-				FREE_SHIPPING_NAME,
-				FREE_SHIPPING_PRICE
-			)
-		).toBe( true );
-		await pageObject.fillInCheckoutWithTestData( TEST_ADDRESS );
-		await pageObject.placeOrder();
-	} );
+	test.beforeEach(
+		async ( { frontendUtils, checkoutPageObject, requestUtils } ) => {
+			await requestUtils.setFeatureFlag( 'experimental-blocks', true );
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+			expect(
+				await checkoutPageObject.selectAndVerifyShippingOption(
+					FREE_SHIPPING_NAME,
+					FREE_SHIPPING_PRICE
+				)
+			).toBe( true );
+			await checkoutPageObject.fillInCheckoutWithTestData( TEST_ADDRESS );
+			await checkoutPageObject.placeOrder();
+		}
+	);
 
 	test( 'Delayed account creation flows', async ( {
 		page,
@@ -226,7 +233,7 @@ test.describe( 'Shopper (guest) → Order Confirmation → Create Account', () =
 
 test.describe( 'Shopper → Order Confirmation → Local Pickup', () => {
 	test( 'Confirm shipping address section is hidden, but billing is visible', async ( {
-		pageObject,
+		checkoutPageObject,
 		frontendUtils,
 		admin,
 	} ) => {
@@ -257,16 +264,16 @@ test.describe( 'Shopper → Order Confirmation → Local Pickup', () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
-		await pageObject.page.getByRole( 'radio', { name: 'Pickup' } ).click();
-		await pageObject.fillInCheckoutWithTestData();
-		await pageObject.placeOrder();
+		await checkoutPageObject.selectDeliveryOption( 'Pickup' );
+		await checkoutPageObject.fillInCheckoutWithTestData();
+		await checkoutPageObject.placeOrder();
 		await expect(
-			pageObject.page.getByRole( 'heading', {
+			checkoutPageObject.page.getByRole( 'heading', {
 				name: 'Shipping address',
 			} )
 		).toBeHidden();
 		await expect(
-			pageObject.page.getByRole( 'heading', {
+			checkoutPageObject.page.getByRole( 'heading', {
 				name: 'Billing address',
 			} )
 		).toBeVisible();
@@ -276,33 +283,39 @@ test.describe( 'Shopper → Order Confirmation → Local Pickup', () => {
 test.describe( 'Shopper → Order Confirmation → Downloadable Products', () => {
 	let confirmationPageUrl: string;
 
-	test.beforeEach( async ( { frontendUtils, pageObject } ) => {
+	test.beforeEach( async ( { frontendUtils, checkoutPageObject } ) => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
-		await pageObject.fillInCheckoutWithTestData();
-		await pageObject.placeOrder();
-		confirmationPageUrl = pageObject.page.url();
+		await checkoutPageObject.fillInCheckoutWithTestData();
+		await checkoutPageObject.placeOrder();
+		confirmationPageUrl = checkoutPageObject.page.url();
 	} );
 
 	test( 'Confirm shipping address section is hidden, but billing is visible', async ( {
-		pageObject,
+		checkoutPageObject,
 	} ) => {
 		await expect(
-			pageObject.page.getByRole( 'heading', { name: 'Shipping address' } )
+			checkoutPageObject.page.getByRole( 'heading', {
+				name: 'Shipping address',
+			} )
 		).toBeHidden();
 		await expect(
-			pageObject.page.getByRole( 'heading', { name: 'Billing address' } )
+			checkoutPageObject.page.getByRole( 'heading', {
+				name: 'Billing address',
+			} )
 		).toBeVisible();
 	} );
 
 	test( 'Confirm order downloads are visible', async ( {
-		pageObject,
+		checkoutPageObject,
 		admin,
 	} ) => {
 		// While order is pending the downloads are hidden.
 		await expect(
-			pageObject.page.getByRole( 'heading', { name: 'Downloads' } )
+			checkoutPageObject.page.getByRole( 'heading', {
+				name: 'Downloads',
+			} )
 		).toBeHidden();
 
 		// Update last order status to completed.
@@ -319,9 +332,11 @@ test.describe( 'Shopper → Order Confirmation → Downloadable Products', () =>
 			.click();
 
 		// Go back to page.
-		await pageObject.page.goto( confirmationPageUrl );
+		await checkoutPageObject.page.goto( confirmationPageUrl );
 		await expect(
-			pageObject.page.getByRole( 'heading', { name: 'Downloads' } )
+			checkoutPageObject.page.getByRole( 'heading', {
+				name: 'Downloads',
+			} )
 		).toBeVisible();
 	} );
 } );
