@@ -597,7 +597,13 @@ class WC_Frontend_Scripts {
 					'i18n_checkout_error'       => sprintf( esc_attr__( 'There was an error processing your order. Please check for any charges in your payment method and review your <a href="%s">order history</a> before placing the order again.', 'woocommerce' ), esc_url( wc_get_account_endpoint_url( 'orders' ) ) ),
 				);
 				if ( Features::is_enabled( 'experimental-blocks' ) ) {
-					$params['address_providers'] = wc_get_container()->get( AddressProviderController::class )->get_providers();
+					$providers = wc_get_container()->get( AddressProviderController::class )->get_providers();
+					$params['address_providers'] = array_map( function( $provider ) {
+						return array(
+							'id' => $provider->id,
+							'name' => $provider->name,
+						);
+					}, $providers );
 				}
 				break;
 			case 'wc-address-i18n':
