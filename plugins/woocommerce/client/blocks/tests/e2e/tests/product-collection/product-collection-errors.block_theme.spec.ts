@@ -63,6 +63,7 @@ test.describe( 'Product Page: error notices when adding out-of-stock products', 
 	} ) => {
 		await blockUtils.createManagedStockProduct();
 		await admin.createNewPost();
+		await editor.insertBlock( { name: 'woocommerce/store-notices' } );
 		await editor.insertBlock( { name: 'woocommerce/single-product' } );
 
 		const productName = 'Managed Stock';
