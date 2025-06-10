@@ -3067,7 +3067,9 @@ function wc_update_1000_add_old_refunded_order_items_to_product_lookup_table() {
  */
 function wc_update_1000_update_primary_key_to_composite_in_order_product_lookup_table() {
 	global $wpdb;
-	$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_product_lookup DROP PRIMARY KEY, ADD PRIMARY KEY (order_item_id, order_id)" );
+	if ( 2 < $wpdb->get_var( "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$wpdb->prefix}wc_order_product_lookup' AND INDEX_NAME = 'PRIMARY'" ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_product_lookup DROP PRIMARY KEY, ADD PRIMARY KEY (order_item_id, order_id)" );
+	}
 }
 
 /**
