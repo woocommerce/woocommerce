@@ -24,24 +24,26 @@ You can send multiline messages in several ways:
 
 - **Using literal newlines in your shell:**
 
-  ```sh
+```sh
   pnpm utils slack "Hello from the CLI!
 This is a second line.
 And a third line."
-  ```
+```
+
   (Press Enter inside the quotes to create new lines.)
 
 - **Using `echo` and command substitution:**
 
-  ```sh
+```sh
   pnpm utils slack "$(echo -e 'Hello from the CLI!\nThis is a second line.\nAnd a third line.')"
-  ```
+```
 
 - **Using escaped newlines (`\\n`):**
 
-  ```sh
+```sh
   pnpm utils slack "Hello from the CLI!\\nThis is a second line.\\nAnd a third line."
-  ```
+```
+
   (The utility will convert `\\n` to real newlines in the message.)
 
 ### Upload a file to Slack
