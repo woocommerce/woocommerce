@@ -38,7 +38,7 @@ describe( 'VerticalCSSTransition', () => {
 			in: false,
 			timeout: 0,
 			nodeRef: nodeRef as React.RefObject< undefined >,
-			clsx: 'test',
+			classNames: 'test',
 			onEntering: () => {
 				onEnteringCalledCount++;
 				expect(
@@ -81,7 +81,7 @@ describe( 'VerticalCSSTransition', () => {
 			in: false,
 			timeout: 0,
 			nodeRef: nodeRef as React.RefObject< undefined >,
-			clsx: 'test',
+			classNames: 'test',
 			onEntering: () => {
 				onEnteringCalledCount++;
 				expect(
@@ -130,7 +130,7 @@ describe( 'VerticalCSSTransition', () => {
 				in={ false }
 				timeout={ 0 }
 				nodeRef={ nodeRef as React.RefObject< undefined > }
-				clsx="test"
+				classNames="test"
 			>
 				<div ref={ nodeRef as React.RefObject< HTMLDivElement > }>
 					Test
@@ -150,7 +150,7 @@ describe( 'VerticalCSSTransition', () => {
 				in={ true }
 				timeout={ 0 }
 				nodeRef={ nodeRef as React.RefObject< undefined > }
-				clsx="test"
+				classNames="test"
 			>
 				<div ref={ nodeRef as React.RefObject< HTMLDivElement > }>
 					Test
@@ -176,7 +176,7 @@ describe( 'VerticalCSSTransition', () => {
 				appear
 				timeout={ 0 }
 				nodeRef={ nodeRef as React.RefObject< undefined > }
-				clsx="test"
+				classNames="test"
 				onEntering={ () => {
 					expect(
 						nodeRef.current &&
@@ -204,7 +204,7 @@ describe( 'VerticalCSSTransition', () => {
 			in: false,
 			timeout: 0,
 			nodeRef: nodeRef as React.RefObject< undefined >,
-			clsx: 'test',
+			classNames: 'test',
 			onEntering: () => {
 				expect(
 					nodeRef.current &&
@@ -241,7 +241,7 @@ describe( 'VerticalCSSTransition', () => {
 			in: true,
 			timeout: 0,
 			nodeRef: nodeRef as React.RefObject< undefined >,
-			clsx: 'test',
+			classNames: 'test',
 			onExiting: () => {
 				expect(
 					nodeRef.current &&
@@ -279,7 +279,7 @@ describe( 'VerticalCSSTransition', () => {
 					appear
 					timeout={ 0 }
 					nodeRef={ nodeRef as React.RefObject< undefined > }
-					clsx="test"
+					classNames="test"
 					defaultStyle={ {
 						transitionProperty: 'max-height, opacity',
 					} }

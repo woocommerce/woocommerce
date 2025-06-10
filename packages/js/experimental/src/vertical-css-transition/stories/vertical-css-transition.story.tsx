@@ -48,7 +48,7 @@ export const Primary = Template.bind( { onClick: () => {} } );
 Primary.args = {
 	appear: true,
 	timeout: 500,
-	clsx: 'collapsible-content',
+	classNames: 'collapsible-content',
 	defaultStyle: {
 		transitionProperty: 'max-height, opacity',
 	},

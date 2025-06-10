@@ -18,7 +18,7 @@ import {
 	TransitionGroup,
 	TransitionStatus,
 } from 'react-transition-group';
-import clsx from 'clsx';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -219,12 +219,12 @@ export const ExperimentalCollapsibleList = ( {
 		triggerCallbacks( ! isCollapsed );
 	}, [ isCollapsed ] );
 
-	const listClasses = clsx(
+	const listClasses = classnames(
 		listProps.className || '',
 		'woocommerce-experimental-list'
 	);
 
-	const wrapperClasses = clsx( {
+	const wrapperClasses = classnames( {
 		'woocommerce-experimental-list-wrapper': ! isCollapsed,
 	} );
 
@@ -297,7 +297,7 @@ export const ExperimentalCollapsibleList = ( {
 													in={ inTransition }
 													enter={ enter }
 													exit={ exit }
-													clsx="woocommerce-list__item"
+													classNames="woocommerce-list__item"
 												>
 													{ cloneElement( child, {
 														animation:
