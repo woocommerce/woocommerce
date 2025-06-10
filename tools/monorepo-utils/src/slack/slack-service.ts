@@ -68,6 +68,8 @@ export async function sendMessage(
 			const messagePayload: any = {
 				channel,
 				text: text.replace( /\\n/g, '\n' ),
+				unfurl_links: false,
+				unfurl_media: false,
 			};
 			if ( replyTs ) {
 				messagePayload.thread_ts = replyTs;
