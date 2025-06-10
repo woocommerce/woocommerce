@@ -94,7 +94,7 @@ jobs:
         with:
           ref: trunk
           sparse-checkout: |
-            readme.txt
+            plugins/woocommerce/readme.txt
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update GitHub stable tag
