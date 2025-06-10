@@ -8,7 +8,6 @@ ignore:
     - 'tools/**'
     - 'packages/js/api-core-tests'
     - 'packages/js/create-woo-extension'
-    - 'packages/js/e2e-environment'
     - 'packages/js/eslint-plugin'
     - 'packages/js/internal-e2e-builds'
     - 'packages/js/internal-js-tests'

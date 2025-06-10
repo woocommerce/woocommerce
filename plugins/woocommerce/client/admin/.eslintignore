@@ -13,7 +13,6 @@ build-types
 
 # These packages have their own eslint config and command
 api
-e2e-environment
 
 # These packages don't have their eslint setup, but have many lint errors.
 api-core-tests
