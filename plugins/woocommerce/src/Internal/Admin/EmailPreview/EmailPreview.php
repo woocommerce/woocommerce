@@ -530,7 +530,7 @@ class EmailPreview {
 	 * @return string
 	 */
 	public function get_placeholder_image() {
-		return '<img src="' . WC()->plugin_url() . '/assets/images/placeholder.png" width="48" height="48" alt="" />';
+		return '<img src="' . WC()->plugin_url() . '/assets/images/placeholder.webp" width="48" height="48" alt="" />';
 	}
 
 	/**

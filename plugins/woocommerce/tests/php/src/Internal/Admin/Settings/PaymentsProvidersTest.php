@@ -59,7 +59,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	/**
 	 * Test getting payment gateways.
 	 */
-	public function test_get_payment_gateways() {
+	public function test_get_payment_gateways_with_core_gateways() {
 		// Arrange.
 		$this->load_core_paypal_pg();
 
@@ -86,6 +86,300 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test getting payment gateways.
+	 *
+	 * @dataProvider data_provider_test_get_payment_gateways
+	 *
+	 * @param array $gateways_to_mock     List of payment gateways instances to mock.
+	 * @param array $expected_gateway_ids List of expected gateway IDs.
+	 *
+	 * @return void
+	 */
+	public function test_get_payment_gateways( array $gateways_to_mock, array $expected_gateway_ids ) {
+		// Arrange.
+		$this->mock_payment_gateways( $gateways_to_mock );
+
+		// Act.
+		$payment_gateways = $this->sut->get_payment_gateways();
+
+		// Assert.
+		$this->assertCount( count( $expected_gateway_ids ), $payment_gateways, 'Unexpected number of payment gateways returned' );
+		$this->assertEquals(
+			$expected_gateway_ids,
+			array_values(
+				array_map(
+					function ( $gateway ) {
+						return $gateway->id;
+					},
+					$payment_gateways
+				)
+			),
+			'Unexpected payment gateway IDs returned'
+		);
+	}
+
+	/**
+	 * Data provider for test_get_payment_gateways.
+	 *
+	 * @return array
+	 */
+	public function data_provider_test_get_payment_gateways(): array {
+		return array(
+			'no gateways'                               => array(
+				array(),
+				array(),
+			),
+			'one extension with one gateway'            => array(
+				array(
+					'gateway1' => array(
+						'enabled'     => false,
+						'plugin_slug' => 'plugin1',
+						'plugin_file' => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway1' ),
+			),
+			'one extension with one shell gateway'      => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => false,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway1' ),
+			),
+			'one extension with only shell gateways'    => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => false,
+						// No title or description, so it's a shell gateway.
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'gateway2' => array(
+						'enabled'            => false,
+						// No title or description, so it's a shell gateway.
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway1', 'gateway2' ),
+			),
+			'one extension with shell and non-shell gateways' => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => false,
+						// No title or description, so it's a shell gateway.
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'gateway2' => array(
+						'enabled'            => false,
+						// No title or description, so it's a shell gateway.
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'gateway3' => array(
+						'enabled'            => true,
+						'method_title'       => 'Gateway 3',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'gateway4' => array(
+						'enabled'            => false,
+						// No title or description, so it's a shell gateway.
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway3' ),
+			),
+			'two extensions with one gateway each'      => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => 'Gateway 1',
+						'method_description' => 'Description for Gateway 1',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'gateway2' => array(
+						'enabled'            => false,
+						'method_title'       => 'Gateway 2',
+						'method_description' => 'Description for Gateway 2',
+						'plugin_slug'        => 'plugin2',
+						'plugin_file'        => 'plugin2/plugin2',
+					),
+				),
+				array( 'gateway1', 'gateway2' ),
+			),
+			'two extensions with multiple gateways'     => array(
+				array(
+					'shell_gateway1' => array(
+						'enabled'            => false,
+						// No title or description, so it's a shell gateway.
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'gateway1'       => array(
+						'enabled'            => true,
+						'method_title'       => 'Gateway 1',
+						'method_description' => 'Description for Gateway 1',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'shell_gateway2' => array(
+						'enabled'            => false,
+						// No title or description, so it's a shell gateway.
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'gateway2'       => array(
+						'enabled'            => false,
+						'method_title'       => 'Gateway 2',
+						'method_description' => 'Description for Gateway 2',
+						'plugin_slug'        => 'plugin2',
+						'plugin_file'        => 'plugin2/plugin2',
+					),
+					'gateway3'       => array(
+						'enabled'            => false,
+						'method_title'       => 'Gateway 3',
+						'method_description' => 'Description for Gateway 3',
+						'plugin_slug'        => 'plugin2',
+						'plugin_file'        => 'plugin2/plugin2',
+					),
+					'gateway4'       => array(
+						'enabled'            => true,
+						'method_title'       => 'Gateway 4',
+						'method_description' => 'Description for Gateway 4',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'gateway5'       => array(
+						'enabled'            => true,
+						// Not a shell because it has description.
+						'method_title'       => '',
+						'method_description' => 'Description for Gateway 5',
+						'plugin_slug'        => 'plugin3',
+						'plugin_file'        => 'plugin3/plugin3',
+					),
+					'gateway6'       => array(
+						'enabled'            => true,
+						// Not a shell because it has title.
+						'method_title'       => 'Title for Gateway 6',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin3',
+						'plugin_file'        => 'plugin3/plugin3',
+					),
+					'gateway7'       => array(
+						'enabled'            => true,
+						// No title or description, so it's a shell gateway.
+						// It will be included because it is the only one from the extension.
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin4',
+						'plugin_file'        => 'plugin4/plugin4',
+					),
+				),
+				array( 'gateway1', 'gateway2', 'gateway3', 'gateway4', 'gateway5', 'gateway6', 'gateway7' ),
+			),
+			'two non-extensions with one gateway each'  => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => 'Gateway 1',
+						'method_description' => 'Description for Gateway 1',
+						'plugin_slug'        => 'theme1',
+						'plugin_file'        => '',
+					),
+					'gateway2' => array(
+						'enabled'            => false,
+						'method_title'       => 'Gateway 2',
+						'method_description' => 'Description for Gateway 2',
+						'plugin_slug'        => 'theme2',
+						'plugin_file'        => '',
+					),
+				),
+				array( 'gateway1', 'gateway2' ),
+			),
+			'two non-extensions with one shell gateway each' => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						// No title or description, so it's a shell gateway.
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'theme1',
+						'plugin_file'        => '',
+					),
+					'gateway2' => array(
+						'enabled'            => false,
+						// No title or description, so it's a shell gateway.
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'theme2',
+						'plugin_file'        => '',
+					),
+				),
+				array( 'gateway1', 'gateway2' ),
+			),
+			'two non-extensions with a mix of gateways' => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						// No title or description, so it's a shell gateway.
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'theme1',
+						'plugin_file'        => '',
+					),
+					'gateway2' => array(
+						'enabled'            => false,
+						'method_title'       => 'Gateway 2',
+						'method_description' => 'Description for Gateway 2',
+						'plugin_slug'        => 'theme1',
+						'plugin_file'        => '',
+					),
+					'gateway3' => array(
+						'enabled'            => false,
+						// No title or description, so it's a shell gateway.
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'theme2',
+						'plugin_file'        => '',
+					),
+					'gateway4' => array(
+						'enabled'            => true,
+						'method_title'       => 'Gateway 4',
+						'method_description' => 'Description for Gateway 4',
+						'plugin_slug'        => 'theme2',
+						'plugin_file'        => '',
+					),
+				),
+				array( 'gateway1', 'gateway2', 'gateway3', 'gateway4' ),
+			),
+		);
+	}
+
+	/**
 	 * Test getting payment gateway base details.
 	 */
 	public function test_get_payment_gateway_base_details() {
@@ -101,6 +395,10 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'onboarding_started'          => true,
 				'onboarding_completed'        => true,
 				'test_mode_onboarding'        => true,
+				'title'                       => 'WooPayments for shoppers',
+				'method_title'                => 'WooPayments for merchants',
+				'description'                 => 'Accept payments with WooPayments.',
+				'method_description'          => '',
 				'plugin_slug'                 => 'woocommerce-payments',
 				'plugin_file'                 => 'woocommerce-payments/woocommerce-payments.php',
 				'recommended_payment_methods' => array(
@@ -158,7 +456,11 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'id', $gateway_details, 'Gateway `id` entry is missing' );
 		$this->assertArrayHasKey( '_order', $gateway_details, 'Gateway `_order` entry is missing' );
 		$this->assertArrayHasKey( 'title', $gateway_details, 'Gateway `title` entry is missing' );
+		// Uses the admin area title.
+		$this->assertSame( 'WooPayments for merchants', $gateway_details['title'] );
 		$this->assertArrayHasKey( 'description', $gateway_details, 'Gateway `description` entry is missing' );
+		// Falls back on using the public-facing description.
+		$this->assertSame( 'Accept payments with WooPayments.', $gateway_details['description'] );
 		$this->assertArrayHasKey( 'supports', $gateway_details, 'Gateway `supports` entry is missing' );
 		$this->assertIsList( $gateway_details['supports'], 'Gateway `supports` entry is not a list' );
 		$this->assertArrayHasKey( 'state', $gateway_details, 'Gateway `state` entry is missing' );

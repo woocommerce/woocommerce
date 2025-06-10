@@ -72,6 +72,10 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 	const sidebarTitle = (
 		<Button
 			onClick={ () => {
+				// Clear session flag to prevent redirect back to payments setup
+				// after exiting the flow and returning to the WC Admin home.
+				window.sessionStorage.setItem( 'lysWaiting', 'no' );
+
 				props.sendEventToSidebar( {
 					type: 'RETURN_FROM_PAYMENTS',
 				} );
