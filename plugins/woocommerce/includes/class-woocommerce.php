@@ -31,7 +31,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
-use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentHooks;
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsManager;
 use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsRenderer;
 
 /**
@@ -335,8 +335,8 @@ final class WooCommerce {
 		$container->get( ComingSoonCacheInvalidator::class );
 		$container->get( ComingSoonRequestHandler::class );
 		$container->get( OrderCountCacheService::class );
+		$container->get( FulfillmentsManager::class );
 		$container->get( FulfillmentsRenderer::class );
-		$container->get( FulfillmentHooks::class );
 		$container->get( EmailImprovements::class );
 
 		/**

@@ -8,14 +8,14 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Fulfillments;
 
 /**
- * FulfillmentHooks class.
+ * FulfillmentsManager class.
  *
  * This class is responsible for adding hooks related to fulfillments in WooCommerce.
  *
  * @since 9.9.0
  * @package WooCommerce\Internal\Fulfillments
  */
-class FulfillmentHooks {
+class FulfillmentsManager {
 	/**
 	 * Class constructor.
 	 */
