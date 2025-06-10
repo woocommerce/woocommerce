@@ -418,7 +418,12 @@ function setActiveProvider( country, type ) {
 
 		// Helper function to set field value and trigger events
 		const setFieldValue = ( input, value ) => {
-			if ( input && value ) {
+			if (
+				input &&
+				value !== null &&
+				value !== undefined &&
+				value !== ''
+			) {
 				input.value = value;
 				input.dispatchEvent( new Event( 'change' ) );
 
@@ -440,55 +445,110 @@ function setActiveProvider( country, type ) {
 			const countryInput = addressInputs[ type ][ 'country' ];
 			const postcodeInput = addressInputs[ type ][ 'postcode' ];
 			const stateInput = document.getElementById( `${ type }_state` );
-			const addressData = await activeAddressProvider[ type ].select(
-				addressId
-			);
+
+			const activeProviderId =
+				activeAddressProvider &&
+				activeAddressProvider[ type ] &&
+				activeAddressProvider[ type ].id
+					? activeAddressProvider[ type ].id
+					: '';
+
+			let addressData;
+			try {
+				addressData = await activeAddressProvider[ type ].select(
+					addressId
+				);
+			} catch ( error ) {
+				console.error(
+					'Error selecting address from provider',
+					activeProviderId,
+					error
+				);
+				return; // Exit early if address selection fails
+			}
+
+			// Validate that we received valid address data
+			if ( ! addressData || typeof addressData !== 'object' ) {
+				console.error(
+					'Invalid address data received from provider',
+					activeProviderId
+				);
+				return;
+			}
 
 			// First pass - set all available fields immediately
-			if ( addressData ) {
+			// Only set fields if the address data property exists and has a value
+			if ( addressData.address1 ) {
 				setFieldValue( addressInput, addressData.address1 );
+			}
+			if ( addressData.city ) {
 				setFieldValue( cityInput, addressData.city );
+			}
+			if ( addressData.country ) {
 				setFieldValue( countryInput, addressData.country );
+			}
+			if ( addressData.postcode ) {
 				setFieldValue( postcodeInput, addressData.postcode );
+			}
+			if ( addressData.state ) {
 				setFieldValue( stateInput, addressData.state );
 			}
 
 			// Second pass after a delay to verify all fields and fix any that don't match
 			setTimeout( () => {
-				if ( addressData ) {
-					const updatedCityInput = document.getElementById(
-						`${ type }_city`
-					);
-					const updatedPostcodeInput = document.getElementById(
-						`${ type }_postcode`
-					);
-					const updatedStateInput = document.getElementById(
-						`${ type }_state`
-					);
+				const updatedAddressInput = document.getElementById(
+					`${ type }_address_1`
+				);
+				const updatedCityInput = document.getElementById(
+					`${ type }_city`
+				);
+				const updatedCountryInput = document.getElementById(
+					`${ type }_country`
+				);
+				const updatedPostcodeInput = document.getElementById(
+					`${ type }_postcode`
+				);
+				const updatedStateInput = document.getElementById(
+					`${ type }_state`
+				);
 
-					// Verify and fix any fields that don't match the expected values
-					if (
-						updatedCityInput &&
-						getFieldValue( updatedCityInput ) !== addressData.city
-					) {
-						setFieldValue( updatedCityInput, addressData.city );
-					}
-					if (
-						updatedPostcodeInput &&
-						getFieldValue( updatedPostcodeInput ) !==
-							addressData.postcode
-					) {
-						setFieldValue(
-							updatedPostcodeInput,
-							addressData.postcode
-						);
-					}
-					if (
-						updatedStateInput &&
-						getFieldValue( updatedStateInput ) !== addressData.state
-					) {
-						setFieldValue( updatedStateInput, addressData.state );
-					}
+				// Verify and fix any fields that don't match the expected values
+				if (
+					updatedAddressInput &&
+					addressData.address1 &&
+					getFieldValue( updatedAddressInput ) !==
+						addressData.address1
+				) {
+					setFieldValue( updatedAddressInput, addressData.address1 );
+				}
+				if (
+					updatedCityInput &&
+					addressData.city &&
+					getFieldValue( updatedCityInput ) !== addressData.city
+				) {
+					setFieldValue( updatedCityInput, addressData.city );
+				}
+				if (
+					updatedCountryInput &&
+					addressData.country &&
+					getFieldValue( updatedCountryInput ) !== addressData.country
+				) {
+					setFieldValue( updatedCountryInput, addressData.country );
+				}
+				if (
+					updatedPostcodeInput &&
+					addressData.postcode &&
+					getFieldValue( updatedPostcodeInput ) !==
+						addressData.postcode
+				) {
+					setFieldValue( updatedPostcodeInput, addressData.postcode );
+				}
+				if (
+					updatedStateInput &&
+					addressData.state &&
+					getFieldValue( updatedStateInput ) !== addressData.state
+				) {
+					setFieldValue( updatedStateInput, addressData.state );
 				}
 			}, 100 );
 		}
