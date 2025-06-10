@@ -236,24 +236,25 @@ function setActiveProvider( country, type ) {
 		};
 
 		function disableBrowserAutofill( input ) {
-			if ( input.getAttribute( 'autocomplete' ) === 'off' ) {
+			if ( input.getAttribute( 'autocomplete' ) === 'none' ) {
 				return;
 			}
 
-			input.setAttribute( 'autocomplete', 'off' );
-			input.setAttribute( 'data-1p-ignore', '' );
-			input.setAttribute( 'data-lpignore', '' );
+			input.setAttribute( 'autocomplete', 'none' );
+			input.setAttribute( 'data-1p-ignore', 'true' );
+			input.setAttribute( 'data-lpignore', 'true' );
 
-			// We need to refocus the element so that the browser can reset the autocomplete attribute.
+			// To prevent 1Password/LastPass and autocomplete clashes, we need to refocus the element
+			// This is achieved by removing and re-adding the element to trigger browser updates
 			const parentElement = input.parentElement;
 			if ( parentElement ) {
-				parentElement.insertBefore( input, parentElement.firstChild );
+				parentElement.appendChild( parentElement.removeChild( input ) );
 				input.focus();
 			}
 		}
 
 		function enableBrowserAutofill( input ) {
-			if ( input.getAttribute( 'autocomplete' ) !== 'off' ) {
+			if ( input.getAttribute( 'autocomplete' ) !== 'none' ) {
 				return;
 			}
 
