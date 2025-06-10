@@ -47,14 +47,14 @@ jQuery( function( $ ) {
 		.on( 'keydown', '.wc-tabs li a, ul.tabs li a', function( e ) {
 			var isRTL     = document.documentElement.dir === 'rtl';
 			var direction = e.key;
-			var right     = isRTL ? 'ArrowLeft' : 'ArrowRight';
-			var left      = isRTL ? 'ArrowRight' : 'ArrowLeft';
+			var next      = isRTL ? 'ArrowLeft' : 'ArrowRight';
+			var prev      = isRTL ? 'ArrowRight' : 'ArrowLeft';
 			var down      = 'ArrowDown';
 			var up        = 'ArrowUp';
 			var home	  = 'Home';
 			var end		  = 'End';
 
-			if ( ! [ right, left, down, up, end, home ].includes( direction ) ) {
+			if ( ! [ next, prev, down, up, end, home ].includes( direction ) ) {
 				return;
 			}
 
@@ -64,7 +64,7 @@ jQuery( function( $ ) {
 			var $tabs         = $tabsList.find( 'a[role="tab"]' );
 			var endIndex	  = $tabs.length - 1;
 			var tabIndex      = $tabs.index( $tab );
-			var targetIndex   = direction === left || direction === up ? tabIndex - 1 : tabIndex + 1;
+			var targetIndex   = direction === prev || direction === up ? tabIndex - 1 : tabIndex + 1;
 			var orientation   = 'horizontal';
 
 			/**
@@ -85,7 +85,7 @@ jQuery( function( $ ) {
 			 * If the tabs are horizontal, we don't need to detect up/down keys
 			*/
 			if (
-				( orientation === 'vertical' && ( direction === left || direction === right ) ) ||
+				( orientation === 'vertical' && ( direction === prev || direction === next ) ) ||
 				( orientation === 'horizontal' && ( direction === up || direction === down ) )
 			) {
 				return;
@@ -94,13 +94,13 @@ jQuery( function( $ ) {
 			e.preventDefault();
 
 			if (
-				( direction === left && tabIndex === 0 && orientation === 'horizontal' ) ||
+				( direction === prev && tabIndex === 0 && orientation === 'horizontal' ) ||
 				( direction === up && tabIndex === 0 && orientation === 'vertical' ) ||
 				direction === end
 			) {
 				targetIndex = endIndex;
 			} else if (
-				( right === direction && tabIndex === endIndex && orientation === 'horizontal' ) ||
+				( next === direction && tabIndex === endIndex && orientation === 'horizontal' ) ||
 				( down === direction && tabIndex === endIndex && orientation === 'vertical' ) ||
 				direction === home
 			) {
