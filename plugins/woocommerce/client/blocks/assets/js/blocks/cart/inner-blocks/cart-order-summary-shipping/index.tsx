@@ -9,8 +9,10 @@ import { registerBlockType } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
+import metadata from './block.json';
 
 registerBlockType( 'woocommerce/cart-order-summary-shipping-block', {
+	...metadata,
 	icon: {
 		src: (
 			<Icon
