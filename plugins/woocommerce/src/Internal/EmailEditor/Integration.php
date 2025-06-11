@@ -13,6 +13,8 @@ use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransact
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplateApiController;
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger_Interface;
 use Throwable;
 use WP_Post;
 
@@ -78,10 +80,22 @@ class Integration {
 	 * Initialize the integration.
 	 */
 	public function initialize() {
+		$this->init_logger();
 		$this->init_hooks();
 		$this->extend_post_api();
 		$this->extend_template_post_api();
 		$this->register_hooks();
+	}
+
+	/**
+	 * Initialize the logger.
+	 */
+	public function init_logger() {
+		$editor_container = Email_Editor_Container::container();
+		$logger           = $editor_container->get( Email_Editor_Logger::class );
+
+		// Register the WooCommerce logger with the email editor package.
+		$logger->set_logger( new Logger( wc_get_logger() ) );
 	}
 
 	/**
@@ -123,13 +137,13 @@ class Integration {
 			'name' => self::EMAIL_POST_TYPE,
 			'args' => array(
 				'labels'   => array(
-					'name'          => __( 'Woo Emails', 'woocommerce' ),
-					'singular_name' => __( 'Woo Email', 'woocommerce' ),
-					'add_new_item'  => __( 'Add New Woo Email', 'woocommerce' ),
-					'edit_item'     => __( 'Edit Woo Email', 'woocommerce' ),
-					'new_item'      => __( 'New Woo Email', 'woocommerce' ),
-					'view_item'     => __( 'View Woo Email', 'woocommerce' ),
-					'search_items'  => __( 'Search Woo Emails', 'woocommerce' ),
+					'name'          => __( 'Emails', 'woocommerce' ),
+					'singular_name' => __( 'Email', 'woocommerce' ),
+					'add_new_item'  => __( 'Add Email', 'woocommerce' ),
+					'edit_item'     => __( 'Edit Email', 'woocommerce' ),
+					'new_item'      => __( 'New Email', 'woocommerce' ),
+					'view_item'     => __( 'View Email', 'woocommerce' ),
+					'search_items'  => __( 'Search Emails', 'woocommerce' ),
 				),
 				'rewrite'  => array( 'slug' => self::EMAIL_POST_TYPE ),
 				'supports' => array(
@@ -137,6 +151,7 @@ class Integration {
 					'editor' => array(
 						'default-mode' => 'template-locked',
 					),
+					'excerpt',
 				),
 			),
 		);

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { EllipsisMenu } from '@woocommerce/components';
-import { PaymentProvider } from '@woocommerce/data';
+import { PaymentsProvider } from '@woocommerce/data';
 import { useState } from '@wordpress/element';
 
 /**
@@ -18,9 +18,9 @@ interface EllipsisMenuProps {
 	 */
 	label: string;
 	/**
-	 * The payment provider associated with the menu.
+	 * The payments provider associated with the menu.
 	 */
-	provider: PaymentProvider;
+	provider: PaymentsProvider;
 }
 
 /**
@@ -41,8 +41,8 @@ export const EllipsisMenuWrapper = ( {
 		isWooPayments( provider.id ) &&
 		provider._type === 'gateway' &&
 		provider.state?.account_connected &&
-		( provider.onboarding?.state.test_mode ||
-			! provider.onboarding?.state.completed );
+		( provider.onboarding?.state?.test_mode ||
+			! provider.onboarding?.state?.completed );
 
 	return (
 		<>
@@ -53,11 +53,7 @@ export const EllipsisMenuWrapper = ( {
 						providerId={ provider.id }
 						pluginFile={ provider.plugin.file }
 						isSuggestion={ provider._type === 'suggestion' }
-						suggestionId={
-							provider._type === 'suggestion'
-								? provider._suggestion_id
-								: undefined
-						}
+						suggestionId={ provider._suggestion_id || '' }
 						suggestionHideUrl={
 							provider._type === 'suggestion'
 								? provider._links?.hide?.href
@@ -78,7 +74,7 @@ export const EllipsisMenuWrapper = ( {
 			<WooPaymentsResetAccountModal
 				isOpen={ resetAccountModalVisible }
 				onClose={ () => setResetAccountModalVisible( false ) }
-				isTestMode={ provider.onboarding?.state.test_mode }
+				isTestMode={ provider.onboarding?.state?.test_mode }
 			/>
 		</>
 	);

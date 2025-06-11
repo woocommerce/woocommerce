@@ -47,7 +47,7 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'This order notification will be sent to shoppers after an order is placed on-hold from a Pending, Cancelled, or Failed order status.', 'woocommerce' )
+				? __( 'Send an email to customers notifying them when their order has been placed on hold', 'woocommerce' )
 				: __( 'This is an order notification sent to customers containing order details after an order is placed on-hold from Pending, Cancelled or Failed order status.', 'woocommerce' );
 		}
 

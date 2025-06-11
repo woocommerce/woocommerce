@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: drop unsupported @woocommerce/internal-e2e-builds package.

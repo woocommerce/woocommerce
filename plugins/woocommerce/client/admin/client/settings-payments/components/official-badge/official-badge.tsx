@@ -10,27 +10,37 @@ import { createInterpolateElement, useRef, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { WC_ASSET_URL } from '~/utils/admin-settings';
+import { recordPaymentsEvent } from '~/settings-payments/utils';
 
 interface OfficialBadgeProps {
 	/**
 	 * The style of the badge.
 	 */
 	variant: 'expanded' | 'compact';
+
+	/**
+	 * The id of the official suggestion.
+	 */
+	suggestionId: string;
 }
 
 /**
  * A component that displays an official badge.
+ *
  * The style of the badge can be either "expanded" or "compact".
  *
  * @example
  * // Render an official badge with icon and text.
- * <OfficialBadge variant="expanded" />
+ * <OfficialBadge variant="expanded" suggestionId="some_id" />
  *
  * @example
  * // Render an official badge with just the icon.
- * <OfficialBadge variant="compact" />
+ * <OfficialBadge variant="compact" suggestionId="some_id" />
  */
-export const OfficialBadge = ( { variant }: OfficialBadgeProps ) => {
+export const OfficialBadge = ( {
+	variant,
+	suggestionId,
+}: OfficialBadgeProps ) => {
 	const [ isPopoverVisible, setPopoverVisible ] = useState( false );
 	const buttonRef = useRef< HTMLButtonElement >( null );
 
@@ -45,6 +55,11 @@ export const OfficialBadge = ( { variant }: OfficialBadgeProps ) => {
 		}
 
 		setPopoverVisible( ( prev ) => ! prev );
+
+		// Record the event when the user clicks on the badge.
+		recordPaymentsEvent( 'official_badge_click', {
+			suggestion_id: suggestionId,
+		} );
 	};
 
 	const handleFocusOutside = () => {
@@ -100,6 +115,16 @@ export const OfficialBadge = ( { variant }: OfficialBadgeProps ) => {
 												target="_blank"
 												rel="noreferrer"
 												type="external"
+												onClick={ () => {
+													// Record the event when the user clicks on the learn more link.
+													recordPaymentsEvent(
+														'official_badge_learn_more_click',
+														{
+															suggestion_id:
+																suggestionId,
+														}
+													);
+												} }
 											>
 												{ __(
 													'Learn more',

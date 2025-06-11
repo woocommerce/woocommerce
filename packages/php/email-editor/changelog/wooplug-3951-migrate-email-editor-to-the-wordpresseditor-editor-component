@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add autosave timeout and disable code editor in editor settings
