@@ -188,6 +188,8 @@ jobs:
       steps:
         - name: Checkout repository
           uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
   
         - name: Check for database updates
           id: check-db-updates
@@ -200,7 +202,7 @@ jobs:
               
               console.log(`Checking for database updates for version: ${version}`);
               
-
+              try {
                 const fileContent = fs.readFileSync(path, 'utf8');
                 
                 // Look for the $db_updates array definition
@@ -244,56 +246,75 @@ jobs:
                   core.setOutput('updates_list', '');
                 }
                 
+              } catch (error) {
+                console.error(`Error reading file: ${error.message}`);
+                core.setFailed(`Failed to check database updates: ${error.message}`);
+              }
+  
         - name: Find PRs for each database update
-                id: find-pr
-                if: ${{ steps.check-db-updates.outputs.has_updates == 'true' }}
-                run: |
-                  FILE_PATH="plugins/woocommerce/includes/class-wc-install.php"
-                  UPDATES="${{ steps.check-db-updates.outputs.updates_list }}"
-                  
-                  echo "Searching for PRs that introduced database updates"
-                  echo "Updates to search for: $UPDATES"
-                  echo ""
-                  
-                  echo "Database updates:"
-                  
-                  # Convert comma-separated list to array
-                  IFS=',' read -ra UPDATE_ARRAY <<< "$UPDATES"
-                  
-                  for update_function in "${UPDATE_ARRAY[@]}"; do
-                    # Clean up the function name (remove any extra whitespace)
-                    update_function=$(echo "$update_function" | xargs)
-                    
-                    echo "Searching for: $update_function"
-                    
-                    # Find the commit that first added this update function
-                    commit=$(git log -S"'$update_function'" --reverse --oneline --format="%H" -- "$FILE_PATH" | head -1)
-                    
-                    if [ -z "$commit" ]; then
-                      # Try with double quotes if single quotes didn't work
-                      commit=$(git log -S"\"$update_function\"" --reverse --oneline --format="%H" -- "$FILE_PATH" | head -1)
+          id: find-pr
+          if: ${{ steps.check-db-updates.outputs.has_updates == 'true' }}
+          run: |
+            FILE_PATH="plugins/woocommerce/includes/class-wc-install.php"
+            UPDATES="${{ steps.check-db-updates.outputs.updates_list }}"
+            
+            echo "Searching for PRs that introduced database updates"
+            echo "Updates to search for: $UPDATES"
+            echo ""
+            
+            echo "Database updates:"
+            
+            # Convert comma-separated list to array
+            IFS=',' read -ra UPDATE_ARRAY <<< "$UPDATES"
+            
+            for update_function in "${UPDATE_ARRAY[@]}"; do
+              # Clean up the function name (remove any extra whitespace)
+              update_function=$(echo "$update_function" | xargs)
+              
+              echo "Searching for: $update_function"
+              
+              # Use git log with pickaxe to find when this function was added to the db_updates array
+              # Look for the pattern within the file content, not just any occurrence
+              commit=$(git log --follow --pickaxe-regex -S"'$update_function'" --format="%H %s" -- "$FILE_PATH" | \
+                while read commit_hash commit_msg; do
+                  # Check if this commit actually added the function to the db_updates array
+                  if git show "$commit_hash" -- "$FILE_PATH" | grep -q "^+.*'$update_function'"; then
+                    echo "$commit_hash $commit_msg"
+                    break
+                  fi
+                done | head -1)
+              
+              if [ -z "$commit" ]; then
+                # Try with double quotes if single quotes didn't work
+                commit=$(git log --follow --pickaxe-regex -S"\"$update_function\"" --format="%H %s" -- "$FILE_PATH" | \
+                  while read commit_hash commit_msg; do
+                    if git show "$commit_hash" -- "$FILE_PATH" | grep -q "^+.*\"$update_function\""; then
+                      echo "$commit_hash $commit_msg"
+                      break
                     fi
-                    
-                    if [ -n "$commit" ]; then
-                      echo "Found commit: $commit"
-                      
-                      # Get the commit message to look for PR number
-                      commit_message=$(git log --format="%s" -1 "$commit")
-                      echo "Commit message: $commit_message"
-                      
-                      # Extract PR number from commit message (common patterns: #1234, (#1234), PR #1234)
-                      pr_number=$(echo "$commit_message" | grep -oE '\(#[0-9]+\)|#[0-9]+|PR #[0-9]+' | grep -oE '[0-9]+' | head -1)
-                      
-                      if [ -n "$pr_number" ]; then
-                        pr_url="https://github.com/${{ github.repository }}/pull/$pr_number"
-                        echo "* \`$update_function\`, [$pr_url]($pr_url)"
-                      else
-                        # If no PR number found, link to the commit
-                        commit_url="https://github.com/${{ github.repository }}/commit/$commit"
-                        echo "* \`$update_function\`, [$commit_url]($commit_url)"
-                      fi
-                    else
-                      echo "* \`$update_function\`, [Not found]"
-                    fi
-                    echo ""
-                  done
+                  done | head -1)
+              fi
+              
+              if [ -n "$commit" ]; then
+                commit_hash=$(echo "$commit" | cut -d' ' -f1)
+                commit_message=$(echo "$commit" | cut -d' ' -f2-)
+                
+                echo "Found commit: $commit_hash"
+                echo "Commit message: $commit_message"
+                
+                # Extract PR number from commit message (common patterns: #1234, (#1234), PR #1234)
+                pr_number=$(echo "$commit_message" | grep -oE '\(#[0-9]+\)|#[0-9]+|PR #[0-9]+' | grep -oE '[0-9]+' | head -1)
+                
+                if [ -n "$pr_number" ]; then
+                  pr_url="https://github.com/${{ github.repository }}/pull/$pr_number"
+                  echo "* \`$update_function\`, [$pr_url]($pr_url)"
+                else
+                  # If no PR number found, link to the commit
+                  commit_url="https://github.com/${{ github.repository }}/commit/$commit_hash"
+                  echo "* \`$update_function\`, [$commit_url]($commit_url)"
+                fi
+              else
+                echo "* \`$update_function\`, [Not found]"
+              fi
+              echo ""
+            done
