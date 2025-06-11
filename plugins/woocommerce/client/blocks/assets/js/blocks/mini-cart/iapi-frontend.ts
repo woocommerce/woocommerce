@@ -58,7 +58,7 @@ type MiniCart = {
 };
 
 // Destructure state in an empty call to the store, to ensure that state can be correctly typed.
-const { state: miniCartState } = store< MiniCart >(
+const { state: miniCartState, callbacks } = store< MiniCart >(
 	'woocommerce/mini-cart',
 	{},
 	{ lock: true }
@@ -124,18 +124,16 @@ store< MiniCart >(
 
 		callbacks: {
 			setupOpenDrawerListener() {
-				// const { addToCartBehaviour } = getConfig(
-				// 	'woocommerce/mini-cart'
-				// );
+				const { addToCartBehaviour } = getConfig(
+					'woocommerce/mini-cart'
+				);
 
-				console.log( 'init' );
-
-				// if ( addToCartBehaviour === 'open_drawer' ) {
-				// 	document.body.addEventListener(
-				// 		'wc-blocks_added_to_cart',
-				// 		callbacks.openDrawer
-				// 	);
-				// }
+				if ( addToCartBehaviour === 'open_drawer' ) {
+					document.body.addEventListener(
+						'wc-blocks_added_to_cart',
+						callbacks.openDrawer
+					);
+				}
 			},
 
 			openDrawer() {

@@ -468,12 +468,24 @@ class MiniCart extends AbstractBlock {
 		$cart                             = $this->get_cart_instance();
 		$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
 		$badge_is_visible                 = ( 'always' === $product_count_visibility ) || ( 'never' !== $product_count_visibility && $cart_item_count > 0 );
+		$subtotal                         = $display_cart_price_including_tax ? $cart->get_subtotal_tax() : $cart->get_subtotal();
+		$formatted_subtotal               = '';
+		$html                             = new \WP_HTML_Tag_Processor( wc_price( $subtotal ) );
+
+		if ( $html->next_tag( 'bdi' ) ) {
+			while ( $html->next_token() ) {
+				if ( '#text' === $html->get_token_name() ) {
+						$formatted_subtotal .= $html->get_modifiable_text();
+				}
+			}
+		}
 
 		wp_interactivity_state(
 			$this->get_full_block_name(),
 			array(
-				'totalItemsInCart' => $cart_item_count,
-				'badgeIsVisible'   => $badge_is_visible,
+				'totalItemsInCart'  => $cart_item_count,
+				'badgeIsVisible'    => $badge_is_visible,
+				'formattedSubtotal' => $formatted_subtotal,
 			)
 		);
 
@@ -490,18 +502,6 @@ class MiniCart extends AbstractBlock {
 			)
 		);
 
-		$subtotal           = $display_cart_price_including_tax ? $cart->get_subtotal_tax() : $cart->get_subtotal();
-		$formatted_subtotal = '';
-		$html               = new \WP_HTML_Tag_Processor( wc_price( $subtotal ) );
-
-		if ( $html->next_tag( 'bdi' ) ) {
-			while ( $html->next_token() ) {
-				if ( '#text' === $html->get_token_name() ) {
-						$formatted_subtotal .= $html->get_modifiable_text();
-				}
-			}
-		}
-
 		$cart_always_shows_price = isset( $attributes['hasHiddenPrice'] ) && false === $attributes['hasHiddenPrice'];
 		$price_color             = isset( $attributes['priceColor']['color'] ) ? $attributes['priceColor']['color'] : '';
 
@@ -510,6 +510,7 @@ class MiniCart extends AbstractBlock {
 		
 		<div
 			data-wp-interactive="woocommerce/mini-cart"
+			data-wp-init="callbacks.setupOpenDrawerListener"
 			<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<?php echo wp_interactivity_data_wp_context( $context ); ?>
 			class="<?php echo esc_attr( $wrapper_classes ); ?>"
@@ -528,10 +529,6 @@ class MiniCart extends AbstractBlock {
 				</span>
 				<?php if ( $cart_always_shows_price ) : ?>
 						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
-							<?php
-								// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-								echo $formatted_subtotal;
-							?>
 						</span>
 						<?php
 							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
