@@ -1087,7 +1087,7 @@ class WooPaymentsService {
 		// Record an event for the KYC session being created.
 		$event_props = array(
 			'new_account_created' => $response['accountCreated'] ?? false,
-			'onboarding_mode'     => ( $response['isLive'] ?? false ) ? 'live' : 'test',
+			'account_mode'        => ( $response['isLive'] ?? false ) ? 'live' : 'test',
 			'source'              => $source,
 		);
 		$this->record_event(
@@ -1194,12 +1194,17 @@ class WooPaymentsService {
 		}
 
 		// Record an event for the KYC session being finished.
+		$event_props = array(
+			'successful_kyc'    => filter_var( $response['success'] ?? false, FILTER_VALIDATE_BOOLEAN | FILTER_NULL_ON_FAILURE ) ?? false,
+			'account_mode'      => ( 'live' === ( $response['mode'] ?? false ) ) ? 'live' : 'test',
+			'details_submitted' => filter_var( $response['details_submitted'] ?? false, FILTER_VALIDATE_BOOLEAN | FILTER_NULL_ON_FAILURE ) ?? false,
+			'promotion_id'      => $response['promotion_id'] ?? 'none',
+			'source'            => $source,
+		);
 		$this->record_event(
 			self::EVENT_PREFIX . 'onboarding_kyc_session_finished',
 			$location,
-			array(
-				'source' => $source,
-			)
+			$event_props
 		);
 
 		// Mark the business verification step as completed.
