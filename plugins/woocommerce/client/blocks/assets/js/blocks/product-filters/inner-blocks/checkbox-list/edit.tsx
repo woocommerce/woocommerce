@@ -85,14 +85,14 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 		<>
 			<div { ...blockProps }>
 				<Disabled>
-					<ul className="wc-block-product-filter-checkbox-list__list">
+					<div className="wc-block-product-filter-checkbox-list__items">
 						{ isLoading && loadingState }
 						{ ! isLoading &&
 							( isLongList
 								? items.slice( 0, threshold )
 								: items
 							).map( ( item, index ) => (
-								<li
+								<div
 									key={ index }
 									className="wc-block-product-filter-checkbox-list__item"
 								>
@@ -125,9 +125,9 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 											) }
 										</span>
 									</label>
-								</li>
+								</div>
 							) ) }
-					</ul>
+					</div>
 					{ ! isLoading && isLongList && (
 						<button className="wc-block-product-filter-checkbox-list__show-more">
 							{ __( 'Show more…', 'woocommerce' ) }
