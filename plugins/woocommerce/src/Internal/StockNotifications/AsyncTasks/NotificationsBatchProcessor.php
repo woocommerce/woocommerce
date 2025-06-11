@@ -149,7 +149,8 @@ class NotificationsBatchProcessor implements BatchProcessorInterface {
 		$table                = $wpdb->prefix . 'wc_stock_notifications';
 		$statuses_placeholder = implode( ', ', array_fill( 0, count( Config::get_eligible_stock_statuses() ), '%s' ) );
 
-		$sql = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$sql = $wpdb->prepare(
 			"SELECT n.id
 			FROM %i AS n
 			LEFT JOIN %i AS t ON n.product_id = t.post_id
@@ -161,7 +162,7 @@ class NotificationsBatchProcessor implements BatchProcessorInterface {
 			AND ss.meta_key = '_stock_status'
 			AND ss.meta_value IN ($statuses_placeholder)
 			ORDER BY n.product_id ASC
-			LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			LIMIT %d",
 			array(
 				$table,
 				$wpdb->postmeta,
@@ -172,6 +173,7 @@ class NotificationsBatchProcessor implements BatchProcessorInterface {
 				$size,
 			)
 		);
+		// phpcs:enable
 
 		$data = $wpdb->get_col( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		return array_map( 'intval', $data );
