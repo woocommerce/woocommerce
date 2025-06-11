@@ -183,7 +183,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			 * @param number $default_quantity The default quantity.
 			 * @param number $product_id The product id.
 			 */
-			$default_quantity = apply_filters( 'woocommerce_add_to_cart_quantity', 1, $product->get_id() );
+			$default_quantity = apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product );
 
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options',
@@ -230,11 +230,17 @@ class AddToCartWithOptions extends AbstractBlock {
 					$default_quantity
 				);
 
-				// Check for any "sold individually" products and set their default quantity to 0.
+				// Set default quantity for each child product.
 				foreach ( $context['groupedProductIds'] as $child_product_id ) {
 					$child_product = wc_get_product( $child_product_id );
-					if ( $child_product && $child_product->is_sold_individually() ) {
-						$context['quantity'][ $child_product_id ] = 0;
+					if ( $child_product && $this->is_child_product_purchasable( $child_product ) ) {
+						$default_child_quantity = apply_filters( 'woocommerce_quantity_input_min', $child_product->get_min_purchase_quantity(), $child_product );
+						$context['quantity'][ $child_product_id ] = $default_child_quantity;
+
+						// Check for any "sold individually" products and set their default quantity to 0.
+						if ( $child_product->is_sold_individually() ) {
+							$context['quantity'][ $child_product_id ] = 0;
+						}
 					}
 				}
 			}
