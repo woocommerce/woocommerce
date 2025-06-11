@@ -324,6 +324,10 @@ jobs:
             📊 *Statistics:*
             • Commits: ${{ needs.count-commits-and-contributors.outputs.commit_count }}
             • Contributors: ${{ needs.count-commits-and-contributors.outputs.contributor_count }}
-            ${{ needs.generate-contributors-list.outputs.contributors_url && format('• <{0}|View Contributors List>', needs.generate-contributors-list.outputs.contributors_url) || '' }}
+            ${{ needs.generate-contributors-list.outputs.contributor_list_path && format('• <{0}|View Contributors List>', needs.generate-contributors-list.outputs.contributor_list_path) || '' }}
             
-            ${{ needs.has-db-updates.outputs.has_updates == 'true' && '💾 *Database Updates:*\nℹ️ Check the workflow logs for database update details' || '✅ No database updates required' }}
+            *** ${{ needs.generate-contributors-list.outputs.contributor_list_path }}
+            *** ${{ needs.db-updates.outputs.has_updates }}
+            *** ${{ needs.db-updates.outputs.formatted_updates }}
+            
+            ${{ needs.db-updates.outputs.has_updates == 'true' && '💾 *Database Updates:*\nℹ️ Check the workflow logs for database update details' || '✅ No database updates required' }}
