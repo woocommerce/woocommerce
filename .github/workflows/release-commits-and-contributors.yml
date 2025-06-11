@@ -324,10 +324,11 @@ jobs:
             📊 *Statistics:*
             • Commits: ${{ needs.count-commits-and-contributors.outputs.commit_count }}
             • Contributors: ${{ needs.count-commits-and-contributors.outputs.contributor_count }}
-            ${{ steps.generate-contributors-list.outputs.filepath }} && format('• <{0}|View Contributors List>', needs.generate-contributors-list.outputs.contributor_list_path) || '' }}
+            1. ${{ steps.generate-contributors-list.outputs.filepath }} && format('• <{0}|View Contributors List>', needs.generate-contributors-list.outputs.contributor_list_path) || '' }}
+            2. ${{ steps.generate-contributors-list.outputs.filepath }} && format('• <{0}|View Contributors List>', steps.generate-contributors-list.outputs.filepath) || '' }}
             
             - filepath: ${{ steps.generate-contributors-list.outputs.filepath }}
             - hasupdates: ${{ needs.db-updates.outputs.has_updates }}
             - updates: ${{ needs.db-updates.outputs.formatted_updates }}
             
-            ${{ needs.db-updates.outputs.has_updates == 'true' && '💾 *Database Updates:*\n${{ needs.db-updates.outputs.formatted_updates }} || '✅ No database updates required' }}
+            ${{ needs.db-updates.outputs.has_updates == 'true' && needs.db-updates.outputs.formatted_updates || '✅ No database updates required' }}
