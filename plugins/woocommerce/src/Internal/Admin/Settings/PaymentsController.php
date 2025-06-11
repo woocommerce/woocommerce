@@ -134,6 +134,11 @@ class PaymentsController {
 			return $settings;
 		}
 
+		// Reset the received value if the type is invalid.
+		if ( ! is_array( $settings ) ) {
+			$settings = array();
+		}
+
 		// Add the business location country to the settings.
 		if ( ! isset( $settings[ Payments::PAYMENTS_NOX_PROFILE_KEY ] ) ) {
 			$settings[ Payments::PAYMENTS_NOX_PROFILE_KEY ] = array();
@@ -151,6 +156,11 @@ class PaymentsController {
 	 * @return array The updated list of allowed promo note IDs.
 	 */
 	public function add_allowed_promo_notes( $promo_notes = array() ): array {
+		// Reset the value if the type is invalid.
+		if ( ! is_array( $promo_notes ) ) {
+			$promo_notes = array();
+		}
+
 		try {
 			$providers = $this->payments->get_payment_providers( $this->payments->get_country(), false );
 		} catch ( Throwable $e ) {
@@ -186,6 +196,16 @@ class PaymentsController {
 	 */
 	public function handle_sections( $sections = array() ): array {
 		global $current_section;
+
+		// Reset the value if the type is invalid.
+		if ( ! is_array( $sections ) ) {
+			$sections = array();
+		}
+
+		// Bail if the current section global is empty or of the wrong type.
+		if ( empty( $current_section ) || ! is_string( $current_section ) ) {
+			return $sections;
+		}
 
 		// For WooPayments and offline payment methods settings pages, we don't want any section navigation.
 		if ( in_array( $current_section, array( WooPaymentsService::GATEWAY_ID, WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ), true ) ) {
@@ -248,6 +268,7 @@ class PaymentsController {
 			);
 
 			// In case of an error, default to false.
+			// Set the transient to avoid repeated errors.
 			set_transient( self::TRANSIENT_HAS_PROVIDERS_WITH_INCENTIVE_KEY, 'no', HOUR_IN_SECONDS );
 			return false;
 		}
