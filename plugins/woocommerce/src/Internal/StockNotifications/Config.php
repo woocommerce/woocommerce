@@ -14,11 +14,35 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 class Config {
 
 	/**
+	 * Runtime cache for supported product types.
+	 *
+	 * @var array<string>
+	 */
+	private static array $supported_product_types = array();
+
+	/**
+	 * Runtime cache for supported product statuses.
+	 *
+	 * @var array<string>
+	 */
+	private static array $supported_product_statuses = array();
+
+	/**
+	 * Runtime cache for eligible stock statuses.
+	 *
+	 * @var array<string>
+	 */
+	private static array $eligible_stock_statuses = array();
+
+	/**
 	 * Get the supported product types.
 	 *
 	 * @return array<string>
 	 */
 	public static function get_supported_product_types(): array {
+		if ( ! empty( self::$supported_product_types ) ) {
+			return self::$supported_product_types;
+		}
 
 		/**
 		 * Filter: woocommerce_stock_notifications_supported_product_types
@@ -27,7 +51,7 @@ class Config {
 		 *
 		 * @param array $product_types Product types.
 		 */
-		return (array) apply_filters(
+		self::$supported_product_types = (array) apply_filters(
 			'woocommerce_stock_notifications_supported_product_types',
 			array(
 				ProductType::SIMPLE,
@@ -35,6 +59,8 @@ class Config {
 				ProductType::VARIATION,
 			)
 		);
+
+		return self::$supported_product_types;
 	}
 
 	/**
@@ -43,6 +69,9 @@ class Config {
 	 * @return array<string>
 	 */
 	public static function get_supported_product_statuses(): array {
+		if ( ! empty( self::$supported_product_statuses ) ) {
+			return self::$supported_product_statuses;
+		}
 
 		/**
 		 * Filter: woocommerce_stock_notifications_supported_product_stock_statuses
@@ -51,12 +80,14 @@ class Config {
 		 *
 		 * @param array $product_stock_statuses Product stock statuses.
 		 */
-		return (array) apply_filters(
+		self::$supported_product_statuses = (array) apply_filters(
 			'woocommerce_stock_notifications_supported_product_stock_statuses',
 			array(
 				ProductStatus::PUBLISH,
 			)
 		);
+
+		return self::$supported_product_statuses;
 	}
 
 	/**
@@ -65,6 +96,9 @@ class Config {
 	 * @return array<string>
 	 */
 	public static function get_eligible_stock_statuses(): array {
+		if ( ! empty( self::$eligible_stock_statuses ) ) {
+			return self::$eligible_stock_statuses;
+		}
 
 		/**
 		 * Filter: woocommerce_stock_notifications_supported_stock_statuses
@@ -73,12 +107,14 @@ class Config {
 		 *
 		 * @param array $stock_statuses Stock statuses.
 		 */
-		return (array) apply_filters(
+		self::$eligible_stock_statuses = (array) apply_filters(
 			'woocommerce_stock_notifications_supported_stock_statuses',
 			array(
 				ProductStockStatus::IN_STOCK,
 				ProductStockStatus::ON_BACKORDER,
 			)
 		);
+
+		return self::$eligible_stock_statuses;
 	}
 }
