@@ -2,42 +2,19 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { test as base, expect, Editor, wpCLI } from '@woocommerce/e2e-utils';
-
-/**
- * Internal dependencies
- */
-
-class BlockUtils {
-	editor: Editor;
-	page: Page;
-
-	constructor( { editor, page }: { editor: Editor; page: Page } ) {
-		this.editor = editor;
-		this.page = page;
-	}
-
-	async createManagedStockProduct() {
-		await wpCLI(
-			'wc product create --name="A Managed Stock" --regular_price=10 --manage_stock=true --stock_quantity=1 --user=admin'
-		);
-	}
-}
-
-const test = base.extend< { blockUtils: BlockUtils } >( {
-	blockUtils: async ( { editor, page }, use ) => {
-		await use( new BlockUtils( { editor, page } ) );
-	},
-} );
+import { test, expect, Editor, wpCLI } from '@woocommerce/e2e-utils';
 
 test.describe( 'Product Page: error notices when adding out-of-stock products', () => {
 	test( 'displays error notice when attempting to add product beyond stock limit', async ( {
 		admin,
 		editor,
-		blockUtils,
 		page,
 	} ) => {
-		await blockUtils.createManagedStockProduct();
+		const productName = 'A Managed Stock';
+
+		wpCLI(
+			`wc product create --name="${productName}" --regular_price=10 --manage_stock=true --stock_quantity=1 --user=admin`
+		);
 		await admin.createNewPost();
 		await editor.insertBlock( { name: 'woocommerce/product-collection' } );
 
@@ -46,18 +23,10 @@ test.describe( 'Product Page: error notices when adding out-of-stock products', 
 		);
 
 		await expect(
-			singleProduct.locator(
-				'.wc-blocks-product-collection__collections-create button'
-			)
+			singleProduct.getByText( 'create your own' )
 		).toBeVisible();
-
-		await singleProduct
-			.locator(
-				'.wc-blocks-product-collection__collections-create button'
-			)
-			.click();
-
-		const productName = 'A Managed Stock';
+		
+		await singleProduct.getByText( 'create your own' ).click();
 
 		await editor.publishAndVisitPost();
 
@@ -68,10 +37,10 @@ test.describe( 'Product Page: error notices when adding out-of-stock products', 
 		await expect( productCart ).toBeVisible();
 
 		// Add to cart once — succeeds.
-		await productCart.locator( '.add_to_cart_button' ).click();
+		await productCart.getByRole( 'button' ).click();
 
 		// Add to cart again — triggers out-of-stock error.
-		await productCart.locator( '.add_to_cart_button' ).click();
+		await productCart.getByRole( 'button' ).click();
 
 		// Verify error notice is displayed.
 		await expect(
