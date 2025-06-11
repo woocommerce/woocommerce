@@ -361,7 +361,7 @@ class Payments extends Task {
 	private function get_woopayments_provider(): ?array {
 		$providers = $this->get_payments_providers();
 		foreach ( $providers as $provider ) {
-			if ( ! empty( $provider['id'] ) && 'woocommerce_payments' === $provider['id'] ) {
+			if ( ! empty( $provider['id'] ) && PaymentsProviders\WooPayments\WooPaymentsService::GATEWAY_ID === $provider['id'] ) {
 				return $provider;
 			}
 		}
