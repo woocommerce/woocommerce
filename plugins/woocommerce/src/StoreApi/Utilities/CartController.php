@@ -127,10 +127,12 @@ class CartController {
 
 		$this->validate_add_to_cart( $product, $request );
 		$existing_cart_id = $cart->find_product_in_cart( $cart_id );
+		$request_quantity = wc_stock_amount( $request['quantity'] );
 
 		if ( $existing_cart_id ) {
 			$cart_item           = $cart->cart_contents[ $existing_cart_id ];
-			$quantity_validation = $quantity_limits->validate_cart_item_quantity( $request['quantity'] + $cart_item['quantity'], $cart_item );
+			$updated_quantity    = $request_quantity + $cart_item['quantity'];
+			$quantity_validation = $quantity_limits->validate_cart_item_quantity( $updated_quantity, $cart_item );
 
 			if ( is_wp_error( $quantity_validation ) ) {
 				throw new RouteException(
@@ -140,14 +142,13 @@ class CartController {
 				);
 			}
 
-			$cart->set_quantity( $existing_cart_id, $request['quantity'] + $cart->cart_contents[ $existing_cart_id ]['quantity'], true );
+			$cart->set_quantity( $existing_cart_id, $updated_quantity, true );
 
 			return $existing_cart_id;
 		}
 
 		// Normalize quantity.
 		$add_to_cart_limits = $quantity_limits->get_add_to_cart_limits( $product );
-		$request_quantity   = wc_stock_amount( $request['quantity'] );
 
 		if ( $add_to_cart_limits['maximum'] ) {
 			$request_quantity = min( $request_quantity, $add_to_cart_limits['maximum'] );
