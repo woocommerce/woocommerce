@@ -175,3 +175,77 @@ jobs:
         with:
           name: contributors-release-${{ needs.extract-versions.outputs.current_version }}
           path: ${{ steps.generate-contributors-list.outputs.filepath }}
+
+  has-db-updates:
+      name: Check for database updates
+      needs: extract-versions
+      runs-on: ubuntu-latest
+      outputs:
+        has_updates: ${{ steps.check-db-updates.outputs.has_updates }}
+        updates_list: ${{ steps.check-db-updates.outputs.updates_list }}
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v4
+
+        - name: Check for database updates
+          id: check-db-updates
+          uses: actions/github-script@v7
+          with:
+            script: |
+              const fs = require('fs');
+              const path = 'plugins/woocommerce/includes/class-wc-install.php';
+              const version = '${{ needs.extract-versions.outputs.current_version }}';
+
+              console.log(`Checking for database updates for version: ${version}`);
+
+              try {
+                const fileContent = fs.readFileSync(path, 'utf8');
+
+                // Look for the $db_updates array definition
+                const dbUpdatesMatch = fileContent.match(/\$db_updates\s*=\s*array\s*\((.*?)\);/s);
+
+                if (!dbUpdatesMatch) {
+                  console.log('Could not find $db_updates array in the file');
+                  core.setOutput('has_updates', 'false');
+                  return;
+                }
+
+                const dbUpdatesContent = dbUpdatesMatch[1];
+                console.log('Found $db_updates array content');
+
+                // Check if the version exists as a key in the array
+                // This regex looks for the version as a string key (with quotes) or array key
+                const versionPattern = new RegExp(`['"]${version.replace('.', '\\.')}['"]\\s*=>\\s*array\\s*\\((.*?)\\)`, 's');
+                const versionMatch = dbUpdatesContent.match(versionPattern);
+
+                if (versionMatch) {
+                  console.log(`✓ Found database updates for version ${version}`);
+                  core.setOutput('has_updates', 'true');
+
+                  // Extract and list the database updates
+                  const updatesContent = versionMatch[1];
+                  console.log('Database updates:');
+
+                  // Split by comma and clean up each update function
+                  const updates = updatesContent
+                    .split(',')
+                    .map(update => update.trim().replace(/['"]/g, ''))
+                    .filter(update => update.length > 0);
+
+                  updates.forEach((update, index) => {
+                    console.log(`  ${index + 1}. ${update}`);
+                  });
+
+                  // Also set the updates as output for potential use by other jobs
+                  core.setOutput('updates_list', updates.join(','));
+
+                } else {
+                  console.log(`✗ No database updates found for version ${version}`);
+                  core.setOutput('has_updates', 'false');
+                  core.setOutput('updates_list', '');
+                }
+
+              } catch (error) {
+                console.error(`Error reading file: ${error.message}`);
+                core.setFailed(`Failed to check database updates: ${error.message}`);
+              }
