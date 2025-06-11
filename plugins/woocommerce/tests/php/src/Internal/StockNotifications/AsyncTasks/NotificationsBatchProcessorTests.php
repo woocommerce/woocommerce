@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\AsyncTasks;
 
@@ -13,7 +14,9 @@ use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 
-
+/**
+ * Class NotificationsBatchProcessorTests.
+ */
 class NotificationsBatchProcessorTests extends \WC_Unit_Test_Case {
 
 	/**
@@ -83,7 +86,8 @@ class NotificationsBatchProcessorTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_process_batch(): void {
 		list( $product, $notification ) = $this->create_product_with_active_notification();
-		$batch = $this->sut->get_next_batch_to_process( 10 );
+		$batch                          = $this->sut->get_next_batch_to_process( 10 );
+
 		$this->assertEquals( array( $notification->get_id() ), $batch );
 		$this->sut->process_batch( $batch );
 
@@ -102,7 +106,8 @@ class NotificationsBatchProcessorTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_process_batch_with_out_of_stock_product(): void {
 		list( $product, $notification ) = $this->create_product_with_active_notification();
-		$batch = $this->sut->get_next_batch_to_process( 10 );
+		$batch                          = $this->sut->get_next_batch_to_process( 10 );
+
 		$this->assertEquals( array( $notification->get_id() ), $batch );
 
 		// Make the product out-of-stock after calculating the batch.
@@ -158,7 +163,7 @@ class NotificationsBatchProcessorTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_process_batch_with_skipped_filter() {
 		list( $product, $notification ) = $this->create_product_with_active_notification();
-		$batch = $this->sut->get_next_batch_to_process( 10 );
+		$batch                          = $this->sut->get_next_batch_to_process( 10 );
 		$this->assertEquals( array( $notification->get_id() ), $batch );
 
 		// Add the filter.

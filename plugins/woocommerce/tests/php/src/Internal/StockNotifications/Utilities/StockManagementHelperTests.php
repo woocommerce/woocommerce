@@ -103,7 +103,6 @@ class StockManagementHelperTests extends \WC_Unit_Test_Case {
 	public function test_get_managed_variations_returns_empty_array_for_variable_with_no_children(): void {
 		$variable = WC_Helper_Product::create_variation_product();
 
-		// Remove all variations
 		foreach ( $variable->get_children() as $child_id ) {
 			wp_delete_post( $child_id, true );
 		}
@@ -117,15 +116,12 @@ class StockManagementHelperTests extends \WC_Unit_Test_Case {
 	public function test_get_managed_variations_uses_cache(): void {
 		$variable = WC_Helper_Product::create_variation_product();
 
-		// First call populates cache
 		$result1 = $this->sut->get_managed_variations( $variable );
 
-		// Change variation stock management
 		$variation = wc_get_product( $variable->get_children()[0] );
 		$variation->set_manage_stock( ! $variation->get_manage_stock() );
 		$variation->save();
 
-		// Second call should return cached result
 		$result2 = $this->sut->get_managed_variations( $variable );
 
 		$this->assertEquals( $result1, $result2 );

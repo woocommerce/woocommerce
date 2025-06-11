@@ -121,6 +121,7 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 				'stock_status' => ProductStockStatus::IN_STOCK,
 			)
 		);
+
 		$notification = new Notification();
 		$notification->set_product_id( $product->get_id() );
 		$notification->set_user_id( 1 );
@@ -201,7 +202,7 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 		$product = \WC_Helper_Product::create_variation_product();
 
 		$variation_id = $product->get_children()[0];
-		$variation = wc_get_product( $variation_id );
+		$variation    = wc_get_product( $variation_id );
 		$variation->set_manage_stock( true );
 		$variation->set_stock_quantity( 0 );
 		$variation->save();
@@ -229,7 +230,7 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 	 * Test variation that doesn't manage stock and the parent goes in stock.
 	 */
 	public function test_variation_does_not_manage_stock_and_parent_goes_in_stock() {
-		$product = \WC_Helper_Product::create_variation_product();
+		$product   = \WC_Helper_Product::create_variation_product();
 		$variation = $product->get_children()[0];
 		$variation = wc_get_product( $variation );
 		$variation->set_manage_stock( false );

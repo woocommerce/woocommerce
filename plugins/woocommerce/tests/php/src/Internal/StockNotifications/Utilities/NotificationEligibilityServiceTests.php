@@ -127,7 +127,7 @@ class NotificationEligibilityServiceTests extends \WC_Unit_Test_Case {
 	 * @testdox should_skip_notification returns false for product with no active notifications
 	 */
 	public function test_should_skip_notification(): void {
-		$product = WC_Helper_Product::create_simple_product();
+		$product      = WC_Helper_Product::create_simple_product();
 		$notification = new Notification();
 		$notification->set_product_id( $product->get_id() );
 		$notification->set_status( NotificationStatus::ACTIVE );
