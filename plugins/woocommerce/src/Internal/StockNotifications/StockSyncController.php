@@ -63,6 +63,9 @@ class StockSyncController {
 
 		// Process the queue on shutdown.
 		add_action( 'shutdown', array( $this, 'process_queue' ) );
+
+		// Output the admin notice.
+		add_action( 'admin_notices', array( $this, 'output_admin_notice' ) );
 	}
 
 	/**
@@ -74,12 +77,13 @@ class StockSyncController {
 	 * @return void
 	 */
 	public function handle_product_stock_status_change( $product_id, $stock_status, $product = null ) {
-		if ( ! $this->eligibility_service->is_stock_status_eligible( $stock_status ) ) {
-			return;
-		}
 
 		try {
-			// Get product if not provided.
+
+			if ( ! $this->eligibility_service->is_stock_status_eligible( $stock_status ) ) {
+				return;
+			}
+
 			if ( null === $product ) {
 				$product = \wc_get_product( $product_id );
 			}
@@ -135,12 +139,10 @@ class StockSyncController {
 				continue;
 			}
 
-			// Update the last stock sync timestamp.
-			// Hint: This is an internal meta field used to track the last time a product was synced.
-			// We don't use the WC_Data interface here because we want to avoid the overhead of
-			// loading the product object and invalidating the cache.
-			update_post_meta( $product_id, self::LAST_SYNC_TIMESTAMP_META_KEY, time() );
+			$this->update_last_sync_timestamp( $product_id );
 		}
+
+		$this->store_admin_notice();
 
 		/**
 		 * Triggers the batch processor to process the product IDs.
@@ -151,5 +153,72 @@ class StockSyncController {
 		 */
 		do_action( 'woocommerce_customer_stock_notifications_product_sync', $product_ids );
 		$this->queue = array();
+	}
+
+	/**
+	 * Update the last sync timestamp.
+	 *
+	 * @param int $product_id The product ID.
+	 * @return void
+	 */
+	private function update_last_sync_timestamp( int $product_id ): void {
+
+		// Update the last stock sync timestamp.
+		// Hint: This is an internal meta field used to track the last time a product was synced.
+		// We don't use the WC_Data interface here because we want to avoid the overhead of
+		// loading the product object and invalidating the cache.
+		update_post_meta( $product_id, self::LAST_SYNC_TIMESTAMP_META_KEY, time() );
+
+		$this->logger->info(
+			sprintf( 'StockSyncController: Scheduled back-in-stock notifications for product ID: [ %d ]', $product_id ),
+			array( 'source' => 'wc-stock-notifications' )
+		);
+
+		// Add admin notice.
+		$notice_message = __( 'Subscribed customers will receive back-in-stock notifications within the next few minutes.', 'woocommerce' );
+		update_option( 'wc_customer_stock_notifications_product_sync_notice', $notice_message );
+	}
+
+	/**
+	 * Store the admin notice.
+	 *
+	 * @return void
+	 */
+	private function store_admin_notice(): void {
+		if ( ! is_admin() || ! function_exists( 'wp_admin_notice' ) ) {
+			return;
+		}
+
+		/* translators: 1 = URL of the Back in Stock Notifications page */
+		$notice_message = sprintf( __( 'Back-in-stock notifications for this product are now being processed. Subscribed customers will receive these emails over the next few minutes. You can monitor or manage individual subscriptions on the <a href="%s">Stock Notifications page</a>.', 'woocommerce' ), admin_url( 'admin.php?page=customer-stock-notifications' ) );
+
+		update_option( 'wc_customer_stock_notifications_product_sync_notice', $notice_message );
+	}
+
+	/**
+	 * Add admin notices.
+	 *
+	 * @return void
+	 */
+	public function output_admin_notice(): void {
+		if ( ! function_exists( 'wp_admin_notice' ) ) {
+			return;
+		}
+
+		$notice_message = get_option( 'wc_customer_stock_notifications_product_sync_notice' );
+		if ( empty( $notice_message ) ) {
+			return;
+		}
+
+		\wp_admin_notice(
+			$notice_message,
+			array(
+				'type'        => 'info',
+				'id'          => 'woocommerce_customer_stock_notifications_product_sync_notice',
+				'dismissible' => false,
+			)
+		);
+
+		delete_option( 'wc_customer_stock_notifications_product_sync_notice' );
 	}
 }

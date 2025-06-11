@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\NotificationEligibilityService;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
+use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
 
 /**
  * The batch processor for the stock notifications.
@@ -111,7 +112,8 @@ class NotificationsBatchProcessor implements BatchProcessorInterface {
 	public function get_total_pending_count(): int {
 		global $wpdb;
 
-		$table                = $wpdb->prefix . 'wc_stock_notifications';
+		$data_store           = wc_get_container()->get( StockNotificationsDataStore::class );
+		$table                = $data_store->get_table_name();
 		$statuses_placeholder = implode( ', ', array_fill( 0, count( Config::get_eligible_stock_statuses() ), '%s' ) );
 
 		$sql = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
@@ -146,7 +148,8 @@ class NotificationsBatchProcessor implements BatchProcessorInterface {
 	public function get_next_batch_to_process( int $size ): array {
 		global $wpdb;
 
-		$table                = $wpdb->prefix . 'wc_stock_notifications';
+		$data_store           = wc_get_container()->get( StockNotificationsDataStore::class );
+		$table                = $data_store->get_table_name();
 		$statuses_placeholder = implode( ', ', array_fill( 0, count( Config::get_eligible_stock_statuses() ), '%s' ) );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
@@ -252,7 +255,7 @@ class NotificationsBatchProcessor implements BatchProcessorInterface {
 
 			} catch ( \Exception $e ) {
 				$this->logger->error(
-					sprintf( 'Failed to process notification ID: %d', $notification_id ),
+					sprintf( 'Failed to process notification ID: %d, Error: %s', $notification_id, $e->getMessage() ),
 					array( 'source' => 'wc-stock-notifications' )
 				);
 
@@ -267,7 +270,6 @@ class NotificationsBatchProcessor implements BatchProcessorInterface {
 				++$batch_metrics['failed_count'];
 			}
 
-			// Hint: This is just a hashmap to track the products that were processed in o(1) time.
 			$batch_metrics['product_ids'][ $notification->get_product_id() ] = true;
 		}
 
