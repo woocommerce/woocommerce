@@ -113,6 +113,7 @@ const { state, actions } = store< Store >(
 					actions.showNoticeError( error as Error );
 				}
 			},
+
 			*addCartItem( { id, quantity, variation }: OptimisticCartItem ) {
 				let item = state.cart.items.find(
 					( { id: productId } ) => id === productId
@@ -175,6 +176,7 @@ const { state, actions } = store< Store >(
 					actions.showNoticeError( error as Error );
 				}
 			},
+
 			*refreshCartItems() {
 				// Skips if there's a pending request.
 				if ( pendingRefresh ) return;
@@ -207,6 +209,7 @@ const { state, actions } = store< Store >(
 					pendingRefresh = false;
 				}
 			},
+
 			*showNoticeError( error: Error | ApiErrorResponse ) {
 				// Todo: Use the module exports instead of `store()` once the store-notices
 				// store is public.

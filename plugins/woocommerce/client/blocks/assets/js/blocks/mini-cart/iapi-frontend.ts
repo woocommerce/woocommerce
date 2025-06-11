@@ -40,6 +40,7 @@ setStyles();
 
 type MiniCartState = {
 	totalItemsInCart: number;
+	formattedSubtotal: string;
 	drawerOverlayClass: string;
 	badgeIsVisible: boolean;
 	cartIsEmpty: boolean;
@@ -52,6 +53,7 @@ type MiniCart = {
 		openDrawer: () => void;
 		closeDrawer: () => void;
 		overlayCloseDrawer: ( e: MouseEvent ) => void;
+		setupOpenDrawerListener: () => void;
 	};
 };
 
@@ -71,6 +73,26 @@ store< MiniCart >(
 					( total, { quantity } ) => total + quantity,
 					0
 				);
+			},
+
+			get formattedSubtotal(): string {
+				const { displayCartPriceIncludingTax } = getConfig(
+					'woocommerce/mini-cart-footer-block'
+				);
+
+				const { currency } = getConfig( 'woocommerce' );
+
+				const subtotal = displayCartPriceIncludingTax
+					? parseInt( wooStoreState.cart.totals.total_items, 10 ) +
+					  parseInt( wooStoreState.cart.totals.total_items_tax, 10 )
+					: parseInt( wooStoreState.cart.totals.total_items, 10 );
+
+				const normalizedCurrency = normalizeCurrencyResponse(
+					wooStoreState.cart.totals,
+					currency
+				);
+
+				return formatPriceWithCurrency( subtotal, normalizedCurrency );
 			},
 
 			get drawerOverlayClass() {
@@ -101,6 +123,21 @@ store< MiniCart >(
 		},
 
 		callbacks: {
+			setupOpenDrawerListener() {
+				// const { addToCartBehaviour } = getConfig(
+				// 	'woocommerce/mini-cart'
+				// );
+
+				console.log( 'init' );
+
+				// if ( addToCartBehaviour === 'open_drawer' ) {
+				// 	document.body.addEventListener(
+				// 		'wc-blocks_added_to_cart',
+				// 		callbacks.openDrawer
+				// 	);
+				// }
+			},
+
 			openDrawer() {
 				const ctx = getContext< MiniCartContext >();
 				ctx.isOpen = true;
@@ -131,6 +168,10 @@ const { state } = store(
 	'woocommerce/mini-cart-items-block',
 	{
 		state: {
+			get cartItems() {
+				return wooStoreState.cart.items;
+			},
+
 			get currency(): Currency {
 				const { currency } = getConfig( 'woocommerce' );
 
@@ -271,10 +312,6 @@ const { state } = store(
 			get itemThumbnail(): string {
 				const { cartItem } = getContext< CartItemContext >();
 				return cartItem.images[ 0 ]?.thumbnail || '';
-			},
-
-			get cartItems() {
-				return wooStoreState.cart.items;
 			},
 
 			// Intended to be used in context of a cart item in wp-each
@@ -430,34 +467,6 @@ store(
 					cartItemsCount === 1 ? singularItemsText : pluralItemsText;
 
 				return template.replace( '%d', cartItemsCount.toString() );
-			},
-		},
-	},
-	{ lock: true }
-);
-
-store(
-	'woocommerce/mini-cart-footer-block',
-	{
-		state: {
-			get formattedSubtotal(): string {
-				const { displayCartPriceIncludingTax } = getConfig(
-					'woocommerce/mini-cart-footer-block'
-				);
-
-				const { currency } = getConfig( 'woocommerce' );
-
-				const subtotal = displayCartPriceIncludingTax
-					? parseInt( wooStoreState.cart.totals.total_items, 10 ) +
-					  parseInt( wooStoreState.cart.totals.total_items_tax, 10 )
-					: parseInt( wooStoreState.cart.totals.total_items, 10 );
-
-				const normalizedCurrency = normalizeCurrencyResponse(
-					wooStoreState.cart.totals,
-					currency
-				);
-
-				return formatPriceWithCurrency( subtotal, normalizedCurrency );
 			},
 		},
 	},

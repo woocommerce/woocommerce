@@ -483,10 +483,38 @@ class MiniCart extends AbstractBlock {
 			'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
 		);
 
+		wp_interactivity_config(
+			$this->get_full_block_name(),
+			array(
+				'addToCartBehaviour' => $attributes['addToCartBehaviour'],
+			)
+		);
+
+		$subtotal           = $display_cart_price_including_tax ? $cart->get_subtotal_tax() : $cart->get_subtotal();
+		$formatted_subtotal = '';
+		$html               = new \WP_HTML_Tag_Processor( wc_price( $subtotal ) );
+
+		if ( $html->next_tag( 'bdi' ) ) {
+			while ( $html->next_token() ) {
+				if ( '#text' === $html->get_token_name() ) {
+						$formatted_subtotal .= $html->get_modifiable_text();
+				}
+			}
+		}
+
+		$cart_always_shows_price = isset( $attributes['hasHiddenPrice'] ) && false === $attributes['hasHiddenPrice'];
+		$price_color             = isset( $attributes['priceColor']['color'] ) ? $attributes['priceColor']['color'] : '';
+
 		ob_start();
 		?>
-		<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-		<div <?php echo wp_interactivity_data_wp_context( $context ); ?> data-wp-interactive="woocommerce/mini-cart" class="<?php echo esc_attr( $wrapper_classes ); ?>" style="<?php echo esc_attr( $wrapper_styles ); ?>">
+		
+		<div
+			data-wp-interactive="woocommerce/mini-cart"
+			<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<?php echo wp_interactivity_data_wp_context( $context ); ?>
+			class="<?php echo esc_attr( $wrapper_classes ); ?>"
+			style="<?php echo esc_attr( $wrapper_styles ); ?>"
+		>
 			<button data-wp-on--click="callbacks.openDrawer" class="wc-block-mini-cart__button" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">
 				<span class="wc-block-mini-cart__quantity-badge">
 					<?php
@@ -497,11 +525,19 @@ class MiniCart extends AbstractBlock {
 						<span data-wp-bind--hidden="!state.badgeIsVisible" data-wp-text="state.totalItemsInCart" class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
 						</span>
 					<?php endif; ?>
-					<?php
-					  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-						echo $this->get_cart_price_markup( $attributes );
-					?>
 				</span>
+				<?php if ( $cart_always_shows_price ) : ?>
+						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
+							<?php
+								// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+								echo $formatted_subtotal;
+							?>
+						</span>
+						<?php
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							echo $this->get_include_tax_label_markup( $attributes );
+						?>
+					<?php endif; ?>
 			</button>
 			<div data-wp-on--click="callbacks.overlayCloseDrawer" data-wp-bind--class="state.drawerOverlayClass" class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden">
 				<div class="wc-block-mini-cart__drawer wc-block-components-drawer is-mobile">
