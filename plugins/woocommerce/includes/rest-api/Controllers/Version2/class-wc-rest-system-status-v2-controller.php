@@ -987,7 +987,9 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		// Operating system.
-		$server_architecture = sprintf( '%s %s %s', php_uname( 's' ), php_uname( 'r' ), php_uname( 'm' ) );
+		$server_architecture = function_exists( 'php_uname' )
+			? sprintf( '%s %s %s', php_uname( 's' ), php_uname( 'r' ), php_uname( 'm' ) )
+			: __( 'Unable to determine server architecture.  Please ask your hosting provider for this information.', 'woocommerce' );
 
 		$database_version = wc_get_server_database_version();
 		$log_directory    = LoggingUtil::get_log_directory( false );
