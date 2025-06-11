@@ -11,37 +11,11 @@ use Yoast\PHPUnitPolyfills\TestCases\TestCase;
  * QuantityLimitsTests class.
  */
 class QuantityLimitsTests extends TestCase {
-
-	/**
-	 * Store original filter state for cleanup.
-	 */
-	private $original_stock_amount_filters = array();
-
-	/**
-	 * Set up test environment.
-	 */
-	public function setUp(): void {
-		parent::setUp();
-
-		// Store current filter state.
-		global $wp_filter;
-		if ( isset( $wp_filter['woocommerce_stock_amount'] ) ) {
-			$this->original_stock_amount_filters = $wp_filter['woocommerce_stock_amount'];
-		}
-	}
-
 	/**
 	 * Clean up test environment.
 	 */
 	public function tearDown(): void {
-		// Restore original filter state.
-		global $wp_filter;
-		if ( ! empty( $this->original_stock_amount_filters ) ) {
-			$wp_filter['woocommerce_stock_amount'] = $this->original_stock_amount_filters;
-		} else {
-			unset( $wp_filter['woocommerce_stock_amount'] );
-		}
-
+		$this->disable_float_support();
 		parent::tearDown();
 	}
 
@@ -59,7 +33,9 @@ class QuantityLimitsTests extends TestCase {
 	 * Disable float support and restore integer support.
 	 */
 	private function disable_float_support() {
-		remove_filter( 'woocommerce_stock_amount', 'floatval' );
+		// Remove all existing filters first.
+		remove_all_filters( 'woocommerce_stock_amount' );
+		// Add only intval.
 		add_filter( 'woocommerce_stock_amount', 'intval' );
 	}
 	/**
@@ -258,9 +234,13 @@ class QuantityLimitsTests extends TestCase {
 		$this->enable_float_support();
 
 		// Make multiple_of 0.5.
-		add_filter( 'woocommerce_store_api_product_quantity_multiple_of', function( $value, $product, $cart_item ) {
-			return 0.5;
-		}, 10, 3 );
+		add_filter(
+			'woocommerce_store_api_product_quantity_multiple_of',
+			function () {
+				return 0.5;
+			},
+			10
+		);
 
 		// Test the filter is working.
 		$test_value = wc_stock_amount( 5.5 );
@@ -461,9 +441,13 @@ class QuantityLimitsTests extends TestCase {
 		);
 
 		// Add filter to set multiple_of to 0.5.
-		add_filter( 'woocommerce_store_api_product_quantity_multiple_of', function( $value, $product, $cart_item ) {
-			return 0.5;
-		}, 10, 3 );
+		add_filter(
+			'woocommerce_store_api_product_quantity_multiple_of',
+			function () {
+				return 0.5;
+			},
+			10
+		);
 
 		$quantity_limits = new QuantityLimits();
 

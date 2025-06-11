@@ -294,14 +294,14 @@ final class QuantityLimits {
 			return true; // Avoid division by zero.
 		}
 
-		// Handle very small multiples that could cause precision issues.
+		// Handle very small multiples that could cause precision issues. Treat as effectively zero.
 		if ( $multiple_of < self::FLOAT_TOLERANCE ) {
-			return true; // Treat as effectively zero.
+			return true;
 		}
 
 		// For integers, use exact modulo comparison.
 		if ( is_int( $number ) && is_int( $multiple_of ) ) {
-			return $number % $multiple_of === 0;
+			return 0 === $number % $multiple_of;
 		}
 
 		// For floats, use division and check if result is close to an integer.
