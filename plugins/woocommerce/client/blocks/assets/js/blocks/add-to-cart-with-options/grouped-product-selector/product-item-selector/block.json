@@ -1,13 +1,11 @@
 {
-	"name": "woocommerce/add-to-cart-with-options-grouped-product-selector-item-cta",
+	"name": "woocommerce/add-to-cart-with-options-grouped-product-item-selector",
 	"title": "Grouped Product: Item Selector (Beta)",
 	"description": "Add a way of selecting a child product within the Grouped Product block. Depending on the type of product and its properties, this might be a button, a checkbox, or a link.",
 	"category": "woocommerce-product-elements",
 	"keywords": [ "WooCommerce" ],
 	"usesContext": [ "postId" ],
-	"ancestor": [
-		"woocommerce/add-to-cart-with-options-grouped-product-selector-item"
-	],
+	"ancestor": [ "woocommerce/add-to-cart-with-options-grouped-product-item" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json",
@@ -15,5 +13,5 @@
 		"inserter": false,
 		"interactivity": true
 	},
-	"style": "file:../woocommerce/add-to-cart-with-options-grouped-product-selector-item-cta-style.css"
+	"style": "file:../woocommerce/add-to-cart-with-options-grouped-product-item-selector-style.css"
 }

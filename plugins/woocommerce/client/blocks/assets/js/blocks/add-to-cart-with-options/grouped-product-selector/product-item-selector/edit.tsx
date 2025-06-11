@@ -54,7 +54,7 @@ const CTA = () => {
 export default function ProductItemCTAEdit() {
 	const blockProps = useBlockProps( {
 		className:
-			'wc-block-add-to-cart-with-options-grouped-product-selector-item-cta',
+			'wc-block-add-to-cart-with-options-grouped-product-item-selector',
 	} );
 
 	return (
