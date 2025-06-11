@@ -104,7 +104,7 @@ class PaymentsController {
 	 *
 	 * @return string The modified body classes for the admin area.
 	 */
-	public function add_body_classes( $classes ) {
+	public function add_body_classes( $classes = '' ) {
 		global $current_tab;
 
 		// Bail if the type is invalid.
