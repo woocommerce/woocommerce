@@ -12,6 +12,7 @@ import { act, screen } from '@testing-library/react';
 import '../';
 import '../../cart';
 import '../../checkout';
+import '../../product-new';
 import { initializeEditor } from '../../../../../tests/integration/helpers/integration-test-editor';
 
 async function setup( attributes: BlockAttributes ) {
@@ -30,7 +31,7 @@ describe( 'Classic Shortcode block', () => {
 			await transformButton.click();
 		} );
 
-		expect( screen.getByLabelText( /Block: Cart/i ) ).toBeInTheDocument();
+		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeInTheDocument();
 	} );
 	test( 'can convert to Checkout block', async () => {
 		await setup( { shortcode: 'checkout' } );
@@ -43,7 +44,7 @@ describe( 'Classic Shortcode block', () => {
 		} );
 
 		expect(
-			screen.getByLabelText( /Block: Checkout/i )
+			screen.getByLabelText( /^Block: Checkout$/i )
 		).toBeInTheDocument();
 	} );
 } );

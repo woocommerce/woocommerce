@@ -67,7 +67,7 @@
 		"@wordpress/preferences": "wp-6.6",
 		"@wordpress/router": "1.11.0",
 		"@wordpress/url": "wp-6.6",
-		"clsx": "^2.1.1",
+		"clsx": "2.1.x",
 		"dompurify": "^2.5.7",
 		"prop-types": "^15.8.1",
 		"react-router-dom": "~6.3.0"

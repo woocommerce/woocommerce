@@ -144,6 +144,7 @@ final class ProductFilterStatus extends AbstractBlock {
 		$filter_context = array(
 			'items'      => array_values( $filter_options ),
 			'showCounts' => $attributes['showCounts'] ?? false,
+			'groupLabel' => __( 'Status', 'woocommerce' ),
 		);
 
 		$wrapper_attributes = array(

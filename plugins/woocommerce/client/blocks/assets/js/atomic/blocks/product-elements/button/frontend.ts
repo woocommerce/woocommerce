@@ -16,10 +16,13 @@ const universalLock =
 interface Context {
 	addToCartText: string;
 	productId: number;
+	productType: string;
+	groupedProductIds?: number[];
 	displayViewCart: boolean;
 	quantityToAdd: number;
 	tempQuantity: number;
 	animationStatus: AnimationStatus;
+	hasPressedButton: boolean;
 }
 
 enum AnimationStatus {
@@ -65,8 +68,14 @@ const productButtonStore = {
 			return animationStatus === AnimationStatus.SLIDE_OUT;
 		},
 		get addToCartText(): string {
-			const { animationStatus, tempQuantity, addToCartText } =
-				getContext< Context >();
+			const {
+				animationStatus,
+				tempQuantity,
+				addToCartText,
+				productType,
+				groupedProductIds,
+				hasPressedButton,
+			} = getContext< Context >();
 
 			// We use the temporary quantity when there's no animation, or
 			// when the second part of the animation hasn't started yet.
@@ -77,9 +86,32 @@ const productButtonStore = {
 				? tempQuantity || 0
 				: state.quantity;
 
-			if ( quantity === 0 ) return addToCartText;
+			if ( productType === 'grouped' ) {
+				const groupedProductIdsInCart = groupedProductIds?.map(
+					( productId ) => {
+						const product = wooState.cart?.items.find(
+							( item ) => item.id === productId
+						);
+						return product?.quantity || 0;
+					}
+				);
+				if (
+					groupedProductIdsInCart?.some( ( qty ) => qty > 0 ) &&
+					hasPressedButton
+				) {
+					return state.inTheCartText;
+				}
+				return addToCartText;
+			}
 
-			return state.inTheCartText.replace( '###', quantity.toString() );
+			if ( quantity > 0 ) {
+				return state.inTheCartText.replace(
+					'###',
+					quantity.toString()
+				);
+			}
+
+			return addToCartText;
 		},
 		get displayViewCart(): boolean {
 			const { displayViewCart } = getContext< Context >();
@@ -138,6 +170,10 @@ const productButtonStore = {
 				context.tempQuantity = state.quantity;
 				context.animationStatus = AnimationStatus.IDLE;
 			}
+		},
+		handlePressedState() {
+			const context = getContext< Context >();
+			context.hasPressedButton = true;
 		},
 	},
 	callbacks: {
