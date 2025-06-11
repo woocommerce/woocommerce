@@ -128,7 +128,7 @@ class PaymentsController {
 	 *
 	 * @return array Settings array with additional settings added.
 	 */
-	public function preload_settings( array $settings ): array {
+	public function preload_settings( $settings = array() ) {
 		// We only preload settings in the WP admin.
 		if ( ! is_admin() ) {
 			return $settings;
@@ -150,7 +150,7 @@ class PaymentsController {
 	 *
 	 * @return array The updated list of allowed promo note IDs.
 	 */
-	public function add_allowed_promo_notes( array $promo_notes = array() ): array {
+	public function add_allowed_promo_notes( $promo_notes = array() ): array {
 		try {
 			$providers = $this->payments->get_payment_providers( $this->payments->get_country(), false );
 		} catch ( Throwable $e ) {
@@ -184,7 +184,7 @@ class PaymentsController {
 	 *
 	 * @return array The filtered sections.
 	 */
-	public function handle_sections( array $sections ): array {
+	public function handle_sections( $sections = array() ): array {
 		global $current_section;
 
 		// For WooPayments and offline payment methods settings pages, we don't want any section navigation.
