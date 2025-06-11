@@ -4,13 +4,13 @@
 import type { DocumentObject } from '@woocommerce/base-hooks';
 import type { JSONSchemaType } from 'ajv';
 import type { AllHTMLAttributes, AriaAttributes } from 'react';
+import { isFormFields } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import { SelectOption } from '../../base/components';
 import { getSettingWithCoercion } from './utils';
-import { isFormFields } from '../../types/type-guards';
 
 // A list of attributes that can be added to a custom field when registering it.
 type CustomFieldAttributes = Pick<
