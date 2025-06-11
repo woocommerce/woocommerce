@@ -4,15 +4,21 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications;
 
-use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\StockNotifications\Config;
-use Automattic\WooCommerce\Internal\StockNotifications\Utilities\StockManagementHelper;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\NotificationEligibilityService;
 use WC_Product;
+use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\NotificationsBatchProcessor;
 
 /**
  * The controller for the stock events.
  */
 class StockSyncController {
+
+	/**
+	 * The meta key for the last sync timestamp.
+	 *
+	 * @var string
+	 */
+	public const LAST_SYNC_TIMESTAMP_META_KEY = '_wc_customer_stock_notifications_last_sync_timestamp';
 
 	/**
 	 * The queue using product IDs as keys.
@@ -22,18 +28,35 @@ class StockSyncController {
 	private array $queue = array();
 
 	/**
+	 * The eligibility service instance.
+	 *
+	 * @var NotificationEligibilityService
+	 */
+	private NotificationEligibilityService $eligibility_service;
+
+	/**
 	 * Logger instance.
 	 *
-	 * @var \WC_Logger
+	 * @var \WC_Logger_Interface
 	 */
 	protected $logger;
+
+	/**
+	 * Init.
+	 *
+	 * @internal
+	 *
+	 * @param NotificationEligibilityService $eligibility_service The eligibility service instance.
+	 */
+	final public function init( NotificationEligibilityService $eligibility_service ): void {
+		$this->logger              = \wc_get_logger();
+		$this->eligibility_service = $eligibility_service;
+	}
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->logger = \wc_get_logger();
-
 		// Event handlers.
 		add_action( 'woocommerce_product_set_stock_status', array( $this, 'handle_product_stock_status_change' ), 100, 3 );
 		add_action( 'woocommerce_variation_set_stock_status', array( $this, 'handle_product_stock_status_change' ), 100, 3 );
@@ -51,36 +74,33 @@ class StockSyncController {
 	 * @return void
 	 */
 	public function handle_product_stock_status_change( $product_id, $stock_status, $product = null ) {
+		if ( ! $this->eligibility_service->is_stock_status_eligible( $stock_status ) ) {
+			return;
+		}
+
 		try {
-
-			if ( ! in_array( (string) $stock_status, Config::get_eligible_stock_statuses(), true ) ) {
-				return;
-			}
-
 			// Get product if not provided.
 			if ( null === $product ) {
 				$product = \wc_get_product( $product_id );
 			}
 
-			// Validate product exists and is supported.
-			if ( ! $this->validate_product( $product ) ) {
+			if ( ! is_a( $product, 'WC_Product' ) ) {
 				return;
 			}
 
-			$lookup_ids = array( $product_id );
-			// If product is variable, check for the variations that inherit stock management from the parent.
-			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$children_ids = StockManagementHelper::get_managed_variations( $product );
-				$lookup_ids   = array_merge( $lookup_ids, $children_ids );
+			if ( ! $this->eligibility_service->is_product_eligible( $product ) ) {
+				return;
 			}
 
-			if ( ! NotificationQuery::product_has_active_notifications( $lookup_ids ) ) {
+			if ( ! $this->eligibility_service->has_active_notifications( $product ) ) {
 				return;
 			}
 
 			// Add to queue.
-			$this->queue[ $product_id ] = true;
-
+			$target_product_ids = $this->eligibility_service->get_target_product_ids( $product );
+			foreach ( $target_product_ids as $target_product_id ) {
+				$this->queue[ $target_product_id ] = true;
+			}
 		} catch ( \Throwable $e ) {
 			$this->logger->error(
 				sprintf( 'StockSyncController: Failed to process product %d: %s', $product_id, $e->getMessage() ),
@@ -99,48 +119,37 @@ class StockSyncController {
 	 */
 	public function process_queue(): void {
 		if ( empty( $this->queue ) || ! is_array( $this->queue ) ) {
+			$this->queue = array();
 			return;
 		}
 
 		$product_ids = array_keys( $this->queue );
+		if ( empty( $product_ids ) ) {
+			return;
+		}
+
 		foreach ( $product_ids as $product_id ) {
 
-			/**
-			 * Action: woocommerce_stock_notifications_product_sync
-			 *
-			 * @since 0.0.0
-			 *
-			 * @param int $product_id The product ID.
-			 */
-			do_action( 'woocommerce_stock_notifications_product_sync', $product_id );
+			$product_id = absint( $product_id );
+			if ( ! $product_id ) {
+				continue;
+			}
+
+			// Update the last stock sync timestamp.
+			// Hint: This is an internal meta field used to track the last time a product was synced.
+			// We don't use the WC_Data interface here because we want to avoid the overhead of
+			// loading the product object and invalidating the cache.
+			update_post_meta( $product_id, self::LAST_SYNC_TIMESTAMP_META_KEY, time() );
 		}
-
-		$this->queue = array();
-	}
-
-	/**
-	 * Validate product to be synced.
-	 *
-	 * @param WC_Product|null $product The product object.
-	 * @return bool True if product is valid for sync, false otherwise.
-	 */
-	public function validate_product( ?WC_Product $product ): bool {
-		if ( null === $product || ! is_a( $product, 'WC_Product' ) ) {
-			return false;
-		}
-
-		$valid = $product->is_type( Config::get_supported_product_types() );
 
 		/**
-		 * Filter: woocommerce_stock_notifications_product_sync_validate
+		 * Triggers the batch processor to process the product IDs.
 		 *
 		 * @since 0.0.0
 		 *
-		 * Allow plugins to modify product validation logic.
-		 *
-		 * @param bool       $valid   Whether the product is valid for sync.
-		 * @param WC_Product $product The product object.
+		 * @param array $product_ids The product IDs to process.
 		 */
-		return (bool) apply_filters( 'woocommerce_stock_notifications_product_sync_validate', $valid, $product );
+		do_action( 'woocommerce_customer_stock_notifications_product_sync', $product_ids );
+		$this->queue = array();
 	}
 }

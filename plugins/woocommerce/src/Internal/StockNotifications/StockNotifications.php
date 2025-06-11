@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificat
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
 use Automattic\WooCommerce\Internal\StockNotifications\StockSyncController;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
-use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\NotificationsProcessor;
+use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\NotificationsBatchProcessor;
 
 /**
  * The controller for the stock notifications.
@@ -34,7 +34,7 @@ class StockNotifications {
 		$container = wc_get_container();
 		$container->get( EmailManager::class );
 		$container->get( StockSyncController::class );
-		$container->get( NotificationsProcessor::class );
+		$container->get( NotificationsBatchProcessor::class );
 
 		if ( is_admin() ) {
 			$container->get( SettingsController::class );

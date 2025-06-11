@@ -1,8 +1,4 @@
 <?php
-/**
- * StockManagementHelper class file.
- */
-
 declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Utilities;
@@ -18,17 +14,27 @@ defined( 'ABSPATH' ) || exit;
 class StockManagementHelper {
 
 	/**
-	 * Get a list of product IDs for stock sync.
+	 * Runtime cache for managed variations.
+	 *
+	 * @var array<int, array<int>>
+	 */
+	private array $managed_variations = array();
+
+	/**
+	 * Get a list of variations that inherit stock management from the parent.
 	 *
 	 * If the product is a variable product, we need sync the children that don't manage stock.
 	 *
 	 * @param WC_Product $product The product to check.
-	 * @return array<int> Array of product IDs that don't manage stock.
+	 * @return array<int> Array of variation IDs that inherit stock management from the parent.
 	 */
-	public static function get_managed_variations( WC_Product $product ): array {
-
+	public function get_managed_variations( WC_Product $product ): array {
 		if ( ! $product->is_type( ProductType::VARIABLE ) ) {
 			return array();
+		}
+
+		if ( isset( $this->managed_variations[ $product->get_id() ] ) ) {
+			return $this->managed_variations[ $product->get_id() ];
 		}
 
 		$children = $product->get_children();
@@ -42,6 +48,8 @@ class StockManagementHelper {
 		$query_in         = '(' . implode( ',', $format ) . ')';
 		$managed_children = $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN {$query_in}", $children ) ); // @codingStandardsIgnoreLine.
 
-		return array_map( 'intval', $managed_children );
+		$this->managed_variations[ $product->get_id() ] = array_map( 'intval', $managed_children );
+
+		return $this->managed_variations[ $product->get_id() ];
 	}
 }

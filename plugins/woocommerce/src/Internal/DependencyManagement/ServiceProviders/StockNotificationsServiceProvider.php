@@ -13,10 +13,14 @@ use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificat
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Internal\StockNotifications\StockSyncController;
 use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\NotificationsProcessor;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\NotificationEligibilityService;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\StockManagementHelper;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailTemplatesController;
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\NotificationsBatchProcessor;
+use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 
 /**
  * Service provider for Back in Stock Notification classes.
@@ -37,6 +41,9 @@ class StockNotificationsServiceProvider extends AbstractServiceProvider {
 		EmailManager::class,
 		EmailTemplatesController::class,
 		SettingsController::class,
+		NotificationEligibilityService::class,
+		NotificationsBatchProcessor::class,
+		StockManagementHelper::class,
 	);
 
 	/**
@@ -47,7 +54,10 @@ class StockNotificationsServiceProvider extends AbstractServiceProvider {
 		$this->share( StockNotificationsDataStore::class )->addArguments( array( StockNotificationsMetaDataStore::class, DatabaseUtil::class ) );
 		$this->share( EmailManager::class );
 		$this->share( EmailTemplatesController::class );
-		$this->share( StockSyncController::class );
+		$this->share( StockManagementHelper::class );
+		$this->share( NotificationEligibilityService::class )->addArguments( array( StockManagementHelper::class ) );
+		$this->share( NotificationsBatchProcessor::class )->addArguments( array( EmailManager::class, NotificationEligibilityService::class, BatchProcessingController::class ) );
+		$this->share( StockSyncController::class )->addArguments( array( NotificationEligibilityService::class ) );
 		$this->share( NotificationsProcessor::class )->addArguments( array( EmailManager::class ) );
 		$this->share( SettingsController::class );
 	}
