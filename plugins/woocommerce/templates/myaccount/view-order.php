@@ -17,6 +17,8 @@
  * @version 3.0.0
  */
 
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+
 defined( 'ABSPATH' ) || exit;
 
 $notes = $order->get_customer_order_notes();
@@ -30,6 +32,7 @@ printf(
 	'<mark class="order-date">' . wc_format_datetime( $order->get_date_created() ) . '</mark>', // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	'<mark class="order-status">' . wc_get_order_status_name( $order->get_status() ) . '</mark>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 );
+echo wp_kses( FulfillmentUtils::get_order_fulfillment_status_text( $order ), 'strong' );
 ?>
 </p>
 

@@ -97,7 +97,7 @@ class FulfillmentsRenderer {
 	 * @param Fulfillment[] $fulfillments The fulfillments.
 	 */
 	private function render_fulfillment_status_column_row_data( WC_Order $order, array $fulfillments ) {
-		$order_fulfillment_status = $this->get_fulfillment_status( $fulfillments );
+		$order_fulfillment_status = FulfillmentUtils::get_fulfillment_status( $order, $fulfillments );
 		echo "<div class='fulfillment-status-wrapper'>";
 		switch ( $order_fulfillment_status ) {
 			case 'no_fulfillments':
@@ -174,41 +174,6 @@ class FulfillmentsRenderer {
 			echo '<span>' . esc_html( array_shift( $tracking ) ) . '</span>';
 		} else {
 			echo '<span>--</span>';
-		}
-	}
-
-	/**
-	 * Get the fulfillment status of the entity. This runs like a computed property, where
-	 * it checks the fulfillment status of each fulfillment attached to the order,
-	 * and computes the overall fulfillment status of the order.
-	 *
-	 * @param array $fulfillments The fulfillments.
-	 *
-	 * @return string The fulfillment status.
-	 */
-	private function get_fulfillment_status( array $fulfillments ): string {
-		$has_fulfillments = ! empty( $fulfillments );
-		$all_fulfilled    = true;
-		$some_fulfilled   = false;
-
-		if ( $has_fulfillments ) {
-			foreach ( $fulfillments as $fulfillment ) {
-				if ( ! $fulfillment->get_is_fulfilled() ) {
-					$all_fulfilled = false;
-				} else {
-					$some_fulfilled = true;
-				}
-			}
-
-			if ( $all_fulfilled ) {
-				return 'fulfilled';
-			} elseif ( $some_fulfilled ) {
-				return 'partially_fulfilled';
-			} else {
-				return 'unfulfilled';
-			}
-		} else {
-			return 'no_fulfillments';
 		}
 	}
 

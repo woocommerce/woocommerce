@@ -15,6 +15,8 @@
  * @version 2.2.0
  */
 
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+
 defined( 'ABSPATH' ) || exit;
 
 $notes = $order->get_customer_order_notes();
@@ -34,6 +36,7 @@ $notes = $order->get_customer_order_notes();
 			)
 		)
 	);
+	echo wp_kses( FulfillmentUtils::get_order_fulfillment_status_text( $order ), 'strong' );
 	?>
 </p>
 
