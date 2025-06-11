@@ -55,7 +55,7 @@ class Payments {
 	 * Get the payment provider details list for the settings page.
 	 *
 	 * @param string $location    The location for which the providers are being determined.
-	 *                            This is a ISO 3166-1 alpha-2 country code.
+	 *                            This is an ISO 3166-1 alpha-2 country code.
 	 * @param bool   $for_display Whether the payment providers list is intended for display purposes or
 	 *                            it is meant to be used for internal business logic.
 	 *                            Primarily, this means that when it is not for display, we will use the raw
@@ -222,7 +222,7 @@ class Payments {
 	/**
 	 * Set the business location country for the Payments settings.
 	 *
-	 * @param string $location The country code. This should be a ISO 3166-1 alpha-2 country code.
+	 * @param string $location The country code. This should be an ISO 3166-1 alpha-2 country code.
 	 */
 	public function set_country( string $location ): bool {
 		$previous_country = $this->get_country();

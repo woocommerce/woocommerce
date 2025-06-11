@@ -326,7 +326,7 @@ class PaymentsProviders {
 	 * @param WC_Payment_Gateway $payment_gateway       The payment gateway object.
 	 * @param int                $payment_gateway_order The order of the payment gateway.
 	 * @param string             $country_code          Optional. The country code for which the details are being gathered.
-	 *                                                  This should be a ISO 3166-1 alpha-2 country code.
+	 *                                                  This should be an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The payment gateway details.
 	 */
@@ -344,7 +344,7 @@ class PaymentsProviders {
 	 * @param WC_Payment_Gateway $payment_gateway       The payment gateway object.
 	 * @param int                $payment_gateway_order The order of the payment gateway.
 	 * @param string             $country_code          Optional. The country code for which the details are being gathered.
-	 *                                                  This should be a ISO 3166-1 alpha-2 country code.
+	 *                                                  This should be an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The payment gateway base details.
 	 */
@@ -1048,7 +1048,7 @@ class PaymentsProviders {
 	 * @param array              $gateway_details The gateway details to enhance.
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 * @param string             $country_code    The country code for which the details are being enhanced.
-	 *                                            This should be a ISO 3166-1 alpha-2 country code.
+	 *                                            This should be an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The enhanced gateway details.
 	 */

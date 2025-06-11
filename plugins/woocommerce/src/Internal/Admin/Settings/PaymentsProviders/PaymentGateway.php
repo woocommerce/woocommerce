@@ -43,7 +43,7 @@ class PaymentGateway {
 	 * @param int                $order        Optional. The order to assign.
 	 *                                         Defaults to 0 if not provided.
 	 * @param string             $country_code Optional. The country code for which the details are being gathered.
-	 *                                         This should be a ISO 3166-1 alpha-2 country code.
+	 *                                         This should be an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The payment gateway provider details.
 	 */
@@ -652,7 +652,7 @@ class PaymentGateway {
 	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 * @param string             $country_code    Optional. The country code for which to get recommended payment methods.
-	 *                                            This should be a ISO 3166-1 alpha-2 country code.
+	 *                                            This should be an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The recommended payment methods list for the payment gateway.
 	 *               Empty array if there are none.
