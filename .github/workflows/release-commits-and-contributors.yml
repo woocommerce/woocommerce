@@ -180,18 +180,17 @@ jobs:
           echo "filepath=${HTML_FILE_PATH}" >> $GITHUB_OUTPUT
 
       - name: Upload contributors HTML
+        id: artifact-upload
         uses: actions/upload-artifact@v4
         with:
           name: contributors-release-${{ needs.extract-versions.outputs.current_version }}
           path: ${{ steps.generate-contributors-list.outputs.filepath }}
           
-      - name: Get artifact download URL
-        id: get-artifact-url
+      - name: Output artifact URL
         run: |
-          # The upload-artifact action outputs the artifact ID, we can construct the URL
-          ARTIFACT_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ steps.upload-contributors.outputs.artifact-id }}"
-          echo "artifact_url=${ARTIFACT_URL}" >> $GITHUB_OUTPUT
-
+            ARTIFACT_URL=${{ steps.artifact-upload.outputs.artifact-url }}
+            echo "artifact_url=${ARTIFACT_URL}" >> $GITHUB_OUTPUT
+      
   db-updates:
     name: Check for database updates
     needs: extract-versions
