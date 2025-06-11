@@ -52,9 +52,9 @@ class NotificationsBatchProcessorTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_total_pending_count(): void {
 		$this->assertEquals( 0, $this->sut->get_total_pending_count() );
-		$this->create_product_with_active_notification();
+		$this->create_product_with_queued_notification();
 		$this->assertEquals( 1, $this->sut->get_total_pending_count() );
-		$this->create_product_with_active_notification();
+		$this->create_product_with_queued_notification();
 		$this->assertEquals( 2, $this->sut->get_total_pending_count() );
 	}
 
@@ -64,7 +64,7 @@ class NotificationsBatchProcessorTests extends \WC_Unit_Test_Case {
 	public function test_get_next_batch_to_process(): void {
 		$this->assertEquals( array(), $this->sut->get_next_batch_to_process( 10 ) );
 
-		list( $product, $notification ) = $this->create_product_with_active_notification();
+		list( $product, $notification ) = $this->create_product_with_queued_notification();
 
 		$batch = $this->sut->get_next_batch_to_process( 10 );
 		$this->assertEquals( array( $notification->get_id() ), $batch );
@@ -85,7 +85,7 @@ class NotificationsBatchProcessorTests extends \WC_Unit_Test_Case {
 	 * @testdox process_batch sends notification for product with active notification
 	 */
 	public function test_process_batch(): void {
-		list( $product, $notification ) = $this->create_product_with_active_notification();
+		list( $product, $notification ) = $this->create_product_with_queued_notification();
 		$batch                          = $this->sut->get_next_batch_to_process( 10 );
 
 		$this->assertEquals( array( $notification->get_id() ), $batch );
@@ -105,7 +105,7 @@ class NotificationsBatchProcessorTests extends \WC_Unit_Test_Case {
 	 * @testdox process_batch prevents notification for product with out of stock
 	 */
 	public function test_process_batch_with_out_of_stock_product(): void {
-		list( $product, $notification ) = $this->create_product_with_active_notification();
+		list( $product, $notification ) = $this->create_product_with_queued_notification();
 		$batch                          = $this->sut->get_next_batch_to_process( 10 );
 
 		$this->assertEquals( array( $notification->get_id() ), $batch );
@@ -127,7 +127,7 @@ class NotificationsBatchProcessorTests extends \WC_Unit_Test_Case {
 	 * @testdox process_batch_with_throttled_notification sends notification for product with active notification
 	 */
 	public function test_process_batch_with_throttled_notification(): void {
-		list( $product, $notification ) = $this->create_product_with_active_notification();
+		list( $product, $notification ) = $this->create_product_with_queued_notification();
 		// Set the notification email only so it doesn't get bypassed due to a privileged user.
 		$notification->set_user_email( 'test@test.com' );
 		$notification->set_user_id( 0 );
@@ -145,6 +145,8 @@ class NotificationsBatchProcessorTests extends \WC_Unit_Test_Case {
 
 		// Set the notification to active again.
 		$notification->set_status( NotificationStatus::ACTIVE );
+		// Simulate the notification being processed 20 seconds ago.
+		$notification->set_date_last_attempt( time() - 20 );
 		$notification->save();
 
 		// Process the batch again.
@@ -162,7 +164,7 @@ class NotificationsBatchProcessorTests extends \WC_Unit_Test_Case {
 	 * @testdox process_batch_with_skipped_filter prevents notification for product with active notification
 	 */
 	public function test_process_batch_with_skipped_filter() {
-		list( $product, $notification ) = $this->create_product_with_active_notification();
+		list( $product, $notification ) = $this->create_product_with_queued_notification();
 		$batch                          = $this->sut->get_next_batch_to_process( 10 );
 		$this->assertEquals( array( $notification->get_id() ), $batch );
 
@@ -203,7 +205,7 @@ class NotificationsBatchProcessorTests extends \WC_Unit_Test_Case {
 	 * @testdox process_batch_with_unpublished_product prevents notification for product with active notification
 	 */
 	public function test_process_batch_with_unpublished_product(): void {
-		list( $product, $notification ) = $this->create_product_with_active_notification();
+		list( $product, $notification ) = $this->create_product_with_queued_notification();
 		// Set the user email only so it doesn't get bypassed due to a privileged user.
 		$notification->set_user_email( 'test@test.com' );
 		$notification->set_user_id( 0 );
@@ -226,9 +228,9 @@ class NotificationsBatchProcessorTests extends \WC_Unit_Test_Case {
 	 * @testdox process_batch_with_multiple_batches processes multiple batches
 	 */
 	public function test_process_batch_with_multiple_batches(): void {
-		list( $product, $notification )   = $this->create_product_with_active_notification();
-		list( $product2, $notification2 ) = $this->create_product_with_active_notification();
-		list( $product3, $notification3 ) = $this->create_product_with_active_notification();
+		list( $product, $notification )   = $this->create_product_with_queued_notification();
+		list( $product2, $notification2 ) = $this->create_product_with_queued_notification();
+		list( $product3, $notification3 ) = $this->create_product_with_queued_notification();
 
 		$batch = $this->sut->get_next_batch_to_process( 1 );
 		$this->assertEquals( array( $notification->get_id() ), $batch );
@@ -251,7 +253,7 @@ class NotificationsBatchProcessorTests extends \WC_Unit_Test_Case {
 	 *
 	 * @return array
 	 */
-	private function create_product_with_active_notification(): array {
+	private function create_product_with_queued_notification(): array {
 		$product = \WC_Helper_Product::create_simple_product();
 		// Replicate the stock sync controller behavior.
 		update_post_meta( $product->get_id(), StockSyncController::LAST_SYNC_TIMESTAMP_META_KEY, time() - 10 );
