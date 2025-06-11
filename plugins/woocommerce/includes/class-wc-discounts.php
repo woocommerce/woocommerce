@@ -446,7 +446,7 @@ class WC_Discounts {
 			if ( $limit_usage_qty ) {
 				$apply_quantity = $limit_usage_qty - $applied_count < $item->quantity ? $limit_usage_qty - $applied_count : $item->quantity;
 				$apply_quantity = max( 0, apply_filters( 'woocommerce_coupon_get_apply_quantity', $apply_quantity, $item, $coupon, $this ) );
-				$discount       = min( $amount, $item->price / $item->quantity ) * $apply_quantity;
+				$discount       = min( $amount, $price_to_discount / $item->quantity ) * $apply_quantity;
 			} else {
 				$apply_quantity = apply_filters( 'woocommerce_coupon_get_apply_quantity', $item->quantity, $item, $coupon, $this );
 				$discount       = $amount * $apply_quantity;
