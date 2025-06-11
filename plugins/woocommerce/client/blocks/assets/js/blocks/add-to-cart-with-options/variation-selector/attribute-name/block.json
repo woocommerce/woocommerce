@@ -5,7 +5,7 @@
 	"category": "woocommerce-product-elements",
 	"keywords": [ "WooCommerce" ],
 	"ancestor": [
-		"woocommerce/add-to-cart-with-options-variation-selector-item"
+		"woocommerce/add-to-cart-with-options-variation-selector-attribute"
 	],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
