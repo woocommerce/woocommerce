@@ -371,6 +371,6 @@ class PaymentsController {
 			return false;
 		}
 
-		return filter_var( $account_data['data']['details_submitted'],  FILTER_VALIDATE_BOOLEAN | FILTER_NULL_ON_FAILURE ) ?? false;
+		return filter_var( $account_data['data']['details_submitted'], FILTER_VALIDATE_BOOLEAN | FILTER_NULL_ON_FAILURE ) ?? false;
 	}
 }
