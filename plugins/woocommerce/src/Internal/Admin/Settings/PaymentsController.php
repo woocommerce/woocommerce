@@ -359,15 +359,18 @@ class PaymentsController {
 		}
 
 		$account_data = get_option( 'wcpay_account_data', array() );
+
+		// The account ID must be present.
 		if ( empty( $account_data['data']['account_id'] ) ) {
 			return false;
 		}
 
+		// We consider the store to have an onboarded WooPayments account if account data in the WooPayments account cache
+		// contains a details_submitted = true entry. This implies that WooPayments is also connected.
 		if ( empty( $account_data['data']['details_submitted'] ) ) {
 			return false;
 		}
-		// We consider the store to have WooPayments account connected if account data in the WooPayments account cache
-		// contains details_submitted = true entry. This implies that WooPayments was connected.
-		return $account_data['data']['details_submitted'];
+
+		return filter_var( $account_data['data']['details_submitted'],  FILTER_VALIDATE_BOOLEAN | FILTER_NULL_ON_FAILURE ) ?? false;
 	}
 }
