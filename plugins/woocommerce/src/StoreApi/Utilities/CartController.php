@@ -112,9 +112,14 @@ class CartController {
 			$request['cart_item_data']
 		);
 
-		$this->validate_add_to_cart( $product, $request );
+		$quantity_limits = new QuantityLimits();
 
-		$quantity_limits  = new QuantityLimits();
+		// If quantity was not passed, it should default to the minimum allowed quantity.
+		if ( null === $request['quantity'] ) {
+			$request['quantity'] = $quantity_limits->get_add_to_cart_limits( $product )['minimum'];
+		}
+
+		$this->validate_add_to_cart( $product, $request );
 		$existing_cart_id = $cart->find_product_in_cart( $cart_id );
 
 		if ( $existing_cart_id ) {
@@ -254,6 +259,18 @@ class CartController {
 	public function validate_add_to_cart( \WC_Product $product, $request ) {
 		if ( ! $product->is_purchasable() ) {
 			$this->throw_default_product_exception( $product );
+		}
+
+		if ( floatval( $request['quantity'] ) <= 0 ) {
+			throw new RouteException(
+				'woocommerce_rest_product_invalid_quantity',
+				sprintf(
+					/* translators: %s: product name */
+					esc_html__( 'You cannot add &quot;%s&quot; with a quantity less than or equal to 0 to the cart.', 'woocommerce' ),
+					esc_html( $product->get_name() )
+				),
+				400
+			);
 		}
 
 		if ( ! $product->is_in_stock() ) {
