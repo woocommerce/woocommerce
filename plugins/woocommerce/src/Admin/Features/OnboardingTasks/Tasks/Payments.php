@@ -106,7 +106,7 @@ class Payments extends Task {
 	/**
 	 * The task action URL.
 	 *
-	 * Empty string means the task linking will be handled by the JS logic.
+	 * Empty string means the JS logic will handle the task linking.
 	 *
 	 * @return string
 	 */

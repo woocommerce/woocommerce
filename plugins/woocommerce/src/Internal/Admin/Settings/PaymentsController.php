@@ -55,11 +55,11 @@ class PaymentsController {
 	public function add_menu() {
 		global $menu;
 
-		// When WooPayments account is onboarded, WooPayments will own the Payments menu item since it is the native Woo payments solution.
+		// When the WooPayments account is onboarded, WooPayments will own the Payments menu item since it is the native Woo payments solution.
 		if ( $this->is_woopayments_account_onboarded() ) {
 			return;
 		} else {
-			// Otherwise, remove Payments menu item linking to the connect page to avoid Payments menu item duplication.
+			// Otherwise, remove the Payments menu item linking to the Connect page to avoid Payments menu item duplication.
 			remove_menu_page( 'wc-admin&path=/payments/connect' );
 		}
 
@@ -82,7 +82,7 @@ class PaymentsController {
 		if ( $this->store_has_providers_with_incentive() ) {
 			$badge = ' <span class="wcpay-menu-badge awaiting-mod count-1"><span class="plugin-count">1</span></span>';
 			foreach ( $menu as $index => $menu_item ) {
-				// Only add the badge markup if not already present and the menu item is the Payments menu item.
+				// Only add the badge markup if not already present, and the menu item is the Payments menu item.
 				if ( 0 === strpos( $menu_item[0], $menu_title )
 					&& $menu_path === $menu_item[2]
 					&& false === strpos( $menu_item[0], $badge ) ) {
@@ -97,7 +97,7 @@ class PaymentsController {
 	}
 
 	/**
-	 * Adds body classes when on the Payments Settings admin area.
+	 * Adds body classes when in the Payments Settings admin area.
 	 *
 	 * @param string $classes The existing body classes for the admin area.
 	 *
@@ -106,7 +106,7 @@ class PaymentsController {
 	public function add_body_classes( $classes ) {
 		global $current_tab;
 
-		// Bail if it is not a string.
+		// Bail if the type is invalid.
 		if ( ! is_string( $classes ) ) {
 			return $classes;
 		}
@@ -200,7 +200,7 @@ class PaymentsController {
 	 * @return void
 	 */
 	public function handle_incentive_dismissed(): void {
-		// Just clear the transient to force a new check for providers with an incentive.
+		// Clear the transient to force a new check for providers with an incentive.
 		delete_transient( self::TRANSIENT_HAS_PROVIDERS_WITH_INCENTIVE_KEY );
 	}
 
@@ -331,7 +331,7 @@ class PaymentsController {
 	 * @return boolean
 	 */
 	private function is_woopayments_account_onboarded(): bool {
-		// If WooPayments is active right now, we will not get to this point since the plugin is active check is done first.
+		// Sanity check: the WooPayments extension must be active.
 		if ( ! class_exists( '\WC_Payments' ) ) {
 			return false;
 		}
