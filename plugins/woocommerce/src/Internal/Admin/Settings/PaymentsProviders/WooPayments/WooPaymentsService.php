@@ -1317,6 +1317,13 @@ class WooPaymentsService {
 			$source = self::FROM_PAYMENT_SETTINGS;
 		}
 
+		// Before resetting the account, record its details for tracking purposes.
+		$event_props = array(
+			'account_mode' => $this->has_live_account() ? 'live' : 'test',
+			'test_account' => $this->has_test_account(),
+			'source'       => $source,
+		);
+
 		try {
 			// Call the WooPayments API to reset onboarding.
 			$response = $this->proxy->call_static(
@@ -1368,9 +1375,7 @@ class WooPaymentsService {
 		$this->record_event(
 			self::EVENT_PREFIX . 'onboarding_reset',
 			$location,
-			array(
-				'source' => $source,
-			)
+			$event_props
 		);
 
 		return $response;
