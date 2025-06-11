@@ -201,50 +201,49 @@ jobs:
               const version = '${{ needs.extract-versions.outputs.current_version }}';
               
               console.log(`Checking for database updates for version: ${version}`);
+
+              const fileContent = fs.readFileSync(path, 'utf8');
               
-              try {
-                const fileContent = fs.readFileSync(path, 'utf8');
+              // Look for the $db_updates array definition
+              const dbUpdatesMatch = fileContent.match(/\$db_updates\s*=\s*array\s*\((.*?)\);/s);
+              
+              if (!dbUpdatesMatch) {
+                console.log('Could not find $db_updates array in the file');
+                core.setOutput('has_updates', 'false');
+                return;
+              }
+              
+              const dbUpdatesContent = dbUpdatesMatch[1];
+              console.log('Found $db_updates array content');
+              
+              // Check if the version exists as a key in the array
+              // This regex looks for the version as a string key, allowing for patch versions (X.Y.Z)
+              const escapedVersion = version.replace('.', '\\.');
+              const versionPattern = new RegExp(`['"]${escapedVersion}(?:\\.\\d+)?['"]\\s*=>\\s*array\\s*\\((.*?)\\)`, 's');
+              const versionMatch = dbUpdatesContent.match(versionPattern);
+              
+              if (versionMatch) {
+                console.log(`✓ Found database updates for version ${version}`);
+                core.setOutput('has_updates', 'true');
                 
-                // Look for the $db_updates array definition
-                const dbUpdatesMatch = fileContent.match(/\$db_updates\s*=\s*array\s*\((.*?)\);/s);
+                // Extract and list the database updates
+                const updatesContent = versionMatch[1];
                 
-                if (!dbUpdatesMatch) {
-                  console.log('Could not find $db_updates array in the file');
-                  core.setOutput('has_updates', 'false');
-                  return;
-                }
+                // Split by comma and clean up each update function
+                const updates = updatesContent
+                  .split(',')
+                  .map(update => update.trim().replace(/['"]/g, ''))
+                  .filter(update => update.length > 0);
                 
-                const dbUpdatesContent = dbUpdatesMatch[1];
-                console.log('Found $db_updates array content');
+                // Store updates for the PR finding step
+                core.setOutput('updates_list', updates.join(','));
+                core.setOutput('updates_array', JSON.stringify(updates));
                 
-                // Check if the version exists as a key in the array
-                // This regex looks for the version as a string key, allowing for patch versions (X.Y.Z)
-                const escapedVersion = version.replace('.', '\\.');
-                const versionPattern = new RegExp(`['"]${escapedVersion}(?:\\.\\d+)?['"]\\s*=>\\s*array\\s*\\((.*?)\\)`, 's');
-                const versionMatch = dbUpdatesContent.match(versionPattern);
-                
-                if (versionMatch) {
-                  console.log(`✓ Found database updates for version ${version}`);
-                  core.setOutput('has_updates', 'true');
-                  
-                  // Extract and list the database updates
-                  const updatesContent = versionMatch[1];
-                  
-                  // Split by comma and clean up each update function
-                  const updates = updatesContent
-                    .split(',')
-                    .map(update => update.trim().replace(/['"]/g, ''))
-                    .filter(update => update.length > 0);
-                  
-                  // Store updates for the PR finding step
-                  core.setOutput('updates_list', updates.join(','));
-                  core.setOutput('updates_array', JSON.stringify(updates));
-                  
-                } else {
-                  console.log(`✗ No database updates found for version ${version}`);
-                  core.setOutput('has_updates', 'false');
-                  core.setOutput('updates_list', '');
-                }
+              } else {
+                console.log(`✗ No database updates found for version ${version}`);
+                core.setOutput('has_updates', 'false');
+                core.setOutput('updates_list', '');
+              }
                 
         - name: Find PRs for each database update
           id: find-pr
