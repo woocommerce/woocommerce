@@ -950,12 +950,33 @@ class WooPaymentsService {
 		}
 
 		// Record an event for the test account being initialized.
+		$payment_methods_enabled  = array();
+		$payment_methods_disabled = array();
+		if ( ! empty( $configured_payment_methods ) && is_array( $configured_payment_methods ) ) {
+			foreach ( $configured_payment_methods as $pm_id => $enabled ) {
+				if ( ! is_string( $pm_id ) || ! is_bool( $enabled ) ) {
+					continue; // Skip invalid entries.
+				}
+
+				if ( $enabled ) {
+					$payment_methods_enabled[] = $pm_id;
+				} else {
+					$payment_methods_disabled[] = $pm_id;
+				}
+			}
+		}
+		$payment_methods_enabled  = array_unique( $payment_methods_enabled );
+		$payment_methods_disabled = array_unique( $payment_methods_disabled );
+
+		$event_props = array(
+			'payment_methods_enabled'  => implode( ', ', $payment_methods_enabled ),
+			'payment_methods_disabled' => implode( ', ', $payment_methods_disabled ),
+			'source'                   => $source,
+		);
 		$this->record_event(
 			self::EVENT_PREFIX . 'onboarding_test_account_init',
 			$location,
-			array(
-				'source' => $source,
-			)
+			$event_props
 		);
 
 		return $response;
