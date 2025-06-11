@@ -1,0 +1,177 @@
+name: 'Release: Generate Number of Commits and Contributors'
+on:
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: false
+        description: 'The release version (X.Y format) to be used to calculate the number of commits and contributors. If not provided, it will be derived from the branch name.'
+
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        required: false
+        description: 'The release version (X.Y format) to be used to calculate the number of commits and contributors. If not provided, it will be derived from the branch name.'
+
+jobs:
+  extract-versions:
+    name: Extract release current and previous versions
+    runs-on: ubuntu-latest
+    outputs:
+      current_version: ${{ steps.calculate-versions.outputs.current_version }}
+      previous_version: ${{ steps.calculate-versions.outputs.previous_version }}
+    steps:
+      - name: Extract version from the provided input version
+        id: version-from-input
+        if: ${{ github.event.inputs.version != '' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const currentVersion = '${{ github.event.inputs.version }}';
+            console.log(`Current version from input: ${currentVersion}`);
+
+            const versionMatch = currentVersion.match(/^(\d+)\.(\d+)$/);
+            if (!versionMatch) {
+              core.setFailed(`Version format must be 'x.y', got: ${currentVersion}`);
+              process.exit(1);
+            }
+
+            const major = parseInt(versionMatch[1]);
+            const minor = parseInt(versionMatch[2]);
+            console.log(`Parsed version: major=${major}, minor=${minor}`);
+
+            core.setOutput('major', major);
+            core.setOutput('minor', minor);
+
+      - name: Extract version from the branch name
+        id: version-from-branch
+        if: ${{ github.event.inputs.version == '' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branchName = '${{ github.ref_name }}';
+            console.log(`Branch name: ${branchName}`);
+
+            const branchMatch = branchName.match(/^release\/(\d+)\.(\d+)$/);
+            if (!branchMatch) {
+              core.setFailed(`Branch name must be in format 'release/x.y', got: ${branchName}`);
+              process.exit(1);
+            }
+
+            const major = parseInt(branchMatch[1]);
+            const minor = parseInt(branchMatch[2]);
+            const currentVersion = `${major}.${minor}`;
+
+            console.log(`Extracted current version: ${currentVersion}`);
+            console.log(`Parsed version: major=${major}, minor=${minor}`);
+
+            core.setOutput('major', major);
+            core.setOutput('minor', minor);
+
+      - name: Calculate current and previous version
+        id: calculate-versions
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let major, minor;
+            if (${{ github.event.inputs.version == '' }}) {
+              major = parseInt('${{ steps.version-from-branch.outputs.major }}');
+              minor = parseInt('${{ steps.version-from-branch.outputs.minor }}');
+            } else {
+              major = parseInt('${{ steps.version-from-input.outputs.major }}');
+              minor = parseInt('${{ steps.version-from-input.outputs.minor }}');
+            }
+
+            let previousVersion;
+            if (minor > 0) {
+              previousVersion = `${major}.${minor - 1}`;
+            } else {
+              previousVersion = `${major - 1}.9`;
+            }
+
+            console.log(`Current version: ${major}.${minor}`);
+            console.log(`Previous version: ${previousVersion}`);
+            core.setOutput('current_version', `${major}.${minor}`);
+            core.setOutput('previous_version', previousVersion);
+
+  count-commits-and-contributors:
+    name: Count commits and contributors between releases
+    needs: extract-versions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Count
+        run: |
+          CURRENT_BRANCH="origin/release/${{ needs.extract-versions.outputs.current_version }}"
+          PREVIOUS_BRANCH="origin/release/${{ needs.extract-versions.outputs.previous_version }}"
+
+          set +e  # Don't exit on error for the git command
+          COMMIT_COUNT=$(git rev-list --count ${CURRENT_BRANCH} ^${PREVIOUS_BRANCH} 2>&1)
+          COMMIT_EXIT_CODE=$?
+
+          CONTRIBUTOR_COUNT=$(git log --format='%ae' ${PREVIOUS_BRANCH}..${CURRENT_BRANCH} | sort -u | wc -l 2>&1)
+          CONTRIBUTOR_EXIT_CODE=$?
+          set -e  # Resume exit on error
+
+          if [ $COMMIT_EXIT_CODE -eq 0 ] && [ $CONTRIBUTOR_EXIT_CODE -eq 0 ]; then
+            echo "Found ${COMMIT_COUNT} commits and ${CONTRIBUTOR_COUNT} contributors in the ${{ needs.extract-versions.outputs.current_version }} release"
+          else
+            echo "Error counting commits: ${COMMIT_COUNT}"
+            exit 1
+          fi
+
+  generate-contributors-list:
+    name: Generate contributors list
+    needs: extract-versions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
+
+      - name: Setup Node
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install prerequisites
+        working-directory: tools/release-posts
+        run: |
+          pnpm install
+
+      - name: Generate contributors list
+        id: generate-contributors-list
+        working-directory: tools/release-posts
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          CURRENT_BRANCH="release/${{ needs.extract-versions.outputs.current_version }}"
+          PREVIOUS_BRANCH="release/${{ needs.extract-versions.outputs.previous_version }}"
+
+          OUTPUT=$(pnpm run release-post contributors ${CURRENT_BRANCH} ${PREVIOUS_BRANCH})
+          echo "$OUTPUT"
+
+          HTML_FILE_PATH=$(echo "$OUTPUT" | grep "Contributors HTML generated at" | sed 's/.*Contributors HTML generated at //')
+          if [ -z "$HTML_FILE_PATH" ]; then
+            echo "Error: Could not find HTML file path in $OUTPUT"
+            exit 1
+          fi
+
+          echo "filepath=${HTML_FILE_PATH}" >> $GITHUB_OUTPUT
+
+      - name: Upload contributors HTML
+        uses: actions/upload-artifact@v4
+        with:
+          name: contributors-release-${{ needs.extract-versions.outputs.current_version }}
+          path: ${{ steps.generate-contributors-list.outputs.filepath }}
