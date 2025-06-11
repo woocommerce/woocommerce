@@ -289,12 +289,12 @@ jobs:
               if [ -n "$pr_number" ]; then
                 pr_url="https://github.com/${{ github.repository }}/pull/$pr_number"
                 echo "* \`$update_function\`, $pr_url"
-                FORMATTED_UPDATES="${FORMATTED_UPDATES}* \`$update_function\`: [PR #$pr_number]($pr_url)"
+                FORMATTED_UPDATES="${FORMATTED_UPDATES}* \`$update_function\`: <PR #$pr_number|$pr_url>"
               else
                 # If no PR number found, link to the commit
                 commit_url="https://github.com/${{ github.repository }}/commit/$commit_hash"
                 echo "* \`$update_function\`, $commit_url"
-                FORMATTED_UPDATES="${FORMATTED_UPDATES}* \`$update_function\`: [Commit $commit_hash]($commit_url)"
+                FORMATTED_UPDATES="${FORMATTED_UPDATES}* \`$update_function\`: <Commit $commit_hash|$commit_url>"
               fi
             else
               echo "* \`$update_function\`, No commit or PR found"
