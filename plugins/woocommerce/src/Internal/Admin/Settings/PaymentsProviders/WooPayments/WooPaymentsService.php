@@ -1085,12 +1085,15 @@ class WooPaymentsService {
 		}
 
 		// Record an event for the KYC session being created.
+		$event_props = array(
+			'new_account_created' => $response['accountCreated'] ?? false,
+			'onboarding_mode'     => ( $response['isLive'] ?? false ) ? 'live' : 'test',
+			'source'              => $source,
+		);
 		$this->record_event(
 			self::EVENT_PREFIX . 'onboarding_kyc_session_created',
 			$location,
-			array(
-				'source' => $source,
-			)
+			$event_props
 		);
 
 		return $response;
