@@ -292,6 +292,7 @@ class WC_Install {
 		),
 		'10.0.0' => array(
 			'wc_update_1000_multisite_visibility_setting',
+			'wc_update_1000_remove_patterns_toolkit_transient',
 		),
 	);
 
