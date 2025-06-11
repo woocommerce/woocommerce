@@ -165,6 +165,35 @@ const { state } = store(
 				return formatPriceWithCurrency( discountPrice, state.currency );
 			},
 
+			get lineItemDiscount(): string {
+				const {
+					cartItem: { prices, quantity },
+				} = getContext< CartItemContext >();
+
+				const regularAmountSingle = Dinero( {
+					amount: parseInt( prices.raw_prices.regular_price, 10 ),
+					precision: prices.raw_prices.precision,
+				} );
+
+				const purchaseAmountSingle = Dinero( {
+					amount: parseInt( prices.raw_prices.price, 10 ),
+					precision: prices.raw_prices.precision,
+				} );
+
+				const saleAmountLineItem = regularAmountSingle
+					.subtract( purchaseAmountSingle )
+					.multiply( quantity );
+
+				const totalLineItemDiscount = saleAmountLineItem
+					.convertPrecision( state.currency.minorUnit )
+					.getAmount();
+
+				return formatPriceWithCurrency(
+					totalLineItemDiscount,
+					state.currency
+				);
+			},
+
 			get cartItemHasDiscount(): boolean {
 				const { cartItem } = getContext< CartItemContext >();
 				return cartItem.prices.regular_price !== cartItem.prices.price;

@@ -54,6 +54,9 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 		// translators: %s is the name of the product in cart.
 		$remove_from_cart_label = __( 'Remove %s from cart', 'woocommerce' );
 
+		// translators: Save as in "Save $x".
+		$save_label = __( 'Save', 'woocommerce' );
+
 		wp_interactivity_config(
 			$this->get_full_block_name(),
 			array(
@@ -106,7 +109,8 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 											class="wc-block-components-product-badge wc-block-components-sale-badge"
 											hidden
 										>
-											Save
+											<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+											<?php echo $save_label; ?>
 											<span
 												data-wp-text="state.cartItemDiscount" 
 												class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
@@ -158,8 +162,21 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 									<div class="wc-block-cart-item__total-price-and-sale-badge-wrapper">
 										<span class="price wc-block-components-product-price">
 											<span data-wp-text="state.lineItemTotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value">
-											</span>
+											</span>											
 										</span>
+										<div 
+												data-wp-bind--hidden="!state.cartItemHasDiscount" 
+												class="wc-block-components-product-badge wc-block-components-sale-badge"
+												hidden
+											>
+												<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+												<?php echo $save_label; ?>
+												<span
+													data-wp-text="state.lineItemDiscount" 
+													class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+												>
+												</span>
+											</div>
 									</div>
 								</td>
 							</tr>
