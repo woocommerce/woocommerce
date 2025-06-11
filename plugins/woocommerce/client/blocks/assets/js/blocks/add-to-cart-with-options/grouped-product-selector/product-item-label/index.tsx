@@ -26,7 +26,7 @@ if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
 			}
 			return (
 				<div { ...blockProps }>
-					<div className="wp-block-woocommerce-add-to-cart-with-options-grouped-product-selector-item-label">
+					<div className="wp-block-woocommerce-add-to-cart-with-options-grouped-product-item-label">
 						{ product.name }
 					</div>
 				</div>

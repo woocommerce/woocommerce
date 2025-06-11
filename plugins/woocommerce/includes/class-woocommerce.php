@@ -285,6 +285,7 @@ final class WooCommerce {
 		register_shutdown_function( array( $this, 'log_errors' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), -1 );
+		add_action( 'plugins_loaded', array( $this, 'init_customizer' ) );
 		add_action( 'plugins_loaded', array( $this, 'init_jetpack_connection_config' ), 1 );
 		add_action( 'admin_notices', array( $this, 'build_dependencies_notice' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
@@ -1380,5 +1381,25 @@ final class WooCommerce {
 
 		// Always update the last change.
 		update_option( 'woocommerce_allow_tracking_last_modified', time() );
+	}
+
+	/**
+	 * Initialize the customizer on the plugins_loaded action.
+	 * If WooCommerce is network activated, wp_is_block_theme() will be called too early,
+	 * which cause the warning in #58364. By initializing the customizer on plugins_loaded,
+	 * we ensure that wp_is_block_theme() is called after theme directories registration.
+	 *
+	 * @internal
+	 * @see https://github.com/woocommerce/woocommerce/issues/58364
+	 */
+	public function init_customizer() {
+		global $pagenow;
+		if (
+			'customize.php' === $pagenow ||
+			isset( $_REQUEST['customize_theme'] ) || // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			! wp_is_block_theme()
+		) {
+			new WC_Shop_Customizer();
+		}
 	}
 }

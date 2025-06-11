@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Further fix for flaky shipping selection e2e test

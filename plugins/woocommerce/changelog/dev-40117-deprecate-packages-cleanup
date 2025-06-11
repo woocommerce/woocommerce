@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: cleanup after dropping unsupported packages.

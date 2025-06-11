@@ -41,7 +41,7 @@
 		"@wordpress/i18n": "wp-6.6",
 		"@wordpress/icons": "wp-6.6",
 		"@wordpress/keycodes": "wp-6.6",
-		"classnames": "^2.3.2",
+		"clsx": "2.1.x",
 		"dompurify": "^2.5.7",
 		"gridicons": "^3.4.2",
 		"moment": "^2.29.4",

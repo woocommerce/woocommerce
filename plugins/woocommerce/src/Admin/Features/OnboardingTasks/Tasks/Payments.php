@@ -196,7 +196,7 @@ class Payments extends Task {
 	}
 
 	/**
-	 * Check if WooPayments is onboarded and has a test account.
+	 * Check if WooPayments is onboarded and has a test [drive] account.
 	 *
 	 * @return bool
 	 */
@@ -211,8 +211,8 @@ class Payments extends Task {
 			return false;
 		}
 
-		// Check the provider's state to determine if a test account is in use.
-		if ( ! empty( $woopayments_provider['onboarding']['state']['test_mode'] ) ) {
+		// Check the provider's state to determine if a test [drive] account is in use.
+		if ( ! empty( $woopayments_provider['onboarding']['state']['test_drive_account'] ) ) {
 			return true;
 		}
 
