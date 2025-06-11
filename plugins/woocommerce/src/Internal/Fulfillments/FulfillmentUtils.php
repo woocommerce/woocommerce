@@ -36,7 +36,7 @@ class FulfillmentUtils {
 					'qty'     => $item->get_quantity() - $order->get_qty_refunded_for_item( $item ),
 				);
 			},
-			$order->get_items()
+			$order->get_items() ?? array()
 		);
 
 		foreach ( $order_items as $item_id => &$item ) {
@@ -119,7 +119,7 @@ class FulfillmentUtils {
 			$fulfillments_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
 			$fulfillments            = $fulfillments_data_store->read_fulfillments( WC_Order::class, (string) $order->get_id() );
 		}
-		$pending_items    = self::get_pending_items( $order, $fulfillments );
+		$pending_items    = empty( $fulfillments ) ? array() : self::get_pending_items( $order, $fulfillments );
 		$has_fulfillments = ! empty( $fulfillments );
 		$all_fulfilled    = true;
 		$some_fulfilled   = false;
