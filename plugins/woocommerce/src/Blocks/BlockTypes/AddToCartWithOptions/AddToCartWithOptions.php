@@ -385,6 +385,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					),
 					'method'  => 'post',
 					'enctype' => 'multipart/form-data',
+					'class'   => 'cart',
 				);
 				if ( ProductType::SIMPLE === $product_type ) {
 					$hidden_input = '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '" />';
@@ -404,7 +405,23 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			$form_html = sprintf(
 				'<form %1$s>%2$s%3$s%4$s%5$s</form>',
-				get_block_wrapper_attributes( array_merge( $wrapper_attributes, $form_attributes ) ),
+				get_block_wrapper_attributes(
+					array_merge(
+						$wrapper_attributes,
+						$form_attributes,
+						array(
+							'class' => implode(
+								' ',
+								array_filter(
+									array(
+										isset( $wrapper_attributes['class'] ) ? $wrapper_attributes['class'] : '',
+										isset( $form_attributes['class'] ) ? $form_attributes['class'] : '',
+									)
+								)
+							),
+						)
+					)
+				),
 				$hooks_before,
 				$template_part_blocks,
 				$hooks_after,
