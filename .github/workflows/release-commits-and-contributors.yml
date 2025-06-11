@@ -310,7 +310,7 @@ jobs:
 
   send-slack-notification:
     name: Send Slack Notification
-    needs: [extract-versions, count-commits-and-contributors, generate-contributors-list, has-db-updates]
+    needs: [extract-versions, count-commits-and-contributors, generate-contributors-list, db-updates]
     runs-on: ubuntu-latest
     steps:
       - name: Send Slack message
