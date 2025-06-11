@@ -133,7 +133,25 @@
 			"lint": {
 				"command": "lint",
 				"changes": "src/**/*.{js,ts,tsx,scss,css}"
-			}
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"webpack.config.js",
+						"jest.config.json",
+						"jest.setup.ts",
+						"tsconfig.json",
+						"src/**/*.{js,jsx,ts,tsx}",
+						"typings/**/*.ts"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
 		}
 	},
 	"wireit": {
