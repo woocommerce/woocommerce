@@ -126,7 +126,7 @@ class MenusController {
 					'path'      => add_query_arg(
 						array(
 							'page'         => 'wc-customer-stock-notifications',
-							'action'      => 'create',
+							'action'       => 'create',
 							'notification' => 1,
 						),
 						'admin.php'
@@ -143,7 +143,7 @@ class MenusController {
 					'path'      => add_query_arg(
 						array(
 							'page'         => 'wc-customer-stock-notifications',
-							'action'      => 'edit',
+							'action'       => 'edit',
 							'notification' => 1,
 						),
 						'admin.php'
