@@ -68,11 +68,13 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<fieldset>
-				<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
-				<ul class="wc-block-product-filter-checkbox-list__list">
+				<?php if ( ! empty( $block_context['groupLabel'] ) ) : ?>
+					<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
+				<?php endif; ?>
+				<div class="wc-block-product-filter-checkbox-list__item">
 					<?php foreach ( $items as $item ) { ?>
 						<?php $item_id = $item['type'] . '-' . $item['value']; ?>
-						<li
+						<div
 							data-wp-key="<?php echo esc_attr( $item_id ); ?>"
 							class="wc-block-product-filter-checkbox-list__item"
 							<?php if ( ! $item['selected'] ) : ?>
@@ -114,9 +116,9 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 									<?php endif; ?>
 								</span>
 							</label>
-						</li>
+						</div>
 					<?php } ?>
-				</ul>
+				</div>
 				<?php if ( count( $items ) > $show_initially ) : ?>
 					<button
 						class="wc-block-product-filter-checkbox-list__show-more"
@@ -124,7 +126,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 						data-wp-on--click="actions.showAllListItems"
 						hidden
 					>
-						<?php echo esc_html__( 'Show more...', 'woocommerce' ); ?>
+						<?php echo esc_html__( 'Show more…', 'woocommerce' ); ?>
 					</button>
 				<?php endif; ?>
 			</fieldset>

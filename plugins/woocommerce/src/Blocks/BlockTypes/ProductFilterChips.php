@@ -69,7 +69,9 @@ final class ProductFilterChips extends AbstractBlock {
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<fieldset>
-				<legend class="screen-reader-text"><?php echo esc_html( $block->context['filterData']['groupLabel'] ); ?></legend>
+				<?php if ( ! empty( $block->context['filterData']['groupLabel'] ) ) : ?>
+					<legend class="screen-reader-text"><?php echo esc_html( $block->context['filterData']['groupLabel'] ); ?></legend>
+				<?php endif; ?>
 				<div class="wc-block-product-filter-chips__items">
 					<?php foreach ( $items as $item ) { ?>
 						<?php $item_id = $item['type'] . '-' . $item['value']; ?>
@@ -113,7 +115,7 @@ final class ProductFilterChips extends AbstractBlock {
 						data-wp-bind--hidden="context.showAll"
 						hidden
 					>
-						<?php echo esc_html__( 'Show more...', 'woocommerce' ); ?>
+						<?php echo esc_html__( 'Show more…', 'woocommerce' ); ?>
 					</button>
 				<?php endif; ?>
 			</fieldset>
