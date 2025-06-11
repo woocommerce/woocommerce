@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\StockSyncController;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\NotificationEligibilityService;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\StockManagementHelper;
 
 /**
  * StockSyncControllerTests data tests.
@@ -24,8 +25,10 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut = new StockSyncController();
-		$this->sut->init( new NotificationEligibilityService() );
+		$this->sut           = new StockSyncController();
+		$eligibility_service = new NotificationEligibilityService();
+		$eligibility_service->init( new StockManagementHelper() );
+		$this->sut->init( $eligibility_service );
 	}
 
 	/**
@@ -148,7 +151,8 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 		$notification->save();
 
 		$this->assertEquals( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
-		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
 		$product->save();
 
 		// Check that the product is in the queue.
