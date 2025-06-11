@@ -114,7 +114,7 @@ class NotificationsBatchProcessor implements BatchProcessorInterface {
 		$table                = $wpdb->prefix . 'wc_stock_notifications';
 		$statuses_placeholder = implode( ', ', array_fill( 0, count( Config::get_eligible_stock_statuses() ), '%s' ) );
 
-		$sql = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$sql = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 			"SELECT COUNT(DISTINCT n.id)
 			FROM %i AS n
 			LEFT JOIN %i AS t ON n.product_id = t.post_id
@@ -124,7 +124,7 @@ class NotificationsBatchProcessor implements BatchProcessorInterface {
 			AND t.meta_value > 0
 			AND (n.date_last_attempt_gmt < FROM_UNIXTIME(t.meta_value) OR n.date_last_attempt_gmt IS NULL)
 			AND ss.meta_key = '_stock_status'
-			AND ss.meta_value IN ($statuses_placeholder)",
+			AND ss.meta_value IN ($statuses_placeholder)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			array(
 				$table,
 				$wpdb->postmeta,
@@ -149,7 +149,7 @@ class NotificationsBatchProcessor implements BatchProcessorInterface {
 		$table                = $wpdb->prefix . 'wc_stock_notifications';
 		$statuses_placeholder = implode( ', ', array_fill( 0, count( Config::get_eligible_stock_statuses() ), '%s' ) );
 
-		$sql = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$sql = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 			"SELECT n.id
 			FROM %i AS n
 			LEFT JOIN %i AS t ON n.product_id = t.post_id
@@ -161,7 +161,7 @@ class NotificationsBatchProcessor implements BatchProcessorInterface {
 			AND ss.meta_key = '_stock_status'
 			AND ss.meta_value IN ($statuses_placeholder)
 			ORDER BY n.product_id ASC
-			LIMIT %d",
+			LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			array(
 				$table,
 				$wpdb->postmeta,

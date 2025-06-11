@@ -167,7 +167,7 @@ class NotificationsBatchProcessorTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( array( $notification->get_id() ), $batch );
 
 		// Add the filter.
-		$skip_callback = function( $should_skip, $notification_id ) use ( $notification ) {
+		$skip_callback = function ( $should_skip, $notification_id ) use ( $notification ) {
 			return $notification_id === $notification->get_id();
 		};
 		\add_filter(
