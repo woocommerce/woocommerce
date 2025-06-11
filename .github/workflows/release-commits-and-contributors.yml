@@ -137,7 +137,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       contributor_list_path: ${{ steps.generate-contributors-list.outputs.filepath }}
-      artifact_url: ${{ steps.artifact-upload.outputs.artifact_url }}
+      artifact_url: ${{ steps.output-artifact-url.outputs.artifact_url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -187,9 +187,10 @@ jobs:
           path: ${{ steps.generate-contributors-list.outputs.filepath }}
           
       - name: Output artifact URL
+        id: output-artifact-url
         run: |
           ARTIFACT_URL=${{ steps.artifact-upload.outputs.artifact-url }}
-          echo "artifact_url=${ARTIFACT_URL}" >> $GITHUB_OUTPUT
+          echo "artifact_url=$ARTIFACT_URL" >> $GITHUB_OUTPUT
       
   db-updates:
     name: Check for database updates
@@ -296,12 +297,12 @@ jobs:
               if [ -n "$pr_number" ]; then
                 pr_url="https://github.com/${{ github.repository }}/pull/$pr_number"
                 echo "* \`$update_function\`, $pr_url"
-                FORMATTED_UPDATES="${FORMATTED_UPDATES}• \`$update_function\`: <$pr_url|PR #$pr_number>\n"
+                FORMATTED_UPDATES="${FORMATTED_UPDATES}• \`$update_function\` (<$pr_url|PR #$pr_number>)\n"
               else
                 # If no PR number found, link to the commit
                 commit_url="https://github.com/${{ github.repository }}/commit/$commit_hash"
                 echo "* \`$update_function\`, $commit_url"
-                FORMATTED_UPDATES="${FORMATTED_UPDATES}• \`$update_function\`: <$commit_url|Commit>\n"
+                FORMATTED_UPDATES="${FORMATTED_UPDATES}• \`$update_function\` (<$commit_url|Commit>)\n"
               fi
             else
               echo "* \`$update_function\`, No commit or PR found"
