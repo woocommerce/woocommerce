@@ -28,42 +28,6 @@ const isField = ( value: unknown ): value is Field => {
 		return false;
 	}
 
-	// Optional properties - validate type if present
-	if ( field.autocomplete !== undefined && typeof field.autocomplete !== 'string' ) {
-		return false;
-	}
-
-	if ( field.autocapitalize !== undefined && typeof field.autocapitalize !== 'string' ) {
-		return false;
-	}
-
-	if ( field.type !== undefined && typeof field.type !== 'string' ) {
-		return false;
-	}
-
-	// Validation can be boolean, array, or JSON schema object
-	if ( field.validation !== undefined && 
-		 typeof field.validation !== 'boolean' &&
-		 ! Array.isArray( field.validation ) &&
-		 typeof field.validation !== 'object' ) {
-		return false;
-	}
-
-	// For select fields
-	if ( field.options !== undefined && ! Array.isArray( field.options ) ) {
-		return false;
-	}
-
-	if ( field.placeholder !== undefined && typeof field.placeholder !== 'string' ) {
-		return false;
-	}
-
-	// Attributes should be an object if present
-	if ( field.attributes !== undefined && 
-		 ( typeof field.attributes !== 'object' || field.attributes === null || Array.isArray( field.attributes ) ) ) {
-		return false;
-	}
-
 	return true;
 };
 
@@ -90,7 +54,7 @@ export const isFormFields = ( value: unknown ): value is FormFields => {
 	// These are the fields that should always be present
 	const coreFields = [
 		'email',
-		'country', 
+		'country',
 		'first_name',
 		'last_name',
 		'company',
@@ -99,36 +63,21 @@ export const isFormFields = ( value: unknown ): value is FormFields => {
 		'city',
 		'state',
 		'postcode',
-		'phone'
+		'phone',
 	];
 
-	// We'll check for a minimum subset to allow flexibility
-	// but still ensure it's a valid checkout form structure
-	const minimumRequiredFields = [ 'first_name', 'last_name', 'email' ];
-	
-	if ( ! minimumRequiredFields.every( ( field ) => field in fields ) ) {
+	if ( ! coreFields.every( ( field ) => field in fields ) ) {
 		return false;
 	}
 
 	// Validate each field has the proper Field structure
-	for ( const [ fieldKey, fieldValue ] of Object.entries( fields ) ) {
+	for ( const [ fieldId, fieldValue ] of Object.entries( fields ) ) {
+		// If not included in core fields, it's an additional field we don't need to consider.
+		if ( ! coreFields.includes( fieldId ) ) {
+			continue;
+		}
 		if ( ! isField( fieldValue ) ) {
 			return false;
-		}
-
-		// Additional validation for specific core fields
-		if ( fieldKey === 'email' ) {
-			const emailField = fieldValue as Record< string, unknown >;
-			if ( emailField.type !== undefined && emailField.type !== 'email' ) {
-				return false;
-			}
-		}
-
-		if ( fieldKey === 'phone' ) {
-			const phoneField = fieldValue as Record< string, unknown >;
-			if ( phoneField.type !== undefined && phoneField.type !== 'tel' ) {
-				return false;
-			}
 		}
 	}
 
