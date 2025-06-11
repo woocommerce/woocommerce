@@ -889,6 +889,7 @@ abstract class WC_Data {
 	/**
 	 * Sets a date prop whilst handling formatting and datetime objects.
 	 *
+	 * @throws WC_Data_Exception Data Exception.
 	 * @since 3.0.0
 	 * @param string         $prop Name of prop to set.
 	 * @param string|integer $value Value of the prop.
