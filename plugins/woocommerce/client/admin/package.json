@@ -84,7 +84,7 @@
 		"@wordpress/warning": "wp-6.6",
 		"@xstate/react": "3.2.1",
 		"@xstate5/react": "npm:@xstate/react@4",
-		"clsx": "^2.1.1",
+		"clsx": "2.1.x",
 		"core-js": "^3.34.0",
 		"debug": "^4.3.4",
 		"dompurify": "^2.5.7",

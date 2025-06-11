@@ -530,13 +530,13 @@ final class BlockTypesController {
 				$block_types[] = 'AddToCartWithOptions\AddToCartWithOptions';
 				$block_types[] = 'AddToCartWithOptions\QuantitySelector';
 				$block_types[] = 'AddToCartWithOptions\VariationSelector';
-				$block_types[] = 'AddToCartWithOptions\VariationSelectorItemTemplate';
+				$block_types[] = 'AddToCartWithOptions\VariationSelectorAttribute';
 				$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeName';
 				$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeOptions';
 				$block_types[] = 'AddToCartWithOptions\GroupedProductSelector';
-				$block_types[] = 'AddToCartWithOptions\GroupedProductSelectorItemTemplate';
-				$block_types[] = 'AddToCartWithOptions\GroupedProductSelectorItemCTA';
-				$block_types[] = 'AddToCartWithOptions\GroupedProductSelectorItemLabel';
+				$block_types[] = 'AddToCartWithOptions\GroupedProductItem';
+				$block_types[] = 'AddToCartWithOptions\GroupedProductItemSelector';
+				$block_types[] = 'AddToCartWithOptions\GroupedProductItemLabel';
 			}
 
 			$block_types[] = 'BlockifiedProductDetails';

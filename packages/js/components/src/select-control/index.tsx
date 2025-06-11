@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Component, createElement } from '@wordpress/element';
 import {
 	debounce,
@@ -558,15 +558,11 @@ export class SelectControl extends Component< Props, State > {
 
 		return (
 			<div
-				className={ classnames(
-					'woocommerce-select-control',
-					className,
-					{
-						'has-inline-tags': hasMultiple && inlineTags,
-						'is-focused': isFocused,
-						'is-searchable': isSearchable,
-					}
-				) }
+				className={ clsx( 'woocommerce-select-control', className, {
+					'has-inline-tags': hasMultiple && inlineTags,
+					'is-focused': isFocused,
+					'is-searchable': isSearchable,
+				} ) }
 				ref={ this.bindNode }
 			>
 				{ autofill && (
