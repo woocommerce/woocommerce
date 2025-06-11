@@ -93,9 +93,14 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		 * Includes legacy_get_main_images_html method.
 		 */
 
-		$has_product_image_block = ! empty( array_filter( iterator_to_array( $block->inner_blocks ), function( $inner_block ) {
-			return $inner_block->name === 'woocommerce/product-image';
-		} ) );
+		$has_product_image_block = ! empty(
+			array_filter(
+				iterator_to_array( $block->inner_blocks ),
+				function ( $inner_block ) {
+					return 'woocommerce/product-image' === $inner_block->name;
+				}
+			)
+		);
 
 		if ( ! $has_product_image_block ) {
 			$images_html = $this->legacy_get_main_images_html( $block->context, $product );
@@ -108,7 +113,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		 */
 
 		foreach ( $block->inner_blocks as $inner_block ) {
-			if ( $inner_block->name === 'woocommerce/product-image' ) {
+			if ( 'woocommerce/product-image' === $inner_block->name ) {
 				// Product Image requires special handling because we need to render it once for each image.
 				$images_html .= $this->get_main_images_html( $block->context, $product, $inner_block );
 			} else {
@@ -131,6 +136,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php echo $images_html; ?>
 				<div class="wc-block-product-gallery-large-image__inner-blocks">
+					<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					<?php echo $inner_blocks_html; ?>
 				</div>
 			</div>
@@ -221,7 +227,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 								)
 							)->render( array( 'dynamic' => true ) );
 
-							echo $this->update_single_image( $image_html, $context, $index );
+							echo $this->update_single_image( $image_html, $context, $index ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						?>
 					</li>
 				<?php endforeach; ?>
