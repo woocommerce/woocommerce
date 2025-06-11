@@ -17,33 +17,9 @@ class BlockUtils {
 		this.page = page;
 	}
 
-	/**
-	 * Configures the Single Product Block in the editor.
-	 */
-	async configureSingleProductBlock( name?: string ) {
-		const singleProductBlock = await this.editor.getBlockByName(
-			'woocommerce/single-product'
-		);
-
-		if ( name ) {
-			await singleProductBlock
-				.locator( 'input[type="search"]' )
-				.fill( name );
-			await singleProductBlock.getByText( 'Search' ).click();
-			await singleProductBlock.getByText( name ).click();
-		} else {
-			await singleProductBlock
-				.locator( 'input[type="radio"]' )
-				.nth( 0 )
-				.click();
-		}
-
-		await singleProductBlock.getByText( 'Done' ).click();
-	}
-
 	async createManagedStockProduct() {
 		await wpCLI(
-			'wc product create --name="Managed Stock" --regular_price=10 --manage_stock=true --stock_quantity=1 --user=admin'
+			'wc product create --name="A Managed Stock" --regular_price=10 --manage_stock=true --stock_quantity=1 --user=admin'
 		);
 	}
 }
@@ -63,20 +39,39 @@ test.describe( 'Product Page: error notices when adding out-of-stock products', 
 	} ) => {
 		await blockUtils.createManagedStockProduct();
 		await admin.createNewPost();
-		await editor.insertBlock( { name: 'woocommerce/store-notices' } );
-		await editor.insertBlock( { name: 'woocommerce/single-product' } );
+		await editor.insertBlock( { name: 'woocommerce/product-collection' } );
 
-		const productName = 'Managed Stock';
+		const singleProduct = await editor.getBlockByName(
+			'woocommerce/product-collection'
+		);
 
-		await blockUtils.configureSingleProductBlock( productName );
+		await expect(
+			singleProduct.locator(
+				'.wc-blocks-product-collection__collections-create button'
+			)
+		).toBeVisible();
+
+		await singleProduct
+			.locator(
+				'.wc-blocks-product-collection__collections-create button'
+			)
+			.click();
+
+		const productName = 'A Managed Stock';
 
 		await editor.publishAndVisitPost();
 
+		const productCart = page
+			.locator( '.wc-block-product' )
+			.filter( { hasText: productName } );
+
+		await expect( productCart ).toBeVisible();
+
 		// Add to cart once — succeeds.
-		await page.click( 'text=Add to cart' );
+		await productCart.locator( '.add_to_cart_button' ).click();
 
 		// Add to cart again — triggers out-of-stock error.
-		await page.click( 'text=Add to cart' );
+		await productCart.locator( '.add_to_cart_button' ).click();
 
 		// Verify error notice is displayed.
 		await expect(
