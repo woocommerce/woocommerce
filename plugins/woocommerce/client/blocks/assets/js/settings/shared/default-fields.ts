@@ -139,7 +139,9 @@ export type CountryAddressFields = Record< string, FormFields >;
 /**
  * Default field properties.
  */
-export const defaultFields: FormFields =
-	getSetting< FormFields >( 'defaultFields' );
+export const defaultFields: FormFields = getSetting< FormFields >(
+	'defaultFields',
+	{}
+);
 
 export default defaultFields;
