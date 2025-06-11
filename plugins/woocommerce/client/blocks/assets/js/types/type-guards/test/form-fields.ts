@@ -4,7 +4,7 @@
 import { isFormFields } from '../form-fields';
 
 describe( 'isFormFields', () => {
-	it( 'should return true for valid FormFields object', () => {
+	it( 'should return true for valid FormFields object with all core fields', () => {
 		const validFormFields = {
 			email: {
 				label: 'Email address',
@@ -12,6 +12,13 @@ describe( 'isFormFields', () => {
 				required: true,
 				hidden: false,
 				index: 0,
+			},
+			country: {
+				label: 'Country/Region',
+				optionalLabel: 'Country/Region (optional)',
+				required: true,
+				hidden: false,
+				index: 1,
 			},
 			first_name: {
 				label: 'First name',
@@ -26,6 +33,55 @@ describe( 'isFormFields', () => {
 				required: true,
 				hidden: false,
 				index: 20,
+			},
+			company: {
+				label: 'Company',
+				optionalLabel: 'Company (optional)',
+				required: false,
+				hidden: false,
+				index: 30,
+			},
+			address_1: {
+				label: 'Address',
+				optionalLabel: 'Address (optional)',
+				required: true,
+				hidden: false,
+				index: 40,
+			},
+			address_2: {
+				label: 'Apartment, suite, etc.',
+				optionalLabel: 'Apartment, suite, etc. (optional)',
+				required: false,
+				hidden: false,
+				index: 50,
+			},
+			city: {
+				label: 'City',
+				optionalLabel: 'City (optional)',
+				required: true,
+				hidden: false,
+				index: 70,
+			},
+			state: {
+				label: 'State/County',
+				optionalLabel: 'State/County (optional)',
+				required: true,
+				hidden: false,
+				index: 80,
+			},
+			postcode: {
+				label: 'Postal code',
+				optionalLabel: 'Postal code (optional)',
+				required: true,
+				hidden: false,
+				index: 90,
+			},
+			phone: {
+				label: 'Phone',
+				optionalLabel: 'Phone (optional)',
+				required: true,
+				hidden: false,
+				index: 100,
 			},
 		};
 
@@ -43,6 +99,14 @@ describe( 'isFormFields', () => {
 				type: 'email',
 				autocomplete: 'email',
 				validation: [],
+			},
+			country: {
+				label: 'Country/Region',
+				optionalLabel: 'Country/Region (optional)',
+				required: true,
+				hidden: false,
+				index: 1,
+				autocomplete: 'country',
 			},
 			first_name: {
 				label: 'First name',
@@ -66,6 +130,153 @@ describe( 'isFormFields', () => {
 				hidden: true,
 				index: 30,
 			},
+			address_1: {
+				label: 'Address',
+				optionalLabel: 'Address (optional)',
+				required: true,
+				hidden: false,
+				index: 40,
+			},
+			address_2: {
+				label: 'Apartment, suite, etc.',
+				optionalLabel: 'Apartment, suite, etc. (optional)',
+				required: false,
+				hidden: false,
+				index: 50,
+			},
+			city: {
+				label: 'City',
+				optionalLabel: 'City (optional)',
+				required: true,
+				hidden: false,
+				index: 70,
+			},
+			state: {
+				label: 'State/County',
+				optionalLabel: 'State/County (optional)',
+				required: true,
+				hidden: false,
+				index: 80,
+			},
+			postcode: {
+				label: 'Postal code',
+				optionalLabel: 'Postal code (optional)',
+				required: true,
+				hidden: false,
+				index: 90,
+			},
+			phone: {
+				label: 'Phone',
+				optionalLabel: 'Phone (optional)',
+				required: true,
+				hidden: false,
+				index: 100,
+				type: 'tel',
+			},
+		};
+
+		expect( isFormFields( formFieldsWithExtras ) ).toBe( true );
+	} );
+
+	it( 'should return true for FormFields with additional optional fields', () => {
+		const formFieldsWithExtras = {
+			email: {
+				label: 'Email address',
+				optionalLabel: 'Email address (optional)',
+				required: true,
+				hidden: false,
+				index: 0,
+				type: 'email',
+				autocomplete: 'email',
+				validation: [],
+			},
+			country: {
+				label: 'Country/Region',
+				optionalLabel: 'Country/Region (optional)',
+				required: true,
+				hidden: false,
+				index: 1,
+				autocomplete: 'country',
+			},
+			first_name: {
+				label: 'First name',
+				optionalLabel: 'First name (optional)',
+				required: true,
+				hidden: false,
+				index: 10,
+				autocomplete: 'given-name',
+			},
+			last_name: {
+				label: 'Last name',
+				optionalLabel: 'Last name (optional)',
+				required: true,
+				hidden: false,
+				index: 20,
+			},
+			company: {
+				label: 'Company',
+				optionalLabel: 'Company (optional)',
+				required: false,
+				hidden: true,
+				index: 30,
+			},
+			address_1: {
+				label: 'Address',
+				optionalLabel: 'Address (optional)',
+				required: true,
+				hidden: false,
+				index: 40,
+			},
+			address_2: {
+				label: 'Apartment, suite, etc.',
+				optionalLabel: 'Apartment, suite, etc. (optional)',
+				required: false,
+				hidden: false,
+				index: 50,
+			},
+			city: {
+				label: 'City',
+				optionalLabel: 'City (optional)',
+				required: true,
+				hidden: false,
+				index: 70,
+			},
+			state: {
+				label: 'State/County',
+				optionalLabel: 'State/County (optional)',
+				required: true,
+				hidden: false,
+				index: 80,
+			},
+			postcode: {
+				label: 'Postal code',
+				optionalLabel: 'Postal code (optional)',
+				required: true,
+				hidden: false,
+				index: 90,
+			},
+			phone: {
+				label: 'Phone',
+				optionalLabel: 'Phone (optional)',
+				required: true,
+				hidden: false,
+				index: 100,
+				type: 'tel',
+			},
+			'switch-shipping-methods/custom-checkbox': {
+				label: 'Check this box to see a custom field on the order.',
+				optionalLabel:
+					'Check this box to see a custom field on the order. (optional)',
+				location: 'contact',
+				type: 'checkbox',
+				hidden: false,
+				required: false,
+				attributes: [],
+				show_in_order_confirmation: true,
+				sanitize_callback: [ {}, 'default_sanitize_callback' ],
+				validate_callback: [ {}, 'default_validate_callback' ],
+				validation: [],
+			},
 		};
 
 		expect( isFormFields( formFieldsWithExtras ) ).toBe( true );
@@ -79,7 +290,7 @@ describe( 'isFormFields', () => {
 		expect( isFormFields( undefined ) ).toBe( false );
 	} );
 
-	it( 'should return false for false (the original bug case)', () => {
+	it( 'should return false for false', () => {
 		expect( isFormFields( false ) ).toBe( false );
 	} );
 
@@ -98,8 +309,8 @@ describe( 'isFormFields', () => {
 		expect( isFormFields( {} ) ).toBe( false );
 	} );
 
-	it( 'should return false when missing required fields', () => {
-		// Missing first_name
+	it( 'should return false when missing any required core fields', () => {
+		// Missing first_name (and other core fields)
 		const missingFirstName = {
 			email: {
 				label: 'Email address',
@@ -108,6 +319,13 @@ describe( 'isFormFields', () => {
 				hidden: false,
 				index: 0,
 			},
+			country: {
+				label: 'Country/Region',
+				optionalLabel: 'Country/Region (optional)',
+				required: true,
+				hidden: false,
+				index: 1,
+			},
 			last_name: {
 				label: 'Last name',
 				optionalLabel: 'Last name (optional)',
@@ -115,11 +333,67 @@ describe( 'isFormFields', () => {
 				hidden: false,
 				index: 20,
 			},
+			company: {
+				label: 'Company',
+				optionalLabel: 'Company (optional)',
+				required: false,
+				hidden: false,
+				index: 30,
+			},
+			address_1: {
+				label: 'Address',
+				optionalLabel: 'Address (optional)',
+				required: true,
+				hidden: false,
+				index: 40,
+			},
+			address_2: {
+				label: 'Apartment, suite, etc.',
+				optionalLabel: 'Apartment, suite, etc. (optional)',
+				required: false,
+				hidden: false,
+				index: 50,
+			},
+			city: {
+				label: 'City',
+				optionalLabel: 'City (optional)',
+				required: true,
+				hidden: false,
+				index: 70,
+			},
+			state: {
+				label: 'State/County',
+				optionalLabel: 'State/County (optional)',
+				required: true,
+				hidden: false,
+				index: 80,
+			},
+			postcode: {
+				label: 'Postal code',
+				optionalLabel: 'Postal code (optional)',
+				required: true,
+				hidden: false,
+				index: 90,
+			},
+			phone: {
+				label: 'Phone',
+				optionalLabel: 'Phone (optional)',
+				required: true,
+				hidden: false,
+				index: 100,
+			},
 		};
 		expect( isFormFields( missingFirstName ) ).toBe( false );
 
-		// Missing email
-		const missingEmail = {
+		// Missing multiple core fields
+		const missingMultiple = {
+			email: {
+				label: 'Email address',
+				optionalLabel: 'Email address (optional)',
+				required: true,
+				hidden: false,
+				index: 0,
+			},
 			first_name: {
 				label: 'First name',
 				optionalLabel: 'First name (optional)',
@@ -135,12 +409,19 @@ describe( 'isFormFields', () => {
 				index: 20,
 			},
 		};
-		expect( isFormFields( missingEmail ) ).toBe( false );
+		expect( isFormFields( missingMultiple ) ).toBe( false );
 	} );
 
 	it( 'should return false when field values are not objects', () => {
 		const invalidFieldValue = {
 			email: 'invalid string instead of object',
+			country: {
+				label: 'Country/Region',
+				optionalLabel: 'Country/Region (optional)',
+				required: true,
+				hidden: false,
+				index: 1,
+			},
 			first_name: {
 				label: 'First name',
 				optionalLabel: 'First name (optional)',
@@ -154,6 +435,55 @@ describe( 'isFormFields', () => {
 				required: true,
 				hidden: false,
 				index: 20,
+			},
+			company: {
+				label: 'Company',
+				optionalLabel: 'Company (optional)',
+				required: false,
+				hidden: false,
+				index: 30,
+			},
+			address_1: {
+				label: 'Address',
+				optionalLabel: 'Address (optional)',
+				required: true,
+				hidden: false,
+				index: 40,
+			},
+			address_2: {
+				label: 'Apartment, suite, etc.',
+				optionalLabel: 'Apartment, suite, etc. (optional)',
+				required: false,
+				hidden: false,
+				index: 50,
+			},
+			city: {
+				label: 'City',
+				optionalLabel: 'City (optional)',
+				required: true,
+				hidden: false,
+				index: 70,
+			},
+			state: {
+				label: 'State/County',
+				optionalLabel: 'State/County (optional)',
+				required: true,
+				hidden: false,
+				index: 80,
+			},
+			postcode: {
+				label: 'Postal code',
+				optionalLabel: 'Postal code (optional)',
+				required: true,
+				hidden: false,
+				index: 90,
+			},
+			phone: {
+				label: 'Phone',
+				optionalLabel: 'Phone (optional)',
+				required: true,
+				hidden: false,
+				index: 100,
 			},
 		};
 		expect( isFormFields( invalidFieldValue ) ).toBe( false );
@@ -169,6 +499,13 @@ describe( 'isFormFields', () => {
 				hidden: false,
 				index: 0,
 			},
+			country: {
+				label: 'Country/Region',
+				optionalLabel: 'Country/Region (optional)',
+				required: true,
+				hidden: false,
+				index: 1,
+			},
 			first_name: {
 				label: 'First name',
 				optionalLabel: 'First name (optional)',
@@ -182,6 +519,55 @@ describe( 'isFormFields', () => {
 				required: true,
 				hidden: false,
 				index: 20,
+			},
+			company: {
+				label: 'Company',
+				optionalLabel: 'Company (optional)',
+				required: false,
+				hidden: false,
+				index: 30,
+			},
+			address_1: {
+				label: 'Address',
+				optionalLabel: 'Address (optional)',
+				required: true,
+				hidden: false,
+				index: 40,
+			},
+			address_2: {
+				label: 'Apartment, suite, etc.',
+				optionalLabel: 'Apartment, suite, etc. (optional)',
+				required: false,
+				hidden: false,
+				index: 50,
+			},
+			city: {
+				label: 'City',
+				optionalLabel: 'City (optional)',
+				required: true,
+				hidden: false,
+				index: 70,
+			},
+			state: {
+				label: 'State/County',
+				optionalLabel: 'State/County (optional)',
+				required: true,
+				hidden: false,
+				index: 80,
+			},
+			postcode: {
+				label: 'Postal code',
+				optionalLabel: 'Postal code (optional)',
+				required: true,
+				hidden: false,
+				index: 90,
+			},
+			phone: {
+				label: 'Phone',
+				optionalLabel: 'Phone (optional)',
+				required: true,
+				hidden: false,
+				index: 100,
 			},
 		};
 		expect( isFormFields( invalidLabel ) ).toBe( false );
@@ -195,6 +581,13 @@ describe( 'isFormFields', () => {
 				hidden: false,
 				index: 0,
 			},
+			country: {
+				label: 'Country/Region',
+				optionalLabel: 'Country/Region (optional)',
+				required: true,
+				hidden: false,
+				index: 1,
+			},
 			first_name: {
 				label: 'First name',
 				optionalLabel: 'First name (optional)',
@@ -208,6 +601,55 @@ describe( 'isFormFields', () => {
 				required: true,
 				hidden: false,
 				index: 20,
+			},
+			company: {
+				label: 'Company',
+				optionalLabel: 'Company (optional)',
+				required: false,
+				hidden: false,
+				index: 30,
+			},
+			address_1: {
+				label: 'Address',
+				optionalLabel: 'Address (optional)',
+				required: true,
+				hidden: false,
+				index: 40,
+			},
+			address_2: {
+				label: 'Apartment, suite, etc.',
+				optionalLabel: 'Apartment, suite, etc. (optional)',
+				required: false,
+				hidden: false,
+				index: 50,
+			},
+			city: {
+				label: 'City',
+				optionalLabel: 'City (optional)',
+				required: true,
+				hidden: false,
+				index: 70,
+			},
+			state: {
+				label: 'State/County',
+				optionalLabel: 'State/County (optional)',
+				required: true,
+				hidden: false,
+				index: 80,
+			},
+			postcode: {
+				label: 'Postal code',
+				optionalLabel: 'Postal code (optional)',
+				required: true,
+				hidden: false,
+				index: 90,
+			},
+			phone: {
+				label: 'Phone',
+				optionalLabel: 'Phone (optional)',
+				required: true,
+				hidden: false,
+				index: 100,
 			},
 		};
 		expect( isFormFields( invalidRequired ) ).toBe( false );
@@ -221,6 +663,13 @@ describe( 'isFormFields', () => {
 				hidden: false,
 				index: '0', // should be number
 			},
+			country: {
+				label: 'Country/Region',
+				optionalLabel: 'Country/Region (optional)',
+				required: true,
+				hidden: false,
+				index: 1,
+			},
 			first_name: {
 				label: 'First name',
 				optionalLabel: 'First name (optional)',
@@ -234,6 +683,55 @@ describe( 'isFormFields', () => {
 				required: true,
 				hidden: false,
 				index: 20,
+			},
+			company: {
+				label: 'Company',
+				optionalLabel: 'Company (optional)',
+				required: false,
+				hidden: false,
+				index: 30,
+			},
+			address_1: {
+				label: 'Address',
+				optionalLabel: 'Address (optional)',
+				required: true,
+				hidden: false,
+				index: 40,
+			},
+			address_2: {
+				label: 'Apartment, suite, etc.',
+				optionalLabel: 'Apartment, suite, etc. (optional)',
+				required: false,
+				hidden: false,
+				index: 50,
+			},
+			city: {
+				label: 'City',
+				optionalLabel: 'City (optional)',
+				required: true,
+				hidden: false,
+				index: 70,
+			},
+			state: {
+				label: 'State/County',
+				optionalLabel: 'State/County (optional)',
+				required: true,
+				hidden: false,
+				index: 80,
+			},
+			postcode: {
+				label: 'Postal code',
+				optionalLabel: 'Postal code (optional)',
+				required: true,
+				hidden: false,
+				index: 90,
+			},
+			phone: {
+				label: 'Phone',
+				optionalLabel: 'Phone (optional)',
+				required: true,
+				hidden: false,
+				index: 100,
 			},
 		};
 		expect( isFormFields( invalidIndex ) ).toBe( false );
@@ -242,6 +740,13 @@ describe( 'isFormFields', () => {
 	it( 'should return false when field has null values', () => {
 		const nullFieldValue = {
 			email: null,
+			country: {
+				label: 'Country/Region',
+				optionalLabel: 'Country/Region (optional)',
+				required: true,
+				hidden: false,
+				index: 1,
+			},
 			first_name: {
 				label: 'First name',
 				optionalLabel: 'First name (optional)',
@@ -255,6 +760,55 @@ describe( 'isFormFields', () => {
 				required: true,
 				hidden: false,
 				index: 20,
+			},
+			company: {
+				label: 'Company',
+				optionalLabel: 'Company (optional)',
+				required: false,
+				hidden: false,
+				index: 30,
+			},
+			address_1: {
+				label: 'Address',
+				optionalLabel: 'Address (optional)',
+				required: true,
+				hidden: false,
+				index: 40,
+			},
+			address_2: {
+				label: 'Apartment, suite, etc.',
+				optionalLabel: 'Apartment, suite, etc. (optional)',
+				required: false,
+				hidden: false,
+				index: 50,
+			},
+			city: {
+				label: 'City',
+				optionalLabel: 'City (optional)',
+				required: true,
+				hidden: false,
+				index: 70,
+			},
+			state: {
+				label: 'State/County',
+				optionalLabel: 'State/County (optional)',
+				required: true,
+				hidden: false,
+				index: 80,
+			},
+			postcode: {
+				label: 'Postal code',
+				optionalLabel: 'Postal code (optional)',
+				required: true,
+				hidden: false,
+				index: 90,
+			},
+			phone: {
+				label: 'Phone',
+				optionalLabel: 'Phone (optional)',
+				required: true,
+				hidden: false,
+				index: 100,
 			},
 		};
 		expect( isFormFields( nullFieldValue ) ).toBe( false );
@@ -272,6 +826,13 @@ describe( 'isFormFields', () => {
 				autocomplete: 'email',
 				autocapitalize: 'none',
 			},
+			country: {
+				label: 'Country/Region',
+				optionalLabel: 'Country/Region (optional)',
+				required: true,
+				hidden: false,
+				index: 1,
+			},
 			first_name: {
 				label: 'First name',
 				optionalLabel: 'First name (optional)',
@@ -288,138 +849,57 @@ describe( 'isFormFields', () => {
 				hidden: false,
 				index: 20,
 			},
-		};
-		expect( isFormFields( fieldsWithOptionalProps ) ).toBe( true );
-	} );
-
-	it( 'should reject fields with wrong optional property types', () => {
-		const invalidAutocomplete = {
-			email: {
-				label: 'Email address',
-				optionalLabel: 'Email address (optional)',
-				required: true,
+			company: {
+				label: 'Company',
+				optionalLabel: 'Company (optional)',
+				required: false,
 				hidden: false,
-				index: 0,
-				autocomplete: 123, // should be string
+				index: 30,
 			},
-			first_name: {
-				label: 'First name',
-				optionalLabel: 'First name (optional)',
+			address_1: {
+				label: 'Address',
+				optionalLabel: 'Address (optional)',
 				required: true,
 				hidden: false,
-				index: 10,
+				index: 40,
 			},
-			last_name: {
-				label: 'Last name',
-				optionalLabel: 'Last name (optional)',
-				required: true,
+			address_2: {
+				label: 'Apartment, suite, etc.',
+				optionalLabel: 'Apartment, suite, etc. (optional)',
+				required: false,
 				hidden: false,
-				index: 20,
+				index: 50,
 			},
-		};
-		expect( isFormFields( invalidAutocomplete ) ).toBe( false );
-	} );
-
-	it( 'should validate email field type if present', () => {
-		const wrongEmailType = {
-			email: {
-				label: 'Email address',
-				optionalLabel: 'Email address (optional)',
+			city: {
+				label: 'City',
+				optionalLabel: 'City (optional)',
 				required: true,
 				hidden: false,
-				index: 0,
-				type: 'text', // should be 'email' when specified
+				index: 70,
 			},
-			first_name: {
-				label: 'First name',
-				optionalLabel: 'First name (optional)',
+			state: {
+				label: 'State/County',
+				optionalLabel: 'State/County (optional)',
 				required: true,
 				hidden: false,
-				index: 10,
+				index: 80,
 			},
-			last_name: {
-				label: 'Last name',
-				optionalLabel: 'Last name (optional)',
+			postcode: {
+				label: 'Postal code',
+				optionalLabel: 'Postal code (optional)',
 				required: true,
 				hidden: false,
-				index: 20,
-			},
-		};
-		expect( isFormFields( wrongEmailType ) ).toBe( false );
-	} );
-
-	it( 'should validate phone field type if present', () => {
-		const validWithPhone = {
-			email: {
-				label: 'Email address',
-				optionalLabel: 'Email address (optional)',
-				required: true,
-				hidden: false,
-				index: 0,
-			},
-			first_name: {
-				label: 'First name',
-				optionalLabel: 'First name (optional)',
-				required: true,
-				hidden: false,
-				index: 10,
-			},
-			last_name: {
-				label: 'Last name',
-				optionalLabel: 'Last name (optional)',
-				required: true,
-				hidden: false,
-				index: 20,
+				index: 90,
 			},
 			phone: {
 				label: 'Phone',
 				optionalLabel: 'Phone (optional)',
-				required: false,
+				required: true,
 				hidden: false,
 				index: 100,
-				type: 'tel',
 			},
 		};
-		expect( isFormFields( validWithPhone ) ).toBe( true );
-
-		const wrongPhoneType = {
-			...validWithPhone,
-			phone: {
-				...validWithPhone.phone,
-				type: 'text', // should be 'tel'
-			},
-		};
-		expect( isFormFields( wrongPhoneType ) ).toBe( false );
-	} );
-
-	it( 'should accept fields with validation arrays', () => {
-		const fieldsWithValidation = {
-			email: {
-				label: 'Email address',
-				optionalLabel: 'Email address (optional)',
-				required: true,
-				hidden: false,
-				index: 0,
-				validation: [],
-			},
-			first_name: {
-				label: 'First name',
-				optionalLabel: 'First name (optional)',
-				required: true,
-				hidden: false,
-				index: 10,
-				validation: [ { type: 'string', minLength: 1 } ],
-			},
-			last_name: {
-				label: 'Last name',
-				optionalLabel: 'Last name (optional)',
-				required: true,
-				hidden: false,
-				index: 20,
-				validation: false,
-			},
-		};
-		expect( isFormFields( fieldsWithValidation ) ).toBe( true );
+		expect( isFormFields( fieldsWithOptionalProps ) ).toBe( true );
 	} );
 
 	it( 'should accept complete core fields structure matching PHP', () => {
