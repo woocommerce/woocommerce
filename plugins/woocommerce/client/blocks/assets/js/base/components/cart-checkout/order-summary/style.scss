@@ -1,5 +1,5 @@
-@include cart-checkout-large-container {
-	.wc-block-components-order-summary {
+.wc-block-components-order-summary {
+	@include cart-checkout-large-container {
 		padding: 0 $gap;
 	}
 }

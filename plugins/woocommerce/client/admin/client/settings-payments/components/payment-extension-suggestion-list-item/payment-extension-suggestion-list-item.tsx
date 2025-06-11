@@ -6,7 +6,7 @@ import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
 import {
-	PaymentExtensionSuggestionProvider,
+	PaymentsExtensionSuggestionProvider,
 	PaymentsEntity,
 } from '@woocommerce/data';
 
@@ -30,7 +30,7 @@ type PaymentExtensionSuggestionListItemProps = {
 	/**
 	 * The payment extension suggestion to display.
 	 */
-	suggestion: PaymentExtensionSuggestionProvider;
+	suggestion: PaymentsExtensionSuggestionProvider;
 	/**
 	 * The ID of the plugin currently being installed, or `null` if none.
 	 */

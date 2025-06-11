@@ -9,8 +9,10 @@ import { registerBlockType } from '@wordpress/blocks';
  */
 import { Edit, Save } from './edit';
 import attributes from './attributes';
+import metadata from './block.json';
 
 registerBlockType( 'woocommerce/checkout-shipping-address-block', {
+	...metadata,
 	icon: {
 		src: (
 			<Icon

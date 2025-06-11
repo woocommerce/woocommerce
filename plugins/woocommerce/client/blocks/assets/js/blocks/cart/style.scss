@@ -108,7 +108,7 @@
 	padding-top: 0;
 }
 
-@include cart-checkout-not-large-container {
+@include cart-checkout-below-large {
 	.wc-block-cart-item__total {
 		.wc-block-components-sale-badge {
 			display: none;

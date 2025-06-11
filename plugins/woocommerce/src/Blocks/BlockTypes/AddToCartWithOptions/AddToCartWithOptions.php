@@ -81,6 +81,26 @@ class AddToCartWithOptions extends AbstractBlock {
 	}
 
 	/**
+	 * Check if a child product is purchasable.
+	 *
+	 * @param \WC_Product $product The product to check.
+	 * @return bool True if the product is purchasable, false otherwise.
+	 */
+	private function is_child_product_purchasable( \WC_Product $product ) {
+		// Skip variable products.
+		if ( $product->is_type( 'variable' ) ) {
+			return false;
+		}
+
+		// Skip grouped products.
+		if ( $product->is_type( 'grouped' ) ) {
+			return false;
+		}
+
+		return $product->is_purchasable() && $product->is_in_stock();
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -123,6 +143,17 @@ class AddToCartWithOptions extends AbstractBlock {
 			$template_part_path = apply_filters( '__experimental_woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part', false, $product_type );
 		}
 
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
+		$classes            = implode(
+			' ',
+			array_filter(
+				array(
+					'wp-block-add-to-cart-with-options wc-block-add-to-cart-with-options',
+					esc_attr( $classes_and_styles['classes'] ),
+				)
+			)
+		);
+
 		if ( is_string( $template_part_path ) && file_exists( $template_part_path ) ) {
 
 			$template_part_contents = '';
@@ -145,18 +176,6 @@ class AddToCartWithOptions extends AbstractBlock {
 				$template_part_contents = file_get_contents( $template_part_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			}
 
-			$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
-
-			$classes = implode(
-				' ',
-				array_filter(
-					array(
-						'wp-block-add-to-cart-with-options wc-block-add-to-cart-with-options',
-						esc_attr( $classes_and_styles['classes'] ),
-					)
-				)
-			);
-
 			/**
 			 * Filters the change the quantity to add to cart.
 			 *
@@ -177,7 +196,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			$context = array(
 				'productId'   => $product->get_id(),
 				'productType' => $product->get_type(),
-				'quantity'    => $default_quantity,
+				'quantity'    => array( $product->get_id() => $default_quantity ),
 			);
 
 			if ( $product->is_type( 'variable' ) ) {
@@ -193,6 +212,31 @@ class AddToCartWithOptions extends AbstractBlock {
 					$available_variations
 				);
 				$context['availableVariations'] = $available_variations_data;
+			}
+
+			if ( $product->is_type( 'grouped' ) ) {
+				// Add context for purchasable child products.
+				$context['groupedProductIds'] = array();
+				foreach ( $product->get_children() as $child_product_id ) {
+					$child_product = wc_get_product( $child_product_id );
+					if ( $child_product && $this->is_child_product_purchasable( $child_product ) ) {
+						$context['groupedProductIds'][] = $child_product_id;
+					}
+				}
+
+				// Add quantity context for purchasable child products.
+				$context['quantity'] = array_fill_keys(
+					$context['groupedProductIds'],
+					$default_quantity
+				);
+
+				// Check for any "sold individually" products and set their default quantity to 0.
+				foreach ( $context['groupedProductIds'] as $child_product_id ) {
+					$child_product = wc_get_product( $child_product_id );
+					if ( $child_product && $child_product->is_sold_individually() ) {
+						$context['quantity'][ $child_product_id ] = 0;
+					}
+				}
 			}
 
 			$hooks_before = '';
@@ -220,30 +264,75 @@ class AddToCartWithOptions extends AbstractBlock {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_button' );
 				} elseif ( ProductType::EXTERNAL === $product_type ) {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_button' );
 				} elseif ( ProductType::GROUPED === $product_type ) {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_button' );
 				} elseif ( ProductType::VARIABLE === $product_type ) {
 					/**
 					 * Hook: woocommerce_before_variations_form.
 					 *
-					 * @since 2.4.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_variations_form' );
+					/**
+					 * Hook: woocommerce_after_variations_table.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_after_variations_table' );
+					/**
+					 * Hook: woocommerce_before_single_variation.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_before_single_variation' );
+
+					// WooCommerce uses `woocommerce_single_variation` to render
+					// some UI elements like the Add to Cart button for
+					// variations. We need to remove them to avoid those UI
+					// elements being duplicate with the blocks.
+					// We later add these actions back to avoid affecting other
+					// blocks or templates.
+					remove_action( 'woocommerce_single_variation', 'woocommerce_single_variation', 10 );
+					remove_action( 'woocommerce_single_variation', 'woocommerce_single_variation_add_to_cart_button', 20 );
+					/**
+					 * Hook: woocommerce_single_variation.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_single_variation' );
+					if ( function_exists( 'woocommerce_single_variation' ) ) {
+						add_action( 'woocommerce_single_variation', 'woocommerce_single_variation', 10 );
+					}
+					if ( function_exists( 'woocommerce_single_variation_add_to_cart_button' ) ) {
+						add_action( 'woocommerce_single_variation', 'woocommerce_single_variation_add_to_cart_button', 20 );
+					}
+					/**
+					 * Hook: woocommerce_before_add_to_cart_button.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_before_add_to_cart_button' );
+					/**
+					 * Hook: woocommerce_before_add_to_cart_quantity.
+					 *
+					 * @since 2.7.0
+					 */
+					do_action( 'woocommerce_before_add_to_cart_quantity' );
 				}
 				$hooks_before = ob_get_clean();
 
@@ -252,34 +341,52 @@ class AddToCartWithOptions extends AbstractBlock {
 					/**
 					 * Hook: woocommerce_after_add_to_cart_quantity.
 					 *
-					 * @since 2.7.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_add_to_cart_quantity' );
 					/**
 					 * Hook: woocommerce_after_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_add_to_cart_button' );
 				} elseif ( ProductType::EXTERNAL === $product_type ) {
 					/**
 					 * Hook: woocommerce_after_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_add_to_cart_button' );
 				} elseif ( ProductType::GROUPED === $product_type ) {
 					/**
 					 * Hook: woocommerce_after_add_to_cart_button.
 					 *
-					 * @since 1.5.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_add_to_cart_button' );
 				} elseif ( ProductType::VARIABLE === $product_type ) {
 					/**
+					 * Hook: woocommerce_after_add_to_cart_quantity.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_after_add_to_cart_quantity' );
+					/**
+					 * Hook: woocommerce_after_add_to_cart_button.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_after_add_to_cart_button' );
+					/**
+					 * Hook: woocommerce_after_single_variation.
+					 *
+					 * @since 10.0.0
+					 */
+					do_action( 'woocommerce_after_single_variation' );
+					/**
 					 * Hook: woocommerce_after_variations_form.
 					 *
-					 * @since 2.4.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_after_variations_form' );
 				}
@@ -306,7 +413,8 @@ class AddToCartWithOptions extends AbstractBlock {
 			$cart_redirect_after_add = get_option( 'woocommerce_cart_redirect_after_add' );
 			$form_attributes         = '';
 			$hidden_input            = '';
-			if ( $hooks_before || $hooks_after || 'yes' === $cart_redirect_after_add ) {
+			$legacy_mode             = $hooks_before || $hooks_after || 'yes' === $cart_redirect_after_add;
+			if ( $legacy_mode ) {
 				// If an extension is hoooking into the form or we need to redirect to the cart,
 				// we fall back to a regular HTML form.
 				$form_attributes = array(
@@ -322,6 +430,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					),
 					'method'  => 'post',
 					'enctype' => 'multipart/form-data',
+					'class'   => 'cart',
 				);
 				if ( ProductType::SIMPLE === $product_type ) {
 					$hidden_input = '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '" />';
@@ -341,7 +450,23 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			$form_html = sprintf(
 				'<form %1$s>%2$s%3$s%4$s%5$s</form>',
-				get_block_wrapper_attributes( array_merge( $wrapper_attributes, $form_attributes ) ),
+				get_block_wrapper_attributes(
+					array_merge(
+						$wrapper_attributes,
+						$form_attributes,
+						array(
+							'class' => implode(
+								' ',
+								array_filter(
+									array(
+										isset( $wrapper_attributes['class'] ) ? $wrapper_attributes['class'] : '',
+										isset( $form_attributes['class'] ) ? $form_attributes['class'] : '',
+									)
+								)
+							),
+						)
+					)
+				),
 				$hooks_before,
 				$template_part_blocks,
 				$hooks_after,
@@ -365,6 +490,10 @@ class AddToCartWithOptions extends AbstractBlock {
 			}
 
 			$form_html = $form_html . ob_get_clean();
+
+			if ( ! $legacy_mode ) {
+				$form_html = $this->render_interactivity_notices_region( $form_html );
+			}
 		} else {
 			ob_start();
 
@@ -375,11 +504,65 @@ class AddToCartWithOptions extends AbstractBlock {
 			 */
 			do_action( 'woocommerce_' . $product->get_type() . '_add_to_cart' );
 
+			$wrapper_attributes = array(
+				'class' => $classes,
+				'style' => esc_attr( $classes_and_styles['styles'] ),
+			);
+
 			$form_html = ob_get_clean();
+			$form_html = sprintf( '<div %1$s>%2$s</div>', get_block_wrapper_attributes( $wrapper_attributes ), $form_html );
 		}
 
 		$product = $previous_product;
 
 		return $form_html;
+	}
+
+	/**
+	 * Render interactivity API powered notices that can be added client-side. This reuses classes
+	 * from the woocommerce/store-notices block to ensure style consistency.
+	 *
+	 * @param string $form_html The form HTML.
+	 * @return string The rendered store notices HTML.
+	 */
+	protected function render_interactivity_notices_region( $form_html ) {
+		$context = array(
+			'notices' => array(),
+		);
+
+		ob_start();
+		?>
+		<div data-wp-interactive="woocommerce/store-notices" class="wc-block-components-notices alignwide" data-wp-context='<?php echo wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ); ?>'>
+			<template data-wp-each--notice="context.notices" data-wp-each-key="context.notice.id">
+				<div
+					class="wc-block-components-notice-banner"
+					data-wp-class--is-error="state.isError"
+					data-wp-class--is-success ="state.isSuccess"
+					data-wp-class--is-info="state.isInfo"
+					data-wp-class--is-dismissible="context.notice.dismissible"
+					data-wp-bind--role="state.role"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+						<path data-wp-bind--d="state.iconPath"></path>
+					</svg>
+					<div class="wc-block-components-notice-banner__content">
+						<span data-wp-init="callbacks.renderNoticeContent"></span>
+					</div>
+					<button
+						data-wp-bind--hidden="!context.notice.dismissible"
+						class="wc-block-components-button wp-element-button wc-block-components-notice-banner__dismiss contained"
+						aria-label="<?php esc_attr_e( 'Dismiss this notice', 'woocommerce' ); ?>"
+						data-wp-on--click="actions.removeNotice"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+							<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z" />
+						</svg>
+					</button>
+				</div>
+			</template>
+			<?php echo $form_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+		</div>
+		<?php
+		return ob_get_clean();
 	}
 }

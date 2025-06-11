@@ -13,7 +13,7 @@
 		padding: 0;
 	}
 }
-@include cart-checkout-not-large-container {
+@include cart-checkout-below-large {
 	.wc-block-checkout__sidebar {
 		margin-bottom: $gap-large;
 		order: 0;

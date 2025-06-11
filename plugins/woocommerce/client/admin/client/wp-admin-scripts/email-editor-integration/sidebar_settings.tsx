@@ -54,6 +54,10 @@ const SidebarSettings = ( {
 	const [ addBCC, setAddBCC ] = useState( !! woocommerce_email_data?.bcc );
 	const [ addCC, setAddCC ] = useState( !! woocommerce_email_data?.cc );
 
+	if ( ! woocommerce_email_data ) {
+		return null;
+	}
+
 	const updateWooMailProperty = ( name: string, value: string | boolean ) => {
 		const editedPost = select( coreDataStore ).getEditedEntityRecord(
 			'postType',
@@ -157,6 +161,7 @@ const SidebarSettings = ( {
 							__nextHasNoMarginBottom
 							__next40pxDefaultSize
 							name="recipient"
+							data-testid="email_recipient"
 							value={ woocommerce_email_data.recipient }
 							onChange={ ( value ) => {
 								updateWooMailProperty( 'recipient', value );
@@ -194,6 +199,7 @@ const SidebarSettings = ( {
 						<TextControl
 							__nextHasNoMarginBottom
 							__next40pxDefaultSize
+							data-testid="email_cc"
 							value={ woocommerce_email_data?.cc || '' }
 							onChange={ ( value ) => {
 								updateWooMailProperty( 'cc', value );
@@ -237,6 +243,7 @@ const SidebarSettings = ( {
 						<TextControl
 							__nextHasNoMarginBottom
 							__next40pxDefaultSize
+							data-testid="email_bcc"
 							value={ woocommerce_email_data?.bcc || '' }
 							onChange={ ( value ) => {
 								updateWooMailProperty( 'bcc', value );

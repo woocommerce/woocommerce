@@ -32,7 +32,7 @@
 	}
 }
 
-@include cart-checkout-not-large-container {
+@include cart-checkout-below-large {
 	.wc-block-components-sidebar-layout {
 		flex-direction: column;
 		margin: 0 auto $gap;
