@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Fix issue where “Set up payments” task wasn’t marked complete immediately after onboarding in LYS.
