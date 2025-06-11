@@ -166,12 +166,9 @@ const InboxNoteCard = ( {
 		}
 	);
 
-	const actionWrapperClassName = clsx(
-		'woocommerce-inbox-message__actions',
-		{
-			'has-multiple-actions': note.actions?.length > 1,
-		}
-	);
+	const actionWrapperClassName = clsx( 'woocommerce-inbox-message__actions', {
+		'has-multiple-actions': note.actions?.length > 1,
+	} );
 
 	return (
 		<section ref={ ref } className={ cardClassName }>

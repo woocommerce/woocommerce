@@ -563,10 +563,7 @@ const TreeSelectControl = ( {
 		<div
 			{ ...focusOutside }
 			onKeyDown={ onKeyDown }
-			className={ clsx(
-				'woocommerce-tree-select-control',
-				className
-			) }
+			className={ clsx( 'woocommerce-tree-select-control', className ) }
 		>
 			{ !! label && (
 				<label

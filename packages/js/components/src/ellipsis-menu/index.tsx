@@ -73,12 +73,9 @@ const EllipsisMenu = ( {
 		onToggle: toggleHandlerOverride,
 		isOpen,
 	}: CallbackProps ) => {
-		const toggleClassname = clsx(
-			'woocommerce-ellipsis-menu__toggle',
-			{
-				'is-opened': isOpen,
-			}
-		);
+		const toggleClassname = clsx( 'woocommerce-ellipsis-menu__toggle', {
+			'is-opened': isOpen,
+		} );
 
 		return (
 			<Button

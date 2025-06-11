@@ -31,10 +31,7 @@ export const MoreMenuDropdown = ( {
 } ) => {
 	return (
 		<DropdownComponent
-			className={ clsx(
-				'interface-more-menu-dropdown',
-				className
-			) }
+			className={ clsx( 'interface-more-menu-dropdown', className ) }
 			icon={ moreVertical }
 			label={ label }
 			popoverProps={ {

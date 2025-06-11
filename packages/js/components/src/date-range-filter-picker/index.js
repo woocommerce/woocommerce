@@ -133,12 +133,9 @@ class DateRangeFilterPicker extends Component {
 		if ( ! popoverProps.placement ) {
 			popoverProps.placement = 'bottom';
 		}
-		const contentClasses = clsx(
-			'woocommerce-filters-date__content',
-			{
-				'is-mobile': isViewportMobile,
-			}
-		);
+		const contentClasses = clsx( 'woocommerce-filters-date__content', {
+			'is-mobile': isViewportMobile,
+		} );
 		return (
 			<div className="woocommerce-filters-filter">
 				<span className="woocommerce-filters-label">

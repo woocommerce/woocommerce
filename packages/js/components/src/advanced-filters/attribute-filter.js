@@ -143,12 +143,9 @@ const AttributeFilter = ( props ) => {
 		>
 			<legend className="screen-reader-text">{ labels.add || '' }</legend>
 			<div
-				className={ clsx(
-					'woocommerce-filters-advanced__fieldset',
-					{
-						'is-english': isEnglish,
-					}
-				) }
+				className={ clsx( 'woocommerce-filters-advanced__fieldset', {
+					'is-english': isEnglish,
+				} ) }
 			>
 				{ createInterpolateElement( labels.title, {
 					title: <span className={ className } />,

@@ -558,15 +558,11 @@ export class SelectControl extends Component< Props, State > {
 
 		return (
 			<div
-				className={ clsx(
-					'woocommerce-select-control',
-					className,
-					{
-						'has-inline-tags': hasMultiple && inlineTags,
-						'is-focused': isFocused,
-						'is-searchable': isSearchable,
-					}
-				) }
+				className={ clsx( 'woocommerce-select-control', className, {
+					'has-inline-tags': hasMultiple && inlineTags,
+					'is-focused': isFocused,
+					'is-searchable': isSearchable,
+				} ) }
 				ref={ this.bindNode }
 			>
 				{ autofill && (

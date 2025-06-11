@@ -94,15 +94,10 @@ const Table: React.VFC< TableProps > = ( {
 		} );
 	}
 
-	const classes = clsx(
-		'woocommerce-table__table',
-		classNames,
-		className,
-		{
-			'is-scrollable-right': isScrollableRight,
-			'is-scrollable-left': isScrollableLeft,
-		}
-	);
+	const classes = clsx( 'woocommerce-table__table', classNames, className, {
+		'is-scrollable-right': isScrollableRight,
+		'is-scrollable-left': isScrollableLeft,
+	} );
 
 	const sortBy = ( key: string ) => {
 		return () => {

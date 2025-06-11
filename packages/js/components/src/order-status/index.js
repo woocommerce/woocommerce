@@ -22,12 +22,9 @@ const OrderStatus = ( {
 	orderStatusMap,
 	labelPositionToLeft = false,
 } ) => {
-	const indicatorClasses = clsx(
-		'woocommerce-order-status__indicator',
-		{
-			[ 'is-' + status ]: true,
-		}
-	);
+	const indicatorClasses = clsx( 'woocommerce-order-status__indicator', {
+		[ 'is-' + status ]: true,
+	} );
 	const label = orderStatusMap[ status ] || status;
 
 	return (

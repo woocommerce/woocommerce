@@ -155,12 +155,9 @@ export function HeaderToolbar( {
 				{ hasFixedToolbar && isLargeViewport && (
 					<>
 						<div
-							className={ clsx(
-								'selected-block-tools-wrapper',
-								{
-									'is-collapsed': isBlockToolsCollapsed,
-								}
-							) }
+							className={ clsx( 'selected-block-tools-wrapper', {
+								'is-collapsed': isBlockToolsCollapsed,
+							} ) }
 						>
 							{ /* @ts-expect-error missing type */ }
 							<BlockToolbar hideDragHandle />

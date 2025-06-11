@@ -44,12 +44,7 @@ export const Tooltip = ( {
 
 	return (
 		<>
-			<div
-				className={ clsx(
-					'woocommerce-tooltip',
-					uniqueIdentifier
-				) }
-			>
+			<div className={ clsx( 'woocommerce-tooltip', uniqueIdentifier ) }>
 				<Button
 					className={ clsx(
 						'woocommerce-tooltip__button',

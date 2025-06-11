@@ -306,13 +306,10 @@ class List extends Component< Props > {
 			virtualListHeight = 300,
 		} = this.props;
 
-		const listboxClasses = clsx(
-			'woocommerce-select-control__listbox',
-			{
-				'is-static': staticList,
-				'is-virtual': virtualScroll,
-			}
-		);
+		const listboxClasses = clsx( 'woocommerce-select-control__listbox', {
+			'is-static': staticList,
+			'is-virtual': virtualScroll,
+		} );
 
 		if ( virtualScroll ) {
 			return (

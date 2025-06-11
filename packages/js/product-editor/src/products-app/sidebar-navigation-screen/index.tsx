@@ -58,12 +58,9 @@ export default function SidebarNavigationScreen( {
 	return (
 		<>
 			<VStack
-				className={ clsx(
-					'edit-site-sidebar-navigation-screen__main',
-					{
-						'has-footer': !! footer,
-					}
-				) }
+				className={ clsx( 'edit-site-sidebar-navigation-screen__main', {
+					'has-footer': !! footer,
+				} ) }
 				spacing={ 0 }
 				justify="flex-start"
 			>

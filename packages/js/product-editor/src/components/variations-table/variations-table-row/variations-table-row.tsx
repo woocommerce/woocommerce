@@ -359,25 +359,19 @@ export function VariationsTableRow( {
 				</div>
 			</div>
 			<div
-				className={ clsx(
-					'woocommerce-product-variations__price',
-					{
-						'woocommerce-product-variations__price--fade':
-							variation.status === 'private',
-					}
-				) }
+				className={ clsx( 'woocommerce-product-variations__price', {
+					'woocommerce-product-variations__price--fade':
+						variation.status === 'private',
+				} ) }
 				role="cell"
 			>
 				{ renderPriceCellContent() }
 			</div>
 			<div
-				className={ clsx(
-					'woocommerce-product-variations__quantity',
-					{
-						'woocommerce-product-variations__quantity--fade':
-							variation.status === 'private',
-					}
-				) }
+				className={ clsx( 'woocommerce-product-variations__quantity', {
+					'woocommerce-product-variations__quantity--fade':
+						variation.status === 'private',
+				} ) }
 				role="cell"
 			>
 				{ renderStockCellContent() }

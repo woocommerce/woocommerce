@@ -71,16 +71,13 @@ export const Stepper = ( {
 					const { key, label, description, isComplete, onClick } =
 						step;
 					const isCurrentStep = key === currentStep;
-					const stepClassName = clsx(
-						'woocommerce-stepper__step',
-						{
-							'is-active': isCurrentStep,
-							'is-complete':
-								typeof isComplete !== 'undefined'
-									? isComplete
-									: currentIndex > i,
-						}
-					);
+					const stepClassName = clsx( 'woocommerce-stepper__step', {
+						'is-active': isCurrentStep,
+						'is-complete':
+							typeof isComplete !== 'undefined'
+								? isComplete
+								: currentIndex > i,
+					} );
 					const icon =
 						isCurrentStep && isPending ? (
 							<Spinner />

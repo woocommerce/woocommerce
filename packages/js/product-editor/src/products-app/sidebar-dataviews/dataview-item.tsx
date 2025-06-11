@@ -88,12 +88,9 @@ export default function DataViewItem( {
 	return (
 		<HStack
 			justify="flex-start"
-			className={ clsx(
-				'edit-site-sidebar-dataviews-dataview-item',
-				{
-					'is-selected': isActive,
-				}
-			) }
+			className={ clsx( 'edit-site-sidebar-dataviews-dataview-item', {
+				'is-selected': isActive,
+			} ) }
 		>
 			<SidebarNavigationItem
 				icon={ iconToUse }

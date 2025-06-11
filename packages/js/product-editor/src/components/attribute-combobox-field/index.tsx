@@ -208,12 +208,9 @@ const AttributesComboboxControl = ( {
 
 	return (
 		<div
-			className={ clsx(
-				'woocommerce-attributes-combobox-container',
-				{
-					'no-items': ! options.length,
-				}
-			) }
+			className={ clsx( 'woocommerce-attributes-combobox-container', {
+				'no-items': ! options.length,
+			} ) }
 			ref={ comboRef }
 		>
 			<BaseControl label={ label } help={ help } id={ labelFor }>
