@@ -70,7 +70,7 @@ $parent_container->add_block(
         'woocommerce'
       ),
       'label'    => __(
-        'Limit purchases to a single item per order',
+        'Limit purchases to 1 item per order',
         'woocommerce'
       ),
       'property' => 'sold_individually',
