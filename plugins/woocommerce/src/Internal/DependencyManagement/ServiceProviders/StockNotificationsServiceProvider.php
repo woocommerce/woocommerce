@@ -12,7 +12,6 @@ use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificat
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsMetaDataStore;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Internal\StockNotifications\StockSyncController;
-use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\NotificationsProcessor;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\NotificationEligibilityService;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\StockManagementHelper;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
@@ -36,7 +35,6 @@ class StockNotificationsServiceProvider extends AbstractServiceProvider {
 		StockNotifications::class,
 		StockNotificationsDataStore::class,
 		StockNotificationsMetaDataStore::class,
-		NotificationsProcessor::class,
 		StockSyncController::class,
 		EmailManager::class,
 		EmailTemplatesController::class,
@@ -56,9 +54,8 @@ class StockNotificationsServiceProvider extends AbstractServiceProvider {
 		$this->share( EmailTemplatesController::class );
 		$this->share( StockManagementHelper::class );
 		$this->share( NotificationEligibilityService::class )->addArguments( array( StockManagementHelper::class ) );
-		$this->share( NotificationsBatchProcessor::class )->addArguments( array( EmailManager::class, NotificationEligibilityService::class, BatchProcessingController::class ) );
 		$this->share( StockSyncController::class )->addArguments( array( NotificationEligibilityService::class ) );
-		$this->share( NotificationsProcessor::class )->addArguments( array( EmailManager::class ) );
+		$this->share( NotificationsBatchProcessor::class )->addArguments( array( EmailManager::class, NotificationEligibilityService::class, BatchProcessingController::class ) );
 		$this->share( SettingsController::class );
 	}
 }
