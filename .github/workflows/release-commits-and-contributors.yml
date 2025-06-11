@@ -185,8 +185,6 @@ jobs:
       outputs:
         has_updates: ${{ steps.check-db-updates.outputs.has_updates }}
         updates_list: ${{ steps.check-db-updates.outputs.updates_list }}
-        updates_array: ${{ steps.check-db-updates.outputs.updates_array }}
-        update_results: ${{ steps.find-pr.outputs.update_results }}
       steps:
         - name: Checkout repository
           uses: actions/checkout@v4
@@ -201,166 +199,101 @@ jobs:
               const version = '${{ needs.extract-versions.outputs.current_version }}';
               
               console.log(`Checking for database updates for version: ${version}`);
+              
 
-              const fileContent = fs.readFileSync(path, 'utf8');
-              
-              // Look for the $db_updates array definition
-              const dbUpdatesMatch = fileContent.match(/\$db_updates\s*=\s*array\s*\((.*?)\);/s);
-              
-              if (!dbUpdatesMatch) {
-                console.log('Could not find $db_updates array in the file');
-                core.setOutput('has_updates', 'false');
-                return;
-              }
-              
-              const dbUpdatesContent = dbUpdatesMatch[1];
-              console.log('Found $db_updates array content');
-              
-              // Check if the version exists as a key in the array
-              // This regex looks for the version as a string key, allowing for patch versions (X.Y.Z)
-              const escapedVersion = version.replace('.', '\\.');
-              const versionPattern = new RegExp(`['"]${escapedVersion}(?:\\.\\d+)?['"]\\s*=>\\s*array\\s*\\((.*?)\\)`, 's');
-              const versionMatch = dbUpdatesContent.match(versionPattern);
-              
-              if (versionMatch) {
-                console.log(`✓ Found database updates for version ${version}`);
-                core.setOutput('has_updates', 'true');
+                const fileContent = fs.readFileSync(path, 'utf8');
                 
-                // Extract and list the database updates
-                const updatesContent = versionMatch[1];
+                // Look for the $db_updates array definition
+                const dbUpdatesMatch = fileContent.match(/\$db_updates\s*=\s*array\s*\((.*?)\);/s);
                 
-                // Split by comma and clean up each update function
-                const updates = updatesContent
-                  .split(',')
-                  .map(update => update.trim().replace(/['"]/g, ''))
-                  .filter(update => update.length > 0);
+                if (!dbUpdatesMatch) {
+                  console.log('Could not find $db_updates array in the file');
+                  core.setOutput('has_updates', 'false');
+                  return;
+                }
                 
-                // Store updates for the PR finding step
-                core.setOutput('updates_list', updates.join(','));
-                core.setOutput('updates_array', JSON.stringify(updates));
+                const dbUpdatesContent = dbUpdatesMatch[1];
+                console.log('Found $db_updates array content');
                 
-              } else {
-                console.log(`✗ No database updates found for version ${version}`);
-                core.setOutput('has_updates', 'false');
-                core.setOutput('updates_list', '');
-              }
+                // Check if the version exists as a key in the array
+                // This regex looks for the version as a string key, allowing for patch versions (X.Y.Z)
+                const escapedVersion = version.replace('.', '\\.');
+                const versionPattern = new RegExp(`['"]${escapedVersion}(?:\\.\\d+)?['"]\\s*=>\\s*array\\s*\\((.*?)\\)`, 's');
+                const versionMatch = dbUpdatesContent.match(versionPattern);
+                
+                if (versionMatch) {
+                  console.log(`✓ Found database updates for version ${version}`);
+                  core.setOutput('has_updates', 'true');
+                  
+                  // Extract and list the database updates
+                  const updatesContent = versionMatch[1];
+                  
+                  // Split by comma and clean up each update function
+                  const updates = updatesContent
+                    .split(',')
+                    .map(update => update.trim().replace(/['"]/g, ''))
+                    .filter(update => update.length > 0);
+                  
+                  // Store updates for the PR finding step
+                  core.setOutput('updates_list', updates.join(','));
+                  core.setOutput('updates_array', JSON.stringify(updates));
+                  
+                } else {
+                  console.log(`✗ No database updates found for version ${version}`);
+                  core.setOutput('has_updates', 'false');
+                  core.setOutput('updates_list', '');
+                }
                 
         - name: Find PRs for each database update
           id: find-pr
           if: ${{ steps.check-db-updates.outputs.has_updates == 'true' }}
-          uses: actions/github-script@v7
-          with:
-            script: |
-              const version = '${{ needs.extract-versions.outputs.current_version }}';
-              const filePath = 'plugins/woocommerce/includes/class-wc-install.php';
-              const updates = JSON.parse('${{ steps.check-db-updates.outputs.updates_array }}');
+          run: |
+            FILE_PATH="plugins/woocommerce/includes/class-wc-install.php"
+            UPDATES="${{ steps.check-db-updates.outputs.updates_list }}"
+            
+            echo "Searching for PRs that introduced database updates"
+            echo "Updates to search for: $UPDATES"
+            echo ""
+            
+            echo "Database updates:"
+            
+            # Convert comma-separated list to array
+            IFS=',' read -ra UPDATE_ARRAY <<< "$UPDATES"
+            
+            for update_function in "${UPDATE_ARRAY[@]}"; do
+              # Clean up the function name (remove any extra whitespace)
+              update_function=$(echo "$update_function" | xargs)
               
-              console.log(`Searching for PRs that introduced database updates for version ${version}`);
-              console.log(`Updates to search for: ${updates.join(', ')}`);
+              echo "Searching for: $update_function"
               
-              const updateResults = [];
+              # Find the commit that first added this update function
+              commit=$(git log -S"'$update_function'" --reverse --oneline --format="%H" -- "$FILE_PATH" | head -1)
               
-              try {
-                // Get the commit history for the specific file
-                const { data: commits } = await github.rest.repos.listCommits({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  path: filePath,
-                  per_page: 100
-                });
+              if [ -z "$commit" ]; then
+                # Try with double quotes if single quotes didn't work
+                commit=$(git log -S"\"$update_function\"" --reverse --oneline --format="%H" -- "$FILE_PATH" | head -1)
+              fi
+              
+              if [ -n "$commit" ]; then
+                echo "Found commit: $commit"
                 
-                console.log(`Found ${commits.length} commits for ${filePath}`);
+                # Get the commit message to look for PR number
+                commit_message=$(git log --format="%s" -1 "$commit")
+                echo "Commit message: $commit_message"
                 
-                // For each update function, find which commit/PR introduced it
-                for (const updateFunction of updates) {
-                  console.log(`\nSearching for: ${updateFunction}`);
-                  let foundPR = null;
-                  
-                  for (const commit of commits) {
-                    try {
-                      // Get the commit details to see the diff
-                      const { data: commitData } = await github.rest.repos.getCommit({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        ref: commit.sha
-                      });
-                      
-                      // Check if this commit added our update function
-                      const files = commitData.files || [];
-                      const targetFile = files.find(file => file.filename === filePath);
-                      
-                      if (targetFile && targetFile.patch) {
-                        // Look for added lines that contain our update function
-                        const addedLines = targetFile.patch.split('\n').filter(line => line.startsWith('+'));
-                        const hasUpdateFunction = addedLines.some(line => line.includes(`'${updateFunction}'`) || line.includes(`"${updateFunction}"`));
-                        
-                        if (hasUpdateFunction) {
-                          console.log(`Found commit that added ${updateFunction}: ${commit.sha}`);
-                          
-                          // Check if this commit is associated with a PR
-                          const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
-                            owner: context.repo.owner,
-                            repo: context.repo.repo,
-                            commit_sha: commit.sha
-                          });
-                          
-                          if (prs.length > 0) {
-                            const pr = prs[0];
-                            console.log(`✓ Found PR #${pr.number}: ${pr.title}`);
-                            foundPR = {
-                              updateFunction,
-                              prNumber: pr.number,
-                              prTitle: pr.title,
-                              prUrl: pr.html_url,
-                              prAuthor: pr.user.login
-                            };
-                          } else {
-                            console.log(`Found commit ${commit.sha} but no associated PR`);
-                            foundPR = {
-                              updateFunction,
-                              prNumber: null,
-                              prTitle: 'Direct commit (no PR)',
-                              prUrl: commitData.html_url,
-                              prAuthor: commit.author?.login || 'Unknown'
-                            };
-                          }
-                          break; // Found the commit, no need to continue
-                        }
-                      }
-                    } catch (error) {
-                      console.log(`Error processing commit ${commit.sha}: ${error.message}`);
-                      continue;
-                    }
-                  }
-                  
-                  if (foundPR) {
-                    updateResults.push(foundPR);
-                  } else {
-                    console.log(`✗ Could not find commit that introduced ${updateFunction}`);
-                    updateResults.push({
-                      updateFunction,
-                      prNumber: null,
-                      prTitle: 'Not found',
-                      prUrl: '',
-                      prAuthor: 'Unknown'
-                    });
-                  }
-                }
+                # Extract PR number from commit message (common patterns: #1234, (#1234), PR #1234)
+                pr_number=$(echo "$commit_message" | grep -oE '\(#[0-9]+\)|#[0-9]+|PR #[0-9]+' | grep -oE '[0-9]+' | head -1)
                 
-                // Print the formatted list
-                console.log('\nDatabase updates:');
-                updateResults.forEach(result => {
-                  if (result.prUrl) {
-                    console.log(`* \`${result.updateFunction}\`, [${result.prUrl}](${result.prUrl})`);
-                  } else {
-                    console.log(`* \`${result.updateFunction}\`, [Not found]`);
-                  }
-                });
-                
-                // Set outputs
-                core.setOutput('update_results', JSON.stringify(updateResults));
-                
-              } catch (error) {
-                console.error(`Error searching for PRs: ${error.message}`);
-                core.setOutput('update_results', JSON.stringify([]));
-              }
+                if [ -n "$pr_number" ]; then
+                  pr_url="https://github.com/${{ github.repository }}/pull/$pr_number"
+                  echo "* \`$update_function\`, [$pr_url]($pr_url)"
+                else
+                  # If no PR number found, link to the commit
+                  commit_url="https://github.com/${{ github.repository }}/commit/$commit"
+                  echo "* \`$update_function\`, [$commit_url]($commit_url)"
+                fi
+              else
+                echo "* \`$update_function\`, [Not found]"
+              fi
+              echo ""
+            done
