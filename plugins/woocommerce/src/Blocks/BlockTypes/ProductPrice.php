@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
@@ -9,6 +10,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 class ProductPrice extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
+	use BlocksSharedState;
 
 
 	/**
@@ -85,6 +87,15 @@ class ProductPrice extends AbstractBlock {
 				wp_enqueue_script_module( 'woocommerce/product-price' );
 				$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-price';
 				$wrapper_attributes['data-wp-watch']       = 'callbacks.setNewPrice';
+				$wrapper_attributes['data-wp-context']     = wp_json_encode(
+					array(
+						// translators: %s is a product's regular price.
+						'regularPriceText' => esc_html( __( 'Original price was: %s.', 'woocommerce' ) ),
+						// translators: %s is a product's current (sale) price.
+						'currentPriceText' => esc_html( __( 'Current price is: %s.', 'woocommerce' ) ),
+					)
+				);
+				$this->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 			}
 
 			return sprintf(

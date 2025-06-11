@@ -11,7 +11,8 @@ import type { SingleProductTemplateStore } from '@woocommerce/base-stores/single
 export type AvailableVariation = {
 	attributes: Record< string, string >;
 	variation_id: number;
-	price_html: string;
+	display_price: number;
+	display_regular_price: number;
 };
 
 export type Context = {
@@ -356,11 +357,15 @@ const addToCartWithOptionsStore = store(
 				if ( matchedVariation ) {
 					if ( context ) {
 						context.productData = {
-							price_html: matchedVariation.price_html,
+							display_price: matchedVariation.display_price,
+							display_regular_price:
+								matchedVariation.display_regular_price,
 						};
 					} else {
 						wooState.singleProductTemplate.productData = {
-							price_html: matchedVariation.price_html,
+							display_price: matchedVariation.display_price,
+							display_regular_price:
+								matchedVariation.display_regular_price,
 						};
 					}
 					return;
