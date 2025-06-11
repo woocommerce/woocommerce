@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure settings are not null before merging arrays to prevent fatal.
