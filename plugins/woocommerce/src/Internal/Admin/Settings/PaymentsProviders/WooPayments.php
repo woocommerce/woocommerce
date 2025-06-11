@@ -46,6 +46,9 @@ class WooPayments extends PaymentGateway {
 		// Switch the onboarding type to native.
 		$details['onboarding']['type'] = self::ONBOARDING_TYPE_NATIVE;
 
+		// Add the test [drive] account details to the onboarding state.
+		$details['onboarding']['state']['test_drive_account'] = $this->has_test_drive_account();
+
 		// Add WPCOM/Jetpack connection details to the onboarding state.
 		$details['onboarding']['state'] = array_merge( $details['onboarding']['state'], $this->get_wpcom_connection_state() );
 
@@ -177,15 +180,9 @@ class WooPayments extends PaymentGateway {
 			return true;
 		}
 
-		if ( function_exists( '\wcpay_get_container' ) && class_exists( '\WC_Payments_Account' ) ) {
-			$account = \wcpay_get_container()->get( \WC_Payments_Account::class );
-			if ( is_callable( array( $account, 'get_account_status_data' ) ) ) {
-				// Test-drive accounts don't need setup.
-				$account_status = $account->get_account_status_data();
-				if ( ! empty( $account_status['testDrive'] ) ) {
-					return false;
-				}
-			}
+		// Test-drive accounts don't need setup.
+		if ( $this->has_test_drive_account() ) {
+			return false;
 		}
 
 		return parent::needs_setup( $payment_gateway );
@@ -449,5 +446,23 @@ class WooPayments extends PaymentGateway {
 		);
 
 		return ! empty( $other_ecommerce_gateways );
+	}
+
+	/**
+	 * Determines if the current account is a test-drive account.
+	 *
+	 * @return bool True if the account is a test-drive account, false otherwise.
+	 */
+	private function has_test_drive_account(): bool {
+		if ( function_exists( '\wcpay_get_container' ) && class_exists( '\WC_Payments_Account' ) ) {
+			$account_service = \wcpay_get_container()->get( \WC_Payments_Account::class );
+			if ( ! empty( $account_service ) && is_callable( array( $account_service, 'get_account_status_data' ) ) ) {
+				$account_status = $account_service->get_account_status_data();
+
+				return ! empty( $account_status['testDrive'] );
+			}
+		}
+
+		return false;
 	}
 }
