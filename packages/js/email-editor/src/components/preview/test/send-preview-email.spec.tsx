@@ -1,6 +1,5 @@
-// eslint-disable-next-line @woocommerce/dependency-group -- mocks has to be imported before @wordpress/data
-import '../../__mocks__/setup-shared-mocks';
 /* eslint-disable @woocommerce/dependency-group -- because we import mocks first, we deactivate this rule to avoid es lint errors */
+import '../../__mocks__/setup-shared-mocks';
 
 /**
  * External dependencies
