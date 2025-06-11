@@ -162,6 +162,41 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 	} );
 
+	test( 'allows adding grouped products to cart', async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await pageObject.setFeatureFlags();
+
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/logo-collection' );
+
+		const increaseQuantityButton = page.getByLabel(
+			'Increase quantity of Beanie'
+		);
+		await increaseQuantityButton.click();
+
+		const addToCartButton = page.getByText( 'Add to cart' ).first();
+
+		await addToCartButton.click();
+
+		await page.waitForResponse(
+			( response ) =>
+				response.url().includes( 'wp-json/wc/store/v1/cart' ) &&
+				response.status() === 200
+		);
+
+		await expect( page.getByText( 'Added to cart' ).first() ).toBeVisible();
+
+		await expect( page.getByLabel( '4 items in cart' ) ).toBeVisible();
+	} );
+
 	test( "doesn't allow selecting invalid variations in pills mode", async ( {
 		page,
 		pageObject,
