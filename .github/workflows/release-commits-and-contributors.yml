@@ -97,6 +97,7 @@ jobs:
 
   count-commits-and-contributors:
     name: Count commits and contributors between releases
+    if: false
     needs: extract-versions
     runs-on: ubuntu-latest
     steps:
@@ -127,6 +128,7 @@ jobs:
 
   generate-contributors-list:
     name: Generate contributors list
+    if: false
     needs: extract-versions
     runs-on: ubuntu-latest
     steps:
