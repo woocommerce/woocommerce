@@ -91,7 +91,7 @@ class MenusController {
 	 * Displays the Notifications list table.
 	 */
 	public function notifications_page() {
-		wc_get_container()->get( NotificationsPage::class );
+		new NotificationsPage();
 	}
 
 	/**
@@ -126,7 +126,7 @@ class MenusController {
 					'path'      => add_query_arg(
 						array(
 							'page'         => 'wc-customer-stock-notifications',
-							'section'      => 'create',
+							'action'      => 'create',
 							'notification' => 1,
 						),
 						'admin.php'
@@ -143,7 +143,7 @@ class MenusController {
 					'path'      => add_query_arg(
 						array(
 							'page'         => 'wc-customer-stock-notifications',
-							'section'      => 'edit',
+							'action'      => 'edit',
 							'notification' => 1,
 						),
 						'admin.php'

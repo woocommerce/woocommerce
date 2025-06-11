@@ -20,22 +20,18 @@ class NotificationsPage {
 	const PAGE_URL = 'admin.php?page=wc-customer-stock-notifications';
 
 	/**
-	 * Init.
-	 *
-	 * @internal
-	 *
-	 * @return void
+	 * Constructor.
 	 */
-	final public function init() {
-		// Select section.
-		$section = '';
+	public function __construct() {
+		// Select action.
+		$action = '';
 
 		// Nonce is checked in NotificationsPage::delete and NotificationsPage::output just displays the page.
-		if ( isset( $_GET['section'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$section = wc_clean( wp_unslash( $_GET['section'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$action = wc_clean( wp_unslash( $_GET['action'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 
-		switch ( $section ) {
+		switch ( $action ) {
 			case 'delete':
 				$this->delete();
 				break;
