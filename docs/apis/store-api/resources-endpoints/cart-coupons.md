@@ -1,12 +1,4 @@
-# Cart Coupons API <!-- omit in toc -->
-
-## Table of Contents <!-- omit in toc -->
-
--   [List Cart Coupons](#list-cart-coupons)
--   [Single Cart Coupon](#single-cart-coupon)
--   [Add Cart Coupon](#add-cart-coupon)
--   [Delete Single Cart Coupon](#delete-single-cart-coupon)
--   [Delete All Cart Coupons](#delete-all-cart-coupons)
+# Cart Coupons API 
 
 ## List Cart Coupons
 
@@ -161,14 +153,3 @@ curl --request DELETE https://example-store.com/wp-json/wc/store/v1/cart/coupons
 ```json
 []
 ```
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./src/StoreApi/docs/cart-coupons.md)
-
-<!-- /FEEDBACK -->
-

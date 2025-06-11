@@ -1,15 +1,9 @@
-# Store API Guiding principles <!-- omit in toc -->
+---
+sidebar_label: Guiding principles  
+sidebar_position: 0
+---
 
-## Table of Contents <!-- omit in toc -->
-
--   [Routes must include a well-defined JSON schema](#routes-must-include-a-well-defined-json-schema)
--   [Routes should be designed around resources with a single type of schema](#routes-should-be-designed-around-resources-with-a-single-type-of-schema)
-    -   [Error Handling](#error-handling)
-    -   [Cart Operations](#cart-operations)
--   [Exposed data must belong to the current user or be non-sensitive](#exposed-data-must-belong-to-the-current-user-or-be-non-sensitive)
--   [Collections of resources should be paginated](#collections-of-resources-should-be-paginated)
--   [API Responses should use standard HTTP status codes](#api-responses-should-use-standard-http-status-codes)
--   [Breaking changes should be avoided where possible](#breaking-changes-should-be-avoided-where-possible)
+# Store API Guiding principles 
 
 The following principles should be considered when extending, creating, or updating endpoints in the Store API.
 
@@ -21,11 +15,11 @@ Well-defined schema also provides a layer of security, as it enables us to valid
 
 When defining schema, take note of the [WordPress REST API handbook](https://developer.wordpress.org/rest-api/extending-the-rest-api/schema/) which documents available properties and types, as well as the [JSON schema standard](http://json-schema.org/). In addition to this:
 
--   Properties should use snake_case 🐍
--   Ambiguous terms should be avoided, and property names should try to use understandable language, rather than "WooCommerce" terminology or setting names
--   Properties should be defined using US English, but the descriptions of fields should be localized
--   Multiple types are permitted, for example, using a `null` type if a value is not applicable
--   `sanitize_callback` and `validate_callback` are encouraged where possible to ensure data is received in the correct format before processing requests
+* Properties should use snake_case 🐍
+* Ambiguous terms should be avoided, and property names should try to use understandable language, rather than "WooCommerce" terminology or setting names
+* Properties should be defined using US English, but the descriptions of fields should be localized
+* Multiple types are permitted, for example, using a `null` type if a value is not applicable
+* `sanitize_callback` and `validate_callback` are encouraged where possible to ensure data is received in the correct format before processing requests
 
 If you’re struggling to define a consistent schema, your approach may be flawed. A common real-world example of this would be representing something like _Post Tags_. It may be tempting to use the Slug as the property field name in the response:
 
@@ -96,21 +90,21 @@ It is the client’s responsibility to properly escape data that comes from the 
 
 Large volumes of data should be paginated to avoid overwhelming the server. For example, returning a collection of products.
 
--   Use the response Headers `X-WP-Total`, `X-WP-TotalPages`, and Link to indicate available resources.
--   Use parameters `page` and `per_page` to retrieve certain pages.
--   The maximum allowed value for `per_page` is 100.
+* Use the response Headers `X-WP-Total`, `X-WP-TotalPages`, and Link to indicate available resources.
+* Use parameters `page` and `per_page` to retrieve certain pages.
+* The maximum allowed value for `per_page` is 100.
 
 ## API Responses should use standard HTTP status codes
 
 When returning content, use a valid HTTP response code such as:
 
--   `200 OK` for successful responses (this is the default response code).
--   `201 Created` when creating a resource, for example, adding a new cart item or applying a new coupon.
--   `204 No Content` for successful deletes.
--   `400 Bad Request` when a required parameter is not set.
--   `403 Forbidden` when a request is not allowed, for example, if the provided security nonce is invalid.
--   `404 Not Found` if a resource does not exist.
--   `409 Conflict` if a resource cannot be updated, for example, if something in the cart is invalid and removed during the request.
+* `200 OK` for successful responses (this is the default response code).
+* `201 Created` when creating a resource, for example, adding a new cart item or applying a new coupon.
+* `204 No Content` for successful deletes.
+* `400 Bad Request` when a required parameter is not set.
+* `403 Forbidden` when a request is not allowed, for example, if the provided security nonce is invalid.
+* `404 Not Found` if a resource does not exist.
+* `409 Conflict` if a resource cannot be updated, for example, if something in the cart is invalid and removed during the request.
 
 A note on `DELETE` requests, a common pattern in the WordPress REST API is to return the deleted object. In the case of the Store API, we opt to return an empty response with status code `204 No Content` instead. This is more efficient.
 
@@ -124,20 +118,9 @@ A breaking change is anything that changes the format of existing Schema, remove
 
 Non-breaking changes are always permitted without the need to increase the API version. Some examples of these include:
 
--   Adding new properties to schema
--   Adding new routes, endpoints, methods
--   Adding optional request parameters
--   Re-ordering response fields
+* Adding new properties to schema
+* Adding new routes, endpoints, methods
+* Adding optional request parameters
+* Re-ordering response fields
 
 The version will not increase for bug fixes unless the scope of the bug causes a backwards-incompatible change. Fixes would not be rolled back to past API versions with the exception of security issues that require backporting.
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./src/StoreApi/docs/guiding-principles.md)
-
-<!-- /FEEDBACK -->
-

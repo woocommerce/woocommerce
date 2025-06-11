@@ -1,13 +1,4 @@
-# Cart Items API <!-- omit in toc -->
-
-## Table of Contents <!-- omit in toc -->
-
-- [List Cart Items](#list-cart-items)
-- [Single Cart Item](#single-cart-item)
-- [Add Cart Item](#add-cart-item)
-- [Edit Single Cart Item](#edit-single-cart-item)
-- [Delete Single Cart Item](#delete-single-cart-item)
-- [Delete All Cart Items](#delete-all-cart-items)
+# Cart Items API 
 
 ## List Cart Items
 
@@ -317,7 +308,7 @@ curl --request POST https://example-store.com/wp-json/wc/store/v1/cart/items?id=
 
 For an example response, see [Single Cart Item](#single-cart-item).
 
-If you're looking to add multiple items to the cart at once, please take a look at [batching](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/src/StoreApi/docs/cart.md#add-item).
+If you're looking to add multiple items to the cart at once, please take a look at [batching](/docs/apis/store-api/resources-endpoints/cart#add-item).
 
 ## Edit Single Cart Item
 
@@ -373,13 +364,3 @@ curl --request DELETE https://example-store.com/wp-json/wc/store/v1/cart/items
 ```json
 []
 ```
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./src/StoreApi/docs/cart-items.md)
-
-<!-- /FEEDBACK -->

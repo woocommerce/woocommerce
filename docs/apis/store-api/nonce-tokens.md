@@ -1,17 +1,14 @@
-# Nonce Tokens <!-- omit in toc -->
+---
+sidebar_position: 1
+---
 
-## Table of Contents <!-- omit in toc -->
-
--   [Store API Endpoints that Require Nonces](#store-api-endpoints-that-require-nonces)
--   [Sending Nonce Tokens with requests](#sending-nonce-tokens-with-requests)
--   [Generating security nonces from WordPress](#generating-security-nonces-from-wordpress)
--   [Disabling Nonces for Development](#disabling-nonces-for-development)
+# Nonce Tokens 
 
 Nonces are generated numbers used to verify origin and intent of requests for security purposes. You can read more about [nonces in the WordPress codex](https://developer.wordpress.org/apis/security/nonces/).
 
 ## Store API Endpoints that Require Nonces
 
-POST requests to the `/cart` endpoints and all requests to the `/checkout` endpoints require a nonce to function. Failure to provide a valid nonce will return an error response, unless you're using [Cart Tokens](cart-tokens.md) instead.
+POST requests to the `/cart` endpoints and all requests to the `/checkout` endpoints require a nonce to function. Failure to provide a valid nonce will return an error response, unless you're using [Cart Tokens](/docs/apis/store-api/cart-tokens) instead.
 
 ## Sending Nonce Tokens with requests
 
@@ -46,14 +43,3 @@ add_filter( 'woocommerce_store_api_disable_nonce_check', '__return_true' );
 Nonce checks will be bypassed if `woocommerce_store_api_disable_nonce_check` evaluates to `true`.
 
 NOTE: This should only be done on development sites where security is not important. Do not enable this in production.
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./src/StoreApi/docs/nonce-tokens.md)
-
-<!-- /FEEDBACK -->
-
