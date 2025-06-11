@@ -286,9 +286,13 @@ final class QuantityLimits {
 	 * @return bool
 	 */
 	protected function is_multiple_of( $number, $multiple_of ) {
-		// Handle negative numbers by working with absolute values. This applies wc_stock_amount to ensure we have a valid number.
-		$number      = abs( wc_stock_amount( $number ) );
-		$multiple_of = abs( wc_stock_amount( $multiple_of ) );
+		// Ensure we have valid numbers. abs() will not work with strings.
+		$number      = is_string( $number ) ? wc_stock_amount( $number ) : $number;
+		$multiple_of = is_string( $multiple_of ) ? wc_stock_amount( $multiple_of ) : $multiple_of;
+
+		// Handle negative numbers by working with absolute values.
+		$number      = abs( $number );
+		$multiple_of = abs( $multiple_of );
 
 		if ( 0 === $multiple_of ) {
 			return true; // Avoid division by zero.
