@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 
 export const ATTRIBUTE_ITEM_TEMPLATE: TemplateArray = [
 	[
-		'woocommerce/add-to-cart-with-options-variation-selector-item',
+		'woocommerce/add-to-cart-with-options-variation-selector-attribute',
 		{},
 		[
 			[
