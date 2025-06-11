@@ -310,6 +310,11 @@ class Payments extends Task {
 	 */
 	private function get_payments_settings_country(): string {
 		try {
+			/**
+			 * The Payments Settings [page] service.
+			 *
+			 * @var SettingsPaymentsService $settings_payments_service
+			 */
 			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
 			return $settings_payments_service->get_country();
@@ -328,6 +333,11 @@ class Payments extends Task {
 	 */
 	private function get_payments_providers(): array {
 		try {
+			/**
+			 * The Payments Settings [page] service.
+			 *
+			 * @var SettingsPaymentsService $settings_payments_service
+			 */
 			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
 			return $settings_payments_service->get_payment_providers( $settings_payments_service->get_country(), false );
@@ -344,6 +354,11 @@ class Payments extends Task {
 	 */
 	private function get_payments_extension_suggestions(): array {
 		try {
+			/**
+			 * The Payments Settings [page] service.
+			 *
+			 * @var SettingsPaymentsService $settings_payments_service
+			 */
 			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
 			return $settings_payments_service->get_payment_extension_suggestions( $settings_payments_service->get_country() );
