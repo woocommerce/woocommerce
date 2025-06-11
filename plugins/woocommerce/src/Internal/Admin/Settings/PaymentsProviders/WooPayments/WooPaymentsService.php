@@ -866,7 +866,7 @@ class WooPaymentsService {
 		// Clear any previous failed status for the step.
 		$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
-		$selected_payment_methods = $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_PAYMENT_METHODS, $location, 'payment_methods', array() );
+		$configured_payment_methods = $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_PAYMENT_METHODS, $location, 'payment_methods', array() );
 
 		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
 		WC()->payment_gateways();
@@ -887,7 +887,7 @@ class WooPaymentsService {
 				'/wc/v3/payments/onboarding/test_drive_account/init',
 				array(
 					'country'      => $location,
-					'capabilities' => $selected_payment_methods,
+					'capabilities' => $configured_payment_methods,
 					'source'       => $source,
 					'from'         => self::FROM_NOX_IN_CONTEXT,
 				)
