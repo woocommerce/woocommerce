@@ -695,7 +695,7 @@ class WC_Emails {
 						 *
 						 * @since 9.9.0
 						 */
-						$meta_key_translation = apply_filters( 'woocommmerce_fulfillment_translate_meta_key', $field->key );
+						$meta_key_translation = apply_filters( 'woocommerce_fulfillment_translate_meta_key', $field->key );
 						echo '<strong>' . esc_attr( $meta_key_translation ) . ':</strong> ' . esc_attr( $field->value ) . "\n";
 					}
 				}
@@ -707,7 +707,7 @@ class WC_Emails {
 						 *
 						 * @since 9.9.0
 						 */
-						$meta_key_translation = apply_filters( 'woocommmerce_fulfillment_translate_meta_key', $field->key );
+						$meta_key_translation = apply_filters( 'woocommerce_fulfillment_translate_meta_key', $field->key );
 						echo '<p><strong>' . esc_attr( $meta_key_translation ) . ':</strong> ' . esc_attr( $field->value ) . '</p>';
 					}
 				}

@@ -20,7 +20,7 @@ class FulfillmentsManager {
 	 * Class constructor.
 	 */
 	public function __construct() {
-		add_filter( 'woocommmerce_fulfillment_translate_meta_key', array( $this, 'translate_fulfillment_meta_key' ), 10, 1 );
+		add_filter( 'woocommerce_fulfillment_translate_meta_key', array( $this, 'translate_fulfillment_meta_key' ), 10, 1 );
 	}
 
 	/**
