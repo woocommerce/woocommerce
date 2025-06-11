@@ -137,7 +137,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       contributor_list_path: ${{ steps.generate-contributors-list.outputs.filepath }}
-      artifact_url: ${{ steps.get-artifact-url.outputs.artifact_url }}
+      artifact_url: ${{ steps.artifact-upload.outputs.artifact_url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -188,8 +188,8 @@ jobs:
           
       - name: Output artifact URL
         run: |
-            ARTIFACT_URL=${{ steps.artifact-upload.outputs.artifact-url }}
-            echo "artifact_url=${ARTIFACT_URL}" >> $GITHUB_OUTPUT
+          ARTIFACT_URL=${{ steps.artifact-upload.outputs.artifact-url }}
+          echo "artifact_url=${ARTIFACT_URL}" >> $GITHUB_OUTPUT
       
   db-updates:
     name: Check for database updates
