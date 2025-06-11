@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update showOtherPaymentMethods() to test latest payment task properly

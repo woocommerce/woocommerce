@@ -13,14 +13,17 @@
 		padding: 0;
 	}
 }
-@include cart-checkout-below-large {
+
+.is-mobile,
+.is-small,
+.is-medium {
 	.wc-block-checkout__sidebar {
 		margin-bottom: $gap-large;
 		order: 0;
 	}
 }
 
-@include cart-checkout-large-container {
+.is-large {
 	.wc-block-checkout__sidebar {
 		align-self: flex-start;
 		top: $gap-large;

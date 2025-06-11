@@ -59,6 +59,5 @@
 		"woocommerce/attributeId",
 		"woocommerce/attributeName",
 		"woocommerce/attributeTerms"
-	],
-	"style": "file:../woocommerce/add-to-cart-with-options-variation-selector-attribute-name-style.css"
+	]
 }

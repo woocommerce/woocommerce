@@ -15,7 +15,6 @@ test.describe( 'Test the cart template', () => {
 			postId: templatePath,
 			postType: templateType,
 			canvas: 'edit',
-			showWelcomeGuide: false,
 		} );
 		await expect(
 			editor.canvas.getByLabel( 'Block: Title' )

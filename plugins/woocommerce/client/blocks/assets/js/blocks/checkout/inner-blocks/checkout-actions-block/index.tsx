@@ -15,7 +15,6 @@ import metadata from './block.json';
 import './style.scss';
 
 const blockConfig: BlockConfiguration = {
-	...metadata,
 	example: {
 		attributes: {
 			showPrice: true,

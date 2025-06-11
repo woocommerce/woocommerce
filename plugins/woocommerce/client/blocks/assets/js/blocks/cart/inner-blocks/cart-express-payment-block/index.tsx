@@ -9,10 +9,8 @@ import { registerBlockType } from '@wordpress/blocks';
  */
 import { Edit, Save } from './edit';
 import expressIcon from '../../../cart-checkout-shared/icon';
-import metadata from './block.json';
 
 registerBlockType( 'woocommerce/cart-express-payment-block', {
-	...metadata,
 	icon: {
 		src: (
 			<Icon

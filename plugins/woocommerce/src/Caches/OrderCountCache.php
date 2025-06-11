@@ -30,6 +30,22 @@ class OrderCountCache {
 	private $cache_prefix = 'order-count';
 
 	/**
+	 * Validate an object before caching it.
+	 *
+	 * @param string[] $statuses The statuses to validate.
+	 * @throws CacheException If the statuses are not valid.
+	 * @return void
+	 */
+	protected function validate( $statuses ): void {
+		$valid_statuses   = $this->get_valid_statuses();
+		$invalid_statuses = array_diff( $statuses, $valid_statuses );
+
+		if ( ! empty( $invalid_statuses ) ) {
+			throw new \Exception( sprintf( __( '%s is not one of: %s', 'woocommerce' ), implode( ', ', $invalid_statuses ), implode( ', ', $valid_statuses ) ) );
+		}
+	}
+
+	/**
 	 * Get valid statuses.
 	 *
 	 * @return string[]
@@ -85,6 +101,7 @@ class OrderCountCache {
 	 * @return bool True if the value was set, false otherwise.
 	 */
 	public function set( $order_type, $order_status, int $value ): bool {
+		$this->validate( array( $order_status ) );
 		$cache_key = $this->get_cache_key( $order_type, $order_status );
 		return wp_cache_set( $cache_key, $value, '', $this->expiration );
 	}
@@ -97,6 +114,8 @@ class OrderCountCache {
 	 * @return int[] The cache value.
 	 */
 	public function get( $order_type, $order_statuses = array() ) {
+		$this->validate( $order_statuses );
+
 		if ( empty( $order_statuses ) ) {
 			$order_statuses = $this->get_default_statuses();
 		}
@@ -130,6 +149,7 @@ class OrderCountCache {
 	 * @return int The new value of the cache.
 	 */
 	public function increment( $order_type, $order_status, $offset = 1 ) {
+		$this->validate( array( $order_status ) );
 		$cache_key = $this->get_cache_key( $order_type, $order_status );
 		return wp_cache_incr( $cache_key, $offset );
 	}
@@ -143,6 +163,7 @@ class OrderCountCache {
 	 * @return int The new value of the cache.
 	 */
 	public function decrement( $order_type, $order_status, $offset = 1 ) {
+		$this->validate( array( $order_status ) );
 		$cache_key = $this->get_cache_key( $order_type, $order_status );
 		return wp_cache_decr( $cache_key, $offset );
 	}

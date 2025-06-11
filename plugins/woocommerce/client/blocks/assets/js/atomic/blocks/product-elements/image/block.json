@@ -48,7 +48,7 @@
 		"woocommerce/product-template",
 		"core/post-template"
 	],
-	"usesContext": [ "imageId", "postId", "query", "queryId" ],
+	"usesContext": [ "query", "queryId", "postId" ],
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,

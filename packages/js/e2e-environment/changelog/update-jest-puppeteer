@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Updated `jest`, `jest-circus`, `jest-each`, `@jest/test-sequencer` to `27.5.1` from `25`, and `jest-puppeteer@^5.0.4`.

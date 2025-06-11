@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fixes keyboard navigation in product tabs when the tabs are vertical or horizontal for RTL languages

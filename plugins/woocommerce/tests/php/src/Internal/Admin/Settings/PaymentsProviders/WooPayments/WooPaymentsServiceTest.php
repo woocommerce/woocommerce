@@ -6899,7 +6899,6 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$requests_made     = array();
 		$expected_payload  = array(
 			'self_assessment' => $self_assessment,
-			'capabilities'    => array(),
 		);
 		$expected_response = array(
 			'clientSecret'   => 'secret',
@@ -6992,7 +6991,6 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$requests_made     = array();
 		$expected_payload  = array(
 			'self_assessment' => $self_assessment,
-			'capabilities'    => array(),
 		);
 		$expected_response = array(
 			'clientSecret'   => 'secret',

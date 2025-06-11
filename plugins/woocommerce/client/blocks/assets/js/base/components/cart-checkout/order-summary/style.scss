@@ -1,5 +1,6 @@
 .wc-block-components-order-summary {
-	@include cart-checkout-large-container {
+	&.is-large {
+		// Compensate for removing Panel.
 		padding: 0 $gap;
 	}
 

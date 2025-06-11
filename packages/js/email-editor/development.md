@@ -11,5 +11,3 @@ pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:admin
 ## Running Tests
 
 TBD
-
-E2E tests guide at [writing-e2e-tests.md](writing-e2e-tests.md)

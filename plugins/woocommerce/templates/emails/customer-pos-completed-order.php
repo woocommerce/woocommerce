@@ -116,7 +116,6 @@ if ( ! empty( $pos_refund_returns_policy ) ) {
 /**
  * Output the email footer
  *
- * @hooked WC_Email_Customer_POS_*::email_footer() Output the email footer
- * @since 10.0.0
+ * @since 4.0.0
  */
-do_action( 'woocommerce_pos_email_footer', $email );
+do_action( 'woocommerce_email_footer', $email );

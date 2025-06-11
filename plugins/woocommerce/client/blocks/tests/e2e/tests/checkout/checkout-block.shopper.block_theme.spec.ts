@@ -213,16 +213,6 @@ test.describe( 'Shopper → Local pickup', () => {
 			.click();
 		await expect( page.getByText( 'Pickup (Testing)' ) ).toBeVisible();
 
-		// Wait for the shipping rate selection request to complete
-		await page.waitForResponse(
-			( response ) =>
-				response
-					.url()
-					.includes(
-						'wp-json/wc/store/v1/cart/select-shipping-rate'
-					) && response.status() === 200
-		);
-
 		await checkoutPageObject.placeOrder();
 
 		await expect(

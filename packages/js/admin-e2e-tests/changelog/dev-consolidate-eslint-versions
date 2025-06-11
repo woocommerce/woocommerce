@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update eslint to 8.32.0 across the monorepo.

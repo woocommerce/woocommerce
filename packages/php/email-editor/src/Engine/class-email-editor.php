@@ -11,7 +11,6 @@ namespace Automattic\WooCommerce\EmailEditor\Engine;
 use Automattic\WooCommerce\EmailEditor\Engine\Patterns\Patterns;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates;
-use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use WP_Post;
 use WP_Theme_JSON;
 
@@ -57,13 +56,6 @@ class Email_Editor {
 	private Personalization_Tags_Registry $personalization_tags_registry;
 
 	/**
-	 * Property for the logger.
-	 *
-	 * @var Email_Editor_Logger Logger instance.
-	 */
-	private Email_Editor_Logger $logger;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param Email_Api_Controller          $email_api_controller Email API controller.
@@ -71,22 +63,19 @@ class Email_Editor {
 	 * @param Patterns                      $patterns Patterns.
 	 * @param Send_Preview_Email            $send_preview_email Preview email controller.
 	 * @param Personalization_Tags_Registry $personalization_tags_controller Personalization tags registry that allows initializing personalization tags.
-	 * @param Email_Editor_Logger           $logger Logger instance.
 	 */
 	public function __construct(
 		Email_Api_Controller $email_api_controller,
 		Templates $templates,
 		Patterns $patterns,
 		Send_Preview_Email $send_preview_email,
-		Personalization_Tags_Registry $personalization_tags_controller,
-		Email_Editor_Logger $logger
+		Personalization_Tags_Registry $personalization_tags_controller
 	) {
 		$this->email_api_controller          = $email_api_controller;
 		$this->templates                     = $templates;
 		$this->patterns                      = $patterns;
 		$this->send_preview_email            = $send_preview_email;
 		$this->personalization_tags_registry = $personalization_tags_controller;
-		$this->logger                        = $logger;
 	}
 
 	/**
@@ -95,7 +84,6 @@ class Email_Editor {
 	 * @return void
 	 */
 	public function initialize(): void {
-		$this->logger->info( 'Initializing email editor' );
 		do_action( 'woocommerce_email_editor_initialized' );
 		add_filter( 'woocommerce_email_editor_rendering_theme_styles', array( $this, 'extend_email_theme_styles' ), 10, 2 );
 		$this->register_block_patterns();
@@ -111,7 +99,6 @@ class Email_Editor {
 		add_filter( 'woocommerce_email_editor_send_preview_email', array( $this->send_preview_email, 'send_preview_email' ), 11, 1 ); // allow for other filter methods to take precedent.
 		add_filter( 'single_template', array( $this, 'load_email_preview_template' ) );
 		add_filter( 'preview_post_link', array( $this, 'update_preview_post_link' ), 10, 2 );
-		$this->logger->info( 'Email editor initialized successfully' );
 	}
 
 	/**

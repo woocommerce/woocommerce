@@ -33,6 +33,7 @@ export type Store = {
 		};
 	};
 	actions: {
+		removeCartItem: ( key: string ) => void;
 		addCartItem: ( args: OptimisticCartItem ) => void;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		refreshCartItems: () => void;
@@ -82,6 +83,36 @@ const { state, actions } = store< Store >(
 	'woocommerce',
 	{
 		actions: {
+			*removeCartItem( key: string ) {
+				// optimistically update the cart
+				state.cart.items = state.cart.items.filter(
+					( item ) => item.key !== key
+				);
+
+				const previousCart = JSON.stringify( state.cart );
+
+				try {
+					const res: Response = yield fetch(
+						`${ state.restUrl }wc/store/v1/cart/remove-item`,
+						{
+							method: 'POST',
+							headers: {
+								Nonce: state.nonce,
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify( { key } ),
+						}
+					);
+
+					const json: Cart = yield res.json();
+					state.cart = json;
+				} catch ( error ) {
+					state.cart = JSON.parse( previousCart );
+
+					// Shows the error notice.
+					actions.showNoticeError( error as Error );
+				}
+			},
 			*addCartItem( { id, quantity, variation }: OptimisticCartItem ) {
 				let item = state.cart.items.find(
 					( { id: productId } ) => id === productId

@@ -12,13 +12,10 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.0.0
+ * @version 9.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
-
-$email = $email ?? null;
-
 ?>
 																		</div>
 																	</td>
@@ -64,7 +61,7 @@ $email = $email ?? null;
 																		 *
 																		 * @param string $email_footer_text
 																		 */
-																		apply_filters( 'woocommerce_email_footer_text', $email_footer_text, $email )
+																		apply_filters( 'woocommerce_email_footer_text', $email_footer_text )
 																	)
 																)
 															);

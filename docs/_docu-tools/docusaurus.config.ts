@@ -41,7 +41,8 @@ const config: Config = {
 					sidebarPath: './sidebars.ts',
 					path: '../',
 					exclude: ['_docu-tools/**'],
-					showLastUpdateTime: true,		
+					// Please change this to your repo.
+					// Remove this to remove the "edit this page" links.
 					editUrl:
 						'https://github.com/woocommerce/woocommerce/tree/trunk/docs/docs/',
 					routeBasePath: '/',

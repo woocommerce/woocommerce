@@ -1,8 +1,3 @@
-.wp-block-woocommerce-cart {
-	// Don't remove this, it marks the container for container queries used in inner blocks.
-	container-type: inline-size;
-}
-
 .wc-block-cart {
 	padding-top: $gap;
 
@@ -108,7 +103,9 @@
 	padding-top: 0;
 }
 
-@include cart-checkout-below-large {
+.is-medium,
+.is-small,
+.is-mobile {
 	.wc-block-cart-item__total {
 		.wc-block-components-sale-badge {
 			display: none;
@@ -117,8 +114,12 @@
 	table.wc-block-cart-items {
 		margin: 0;
 	}
+}
 
-	.wc-block-cart {
+.is-medium,
+.is-small,
+.is-mobile {
+	&.wc-block-cart {
 		.wc-block-components-sidebar {
 			.wc-block-cart__totals-title {
 				display: none;
@@ -127,35 +128,33 @@
 	}
 }
 
-@include cart-checkout-large-container {
-	.wc-block-cart {
-		margin-bottom: 3em;
+.is-large.wc-block-cart {
+	margin-bottom: 3em;
 
-		.wc-block-components-radio-control__input {
-			left: 0;
-			margin: 0;
-		}
+	.wc-block-components-radio-control__input {
+		left: 0;
+		margin: 0;
+	}
 
-		.wc-block-cart__totals-title {
-			@include text-heading();
-			@include font-size(smaller);
-			display: block;
-			font-weight: 700;
-			padding: $gap-smaller $gap $gap-smaller 0;
-			text-align: left;
-			text-transform: uppercase;
-		}
+	.wc-block-cart__totals-title {
+		@include text-heading();
+		@include font-size(smaller);
+		display: block;
+		font-weight: 700;
+		padding: $gap-smaller $gap $gap-smaller 0;
+		text-align: left;
+		text-transform: uppercase;
+	}
 
-		.wc-block-components-sidebar {
-			margin-top: 0;
-		}
+	.wc-block-components-sidebar {
+		margin-top: 0;
+	}
 
-		.wc-block-cart__payment-options {
-			padding: $gap 0 0;
+	.wc-block-cart__payment-options {
+		padding: $gap 0 0;
 
-			&:empty {
-				padding: 0;
-			}
+		&:empty {
+			padding: 0;
 		}
 	}
 }

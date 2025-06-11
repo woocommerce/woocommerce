@@ -29,7 +29,7 @@ describe( 'payment data store actions', () => {
 				Object.keys( paymentMethods )[ 0 ]
 			);
 			actions.__internalSetAvailablePaymentMethods( paymentMethods );
-			expect( setDefaultPaymentMethodOriginal ).not.toHaveBeenCalled();
+			expect( setDefaultPaymentMethodOriginal ).not.toBeCalled();
 		} );
 
 		it( 'Resets the default gateway if the current method is no longer available', () => {
@@ -40,7 +40,7 @@ describe( 'payment data store actions', () => {
 			actions.__internalSetAvailablePaymentMethods( [
 				paymentMethods[ Object.keys( paymentMethods )[ 0 ] ],
 			] );
-			expect( setDefaultPaymentMethodOriginal ).toHaveBeenCalled();
+			expect( setDefaultPaymentMethodOriginal ).toBeCalled();
 		} );
 	} );
 } );

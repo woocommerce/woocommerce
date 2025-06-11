@@ -153,8 +153,10 @@ const coreModules = [
 	'@wordpress/url',
 	'@wordpress/wordcount',
 	'@woocommerce/blocks-test-utils',
+	'@woocommerce/e2e-utils',
 	'babel-jest',
 	'dotenv',
+	'jest-environment-puppeteer',
 	'lodash/kebabCase',
 	'lodash',
 	'prop-types',
@@ -186,6 +188,7 @@ module.exports = {
 		page: 'readonly',
 		browser: 'readonly',
 		context: 'readonly',
+		jestPuppeteer: 'readonly',
 	},
 	settings: {
 		jsdoc: { mode: 'typescript' },

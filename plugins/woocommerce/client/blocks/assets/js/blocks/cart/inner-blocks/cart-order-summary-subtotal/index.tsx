@@ -9,10 +9,8 @@ import { registerBlockType } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
-import metadata from './block.json';
 
 registerBlockType( 'woocommerce/cart-order-summary-subtotal-block', {
-	...metadata,
 	icon: {
 		src: (
 			<Icon

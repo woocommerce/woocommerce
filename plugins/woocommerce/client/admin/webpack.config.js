@@ -5,6 +5,7 @@ const { get } = require( 'lodash' );
 const path = require( 'path' );
 const fs = require( 'fs' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
+const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
@@ -13,8 +14,7 @@ const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin
 /**
  * Internal dependencies
  */
-const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
-const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
+const UnminifyWebpackPlugin = require( './unminify' );
 const {
 	webpackConfig: styleConfig,
 } = require( '@woocommerce/internal-style-build' );
