@@ -339,6 +339,37 @@
 					"lineHeight": "1.18"
 				}
 			},
+			"woocommerce/accordion-item": {
+				"border": {
+					"bottom": {
+						"color": "var(--wp--preset--color--theme-6)",
+						"style": "solid",
+						"width": "1px"
+					},
+					"color": null,
+					"style": null,
+					"width": null
+				},
+				"spacing": {
+					"blockGap": "0"
+				}
+			},
+			"woocommerce/accordion-header": {
+				"spacing": {
+					"padding": {
+						"top": "0.75rem",
+						"bottom": "0.75rem"
+					}
+				},
+				"typography": {
+					"fontSize":  "var(--wp--preset--font-size--medium)"
+				}
+			},
+			"woocommerce/accordion-panel": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-4)"
+				}
+			},
 			"woocommerce/product-price": {
 				"typography": {
 					"fontSize":  "var(--wp--preset--font-size--large)",
@@ -384,6 +415,20 @@
 		},
 		"css": "",
 		"elements": {
+			"textInput": {
+				"border": {
+					"radius": "0",
+					"style": "solid",
+					"width": "1px",
+					"color": "red"
+				},
+				"color": {
+					"text": "var(--wp--preset--color--theme-2)"
+				},
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--inter)"
+				}
+			},
 			"button": {
 				":hover": {
 					"color": {
