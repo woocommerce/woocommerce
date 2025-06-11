@@ -76,13 +76,14 @@ const LaunchStoreController = () => {
 		);
 
 	const handlePaymentsClose = () => {
-		// Invalidate the task lists to ensure they are refreshed
-		// when the user returns to the main flow.
-		invalidateResolutionForStoreSelector( 'getTaskLists' );
-
 		// Clear session flag to prevent redirect back to payments setup
 		// after exiting the flow and returning to the WC Admin home.
 		window.sessionStorage.setItem( 'lysWaiting', 'no' );
+
+		// Invalidate the task lists to ensure they are refreshed
+		// when the user returns to the main flow.
+		invalidateResolutionForStoreSelector( 'getTaskLists' );
+    	invalidateResolutionForStoreSelector( 'getTaskListsByIds' );
 
 		// Navigate back to the main flow
 		sendToSidebar( { type: 'RETURN_FROM_PAYMENTS' } );
