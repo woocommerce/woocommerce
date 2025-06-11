@@ -205,29 +205,26 @@ jobs:
               try {
                 const fileContent = fs.readFileSync(path, 'utf8');
                 
-                // Look for the $db_updates array definition
                 const dbUpdatesMatch = fileContent.match(/\$db_updates\s*=\s*array\s*\((.*?)\);/s);
                 
                 if (!dbUpdatesMatch) {
-                  console.log('Could not find $db_updates array in the file');
+                  console.log('Could not find `$db_updates` array in the file');
                   core.setOutput('has_updates', 'false');
                   return;
                 }
                 
-                const dbUpdatesContent = dbUpdatesMatch[1];
-                console.log('Found $db_updates array content');
+                const dbUpdatesContent = dbUpdatesMatch[1];                
                 
                 // Check if the version exists as a key in the array
-                // This regex looks for the version as a string key, allowing for patch versions (X.Y.Z)
+                // This regex looks for the version as a string key with the format X.Y.Z
                 const escapedVersion = version.replace('.', '\\.');
                 const versionPattern = new RegExp(`['"]${escapedVersion}(?:\\.\\d+)?['"]\\s*=>\\s*array\\s*\\((.*?)\\)`, 's');
                 const versionMatch = dbUpdatesContent.match(versionPattern);
                 
                 if (versionMatch) {
-                  console.log(`✓ Found database updates for version ${version}`);
+                  console.log(`✅ Found database updates for version ${version}`);
                   core.setOutput('has_updates', 'true');
                   
-                  // Extract and list the database updates
                   const updatesContent = versionMatch[1];
                   
                   // Split by comma and clean up each update function
@@ -238,14 +235,12 @@ jobs:
                   
                   // Store updates for the PR finding step
                   core.setOutput('updates_list', updates.join(','));
-                  core.setOutput('updates_array', JSON.stringify(updates));
                   
                 } else {
-                  console.log(`✗ No database updates found for version ${version}`);
+                  console.log(`⛔ No database updates found for version ${version}`);
                   core.setOutput('has_updates', 'false');
                   core.setOutput('updates_list', '');
                 }
-                
               } catch (error) {
                 console.error(`Error reading file: ${error.message}`);
                 core.setFailed(`Failed to check database updates: ${error.message}`);
@@ -273,31 +268,12 @@ jobs:
               
               echo "Searching for: $update_function"
               
-              # Use git log with pickaxe to find when this function was added to the db_updates array
-              # Look for the pattern within the file content, not just any occurrence
-              commit=$(git log --follow --pickaxe-regex -S"'$update_function'" --format="%H %s" -- "$FILE_PATH" | \
-                while read commit_hash commit_msg; do
-                  # Check if this commit actually added the function to the db_updates array
-                  if git show "$commit_hash" -- "$FILE_PATH" | grep -q "^+.*'$update_function'"; then
-                    echo "$commit_hash $commit_msg"
-                    break
-                  fi
-                done | head -1)
+              # Use git blame to find which commit last modified the line with this function
+              commit_hash=$(git blame "$FILE_PATH" | grep "$update_function" | head -1 | cut -d' ' -f1)
               
-              if [ -z "$commit" ]; then
-                # Try with double quotes if single quotes didn't work
-                commit=$(git log --follow --pickaxe-regex -S"\"$update_function\"" --format="%H %s" -- "$FILE_PATH" | \
-                  while read commit_hash commit_msg; do
-                    if git show "$commit_hash" -- "$FILE_PATH" | grep -q "^+.*\"$update_function\""; then
-                      echo "$commit_hash $commit_msg"
-                      break
-                    fi
-                  done | head -1)
-              fi
-              
-              if [ -n "$commit" ]; then
-                commit_hash=$(echo "$commit" | cut -d' ' -f1)
-                commit_message=$(echo "$commit" | cut -d' ' -f2-)
+              if [ -n "$commit_hash" ] && [ "$commit_hash" != "00000000" ]; then
+                # Get the commit message
+                commit_message=$(git log --format="%s" -1 "$commit_hash")
                 
                 echo "Found commit: $commit_hash"
                 echo "Commit message: $commit_message"
