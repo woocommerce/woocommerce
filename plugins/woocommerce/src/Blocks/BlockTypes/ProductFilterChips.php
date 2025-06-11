@@ -68,52 +68,57 @@ final class ProductFilterChips extends AbstractBlock {
 		ob_start();
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<div class="wc-block-product-filter-chips__items" aria-label="<?php echo esc_attr__( 'Filter Options', 'woocommerce' ); ?>">
-				<?php foreach ( $items as $item ) { ?>
-					<?php $item_id = $item['type'] . '-' . $item['value']; ?>
-					<button
-						data-wp-key="<?php echo esc_attr( $item_id ); ?>"
-						id="<?php echo esc_attr( $item_id ); ?>"
-						class="wc-block-product-filter-chips__item"
-						type="button"
-						role="checkbox"
-						aria-label="<?php echo esc_attr( $this->get_aria_label( $item, $show_counts ) ); ?>"
-						data-wp-on--click="actions.toggleFilter"
-						value="<?php echo esc_attr( $item['value'] ); ?>"
-						data-wp-bind--aria-checked="state.isFilterSelected"
-						<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-						<?php if ( ! $item['selected'] ) : ?>
-							<?php if ( $count >= $remaining_initial_unchecked ) : ?>
-								data-wp-bind--hidden="!context.showAll"
-								hidden
-							<?php else : ?>
-								<?php ++$count; ?>
+			<fieldset>
+				<?php if ( ! empty( $block->context['filterData']['groupLabel'] ) ) : ?>
+					<legend class="screen-reader-text"><?php echo esc_html( $block->context['filterData']['groupLabel'] ); ?></legend>
+				<?php endif; ?>
+				<div class="wc-block-product-filter-chips__items">
+					<?php foreach ( $items as $item ) { ?>
+						<?php $item_id = $item['type'] . '-' . $item['value']; ?>
+						<button
+							data-wp-key="<?php echo esc_attr( $item_id ); ?>"
+							id="<?php echo esc_attr( $item_id ); ?>"
+							class="wc-block-product-filter-chips__item"
+							type="button"
+							role="checkbox"
+							aria-label="<?php echo esc_attr( $this->get_aria_label( $item, $show_counts ) ); ?>"
+							data-wp-on--click="actions.toggleFilter"
+							value="<?php echo esc_attr( $item['value'] ); ?>"
+							data-wp-bind--aria-checked="state.isFilterSelected"
+							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php if ( ! $item['selected'] ) : ?>
+								<?php if ( $count >= $remaining_initial_unchecked ) : ?>
+									data-wp-bind--hidden="!context.showAll"
+									hidden
+								<?php else : ?>
+									<?php ++$count; ?>
+								<?php endif; ?>
 							<?php endif; ?>
-						<?php endif; ?>
-					>
-						<span class="wc-block-product-filter-chips__label">
-							<span class="wc-block-product-filter-chips__text">
-								<?php echo $item['label']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							</span>
-							<?php if ( $show_counts ) : ?>
-								<span class="wc-block-product-filter-chips__count">
-									(<?php echo esc_html( $item['count'] ); ?>)
+						>
+							<span class="wc-block-product-filter-chips__label">
+								<span class="wc-block-product-filter-chips__text">
+									<?php echo $item['label']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								</span>
-							<?php endif; ?>
-						</span>
+								<?php if ( $show_counts ) : ?>
+									<span class="wc-block-product-filter-chips__count">
+										(<?php echo esc_html( $item['count'] ); ?>)
+									</span>
+								<?php endif; ?>
+							</span>
+						</button>
+					<?php } ?>
+				</div>
+				<?php if ( count( $items ) > $show_initially ) : ?>
+					<button
+						class="wc-block-product-filter-chips__show-more"
+						data-wp-on--click="actions.showAllChips"
+						data-wp-bind--hidden="context.showAll"
+						hidden
+					>
+						<?php echo esc_html__( 'Show more…', 'woocommerce' ); ?>
 					</button>
-				<?php } ?>
-			</div>
-			<?php if ( count( $items ) > $show_initially ) : ?>
-				<button
-					class="wc-block-product-filter-chips__show-more"
-					data-wp-on--click="actions.showAllChips"
-					data-wp-bind--hidden="context.showAll"
-					hidden
-				>
-					<?php echo esc_html__( 'Show more...', 'woocommerce' ); ?>
-				</button>
-			<?php endif; ?>
+				<?php endif; ?>
+			</fieldset>
 		</div>
 		<?php
 		return ob_get_clean();
