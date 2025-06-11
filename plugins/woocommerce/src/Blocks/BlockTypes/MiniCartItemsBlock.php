@@ -64,13 +64,6 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 			)
 		);
 
-		wp_interactivity_state(
-			$this->get_full_block_name(),
-			array(
-				'cartItems' => wp_interactivity_state( 'woocommerce' )['cart']['items'] ?? [],
-			)
-		);
-
 		ob_start();
 		?>
 		<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -85,21 +78,39 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 					<tbody>
 						<template
 							data-wp-each--cart-item="state.cartItems"
-							data-wp-each-key="context.cartItem.id"
+							data-wp-each-key="context.cartItem.key"
 						>
 							<tr class="wc-block-cart-items__row" tabindex="-1">
 								<td class="wc-block-cart-item__image" aria-hidden="true">
 									<a data-wp-bind--href="context.cartItem.permalink" tabindex="-1">
 										<img data-wp-bind--src="state.itemThumbnail" data-wp-bind--alt="state.cartItemName">	
-									</a>									
+									</a>
 								</td>
 								<td class="wc-block-cart-item__product">
 									<div class="wc-block-cart-item__wrap">
-										<a data-wp-text="context.cartItemName" data-wp-bind--href="context.cartItem.permalink" class="wc-block-components-product-name"></a>
+										<a data-wp-text="state.cartItemName" data-wp-bind--href="context.cartItem.permalink" class="wc-block-components-product-name"></a>
 										<div class="wc-block-cart-item__prices">
-											<span class="price wc-block-components-product-price">
-												<span data-wp-text="context.itemPrice" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value">
+											<span data-wp-bind--hidden="!state.cartItemHasDiscount" class="price wc-block-components-product-price" hidden>
+												<span class="screen-reader-text">Previous price:</span>
+												<del data-wp-text="state.priceWithoutDiscount" class="wc-block-components-product-price__regular"></del>
+												<span class="screen-reader-text">Discounted price:</span>
+												<ins data-wp-text="state.itemPrice" class="wc-block-components-product-price__value is-discounted"></ins>
+											</span>
+											<span data-wp-bind--hidden="state.cartItemHasDiscount" class="price wc-block-components-product-price" hidden>
+												<span data-wp-text="state.itemPrice" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value">
 												</span>
+											</span>
+										</div>
+										<div 
+											data-wp-bind--hidden="!state.cartItemHasDiscount" 
+											class="wc-block-components-product-badge wc-block-components-sale-badge"
+											hidden
+										>
+											Save
+											<span
+												data-wp-text="state.cartItemDiscount" 
+												class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+											>
 											</span>
 										</div>
 										<div class="wc-block-components-product-metadata">
@@ -109,11 +120,35 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 										</div>
 										<div class="wc-block-cart-item__quantity">
 											<div class="wc-block-components-quantity-selector">
-												<input data-wp-bind--aria-label="state.quantityDescriptionLabel" data-wp-bind--value="context.cartItem.quantity" class="wc-block-components-quantity-selector__input" type="number" step="1" min="1" max="9999" >
-												<button data-wp-on--click="actions.decrementQuantity" data-wp-bind--aria-label="state.reduceQuantityLabel" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
-												<button data-wp-on--click="actions.incrementQuantity" data-wp-bind--aria-label="state.increaseQuantityLabel" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
+												<input 
+													data-wp-on--input="actions.overrideInvalidQuantity"
+													data-wp-on--change="actions.changeQuantity" 
+													data-wp-bind--aria-label="state.quantityDescriptionLabel" 
+													data-wp-bind--min="state.cartItemMinimum" 
+													data-wp-bind--max="state.cartItemMaximum"
+													data-wp-bind--value="context.cartItem.quantity" 
+													class="wc-block-components-quantity-selector__input" 
+													type="number" 
+													step="1"
+												>
+												<button 
+													data-wp-bind--disabled="state.minimumReached" 
+													data-wp-on--click="actions.decrementQuantity" 
+													data-wp-bind--aria-label="state.reduceQuantityLabel" 
+													class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus"
+												>
+													－
+												</button>
+												<button 
+													data-wp-bind--disabled="state.maximumReached" 
+													data-wp-on--click="actions.incrementQuantity" 
+													data-wp-bind--aria-label="state.increaseQuantityLabel" 
+													class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus"
+												>
+													＋
+												</button>
 											</div>
-											<button data-wp-bind--aria-label="state.removeFromCartLabel" class="wc-block-cart-item__remove-link" >
+											<button data-wp-on--click="actions.removeItemFromCart" data-wp-bind--aria-label="state.removeFromCartLabel" class="wc-block-cart-item__remove-link" >
 												<?php echo esc_html( $remove_item_label ); ?>
 											</button>
 										</div>

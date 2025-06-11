@@ -16,6 +16,10 @@
 .wc-block-components-product-price {
 	display: block;
 
+	&[hidden] {
+		display: none;
+	}
+
 	.wc-block-all-products .wc-block-components-product-price {
 		margin-bottom: $gap-small;
 	}

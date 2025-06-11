@@ -9,6 +9,7 @@ import {
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/cart';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
+import Dinero from 'dinero.js';
 
 /**
  * Internal dependencies
@@ -18,7 +19,7 @@ import {
 	formatPriceWithCurrency,
 	normalizeCurrencyResponse,
 } from '../../../../packages/prices/utils/currency';
-import { CartItem } from '../../types';
+import { CartItem, Currency } from '../../types';
 
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
@@ -130,9 +131,66 @@ const { state } = store(
 	'woocommerce/mini-cart-items-block',
 	{
 		state: {
-			// get cartItem() {
-			// 	return getContext< CartItemContext >().cartItem;
-			// },
+			get currency(): Currency {
+				const { currency } = getConfig( 'woocommerce' );
+
+				return normalizeCurrencyResponse(
+					wooStoreState.cart.totals,
+					currency
+				);
+			},
+
+			get cartItemDiscount(): string {
+				const {
+					cartItem: { prices },
+				} = getContext< CartItemContext >();
+
+				const regularAmountSingle = Dinero( {
+					amount: parseInt( prices.raw_prices.regular_price, 10 ),
+					precision: prices.raw_prices.precision,
+				} );
+
+				const purchaseAmountSingle = Dinero( {
+					amount: parseInt( prices.raw_prices.price, 10 ),
+					precision: prices.raw_prices.precision,
+				} );
+
+				const saleAmountSingle =
+					regularAmountSingle.subtract( purchaseAmountSingle );
+
+				const discountPrice = saleAmountSingle
+					.convertPrecision( state.currency.minorUnit )
+					.getAmount();
+
+				return formatPriceWithCurrency( discountPrice, state.currency );
+			},
+
+			get cartItemHasDiscount(): boolean {
+				const { cartItem } = getContext< CartItemContext >();
+				return cartItem.prices.regular_price !== cartItem.prices.price;
+			},
+
+			get cartItemMinimum() {
+				const { cartItem } = getContext< CartItemContext >();
+				return cartItem.quantity_limits.minimum;
+			},
+
+			get cartItemMaximum() {
+				const { cartItem } = getContext< CartItemContext >();
+				return cartItem.quantity_limits.maximum;
+			},
+
+			// Intended to be used in context of a cart item in wp-each
+			get minimumReached() {
+				const { cartItem } = getContext< CartItemContext >();
+				return cartItem.quantity - 1 < cartItem.quantity_limits.minimum;
+			},
+
+			// Intended to be used in context of a cart item in wp-each
+			get maximumReached() {
+				const { cartItem } = getContext< CartItemContext >();
+				return cartItem.quantity + 1 > cartItem.quantity_limits.maximum;
+			},
 
 			// Intended to be used in context of a cart item in wp-each
 			get reduceQuantityLabel(): string {
@@ -207,19 +265,22 @@ const { state } = store(
 				}
 			},
 
+			get priceWithoutDiscount(): string {
+				const { cartItem } = getContext< CartItemContext >();
+
+				return formatPriceWithCurrency(
+					cartItem.prices.regular_price,
+					state.currency
+				);
+			},
+
 			// Intended to be used in context of a cart item in wp-each
 			get itemPrice(): string {
 				const { cartItem } = getContext< CartItemContext >();
-				const { currency } = getConfig( 'woocommerce' );
-
-				const normalizedCurrency = normalizeCurrencyResponse(
-					wooStoreState.cart.totals,
-					currency
-				);
 
 				return formatPriceWithCurrency(
 					cartItem.prices.price,
-					normalizedCurrency
+					state.currency
 				);
 			},
 
@@ -229,13 +290,7 @@ const { state } = store(
 				const { displayCartPriceIncludingTax } = getConfig(
 					'woocommerce/mini-cart'
 				);
-				const { currency } = getConfig( 'woocommerce' );
-
-				const normalizedCurrency = normalizeCurrencyResponse(
-					wooStoreState.cart.totals,
-					currency
-				);
-
+				const currency = state.currency;
 				const totals = cartItem.totals;
 
 				const totalLinePrice = displayCartPriceIncludingTax
@@ -243,14 +298,58 @@ const { state } = store(
 					  parseInt( totals.line_subtotal_tax, 10 )
 					: parseInt( totals.line_subtotal, 10 );
 
-				return formatPriceWithCurrency(
-					totalLinePrice,
-					normalizedCurrency
-				);
+				return formatPriceWithCurrency( totalLinePrice, currency );
 			},
 		},
 
 		actions: {
+			overrideInvalidQuantity( e: InputEvent ) {
+				const input = e.target as HTMLInputElement;
+				const qty = input.value;
+
+				const { cartItem } = getContext< CartItemContext >();
+				const { minimum, maximum } = cartItem.quantity_limits;
+
+				const quantity = parseInt( qty, 10 );
+
+				let finalQuantity = quantity;
+
+				if ( quantity < minimum ) {
+					finalQuantity = minimum;
+				} else if ( quantity > maximum ) {
+					finalQuantity = maximum;
+				} else if ( qty === '' ) {
+					finalQuantity = minimum;
+				}
+
+				cartItem.quantity = finalQuantity;
+			},
+
+			*changeQuantity( e: InputEvent ): Generator< unknown, void > {
+				const { cartItem } = getContext< CartItemContext >();
+				const { actions } = store< WooCommerce >(
+					'woocommerce',
+					{},
+					{ lock: universalLock }
+				);
+
+				yield actions.addCartItem( {
+					id: cartItem.id,
+					quantity: cartItem.quantity,
+				} );
+			},
+
+			*removeItemFromCart(): Generator< unknown, void > {
+				const { cartItem } = getContext< CartItemContext >();
+				const { actions } = store< WooCommerce >(
+					'woocommerce',
+					{},
+					{ lock: universalLock }
+				);
+
+				yield actions.removeCartItem( cartItem.key );
+			},
+
 			*incrementQuantity(): Generator< unknown, void > {
 				const { cartItem } = getContext< CartItemContext >();
 				const { actions } = store< WooCommerce >(
