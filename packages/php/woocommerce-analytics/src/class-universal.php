@@ -686,6 +686,10 @@ class Universal {
 	 */
 	public function capture_checkout_view() {
 		global $post;
+		if ( ! $post instanceof \WP_Post ) {
+			return;
+		}
+
 		$checkout_page_id = wc_get_page_id( 'checkout' );
 
 		$is_checkout = $checkout_page_id && is_page( $checkout_page_id )

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Prevent PHP warning in checkout view.
