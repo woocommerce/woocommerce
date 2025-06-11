@@ -7,6 +7,7 @@ import type {
 	CartItem,
 	CartVariationItem,
 	ApiErrorResponse,
+	ApiResponse,
 	CartResponseTotals,
 } from '@woocommerce/types';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
@@ -34,6 +35,7 @@ export type Store = {
 	};
 	actions: {
 		addCartItem: ( args: OptimisticCartItem ) => void;
+		batchAddCartItems: ( items: OptimisticCartItem[] ) => void;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		refreshCartItems: () => void;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => void;
@@ -44,6 +46,10 @@ type QuantityChanges = {
 	cartItemsPendingQuantity?: string[];
 	cartItemsPendingDelete?: string[];
 	productsPendingAdd?: number[];
+};
+
+type BatchResponse = {
+	responses: ApiResponse< Cart >[];
 };
 
 function isApiErrorResponse(
@@ -139,6 +145,137 @@ const { state, actions } = store< Store >(
 					// Reverts the optimistic update.
 					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
 					state.cart = JSON.parse( previousCart );
+
+					// Shows the error notice.
+					actions.showNoticeError( error as Error );
+				}
+			},
+			*batchAddCartItems( items: OptimisticCartItem[] ) {
+				const previousCart = structuredClone( state.cart );
+				const quantityChanges: QuantityChanges = {};
+
+				// Updates the database.
+				try {
+					const requests = items.map( ( item ) => {
+						const existingItem = state.cart.items.find(
+							( { id: productId } ) => item.id === productId
+						);
+
+						// Updates existing cart item.
+						if ( existingItem ) {
+							// Optimistically updates the number of items in the cart.
+							existingItem.quantity = item.quantity;
+							if ( existingItem.key ) {
+								quantityChanges.cartItemsPendingQuantity = [
+									existingItem.key,
+								];
+							}
+
+							return {
+								method: 'POST',
+								path: `/wc/store/v1/cart/update-item`,
+								headers: {
+									Nonce: state.nonce,
+									'Content-Type': 'application/json',
+								},
+								body: existingItem,
+							};
+						}
+
+						// Adds new cart item.
+						item = {
+							id: item.id,
+							quantity: item.quantity,
+							variation: item.variation,
+						} as OptimisticCartItem;
+						state.cart.items.push( item );
+						quantityChanges.productsPendingAdd =
+							quantityChanges.productsPendingAdd
+								? [
+										...quantityChanges.productsPendingAdd,
+										item.id,
+								  ]
+								: [ item.id ];
+
+						return {
+							method: 'POST',
+							path: `/wc/store/v1/cart/add-item`,
+							headers: {
+								Nonce: state.nonce,
+								'Content-Type': 'application/json',
+							},
+							body: item,
+						};
+					} );
+
+					const res: Response = yield fetch(
+						`${ state.restUrl }wc/store/v1/batch`,
+						{
+							method: 'POST',
+							headers: {
+								Nonce: state.nonce,
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify( { requests } ),
+						}
+					);
+
+					const json: BatchResponse = yield res.json();
+
+					// Checks if any of the responses contain an error.
+					json.responses?.forEach( ( response ) => {
+						if ( isApiErrorResponse( res, response ) )
+							throw generateError( response );
+					} );
+
+					// Gets the last successful cart response.
+					const successfulResponses = Array.isArray( json.responses )
+						? json.responses.filter(
+								( response ) =>
+									response.status >= 200 &&
+									response.status < 300
+						  )
+						: [];
+					const lastSuccessfulCartResponse = successfulResponses[
+						successfulResponses.length - 1
+					]?.body as Cart;
+
+					// Checks if the last successful cart response is valid.
+					if ( ! lastSuccessfulCartResponse ) {
+						throw new Error(
+							'No successful cart response received.'
+						);
+					}
+
+					// Checks if the last successful response contains any errors.
+					if (
+						lastSuccessfulCartResponse?.errors &&
+						Array.isArray( lastSuccessfulCartResponse.errors )
+					) {
+						lastSuccessfulCartResponse.errors.forEach(
+							( error ) => {
+								actions.showNoticeError( error );
+							}
+						);
+					}
+
+					// Use the last successful response to update the local cart.
+					const cartResponse = lastSuccessfulCartResponse;
+
+					// Updates the local cart.
+					state.cart = cartResponse;
+
+					// Dispatches a legacy event.
+					triggerAddedToCartEvent( {
+						preserveCartData: true,
+					} );
+
+					// Dispatches the event to sync the @wordpress/data store.
+					emitSyncEvent( { quantityChanges } );
+				} catch ( error ) {
+					// Reverts the optimistic update.
+					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
+					state.cart = previousCart;
 
 					// Shows the error notice.
 					actions.showNoticeError( error as Error );
