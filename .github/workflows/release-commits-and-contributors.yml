@@ -217,8 +217,9 @@ jobs:
 
                 // Check if the version exists as a key in the array
                 // This regex looks for the version as a string key (with quotes) or array key
-                const versionPattern = new RegExp(`['"]${version.replace('.', '\\.')}['"]\\s*=>\\s*array\\s*\\((.*?)\\)`, 's');
-                const versionMatch = dbUpdatesContent.match(versionPattern);
+                const escapedVersion = version.replace('.', '\\.');
+                              const versionPattern = new RegExp(`['"]${escapedVersion}(?:\\.\\d+)?['"]\\s*=>\\s*array\\s*\\((.*?)\\)`, 's');
+                              const versionMatch = dbUpdatesContent.match(versionPattern);
 
                 if (versionMatch) {
                   console.log(`✓ Found database updates for version ${version}`);
