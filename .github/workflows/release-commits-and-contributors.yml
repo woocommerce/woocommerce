@@ -175,7 +175,6 @@ jobs:
           fi
 
   generate-contributors-list:
-    if: false
     name: Generate contributors list
     needs: extract-versions
     runs-on: ubuntu-latest
@@ -362,7 +361,7 @@ jobs:
 
   send-slack-notification:
     name: Send Slack Notification
-    needs: [extract-versions, count-commits-and-contributors, db-updates]
+    needs: [extract-versions, count-commits-and-contributors, generate-contributors-list, db-updates]
     runs-on: ubuntu-latest
     steps:
       - name: Send Slack message
