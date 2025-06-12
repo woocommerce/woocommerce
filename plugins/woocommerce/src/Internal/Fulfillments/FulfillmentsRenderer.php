@@ -36,6 +36,9 @@ class FulfillmentsRenderer {
 		add_action( 'admin_footer', array( $this, 'render_fulfillment_drawer_slot' ) );
 		// Hook into the admin enqueue scripts to load the fulfillment drawer component.
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_components' ) );
+		// Hook into the admin head to print the fulfillments object, which contains the shipping providers.
+		add_action( 'wp_head', array( $this, 'print_fulfillments_object' ) );
+		add_action( 'admin_head', array( $this, 'print_fulfillments_object' ) );
 	}
 
 	/**
@@ -216,7 +219,7 @@ class FulfillmentsRenderer {
 	 * Render the fulfillment drawer.
 	 */
 	public function render_fulfillment_drawer_slot() {
-		if ( ! self::should_render_fulfillment_drawer() ) {
+		if ( ! $this->should_render_fulfillment_drawer() ) {
 			return;
 		}
 		?>
@@ -227,12 +230,54 @@ class FulfillmentsRenderer {
 	/**
 	 * Loads the payment method promotions scripts and styles.
 	 */
-	public static function load_components() {
-		if ( ! self::should_render_fulfillment_drawer() ) {
+	public function load_components() {
+		if ( ! $this->should_render_fulfillment_drawer() ) {
 			return;
 		}
 		WCAdminAssets::register_style( 'fulfillments', 'style', array( 'wp-components' ) );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'fulfillments', true );
+	}
+
+	/**
+	 * Prints the fulfillments object in the admin header.
+	 */
+	public function print_fulfillments_object() {
+		if ( ! $this->should_render_fulfillment_object() ) {
+			return;
+		}
+		?>
+		<script type="text/javascript" id="wc-fulfillments-object">
+			var wcFulfillmentSettings =
+				<?php
+				echo wp_json_encode(
+					array(
+						/**
+						 * Filter to modify the initial shipping providers.
+						 *
+						 * @since 9.9.0
+						 */
+						'providers'        => apply_filters( 'wc_fulfillment_shipping_providers', array() ),
+						/**
+						 * Filter to modify the fulfillment statuses.
+						 *
+						 * @since 9.9.0
+						 */
+						'statuses'         => apply_filters(
+							'wc_fulfillment_statuses',
+							array(
+								'unfulfilled'         => __( 'Unfulfilled', 'woocommerce' ),
+								'partially_fulfilled' => __( 'Partially fulfilled', 'woocommerce' ),
+								'fulfilled'           => __( 'Fulfilled', 'woocommerce' ),
+								'no_fulfillments'     => __( 'No fulfillments', 'woocommerce' ),
+							)
+						),
+						'currency_symbols' => get_woocommerce_currency_symbols(),
+					)
+				);
+				?>
+				;
+		</script>
+		<?php
 	}
 
 	/**
@@ -246,5 +291,25 @@ class FulfillmentsRenderer {
 			return false;
 		}
 		return 'woocommerce_page_wc-orders' === $current_screen->id;
+	}
+
+	/**
+	 * Check if the fulfillment object should be rendered.
+	 *
+	 * @return bool True if the fulfillment object should be rendered, false otherwise.
+	 */
+	private function should_render_fulfillment_object(): bool {
+		// Check if we are on the order details page in the customer area.
+		if ( ! is_admin() && function_exists( 'is_account_page' ) && is_account_page() && get_query_var( 'view-order', false ) ) {
+			return true;
+		}
+
+		// Check if the current screen is the orders page or the edit order page on the admin side.
+		$current_screen = get_current_screen();
+		if ( is_admin() && $current_screen && $current_screen->id && 'woocommerce_page_wc-orders' === $current_screen->id ) {
+			return true;
+		}
+
+		return false;
 	}
 }

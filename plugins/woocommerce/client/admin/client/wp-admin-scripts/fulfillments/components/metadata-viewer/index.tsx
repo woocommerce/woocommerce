@@ -27,7 +27,7 @@ export default function MetadataViewer( { fulfillment }: MetadataViewerProps ) {
 				{
 					id: 2,
 					key: __( 'Source', 'woocommerce' ),
-					value: 'Easyship',
+					value: 'My WooCommerce Store',
 				},
 				{
 					id: 3,
