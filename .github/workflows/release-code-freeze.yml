@@ -25,6 +25,12 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const shouldSkipCalendarCheck = ${{ github.event_name !== 'schedule' }};
+            if (shouldSkipCalendarCheck) {
+              core.setOutput('should-run', 'true');
+              return;
+            }
+
             const ical = require('node-ical');
 
             console.log('Checking for Feature Freeze events today...');
