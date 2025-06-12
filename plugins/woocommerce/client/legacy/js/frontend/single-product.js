@@ -120,7 +120,7 @@ jQuery( function( $ ) {
 				.hide()
 				.before(
 					'<p class="stars">\
-						<span role="group" aria-labeledby="comment-form-rating-label">\
+						<span role="group" aria-labelledby="comment-form-rating-label">\
 							<a role="radio" tabindex="0" aria-checked="false" class="star-1" href="#">' +
 								wc_single_product_params.i18n_rating_options[0] + 
 							'</a>\
