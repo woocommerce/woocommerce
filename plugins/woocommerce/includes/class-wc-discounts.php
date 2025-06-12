@@ -565,7 +565,7 @@ class WC_Discounts {
 		$total_discount = 0;
 
 		foreach ( $items_to_apply as $item ) {
-			for ( $i = 0; $i < $item->quantity; $i++ ) {
+			for ( $i = 0; $i < ceil( $item->quantity ); $i++ ) {
 				// Find out how much price is available to discount for the item.
 				$price_to_discount = $this->get_discounted_price_in_cents( $item );
 
