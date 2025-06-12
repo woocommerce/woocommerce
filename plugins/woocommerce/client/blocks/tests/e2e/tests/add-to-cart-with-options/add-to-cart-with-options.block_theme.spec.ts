@@ -186,12 +186,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await addToCartButton.click();
 
-		await page.waitForResponse(
-			( response ) =>
-				response.url().includes( 'wp-json/wc/store/v1/cart' ) &&
-				response.status() === 200
-		);
-
 		await expect( page.getByText( 'Added to cart' ).first() ).toBeVisible();
 
 		await expect( page.getByLabel( '4 items in cart' ) ).toBeVisible();
