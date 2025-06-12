@@ -12,7 +12,8 @@ import attributes from './attributes';
 import metadata from './block.json';
 
 registerBlockType( 'woocommerce/checkout-shipping-address-block', {
-	...metadata,
+	apiVersion: metadata.apiVersion,
+	title: metadata.title,
 	icon: {
 		src: (
 			<Icon
