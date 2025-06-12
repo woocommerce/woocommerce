@@ -132,20 +132,17 @@ class Additional_Checkout_Fields_Test_Helper {
 					),
 
 				),
-				'required' => array(
-					'type'       => 'object',
-					'properties' => array(
-						'cart' => array(
-							'properties' => array(
-								'totals' => array(
-									'properties' => array(
-										'totalPrice' => array(
-											'minimum' => 5900,
-										),
+				'required' => array( // Intentionally passing an unwrapped rule set.
+					'cart' => array(
+						'properties' => array(
+							'totals' => array(
+								'properties' => array(
+									'totalPrice' => array(
+										'minimum' => 5900,
 									),
 								),
-
 							),
+
 						),
 					),
 				),
