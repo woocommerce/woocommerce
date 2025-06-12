@@ -237,7 +237,7 @@ class AddToCartWithOptions extends AbstractBlock {
 						/**
 						 * Filter the minimum quantity for a child product in a grouped product.
 						 *
-						 * @since 10.9.0
+						 * @since 10.0.0
 						 * @param int $min_quantity The minimum quantity.
 						 * @param WC_Product $child_product The child product object.
 						 */
