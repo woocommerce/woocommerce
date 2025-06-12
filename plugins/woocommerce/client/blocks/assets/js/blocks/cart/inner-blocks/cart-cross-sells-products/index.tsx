@@ -12,7 +12,8 @@ import './style.scss';
 import metadata from './block.json';
 
 registerBlockType( 'woocommerce/cart-cross-sells-products-block', {
-	...metadata,
+	apiVersion: metadata.apiVersion,
+	title: metadata.title,
 	icon: {
 		src: (
 			<Icon

@@ -114,6 +114,15 @@ class DataSynchronizer implements BatchProcessorInterface {
 		if ( self::BACKGROUND_SYNC_MODE_CONTINUOUS === $this->get_background_sync_mode() ) {
 			add_action( 'shutdown', array( $this, 'handle_continuous_background_sync' ) );
 		}
+
+		if ( defined( 'WC_PLUGIN_BASENAME' ) ) {
+			add_action(
+				'deactivate_' . WC_PLUGIN_BASENAME,
+				function () {
+					$this->unschedule_background_sync();
+				}
+			);
+		}
 	}
 
 	/**

@@ -12,7 +12,7 @@ import dotenv from 'dotenv';
 import PullRequest from './pull-requests/commands';
 import CodeFreeze from './code-freeze/commands';
 import Github from './github/commands';
-import Slack from './slack/commands/slack';
+import Slack from './slack';
 import Manifest from './md-docs/commands';
 import Changefile from './changefile';
 import CIJobs from './ci-jobs';
