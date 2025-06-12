@@ -59,7 +59,7 @@
 <!-- /wp:jetpack/rating-star -->
 
 <!-- wp:paragraph {"align":"left","placeholder":"Write title…","fontSize":"medium"} -->
-<p class="has-text-align-left has-medium-font-size"><?php esc_html_e('“I cannot point out one flaw thoughout the whole purchase process.”', 'woostarter');?></p>
+<p class="has-text-align-left has-medium-font-size"><?php esc_html_e('“I cannot point out one flaw throughout the whole purchase process.”', 'woostarter');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
