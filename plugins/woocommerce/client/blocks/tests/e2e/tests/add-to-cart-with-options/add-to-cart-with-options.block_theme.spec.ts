@@ -186,7 +186,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await addToCartButton.click();
 
-		await expect( page.getByText( 'Added to cart' ).first() ).toBeVisible();
+		await expect( page.getByText( 'Added to cart' ) ).toBeVisible();
 
 		await expect( page.getByLabel( '4 items in cart' ) ).toBeVisible();
 	} );
