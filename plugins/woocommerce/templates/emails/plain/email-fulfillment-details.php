@@ -15,19 +15,12 @@ if ( null === $fulfillment->get_date_deleted() ) {
 		echo esc_html__( 'No tracking information available for this fulfillment at the moment.', 'woocommerce' );
 		return;
 	} else {
-		?>
-<strong>Tracking Number:</strong> <?php echo esc_attr( $tracking_number ); ?><br />
-<strong>Shipment Provider:</strong> <?php echo esc_html( $shipment_provider ); ?><br />
-<a href="<?php echo esc_html( $tracking_url ); ?>" target="_blank">Track your shipment</a><br /><br /><?php
+		echo esc_html__( 'Tracking Number', 'woocommerce' ) . ': ' . esc_attr( $tracking_number ) . "\n";
+		echo esc_html__( 'Shipment Provider', 'woocommerce' ) . ': ' . esc_html( $shipment_provider ) . "\n";
+		echo esc_html__( 'Tracking URL', 'woocommerce' ) . ': ' . esc_html( $tracking_url ) . "\n\n";
 	}
-	echo wp_kses(
-		sprintf(
-			/* translators: %s: Link to My Account > Orders page. */
-			__( 'You can access to more details of your order by visiting <a href="%s" target="_blank">My Account > Orders</a> and select the order you wish to see the latest status of the delivery.', 'woocommerce' ),
-			site_url( 'my-account/orders/' )
-		),
-		'strong, a'
-	);
+
+	echo esc_html__( 'You can access to more details of your order by visiting My Account > Orders and select the order you wish to see the latest status of the delivery.', 'woocommerce' );
 	echo "\n\n\n";
 }
 
@@ -47,8 +40,8 @@ echo wp_kses_post( __( 'Fulfillment summary', 'woocommerce' ) );
 echo "\n\n==========\n\n";
 
 if ( $sent_to_admin ) {
-	$before = '<a class="link" href="' . esc_url( $order->get_edit_order_url() ) . '">';
-	$after  = '</a>';
+	$before = '';
+	$after  = '(' . esc_url( $order->get_edit_order_url() ) . ')';
 } else {
 	$before = '';
 	$after  = '';
@@ -86,4 +79,3 @@ echo wc_get_email_fulfillment_items( // phpcs:ignore WordPress.Security.EscapeOu
  * @since 2.5.0
  */
 do_action( 'woocommerce_email_after_fulfillment_table', $order, $fulfillment, $sent_to_admin, $plain_text, $email );
-?>
