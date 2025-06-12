@@ -176,11 +176,8 @@ test.describe( 'Compatibility Layer in Single Product template', () => {
 		page,
 		admin,
 		editor,
-		requestUtils,
 	} ) => {
 		/* Switch to the blockified Add to Cart + Options block to be able to test all hooks */
-		await requestUtils.setFeatureFlag( 'experimental-blocks', true );
-		await requestUtils.setFeatureFlag( 'blockified-add-to-cart', true );
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//single-product',
 			postType: 'wp_template',

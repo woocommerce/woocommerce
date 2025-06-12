@@ -13,7 +13,8 @@ import attributes from './attributes';
 import metadata from './block.json';
 
 registerBlockType( 'woocommerce/cart-order-summary-taxes-block', {
-	...metadata,
+	apiVersion: metadata.apiVersion,
+	title: metadata.title,
 	icon: {
 		src: (
 			<Icon
