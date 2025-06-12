@@ -332,7 +332,7 @@ jobs:
             📊 *Statistics:*
             • Commits: ${{ needs.count-commits-and-contributors.outputs.commit_count }}
             • Contributors: ${{ needs.count-commits-and-contributors.outputs.contributor_count }}
-            • <${{ needs.generate-contributors-list.outputs.artifact_url }}|👥 View Contributors List>
+            • <${{ needs.generate-contributors-list.outputs.artifact_url }}|Download Contributors List>
             
             :database: *Database Updates:*
-            ${{ needs.db-updates.outputs.has_updates == 'true' && needs.db-updates.outputs.formatted_updates || 'No database updates in this release' }}
+            ${{ needs.db-updates.outputs.has_updates == 'true' && needs.db-updates.outputs.formatted_updates || 'This release does not include a database update.' }}
