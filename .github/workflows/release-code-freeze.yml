@@ -61,6 +61,7 @@ jobs:
 
   prepare-for-code-freeze:
     name: Calculate versions and confirm repo is in a good state
+    needs: check-feature-freeze-event
     runs-on: ubuntu-latest
     outputs:
       nextReleaseBranch: ${{ steps.calculate-versions.outputs.nextReleaseBranch }}
