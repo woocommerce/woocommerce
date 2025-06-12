@@ -1,18 +1,14 @@
 name: 'Release: Generate Number of Commits and Contributors'
 on:
-  workflow_call:
-    inputs:
-      version:
-        type: string
-        required: false
-        description: 'The release version (X.Y format) to be used to calculate the number of commits and contributors. If not provided, it will be derived from the branch name.'
-
   workflow_dispatch:
     inputs:
       version:
         type: string
         required: false
         description: 'The release version (X.Y format) to be used to calculate the number of commits and contributors. If not provided, it will be derived from the branch name.'
+
+  release:
+    types: [prereleased]
 
 jobs:
   extract-versions:
@@ -22,6 +18,42 @@ jobs:
       current_version: ${{ steps.calculate-versions.outputs.current_version }}
       previous_version: ${{ steps.calculate-versions.outputs.previous_version }}
     steps:
+      - name: Check pre-release and extract RC version
+        id: version-from-prerelease
+        if: ${{ github.event_name == 'release' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tagName = '${{ github.event.release.tag_name }}';
+            const isPrerelease = ${{ github.event.release.prerelease }};
+
+            console.log(`Release tag: ${tagName}, prerelease: ${isPrerelease}`);
+
+            if (!isPrerelease) {
+              core.setFailed(`This workflow only runs for pre-releases`);
+              process.exit(1);
+            }
+
+            // Check if it's an RC format: x.y.z-rc.N
+            const rcPattern = /^v?(\d+)\.(\d+)\.(\d+)-rc\.(\d+)$/;
+            const rcMatch = tagName.match(rcPattern);
+
+            if (!rcMatch) {
+              console.log(`⛔ Not an RC pre-release format: ${tagName}`);
+              console.log(`Expected format: x.y.z-rc.N (e.g., 9.8.0-rc.1)`);
+              core.setFailed(`This workflow only runs for RC pre-releases with format x.y.z-rc.N`);
+              process.exit(1);
+            }
+
+            const major = parseInt(rcMatch[1]);
+            const minor = parseInt(rcMatch[2]);
+
+            console.log(`✅ Valid RC pre-release: ${tagName}`);
+            console.log(`Extracted version: major=${major}, minor=${minor}`);
+
+            core.setOutput('major', major);
+            core.setOutput('minor', minor);
+
       - name: Extract version from the provided input version
         id: version-from-input
         if: ${{ github.event.inputs.version != '' }}
@@ -46,7 +78,7 @@ jobs:
 
       - name: Extract version from the branch name
         id: version-from-branch
-        if: ${{ github.event.inputs.version == '' }}
+        if: ${{ github.event.inputs.version == '' && github.event_name != 'release' }}
         uses: actions/github-script@v7
         with:
           script: |
@@ -75,12 +107,22 @@ jobs:
         with:
           script: |
             let major, minor;
-            if (${{ github.event.inputs.version == '' }}) {
-              major = parseInt('${{ steps.version-from-branch.outputs.major }}');
-              minor = parseInt('${{ steps.version-from-branch.outputs.minor }}');
-            } else {
+
+            if ('${{ github.event_name }}' === 'release') {
+              // Pre-release trigger - use RC tag version
+              major = parseInt('${{ steps.version-from-prerelease.outputs.major }}');
+              minor = parseInt('${{ steps.version-from-prerelease.outputs.minor }}');
+              console.log(`Using version from RC pre-release: ${major}.${minor}`);
+            } else if ('${{ github.event.inputs.version }}' !== '') {
+              // Manual trigger with input version
               major = parseInt('${{ steps.version-from-input.outputs.major }}');
               minor = parseInt('${{ steps.version-from-input.outputs.minor }}');
+              console.log(`Using version from input: ${major}.${minor}`);
+            } else {
+              // Manual trigger from branch name
+              major = parseInt('${{ steps.version-from-branch.outputs.major }}');
+              minor = parseInt('${{ steps.version-from-branch.outputs.minor }}');
+              console.log(`Using version from branch: ${major}.${minor}`);
             }
 
             let previousVersion;
@@ -92,6 +134,7 @@ jobs:
 
             console.log(`Current version: ${major}.${minor}`);
             console.log(`Previous version: ${previousVersion}`);
+
             core.setOutput('current_version', `${major}.${minor}`);
             core.setOutput('previous_version', previousVersion);
 
@@ -325,7 +368,7 @@ jobs:
         uses: archive/github-actions-slack@v2.10.0
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
-          slack-channel: ${{ secrets.WOO_ANNOUNCEMENTS_SLACK_CHANNEL }}
+          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
           slack-text: |
             :woo: *WooCommerce ${{ needs.extract-versions.outputs.current_version }} Release Summary*
 
@@ -336,3 +379,5 @@ jobs:
 
             :database: *Database Updates:*
             ${{ needs.db-updates.outputs.has_updates == 'true' && needs.db-updates.outputs.formatted_updates || 'This release does not include a database update.' }}
+
+            <!subteam^S086N376UTS> you can re-run this workflow <https://github.com/woocommerce/woocommerce/actions/workflows/release-commits-and-contributors.yml|here>
