@@ -175,6 +175,7 @@ jobs:
           fi
 
   generate-contributors-list:
+    if: false
     name: Generate contributors list
     needs: extract-versions
     runs-on: ubuntu-latest
