@@ -37,7 +37,7 @@ test.describe( 'Product Page: error notices when adding out-of-stock products', 
 		await expect( productCart ).toBeVisible();
 
 		// Add to cart once — succeeds.
-		await productCart.getByRole( 'button' ).click();
+		await productCart.getByRole( 'button', { name: 'Add to cart' } ).click();
 
 		// Add to cart again — triggers out-of-stock error.
 		await productCart.getByRole( 'button' ).click();
