@@ -270,10 +270,6 @@ CREATE TABLE $meta_table_name (
 				$notification->set_date_modified( time() );
 			}
 
-			if ( ! array_key_exists( 'date_created', $changes ) ) {
-				$notification->set_date_created( time() );
-			}
-
 			$result = $wpdb->update(
 				$this->get_table_name(),
 				array(
@@ -281,7 +277,7 @@ CREATE TABLE $meta_table_name (
 					'user_id'               => $notification->get_user_id( 'edit' ),
 					'user_email'            => $notification->get_user_email( 'edit' ),
 					'status'                => $notification->get_status( 'edit' ),
-					'date_created_gmt'      => gmdate( 'Y-m-d H:i:s', $notification->get_date_created( 'edit' )->getTimestamp() ),
+					'date_created_gmt'      => $notification->get_date_created( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_created( 'edit' )->getTimestamp() ) : null,
 					'date_modified_gmt'     => gmdate( 'Y-m-d H:i:s', $notification->get_date_modified( 'edit' )->getTimestamp() ),
 					'date_confirmed_gmt'    => $notification->get_date_confirmed( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_confirmed( 'edit' )->getTimestamp() ) : null,
 					'date_last_attempt_gmt' => $notification->get_date_last_attempt( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_last_attempt( 'edit' )->getTimestamp() ) : null,
