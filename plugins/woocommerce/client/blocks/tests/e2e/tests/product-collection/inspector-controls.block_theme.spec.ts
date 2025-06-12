@@ -543,11 +543,8 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			pageObject,
 			editor,
 			page,
-			wpCoreVersion,
 			requestUtils,
 		} ) => {
-			test.skip( wpCoreVersion <= 6.6, 'Skipping on WP 6.6 and below' );
-
 			await requestUtils.setFeatureFlag( 'experimental-blocks', true );
 			await pageObject.createNewPostAndInsertBlock();
 
@@ -604,10 +601,8 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			pageObject,
 			editor,
 			page,
-			wpCoreVersion,
 			requestUtils,
 		} ) => {
-			test.skip( wpCoreVersion <= 6.6, 'Skipping on WP 6.6 and below' );
 			await requestUtils.setFeatureFlag( 'experimental-blocks', true );
 
 			await pageObject.createNewPostAndInsertBlock();

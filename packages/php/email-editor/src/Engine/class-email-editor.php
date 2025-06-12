@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\EmailEditor\Engine;
 use Automattic\WooCommerce\EmailEditor\Engine\Patterns\Patterns;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates;
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use WP_Post;
 use WP_Theme_JSON;
 
@@ -56,6 +57,13 @@ class Email_Editor {
 	private Personalization_Tags_Registry $personalization_tags_registry;
 
 	/**
+	 * Property for the logger.
+	 *
+	 * @var Email_Editor_Logger Logger instance.
+	 */
+	private Email_Editor_Logger $logger;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param Email_Api_Controller          $email_api_controller Email API controller.
@@ -63,19 +71,22 @@ class Email_Editor {
 	 * @param Patterns                      $patterns Patterns.
 	 * @param Send_Preview_Email            $send_preview_email Preview email controller.
 	 * @param Personalization_Tags_Registry $personalization_tags_controller Personalization tags registry that allows initializing personalization tags.
+	 * @param Email_Editor_Logger           $logger Logger instance.
 	 */
 	public function __construct(
 		Email_Api_Controller $email_api_controller,
 		Templates $templates,
 		Patterns $patterns,
 		Send_Preview_Email $send_preview_email,
-		Personalization_Tags_Registry $personalization_tags_controller
+		Personalization_Tags_Registry $personalization_tags_controller,
+		Email_Editor_Logger $logger
 	) {
 		$this->email_api_controller          = $email_api_controller;
 		$this->templates                     = $templates;
 		$this->patterns                      = $patterns;
 		$this->send_preview_email            = $send_preview_email;
 		$this->personalization_tags_registry = $personalization_tags_controller;
+		$this->logger                        = $logger;
 	}
 
 	/**
@@ -84,6 +95,7 @@ class Email_Editor {
 	 * @return void
 	 */
 	public function initialize(): void {
+		$this->logger->info( 'Initializing email editor' );
 		do_action( 'woocommerce_email_editor_initialized' );
 		add_filter( 'woocommerce_email_editor_rendering_theme_styles', array( $this, 'extend_email_theme_styles' ), 10, 2 );
 		$this->register_block_patterns();
@@ -98,6 +110,8 @@ class Email_Editor {
 		add_action( 'rest_api_init', array( $this, 'register_email_editor_api_routes' ) );
 		add_filter( 'woocommerce_email_editor_send_preview_email', array( $this->send_preview_email, 'send_preview_email' ), 11, 1 ); // allow for other filter methods to take precedent.
 		add_filter( 'single_template', array( $this, 'load_email_preview_template' ) );
+		add_filter( 'preview_post_link', array( $this, 'update_preview_post_link' ), 10, 2 );
+		$this->logger->info( 'Email editor initialized successfully' );
 	}
 
 	/**
@@ -107,7 +121,11 @@ class Email_Editor {
 	 */
 	private function register_block_templates(): void {
 		// Since we cannot currently disable blocks in the editor for specific templates, disable templates when viewing site editor. @see https://github.com/WordPress/gutenberg/issues/41062.
-		if ( strstr( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), 'site-editor.php' ) === false ) {
+		$request_uri = '';
+		if ( isset( $_SERVER['REQUEST_URI'] ) && is_string( $_SERVER['REQUEST_URI'] ) ) {
+			$request_uri = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		}
+		if ( strstr( $request_uri, 'site-editor.php' ) === false ) {
 			$post_types = array_column( $this->get_post_types(), 'name' );
 			$this->templates->initialize( $post_types );
 		}
@@ -275,11 +293,29 @@ class Email_Editor {
 	 */
 	public function get_current_post() {
 		if ( isset( $_GET['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$current_post = get_post( intval( $_GET['post'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- data valid
+			$post_id = 0;
+			if ( is_string( $_GET['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- data valid
+				$post_id = intval( $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- data valid
+			}
+			$current_post = get_post( $post_id );
 		} else {
 			$current_post = $GLOBALS['post'];
 		}
 		return $current_post;
+	}
+
+	/**
+	 * Check if the current post type is an email post type.
+	 *
+	 * @param string $current_post_type The current post type.
+	 * @return bool
+	 */
+	private function current_post_is_email_post_type( $current_post_type ): bool {
+		if ( ! $current_post_type ) {
+			return false;
+		}
+		$email_post_types = array_column( $this->get_post_types(), 'name' );
+		return in_array( $current_post_type, $email_post_types, true );
 	}
 
 	/**
@@ -295,11 +331,7 @@ class Email_Editor {
 			return $template;
 		}
 
-		$current_post_type = $post->post_type;
-
-		$email_post_types = array_column( $this->get_post_types(), 'name' );
-
-		if ( ! in_array( $current_post_type, $email_post_types, true ) ) {
+		if ( ! $this->current_post_is_email_post_type( $post->post_type ) ) {
 			return $template;
 		}
 
@@ -312,5 +344,25 @@ class Email_Editor {
 		);
 
 		return __DIR__ . '/Templates/single-email-post-template.php';
+	}
+
+	/**
+	 * Update the preview post link to remove the preview nonce.
+	 *
+	 * @param string  $preview_link The preview post link.
+	 * @param WP_Post $post The post object.
+	 * @return string
+	 */
+	public function update_preview_post_link( $preview_link, $post ) {
+		if ( ! $post instanceof \WP_Post ) {
+			return $preview_link;
+		}
+
+		if ( ! $this->current_post_is_email_post_type( $post->post_type ) ) {
+			return $preview_link;
+		}
+
+		// Remove preview_nonce from the link.
+		return remove_query_arg( 'preview_nonce', $preview_link );
 	}
 }

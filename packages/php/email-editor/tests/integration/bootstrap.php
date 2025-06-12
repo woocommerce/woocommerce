@@ -6,7 +6,7 @@
  */
 
 /**
- * Class WC_Unit_Tests_Bootstrap.
+ * Class Email_Editor_Unit_Tests_Bootstrap.
  */
 class Email_Editor_Unit_Tests_Bootstrap {
 

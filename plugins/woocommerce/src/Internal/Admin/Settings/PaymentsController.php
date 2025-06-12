@@ -4,7 +4,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Throwable;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
@@ -31,22 +30,8 @@ class PaymentsController {
 	 * Register hooks.
 	 */
 	public function register() {
-		// Because we gate the hooking based on a feature flag,
-		// we need to delay the registration until the 'woocommerce_init' hook.
-		// Otherwise, we end up in an infinite loop.
-		add_action( 'woocommerce_init', array( $this, 'delayed_register' ) );
-	}
-
-	/**
-	 * Delayed hook registration.
-	 */
-	public function delayed_register() {
-		// Don't do anything if the feature is not enabled.
-		if ( ! FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
-			return;
-		}
-
 		add_action( 'admin_menu', array( $this, 'add_menu' ) );
+		add_filter( 'admin_body_class', array( $this, 'add_body_classes' ), 20 );
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
 		add_filter( 'woocommerce_admin_allowed_promo_notes', array( $this, 'add_allowed_promo_notes' ) );
 		add_filter( 'woocommerce_get_sections_checkout', array( $this, 'handle_sections' ), 20 );
@@ -81,7 +66,7 @@ class PaymentsController {
 		$menu_title = esc_html__( 'Payments', 'woocommerce' );
 		$menu_icon  = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4NTIiIGhlaWdodD0iNjg0Ij48cGF0aCBmaWxsPSIjYTJhYWIyIiBkPSJNODIgODZ2NTEyaDY4NFY4NlptMCA1OThjLTQ4IDAtODQtMzgtODQtODZWODZDLTIgMzggMzQgMCA4MiAwaDY4NGM0OCAwIDg0IDM4IDg0IDg2djUxMmMwIDQ4LTM2IDg2LTg0IDg2em0zODQtNTU2djQ0aDg2djg0SDM4MnY0NGgxMjhjMjQgMCA0MiAxOCA0MiA0MnYxMjhjMCAyNC0xOCA0Mi00MiA0MmgtNDR2NDRoLTg0di00NGgtODZ2LTg0aDE3MHYtNDRIMzM4Yy0yNCAwLTQyLTE4LTQyLTQyVjIxNGMwLTI0IDE4LTQyIDQyLTQyaDQ0di00NHoiLz48L3N2Zz4=';
 		// Link to the Payments settings page.
-		$menu_path = 'admin.php?page=wc-settings&tab=checkout';
+		$menu_path = 'admin.php?page=wc-settings&tab=checkout&from=' . Payments::FROM_PAYMENTS_MENU_ITEM;
 
 		add_menu_page(
 			$menu_title,
@@ -109,6 +94,28 @@ class PaymentsController {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Adds body classes when on the Payments Settings admin area.
+	 *
+	 * @param string $classes The existing body classes for the admin area.
+	 *
+	 * @return string The modified body classes for the admin area.
+	 */
+	public function add_body_classes( $classes ) {
+		global $current_tab;
+
+		// Bail if it is not a string.
+		if ( ! is_string( $classes ) ) {
+			return $classes;
+		}
+
+		if ( 'checkout' === $current_tab && ! str_contains( 'woocommerce-settings-payments-tab', $classes ) ) {
+			$classes = "$classes woocommerce-settings-payments-tab";
+		}
+
+		return $classes;
 	}
 
 	/**
@@ -144,7 +151,7 @@ class PaymentsController {
 	 */
 	public function add_allowed_promo_notes( array $promo_notes = array() ): array {
 		try {
-			$providers = $this->payments->get_payment_providers( $this->payments->get_country() );
+			$providers = $this->payments->get_payment_providers( $this->payments->get_country(), false );
 		} catch ( Throwable $e ) {
 			// Catch everything since we don't want to break all the WP admin pages.
 			// Log so we can investigate.
@@ -227,7 +234,7 @@ class PaymentsController {
 		}
 
 		try {
-			$providers = $this->payments->get_payment_providers( $this->payments->get_country() );
+			$providers = $this->payments->get_payment_providers( $this->payments->get_country(), false );
 		} catch ( Throwable $e ) {
 			// Catch everything since we don't want to break all the WP admin pages.
 			// Log so we can investigate.

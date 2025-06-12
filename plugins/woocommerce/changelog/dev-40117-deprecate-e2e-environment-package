@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: drop unsupported @woocommerce/e2e-environment package.

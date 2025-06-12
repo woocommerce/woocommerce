@@ -2,6 +2,19 @@
 	width: 512px;
 	max-width: 512px;
 	max-height: 90%;
+	display: flex;
+	flex-direction: column;
+
+	// Reset default padding provided by WordPress modal content.
+	.components-modal__content {
+		padding: 0;
+		overflow-y: auto;
+	}
+
+	&__content {
+		padding: 8px 32px 0 32px; // Re-add the padding only to the inner modal content.
+		overflow-y: auto;
+	}
 
 	&__description {
 		margin-top: 0;
@@ -25,7 +38,13 @@
 	&__actions {
 		display: flex;
 		justify-content: flex-end;
-		margin-top: 16px;
+		margin-top: auto;
+		padding: 16px 24px;
+		background-color: #fff;
+		position: sticky;
+		bottom: 0;
+		z-index: 10;
+		border-top: 1px solid $gray-200;
 
 		> .bank-account-modal__save {
 			margin-left: 8px;

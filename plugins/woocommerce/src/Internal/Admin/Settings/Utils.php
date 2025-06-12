@@ -3,7 +3,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
-use Automattic\Jetpack\Connection\Manager;
 use Automattic\WooCommerce\Admin\API\OnboardingPlugins;
 use WP_REST_Request;
 
