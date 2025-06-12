@@ -77,16 +77,16 @@ class ProductPrice extends AbstractBlock {
 
 			$is_descendant_of_product_collection       = isset( $block->context['query']['isProductCollectionBlock'] );
 			$is_descendant_of_grouped_product_selector = isset( $block->context['isDescendantOfGroupedProductSelector'] );
+			$is_interactive                            = ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector && $product->is_type( 'variable' );
 
-			$wrapper_attributes =
-				array(
-					'class' => 'wp-block-woocommerce-product-price',
+			$wrapper_attributes = array(
+				'class' => 'wp-block-woocommerce-product-price',
+			);
 
-				);
-			if ( ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector ) {
+			if ( $is_interactive ) {
 				wp_enqueue_script_module( 'woocommerce/product-price' );
 				$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-price';
-				$wrapper_attributes['data-wp-watch']       = 'callbacks.setNewPrice';
+				$wrapper_attributes['data-wp-watch']       = 'callbacks.updatePrice';
 				$wrapper_attributes['data-wp-context']     = wp_json_encode(
 					array(
 						// translators: %s is a product's regular price.

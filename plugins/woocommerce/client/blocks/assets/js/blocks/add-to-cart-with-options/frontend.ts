@@ -5,8 +5,11 @@ import type { FormEvent, HTMLElementEvent } from 'react';
 import { store, getContext } from '@wordpress/interactivity';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import type { CartVariationItem } from '@woocommerce/types';
-import type { ProductData } from '@woocommerce/type-defs/product';
-import type { SingleProductTemplateStore } from '@woocommerce/base-stores/single-product-template';
+
+/**
+ * Internal dependencies
+ */
+import type { SingleProductStore } from '../single-product/frontend';
 
 export type AvailableVariation = {
 	attributes: Record< string, string >;
@@ -36,7 +39,7 @@ interface GroupedCartItem {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: wooState } = store< WooCommerce & SingleProductTemplateStore >(
+const { state: wooState } = store< WooCommerce >(
 	'woocommerce',
 	{},
 	{ lock: universalLock }
@@ -350,31 +353,24 @@ const addToCartWithOptionsStore = store(
 					selectedAttributes
 				);
 
-				const context = getContext< {
-					productData: ProductData | null;
-				} >( 'woocommerce/single-product' );
+				const { actions } = store< SingleProductStore >(
+					'woocommerce/single-product',
+					{},
+					{ lock: universalLock }
+				);
 
 				if ( matchedVariation ) {
-					if ( context ) {
-						context.productData = {
-							display_price: matchedVariation.display_price,
-							display_regular_price:
-								matchedVariation.display_regular_price,
-						};
-					} else {
-						wooState.singleProductTemplate.productData = {
-							display_price: matchedVariation.display_price,
-							display_regular_price:
-								matchedVariation.display_regular_price,
-						};
-					}
-					return;
-				}
-
-				if ( context ) {
-					context.productData = null;
+					actions.setProductData(
+						'display_price',
+						matchedVariation.display_price
+					);
+					actions.setProductData(
+						'display_regular_price',
+						matchedVariation.display_regular_price
+					);
 				} else {
-					wooState.singleProductTemplate.productData = null;
+					actions.setProductData( 'display_price', null );
+					actions.setProductData( 'display_regular_price', null );
 				}
 			},
 		},

@@ -177,9 +177,15 @@ class SingleProduct extends AbstractBlock {
 			return '';
 		}
 
+		if ( ! $product->is_type( 'variable' ) ) {
+			return $content;
+		}
+
+		wp_enqueue_script_module( 'woocommerce/single-product' );
+
 		$interactivity_context = array(
 			'originalProductData' => ProductDataUtils::get_product_data( $product ),
-			'productData'         => null,
+			'productData'         => array(),
 		);
 
 		$html = new \WP_HTML_Tag_Processor( $content );

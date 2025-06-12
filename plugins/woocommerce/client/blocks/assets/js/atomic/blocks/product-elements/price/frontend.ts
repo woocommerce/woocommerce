@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { getContext, getElement, store } from '@wordpress/interactivity';
-import type { ProductData } from '@woocommerce/type-defs/product';
-import type { SingleProductTemplateStore } from '@woocommerce/base-stores/single-product-template';
+import type { SingleProductStore } from '@woocommerce/blocks/single-product/frontend';
 import { sanitize } from 'dompurify'; // eslint-disable-line import/named
 
 /**
@@ -15,11 +14,16 @@ import { formatPrice } from '../../../../blocks/product-filters/utils/price-curr
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: wooState } = store< SingleProductTemplateStore >(
-	'woocommerce',
+const { state: singleProductState } = store< SingleProductStore >(
+	'woocommerce/single-product',
 	{},
 	{ lock: universalLock }
 );
+
+export type Context = {
+	regularPriceText: string;
+	currentPriceText: string;
+};
 
 const ALLOWED_TAGS = [
 	'a',
@@ -44,28 +48,6 @@ const ALLOWED_ATTR = [
 	'aria-hidden',
 ];
 
-const getProductData = ( key: keyof ProductData ) => {
-	const singleProductContext = getContext< {
-		productData: ProductData | null;
-		originalProductData: ProductData;
-	} >( 'woocommerce/single-product' );
-
-	return singleProductContext
-		? singleProductContext?.productData?.[ key ]
-		: wooState?.singleProductTemplate?.productData?.[ key ];
-};
-
-const getOriginalProductData = ( key: keyof ProductData ) => {
-	const singleProductContext = getContext< {
-		productData: ProductData | null;
-		originalProductData: ProductData;
-	} >( 'woocommerce/single-product' );
-
-	return singleProductContext
-		? singleProductContext?.originalProductData?.[ key ]
-		: wooState?.singleProductTemplate?.originalProductData?.[ key ];
-};
-
 const sprintf = ( text: string, value: string ) => {
 	return text.replace( '%s', value );
 };
@@ -73,30 +55,25 @@ const sprintf = ( text: string, value: string ) => {
 const productPriceStore = store(
 	'woocommerce/product-price',
 	{
-		callbacks: {
-			setNewPrice: () => {
-				const element = getElement();
-
-				if ( ! element.ref ) {
-					return;
+		state: {
+			get formattedPrice(): string {
+				if ( ! singleProductState?.productData ) {
+					return '';
 				}
 
-				const newPrice = getProductData( 'display_price' );
-				const newRegularPrice = getProductData(
-					'display_regular_price'
-				);
-
-				const { regularPriceText, currentPriceText } = getContext< {
-					regularPriceText: string;
-					currentPriceText: string;
-				} >( 'woocommerce/product-price' );
+				const {
+					display_price: newPrice,
+					display_regular_price: newRegularPrice,
+				} = singleProductState.productData;
 
 				if (
 					newPrice &&
 					newRegularPrice &&
 					newPrice !== newRegularPrice
 				) {
-					element.ref.innerHTML = `<span class="price"><del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi>${ formatPrice(
+					const { regularPriceText = '%s', currentPriceText = '%s' } =
+						getContext< Context >();
+					return `<span class="price"><del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi>${ formatPrice(
 						newRegularPrice
 					) }</bdi></span></del><span class="screen-reader-text">${ sprintf(
 						regularPriceText,
@@ -108,21 +85,41 @@ const productPriceStore = store(
 						formatPrice( newPrice )
 					) }</span></span>`;
 				} else if ( newPrice ) {
-					element.ref.innerHTML = `<span class="price"><span class="woocommerce-Price-amount amount"><bdi>${ formatPrice(
+					return `<span class="price"><span class="woocommerce-Price-amount amount"><bdi>${ formatPrice(
 						newPrice
 					) }</bdi></span></span>`;
-				} else {
-					const originalPrice = getOriginalProductData(
-						'price_html'
-					) as string;
-
-					if ( originalPrice ) {
-						element.ref.innerHTML = sanitize( originalPrice, {
-							ALLOWED_TAGS,
-							ALLOWED_ATTR,
-						} );
-					}
 				}
+
+				return '';
+			},
+			get originalPriceHtml(): string {
+				return (
+					singleProductState?.originalProductData?.price_html || ''
+				);
+			},
+		},
+		callbacks: {
+			updatePrice: () => {
+				const element = getElement();
+
+				if ( ! element.ref ) {
+					return;
+				}
+
+				const { formattedPrice, originalPriceHtml } =
+					productPriceStore.state;
+
+				if ( ! formattedPrice && ! originalPriceHtml ) {
+					return;
+				}
+
+				element.ref.innerHTML = sanitize(
+					formattedPrice || originalPriceHtml,
+					{
+						ALLOWED_TAGS,
+						ALLOWED_ATTR,
+					}
+				);
 			},
 		},
 	},
