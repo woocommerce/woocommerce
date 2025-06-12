@@ -13,7 +13,7 @@ test.describe( 'Product Page: error notices when adding out-of-stock products', 
 		const productName = 'A Managed Stock';
 
 		wpCLI(
-			`wc product create --name="${productName}" --regular_price=10 --manage_stock=true --stock_quantity=1 --user=admin`
+			`wc product create --name="${ productName }" --regular_price=10 --manage_stock=true --stock_quantity=1 --user=admin`
 		);
 		await admin.createNewPost();
 		await editor.insertBlock( { name: 'woocommerce/product-collection' } );
@@ -25,7 +25,7 @@ test.describe( 'Product Page: error notices when adding out-of-stock products', 
 		await expect(
 			singleProduct.getByText( 'create your own' )
 		).toBeVisible();
-		
+
 		await singleProduct.getByText( 'create your own' ).click();
 
 		await editor.publishAndVisitPost();
@@ -37,14 +37,17 @@ test.describe( 'Product Page: error notices when adding out-of-stock products', 
 		await expect( productCart ).toBeVisible();
 
 		// Add to cart once — succeeds.
-		await productCart.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await productCart
+			.getByRole( 'button', { name: 'Add to cart' } )
+			.click();
 
 		// Add to cart again — triggers out-of-stock error.
 		await productCart.getByRole( 'button' ).click();
 
 		// Verify error notice is displayed.
-		await expect(
-			page.locator( '.wc-block-components-notice-banner.is-error' )
-		).toBeVisible();
+		await expect( page.getByRole( 'alert' ) ).toBeVisible();
+		await expect( page.getByRole( 'alert' ) ).toHaveText(
+			/maximum quantity|You cannot add that amount/i
+		);
 	} );
 } );
