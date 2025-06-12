@@ -133,6 +133,7 @@ const coreModules = [
 	'@woocommerce/shared-hocs',
 	'@woocommerce/stores/store-notices',
 	'@woocommerce/stores/woocommerce/cart',
+	'@woocommerce/stores/woocommerce/single-product',
 	'@woocommerce/tracks',
 	'@woocommerce/data',
 	'@woocommerce/customer-effort-score',

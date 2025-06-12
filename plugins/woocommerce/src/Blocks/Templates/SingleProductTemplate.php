@@ -87,8 +87,6 @@ class SingleProductTemplate extends AbstractTemplate {
 
 			$product = wc_get_product( $post->ID );
 			if ( $product ) {
-				wp_enqueue_script_module( 'woocommerce/single-product' );
-
 				wp_interactivity_state(
 					'woocommerce',
 					array(

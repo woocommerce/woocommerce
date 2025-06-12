@@ -35,6 +35,8 @@ const entries = {
 		'./assets/js/base/stores/woocommerce/cart.ts',
 	'@woocommerce/stores/store-notices':
 		'./assets/js/base/stores/store-notices.ts',
+	'@woocommerce/stores/woocommerce/single-product':
+		'./assets/js/base/stores/woocommerce/single-product.ts',
 };
 
 module.exports = {

@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { getContext, getElement, store } from '@wordpress/interactivity';
-import type { SingleProductStore } from '@woocommerce/blocks/single-product/frontend';
+import '@woocommerce/stores/woocommerce/single-product';
+import type { SingleProductStore } from '@woocommerce/stores/woocommerce/single-product';
 import { sanitize } from 'dompurify'; // eslint-disable-line import/named
 
 /**

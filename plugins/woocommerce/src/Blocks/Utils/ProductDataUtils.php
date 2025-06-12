@@ -8,7 +8,6 @@ namespace Automattic\WooCommerce\Blocks\Utils;
  * @internal
  */
 class ProductDataUtils {
-
 	/**
 	 * Get the product data.
 	 *
@@ -17,9 +16,7 @@ class ProductDataUtils {
 	 */
 	public static function get_product_data( $product ) {
 		return array(
-			'price_html'            => $product->get_price_html(),
-			'display_price'         => $product->get_price(),
-			'display_regular_price' => $product->get_regular_price(),
+			'price_html' => $product->get_price_html(),
 		);
 	}
 }

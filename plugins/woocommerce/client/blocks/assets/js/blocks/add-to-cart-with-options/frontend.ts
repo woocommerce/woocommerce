@@ -5,11 +5,8 @@ import type { FormEvent, HTMLElementEvent } from 'react';
 import { store, getContext } from '@wordpress/interactivity';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import type { CartVariationItem } from '@woocommerce/types';
-
-/**
- * Internal dependencies
- */
-import type { SingleProductStore } from '../single-product/frontend';
+import '@woocommerce/stores/woocommerce/single-product';
+import type { SingleProductStore } from '@woocommerce/stores/woocommerce/single-product';
 
 export type AvailableVariation = {
 	attributes: Record< string, string >;
