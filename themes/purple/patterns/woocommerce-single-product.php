@@ -40,7 +40,7 @@
 <!-- wp:woocommerce/product-sale-badge /--></div>
 <!-- /wp:group -->
 
-<!-- wp:woocommerce/product-rating {"isDescendentOfSingleProductTemplate":true,"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|30"}}}} /--></div>
+<!-- wp:woocommerce/product-rating {"isDescendentOfSingleProductTemplate":true,"fontSize":"small","style":{"spacing":{"margin":{"bottom":"var:preset|spacing|30"}}}} /--></div>
 <!-- /wp:group -->
 
 <!-- wp:woocommerce/product-summary {"isDescendentOfSingleProductTemplate":true,"showDescriptionIfEmpty":true,"fontSize":"medium","style":{"typography":{"lineHeight":1.4},"spacing":{"padding":{"top":"0","bottom":"0"},"margin":{"bottom":"var:preset|spacing|40"}}}} /-->
@@ -48,6 +48,15 @@
 <!-- wp:woocommerce/add-to-cart-with-options /-->
 
 <!-- wp:pattern {"slug":"woostarter/woocommerce-product-details"} /-->
+
+
+
+
+
+
+
+
+
 
 </div>
 <!-- /wp:column --></div>
@@ -137,6 +146,45 @@
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover --></div>
 <!-- /wp:column --></div>
-<!-- /wp:columns --></div>
+<!-- /wp:columns -->
+
+
+<!-- wp:woocommerce/blockified-product-reviews -->
+<div class="wp-block-woocommerce-blockified-product-reviews"><!-- wp:woocommerce/product-reviews-title {"level":4} /-->
+
+<!-- wp:woocommerce/product-review-template -->
+<!-- wp:columns -->
+<div class="wp-block-columns"><!-- wp:column {"width":"40px"} -->
+<div class="wp-block-column" style="flex-basis:40px"><!-- wp:avatar {"size":40,"style":{"border":{"radius":"20px"}}} /--></div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column"><!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
+<div class="wp-block-group"><!-- wp:woocommerce/product-review-author-name {"fontSize":"small"} /-->
+
+<!-- wp:woocommerce/product-review-rating /--></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"style":{"spacing":{"margin":{"top":"0px","bottom":"0px"}}},"layout":{"type":"flex"}} -->
+<div class="wp-block-group" style="margin-top:0px;margin-bottom:0px"><!-- wp:woocommerce/product-review-date {"fontSize":"small"} /--></div>
+<!-- /wp:group -->
+
+<!-- wp:woocommerce/product-review-content /--></div>
+<!-- /wp:column --></div>
+<!-- /wp:columns -->
+<!-- /wp:woocommerce/product-review-template -->
+
+<!-- wp:woocommerce/product-reviews-pagination -->
+<!-- wp:woocommerce/product-reviews-pagination-previous /-->
+
+<!-- wp:woocommerce/product-reviews-pagination-numbers /-->
+
+<!-- wp:woocommerce/product-reviews-pagination-next /-->
+<!-- /wp:woocommerce/product-reviews-pagination -->
+
+<!-- wp:woocommerce/product-review-form /--></div>
+<!-- /wp:woocommerce/blockified-product-reviews -->
+
+</div>
 <!-- /wp:group --></main>
 <!-- /wp:group -->
