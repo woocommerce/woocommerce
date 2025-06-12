@@ -124,7 +124,14 @@ test( 'can bulk edit products', async ( { page, products } ) => {
 
 	await test.step( 'select and bulk edit the products', async () => {
 		for ( const product of products ) {
-			await page.getByLabel( `Select ${ product.name }` ).click();
+			await page
+				.getByLabel( `Select ${ product.name }` )
+				.and(
+					page.getByRole( 'checkbox', {
+						value: product.id.toString(),
+					} )
+				)
+				.click();
 		}
 
 		await page

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Fix inconsistent redirection when navigating back from LYS payments setup flow in WooCommerce Home.

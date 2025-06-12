@@ -188,7 +188,7 @@ jQuery( function ( $ ) {
 		$( document.body ).on( 'keydown', '.remove_from_cart_button', on_keydown_remove_from_cart );
 	}
 
-	$( document.body ).on( 'item_removed_from_classic_cart', focus_populate_live_region );
+	$( document.body ).on( 'item_removed_from_classic_cart updated_wc_div', focus_populate_live_region );
 } );
 
 /**
