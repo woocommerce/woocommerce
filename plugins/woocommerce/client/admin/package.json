@@ -178,7 +178,6 @@
 		"babel-plugin-transform-react-remove-prop-types": "0.4.24",
 		"chalk": "^4.1.2",
 		"comment-parser": "^1.4.1",
-		"concurrently": "^7.6.0",
 		"config": "3.3.7",
 		"copy-webpack-plugin": "13.0.x",
 		"cross-env": "^7.0.3",
