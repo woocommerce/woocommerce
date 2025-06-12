@@ -158,8 +158,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
-		await pageObject.setFeatureFlags();
-
 		await pageObject.updateSingleProductTemplate();
 
 		await editor.saveSiteEditorEntities( {
