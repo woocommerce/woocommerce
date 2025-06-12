@@ -290,3 +290,42 @@ $fontSizes: (
 	$hex: string.slice(color.ie-hex-str($color), 4);
 	@return "%23" + string.unquote("#{$hex}");
 }
+
+// Container query mixins based on use-container-queries.ts breakpoints
+// we're measuring the width of the container, not the viewport
+// because in the editor, the block can be viewed as on mobile, desktop and tablet in the same viewport
+// .wp-block-woocommerce-checkout and .wp-block-woocommerce-cart are the containers
+// Large: > 700px
+// Medium: > 520px
+// Small: > 400px
+// Mobile: <= 400px
+
+@mixin cart-checkout-large-container {
+	@container (min-width: 700px) {
+		@content;
+	}
+}
+
+@mixin cart-checkout-below-large {
+	@container (max-width: 699px) {
+		@content;
+	}
+}
+
+@mixin cart-checkout-medium-container {
+	@container (min-width: 520px) and (max-width: 699px) {
+		@content;
+	}
+}
+
+@mixin cart-checkout-small-container {
+	@container (min-width: 400px) and (max-width: 519px) {
+		@content;
+	}
+}
+
+@mixin cart-checkout-mobile-container {
+	@container (max-width: 399px) {
+		@content;
+	}
+}

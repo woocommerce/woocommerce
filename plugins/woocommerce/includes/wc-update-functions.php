@@ -3031,3 +3031,14 @@ function wc_update_990_remove_email_notes() {
 		array( '%s' )
 	);
 }
+
+/**
+ * Remove the transient ptk_patterns.
+ * This was used to store the Patterns Toolkit patterns in the database.
+ * The patterns are now stored in the option ptk_patterns.
+ *
+ * @return void
+ */
+function wc_update_1000_remove_patterns_toolkit_transient() {
+	delete_transient( 'ptk_patterns' );
+}
