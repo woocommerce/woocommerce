@@ -1,5 +1,11 @@
+export {};
 
 declare global {
+	interface ShipmentProvider {
+		label: string;
+		icon: string | null;
+		value: string;
+	}
 	interface Window {
 		wcFulfillmentSettings: {
 			providers: Record< string, ShipmentProvider >;
@@ -7,10 +13,4 @@ declare global {
 			statuses: Record< string, string >;
 		};
 	}
-}
-
-export interface ShipmentProvider {
-	label: string;
-	icon: string | null;
-	value: string;
 }

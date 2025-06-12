@@ -3,11 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 
-/**
- * Internal dependencies
- */
-import { ShipmentProvider } from '../global';
-
 const ShipmentProviders: ShipmentProvider[] = [
 	...Object.values( window.wcFulfillmentSettings.providers ?? {} ),
 	{
