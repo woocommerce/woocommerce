@@ -327,12 +327,12 @@ jobs:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
           slack-channel: ${{ secrets.WOO_ANNOUNCEMENTS_SLACK_CHANNEL }}
           slack-text: |
-            🚀 *Release Summary for v${{ needs.extract-versions.outputs.current_version }}*
+            :woo: *WooCommerce ${{ needs.extract-versions.outputs.current_version }} Release Summary*
             
             📊 *Statistics:*
             • Commits: ${{ needs.count-commits-and-contributors.outputs.commit_count }}
             • Contributors: ${{ needs.count-commits-and-contributors.outputs.contributor_count }}
-            • <${{ needs.generate-contributors-list.outputs.artifact_url }}|📋 View Contributors List>
+            • <${{ needs.generate-contributors-list.outputs.artifact_url }}|👥 View Contributors List>
             
-            💾 *Database Updates:*
-            ${{ needs.db-updates.outputs.has_updates == 'true' && needs.db-updates.outputs.formatted_updates || '✅ No database updates required' }}
+            :database: *Database Updates:*
+            ${{ needs.db-updates.outputs.has_updates == 'true' && needs.db-updates.outputs.formatted_updates || 'No database updates in this release' }}
