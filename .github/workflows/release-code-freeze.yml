@@ -27,6 +27,7 @@ jobs:
           script: |
             const shouldSkipCalendarCheck = '${{ github.event_name }}' !== 'schedule';
             if (shouldSkipCalendarCheck) {
+              console.log('Skip calendar event check, since the workflow was triggered manually.');
               core.setOutput('should-run', 'true');
               return;
             }
