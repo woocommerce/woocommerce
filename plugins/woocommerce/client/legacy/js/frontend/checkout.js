@@ -934,9 +934,9 @@ jQuery( function ( $ ) {
 				return;
 			}
 
-      this.remove_coupon_error();
+			this.remove_coupon_error();
 
-      var msg = $( $.parseHTML( html_element ) ).text().trim();
+			var msg = $( $.parseHTML( html_element ) ).text().trim();
 
 			if ( msg === '' ) {
 				return;
@@ -986,7 +986,7 @@ jQuery( function ( $ ) {
 			var $coupon_field = $form.find( '#coupon_code' );
 			var self = this;
 
-      self.remove_coupon_error();
+			self.remove_coupon_error();
 
 			if ( $form.is( '.processing' ) ) {
 				return false;
