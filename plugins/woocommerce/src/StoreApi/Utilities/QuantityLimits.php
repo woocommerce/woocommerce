@@ -39,9 +39,9 @@ final class QuantityLimits {
 			];
 		}
 
-		$minimum     = $this->filter_numeric_value( 1, 'minimum', $cart_item );
+		$multiple_of = $this->filter_numeric_value( 1, 'multiple_of', $cart_item );
+		$minimum     = $this->filter_numeric_value( $multiple_of, 'minimum', $cart_item );
 		$maximum     = $this->filter_numeric_value( $this->get_product_quantity_limit( $product, $minimum ), 'maximum', $cart_item );
-		$multiple_of = $this->filter_numeric_value( $minimum, 'multiple_of', $cart_item );
 		$editable    = $this->filter_boolean_value( ! $product->is_sold_individually(), 'editable', $cart_item );
 
 		// Maximum must be at least minimum.
@@ -63,7 +63,7 @@ final class QuantityLimits {
 	 */
 	public function get_add_to_cart_limits( \WC_Product $product ) {
 		$multiple_of = $this->filter_numeric_value( 1, 'multiple_of', $product );
-		$minimum     = $this->filter_numeric_value( 1, 'minimum', $product );
+		$minimum     = $this->filter_numeric_value( $multiple_of, 'minimum', $product );
 		$maximum     = $this->filter_numeric_value( $this->get_product_quantity_limit( $product, $minimum ), 'maximum', $product );
 
 		// Maximum must be at least minimum.
