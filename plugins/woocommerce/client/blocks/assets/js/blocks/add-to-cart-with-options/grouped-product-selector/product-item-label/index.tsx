@@ -7,35 +7,29 @@ import { useBlockProps } from '@wordpress/block-editor';
 import type { BlockConfiguration } from '@wordpress/blocks';
 import { useProductDataContext } from '@woocommerce/shared-context';
 import { Spinner } from '@wordpress/components';
-import { isBoolean } from '@woocommerce/types';
-import { getSettingWithCoercion } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import metadata from './block.json';
 
-const isBlockTheme = getSettingWithCoercion( 'isBlockTheme', false, isBoolean );
+registerBlockType( metadata.name, {
+	...metadata,
+	edit: function Edit() {
+		const blockProps = useBlockProps();
+		const { isLoading, product } = useProductDataContext();
 
-if ( isBlockTheme ) {
-	registerBlockType( metadata.name, {
-		...metadata,
-		edit: function Edit() {
-			const blockProps = useBlockProps();
-			const { isLoading, product } = useProductDataContext();
-
-			if ( isLoading ) {
-				return <Spinner />;
-			}
-			return (
-				<div { ...blockProps }>
-					<div className="wp-block-woocommerce-add-to-cart-with-options-grouped-product-item-label">
-						{ product.name }
-					</div>
+		if ( isLoading ) {
+			return <Spinner />;
+		}
+		return (
+			<div { ...blockProps }>
+				<div className="wp-block-woocommerce-add-to-cart-with-options-grouped-product-item-label">
+					{ product.name }
 				</div>
-			);
-		},
-		icon: heading,
-		save: () => null,
-	} as unknown as BlockConfiguration );
-}
+			</div>
+		);
+	},
+	icon: heading,
+	save: () => null,
+} as unknown as BlockConfiguration );
