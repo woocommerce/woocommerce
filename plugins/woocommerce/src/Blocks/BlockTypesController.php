@@ -523,22 +523,22 @@ final class BlockTypesController {
 			MiniCartContents::get_mini_cart_block_types()
 		);
 
+		if ( wp_is_block_theme() ) {
+			$block_types[] = 'AddToCartWithOptions\AddToCartWithOptions';
+			$block_types[] = 'AddToCartWithOptions\QuantitySelector';
+			$block_types[] = 'AddToCartWithOptions\VariationSelector';
+			$block_types[] = 'AddToCartWithOptions\VariationSelectorAttribute';
+			$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeName';
+			$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeOptions';
+			$block_types[] = 'AddToCartWithOptions\GroupedProductSelector';
+			$block_types[] = 'AddToCartWithOptions\GroupedProductItem';
+			$block_types[] = 'AddToCartWithOptions\GroupedProductItemSelector';
+			$block_types[] = 'AddToCartWithOptions\GroupedProductItemLabel';
+		}
+
 		// Update plugins/woocommerce/client/blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
 		// when modifying this list.
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			if ( Features::is_enabled( 'blockified-add-to-cart' ) && wp_is_block_theme() ) {
-				$block_types[] = 'AddToCartWithOptions\AddToCartWithOptions';
-				$block_types[] = 'AddToCartWithOptions\QuantitySelector';
-				$block_types[] = 'AddToCartWithOptions\VariationSelector';
-				$block_types[] = 'AddToCartWithOptions\VariationSelectorAttribute';
-				$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeName';
-				$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeOptions';
-				$block_types[] = 'AddToCartWithOptions\GroupedProductSelector';
-				$block_types[] = 'AddToCartWithOptions\GroupedProductItem';
-				$block_types[] = 'AddToCartWithOptions\GroupedProductItemSelector';
-				$block_types[] = 'AddToCartWithOptions\GroupedProductItemLabel';
-			}
-
 			$block_types[] = 'BlockifiedProductDetails';
 			$block_types[] = 'ProductDescription';
 			$block_types[] = 'ProductSpecifications';
