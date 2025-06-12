@@ -44,6 +44,7 @@ type MiniCartState = {
 	drawerOverlayClass: string;
 	badgeIsVisible: boolean;
 	cartIsEmpty: boolean;
+	shopUrl: string;
 };
 
 type MiniCart = {
@@ -68,6 +69,10 @@ store< MiniCart >(
 	'woocommerce/mini-cart',
 	{
 		state: {
+			get shopUrl() {
+				return getConfig( 'woocommerce' ).shopUrl;
+			},
+
 			get totalItemsInCart() {
 				return wooStoreState.cart.items.reduce< number >(
 					( total, { quantity } ) => total + quantity,

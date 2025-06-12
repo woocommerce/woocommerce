@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\Utils;
 
 use InvalidArgumentException;
+use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 
 /**
  * Manages the registration of interactivity config and state that is commonly shared by WooCommerce blocks.
@@ -124,6 +125,7 @@ trait BlocksSharedState {
 	private static function get_core_data() {
 		return [
 			'isBlockTheme' => wp_is_block_theme(),
+			'shopUrl'      => get_permalink( wc_get_page_id( 'shop' ) ),
 		];
 	}
 
