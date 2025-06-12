@@ -14,7 +14,7 @@ import edit, { Save as save } from './edit';
 import { blockName, attributes } from './attributes';
 import './inner-blocks';
 
-const settings: BlockConfiguration = {
+export const settings: BlockConfiguration = {
 	apiVersion: 3,
 	title: __( 'Mini-Cart Contents', 'woocommerce' ),
 	icon: {
