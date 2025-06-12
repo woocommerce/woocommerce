@@ -183,7 +183,10 @@ const Edit = ( {
 				</PanelBody>
 			</InspectorControls>
 			<Block { ...{ ...attributes, ...context } }>
-				<div { ...innerBlockProps } />
+				{ ( isDescendentOfQueryLoop ||
+					isDescendentOfSingleProductBlock ) && (
+					<div { ...innerBlockProps } />
+				) }
 			</Block>
 		</div>
 	);
