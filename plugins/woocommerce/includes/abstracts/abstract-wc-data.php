@@ -889,7 +889,6 @@ abstract class WC_Data {
 	/**
 	 * Sets a date prop whilst handling formatting and datetime objects.
 	 *
-	 * @throws WC_Data_Exception Data Exception.
 	 * @since 3.0.0
 	 * @param string         $prop Name of prop to set.
 	 * @param string|integer $value Value of the prop.
@@ -915,13 +914,6 @@ abstract class WC_Data {
 					$timestamp = wc_string_to_timestamp( get_gmt_from_date( gmdate( 'Y-m-d H:i:s', wc_string_to_timestamp( $value ) ) ) );
 				}
 				$datetime = new WC_DateTime( "@{$timestamp}", new DateTimeZone( 'UTC' ) );
-			} else {
-				throw new WC_Data_Exception(
-					'woocommerce_invalid_date_value',
-					sprintf( __( 'Invalid date value for %s: %s', 'woocommerce' ), $prop, print_r( $value, true ) ),
-					400,
-					array( 'property_name' => $prop )
-				);
 			}
 
 			// Set local timezone or offset.
