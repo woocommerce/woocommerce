@@ -345,10 +345,21 @@ export const SettingsPaymentsMain = () => {
 						'getPaymentProviders'
 					);
 
-					// Record the plugin installation event.
-					recordPaymentsEvent( 'provider_installed', {
-						provider_id: paymentsEntity.id,
-					} );
+					if ( paymentsEntity.plugin.status === 'not_installed' ) {
+						// Record the plugin installation event.
+						recordPaymentsEvent( 'provider_installed', {
+							provider_id: paymentsEntity.id,
+							extension_slug: paymentsEntity.plugin.slug,
+							from: context,
+						} );
+					} else {
+						// Record the plugin activation event.
+						recordPaymentsEvent( 'provider_activated', {
+							provider_id: paymentsEntity.id,
+							extension_slug: paymentsEntity.plugin.slug,
+							from: context,
+						} );
+					}
 
 					// Wait for the state update and fetch the latest providers.
 					const updatedProviders = await resolveSelect(
