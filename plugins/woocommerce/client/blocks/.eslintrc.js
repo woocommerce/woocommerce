@@ -114,11 +114,6 @@ const restrictedImports = [
 		message:
 			'This Lodash method is not recommended. Please use native functionality instead. If using `memoize`, please use `memize` instead.',
 	},
-	{
-		name: 'classnames',
-		message:
-			"Please use `clsx` instead. It's a lighter and faster drop-in replacement for `classnames`.",
-	},
 ];
 
 const coreModules = [
@@ -153,10 +148,8 @@ const coreModules = [
 	'@wordpress/url',
 	'@wordpress/wordcount',
 	'@woocommerce/blocks-test-utils',
-	'@woocommerce/e2e-utils',
 	'babel-jest',
 	'dotenv',
-	'jest-environment-puppeteer',
 	'lodash/kebabCase',
 	'lodash',
 	'prop-types',
@@ -188,7 +181,6 @@ module.exports = {
 		page: 'readonly',
 		browser: 'readonly',
 		context: 'readonly',
-		jestPuppeteer: 'readonly',
 	},
 	settings: {
 		jsdoc: { mode: 'typescript' },

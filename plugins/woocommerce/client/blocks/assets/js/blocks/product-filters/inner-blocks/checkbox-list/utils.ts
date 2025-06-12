@@ -12,6 +12,8 @@ export function getColorVars( attributes: BlockAttributes ) {
 		customOptionElement,
 		customOptionElementBorder,
 		customOptionElementSelected,
+		labelElement,
+		customLabelElement,
 	} = attributes;
 
 	const vars: Record< string, string > = {
@@ -26,6 +28,10 @@ export function getColorVars( attributes: BlockAttributes ) {
 				optionElementSelected,
 				customOptionElementSelected
 			),
+		'--wc-product-filter-checkbox-list-label-element': getColorCSSVar(
+			labelElement,
+			customLabelElement
+		),
 	};
 
 	return Object.keys( vars ).reduce(
@@ -47,6 +53,8 @@ export function getColorClasses( attributes: BlockAttributes ) {
 		customOptionElement,
 		customOptionElementBorder,
 		customOptionElementSelected,
+		labelElement,
+		customLabelElement,
 	} = attributes;
 
 	return {
@@ -55,5 +63,6 @@ export function getColorClasses( attributes: BlockAttributes ) {
 			optionElementBorder || customOptionElementBorder,
 		'has-option-element-selected-color':
 			optionElementSelected || customOptionElementSelected,
+		'has-label-element-color': labelElement || customLabelElement,
 	};
 }

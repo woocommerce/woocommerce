@@ -1,3 +1,7 @@
+.wc-block-product-filter-chips fieldset {
+	display: contents;
+}
+
 :where(.wc-block-product-filter-chips__items) {
 	display: flex;
 	flex-wrap: wrap;

@@ -41,8 +41,7 @@ const config: Config = {
 					sidebarPath: './sidebars.ts',
 					path: '../',
 					exclude: ['_docu-tools/**'],
-					// Please change this to your repo.
-					// Remove this to remove the "edit this page" links.
+					showLastUpdateTime: true,		
 					editUrl:
 						'https://github.com/woocommerce/woocommerce/tree/trunk/docs/docs/',
 					routeBasePath: '/',
@@ -184,7 +183,7 @@ const config: Config = {
 					<a href="https://automattic.com/">
 						An
 						<img src="img/automattic.svg" alt="Automattic" class="automattic-logo automattic-logo-light" />
-						<img src="img/automattic_dark.svg" alt="Automattic" class="automattic-logo automattic-logo-dark" /> 
+						<img src="img/automattic_dark.svg" alt="Automattic" class="automattic-logo automattic-logo-dark" />
 						Creation</a>
 				</div>`,
 		},

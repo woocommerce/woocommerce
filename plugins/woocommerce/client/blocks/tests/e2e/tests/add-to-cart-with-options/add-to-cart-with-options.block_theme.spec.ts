@@ -9,12 +9,11 @@ import { test as base, expect } from '@woocommerce/e2e-utils';
 import AddToCartWithOptionsPage from './add-to-cart-with-options.page';
 
 const test = base.extend< { pageObject: AddToCartWithOptionsPage } >( {
-	pageObject: async ( { page, admin, editor, requestUtils }, use ) => {
+	pageObject: async ( { page, admin, editor }, use ) => {
 		const pageObject = new AddToCartWithOptionsPage( {
 			page,
 			admin,
 			editor,
-			requestUtils,
 		} );
 		await use( pageObject );
 	},
@@ -27,8 +26,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		editor,
 		admin,
 	} ) => {
-		await pageObject.setFeatureFlags();
-
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//single-product',
 			postType: 'wp_template',
@@ -62,8 +59,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 			'woocommerce-blocks-test-custom-product-type'
 		);
 
-		await pageObject.setFeatureFlags();
-
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//single-product',
 			postType: 'wp_template',
@@ -86,8 +81,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
-		await pageObject.setFeatureFlags();
-
 		await pageObject.updateSingleProductTemplate();
 
 		await editor.saveSiteEditorEntities( {
@@ -113,13 +106,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect( addToCartButton ).toHaveText( '6 in cart' );
 	} );
 
-	test( "'X in cart' text reflects the correct amount in variations", async ( {
+	test( 'allows adding variable products to cart', async ( {
 		page,
 		pageObject,
 		editor,
 	} ) => {
-		await pageObject.setFeatureFlags();
-
 		await pageObject.updateSingleProductTemplate();
 
 		await editor.saveSiteEditorEntities( {
@@ -135,19 +126,31 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const colorGreenOption = page.locator( 'label:has-text("Green")' );
 		const addToCartButton = page.getByText( 'Add to cart' ).first();
 
-		await logoNoOption.click();
-		await colorGreenOption.click();
-		await addToCartButton.click();
+		await test.step( 'displays an error when attributes are not selected', async () => {
+			await addToCartButton.click();
 
-		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+			await expect(
+				page.getByText( ' No matching variation found.' )
+			).toBeVisible();
+		} );
 
-		await colorBlueOption.click();
+		await test.step( 'successfully adds to cart when attributes are selected', async () => {
+			await logoNoOption.click();
+			await colorGreenOption.click();
+			await addToCartButton.click();
 
-		await expect( page.getByText( '1 in cart' ) ).toBeHidden();
+			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+		} );
 
-		await colorGreenOption.click();
+		await test.step( '"X in cart" text reflects the correct amount in variations', async () => {
+			await colorBlueOption.click();
 
-		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+			await expect( page.getByText( '1 in cart' ) ).toBeHidden();
+
+			await colorGreenOption.click();
+
+			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+		} );
 	} );
 
 	test( "doesn't allow selecting invalid variations in pills mode", async ( {
@@ -155,8 +158,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
-		await pageObject.setFeatureFlags();
-
 		await pageObject.updateSingleProductTemplate();
 
 		await editor.saveSiteEditorEntities( {
@@ -182,8 +183,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
-		await pageObject.setFeatureFlags();
-
 		await pageObject.updateSingleProductTemplate();
 
 		await pageObject.switchProductType( 'Variable Product' );

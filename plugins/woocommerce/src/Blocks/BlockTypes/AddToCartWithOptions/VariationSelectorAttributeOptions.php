@@ -46,7 +46,13 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	 * @return string Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ): string {
-		if ( empty( $block->context ) ) {
+		if (
+			! isset(
+				$block->context['woocommerce/attributeName'],
+				$block->context['woocommerce/attributeId'],
+				$block->context['woocommerce/attributeTerms']
+			)
+		) {
 			return '';
 		}
 
@@ -147,17 +153,19 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				'<input type="radio" %s/>',
 				$this->get_normalized_attributes(
 					array(
-						'class'                  => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input',
-						'name'                   => $attribute_slug,
-						'value'                  => $attribute_term['value'],
-						'data-wp-bind--checked'  => 'state.isPillSelected',
-						'data-wp-bind--disabled' => 'state.isPillDisabled',
-						'data-wp-watch'          => 'callbacks.watchSelected',
-						'data-wp-on--click'      => 'actions.toggleSelected',
-						'data-wp-on--keydown'    => 'actions.handleKeyDown',
-						'data-wp-context'        => array(
+						'class'                      => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input',
+						'name'                       => $attribute_slug,
+						'value'                      => $attribute_term['value'],
+						'data-wp-bind--checked'      => 'state.isPillSelected',
+						'data-wp-bind--disabled'     => 'state.isPillDisabled',
+						'data-wp-watch'              => 'callbacks.watchSelected',
+						'data-wp-on--click'          => 'actions.toggleSelected',
+						'data-wp-on--keydown'        => 'actions.handleKeyDown',
+						'data-wp-context'            => array(
 							'option' => $attribute_term,
 						),
+						'data-wp-bind--aria-checked' => 'state.isPillSelected',
+						'data-wp-bind--tabindex'     => 'state.pillTabIndex',
 					),
 				),
 				$attribute_term['label']
