@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { addQueryArgs, getQueryArgs, removeQueryArgs } from '@wordpress/url';
 import { VIEW_LAYOUTS } from '@wordpress/dataviews';
@@ -88,12 +88,9 @@ export default function DataViewItem( {
 	return (
 		<HStack
 			justify="flex-start"
-			className={ classNames(
-				'edit-site-sidebar-dataviews-dataview-item',
-				{
-					'is-selected': isActive,
-				}
-			) }
+			className={ clsx( 'edit-site-sidebar-dataviews-dataview-item', {
+				'is-selected': isActive,
+			} ) }
 		>
 			<SidebarNavigationItem
 				icon={ iconToUse }

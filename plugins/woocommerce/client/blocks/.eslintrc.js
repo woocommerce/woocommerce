@@ -114,11 +114,6 @@ const restrictedImports = [
 		message:
 			'This Lodash method is not recommended. Please use native functionality instead. If using `memoize`, please use `memize` instead.',
 	},
-	{
-		name: 'classnames',
-		message:
-			"Please use `clsx` instead. It's a lighter and faster drop-in replacement for `classnames`.",
-	},
 ];
 
 const coreModules = [
