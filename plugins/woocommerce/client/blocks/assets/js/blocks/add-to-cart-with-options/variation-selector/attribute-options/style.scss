@@ -15,6 +15,11 @@
 	cursor: pointer;
 	user-select: none;
 
+	&:focus {
+		outline: 1px solid currentColor;
+		outline-offset: 1px;
+	}
+
 	&:hover {
 		background-color: color-mix(
 			in srgb,
@@ -24,18 +29,8 @@
 	}
 
 	&:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:focus) {
-		outline: 1px solid var(--wp--preset--color--accent-4);
+		outline: 1px solid currentColor;
 		outline-offset: 1px;
-	}
-
-	&:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:checked) {
-		&:hover {
-			background-color: color-mix(
-				in srgb,
-				var(--wp--preset--color--contrast) 85%,
-				transparent
-			);
-		}
 	}
 
 	&:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:disabled) {

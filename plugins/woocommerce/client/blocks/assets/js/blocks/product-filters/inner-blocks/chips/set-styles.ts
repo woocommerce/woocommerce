@@ -77,7 +77,7 @@ function setStyles(): void {
 			}
 
 			:where(.wc-block-product-filter-chips__item)[aria-checked="true"]:hover {
-				opacity: 0.85;
+				background-color: color-mix(in srgb,${ selectedPillBackgroundColor } 85%,transparent)
 			}`
 		)
 	);
