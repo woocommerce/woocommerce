@@ -7744,8 +7744,8 @@ table.bar_chart {
 				overflow: visible;
 			}
 
-			.is-expanded .toggle-row {
-				top: -28px;
+			.is-expanded:has(td.column-thumb:not(.hidden)) .toggle-row {
+				top: -30px;
 			}
 		}
 	}
