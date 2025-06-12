@@ -9,7 +9,12 @@ import {
 	Icon,
 } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
-import { useState, createInterpolateElement } from '@wordpress/element';
+import {
+	useState,
+	useEffect,
+	useRef,
+	createInterpolateElement,
+} from '@wordpress/element';
 import { registerPlugin, getPlugin } from '@wordpress/plugins';
 import { __, sprintf } from '@wordpress/i18n';
 import { CollapsibleContent } from '@woocommerce/components';
@@ -50,7 +55,33 @@ const Blueprint = () => {
 		}, {} )
 	);
 
+	const initialCheckedState = useRef( checkedState );
+
 	const { currentUserCan } = useUser();
+
+	const hasChanges = () => {
+		// Compare current vs initial state
+		for ( const groupId in checkedState ) {
+			for ( const itemId in checkedState[ groupId ] ) {
+				if (
+					checkedState[ groupId ][ itemId ] !==
+					initialCheckedState.current[ groupId ][ itemId ]
+				) {
+					return true;
+				}
+			}
+		}
+		return false;
+	};
+
+	useEffect( () => {
+		// Set or clear unload warning
+		if ( hasChanges() ) {
+			window.onbeforeunload = () => true;
+		} else {
+			window.onbeforeunload = null;
+		}
+	}, [ checkedState ] );
 
 	const exportBlueprint = async ( _steps ) => {
 		setExportError( null );
@@ -91,6 +122,12 @@ const Blueprint = () => {
 			if ( url ) {
 				window.URL.revokeObjectURL( url );
 			}
+
+			// Clears the unsaved changes warning more reliably
+			window.onbeforeunload = null;
+
+			// Update baseline
+			initialCheckedState.current = checkedState;
 
 			recordEvent( 'blueprint_export_success', {
 				has_plugins: _steps.plugins?.length > 0,
