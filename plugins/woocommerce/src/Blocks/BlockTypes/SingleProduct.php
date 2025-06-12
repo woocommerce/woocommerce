@@ -171,7 +171,7 @@ class SingleProduct extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$product = wc_get_product( $this->product_id );
+		$product = wc_get_product( $block->context['postId'] );
 
 		if ( ! $product ) {
 			return '';
