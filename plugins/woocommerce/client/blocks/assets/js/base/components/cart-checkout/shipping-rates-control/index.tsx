@@ -17,7 +17,7 @@ import {
 } from '@woocommerce/base-context';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import { isObject } from '@woocommerce/types';
-import { CheckoutShippingOptionSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-shipping';
+import { CheckoutShippingSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-shipping';
 
 /**
  * Internal dependencies
@@ -135,7 +135,7 @@ const ShippingRatesControl = ( {
 	} );
 
 	if ( isLoadingRates ) {
-		return <CheckoutShippingOptionSkeleton />;
+		return <CheckoutShippingSkeleton />;
 	}
 
 	return (

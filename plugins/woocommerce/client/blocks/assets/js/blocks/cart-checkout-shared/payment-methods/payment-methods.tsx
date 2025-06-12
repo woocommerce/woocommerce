@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Label } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { paymentStore } from '@woocommerce/block-data';
-import { CheckoutPaymentOptionSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-payment';
+import { CheckoutPaymentSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-payment';
 
 /**
  * Internal dependencies
@@ -37,7 +37,7 @@ const PaymentMethods = ( {
 	} );
 
 	if ( ! paymentMethodsInitialized ) {
-		return <CheckoutPaymentOptionSkeleton />;
+		return <CheckoutPaymentSkeleton />;
 	}
 
 	if (

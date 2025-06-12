@@ -5,7 +5,7 @@ import { CheckoutOrderSummaryMobileSkeleton } from '../../patterns/checkout-orde
 import { CheckoutContactSkeleton } from '../../patterns/checkout-contact';
 import { CheckoutDeliverySkeleton } from '../../patterns/checkout-delivery';
 import { CheckoutPaymentSkeleton } from '../../patterns/checkout-payment';
-import { CheckoutShippingSkeletonPrimary } from '../../patterns/checkout-shipping-primary';
+import { CheckoutShippingSkeleton } from '../../patterns/checkout-shipping';
 import { CheckoutOrderSummarySkeleton } from '../../patterns/checkout-order-summary';
 import '../../../sidebar-layout/style.scss';
 import './style.scss';
@@ -18,7 +18,7 @@ export const CheckoutSkeleton = () => {
 				<CheckoutContactSkeleton />
 				<CheckoutDeliverySkeleton />
 				<CheckoutPaymentSkeleton />
-				<CheckoutShippingSkeletonPrimary />
+				<CheckoutShippingSkeleton />
 			</div>
 			<div className="wc-block-components-sidebar">
 				<CheckoutOrderSummarySkeleton />
