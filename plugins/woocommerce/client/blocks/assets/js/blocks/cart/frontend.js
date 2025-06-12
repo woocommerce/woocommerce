@@ -14,6 +14,7 @@ import { renderParentBlock } from '@woocommerce/atomic-utils';
 import './inner-blocks/register-components';
 import Block from './block';
 import { blockName, blockAttributes } from './attributes';
+import { settings } from './index';
 
 const getProps = ( el ) => {
 	return {
@@ -47,4 +48,7 @@ renderParentBlock( {
 	getProps,
 	blockMap: getRegisteredBlockComponents( blockName ),
 	blockWrapper: Wrapper,
+	options: {
+		multiple: settings.supports.multiple,
+	},
 } );

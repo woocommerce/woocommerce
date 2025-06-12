@@ -18,7 +18,7 @@ import './inner-blocks';
 /**
  * Register and run the Cart block.
  */
-const settings = {
+export const settings = {
 	title: __( 'Cart', 'woocommerce' ),
 	apiVersion: 3,
 	icon: {
