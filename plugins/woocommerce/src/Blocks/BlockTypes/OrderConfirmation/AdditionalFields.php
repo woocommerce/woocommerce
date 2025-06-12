@@ -31,6 +31,11 @@ class AdditionalFields extends AbstractOrderConfirmationBlock {
 			return $content;
 		}
 
+		/**
+		 * Service class managing checkout fields and its related extensibility points.
+		 *
+		 * @var CheckoutFields $controller
+		 */
 		$controller = Package::container()->get( CheckoutFields::class );
 		$content   .= $this->render_additional_fields(
 			$controller->filter_fields_for_order_confirmation(
