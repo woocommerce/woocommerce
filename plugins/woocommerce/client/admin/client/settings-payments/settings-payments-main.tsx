@@ -329,6 +329,10 @@ export const SettingsPaymentsMain = () => {
 			setInstallingPlugin( paymentsEntity.id );
 			recordPaymentsEvent( 'recommendations_setup', {
 				extension_selected: paymentsEntity.plugin.slug,
+				extension_action:
+					paymentsEntity.plugin.status === 'installed'
+						? 'activate'
+						: 'install',
 			} );
 			installAndActivatePlugins( [ paymentsEntity.plugin.slug ] )
 				.then( async ( response ) => {
