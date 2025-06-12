@@ -8,12 +8,19 @@
 	}
 }
 
-.is-mobile,
-.is-small {
+@mixin small-medium-styles {
 	.wc-block-components-payment-method-label--with-icon {
 		> img,
 		> svg {
 			display: none;
 		}
 	}
+}
+
+@include cart-checkout-small-container {
+	@include small-medium-styles;
+}
+
+@include cart-checkout-medium-container {
+	@include small-medium-styles;
 }

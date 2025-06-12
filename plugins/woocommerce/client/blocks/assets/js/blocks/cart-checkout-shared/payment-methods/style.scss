@@ -124,8 +124,7 @@
 
 // These elements have available space below, so we can display errors with a
 // larger line height.
-.is-medium,
-.is-large {
+@mixin medium-large-styles {
 	.wc-card-expiry-element,
 	.wc-card-cvc-element {
 		.wc-block-components-validation-error > p {
@@ -135,22 +134,21 @@
 	}
 }
 
-.is-mobile,
-.is-small {
+@include cart-checkout-medium-container {
+	@include medium-large-styles;
+}
+@include cart-checkout-large-container {
+	@include medium-large-styles;
+}
+
+@mixin small-mobile-styles {
 	.wc-card-expiry-element,
 	.wc-card-cvc-element {
 		.wc-block-components-validation-error > p {
 			min-height: 28px;
 		}
 	}
-}
 
-.wc-block-components-checkout-payment-methods * {
-	pointer-events: all; // Overrides parent disabled component in editor context
-}
-
-.is-mobile,
-.is-small {
 	.wc-block-card-elements {
 		flex-wrap: wrap;
 	}
@@ -169,6 +167,18 @@
 		flex-basis: calc(50% - #{$gap-smaller});
 		margin-left: $gap-smaller;
 	}
+}
+
+@include cart-checkout-small-container {
+	@include small-mobile-styles;
+}
+
+@include cart-checkout-mobile-container {
+	@include small-mobile-styles;
+}
+
+.wc-block-components-checkout-payment-methods * {
+	pointer-events: all; // Overrides parent disabled component in editor context
 }
 
 .wc-block-checkout__payment-method {

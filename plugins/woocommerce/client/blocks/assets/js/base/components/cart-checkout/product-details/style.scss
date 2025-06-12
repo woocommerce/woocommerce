@@ -18,7 +18,7 @@
 	display: inline-block;
 }
 
-.is-large {
+@include cart-checkout-large-container {
 	.wc-block-cart__main {
 		.wc-block-components-product-details__name {
 			font-weight: bold;

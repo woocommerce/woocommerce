@@ -38,11 +38,18 @@
 	}
 }
 
-.is-mobile,
-.is-small {
+@mixin medium-small-styles {
 	.wc-block-components-payment-method-icons {
 		.wc-block-components-payment-method-icon {
 			height: 16px;
 		}
 	}
+}
+
+@include cart-checkout-medium-container {
+	@include medium-small-styles;
+}
+
+@include cart-checkout-small-container {
+	@include medium-small-styles;
 }
