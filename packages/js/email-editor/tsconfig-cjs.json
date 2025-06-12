@@ -1,0 +1,22 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"module": "CommonJS",
+		"outDir": "build",
+		"declaration": true,
+		"declarationDir": "build-types",
+		"rootDir": "./src"
+	},
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.tsx",
+		"src/**/*.js",
+		"src/**/*.jsx",
+		"typings/**/*.ts"
+	],
+	"exclude": [
+		"**/*.test.ts",
+		"**/*.test.tsx",
+		"**/test/**"
+	]
+} 

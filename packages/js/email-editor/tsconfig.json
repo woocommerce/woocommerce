@@ -1,9 +1,10 @@
 {
 	"compilerOptions": {
 		"rootDir": "src",
-		"noEmit": true,
+		"outDir": "build-module",
+		"declaration": true,
+		"declarationDir": "build-types",
 		"composite": true,
-		"incremental": true,
 		"target": "esnext",
 		"module": "esnext",
 		"moduleResolution": "node",
@@ -34,9 +35,13 @@
 		"typeRoots": [ "./node_modules/@types" ]
 	},
 	"include": [
-		"src/**/*"
+		"src/**/*.ts",
+		"src/**/*.tsx",
+		"src/**/*.js",
+		"src/**/*.jsx",
+		"typings/**/*.ts"
 	],
 	"exclude": [
-		"**/test/**",
+		"**/test/**"
 	]
 }
