@@ -15,7 +15,8 @@ import metadata from './block.json';
 import './style.scss';
 
 const blockConfig: BlockConfiguration = {
-	...metadata,
+	apiVersion: metadata.apiVersion,
+	title: metadata.title,
 	example: {
 		attributes: {
 			showPrice: true,

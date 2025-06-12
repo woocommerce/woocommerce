@@ -22,9 +22,8 @@ const blocks = {
 	'add-to-cart-with-options-variation-selector': {
 		customDir: 'add-to-cart-with-options/variation-selector',
 	},
-	'add-to-cart-with-options-variation-selector-item': {
-		customDir:
-			'add-to-cart-with-options/variation-selector/attribute-item-template',
+	'add-to-cart-with-options-variation-selector-attribute': {
+		customDir: 'add-to-cart-with-options/variation-selector/attribute',
 	},
 	'add-to-cart-with-options-variation-selector-attribute-name': {
 		customDir: 'add-to-cart-with-options/variation-selector/attribute-name',
@@ -36,16 +35,16 @@ const blocks = {
 	'add-to-cart-with-options-grouped-product-selector': {
 		customDir: 'add-to-cart-with-options/grouped-product-selector',
 	},
-	'add-to-cart-with-options-grouped-product-selector-item': {
+	'add-to-cart-with-options-grouped-product-item': {
 		customDir:
-			'add-to-cart-with-options/grouped-product-selector/product-item-template',
+			'add-to-cart-with-options/grouped-product-selector/product-item',
 	},
-	'add-to-cart-with-options-grouped-product-selector-item-cta': {
+	'add-to-cart-with-options-grouped-product-item-selector': {
 		customDir:
-			'add-to-cart-with-options/grouped-product-selector/product-item-cta',
+			'add-to-cart-with-options/grouped-product-selector/product-item-selector',
 	},
 
-	'add-to-cart-with-options-grouped-product-selector-item-label': {
+	'add-to-cart-with-options-grouped-product-item-label': {
 		customDir:
 			'add-to-cart-with-options/grouped-product-selector/product-item-label',
 	},
