@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { expect } from '../fixtures/fixtures';
+import ApiClient, { WP_API_PATH } from './api-client';
 
 /**
  * Check that an email exists in the WP Mail Logging plugin Email Log page. WP Mail Logging plugin must be installed.
@@ -66,4 +67,43 @@ export async function expectEmailContent(
 	await expect( emailContentFrame.locator( 'body' ) ).toContainText(
 		emailContent
 	);
+}
+
+export async function getWooEmails( params ) {
+	const emails = await ApiClient.getInstance().get(
+		`${ WP_API_PATH }/woo_email`,
+		{ ...params }
+	);
+	return emails;
+}
+
+/**
+ * Access the email editor and using the WooCommerce settings page.
+ * Note: Ensure the block email editor feature flag is already enabled.
+ *
+ * @param {import('@playwright/test').Page } page       The Playwright page.
+ * @param {string}                           emailTitle The transactional email title.
+ */
+export async function accessTheEmailEditor( page, emailTitle = 'New order' ) {
+	await page.goto( '/wp-admin/admin.php?page=wc-settings&tab=email' );
+	await page
+		.getByRole( 'row', { name: emailTitle } )
+		.getByLabel( 'Edit' )
+		.click();
+	await expect( page.locator( '#woocommerce-email-editor' ) ).toBeVisible();
+}
+
+export async function ensureEmailEditorSettingsPanelIsOpened( page ) {
+	const status = await page.evaluate( async () => {
+		const elem = document.querySelector(
+			'.woocommerce-email-editor__settings-panel'
+		);
+		return elem?.classList?.contains( 'is-opened' ) || false;
+	} );
+
+	if ( ! status ) {
+		await page
+			.locator( '.woocommerce-email-editor__settings-panel' )
+			.click();
+	}
 }

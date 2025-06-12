@@ -605,7 +605,7 @@ class WC_Discounts {
 			throw new Exception(
 				sprintf(
 					/* translators: %s: coupon code */
-					esc_html__( 'Coupon "%s" does not exist!', 'woocommerce' ),
+					esc_html__( 'Coupon "%s" cannot be applied because it does not exist.', 'woocommerce' ),
 					esc_html( $coupon->get_code() )
 				),
 				105

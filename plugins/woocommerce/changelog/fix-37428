@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Unschedule recurring actions when WooCommerce is deactivated.
