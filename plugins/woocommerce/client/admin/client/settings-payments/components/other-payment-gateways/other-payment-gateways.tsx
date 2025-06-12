@@ -40,11 +40,13 @@ interface OtherPaymentGatewaysProps {
 	 * @param provider      Extension provider.
 	 * @param onboardingUrl Extension onboarding URL (if available).
 	 * @param attachUrl     Extension attach URL (if available).
+	 * @param context       The context from which the plugin is set up (e.g. 'wc_settings_payments__other_payment_options').
 	 */
 	setUpPlugin: (
 		provider: PaymentsEntity,
 		onboardingUrl: string | null,
-		attachUrl: string | null
+		attachUrl: string | null,
+		context?: string
 	) => void;
 	/**
 	 * Indicates whether the suggestions are still being fetched.
@@ -305,7 +307,8 @@ export const OtherPaymentGateways = ( {
 																		?.attach
 																		?.href ??
 																		null
-																: null
+																: null,
+															'wc_settings_payments__other_payment_options'
 														)
 													}
 													isBusy={

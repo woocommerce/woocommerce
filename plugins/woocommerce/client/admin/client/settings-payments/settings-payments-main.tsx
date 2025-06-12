@@ -303,7 +303,8 @@ export const SettingsPaymentsMain = () => {
 		(
 			paymentsEntity: PaymentsEntity,
 			onboardingUrl: string | null,
-			attachUrl: string | null
+			attachUrl: string | null,
+			context = 'wc_settings_payments__main'
 		) => {
 			if ( installingPlugin ) {
 				return;
@@ -333,6 +334,7 @@ export const SettingsPaymentsMain = () => {
 					paymentsEntity.plugin.status === 'installed'
 						? 'activate'
 						: 'install',
+				from: context,
 			} );
 			installAndActivatePlugins( [ paymentsEntity.plugin.slug ] )
 				.then( async ( response ) => {
@@ -374,9 +376,11 @@ export const SettingsPaymentsMain = () => {
 							current.plugin.slug === paymentsEntity.plugin.slug // Last resort to find the provider.
 					);
 
-					// Record the event when the user successfully enables a gateway.
+					// Record the event when the user successfully enables a provider.
 					recordPaymentsEvent( 'provider_enable', {
 						provider_id: paymentsEntity.id,
+						extension_slug: paymentsEntity.plugin.slug,
+						from: context,
 					} );
 
 					/**
