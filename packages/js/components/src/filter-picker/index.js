@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button, Dropdown } from '@wordpress/components';
 import { focus } from '@wordpress/dom';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createElement, Component } from '@wordpress/element';
 import { find, partial, last, get, includes } from 'lodash';
 import PropTypes from 'prop-types';
@@ -331,7 +331,7 @@ class FilterPicker extends Component {
 									{ visibleFilters.map( ( filter ) => (
 										<li
 											key={ filter.value }
-											className={ classnames(
+											className={ clsx(
 												'woocommerce-filters-filter__content-list-item',
 												{
 													'is-selected':

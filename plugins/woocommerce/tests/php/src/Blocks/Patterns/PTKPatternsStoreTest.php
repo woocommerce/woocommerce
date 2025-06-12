@@ -56,7 +56,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 			),
 		);
 
-		set_transient( PTKPatternsStore::TRANSIENT_NAME, $expected_patterns );
+		update_option( PTKPatternsStore::OPTION_NAME, $expected_patterns, false );
 
 		$this->ptk_client
 			->expects( $this->never() )
@@ -76,7 +76,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	 * Test get_patterns should be empty when the cache is empty.
 	 */
 	public function test_get_patterns_should_return_an_empty_array_when_the_cache_is_empty() {
-		delete_transient( PTKPatternsStore::TRANSIENT_NAME );
+		delete_option( PTKPatternsStore::OPTION_NAME );
 
 		$this->ptk_client
 			->expects( $this->never() )
@@ -109,11 +109,11 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 			),
 		);
 
-		set_transient( PTKPatternsStore::TRANSIENT_NAME, $expected_patterns );
+		update_option( PTKPatternsStore::OPTION_NAME, $expected_patterns, false );
 
 		$this->pattern_store->flush_cached_patterns();
 
-		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
+		$patterns = get_option( PTKPatternsStore::OPTION_NAME );
 		$this->assertFalse( $patterns );
 	}
 
@@ -139,11 +139,11 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 				),
 			),
 		);
-		set_transient( PTKPatternsStore::TRANSIENT_NAME, $expected_patterns );
+		update_option( PTKPatternsStore::OPTION_NAME, $expected_patterns );
 
 		$this->pattern_store->flush_or_fetch_patterns();
 
-		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
+		$patterns = get_option( PTKPatternsStore::OPTION_NAME );
 		$this->assertFalse( $patterns );
 	}
 
@@ -167,7 +167,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 				),
 			),
 		);
-		set_transient( PTKPatternsStore::TRANSIENT_NAME, $expected_patterns );
+		update_option( PTKPatternsStore::OPTION_NAME, $expected_patterns );
 
 		$this->pattern_store->flush_or_fetch_patterns();
 
@@ -186,7 +186,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 
 		$this->pattern_store->fetch_patterns();
 
-		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
+		$patterns = get_option( PTKPatternsStore::OPTION_NAME );
 		$this->assertFalse( $patterns );
 	}
 
@@ -218,7 +218,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 			->willReturn( $expected_patterns );
 		$this->pattern_store->fetch_patterns();
 
-		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
+		$patterns = get_option( PTKPatternsStore::OPTION_NAME );
 
 		$this->assertEquals( $expected_patterns, $patterns );
 	}
@@ -272,10 +272,10 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 
 		$this->pattern_store->fetch_patterns();
 
-		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
+		$patterns = get_option( PTKPatternsStore::OPTION_NAME );
 
 		$this->assertEquals( $expected_patterns, $patterns );
-		$this->assertEquals( $expected_patterns, get_transient( PTKPatternsStore::TRANSIENT_NAME ) );
+		$this->assertEquals( $expected_patterns, get_option( PTKPatternsStore::OPTION_NAME ) );
 	}
 
 	/**
@@ -401,9 +401,9 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 
 		$this->pattern_store->fetch_patterns();
 
-		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
+		$patterns = get_option( PTKPatternsStore::OPTION_NAME );
 
 		$this->assertEquals( $expected_patterns, $patterns );
-		$this->assertEquals( $expected_patterns, get_transient( PTKPatternsStore::TRANSIENT_NAME ) );
+		$this->assertEquals( $expected_patterns, get_option( PTKPatternsStore::OPTION_NAME ) );
 	}
 }
