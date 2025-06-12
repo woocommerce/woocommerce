@@ -40,7 +40,7 @@ class FulfillmentsManager {
 		 * @since 9.9.0
 		 */
 		$meta_key_translations = apply_filters(
-			'woocommerce_fulfillment_meta_key_translations',
+			'wc_fulfillment_meta_key_translations',
 			array(
 				'fulfillment_status' => __( 'Fulfillment Status', 'woocommerce' ),
 				'shipment_tracking'  => __( 'Shipment Tracking', 'woocommerce' ),

@@ -155,4 +155,54 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$output = ob_get_clean();
 		$this->assertStringContainsString( '<div id="wc_order_fulfillments_panel_container"></div>', $output );
 	}
+
+	/**
+	 * Test the print_fulfillments_object method.
+	 */
+	public function test_render_fulfillment_object_renders_on_admin_orders_page() {
+		$renderer = new FulfillmentsRenderer();
+		set_current_screen( 'woocommerce_page_wc-orders' );
+
+		ob_start();
+		$renderer->print_fulfillments_object();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'wcFulfillmentSettings', $output );
+	}
+
+	/**
+	 * Test the print_fulfillments_object method renders on customer order details page.
+	 */
+	public function test_render_fulfillment_object_renders_on_customer_order_details_page() {
+		$renderer = new FulfillmentsRenderer();
+		add_filter( 'is_admin', '__return_false' );
+		add_filter(
+			'woocommerce_is_account_page',
+			function () {
+				return true;
+			}
+		);
+		// mock get_query_var to return 'view-order'.
+		set_query_var( 'view-order', true );
+
+		ob_start();
+		$renderer->print_fulfillments_object();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'wcFulfillmentSettings', $output );
+	}
+
+	/**
+	 * Test the print_fulfillments_object method does not render on other pages.
+	 */
+	public function test_render_fulfillment_object_does_not_render_on_other_pages() {
+		$renderer = new FulfillmentsRenderer();
+		set_current_screen( 'dashboard' );
+
+		ob_start();
+		$renderer->print_fulfillments_object();
+		$output = ob_get_clean();
+
+		$this->assertStringNotContainsString( 'wcFulfillmentSettings', $output );
+	}
 }
