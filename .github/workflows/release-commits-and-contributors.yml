@@ -369,7 +369,7 @@ jobs:
         uses: archive/github-actions-slack@v2.10.0
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
-          slack-channel: ${{ secrets.WOO_ANNOUNCEMENTS_SLACK_CHANNEL }}
+          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
           slack-text: |
             :woo: *WooCommerce ${{ needs.extract-versions.outputs.current_version }} Release Summary*
             
@@ -380,3 +380,5 @@ jobs:
             
             :database: *Database Updates:*
             ${{ needs.db-updates.outputs.has_updates == 'true' && needs.db-updates.outputs.formatted_updates || 'This release does not include a database update.' }}
+
+            <!subteam^S086N376UTS> you can re-run this workflow <https://github.com/woocommerce/woocommerce/actions/workflows/release-commits-and-contributors.yml|here>
