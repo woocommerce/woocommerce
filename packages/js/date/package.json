@@ -45,7 +45,6 @@
 		"@types/qs": "^6.9.10",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"concurrently": "^7.6.0",
 		"d3-time-format": "^2.3.0",
 		"eslint": "^8.55.0",
 		"jest": "27.5.x",

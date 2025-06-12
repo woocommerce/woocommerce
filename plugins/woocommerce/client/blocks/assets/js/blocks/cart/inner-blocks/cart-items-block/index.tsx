@@ -11,7 +11,8 @@ import { Edit, Save } from './edit';
 import metadata from './block.json';
 
 registerBlockType( 'woocommerce/cart-items-block', {
-	...metadata,
+	apiVersion: metadata.apiVersion,
+	title: metadata.title,
 	icon: {
 		src: (
 			<Icon

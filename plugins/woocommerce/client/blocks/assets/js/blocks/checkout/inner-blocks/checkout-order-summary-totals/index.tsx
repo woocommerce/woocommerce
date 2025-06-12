@@ -13,7 +13,8 @@ import metadata from './block.json';
 import './style.scss';
 
 registerBlockType( 'woocommerce/checkout-order-summary-totals-block', {
-	...metadata,
+	apiVersion: metadata.apiVersion,
+	title: metadata.title,
 	icon: {
 		src: (
 			<Icon
