@@ -42,7 +42,6 @@
 		"product-editor-template-system": false,
 		"use-wp-horizon": false,
 		"add-to-cart-with-options-stepper-layout": true,
-		"blockified-add-to-cart": false,
-		"disable-core-profiler-fallback": true
+		"blockified-add-to-cart": false
 	}
 }
