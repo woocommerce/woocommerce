@@ -84,9 +84,18 @@ window.wc.addressAutocomplete = {
 	registerAddressAutocompleteProvider: registerAddressAutocompleteProvider,
 };
 
-function setActiveProvider( country, type ) {
-	// Get server providers list (already ordered by preference).
-	const serverProviders =
+( function () {
+	'use strict';
+
+	/**
+	 * Set the active address provider based on which providers' (queried in order) canSearch returns true.
+	 * Triggers when country changes.
+	 * @param country {string} country code.
+	 * @param type {string} type 'billing' or 'shipping'
+	 */
+	function setActiveProvider( country, type ) {
+		// Get server providers list (already ordered by preference).
+		const serverProviders =
 		( window &&
 			window.wc_checkout_params &&
 			window.wc_checkout_params.address_providers ) ||
@@ -102,12 +111,9 @@ function setActiveProvider( country, type ) {
 		}
 	}
 
-	// No provider can search for this country.
-	activeAddressProvider[ type ] = null;
-}
-
-( function () {
-	'use strict';
+		// No provider can search for this country.
+		activeAddressProvider[ type ] = null;
+	}
 
 	document.addEventListener( 'DOMContentLoaded', function () {
 		// This script would not be enqueued if the feature was not enabled.
