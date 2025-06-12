@@ -106,7 +106,6 @@
 		"@woocommerce/internal-style-build": "workspace:*",
 		"@wordpress/block-editor": "wp-6.6",
 		"@wordpress/browserslist-config": "next",
-		"concurrently": "^7.6.0",
 		"copy-webpack-plugin": "13.0.x",
 		"css-loader": "6.11.x",
 		"eslint": "^8.55.0",
