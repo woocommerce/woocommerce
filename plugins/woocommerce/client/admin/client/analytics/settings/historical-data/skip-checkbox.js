@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { CheckboxControl } from '@wordpress/components';
-import { IMPORT_STORE_NAME } from '@woocommerce/data';
+import { importStore } from '@woocommerce/data';
 import { withDispatch } from '@wordpress/data';
 
 function HistoricalDataSkipCheckbox( { checked, disabled, setSkipPrevious } ) {
@@ -25,6 +25,6 @@ function HistoricalDataSkipCheckbox( { checked, disabled, setSkipPrevious } ) {
 }
 
 export default withDispatch( ( dispatch ) => {
-	const { setSkipPrevious } = dispatch( IMPORT_STORE_NAME );
+	const { setSkipPrevious } = dispatch( importStore );
 	return { setSkipPrevious };
 } )( HistoricalDataSkipCheckbox );

@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { select, resolveSelect, dispatch } from '@wordpress/data';
-import { PRODUCTS_STORE_NAME } from '@woocommerce/data';
-import type { Product } from '@woocommerce/data';
+import { productsStore } from '@woocommerce/data';
+import type { PartialProduct, Product } from '@woocommerce/data';
 
 type getRelatedProductsOptions = {
 	// If true, return random products if no related products are found.
@@ -93,7 +93,7 @@ export async function getSuggestedProductsFor( {
 	postType = 'product',
 	forceRequest = false,
 	exclude = [],
-}: getSuggestedProductsForOptions ): Promise< Product[] | undefined > {
+}: getSuggestedProductsForOptions ): Promise< PartialProduct[] | undefined > {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	const { getEditedEntityRecord } = select( 'core' );
@@ -110,15 +110,11 @@ export async function getSuggestedProductsFor( {
 	};
 
 	if ( forceRequest ) {
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-		await dispatch( PRODUCTS_STORE_NAME ).invalidateResolution(
+		await dispatch( productsStore ).invalidateResolution(
 			'getSuggestedProducts',
 			[ options ]
 		);
 	}
 
-	// @ts-expect-error TODO react-18-upgrade: getSuggestedProducts type is not correctly typed and was surfaced by https://github.com/woocommerce/woocommerce/pull/54146
-	return await resolveSelect( PRODUCTS_STORE_NAME ).getSuggestedProducts(
-		options
-	);
+	return await resolveSelect( productsStore ).getSuggestedProducts( options );
 }

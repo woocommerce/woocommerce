@@ -315,9 +315,10 @@ export const pluginInstallerMachine = createMachine(
 				}: {
 					input: { pluginsInstallationQueue: PluginNames[] };
 				} ) => {
-					return dispatch( pluginsStore ).installAndActivatePlugins( [
-						getPluginSlug( pluginsInstallationQueue[ 0 ] ),
-					] );
+					return dispatch( pluginsStore ).installAndActivatePlugins(
+						[ getPluginSlug( pluginsInstallationQueue[ 0 ] ) ],
+						'core-profiler'
+					);
 				}
 			),
 			queueRemainingPluginsAsync: fromPromise(
@@ -331,7 +332,8 @@ export const pluginInstallerMachine = createMachine(
 					).installAndActivatePluginsAsync(
 						pluginsInstallationQueue.map(
 							getPluginSlug
-						) as PluginNames[]
+						) as PluginNames[],
+						'core-profiler'
 					);
 				}
 			),

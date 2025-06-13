@@ -291,7 +291,6 @@ class WC_Shop_Customizer {
 			</script>
 			<?php
 		}
-
 	}
 
 	/**
@@ -949,13 +948,4 @@ class WC_Shop_Customizer {
 		$post = get_post( get_option( 'woocommerce_checkout_page_id' ) );
 		return strpos( $post->post_content, '<!-- wp:woocommerce/checkout' ) !== false;
 	}
-}
-
-global $pagenow;
-if (
-	'customize.php' === $pagenow ||
-	isset( $_REQUEST['customize_theme'] ) || // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	! wc_current_theme_is_fse_theme()
-) {
-	new WC_Shop_Customizer();
 }

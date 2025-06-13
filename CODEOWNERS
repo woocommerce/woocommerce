@@ -8,9 +8,13 @@
 /tools/ @woocommerce/flux
 /packages/js/eslint-plugin/ @woocommerce/flux
 /packages/js/dependency-extraction-webpack-plugin/ @woocommerce/flux
-/packages/js/e2e-utils-playwright/ @woocommerce/solaris
+/packages/js/e2e-utils-playwright/ @woocommerce/flux
 
 # Files in root of repository
 /.* @woocommerce/flux
 /*.* @woocommerce/flux
 /changelog.txt
+/pnpm-lock.yaml
+
+# Docs resources, which gets published to https://developer.woocommerce.com
+/docs/ @woocommerce/developer-advocacy

@@ -7,7 +7,7 @@ import { themes } from '@storybook/theming';
 /**
  * Internal dependencies
  */
-import logoUrl from '../woocommerce_logo.png';
+import logoUrl from '../woo-logo.svg';
 
 addons.setConfig( {
 	theme: { ...themes.light, brandImage: logoUrl },

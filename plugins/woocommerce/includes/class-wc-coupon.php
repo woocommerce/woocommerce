@@ -5,7 +5,7 @@
  * The WooCommerce coupons class gets coupon data from storage and checks coupon validity.
  *
  * @package WooCommerce\Classes
- * @version 3.0.0
+ * @version x.x.x
  */
 
 use Automattic\WooCommerce\Enums\ProductType;
@@ -547,7 +547,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$discount_type = 'percent'; // Backwards compatibility.
 		}
 		if ( ! in_array( $discount_type, array_keys( wc_get_coupon_types() ), true ) ) {
-			$this->error( 'coupon_invalid_discount_type', __( 'Invalid discount type', 'woocommerce' ) );
+			$this->error( 'coupon_invalid_discount_type', __( 'Invalid discount type.', 'woocommerce' ) );
 		}
 		$this->set_prop( 'discount_type', $discount_type );
 	}
@@ -566,11 +566,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		}
 
 		if ( $amount < 0 ) {
-			$this->error( 'coupon_invalid_amount', __( 'Invalid discount amount', 'woocommerce' ) );
+			$this->error( 'coupon_invalid_amount', __( 'Invalid discount amount.', 'woocommerce' ) );
 		}
 
 		if ( 'percent' === $this->get_discount_type() && $amount > 100 ) {
-			$this->error( 'coupon_invalid_amount', __( 'Invalid discount amount', 'woocommerce' ) );
+			$this->error( 'coupon_invalid_amount', __( 'Invalid discount amount.', 'woocommerce' ) );
 		}
 
 		$this->set_prop( 'amount', $amount );
@@ -733,6 +733,10 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @param float $amount Maximum amount.
 	 */
 	public function set_maximum_amount( $amount ) {
+		if ( $amount && $this->get_minimum_amount() > $amount ) {
+			$this->error( 'coupon_invalid_maximum_amount', __( 'Invalid maximum spend value.', 'woocommerce' ) );
+		}
+
 		$this->set_prop( 'maximum_amount', wc_format_decimal( $amount ) );
 	}
 
@@ -746,7 +750,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$emails = array_filter( array_map( 'sanitize_email', array_map( 'strtolower', (array) $emails ) ) );
 		foreach ( $emails as $email ) {
 			if ( ! is_email( $email ) ) {
-				$this->error( 'coupon_invalid_email_address', __( 'Invalid email address restriction', 'woocommerce' ) );
+				$this->error( 'coupon_invalid_email_address', __( 'Invalid email address restriction.', 'woocommerce' ) );
 			}
 		}
 		$this->set_prop( 'email_restrictions', $emails );
@@ -1021,61 +1025,126 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	public function get_coupon_error( $err_code ) {
 		switch ( $err_code ) {
 			case self::E_WC_COUPON_INVALID_FILTERED:
-				$err = __( 'Coupon is not valid.', 'woocommerce' );
+				$err = sprintf(
+					/* translators: %s: coupon code */
+					esc_html__( 'Coupon "%s" cannot be applied because it is not valid.', 'woocommerce' ),
+					esc_html( $this->get_code() )
+				);
 				break;
 			case self::E_WC_COUPON_NOT_EXIST:
-				/* translators: %s: coupon code */
-				$err = sprintf( __( 'Coupon "%s" does not exist!', 'woocommerce' ), esc_html( $this->get_code() ) );
+				$err = sprintf(
+					/* translators: %s: coupon code */
+					esc_html__( 'Coupon "%s" cannot be applied because it does not exist.', 'woocommerce' ),
+					esc_html( $this->get_code() )
+				);
 				break;
 			case self::E_WC_COUPON_INVALID_REMOVED:
-				/* translators: %s: coupon code */
-				$err = sprintf( __( 'Sorry, it seems the coupon "%s" is invalid - it has now been removed from your order.', 'woocommerce' ), esc_html( $this->get_code() ) );
+				$err = sprintf(
+					/* translators: %s: coupon code */
+					esc_html__( 'Sorry, it seems the coupon "%s" is invalid - it has now been removed from your order.', 'woocommerce' ),
+					esc_html( $this->get_code() )
+				);
 				break;
 			case self::E_WC_COUPON_NOT_YOURS_REMOVED:
 				// We check for supplied billing email. On shortcode, this will be present for checkout requests.
 				$billing_email = \Automattic\WooCommerce\Utilities\ArrayUtil::get_value_or_default( $_POST, 'billing_email' ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 				if ( ! is_null( $billing_email ) ) {
-					/* translators: %s: coupon code */
-					$err = sprintf( __( 'Please enter a valid email to use coupon code "%s".', 'woocommerce' ), esc_html( $this->get_code() ) );
+					$err = sprintf(
+						/* translators: %s: coupon code */
+						esc_html__( 'Please enter a valid email to use coupon code "%s".', 'woocommerce' ),
+						esc_html( $this->get_code() )
+					);
 				} else {
-					/* translators: %s: coupon code */
-					$err = sprintf( __( 'Please enter a valid email at checkout to use coupon code "%s".', 'woocommerce' ), esc_html( $this->get_code() ) );
+					$err = sprintf(
+						/* translators: %s: coupon code */
+						esc_html__( 'Please enter a valid email at checkout to use coupon code "%s".', 'woocommerce' ),
+						esc_html( $this->get_code() )
+					);
 				}
 				break;
 			case self::E_WC_COUPON_ALREADY_APPLIED:
-				$err = __( 'Coupon code already applied!', 'woocommerce' );
+				$err = sprintf(
+					/* translators: %s: coupon code */
+					esc_html__( 'Coupon code "%s" already applied!', 'woocommerce' ),
+					esc_html( $this->get_code() )
+				);
 				break;
 			case self::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY:
-				/* translators: %s: coupon code */
-				$err = sprintf( __( 'Sorry, coupon "%s" has already been applied and cannot be used in conjunction with other coupons.', 'woocommerce' ), esc_html( $this->get_code() ) );
+				$err = sprintf(
+					/* translators: %s: coupon code */
+					esc_html__( 'Sorry, coupon "%s" has already been applied and cannot be used in conjunction with other coupons.', 'woocommerce' ),
+					esc_html( $this->get_code() )
+				);
 				break;
 			case self::E_WC_COUPON_USAGE_LIMIT_REACHED:
-				$err = __( 'Coupon usage limit has been reached.', 'woocommerce' );
+				$err = sprintf(
+					/* translators: %s: coupon code */
+					esc_html__( 'Usage limit for coupon "%s" has been reached.', 'woocommerce' ),
+					esc_html( $this->get_code() )
+				);
 				break;
 			case self::E_WC_COUPON_EXPIRED:
-				$err = __( 'This coupon has expired.', 'woocommerce' );
+				$err = sprintf(
+					/* translators: %s: coupon code */
+					esc_html__( 'Coupon "%s" has expired.', 'woocommerce' ),
+					esc_html( $this->get_code() )
+				);
 				break;
 			case self::E_WC_COUPON_MIN_SPEND_LIMIT_NOT_MET:
-				/* translators: %s: coupon minimum amount */
-				$err = sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), wc_price( $this->get_minimum_amount() ) );
+				$allowed_tags = array(
+					'span'  => array(
+						'class' => true,
+					),
+					'bdi'   => true,
+					'small' => true,
+				);
+				$err          = sprintf(
+					/* translators: %1$s: coupon code,  %2$s: coupon minimum amount */
+					esc_html__( 'The minimum spend for coupon "%1$s" is %2$s.', 'woocommerce' ),
+					esc_html( $this->get_code() ),
+					wp_kses( wc_price( $this->get_minimum_amount() ), $allowed_tags )
+				);
 				break;
 			case self::E_WC_COUPON_MAX_SPEND_LIMIT_MET:
-				/* translators: %s: coupon maximum amount */
-				$err = sprintf( __( 'The maximum spend for this coupon is %s.', 'woocommerce' ), wc_price( $this->get_maximum_amount() ) );
+				$allowed_tags = array(
+					'span'  => array(
+						'class' => true,
+					),
+					'bdi'   => true,
+					'small' => true,
+				);
+				$err          = sprintf(
+					/* translators: %1$s: coupon code, %2$s: coupon maximum amount */
+					esc_html__( 'The maximum spend for coupon "%1$s" is %2$s.', 'woocommerce' ),
+					esc_html( $this->get_code() ),
+					wp_kses( wc_price( $this->get_maximum_amount() ), $allowed_tags )
+				);
 				break;
 			case self::E_WC_COUPON_NOT_APPLICABLE:
-				$err = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
+				$err = sprintf(
+					/* translators: %s: coupon code */
+					esc_html__( 'Sorry, coupon "%s" is not applicable to your cart contents.', 'woocommerce' ),
+					esc_html( $this->get_code() )
+				);
 				break;
 			case self::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK:
 				if ( is_user_logged_in() && wc_get_page_id( 'myaccount' ) > 0 && ! WC()->is_store_api_request() ) {
-					/* translators: %s: myaccount page link. */
-					$err = sprintf( __( 'Coupon usage limit has been reached. If you were using this coupon just now but your order was not complete, you can retry or cancel the order by going to the <a href="%s">my account page</a>.', 'woocommerce' ), wc_get_endpoint_url( 'orders', '', wc_get_page_permalink( 'myaccount' ) ) );
+					$err = sprintf(
+						/* translators: %1$s: coupon code, %2$s: myaccount page link. */
+						wp_kses_data( __( 'Usage limit for coupon "%1$s" has been reached. If you were using this coupon just now but your order was not complete, you can retry or cancel the order by going to the <a href="%2$s">my account page</a>.', 'woocommerce' ) ),
+						esc_html( $this->get_code() ),
+						esc_attr( wc_get_endpoint_url( 'orders', '', wc_get_page_permalink( 'myaccount' ) ) )
+					);
 				} else {
 					$err = $this->get_coupon_error( self::E_WC_COUPON_USAGE_LIMIT_REACHED );
 				}
 				break;
 			case self::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK_GUEST:
-				$err = __( 'Coupon usage limit has been reached. Please try again after some time, or contact us for help.', 'woocommerce' );
+				$err = sprintf(
+					/* translators: %s: coupon code */
+					esc_html__( 'Usage limit for coupon "%s" has been reached. Please try again after some time, or contact us for help.', 'woocommerce' ),
+					esc_html( $this->get_code() )
+				);
 				break;
 			case self::E_WC_COUPON_EXCLUDED_PRODUCTS:
 				// Store excluded products that are in cart in $products.
@@ -1088,8 +1157,12 @@ class WC_Coupon extends WC_Legacy_Coupon {
 					}
 				}
 
-				/* translators: %s: products list */
-				$err = sprintf( __( 'Sorry, this coupon is not applicable to the products: %s.', 'woocommerce' ), implode( ', ', $products ) );
+				$err = sprintf(
+					/* translators: %1$s: coupon code, %2$s: products list */
+					esc_html__( 'Sorry, coupon "%1$s" is not applicable to the products: %2$s.', 'woocommerce' ),
+					esc_html( $this->get_code() ),
+					esc_html( implode( ', ', $products ) )
+				);
 				break;
 			case self::E_WC_COUPON_EXCLUDED_CATEGORIES:
 				// Store excluded categories that are in cart in $categories.
@@ -1108,11 +1181,19 @@ class WC_Coupon extends WC_Legacy_Coupon {
 					}
 				}
 
-				/* translators: %s: categories list */
-				$err = sprintf( __( 'Sorry, this coupon is not applicable to the categories: %s.', 'woocommerce' ), implode( ', ', array_unique( $categories ) ) );
+				$err = sprintf(
+					/* translators: "%1$s": coupon code, %2$s: categories list */
+					esc_html__( 'Sorry, coupon "%1$s" is not applicable to the categories: %2$s.', 'woocommerce' ),
+					esc_html( $this->get_code() ),
+					esc_html( implode( ', ', array_unique( $categories ) ) )
+				);
 				break;
 			case self::E_WC_COUPON_NOT_VALID_SALE_ITEMS:
-				$err = __( 'Sorry, this coupon is not valid for sale items.', 'woocommerce' );
+				$err = sprintf(
+					/* translators: %s: coupon code */
+					esc_html__( 'Sorry, coupon "%s" is not valid for sale items.', 'woocommerce' ),
+					esc_html( $this->get_code() )
+				);
 				break;
 			default:
 				$err = '';
@@ -1132,7 +1213,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	public static function get_generic_coupon_error( $err_code ) {
 		switch ( $err_code ) {
 			case self::E_WC_COUPON_NOT_EXIST:
-				$err = __( 'Coupon does not exist!', 'woocommerce' );
+				$err = __( 'Coupon does not exist.', 'woocommerce' );
 				break;
 			case self::E_WC_COUPON_PLEASE_ENTER:
 				$err = __( 'Please enter a coupon code.', 'woocommerce' );
@@ -1203,10 +1284,16 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		switch ( $err_code ) {
 			case self::E_WC_COUPON_NOT_YOURS_REMOVED:
 				return array(
-					/* translators: %s: coupon code */
-					'cart'     => sprintf( __( 'Please enter a valid email at checkout to use coupon code "%s".', 'woocommerce' ), esc_html( $this->get_code() ) ),
-					/* translators: %s: coupon code */
-					'checkout' => sprintf( __( 'Please enter a valid email to use coupon code "%s".', 'woocommerce' ), esc_html( $this->get_code() ) ),
+					'cart'     => sprintf(
+						/* translators: %s: coupon code */
+						esc_html__( 'Please enter a valid email at checkout to use coupon code "%s".', 'woocommerce' ),
+						esc_html( $this->get_code() )
+					),
+					'checkout' => sprintf(
+						/* translators: %s: coupon code */
+						esc_html__( 'Please enter a valid email to use coupon code "%s".', 'woocommerce' ),
+						esc_html( $this->get_code() )
+					),
 				);
 			default:
 				return array();

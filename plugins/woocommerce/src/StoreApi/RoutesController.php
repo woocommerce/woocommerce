@@ -61,6 +61,8 @@ class RoutesController {
 				Routes\V1\ProductAttributeTerms::IDENTIFIER => Routes\V1\ProductAttributeTerms::class,
 				Routes\V1\ProductCategories::IDENTIFIER  => Routes\V1\ProductCategories::class,
 				Routes\V1\ProductCategoriesById::IDENTIFIER => Routes\V1\ProductCategoriesById::class,
+				Routes\V1\ProductBrands::IDENTIFIER      => Routes\V1\ProductBrands::class,
+				Routes\V1\ProductBrandsById::IDENTIFIER  => Routes\V1\ProductBrandsById::class,
 				Routes\V1\ProductCollectionData::IDENTIFIER => Routes\V1\ProductCollectionData::class,
 				Routes\V1\ProductReviews::IDENTIFIER     => Routes\V1\ProductReviews::class,
 				Routes\V1\ProductTags::IDENTIFIER        => Routes\V1\ProductTags::class,
@@ -69,8 +71,8 @@ class RoutesController {
 				Routes\V1\ProductsBySlug::IDENTIFIER     => Routes\V1\ProductsBySlug::class,
 			],
 			'private' => [
-				Routes\V1\AI\Products::IDENTIFIER => Routes\V1\AI\Products::class,
-				Routes\V1\Patterns::IDENTIFIER    => Routes\V1\Patterns::class,
+				// This route should be moved outside of the Store API namespace.
+				Routes\V1\Patterns::IDENTIFIER => Routes\V1\Patterns::class,
 			],
 		];
 	}

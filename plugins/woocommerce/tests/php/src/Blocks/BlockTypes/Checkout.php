@@ -31,6 +31,13 @@ class Checkout extends \WP_UnitTestCase {
 	private $asset_api;
 
 	/**
+	 * Mock logger instance.
+	 *
+	 * @var \WC_Logger_Interface $mock_logger
+	 */
+	private $mock_logger;
+
+	/**
 	 * Set up the test. Creates a AssetDataRegistryMock.
 	 *
 	 * @return void
@@ -40,6 +47,21 @@ class Checkout extends \WP_UnitTestCase {
 		$this->asset_api            = Package::container()->get( API::class );
 		$this->registry             = new AssetDataRegistryMock( $this->asset_api );
 		$this->integration_registry = new IntegrationRegistry();
+		$this->mock_logger          = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		add_filter(
+			'woocommerce_logging_class',
+			array( $this, 'override_wc_logger' )
+		);
+	}
+
+	/**
+	 * Tear down after test.
+	 *
+	 * @return void
+	 */
+	protected function tearDown(): void {
+		parent::tearDown();
+		remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
 	}
 
 	/**
@@ -109,5 +131,14 @@ class Checkout extends \WP_UnitTestCase {
 		$data_from_registry = $this->registry->get();
 		$this->assertEquals( 'Changed pickup', $data_from_registry['localPickupText'] );
 		wp_delete_post( $page_id );
+	}
+
+	/**
+	 * Overrides the WC logger.
+	 *
+	 * @return mixed
+	 */
+	public function override_wc_logger() {
+		return $this->mock_logger;
 	}
 }

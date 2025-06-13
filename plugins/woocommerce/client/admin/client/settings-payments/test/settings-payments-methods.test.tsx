@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { recordEvent } from '@woocommerce/tracks';
 import { render, fireEvent } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -48,8 +47,10 @@ describe( 'SettingsPaymentsMethods', () => {
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'wcpay_settings_payment_methods_continue',
 			{
+				displayed_payment_methods: expect.any( String ),
 				selected_payment_methods: expect.any( String ),
 				deselected_payment_methods: expect.any( String ),
+				business_country: expect.any( String ),
 			}
 		);
 	} );

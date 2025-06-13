@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Button, Popover } from '@wordpress/components';
 import { createElement, Fragment, useState } from '@wordpress/element';
 import { KeyboardEvent } from 'react';
@@ -28,13 +28,13 @@ type TooltipProps = {
 	className?: string;
 };
 
-export const Tooltip: React.FC< TooltipProps > = ( {
+export const Tooltip = ( {
 	children = <Icon icon={ help } />,
 	className = '',
 	helperText = __( 'Help', 'woocommerce' ),
 	position = 'top center',
 	text,
-} ) => {
+}: TooltipProps ) => {
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
 
 	const uniqueIdentifier = useInstanceId(
@@ -44,14 +44,9 @@ export const Tooltip: React.FC< TooltipProps > = ( {
 
 	return (
 		<>
-			<div
-				className={ classnames(
-					'woocommerce-tooltip',
-					uniqueIdentifier
-				) }
-			>
+			<div className={ clsx( 'woocommerce-tooltip', uniqueIdentifier ) }>
 				<Button
-					className={ classnames(
+					className={ clsx(
 						'woocommerce-tooltip__button',
 						className
 					) }

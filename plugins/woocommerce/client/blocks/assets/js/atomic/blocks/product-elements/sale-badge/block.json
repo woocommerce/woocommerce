@@ -1,0 +1,64 @@
+{
+	"name": "woocommerce/product-sale-badge",
+	"title": "On-Sale Badge",
+	"description": "Displays an on-sale badge if the product is on-sale.",
+	"category": "woocommerce-product-elements",
+	"attributes": {
+		"productId": { "type": "number", "default": 0 },
+		"isDescendentOfQueryLoop": { "type": "boolean", "default": false },
+		"isDescendentOfSingleProductBlock": {
+			"type": "boolean",
+			"default": false
+		},
+		"isDescendentOfSingleProductTemplate": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
+		"html": false,
+		"align": true,
+		"color": {
+			"gradients": true,
+			"background": true,
+			"link": false,
+			"__experimentalSkipSerialization": true
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontStyle": true,
+			"__experimentalSkipSerialization": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalTextTransform": true,
+			"__experimentalTextDecoration": true
+		},
+		"__experimentalBorder": {
+			"color": true,
+			"radius": true,
+			"width": true,
+			"__experimentalSkipSerialization": true
+		},
+		"spacing": {
+			"margin": true
+		},
+		"__experimentalSelector": ".wc-block-components-product-sale-badge"
+	},
+	"ancestor": [
+		"woocommerce/single-product",
+		"woocommerce/product-template",
+		"core/post-template",
+		"woocommerce/product-gallery"
+	],
+	"usesContext": [ "query", "queryId", "postId" ],
+	"keywords": [ "WooCommerce" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"example": {},
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

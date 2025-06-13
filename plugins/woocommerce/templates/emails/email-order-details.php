@@ -54,7 +54,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 		$after  = '';
 	}
 	if ( $email_improvements_enabled ) {
-		echo '<span>';
+		echo '<br><span>';
 	}
 	/* translators: %s: Order ID. */
 	$order_number_string = __( '[Order #%s]', 'woocommerce' );

@@ -3,7 +3,6 @@
  */
 import { render } from '@testing-library/react';
 import { recordEvent } from '@woocommerce/tracks';
-import { TRACKS_SOURCE } from '@woocommerce/product-editor';
 import { useParams } from 'react-router-dom';
 
 /**
@@ -36,7 +35,19 @@ jest.mock( '@woocommerce/product-editor', () => ( {
 	productApiFetchMiddleware: jest.fn(),
 	__experimentalInitBlocks: jest.fn().mockImplementation( () => () => {} ),
 } ) );
+jest.mock( '@woocommerce/product-editor', () => ( {
+	__experimentalEditor: jest.fn(),
+	__experimentalInitBlocks: jest.fn().mockImplementation( () => () => {} ),
+	__experimentalWooProductMoreMenuItem: jest.fn(),
+	productApiFetchMiddleware: jest.fn(),
+	productEditorHeaderApiFetchMiddleware: jest.fn(),
+	TRACKS_SOURCE: 'test-source',
+	__experimentalProductMVPCESFooter: jest.fn(),
+	__experimentalEditorLoadingContext: jest.fn(),
+	__experimentalProductMVPFeedbackModalContainer: jest.fn(),
+} ) );
 
+const TRACKS_SOURCE = 'test-source';
 describe( 'ProductPage', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();

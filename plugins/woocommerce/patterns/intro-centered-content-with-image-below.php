@@ -6,13 +6,11 @@
  */
 
 declare(strict_types=1);
-use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
-
 
 $header  = __( 'Find your shade', 'woocommerce' );
 $content = __( 'Explore our exclusive collection of sunglasses, crafted to elevate your look and safeguard your eyes. Find your perfect pair and see the world through a new lens.', 'woocommerce' );
 $button  = __( 'Shop now', 'woocommerce' );
-$image_0 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/girls-in-the-hills.jpg' );
+$image_0 = plugins_url( 'assets/images/pattern-placeholders/girls-in-the-hills.jpg', WC_PLUGIN_FILE );
 
 ?>
 

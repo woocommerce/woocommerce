@@ -402,6 +402,44 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test is_current_page_store_page when checkout page is set to a non-default page.
+	 */
+	public function test_is_current_page_store_page_when_checkout_page_is_set_to_non_default_page() {
+		$default_checkout_page_id = wc_get_page_id( 'checkout' );
+
+		// create a new checkout page with slug "shop-checkout".
+		$page_id = wp_insert_post(
+			array(
+				'post_title'  => 'Shop Checkout',
+				'post_name'   => 'shop-checkout',
+				'post_status' => 'publish',
+				'post_type'   => 'page',
+			)
+		);
+
+		// update the checkout page to the new page.
+		update_option( 'woocommerce_checkout_page_id', $page_id );
+
+		global $wp_rewrite;
+		$wp_rewrite->init();
+		$wp_rewrite->flush_rules( true );
+
+		// go to the new checkout page.
+		$this->go_to( get_permalink( $page_id ) );
+
+		// Test that the new checkout page is a store page.
+		$is_store_page = WCAdminHelper::is_current_page_store_page();
+		$this->assertTrue( $is_store_page, 'Failed to identify new checkout page as store page ' . get_permalink( $page_id ) );
+
+		// go to the default checkout page.
+		$this->go_to( get_permalink( $default_checkout_page_id ) );
+
+		// Test that the default checkout page is not a store page.
+		$is_store_page = WCAdminHelper::is_current_page_store_page();
+		$this->assertFalse( $is_store_page, 'Failed to identify default checkout page as store page ' . get_permalink( $default_checkout_page_id ) );
+	}
+
+	/**
 	 * Copied and modified from https://github.com/WordPress/wordpress-develop/blob/126e3bcc2b41c06c92f95d1796c2766bfbb19f86/tests/phpunit/includes/abstract-testcase.php#L1212.
 	 *
 	 * Sets the global state to as if a given URL has been requested.

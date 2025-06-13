@@ -1,0 +1,181 @@
+/*
+ * Styles for the email editor.
+ */
+/*
+ * Flex layout used for buttons block for email editor.
+ */
+.is-layout-email-flex {
+	flex-wrap: nowrap;
+}
+
+:where(body .is-layout-flex) {
+	gap: var(--wp--style--block-gap, 16px);
+}
+
+.is-mobile-preview .is-layout-email-flex {
+	display: block;
+}
+
+.is-mobile-preview .is-layout-email-flex .block-editor-block-list__block {
+	padding: 5px 0;
+	width: 100%;
+}
+
+.is-mobile-preview .is-layout-email-flex .wp-block-button__link {
+	width: 100%;
+}
+
+/*
+ * Email Editor specific styles for vertical gap between blocks in column and group.
+ * This is needed because we disable layout for core/group, core/column and core/columns blocks, and .is-layout-flex is not applied.
+ */
+.wp-block-columns:not(.is-not-stacked-on-mobile)
+> .wp-block-column
+> .wp-block:first-child,
+.wp-block-group > .wp-block:first-child {
+	margin-top: 0;
+}
+
+.wp-block-columns:not(.is-not-stacked-on-mobile)
+> .wp-block-column
+> .wp-block,
+.wp-block-group > .wp-block {
+	margin-bottom: var(--wp--style--block-gap, 16px);
+	margin-top: var(--wp--style--block-gap, 16px);
+}
+
+.wp-block-columns:not(.is-not-stacked-on-mobile)
+> .wp-block-column
+> .wp-block:not([aria-hidden="true"]):last-of-type,
+.wp-block-group > .wp-block:not([aria-hidden="true"]):last-of-type {
+	margin-bottom: 0;
+}
+
+/*
+ * Use box sizing border box for columns that have defined a width (they have flex-basis set).
+ */
+.wp-block-columns:not(.is-not-stacked-on-mobile)
+	> .wp-block-column[style*='flex-basis'] {
+	box-sizing: border-box;
+}
+
+/*
+ * For the WYSIWYG experience we don't want to display any margins between blocks in the editor
+ */
+.wp-block {
+	clear: both;
+}
+
+/*
+ * Image block enhancements
+ */
+.wp-block-image figcaption {
+	/* Resetting the margin for images in the editor to avoid unexpected spacing */
+	margin: 0;
+}
+
+.wp-block-image.alignleft,
+.wp-block-image.alignright {
+	margin-inline: 0 0;
+	text-align: center;
+}
+
+.wp-block-image.aligncenter {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.wp-block-image.alignright {
+	margin-left: auto;
+}
+
+/*
+ * Set default padding-left to have consistent default look in editor and in email
+ * This also overrides the default values in browsers for padding-inline-start
+ */
+ul,
+ol,
+ul.has-background,
+ol.has-background {
+	padding-left: 40px;
+}
+
+/*
+ * Override default button border radius which is set in core to 9999px
+ */
+.wp-block-button__link {
+	border-radius: 0;
+}
+
+/*
+ * Mobile preview fixes
+ */
+.is-mobile-preview figure > div {
+	max-width: 100% !important;
+	height: auto !important;
+}
+
+/*
+ * Reset default margin for blocks in template-mode
+ * This was causing the first block to have a margin-top set to block gap.
+ * We control the gab via different css
+ */
+.wp-site-blocks > * {
+	margin-block-start: 0;
+}
+
+/*
+ * Hide the post title.
+ * When user disables the template-lock mode we don't want to show the post title.
+ */
+.editor-visual-editor__post-title-wrapper {
+	display: none;
+}
+
+/*
+ * Temporary styles for Rich Text HTML comments from the PR: https://github.com/WordPress/gutenberg/pull/62128/files
+ */
+[data-rich-text-comment],
+[data-rich-text-format-boundary] {
+	border-radius: 2px;
+}
+
+[data-rich-text-comment] {
+	background-color: var(
+		--wp-components-color-accent,
+		var(--wp-admin-theme-color, #3858e9)
+	);
+
+	span {
+		color: var(--wp-components-color-accent-inverted, #fff);
+		filter: none;
+		padding: 0 2px;
+	}
+}
+
+/**
+ * Override the default gap for social links block in the editor.
+ * This is needed because we do not want to have a gap between the social links and also for a WYSIWYG experience.
+*/
+.wp-block-social-links.is-layout-flex {
+	gap: 16px !important;
+}
+
+/**
+ * Override the default padding for social links block in the editor.
+ * This is needed because we do not want to have a padding for the social links block particularly for a WYSIWYG experience.
+*/
+.wp-block-social-links.has-background {
+	padding-left: 0;
+}
+
+/**
+ * Override the default background color for social links block in the editor.
+ * This is mostly for a WYSIWYG experience. These icons don't have a default background color.
+*/
+:where(.wp-block-social-links:not(.is-style-logos-only)) .wp-social-link-mail,
+:where(.wp-block-social-links:not(.is-style-logos-only)) .wp-social-link-feed,
+:where(.wp-block-social-links:not(.is-style-logos-only)) .wp-social-link-chain {
+	background-color:#000;
+	color:#fff;
+	}

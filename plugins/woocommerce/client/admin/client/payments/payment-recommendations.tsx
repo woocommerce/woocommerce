@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -17,7 +16,7 @@ import {
 	type PaymentSelectors,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import ExternalIcon from 'gridicons/dist/external';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -26,15 +25,14 @@ import './payment-recommendations.scss';
 import { createNoticesFromResponse } from '~/lib/notices';
 import { getPluginSlug } from '~/utils';
 import { isWcPaySupported } from './utils';
-
-const SEE_MORE_LINK =
-	'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations';
+import { TrackedLink } from '~/components/tracked-link/tracked-link';
+import { isFeatureEnabled } from '~/utils/features';
 
 const WcPayPromotionGateway = document.querySelector(
 	'[data-gateway_id="pre_install_woocommerce_payments_promotion"]'
 );
 
-const PaymentRecommendations: React.FC = () => {
+const PaymentRecommendations = () => {
 	const [ installingPlugin, setInstallingPlugin ] = useState< string | null >(
 		null
 	);
@@ -262,10 +260,26 @@ const PaymentRecommendations: React.FC = () => {
 			</CardHeader>
 			<List items={ pluginsList } />
 			<CardFooter>
-				<Button href={ SEE_MORE_LINK } target="_blank" isTertiary>
-					{ __( 'Discover other payment providers', 'woocommerce' ) }
-					<ExternalIcon size={ 18 } />
-				</Button>
+				<TrackedLink
+					message={ __(
+						// translators: {{Link}} is a placeholder for a html element.
+						'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find additional payment providers.',
+						'woocommerce'
+					) }
+					eventName="settings_payment_recommendations_visit_marketplace_click"
+					targetUrl={
+						isFeatureEnabled( 'marketplace' )
+							? getAdminLink(
+									'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
+							  )
+							: 'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/'
+					}
+					linkType={
+						isFeatureEnabled( 'marketplace' )
+							? 'wc-admin'
+							: 'external'
+					}
+				/>
 			</CardFooter>
 		</Card>
 	);

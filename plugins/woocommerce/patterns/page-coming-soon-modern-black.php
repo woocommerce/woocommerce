@@ -5,10 +5,7 @@
  * Categories: WooCommerce
  * Template Types: coming-soon
  * Inserter: false
- * Feature Flag: coming-soon-newsletter-template
  */
-
-use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
 $current_theme = wp_get_theme()->get_stylesheet();
 use Automattic\WooCommerce\Blocks\Templates\ComingSoonTemplate;
@@ -17,7 +14,7 @@ $fonts               = ComingSoonTemplate::get_font_families();
 $heading_font_family = $fonts['heading'];
 $body_font_family    = $fonts['body'];
 
-$default_image = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/music-black-and-white-white-photography-darkness-black.jpg' );
+$default_image = plugins_url( 'assets/images/pattern-placeholders/music-black-and-white-white-photography-darkness-black.jpg', WC_PLUGIN_FILE );
 $email         = get_option( 'admin_email', 'marianne.renoir@mail.com' );
 
 ?>

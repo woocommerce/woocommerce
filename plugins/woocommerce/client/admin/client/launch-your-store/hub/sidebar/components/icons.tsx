@@ -12,7 +12,8 @@ import {
 /**
  * Internal dependencies
  */
-
+import CompletedStep from './payments-icons/completed-step';
+import ActiveStep from './payments-icons/active-step';
 export const taskCompleteIcon = check;
 
 export const taskIcons: Record< string, JSX.Element > = {
@@ -22,4 +23,6 @@ export const taskIcons: Record< string, JSX.Element > = {
 	payments: payment,
 	'woocommerce-payments': payment,
 	products: tag,
+	activePaymentStep: ActiveStep,
+	completedPaymentStep: CompletedStep,
 };

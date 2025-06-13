@@ -207,7 +207,27 @@ final class WC_Cart_Session {
 					)
 				);
 
+				/**
+				 * Filter to modify or add session data to the cart contents.
+				 *
+				 * @since 3.2.0
+				 *
+				 * @param array  $session_data Data for an item in the cart.
+				 * @param array  $values       Data for an item in the cart, without the product object.
+				 * @param string $key          The cart item hash.
+				 */
 				$cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', $session_data, $values, $key );
+				if ( ! isset( $cart_contents[ $key ]['data'] ) || ! $cart_contents[ $key ]['data'] instanceof WC_Product ) {
+					// If the cart contents is missing the product object after filtering, something is wrong.
+					wc_doing_it_wrong(
+						__METHOD__,
+						'When filtering cart items with woocommerce_get_cart_item_from_session, each item must have a data key containing a product object.',
+						'9.8.0'
+					);
+
+					// Add the product back in.
+					$cart_contents[ $key ]['data'] = $product;
+				}
 
 				// Add to cart right away so the product is visible in woocommerce_get_cart_item_from_session hook.
 				$this->cart->set_cart_contents( $cart_contents );
@@ -222,7 +242,8 @@ final class WC_Cart_Session {
 		do_action( 'woocommerce_cart_loaded_from_session', $this->cart );
 
 		if ( $update_cart_session || is_null( WC()->session->get( 'cart_totals', null ) ) ) {
-			WC()->session->set( 'cart', $this->get_cart_for_session() );
+			$cart_for_session = $this->get_cart_for_session();
+			WC()->session->set( 'cart', empty( $cart_for_session ) ? null : $cart_for_session );
 			$this->cart->calculate_totals();
 
 			if ( $merge_saved_cart ) {
@@ -327,12 +348,24 @@ final class WC_Cart_Session {
 	 * Sets the php session data for the cart and coupons.
 	 */
 	public function set_session() {
-		WC()->session->set( 'cart', $this->get_cart_for_session() );
-		WC()->session->set( 'cart_totals', $this->cart->get_totals() );
-		WC()->session->set( 'applied_coupons', $this->cart->get_applied_coupons() );
-		WC()->session->set( 'coupon_discount_totals', $this->cart->get_coupon_discount_totals() );
-		WC()->session->set( 'coupon_discount_tax_totals', $this->cart->get_coupon_discount_tax_totals() );
-		WC()->session->set( 'removed_cart_contents', $this->cart->get_removed_cart_contents() );
+		$wc_session = WC()->session;
+
+		$cart                       = $this->get_cart_for_session();
+		$applied_coupons            = $this->cart->get_applied_coupons();
+		$coupon_discount_totals     = $this->cart->get_coupon_discount_totals();
+		$coupon_discount_tax_totals = $this->cart->get_coupon_discount_tax_totals();
+		$removed_cart_contents      = $this->cart->get_removed_cart_contents();
+
+		/*
+		 * We want to clear out any empty/default data from the session that have no value in being stored so the session
+		 * can be forgotten if empty.
+		 */
+		$wc_session->set( 'cart_totals', empty( $cart ) ? null : $this->cart->get_totals() );
+		$wc_session->set( 'cart', empty( $cart ) ? null : $cart );
+		$wc_session->set( 'applied_coupons', empty( $applied_coupons ) ? null : $applied_coupons );
+		$wc_session->set( 'coupon_discount_totals', empty( $coupon_discount_totals ) ? null : $coupon_discount_totals );
+		$wc_session->set( 'coupon_discount_tax_totals', empty( $coupon_discount_tax_totals ) ? null : $coupon_discount_tax_totals );
+		$wc_session->set( 'removed_cart_contents', empty( $removed_cart_contents ) ? null : $removed_cart_contents );
 
 		do_action( 'woocommerce_cart_updated' );
 	}
@@ -422,7 +455,7 @@ final class WC_Cart_Session {
 		if ( apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 			$saved_cart_meta = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
 
-			if ( isset( $saved_cart_meta['cart'] ) ) {
+			if ( is_array( $saved_cart_meta ) && isset( $saved_cart_meta['cart'] ) ) {
 				$saved_cart = array_filter( (array) $saved_cart_meta['cart'] );
 			}
 		}

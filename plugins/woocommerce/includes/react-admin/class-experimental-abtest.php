@@ -99,9 +99,11 @@ final class Experimental_Abtest {
 	/**
 	 * Returns true if the current user is in the treatment group of the given experiment.
 	 *
-	 * @param string $experiment_name Name of the experiment.
+	 * @param string $experiment_name    Name of the experiment.
 	 * @param bool   $as_auth_wpcom_user Request variation as a auth wp user or not.
-	 * @return bool
+	 *
+	 * @return bool True if the user is in the treatment group, false otherwise.
+	 * @throws \Exception If there is an error retrieving the variation.
 	 */
 	public static function in_treatment( string $experiment_name, bool $as_auth_wpcom_user = false ) {
 		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';

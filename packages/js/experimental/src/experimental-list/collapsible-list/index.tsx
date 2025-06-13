@@ -18,7 +18,7 @@ import {
 	TransitionGroup,
 	TransitionStatus,
 } from 'react-transition-group';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -120,7 +120,7 @@ const getTransitionStyle = (
 	return styles;
 };
 
-export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
+export const ExperimentalCollapsibleList = ( {
 	children,
 	collapsed = true,
 	collapseLabel,
@@ -130,7 +130,7 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 	onExpand,
 	direction = 'up',
 	...listProps
-} ): JSX.Element => {
+}: CollapsibleListProps ): JSX.Element => {
 	const [ isCollapsed, setCollapsed ] = useState( collapsed );
 	const [ isTransitionComponentCollapsed, setTransitionComponentCollapsed ] =
 		useState( collapsed );
@@ -219,12 +219,12 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 		triggerCallbacks( ! isCollapsed );
 	}, [ isCollapsed ] );
 
-	const listClasses = classnames(
+	const listClasses = clsx(
 		listProps.className || '',
 		'woocommerce-experimental-list'
 	);
 
-	const wrapperClasses = classnames( {
+	const wrapperClasses = clsx( {
 		'woocommerce-experimental-list-wrapper': ! isCollapsed,
 	} );
 

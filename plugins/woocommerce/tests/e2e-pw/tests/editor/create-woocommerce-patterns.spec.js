@@ -13,10 +13,9 @@ import {
  * Internal dependencies
  */
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-
-const { test: baseTest, expect, tags } = require( '../../fixtures/fixtures' );
-const { fillPageTitle } = require( '../../utils/editor' );
-const { getInstalledWordPressVersion } = require( '../../utils/wordpress' );
+import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
+import { fillPageTitle } from '../../utils/editor';
+import { getInstalledWordPressVersion } from '../../utils/wordpress';
 
 // some WooCommerce Patterns to use
 const wooPatterns = [

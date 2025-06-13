@@ -70,7 +70,9 @@ class Init {
 		wp_register_style(
 			$style_name,
 			WCAdminAssets::get_url( $style_path_name . '/style', 'css' ),
-			isset( $style_assets['dependencies'] ) ? $style_assets['dependencies'] : array(),
+			// Manually set dependencies for now, because the asset file is not being generated correctly.
+			// See plugins/woocommerce/assets/client/admin/settings-editor/style.asset.php. Should be: `isset( $style_assets['dependencies'] ) ? $style_assets['dependencies'] : array(),`.
+			array( 'wp-components', 'wc-components' ),
 			WCAdminAssets::get_file_version( 'css', $style_assets['version'] ),
 		);
 
@@ -80,27 +82,6 @@ class Init {
 		wp_register_style( 'wc-global-presets', false ); // phpcs:ignore
 		wp_add_inline_style( 'wc-global-presets', wp_get_global_stylesheet( array( 'presets' ) ) );
 		wp_enqueue_style( 'wc-global-presets' );
-
-		// Gutenberg posts editor styles.
-		if ( function_exists( 'gutenberg_url' ) ) {
-			// phpcs:disable WordPress.WP.EnqueuedResourceParameters.MissingVersion
-			wp_register_style(
-				'wp-gutenberg-posts-dashboard',
-				gutenberg_url( 'build/edit-site/posts.css', __FILE__ ),
-				array( 'wp-components' ),
-			);
-			// phpcs:enable WordPress.WP.EnqueuedResourceParameters.MissingVersion
-			wp_enqueue_style( 'wp-gutenberg-posts-dashboard' );
-
-			// phpcs:disable WordPress.WP.EnqueuedResourceParameters.MissingVersion
-			wp_register_style(
-				'wp-gutenberg-edit-site',
-				gutenberg_url( 'build/edit-site/style.css', __FILE__ ),
-				array( 'wp-components' ),
-			);
-			// phpcs:enable WordPress.WP.EnqueuedResourceParameters.MissingVersion
-			wp_enqueue_style( 'wp-gutenberg-edit-site' );
-		}
 	}
 
 	/**
@@ -123,7 +104,7 @@ class Init {
 		wp_enqueue_script(
 			$script_name,
 			WCAdminAssets::get_url( $script_path_name . '/index', 'js' ),
-			array_merge( array( 'wp-edit-site' ), $script_assets['dependencies'] ),
+			$script_assets['dependencies'],
 			WCAdminAssets::get_file_version( 'js', $script_assets['version'] ),
 			true
 		);
@@ -163,18 +144,46 @@ class Init {
 
 		// Add the settings data to the settings array.
 		$setting_pages = \WC_Admin_Settings::get_settings_pages();
-		$pages         = array();
+		$settings      = self::get_page_data( $settings, $setting_pages );
+
+		return $settings;
+	}
+
+	/**
+	 * Get the page data for the settings editor.
+	 *
+	 * @param array $settings The settings array.
+	 * @param array $setting_pages The setting pages.
+	 * @return array The settings array.
+	 */
+	public static function get_page_data( $settings, $setting_pages ) {
+		global $wp_scripts;
+		/**
+		 * Filters the settings tabs array.
+		 *
+		 * @since 2.5.0
+		 *
+		 * @param array $available_pages The available pages.
+		 */
+		$available_pages = apply_filters( 'woocommerce_settings_tabs_array', array() );
+		$pages           = array();
+
 		foreach ( $setting_pages as $setting_page ) {
+			// If any page has removed itself from the tabs array, avoid adding this page to the settings editor.
+			if ( ! in_array( $setting_page->get_id(), array_keys( $available_pages ), true ) ) {
+				continue;
+			}
+
 			$scripts_before_adding_settings = $wp_scripts->queue;
 			$pages                          = $setting_page->add_settings_page_data( $pages );
-
-			$settings_scripts_handles                               = array_diff( $wp_scripts->queue, $scripts_before_adding_settings );
+			$settings_scripts_handles       = array_diff( $wp_scripts->queue, $scripts_before_adding_settings );
 			$settings['settingsScripts'][ $setting_page->get_id() ] = self::get_script_urls( $settings_scripts_handles );
 		}
 
-		$transformer                       = new Transformer();
-		$settings['settingsData']['pages'] = $transformer->transform( $pages );
-		$settings['settingsData']['start'] = $setting_pages[0]->get_custom_view( 'woocommerce_settings_start' );
+		$transformer                          = new Transformer();
+		$settings['settingsData']['pages']    = $transformer->transform( $pages );
+		$settings['settingsData']['start']    = $setting_pages[0]->get_custom_view( 'woocommerce_settings_start' );
+		$settings['settingsData']['_wpnonce'] = wp_create_nonce( 'wp_rest' );
 
 		return $settings;
 	}

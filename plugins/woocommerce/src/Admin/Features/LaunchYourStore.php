@@ -36,7 +36,9 @@ class LaunchYourStore {
 	 */
 	public function save_site_visibility_options() {
 		$nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : '';
-		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'woocommerce-settings' ) ) {
+		// New Settings API uses wp_rest nonce.
+		$nonce_string = Features::is_enabled( 'settings' ) ? 'wp_rest' : 'woocommerce-settings';
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, $nonce_string ) ) {
 			return;
 		}
 
@@ -183,7 +185,7 @@ class LaunchYourStore {
 		}
 
 		$store_pages_only = get_option( 'woocommerce_store_pages_only' ) === 'yes';
-		if ( $store_pages_only && ! WCAdminHelper::is_store_page() ) {
+		if ( $store_pages_only && ! WCAdminHelper::is_current_page_store_page() ) {
 			return false;
 		}
 

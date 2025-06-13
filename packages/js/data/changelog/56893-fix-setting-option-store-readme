@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix the import path for the setting options data store in README.md

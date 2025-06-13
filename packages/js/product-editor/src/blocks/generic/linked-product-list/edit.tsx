@@ -11,7 +11,7 @@ import {
 } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { resolveSelect } from '@wordpress/data';
-import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
+import { Product, productsStore } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { reusableBlock } from '@wordpress/icons';
@@ -74,12 +74,11 @@ async function getProductsBySearchValue(
 	searchValue = '',
 	excludedIds: number[] = []
 ): Promise< Product[] > {
-	return resolveSelect( PRODUCTS_STORE_NAME ).getProducts( {
+	return resolveSelect( productsStore ).getProducts( {
 		search: searchValue,
 		orderby: 'title',
 		order: 'asc',
 		per_page: 5,
-		// @ts-expect-error TODO react-18-upgrade: getProducts type is not correctly typed and was surfaced by https://github.com/woocommerce/woocommerce/pull/54146
 		exclude: excludedIds,
 	} );
 }

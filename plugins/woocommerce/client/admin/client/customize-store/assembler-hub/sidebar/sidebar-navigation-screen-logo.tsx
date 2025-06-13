@@ -69,7 +69,7 @@ const useLogoEdit = ( {
 		return {
 			siteIconId: _siteIconId,
 			mediaUpload:
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+				// @ts-expect-error Selector is not typed
 				select( blockEditorStore ).getSettings().mediaUpload,
 		};
 	}, [] );

@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 9.7.0
+ * @version 9.9.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -86,7 +86,33 @@ foreach ( $items as $item_id => $item ) :
 							 */
 							do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, $plain_text );
 
-							wc_display_item_meta( $item );
+							$item_meta = wc_display_item_meta(
+								$item,
+								array(
+									'before'       => '',
+									'after'        => '',
+									'separator'    => '<br>',
+									'echo'         => false,
+									'label_before' => '<span>',
+									'label_after'  => ':</span> ',
+								)
+							);
+							echo '<div class="email-order-item-meta">';
+							// Using wp_kses instead of wp_kses_post to remove all block elements.
+							echo wp_kses(
+								$item_meta,
+								array(
+									'br'   => array(),
+									'span' => array(),
+									'a'    => array(
+										'href'   => true,
+										'target' => true,
+										'rel'    => true,
+										'title'  => true,
+									),
+								)
+							);
+							echo '</div>';
 
 							/**
 							 * Allow other plugins to add additional product information.

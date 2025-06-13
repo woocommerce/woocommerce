@@ -28,7 +28,7 @@ const ShippingRecommendationWrapper = compose(
 					'woocommerce_setup_jetpack_opted_in',
 				] ) ||
 				! hasFinishedResolution( 'getOption', [
-					'wc_connect_options',
+					'wcshipping_options',
 				] ) ||
 				! select( pluginsStore ).hasFinishedResolution(
 					'isJetpackConnected',

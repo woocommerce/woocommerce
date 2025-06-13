@@ -1,0 +1,64 @@
+{
+	"name": "woocommerce/add-to-cart-with-options-variation-selector-attribute-name",
+	"title": "Variation Selector: Attribute Name (Beta)",
+	"description": "Format the name of an attribute associated with a variable product.",
+	"category": "woocommerce-product-elements",
+	"keywords": [ "WooCommerce" ],
+	"ancestor": [
+		"woocommerce/add-to-cart-with-options-variation-selector-attribute"
+	],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"supports": {
+		"inserter": false,
+		"interactivity": true,
+		"align": false,
+		"alignWide": false,
+		"color": {
+			"__experimentalSkipSerialization": true,
+			"gradients": true,
+			"__experimentalDefaultControls": {
+				"background": true,
+				"text": true
+			}
+		},
+		"typography": {
+			"__experimentalSkipSerialization": [
+				"fontSize",
+				"lineHeight",
+				"fontFamily",
+				"fontWeight",
+				"fontStyle",
+				"textTransform",
+				"textDecoration",
+				"letterSpacing"
+			],
+			"fontSize": true,
+			"lineHeight": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontStyle": true,
+			"__experimentalTextTransform": true,
+			"__experimentalTextDecoration": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalWritingMode": true,
+			"__experimentalDefaultControls": {
+				"fontSize": true
+			}
+		},
+		"spacing": {
+			"__experimentalSkipSerialization": true,
+			"padding": [ "horizontal", "vertical" ],
+			"__experimentalDefaultControls": {
+				"padding": true
+			}
+		}
+	},
+	"usesContext": [
+		"woocommerce/attributeId",
+		"woocommerce/attributeName",
+		"woocommerce/attributeTerms"
+	],
+	"style": "file:../woocommerce/add-to-cart-with-options-variation-selector-attribute-name-style.css"
+}

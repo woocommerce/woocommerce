@@ -1,5 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: Docs improvement, which will mostly surface in the developer docs. Beyond that, it doesn't feel like adding a README.md to the source tree warrants a changelog entry.
-
-

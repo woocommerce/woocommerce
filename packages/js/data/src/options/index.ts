@@ -12,7 +12,6 @@ import * as actions from './actions';
 import * as resolvers from './resolvers';
 import reducer, { State } from './reducer';
 import { controls } from './controls';
-
 export * from './types';
 export type { State };
 

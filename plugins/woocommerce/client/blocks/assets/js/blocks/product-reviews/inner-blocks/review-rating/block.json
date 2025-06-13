@@ -1,0 +1,28 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/product-review-rating",
+	"title": "Review Rating",
+	"category": "woocommerce",
+	"ancestor": [ "woocommerce/blockified-product-reviews" ],
+	"description": "Displays the rating of a product review.",
+	"textdomain": "woocommerce",
+	"usesContext": [ "commentId" ],
+	"attributes": {
+		"textAlign": {
+			"type": "string"
+		}
+	},
+	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
+		"color": {
+			"gradients": true,
+			"__experimentalDefaultControls": {
+				"background": true,
+				"text": true
+			}
+		}
+	}
+}

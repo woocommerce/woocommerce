@@ -29,6 +29,8 @@
 
 	&.single {
 		display: flex;
+		gap: $gap-small;
+
 		.plugins-install__list {
 			max-width: 360px;
 		}

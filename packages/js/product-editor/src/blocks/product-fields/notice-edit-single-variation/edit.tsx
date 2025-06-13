@@ -11,7 +11,7 @@ import { getNewPath } from '@woocommerce/navigation';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { useEntityProp } from '@wordpress/core-data';
+import { useEntityProp, store as coreStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -38,15 +38,15 @@ export function Edit( {
 	}: { parentName: string; isParentResolving: boolean } = useSelect(
 		( select ) => {
 			const { getEditedEntityRecord, hasFinishedResolution } =
-				select( 'core' );
+				select( coreStore );
 
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+			// @ts-expect-error getEditedEntityRecord of coreStore is not typed
 			const { name }: Product = getEditedEntityRecord(
 				'postType',
 				'product',
 				parentId
 			);
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+			// @ts-expect-error hasFinishedResolution of coreStore is not typed
 			const isResolutionFinished = ! hasFinishedResolution(
 				'getEditedEntityRecord',
 				[ 'postType', 'product', parentId ]

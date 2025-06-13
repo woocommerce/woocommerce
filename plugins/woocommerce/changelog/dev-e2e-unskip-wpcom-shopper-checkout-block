@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Make E2E test `shopper/checkout-block.spec.js` runnable in WPCOM.

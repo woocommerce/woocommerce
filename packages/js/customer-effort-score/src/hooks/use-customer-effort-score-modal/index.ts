@@ -31,7 +31,7 @@ export const useCustomerEffortScoreModal = () => {
 			},
 			isLoading: resolving,
 		};
-	} );
+	}, [] );
 
 	const markCesAsShown = async ( action: string ) => {
 		const { getOption } = resolveSelect( optionsStore );

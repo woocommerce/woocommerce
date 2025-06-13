@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Long local pickup details text will truncate on all options after selecting.

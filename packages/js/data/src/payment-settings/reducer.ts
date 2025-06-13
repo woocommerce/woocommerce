@@ -2,20 +2,21 @@
  * Internal dependencies
  */
 import { ACTION_TYPES } from './action-types';
-import { PaymentSettingsState } from './types';
+import { PaymentsSettingsState } from './types';
 import { Actions } from './actions';
 
 const reducer = (
-	state: PaymentSettingsState = {
+	state: PaymentsSettingsState = {
 		providers: [],
 		offlinePaymentGateways: [],
 		suggestions: [],
 		suggestionCategories: [],
 		isFetching: false,
+		isWooPayEligible: false,
 		errors: {},
 	},
 	payload?: Actions
-): PaymentSettingsState => {
+): PaymentsSettingsState => {
 	if ( payload && 'type' in payload ) {
 		switch ( payload.type ) {
 			case ACTION_TYPES.GET_PAYMENT_PROVIDERS_REQUEST:
@@ -44,6 +45,11 @@ const reducer = (
 			case ACTION_TYPES.UPDATE_PROVIDER_ORDERING:
 				return {
 					...state,
+				};
+			case ACTION_TYPES.SET_IS_ELIGIBLE:
+				return {
+					...state,
+					isWooPayEligible: payload.isEligible,
 				};
 		}
 	}

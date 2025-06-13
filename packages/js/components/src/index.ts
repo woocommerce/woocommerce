@@ -37,7 +37,7 @@ export { default as Rating } from './rating';
 export { default as ReportFilters } from './filters';
 export { default as ReviewRating } from './rating/review';
 export { RichTextEditor as __experimentalRichTextEditor } from './rich-text-editor';
-export { default as Search } from './search';
+export * from './search';
 export { default as SearchListControl } from './search-list-control';
 export { default as SearchListItem } from './search-list-control/item';
 export { default as SectionHeader } from './section-header';

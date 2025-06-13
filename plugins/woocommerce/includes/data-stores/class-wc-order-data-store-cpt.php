@@ -658,7 +658,18 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			);
 		}
 
-		return apply_filters( 'woocommerce_shop_order_search_results', $order_ids, $term, $search_fields );
+		/**
+		 * Filter the order ids to be returned.
+		 *
+		 * @since 3.0.0
+		 * @param array $order_ids The order ids.
+		 * @param string $term The search term.
+		 * @param array $search_fields The search fields.
+		 * @return array
+		 */
+		$order_ids = apply_filters( 'woocommerce_shop_order_search_results', $order_ids, $term, $search_fields );
+
+		return array_map( 'absint', $order_ids );
 	}
 
 	/**
@@ -863,7 +874,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		if ( $save ) {
 			$order->save_meta_data();
 		}
-
 	}
 
 	/**

@@ -20,7 +20,7 @@ import {
 	useAsyncFilter,
 } from '@woocommerce/components';
 import { CurrencyContext } from '@woocommerce/currency';
-import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
+import { productsStore, Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -59,12 +59,11 @@ export function AddProductsModal( {
 		async ( search = '' ) => {
 			setProducts( [] );
 
-			return resolveSelect( PRODUCTS_STORE_NAME )
+			return resolveSelect( productsStore )
 				.getProducts( {
 					search,
 					orderby: 'title',
 					order: 'asc',
-					// @ts-expect-error TODO react-18-upgrade: getProducts type is not correctly typed and was surfaced by https://github.com/woocommerce/woocommerce/pull/54146
 					exclude: [ ...initialValue, ...selectedProducts ].map(
 						( product ) => product.id
 					),

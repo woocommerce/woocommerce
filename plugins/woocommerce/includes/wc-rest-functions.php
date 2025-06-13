@@ -255,7 +255,7 @@ function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_
 function wc_rest_check_user_permissions( $context = 'read', $object_id = 0 ) {
 	$contexts = array(
 		'read'   => 'list_users',
-		'create' => 'promote_users', // Check if current user can create users, shop managers are not allowed to create users.
+		'create' => 'create_customers',
 		'edit'   => 'edit_users',
 		'delete' => 'delete_users',
 		'batch'  => 'promote_users',

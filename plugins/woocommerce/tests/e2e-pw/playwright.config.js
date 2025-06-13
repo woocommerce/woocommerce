@@ -6,8 +6,11 @@ import { defineConfig, devices } from '@playwright/test';
 require( 'dotenv' ).config( { path: __dirname + '/.env' } );
 
 if ( ! process.env.BASE_URL ) {
-	console.log( 'BASE_URL is not set. Using default.' );
-	process.env.BASE_URL = 'http://localhost:8086';
+	process.env.BASE_URL =
+		'http://localhost:' + ( process.env.WP_ENV_TESTS_PORT || '8086' );
+	console.log(
+		'BASE_URL is not set. Using default: ' + process.env.BASE_URL
+	);
 }
 
 const { BASE_URL, CI, E2E_MAX_FAILURES, REPEAT_EACH } = process.env;
@@ -71,28 +74,16 @@ export const setupProjects = [
 		dependencies: [ 'install wc' ],
 	},
 	{
-		name: 'consumer token setup',
-		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
-		testMatch: 'token.setup.js',
-		teardown: 'consumer token teardown',
-		dependencies: [ 'global authentication' ],
-	},
-	{
-		name: 'consumer token teardown',
-		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
-		testMatch: `token.teardown.js`,
-	},
-	{
 		name: 'site setup',
 		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
 		testMatch: `site.setup.js`,
-		dependencies: [ 'consumer token setup' ],
+		dependencies: [ 'global authentication' ],
 	},
 ];
 
 export default defineConfig( {
 	timeout: 120 * 1000,
-	expect: { timeout: 20 * 1000 },
+	expect: { timeout: CI ? 20 * 1000 : 10 * 1000 },
 	outputDir: TESTS_RESULTS_PATH,
 	testDir: `${ TESTS_ROOT_PATH }/tests`,
 	retries: CI ? 1 : 0,
@@ -110,8 +101,8 @@ export default defineConfig( {
 				? 'retain-on-first-failure'
 				: 'off',
 		video: 'retain-on-failure',
-		actionTimeout: 20 * 1000,
-		navigationTimeout: 20 * 1000,
+		actionTimeout: CI ? 20 * 1000 : 10 * 1000,
+		navigationTimeout: CI ? 20 * 1000 : 10 * 1000,
 		channel: 'chrome',
 		...devices[ 'Desktop Chrome' ],
 	},
@@ -123,7 +114,6 @@ export default defineConfig( {
 			name: 'e2e',
 			testIgnore: '**/api-tests/**',
 			dependencies: [ 'site setup' ],
-			fullyParallel: true,
 		},
 		{
 			name: 'api',

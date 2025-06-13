@@ -1,9 +1,13 @@
-const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * Internal dependencies
+ */
+import { expect, test as baseTest } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { WC_API_PATH } from '../../utils/api-client';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	customers: async ( { api }, use ) => {
+	customers: async ( { restApi }, use ) => {
 		const now = Date.now();
 		const customerData = {
 			walterWhite: {
@@ -66,14 +70,16 @@ const test = baseTest.extend( {
 		const customers = [];
 
 		for ( const customer of Object.values( customerData ) ) {
-			await api.post( 'customers', customer ).then( ( response ) => {
-				customers.push( response.data );
-			} );
+			await restApi
+				.post( `${ WC_API_PATH }/customers`, customer )
+				.then( ( response ) => {
+					customers.push( response.data );
+				} );
 		}
 
 		await use( customers );
 
-		await api.post( `customers/batch`, {
+		await restApi.post( `${ WC_API_PATH }/customers/batch`, {
 			delete: customers.map( ( customer ) => customer.id ),
 		} );
 	},

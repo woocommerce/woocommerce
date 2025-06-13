@@ -21,7 +21,7 @@ import { SurveyForm } from './survey-form';
 import lessonPlan from '../assets/icons/lesson-plan.js';
 import { Icon, brush, tag } from '@wordpress/icons';
 import { trackEvent } from '../tracking';
-import { isEntrepreneurFlow } from '~/customize-store/design-with-ai/entrepreneur-flow';
+import { isEntrepreneurFlow } from '../entrepreneur-flow';
 
 export * as actions from './actions';
 export * as services from './services';
@@ -34,14 +34,12 @@ export const Transitional = ( {
 	isWooExpress,
 	isSurveyOpen,
 	setSurveyOpen,
-	aiOnline,
 }: {
 	sendEvent: ( event: events ) => void;
 	hasCompleteSurvey: boolean;
 	isWooExpress: boolean;
 	isSurveyOpen: boolean;
 	setSurveyOpen: ( isOpen: boolean ) => void;
-	aiOnline: boolean;
 } ) => {
 	const homeUrl: string = getSetting( 'homeUrl', '' );
 	const adminUrl = getNewPath( getPersistedQuery(), '/', {} );
@@ -50,7 +48,6 @@ export const Transitional = ( {
 	};
 
 	const showSurveyButton = ! hasCompleteSurvey && ! isEntrepreneurFlow();
-	const showAISurvey = isWooExpress && aiOnline;
 
 	return (
 		<div className="woocommerce-customize-store__transitional">
@@ -62,7 +59,6 @@ export const Transitional = ( {
 					className="woocommerce-ai-survey-modal"
 				>
 					<SurveyForm
-						showAISurvey={ showAISurvey }
 						onSend={ () => {
 							sendEvent( {
 								type: 'COMPLETE_SURVEY',

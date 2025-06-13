@@ -11,7 +11,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { plus, reset } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import type { ForwardedRef } from 'react';
@@ -49,7 +49,7 @@ export type NumberProps = {
 const MEDIUM_DELAY = 500;
 const SHORT_DELAY = 100;
 
-export const NumberControl: React.FC< NumberProps > = forwardRef(
+export const NumberControl = forwardRef(
 	(
 		{
 			id,
@@ -145,7 +145,7 @@ export const NumberControl: React.FC< NumberProps > = forwardRef(
 
 		return (
 			<BaseControl
-				className={ classNames( {
+				className={ clsx( {
 					'has-error': error,
 				} ) }
 				id={ identifier }

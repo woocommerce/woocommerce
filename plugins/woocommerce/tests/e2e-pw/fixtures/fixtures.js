@@ -1,81 +1,34 @@
-const base = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { admin } = require( '../test-data/data' );
-const { random } = require( '../utils/helpers' );
+/**
+ * External dependencies
+ */
+import {
+	test as baseTest,
+	expect as baseExpect,
+	request as baseRequest,
+} from '@playwright/test';
 
-exports.test = base.test.extend( {
-	api: async ( { baseURL }, use ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-			axiosConfig: {
-				// allow 404s, so we can check if a resource was deleted without try/catch
-				validateStatus( status ) {
-					return ( status >= 200 && status < 300 ) || status === 404;
-				},
-			},
-		} );
+/**
+ * Internal dependencies
+ */
+import { random } from '../utils/helpers';
+import ApiClient, { WP_API_PATH } from '../utils/api-client';
 
-		await use( api );
-	},
-	wcAdminApi: async ( { baseURL }, use ) => {
-		const wcAdminApi = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc-admin', // Use wc-admin namespace
-		} );
-
-		await use( wcAdminApi );
-	},
-
-	/**
-	 * Fixture for interacting with the [WordPress REST API](https://developer.wordpress.org/rest-api/reference/) endpoints.
-	 *
-	 * @param {{baseURL: string}} fixtures
-	 * @param {function(base.APIRequestContext): Promise<void>} use
-	 */
-	wpApi: async ( { baseURL }, use ) => {
-		const wpApi = await base.request.newContext( {
-			baseURL,
-			extraHTTPHeaders: {
-				Authorization: `Basic ${ Buffer.from(
-					`${ admin.username }:${ admin.password }`
-				).toString( 'base64' ) }`,
-				cookie: '',
-			},
-		} );
-
-		await use( wpApi );
-	},
-
-	wcbtApi: async ( { baseURL }, use ) => {
-		const wcbtApi = await base.request.newContext( {
-			baseURL,
-			extraHTTPHeaders: {
-				Authorization: `Basic ${ Buffer.from(
-					`${ admin.username }:${ admin.password }`
-				).toString( 'base64' ) }`,
-				cookie: '',
-			},
-		} );
-
-		await use( wcbtApi );
+export const test = baseTest.extend( {
+	restApi: async ( {}, use ) => {
+		await use( ApiClient.getInstance() );
 	},
 
 	testPageTitlePrefix: [ '', { option: true } ],
 
-	testPage: async ( { wpApi, testPageTitlePrefix }, use ) => {
+	testPage: async ( { restApi, testPageTitlePrefix }, use ) => {
 		const pageTitle = `${ testPageTitlePrefix } Page ${ random() }`.trim();
 		const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
 
 		await use( { title: pageTitle, slug: pageSlug } );
 
 		// Cleanup
-		const pages = await wpApi.get(
-			`./wp-json/wp/v2/pages?slug=${ pageSlug }`,
+		const pages = await restApi.get(
+			`${ WP_API_PATH }/pages?slug=${ pageSlug }`,
 			{
 				data: {
 					_fields: [ 'id' ],
@@ -84,9 +37,8 @@ exports.test = base.test.extend( {
 			}
 		);
 
-		for ( const page of await pages.json() ) {
-			console.log( `Deleting page ${ page.id }` );
-			await wpApi.delete( `./wp-json/wp/v2/pages/${ page.id }`, {
+		for ( const page of await pages.data ) {
+			await restApi.delete( `${ WP_API_PATH }/pages/${ page.id }`, {
 				data: {
 					force: true,
 				},
@@ -96,15 +48,15 @@ exports.test = base.test.extend( {
 
 	testPostTitlePrefix: [ '', { option: true } ],
 
-	testPost: async ( { wpApi, testPostTitlePrefix }, use ) => {
+	testPost: async ( { restApi, testPostTitlePrefix }, use ) => {
 		const postTitle = `${ testPostTitlePrefix } Post ${ random() }`.trim();
 		const postSlug = postTitle.replace( / /gi, '-' ).toLowerCase();
 
 		await use( { title: postTitle, slug: postSlug } );
 
 		// Cleanup
-		const posts = await wpApi.get(
-			`./wp-json/wp/v2/posts?slug=${ postSlug }`,
+		const posts = await restApi.get(
+			`${ WP_API_PATH }/posts?slug=${ postSlug }`,
 			{
 				data: {
 					_fields: [ 'id' ],
@@ -113,9 +65,8 @@ exports.test = base.test.extend( {
 			}
 		);
 
-		for ( const post of await posts.json() ) {
-			console.log( `Deleting post ${ post.id }` );
-			await wpApi.delete( `./wp-json/wp/v2/posts/${ post.id }`, {
+		for ( const post of await posts.data ) {
+			await restApi.delete( `${ WP_API_PATH }/posts/${ post.id }`, {
 				data: {
 					force: true,
 				},
@@ -124,9 +75,9 @@ exports.test = base.test.extend( {
 	},
 } );
 
-exports.expect = base.expect;
-exports.request = base.request;
-exports.tags = {
+export const expect = baseExpect;
+export const request = baseRequest;
+export const tags = {
 	GUTENBERG: '@gutenberg',
 	SERVICES: '@services',
 	PAYMENTS: '@payments',

@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { addQueryArgs } from '@wordpress/url';
-import { apiFetch, select } from '@wordpress/data-controls';
+import { controls } from '@wordpress/data';
+import { apiFetch } from '@wordpress/data-controls';
 
 /**
  * Internal dependencies
@@ -110,7 +111,10 @@ export function* request< Query extends BaseQueryParams, DataType >(
  * @throws {Error} If the user does not have the required capability.
  */
 export function* checkUserCapability( capability: string ) {
-	const currentUser: WCUser = yield select( userStore, 'getCurrentUser' );
+	const currentUser: WCUser = yield controls.resolveSelect(
+		userStore,
+		'getCurrentUser'
+	);
 
 	if ( ! currentUser.capabilities[ capability ] ) {
 		throw new Error( `User does not have ${ capability } capability.` );

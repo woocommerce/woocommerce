@@ -17,6 +17,12 @@ use WC_Tracks;
  * @internal
  */
 class ShippingController {
+
+	/**
+	 * Script handle used for enqueueing the scripts needed for managing the Local Pickup Shipping Settings.
+	 */
+	private const LOCAL_PICKUP_ADMIN_JS_HANDLE = 'wc-shipping-method-pickup-location';
+
 	/**
 	 * Instance of the asset API.
 	 *
@@ -45,9 +51,8 @@ class ShippingController {
 	 * @param AssetDataRegistry $asset_data_registry Instance of the asset data registry.
 	 */
 	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry ) {
-		$this->asset_api           = $asset_api;
-		$this->asset_data_registry = $asset_data_registry;
-
+		$this->asset_api            = $asset_api;
+		$this->asset_data_registry  = $asset_data_registry;
 		$this->local_pickup_enabled = LocalPickupUtils::is_local_pickup_enabled();
 	}
 
@@ -66,7 +71,7 @@ class ShippingController {
 		$this->asset_data_registry->add( 'shippingCostRequiresAddress', get_option( 'woocommerce_shipping_cost_requires_address', false ) === 'yes' );
 		add_action( 'rest_api_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'hydrate_client_settings' ) );
+		add_action( 'admin_footer', array( $this, 'hydrate_client_settings' ), 0 );
 		add_action( 'woocommerce_load_shipping_methods', array( $this, 'register_local_pickup' ) );
 		add_filter( 'woocommerce_local_pickup_methods', array( $this, 'register_local_pickup_method' ) );
 		add_filter( 'woocommerce_order_hide_shipping_address', array( $this, 'hide_shipping_address_for_local_pickup' ), 10 );
@@ -77,7 +82,6 @@ class ShippingController {
 		add_filter( 'pre_update_option_pickup_location_pickup_locations', array( $this, 'flush_cache' ) );
 		add_filter( 'woocommerce_shipping_packages', array( $this, 'remove_shipping_if_no_address' ), 11 );
 		add_filter( 'woocommerce_order_shipping_to_display', array( $this, 'show_local_pickup_details' ), 10, 2 );
-
 		add_action( 'rest_pre_serve_request', array( $this, 'track_local_pickup' ), 10, 4 );
 	}
 
@@ -106,16 +110,90 @@ class ShippingController {
 		$details         = $shipping_method->get_meta( 'pickup_details' );
 		$location        = $shipping_method->get_meta( 'pickup_location' );
 		$address         = $shipping_method->get_meta( 'pickup_address' );
+		$cost            = $shipping_method->get_total();
 
-		if ( ! $address ) {
+		$lines = array();
+
+		if ( $location ) {
+			$lines[] = sprintf(
+				// Translators: %s location name.
+				__( 'Collection from <strong>%s</strong>:', 'woocommerce' ),
+				$location
+			);
+		}
+
+		if ( $address ) {
+			$lines[] = nl2br( esc_html( str_replace( ',', ', ', $address ) ) );
+		}
+
+		if ( $details ) {
+			$lines[] = wp_kses_post( $details );
+		}
+
+		if ( $cost > 0 ) {
+			$tax_display = get_option( 'woocommerce_tax_display_cart' );
+			$tax         = $shipping_method->get_total_tax();
+
+			// Format cost with tax handling.
+			if ( 'excl' === $tax_display ) {
+				// Show pickup cost excluding tax.
+				$formatted_cost = wc_price( $cost, array( 'currency' => $order->get_currency() ) );
+				if ( (float) $tax > 0 && $order->get_prices_include_tax() ) {
+					/**
+					 * Hook to add tax label to pickup cost.
+					 *
+					 * @since 6.0.0
+					 * @param string $tax_label Tax label.
+					 * @param \WC_Order $order Order object.
+					 * @param string $tax_display Tax display.
+					 * @return string
+					 */
+					$formatted_cost .= apply_filters(
+						'woocommerce_order_shipping_to_display_tax_label',
+						'&nbsp;<small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>',
+						$order,
+						$tax_display
+					);
+				}
+			} else {
+				// Show pickup cost including tax.
+				$formatted_cost = wc_price(
+					(float) $cost + (float) $tax,
+					array( 'currency' => $order->get_currency() )
+				);
+				if ( (float) $tax > 0 && ! $order->get_prices_include_tax() ) {
+					/**
+					 * Hook to add tax label to pickup cost.
+					 *
+					 * @since 6.0.0
+					 * @param string $tax_label Tax label.
+					 * @param \WC_Order $order Order object.
+					 * @param string $tax_display Tax display.
+					 * @return string
+					 */
+					$formatted_cost .= apply_filters(
+						'woocommerce_order_shipping_to_display_tax_label',
+						'&nbsp;<small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>',
+						$order,
+						$tax_display
+					);
+				}
+			}
+
+			$lines[] = '<br>' . sprintf(
+				// Translators: %s is the formatted price.
+				__( 'Pickup cost: %s', 'woocommerce' ),
+				$formatted_cost
+			);
+		}
+
+		// If nothing is available, return original.
+		if ( empty( $lines ) ) {
 			return $return_value;
 		}
 
-		return sprintf(
-			// Translators: %s location name.
-			__( 'Collection from <strong>%s</strong>:', 'woocommerce' ),
-			$location
-		) . '<br/><address>' . str_replace( ',', ',<br/>', $address ) . '</address><br/>' . $details;
+		// Join all the lines with a <br> separator.
+		return implode( '<br>', $lines );
 	}
 
 	/**
@@ -125,11 +203,16 @@ class ShippingController {
 	 * @return array|mixed The filtered settings.
 	 */
 	public function remove_shipping_settings( $settings ) {
-		if ( CartCheckoutUtils::is_checkout_block_default() && $this->local_pickup_enabled ) {
+		if ( CartCheckoutUtils::is_cart_block_default() ) {
 			foreach ( $settings as $index => $setting ) {
-				if ( 'woocommerce_shipping_cost_requires_address' === $setting['id'] ) {
-					$settings[ $index ]['desc_tip'] =
-						__( 'Local pickup rates will display in the Cart and Checkout blocks, even without an address.', 'woocommerce' );
+				if ( 'woocommerce_enable_shipping_calc' === $setting['id'] ) {
+					$settings[ $index ]['desc_tip'] = sprintf(
+					/* translators: %s: URL to the documentation. */
+						__( 'This feature is not available when using the <a href="%s">Cart and checkout blocks</a>. Shipping will be calculated at checkout.', 'woocommerce' ),
+						'https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/'
+					);
+					$settings[ $index ]['disabled'] = true;
+					$settings[ $index ]['value']    = 'no';
 					break;
 				}
 			}
@@ -232,6 +315,11 @@ class ShippingController {
 	 * Hydrate client settings
 	 */
 	public function hydrate_client_settings() {
+		if ( ! wp_script_is( self::LOCAL_PICKUP_ADMIN_JS_HANDLE, 'enqueued' ) ) {
+			// Only hydrate the settings if the script dependent on them is enqueued.
+			return;
+		}
+
 		$locations = get_option( 'pickup_location_pickup_locations', array() );
 
 		$formatted_pickup_locations = array();
@@ -281,7 +369,7 @@ class ShippingController {
 		);
 
 		wp_add_inline_script(
-			'wc-shipping-method-pickup-location',
+			self::LOCAL_PICKUP_ADMIN_JS_HANDLE,
 			sprintf(
 				'var hydratedScreenSettings = %s;',
 				wp_json_encode( $settings )
@@ -293,7 +381,7 @@ class ShippingController {
 	 * Load admin scripts.
 	 */
 	public function admin_scripts() {
-		$this->asset_api->register_script( 'wc-shipping-method-pickup-location', 'assets/client/blocks/wc-shipping-method-pickup-location.js', array(), true );
+		$this->asset_api->register_script( self::LOCAL_PICKUP_ADMIN_JS_HANDLE, 'assets/client/blocks/wc-shipping-method-pickup-location.js', array(), true );
 	}
 
 	/**
@@ -301,7 +389,12 @@ class ShippingController {
 	 */
 	public function register_local_pickup() {
 		if ( CartCheckoutUtils::is_checkout_block_default() ) {
-			wc()->shipping->register_shipping_method( new PickupLocation() );
+			$wc_instance = WC();
+			if ( is_object( $wc_instance ) && method_exists( $wc_instance, 'shipping' ) && is_object( $wc_instance->shipping ) && method_exists( $wc_instance->shipping, 'register_shipping_method' ) ) {
+				$wc_instance->shipping->register_shipping_method( new PickupLocation() );
+			} else {
+				wc_get_logger()->error( 'Error registering pickup location: WC()->shipping->register_shipping_method is not available', array( 'source' => 'shipping-controller' ) );
+			}
 		}
 	}
 
@@ -415,62 +508,19 @@ class ShippingController {
 	}
 
 	/**
-	 * Checks whether the address is "full" in the sense that it contains all required fields to calculate shipping rates.
-	 *
-	 * @return bool Whether the customer has a full shipping address (address_1, city, state, postcode, country).
-	 * Only required fields are checked.
-	 */
-	public function has_full_shipping_address() {
-		$customer = WC()->customer;
-
-		if ( ! $customer instanceof WC_Customer ) {
-			return false;
-		}
-
-		// These are the important fields required to get the shipping rates.
-		$shipping_address = array(
-			'city'     => $customer->get_shipping_city(),
-			'state'    => $customer->get_shipping_state(),
-			'postcode' => $customer->get_shipping_postcode(),
-			'country'  => $customer->get_shipping_country(),
-		);
-		$address_fields   = WC()->countries->get_country_locale();
-		$locale_key       = ! empty( $shipping_address['country'] ) && array_key_exists( $shipping_address['country'], $address_fields ) ? $shipping_address['country'] : 'default';
-		$default_locale   = $address_fields['default'];
-		$country_locale   = $address_fields[ $locale_key ] ?? array();
-
-		/**
-		 * Checks all shipping address fields against the country's locale settings.
-		 *
-		 * If there's a `required` setting for the field in the country-specific locale, that setting is used, otherwise
-		 * the default locale's setting is used. If the default locale doesn't have a setting either, the field is
-		 * considered optional and therefore valid, even if empty.
-		 */
-		foreach ( $shipping_address as $key => $value ) {
-			// Skip further checks if the field has a value. From this point on $value is empty.
-			if ( ! empty( $value ) ) {
-				continue;
-			}
-
-			$locale_to_check = isset( $country_locale[ $key ]['required'] ) ? $country_locale : $default_locale;
-
-			// If the locale requires the field return false.
-			if ( isset( $locale_to_check[ $key ]['required'] ) && true === wc_string_to_bool( $locale_to_check[ $key ]['required'] ) ) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Remove shipping (i.e. delivery, not local pickup) if
-	 * "Hide shipping costs until an address is entered" is enabled,
+	 * Remove shipping (i.e. delivery, not local pickup) if "Hide shipping costs until an address is entered" is enabled,
 	 * and no address has been entered yet.
+	 *
+	 * Only applies to block checkout because pickup is chosen separately to shipping in that context.
 	 *
 	 * @param array $packages Array of shipping packages.
 	 * @return array
 	 */
 	public function remove_shipping_if_no_address( $packages ) {
+		if ( 'shortcode' === WC()->cart->cart_context ) {
+			return $packages;
+		}
+
 		$shipping_cost_requires_address = wc_string_to_bool( get_option( 'woocommerce_shipping_cost_requires_address', 'no' ) );
 
 		// Return early here for a small performance gain if we don't need to hide shipping costs until an address is entered.
@@ -478,9 +528,9 @@ class ShippingController {
 			return $packages;
 		}
 
-		$has_full_address = $this->has_full_shipping_address();
+		$customer = WC()->customer;
 
-		if ( $has_full_address ) {
+		if ( $customer instanceof WC_Customer && $customer->has_full_shipping_address() ) {
 			return $packages;
 		}
 
@@ -498,6 +548,7 @@ class ShippingController {
 			$packages
 		);
 	}
+
 	/**
 	 * Track local pickup settings changes via Store API
 	 *

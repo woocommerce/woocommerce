@@ -29,24 +29,37 @@ class WC_REST_Customers_Controller_Test extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut         = new WC_REST_Customers_Controller();
-		$this->admin_id    = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		$this->customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$this->sut             = new WC_REST_Customers_Controller();
+		$this->admin_id        = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->shop_manager_id = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
+		$this->editor_id       = self::factory()->user->create( array( 'role' => 'editor' ) );
+		$this->customer_id     = self::factory()->user->create( array( 'role' => 'customer' ) );
 	}
 
 	/**
-	 * @testDox Test that an admin user can create a customer.
+	 * @testDox Test creating customers.
 	 */
 	public function test_customer_create_permissions(): void {
 		$api_request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
 		$api_request->set_body_params(
 			array(
-				'email' => 'test_customer',
-				'role'  => 'customer',
+				'email' => 'test_customer@example.com',
 			)
 		);
-		wp_set_current_user( $this->admin_id );
 
+		wp_set_current_user( $this->shop_manager_id );
+		$this->assertTrue(
+			$this->sut->create_item_permissions_check( $api_request ),
+			'A shop manager user can create a customer.'
+		);
+
+		wp_set_current_user( $this->editor_id );
+		$this->assertWPError(
+			$this->sut->create_item_permissions_check( $api_request ),
+			'An editor user cannot create a customer.'
+		);
+
+		wp_set_current_user( $this->admin_id );
 		$this->assertTrue(
 			$this->sut->create_item_permissions_check( $api_request ),
 			'An admin user can create a customer.'
@@ -55,24 +68,37 @@ class WC_REST_Customers_Controller_Test extends WC_Unit_Test_Case {
 		$api_request->set_body_params(
 			array(
 				'role'  => 'administrator',
+				'roles' => 'administrator',
 				'email' => 'test_admin@example.com',
 			)
 		);
 		$response = $this->sut->create_item( $api_request );
 		$data     = $response->get_data();
-		$this->assertEquals( 'customer', $data['role'] );
+		$this->assertEquals( 'customer', $data['role'], 'A created customer will always have a role of customer.' );
 		$customer = new WC_Customer( $data['id'] );
 		$this->assertEquals( 'customer', $customer->get_role() );
 	}
 
 	/**
-	 * @testDox Test that an admin user can update a customer.
+	 * @testDox Test updating customers.
 	 */
 	public function test_customer_update_permissions(): void {
 		$api_request = new WP_REST_Request( 'PUT', '/wc/v3/customers/' );
 		$api_request->set_param( 'id', $this->customer_id );
-		wp_set_current_user( $this->admin_id );
 
+		wp_set_current_user( $this->shop_manager_id );
+		$this->assertTrue(
+			$this->sut->update_item_permissions_check( $api_request ),
+			'A shop manager user can update a customer.'
+		);
+
+		wp_set_current_user( $this->editor_id );
+		$this->assertWPError(
+			$this->sut->update_item_permissions_check( $api_request ),
+			'An editor user cannot update a customer.'
+		);
+
+		wp_set_current_user( $this->admin_id );
 		$this->assertTrue(
 			$this->sut->update_item_permissions_check( $api_request ),
 			'An admin user can update a customer.'
@@ -99,8 +125,9 @@ class WC_REST_Customers_Controller_Test extends WC_Unit_Test_Case {
 
 		$api_request->set_body_params(
 			array(
-				'id'   => $this->customer_id,
-				'role' => 'administrator',
+				'id'    => $this->customer_id,
+				'role'  => 'administrator',
+				'roles' => 'administrator',
 			)
 		);
 		$response = $this->sut->update_item( $api_request );
@@ -110,13 +137,25 @@ class WC_REST_Customers_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox Test that an admin user can delete a customer.
+	 * @testDox Test deleting customers.
 	 */
 	public function test_customer_delete_permission(): void {
 		$api_request = new WP_REST_Request( 'DELETE', '/wc/v3/customers' );
 		$api_request->set_param( 'id', $this->customer_id );
-		wp_set_current_user( $this->admin_id );
 
+		wp_set_current_user( $this->shop_manager_id );
+		$this->assertWPError(
+			$this->sut->delete_item_permissions_check( $api_request ),
+			'A shop manager user cannot delete a customer.'
+		);
+
+		wp_set_current_user( $this->editor_id );
+		$this->assertWPError(
+			$this->sut->delete_item_permissions_check( $api_request ),
+			'An editor user cannot delete a customer.'
+		);
+
+		wp_set_current_user( $this->admin_id );
 		$this->assertTrue(
 			$this->sut->delete_item_permissions_check( $api_request ),
 			'An admin user can delete a customer.'
@@ -131,13 +170,25 @@ class WC_REST_Customers_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox Test that an admin user can view a customer.
+	 * @testDox Test viewing customer data.
 	 */
 	public function test_customer_view_permission(): void {
 		$api_request = new WP_REST_Request( 'GET', '/wc/v3/customers/' );
 		$api_request->set_param( 'id', $this->customer_id );
-		wp_set_current_user( $this->admin_id );
 
+		wp_set_current_user( $this->shop_manager_id );
+		$this->assertTrue(
+			$this->sut->get_item_permissions_check( $api_request ),
+			'A shop manager user can view a customer.'
+		);
+
+		wp_set_current_user( $this->editor_id );
+		$this->assertWPError(
+			$this->sut->get_item_permissions_check( $api_request ),
+			'An editor user cannot view a customer.'
+		);
+
+		wp_set_current_user( $this->admin_id );
 		$this->assertTrue(
 			$this->sut->get_item_permissions_check( $api_request ),
 			'An admin user can view a customer.'

@@ -140,7 +140,6 @@ test.describe(
 			assemblerPage,
 		} ) => {
 			const assembler = await assemblerPage.getAssembler();
-			const editor = await assemblerPage.getEditor();
 
 			await assembler
 				.locator( '.block-editor-block-patterns-list__list-item' )
@@ -164,14 +163,28 @@ test.describe(
 				const expectedFooterClass =
 					extractFooterClass( footerPickerClass );
 
-				const footerPattern = editor.locator(
-					`footer div.wc-blocks-footer-pattern`
+				const editor = await assemblerPage.getEditor();
+				const footer = editor.getByRole( 'document', {
+					name: 'Footer',
+				} );
+
+				await expect(
+					footer,
+					'Footer should be visible'
+				).toBeVisible();
+
+				const footerPattern = footer.locator(
+					`div.wc-blocks-footer-pattern`
 				);
 
-				await footerPattern.waitFor();
 				await expect(
-					await footerPattern.getAttribute( 'class' )
-				).toContain( expectedFooterClass );
+					footerPattern,
+					'Footer pattern should be visible'
+				).toBeVisible();
+				await expect(
+					footerPattern,
+					`Footer should have class ${ expectedFooterClass }`
+				).toHaveClass( new RegExp( expectedFooterClass ) );
 			}
 		} );
 	}

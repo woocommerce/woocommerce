@@ -7,43 +7,17 @@ namespace Automattic\WooCommerce\Internal\Admin\WCPayPromotion;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\EvaluateSuggestion;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * WooPayments Promotion engine.
+ *
+ * @deprecated 9.9.0 The WooPayments promotion engine is deprecated and will be removed in a future version of WooCommerce.
  */
 class Init extends RemoteSpecsEngine {
-	/**
-	 * Constructor.
-	 */
-	public function __construct() {
-		// If the React-based Payments settings page is enabled, we don't need the old WooPayments promotion system,
-		// as we will show the WooPayments suggestion with the new system.
-		if ( Features::is_enabled( 'reactify-classic-payments-settings' ) ) {
-			return;
-		}
-
-		/* phpcs:disable WordPress.Security.NonceVerification */
-		$is_payments_setting_page = isset( $_GET['page'] ) && 'wc-settings' === $_GET['page'] && isset( $_GET['tab'] ) && 'checkout' === $_GET['tab'];
-		$is_wc_admin_page         = isset( $_GET['page'] ) && 'wc-admin' === $_GET['page'];
-
-		if ( $is_payments_setting_page || $is_wc_admin_page ) {
-			add_filter( 'woocommerce_admin_shared_settings', array( $this, 'add_component_settings' ) );
-		}
-
-		if ( ! wp_is_json_request() && ! $is_payments_setting_page ) {
-			return;
-		}
-
-		add_filter( 'woocommerce_payment_gateways', array( __CLASS__, 'possibly_register_pre_install_wc_pay_promotion_gateway' ) );
-		add_filter( 'option_woocommerce_gateway_order', array( __CLASS__, 'set_gateway_top_of_list' ) );
-		add_filter( 'default_option_woocommerce_gateway_order', array( __CLASS__, 'set_gateway_top_of_list' ) );
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'load_payment_method_promotions' ) );
-		add_action( 'update_option_woocommerce_default_country', array( $this, 'delete_specs_transient' ) );
-	}
 
 	/**
 	 * Possibly registers the pre-install WooPayments promoted gateway.
@@ -90,11 +64,12 @@ class Init extends RemoteSpecsEngine {
 	public static function set_gateway_top_of_list( $ordering ) {
 		$ordering = (array) $ordering;
 		$id       = WCPaymentGatewayPreInstallWCPayPromotion::GATEWAY_ID;
-		// Only tweak the ordering if the list hasn't been reordered with WooCommerce Payments in it already.
+		// Only tweak the ordering if the list hasn't been reordered with WooPayments in it already.
 		if ( ! isset( $ordering[ $id ] ) || ! is_numeric( $ordering[ $id ] ) ) {
-			$is_empty        = empty( $ordering ) || ( count( $ordering ) === 1 && $ordering[0] === false );
-			$ordering[ $id ] = $is_empty ? 0 : ( min( $ordering ) - 1 );
+			$is_empty        = empty( $ordering ) || ( count( $ordering ) === 1 && in_array( $ordering[0], array( false, '' ) ) );
+			$ordering[ $id ] = $is_empty ? 0 : ( min( array_map( 'intval', $ordering ) ) - 1 );
 		}
+
 		return $ordering;
 	}
 
@@ -204,18 +179,6 @@ class Init extends RemoteSpecsEngine {
 		}
 
 		return $specs;
-	}
-
-	/**
-	 * Add component settings.
-	 *
-	 * @param array $settings Component settings.
-	 *
-	 * @return array
-	 */
-	public function add_component_settings( $settings ) {
-		$settings['isWooPayEligible'] = self::is_woopay_eligible();
-		return $settings;
 	}
 
 	/**

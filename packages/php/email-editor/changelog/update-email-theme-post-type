@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Updated post type for theme from `mailpoet_email_theme` to `woocommerce_email_theme` for consistency with WooCommerce naming conventions.

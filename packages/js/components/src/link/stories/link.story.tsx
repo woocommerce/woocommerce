@@ -3,7 +3,6 @@
  */
 import { withConsole } from '@storybook/addon-console';
 import { createElement } from '@wordpress/element';
-import React from 'react';
 
 /**
  * Internal dependencies

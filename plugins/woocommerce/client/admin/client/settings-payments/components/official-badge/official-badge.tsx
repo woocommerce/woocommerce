@@ -1,46 +1,69 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { Popover } from '@wordpress/components';
 import { Link, Pill } from '@woocommerce/components';
-import { createInterpolateElement, useState } from '@wordpress/element';
-import { useDebounce } from '@wordpress/compose';
+import { createInterpolateElement, useRef, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { WC_ASSET_URL } from '~/utils/admin-settings';
+import { recordPaymentsEvent } from '~/settings-payments/utils';
 
 interface OfficialBadgeProps {
 	/**
 	 * The style of the badge.
 	 */
 	variant: 'expanded' | 'compact';
+
+	/**
+	 * The id of the official suggestion.
+	 */
+	suggestionId: string;
 }
 
 /**
  * A component that displays an official badge.
+ *
  * The style of the badge can be either "expanded" or "compact".
  *
  * @example
  * // Render an official badge with icon and text.
- * <OfficialBadge variant="expanded" />
+ * <OfficialBadge variant="expanded" suggestionId="some_id" />
  *
  * @example
  * // Render an official badge with just the icon.
- * <OfficialBadge variant="compact" />
+ * <OfficialBadge variant="compact" suggestionId="some_id" />
  */
-export const OfficialBadge = ( { variant }: OfficialBadgeProps ) => {
+export const OfficialBadge = ( {
+	variant,
+	suggestionId,
+}: OfficialBadgeProps ) => {
 	const [ isPopoverVisible, setPopoverVisible ] = useState( false );
+	const buttonRef = useRef< HTMLButtonElement >( null );
 
-	const hidePopoverDebounced = useDebounce( () => {
+	const handleClick = ( event: React.MouseEvent | React.KeyboardEvent ) => {
+		const clickedElement = event.target as HTMLElement;
+		const parentSpan = clickedElement.closest(
+			'.woocommerce-official-extension-badge__container'
+		);
+
+		if ( buttonRef.current && parentSpan !== buttonRef.current ) {
+			return;
+		}
+
+		setPopoverVisible( ( prev ) => ! prev );
+
+		// Record the event when the user clicks on the badge.
+		recordPaymentsEvent( 'official_badge_click', {
+			suggestion_id: suggestionId,
+		} );
+	};
+
+	const handleFocusOutside = () => {
 		setPopoverVisible( false );
-	}, 350 );
-	const showPopover = () => {
-		setPopoverVisible( true );
-		hidePopoverDebounced.cancel();
 	};
 
 	return (
@@ -49,12 +72,11 @@ export const OfficialBadge = ( { variant }: OfficialBadgeProps ) => {
 				className="woocommerce-official-extension-badge__container"
 				tabIndex={ 0 }
 				role="button"
-				onClick={ () => setPopoverVisible( ! isPopoverVisible ) }
-				onMouseEnter={ showPopover }
-				onMouseLeave={ hidePopoverDebounced }
-				onKeyDown={ ( event ) => {
+				ref={ buttonRef }
+				onClick={ handleClick }
+				onKeyDown={ ( event: React.KeyboardEvent ) => {
 					if ( event.key === 'Enter' || event.key === ' ' ) {
-						setPopoverVisible( ! isPopoverVisible );
+						handleClick( event );
 					}
 				} }
 			>
@@ -77,7 +99,7 @@ export const OfficialBadge = ( { variant }: OfficialBadgeProps ) => {
 						focusOnMount={ true }
 						noArrow={ true }
 						shift={ true }
-						onClose={ hidePopoverDebounced }
+						onFocusOutside={ handleFocusOutside }
 					>
 						<div className="components-popover__content-container">
 							<p>
@@ -93,6 +115,16 @@ export const OfficialBadge = ( { variant }: OfficialBadgeProps ) => {
 												target="_blank"
 												rel="noreferrer"
 												type="external"
+												onClick={ () => {
+													// Record the event when the user clicks on the learn more link.
+													recordPaymentsEvent(
+														'official_badge_learn_more_click',
+														{
+															suggestion_id:
+																suggestionId,
+														}
+													);
+												} }
 											>
 												{ __(
 													'Learn more',

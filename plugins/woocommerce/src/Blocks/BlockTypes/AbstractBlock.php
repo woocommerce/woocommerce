@@ -223,9 +223,16 @@ abstract class AbstractBlock {
 		$block_settings = [
 			'render_callback' => $this->get_block_type_render_callback(),
 			'editor_script'   => $this->get_block_type_editor_script( 'handle' ),
-			'editor_style'    => $this->get_block_type_editor_style(),
-			'style'           => $this->get_block_type_style(),
 		];
+
+		// Conditionally override these, otherwise rely on block.json metadata.
+		if ( $this->get_block_type_style() ) {
+			$block_settings['style'] = $this->get_block_type_style();
+		}
+
+		if ( $this->get_block_type_editor_style() ) {
+			$block_settings['editor_style'] = $this->get_block_type_editor_style();
+		}
 
 		if ( isset( $this->api_version ) ) {
 			$block_settings['api_version'] = intval( $this->api_version );
@@ -241,8 +248,8 @@ abstract class AbstractBlock {
 		 */
 		if (
 			! is_admin() &&
-			! wc_current_theme_is_fse_theme() &&
-			$block_settings['style'] &&
+			! wp_is_block_theme() &&
+			! empty( $block_settings['style'] ) &&
 			(
 				! function_exists( 'wp_should_load_separate_core_block_assets' ) ||
 				! wp_should_load_separate_core_block_assets()

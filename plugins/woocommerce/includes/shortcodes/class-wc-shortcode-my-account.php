@@ -311,12 +311,6 @@ class WC_Shortcode_My_Account {
 			return false;
 		}
 
-		if ( is_multisite() && ! is_user_member_of_blog( $user_data->ID, get_current_blog_id() ) ) {
-			wc_add_notice( __( 'Invalid username or email.', 'woocommerce' ), 'error' );
-
-			return false;
-		}
-
 		// Redefining user_login ensures we return the right case in the email.
 		$user_login = $user_data->user_login;
 

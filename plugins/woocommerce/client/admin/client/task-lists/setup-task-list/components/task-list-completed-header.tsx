@@ -44,9 +44,10 @@ function getStoreAgeInWeeks( adminInstallTimestamp: number ) {
 	return storeAgeInWeeks;
 }
 
-export const TaskListCompletedHeader: React.FC<
-	TaskListCompletedHeaderProps
-> = ( { hideTasks, customerEffortScore } ) => {
+export const TaskListCompletedHeader = ( {
+	hideTasks,
+	customerEffortScore,
+}: TaskListCompletedHeaderProps ) => {
 	const { updateOptions } = useDispatch( optionsStore );
 	const [ showCesModal, setShowCesModal ] = useState( false );
 	const [ hasSubmittedScore, setHasSubmittedScore ] = useState( false );

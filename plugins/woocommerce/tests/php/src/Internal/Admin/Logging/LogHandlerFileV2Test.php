@@ -314,4 +314,21 @@ MESSAGE;
 		$expected_string = '4 expired log files were deleted.';
 		$this->assertStringContainsString( $expected_string, $actual_content );
 	}
+
+	/**
+	 * @testdox Check that the handle method does not throw an error when passed a non-array context.
+	 */
+	public function test_handle_context_does_not_throw_error_non_array_contexts() {
+		$result = $this->sut->handle( time(), 'debug', 'test', 'not an array' );
+		$this->assertTrue( $result );
+
+		$result = $this->sut->handle( time(), 'debug', 'test', null );
+		$this->assertTrue( $result );
+
+		$result = $this->sut->handle( time(), 'debug', 'test', 42 );
+		$this->assertTrue( $result );
+
+		$result = $this->sut->handle( time(), 'debug', 'test', new \WC_Order() );
+		$this->assertTrue( $result );
+	}
 }

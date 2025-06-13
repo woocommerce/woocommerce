@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<ruleset name="Custom WordPress Standards">
+	<!-- Set the base standard to WordPress -->
+	<rule ref="WordPress"/>
+
+	<!-- Define files and folders to scan -->
+	<file>.</file>
+
+	<!-- Exclude test files from FileName rules because we need to match Codeception autoload -->
+	<rule ref="WordPress.Files.FileName">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<!-- We should use WP_Filesystem or another safer solution but this change can be more complex -->
+	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents">
+		<exclude-pattern>src</exclude-pattern>
+	</rule>
+
+	<!-- Exclude bootstrap from the SeparateFunctionsFromOO.Mixed rule -->
+	<rule ref="Universal.Files.SeparateFunctionsFromOO.Mixed">
+		<exclude-pattern>tests/unit/_bootstrap.php</exclude-pattern>
+	</rule>
+
+	<!-- Exclude test files from the PSR2.Methods.MethodDeclaration.Underscore rule due to methods _after() and _before() -->
+	<rule ref="PSR2.Methods.MethodDeclaration.Underscore">
+		<exclude-pattern>tests/integration</exclude-pattern>
+		<exclude-pattern>tests/unit</exclude-pattern>
+	</rule>
+
+	<!-- Skip the vendor directory -->
+	<exclude-pattern>vendor/*</exclude-pattern>
+
+	<!-- Skip the node_modules directory -->
+	<exclude-pattern>node_modules/*</exclude-pattern>
+
+	<!-- Skip the PHPStan temp directory -->
+	<exclude-pattern>tasks/phpstan/temp/*</exclude-pattern>
+</ruleset>

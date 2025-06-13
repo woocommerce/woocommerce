@@ -13,26 +13,22 @@ import {
  * Internal dependencies
  */
 import { getCountryCode } from '~/dashboard/utils';
-import WooCommerceServicesItem from './experimental-woocommerce-services-item';
+import WooCommerceShippingItem from './experimental-woocommerce-shipping-item';
 import { ShippingRecommendationsList } from './shipping-recommendations';
 import './shipping-recommendations.scss';
 import { ShippingTour } from '../guided-tours/shipping-tour';
 
-const ShippingRecommendations: React.FC = () => {
+const ShippingRecommendations = () => {
 	const {
 		activePlugins,
 		installedPlugins,
 		countryCode,
-		isJetpackConnected,
 		isSellingDigitalProductsOnly,
 	} = useSelect( ( select ) => {
 		const settings = select( settingsStore ).getSettings( 'general' );
 
-		const {
-			getActivePlugins,
-			getInstalledPlugins,
-			isJetpackConnected: _isJetpackConnected,
-		} = select( pluginsStore );
+		const { getActivePlugins, getInstalledPlugins } =
+			select( pluginsStore );
 
 		const profileItems =
 			select( onboardingStore ).getProfileItems().product_types;
@@ -43,23 +39,12 @@ const ShippingRecommendations: React.FC = () => {
 			countryCode: getCountryCode(
 				settings.general?.woocommerce_default_country
 			),
-			isJetpackConnected: _isJetpackConnected(),
 			isSellingDigitalProductsOnly:
 				profileItems?.length === 1 && profileItems[ 0 ] === 'downloads',
 		};
 	}, [] );
 
-	if (
-		activePlugins.includes( 'woocommerce-shipping' ) ||
-		activePlugins.includes( 'woocommerce-tax' )
-	) {
-		return <ShippingTour showShippingRecommendationsStep={ false } />;
-	}
-
-	if (
-		activePlugins.includes( 'woocommerce-services' ) &&
-		isJetpackConnected
-	) {
+	if ( activePlugins.includes( 'woocommerce-shipping' ) ) {
 		return <ShippingTour showShippingRecommendationsStep={ false } />;
 	}
 
@@ -71,9 +56,9 @@ const ShippingRecommendations: React.FC = () => {
 		<>
 			<ShippingTour showShippingRecommendationsStep={ true } />
 			<ShippingRecommendationsList>
-				<WooCommerceServicesItem
-					isWCSInstalled={ installedPlugins.includes(
-						'woocommerce-services'
+				<WooCommerceShippingItem
+					isPluginInstalled={ installedPlugins.includes(
+						'woocommerce-shipping'
 					) }
 				/>
 			</ShippingRecommendationsList>

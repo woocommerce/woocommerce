@@ -3,7 +3,6 @@
  */
 import { render, screen } from '@testing-library/react';
 import { useSortable } from '@dnd-kit/sortable';
-import React from 'react';
 
 /**
  * Internal dependencies

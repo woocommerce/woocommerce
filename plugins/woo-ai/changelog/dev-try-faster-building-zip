@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Monorepo: minor tweaks in zip building script (use frozen lock file when installing dependecies).

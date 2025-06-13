@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { assertEvent, assign, fromCallback, fromPromise, setup } from 'xstate5';
-import React from 'react';
 import { getQuery, navigateTo } from '@woocommerce/navigation';
 import { onboardingStore, type TaskListType } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -14,6 +13,7 @@ import { getSetting } from '@woocommerce/settings';
  */
 import { LoadingPage } from './pages/loading';
 import { SitePreviewPage } from './pages/site-preview';
+import { PaymentsContent } from './pages/payments-content';
 import type {
 	LaunchYourStoreComponentProps,
 	LaunchYourStoreQueryParams,
@@ -48,6 +48,9 @@ export type MainContentMachineEvents =
 	| { type: 'SHOW_LAUNCH_STORE_PENDING_CACHE' }
 	| { type: 'EXTERNAL_URL_UPDATE' }
 	| { type: 'SHOW_LOADING' }
+	| { type: 'SHOW_PAYMENTS' }
+	| { type: 'POP_BROWSER_STACK' }
+	| { type: 'RETURN_FROM_PAYMENTS' }
 	| congratsEvents;
 
 const contentQueryParamListener = fromCallback( ( { sendBack } ) => {
@@ -62,6 +65,17 @@ export const mainContentMachine = setup( {
 	actions: {
 		updateQueryParams: ( _, params: LaunchYourStoreQueryParams ) => {
 			updateQueryParams< LaunchYourStoreQueryParams >( params );
+		},
+		cleanupPaymentsUrl: () => {
+			// Clean up URL without causing page refresh
+			const url = new URL( window.location.href );
+			url.searchParams.delete( 'content' );
+
+			// Remove any payments-related path parameters
+			if ( url.searchParams.get( 'path' )?.includes( 'woopayments' ) ) {
+				url.searchParams.set( 'path', '/launch-your-store' );
+			}
+			window.history.replaceState( null, '', url.toString() );
 		},
 		assignSiteCachedStatus: assign( {
 			siteIsShowingCachedContent: true,
@@ -99,6 +113,15 @@ export const mainContentMachine = setup( {
 			const { content } = getQuery() as LaunchYourStoreQueryParams;
 			return !! content && content === contentLocation;
 		},
+		hasWooPaymentsOnboardingPath: () => {
+			const query = getQuery() as LaunchYourStoreQueryParams & {
+				path?: string;
+			};
+			return (
+				!! query.path &&
+				query.path.includes( '/woopayments/onboarding' )
+			);
+		},
 	},
 	actors: {
 		contentQueryParamListener,
@@ -125,6 +148,10 @@ export const mainContentMachine = setup( {
 		navigate: {
 			always: [
 				{
+					guard: { type: 'hasWooPaymentsOnboardingPath' },
+					target: 'payments',
+				},
+				{
 					guard: {
 						type: 'hasContentLocation',
 						params: { content: 'site-preview' },
@@ -138,6 +165,13 @@ export const mainContentMachine = setup( {
 					target: 'launchStoreSuccess',
 				},
 				{
+					guard: {
+						type: 'hasContentLocation',
+						params: { content: 'payments' },
+					},
+					target: 'payments',
+				},
+				{
 					target: '#sitePreview',
 				},
 			],
@@ -146,6 +180,23 @@ export const mainContentMachine = setup( {
 			id: 'sitePreview',
 			meta: {
 				component: SitePreviewPage,
+			},
+		},
+		payments: {
+			id: 'payments',
+			meta: {
+				component: PaymentsContent,
+			},
+			entry: [
+				{
+					type: 'updateQueryParams',
+					params: { content: 'payments' },
+				},
+			],
+			on: {
+				EXTERNAL_URL_UPDATE: {
+					target: 'navigate',
+				},
 			},
 		},
 		launchStoreSuccess: {
@@ -238,6 +289,24 @@ export const mainContentMachine = setup( {
 		},
 		SHOW_LOADING: {
 			target: '#loading',
+		},
+		SHOW_PAYMENTS: {
+			target: '#payments',
+		},
+		POP_BROWSER_STACK: {
+			actions: assign( {
+				siteIsShowingCachedContent: undefined,
+			} ),
+			target: '#sitePreview',
+		},
+		RETURN_FROM_PAYMENTS: {
+			actions: [
+				assign( {
+					siteIsShowingCachedContent: undefined,
+				} ),
+				'cleanupPaymentsUrl',
+			],
+			target: '#sitePreview',
 		},
 	},
 } );

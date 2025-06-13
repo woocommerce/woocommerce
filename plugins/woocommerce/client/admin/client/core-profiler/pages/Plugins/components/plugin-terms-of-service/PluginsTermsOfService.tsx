@@ -18,7 +18,6 @@ export const PluginsTermsOfService = ( {
 	const pluginsWithTOS = selectedPlugins.filter( ( plugin ) =>
 		[
 			'jetpack',
-			'woocommerce-services:shipping',
 			'woocommerce-services:tax',
 			'woocommerce-shipping',
 			'woocommerce-tax',

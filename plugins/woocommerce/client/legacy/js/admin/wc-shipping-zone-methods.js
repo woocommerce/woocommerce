@@ -104,7 +104,6 @@
 					$( document.body ).on( 'wc_backbone_modal_next_response', this.onAddShippingMethodSubmitted );
 					$( document.body ).on( 'wc_backbone_modal_before_remove', this.onCloseConfigureShippingMethod );
 					$( document.body ).on( 'wc_backbone_modal_back_response', this.onConfigureShippingMethodBack );
-					$( document.body ).on( 'change', '.wc-shipping-zone-method-selector select', this.onChangeShippingMethodSelector );
 					$( document.body ).on( 'click', '.wc-shipping-zone-postcodes-toggle', this.onTogglePostcodes );
 					$( document.body ).on( 'wc_backbone_modal_validation', { view: this }, this.validateFormArguments );
 					$( document.body ).on( 'wc_backbone_modal_loaded', { view: this }, this.onModalLoaded );
@@ -351,6 +350,40 @@
 
 					$( document.body ).trigger( 'init_tooltips' );
 				},
+				// Cost values need to be stripped of their thousandth separators and made sure
+				// the decimal separator is a ".".
+				unformatShippingMethodNumericValues: function( data ) {
+					if ( ! window.wc.wcSettings.CURRENCY ) {
+						return data;
+					}
+
+					const config = window.wc.wcSettings.CURRENCY ;
+					const numericValuesFields = [
+						'woocommerce_free_shipping_min_amount',
+						'woocommerce_flat_rate_cost',
+						'woocommerce_flat_rate_no_class_cost',
+					];
+					const flatRateClassCostIdPrefix = 'woocommerce_flat_rate_class_cost_';
+
+					Object.keys( data ).forEach( ( key ) => {
+						if ( numericValuesFields.includes( key ) || key.startsWith( flatRateClassCostIdPrefix ) ) {
+							const formattedValue = data[ key ];
+
+							// this method runs for every field in the model, so we may encounter empty fields because
+							// the field may not be present in the form presented to the user.
+							// we don't throw the error since we expect any validation error to be handled in the backend
+
+							try {
+								const unformattedValue = window.wc.currency.unformatLocalisedMonetaryValue( config, formattedValue );
+								data[ key ] = unformattedValue;
+							} catch ( error ) {
+								return; // we leave the original data as-is by returning here
+							}
+						}
+					} );
+
+					return data;
+				},
 				onConfigureShippingMethodSubmitted: function( event, target, posted_data ) {
 					if ( 'wc-modal-shipping-method-settings' === target ) {
 						shippingMethodView.block();
@@ -361,7 +394,7 @@
 							{
 								wc_shipping_zones_nonce : data.wc_shipping_zones_nonce,
 								instance_id             : posted_data.instance_id,
-								data                    : posted_data
+								data                    : shippingMethodView.unformatShippingMethodNumericValues( posted_data )
 							},
 							function( response, textStatus ) {
 								if ( 'success' === textStatus && response.success ) {
@@ -457,12 +490,12 @@
 					return htmlContent.prop( 'outerHTML' );
 				},
 				addCurrencySymbol: function( html ) {
-					if ( ! window.wc.ShippingCurrencyContext || ! window.wc.ShippingCurrencyNumberFormat ) {
+					if ( ! window.wc.wcSettings.CURRENCY || ! window.wc.currency.localiseMonetaryValue ) {
 						return html;
 					}
 					const htmlContent = $( html );
 					const priceInputs = htmlContent.find( '.wc-shipping-modal-price' );
-					const config = window.wc.ShippingCurrencyContext.getCurrencyConfig();
+					const config = window.wc.wcSettings.CURRENCY;
 					const { symbol, symbolPosition } = config;
 
 					priceInputs.addClass( `wc-shipping-currency-size-${ symbol.length }` );
@@ -474,7 +507,7 @@
 					priceInputs.each( ( i ) => {
 						const priceInput = $( priceInputs[ i ] );
 						const value = priceInput.attr( 'value' );
-						const formattedValue = window.wc.ShippingCurrencyNumberFormat( config, value );
+						const formattedValue = window.wc.currency.localiseMonetaryValue( config, value );
 						priceInput.attr( 'value', formattedValue );
 					} );
 
@@ -643,6 +676,14 @@
 						}
 
 						event.data.view.possiblyAddShippingClassLink( event );
+						if ( window.wc.wcSettings.CURRENCY && window.wc.currency.localiseMonetaryValue ) {
+							const config = window.wc.wcSettings.CURRENCY;
+							$('.wc-shipping-modal-price').on('blur', function() {
+								const value = $(this).val();
+								const formattedValue = window.wc.currency.localiseMonetaryValue( config, value );
+								$(this).val( formattedValue );
+							});
+						}
 					}
 				},
 				possiblyAddShippingClassLink: function( event ) {
@@ -708,11 +749,6 @@
 							});
 						}
 					}
-				},
-				onChangeShippingMethodSelector: function() {
-					var description = $( this ).find( 'option:selected' ).data( 'description' );
-					$( this ).parent().find( '.wc-shipping-zone-method-description' ).remove();
-					$( this ).after( '<div class="wc-shipping-zone-method-description">' + description + '</div>' );
 				},
 				onTogglePostcodes: function( event ) {
 					event.preventDefault();

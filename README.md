@@ -25,7 +25,7 @@ Once you've installed all of the prerequisites, the following will prepare all o
 # Ensure that correct version of Node is installed and being used
 nvm install
 # Install the PHP and Composer dependencies for all of the plugins, packages, and tools
-pnpm install
+pnpm install -frozen-lockfile
 # Build all of the plugins, packages, and tools in the monorepo
 pnpm build
 ```
@@ -63,4 +63,4 @@ For peer to peer support, real-time announcements, and office hours, please [joi
 
 ## Contributing to WooCommerce
 
-As an open source project, we rely on community contributions to continue to improve WooCommerce. To contribute, please follow the pre-requisites above and visit our [Contributing to Woo](https://developer.woo.com/docs/category/contributing/) doc for more links and contribution guidelines.
+As an open source project, we rely on community contributions to continue to improve WooCommerce. To contribute, please follow the pre-requisites above and visit our [Contributing to Woo](https://developer.woocommerce.com/docs/contribution/contributing/) doc for more links and contribution guidelines.

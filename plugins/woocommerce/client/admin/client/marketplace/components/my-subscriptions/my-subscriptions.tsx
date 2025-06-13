@@ -140,6 +140,24 @@ export default function MySubscriptions(): JSX.Element {
 					onClose={ handleConnectNoticeClose }
 				/>
 			) }
+
+			{ ! wccomSettings?.has_host_plan_orders &&
+				wccomSettings?.connection_url_notice && (
+					<Notice
+						id={ 'woo-connection-url-notice' }
+						description={ wccomSettings?.connection_url_notice }
+						isDismissible={ false }
+						variant="error"
+					>
+						<Button
+							href={ connectUrl( 'wc-admin', true ) }
+							variant="secondary"
+						>
+							{ __( 'Reconnect', 'woocommerce' ) }
+						</Button>
+					</Notice>
+				) }
+
 			<div className="woocommerce-marketplace__my-subscriptions">
 				<InstallModal />
 				<section className="woocommerce-marketplace__my-subscriptions__notices">

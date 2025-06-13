@@ -11,7 +11,7 @@ import {
 import { __ } from '@wordpress/i18n';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import {
-	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	experimentalProductVariationsStore,
 	optionsStore,
 	useUserPreferences,
 } from '@woocommerce/data';
@@ -27,7 +27,7 @@ import { useEntityId } from '@wordpress/core-data';
  */
 import { DEFAULT_VARIATION_PER_PAGE_OPTION } from '../../../constants';
 
-export const VariableProductTour: React.FC = () => {
+export const VariableProductTour = () => {
 	const [ isTourOpen, setIsTourOpen ] = useState( false );
 	const productId = useEntityId( 'postType', 'product' );
 	const prevTotalCount = useRef< undefined | number >();
@@ -36,8 +36,8 @@ export const VariableProductTour: React.FC = () => {
 			product_id: productId,
 			page: 1,
 			per_page: DEFAULT_VARIATION_PER_PAGE_OPTION,
-			order: 'asc',
-			orderby: 'menu_order',
+			order: 'asc' as const,
+			orderby: 'menu_order' as const,
 		} ),
 		[ productId ]
 	);
@@ -45,10 +45,9 @@ export const VariableProductTour: React.FC = () => {
 	const { totalCount } = useSelect(
 		( select ) => {
 			const { getProductVariationsTotalCount } = select(
-				EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+				experimentalProductVariationsStore
 			);
 			return {
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				totalCount: getProductVariationsTotalCount( requestParams ),
 			};
 		},

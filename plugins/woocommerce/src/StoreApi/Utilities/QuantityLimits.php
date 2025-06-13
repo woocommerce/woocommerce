@@ -138,7 +138,7 @@ final class QuantityLimits {
 			return true;
 		}
 
-		if ( ! $limits['editable'] ) {
+		if ( ! $limits['editable'] && $quantity > 1 ) {
 			/* translators: 1: product name */
 			return new \WP_Error( 'readonly_quantity', sprintf( __( 'The quantity of &quot;%1$s&quot; cannot be changed', 'woocommerce' ), $product->get_name() ) );
 		}
@@ -175,7 +175,7 @@ final class QuantityLimits {
 
 		if ( $product->is_sold_individually() ) {
 			$limits[] = 1;
-		} elseif ( ! $product->backorders_allowed() ) {
+		} elseif ( $product->managing_stock() || ! $product->backorders_allowed() ) {
 			$limits[] = $this->get_remaining_stock( $product );
 		}
 

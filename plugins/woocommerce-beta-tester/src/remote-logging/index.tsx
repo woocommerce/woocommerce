@@ -10,12 +10,15 @@ import { log, init as initRemoteLogging } from '@woocommerce/remote-logging';
 // @ts-ignore no types
 // eslint-disable-next-line @woocommerce/dependency-group
 import { dispatch } from '@wordpress/data';
+
+/**
+ * Internal dependencies
+ */
+import { API_NAMESPACE } from './constants';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore no types
 // eslint-disable-next-line @woocommerce/dependency-group
 import { STORE_KEY as optionsStore } from '../options/data/constants';
-
-export const API_NAMESPACE = '/wc-admin-test-helper';
 
 interface RemoteLoggingStatus {
 	isEnabled: boolean;

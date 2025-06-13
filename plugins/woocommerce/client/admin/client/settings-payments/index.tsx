@@ -2,11 +2,8 @@
  * External dependencies
  */
 import { Gridicon } from '@automattic/components';
-import { Button, SelectControl } from '@wordpress/components';
-import {
-	PAYMENT_SETTINGS_STORE_NAME,
-	type PaymentSettingsSelectors,
-} from '@woocommerce/data';
+import { Button, Placeholder, SelectControl } from '@wordpress/components';
+import { paymentSettingsStore } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import React, {
 	useState,
@@ -71,10 +68,31 @@ const SettingsPaymentsOfflineChunk = lazy(
 /**
  * Lazy-loaded chunk for the WooPayments settings page.
  */
-const SettingsPaymentsWooCommercePaymentsChunk = lazy(
+const SettingsPaymentsWooPaymentsChunk = lazy(
 	() =>
 		import(
-			/* webpackChunkName: "settings-payments-woocommerce-payments" */ './settings-payments-woocommerce-payments'
+			/* webpackChunkName: "settings-payments-woocommerce-payments" */ './settings-payments-woopayments'
+		)
+);
+
+const SettingsPaymentsBacsChunk = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "settings-payments-bacs" */ './offline/settings-payments-bacs'
+		)
+);
+
+const SettingsPaymentsCodChunk = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "settings-payments-cod" */ './offline/settings-payments-cod'
+		)
+);
+
+const SettingsPaymentsChequeChunk = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "settings-payments-cheque" */ './offline/settings-payments-cheque'
 		)
 );
 
@@ -86,7 +104,7 @@ const hideWooCommerceNavTab = ( display: string ) => {
 		'.woo-nav-tab-wrapper'
 	);
 
-	// Add the 'hidden' class to hide the element
+	// Add the 'hidden' class to hide the element.
 	if ( externalElement ) {
 		externalElement.style.display = display;
 	}
@@ -100,7 +118,7 @@ const SettingsPaymentsMain = () => {
 
 	useEffect( () => {
 		if ( location.pathname === '' ) {
-			hideWooCommerceNavTab( 'block' );
+			hideWooCommerceNavTab( 'flex' );
 		}
 	}, [ location ] );
 	return (
@@ -180,58 +198,51 @@ export const SettingsPaymentsMethods = () => {
 	const [ isCompleted, setIsCompleted ] = useState( false );
 	const { providers } = useSelect( ( select ) => {
 		return {
-			isFetching: (
-				select(
-					PAYMENT_SETTINGS_STORE_NAME
-				) as PaymentSettingsSelectors
-			 ).isFetching(),
+			isFetching: select( paymentSettingsStore ).isFetching(),
 			providers:
-				(
-					select(
-						PAYMENT_SETTINGS_STORE_NAME
-					) as PaymentSettingsSelectors
-				 ).getPaymentProviders() || [],
+				select( paymentSettingsStore ).getPaymentProviders() || [],
 		};
 	}, [] );
 
-	// Retrieve wooPayments gateway
+	// Retrieve the WooPayments gateway.
 	const wooPayments = getWooPaymentsFromProviders( providers );
 
 	const onPaymentMethodsContinueClick = useCallback( () => {
-		// Record the event along with payment methods selected
+		// Record the event along with payment methods selected.
 		recordEvent( 'wcpay_settings_payment_methods_continue', {
+			displayed_payment_methods:
+				Object.keys( paymentMethodsState ).join( ', ' ),
 			selected_payment_methods: Object.keys( paymentMethodsState )
 				.filter(
-					( paymentMethod ) =>
-						paymentMethodsState[ paymentMethod ] === true
+					( paymentMethod ) => paymentMethodsState[ paymentMethod ]
 				)
 				.join( ', ' ),
 			deselected_payment_methods: Object.keys( paymentMethodsState )
 				.filter(
-					( paymentMethod ) =>
-						paymentMethodsState[ paymentMethod ] === false
+					( paymentMethod ) => ! paymentMethodsState[ paymentMethod ]
 				)
 				.join( ', ' ),
+			business_country:
+				window.wcSettings?.admin?.woocommerce_payments_nox_profile
+					?.business_country_code ?? 'unknown',
 		} );
 
 		setIsCompleted( true );
-		// Get the onboarding URL or fallback to the test drive account link
+
+		// Get the onboarding URL or fallback to the test drive account link.
 		const onboardUrl =
-			wooPayments?.onboarding?._links.onboard.href ||
+			wooPayments?.onboarding?._links?.onboard?.href ||
 			getWooPaymentsTestDriveAccountLink();
 
-		// Combine the onboard URL with the query string
-		const fullOnboardUrl =
+		// Combine the onboard URL with the query string and redirect to the onboard URL.
+		window.location.href =
 			onboardUrl +
 			'&capabilities=' +
 			encodeURIComponent( JSON.stringify( paymentMethodsState ) );
-
-		// Redirect to the onboard URL
-		window.location.href = fullOnboardUrl;
 	}, [ paymentMethodsState, wooPayments ] );
 
 	useEffect( () => {
-		window.scrollTo( 0, 0 ); // Scrolls to the top-left corner of the page
+		window.scrollTo( 0, 0 ); // Scrolls to the top-left corner of the page.
 
 		if ( location.pathname === '/payment-methods' ) {
 			hideWooCommerceNavTab( 'none' );
@@ -301,14 +312,14 @@ export const SettingsPaymentsMethods = () => {
 export const SettingsPaymentsMainWrapper = () => {
 	return (
 		<>
-			<Header title={ __( 'WooCommerce Settings', 'woocommerce' ) } />
+			<Header title={ __( 'Settings', 'woocommerce' ) } />
 			<HistoryRouter history={ getHistory() }>
 				<Routes>
-					<Route path="/" element={ <SettingsPaymentsMain /> } />
 					<Route
 						path="/payment-methods"
 						element={ <SettingsPaymentsMethods /> }
 					/>
+					<Route path="/*" element={ <SettingsPaymentsMain /> } />
 				</Routes>
 			</HistoryRouter>
 		</>
@@ -355,12 +366,114 @@ export const SettingsPaymentsOfflineWrapper = () => {
 /**
  * Wraps the WooPayments settings page.
  */
-export const SettingsPaymentsWooCommercePaymentsWrapper = () => {
+export const SettingsPaymentsWooPaymentsWrapper = () => {
 	return (
 		<>
-			<Header title={ __( 'WooCommerce Settings', 'woocommerce' ) } />
+			<Header title={ __( 'Settings', 'woocommerce' ) } />
 			<Suspense fallback={ <div>Loading WooPayments settings...</div> }>
-				<SettingsPaymentsWooCommercePaymentsChunk />
+				<SettingsPaymentsWooPaymentsChunk />
+			</Suspense>
+		</>
+	);
+};
+
+export const SettingsPaymentsBacsWrapper = () => {
+	return (
+		<>
+			<Header
+				title={ __( 'Direct bank transfer', 'woocommerce' ) }
+				backLink={ getAdminLink(
+					'admin.php?page=wc-settings&tab=checkout&section=offline'
+				) }
+			/>
+			<Suspense
+				fallback={
+					<>
+						<div className="settings-payments-bacs__container">
+							<div className="settings-payment-gateways">
+								<div className="settings-payment-gateways__header">
+									<div className="settings-payment-gateways__header-title">
+										{ __(
+											'Direct bank transfer',
+											'woocommerce'
+										) }
+									</div>
+								</div>
+								<Placeholder />
+							</div>
+						</div>
+					</>
+				}
+			>
+				<SettingsPaymentsBacsChunk />
+			</Suspense>
+		</>
+	);
+};
+
+export const SettingsPaymentsCodWrapper = () => {
+	return (
+		<>
+			<Header
+				title={ __( 'Cash on delivery', 'woocommerce' ) }
+				backLink={ getAdminLink(
+					'admin.php?page=wc-settings&tab=checkout&section=offline'
+				) }
+			/>
+			<Suspense
+				fallback={
+					<>
+						<div className="settings-payments-cod__container">
+							<div className="settings-payment-gateways">
+								<div className="settings-payment-gateways__header">
+									<div className="settings-payment-gateways__header-title">
+										{ __(
+											'Cash on delivery',
+											'woocommerce'
+										) }
+									</div>
+								</div>
+								<Placeholder />
+							</div>
+						</div>
+					</>
+				}
+			>
+				<SettingsPaymentsCodChunk />
+			</Suspense>
+		</>
+	);
+};
+
+export const SettingsPaymentsChequeWrapper = () => {
+	return (
+		<>
+			<Header
+				title={ __( 'Check payments', 'woocommerce' ) }
+				backLink={ getAdminLink(
+					'admin.php?page=wc-settings&tab=checkout&section=offline'
+				) }
+			/>
+			<Suspense
+				fallback={
+					<>
+						<div className="settings-payments-cheque__container">
+							<div className="settings-payment-gateways">
+								<div className="settings-payment-gateways__header">
+									<div className="settings-payment-gateways__header-title">
+										{ __(
+											'Check payments',
+											'woocommerce'
+										) }
+									</div>
+								</div>
+								<Placeholder />
+							</div>
+						</div>
+					</>
+				}
+			>
+				<SettingsPaymentsChequeChunk />
 			</Suspense>
 		</>
 	);

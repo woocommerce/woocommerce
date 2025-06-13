@@ -1,0 +1,222 @@
+/**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+import { useShippingData } from '@woocommerce/base-context/hooks';
+import clsx from 'clsx';
+import { Icon, store, shipping } from '@wordpress/icons';
+import { useEffect } from '@wordpress/element';
+import { cartStore, validationStore } from '@woocommerce/block-data';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { isPackageRateCollectable } from '@woocommerce/base-utils';
+import { getSetting } from '@woocommerce/settings';
+import { Button } from '@ariakit/react';
+
+/**
+ * Internal dependencies
+ */
+import { RatePrice, getLocalPickupPrices, getShippingPrices } from './shared';
+import type { minMaxPrices } from './shared';
+import { defaultLocalPickupText, defaultShippingText } from './constants';
+import { shippingAddressHasValidationErrors } from '../../../../data/cart/utils';
+
+const SHIPPING_RATE_ERROR = {
+	hidden: true,
+	message: __( 'Shipping options are not available', 'woocommerce' ),
+};
+
+const LocalPickupSelector = ( {
+	checked,
+	rate,
+	showPrice,
+	showIcon,
+	toggleText,
+	multiple,
+	onClick,
+}: {
+	checked: string;
+	rate: minMaxPrices;
+	showPrice: boolean;
+	showIcon: boolean;
+	toggleText: string;
+	multiple: boolean;
+	onClick: () => void;
+} ) => {
+	return (
+		<Button
+			render={ <div /> }
+			role="radio"
+			onClick={ onClick }
+			aria-checked={ checked === 'pickup' }
+			className={ clsx( 'wc-block-checkout__shipping-method-option', {
+				'wc-block-checkout__shipping-method-option--selected':
+					checked === 'pickup',
+			} ) }
+		>
+			<span className="wc-block-checkout__shipping-method-option-title-wrapper">
+				{ showIcon === true && (
+					<Icon
+						icon={ store }
+						size={ 28 }
+						className="wc-block-checkout__shipping-method-option-icon"
+					/>
+				) }
+				<span className="wc-block-checkout__shipping-method-option-title">
+					{ toggleText }
+				</span>
+			</span>
+			{ showPrice === true && (
+				<RatePrice
+					multiple={ multiple }
+					minRate={ rate.min }
+					maxRate={ rate.max }
+				/>
+			) }
+		</Button>
+	);
+};
+
+const ShippingSelector = ( {
+	checked,
+	rate,
+	showPrice,
+	showIcon,
+	toggleText,
+	onClick,
+	shippingCostRequiresAddress = false,
+}: {
+	checked: string;
+	rate: minMaxPrices;
+	showPrice: boolean;
+	showIcon: boolean;
+	shippingCostRequiresAddress: boolean;
+	onClick: () => void;
+	toggleText: string;
+} ) => {
+	const hasShippableRates = useSelect( ( select ) => {
+		const rates = select( cartStore ).getShippingRates();
+		return rates.some(
+			( { shipping_rates: shippingRate } ) =>
+				! shippingRate.every( isPackageRateCollectable )
+		);
+	} );
+	const rateShouldBeHidden =
+		shippingCostRequiresAddress &&
+		shippingAddressHasValidationErrors() &&
+		! hasShippableRates;
+	const hasShippingPrices = rate.min !== undefined && rate.max !== undefined;
+	const { setValidationErrors, clearValidationError } =
+		useDispatch( validationStore );
+	useEffect( () => {
+		if ( checked === 'shipping' && ! hasShippingPrices ) {
+			setValidationErrors( {
+				'shipping-rates-error': SHIPPING_RATE_ERROR,
+			} );
+		} else {
+			clearValidationError( 'shipping-rates-error' );
+		}
+		return () => clearValidationError( 'shipping-rates-error' );
+	}, [
+		checked,
+		clearValidationError,
+		hasShippingPrices,
+		setValidationErrors,
+	] );
+	const Price =
+		rate.min === undefined || rateShouldBeHidden ? (
+			<span className="wc-block-checkout__shipping-method-option-price">
+				{ __( 'calculated with an address', 'woocommerce' ) }
+			</span>
+		) : (
+			<RatePrice minRate={ rate.min } maxRate={ rate.max } />
+		);
+
+	return (
+		<Button
+			render={ <div /> }
+			role="radio"
+			onClick={ onClick }
+			aria-checked={ checked === 'shipping' }
+			className={ clsx( 'wc-block-checkout__shipping-method-option', {
+				'wc-block-checkout__shipping-method-option--selected':
+					checked === 'shipping',
+			} ) }
+		>
+			<span className="wc-block-checkout__shipping-method-option-title-wrapper">
+				{ showIcon === true && (
+					<Icon
+						icon={ shipping }
+						size={ 28 }
+						className="wc-block-checkout__shipping-method-option-icon"
+					/>
+				) }
+				<span className="wc-block-checkout__shipping-method-option-title">
+					{ toggleText }
+				</span>
+			</span>
+			{ showPrice === true && Price }
+		</Button>
+	);
+};
+
+const Block = ( {
+	checked,
+	onChange,
+	showPrice,
+	showIcon,
+	localPickupText,
+	shippingText,
+}: {
+	checked: string;
+	onChange: ( value: string ) => void;
+	showPrice: boolean;
+	showIcon: boolean;
+	localPickupText: string;
+	shippingText: string;
+} ): JSX.Element | null => {
+	const { shippingRates } = useShippingData();
+	const shippingCostRequiresAddress = getSetting< boolean >(
+		'shippingCostRequiresAddress',
+		false
+	);
+	const localPickupTextFromSettings = getSetting< string >(
+		'localPickupText',
+		localPickupText || defaultLocalPickupText
+	);
+
+	return (
+		<div
+			id="shipping-method"
+			// components-button-group is here for backwards compatibility, in case themes or plugins rely on it.
+			className="components-button-group wc-block-checkout__shipping-method-container"
+			role="radiogroup"
+		>
+			<ShippingSelector
+				checked={ checked }
+				onClick={ () => {
+					onChange( 'shipping' );
+				} }
+				rate={ getShippingPrices( shippingRates[ 0 ]?.shipping_rates ) }
+				showPrice={ showPrice }
+				showIcon={ showIcon }
+				shippingCostRequiresAddress={ shippingCostRequiresAddress }
+				toggleText={ shippingText || defaultShippingText }
+			/>
+			<LocalPickupSelector
+				checked={ checked }
+				onClick={ () => {
+					onChange( 'pickup' );
+				} }
+				rate={ getLocalPickupPrices(
+					shippingRates[ 0 ]?.shipping_rates
+				) }
+				multiple={ shippingRates.length > 1 }
+				showPrice={ showPrice }
+				showIcon={ showIcon }
+				toggleText={ localPickupTextFromSettings }
+			/>
+		</div>
+	);
+};
+
+export default Block;

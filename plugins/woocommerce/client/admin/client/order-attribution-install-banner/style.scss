@@ -98,6 +98,8 @@
 .components-button {
 	&.small {
 		width: 100%;
+		display: flex;
+		justify-content: center;
 	}
 
 	&.has-icon.has-text {

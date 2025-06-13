@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure Customer Effort Score queue option value is an array when corrupted with a string.

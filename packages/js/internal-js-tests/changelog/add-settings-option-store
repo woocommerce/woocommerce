@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Improve wpModulesMapper to exclude mappings for paths with suffixes

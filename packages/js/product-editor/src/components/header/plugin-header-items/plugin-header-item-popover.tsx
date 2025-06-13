@@ -7,7 +7,7 @@ import { plugins } from '@wordpress/icons';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { PinnedItems } from '@wordpress/interface';
+import PinnedItems from '@wordpress/interface/build-module/components/pinned-items';
 
 /**
  * Internal dependencies
@@ -15,9 +15,11 @@ import { PinnedItems } from '@wordpress/interface';
 import { HEADER_PINNED_ITEMS_SCOPE } from '../../../constants';
 import { PluginHeaderItemPopoverProps } from './types';
 
-export const PluginHeaderItemPopover: React.FC<
-	PluginHeaderItemPopoverProps
-> = ( { children, label, icon } ) => {
+export const PluginHeaderItemPopover = ( {
+	children,
+	label,
+	icon,
+}: PluginHeaderItemPopoverProps ) => {
 	const [ isVisible, setVisible ] = useState( false );
 
 	const childrenToRender =

@@ -1,0 +1,10 @@
+.wc-block-components-skeleton.wc-block-components-skeleton--checkout-order-summary-mobile {
+	.wc-block-components-skeleton__row {
+		padding: $gap-small 0;
+		display: flex;
+		justify-content: space-between;
+		border: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+		border-left: 0;
+		border-right: 0;
+	}
+}

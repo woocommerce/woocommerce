@@ -409,7 +409,9 @@ class WC_Helper_Updater {
 		$payload = array();
 
 		// Scan subscriptions.
-		foreach ( WC_Helper::get_subscriptions() as $subscription ) {
+		$subscriptions = WC_Helper::get_subscriptions();
+
+		foreach ( $subscriptions as $subscription ) {
 			$payload[ $subscription['product_id'] ] = array(
 				'product_id' => $subscription['product_id'],
 				'file_id'    => '',
@@ -443,7 +445,9 @@ class WC_Helper_Updater {
 		$payload = array();
 
 		// Scan subscriptions.
-		foreach ( WC_Helper::get_subscriptions() as $subscription ) {
+		$subscriptions = WC_Helper::get_subscriptions();
+
+		foreach ( $subscriptions as $subscription ) {
 			$payload[ $subscription['product_id'] ] = array(
 				'product_id' => $subscription['product_id'],
 				'file_id'    => '',
@@ -775,7 +779,7 @@ class WC_Helper_Updater {
 	 */
 	public static function get_updates_count_html() {
 		$count      = self::get_updates_count_based_on_site_status();
-		$count_html = sprintf( '<span class="update-plugins count-%d"><span class="update-count">%d</span></span>', $count, number_format_i18n( $count ) );
+		$count_html = sprintf( ' <span class="update-plugins count-%d"><span class="update-count">%d</span></span>', $count, number_format_i18n( $count ) );
 
 		return $count_html;
 	}

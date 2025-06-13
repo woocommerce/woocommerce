@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Added a filter to override IP/UserID in grouping rate limited requests. Custom logic can now be used to fingerprint requests, and allow more control over the rate limit.

@@ -1,10 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	TimezoneConfig,
-	__experimentalGetSettings as getSettings,
-} from '@wordpress/date';
+import { TimezoneConfig, getSettings } from '@wordpress/date';
 
 export function getSiteSettingsTimezoneAbbreviation() {
 	const { timezone } = getSettings() as {

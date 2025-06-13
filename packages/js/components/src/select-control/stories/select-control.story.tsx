@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { createElement, useState } from '@wordpress/element';
 /**
  * Internal dependencies
@@ -52,6 +51,16 @@ const options = [
 	},
 ];
 
+// Create a larger list of options for virtual scrolling example
+const manyOptions = Array.from( { length: 2000 }, ( _, index ) => {
+	const key = `option-${ index + 1 }`;
+	return {
+		key,
+		label: `Option ${ index + 1 }`,
+		value: { id: key },
+	};
+} );
+
 const SelectControlExample = () => {
 	const [ state, setState ] = useState( {
 		simpleSelected: [],
@@ -61,6 +70,31 @@ const SelectControlExample = () => {
 		multipleSelected: [],
 		inlineSelected: [],
 		allOptionsIncludingSelected: options[ options.length - 1 ].key,
+		virtualScrollSelected: [],
+		disabledSelected: [
+			{
+				key: 'apple',
+				label: 'Apple',
+				value: { id: 'apple' },
+			},
+			{
+				key: 'banana',
+				label: 'Banana',
+				value: { id: 'banana' },
+			},
+		],
+		disabledInlineSelected: [
+			{
+				key: 'apple',
+				label: 'Apple',
+				value: { id: 'apple' },
+			},
+			{
+				key: 'banana',
+				label: 'Banana',
+				value: { id: 'banana' },
+			},
+		],
 	} );
 
 	const {
@@ -71,6 +105,9 @@ const SelectControlExample = () => {
 		multipleSelected,
 		inlineSelected,
 		allOptionsIncludingSelected,
+		virtualScrollSelected,
+		disabledSelected,
+		disabledInlineSelected,
 	} = state;
 
 	return (
@@ -159,6 +196,50 @@ const SelectControlExample = () => {
 				options={ options }
 				placeholder="Start typing to filter options..."
 				selected={ multipleSelected }
+				showClearButton
+			/>
+			<br />
+			<SelectControl
+				label="Virtual scrolling with many options"
+				isSearchable
+				onChange={ ( selected ) =>
+					setState( { ...state, virtualScrollSelected: selected } )
+				}
+				options={ manyOptions }
+				placeholder="Start typing to filter options..."
+				selected={ virtualScrollSelected }
+				showAllOnFocus
+				virtualScroll={ true }
+				virtualItemHeight={ 56 }
+				virtualListHeight={ 56 * 6 }
+			/>
+			<br />
+			<SelectControl
+				label="Disabled select control"
+				isSearchable
+				multiple
+				disabled
+				onChange={ ( selected ) =>
+					setState( { ...state, disabledSelected: selected } )
+				}
+				options={ options }
+				placeholder="Start typing to filter options..."
+				selected={ disabledSelected }
+				showClearButton
+			/>
+			<br />
+			<SelectControl
+				label="Disabled select control with inline tags"
+				isSearchable
+				multiple
+				disabled
+				inlineTags
+				onChange={ ( selected ) =>
+					setState( { ...state, disabledInlineSelected: selected } )
+				}
+				options={ options }
+				placeholder="Start typing to filter options..."
+				selected={ disabledInlineSelected }
 				showClearButton
 			/>
 		</div>

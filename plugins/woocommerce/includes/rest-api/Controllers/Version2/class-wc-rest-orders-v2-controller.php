@@ -11,7 +11,6 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -253,8 +252,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			foreach ( $data['taxes']['total'] as $tax_rate_id => $tax ) {
 				$taxes[] = array(
 					'id'       => $tax_rate_id,
-					'total'    => $tax,
-					'subtotal' => isset( $data['taxes']['subtotal'][ $tax_rate_id ] ) ? $data['taxes']['subtotal'][ $tax_rate_id ] : '',
+					'total'    => wc_format_decimal( $tax, $this->request['dp'] ),
+					'subtotal' => isset( $data['taxes']['subtotal'][ $tax_rate_id ] ) ? wc_format_decimal( $data['taxes']['subtotal'][ $tax_rate_id ], $this->request['dp'] ) : '',
 				);
 			}
 			$data['taxes'] = $taxes;
@@ -1841,7 +1840,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'description' => __( 'Tax status of fee.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
-								'enum'        => array( ProductTaxStatus::TAXABLE, ProductTaxStatus::NONE ),
+								'enum'        => array( 'taxable', 'none' ),
 							),
 							'total'      => array(
 								'description' => __( 'Line total (after discounts).', 'woocommerce' ),

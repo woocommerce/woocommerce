@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Refactor email editor to work on top of wordpress/editor Editor component

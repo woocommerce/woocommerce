@@ -149,7 +149,7 @@ class WCAdminHelper {
 		$store_pages = apply_filters( 'woocommerce_store_pages', $store_pages );
 
 		foreach ( $store_pages as $page_slug => $page_id ) {
-			if ( is_page( $page_slug ) || ( $page_id > 0 && is_page( $page_id ) ) ) {
+			if ( $page_id > 0 && is_page( $page_id ) ) {
 				return true;
 			}
 		}

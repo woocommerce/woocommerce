@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { Button, CardDivider } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import {
 	pluginsStore,
-	PAYMENT_SETTINGS_STORE_NAME,
+	paymentSettingsStore,
 	PaymentGatewayLink,
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
@@ -16,6 +15,7 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import './ellipsis-menu-content.scss';
+import { recordPaymentsEvent } from '~/settings-payments/utils';
 
 interface EllipsisMenuContentProps {
 	/**
@@ -30,6 +30,10 @@ interface EllipsisMenuContentProps {
 	 * Indicates if the menu is being used for a payment extension suggestion.
 	 */
 	isSuggestion: boolean;
+	/**
+	 * The ID of the payment extension suggestion. Optional.
+	 */
+	suggestionId?: string;
 	/**
 	 * The URL to call when hiding a payment extension suggestion. Optional.
 	 */
@@ -65,6 +69,7 @@ export const EllipsisMenuContent = ( {
 	providerId,
 	pluginFile,
 	isSuggestion,
+	suggestionId = '',
 	suggestionHideUrl = '',
 	onToggle,
 	links = [],
@@ -81,7 +86,7 @@ export const EllipsisMenuContent = ( {
 		invalidateResolutionForStoreSelector,
 		togglePaymentGateway,
 		hidePaymentExtensionSuggestion,
-	} = useDispatch( PAYMENT_SETTINGS_STORE_NAME );
+	} = useDispatch( paymentSettingsStore );
 	const { createErrorNotice, createSuccessNotice } =
 		useDispatch( 'core/notices' );
 
@@ -94,14 +99,29 @@ export const EllipsisMenuContent = ( {
 	};
 
 	/**
-	 * Deactivates the payment gateway plugin.
+	 * Deactivates the payment gateway containing plugin.
 	 */
 	const deactivateGateway = () => {
+		// Record the event when user clicks on a gateway's deactivate button.
+		recordPaymentsEvent( 'provider_deactivate_click', {
+			provider_id: providerId,
+			suggestion_id: suggestionId,
+		} );
+
 		setIsDeactivating( true );
 		deactivatePlugin( pluginFile )
 			.then( () => {
+				// Record the event when user successfully deactivates a gateway.
+				recordPaymentsEvent( 'provider_deactivate', {
+					provider_id: providerId,
+					suggestion_id: suggestionId,
+				} );
+
 				createSuccessNotice(
-					__( 'Plugin was successfully deactivated.', 'woocommerce' )
+					__(
+						'The provider plugin was successfully deactivated.',
+						'woocommerce'
+					)
 				);
 				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
 				setIsDeactivating( false );
@@ -109,7 +129,10 @@ export const EllipsisMenuContent = ( {
 			} )
 			.catch( () => {
 				createErrorNotice(
-					__( 'Failed to deactivate the plugin.', 'woocommerce' )
+					__(
+						'Failed to deactivate the provider plugin.',
+						'woocommerce'
+					)
 				);
 				setIsDeactivating( false );
 				onToggle();
@@ -120,6 +143,12 @@ export const EllipsisMenuContent = ( {
 	 * Disables the payment gateway from payment processing.
 	 */
 	const disableGateway = () => {
+		// Record the event when user clicks on a gateway's disable button.
+		recordPaymentsEvent( 'provider_disable_click', {
+			provider_id: providerId,
+			suggestion_id: suggestionId,
+		} );
+
 		const gatewayToggleNonce =
 			window.woocommerce_admin.nonces?.gateway_toggle || '';
 
@@ -136,6 +165,12 @@ export const EllipsisMenuContent = ( {
 			gatewayToggleNonce
 		)
 			.then( () => {
+				// Record the event when user successfully disables a gateway.
+				recordPaymentsEvent( 'provider_disable', {
+					provider_id: providerId,
+					suggestion_id: suggestionId,
+				} );
+
 				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
 				setIsDisabling( false );
 				onToggle();
@@ -201,7 +236,21 @@ export const EllipsisMenuContent = ( {
 						className="woocommerce-ellipsis-menu__content__item"
 						key={ link._type }
 					>
-						<Button target="_blank" href={ link.url }>
+						<Button
+							target="_blank"
+							href={ link.url }
+							onClick={ () => {
+								// Record the event when user clicks on a gateway's context link.
+								recordPaymentsEvent(
+									'provider_context_link_click',
+									{
+										provider_id: providerId,
+										suggestion_id: suggestionId,
+										link_type: link._type,
+									}
+								);
+							} }
+						>
 							{ displayName }
 						</Button>
 					</div>
@@ -247,7 +296,8 @@ export const EllipsisMenuContent = ( {
 						className={ 'components-button__danger' }
 						onClick={ deactivateGateway }
 						isBusy={ isDeactivating }
-						disabled={ isDeactivating }
+						// If the plugin file is not available, the button should be disabled.
+						disabled={ ! pluginFile || isDeactivating }
 					>
 						{ __( 'Deactivate', 'woocommerce' ) }
 					</Button>

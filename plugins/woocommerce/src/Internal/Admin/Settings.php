@@ -6,11 +6,11 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\API\Plugins;
-use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use Automattic\WooCommerce\Internal\BrandingController;
 use WC_Marketplace_Suggestions;
 
 /**
@@ -91,7 +91,11 @@ class Settings {
 	public static function get_currency_settings() {
 		$code = get_woocommerce_currency();
 
-		//phpcs:ignore
+		/**
+		 * The wc_currency_settings hook
+		 *
+		 * @since 6.5.0
+		 */
 		return apply_filters(
 			'wc_currency_settings',
 			array(
@@ -202,17 +206,16 @@ class Settings {
 		);
 
 		// DO NOT use outside of core, these can be removed without deprecation.
-		$settings['__experimentalFlags'] = array(
-			'isNewBranding' => BrandingController::use_new_branding(),
-		);
+		$settings['__experimentalFlags'] = array();
 
 		// Plugins that depend on changing the translation work on the server but not the client -
 		// WooCommerce Branding is an example of this - so pass through the translation of
 		// 'WooCommerce' to wcSettings.
 		$settings['woocommerceTranslation'] = __( 'WooCommerce', 'woocommerce' );
-		// We may have synced orders with a now-unregistered status.
-		// E.g An extension that added statuses is now inactive or removed.
-		if ( PageController::is_admin_page() ) {
+
+		if ( PageController::is_admin_page() && Features::is_enabled( 'analytics' ) ) {
+			// We may have synced orders with a now-unregistered status.
+			// E.g. an extension that added statuses is now inactive or removed.
 			$settings['unregisteredOrderStatuses'] = $this->get_unregistered_order_statuses();
 		}
 
@@ -242,6 +245,7 @@ class Settings {
 		$settings['connectNonce']                     = wp_create_nonce( 'connect' );
 		$settings['wcpay_welcome_page_connect_nonce'] = wp_create_nonce( 'wcpay-connect' );
 		$settings['email_preview_nonce']              = wp_create_nonce( 'email-preview-nonce' );
+		$settings['email_listing_nonce']              = wp_create_nonce( 'email-listing-nonce' );
 		$settings['wc_helper_nonces']                 = array(
 			'refresh' => wp_create_nonce( 'refresh' ),
 		);

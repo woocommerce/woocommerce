@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
 
 defined( 'ABSPATH' ) || exit;
@@ -208,8 +209,6 @@ class WC_Form_Handler {
 
 		$customer->save();
 
-		wc_add_notice( __( 'Address changed successfully.', 'woocommerce' ) );
-
 		/**
 		 * Hook: woocommerce_customer_save_address.
 		 *
@@ -218,9 +217,16 @@ class WC_Form_Handler {
 		 * @since 3.6.0
 		 * @param int    $user_id User ID being saved.
 		 * @param string $address_type Type of address; 'billing' or 'shipping'.
+		 * @param array  $address The address fields. Since 9.8.0.
+		 * @param WC_Customer $customer The customer object being saved. Since 9.8.0.
 		 */
-		do_action( 'woocommerce_customer_save_address', $user_id, $address_type );
+		do_action( 'woocommerce_customer_save_address', $user_id, $address_type, $address, $customer );
 
+		if ( 0 < wc_notice_count( 'error' ) ) {
+			return;
+		}
+
+		wc_add_notice( __( 'Address changed successfully.', 'woocommerce' ) );
 		wp_safe_redirect( wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) );
 		exit;
 	}
@@ -337,9 +343,9 @@ class WC_Form_Handler {
 			wp_update_user( $user );
 
 			// Update customer object to keep data in sync.
-			$customer = new WC_Customer( $user->ID );
+			try {
+				$customer = new WC_Customer( $user->ID );
 
-			if ( $customer ) {
 				// Keep billing data in sync if data changed.
 				if ( isset( $user->user_email ) && is_email( $user->user_email ) && $current_email !== $user->user_email ) {
 					$customer->set_billing_email( $user->user_email );
@@ -354,6 +360,18 @@ class WC_Form_Handler {
 				}
 
 				$customer->save();
+			} catch ( WC_Data_Exception $e ) {
+				// These error messages are already translated.
+				wc_add_notice( $e->getMessage(), 'error' );
+			} catch ( \Exception $e ) {
+				wc_add_notice(
+					sprintf(
+						/* translators: %s: Error message. */
+						__( 'An error occurred while saving account details: %s', 'woocommerce' ),
+						esc_html( $e->getMessage() )
+					),
+					'error'
+				);
 			}
 
 			/**
@@ -534,7 +552,7 @@ class WC_Form_Handler {
 			if ( isset( $available_gateways[ $payment_method_id ] ) ) {
 				$gateway = $available_gateways[ $payment_method_id ];
 
-				if ( ! $gateway->supports( 'add_payment_method' ) && ! $gateway->supports( 'tokenization' ) ) {
+				if ( ! $gateway->supports( PaymentGatewayFeature::ADD_PAYMENT_METHODS ) && ! $gateway->supports( PaymentGatewayFeature::TOKENIZATION ) ) {
 					wc_add_notice( __( 'Invalid payment gateway.', 'woocommerce' ), 'error' );
 					return;
 				}
@@ -969,7 +987,7 @@ class WC_Form_Handler {
 			$valid_nonce = wp_verify_nonce( $nonce_value, 'woocommerce-login' );
 		}
 
-		if ( isset( $_POST['login'], $_POST['username'], $_POST['password'] ) && $valid_nonce ) {
+		if ( isset( $_POST['login'], $_POST['username'], $_POST['password'] ) && is_string( $_POST['username'] ) && is_string( $_POST['password'] ) && $valid_nonce ) {
 
 			try {
 				$creds = array(

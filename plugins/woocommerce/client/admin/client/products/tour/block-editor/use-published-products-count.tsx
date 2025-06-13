@@ -1,26 +1,25 @@
 /**
  * External dependencies
  */
-import { PRODUCTS_STORE_NAME } from '@woocommerce/data';
+import { productsStore } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 
 const PUBLISHED_PRODUCTS_QUERY_PARAMS = {
-	status: 'publish',
-	_fields: [ 'id' ],
+	status: 'publish' as const,
+	_fields: [ 'id' as const ],
 };
 
 export const usePublishedProductsCount = () => {
 	return useSelect( ( select ) => {
 		const { getProductsTotalCount, hasFinishedResolution } =
-			select( PRODUCTS_STORE_NAME );
+			select( productsStore );
 
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 		const publishedProductsCount = getProductsTotalCount(
 			PUBLISHED_PRODUCTS_QUERY_PARAMS,
+			// @ts-expect-error Todo: type of default value is not inferred correctly.
 			0
 		) as number;
 
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 		const loadingPublishedProductsCount = ! hasFinishedResolution(
 			'getProductsTotalCount',
 			[ PUBLISHED_PRODUCTS_QUERY_PARAMS, 0 ]

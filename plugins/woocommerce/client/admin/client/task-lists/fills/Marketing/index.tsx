@@ -16,6 +16,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { getNewPath } from '@woocommerce/navigation';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -25,6 +26,8 @@ import { createNoticesFromResponse } from '~/lib/notices';
 import { PluginList, PluginListProps } from './PluginList';
 import { PluginProps } from './Plugin';
 import { getPluginSlug } from '../../../utils';
+import { TaskPromo } from './TaskPromo';
+import { isFeatureEnabled } from '~/utils/features';
 
 // We display the list of plugins ordered by this list.
 const ALLOWED_PLUGIN_LISTS = [ 'task-list/grow', 'task-list/reach' ];
@@ -34,8 +37,17 @@ export const transformExtensionToPlugin = (
 	activePlugins: string[],
 	installedPlugins: string[]
 ): PluginProps => {
-	const { description, image_url, is_built_by_wc, key, manage_url, name } =
-		extension;
+	const {
+		description,
+		image_url,
+		is_built_by_wc,
+		key,
+		manage_url,
+		name,
+		learn_more_link,
+		tags,
+		install_external,
+	} = extension;
 	const slug = getPluginSlug( key );
 	return {
 		description,
@@ -46,6 +58,9 @@ export const transformExtensionToPlugin = (
 		isBuiltByWC: is_built_by_wc,
 		manageUrl: manage_url,
 		name,
+		tags,
+		learnMoreLink: learn_more_link,
+		installExternal: install_external,
 	};
 };
 
@@ -101,7 +116,7 @@ export type MarketingProps = {
 	onComplete: ( option?: { redirectPath: string } ) => void;
 };
 
-const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
+const Marketing = ( { onComplete }: MarketingProps ) => {
 	const [ currentPlugin, setCurrentPlugin ] = useState< string | null >(
 		null
 	);
@@ -161,6 +176,12 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 
 	const onManage = () => {
 		actionTask( 'marketing' );
+	};
+
+	const trackPromoButtonClick = () => {
+		recordEvent( 'task_marketing_marketplace_promo_clicked', {
+			task: 'marketing',
+		} );
 	};
 
 	if ( isResolving ) {
@@ -225,6 +246,28 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 						);
 					} ) }
 				</Card>
+			) }
+			{ window?.wcTracks?.isEnabled && (
+				<TaskPromo
+					title={ __(
+						"Boost your store's potential",
+						'woocommerce'
+					) }
+					text={ __(
+						'Discover hand-picked extensions to grow your business in' +
+							' the WooCommerce marketplace.',
+						'woocommerce'
+					) }
+					buttonHref={
+						isFeatureEnabled( 'marketplace' )
+							? getAdminLink(
+									'admin.php?page=wc-admin&tab=extensions&path=%2Fextensions&category=marketing-extensions'
+							  )
+							: 'https://woocommerce.com/product-category/woocommerce-extensions/marketing-extensions/'
+					}
+					buttonText={ __( 'Start growing', 'woocommerce' ) }
+					onButtonClick={ trackPromoButtonClick }
+				/>
 			) }
 		</div>
 	);

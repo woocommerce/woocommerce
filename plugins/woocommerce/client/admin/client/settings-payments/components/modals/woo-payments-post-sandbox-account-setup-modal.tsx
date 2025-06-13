@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button, Modal } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
@@ -13,7 +12,10 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import './modals.scss';
-import { getWooPaymentsSetupLiveAccountLink } from '~/settings-payments/utils';
+import {
+	getWooPaymentsSetupLiveAccountLink,
+	recordPaymentsEvent,
+} from '~/settings-payments/utils';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
 
 interface WooPaymentsReadyToTestModalProps {
@@ -50,6 +52,11 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 	 * Redirects the user to the WooPayments setup live account link.
 	 */
 	const handleActivatePayments = () => {
+		// Record the event when the user clicks on the "Activate Payments" button.
+		recordPaymentsEvent( 'switch_to_live_account_click', {
+			provider_id: 'woocommerce_payments',
+		} );
+
 		setIsActivatingPayments( true );
 
 		window.location.href = getWooPaymentsSetupLiveAccountLink();
@@ -60,6 +67,11 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 	 * Redirects the user to the WooCommerce admin store setup page.
 	 */
 	const handleContinueStoreSetup = () => {
+		// Record the event when the user clicks on the "Continue Store Setup" button.
+		recordPaymentsEvent( 'continue_store_setup_click', {
+			provider_id: 'woocommerce_payments',
+		} );
+
 		setIsContinuingStoreSetup( true );
 
 		window.location.href = getAdminLink( 'admin.php?page=wc-admin' );
@@ -143,7 +155,7 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 										<p>
 											{ interpolateComponents( {
 												mixedString: __(
-													'Provide some additional details about your business so you can being accepting real payments. {{link}}Learn more{{/link}}',
+													'Provide some additional details about your business so you can begin accepting real payments. {{link}}Learn more{{/link}}',
 													'woocommerce'
 												),
 												components: {

@@ -8,11 +8,11 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { ACTION_TYPES } from './action-types';
 import {
-	PaymentProvider,
+	PaymentsProvider,
 	OfflinePaymentMethodProvider,
 	OrderMap,
-	SuggestedPaymentExtension,
-	SuggestedPaymentExtensionCategory,
+	SuggestedPaymentsExtension,
+	SuggestedPaymentsExtensionCategory,
 	EnableGatewayResponse,
 } from './types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
@@ -26,16 +26,16 @@ export function getPaymentProvidersRequest(): {
 }
 
 export function getPaymentProvidersSuccess(
-	providers: PaymentProvider[],
+	providers: PaymentsProvider[],
 	offlinePaymentGateways: OfflinePaymentMethodProvider[],
-	suggestions: SuggestedPaymentExtension[],
-	suggestionCategories: SuggestedPaymentExtensionCategory[]
+	suggestions: SuggestedPaymentsExtension[],
+	suggestionCategories: SuggestedPaymentsExtensionCategory[]
 ): {
 	type: ACTION_TYPES.GET_PAYMENT_PROVIDERS_SUCCESS;
-	providers: PaymentProvider[];
+	providers: PaymentsProvider[];
 	offlinePaymentGateways: OfflinePaymentMethodProvider[];
-	suggestions: SuggestedPaymentExtension[];
-	suggestionCategories: SuggestedPaymentExtensionCategory[];
+	suggestions: SuggestedPaymentsExtension[];
+	suggestionCategories: SuggestedPaymentsExtensionCategory[];
 } {
 	return {
 		type: ACTION_TYPES.GET_PAYMENT_PROVIDERS_SUCCESS,
@@ -82,6 +82,20 @@ export function* togglePaymentGateway(
 	}
 }
 
+export function* attachPaymentExtensionSuggestion( url: string ) {
+	try {
+		// Use apiFetch for the AJAX request
+		const result: { success: boolean } = yield apiFetch( {
+			url,
+			method: 'POST',
+		} );
+
+		return result;
+	} catch ( error ) {
+		throw error;
+	}
+}
+
 export function* hidePaymentExtensionSuggestion( url: string ) {
 	try {
 		// Use apiFetch for the AJAX request
@@ -116,10 +130,22 @@ export function updateProviderOrdering( orderMap: OrderMap ): {
 	};
 }
 
+export function setIsWooPayEligible( isEligible: boolean ): {
+	type: ACTION_TYPES.SET_IS_ELIGIBLE;
+	isEligible: boolean;
+} {
+	return {
+		type: ACTION_TYPES.SET_IS_ELIGIBLE,
+		isEligible,
+	};
+}
+
 export type Actions =
 	| ReturnType< typeof getPaymentProvidersRequest >
 	| ReturnType< typeof getPaymentProvidersSuccess >
 	| ReturnType< typeof getPaymentProvidersError >
 	| ReturnType< typeof togglePaymentGateway >
+	| ReturnType< typeof attachPaymentExtensionSuggestion >
 	| ReturnType< typeof hidePaymentExtensionSuggestion >
-	| ReturnType< typeof updateProviderOrdering >;
+	| ReturnType< typeof updateProviderOrdering >
+	| ReturnType< typeof setIsWooPayEligible >;

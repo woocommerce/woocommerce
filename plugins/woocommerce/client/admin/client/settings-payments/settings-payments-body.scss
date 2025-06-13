@@ -4,7 +4,17 @@ html {
 	font-family: $font-sf-pro-display;
 }
 
-/* Use this carefully as in changes the body background to white. Include it only in components, otherwise white background will be all over the pages. */
-#wpcontent {
-	background-color: #fff;
+body.woocommerce-settings-payments-tab {
+	#mainform,
+	#wpcontent {
+		background-color: #fff;
+	}
+
+	.woocommerce-layout .woocommerce-store-alerts {
+		margin-top: $gap-large;
+	}
+
+	#wpbody.has-settings-layout {
+		margin-top: 60px !important;
+	}
 }

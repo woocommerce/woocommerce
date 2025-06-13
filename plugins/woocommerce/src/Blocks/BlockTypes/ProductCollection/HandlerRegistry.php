@@ -85,7 +85,9 @@ class HandlerRegistry {
 				$related_products = wc_get_related_products(
 					$collection_args['relatedProductReference'],
 					// Use a higher limit so that the result set contains enough products for the collection to subsequently filter.
-					100
+					100,
+					array(),
+					$collection_args['relatedBy']
 				);
 
 				remove_filter( 'woocommerce_product_related_posts_relate_by_category', $category_callback, PHP_INT_MAX );
@@ -113,7 +115,10 @@ class HandlerRegistry {
 				}
 
 				$collection_args['relatedProductReference'] = $product_reference;
-				$collection_args['relatedBy']               = array(
+				$collection_args['relatedBy']               = ! isset( $query['relatedBy'] ) ? array(
+					'categories' => true,
+					'tags'       => true,
+				) : array(
 					'categories' => isset( $query['relatedBy']['categories'] ) && true === $query['relatedBy']['categories'],
 					'tags'       => isset( $query['relatedBy']['tags'] ) && true === $query['relatedBy']['tags'],
 				);
@@ -132,9 +137,13 @@ class HandlerRegistry {
 
 				$collection_args['relatedProductReference'] = $product_reference;
 
-				$collection_args['relatedBy'] = array(
-					'categories' => rest_sanitize_boolean( $request->get_param( 'relatedBy' )['categories'] ?? false ),
-					'tags'       => rest_sanitize_boolean( $request->get_param( 'relatedBy' )['tags'] ?? false ),
+				$related_by                   = $request->get_param( 'relatedBy' );
+				$collection_args['relatedBy'] = ! isset( $related_by ) ? array(
+					'categories' => true,
+					'tags'       => true,
+				) : array(
+					'categories' => rest_sanitize_boolean( $related_by['categories'] ?? false ),
+					'tags'       => rest_sanitize_boolean( $related_by['tags'] ?? false ),
 				);
 
 				return $collection_args;

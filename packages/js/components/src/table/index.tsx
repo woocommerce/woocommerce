@@ -2,10 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createElement, Fragment, useState } from '@wordpress/element';
 import { find, first, without } from 'lodash';
-import React from 'react';
 import {
 	Card,
 	CardBody,
@@ -127,7 +126,7 @@ const TableCard: React.VFC< TableCardProps > = ( {
 			} )
 			.filter( Boolean );
 	} );
-	const classes = classnames( 'woocommerce-table', className, {
+	const classes = clsx( 'woocommerce-table', className, {
 		'has-actions': !! actions,
 		'has-menu': showMenu,
 		'has-search': hasSearch,

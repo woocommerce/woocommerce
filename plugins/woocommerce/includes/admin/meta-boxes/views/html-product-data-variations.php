@@ -5,6 +5,8 @@
  * @package WooCommerce\Admin\Metaboxes\Views
  */
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -92,6 +94,11 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 						<option value="variable_sale_price_decrease"><?php esc_html_e( 'Decrease sale prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
 						<option value="variable_sale_schedule"><?php esc_html_e( 'Set scheduled sale dates', 'woocommerce' ); ?></option>
 					</optgroup>
+					<?php if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) : ?>
+						<optgroup label="<?php esc_attr_e( 'Cost of goods', 'woocommerce' ); ?>">
+							<option value="variable_unset_cogs_value"><?php esc_html_e( 'Remove custom costs', 'woocommerce' ); ?></option>
+						</optgroup>
+					<?php endif; ?>
 					<optgroup label="<?php esc_attr_e( 'Inventory', 'woocommerce' ); ?>">
 						<option value="toggle_manage_stock"><?php esc_html_e( 'Toggle &quot;Manage stock&quot;', 'woocommerce' ); ?></option>
 						<option value="variable_stock"><?php esc_html_e( 'Stock', 'woocommerce' ); ?></option>

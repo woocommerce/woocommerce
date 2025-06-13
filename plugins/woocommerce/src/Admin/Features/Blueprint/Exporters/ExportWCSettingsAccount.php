@@ -4,16 +4,12 @@ declare( strict_types = 1);
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
-use Automattic\WooCommerce\Admin\Features\Blueprint\SettingOptions;
-use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
-use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
-use Automattic\WooCommerce\Blueprint\Steps\SetSiteOptions;
 use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 
 /**
- * Class ExportWCSettingsProducts
+ * Class ExportWCSettingsAccount
  *
- * This class exports WooCommerce settings and implements the StepExporter and HasAlias interfaces.
+ * This class exports WooCommerce settings on the Account and Privacy page.
  *
  * @package Automattic\WooCommerce\Admin\Features\Blueprint\Exporters
  */
@@ -44,7 +40,7 @@ class ExportWCSettingsAccount extends ExportWCSettings {
 	 * @return string
 	 */
 	public function get_description() {
-		return __( 'It includes all settings in WooCommerce | Settings | Account and Privacy.', 'woocommerce' );
+		return __( 'Includes all settings in WooCommerce | Settings | Account and Privacy.', 'woocommerce' );
 	}
 
 	/**

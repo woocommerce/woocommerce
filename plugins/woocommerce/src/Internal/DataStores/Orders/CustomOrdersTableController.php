@@ -145,7 +145,6 @@ class CustomOrdersTableController {
 		add_action( 'woocommerce_after_register_post_type', array( $this, 'register_post_type_for_order_placeholders' ), 10, 0 );
 		add_action( 'woocommerce_sections_advanced', array( $this, 'sync_now' ) );
 		add_filter( 'removable_query_args', array( $this, 'register_removable_query_arg' ) );
-		add_action( 'woocommerce_register_feature_definitions', array( $this, 'add_feature_definition' ) );
 		add_filter( 'get_edit_post_link', array( $this, 'maybe_rewrite_order_edit_link' ), 10, 2 );
 		add_action( 'before_woocommerce_init', array( $this, 'maybe_set_order_cache_group_as_non_persistent' ) );
 	}
@@ -274,7 +273,7 @@ class CustomOrdersTableController {
 		$tools_array = array_merge( $tools_array, $this->data_cleanup->get_tools_entries() );
 
 		// Delete HPOS tables tool.
-		if ( $this->custom_orders_table_usage_is_enabled() || $this->data_synchronizer->data_sync_is_enabled() ) {
+		if ( $this->custom_orders_table_usage_is_enabled() || $this->data_synchronizer->data_sync_is_enabled() || $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) ) ) {
 			$disabled = true;
 			$message  = __( 'This will delete the custom orders tables. The tables can be deleted only if the "High-Performance order storage" is not authoritative and sync is disabled (via Settings > Advanced > Features).', 'woocommerce' );
 		} else {
@@ -290,7 +289,11 @@ class CustomOrdersTableController {
 				$message
 			),
 			'requires_refresh' => true,
-			'callback'         => function () {
+			'callback'         => function () use ( $disabled ) {
+				if ( $disabled ) {
+					return;
+				}
+
 				$this->features_controller->change_feature_enable( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, false );
 				$this->delete_custom_orders_tables();
 				return __( 'Custom orders tables have been deleted.', 'woocommerce' );
@@ -460,7 +463,7 @@ class CustomOrdersTableController {
 			return 'no';
 		}
 
-		$sync_is_pending = 0 !== $this->data_synchronizer->get_current_orders_pending_sync_count();
+		$sync_is_pending = $this->data_synchronizer->has_orders_pending_sync();
 		if ( $sync_is_pending && ! $this->changing_data_source_with_sync_pending_is_allowed() ) {
 			throw new \Exception( "The authoritative table for orders storage can't be changed while there are orders out of sync" );
 		}
@@ -501,6 +504,13 @@ class CustomOrdersTableController {
 		$this->data_cleanup->toggle_flag( false );
 
 		if ( 'sync-now' === $action ) {
+			if ( ! $this->data_synchronizer->check_orders_table_exists() && ! $this->data_synchronizer->create_database_tables() ) {
+				WC_Admin_Settings::add_error(
+					__( 'Unable to create HPOS tables for synchronization.', 'woocommerce' )
+				);
+				return;
+			}
+
 			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
 		} else {
 			$this->batch_processing_controller->remove_processor( DataSynchronizer::class );
@@ -612,7 +622,7 @@ class CustomOrdersTableController {
 
 		$get_disabled = function () {
 			$compatibility_info = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
-			$sync_complete      = 0 === $this->data_synchronizer->get_current_orders_pending_sync_count();
+			$sync_complete      = ! $this->data_synchronizer->has_orders_pending_sync();
 			$disabled           = array();
 			// Changing something here? You might also want to look at `enable|disable` functions in Automattic\WooCommerce\Database\Migrations\CustomOrderTable\CLIRunner.
 			$incompatible_plugins = $this->plugin_util->get_items_considered_incompatible( 'custom_order_tables', $compatibility_info );
@@ -658,22 +668,15 @@ class CustomOrdersTableController {
 		};
 
 		$get_sync_message = function () {
-			$orders_pending_sync_count = $this->data_synchronizer->get_current_orders_pending_sync_count( true );
-			$sync_in_progress          = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
-			$sync_enabled              = $this->data_synchronizer->data_sync_is_enabled();
-			$sync_is_pending           = $orders_pending_sync_count > 0;
-			$sync_message              = array();
-
-			$is_dangerous = $sync_is_pending && $this->changing_data_source_with_sync_pending_is_allowed();
+			$sync_in_progress = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
+			$sync_enabled     = $this->data_synchronizer->data_sync_is_enabled();
+			$sync_is_pending  = $this->data_synchronizer->has_orders_pending_sync( true );
+			$sync_message     = array();
+			$is_dangerous     = $sync_is_pending && $this->changing_data_source_with_sync_pending_is_allowed();
 
 			if ( $is_dangerous ) {
 				$sync_message[] = wp_kses_data(
-					sprintf(
-						// translators: %s: number of pending orders.
-						_n( "There's %s order pending sync.", 'There are %s orders pending sync.', $orders_pending_sync_count, 'woocommerce' ),
-						number_format_i18n( $orders_pending_sync_count ),
-					)
-					. ' '
+					__( "There are orders pending sync.", 'woocommerce' )
 					. '<strong>'
 					. __( 'Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!', 'woocommerce' )
 					. '</strong>'
@@ -685,6 +688,8 @@ class CustomOrdersTableController {
 			}
 
 			if ( $sync_in_progress && $sync_is_pending ) {
+				$orders_pending_sync_count = $this->data_synchronizer->get_current_orders_pending_sync_count( true );
+
 				$sync_message[] = sprintf(
 					// translators: %s: number of pending orders.
 					__( 'Currently syncing orders... %s pending', 'woocommerce' ),
@@ -721,16 +726,7 @@ class CustomOrdersTableController {
 
 				if ( ! $is_dangerous ) {
 					$sync_message[] = wp_kses_data(
-						sprintf(
-							// translators: %s: number of pending orders.
-							_n(
-								"You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>. There's currently %s order out of sync.",
-								'You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>. There are currently %s orders out of sync. ',
-								$orders_pending_sync_count,
-								'woocommerce'
-							),
-							number_format_i18n( $orders_pending_sync_count )
-						)
+						__( "You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>. There are currently orders out of sync.", 'woocommerce' ),
 					);
 				}
 
@@ -745,7 +741,7 @@ class CustomOrdersTableController {
 		};
 
 		$get_description_is_error = function () {
-			$sync_is_pending = $this->data_synchronizer->get_current_orders_pending_sync_count( true ) > 0;
+			$sync_is_pending = $this->data_synchronizer->has_orders_pending_sync();
 
 			return $sync_is_pending && $this->changing_data_source_with_sync_pending_is_allowed();
 		};

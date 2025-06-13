@@ -10,6 +10,12 @@ import { WebClient } from '@slack/web-api';
 import { Logger } from '../core/logger';
 import { getEnvVar } from '../core/environment';
 import { createMessage, postMessage } from './lib/message';
+import {
+	getConfiguredChannels,
+	loadConfig,
+	parseConfig,
+	resolveChannels,
+} from './lib/config';
 
 const conclusions = [ 'success', 'failure', 'skipped', 'cancelled' ];
 
@@ -40,6 +46,11 @@ const program = new Command( 'slack-test-report' )
 		'Default PR title'
 	)
 	.option( '-m --commit-message <commitMessage>', 'The commit message.', '' )
+	.option(
+		'--config <configPath>',
+		'Path to a JSON config file containing notification rules or settings',
+		''
+	)
 	.action( async ( options ) => {
 		if ( options.reportName === '' ) {
 			Logger.warn(
@@ -47,8 +58,31 @@ const program = new Command( 'slack-test-report' )
 			);
 		}
 
+		const channels: string[] = [];
+
+		if ( options.config ) {
+			try {
+				const configContent = loadConfig( options.config );
+				const reporterConfig = parseConfig( configContent );
+				const refName = getEnvVar( 'GITHUB_REF_NAME', true );
+				const configuredChannels = getConfiguredChannels(
+					reporterConfig,
+					refName,
+					options.reportName
+				);
+				channels.push( ...resolveChannels( configuredChannels ) );
+			} catch ( error ) {
+				Logger.error(
+					`Failed to determine channels to send the notification to: ${ error.message }`
+				);
+				process.exit( 1 );
+			}
+		} else {
+			const defaultChannel = getEnvVar( 'DEFAULT_CHECKS_CHANNEL', true );
+			channels.push( defaultChannel );
+		}
+
 		const isFailure = options.conclusion === 'failure';
-		const channel = getEnvVar( 'SLACK_CHANNEL', true );
 
 		if ( isFailure ) {
 			const { username } = options;
@@ -76,26 +110,35 @@ const program = new Command( 'slack-test-report' )
 					refName: getEnvVar( 'GITHUB_REF_NAME', true ),
 				} );
 
-			Logger.notice( 'Sending new message' );
-			// Send a new main message
-			const response = await postMessage( client, {
-				text: `${ text }`,
-				blocks: mainMsgBlocks,
-				channel,
-				username,
-			} );
-			const mainMessageTS = response.ts;
-
-			if ( detailsMsgBlocksChunks.length > 0 ) {
-				Logger.notice( 'Replying with failure details' );
-				// Send replies to the main message with the current failure result
-				await postMessage( client, {
-					text,
-					blocks: detailsMsgBlocksChunks,
+			for ( const channel of channels ) {
+				Logger.notice( 'Sending new message' );
+				// Send a new main message
+				const response = await postMessage( client, {
+					text: `${ text }`,
+					blocks: mainMsgBlocks,
 					channel,
 					username,
-					thread_ts: mainMessageTS,
 				} );
+				const mainMessageTS = response.ts;
+
+				if ( detailsMsgBlocksChunks.length > 0 ) {
+					Logger.notice( 'Replying with failure details' );
+					// Send replies to the main message with the current failure result
+					await postMessage( client, {
+						text,
+						blocks: detailsMsgBlocksChunks,
+						channel,
+						username,
+						thread_ts: mainMessageTS,
+					} );
+				}
+			}
+
+			if ( channels.length === 0 ) {
+				Logger.error(
+					'No channels found. Please check your configuration.'
+				);
+				process.exit( 1 );
 			}
 		} else {
 			Logger.notice(

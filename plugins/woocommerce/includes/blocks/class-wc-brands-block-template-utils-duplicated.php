@@ -249,6 +249,8 @@ class BlockTemplateUtilsDuplicated {
 				return __( 'Product Category', 'woocommerce' );
 			case 'taxonomy-product_tag':
 				return __( 'Product Tag', 'woocommerce' );
+			case 'taxonomy-product_brand':
+				return __( 'Products by Brand', 'woocommerce' );
 			default:
 				// Replace all hyphens and underscores with spaces.
 				return ucwords( preg_replace( '/[\-_]/', ' ', $template_slug ) );
@@ -361,7 +363,7 @@ class BlockTemplateUtilsDuplicated {
 		$use_blockified_templates = wc_string_to_bool( get_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE ) );
 
 		if ( false === $use_blockified_templates ) {
-			return function_exists( 'wc_current_theme_is_fse_theme' ) && wc_current_theme_is_fse_theme();
+			return wp_is_block_theme();
 		}
 
 		return $use_blockified_templates;

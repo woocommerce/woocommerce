@@ -8,8 +8,11 @@
  * @version 3.4.0
  */
 
+use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -387,35 +390,32 @@ function wc_processing_order_count() {
  */
 function wc_orders_count( $status, string $type = '' ) {
 	$count           = 0;
-	$legacy_statuses = array( OrderStatus::DRAFT, OrderStatus::TRASH );
-	$valid_statuses  = array_merge( array_keys( wc_get_order_statuses() ), $legacy_statuses );
+	$legacy_statuses = array(
+		OrderStatus::DRAFT,
+		OrderStatus::TRASH,
+	);
 	$status          = ( ! in_array( $status, $legacy_statuses, true ) && 0 !== strpos( $status, 'wc-' ) ) ? 'wc-' . $status : $status;
 	$valid_types     = wc_get_order_types( 'order-count' );
 	$type            = trim( $type );
 
-	if ( ! in_array( $status, $valid_statuses, true ) || ( $type && ! in_array( $type, $valid_types, true ) ) ) {
+	try {
+		$types_for_count   = $type ? array( $type ) : $valid_types;
+		$order_count_cache = new OrderCountCache();
+
+		foreach ( $types_for_count as $type ) {
+			$cache = $order_count_cache->get( $type, array( $status ) );
+			if ( false !== $cache && isset( $cache[ $status ] ) ) {
+				$count += $cache[ $status ];
+			} else {
+				$count_for_type = OrderUtil::get_count_for_type( $type );
+				$count         += $count_for_type[ $status ];
+			}
+		}
+
+		return $count;
+	} catch ( Exception $e ) {
 		return 0;
 	}
-
-	$cache_key    = WC_Cache_Helper::get_cache_prefix( 'orders' ) . $status . $type;
-	$cached_count = wp_cache_get( $cache_key, 'counts' );
-
-	if ( false !== $cached_count ) {
-		return $cached_count;
-	}
-
-	$types_for_count = $type ? array( $type ) : $valid_types;
-
-	foreach ( $types_for_count as $type ) {
-		$data_store = WC_Data_Store::load( 'shop_order' === $type ? 'order' : $type );
-		if ( $data_store ) {
-			$count += $data_store->get_order_count( $status );
-		}
-	}
-
-	wp_cache_set( $cache_key, $count, 'counts' );
-
-	return $count;
 }
 
 /**
@@ -703,7 +703,13 @@ function wc_create_refund( $args = array() ) {
 			 * @param int  $order_id The order id.
 			 * @param int  $refund_id The refund id.
 			 */
-			if ( (bool) apply_filters( 'woocommerce_order_is_partially_refunded', ( $remaining_refund_amount - $args['amount'] ) > 0 || ( $order->has_free_item() && ( $remaining_refund_items - $refund_item_count ) > 0 ), $order->get_id(), $refund->get_id() ) ) {
+			if ( (bool) apply_filters(
+				'woocommerce_order_is_partially_refunded',
+				( $remaining_refund_amount - $args['amount'] ) > 0 ||
+				( ! empty( $args['line_items'] ) && $order->has_free_item() && ( $remaining_refund_items - $refund_item_count ) > 0 ),
+				$order->get_id(),
+				$refund->get_id()
+			) ) {
 				do_action( 'woocommerce_order_partially_refunded', $order->get_id(), $refund->get_id() );
 			} else {
 				do_action( 'woocommerce_order_fully_refunded', $order->get_id(), $refund->get_id() );
@@ -726,6 +732,9 @@ function wc_create_refund( $args = array() ) {
 		}
 
 		$order->set_date_modified( time() );
+		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() && $order->has_cogs() ) {
+			$order->calculate_cogs_total_value();
+		}
 		$order->save();
 
 		do_action( 'woocommerce_refund_created', $refund->get_id(), $args );
@@ -766,7 +775,7 @@ function wc_refund_payment( $order, $amount, $reason = '' ) {
 			throw new Exception( __( 'The payment gateway for this order does not exist.', 'woocommerce' ) );
 		}
 
-		if ( ! $gateway->supports( 'refunds' ) ) {
+		if ( ! $gateway->supports( PaymentGatewayFeature::REFUNDS ) ) {
 			throw new Exception( __( 'The payment gateway for this order does not support automatic refunds.', 'woocommerce' ) );
 		}
 
