@@ -56,20 +56,20 @@ const TestDriveLoader: React.FunctionComponent< {
 	</Loader>
 );
 
-// Constants for polling intervals and phase durations
-const POLLING_INTERVAL_INITIAL = 3000; // 3 seconds is the initial polling interval
-const POLLING_INTERVAL_EXTENDED_1 = 5000; // 5 seconds is the extended polling interval for phase 1
-const POLLING_INTERVAL_EXTENDED_2 = 7000; // 7 seconds is the extended polling interval for phase 2
-const EXTENDED_POLLING_PHASE_1_DURATION = 30000; // 30 seconds is the duration of phase 1
-const MAX_INITIAL_PROGRESS = 90; // Cap progress at 90% for the initial phase
-const MAX_EXTENDED_PHASE_1_PROGRESS = 96; // Cap progress at 96% for the extended phase 1
-const INITIAL_PHASE_INCREMENT = 5; // Increment progress by 20% for the initial phase
-const EXTENDED_PHASE_1_INCREMENT = 1; // Increment progress by 1% for the extended phase 1
-const INIT_PROGRESS_START = 10; // Start progress at 10% during init
-const INIT_PROGRESS_INCREMENT = 2; // Increment by 2% every second during init
-const INIT_PROGRESS_MAX = 30; // Cap progress at 30% during init
+// Constants for polling intervals and phase durations.
+const POLLING_INTERVAL_INITIAL = 3000; // 3 seconds is the initial polling interval.
+const POLLING_INTERVAL_EXTENDED_1 = 5000; // 5 seconds is the extended polling interval for phase 1.
+const POLLING_INTERVAL_EXTENDED_2 = 7000; // 7 seconds is the extended polling interval for phase 2.
+const EXTENDED_POLLING_PHASE_1_DURATION = 30000; // 30 seconds is the duration of phase 1.
+const MAX_INITIAL_PROGRESS = 90; // Cap progress at 90% for the initial phase.
+const MAX_EXTENDED_PHASE_1_PROGRESS = 96; // Cap progress at 96% for the extended phase 1.
+const INITIAL_PHASE_INCREMENT = 5; // Increment progress by 20% for the initial phase.
+const EXTENDED_PHASE_1_INCREMENT = 1; // Increment progress by 1% for the extended phase 1.
+const INIT_PROGRESS_START = 10; // Start progress at 10% during init.
+const INIT_PROGRESS_INCREMENT = 2; // Increment by 2% every second during init.
+const INIT_PROGRESS_MAX = 30; // Cap progress at 30% during init.
 
-// Status types for the component
+// Status types for the component.
 type Status =
 	| 'idle'
 	| 'initializing'
@@ -88,19 +88,19 @@ const TestAccountStep = () => {
 		setJustCompletedStepId,
 	} = useOnboardingContext();
 
-	// Component State
+	// Component State.
 	const [ status, setStatus ] = useState< Status >( 'idle' );
 	const [ progress, setProgress ] = useState( 20 );
 	const [ errorMessage, setErrorMessage ] = useState< string | undefined >();
 	const [ pollingPhase, setPollingPhase ] = useState( 0 ); // 0: initial, 1: extended 1, 2: extended 2
 	const [ retryCounter, setRetryCounter ] = useState( 0 );
 
-	// Refs for timers and phase tracking
+	// Refs for timers and phase tracking.
 	const pollingTimeoutRef = useRef< number | null >( null );
 	const phase1StartTimeRef = useRef< number | null >( null );
 	const initializingTimeoutRef = useRef< number | null >( null );
 
-	// Helper to clear timers
+	// Helper to clear timers.
 	const clearTimers = () => {
 		if ( pollingTimeoutRef.current !== null ) {
 			clearTimeout( pollingTimeoutRef.current );
@@ -196,7 +196,7 @@ const TestAccountStep = () => {
 					}
 				};
 
-				// First clean the step if needed, then initialize
+				// First clean the step if needed, then initialize.
 				cleanStepIfNeeded()
 					.then( () => {
 						return apiFetch< {
@@ -209,7 +209,7 @@ const TestAccountStep = () => {
 					} )
 					.then( ( response ) => {
 						if ( response?.success ) {
-							// Start polling immediately after successful init
+							// Start polling immediately after successful init.
 							setStatus( 'polling' );
 						} else {
 							setErrorMessage(
@@ -227,7 +227,7 @@ const TestAccountStep = () => {
 						setStatus( 'error' );
 					} );
 			} else {
-				// If status is neither 'not_started' nor 'completed', assume we can start polling
+				// If status is neither 'not_started' nor 'completed', assume we can start polling.
 				setStatus( 'polling' );
 			}
 		}
@@ -235,7 +235,7 @@ const TestAccountStep = () => {
 		// -- Polling Phase --
 		if ( status === 'polling' ) {
 			const poll = () => {
-				// Clear any existing timeout before starting a new one
+				// Clear any existing timeout before starting a new one.
 				clearTimers();
 
 				apiFetch< StepCheckResponse >( {
@@ -244,85 +244,85 @@ const TestAccountStep = () => {
 				} )
 					.then( ( response ) => {
 						if ( response?.status === 'completed' ) {
-							// Use timeout for smoother transition to success UI
+							// Use timeout for smoother transition to success UI.
 							pollingTimeoutRef.current = window.setTimeout(
 								() => {
 									setStatus( 'success' );
-									setProgress( 100 ); // Visually complete
+									setProgress( 100 ); // Visually complete.
 									setJustCompletedStepId(
 										currentStep?.id || ''
 									);
 								},
 								1000
 							);
-							return; // Stop polling loop
+							return; // Stop polling loop.
 						}
 
-						// Still pending, update progress and determine next poll
+						// Still pending, update progress and determine next poll.
 						let nextPhase = pollingPhase;
 						let nextInterval = POLLING_INTERVAL_INITIAL;
 						let newProgress = 0;
 
-						// Use functional update to ensure we always increment from the latest progress
+						// Use functional update to ensure we always increment from the latest progress.
 						setProgress( ( currentProgress ) => {
-							// Apply different increment logic based on phase
+							// Apply different increment logic based on phase.
 							if ( pollingPhase === 0 ) {
-								// Phase 0: increment by INITIAL_PHASE_INCREMENT until MAX_INITIAL_PROGRESS
+								// Phase 0: increment by INITIAL_PHASE_INCREMENT until MAX_INITIAL_PROGRESS.
 								newProgress = Math.min(
 									currentProgress + INITIAL_PHASE_INCREMENT,
 									MAX_INITIAL_PROGRESS
 								);
 							} else if ( pollingPhase === 1 ) {
-								// Phase 1: increment by EXTENDED_PHASE_1_INCREMENT until 96%
+								// Phase 1: increment by EXTENDED_PHASE_1_INCREMENT until 96%.
 								newProgress = Math.min(
 									currentProgress +
 										EXTENDED_PHASE_1_INCREMENT,
 									MAX_EXTENDED_PHASE_1_PROGRESS
 								);
 							} else {
-								// Phase 2: Do not increment progress
+								// Phase 2: Do not increment progress.
 								newProgress = currentProgress;
 							}
 							return newProgress;
 						} );
 
-						// Update next phase and interval based on current phase and progress
+						// Update next phase and interval based on current phase and progress.
 						if (
 							pollingPhase === 0 &&
 							newProgress >= MAX_INITIAL_PROGRESS
 						) {
-							// Transition to phase 1 when first reaching MAX_INITIAL_PROGRESS while in phase 0
+							// Transition to phase 1 when first reaching MAX_INITIAL_PROGRESS while in phase 0.
 							nextPhase = 1;
 							nextInterval = POLLING_INTERVAL_EXTENDED_1;
 							phase1StartTimeRef.current = Date.now();
 						} else if ( pollingPhase === 1 ) {
-							// Already in phase 1, check if duration exceeded
+							// Already in phase 1, check if duration exceeded.
 							if (
 								phase1StartTimeRef.current &&
 								Date.now() - phase1StartTimeRef.current >
 									EXTENDED_POLLING_PHASE_1_DURATION
 							) {
-								// Transition to phase 2
+								// Transition to phase 2.
 								nextPhase = 2;
 								nextInterval = POLLING_INTERVAL_EXTENDED_2;
 							} else {
-								// Stay in phase 1
+								// Stay in phase 1.
 								nextPhase = 1;
 								nextInterval = POLLING_INTERVAL_EXTENDED_1;
 							}
 						} else if ( pollingPhase === 2 ) {
-							// Stay in phase 2
+							// Stay in phase 2.
 							nextPhase = 2;
 							nextInterval = POLLING_INTERVAL_EXTENDED_2;
 						} else {
-							// Stay in phase 0
+							// Stay in phase 0.
 							nextPhase = 0;
 							nextInterval = POLLING_INTERVAL_INITIAL;
 						}
 
-						setPollingPhase( nextPhase ); // Update phase state
+						setPollingPhase( nextPhase ); // Update phase state.
 
-						// Schedule the next poll
+						// Schedule the next poll.
 						pollingTimeoutRef.current = window.setTimeout(
 							poll,
 							nextInterval
@@ -335,13 +335,13 @@ const TestAccountStep = () => {
 					} );
 			};
 
-			// Start the first poll
+			// Start the first poll.
 			poll();
 		}
 
 		// -- Progress animation during Initializing Phase --
 		if ( status === 'initializing' ) {
-			// Start progress animation from 10% to 30%, increment by 2% every second
+			// Start progress animation from 10% to 30%, increment by 2% every second.
 			if ( initializingTimeoutRef.current === null ) {
 				initializingTimeoutRef.current = window.setInterval( () => {
 					setProgress( ( current ) => {
@@ -356,7 +356,7 @@ const TestAccountStep = () => {
 				}, 1000 );
 			}
 		}
-		// Clear the initializing timer if not in initializing phase
+		// Clear the initializing timer if not in initializing phase.
 		if (
 			status !== 'initializing' &&
 			initializingTimeoutRef.current !== null
@@ -365,9 +365,9 @@ const TestAccountStep = () => {
 			initializingTimeoutRef.current = null;
 		}
 
-		// Cleanup function for the effect
+		// Cleanup function for the effect.
 		return () => {
-			clearTimers(); // Clear any pending timeouts
+			clearTimers(); // Clear any pending timeouts.
 		};
 	}, [
 		status,
@@ -394,7 +394,7 @@ const TestAccountStep = () => {
 	};
 
 	if ( status === 'success' ) {
-		// Render success state
+		// Render success state.
 		return (
 			<>
 				<WooPaymentsStepHeader onClose={ closeModal } />
@@ -539,7 +539,7 @@ const TestAccountStep = () => {
 		);
 	}
 
-	// Render loading/error state
+	// Render loading/error state.
 	return (
 		<div className="woocommerce-payments-test-account-step">
 			<WooPaymentsStepHeader onClose={ closeModal } />
@@ -550,7 +550,7 @@ const TestAccountStep = () => {
 					status={ status === 'blocked' ? 'error' : 'warning' }
 					isDismissible={ false }
 					actions={
-						// Only show actions if the step is not blocked
+						// Only show actions if the step is not blocked.
 						status !== 'blocked'
 							? [
 									{
