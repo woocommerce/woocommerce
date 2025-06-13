@@ -1,4 +1,4 @@
-/* eslint-disable @woocommerce/dependency-group -- because we import mocks first, we deactivate this rule to avoid es lint errors */
+/* eslint-disable @woocommerce/dependency-group -- because we import mocks first, we deactivate this rule to avoid ESLint errors */
 import '../../__mocks__/setup-shared-mocks';
 
 /**

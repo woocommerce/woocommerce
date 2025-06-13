@@ -17,31 +17,31 @@ pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:admin
 To run component tests in the JS package:
 
 ```bash
-pnpm test:js
+pnpm run test:js
 ```
 
 To run a specific test file:
 
 ```bash
-pnpm test:js -- src/components/my-component/test/my-component.spec.tsx
+pnpm run test:js -- src/components/my-component/test/my-component.spec.tsx
 ```
 
 We use [Jest](https://jestjs.io/) with `@testing-library/react`. These are **component tests**, not strict unit tests, and include mocked dependencies.
 
 #### Guidelines for Writing Component Tests
 
-- Use `should` prefix in test names (e.g., `should render the modal`).
+- Use the `should` prefix in test names (e.g., `should render the modal`).
 - Avoid testing implementation details. Prefer visible DOM assertions.
 - Use [jest.fn()](https://jestjs.io/docs/mock-functions) and [jest.mock()](https://jestjs.io/docs/manual-mocks) for mocking.
 - Always mock required dependencies **before** importing the tested component.
 - Avoid writing tests for components that are simple wrappers of 3rd-party libraries (e.g., just rendering a WordPress component without added logic).
 - Prefer reusable mocks for commonly used packages (e.g., `@wordpress/data`, `@wordpress/components`). Create shared mock setup files when possible.
-- Use descriptive `data-testid` attributes when using them in mocked components (e.g., `data-testid=“modal”).
+- Use descriptive `data-testid` attributes when using them in mocked components (e.g., `data-testid="modal"`).
 - Use `screen.getByRole()`, `getByText()`, or similar accessible queries where applicable.
 
 #### Mocking
 
-- Keep all mocks close to the test unless reused in multiple tests.
+- Keep all mocks close to the test, unless reused in multiple tests.
 - Use shared mock setup files (e.g., `__mocks__/setup-shared-mocks.ts`) to keep individual test files clean.
 - Use `jest.mock()` for external dependencies like WordPress packages or internal modules.
 - When mocking component props, prefer `React.ComponentProps<'button'>` or specific prop interfaces to avoid `any`.
