@@ -51,7 +51,15 @@ if ( ! empty( $fulfillments ) ) {
 						/* translators: %1$s is the shipment index, %2$s is the shipment date */
 						wp_kses( __( '<strong>Shipment %1$s</strong> was shipped on <strong>%2$s</strong>', 'woocommerce' ), 'strong' ),
 						intval( $index ) + 1,
-						esc_html( gmdate( 'F j, Y', strtotime( $fulfillment->get_date_updated() ) ) )
+						esc_html(
+							gmdate(
+								'F j, Y',
+								strtotime(
+									$fulfillment->get_meta( '_fulfilled_date' )
+									?? $fulfillment->get_date_updated() // Fallback to the updated date if fulfilled date is not set.
+								)
+							)
+						)
 					);
 					?>
 				</th>
