@@ -1,15 +1,12 @@
 /**
  * External dependencies
  */
-import type {
-	OriginalProductData,
-	ProductData,
-} from '@woocommerce/type-defs/product';
+import type { ProductData } from '@woocommerce/type-defs/product';
 
 export type SingleProductTemplateStore = {
 	state: {
 		singleProductTemplate: {
-			originalProductData: OriginalProductData;
+			originalProductData: ProductData;
 			productData: ProductData;
 		};
 	};

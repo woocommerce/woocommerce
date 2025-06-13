@@ -1,15 +1,10 @@
 /**
  * External dependencies
  */
-import { getContext, getElement, store } from '@wordpress/interactivity';
+import { getElement, store } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/single-product';
 import type { SingleProductStore } from '@woocommerce/stores/woocommerce/single-product';
 import { sanitize } from 'dompurify'; // eslint-disable-line import/named
-
-/**
- * Internal dependencies
- */
-import { formatPrice } from '../../../../blocks/product-filters/utils/price-currency';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -20,11 +15,6 @@ const { state: singleProductState } = store< SingleProductStore >(
 	{},
 	{ lock: universalLock }
 );
-
-export type Context = {
-	regularPriceText: string;
-	currentPriceText: string;
-};
 
 const ALLOWED_TAGS = [
 	'a',
@@ -49,49 +39,12 @@ const ALLOWED_ATTR = [
 	'aria-hidden',
 ];
 
-const sprintf = ( text: string, value: string ) => {
-	return text.replace( '%s', value );
-};
-
 const productPriceStore = store(
 	'woocommerce/product-price',
 	{
 		state: {
-			get formattedPrice(): string {
-				if ( ! singleProductState?.productData ) {
-					return '';
-				}
-
-				const {
-					display_price: newPrice,
-					display_regular_price: newRegularPrice,
-				} = singleProductState.productData;
-
-				if (
-					newPrice &&
-					newRegularPrice &&
-					newPrice !== newRegularPrice
-				) {
-					const { regularPriceText = '%s', currentPriceText = '%s' } =
-						getContext< Context >();
-					return `<span class="price"><del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi>${ formatPrice(
-						newRegularPrice
-					) }</bdi></span></del><span class="screen-reader-text">${ sprintf(
-						regularPriceText,
-						formatPrice( newRegularPrice )
-					) }</span> <ins aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi>${ formatPrice(
-						newPrice
-					) }</bdi></span></ins><span class="screen-reader-text">${ sprintf(
-						currentPriceText,
-						formatPrice( newPrice )
-					) }</span></span>`;
-				} else if ( newPrice ) {
-					return `<span class="price"><span class="woocommerce-Price-amount amount"><bdi>${ formatPrice(
-						newPrice
-					) }</bdi></span></span>`;
-				}
-
-				return '';
+			get priceHTML(): string {
+				return singleProductState?.productData?.price_html || '';
 			},
 			get originalPriceHtml(): string {
 				return (
@@ -107,15 +60,15 @@ const productPriceStore = store(
 					return;
 				}
 
-				const { formattedPrice, originalPriceHtml } =
+				const { priceHTML, originalPriceHtml } =
 					productPriceStore.state;
 
-				if ( ! formattedPrice && ! originalPriceHtml ) {
+				if ( ! priceHTML && ! originalPriceHtml ) {
 					return;
 				}
 
 				element.ref.innerHTML = sanitize(
-					formattedPrice || originalPriceHtml,
+					priceHTML || originalPriceHtml,
 					{
 						ALLOWED_TAGS,
 						ALLOWED_ATTR,

@@ -204,10 +204,9 @@ class AddToCartWithOptions extends AbstractBlock {
 				$available_variations_data      = array_map(
 					function ( $variation ) {
 						return array(
-							'variation_id'          => $variation['variation_id'],
-							'attributes'            => $variation['attributes'],
-							'display_price'         => $variation['display_price'],
-							'display_regular_price' => $variation['display_regular_price'],
+							'variation_id' => $variation['variation_id'],
+							'attributes'   => $variation['attributes'],
+							'price_html'   => $variation['price_html'],
 						);
 					},
 					$available_variations

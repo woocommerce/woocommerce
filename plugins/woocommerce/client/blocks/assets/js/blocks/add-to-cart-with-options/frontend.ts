@@ -11,8 +11,7 @@ import type { SingleProductStore } from '@woocommerce/stores/woocommerce/single-
 export type AvailableVariation = {
 	attributes: Record< string, string >;
 	variation_id: number;
-	display_price: number;
-	display_regular_price: number;
+	price_html: string;
 };
 
 export type Context = {
@@ -358,16 +357,11 @@ const addToCartWithOptionsStore = store(
 
 				if ( matchedVariation ) {
 					actions.setProductData(
-						'display_price',
-						matchedVariation.display_price
-					);
-					actions.setProductData(
-						'display_regular_price',
-						matchedVariation.display_regular_price
+						'price_html',
+						matchedVariation.price_html
 					);
 				} else {
-					actions.setProductData( 'display_price', null );
-					actions.setProductData( 'display_regular_price', null );
+					actions.setProductData( 'price_html', null );
 				}
 			},
 		},
