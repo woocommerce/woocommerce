@@ -143,6 +143,13 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 
 		$this->validate_items( $data );
 
+		/**
+		 * Filter to modify the fulfillment data before it is updated.
+		 *
+		 * @since 9.9.0
+		 */
+		$data = apply_filters( 'wc_fulfillment_before_update', $data );
+
 		$wpdb->update(
 			$wpdb->prefix . 'wc_order_fulfillments',
 			array(
@@ -171,6 +178,13 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		$data->apply_changes();
 
 		$data->set_object_read( true );
+
+		/**
+		 * Action to perform after a fulfillment is updated.
+		 *
+		 * @since 9.9.0
+		 */
+		do_action( 'wc_fulfillment_after_update', $data );
 	}
 
 	/**
