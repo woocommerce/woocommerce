@@ -80,8 +80,23 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	public function test_package_rates_filter_error_handling( callable $filter_callback, string $description ) {
 		$shipping_methods_hook = function () {
 			$custom_pickup = new class() extends WC_Shipping_Method {
-				public $id       = 'custom_pickup';
+				/**
+				 * Custom pickup shipping method.
+				 * @var string
+				 */
+				public $id = 'custom_pickup';
+				/**
+				 * Array of features this rate supports.
+				 * @var array
+				 */
 				public $supports = array( 'local-pickup' );
+
+				/**
+				 * Get rates for package.
+				 * @param array $package package.
+				 *
+				 * @return WC_Shipping_Rate[]
+				 */
 				public function get_rates_for_package( $package ) {
 					return array( 'pickup_location:0' => new WC_Shipping_Rate( 'pickup_location:0', 'Pickup Location', '5', array(), 'custom_pickup' ) );
 				}
@@ -92,7 +107,7 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 		add_action( 'woocommerce_shipping_methods', $shipping_methods_hook );
 		add_filter( 'woocommerce_package_rates', $filter_callback, 10, 2 );
 
-		// This should not throw any errors or warnings
+		// This should not throw any errors or warnings.
 		$result = $this->sut->calculate_shipping_for_package(
 			array(
 				'contents'      => array(),
@@ -105,7 +120,7 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 			),
 		);
 
-		// Verify that rates are still returned
+		// Verify that rates are still returned.
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'rates', $result );
 
@@ -122,7 +137,7 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 		return array(
 			'accessing non-existent rate with arithmetic' => array(
 				function ( $rates, $package ) {
-					// This should not cause an error even if pickup_location:0 doesn't exist in rates
+					// This should not cause an error even if pickup_location:0 doesn't exist in rates.
 					if ( isset( $package['rates']['pickup_location:0'] ) ) {
 						$new_value = 1 + $package['rates']['pickup_location:0']->cost;
 					}
@@ -131,8 +146,8 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 				'Filter safely checks if rate exists before arithmetic operations',
 			),
 			'accessing rate cost with empty string'       => array(
-				function ( $rates, $package ) {
-					// Test that empty cost values don't break arithmetic
+				function ( $rates ) {
+					// Test that empty cost values don't break arithmetic.
 					foreach ( $rates as $rate_id => $rate ) {
 						if ( '' === $rate->cost ) {
 							$rate->cost = '0';
@@ -143,8 +158,8 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 				'Filter handles empty cost values in rates',
 			),
 			'unsafe access that could cause errors'       => array(
-				function ( $rates, $package ) {
-					// This is the problematic code that the fix should prevent errors for
+				function ( $rates ) {
+					// This is the problematic code that the fix should prevent errors for.
 					if ( isset( $rates['pickup_location:0'] ) ) {
 						$new_value = 1 + $rates['pickup_location:0']->cost;
 					}
