@@ -132,7 +132,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the fulfillment before create hook is called when creating a fulfillment with an error.
+	 * Create a test fulfillment to use in the tests.
 	 *
 	 * @param int $order_id The ID of the order to create a fulfillment for.
 	 *
