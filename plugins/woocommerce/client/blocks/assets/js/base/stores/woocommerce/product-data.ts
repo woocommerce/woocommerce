@@ -12,46 +12,56 @@ export type Context = {
 	productData: ProductData;
 };
 
-// Stores are locked to prevent 3PD usage until the API is stable.
-const universalLock =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+type ServerState = {
+	templateState: {
+		originalProductData: ProductData;
+		productData: ProductData;
+	};
+};
 
-const { state: wooState } = store< {
-	state: { singleProductTemplate: Context };
-} >( 'woocommerce', {}, { lock: universalLock } );
-
-const productDataStore = store(
+const productDataStore = store< {
+	state: {
+		productData: ProductData;
+		originalProductData: ProductData;
+	} & ServerState;
+	actions: {
+		setProductData: (
+			key: keyof ProductData,
+			value: string | null
+		) => void;
+	};
+} >(
 	'woocommerce/product-data',
 	{
 		state: {
-			get productData(): ProductData | null {
+			get productData(): ProductData {
 				const context = getContext< Context >();
 
 				return (
 					context?.productData ||
-					wooState?.singleProductTemplate?.productData
+					productDataStore?.state?.templateState?.productData
 				);
 			},
-			get originalProductData(): ProductData | null {
+			get originalProductData(): ProductData {
 				const context = getContext< Context >();
 
 				return (
 					context?.originalProductData ||
-					wooState?.singleProductTemplate?.originalProductData
+					productDataStore?.state?.templateState?.originalProductData
 				);
 			},
 		},
 		actions: {
-			setProductData: (
-				key: keyof ProductData,
-				value: string | null
-			) => {
+			setProductData: ( key, value ) => {
 				const context = getContext< Context >();
 
 				if ( context?.productData ) {
 					context.productData[ key ] = value;
-				} else if ( wooState?.singleProductTemplate?.productData ) {
-					wooState.singleProductTemplate.productData[ key ] = value;
+				} else if (
+					productDataStore?.state?.templateState?.productData
+				) {
+					productDataStore.state.templateState.productData[ key ] =
+						value;
 				}
 			},
 		},
