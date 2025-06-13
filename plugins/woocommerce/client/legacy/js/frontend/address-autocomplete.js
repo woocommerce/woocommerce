@@ -312,42 +312,28 @@ window.wc.addressAutocomplete = {
 			return parts;
 		}
 
-		// Sanitize and validate input.
-		const sanitizeInput = ( input ) => {
-			if ( typeof input !== 'string' ) {
-				return '';
-			}
-			// Remove potentially dangerous characters and limit length.
-			return input
-				.replace( /[<>'"&]/g, '' )
-				.trim()
-				.substring( 0, 200 );
-		};
+		/**
+		 * Sanitize HTML for display by removing any HTML tags.
+		 *
+		 * @param html
+		 * @return {string|string}
+		 */
+		function sanitizeForDisplay( html ) {
+			const doc = document.implementation.createHTMLDocument( '' );
+			doc.body.innerHTML = html;
+			return doc.body.textContent || '';
+		}
 
-		// Sanitize text content for display (prevent XSS).
-		const sanitizeForDisplay = ( text ) => {
-			if ( typeof text !== 'string' ) {
-				return '';
-			}
-			// Create a temporary textarea to leverage browser's built-in text sanitization.
-			const textarea = document.createElement( 'textarea' );
-			textarea.textContent = text;
-			return textarea.innerHTML;
-		};
-
-		const validateAddressType = ( type ) => {
-			return type === 'billing' || type === 'shipping';
-		};
-
+		/**
+		 * Handle searching and displaying autocomplete results below the address input if the value meets the criteria
+		 * of 3 or more characters.
+		 * @param type {string} The address type ('billing' or 'shipping').
+		 * @param inputValue {string} The value entered into the address input.
+		 * @return {Promise<void>}
+		 */
 		async function displaySuggestions( type, inputValue ) {
-			// Validate address type.
-			if ( ! validateAddressType( type ) ) {
-				console.error( 'Invalid address type:', type );
-				return;
-			}
-
 			// Sanitize input value.
-			const sanitizedInput = sanitizeInput( inputValue );
+			const sanitizedInput = sanitizeForDisplay( inputValue );
 			if ( sanitizedInput !== inputValue ) {
 				console.warn( 'Input was sanitized for security' );
 			}
