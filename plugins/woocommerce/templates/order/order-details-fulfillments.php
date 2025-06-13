@@ -55,7 +55,7 @@ if ( ! empty( $fulfillments ) ) {
 							gmdate(
 								'F j, Y',
 								strtotime(
-									$fulfillment->get_meta( '_fulfilled_date' )
+									$fulfillment->get_date_fulfilled() // Get the fulfilled date.
 									?? $fulfillment->get_date_updated() // Fallback to the updated date if fulfilled date is not set.
 								)
 							)

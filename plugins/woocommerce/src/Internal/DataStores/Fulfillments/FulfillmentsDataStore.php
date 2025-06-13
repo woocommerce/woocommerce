@@ -75,7 +75,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 
 		// If the fulfillment is fulfilled, set the fulfilled date.
 		if ( $data->get_is_fulfilled() ) {
-			$data->add_meta_data( '_fulfilled_date', current_time( 'mysql' ), true );
+			$data->set_date_fulfilled( current_time( 'mysql' ) );
 		}
 
 		// Save the metadata for the fulfillment to the database.
@@ -159,7 +159,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 
 		// If the fulfillment is fulfilled, set the fulfilled date.
 		if ( $data->get_is_fulfilled() && ! $data->meta_exists( '_fulfilled_date' ) ) {
-			$data->add_meta_data( '_fulfilled_date', current_time( 'mysql' ), true );
+			$data->set_date_fulfilled( current_time( 'mysql' ) );
 		}
 
 		// Update the metadata for the fulfillment.
