@@ -55,6 +55,7 @@ woocommerce_register_additional_checkout_field(
     )
 );
 ```
+
 ![Additional field for contact](/img/doc_images/additional-field-contact.png)
 
 ### Address (`address`)
