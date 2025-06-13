@@ -157,16 +157,19 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	private function update_single_image( $image_html, $context, $index ) {
 		$p = new \WP_HTML_Tag_Processor( $image_html );
 
-		// Bail out if the image HTML is not valid.
-		if ( ! $p->next_tag( 'a' ) ) {
-			return $image_html;
+		if ( $p->next_tag( 'a' ) ) {
+			$p->remove_attribute( 'onclick' );
+			$p->remove_attribute( 'style' );
+			$p->set_attribute( 'tabindex', '-1' );
+		} else {
+			/**
+			 * If we can't find and <a> tag, we're at then end of the document.
+			 * We need to reinitialize the processor instance to search for <img> tag.
+			 */
+			$p = new \WP_HTML_Tag_Processor( $image_html );
 		}
 
-		$p->remove_attribute( 'onclick' );
-		$p->remove_attribute( 'style' );
-		$p->set_attribute( 'tabindex', '-1' );
-
-		// Bail out if the image HTML is not valid.
+		// Bail out early if we don't find any image.
 		if ( ! $p->next_tag( 'img' ) ) {
 			return $image_html;
 		}
