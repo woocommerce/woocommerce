@@ -1,6 +1,9 @@
 .wc-block-product-gallery-large-image__inner-blocks {
 	.wp-block-woocommerce-product-image {
 		position: absolute;
-		inset: -5px;
+		top: -5px;
+		right: -5px;
+		bottom: -5px;
+		left: -5px;
 	}
 }
