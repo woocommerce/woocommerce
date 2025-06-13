@@ -72,10 +72,23 @@ export const useFormFields = < T extends keyof FormFields >(
 				}
 			}
 			if ( hasSchemaRules( defaultConfig, 'hidden' ) ) {
-				const schema = {
-					type: 'object',
-					properties: defaultConfig.hidden,
-				};
+				let schema = {};
+				if (
+					Object.keys( defaultConfig.hidden ).some(
+						( key ) =>
+							key === 'cart' ||
+							key === 'checkout' ||
+							key === 'customer'
+					)
+				) {
+					schema = {
+						type: 'object',
+						properties: defaultConfig.hidden,
+					};
+				} else {
+					schema = defaultConfig.hidden;
+				}
+
 				try {
 					const result = parser.validate( schema, data );
 					field.hidden = result;
