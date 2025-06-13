@@ -5,13 +5,14 @@
 describe( 'Address Autocomplete Provider Registration', () => {
 	beforeEach( () => {
 		// Reset the window object and providers before each test
-		global.window = {};
-		global.window.wc_checkout_params = {
-			address_providers: [
-				{ id: 'test-provider', name: 'Test provider' },
-				{ id: 'wc-payments', name: 'WooCommerce Payments' },
-			],
-		};
+		Object.assign( global.window, {
+			wc_checkout_params: {
+				address_providers: [
+					{ id: 'test-provider', name: 'Test provider' },
+					{ id: 'wc-payments', name: 'WooCommerce Payments' },
+				],
+			},
+		} );
 		global.console = {
 			error: jest.fn(),
 		};
