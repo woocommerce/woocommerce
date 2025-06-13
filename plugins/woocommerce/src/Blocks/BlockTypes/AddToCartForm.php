@@ -62,7 +62,6 @@ class AddToCartForm extends AbstractBlock {
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
 		$this->asset_data_registry->add( 'isStepperLayoutFeatureEnabled', Features::is_enabled( 'add-to-cart-with-options-stepper-layout' ) );
-		$this->asset_data_registry->add( 'isBlockifiedAddToCart', Features::is_enabled( 'blockified-add-to-cart' ) );
 		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
 	}
 
