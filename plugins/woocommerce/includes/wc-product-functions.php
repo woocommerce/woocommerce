@@ -126,7 +126,6 @@ function wc_product_dimensions_enabled() {
  * Calling it on read/display code paths can create unbounded action‑scheduler
  * rows and DOS the site.
  *
- *
  * @param int $post_id (default: 0) The product ID.
  * @param bool $force               Force execution even if context check fails (default false).
  */
@@ -136,7 +135,7 @@ function wc_delete_product_transients( $post_id = 0, $force = false ) {
 		|| wp_doing_cron()
 		|| ( defined( 'WP_CLI' ) && WP_CLI )
 		|| (
-			defined( 'REST_REQUEST' )            // REST route *AND* method is mutating
+			defined( 'REST_REQUEST' )            // REST route *AND* method is mutating.
 			&& REST_REQUEST
 			&& isset( $_SERVER['REQUEST_METHOD'] )
 			&& in_array( $_SERVER['REQUEST_METHOD'], array( 'POST', 'PUT', 'PATCH', 'DELETE' ), true )
@@ -145,6 +144,7 @@ function wc_delete_product_transients( $post_id = 0, $force = false ) {
 	/**
 	 * Last‑chance filter. Return `true` to allow, `false` to block.
 	 *
+	 * @since 9.10.0
 	 * @param bool $is_write_context Result of WooCommerce’s own context test.
 	 * @param int  $post_id          Product ID for which the flush was requested.
 	 */
