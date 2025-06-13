@@ -394,7 +394,7 @@ const { state } = store(
 				cartItem.quantity = finalQuantity;
 			},
 
-			*changeQuantity( e: InputEvent ): Generator< unknown, void > {
+			*changeQuantity(): Generator< unknown, void > {
 				const { cartItem } = getContext< CartItemContext >();
 				const { actions } = store< WooCommerce >(
 					'woocommerce',
