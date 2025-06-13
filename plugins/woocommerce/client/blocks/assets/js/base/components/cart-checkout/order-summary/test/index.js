@@ -9,13 +9,24 @@ import { previewCart } from '@woocommerce/resource-previews';
  */
 import OrderSummary from '../index';
 
+let mockCartIsLoading = false;
+
 jest.mock( '@woocommerce/base-context', () => ( {
 	...jest.requireActual( '@woocommerce/base-context' ),
+	useStoreCart: () => ( {
+		cartIsLoading: mockCartIsLoading,
+		// other cart properties you need
+	} ),
 	useContainerWidthContext: () => ( {
 		isLarge: true,
 		hasContainerWidth: true,
 	} ),
 } ) );
+
+// Helper function to update the mock value
+const setCartIsLoading = ( value ) => {
+	mockCartIsLoading = value;
+};
 
 describe( 'Order Summary', () => {
 	it( 'renders correct cart line subtotal when currency has 0 decimals', async () => {
@@ -39,5 +50,15 @@ describe( 'Order Summary', () => {
 		);
 
 		expect( screen.getByText( '16€' ) ).toBeTruthy();
+	} );
+
+	it( 'should show loading state', () => {
+		setCartIsLoading( true );
+		// your test code
+	} );
+
+	it( 'should show loaded state', () => {
+		setCartIsLoading( false );
+		// your test code
 	} );
 } );
