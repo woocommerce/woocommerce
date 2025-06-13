@@ -69,7 +69,10 @@ async function getAllMarkdownFiles(dir: string): Promise<Array<{ path: string; r
           continue;
         }
         await scanDirectory(fullPath, entryRelativePath);
-      } else if (entry.isFile() && entry.name.endsWith('.md')) {
+      } else if (
+        entry.isFile() &&
+        (entry.name.endsWith('.md') || entry.name.endsWith('.mdx'))
+      ) {
         try {
           const content = await fs.promises.readFile(fullPath, 'utf-8');
           const title = extractTitle(content, entry.name);
@@ -123,7 +126,8 @@ async function generateFileList(files: Array<{ path: string; relativePath: strin
   
   for (const file of files) {
     const description = extractDescription(file.content);
-    const url = `https://raw.githubusercontent.com/woocommerce/woocommerce/refs/heads/trunk/docs/${file.relativePath}`;
+    const posixPath = file.relativePath.split(path.sep).join('/'); // ensure forward slashes
+    const url = `https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/${posixPath}`;
     content += `[${file.title}](${url}) ${description}\n\n`;
   }
   

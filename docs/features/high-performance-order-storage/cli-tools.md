@@ -333,7 +333,7 @@ Warning: Differences found for order 100126:
 
 If reconciling is not necessary, the `--force` flag can be used to skip the verification checks:
 
-```plaintext
+```plaintext
 $ wp wc hpos cleanup 100126 --force
 Starting cleanup for 1 order...
 HPOS cleanup  100% [=====================================================================================================================] 0:00 / 0:00
