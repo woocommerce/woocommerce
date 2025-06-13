@@ -56,6 +56,16 @@ export function getPaymentProvidersError( error: unknown ): {
 	};
 }
 
+/**
+ * Toggle the enabled state of a payment gateway.
+ * This function makes an AJAX request to the server to toggle the gateway's enabled state.
+ *
+ * See `WC_AJAX::toggle_gateway_enabled()` for the response structure.
+ *
+ * @param gatewayId          The ID of the payment gateway to toggle.
+ * @param ajaxUrl            The URL to send the AJAX request to, typically the admin-ajax.php endpoint.
+ * @param gatewayToggleNonce The nonce for security, used to verify the request.
+ */
 export function* togglePaymentGateway(
 	gatewayId: string,
 	ajaxUrl: string,
