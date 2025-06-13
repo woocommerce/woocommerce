@@ -50,8 +50,9 @@ final class QuantityLimits {
 		$editable    = $this->filter_boolean_value( $editable, 'editable', $cart_item );
 
 		// Ensure values are compatible with each other.
-		$minimum = max( $multiple_of, $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ) );
-		$maximum = max( $minimum, $this->limit_to_multiple( $maximum, $multiple_of, 'floor' ) );
+		$multiple_of = $multiple_of < self::FLOAT_TOLERANCE ? 1 : $multiple_of;
+		$minimum     = max( $multiple_of, $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ) );
+		$maximum     = max( $minimum, $this->limit_to_multiple( $maximum, $multiple_of, 'floor' ) );
 
 		return [
 			'minimum'     => $minimum,
@@ -79,8 +80,9 @@ final class QuantityLimits {
 		$maximum     = $this->filter_numeric_value( $maximum, 'maximum', $product );
 
 		// Ensure values are compatible with each other.
-		$minimum = max( $multiple_of, $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ) );
-		$maximum = max( $minimum, $this->limit_to_multiple( $maximum, $multiple_of, 'floor' ) );
+		$multiple_of = $multiple_of < self::FLOAT_TOLERANCE ? 1 : $multiple_of;
+		$minimum     = max( $multiple_of, $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ) );
+		$maximum     = max( $minimum, $this->limit_to_multiple( $maximum, $multiple_of, 'floor' ) );
 
 		return [
 			'minimum'     => $minimum,
