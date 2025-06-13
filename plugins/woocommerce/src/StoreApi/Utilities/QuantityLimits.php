@@ -37,7 +37,7 @@ final class QuantityLimits {
 			];
 		}
 
-		// Set defaults. Products that aresold individually need special handling.
+		// Set defaults. Products that are sold individually need special handling.
 		$minimum     = 1;
 		$multiple_of = 1;
 		$maximum     = $product->is_sold_individually() ? 1 : $this->get_product_quantity_limit( $product );
@@ -49,7 +49,7 @@ final class QuantityLimits {
 		$maximum     = $this->filter_numeric_value( $maximum, 'maximum', $cart_item );
 		$editable    = $this->filter_boolean_value( $editable, 'editable', $cart_item );
 
-		// Ensure values are compatibile with each other.
+		// Ensure values are compatible with each other.
 		$minimum = max( $multiple_of, $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ) );
 		$maximum = max( $minimum, $this->limit_to_multiple( $maximum, $multiple_of, 'floor' ) );
 
@@ -68,7 +68,7 @@ final class QuantityLimits {
 	 * @return array
 	 */
 	public function get_add_to_cart_limits( \WC_Product $product ) {
-		// Set defaults. Products that aresold individually need special handling.
+		// Set defaults. Products that are sold individually need special handling.
 		$minimum     = 1;
 		$multiple_of = 1;
 		$maximum     = $product->is_sold_individually() ? 1 : $this->get_product_quantity_limit( $product );
@@ -78,7 +78,7 @@ final class QuantityLimits {
 		$minimum     = $this->filter_numeric_value( $minimum, 'minimum', $product );
 		$maximum     = $this->filter_numeric_value( $maximum, 'maximum', $product );
 
-		// Ensure values are compatibile with each other.
+		// Ensure values are compatible with each other.
 		$minimum = max( $multiple_of, $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ) );
 		$maximum = max( $minimum, $this->limit_to_multiple( $maximum, $multiple_of, 'floor' ) );
 
