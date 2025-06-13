@@ -1,7 +1,10 @@
 /**
  * Internal dependencies
  */
-const { webpackConfig } = require( '@woocommerce/internal-style-build' );
+const {
+	webpackConfig,
+	webpackWatchOptions,
+} = require( '@woocommerce/internal-style-build' );
 
 /**
  * External dependencies
@@ -30,4 +33,5 @@ module.exports = {
 		rules: webpackConfig.rules,
 	},
 	plugins: webpackConfig.plugins,
+	watchOptions: webpackWatchOptions,
 };
