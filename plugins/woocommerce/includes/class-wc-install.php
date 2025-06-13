@@ -291,6 +291,7 @@ class WC_Install {
 			'wc_update_990_remove_email_notes',
 		),
 		'10.0.0' => array(
+			'wc_update_1000_multisite_visibility_setting',
 			'wc_update_1000_remove_patterns_toolkit_transient',
 		),
 	);
