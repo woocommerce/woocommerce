@@ -127,7 +127,11 @@ class CartController {
 			$quantity_validation = $quantity_limits->validate_cart_item_quantity( $request['quantity'] + $cart_item['quantity'], $cart_item );
 
 			if ( is_wp_error( $quantity_validation ) ) {
-				throw new RouteException( $quantity_validation->get_error_code(), $quantity_validation->get_error_message(), 400 );
+				throw new RouteException(
+					esc_html( $quantity_validation->get_error_code() ),
+					esc_html( $quantity_validation->get_error_message() ),
+					400
+				);
 			}
 
 			$cart->set_quantity( $existing_cart_id, $request['quantity'] + $cart->cart_contents[ $existing_cart_id ]['quantity'], true );
@@ -1157,7 +1161,11 @@ class CartController {
 		if ( ! $product || ProductStatus::TRASH === $product->get_status() ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_invalid_product',
-				__( 'This product cannot be added to the cart.', 'woocommerce' ),
+				sprintf(
+					/* translators: %s: product ID */
+					esc_html__( 'Product with ID "%s" was not found and cannot be added to the cart.', 'woocommerce' ),
+					esc_html( $request['id'] )
+				),
 				400
 			);
 		}

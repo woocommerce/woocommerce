@@ -3,7 +3,7 @@
  */
 import { createElement, Component, createRef } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { timeFormat as d3TimeFormat } from 'd3-time-format';
 
 /**
@@ -223,13 +223,13 @@ class D3Chart extends Component {
 		const computedWidth = this.getWidth();
 		return (
 			<div
-				className={ classNames( 'd3-chart__container', className ) }
+				className={ clsx( 'd3-chart__container', className ) }
 				style={ { height } }
 			>
 				{ this.getEmptyMessage() }
 				<div className="d3-chart__tooltip" ref={ this.tooltipRef } />
 				<D3Base
-					className={ classNames( className ) }
+					className={ clsx( className ) }
 					data={ data }
 					drawChart={ this.drawChart }
 					height={ height }
