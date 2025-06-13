@@ -96,20 +96,20 @@ window.wc.addressAutocomplete = {
 	function setActiveProvider( country, type ) {
 		// Get server providers list (already ordered by preference).
 		const serverProviders =
-		( window &&
-			window.wc_checkout_params &&
-			window.wc_checkout_params.address_providers ) ||
-		[];
+			( window &&
+				window.wc_checkout_params &&
+				window.wc_checkout_params.address_providers ) ||
+			[];
 
-	// Check providers in preference order (server handles preferred provider ordering).
-	for ( const serverProvider of serverProviders ) {
-		const provider = addressProviders[ serverProvider.id ];
+		// Check providers in preference order (server handles preferred provider ordering).
+		for ( const serverProvider of serverProviders ) {
+			const provider = addressProviders[ serverProvider.id ];
 
-		if ( provider && provider.canSearch( country ) ) {
-			activeAddressProvider[ type ] = provider;
-			return;
+			if ( provider && provider.canSearch( country ) ) {
+				activeAddressProvider[ type ] = provider;
+				return;
+			}
 		}
-	}
 
 		// No provider can search for this country.
 		activeAddressProvider[ type ] = null;
@@ -490,7 +490,7 @@ window.wc.addressAutocomplete = {
 			} catch ( error ) {
 				console.error(
 					'Error selecting address from provider',
-					activeProviderId,
+					activeAddressProvider[ type ].id,
 					error
 				);
 				return; // Exit early if address selection fails.
@@ -505,16 +505,16 @@ window.wc.addressAutocomplete = {
 				return;
 			}
 
-			// First pass - set all available fields immediately.
+			// Set all available fields.
 			// Only set fields if the address data property exists and has a value.
-			if ( addressData.address1 ) {
-				setFieldValue( addressInput, addressData.address1 );
+			if ( addressData.address_1 ) {
+				setFieldValue( addressInput, addressData.address_1 );
+			}
+			if ( addressData.address_2 ) {
+				setFieldValue( address2Input, addressData.address_2 );
 			}
 			if ( addressData.city ) {
 				setFieldValue( cityInput, addressData.city );
-			}
-			if ( addressData.country ) {
-				setFieldValue( countryInput, addressData.country );
 			}
 			if ( addressData.postcode ) {
 				setFieldValue( postcodeInput, addressData.postcode );
@@ -522,66 +522,13 @@ window.wc.addressAutocomplete = {
 			if ( addressData.state ) {
 				setFieldValue( stateInput, addressData.state );
 			}
-
-			// Second pass after a delay to verify all fields and fix any that don't match.
-			setTimeout( () => {
-				const updatedAddressInput = document.getElementById(
-					`${ type }_address_1`
-				);
-				const updatedCityInput = document.getElementById(
-					`${ type }_city`
-				);
-				const updatedCountryInput = document.getElementById(
-					`${ type }_country`
-				);
-				const updatedPostcodeInput = document.getElementById(
-					`${ type }_postcode`
-				);
-				const updatedStateInput = document.getElementById(
-					`${ type }_state`
-				);
-
-				// Verify and fix any fields that don't match the expected values.
-				if (
-					updatedAddressInput &&
-					addressData.address1 &&
-					getFieldValue( updatedAddressInput ) !==
-						addressData.address1
-				) {
-					setFieldValue( updatedAddressInput, addressData.address1 );
-				}
-				if (
-					updatedCityInput &&
-					addressData.city &&
-					getFieldValue( updatedCityInput ) !== addressData.city
-				) {
-					setFieldValue( updatedCityInput, addressData.city );
-				}
-				if (
-					updatedCountryInput &&
-					addressData.country &&
-					getFieldValue( updatedCountryInput ) !== addressData.country
-				) {
-					setFieldValue( updatedCountryInput, addressData.country );
-				}
-				if (
-					updatedPostcodeInput &&
-					addressData.postcode &&
-					getFieldValue( updatedPostcodeInput ) !==
-						addressData.postcode
-				) {
-					setFieldValue( updatedPostcodeInput, addressData.postcode );
-				}
-				if (
-					updatedStateInput &&
-					addressData.state &&
-					getFieldValue( updatedStateInput ) !== addressData.state
-				) {
-					setFieldValue( updatedStateInput, addressData.state );
-				}
-			}, 100 );
 		}
 
+		/**
+		 * Set the active suggestion in the suggestions list, highlights it.
+		 * @param type {string} The address type ('billing' or 'shipping').
+		 * @param index {number} The index of the suggestion to set as active.
+		 */
 		function setActiveSuggestion( type, index ) {
 			const suggestionsList = suggestionsLists[ type ];
 			const addressInput = addressInputs[ type ][ 'address_1' ];
