@@ -13,6 +13,7 @@ import {
 	getWooPaymentsSetupLiveAccountLink,
 	disableWooPaymentsTestAccount,
 	recordPaymentsEvent,
+	recordPaymentsOnboardingEvent,
 } from '~/settings-payments/utils';
 
 interface ActivatePaymentsButtonProps {
@@ -76,6 +77,9 @@ export const ActivatePaymentsButton = ( {
 
 				if ( onboardingType === 'native_in_context' ) {
 					// Open the onboarding modal.
+					recordPaymentsOnboardingEvent(
+						'woopayments_onboarding_modal_opened'
+					);
 					setOnboardingModalOpen( true );
 					setIsUpdating( false );
 				} else {

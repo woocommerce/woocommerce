@@ -16,6 +16,7 @@ import { useSelect } from '@wordpress/data';
  */
 import {
 	isWooPayments,
+	recordPaymentsOnboardingEvent,
 	recordPaymentsProviderEvent,
 } from '~/settings-payments/utils';
 
@@ -101,6 +102,9 @@ export const CompleteSetupButton = ( {
 		setIsUpdating( true );
 
 		if ( onboardingType === 'native_in_context' ) {
+			recordPaymentsOnboardingEvent(
+				'woopayments_onboarding_modal_opened'
+			);
 			setOnboardingModalOpen( true );
 		} else if ( ! accountConnected || ! onboardingStarted ) {
 			if ( gatewayHasRecommendedPaymentMethods ) {

@@ -394,6 +394,14 @@ const TestAccountStep = () => {
 	};
 
 	if ( status === 'success' ) {
+		recordPaymentsOnboardingEvent(
+			'woopayments_onboarding_modal_step_view',
+			{
+				step: currentStep?.id || 'unknown',
+				screen: 'ready_to_test_payments',
+			}
+		);
+
 		// Render success state.
 		return (
 			<>

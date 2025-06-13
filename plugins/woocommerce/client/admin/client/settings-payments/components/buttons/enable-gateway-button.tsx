@@ -17,7 +17,10 @@ import { getHistory, getNewPath } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { recordPaymentsProviderEvent } from '~/settings-payments/utils';
+import {
+	recordPaymentsOnboardingEvent,
+	recordPaymentsProviderEvent,
+} from '~/settings-payments/utils';
 
 interface EnableGatewayButtonProps {
 	/**
@@ -144,6 +147,9 @@ export const EnableGatewayButton = ( {
 							onboardingType === 'native_in_context' &&
 							setOnboardingModalOpen
 						) {
+							recordPaymentsOnboardingEvent(
+								'woopayments_onboarding_modal_opened'
+							);
 							setOnboardingModalOpen( true );
 						} else if ( gatewayHasRecommendedPaymentMethods ) {
 							// Redirect to the recommended payment methods page if available, or the onboarding URL.

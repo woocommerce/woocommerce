@@ -37,6 +37,7 @@ import {
 	isIncentiveDismissedEarlierThanTimestamp,
 	isActionIncentive,
 	recordPaymentsEvent,
+	recordPaymentsOnboardingEvent,
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
 import WooPaymentsModal from '~/settings-payments/onboarding/providers/woopayments';
@@ -399,6 +400,9 @@ export const SettingsPaymentsMain = () => {
 						updatedPaymentsEntity?.onboarding?.type ===
 						'native_in_context'
 					) {
+						recordPaymentsOnboardingEvent(
+							'woopayments_onboarding_modal_opened'
+						);
 						setIsOnboardingModalOpen( true );
 						setInstallingPlugin( null );
 					} else {
