@@ -33,7 +33,7 @@ class FulfillmentsManager {
 	public function translate_fulfillment_meta_key( $meta_key ) {
 		/**
 		 * Filter to translate fulfillment meta keys.
-		 *0
+		 *
 		 * This filter allows us to translate fulfillment meta keys
 		 * to make them more user-friendly in the admin interface and emails.
 		 *
