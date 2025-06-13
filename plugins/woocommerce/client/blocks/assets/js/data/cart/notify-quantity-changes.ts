@@ -27,14 +27,10 @@ type NotifyQuantityChangesArgs = {
 	newCart: Cart;
 } & QuantityChanges;
 
-const FLOAT_TOLERANCE = 0.00001;
-
 const isWithinQuantityLimits = ( cartItem: CartItem ) => {
 	return (
 		cartItem.quantity >= cartItem.quantity_limits.minimum &&
-		cartItem.quantity <= cartItem.quantity_limits.maximum &&
-		cartItem.quantity % cartItem.quantity_limits.multiple_of <
-			FLOAT_TOLERANCE
+		cartItem.quantity <= cartItem.quantity_limits.maximum
 	);
 };
 
