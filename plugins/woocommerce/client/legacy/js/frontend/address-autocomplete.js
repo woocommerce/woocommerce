@@ -1,12 +1,13 @@
 /**
- * Simple address provider registration for WooCommerce checkout
+ * Address provider registration for WooCommerce shortcode checkout
  */
-var addressProviders = {};
 
-/**
- * Currently selected address provider. It will be used to search for addresses.
- */
-var activeAddressProvider = { billing: null, shipping: null };
+// Make functions and state available globally under window.wc.addressAutocomplete
+window.wc = window.wc || {};
+window.wc.addressAutocomplete = window.wc.addressAutocomplete || {
+	providers: {},
+	activeProvider: { billing: null, shipping: null },
+};
 
 /**
  * Register an address autocomplete provider
@@ -70,7 +71,7 @@ function registerAddressAutocompleteProvider( provider ) {
 
 		// Freeze and add provider to registry.
 		Object.freeze( provider );
-		addressProviders[ provider.id ] = provider;
+		window.wc.addressAutocomplete.providers[ provider.id ] = provider;
 		return true;
 	} catch ( error ) {
 		console.error( 'Error registering address provider:', error.message );
@@ -78,11 +79,9 @@ function registerAddressAutocompleteProvider( provider ) {
 	}
 }
 
-// Make functions available globally
-window.wc = window.wc || {};
-window.wc.addressAutocomplete = {
-	registerAddressAutocompleteProvider: registerAddressAutocompleteProvider,
-};
+// Export the registration function
+window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
+	registerAddressAutocompleteProvider;
 
 ( function () {
 	'use strict';
@@ -103,16 +102,17 @@ window.wc.addressAutocomplete = {
 
 		// Check providers in preference order (server handles preferred provider ordering).
 		for ( const serverProvider of serverProviders ) {
-			const provider = addressProviders[ serverProvider.id ];
+			const provider =
+				window.wc.addressAutocomplete.providers[ serverProvider.id ];
 
 			if ( provider && provider.canSearch( country ) ) {
-				activeAddressProvider[ type ] = provider;
+				window.wc.addressAutocomplete.activeProvider[ type ] = provider;
 				return;
 			}
 		}
 
 		// No provider can search for this country.
-		activeAddressProvider[ type ] = null;
+		window.wc.addressAutocomplete.activeProvider[ type ] = null;
 	}
 
 	document.addEventListener( 'DOMContentLoaded', function () {
@@ -371,16 +371,17 @@ window.wc.addressAutocomplete = {
 			}
 
 			// Check if we have an active provider for this address type.
-			if ( ! activeAddressProvider[ type ] ) {
+			if ( ! window.wc.addressAutocomplete.activeProvider[ type ] ) {
 				hideSuggestions( type );
 				enableBrowserAutofill( addressInput );
 				return;
 			}
 
 			try {
-				const filteredSuggestions = await activeAddressProvider[
-					type
-				].search( type, sanitizedInput );
+				const filteredSuggestions =
+					await window.wc.addressAutocomplete.activeProvider[
+						type
+					].search( type, sanitizedInput );
 
 				// Validate suggestions array.
 				if ( ! Array.isArray( filteredSuggestions ) ) {
@@ -500,13 +501,14 @@ window.wc.addressAutocomplete = {
 		async function selectAddress( type, addressId ) {
 			let addressData;
 			try {
-				addressData = await activeAddressProvider[ type ].select(
-					addressId
-				);
+				addressData =
+					await window.wc.addressAutocomplete.activeProvider[
+						type
+					].select( addressId );
 			} catch ( error ) {
 				console.error(
 					'Error selecting address from provider',
-					activeAddressProvider[ type ].id,
+					window.wc.addressAutocomplete.activeProvider[ type ].id,
 					error
 				);
 				return; // Exit early if address selection fails.
