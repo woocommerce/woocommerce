@@ -8,20 +8,6 @@ If you've already learned how to [add additional fields to the WooCommerce Check
 
 Conditional visibility allows you to create smart, adaptive checkout forms that only show relevant fields when needed, reducing form clutter and improving the customer experience.
 
-## Table of Contents
-
-* [Why Use Conditional Visibility?](#why-use-conditional-visibility)
-* [Understanding JSON Schema for Conditions](#understanding-json-schema-for-conditions)
-* [Common Conditional Scenarios](#common-conditional-scenarios)
-
-  * [Show Fields Based on Shipping Method](#show-fields-based-on-shipping-method)
-  * [Show Fields Based on Cart Contents](#show-fields-based-on-cart-contents)
-  * [Show Fields Based on Cart Value](#show-fields-based-on-cart-value)
-  * [Show Fields Based on Customer Location](#show-fields-based-on-customer-location)
-  * [Show Fields Based on Other Field Values](#show-fields-based-on-other-field-values)
-* [Practical Complete Example](#practical-complete-example)
-* [Next Steps](#next-steps)
-
 ## Why Use Conditional Visibility?
 
 Conditional fields help you:

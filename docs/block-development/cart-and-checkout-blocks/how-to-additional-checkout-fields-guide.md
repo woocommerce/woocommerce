@@ -11,24 +11,6 @@ In this post, we’ll walk through the process of adding your own additional fie
 
 For a deeper dive on the fields and helper methods referenced in this guide, please head to the [Additional Checkout Fields](https://developer.woocommerce.com/docs/block-development/cart-and-checkout-blocks/additional-checkout-fields) documentation.
 
-## Table of Contents
-
-* [Getting Started](#getting-started)
-* [Field Locations: Where Your Fields Appear](#field-locations-where-your-fields-appear)
-
-  * [Contact Information (`contact`)](#contact-information-contact)
-  * [Address (`address`)](#address-address)
-  * [Order Information (`order`)](#order-information-order)
-* [Supported Field Types](#supported-field-types)
-
-  * [Text Fields](#text-fields)
-  * [Select Dropdowns](#select-dropdowns)
-  * [Checkboxes](#checkboxes)
-* [Adding Field Attributes](#adding-field-attributes)
-* [Validation and Sanitization](#validation-and-sanitization)
-* [Accessing Field Values](#accessing-field-values)
-* [Next Steps](#next-steps)
-
 ## Getting Started
 
 To add additional checkout fields, you’ll use the `woocommerce_register_additional_checkout_field()` function. This should be called after the `woocommerce_init` action to ensure WooCommerce is fully loaded.
