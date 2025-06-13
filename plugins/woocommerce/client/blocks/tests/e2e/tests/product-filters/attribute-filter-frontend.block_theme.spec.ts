@@ -62,8 +62,11 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 			await page.goto( '/shop' );
 
 			const listItems = page
-				.getByLabel( 'Filter Options' )
-				.getByRole( 'listitem' );
+				.getByRole( 'heading', {
+					name: 'Attribute',
+				} )
+				.locator( '..' )
+				.locator( 'label' );
 
 			await expect( listItems ).toHaveCount( 5 );
 
@@ -171,8 +174,11 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 			await page.goto( '/shop' );
 
 			const listItems = page
-				.getByLabel( 'Filter Options' )
-				.getByRole( 'listitem' );
+				.getByRole( 'heading', {
+					name: 'Attribute',
+				} )
+				.locator( '..' )
+				.locator( 'label' );
 
 			await expect( listItems ).toHaveCount( 5 );
 

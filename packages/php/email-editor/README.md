@@ -98,3 +98,60 @@ We may add, update and delete any of them.
 | `woocommerce_email_blocks_renderer_parsed_blocks`                  | `Array` Parsed blocks data                | `Array` Parsed blocks data                                   | You can modify the parsed blocks before they are processed by email renderer.                                                                                          |
 | `woocommerce_email_editor_send_preview_email_rendered_data`        | `string` $data Rendered email             | `string` Rendered email                                      | Allows modifying the rendered email when displaying or sending it in preview                                                                                           |
 | `woocommerce_email_editor_send_preview_email_personalizer_context` | `Array` $personalizerContext              | `Array` Personalizer context data                            | Allows modifying the personalizer context data for the send preview email function                                                                                     |
+
+## Logging
+
+The email editor package includes logging functionality to help developers identify and debug issues. The package provides a simple logger that can either write to WordPress debug log or delegate to another logger.
+
+### Usage
+
+The logger is automatically initialized when the email editor is initialized. It's used internally by the email editor to log various events and operations.
+
+### Log Levels
+
+The following log levels are supported:
+
+-   `emergency`: System is unusable
+-   `alert`: Action must be taken immediately
+-   `critical`: Critical conditions
+-   `error`: Error conditions
+-   `warning`: Warning conditions
+-   `notice`: Normal but significant condition
+-   `info`: Informational messages
+-   `debug`: Debug-level messages
+
+### Log Locations
+
+By default, logs are written to the WordPress debug log if `WP_DEBUG_LOG` is enabled. The location is `wp-content/debug.log`.
+
+### Example Log Messages
+
+The package logs various events, including:
+
+1. Email editor initialization
+2. Personalization tag registration
+3. Duplicate personalization tag registration attempts
+
+Example log entry:
+
+```text
+[2025-01-01 12:00:00] INFO: Initializing email editor
+[2025-01-01 12:00:00] INFO: Personalization tags registry initialized {"tags_count": 15}
+[2025-01-01 12:00:00] WARNING: Personalization tag already registered {"token": "[user/firstname]", "name": "First Name", "category": "User"}
+```
+
+### Customizing Logging
+
+You can customize the logging behavior by:
+
+1. Setting a delegate logger using `set_delegate_logger()` method to use another logging system (e.g., WooCommerce's logger)
+2. Configuring WordPress debug logging through `WP_DEBUG_LOG` constant in wp-config.php to enable/disable logging to wp-content/debug.log
+
+### Best Practices
+
+1. Use appropriate log levels for different types of messages
+2. Include relevant context data in log messages
+3. Avoid logging sensitive information
+4. Use debug level for detailed troubleshooting information
+5. Use warning level for potential issues that don't prevent functionality
+6. Use error level for issues that affect functionality

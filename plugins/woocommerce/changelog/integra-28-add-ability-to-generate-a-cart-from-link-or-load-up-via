@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Added new `checkout-link` endpoint which accepts a comma separated list of product ids and a coupon code to prepopulate the cart and redirect to checkout with a new session. Allows for shareable carts. Supports simple products without additional options.

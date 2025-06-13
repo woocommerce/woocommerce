@@ -20,7 +20,7 @@ import {
 } from '@wordpress/element';
 import { plus, info, Icon } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -148,7 +148,7 @@ export function VariationsTableRow( {
 						</div>
 					) : (
 						<Button
-							className={ classNames(
+							className={ clsx(
 								variation.image
 									? 'woocommerce-product-variations__image-button'
 									: 'woocommerce-product-variations__add-image-button'
@@ -188,7 +188,7 @@ export function VariationsTableRow( {
 					</span>
 				) }
 				<span
-					className={ classNames(
+					className={ clsx(
 						'woocommerce-product-variations__regular-price',
 						{
 							'woocommerce-product-variations__regular-price--on-sale':
@@ -239,7 +239,7 @@ export function VariationsTableRow( {
 		return (
 			<>
 				<span
-					className={ classNames(
+					className={ clsx(
 						'woocommerce-product-variations__status-dot',
 						getProductStockStatusClass( variation )
 					) }
@@ -359,25 +359,19 @@ export function VariationsTableRow( {
 				</div>
 			</div>
 			<div
-				className={ classNames(
-					'woocommerce-product-variations__price',
-					{
-						'woocommerce-product-variations__price--fade':
-							variation.status === 'private',
-					}
-				) }
+				className={ clsx( 'woocommerce-product-variations__price', {
+					'woocommerce-product-variations__price--fade':
+						variation.status === 'private',
+				} ) }
 				role="cell"
 			>
 				{ renderPriceCellContent() }
 			</div>
 			<div
-				className={ classNames(
-					'woocommerce-product-variations__quantity',
-					{
-						'woocommerce-product-variations__quantity--fade':
-							variation.status === 'private',
-					}
-				) }
+				className={ clsx( 'woocommerce-product-variations__quantity', {
+					'woocommerce-product-variations__quantity--fade':
+						variation.status === 'private',
+				} ) }
 				role="cell"
 			>
 				{ renderStockCellContent() }

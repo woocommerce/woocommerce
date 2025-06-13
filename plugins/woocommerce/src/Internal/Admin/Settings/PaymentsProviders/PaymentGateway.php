@@ -424,7 +424,7 @@ class PaymentGateway {
 	}
 
 	/**
-	 * Try to determine if the payment gateway is in test mode onboarding (aka sandbox or test-drive).
+	 * Try to determine if the payment gateway is in test mode onboarding (aka sandbox).
 	 *
 	 * This is a best-effort attempt, as there is no standard way to determine this.
 	 * Trust the true value, but don't consider a false value as definitive.
