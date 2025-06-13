@@ -6,13 +6,13 @@ import { isValidElement } from '@wordpress/element';
 import type { ReactElement, ReactNode } from 'react';
 import type { Currency } from '@woocommerce/types';
 import { useStoreCart } from '@woocommerce/base-context';
+import { Skeleton } from '@woocommerce/base-components/skeleton';
 
 /**
  * Internal dependencies
  */
-import './style.scss';
 import FormattedMonetaryAmount from '../../formatted-monetary-amount';
-import { Skeleton } from '@woocommerce/base-components/skeleton';
+import './style.scss';
 
 export interface TotalsItemProps {
 	className?: string | undefined;
