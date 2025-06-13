@@ -123,16 +123,37 @@ window.wc.addressAutocomplete = {
 		const suggestionsLists = {};
 		let activeSuggestionIndices = {};
 
-		// Initialize for both billing and shipping.
-		addressTypes.forEach( ( type ) => {
-			const addressInput = document.getElementById(
+		/**
+		 * Cache address fields for a given type, will re-run when country changes.
+		 * @param type
+		 * @return {{address_2: HTMLElement, city: HTMLElement, country: HTMLElement, postcode: HTMLElement}}
+		 */
+		function cacheAddressFields( type ) {
+			addressInputs[ type ] = {};
+			addressInputs[ type ][ 'address_1' ] = document.getElementById(
 				`${ type }_address_1`
 			);
-			const cityInput = document.getElementById( `${ type }_city` );
-			const countryInput = document.getElementById( `${ type }_country` );
-			const postcodeInput = document.getElementById(
+			addressInputs[ type ][ 'city' ] = document.getElementById(
+				`${ type }_city`
+			);
+			addressInputs[ type ][ 'country' ] = document.getElementById(
+				`${ type }_country`
+			);
+			addressInputs[ type ][ 'postcode' ] = document.getElementById(
 				`${ type }_postcode`
 			);
+			addressInputs[ type ][ 'state' ] = document.getElementById(
+				`${ type }_state`
+			);
+		}
+
+		// Initialize for both billing and shipping.
+		addressTypes.forEach( ( type ) => {
+			cacheAddressFields( type );
+			const addressInput = addressInputs[ type ][ 'address_1' ];
+			const cityInput = addressInputs[ type ][ 'city' ];
+			const countryInput = addressInputs[ type ][ 'country' ];
+			const postcodeInput = addressInputs[ type ][ 'postcode' ];
 
 			if ( addressInput ) {
 				// Create suggestions container if it doesn't exist.
@@ -198,6 +219,7 @@ window.wc.addressAutocomplete = {
 				 * Handle both regular change events and Select2 events.
 				 */
 				const handleCountryChange = function () {
+					cacheAddressFields( type );
 					setActiveProvider( countryInput.value, type );
 					if ( addressInputs[ type ][ 'address_1' ] ) {
 						hideSuggestions( type );
@@ -476,12 +498,6 @@ window.wc.addressAutocomplete = {
 		 * @return {Promise<void>}
 		 */
 		async function selectAddress( type, addressId ) {
-			const addressInput = addressInputs[ type ][ 'address_1' ];
-			const address2Input = addressInputs[ type ][ 'address_2' ];
-			const cityInput = addressInputs[ type ][ 'city' ];
-			const postcodeInput = addressInputs[ type ][ 'postcode' ];
-			const stateInput = document.getElementById( `${ type }_state` );
-
 			let addressData;
 			try {
 				addressData = await activeAddressProvider[ type ].select(
@@ -505,23 +521,50 @@ window.wc.addressAutocomplete = {
 				return;
 			}
 
-			// Set all available fields.
-			// Only set fields if the address data property exists and has a value.
-			if ( addressData.address_1 ) {
-				setFieldValue( addressInput, addressData.address_1 );
+			if ( addressData.country ) {
+				setFieldValue(
+					addressInputs[ type ][ 'country' ],
+					addressData.country
+				);
 			}
-			if ( addressData.address_2 ) {
-				setFieldValue( address2Input, addressData.address_2 );
-			}
-			if ( addressData.city ) {
-				setFieldValue( cityInput, addressData.city );
-			}
-			if ( addressData.postcode ) {
-				setFieldValue( postcodeInput, addressData.postcode );
-			}
-			if ( addressData.state ) {
-				setFieldValue( stateInput, addressData.state );
-			}
+
+			setTimeout( function () {
+				// Cache address fields again as they may have updated following the country change.
+				cacheAddressFields( type );
+
+				// Set all available fields.
+				// Only set fields if the address data property exists and has a value.
+				if ( addressData.address_1 ) {
+					setFieldValue(
+						addressInputs[ type ][ 'address_1' ],
+						addressData.address_1
+					);
+				}
+				if ( addressData.address_2 ) {
+					setFieldValue(
+						addressInputs[ type ][ 'address_2' ],
+						addressData.address_2
+					);
+				}
+				if ( addressData.city ) {
+					setFieldValue(
+						addressInputs[ type ][ 'city' ],
+						addressData.city
+					);
+				}
+				if ( addressData.postcode ) {
+					setFieldValue(
+						addressInputs[ type ][ 'postcode' ],
+						addressData.postcode
+					);
+				}
+				if ( addressData.state ) {
+					setFieldValue(
+						addressInputs[ type ][ 'state' ],
+						addressData.state
+					);
+				}
+			}, 200 );
 		}
 
 		/**
