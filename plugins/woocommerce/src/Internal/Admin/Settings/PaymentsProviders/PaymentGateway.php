@@ -273,6 +273,13 @@ class PaymentGateway {
 				if ( ! is_null( $test_mode ) ) {
 					return $test_mode;
 				}
+
+				$mode = $payment_gateway->get_option( 'mode', 'not_found' );
+				if ( 'test' === $mode || 'sandbox' === $mode ) {
+					return true;
+				} elseif ( 'live' === $mode ) {
+					return false;
+				}
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
