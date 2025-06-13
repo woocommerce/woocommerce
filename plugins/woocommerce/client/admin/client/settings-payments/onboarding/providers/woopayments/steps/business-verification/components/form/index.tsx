@@ -44,7 +44,7 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 	const handleContinue = () => {
 		if ( isEmpty( errors ) && isPreKycComplete( data ) ) {
 			recordPaymentsOnboardingEvent(
-				'woopayments_onboarding_modal_kyc_sub_step_completed',
+				'woopayments_modal_kyc_sub_step_completed',
 				{
 					sub_step_id: 'business',
 					country: data.country || 'unknown',
@@ -78,14 +78,11 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 				type="submit"
 				className="stepper__cta"
 				onClick={ () => {
-					recordPaymentsOnboardingEvent(
-						'woopayments_onboarding_modal_click',
-						{
-							step_id: currentStep?.id ?? 'unknown',
-							sub_step_id: 'business',
-							action: 'business_form_continue',
-						}
-					);
+					recordPaymentsOnboardingEvent( 'woopayments_modal_click', {
+						step_id: currentStep?.id ?? 'unknown',
+						sub_step_id: 'business',
+						action: 'business_form_continue',
+					} );
 				} }
 			>
 				{ strings.continue }

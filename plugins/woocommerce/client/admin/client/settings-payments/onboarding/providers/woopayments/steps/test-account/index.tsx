@@ -116,7 +116,7 @@ const TestAccountStep = () => {
 		useState( false );
 
 	const handleContinue = () => {
-		recordPaymentsOnboardingEvent( 'woopayments_onboarding_modal_click', {
+		recordPaymentsOnboardingEvent( 'woopayments_modal_click', {
 			step: currentStep?.id || 'unknown',
 			action: 'activate_payments',
 		} );
@@ -501,7 +501,7 @@ const TestAccountStep = () => {
 								variant="primary"
 								onClick={ () => {
 									recordPaymentsOnboardingEvent(
-										'woopayments_onboarding_modal_click',
+										'woopayments_modal_click',
 										{
 											step: currentStep?.id || 'unknown',
 											action: 'continue_store_setup',
@@ -558,7 +558,7 @@ const TestAccountStep = () => {
 										variant: 'primary',
 										onClick: () => {
 											recordPaymentsOnboardingEvent(
-												'woopayments_onboarding_modal_click',
+												'woopayments_modal_click',
 												{
 													step:
 														currentStep?.id ||
@@ -579,7 +579,7 @@ const TestAccountStep = () => {
 											'woocommerce-payments-test-account-step__error-cancel-button',
 										onClick: () => {
 											recordPaymentsOnboardingEvent(
-												'woopayments_onboarding_modal_click',
+												'woopayments_modal_click',
 												{
 													step:
 														currentStep?.id ||

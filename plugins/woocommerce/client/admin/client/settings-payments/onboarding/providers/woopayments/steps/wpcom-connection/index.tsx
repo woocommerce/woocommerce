@@ -40,7 +40,7 @@ export const JetpackStep: React.FC = () => {
 						disabled={ isConnectButtonLoading }
 						onClick={ () => {
 							recordPaymentsOnboardingEvent(
-								'woopayments_onboarding_modal_click',
+								'woopayments_modal_click',
 								{
 									step: currentStep?.id || 'unknown',
 									action: 'connect_to_wpcom',

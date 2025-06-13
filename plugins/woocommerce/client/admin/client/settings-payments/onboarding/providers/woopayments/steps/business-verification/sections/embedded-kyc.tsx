@@ -32,13 +32,10 @@ const EmbeddedKyc: React.FC< Props > = ( {
 	const fallbackUrl = currentStep?.actions?.kyc_fallback?.href ?? '';
 
 	const handleStepChange = ( step: string ) => {
-		recordPaymentsOnboardingEvent(
-			'woopayments_onboarding_modal_kyc_step_change',
-			{
-				kyc_step_id: step, // This is the Stripe Embedded KYC step ID.
-				collect_payout_requirements: collectPayoutRequirements,
-			}
-		);
+		recordPaymentsOnboardingEvent( 'woopayments_modal_kyc_step_change', {
+			kyc_step_id: step, // This is the Stripe Embedded KYC step ID.
+			collect_payout_requirements: collectPayoutRequirements,
+		} );
 	};
 
 	const handleOnExit = async () => {
@@ -61,7 +58,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 
 	const handleLoaderStart = () => {
 		recordPaymentsOnboardingEvent(
-			'woopayments_onboarding_modal_kyc_started_loading',
+			'woopayments_modal_kyc_started_loading',
 			{
 				collect_payout_requirements: collectPayoutRequirements,
 			}
@@ -71,14 +68,11 @@ const EmbeddedKyc: React.FC< Props > = ( {
 	};
 
 	const handleLoadError = ( err: LoadError ) => {
-		recordPaymentsOnboardingEvent(
-			'woopayments_onboarding_modal_kyc_load_error',
-			{
-				error_type: err.error.type,
-				error_message: err.error.message || 'no_message',
-				collect_payout_requirements: collectPayoutRequirements,
-			}
-		);
+		recordPaymentsOnboardingEvent( 'woopayments_modal_kyc_load_error', {
+			error_type: err.error.type,
+			error_message: err.error.message || 'no_message',
+			collect_payout_requirements: collectPayoutRequirements,
+		} );
 
 		setLoadError( err );
 	};
