@@ -12,7 +12,7 @@ test.describe( 'Product Page: error notices when adding out-of-stock products', 
 	} ) => {
 		const productName = 'A Managed Stock';
 
-		wpCLI(
+		await wpCLI(
 			`wc product create --name="${ productName }" --regular_price=10 --manage_stock=true --stock_quantity=1 --user=admin`
 		);
 		await admin.createNewPost();
