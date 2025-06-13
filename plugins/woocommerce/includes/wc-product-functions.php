@@ -126,18 +126,18 @@ function wc_product_dimensions_enabled() {
  * Calling it on read/display code paths can create unbounded action‑scheduler
  * rows and DOS the site.
  *
- * @param int $post_id (default: 0) The product ID.
+ * @param int  $post_id (default: 0) The product ID.
  * @param bool $force               Force execution even if context check fails (default false).
  */
 function wc_delete_product_transients( $post_id = 0, $force = false ) {
 	$is_cli_or_cron = wp_doing_cron()
 		|| ( defined( 'WP_CLI' ) && WP_CLI );
 
-	$is_rest_write  = defined( 'REST_REQUEST' ) && REST_REQUEST
+	$is_rest_write = defined( 'REST_REQUEST' ) && REST_REQUEST
 		&& isset( $_SERVER['REQUEST_METHOD'] )
-		&& in_array( $_SERVER['REQUEST_METHOD'], [ 'POST', 'PUT', 'PATCH', 'DELETE' ], true );
+		&& in_array( $_SERVER['REQUEST_METHOD'], array( 'POST', 'PUT', 'PATCH', 'DELETE' ), true );
 
-	$is_admin_page  = is_admin() && ! wp_doing_ajax();  // wp‑admin screens.
+	$is_admin_page = is_admin() && ! wp_doing_ajax();  // wp‑admin screens.
 
 	// Allow admin-ajax.php, but only from editors or shop managers. This stops regular tracking requests like platform_tracks from queuing jobs.
 	$is_privileged_ajax =
@@ -145,7 +145,7 @@ function wc_delete_product_transients( $post_id = 0, $force = false ) {
 		&& current_user_can( 'edit_products' );
 
 	$is_write_context = (
-		   $is_cli_or_cron
+		$is_cli_or_cron
 		|| $is_rest_write
 		|| $is_admin_page
 		|| $is_privileged_ajax
@@ -168,8 +168,7 @@ function wc_delete_product_transients( $post_id = 0, $force = false ) {
 		_doing_it_wrong(
 			__FUNCTION__,
 			esc_html__(
-				'wc_delete_product_transients() must not be called during normal front‑end rendering. ' .
-				'It is intended only for code paths that alter product data (admin, REST writes, CLI, cron).',
+				'wc_delete_product_transients() must not be called during normal front‑end rendering. It is intended only for code paths that alter product data (admin, REST writes, CLI, cron).',
 				'woocommerce'
 			),
 			'9.10.0'
