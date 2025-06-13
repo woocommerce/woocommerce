@@ -226,7 +226,7 @@ export default function PaymentMethodsSelection() {
 									className="settings-payments-methods__show-more"
 									onClick={ () => {
 										recordPaymentsOnboardingEvent(
-											'woopayments_modal_click',
+											'woopayments_onboarding_modal_click',
 											{
 												step:
 													currentStep?.id ||

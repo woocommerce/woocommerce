@@ -39,7 +39,7 @@ export const FinishStep: React.FC = () => {
 						onClick={ () => {
 							// Record the event when the user clicks on the button.
 							recordPaymentsOnboardingEvent(
-								'woopayments_modal_click',
+								'woopayments_onboarding_modal_click',
 								{
 									step: 'finish',
 									action: 'go_to_payments_overview',
@@ -65,7 +65,7 @@ export const FinishStep: React.FC = () => {
 						onClick={ () => {
 							// Record the event when the user clicks on the button.
 							recordPaymentsOnboardingEvent(
-								'woopayments_modal_click',
+								'woopayments_onboarding_modal_click',
 								{
 									step: 'finish',
 									action: 'close_window',

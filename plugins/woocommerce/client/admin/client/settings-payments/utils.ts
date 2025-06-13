@@ -391,24 +391,30 @@ export const recordPaymentsProviderEvent = (
 /**
  * Records a payments onboarding-related event with the WooCommerce Tracks system.
  *
- * This function ensures that the event name starts with 'settings_payments_onboarding_' and attaches contextual data
+ * This function ensures that the event name starts with 'settings_payments_' and attaches contextual data
  * such as the `source` and `from` parameters from the URL if they are not provided in the data object.
  *
  * @param eventName The partial name of the event to record.
  *                  This should be a string that represents the specific event being tracked,
- *                  such as 'started' or 'gateway_configured'.
+ *                  such as 'onboarding_started' or 'gateway_configured'.
  *                  Event names should focus on the action or outcome, e.g., 'started' not 'start'.
- *                  Event names are best to include the provider or gateway id, e.g., 'woopayments_started'.
+ *                  Event names are best to include the provider or gateway id, e.g., 'woopayments_onboarding_started'.
  * @param data      An object containing additional data to be sent with the event.
  */
 export const recordPaymentsOnboardingEvent = (
 	eventName: string,
 	data: Record< string, string | boolean | number > = {}
 ) => {
-	// Ensure the event name starts with 'onboarding_'.
-	// The rest of the prefixing is handled by `recordPaymentsEvent`.
-	if ( ! eventName.startsWith( 'onboarding_' ) ) {
-		eventName = `onboarding_${ eventName }`;
+	// Ensure the event name starts with 'settings_payments_'.
+	if ( ! eventName.startsWith( 'settings_payments_' ) ) {
+		eventName = `settings_payments_${ eventName }`;
+	}
+
+	// Capture the business registration country code from the WooCommerce settings if not provided.
+	if ( ! data.business_country ) {
+		data.business_country =
+			window.wcSettings?.admin?.woocommerce_payments_nox_profile
+				?.business_country_code ?? 'unknown';
 	}
 
 	// Capture the onboarding flow `source` and `from` from the URL parameters, if not provided.
@@ -422,5 +428,5 @@ export const recordPaymentsOnboardingEvent = (
 			urlParams.get( 'from' )?.replace( /[^\w-]+/g, '' ) || 'unknown';
 	}
 
-	recordPaymentsEvent( eventName, data );
+	recordEvent( eventName, data );
 };
