@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { test, expect, Editor, wpCLI } from '@woocommerce/e2e-utils';
+import { test as base, expect, Editor, wpCLI } from '@woocommerce/e2e-utils';
+
+/**
+ * Internal dependencies
+ */
+import ProductCollectionPage from './product-collection.page';
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	pageObject: async ( { page, admin, editor }, use ) => {
