@@ -21,7 +21,6 @@ import {
 	initDomTracking,
 } from './events';
 import { useContentValidation } from './hooks/use-content-validation';
-import './style.scss';
 
 function Editor() {
 	const { postId, settings } = useSelect(
