@@ -350,17 +350,21 @@ export const SettingsPaymentsMain = () => {
 					);
 
 					if ( paymentsEntity.plugin.status === 'not_installed' ) {
-						// Record the plugin installation event.
-						recordPaymentsEvent( 'provider_installed', {
+						// Record the extension installation event.
+						recordPaymentsEvent( 'extension_installed', {
 							provider_id: paymentsEntity.id,
-							extension_slug: paymentsEntity.plugin.slug,
+							suggestion_id:
+								paymentsEntity?._suggestion_id ?? 'unknown',
+							provider_extension_slug: paymentsEntity.plugin.slug,
 							from: context,
 						} );
 					} else {
-						// Record the plugin activation event.
-						recordPaymentsEvent( 'provider_activated', {
+						// Record the extension activation event.
+						recordPaymentsEvent( 'extension_activated', {
 							provider_id: paymentsEntity.id,
-							extension_slug: paymentsEntity.plugin.slug,
+							suggestion_id:
+								paymentsEntity?._suggestion_id ?? 'unknown',
+							provider_extension_slug: paymentsEntity.plugin.slug,
 							from: context,
 						} );
 					}
@@ -381,7 +385,9 @@ export const SettingsPaymentsMain = () => {
 					// Record the event when the user successfully enables a provider.
 					recordPaymentsEvent( 'provider_enable', {
 						provider_id: paymentsEntity.id,
-						extension_slug: paymentsEntity.plugin.slug,
+						suggestion_id:
+							paymentsEntity?._suggestion_id ?? 'unknown',
+						provider_extension_slug: paymentsEntity.plugin.slug,
 						from: context,
 					} );
 
