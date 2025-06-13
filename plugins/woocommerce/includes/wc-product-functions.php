@@ -122,9 +122,51 @@ function wc_product_dimensions_enabled() {
 /**
  * Clear transient cache for product data.
  *
+ * IMPORTANT: This MUST be called only when product data is *mutated*.
+ * Calling it on read/display code paths can create unbounded action‑scheduler
+ * rows and DOS the site.
+ *
+ *
  * @param int $post_id (default: 0) The product ID.
+ * @param bool $force               Force execution even if context check fails (default false).
  */
-function wc_delete_product_transients( $post_id = 0 ) {
+function wc_delete_product_transients( $post_id = 0, $force = false ) {
+	$is_write_context = (
+		is_admin()
+		|| wp_doing_cron()
+		|| ( defined( 'WP_CLI' ) && WP_CLI )
+		|| (
+			defined( 'REST_REQUEST' )            // REST route *AND* method is mutating
+			&& REST_REQUEST
+			&& isset( $_SERVER['REQUEST_METHOD'] )
+			&& in_array( $_SERVER['REQUEST_METHOD'], array( 'POST', 'PUT', 'PATCH', 'DELETE' ), true )
+		)
+	);
+	/**
+	 * Last‑chance filter. Return `true` to allow, `false` to block.
+	 *
+	 * @param bool $is_write_context Result of WooCommerce’s own context test.
+	 * @param int  $post_id          Product ID for which the flush was requested.
+	 */
+	$is_write_context = apply_filters(
+		'woocommerce_allow_product_transient_deletion',
+		$is_write_context,
+		$post_id
+	);
+
+	if ( ! $is_write_context && ! $force ) {
+		_doing_it_wrong(
+			__FUNCTION__,
+			esc_html__(
+				'wc_delete_product_transients() must not be called during normal front‑end rendering. ' .
+				'It is intended only for code paths that alter product data (admin, REST writes, CLI, cron).',
+				'woocommerce'
+			),
+			'9.10.0'
+		);
+		return;
+	}
+
 	// Transient data to clear with a fixed name which may be stale after product updates.
 	$transients_to_clear = array(
 		'wc_products_onsale',
