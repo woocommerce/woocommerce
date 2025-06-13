@@ -11,7 +11,8 @@ import { PaymentsProviderIncentive } from '@woocommerce/data';
  */
 import {
 	getWooPaymentsSetupLiveAccountLink,
-	disableWooPaymentsTestAccount, recordPaymentsEvent,
+	disableWooPaymentsTestAccount,
+	recordPaymentsEvent,
 } from '~/settings-payments/utils';
 
 interface ActivatePaymentsButtonProps {
@@ -45,7 +46,8 @@ interface ActivatePaymentsButtonProps {
 
 /**
  * A button component that initiates the payment activation process.
- * If incentive data is provided, it will trigger the `acceptIncentive` callback with the incentive ID before redirecting to setup live payments link.
+ * If incentive data is provided, it will trigger the `acceptIncentive` callback with the incentive ID before
+ * moving to the live account setup.
  */
 export const ActivatePaymentsButton = ( {
 	acceptIncentive,
@@ -59,6 +61,11 @@ export const ActivatePaymentsButton = ( {
 
 	const activatePayments = () => {
 		setIsUpdating( true );
+
+		recordPaymentsEvent( 'activate_payments_button_click', {
+			incentive_id: incentive ? incentive.promo_id : 'none',
+			onboarding_type: onboardingType || 'unknown',
+		} );
 
 		// Disable test account and redirect to the live account setup link.
 		disableWooPaymentsTestAccount()
