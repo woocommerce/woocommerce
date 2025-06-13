@@ -454,8 +454,13 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			// These hidden inputs are used by extensions or Express Payment methods to gather information of the form state.
 			$hidden_input = '';
-			if ( ProductType::VARIABLE === $product_type ) {
+			if ( ProductType::SIMPLE === $product_type ) {
+				$hidden_input = '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '" />';
+			} elseif ( ProductType::GROUPED === $product_type ) {
+				$hidden_input = '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '" />';
+			} elseif ( ProductType::VARIABLE === $product_type ) {
 				$hidden_input = '<div class="single_variation_wrap">
+					<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '" />
 					<input type="hidden" name="product_id" value="' . $product->get_id() . '" />
 					<input type="hidden"
 						name="variation_id"
