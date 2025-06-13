@@ -14,7 +14,7 @@ class ProductDataUtils {
 	 * @param \WC_Product $product Product object.
 	 * @return array The product data.
 	 */
-	public static function get_product_data( $product ) {
+	public static function get_product_data( \WC_Product $product ) {
 		return array(
 			'price_html' => $product->get_price_html(),
 		);
