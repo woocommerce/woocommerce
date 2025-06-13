@@ -51,6 +51,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 				'Error registering address provider:',
 				'Address provider must be a valid object'
 			);
+			expect( console.error ).toHaveBeenCalledTimes( 1 );
 			console.error.mockClear();
 		} );
 	} );
