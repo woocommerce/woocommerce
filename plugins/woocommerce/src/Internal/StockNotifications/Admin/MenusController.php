@@ -186,17 +186,17 @@ class MenusController {
 	 * @return void
 	 */
 	public static function output_admin_notice(): void {
-	
+
 		if ( ! function_exists( 'wp_admin_notice' ) ) {
 			return;
 		}
 
 		$notice_message = get_option( 'wc_customer_stock_notifications_action_notice' );
-		
+
 		if ( empty( $notice_message ) ) {
 			return;
 		}
-		
+
 		\wp_admin_notice(
 			$notice_message,
 			array(

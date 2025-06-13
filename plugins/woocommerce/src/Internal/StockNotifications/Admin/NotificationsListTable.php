@@ -510,7 +510,9 @@ class NotificationsListTable extends \WP_List_Table {
 						count( $notifications ),
 						'notifications_status',
 						'woocommerce'
-					), count( $notifications ) );
+					), 
+					count( $notifications ) 
+				);
 				update_option( 'wc_customer_stock_notifications_action_notice', $notice_message );
 			} elseif ( 'cancel' === $this->current_action() ) {
 				foreach ( $notifications as $id ) {
@@ -527,7 +529,9 @@ class NotificationsListTable extends \WP_List_Table {
 						count( $notifications ),
 						'notifications_status',
 						'woocommerce'
-					), count( $notifications ) );
+					), 
+					count( $notifications ) 
+				);
 				update_option( 'wc_customer_stock_notifications_action_notice', $notice_message );
 			} elseif ( 'delete' === $this->current_action() ) {
 				foreach ( $notifications as $id ) {
@@ -543,7 +547,9 @@ class NotificationsListTable extends \WP_List_Table {
 						count( $notifications ),
 						'notifications_status',
 						'woocommerce'
-					), count( $notifications ) );
+					), 
+					count( $notifications ) 
+				);
 				update_option( 'wc_customer_stock_notifications_action_notice', $notice_message );
 			}
 
