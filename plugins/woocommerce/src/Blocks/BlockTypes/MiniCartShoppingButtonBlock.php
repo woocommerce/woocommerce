@@ -43,8 +43,8 @@ class MiniCartShoppingButtonBlock extends AbstractInnerBlock {
 		ob_start();
 		?>
 		<div class="wp-block-button has-text-align-center">
-			<a 
-				data-wp-interactive="<?php echo $this->get_full_block_name(); ?>"
+			<a 				
+				data-wp-interactive="woocommerce/mini-cart-shopping-button-block"
 				data-wp-bind--href="woocommerce/mini-cart::state.shopUrl" 
 				class="wc-block-components-button wp-element-button wp-block-woocommerce-mini-cart-shopping-button-block wc-block-mini-cart__shopping-button contained"
 			>
