@@ -24,6 +24,9 @@ class MenusController {
 		add_filter( 'woocommerce_navigation_pages_with_tabs', array( $this, 'wc_admin_navigation_pages_with_tabs' ) );
 		add_filter( 'woocommerce_screen_ids', array( $this, 'wc_admin_stock_notifications_screen_ids' ) );
 		add_filter( 'set-screen-option', array( $this, 'set_screen_option' ), 10, 3 );
+
+		// Output the admin notice.
+		add_action( 'admin_notices', array( $this, 'output_admin_notice' ) );
 	}
 
 	/**
@@ -175,5 +178,34 @@ class MenusController {
 	public static function wc_admin_stock_notifications_screen_ids( $screen_ids ) {
 		$screen_ids[] = 'woocommerce_page_wc-customer-stock-notifications';
 		return $screen_ids;
+	}
+
+	/**
+	 * Add admin notices.
+	 *
+	 * @return void
+	 */
+	public static function output_admin_notice(): void {
+	
+		if ( ! function_exists( 'wp_admin_notice' ) ) {
+			return;
+		}
+
+		$notice_message = get_option( 'wc_customer_stock_notifications_action_notice' );
+		
+		if ( empty( $notice_message ) ) {
+			return;
+		}
+		
+		\wp_admin_notice(
+			$notice_message,
+			array(
+				'type'        => 'info',
+				'id'          => 'woocommerce_customer_stock_notifications_action_notice',
+				'dismissible' => false,
+			)
+		);
+
+		delete_option( 'wc_customer_stock_notifications_action_notice' );
 	}
 }

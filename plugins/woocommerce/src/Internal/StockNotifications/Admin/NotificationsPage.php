@@ -23,12 +23,13 @@ class NotificationsPage {
 	 * Constructor.
 	 */
 	public function __construct() {
+
 		// Select action.
 		$action = '';
 
 		// Nonce is checked in NotificationsPage::delete and NotificationsPage::output just displays the page.
-		if ( isset( $_GET['action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$action = wc_clean( wp_unslash( $_GET['action'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['notification_action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$action = wc_clean( wp_unslash( $_GET['notification_action'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 
 		switch ( $action ) {
@@ -45,27 +46,6 @@ class NotificationsPage {
 	 * Render page.
 	 */
 	public static function output() {
-
-		if ( isset( $_GET['notice'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$updated_notice_args = array(
-				'id'                 => 'message',
-				'type'               => 'success',
-				'additional_classes' => array( 'updated' ),
-				'dismissible'        => false,
-			);
-			switch ( $_GET['notice'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				case 'deleted':
-					wp_admin_notice( __( 'Notification deleted.', 'woocommerce' ), $updated_notice_args );
-					break;
-				case 'updated':
-					wp_admin_notice( __( 'Notification updated.', 'woocommerce' ), $updated_notice_args );
-					break;
-				case 'not_found':
-					$updated_notice_args['type'] = 'error';
-					wp_admin_notice( __( 'Notification not found.', 'woocommerce' ), $updated_notice_args );
-					break;
-			}
-		}
 
 		$search = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$table  = new NotificationsListTable();
@@ -92,11 +72,19 @@ class NotificationsPage {
 			$notification = new Notification( $notification_id ); // <- this can throw
 			\WC_Data_Store::load( 'stock_notification' )->delete( $notification );
 
-			wp_safe_redirect( add_query_arg( 'notice', 'deleted', admin_url( self::PAGE_URL ) ) );
+			// Add admin notice.
+			$notice_message = __( 'Notification deleted.', 'woocommerce' );
+			update_option( 'wc_customer_stock_notifications_action_notice', $notice_message );
+
+			wp_safe_redirect( admin_url( self::PAGE_URL ) );
 			exit;
 
 		} catch ( \Exception $e ) {
-			wp_safe_redirect( add_query_arg( 'notice', 'not_found', admin_url( self::PAGE_URL ) ) );
+			// Add admin notice.
+			$notice_message = __( 'Notification not found.', 'woocommerce' );
+			update_option( 'wc_customer_stock_notifications_action_notice', $notice_message );
+
+			wp_safe_redirect( admin_url( self::PAGE_URL ) );
 			exit;
 		}
 	}

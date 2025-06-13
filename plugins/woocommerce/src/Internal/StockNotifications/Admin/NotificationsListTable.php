@@ -144,15 +144,15 @@ class NotificationsListTable extends \WP_List_Table {
 	 */
 	public function column_id( $notification ) {
 		$actions = array(
-			'edit'   => sprintf( '<a href="' . admin_url( 'admin.php?page=wc-customer-stock-notifications&action=edit&notification=%d' ) . '">%s</a>', $notification->get_id(), __( 'Edit', 'woocommerce' ) ),
-			'delete' => sprintf( '<a href="' . wp_nonce_url( admin_url( 'admin.php?page=wc-customer-stock-notifications&action=delete&notification=%d' ), 'delete_customer_stock_notification' ) . '">%s</a>', $notification->get_id(), __( 'Delete', 'woocommerce' ) ),
+			'edit'   => sprintf( '<a href="' . admin_url( 'admin.php?page=wc-customer-stock-notifications&notification_action=edit&notification=%d' ) . '">%s</a>', $notification->get_id(), __( 'Edit', 'woocommerce' ) ),
+			'delete' => sprintf( '<a href="' . wp_nonce_url( admin_url( 'admin.php?page=wc-customer-stock-notifications&notification_action=delete&notification=%d' ), 'delete_customer_stock_notification' ) . '">%s</a>', $notification->get_id(), __( 'Delete', 'woocommerce' ) ),
 		);
 
 		$title = $notification->get_id();
 
 		printf(
 			'<a class="row-title" href="%s" aria-label="%s">#%s</a>%s',
-			esc_url( admin_url( 'admin.php?page=wc-customer-stock-notifications&action=edit&notification=' . $notification->get_id() ) ),
+			esc_url( admin_url( 'admin.php?page=wc-customer-stock-notifications&notification_action=edit&notification=' . $notification->get_id() ) ),
 			/* translators: %s: Notification code */
 			sprintf( esc_attr__( '&#8220;%s&#8221; (Edit)', 'woocommerce' ), esc_attr( $title ) ),
 			esc_html( $title ),
@@ -227,7 +227,7 @@ class NotificationsListTable extends \WP_List_Table {
 
 		echo wp_kses_post(
 			sprintf(
-				'<a target="_blank" href="' . admin_url( 'post.php?post=%d&action=edit' ) . '">%s</a>',
+				'<a target="_blank" href="' . admin_url( 'post.php?post=%d&notification_action=edit' ) . '">%s</a>',
 				$product->get_parent_id() ? absint( $product->get_parent_id() ) : absint( $product->get_id() ),
 				$name
 			)
@@ -502,12 +502,16 @@ class NotificationsListTable extends \WP_List_Table {
 					$this->data_store->update( $notification );
 
 				}
-				$redirect_url = add_query_arg(
-					array(
-						'notice' => 'updated',
-					),
-					$redirect_url
-				);
+				$notice_message = sprintf(
+					/* translators: %s: Notifications count */
+					_nx(
+						'%s notification updated.',
+						'%s notifications updated.',
+						count( $notifications ),
+						'notifications_status',
+						'woocommerce'
+					), count( $notifications ) );
+				update_option( 'wc_customer_stock_notifications_action_notice', $notice_message );
 			} elseif ( 'cancel' === $this->current_action() ) {
 				foreach ( $notifications as $id ) {
 					$notification = new Notification( $id );
@@ -515,24 +519,32 @@ class NotificationsListTable extends \WP_List_Table {
 					$this->data_store->update( $notification );
 				}
 
-				$redirect_url = add_query_arg(
-					array(
-						'notice' => 'updated',
-					),
-					$redirect_url
-				);
+				$notice_message = sprintf(
+					/* translators: %s: Notifications count */
+					_nx(
+						'%s notification updated.',
+						'%s notifications updated.',
+						count( $notifications ),
+						'notifications_status',
+						'woocommerce'
+					), count( $notifications ) );
+				update_option( 'wc_customer_stock_notifications_action_notice', $notice_message );
 			} elseif ( 'delete' === $this->current_action() ) {
 				foreach ( $notifications as $id ) {
 					$notification = new Notification( $id );
 					$this->data_store->delete( $notification );
 				}
 
-				$redirect_url = add_query_arg(
-					array(
-						'notice' => 'deleted',
-					),
-					$redirect_url
-				);
+				$notice_message = sprintf(
+					/* translators: %s: Notifications count */
+					_nx(
+						'%s notification deleted.',
+						'%s notifications deleted.',
+						count( $notifications ),
+						'notifications_status',
+						'woocommerce'
+					), count( $notifications ) );
+				update_option( 'wc_customer_stock_notifications_action_notice', $notice_message );
 			}
 
 			wp_safe_redirect( $redirect_url );
