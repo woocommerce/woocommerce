@@ -4,11 +4,21 @@
 import { Page } from '@playwright/test';
 import { test, expect, Editor, wpCLI } from '@woocommerce/e2e-utils';
 
+const test = base.extend< { pageObject: ProductCollectionPage } >( {
+	pageObject: async ( { page, admin, editor }, use ) => {
+		const pageObject = new ProductCollectionPage( {
+			page,
+			admin,
+			editor,
+		} );
+		await use( pageObject );
+	},
+} );
+
 test.describe( 'Product Page: error notices when adding out-of-stock products', () => {
 	test( 'displays error notice when attempting to add product beyond stock limit', async ( {
-		admin,
-		editor,
 		page,
+		pageObject,
 	} ) => {
 		const productName = 'A Managed Stock';
 
