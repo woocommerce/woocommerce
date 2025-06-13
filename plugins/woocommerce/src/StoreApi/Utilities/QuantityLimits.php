@@ -10,8 +10,6 @@ use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
  * QuantityLimits class.
  *
  * Returns limits for products and cart items when using the StoreAPI and supporting classes.
- * Supports both integer and decimal quantities, with integers as the default unless
- * wc_stock_amount() is customized to support decimals.
  */
 final class QuantityLimits {
 	use DraftOrderTrait;
@@ -79,18 +77,16 @@ final class QuantityLimits {
 	/**
 	 * Fix a quantity violation by adjusting it to the nearest valid quantity.
 	 *
-	 * @param int|float $quantity The quantity to fix.
-	 * @param array     $cart_item The cart item.
-	 * @return int|float
+	 * This method only supports integers.
+	 *
+	 * @param mixed $quantity The quantity to fix.
+	 * @param array $cart_item The cart item.
+	 * @return mixed Normalized quantity or original quantity if it's not an integer.
 	 */
 	public function normalize_cart_item_quantity( $quantity, array $cart_item ) {
-		if ( ! is_numeric( $quantity ) || $quantity < 0 ) {
-			return 0;
-		}
-
 		$product = $cart_item['data'] ?? false;
 
-		if ( ! $product instanceof \WC_Product ) {
+		if ( ! $product instanceof \WC_Product || ! is_int( $quantity ) ) {
 			return wc_stock_amount( $quantity );
 		}
 
@@ -117,11 +113,7 @@ final class QuantityLimits {
 	 * @return int|float
 	 */
 	public function limit_to_multiple( $number, $multiple_of, string $rounding_function = 'round' ) {
-		if ( 0 === $multiple_of ) {
-			return $number; // Avoid division by zero.
-		}
-
-		if ( $this->is_multiple_of( $number, $multiple_of ) ) {
+		if ( $multiple_of < self::FLOAT_TOLERANCE || $this->is_multiple_of( $number, $multiple_of ) ) {
 			return wc_stock_amount( $number );
 		}
 
