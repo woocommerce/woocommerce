@@ -9,7 +9,7 @@ import { Button } from '@wordpress/components';
  */
 import { useStepperContext } from '../components/stepper';
 import {
-	disableWooPaymentsTestMode,
+	disableWooPaymentsTestAccount,
 	recordPaymentsOnboardingEvent,
 } from '~/settings-payments/utils';
 import strings from '../strings';
@@ -32,7 +32,7 @@ const ActivatePayments: React.FC = () => {
 		setIsContinueButtonLoading( true );
 
 		// Disable test mode and redirect to the live account setup link.
-		disableWooPaymentsTestMode()
+		disableWooPaymentsTestAccount()
 			.then( () => {
 				// Set the continue button loading state to false.
 				setIsContinueButtonLoading( false );

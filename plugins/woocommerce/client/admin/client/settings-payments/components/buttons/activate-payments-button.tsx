@@ -11,7 +11,7 @@ import { PaymentsProviderIncentive } from '@woocommerce/data';
  */
 import {
 	getWooPaymentsSetupLiveAccountLink,
-	disableWooPaymentsTestMode,
+	disableWooPaymentsTestAccount, recordPaymentsEvent,
 } from '~/settings-payments/utils';
 
 interface ActivatePaymentsButtonProps {
@@ -60,8 +60,8 @@ export const ActivatePaymentsButton = ( {
 	const activatePayments = () => {
 		setIsUpdating( true );
 
-		// Disable test mode and redirect to the live account setup link.
-		disableWooPaymentsTestMode()
+		// Disable test account and redirect to the live account setup link.
+		disableWooPaymentsTestAccount()
 			.then( () => {
 				if ( incentive ) {
 					acceptIncentive( incentive.promo_id );

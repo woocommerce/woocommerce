@@ -17,7 +17,7 @@ import WooPaymentsStepHeader from '../../components/header';
 import { useOnboardingContext } from '../../data/onboarding-context';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
 import {
-	disableWooPaymentsTestMode,
+	disableWooPaymentsTestAccount,
 	recordPaymentsOnboardingEvent,
 } from '~/settings-payments/utils';
 import './style.scss';
@@ -125,7 +125,7 @@ const TestAccountStep = () => {
 		setIsContinueButtonLoading( true );
 
 		// Disable test mode and redirect to the live account setup link.
-		disableWooPaymentsTestMode()
+		disableWooPaymentsTestAccount()
 			.then( () => {
 				// Set the continue button loading state to false.
 				setIsContinueButtonLoading( false );
