@@ -262,6 +262,11 @@ class PaymentGateway {
 				return filter_var( $payment_gateway->is_in_test_mode(), FILTER_VALIDATE_BOOLEAN );
 			}
 
+			// Try various gateway public properties to check if the payment gateway is in test mode.
+			if ( isset( $payment_gateway->testmode ) ) {
+				return filter_var( $payment_gateway->testmode, FILTER_VALIDATE_BOOLEAN );
+			}
+
 			// Try various gateway option entries to check if the payment gateway is in test mode.
 			if ( is_callable( array( $payment_gateway, 'get_option' ) ) ) {
 				$test_mode = filter_var( $payment_gateway->get_option( 'test_mode', 'not_found' ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
