@@ -77,8 +77,6 @@ final class QuantityLimits {
 	/**
 	 * Fix a quantity violation by adjusting it to the nearest valid quantity.
 	 *
-	 * This method only supports integers.
-	 *
 	 * @param mixed $quantity The quantity to fix.
 	 * @param array $cart_item The cart item.
 	 * @return mixed Normalized quantity or original quantity if it's not an integer.
@@ -86,7 +84,7 @@ final class QuantityLimits {
 	public function normalize_cart_item_quantity( $quantity, array $cart_item ) {
 		$product = $cart_item['data'] ?? false;
 
-		if ( ! $product instanceof \WC_Product || ! is_int( $quantity ) ) {
+		if ( ! $product instanceof \WC_Product ) {
 			return wc_stock_amount( $quantity );
 		}
 
