@@ -2,33 +2,26 @@
  * External dependencies
  */
 import { getContext, store } from '@wordpress/interactivity';
-import type { ProductData } from '@woocommerce/type-defs/product';
 
-// Stores are locked to prevent 3PD usage until the API is stable.
-const universalLock =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-type SingleProductTemplateStore = {
-	state: {
-		singleProductTemplate: {
-			originalProductData: ProductData;
-			productData: ProductData;
-		};
-	};
+type ProductData = {
+	price_html: string | null;
 };
 
 export type Context = {
 	originalProductData: ProductData;
 	productData: ProductData;
 };
-const { state: wooState } = store< SingleProductTemplateStore >(
-	'woocommerce',
-	{},
-	{ lock: universalLock }
-);
 
-const singleProductStore = store(
-	'woocommerce/single-product',
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+const { state: wooState } = store< {
+	state: { singleProductTemplate: Context };
+} >( 'woocommerce', {}, { lock: universalLock } );
+
+const productDataStore = store(
+	'woocommerce/product-data',
 	{
 		state: {
 			get productData(): ProductData | null {
@@ -51,7 +44,7 @@ const singleProductStore = store(
 		actions: {
 			setProductData: (
 				key: keyof ProductData,
-				value: string | number | null
+				value: string | null
 			) => {
 				const context = getContext< Context >();
 
@@ -66,4 +59,4 @@ const singleProductStore = store(
 	{ lock: true }
 );
 
-export type SingleProductStore = typeof singleProductStore;
+export type ProductDataStore = typeof productDataStore;

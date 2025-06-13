@@ -121,8 +121,8 @@
 			"@woocommerce/stores/woocommerce/cart": [
 				"assets/js/base/stores/woocommerce/cart"
 			],
-			"@woocommerce/stores/woocommerce/single-product": [
-				"assets/js/base/stores/woocommerce/single-product"
+			"@woocommerce/stores/woocommerce/product-data": [
+				"assets/js/base/stores/woocommerce/product-data"
 			],
 			"@woocommerce/type-defs/*": [
 				"assets/js/types/type-defs/*"

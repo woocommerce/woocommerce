@@ -2,16 +2,16 @@
  * External dependencies
  */
 import { getElement, store } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/single-product';
-import type { SingleProductStore } from '@woocommerce/stores/woocommerce/single-product';
+import '@woocommerce/stores/woocommerce/product-data';
+import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 import { sanitize } from 'dompurify'; // eslint-disable-line import/named
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: singleProductState } = store< SingleProductStore >(
-	'woocommerce/single-product',
+const { state: productDataState } = store< ProductDataStore >(
+	'woocommerce/product-data',
 	{},
 	{ lock: universalLock }
 );
@@ -50,21 +50,16 @@ const productPriceStore = store(
 					return;
 				}
 
-				const priceHTML = singleProductState?.productData?.price_html;
-				const originalPriceHtml =
-					singleProductState?.originalProductData?.price_html;
+				const newPriceHTML =
+					productDataState?.productData?.price_html ||
+					productDataState?.originalProductData?.price_html;
 
-				if ( ! priceHTML && ! originalPriceHtml ) {
-					return;
-				}
-
-				element.ref.innerHTML = sanitize(
-					priceHTML || originalPriceHtml,
-					{
+				if ( newPriceHTML ) {
+					element.ref.innerHTML = sanitize( newPriceHTML, {
 						ALLOWED_TAGS,
 						ALLOWED_ATTR,
-					}
-				);
+					} );
+				}
 			},
 		},
 	},

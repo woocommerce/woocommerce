@@ -5,8 +5,8 @@ import type { FormEvent, HTMLElementEvent } from 'react';
 import { store, getContext } from '@wordpress/interactivity';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import type { CartVariationItem } from '@woocommerce/types';
-import '@woocommerce/stores/woocommerce/single-product';
-import type { SingleProductStore } from '@woocommerce/stores/woocommerce/single-product';
+import '@woocommerce/stores/woocommerce/product-data';
+import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
 export type AvailableVariation = {
 	attributes: Record< string, string >;
@@ -349,8 +349,8 @@ const addToCartWithOptionsStore = store(
 					selectedAttributes
 				);
 
-				const { actions } = store< SingleProductStore >(
-					'woocommerce/single-product',
+				const { actions } = store< ProductDataStore >(
+					'woocommerce/product-data',
 					{},
 					{ lock: universalLock }
 				);
