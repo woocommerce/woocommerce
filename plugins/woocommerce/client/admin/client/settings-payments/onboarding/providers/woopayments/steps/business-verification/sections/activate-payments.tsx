@@ -28,13 +28,11 @@ const ActivatePayments: React.FC = () => {
 			action: 'activate_payments',
 		} );
 
-		// Set the continue button loading state to true.
 		setIsContinueButtonLoading( true );
 
-		// Disable test mode and redirect to the live account setup link.
+		// Disable test account and proceed to live KYC.
 		disableWooPaymentsTestAccount()
 			.then( () => {
-				// Set the continue button loading state to false.
 				setIsContinueButtonLoading( false );
 				// Navigate to the live account setup.
 				return nextStep();

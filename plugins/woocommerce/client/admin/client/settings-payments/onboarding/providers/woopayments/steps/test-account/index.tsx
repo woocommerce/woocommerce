@@ -121,19 +121,16 @@ const TestAccountStep = () => {
 			action: 'activate_payments',
 		} );
 
-		// Set the continue button loading state to true.
 		setIsContinueButtonLoading( true );
 
-		// Disable test mode and redirect to the live account setup link.
+		// Disable test account and proceed to live KYC.
 		disableWooPaymentsTestAccount()
 			.then( () => {
-				// Set the continue button loading state to false.
 				setIsContinueButtonLoading( false );
 
-				// This will refresh the steps and move the modal to the next step
+				// This will refresh the steps and move the modal to the next step.
 				navigateToNextStep();
 
-				// Refresh the store data
 				return refreshStoreData();
 			} )
 			.catch( () => {
@@ -142,7 +139,6 @@ const TestAccountStep = () => {
 			} );
 	};
 
-	// Reset state function
 	const resetState = useCallback( () => {
 		setStatus( 'idle' );
 		setProgress( 0 );
@@ -152,7 +148,7 @@ const TestAccountStep = () => {
 		clearTimers();
 	}, [ setStatus, setProgress, setErrorMessage, setPollingPhase ] );
 
-	// Main effect for handling initialization and polling loop
+	// Main effect for handling initialization and polling loop.
 	useEffect( () => {
 		// -- Initialization Phase --
 		if ( status === 'idle' ) {
@@ -160,7 +156,7 @@ const TestAccountStep = () => {
 				setStatus( 'success' );
 				setJustCompletedStepId( currentStep.id );
 
-				setProgress( 100 ); // Show success state immediately
+				setProgress( 100 ); // Show success state immediately.
 				return;
 			}
 
@@ -176,13 +172,13 @@ const TestAccountStep = () => {
 				return;
 			}
 
-			// If this step is not started or previously failed, try to initialize it
+			// If this step is not started or previously failed, try to initialize it.
 			if (
 				currentStep?.status === 'not_started' ||
 				currentStep?.status === 'failed'
 			) {
 				setStatus( 'initializing' );
-				setProgress( INIT_PROGRESS_START ); // Start at 10%
+				setProgress( INIT_PROGRESS_START );
 
 				const cleanStepIfNeeded = async () => {
 					// We only need to clean the step if it has been retried or failed.
