@@ -260,17 +260,17 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		$image_data   = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_single' );
 		$base_classes = 'wc-block-woocommerce-product-gallery-large-image__image wc-block-woocommerce-product-gallery-large-image__image--legacy';
 
-		if ( $context['fullScreenOnClick'] ) {
+		if ( ! empty( $context['fullScreenOnClick'] ) ) {
 			$base_classes .= ' wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click';
 		}
-		if ( $context['hoverZoom'] ) {
+		if ( ! empty( $context['hoverZoom'] ) ) {
 			$base_classes .= ' wc-block-woocommerce-product-gallery-large-image__image--hoverZoom';
 		}
 
 		ob_start();
 		?>
 			<ul
-	@@ -119,33 +184,19 @@ class="wc-block-product-gallery-large-image__container"
+				class="wc-block-product-gallery-large-image__container"
 				aria-roledescription="carousel"
 			>
 				<?php foreach ( $image_data as $index => $image ) : ?>
@@ -330,7 +330,6 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		if ( ! empty( $metadata['name'] ) && 'woocommerce/product-gallery-large-image' === $metadata['name'] ) {
 			$settings['skip_inner_blocks'] = true;
 		}
-
 		return $settings;
 	}
 }
