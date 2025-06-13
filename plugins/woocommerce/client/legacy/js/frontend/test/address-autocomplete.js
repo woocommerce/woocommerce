@@ -37,26 +37,21 @@ describe( 'Address Autocomplete Provider Registration', () => {
 		expect( console.error ).not.toHaveBeenCalled();
 	} );
 
-	test( 'should reject undefined provider', () => {
-		const result =
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider();
-		expect( result ).toBe( false );
-		expect( console.error ).toHaveBeenCalledWith(
-			'Error registering address provider:',
-			'Address provider must be a valid object'
-		);
-	} );
+	test( 'should reject invalid provider (null, undefined, non-object)', () => {
+		const invalidProviders = [ null, undefined, 'string', 123, true ];
 
-	test( 'should reject null provider', () => {
-		const result =
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-				null
+		invalidProviders.forEach( ( provider ) => {
+			const result =
+				window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
+					provider
+				);
+			expect( result ).toBe( false );
+			expect( console.error ).toHaveBeenCalledWith(
+				'Error registering address provider:',
+				'Address provider must be a valid object'
 			);
-		expect( result ).toBe( false );
-		expect( console.error ).toHaveBeenCalledWith(
-			'Error registering address provider:',
-			'Address provider must be a valid object'
-		);
+			console.error.mockClear();
+		} );
 	} );
 
 	test( 'should handle missing wc_checkout_params', () => {
@@ -207,5 +202,77 @@ describe( 'Address Autocomplete Provider Registration', () => {
 			'Error registering address provider:',
 			'Provider unregistered-provider not registered on server'
 		);
+	} );
+
+	test( 'should freeze provider after successful registration', () => {
+		const validProvider = {
+			id: 'test-provider',
+			canSearch: () => {},
+			search: () => {},
+			select: () => {},
+		};
+
+		const result =
+			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
+				validProvider
+			);
+		expect( result ).toBe( true );
+
+		// Verify provider is frozen
+		expect(
+			Object.isFrozen(
+				window.wc.addressAutocomplete.providers[ 'test-provider' ]
+			)
+		).toBe( true );
+
+		// Attempt to modify should throw in strict mode
+		expect( () => {
+			'use strict';
+			window.wc.addressAutocomplete.providers[ 'test-provider' ].newProp = 'test';
+		} ).toThrow( TypeError );
+		
+		// Verify the property wasn't added
+		expect( window.wc.addressAutocomplete.providers[ 'test-provider' ].newProp ).toBeUndefined();
+	} );
+
+	test( 'should not allow duplicate provider registration', () => {
+		const provider1 = {
+			id: 'test-provider',
+			canSearch: () => {},
+			search: () => {},
+			select: () => {},
+		};
+
+		const provider2 = {
+			id: 'test-provider',
+			canSearch: () => {
+				return true;
+			},
+			search: () => {
+				return [];
+			},
+			select: () => {
+				return {};
+			},
+		};
+
+		// Register first provider
+		window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
+			provider1
+		);
+
+		// Try to register second provider with same ID
+		const result =
+			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
+				provider2
+			);
+		expect( result ).toBe( true );
+
+		// Verify the second provider overwrote the first
+		expect(
+			window.wc.addressAutocomplete.providers[
+				'test-provider'
+			].canSearch()
+		).toBe( true );
 	} );
 } );
