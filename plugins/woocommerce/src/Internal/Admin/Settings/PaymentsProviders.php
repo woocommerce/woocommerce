@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Affirm;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AfterpayClearpay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AmazonPay;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Antom;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Klarna;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\MercadoPago;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mollie;
@@ -80,6 +81,7 @@ class PaymentsProviders {
 		'klarna_payments'           => Klarna::class,
 		'afterpay'                  => AfterpayClearpay::class,
 		'clearpay'                  => AfterpayClearpay::class,
+		'antom_*'                   => Antom::class,
 	);
 
 	/**
@@ -101,6 +103,7 @@ class PaymentsProviders {
 		ExtensionSuggestions::KLARNA            => Klarna::class,
 		ExtensionSuggestions::AFTERPAY          => AfterpayClearpay::class,
 		ExtensionSuggestions::CLEARPAY          => AfterpayClearpay::class,
+		ExtensionSuggestions::ANTOM             => Antom::class,
 	);
 
 	/**
