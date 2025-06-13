@@ -82,8 +82,8 @@
 
 	<!-- wp:pattern {"slug":"woostarter/categories-on-three-columns"} /-->
 
-	<!-- wp:group {"metadata":{"name":"Product reviews"},"layout":{"type":"constrained"}} -->
-	<div class="wp-block-group">
+	<!-- wp:group {"metadata":{"name":"Product reviews"},"align":"wide","layout":{"type":"constrained","contentSize":"","wideSize":"49rem"}} -->
+	<div class="wp-block-group alignwide">
 		<!-- wp:spacer {"height":"var:preset|spacing|40"} -->
 		<div style="height:var(--wp--preset--spacing--40)" aria-hidden="true" class="wp-block-spacer"></div>
 		<!-- /wp:spacer -->
@@ -93,35 +93,28 @@
 			<!-- wp:woocommerce/product-reviews-title {"level":3} /-->
 			<!-- wp:woocommerce/product-review-template -->
 		
-				<!-- wp:columns -->
+				<!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"var:preset|spacing|40"}}}} -->
 				<div class="wp-block-columns">
 					<!-- wp:column {"width":"140px"} -->
 					<div class="wp-block-column" style="flex-basis:140px">
-						<!-- wp:woocommerce/product-review-author-name /-->
+						<!-- wp:woocommerce/product-review-author-name {"isLink":false,"style":{"spacing":{"padding":{"bottom":"0","top":"0.25em"}}}} /-->
 					</div>
 					<!-- /wp:column -->
 
 					<!-- wp:column -->
 					<div class="wp-block-column">
-						<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
+						<!-- wp:group {"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","orientation":"vertical"}} -->
 						<div class="wp-block-group">
 							<!-- wp:woocommerce/product-review-rating /-->
+							<!-- wp:woocommerce/product-review-content /-->
 						</div>
 						<!-- /wp:group -->
-
-						<!-- wp:group {"style":{"spacing":{"margin":{"top":"0px","bottom":"0px"}}},"layout":{"type":"flex"}} -->
-						<div class="wp-block-group" style="margin-top:0px;margin-bottom:0px">
-						</div>
-						<!-- /wp:group -->
-
-						<!-- wp:woocommerce/product-review-content /-->
 					</div>
 					<!-- /wp:column -->
 
 					<!-- wp:column {"width":"100px"} -->
 					<div class="wp-block-column" style="flex-basis:100px">
-						<!-- wp:woocommerce/product-review-author-name /-->
-						<!-- wp:woocommerce/product-review-date /-->
+						<!-- wp:woocommerce/product-review-date {"isLink":false,"style":{"spacing":{"padding":{"bottom":"0","top":"0.25em"}}}} /-->
 					</div>
 					<!-- /wp:column -->
 				</div>

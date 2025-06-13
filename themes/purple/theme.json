@@ -405,12 +405,19 @@
 			"woocommerce/product-review-author-name" : {
 				"typography": {
 					"fontSize":  "var(--wp--preset--font-size--small)",
+					"lineHeight": "1.7",
 					"fontWeight": "700"
 				}
 			},
 			"woocommerce/product-review-date" : {
 				"typography": {
-					"fontSize":  "var(--wp--preset--font-size--small)"
+					"fontSize":  "var(--wp--preset--font-size--small)",
+					"lineHeight": "1.7"
+				}
+			},
+			"woocommerce/product-review-content" : {
+				"color": {
+					"text": "var(--wp--preset--color--theme-4)"
 				}
 			},
 			"woocommerce/add-to-cart-with-options-variation-selector-attribute-name" : {
