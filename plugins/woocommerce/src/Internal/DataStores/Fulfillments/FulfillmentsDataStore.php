@@ -48,6 +48,13 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		// Set fulfillment properties.
 		$data->set_date_updated( current_time( 'mysql' ) );
 
+		/**
+		 * Filter to modify the fulfillment data before it is created.
+		 *
+		 * @since 9.9.0
+		 */
+		$data = apply_filters( 'wc_fulfillment_before_create', $data );
+
 		// Save the fulfillment to the database.
 		global $wpdb;
 		$rows_inserted = $wpdb->insert(
@@ -79,6 +86,13 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		// Apply changes let's the object know that the current object reflects the database and no "changes" exist between the two.
 		$data->apply_changes();
 		$data->set_object_read( true );
+
+		/**
+		 * Action to perform after a fulfillment is created.
+		 *
+		 * @since 9.9.0
+		 */
+		do_action( 'wc_fulfillment_after_create', $data );
 	}
 
 	/**
