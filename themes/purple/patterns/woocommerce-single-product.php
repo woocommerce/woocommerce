@@ -90,7 +90,7 @@
 
 		<!-- wp:woocommerce/blockified-product-reviews -->
 		<div class="wp-block-woocommerce-blockified-product-reviews">
-			<!-- wp:woocommerce/product-reviews-title {"level":3} /-->
+			<!-- wp:woocommerce/product-reviews-title {"showProductTitle":false,"showReviewsCount":false,"level":3,"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|50"}}}} /-->
 			<!-- wp:woocommerce/product-review-template -->
 		
 				<!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"var:preset|spacing|40"}}}} -->
