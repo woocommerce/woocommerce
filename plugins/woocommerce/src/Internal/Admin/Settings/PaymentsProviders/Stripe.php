@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 
+use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
+use Throwable;
 use WC_Payment_Gateway;
 
 defined( 'ABSPATH' ) || exit;
@@ -13,6 +15,38 @@ defined( 'ABSPATH' ) || exit;
  * This class handles all the custom logic for the Stripe payment gateway provider.
  */
 class Stripe extends PaymentGateway {
+
+	/**
+	 * Try to determine if the payment gateway is in test mode.
+	 *
+	 * This is a best-effort attempt, as there is no standard way to determine this.
+	 * Trust the true value, but don't consider a false value as definitive.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
+	 * @return bool True if the payment gateway is in test mode, false otherwise.
+	 */
+	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
+		try {
+			if ( class_exists( '\WC_Stripe_Mode' ) &&
+				is_callable( '\WC_Stripe_Mode::is_test' ) ) {
+
+				return filter_var( \WC_Stripe_Mode::is_test(), FILTER_VALIDATE_BOOLEAN );
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway is in test mode: ' . $e->getMessage(),
+				array(
+					'gateway' => $payment_gateway->id,
+					'source'  => 'settings-payments',
+					'error'   => $e,
+				)
+			);
+		}
+
+		return parent::is_in_test_mode( $payment_gateway );
+	}
 
 	/**
 	 * Check if the payment gateway has a payments processor account connected.
