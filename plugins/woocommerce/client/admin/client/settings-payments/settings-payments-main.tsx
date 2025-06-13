@@ -351,7 +351,7 @@ export const SettingsPaymentsMain = () => {
 
 					if ( paymentsEntity.plugin.status === 'not_installed' ) {
 						// Record the extension installation event.
-						recordPaymentsEvent( 'extension_installed', {
+						recordPaymentsEvent( 'provider_installed', {
 							provider_id: paymentsEntity.id,
 							suggestion_id:
 								paymentsEntity?._suggestion_id ?? 'unknown',
@@ -360,7 +360,7 @@ export const SettingsPaymentsMain = () => {
 						} );
 					} else {
 						// Record the extension activation event.
-						recordPaymentsEvent( 'extension_activated', {
+						recordPaymentsEvent( 'provider_activated', {
 							provider_id: paymentsEntity.id,
 							suggestion_id:
 								paymentsEntity?._suggestion_id ?? 'unknown',
