@@ -599,7 +599,7 @@ class ProductSchema extends AbstractSchema {
 	 * Gets remaining stock amount for a product.
 	 *
 	 * @param \WC_Product $product Product instance.
-	 * @return int|null
+	 * @return int|float|null
 	 */
 	protected function get_remaining_stock( \WC_Product $product ) {
 		if ( is_null( $product->get_stock_quantity() ) ) {
@@ -612,7 +612,7 @@ class ProductSchema extends AbstractSchema {
 	 * If a product has low stock, return the remaining stock amount for display.
 	 *
 	 * @param \WC_Product $product Product instance.
-	 * @return int|null
+	 * @return int|float|null
 	 */
 	protected function get_low_stock_remaining( \WC_Product $product ) {
 		$remaining_stock = $this->get_remaining_stock( $product );

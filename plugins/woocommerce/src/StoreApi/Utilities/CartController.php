@@ -436,12 +436,12 @@ class CartController {
 			'too_many_in_cart'     => [
 				/* translators: %s: product names. */
 				'singular' => __(
-					'There are too many %s in the cart. Only 1 item can be purchased. Please reduce the quantity in your cart.',
+					'There are too many %s in the cart. Only 1 can be purchased. Please reduce the quantity in your cart.',
 					'woocommerce'
 				),
 				/* translators: %s: product names. */
 				'plural'   => __(
-					'There are too many %s in the cart. Only 1 item of each can be purchased. Please reduce the quantities in your cart.',
+					'There are too many %s in the cart. Only 1 of each can be purchased. Please reduce the quantities in your cart.',
 					'woocommerce'
 				),
 			],
