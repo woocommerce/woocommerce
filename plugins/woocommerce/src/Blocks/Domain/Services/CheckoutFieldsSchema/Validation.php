@@ -57,6 +57,16 @@ class Validation {
 	}
 
 	/**
+	 * Check if the schema is unwrapped (has cart, checkout, customer, as top level keys).
+	 *
+	 * @param array $schema The schema to check.
+	 * @return bool
+	 */
+	private static function schema_is_unwrapped( $schema ) {
+		return isset( $schema['cart'] ) || isset( $schema['checkout'] ) || isset( $schema['customer'] );
+	}
+
+	/**
 	 * Validate the field rules.
 	 *
 	 * @param DocumentObject $document_object The document object to validate.
@@ -64,6 +74,13 @@ class Validation {
 	 * @return bool|WP_Error
 	 */
 	public static function validate_document_object( DocumentObject $document_object, $rules ) {
+		if ( self::schema_is_unwrapped( $rules ) ) {
+			$rules = [
+				'type'       => 'object',
+				'properties' => $rules,
+			];
+		}
+
 		try {
 			$validator = new Validator();
 			$result    = $validator->validate(
@@ -124,6 +141,13 @@ class Validation {
 
 		if ( empty( $rules ) ) {
 			return true;
+		}
+
+		if ( self::schema_is_unwrapped( $rules ) ) {
+			$rules = [
+				'type'       => 'object',
+				'properties' => $rules,
+			];
 		}
 
 		if ( empty( self::$meta_schema_json ) ) {
