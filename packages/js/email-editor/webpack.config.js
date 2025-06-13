@@ -20,12 +20,16 @@ module.exports = {
 	plugins: [
 		...webpackConfig.plugins,
 		// Copy the rich-text.js file to the build directory.
-		// This is required for the Personalization tags to work. Can be removed after default version is set to WP 6.8.
+		// This is required for the Personalization tags to work. Can be removed after minimal required WordPress version is set to 6.8.
 		new CopyWebpackPlugin( {
 			patterns: [
 				{
 					from: path.join( __dirname, 'assets' ),
-					to: './assets',
+					to: './build/assets',
+				},
+				{
+					from: path.join( __dirname, 'assets' ),
+					to: './build-module/assets',
 				},
 			],
 		} ),

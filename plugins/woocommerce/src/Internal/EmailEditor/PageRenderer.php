@@ -134,7 +134,7 @@ class PageRenderer {
 		);
 		wp_enqueue_style(
 			'woocommerce_email_editor',
-			$email_editor_assets_url . "style-{$file_name}.css",
+			$email_editor_assets_url . "style.css",
 			array(),
 			$assets_params['version']
 		);
