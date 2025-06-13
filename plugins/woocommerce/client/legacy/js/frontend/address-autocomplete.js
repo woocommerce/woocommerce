@@ -364,7 +364,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			const suggestionsList = suggestionsLists[ type ];
 			const suggestionsContainer = suggestionsContainers[ type ];
 
-			if ( sanitizedInput.length < 3 || sanitizedInput.length > 200 ) {
+			if ( sanitizedInput.length < 3 ) {
 				hideSuggestions( type );
 				enableBrowserAutofill( addressInput );
 				return;
