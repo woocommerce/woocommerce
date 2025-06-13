@@ -84,12 +84,15 @@ export const GeolocationCountrySelect = ( {
 				label={ selectedCountry.key === '' ? label : '' }
 				diacriticInsensitive={ true }
 				getSearchExpression={ ( query: string ) => {
-					const normalizedQuery = query
-						.normalize( 'NFD' )
-						.replace( /[\u0300-\u036f]/g, '' )
-						.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
-					return new RegExp( `(^${ normalizedQuery }| — (${ normalizedQuery }))`, 'i' );
-				} }
+					return new RegExp( `(^${ query }| — (${ query }))`, 'i' );
+				}}
+				// getSearchExpression={ ( query: string ) => {
+				// 	const normalizedQuery = query
+				// 		.normalize( 'NFD' )
+				// 		.replace( /[\u0300-\u036f]/g, '' )
+				// 		.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
+				// 	return new RegExp( `(^${ normalizedQuery }| — (${ normalizedQuery }))`, 'i' );
+				// } }
 				options={ countries }
 				help={ <Icon icon={ chevronDown } /> }
 				onChange={ ( results ) => {

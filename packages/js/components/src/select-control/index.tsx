@@ -195,6 +195,7 @@ const initialState: State = {
  */
 export class SelectControl extends Component< Props, State > {
 	static defaultProps: Partial< Props > = {
+		diacriticInsensitive: false,
 		excludeSelectedOptions: true,
 		getSearchExpression: identity,
 		inlineTags: false,
