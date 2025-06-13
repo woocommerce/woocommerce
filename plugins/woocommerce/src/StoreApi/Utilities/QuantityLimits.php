@@ -195,7 +195,7 @@ final class QuantityLimits {
 			$limits[] = $this->get_remaining_stock( $product );
 		}
 
-		$limit = max( min( array_filter( $limits ) ), $minimum );
+		$limit = min( array_filter( $limits ) );
 
 		return $this->filter_numeric_value( $limit, 'limit', $product );
 	}
