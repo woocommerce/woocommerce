@@ -297,10 +297,11 @@ class CartController {
 		}
 
 		if ( $product->managing_stock() && ! $product->backorders_allowed() ) {
-			$qty_remaining = $this->get_remaining_stock_for_product( $product );
-			$qty_in_cart   = $this->get_product_quantity_in_cart( $product );
+			$request_quantity = wc_stock_amount( $request['quantity'] );
+			$qty_remaining    = $this->get_remaining_stock_for_product( $product );
+			$qty_in_cart      = $this->get_product_quantity_in_cart( $product );
 
-			if ( $qty_remaining < $qty_in_cart + $request['quantity'] ) {
+			if ( $qty_remaining < $qty_in_cart + $request_quantity ) {
 				throw new RouteException(
 					'woocommerce_rest_product_partially_out_of_stock',
 					sprintf(
