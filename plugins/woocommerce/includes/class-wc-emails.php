@@ -14,6 +14,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -240,6 +241,10 @@ class WC_Emails {
 		add_action( 'woocommerce_email_customer_details', array( $this, 'additional_checkout_fields' ), 30, 3 );
 		add_action( 'woocommerce_email_customer_address_section', array( $this, 'additional_address_fields' ), 30, 4 );
 
+		// Fulfillment details and meta.
+		add_action( 'woocommerce_email_fulfillment_details', array( $this, 'fulfillment_details' ), 10, 5 );
+		add_action( 'woocommerce_email_fulfillment_meta', array( $this, 'fulfillment_meta' ), 30, 4 );
+
 		// Hooks for sending emails during store events.
 		add_action( 'woocommerce_low_stock_notification', array( $this, 'low_stock' ) );
 		add_action( 'woocommerce_no_stock_notification', array( $this, 'no_stock' ) );
@@ -265,19 +270,22 @@ class WC_Emails {
 		// Include email classes.
 		include_once __DIR__ . '/emails/class-wc-email.php';
 
-		$this->emails['WC_Email_New_Order']                 = include __DIR__ . '/emails/class-wc-email-new-order.php';
-		$this->emails['WC_Email_Cancelled_Order']           = include __DIR__ . '/emails/class-wc-email-cancelled-order.php';
-		$this->emails['WC_Email_Customer_Cancelled_Order']  = include __DIR__ . '/emails/class-wc-email-customer-cancelled-order.php';
-		$this->emails['WC_Email_Failed_Order']              = include __DIR__ . '/emails/class-wc-email-failed-order.php';
-		$this->emails['WC_Email_Customer_Failed_Order']     = include __DIR__ . '/emails/class-wc-email-customer-failed-order.php';
-		$this->emails['WC_Email_Customer_On_Hold_Order']    = include __DIR__ . '/emails/class-wc-email-customer-on-hold-order.php';
-		$this->emails['WC_Email_Customer_Processing_Order'] = include __DIR__ . '/emails/class-wc-email-customer-processing-order.php';
-		$this->emails['WC_Email_Customer_Completed_Order']  = include __DIR__ . '/emails/class-wc-email-customer-completed-order.php';
-		$this->emails['WC_Email_Customer_Refunded_Order']   = include __DIR__ . '/emails/class-wc-email-customer-refunded-order.php';
-		$this->emails['WC_Email_Customer_Invoice']          = include __DIR__ . '/emails/class-wc-email-customer-invoice.php';
-		$this->emails['WC_Email_Customer_Note']             = include __DIR__ . '/emails/class-wc-email-customer-note.php';
-		$this->emails['WC_Email_Customer_Reset_Password']   = include __DIR__ . '/emails/class-wc-email-customer-reset-password.php';
-		$this->emails['WC_Email_Customer_New_Account']      = include __DIR__ . '/emails/class-wc-email-customer-new-account.php';
+		$this->emails['WC_Email_New_Order']                    = include __DIR__ . '/emails/class-wc-email-new-order.php';
+		$this->emails['WC_Email_Cancelled_Order']              = include __DIR__ . '/emails/class-wc-email-cancelled-order.php';
+		$this->emails['WC_Email_Customer_Cancelled_Order']     = include __DIR__ . '/emails/class-wc-email-customer-cancelled-order.php';
+		$this->emails['WC_Email_Failed_Order']                 = include __DIR__ . '/emails/class-wc-email-failed-order.php';
+		$this->emails['WC_Email_Customer_Failed_Order']        = include __DIR__ . '/emails/class-wc-email-customer-failed-order.php';
+		$this->emails['WC_Email_Customer_On_Hold_Order']       = include __DIR__ . '/emails/class-wc-email-customer-on-hold-order.php';
+		$this->emails['WC_Email_Customer_Processing_Order']    = include __DIR__ . '/emails/class-wc-email-customer-processing-order.php';
+		$this->emails['WC_Email_Customer_Completed_Order']     = include __DIR__ . '/emails/class-wc-email-customer-completed-order.php';
+		$this->emails['WC_Email_Customer_Refunded_Order']      = include __DIR__ . '/emails/class-wc-email-customer-refunded-order.php';
+		$this->emails['WC_Email_Customer_Invoice']             = include __DIR__ . '/emails/class-wc-email-customer-invoice.php';
+		$this->emails['WC_Email_Customer_Note']                = include __DIR__ . '/emails/class-wc-email-customer-note.php';
+		$this->emails['WC_Email_Customer_Reset_Password']      = include __DIR__ . '/emails/class-wc-email-customer-reset-password.php';
+		$this->emails['WC_Email_Customer_New_Account']         = include __DIR__ . '/emails/class-wc-email-customer-new-account.php';
+		$this->emails['WC_Email_Customer_Fulfillment_Created'] = include __DIR__ . '/emails/class-wc-email-customer-fulfillment-created.php';
+		$this->emails['WC_Email_Customer_Fulfillment_Updated'] = include __DIR__ . '/emails/class-wc-email-customer-fulfillment-updated.php';
+		$this->emails['WC_Email_Customer_Fulfillment_Deleted'] = include __DIR__ . '/emails/class-wc-email-customer-fulfillment-deleted.php';
 
 		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
 			$this->emails['WC_Email_Customer_POS_Completed_Order'] = include __DIR__ . '/emails/class-wc-email-customer-pos-completed-order.php';
@@ -627,6 +635,78 @@ class WC_Emails {
 	}
 
 	/**
+	 * Show the fulfillment details
+	 *
+	 * @param WC_Order    $order         Order instance.
+	 * @param Fulfillment $fulfillment Fulfillment instance.
+	 * @param bool        $sent_to_admin If should sent to admin.
+	 * @param bool        $plain_text    If is plain text email.
+	 * @param string      $email         Email address.
+	 */
+	public function fulfillment_details( $order, $fulfillment, $sent_to_admin = false, $plain_text = false, $email = '' ) {
+		if ( $plain_text ) {
+			wc_get_template(
+				'emails/plain/email-fulfillment-details.php',
+				array(
+					'order'         => $order,
+					'fulfillment'   => $fulfillment,
+					'sent_to_admin' => $sent_to_admin,
+					'plain_text'    => $plain_text,
+					'email'         => $email,
+				)
+			);
+		} else {
+			wc_get_template(
+				'emails/email-fulfillment-details.php',
+				array(
+					'order'         => $order,
+					'fulfillment'   => $fulfillment,
+					'sent_to_admin' => $sent_to_admin,
+					'plain_text'    => $plain_text,
+					'email'         => $email,
+				)
+			);
+		}
+	}
+
+	/**
+	 * Add fulfillment meta to email templates.
+	 *
+	 * @param WC_Order    $order         Order instance.
+	 * @param Fulfillment $fulfillment   Fulfillment instance.
+	 * @param bool        $sent_to_admin If should sent to admin.
+	 * @param bool        $plain_text    If is plain text email.
+	 */
+	public function fulfillment_meta( $order, $fulfillment, $sent_to_admin = false, $plain_text = false ) {
+		$fields        = $fulfillment->get_meta_data();
+		$public_fields = array_filter(
+			$fields,
+			function ( $field ) {
+				return ! str_starts_with( $field->key, '_' );
+			}
+		);
+
+		if ( 0 < count( $public_fields ) ) {
+
+			foreach ( $public_fields as $field ) {
+				if ( isset( $field->key ) && isset( $field->value ) && $field->value ) {
+					/**
+					 * Allows developers to translate the fulfillment meta key for display in emails.
+					 *
+					 * @since 9.9.0
+					 */
+					$meta_key_translation = apply_filters( 'woocommerce_fulfillment_translate_meta_key', $field->key );
+					if ( $plain_text ) {
+						echo esc_attr( $meta_key_translation ) . ': ' . esc_attr( $field->value ) . PHP_EOL;
+					} else {
+						echo '<p><strong>' . esc_attr( $meta_key_translation ) . ':</strong> ' . esc_attr( $field->value ) . '</p>';
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Is customer detail field valid?
 	 *
 	 * @param  array $field Field data to check if is valid.
@@ -846,57 +926,57 @@ class WC_Emails {
 
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product low in stock', 'woocommerce' ) );
 		$message = sprintf(
-			/* translators: 1: product name 2: items in stock */
+		/* translators: 1: product name 2: items in stock */
 			__( '%1$s is low in stock. There are %2$d left.', 'woocommerce' ),
 			html_entity_decode( wp_strip_all_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
 			html_entity_decode( wp_strip_all_tags( $product->get_stock_quantity() ) )
 		);
 
 		wp_mail(
-			/**
-			 * Filter the recipient of the low stock notification email.
-			 *
-			 * @since 3.0.0
-			 * @param string $recipient The recipient email address.
-			 * @param WC_Product $product Product instance.
-			 * @param null $null Unused.
-			 */
+		/**
+		 * Filter the recipient of the low stock notification email.
+		 *
+		 * @since 3.0.0
+		 * @param string $recipient The recipient email address.
+		 * @param WC_Product $product Product instance.
+		 * @param null $null Unused.
+		 */
 			apply_filters( 'woocommerce_email_recipient_low_stock', get_option( 'woocommerce_stock_email_recipient' ), $product, null ),
 			/**
-			 * Filter the subject of the low stock notification email.
-			 *
-			 * @since 3.0.0
-			 * @param string $subject The email subject.
-			 * @param WC_Product $product Product instance.
-			 * @param null $null Unused.
-			 */
+			* Filter the subject of the low stock notification email.
+			*
+			* @since 3.0.0
+			* @param string $subject The email subject.
+			* @param WC_Product $product Product instance.
+			* @param null $null Unused.
+			*/
 			apply_filters( 'woocommerce_email_subject_low_stock', $subject, $product, null ),
 			/**
-			 * Filter the content of the low stock notification email.
-			 *
-			 * @since 3.0.0
-			 * @param string $message The email content.
-			 * @param WC_Product $product Product instance.
-			 * @param null $null Unused.
-			 */
+			* Filter the content of the low stock notification email.
+			*
+			* @since 3.0.0
+			* @param string $message The email content.
+			* @param WC_Product $product Product instance.
+			* @param null $null Unused.
+			*/
 			apply_filters( 'woocommerce_email_content_low_stock', $message, $product ),
 			/**
-			 * Filter the headers of the low stock notification email.
-			 *
-			 * @since 3.0.0
-			 * @param string $headers The email headers.
-			 * @param WC_Product $product Product instance.
-			 * @param null $null Unused.
-			 */
+			* Filter the headers of the low stock notification email.
+			*
+			* @since 3.0.0
+			* @param string $headers The email headers.
+			* @param WC_Product $product Product instance.
+			* @param null $null Unused.
+			*/
 			apply_filters( 'woocommerce_email_headers', '', 'low_stock', $product, null ),
 			/**
-			 * Filter the attachments of the low stock notification email.
-			 *
-			 * @since 3.0.0
-			 * @param array $attachments The email attachments.
-			 * @param WC_Product $product Product instance.
-			 * @param null $null Unused.
-			 */
+			* Filter the attachments of the low stock notification email.
+			*
+			* @since 3.0.0
+			* @param array $attachments The email attachments.
+			* @param WC_Product $product Product instance.
+			* @param null $null Unused.
+			*/
 			apply_filters( 'woocommerce_email_attachments', array(), 'low_stock', $product, null )
 		);
 	}
@@ -935,50 +1015,50 @@ class WC_Emails {
 		$message = sprintf( __( '%s is out of stock.', 'woocommerce' ), html_entity_decode( wp_strip_all_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
 
 		wp_mail(
-			/**
-			 * Filter the recipient of the no stock notification email.
-			 *
-			 * @since 3.0.0
-			 * @param string $recipient The recipient email address.
-			 * @param WC_Product $product Product instance.
-			 * @param null $null Unused.
-			 */
+		/**
+		 * Filter the recipient of the no stock notification email.
+		 *
+		 * @since 3.0.0
+		 * @param string $recipient The recipient email address.
+		 * @param WC_Product $product Product instance.
+		 * @param null $null Unused.
+		 */
 			apply_filters( 'woocommerce_email_recipient_no_stock', get_option( 'woocommerce_stock_email_recipient' ), $product, null ),
 			/**
-			 * Filter the subject of the no stock notification email.
-			 *
-			 * @since 3.0.0
-			 * @param string $subject The email subject.
-			 * @param WC_Product $product Product instance.
-			 * @param null $null Unused.
-			 */
+			* Filter the subject of the no stock notification email.
+			*
+			* @since 3.0.0
+			* @param string $subject The email subject.
+			* @param WC_Product $product Product instance.
+			* @param null $null Unused.
+			*/
 			apply_filters( 'woocommerce_email_subject_no_stock', $subject, $product, null ),
 			/**
-			 * Filter the content of the no stock notification email.
-			 *
-			 * @since 3.0.0
-			 * @param string $message The email content.
-			 * @param WC_Product $product Product instance.
-			 * @param null $null Unused.
-			 */
+			* Filter the content of the no stock notification email.
+			*
+			* @since 3.0.0
+			* @param string $message The email content.
+			* @param WC_Product $product Product instance.
+			* @param null $null Unused.
+			*/
 			apply_filters( 'woocommerce_email_content_no_stock', $message, $product ),
 			/**
-			 * Filter the headers of the no stock notification email.
-			 *
-			 * @since 3.0.0
-			 * @param string $headers The email headers.
-			 * @param WC_Product $product Product instance.
-			 * @param null $null Unused.
-			 */
+			* Filter the headers of the no stock notification email.
+			*
+			* @since 3.0.0
+			* @param string $headers The email headers.
+			* @param WC_Product $product Product instance.
+			* @param null $null Unused.
+			*/
 			apply_filters( 'woocommerce_email_headers', '', 'no_stock', $product, null ),
 			/**
-			 * Filter the attachments of the no stock notification email.
-			 *
-			 * @since 3.0.0
-			 * @param array $attachments The email attachments.
-			 * @param WC_Product $product Product instance.
-			 * @param null $null Unused.
-			 */
+			* Filter the attachments of the no stock notification email.
+			*
+			* @since 3.0.0
+			* @param array $attachments The email attachments.
+			* @param WC_Product $product Product instance.
+			* @param null $null Unused.
+			*/
 			apply_filters( 'woocommerce_email_attachments', array(), 'no_stock', $product, null )
 		);
 	}
@@ -1000,10 +1080,10 @@ class WC_Emails {
 
 		$order = wc_get_order( $args['order_id'] );
 		if (
-			! $args['product'] ||
-			! is_object( $args['product'] ) ||
-			! $args['quantity'] ||
-			! $order
+		! $args['product'] ||
+		! is_object( $args['product'] ) ||
+		! $args['quantity'] ||
+		! $order
 		) {
 			return;
 		}
@@ -1016,50 +1096,50 @@ class WC_Emails {
 		$message = sprintf( __( '%1$s units of %2$s have been backordered in order #%3$s.', 'woocommerce' ), $backordered_quantity, html_entity_decode( wp_strip_all_tags( $args['product']->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $order->get_order_number() );
 
 		wp_mail(
-			/**
-			 * Filter the recipient of the backorder notification email.
-			 *
-			 * @since 3.0.0
-			 * @param string $recipient The recipient email address.
-			 * @param array $args Arguments.
-			 * @param null $null Unused.
-			 */
+		/**
+		 * Filter the recipient of the backorder notification email.
+		 *
+		 * @since 3.0.0
+		 * @param string $recipient The recipient email address.
+		 * @param array $args Arguments.
+		 * @param null $null Unused.
+		 */
 			apply_filters( 'woocommerce_email_recipient_backorder', get_option( 'woocommerce_stock_email_recipient' ), $args, null ),
 			/**
-			 * Filter the subject of the backorder notification email.
-			 *
-			 * @since 3.0.0
-			 * @param string $subject The email subject.
-			 * @param array $args Arguments.
-			 * @param null $null Unused.
-			 */
+			* Filter the subject of the backorder notification email.
+			*
+			* @since 3.0.0
+			* @param string $subject The email subject.
+			* @param array $args Arguments.
+			* @param null $null Unused.
+			*/
 			apply_filters( 'woocommerce_email_subject_backorder', $subject, $args, null ),
 			/**
-			 * Filter the content of the backorder notification email.
-			 *
-			 * @since 3.0.0
-			 * @param string $message The email content.
-			 * @param array $args Arguments.
-			 * @param null $null Unused.
-			 */
+			* Filter the content of the backorder notification email.
+			*
+			* @since 3.0.0
+			* @param string $message The email content.
+			* @param array $args Arguments.
+			* @param null $null Unused.
+			*/
 			apply_filters( 'woocommerce_email_content_backorder', $message, $args ),
 			/**
-			 * Filter the headers of the backorder notification email.
-			 *
-			 * @since 3.0.0
-			 * @param string $headers The email headers.
-			 * @param array $args Arguments.
-			 * @param null $null Unused.
-			 */
+			* Filter the headers of the backorder notification email.
+			*
+			* @since 3.0.0
+			* @param string $headers The email headers.
+			* @param array $args Arguments.
+			* @param null $null Unused.
+			*/
 			apply_filters( 'woocommerce_email_headers', '', 'backorder', $args, null ),
 			/**
-			 * Filter the attachments of the backorder notification email.
-			 *
-			 * @since 3.0.0
-			 * @param array $attachments The email attachments.
-			 * @param array $args Arguments.
-			 * @param null $null Unused.
-			 */
+			* Filter the attachments of the backorder notification email.
+			*
+			* @since 3.0.0
+			* @param array $attachments The email attachments.
+			* @param array $args Arguments.
+			* @param null $null Unused.
+			*/
 			apply_filters( 'woocommerce_email_attachments', array(), 'backorder', $args, null )
 		);
 	}

@@ -246,8 +246,8 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response The created fulfillment, or an error if the request fails.
 	 */
 	public function create_fulfillment( WP_REST_Request $request ) {
-		$order_id = (int) $request->get_param( 'order_id' );
-
+		$order_id        = (int) $request->get_param( 'order_id' );
+		$notify_customer = (bool) $request->get_param( 'notify_customer' );
 		// Create a new fulfillment.
 		try {
 			$fulfillment = new Fulfillment();
@@ -257,6 +257,15 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			$fulfillment->set_entity_id( "$order_id" );
 
 			$fulfillment->save();
+
+			if ( $fulfillment->get_is_fulfilled() && $notify_customer ) {
+				/**
+				 * Trigger the fulfillment created notification on creating a fulfilled fulfillment.
+				 *
+				 * @since 9.9.0
+				 */
+				do_action( 'woocommerce_fulfillment_created_notification', $order_id, $fulfillment, wc_get_order( $order_id ) );
+			}
 		} catch ( \Exception $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),
@@ -305,15 +314,19 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response The updated fulfillment, or an error if the request fails.
 	 */
 	public function update_fulfillment( WP_REST_Request $request ): WP_REST_Response {
-		$order_id       = (int) $request->get_param( 'order_id' );
-		$fulfillment_id = (int) $request->get_param( 'fulfillment_id' );
+		$order_id        = (int) $request->get_param( 'order_id' );
+		$fulfillment_id  = (int) $request->get_param( 'fulfillment_id' );
+		$notify_customer = (bool) $request->get_param( 'notify_customer' );
 
 		// Update the fulfillment for the order.
 		try {
-			$fulfillment = new Fulfillment( $fulfillment_id );
+			$fulfillment    = new Fulfillment( $fulfillment_id );
+			$previous_state = $fulfillment->get_is_fulfilled();
 			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
 
 			$fulfillment->set_props( $request->get_json_params() );
+			$next_state = $fulfillment->get_is_fulfilled();
+
 			if ( isset( $request->get_json_params()['meta_data'] ) && is_array( $request->get_json_params()['meta_data'] ) ) {
 				// Update the meta data keys that exist in the request.
 				foreach ( $request->get_json_params()['meta_data'] as $meta ) {
@@ -330,6 +343,24 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			}
 			$fulfillment->save();
 			$fulfillment->save_meta_data();
+
+			if ( $notify_customer ) {
+				if ( ! $previous_state && $next_state ) {
+					/**
+					 * Trigger the fulfillment created notification on fulfilling a fulfillment.
+					 *
+					 * @since 9.9.0
+					 */
+					do_action( 'woocommerce_fulfillment_created_notification', $order_id, $fulfillment, wc_get_order( $order_id ) );
+				} elseif ( $next_state ) {
+					/**
+					 * Trigger the fulfillment updated notification on updating a fulfillment.
+					 *
+					 * @since 9.9.0
+					 */
+					do_action( 'woocommerce_fulfillment_updated_notification', $order_id, $fulfillment, wc_get_order( $order_id ) );
+				}
+			}
 		} catch ( \Exception $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),
@@ -352,14 +383,16 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response The deleted fulfillment, or an error if the request fails.
 	 */
 	public function delete_fulfillment( WP_REST_Request $request ) {
-		$order_id       = (int) $request->get_param( 'order_id' );
-		$fulfillment_id = (int) $request->get_param( 'fulfillment_id' );
+		$order_id        = (int) $request->get_param( 'order_id' );
+		$fulfillment_id  = (int) $request->get_param( 'fulfillment_id' );
+		$notify_customer = (bool) $request->get_param( 'notify_customer' );
 
 		// Delete the fulfillment for the order.
 		try {
 			$fulfillment = new Fulfillment( $fulfillment_id );
 			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
-			$fulfillment->delete();
+			$fulfillment->set_date_deleted( current_time( 'mysql' ) );
+			$fulfillment->save();
 		} catch ( \Exception $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),
@@ -368,6 +401,14 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			);
 		}
 
+		if ( $fulfillment->get_is_fulfilled() && $notify_customer ) {
+			/**
+			 * Trigger the fulfillment deleted notification.
+			 *
+			 * @since 9.9.0
+			 */
+			do_action( 'woocommerce_fulfillment_deleted_notification', $order_id, $fulfillment, wc_get_order( $order_id ) );
+		}
 		return new WP_REST_Response(
 			array(
 				'message' => __( 'Fulfillment deleted successfully.', 'woocommerce' ),
