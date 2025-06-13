@@ -8,7 +8,7 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 use WP_Style_Engine;
 
@@ -17,14 +17,14 @@ use WP_Style_Engine;
  */
 class Quote extends Abstract_Block_Renderer {
 	/**
-	 * Renders the block content.
+	 * Renders the block content
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	protected function render_content( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$content    = '';
 		$dom_helper = new Dom_Document_Helper( $block_content );
 
@@ -44,7 +44,7 @@ class Quote extends Abstract_Block_Renderer {
 		return str_replace(
 			array( '{quote_content}', '{citation_content}' ),
 			array( $content, $citation_content ),
-			$this->get_block_wrapper( $block_content, $parsed_block, $settings_controller )
+			$this->get_block_wrapper( $block_content, $parsed_block, $rendering_context )
 		);
 	}
 
@@ -73,11 +73,11 @@ class Quote extends Abstract_Block_Renderer {
 	/**
 	 * Returns the block wrapper.
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 */
-	private function get_block_wrapper( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	private function get_block_wrapper( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$original_classname = ( new Dom_Document_Helper( $block_content ) )->get_attribute_value_by_tag_name( 'blockquote', 'class' ) ?? '';
 		$block_attributes   = wp_parse_args(
 			$parsed_block['attrs'] ?? array(),
@@ -91,7 +91,7 @@ class Quote extends Abstract_Block_Renderer {
 
 		// Layout, background, borders need to be on the outer table element.
 		$border                 = $block_attributes['style']['border'] ?? array();
-		$border_color_attribute = $block_attributes['borderColor'] ? $settings_controller->translate_slug_to_color( $block_attributes['borderColor'] ) : null;
+		$border_color_attribute = $block_attributes['borderColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['borderColor'] ) : null;
 		if ( ! isset( $border['color'] ) && ! is_null( $border_color_attribute ) ) {
 			$border['color'] = $border_color_attribute;
 		}
@@ -100,8 +100,8 @@ class Quote extends Abstract_Block_Renderer {
 			array(
 				'color'      => array_filter(
 					array(
-						'background' => $block_attributes['backgroundColor'] ? $settings_controller->translate_slug_to_color( $block_attributes['backgroundColor'] ) : null,
-						'text'       => $block_attributes['textColor'] ? $settings_controller->translate_slug_to_color( $block_attributes['textColor'] ) : null,
+						'background' => $block_attributes['backgroundColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['backgroundColor'] ) : null,
+						'text'       => $block_attributes['textColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['textColor'] ) : null,
 					)
 				),
 				'background' => $block_attributes['style']['background'] ?? array(),

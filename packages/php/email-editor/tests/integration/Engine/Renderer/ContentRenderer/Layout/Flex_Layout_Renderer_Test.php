@@ -9,7 +9,8 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Layout;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Dummy_Block_Renderer;
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 
 require_once __DIR__ . '/../Dummy_Block_Renderer.php';
 
@@ -26,19 +27,20 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	private $renderer;
 
 	/**
-	 * Instance of the settings controller.
+	 * Instance of the rendering context.
 	 *
-	 * @var Settings_Controller
+	 * @var Rendering_Context
 	 */
-	private $settings_controller;
+	private $rendering_context;
 
 	/**
 	 * Set up before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->settings_controller = $this->di_container->get( Settings_Controller::class );
-		$this->renderer            = new Flex_Layout_Renderer();
+		$theme_controller        = $this->di_container->get( Theme_Controller::class );
+		$this->rendering_context = new Rendering_Context( $theme_controller->get_theme() );
+		$this->renderer          = new Flex_Layout_Renderer();
 		register_block_type( 'dummy/block', array() );
 		add_filter( 'render_block', array( $this, 'renderDummyBlock' ), 10, 2 );
 	}
@@ -60,7 +62,7 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			),
 			'email_attrs' => array(),
 		);
-		$output       = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->settings_controller );
+		$output       = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
 		$this->assertStringContainsString( 'Dummy 1', $output );
 		$this->assertStringContainsString( 'Dummy 2', $output );
 	}
@@ -79,17 +81,17 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			'email_attrs' => array(),
 		);
 		// Default justification is left.
-		$output = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->settings_controller );
+		$output = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
 		$this->assertStringContainsString( 'text-align: left', $output );
 		$this->assertStringContainsString( 'align="left"', $output );
 		// Right justification.
 		$parsed_block['attrs']['layout']['justifyContent'] = 'right';
-		$output = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->settings_controller );
+		$output = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
 		$this->assertStringContainsString( 'text-align: right', $output );
 		$this->assertStringContainsString( 'align="right"', $output );
 		// Center justification.
 		$parsed_block['attrs']['layout']['justifyContent'] = 'center';
-		$output = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->settings_controller );
+		$output = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
 		$this->assertStringContainsString( 'text-align: center', $output );
 		$this->assertStringContainsString( 'align="center"', $output );
 	}
@@ -108,7 +110,7 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			'email_attrs' => array(),
 		);
 		$parsed_block['attrs']['layout']['justifyContent'] = '"> <script>alert("XSS")</script><div style="text-align: right';
-		$output = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->settings_controller );
+		$output = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
 		$this->assertStringNotContainsString( '<script>alert("XSS")</script>', $output );
 	}
 
@@ -136,7 +138,7 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 				'attrs'     => array( 'width' => '25' ),
 			),
 		);
-		$output                      = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->settings_controller );
+		$output                      = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
 		$flex_items                  = $this->getFlexItemsFromOutput( $output );
 		$this->assertStringContainsString( 'width:312px;', $flex_items[0] );
 		$this->assertStringContainsString( 'width:148px;', $flex_items[1] );
@@ -159,7 +161,7 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 				'attrs'     => array(),
 			),
 		);
-		$output                      = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->settings_controller );
+		$output                      = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
 		$flex_items                  = $this->getFlexItemsFromOutput( $output );
 		$this->assertStringContainsString( 'width:148px;', $flex_items[0] );
 		$this->assertStringContainsString( 'width:148px;', $flex_items[1] );
@@ -178,7 +180,7 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 				'attrs'     => array( 'width' => '50' ),
 			),
 		);
-		$output                      = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->settings_controller );
+		$output                      = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
 		$flex_items                  = $this->getFlexItemsFromOutput( $output );
 		$this->assertStringContainsString( 'width:312px;', $flex_items[0] );
 		$this->assertStringContainsString( 'width:312px;', $flex_items[1] );
@@ -208,7 +210,7 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 				'attrs'     => array( 'width' => '25' ),
 			),
 		);
-		$output                      = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->settings_controller );
+		$output                      = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
 		$flex_items                  = $this->getFlexItemsFromOutput( $output );
 		$this->assertStringContainsString( 'width:508px;', $flex_items[0] );
 		$this->assertStringContainsString( 'width:105px;', $flex_items[1] );
@@ -226,7 +228,7 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 				'attrs'     => array( 'width' => '100' ),
 			),
 		);
-		$output                      = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->settings_controller );
+		$output                      = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
 		$flex_items                  = $this->getFlexItemsFromOutput( $output );
 		$this->assertStringContainsString( 'width:312px;', $flex_items[0] );
 		$this->assertStringContainsString( 'width:312px;', $flex_items[1] );
@@ -244,7 +246,7 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 				'attrs'     => array(),
 			),
 		);
-		$output                      = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->settings_controller );
+		$output                      = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
 		$flex_items                  = $this->getFlexItemsFromOutput( $output );
 		$this->assertStringContainsString( 'width:508px;', $flex_items[0] );
 		$this->assertStringNotContainsString( 'width:', $flex_items[1] );
@@ -272,7 +274,7 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function renderDummyBlock( $block_content, $parsed_block ): string {
 		$dummy_renderer = new Dummy_Block_Renderer();
-		return $dummy_renderer->render( $block_content, $parsed_block, $this->settings_controller );
+		return $dummy_renderer->render( $block_content, $parsed_block, $this->rendering_context );
 	}
 
 	/**
