@@ -36,7 +36,7 @@ function getClosestColor(
 }
 
 /**
- * Sets the appropriate styles for variation selector pills to ensure
+ * Sets the appropriate styles for Product Filter selector pills to ensure
  * visibility in both light and dark themes.
  *
  * This function swaps the text and background colors for selected pills
@@ -45,13 +45,13 @@ function getClosestColor(
 function setStyles(): void {
 	/**
 	 * Get the background color of the body then set it as the background color
-	 * of the Variation Selector selected pills.
+	 * of the Product Filter Selector selected pills.
 	 *
 	 * We only set the background color, instead of the whole background. As
 	 * we only provide the option to customize the background color.
 	 */
 
-	// For simplicity, we only consider the background color of the first Variation Selector pills.
+	// For simplicity, we only consider the background color of the first Product Filter Selector pills.
 	const pillsContainer = document.querySelector(
 		'.wc-block-product-filter-chips__items'
 	);
