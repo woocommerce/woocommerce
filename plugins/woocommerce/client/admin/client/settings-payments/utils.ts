@@ -336,6 +336,59 @@ export const recordPaymentsEvent = (
 };
 
 /**
+ * Records a payments-provider-related event with the WooCommerce Tracks system.
+ *
+ * This function ensures that the event name starts with 'settings_payments_provider_'.
+ *
+ * @param eventName The partial name of the event to record.
+ *                  This should be a string that represents the specific event being tracked,
+ *                  such as 'enabled' or 'incentive_accepted'.
+ *                  Event names should focus on the action or outcome, e.g., 'started' not 'start'.
+ * @param provider  The payments provider for which the event is being recorded.
+ * @param data      An object containing additional data to be sent with the event.
+ */
+export const recordPaymentsProviderEvent = (
+	eventName: string,
+	provider: PaymentsProvider,
+	data: Record< string, string | boolean | number > = {}
+) => {
+	// Ensure the event name starts with 'provider_'.
+	// The rest of the prefixing is handled by `recordPaymentsEvent`.
+	if ( ! eventName.startsWith( 'provider_' ) ) {
+		eventName = `provider_${ eventName }`;
+	}
+
+	// Add provider-specific data to the event.
+	data.provider_id = provider.id;
+	data.suggestion_id = provider._suggestion_id ?? 'unknown';
+	// The provider state.
+	data.provider_enabled = provider.state?.enabled ?? false;
+	data.provider_account_connected =
+		provider.state?.account_connected ?? false;
+	data.provider_needs_setup = provider.state?.needs_setup ?? false;
+	data.provider_test_mode = provider.state?.test_mode ?? false;
+	data.provider_dev_mode = provider.state?.dev_mode ?? false;
+	// The provider onboarding state.
+	data.provider_onboarding_started =
+		provider.onboarding?.state?.started ?? false;
+	data.provider_onboarding_completed =
+		provider.onboarding?.state?.completed ?? false;
+	data.provider_onboarding_test_mode =
+		provider.onboarding?.state?.test_mode ?? false;
+	// The provider extension data.
+	data.provider_extension_slug = provider.plugin.slug ?? 'unknown';
+	// WooPayments-specific data.
+	if ( isWooPayments( provider.id ) ) {
+		data.provider_has_test_drive_account =
+			provider.onboarding?.state?.test_drive_account ?? false;
+		data.provider_has_working_wpcom_connection =
+			provider.onboarding?.state?.wpcom_has_working_connection ?? false;
+	}
+
+	recordPaymentsEvent( eventName, data );
+};
+
+/**
  * Records a payments onboarding-related event with the WooCommerce Tracks system.
  *
  * This function ensures that the event name starts with 'settings_payments_' and attaches contextual data
