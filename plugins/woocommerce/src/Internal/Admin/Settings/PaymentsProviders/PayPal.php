@@ -134,8 +134,8 @@ class PayPal extends PaymentGateway {
 
 					return \WooCommerce\PayPalCommerce\Onboarding\Environment::SANDBOX === $current_environment;
 				}
-			} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-				// Ignore any exceptions.
+			} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				// Ignore any errors.
 			}
 		}
 
@@ -168,7 +168,7 @@ class PayPal extends PaymentGateway {
 
 					return $state->current_state() >= \WooCommerce\PayPalCommerce\Onboarding\State::STATE_ONBOARDED;
 				}
-			} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 				// Ignore any exceptions.
 			}
 		}
