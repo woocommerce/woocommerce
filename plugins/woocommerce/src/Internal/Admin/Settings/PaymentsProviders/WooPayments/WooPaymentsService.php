@@ -1216,9 +1216,9 @@ class WooPaymentsService {
 
 		// Record an event for the KYC session being finished.
 		$event_props = array(
-			'successful_kyc'    => filter_var( $response['success'] ?? false, FILTER_VALIDATE_BOOLEAN | FILTER_NULL_ON_FAILURE ) ?? false,
+			'successful_kyc'    => filter_var( $response['success'] ?? false, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) ?? false,
 			'account_mode'      => ( 'live' === ( $response['mode'] ?? false ) ) ? 'live' : 'test',
-			'details_submitted' => filter_var( $response['details_submitted'] ?? false, FILTER_VALIDATE_BOOLEAN | FILTER_NULL_ON_FAILURE ) ?? false,
+			'details_submitted' => filter_var( $response['details_submitted'] ?? false, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) ?? false,
 			'promotion_id'      => $response['promotion_id'] ?? 'none',
 			'source'            => $source,
 		);
