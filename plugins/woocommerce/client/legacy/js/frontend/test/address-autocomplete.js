@@ -55,7 +55,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 	} );
 
 	test( 'should handle missing wc_checkout_params', () => {
-		delete window.wc_checkout_params;
+		window.wc_checkout_params = undefined;
 		const validProvider = {
 			id: 'test-provider',
 			canSearch: () => {},
@@ -227,12 +227,14 @@ describe( 'Address Autocomplete Provider Registration', () => {
 
 		// Attempt to modify should throw in strict mode
 		expect( () => {
-			'use strict';
-			window.wc.addressAutocomplete.providers[ 'test-provider' ].newProp = 'test';
+			window.wc.addressAutocomplete.providers[ 'test-provider' ].newProp =
+				'test';
 		} ).toThrow( TypeError );
-		
+
 		// Verify the property wasn't added
-		expect( window.wc.addressAutocomplete.providers[ 'test-provider' ].newProp ).toBeUndefined();
+		expect(
+			window.wc.addressAutocomplete.providers[ 'test-provider' ].newProp
+		).toBeUndefined();
 	} );
 
 	test( 'should not allow duplicate provider registration', () => {
