@@ -144,7 +144,7 @@ function wc_delete_product_transients( $post_id = 0, $force = false ) {
 		defined( 'DOING_AJAX' ) && DOING_AJAX
 		&& current_user_can( 'edit_products' );
 
-	$is_unit_test = defined( 'WP_RUN_CORE_TESTS' ) && WP_RUN_CORE_TESTS;
+	$is_unit_test = class_exists( 'WC_Unit_Test_Case' );
 
 	$is_write_context = (
 		$is_cli_or_cron
