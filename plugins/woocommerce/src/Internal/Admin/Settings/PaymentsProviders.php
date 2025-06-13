@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Affirm;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AmazonPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\MercadoPago;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mollie;
@@ -73,6 +74,7 @@ class PaymentsProviders {
 		'mollie_wc_gateway_*'       => Mollie::class, // Target all the Mollie gateways.
 		'amazon_payments_advanced*' => AmazonPay::class,
 		'woo-mercado-pago-*'        => MercadoPago::class,
+		'affirm'                    => Affirm::class,
 	);
 
 	/**
