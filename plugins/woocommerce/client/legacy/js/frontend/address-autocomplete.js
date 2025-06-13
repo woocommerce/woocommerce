@@ -447,32 +447,13 @@ window.wc.addressAutocomplete = {
 			activeSuggestionIndices[ type ] = -1;
 		}
 
-		// Helper function to get field value, accounting for Select2.
-		const getFieldValue = ( input ) => {
-			if ( ! input ) {
-				return '';
-			}
-
-			// For Select2 fields, get the value using jQuery if available.
-			if (
-				window.jQuery &&
-				window.jQuery( input ).hasClass( 'select2-hidden-accessible' )
-			) {
-				return window.jQuery( input ).val() || '';
-			}
-
-			// For regular inputs, use the standard value property.
-			return input.value || '';
-		};
-
-		// Helper function to set field value and trigger events.
+		/**
+		 * Helper function to set field value and trigger events.
+		 * @param input {HTMLInputElement} The input element to set the value for.
+		 * @param value {string} The value to set.
+		 */
 		const setFieldValue = ( input, value ) => {
-			if (
-				input &&
-				value !== null &&
-				value !== undefined &&
-				value !== ''
-			) {
+			if ( input ) {
 				input.value = value;
 				input.dispatchEvent( new Event( 'change' ) );
 
@@ -520,10 +501,7 @@ window.wc.addressAutocomplete = {
 				addressData === null ||
 				! addressData
 			) {
-				console.error(
-					'Invalid address data returned by provider',
-					activeProviderId
-				);
+				// Return without setting the address since response was invalid.
 				return;
 			}
 
