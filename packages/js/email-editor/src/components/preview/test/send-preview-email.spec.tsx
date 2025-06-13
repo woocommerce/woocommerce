@@ -65,17 +65,8 @@ jest.mock( '@wordpress/icons', () => ( {
 	check: 'check',
 } ) );
 
-jest.mock( '@wordpress/i18n', () => ( {
-	__: ( str: string ) => str,
-	sprintf: ( format: string, value: string ) => format.replace( '%s', value ),
-} ) );
-
 jest.mock( '@wordpress/keycodes', () => ( {
 	ENTER: 13,
-} ) );
-
-jest.mock( '@wordpress/hooks', () => ( {
-	applyFilters: ( _hook: string, value: string ) => value,
 } ) );
 
 jest.mock( '../../../events', () => ( {

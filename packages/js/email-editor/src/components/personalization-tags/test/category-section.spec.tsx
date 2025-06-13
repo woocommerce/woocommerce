@@ -24,10 +24,6 @@ jest.mock( '@wordpress/components', () => ( {
 	),
 } ) );
 
-jest.mock( '@wordpress/i18n', () => ( {
-	__: ( str: string ) => str,
-} ) );
-
 jest.mock( '@wordpress/block-editor', () => ( {
 	store: {},
 } ) );

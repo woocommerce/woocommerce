@@ -36,7 +36,7 @@ We use [Jest](https://jestjs.io/) with `@testing-library/react`. These are **com
 - Always mock required dependencies **before** importing the tested component.
 - Avoid writing tests for components that are simple wrappers of 3rd-party libraries (e.g., just rendering a WordPress component without added logic).
 - Prefer reusable mocks for commonly used packages (e.g., `@wordpress/data`, `@wordpress/components`). Create shared mock setup files when possible.
-- Use descriptive `data-testid` attributes when mocking components (e.g., `data-testid="modal"`).
+- Use descriptive `data-testid` attributes when using them in mocked components (e.g., `data-testid=“modal”).
 - Use `screen.getByRole()`, `getByText()`, or similar accessible queries where applicable.
 
 #### Mocking

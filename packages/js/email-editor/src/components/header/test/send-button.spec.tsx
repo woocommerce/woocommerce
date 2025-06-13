@@ -19,10 +19,6 @@ import { SendButton } from '../send-button';
 import { storeName } from '../../../store';
 import { recordEvent } from '../../../events';
 
-jest.mock( '@wordpress/hooks', () => ( {
-	applyFilters: jest.fn( ( _, value ) => value ),
-} ) );
-
 jest.mock( '@wordpress/components', () => ( {
 	Button: ( props ) => <button { ...props }>{ props.children }</button>,
 } ) );
