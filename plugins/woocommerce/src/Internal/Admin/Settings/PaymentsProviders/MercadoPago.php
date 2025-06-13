@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
+use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use WC_Payment_Gateway;
 
 defined( 'ABSPATH' ) || exit;
@@ -167,16 +168,27 @@ class MercadoPago extends PaymentGateway {
 	private function is_mercado_pago_in_sandbox_mode(): ?bool {
 		global $mercadopago;
 
-		// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-		if ( class_exists( '\MercadoPago\Woocommerce\WoocommerceMercadoPago' ) &&
-			class_exists( '\MercadoPago\Woocommerce\Configs\Store' ) &&
-			$mercadopago instanceof \MercadoPago\Woocommerce\WoocommerceMercadoPago &&
-			! is_null( $mercadopago->storeConfig ) &&
-			$mercadopago->storeConfig instanceof \MercadoPago\Woocommerce\Configs\Store &&
-			is_callable( array( $mercadopago->storeConfig, 'isTestMode' ) )
-		) {
-			return $mercadopago->storeConfig->isTestMode();
+		try {
+			// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			if ( class_exists( '\MercadoPago\Woocommerce\WoocommerceMercadoPago' ) &&
+				 class_exists( '\MercadoPago\Woocommerce\Configs\Store' ) &&
+				 $mercadopago instanceof \MercadoPago\Woocommerce\WoocommerceMercadoPago &&
+				 ! is_null( $mercadopago->storeConfig ) &&
+				 $mercadopago->storeConfig instanceof \MercadoPago\Woocommerce\Configs\Store &&
+				 is_callable( array( $mercadopago->storeConfig, 'isTestMode' ) )
+			) {
+				return filter_var( $mercadopago->storeConfig->isTestMode(), FILTER_VALIDATE_BOOLEAN );
 
+			}
+		} catch ( \Throwable $e ) {
+			// Log the error for debugging purposes.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if the MercadoPago gateway is in sandbox mode: ' . $e->getMessage(),
+				array(
+					'source'  => 'settings-payments',
+					'error'   => $e,
+				)
+			);
 		}
 
 		// Let the caller know that we couldn't determine the environment.
@@ -194,18 +206,29 @@ class MercadoPago extends PaymentGateway {
 	private function is_mercado_pago_onboarded(): ?bool {
 		global $mercadopago;
 
-		// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-		if ( class_exists( '\MercadoPago\Woocommerce\WoocommerceMercadoPago' ) &&
-			class_exists( '\MercadoPago\Woocommerce\Configs\Seller' ) &&
-			$mercadopago instanceof \MercadoPago\Woocommerce\WoocommerceMercadoPago &&
-			! is_null( $mercadopago->sellerConfig ) &&
-			$mercadopago->sellerConfig instanceof \MercadoPago\Woocommerce\Configs\Seller &&
-			is_callable( array( $mercadopago->sellerConfig, 'getCredentialsPublicKey' ) ) &&
-			is_callable( array( $mercadopago->sellerConfig, 'getCredentialsAccessToken' ) )
-		) {
-			return ! empty( $mercadopago->sellerConfig->getCredentialsPublicKey() ) &&
-					! empty( $mercadopago->sellerConfig->getCredentialsAccessToken() );
+		try {
+			// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			if ( class_exists( '\MercadoPago\Woocommerce\WoocommerceMercadoPago' ) &&
+				class_exists( '\MercadoPago\Woocommerce\Configs\Seller' ) &&
+				$mercadopago instanceof \MercadoPago\Woocommerce\WoocommerceMercadoPago &&
+				! is_null( $mercadopago->sellerConfig ) &&
+				$mercadopago->sellerConfig instanceof \MercadoPago\Woocommerce\Configs\Seller &&
+				is_callable( array( $mercadopago->sellerConfig, 'getCredentialsPublicKey' ) ) &&
+				is_callable( array( $mercadopago->sellerConfig, 'getCredentialsAccessToken' ) )
+			) {
+				return ! empty( $mercadopago->sellerConfig->getCredentialsPublicKey() ) &&
+						! empty( $mercadopago->sellerConfig->getCredentialsAccessToken() );
 
+			}
+		} catch ( \Throwable $e ) {
+			// Log the error for debugging purposes.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if the MercadoPago gateway is onboarded: ' . $e->getMessage(),
+				array(
+					'source'  => 'settings-payments',
+					'error'   => $e,
+				)
+			);
 		}
 
 		// Let the caller know that we couldn't determine the onboarding status.
