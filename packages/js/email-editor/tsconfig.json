@@ -1,23 +1,18 @@
 {
+	"extends": "../tsconfig",
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "build-module",
 		"declaration": true,
 		"declarationDir": "build-types",
-		"composite": true,
-		"target": "esnext",
-		"module": "esnext",
-		"moduleResolution": "node",
-		"esModuleInterop": true,
 		"resolveJsonModule": true,
 		"allowSyntheticDefaultImports": true,
-		"allowJs": true,
-		"skipLibCheck": true,
 		"downlevelIteration": true,
 		"jsx": "react-jsx",
+		"jsxFactory": null,
+		"jsxFragmentFactory": null,
 
 		// strict checks
-		"strict": true,
 		"alwaysStrict": true,
 		"strictBindCallApply": false,
 		"strictFunctionTypes": false,
