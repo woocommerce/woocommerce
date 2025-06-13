@@ -980,7 +980,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'woocommerce'
 					),
 					'label'    => __(
-						'Limit purchases to a single item per order',
+						'Limit purchases to 1 item per order',
 						'woocommerce'
 					),
 					'property' => 'sold_individually',

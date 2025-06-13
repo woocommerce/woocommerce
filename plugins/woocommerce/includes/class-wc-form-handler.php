@@ -718,7 +718,7 @@ class WC_Form_Handler {
 					// is_sold_individually.
 					if ( $_product->is_sold_individually() && $quantity > 1 ) {
 						/* Translators: %s Product title. */
-						wc_add_notice( sprintf( __( 'You can only have a single %s in your cart.', 'woocommerce' ), $_product->get_name() ), 'error' );
+						wc_add_notice( sprintf( __( 'You can only have a 1 %s in your cart.', 'woocommerce' ), $_product->get_name() ), 'error' );
 						$passed_validation = false;
 					}
 
