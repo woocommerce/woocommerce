@@ -87,7 +87,6 @@ class ProductPrice extends AbstractBlock {
 				wp_enqueue_script_module( 'woocommerce/product-price' );
 				$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-price';
 				$wrapper_attributes['data-wp-watch']       = 'callbacks.updatePrice';
-				$this->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 			}
 
 			return sprintf(
