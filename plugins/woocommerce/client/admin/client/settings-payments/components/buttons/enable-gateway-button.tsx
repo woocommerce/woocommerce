@@ -142,13 +142,10 @@ export const EnableGatewayButton = ( {
 			gatewayToggleNonce
 		)
 			.then( ( response: EnableGatewayResponse ) => {
+				// The backend will return 'needs_setup' if the gateway needs additional setup and could not be enabled.
 				if ( response.data === 'needs_setup' ) {
-					// We only need to perform additional logic/redirects if no account connected.
+					// We only need to perform additional logic/redirects if no account is connected.
 					if ( ! gatewayState.account_connected ) {
-						// Record the event when user successfully enables a gateway.
-						recordPaymentsEvent( 'provider_enable', {
-							provider_id: gatewayId,
-						} );
 						if (
 							onboardingType === 'native_in_context' &&
 							setOnboardingModalOpen
@@ -183,7 +180,13 @@ export const EnableGatewayButton = ( {
 							}
 						);
 					}
+				} else {
+					// Record the event when user successfully enables a gateway.
+					recordPaymentsEvent( 'provider_enable', {
+						provider_id: gatewayId,
+					} );
 				}
+
 				// If no redirect occurred, the data needs to be refreshed.
 				invalidateResolutionForStoreSelector(
 					isOffline
