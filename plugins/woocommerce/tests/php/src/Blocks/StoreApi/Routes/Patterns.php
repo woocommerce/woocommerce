@@ -33,7 +33,7 @@ class Patterns extends ControllerTestCase {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( true, $data['success'] );
 
-		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
+		$patterns = get_option( PTKPatternsStore::OPTION_NAME );
 		$this->assertFalse( $patterns );
 	}
 
@@ -51,7 +51,7 @@ class Patterns extends ControllerTestCase {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( true, $data['success'] );
 
-		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
+		$patterns = get_option( PTKPatternsStore::OPTION_NAME );
 		$this->assertNotFalse( $patterns );
 	}
 }
