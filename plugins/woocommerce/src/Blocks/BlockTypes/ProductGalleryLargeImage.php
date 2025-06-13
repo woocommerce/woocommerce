@@ -156,18 +156,27 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	 */
 	private function update_single_image( $image_html, $context, $index ) {
 		$p = new \WP_HTML_Tag_Processor( $image_html );
-		if ( $p->next_tag( 'a' ) ) {
-			$p->remove_attribute( 'onclick' );
-			$p->remove_attribute( 'style' );
-			$p->set_attribute( 'tabindex', '-1' );
-			$p->next_tag( 'img' );
-			$p->set_attribute( 'tabindex', '-1' );
-			$p->set_attribute( 'draggable', 'false' );
-			$p->set_attribute( 'data-wp-on--click', 'actions.onSelectedLargeImageClick' );
-			$p->set_attribute( 'data-wp-on--touchstart', 'actions.onTouchStart' );
-			$p->set_attribute( 'data-wp-on--touchmove', 'actions.onTouchMove' );
-			$p->set_attribute( 'data-wp-on--touchend', 'actions.onTouchEnd' );
+
+		// Bail out if the image HTML is not valid.
+		if ( ! $p->next_tag( 'a' ) ) {
+			return $image_html;
 		}
+
+		$p->remove_attribute( 'onclick' );
+		$p->remove_attribute( 'style' );
+		$p->set_attribute( 'tabindex', '-1' );
+
+		// Bail out if the image HTML is not valid.
+		if ( ! $p->next_tag( 'img' ) ) {
+			return $image_html;
+		}
+
+		$p->set_attribute( 'tabindex', '-1' );
+		$p->set_attribute( 'draggable', 'false' );
+		$p->set_attribute( 'data-wp-on--click', 'actions.onSelectedLargeImageClick' );
+		$p->set_attribute( 'data-wp-on--touchstart', 'actions.onTouchStart' );
+		$p->set_attribute( 'data-wp-on--touchmove', 'actions.onTouchMove' );
+		$p->set_attribute( 'data-wp-on--touchend', 'actions.onTouchEnd' );
 
 		if ( 0 === $index ) {
 			$p->set_attribute( 'fetchpriority', 'high' );
