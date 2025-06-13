@@ -67,7 +67,7 @@ trait OrderTraits {
 			return 0;
 		}
 
-		// Use the passed shipping_tax_amount if provided, otherwise initiliase it to 0 and calculate the total shipping tax amount in the order.
+		// Use the passed shipping_tax_amount if provided, otherwise initialize it to 0 and calculate the total shipping tax amount in the order.
 		// This is useful when calculating refunds for partial shipping tax in an order.
 		// For example, if $1 shipping tax is refunded from an order with $3 shipping tax, the remaining $2 should be distributed to the remaining items.
 		$total_shipping_tax_amount = $shipping_tax_amount ? $shipping_tax_amount : 0;
