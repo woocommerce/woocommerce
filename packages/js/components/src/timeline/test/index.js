@@ -9,7 +9,7 @@ import { createElement } from '@wordpress/element';
  * Internal dependencies
  */
 import Timeline from '..';
-import mockData from '../__mocks__/timeline-mock-data';
+import mockData from './__mocks__/timeline-mock-data';
 import { groupItemsUsing, sortByDateUsing } from '../util.js';
 
 describe( 'Timeline', () => {
