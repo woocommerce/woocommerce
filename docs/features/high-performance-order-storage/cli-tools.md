@@ -4,6 +4,7 @@ post_title: HPOS CLI Tools
 ---
 
 # HPOS CLI Tools
+
 ## Overview
 
 We have a number of [WP-CLI commands](https://developer.woocommerce.com/docs/category/wc-cli/) that can be used to manage HPOS-related functionality, all of which live under the `wp wc hpos` namespace (though you may come across blog posts and older documentation referencing the now-deprecated `wp wc cot` namespace).
