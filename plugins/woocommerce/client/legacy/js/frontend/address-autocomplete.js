@@ -215,6 +215,10 @@ window.wc.addressAutocomplete = {
 			}
 		} );
 
+		/**
+		 * Disable browser autofill for address inputs to prevent conflicts with autocomplete.
+		 * @param input {HTMLInputElement} The input element to disable autofill for.
+		 */
 		function disableBrowserAutofill( input ) {
 			if ( input.getAttribute( 'autocomplete' ) === 'none' ) {
 				return;
@@ -233,6 +237,10 @@ window.wc.addressAutocomplete = {
 			}
 		}
 
+		/**
+		 * Enable browser autofill for address input.
+		 * @param input {HTMLInputElement} The input element to enable autofill for.
+		 */
 		function enableBrowserAutofill( input ) {
 			if ( input.getAttribute( 'autocomplete' ) !== 'none' ) {
 				return;
@@ -243,6 +251,12 @@ window.wc.addressAutocomplete = {
 			input.removeAttribute( 'data-lpignore' );
 		}
 
+		/**
+		 * Get highlighted label parts based on matches returned by `search` results.
+		 * @param label {string} The label to highlight.
+		 * @param matches {*[]} Array of match objects with `offset` and `length`.
+		 * @return {*[]} Array of nodes with highlighted parts.
+		 */
 		function getHighlightedLabel( label, matches ) {
 			// Sanitize label for display.
 			const sanitizedLabel = sanitizeForDisplay( label );
