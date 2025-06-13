@@ -56,7 +56,10 @@ describe( 'Address Autocomplete Provider Registration', () => {
 	} );
 
 	test( 'should handle missing wc_checkout_params', () => {
-		window.wc_checkout_params = undefined;
+		delete global.window.wc; // ensure fresh load
+		global.window.wc_checkout_params = undefined;
+		jest.resetModules();
+		require( '../address-autocomplete' );
 		const validProvider = {
 			id: 'test-provider',
 			canSearch: () => {},
