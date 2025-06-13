@@ -15,20 +15,8 @@ test.describe( 'Product Page: error notices when adding out-of-stock products', 
 		await wpCLI(
 			`wc product create --name="${ productName }" --regular_price=10 --manage_stock=true --stock_quantity=1 --user=admin`
 		);
-		await admin.createNewPost();
-		await editor.insertBlock( { name: 'woocommerce/product-collection' } );
-
-		const singleProduct = await editor.getBlockByName(
-			'woocommerce/product-collection'
-		);
-
-		await expect(
-			singleProduct.getByText( 'create your own' )
-		).toBeVisible();
-
-		await singleProduct.getByText( 'create your own' ).click();
-
-		await editor.publishAndVisitPost();
+		await pageObject.createNewPostAndInsertBlock();
+		await pageObject.publishAndGoToFrontend();
 
 		const productCart = page
 			.locator( '.wc-block-product' )
