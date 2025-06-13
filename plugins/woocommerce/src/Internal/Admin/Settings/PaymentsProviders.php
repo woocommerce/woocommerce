@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\MercadoPago
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mollie;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PayPal;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Razorpay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Stripe;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WCCore;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
@@ -82,6 +83,8 @@ class PaymentsProviders {
 		'afterpay'                  => AfterpayClearpay::class,
 		'clearpay'                  => AfterpayClearpay::class,
 		'antom_*'                   => Antom::class,
+		'razorpay'                  => Razorpay::class,
+
 	);
 
 	/**
