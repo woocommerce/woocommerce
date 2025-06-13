@@ -106,7 +106,7 @@ class CartShippingRateSchema extends AbstractSchema {
 						],
 						'quantity' => [
 							'description' => __( 'Quantity of the item in the current package.', 'woocommerce' ),
-							'type'        => has_filter( 'woocommerce_stock_amount', 'intval' ) ? 'integer' : 'number',
+							'type'        => 'number',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
@@ -341,7 +341,7 @@ class CartShippingRateSchema extends AbstractSchema {
 
 		return array_reduce(
 			array_keys( $meta_data ),
-			function( $return, $key ) use ( $meta_data ) {
+			function ( $return, $key ) use ( $meta_data ) {
 				$return[] = [
 					'key'   => $key,
 					'value' => $meta_data[ $key ],

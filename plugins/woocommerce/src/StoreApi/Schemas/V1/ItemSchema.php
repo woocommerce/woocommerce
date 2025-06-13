@@ -1,4 +1,6 @@
 <?php
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
 /**
@@ -33,7 +35,7 @@ abstract class ItemSchema extends ProductSchema {
 			],
 			'quantity'             => [
 				'description' => __( 'Quantity of this item.', 'woocommerce' ),
-				'type'        => has_filter( 'woocommerce_stock_amount', 'intval' ) ? 'integer' : 'number',
+				'type'        => $this->get_quantity_property_type(),
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
@@ -45,19 +47,19 @@ abstract class ItemSchema extends ProductSchema {
 				'properties'  => [
 					'minimum'     => [
 						'description' => __( 'The minimum quantity allowed for this line item.', 'woocommerce' ),
-						'type'        => has_filter( 'woocommerce_stock_amount', 'intval' ) ? 'integer' : 'number',
+						'type'        => $this->get_quantity_property_type(),
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 					],
 					'maximum'     => [
 						'description' => __( 'The maximum quantity allowed for this line item.', 'woocommerce' ),
-						'type'        => has_filter( 'woocommerce_stock_amount', 'intval' ) ? 'integer' : 'number',
+						'type'        => $this->get_quantity_property_type(),
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 					],
 					'multiple_of' => [
 						'description' => __( 'The amount that quantities increment by. Quantity must be an multiple of this value.', 'woocommerce' ),
-						'type'        => has_filter( 'woocommerce_stock_amount', 'intval' ) ? 'integer' : 'number',
+						'type'        => $this->get_quantity_property_type(),
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 						'default'     => 1,
@@ -97,7 +99,7 @@ abstract class ItemSchema extends ProductSchema {
 			],
 			'low_stock_remaining'  => [
 				'description' => __( 'Quantity left in stock if stock is low, or null if not applicable.', 'woocommerce' ),
-				'type'        => [ 'integer', 'null' ],
+				'type'        => [ $this->get_quantity_property_type(), 'null' ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
