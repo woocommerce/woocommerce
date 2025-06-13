@@ -488,34 +488,18 @@ window.wc.addressAutocomplete = {
 			}
 		};
 
+		/**
+		 * Select an address from the suggestions list and submit it to the provider's `select` method.
+		 * @param type {string} The address type ('billing' or 'shipping').
+		 * @param addressId {string} The ID of the address to select.
+		 * @return {Promise<void>}
+		 */
 		async function selectAddress( type, addressId ) {
-			// Validate inputs
-			if ( ! validateAddressType( type ) ) {
-				console.error( 'Invalid address type for selection:', type );
-				return;
-			}
-
-			if (
-				typeof addressId !== 'string' ||
-				addressId.length === 0 ||
-				addressId.length > 100
-			) {
-				console.error( 'Invalid address ID for selection:', addressId );
-				return;
-			}
-
 			const addressInput = addressInputs[ type ][ 'address_1' ];
+			const address2Input = addressInputs[ type ][ 'address_2' ];
 			const cityInput = addressInputs[ type ][ 'city' ];
-			const countryInput = addressInputs[ type ][ 'country' ];
 			const postcodeInput = addressInputs[ type ][ 'postcode' ];
 			const stateInput = document.getElementById( `${ type }_state` );
-
-			const activeProviderId =
-				activeAddressProvider &&
-				activeAddressProvider[ type ] &&
-				activeAddressProvider[ type ].id
-					? activeAddressProvider[ type ].id
-					: '';
 
 			let addressData;
 			try {
