@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import {
 	pluginsStore,
 	paymentSettingsStore,
-	PaymentGatewayLink,
+	PaymentsProviderLink,
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
@@ -45,7 +45,7 @@ interface EllipsisMenuContentProps {
 	/**
 	 * Array of links related to the payment provider.
 	 */
-	links?: PaymentGatewayLink[];
+	links?: PaymentsProviderLink[];
 	/**
 	 * Indicates if the account can be reset. Optional.
 	 */
@@ -209,7 +209,7 @@ export const EllipsisMenuContent = ( {
 	};
 
 	// Filter links in accordance with the gateway state.
-	const contextLinks = links.filter( ( link: PaymentGatewayLink ) => {
+	const contextLinks = links.filter( ( link: PaymentsProviderLink ) => {
 		switch ( link._type ) {
 			case 'pricing':
 				// Show pricing link for any state.
@@ -229,7 +229,7 @@ export const EllipsisMenuContent = ( {
 
 	return (
 		<>
-			{ contextLinks.map( ( link: PaymentGatewayLink ) => {
+			{ contextLinks.map( ( link: PaymentsProviderLink ) => {
 				const displayName = typeToDisplayName[ link._type ];
 				return displayName ? (
 					<div

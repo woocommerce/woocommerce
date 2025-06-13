@@ -43,7 +43,7 @@ export {
 	SuggestedPaymentsExtensionCategory,
 	PaymentsProviderIncentive,
 	EnableGatewayResponse,
-	PaymentGatewayLink,
+	PaymentsProviderLink,
 	RecommendedPaymentMethod,
 	PluginData,
 } from './payment-settings/types';

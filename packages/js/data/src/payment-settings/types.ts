@@ -1,4 +1,4 @@
-export interface PaymentGatewayLink {
+export interface PaymentsProviderLink {
 	_type: string;
 	url: string;
 }
