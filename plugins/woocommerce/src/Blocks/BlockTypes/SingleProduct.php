@@ -173,12 +173,12 @@ class SingleProduct extends AbstractBlock {
 	protected function render( $attributes, $content, $block ) {
 		$product = wc_get_product( $block->context['postId'] );
 
-		if ( ! $product ) {
+		if ( ! $product instanceof \WC_Product ) {
 			return '';
 		}
 
 		if ( ! $product->is_type( 'variable' ) ) {
-			return $content;
+			return parent::render( $attributes, $content, $block );
 		}
 
 		$interactivity_context = array(
@@ -193,9 +193,9 @@ class SingleProduct extends AbstractBlock {
 			$html->set_attribute( 'data-wp-context', wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 		}
 
-		$content = $html->get_updated_html();
+		$updated_html = $html->get_updated_html();
 
-		return $content;
+		return parent::render( $attributes, $updated_html, $block );
 	}
 
 	/**
