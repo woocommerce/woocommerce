@@ -8,6 +8,9 @@ const { webpackConfig } = require( '@woocommerce/internal-style-build' );
  */
 const path = require( 'path' );
 
+//const packagesPathForRegex = path.resolve( __dirname, '..' ).replaceAll( /\W/g, '.' );
+// const watchIgnoreRegex = `^(?!(${ packagesPathForRegex }.((packages.js.components.src)|(packages.js.internal-style-build.abstracts)|(node_modules..pnpm.(@automattic|@wordpress))))).*`;
+
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 module.exports = {
@@ -30,4 +33,5 @@ module.exports = {
 		rules: webpackConfig.rules,
 	},
 	plugins: webpackConfig.plugins,
+	// watchOptions: { ignored: new RegExp( `^(?!(${ packagesPathForRegex }.((components.src)|(internal-style-build.abstracts)))).*` ), },
 };

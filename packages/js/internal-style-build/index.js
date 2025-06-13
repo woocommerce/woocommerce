@@ -45,7 +45,7 @@ module.exports = {
 									path.resolve( __dirname, 'abstracts' ),
 								],
 							},
-							webpackImporter: true,
+							// webpackImporter: true,
 							additionalData: ( content, loaderContext ) => {
 								const { resourcePath } = loaderContext;
 								if ( resourcePath.includes( '@automattic+' ) ) {
