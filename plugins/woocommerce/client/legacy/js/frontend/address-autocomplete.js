@@ -122,7 +122,6 @@ window.wc.addressAutocomplete = {
 		const suggestionsContainers = {};
 		const suggestionsLists = {};
 		let activeSuggestionIndices = {};
-		let searchControllers = {}; // Track AbortControllers for search requests.
 
 		// Initialize for both billing and shipping.
 		addressTypes.forEach( ( type ) => {
@@ -188,22 +187,18 @@ window.wc.addressAutocomplete = {
 						'.suggestions-list'
 					);
 				activeSuggestionIndices[ type ] = -1;
-				searchControllers[ type ] = null;
 			}
 
 			// Get country value and set active address provider based on it.
 			if ( countryInput ) {
 				setActiveProvider( countryInput.value, type );
 
-				// Listen for country changes to re-evaluate provider availability.
-				// Handle both regular change events and Select2 events.
+				/**
+				 * Listen for country changes to re-evaluate provider availability.
+				 * Handle both regular change events and Select2 events.
+				 */
 				const handleCountryChange = function () {
 					setActiveProvider( countryInput.value, type );
-					// Cancel any inflight search and hide suggestions when country changes.
-					if ( searchControllers[ type ] ) {
-						searchControllers[ type ].abort();
-						searchControllers[ type ] = null;
-					}
 					if ( addressInputs[ type ][ 'address_1' ] ) {
 						hideSuggestions( type );
 					}
@@ -360,24 +355,10 @@ window.wc.addressAutocomplete = {
 				return;
 			}
 
-			// Cancel any existing search request for this type.
-			if ( searchControllers[ type ] ) {
-				searchControllers[ type ].abort();
-			}
-
-			// Create new AbortController for this search.
-			searchControllers[ type ] = new AbortController();
-			const controller = searchControllers[ type ];
-
 			try {
 				const filteredSuggestions = await activeAddressProvider[
 					type
 				].search( type, sanitizedInput );
-
-				// Check if this request was aborted.
-				if ( controller.signal.aborted ) {
-					return;
-				}
 
 				// Validate suggestions array.
 				if ( ! Array.isArray( filteredSuggestions ) ) {
@@ -443,33 +424,20 @@ window.wc.addressAutocomplete = {
 				suggestionsList.id = `address_suggestions_${ type }_list`;
 				setActiveSuggestion( type, 0 );
 			} catch ( error ) {
-				// Handle search errors (including AbortError from cancelled requests).
-				if ( error.name === 'AbortError' ) {
-					// Request was aborted - keep existing suggestions visible.
-					// Silently ignore AbortError as it's expected when cancelling requests.
-				} else {
-					console.error( 'Address search error:', error );
-					hideSuggestions( type );
-					enableBrowserAutofill( addressInput );
-				}
-			} finally {
-				// Clear the controller reference if this was the active request.
-				if ( searchControllers[ type ] === controller ) {
-					searchControllers[ type ] = null;
-				}
+				console.error( 'Address search error:', error );
+				hideSuggestions( type );
+				enableBrowserAutofill( addressInput );
 			}
 		}
 
+		/**
+		 * Hide the suggestions container for a given address type.
+		 * @param type {string} The address type ('billing' or 'shipping').
+		 */
 		function hideSuggestions( type ) {
 			const suggestionsList = suggestionsLists[ type ];
 			const suggestionsContainer = suggestionsContainers[ type ];
 			const addressInput = addressInputs[ type ][ 'address_1' ];
-
-			// Cancel any inflight search requests.
-			if ( searchControllers[ type ] ) {
-				searchControllers[ type ].abort();
-				searchControllers[ type ] = null;
-			}
 
 			suggestionsList.innerHTML = '';
 			suggestionsContainer.style.display = 'none';
