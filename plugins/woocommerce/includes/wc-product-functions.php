@@ -130,17 +130,27 @@ function wc_product_dimensions_enabled() {
  * @param bool $force               Force execution even if context check fails (default false).
  */
 function wc_delete_product_transients( $post_id = 0, $force = false ) {
+	$is_cli_or_cron = wp_doing_cron()
+		|| ( defined( 'WP_CLI' ) && WP_CLI );
+
+	$is_rest_write  = defined( 'REST_REQUEST' ) && REST_REQUEST
+		&& isset( $_SERVER['REQUEST_METHOD'] )
+		&& in_array( $_SERVER['REQUEST_METHOD'], [ 'POST', 'PUT', 'PATCH', 'DELETE' ], true );
+
+	$is_admin_page  = is_admin() && ! wp_doing_ajax();  // wp‑admin screens.
+
+	// Allow admin-ajax.php, but only from editors or shop managers. This stops regular tracking requests like platform_tracks from queuing jobs.
+	$is_privileged_ajax =
+		defined( 'DOING_AJAX' ) && DOING_AJAX
+		&& current_user_can( 'edit_products' );
+
 	$is_write_context = (
-		is_admin()
-		|| wp_doing_cron()
-		|| ( defined( 'WP_CLI' ) && WP_CLI )
-		|| (
-			defined( 'REST_REQUEST' )            // REST route *AND* method is mutating.
-			&& REST_REQUEST
-			&& isset( $_SERVER['REQUEST_METHOD'] )
-			&& in_array( $_SERVER['REQUEST_METHOD'], array( 'POST', 'PUT', 'PATCH', 'DELETE' ), true )
-		)
+		   $is_cli_or_cron
+		|| $is_rest_write
+		|| $is_admin_page
+		|| $is_privileged_ajax
 	);
+
 	/**
 	 * Last‑chance filter. Return `true` to allow, `false` to block.
 	 *
