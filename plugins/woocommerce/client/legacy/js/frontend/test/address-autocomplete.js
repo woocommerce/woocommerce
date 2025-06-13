@@ -80,7 +80,10 @@ describe( 'Address Autocomplete Provider Registration', () => {
 	} );
 
 	test( 'should handle invalid address_providers type', () => {
-		window.wc_checkout_params.address_providers = 'not an array';
+		delete global.window.wc; // ensure fresh load
+		global.window.wc_checkout_params = undefined;
+		jest.resetModules();
+		require( '../address-autocomplete' );
 		const validProvider = {
 			id: 'test-provider',
 			canSearch: () => {},
