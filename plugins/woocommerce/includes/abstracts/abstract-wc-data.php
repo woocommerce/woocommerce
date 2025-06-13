@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Implemented by classes using the same CRUD(s) pattern.
  *
- * @version  2.6.0
+ * @version  x.x.x
  * @package  WooCommerce\Abstracts
  */
 abstract class WC_Data {
@@ -27,7 +27,7 @@ abstract class WC_Data {
 	/**
 	 * ID for this object.
 	 *
-	 * @since 3.0.0
+	 * @since x.x.x
 	 * @var int
 	 */
 	protected $id = 0;
@@ -914,6 +914,9 @@ abstract class WC_Data {
 					$timestamp = wc_string_to_timestamp( get_gmt_from_date( gmdate( 'Y-m-d H:i:s', wc_string_to_timestamp( $value ) ) ) );
 				}
 				$datetime = new WC_DateTime( "@{$timestamp}", new DateTimeZone( 'UTC' ) );
+			} else {
+				// If we get here, the value is not a valid date.
+				$this->error( 'invalid_date', __( 'Invalid date provided.', 'woocommerce' ) );
 			}
 
 			// Set local timezone or offset.
