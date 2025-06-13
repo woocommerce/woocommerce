@@ -31,7 +31,7 @@ export default function MetadataViewer( { fulfillment }: MetadataViewerProps ) {
 			}
 		>
 			{ publicMetadata.length === 0 && (
-				<p>{ __( 'No information available.', 'woocommerce' ) }</p>
+				<p>{ __( 'No metadata available.', 'woocommerce' ) }</p>
 			) }
 			{ publicMetadata.length > 0 && (
 				<MetaList
