@@ -583,8 +583,8 @@ function wc_change_term_counts( $terms, $taxonomies ) {
 		if ( $term instanceof WP_Term && in_array( $term->taxonomy, $current_taxonomies, true ) ) {
 			$key = $term->term_id . '_' . $term->taxonomy;
 			if ( ! isset( $term_counts[ $key ] ) ) {
-				$count = get_term_meta( $term->term_id, 'product_count_' . $term->taxonomy, true );
-				$count = '' !== $count ? absint( $count ) : 0;
+				$count               = get_term_meta( $term->term_id, 'product_count_' . $term->taxonomy, true );
+				$count               = '' !== $count ? absint( $count ) : 0;
 				$term_counts[ $key ] = $count;
 			}
 
