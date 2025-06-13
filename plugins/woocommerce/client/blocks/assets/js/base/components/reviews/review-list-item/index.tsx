@@ -138,7 +138,9 @@ function getReviewRating(
 	return (
 		<div
 			id={ reviewRatingId }
-			aria-label={ `${decodeEntities( review.product_name )} ${ratingText}` }
+			aria-label={ `${ decodeEntities(
+				review.product_name
+			) } ${ ratingText }` }
 			className="wc-block-review-list-item__rating wc-block-components-review-list-item__rating"
 		>
 			<div
