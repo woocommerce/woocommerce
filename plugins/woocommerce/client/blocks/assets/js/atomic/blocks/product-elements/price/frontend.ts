@@ -42,16 +42,6 @@ const ALLOWED_ATTR = [
 const productPriceStore = store(
 	'woocommerce/product-price',
 	{
-		state: {
-			get priceHTML(): string {
-				return singleProductState?.productData?.price_html || '';
-			},
-			get originalPriceHtml(): string {
-				return (
-					singleProductState?.originalProductData?.price_html || ''
-				);
-			},
-		},
 		callbacks: {
 			updatePrice: () => {
 				const element = getElement();
@@ -60,8 +50,9 @@ const productPriceStore = store(
 					return;
 				}
 
-				const { priceHTML, originalPriceHtml } =
-					productPriceStore.state;
+				const priceHTML = singleProductState?.productData?.price_html;
+				const originalPriceHtml =
+					singleProductState?.originalProductData?.price_html;
 
 				if ( ! priceHTML && ! originalPriceHtml ) {
 					return;
