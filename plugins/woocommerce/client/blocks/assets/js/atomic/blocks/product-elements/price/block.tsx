@@ -44,7 +44,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		parentName === 'woocommerce/all-products';
 	const isDescendentOfAddToCartGroupedProductSelectorBlock =
 		parentName ===
-		'woocommerce/add-to-cart-with-options-grouped-product-selector-item';
+		'woocommerce/add-to-cart-with-options-grouped-product-item';
 
 	const showPricePreview =
 		isDescendentOfSingleProductTemplate &&

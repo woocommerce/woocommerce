@@ -153,17 +153,19 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				'<input type="radio" %s/>',
 				$this->get_normalized_attributes(
 					array(
-						'class'                  => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input',
-						'name'                   => $attribute_slug,
-						'value'                  => $attribute_term['value'],
-						'data-wp-bind--checked'  => 'state.isPillSelected',
-						'data-wp-bind--disabled' => 'state.isPillDisabled',
-						'data-wp-watch'          => 'callbacks.watchSelected',
-						'data-wp-on--click'      => 'actions.toggleSelected',
-						'data-wp-on--keydown'    => 'actions.handleKeyDown',
-						'data-wp-context'        => array(
+						'class'                      => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input',
+						'name'                       => $attribute_slug,
+						'value'                      => $attribute_term['value'],
+						'data-wp-bind--checked'      => 'state.isPillSelected',
+						'data-wp-bind--disabled'     => 'state.isPillDisabled',
+						'data-wp-watch'              => 'callbacks.watchSelected',
+						'data-wp-on--click'          => 'actions.toggleSelected',
+						'data-wp-on--keydown'        => 'actions.handleKeyDown',
+						'data-wp-context'            => array(
 							'option' => $attribute_term,
 						),
+						'data-wp-bind--aria-checked' => 'state.isPillSelected',
+						'data-wp-bind--tabindex'     => 'state.pillTabIndex',
 					),
 				),
 				$attribute_term['label']
@@ -179,7 +181,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 					'class'               => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills',
 					'role'                => 'radiogroup',
 					'id'                  => $attribute_id,
-					'aria-labeledby'      => $attribute_id . '_label',
+					'aria-labelledby'     => $attribute_id . '_label',
 					'data-wp-interactive' => $this->get_full_block_name() . '__pills',
 					'data-wp-context'     => array(
 						'name'          => $attribute_slug,

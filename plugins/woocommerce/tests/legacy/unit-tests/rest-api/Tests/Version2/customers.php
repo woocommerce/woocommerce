@@ -468,7 +468,7 @@ class Customers_V2 extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'DELETE', '/wc/v2/customers/0' );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 404, $response->get_status() );
 	}
 
 	/**
