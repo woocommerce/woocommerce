@@ -49,7 +49,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	 * @param WP_Block $block    The block object.
 	 */
 	protected function enqueue_assets( array $attributes, $content, $block ) {
-		if ( $block->context['hoverZoom'] || $block->context['fullScreenOnClick'] ) {
+		if ( ! empty( $block->context['hoverZoom'] ) || ! empty( $block->context['fullScreenOnClick'] ) ) {
 			parent::enqueue_assets( $attributes, $content, $block );
 		}
 	}
@@ -330,6 +330,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		if ( ! empty( $metadata['name'] ) && 'woocommerce/product-gallery-large-image' === $metadata['name'] ) {
 			$settings['skip_inner_blocks'] = true;
 		}
-			return $settings;
+
+		return $settings;
 	}
 }
