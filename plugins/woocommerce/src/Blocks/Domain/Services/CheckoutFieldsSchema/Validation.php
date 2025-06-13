@@ -76,22 +76,24 @@ class Validation {
 	public static function validate_document_object( DocumentObject $document_object, $rules ) {
 		if ( self::schema_is_unwrapped( $rules ) ) {
 			$rules = [
+				'$schema'    => 'http://json-schema.org/draft-07/schema#',
 				'type'       => 'object',
 				'properties' => $rules,
 			];
+		} else {
+			if ( ! isset( $rules['$schema'] ) ) {
+				$rules['$schema'] = 'http://json-schema.org/draft-07/schema#';
+			}
+			if ( ! isset( $rules['type'] ) ) {
+				$rules['type'] = 'object';
+			}
 		}
 
 		try {
 			$validator = new Validator();
 			$result    = $validator->validate(
 				Helper::toJSON( $document_object->get_data() ),
-				Helper::toJSON(
-					[
-						'$schema'    => 'http://json-schema.org/draft-07/schema#',
-						'type'       => 'object',
-						'properties' => $rules,
-					]
-				)
+				Helper::toJSON( $rules )
 			);
 
 			if ( ! $result->hasError() ) {
