@@ -6,9 +6,7 @@
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"supports": {
-		"interactivity": {
-			"clientNavigation": true
-		},
+		"interactivity": true,
 		"align": [ "wide", "full" ]
 	},
 	"attributes": {

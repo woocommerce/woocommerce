@@ -23,6 +23,13 @@ const TEMPLATE: InnerBlockTemplate[] = [
 		{},
 		[
 			[
+				'woocommerce/product-image',
+				{
+					showProductLink: false,
+					showSaleBadge: false,
+				},
+			],
+			[
 				'woocommerce/product-sale-badge',
 				{
 					align: 'right',
