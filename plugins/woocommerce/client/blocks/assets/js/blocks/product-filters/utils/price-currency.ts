@@ -148,18 +148,10 @@ export const formatPrice = (
 		return '';
 	}
 
-	const currency = getCurrency( currencyData ) as Currency & {
-		precision: number;
-	};
+	const currency: Currency = getCurrency( currencyData );
 
-	const {
-		minorUnit = 0,
-		precision,
-		prefix,
-		suffix,
-		decimalSeparator,
-		thousandSeparator,
-	} = currency;
+	const { minorUnit, prefix, suffix, decimalSeparator, thousandSeparator } =
+		currency;
 
 	const formattedPrice: number = priceInt / 10 ** minorUnit;
 
@@ -173,7 +165,7 @@ export const formatPrice = (
 	) }${ applyDecimal(
 		afterDecimal,
 		decimalSeparator,
-		precision
+		minorUnit
 	) }${ suffix }`;
 
 	return formattedValue;
