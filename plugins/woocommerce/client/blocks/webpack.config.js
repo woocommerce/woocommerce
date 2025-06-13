@@ -16,6 +16,11 @@ const {
 const interactivityBlocksConfig = require( './bin/webpack-config-interactive-blocks.js' );
 const interactivityAPIConfig = require( './bin/webpack-config-interactivity.js' );
 
+/**
+ * External dependencies
+ */
+const path = require( 'path' );
+
 // Only options shared between all configs should be defined here.
 const sharedConfig = {
 	mode: NODE_ENV,
@@ -39,18 +44,39 @@ const sharedConfig = {
 
 const CartAndCheckoutFrontendConfig = {
 	...sharedConfig,
+	cache: ( NODE_ENV !== 'development' && { type: 'memory' } ) || {
+		type: 'filesystem',
+		cacheDirectory: path.resolve(
+			__dirname,
+			'../../node_modules/.cache/webpack-blocks-cart-and-checkout'
+		),
+	},
 	...getCartAndCheckoutFrontendConfig( { alias: getAlias() } ),
 };
 
 // Core config for shared libraries.
 const CoreConfig = {
 	...sharedConfig,
+	cache: ( NODE_ENV !== 'development' && { type: 'memory' } ) || {
+		type: 'filesystem',
+		cacheDirectory: path.resolve(
+			__dirname,
+			'../../node_modules/.cache/webpack-blocks-core'
+		),
+	},
 	...getCoreConfig( { alias: getAlias() } ),
 };
 
 // Main Blocks config for registering Blocks and for the Editor.
 const MainConfig = {
 	...sharedConfig,
+	cache: ( NODE_ENV !== 'development' && { type: 'memory' } ) || {
+		type: 'filesystem',
+		cacheDirectory: path.resolve(
+			__dirname,
+			'../../node_modules/.cache/webpack-blocks-main'
+		),
+	},
 	...getMainConfig( {
 		alias: getAlias(),
 	} ),
@@ -59,6 +85,13 @@ const MainConfig = {
 // Frontend config for scripts used in the store itself.
 const FrontendConfig = {
 	...sharedConfig,
+	cache: ( NODE_ENV !== 'development' && { type: 'memory' } ) || {
+		type: 'filesystem',
+		cacheDirectory: path.resolve(
+			__dirname,
+			'../../node_modules/.cache/webpack-blocks-frontend'
+		),
+	},
 	...getFrontConfig( { alias: getAlias() } ),
 };
 
@@ -67,6 +100,13 @@ const FrontendConfig = {
  */
 const ExtensionsConfig = {
 	...sharedConfig,
+	cache: ( NODE_ENV !== 'development' && { type: 'memory' } ) || {
+		type: 'filesystem',
+		cacheDirectory: path.resolve(
+			__dirname,
+			'../../node_modules/.cache/webpack-blocks-extensions'
+		),
+	},
 	...getExtensionsConfig( { alias: getAlias() } ),
 };
 
@@ -75,6 +115,13 @@ const ExtensionsConfig = {
  */
 const PaymentsConfig = {
 	...sharedConfig,
+	cache: ( NODE_ENV !== 'development' && { type: 'memory' } ) || {
+		type: 'filesystem',
+		cacheDirectory: path.resolve(
+			__dirname,
+			'../../node_modules/.cache/webpack-blocks-payments'
+		),
+	},
 	...getPaymentsConfig( { alias: getAlias() } ),
 };
 
@@ -83,6 +130,13 @@ const PaymentsConfig = {
  */
 const StylingConfig = {
 	...sharedConfig,
+	cache: ( NODE_ENV !== 'development' && { type: 'memory' } ) || {
+		type: 'filesystem',
+		cacheDirectory: path.resolve(
+			__dirname,
+			'../../node_modules/.cache/webpack-blocks-styling'
+		),
+	},
 	...getStylingConfig( { alias: getAlias() } ),
 };
 
@@ -91,16 +145,37 @@ const StylingConfig = {
  */
 const SiteEditorConfig = {
 	...sharedConfig,
+	cache: ( NODE_ENV !== 'development' && { type: 'memory' } ) || {
+		type: 'filesystem',
+		cacheDirectory: path.resolve(
+			__dirname,
+			'../../node_modules/.cache/webpack-blocks-site-editor'
+		),
+	},
 	...getSiteEditorConfig( { alias: getAlias() } ),
 };
 
 const InteractivityBlocksConfig = {
 	...sharedConfig,
+	cache: ( NODE_ENV !== 'development' && { type: 'memory' } ) || {
+		type: 'filesystem',
+		cacheDirectory: path.resolve(
+			__dirname,
+			'../../node_modules/.cache/webpack-blocks-interactivity'
+		),
+	},
 	...interactivityBlocksConfig,
 };
 
 const InteractivityAPIConfig = {
 	...sharedConfig,
+	cache: ( NODE_ENV !== 'development' && { type: 'memory' } ) || {
+		type: 'filesystem',
+		cacheDirectory: path.resolve(
+			__dirname,
+			'../../node_modules/.cache/webpack-api-interactivity'
+		),
+	},
 	...interactivityAPIConfig,
 };
 
