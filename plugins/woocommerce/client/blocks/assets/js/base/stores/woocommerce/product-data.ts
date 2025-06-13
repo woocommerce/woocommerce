@@ -35,7 +35,9 @@ const productDataStore = store< {
 	{
 		state: {
 			get productData(): ProductData {
-				const context = getContext< Context >();
+				const context = getContext< Context >(
+					'woocommerce/single-product'
+				);
 
 				return (
 					context?.productData ||
@@ -43,7 +45,9 @@ const productDataStore = store< {
 				);
 			},
 			get originalProductData(): ProductData {
-				const context = getContext< Context >();
+				const context = getContext< Context >(
+					'woocommerce/single-product'
+				);
 
 				return (
 					context?.originalProductData ||
@@ -53,7 +57,9 @@ const productDataStore = store< {
 		},
 		actions: {
 			setProductData: ( key, value ) => {
-				const context = getContext< Context >();
+				const context = getContext< Context >(
+					'woocommerce/single-product'
+				);
 
 				if ( context?.productData ) {
 					context.productData[ key ] = value;
