@@ -4,6 +4,7 @@
 
 describe( 'Address Autocomplete Provider Registration', () => {
 	beforeEach( () => {
+		delete global.window.wc;
 		// Reset the window object and providers before each test
 		Object.assign( global.window, {
 			wc_checkout_params: {
@@ -13,9 +14,6 @@ describe( 'Address Autocomplete Provider Registration', () => {
 				],
 			},
 		} );
-		global.console = {
-			error: jest.fn(),
-		};
 
 		// Reset the module before each test
 		jest.resetModules();
@@ -35,7 +33,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 				validProvider
 			);
 		expect( result ).toBe( true );
-		expect( console.error ).not.toHaveBeenCalled();
+		expect( console ).not.toHaveErrored();
 	} );
 
 	test( 'should reject invalid provider (null, undefined, non-object)', () => {
@@ -47,12 +45,11 @@ describe( 'Address Autocomplete Provider Registration', () => {
 					provider
 				);
 			expect( result ).toBe( false );
-			expect( console.error ).toHaveBeenCalledWith(
+			expect( console ).toHaveErroredWith(
 				'Error registering address provider:',
 				'Address provider must be a valid object'
 			);
-			expect( console.error ).toHaveBeenCalledTimes( 1 );
-			console.error.mockClear();
+			expect( console ).toHaveErrored();
 		} );
 	} );
 
@@ -73,7 +70,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 				validProvider
 			);
 		expect( result ).toBe( false );
-		expect( console.error ).toHaveBeenCalledWith(
+		expect( console ).toHaveErroredWith(
 			'Error registering address provider:',
 			'Provider test-provider not registered on server'
 		);
@@ -96,7 +93,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 				validProvider
 			);
 		expect( result ).toBe( false );
-		expect( console.error ).toHaveBeenCalledWith(
+		expect( console ).toHaveErroredWith(
 			'Error registering address provider:',
 			'Provider test-provider not registered on server'
 		);
@@ -114,7 +111,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 				invalidProvider
 			);
 		expect( result ).toBe( false );
-		expect( console.error ).toHaveBeenCalledWith(
+		expect( console ).toHaveErroredWith(
 			'Error registering address provider:',
 			'Address provider must have a valid ID'
 		);
@@ -133,7 +130,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 				invalidProvider
 			);
 		expect( result ).toBe( false );
-		expect( console.error ).toHaveBeenCalledWith(
+		expect( console ).toHaveErroredWith(
 			'Error registering address provider:',
 			'Address provider must have a valid ID'
 		);
@@ -151,7 +148,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 				invalidProvider
 			);
 		expect( result ).toBe( false );
-		expect( console.error ).toHaveBeenCalledWith(
+		expect( console ).toHaveErroredWith(
 			'Error registering address provider:',
 			'Address provider must have a canSearch function'
 		);
@@ -169,7 +166,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 				invalidProvider
 			);
 		expect( result ).toBe( false );
-		expect( console.error ).toHaveBeenCalledWith(
+		expect( console ).toHaveErroredWith(
 			'Error registering address provider:',
 			'Address provider must have a search function'
 		);
@@ -187,7 +184,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 				invalidProvider
 			);
 		expect( result ).toBe( false );
-		expect( console.error ).toHaveBeenCalledWith(
+		expect( console ).toHaveErroredWith(
 			'Error registering address provider:',
 			'Address provider must have a select function'
 		);
@@ -206,7 +203,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 				unregisteredProvider
 			);
 		expect( result ).toBe( false );
-		expect( console.error ).toHaveBeenCalledWith(
+		expect( console ).toHaveErroredWith(
 			'Error registering address provider:',
 			'Provider unregistered-provider not registered on server'
 		);
