@@ -165,8 +165,7 @@ export const PaymentGatewayListItem = ( {
 						{ ! gateway.state.enabled &&
 							! gatewayNeedsOnboarding && (
 								<EnableGatewayButton
-									gatewayId={ gateway.id }
-									gatewayState={ gateway.state }
+									gatewayProvider={ gateway }
 									settingsHref={
 										gateway.management._links.settings.href
 									}
@@ -199,9 +198,7 @@ export const PaymentGatewayListItem = ( {
 
 						{ gatewayNeedsOnboarding && (
 							<CompleteSetupButton
-								gatewayId={ gateway.id }
-								gatewayState={ gateway.state }
-								onboardingState={ gateway.onboarding.state }
+								gatewayProvider={ gateway }
 								settingsHref={
 									gateway.management._links.settings.href
 								}

@@ -9,24 +9,21 @@ import {
 	EnableGatewayResponse,
 	paymentSettingsStore,
 	PaymentsProviderIncentive,
-	PaymentsProviderState,
+	PaymentGatewayProvider,
+	OfflinePaymentMethodProvider,
 } from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
-import { recordPaymentsEvent } from '~/settings-payments/utils';
+import { recordPaymentsProviderEvent } from '~/settings-payments/utils';
 
 interface EnableGatewayButtonProps {
 	/**
-	 * The ID of the gateway to enable.
+	 * The details of the payment gateway to enable.
 	 */
-	gatewayId: string;
-	/**
-	 * The state of the gateway.
-	 */
-	gatewayState: PaymentsProviderState;
+	gatewayProvider: PaymentGatewayProvider | OfflinePaymentMethodProvider;
 	/**
 	 * The settings URL to navigate to when the enable gateway button is clicked.
 	 */
@@ -77,8 +74,7 @@ interface EnableGatewayButtonProps {
  * If incentive data is provided, it will trigger the `acceptIncentive` callback with the incentive ID.
  */
 export const EnableGatewayButton = ( {
-	gatewayId,
-	gatewayState,
+	gatewayProvider,
 	settingsHref,
 	onboardingHref,
 	isOffline,
@@ -112,14 +108,12 @@ export const EnableGatewayButton = ( {
 		e.preventDefault();
 
 		// Since this logic can toggle the gateway state on and off, we make sure we don't accidentally disable the gateway.
-		if ( gatewayState.enabled ) {
+		if ( gatewayProvider.state.enabled ) {
 			return;
 		}
 
 		// Record the event when user clicks on a gateway's enable button.
-		recordPaymentsEvent( 'provider_enable_click', {
-			provider_id: gatewayId,
-		} );
+		recordPaymentsProviderEvent( 'enable_click', gatewayProvider );
 
 		const gatewayToggleNonce =
 			window.woocommerce_admin.nonces?.gateway_toggle || '';
@@ -137,7 +131,7 @@ export const EnableGatewayButton = ( {
 		}
 
 		togglePaymentGateway(
-			gatewayId,
+			gatewayProvider.id,
 			window.woocommerce_admin.ajax_url,
 			gatewayToggleNonce
 		)
@@ -145,7 +139,7 @@ export const EnableGatewayButton = ( {
 				// The backend will return 'needs_setup' if the gateway needs additional setup and could not be enabled.
 				if ( response.data === 'needs_setup' ) {
 					// We only need to perform additional logic/redirects if no account is connected.
-					if ( ! gatewayState.account_connected ) {
+					if ( ! gatewayProvider.state.account_connected ) {
 						if (
 							onboardingType === 'native_in_context' &&
 							setOnboardingModalOpen
@@ -182,9 +176,7 @@ export const EnableGatewayButton = ( {
 					}
 				} else {
 					// Record the event when user successfully enables a gateway.
-					recordPaymentsEvent( 'provider_enable', {
-						provider_id: gatewayId,
-					} );
+					recordPaymentsProviderEvent( 'enable', gatewayProvider );
 				}
 
 				// If no redirect occurred, the data needs to be refreshed.

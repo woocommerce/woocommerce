@@ -19,7 +19,7 @@ import {
 	isWooPayments,
 	hasIncentive,
 	isWooPayEligible,
-	recordPaymentsEvent,
+	recordPaymentsProviderEvent,
 } from '~/settings-payments/utils';
 import { DefaultDragHandle } from '~/settings-payments/components/sortable';
 import { StatusBadge } from '~/settings-payments/components/status-badge';
@@ -145,13 +145,10 @@ export const PaymentExtensionSuggestionListItem = ( {
 							variant="primary"
 							onClick={ () => {
 								if ( pluginInstalled ) {
-									// Record the event when user clicks on a gateway's enable button.
-									recordPaymentsEvent(
-										'provider_enable_click',
-										{
-											provider_id: suggestion.id,
-											suggestion_id: suggestion.id,
-										}
+									// Record the event when user clicks on a suggestion's enable button.
+									recordPaymentsProviderEvent(
+										'enable_click',
+										suggestion
 									);
 								}
 

@@ -4,6 +4,7 @@
 import { recordEvent } from '@woocommerce/tracks';
 import { render, fireEvent } from '@testing-library/react';
 import {
+	PaymentGatewayProvider,
 	PaymentsProviderState,
 	PaymentsProviderOnboardingState,
 } from '@woocommerce/data';
@@ -21,22 +22,24 @@ describe( 'CompleteSetupButton', () => {
 	it( 'should record settings_payments_provider_complete_setup_click event on click of the button', () => {
 		const { getByRole } = render(
 			<CompleteSetupButton
-				gatewayId="test-gateway"
-				gatewayState={
+				gatewayProvider={
 					{
-						enabled: true,
-						account_connected: false,
-						needs_setup: true,
-						test_mode: false,
-						dev_mode: false,
-					} as PaymentsProviderState
-				}
-				onboardingState={
-					{
-						started: true,
-						completed: false,
-						test_mode: false,
-					} as PaymentsProviderOnboardingState
+						id: 'test-gateway',
+						state: {
+							enabled: true,
+							account_connected: false,
+							needs_setup: true,
+							test_mode: false,
+							dev_mode: false,
+						} as PaymentsProviderState,
+						onboarding: {
+							state: {
+								started: true,
+								completed: false,
+								test_mode: false,
+							} as PaymentsProviderOnboardingState,
+						},
+					} as PaymentGatewayProvider
 				}
 				settingsHref="/settings"
 				onboardingHref={ '' }
@@ -53,9 +56,9 @@ describe( 'CompleteSetupButton', () => {
 			{
 				business_country: expect.any( String ),
 				provider_id: 'test-gateway',
-				onboarding_started: true,
-				onboarding_completed: false,
-				onboarding_test_mode: false,
+				provider_onboarding_started: true,
+				provider_onboarding_completed: false,
+				provider_onboarding_test_mode: false,
 			}
 		);
 	} );

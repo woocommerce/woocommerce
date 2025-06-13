@@ -7,6 +7,7 @@ import {
 	pluginsStore,
 	paymentSettingsStore,
 	PaymentsProviderLink,
+	PaymentsProvider,
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
@@ -15,13 +16,13 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import './ellipsis-menu-content.scss';
-import { recordPaymentsEvent } from '~/settings-payments/utils';
+import { recordPaymentsProviderEvent } from '~/settings-payments/utils';
 
 interface EllipsisMenuContentProps {
 	/**
-	 * The ID of the payment provider.
+	 * The provider details.
 	 */
-	providerId: string;
+	provider: PaymentsProvider;
 	/**
 	 * The main plugin file path of the plugin associated with the payment gateway.
 	 */
@@ -30,14 +31,6 @@ interface EllipsisMenuContentProps {
 	 * Indicates if the menu is being used for a payment extension suggestion.
 	 */
 	isSuggestion: boolean;
-	/**
-	 * The ID of the payment extension suggestion. Optional.
-	 */
-	suggestionId?: string;
-	/**
-	 * The URL to call when hiding a payment extension suggestion. Optional.
-	 */
-	suggestionHideUrl?: string;
 	/**
 	 * Callback to close the ellipsis menu.
 	 */
@@ -66,11 +59,9 @@ interface EllipsisMenuContentProps {
  * hiding suggestions, and resetting accounts.
  */
 export const EllipsisMenuContent = ( {
-	providerId,
+	provider,
 	pluginFile,
 	isSuggestion,
-	suggestionId = '',
-	suggestionHideUrl = '',
 	onToggle,
 	links = [],
 	canResetAccount = false,
@@ -103,19 +94,13 @@ export const EllipsisMenuContent = ( {
 	 */
 	const deactivateGateway = () => {
 		// Record the event when user clicks on a gateway's deactivate button.
-		recordPaymentsEvent( 'provider_deactivate_click', {
-			provider_id: providerId,
-			suggestion_id: suggestionId,
-		} );
+		recordPaymentsProviderEvent( 'deactivate_click', provider );
 
 		setIsDeactivating( true );
 		deactivatePlugin( pluginFile )
 			.then( () => {
 				// Record the event when user successfully deactivates a gateway.
-				recordPaymentsEvent( 'provider_deactivate', {
-					provider_id: providerId,
-					suggestion_id: suggestionId,
-				} );
+				recordPaymentsProviderEvent( 'deactivate', provider );
 
 				createSuccessNotice(
 					__(
@@ -144,10 +129,7 @@ export const EllipsisMenuContent = ( {
 	 */
 	const disableGateway = () => {
 		// Record the event when user clicks on a gateway's disable button.
-		recordPaymentsEvent( 'provider_disable_click', {
-			provider_id: providerId,
-			suggestion_id: suggestionId,
-		} );
+		recordPaymentsProviderEvent( 'disable_click', provider );
 
 		const gatewayToggleNonce =
 			window.woocommerce_admin.nonces?.gateway_toggle || '';
@@ -160,16 +142,13 @@ export const EllipsisMenuContent = ( {
 		}
 		setIsDisabling( true );
 		togglePaymentGateway(
-			providerId,
+			provider.id,
 			window.woocommerce_admin.ajax_url,
 			gatewayToggleNonce
 		)
 			.then( () => {
 				// Record the event when user successfully disables a gateway.
-				recordPaymentsEvent( 'provider_disable', {
-					provider_id: providerId,
-					suggestion_id: suggestionId,
-				} );
+				recordPaymentsProviderEvent( 'disable', provider );
 
 				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
 				setIsDisabling( false );
@@ -188,6 +167,17 @@ export const EllipsisMenuContent = ( {
 	 * Hides the payment gateway suggestion.
 	 */
 	const hideSuggestion = () => {
+		const suggestionHideUrl = provider._links?.hide?.href;
+		if ( ! suggestionHideUrl ) {
+			createErrorNotice(
+				__(
+					'Failed to hide the payment extension suggestion.',
+					'woocommerce'
+				)
+			);
+			return;
+		}
+
 		setIsHidingSuggestion( true );
 
 		hidePaymentExtensionSuggestion( suggestionHideUrl )
@@ -240,12 +230,11 @@ export const EllipsisMenuContent = ( {
 							target="_blank"
 							href={ link.url }
 							onClick={ () => {
-								// Record the event when user clicks on a gateway's context link.
-								recordPaymentsEvent(
-									'provider_context_link_click',
+								// Record the event when user clicks on a provider's context link.
+								recordPaymentsProviderEvent(
+									'context_link_click',
+									provider,
 									{
-										provider_id: providerId,
-										suggestion_id: suggestionId,
 										link_type: link._type,
 									}
 								);
