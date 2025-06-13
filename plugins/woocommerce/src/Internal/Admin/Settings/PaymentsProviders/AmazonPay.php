@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 
+use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use WC_Payment_Gateway;
 
 defined( 'ABSPATH' ) || exit;
@@ -115,14 +116,25 @@ class AmazonPay extends PaymentGateway {
 	 *               Null if the environment could not be determined.
 	 */
 	private function is_amazon_pay_in_sandbox_mode(): ?bool {
-		if ( class_exists( '\WC_Amazon_Payments_Advanced_API' ) &&
-			is_callable( '\WC_Amazon_Payments_Advanced_API::get_settings' ) ) {
+		try {
+			if ( class_exists( '\WC_Amazon_Payments_Advanced_API' ) &&
+				is_callable( '\WC_Amazon_Payments_Advanced_API::get_settings' ) ) {
 
-			$settings = \WC_Amazon_Payments_Advanced_API::get_settings();
+				$settings = \WC_Amazon_Payments_Advanced_API::get_settings();
 
-			if ( isset( $settings['sandbox'] ) ) {
-				return filter_var( $settings['sandbox'], FILTER_VALIDATE_BOOLEAN );
+				if ( isset( $settings['sandbox'] ) ) {
+					return filter_var( $settings['sandbox'], FILTER_VALIDATE_BOOLEAN );
+				}
 			}
+		} catch ( \Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if the AmazonPay gateway is in sandbox mode: ' . $e->getMessage(),
+				array(
+					'source'  => 'settings-payments',
+					'error'   => $e,
+				)
+			);
 		}
 
 		// Let the caller know that we couldn't determine the environment.
@@ -138,10 +150,21 @@ class AmazonPay extends PaymentGateway {
 	 *               Null if we failed to determine the onboarding status.
 	 */
 	private function is_amazon_pay_onboarded(): ?bool {
-		if ( class_exists( '\WC_Amazon_Payments_Advanced_API' ) &&
-			is_callable( '\WC_Amazon_Payments_Advanced_API::validate_api_settings' ) ) {
+		try {
+			if ( class_exists( '\WC_Amazon_Payments_Advanced_API' ) &&
+				is_callable( '\WC_Amazon_Payments_Advanced_API::validate_api_settings' ) ) {
 
-			return true === \WC_Amazon_Payments_Advanced_API::validate_api_settings();
+				return true === \WC_Amazon_Payments_Advanced_API::validate_api_settings();
+			}
+		} catch ( \Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if the AmazonPay gateway is onboarded: ' . $e->getMessage(),
+				array(
+					'source'  => 'settings-payments',
+					'error'   => $e,
+				)
+			);
 		}
 
 		// Let the caller know that we couldn't determine the onboarding status.
