@@ -402,6 +402,17 @@
 					"text": "var(--wp--preset--color--theme-4)"
 				}
 			},
+			"woocommerce/product-review-author-name" : {
+				"typography": {
+					"fontSize":  "var(--wp--preset--font-size--small)",
+					"fontWeight": "700"
+				}
+			},
+			"woocommerce/product-review-date" : {
+				"typography": {
+					"fontSize":  "var(--wp--preset--font-size--small)"
+				}
+			},
 			"woocommerce/add-to-cart-with-options-variation-selector-attribute-name" : {
 				"color": {
 					"text": "var(--wp--preset--color--theme-4)"
