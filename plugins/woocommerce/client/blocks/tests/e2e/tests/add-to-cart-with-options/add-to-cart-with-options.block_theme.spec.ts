@@ -9,12 +9,11 @@ import { test as base, expect } from '@woocommerce/e2e-utils';
 import AddToCartWithOptionsPage from './add-to-cart-with-options.page';
 
 const test = base.extend< { pageObject: AddToCartWithOptionsPage } >( {
-	pageObject: async ( { page, admin, editor, requestUtils }, use ) => {
+	pageObject: async ( { page, admin, editor }, use ) => {
 		const pageObject = new AddToCartWithOptionsPage( {
 			page,
 			admin,
 			editor,
-			requestUtils,
 		} );
 		await use( pageObject );
 	},
@@ -27,8 +26,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		editor,
 		admin,
 	} ) => {
-		await pageObject.setFeatureFlags();
-
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//single-product',
 			postType: 'wp_template',
@@ -62,8 +59,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 			'woocommerce-blocks-test-custom-product-type'
 		);
 
-		await pageObject.setFeatureFlags();
-
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//single-product',
 			postType: 'wp_template',
@@ -86,8 +81,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
-		await pageObject.setFeatureFlags();
-
 		await pageObject.updateSingleProductTemplate();
 
 		await editor.saveSiteEditorEntities( {
@@ -118,8 +111,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
-		await pageObject.setFeatureFlags();
-
 		await pageObject.updateSingleProductTemplate();
 
 		await editor.saveSiteEditorEntities( {
@@ -162,13 +153,38 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 	} );
 
+	test( 'allows adding grouped products to cart', async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/logo-collection' );
+
+		const increaseQuantityButton = page.getByLabel(
+			'Increase quantity of Beanie'
+		);
+		await increaseQuantityButton.click();
+
+		const addToCartButton = page.getByText( 'Add to cart' ).first();
+
+		await addToCartButton.click();
+
+		await expect( page.getByText( 'Added to cart' ) ).toBeVisible();
+
+		await expect( page.getByLabel( '4 items in cart' ) ).toBeVisible();
+	} );
+
 	test( "doesn't allow selecting invalid variations in pills mode", async ( {
 		page,
 		pageObject,
 		editor,
 	} ) => {
-		await pageObject.setFeatureFlags();
-
 		await pageObject.updateSingleProductTemplate();
 
 		await editor.saveSiteEditorEntities( {
@@ -194,8 +210,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
-		await pageObject.setFeatureFlags();
-
 		await pageObject.updateSingleProductTemplate();
 
 		await pageObject.switchProductType( 'Variable Product' );
