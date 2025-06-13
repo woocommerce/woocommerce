@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Affirm;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AfterpayClearpay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AmazonPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Klarna;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\MercadoPago;
@@ -77,6 +78,8 @@ class PaymentsProviders {
 		'woo-mercado-pago-*'        => MercadoPago::class,
 		'affirm'                    => Affirm::class,
 		'klarna_payments'           => Klarna::class,
+		'afterpay'                  => AfterpayClearpay::class,
+		'clearpay'                  => AfterpayClearpay::class,
 	);
 
 	/**
@@ -94,6 +97,10 @@ class PaymentsProviders {
 		ExtensionSuggestions::MOLLIE            => Mollie::class,
 		ExtensionSuggestions::AMAZON_PAY        => AmazonPay::class,
 		ExtensionSuggestions::MERCADO_PAGO      => MercadoPago::class,
+		ExtensionSuggestions::AFFIRM            => Affirm::class,
+		ExtensionSuggestions::KLARNA            => Klarna::class,
+		ExtensionSuggestions::AFTERPAY          => AfterpayClearpay::class,
+		ExtensionSuggestions::CLEARPAY          => AfterpayClearpay::class,
 	);
 
 	/**
