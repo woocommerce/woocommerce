@@ -40,6 +40,8 @@ const mockStoreValues = {
 describe( 'SendButton', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
+		mockStoreValues.hasEmptyContent = false;
+		mockStoreValues.isEmailSent = false;
 
 		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( { isDirty: false } );
 
