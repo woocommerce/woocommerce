@@ -790,7 +790,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( true, $fulfillment['is_fulfilled'] );
 
 		$this->assertIsArray( $fulfillment['meta_data'] );
-		$this->assertCount( 3, $fulfillment['meta_data'] );
+		$this->assertCount( 4, $fulfillment['meta_data'] );  // _fulfilled_date is added automatically.
 
 		// Test updated meta data.
 		$this->assertNotContains( 'test_meta_key', wp_list_pluck( $fulfillment['meta_data'], 'key' ) );

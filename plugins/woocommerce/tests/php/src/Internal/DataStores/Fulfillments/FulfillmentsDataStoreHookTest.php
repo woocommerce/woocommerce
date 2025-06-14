@@ -229,6 +229,202 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Data provider for fulfillment types.
+	 *
+	 * @return array
+	 */
+	public function fulfillment_types() {
+		return array( array( 'create' ), array( 'update' ) );
+	}
+
+	/**
+	 * Test that the fulfillment before fulfill hook is not called when is_fulfilled is false.
+	 *
+	 * @param string $type The type of fulfillment operation ('create' or 'update').
+	 *
+	 * @dataProvider fulfillment_types
+	 */
+	public function test_fulfillment_before_fulfill_hook_is_not_called( $type ) {
+		// Create a fulfillment for the order.
+		$fulfillment = $this->get_test_fulfillment( $this->order->get_id() );
+		if ( 'update' === $type ) {
+			$fulfillment->save();
+			$this->assertNotNull( $fulfillment->get_id(), 'Fulfillment ID should not be null.' );
+		}
+
+		$hook_called = false;
+		add_filter(
+			'wc_fulfillment_before_fulfill',
+			function ( $fulfillment ) use ( &$hook_called ) {
+				$hook_called = true;
+
+				return $fulfillment;
+			}
+		);
+
+		if ( 'create' === $type ) {
+			// Create the fulfillment.
+			$this->store->create( $fulfillment );
+		} else {
+			// Update the fulfillment.
+			$this->store->update( $fulfillment );
+		}
+
+		$this->assertFalse( $hook_called, 'The fulfillment before fulfill hook was called.' );
+
+		$db_fulfillment = new Fulfillment( $fulfillment->get_id() );
+		$this->assertFalse( $db_fulfillment->get_is_fulfilled() );
+		remove_all_filters( 'wc_fulfillment_before_fulfill' );
+	}
+
+	/**
+	 * Test that the fulfillment before fulfill hook is called when updating a fulfillment.
+	 *
+	 * @param string $type The type of fulfillment operation ('create' or 'update').
+	 *
+	 * @dataProvider fulfillment_types
+	 */
+	public function test_fulfillment_before_fulfill_hook_is_called( $type ) {
+		// Create a fulfillment for the order.
+		$fulfillment = $this->get_test_fulfillment( $this->order->get_id() );
+		if ( 'update' === $type ) {
+			$fulfillment->save();
+			$this->assertNotNull( $fulfillment->get_id(), 'Fulfillment ID should not be null.' );
+		}
+
+		$hook_called = false;
+		add_filter(
+			'wc_fulfillment_before_fulfill',
+			function ( $fulfillment ) use ( &$hook_called ) {
+				$hook_called = true;
+
+				return $fulfillment;
+			}
+		);
+
+		// Fulfill the fulfillment.
+		$fulfillment->set_is_fulfilled( true );
+
+		if ( 'create' === $type ) {
+			// Create the fulfillment.
+			$this->store->create( $fulfillment );
+		} else {
+			// Update the fulfillment.
+			$this->store->update( $fulfillment );
+		}
+
+		$this->assertTrue( $hook_called, 'The fulfillment before fulfill hook was not called.' );
+
+		$db_fulfillment = new Fulfillment( $fulfillment->get_id() );
+		$this->assertTrue( $db_fulfillment->get_is_fulfilled() );
+		remove_all_filters( 'wc_fulfillment_before_fulfill' );
+	}
+
+	/**
+	 * Test that the fulfillment before fulfill hook can prevent updating a fulfillment.
+	 *
+	 * @param string $type The type of fulfillment operation ('create' or 'update').
+	 *
+	 * @dataProvider fulfillment_types
+	 */
+	public function test_fulfillment_before_fulfill_hook_can_interrupt( $type ) {
+		// Create a fulfillment for the order.
+		$fulfillment = $this->get_test_fulfillment( $this->order->get_id() );
+		if ( 'update' === $type ) {
+			$fulfillment->save();
+			$this->assertNotNull( $fulfillment->get_id(), 'Fulfillment ID should not be null.' );
+		}
+
+		$hook_called = false;
+		add_filter(
+			'wc_fulfillment_before_fulfill',
+			function () use ( &$hook_called ) {
+				$hook_called = true;
+				throw new \Exception( 'Fulfillment fulfill prevented by hook.' );
+			}
+		);
+
+		// Fulfill the fulfillment.
+		$fulfillment->set_is_fulfilled( true );
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'Fulfillment fulfill prevented by hook.' );
+
+		if ( 'create' === $type ) {
+			// Create the fulfillment.
+			$this->store->create( $fulfillment );
+		} else {
+			// Update the fulfillment.
+			$this->store->update( $fulfillment );
+		}
+
+		$this->assertTrue( $hook_called, 'The fulfillment before fulfill hook was not called.' );
+		if ( 'update' === $type ) {
+			// If it's an update, we should still have the unfulfilled fulfillment in the database.
+			$db_fulfillment = new Fulfillment( $fulfillment->get_id() );
+			$this->assertFalse( $db_fulfillment->get_is_fulfilled(), 'Fulfillment was fulfilled.' );
+		} else {
+			// If it's a create, we should not have the fulfillment in the database.
+			$this->expectException( \Exception::class );
+			$this->expectExceptionMessage( 'Fulfillment not found.' );
+			new Fulfillment( $fulfillment->get_id() );
+		}
+		remove_all_filters( 'wc_fulfillment_before_fulfill' );
+	}
+
+	/**
+	 * Test that the fulfillment after update hook is called after updating a fulfillment.
+	 *
+	 * @param string $type The type of fulfillment operation ('create' or 'update').
+	 *
+	 * @dataProvider fulfillment_types
+	 */
+	public function test_fulfillment_after_fulfill_hook_is_called( $type ) {
+		// Create a fulfillment for the order.
+		$fulfillment = $this->get_test_fulfillment( $this->order->get_id() );
+		if ( 'update' === $type ) {
+			$fulfillment->save();
+			$this->assertNotNull( $fulfillment->get_id(), 'Fulfillment ID should not be null.' );
+		}
+
+		$hook_called = false;
+		add_action(
+			'wc_fulfillment_after_fulfill',
+			function ( $fulfillment ) use ( &$hook_called, &$received_fulfillment ) {
+				$received_fulfillment = $fulfillment;
+				$hook_called          = true;
+				return $fulfillment;
+			},
+			10,
+			2
+		);
+
+		// Fulfill the fulfillment.
+		$fulfillment->set_is_fulfilled( true );
+
+		if ( 'create' === $type ) {
+			// Create the fulfillment.
+			$this->store->create( $fulfillment );
+		} else {
+			// Update the fulfillment.
+			$this->store->update( $fulfillment );
+		}
+		$this->assertTrue( $hook_called, 'The fulfillment after fulfill hook was not called.' );
+
+		// Compare the received fulfillment with the expected data.
+		$this->assertEquals( $received_fulfillment->get_id(), $fulfillment->get_id() );
+		$this->assertEquals( $received_fulfillment->get_entity_type(), $fulfillment->get_entity_type() );
+		$this->assertEquals( $received_fulfillment->get_entity_id(), $fulfillment->get_entity_id() );
+		$this->assertEquals( $received_fulfillment->get_status(), $fulfillment->get_status() );
+		$this->assertEquals( $received_fulfillment->get_is_fulfilled(), $fulfillment->get_is_fulfilled() );
+		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_key' ), $fulfillment->get_meta( 'test_meta_key' ) );
+		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_key_2' ), $fulfillment->get_meta( 'test_meta_key_2' ) );
+		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_update' ), $fulfillment->get_meta( 'test_meta_update' ) );
+		$this->assertEquals( $received_fulfillment->get_items(), $fulfillment->get_items() );
+		remove_all_actions( 'wc_fulfillment_after_fulfill' );
+	}
+
+	/**
 	 * Test that the fulfillment before delete hook is called when deleting a fulfillment.
 	 */
 	public function test_fulfillment_before_delete_hook_is_called() {

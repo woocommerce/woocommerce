@@ -55,6 +55,22 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		 */
 		$data = apply_filters( 'wc_fulfillment_before_create', $data );
 
+		$is_fulfill_action = $data->get_is_fulfilled();
+		// If the fulfillment is fulfilled, set the fulfilled date.
+		if ( $is_fulfill_action ) {
+			$data->set_date_fulfilled( current_time( 'mysql' ) );
+
+			/**
+			 * Filter to modify the fulfillment data before it is fulfilled.
+			 *
+			 * @since 9.9.0
+			 */
+			$data = apply_filters(
+				'wc_fulfillment_before_fulfill',
+				$data
+			);
+		}
+
 		// Save the fulfillment to the database.
 		global $wpdb;
 		$rows_inserted = $wpdb->insert(
@@ -93,6 +109,15 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		 * @since 9.9.0
 		 */
 		do_action( 'wc_fulfillment_after_create', $data );
+
+		if ( $is_fulfill_action ) {
+			/**
+			 * Action to perform after a fulfillment is fulfilled.
+			 *
+			 * @since 9.9.0
+			 */
+			do_action( 'wc_fulfillment_after_fulfill', $data );
+		}
 	}
 
 	/**
@@ -137,8 +162,6 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	 */
 	public function update( &$data ): void {
 		// Update the fulfillment in the database.
-		global $wpdb;
-
 		$data_id = $data->get_id();
 
 		$this->validate_items( $data );
@@ -149,6 +172,25 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		 * @since 9.9.0
 		 */
 		$data = apply_filters( 'wc_fulfillment_before_update', $data );
+
+		// If the fulfillment is fulfilled, set the fulfilled date.
+		$is_fulfill_action = false;
+		if ( $data->get_is_fulfilled() && empty( $data->get_date_fulfilled() ) ) {
+			$is_fulfill_action = true;
+			$data->set_date_fulfilled( current_time( 'mysql' ) );
+
+			/**
+			 * Filter to modify the fulfillment data before it is fulfilled.
+			 *
+			 * @since 9.9.0
+			 */
+			$data = apply_filters(
+				'wc_fulfillment_before_fulfill',
+				$data
+			);
+		}
+
+		global $wpdb;
 
 		$wpdb->update(
 			$wpdb->prefix . 'wc_order_fulfillments',
@@ -185,6 +227,15 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		 * @since 9.9.0
 		 */
 		do_action( 'wc_fulfillment_after_update', $data );
+
+		if ( $is_fulfill_action ) {
+			/**
+			 * Action to perform after a fulfillment is fulfilled.
+			 *
+			 * @since 9.9.0
+			 */
+			do_action( 'wc_fulfillment_after_fulfill', $data );
+		}
 	}
 
 	/**

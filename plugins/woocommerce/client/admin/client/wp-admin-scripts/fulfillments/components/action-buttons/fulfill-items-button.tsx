@@ -3,7 +3,7 @@
  */
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { useState } from 'react';
 
 /**
@@ -23,8 +23,12 @@ export default function FulfillItemsButton( {
 	const { order, fulfillment, notifyCustomer } = useFulfillmentContext();
 	const [ isExecuting, setIsExecuting ] = useState( false );
 	const { saveFulfillment } = useDispatch( FulfillmentStore );
+	const { getError } = useSelect(
+		( select ) => ( { getError: select( FulfillmentStore ).getError } ),
+		[]
+	);
 
-	const handleFulfillItems = () => {
+	const handleFulfillItems = async () => {
 		setIsExecuting( true );
 		setError( null );
 		if ( ! fulfillment || ! order ) {
@@ -38,16 +42,14 @@ export default function FulfillItemsButton( {
 		}
 		fulfillment.is_fulfilled = true;
 		fulfillment.status = 'fulfilled';
-		saveFulfillment( order.id, fulfillment, notifyCustomer )
-			.then( () => {
-				setIsEditing( false );
-			} )
-			.catch( ( error ) => {
-				setError( error );
-			} )
-			.finally( () => {
-				setIsExecuting( false );
-			} );
+		await saveFulfillment( order.id, fulfillment, notifyCustomer );
+		const error = getError( order.id );
+		if ( error ) {
+			setError( error );
+		} else {
+			setIsEditing( false );
+		}
+		setIsExecuting( false );
 	};
 
 	return (
