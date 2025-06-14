@@ -36,7 +36,7 @@ export default function FulfillItemsButton( {
 			return;
 		}
 		if ( getFulfillmentItems( fulfillment ).length === 0 ) {
-			setError( 'Select items to be fulfilled.' );
+			setError( __( 'Select items to be fulfilled.', 'woocommerce' ) );
 			setIsExecuting( false );
 			return;
 		}
