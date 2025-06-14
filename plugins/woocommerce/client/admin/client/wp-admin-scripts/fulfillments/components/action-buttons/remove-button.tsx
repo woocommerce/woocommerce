@@ -3,7 +3,7 @@
  */
 import { Button, Modal } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { useState } from 'react';
 
 /**
@@ -23,29 +23,31 @@ export default function RemoveButton( {
 	const { order, fulfillment, notifyCustomer } = useFulfillmentContext();
 	const [ isExecuting, setIsExecuting ] = useState< boolean >( false );
 	const { deleteFulfillment } = useDispatch( FulfillmentStore );
+	const { getError } = useSelect(
+		( select ) => ( { getError: select( FulfillmentStore ).getError } ),
+		[]
+	);
 
 	const [ isOpen, setOpen ] = useState( false );
 	const openModal = () => setOpen( true );
 	const closeModal = () => setOpen( false );
 
-	const handleDeleteFulfillment = () => {
+	const handleDeleteFulfillment = async () => {
 		setError( null );
 		setIsExecuting( true );
 		if ( ! fulfillment || ! fulfillment.id || ! order || ! order.id ) {
 			setIsExecuting( false );
 			return;
 		}
-		deleteFulfillment( order.id, fulfillment.id, notifyCustomer )
-			.then( () => {
-				setOpenSection( 'order' );
-				setIsEditing( false );
-			} )
-			.catch( ( error ) => {
-				setError( error );
-			} )
-			.finally( () => {
-				setIsExecuting( false );
-			} );
+		await deleteFulfillment( order.id, fulfillment.id, notifyCustomer );
+		const error = getError( order.id );
+		if ( error ) {
+			setError( error );
+		} else {
+			setOpenSection( 'order' );
+			setIsEditing( false );
+		}
+		setIsExecuting( false );
 	};
 
 	const handleRemoveButtonClick = ( event: React.MouseEvent ) => {
