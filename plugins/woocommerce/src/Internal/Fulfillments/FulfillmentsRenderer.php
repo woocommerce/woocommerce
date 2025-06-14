@@ -36,6 +36,18 @@ class FulfillmentsRenderer {
 		add_action( 'admin_footer', array( $this, 'render_fulfillment_drawer_slot' ) );
 		// Hook into the admin enqueue scripts to load the fulfillment drawer component.
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_components' ) );
+		// Initialize the renderer for bulk actions.
+		add_action( 'admin_init', array( $this, 'init_bulk_actions' ) );
+	}
+
+	/**
+	 * Initialize the renderer.
+	 */
+	public function init_bulk_actions() {
+		// Add bulk actions for fulfillments.
+		add_filter( 'bulk_actions-woocommerce_page_wc-orders', array( $this, 'define_fulfillment_bulk_actions' ) );
+		// Add bulk action handler for fulfillments.
+		add_filter( 'handle_bulk_actions-woocommerce_page_wc-orders', array( $this, 'handle_fulfillment_bulk_actions' ), 10, 3 );
 	}
 
 	/**
@@ -222,6 +234,76 @@ class FulfillmentsRenderer {
 		?>
 		<div id="wc_order_fulfillments_panel_container"></div>
 		<?php
+	}
+
+	/**
+	 * Define bulk actions for fulfillments.
+	 *
+	 * @param array $actions Existing actions.
+	 * @return array
+	 */
+	public function define_fulfillment_bulk_actions( $actions ) {
+		$actions['fulfill']   = __( 'Mark as fulfilled', 'woocommerce' );
+		$actions['unfulfill'] = __( 'Mark as unfulfilled', 'woocommerce' );
+
+		return $actions;
+	}
+
+	/**
+	 * Handle bulk actions for fulfillments.
+	 *
+	 * @param string $redirect_to The redirect URL.
+	 * @param string $action The action being performed.
+	 * @param array  $post_ids The post IDs being acted upon.
+	 * @return string
+	 */
+	public function handle_fulfillment_bulk_actions( $redirect_to, $action, $post_ids ) {
+		if ( 'fulfill' === $action || 'unfulfill' === $action ) {
+			$fulfillment_action = 'fulfill' === $action ? 'fulfill' : 'unfulfill';
+			foreach ( $post_ids as $post_id ) {
+				$order = wc_get_order( $post_id );
+				if ( ! $order ) {
+					continue;
+				}
+
+				$data_store   = wc_get_container()->get( FulfillmentsDataStore::class );
+				$fulfillments = $data_store->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+				if ( 'fulfill' === $action ) {
+					/**
+					 * Note: This is a simplified logic for fulfilling an order.
+					 * phpcs:ignore
+					 * TODO: Not all the scenarios are covered here, like when:
+					 * - all of the order items are already fulfilled.
+					 * - some of the order items are fulfilled.
+					 * - some of the order items are unfulfilled.
+					 * We need to use the remaining items in the order to create a new fulfillment.
+					 */
+					// Create a fulfillment for the order, containing all items in the order.
+					$items = array();
+					foreach ( $order->get_items() as $item ) {
+						$items[] = array(
+							'item_id' => $item->get_id(),
+							'qty'     => $item->get_quantity(),
+						);
+					}
+					$fulfillment = new Fulfillment();
+					$fulfillment->set_entity_type( WC_Order::class );
+					$fulfillment->set_entity_id( (string) $order->get_id() );
+					$fulfillment->set_status( 'fulfilled' );
+					$fulfillment->set_is_fulfilled( true );
+					$fulfillment->set_items( $items );
+					$fulfillment->save();
+				} else {
+					foreach ( $fulfillments as $fulfillment ) {
+						$fulfillment->set_status( 'unfulfilled' );
+						$fulfillment->set_is_fulfilled( false );
+						$fulfillment->save();
+					}
+				}
+			}
+			$redirect_to = add_query_arg( array( 'bulk_action' => $fulfillment_action ), $redirect_to );
+		}
+		return $redirect_to;
 	}
 
 	/**
