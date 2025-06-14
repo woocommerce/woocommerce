@@ -42,6 +42,7 @@ export default function FulfillItemsButton( {
 		}
 		fulfillment.is_fulfilled = true;
 		fulfillment.status = 'fulfilled';
+
 		await saveFulfillment( order.id, fulfillment, notifyCustomer );
 		const error = getError( order.id );
 		if ( error ) {
