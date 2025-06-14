@@ -269,31 +269,36 @@ class FulfillmentsRenderer {
 				$data_store   = wc_get_container()->get( FulfillmentsDataStore::class );
 				$fulfillments = $data_store->read_fulfillments( WC_Order::class, (string) $order->get_id() );
 				if ( 'fulfill' === $action ) {
-					/**
-					 * Note: This is a simplified logic for fulfilling an order.
-					 * phpcs:ignore
-					 * TODO: Not all the scenarios are covered here, like when:
-					 * - all of the order items are already fulfilled.
-					 * - some of the order items are fulfilled.
-					 * - some of the order items are unfulfilled.
-					 * We need to use the remaining items in the order to create a new fulfillment.
-					 */
-					// Create a fulfillment for the order, containing all items in the order.
-					$items = array();
-					foreach ( $order->get_items() as $item ) {
-						$items[] = array(
-							'item_id' => $item->get_id(),
-							'qty'     => $item->get_quantity(),
-						);
+
+					// Fulfill all existing fulfillments.
+					foreach ( $fulfillments as $fulfillment ) {
+						$fulfillment->set_status( 'fulfilled' );
+						$fulfillment->set_is_fulfilled( true );
+						$fulfillment->save();
 					}
-					$fulfillment = new Fulfillment();
-					$fulfillment->set_entity_type( WC_Order::class );
-					$fulfillment->set_entity_id( (string) $order->get_id() );
-					$fulfillment->set_status( 'fulfilled' );
-					$fulfillment->set_is_fulfilled( true );
-					$fulfillment->set_items( $items );
-					$fulfillment->save();
+
+					// Create a fulfillment for the order, containing all remaining items in the order.
+					$remaining_items = array_map(
+						function ( $item ) {
+							return array(
+								'item_id' => $item['item_id'],
+								'qty'     => $item['qty'],
+							);
+						},
+						FulfillmentUtils::get_pending_items( $order, $fulfillments )
+					);
+
+					if ( 0 < count( $remaining_items ) ) {
+						$fulfillment = new Fulfillment();
+						$fulfillment->set_entity_type( WC_Order::class );
+						$fulfillment->set_entity_id( (string) $order->get_id() );
+						$fulfillment->set_status( 'fulfilled' );
+						$fulfillment->set_is_fulfilled( true );
+						$fulfillment->set_items( $remaining_items );
+						$fulfillment->save();
+					}
 				} else {
+					// Unfulfill all existing fulfillments.
 					foreach ( $fulfillments as $fulfillment ) {
 						$fulfillment->set_status( 'unfulfilled' );
 						$fulfillment->set_is_fulfilled( false );
