@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix: ensure wp_is_block_theme() is called after theme directories registration.

@@ -655,4 +655,17 @@ export class CheckoutPage {
 			billingAddressSection.getByText( addresssecondline )
 		).toBeVisible();
 	}
+
+	/**
+	 * Selects a delivery option in the checkout page.
+	 *
+	 * @param {'Ship' | 'Pickup'} option - The delivery option to select.
+	 */
+	async selectDeliveryOption( option: 'Ship' | 'Pickup' ) {
+		await this.page
+			.getByRole( 'radio', { name: option, exact: true } )
+			.click();
+		// Wait for the shipping rate selection request to complete
+		await this.waitForCheckoutToFinishUpdating();
+	}
 }

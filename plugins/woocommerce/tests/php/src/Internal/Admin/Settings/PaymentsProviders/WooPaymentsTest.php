@@ -145,6 +145,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 						'started'                      => true,
 						'completed'                    => true,
 						'test_mode'                    => true,
+						'test_drive_account'           => false,
 						'wpcom_has_working_connection' => false,
 						'wpcom_is_store_connected'     => false,
 						'wpcom_has_connected_owner'    => false,
