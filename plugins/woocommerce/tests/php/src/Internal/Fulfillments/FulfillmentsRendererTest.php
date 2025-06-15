@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Fulfillments;
 use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
 use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsRenderer;
+use WC_Helper_Order;
+use WC_Helper_Product;
 use WC_Order;
 
 /**
@@ -21,6 +23,17 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$this->assertNotFalse( has_action( 'manage_woocommerce_page_wc-orders_custom_column', array( $renderer, 'render_fulfillment_column_row_data' ) ) );
 		$this->assertNotFalse( has_action( 'admin_footer', array( $renderer, 'render_fulfillment_drawer_slot' ) ) );
 		$this->assertNotFalse( has_action( 'admin_enqueue_scripts', array( $renderer, 'load_components' ) ) );
+		$this->assertNotFalse( has_action( 'admin_init', array( $renderer, 'init_bulk_actions' ) ) );
+	}
+
+	/**
+	 * Test that the admin_init hooks are registered.
+	 */
+	public function test_admin_init_hooks() {
+		$renderer = new FulfillmentsRenderer();
+		$renderer->init_bulk_actions();
+		$this->assertNotFalse( has_filter( 'bulk_actions-woocommerce_page_wc-orders', array( $renderer, 'define_fulfillment_bulk_actions' ) ) );
+		$this->assertNotFalse( has_filter( 'handle_bulk_actions-woocommerce_page_wc-orders', array( $renderer, 'handle_fulfillment_bulk_actions' ) ) );
 	}
 
 	/**
@@ -73,10 +86,10 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$container->replace( FulfillmentsDataStore::class, $fulfillments_data_store );
 
 		$fulfillments_data_store
-			->expects( $this->once() )
-			->method( 'read_fulfillments' )
-			->with( WC_Order::class, '1' )
-			->willReturn( array( $fulfillment ) );
+		->expects( $this->once() )
+		->method( 'read_fulfillments' )
+		->with( WC_Order::class, '1' )
+		->willReturn( array( $fulfillment ) );
 
 		$renderer = new FulfillmentsRenderer();
 		$order    = $this->createMock( \WC_Order::class );
@@ -154,5 +167,332 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$renderer->render_fulfillment_drawer_slot();
 		$output = ob_get_clean();
 		$this->assertStringContainsString( '<div id="wc_order_fulfillments_panel_container"></div>', $output );
+	}
+
+	/**
+	 * Test the test_handle_fulfillment_bulk_actions method fulfill action on an order without any fulfillments.
+	 */
+	public function test_handle_fulfillment_bulk_actions_fulfill_new_order() {
+		$renderer = new FulfillmentsRenderer();
+		$order    = WC_Helper_Order::create_order( get_current_user_id() );
+
+		$renderer->handle_fulfillment_bulk_actions( 'dummy_redirect', 'fulfill', array( $order->get_id() ) );
+
+		$fulfillments = wc_get_container()
+		->get( FulfillmentsDataStore::class )
+		->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+
+		$this->assertCount( 1, $fulfillments, 'Fulfillment was not created.' );
+		$this->assertEquals( 'fulfilled', $fulfillments[0]->get_status(), 'Fulfillment status is not set to Fulfilled.' );
+		$this->assertTrue( $fulfillments[0]->get_is_fulfilled(), 'Fulfillment is not marked as fulfilled.' );
+
+		// Check that the fulfillment has all the items in the order.
+		$items = $fulfillments[0]->get_items();
+		$this->assertCount( count( $order->get_items() ), $items, 'Fulfillment items do not match order items.' );
+		foreach ( $order->get_items() as $item_id => $item ) {
+			$this->assertArrayHasKey( $item_id, $items, 'Fulfillment does not contain item with ID ' . $item_id );
+			$this->assertEquals( $item->get_quantity(), $items[ $item_id ]['qty'], 'Fulfillment item quantity does not match order item quantity.' );
+		}
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+	/**
+	 * Test the test_handle_fulfillment_bulk_actions method fulfill action on an order with existing fulfillments.
+	 */
+	public function test_handle_fulfillment_bulk_actions_fulfill_with_partial_fulfillments() {
+		$renderer = new FulfillmentsRenderer();
+
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+		$order->add_item( WC_Helper_Product::create_simple_product(), 2 );
+		$order->calculate_totals();
+
+		$order_items = array_values( $order->get_items() );
+
+		// Create an initial fulfillment with only one item.
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_entity_type( WC_Order::class );
+		$fulfillment->set_entity_id( (string) $order->get_id() );
+		$fulfillment->set_status( 'unfulfilled' );
+		$fulfillment->set_is_fulfilled( false );
+		$fulfillment->set_items(
+			array(
+				array(
+					'item_id' => $order_items[0]->get_id(),
+					'qty'     => 1,
+				),
+			)
+		);
+		$fulfillment->save();
+
+		// Now fulfill the order again.
+		$renderer->handle_fulfillment_bulk_actions( 'dummy_redirect', 'fulfill', array( $order->get_id() ) );
+
+		$fulfillments = wc_get_container()
+		->get( FulfillmentsDataStore::class )
+		->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+
+		$this->assertCount( 2, $fulfillments, 'Fulfillment was not created.' );
+		foreach ( $fulfillments as $fulfillment ) {
+			$this->assertEquals( 'fulfilled', $fulfillment->get_status(), 'Fulfillment status is not set to Fulfilled.' );
+			$this->assertTrue( $fulfillment->get_is_fulfilled(), 'Fulfillment is not marked as fulfilled.' );
+		}
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+	/**
+	 * Test bulk action for fulfilling orders with all items in an unfullfilled fulfillment.
+	 */
+	public function test_handle_fulfillment_bulk_actions_fulfill_all_items_in_unfulfilled_fulfillment() {
+		$renderer = new FulfillmentsRenderer();
+		$order    = WC_Helper_Order::create_order( get_current_user_id() );
+
+		// Add multiple items to the order.
+		for ( $i = 0; $i < 3; $i++ ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$order->add_item( $product, 2 );
+		}
+		$order->calculate_totals();
+
+		// Fulfill the order without calling the bulk action first.
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_entity_type( WC_Order::class );
+		$fulfillment->set_entity_id( (string) $order->get_id() );
+		$fulfillment->set_status( 'unfulfilled' );
+		$fulfillment->set_is_fulfilled( false );
+		$fulfillment->set_items(
+			array_map(
+				function ( $item ) {
+					return array(
+						'item_id' => $item->get_id(),
+						'qty'     => $item->get_quantity(),
+					);
+				},
+				array_values( $order->get_items() )
+			)
+		);
+		$fulfillment->save();
+
+		// Fulfill the order with bulk action. There should be no change except the existing fulfillment status.
+		$renderer->handle_fulfillment_bulk_actions( 'dummy_redirect', 'fulfill', array( $order->get_id() ) );
+
+		$fulfillments = wc_get_container()
+		->get( FulfillmentsDataStore::class )
+		->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+
+		$this->assertCount( 1, $fulfillments, 'Fulfillment was not created.' );
+		$this->assertEquals( $fulfillment->get_id(), $fulfillments[0]->get_id(), 'Fulfillment ID does not match.' );
+		$this->assertEquals( 'fulfilled', $fulfillments[0]->get_status(), 'Fulfillment status is not set to Fulfilled.' );
+		$this->assertTrue( $fulfillments[0]->get_is_fulfilled(), 'Fulfillment is not marked as fulfilled.' );
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+	/**
+	 * Test bulk action for fulfilling orders with all items in a fullfilled fulfillment.
+	 */
+	public function test_handle_fulfillment_bulk_actions_fulfill_all_items_in_fulfilled_fulfillment() {
+		$renderer = new FulfillmentsRenderer();
+		$order    = WC_Helper_Order::create_order( get_current_user_id() );
+
+		// Add multiple items to the order.
+		for ( $i = 0; $i < 3; $i++ ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$order->add_item( $product, 2 );
+		}
+		$order->calculate_totals();
+
+		// Fulfill the order without calling the bulk action first.
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_entity_type( WC_Order::class );
+		$fulfillment->set_entity_id( (string) $order->get_id() );
+		$fulfillment->set_status( 'fulfilled' );
+		$fulfillment->set_is_fulfilled( true );
+		$fulfillment->set_items(
+			array_map(
+				function ( $item ) {
+					return array(
+						'item_id' => $item->get_id(),
+						'qty'     => $item->get_quantity(),
+					);
+				},
+				array_values( $order->get_items() )
+			)
+		);
+		$fulfillment->save();
+
+		// Fulfill the order with bulk action. There should be no change since all items are fulfilled.
+		$renderer->handle_fulfillment_bulk_actions( 'dummy_redirect', 'fulfill', array( $order->get_id() ) );
+
+		$fulfillments = wc_get_container()
+		->get( FulfillmentsDataStore::class )
+		->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+
+		$this->assertCount( 1, $fulfillments, 'Fulfillment was not created.' );
+		$this->assertEquals( $fulfillment->get_id(), $fulfillments[0]->get_id(), 'Fulfillment ID does not match.' );
+		$this->assertEquals( 'fulfilled', $fulfillments[0]->get_status(), 'Fulfillment status is not set to Fulfilled.' );
+		$this->assertTrue( $fulfillments[0]->get_is_fulfilled(), 'Fulfillment is not marked as fulfilled.' );
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+
+	/**
+	 * Test the test_handle_fulfillment_bulk_actions method unfulfill action on an order without any fulfillments.
+	 */
+	public function test_handle_fulfillment_bulk_actions_unfulfill_new_order() {
+		$renderer = new FulfillmentsRenderer();
+		$order    = WC_Helper_Order::create_order( get_current_user_id() );
+
+		$renderer->handle_fulfillment_bulk_actions( 'dummy_redirect', 'unfulfill', array( $order->get_id() ) );
+
+		$fulfillments = wc_get_container()
+		->get( FulfillmentsDataStore::class )
+		->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+
+		$this->assertCount( 0, $fulfillments, 'Fulfillment was not created.' );
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+	/**
+	 * Test the test_handle_fulfillment_bulk_actions method fulfill action on an order with existing fulfillments.
+	 */
+	public function test_handle_fulfillment_bulk_actions_unfulfill_with_partial_fulfillments() {
+		$renderer = new FulfillmentsRenderer();
+
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+		$order->add_item( WC_Helper_Product::create_simple_product(), 2 );
+		$order->calculate_totals();
+
+		$order_items = array_values( $order->get_items() );
+
+		// Create an initial fulfillment with only one item.
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_entity_type( WC_Order::class );
+		$fulfillment->set_entity_id( (string) $order->get_id() );
+		$fulfillment->set_status( 'fulfilled' );
+		$fulfillment->set_is_fulfilled( true );
+		$fulfillment->set_items(
+			array(
+				array(
+					'item_id' => $order_items[0]->get_id(),
+					'qty'     => 1,
+				),
+			)
+		);
+		$fulfillment->save();
+
+		// Now fulfill the order again.
+		$renderer->handle_fulfillment_bulk_actions( 'dummy_redirect', 'unfulfill', array( $order->get_id() ) );
+
+		$fulfillments = wc_get_container()
+		->get( FulfillmentsDataStore::class )
+		->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+
+		$this->assertCount( 1, $fulfillments, 'Fulfillment was not created.' );
+
+		$this->assertEquals( $fulfillment->get_id(), $fulfillments[0]->get_id(), 'Fulfillment ID does not match.' );
+		$this->assertEquals( 'unfulfilled', $fulfillments[0]->get_status(), 'Fulfillment status is not set to Fulfilled.' );
+		$this->assertFalse( $fulfillments[0]->get_is_fulfilled(), 'Fulfillment is not marked as fulfilled.' );
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+	/**
+	 * Test bulk action for fulfilling orders with all items in an unfullfilled fulfillment.
+	 */
+	public function test_handle_fulfillment_bulk_actions_unfulfill_all_items_in_unfulfilled_fulfillment() {
+		$renderer = new FulfillmentsRenderer();
+		$order    = WC_Helper_Order::create_order( get_current_user_id() );
+
+		// Add multiple items to the order.
+		for ( $i = 0; $i < 3; $i++ ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$order->add_item( $product, 2 );
+		}
+		$order->calculate_totals();
+
+		// Fulfill the order without calling the bulk action first.
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_entity_type( WC_Order::class );
+		$fulfillment->set_entity_id( (string) $order->get_id() );
+		$fulfillment->set_status( 'unfulfilled' );
+		$fulfillment->set_is_fulfilled( false );
+		$fulfillment->set_items(
+			array_map(
+				function ( $item ) {
+					return array(
+						'item_id' => $item->get_id(),
+						'qty'     => $item->get_quantity(),
+					);
+				},
+				array_values( $order->get_items() )
+			)
+		);
+		$fulfillment->save();
+
+		// Fulfill the order with bulk action. There should be no change.
+		$renderer->handle_fulfillment_bulk_actions( 'dummy_redirect', 'unfulfill', array( $order->get_id() ) );
+
+		$fulfillments = wc_get_container()
+		->get( FulfillmentsDataStore::class )
+		->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+
+		$this->assertCount( 1, $fulfillments, 'Fulfillment was not created.' );
+		$this->assertEquals( $fulfillment->get_id(), $fulfillments[0]->get_id(), 'Fulfillment ID does not match.' );
+		$this->assertEquals( 'unfulfilled', $fulfillments[0]->get_status(), 'Fulfillment status is not set to Unfulfilled.' );
+		$this->assertFalse( $fulfillments[0]->get_is_fulfilled(), 'Fulfillment is marked as fulfilled.' );
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+	/**
+	 * Test bulk action for fulfilling orders with all items in a fullfilled fulfillment.
+	 */
+	public function test_handle_fulfillment_bulk_actions_unfulfill_all_items_in_fulfilled_fulfillment() {
+		$renderer = new FulfillmentsRenderer();
+		$order    = WC_Helper_Order::create_order( get_current_user_id() );
+
+		// Add multiple items to the order.
+		for ( $i = 0; $i < 3; $i++ ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$order->add_item( $product, 2 );
+		}
+		$order->calculate_totals();
+
+		// Fulfill the order without calling the bulk action first.
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_entity_type( WC_Order::class );
+		$fulfillment->set_entity_id( (string) $order->get_id() );
+		$fulfillment->set_status( 'fulfilled' );
+		$fulfillment->set_is_fulfilled( true );
+		$fulfillment->set_items(
+			array_map(
+				function ( $item ) {
+					return array(
+						'item_id' => $item->get_id(),
+						'qty'     => $item->get_quantity(),
+					);
+				},
+				array_values( $order->get_items() )
+			)
+		);
+		$fulfillment->save();
+
+		// Fulfill the order with bulk action. There should be no change except the fulfillment status.
+		$renderer->handle_fulfillment_bulk_actions( 'dummy_redirect', 'unfulfill', array( $order->get_id() ) );
+
+		$fulfillments = wc_get_container()
+		->get( FulfillmentsDataStore::class )
+		->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+
+		$this->assertCount( 1, $fulfillments, 'Fulfillment was not created.' );
+		$this->assertEquals( $fulfillment->get_id(), $fulfillments[0]->get_id(), 'Fulfillment ID does not match.' );
+		$this->assertEquals( 'unfulfilled', $fulfillments[0]->get_status(), 'Fulfillment status is not set to Unfulfilled.' );
+		$this->assertFalse( $fulfillments[0]->get_is_fulfilled(), 'Fulfillment is marked as fulfilled.' );
+
+		WC_Helper_Order::delete_order( $order->get_id() );
 	}
 }
