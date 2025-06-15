@@ -82,17 +82,10 @@ export const GeolocationCountrySelect = ( {
 				instanceId={ 2 }
 				placeholder={ placeholder }
 				label={ selectedCountry.key === '' ? label : '' }
-				diacriticInsensitive={ true }
+				ignoreDiacritics={ true }
 				getSearchExpression={ ( query: string ) => {
 					return new RegExp( `(^${ query }| — (${ query }))`, 'i' );
 				}}
-				// getSearchExpression={ ( query: string ) => {
-				// 	const normalizedQuery = query
-				// 		.normalize( 'NFD' )
-				// 		.replace( /[\u0300-\u036f]/g, '' )
-				// 		.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
-				// 	return new RegExp( `(^${ normalizedQuery }| — (${ normalizedQuery }))`, 'i' );
-				// } }
 				options={ countries }
 				help={ <Icon icon={ chevronDown } /> }
 				onChange={ ( results ) => {

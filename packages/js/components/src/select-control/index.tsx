@@ -44,7 +44,7 @@ type Props = {
 	/**
 	 * Whether to ignore diacritics when matching search queries.
 	 */
-	diacriticInsensitive?: boolean;
+	ignoreDiacritics?: boolean;
 	/**
 	 * Allow the select options to be disabled.
 	 */
@@ -195,7 +195,7 @@ const initialState: State = {
  */
 export class SelectControl extends Component< Props, State > {
 	static defaultProps: Partial< Props > = {
-		diacriticInsensitive: false,
+		ignoreDiacritics: false,
 		excludeSelectedOptions: true,
 		getSearchExpression: identity,
 		inlineTags: false,
@@ -417,12 +417,12 @@ export class SelectControl extends Component< Props, State > {
 	}
 
 	getOptionsByQuery( options: Option[], query: string | null ) {
-		const { getSearchExpression, maxResults, onFilter, diacriticInsensitive } = this.props;
+		const { getSearchExpression, maxResults, onFilter, ignoreDiacritics } = this.props;
 		const filtered = [];
 
 		// Create a regular expression to filter the options.
 		const baseQuery = query ? query.trim() : '';
-		const normalizedQuery = diacriticInsensitive
+		const normalizedQuery = ignoreDiacritics
 			? baseQuery.normalize( 'NFD' ).replace( /[\u0300-\u036f]/g, '' )
 			: baseQuery;
 
@@ -439,7 +439,7 @@ export class SelectControl extends Component< Props, State > {
 			}
 
 			const isMatch = keywords.some( ( keyword ) => {			
-				const normalizedKeyword = diacriticInsensitive
+				const normalizedKeyword = ignoreDiacritics
 					? keyword.normalize( 'NFD' ).replace( /[\u0300-\u036f]/g, '' )
 					: keyword;
 			
