@@ -85,7 +85,7 @@ export const GeolocationCountrySelect = ( {
 				ignoreDiacritics={ true }
 				getSearchExpression={ ( query: string ) => {
 					return new RegExp( `(^${ query }| — (${ query }))`, 'i' );
-				}}
+				} }
 				options={ countries }
 				help={ <Icon icon={ chevronDown } /> }
 				onChange={ ( results ) => {
