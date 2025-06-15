@@ -32,7 +32,7 @@ echo $email_improvements_enabled ? '<div class="email-introduction">' : '';
 $text = __( 'You’ve received the following order from %s:', 'woocommerce' );
 if ( $email_improvements_enabled ) {
 	/* translators: %s: Customer billing full name */
-	$text = __( 'Woo! You’ve received a new order from %s:', 'woocommerce' );
+	$text = __( 'You’ve received a new order from %s:', 'woocommerce' );
 }
 ?>
 <p><?php printf( esc_html( $text ), esc_html( $order->get_formatted_billing_full_name() ) ); ?></p>

@@ -70,7 +70,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		 */
 		public function get_default_subject() {
 			return $this->email_improvements_enabled
-				? __( '[{site_title}]: Cha-ching! You\'ve got a new order: #{order_number}', 'woocommerce' )
+				? __( '[{site_title}]: You\'ve got a new order: #{order_number}', 'woocommerce' )
 				: __( '[{site_title}]: New order #{order_number}', 'woocommerce' );
 		}
 
