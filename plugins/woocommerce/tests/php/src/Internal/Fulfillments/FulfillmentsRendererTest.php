@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Tests\Internal\Fulfillments;
 
 use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsRenderer;
 use WC_Helper_Order;
@@ -18,22 +19,81 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	 * Test hooks.
 	 */
 	public function test_hooks() {
+		/**
+		 * @var TestingContainer $container
+		 */
+		$container = wc_get_container();
+		$cot_mock  = $this->createMock( CustomOrdersTableController::class );
+		$cot_mock->method( 'custom_orders_table_usage_is_enabled' )->willReturn( true );
+		$container->replace( CustomOrdersTableController::class, $cot_mock );
+
 		$renderer = new FulfillmentsRenderer();
 		$this->assertNotFalse( has_filter( 'manage_woocommerce_page_wc-orders_columns', array( $renderer, 'add_fulfillment_columns' ) ) );
 		$this->assertNotFalse( has_action( 'manage_woocommerce_page_wc-orders_custom_column', array( $renderer, 'render_fulfillment_column_row_data' ) ) );
 		$this->assertNotFalse( has_action( 'admin_footer', array( $renderer, 'render_fulfillment_drawer_slot' ) ) );
 		$this->assertNotFalse( has_action( 'admin_enqueue_scripts', array( $renderer, 'load_components' ) ) );
 		$this->assertNotFalse( has_action( 'admin_init', array( $renderer, 'init_bulk_actions' ) ) );
+		$container->reset_replacement( CustomOrdersTableController::class );
+	}
+
+	/**
+	 * Test hooks when HPOS isn't enabled.
+	 */
+	public function test_hooks_legacy() {
+		/**
+		 * @var TestingContainer $container
+		 */
+		$container = wc_get_container();
+		$cot_mock  = $this->createMock( CustomOrdersTableController::class );
+		$cot_mock->method( 'custom_orders_table_usage_is_enabled' )->willReturn( false );
+		$container->replace( CustomOrdersTableController::class, $cot_mock );
+
+		$renderer = new FulfillmentsRenderer();
+
+		$this->assertNotFalse( has_filter( 'manage_edit-shop_order_columns', array( $renderer, 'add_fulfillment_columns' ) ) );
+		$this->assertNotFalse( has_action( 'manage_shop_order_posts_custom_column', array( $renderer, 'render_fulfillment_column_row_data_legacy' ) ) );
+		$this->assertNotFalse( has_action( 'admin_footer', array( $renderer, 'render_fulfillment_drawer_slot' ) ) );
+		$this->assertNotFalse( has_action( 'admin_enqueue_scripts', array( $renderer, 'load_components' ) ) );
+		$this->assertNotFalse( has_action( 'admin_init', array( $renderer, 'init_bulk_actions' ) ) );
+		$container->reset_replacement( CustomOrdersTableController::class );
 	}
 
 	/**
 	 * Test that the admin_init hooks are registered.
 	 */
 	public function test_admin_init_hooks() {
+		/**
+		 * @var TestingContainer $container
+		 */
+		$container = wc_get_container();
+		$cot_mock  = $this->createMock( CustomOrdersTableController::class );
+		$cot_mock->method( 'custom_orders_table_usage_is_enabled' )->willReturn( true );
+		$container->replace( CustomOrdersTableController::class, $cot_mock );
+
 		$renderer = new FulfillmentsRenderer();
 		$renderer->init_bulk_actions();
 		$this->assertNotFalse( has_filter( 'bulk_actions-woocommerce_page_wc-orders', array( $renderer, 'define_fulfillment_bulk_actions' ) ) );
 		$this->assertNotFalse( has_filter( 'handle_bulk_actions-woocommerce_page_wc-orders', array( $renderer, 'handle_fulfillment_bulk_actions' ) ) );
+		$container->reset_replacement( CustomOrdersTableController::class );
+	}
+
+	/**
+	 * Test that the admin_init hooks are registered when HPOS isn't enabled.
+	 */
+	public function test_admin_init_hooks_legacy() {
+		/**
+		 * @var TestingContainer $container
+		 */
+		$container = wc_get_container();
+		$cot_mock  = $this->createMock( CustomOrdersTableController::class );
+		$cot_mock->method( 'custom_orders_table_usage_is_enabled' )->willReturn( false );
+		$container->replace( CustomOrdersTableController::class, $cot_mock );
+
+		$renderer = new FulfillmentsRenderer();
+		$renderer->init_bulk_actions();
+		$this->assertNotFalse( has_filter( 'bulk_actions-edit-shop_order', array( $renderer, 'define_fulfillment_bulk_actions' ) ) );
+		$this->assertNotFalse( has_filter( 'handle_bulk_actions-edit-shop_order', array( $renderer, 'handle_fulfillment_bulk_actions' ) ) );
+		$container->reset_replacement( CustomOrdersTableController::class );
 	}
 
 	/**
