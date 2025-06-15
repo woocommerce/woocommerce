@@ -107,6 +107,7 @@ class PaymentsProviders {
 		ExtensionSuggestions::AFTERPAY          => AfterpayClearpay::class,
 		ExtensionSuggestions::CLEARPAY          => AfterpayClearpay::class,
 		ExtensionSuggestions::ANTOM             => Antom::class,
+		ExtensionSuggestions::RAZORPAY          => Razorpay::class,
 	);
 
 	/**
