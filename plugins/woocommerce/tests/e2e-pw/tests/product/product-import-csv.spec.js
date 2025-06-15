@@ -10,7 +10,7 @@ import { test, expect, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { WC_API_PATH } from '../../utils/api-client';
 
-const filePath = path.resolve( 'tests/e2e-pw/test-data/sample_products.csv' );
+const filePath = path.resolve('tests/e2e-pw/test-data/sample_products_local.csv');
 const filePathOverride = path.resolve(
 	'tests/e2e-pw/test-data/sample_products_override.csv'
 );
