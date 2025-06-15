@@ -43,6 +43,7 @@ type Props = {
 	controlClassName?: string;
 	/**
 	 * Whether to ignore diacritics when matching search queries.
+	 * If true, both the user’s query and all option keywords are normalised to their base characters.
 	 */
 	ignoreDiacritics?: boolean;
 	/**
@@ -426,7 +427,7 @@ export class SelectControl extends Component< Props, State > {
 			? baseQuery.normalize( 'NFD' ).replace( /[\u0300-\u036f]/g, '' )
 			: baseQuery;
 
-		const expression = getSearchExpression!( escapeRegExp( normalizedQuery ) )
+		const expression = getSearchExpression!( escapeRegExp( normalizedQuery ) );
 		const search = expression ? new RegExp( expression, 'i' ) : /^$/;
 
 		for ( let i = 0; i < options.length; i++ ) {
