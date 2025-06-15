@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Fulfillments;
 
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 
 /**
@@ -28,10 +29,17 @@ class FulfillmentsRenderer {
 	 * CLass constructor.
 	 */
 	public function __construct() {
-		// Hook into column definitions and add the new fulfillment columns.
-		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'add_fulfillment_columns' ) );
-		// Hook into the column rendering and render the new fulfillment columns.
-		add_action( 'manage_woocommerce_page_wc-orders_custom_column', array( $this, 'render_fulfillment_column_row_data' ), 10, 2 );
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			// Hook into column definitions and add the new fulfillment columns.
+			add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'add_fulfillment_columns' ) );
+			// Hook into the column rendering and render the new fulfillment columns.
+			add_action( 'manage_woocommerce_page_wc-orders_custom_column', array( $this, 'render_fulfillment_column_row_data' ), 10, 2 );
+		} else {
+			// For legacy orders table, hook into column definitions and add the new fulfillment columns.
+			add_filter( 'manage_edit-shop_order_columns', array( $this, 'add_fulfillment_columns' ) );
+			// Hook into the column rendering and render the new fulfillment columns.
+			add_action( 'manage_shop_order_posts_custom_column', array( $this, 'render_fulfillment_column_row_data_legacy' ), 25, 1 );
+		}
 		// Hook into the admin footer to add the fulfillment drawer slot, which the React component will mount on.
 		add_action( 'admin_footer', array( $this, 'render_fulfillment_drawer_slot' ) );
 		// Hook into the admin enqueue scripts to load the fulfillment drawer component.
@@ -44,10 +52,15 @@ class FulfillmentsRenderer {
 	 * Initialize the renderer.
 	 */
 	public function init_bulk_actions() {
-		// Add bulk actions for fulfillments.
-		add_filter( 'bulk_actions-woocommerce_page_wc-orders', array( $this, 'define_fulfillment_bulk_actions' ) );
-		// Add bulk action handler for fulfillments.
-		add_filter( 'handle_bulk_actions-woocommerce_page_wc-orders', array( $this, 'handle_fulfillment_bulk_actions' ), 10, 3 );
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			// For custom orders table, we need to add the bulk actions to the custom orders table.
+			add_filter( 'bulk_actions-woocommerce_page_wc-orders', array( $this, 'define_fulfillment_bulk_actions' ) );
+			add_filter( 'handle_bulk_actions-woocommerce_page_wc-orders', array( $this, 'handle_fulfillment_bulk_actions' ), 10, 3 );
+		} else {
+			// For legacy orders table, we need to add the bulk actions to the legacy orders table.
+			add_filter( 'bulk_actions-edit-shop_order', array( $this, 'define_fulfillment_bulk_actions' ) );
+			add_filter( 'handle_bulk_actions-edit-shop_order', array( $this, 'handle_fulfillment_bulk_actions' ), 10, 3 );
+		}
 	}
 
 	/**
@@ -70,6 +83,18 @@ class FulfillmentsRenderer {
 		return $new_columns;
 	}
 
+	/**
+	 * Render the fulfillment column row data for legacy support.
+	 *
+	 * @deprecated 4.0.0 Use render_fulfillment_column_row_data instead.
+	 *
+	 * @param string $column_name The name of the column.
+	 */
+	public function render_fulfillment_column_row_data_legacy( string $column_name ) {
+		global $the_order;
+		// This method is kept for legacy support, but the main rendering logic is now in render_fulfillment_column_row_data.
+		return $this->render_fulfillment_column_row_data( $column_name, $the_order );
+	}
 
 	/**
 	 * Render the fulfillment status column.
@@ -332,6 +357,7 @@ class FulfillmentsRenderer {
 		if ( ! $current_screen || ! $current_screen->id ) {
 			return false;
 		}
-		return 'woocommerce_page_wc-orders' === $current_screen->id;
+		return 'woocommerce_page_wc-orders' === $current_screen->id // HPOS support.
+			|| 'edit-shop_order' === $current_screen->id; // Legacy support.
 	}
 }
