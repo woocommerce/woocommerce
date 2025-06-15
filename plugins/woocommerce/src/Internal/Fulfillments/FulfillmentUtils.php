@@ -65,7 +65,11 @@ class FulfillmentUtils {
 		foreach ( $fulfillments as $fulfillment ) {
 			$fulfillment_items = $fulfillment->get_items();
 			foreach ( $fulfillment_items as $item ) {
-				$items[ $item['item_id'] ] = $item['qty'];
+				if ( ! isset( $items[ $item['item_id'] ] ) ) {
+					$items[ $item['item_id'] ] = 0; // Initialize if not set.
+				}
+				// Sum the quantities for each item.
+				$items[ $item['item_id'] ] += $item['qty'];
 			}
 		}
 		return $items;
