@@ -71,4 +71,30 @@ class Stripe extends PaymentGateway {
 
 		return parent::is_account_connected( $payment_gateway );
 	}
+
+	/**
+	 * Try to determine if the payment gateway is in test mode onboarding (aka sandbox or test-drive).
+	 *
+	 * This is a best-effort attempt, as there is no standard way to determine this.
+	 * Trust the true value, but don't consider a false value as definitive.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
+	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
+	 */
+	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
+		if ( class_exists( '\WC_Stripe' ) && is_callable( '\WC_Stripe::get_instance' ) ) {
+			$stripe = \WC_Stripe::get_instance();
+			if ( isset( $stripe->connect ) &&
+				 class_exists( '\WC_Stripe_Connect' ) &&
+				 $stripe->connect instanceof \WC_Stripe_Connect &&
+				 is_callable( array( $stripe->connect, 'is_connected' ) ) ) {
+
+				return $stripe->connect->is_connected( 'test' )
+					&& ! $stripe->connect->is_connected( 'live' );
+			}
+		}
+
+		return parent::is_in_test_mode_onboarding( $payment_gateway );
+	}
 }
