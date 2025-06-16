@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { ShippingMethod } from '../types';
+import { ShippingMethod } from '../../types';
 
 export const shippingMethodsStub: ShippingMethod[] = [
 	{

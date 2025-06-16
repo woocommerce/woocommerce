@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { PaymentGateway } from '../types';
+import { PaymentGateway } from '../../types';
 
 export const paymentGatewaysStub: PaymentGateway[] = [
 	{
