@@ -33,7 +33,7 @@ printf( esc_html__( 'New order: #%s,', 'woocommerce' ), '<!--[woocommerce/order-
 <p>
 <?php
 /* translators: %s: Customer full name */
-printf( esc_html__( 'Woo! You’ve received a new order from %s', 'woocommerce' ), '<!--[woocommerce/customer-full-name]-->' );
+printf( esc_html__( 'You’ve received a new order from %s', 'woocommerce' ), '<!--[woocommerce/customer-full-name]-->' );
 ?>
 </p>
 <!-- /wp:paragraph -->
