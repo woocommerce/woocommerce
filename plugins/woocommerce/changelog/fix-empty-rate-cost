@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent shipping rate defaulting to empty string if it has no cost, go to '0' instead.
