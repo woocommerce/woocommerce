@@ -11,8 +11,10 @@ import { Edit, Save } from './edit';
 import metadata from './block.json';
 import './style.scss';
 
+// Register the block
 registerBlockType( 'woocommerce/checkout-order-note-block', {
-	...metadata,
+	apiVersion: metadata.apiVersion,
+	title: metadata.title,
 	icon: {
 		src: (
 			<Icon

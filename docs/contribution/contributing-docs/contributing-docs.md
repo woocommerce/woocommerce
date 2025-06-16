@@ -24,7 +24,7 @@ This guide walks you through the structure, tooling, and process for contributin
 2. For each modification you'd like to make, create a new branch off `trunk` in your fork that starts with `docs/`. For example, if you're adding a doc about improving extension performance, you could call your branch `docs/improve-extension-performance`.
 3. Create or edit markdown files inside the appropriate folder under `docs/`.
 4. If needed, update the folder's `_category_.json` (for sidebar label/position).
-5. Run a build to verify changes and detect broken links (link checking only happens on build):
+5. Run a build to verify changes, confirm that the sitemaps and llms-txt files are updated, and detect broken links (link checking only happens on build):
 
     ```bash
     npm run build
