@@ -1670,7 +1670,7 @@ Display reviews for your products.
 -	**Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize), ~~html~~
 -	**Attributes:** 
 
-## Single Product - woocommerce/single-product
+## Product - woocommerce/single-product
 
 Display a single product.
 
