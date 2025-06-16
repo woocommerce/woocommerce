@@ -27,14 +27,16 @@ This guide walks you through the structure, tooling, and process for contributin
 
 ### Validating changes
 
+Make sure you are in the `/docs` directory in your terminal.
+
 Run the `markdownlint` command to confirm that all markdown files will pass validation.
 
 ```bash
 # Install markdownlint-cli globally if needed.
 npm install -g markdownlint-cli
 
-# Run markdownlint-cli on the docs directory.
-markdownlint docs --ignore=docs/_docu-tools/
+# Run markdownlint-cli from inside the docs directory.
+markdownlint **/*.md --ignore=_docu-tools/ --config=../.markdownlint.json
 ```
 
 Run a build to verify changes, confirm that the sitemaps and llms-txt files are updated, and detect broken links (link checking only happens on build):
