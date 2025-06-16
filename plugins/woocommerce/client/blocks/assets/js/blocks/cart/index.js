@@ -14,11 +14,13 @@ import { Edit, Save } from './edit';
 import './style.scss';
 import { blockName, blockAttributes } from './attributes';
 import './inner-blocks';
+import metadata from './block.json';
 
 /**
  * Register and run the Cart block.
  */
 export const settings = {
+	...metadata,
 	title: __( 'Cart', 'woocommerce' ),
 	apiVersion: 3,
 	icon: {
@@ -32,17 +34,6 @@ export const settings = {
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
 	description: __( 'Shopping cart.', 'woocommerce' ),
-	supports: {
-		align: [ 'wide' ],
-		html: false,
-		multiple: false,
-	},
-	example: {
-		attributes: {
-			isPreview: true,
-		},
-		viewportWidth: 800,
-	},
 	attributes: blockAttributes,
 	edit: Edit,
 	save: Save,
