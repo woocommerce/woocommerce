@@ -276,7 +276,7 @@ class WC_Admin_Report {
 
 					if ( ! empty( $value['meta_value'] ) ) {
 						$formats     = implode( ', ', array_fill( 0, count( $value['meta_value'] ), '%s' ) );
-						$where_value = $value['operator'] . ' (' . $wpdb->prepare( $formats, $value['meta_value'] ) . ')';
+						$where_value = $value['operator'] . ' (' . $wpdb->prepare( $formats, $value['meta_value'] ) . ')'; // @phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 					}
 				} else {
 					$where_value = $value['operator'] . ' ' . $wpdb->prepare( '%s', $value['meta_value'] );
@@ -322,7 +322,7 @@ class WC_Admin_Report {
 						$value['value'] = (array) $value['value'];
 					}
 					if ( ! empty( $value['value'] ) ) {
-						$formats = implode( ', ', array_fill( 0, count( $value['value'] ), '%s' ) );
+						$formats     = implode( ', ', array_fill( 0, count( $value['value'] ), '%s' ) );
 						$where_value = $value['operator'] . ' (' . $wpdb->prepare( $formats, $value['value'] ) . ')'; // @phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 					}
 				} else {
