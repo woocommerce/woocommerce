@@ -534,11 +534,7 @@ final class BlockTypesController {
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItem';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItemSelector';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItemLabel';
-		}
 
-		// Update plugins/woocommerce/client/blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
-		// when modifying this list.
-		if ( Features::is_enabled( 'experimental-blocks' ) ) {
 			$block_types[] = 'BlockifiedProductDetails';
 			$block_types[] = 'ProductDescription';
 			$block_types[] = 'ProductSpecifications';
