@@ -24,7 +24,7 @@ const MarkdownCopy: React.FC = () => {
       const contentClone = mainContent.cloneNode(true) as HTMLElement;
 
       // Remove unwanted elements
-      const elementsToRemove = contentClone.querySelectorAll('.theme-code-block, .theme-edit-this-page, .theme-last-updated, .theme-prev-next-button');
+      const elementsToRemove = contentClone.querySelectorAll('.theme-code-block, .theme-edit-this-page, .theme-last-updated, .theme-prev-next-button, .markdown-copy-button, .hash-link');
       elementsToRemove.forEach(el => el.remove());
 
       // Configure turndown service

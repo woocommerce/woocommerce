@@ -79,24 +79,24 @@ class ProductPrice extends AbstractBlock {
 			$is_descendant_of_grouped_product_selector = isset( $block->context['isDescendantOfGroupedProductSelector'] );
 			$is_interactive                            = ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector && $product->is_type( 'variable' );
 
-			$wrapper_attributes = array(
-				'class' => 'wp-block-woocommerce-product-price',
-			);
+			$wrapper_attributes = array();
+			$watch_attribute    = '';
 
 			if ( $is_interactive ) {
 				wp_enqueue_script_module( 'woocommerce/product-price' );
 				$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-price';
-				$wrapper_attributes['data-wp-watch']       = 'callbacks.updatePrice';
+				$watch_attribute                           = 'data-wp-watch="callbacks.updatePrice"';
 			}
 
 			return sprintf(
-				'<div %1$s><div class="wc-block-components-product-price wc-block-grid__product-price %2$s %3$s" style="%4$s">
-					%5$s
+				'<div %1$s><div class="wc-block-components-product-price wc-block-grid__product-price %2$s %3$s" style="%4$s" %5$s>
+					%6$s
 				</div></div>',
 				get_block_wrapper_attributes( $wrapper_attributes ),
 				esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
 				esc_attr( $styles_and_classes['classes'] ),
 				esc_attr( $styles_and_classes['styles'] ?? '' ),
+				$watch_attribute,
 				$product->get_price_html()
 			);
 		}
