@@ -36,6 +36,8 @@ class FulfillmentsRenderer {
 		add_action( 'admin_footer', array( $this, 'render_fulfillment_drawer_slot' ) );
 		// Hook into the admin enqueue scripts to load the fulfillment drawer component.
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_components' ) );
+		// Hook into the orders table extra tablenav to render the fulfillment filters.
+		add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'render_fulfillment_filters' ) );
 	}
 
 	/**
@@ -233,6 +235,24 @@ class FulfillmentsRenderer {
 		}
 		WCAdminAssets::register_style( 'fulfillments', 'style', array( 'wp-components' ) );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'fulfillments', true );
+	}
+
+	/**
+	 * Render the fulfillment filters in the orders table.
+	 */
+	public function render_fulfillment_filters() {
+		if ( ! self::should_render_fulfillment_drawer() ) {
+			return;
+		}
+		?>
+		<select id="fulfillment-status-filter" name="fulfillment_status">
+			<option value=""><?php esc_html_e( 'Filter by fulfillment', 'woocommerce' ); ?></option>
+			<option value="fulfilled"><?php esc_html_e( 'Fulfilled', 'woocommerce' ); ?></option>
+			<option value="unfulfilled"><?php esc_html_e( 'Unfulfilled', 'woocommerce' ); ?></option>
+			<option value="partially_fulfilled"><?php esc_html_e( 'Partially Fulfilled', 'woocommerce' ); ?></option>
+			<option value="no_fulfillments"><?php esc_html_e( 'Fulfillment N/A', 'woocommerce' ); ?></option>
+		</select>
+		<?php
 	}
 
 	/**
