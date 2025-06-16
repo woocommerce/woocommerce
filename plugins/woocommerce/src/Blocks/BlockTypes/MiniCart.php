@@ -453,19 +453,21 @@ class MiniCart extends AbstractBlock {
 		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 		$this->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
-		$classes_styles           = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_weight', 'font_family', 'extra_classes' ) );
-		$icon_color               = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
-		$product_count_color      = isset( $attributes['productCountColor']['color'] ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
-		$styles                   = $product_count_color ? 'background:' . $product_count_color : '';
-		$icon                     = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
-		$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
-		$wrapper_classes          = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
-		$wrapper_styles           = $classes_styles['styles'];
-		$template_part_contents   = $this->get_template_part_contents( 'experimental-iapi-mini-cart' );
-
-		$cart             = $this->get_cart_instance();
-		$cart_item_count  = $cart ? $cart->get_cart_contents_count() : 0;
-		$badge_is_visible = ( 'always' === $product_count_visibility ) || ( 'never' !== $product_count_visibility && $cart_item_count > 0 );
+		$classes_styles                   = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_weight', 'font_family', 'extra_classes' ) );
+		$icon_color                       = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
+		$product_count_color              = isset( $attributes['productCountColor']['color'] ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
+		$styles                           = $product_count_color ? 'background:' . $product_count_color : '';
+		$icon                             = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
+		$product_count_visibility         = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
+		$wrapper_classes                  = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
+		$wrapper_styles                   = $classes_styles['styles'];
+		$template_part_contents           = $this->get_template_part_contents( 'experimental-iapi-mini-cart' );
+		$cart                             = $this->get_cart_instance();
+		$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
+		$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === 'incl';
+		$cart                             = $this->get_cart_instance();
+		$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
+		$badge_is_visible                 = ( 'always' === $product_count_visibility ) || ( 'never' !== $product_count_visibility && $cart_item_count > 0 );
 
 		wp_interactivity_state(
 			$this->get_full_block_name(),
@@ -476,8 +478,9 @@ class MiniCart extends AbstractBlock {
 		);
 
 		$context = array(
-			'isOpen'                 => false,
-			'productCountVisibility' => $product_count_visibility,
+			'isOpen'                       => false,
+			'productCountVisibility'       => $product_count_visibility,
+			'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
 		);
 
 		ob_start();
@@ -501,7 +504,7 @@ class MiniCart extends AbstractBlock {
 				</span>
 			</button>
 			<div data-wp-on--click="callbacks.overlayCloseDrawer" data-wp-bind--class="state.drawerOverlayClass" class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden">
-				<div class="wc-block-mini-cart__drawer wc-block-components-drawer">
+				<div class="wc-block-mini-cart__drawer wc-block-components-drawer is-mobile">
 					<div class="wc-block-components-drawer__content">
 						<div class="wc-block-mini-cart__template-part">
 							<?php
