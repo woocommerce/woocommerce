@@ -90,3 +90,18 @@
 		}
 	}
 }
+
+@media screen and (max-width: 782px) {
+	.woocommerce-fulfillment-drawer {
+		top: 46px;
+		height: calc(100vh - 46px);
+		width: 100%;
+		min-width: 100%;
+		max-width: 100%;
+		.drawer-panel {
+			width: 100%;
+			min-width: 100%;
+			max-width: 100%;
+		}
+	}
+}

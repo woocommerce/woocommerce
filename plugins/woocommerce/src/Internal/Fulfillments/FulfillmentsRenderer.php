@@ -36,6 +36,8 @@ class FulfillmentsRenderer {
 		add_action( 'admin_footer', array( $this, 'render_fulfillment_drawer_slot' ) );
 		// Hook into the admin enqueue scripts to load the fulfillment drawer component.
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_components' ) );
+		// Hook into the order details page to render the fulfillment badges.
+		add_action( 'woocommerce_admin_order_data_after_payment_info', array( $this, 'render_order_details_badges' ) );
 	}
 
 	/**
@@ -99,6 +101,17 @@ class FulfillmentsRenderer {
 	private function render_fulfillment_status_column_row_data( WC_Order $order, array $fulfillments ) {
 		$order_fulfillment_status = $this->get_fulfillment_status( $fulfillments );
 		echo "<div class='fulfillment-status-wrapper'>";
+		$this->render_fulfillment_status_badge( $order, $order_fulfillment_status );
+		echo '</div>';
+	}
+
+	/**
+	 * Render the fulfillment status badge.
+	 *
+	 * @param WC_Order $order The order object.
+	 * @param string   $order_fulfillment_status The fulfillment status of the order.
+	 */
+	private function render_fulfillment_status_badge( $order, string $order_fulfillment_status ) {
 		switch ( $order_fulfillment_status ) {
 			case 'no_fulfillments':
 			case 'unfulfilled':
@@ -118,7 +131,6 @@ class FulfillmentsRenderer {
 				<path d='M11.8333 2.83301L9.33329 0.333008L2.24996 7.41634L1.41663 10.7497L4.74996 9.91634L11.8333 2.83301ZM5.99996 12.4163H0.166626V13.6663H5.99996V12.4163Z' fill='#3858E9'/>
 			</svg>
 		</a>";
-		echo '</div>';
 	}
 
 	/**
@@ -222,6 +234,22 @@ class FulfillmentsRenderer {
 		?>
 		<div id="wc_order_fulfillments_panel_container"></div>
 		<?php
+	}
+
+	/**
+	 * Render the fulfillment badges in the order details page.
+	 *
+	 * @param WC_Order $order The order object.
+	 */
+	public function render_order_details_badges( WC_Order $order ) {
+		echo '<div class="wc-order-fulfillment-badges">';
+
+		// Render order status badge.
+		$order_status = $order->get_status();
+		echo '<mark class="order-status status-' . esc_attr( $order_status ) . '"><span>' . esc_html( wc_get_order_status_name( $order_status ) ) . '</span></mark>';
+		// Render fulfillment status badge.
+		$this->render_fulfillment_status_badge( $order, $this->get_fulfillment_status( $this->fulfillments_cache[ $order->get_id() ] ?? array() ) );
+		echo '</div>';
 	}
 
 	/**
