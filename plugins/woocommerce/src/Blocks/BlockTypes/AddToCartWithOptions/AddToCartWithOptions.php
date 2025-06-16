@@ -261,7 +261,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			* This hook allows to disable the compatibility layer for the blockified.
 			*
 			* @since 7.6.0
-			* @param boolean.
+			* @param boolean $is_disabled_compatibility_layer Whether the compatibility layer should be disabled.
 			*/
 			$is_disabled_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
 
