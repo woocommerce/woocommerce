@@ -240,9 +240,24 @@ function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_
 	} else {
 		$cap              = $contexts[ $context ];
 		$post_type_object = get_post_type_object( $post_type );
-		$permission       = current_user_can( $post_type_object->cap->$cap, $object_id );
+		
+		if ( $post_type_object && isset( $post_type_object->cap->$cap ) ) {
+			$permission = current_user_can( $post_type_object->cap->$cap, $object_id );
+		} else {
+			$permission = false;
+		}
 	}
 
+	/**
+	 * Filter REST API permissions check for posts.
+	 *
+	 * @since 2.6.0
+	 *
+	 * @param bool   $permission Whether the user has permission.
+	 * @param string $context    Request context.
+	 * @param int    $object_id  Object ID.
+	 * @param string $post_type  Post type.
+	 */
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, $post_type );
 }
 
