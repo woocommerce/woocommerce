@@ -132,7 +132,6 @@
 		"@types/jest": "29.5.x",
 		"@types/jquery": "3.5.14",
 		"@types/lodash": "4.14.182",
-		"@types/node": "20.x.x",
 		"@types/prop-types": "^15.7.11",
 		"@types/react": "18.3.x",
 		"@types/react-dom": "18.3.x",
