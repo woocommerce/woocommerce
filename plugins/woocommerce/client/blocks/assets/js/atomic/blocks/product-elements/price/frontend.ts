@@ -50,12 +50,20 @@ const productPriceStore = store(
 					return;
 				}
 
+				const priceWrapper = element.ref.querySelector(
+					'.wc-block-components-product-price'
+				);
+
+				if ( ! priceWrapper ) {
+					return;
+				}
+
 				const newPriceHTML =
 					productDataState?.productData?.price_html ||
 					productDataState?.originalProductData?.price_html;
 
 				if ( newPriceHTML ) {
-					element.ref.innerHTML = sanitize( newPriceHTML, {
+					priceWrapper.innerHTML = sanitize( newPriceHTML, {
 						ALLOWED_TAGS,
 						ALLOWED_ATTR,
 					} );

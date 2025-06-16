@@ -79,9 +79,7 @@ class ProductPrice extends AbstractBlock {
 			$is_descendant_of_grouped_product_selector = isset( $block->context['isDescendantOfGroupedProductSelector'] );
 			$is_interactive                            = ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector && $product->is_type( 'variable' );
 
-			$wrapper_attributes = array(
-				'class' => 'wp-block-woocommerce-product-price',
-			);
+			$wrapper_attributes = array();
 
 			if ( $is_interactive ) {
 				wp_enqueue_script_module( 'woocommerce/product-price' );
