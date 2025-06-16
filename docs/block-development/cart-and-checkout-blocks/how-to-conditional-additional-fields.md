@@ -6,8 +6,6 @@ sidebar_label: How to add additional conditional fields in checkout
 
 This feature requires a minimum version of WooCommerce 9.9.0
 
-If you've already learned how to [add additional fields to the WooCommerce Checkout Block](/docs/block-development/cart-and-checkout-blocks/how-to-add-additional-fields-guide), let's take it a step further and explore how to make those fields appear and disappear based on customer choices, cart contents, or other dynamic conditions.
-
 Conditional visibility allows you to create smart, adaptive checkout forms that only show relevant fields when needed, reducing form clutter and improving the customer experience.
 
 ## Why Use Conditional Visibility?
@@ -352,14 +350,8 @@ You can create conditions based on various checkout data:
 2. Customer data: ID, billing/shipping addresses, email
 3. Other additional fields: Reference values from other custom fields and more!
 
-For a complete reference of available data structure, check out the [official conditional visibility documentation](https://developer.woocommerce.com/docs/block-development/cart-and-checkout-blocks/additional-checkout-fields#conditional-visibility-and-validation-via-json-schema).
-
 ## Next Steps
 
 Conditional visibility transforms static checkout forms into dynamic, intelligent interfaces that adapt to your customers’ needs. Combined with the basic additional fields from our previous post, you can create sophisticated checkout experiences that collect exactly the right information at exactly the right time.
 
 Start experimenting with simple conditions and gradually build more complex logic as you become comfortable with the JSON Schema syntax. Your customers will appreciate the cleaner, more relevant checkout experience!
-
-For more information, refer to the [Additional Checkout Fields](/docs/block-development/cart-and-checkout-blocks/additional-checkout-fields/) reference document.
-
----

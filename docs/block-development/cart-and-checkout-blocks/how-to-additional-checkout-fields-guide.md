@@ -11,8 +11,6 @@ The WooCommerce Checkout Block provides a powerful API for developers to add add
 
 In this guide, we’ll walk through the process of adding your own additional fields to your checkout form and show you practical examples you can implement right away.
 
-For a deeper dive on the fields and helper methods referenced in this guide, please head to the [Additional Checkout Fields](/docs/block-development/cart-and-checkout-blocks/additional-checkout-fields) documentation.
-
 ## Getting Started
 
 To add additional checkout fields, you’ll use the `woocommerce_register_additional_checkout_field()` function. This should be called after the `woocommerce_init` action to ensure WooCommerce is fully loaded.
