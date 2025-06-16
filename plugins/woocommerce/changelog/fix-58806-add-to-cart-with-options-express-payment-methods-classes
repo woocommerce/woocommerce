@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Add missing classes used by some express payment methods to the Add to Cart + Options block
+
+
