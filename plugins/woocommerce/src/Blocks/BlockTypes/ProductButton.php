@@ -143,8 +143,6 @@ class ProductButton extends AbstractBlock {
 			)
 		);
 
-		$is_descendant_of_add_to_cart_form = isset( $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] ) ? $block->context['woocommerce/isDescendantOfAddToCartWithOptions'] : false;
-
 		$default_quantity = 1;
 
 		if ( ! $is_descendant_of_add_to_cart_form ) {
