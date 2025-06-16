@@ -77,9 +77,7 @@ export const renderBlock = <
 		if ( isCheckoutBlock ) {
 			return (
 				<BlockErrorBoundary { ...errorBoundaryProps }>
-					{ Block && (
-						<Block { ...props } attributes={ attributes } />
-					) }
+					<Block { ...props } attributes={ attributes } />
 				</BlockErrorBoundary>
 			);
 		}
