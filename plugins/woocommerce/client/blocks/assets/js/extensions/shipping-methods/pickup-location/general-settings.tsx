@@ -45,7 +45,7 @@ const StyledNotice = styled( Notice )`
 const GeneralSettings = () => {
 	const { settings, setSettingField, readOnlySettings } =
 		useSettingsContext();
-	const [ showCosts, setShowCosts ] = useState( !! settings.cost );
+	const [ showCosts, setShowCosts ] = useState( settings.cost !== '0' );
 
 	const shippingCostRequiresAddress = getSetting< boolean >(
 		'shippingCostRequiresAddress',
