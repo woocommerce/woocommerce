@@ -418,7 +418,8 @@ export class SelectControl extends Component< Props, State > {
 	}
 
 	getOptionsByQuery( options: Option[], query: string | null ) {
-		const { getSearchExpression, maxResults, onFilter, ignoreDiacritics } = this.props;
+		const { getSearchExpression, maxResults, onFilter, ignoreDiacritics } =
+			this.props;
 		const filtered = [];
 
 		// Create a regular expression to filter the options.
@@ -427,7 +428,9 @@ export class SelectControl extends Component< Props, State > {
 			? baseQuery.normalize( 'NFD' ).replace( /[\u0300-\u036f]/g, '' )
 			: baseQuery;
 
-		const expression = getSearchExpression!( escapeRegExp( normalizedQuery ) );
+		const expression = getSearchExpression!(
+			escapeRegExp( normalizedQuery )
+		);
 		const search = expression ? new RegExp( expression, 'i' ) : /^$/;
 
 		for ( let i = 0; i < options.length; i++ ) {
@@ -439,11 +442,13 @@ export class SelectControl extends Component< Props, State > {
 				keywords = [ ...keywords, option.label ];
 			}
 
-			const isMatch = keywords.some( ( keyword ) => {			
+			const isMatch = keywords.some( ( keyword ) => {
 				const normalizedKeyword = ignoreDiacritics
-					? keyword.normalize( 'NFD' ).replace( /[\u0300-\u036f]/g, '' )
+					? keyword
+							.normalize( 'NFD' )
+							.replace( /[\u0300-\u036f]/g, '' )
 					: keyword;
-			
+
 				return search.test( normalizedKeyword );
 			} );
 			if ( ! isMatch ) {
