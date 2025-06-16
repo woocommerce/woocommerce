@@ -73,6 +73,11 @@ const Edit = ( {
 
 	const { product, isLoadingProduct } = useSelect(
 		( select ) => {
+			if ( ! postId )
+				return {
+					product: null,
+					isLoadingProduct: false,
+				};
 			const { getProduct } = select( productsStore );
 			return {
 				product: getProduct( Number( postId ) ),
@@ -130,7 +135,7 @@ const Edit = ( {
 		};
 
 		if ( isSpecificProductContext ) {
-			productData.weight.value = product.weight
+			productData.weight.value = product?.weight
 				? `${ product.weight } ${ weightUnit }`
 				: '';
 		} else {

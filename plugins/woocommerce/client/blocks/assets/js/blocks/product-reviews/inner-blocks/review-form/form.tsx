@@ -74,6 +74,9 @@ const CommentsForm = ( {
 	const { updateProduct } = useDispatch( productsStore );
 	const product = useSelect(
 		( select ) => {
+			if ( ! postId ) {
+				return null;
+			}
 			return select( productsStore ).getProduct( Number( postId ) );
 		},
 		[ postId ]
