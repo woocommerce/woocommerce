@@ -30,7 +30,7 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		).toHaveCount( 9 );
 	} );
 
-	// Check this regression: https://github.com/woocommerce/woocommerce/issues/49000.
+	// Check this regression: hhttps://github.com/woocommerce/woocommerce/pull/58741.
 	// The block has a dependency on the Mini Cart block/Checkout/Cart blocks.
 	// This test checks that the block can be inserted and it is rendered on the frontend without the mini cart block.
 	test( 'block can be inserted and it is rendered on the frontend without the mini cart block', async ( {
