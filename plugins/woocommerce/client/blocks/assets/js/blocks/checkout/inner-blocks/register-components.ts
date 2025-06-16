@@ -11,8 +11,6 @@ import { registerCheckoutBlock } from '@woocommerce/blocks-checkout';
  * Internal dependencies
  */
 import metadata from './component-metadata';
-
-// Direct imports - no lazy loading for immediate rendering
 import CheckoutFieldsBlock from './checkout-fields-block/frontend';
 import CheckoutExpressPaymentBlock from './checkout-express-payment-block/frontend';
 import CheckoutContactInformationBlock from './checkout-contact-information-block/frontend';
