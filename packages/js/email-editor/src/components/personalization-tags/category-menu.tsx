@@ -30,6 +30,8 @@ const CategoryMenu = ( {
 			<div
 				className="woocommerce-personalization-tags-modal-menu-separator"
 				aria-hidden="true"
+				role="presentation"
+				data-testid="woocommerce-personalization-tags-modal-menu-separator"
 			></div>
 			{ Object.keys( groupedTags ).map( ( category, index, array ) => (
 				<React.Fragment key={ category }>
@@ -43,6 +45,8 @@ const CategoryMenu = ( {
 						<div
 							className="woocommerce-personalization-tags-modal-menu-separator"
 							aria-hidden="true"
+							role="presentation"
+							data-testid="woocommerce-personalization-tags-modal-menu-separator"
 						></div>
 					) }
 				</React.Fragment>
