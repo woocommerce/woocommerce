@@ -14,13 +14,13 @@ import { Edit, Save } from './edit';
 import './style.scss';
 import { blockName, blockAttributes } from './attributes';
 import './inner-blocks';
-import metadata from './block.json';
+import { default as staticSettings } from './settings';
 
 /**
  * Register and run the Cart block.
  */
 export const settings = {
-	...metadata,
+	...staticSettings,
 	title: __( 'Cart', 'woocommerce' ),
 	apiVersion: 3,
 	icon: {

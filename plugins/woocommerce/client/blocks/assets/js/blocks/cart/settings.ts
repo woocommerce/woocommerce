@@ -1,0 +1,13 @@
+export default {
+	supports: {
+		align: [ 'wide' ],
+		html: false,
+		multiple: false,
+	},
+	example: {
+		attributes: {
+			isPreview: true,
+		},
+		viewportWidth: 800,
+	},
+};
