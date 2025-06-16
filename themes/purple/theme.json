@@ -345,10 +345,7 @@
 						"color": "var(--wp--preset--color--theme-6)",
 						"style": "solid",
 						"width": "1px"
-					},
-					"color": null,
-					"style": null,
-					"width": null
+					}
 				},
 				"spacing": {
 					"blockGap": "0"
