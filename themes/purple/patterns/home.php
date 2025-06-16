@@ -14,3 +14,5 @@
 <!-- wp:pattern {"slug":"woostarter/woocommerce-best-sellers"} /-->
 
 <!-- wp:pattern {"slug":"woostarter/cta-with-images"} /-->
+
+<!-- wp:pattern {"slug":"woostarter/template-query-loop"} /-->
