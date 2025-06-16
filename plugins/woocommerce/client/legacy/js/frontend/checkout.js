@@ -906,7 +906,7 @@ jQuery( function ( $ ) {
 				this.on_keydown_remove_coupon
 			);
 			$( document.body ).on(
-				'blur change input',
+				'change input',
 				'#coupon_code',
 				this.remove_coupon_error
 			);
@@ -934,6 +934,8 @@ jQuery( function ( $ ) {
 				return;
 			}
 
+			this.remove_coupon_error();
+
 			var msg = $( $.parseHTML( html_element ) ).text().trim();
 
 			if ( msg === '' ) {
@@ -954,18 +956,37 @@ jQuery( function ( $ ) {
 				text: msg,
 			} ).appendTo( $target );
 		},
-		remove_coupon_error: function ( evt ) {
-			$( evt.currentTarget )
+		remove_coupon_error: function () {
+			var $coupon_field = $( '#coupon_code' );
+
+			if ( $coupon_field.length === 0 ) {
+				return;
+			}
+
+			$coupon_field
 				.removeClass( 'has-error' )
 				.removeAttr( 'aria-invalid' )
 				.removeAttr( 'aria-describedby' )
 				.next( '.coupon-error-notice' )
 				.remove();
 		},
+
+		clear_coupon_input: function () {
+			const $coupon_field = $( '#coupon_code' );
+			$coupon_field
+				.val('')
+				.removeClass('has-error')
+				.removeAttr('aria-invalid')
+				.removeAttr('aria-describedby')
+				.next('.coupon-error-notice')
+				.remove();
+		},
 		submit: function ( evt ) {
 			var $form = $( evt.currentTarget );
 			var $coupon_field = $form.find( '#coupon_code' );
 			var self = this;
+
+			self.remove_coupon_error();
 
 			if ( $form.is( '.processing' ) ) {
 				return false;
@@ -1013,6 +1034,7 @@ jQuery( function ( $ ) {
 								);
 								$form.before( response );
 							} );
+							self.clear_coupon_input();
 						} else {
 							self.show_coupon_error(
 								response,
@@ -1079,9 +1101,7 @@ jQuery( function ( $ ) {
 						} );
 
 						// Remove coupon code from coupon field
-						$( 'form.checkout_coupon' )
-							.find( 'input[name="coupon_code"]' )
-							.val( '' );
+						wc_checkout_coupons.clear_coupon_input();
 						$( 'form.checkout_coupon' ).slideUp( 400, function () {
 							$( 'a.showcoupon' ).attr(
 								'aria-expanded',

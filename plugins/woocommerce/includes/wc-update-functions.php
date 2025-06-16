@@ -2973,6 +2973,33 @@ function wc_update_940_remove_help_panel_highlight_shown() {
 }
 
 /**
+ * Set multisite customer visibility option for existing sites.
+ *
+ * If WooCommerce is updated from an earlier version to 10.0.0, and if it is a multisite network,
+ * then set 'woocommerce_network_wide_customers' to 'yes' (but only if it has not already been
+ * set).
+ *
+ * This preserves WooCommerce's historic handling of cross-network user visibility for existing
+ * networks. New sites, or sites that are newly turned into networks at some later point, will
+ * instead use updated and stricter handling.
+ *
+ * @return void
+ */
+function wc_update_1000_multisite_visibility_setting(): void {
+	if ( ! is_multisite() ) {
+		return;
+	}
+
+	$existing_site_option = get_site_option( 'woocommerce_network_wide_customers', '' );
+
+	if ( is_string( $existing_site_option ) && strlen( $existing_site_option ) > 0 ) {
+		return;
+	}
+
+	update_site_option( 'woocommerce_network_wide_customers', 'yes' );
+}
+
+/**
  * Autoloads woocommerce_allow_tracking option.
  */
 function wc_update_950_tracking_option_autoload() {
@@ -3030,4 +3057,15 @@ function wc_update_990_remove_email_notes() {
 		),
 		array( '%s' )
 	);
+}
+
+/**
+ * Remove the transient ptk_patterns.
+ * This was used to store the Patterns Toolkit patterns in the database.
+ * The patterns are now stored in the option ptk_patterns.
+ *
+ * @return void
+ */
+function wc_update_1000_remove_patterns_toolkit_transient() {
+	delete_transient( 'ptk_patterns' );
 }

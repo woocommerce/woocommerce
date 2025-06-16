@@ -307,7 +307,7 @@ class EmailPreview {
 		}
 
 		if ( 'plain' === $this->email->get_email_type() ) {
-			$content  = '<pre style="word-wrap: break-word; white-space: pre-wrap;">';
+			$content  = '<pre style="word-wrap: break-word; white-space: pre-wrap; text-align: ' . ( is_rtl() ? 'right' : 'left' ) . ';">';
 			$content .= $this->email->get_content_plain();
 			$content .= '</pre>';
 		} else {
@@ -530,7 +530,7 @@ class EmailPreview {
 	 * @return string
 	 */
 	public function get_placeholder_image() {
-		return '<img src="' . WC()->plugin_url() . '/assets/images/placeholder.png" width="48" height="48" alt="" />';
+		return '<img src="' . WC()->plugin_url() . '/assets/images/placeholder.webp" width="48" height="48" alt="" />';
 	}
 
 	/**

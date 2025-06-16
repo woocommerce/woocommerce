@@ -118,7 +118,7 @@ final class ProductFilterRating extends AbstractBlock {
 		$selected_rating        = array_filter( explode( ',', $rating_query ) );
 
 		$filter_options = array_map(
-			function ( $rating ) use ( $selected_rating, $attributes ) {
+			function ( $rating ) use ( $selected_rating ) {
 				$value = (string) $rating['rating'];
 
 				$aria_label = sprintf(
@@ -126,20 +126,6 @@ final class ProductFilterRating extends AbstractBlock {
 					__( 'Rated %1$d out of 5', 'woocommerce' ),
 					$value,
 				);
-
-				if ( $attributes['showCounts'] ) {
-					$aria_label = sprintf(
-						/* translators: %1$d is referring to rating value, %2$d is the count. */
-						_n(
-							'Rated %1$d out of 5 (%2$d product)',
-							'Rated %1$d out of 5 (%2$d products)',
-							$rating['count'],
-							'woocommerce'
-						),
-						$value,
-						$rating['count']
-					);
-				}
 
 				return array(
 					'label'     => $this->render_rating_label( (int) $value ),
@@ -156,6 +142,7 @@ final class ProductFilterRating extends AbstractBlock {
 		$filter_context = array(
 			'items'      => $filter_options,
 			'showCounts' => $attributes['showCounts'] ?? false,
+			'groupLabel' => __( 'Rating', 'woocommerce' ),
 		);
 
 		$wrapper_attributes = array(
@@ -197,7 +184,7 @@ final class ProductFilterRating extends AbstractBlock {
 	 * @return string|false
 	 */
 	private function render_rating_label( $rating ) {
-		$width = $rating * 20;
+		$view_box_width = $rating * 24;
 
 		$rating_label = sprintf(
 			/* translators: %1$d is referring to rating value. Example: Rated 4 out of 5. */
@@ -207,11 +194,24 @@ final class ProductFilterRating extends AbstractBlock {
 
 		ob_start();
 		?>
-		<div class="wc-block-components-product-rating">
-			<div class="wc-block-components-product-rating__stars" role="img" aria-label="<?php echo esc_attr( $rating_label ); ?>">
-				<span style="width: <?php echo esc_attr( $width ); ?>%" aria-hidden="true"></span>
-			</div>
-		</div>
+			<svg
+				width="<?php echo esc_attr( $view_box_width ); ?>"
+				height="24"
+				viewBox="0 0 <?php echo esc_attr( $view_box_width ); ?> 24"
+				fill="currentColor"
+				aria-label="<?php echo esc_attr( $rating_label ); ?>"
+			>
+				<?php
+				for ( $i = 0; $i < $rating; $i++ ) {
+					?>
+					<path
+						d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+						transform="translate(<?php echo esc_attr( $i * 24 ); ?>, 0)"
+					/>
+					<?php
+				}
+				?>
+			</svg>
 		<?php
 		return ob_get_clean();
 	}

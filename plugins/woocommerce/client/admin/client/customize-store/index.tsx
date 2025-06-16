@@ -49,6 +49,7 @@ import { navigateOrParent, attachParentListeners, isIframe } from './utils';
 import useBodyClass from './hooks/use-body-class';
 import { isWooExpress } from '~/utils/is-woo-express';
 import { useXStateInspect } from '~/xstate';
+import { isFeatureEnabled } from '~/utils/features';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
@@ -119,10 +120,13 @@ const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
 		window.location.href =
 			_context?.intro?.themeData?._links?.browse_all?.href ??
 			getAdminLink( 'themes.php' );
-	} else {
+	} else if ( isFeatureEnabled( 'marketplace' ) ) {
 		window.location.href = getAdminLink(
 			'admin.php?page=wc-admin&tab=themes&path=%2Fextensions'
 		);
+	} else {
+		window.location.href =
+			'https://woocommerce.com/product-category/themes/';
 	}
 };
 

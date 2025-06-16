@@ -433,7 +433,7 @@ jQuery( function ( $ ) {
 				this.input_changed
 			);
 			$( document ).on(
-				'blur change input',
+				'change input',
 				'#coupon_code',
 				this.remove_coupon_error
 			);
@@ -661,6 +661,14 @@ jQuery( function ( $ ) {
 					).remove();
 					show_notice( response );
 					$( document.body ).trigger( 'removed_coupon', [ coupon ] );
+					$( '#coupon_code' )
+						.val('')
+						.removeClass('has-error')
+						.removeAttr('aria-invalid')
+						.removeAttr('aria-describedby')
+						.closest('.coupon')
+						.find('.coupon-error-notice')
+						.remove();
 					unblock( $wrapper );
 				},
 				complete: function () {
