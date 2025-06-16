@@ -32,7 +32,11 @@ class Quote extends Abstract_Block_Renderer {
 		$citation_content = '';
 		$cite_element     = $dom_helper->find_element( 'cite' );
 		if ( $cite_element ) {
-			$citation_content = $this->get_citation_wrapper( $dom_helper->get_element_inner_html( $cite_element ), $parsed_block );
+			$citation_content = $this->get_citation_wrapper(
+				$dom_helper->get_element_inner_html( $cite_element ),
+				$parsed_block,
+				$rendering_context
+			);
 		}
 
 		// Process inner blocks for main content.
@@ -51,20 +55,31 @@ class Quote extends Abstract_Block_Renderer {
 	/**
 	 * Returns the citation content with a wrapper.
 	 *
-	 * @param string $citation_content The citation text.
-	 * @param array  $parsed_block Parsed block.
+	 * @param string            $citation_content The citation text.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context instance.
 	 * @return string The wrapped citation HTML or empty string if no citation.
 	 */
-	private function get_citation_wrapper( string $citation_content, array $parsed_block ): string {
+	private function get_citation_wrapper( string $citation_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		if ( empty( $citation_content ) ) {
 			return '';
 		}
 
+		// The HTML cite tag should use block gap as margin-top.
+		$theme_styles = $rendering_context->get_theme_styles();
+		$margin_top   = $theme_styles['spacing']['blockGap'] ?? '0px';
+
 		return $this->add_spacer(
 			sprintf(
-				'<p style="margin: 0; %2$s"><cite class="email-block-quote-citation" style="display: block; margin: 0;">%1$s</cite></p>',
+				'<p style="%2$s"><cite class="email-block-quote-citation" style="display: block; margin: 0;">%1$s</cite></p>',
 				$citation_content,
-				WP_Style_Engine::compile_css( array( 'text-align' => $parsed_block['attrs']['textAlign'] ?? '' ), '' ),
+				WP_Style_Engine::compile_css(
+					array(
+						'margin'     => "{$margin_top} 0px 0px 0px",
+						'text-align' => $parsed_block['attrs']['textAlign'] ?? '',
+					),
+					''
+				),
 			),
 			$parsed_block['email_attrs'] ?? array()
 		);
