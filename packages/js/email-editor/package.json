@@ -116,7 +116,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
-		"@wordpress/prettier-config": "latest",
+		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/stylelint-config": "^21.0.0",
 		"@wordpress/browserslist-config": "next",
 		"copy-webpack-plugin": "13.0.x",
