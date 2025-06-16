@@ -12,11 +12,11 @@ Conditional visibility allows you to create smart, adaptive checkout forms that 
 
 Conditional fields help you:
 
-    * Reduce form complexity by hiding irrelevant fields
-    * Create dynamic checkout flows based on customer selections
-    * Show specialized fields only for specific products or customer types
-    * Improve conversion rates with cleaner, more focused forms
-    * Collect contextual information that's only relevant in certain situations
+* Reduce form complexity by hiding irrelevant fields
+* Create dynamic checkout flows based on customer selections
+* Show specialized fields only for specific products or customer types
+* Improve conversion rates with cleaner, more focused forms
+* Collect contextual information that's only relevant in certain situations
 
 ## Understanding JSON Schema for Conditions
 
