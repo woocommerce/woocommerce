@@ -2,6 +2,7 @@
 post_title: How to Add Conditional Additional Checkout Fields
 sidebar_label: How to add additional conditional fields in checkout
 ---
+
 # How to Make Your WooCommerce Additional Checkout Fields Conditionally Visible in the Checkout Block
 
 This feature requires a minimum version of WooCommerce 9.9.0
@@ -344,6 +345,7 @@ add_action( 'woocommerce_init', function() {
 ```
 
 ## Available data for conditions
+
 You can create conditions based on various checkout data:
 
 1. Cart information: Total price, items, shipping rates, coupons, weight
