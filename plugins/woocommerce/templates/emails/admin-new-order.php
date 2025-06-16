@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\HTML
- * @version 9.8.0
+ * @version 10.0.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
