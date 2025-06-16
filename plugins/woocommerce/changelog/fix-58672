@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Hide general tab when COGS is disabled in variable products

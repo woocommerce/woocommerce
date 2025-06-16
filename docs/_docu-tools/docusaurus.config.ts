@@ -67,7 +67,7 @@ const config: Config = {
 
 	themeConfig: {
 		// Replace with your project's social card
-		image: 'img/woo-dev-site-logo.svg',
+		image: 'https://developer.woocommerce.com/docs/wp-content/uploads/sites/3/2025/03/woo-dev-docs-banner.png',
 		navbar: {
 			logo: {
 				alt: 'WooCommerce developer docs',
