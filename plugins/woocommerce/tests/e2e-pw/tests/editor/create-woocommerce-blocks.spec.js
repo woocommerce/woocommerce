@@ -119,7 +119,10 @@ const blocks = {
 		await canvas.getByRole( 'button', { name: 'Done' } ).click();
 
 		await expect(
-			canvas.getByRole( 'document', { name: `Block: Product` } )
+			canvas.getByRole( 'document', {
+				name: `Block: Product`,
+				exact: true,
+			} )
 		).toBeVisible();
 	},
 	'Store Notices': null,
