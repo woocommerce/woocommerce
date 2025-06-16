@@ -144,7 +144,11 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test it renders image with borders
 	 */
 	public function testItRendersBorders(): void {
-		$image_content                            = $this->image_content;
+		$image_content                            = '
+			<figure class="wp-block-image alignleft size-full is-style-default">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" style="border-width:10px;border-color:#000001;border-radius:20px;height:auto;" srcset="https://test.com/wp-content/uploads/2023/05/image.jpg 1000w"/>
+			</figure>
+		';
 		$parsed_image                             = $this->parsed_image;
 		$parsed_image['attrs']['style']['border'] = array(
 			'width'  => '10px',

@@ -24,7 +24,7 @@ class Image extends Abstract_Block_Renderer {
 	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	protected function render_content( $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$parsed_html = $this->parse_block_content( $block_content );
 
 		if ( ! $parsed_html ) {
@@ -38,8 +38,6 @@ class Image extends Abstract_Block_Renderer {
 
 		$parsed_block = $this->add_image_size_when_missing( $parsed_block, $image_url );
 		$image        = $this->add_image_dimensions( $image, $parsed_block );
-		$image        = $this->apply_image_border_style( $image, $parsed_block, $caption );
-		$image        = $this->apply_rounded_style( $image, $parsed_block );
 
 		$image_with_wrapper = str_replace(
 			array( '{image_content}', '{caption_content}' ),
@@ -127,6 +125,11 @@ class Image extends Abstract_Block_Renderer {
 			'class_name' => 'email-image-cell',
 		);
 		$content_with_border_styles = $this->add_style_to_element( $block_content, $border_element_tag, \WP_Style_Engine::compile_css( $border_styles, '' ) );
+		// Remove border styles from the image HTML tag.
+		$content_with_border_styles = $this->remove_style_attribute_from_element( $content_with_border_styles, array( 'tag_name' => 'img' ), 'border-style' );
+		$content_with_border_styles = $this->remove_style_attribute_from_element( $content_with_border_styles, array( 'tag_name' => 'img' ), 'border-width' );
+		$content_with_border_styles = $this->remove_style_attribute_from_element( $content_with_border_styles, array( 'tag_name' => 'img' ), 'border-color' );
+		$content_with_border_styles = $this->remove_style_attribute_from_element( $content_with_border_styles, array( 'tag_name' => 'img' ), 'border-radius' );
 		// Add Border related classes to proper element. This is required for inlined border-color styles when defined via class.
 		$border_classes = array_filter(
 			explode( ' ', $class_name ),
@@ -149,7 +152,7 @@ class Image extends Abstract_Block_Renderer {
 	 * @param string $block_content Block content.
 	 * @param array  $parsed_block Parsed block.
 	 */
-	private function add_image_dimensions( $block_content, array $parsed_block ): string {
+	private function add_image_dimensions( string $block_content, array $parsed_block ): string {
 		$html = new \WP_HTML_Tag_Processor( $block_content );
 		if ( $html->next_tag( array( 'tag_name' => 'img' ) ) ) {
 			// Getting height from styles and if it's set, we set the height attribute.
@@ -261,7 +264,7 @@ class Image extends Abstract_Block_Renderer {
               width="' . esc_attr( $wrapper_width ) . '"
             >
               <tr>
-                <td class="email-image-cell">{image_content}</td>
+                <td class="email-image-cell" style="overflow: hidden;">{image_content}</td>
               </tr>
             </table>' . $caption_html . '
           </td>
@@ -303,7 +306,7 @@ class Image extends Abstract_Block_Renderer {
 		if ( $html->next_tag( $tag ) ) {
 			/** @var string $element_style */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
 			$element_style = $html->get_attribute( 'style' ) ?? '';
-			$element_style = preg_replace( '/' . $style_name . ':(.?[0-9]+px)+;?/', '', $element_style );
+			$element_style = preg_replace( '/' . preg_quote( $style_name, '/' ) . '\s*:\s*[^;]+;?/', '', $element_style );
 			$html->set_attribute( 'style', esc_attr( strval( $element_style ) ) );
 			$block_content = $html->get_updated_html();
 		}
