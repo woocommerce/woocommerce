@@ -44,10 +44,12 @@ class QuantitySelector extends AbstractBlock {
 		$product = AddToCartWithOptionsUtils::get_product_from_context( $block, $previous_product );
 
 		if ( ! $product ) {
+			$product = $previous_product;
+
 			return '';
 		}
 
-		if ( AddToCartWithOptionsUtils::is_not_purchasable_simple_product( $product ) ) {
+		if ( AddToCartWithOptionsUtils::is_not_purchasable_product( $product ) ) {
 			$product = $previous_product;
 
 			return '';
@@ -57,8 +59,9 @@ class QuantitySelector extends AbstractBlock {
 		$can_only_be_purchased_one_at_a_time = $product->is_sold_individually();
 		$managing_stock                      = $product->managing_stock();
 		$stock_quantity                      = $product->get_stock_quantity();
+		$allows_backorders                   = $product->backorders_allowed();
 
-		if ( $is_external_product_with_url || $can_only_be_purchased_one_at_a_time || ( $managing_stock && $stock_quantity <= 1 ) ) {
+		if ( $is_external_product_with_url || $can_only_be_purchased_one_at_a_time || ( $managing_stock && $stock_quantity <= 1 && ! $allows_backorders ) ) {
 			$product = $previous_product;
 
 			return '';

@@ -30,7 +30,7 @@ class ProductAvailabilityUtils {
 		// at the parent product level, check if any of its variations is in stock.
 		// We will show a custom availability message if all variations are out of stock.
 		if ( ! $product_availability && $product->get_type() === ProductType::VARIABLE ) {
-			if ( ! $product->has_available_variations() ) {
+			if ( ! $product->has_purchasable_variations() ) {
 				$product_availability['availability'] = __( 'This product is currently out of stock and unavailable.', 'woocommerce' );
 				$product_availability['class']        = 'out-of-stock';
 			}

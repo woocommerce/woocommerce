@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 
 /**
  * Block type for variation selector in add to cart with options.
@@ -31,7 +32,7 @@ class VariationSelector extends AbstractBlock {
 	protected function render( $attributes, $content, $block ): string {
 		global $product;
 
-		if ( $product instanceof \WC_Product && $product->is_type( 'variable' ) ) {
+		if ( $product instanceof \WC_Product && $product->is_type( 'variable' ) && ! Utils::is_not_purchasable_product( $product ) ) {
 			return $content;
 		}
 
