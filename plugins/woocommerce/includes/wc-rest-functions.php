@@ -240,7 +240,7 @@ function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_
 	} else {
 		$cap              = $contexts[ $context ];
 		$post_type_object = get_post_type_object( $post_type );
-		
+			
 		if ( $post_type_object && isset( $post_type_object->cap->$cap ) ) {
 			$permission = current_user_can( $post_type_object->cap->$cap, $object_id );
 		} else {
