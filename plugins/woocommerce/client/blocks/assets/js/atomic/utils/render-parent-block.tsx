@@ -216,7 +216,9 @@ const renderInnerBlocks = ( {
 			? blockWrapper
 			: Fragment;
 
-		const isCheckoutBlock = block === 'woocommerce/checkout';
+		const isCheckoutBlockChild = /^woocommerce\/checkout-/.test(
+			blockName
+		);
 
 		const blockContent = (
 			<BlockErrorBoundary
@@ -264,7 +266,7 @@ const renderInnerBlocks = ( {
 		);
 
 		// Temporary return until the Cart block is also updated
-		return isCheckoutBlock ? (
+		return isCheckoutBlockChild ? (
 			blockContent
 		) : (
 			<Suspense fallback={ null }>{ blockContent }</Suspense>
