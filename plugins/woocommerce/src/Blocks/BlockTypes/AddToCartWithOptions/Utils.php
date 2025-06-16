@@ -137,7 +137,7 @@ class Utils {
 			return ! $product->has_purchasable_variations();
 		}
 
-		return true;
+		return false;
 	}
 
 	/**
