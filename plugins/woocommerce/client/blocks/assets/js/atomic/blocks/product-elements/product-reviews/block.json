@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/product-reviews",
 	"icon": "admin-comments",
-	"title": "Product Reviews",
+	"title": "Product Reviews (Legacy)",
 	"description": "A block that shows the reviews for a product.",
 	"category": "woocommerce-product-elements",
 	"keywords": [ "WooCommerce" ],

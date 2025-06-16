@@ -53,7 +53,7 @@ Display the price of a product.
 -	**Supports:** color (background, text, ~~link~~), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 -	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId, textAlign
 
-## Product Details - woocommerce/product-details
+## Product Details (Legacy) - woocommerce/product-details
 
 Display a product's description, attributes, and reviews.
 
@@ -86,7 +86,7 @@ Display a product’s SKU, categories, tags, and more.
 -	**Supports:** align, interactivity (clientNavigation), ~~reusable~~
 -	**Attributes:** 
 
-## Product Reviews - woocommerce/product-reviews
+## Product Reviews (Legacy) - woocommerce/product-reviews
 
 A block that shows the reviews for a product.
 
@@ -1318,7 +1318,7 @@ Displays the description of the product.
 -	**Supports:** align (full, wide), background (backgroundImage, backgroundSize), color (background, gradients, heading, link, text), dimensions (minHeight), interactivity (clientNavigation), layout, spacing (blockGap, margin, padding), typography (fontSize, lineHeight), ~~html~~
 -	**Attributes:** 
 
-## Blockified Product Details - woocommerce/blockified-product-details
+## Product Details - woocommerce/blockified-product-details
 
 Display a product's description, attributes, and reviews
 
@@ -1538,7 +1538,7 @@ Display the number of products on the archive page or search result page.
 -	**Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize)
 -	**Attributes:** 
 
-## Blockified Product Reviews - woocommerce/blockified-product-reviews
+## Product Reviews - woocommerce/blockified-product-reviews
 
 Display a product's reviews
 

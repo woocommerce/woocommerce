@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/product-details",
 	"icon": "info",
-	"title": "Product Details",
+	"title": "Product Details (Legacy)",
 	"description": "Display a product's description, attributes, and reviews.",
 	"category": "woocommerce-product-elements",
 	"attributes": {

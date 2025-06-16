@@ -3,7 +3,7 @@
 	"apiVersion": 3,
 	"name": "woocommerce/blockified-product-reviews",
 	"icon": "admin-comments",
-	"title": "Blockified Product Reviews",
+	"title": "Product Reviews",
 	"description": "Display a product's reviews",
 	"category": "woocommerce",
 	"textdomain": "woocommerce",
