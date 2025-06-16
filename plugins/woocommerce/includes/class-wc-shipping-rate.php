@@ -117,6 +117,7 @@ class WC_Shipping_Rate implements JsonSerializable {
 	 *
 	 * @return object|array
 	 */
+	#[\ReturnTypeWillChange]
 	public function jsonSerialize() {
 		return array(
 			'data'      => $this->data,

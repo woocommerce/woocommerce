@@ -31,6 +31,10 @@ const config: Config = {
 		locales: ['en'],
 	},
 
+	plugins: [
+		'./llms-txt/index.ts'
+	],
+
 	presets: [
 		[
 			'classic',
