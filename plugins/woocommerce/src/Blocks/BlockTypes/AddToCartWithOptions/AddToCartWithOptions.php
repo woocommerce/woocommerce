@@ -265,9 +265,9 @@ class AddToCartWithOptions extends AbstractBlock {
 			*/
 			$is_disabled_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
 
-			if ( ! $is_disabled_compatibility_layer ) {
+			if ( ! $is_disabled_compatibility_layer && ! Utils::is_not_purchasable_product( $product ) ) {
 				ob_start();
-				if ( ProductType::SIMPLE === $product_type && $product->is_in_stock() && $product->is_purchasable() ) {
+				if ( ProductType::SIMPLE === $product_type ) {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_quantity.
 					 *
