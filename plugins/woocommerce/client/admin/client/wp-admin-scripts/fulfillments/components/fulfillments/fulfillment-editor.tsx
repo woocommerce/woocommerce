@@ -148,7 +148,7 @@ export default function FulfillmentEditor( {
 								<CustomerNotificationBox type="update" />
 							) }
 							{ fulfillmentLockState.isLocked ? (
-								<div className="woocommerce-fulfillment-item-actions">
+								<div className="woocommerce-fulfillment-item-lock-container">
 									<LockLabel
 										message={ fulfillmentLockState.reason }
 									/>
