@@ -173,6 +173,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Security - Prepare admin report query conditional statements. [#58857](https://github.com/woocommerce/woocommerce/pull/58857)
 * Fix - Add proper error handling when WCCOM API is unavailable, don't crash the site. [#58750](https://github.com/woocommerce/woocommerce/pull/58750)
 * Fix - Fixed bug in wc_change_term_counts() that hid empty top level product categories [#58821](https://github.com/woocommerce/woocommerce/pull/58821)
 * Fix - Hide general tab when COGS is disabled in variable products [#58701](https://github.com/woocommerce/woocommerce/pull/58701)
