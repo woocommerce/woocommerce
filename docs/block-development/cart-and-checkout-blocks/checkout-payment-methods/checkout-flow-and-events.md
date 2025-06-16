@@ -76,6 +76,7 @@ The following booleans are exposed via the checkout provider. They are independe
 There are numerous things that might trigger a recalculation of the total—coupons being added or removed, shipping rates updating, shipping rates being selected, etc. Instead of having to check each of those individual states, you can reliably check if this boolean is true (calculating) or false (not calculating).
 
 What `isCalculating` affects:
+
 - Disables the "Place Order" button in the checkout block
 - Disables the "Proceed to Checkout" button in the cart block
 - Shows a loading state for Express Payment methods while calculations are pending

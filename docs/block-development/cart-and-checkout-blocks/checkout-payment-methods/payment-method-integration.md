@@ -177,4 +177,4 @@ A big part of the payment method integration is the interface that is exposed fo
 | `buttonAttributes` | { `height`, `borderRadius` } | Styles set by the merchant that should be respected by all express payment buttons |
 | `paymentStatus` | Object | Various payment status helpers. Note, your payment method does not have to handle setting this status client side. Checkout will handle this via the responses your payment method gives from observers registered to [checkout event emitters](./checkout-flow-and-events.md). |
 | `paymentStatus.isPristine` | Boolean | This is true when the current payment status is `PRISTINE`. |
-| `paymentStatus.isStarted`
+| `paymentStatus.isStarted` | | |

@@ -6,7 +6,7 @@ sidebar_label: Registering custom collections
 
 # Registering custom collections in product collection block
 
-# Register Product Collection
+## Register Product Collection
 
 The `__experimentalRegisterProductCollection` function is part of the `@woocommerce/blocks-registry` package. This function allows third party developers to register a new collection. This function accepts most of the arguments that are accepted by [Block Variation](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/#defining-a-block-variation).
 
