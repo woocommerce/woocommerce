@@ -29,8 +29,9 @@ interface StepCheckResponse {
 
 const TestDriveLoader: React.FunctionComponent< {
 	progress: number;
+	title?: string;
 	message?: string;
-} > = ( { progress, message } ) => (
+} > = ( { progress, title, message } ) => (
 	<Loader className="woocommerce-payments-test-account-step__preloader">
 		<Loader.Layout className="woocommerce-payments-test-account-step__preloader-layout">
 			<Loader.Illustration>
@@ -42,7 +43,7 @@ const TestDriveLoader: React.FunctionComponent< {
 			</Loader.Illustration>
 
 			<Loader.Title>
-				{ __( 'Finishing payments setup', 'woocommerce' ) }
+				{ title || __( 'Finishing payments setup', 'woocommerce' ) }
 			</Loader.Title>
 			<Loader.ProgressBar progress={ progress ?? 0 } />
 			<Loader.Sequence interval={ 0 }>
