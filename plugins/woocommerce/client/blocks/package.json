@@ -99,7 +99,7 @@
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:bundle": "wireit",
-		"knip": "WP_EXPERIMENTAL_MODULES=true knip"
+		"knip": "cross-env WP_EXPERIMENTAL_MODULES=true knip"
 	},
 	"devDependencies": {
 		"@automattic/color-studio": "4.0.0",
