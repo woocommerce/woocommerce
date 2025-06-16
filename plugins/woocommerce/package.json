@@ -57,7 +57,7 @@
 		"test:e2e": "pnpm test:e2e:default --project=e2e",
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
 		"test:e2e:install": "pnpm playwright install chromium",
-		"test:e2e:blocks": "pnpm --filter='@woocommerce/block-library' test:e2e tests/e2e/tests/add-to-cart-with-options/add-to-cart-with-options.block_theme.spec.ts --repeat-each=50",
+		"test:e2e:blocks": "pnpm --filter='@woocommerce/block-library' test:e2e",
 		"test:e2e:with-env": "pnpm test:e2e:install && bash ./tests/e2e-pw/run-tests-with-env.sh",
 		"test:e2e:pressable": "pnpm test:e2e:with-env default-pressable",
 		"test:e2e:wpcom": "pnpm test:e2e:with-env default-wpcom",
