@@ -99,16 +99,16 @@ trait BlocksSharedState {
 		self::check_consent( $consent_statement );
 
 		if ( null === self::$blocks_shared_cart_state ) {
-			$cart_exists                    = isset( WC()->cart );
-			$cart_has_contents              = $cart_exists && ! WC()->cart->is_empty();
+			$cart_exists       = isset( WC()->cart );
+			$cart_has_contents = $cart_exists && ! WC()->cart->is_empty();
 			if ( isset( WC()->cart ) ) {
 				$cart_controller = new CartController();
-				$cart_object = $cart_controller->get_cart_for_response();
+				$cart_object     = $cart_controller->get_cart_for_response();
 
-				$store_api = Package::container()->get( StoreApi::class );
+				$store_api         = Package::container()->get( StoreApi::class );
 				$schema_controller = $store_api->container()->get( SchemaController::class );
-				$cart_schema = $schema_controller->get( CartSchema::IDENTIFIER );
-				$cart_response = $cart_schema->get_item_response( $cart_object );
+				$cart_schema       = $schema_controller->get( CartSchema::IDENTIFIER );
+				$cart_response     = $cart_schema->get_item_response( $cart_object );
 
 				self::$blocks_shared_cart_state = $cart_response;
 			} else {
