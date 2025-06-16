@@ -232,7 +232,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		// We need to make sure the block updated before saving.
 		// @see https://github.com/woocommerce/woocommerce/issues/57718
-		await expect( editor.canvas.getByLabel( 'Color' ) ).toBeVisible();
+		await expect(
+			editor.canvas.getByLabel( 'Color', { exact: true } )
+		).toBeVisible();
 
 		await editor.saveSiteEditorEntities();
 
