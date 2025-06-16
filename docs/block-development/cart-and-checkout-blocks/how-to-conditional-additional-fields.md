@@ -4,6 +4,8 @@ sidebar_label: How to add additional conditional fields in checkout
 ---
 # How to Make Your WooCommerce Additional Checkout Fields Conditionally Visible in the Checkout Block
 
+This feature requires a minimum version of WooCommerce 9.9.0
+
 If you've already learned how to [add additional fields to the WooCommerce Checkout Block](https://developer.woocommerce.com//docs/block-development/cart-and-checkout-blocks/how-to-add-additional-fields-guide), let's take it a step further and explore how to make those fields appear and disappear based on customer choices, cart contents, or other dynamic conditions.
 
 Conditional visibility allows you to create smart, adaptive checkout forms that only show relevant fields when needed, reducing form clutter and improving the customer experience.
@@ -12,34 +14,24 @@ Conditional visibility allows you to create smart, adaptive checkout forms that 
 
 Conditional fields help you:
 
-* Reduce form complexity by hiding irrelevant fields
-* Create dynamic checkout flows based on customer selections
-* Show specialized fields only for specific products or customer types
-* Improve conversion rates with cleaner, more focused forms
-* Collect contextual information that's only relevant in certain situations
+    * Reduce form complexity by hiding irrelevant fields
+    * Create dynamic checkout flows based on customer selections
+    * Show specialized fields only for specific products or customer types
+    * Improve conversion rates with cleaner, more focused forms
+    * Collect contextual information that's only relevant in certain situations
 
 ## Understanding JSON Schema for Conditions
 
-WooCommerce's additional checkout fields use JSON Schema to define conditional logic. Don't worry if you're not familiar with JSON Schema – we'll walk through practical examples that you can adapt for your needs.
+WooCommerce’s additional checkout fields use JSON Schema to define conditional logic. Don’t worry if you’re not familiar with JSON Schema – we’ll walk through practical examples that you can adapt for your needs.
 
 The basic structure looks like this:
 
 ```php
 'required' => [
-    [
-        'type' => 'object',
-        'properties' => [
-            // Define conditions here
-        ]
-    ]
+    // Define when to hide here
 ],
 'hidden' => [
-    [
-        'type' => 'object',
-        'properties' => [
-            // Define when to hide here
-        ]
-    ]
+    // Define when to hide here
 ]
 ```
 
@@ -51,30 +43,30 @@ One of the most common use cases is showing fields only when specific shipping m
 
 ```php
 woocommerce_register_additional_checkout_field(
-    array(
-        'id'       => 'my-plugin/delivery-instructions',
-        'label'    => __('Special delivery instructions', 'your-text-domain'),
-        'location' => 'order',
-        'type'     => 'text',
-        'required' => [
-            'cart' => [
-                'properties' => [
-                    'prefers_collection' => [
-                        'const' => true
-                    ]
-                ]
-            ]
-        ],
-        'hidden' => [
-            'cart' => [
-                'properties' => [
-                    'prefers_collection' => [
-                        'const' => false
-                    ]
-                ]
-            ]
-        ]
-    )
+	array(
+		'id'       => 'my-plugin/delivery-instructions',
+		'label'    => __('Special delivery instructions', 'your-text-domain'),
+		'location' => 'order',
+		'type'     => 'text',
+		'required' => [
+			'cart' => [
+				'properties' => [
+					'prefers_collection' => [
+						'const' => true
+					]
+				]
+			]
+		],
+		'hidden' => [
+			'cart' => [
+				'properties' => [
+					'prefers_collection' => [
+						'const' => false
+					]
+				]
+			]
+		]
+	)
 );
 ```
 
@@ -84,56 +76,51 @@ Display fields only when specific products are in the cart:
 
 ```php
 woocommerce_register_additional_checkout_field(
-    array(
-        'id'       => 'my-plugin/fragile-handling',
-        'label'    => __('This order contains fragile items – special handling required?', 'your-text-domain'),
-        'location' => 'order',
-        'type'     => 'checkbox',
-        'required' => [
-            'cart' => [
-                'properties' => [
-                    'items' => [
-                        'contains' => [
-                            'enum' => [2766, 456, 789] // Product IDs for fragile items
-                        ]
-                    ]
-                ]
-            ]
-        ]
-    )
+	array(
+		'id'       => 'my-plugin/fragile-handling',
+		'label'    => __('This order contains fragile items - special handling required?','your-text-domain'),
+		'location' => 'order',
+		'type'     => 'checkbox',
+		'required' => [
+			'cart' => [
+				'properties' => [
+					'items' => [
+						'contains' => [
+							'enum' => [2766, 456, 789] // Product IDs for fragile items
+						]
+					]
+				]
+			]
+		]
+	)
 );
 ```
 
 ### Show Fields Based on Cart Value
 
-You can conditionally display fields based on the total cart value. For example, show a field only if the cart total exceeds \$100:
+Display premium service options only for high-value orders:
 
 ```php
 woocommerce_register_additional_checkout_field(
-    array(
-        'id'       => 'my-plugin/high-value-note',
-        'label'    => __('Additional instructions for high-value orders', 'your-text-domain'),
-        'location' => 'order',
-        'type'     => 'text',
-        'required' => [
-            'cart' => [
-                'properties' => [
-                    'total' => [
-                        'minimum' => 100
-                    ]
-                ]
-            ]
-        ],
-        'hidden' => [
-            'cart' => [
-                'properties' => [
-                    'total' => [
-                        'maximum' => 99.99
-                    ]
-                ]
-            ]
-        ]
-    )
+	array(
+		'id'       => 'my-plugin/white-glove-service',
+		'label'    => __('Add white glove delivery service?', 'your-text-domain'),
+		'location' => 'order',
+		'type'     => 'checkbox',
+		'hidden' => [
+			'cart' => [
+				'properties' => [
+					'totals' => [
+						'properties' => [
+							'totalPrice' => [
+								'maximum' => 50000 // Hide if cart total is less than $500 (in cents)
+							]
+						]
+					]
+				]
+			]
+		]
+	)
 );
 ```
 
@@ -143,117 +130,235 @@ Display fields only for customers from specific countries:
 
 ```php
 woocommerce_register_additional_checkout_field(
-    array(
-        'id'       => 'my-plugin/eu-vat-number',
-        'label'    => __('EU VAT Number', 'your-text-domain'),
-        'location' => 'billing',
-        'type'     => 'text',
-        'required' => [
-            'customer' => [
-                'properties' => [
-                    'billing_country' => [
-                        'enum' => ['DE', 'FR', 'ES'] // List of EU country codes
-                    ]
-                ]
-            ]
-        ],
-        'hidden' => [
-            'customer' => [
-                'properties' => [
-                    'billing_country' => [
-                        'not' => [
-                            'enum' => ['DE', 'FR', 'ES']
-                        ]
-                    ]
-                ]
-            ]
-        ]
-    )
+	array(
+		'id'       => 'my-plugin/tax-exemption-number',
+		'label'    => __('Tax exemption number', 'your-text-domain'),
+		'location' => 'address',
+		'type'     => 'text',
+		'required' => [
+			'customer' => [
+				'properties' => [
+					'address' => [
+						'properties' => [
+							'country' => [
+								'enum' => ['US', 'CA'] // Required only for US and Canada
+							]
+						]
+					]
+				]
+			]
+		],
+		'hidden' => [
+			'customer' => [
+				'properties' => [
+					'address' => [
+						'properties' => [
+							'country' => [
+								'not' => [
+									'enum' => ['US', 'CA'] // Hide for countries other than US and Canada
+								]
+							]
+						]
+					]
+				]
+			]
+		]
+	)
 );
 ```
 
 ### Show Fields Based on Other Field Values
 
-You can also conditionally display fields based on the values of other custom fields:
+Create dependent fields where one field’s visibility depends on another field’s value:
 
 ```php
+// First field - service type selection
 woocommerce_register_additional_checkout_field(
-    array(
-        'id'       => 'my-plugin/alternate-contact',
-        'label'    => __('Alternate Contact Number', 'your-text-domain'),
-        'location' => 'contact',
-        'type'     => 'text',
-        'required' => [
-            'customer' => [
-                'properties' => [
-                    'my-plugin/contact-preference' => [
-                        'const' => 'phone'
-                    ]
-                ]
-            ]
-        ],
-        'hidden' => [
-            'customer' => [
-                'properties' => [
-                    'my-plugin/contact-preference' => [
-                        'not' => [
-                            'const' => 'phone'
-                        ]
-                    ]
-                ]
-            ]
-        ]
-    )
+	array(
+		'id'       => 'my-plugin/service-type',
+		'label'    => __('Type of service needed', 'your-text-domain'),
+		'location' => 'order',
+		'type'     => 'select',
+		'options'  => array(
+			array( 'value' => 'standard', 'label' => 'Standard' ),
+			array( 'value' => 'express', 'label' => 'Express' ),
+			array( 'value' => 'custom', 'label' => 'Custom' ),
+		),
+	)
+);
+
+// Second field - only show when "custom" is selected
+woocommerce_register_additional_checkout_field(
+	array(
+		'id'       => 'my-plugin/custom-requirements',
+		'label'    => __('Describe your custom requirements', 'your-text-domain'),
+		'location' => 'order',
+		'type'     => 'text',
+		'required' => [
+			'checkout' => [
+				'properties' => [
+					'additional_fields' => [
+						'properties' => [
+							'my-plugin/service-type' => [
+								'const' => 'custom'
+							]
+						]
+					]
+				]
+			]
+							],
+		'hidden' => [
+			'checkout' => [
+				'properties' => [
+					'additional_fields' => [
+						'properties' => [
+							'my-plugin/service-type' => [
+								'not' => [
+									'const' => 'custom'
+								]
+							]
+						]
+					]
+				]
+			]
+		]
+	)
 );
 ```
 
 ## Practical Complete Example
 
-Combining multiple conditions, here's a comprehensive example:
+Here’s a comprehensive example for a store that offers both digital and physical products:
 
 ```php
-woocommerce_register_additional_checkout_field(
-    array(
-        'id'       => 'my-plugin/special-instructions',
-        'label'    => __('Special Instructions', 'your-text-domain'),
-        'location' => 'order',
-        'type'     => 'textarea',
-        'required' => [
-            'cart' => [
-                'properties' => [
-                    'total' => [
-                        'minimum' => 150
-                    ],
-                    'items' => [
-                        'contains' => [
-                            'enum' => [1234, 5678]
-                        ]
-                    ]
-                ]
-            ]
-        ],
-        'hidden' => [
-            'cart' => [
-                'properties' => [
-                    'total' => [
-                        'maximum' => 149.99
-                    ]
-                ]
-            ]
-        ]
-    )
-);
+add_action( 'woocommerce_init', function() {
+	if ( ! function_exists( 'woocommerce_register_additional_checkout_field' ) ) {
+		return;
+	}
+
+	// Delivery preference - only for physical products
+	woocommerce_register_additional_checkout_field(
+		array(
+			'id'       => 'my-store/delivery-preference',
+			'label'    => __('Delivery preference', 'your-text-domain'),
+			'location' => 'order',
+			'type'     => 'select',
+			'options'  => array(
+				array( 'value' => 'doorstep', 'label' => __('Leave at doorstep', 'your-text-domain') ),
+				array( 'value' => 'neighbor', 'label' => __('Leave with neighbor', 'your-text-domain') ),
+				array( 'value' => 'pickup_point', 'label' => __('Delivery to pickup point', 'your-text-domain') ),
+			),
+			'required' => [
+				'cart' => [
+					'properties' => [
+						'needs_shipping' => [
+							'const' => true
+						]
+					]
+				]
+			],
+			'hidden' => [
+				'cart' => [
+					'properties' => [
+						'needs_shipping' => [
+							'const' => false
+						]
+					]
+				]
+			]
+		)
+	);
+
+	// Delivery instructions - only when 'doorstep' is selected
+	woocommerce_register_additional_checkout_field(
+		array(
+			'id'       => 'my-store/doorstep-instructions',
+			'label'    => __('Specific doorstep delivery instructions', 'your-text-domain'),
+			'location' => 'order',
+			'type'     => 'text',
+			'required' => [
+				'checkout' => [
+					'properties' => [
+						'additional_fields' => [
+							'properties' => [
+								'my-store/delivery-preference' => [
+									'const' => 'doorstep'
+								]
+							]
+						]
+					]
+				]
+								],
+			'hidden' => [
+				'checkout' => [
+					'properties' => [
+						'additional_fields' => [
+							'properties' => [
+								'my-store/delivery-preference' => [
+									'not' => [
+										'const' => 'doorstep'
+									]
+								]
+							]
+						]
+					]
+				]
+			]
+		)
+	);
+
+	// Digital delivery email - only for digital products
+	woocommerce_register_additional_checkout_field(
+		array(
+			'id'       => 'my-store/digital-delivery-email',
+			'label'    => __('Alternative email for digital products', 'your-text-domain'),
+			'location' => 'contact',
+			'type'     => 'text',
+			'required' => [
+				'cart' => [
+					'properties' => [
+						'needs_shipping' => [
+							'const' => false
+						]
+					]
+				]
+			],
+			'hidden' => [
+				'cart' => [
+					'properties' => [
+						'needs_shipping' => [
+							'const' => true
+						]
+					]
+				]
+			],
+			'sanitize_callback' => function ( $field_value ) {
+				return sanitize_email( $field_value );
+			},
+			'validate_callback' => function ( $field_value ) {
+				if ( ! is_email( $field_value ) ) {
+					return new \WP_Error( 'invalid_alt_email', __('Please ensure your alternative email matches the correct format.', 'your-text-domain') );
+				}
+			},
+		)
+	);
+});
 ```
 
-In this example, the "Special Instructions" field appears only when the cart total is at least \$150 and contains specific products.
+## Available data for conditions
+You can create conditions based on various checkout data:
+
+1. Cart information: Total price, items, shipping rates, coupons, weight
+2. Customer data: ID, billing/shipping addresses, email
+3. Other additional fields: Reference values from other custom fields and more!
+
+For a complete reference of available data structure, check out the [official conditional visibility documentation](https://developer.woocommerce.com/docs/block-development/cart-and-checkout-blocks/additional-checkout-fields#conditional-visibility-and-validation-via-json-schema).
 
 ## Next Steps
 
-Now that you've learned how to make your WooCommerce additional checkout fields conditionally visible, consider exploring more advanced features such as:
+Conditional visibility transforms static checkout forms into dynamic, intelligent interfaces that adapt to your customers’ needs. Combined with the basic additional fields from our previous post, you can create sophisticated checkout experiences that collect exactly the right information at exactly the right time.
 
-* Conditional field visibility based on user roles
-* Dynamic field values populated from external APIs
-* Integrating with third-party services for enhanced functionality
+Start experimenting with simple conditions and gradually build more complex logic as you become comfortable with the JSON Schema syntax. Your customers will appreciate the cleaner, more relevant checkout experience!
 
 For more information, refer to the [Additional Checkout Fields](https://developer.woocommerce.com/docs/block-development/cart-and-checkout-blocks/additional-checkout-fields/) reference document.
 
