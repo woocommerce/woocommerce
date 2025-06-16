@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -14,15 +14,30 @@ const Edit = (): JSX.Element => {
 		className: 'wc-block-order-confirmation-status',
 	} );
 
+	// @TODO Think about wrapping with Noninteractive component?
 	return (
 		<div { ...blockProps }>
-			<h1>{ __( 'Order received', 'woocommerce' ) }</h1>
-			<p>
-				{ __(
-					'Thank you. Your order has been received.',
-					'woocommerce'
-				) }
-			</p>
+			<InnerBlocks
+				template={ [
+					[
+						'core/heading',
+						{
+							level: 1,
+							content: __( 'Order received', 'woocommerce' ),
+						},
+					],
+					[
+						'core/paragraph',
+						{
+							content: __(
+								'Thank you. Your order has been received.',
+								'woocommerce'
+							),
+						},
+					],
+				] }
+				templateLock="all"
+			/>
 		</div>
 	);
 };

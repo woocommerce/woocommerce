@@ -9,6 +9,7 @@ import { Icon, info } from '@wordpress/icons';
  */
 import metadata from './block.json';
 import edit from './edit';
+import save from './save';
 
 registerBlockType( metadata, {
 	icon: {
@@ -19,11 +20,19 @@ registerBlockType( metadata, {
 			/>
 		),
 	},
-	attributes: {
-		...metadata.attributes,
-	},
 	edit,
-	save() {
-		return null;
-	},
+	save,
+	deprecated: [
+		{
+			attributes: {
+				...metadata.attributes,
+			},
+			save() {
+				return null;
+			},
+			migrate( attributes: ( typeof metadata )[ 'attributes' ] ) {
+				return attributes;
+			},
+		},
+	],
 } );
