@@ -5,6 +5,8 @@
  * Inserter: no
  */
 ?>
+<!-- wp:pattern {"slug":"woostarter/hero-with-text-and-two-buttons"} /-->
+
 <!-- wp:pattern {"slug":"woostarter/woocommerce-new-arrivals"} /-->
 
 <!-- wp:pattern {"slug":"woostarter/two-columns-full-width-categories"} /-->
