@@ -271,12 +271,12 @@ class WC_Admin_Report {
 				if ( strtolower( $value['operator'] ) === 'in' || strtolower( $value['operator'] ) === 'not in' ) {
 
 					if ( ! empty( $value['meta_value'] ) && ! is_array( $value['meta_value'] ) ) {
-						$value['meta_value'] = (array) $value['meta_value'];
+						$value['meta_value'] = (array) $value['meta_value']; // @phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 					}
 
 					if ( ! empty( $value['meta_value'] ) ) {
-						$formats = implode( ', ', array_fill( 0, count( $value['meta_value'] ), '%s' ) );
-						$where_value = $value['operator'] . ' (' . $wpdb->prepare( $formats, $value['meta_value'] ) . ')';
+						$formats     = implode( ', ', array_fill( 0, count( $value['meta_value'] ), '%s' ) );
+						$where_value = $value['operator'] . ' (' . $wpdb->prepare( $formats, $value['meta_value'] ) . ')'; // @phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 					}
 				} else {
 					$where_value = $value['operator'] . ' ' . $wpdb->prepare( '%s', $value['meta_value'] );
@@ -322,8 +322,8 @@ class WC_Admin_Report {
 						$value['value'] = (array) $value['value'];
 					}
 					if ( ! empty( $value['value'] ) ) {
-						$formats = implode( ', ', array_fill( 0, count( $value['value'] ), '%s' ) );
-						$where_value = $value['operator'] . ' (' . $wpdb->prepare( $formats, $value['value'] ) . ')';
+						$formats     = implode( ', ', array_fill( 0, count( $value['value'] ), '%s' ) );
+						$where_value = $value['operator'] . ' (' . $wpdb->prepare( $formats, $value['value'] ) . ')'; // @phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 					}
 				} else {
 					$where_value = $value['operator'] . ' ' . $wpdb->prepare( '%s', $value['value'] );
