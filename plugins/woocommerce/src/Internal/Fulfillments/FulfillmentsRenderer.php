@@ -268,8 +268,7 @@ class FulfillmentsRenderer {
 	 * @return array
 	 */
 	public function define_fulfillment_bulk_actions( $actions ) {
-		$actions['fulfill']   = __( 'Mark as fulfilled', 'woocommerce' );
-		$actions['unfulfill'] = __( 'Mark as unfulfilled', 'woocommerce' );
+		$actions['fulfill'] = __( 'Mark as fulfilled', 'woocommerce' );
 
 		return $actions;
 	}
@@ -283,8 +282,7 @@ class FulfillmentsRenderer {
 	 * @return string
 	 */
 	public function handle_fulfillment_bulk_actions( $redirect_to, $action, $post_ids ) {
-		if ( 'fulfill' === $action || 'unfulfill' === $action ) {
-			$fulfillment_action = 'fulfill' === $action ? 'fulfill' : 'unfulfill';
+		if ( 'fulfill' === $action ) {
 			foreach ( $post_ids as $post_id ) {
 				$order = wc_get_order( $post_id );
 				if ( ! $order ) {
@@ -293,45 +291,36 @@ class FulfillmentsRenderer {
 
 				$data_store   = wc_get_container()->get( FulfillmentsDataStore::class );
 				$fulfillments = $data_store->read_fulfillments( WC_Order::class, (string) $order->get_id() );
-				if ( 'fulfill' === $action ) {
 
-					// Fulfill all existing fulfillments.
-					foreach ( $fulfillments as $fulfillment ) {
-						$fulfillment->set_status( 'fulfilled' );
-						$fulfillment->set_is_fulfilled( true );
-						$fulfillment->save();
-					}
+				// Fulfill all existing fulfillments.
+				foreach ( $fulfillments as $fulfillment ) {
+					$fulfillment->set_status( 'fulfilled' );
+					$fulfillment->set_is_fulfilled( true );
+					$fulfillment->save();
+				}
 
-					// Create a fulfillment for the order, containing all remaining items in the order.
-					$remaining_items = array_map(
-						function ( $item ) {
-							return array(
-								'item_id' => $item['item_id'],
-								'qty'     => $item['qty'],
-							);
-						},
-						FulfillmentUtils::get_pending_items( $order, $fulfillments )
-					);
+				// Create a fulfillment for the order, containing all remaining items in the order.
+				$remaining_items = array_map(
+					function ( $item ) {
+						return array(
+							'item_id' => $item['item_id'],
+							'qty'     => $item['qty'],
+						);
+					},
+					FulfillmentUtils::get_pending_items( $order, $fulfillments )
+				);
 
-					if ( 0 < count( $remaining_items ) ) {
-						$fulfillment = new Fulfillment();
-						$fulfillment->set_entity_type( WC_Order::class );
-						$fulfillment->set_entity_id( (string) $order->get_id() );
-						$fulfillment->set_status( 'fulfilled' );
-						$fulfillment->set_is_fulfilled( true );
-						$fulfillment->set_items( $remaining_items );
-						$fulfillment->save();
-					}
-				} else {
-					// Unfulfill all existing fulfillments.
-					foreach ( $fulfillments as $fulfillment ) {
-						$fulfillment->set_status( 'unfulfilled' );
-						$fulfillment->set_is_fulfilled( false );
-						$fulfillment->save();
-					}
+				if ( 0 < count( $remaining_items ) ) {
+					$fulfillment = new Fulfillment();
+					$fulfillment->set_entity_type( WC_Order::class );
+					$fulfillment->set_entity_id( (string) $order->get_id() );
+					$fulfillment->set_status( 'fulfilled' );
+					$fulfillment->set_is_fulfilled( true );
+					$fulfillment->set_items( $remaining_items );
+					$fulfillment->save();
 				}
 			}
-			$redirect_to = add_query_arg( array( 'bulk_action' => $fulfillment_action ), $redirect_to );
+			$redirect_to = add_query_arg( array( 'bulk_action' => $action ), $redirect_to );
 		}
 		return $redirect_to;
 	}
