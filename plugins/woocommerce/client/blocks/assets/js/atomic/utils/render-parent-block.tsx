@@ -269,7 +269,12 @@ const renderInnerBlocks = ( {
 		return isCheckoutBlockChild ? (
 			blockContent
 		) : (
-			<Suspense fallback={ null }>{ blockContent }</Suspense>
+			<Suspense
+				fallback={ null }
+				key={ `${ block }_${ depth }_${ index }_suspense` }
+			>
+				{ blockContent }
+			</Suspense>
 		);
 	} );
 };
