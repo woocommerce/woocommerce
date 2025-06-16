@@ -194,7 +194,7 @@ Any registered `savedTokenComponent` node will also receive a `token` prop which
 
 For the server side integration, you need to create a class that extends the `Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType` class. 
 
-This class is the server side representation of your payment method. It is used to handle the registration of your payment methods assets with the Store API and Checkout block at the correct time. It is not the same as the [Payment Gateway API](../../payments/payment-gateway-api.md) that you need to implement separately for payment processing.
+This class is the server side representation of your payment method. It is used to handle the registration of your payment methods assets with the Store API and Checkout block at the correct time. It is not the same as the [Payment Gateway API](/docs/features/payments/payment-gateway-api/) that you need to implement separately for payment processing.
 
 ### Example Payment Method Integration Class
 
@@ -310,7 +310,7 @@ add_action(
 
 ## Processing Payments (legacy support)
 
-Payments are still handled via the [Payment Gateway API](../../payments/payment-gateway-api.md). This is a separate API from the one used for the payment methods integration above.
+Payments are still handled via the [Payment Gateway API](/docs/features/payments/payment-gateway-api/). This is a separate API from the one used for the payment methods integration above.
 
 The checkout block converts incoming `payment_data` provided by the client-side script to `$_POST` and calls the Payment Gateway `process_payment` method. 
 
