@@ -852,6 +852,9 @@ class WC_Emails {
 			html_entity_decode( wp_strip_all_tags( $product->get_stock_quantity() ) )
 		);
 
+		add_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
+		add_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
+
 		wp_mail(
 			/**
 			 * Filter the recipient of the low stock notification email.
@@ -899,6 +902,9 @@ class WC_Emails {
 			 */
 			apply_filters( 'woocommerce_email_attachments', array(), 'low_stock', $product, null )
 		);
+
+		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
+		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 	}
 
 	/**
@@ -933,6 +939,9 @@ class WC_Emails {
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product out of stock', 'woocommerce' ) );
 		/* translators: %s: product name */
 		$message = sprintf( __( '%s is out of stock.', 'woocommerce' ), html_entity_decode( wp_strip_all_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
+
+		add_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
+		add_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 
 		wp_mail(
 			/**
@@ -981,6 +990,9 @@ class WC_Emails {
 			 */
 			apply_filters( 'woocommerce_email_attachments', array(), 'no_stock', $product, null )
 		);
+
+		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
+		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 	}
 
 	/**
@@ -1014,6 +1026,9 @@ class WC_Emails {
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product backorder', 'woocommerce' ) );
 		/* translators: 1: backordered quantity 2: product name 3: order number */
 		$message = sprintf( __( '%1$s units of %2$s have been backordered in order #%3$s.', 'woocommerce' ), $backordered_quantity, html_entity_decode( wp_strip_all_tags( $args['product']->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $order->get_order_number() );
+
+		add_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
+		add_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 
 		wp_mail(
 			/**
@@ -1062,6 +1077,9 @@ class WC_Emails {
 			 */
 			apply_filters( 'woocommerce_email_attachments', array(), 'backorder', $args, null )
 		);
+
+		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
+		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 	}
 
 	/**
