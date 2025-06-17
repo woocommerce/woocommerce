@@ -8,10 +8,7 @@ import {
 	getElement,
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/cart';
-import type {
-	OptimisticCartItem,
-	Store as WooCommerce,
-} from '@woocommerce/stores/woocommerce/cart';
+import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import Dinero from 'dinero.js';
 
 /**
@@ -142,6 +139,13 @@ store< MiniCart >(
 						callbacks.openDrawer
 					);
 				}
+
+				return () => {
+					document.body.removeEventListener(
+						'wc-blocks_added_to_cart',
+						callbacks.openDrawer
+					);
+				};
 			},
 
 			openDrawer() {
@@ -261,7 +265,7 @@ const { state } = store(
 
 			get cartItemMaximum(): number {
 				const { cartItem } = getContext< CartItemContext >();
-				return cartItem.quantity_limits.minimum;
+				return cartItem.quantity_limits.maximum;
 			},
 
 			// Intended to be used in context of a cart item in wp-each
@@ -402,6 +406,11 @@ const { state } = store(
 				const { minimum, maximum } = cartItem.quantity_limits;
 
 				const quantity = parseInt( qty, 10 );
+
+				if ( Number.isNaN( quantity ) ) {
+					input.value = cartItem.quantity.toString();
+					return;
+				}
 
 				let finalQuantity = quantity;
 

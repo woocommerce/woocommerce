@@ -90,12 +90,12 @@ const { state, actions } = store< Store >(
 	{
 		actions: {
 			*removeCartItem( key: string ) {
+				const previousCart = JSON.stringify( state.cart );
+
 				// optimistically update the cart
 				state.cart.items = state.cart.items.filter(
 					( item ) => item.key !== key
 				);
-
-				const previousCart = JSON.stringify( state.cart );
 
 				try {
 					const res: Response = yield fetch(
@@ -110,8 +110,15 @@ const { state, actions } = store< Store >(
 						}
 					);
 
-					const json: Cart = yield res.json();
+					const json: Cart | ApiErrorResponse = yield res.json();
+
+					if ( isApiErrorResponse( res, json ) ) {
+						throw generateError( json );
+					}
 					state.cart = json;
+					emitSyncEvent( {
+						quantityChanges: { cartItemsPendingDelete: [ key ] },
+					} );
 				} catch ( error ) {
 					state.cart = JSON.parse( previousCart );
 
