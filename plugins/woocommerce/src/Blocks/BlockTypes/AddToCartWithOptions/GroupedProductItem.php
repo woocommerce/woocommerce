@@ -24,6 +24,20 @@ class GroupedProductItem extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-grouped-product-item';
 
 	/**
+	 * Modifies the block context for product price blocks when inside the Grouped Product Selector block.
+	 *
+	 * @param array $context The block context.
+	 * @param array $block   The parsed block.
+	 * @return array Modified block context.
+	 */
+	public function set_is_descendant_of_grouped_product_selector_context( $context, $block ) {
+		if ( 'woocommerce/product-price' === $block['blockName'] ) {
+			$context['isDescendantOfGroupedProductSelector'] = true;
+		}
+		return $context;
+	}
+
+	/**
 	 * Get product row HTML.
 	 *
 	 * @param string   $product_id Product ID.
@@ -42,6 +56,8 @@ class GroupedProductItem extends AbstractBlock {
 		$post    = get_post( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$product = wc_get_product( $product_id );
 
+		add_filter( 'render_block_context', array( $this, 'set_is_descendant_of_grouped_product_selector_context' ), 10, 2 );
+
 		// Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
 		// `render_callback` and ensure that no wrapper markup is included.
 		$block_content = AddToCartWithOptionsUtils::render_block_with_context(
@@ -51,6 +67,8 @@ class GroupedProductItem extends AbstractBlock {
 				'postId'   => $post->ID,
 			),
 		);
+
+		remove_filter( 'render_block_context', array( $this, 'set_is_descendant_of_grouped_product_selector_context' ) );
 
 		$post    = $previous_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$product = $previous_product;
