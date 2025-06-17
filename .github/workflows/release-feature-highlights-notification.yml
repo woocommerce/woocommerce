@@ -49,16 +49,18 @@ jobs:
                 const versionMatch = ffEvent.summary.match(/WooCommerce (\d+\.\d+) Feature Freeze/i);
                 const version = versionMatch ? versionMatch[1] : '';
 
+                // Calculate deadline date (5 days after the event)
+                const deadlineDate = new Date(ffEvent.start);
+                deadlineDate.setDate(deadlineDate.getDate() + 5);
+
                 core.setOutput('event-title', ffEvent.summary);
                 core.setOutput('event-version', version);
-
-                const deadlineDate = (new Date(ffEvent.start)).getDate() + 5;
                 core.setOutput('deadline-date', deadlineDate.toDateString());
                 console.log(`Feature Freeze event for version ${version} found:`, ffEvent);
               } else {
                 core.setOutput('event-title', '');
                 core.setOutput('event-version', '');
-                core.setOutput('deadeline-date', '');
+                core.setOutput('deadline-date', '');
                 console.log('No Feature Freeze events found.');
               }
             } catch (error) {
