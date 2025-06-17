@@ -388,4 +388,61 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $notices['error'] );
 		$this->assertMatchesRegularExpression( '/Please choose product options by visiting/', $notices['error'][0]['notice'] );
 	}
+
+	/**
+	 * Test case sensitivity fix for coupon discount amounts.
+	 *
+	 * This test verifies that the fix for issue #58864 works correctly.
+	 * It creates a coupon with uppercase code in the database, applies it with lowercase code,
+	 * and ensures that get_coupon_discount_amount and get_coupon_discount_tax_amount
+	 * return the correct values regardless of case.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/58864
+	 */
+	public function test_coupon_discount_amount_case_sensitivity() {
+		// Create a product to add to cart.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		// Create a coupon with uppercase code.
+		$coupon = WC_Helper_Coupon::create_coupon( 'TESTCOUPON123' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		// Add product to cart.
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		// Apply the coupon using lowercase code.
+		$applied = WC()->cart->apply_coupon( 'testcoupon123' );
+		$this->assertTrue( $applied, 'Coupon should be applied successfully with lowercase code' );
+
+		// Verify the coupon is in applied coupons (should be stored in original case).
+		$applied_coupons = WC()->cart->get_applied_coupons();
+		$this->assertContains( 'TESTCOUPON123', $applied_coupons, 'Coupon should be stored in original uppercase case' );
+
+		// Test get_coupon_discount_amount with lowercase code.
+		$discount_amount = WC()->cart->get_coupon_discount_amount( 'testcoupon123' );
+		$this->assertEquals( 10.00, $discount_amount, 'get_coupon_discount_amount should return correct value with lowercase code' );
+
+		// Test get_coupon_discount_amount with uppercase code.
+		$discount_amount_upper = WC()->cart->get_coupon_discount_amount( 'TESTCOUPON123' );
+		$this->assertEquals( 10.00, $discount_amount_upper, 'get_coupon_discount_amount should return correct value with uppercase code' );
+
+		// Test get_coupon_discount_tax_amount with lowercase code.
+		$tax_amount = WC()->cart->get_coupon_discount_tax_amount( 'testcoupon123' );
+		$this->assertEquals( 2.00, $tax_amount, 'get_coupon_discount_tax_amount should return correct value with lowercase code' );
+
+		// Test get_coupon_discount_tax_amount with uppercase code.
+		$tax_amount_upper = WC()->cart->get_coupon_discount_tax_amount( 'TESTCOUPON123' );
+		$this->assertEquals( 2.00, $tax_amount_upper, 'get_coupon_discount_tax_amount should return correct value with uppercase code' );
+
+		// Clean up.
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+		$product->delete( true );
+		$coupon->delete( true );
+	}
 }
