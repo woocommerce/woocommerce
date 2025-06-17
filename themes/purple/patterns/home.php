@@ -18,3 +18,7 @@
 <!-- wp:pattern {"slug":"woostarter/template-query-loop"} /-->
 
 <!-- wp:pattern {"slug":"woostarter/testimonial-with-logo"} /-->
+
+<!-- wp:pattern {"slug":"woostarter/social-media-call-to-action-with-hero-image"} /-->
+
+<!-- wp:pattern {"slug":"woostarter/store-features-row-icons-4-columns"} /-->
