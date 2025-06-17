@@ -60,7 +60,7 @@ class Stripe extends PaymentGateway {
 		try {
 			if ( class_exists( '\WC_Stripe' ) && is_callable( '\WC_Stripe::get_instance' ) ) {
 				$stripe = \WC_Stripe::get_instance();
-				if ( isset( $stripe->account ) &&
+				if ( is_object( $stripe ) && isset( $stripe->account ) &&
 					class_exists( '\WC_Stripe_Account' ) &&
 					defined( '\WC_Stripe_Account::STATUS_NO_ACCOUNT' ) &&
 					$stripe->account instanceof \WC_Stripe_Account &&
@@ -98,7 +98,7 @@ class Stripe extends PaymentGateway {
 		try {
 			if ( class_exists( '\WC_Stripe' ) && is_callable( '\WC_Stripe::get_instance' ) ) {
 				$stripe = \WC_Stripe::get_instance();
-				if ( isset( $stripe->connect ) &&
+				if ( is_object( $stripe ) && isset( $stripe->connect ) &&
 					class_exists( '\WC_Stripe_Connect' ) &&
 					$stripe->connect instanceof \WC_Stripe_Connect &&
 					is_callable( array( $stripe->connect, 'is_connected' ) ) ) {
