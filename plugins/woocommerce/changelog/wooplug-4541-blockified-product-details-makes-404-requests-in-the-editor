@@ -1,5 +1,4 @@
 Significance: patch
-Type: fix
-Comment: Blockified Product Details: fix 404 requests in the Site Editor.
+Type: dev
 
-
+Font Picker E2E test: refactor response handling to ensure all font families are loaded before proceed with test
