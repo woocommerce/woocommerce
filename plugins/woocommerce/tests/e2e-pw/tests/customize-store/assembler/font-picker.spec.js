@@ -275,7 +275,7 @@ test.describe(
 				'.woocommerce-customize-store_global-styles-variations_item'
 			);
 
-			await fontPickers.count();
+			await expect( fontPickers ).toHaveCount( 10 );
 
 			await assembler
 				.locator(
