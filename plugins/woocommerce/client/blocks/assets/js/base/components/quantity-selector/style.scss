@@ -22,7 +22,7 @@
 
 	&::after {
 		border-radius: $universal-border-radius;
-		border: 1px solid $universal-border-light;
+		border: 1px solid currentColor;
 		bottom: 0;
 		content: "";
 		left: 0;
@@ -30,10 +30,7 @@
 		position: absolute;
 		right: 0;
 		top: 0;
-
-		.has-dark-controls & {
-			border-color: $input-border-dark;
-		}
+		opacity: 0.3;
 	}
 
 	// Extra label for specificity needed in the editor.
