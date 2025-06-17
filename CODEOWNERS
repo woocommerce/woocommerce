@@ -21,3 +21,4 @@
 
 # Interactivity API - public stores
 /plugins/woocommerce/client/blocks/assets/js/base/stores @woocommerce/billow
+/plugins/woocommerce/src/Blocks/Utils/BlocksSharedState.php @woocommerce/billow
