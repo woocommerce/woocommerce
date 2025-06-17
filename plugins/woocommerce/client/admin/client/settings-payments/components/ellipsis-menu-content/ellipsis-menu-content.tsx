@@ -99,9 +99,6 @@ export const EllipsisMenuContent = ( {
 		setIsDeactivating( true );
 		deactivatePlugin( pluginFile )
 			.then( () => {
-				// Record the event when user successfully deactivates a gateway.
-				recordPaymentsProviderEvent( 'deactivate', provider );
-
 				createSuccessNotice(
 					__(
 						'The provider plugin was successfully deactivated.',
