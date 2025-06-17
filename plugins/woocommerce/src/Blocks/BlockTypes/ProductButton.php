@@ -34,7 +34,7 @@ class ProductButton extends AbstractBlock {
 	 * Register the context.
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'query', 'queryId', 'postId' ];
+		return array( 'query', 'queryId', 'postId' );
 	}
 
 	/**
@@ -237,10 +237,10 @@ class ProductButton extends AbstractBlock {
 				'class' => implode(
 					' ',
 					array_filter(
-						[
+						array(
 							'wp-block-button wc-block-components-product-button',
 							esc_attr( $classname . ' ' . $custom_width_classes . ' ' . $custom_align_classes ),
-						]
+						)
 					)
 				),
 			)
@@ -270,6 +270,9 @@ class ProductButton extends AbstractBlock {
 						style="{button_styles}"
 						{attributes}
 						{button_directives}
+						data-wp-init="actions.fetchStockStatus"
+						data-wp-watch="actions.fetchStockStatus"
+						data-wp-bind--disabled="!state.isAddToCartButtonActive"
 					>
 					<span {span_button_directives}>{add_to_cart_text}</span>
 					</{html_element}>
