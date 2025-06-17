@@ -381,14 +381,17 @@ export const SettingsPaymentsMain = () => {
 							current.plugin.slug === paymentsEntity.plugin.slug // Last resort to find the provider.
 					);
 
-					// Record the event when the user successfully enables a provider.
-					recordPaymentsEvent( 'provider_enable', {
-						provider_id: paymentsEntity.id,
-						suggestion_id:
-							paymentsEntity?._suggestion_id ?? 'unknown',
-						provider_extension_slug: paymentsEntity.plugin.slug,
-						from: context,
-					} );
+					// We need to check if the provider is enabled after the update.
+					if ( updatedPaymentsEntity?.state?.enabled ) {
+						// Record the event when the user successfully enables a provider.
+						recordPaymentsEvent( 'provider_enable', {
+							provider_id: paymentsEntity.id,
+							suggestion_id:
+								paymentsEntity?._suggestion_id ?? 'unknown',
+							extension_slug: paymentsEntity.plugin.slug,
+							from: context,
+						} );
+					}
 
 					/**
 					 * If the onboarding type is 'native_in_context', we need to open the WooPayments onboarding modal.
