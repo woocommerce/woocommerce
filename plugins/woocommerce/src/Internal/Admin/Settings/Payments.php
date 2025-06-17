@@ -468,7 +468,7 @@ class Payments {
 
 			// Generate the new snapshot for the provider.
 			$new_snapshots[ $snapshot_key ] = array(
-				'extension_active'  => true,
+				'extension_active'  => true, // The extension is definitely active since we have a gateway from it.
 				'account_connected' => $provider['state']['account_connected'] ?? $default_snapshot['account_connected'],
 				'account_test_mode' => $provider['onboarding']['state']['test_mode'] ?? $default_snapshot['account_test_mode'],
 				'needs_setup'       => $provider['state']['needs_setup'] ?? $default_snapshot['needs_setup'],
