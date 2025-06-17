@@ -200,7 +200,10 @@ export const SettingsPaymentsMethods = () => {
 		return {
 			isFetching: select( paymentSettingsStore ).isFetching(),
 			providers:
-				select( paymentSettingsStore ).getPaymentProviders() || [],
+				select( paymentSettingsStore ).getPaymentProviders(
+					window.wcSettings?.admin?.woocommerce_payments_nox_profile
+						?.business_country_code || null
+				) || [],
 		};
 	}, [] );
 
