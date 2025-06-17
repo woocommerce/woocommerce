@@ -53,7 +53,7 @@ jobs:
                 core.setOutput('event-version', version);
 
                 const deadlineDate = (new Date(ffEvent.start)).getDate() + 5;
-                core.setOutput('deadline-date', deadlineDate.start.toDateString());
+                core.setOutput('deadline-date', deadlineDate.toDateString());
                 console.log(`Feature Freeze event for version ${version} found:`, ffEvent);
               } else {
                 core.setOutput('event-title', '');
