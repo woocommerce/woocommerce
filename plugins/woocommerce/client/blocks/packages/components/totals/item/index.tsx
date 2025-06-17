@@ -5,8 +5,6 @@ import clsx from 'clsx';
 import { isValidElement } from '@wordpress/element';
 import type { ReactElement, ReactNode } from 'react';
 import type { Currency } from '@woocommerce/types';
-import { useStoreCart } from '@woocommerce/base-context';
-import { Skeleton } from '@woocommerce/base-components/skeleton';
 
 /**
  * Internal dependencies
@@ -21,6 +19,8 @@ export interface TotalsItemProps {
 	// Value may be a number, or react node. Numbers are passed to FormattedMonetaryAmount.
 	value: number | ReactNode;
 	description?: ReactNode;
+	showSkeleton?: boolean;
+	skeleton?: ReactElement;
 }
 
 const TotalsItemValue = ( {
@@ -50,16 +50,16 @@ const TotalsItem = ( {
 	label,
 	value,
 	description,
+	showSkeleton = false,
+	skeleton,
 }: TotalsItemProps ): ReactElement => {
-	const { cartIsLoading } = useStoreCart();
-
 	return (
 		<div className={ clsx( 'wc-block-components-totals-item', className ) }>
 			<span className="wc-block-components-totals-item__label">
 				{ label }
 			</span>
-			{ cartIsLoading ? (
-				<Skeleton width="45px" height="1em" />
+			{ showSkeleton ? (
+				skeleton
 			) : (
 				<TotalsItemValue value={ value } currency={ currency } />
 			) }

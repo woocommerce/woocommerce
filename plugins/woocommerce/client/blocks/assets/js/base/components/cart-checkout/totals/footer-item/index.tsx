@@ -21,6 +21,7 @@ import {
 } from '@woocommerce/types';
 import { formatPrice } from '@woocommerce/price-format';
 import { hasSelectedShippingRate } from '@woocommerce/base-utils';
+import { Skeleton } from '@woocommerce/base-components/skeleton';
 
 /**
  * Internal dependencies
@@ -158,6 +159,8 @@ const TotalsFooterItem = ( {
 					) }
 				</>
 			}
+			showSkeleton={ cart.cartIsLoading }
+			skeleton={ <Skeleton width="45px" height="1em" /> }
 		/>
 	);
 };

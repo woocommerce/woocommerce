@@ -12,6 +12,7 @@ import {
 	Currency,
 	LooselyMustHave,
 } from '@woocommerce/types';
+import { Skeleton } from '@woocommerce/base-components/skeleton';
 
 /**
  * Internal dependencies
@@ -30,6 +31,7 @@ export interface TotalsDiscountProps {
 		CartTotalsItem,
 		'total_discount' | 'total_discount_tax'
 	>;
+	isLoading: boolean;
 }
 
 const filteredCartCouponsFilterArg = {
@@ -42,6 +44,7 @@ const TotalsDiscount = ( {
 	isRemovingCoupon,
 	removeCoupon,
 	values,
+	isLoading,
 }: TotalsDiscountProps ): JSX.Element | null => {
 	const {
 		total_discount: totalDiscount,
@@ -119,6 +122,8 @@ const TotalsDiscount = ( {
 					: __( 'Coupons', 'woocommerce' )
 			}
 			value={ discountTotalValue ? discountTotalValue * -1 : '-' }
+			showSkeleton={ isLoading }
+			skeleton={ <Skeleton width="45px" height="1em" /> }
 		/>
 	);
 };
