@@ -195,15 +195,16 @@ class FulfillmentUtils {
 	 */
 	public static function get_order_fulfillment_status_text( WC_Order $order ): string {
 		$fulfillment_status = self::get_fulfillment_status( $order );
+
 		switch ( $fulfillment_status ) {
 			case 'fulfilled':
-				return '&nbsp;' . wp_kses( __( 'It has been <strong>Fulfilled</strong>', 'woocommerce' ), 'strong' );
+				return '&nbsp;' . __( 'It has been <mark class="fulfillment-status">Fulfilled</mark>.', 'woocommerce' );
 			case 'partially_fulfilled':
-				return '&nbsp;' . wp_kses( __( 'It has been <strong>Partially fulfilled</strong>.', 'woocommerce' ), 'strong' );
+				return '&nbsp;' . __( 'It has been <mark class="fulfillment-status">Partially fulfilled</mark>.', 'woocommerce' );
 			case 'unfulfilled':
-				return '&nbsp;' . wp_kses( __( 'It is currently <strong>Unfulfilled</strong>.', 'woocommerce' ), 'strong' );
+				return '&nbsp;' . __( 'It is currently <mark class="fulfillment-status">Unfulfilled</mark>.', 'woocommerce' );
 			case 'no_fulfillments':
-				return '&nbsp;' . wp_kses( __( 'It has <strong>no fulfillments</strong> yet.', 'woocommerce' ), 'strong' );
+				return '&nbsp;' . __( 'It has <mark class="fulfillment-status">no fulfillments</mark> yet.', 'woocommerce' );
 			default:
 				return '';
 		}
