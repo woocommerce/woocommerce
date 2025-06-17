@@ -3,6 +3,7 @@
  * Title: home
  * Slug: woostarter/home
  * Inserter: no
+ * Template Types: front-page, index, home
  */
 ?>
 <!-- wp:pattern {"slug":"woostarter/hero-with-text-and-two-buttons"} /-->
