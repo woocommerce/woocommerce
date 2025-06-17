@@ -250,8 +250,9 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$items = $fulfillments[0]->get_items();
 		$this->assertCount( count( $order->get_items() ), $items, 'Fulfillment items do not match order items.' );
 		foreach ( $order->get_items() as $item_id => $item ) {
-			$this->assertArrayHasKey( $item_id, $items, 'Fulfillment does not contain item with ID ' . $item_id );
-			$this->assertEquals( $item->get_quantity(), $items[ $item_id ]['qty'], 'Fulfillment item quantity does not match order item quantity.' );
+			$fulfillment_item = array_filter( $items, fn( $item ) => $item['item_id'] === $item_id );
+			$this->assertNotEmpty( $fulfillment_item, 'Fulfillment does not contain item with ID ' . $item_id );
+			$this->assertEquals( $item->get_quantity(), $fulfillment_item[0]['qty'], 'Fulfillment item quantity does not match order item quantity.' );
 		}
 
 		WC_Helper_Order::delete_order( $order->get_id() );
