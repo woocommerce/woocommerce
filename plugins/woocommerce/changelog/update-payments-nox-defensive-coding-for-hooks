@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Remove hook callbacks type hinting and add more defensive coding measures.
+
+
