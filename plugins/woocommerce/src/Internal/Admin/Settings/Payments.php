@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 class Payments {
 
 	const PAYMENTS_NOX_PROFILE_KEY              = 'woocommerce_payments_nox_profile';
-	const PAYMENTS_PROVIDER_STATE_SNAPSHOTS_KEY = 'woocommerce_payments_provider_snapshots';
+	const PAYMENTS_PROVIDER_STATE_SNAPSHOTS_KEY = 'woocommerce_payments_provider_state_snapshots';
 
 	const SUGGESTIONS_CONTEXT = 'wc_settings_payments';
 
@@ -415,16 +415,18 @@ class Payments {
 			$snapshots = array();
 		}
 
-		// Iterate through the payment providers and generate their updated snapshots.
-		// We will use the provider's plugin slug as the key for the snapshot to ensure uniqueness.
-		// We will only focus on the provider state and only for gateways that match a suggestion.
 		$default_snapshot = array(
-			'needs_setup'       => false,
-			'test_mode'         => false,
+			'extension_active'  => false,
 			'account_connected' => false,
 			'account_test_mode' => false,
+			'needs_setup'       => false,
+			'test_mode'         => false,
 		);
-		$new_snapshots    = array();
+
+		// Iterate through the payment providers and generate their updated snapshots.
+		// We will use the provider's plugin slug as the key for the snapshot to ensure uniqueness.
+		// For now, we will only focus on the provider state for official extensions, not all the gateways.
+		$new_snapshots = array();
 		foreach ( $payment_providers as $provider ) {
 			if ( empty( $provider['plugin']['slug'] ) ||
 				empty( $provider['id'] ) ||
@@ -446,26 +448,100 @@ class Payments {
 			}
 
 			// If we don't have an already existing snapshot for this provider, we create one with default values.
+			// This way we can track changes even for the first time we see a provider.
 			if ( ! isset( $snapshots[ $snapshot_key ] ) ) {
 				$snapshots[ $snapshot_key ] = $default_snapshot;
+			} else {
+				// Make sure the old snapshot has the same keys as the default one.
+				$snapshots[ $snapshot_key ] = array_merge( $default_snapshot, $snapshots[ $snapshot_key ] );
+				// Remove any keys that are not in the default snapshot.
+				$snapshot_keys = array_keys( $default_snapshot );
+				foreach ( $snapshots[ $snapshot_key ] as $key => $v ) {
+					if ( ! in_array( $key, $snapshot_keys, true ) ) {
+						unset( $snapshots[ $snapshot_key ][ $key ] );
+					}
+				}
+
+				// Always sort the old snapshot by keys to ensure consistency.
+				ksort( $snapshots[ $snapshot_key ] );
 			}
 
 			// Generate the new snapshot for the provider.
 			$new_snapshots[ $snapshot_key ] = array(
-				'needs_setup'       => $provider['state']['needs_setup'] ?? $default_snapshot['needs_setup'],
-				'test_mode'         => $provider['state']['test_mode'] ?? $default_snapshot['test_mode'],
+				'extension_active'  => true,
 				'account_connected' => $provider['state']['account_connected'] ?? $default_snapshot['account_connected'],
 				'account_test_mode' => $provider['onboarding']['state']['test_mode'] ?? $default_snapshot['account_test_mode'],
+				'needs_setup'       => $provider['state']['needs_setup'] ?? $default_snapshot['needs_setup'],
+				'test_mode'         => $provider['state']['test_mode'] ?? $default_snapshot['test_mode'],
 			);
 
-			$this->maybe_track_provider_state_change( $provider, $snapshots[ $snapshot_key ], $new_snapshots[ $snapshot_key ] );
+			// Always sort the new snapshot by keys to ensure consistency.
+			ksort( $new_snapshots[ $snapshot_key ] );
+		}
+
+		// Provider snapshots that are not in the new snapshots but were in the old ones should be kept but marked as inactive.
+		foreach ( $snapshots as $snapshot_key => $old_snapshot ) {
+			if ( ! isset( $new_snapshots[ $snapshot_key ] ) ) {
+				$new_snapshots[ $snapshot_key ]                     = $old_snapshot;
+				$new_snapshots[ $snapshot_key ]['extension_active'] = false;
+			}
 		}
 
 		// Always order the new snapshots by keys to ensure DB updates happen only when the data changes.
 		ksort( $new_snapshots );
-		// Save the new snapshots back to the DB.
-		// No need to autoload this option since it will be used only when the Payments settings page is loaded.
-		update_option( self::PAYMENTS_PROVIDER_STATE_SNAPSHOTS_KEY, $new_snapshots, false );
+
+		// Save the new snapshots back to the DB, as soon as we have them ready to avoid concurrent state change tracking.
+		// No need to autoload this option since it will be used only in the Payments Settings area.
+		$result = update_option( self::PAYMENTS_PROVIDER_STATE_SNAPSHOTS_KEY, $new_snapshots, false );
+		if ( ! $result ) {
+			// If we didn't update the option, we don't need to track any changes.
+			return;
+		}
+
+		$this->maybe_track_providers_state_change( $payment_providers, $snapshots, $new_snapshots );
+	}
+
+	/**
+	 * Maybe track the payment providers state change.
+	 *
+	 * This method will iterate through the new snapshots and compare them with the old ones.
+	 * If there are any changes, it will track them.
+	 *
+	 * @param array $providers      The list of payment provider details.
+	 * @param array $old_snapshots  The old snapshots of the providers' states.
+	 * @param array $new_snapshots  The new snapshots of the providers' states.
+	 */
+	private function maybe_track_providers_state_change( array $providers, array $old_snapshots, array $new_snapshots ): void {
+		foreach ( $new_snapshots as $provider_extension_slug => $new_snapshot ) {
+			if ( ! isset( $old_snapshots[ $provider_extension_slug ] ) ) {
+				// If we don't have an old snapshot for this provider, we can't track the change.
+				continue;
+			}
+
+			// If there are no changes, we don't need to track anything.
+			if ( maybe_serialize( $old_snapshots[ $provider_extension_slug ] ) === maybe_serialize( $new_snapshot ) ) {
+				continue;
+			}
+
+			// Search for the provider by its plugin slug.
+			$provider = null;
+			foreach ( $providers as $p ) {
+				if ( isset( $p['plugin']['slug'] ) && $p['plugin']['slug'] === $provider_extension_slug ) {
+					$provider = $p;
+					break;
+				}
+			}
+			if ( ! $provider ) {
+				// If we couldn't find the provider in the list it means the extension was deactivated.
+				// Get the matching suggestion by its slug.
+				$provider = $this->providers->get_extension_suggestion_by_plugin_slug( $provider_extension_slug );
+			}
+			if ( ! $provider ) {
+				continue;
+			}
+
+			$this->maybe_track_provider_state_change( $provider, $old_snapshots[ $provider_extension_slug ], $new_snapshot );
+		}
 	}
 
 	/**
@@ -476,47 +552,34 @@ class Payments {
 	 * @param array $new_snapshot   The new snapshot of the provider's state.
 	 */
 	private function maybe_track_provider_state_change( array $provider, array $old_snapshot, array $new_snapshot ): void {
-		// If there are no changes, we don't need to track anything.
-		if ( $old_snapshot === $new_snapshot ) {
-			return;
-		}
+		// Note: Keep the order of the events in a way that makes sense for the onboarding flow.
 
-		// Track needs_setup change.
-		if ( $old_snapshot['needs_setup'] && ! $new_snapshot['needs_setup'] ) {
+		// Track extension_active change.
+		if ( $old_snapshot['extension_active'] && ! $new_snapshot['extension_active'] ) {
 			$this->record_event(
-				'provider_setup_completed',
+				'provider_extension_deactivated',
 				array(
-					'provider_id'   => $provider['id'],
-					'suggestion_id' => $provider['_suggestion_id'],
-					'extension'     => $provider['plugin']['slug'],
+					'suggestion_id'  => $provider['_suggestion_id'],
+					'extension_slug' => $provider['plugin']['slug'],
 				)
 			);
-		} elseif ( ! $old_snapshot['needs_setup'] && $new_snapshot['needs_setup'] ) {
-			$this->record_event(
-				'provider_setup_required',
-				array(
-					'provider_id'   => $provider['id'],
-					'suggestion_id' => $provider['_suggestion_id'],
-					'extension'     => $provider['plugin']['slug'],
-				)
-			);
-		}
 
-		// Track payments test_mode change.
-		if ( $old_snapshot['test_mode'] && ! $new_snapshot['test_mode'] ) {
+			// If the extension was also uninstalled, we can track that as well.
+			if ( ! empty( $provider['plugin']['status'] ) && PaymentsProviders::EXTENSION_NOT_INSTALLED === $provider['plugin']['status'] ) {
+				$this->record_event(
+					'provider_extension_uninstalled',
+					array(
+						'suggestion_id'  => $provider['_suggestion_id'],
+						'extension_slug' => $provider['plugin']['slug'],
+					)
+				);
+			}
+		} elseif ( ! $old_snapshot['extension_active'] && $new_snapshot['extension_active'] ) {
 			$this->record_event(
-				'provider_live_payments_enabled',
+				'provider_extension_activated',
 				array(
-					'suggestion_id' => $provider['_suggestion_id'],
-					'extension'     => $provider['plugin']['slug'],
-				)
-			);
-		} elseif ( ! $old_snapshot['test_mode'] && $new_snapshot['test_mode'] ) {
-			$this->record_event(
-				'provider_test_payments_enabled',
-				array(
-					'suggestion_id' => $provider['_suggestion_id'],
-					'extension'     => $provider['plugin']['slug'],
+					'suggestion_id'  => $provider['_suggestion_id'],
+					'extension_slug' => $provider['plugin']['slug'],
 				)
 			);
 		}
@@ -527,7 +590,7 @@ class Payments {
 				'provider_account_disconnected',
 				array(
 					'suggestion_id'     => $provider['_suggestion_id'],
-					'extension'         => $provider['plugin']['slug'],
+					'extension_slug'    => $provider['plugin']['slug'],
 					'account_test_mode' => $old_snapshot['account_test_mode'] ? 'yes' : 'no',
 				)
 			);
@@ -536,29 +599,73 @@ class Payments {
 				'provider_account_connected',
 				array(
 					'suggestion_id'     => $provider['_suggestion_id'],
-					'extension'         => $provider['plugin']['slug'],
+					'extension_slug'    => $provider['plugin']['slug'],
 					'account_test_mode' => $new_snapshot['account_test_mode'] ? 'yes' : 'no',
 				)
 			);
 		}
 
-		// Track account_test_mode change.
-		if ( $old_snapshot['account_test_mode'] && ! $new_snapshot['account_test_mode'] ) {
+		// Track needs_setup change.
+		if ( $old_snapshot['needs_setup'] && ! $new_snapshot['needs_setup'] ) {
 			$this->record_event(
-				'provider_account_live_mode_enabled',
+				'provider_setup_completed',
 				array(
-					'suggestion_id' => $provider['_suggestion_id'],
-					'extension'     => $provider['plugin']['slug'],
+					'provider_id'    => $provider['id'],
+					'suggestion_id'  => $provider['_suggestion_id'],
+					'extension_slug' => $provider['plugin']['slug'],
 				)
 			);
-		} elseif ( ! $old_snapshot['account_test_mode'] && $new_snapshot['account_test_mode'] ) {
+		} elseif ( ! $old_snapshot['needs_setup'] && $new_snapshot['needs_setup'] ) {
 			$this->record_event(
-				'provider_account_test_mode_enabled',
+				'provider_setup_required',
 				array(
-					'suggestion_id' => $provider['_suggestion_id'],
-					'extension'     => $provider['plugin']['slug'],
+					'provider_id'    => $provider['id'],
+					'suggestion_id'  => $provider['_suggestion_id'],
+					'extension_slug' => $provider['plugin']['slug'],
 				)
 			);
+		}
+
+		// Track payments test_mode change, but only if an account is connected.
+		if ( $new_snapshot['account_connected'] ) {
+			if ( $old_snapshot['test_mode'] && ! $new_snapshot['test_mode'] ) {
+				$this->record_event(
+					'provider_live_payments_enabled',
+					array(
+						'suggestion_id'  => $provider['_suggestion_id'],
+						'extension_slug' => $provider['plugin']['slug'],
+					)
+				);
+			} elseif ( ! $old_snapshot['test_mode'] && $new_snapshot['test_mode'] ) {
+				$this->record_event(
+					'provider_test_payments_enabled',
+					array(
+						'suggestion_id'  => $provider['_suggestion_id'],
+						'extension_slug' => $provider['plugin']['slug'],
+					)
+				);
+			}
+		}
+
+		// Track account_test_mode change, but only if the account is connected.
+		if ( $new_snapshot['account_connected'] ) {
+			if ( $old_snapshot['account_test_mode'] && ! $new_snapshot['account_test_mode'] ) {
+				$this->record_event(
+					'provider_account_live_mode_enabled',
+					array(
+						'suggestion_id'  => $provider['_suggestion_id'],
+						'extension_slug' => $provider['plugin']['slug'],
+					)
+				);
+			} elseif ( ! $old_snapshot['account_test_mode'] && $new_snapshot['account_test_mode'] ) {
+				$this->record_event(
+					'provider_account_test_mode_enabled',
+					array(
+						'suggestion_id'  => $provider['_suggestion_id'],
+						'extension_slug' => $provider['plugin']['slug'],
+					)
+				);
+			}
 		}
 	}
 }
