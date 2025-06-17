@@ -959,9 +959,9 @@ class WooPaymentsService {
 				}
 
 				if ( $enabled ) {
-					$payment_methods_enabled[] = $pm_id;
+					$payment_methods_enabled[] = sanitize_key( $pm_id );
 				} else {
-					$payment_methods_disabled[] = $pm_id;
+					$payment_methods_disabled[] = sanitize_key( $pm_id );
 				}
 			}
 		}
