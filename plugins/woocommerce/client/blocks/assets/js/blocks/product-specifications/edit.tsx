@@ -208,26 +208,28 @@ const Edit = ( {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<table { ...blockProps }>
-				<tbody>
-					{ Object.entries( productData ).map(
-						( [ key, data ] ) =>
-							data.value && (
-								<tr
-									key={ key }
-									className={ `wc-block-product-specifications-item wc-block-product-specifications-item__${ key }` }
-								>
-									<th className="wc-block-product-specifications-item__label">
-										{ data.label }
-									</th>
-									<td className="wc-block-product-specifications-item__value">
-										{ data.value }
-									</td>
-								</tr>
-							)
-					) }
-				</tbody>
-			</table>
+			<figure { ...blockProps }>
+				<table>
+					<tbody>
+						{ Object.entries( productData ).map(
+							( [ key, data ] ) =>
+								data.value && (
+									<tr
+										key={ key }
+										className={ `wc-block-product-specifications-item wc-block-product-specifications-item__${ key }` }
+									>
+										<td className="wc-block-product-specifications-item__label">
+											{ data.label }
+										</td>
+										<td className="wc-block-product-specifications-item__value">
+											{ data.value }
+										</td>
+									</tr>
+								)
+						) }
+					</tbody>
+				</table>
+			</figure>
 		</>
 	);
 };
