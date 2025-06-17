@@ -93,7 +93,7 @@ class CartCouponSchema extends AbstractSchema {
 		$cart       = $controller->get_cart_instance();
 		$coupon     = new \WC_Coupon( $coupon_code );
 		return [
-			'code'          => $coupon_code,
+			'code'          => $coupon->get_code(),
 			'discount_type' => $coupon->get_discount_type(),
 			'totals'        => (object) $this->prepare_currency_response(
 				[

@@ -436,7 +436,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		// Verify the coupon is in applied coupons (should be stored in original case).
 		$applied_coupons = WC()->cart->get_applied_coupons();
-		$this->assertContains( 'TESTCOUPON123', $applied_coupons, 'Coupon should be stored in original uppercase case' );
+		$this->assertContains( 'testcoupon123', $applied_coupons, 'Coupon should be stored in provided case' );
 
 		// Test get_coupon_discount_amount with lowercase code.
 		$discount_amount = WC()->cart->get_coupon_discount_amount( 'testcoupon123' );

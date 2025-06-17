@@ -997,7 +997,7 @@ class CartController {
 			);
 		}
 
-		if ( $this->has_coupon( $coupon->get_code() ) ) {
+		if ( $this->has_coupon( $coupon_code ) ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_coupon_error',
 				sprintf(
@@ -1051,7 +1051,7 @@ class CartController {
 					sprintf(
 						/* translators: %s: coupon code */
 						esc_html__( '"%s" has already been applied and cannot be used in conjunction with other coupons.', 'woocommerce' ),
-						esc_html( $code )
+						esc_html( $individual_use_coupon->get_code() )
 					),
 					400
 				);
@@ -1080,7 +1080,7 @@ class CartController {
 			$applied_coupons = array_diff( $applied_coupons, $coupons_to_remove );
 		}
 
-		$applied_coupons[] = $coupon->get_code();
+		$applied_coupons[] = $coupon_code;
 		$cart->set_applied_coupons( $applied_coupons );
 
 		/**
@@ -1092,7 +1092,7 @@ class CartController {
 		 *
 		 * @param string $coupon_code The coupon code that was applied.
 		 */
-		do_action( 'woocommerce_applied_coupon', $coupon->get_code() );
+		do_action( 'woocommerce_applied_coupon', $coupon_code );
 	}
 
 	/**

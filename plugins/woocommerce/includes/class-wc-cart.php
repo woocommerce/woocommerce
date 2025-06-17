@@ -1810,16 +1810,22 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool
 	 */
 	public function has_discount( $coupon_code = '' ) {
-		return $coupon_code ? in_array(
-			wc_strtolower( wc_format_coupon_code( $coupon_code ) ),
-			array_map(
-				function ( $code ) {
-					return wc_strtolower( wc_format_coupon_code( $code ) );
-				},
-				$this->applied_coupons
-			),
-			true
-		) : count( $this->applied_coupons ) > 0;
+		$applied_coupons = $this->get_applied_coupons();
+
+		if ( ! $coupon_code ) {
+			return count( $applied_coupons ) > 0;
+		}
+
+		$coupon_code = wc_format_coupon_code( $coupon_code );
+
+		// Check if the coupon is in applied coupons using case-insensitive comparison.
+		foreach ( $applied_coupons as $applied_coupon ) {
+			if ( wc_is_same_coupon( $applied_coupon, $coupon_code ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -1854,7 +1860,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		// Check if applied.
-		if ( $this->has_discount( $the_coupon->get_code() ) ) {
+		if ( $this->has_discount( $coupon_code ) ) {
 			$the_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED );
 			return false;
 		}
@@ -1892,7 +1898,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 		}
 
-		$this->applied_coupons[] = $the_coupon->get_code();
+		$this->applied_coupons[] = $coupon_code;
 
 		// Choose free shipping.
 		if ( $the_coupon->get_free_shipping() ) {
@@ -1916,7 +1922,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		 * @param WC_Coupon $the_coupon The coupon object that was applied.
 		 * @param WC_Cart $this The cart object.
 		 */
-		do_action( 'woocommerce_applied_coupon', $the_coupon->get_code() );
+		do_action( 'woocommerce_applied_coupon', $coupon_code );
 
 		return true;
 	}
@@ -2004,19 +2010,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function remove_coupon( $coupon_code ) {
 		$coupon_code = wc_format_coupon_code( $coupon_code );
-		$position    = array_search(
-			wc_strtolower( $coupon_code ),
-			array_map(
-				function ( $code ) {
-					return wc_strtolower( wc_format_coupon_code( $code ) );
-				},
-				$this->get_applied_coupons()
-			),
-			true
-		);
 
-		if ( false !== $position ) {
-			unset( $this->applied_coupons[ $position ] );
+		// Find the coupon in applied coupons using case-insensitive comparison.
+		foreach ( $this->get_applied_coupons() as $key => $applied_coupon ) {
+			if ( wc_is_same_coupon( $applied_coupon, $coupon_code ) ) {
+				unset( $this->applied_coupons[ $key ] );
+				break;
+			}
 		}
 
 		WC()->session->set( 'refresh_totals', true );
