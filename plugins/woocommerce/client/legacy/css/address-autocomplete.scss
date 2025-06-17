@@ -49,23 +49,35 @@
 .woocommerce-input-wrapper:has(#billing_address_1, #shipping_address_1) {
 	position: relative;
 	display: block;
-}
 
-// Search icon styles
-.address-search-icon {
-	position: absolute;
-	inset-inline-end: 16px;
-	top: 50%;
-	transform: translateY(-50%);
-	pointer-events: none;
-	width: 16px;
-	height: 16px;
-	line-height: 16px;
-	z-index: 1;
+	// Default to showing nothing if autocomplete is not available.
+	.address-search-icon {
+		display: none;
+	}
 
-	svg {
-		fill: none;
-		stroke: var(--wc-form-color-text, #444);
-		stroke-width: 1;
+	// Search icon styles
+	&.autocomplete-available {
+		input#billing_address_1, input#shipping_address_1 {
+			padding-right: calc(1.1rem + 16px); // Adjust padding for icon
+		}
+
+		.address-search-icon {
+			display: block;
+			position: absolute;
+			inset-inline-end: 16px;
+			top: 50%;
+			transform: translateY(-50%);
+			pointer-events: none;
+			width: 16px;
+			height: 16px;
+			line-height: 16px;
+			z-index: 1;
+
+			svg {
+				fill: none;
+				stroke: var(--wc-form-color-text, #444);
+				stroke-width: 1;
+			}
+		}
 	}
 }
