@@ -1,5 +1,5 @@
 {
-	"name": "woocommerce/email-editor-js-config",
+	"name": "woocommerce/email-editor-config",
 	"description": "Email editor based on WordPress Gutenberg package.",
 	"type": "library",
 	"license": "GPL-3.0-or-later",
