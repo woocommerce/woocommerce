@@ -26,7 +26,7 @@ class PayUIndia extends PaymentGateway {
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
-			return ! empty( $payment_gateway->settings['currency1_payu_key'] ) && ! empty( $payment_gateway->settings['currency1_payu_salt'] );
+			return ! empty( $payment_gateway->get_option( 'currency1_payu_key' ) ) && ! empty( $payment_gateway->get_option( 'currency1_payu_salt' ) );
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(

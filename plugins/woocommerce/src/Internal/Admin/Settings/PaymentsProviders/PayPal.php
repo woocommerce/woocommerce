@@ -26,12 +26,7 @@ class PayPal extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode, false otherwise.
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_paypal_in_sandbox_mode( $payment_gateway );
-		if ( ! is_null( $is_in_sandbox_mode ) ) {
-			return $is_in_sandbox_mode;
-		}
-
-		return parent::is_in_test_mode( $payment_gateway );
+		return $this->is_paypal_in_sandbox_mode( $payment_gateway ) ?? parent::is_in_test_mode( $payment_gateway );
 	}
 
 	/**
@@ -45,12 +40,7 @@ class PayPal extends PaymentGateway {
 	 * @return bool True if the payment gateway is in dev mode, false otherwise.
 	 */
 	public function is_in_dev_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_paypal_in_sandbox_mode( $payment_gateway );
-		if ( ! is_null( $is_in_sandbox_mode ) ) {
-			return $is_in_sandbox_mode;
-		}
-
-		return parent::is_in_dev_mode( $payment_gateway );
+		return $this->is_paypal_in_sandbox_mode( $payment_gateway ) ?? parent::is_in_dev_mode( $payment_gateway );
 	}
 
 	/**
@@ -62,12 +52,7 @@ class PayPal extends PaymentGateway {
 	 *              If the payment gateway does not provide the information, it will return true.
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_onboarded = $this->is_paypal_onboarded( $payment_gateway );
-		if ( ! is_null( $is_onboarded ) ) {
-			return $is_onboarded;
-		}
-
-		return parent::is_account_connected( $payment_gateway );
+		return $this->is_paypal_onboarded( $payment_gateway ) ?? parent::is_account_connected( $payment_gateway );
 	}
 
 	/**
@@ -80,12 +65,7 @@ class PayPal extends PaymentGateway {
 	 *              it will infer it from having a connected account.
 	 */
 	public function is_onboarding_completed( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_onboarded = $this->is_paypal_onboarded( $payment_gateway );
-		if ( ! is_null( $is_onboarded ) ) {
-			return $is_onboarded;
-		}
-
-		return parent::is_onboarding_completed( $payment_gateway );
+		return $this->is_paypal_onboarded( $payment_gateway ) ?? parent::is_onboarding_completed( $payment_gateway );
 	}
 
 	/**
@@ -99,12 +79,7 @@ class PayPal extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_paypal_in_sandbox_mode( $payment_gateway );
-		if ( ! is_null( $is_in_sandbox_mode ) ) {
-			return $is_in_sandbox_mode;
-		}
-
-		return parent::is_in_test_mode_onboarding( $payment_gateway );
+		return $this->is_paypal_in_sandbox_mode( $payment_gateway ) ?? parent::is_in_test_mode_onboarding( $payment_gateway );
 	}
 
 	/**
@@ -184,7 +159,7 @@ class PayPal extends PaymentGateway {
 			} catch ( \Throwable $e ) {
 				// Do nothing but log so we can investigate.
 				SafeGlobalFunctionProxy::wc_get_logger()->debug(
-					'Failed to determine if PayPal is onboarded: ' . $e->getMessage(),
+					'Failed to determine if gateway is onboarded: ' . $e->getMessage(),
 					array(
 						'gateway' => $payment_gateway->id,
 						'source'  => 'settings-payments',

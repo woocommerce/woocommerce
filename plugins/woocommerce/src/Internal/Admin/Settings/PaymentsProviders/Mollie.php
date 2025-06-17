@@ -74,12 +74,7 @@ class Mollie extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode, false otherwise.
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_mollie_in_sandbox_mode( $payment_gateway );
-		if ( ! is_null( $is_in_sandbox_mode ) ) {
-			return $is_in_sandbox_mode;
-		}
-
-		return parent::is_in_test_mode( $payment_gateway );
+		return $this->is_mollie_in_sandbox_mode( $payment_gateway ) ?? parent::is_in_test_mode( $payment_gateway );
 	}
 
 	/**
@@ -93,12 +88,7 @@ class Mollie extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_mollie_in_sandbox_mode( $payment_gateway );
-		if ( ! is_null( $is_in_sandbox_mode ) ) {
-			return $is_in_sandbox_mode;
-		}
-
-		return parent::is_in_test_mode_onboarding( $payment_gateway );
+		return $this->is_mollie_in_sandbox_mode( $payment_gateway ) ?? parent::is_in_test_mode_onboarding( $payment_gateway );
 	}
 
 	/**

@@ -57,7 +57,7 @@ class MercadoPago extends PaymentGateway {
 	 * @return bool True if the payment gateway needs setup, false otherwise.
 	 */
 	public function needs_setup( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_onboarded = $this->is_mercado_pago_onboarded();
+		$is_onboarded = $this->is_mercado_pago_onboarded( $payment_gateway );
 		if ( ! is_null( $is_onboarded ) ) {
 			return ! $is_onboarded;
 		}
@@ -76,12 +76,7 @@ class MercadoPago extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode, false otherwise.
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_mercado_pago_in_sandbox_mode( $payment_gateway );
-		if ( ! is_null( $is_in_sandbox_mode ) ) {
-			return $is_in_sandbox_mode;
-		}
-
-		return parent::is_in_test_mode( $payment_gateway );
+		return $this->is_mercado_pago_in_sandbox_mode( $payment_gateway ) ?? parent::is_in_test_mode( $payment_gateway );
 	}
 
 	/**
@@ -95,12 +90,7 @@ class MercadoPago extends PaymentGateway {
 	 * @return bool True if the payment gateway is in dev mode, false otherwise.
 	 */
 	public function is_in_dev_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_mercado_pago_in_sandbox_mode( $payment_gateway );
-		if ( ! is_null( $is_in_sandbox_mode ) ) {
-			return $is_in_sandbox_mode;
-		}
-
-		return parent::is_in_dev_mode( $payment_gateway );
+		return $this->is_mercado_pago_in_sandbox_mode( $payment_gateway ) ?? parent::is_in_dev_mode( $payment_gateway );
 	}
 
 	/**
@@ -112,12 +102,7 @@ class MercadoPago extends PaymentGateway {
 	 *              If the payment gateway does not provide the information, it will return true.
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_onboarded = $this->is_mercado_pago_onboarded();
-		if ( ! is_null( $is_onboarded ) ) {
-			return $is_onboarded;
-		}
-
-		return parent::is_account_connected( $payment_gateway );
+		return $this->is_mercado_pago_onboarded( $payment_gateway ) ?? parent::is_account_connected( $payment_gateway );
 	}
 
 	/**
@@ -130,12 +115,7 @@ class MercadoPago extends PaymentGateway {
 	 *              it will infer it from having a connected account.
 	 */
 	public function is_onboarding_completed( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_onboarded = $this->is_mercado_pago_onboarded();
-		if ( ! is_null( $is_onboarded ) ) {
-			return $is_onboarded;
-		}
-
-		return parent::is_onboarding_completed( $payment_gateway );
+		return $this->is_mercado_pago_onboarded( $payment_gateway ) ?? parent::is_onboarding_completed( $payment_gateway );
 	}
 
 	/**
@@ -149,12 +129,7 @@ class MercadoPago extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_mercado_pago_in_sandbox_mode( $payment_gateway );
-		if ( ! is_null( $is_in_sandbox_mode ) ) {
-			return $is_in_sandbox_mode;
-		}
-
-		return parent::is_in_test_mode_onboarding( $payment_gateway );
+		return $this->is_mercado_pago_in_sandbox_mode( $payment_gateway ) ?? parent::is_in_test_mode_onboarding( $payment_gateway );
 	}
 
 	/**
@@ -203,10 +178,12 @@ class MercadoPago extends PaymentGateway {
 	 *
 	 * For MercadoPago, there are two different environments: sandbox/test and production/sale.
 	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
 	 * @return ?bool True if the payment gateway is onboarded, false otherwise.
 	 *               Null if we failed to determine the onboarding status.
 	 */
-	private function is_mercado_pago_onboarded(): ?bool {
+	private function is_mercado_pago_onboarded( WC_Payment_Gateway $payment_gateway ): ?bool {
 		global $mercadopago;
 
 		try {
@@ -224,12 +201,13 @@ class MercadoPago extends PaymentGateway {
 
 			}
 		} catch ( \Throwable $e ) {
-			// Log the error for debugging purposes.
+			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
-				'Failed to determine if the MercadoPago gateway is onboarded: ' . $e->getMessage(),
+				'Failed to determine if gateway is onboarded: ' . $e->getMessage(),
 				array(
-					'source' => 'settings-payments',
-					'error'  => $e,
+					'gateway' => $payment_gateway->id,
+					'source'  => 'settings-payments',
+					'error'   => $e,
 				)
 			);
 		}

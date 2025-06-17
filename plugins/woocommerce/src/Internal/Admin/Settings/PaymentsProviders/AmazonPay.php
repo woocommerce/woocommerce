@@ -26,12 +26,7 @@ class AmazonPay extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode, false otherwise.
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_amazon_pay_in_sandbox_mode( $payment_gateway );
-		if ( ! is_null( $is_in_sandbox_mode ) ) {
-			return $is_in_sandbox_mode;
-		}
-
-		return parent::is_in_test_mode( $payment_gateway );
+		return $this->is_amazon_pay_in_sandbox_mode( $payment_gateway ) ?? parent::is_in_test_mode( $payment_gateway );
 	}
 
 	/**
@@ -45,12 +40,7 @@ class AmazonPay extends PaymentGateway {
 	 * @return bool True if the payment gateway is in dev mode, false otherwise.
 	 */
 	public function is_in_dev_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_amazon_pay_in_sandbox_mode( $payment_gateway );
-		if ( ! is_null( $is_in_sandbox_mode ) ) {
-			return $is_in_sandbox_mode;
-		}
-
-		return parent::is_in_dev_mode( $payment_gateway );
+		return $this->is_amazon_pay_in_sandbox_mode( $payment_gateway ) ?? parent::is_in_dev_mode( $payment_gateway );
 	}
 
 	/**
@@ -62,12 +52,7 @@ class AmazonPay extends PaymentGateway {
 	 *              If the payment gateway does not provide the information, it will return true.
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_onboarded = $this->is_amazon_pay_onboarded();
-		if ( ! is_null( $is_onboarded ) ) {
-			return $is_onboarded;
-		}
-
-		return parent::is_account_connected( $payment_gateway );
+		return $this->is_amazon_pay_onboarded( $payment_gateway ) ?? parent::is_account_connected( $payment_gateway );
 	}
 
 	/**
@@ -80,12 +65,7 @@ class AmazonPay extends PaymentGateway {
 	 *              it will infer it from having a connected account.
 	 */
 	public function is_onboarding_completed( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_onboarded = $this->is_amazon_pay_onboarded();
-		if ( ! is_null( $is_onboarded ) ) {
-			return $is_onboarded;
-		}
-
-		return parent::is_onboarding_completed( $payment_gateway );
+		return $this->is_amazon_pay_onboarded( $payment_gateway ) ?? parent::is_onboarding_completed( $payment_gateway );
 	}
 
 	/**
@@ -99,12 +79,7 @@ class AmazonPay extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_amazon_pay_in_sandbox_mode( $payment_gateway );
-		if ( ! is_null( $is_in_sandbox_mode ) ) {
-			return $is_in_sandbox_mode;
-		}
-
-		return parent::is_in_test_mode_onboarding( $payment_gateway );
+		return $this->is_amazon_pay_in_sandbox_mode( $payment_gateway ) ?? parent::is_in_test_mode_onboarding( $payment_gateway );
 	}
 
 	/**
@@ -149,10 +124,12 @@ class AmazonPay extends PaymentGateway {
 	 *
 	 * For AmazonPay, there are two different environments: sandbox and production.
 	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
 	 * @return ?bool True if the payment gateway is onboarded, false otherwise.
 	 *               Null if we failed to determine the onboarding status.
 	 */
-	private function is_amazon_pay_onboarded(): ?bool {
+	private function is_amazon_pay_onboarded( WC_Payment_Gateway $payment_gateway ): ?bool {
 		try {
 			if ( class_exists( '\WC_Amazon_Payments_Advanced_API' ) &&
 				is_callable( '\WC_Amazon_Payments_Advanced_API::validate_api_settings' ) ) {
@@ -162,10 +139,11 @@ class AmazonPay extends PaymentGateway {
 		} catch ( \Throwable $e ) {
 			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
-				'Failed to determine if the AmazonPay gateway is onboarded: ' . $e->getMessage(),
+				'Failed to determine if gateway is onboarded: ' . $e->getMessage(),
 				array(
-					'source' => 'settings-payments',
-					'error'  => $e,
+					'gateway' => $payment_gateway->id,
+					'source'  => 'settings-payments',
+					'error'   => $e,
 				)
 			);
 		}
