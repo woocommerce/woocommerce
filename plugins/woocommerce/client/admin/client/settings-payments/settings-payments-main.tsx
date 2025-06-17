@@ -373,6 +373,9 @@ export const SettingsPaymentsMain = () => {
 							from: context,
 						} );
 					}
+					// Note: The provider extension activation is tracked from the backend.
+
+					setInstallingPlugin( null );
 
 					// Wait for the state update and fetch the latest providers.
 					const updatedProviders = await resolveSelect(
@@ -408,7 +411,6 @@ export const SettingsPaymentsMain = () => {
 							'woopayments_onboarding_modal_opened'
 						);
 						setIsOnboardingModalOpen( true );
-						setInstallingPlugin( null );
 					} else {
 						// If the installed and/or activated extension has recommended payment methods,
 						// redirect to the payment methods page.
@@ -423,11 +425,8 @@ export const SettingsPaymentsMain = () => {
 								getNewPath( {}, '/payment-methods' )
 							);
 
-							setInstallingPlugin( null );
 							return;
 						}
-
-						setInstallingPlugin( null );
 
 						if ( onboardingUrl ) {
 							window.location.href = onboardingUrl;
