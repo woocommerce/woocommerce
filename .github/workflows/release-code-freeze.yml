@@ -14,6 +14,7 @@ env:
 
 jobs:
   check-feature-freeze-event:
+    name: Check for Feature Freeze events today
     runs-on: ubuntu-latest
     outputs:
       should-run: ${{ steps.check-feature-freeze-event.outputs.should-run }}
