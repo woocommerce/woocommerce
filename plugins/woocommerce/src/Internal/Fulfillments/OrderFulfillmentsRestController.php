@@ -406,9 +406,6 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			$fulfillment = new Fulfillment( $fulfillment_id );
 			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
 			$fulfillment->delete();
-
-			$fulfillment->set_date_deleted( current_time( 'mysql' ) );
-			$fulfillment->save();
 		} catch ( ApiException $ex ) {
 			return $this->prepare_error_response(
 				$ex->getErrorCode(),
