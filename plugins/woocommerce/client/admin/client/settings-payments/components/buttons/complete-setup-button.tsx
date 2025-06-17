@@ -93,7 +93,7 @@ export const CompleteSetupButton = ( {
 			// Calling the selector triggers the data fetch
 			select( woopaymentsOnboardingStore ).getOnboardingData();
 		}
-	}, [ gatewayProvider, onboardingType, select ] );
+	}, [ gatewayProvider.id, onboardingCompleted, onboardingType, select ] );
 
 	const completeSetup = () => {
 		// Record the click of this button.
