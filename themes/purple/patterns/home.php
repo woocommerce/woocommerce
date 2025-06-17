@@ -16,3 +16,5 @@
 <!-- wp:pattern {"slug":"woostarter/cta-with-images"} /-->
 
 <!-- wp:pattern {"slug":"woostarter/template-query-loop"} /-->
+
+<!-- wp:pattern {"slug":"woostarter/testimonial-with-logo"} /-->
