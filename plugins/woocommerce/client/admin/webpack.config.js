@@ -222,13 +222,13 @@ const webpackConfig = {
 			],
 		} ),
 
-		// The email-editor assets need to be copied to the build directory. TODO BETTTER COMENT
+		// The email-editor assets for the rich-text.js file need to be copied to the build directory.
 		new CopyWebpackPlugin( {
 			patterns: [
 				{
 					from: path.join(
 						__dirname,
-						'../../../../packages/js/email-editor/build/assets'
+						'../../../../packages/js/email-editor/assets'
 					),
 					to: './email-editor/assets',
 				},
