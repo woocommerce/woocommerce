@@ -43,16 +43,16 @@
 		"./packages/**/*.{tsx,ts,js}"
 	],
 	"scripts": {
-		"analyze-bundles": "cross-env WP_BUNDLE_ANALYZER=1 pnpm run build",
+		"analyze-bundles": "WP_BUNDLE_ANALYZER=1 pnpm run build",
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:bundle": "wireit",
-		"build:check-assets": "npx ajv validate -s bin/block.json-validation-schema.json -d assets/js/**/block.json && rimraf build/* && cross-env ASSET_CHECK=true BABEL_ENV=default NODE_ENV=production webpack",
+		"build:check-assets": "npx ajv validate -s bin/block.json-validation-schema.json -d assets/js/**/block.json && rimraf build/* && ASSET_CHECK=true BABEL_ENV=default NODE_ENV=production webpack",
 		"prebuild:docs": "rimraf docs/extensibility/actions.md & rimraf docs/extensibility/filters.md",
 		"build:docs": "./vendor/bin/wp-hooks-generator --input=src --output=bin/hook-docs/data && node ./bin/hook-docs && pnpm build:docs:block-references",
 		"build:docs:block-references": "node ./bin/gen-block-list-doc.js",
 		"postbuild:docs": "./bin/add-doc-footer.sh",
-		"dev": "rimraf build/* && cross-env BABEL_ENV=default webpack",
+		"dev": "rimraf build/* && BABEL_ENV=default webpack",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:css": "pnpm lint:css-fix",
@@ -69,7 +69,7 @@
 		"pre-commit": "lint-staged",
 		"reformat-files": "prettier --ignore-path .eslintignore --write \"**/*.{js,jsx,ts,tsx,css,scss}\"",
 		"rimraf": "./node_modules/rimraf/bin.js",
-		"start": "rimraf build/* && cross-env BABEL_ENV=default CHECK_CIRCULAR_DEPS=true webpack --watch",
+		"start": "rimraf build/* && BABEL_ENV=default CHECK_CIRCULAR_DEPS=true webpack --watch",
 		"storybook": "pnpm watch:build:storybook",
 		"storybook:build": "pnpm build:storybook",
 		"storybook:deploy": "rimraf ./storybook/dist/* && pnpm run storybook:build && gh-pages -d ./storybook/dist",
@@ -99,7 +99,7 @@
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:bundle": "wireit",
-		"knip": "cross-env WP_EXPERIMENTAL_MODULES=true knip"
+		"knip": "WP_EXPERIMENTAL_MODULES=true knip"
 	},
 	"devDependencies": {
 		"@automattic/color-studio": "4.0.0",
@@ -192,7 +192,6 @@
 		"circular-dependency-plugin": "5.2.x",
 		"copy-webpack-plugin": "13.0.x",
 		"core-js": "3.25.0",
-		"cross-env": "7.0.3",
 		"css-loader": "6.11.x",
 		"cssnano": "5.1.12",
 		"deep-freeze": "0.0.1",
