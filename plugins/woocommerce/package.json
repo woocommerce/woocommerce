@@ -768,7 +768,6 @@
 		"axios": "^0.24.0",
 		"buildkite-test-collector": "^1.7.1",
 		"config": "3.3.7",
-		"cross-env": "6.0.3",
 		"dotenv": "^10.0.0",
 		"eslint": "^8.55.0",
 		"eslint-config-wpcalypso": "5.0.0",
