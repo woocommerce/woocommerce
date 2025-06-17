@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\Utils;
 
 use InvalidArgumentException;
-use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 
 /**
  * Manages the registration of interactivity config and state that is commonly shared by WooCommerce blocks.

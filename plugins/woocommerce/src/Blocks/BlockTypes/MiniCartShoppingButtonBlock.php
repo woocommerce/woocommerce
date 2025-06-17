@@ -39,20 +39,16 @@ class MiniCartShoppingButtonBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
-		$start_shopping_label = __( 'Start shopping', 'woocommerce' );
 		ob_start();
 		?>
 		<div class="wp-block-button has-text-align-center">
-			<a 				
+			<a
 				data-wp-interactive="woocommerce/mini-cart-shopping-button-block"
 				data-wp-bind--href="woocommerce/mini-cart::state.shopUrl" 
 				class="wc-block-components-button wp-element-button wp-block-woocommerce-mini-cart-shopping-button-block wc-block-mini-cart__shopping-button contained"
 			>
 				<div class="wc-block-components-button__text">
-					<?php
-						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-						echo $start_shopping_label;
-					?>
+					<?php esc_html_e( 'Start shopping', 'woocommerce' ); ?>
 				</div>
 			</a>
 		</div>

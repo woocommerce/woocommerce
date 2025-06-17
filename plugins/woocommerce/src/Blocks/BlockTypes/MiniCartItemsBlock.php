@@ -94,9 +94,13 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 										<a data-wp-text="state.cartItemName" data-wp-bind--href="context.cartItem.permalink" class="wc-block-components-product-name"></a>
 										<div class="wc-block-cart-item__prices">
 											<span data-wp-bind--hidden="!state.cartItemHasDiscount" class="price wc-block-components-product-price" hidden>
-												<span class="screen-reader-text"><?php echo esc_html_e( 'Previous price:', 'woocommerce' ); ?></span>
+												<span class="screen-reader-text">
+													<?php esc_html_e( 'Previous price:', 'woocommerce' ); ?>
+												</span>
 												<del data-wp-text="state.priceWithoutDiscount" class="wc-block-components-product-price__regular"></del>
-												<span class="screen-reader-text"><?php echo esc_html_e( 'Discounted price:', 'woocommerce' ); ?></span>
+												<span class="screen-reader-text">
+													<?php esc_html_e( 'Discounted price:', 'woocommerce' ); ?>
+												</span>
 												<ins data-wp-text="state.itemPrice" class="wc-block-components-product-price__value is-discounted"></ins>
 											</span>
 											<span data-wp-bind--hidden="state.cartItemHasDiscount" class="price wc-block-components-product-price" hidden>
