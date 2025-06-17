@@ -141,9 +141,12 @@ export const SettingsPaymentsMain = () => {
 				providers:
 					paymentSettings.getPaymentProviders( businessCountry ),
 				offlinePaymentGateways:
-					paymentSettings.getOfflinePaymentGateways(),
-				suggestions: paymentSettings.getSuggestions(),
-				suggestionCategories: paymentSettings.getSuggestionCategories(),
+					paymentSettings.getOfflinePaymentGateways(
+						businessCountry
+					),
+				suggestions: paymentSettings.getSuggestions( businessCountry ),
+				suggestionCategories:
+					paymentSettings.getSuggestionCategories( businessCountry ),
 				isFetching: paymentSettings.isFetching(),
 			};
 		},
