@@ -43,7 +43,7 @@ class Mollie extends PaymentGateway {
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
-			$sandbox_mode = $this->is_mollie_in_sandbox_mode();
+			$sandbox_mode = $this->is_mollie_in_sandbox_mode( $payment_gateway );
 			if ( $sandbox_mode ) {
 				// If Mollie is in sandbox mode, we consider the account connected if the test API key is set.
 				return ! empty( get_option( 'mollie-payments-for-woocommerce_test_api_key', '' ) );
@@ -74,7 +74,7 @@ class Mollie extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode, false otherwise.
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_mollie_in_sandbox_mode();
+		$is_in_sandbox_mode = $this->is_mollie_in_sandbox_mode( $payment_gateway );
 		if ( ! is_null( $is_in_sandbox_mode ) ) {
 			return $is_in_sandbox_mode;
 		}
@@ -93,7 +93,7 @@ class Mollie extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_mollie_in_sandbox_mode();
+		$is_in_sandbox_mode = $this->is_mollie_in_sandbox_mode( $payment_gateway );
 		if ( ! is_null( $is_in_sandbox_mode ) ) {
 			return $is_in_sandbox_mode;
 		}
@@ -169,15 +169,25 @@ class Mollie extends PaymentGateway {
 	/**
 	 * Check if the Mollie payment gateway is in sandbox mode.
 	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
 	 * @return ?bool True if the payment gateway is in sandbox mode, false otherwise.
 	 *               Null if the environment could not be determined.
 	 */
-	private function is_mollie_in_sandbox_mode(): ?bool {
+	private function is_mollie_in_sandbox_mode( WC_Payment_Gateway $payment_gateway ): ?bool {
 		try {
 			// Unfortunately, Mollie does not provide a standard way to determine if the gateway is in sandbox mode.
 			return filter_var( get_option( 'mollie-payments-for-woocommerce_test_mode_enabled', 'yes' ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-		} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-			// Ignore any errors.
+		} catch ( \Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway is in sandbox mode: ' . $e->getMessage(),
+				array(
+					'gateway' => $payment_gateway->id,
+					'source'  => 'settings-payments',
+					'error'   => $e,
+				)
+			);
 		}
 
 		// Let the caller know that we couldn't determine the environment.
