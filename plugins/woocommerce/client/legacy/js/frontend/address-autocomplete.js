@@ -265,13 +265,12 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		 * @param input {HTMLInputElement} The input element to disable autofill for.
 		 */
 		function disableBrowserAutofill( input ) {
-			if ( input.getAttribute( 'autocomplete' ) === 'none' ) {
+			if ( input.getAttribute( 'autocomplete' ) === 'off' ) {
 				return;
 			}
 
-			input.setAttribute( 'autocomplete', 'none' );
-			input.setAttribute( 'data-1p-ignore', 'true' );
-			input.setAttribute( 'data-lpignore', 'true' );
+			input.setAttribute( 'autocomplete', 'off' );
+			input.setAttribute( 'data-lpignore', '' );
 
 			// To prevent 1Password/LastPass and autocomplete clashes, we need to refocus the element.
 			// This is achieved by removing and re-adding the element to trigger browser updates.
@@ -287,13 +286,12 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		 * @param input {HTMLInputElement} The input element to enable autofill for.
 		 */
 		function enableBrowserAutofill( input ) {
-			if ( input.getAttribute( 'autocomplete' ) !== 'none' ) {
+			if ( input.getAttribute( 'autocomplete' ) !== 'off' ) {
 				return;
 			}
 
 			input.setAttribute( 'autocomplete', 'address-line1' );
-			input.removeAttribute( 'data-1p-ignore' );
-			input.removeAttribute( 'data-lpignore' );
+			input.setAttribute( 'data-lpignore', 'false' );
 		}
 
 		/**
@@ -678,6 +676,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 							);
 							// Hide suggestions immediately for better UX.
 							hideSuggestions( type );
+							enableBrowserAutofill( addressInput );
 							await selectAddress(
 								type,
 								selectedItem.dataset.id
@@ -685,6 +684,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 						}
 					} else if ( e.key === 'Escape' ) {
 						hideSuggestions( type );
+						enableBrowserAutofill( addressInput );
 					}
 				} );
 			}
