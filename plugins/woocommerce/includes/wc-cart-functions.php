@@ -380,10 +380,11 @@ function wc_cart_totals_shipping_method_label( $method ) {
  *
  * @param  double $value Amount to round.
  * @param  int    $precision DP to round.
+ * @param  int    $round_mode Round mode.
  * @return float
  */
-function wc_cart_round_discount( $value, $precision ) {
-	return wc_round_discount( $value, $precision );
+function wc_cart_round_discount( $value, $precision, $round_mode = WC_DISCOUNT_ROUNDING_MODE ) {
+	return wc_round_discount( $value, $precision, $round_mode );
 }
 
 /**
