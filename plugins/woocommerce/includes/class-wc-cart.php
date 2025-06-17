@@ -1943,7 +1943,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_coupon_discount_amount( $code, $ex_tax = true ) {
 		$totals          = $this->get_coupon_discount_totals();
-		$discount_amount = isset( $totals[ $code ] ) ? $totals[ $code ] : 0;
+		$discount_amount = 0;
+		foreach ( $totals as $key => $value ) {
+			if ( wc_is_same_coupon( $key, $code ) ) {
+				$discount_amount = $value;
+				break;
+			}
+		}
 
 		if ( ! $ex_tax ) {
 			$discount_amount += $this->get_coupon_discount_tax_amount( $code );
@@ -1959,8 +1965,15 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float discount amount
 	 */
 	public function get_coupon_discount_tax_amount( $code ) {
-		$totals = $this->get_coupon_discount_tax_totals();
-		return wc_cart_round_discount( isset( $totals[ $code ] ) ? $totals[ $code ] : 0, wc_get_price_decimals() );
+		$totals     = $this->get_coupon_discount_tax_totals();
+		$tax_amount = 0;
+		foreach ( $totals as $key => $value ) {
+			if ( wc_is_same_coupon( $key, $code ) ) {
+				$tax_amount = $value;
+				break;
+			}
+		}
+		return wc_cart_round_discount( $tax_amount, wc_get_price_decimals(), PHP_ROUND_HALF_DOWN );
 	}
 
 	/**
