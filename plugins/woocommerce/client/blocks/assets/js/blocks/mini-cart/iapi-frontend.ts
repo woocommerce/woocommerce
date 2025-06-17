@@ -69,10 +69,6 @@ store< MiniCart >(
 	'woocommerce/mini-cart',
 	{
 		state: {
-			get shopUrl() {
-				return getConfig( 'woocommerce' ).shopUrl;
-			},
-
 			get totalItemsInCart() {
 				return wooStoreState.cart.items.reduce< number >(
 					( total, { quantity } ) => total + quantity,
@@ -179,8 +175,12 @@ const { state } = store(
 	{
 		state: {
 			// As a workaround for a bug in context of wp-each we use state to find the cart item. Where we need
-			// reactivity for the wp-each, use getCartItemById to get the cart item.
-			getCartItemById( id: number ): CartItem {
+			// reactivity for the wp-each, use state.cartItem to get the cart item.
+			get cartItem(): CartItem {
+				const {
+					cartItem: { id },
+				} = getContext< CartItemContext >();
+
 				return wooStoreState.cart.items.find(
 					( item ) => item.id === id
 				) as CartItem;
@@ -225,9 +225,7 @@ const { state } = store(
 			},
 
 			get lineItemDiscount(): string {
-				const { quantity, prices } = state.getCartItemById(
-					getContext< CartItemContext >().cartItem.id
-				);
+				const { quantity, prices } = state.cartItem;
 
 				const regularAmountSingle = Dinero( {
 					amount: parseInt( prices.raw_prices.regular_price, 10 ),
@@ -273,9 +271,7 @@ const { state } = store(
 				const {
 					quantity,
 					quantity_limits: { minimum },
-				} = state.getCartItemById(
-					getContext< CartItemContext >().cartItem.id
-				);
+				} = state.cartItem;
 				return quantity - 1 < minimum;
 			},
 
@@ -284,9 +280,7 @@ const { state } = store(
 				const {
 					quantity,
 					quantity_limits: { maximum },
-				} = state.getCartItemById(
-					getContext< CartItemContext >().cartItem.id
-				);
+				} = state.cartItem;
 				return quantity + 1 > maximum;
 			},
 

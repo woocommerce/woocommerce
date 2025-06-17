@@ -124,7 +124,6 @@ trait BlocksSharedState {
 	private static function get_core_data() {
 		return [
 			'isBlockTheme' => wp_is_block_theme(),
-			'shopUrl'      => get_permalink( wc_get_page_id( 'shop' ) ),
 		];
 	}
 

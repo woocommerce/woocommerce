@@ -40,11 +40,12 @@ class MiniCartShoppingButtonBlock extends AbstractInnerBlock {
 	 */
 	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
 		ob_start();
+		$shop_url = get_permalink( wc_get_page_id( 'shop' ) );
 		?>
 		<div class="wp-block-button has-text-align-center">
 			<a
 				data-wp-interactive="woocommerce/mini-cart-shopping-button-block"
-				data-wp-bind--href="woocommerce/mini-cart::state.shopUrl" 
+				href="<?php echo esc_attr( $shop_url ); ?>"
 				class="wc-block-components-button wp-element-button wp-block-woocommerce-mini-cart-shopping-button-block wc-block-mini-cart__shopping-button contained"
 			>
 				<div class="wc-block-components-button__text">

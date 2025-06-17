@@ -528,13 +528,13 @@ class MiniCart extends AbstractBlock {
 						<?php endif; ?>
 					</span>
 					<?php if ( $cart_always_shows_price ) : ?>
-							<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
-							</span>
-							<?php
-								// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-								echo $this->get_include_tax_label_markup( $attributes );
-							?>
-						<?php endif; ?>
+						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
+						</span>
+						<?php
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							echo $this->get_include_tax_label_markup( $attributes );
+						?>
+					<?php endif; ?>
 				</button>
 				<div data-wp-on--click="callbacks.overlayCloseDrawer" data-wp-bind--class="state.drawerOverlayClass" class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden">
 					<div class="wc-block-mini-cart__drawer wc-block-components-drawer is-mobile">
