@@ -87,4 +87,14 @@ final class OrderStatus {
 	 * @var string
 	 */
 	public const DRAFT = 'draft';
+
+	/**
+	 * Array of all the valid order statuses for a complete payment.
+	 */
+	public const PAYMENT_COMPLETE_STATUSES = array(
+		OrderStatus::ON_HOLD,
+		OrderStatus::PENDING,
+		OrderStatus::FAILED,
+		OrderStatus::CANCELLED,
+	);
 }
