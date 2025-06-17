@@ -10,11 +10,11 @@ use WC_Payment_Gateway;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Stripe payment gateway provider class.
+ * Payoneer payment gateway provider class.
  *
- * This class handles all the custom logic for the Stripe payment gateway provider.
+ * This class handles all the custom logic for the Payoneer payment gateway provider.
  */
-class Stripe extends PaymentGateway {
+class Payoneer extends PaymentGateway {
 
 	/**
 	 * Try to determine if the payment gateway is in test mode.
@@ -28,11 +28,7 @@ class Stripe extends PaymentGateway {
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
-			if ( class_exists( '\WC_Stripe_Mode' ) &&
-				is_callable( '\WC_Stripe_Mode::is_test' ) ) {
-
-				return filter_var( \WC_Stripe_Mode::is_test(), FILTER_VALIDATE_BOOLEAN );
-			}
+			return ! filter_var( $payment_gateway->get_option( 'live_mode' ), FILTER_VALIDATE_BOOLEAN );
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
@@ -57,16 +53,21 @@ class Stripe extends PaymentGateway {
 	 *              If the payment gateway does not provide the information, it will return true.
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( class_exists( '\WC_Stripe' ) && is_callable( '\WC_Stripe::get_instance' ) ) {
-			$stripe = \WC_Stripe::get_instance();
-			if ( isset( $stripe->account ) &&
-				class_exists( '\WC_Stripe_Account' ) &&
-				defined( '\WC_Stripe_Account::STATUS_NO_ACCOUNT' ) &&
-				$stripe->account instanceof \WC_Stripe_Account &&
-				is_callable( array( $stripe->account, 'get_account_status' ) ) ) {
-
-				return \WC_Stripe_Account::STATUS_NO_ACCOUNT !== $stripe->account->get_account_status();
-			}
+		try {
+			$sandbox_prefix = $this->is_in_test_mode( $payment_gateway ) ? 'sandbox_' : '';
+			return ! empty( $payment_gateway->get_option( 'merchant_code' ) ) &&
+					! empty( $payment_gateway->get_option( $sandbox_prefix . 'merchant_token' ) ) &&
+					! empty( $payment_gateway->get_option( $sandbox_prefix . 'store_code' ) );
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway has an account connected: ' . $e->getMessage(),
+				array(
+					'gateway' => $payment_gateway->id,
+					'source'  => 'settings-payments',
+					'error'   => $e,
+				)
+			);
 		}
 
 		return parent::is_account_connected( $payment_gateway );
@@ -83,18 +84,7 @@ class Stripe extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( class_exists( '\WC_Stripe' ) && is_callable( '\WC_Stripe::get_instance' ) ) {
-			$stripe = \WC_Stripe::get_instance();
-			if ( isset( $stripe->connect ) &&
-				class_exists( '\WC_Stripe_Connect' ) &&
-				$stripe->connect instanceof \WC_Stripe_Connect &&
-				is_callable( array( $stripe->connect, 'is_connected' ) ) ) {
-
-				return $stripe->connect->is_connected( 'test' )
-					&& ! $stripe->connect->is_connected( 'live' );
-			}
-		}
-
-		return parent::is_in_test_mode_onboarding( $payment_gateway );
+		// Test mode is actually sandbox mode for Payoneer, affecting the API credentials used.
+		return $this->is_in_test_mode( $payment_gateway );
 	}
 }

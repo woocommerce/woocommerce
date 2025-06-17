@@ -1,0 +1,107 @@
+<?php
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
+
+use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
+use Throwable;
+use WC_Payment_Gateway;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Paymob payment gateway provider class.
+ *
+ * This class handles all the custom logic for the Paymob payment gateway provider.
+ */
+class Paymob extends PaymentGateway {
+
+	/**
+	 * Check if the payment gateway needs setup.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
+	 * @return bool True if the payment gateway needs setup, false otherwise.
+	 */
+	public function needs_setup( WC_Payment_Gateway $payment_gateway ): bool {
+		$needs_setup = filter_var( $payment_gateway->needs_setup(), FILTER_VALIDATE_BOOLEAN );
+		// If we get a true value, it means the gateway needs setup.
+		if ( $needs_setup ) {
+			return true;
+		}
+
+		// If we reach here, just assume that the gateway does not need setup.
+		return false;
+	}
+
+	/**
+	 * Try to determine if the payment gateway is in test mode.
+	 *
+	 * This is a best-effort attempt, as there is no standard way to determine this.
+	 * Trust the true value, but don't consider a false value as definitive.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
+	 * @return bool True if the payment gateway is in test mode, false otherwise.
+	 */
+	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
+		$is_in_sandbox_mode = $this->is_paymob_in_sandbox_mode();
+		if ( ! is_null( $is_in_sandbox_mode ) ) {
+			return $is_in_sandbox_mode;
+		}
+
+		return parent::is_in_test_mode( $payment_gateway );
+	}
+
+	/**
+	 * Check if the payment gateway has a payments processor account connected.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
+	 * @return bool True if the payment gateway account is connected, false otherwise.
+	 *              If the payment gateway does not provide the information, it will return true.
+	 */
+	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
+		// The Paymob gateway ties needs_setup only to the API keys, so if they are set, we consider the account connected.
+		// Note: we need to overwrite the needs_setup method to NOT call is_account_connected and avoid infinite recursion.
+		return ! $this->needs_setup( $payment_gateway );
+	}
+
+	/**
+	 * Try to determine if the payment gateway is in test mode onboarding (aka sandbox or test-drive).
+	 *
+	 * This is a best-effort attempt, as there is no standard way to determine this.
+	 * Trust the true value, but don't consider a false value as definitive.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
+	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
+	 */
+	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
+		$is_in_sandbox_mode = $this->is_paymob_in_sandbox_mode();
+		if ( ! is_null( $is_in_sandbox_mode ) ) {
+			return $is_in_sandbox_mode;
+		}
+
+		return parent::is_in_test_mode_onboarding( $payment_gateway );
+	}
+
+	/**
+	 * Check if the Paymob payment gateway is in sandbox mode.
+	 *
+	 * @return ?bool True if the payment gateway is in sandbox mode, false otherwise.
+	 *               Null if the environment could not be determined.
+	 */
+	private function is_paymob_in_sandbox_mode(): ?bool {
+		try {
+			// Unfortunately, Paymob does not provide a standard way to determine if the gateway is in sandbox mode.
+			$options = get_option( 'woocommerce_paymob-main_settings', array() );
+			return 'test' === ( $options['mode'] ?? 'test' );
+		} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Ignore any errors.
+		}
+
+		// Let the caller know that we couldn't determine the environment.
+		return null;
+	}
+}

@@ -10,11 +10,11 @@ use WC_Payment_Gateway;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Razorpay payment gateway provider class.
+ * Viva.com payment gateway provider class.
  *
- * This class handles all the custom logic for the Razorpay payment gateway provider.
+ * This class handles all the custom logic for the Viva.com payment gateway provider.
  */
-class Razorpay extends PaymentGateway {
+class Vivacom extends PaymentGateway {
 
 	/**
 	 * Check if the payment gateway has a payments processor account connected.
@@ -26,9 +26,10 @@ class Razorpay extends PaymentGateway {
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
-			if ( is_callable( array( $payment_gateway, 'getSetting' ) ) ) {
-				return ! empty( $payment_gateway->getSetting( 'key_id' ) ) &&
-						! empty( $payment_gateway->getSetting( 'key_secret' ) );
+			if ( $this->is_in_test_mode( $payment_gateway ) ) {
+				return ! empty( $payment_gateway->test_client_id ) && ! empty( $payment_gateway->test_client_secret ) && ! empty( $payment_gateway->test_source_code );
+			} else {
+				return ! empty( $payment_gateway->client_id ) && ! empty( $payment_gateway->client_secret ) && ! empty( $payment_gateway->source_code );
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
@@ -46,32 +47,17 @@ class Razorpay extends PaymentGateway {
 	}
 
 	/**
-	 * Try to determine if the payment gateway is in test mode.
+	 * Try to determine if the payment gateway is in test mode onboarding (aka sandbox or test-drive).
 	 *
 	 * This is a best-effort attempt, as there is no standard way to determine this.
 	 * Trust the true value, but don't consider a false value as definitive.
 	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 *
-	 * @return bool True if the payment gateway is in test mode, false otherwise.
+	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
-	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		try {
-			if ( function_exists( '\isTestModeEnabled' ) ) {
-				return filter_var( \isTestModeEnabled(), FILTER_VALIDATE_BOOLEAN );
-			}
-		} catch ( Throwable $e ) {
-			// Do nothing but log so we can investigate.
-			SafeGlobalFunctionProxy::wc_get_logger()->debug(
-				'Failed to determine if gateway is in test mode: ' . $e->getMessage(),
-				array(
-					'gateway' => $payment_gateway->id,
-					'source'  => 'settings-payments',
-					'error'   => $e,
-				)
-			);
-		}
-
-		return parent::is_in_test_mode( $payment_gateway );
+	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
+		// Test mode is actually sandbox mode for Viva.com, affecting the used API keys.
+		return $this->is_in_test_mode( $payment_gateway );
 	}
 }

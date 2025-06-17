@@ -6,15 +6,24 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Affirm;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AfterpayClearpay;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Airwallex;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AmazonPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Antom;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\HelioPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Klarna;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\MercadoPago;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mollie;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Payfast;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Paymob;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Payoneer;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PayPal;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Paystack;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PayUIndia;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Razorpay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Stripe;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Tilopay;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Vivacom;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WCCore;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
@@ -84,7 +93,17 @@ class PaymentsProviders {
 		'clearpay'                  => AfterpayClearpay::class,
 		'antom_*'                   => Antom::class,
 		'razorpay'                  => Razorpay::class,
-
+		'paystack'                  => Paystack::class,
+		'paystack-*'                => Paystack::class,
+		'payfast'                   => Payfast::class,
+		'payoneer-*'                => Payoneer::class,
+		'payubiz'                   => PayUIndia::class,
+		'paymob'                    => Paymob::class,
+		'paymob-*'                  => Paymob::class,
+		'airwallex_*'               => Airwallex::class,
+		'vivawallet*'               => Vivacom::class,
+		'tilopay'                   => Tilopay::class,
+		'helio'                     => HelioPay::class,
 	);
 
 	/**
@@ -108,6 +127,15 @@ class PaymentsProviders {
 		ExtensionSuggestions::CLEARPAY          => AfterpayClearpay::class,
 		ExtensionSuggestions::ANTOM             => Antom::class,
 		ExtensionSuggestions::RAZORPAY          => Razorpay::class,
+		ExtensionSuggestions::PAYSTACK          => Paystack::class,
+		ExtensionSuggestions::PAYFAST           => Payfast::class,
+		ExtensionSuggestions::PAYONEER          => Payoneer::class,
+		ExtensionSuggestions::PAYU_INDIA        => PayUIndia::class,
+		ExtensionSuggestions::PAYMOB            => Paymob::class,
+		ExtensionSuggestions::AIRWALLEX         => Airwallex::class,
+		ExtensionSuggestions::VIVA_WALLET       => Vivacom::class,
+		ExtensionSuggestions::TILOPAY           => Tilopay::class,
+		ExtensionSuggestions::HELIOPAY          => HelioPay::class,
 	);
 
 	/**

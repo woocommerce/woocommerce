@@ -17,17 +17,6 @@ defined( 'ABSPATH' ) || exit;
 class Antom extends PaymentGateway {
 
 	/**
-	 * Check if the payment gateway needs setup.
-	 *
-	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
-	 *
-	 * @return bool True if the payment gateway needs setup, false otherwise.
-	 */
-	public function needs_setup( WC_Payment_Gateway $payment_gateway ): bool {
-		return ! $this->is_account_connected( $payment_gateway );
-	}
-
-	/**
 	 * Check if the payment gateway has a payments processor account connected.
 	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
@@ -37,12 +26,12 @@ class Antom extends PaymentGateway {
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
-			if ( is_callable( '\antom_is_active' ) &&
+			if ( function_exists( '\antom_is_active' ) &&
 				! \antom_is_active() ) {
 				return false;
 			}
 
-			if ( is_callable( '\antom_get_core_settings' ) ) {
+			if ( function_exists( '\antom_get_core_settings' ) ) {
 				$core_settings = \antom_get_core_settings();
 				if ( ! is_array( $core_settings ) ) {
 					return false;
@@ -127,7 +116,7 @@ class Antom extends PaymentGateway {
 			return $is_in_sandbox_mode;
 		}
 
-		return parent::is_in_test_mode( $payment_gateway );
+		return parent::is_in_test_mode_onboarding( $payment_gateway );
 	}
 
 	/**
@@ -140,7 +129,7 @@ class Antom extends PaymentGateway {
 	 */
 	private function is_antom_in_sandbox_mode(): ?bool {
 		try {
-			if ( is_callable( '\antom_get_core_settings' ) ) {
+			if ( function_exists( '\antom_get_core_settings' ) ) {
 				return filter_var( \antom_get_core_settings()['test_mode'], FILTER_VALIDATE_BOOLEAN );
 			}
 		} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch

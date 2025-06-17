@@ -154,7 +154,7 @@ class MercadoPago extends PaymentGateway {
 			return $is_in_sandbox_mode;
 		}
 
-		return parent::is_in_test_mode( $payment_gateway );
+		return parent::is_in_test_mode_onboarding( $payment_gateway );
 	}
 
 	/**
@@ -171,11 +171,11 @@ class MercadoPago extends PaymentGateway {
 		try {
 			// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			if ( class_exists( '\MercadoPago\Woocommerce\WoocommerceMercadoPago' ) &&
-				 class_exists( '\MercadoPago\Woocommerce\Configs\Store' ) &&
-				 $mercadopago instanceof \MercadoPago\Woocommerce\WoocommerceMercadoPago &&
-				 ! is_null( $mercadopago->storeConfig ) &&
-				 $mercadopago->storeConfig instanceof \MercadoPago\Woocommerce\Configs\Store &&
-				 is_callable( array( $mercadopago->storeConfig, 'isTestMode' ) )
+				class_exists( '\MercadoPago\Woocommerce\Configs\Store' ) &&
+				$mercadopago instanceof \MercadoPago\Woocommerce\WoocommerceMercadoPago &&
+				! is_null( $mercadopago->storeConfig ) &&
+				$mercadopago->storeConfig instanceof \MercadoPago\Woocommerce\Configs\Store &&
+				is_callable( array( $mercadopago->storeConfig, 'isTestMode' ) )
 			) {
 				return filter_var( $mercadopago->storeConfig->isTestMode(), FILTER_VALIDATE_BOOLEAN );
 
@@ -185,8 +185,8 @@ class MercadoPago extends PaymentGateway {
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to determine if the MercadoPago gateway is in sandbox mode: ' . $e->getMessage(),
 				array(
-					'source'  => 'settings-payments',
-					'error'   => $e,
+					'source' => 'settings-payments',
+					'error'  => $e,
 				)
 			);
 		}
@@ -225,8 +225,8 @@ class MercadoPago extends PaymentGateway {
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to determine if the MercadoPago gateway is onboarded: ' . $e->getMessage(),
 				array(
-					'source'  => 'settings-payments',
-					'error'   => $e,
+					'source' => 'settings-payments',
+					'error'  => $e,
 				)
 			);
 		}

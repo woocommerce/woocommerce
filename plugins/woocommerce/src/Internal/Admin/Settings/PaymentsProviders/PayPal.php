@@ -103,7 +103,7 @@ class PayPal extends PaymentGateway {
 			return $is_in_sandbox_mode;
 		}
 
-		return parent::is_in_test_mode( $payment_gateway );
+		return parent::is_in_test_mode_onboarding( $payment_gateway );
 	}
 
 	/**

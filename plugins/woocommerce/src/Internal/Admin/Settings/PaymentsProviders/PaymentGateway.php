@@ -239,7 +239,21 @@ class PaymentGateway {
 	 * @return bool True if the payment gateway needs setup, false otherwise.
 	 */
 	public function needs_setup( WC_Payment_Gateway $payment_gateway ): bool {
-		return filter_var( $payment_gateway->needs_setup(), FILTER_VALIDATE_BOOLEAN );
+		$needs_setup = filter_var( $payment_gateway->needs_setup(), FILTER_VALIDATE_BOOLEAN );
+		// If we get a true value, it means the gateway needs setup.
+		if ( $needs_setup ) {
+			return true;
+		}
+
+		// If we get a false value, it might mean that it doesn't need setup,
+		// but it can also mean that the gateway does not provide the information and just falls back to the default.
+		// Check if there is a connected account, as that is the most common indicator of a setup.
+		if ( ! $this->is_account_connected( $payment_gateway ) ) {
+			return true;
+		}
+
+		// If we reach here, just assume that the gateway does not need setup.
+		return false;
 	}
 
 	/**
@@ -265,6 +279,9 @@ class PaymentGateway {
 			// Try various gateway public properties to check if the payment gateway is in test mode.
 			if ( isset( $payment_gateway->testmode ) ) {
 				return filter_var( $payment_gateway->testmode, FILTER_VALIDATE_BOOLEAN );
+			}
+			if ( isset( $payment_gateway->test_mode ) ) {
+				return filter_var( $payment_gateway->test_mode, FILTER_VALIDATE_BOOLEAN );
 			}
 
 			// Try various gateway option entries to check if the payment gateway is in test mode.

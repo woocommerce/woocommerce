@@ -10,11 +10,11 @@ use WC_Payment_Gateway;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Stripe payment gateway provider class.
+ * HelioPay payment gateway provider class.
  *
- * This class handles all the custom logic for the Stripe payment gateway provider.
+ * This class handles all the custom logic for the HelioPay payment gateway provider.
  */
-class Stripe extends PaymentGateway {
+class HelioPay extends PaymentGateway {
 
 	/**
 	 * Try to determine if the payment gateway is in test mode.
@@ -28,10 +28,8 @@ class Stripe extends PaymentGateway {
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
-			if ( class_exists( '\WC_Stripe_Mode' ) &&
-				is_callable( '\WC_Stripe_Mode::is_test' ) ) {
-
-				return filter_var( \WC_Stripe_Mode::is_test(), FILTER_VALIDATE_BOOLEAN );
+			if ( defined( '\HELIO_DEVNET_ENABLED' ) ) {
+				return filter_var( $payment_gateway->get_option( \HELIO_DEVNET_ENABLED ), FILTER_VALIDATE_BOOLEAN );
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
@@ -57,16 +55,28 @@ class Stripe extends PaymentGateway {
 	 *              If the payment gateway does not provide the information, it will return true.
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( class_exists( '\WC_Stripe' ) && is_callable( '\WC_Stripe::get_instance' ) ) {
-			$stripe = \WC_Stripe::get_instance();
-			if ( isset( $stripe->account ) &&
-				class_exists( '\WC_Stripe_Account' ) &&
-				defined( '\WC_Stripe_Account::STATUS_NO_ACCOUNT' ) &&
-				$stripe->account instanceof \WC_Stripe_Account &&
-				is_callable( array( $stripe->account, 'get_account_status' ) ) ) {
+		try {
+			if ( $this->is_in_test_mode( $payment_gateway ) ) {
+				if ( defined( '\HELIO_API_KEY_DEVNET' ) &&
+					defined( '\HELIO_API_SECRET_DEVNET' ) ) {
 
-				return \WC_Stripe_Account::STATUS_NO_ACCOUNT !== $stripe->account->get_account_status();
+					return ! empty( $payment_gateway->get_option( \HELIO_API_KEY_DEVNET ) ) && ! empty( $payment_gateway->get_option( \HELIO_API_SECRET_DEVNET ) );
+				}
+			} elseif ( defined( '\HELIO_API_KEY_MAINNET' ) &&
+					defined( '\HELIO_API_SECRET_MAINNET' ) ) {
+
+					return ! empty( $payment_gateway->get_option( \HELIO_API_KEY_MAINNET ) ) && ! empty( $payment_gateway->get_option( \HELIO_API_SECRET_MAINNET ) );
 			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway has an account connected: ' . $e->getMessage(),
+				array(
+					'gateway' => $payment_gateway->id,
+					'source'  => 'settings-payments',
+					'error'   => $e,
+				)
+			);
 		}
 
 		return parent::is_account_connected( $payment_gateway );
@@ -83,18 +93,7 @@ class Stripe extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( class_exists( '\WC_Stripe' ) && is_callable( '\WC_Stripe::get_instance' ) ) {
-			$stripe = \WC_Stripe::get_instance();
-			if ( isset( $stripe->connect ) &&
-				class_exists( '\WC_Stripe_Connect' ) &&
-				$stripe->connect instanceof \WC_Stripe_Connect &&
-				is_callable( array( $stripe->connect, 'is_connected' ) ) ) {
-
-				return $stripe->connect->is_connected( 'test' )
-					&& ! $stripe->connect->is_connected( 'live' );
-			}
-		}
-
-		return parent::is_in_test_mode_onboarding( $payment_gateway );
+		// Test mode is actually sandbox mode for HelioPay, affecting the API credentials used.
+		return $this->is_in_test_mode( $payment_gateway );
 	}
 }
