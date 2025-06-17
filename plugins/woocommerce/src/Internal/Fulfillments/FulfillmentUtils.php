@@ -198,13 +198,13 @@ class FulfillmentUtils {
 
 		switch ( $fulfillment_status ) {
 			case 'fulfilled':
-				return '&nbsp;' . __( 'It has been <mark class="fulfillment-status">Fulfilled</mark>.', 'woocommerce' );
+				return ' ' . __( 'It has been <mark class="fulfillment-status">Fulfilled</mark>.', 'woocommerce' );
 			case 'partially_fulfilled':
-				return '&nbsp;' . __( 'It has been <mark class="fulfillment-status">Partially fulfilled</mark>.', 'woocommerce' );
+				return ' ' . __( 'It has been <mark class="fulfillment-status">Partially fulfilled</mark>.', 'woocommerce' );
 			case 'unfulfilled':
-				return '&nbsp;' . __( 'It is currently <mark class="fulfillment-status">Unfulfilled</mark>.', 'woocommerce' );
+				return ' ' . __( 'It is currently <mark class="fulfillment-status">Unfulfilled</mark>.', 'woocommerce' );
 			case 'no_fulfillments':
-				return '&nbsp;' . __( 'It has <mark class="fulfillment-status">no fulfillments</mark> yet.', 'woocommerce' );
+				return ' ' . __( 'It has <mark class="fulfillment-status">no fulfillments</mark> yet.', 'woocommerce' );
 			default:
 				return '';
 		}
