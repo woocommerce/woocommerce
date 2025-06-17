@@ -335,9 +335,9 @@ export const SettingsPaymentsMain = () => {
 			recordPaymentsEvent( 'recommendations_setup', {
 				extension_selected: paymentsEntity.plugin.slug,
 				extension_action:
-					paymentsEntity.plugin.status === 'installed'
-						? 'activate'
-						: 'install',
+					paymentsEntity.plugin.status === 'not_installed'
+						? 'install'
+						: 'activate',
 				provider_id: paymentsEntity.id,
 				suggestion_id: paymentsEntity?._suggestion_id ?? 'unknown',
 				extension_slug: paymentsEntity.plugin.slug,
