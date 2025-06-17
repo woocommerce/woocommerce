@@ -49,7 +49,7 @@ jobs:
         run: echo "str=${{ github.event.inputs.packages }}" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e #v7.0.8
         env:
           HUSKY: '0' # pre-push hook incorrectly considers the working branch as the push-to branch and the push will fail if the working branch is trunk
         with:

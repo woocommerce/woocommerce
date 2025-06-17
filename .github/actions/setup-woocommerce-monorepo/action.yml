@@ -41,7 +41,7 @@ runs:
               cache: ''
         - name: 'Setup PHP'
           if: ${{ inputs.php-version != 'false' && inputs.build-type != 'dependencies' }}
-          uses: 'shivammathur/setup-php@v2'
+          uses: 'shivammathur/setup-php@0f7f1d08e3e32076e51cae65eb0b0c871405b16e' # v2.34.1
           with:
               php-version: '${{ inputs.php-version }}'
               coverage: 'none'

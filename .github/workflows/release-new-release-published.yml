@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: 'Notify to release channel'
-        uses: archive/github-actions-slack@v2.10.0
+        uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v 2.10.0
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
           slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
@@ -21,7 +21,7 @@ jobs:
             (<!subteam^S086N376UTS> could you publish the release post? :ty2:)
 
       - name: 'Notify to announcements channel'
-        uses: archive/github-actions-slack@v2.10.0
+        uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v 2.10.0
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
           slack-channel: ${{ secrets.WOO_ANNOUNCEMENTS_SLACK_CHANNEL }}
