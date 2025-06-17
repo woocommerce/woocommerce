@@ -422,10 +422,10 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 
 		if ( $fulfillment->get_is_fulfilled() && $notify_customer ) {
 			/**
-		 * Trigger the fulfillment deleted notification.
-		 *
-		 * @since 9.9.0
-		 */
+			 * Trigger the fulfillment deleted notification.
+			 *
+			 * @since 9.9.0
+			 */
 			do_action( 'woocommerce_fulfillment_deleted_notification', $order_id, $fulfillment, wc_get_order( $order_id ) );
 		}
 		return new WP_REST_Response(
