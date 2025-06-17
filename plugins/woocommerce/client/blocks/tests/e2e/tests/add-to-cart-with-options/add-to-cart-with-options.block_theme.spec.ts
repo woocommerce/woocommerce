@@ -230,6 +230,12 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await page.getByRole( 'radio', { name: 'Dropdown' } ).click();
 
+		// We need to make sure the block updated before saving.
+		// @see https://github.com/woocommerce/woocommerce/issues/57718
+		await expect(
+			editor.canvas.getByLabel( 'Color', { exact: true } )
+		).toBeVisible();
+
 		await editor.saveSiteEditorEntities();
 
 		await page.goto( '/hoodie' );

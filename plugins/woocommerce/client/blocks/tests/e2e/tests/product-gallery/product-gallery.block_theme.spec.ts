@@ -347,7 +347,7 @@ test.describe( `${ blockData.name }`, () => {
 			editor,
 		} ) => {
 			await admin.createNewPost();
-			await editor.insertBlockUsingGlobalInserter( 'Single Product' );
+			await editor.insertBlockUsingGlobalInserter( 'Product' );
 			await editor.canvas.getByText( 'Album' ).click();
 			await editor.canvas.getByText( 'Done' ).click();
 			const singleProductBlock = await editor.getBlockByName(
