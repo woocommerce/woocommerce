@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Exception;
 
 defined( 'ABSPATH' ) || exit;
@@ -498,7 +499,18 @@ class Payments {
 			return;
 		}
 
-		$this->maybe_track_providers_state_change( $payment_providers, $snapshots, $new_snapshots );
+		try {
+			$this->maybe_track_providers_state_change( $payment_providers, $snapshots, $new_snapshots );
+		} catch ( \Throwable $exception ) {
+			// If we failed to track the changes, we log the error but don't throw it.
+			// This is to avoid breaking the Payments Settings page.
+			SafeGlobalFunctionProxy::wc_get_logger()->error(
+				'Failed to track payment providers state change: ' . $exception->getMessage(),
+				array(
+					'source' => 'settings-payments',
+				)
+			);
+		}
 	}
 
 	/**
