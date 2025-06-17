@@ -57,7 +57,7 @@ class Paystack extends PaymentGateway {
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
 			return property_exists( $payment_gateway, 'public_key' ) && ! empty( $payment_gateway->public_key ) &&
-				property_exists( $payment_gateway, 'secret_key') && ! empty( $payment_gateway->secret_key );
+				property_exists( $payment_gateway, 'secret_key' ) && ! empty( $payment_gateway->secret_key );
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(

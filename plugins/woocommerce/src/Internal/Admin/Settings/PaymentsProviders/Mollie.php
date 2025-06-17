@@ -44,10 +44,11 @@ class Mollie extends PaymentGateway {
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
 			$sandbox_mode = $this->is_mollie_in_sandbox_mode( $payment_gateway );
-			if ( $sandbox_mode ) {
+			// Let null results bubble up to the parent class.
+			if ( true === $sandbox_mode ) {
 				// If Mollie is in sandbox mode, we consider the account connected if the test API key is set.
 				return ! empty( get_option( 'mollie-payments-for-woocommerce_test_api_key', '' ) );
-			} else {
+			} elseif ( false === $sandbox_mode ) {
 				// In production mode, we check the live API key.
 				return ! empty( get_option( 'mollie-payments-for-woocommerce_live_api_key', '' ) );
 			}

@@ -57,16 +57,28 @@ class Stripe extends PaymentGateway {
 	 *              If the payment gateway does not provide the information, it will return true.
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( class_exists( '\WC_Stripe' ) && is_callable( '\WC_Stripe::get_instance' ) ) {
-			$stripe = \WC_Stripe::get_instance();
-			if ( isset( $stripe->account ) &&
-				class_exists( '\WC_Stripe_Account' ) &&
-				defined( '\WC_Stripe_Account::STATUS_NO_ACCOUNT' ) &&
-				$stripe->account instanceof \WC_Stripe_Account &&
-				is_callable( array( $stripe->account, 'get_account_status' ) ) ) {
+		try {
+			if ( class_exists( '\WC_Stripe' ) && is_callable( '\WC_Stripe::get_instance' ) ) {
+				$stripe = \WC_Stripe::get_instance();
+				if ( isset( $stripe->account ) &&
+					class_exists( '\WC_Stripe_Account' ) &&
+					defined( '\WC_Stripe_Account::STATUS_NO_ACCOUNT' ) &&
+					$stripe->account instanceof \WC_Stripe_Account &&
+					is_callable( array( $stripe->account, 'get_account_status' ) ) ) {
 
-				return \WC_Stripe_Account::STATUS_NO_ACCOUNT !== $stripe->account->get_account_status();
+					return \WC_Stripe_Account::STATUS_NO_ACCOUNT !== $stripe->account->get_account_status();
+				}
 			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway has account connected: ' . $e->getMessage(),
+				array(
+					'gateway' => $payment_gateway->id,
+					'source'  => 'settings-payments',
+					'error'   => $e,
+				)
+			);
 		}
 
 		return parent::is_account_connected( $payment_gateway );
@@ -83,16 +95,28 @@ class Stripe extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( class_exists( '\WC_Stripe' ) && is_callable( '\WC_Stripe::get_instance' ) ) {
-			$stripe = \WC_Stripe::get_instance();
-			if ( isset( $stripe->connect ) &&
-				class_exists( '\WC_Stripe_Connect' ) &&
-				$stripe->connect instanceof \WC_Stripe_Connect &&
-				is_callable( array( $stripe->connect, 'is_connected' ) ) ) {
+		try {
+			if ( class_exists( '\WC_Stripe' ) && is_callable( '\WC_Stripe::get_instance' ) ) {
+				$stripe = \WC_Stripe::get_instance();
+				if ( isset( $stripe->connect ) &&
+					class_exists( '\WC_Stripe_Connect' ) &&
+					$stripe->connect instanceof \WC_Stripe_Connect &&
+					is_callable( array( $stripe->connect, 'is_connected' ) ) ) {
 
-				return $stripe->connect->is_connected( 'test' )
-					&& ! $stripe->connect->is_connected( 'live' );
+					return $stripe->connect->is_connected( 'test' )
+						&& ! $stripe->connect->is_connected( 'live' );
+				}
 			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway is in test mode onboarding: ' . $e->getMessage(),
+				array(
+					'gateway' => $payment_gateway->id,
+					'source'  => 'settings-payments',
+					'error'   => $e,
+				)
+			);
 		}
 
 		return parent::is_in_test_mode_onboarding( $payment_gateway );
