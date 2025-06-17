@@ -108,7 +108,7 @@ class ProductSpecifications extends AbstractBlock {
 		<table <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> aria-label="<?php esc_attr_e( 'Product Specifications', 'woocommerce' ); ?>">
 			<tbody>
 				<?php foreach ( $product_data as $product_attribute_key => $product_attribute ) : ?>
-					<tr class="wc-block-product-specifications-item wc-block-product-specifications-item__<?php echo esc_attr( $product_attribute_key ); ?>" scope="row">
+					<tr class="wc-block-product-specifications-item wc-block-product-specifications-item__<?php echo esc_attr( $product_attribute_key ); ?>">
 						<th class="wc-block-product-specifications-item__label">
 							<?php echo wp_kses_post( $product_attribute['label'] ); ?>
 						</th>
