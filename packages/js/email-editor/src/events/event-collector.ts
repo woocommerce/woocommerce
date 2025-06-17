@@ -17,7 +17,7 @@ const eventListenerHandler = ( eventData ) => {
 };
 
 const initEventCollector = () => {
-	if ( ! isEventTrackingEnabled ) {
+	if ( ! isEventTrackingEnabled() ) {
 		return;
 	}
 
@@ -25,7 +25,7 @@ const initEventCollector = () => {
 };
 
 window.addEventListener( 'unload', function () {
-	if ( ! isEventTrackingEnabled ) {
+	if ( ! isEventTrackingEnabled() ) {
 		return;
 	}
 
