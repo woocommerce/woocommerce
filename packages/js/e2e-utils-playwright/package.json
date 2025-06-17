@@ -20,7 +20,7 @@
 		"prepack": "pnpm build",
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
-		"build:project:esm": "rm -rf build; babel src --out-dir build --copy-files"
+		"build:project:esm": "wireit"
 	},
 	"config": {
 		"ci": {
@@ -34,9 +34,25 @@
 		"@babel/cli": "7.25.7",
 		"@babel/core": "7.25.7",
 		"@wordpress/babel-preset-default": "next",
-		"jest": "27.5.x"
+		"jest": "27.5.x",
+		"wireit": "0.14.12"
 	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"wireit": {
+		"build:project:esm": {
+			"command": "babel src --out-dir build --copy-files --no-copy-ignored --ignore '**/test/**'",
+			"clean": "if-file-deleted",
+			"files": [
+				"babel.config.js",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build"
+			],
+			"dependencies": []
+		}
 	}
 }
