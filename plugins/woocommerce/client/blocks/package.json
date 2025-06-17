@@ -98,7 +98,8 @@
 		"wp-env:config": "echo 'wp-env:config is no more. Use env:start instead.'",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:bundle": "wireit"
+		"watch:build:project:bundle": "wireit",
+		"knip": "cross-env WP_EXPERIMENTAL_MODULES=true knip"
 	},
 	"devDependencies": {
 		"@automattic/color-studio": "4.0.0",
@@ -213,6 +214,7 @@
 		"jest-circus": "29.5.x",
 		"jest-fetch-mock": "3.0.3",
 		"json2md": "1.12.0",
+		"knip": "^5.60.2",
 		"lint-staged": "13.2.0",
 		"lodash": "4.17.21",
 		"markdown-it": "13.0.1",
@@ -349,6 +351,16 @@
 				}
 			]
 		}
+	},
+	"knip": {
+		"entry": [
+			"assets/js/**/index.{ts,tsx,jsx,js}!"
+		],
+		"project": [
+			"assets/js/**/*.{ts,tsx,jsx,js}!",
+			"!assets/js/**/test/**/*.{ts,tsx,jsx,js}"
+		],
+		"webpack": true
 	},
 	"wireit": {
 		"build:project:bundle": {
