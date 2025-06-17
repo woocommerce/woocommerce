@@ -8,7 +8,10 @@ import {
 	getElement,
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/cart';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
+import type {
+	OptimisticCartItem,
+	Store as WooCommerce,
+} from '@woocommerce/stores/woocommerce/cart';
 import Dinero from 'dinero.js';
 
 /**
@@ -171,6 +174,14 @@ const { state } = store(
 	'woocommerce/mini-cart-items-block',
 	{
 		state: {
+			// As a workaround for a bug in context of wp-each we use state to find the cart item. Where we need
+			// reactivity for the wp-each, use getCartItemById to get the cart item.
+			getCartItemById( id: number ): CartItem {
+				return wooStoreState.cart.items.find(
+					( item ) => item.id === id
+				) as CartItem;
+			},
+
 			get cartItems() {
 				return wooStoreState.cart.items;
 			},
@@ -210,9 +221,9 @@ const { state } = store(
 			},
 
 			get lineItemDiscount(): string {
-				const {
-					cartItem: { prices, quantity },
-				} = getContext< CartItemContext >();
+				const { quantity, prices } = state.getCartItemById(
+					getContext< CartItemContext >().cartItem.id
+				);
 
 				const regularAmountSingle = Dinero( {
 					amount: parseInt( prices.raw_prices.regular_price, 10 ),
@@ -243,26 +254,36 @@ const { state } = store(
 				return cartItem.prices.regular_price !== cartItem.prices.price;
 			},
 
-			get cartItemMinimum() {
+			get cartItemMinimum(): number {
 				const { cartItem } = getContext< CartItemContext >();
 				return cartItem.quantity_limits.minimum;
 			},
 
-			get cartItemMaximum() {
+			get cartItemMaximum(): number {
 				const { cartItem } = getContext< CartItemContext >();
-				return cartItem.quantity_limits.maximum;
+				return cartItem.quantity_limits.minimum;
 			},
 
 			// Intended to be used in context of a cart item in wp-each
-			get minimumReached() {
-				const { cartItem } = getContext< CartItemContext >();
-				return cartItem.quantity - 1 < cartItem.quantity_limits.minimum;
+			get minimumReached(): boolean {
+				const {
+					quantity,
+					quantity_limits: { minimum },
+				} = state.getCartItemById(
+					getContext< CartItemContext >().cartItem.id
+				);
+				return quantity - 1 < minimum;
 			},
 
 			// Intended to be used in context of a cart item in wp-each
-			get maximumReached() {
-				const { cartItem } = getContext< CartItemContext >();
-				return cartItem.quantity + 1 > cartItem.quantity_limits.maximum;
+			get maximumReached(): boolean {
+				const {
+					quantity,
+					quantity_limits: { maximum },
+				} = state.getCartItemById(
+					getContext< CartItemContext >().cartItem.id
+				);
+				return quantity + 1 > maximum;
 			},
 
 			// Intended to be used in context of a cart item in wp-each
@@ -355,12 +376,13 @@ const { state } = store(
 
 			// Intended to be used in context of a cart item in wp-each
 			get lineItemTotal(): string {
-				const { cartItem } = getContext< CartItemContext >();
+				const { totals } = state.getCartItemById(
+					getContext< CartItemContext >().cartItem.id
+				);
 				const { displayCartPriceIncludingTax } = getConfig(
 					'woocommerce/mini-cart'
 				);
 				const currency = state.currency;
-				const totals = cartItem.totals;
 
 				const totalLinePrice = displayCartPriceIncludingTax
 					? parseInt( totals.line_subtotal, 10 ) +
