@@ -3,7 +3,7 @@
  */
 import { Button, Modal } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch, select } from '@wordpress/data';
 import { useState } from 'react';
 
 /**
@@ -23,10 +23,6 @@ export default function RemoveButton( {
 	const { order, fulfillment, notifyCustomer } = useFulfillmentContext();
 	const [ isExecuting, setIsExecuting ] = useState< boolean >( false );
 	const { deleteFulfillment } = useDispatch( FulfillmentStore );
-	const { getError } = useSelect(
-		( select ) => ( { getError: select( FulfillmentStore ).getError } ),
-		[]
-	);
 
 	const [ isOpen, setOpen ] = useState( false );
 	const openModal = () => setOpen( true );
@@ -34,13 +30,12 @@ export default function RemoveButton( {
 
 	const handleDeleteFulfillment = async () => {
 		setError( null );
-		setIsExecuting( true );
 		if ( ! fulfillment || ! fulfillment.id || ! order || ! order.id ) {
-			setIsExecuting( false );
 			return;
 		}
+		setIsExecuting( true );
 		await deleteFulfillment( order.id, fulfillment.id, notifyCustomer );
-		const error = getError( order.id );
+		const error = select( FulfillmentStore ).getError( order.id );
 		if ( error ) {
 			setError( error );
 		} else {
