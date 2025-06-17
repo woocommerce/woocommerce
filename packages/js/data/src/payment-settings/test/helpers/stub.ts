@@ -7,7 +7,7 @@ import {
 	PaymentsProviderType,
 	SuggestedPaymentsExtension,
 	SuggestedPaymentsExtensionCategory,
-} from '../types';
+} from '../../types';
 
 export const providersStub: PaymentsProvider[] = [
 	{

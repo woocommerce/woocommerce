@@ -14,3 +14,6 @@ export class DummyModel extends Model {
 		Object.assign( this, partial );
 	}
 }
+
+// Suppress 'Your test suite must contain at least one test.' failure for this file.
+test.skip( 'skip', () => {} );

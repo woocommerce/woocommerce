@@ -82,3 +82,6 @@ export const createTestSettingGroup = (
  */
 export const createTestError = ( message = 'Test error' ) =>
 	new Error( message );
+
+// Suppress 'Your test suite must contain at least one test.' failure for this file.
+test.skip( 'skip', () => {} );
