@@ -16,7 +16,7 @@ import {
 	UpdatesChildModels,
 	UpdatesModels,
 } from '../model-repository';
-import { DummyModel } from '../../__test_data__/dummy-model';
+import { DummyModel } from '../../test/dummy-model';
 
 type DummyModelParams = ModelRepositoryParams<
 	DummyModel,
