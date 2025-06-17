@@ -191,6 +191,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		$filter_context = array(
 			'showCounts' => $block_attributes['showCounts'] ?? false,
 			'items'      => array(),
+			'groupLabel' => $product_attribute->name,
 		);
 
 		if ( ! empty( $attribute_counts ) ) {

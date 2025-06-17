@@ -108,29 +108,39 @@ const Edit = ( {
 		setAttributes,
 	] );
 
+	const showAllControls =
+		isDescendentOfQueryLoop || isDescendentOfSingleProductBlock;
+
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
-				<ImageSizeSettings
-					scale={ scale }
-					width={ width }
-					height={ height }
-					setAttributes={ setAttributes }
-				/>
-				<PanelBody title={ __( 'Content', 'woocommerce' ) }>
-					<ToggleControl
-						label={ __( 'Link to Product Page', 'woocommerce' ) }
-						help={ __(
-							'Links the image to the single product listing.',
-							'woocommerce'
-						) }
-						checked={ showProductLink }
-						onChange={ () =>
-							setAttributes( {
-								showProductLink: ! showProductLink,
-							} )
-						}
+				{ showAllControls && (
+					<ImageSizeSettings
+						scale={ scale }
+						width={ width }
+						height={ height }
+						setAttributes={ setAttributes }
 					/>
+				) }
+				<PanelBody title={ __( 'Content', 'woocommerce' ) }>
+					{ showAllControls && (
+						<ToggleControl
+							label={ __(
+								'Link to Product Page',
+								'woocommerce'
+							) }
+							help={ __(
+								'Links the image to the single product listing.',
+								'woocommerce'
+							) }
+							checked={ showProductLink }
+							onChange={ () =>
+								setAttributes( {
+									showProductLink: ! showProductLink,
+								} )
+							}
+						/>
+					) }
 					<ToggleGroupControl
 						label={ __( 'Image Sizing', 'woocommerce' ) }
 						isBlock
@@ -173,7 +183,7 @@ const Edit = ( {
 				</PanelBody>
 			</InspectorControls>
 			<Block { ...{ ...attributes, ...context } }>
-				<div { ...innerBlockProps } />
+				{ showAllControls && <div { ...innerBlockProps } /> }
 			</Block>
 		</div>
 	);

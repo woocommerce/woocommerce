@@ -1,7 +1,7 @@
 ---
 post_title: Resources for debugging
 sidebar_label: Debugging
-sidebar_position: 6
+sidebar_position: 7
 ---
 
 # Resources for debugging
@@ -34,7 +34,7 @@ WooCommerce has a logging system that can be very helpful for finding and tracki
 
 WooCommerce's coming soon mode allows you to temporarily make your site invisible to the public while you work on it.
 
-- Integrating with coming soon mode
+* [Integrating with coming soon mode](/docs/extensions/extension-onboarding/integrating-coming-soon-mode)
 
 ## PHP/JavaScript Debugging
 

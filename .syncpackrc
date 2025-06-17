@@ -9,6 +9,18 @@
 	},
 	"versionGroups": [
 		{
+			"label": "Banned dependencies: classnames(->clsx), concurrently(->pnpm), cross-env(->wsl)",
+			"dependencies": [
+				"classnames",
+				"concurrently",
+				"cross-env"
+			],
+			"packages": [
+				"**"
+			],
+			"isBanned": true
+		},
+		{
 			"dependencies": [
 				"node"
 			],
@@ -303,15 +315,6 @@
 		},
 		{
 			"dependencies": [
-				"github-label-sync"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^2.3.1"
-		},
-		{
-			"dependencies": [
 				"@playwright/test"
 			],
 			"packages": [
@@ -445,12 +448,12 @@
 		},
 		{
 			"dependencies": [
-				"classnames"
+				"clsx"
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^2.3.2"
+			"pinVersion": "2.1.x"
 		},
 		{
 			"dependencies": [

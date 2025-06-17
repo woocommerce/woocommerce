@@ -142,6 +142,7 @@ final class ProductFilterRating extends AbstractBlock {
 		$filter_context = array(
 			'items'      => $filter_options,
 			'showCounts' => $attributes['showCounts'] ?? false,
+			'groupLabel' => __( 'Rating', 'woocommerce' ),
 		);
 
 		$wrapper_attributes = array(

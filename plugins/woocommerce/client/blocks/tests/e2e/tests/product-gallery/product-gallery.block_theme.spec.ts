@@ -234,14 +234,12 @@ test.describe( `${ blockData.name }`, () => {
 			} );
 			await largeImageBlock.click();
 
-			await expect( async () => {
-				const popUpSelectedImageId =
-					await pageObject.getActiveImageElementId( {
-						page,
-					} );
+			const dialogImage = page
+				.getByRole( 'dialog' )
+				.locator( `img[data-image-id='${ nextImageId }']` );
 
-				expect( popUpSelectedImageId ).toBe( nextImageId );
-			} ).toPass( { timeout: 1_000 } );
+			// The image should be in the viewport but it simply doesn't fit fully.
+			await expect( dialogImage ).toBeInViewport( { ratio: 0.75 } );
 
 			const closePopUpButton = page.locator(
 				'.wc-block-product-gallery-dialog__close-button'
@@ -349,7 +347,7 @@ test.describe( `${ blockData.name }`, () => {
 			editor,
 		} ) => {
 			await admin.createNewPost();
-			await editor.insertBlockUsingGlobalInserter( 'Single Product' );
+			await editor.insertBlockUsingGlobalInserter( 'Product' );
 			await editor.canvas.getByText( 'Album' ).click();
 			await editor.canvas.getByText( 'Done' ).click();
 			const singleProductBlock = await editor.getBlockByName(

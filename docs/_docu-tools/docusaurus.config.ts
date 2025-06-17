@@ -31,6 +31,10 @@ const config: Config = {
 		locales: ['en'],
 	},
 
+	plugins: [
+		'./llms-txt/index.ts'
+	],
+
 	presets: [
 		[
 			'classic',
@@ -41,8 +45,7 @@ const config: Config = {
 					sidebarPath: './sidebars.ts',
 					path: '../',
 					exclude: ['_docu-tools/**'],
-					// Please change this to your repo.
-					// Remove this to remove the "edit this page" links.
+					showLastUpdateTime: true,		
 					editUrl:
 						'https://github.com/woocommerce/woocommerce/tree/trunk/docs/docs/',
 					routeBasePath: '/',
@@ -64,7 +67,7 @@ const config: Config = {
 
 	themeConfig: {
 		// Replace with your project's social card
-		image: 'img/woo-dev-site-logo.svg',
+		image: 'https://developer.woocommerce.com/docs/wp-content/uploads/sites/3/2025/03/woo-dev-docs-banner.png',
 		navbar: {
 			logo: {
 				alt: 'WooCommerce developer docs',
