@@ -136,6 +136,7 @@ const TestAccountStep = () => {
 			.catch( () => {
 				// Handle any errors that occur during the process.
 				setIsContinueButtonLoading( false );
+				// Error tracking is handled on the backend, so we don't need to do anything here.
 			} );
 	};
 

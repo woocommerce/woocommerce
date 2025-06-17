@@ -1435,6 +1435,17 @@ class WooPaymentsService {
 		// Unlock the onboarding after the API call finished or errored.
 		$this->clear_onboarding_lock();
 
+		// Track the failure to disable the test account.
+		if ( is_wp_error( $response ) || ! is_array( $response ) || empty( $response['success'] ) ) {
+			$this->record_event(
+				self::EVENT_PREFIX . 'onboarding_test_account_disable_error',
+				$location,
+				array(
+					'source' => $source,
+				)
+			);
+		}
+
 		if ( is_wp_error( $response ) ) {
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_client_api_error',

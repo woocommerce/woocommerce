@@ -75,13 +75,14 @@ export const ActivatePaymentsButton = ( {
 					acceptIncentive( incentive.promo_id );
 				}
 
+				setIsUpdating( false );
+
 				if ( onboardingType === 'native_in_context' ) {
 					// Open the onboarding modal.
 					recordPaymentsOnboardingEvent(
 						'woopayments_onboarding_modal_opened'
 					);
 					setOnboardingModalOpen( true );
-					setIsUpdating( false );
 				} else {
 					window.location.href = getWooPaymentsSetupLiveAccountLink();
 				}
@@ -89,6 +90,7 @@ export const ActivatePaymentsButton = ( {
 			.catch( () => {
 				// Handle any errors that occur during the process.
 				setIsUpdating( false );
+				// Error tracking is handled on the backend, so we don't need to do anything here.
 			} );
 	};
 
