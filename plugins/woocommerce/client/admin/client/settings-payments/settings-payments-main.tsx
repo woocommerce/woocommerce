@@ -340,7 +340,7 @@ export const SettingsPaymentsMain = () => {
 						: 'install',
 				provider_id: paymentsEntity.id,
 				suggestion_id: paymentsEntity?._suggestion_id ?? 'unknown',
-				provider_extension_slug: paymentsEntity.plugin.slug,
+				extension_slug: paymentsEntity.plugin.slug,
 				from: context,
 			} );
 			installAndActivatePlugins( [ paymentsEntity.plugin.slug ] )
