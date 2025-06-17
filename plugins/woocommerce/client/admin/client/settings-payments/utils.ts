@@ -358,41 +358,44 @@ export const recordPaymentsProviderEvent = (
 		eventName = `provider_${ eventName }`;
 	}
 
-	// Add provider-specific data to the event.
-	data.provider_id = provider.id;
+	const enrichedData: Record< string, string | boolean | number > = {
+		...data,
+		provider_id: provider.id,
+	};
 
+	// Add provider-specific data to the event.
 	// If the provider is a suggestion, use its ID as the suggestion ID.
 	if ( provider._type === 'suggestion' ) {
-		data.suggestion_id = provider.id;
+		enrichedData.suggestion_id = provider.id;
 	} else {
-		data.suggestion_id = provider._suggestion_id ?? 'unknown';
+		enrichedData.suggestion_id = provider._suggestion_id ?? 'unknown';
 	}
 
 	// The provider state.
-	data.provider_enabled = provider.state?.enabled ?? false;
-	data.provider_account_connected =
+	enrichedData.provider_enabled = provider.state?.enabled ?? false;
+	enrichedData.provider_account_connected =
 		provider.state?.account_connected ?? false;
-	data.provider_needs_setup = provider.state?.needs_setup ?? false;
-	data.provider_test_mode = provider.state?.test_mode ?? false;
-	data.provider_dev_mode = provider.state?.dev_mode ?? false;
+	enrichedData.provider_needs_setup = provider.state?.needs_setup ?? false;
+	enrichedData.provider_test_mode = provider.state?.test_mode ?? false;
+	enrichedData.provider_dev_mode = provider.state?.dev_mode ?? false;
 	// The provider onboarding state.
-	data.provider_onboarding_started =
+	enrichedData.provider_onboarding_started =
 		provider.onboarding?.state?.started ?? false;
-	data.provider_onboarding_completed =
+	enrichedData.provider_onboarding_completed =
 		provider.onboarding?.state?.completed ?? false;
-	data.provider_onboarding_test_mode =
+	enrichedData.provider_onboarding_test_mode =
 		provider.onboarding?.state?.test_mode ?? false;
 	// The provider extension data.
-	data.provider_extension_slug = provider.plugin.slug ?? 'unknown';
+	enrichedData.provider_extension_slug = provider.plugin.slug ?? 'unknown';
 	// WooPayments-specific data.
 	if ( isWooPayments( provider.id ) ) {
-		data.provider_has_test_drive_account =
+		enrichedData.provider_has_test_drive_account =
 			provider.onboarding?.state?.test_drive_account ?? false;
-		data.provider_has_working_wpcom_connection =
+		enrichedData.provider_has_working_wpcom_connection =
 			provider.onboarding?.state?.wpcom_has_working_connection ?? false;
 	}
 
-	recordPaymentsEvent( eventName, data );
+	recordPaymentsEvent( eventName, enrichedData );
 };
 
 /**
