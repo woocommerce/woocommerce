@@ -400,6 +400,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 * @see https://github.com/woocommerce/woocommerce/issues/58864
 	 */
 	public function test_coupon_discount_amount_case_sensitivity() {
+		$old_calc_taxes = get_option( 'woocommerce_calc_taxes', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
 		$tax_rate = array(
@@ -413,7 +414,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			'tax_rate_order'    => '1',
 		);
 
-		WC_Tax::_insert_tax_rate( $tax_rate );
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		// Create a product to add to cart.
 		$product = WC_Helper_Product::create_simple_product();
@@ -459,5 +460,11 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->remove_coupons();
 		$product->delete( true );
 		$coupon->delete( true );
+
+		// Restore global state.
+		update_option( 'woocommerce_calc_taxes', $old_calc_taxes );
+		if ( $tax_rate_id ) {
+			WC_Tax::_delete_tax_rate( $tax_rate_id );
+		}
 	}
 }

@@ -1919,8 +1919,6 @@ class WC_Cart extends WC_Legacy_Cart {
 		 *
 		 * @since 2.0.0
 		 * @param string $coupon_code The coupon code that was applied.
-		 * @param WC_Coupon $the_coupon The coupon object that was applied.
-		 * @param WC_Cart $this The cart object.
 		 */
 		do_action( 'woocommerce_applied_coupon', $coupon_code );
 
