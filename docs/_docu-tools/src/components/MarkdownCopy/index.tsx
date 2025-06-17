@@ -1,14 +1,20 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import TurndownService from 'turndown';
 import './styles.css';
 
 const MarkdownCopy: React.FC = () => {
   const [isCopying, setIsCopying] = useState(false);
   const [copyStatus, setCopyStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [isClient, setIsClient] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
+  // Ensure we're on the client side before rendering interactive elements
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const copyMarkdownToClipboard = async () => {
-    if (isCopying) return; // Prevent multiple simultaneous operations
+    if (isCopying || !isClient) return; // Prevent multiple simultaneous operations and ensure client-side
     
     setIsCopying(true);
     setCopyStatus('idle');
@@ -94,6 +100,8 @@ const MarkdownCopy: React.FC = () => {
 
   // Function to announce messages to screen readers
   const announceToScreenReader = (message: string) => {
+    if (!isClient) return; // Only run on client side
+    
     const announcement = document.createElement('div');
     announcement.setAttribute('aria-live', 'polite');
     announcement.setAttribute('aria-atomic', 'true');
@@ -104,7 +112,9 @@ const MarkdownCopy: React.FC = () => {
     
     // Remove after announcement
     setTimeout(() => {
-      document.body.removeChild(announcement);
+      if (document.body.contains(announcement)) {
+        document.body.removeChild(announcement);
+      }
     }, 1000);
   };
 
@@ -131,6 +141,11 @@ const MarkdownCopy: React.FC = () => {
     if (copyStatus === 'error') return 'Copy failed';
     return 'Copy markdown';
   };
+
+  // Don't render the button until we're on the client side
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <button
