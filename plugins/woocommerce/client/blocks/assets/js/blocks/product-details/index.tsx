@@ -16,6 +16,7 @@ const blockConfig = {
 	icon,
 	edit,
 	save,
+	ancestor: [ 'woocommerce/single-product' ],
 };
 // @ts-expect-error blockConfig is not typed.
 registerProductBlockType( blockConfig, {
