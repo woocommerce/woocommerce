@@ -66,7 +66,7 @@ export const SettingsPaymentsMain = () => {
 		setPostSandboxAccountSetupModalVisible,
 	] = useState( false );
 
-	const [ storeCountry, setStoreCountry ] = useState< string | null >(
+	const [ businessCountry, setBusinessCountry ] = useState< string | null >(
 		window.wcSettings?.admin?.woocommerce_payments_nox_profile
 			?.business_country_code || null
 	);
@@ -138,7 +138,8 @@ export const SettingsPaymentsMain = () => {
 			const paymentSettings = select( paymentSettingsStore );
 
 			return {
-				providers: paymentSettings.getPaymentProviders( storeCountry ),
+				providers:
+					paymentSettings.getPaymentProviders( businessCountry ),
 				offlinePaymentGateways:
 					paymentSettings.getOfflinePaymentGateways(),
 				suggestions: paymentSettings.getSuggestions(),
@@ -146,7 +147,7 @@ export const SettingsPaymentsMain = () => {
 				isFetching: paymentSettings.isFetching(),
 			};
 		},
-		[ storeCountry ]
+		[ businessCountry ]
 	);
 
 	const dismissIncentive = useCallback(
@@ -316,7 +317,7 @@ export const SettingsPaymentsMain = () => {
 					url: paymentsEntity?.onboarding?._links?.preload.href,
 					method: 'POST',
 					data: {
-						location: storeCountry,
+						location: businessCountry,
 					},
 				} );
 			}
@@ -373,7 +374,7 @@ export const SettingsPaymentsMain = () => {
 					// Wait for the state update and fetch the latest providers.
 					const updatedProviders = await resolveSelect(
 						paymentSettingsStore
-					).getPaymentProviders( storeCountry );
+					).getPaymentProviders( businessCountry );
 
 					// Find the matching provider in the updated list.
 					const updatedPaymentsEntity = updatedProviders.find(
@@ -439,7 +440,7 @@ export const SettingsPaymentsMain = () => {
 			installingPlugin,
 			installAndActivatePlugins,
 			invalidateResolutionForStoreSelector,
-			storeCountry,
+			businessCountry,
 		]
 	);
 
@@ -548,8 +549,8 @@ export const SettingsPaymentsMain = () => {
 					shouldHighlightIncentive={ shouldHighlightIncentive }
 					updateOrdering={ handleOrderingUpdate }
 					isFetching={ isFetching }
-					businessRegistrationCountry={ storeCountry }
-					setBusinessRegistrationCountry={ setStoreCountry }
+					businessRegistrationCountry={ businessCountry }
+					setBusinessRegistrationCountry={ setBusinessCountry }
 					setIsOnboardingModalOpen={ setIsOnboardingModalOpen }
 				/>
 				{
