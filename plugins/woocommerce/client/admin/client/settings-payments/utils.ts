@@ -360,7 +360,14 @@ export const recordPaymentsProviderEvent = (
 
 	// Add provider-specific data to the event.
 	data.provider_id = provider.id;
-	data.suggestion_id = provider._suggestion_id ?? 'unknown';
+
+	// If the provider is a suggestion, use its ID as the suggestion ID.
+	if ( provider._type === 'suggestion' ) {
+		data.suggestion_id = provider.id;
+	} else {
+		data.suggestion_id = provider._suggestion_id ?? 'unknown';
+	}
+
 	// The provider state.
 	data.provider_enabled = provider.state?.enabled ?? false;
 	data.provider_account_connected =
