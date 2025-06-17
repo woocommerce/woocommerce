@@ -39,6 +39,8 @@ describe( 'CompleteSetupButton', () => {
 								test_mode: false,
 							} as PaymentsProviderOnboardingState,
 						},
+						_suggestion_id: 'test-suggestion',
+						_type: 'gateway',
 					} as PaymentGatewayProvider
 				}
 				settingsHref="/settings"
@@ -56,6 +58,7 @@ describe( 'CompleteSetupButton', () => {
 			{
 				business_country: expect.any( String ),
 				provider_id: 'test-gateway',
+				suggestion_id: 'test-suggestion',
 				provider_onboarding_started: true,
 				provider_onboarding_completed: false,
 				provider_onboarding_test_mode: false,
