@@ -140,7 +140,6 @@ class WooPayments extends PaymentGateway {
 					'Failed to get the WooPayments REST controller instance: ' . $e->getMessage(),
 					array(
 						'source' => 'settings-payments',
-						'error'  => $e,
 					)
 				);
 			}
