@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\BlockifiedProductDetail
 
 use WC_Helper_Product;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\BlockifiedProductDetailsMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\BlockifiedProductDetailsNoRegisterMock;
 
 /**
  * Tests for the BlockifiedProductDetails block type
@@ -42,6 +43,8 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 			],
 			true
 		);
+
+		new BlockifiedProductDetailsMock();
 	}
 	/**
 	 * Set up product and page for each test, and create an AssetDataRegistryMock.
@@ -87,11 +90,11 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 	 */
 	public function test_product_details_render_with_no_hook() {
 
-		$template = file_get_contents( __DIR__ . '/test_product_details_render_with_no_hook_template.html' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$template = file_get_contents( __DIR__ . '/template.html' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
 		$serialized_blocks = do_blocks( $template );
 
-		$expected_serialized_blocks                    = file_get_contents( __DIR__ . '/test_product_details_render_with_no_hook_expected_result.html' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$expected_serialized_blocks                    = file_get_contents( __DIR__ . '/render_with_no_hook_expected_result.html' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$serialized_blocks_without_whitespace          = wp_strip_all_tags( $serialized_blocks, true );
 		$expected_serialized_blocks_without_whitespace = wp_strip_all_tags( $expected_serialized_blocks, true );
 		$this->assertEquals( $serialized_blocks_without_whitespace, $expected_serialized_blocks_without_whitespace, '' );
@@ -127,11 +130,11 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 			}
 		);
 
-		$template = file_get_contents( __DIR__ . '/test_product_details_render_with_hook_template.html' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$template = file_get_contents( __DIR__ . '/template.html' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
 		$serialized_blocks = do_blocks( $template );
 
-		$expected_serialized_blocks = file_get_contents( __DIR__ . '/test_product_details_render_with_hook_expected_result.html' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$expected_serialized_blocks = file_get_contents( __DIR__ . '/render_with_hook_expected_result.html' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
 		$serialized_blocks_without_whitespace          = wp_strip_all_tags( $serialized_blocks, true );
 		$expected_serialized_blocks_without_whitespace = wp_strip_all_tags( $expected_serialized_blocks, true );
@@ -159,7 +162,7 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 			}
 		);
 
-		new BlockifiedProductDetailsMock();
+		new BlockifiedProductDetailsNoRegisterMock();
 
 		// Next, we apply the `hooked_block_types` and `hooked_block_{$slug}` filters.
 		// We pretend that we're in the `last_child` position of the `woocommerce/accordion-group` block.
