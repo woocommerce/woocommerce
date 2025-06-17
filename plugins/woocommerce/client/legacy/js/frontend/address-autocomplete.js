@@ -107,12 +107,34 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 
 			if ( provider && provider.canSearch( country ) ) {
 				window.wc.addressAutocomplete.activeProvider[ type ] = provider;
+				// Add autocomplete-available class to parent .woocommerce-input-wrapper
+				const addressInput = document.getElementById(
+					`${ type }_address_1`
+				);
+				if ( addressInput ) {
+					const wrapper = addressInput.closest(
+						'.woocommerce-input-wrapper'
+					);
+					if ( wrapper ) {
+						wrapper.classList.add( 'autocomplete-available' );
+					}
+				}
 				return;
 			}
 		}
 
 		// No provider can search for this country.
 		window.wc.addressAutocomplete.activeProvider[ type ] = null;
+		// Remove autocomplete-available class from parent .woocommerce-input-wrapper
+		const addressInput = document.getElementById( `${ type }_address_1` );
+		if ( addressInput ) {
+			const wrapper = addressInput.closest(
+				'.woocommerce-input-wrapper'
+			);
+			if ( wrapper ) {
+				wrapper.classList.remove( 'autocomplete-available' );
+			}
+		}
 	}
 
 	document.addEventListener( 'DOMContentLoaded', function () {
