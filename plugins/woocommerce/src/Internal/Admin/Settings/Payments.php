@@ -535,6 +535,11 @@ class Payments {
 				// If we couldn't find the provider in the list it means the extension was deactivated.
 				// Get the matching suggestion by its slug.
 				$provider = $this->providers->get_extension_suggestion_by_plugin_slug( $provider_extension_slug );
+				if ( ! empty( $provider['id'] ) ) {
+					// If we found the suggestion, we can use it as a replacement provider.
+					// We need to set the `_suggestion_id`.
+					$provider['_suggestion_id'] = $provider['id'];
+				}
 			}
 			if ( ! $provider ) {
 				continue;
