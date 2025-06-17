@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevented the browser's 'unsaved changes' warning from appearing after a successful export in the Blueprint settings page

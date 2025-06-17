@@ -307,7 +307,7 @@ class EmailPreview {
 		}
 
 		if ( 'plain' === $this->email->get_email_type() ) {
-			$content  = '<pre style="word-wrap: break-word; white-space: pre-wrap;">';
+			$content  = '<pre style="word-wrap: break-word; white-space: pre-wrap; text-align: ' . ( is_rtl() ? 'right' : 'left' ) . ';">';
 			$content .= $this->email->get_content_plain();
 			$content .= '</pre>';
 		} else {

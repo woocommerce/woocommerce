@@ -3,7 +3,7 @@
  */
 import { ModelTransformerTransformation } from '../model-transformer-transformation';
 import { ModelTransformer } from '../../model-transformer';
-import { DummyModel } from '../../../__test_data__/dummy-model';
+import { DummyModel } from '../../../test/dummy-model';
 
 jest.mock( '../../model-transformer' );
 

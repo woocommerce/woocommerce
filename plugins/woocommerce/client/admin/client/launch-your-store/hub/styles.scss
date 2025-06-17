@@ -303,15 +303,15 @@
 
 							.edit-site-sidebar-navigation-item.is-complete {
 								text-decoration: line-through;
-								color: $gray-700;
+								color: $gray-800;
 
 								&:hover {
 									background: transparent;
-									color: $gray-700;
+									color: $gray-800;
 								}
 
 								.components-flex-block {
-									color: $gray-700;
+									color: $gray-800;
 								}
 							}
 						}
