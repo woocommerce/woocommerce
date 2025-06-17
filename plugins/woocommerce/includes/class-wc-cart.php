@@ -1908,6 +1908,14 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		$the_coupon->add_coupon_message( WC_Coupon::WC_COUPON_SUCCESS );
 
+		/**
+		 * Action ran after a coupon is applied.
+		 *
+		 * @since 2.0.0
+		 * @param string $coupon_code The coupon code that was applied.
+		 * @param WC_Coupon $the_coupon The coupon object that was applied.
+		 * @param WC_Cart $this The cart object.
+		 */
 		do_action( 'woocommerce_applied_coupon', $the_coupon->get_code() );
 
 		return true;
