@@ -27,9 +27,13 @@ class Vivacom extends PaymentGateway {
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
 			if ( $this->is_in_test_mode( $payment_gateway ) ) {
-				return ! empty( $payment_gateway->test_client_id ) && ! empty( $payment_gateway->test_client_secret ) && ! empty( $payment_gateway->test_source_code );
+				return property_exists( $payment_gateway, 'test_client_id' ) && ! empty( $payment_gateway->test_client_id )
+					&& property_exists( $payment_gateway, 'test_client_secret' ) && ! empty( $payment_gateway->test_client_secret )
+					&& property_exists( $payment_gateway, 'test_source_code' ) && ! empty( $payment_gateway->test_source_code );
 			} else {
-				return ! empty( $payment_gateway->client_id ) && ! empty( $payment_gateway->client_secret ) && ! empty( $payment_gateway->source_code );
+				return property_exists( $payment_gateway, 'client_id' ) && ! empty( $payment_gateway->client_id )
+					&& property_exists( $payment_gateway, 'client_secret' ) && ! empty( $payment_gateway->client_secret )
+					&& property_exists( $payment_gateway, 'source_code' ) && ! empty( $payment_gateway->source_code );
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.

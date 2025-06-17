@@ -26,7 +26,9 @@ class Tilopay extends PaymentGateway {
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
-			return ! empty( $payment_gateway->tpay_key ) && ! empty( $payment_gateway->tpay_user ) && ! empty( $payment_gateway->tpay_password );
+			return property_exists( $payment_gateway, 'tpay_key' ) && ! empty( $payment_gateway->tpay_key ) &&
+				property_exists( $payment_gateway, 'tpay_user' ) && ! empty( $payment_gateway->tpay_user ) &&
+				property_exists( $payment_gateway, 'tpay_password' ) && ! empty( $payment_gateway->tpay_password );
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
