@@ -31,7 +31,7 @@ export interface TotalsDiscountProps {
 		CartTotalsItem,
 		'total_discount' | 'total_discount_tax'
 	>;
-	isLoading: boolean;
+	isLoading?: boolean;
 }
 
 const filteredCartCouponsFilterArg = {
