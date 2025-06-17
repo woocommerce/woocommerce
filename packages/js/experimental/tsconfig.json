@@ -15,6 +15,6 @@
 	],
 	"exclude": [
 		"**/test/**",
-		"**/stories/**",
+		"**/stories/**"
 	]
 }

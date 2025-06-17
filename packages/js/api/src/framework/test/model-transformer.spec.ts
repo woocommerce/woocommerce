@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { ModelTransformation, ModelTransformer } from '../model-transformer';
-import { DummyModel } from '../../__test_data__/dummy-model';
+import { DummyModel } from '../../test/dummy-model';
 
 class DummyTransformation implements ModelTransformation {
 	public readonly fromModelOrder: number;

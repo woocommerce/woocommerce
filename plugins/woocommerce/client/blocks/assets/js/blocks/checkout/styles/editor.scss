@@ -1,10 +1,3 @@
-// The post editor has a max-width of 645px, so we need to override it.
-// so we don't render a mobile layout on first render.
-.block-editor-block-list__layout.is-root-container
-	> :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
-	max-width: var(--wp--style--global--wide-size) !important;
-}
-
 .wp-block-woocommerce-checkout {
 	.wc-block-components-sidebar-layout {
 		display: block;

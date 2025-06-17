@@ -1,10 +1,15 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductDataUtils;
+
 /**
  * SingleProduct class.
  */
 class SingleProduct extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -154,6 +159,43 @@ class SingleProduct extends AbstractBlock {
 				$context['singleProduct'] = true;
 			}
 		}
+	}
+
+	/**
+	 * Render the Single Product block.
+	 *
+	 * @param array    $attributes Block attributes.
+	 * @param string   $content Block content.
+	 * @param WP_Block $block Block instance.
+	 *
+	 * @return string Rendered block type output.
+	 */
+	protected function render( $attributes, $content, $block ) {
+		$product = wc_get_product( $block->context['postId'] );
+
+		if ( ! $product instanceof \WC_Product ) {
+			return '';
+		}
+
+		if ( ! $product->is_type( 'variable' ) ) {
+			return parent::render( $attributes, $content, $block );
+		}
+
+		$interactivity_context = array(
+			'originalProductData' => ProductDataUtils::get_product_data( $product ),
+			'productData'         => array(),
+		);
+
+		$html = new \WP_HTML_Tag_Processor( $content );
+
+		if ( $html->next_tag( array( 'tag_name' => 'div' ) ) ) {
+			$html->set_attribute( 'data-wp-interactive', $this->get_full_block_name() );
+			$html->set_attribute( 'data-wp-context', wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+		}
+
+		$updated_html = $html->get_updated_html();
+
+		return parent::render( $attributes, $updated_html, $block );
 	}
 
 	/**
