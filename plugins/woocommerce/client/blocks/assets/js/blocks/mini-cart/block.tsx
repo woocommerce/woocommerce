@@ -37,7 +37,7 @@ import {
 	blockName,
 	attributes as miniCartContentsAttributes,
 } from './mini-cart-contents/attributes';
-import { settings as miniCartContentsMetadata } from './mini-cart-contents/index';
+import { default as miniCartContentsMetadata } from './mini-cart-contents/settings';
 import { defaultColorItem } from './utils/defaults';
 
 type Props = BlockAttributes;
