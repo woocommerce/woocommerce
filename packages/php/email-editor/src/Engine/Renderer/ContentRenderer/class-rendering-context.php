@@ -95,7 +95,10 @@ class Rendering_Context {
 	public function translate_slug_to_color( string $color_slug ): string {
 		$settings = $this->get_theme_settings();
 
-		$color_definitions = array_merge( $settings['color']['palette']['theme'], $settings['color']['palette']['default'] );
+		$color_definitions = array_merge(
+			$settings['color']['palette']['theme'] ?? array(),
+			$settings['color']['palette']['default'] ?? array()
+		);
 		foreach ( $color_definitions as $color_definition ) {
 			if ( $color_definition['slug'] === $color_slug ) {
 				return strtolower( $color_definition['color'] );

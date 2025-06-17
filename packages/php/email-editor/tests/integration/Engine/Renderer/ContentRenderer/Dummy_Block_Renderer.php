@@ -21,6 +21,6 @@ class Dummy_Block_Renderer implements Block_Renderer {
 	 * @return string
 	 */
 	public function render( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
-		return $parsed_block['innerHtml'];
+		return $parsed_block['innerHTML'] ?? '';
 	}
 }

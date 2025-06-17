@@ -13,14 +13,16 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Utils;
  */
 class Styles_Helper {
 	/**
-	 * Parse number value from a string with an optional unit as a parameter.
+	 * Parse number value from a string.
 	 *
 	 * @param string $value String value with value and unit.
-	 * @param string $unit Unit that should be removed from the value.
 	 * @return float
 	 */
-	public static function parse_value( string $value, string $unit = 'px' ): float {
-		return (float) str_replace( $unit, '', trim( $value ) );
+	public static function parse_value( string $value ): float {
+		if ( preg_match( '/^\s*(-?\d+(?:\.\d+)?)/', $value, $m ) ) {
+			return (float) $m[1];
+		}
+		return 0.0;
 	}
 
 	/**
@@ -34,7 +36,7 @@ class Styles_Helper {
 
 		$parsed_styles = array();
 		foreach ( $styles as $style ) {
-			$style = explode( ':', $style );
+			$style = explode( ':', $style, 2 );
 			if ( count( $style ) === 2 ) {
 				$parsed_styles[ trim( $style[0] ) ] = trim( $style[1] );
 			}

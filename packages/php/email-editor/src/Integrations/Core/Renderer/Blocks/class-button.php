@@ -80,7 +80,7 @@ class Button extends Abstract_Block_Renderer {
 	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	protected function render_content( $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		if ( empty( $parsed_block['innerHTML'] ) ) {
 			return '';
 		}

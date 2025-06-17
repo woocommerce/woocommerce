@@ -26,8 +26,8 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 	 * Test it parses float from string with custom unit.
 	 */
 	public function testItParsesValueWithCustomUnit(): void {
-		$this->assertSame( 1.25, Styles_Helper::parse_value( '1.25em', 'em' ) );
-		$this->assertSame( 80.0, Styles_Helper::parse_value( '80%', '%' ) );
+		$this->assertSame( 1.25, Styles_Helper::parse_value( '1.25em' ) );
+		$this->assertSame( 80.0, Styles_Helper::parse_value( '80%' ) );
 	}
 
 	/**

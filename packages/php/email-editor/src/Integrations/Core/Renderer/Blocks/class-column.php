@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use WP_Style_Engine;
 
 /**
@@ -107,7 +108,7 @@ class Column extends Abstract_Block_Renderer {
 		}
 
 		return '
-      <td class="' . esc_attr( $wrapper_classname ) . '" style="' . esc_attr( $wrapper_css ) . '" width="' . esc_attr( $block_attributes['width'] ) . '">
+      <td class="' . esc_attr( $wrapper_classname ) . '" style="' . esc_attr( $wrapper_css ) . '" width="' . Styles_Helper::parse_value( $block_attributes['width'] ) . '">
         <table class="' . esc_attr( $content_classname ) . '" style="' . esc_attr( $content_css ) . '" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
           <tbody>
             <tr>

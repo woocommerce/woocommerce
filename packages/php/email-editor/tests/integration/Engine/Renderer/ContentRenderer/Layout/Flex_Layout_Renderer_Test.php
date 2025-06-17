@@ -53,11 +53,11 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			'innerBlocks' => array(
 				array(
 					'blockName' => 'dummy/block',
-					'innerHtml' => 'Dummy 1',
+					'innerHTML' => 'Dummy 1',
 				),
 				array(
 					'blockName' => 'dummy/block',
-					'innerHtml' => 'Dummy 2',
+					'innerHTML' => 'Dummy 2',
 				),
 			),
 			'email_attrs' => array(),
@@ -75,7 +75,7 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			'innerBlocks' => array(
 				array(
 					'blockName' => 'dummy/block',
-					'innerHtml' => 'Dummy 1',
+					'innerHTML' => 'Dummy 1',
 				),
 			),
 			'email_attrs' => array(),
@@ -104,7 +104,7 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			'innerBlocks' => array(
 				array(
 					'blockName' => 'dummy/block',
-					'innerHtml' => 'Dummy 1',
+					'innerHTML' => 'Dummy 1',
 				),
 			),
 			'email_attrs' => array(),
@@ -129,12 +129,12 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_block['innerBlocks'] = array(
 			array(
 				'blockName' => 'dummy/block',
-				'innerHtml' => 'Dummy 1',
+				'innerHTML' => 'Dummy 1',
 				'attrs'     => array( 'width' => '50' ),
 			),
 			array(
 				'blockName' => 'dummy/block',
-				'innerHtml' => 'Dummy 2',
+				'innerHTML' => 'Dummy 2',
 				'attrs'     => array( 'width' => '25' ),
 			),
 		);
@@ -147,17 +147,17 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_block['innerBlocks'] = array(
 			array(
 				'blockName' => 'dummy/block',
-				'innerHtml' => 'Dummy 1',
+				'innerHTML' => 'Dummy 1',
 				'attrs'     => array( 'width' => '25' ),
 			),
 			array(
 				'blockName' => 'dummy/block',
-				'innerHtml' => 'Dummy 2',
+				'innerHTML' => 'Dummy 2',
 				'attrs'     => array( 'width' => '25' ),
 			),
 			array(
 				'blockName' => 'dummy/block',
-				'innerHtml' => 'Dummy 3',
+				'innerHTML' => 'Dummy 3',
 				'attrs'     => array(),
 			),
 		);
@@ -171,12 +171,12 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_block['innerBlocks'] = array(
 			array(
 				'blockName' => 'dummy/block',
-				'innerHtml' => 'Dummy 1',
+				'innerHTML' => 'Dummy 1',
 				'attrs'     => array( 'width' => '50' ),
 			),
 			array(
 				'blockName' => 'dummy/block',
-				'innerHtml' => 'Dummy 2',
+				'innerHTML' => 'Dummy 2',
 				'attrs'     => array( 'width' => '50' ),
 			),
 		);
@@ -201,12 +201,12 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_block['innerBlocks'] = array(
 			array(
 				'blockName' => 'dummy/block',
-				'innerHtml' => 'Dummy 1',
+				'innerHTML' => 'Dummy 1',
 				'attrs'     => array( 'width' => '100' ),
 			),
 			array(
 				'blockName' => 'dummy/block',
-				'innerHtml' => 'Dummy 2',
+				'innerHTML' => 'Dummy 2',
 				'attrs'     => array( 'width' => '25' ),
 			),
 		);
@@ -219,12 +219,12 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_block['innerBlocks'] = array(
 			array(
 				'blockName' => 'dummy/block',
-				'innerHtml' => 'Dummy 1',
+				'innerHTML' => 'Dummy 1',
 				'attrs'     => array( 'width' => '100' ),
 			),
 			array(
 				'blockName' => 'dummy/block',
-				'innerHtml' => 'Dummy 2',
+				'innerHTML' => 'Dummy 2',
 				'attrs'     => array( 'width' => '100' ),
 			),
 		);
@@ -237,12 +237,12 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_block['innerBlocks'] = array(
 			array(
 				'blockName' => 'dummy/block',
-				'innerHtml' => 'Dummy 1',
+				'innerHTML' => 'Dummy 1',
 				'attrs'     => array( 'width' => '100' ),
 			),
 			array(
 				'blockName' => 'dummy/block',
-				'innerHtml' => 'Dummy 2',
+				'innerHTML' => 'Dummy 2',
 				'attrs'     => array(),
 			),
 		);

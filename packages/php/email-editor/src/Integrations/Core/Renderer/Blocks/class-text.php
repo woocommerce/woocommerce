@@ -57,7 +57,7 @@ class Text extends Abstract_Block_Renderer {
 		$color_styles = $block_attributes['style']['color'] ?? array();
 		if ( empty( $color_styles['text'] ) && empty( $block_attributes['textColor'] ) ) {
 			$email_styles         = $rendering_context->get_theme_styles();
-			$color_styles['text'] = $email_styles['color']['text'];
+			$color_styles['text'] = $email_styles['color']['text'] ?? '#000000'; // Fallback for the text color.
 		}
 
 		$block_styles = $this->get_styles_from_block(
