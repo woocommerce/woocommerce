@@ -400,6 +400,21 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 * @see https://github.com/woocommerce/woocommerce/issues/58864
 	 */
 	public function test_coupon_discount_amount_case_sensitivity() {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'TAX20',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '0',
+			'tax_rate_order'    => '1',
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
 		// Create a product to add to cart.
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( 100 );
