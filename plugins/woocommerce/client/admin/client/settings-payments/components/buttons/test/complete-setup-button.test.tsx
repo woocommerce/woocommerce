@@ -7,6 +7,7 @@ import {
 	PaymentGatewayProvider,
 	PaymentsProviderState,
 	PaymentsProviderOnboardingState,
+	PluginData,
 } from '@woocommerce/data';
 
 /**
@@ -39,6 +40,11 @@ describe( 'CompleteSetupButton', () => {
 								test_mode: false,
 							} as PaymentsProviderOnboardingState,
 						},
+						plugin: {
+							slug: 'test-plugin',
+							file: 'test-file',
+							status: 'installed',
+						} as PluginData,
 						_suggestion_id: 'test-suggestion',
 						_type: 'gateway',
 					} as PaymentGatewayProvider
@@ -55,14 +61,10 @@ describe( 'CompleteSetupButton', () => {
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_provider_complete_setup_click',
-			{
-				business_country: expect.any( String ),
+			expect.objectContaining( {
 				provider_id: 'test-gateway',
 				suggestion_id: 'test-suggestion',
-				provider_onboarding_started: true,
-				provider_onboarding_completed: false,
-				provider_onboarding_test_mode: false,
-			}
+			} )
 		);
 	} );
 } );

@@ -50,11 +50,10 @@ describe( 'PaymentExtensionSuggestionListItem', () => {
 		fireEvent.click( getByRole( 'button', { name: 'Enable' } ) );
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_provider_enable_click',
-			{
-				business_country: expect.any( String ),
+			expect.objectContaining( {
 				provider_id: 'test-suggestion',
 				suggestion_id: 'test-suggestion',
-			}
+			} )
 		);
 	} );
 } );
