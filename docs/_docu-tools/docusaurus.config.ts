@@ -35,6 +35,18 @@ const config: Config = {
 		'./llms-txt/index.ts'
 	],
 
+	// Add custom scripts
+	scripts: [
+		{
+			src: '/docs/js/gtm-consent.js',
+			async: false,
+		},
+		{
+			src: '/docs/js/gtm-loader.js',
+			async: false,
+		},
+	],
+
 	presets: [
 		[
 			'classic',

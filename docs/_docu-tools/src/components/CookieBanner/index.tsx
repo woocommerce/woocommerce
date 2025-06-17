@@ -4,6 +4,15 @@ import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import './styles.css';
 
+// TypeScript declarations for GTM
+declare global {
+  interface Window {
+    dataLayer: any[];
+    gtag: (...args: any[]) => void;
+    updateGTMConsent: (buckets: CookieBuckets) => void;
+  }
+}
+
 interface CookieBuckets {
   ad_storage: boolean;
   analytics_storage: boolean;
@@ -38,59 +47,42 @@ const COOKIE_OPTIONS = {
   secure: process.env.NODE_ENV === 'production',
 };
 
-// Initialize GTM with proper consent settings
-const initializeGTM = () => {
-  if (typeof window.gtag !== 'function') {
-    return;
-  }
-
-  // Set default consent state
-  window.gtag('consent', 'default', {
-    analytics_storage: 'denied' as const,
-    ad_storage: 'denied' as const,
-  });
-
-  // Initialize GTM
-  window.gtag('js', new Date());
-  window.gtag('config', 'GTM-WW2RLFD7');
-};
-
 // Helper function to create consent options
 const createConsentOptions = (buckets: CookieBuckets) => ({
   analytics_storage: buckets.analytics_storage ? 'granted' as const : 'denied' as const,
   ad_storage: buckets.ad_storage ? 'granted' as const : 'denied' as const,
 });
 
-const loadGTMScript = () => {
-  const script = document.createElement('script');
-  script.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-WW2RLFD7';
-  script.async = true;
-  script.onload = () => {
-    initializeGTM();
-  };
-  document.head.appendChild(script);
+// Helper function to push to dataLayer
+const pushToDataLayer = (event: string, parameters: any) => {
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({
+      event,
+      ...parameters,
+    });
+  }
 };
 
 export const CookieBanner: React.FC = () => {
   const [preferences, setPreferences] = useState<CookiePreferences>(DEFAULT_PREFERENCES);
   const [showDetails, setShowDetails] = useState(false);
-  const [showBanner, setShowBanner] = useState(true);
+  const [showBanner, setShowBanner] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
+    setHasMounted(true);
+    // Only run cookie logic after mount
     const savedPreferences = Cookies.get(COOKIE_NAME);
     if (savedPreferences) {
       try {
         const decodedPreferences = JSON.parse(decodeURIComponent(savedPreferences));
         setPreferences(decodedPreferences);
-        if (decodedPreferences.ok) {
-          setShowBanner(false);
-          if (decodedPreferences.buckets.analytics_storage || decodedPreferences.buckets.ad_storage) {
-            loadGTMScript();
-          }
-          updateGtagConsent(decodedPreferences.buckets);
-        } else {
+        if (!decodedPreferences.ok) {
           setShowBanner(true);
+        } else {
+          setShowBanner(false);
         }
+        updateGtagConsent(decodedPreferences.buckets);
       } catch (error) {
         setShowBanner(true);
       }
@@ -99,15 +91,37 @@ export const CookieBanner: React.FC = () => {
     }
   }, []);
 
-  const updateGtagConsent = (buckets: CookieBuckets) => {
-    if (typeof window.gtag === 'function') {
+  const updateGtagConsent = (buckets: CookieBuckets, retryCount = 0) => {
+    // Initialize dataLayer if it doesn't exist
+    if (typeof window !== 'undefined' && !window.dataLayer) {
+      window.dataLayer = [];
+    }
+
+    // Use the global updateGTMConsent function if available
+    if (typeof window !== 'undefined' && typeof window.updateGTMConsent === 'function') {
+      window.updateGTMConsent(buckets);
+      return;
+    }
+
+    // Fallback to direct gtag call
+    if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
       window.gtag('consent', 'update', createConsentOptions(buckets));
-    } else {
-      // Retry after a short delay
+      return;
+    }
+
+    // Fallback to dataLayer push
+    if (typeof window !== 'undefined' && window.dataLayer) {
+      pushToDataLayer('consent', {
+        action: 'update',
+        ...createConsentOptions(buckets),
+      });
+      return;
+    }
+
+    // Retry if nothing is available yet
+    if (retryCount < 10) {
       setTimeout(() => {
-        if (typeof window.gtag === 'function') {
-          window.gtag('consent', 'update', createConsentOptions(buckets));
-        }
+        updateGtagConsent(buckets, retryCount + 1);
       }, 1000);
     }
   };
@@ -126,7 +140,6 @@ export const CookieBanner: React.FC = () => {
     };
     setPreferences(newPreferences);
     Cookies.set(COOKIE_NAME, encodeURIComponent(JSON.stringify(newPreferences)), COOKIE_OPTIONS);
-    loadGTMScript(); // Load GTM script after accepting all
     updateGtagConsent(newPreferences.buckets);
     setShowBanner(false);
   };
@@ -141,17 +154,16 @@ export const CookieBanner: React.FC = () => {
         security_storage: true,
       },
     };
-    
     Cookies.set(COOKIE_NAME, encodeURIComponent(JSON.stringify(newPreferences)), COOKIE_OPTIONS);
-    
-    if (newPreferences.buckets.analytics_storage || newPreferences.buckets.ad_storage) {
-      loadGTMScript(); // Load GTM script if analytics or ads are enabled
-    }
     updateGtagConsent(newPreferences.buckets);
     setShowDetails(false);
     setShowBanner(false);
   };
 
+  // Only render on client after mount
+  if (!hasMounted) {
+    return null;
+  }
   if (!showBanner) {
     return null;
   }
@@ -249,4 +261,4 @@ export const CookieBanner: React.FC = () => {
       </div>
     </div>
   );
-}; 
+};
