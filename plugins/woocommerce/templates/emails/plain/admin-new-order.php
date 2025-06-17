@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Plain
- * @version 9.8.0
+ * @version 10.0.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -29,7 +29,7 @@ echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 $text = __( 'You’ve received the following order from %s:', 'woocommerce' );
 if ( $email_improvements_enabled ) {
 	/* translators: %s: Customer billing full name */
-	$text = __( 'Woo! You’ve received a new order from %s:', 'woocommerce' );
+	$text = __( 'You’ve received a new order from %s:', 'woocommerce' );
 }
 echo sprintf( esc_html( $text ), esc_html( $order->get_formatted_billing_full_name() ) ) . "\n\n";
 

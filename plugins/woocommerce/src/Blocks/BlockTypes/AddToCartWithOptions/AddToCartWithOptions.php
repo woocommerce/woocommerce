@@ -111,14 +111,14 @@ class AddToCartWithOptions extends AbstractBlock {
 	protected function render( $attributes, $content, $block ) {
 		global $product;
 
-		$post_id = $block->context['postId'];
+		$product_id = $block->context['postId'];
 
-		if ( ! isset( $post_id ) ) {
+		if ( ! isset( $product_id ) ) {
 			return '';
 		}
 
 		$previous_product = $product;
-		$product          = wc_get_product( $post_id );
+		$product          = wc_get_product( $product_id );
 		if ( ! $product instanceof \WC_Product ) {
 			$product = $previous_product;
 
@@ -426,7 +426,6 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			$cart_redirect_after_add = get_option( 'woocommerce_cart_redirect_after_add' );
 			$form_attributes         = '';
-			$hidden_input            = '';
 			$legacy_mode             = $hooks_before || $hooks_after || 'yes' === $cart_redirect_after_add;
 			if ( $legacy_mode ) {
 				// If an extension is hoooking into the form or we need to redirect to the cart,
@@ -446,20 +445,29 @@ class AddToCartWithOptions extends AbstractBlock {
 					'enctype' => 'multipart/form-data',
 					'class'   => 'cart',
 				);
-				if ( ProductType::SIMPLE === $product_type ) {
-					$hidden_input = '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '" />';
-				} elseif ( ProductType::GROUPED === $product_type ) {
-					$hidden_input = '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '" />';
-				} elseif ( ProductType::VARIABLE === $product_type ) {
-					$hidden_input  = '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '" />';
-					$hidden_input .= '<input type="hidden" name="product_id" value="' . $product->get_id() . '" />';
-					$hidden_input .= '<input type="hidden" name="variation_id" data-wp-interactive="woocommerce/add-to-cart-with-options" data-wp-bind--value="state.variationId" />';
-				}
 			} else {
 				// Otherwise, we use the Interactivity API.
 				$form_attributes = array(
 					'data-wp-on--submit' => 'actions.handleSubmit',
 				);
+			}
+
+			// These hidden inputs are used by extensions or Express Payment methods to gather information of the form state.
+			$hidden_input = '';
+			if ( ProductType::SIMPLE === $product_type ) {
+				$hidden_input = '<input type="hidden" name="add-to-cart" value="' . esc_attr( $product_id ) . '" />';
+			} elseif ( ProductType::GROUPED === $product_type ) {
+				$hidden_input = '<input type="hidden" name="add-to-cart" value="' . esc_attr( $product_id ) . '" />';
+			} elseif ( ProductType::VARIABLE === $product_type ) {
+				$hidden_input = '<div class="single_variation_wrap">
+					<input type="hidden" name="add-to-cart" value="' . esc_attr( $product_id ) . '" />
+					<input type="hidden" name="product_id" value="' . esc_attr( $product_id ) . '" />
+					<input type="hidden"
+						name="variation_id"
+						data-wp-interactive="woocommerce/add-to-cart-with-options"
+						data-wp-bind--value="state.variationId"
+					/>
+				</div>';
 			}
 
 			$form_html = sprintf(
