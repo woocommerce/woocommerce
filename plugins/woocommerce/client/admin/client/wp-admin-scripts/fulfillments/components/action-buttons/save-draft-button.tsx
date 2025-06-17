@@ -3,7 +3,7 @@
  */
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch, select } from '@wordpress/data';
 import { useState } from 'react';
 
 /**
@@ -23,26 +23,19 @@ export default function SaveAsDraftButton( {
 	const { order, fulfillment, notifyCustomer } = useFulfillmentContext();
 	const [ isExecuting, setIsExecuting ] = useState( false );
 	const { saveFulfillment } = useDispatch( FulfillmentStore );
-	const { getError } = useSelect(
-		( select ) => ( { getError: select( FulfillmentStore ).getError } ),
-		[]
-	);
 
 	const handleFulfillItems = async () => {
 		setError( null );
-		setIsExecuting( true );
-
 		if ( ! fulfillment || ! order ) {
-			setIsExecuting( false );
 			return;
 		}
 		if ( getFulfillmentItems( fulfillment ).length === 0 ) {
-			setIsExecuting( false );
 			setError( __( 'Select items to be fulfilled.', 'woocommerce' ) );
 			return;
 		}
+		setIsExecuting( true );
 		await saveFulfillment( order.id, fulfillment, notifyCustomer );
-		const error = getError( order.id );
+		const error = select( FulfillmentStore ).getError( order.id );
 		if ( error ) {
 			setError( error );
 		} else {
