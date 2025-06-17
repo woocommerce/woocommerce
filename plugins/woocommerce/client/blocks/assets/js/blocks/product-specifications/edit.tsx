@@ -37,6 +37,11 @@ const getFormattedDimensions = (
 	return `${ validDimensions.join( ' × ' ) } ${ dimensionUnit }`;
 };
 
+const EMPTY_PRODUCT_RESULT = {
+	product: null,
+	isLoadingProduct: false,
+};
+
 const Edit = ( {
 	context: { postId, postType },
 	clientId,
@@ -73,11 +78,7 @@ const Edit = ( {
 
 	const { product, isLoadingProduct } = useSelect(
 		( select ) => {
-			if ( ! postId )
-				return {
-					product: null,
-					isLoadingProduct: false,
-				};
+			if ( ! postId ) return EMPTY_PRODUCT_RESULT;
 			const { getProduct } = select( productsStore );
 			return {
 				product: getProduct( Number( postId ) ),
@@ -150,7 +151,7 @@ const Edit = ( {
 		};
 
 		if ( isSpecificProductContext ) {
-			productData.dimensions.value = product.dimensions
+			productData.dimensions.value = product?.dimensions
 				? getFormattedDimensions( product.dimensions, dimensionUnit )
 				: '';
 		} else {
@@ -160,7 +161,7 @@ const Edit = ( {
 
 	if ( showAttributes ) {
 		if ( isSpecificProductContext ) {
-			if ( product.attributes ) {
+			if ( product?.attributes ) {
 				product.attributes.forEach( ( attribute ) => {
 					productData[ attribute.name.toLowerCase() ] = {
 						label: attribute.name,
