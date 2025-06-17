@@ -26,8 +26,8 @@ export const SettingsPaymentsOffline = () => {
 	const { offlinePaymentGateways, isFetching } = useSelect( ( select ) => {
 		const paymentSettings = select( paymentSettingsStore );
 		return {
-			isFetching: paymentSettings.isFetching(),
 			offlinePaymentGateways: paymentSettings.getOfflinePaymentGateways(),
+			isFetching: paymentSettings.isFetching(),
 		};
 	}, [] );
 
