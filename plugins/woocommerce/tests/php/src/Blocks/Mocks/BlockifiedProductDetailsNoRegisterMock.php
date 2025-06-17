@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 /**
  * BlockifiedProductDetailsMock used to test BlockifiedProductDetails block functions.
  */
-class BlockifiedProductDetailsMock extends BlockifiedProductDetails {
+class BlockifiedProductDetailsNoRegisterMock extends BlockifiedProductDetails {
 
 	/**
 	 * Initialize our mock class.
@@ -26,4 +26,11 @@ class BlockifiedProductDetailsMock extends BlockifiedProductDetails {
 			new IntegrationRegistry(),
 		);
 	}
+
+	/**
+	 * Mock implementation of register_block_type method.
+	 *
+	 * @return void
+	 */
+	protected function register_block_type() {}
 }
