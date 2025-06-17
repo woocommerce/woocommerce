@@ -1,8 +1,8 @@
 <?php
 /**
- * Order details
+ * Order details (fulfillments)
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/order/order-details.php.
+ * This template can be overridden by copying it to yourtheme/woocommerce/order/order-details-fulfillments.php.
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you
  * (the theme developer) will need to copy the new files to your theme to
@@ -28,52 +28,6 @@ $order = wc_get_order( $order_id ); // phpcs:ignore WordPress.WP.GlobalVariables
 
 if ( ! $order ) {
 	return;
-}
-
-$fulfillments_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
-$fulfillments            = $fulfillments_data_store->read_fulfillments( WC_Order::class, $order->get_id() );
-
-if ( ! empty( $fulfillments ) ) {
-	?>
-<section class="woocommerce-order-shipment-details">
-	<table class="woocommerce-table woocommerce-table--order-shipment-details shop_table order_shipment_details">
-		<thead>
-	<?php
-	foreach ( $fulfillments as $index => $fulfillment ) {
-		if ( ! $fulfillment->get_is_fulfilled() ) {
-			continue;
-		}
-		?>
-			<tr>
-				<th class="woocommerce-table__shipment-info shipment-info" style="font-weight: normal;">
-					<?php
-					printf(
-						/* translators: %1$s is the shipment index, %2$s is the shipment date */
-						wp_kses( __( '<strong>Shipment %1$s</strong> was shipped on <strong>%2$s</strong>', 'woocommerce' ), 'strong' ),
-						intval( $index ) + 1,
-						esc_html(
-							gmdate(
-								'F j, Y',
-								strtotime(
-									$fulfillment->get_date_fulfilled() // Get the fulfilled date.
-									?? $fulfillment->get_date_updated() // Fallback to the updated date if fulfilled date is not set.
-								)
-							)
-						)
-					);
-					?>
-				</th>
-				<th class="woocommerce-table__shipment-tracking shipment-tracking" style="font-weight: normal;">
-					<?php echo wp_kses( FulfillmentUtils::get_tracking_info_html( $fulfillment ), 'a' ); ?>
-				</th>
-			</tr>
-		<?php
-	}
-	?>
-		</thead>
-	</table>
-</section>
-	<?php
 }
 
 $order_items        = $order->get_items( apply_filters( 'woocommerce_purchase_order_item_types', 'line_item' ) );
@@ -107,6 +61,9 @@ if ( $show_downloads ) {
 
 	<table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
 	<?php
+	$fulfillments_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
+	$fulfillments            = $fulfillments_data_store->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+
 	if ( FulfillmentUtils::has_pending_items( $order, $fulfillments ) ) {
 		$pending_items = FulfillmentUtils::get_pending_items( $order, $fulfillments );
 		?>

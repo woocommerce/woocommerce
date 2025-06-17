@@ -36,6 +36,8 @@ class FulfillmentsRenderer {
 		add_action( 'admin_footer', array( $this, 'render_fulfillment_drawer_slot' ) );
 		// Hook into the admin enqueue scripts to load the fulfillment drawer component.
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_components' ) );
+		// Hook into the order details before order table to render the fulfillment customer details.
+		add_action( 'woocommerce_order_details_before_order_table', array( $this, 'render_fulfillment_customer_details' ) );
 	}
 
 	/**
@@ -187,6 +189,59 @@ class FulfillmentsRenderer {
 		?>
 		<div id="wc_order_fulfillments_panel_container"></div>
 		<?php
+	}
+
+	/**
+	 * Render the fulfillment customer details in the order details page.
+	 *
+	 * @param WC_Order $order The order object.
+	 */
+	public function render_fulfillment_customer_details( WC_Order $order ) {
+		$fulfillments_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
+		$fulfillments            = $fulfillments_data_store->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+
+		if ( ! empty( $fulfillments ) ) {
+			?>
+<section class="woocommerce-order-details">
+	<table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
+		<thead>
+			<?php
+			foreach ( $fulfillments as $index => $fulfillment ) {
+				if ( ! $fulfillment->get_is_fulfilled() ) {
+					continue;
+				}
+				?>
+			<tr>
+				<th class="woocommerce-table__shipment-info shipment-info" style="font-weight: normal;">
+					<?php
+					printf(
+						/* translators: %1$s is the shipment index, %2$s is the shipment date */
+						wp_kses( __( '<b>Shipment %1$s</b> was shipped on <b>%2$s</b>', 'woocommerce' ), 'b' ),
+						intval( $index ) + 1,
+						esc_html(
+							gmdate(
+								'F j, Y',
+								strtotime(
+									$fulfillment->get_date_fulfilled() // Get the fulfilled date.
+									?? $fulfillment->get_date_updated() // Fallback to the updated date if fulfilled date is not set.
+								)
+							)
+						)
+					);
+					?>
+				</th>
+				<th class="woocommerce-table__shipment-tracking shipment-tracking" style="font-weight: normal;">
+						<?php echo wp_kses( FulfillmentUtils::get_tracking_info_html( $fulfillment ), 'a' ); ?>
+				</th>
+			</tr>
+				<?php
+			}
+			?>
+		</thead>
+	</table>
+</section>
+			<?php
+		}
 	}
 
 	/**
