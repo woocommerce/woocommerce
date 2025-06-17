@@ -626,7 +626,13 @@ class PaymentsProviders {
 	 * @return ?array The payment extension suggestion details, or null if not found.
 	 */
 	public function get_extension_suggestion_by_id( string $id ): ?array {
-		return $this->extension_suggestions->get_by_id( $id );
+		$suggestion = $this->extension_suggestions->get_by_id( $id );
+		if ( ! is_null( $suggestion ) ) {
+			// Enhance the suggestion details.
+			$suggestion = $this->enhance_extension_suggestion( $suggestion );
+		}
+
+		return $suggestion;
 	}
 
 	/**
@@ -638,7 +644,13 @@ class PaymentsProviders {
 	 * @return ?array The payment extension suggestion details, or null if not found.
 	 */
 	public function get_extension_suggestion_by_plugin_slug( string $slug, string $country_code = '' ): ?array {
-		return $this->extension_suggestions->get_by_plugin_slug( $slug, $country_code, Payments::SUGGESTIONS_CONTEXT );
+		$suggestion = $this->extension_suggestions->get_by_plugin_slug( $slug, $country_code, Payments::SUGGESTIONS_CONTEXT );
+		if ( ! is_null( $suggestion ) ) {
+			// Enhance the suggestion details.
+			$suggestion = $this->enhance_extension_suggestion( $suggestion );
+		}
+
+		return $suggestion;
 	}
 
 	/**
@@ -1076,7 +1088,6 @@ class PaymentsProviders {
 		if ( empty( $mollie_suggestion ) ) {
 			return $payment_gateways;
 		}
-		$mollie_suggestion = $this->enhance_extension_suggestion( $mollie_suggestion );
 		// Do nothing if the plugin is not active.
 		if ( self::EXTENSION_ACTIVE !== $mollie_suggestion['plugin']['status'] ) {
 			return $payment_gateways;
@@ -1111,9 +1122,6 @@ class PaymentsProviders {
 		// The suggestions only know about the normalized (aka official) plugin slug.
 		$suggestion = $this->get_extension_suggestion_by_plugin_slug( $normalized_plugin_slug, $country_code );
 		if ( ! is_null( $suggestion ) ) {
-			// Enhance the suggestion details.
-			$suggestion = $this->enhance_extension_suggestion( $suggestion );
-
 			// The title, description, icon, and image from the suggestion take precedence over the ones from the gateway.
 			// This is temporary until we update the partner extensions.
 			// Do not override the title and description for certain suggestions because theirs are more descriptive
