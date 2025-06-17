@@ -2,7 +2,7 @@
 /**
  * Title: List of posts in three columns
  * Slug: woostarter/template-query-loop
- * Categories: query
+ * Categories: posts
  * Description: A list of posts, 3 columns, with featured image, post date and title.
  * Block Types: core/query
  *
