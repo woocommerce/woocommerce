@@ -49,9 +49,9 @@ jobs:
                 const versionMatch = ffEvent.summary.match(/WooCommerce (\d+\.\d+) Feature Freeze/i);
                 const version = versionMatch ? versionMatch[1] : '';
 
-                // Calculate deadline date (5 days after the event)
+                // Calculate deadline date (4 days after the event)
                 const deadlineDate = new Date(ffEvent.start);
-                deadlineDate.setDate(deadlineDate.getDate() + 5);
+                deadlineDate.setDate(deadlineDate.getDate() + 4);
 
                 core.setOutput('event-title', ffEvent.summary);
                 core.setOutput('event-version', version);
