@@ -28,7 +28,7 @@ class HelioPay extends PaymentGateway {
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
-			if ( defined( '\HELIO_DEVNET_ENABLED' ) ) {
+			if ( defined( 'HELIO_DEVNET_ENABLED' ) ) {
 				return filter_var( $payment_gateway->get_option( \HELIO_DEVNET_ENABLED ), FILTER_VALIDATE_BOOLEAN );
 			}
 		} catch ( Throwable $e ) {
@@ -57,13 +57,13 @@ class HelioPay extends PaymentGateway {
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
 			if ( $this->is_in_test_mode( $payment_gateway ) ) {
-				if ( defined( '\HELIO_API_KEY_DEVNET' ) &&
-					defined( '\HELIO_API_SECRET_DEVNET' ) ) {
+				if ( defined( 'HELIO_API_KEY_DEVNET' ) &&
+					defined( 'HELIO_API_SECRET_DEVNET' ) ) {
 
 					return ! empty( $payment_gateway->get_option( \HELIO_API_KEY_DEVNET ) ) && ! empty( $payment_gateway->get_option( \HELIO_API_SECRET_DEVNET ) );
 				}
-			} elseif ( defined( '\HELIO_API_KEY_MAINNET' ) &&
-					defined( '\HELIO_API_SECRET_MAINNET' ) ) {
+			} elseif ( defined( 'HELIO_API_KEY_MAINNET' ) &&
+					defined( 'HELIO_API_SECRET_MAINNET' ) ) {
 
 					return ! empty( $payment_gateway->get_option( \HELIO_API_KEY_MAINNET ) ) && ! empty( $payment_gateway->get_option( \HELIO_API_SECRET_MAINNET ) );
 			}
