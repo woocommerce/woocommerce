@@ -15,18 +15,17 @@ jobs:
       - name: Install node-ical
         run: npm install node-ical
 
-      - name: Check for Feature Freeze events in a week
+      - name: Check for Feature Freeze events today
         id: find-feature-freeze-event
         uses: actions/github-script@v7
         with:
           script: |
             const ical = require('node-ical');
             
-            console.log('Checking for Feature Freeze events in a week...');
+            console.log('Checking for Feature Freeze events today...');
             
             try {
-              const aWeekFromNow = new Date();
-              aWeekFromNow.setDate((new Date()).getDate() + 7);
+              const today = new Date();
 
               const events = await ical.async.fromURL('https://calendar.google.com/calendar/ical/${{ secrets.RELEASE_CALENDAR_ID }}/public/basic.ics');
 
@@ -34,7 +33,7 @@ jobs:
                 .filter(event => event.type === 'VEVENT')
                 .filter(event => {
                   if (!event.start) return false;
-                  return new Date(event.start).toDateString() === new Date(aWeekFromNow).toDateString();
+                  return new Date(event.start).toDateString() === new Date(today).toDateString();
                 });
 
               const ffEvent = dayEvents.find(event => {
@@ -64,7 +63,7 @@ jobs:
               core.setFailed(`Failed to fetch calendar events: ${error.message}`);
             }
 
-  notify-upcoming-feature-freeze:
+  notify-feature-freeze-today:
     needs: check-feature-freeze
     if: needs.check-feature-freeze.outputs.event-title != ''
     runs-on: ubuntu-latest
