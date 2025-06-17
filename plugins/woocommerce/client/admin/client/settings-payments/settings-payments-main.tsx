@@ -360,16 +360,7 @@ export const SettingsPaymentsMain = () => {
 							provider_id: paymentsEntity.id,
 							suggestion_id:
 								paymentsEntity?._suggestion_id ?? 'unknown',
-							provider_extension_slug: paymentsEntity.plugin.slug,
-							from: context,
-						} );
-					} else {
-						// Record the extension activation event.
-						recordPaymentsEvent( 'provider_activated', {
-							provider_id: paymentsEntity.id,
-							suggestion_id:
-								paymentsEntity?._suggestion_id ?? 'unknown',
-							provider_extension_slug: paymentsEntity.plugin.slug,
+							extension_slug: paymentsEntity.plugin.slug,
 							from: context,
 						} );
 					}
