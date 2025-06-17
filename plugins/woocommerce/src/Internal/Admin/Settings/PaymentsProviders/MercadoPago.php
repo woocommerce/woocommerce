@@ -76,7 +76,7 @@ class MercadoPago extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode, false otherwise.
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_mercado_pago_in_sandbox_mode();
+		$is_in_sandbox_mode = $this->is_mercado_pago_in_sandbox_mode( $payment_gateway );
 		if ( ! is_null( $is_in_sandbox_mode ) ) {
 			return $is_in_sandbox_mode;
 		}
@@ -95,7 +95,7 @@ class MercadoPago extends PaymentGateway {
 	 * @return bool True if the payment gateway is in dev mode, false otherwise.
 	 */
 	public function is_in_dev_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_mercado_pago_in_sandbox_mode();
+		$is_in_sandbox_mode = $this->is_mercado_pago_in_sandbox_mode( $payment_gateway );
 		if ( ! is_null( $is_in_sandbox_mode ) ) {
 			return $is_in_sandbox_mode;
 		}
@@ -149,7 +149,7 @@ class MercadoPago extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_mercado_pago_in_sandbox_mode();
+		$is_in_sandbox_mode = $this->is_mercado_pago_in_sandbox_mode( $payment_gateway );
 		if ( ! is_null( $is_in_sandbox_mode ) ) {
 			return $is_in_sandbox_mode;
 		}
@@ -162,10 +162,12 @@ class MercadoPago extends PaymentGateway {
 	 *
 	 * For MercadoPago, there are two different environments: sandbox and production.
 	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
 	 * @return ?bool True if the payment gateway is in sandbox mode, false otherwise.
 	 *               Null if the environment could not be determined.
 	 */
-	private function is_mercado_pago_in_sandbox_mode(): ?bool {
+	private function is_mercado_pago_in_sandbox_mode( WC_Payment_Gateway $payment_gateway ): ?bool {
 		global $mercadopago;
 
 		try {
@@ -181,12 +183,13 @@ class MercadoPago extends PaymentGateway {
 
 			}
 		} catch ( \Throwable $e ) {
-			// Log the error for debugging purposes.
+			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
-				'Failed to determine if the MercadoPago gateway is in sandbox mode: ' . $e->getMessage(),
+				'Failed to determine if gateway is in sandbox mode: ' . $e->getMessage(),
 				array(
-					'source' => 'settings-payments',
-					'error'  => $e,
+					'gateway' => $payment_gateway->id,
+					'source'  => 'settings-payments',
+					'error'   => $e,
 				)
 			);
 		}

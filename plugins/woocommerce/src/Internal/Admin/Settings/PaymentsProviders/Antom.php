@@ -73,7 +73,7 @@ class Antom extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode, false otherwise.
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_antom_in_sandbox_mode();
+		$is_in_sandbox_mode = $this->is_antom_in_sandbox_mode( $payment_gateway );
 		if ( ! is_null( $is_in_sandbox_mode ) ) {
 			return $is_in_sandbox_mode;
 		}
@@ -92,7 +92,7 @@ class Antom extends PaymentGateway {
 	 * @return bool True if the payment gateway is in dev mode, false otherwise.
 	 */
 	public function is_in_dev_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_antom_in_sandbox_mode();
+		$is_in_sandbox_mode = $this->is_antom_in_sandbox_mode( $payment_gateway );
 		if ( ! is_null( $is_in_sandbox_mode ) ) {
 			return $is_in_sandbox_mode;
 		}
@@ -111,7 +111,7 @@ class Antom extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
-		$is_in_sandbox_mode = $this->is_antom_in_sandbox_mode();
+		$is_in_sandbox_mode = $this->is_antom_in_sandbox_mode( $payment_gateway );
 		if ( ! is_null( $is_in_sandbox_mode ) ) {
 			return $is_in_sandbox_mode;
 		}
@@ -124,16 +124,26 @@ class Antom extends PaymentGateway {
 	 *
 	 * There are two different environments: test and production.
 	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
 	 * @return ?bool True if the payment gateway is in sandbox mode, false otherwise.
 	 *               Null if the environment could not be determined.
 	 */
-	private function is_antom_in_sandbox_mode(): ?bool {
+	private function is_antom_in_sandbox_mode( WC_Payment_Gateway $payment_gateway ): ?bool {
 		try {
 			if ( function_exists( '\antom_get_core_settings' ) ) {
 				return filter_var( \antom_get_core_settings()['test_mode'], FILTER_VALIDATE_BOOLEAN );
 			}
-		} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-			// Ignore any errors.
+		} catch ( \Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway is in sandbox mode: ' . $e->getMessage(),
+				array(
+					'gateway' => $payment_gateway->id,
+					'source'  => 'settings-payments',
+					'error'   => $e,
+				)
+			);
 		}
 
 		// Let the caller know that we couldn't determine the environment.

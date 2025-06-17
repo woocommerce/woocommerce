@@ -118,8 +118,16 @@ class AfterpayClearpay extends PaymentGateway {
 			if ( is_callable( array( $payment_gateway, 'get_api_env' ) ) ) {
 				return 'production' !== $payment_gateway->get_api_env();
 			}
-		} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-			// Ignore any errors.
+		} catch ( \Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway is in sandbox mode: ' . $e->getMessage(),
+				array(
+					'gateway' => $payment_gateway->id,
+					'source'  => 'settings-payments',
+					'error'   => $e,
+				)
+			);
 		}
 
 		// Let the caller know that we couldn't determine the environment.
