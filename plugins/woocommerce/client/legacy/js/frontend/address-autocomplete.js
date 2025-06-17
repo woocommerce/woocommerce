@@ -144,6 +144,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		const suggestionsContainers = {};
 		const suggestionsLists = {};
 		let activeSuggestionIndices = {};
+		let addressSelectionTimeout;
 
 		/**
 		 * Cache address fields for a given type, will re-run when country changes.
@@ -552,7 +553,12 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 				);
 			}
 
-			setTimeout( function () {
+			// Note: Passing an invalid ID to clearTimeout() silently does nothing; no exception is thrown.
+			if ( addressSelectionTimeout ) {
+				clearTimeout( addressSelectionTimeout );
+			}
+
+			addressSelectionTimeout = setTimeout( function () {
 				// Cache address fields again as they may have updated following the country change.
 				cacheAddressFields( type );
 
