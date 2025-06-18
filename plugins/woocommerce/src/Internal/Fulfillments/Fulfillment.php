@@ -253,7 +253,7 @@ class Fulfillment extends \WC_Data {
 	 * @param array $items Fulfillment items.
 	 */
 	public function set_items( array $items ): void {
-		$this->update_meta_data( '_items', $items );
+		$this->update_meta_data( '_items', array_values( $items ) );
 	}
 
 	/**
