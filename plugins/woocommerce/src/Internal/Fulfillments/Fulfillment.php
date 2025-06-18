@@ -149,6 +149,42 @@ class Fulfillment extends \WC_Data {
 	}
 
 	/**
+	 * Check if the fulfillment is locked.
+	 *
+	 * @return bool Whether the fulfillment is locked.
+	 */
+	public function is_locked(): bool {
+		return boolval( $this->get_meta( '_is_locked' ) );
+	}
+
+	/**
+	 * Get the lock message.
+	 *
+	 * @return string Lock message.
+	 */
+	public function get_lock_message(): string {
+		return $this->get_meta( '_lock_message' ) ?? '';
+	}
+
+	/**
+	 * Set the lock status and message.
+	 *
+	 * @param bool   $locked  Whether the fulfillment is locked.
+	 * @param string $message Optional. The lock message.
+	 *                        Defaults to an empty string.
+	 *
+	 * @return void
+	 */
+	public function set_locked( bool $locked, string $message = '' ): void {
+		$this->update_meta_data( '_is_locked', $locked );
+		if ( $locked ) {
+			$this->update_meta_data( '_lock_message', $message );
+		} else {
+			$this->delete_meta_data( '_lock_message' );
+		}
+	}
+
+	/**
 	 * Get the date updated.
 	 *
 	 * @return string|null Date updated.
