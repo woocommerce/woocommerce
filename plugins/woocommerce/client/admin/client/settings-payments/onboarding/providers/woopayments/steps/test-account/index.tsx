@@ -627,6 +627,7 @@ const TestAccountStep = () => {
 			{ ( status === 'initializing' || status === 'polling' ) && (
 				<TestDriveLoader
 					progress={ progress }
+					title={ loaderTitle }
 					message={ getPhaseMessage( pollingPhase ) }
 				/>
 			) }
