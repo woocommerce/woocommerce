@@ -26,12 +26,14 @@ export const useFeaturedItemStatus = ( {
 }: FeaturedItemProps ): FeaturedItemReturnType => {
 	return useSelect(
 		( selectFunc ) => {
-			let featuredItemStatus: FeaturedItemReturnType = {
+			const featuredItemStatus: FeaturedItemReturnType = {
 				status: null,
 				isDeleted: null,
 				isLoading: true,
 			};
-			if ( ! itemId ) return featuredItemStatus;
+
+			if ( ! itemId ) return { ...featuredItemStatus, isLoading: false };
+
 			const { getEntityRecord, getEntityRecords, hasFinishedResolution } =
 				selectFunc( coreDataStore );
 
@@ -49,11 +51,6 @@ export const useFeaturedItemStatus = ( {
 			const isCategoryDeleted =
 				itemType === BLOCK_NAMES.featuredCategory &&
 				! getEntityRecords( ...categoryArgs )?.length;
-
-			console.log( `activeProduct:` );
-			console.log( getEntityRecord( ...productArgs ) );
-			console.log( `isCategoryDeleted:` );
-			console.log( ! getEntityRecords( ...categoryArgs )?.length );
 
 			if ( itemType === BLOCK_NAMES.featuredProduct ) {
 				if ( ! activeProduct ) {

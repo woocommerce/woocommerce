@@ -80,32 +80,17 @@ export const withEditMode =
 					: attributes?.categoryId,
 			itemType: name,
 		} );
-		console.log( isLoading );
+
 		useEffect( () => {
-			console.log( '-----------------' );
-			console.log( name );
-			console.log( attributes );
-			console.log( status );
-			console.log( `isDeleted:`, isDeleted );
-			console.log( isLoading );
-			console.log( '-----------------' );
-			if ( status !== null || isDeleted !== null ) {
-				if (
-					name === BLOCK_NAMES.featuredProduct &&
-					status !== 'publish'
-				) {
-					// console.log( 'INSIDE' );
-					setAttributes( { editMode: true } );
-				} else if ( isDeleted ) {
-					// console.log( 'INSIDE 2' );
-					setAttributes( { editMode: true } );
-				} else {
-					// console.log( 'INSIDE 3')
-					setAttributes( { editMode: false } );
-				}
+			const currEditModeValue =
+				( name === BLOCK_NAMES.featuredProduct &&
+					status !== 'publish' ) ||
+				isDeleted;
+			if ( currEditModeValue !== attributes.editMode ) {
+				setAttributes( { editMode: currEditModeValue } );
 			}
 		}, [ status, isDeleted ] );
-		// console.log( `editmode: ${attributes.editMode}` )
+
 		if ( ! isLoading && attributes.editMode ) {
 			return (
 				<Placeholder
