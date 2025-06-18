@@ -8,7 +8,7 @@
 	}
 }
 
-@mixin small-medium-styles {
+@mixin small-mobile-styles {
 	.wc-block-components-payment-method-label--with-icon {
 		> img,
 		> svg {
@@ -21,6 +21,6 @@
 	@include small-medium-styles;
 }
 
-@include cart-checkout-medium-container {
+@include cart-checkout-mobile-container {
 	@include small-medium-styles;
 }
