@@ -369,7 +369,7 @@ class FulfillmentsRenderer {
 		$order_status = $order->get_status();
 		echo '<mark class="order-status status-' . esc_attr( $order_status ) . '"><span>' . esc_html( wc_get_order_status_name( $order_status ) ) . '</span></mark>';
 		// Render fulfillment status badge.
-		$this->render_fulfillment_status_badge( $order, $this->get_fulfillment_status( $this->fulfillments_cache[ $order->get_id() ] ?? array() ) );
+		$this->render_fulfillment_status_badge( $order, FulfillmentUtils::get_fulfillment_status( $this->fulfillments_cache[ $order->get_id() ] ?? array() ) );
 		echo '</div>';
 	}
 
