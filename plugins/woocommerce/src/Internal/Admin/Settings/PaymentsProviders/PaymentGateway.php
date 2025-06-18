@@ -476,8 +476,6 @@ class PaymentGateway {
 					'exception' => $e,
 				)
 			);
-
-			return false;
 		}
 
 		// Fall back to inferring this from having a connected account.
