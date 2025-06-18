@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -375,7 +376,10 @@ class WC_Meta_Box_Order_Data {
 							$user_string = '';
 							$user_id     = '';
 							if ( $order->get_user_id() ) {
-								$user_id  = absint( $order->get_user_id() );
+								$user_id = absint( $order->get_user_id() );
+								$user    = Users::get_user_in_current_site( $user_id );
+
+								if ( ! is_wp_error( $user ) ) {
 								$customer = new WC_Customer( $user_id );
 								/* translators: 1: user display name 2: user ID 3: user email */
 								$user_string = sprintf(
@@ -385,6 +389,10 @@ class WC_Meta_Box_Order_Data {
 									$customer->get_id(),
 									$customer->get_email()
 								);
+								} else {
+									// print customer not available in the current site.
+									$user_string = esc_html__( '(Not available)', 'woocommerce' );
+								}
 							}
 							?>
 							<select class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-allow_clear="true">
@@ -417,6 +425,13 @@ class WC_Meta_Box_Order_Data {
 						<div class="address">
 							<?php
 							// Display values.
+							$user = Users::get_user_in_current_site( $order->get_user_id() );
+
+							$details_not_available_message = __( 'Details are not available for this customer as this user does not exist in the current site.', 'woocommerce' );
+							// If the user is not a guest and is not a valid user in the current site, print details not available.
+							if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
+								echo '<p>' . esc_html( $details_not_available_message ) . '</p>';
+							} else {
 							if ( $order->get_formatted_billing_address() ) {
 								echo '<p>' . wp_kses( $order->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
 							} else {
@@ -450,6 +465,7 @@ class WC_Meta_Box_Order_Data {
 
 								if ( $field_value || '0' === $field_value ) {
 									echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . wp_kses_post( $field_value ) . '</p>';
+									}
 								}
 							}
 							?>
@@ -470,7 +486,13 @@ class WC_Meta_Box_Order_Data {
 
 								$field_name = 'billing_' . $key;
 
-								if ( ! isset( $field['value'] ) ) {
+								// Check if the user is a valid user in the current site.
+								// If not, set the value to an empty string.
+								// This is to prevent the user from being able to view the billing address of a user that does not exist.
+								// If the user is not a guest and is not a valid user in the current site, print details not available.
+								if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
+									$field['value'] = '';
+								} elseif ( ! isset( $field['value'] ) ) {
 									if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
 										$field['value'] = $order->{"get_$field_name"}( 'edit' );
 									} else {
@@ -542,6 +564,10 @@ class WC_Meta_Box_Order_Data {
 						<div class="address">
 							<?php
 							// Display values.
+							// If the user is not a guest and is not a valid user in the current site, print details not available.
+							if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
+								echo '<p>' . esc_html( $details_not_available_message ) . '</p>';
+							} else {
 							if ( $order->get_formatted_shipping_address() ) {
 								echo '<p>' . wp_kses( $order->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
 							} else {
@@ -578,6 +604,7 @@ class WC_Meta_Box_Order_Data {
 
 							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) && $order->get_customer_note() ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 								echo '<p class="order_note"><strong>' . esc_html( __( 'Customer provided note:', 'woocommerce' ) ) . '</strong> ' . wp_kses( nl2br( esc_html( $order->get_customer_note() ) ), array( 'br' => array() ) ) . '</p>';
+								}
 							}
 							?>
 						</div>
@@ -597,7 +624,13 @@ class WC_Meta_Box_Order_Data {
 
 									$field_name = 'shipping_' . $key;
 
-									if ( ! isset( $field['value'] ) ) {
+									// Check if the user is a valid user in the current site.
+									// If not, set the value to an empty string.
+									// This is to prevent the user from being able to view the shipping address of a user that does not exist.
+									// If the user is not a guest and is not a valid user in the current site, print details not available.
+									if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
+										$field['value'] = '';
+									} elseif ( ! isset( $field['value'] ) ) {
 										if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
 											$field['value'] = $order->{"get_$field_name"}( 'edit' );
 										} else {
@@ -676,14 +709,24 @@ class WC_Meta_Box_Order_Data {
 
 		// Update customer.
 		$customer_id = isset( $_POST['customer_user'] ) ? absint( $_POST['customer_user'] ) : 0;
-		if ( $customer_id !== $order->get_customer_id() ) {
+
+		$selected_customer = Users::get_user_in_current_site( $customer_id );
+
+		// Only update the customer ID if it's a guest (0) or if it's a different customer that exists in the current site.
+		// If the customer doesn't exist in the current site (is_wp_error), we won't update the customer ID.
+		$is_valid_guest_or_new_customer = $customer_id !== $order->get_customer_id() && ( 0 === $customer_id || ! is_wp_error( $selected_customer ) );
+		if ( $is_valid_guest_or_new_customer ) {
 			$props['customer_id'] = $customer_id;
 		}
 
 		// Update billing fields.
 		$billing_fields = self::get_billing_fields( $order, 'edit' );
 
-		if ( ! empty( $billing_fields ) ) {
+		// Only update billing fields if the order is for a valid user in the current site.
+		// This is to prevent the user from being able to update the billing address of a user that does not exist in the current site.
+		$save_metadata_for_guest_user_or_a_valid_user = 0 === $customer_id || ! is_wp_error( $selected_customer );
+
+		if ( ! empty( $billing_fields ) && $save_metadata_for_guest_user_or_a_valid_user ) {
 			foreach ( $billing_fields as $key => $field ) {
 				if ( ! isset( $field['id'] ) ) {
 					$field['id'] = '_billing_' . $key;
@@ -709,7 +752,9 @@ class WC_Meta_Box_Order_Data {
 		// Update shipping fields.
 		$shipping_fields = self::get_shipping_fields( $order, 'edit' );
 
-		if ( ! empty( $shipping_fields ) ) {
+		// Only update shipping fields if the order is for a valid user in the current site.
+		// This is to prevent the user from being able to update the shipping address of a user that does not exist in the current site.
+		if ( ! empty( $shipping_fields ) && $save_metadata_for_guest_user_or_a_valid_user ) {
 			foreach ( $shipping_fields as $key => $field ) {
 				if ( ! isset( $field['id'] ) ) {
 					$field['id'] = '_shipping_' . $key;
