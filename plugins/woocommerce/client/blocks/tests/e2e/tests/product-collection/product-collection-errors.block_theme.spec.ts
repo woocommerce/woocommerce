@@ -45,7 +45,10 @@ test.describe( 'Product Page: error notices when adding out-of-stock products', 
 			.click();
 
 		// Add to cart again — triggers out-of-stock error.
-		await productCart.getByRole( 'button' ).click();
+		await productCart
+			.locator( 'button' )
+			.filter( { hasText: '1 in cart' } )
+			.click();
 
 		// Verify error notice is displayed.
 		await expect( page.getByRole( 'alert' ) ).toBeVisible();
