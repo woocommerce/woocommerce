@@ -373,9 +373,7 @@ const { state } = store(
 
 			// Intended to be used in context of a cart item in wp-each
 			get lineItemTotal(): string {
-				const { totals } = state.getCartItemById(
-					getContext< CartItemContext >().cartItem.id
-				);
+				const { totals } = state.cartItem;
 				const { displayCartPriceIncludingTax } = getConfig(
 					'woocommerce/mini-cart'
 				);
