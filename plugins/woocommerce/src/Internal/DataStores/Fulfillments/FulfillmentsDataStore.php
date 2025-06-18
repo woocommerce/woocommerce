@@ -126,7 +126,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 			 * @since 9.9.0
 			 */
 			do_action( 'wc_fulfillment_after_fulfill', $data );
-    }
+		}
 	}
 
 	/**
@@ -178,7 +178,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		/**
 		 * Filter to modify the fulfillment data before it is updated.
 		 *
-		 * @param Fulfillment $data Fulfillment The fulfillment object to update.
+		 * @param Fulfillment $data The fulfillment object that is being updated.
 		 *
 		 * @since 9.9.0
 		 */
@@ -192,6 +192,8 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 
 			/**
 			 * Filter to modify the fulfillment data before it is fulfilled.
+			 *
+			 * @param Fulfillment $data The fulfillment object that is being fulfilled.
 			 *
 			 * @since 9.9.0
 			 */
@@ -248,16 +250,16 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 			do_action( 'wc_fulfillment_after_update', $data );
 		}
 
-    if ( $is_fulfill_action && ! doing_action( 'wc_fulfillment_after_fulfill' ) ) {
+		if ( $is_fulfill_action && ! doing_action( 'wc_fulfillment_after_fulfill' ) ) {
 			/**
 			 * Action to perform after a fulfillment is fulfilled.
-       *
-			 * @param Fulfillment $data The fulfillment object that was updated.
-       *
+			 *
+			 * @param Fulfillment $data The fulfillment object that was fulfilled.
+			 *
 			 * @since 9.9.0
 			 */
 			do_action( 'wc_fulfillment_after_fulfill', $data );
-    }
+		}
 	}
 
 	/**
