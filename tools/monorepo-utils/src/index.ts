@@ -13,7 +13,6 @@ import PullRequest from './pull-requests/commands';
 import CodeFreeze from './code-freeze/commands';
 import Github from './github/commands';
 import Slack from './slack';
-import Manifest from './md-docs/commands';
 import Changefile from './changefile';
 import CIJobs from './ci-jobs';
 import WorkflowProfiler from './workflow-profiler/commands';
@@ -39,7 +38,6 @@ const program = new Command()
 	.addCommand( Changefile )
 	.addCommand( CIJobs )
 	.addCommand( WorkflowProfiler )
-	.addCommand( Manifest )
 	.addCommand( SlackTestReport )
 	.addCommand( PullRequest )
 	.addCommand( Github );
@@ -51,7 +49,7 @@ const run = async () => {
 		//  parseAsync handles cases where the action is async and not async.
 		await program.parseAsync( process.argv );
 	} catch ( e ) {
-		// if github ci, always error
+		// if GitHub CI, always error
 		if ( isGithubCI() ) {
 			Logger.error( e );
 		} else if ( e.code !== 'commander.help' ) {
