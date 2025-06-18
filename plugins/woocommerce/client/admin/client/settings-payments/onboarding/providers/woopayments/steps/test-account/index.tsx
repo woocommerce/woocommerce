@@ -114,7 +114,7 @@ const TestAccountStep = () => {
 
 	// Update loader title based on time intervals
 	useEffect( () => {
-		if ( status !== 'polling' ) {
+		if ( status !== 'polling' && status !== 'initializing' ) {
 			if ( titleIntervalRef.current ) {
 				clearInterval( titleIntervalRef.current );
 				titleIntervalRef.current = null;
