@@ -97,7 +97,12 @@ test.describe( `${ blockData.slug } Block`, () => {
 		}
 
 		if ( ! template ) {
-			throw lastError ?? new Error( 'Template was not created.' );
+			throw (
+				lastError ??
+				new Error(
+					`Template was not created after ${ maxRetries } attempts.`
+				)
+			);
 		}
 
 		await admin.visitSiteEditor( {
