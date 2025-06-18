@@ -192,6 +192,15 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_rest_check_post_permissions() with invalid post type.
+	 *
+	 * @since 2.6.0
+	 */
+	public function test_wc_rest_check_post_permissions_invalid_post_type() {
+		$this->assertFalse( wc_rest_check_post_permissions( 'invalid_post_type' ) );
+	}
+
+	/**
 	 * Test wc_rest_check_product_term_permissions().
 	 *
 	 * @since 2.6.0
