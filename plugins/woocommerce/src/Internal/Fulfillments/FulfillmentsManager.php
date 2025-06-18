@@ -20,7 +20,8 @@ class FulfillmentsManager {
 	 * Class constructor.
 	 */
 	public function __construct() {
-		add_filter( 'woocommerce_fulfillment_translate_meta_key', array( $this, 'translate_fulfillment_meta_key' ), 10, 1 );
+		add_filter( 'wc_fulfillment_shipping_providers', array( $this, 'get_initial_shipping_providers' ), 10, 1 );
+		add_filter( 'wc_fulfillment_translate_meta_key', array( $this, 'translate_fulfillment_meta_key' ), 10, 1 );
 	}
 
 	/**
@@ -39,7 +40,7 @@ class FulfillmentsManager {
 		 * @since 9.9.0
 		 */
 		$meta_key_translations = apply_filters(
-			'woocommerce_fulfillment_meta_key_translations',
+			'wc_fulfillment_meta_key_translations',
 			array(
 				'fulfillment_status' => __( 'Fulfillment Status', 'woocommerce' ),
 				'shipment_tracking'  => __( 'Shipment Tracking', 'woocommerce' ),
@@ -47,5 +48,28 @@ class FulfillmentsManager {
 			)
 		);
 		return isset( $meta_key_translations[ $meta_key ] ) ? $meta_key_translations[ $meta_key ] : $meta_key;
+	}
+
+	/**
+	 * Get initial shipping providers.
+	 *
+	 * This method provides the initial shipping providers that feeds the `wc_fulfillment_shipping_providers` filter,
+	 * which is used to populate the list of available shipping providers on the fulfillment UI.
+	 *
+	 * @param array $shipping_providers The current list of shipping providers.
+	 *
+	 * @return array The modified list of shipping providers.
+	 */
+	public function get_initial_shipping_providers( $shipping_providers ) {
+		if ( ! is_array( $shipping_providers ) ) {
+			$shipping_providers = array();
+		}
+
+		$shipping_providers = array_merge(
+			$shipping_providers,
+			include __DIR__ . '/ShippingProviders.php'
+		);
+
+		return $shipping_providers;
 	}
 }

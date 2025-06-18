@@ -180,7 +180,6 @@
 		"comment-parser": "^1.4.1",
 		"config": "3.3.7",
 		"copy-webpack-plugin": "13.0.x",
-		"cross-env": "^7.0.3",
 		"css-loader": "6.11.x",
 		"eslint": "^8.55.0",
 		"eslint-import-resolver-typescript": "3.6.1",

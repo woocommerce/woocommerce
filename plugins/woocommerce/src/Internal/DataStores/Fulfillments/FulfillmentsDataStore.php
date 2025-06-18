@@ -108,21 +108,25 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		$data->apply_changes();
 		$data->set_object_read( true );
 
-		/**
-		 * Action to perform after a fulfillment is created.
-		 *
-		 * @since 9.9.0
-		 */
-		do_action( 'wc_fulfillment_after_create', $data );
+		if ( ! doing_action( 'wc_fulfillment_after_create' ) ) {
+			/**
+			* Action to perform after a fulfillment is created.
+			*
+			* @param Fulfillment $data The fulfillment object that was created.
+			*
+			* @since 9.9.0
+			*/
+			do_action( 'wc_fulfillment_after_create', $data );
+		}
 
-		if ( $is_fulfill_action ) {
+		if ( $is_fulfill_action && ! doing_action( 'wc_fulfillment_after_fulfill' ) ) {
 			/**
 			 * Action to perform after a fulfillment is fulfilled.
 			 *
 			 * @since 9.9.0
 			 */
 			do_action( 'wc_fulfillment_after_fulfill', $data );
-		}
+    }
 	}
 
 	/**
@@ -173,6 +177,8 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 
 		/**
 		 * Filter to modify the fulfillment data before it is updated.
+		 *
+		 * @param Fulfillment $data Fulfillment The fulfillment object to update.
 		 *
 		 * @since 9.9.0
 		 */
@@ -231,21 +237,27 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 
 		$data->set_object_read( true );
 
-		/**
-		 * Action to perform after a fulfillment is updated.
-		 *
-		 * @since 9.9.0
-		 */
-		do_action( 'wc_fulfillment_after_update', $data );
-
-		if ( $is_fulfill_action ) {
+		if ( ! doing_action( 'wc_fulfillment_after_update' ) ) {
 			/**
-			 * Action to perform after a fulfillment is fulfilled.
+			 * Action to perform after a fulfillment is updated.
+			 *
+			 * @param Fulfillment $data The fulfillment object that was updated.
 			 *
 			 * @since 9.9.0
 			 */
-			do_action( 'wc_fulfillment_after_fulfill', $data );
+			do_action( 'wc_fulfillment_after_update', $data );
 		}
+
+    if ( $is_fulfill_action && ! doing_action( 'wc_fulfillment_after_fulfill' ) ) {
+			/**
+			 * Action to perform after a fulfillment is fulfilled.
+       *
+			 * @param Fulfillment $data The fulfillment object that was updated.
+       *
+			 * @since 9.9.0
+			 */
+			do_action( 'wc_fulfillment_after_fulfill', $data );
+    }
 	}
 
 	/**
@@ -292,12 +304,14 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		$data->apply_changes();
 		$data->set_object_read( true );
 
-		/**
-		 * Action to perform after a fulfillment is deleted.
-		 *
-		 * @since 9.9.0
-		 */
-		do_action( 'wc_fulfillment_after_delete', $data );
+		if ( ! doing_action( 'wc_fulfillment_after_delete', $data ) ) {
+			/**
+			 * Action to perform after a fulfillment is deleted.
+			 *
+			 * @since 9.9.0
+			 */
+			do_action( 'wc_fulfillment_after_delete', $data );
+		}
 
 		// Set the fulfillment object to a fresh state.
 		$data = new Fulfillment();

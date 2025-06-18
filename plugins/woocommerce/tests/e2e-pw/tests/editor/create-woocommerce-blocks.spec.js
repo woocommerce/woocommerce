@@ -110,7 +110,7 @@ const blocks = {
 			} )
 		).toBeVisible();
 	},
-	'Single Product': async ( canvas ) => {
+	Product: async ( canvas ) => {
 		await canvas
 			.getByRole( 'listitem' )
 			.filter( { hasText: /^Simplest Product$/ } )
@@ -119,7 +119,10 @@ const blocks = {
 		await canvas.getByRole( 'button', { name: 'Done' } ).click();
 
 		await expect(
-			canvas.getByRole( 'document', { name: `Block: Single Product` } )
+			canvas.getByRole( 'document', {
+				name: `Block: Product`,
+				exact: true,
+			} )
 		).toBeVisible();
 	},
 	'Store Notices': null,
