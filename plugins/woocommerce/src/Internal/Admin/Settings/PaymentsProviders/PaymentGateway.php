@@ -228,7 +228,22 @@ class PaymentGateway {
 	 * @return bool True if the payment gateway is enabled, false otherwise.
 	 */
 	public function is_enabled( WC_Payment_Gateway $payment_gateway ): bool {
-		return wc_string_to_bool( $payment_gateway->enabled ?? 'no' );
+		try {
+			return wc_string_to_bool( $payment_gateway->enabled ?? 'no' );
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway is enabled: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
+		}
+
+		// If we reach here, just assume that the gateway is not enabled.
+		return false;
 	}
 
 	/**
@@ -239,10 +254,22 @@ class PaymentGateway {
 	 * @return bool True if the payment gateway needs setup, false otherwise.
 	 */
 	public function needs_setup( WC_Payment_Gateway $payment_gateway ): bool {
-		$needs_setup = wc_string_to_bool( $payment_gateway->needs_setup() );
-		// If we get a true value, it means the gateway needs setup.
-		if ( $needs_setup ) {
-			return true;
+		try {
+			$needs_setup = wc_string_to_bool( $payment_gateway->needs_setup() );
+			// If we get a true value, it means the gateway needs setup.
+			if ( $needs_setup ) {
+				return true;
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway needs setup: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
 		}
 
 		// If we get a false value, it might mean that it doesn't need setup,
