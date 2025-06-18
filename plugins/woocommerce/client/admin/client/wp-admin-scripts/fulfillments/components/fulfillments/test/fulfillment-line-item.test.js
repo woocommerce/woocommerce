@@ -6,6 +6,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 /**
  * Internal dependencies
  */
+import '../../../test-helper/global-mock';
 import FulfillmentLineItem from '../fulfillment-line-item';
 
 jest.mock( '@wordpress/components', () => ( {

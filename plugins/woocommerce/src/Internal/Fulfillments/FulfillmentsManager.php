@@ -22,6 +22,7 @@ class FulfillmentsManager {
 	public function __construct() {
 		add_filter( 'wc_fulfillment_translate_meta_key', array( $this, 'translate_fulfillment_meta_key' ), 10, 1 );
 		add_filter( 'wc_fulfillment_get_status', array( $this, 'get_fulfillment_status' ), 10, 1 );
+		add_filter( 'wc_fulfillment_shipping_providers', array( $this, 'get_initial_shipping_providers' ), 10, 1 );
 	}
 
 	/**
@@ -103,5 +104,28 @@ class FulfillmentsManager {
 			'label'        => __( 'Unknown', 'woocommerce' ),
 			'is_fulfilled' => false,
 		);
+  }
+  
+  /**
+	 * Get initial shipping providers.
+	 *
+	 * This method provides the initial shipping providers that feeds the `wc_fulfillment_shipping_providers` filter,
+	 * which is used to populate the list of available shipping providers on the fulfillment UI.
+	 *
+	 * @param array $shipping_providers The current list of shipping providers.
+	 *
+	 * @return array The modified list of shipping providers.
+	 */
+	public function get_initial_shipping_providers( $shipping_providers ) {
+		if ( ! is_array( $shipping_providers ) ) {
+			$shipping_providers = array();
+		}
+
+		$shipping_providers = array_merge(
+			$shipping_providers,
+			include __DIR__ . '/ShippingProviders.php'
+		);
+
+		return $shipping_providers;
 	}
 }

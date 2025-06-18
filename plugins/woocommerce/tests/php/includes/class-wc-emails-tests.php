@@ -71,7 +71,7 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 		$fulfillment = FulfillmentsHelper::create_fulfillment();
 
 		add_filter(
-			'woocommerce_fulfillment_meta_key_translations',
+			'wc_fulfillment_meta_key_translations',
 			function ( $translations ) {
 				$translations['test_meta_key'] = __( 'Test meta key', 'woocommerce' );
 				return $translations;

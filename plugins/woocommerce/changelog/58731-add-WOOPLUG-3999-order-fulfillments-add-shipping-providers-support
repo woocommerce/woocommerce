@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+Comment: Move the shipping providers list from frontend to backend, add additional providers
+
