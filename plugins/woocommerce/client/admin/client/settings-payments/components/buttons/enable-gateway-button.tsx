@@ -180,9 +180,6 @@ export const EnableGatewayButton = ( {
 							}
 						);
 					}
-				} else {
-					// Record the event when user successfully enables a gateway.
-					recordPaymentsProviderEvent( 'enable', gatewayProvider );
 				}
 
 				// If no redirect occurred, the data needs to be refreshed.

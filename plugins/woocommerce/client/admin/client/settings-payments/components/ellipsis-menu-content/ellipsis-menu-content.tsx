@@ -144,9 +144,6 @@ export const EllipsisMenuContent = ( {
 			gatewayToggleNonce
 		)
 			.then( () => {
-				// Record the event when user successfully disables a gateway.
-				recordPaymentsProviderEvent( 'disable', provider );
-
 				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
 				setIsDisabling( false );
 				onToggle();
