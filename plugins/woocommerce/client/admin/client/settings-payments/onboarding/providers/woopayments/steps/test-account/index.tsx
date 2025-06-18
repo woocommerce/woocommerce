@@ -80,6 +80,12 @@ type Status =
 	| 'blocked'
 	| 'failed';
 
+const PHASE_MESSAGES = [
+	__( 'Setting up your test account', 'woocommerce' ),
+	__( 'Finishing payments setup', 'woocommerce' ),
+	__( 'Almost there!', 'woocommerce' ),
+];
+
 const TestAccountStep = () => {
 	const {
 		currentStep,
