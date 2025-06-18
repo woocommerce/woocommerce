@@ -46,6 +46,7 @@ class FulfillmentsRenderer {
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_components' ) );
 		// Hook into the orders table extra tablenav to render the fulfillment filters.
 		add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'render_fulfillment_filters' ) );
+		add_filter( 'woocommerce_order_list_table_query', 'apply_fulfillment_status_filter_to_orders_list' );
 		// Hook into the order details before order table to render the fulfillment customer details.
 		add_action( 'woocommerce_order_details_before_order_table', array( $this, 'render_fulfillment_customer_details' ) );
 		// Initialize the renderer for bulk actions.
@@ -366,14 +367,51 @@ class FulfillmentsRenderer {
 			return;
 		}
 		?>
+		<?php $selected_status = isset( $_GET['fulfillment_status'] ) ? sanitize_text_field( wp_unslash( $_GET['fulfillment_status'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification ?>
 		<select id="fulfillment-status-filter" name="fulfillment_status">
-			<option value=""><?php esc_html_e( 'Filter by fulfillment', 'woocommerce' ); ?></option>
-			<option value="fulfilled"><?php esc_html_e( 'Fulfilled', 'woocommerce' ); ?></option>
-			<option value="unfulfilled"><?php esc_html_e( 'Unfulfilled', 'woocommerce' ); ?></option>
-			<option value="partially_fulfilled"><?php esc_html_e( 'Partially Fulfilled', 'woocommerce' ); ?></option>
-			<option value="no_fulfillments"><?php esc_html_e( 'Fulfillment N/A', 'woocommerce' ); ?></option>
+			<option value="" <?php selected( $selected_status, '' ); ?>><?php esc_html_e( 'Filter by fulfillment', 'woocommerce' ); ?></option>
+			<option value="fulfilled" <?php selected( $selected_status, 'fulfilled' ); ?>><?php esc_html_e( 'Fulfilled', 'woocommerce' ); ?></option>
+			<option value="unfulfilled" <?php selected( $selected_status, 'unfulfilled' ); ?>><?php esc_html_e( 'Unfulfilled', 'woocommerce' ); ?></option>
+			<option value="partially_fulfilled" <?php selected( $selected_status, 'partially_fulfilled' ); ?>><?php esc_html_e( 'Partially Fulfilled', 'woocommerce' ); ?></option>
+			<option value="no_fulfillments" <?php selected( $selected_status, 'no_fulfillments' ); ?>><?php esc_html_e( 'Fulfillment N/A', 'woocommerce' ); ?></option>
 		</select>
 		<?php
+	}
+
+	/**
+	 * Apply the fulfillment status filter to the orders list.
+	 *
+	 * @param array $args The query arguments for the orders list.
+	 * @return array The modified query arguments.
+	 */
+	public function apply_fulfillment_status_filter_to_orders_list( $args ) {
+		// phpcs:ignore WordPress.Security.NonceVerification
+		if ( isset( $_GET['fulfillment_status'] ) && ! empty( $_GET['fulfillment_status'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification
+			$fulfillment_status = sanitize_text_field( wp_unslash( $_GET['fulfillment_status'] ) );
+
+			// Ensure the fulfillment status is one of the allowed values.
+			$allowed_statuses = array( 'fulfilled', 'unfulfilled', 'partially_fulfilled', 'no_fulfillments' );
+			if ( in_array( $fulfillment_status, $allowed_statuses, true ) ) {
+				switch ( $fulfillment_status ) {
+					case 'no_fulfillments':
+						$args['meta_query'][] = array(
+							'key'     => '_fulfillment_status',
+							'compare' => 'NOT EXISTS',
+						);
+						break;
+					default:
+						$args['meta_query'][] = array(
+							'key'     => '_fulfillment_status',
+							'value'   => $fulfillment_status,
+							'compare' => '=',
+						);
+						break;
+				}
+			}
+		}
+
+		return $args;
 	}
 
 	/**
