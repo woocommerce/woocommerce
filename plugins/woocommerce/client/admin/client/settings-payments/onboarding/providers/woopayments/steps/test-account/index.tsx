@@ -69,6 +69,7 @@ const EXTENDED_PHASE_1_INCREMENT = 1; // Increment progress by 1% for the extend
 const INIT_PROGRESS_START = 10; // Start progress at 10% during init
 const INIT_PROGRESS_INCREMENT = 2; // Increment by 2% every second during init
 const INIT_PROGRESS_MAX = 30; // Cap progress at 30% during init
+const TITLE_CHANGE_INTERVAL = 5000; // The time interval for the title to change
 
 // Status types for the component
 type Status =
