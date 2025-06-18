@@ -22,7 +22,13 @@ trait EnableBlockJsonAssetsTrait {
 	 * @return null
 	 */
 	protected function get_block_type_style() {
-		return null;
+		if ( wp_is_block_theme() ) {
+			return null;
+		}
+
+		$this->asset_api->register_style( 'woocommerce-' . $this->block_name . '-style', 'assets/client/blocks/woocommerce/' . $this->block_name . '-style.css', [], 'all', true );
+
+		return [ 'wc-blocks-style', 'woocommerce-' . $this->block_name . '-style' ];
 	}
 
 	/**

@@ -214,6 +214,26 @@ abstract class AbstractBlock {
 		$chunks = preg_filter( '/.js/', '', $blocks );
 		return $chunks;
 	}
+
+	/**
+	 * Removes the style property from block metadata for WooCommerce blocks.
+	 * Intended to be used in classic themes for blocks with manually enqueued styles.
+	 *
+	 * @internal
+	 *
+	 * @param array $metadata Block metadata.
+	 * @return array Modified block metadata.
+	 */
+	public function remove_style_from_block_metadata( $metadata ) {
+		if (
+			strpos( $metadata['name'], 'woocommerce/' ) === 0 &&
+			! empty( $metadata['style'] )
+		) {
+			$metadata['style'] = null;
+		}
+		return $metadata;
+	}
+
 	/**
 	 * Registers the block type with WordPress.
 	 *
@@ -227,7 +247,8 @@ abstract class AbstractBlock {
 
 		// Conditionally override these, otherwise rely on block.json metadata.
 		if ( $this->get_block_type_style() ) {
-			$block_settings['style'] = $this->get_block_type_style();
+			$block_types_styles      = $this->get_block_type_style();
+			$block_settings['style'] = $block_types_styles;
 		}
 
 		if ( $this->get_block_type_editor_style() ) {
@@ -250,10 +271,7 @@ abstract class AbstractBlock {
 			! is_admin() &&
 			! wp_is_block_theme() &&
 			! empty( $block_settings['style'] ) &&
-			(
-				! function_exists( 'wp_should_load_separate_core_block_assets' ) ||
-				! wp_should_load_separate_core_block_assets()
-			)
+			! wp_should_load_separate_core_block_assets()
 		) {
 			$style_handles           = $block_settings['style'];
 			$block_settings['style'] = null;
@@ -272,10 +290,30 @@ abstract class AbstractBlock {
 
 		// Prefer to register with metadata if the path is set in the block's class.
 		if ( ! empty( $metadata_path ) ) {
+			// In classic themes, remove the `style` property from block.json to
+			// avoid styles being enqueued on all pages.
+			// @see https://github.com/woocommerce/woocommerce/issues/58791.
+			if (
+				! wp_is_block_theme() &&
+				! empty( $block_types_styles ) &&
+				! wp_should_load_separate_core_block_assets()
+			) {
+				add_filter( 'block_type_metadata', [ $this, 'remove_style_from_block_metadata' ] );
+			}
+
 			register_block_type_from_metadata(
 				$metadata_path,
 				$block_settings
 			);
+
+			if (
+				! wp_is_block_theme() &&
+				! empty( $block_types_styles ) &&
+				! wp_should_load_separate_core_block_assets()
+			) {
+				remove_filter( 'block_type_metadata', [ $this, 'remove_style_from_block_metadata' ] );
+			}
+
 			return;
 		}
 

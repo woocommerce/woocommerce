@@ -35,7 +35,6 @@ class AddToCartForm extends AbstractBlock {
 		return wp_parse_args( $attributes, $defaults );
 	}
 
-
 	/**
 	 * Enqueue assets specific to this block.
 	 * We enqueue frontend scripts only if the quantitySelectorStyle is set to 'stepper'.
