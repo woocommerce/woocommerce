@@ -9,6 +9,7 @@ on:
       - '**/*.md'
       - '**/changelog.txt'
       - '.gitignore'
+      - '.coderabbit.yml'
       - 'CODEOWNERS'
       - '.github/**'
       - '!.github/workflows/ci.yml'
