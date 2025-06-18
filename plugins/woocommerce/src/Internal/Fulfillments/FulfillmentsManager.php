@@ -20,7 +20,8 @@ class FulfillmentsManager {
 	 * Class constructor.
 	 */
 	public function __construct() {
-		add_filter( 'woocommerce_fulfillment_translate_meta_key', array( $this, 'translate_fulfillment_meta_key' ), 10, 1 );
+		add_filter( 'wc_fulfillment_translate_meta_key', array( $this, 'translate_fulfillment_meta_key' ), 10, 1 );
+		add_filter( 'wc_custom_fulfillment_statuses', array( $this, 'get_fulfillment_statuses' ), 10, 0 );
 	}
 
 	/**
@@ -39,7 +40,7 @@ class FulfillmentsManager {
 		 * @since 9.9.0
 		 */
 		$meta_key_translations = apply_filters(
-			'woocommerce_fulfillment_meta_key_translations',
+			'wc_fulfillment_meta_key_translations',
 			array(
 				'fulfillment_status' => __( 'Fulfillment Status', 'woocommerce' ),
 				'shipment_tracking'  => __( 'Shipment Tracking', 'woocommerce' ),
@@ -47,5 +48,55 @@ class FulfillmentsManager {
 			)
 		);
 		return isset( $meta_key_translations[ $meta_key ] ) ? $meta_key_translations[ $meta_key ] : $meta_key;
+	}
+
+	/**
+	 * Get fulfillment statuses.
+	 *
+	 * @return array An array of fulfillment statuses.
+	 */
+	public function get_fulfillment_statuses() {
+
+		$core_fulfillment_statuses = array(
+			'unfulfilled'         => array(
+				'key'          => 'unfulfilled',
+				'label'        => __( 'Unfulfilled', 'woocommerce' ),
+				'is_fulfilled' => false,
+			),
+			'partially_fulfilled' => array(
+				'key'          => 'partially_fulfilled',
+				'label'        => __( 'Partially fulfilled', 'woocommerce' ),
+				'is_fulfilled' => false,
+			),
+			'fulfilled'           => array(
+				'key'          => 'fulfilled',
+				'label'        => __( 'Fulfilled', 'woocommerce' ),
+				'is_fulfilled' => true,
+			),
+			'no_fulfillments'     => array(
+				'key'          => 'no_fulfillments',
+				'label'        => __( 'No fulfillments', 'woocommerce' ),
+				'is_fulfilled' => false,
+			),
+		);
+
+		/**
+		 * Filter to modify the list of default fulfillment statuses.
+		 *
+		 * This filter allows us to add or modify fulfillment statuses
+		 * that can be used in the WooCommerce fulfillment system.
+		 *
+		 * @since 9.9.0
+		 */
+		$fulfillment_statuses = apply_filters( 'wc_custom_fulfillment_statuses', $core_fulfillment_statuses );
+
+		// Ensure that the default statuses are always included.
+		foreach ( $core_fulfillment_statuses as $key => $status ) {
+			if ( ! isset( $fulfillment_statuses[ $key ] ) ) {
+				$fulfillment_statuses[ $key ] = $status;
+			}
+		}
+
+		return $fulfillment_statuses;
 	}
 }
