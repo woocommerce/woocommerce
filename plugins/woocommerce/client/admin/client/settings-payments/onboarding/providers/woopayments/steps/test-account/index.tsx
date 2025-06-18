@@ -110,37 +110,30 @@ const TestAccountStep = () => {
 	const pollingTimeoutRef = useRef< number | null >( null );
 	const phase1StartTimeRef = useRef< number | null >( null );
 	const initializingTimeoutRef = useRef< number | null >( null );
-	const titleIntervalRef = useRef< number | null >( null );
+	const titlePhaseRef = useRef< number >( 0 );
 
 	// Update loader title based on time intervals
 	useEffect( () => {
 		if ( status !== 'polling' && status !== 'initializing' ) {
-			if ( titleIntervalRef.current ) {
-				clearInterval( titleIntervalRef.current );
-				titleIntervalRef.current = null;
-			}
+			titlePhaseRef.current = 0;
 			return;
 		}
 
-		const startTime = Date.now();
-		titleIntervalRef.current = window.setInterval( () => {
-			const elapsed = Date.now() - startTime;
-			const totalPhases = PHASE_MESSAGES.length;
+		// Start with first title
+		if ( titlePhaseRef.current === 0 ) {
+			setLoaderTitle( PHASE_MESSAGES[ 0 ] );
+		}
 
-			// Calculate which phase we should be in based on elapsed time
-			const currentPhase = Math.floor( elapsed / TITLE_CHANGE_INTERVAL );
-
-			// Only update if we're in a valid phase range and it's less than the total phases. Otherwise, we keep the last message.
-			if ( currentPhase >= 0 && currentPhase < totalPhases ) {
-				setLoaderTitle( PHASE_MESSAGES[ currentPhase ] );
+		// Increment title phase every TITLE_CHANGE_INTERVAL
+		const timer = setTimeout( () => {
+			titlePhaseRef.current += 1;
+			if ( titlePhaseRef.current < PHASE_MESSAGES.length ) {
+				setLoaderTitle( PHASE_MESSAGES[ titlePhaseRef.current ] );
 			}
 		}, TITLE_CHANGE_INTERVAL );
 
 		return () => {
-			if ( titleIntervalRef.current ) {
-				clearInterval( titleIntervalRef.current );
-				titleIntervalRef.current = null;
-			}
+			clearTimeout( timer );
 		};
 	}, [ status ] );
 
@@ -668,3 +661,4 @@ const TestAccountStep = () => {
 };
 
 export default TestAccountStep;
+
