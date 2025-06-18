@@ -307,9 +307,30 @@ class WC_Session_Handler extends WC_Session {
 	 * @return array The updated session data.
 	 */
 	private function migrate_cart_data( array $data, array $user_session_data ) {
-		if ( empty( $data['cart'] ) && ! empty( $user_session_data['cart'] ) ) {
+		$user_cart_is_empty = empty( $user_session_data['cart'] );
+
+		// Nothing to migrate!
+		if ( $user_cart_is_empty ) {
+			return $data;
+		}
+
+		$guest_cart_is_empty = empty( $data['cart'] );
+
+		// Replace the guest cart with the user cart.
+		if ( $guest_cart_is_empty ) {
 			$data['cart'] = $user_session_data['cart'];
 		}
+
+		// Merge carts unless on the checkout.
+		if ( ! is_checkout() && ! WC()->is_store_api_request() ) {
+			$data['cart'] = array_filter(
+				array_merge(
+					(array) maybe_unserialize( $data['cart'] ),
+					(array) maybe_unserialize( $user_session_data['cart'] )
+				)
+			);
+		}
+
 		return $data;
 	}
 
