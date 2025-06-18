@@ -104,9 +104,9 @@ class FulfillmentsManager {
 			'label'        => __( 'Unknown', 'woocommerce' ),
 			'is_fulfilled' => false,
 		);
-  }
-  
-  /**
+	}
+
+	/**
 	 * Get initial shipping providers.
 	 *
 	 * This method provides the initial shipping providers that feeds the `wc_fulfillment_shipping_providers` filter,
