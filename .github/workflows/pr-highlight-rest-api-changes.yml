@@ -27,7 +27,7 @@ jobs:
               - 'plugins/woocommerce/src/**/*RestController*'
               - 'plugins/woocommerce/includes/rest-api/**'
               - 'plugins/woocommerce/includes/*-wc-rest-*'
-              
+
       - name: Send notification
         if: steps.filter.outputs.rest == 'true'
         uses: archive/github-actions-slack@d9dae40827adf93bddf939db6552d1e392259d7d
@@ -42,3 +42,15 @@ jobs:
                 ```${{ join(fromJson(steps.filter.outputs.rest_files || '[]'), '\n') }}```
             slack-optional-unfurl_links: false
             slack-optional-unfurl_media: false
+
+      - name: Comment on PR to remind the author about updating API docs
+        if: steps.filter.outputs.rest == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.payload.pull_request.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '⚠️ **API Documentation Reminder**\n\nHi @${{ github.event.pull_request.user.login }}! Your PR contains REST API changes. Please consider updating the [REST API documentation](https://github.com/woocommerce/woocommerce-rest-api-docs) if your changes affect the public API.\n\nChanged API files:\n```\n${{ join(fromJson(steps.filter.outputs.rest_files || '[]'), '\n') }}\n```'
+            });
