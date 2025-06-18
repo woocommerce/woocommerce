@@ -67,7 +67,7 @@ class WC_Product_Variable extends WC_Product {
 		 *
 		 * @since 7.8.0
 		 */
-		return apply_filters( 'woocommerce_product_add_to_cart_aria_describedby', $this->is_purchasable() ? __( 'This product has multiple variants. The options may be chosen on the product page', 'woocommerce' ) : '', $this );
+		return apply_filters( 'woocommerce_product_add_to_cart_aria_describedby', $this->is_purchasable() && $this->has_purchasable_variations() ? __( 'This product has multiple variants. The options may be chosen on the product page', 'woocommerce' ) : '', $this );
 	}
 
 	/**
@@ -76,7 +76,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return string
 	 */
 	public function add_to_cart_text() {
-		return apply_filters( 'woocommerce_product_add_to_cart_text', $this->is_purchasable() ? __( 'Select options', 'woocommerce' ) : __( 'Read more', 'woocommerce' ), $this );
+		return apply_filters( 'woocommerce_product_add_to_cart_text', $this->is_purchasable() && $this->has_purchasable_variations() ? __( 'Select options', 'woocommerce' ) : __( 'Read more', 'woocommerce' ), $this );
 	}
 
 	/**
