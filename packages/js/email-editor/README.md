@@ -1,11 +1,43 @@
 # WooCommerce Email Editor
 
-This folder contains the code for the WooCommerce Email Editor JS Package.
-We aim to extract the package as an independent library, so it can be used in other projects.
+This is the WooCommerce Email Editor package - a JavaScript library for building and customizing email templates. While currently integrated with WooCommerce, this package is designed to be used as an independent library in other projects.
 
 You can try the email editor in [the WordPress Playground](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/woocommerce/woocommerce/refs/heads/trunk/packages/js/email-editor/blueprint.json).
 
-You can locate the PHP package here `packages/php/email-editor`
+This JavaScript package is designed to work in conjunction with its PHP counterpart, which can be found in the same repository at `packages/php/email-editor`. Both packages are required for full functionality.
+
+## Initializing the editor
+  
+> **Note:** The `initializeEditor` function is currently experimental and its API is subject to change in future releases. Please be aware that breaking changes may occur.
+
+To use the email editor in your project, you'll need to initialize it using the `initializeEditor` function. The editor requires certain data to be set on the global `window.WooCommerceEmailEditor` object before initialization:
+
+```javascript
+// First, set up the required data on the window object
+window.WooCommerceEmailEditor = {
+    current_post_type: '', // The post type of the current post
+    current_post_id: '', // The ID of the current post
+    current_wp_user_email: '', // The email of the current user
+    editor_settings: {}, // The block editor settings
+    editor_theme: {}, // The block editor theme
+    user_theme_post_id: '', // The ID of the user theme post
+    urls: {
+        listings: '', // optional: The URL for the listings page
+        send: '', // optional: The URL for the send button
+        back: '' // optional: The URL for the back button (top left corner)
+    }
+};
+
+// Then initialize the editor with the HTML element ID
+import { initializeEditor } from '@woocommerce/email-editor';
+initializeEditor('email-editor-container');
+```
+
+The `initializeEditor` function accepts a single parameter:
+
+- `htmlId` (required): The ID of the HTML element where the editor will be mounted
+
+Make sure to set up the required data on `window.WooCommerceEmailEditor` before calling `initializeEditor`.
 
 ## Workflow Commands
 

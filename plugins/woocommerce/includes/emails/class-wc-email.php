@@ -1186,6 +1186,7 @@ class WC_Email extends WC_Settings_API {
 				 */
 				do_action( 'woocommerce_copy_email_template', $template_type, $this );
 
+				wc_clear_template_cache();
 				?>
 				<div class="updated">
 					<p><?php echo esc_html__( 'Template file copied to theme.', 'woocommerce' ); ?></p>
@@ -1217,6 +1218,8 @@ class WC_Email extends WC_Settings_API {
 					 * @param string $email The email object
 					 */
 					do_action( 'woocommerce_delete_email_template', $template_type, $this );
+
+					wc_clear_template_cache();
 					?>
 					<div class="updated">
 						<p><?php echo esc_html__( 'Template file deleted from theme.', 'woocommerce' ); ?></p>

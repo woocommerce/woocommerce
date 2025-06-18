@@ -1,5 +1,5 @@
 /* eslint-disable @woocommerce/dependency-group -- because we import mocks first, we deactivate this rule to avoid ESLint errors */
-import '../../__mocks__/setup-shared-mocks';
+import '../../test/__mocks__/setup-shared-mocks';
 
 /**
  * External dependencies

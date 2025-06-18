@@ -9,6 +9,12 @@
 		"typeRoots": [ "./typings", "./node_modules/@types" ],
 		"types": [ "jest" ]
 	},
-	"exclude": [],
-	"include": [ "typings/**/*", "src/**/*" ]
+	"include": [
+		"typings/**/*",
+		"src/**/*"
+	],
+	"exclude": [
+		"**/test/**",
+		"**/stories/**"
+	]
 }

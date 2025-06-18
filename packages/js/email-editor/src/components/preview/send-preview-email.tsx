@@ -10,6 +10,7 @@ import {
 	useRef,
 	createInterpolateElement,
 	memo,
+	useMemo,
 } from '@wordpress/element';
 import { ENTER } from '@wordpress/keycodes';
 import { isEmail } from '@wordpress/url';
@@ -24,11 +25,6 @@ import {
 	editorCurrentPostType,
 } from '../../store';
 import { recordEvent, recordEventOnce } from '../../events';
-
-const sendingMethodConfigurationLink = applyFilters(
-	'woocommerce_email_editor_check_sending_method_configuration_link',
-	`https://www.mailpoet.com/blog/mailpoet-smtp-plugin/?utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${ editorCurrentPostType }`
-) as string;
 
 function RawSendPreviewEmail() {
 	const sendToRef = useRef( null );
@@ -50,6 +46,15 @@ function RawSendPreviewEmail() {
 	const handleSendPreviewEmail = () => {
 		void requestSendingNewsletterPreview( previewToEmail );
 	};
+
+	const sendingMethodConfigurationLink = useMemo(
+		() =>
+			applyFilters(
+				'woocommerce_email_editor_check_sending_method_configuration_link',
+				`https://www.mailpoet.com/blog/mailpoet-smtp-plugin/?utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${ editorCurrentPostType }`
+			) as string,
+		[]
+	);
 
 	const closeCallback = () => {
 		recordEvent( 'send_preview_email_modal_closed' );

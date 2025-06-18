@@ -18,45 +18,46 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"main": "build/index.js",
-	"publishConfig": {
-		"access": "public"
-	},
+	"module": "build-module/index.js",
+	"types": "build-types",
 	"files": [
 		"build",
+		"build-module",
+		"build-style",
+		"build-types",
 		"assets"
 	],
 	"sideEffects": [
-		"build/**/*.css",
+		"build-style/**",
 		"src/**/*.scss"
 	],
 	"scripts": {
-		"start": "wp-scripts start",
-		"lint:css": "wp-scripts lint-style",
-		"lint:css-fix": "wp-scripts lint-style --fix",
-		"lint:js": "wp-scripts lint-js './src/**/*.{js,jsx,json,ts,tsx,yml,yaml}'",
-		"lint:js-fix": "wp-scripts lint-js './src/**/*.{js,jsx,json,ts,tsx}' --fix",
-		"format": "./node_modules/.bin/prettier --config .prettierrc.js --write 'src/**/*.{js,jsx,json,ts,tsx,yml,yaml,scss}'",
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
-		"build:project:editor": "wireit",
-		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
-		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
-		"lint:fix:lang:js": "pnpm lint:js-fix",
-		"lint:fix:lang:css": "pnpm lint:css-fix",
-		"lint:lang:js": "pnpm lint:js",
-		"lint:lang:css": "pnpm lint:css",
-		"lint:lang:types": "NODE_OPTIONS=--max_old_space_size=2048 tsc --noEmit",
+		"build:project:bundle": "wireit",
+		"build:project:cjs": "wireit",
+		"build:project:esm": "wireit",
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"format": "prettier --write 'src/**/*.{js,jsx,json,ts,tsx,yml,yaml,scss}'",
+		"format:check": "prettier --check 'src/**/*.{js,jsx,json,ts,tsx,yml,yaml,scss}'",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/' && pnpm format:check && pnpm lint:lang:style",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/' && pnpm format && pnpm lint:fix:lang:style",
+		"lint:fix:lang:js": "eslint --ext=js,ts,tsx src --fix",
+		"lint:fix:lang:style": "stylelint 'src/**/*.{css,scss}' --fix",
+		"lint:lang:js": "eslint --ext=js,ts,tsx src",
+		"lint:lang:style": "stylelint 'src/**/*.{css,scss}'",
 		"prepack": "pnpm build",
 		"test:js": "jest --config ./jest.config.json --passWithNoTests",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:editor": "wireit",
-		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger"
+		"watch:build:project:bundle": "wireit",
+		"watch:build:project:cjs": "wireit",
+		"watch:build:project:esm": "wireit"
 	},
 	"lint-staged": {
 		"*.{js,jsx,json,ts,tsx,yml,yaml,scss}": "pnpm run format",
-		"*.{scss,css}": "pnpm run lint:css",
-		"*.{js,jsx,ts,tsx}": "pnpm run lint:js"
+		"*.{scss,css}": "pnpm run lint:lang:style",
+		"*.{js,jsx,ts,tsx}": "pnpm run lint:lang:js"
 	},
 	"dependencies": {
 		"@wordpress/api-fetch": "wp-6.6",
@@ -111,22 +112,23 @@
 		"@types/wordpress__edit-post": "^7.5.7",
 		"@types/wordpress__editor": "^13.6.8",
 		"@types/wordpress__media-utils": "^4.14.4",
-		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
+		"@woocommerce/internal-style-build": "workspace:*",
+		"@wordpress/browserslist-config": "next",
 		"@wordpress/prettier-config": "2.17.0",
-		"@wordpress/scripts": "wp-6.6",
-		"@wordpress/stylelint-config": "^21.36.0",
-		"copy-webpack-plugin": "13.0.x",
+		"@wordpress/stylelint-config": "^21.0.0",
+		"eslint": "^8.55.0",
 		"jest": "27.5.x",
 		"jest-cli": "27.5.x",
 		"jest-environment-jsdom": "27.5.x",
-		"prettier": "npm:wp-prettier@^3.0.3",
+		"prettier": "npm:wp-prettier@^2.8.5",
+		"rimraf": "5.0.5",
+		"stylelint": "^14.16.1",
 		"ts-jest": "29.1.x",
 		"ts-loader": "9.5.x",
 		"typescript": "5.7.x",
-		"wireit": "0.14.12",
-		"wp-types": "^3.65.0"
+		"wireit": "0.14.12"
 	},
 	"config": {
 		"ci": {
@@ -155,8 +157,8 @@
 		}
 	},
 	"wireit": {
-		"build:project:editor": {
-			"command": "wp-scripts build",
+		"build:project:bundle": {
+			"command": "webpack",
 			"clean": "if-file-deleted",
 			"env": {
 				"NODE_ENV": {
@@ -166,8 +168,26 @@
 			},
 			"files": [
 				"webpack.config.js",
-				"tsconfig.json",
-				"src/*"
+				"src/**/*.scss"
+			],
+			"output": [
+				"build-style"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"watch:build:project:bundle": {
+			"command": "webpack --watch",
+			"service": true
+		},
+		"build:project:cjs": {
+			"command": "tsc --project tsconfig-cjs.json --noCheck",
+			"clean": "if-file-deleted",
+			"files": [
+				"tsconfig-cjs.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
 			],
 			"output": [
 				"build"
@@ -176,22 +196,42 @@
 				"dependencyOutputs"
 			]
 		},
-		"watch:build:project:editor": {
-			"command": "wp-scripts start",
+		"watch:build:project:cjs": {
+			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
+			"service": true
+		},
+		"build:project:esm": {
+			"command": "tsc --project tsconfig.json",
+			"clean": "if-file-deleted",
+			"files": [
+				"tsconfig.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build-module",
+				"build-types"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"watch:build:project:esm": {
+			"command": "tsc --project tsconfig.json --watch",
 			"service": true
 		},
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
-				"node_modules/@woocommerce/dependency-extraction-webpack-plugin/src/",
-				"node_modules/@woocommerce/dependency-extraction-webpack-plugin/assets/",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
 				"node_modules/@woocommerce/internal-js-tests/build",
 				"node_modules/@woocommerce/internal-js-tests/build-module",
-				"node_modules/@woocommerce/internal-js-tests/jest-preset.js"
+				"node_modules/@woocommerce/internal-js-tests/jest-preset.js",
+				"node_modules/@woocommerce/internal-style-build/index.js",
+				"node_modules/@woocommerce/internal-style-build/abstracts"
 			]
 		}
 	}
