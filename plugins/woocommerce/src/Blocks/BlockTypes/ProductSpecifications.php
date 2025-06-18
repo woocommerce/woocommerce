@@ -116,9 +116,9 @@ class ProductSpecifications extends AbstractBlock {
 				<tbody>
 					<?php foreach ( $product_data as $product_attribute_key => $product_attribute ) : ?>
 						<tr class="wp-block-product-specifications-item wp-block-product-specifications-item-<?php echo esc_attr( $product_attribute_key ); ?>">
-							<td class="wp-block-product-specifications-item__label">
+							<th scope="row" class="wp-block-product-specifications-item__label">
 								<?php echo wp_kses_post( $product_attribute['label'] ); ?>
-							</td>
+							</th>
 							<td class="wp-block-product-specifications-item__value">
 								<?php echo wp_kses_post( $product_attribute['value'] ); ?>
 							</td>
