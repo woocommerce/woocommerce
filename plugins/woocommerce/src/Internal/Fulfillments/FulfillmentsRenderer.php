@@ -51,14 +51,6 @@ class FulfillmentsRenderer {
 		add_action( 'woocommerce_order_details_before_order_table', array( $this, 'render_fulfillment_customer_details' ) );
 		// Initialize the renderer for bulk actions.
 		add_action( 'admin_init', array( $this, 'init_bulk_actions' ) );
-
-		add_action(
-			'wc_fulfillment_after_update',
-			function ( $fulfillment ) {
-				$fulfillment->add_meta_data( 'update_taha', 'was here', true );
-				$fulfillment->save();
-			}
-		);
 	}
 
 	/**
