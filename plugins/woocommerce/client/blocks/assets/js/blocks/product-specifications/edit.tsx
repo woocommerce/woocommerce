@@ -50,7 +50,7 @@ const Edit = ( {
 }: ProductSpecificationsEditProps ) => {
 	const { showWeight, showDimensions, showAttributes } = attributes;
 	const blockProps = useBlockProps( {
-		className: 'wc-block-product-specifications',
+		className: 'wp-block-table',
 	} );
 	const isSpecificProductContext = !! ( postId && postType === 'product' );
 
@@ -210,18 +210,24 @@ const Edit = ( {
 			</InspectorControls>
 			<figure { ...blockProps }>
 				<table>
+					<thead className="screen-reader-text">
+						<tr>
+							<th>{ __( 'Attributes', 'woocommerce' ) }</th>
+							<th>{ __( 'Value', 'woocommerce' ) }</th>
+						</tr>
+					</thead>
 					<tbody>
 						{ Object.entries( productData ).map(
 							( [ key, data ] ) =>
 								data.value && (
 									<tr
 										key={ key }
-										className={ `wc-block-product-specifications-item wc-block-product-specifications-item__${ key }` }
+										className={ `wp-block-product-specifications-item wc-block-product-specifications-item-${ key }` }
 									>
-										<td className="wc-block-product-specifications-item__label">
+										<td className="wp-block-product-specifications-item__label">
 											{ data.label }
 										</td>
-										<td className="wc-block-product-specifications-item__value">
+										<td className="wp-block-product-specifications-item__value">
 											{ data.value }
 										</td>
 									</tr>

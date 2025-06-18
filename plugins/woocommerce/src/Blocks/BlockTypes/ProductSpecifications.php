@@ -115,11 +115,11 @@ class ProductSpecifications extends AbstractBlock {
 				</thead>
 				<tbody>
 					<?php foreach ( $product_data as $product_attribute_key => $product_attribute ) : ?>
-						<tr class="wc-block-product-specifications-item wc-block-product-specifications-item__<?php echo esc_attr( $product_attribute_key ); ?>" scope="row">
-							<td class="wc-block-product-specifications-item__label">
+						<tr class="wp-block-product-specifications-item wp-block-product-specifications-item-<?php echo esc_attr( $product_attribute_key ); ?>">
+							<td class="wp-block-product-specifications-item__label">
 								<?php echo wp_kses_post( $product_attribute['label'] ); ?>
 							</td>
-							<td class="wc-block-product-specifications-item__value">
+							<td class="wp-block-product-specifications-item__value">
 								<?php echo wp_kses_post( $product_attribute['value'] ); ?>
 							</td>
 						</tr>
@@ -135,13 +135,15 @@ class ProductSpecifications extends AbstractBlock {
 	/**
 	 * Get the frontend style handle for this block type.
 	 *
-	 * @return string[]|null
+	 * @return string[]
 	 */
 	protected function get_block_type_style() {
 		$deps = parent::get_block_type_style();
-		return [
-			'wp-block-table',
-			...$deps,
-		];
+
+		if ( ! is_array( $deps ) ) {
+			return array( 'wp-block-table' );
+		}
+
+		return array_merge( array( 'wp-block-table' ), $deps );
 	}
 }
