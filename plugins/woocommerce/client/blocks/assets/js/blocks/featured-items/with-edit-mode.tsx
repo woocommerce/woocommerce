@@ -86,7 +86,11 @@ export const withEditMode =
 				( name === BLOCK_NAMES.featuredProduct &&
 					status !== 'publish' ) ||
 				isDeleted;
-			if ( currEditModeValue !== attributes.editMode ) {
+
+			if (
+				currEditModeValue !== attributes.editMode &&
+				typeof currEditModeValue === 'boolean'
+			) {
 				setAttributes( { editMode: currEditModeValue } );
 			}
 		}, [ status, isDeleted ] );
