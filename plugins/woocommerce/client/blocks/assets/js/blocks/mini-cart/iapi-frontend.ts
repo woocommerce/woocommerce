@@ -426,8 +426,6 @@ const { state } = store(
 					finalQuantity = minimum;
 				} else if ( quantity > maximum ) {
 					finalQuantity = maximum;
-				} else if ( qty === '' ) {
-					finalQuantity = minimum;
 				}
 
 				cartItem.quantity = finalQuantity;
