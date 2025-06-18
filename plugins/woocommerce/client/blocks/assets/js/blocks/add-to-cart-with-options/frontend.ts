@@ -5,10 +5,13 @@ import type { FormEvent, HTMLElementEvent } from 'react';
 import { store, getContext } from '@wordpress/interactivity';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import type { CartVariationItem } from '@woocommerce/types';
+import '@woocommerce/stores/woocommerce/product-data';
+import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
 export type AvailableVariation = {
 	attributes: Record< string, string >;
 	variation_id: number;
+	price_html: string;
 };
 
 export type Context = {
@@ -334,6 +337,31 @@ const addToCartWithOptionsStore = store(
 						quantity: newQuantity,
 						variation: selectedAttributes,
 					} );
+				}
+			},
+		},
+		callbacks: {
+			setProductData: () => {
+				const { availableVariations, selectedAttributes } =
+					getContext< Context >();
+				const matchedVariation = getMatchedVariation(
+					availableVariations,
+					selectedAttributes
+				);
+
+				const { actions } = store< ProductDataStore >(
+					'woocommerce/product-data',
+					{},
+					{ lock: universalLock }
+				);
+
+				if ( matchedVariation ) {
+					actions.setProductData(
+						'price_html',
+						matchedVariation.price_html
+					);
+				} else {
+					actions.setProductData( 'price_html', null );
 				}
 			},
 		},

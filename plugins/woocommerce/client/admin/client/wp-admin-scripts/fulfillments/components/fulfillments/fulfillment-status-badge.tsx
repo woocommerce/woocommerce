@@ -8,12 +8,12 @@ export default function FulfillmentStatusBadge( {
 }: {
 	fulfillment: Fulfillment;
 } ) {
+	const statuses = window.wcFulfillmentSettings.statuses;
 	return (
 		<div
 			className={ `woocommerce-fulfillment-status-badge woocommerce-fulfillment-status-badge__${ fulfillment.status }` }
 		>
-			{ /* TODO: Find a way to convert this to a human readable string. */ }
-			{ fulfillment.status }
+			{ statuses[ fulfillment.status ] ?? fulfillment.status }
 		</div>
 	);
 }

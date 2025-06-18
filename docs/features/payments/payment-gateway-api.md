@@ -33,7 +33,7 @@ It is also important that your gateway class extends the WooCommerce base gatewa
 
 ```php
 function init_your_gateway_class() {
-class WC_Gateway_Your_Gateway extends WC_Payment_Gateway {}
+    class WC_Gateway_Your_Gateway extends WC_Payment_Gateway {}
 }
 ```
 
@@ -43,8 +43,8 @@ As well as defining your class, you need to also tell WooCommerce (WC) that it e
 
 ```php
 function add_your_gateway_class( $methods ) {
-$methods\[\] = 'WC_Gateway_Your_Gateway';
-return $methods;
+    $methods[] = 'WC_Gateway_Your_Gateway';
+    return $methods;
 }
 ```
 
@@ -56,7 +56,7 @@ add_filter( 'woocommerce_payment_gateways', 'add_your_gateway_class' );
 
 Most methods are inherited from the WC_Payment_Gateway class, but some are required in your custom gateway.
 
-#### \_\_construct()
+#### __construct()
 
 Within your constructor, you should define the following variables:
 
@@ -69,7 +69,7 @@ Within your constructor, you should define the following variables:
 Your constructor should also define and load settings fields:
 
 ```php
-$this->init\_form\_fields();
+$this->init_form_fields();
 $this->init_settings();
 ```
 
@@ -84,7 +84,7 @@ $this->title = $this->get_option( 'title' );
 Finally, you need to add a save hook for your settings:
 
 ```php
-add_action( 'woocommerce_update_options_payment_gateways\_' . $this->id, array( $this, 'process_admin_options' ) );
+add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 ```
 
 #### init_form_fields()
@@ -95,24 +95,24 @@ A basic set of settings for your gateway would consist of _enabled_, _title_ and
 
 ```php
 $this->form_fields = array(
-'enabled' => array(
-'title' => \_\_( 'Enable/Disable', 'woocommerce' ),
-'type' => 'checkbox',
-'label' => \_\_( 'Enable Cheque Payment', 'woocommerce' ),
-'default' => 'yes'
-),
-'title' => array(
-'title' => \_\_( 'Title', 'woocommerce' ),
-'type' => 'text',
-'description' => \_\_( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-'default' => \_\_( 'Cheque Payment', 'woocommerce' ),
-'desc_tip' => true,
-),
-'description' => array(
-'title' => \_\_( 'Customer Message', 'woocommerce' ),
-'type' => 'textarea',
-'default' => ''
-)
+    'enabled' => array(
+        'title' => __( 'Enable/Disable', 'woocommerce' ),
+        'type' => 'checkbox',
+        'label' => __( 'Enable Cheque Payment', 'woocommerce' ),
+        'default' => 'yes'
+    ),
+    'title' => array(
+        'title' => __( 'Title', 'woocommerce' ),
+        'type' => 'text',
+        'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+        'default' => __( 'Cheque Payment', 'woocommerce' ),
+        'desc_tip' => true,
+    ),
+    'description' => array(
+        'title' => __( 'Customer Message', 'woocommerce' ),
+        'type' => 'textarea',
+        'default' => ''
+    )
 );
 ```
 
@@ -128,15 +128,15 @@ global $woocommerce;
 $order = new WC_Order( $order_id );
 
     // Mark as on-hold (we're awaiting the cheque)
-    $order->update\_status('on-hold', \_\_( 'Awaiting cheque payment', 'woocommerce' ));
+    $order->update_status('on-hold', __( 'Awaiting cheque payment', 'woocommerce' ));
 
     // Remove cart
-    $woocommerce->cart->empty\_cart();
+    $woocommerce->cart->empty_cart();
 
     // Return thankyou redirect
     return array(
         'result' => 'success',
-        'redirect' => $this->get\_return\_url( $order )
+        'redirect' => $this->get_return_url( $order )
     );
 
 }
@@ -173,14 +173,14 @@ Stock levels are updated via actions (`woocommerce_payment_complete` and in tran
 Updating the order status can be done using functions in the order class. You should only do this if the order status is not processing (in which case you should use payment_complete()). An example of updating to a custom status would be:
 
 ```php
-$order = new WC\_Order( $order\_id );
-$order->update_status('on-hold', \_\_('Awaiting cheque payment', 'woothemes'));
+$order = new WC_Order( $order_id );
+$order->update_status('on-hold', __('Awaiting cheque payment', 'woothemes'));
 ```
 
 The above example updates the status to On-Hold and adds a note informing the owner that it is awaiting a Cheque. You can add notes without updating the order status; this is used for adding a debug message:
 
 ```php
-$order->add_order_note( \_\_('IPN payment completed', 'woothemes') );
+$order->add_order_note( __('IPN payment completed', 'woothemes') );
 ```
 
 ### Order Status Best Practice
@@ -208,7 +208,7 @@ Finally, you need to add payment code inside your `process_payment( $order_id )`
 If payment fails, you should output an error and return the failure array:
 
 ```php
-wc_add_notice( \_\_('Payment error:', 'woothemes') . $error_message, 'error' );
+wc_add_notice( __('Payment error:', 'woothemes') . $error_message, 'error' );
 return array(
     'result'   => 'failure',
 );
@@ -224,8 +224,8 @@ $order->payment_complete();
 ```php
 // Return thank you page redirect
 return array(
-'result' => 'success',
-'redirect' => $this->get_return_url( $order )
+    'result' => 'success',
+    'redirect' => $this->get_return_url( $order )
 );
 ```
 

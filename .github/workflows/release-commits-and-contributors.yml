@@ -1,0 +1,383 @@
+name: 'Release: Generate Number of Commits and Contributors'
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        required: false
+        description: 'The release version (X.Y format) to be used to calculate the number of commits and contributors. If not provided, it will be derived from the branch name.'
+
+  release:
+    types: [prereleased]
+
+jobs:
+  extract-versions:
+    name: Extract release current and previous versions
+    runs-on: ubuntu-latest
+    outputs:
+      current_version: ${{ steps.calculate-versions.outputs.current_version }}
+      previous_version: ${{ steps.calculate-versions.outputs.previous_version }}
+    steps:
+      - name: Check pre-release and extract RC version
+        id: version-from-prerelease
+        if: ${{ github.event_name == 'release' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tagName = '${{ github.event.release.tag_name }}';
+            const isPrerelease = ${{ github.event.release.prerelease }};
+
+            console.log(`Release tag: ${tagName}, prerelease: ${isPrerelease}`);
+
+            if (!isPrerelease) {
+              core.setFailed(`This workflow only runs for pre-releases`);
+              process.exit(1);
+            }
+
+            // Check if it's an RC format: x.y.z-rc.N
+            const rcPattern = /^v?(\d+)\.(\d+)\.(\d+)-rc\.(\d+)$/;
+            const rcMatch = tagName.match(rcPattern);
+
+            if (!rcMatch) {
+              console.log(`⛔ Not an RC pre-release format: ${tagName}`);
+              console.log(`Expected format: x.y.z-rc.N (e.g., 9.8.0-rc.1)`);
+              core.setFailed(`This workflow only runs for RC pre-releases with format x.y.z-rc.N`);
+              process.exit(1);
+            }
+
+            const major = parseInt(rcMatch[1]);
+            const minor = parseInt(rcMatch[2]);
+
+            console.log(`✅ Valid RC pre-release: ${tagName}`);
+            console.log(`Extracted version: major=${major}, minor=${minor}`);
+
+            core.setOutput('major', major);
+            core.setOutput('minor', minor);
+
+      - name: Extract version from the provided input version
+        id: version-from-input
+        if: ${{ github.event.inputs.version != '' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const currentVersion = '${{ github.event.inputs.version }}';
+            console.log(`Current version from input: ${currentVersion}`);
+
+            const versionMatch = currentVersion.match(/^(\d+)\.(\d+)$/);
+            if (!versionMatch) {
+              core.setFailed(`Version format must be 'x.y', got: ${currentVersion}`);
+              process.exit(1);
+            }
+
+            const major = parseInt(versionMatch[1]);
+            const minor = parseInt(versionMatch[2]);
+            console.log(`Parsed version: major=${major}, minor=${minor}`);
+
+            core.setOutput('major', major);
+            core.setOutput('minor', minor);
+
+      - name: Extract version from the branch name
+        id: version-from-branch
+        if: ${{ github.event.inputs.version == '' && github.event_name != 'release' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branchName = '${{ github.ref_name }}';
+            console.log(`Branch name: ${branchName}`);
+
+            const branchMatch = branchName.match(/^release\/(\d+)\.(\d+)$/);
+            if (!branchMatch) {
+              core.setFailed(`Branch name must be in format 'release/x.y', got: ${branchName}`);
+              process.exit(1);
+            }
+
+            const major = parseInt(branchMatch[1]);
+            const minor = parseInt(branchMatch[2]);
+            const currentVersion = `${major}.${minor}`;
+
+            console.log(`Extracted current version: ${currentVersion}`);
+            console.log(`Parsed version: major=${major}, minor=${minor}`);
+
+            core.setOutput('major', major);
+            core.setOutput('minor', minor);
+
+      - name: Calculate current and previous version
+        id: calculate-versions
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let major, minor;
+
+            if ('${{ github.event_name }}' === 'release') {
+              // Pre-release trigger - use RC tag version
+              major = parseInt('${{ steps.version-from-prerelease.outputs.major }}');
+              minor = parseInt('${{ steps.version-from-prerelease.outputs.minor }}');
+              console.log(`Using version from RC pre-release: ${major}.${minor}`);
+            } else if ('${{ github.event.inputs.version }}' !== '') {
+              // Manual trigger with input version
+              major = parseInt('${{ steps.version-from-input.outputs.major }}');
+              minor = parseInt('${{ steps.version-from-input.outputs.minor }}');
+              console.log(`Using version from input: ${major}.${minor}`);
+            } else {
+              // Manual trigger from branch name
+              major = parseInt('${{ steps.version-from-branch.outputs.major }}');
+              minor = parseInt('${{ steps.version-from-branch.outputs.minor }}');
+              console.log(`Using version from branch: ${major}.${minor}`);
+            }
+
+            let previousVersion;
+            if (minor > 0) {
+              previousVersion = `${major}.${minor - 1}`;
+            } else {
+              previousVersion = `${major - 1}.9`;
+            }
+
+            console.log(`Current version: ${major}.${minor}`);
+            console.log(`Previous version: ${previousVersion}`);
+
+            core.setOutput('current_version', `${major}.${minor}`);
+            core.setOutput('previous_version', previousVersion);
+
+  count-commits-and-contributors:
+    name: Count commits and contributors between releases
+    needs: extract-versions
+    runs-on: ubuntu-latest
+    outputs:
+      commit_count: ${{ steps.count-commits.outputs.commit_count }}
+      contributor_count: ${{ steps.count-commits.outputs.contributor_count }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Count
+        id: count-commits
+        run: |
+          CURRENT_BRANCH="origin/release/${{ needs.extract-versions.outputs.current_version }}"
+          PREVIOUS_BRANCH="origin/release/${{ needs.extract-versions.outputs.previous_version }}"
+
+          set +e  # Don't exit on error for the git command
+          COMMIT_COUNT=$(git rev-list --count ${CURRENT_BRANCH} ^${PREVIOUS_BRANCH} 2>&1)
+          COMMIT_EXIT_CODE=$?
+
+          CONTRIBUTOR_COUNT=$(git log --format='%ae' ${PREVIOUS_BRANCH}..${CURRENT_BRANCH} | sort -u | wc -l 2>&1)
+          CONTRIBUTOR_EXIT_CODE=$?
+          set -e  # Resume exit on error
+
+          if [ $COMMIT_EXIT_CODE -eq 0 ] && [ $CONTRIBUTOR_EXIT_CODE -eq 0 ]; then
+            echo "Found ${COMMIT_COUNT} commits and ${CONTRIBUTOR_COUNT} contributors in the ${{ needs.extract-versions.outputs.current_version }} release"
+            echo "commit_count=${COMMIT_COUNT}" >> $GITHUB_OUTPUT
+            echo "contributor_count=${CONTRIBUTOR_COUNT}" >> $GITHUB_OUTPUT
+          else
+            echo "Error counting commits: ${COMMIT_COUNT}"
+            exit 1
+          fi
+
+  generate-contributors-list:
+    name: Generate contributors list
+    needs: extract-versions
+    runs-on: ubuntu-latest
+    outputs:
+      contributor_list_path: ${{ steps.generate-contributors-list.outputs.filepath }}
+      artifact_url: ${{ steps.output-artifact-url.outputs.artifact_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
+
+      - name: Setup Node
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install prerequisites
+        working-directory: tools/release-posts
+        run: |
+          pnpm install
+
+      - name: Generate contributors list
+        id: generate-contributors-list
+        working-directory: tools/release-posts
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          CURRENT_BRANCH="release/${{ needs.extract-versions.outputs.current_version }}"
+          PREVIOUS_BRANCH="release/${{ needs.extract-versions.outputs.previous_version }}"
+
+          OUTPUT=$(pnpm run release-post contributors ${CURRENT_BRANCH} ${PREVIOUS_BRANCH})
+          echo "$OUTPUT"
+
+          HTML_FILE_PATH=$(echo "$OUTPUT" | grep "Contributors HTML generated at" | sed 's/.*Contributors HTML generated at //')
+          if [ -z "$HTML_FILE_PATH" ]; then
+            echo "Error: Could not find HTML file path in $OUTPUT"
+            exit 1
+          fi
+
+          echo "filepath=${HTML_FILE_PATH}" >> $GITHUB_OUTPUT
+
+      - name: Upload contributors HTML
+        id: artifact-upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: contributors-release-${{ needs.extract-versions.outputs.current_version }}
+          path: ${{ steps.generate-contributors-list.outputs.filepath }}
+
+      - name: Output artifact URL
+        id: output-artifact-url
+        run: |
+          ARTIFACT_URL=${{ steps.artifact-upload.outputs.artifact-url }}
+          echo "artifact_url=$ARTIFACT_URL" >> $GITHUB_OUTPUT
+
+  db-updates:
+    name: Check for database updates
+    needs: extract-versions
+    runs-on: ubuntu-latest
+    outputs:
+      has_updates: ${{ steps.check-db-updates.outputs.has_updates }}
+      updates_list: ${{ steps.check-db-updates.outputs.updates_list }}
+      formatted_updates: ${{ steps.find-pr.outputs.formatted_updates }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for database updates
+        id: check-db-updates
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'plugins/woocommerce/includes/class-wc-install.php';
+            const version = '${{ needs.extract-versions.outputs.current_version }}';
+
+            console.log(`Checking for database updates for version: ${version}`);
+
+            try {
+              const fileContent = fs.readFileSync(path, 'utf8');
+
+              const dbUpdatesMatch = fileContent.match(/\$db_updates\s*=\s*array\s*\((.*?)\);/s);
+
+              if (!dbUpdatesMatch) {
+                console.log('Could not find `$db_updates` array in the file');
+                core.setOutput('has_updates', 'false');
+                return;
+              }
+
+              const dbUpdatesContent = dbUpdatesMatch[1];
+
+              // Check if the version exists as a key in the array
+              // This regex looks for the version as a string key with the format X.Y.Z
+              const escapedVersion = version.replace('.', '\\.');
+              const versionPattern = new RegExp(`['"]${escapedVersion}(?:\\.\\d+)?['"]\\s*=>\\s*array\\s*\\((.*?)\\)`, 's');
+              const versionMatch = dbUpdatesContent.match(versionPattern);
+
+              if (versionMatch) {
+                console.log(`✅ Found database updates for version ${version}`);
+                core.setOutput('has_updates', 'true');
+
+                const updatesContent = versionMatch[1];
+
+                // Split by comma and clean up each update function
+                const updates = updatesContent
+                  .split(',')
+                  .map(update => update.trim().replace(/['"]/g, ''))
+                  .filter(update => update.length > 0);
+
+                // Store updates for the PR finding step
+                core.setOutput('updates_list', updates.join(','));
+
+              } else {
+                console.log(`⛔ No database updates found for version ${version}`);
+                core.setOutput('has_updates', 'false');
+                core.setOutput('updates_list', '');
+              }
+            } catch (error) {
+              console.error(`Error reading file: ${error.message}`);
+              core.setFailed(`Failed to check database updates: ${error.message}`);
+            }
+
+      - name: Find PRs for each database update
+        id: find-pr
+        if: ${{ steps.check-db-updates.outputs.has_updates == 'true' }}
+        run: |
+          FILE_PATH="plugins/woocommerce/includes/class-wc-install.php"
+          UPDATES="${{ steps.check-db-updates.outputs.updates_list }}"
+
+          echo "Searching for PRs that introduced database updates"
+
+          # Create a variable to build the formatted updates list
+          FORMATTED_UPDATES=""
+
+          # Convert comma-separated list to array
+          IFS=',' read -ra UPDATE_ARRAY <<< "$UPDATES"
+
+          for update_function in "${UPDATE_ARRAY[@]}"; do
+            # Clean up the function name (remove any extra whitespace)
+            update_function=$(echo "$update_function" | xargs)
+
+            echo "Searching for: $update_function"
+
+            # Use git blame to find which commit last modified the line with this function
+            commit_hash=$(git blame "$FILE_PATH" | grep "$update_function" | head -1 | cut -d' ' -f1)
+
+            if [ -n "$commit_hash" ] && [ "$commit_hash" != "00000000" ]; then
+              commit_message=$(git log --format="%s" -1 "$commit_hash")
+
+              echo "Found commit: $commit_hash"
+              echo "Commit message: $commit_message"
+
+              # Extract PR number from commit message
+              pr_number=$(echo "$commit_message" | grep -oE '\(#[0-9]+\)|#[0-9]+|PR #[0-9]+' | grep -oE '[0-9]+' | head -1)
+
+              if [ -n "$pr_number" ]; then
+                pr_url="https://github.com/${{ github.repository }}/pull/$pr_number"
+                echo "* \`$update_function\`, $pr_url"
+                FORMATTED_UPDATES="${FORMATTED_UPDATES}• \`$update_function\` (<$pr_url|PR #$pr_number>)\n"
+              else
+                # If no PR number found, link to the commit
+                commit_url="https://github.com/${{ github.repository }}/commit/$commit_hash"
+                echo "* \`$update_function\`, $commit_url"
+                FORMATTED_UPDATES="${FORMATTED_UPDATES}• \`$update_function\` (<$commit_url|Commit>)\n"
+              fi
+            else
+              echo "* \`$update_function\`, No commit or PR found"
+              FORMATTED_UPDATES="${FORMATTED_UPDATES}• \`$update_function\`: No PR information found\n"
+            fi
+            echo ""
+          done
+
+          # Set the formatted updates as output
+          echo "formatted_updates<<EOF" >> $GITHUB_OUTPUT
+          echo "$FORMATTED_UPDATES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+  send-slack-notification:
+    name: Send Slack Notification
+    needs: [extract-versions, count-commits-and-contributors, generate-contributors-list, db-updates]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack message
+        uses: archive/github-actions-slack@v2.10.0
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
+          slack-text: |
+            :woo: *WooCommerce ${{ needs.extract-versions.outputs.current_version }} Release Summary*
+
+            📊 *Statistics:*
+            • Commits: ${{ needs.count-commits-and-contributors.outputs.commit_count }}
+            • Contributors: ${{ needs.count-commits-and-contributors.outputs.contributor_count }}
+            • <${{ needs.generate-contributors-list.outputs.artifact_url }}|Download Contributors List>
+
+            :database: *Database Updates:*
+            ${{ needs.db-updates.outputs.has_updates == 'true' && needs.db-updates.outputs.formatted_updates || 'This release does not include a database update.' }}
+
+            <!subteam^S086N376UTS> you can re-run this workflow <https://github.com/woocommerce/woocommerce/actions/workflows/release-commits-and-contributors.yml|here>

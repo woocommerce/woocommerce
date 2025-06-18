@@ -45,7 +45,7 @@ export default function FulfillmentLineItem( {
 		orderCurrencyCode: string
 	) => {
 		if ( ! orderCurrencyCode ) {
-			return null;
+			orderCurrencyCode = storeCurrency?.code || 'USD';
 		}
 
 		// If the order currency is the same as the store currency, we show the formatted amount.
@@ -53,8 +53,8 @@ export default function FulfillmentLineItem( {
 			return currencyContext.formatAmount( total );
 		}
 
-		// TODO: Find a way to get the currency symbols from the store.
-		const symbol = false;
+		const symbol =
+			window.wcFulfillmentSettings.currency_symbols[ orderCurrencyCode ];
 
 		if ( ! symbol ) {
 			// This should never happen, but if it does, we'll just show the currency code.
