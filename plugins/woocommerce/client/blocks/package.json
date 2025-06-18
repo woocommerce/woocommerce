@@ -3,7 +3,7 @@
 	"title": "WooCommerce Blocks",
 	"private": true,
 	"version": "11.8.0-dev",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"author": "Automattic",
 	"description": "WooCommerce blocks for the Gutenberg editor.",
 	"homepage": "https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/README.md",

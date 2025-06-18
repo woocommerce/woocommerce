@@ -3,7 +3,7 @@
 	"version": "2.5.0",
 	"description": "Number formatting utilities for WooCommerce.",
 	"author": "Automattic",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"engines": {
 		"node": "^20.11.1"
 	},

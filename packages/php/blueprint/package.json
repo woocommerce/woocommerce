@@ -13,7 +13,7 @@
 		"test:unit": "composer run-script test:unit",
 		"test:php:ci": "pnpm test:unit"
 	},
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"devDependencies": {
 		"@wordpress/env": "10.17.0"
 	},
