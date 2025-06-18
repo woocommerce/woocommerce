@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed parsing empty argument values in personalization tags.

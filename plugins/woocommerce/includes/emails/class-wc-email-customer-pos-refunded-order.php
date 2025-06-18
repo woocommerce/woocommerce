@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Internal\Email\OrderPriceFormatter;
 use Automattic\WooCommerce\Internal\Orders\PointOfSaleOrderUtil;
+use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -60,7 +61,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Let shoppers know when a full or partial refund is on its way to them for their POS order.', 'woocommerce' )
+				? __( 'Let customers know when a full or partial refund is on its way to them for their POS order.', 'woocommerce' )
 				: __( 'Order refunded emails are sent to customers when their POS orders are refunded.', 'woocommerce' );
 
 			$this->disable_default_refund_emails_for_pos_orders();
@@ -75,10 +76,13 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject( $partial = false ) {
+			$store_name = $this->get_pos_store_name();
 			if ( $partial ) {
-				return __( 'Your {site_title} order #{order_number} has been partially refunded', 'woocommerce' );
+				/* translators: %1$s: Store name, %2$s: Order number */
+				return sprintf( __( 'Your %1$s order #%2$s has been partially refunded', 'woocommerce' ), esc_html( $store_name ), '{order_number}' );
 			} else {
-				return __( 'Your {site_title} order #{order_number} has been refunded', 'woocommerce' );
+				/* translators: %1$s: Store name, %2$s: Order number */
+				return sprintf( __( 'Your %1$s order #%2$s has been refunded', 'woocommerce' ), esc_html( $store_name ), '{order_number}' );
 			}
 		}
 
@@ -221,21 +225,30 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 */
 		public function get_content_html() {
 			$this->add_pos_customizations();
+			add_action( 'woocommerce_pos_email_header', array( $this, 'email_header' ) );
+			add_action( 'woocommerce_pos_email_footer', array( $this, 'email_footer' ) );
 			$content = wc_get_template_html(
 				$this->template_html,
 				array(
-					'order'              => $this->object,
-					'refund'             => $this->refund,
-					'partial_refund'     => $this->partial_refund,
-					'email_heading'      => $this->get_heading(),
-					'additional_content' => $this->get_additional_content(),
-					'blogname'           => $this->get_blogname(),
-					'sent_to_admin'      => false,
-					'plain_text'         => false,
-					'email'              => $this,
+					'order'                     => $this->object,
+					'refund'                    => $this->refund,
+					'partial_refund'            => $this->partial_refund,
+					'email_heading'             => $this->get_heading(),
+					'additional_content'        => $this->get_additional_content(),
+					'pos_store_name'            => $this->get_pos_store_name(),
+					'pos_store_email'           => $this->get_pos_store_email(),
+					'pos_store_phone_number'    => $this->get_pos_store_phone_number(),
+					'pos_store_address'         => $this->get_pos_store_address(),
+					'pos_refund_returns_policy' => $this->get_pos_refund_returns_policy(),
+					'blogname'                  => $this->get_blogname(),
+					'sent_to_admin'             => false,
+					'plain_text'                => false,
+					'email'                     => $this,
 				)
 			);
 			$this->remove_pos_customizations();
+			remove_action( 'woocommerce_pos_email_header', array( $this, 'email_header' ) );
+			remove_action( 'woocommerce_pos_email_footer', array( $this, 'email_footer' ) );
 			return $content;
 		}
 
@@ -249,15 +262,20 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			$content = wc_get_template_html(
 				$this->template_plain,
 				array(
-					'order'              => $this->object,
-					'refund'             => $this->refund,
-					'partial_refund'     => $this->partial_refund,
-					'email_heading'      => $this->get_heading(),
-					'additional_content' => $this->get_additional_content(),
-					'blogname'           => $this->get_blogname(),
-					'sent_to_admin'      => false,
-					'plain_text'         => true,
-					'email'              => $this,
+					'order'                     => $this->object,
+					'refund'                    => $this->refund,
+					'partial_refund'            => $this->partial_refund,
+					'email_heading'             => $this->get_heading(),
+					'additional_content'        => $this->get_additional_content(),
+					'pos_store_name'            => $this->get_pos_store_name(),
+					'pos_store_email'           => $this->get_pos_store_email(),
+					'pos_store_phone_number'    => $this->get_pos_store_phone_number(),
+					'pos_store_address'         => $this->get_pos_store_address(),
+					'pos_refund_returns_policy' => $this->get_pos_refund_returns_policy(),
+					'blogname'                  => $this->get_blogname(),
+					'sent_to_admin'             => false,
+					'plain_text'                => true,
+					'email'                     => $this,
 				)
 			);
 			$this->remove_pos_customizations();
@@ -282,18 +300,6 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 					'email'          => $this,
 				)
 			);
-		}
-
-		/**
-		 * Default content to show below main email content.
-		 *
-		 * @since 3.7.0
-		 * @return string
-		 */
-		public function get_default_additional_content() {
-			return $this->email_improvements_enabled
-				? __( 'If you need any help with your order, please contact us at {store_email}.', 'woocommerce' )
-				: __( 'We hope to see you again soon.', 'woocommerce' );
 		}
 
 		/**
@@ -374,6 +380,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			add_action( 'woocommerce_order_item_meta_start', array( $this, 'add_unit_price' ), 10, 4 );
 			// Add filter to include additional details in the order item totals table.
 			add_filter( 'woocommerce_get_order_item_totals', array( $this, 'order_item_totals' ), 10, 3 );
+			// Add filter for custom footer text with highest priority to run before the default footer text filtering in `WC_Emails`.
+			add_filter( 'woocommerce_email_footer_text', array( $this, 'replace_footer_placeholders' ), 1, 2 );
 		}
 
 		/**
@@ -383,6 +391,40 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			// Remove actions and filters after generating content to avoid affecting other emails.
 			remove_action( 'woocommerce_order_item_meta_start', array( $this, 'add_unit_price' ), 10 );
 			remove_filter( 'woocommerce_get_order_item_totals', array( $this, 'order_item_totals' ), 10 );
+			remove_filter( 'woocommerce_email_footer_text', array( $this, 'replace_footer_placeholders' ), 1 );
+		}
+
+		/**
+		 * Get the email header.
+		 *
+		 * @param mixed $email_heading Heading for the email.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+		 */
+		public function email_header( $email_heading ) {
+			wc_get_template(
+				'emails/email-header.php',
+				array(
+					'email_heading' => $email_heading,
+					'store_name'    => $this->get_pos_store_name(),
+				)
+			);
+		}
+
+		/**
+		 * Get the email footer.
+		 *
+		 * @param mixed $email Email object.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+		 */
+		public function email_footer( $email ) {
+			wc_get_template(
+				'emails/email-footer.php',
+				array(
+					'email' => $email,
+				)
+			);
 		}
 
 		/**
@@ -447,16 +489,6 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @return array Modified array of total rows.
 		 */
 		public function order_item_totals( $total_rows, $order, $tax_display ) {
-			$cash_payment_change_due_amount           = $order->get_meta( '_cash_change_amount', true );
-			$formatted_cash_payment_change_due_amount = wc_price( $cash_payment_change_due_amount, array( 'currency' => $order->get_currency() ) );
-			if ( ! empty( $cash_payment_change_due_amount ) ) {
-				$total_rows['cash_payment_change_due_amount'] = array(
-					'type'  => 'cash_payment_change_due_amount',
-					'label' => __( 'Change due:', 'woocommerce' ),
-					'value' => $formatted_cash_payment_change_due_amount,
-				);
-			}
-
 			$auth_code = $order->get_meta( '_charge_id', true );
 			if ( ! empty( $auth_code ) ) {
 				$total_rows['payment_auth_code'] = array(
@@ -475,6 +507,92 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			}
 
 			return $total_rows;
+		}
+
+		/**
+		 * Get the store name from POS settings.
+		 *
+		 * @return string
+		 */
+		private function get_pos_store_name() {
+			return $this->format_string(
+				get_option( 'woocommerce_pos_store_name', PointOfSaleDefaultSettings::get_default_store_name() )
+			);
+		}
+
+		/**
+		 * Get the store email from POS settings.
+		 *
+		 * @return string
+		 */
+		private function get_pos_store_email() {
+			return $this->format_string(
+				get_option( 'woocommerce_pos_store_email', PointOfSaleDefaultSettings::get_default_store_email() )
+			);
+		}
+
+		/**
+		 * Get the store phone number from POS settings.
+		 *
+		 * @return string
+		 */
+		private function get_pos_store_phone_number() {
+			return $this->format_string(
+				get_option( 'woocommerce_pos_store_phone' )
+			);
+		}
+
+		/**
+		 * Get the store address from POS settings.
+		 *
+		 * @return string
+		 */
+		private function get_pos_store_address() {
+			return $this->format_string(
+				get_option( 'woocommerce_pos_store_address', PointOfSaleDefaultSettings::get_default_store_address() )
+			);
+		}
+
+		/**
+		 * Get the refund and returns policy from POS settings.
+		 *
+		 * @return string
+		 */
+		private function get_pos_refund_returns_policy() {
+			return $this->format_string(
+				get_option( 'woocommerce_pos_refund_returns_policy' )
+			);
+		}
+
+
+		/**
+		 * Replace footer text placeholders with POS-specific values.
+		 *
+		 * @param string $footer_text The footer text to be filtered.
+		 * @param mixed  $email       Email object.
+		 * @return string Modified footer text.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+		 */
+		public function replace_footer_placeholders( $footer_text, $email ) {
+			// Only replace placeholders if we're in the context of a POS email.
+			if ( $email->id !== $this->id ) {
+				return $footer_text;
+			}
+
+			return str_replace(
+				array(
+					'{site_title}',
+					'{store_address}',
+					'{store_email}',
+				),
+				array(
+					$this->get_pos_store_name(),
+					$this->get_pos_store_address(),
+					$this->get_pos_store_email(),
+				),
+				$footer_text
+			);
 		}
 	}
 

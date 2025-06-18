@@ -31,7 +31,7 @@ const displayWithTax = getSetting( 'displayCartPricesIncludingTax', false );
 
 // Sample data for cart block.
 // This closely resembles the data returned from the Store API /cart endpoint.
-// https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/StoreApi/docs/cart.md#cart-response
+// https://github.com/woocommerce/woocommerce/tree/trunk/docs/apis/store-api/resources-endpoints/cart.md#cart-response
 export const previewCart: CartResponse = {
 	coupons: [],
 	shipping_rates:

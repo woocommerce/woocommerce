@@ -9,7 +9,8 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 
 /**
  * Integration test for Paragraph class
@@ -44,11 +45,11 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 	);
 
 	/**
-	 * Settings controller instance
+	 * Instance of Rendering_Context class
 	 *
-	 * @var Settings_Controller
+	 * @var Rendering_Context
 	 */
-	private $settings_controller;
+	private $rendering_context;
 
 	/**
 	 * Set up the test
@@ -56,15 +57,16 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->di_container->get( Email_Editor::class )->initialize();
-		$this->paragraph_renderer  = new Text();
-		$this->settings_controller = $this->di_container->get( Settings_Controller::class );
+		$this->paragraph_renderer = new Text();
+		$theme_controller         = $this->di_container->get( Theme_Controller::class );
+		$this->rendering_context  = new Rendering_Context( $theme_controller->get_theme() );
 	}
 
 	/**
 	 * Test it renders content
 	 */
 	public function testItRendersContent(): void {
-		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $this->parsed_paragraph, $this->settings_controller );
+		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $this->parsed_paragraph, $this->rendering_context );
 		$this->assertStringContainsString( 'width:100%', $rendered );
 		$this->assertStringContainsString( 'Lorem Ipsum', $rendered );
 		$this->assertStringContainsString( 'font-size:16px;', $rendered );
@@ -83,7 +85,7 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_paragraph['attrs']['style']['spacing']['padding']['left']   = '40px';
 		$parsed_paragraph['attrs']['align']                                 = 'center';
 
-		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->settings_controller );
+		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->rendering_context );
 		$this->assertStringContainsString( 'padding-top:10px;', $rendered );
 		$this->assertStringContainsString( 'padding-right:20px;', $rendered );
 		$this->assertStringContainsString( 'padding-bottom:30px;', $rendered );
@@ -106,23 +108,27 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_paragraph['innerHTML']    = $content;
 		$parsed_paragraph['innerContent'] = array( $content );
 
-		$rendered = $this->paragraph_renderer->render( $content, $parsed_paragraph, $this->settings_controller );
+		$rendered = $this->paragraph_renderer->render( $content, $parsed_paragraph, $this->rendering_context );
 		$html     = new \WP_HTML_Tag_Processor( $rendered );
 		$html->next_tag( array( 'tag_name' => 'table' ) );
 		$table_style = $html->get_attribute( 'style' );
 		// Table needs to have border-collapse: separate to make border-radius work.
+		$this->assertIsString( $table_style );
 		$this->assertStringContainsString( 'border-collapse: separate', $table_style );
 		$html->next_tag( array( 'tag_name' => 'td' ) );
 		$table_cell_style = $html->get_attribute( 'style' );
 		// Border styles are applied to the table cell.
+		$this->assertIsString( $table_cell_style );
 		$this->assertStringContainsString( 'border-color:#000001', $table_cell_style );
 		$this->assertStringContainsString( 'border-radius:20px', $table_cell_style );
 		$this->assertStringContainsString( 'border-width:10px', $table_cell_style );
 		$table_cell_classes = $html->get_attribute( 'class' );
+		$this->assertIsString( $table_cell_classes );
 		$this->assertStringContainsString( 'has-border-color test-class has-red-border-color', $table_cell_classes );
 		$html->next_tag( array( 'tag_name' => 'p' ) );
 		// There are no border styles on the paragraph.
 		$paragraph_style = $html->get_attribute( 'style' );
+		$this->assertIsString( $paragraph_style );
 		$this->assertStringNotContainsString( 'border', $paragraph_style );
 	}
 
@@ -140,7 +146,7 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 			'fontSize'       => '20px',
 		);
 
-		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->settings_controller );
+		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->rendering_context );
 		$this->assertStringContainsString( 'text-transform:uppercase;', $rendered );
 		$this->assertStringContainsString( 'letter-spacing:1px;', $rendered );
 		$this->assertStringContainsString( 'text-decoration:underline;', $rendered );

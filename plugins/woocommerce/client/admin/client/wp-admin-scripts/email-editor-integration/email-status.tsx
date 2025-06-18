@@ -21,6 +21,7 @@ import { EMAIL_STATUSES } from '../../settings-email/settings-email-listing-stat
 
 interface EmailStatusProps {
 	className?: string;
+	recordEvent: ( name: string, data?: Record< string, unknown > ) => void;
 }
 
 /**
@@ -30,7 +31,10 @@ interface EmailStatusProps {
  * @param {EmailStatusProps} props - Component props.
  * @return {JSX.Element} Rendered component.
  */
-export function EmailStatus( { className }: EmailStatusProps ): JSX.Element {
+export function EmailStatus( {
+	className,
+	recordEvent,
+}: EmailStatusProps ): JSX.Element {
 	const [ woocommerce_email_data ] = useEntityProp(
 		'postType',
 		'woo_email',
@@ -69,6 +73,9 @@ export function EmailStatus( { className }: EmailStatusProps ): JSX.Element {
 				},
 			}
 		);
+		recordEvent( 'email_status_changed', {
+			status: newValue ? 'active' : 'inactive',
+		} );
 	};
 
 	const renderDropdownContent = ( {

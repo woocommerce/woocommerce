@@ -8,8 +8,9 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use WP_Style_Engine;
 
 /**
@@ -30,12 +31,12 @@ class Column extends Abstract_Block_Renderer {
 	/**
 	 * Renders the block content.
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	protected function render_content( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$content = '';
 		foreach ( $parsed_block['innerBlocks'] ?? array() as $block ) {
 			$content .= render_block( $block );
@@ -44,24 +45,24 @@ class Column extends Abstract_Block_Renderer {
 		return str_replace(
 			'{column_content}',
 			$content,
-			$this->get_block_wrapper( $block_content, $parsed_block, $settings_controller )
+			$this->get_block_wrapper( $block_content, $parsed_block, $rendering_context )
 		);
 	}
 
 	/**
 	 * Based on MJML <mj-column>
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 */
-	private function get_block_wrapper( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	private function get_block_wrapper( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$original_wrapper_classname = ( new Dom_Document_Helper( $block_content ) )->get_attribute_value_by_tag_name( 'div', 'class' ) ?? '';
 		$block_attributes           = wp_parse_args(
 			$parsed_block['attrs'] ?? array(),
 			array(
 				'verticalAlignment' => 'stretch',
-				'width'             => $settings_controller->get_layout_width_without_padding(),
+				'width'             => $rendering_context->get_layout_width_without_padding(),
 				'style'             => array(),
 			)
 		);
@@ -107,7 +108,7 @@ class Column extends Abstract_Block_Renderer {
 		}
 
 		return '
-      <td class="' . esc_attr( $wrapper_classname ) . '" style="' . esc_attr( $wrapper_css ) . '" width="' . esc_attr( $block_attributes['width'] ) . '">
+      <td class="' . esc_attr( $wrapper_classname ) . '" style="' . esc_attr( $wrapper_css ) . '" width="' . Styles_Helper::parse_value( $block_attributes['width'] ) . '">
         <table class="' . esc_attr( $content_classname ) . '" style="' . esc_attr( $content_css ) . '" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
           <tbody>
             <tr>
