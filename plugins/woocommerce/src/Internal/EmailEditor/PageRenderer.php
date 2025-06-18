@@ -122,19 +122,10 @@ class PageRenderer {
 		);
 		// End of replacing Rich Text package.
 
-		$file_name     = 'index';
-		$assets_params = require $email_editor_assets_path . "{$file_name}.asset.php";
-
-		wp_enqueue_script(
-			'woocommerce_email_editor',
-			$email_editor_assets_url . "{$file_name}.js",
-			$assets_params['dependencies'],
-			$assets_params['version'],
-			true
-		);
+		$assets_params = require $email_editor_assets_path . 'index.asset.php';
 		wp_enqueue_style(
-			'woocommerce_email_editor',
-			$email_editor_assets_url . "style-{$file_name}.css",
+			'wc-admin-email-editor-integration',
+			$email_editor_assets_url . 'style.css',
 			array(),
 			$assets_params['version']
 		);
@@ -162,7 +153,7 @@ class PageRenderer {
 		$email_editor_settings['displaySendEmailButton'] = false;
 
 		wp_localize_script(
-			'woocommerce_email_editor',
+			'wc-admin-email-editor-integration',
 			'WooCommerceEmailEditor',
 			array(
 				'current_post_type'     => esc_js( $post_type ),
