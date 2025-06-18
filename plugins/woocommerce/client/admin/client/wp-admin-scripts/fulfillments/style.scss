@@ -342,6 +342,41 @@
 	}
 }
 
+.woocommerce-fulfillment-item-lock-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	padding: 14px 0;
+}
+
+.woocommerce-fulfillment-lock-label {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	gap: 4px;
+	& &__icon {
+		width: 16px;
+		height: 16px;
+		svg {
+			path[stroke-width] {
+				stroke: #757575;
+			}
+			path:not([stroke-width]) {
+				fill: #757575;
+			}
+		}
+	}
+	& &__text {
+		font-size: 12px;
+		line-height: 16px;
+		font-weight: 400;
+		letter-spacing: 0%;
+		vertical-align: middle;
+		color: #757575;
+	}
+}
+
 /**
  * Order list styles
  */

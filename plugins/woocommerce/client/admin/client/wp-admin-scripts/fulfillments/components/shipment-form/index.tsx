@@ -49,6 +49,7 @@ export default function ShipmentForm() {
 							setSelectedOption( SHIPMENT_OPTION_TRACKING_NUMBER )
 						}
 						label={ __( 'Tracking Number', 'woocommerce' ) }
+						__nextHasNoMarginBottom
 					/>
 					{ selectedOption === SHIPMENT_OPTION_TRACKING_NUMBER && (
 						<ShipmentTrackingNumberForm />
@@ -67,6 +68,7 @@ export default function ShipmentForm() {
 							setSelectedOption( SHIPMENT_OPTION_MANUAL_ENTRY )
 						}
 						label={ __( 'Enter manually', 'woocommerce' ) }
+						__nextHasNoMarginBottom
 					/>
 					{ selectedOption === SHIPMENT_OPTION_MANUAL_ENTRY && (
 						<ShipmentManualEntryForm />
@@ -83,6 +85,7 @@ export default function ShipmentForm() {
 							setSelectedOption( SHIPMENT_OPTION_NO_INFO )
 						}
 						label={ __( 'No shipment information', 'woocommerce' ) }
+						__nextHasNoMarginBottom
 					/>
 				</div>
 			</div>

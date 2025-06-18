@@ -48,6 +48,13 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		// Set fulfillment properties.
 		$data->set_date_updated( current_time( 'mysql' ) );
 
+		/**
+		 * Filter to modify the fulfillment data before it is created.
+		 *
+		 * @since 9.9.0
+		 */
+		$data = apply_filters( 'wc_fulfillment_before_create', $data );
+
 		// Save the fulfillment to the database.
 		global $wpdb;
 		$rows_inserted = $wpdb->insert(
@@ -73,12 +80,24 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 
 		$data->set_id( $data_id );
 
+		// If the fulfillment is fulfilled, set the fulfilled date.
+		if ( $data->get_is_fulfilled() ) {
+			$data->set_date_fulfilled( current_time( 'mysql' ) );
+		}
+
 		// Save the metadata for the fulfillment to the database.
 		$data->save_meta_data();
 
 		// Apply changes let's the object know that the current object reflects the database and no "changes" exist between the two.
 		$data->apply_changes();
 		$data->set_object_read( true );
+
+		/**
+		 * Action to perform after a fulfillment is created.
+		 *
+		 * @since 9.9.0
+		 */
+		do_action( 'wc_fulfillment_after_create', $data );
 	}
 
 	/**
@@ -150,6 +169,11 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		// Check for errors.
 		if ( $wpdb->last_error ) {
 			throw new \Exception( esc_html__( 'Failed to update fulfillment.', 'woocommerce' ) . ' ' . esc_html( $wpdb->last_error ) );
+		}
+
+		// If the fulfillment is fulfilled, set the fulfilled date.
+		if ( $data->get_is_fulfilled() && ! $data->meta_exists( '_fulfilled_date' ) ) {
+			$data->set_date_fulfilled( current_time( 'mysql' ) );
 		}
 
 		// Update the metadata for the fulfillment.

@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Fulfillments;
 
+use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
 use WC_Order;
@@ -266,6 +267,13 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				 */
 				do_action( 'woocommerce_fulfillment_created_notification', $order_id, $fulfillment, wc_get_order( $order_id ) );
 			}
+		} catch ( ApiException $ex ) {
+			return $this->prepare_error_response(
+				$ex->getErrorCode(),
+				$ex->getMessage(),
+				WP_Http::BAD_REQUEST
+			);
+
 		} catch ( \Exception $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),
@@ -361,6 +369,12 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 					do_action( 'woocommerce_fulfillment_updated_notification', $order_id, $fulfillment, wc_get_order( $order_id ) );
 				}
 			}
+		} catch ( ApiException $ex ) {
+			return $this->prepare_error_response(
+				$ex->getErrorCode(),
+				$ex->getMessage(),
+				WP_Http::BAD_REQUEST
+			);
 		} catch ( \Exception $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),
@@ -391,8 +405,13 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		try {
 			$fulfillment = new Fulfillment( $fulfillment_id );
 			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
-			$fulfillment->set_date_deleted( current_time( 'mysql' ) );
-			$fulfillment->save();
+			$fulfillment->delete();
+		} catch ( ApiException $ex ) {
+			return $this->prepare_error_response(
+				$ex->getErrorCode(),
+				$ex->getMessage(),
+				WP_Http::BAD_REQUEST
+			);
 		} catch ( \Exception $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),
@@ -477,6 +496,12 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				}
 			}
 			$fulfillment->save();
+		} catch ( ApiException $ex ) {
+			return $this->prepare_error_response(
+				$ex->getErrorCode(),
+				$ex->getMessage(),
+				WP_Http::BAD_REQUEST
+			);
 		} catch ( \Exception $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),
@@ -511,6 +536,12 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 
 			$fulfillment->delete_meta_data( $request->get_param( 'meta_key' ) );
 			$fulfillment->save();
+		} catch ( ApiException $ex ) {
+			return $this->prepare_error_response(
+				$ex->getErrorCode(),
+				$ex->getMessage(),
+				WP_Http::BAD_REQUEST
+			);
 		} catch ( \Exception $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),

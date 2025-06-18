@@ -3,7 +3,7 @@
  */
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, select } from '@wordpress/data';
 import { useState } from 'react';
 
 /**
@@ -24,30 +24,31 @@ export default function FulfillItemsButton( {
 	const [ isExecuting, setIsExecuting ] = useState( false );
 	const { saveFulfillment } = useDispatch( FulfillmentStore );
 
-	const handleFulfillItems = () => {
-		setIsExecuting( true );
+	const handleFulfillItems = async () => {
 		setError( null );
 		if ( ! fulfillment || ! order ) {
-			setIsExecuting( false );
 			return;
 		}
 		if ( getFulfillmentItems( fulfillment ).length === 0 ) {
-			setError( 'Select items to be fulfilled.' );
-			setIsExecuting( false );
+			setError( __( 'Select items to be fulfilled.', 'woocommerce' ) );
 			return;
 		}
+
+		setIsExecuting( true );
+
+		// Mark fulfillment as fulfilled.
 		fulfillment.is_fulfilled = true;
 		fulfillment.status = 'fulfilled';
-		saveFulfillment( order.id, fulfillment, notifyCustomer )
-			.then( () => {
-				setIsEditing( false );
-			} )
-			.catch( ( error ) => {
-				setError( error );
-			} )
-			.finally( () => {
-				setIsExecuting( false );
-			} );
+		await saveFulfillment( order.id, fulfillment, notifyCustomer );
+
+		const error = select( FulfillmentStore ).getError( order.id );
+		if ( error ) {
+			setError( error );
+		} else {
+			setIsEditing( false );
+		}
+
+		setIsExecuting( false );
 	};
 
 	return (

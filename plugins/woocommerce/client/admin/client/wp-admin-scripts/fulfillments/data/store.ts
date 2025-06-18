@@ -11,6 +11,24 @@ import { Order, Fulfillment } from './types';
 
 export const STORE_NAME = 'order/fulfillments';
 
+const getFulfillmentErrorMessage = (
+	error: unknown,
+	defaultMessage: string
+): string => {
+	if (
+		error &&
+		typeof error === 'object' &&
+		'message' in error &&
+		'code' in error
+	) {
+		const apiError = error as { message: string; code: string };
+		if ( apiError.code === 'woocommerce_fulfillment_error' ) {
+			return apiError.message;
+		}
+	}
+	return defaultMessage;
+};
+
 const actionTypes = {
 	SET_ORDER: 'SET_ORDER',
 	SET_LOADING: 'SET_LOADING',
@@ -101,9 +119,10 @@ const publicActions = {
 			} catch ( error: unknown ) {
 				dispatch.setError(
 					orderId,
-					error instanceof Error
-						? error.message
-						: 'Failed to save fulfillment'
+					getFulfillmentErrorMessage(
+						error,
+						'Failed to save fulfillment'
+					)
 				);
 			} finally {
 				dispatch.setLoading( orderId, false );
@@ -133,9 +152,10 @@ const publicActions = {
 			} catch ( error: unknown ) {
 				dispatch.setError(
 					orderId,
-					error instanceof Error
-						? error.message
-						: 'Failed to update fulfillment'
+					getFulfillmentErrorMessage(
+						error,
+						'Failed to update fulfillment'
+					)
 				);
 			} finally {
 				dispatch.setLoading( orderId, false );
@@ -156,9 +176,10 @@ const publicActions = {
 			} catch ( error: unknown ) {
 				dispatch.setError(
 					orderId,
-					error instanceof Error
-						? error.message
-						: 'Failed to delete fulfillment'
+					getFulfillmentErrorMessage(
+						error,
+						'Failed to delete fulfillment'
+					)
 				);
 			} finally {
 				dispatch.setLoading( orderId, false );
