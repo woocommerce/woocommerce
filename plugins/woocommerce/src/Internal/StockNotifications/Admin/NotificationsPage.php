@@ -34,7 +34,11 @@ class NotificationsPage {
 
 		switch ( $action ) {
 			case 'delete':
-				$this->delete();
+				check_admin_referer( 'delete_customer_stock_notification' );
+
+				$notification_id = isset( $_GET['notification'] ) ? absint( $_GET['notification'] ) : 0;
+
+				$this->delete( $notification_id );
 				break;
 			default:
 				$this->output();
@@ -50,19 +54,16 @@ class NotificationsPage {
 		$search = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$table  = new NotificationsListTable();
 		$table->prepare_items();
-		include __DIR__ . '/Views/html-admin-notifications.php';
+		include __DIR__ . '/views/html-admin-notifications.php';
 	}
 
 	/**
 	 * Delete notification.
 	 *
+	 * @param int $notification_id Notification ID.
 	 * @throws \Exception If notification ID is missing.
 	 */
-	public static function delete() {
-
-		check_admin_referer( 'delete_customer_stock_notification' );
-
-		$notification_id = isset( $_GET['notification'] ) ? absint( $_GET['notification'] ) : 0;
+	public static function delete( $notification_id ) {
 
 		try {
 			if ( ! $notification_id ) {

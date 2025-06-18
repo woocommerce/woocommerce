@@ -479,12 +479,10 @@ CREATE TABLE $meta_table_name (
 			}
 		}
 
-		$order_by_clauses = empty( $order_by_clauses ) ? array( $table . '.id ASC' ) : $order_by_clauses;
-
 		// Assemble the query.
 		$where    = implode( ' AND ', $where );
 		$where    = $where ? ' WHERE ' . $where : '';
-		$order_by = ' ORDER BY ' . implode( ', ', $order_by_clauses );
+		$order_by = ! empty( $order_by_clauses ) ? ' ORDER BY ' . implode( ', ', $order_by_clauses ) : '';
 		$limit    = $args['limit'] > 0 ? ' LIMIT ' . absint( $args['limit'] ) : '';
 		$offset   = $args['offset'] > 0 ? ' OFFSET ' . absint( $args['offset'] ) : '';
 		$sql      = "SELECT $select FROM $table $where $order_by $limit $offset";

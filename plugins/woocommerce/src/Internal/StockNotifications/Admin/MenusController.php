@@ -19,10 +19,10 @@ class MenusController {
 		// Add Stock Notifications menu item.
 		add_action( 'admin_menu', array( $this, 'add_menu' ), 10 );
 
-		// Integrate WooCommerce breadcrumb bar.
-		add_action( 'admin_menu', array( $this, 'wc_admin_connect_customer_stock_notifications_pages' ) );
-		add_filter( 'woocommerce_navigation_pages_with_tabs', array( $this, 'wc_admin_navigation_pages_with_tabs' ) );
+		// Add screen id.
 		add_filter( 'woocommerce_screen_ids', array( $this, 'wc_admin_stock_notifications_screen_ids' ) );
+
+		// Add screen options support.
 		add_filter( 'set-screen-option', array( $this, 'set_screen_option' ), 10, 3 );
 
 		// Output the admin notice.
@@ -95,77 +95,6 @@ class MenusController {
 	 */
 	public function notifications_page() {
 		new NotificationsPage();
-	}
-
-	/**
-	 * Connect pages with navigation bar.
-	 *
-	 * @return void
-	 */
-	public function wc_admin_connect_customer_stock_notifications_pages() {
-
-		if ( function_exists( 'wc_admin_connect_page' ) ) {
-
-			wc_admin_connect_page(
-				array(
-					'id'        => 'woocommerce-customer_stock_notifications',
-					'screen_id' => 'woocommerce_page_customer_stock_notifications-notifications',
-					'title'     => __( 'Stock Notifications', 'woocommerce' ),
-					'path'      => add_query_arg(
-						array(
-							'page' => 'wc-customer-stock-notifications',
-						),
-						'admin.php'
-					),
-				)
-			);
-
-			wc_admin_connect_page(
-				array(
-					'id'        => 'woocommerce-customer_stock_notifications-create',
-					'parent'    => 'woocommerce-customer_stock_notifications',
-					'screen_id' => 'woocommerce_page_customer_stock_notifications-notifications-create',
-					'title'     => __( 'Add Notification', 'woocommerce' ),
-					'path'      => add_query_arg(
-						array(
-							'page'         => 'wc-customer-stock-notifications',
-							'action'       => 'create',
-							'notification' => 1,
-						),
-						'admin.php'
-					),
-				)
-			);
-
-			wc_admin_connect_page(
-				array(
-					'id'        => 'woocommerce-customer_stock_notifications-edit',
-					'parent'    => 'woocommerce-customer_stock_notifications',
-					'screen_id' => 'woocommerce_page_customer_stock_notifications-notifications-edit',
-					'title'     => __( 'Edit Notification', 'woocommerce' ),
-					'path'      => add_query_arg(
-						array(
-							'page'         => 'wc-customer-stock-notifications',
-							'action'       => 'edit',
-							'notification' => 1,
-						),
-						'admin.php'
-					),
-				)
-			);
-
-		}
-	}
-
-	/**
-	 * Configure Customer Stock Notifications page sections.
-	 *
-	 * @param array $pages Array of pages with their tab identifiers.
-	 * @return array
-	 */
-	public function wc_admin_navigation_pages_with_tabs( $pages ) {
-		$pages['customer_stock_notifications'] = 'notifications';
-		return $pages;
 	}
 
 	/**
