@@ -391,11 +391,11 @@ class FulfillmentsRenderer {
 			'currency_symbols' => get_woocommerce_currency_symbols(),
 		);
 
-		wp_localize_script(
-			'wc-admin-fulfillments',
-			'wcFulfillmentSettings',
-			$fulfillment_settings
-		);
+		?>
+		<script type="text/javascript">
+			window.wcFulfillmentSettings = <?php echo wp_json_encode( $fulfillment_settings ); ?>;
+		</script>
+		<?php
 	}
 
 	/**
@@ -403,7 +403,7 @@ class FulfillmentsRenderer {
 	 *
 	 * @return bool True if the fulfillment drawer should be rendered, false otherwise.
 	 */
-	private static function should_render_fulfillment_drawer(): bool {
+	protected function should_render_fulfillment_drawer(): bool {
 		$current_screen = get_current_screen();
 		if ( ! $current_screen || ! $current_screen->id ) {
 			return false;
@@ -417,18 +417,13 @@ class FulfillmentsRenderer {
 	 *
 	 * @return bool True if the fulfillment object should be rendered, false otherwise.
 	 */
-	private function should_render_fulfillment_object(): bool {
+	protected function should_render_fulfillment_object(): bool {
 		// Check if we are on the order details page in the customer area.
-		if ( ! is_admin() && function_exists( 'is_account_page' ) && is_account_page() && get_query_var( 'view-order', false ) ) {
+		if ( ! is_admin() && function_exists( 'is_view_order_page' ) && is_view_order_page() ) {
 			return true;
 		}
 
 		// Check if the current screen is the orders page or the edit order page on the admin side.
-		$current_screen = get_current_screen();
-		if ( is_admin() && $current_screen && $current_screen->id && 'woocommerce_page_wc-orders' === $current_screen->id ) {
-			return true;
-		}
-
-		return false;
+		return $this->should_render_fulfillment_drawer();
 	}
 }
