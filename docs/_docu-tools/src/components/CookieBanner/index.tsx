@@ -62,6 +62,7 @@ const createConsentOptions = (buckets: CookieBuckets) => ({
 });
 
 const loadGTMScript = () => {
+  return;
   const script = document.createElement('script');
   script.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-WW2RLFD7';
   script.async = true;
