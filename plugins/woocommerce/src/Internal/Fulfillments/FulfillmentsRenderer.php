@@ -46,7 +46,7 @@ class FulfillmentsRenderer {
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_components' ) );
 		// Hook into the order details before order table to render the fulfillment customer details.
 		add_action( 'woocommerce_order_details_before_order_table', array( $this, 'render_fulfillment_customer_details' ) );
-    // Initialize the renderer for bulk actions.
+		// Initialize the renderer for bulk actions.
 		add_action( 'admin_init', array( $this, 'init_bulk_actions' ) );
 	}
 
@@ -290,9 +290,9 @@ class FulfillmentsRenderer {
 			$redirect_to = add_query_arg( array( 'bulk_action' => $action ), $redirect_to );
 		}
 		return $redirect_to;
-  }
-  
-  /**
+	}
+
+	/**
 	 * Render the fulfillment customer details in the order details page.
 	 *
 	 * @param WC_Order $order The order object.
