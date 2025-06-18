@@ -29,6 +29,8 @@ import ShipmentViewer from '../shipment-form/shipment-viewer';
 import ShipmentForm from '../shipment-form';
 import { ShipmentFormProvider } from '../../context/shipment-form-context';
 import MetadataViewer from '../metadata-viewer';
+import { getFulfillmentLockState } from '../../utils/fulfillment-utils';
+import LockLabel from '../user-interface/lock-label';
 
 interface FulfillmentEditorProps {
 	index: number;
@@ -61,6 +63,8 @@ export default function FulfillmentEditor( {
 		[ ...itemsInFulfillment ],
 		[ ...itemsNotInAnyFulfillment ]
 	);
+
+	const fulfillmentLockState = getFulfillmentLockState( fulfillment );
 
 	const handleChevronClick = () => {
 		if ( isEditing ) return;
@@ -143,41 +147,49 @@ export default function FulfillmentEditor( {
 									! isEditing ) ) && (
 								<CustomerNotificationBox type="update" />
 							) }
-							<div className="woocommerce-fulfillment-item-actions">
-								{ ! isEditing ? (
-									<>
-										<EditFulfillmentButton
-											onClick={ () => {
-												setIsEditing( true );
-											} }
-										/>
-										{ ! fulfillment.is_fulfilled && (
-											<FulfillItemsButton
-												setError={ setError }
+							{ fulfillmentLockState.isLocked ? (
+								<div className="woocommerce-fulfillment-item-lock-container">
+									<LockLabel
+										message={ fulfillmentLockState.reason }
+									/>
+								</div>
+							) : (
+								<div className="woocommerce-fulfillment-item-actions">
+									{ ! isEditing ? (
+										<>
+											<EditFulfillmentButton
+												onClick={ () => {
+													setIsEditing( true );
+												} }
 											/>
-										) }
-									</>
-								) : (
-									<>
-										<CancelLink
-											onClick={ () => {
-												setError( null );
-												setIsEditing( false );
-											} }
-										/>
-										<RemoveButton
-											setError={ ( message ) =>
-												setError( message )
-											}
-										/>
-										<UpdateButton
-											setError={ ( message ) =>
-												setError( message )
-											}
-										/>
-									</>
-								) }
-							</div>
+											{ ! fulfillment.is_fulfilled && (
+												<FulfillItemsButton
+													setError={ setError }
+												/>
+											) }
+										</>
+									) : (
+										<>
+											<CancelLink
+												onClick={ () => {
+													setError( null );
+													setIsEditing( false );
+												} }
+											/>
+											<RemoveButton
+												setError={ ( message ) =>
+													setError( message )
+												}
+											/>
+											<UpdateButton
+												setError={ ( message ) =>
+													setError( message )
+												}
+											/>
+										</>
+									) }
+								</div>
+							) }
 						</FulfillmentProvider>
 					</ShipmentFormProvider>
 				</div>
