@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use WP_Block;
-use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 
 /**
  * PaymentMethods class.
@@ -45,53 +44,115 @@ class PaymentMethods extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$payment_methods_from_server = PaymentUtils::get_enabled_payment_gateways();
-		$formatted_payment_methods = array_reduce(
-			$payment_methods_from_server,
-			function ( $acc, $method ) {
-				if ( $method->get_title() === 'Cards' ) {
-					//var_dump( $method );
-				}
-				$acc[] = [
-					'id'          => $method->id,
-					'title'       => $method->get_title() !== '' ? $method->get_title() : $method->get_method_title(),
-					'icon'       => $method->get_icon(),
-				];
-				return $acc;
-			},
-			[]
-		);
+		if ( ! class_exists( 'WC_Payments' ) ) {
+			return;
+		}
 
-		//$payment_methods = $attributes['formattedPaymentMethods'];
-		$output = '';
-		$show_as_icons = isset( $attributes['showAsIcons'] ) ? $attributes['showAsIcons'] : false;
+		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
-		if ( ! empty( $formatted_payment_methods ) ) {
-			$wrapper_attributes = get_block_wrapper_attributes( [ 'class' => 'wc-block-payment-methods' ] );
-			$output .= sprintf( '<div %s>', $wrapper_attributes );
-			$output .= '<ul class="wc-block-payment-methods__list">';
-			foreach ( $formatted_payment_methods as $method ) {
-				if ( $show_as_icons && ! empty( $method['icon'] ) ) {
-					$output .= sprintf(
-						'<li class="wc-block-payment-methods__list-item">%s</li>',
-						$method['icon']
-					);
+		if ( empty( $available_gateways ) ) {
+			return;
+		}
+
+		$output = '<div class="wp-block-woocommerce-payment-methods">';
+
+		foreach ( $available_gateways as $gateway_id => $gateway ) {
+			if ( $gateway->enabled === 'yes' ) {
+				if ( $gateway_id === 'woocommerce_payments' ) {
+					$output .= $this->render_card_brands();
 				} else {
-					$output .= sprintf(
-						'<li class="wc-block-payment-methods__list-item">%s</li>',
-						esc_html( $method['title'] )
-					);
+					$method_title = $gateway->get_title();
+					$icon_url     = $this->get_payment_method_icon( $gateway_id, $gateway );
+
+					$output .= '<div class="payment-method-item">';
+
+					if ( $icon_url ) {
+						$output .= '<img src="' . esc_url( $icon_url ) . '" alt="' . esc_attr( $method_title ) . '" class="payment-method-icon">';
+					}
+
+					$output .= '</div>';
 				}
 			}
-			$output .= '</ul>';
-			$output .= '</div>';
-		} else {
-			$wrapper_attributes = get_block_wrapper_attributes( [ 'class' => 'wc-block-payment-methods wc-block-payment-methods--empty' ] );
-			$output .= sprintf( '<div %s>', $wrapper_attributes );
+		}
+
+		$output .= '</div>';
+
+		return $output;
+	}
+
+	private function render_card_brands() {
+		$output = '';
+		$enabled_card_types = $this->get_enabled_card_types();
+
+		foreach ( $enabled_card_types as $card_type => $card_data ) {
+			$output .= '<div class="payment-method-item">';
+			$output .= '<span class="payment-method-icon" style="background-image: url(\'' . esc_url( $card_data['icon'] ) . '\');">' . esc_attr( $card_data['name'] ) . '</span>';
+
 			$output .= '</div>';
 		}
 
 		return $output;
+	}
+
+	private function get_enabled_card_types() {
+		$card_types = array(
+			'visa'       => array(
+				'name' => 'Visa',
+				'icon' => $this->get_card_brand_icon_url( 'visa' ),
+			),
+			'mastercard' => array(
+				'name' => 'Mastercard',
+				'icon' => $this->get_card_brand_icon_url( 'mastercard' ),
+			),
+			'amex'       => array(
+				'name' => 'American Express',
+				'icon' => $this->get_card_brand_icon_url( 'amex' ),
+			),
+			'discover'   => array(
+				'name' => 'Discover',
+				'icon' => $this->get_card_brand_icon_url( 'discover' ),
+			),
+			'diners'     => array(
+				'name' => 'Diners Club',
+				'icon' => $this->get_card_brand_icon_url( 'diners' ),
+			),
+			'jcb'        => array(
+				'name' => 'JCB',
+				'icon' => $this->get_card_brand_icon_url( 'jcb' ),
+			),
+			'cartes_bancaires' => array(
+				'name' => 'Cartes Bancaires',
+				'icon' => $this->get_card_brand_icon_url( 'cartes_bancaires' ),
+			),
+			'unionpay'   => array(
+				'name' => 'UnionPay',
+				'icon' => $this->get_card_brand_icon_url( 'unionpay' ),
+			),
+		);
+
+		if ( class_exists( 'WC_Payments_Features' ) && method_exists( 'WC_Payments_Features', 'is_enabled' ) ) {
+			$woopayments_gateway = WC()->payment_gateways->payment_gateways()['woocommerce_payments'] ?? null;
+
+			if ( $woopayments_gateway && method_exists( $woopayments_gateway, 'get_option' ) ) {
+				$enabled_card_types = $woopayments_gateway->get_option( 'enabled_card_types', array() );
+
+				if ( ! empty( $enabled_card_types ) && is_array( $enabled_card_types ) ) {
+					$filtered_cards = array();
+					foreach ( $enabled_card_types as $card_type ) {
+						if ( isset( $card_types[ $card_type ] ) ) {
+							$filtered_cards[ $card_type ] = $card_types[ $card_type ];
+						}
+					}
+					return ! empty( $filtered_cards ) ? $filtered_cards : $card_types;
+				}
+			}
+		}
+
+		return $card_types;
+	}
+
+	private function get_card_brand_icon_url( $card_type ) {
+		return WC()->plugin_url() . '/assets/images/payment-methods/' . $card_type . '.svg';
 	}
 
 	/**
