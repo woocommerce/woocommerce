@@ -59,6 +59,7 @@ const wcAdminPackages = [
 	'product-editor',
 	'settings-editor',
 	'remote-logging',
+	'email-editor',
 ];
 
 const getEntryPoints = () => {
@@ -221,15 +222,15 @@ const webpackConfig = {
 			],
 		} ),
 
-		// The email-editor is integrated as admin dependency, hence this copy step.
+		// The email-editor assets for the rich-text.js file need to be copied to the build directory.
 		new CopyWebpackPlugin( {
 			patterns: [
 				{
 					from: path.join(
 						__dirname,
-						'../../../../packages/js/email-editor/build'
+						'../../../../packages/js/email-editor/assets'
 					),
-					to: './email-editor',
+					to: './email-editor/assets',
 				},
 			],
 		} ),

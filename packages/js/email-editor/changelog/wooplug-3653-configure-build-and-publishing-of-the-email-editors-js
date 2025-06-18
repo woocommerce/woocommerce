@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Refactor the package and its build to be prepared for publishing
