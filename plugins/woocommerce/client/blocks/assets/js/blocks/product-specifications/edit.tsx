@@ -224,9 +224,12 @@ const Edit = ( {
 										key={ key }
 										className={ `wp-block-product-specifications-item wc-block-product-specifications-item-${ key }` }
 									>
-										<td className="wp-block-product-specifications-item__label">
+										<th
+											scope="row"
+											className="wp-block-product-specifications-item__label"
+										>
 											{ data.label }
-										</td>
+										</th>
 										<td className="wp-block-product-specifications-item__value">
 											{ data.value }
 										</td>
