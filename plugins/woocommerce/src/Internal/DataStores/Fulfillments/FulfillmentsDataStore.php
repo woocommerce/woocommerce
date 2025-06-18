@@ -241,12 +241,14 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		$data->apply_changes();
 		$data->set_object_read( true );
 
-		/**
-		 * Action to perform after a fulfillment is deleted.
-		 *
-		 * @since 9.9.0
-		 */
-		do_action( 'wc_fulfillment_after_delete', $data );
+		if ( ! doing_action( 'wc_fulfillment_after_delete', $data ) ) {
+			/**
+			 * Action to perform after a fulfillment is deleted.
+			 *
+			 * @since 9.9.0
+			 */
+			do_action( 'wc_fulfillment_after_delete', $data );
+		}
 
 		// Set the fulfillment object to a fresh state.
 		$data = new Fulfillment();
