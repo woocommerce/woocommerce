@@ -45,7 +45,7 @@ export default function FulfillmentLineItem( {
 		orderCurrencyCode: string
 	) => {
 		if ( ! orderCurrencyCode ) {
-			return null;
+			orderCurrencyCode = storeCurrency?.code || 'USD';
 		}
 
 		// If the order currency is the same as the store currency, we show the formatted amount.

@@ -53,9 +53,8 @@ class FulfillmentsManager {
 	/**
 	 * Get initial shipping providers.
 	 *
-	 * This method returns an array of initial shipping providers that will be available
-	 * in the fulfillment process. It allows for filtering to add or modify the list of
-	 * shipping providers.
+	 * This method provides the initial shipping providers that feeds the `wc_fulfillment_shipping_providers` filter,
+	 * which is used to populate the list of available shipping providers on the fulfillment UI.
 	 *
 	 * @param array $shipping_providers The current list of shipping providers.
 	 *
