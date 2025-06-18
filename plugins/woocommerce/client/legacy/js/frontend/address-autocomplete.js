@@ -629,10 +629,16 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		addressTypes.forEach( ( type ) => {
 			const addressInput = addressInputs[ type ][ 'address_1' ];
 			if ( addressInput ) {
+				let inputTimeout;
+
 				addressInput.addEventListener( 'input', function () {
-					if ( document.activeElement === this ) {
-						displaySuggestions( type, this.value );
-					}
+					clearTimeout( inputTimeout );
+					const inputElement = this;
+					inputTimeout = setTimeout( () => {
+						if ( document.activeElement === inputElement ) {
+							displaySuggestions( type, inputElement.value );
+						}
+					}, 100 );
 				} );
 
 				addressInput.addEventListener( 'keydown', async function ( e ) {
