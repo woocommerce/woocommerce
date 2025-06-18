@@ -49,8 +49,7 @@ export class FrontendUtils {
 		 * response is received. This timeout ensures the cart is updated before
 		 * the next test step.
 		 */
-		// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
-		await this.page.waitForTimeout( 2000 );
+		await this.page.waitForLoadState( 'networkidle' );
 	}
 
 	async goToCheckout() {
