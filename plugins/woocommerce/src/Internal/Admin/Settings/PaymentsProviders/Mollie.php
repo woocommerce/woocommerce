@@ -57,9 +57,9 @@ class Mollie extends PaymentGateway {
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to determine if gateway has an account connected: ' . $e->getMessage(),
 				array(
-					'gateway' => $payment_gateway->id,
-					'source'  => 'settings-payments',
-					'error'   => $e,
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
 				)
 			);
 		}
@@ -174,9 +174,9 @@ class Mollie extends PaymentGateway {
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to determine if gateway is in sandbox mode: ' . $e->getMessage(),
 				array(
-					'gateway' => $payment_gateway->id,
-					'source'  => 'settings-payments',
-					'error'   => $e,
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
 				)
 			);
 		}

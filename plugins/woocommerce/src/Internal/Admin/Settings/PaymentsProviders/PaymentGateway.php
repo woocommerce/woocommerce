@@ -308,9 +308,9 @@ class PaymentGateway {
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to determine if gateway is in test mode: ' . $e->getMessage(),
 				array(
-					'gateway' => $payment_gateway->id,
-					'source'  => 'settings-payments',
-					'error'   => $e,
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
 				)
 			);
 		}
@@ -342,9 +342,9 @@ class PaymentGateway {
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to determine if gateway is in dev mode: ' . $e->getMessage(),
 				array(
-					'gateway' => $payment_gateway->id,
-					'source'  => 'settings-payments',
-					'error'   => $e,
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
 				)
 			);
 		}
@@ -374,9 +374,9 @@ class PaymentGateway {
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to determine if gateway account is connected: ' . $e->getMessage(),
 				array(
-					'gateway' => $payment_gateway->id,
-					'source'  => 'settings-payments',
-					'error'   => $e,
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
 				)
 			);
 		}
@@ -404,9 +404,9 @@ class PaymentGateway {
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to determine if gateway onboarding started: ' . $e->getMessage(),
 				array(
-					'gateway' => $payment_gateway->id,
-					'source'  => 'settings-payments',
-					'error'   => $e,
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
 				)
 			);
 		}
@@ -444,9 +444,9 @@ class PaymentGateway {
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to determine if gateway onboarding is completed: ' . $e->getMessage(),
 				array(
-					'gateway' => $payment_gateway->id,
-					'source'  => 'settings-payments',
-					'error'   => $e,
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
 				)
 			);
 
@@ -481,9 +481,9 @@ class PaymentGateway {
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to determine if gateway is in test mode onboarding: ' . $e->getMessage(),
 				array(
-					'gateway' => $payment_gateway->id,
-					'source'  => 'settings-payments',
-					'error'   => $e,
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
 				)
 			);
 		}
@@ -508,9 +508,9 @@ class PaymentGateway {
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to get gateway settings URL: ' . $e->getMessage(),
 				array(
-					'gateway' => $payment_gateway->id,
-					'source'  => 'settings-payments',
-					'error'   => $e,
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
 				)
 			);
 		}
@@ -548,9 +548,9 @@ class PaymentGateway {
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to get gateway connection URL: ' . $e->getMessage(),
 				array(
-					'gateway' => $payment_gateway->id,
-					'source'  => 'settings-payments',
-					'error'   => $e,
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
 				)
 			);
 		}
@@ -715,8 +715,9 @@ class PaymentGateway {
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to get recommended payment methods: ' . $e->getMessage(),
 				array(
-					'source' => 'settings-payments',
-					'error'  => $e,
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
 				)
 			);
 

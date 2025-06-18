@@ -107,9 +107,9 @@ class AmazonPay extends PaymentGateway {
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to determine if gateway is in sandbox mode: ' . $e->getMessage(),
 				array(
-					'gateway' => $payment_gateway->id,
-					'source'  => 'settings-payments',
-					'error'   => $e,
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
 				)
 			);
 		}
@@ -140,9 +140,9 @@ class AmazonPay extends PaymentGateway {
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to determine if gateway is onboarded: ' . $e->getMessage(),
 				array(
-					'gateway' => $payment_gateway->id,
-					'source'  => 'settings-payments',
-					'error'   => $e,
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
 				)
 			);
 		}
