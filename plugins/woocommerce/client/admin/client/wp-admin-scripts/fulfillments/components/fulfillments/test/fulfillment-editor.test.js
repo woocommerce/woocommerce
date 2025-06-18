@@ -153,4 +153,103 @@ describe( 'FulfillmentEditor', () => {
 		);
 		expect( mockProps.onCollapse ).toHaveBeenCalled();
 	} );
+	it( 'doesn`t show the buttons when fulfillment is locked - default message', () => {
+		const lockMetadata = [
+			{
+				id: 2,
+				key: '_is_locked',
+				value: true,
+			},
+		];
+		const lockedProps = {
+			...mockProps,
+			expanded: true,
+			fulfillment: {
+				...mockProps.fulfillment,
+				meta_data: [
+					...mockProps.fulfillment.meta_data,
+					...lockMetadata,
+				],
+			},
+			fulfillments: [
+				{
+					...mockProps.fulfillments[ 0 ],
+					meta_data: [
+						...mockProps.fulfillments[ 0 ].meta_data,
+						...lockMetadata,
+					],
+				},
+			],
+		};
+		render( <FulfillmentEditor { ...lockedProps } /> );
+		expect(
+			screen.queryByTestId( 'edit-fulfillment-button' )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByTestId( 'fulfill-items-button' )
+		).not.toBeInTheDocument();
+		expect( screen.queryByTestId( 'cancel-link' ) ).not.toBeInTheDocument();
+		expect(
+			screen.queryByTestId( 'remove-button' )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByTestId( 'update-button' )
+		).not.toBeInTheDocument();
+		// Check that the lock message is displayed
+		expect(
+			screen.getByText( 'This item is locked and cannot be edited.' )
+		).toBeInTheDocument();
+	} );
+	it( 'doesn`t show the buttons when fulfillment is locked - custom message', () => {
+		const lockMetadata = [
+			{
+				id: 2,
+				key: '_is_locked',
+				value: true,
+			},
+			{
+				id: 3,
+				key: '_lock_message',
+				value: 'This fulfillment is locked.',
+			},
+		];
+		const lockedProps = {
+			...mockProps,
+			expanded: true,
+			fulfillment: {
+				...mockProps.fulfillment,
+				meta_data: [
+					...mockProps.fulfillment.meta_data,
+					...lockMetadata,
+				],
+			},
+			fulfillments: [
+				{
+					...mockProps.fulfillments[ 0 ],
+					meta_data: [
+						...mockProps.fulfillments[ 0 ].meta_data,
+						...lockMetadata,
+					],
+				},
+			],
+		};
+		render( <FulfillmentEditor { ...lockedProps } /> );
+		expect(
+			screen.queryByTestId( 'edit-fulfillment-button' )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByTestId( 'fulfill-items-button' )
+		).not.toBeInTheDocument();
+		expect( screen.queryByTestId( 'cancel-link' ) ).not.toBeInTheDocument();
+		expect(
+			screen.queryByTestId( 'remove-button' )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByTestId( 'update-button' )
+		).not.toBeInTheDocument();
+		// Check that the lock message is displayed
+		expect(
+			screen.getByText( 'This fulfillment is locked.' )
+		).toBeInTheDocument();
+	} );
 } );

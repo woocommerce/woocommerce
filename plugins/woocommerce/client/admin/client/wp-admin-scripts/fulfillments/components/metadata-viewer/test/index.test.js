@@ -42,7 +42,17 @@ jest.mock( '../../user-interface/meta-list/meta-list', () => ( {
 
 describe( 'MetadataViewer component', () => {
 	it( 'renders header and icon', () => {
-		render( <MetadataViewer fulfillment={ { meta_data: [] } } /> );
+		render(
+			<MetadataViewer
+				fulfillment={ {
+					meta_data: [
+						{ key: 'test_key', value: 'test_value' },
+						{ key: 'test_key_2', value: 'test_value_2' },
+						{ key: 'test_key_3', value: 'test_value_3' },
+					],
+				} }
+			/>
+		);
 		expect( screen.getByTestId( 'card-header' ) ).toHaveTextContent(
 			'Fulfillment details'
 		);
@@ -50,9 +60,25 @@ describe( 'MetadataViewer component', () => {
 	} );
 
 	it( 'renders list of metadata items', () => {
-		render( <MetadataViewer fulfillment={ { meta_data: [] } } /> );
+		render(
+			<MetadataViewer
+				fulfillment={ {
+					meta_data: [
+						{ key: 'test_key', value: 'test_value' },
+						{ key: 'test_key_2', value: 'test_value_2' },
+						{ key: 'test_key_3', value: 'test_value_3' },
+					],
+				} }
+			/>
+		);
 		const list = screen.getByTestId( 'meta-list' );
 		expect( list ).toBeInTheDocument();
 		expect( screen.getAllByRole( 'listitem' ) ).toHaveLength( 3 );
+	} );
+	it( 'renders empty state when no metadata', () => {
+		render( <MetadataViewer fulfillment={ { meta_data: [] } } /> );
+		expect(
+			screen.getByText( /No metadata available/ )
+		).toBeInTheDocument();
 	} );
 } );

@@ -16,28 +16,9 @@ interface MetadataViewerProps {
 }
 
 export default function MetadataViewer( { fulfillment }: MetadataViewerProps ) {
-	// TODO: Remove debug code when all is ready.
-	const publicMetadata = true
-		? [
-				{
-					id: 1,
-					key: __( 'Created on', 'woocommerce' ),
-					value: 'February 18, 2020, 12:00pm',
-				},
-				{
-					id: 2,
-					key: __( 'Source', 'woocommerce' ),
-					value: 'My WooCommerce Store',
-				},
-				{
-					id: 3,
-					key: __( 'Service level', 'woocommerce' ),
-					value: 'Express',
-				},
-		  ]
-		: fulfillment.meta_data.filter(
-				( meta ) => meta.key.startsWith( '_' ) === false
-		  );
+	const publicMetadata = fulfillment.meta_data.filter(
+		( meta ) => meta.key.startsWith( '_' ) === false
+	);
 
 	return (
 		<FulfillmentCard
@@ -50,7 +31,7 @@ export default function MetadataViewer( { fulfillment }: MetadataViewerProps ) {
 			}
 		>
 			{ publicMetadata.length === 0 && (
-				<p>{ __( 'No information available.', 'woocommerce' ) }</p>
+				<p>{ __( 'No metadata available.', 'woocommerce' ) }</p>
 			) }
 			{ publicMetadata.length > 0 && (
 				<MetaList

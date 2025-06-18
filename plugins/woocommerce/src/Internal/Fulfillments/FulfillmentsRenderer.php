@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Fulfillments;
 
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 
 /**
@@ -28,10 +29,17 @@ class FulfillmentsRenderer {
 	 * CLass constructor.
 	 */
 	public function __construct() {
-		// Hook into column definitions and add the new fulfillment columns.
-		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'add_fulfillment_columns' ) );
-		// Hook into the column rendering and render the new fulfillment columns.
-		add_action( 'manage_woocommerce_page_wc-orders_custom_column', array( $this, 'render_fulfillment_column_row_data' ), 10, 2 );
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			// Hook into column definitions and add the new fulfillment columns.
+			add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'add_fulfillment_columns' ) );
+			// Hook into the column rendering and render the new fulfillment columns.
+			add_action( 'manage_woocommerce_page_wc-orders_custom_column', array( $this, 'render_fulfillment_column_row_data' ), 10, 2 );
+		} else {
+			// For legacy orders table, hook into column definitions and add the new fulfillment columns.
+			add_filter( 'manage_edit-shop_order_columns', array( $this, 'add_fulfillment_columns' ) );
+			// Hook into the column rendering and render the new fulfillment columns.
+			add_action( 'manage_shop_order_posts_custom_column', array( $this, 'render_fulfillment_column_row_data_legacy' ), 25, 1 );
+		}
 		// Hook into the admin footer to add the fulfillment drawer slot, which the React component will mount on.
 		add_action( 'admin_footer', array( $this, 'render_fulfillment_drawer_slot' ) );
 		// Hook into the admin enqueue scripts to load the fulfillment drawer component.
@@ -39,6 +47,25 @@ class FulfillmentsRenderer {
 		// Hook into the admin head to print the fulfillments object, which contains the shipping providers.
 		add_action( 'wp_head', array( $this, 'print_fulfillments_object' ) );
 		add_action( 'admin_head', array( $this, 'print_fulfillments_object' ) );
+		// Hook into the order details before order table to render the fulfillment customer details.
+		add_action( 'woocommerce_order_details_before_order_table', array( $this, 'render_fulfillment_customer_details' ) );
+		// Initialize the renderer for bulk actions.
+		add_action( 'admin_init', array( $this, 'init_bulk_actions' ) );
+	}
+
+	/**
+	 * Initialize the renderer.
+	 */
+	public function init_bulk_actions() {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			// For custom orders table, we need to add the bulk actions to the custom orders table.
+			add_filter( 'bulk_actions-woocommerce_page_wc-orders', array( $this, 'define_fulfillment_bulk_actions' ) );
+			add_filter( 'handle_bulk_actions-woocommerce_page_wc-orders', array( $this, 'handle_fulfillment_bulk_actions' ), 10, 3 );
+		} else {
+			// For legacy orders table, we need to add the bulk actions to the legacy orders table.
+			add_filter( 'bulk_actions-edit-shop_order', array( $this, 'define_fulfillment_bulk_actions' ) );
+			add_filter( 'handle_bulk_actions-edit-shop_order', array( $this, 'handle_fulfillment_bulk_actions' ), 10, 3 );
+		}
 	}
 
 	/**
@@ -61,6 +88,18 @@ class FulfillmentsRenderer {
 		return $new_columns;
 	}
 
+	/**
+	 * Render the fulfillment column row data for legacy support.
+	 *
+	 * @deprecated 4.0.0 Use render_fulfillment_column_row_data instead.
+	 *
+	 * @param string $column_name The name of the column.
+	 */
+	public function render_fulfillment_column_row_data_legacy( string $column_name ) {
+		global $the_order;
+		// This method is kept for legacy support, but the main rendering logic is now in render_fulfillment_column_row_data.
+		return $this->render_fulfillment_column_row_data( $column_name, $the_order );
+	}
 
 	/**
 	 * Render the fulfillment status column.
@@ -100,7 +139,7 @@ class FulfillmentsRenderer {
 	 * @param Fulfillment[] $fulfillments The fulfillments.
 	 */
 	private function render_fulfillment_status_column_row_data( WC_Order $order, array $fulfillments ) {
-		$order_fulfillment_status = $this->get_fulfillment_status( $fulfillments );
+		$order_fulfillment_status = FulfillmentUtils::get_fulfillment_status( $order, $fulfillments );
 		echo "<div class='fulfillment-status-wrapper'>";
 		switch ( $order_fulfillment_status ) {
 			case 'no_fulfillments':
@@ -181,41 +220,6 @@ class FulfillmentsRenderer {
 	}
 
 	/**
-	 * Get the fulfillment status of the entity. This runs like a computed property, where
-	 * it checks the fulfillment status of each fulfillment attached to the order,
-	 * and computes the overall fulfillment status of the order.
-	 *
-	 * @param array $fulfillments The fulfillments.
-	 *
-	 * @return string The fulfillment status.
-	 */
-	private function get_fulfillment_status( array $fulfillments ): string {
-		$has_fulfillments = ! empty( $fulfillments );
-		$all_fulfilled    = true;
-		$some_fulfilled   = false;
-
-		if ( $has_fulfillments ) {
-			foreach ( $fulfillments as $fulfillment ) {
-				if ( ! $fulfillment->get_is_fulfilled() ) {
-					$all_fulfilled = false;
-				} else {
-					$some_fulfilled = true;
-				}
-			}
-
-			if ( $all_fulfilled ) {
-				return 'fulfilled';
-			} elseif ( $some_fulfilled ) {
-				return 'partially_fulfilled';
-			} else {
-				return 'unfulfilled';
-			}
-		} else {
-			return 'no_fulfillments';
-		}
-	}
-
-	/**
 	 * Render the fulfillment drawer.
 	 */
 	public function render_fulfillment_drawer_slot() {
@@ -225,6 +229,123 @@ class FulfillmentsRenderer {
 		?>
 		<div id="wc_order_fulfillments_panel_container"></div>
 		<?php
+	}
+
+	/**
+	 * Define bulk actions for fulfillments.
+	 *
+	 * @param array $actions Existing actions.
+	 * @return array
+	 */
+	public function define_fulfillment_bulk_actions( $actions ) {
+		$actions['fulfill'] = __( 'Mark as fulfilled', 'woocommerce' );
+
+		return $actions;
+	}
+
+	/**
+	 * Handle bulk actions for fulfillments.
+	 *
+	 * @param string $redirect_to The redirect URL.
+	 * @param string $action The action being performed.
+	 * @param array  $post_ids The post IDs being acted upon.
+	 * @return string
+	 */
+	public function handle_fulfillment_bulk_actions( $redirect_to, $action, $post_ids ) {
+		if ( 'fulfill' === $action ) {
+			foreach ( $post_ids as $post_id ) {
+				$order = wc_get_order( $post_id );
+				if ( ! $order ) {
+					continue;
+				}
+
+				$data_store   = wc_get_container()->get( FulfillmentsDataStore::class );
+				$fulfillments = $data_store->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+
+				// Fulfill all existing fulfillments.
+				foreach ( $fulfillments as $fulfillment ) {
+					$fulfillment->set_status( 'fulfilled' );
+					$fulfillment->set_is_fulfilled( true );
+					$fulfillment->save();
+				}
+
+				// Create a fulfillment for the order, containing all remaining items in the order.
+				$remaining_items = array_map(
+					function ( $item ) {
+						return array(
+							'item_id' => $item['item_id'],
+							'qty'     => $item['qty'],
+						);
+					},
+					FulfillmentUtils::get_pending_items( $order, $fulfillments )
+				);
+
+				if ( 0 < count( $remaining_items ) ) {
+					$fulfillment = new Fulfillment();
+					$fulfillment->set_entity_type( WC_Order::class );
+					$fulfillment->set_entity_id( (string) $order->get_id() );
+					$fulfillment->set_status( 'fulfilled' );
+					$fulfillment->set_is_fulfilled( true );
+					$fulfillment->set_items( $remaining_items );
+					$fulfillment->save();
+				}
+			}
+			$redirect_to = add_query_arg( array( 'bulk_action' => $action ), $redirect_to );
+		}
+		return $redirect_to;
+	}
+
+	/**
+	 * Render the fulfillment customer details in the order details page.
+	 *
+	 * @param WC_Order $order The order object.
+	 */
+	public function render_fulfillment_customer_details( WC_Order $order ) {
+		$fulfillments_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
+		$fulfillments            = $fulfillments_data_store->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+
+		if ( ! empty( $fulfillments ) ) {
+			?>
+<section class="woocommerce-order-details">
+	<table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
+		<thead>
+			<?php
+			foreach ( $fulfillments as $index => $fulfillment ) {
+				if ( ! $fulfillment->get_is_fulfilled() ) {
+					continue;
+				}
+				?>
+			<tr>
+				<th class="woocommerce-table__shipment-info shipment-info" style="font-weight: normal;">
+					<?php
+					printf(
+						/* translators: %1$s is the shipment index, %2$s is the shipment date */
+						wp_kses( __( '<b>Shipment %1$s</b> was shipped on <b>%2$s</b>', 'woocommerce' ), 'b' ),
+						intval( $index ) + 1,
+						esc_html(
+							gmdate(
+								'F j, Y',
+								strtotime(
+									$fulfillment->get_date_fulfilled() // Get the fulfilled date.
+									?? $fulfillment->get_date_updated() // Fallback to the updated date if fulfilled date is not set.
+								)
+							)
+						)
+					);
+					?>
+				</th>
+				<th class="woocommerce-table__shipment-tracking shipment-tracking" style="font-weight: normal;">
+						<?php echo wp_kses( FulfillmentUtils::get_tracking_info_html( $fulfillment ), 'a' ); ?>
+				</th>
+			</tr>
+				<?php
+			}
+			?>
+		</thead>
+	</table>
+</section>
+			<?php
+		}
 	}
 
 	/**
@@ -290,7 +411,8 @@ class FulfillmentsRenderer {
 		if ( ! $current_screen || ! $current_screen->id ) {
 			return false;
 		}
-		return 'woocommerce_page_wc-orders' === $current_screen->id;
+		return 'woocommerce_page_wc-orders' === $current_screen->id // HPOS support.
+			|| 'edit-shop_order' === $current_screen->id; // Legacy support.
 	}
 
 	/**
