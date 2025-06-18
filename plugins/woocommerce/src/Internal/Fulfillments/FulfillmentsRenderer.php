@@ -366,39 +366,36 @@ class FulfillmentsRenderer {
 		if ( ! $this->should_render_fulfillment_object() ) {
 			return;
 		}
-		?>
-		<script type="text/javascript" id="wc-fulfillments-object">
-			var wcFulfillmentSettings =
-				<?php
-				echo wp_json_encode(
-					array(
-						/**
-						 * Filter to modify the initial shipping providers.
-						 *
-						 * @since 9.9.0
-						 */
-						'providers'        => apply_filters( 'wc_fulfillment_shipping_providers', array() ),
-						/**
-						 * Filter to modify the fulfillment statuses.
-						 *
-						 * @since 9.9.0
-						 */
-						'statuses'         => apply_filters(
-							'wc_fulfillment_statuses',
-							array(
-								'unfulfilled'         => __( 'Unfulfilled', 'woocommerce' ),
-								'partially_fulfilled' => __( 'Partially fulfilled', 'woocommerce' ),
-								'fulfilled'           => __( 'Fulfilled', 'woocommerce' ),
-								'no_fulfillments'     => __( 'No fulfillments', 'woocommerce' ),
-							)
-						),
-						'currency_symbols' => get_woocommerce_currency_symbols(),
-					)
-				);
-				?>
-				;
-		</script>
-		<?php
+
+		$fulfillment_settings = array(
+			/**
+			 * Filter to modify the shipping providers.
+			 *
+			 * @since 9.9.0
+			 */
+			'providers'        => apply_filters( 'wc_fulfillment_shipping_providers', array() ),
+			/**
+			 * Filter to modify the fulfillment meta key translations.
+			 *
+			 * @since 9.9.0
+			 */
+			'statuses'         => apply_filters(
+				'wc_fulfillment_statuses',
+				array(
+					'unfulfilled'         => __( 'Unfulfilled', 'woocommerce' ),
+					'partially_fulfilled' => __( 'Partially fulfilled', 'woocommerce' ),
+					'fulfilled'           => __( 'Fulfilled', 'woocommerce' ),
+					'no_fulfillments'     => __( 'No fulfillments', 'woocommerce' ),
+				)
+			),
+			'currency_symbols' => get_woocommerce_currency_symbols(),
+		);
+
+		wp_localize_script(
+			'wc-admin-fulfillments',
+			'wcFulfillmentSettings',
+			$fulfillment_settings
+		);
 	}
 
 	/**
