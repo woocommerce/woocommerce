@@ -106,7 +106,7 @@ class Payments extends Task {
 	/**
 	 * The task action URL.
 	 *
-	 * Empty string means the task linking will be handled by the JS logic.
+	 * Empty string means the JS logic will handle the task linking.
 	 *
 	 * @return string
 	 */
@@ -310,6 +310,11 @@ class Payments extends Task {
 	 */
 	private function get_payments_settings_country(): string {
 		try {
+			/**
+			 * The Payments Settings [page] service.
+			 *
+			 * @var SettingsPaymentsService $settings_payments_service
+			 */
 			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
 			return $settings_payments_service->get_country();
@@ -328,9 +333,14 @@ class Payments extends Task {
 	 */
 	private function get_payments_providers(): array {
 		try {
+			/**
+			 * The Payments Settings [page] service.
+			 *
+			 * @var SettingsPaymentsService $settings_payments_service
+			 */
 			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
-			return $settings_payments_service->get_payment_providers( $settings_payments_service->get_country() );
+			return $settings_payments_service->get_payment_providers( $settings_payments_service->get_country(), false );
 		} catch ( \Throwable $e ) {
 			// In case of any error, return an empty array.
 			return array();
@@ -344,6 +354,11 @@ class Payments extends Task {
 	 */
 	private function get_payments_extension_suggestions(): array {
 		try {
+			/**
+			 * The Payments Settings [page] service.
+			 *
+			 * @var SettingsPaymentsService $settings_payments_service
+			 */
 			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
 			return $settings_payments_service->get_payment_extension_suggestions( $settings_payments_service->get_country() );
@@ -361,7 +376,7 @@ class Payments extends Task {
 	private function get_woopayments_provider(): ?array {
 		$providers = $this->get_payments_providers();
 		foreach ( $providers as $provider ) {
-			if ( ! empty( $provider['id'] ) && 'woocommerce_payments' === $provider['id'] ) {
+			if ( ! empty( $provider['id'] ) && PaymentsProviders\WooPayments\WooPaymentsService::GATEWAY_ID === $provider['id'] ) {
 				return $provider;
 			}
 		}

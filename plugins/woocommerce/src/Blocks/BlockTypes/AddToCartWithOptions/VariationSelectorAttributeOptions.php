@@ -181,7 +181,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 					'class'               => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills',
 					'role'                => 'radiogroup',
 					'id'                  => $attribute_id,
-					'aria-labeledby'      => $attribute_id . '_label',
+					'aria-labelledby'     => $attribute_id . '_label',
 					'data-wp-interactive' => $this->get_full_block_name() . '__pills',
 					'data-wp-context'     => array(
 						'name'          => $attribute_slug,

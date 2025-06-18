@@ -695,7 +695,7 @@ class WC_Emails {
 					 *
 					 * @since 9.9.0
 					 */
-					$meta_key_translation = apply_filters( 'woocommerce_fulfillment_translate_meta_key', $field->key );
+					$meta_key_translation = apply_filters( 'wc_fulfillment_translate_meta_key', $field->key );
 					if ( $plain_text ) {
 						echo esc_attr( $meta_key_translation ) . ': ' . esc_attr( $field->value ) . PHP_EOL;
 					} else {

@@ -219,7 +219,9 @@ class ProductButton extends AbstractBlock {
 			data-wp-init="actions.refreshCartItems"
 		';
 
-		$button_directives = $is_descendant_of_add_to_cart_form ? '' : 'data-wp-on--click="actions.addCartItem"';
+		$button_directives = $is_descendant_of_add_to_cart_form ?
+			'data-wp-class--disabled="woocommerce/add-to-cart-with-options::!state.isFormValid"' :
+			'data-wp-on--click="actions.addCartItem"';
 		$anchor_directive  = $is_descendant_of_add_to_cart_form ? '' : 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"';
 
 		$span_button_directives = '
@@ -245,6 +247,12 @@ class ProductButton extends AbstractBlock {
 				),
 			)
 		);
+
+		$button_classes = isset( $args['class'] ) ? esc_attr( $args['class'] . ' wc-interactive' ) : 'wc-interactive';
+		if ( $is_descendant_of_add_to_cart_form ) {
+			$button_classes             .= ' single_add_to_cart_button';
+			$args['attributes']['value'] = $product->get_id();
+		}
 
 		/**
 		 * Filters the add to cart button class.
@@ -272,7 +280,7 @@ class ProductButton extends AbstractBlock {
 				array(
 					'{wrapper_attributes}'     => $wrapper_attributes,
 					'{html_element}'           => $html_element,
-					'{button_classes}'         => isset( $args['class'] ) ? esc_attr( $args['class'] . ' wc-interactive' ) : 'wc-interactive',
+					'{button_classes}'         => $button_classes,
 					'{button_styles}'          => esc_attr( $styles_and_classes['styles'] ),
 					'{attributes}'             => isset( $args['attributes'] ) ? wc_implode_html_attributes( $args['attributes'] ) : '',
 					'{add_to_cart_text}'       => $is_ajax_button ? '' : $add_to_cart_text,
