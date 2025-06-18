@@ -6,6 +6,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 /**
  * Internal dependencies
  */
+import '../../../test-helper/global-mock';
 import ShipmentTrackingNumberForm from '../shipment-tracking-number-form';
 import { useShipmentFormContext } from '../../../context/shipment-form-context';
 
