@@ -98,9 +98,8 @@ class AmazonPay extends PaymentGateway {
 				is_callable( '\WC_Amazon_Payments_Advanced_API::get_settings' ) ) {
 
 				$settings = \WC_Amazon_Payments_Advanced_API::get_settings();
-
 				if ( isset( $settings['sandbox'] ) ) {
-					return filter_var( $settings['sandbox'], FILTER_VALIDATE_BOOLEAN );
+					return wc_string_to_bool( $settings['sandbox'] );
 				}
 			}
 		} catch ( \Throwable $e ) {

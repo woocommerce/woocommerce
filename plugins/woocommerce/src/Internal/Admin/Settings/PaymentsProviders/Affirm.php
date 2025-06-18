@@ -26,7 +26,7 @@ class Affirm extends PaymentGateway {
 	public function needs_setup( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
 			if ( is_callable( array( $payment_gateway, 'isValidForUse' ) ) ) {
-				return ! filter_var( $payment_gateway->isValidForUse(), FILTER_VALIDATE_BOOLEAN );
+				return ! wc_string_to_bool( $payment_gateway->isValidForUse() );
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.

@@ -2127,7 +2127,7 @@ class WooPaymentsService {
 
 			// Check the stored state, if any.
 			if ( isset( $step_pms_data[ $pm_id ] ) ) {
-				$payment_methods_state[ $pm_id ] = filter_var( $step_pms_data[ $pm_id ], FILTER_VALIDATE_BOOLEAN );
+				$payment_methods_state[ $pm_id ] = wc_string_to_bool( $step_pms_data[ $pm_id ] );
 			}
 		}
 

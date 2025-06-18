@@ -31,7 +31,7 @@ class Stripe extends PaymentGateway {
 			if ( class_exists( '\WC_Stripe_Mode' ) &&
 				is_callable( '\WC_Stripe_Mode::is_test' ) ) {
 
-				return filter_var( \WC_Stripe_Mode::is_test(), FILTER_VALIDATE_BOOLEAN );
+				return wc_string_to_bool( \WC_Stripe_Mode::is_test() );
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.

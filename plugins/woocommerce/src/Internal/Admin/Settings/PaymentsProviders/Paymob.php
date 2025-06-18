@@ -19,12 +19,14 @@ class Paymob extends PaymentGateway {
 	/**
 	 * Check if the payment gateway needs setup.
 	 *
+	 * Note: We are overriding the parent method to avoid infinite recursion with the is_account_connected method.
+	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 *
 	 * @return bool True if the payment gateway needs setup, false otherwise.
 	 */
 	public function needs_setup( WC_Payment_Gateway $payment_gateway ): bool {
-		$needs_setup = filter_var( $payment_gateway->needs_setup(), FILTER_VALIDATE_BOOLEAN );
+		$needs_setup = wc_string_to_bool( $payment_gateway->needs_setup() );
 		// If we get a true value, it means the gateway needs setup.
 		if ( $needs_setup ) {
 			return true;
@@ -58,7 +60,6 @@ class Paymob extends PaymentGateway {
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
 		// The Paymob gateway ties needs_setup only to the API keys, so if they are set, we consider the account connected.
-		// Note: we need to overwrite the needs_setup method to NOT call is_account_connected and avoid infinite recursion.
 		return ! $this->needs_setup( $payment_gateway );
 	}
 

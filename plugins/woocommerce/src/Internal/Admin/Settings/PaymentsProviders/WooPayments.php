@@ -383,7 +383,7 @@ class WooPayments extends PaymentGateway {
 		// This way we avoid costly DB queries and API calls.
 		$has_orders = get_transient( $store_has_orders_transient_name );
 		if ( false !== $has_orders ) {
-			return filter_var( $has_orders, FILTER_VALIDATE_BOOLEAN );
+			return wc_string_to_bool( $has_orders );
 		}
 
 		// We need to determine the value.

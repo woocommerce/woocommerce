@@ -154,7 +154,7 @@ class MercadoPago extends PaymentGateway {
 				$mercadopago->storeConfig instanceof \MercadoPago\Woocommerce\Configs\Store &&
 				is_callable( array( $mercadopago->storeConfig, 'isTestMode' ) )
 			) {
-				return filter_var( $mercadopago->storeConfig->isTestMode(), FILTER_VALIDATE_BOOLEAN );
+				return wc_string_to_bool( $mercadopago->storeConfig->isTestMode() );
 
 			}
 		} catch ( \Throwable $e ) {

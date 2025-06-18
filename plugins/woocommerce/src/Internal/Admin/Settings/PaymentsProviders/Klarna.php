@@ -28,7 +28,7 @@ class Klarna extends PaymentGateway {
 			if ( class_exists( '\KP_Settings_Page' ) &&
 				is_callable( '\KP_Settings_Page::get_setting_status' ) ) {
 
-				return ! filter_var( \KP_Settings_Page::get_setting_status( 'credentials' ), FILTER_VALIDATE_BOOLEAN );
+				return ! wc_string_to_bool( \KP_Settings_Page::get_setting_status( 'credentials' ) );
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.

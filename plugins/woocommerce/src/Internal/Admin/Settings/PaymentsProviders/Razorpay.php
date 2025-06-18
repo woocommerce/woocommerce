@@ -58,7 +58,7 @@ class Razorpay extends PaymentGateway {
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
 			if ( function_exists( '\isTestModeEnabled' ) ) {
-				return filter_var( \isTestModeEnabled(), FILTER_VALIDATE_BOOLEAN );
+				return wc_string_to_bool( \isTestModeEnabled() );
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.

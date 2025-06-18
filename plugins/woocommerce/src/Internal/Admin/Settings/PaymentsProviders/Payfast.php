@@ -29,7 +29,7 @@ class Payfast extends PaymentGateway {
 			return ! empty( $payment_gateway->get_option( 'merchant_id' ) ) &&
 					! empty( $payment_gateway->get_option( 'merchant_key' ) ) &&
 					! empty( $payment_gateway->get_option( 'pass_phrase' ) ) &&
-					! filter_var( get_option( 'woocommerce_payfast_invalid_credentials', 'no' ), FILTER_VALIDATE_BOOLEAN );
+					! wc_string_to_bool( get_option( 'woocommerce_payfast_invalid_credentials', 'no' ) );
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(

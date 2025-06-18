@@ -117,7 +117,7 @@ class Antom extends PaymentGateway {
 	private function is_antom_in_sandbox_mode( WC_Payment_Gateway $payment_gateway ): ?bool {
 		try {
 			if ( function_exists( '\antom_get_core_settings' ) ) {
-				return filter_var( \antom_get_core_settings()['test_mode'], FILTER_VALIDATE_BOOLEAN );
+				return wc_string_to_bool( \antom_get_core_settings()['test_mode'] );
 			}
 		} catch ( \Throwable $e ) {
 			// Do nothing but log so we can investigate.

@@ -29,7 +29,7 @@ class HelioPay extends PaymentGateway {
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
 			if ( defined( 'HELIO_DEVNET_ENABLED' ) ) {
-				return filter_var( $payment_gateway->get_option( \HELIO_DEVNET_ENABLED ), FILTER_VALIDATE_BOOLEAN );
+				return wc_string_to_bool( $payment_gateway->get_option( \HELIO_DEVNET_ENABLED ) );
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.

@@ -28,7 +28,7 @@ class Payoneer extends PaymentGateway {
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
-			return ! filter_var( $payment_gateway->get_option( 'live_mode' ), FILTER_VALIDATE_BOOLEAN );
+			return ! wc_string_to_bool( $payment_gateway->get_option( 'live_mode' ) );
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(

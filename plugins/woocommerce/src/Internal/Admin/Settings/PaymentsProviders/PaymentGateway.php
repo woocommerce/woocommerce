@@ -228,7 +228,7 @@ class PaymentGateway {
 	 * @return bool True if the payment gateway is enabled, false otherwise.
 	 */
 	public function is_enabled( WC_Payment_Gateway $payment_gateway ): bool {
-		return filter_var( $payment_gateway->enabled, FILTER_VALIDATE_BOOLEAN );
+		return wc_string_to_bool( $payment_gateway->enabled ?? 'no' );
 	}
 
 	/**
@@ -239,7 +239,7 @@ class PaymentGateway {
 	 * @return bool True if the payment gateway needs setup, false otherwise.
 	 */
 	public function needs_setup( WC_Payment_Gateway $payment_gateway ): bool {
-		$needs_setup = filter_var( $payment_gateway->needs_setup(), FILTER_VALIDATE_BOOLEAN );
+		$needs_setup = wc_string_to_bool( $payment_gateway->needs_setup() );
 		// If we get a true value, it means the gateway needs setup.
 		if ( $needs_setup ) {
 			return true;
@@ -270,18 +270,18 @@ class PaymentGateway {
 		try {
 			// Try various gateway methods to check if the payment gateway is in test mode.
 			if ( is_callable( array( $payment_gateway, 'is_test_mode' ) ) ) {
-				return filter_var( $payment_gateway->is_test_mode(), FILTER_VALIDATE_BOOLEAN );
+				return wc_string_to_bool( $payment_gateway->is_test_mode() );
 			}
 			if ( is_callable( array( $payment_gateway, 'is_in_test_mode' ) ) ) {
-				return filter_var( $payment_gateway->is_in_test_mode(), FILTER_VALIDATE_BOOLEAN );
+				return wc_string_to_bool( $payment_gateway->is_in_test_mode() );
 			}
 
 			// Try various gateway public properties to check if the payment gateway is in test mode.
 			if ( isset( $payment_gateway->testmode ) ) {
-				return filter_var( $payment_gateway->testmode, FILTER_VALIDATE_BOOLEAN );
+				return wc_string_to_bool( $payment_gateway->testmode );
 			}
 			if ( isset( $payment_gateway->test_mode ) ) {
-				return filter_var( $payment_gateway->test_mode, FILTER_VALIDATE_BOOLEAN );
+				return wc_string_to_bool( $payment_gateway->test_mode );
 			}
 
 			// Try various gateway option entries to check if the payment gateway is in test mode.
@@ -332,10 +332,10 @@ class PaymentGateway {
 		try {
 			// Try various gateway methods to check if the payment gateway is in dev mode.
 			if ( is_callable( array( $payment_gateway, 'is_dev_mode' ) ) ) {
-				return filter_var( $payment_gateway->is_dev_mode(), FILTER_VALIDATE_BOOLEAN );
+				return wc_string_to_bool( $payment_gateway->is_dev_mode() );
 			}
 			if ( is_callable( array( $payment_gateway, 'is_in_dev_mode' ) ) ) {
-				return filter_var( $payment_gateway->is_in_dev_mode(), FILTER_VALIDATE_BOOLEAN );
+				return wc_string_to_bool( $payment_gateway->is_in_dev_mode() );
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
@@ -363,11 +363,11 @@ class PaymentGateway {
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
 			if ( is_callable( array( $payment_gateway, 'is_account_connected' ) ) ) {
-				return filter_var( $payment_gateway->is_account_connected(), FILTER_VALIDATE_BOOLEAN );
+				return wc_string_to_bool( $payment_gateway->is_account_connected() );
 			}
 
 			if ( is_callable( array( $payment_gateway, 'is_connected' ) ) ) {
-				return filter_var( $payment_gateway->is_connected(), FILTER_VALIDATE_BOOLEAN );
+				return wc_string_to_bool( $payment_gateway->is_connected() );
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
@@ -397,7 +397,7 @@ class PaymentGateway {
 	public function is_onboarding_started( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
 			if ( is_callable( array( $payment_gateway, 'is_onboarding_started' ) ) ) {
-				return filter_var( $payment_gateway->is_onboarding_started(), FILTER_VALIDATE_BOOLEAN );
+				return wc_string_to_bool( $payment_gateway->is_onboarding_started() );
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
@@ -432,12 +432,12 @@ class PaymentGateway {
 
 		try {
 			if ( is_callable( array( $payment_gateway, 'is_onboarding_completed' ) ) ) {
-				return filter_var( $payment_gateway->is_onboarding_completed(), FILTER_VALIDATE_BOOLEAN );
+				return wc_string_to_bool( $payment_gateway->is_onboarding_completed() );
 			}
 
 			// Note: This is what WooPayments provides, but it should become standard.
 			if ( is_callable( array( $payment_gateway, 'is_account_partially_onboarded' ) ) ) {
-				return ! filter_var( $payment_gateway->is_account_partially_onboarded(), FILTER_VALIDATE_BOOLEAN );
+				return ! wc_string_to_bool( $payment_gateway->is_account_partially_onboarded() );
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
@@ -471,10 +471,10 @@ class PaymentGateway {
 		try {
 			// Try various gateway methods to check if the payment gateway is in test mode onboarding.
 			if ( is_callable( array( $payment_gateway, 'is_test_mode_onboarding' ) ) ) {
-				return filter_var( $payment_gateway->is_test_mode_onboarding(), FILTER_VALIDATE_BOOLEAN );
+				return wc_string_to_bool( $payment_gateway->is_test_mode_onboarding() );
 			}
 			if ( is_callable( array( $payment_gateway, 'is_in_test_mode_onboarding' ) ) ) {
-				return filter_var( $payment_gateway->is_in_test_mode_onboarding(), FILTER_VALIDATE_BOOLEAN );
+				return wc_string_to_bool( $payment_gateway->is_in_test_mode_onboarding() );
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
@@ -792,9 +792,9 @@ class PaymentGateway {
 			'id'          => sanitize_key( $recommended_pm['id'] ),
 			'_order'      => $order,
 			// Default to enabled if not explicit.
-			'enabled'     => filter_var( $recommended_pm['enabled'] ?? true, FILTER_VALIDATE_BOOLEAN ),
+			'enabled'     => wc_string_to_bool( $recommended_pm['enabled'] ?? true ),
 			// Default to not required if not explicit.
-			'required'    => filter_var( $recommended_pm['required'] ?? false, FILTER_VALIDATE_BOOLEAN ),
+			'required'    => wc_string_to_bool( $recommended_pm['required'] ?? false ),
 			'title'       => sanitize_text_field( $recommended_pm['title'] ),
 			'description' => '',
 			'icon'        => '',

@@ -27,7 +27,7 @@ class Paystack extends PaymentGateway {
 		try {
 			$is_valid_for_use = true;
 			if ( is_callable( array( $payment_gateway, 'is_valid_for_use' ) ) ) {
-				$is_valid_for_use = filter_var( $payment_gateway->is_valid_for_use(), FILTER_VALIDATE_BOOLEAN );
+				$is_valid_for_use = wc_string_to_bool( $payment_gateway->is_valid_for_use() );
 			}
 
 			return ! $is_valid_for_use || ! $this->is_account_connected( $payment_gateway );
