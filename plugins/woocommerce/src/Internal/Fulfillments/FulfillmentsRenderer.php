@@ -415,9 +415,9 @@ class FulfillmentsRenderer {
 		}
 
 		return $args;
-  }
-  
-  /*
+	}
+
+	/*
 	 * Prints the fulfillments object in the admin header.
 	 */
 	public function print_fulfillments_object() {
