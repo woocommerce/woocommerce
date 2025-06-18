@@ -100,7 +100,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pnpm utils code-freeze milestone -o ${{ github.repository_owner }} -n ${{ github.event.repository.name}} -m ${{ needs.prepare-for-code-freeze.outputs.nextTrunkVersion }}
-      - name: Bump versions in frozen release branch for beta.1
+      - name: Bump versions in frozen release branch for rc.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
