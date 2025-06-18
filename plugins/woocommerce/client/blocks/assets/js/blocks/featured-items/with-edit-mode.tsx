@@ -73,11 +73,13 @@ export const withEditMode =
 			debouncedSpeak( editLabel );
 		};
 
+		const itemId =
+			name === BLOCK_NAMES.featuredProduct
+				? attributes?.productId
+				: attributes?.categoryId;
+
 		const { status, isDeleted, isLoading } = useFeaturedItemStatus( {
-			itemId:
-				name === BLOCK_NAMES.featuredProduct
-					? attributes?.productId
-					: attributes?.categoryId,
+			itemId,
 			itemType: name,
 		} );
 
@@ -93,9 +95,13 @@ export const withEditMode =
 			) {
 				setAttributes( { editMode: currEditModeValue } );
 			}
-		}, [ status, isDeleted ] );
+		}, [ status, isDeleted, attributes.editMode, name ] );
 
-		if ( ! isLoading && attributes.editMode ) {
+		if ( isLoading ) {
+			return null;
+		}
+
+		if ( attributes.editMode ) {
 			return (
 				<Placeholder
 					icon={ <Icon icon={ icon } /> }

@@ -26,59 +26,59 @@ export const useFeaturedItemStatus = ( {
 }: FeaturedItemProps ): FeaturedItemReturnType => {
 	return useSelect(
 		( selectFunc ) => {
-			const featuredItemStatus: FeaturedItemReturnType = {
-				status: null,
-				isDeleted: null,
-				isLoading: true,
-			};
-
-			if ( ! itemId ) return { ...featuredItemStatus, isLoading: false };
+			if ( ! itemId ) {
+				return {
+					status: null,
+					isDeleted: null,
+					isLoading: false,
+				};
+			}
 
 			const { getEntityRecord, getEntityRecords, hasFinishedResolution } =
 				selectFunc( coreDataStore );
 
-			const productArgs = [ 'postType', 'product', itemId ];
-			const categoryArgs = [
-				'taxonomy',
-				'product_cat',
-				{ per_page: -1, include: [ itemId ] },
-			];
-
-			const activeProduct =
-				itemType === BLOCK_NAMES.featuredProduct &&
-				getEntityRecord( ...productArgs );
-
-			const isCategoryDeleted =
-				itemType === BLOCK_NAMES.featuredCategory &&
-				! getEntityRecords( ...categoryArgs )?.length;
-
 			if ( itemType === BLOCK_NAMES.featuredProduct ) {
-				if ( ! activeProduct ) {
-					featuredItemStatus.isDeleted = true;
-				} else {
-					featuredItemStatus.status = activeProduct?.status;
-					featuredItemStatus.isDeleted = false;
-					featuredItemStatus.isLoading = ! hasFinishedResolution(
-						'getEntityRecord',
-						productArgs
-					);
-				}
+				const productArgs = [ 'postType', 'product', itemId ];
+				const product = getEntityRecord( ...productArgs );
+				const isResolved = hasFinishedResolution(
+					'getEntityRecord',
+					productArgs
+				);
+
+				return {
+					status: product?.status ?? 'deleted',
+					isDeleted: ! product,
+					isLoading: ! isResolved,
+				};
 			}
 
 			if ( itemType === BLOCK_NAMES.featuredCategory ) {
-				if ( isCategoryDeleted ) {
-					featuredItemStatus.isDeleted = true;
-				} else {
-					featuredItemStatus.isDeleted = false;
-					featuredItemStatus.isLoading = ! hasFinishedResolution(
-						'getEntityRecords',
-						categoryArgs
-					);
-				}
+				const categoryArgs = [
+					'taxonomy',
+					'product_cat',
+					{ per_page: -1, include: [ itemId ] },
+				];
+				const categories = getEntityRecords( ...categoryArgs );
+				const isResolved = hasFinishedResolution(
+					'getEntityRecords',
+					categoryArgs
+				);
+				const isDeleted = ! categories?.length;
+
+				return {
+					status: isDeleted ? 'deleted' : null,
+					isDeleted,
+					isLoading: ! isResolved,
+				};
 			}
 
-			return featuredItemStatus;
+			// Default fallback (if itemType doesn't match any expected value)
+			return {
+				status: null,
+				isDeleted: null,
+				isLoading: false,
+			};
 		},
-		[ itemId ]
+		[ itemId, itemType ]
 	);
 };
