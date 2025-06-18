@@ -369,7 +369,6 @@ class WC_Product_Variable extends WC_Product {
 
 			$variation = wc_get_product( $variation_id );
 
-			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked.
 			if ( ! $variation || ! $variation->is_purchasable() || ! ( $variation->is_in_stock() || $variation->backorders_allowed() ) ) {
 				continue;
 			}
