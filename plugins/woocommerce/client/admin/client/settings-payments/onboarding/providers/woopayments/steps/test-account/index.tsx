@@ -112,6 +112,38 @@ const TestAccountStep = () => {
 	const initializingTimeoutRef = useRef< number | null >( null );
 	const titleIntervalRef = useRef< number | null >( null );
 
+	// Update loader title based on time intervals
+	useEffect( () => {
+		if ( status !== 'polling' ) {
+			if ( titleIntervalRef.current ) {
+				clearInterval( titleIntervalRef.current );
+				titleIntervalRef.current = null;
+			}
+			return;
+		}
+
+		const startTime = Date.now();
+		titleIntervalRef.current = window.setInterval( () => {
+			const elapsed = Date.now() - startTime;
+			const totalPhases = PHASE_MESSAGES.length;
+
+			// Calculate which phase we should be in based on elapsed time
+			const currentPhase = Math.floor( elapsed / TITLE_CHANGE_INTERVAL );
+
+			// Only update if we're in a valid phase range and it's different from current
+			if ( currentPhase >= 0 && currentPhase < totalPhases ) {
+				setLoaderTitle( PHASE_MESSAGES[ currentPhase ] );
+			}
+		}, TITLE_CHANGE_INTERVAL );
+
+		return () => {
+			if ( titleIntervalRef.current ) {
+				clearInterval( titleIntervalRef.current );
+				titleIntervalRef.current = null;
+			}
+		};
+	}, [ status ] );
+
 	// Helper to clear timers
 	const clearTimers = () => {
 		if ( pollingTimeoutRef.current !== null ) {
