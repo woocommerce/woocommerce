@@ -369,7 +369,7 @@ class WC_Product_Variable extends WC_Product {
 
 			$variation = wc_get_product( $variation_id );
 
-			if ( ! $variation || ! $variation->is_purchasable() || ! ( $variation->is_in_stock() || $variation->backorders_allowed() ) ) {
+			if ( ! $variation || ! $variation->is_purchasable() || ! $variation->is_in_stock() ) {
 				continue;
 			}
 
