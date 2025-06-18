@@ -1,8 +1,6 @@
 <?php
 declare(strict_types=1);
 
-use Automattic\WooCommerce\Tests\Blocks\StoreApi\MockSessionHandler;
-
 /**
  * Class WC_Cart_Persistence_Test
  */
@@ -80,12 +78,6 @@ class WC_Cart_Persistence_Test extends \WC_Unit_Test_Case {
 	 * Guest cart is preserved after login if not empty.
 	 */
 	public function test_guest_cart_preserved_on_login_if_not_empty() {
-		// We need to replace the WC_Session with a mock because this test relies on cookies being set which
-		// is not easy with PHPUnit. This is a simpler approach.
-		$old_session  = WC()->session;
-		WC()->session = new MockSessionHandler();
-		WC()->session->init();
-
 		WC()->cart->empty_cart();
 
 		// User adds item A.
