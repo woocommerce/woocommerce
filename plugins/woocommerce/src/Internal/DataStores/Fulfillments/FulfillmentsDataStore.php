@@ -73,6 +73,11 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 
 		$data->set_id( $data_id );
 
+		// If the fulfillment is fulfilled, set the fulfilled date.
+		if ( $data->get_is_fulfilled() ) {
+			$data->set_date_fulfilled( current_time( 'mysql' ) );
+		}
+
 		// Save the metadata for the fulfillment to the database.
 		$data->save_meta_data();
 
@@ -150,6 +155,11 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		// Check for errors.
 		if ( $wpdb->last_error ) {
 			throw new \Exception( esc_html__( 'Failed to update fulfillment.', 'woocommerce' ) . ' ' . esc_html( $wpdb->last_error ) );
+		}
+
+		// If the fulfillment is fulfilled, set the fulfilled date.
+		if ( $data->get_is_fulfilled() && ! $data->meta_exists( '_fulfilled_date' ) ) {
+			$data->set_date_fulfilled( current_time( 'mysql' ) );
 		}
 
 		// Update the metadata for the fulfillment.
