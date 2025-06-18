@@ -13,10 +13,7 @@ import edit from './edit';
 import './style.scss';
 
 registerBlockType( metadata.name, {
-	...( metadata as BlockConfiguration< {
-		showAsIcons: boolean;
-		formattedPaymentMethods: Record< string, PaymentMethodConfigInstance >;
-	} > ),
+	...( metadata as BlockConfiguration ),
 	icon: {
 		src: (
 			<Icon

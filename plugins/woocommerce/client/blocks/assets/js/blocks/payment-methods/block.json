@@ -4,24 +4,16 @@
 	"title": "Payment Methods",
 	"description": "Display available payment methods.",
 	"category": "woocommerce",
-	"keywords": ["woocommerce", "payments", "payment methods"],
+	"keywords": [ "woocommerce", "payments", "payment methods" ],
 	"textdomain": "woocommerce",
 	"attributes": {
 		"className": {
 			"type": "string",
 			"default": ""
-		},
-		"showAsIcons": {
-			"type": "boolean",
-			"default": false
-		},
-		"formattedPaymentMethods": {
-			"type": "object",
-			"default": {}
 		}
 	},
 	"supports": {
-		"align": ["wide", "full"],
+		"align": [ "wide", "full" ],
 		"html": false,
 		"spacing": {
 			"margin": true,
