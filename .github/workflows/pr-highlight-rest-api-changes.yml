@@ -40,5 +40,7 @@ jobs:
                 ${{ github.event.pull_request.milestone && github.event.pull_request.milestone.html_url && github.event.pull_request.milestone.title && format('*Milestone:* <{0}|{1}>', github.event.pull_request.milestone.html_url, github.event.pull_request.milestone.title) || '' }}
                 Changed files:
                 ```${{ join(fromJson(steps.filter.outputs.rest_files || '[]'), '\n') }}```
+
+                :warning: *@${{ github.event.pull_request.user.login }}* - Don't forget to update the <https://github.com/woocommerce/woocommerce-rest-api-docs|REST API documentation> if your changes affect the public API!
             slack-optional-unfurl_links: false
             slack-optional-unfurl_media: false
