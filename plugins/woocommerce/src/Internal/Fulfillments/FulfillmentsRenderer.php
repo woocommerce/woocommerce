@@ -45,7 +45,7 @@ class FulfillmentsRenderer {
 		// Hook into the admin enqueue scripts to load the fulfillment drawer component.
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_components' ) );
 		// Hook into the order details page to render the fulfillment badges.
-		add_action( 'woocommerce_admin_order_data_after_payment_info', array( $this, 'render_order_details_badges' ) );
+		add_action( 'woocommerce_admin_order_data_header_right', array( $this, 'render_order_details_badges' ) );
 		// Hook into the order details before order table to render the fulfillment customer details.
 		add_action( 'woocommerce_order_details_before_order_table', array( $this, 'render_fulfillment_customer_details' ) );
 		// Initialize the renderer for bulk actions.

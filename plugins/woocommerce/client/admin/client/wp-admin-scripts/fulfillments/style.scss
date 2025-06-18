@@ -426,7 +426,6 @@ tr.type-shop_order.is-selected {
 
 .wc-order-fulfillment-badges {
 	width: auto;
-	margin: 24px 0 0 0;
 	display: flex;
 	gap: 12px;
 	.fulfillments-trigger {
@@ -440,14 +439,5 @@ tr.type-shop_order.is-selected {
 			}
 			border-color: transparent;
 		}
-	}
-}
-
-@media (min-width: 1600px) {
-	.wc-order-fulfillment-badges {
-		position: absolute;
-		top: 24px;
-		right: 12px;
-		margin: 0;
 	}
 }
