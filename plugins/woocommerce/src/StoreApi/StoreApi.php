@@ -13,7 +13,7 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 
 /**
- * StoreApi Main Class.
+ * StoreApi Main Class updated
  */
 final class StoreApi {
 	/**
