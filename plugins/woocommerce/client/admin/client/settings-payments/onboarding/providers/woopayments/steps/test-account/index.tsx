@@ -102,11 +102,15 @@ const TestAccountStep = () => {
 	const [ errorMessage, setErrorMessage ] = useState< string | undefined >();
 	const [ pollingPhase, setPollingPhase ] = useState( 0 ); // 0: initial, 1: extended 1, 2: extended 2
 	const [ retryCounter, setRetryCounter ] = useState( 0 );
+	const [ loaderTitle, setLoaderTitle ] = useState< string | undefined >(
+		PHASE_MESSAGES[ 0 ]
+	);
 
 	// Refs for timers and phase tracking
 	const pollingTimeoutRef = useRef< number | null >( null );
 	const phase1StartTimeRef = useRef< number | null >( null );
 	const initializingTimeoutRef = useRef< number | null >( null );
+	const titleIntervalRef = useRef< number | null >( null );
 
 	// Helper to clear timers
 	const clearTimers = () => {
