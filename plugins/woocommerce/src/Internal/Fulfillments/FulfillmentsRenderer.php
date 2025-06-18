@@ -107,15 +107,7 @@ class FulfillmentsRenderer {
 	 * @param WC_Order $order The order object.
 	 */
 	public function render_fulfillment_column_row_data( string $column_name, WC_Order $order ) {
-		// Check if we've already fetched the fulfillments for this order.
-		$fulfillments = $this->fulfillments_cache[ $order->get_id() ] ?? null;
-
-		// If not, fetch them and cache them.
-		if ( null === $fulfillments ) {
-			$data_store                                   = wc_get_container()->get( FulfillmentsDataStore::class );
-			$fulfillments                                 = $data_store->read_fulfillments( WC_Order::class, '' . $order->get_id() );
-			$this->fulfillments_cache[ $order->get_id() ] = $fulfillments;
-		}
+		$fulfillments = $this->maybe_read_fulfillments( $order );
 
 		// Render the column data based on the column name.
 		switch ( $column_name ) {
@@ -268,8 +260,7 @@ class FulfillmentsRenderer {
 					continue;
 				}
 
-				$data_store   = wc_get_container()->get( FulfillmentsDataStore::class );
-				$fulfillments = $data_store->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+				$fulfillments = $this->maybe_read_fulfillments( $order );
 
 				// Fulfill all existing fulfillments.
 				foreach ( $fulfillments as $fulfillment ) {
@@ -310,8 +301,7 @@ class FulfillmentsRenderer {
 	 * @param WC_Order $order The order object.
 	 */
 	public function render_fulfillment_customer_details( WC_Order $order ) {
-		$fulfillments_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
-		$fulfillments            = $fulfillments_data_store->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+		$fulfillments = $this->maybe_read_fulfillments( $order );
 
 		if ( ! empty( $fulfillments ) ) {
 			?>
@@ -365,17 +355,8 @@ class FulfillmentsRenderer {
 	public function render_order_details_badges( WC_Order $order ) {
 		echo '<div class="wc-order-fulfillment-badges">';
 
-		// Check if we've already fetched the fulfillments for this order.
-		$fulfillments = $this->fulfillments_cache[ $order->get_id() ] ?? null;
-
-		// If not, fetch them and cache them.
-		if ( null === $fulfillments ) {
-			$data_store                                   = wc_get_container()->get( FulfillmentsDataStore::class );
-			$fulfillments                                 = $data_store->read_fulfillments( WC_Order::class, '' . $order->get_id() );
-			$this->fulfillments_cache[ $order->get_id() ] = $fulfillments;
-		}
-
 		// Get the fulfillment status for the order.
+		$fulfillments       = $this->maybe_read_fulfillments( $order );
 		$fulfillment_status = FulfillmentUtils::get_fulfillment_status( $order, $fulfillments );
 
 		// Render order status badge.
@@ -410,5 +391,25 @@ class FulfillmentsRenderer {
 		}
 		return 'woocommerce_page_wc-orders' === $current_screen->id // HPOS support.
 			|| 'edit-shop_order' === $current_screen->id; // Legacy support.
+	}
+
+	/**
+	 * Fetches the fulfillments for the given order, caching them to avoid multiple fetches.
+	 *
+	 * @param WC_Order $order The order object.
+	 * @return array The fulfillments for the order.
+	 */
+	private function maybe_read_fulfillments( WC_Order $order ): array {
+		// Check if we've already fetched the fulfillments for this order.
+		if ( isset( $this->fulfillments_cache[ $order->get_id() ] ) ) {
+			return $this->fulfillments_cache[ $order->get_id() ];
+		}
+
+		// If not, fetch them and cache them.
+		$data_store                                   = wc_get_container()->get( FulfillmentsDataStore::class );
+		$fulfillments                                 = $data_store->read_fulfillments( WC_Order::class, '' . $order->get_id() );
+		$this->fulfillments_cache[ $order->get_id() ] = $fulfillments;
+
+		return $fulfillments;
 	}
 }
