@@ -13,9 +13,6 @@ import save from './save';
 
 registerBlockType( metadata, {
 	icon: loopIcon,
-	supports: {
-		...metadata.supports,
-	},
 	edit,
 	save,
 } );

@@ -9,23 +9,14 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './editor.scss';
-import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
 
 const Edit = () => {
-	const isDescendentOfSingleProductTemplate =
-		useIsDescendentOfSingleProductTemplate();
-
 	const TEMPLATE: InnerBlockTemplate[] = [
 		[
 			'core/group',
 			{ layout: { type: 'flex', flexWrap: 'nowrap' } },
 			[
-				[
-					'woocommerce/product-sku',
-					{
-						isDescendentOfSingleProductTemplate,
-					},
-				],
+				[ 'woocommerce/product-sku' ],
 				[
 					'core/post-terms',
 					{

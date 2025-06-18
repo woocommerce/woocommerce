@@ -6,7 +6,6 @@
 import { chromium, request } from '@playwright/test';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 import {
-	BASE_URL,
 	adminFile,
 	wpCLI,
 	customerFile,
@@ -18,6 +17,7 @@ import {
  * Internal dependencies
  */
 import { customer, admin } from './test-data/data/data';
+import { BASE_URL } from './utils/constants';
 
 const prepareAttributes = async () => {
 	const browser = await chromium.launch();
@@ -68,6 +68,7 @@ async function globalSetup() {
 
 	try {
 		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
+		await wpCLI( `db repair` );
 		console.log( '├ Database snapshot imported, running basic setup…' );
 		databaseImported = true;
 	} catch ( error ) {

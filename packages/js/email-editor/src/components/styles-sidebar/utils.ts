@@ -6,7 +6,7 @@ import deepmerge from 'deepmerge';
 /**
  * Internal dependencies
  */
-import { StyleProperties } from '../../hooks/use-email-styles';
+import { EmailStyles } from '../../store';
 
 const defaultStyleObject = {
 	typography: {},
@@ -25,34 +25,34 @@ const defaultStyleObject = {
  * @param merge
  */
 export const getHeadingElementStyles = (
-	styles: StyleProperties,
+	styles: EmailStyles,
 	headingLevel = 'heading',
 	merge = false
-): StyleProperties =>
+): EmailStyles =>
 	merge
 		? ( deepmerge.all( [
 				defaultStyleObject,
 				styles.elements.heading || {},
 				styles.elements[ headingLevel ] || {},
-		  ] ) as StyleProperties )
+		  ] ) as EmailStyles )
 		: ( {
 				...defaultStyleObject,
 				...( styles.elements.heading || {} ),
 				...( styles.elements[ headingLevel ] || {} ),
-		  } as StyleProperties );
+		  } as EmailStyles );
 
 export const getElementStyles = (
-	styles: StyleProperties,
+	styles: EmailStyles,
 	element: string,
 	headingLevel = 'heading',
 	merge = false
-): StyleProperties => {
+): EmailStyles => {
 	switch ( element ) {
 		case 'text':
 			return {
 				typography: styles.typography,
 				color: styles.color,
-			} as StyleProperties;
+			} as EmailStyles;
 		case 'heading':
 			return getHeadingElementStyles(
 				styles,
@@ -61,6 +61,6 @@ export const getElementStyles = (
 			);
 		default:
 			return ( styles.elements[ element ] ||
-				defaultStyleObject ) as StyleProperties;
+				defaultStyleObject ) as EmailStyles;
 	}
 };

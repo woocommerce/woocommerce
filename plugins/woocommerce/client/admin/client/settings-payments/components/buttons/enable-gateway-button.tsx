@@ -8,11 +8,15 @@ import { dispatch, useDispatch } from '@wordpress/data';
 import {
 	EnableGatewayResponse,
 	paymentSettingsStore,
-	PaymentIncentive,
-	PaymentProviderState,
+	PaymentsProviderIncentive,
+	PaymentsProviderState,
 } from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { recordEvent } from '@woocommerce/tracks';
+
+/**
+ * Internal dependencies
+ */
+import { recordPaymentsEvent } from '~/settings-payments/utils';
 
 interface EnableGatewayButtonProps {
 	/**
@@ -22,7 +26,7 @@ interface EnableGatewayButtonProps {
 	/**
 	 * The state of the gateway.
 	 */
-	gatewayState: PaymentProviderState;
+	gatewayState: PaymentsProviderState;
 	/**
 	 * The settings URL to navigate to when the enable gateway button is clicked.
 	 */
@@ -56,7 +60,15 @@ interface EnableGatewayButtonProps {
 	/**
 	 * Incentive data. If provided, the incentive will be accepted when the button is clicked.
 	 */
-	incentive?: PaymentIncentive | null;
+	incentive?: PaymentsProviderIncentive | null;
+	/**
+	 * Function to set the onboarding modal open.
+	 */
+	setOnboardingModalOpen?: ( isOnboardingModalOpen: boolean ) => void;
+	/**
+	 * The onboarding type for the gateway.
+	 */
+	onboardingType?: string;
 }
 
 /**
@@ -75,6 +87,8 @@ export const EnableGatewayButton = ( {
 	installingPlugin,
 	buttonText = __( 'Enable', 'woocommerce' ),
 	incentive = null,
+	setOnboardingModalOpen,
+	onboardingType,
 }: EnableGatewayButtonProps ) => {
 	const [ isUpdating, setIsUpdating ] = useState( false );
 	const { createErrorNotice } = dispatch( 'core/notices' );
@@ -103,7 +117,7 @@ export const EnableGatewayButton = ( {
 		}
 
 		// Record the event when user clicks on a gateway's enable button.
-		recordEvent( 'settings_payments_provider_enable_click', {
+		recordPaymentsEvent( 'provider_enable_click', {
 			provider_id: gatewayId,
 		} );
 
@@ -132,12 +146,16 @@ export const EnableGatewayButton = ( {
 					// We only need to perform additional logic/redirects if no account connected.
 					if ( ! gatewayState.account_connected ) {
 						// Record the event when user successfully enables a gateway.
-						recordEvent( 'settings_payments_provider_enable', {
+						recordPaymentsEvent( 'provider_enable', {
 							provider_id: gatewayId,
 						} );
-
-						// Redirect to the recommended payment methods page if available, or the onboarding URL.
-						if ( gatewayHasRecommendedPaymentMethods ) {
+						if (
+							onboardingType === 'native_in_context' &&
+							setOnboardingModalOpen
+						) {
+							setOnboardingModalOpen( true );
+						} else if ( gatewayHasRecommendedPaymentMethods ) {
+							// Redirect to the recommended payment methods page if available, or the onboarding URL.
 							const history = getHistory();
 							history.push(
 								getNewPath( {}, '/payment-methods' )

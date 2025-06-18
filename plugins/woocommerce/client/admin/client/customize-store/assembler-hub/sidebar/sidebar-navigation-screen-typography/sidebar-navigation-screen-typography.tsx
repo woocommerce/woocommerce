@@ -22,7 +22,6 @@ import { SidebarNavigationScreen } from '../sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { FontPairing } from '../global-styles';
 import { CustomizeStoreContext } from '../..';
-import { FlowType } from '~/customize-store/types';
 import { trackEvent } from '~/customize-store/tracking';
 import { enableTracking } from '~/customize-store/design-without-ai/services';
 
@@ -32,21 +31,13 @@ export const SidebarNavigationScreenTypography = ( {
 	onNavigateBackClick: () => void;
 } ) => {
 	const { context } = useContext( CustomizeStoreContext );
-	const aiOnline = context.flowType === FlowType.AIOnline;
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
 
-	const title = aiOnline
-		? __( 'Change your font', 'woocommerce' )
-		: __( 'Choose fonts', 'woocommerce' );
-	const label = aiOnline
-		? __(
-				"AI has selected a font pairing that's the best fit for your business. If you'd like to change them, select a new option below now, or later in Editor.",
-				'woocommerce'
-		  )
-		: __(
-				'Select the pair of fonts that best suits your brand. The larger font will be used for headings, and the smaller for supporting content. You can change your font at any time in Editor.',
-				'woocommerce'
-		  );
+	const title = __( 'Choose fonts', 'woocommerce' );
+	const label = __(
+		'Select the pair of fonts that best suits your brand. The larger font will be used for headings, and the smaller for supporting content. You can change your font at any time in Editor.',
+		'woocommerce'
+	);
 
 	const trackingAllowed = useSelect(
 		( select ) =>

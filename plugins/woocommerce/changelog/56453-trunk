@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add filter to allow the adding of filtering post clauses outside "is_main_query".

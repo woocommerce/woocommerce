@@ -74,6 +74,11 @@ class WCTransactionalEmailPostsGenerator {
 	 * It fetches all the emails from WooCommerce and filters them to include only the core transactional emails.
 	 */
 	public function init_default_transactional_emails() {
+		if ( ! empty( $this->default_templates ) ) {
+			// If the default templates are already initialized, we don't need to run this function again.
+			return;
+		}
+
 		$core_transactional_emails = WCTransactionalEmails::get_transactional_emails();
 
 		$wc_emails = \WC_Emails::instance();
@@ -250,7 +255,6 @@ class WCTransactionalEmailPostsGenerator {
 			'post_excerpt' => $email_data->get_description(),
 			'post_content' => $this->get_email_template( $email_data ),
 			'meta_input'   => array(
-				Integration::WC_EMAIL_TYPE_ID_POST_META_KEY => $email_type,
 				'_wp_page_template' => ( new WooEmailTemplate() )->get_slug(),
 			),
 		);

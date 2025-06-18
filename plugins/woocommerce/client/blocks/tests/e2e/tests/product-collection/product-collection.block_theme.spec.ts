@@ -449,7 +449,9 @@ test.describe( 'Product Collection', () => {
 				.click();
 			await page
 				.getByRole( 'option', {
-					name: `Cap http://localhost:8889/product/cap/`,
+					name: `Cap http://localhost:${
+						process.env.WP_ENV_TESTS_PORT || '8889'
+					}/product/cap/`,
 				} )
 				.click();
 			await page

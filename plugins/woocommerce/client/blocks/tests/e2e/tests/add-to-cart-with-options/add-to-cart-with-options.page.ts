@@ -2,39 +2,27 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { Editor, Admin, RequestUtils } from '@woocommerce/e2e-utils';
+import { Editor, Admin } from '@woocommerce/e2e-utils';
 
 class AddToCartWithOptionsPage {
 	private page: Page;
 	private admin: Admin;
 	private editor: Editor;
-	private requestUtils: RequestUtils;
 	BLOCK_SLUG = 'woocommerce/add-to-cart-with-options';
-	BLOCK_NAME = 'Add to Cart with Options (Experimental)';
+	BLOCK_NAME = 'Add to Cart + Options (Beta)';
 
 	constructor( {
 		page,
 		admin,
 		editor,
-		requestUtils,
 	}: {
 		page: Page;
 		admin: Admin;
 		editor: Editor;
-		requestUtils: RequestUtils;
 	} ) {
 		this.page = page;
 		this.admin = admin;
 		this.editor = editor;
-		this.requestUtils = requestUtils;
-	}
-
-	async setFeatureFlags() {
-		await this.requestUtils.setFeatureFlag( 'experimental-blocks', true );
-		await this.requestUtils.setFeatureFlag(
-			'blockified-add-to-cart',
-			true
-		);
 	}
 
 	async switchProductType( productType: string ) {
@@ -52,9 +40,11 @@ class AddToCartWithOptionsPage {
 		} );
 		await customProductTypeButton.click();
 
-		await this.editor.canvas.locator( '.components-spinner' ).waitFor( {
-			state: 'hidden',
-		} );
+		await addToCartWithOptionsBlock
+			.locator( '.components-spinner' )
+			.waitFor( {
+				state: 'hidden',
+			} );
 	}
 
 	async insertParagraphInTemplatePart( content: string ) {
@@ -76,6 +66,25 @@ class AddToCartWithOptionsPage {
 			},
 			{ clientId: parentClientId }
 		);
+	}
+
+	async updateSingleProductTemplate() {
+		await this.admin.visitSiteEditor( {
+			postId: 'woocommerce/woocommerce//single-product',
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+
+		const addToCartFormBlock = await this.editor.getBlockByName(
+			'woocommerce/add-to-cart-form'
+		);
+		await this.editor.selectBlocks( addToCartFormBlock );
+
+		await this.page
+			.getByRole( 'button', {
+				name: 'Upgrade to the Add to Cart + Options block',
+			} )
+			.click();
 	}
 }
 

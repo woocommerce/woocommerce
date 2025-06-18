@@ -12,15 +12,6 @@ import { ProductGalleryPage } from './product-gallery.page';
 const blockData = {
 	name: 'woocommerce/product-gallery',
 	title: 'Product Gallery (Beta)',
-	selectors: {
-		frontend: {},
-		editor: {
-			settings: {
-				cropImagesOption:
-					'.wc-block-product-gallery__crop-images .components-form-toggle__input',
-			},
-		},
-	},
 	slug: 'single-product',
 	productPage: '/product/hoodie/',
 };
@@ -50,16 +41,6 @@ export const getImageId = async ( imgElement: Locator ) => {
 	}
 
 	return null;
-};
-
-export const getVisibleLargeImageId = async (
-	mainImageBlockLocator: Locator
-) => {
-	const mainImage = mainImageBlockLocator.locator(
-		'.wc-block-woocommerce-product-gallery-large-image__image--active-image-slide'
-	);
-
-	return getImageId( mainImage );
 };
 
 export const getIsDialogOpen = async (
@@ -116,11 +97,8 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const visibleLargeImageId = await getVisibleLargeImageId(
-				await pageObject.getMainImageBlock( {
-					page: 'frontend',
-				} )
-			);
+			const visibleLargeImageId =
+				await pageObject.getVisibleLargeImageId();
 
 			const firstImageThumbnailId = await getThumbnailImageIdByNth(
 				0,
@@ -145,11 +123,8 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const visibleLargeImageId = await getVisibleLargeImageId(
-				await pageObject.getMainImageBlock( {
-					page: 'frontend',
-				} )
-			);
+			const visibleLargeImageId =
+				await pageObject.getVisibleLargeImageId();
 
 			const secondImageThumbnailId = await getThumbnailImageIdByNth(
 				1,
@@ -169,13 +144,12 @@ test.describe( `${ blockData.name }`, () => {
 				.nth( 1 )
 				.click();
 
-			const newVisibleLargeImageId = await getVisibleLargeImageId(
-				await pageObject.getMainImageBlock( {
-					page: 'frontend',
-				} )
-			);
+			await expect( async () => {
+				const newVisibleLargeImageId =
+					await pageObject.getVisibleLargeImageId();
 
-			expect( newVisibleLargeImageId ).toBe( secondImageThumbnailId );
+				expect( newVisibleLargeImageId ).toBe( secondImageThumbnailId );
+			} ).toPass( { timeout: 1_000 } );
 		} );
 	} );
 
@@ -193,11 +167,8 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const initialVisibleLargeImageId = await getVisibleLargeImageId(
-				await pageObject.getMainImageBlock( {
-					page: 'frontend',
-				} )
-			);
+			const initialVisibleLargeImageId =
+				await pageObject.getVisibleLargeImageId();
 
 			const secondImageThumbnailId = await getThumbnailImageIdByNth(
 				1,
@@ -210,33 +181,15 @@ test.describe( `${ blockData.name }`, () => {
 				secondImageThumbnailId
 			);
 
-			const nextButton = page
-				.locator(
-					'.wc-block-product-gallery-large-image-next-previous--button'
-				)
-				.nth( 1 );
-			await nextButton.click();
+			await pageObject.clickNextButton();
 
-			const nextImageId = await getVisibleLargeImageId(
-				await pageObject.getMainImageBlock( {
-					page: 'frontend',
-				} )
-			);
+			const nextImageId = await pageObject.getVisibleLargeImageId();
 
 			expect( nextImageId ).toBe( secondImageThumbnailId );
 
-			const previousButton = page
-				.locator(
-					'.wc-block-product-gallery-large-image-next-previous--button'
-				)
-				.first();
-			await previousButton.click();
+			await pageObject.clickPreviousButton();
 
-			const previousImageId = await getVisibleLargeImageId(
-				await pageObject.getMainImageBlock( {
-					page: 'frontend',
-				} )
-			);
+			const previousImageId = await pageObject.getVisibleLargeImageId();
 
 			expect( previousImageId ).toBe( initialVisibleLargeImageId );
 		} );
@@ -256,11 +209,8 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const initialVisibleLargeImageId = await getVisibleLargeImageId(
-				await pageObject.getMainImageBlock( {
-					page: 'frontend',
-				} )
-			);
+			const initialVisibleLargeImageId =
+				await pageObject.getVisibleLargeImageId();
 
 			const secondImageThumbnailId = await getThumbnailImageIdByNth(
 				1,
@@ -273,18 +223,9 @@ test.describe( `${ blockData.name }`, () => {
 				secondImageThumbnailId
 			);
 
-			const nextButton = page
-				.locator(
-					'.wc-block-product-gallery-large-image-next-previous--button'
-				)
-				.nth( 1 );
-			await nextButton.click();
+			await pageObject.clickNextButton();
 
-			const nextImageId = await getVisibleLargeImageId(
-				await pageObject.getMainImageBlock( {
-					page: 'frontend',
-				} )
-			);
+			const nextImageId = await pageObject.getVisibleLargeImageId();
 
 			expect( nextImageId ).toBe( secondImageThumbnailId );
 
@@ -293,23 +234,20 @@ test.describe( `${ blockData.name }`, () => {
 			} );
 			await largeImageBlock.click();
 
-			// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
-			await page.waitForTimeout( 300 );
-			const popUpSelectedImageId =
-				await pageObject.getActiveImageElementId( {
-					page,
-				} );
+			const dialogImage = page
+				.getByRole( 'dialog' )
+				.locator( `img[data-image-id='${ nextImageId }']` );
 
-			expect( popUpSelectedImageId ).toBe( nextImageId );
+			// The image should be in the viewport but it simply doesn't fit fully.
+			await expect( dialogImage ).toBeInViewport( { ratio: 0.75 } );
 
 			const closePopUpButton = page.locator(
 				'.wc-block-product-gallery-dialog__close-button'
 			);
 			await closePopUpButton.click();
 
-			const singleProductImageId = await getVisibleLargeImageId(
-				largeImageBlock
-			);
+			const singleProductImageId =
+				await pageObject.getVisibleLargeImageId();
 
 			expect( singleProductImageId ).toBe( nextImageId );
 		} );
@@ -409,7 +347,7 @@ test.describe( `${ blockData.name }`, () => {
 			editor,
 		} ) => {
 			await admin.createNewPost();
-			await editor.insertBlockUsingGlobalInserter( 'Single Product' );
+			await editor.insertBlockUsingGlobalInserter( 'Product' );
 			await editor.canvas.getByText( 'Album' ).click();
 			await editor.canvas.getByText( 'Done' ).click();
 			const singleProductBlock = await editor.getBlockByName(
@@ -426,44 +364,6 @@ test.describe( `${ blockData.name }`, () => {
 				await editor.getBlockByName( blockData.name )
 			).toHaveCount( 1 );
 		} );
-	} );
-
-	test( 'should show (square) cropped main product images when crop option is enabled', async ( {
-		page,
-		editor,
-		pageObject,
-	} ) => {
-		await editor.openDocumentSettingsSidebar();
-		await pageObject.addProductGalleryBlock( { cleanContent: true } );
-
-		await page
-			.locator( blockData.selectors.editor.settings.cropImagesOption )
-			.click();
-
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
-
-		await expect(
-			page.locator( blockData.selectors.editor.settings.cropImagesOption )
-		).toBeChecked();
-
-		await page.goto( blockData.productPage );
-
-		const image = await page
-			.locator(
-				'img.wc-block-woocommerce-product-gallery-large-image__image'
-			)
-			.first()
-			.boundingBox();
-
-		const height = image?.height as number;
-		const width = image?.width as number;
-
-		// Allow 1 pixel of difference.
-		expect(
-			width === height + 1 || width === height - 1 || width === height
-		).toBeTruthy();
 	} );
 
 	test( 'should persistently display the block when navigating back to the template without a page reload', async ( {

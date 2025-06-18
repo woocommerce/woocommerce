@@ -376,7 +376,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				array(
 					'title'         => __( 'Show Suggestions', 'woocommerce' ),
 					'desc'          => __( 'Display suggestions within WooCommerce', 'woocommerce' ),
-					'desc_tip'      => esc_html__( 'Leave this box unchecked if you do not want to pull suggested extensions from WooCommerce.com. You will see a static list of extensions instead.', 'woocommerce' ),
+					'desc_tip'      => esc_html__( 'Leave this box unchecked if you do not want to pull suggested extensions from WooCommerce.com.', 'woocommerce' ),
 					'id'            => 'woocommerce_show_marketplace_suggestions',
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'start',
@@ -447,10 +447,6 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	protected function get_settings_for_blueprint_section() {
 		$settings =
 			array(
-				array(
-					'title' => '',
-					'type'  => 'title',
-				),
 				array(
 					'id'   => 'wc_settings_blueprint_slotfill',
 					'type' => 'slotfill_placeholder',

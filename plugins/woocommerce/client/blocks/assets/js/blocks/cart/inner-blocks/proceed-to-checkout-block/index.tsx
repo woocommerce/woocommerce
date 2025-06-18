@@ -10,8 +10,11 @@ import { registerBlockType } from '@wordpress/blocks';
 import attributes from './attributes';
 import { Edit, Save } from './edit';
 import './style.scss';
+import metadata from './block.json';
 
 registerBlockType( 'woocommerce/proceed-to-checkout-block', {
+	apiVersion: metadata.apiVersion,
+	title: metadata.title,
 	icon: {
 		src: (
 			<Icon

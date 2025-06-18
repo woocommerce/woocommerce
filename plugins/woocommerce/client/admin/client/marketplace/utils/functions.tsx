@@ -23,6 +23,7 @@ import {
 import { Subscription } from '../components/my-subscriptions/types';
 import {
 	Product,
+	ProductCardType,
 	ProductType,
 	SearchAPIJSONType,
 	SearchAPIProductType,
@@ -39,6 +40,7 @@ interface ProductGroup {
 	url_text: string | null;
 	url_type: 'wc-admin' | 'wp-admin' | 'external' | undefined; // types defined by Link component
 	itemType: ProductType;
+	cardType: ProductCardType;
 }
 
 // The fetchCache stores the results of GET fetch/apiFetch calls from the Marketplace, in RAM, for performance
@@ -192,6 +194,25 @@ async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
 	}
 }
 
+async function fetchProductPreview(
+	productId: number
+): Promise< { data: { html: string; css: string } } > {
+	let url = `/wc/v1/marketplace/product-preview?product_id=${ productId }`;
+
+	if ( LOCALE.userLocale ) {
+		url = `${ url }&locale=${ LOCALE.userLocale }`;
+	}
+
+	try {
+		const response = await apiFetchWithCache( {
+			path: url.toString(),
+		} );
+		return response as { data: { html: string; css: string } };
+	} catch ( error ) {
+		return { data: { html: '', css: '' } };
+	}
+}
+
 function getProductType( tab: string ): ProductType {
 	switch ( tab ) {
 		case 'themes':
@@ -247,6 +268,23 @@ function connectProduct( subscription: Subscription ): Promise< void > {
 		return Promise.resolve();
 	}
 	const url = '/wc/v3/marketplace/subscriptions/connect';
+	const data = new URLSearchParams();
+	data.append( 'product_key', subscription.product_key );
+	return apiFetch( {
+		path: url.toString(),
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+		},
+		body: data,
+	} );
+}
+
+function activateProductPlugin( subscription: Subscription ): Promise< void > {
+	if ( subscription.active === true ) {
+		return Promise.resolve();
+	}
+	const url = '/wc/v3/marketplace/subscriptions/activate-plugin';
 	const data = new URLSearchParams();
 	data.append( 'product_key', subscription.product_key );
 	return apiFetch( {
@@ -519,10 +557,12 @@ export {
 	ProductGroup,
 	appendURLParams,
 	connectProduct,
+	activateProductPlugin,
 	enableAutorenewalUrl,
 	fetchCategories,
 	fetchDiscoverPageData,
 	fetchSearchResults,
+	fetchProductPreview,
 	getProductType,
 	fetchSubscriptions,
 	refreshSubscriptions,

@@ -17,7 +17,8 @@ export const CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG = `${ CLASSIC_
 export const CLASSIC_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG = `${ CLASSIC_THEME_SLUG }-child__classic-notices-template`;
 export const CLASSIC_CHILD_THEME_WITH_BLOCK_TEMPLATE_PARTS_SLUG = `${ CLASSIC_THEME_SLUG }-child__with-block-template-part`;
 export const CLASSIC_CHILD_THEME_WITH_BLOCK_TEMPLATE_PARTS_SUPPORT_SLUG = `${ CLASSIC_THEME_SLUG }-child__with-block-template-part-support`;
-export const BASE_URL = 'http://localhost:8889';
+export const BASE_URL =
+	'http://localhost:' + ( process.env.WP_ENV_TESTS_PORT || '8889' );
 
 export const WP_ARTIFACTS_PATH =
 	process.env.WP_ARTIFACTS_PATH ||

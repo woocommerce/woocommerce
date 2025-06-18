@@ -62,11 +62,12 @@
 		"@wordpress/notices": "wp-6.6",
 		"@wordpress/media-utils": "wp-6.6",
 		"@woocommerce/navigation": "workspace:*",
+		"@woocommerce/components": "workspace:*",
 		"@wordpress/plugins": "wp-6.6",
 		"@wordpress/preferences": "wp-6.6",
 		"@wordpress/router": "1.11.0",
 		"@wordpress/url": "wp-6.6",
-		"clsx": "^2.1.1",
+		"clsx": "2.1.x",
 		"dompurify": "^2.5.7",
 		"prop-types": "^15.8.1",
 		"react-router-dom": "~6.3.0"
@@ -92,7 +93,6 @@
 		"@woocommerce/internal-style-build": "workspace:*",
 		"@wordpress/block-editor": "wp-6.6",
 		"@wordpress/browserslist-config": "next",
-		"concurrently": "^7.6.0",
 		"copy-webpack-plugin": "13.0.x",
 		"css-loader": "6.11.x",
 		"eslint": "^8.55.0",
@@ -111,7 +111,7 @@
 		"webpack-cli": "5.1.x",
 		"webpack-remove-empty-scripts": "1.0.x",
 		"webpack-rtl-plugin": "2.0.x",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
@@ -242,6 +242,10 @@
 				"node_modules/@woocommerce/navigation/build",
 				"node_modules/@woocommerce/navigation/build-module",
 				"node_modules/@woocommerce/navigation/build-types",
+				"node_modules/@woocommerce/components/build",
+				"node_modules/@woocommerce/components/build-module",
+				"node_modules/@woocommerce/components/build-style",
+				"node_modules/@woocommerce/components/build-types",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",

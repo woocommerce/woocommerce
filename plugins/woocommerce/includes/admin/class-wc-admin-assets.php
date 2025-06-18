@@ -234,11 +234,14 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'mon_decimal_point'                 => wc_get_price_decimal_separator(),
 					'ajax_url'                          => admin_url( 'admin-ajax.php' ),
 					'strings'                           => array(
-						'import_products' => __( 'Import', 'woocommerce' ),
-						'export_products' => __( 'Export', 'woocommerce' ),
+						'import_products'          => __( 'Import', 'woocommerce' ),
+						'export_products'          => __( 'Export', 'woocommerce' ),
+						// translators: %d: number of selected products.
+						'export_selected_products' => __( 'Export %d selected', 'woocommerce' ),
 					),
 					'nonces'                            => array(
-						'gateway_toggle' => current_user_can( 'manage_woocommerce' ) ? wp_create_nonce( 'woocommerce-toggle-payment-gateway-enabled' ) : null,
+						'gateway_toggle'                 => current_user_can( 'manage_woocommerce' ) ? wp_create_nonce( 'woocommerce-toggle-payment-gateway-enabled' ) : null,
+						'export_selected_products_nonce' => current_user_can( 'export' ) ? wp_create_nonce( 'export-selected-products' ) : null,
 					),
 					'urls'                              => array(
 						'add_product'     => \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,
@@ -366,7 +369,6 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				$remove_item_notice     = __( 'Are you sure you want to remove the selected items?', 'woocommerce' );
 				$remove_fee_notice      = __( 'Are you sure you want to remove the selected fees?', 'woocommerce' );
 				$remove_shipping_notice = __( 'Are you sure you want to remove the selected shipping?', 'woocommerce' );
-				$product                = wc_get_product( $post_id );
 
 				// Eventually this will become wc_data_or_post object as we implement more custom tables.
 				$order_or_post_object = $post;

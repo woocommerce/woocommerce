@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/active-filters",
-	"version": "1.0.0",
 	"title": "Active Filters Controls",
 	"description": "Display the currently active filters.",
 	"category": "woocommerce",

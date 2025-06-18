@@ -33,29 +33,9 @@
 		padding-bottom: 0;
 	}
 
-	.wc-block-components-radio-control .wc-block-components-radio-control__option-layout {
+	.wc-block-components-radio-control
+		.wc-block-components-radio-control__option-layout {
 		padding-bottom: 0;
-	}
-
-	.wc-block-components-radio-control__description-group {
-		// Display in a column so the delivery time can render first.
-		display: flex;
-		flex-direction: column;
-
-		// Use balance as this is not a good candidate for pretty. Pretty is intended for body copy which this is not.
-		text-wrap: balance;
-		// This targets the rate *description* and prevents the rules applying to the delivery_time.
-		.wc-block-components-radio-control__description {
-			padding-right: $gap-small;
-			order: 2;
-		}
-
-		.wc-block-components-radio-control__secondary-description {
-			order: 1;
-			text-align: left;
-			width: auto;
-			margin: $gap-smaller  0;
-		}
 	}
 
 	&--disabled {
@@ -94,9 +74,15 @@
 	display: inline-block;
 	margin: 0;
 	padding: 0;
+	> div {
+		// Usage of RawHTML component from WordPress always adds a div wrapper.
+		display: inline;
+	}
 }
 
-.wc-block-components-shipping-rates-control__package-item:not(:last-child)::after {
+.wc-block-components-shipping-rates-control__package-item:not(
+		:last-child
+	) > div::after { // Usage of RawHTML component from WordPress always adds a div wrapper.
 	content: ", ";
 	white-space: pre;
 }

@@ -314,10 +314,10 @@ test.describe( 'Product Reviews', () => {
 
 			await reviewRow.getByRole( 'button', { name: 'Trash' } ).click();
 			await expect(
-				page.getByText(
-					`Comment by ${ review.reviewer } moved to the Trash`
-				)
-			).toBeVisible();
+				page.locator( '.trash-undo-inside' ).first()
+			).toContainText(
+				`Comment by ${ review.reviewer } moved to the Trash`
+			);
 			await page.getByRole( 'button', { name: 'Undo' } ).click();
 
 			await expect(
@@ -327,10 +327,10 @@ test.describe( 'Product Reviews', () => {
 			await reviewRow.getByRole( 'button', { name: 'Trash' } ).click();
 
 			await expect(
-				page.getByText(
-					`Comment by ${ review.reviewer } moved to the Trash`
-				)
-			).toBeVisible();
+				page.locator( '.trash-undo-inside' ).first()
+			).toContainText(
+				`Comment by ${ review.reviewer } moved to the Trash`
+			);
 
 			await page.click( 'a[href*="comment_status=trash"]' );
 

@@ -14,10 +14,9 @@ import {
  * Internal dependencies
  */
 import { storeName } from '../../store';
-import { useEditorMode } from '../../hooks';
 import { recordEvent } from '../../events';
 
-export function SendButton( { validateContent, isContentInvalid } ) {
+export function SendButton() {
 	const { isDirty } = useEntitiesSavedStatesIsDirty();
 
 	const { hasEmptyContent, isEmailSent, urls } = useSelect(
@@ -35,14 +34,7 @@ export function SendButton( { validateContent, isContentInvalid } ) {
 		}
 	}
 
-	const [ editorMode ] = useEditorMode();
-
-	const isDisabled =
-		editorMode === 'template' ||
-		hasEmptyContent ||
-		isEmailSent ||
-		isContentInvalid ||
-		isDirty;
+	const isDisabled = hasEmptyContent || isEmailSent || isDirty;
 
 	const label = applyFilters(
 		'woocommerce_email_editor_send_button_label',
@@ -52,15 +44,14 @@ export function SendButton( { validateContent, isContentInvalid } ) {
 	return (
 		<Button
 			variant="primary"
+			size="compact"
 			onClick={ () => {
 				recordEvent( 'header_send_button_clicked' );
-				if ( validateContent() ) {
-					const action = applyFilters(
-						'woocommerce_email_editor_send_action_callback',
-						sendAction
-					) as () => void;
-					action();
-				}
+				const action = applyFilters(
+					'woocommerce_email_editor_send_action_callback',
+					sendAction
+				) as () => void;
+				action();
 			} }
 			disabled={ isDisabled }
 			data-automation-id="email_editor_send_button"

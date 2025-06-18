@@ -129,14 +129,13 @@ final class ProductFilterStatus extends AbstractBlock {
 		$selected_stock_statuses = array_filter( explode( ',', $query ) );
 
 		$filter_options = array_map(
-			function ( $item ) use ( $stock_statuses, $selected_stock_statuses, $attributes ) {
+			function ( $item ) use ( $stock_statuses, $selected_stock_statuses ) {
 				return array(
-					'label'     => $stock_statuses[ $item['status'] ],
-					'ariaLabel' => $stock_statuses[ $item['status'] ],
-					'value'     => $item['status'],
-					'selected'  => in_array( $item['status'], $selected_stock_statuses, true ),
-					'count'     => $item['count'],
-					'type'      => 'status',
+					'label'    => $stock_statuses[ $item['status'] ],
+					'value'    => $item['status'],
+					'selected' => in_array( $item['status'], $selected_stock_statuses, true ),
+					'count'    => $item['count'],
+					'type'     => 'status',
 				);
 			},
 			$stock_status_data
@@ -145,11 +144,13 @@ final class ProductFilterStatus extends AbstractBlock {
 		$filter_context = array(
 			'items'      => array_values( $filter_options ),
 			'showCounts' => $attributes['showCounts'] ?? false,
+			'groupLabel' => __( 'Status', 'woocommerce' ),
 		);
 
 		$wrapper_attributes = array(
-			'data-wp-key'     => wp_unique_prefixed_id( $this->get_full_block_name() ),
-			'data-wp-context' => wp_json_encode(
+			'data-wp-interactive' => 'woocommerce/product-filters',
+			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
+			'data-wp-context'     => wp_json_encode(
 				array(
 					/* translators: {{label}} is the status filter item label. */
 					'activeLabelTemplate' => __( 'Status: {{label}}', 'woocommerce' ),
@@ -161,6 +162,7 @@ final class ProductFilterStatus extends AbstractBlock {
 
 		if ( empty( $filter_options ) ) {
 			$wrapper_attributes['hidden'] = true;
+			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 		}
 
 		return sprintf(
@@ -210,7 +212,7 @@ final class ProductFilterStatus extends AbstractBlock {
 		foreach ( $counts as $key => $value ) {
 			$data[] = array(
 				'status' => $key,
-				'count'  => $value,
+				'count'  => intval( $value ),
 			);
 		}
 
@@ -223,10 +225,18 @@ final class ProductFilterStatus extends AbstractBlock {
 	}
 
 	/**
-	 * Disable the block type script, this uses script modules.
+	 * Disable the editor style handle for this block type.
 	 *
-	 * @param string|null $key The key.
+	 * @return null
+	 */
+	protected function get_block_type_editor_style() {
+		return null;
+	}
+
+	/**
+	 * Disable the script handle for this block type. We use block.json to load the script.
 	 *
+	 * @param string|null $key The key of the script to get.
 	 * @return null
 	 */
 	protected function get_block_type_script( $key = null ) {

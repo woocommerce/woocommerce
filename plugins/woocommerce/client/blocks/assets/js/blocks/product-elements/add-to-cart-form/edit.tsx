@@ -3,24 +3,20 @@
  */
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
-import { Skeleton } from '@woocommerce/base-components/skeleton';
+import { ProductShortDescriptionSkeleton } from '@woocommerce/base-components/skeleton/patterns/product-short-description';
 import { BlockEditProps } from '@wordpress/blocks';
 import { Disabled, Tooltip } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { isSiteEditorPage } from '@woocommerce/utils';
-import { getSettingWithCoercion } from '@woocommerce/settings';
+import { getSettingWithCoercion, getSetting } from '@woocommerce/settings';
 import { isBoolean } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import './editor.scss';
 import { QuantitySelectorStyle, AddToCartFormSettings } from './settings';
-import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../../add-to-cart-with-options/utils';
 import { UpgradeNotice } from './components/upgrade-notice';
 import type { Attributes } from './';
-
-export type UpdateFeaturesType = ( key: FeaturesKeys, value: boolean ) => void;
 
 const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 	const { setAttributes } = props;
@@ -46,9 +42,15 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 		[]
 	);
 
+	const isBlockTheme = getSetting( 'isBlockTheme', false );
+	const buttonBlockClass = ! isBlockTheme ? 'wp-block-button' : '';
+	const buttonLinkClass = ! isBlockTheme
+		? 'wp-block-button__link wc-block-components-button'
+		: '';
+
 	return (
 		<>
-			{ shouldBlockifiedAddToCartWithOptionsBeRegistered && (
+			{ isBlockTheme && (
 				<InspectorControls>
 					<UpgradeNotice blockClientId={ props?.clientId } />
 				</InspectorControls>
@@ -69,7 +71,7 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 					position="bottom right"
 				>
 					<div className="wc-block-editor-add-to-cart-form-container">
-						<Skeleton numberOfLines={ 3 } />
+						<ProductShortDescriptionSkeleton isStatic={ true } />
 						<Disabled>
 							{ ( props.attributes.quantitySelectorStyle ===
 								QuantitySelectorStyle.Input ||
@@ -98,11 +100,16 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 											readOnly
 										/>
 									</div>
-									<button
-										className={ `single_add_to_cart_button alt wp-element-button` }
-									>
-										{ __( 'Add to cart', 'woocommerce' ) }
-									</button>
+									<div className={ buttonBlockClass }>
+										<button
+											className={ `single_add_to_cart_button alt wp-element-button ${ buttonLinkClass }` }
+										>
+											{ __(
+												'Add to cart',
+												'woocommerce'
+											) }
+										</button>
+									</div>
 								</>
 							) }
 							{ props.attributes.quantitySelectorStyle ===
@@ -140,14 +147,16 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 												+
 											</button>
 										</div>
-										<button
-											className={ `single_add_to_cart_button alt wp-element-button` }
-										>
-											{ __(
-												'Add to cart',
-												'woocommerce'
-											) }
-										</button>
+										<div className={ buttonBlockClass }>
+											<button
+												className={ `single_add_to_cart_button alt wp-element-button ${ buttonLinkClass }` }
+											>
+												{ __(
+													'Add to cart',
+													'woocommerce'
+												) }
+											</button>
+										</div>
 									</>
 								) }
 						</Disabled>

@@ -46,9 +46,20 @@ test.describe(
 			} );
 
 			await test.step( 'go to Linked Products', async () => {
-				await page
-					.getByRole( 'link', { name: 'Linked Products' } )
-					.click();
+				await expect( async () => {
+					await page
+						.getByRole( 'link', { name: 'Linked Products' } )
+						.click();
+
+					// Sometimes the click on link is too fast and the initial tab (General) is still visible
+					// so we need to wait make sure the upsell textbox is visible.
+					const upsellTextBoxLocator = page
+						.locator( 'p' )
+						.filter( { hasText: 'Upsells' } )
+						.getByRole( 'textbox' );
+
+					await expect( upsellTextBoxLocator ).toBeVisible();
+				} ).toPass();
 			} );
 		}
 
@@ -155,11 +166,12 @@ test.describe(
 
 			await test.step( 'remove up-sells for a product', async () => {
 				// Using backspace to remove the product because clicking the remove button is flaky
-				await page
+				const upsellTextBoxLocator = page
 					.locator( 'p' )
 					.filter( { hasText: 'Upsells' } )
-					.getByRole( 'textbox' )
-					.click();
+					.getByRole( 'textbox' );
+				await upsellTextBoxLocator.waitFor( { state: 'visible' } );
+				await upsellTextBoxLocator.click();
 				await page.keyboard.press( 'Backspace' );
 
 				await expect(
@@ -270,11 +282,12 @@ test.describe(
 
 			await test.step( 'remove cross-sells for a product', async () => {
 				// Using backspace to remove the product because clicking the remove button is flaky
-				await page
+				const crossSellTextBoxLocator = page
 					.locator( 'p' )
 					.filter( { hasText: 'Cross-sells' } )
-					.getByRole( 'textbox' )
-					.click();
+					.getByRole( 'textbox' );
+				await crossSellTextBoxLocator.waitFor( { state: 'visible' } );
+				await crossSellTextBoxLocator.click();
 				await page.keyboard.press( 'Backspace' );
 
 				await expect(

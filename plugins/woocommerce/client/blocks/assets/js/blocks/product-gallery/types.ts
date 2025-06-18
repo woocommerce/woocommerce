@@ -1,5 +1,4 @@
 export interface ProductGalleryBlockAttributes {
-	cropImages: boolean;
 	hoverZoom: boolean;
 	fullScreenOnClick: boolean;
 }
@@ -11,18 +10,6 @@ export interface ProductGallerySettingsProps {
 	) => void;
 }
 
-export interface ImageDataItem {
-	id: number;
-	src: string;
-	srcSet: string;
-	sizes: string;
-}
-
-interface ImageDataObject {
-	images: Record< number, ImageDataItem >;
-	image_ids: number[];
-}
-
 export interface ProductGalleryContext {
 	selectedImageId: number;
 	isDialogOpen: boolean;
@@ -32,9 +19,7 @@ export interface ProductGalleryContext {
 	touchStartX: number;
 	touchCurrentX: number;
 	isDragging: boolean;
-	userHasInteracted: boolean;
-	imageData: ImageDataObject;
-	image: ImageDataItem;
+	imageData: number[];
 	thumbnailsOverflow: {
 		top: boolean;
 		bottom: boolean;

@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/product-meta",
-	"version": "1.0.0",
 	"title": "Product Meta",
 	"icon": "product",
 	"description": "Display a product’s SKU, categories, tags, and more.",

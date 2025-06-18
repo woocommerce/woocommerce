@@ -49,7 +49,7 @@ test.describe( `${ blockData.name }`, () => {
 
 		await expect( block ).toBeVisible();
 
-		await block.click();
+		await editor.selectBlocks( block );
 		await editor.openDocumentSettingsSidebar();
 		await editor.page.getByRole( 'tab', { name: 'Styles' } ).click();
 
@@ -78,7 +78,8 @@ test.describe( `${ blockData.name }`, () => {
 
 		await expect( block ).toBeVisible();
 
-		await block.click();
+		await editor.selectBlocks( block );
+
 		await editor.openDocumentSettingsSidebar();
 		await editor.page.getByRole( 'tab', { name: 'Settings' } ).click();
 
@@ -103,7 +104,7 @@ test.describe( `${ blockData.name }`, () => {
 		const block = editor.canvas.getByLabel( 'Block: Color' );
 
 		await editor.openDocumentSettingsSidebar();
-		await block.click();
+		await editor.selectBlocks( block );
 
 		await editor.page
 			.getByRole( 'tabpanel' )

@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
@@ -165,12 +164,10 @@ class Checkout extends AbstractBlock {
 			$dependencies[] = 'zxcvbn-async';
 		}
 
-		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			$checkout_fields = Package::container()->get( CheckoutFields::class );
-			// Load schema parser asynchronously if we need it.
-			if ( Validation::has_field_schema( $checkout_fields->get_additional_fields() ) ) {
-				$dependencies[] = 'wc-schema-parser';
-			}
+		$checkout_fields = Package::container()->get( CheckoutFields::class );
+		// Load schema parser asynchronously if we need it.
+		if ( Validation::has_field_schema( $checkout_fields->get_additional_fields() ) ) {
+			$dependencies[] = 'wc-schema-parser';
 		}
 
 		$script = [
@@ -451,7 +448,7 @@ class Checkout extends AbstractBlock {
 		$this->asset_data_registry->add( 'localPickupText', $pickup_location_settings['title'] );
 		$this->asset_data_registry->add( 'localPickupCost', $pickup_location_settings['cost'] );
 		$this->asset_data_registry->add( 'collectableMethodIds', $local_pickup_method_ids );
-		$this->asset_data_registry->add( 'shippingMethodsExist', CartCheckoutUtils::shipping_methods_exist() > 0 );
+		$this->asset_data_registry->add( 'shippingMethodsExist', CartCheckoutUtils::shipping_methods_exist() );
 
 		$is_block_editor = $this->is_block_editor();
 

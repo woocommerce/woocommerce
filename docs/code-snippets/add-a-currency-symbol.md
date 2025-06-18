@@ -1,8 +1,10 @@
 ---
 post_title: Add currencies and symbols
-menu_title: Add currencies and symbols
-tags: code-snippet
+sidebar_label: Add currencies and symbols
+
 ---
+
+# Add currencies and symbols
 
 Add custom currencies to your currencies list:
 

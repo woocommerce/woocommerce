@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Filters A11y: use fieldset for checkbox list and chips blocks.

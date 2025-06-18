@@ -47,12 +47,13 @@ const Form = ( {
 	return (
 		<form ref={ formRef }>
 			<TextControl
-				label={ __( 'Location name', 'woocommerce' ) }
+				label={ __( 'Location name', 'woocommerce' ) + ' *' }
 				name={ 'location_name' }
 				value={ values.name }
 				onChange={ setLocationField( 'name' ) }
 				autoComplete="off"
 				required={ true }
+				aria-required={ true }
 				onInvalid={ (
 					event: React.InvalidEvent< HTMLInputElement >
 				) => {

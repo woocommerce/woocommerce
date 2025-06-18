@@ -2,7 +2,6 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "woocommerce/product-collection",
-	"version": "1.0.0",
 	"title": "Product Collection",
 	"description": "Display a collection of products from your store.",
 	"category": "woocommerce",
@@ -69,5 +68,7 @@
 		"html": false,
 		"__experimentalLayout": true,
 		"interactivity": true
-	}
+	},
+	"editorStyle": "file:../woocommerce/product-collection-editor.css",
+	"style": "file:../woocommerce/product-collection-style.css"
 }

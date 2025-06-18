@@ -3,6 +3,7 @@
  */
 const { omit } = require( 'lodash' );
 const glob = require( 'glob' );
+const { scriptModuleEntries } = require( './webpack-interactivity-entries' );
 
 // List of blocks that should be used as webpack entry points. They are expected
 // to be in `/assets/js/blocks/[BLOCK_NAME]`. If they are not, their relative
@@ -21,9 +22,8 @@ const blocks = {
 	'add-to-cart-with-options-variation-selector': {
 		customDir: 'add-to-cart-with-options/variation-selector',
 	},
-	'add-to-cart-with-options-variation-selector-item': {
-		customDir:
-			'add-to-cart-with-options/variation-selector/attribute-item-template',
+	'add-to-cart-with-options-variation-selector-attribute': {
+		customDir: 'add-to-cart-with-options/variation-selector/attribute',
 	},
 	'add-to-cart-with-options-variation-selector-attribute-name': {
 		customDir: 'add-to-cart-with-options/variation-selector/attribute-name',
@@ -35,13 +35,18 @@ const blocks = {
 	'add-to-cart-with-options-grouped-product-selector': {
 		customDir: 'add-to-cart-with-options/grouped-product-selector',
 	},
-	'add-to-cart-with-options-grouped-product-selector-item': {
+	'add-to-cart-with-options-grouped-product-item': {
 		customDir:
-			'add-to-cart-with-options/grouped-product-selector/product-item-template',
+			'add-to-cart-with-options/grouped-product-selector/product-item',
 	},
-	'add-to-cart-with-options-grouped-product-selector-item-cta': {
+	'add-to-cart-with-options-grouped-product-item-selector': {
 		customDir:
-			'add-to-cart-with-options/grouped-product-selector/product-item-cta',
+			'add-to-cart-with-options/grouped-product-selector/product-item-selector',
+	},
+
+	'add-to-cart-with-options-grouped-product-item-label': {
+		customDir:
+			'add-to-cart-with-options/grouped-product-selector/product-item-label',
 	},
 	'all-products': {
 		customDir: 'products/all-products',
@@ -191,18 +196,47 @@ const blocks = {
 	'blockified-product-reviews': {
 		customDir: 'product-reviews',
 	},
+	'product-specifications': {
+		customDir: 'product-specifications',
+	},
 	'product-review-rating': {
 		customDir: 'product-reviews/inner-blocks/review-rating',
-		isExperimental: true,
 	},
 	'product-reviews-title': {
 		customDir: 'product-reviews/inner-blocks/reviews-title',
-		isExperimental: true,
+	},
+	'product-review-form': {
+		customDir: 'product-reviews/inner-blocks/review-form',
+	},
+	'product-review-date': {
+		customDir: 'product-reviews/inner-blocks/review-date',
+	},
+	'product-review-content': {
+		customDir: 'product-reviews/inner-blocks/review-content',
+	},
+	'product-review-author-name': {
+		customDir: 'product-reviews/inner-blocks/review-author-name',
+	},
+	'product-reviews-pagination': {
+		customDir: 'product-reviews/inner-blocks/reviews-pagination',
+	},
+	'product-reviews-pagination-next': {
+		customDir: 'product-reviews/inner-blocks/reviews-pagination-next',
+	},
+	'product-reviews-pagination-previous': {
+		customDir: 'product-reviews/inner-blocks/reviews-pagination-previous',
+	},
+	'product-reviews-pagination-numbers': {
+		customDir: 'product-reviews/inner-blocks/reviews-pagination-numbers',
+	},
+	'product-review-template': {
+		customDir: 'product-reviews/inner-blocks/review-template',
 	},
 };
 
 /**
  * Blocks that are generic and will likely be pushed up to Gutenberg or a public block registry.
+ * Keep in sync with the generic_blocks array in copy-blocks-json.sh
  */
 const genericBlocks = {
 	'accordion-group': {
@@ -251,42 +285,41 @@ const getBlockEntries = ( relativePath, blockEntries = blocks ) => {
 	);
 };
 
-// `blocks` entries are used to build styles **and** JS, but for
-// frontend JS of these blocks we use a script modules build so
-// we skip building their JS files in the old build.
-// The script modules build handles them in
+// Script module blocks scripts and styles are handled in
 // webpack-config-interactivity-blocks-frontend.js.
-const frontendScriptModuleBlocksToSkip = [
-	'product-gallery',
-	'product-gallery-large-image',
-	'store-notices',
-	'product-collection',
-	'product-filters',
-	'product-filter-status',
-	'product-filter-price',
-	'product-filter-attribute',
-	'product-filter-rating',
-	'product-filter-active',
-	'product-filter-removable-chips',
-	'add-to-cart-form',
-	'add-to-cart-with-options',
-	'add-to-cart-with-options-quantity-selector',
-	'add-to-cart-with-options-variation-selector',
-	'add-to-cart-with-options-variation-selector-attribute-options',
-	'add-to-cart-with-options-grouped-product-selector',
-	'add-to-cart-with-options-grouped-product-selector-item',
-	'accordion-group',
-];
+const frontendScriptModuleBlocksToSkip = Object.keys( scriptModuleEntries );
 
 const frontendEntries = getBlockEntries( 'frontend.{t,j}s{,x}', {
 	...Object.fromEntries(
 		Object.entries( { ...blocks, ...genericBlocks } ).filter(
 			( [ blockName ] ) => {
-				return ! frontendScriptModuleBlocksToSkip.includes( blockName );
+				return ! frontendScriptModuleBlocksToSkip.includes(
+					`woocommerce/${ blockName }`
+				);
 			}
 		)
 	),
 } );
+
+// Remove styles from style build,
+// that are already included in interactivity
+// script modules build.
+const blockStylingEntries = getBlockEntries(
+	'{index,block,frontend}.{t,j}s{,x}',
+	{
+		...Object.fromEntries(
+			Object.entries( {
+				...blocks,
+				...genericBlocks,
+				...cartAndCheckoutBlocks,
+			} ).filter( ( [ blockName ] ) => {
+				return ! frontendScriptModuleBlocksToSkip.includes(
+					`woocommerce/${ blockName }`
+				);
+			} )
+		),
+	}
+);
 
 const entries = {
 	styling: {
@@ -306,11 +339,7 @@ const entries = {
 		'product-details':
 			'./assets/js/atomic/blocks/product-elements/product-details/index.tsx',
 
-		...getBlockEntries( '{index,block,frontend}.{t,j}s{,x}', {
-			...blocks,
-			...genericBlocks,
-			...cartAndCheckoutBlocks,
-		} ),
+		...blockStylingEntries,
 
 		// Templates
 		'wc-blocks-classic-template-revert-button-style':

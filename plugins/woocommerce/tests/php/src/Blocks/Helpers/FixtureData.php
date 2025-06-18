@@ -404,6 +404,79 @@ class FixtureData {
 	}
 
 	/**
+	 * Create a flat rate instance in the default zone.
+	 */
+	public function shipping_add_flat_rate_instance() {
+		$flat_rate    = WC()->shipping()->get_shipping_methods()['flat_rate'];
+		$default_zone = \WC_Shipping_Zones::get_zone( 0 );
+		$default_zone->add_shipping_method( $flat_rate->id );
+		$default_zone->save();
+	}
+
+	/**
+	 * Create a pickup location.
+	 */
+	public function shipping_add_pickup_location() {
+		$pickup_location_settings = array(
+			'enabled'    => 'yes',
+			'title'      => 'Pickup Location',
+			'tax_status' => ProductTaxStatus::TAXABLE,
+			'cost'       => '',
+		);
+		update_option( 'woocommerce_pickup_location_settings', $pickup_location_settings );
+		update_option(
+			'pickup_location_pickup_locations',
+			array(
+				array(
+					'name'    => 'Pickup Location',
+					'address' => array(
+						'address_1' => '123 Main St',
+						'city'      => 'Anytown',
+						'state'     => 'CA',
+						'postcode'  => '12345',
+						'country'   => 'US',
+					),
+					'details' => 'Pickup Location Details',
+					'enabled' => true,
+				),
+			)
+		);
+		add_filter( 'woocommerce_shipping_methods', array( $this, 'woocommerce_shipping_methods_pickup_location_callback' ) );
+	}
+
+	/**
+	 * Add a pickup location to the shipping methods.
+	 *
+	 * @param array $methods The shipping methods.
+	 * @return array The shipping methods.
+	 */
+	public function woocommerce_shipping_methods_pickup_location_callback( $methods ) {
+		$methods['pickup_location'] = 'Automattic\WooCommerce\Blocks\Shipping\PickupLocation';
+		return $methods;
+	}
+
+	/**
+	 * Remove a pickup location.
+	 */
+	public function shipping_remove_pickup_location() {
+		update_option( 'woocommerce_pickup_location_settings', array() );
+		update_option( 'pickup_location_pickup_locations', array() );
+		remove_filter( 'woocommerce_shipping_methods', array( $this, 'woocommerce_shipping_methods_pickup_location_callback' ) );
+	}
+
+	/**
+	 * Remove all methods from the default zone.
+	 */
+	public function shipping_remove_methods_from_default_zone() {
+		WC()->shipping()->unregister_shipping_methods();
+		$default_zone     = \WC_Shipping_Zones::get_zone( 0 );
+		$shipping_methods = $default_zone->get_shipping_methods();
+		foreach ( $shipping_methods as $method ) {
+			$default_zone->delete_shipping_method( $method->instance_id );
+		}
+	}
+
+	/**
 	 * Disables the flat rate method.
 	 *
 	 * @param float $cost Optional. Cost of flat rate method.

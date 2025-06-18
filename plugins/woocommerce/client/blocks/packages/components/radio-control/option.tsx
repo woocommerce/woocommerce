@@ -16,7 +16,8 @@ const Option = ( {
 	option,
 	disabled = false,
 	highlightChecked = false,
-}: RadioControlOptionProps ): JSX.Element => {
+	descriptionStackingDirection,
+}: RadioControlOptionProps ) => {
 	const {
 		value,
 		label,
@@ -75,6 +76,7 @@ const Option = ( {
 				secondaryLabel={ secondaryLabel }
 				description={ description }
 				secondaryDescription={ secondaryDescription }
+				descriptionStackingDirection={ descriptionStackingDirection }
 			/>
 		</label>
 	);

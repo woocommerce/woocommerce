@@ -8,6 +8,8 @@ import { useSelect } from '@wordpress/data';
 import { checkoutStore } from '@woocommerce/block-data';
 import { withFilteredAttributes } from '@woocommerce/shared-hocs';
 import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
+import { useCheckoutAddress } from '@woocommerce/base-context';
+import { useFormFields } from '@woocommerce/base-components/cart-checkout';
 
 /**
  * Internal dependencies
@@ -27,12 +29,17 @@ const FrontendBlock = ( {
 	className?: string;
 } ) => {
 	const { showFormStepNumbers } = useCheckoutBlockContext();
+	const { defaultFields } = useCheckoutAddress();
+	const formFields = useFormFields( ORDER_FORM_KEYS, defaultFields, 'order' );
 	const checkoutIsProcessing = useSelect(
 		( select ) => select( checkoutStore ).isProcessing(),
 		[]
 	);
 
-	if ( ORDER_FORM_KEYS.length === 0 ) {
+	if (
+		formFields.length === 0 ||
+		formFields.every( ( field ) => !! field.hidden )
+	) {
 		return null;
 	}
 

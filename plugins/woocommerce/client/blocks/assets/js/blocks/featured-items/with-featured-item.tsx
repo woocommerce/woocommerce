@@ -7,10 +7,17 @@ import type { BlockAlignment } from '@wordpress/blocks';
 import { ProductResponseItem, isEmpty } from '@woocommerce/types';
 import { Icon, Placeholder, Spinner } from '@wordpress/components';
 import clsx from 'clsx';
-import { useCallback, useState } from '@wordpress/element';
+import {
+	useCallback,
+	useState,
+	useEffect,
+	useRef,
+	useMemo,
+} from '@wordpress/element';
 import { WP_REST_API_Category } from 'wp-types';
 import { useStyleProps } from '@woocommerce/base-hooks';
 import type { ComponentType, Dispatch, SetStateAction } from 'react';
+import { trimCharacters } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
@@ -18,8 +25,9 @@ import type { ComponentType, Dispatch, SetStateAction } from 'react';
 import { CallToAction } from './call-to-action';
 import { ConstrainedResizable } from './constrained-resizable';
 import { EditorBlock, GenericBlockUIConfig } from './types';
-import { useBackgroundImage } from './use-background-image';
+import { BgImageDimensions, useBackgroundImage } from './use-background-image';
 import {
+	getBackgroundColorVisibilityStatus,
 	dimRatioToClass,
 	getBackgroundImageStyles,
 	getClassPrefixFromName,
@@ -46,6 +54,12 @@ export interface FeaturedItemRequiredAttributes {
 	showDesc: boolean;
 	showPrice: boolean;
 	editMode: boolean;
+	backgroundColor: string | undefined;
+	style: { color: { background: string } };
+	backgroundColorVisibilityStatus: {
+		isBackgroundVisible: boolean;
+		message?: string | null;
+	};
 }
 
 interface FeaturedCategoryRequiredAttributes
@@ -113,16 +127,61 @@ export const withFeaturedItem =
 			product,
 			setAttributes,
 		} = props;
-		const { mediaId, mediaSrc } = attributes;
+		const { mediaId, mediaSrc, isRepeated, imageFit } = attributes;
 		const item = category || product;
 		const [ backgroundImageSize, setBackgroundImageSize ] = useState( {} );
-
-		const { backgroundImageSrc } = useBackgroundImage( {
+		const {
+			backgroundImageSrc,
+			isImageBgTransparent,
+			originalImgDimension,
+		} = useBackgroundImage( {
 			item,
 			mediaId,
 			mediaSrc,
 			blockName: name,
 		} );
+		const featuredProductParentRef = useRef( null );
+		const [ parentContainerDimension, setParentContainerDimension ] =
+			useState< BgImageDimensions >( { height: 0, width: 0 } );
+
+		useEffect( () => {
+			// Observes the resizable block's dimension changes.
+			const observer = new ResizeObserver( ( entries ) => {
+				setParentContainerDimension( {
+					height: entries[ 0 ].contentRect.height,
+					width: entries[ 0 ].contentRect.width,
+				} );
+			} );
+
+			if ( isLoading === false ) {
+				const element =
+					featuredProductParentRef.current as HTMLElement | null;
+
+				if ( ! element ) return;
+
+				observer.observe( element );
+			}
+
+			return () => observer.disconnect();
+		}, [ isLoading ] );
+
+		const backgroundColorVisibilityStatus = useMemo(
+			() =>
+				getBackgroundColorVisibilityStatus( {
+					isImageBgTransparent,
+					originalImgDimension,
+					parentContainerDimension,
+					isRepeated,
+					imageFit,
+				} ),
+			[
+				parentContainerDimension,
+				originalImgDimension,
+				isRepeated,
+				imageFit,
+				isImageBgTransparent,
+			]
+		);
 
 		const className = getClassPrefixFromName( name );
 
@@ -181,8 +240,6 @@ export const withFeaturedItem =
 				dimRatio,
 				focalPoint,
 				hasParallax,
-				isRepeated,
-				imageFit,
 				minHeight,
 				overlayColor,
 				overlayGradient,
@@ -242,7 +299,11 @@ export const withFeaturedItem =
 						showHandle={ isSelected }
 						style={ { minHeight } }
 					/>
-					<div className={ containerClass } style={ containerStyle }>
+					<div
+						className={ containerClass }
+						ref={ featuredProductParentRef }
+						style={ containerStyle }
+					>
 						<div className={ `${ className }__wrapper` }>
 							<div
 								className="background-dim__overlay"
@@ -295,7 +356,14 @@ export const withFeaturedItem =
 									dangerouslySetInnerHTML={ {
 										__html:
 											category?.description ||
-											product?.short_description,
+											product?.short_description ||
+											// Returning max 400 character to match the frontend block logic in PHP: see https://github.com/woocommerce/woocommerce/blob/027bf00f291967608abbbd6408193c970dffdd2a/plugins/woocommerce/src/Blocks/BlockTypes/FeaturedProduct.php#L88
+											( product?.description?.length > 0
+												? trimCharacters(
+														product.description,
+														400
+												  )
+												: '' ),
 									} }
 								/>
 							) }
@@ -321,6 +389,9 @@ export const withFeaturedItem =
 				<Component
 					{ ...props }
 					backgroundImageSize={ backgroundImageSize }
+					backgroundColorVisibilityStatus={
+						backgroundColorVisibilityStatus
+					}
 				/>
 			);
 		}
@@ -330,6 +401,9 @@ export const withFeaturedItem =
 				<Component
 					{ ...props }
 					backgroundImageSize={ backgroundImageSize }
+					backgroundColorVisibilityStatus={
+						backgroundColorVisibilityStatus
+					}
 				/>
 				{ item ? renderItem() : renderNoItem() }
 			</>

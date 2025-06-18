@@ -5,7 +5,6 @@ import { useBlockProps } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
 import EditProductLink from '@woocommerce/editor-components/edit-product-link';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
-import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -13,7 +12,6 @@ import { useEffect } from '@wordpress/element';
 import './editor.scss';
 import Block from './block';
 import type { Attributes } from './types';
-import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
 import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
 
 const Edit = ( {
@@ -30,8 +28,6 @@ const Edit = ( {
 		...context,
 	};
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
-	const { isDescendentOfSingleProductBlock } =
-		useIsDescendentOfSingleProductBlock( { blockClientId: blockProps.id } );
 
 	let { isDescendentOfSingleProductTemplate } =
 		useIsDescendentOfSingleProductTemplate();
@@ -39,21 +35,6 @@ const Edit = ( {
 	if ( isDescendentOfQueryLoop ) {
 		isDescendentOfSingleProductTemplate = false;
 	}
-
-	useEffect(
-		() =>
-			setAttributes( {
-				isDescendentOfQueryLoop,
-				isDescendentOfSingleProductTemplate,
-				isDescendentOfSingleProductBlock,
-			} ),
-		[
-			setAttributes,
-			isDescendentOfQueryLoop,
-			isDescendentOfSingleProductTemplate,
-			isDescendentOfSingleProductBlock,
-		]
-	);
 
 	return (
 		<>
@@ -69,7 +50,16 @@ const Edit = ( {
 					attributes.isDescendantOfAllProducts ? undefined : style
 				}
 			>
-				<Block { ...blockAttrs } setAttributes={ setAttributes } />
+				<Block
+					{ ...blockAttrs }
+					setAttributes={ setAttributes }
+					isDescendentOfSingleProductTemplate={
+						isDescendentOfSingleProductTemplate
+					}
+					isDescendantOfAllProducts={
+						attributes.isDescendantOfAllProducts
+					}
+				/>
 			</div>
 		</>
 	);

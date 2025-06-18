@@ -78,14 +78,13 @@
 		"@types/qs": "^6.9.10",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"concurrently": "^7.6.0",
 		"eslint": "^8.55.0",
 		"jest": "27.5.x",
 		"jest-cli": "27.5.x",
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"config": {
 		"ci": {

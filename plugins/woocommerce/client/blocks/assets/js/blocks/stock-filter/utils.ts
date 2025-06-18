@@ -28,10 +28,6 @@ export const getActiveFilters = (
 	return parsedParams.filter( ( param ) => filterKeys.includes( param ) );
 };
 
-export function generateUniqueId() {
-	return Math.floor( Math.random() * Date.now() );
-}
-
 export const formatSlug = ( slug: string ) =>
 	slug
 		.trim()

@@ -16,7 +16,7 @@ describe( 'TotalsCoupon', () => {
 		const user = userEvent.setup();
 		const { rerender } = render( <TotalsCoupon instanceId={ 'coupon' } /> );
 
-		const openCouponFormButton = screen.getByText( 'Add a coupon' );
+		const openCouponFormButton = screen.getByText( 'Add coupons' );
 		expect( openCouponFormButton ).toBeInTheDocument();
 		await act( async () => {
 			await user.click( openCouponFormButton );
@@ -36,8 +36,6 @@ describe( 'TotalsCoupon', () => {
 		} );
 		rerender( <TotalsCoupon instanceId={ 'coupon' } /> );
 
-		// TODO: Fix a recent deprecation of showSpinner prop of Button called in this component.
-		expect( console ).toHaveWarned();
 		expect( screen.getByText( 'Invalid coupon code' ) ).toBeInTheDocument();
 	} );
 } );

@@ -2,7 +2,6 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "woocommerce/all-reviews",
-	"version": "1.0.0",
 	"title": "All Reviews",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],

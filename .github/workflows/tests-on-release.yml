@@ -1,25 +1,28 @@
 name: 'Release checks run'
-run-name: ${{ github.event_name == 'schedule' && 'scheduled' || github.event_name == 'workflow_dispatch' && 'on demand'  || github.event_name == 'release' && 'release' || '' }} checks for ${{ inputs.tag != '' && inputs.tag || github.ref_name }}
+run-name: ${{ github.event_name == 'schedule' && 'scheduled' || github.event_name == 'release' && 'release' || '' }} checks ${{ github.ref_name != 'trunk' && github.ref_name || '' }}
 
 on:
   schedule:
     - cron: '0 3 * * *' # Runs at 3 AM UTC.
   release:
     types: [ published, edited ]
-  workflow_dispatch:
-    inputs:
-      tag:
-        type: string
-        description: 'The tag name to run tests on. It needs to have a corresponding release published.'
-        required: true
 
 jobs:
-  run-tests:
-    name: 'Run tests'
-    if: github.repository == 'woocommerce/woocommerce'
+  run-nightly-checks:
+    name: 'Run nightly checks'
+    if: github.repository == 'woocommerce/woocommerce' && github.event_name == 'schedule'
     uses: ./.github/workflows/ci.yml
     with:
-      trigger: ${{ github.event_name == 'schedule' && 'nightly-checks' || 'release-checks' }}
+      trigger: 'nightly-checks'
       refName: 'nightly'
-      artifactName: ${{ github.event_name == 'schedule' && 'woocommerce-trunk-nightly.zip' || 'woocommerce.zip' }}
+      artifactName: 'woocommerce-trunk-nightly.zip'
+    secrets: inherit
+
+  run-release-checks:
+    name: 'Run release checks'
+    if: github.repository == 'woocommerce/woocommerce' && github.event_name == 'release'
+    uses: ./.github/workflows/ci.yml
+    with:
+      trigger: 'release-checks'
+      artifactName: 'woocommerce.zip'
     secrets: inherit

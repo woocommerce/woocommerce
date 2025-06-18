@@ -118,9 +118,10 @@ final class ProductFilterAttribute extends AbstractBlock {
 		);
 
 		foreach ( $active_product_attributes as $product_attribute ) {
-			if ( empty( $params[ "filter_{$product_attribute}" ] ) ) {
+			if ( empty( $params[ "filter_{$product_attribute}" ] ) || ! is_string( $params[ "filter_{$product_attribute}" ] ) ) {
 				continue;
 			}
+
 			$terms                = explode( ',', $params[ "filter_{$product_attribute}" ] );
 			$attribute_label      = wc_attribute_label( "pa_{$product_attribute}" );
 			$attribute_query_type = $params[ "query_type_{$product_attribute}" ] ?? 'or';
@@ -183,13 +184,14 @@ final class ProductFilterAttribute extends AbstractBlock {
 		$filter_params    = $block->context['filterParams'] ?? array();
 		$selected_terms   = array();
 
-		if ( $filter_params && ! empty( $filter_params[ $filter_param_key ] ) ) {
+		if ( $filter_params && ! empty( $filter_params[ $filter_param_key ] ) && is_string( $filter_params[ $filter_param_key ] ) ) {
 			$selected_terms = array_filter( explode( ',', $filter_params[ $filter_param_key ] ) );
 		}
 
 		$filter_context = array(
 			'showCounts' => $block_attributes['showCounts'] ?? false,
 			'items'      => array(),
+			'groupLabel' => $product_attribute->name,
 		);
 
 		if ( ! empty( $attribute_counts ) ) {
@@ -197,9 +199,9 @@ final class ProductFilterAttribute extends AbstractBlock {
 				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute ) {
 					$term          = (array) $term;
 					$term['count'] = $attribute_counts[ $term['term_id'] ] ?? 0;
+
 					return array(
 						'label'              => $term['name'],
-						'ariaLabel'          => $term['name'],
 						'value'              => $term['slug'],
 						'selected'           => in_array( $term['slug'], $selected_terms, true ),
 						'count'              => $term['count'],
@@ -214,8 +216,9 @@ final class ProductFilterAttribute extends AbstractBlock {
 		}
 
 		$wrapper_attributes = array(
-			'data-wp-key'     => wp_unique_prefixed_id( $this->get_full_block_name() ),
-			'data-wp-context' => wp_json_encode(
+			'data-wp-interactive' => 'woocommerce/product-filters',
+			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
+			'data-wp-context'     => wp_json_encode(
 				array(
 					'activeLabelTemplate' => "$product_attribute->name: {{label}}",
 					'filterType'          => 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug ),
@@ -226,6 +229,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		if ( empty( $filter_context['items'] ) ) {
 			$wrapper_attributes['hidden'] = true;
+			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 		}
 
 		return sprintf(
@@ -275,7 +279,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		foreach ( $counts as $key => $value ) {
 			$attribute_counts[] = array(
 				'term'  => $key,
-				'count' => $value,
+				'count' => intval( $value ),
 			);
 		}
 
@@ -408,10 +412,18 @@ final class ProductFilterAttribute extends AbstractBlock {
 	}
 
 	/**
-	 * Disable the block type script, this uses script modules.
+	 * Disable the editor style handle for this block type.
 	 *
-	 * @param string|null $key The key.
+	 * @return null
+	 */
+	protected function get_block_type_editor_style() {
+		return null;
+	}
+
+	/**
+	 * Disable the script handle for this block type. We use block.json to load the script.
 	 *
+	 * @param string|null $key The key of the script to get.
 	 * @return null
 	 */
 	protected function get_block_type_script( $key = null ) {

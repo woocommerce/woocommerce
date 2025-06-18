@@ -4,8 +4,9 @@
 import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import { BlockEditProps } from '@wordpress/blocks';
+
 import { Disabled } from '@wordpress/components';
-import { Skeleton } from '@woocommerce/base-components/skeleton';
+import { ProductShortDescriptionSkeleton } from '@woocommerce/base-components/skeleton/patterns/product-short-description';
 import { useProductDataContext } from '@woocommerce/shared-context';
 import {
 	BlockControls,
@@ -21,15 +22,6 @@ import { DowngradeNotice } from '../components/downgrade-notice';
 import { useProductTypeSelector } from '../../../shared/stores/product-type-template-state';
 import type { Attributes } from '../types';
 import { AddToCartWithOptionsEditTemplatePart } from './edit-template-part';
-import '../edit.scss';
-
-export type FeaturesKeys = 'isBlockifiedAddToCart';
-
-export type FeaturesProps = {
-	[ key in FeaturesKeys ]?: boolean;
-};
-
-export type UpdateFeaturesType = ( key: FeaturesKeys, value: boolean ) => void;
 
 const AddToCartOptionsEdit = ( props: BlockEditProps< Attributes > ) => {
 	const { product } = useProductDataContext();
@@ -71,7 +63,7 @@ const AddToCartOptionsEdit = ( props: BlockEditProps< Attributes > ) => {
 			) : (
 				<div { ...blockProps }>
 					<div className="wp-block-woocommerce-add-to-cart-with-options__skeleton-wrapper">
-						<Skeleton numberOfLines={ 3 } />
+						<ProductShortDescriptionSkeleton />
 					</div>
 					<Disabled>
 						<button

@@ -3,11 +3,14 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes\Reviews;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 
 /**
  * ProductReviews class.
  */
 class ProductReviews extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -16,22 +19,24 @@ class ProductReviews extends AbstractBlock {
 	protected $block_name = 'blockified-product-reviews';
 
 	/**
-	 * Get the frontend style handle for this block type.
+	 * Render the block.
 	 *
-	 * @return string[]|null
+	 * @param array    $attributes Block attributes.
+	 * @param string   $content Block content.
+	 * @param WP_Block $block Block instance.
+	 *
+	 * @return string Rendered block output.
 	 */
-	protected function get_block_type_style() {
-		return null;
-	}
+	protected function render( $attributes, $content, $block ) {
+		if ( ! comments_open() ) {
+			return '';
+		}
 
-	/**
-	 * Get the frontend script handle for this block type.
-	 *
-	 * @see $this->register_block_type()
-	 * @param string $key Data to get, or default to everything.
-	 * @return array|string|null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
+		$p = new \WP_HTML_Tag_Processor( $content );
+		$p->next_tag();
+		$p->set_attribute( 'data-wp-interactive', $this->get_full_block_name() );
+		$p->set_attribute( 'data-wp-router-region', $this->get_full_block_name() );
+
+		return $p->get_updated_html();
 	}
 }

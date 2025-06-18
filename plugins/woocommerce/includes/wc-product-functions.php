@@ -157,12 +157,31 @@ function wc_delete_product_transients( $post_id = 0 ) {
 			// Schedule the async deletion of related product transients.
 			// This should run async cause it also fetches all related products
 			// of the current product to be deleted which we can can't be sure how many there are.
-			WC()->queue()->schedule_single(
-				time(),
-				'wc_delete_related_product_transients_async',
-				array( 'post_id' => $post_id ),
-				'wc_delete_related_product_transients_group'
-			);
+
+			// Add static cache here which is used to check if the transient is already scheduled.
+			// The cache exists ONLY on the current request to prevent searching the DB for every product.
+			static $scheduled = array();
+			$cache_key        = (int) $post_id;
+			$queue            = WC()->queue();
+
+			if ( ! isset( $scheduled[ $cache_key ] ) ) {
+				$existing                = $queue->get_next(
+					'wc_delete_related_product_transients_async',
+					array( 'post_id' => $post_id ),
+					'wc_delete_related_product_transients_group'
+				);
+				$scheduled[ $cache_key ] = null !== $existing;
+			}
+
+			if ( ! $scheduled[ $cache_key ] ) {
+				$queue->schedule_single(
+					time(),
+					'wc_delete_related_product_transients_async',
+					array( 'post_id' => $post_id ),
+					'wc_delete_related_product_transients_group'
+				);
+				$scheduled[ $cache_key ] = true;
+			}
 		}
 	}
 
@@ -180,8 +199,6 @@ function wc_delete_product_transients( $post_id = 0 ) {
  * @param int $post_id The product ID updated/created.
  */
 function wc_delete_related_product_transients( $post_id ) {
-	global $wpdb;
-
 	if ( ! is_numeric( $post_id ) ) {
 		return;
 	}
@@ -401,7 +418,7 @@ add_action( 'template_redirect', 'wc_product_canonical_redirect', 5 );
  * @return string
  */
 function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
-	$src               = WC()->plugin_url() . '/assets/images/placeholder.png';
+	$src               = WC()->plugin_url() . '/assets/images/placeholder.webp';
 	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
 
 	if ( ! empty( $placeholder_image ) ) {
@@ -1163,6 +1180,8 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 			'excluded_ids' => $exclude_ids,
 		)
 	);
+
+	$related_posts = is_array( $related_posts ) ? $related_posts : array();
 
 	if ( apply_filters( 'woocommerce_product_related_posts_shuffle', true ) ) {
 		shuffle( $related_posts );

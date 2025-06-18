@@ -76,7 +76,7 @@
 		"typescript": "5.7.x",
 		"webpack": "5.97.x",
 		"webpack-cli": "5.1.x",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"config": {
 		"ci": {

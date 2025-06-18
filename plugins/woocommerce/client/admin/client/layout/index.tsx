@@ -52,6 +52,7 @@ import { Header } from '../header';
 import { Footer } from './footer';
 import { TransientNotices } from './transient-notices';
 import { usePageClasses, Page } from './hooks/use-page-classes';
+import MarketplaceBanner from '../marketplace/components/banner/banner';
 
 const BaseLayout = ( { page }: { page: Page } ) => {
 	const { activePlugins, installedPlugins, isJetpackConnected } = useSelect(
@@ -70,6 +71,7 @@ const BaseLayout = ( { page }: { page: Page } ) => {
 	const matchFromRouter = useMatch( location.pathname );
 	const params = useParams();
 	const match = { params, url: matchFromRouter?.pathname };
+	const isMarketplacePage = location.pathname.includes( '/extensions' );
 
 	usePageClasses( page );
 
@@ -147,6 +149,7 @@ const BaseLayout = ( { page }: { page: Page } ) => {
 		>
 			<SlotFillProvider>
 				<div className="woocommerce-layout">
+					{ isMarketplacePage && <MarketplaceBanner /> }
 					{ showHeader && (
 						<Header
 							sections={

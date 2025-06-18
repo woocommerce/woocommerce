@@ -64,7 +64,7 @@
 		"@wordpress/compose": "wp-6.6",
 		"@wordpress/element": "wp-6.6",
 		"@wordpress/i18n": "wp-6.6",
-		"classnames": "^2.3.2",
+		"clsx": "2.1.x",
 		"gridicons": "^3.4.2",
 		"react": "18.3.x",
 		"string-similarity": "4.0.4"
@@ -75,12 +75,10 @@
 		"@types/jest": "27.5.x",
 		"@types/react": "18.3.x",
 		"@types/string-similarity": "4.0.0",
-		"@types/wordpress__data": "6.0.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
 		"@wordpress/browserslist-config": "next",
-		"concurrently": "^7.6.0",
 		"css-loader": "6.11.x",
 		"eslint": "^8.55.0",
 		"jest": "27.5.x",
@@ -93,7 +91,7 @@
 		"typescript": "5.7.x",
 		"webpack": "5.97.x",
 		"webpack-cli": "5.1.x",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"publishConfig": {
 		"access": "public"

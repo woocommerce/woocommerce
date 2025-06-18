@@ -6,7 +6,6 @@ import { InspectorControls } from '@wordpress/block-editor';
 import { useSelect } from '@wordpress/data';
 import { addFilter } from '@wordpress/hooks';
 import { type ElementType } from '@wordpress/element';
-import { ProductQueryFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 import { EditorBlock, isNumber } from '@woocommerce/types';
 import { usePrevious } from '@woocommerce/base-hooks';
 import {
@@ -272,9 +271,6 @@ export const withProductQueryControls =
 			<>
 				<ProductQueryControls { ...props } />
 				<BlockEdit { ...props } />
-				<InspectorControls>
-					<ProductQueryFeedbackPrompt />
-				</InspectorControls>
 			</>
 		) : (
 			<BlockEdit { ...props } />

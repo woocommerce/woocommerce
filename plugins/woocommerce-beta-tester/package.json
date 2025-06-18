@@ -24,7 +24,7 @@
 		"ts-loader": "9.5.x",
 		"typescript": "5.7.x",
 		"uglify-js": "^3.17.4",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"dependencies": {
 		"@emotion/react": "^11.11.1",

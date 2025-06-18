@@ -1,29 +1,29 @@
 /**
  * External dependencies
  */
-import { registerBlockType } from '@wordpress/blocks';
+import { registerProductBlockType } from '@woocommerce/atomic-utils';
 import { percent, Icon } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
-import sharedConfig from '../shared/config';
 import edit from './edit';
-import { supports } from './support';
 import metadata from './block.json';
+import deprecated from './deprecated';
 
-registerBlockType( metadata, {
-	...sharedConfig,
+const blockConfig = {
+	...metadata,
 	icon: (
 		<Icon
 			icon={ percent }
 			className="wc-block-editor-components-block-icon"
 		/>
 	),
-	supports,
 	edit,
-	ancestor: [
-		...( sharedConfig.ancestor || [] ),
-		'woocommerce/product-gallery',
-	],
+	save: () => null,
+	deprecated,
+};
+
+registerProductBlockType( blockConfig, {
+	isAvailableOnPostEditor: true,
 } );

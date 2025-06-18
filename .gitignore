@@ -12,6 +12,7 @@ project.properties
 *.sublime-project
 *.sublime-workspace
 .sublimelinterrc
+.claude
 
 # Grunt
 none
@@ -114,3 +115,8 @@ changes.json
 # Cursor related files
 .cursorignore
 .cursorindexingignore
+.cursor/rules/custom-*
+.cursor/rules/local-*
+
+# Docusaurus
+.docusaurus

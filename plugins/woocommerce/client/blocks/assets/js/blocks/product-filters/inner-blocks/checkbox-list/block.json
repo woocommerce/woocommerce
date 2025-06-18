@@ -1,28 +1,21 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "woocommerce/product-filter-checkbox-list",
-	"version": "1.0.0",
 	"title": "List",
 	"description": "Display a list of filter options.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"ancestor": [
 		"woocommerce/product-filter-attribute",
-		"woocommerce/product-filter-status"
+		"woocommerce/product-filter-status",
+		"woocommerce/product-filter-rating"
 	],
 	"supports": {
-		"color": {
-			"enableContrastChecker": false
-		},
 		"interactivity": true
 	},
-	"usesContext": [
-		"filterData"
-	],
+	"usesContext": [ "filterData" ],
 	"attributes": {
 		"optionElementBorder": {
 			"type": "string",
@@ -47,6 +40,17 @@
 		"customOptionElement": {
 			"type": "string",
 			"default": ""
+		},
+		"labelElement": {
+			"type": "string",
+			"default": ""
+		},
+		"customLabelElement": {
+			"type": "string",
+			"default": ""
 		}
-	}
+	},
+	"viewScriptModule": "woocommerce/product-filter-checkbox-list",
+	"style": "file:../woocommerce/product-filter-checkbox-list-style.css",
+	"editorStyle": "file:../woocommerce/product-filter-checkbox-list-editor.css"
 }

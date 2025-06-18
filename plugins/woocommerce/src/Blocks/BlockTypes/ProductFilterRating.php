@@ -118,12 +118,12 @@ final class ProductFilterRating extends AbstractBlock {
 		$selected_rating        = array_filter( explode( ',', $rating_query ) );
 
 		$filter_options = array_map(
-			function ( $rating ) use ( $selected_rating, $attributes ) {
+			function ( $rating ) use ( $selected_rating ) {
 				$value = (string) $rating['rating'];
 
 				$aria_label = sprintf(
-					/* translators: %s is referring to rating value. Example: Rated 4 out of 5. */
-					__( 'Rated %s out of 5', 'woocommerce' ),
+					/* translators: %1$d is referring to rating value. Example: Rated 4 out of 5. */
+					__( 'Rated %1$d out of 5', 'woocommerce' ),
 					$value,
 				);
 
@@ -142,11 +142,13 @@ final class ProductFilterRating extends AbstractBlock {
 		$filter_context = array(
 			'items'      => $filter_options,
 			'showCounts' => $attributes['showCounts'] ?? false,
+			'groupLabel' => __( 'Rating', 'woocommerce' ),
 		);
 
 		$wrapper_attributes = array(
-			'data-wp-key'     => wp_unique_prefixed_id( $this->get_full_block_name() ),
-			'data-wp-context' => wp_json_encode(
+			'data-wp-interactive' => 'woocommerce/product-filters',
+			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
+			'data-wp-context'     => wp_json_encode(
 				array(
 					/* translators: {{label}} is the rating filter item label. */
 					'activeLabelTemplate' => __( 'Rating: {{label}}', 'woocommerce' ),
@@ -158,6 +160,7 @@ final class ProductFilterRating extends AbstractBlock {
 
 		if ( empty( $filter_options ) ) {
 			$wrapper_attributes['hidden'] = true;
+			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 		}
 
 		return sprintf(
@@ -181,7 +184,7 @@ final class ProductFilterRating extends AbstractBlock {
 	 * @return string|false
 	 */
 	private function render_rating_label( $rating ) {
-		$width = $rating * 20;
+		$view_box_width = $rating * 24;
 
 		$rating_label = sprintf(
 			/* translators: %1$d is referring to rating value. Example: Rated 4 out of 5. */
@@ -191,11 +194,24 @@ final class ProductFilterRating extends AbstractBlock {
 
 		ob_start();
 		?>
-		<div class="wc-block-components-product-rating">
-			<div class="wc-block-components-product-rating__stars" role="img" aria-label="<?php echo esc_attr( $rating_label ); ?>">
-				<span style="width: <?php echo esc_attr( $width ); ?>%" aria-hidden="true"></span>
-			</div>
-		</div>
+			<svg
+				width="<?php echo esc_attr( $view_box_width ); ?>"
+				height="24"
+				viewBox="0 0 <?php echo esc_attr( $view_box_width ); ?> 24"
+				fill="currentColor"
+				aria-label="<?php echo esc_attr( $rating_label ); ?>"
+			>
+				<?php
+				for ( $i = 0; $i < $rating; $i++ ) {
+					?>
+					<path
+						d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+						transform="translate(<?php echo esc_attr( $i * 24 ); ?>, 0)"
+					/>
+					<?php
+				}
+				?>
+			</svg>
 		<?php
 		return ob_get_clean();
 	}
@@ -227,7 +243,7 @@ final class ProductFilterRating extends AbstractBlock {
 		foreach ( $counts as $key => $value ) {
 			$data[] = array(
 				'rating' => $key,
-				'count'  => $value,
+				'count'  => intval( $value ),
 			);
 		}
 
@@ -235,10 +251,18 @@ final class ProductFilterRating extends AbstractBlock {
 	}
 
 	/**
-	 * Disable the block type script, this uses script modules.
+	 * Disable the editor style handle for this block type.
 	 *
-	 * @param string|null $key The key.
+	 * @return null
+	 */
+	protected function get_block_type_editor_style() {
+		return null;
+	}
+
+	/**
+	 * Disable the script handle for this block type. We use block.json to load the script.
 	 *
+	 * @param string|null $key The key of the script to get.
 	 * @return null
 	 */
 	protected function get_block_type_script( $key = null ) {

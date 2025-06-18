@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/product-results-count",
-	"version": "1.0.0",
 	"title": "Product Results Count",
 	"description": "Display the number of products on the archive page or search result page.",
 	"category": "woocommerce",

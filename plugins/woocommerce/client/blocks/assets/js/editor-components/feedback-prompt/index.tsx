@@ -71,14 +71,3 @@ export const CartCheckoutFeedbackPrompt = () => (
 		url="https://github.com/woocommerce/woocommerce/discussions/new?category=checkout-flow&labels=type%3A+product%20feedback"
 	/>
 );
-
-export const ProductQueryFeedbackPrompt = () => (
-	<FeedbackPrompt
-		text={ __(
-			'Thanks for trying out the Products block! Help us make it better by sharing your feedback.',
-			'woocommerce'
-		) }
-		title={ __( 'Share your feedback!', 'woocommerce' ) }
-		url={ 'https://airtable.com/shrFX5FAqmCY6hVYI' }
-	/>
-);

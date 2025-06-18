@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { expect } from '@woocommerce/e2e-utils';
+import { expect, RequestUtils } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -14,8 +14,8 @@ import {
 } from './constants';
 
 export class CheckoutPage {
-	private BLOCK_NAME = 'woocommerce/checkout';
 	public page: Page;
+	public requestUtils: RequestUtils;
 	private testData = {
 		...{
 			firstname: 'John',
@@ -32,8 +32,15 @@ export class CheckoutPage {
 		},
 	};
 
-	constructor( { page }: { page: Page } ) {
+	constructor( {
+		page,
+		requestUtils,
+	}: {
+		page: Page;
+		requestUtils: RequestUtils;
+	} ) {
 		this.page = page;
+		this.requestUtils = requestUtils;
 	}
 
 	async isShippingRateSelected(
@@ -647,5 +654,18 @@ export class CheckoutPage {
 		await expect(
 			billingAddressSection.getByText( addresssecondline )
 		).toBeVisible();
+	}
+
+	/**
+	 * Selects a delivery option in the checkout page.
+	 *
+	 * @param {'Ship' | 'Pickup'} option - The delivery option to select.
+	 */
+	async selectDeliveryOption( option: 'Ship' | 'Pickup' ) {
+		await this.page
+			.getByRole( 'radio', { name: option, exact: true } )
+			.click();
+		// Wait for the shipping rate selection request to complete
+		await this.waitForCheckoutToFinishUpdating();
 	}
 }

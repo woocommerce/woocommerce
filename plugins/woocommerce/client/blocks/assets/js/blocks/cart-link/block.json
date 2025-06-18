@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/cart-link",
-	"version": "1.0.0",
 	"title": "Cart Link",
 	"icon": "cart",
 	"description": "Display a link to the cart.",

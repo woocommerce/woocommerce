@@ -23,6 +23,8 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preproces
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Cleanup_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Spacing_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Typography_Preprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Quote_Preprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Border_Style_Postprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Process_Manager;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Send_Preview_Email;
@@ -31,6 +33,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates;
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\User_Theme;
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer;
 
 defined( 'ABSPATH' ) || exit;
@@ -41,6 +44,8 @@ defined( 'ABSPATH' ) || exit;
 class Email_Editor_Container {
 	/**
 	 * Init method.
+	 *
+	 * @return void
 	 */
 	public static function init() {
 		self::container()->get( Bootstrap::class )->init();
@@ -53,7 +58,7 @@ class Email_Editor_Container {
 	 * with a different compatible container.
 	 *
 	 * @param boolean $reset Used to reset the container to a fresh instance. Note: this means all dependencies will be reconstructed.
-	 * @return mixed
+	 * @return Container
 	 */
 	public static function container( $reset = false ) {
 		static $container;
@@ -144,6 +149,12 @@ class Email_Editor_Container {
 			}
 		);
 		$container->register(
+			Quote_Preprocessor::class,
+			function () {
+				return new Quote_Preprocessor();
+			}
+		);
+		$container->register(
 			Highlighting_Postprocessor::class,
 			function () {
 				return new Highlighting_Postprocessor();
@@ -156,6 +167,12 @@ class Email_Editor_Container {
 			}
 		);
 		$container->register(
+			Border_Style_Postprocessor::class,
+			function () {
+				return new Border_Style_Postprocessor();
+			}
+		);
+		$container->register(
 			Process_Manager::class,
 			function ( $container ) {
 				return new Process_Manager(
@@ -163,8 +180,10 @@ class Email_Editor_Container {
 					$container->get( Blocks_Width_Preprocessor::class ),
 					$container->get( Typography_Preprocessor::class ),
 					$container->get( Spacing_Preprocessor::class ),
+					$container->get( Quote_Preprocessor::class ),
 					$container->get( Highlighting_Postprocessor::class ),
 					$container->get( Variables_Postprocessor::class ),
+					$container->get( Border_Style_Postprocessor::class )
 				);
 			}
 		);
@@ -180,7 +199,6 @@ class Email_Editor_Container {
 				return new Content_Renderer(
 					$container->get( Process_Manager::class ),
 					$container->get( Blocks_Registry::class ),
-					$container->get( Settings_Controller::class ),
 					new Email_Css_Inliner(),
 					$container->get( Theme_Controller::class ),
 				);
@@ -199,8 +217,10 @@ class Email_Editor_Container {
 		);
 		$container->register(
 			Personalization_Tags_Registry::class,
-			function () {
-				return new Personalization_Tags_Registry();
+			function ( $container ) {
+				return new Personalization_Tags_Registry(
+					$container->get( Email_Editor_Logger::class )
+				);
 			}
 		);
 		$container->register(
@@ -235,6 +255,12 @@ class Email_Editor_Container {
 			}
 		);
 		$container->register(
+			Email_Editor_Logger::class,
+			function () {
+				return new Email_Editor_Logger();
+			}
+		);
+		$container->register(
 			Email_Editor::class,
 			function ( $container ) {
 				return new Email_Editor(
@@ -243,6 +269,7 @@ class Email_Editor_Container {
 					$container->get( Patterns::class ),
 					$container->get( Send_Preview_Email::class ),
 					$container->get( Personalization_Tags_Registry::class ),
+					$container->get( Email_Editor_Logger::class )
 				);
 			}
 		);

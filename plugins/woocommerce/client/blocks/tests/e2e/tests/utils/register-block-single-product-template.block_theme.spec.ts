@@ -132,6 +132,7 @@ test.describe( 'registerProductBlockType registers', () => {
 	test( 'blocks which are registered via the registerProductBlockType function are visible in the templates data views', async ( {
 		admin,
 		page,
+		wpCoreVersion,
 	} ) => {
 		const productBlockTypes = [
 			'woocommerce/product-price',
@@ -142,15 +143,22 @@ test.describe( 'registerProductBlockType registers', () => {
 			'site-editor.php?postType=wp_template&activeView=WooCommerce'
 		);
 
-		const singleProductTemplate = page.getByRole( 'button', {
-			name: 'Single Product',
-		} );
+		const singleProductTemplate =
+			wpCoreVersion >= 6.8
+				? page.getByLabel( 'Single Product' )
+				: page.getByRole( 'button', { name: 'Single Product' } );
 
 		await expect( singleProductTemplate ).toBeVisible();
 
 		const previewCanvas = singleProductTemplate.frameLocator(
 			'iframe[title="Editor canvas"]'
 		);
+
+		// Wait for the iframe to be fully loaded.
+		await previewCanvas.locator( 'body' ).evaluate( () => {
+			return document?.readyState === 'complete';
+		} );
+
 		for ( const blockType of productBlockTypes ) {
 			const block = previewCanvas.locator(
 				`[data-type="${ blockType }"]`

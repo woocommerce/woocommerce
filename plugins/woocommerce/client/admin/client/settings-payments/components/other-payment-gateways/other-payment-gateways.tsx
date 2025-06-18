@@ -1,16 +1,17 @@
 /**
  * External dependencies
  */
+import React from 'react';
 import { Gridicon } from '@automattic/components';
 import { Button, Popover } from '@wordpress/components';
-import React, { useState, useMemo } from '@wordpress/element';
+import { useState, useMemo, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
-	SuggestedPaymentExtension,
-	SuggestedPaymentExtensionCategory,
+	PaymentsEntity,
+	SuggestedPaymentsExtension,
+	SuggestedPaymentsExtensionCategory,
 } from '@woocommerce/data';
-import { useDebounce } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -18,26 +19,30 @@ import { useDebounce } from '@wordpress/compose';
 import { GridItemPlaceholder } from '~/settings-payments/components/grid-item-placeholder';
 import { OfficialBadge } from '../official-badge';
 import { IncentiveStatusBadge } from '~/settings-payments/components/incentive-status-badge';
+import { recordPaymentsEvent } from '~/settings-payments/utils';
 
 interface OtherPaymentGatewaysProps {
 	/**
 	 * Array of suggested payment extensions.
 	 */
-	suggestions: SuggestedPaymentExtension[];
+	suggestions: SuggestedPaymentsExtension[];
 	/**
 	 * Array of categories for the suggested payment extensions.
 	 */
-	suggestionCategories: SuggestedPaymentExtensionCategory[];
+	suggestionCategories: SuggestedPaymentsExtensionCategory[];
 	/**
 	 * The ID of the plugin currently being installed, or `null` if none.
 	 */
 	installingPlugin: string | null;
 	/**
-	 * Callback to handle plugin setup. Accepts the plugin ID, slug, and onboarding URL (if available).
+	 * Callback to set up the plugin.
+	 *
+	 * @param provider      Extension provider.
+	 * @param onboardingUrl Extension onboarding URL (if available).
+	 * @param attachUrl     Extension attach URL (if available).
 	 */
-	setupPlugin: (
-		id: string,
-		slug: string,
+	setUpPlugin: (
+		provider: PaymentsEntity,
 		onboardingUrl: string | null,
 		attachUrl: string | null
 	) => void;
@@ -60,7 +65,7 @@ export const OtherPaymentGateways = ( {
 	suggestions,
 	suggestionCategories,
 	installingPlugin,
-	setupPlugin,
+	setUpPlugin,
 	isFetching,
 	morePaymentOptionsLink,
 }: OtherPaymentGatewaysProps ) => {
@@ -71,13 +76,48 @@ export const OtherPaymentGateways = ( {
 	const [ isExpanded, setIsExpanded ] = useState( initialExpanded );
 	const [ categoryIdWithPopoverVisible, setCategoryIdWithPopoverVisible ] =
 		useState( '' );
+	const buttonRefs = useRef< Record< string, HTMLSpanElement | null > >( {} );
 
-	const hidePopoverDebounced = useDebounce( () => {
+	const handleInfoIconClick = (
+		event: React.MouseEvent | React.KeyboardEvent,
+		categoryId: string
+	) => {
+		const clickedElement = event.target as HTMLElement;
+		const parentSpan = clickedElement.closest(
+			'.other-payment-gateways__content__title__icon-container'
+		);
+
+		const targetRef = buttonRefs.current[ categoryId ] ?? null;
+		if ( targetRef && parentSpan !== targetRef ) {
+			return;
+		}
+
+		setCategoryIdWithPopoverVisible(
+			categoryId === categoryIdWithPopoverVisible ? '' : categoryId
+		);
+	};
+
+	const handleFocusOutsidePopover = () => {
 		setCategoryIdWithPopoverVisible( '' );
-	}, 350 );
-	const showPopover = ( categoryId: string ) => {
-		setCategoryIdWithPopoverVisible( categoryId );
-		hidePopoverDebounced.cancel();
+	};
+
+	const handleSectionToggle = () => {
+		const expand = ! isExpanded;
+
+		// Record the event when user clicks on the section.
+		recordPaymentsEvent( 'other_payment_options_section_click', {
+			action: expand ? 'expand' : 'collapse',
+		} );
+
+		setIsExpanded( expand );
+
+		// Update the URL params to reflect the expanded state.
+		urlParams.set( 'other_pes_section', expand ? 'expanded' : 'collapsed' );
+		window.history.replaceState(
+			{},
+			document.title,
+			window.location.pathname + '?' + urlParams.toString()
+		);
 	};
 
 	// Group suggestions by category.
@@ -87,8 +127,8 @@ export const OtherPaymentGateways = ( {
 				(
 					category
 				): {
-					category: SuggestedPaymentExtensionCategory;
-					suggestions: SuggestedPaymentExtension[];
+					category: SuggestedPaymentsExtensionCategory;
+					suggestions: SuggestedPaymentsExtension[];
 				} => {
 					return {
 						category,
@@ -158,33 +198,28 @@ export const OtherPaymentGateways = ( {
 								</h3>
 								<span
 									className="other-payment-gateways__content__title__icon-container"
-									onClick={ () =>
-										setCategoryIdWithPopoverVisible(
-											category.id ===
-												categoryIdWithPopoverVisible
-												? ''
-												: category.id
+									onClick={ ( event ) =>
+										handleInfoIconClick(
+											event,
+											category.id
 										)
 									}
-									onMouseEnter={ () =>
-										showPopover( category.id )
-									}
-									onMouseLeave={ hidePopoverDebounced }
 									onKeyDown={ ( event ) => {
 										if (
 											event.key === 'Enter' ||
 											event.key === ' '
 										) {
-											setCategoryIdWithPopoverVisible(
-												category.id ===
-													categoryIdWithPopoverVisible
-													? ''
-													: category.id
+											handleInfoIconClick(
+												event,
+												category.id
 											);
 										}
 									} }
 									tabIndex={ 0 }
 									role="button"
+									ref={ ( el ) => {
+										buttonRefs.current[ category.id ] = el;
+									} }
 								>
 									<Gridicon
 										icon="info-outline"
@@ -200,7 +235,9 @@ export const OtherPaymentGateways = ( {
 											focusOnMount={ true }
 											noArrow={ true }
 											shift={ true }
-											onClose={ hidePopoverDebounced }
+											onFocusOutside={
+												handleFocusOutsidePopover
+											}
 										>
 											<div className="components-popover__content-container">
 												<p>
@@ -240,7 +277,12 @@ export const OtherPaymentGateways = ( {
 													/>
 												) }
 												{ /* All payment extension suggestions are official. */ }
-												<OfficialBadge variant="expanded" />
+												<OfficialBadge
+													variant="expanded"
+													suggestionId={
+														extension.id
+													}
+												/>
 											</span>
 											<span className="other-payment-gateways__content__grid-item__content__description">
 												{ decodeEntities(
@@ -251,10 +293,8 @@ export const OtherPaymentGateways = ( {
 												<Button
 													variant="link"
 													onClick={ () =>
-														setupPlugin(
-															extension.id,
-															extension.plugin
-																.slug,
+														setUpPlugin(
+															extension,
 															null, // Suggested gateways won't have an onboarding URL.
 															// Only provide the attach link if not already installed.
 															extension.plugin
@@ -300,7 +340,7 @@ export const OtherPaymentGateways = ( {
 	}, [
 		suggestionsByCategory,
 		installingPlugin,
-		setupPlugin,
+		setUpPlugin,
 		isFetching,
 		categoryIdWithPopoverVisible,
 	] );
@@ -313,12 +353,10 @@ export const OtherPaymentGateways = ( {
 		>
 			<div
 				className="other-payment-gateways__header"
-				onClick={ () => {
-					setIsExpanded( ! isExpanded );
-				} }
+				onClick={ handleSectionToggle }
 				onKeyDown={ ( event ) => {
 					if ( event.key === 'Enter' || event.key === ' ' ) {
-						setIsExpanded( ! isExpanded );
+						handleSectionToggle();
 					}
 				} }
 				role="button"

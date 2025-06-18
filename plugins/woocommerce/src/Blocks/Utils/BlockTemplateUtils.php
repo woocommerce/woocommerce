@@ -716,12 +716,13 @@ class BlockTemplateUtils {
 				'core/pattern' === $block['blockName'] &&
 				isset( $block['attrs']['slug'] )
 			) {
-				$registry       = WP_Block_Patterns_Registry::get_instance();
-				$pattern        = $registry->get_registered( $block['attrs']['slug'] );
-				$pattern_blocks = parse_blocks( $pattern['content'] );
-
-				if ( self::has_block_including_patterns( $block_names, $pattern_blocks ) ) {
-					return true;
+				$registry = WP_Block_Patterns_Registry::get_instance();
+				$pattern  = $registry->get_registered( $block['attrs']['slug'] );
+				if ( isset( $pattern['content'] ) ) {
+					$pattern_blocks = parse_blocks( $pattern['content'] );
+					if ( self::has_block_including_patterns( $block_names, $pattern_blocks ) ) {
+						return true;
+					}
 				}
 			}
 		}

@@ -19,7 +19,11 @@ import { __ } from '@wordpress/i18n';
 import './style.scss';
 import type { Attributes } from './types';
 
-type Props = BlockEditProps< Attributes > & HTMLAttributes< HTMLDivElement >;
+type Props = BlockEditProps< Attributes > &
+	HTMLAttributes< HTMLDivElement > & {
+		isDescendantOfAllProducts: boolean;
+		isDescendentOfSingleProductTemplate: boolean;
+	};
 
 const Preview = ( {
 	setAttributes,

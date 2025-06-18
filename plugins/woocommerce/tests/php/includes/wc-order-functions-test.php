@@ -184,4 +184,145 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
 		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
 	}
+
+	/**
+	 * Test getting total refunded for an item with and without refunds.
+	 */
+	public function test_get_total_refunded_for_item() {
+		// Create a product.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 99.99 );
+		$product->save();
+
+		// Create an order with the product.
+		$order = new WC_Order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'total'    => 199.98,
+			)
+		);
+		$order->add_item( $item );
+		$order->calculate_totals();
+		$order->save();
+
+		// Get the item ID.
+		$items   = $order->get_items();
+		$item_id = array_key_first( $items );
+
+		// Test that by default there is no refund.
+		$this->assertEquals( 0, $order->get_total_refunded_for_item( $item_id ) );
+
+		// Create first partial refund for 1 item.
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 49.99,
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 0.5,
+						'refund_total' => 49.99,
+					),
+				),
+			)
+		);
+
+		// Verify the refunded amount for the item after first refund.
+		$this->assertEquals( 49.99, $order->get_total_refunded_for_item( $item_id ) );
+
+		// Create second partial refund for remaining amount.
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 149.99,
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 1.5,
+						'refund_total' => 149.99,
+					),
+				),
+			)
+		);
+
+		// Verify the total refunded amount for the item after both refunds.
+		$this->assertEquals( 199.98, $order->get_total_refunded_for_item( $item_id ) );
+	}
+
+	/**
+	 * Test that creating a full refund with free items triggers fully refunded action.
+	 */
+	public function test_full_refund_with_free_items() {
+		// Create a paid product.
+		$paid_product = WC_Helper_Product::create_simple_product();
+		$paid_product->set_regular_price( 10 );
+		$paid_product->save();
+
+		// Create a free product.
+		$free_product = WC_Helper_Product::create_simple_product();
+		$free_product->set_regular_price( 0 );
+		$free_product->save();
+
+		// Create an order with both products.
+		$order = new WC_Order();
+
+		// Add paid product.
+		$paid_item = new WC_Order_Item_Product();
+		$paid_item->set_props(
+			array(
+				'product'  => $paid_product,
+				'quantity' => 1,
+				'total'    => 10,
+			)
+		);
+		$order->add_item( $paid_item );
+
+		// Add free product.
+		$free_item = new WC_Order_Item_Product();
+		$free_item->set_props(
+			array(
+				'product'  => $free_product,
+				'quantity' => 1,
+				'total'    => 0,
+			)
+		);
+		$order->add_item( $free_item );
+
+		$order->calculate_totals();
+		$order->save();
+
+		// Track if fully refunded action was triggered.
+		$fully_refunded_triggered = false;
+		add_action(
+			'woocommerce_order_fully_refunded',
+			function () use ( &$fully_refunded_triggered ) {
+				$fully_refunded_triggered = true;
+			}
+		);
+
+		// Track if partially refunded action was triggered.
+		$partially_refunded_triggered = false;
+		add_action(
+			'woocommerce_order_partially_refunded',
+			function () use ( &$partially_refunded_triggered ) {
+				$partially_refunded_triggered = true;
+			}
+		);
+
+		// Create a full refund.
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => $order->get_total(),
+				'reason'   => 'Testing refund with free items',
+			)
+		);
+
+		$this->assertNotWPError( $refund, 'Refund should be created successfully' );
+
+		// Verify that fully refunded action was triggered and partially refunded was not.
+		$this->assertTrue( $fully_refunded_triggered, 'Fully refunded action should be triggered' );
+		$this->assertFalse( $partially_refunded_triggered, 'Partially refunded action should not be triggered' );
+	}
 }

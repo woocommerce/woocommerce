@@ -182,8 +182,26 @@ jQuery( function ( $ ) {
 		} );
 	} );
 
-	$( document.body ).on( 'item_removed_from_classic_cart', focus_populate_live_region );
+	// If the "Enable AJAX add to cart buttons on archives" setting is disabled
+	// the add-to-cart.js file won't be loaded, so we need to add the event listener here.
+	if ( typeof wc_add_to_cart_params === 'undefined') {
+		$( document.body ).on( 'keydown', '.remove_from_cart_button', on_keydown_remove_from_cart );
+	}
+
+	$( document.body ).on( 'item_removed_from_classic_cart updated_wc_div', focus_populate_live_region );
 } );
+
+/**
+ * Handle when pressing the Space key on the remove item link.
+ * This is necessary because the link has the role="button" attribute
+ * and needs to act like a button.
+ */
+function on_keydown_remove_from_cart( event ) {
+	if ( event.key === ' ' ) {
+		event.preventDefault();
+		event.currentTarget.click();
+	}
+}
 
 /**
  * Focus on the first notice element on the page.
@@ -225,17 +243,19 @@ function focus_populate_live_region() {
  */
 function refresh_sorted_by_live_region() {
 	var sorted_by_live_region = document.querySelector(
-		'.woocommerce-result-count[data-is-sorted-by="true"]'
+		'.woocommerce-result-count'
 	);
 
 	if ( sorted_by_live_region ) {
 		var text = sorted_by_live_region.innerHTML;
-
+		sorted_by_live_region.setAttribute('aria-hidden', 'true');
+		
 		var sorted_by_live_region_id = setTimeout( function () {
+			sorted_by_live_region.setAttribute('aria-hidden', 'false');
 			sorted_by_live_region.innerHTML = '';
 			sorted_by_live_region.innerHTML = text;
 			clearTimeout( sorted_by_live_region_id );
-		}, 1000 );
+		}, 2000 );
 	}
 }
 

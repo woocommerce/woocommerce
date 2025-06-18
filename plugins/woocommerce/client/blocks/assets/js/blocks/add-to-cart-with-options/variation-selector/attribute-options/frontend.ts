@@ -1,8 +1,19 @@
 /**
  * External dependencies
  */
-import type { KeyboardEvent } from 'react';
-import { store, getContext, getElement } from '@wordpress/interactivity';
+import type { ChangeEvent } from 'react';
+import { store, getContext } from '@wordpress/interactivity';
+import type { CartVariationItem } from '@woocommerce/types';
+
+/**
+ * Internal dependencies
+ */
+import type {
+	AddToCartWithOptionsStore,
+	Context as AddToCartWithOptionsStoreContext,
+	AvailableVariation,
+} from '../../frontend';
+import setStyles from './set-styles';
 
 type Option = {
 	value: string;
@@ -11,116 +22,167 @@ type Option = {
 };
 
 type Context = {
+	name: string;
 	selectedValue: string | null;
 	option: Option;
 	options: Option[];
 };
 
-type PillsContext = Context & {
-	focused?: string;
+// Set selected pill styles for proper contrast.
+setStyles();
+
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+const { actions: wooAddToCartWithOptions } = store< AddToCartWithOptionsStore >(
+	'woocommerce/add-to-cart-with-options',
+	{},
+	{ lock: universalLock }
+);
+
+function setAttribute( name: string, value: string | null ) {
+	if ( value ) {
+		wooAddToCartWithOptions.setAttribute( name, value );
+	} else {
+		wooAddToCartWithOptions.removeAttribute( name );
+	}
+}
+
+function setDefaultSelectedAttribute() {
+	const context = getContext< Context >();
+	setAttribute( context.name, context.selectedValue );
+}
+
+/**
+ * Check if the attribute value is valid given the other selected attributes and
+ * the available variations.
+ *
+ * To know if an attribute value is valid given the other selected attributes,
+ * we make sure there is at least one available variation matching the current
+ * selected attributes and the attribute value being checked.
+ */
+const isAttributeValueValid = ( {
+	attributeName,
+	attributeValue,
+	selectedAttributes,
+	availableVariations,
+}: {
+	attributeName: string;
+	attributeValue: string;
+	selectedAttributes: CartVariationItem[];
+	availableVariations: AvailableVariation[];
+} ) => {
+	// If the current attribute is selected, we require one less attribute to
+	// match, this allows shoppers to switch between attributes. For example,
+	// if "Blue" and "Small" are selected, we want "Blue" and "Medium" to be
+	// valid, that's why we subtract one from the total number of attributes to
+	// match.
+	const isCurrentAttributeSelected = selectedAttributes.some(
+		( selectedAttribute ) => selectedAttribute.attribute === attributeName
+	);
+	const attributesToMatch = isCurrentAttributeSelected
+		? selectedAttributes.length - 1
+		: selectedAttributes.length;
+
+	// Check if there is at least one available variation matching the current
+	// selected attributes and the attribute value being checked.
+	return availableVariations.some( ( availableVariation ) => {
+		// Skip variations that don't match the current attribute value.
+		if (
+			availableVariation.attributes[ attributeName ] !== attributeValue &&
+			availableVariation.attributes[ attributeName ] !== '' // "" is used for "any".
+		) {
+			return false;
+		}
+
+		// Count how many of the selected attributes match the variation.
+		const matchingAttributes = selectedAttributes.filter(
+			( selectedAttribute ) => {
+				const availableVariationAttributeValue =
+					availableVariation.attributes[
+						selectedAttribute.attribute
+					];
+				// If the current available variation matches the selected
+				// value, count it.
+				if (
+					availableVariationAttributeValue === selectedAttribute.value
+				) {
+					return true;
+				}
+				// If the current available variation has an empty value
+				// (matching any), count it if it refers to a different
+				// attribute or the attribute it refers matches the current
+				// selection.
+				if ( availableVariationAttributeValue === '' ) {
+					if (
+						selectedAttribute.attribute !== attributeName ||
+						attributeValue === selectedAttribute.value
+					) {
+						return true;
+					}
+				}
+				return false;
+			}
+		).length;
+
+		return matchingAttributes >= attributesToMatch;
+	} );
 };
 
-const { state, actions } = store(
+const { state } = store(
 	'woocommerce/add-to-cart-with-options-variation-selector-attribute-options__pills',
 	{
 		state: {
 			get isPillSelected() {
-				const { selectedValue, option } = getContext< PillsContext >();
+				const { selectedValue, option } = getContext< Context >();
 				return selectedValue === option.value;
 			},
-			get pillTabIndex() {
-				const { selectedValue, focused, option, options } =
-					getContext< PillsContext >();
+			get isPillDisabled() {
+				const { name, option } = getContext< Context >();
+				const { selectedAttributes, availableVariations } =
+					getContext< AddToCartWithOptionsStoreContext >(
+						'woocommerce/add-to-cart-with-options'
+					);
 
-				// Allow the first pill to be focused when no option is selected.
-				if (
-					! selectedValue &&
-					! focused &&
-					options[ 0 ]?.value === option.value
-				) {
+				return ! isAttributeValueValid( {
+					attributeName: name,
+					attributeValue: option.value,
+					selectedAttributes,
+					availableVariations,
+				} );
+			},
+			get pillTabIndex(): number {
+				const { selectedValue } = getContext< Context >();
+				const { isPillSelected, index } = state;
+				if ( isPillSelected || ( index === 0 && ! selectedValue ) ) {
 					return 0;
 				}
-
-				if ( state.isPillSelected || focused === option.value ) {
-					return 0;
-				}
-
 				return -1;
+			},
+			get index() {
+				const context = getContext< Context >();
+				return context.options.findIndex(
+					( option ) => option.value === context.option.value
+				);
 			},
 		},
 		actions: {
 			toggleSelected() {
-				const context = getContext< PillsContext >();
+				if ( state.isPillDisabled ) {
+					return;
+				}
+				const context = getContext< Context >();
 				if ( context.selectedValue === context.option.value ) {
 					context.selectedValue = '';
 				} else {
 					context.selectedValue = context.option.value;
 				}
-				context.focused = context.option.value;
-			},
-			handleKeyDown( event: KeyboardEvent< HTMLElement > ) {
-				const context = getContext< PillsContext >();
-
-				let keyWasProcessed = false;
-
-				switch ( event.key ) {
-					case ' ':
-						actions.toggleSelected();
-						keyWasProcessed = true;
-						break;
-
-					case 'Up':
-					case 'ArrowUp':
-					case 'Left':
-					case 'ArrowLeft': {
-						const index = context.options.findIndex(
-							( option ) => option.value === context.option.value
-						);
-						if ( index === -1 ) return;
-						const at =
-							index > 0 ? index - 1 : context.options.length - 1;
-
-						context.selectedValue = context.options[ at ].value;
-						context.focused = context.selectedValue;
-						keyWasProcessed = true;
-						break;
-					}
-
-					case 'Down':
-					case 'ArrowDown':
-					case 'Right':
-					case 'ArrowRight': {
-						const index = context.options.findIndex(
-							( option ) => option.value === context.option.value
-						);
-						if ( index === -1 ) return;
-						const at =
-							index < context.options.length - 1 ? index + 1 : 0;
-
-						context.selectedValue = context.options[ at ].value;
-						context.focused = context.selectedValue;
-						keyWasProcessed = true;
-						break;
-					}
-					default:
-						break;
-				}
-
-				if ( keyWasProcessed ) {
-					event.stopPropagation();
-					event.preventDefault();
-				}
+				setAttribute( context.name, context.selectedValue );
 			},
 		},
 		callbacks: {
-			watchSelected() {
-				const { focused } = getContext< PillsContext >();
-
-				if ( state.pillTabIndex === 0 && focused ) {
-					const { ref } = getElement();
-					ref?.focus();
-				}
-			},
+			setDefaultSelectedAttribute,
 		},
 	},
 	{ lock: true }
@@ -129,11 +191,36 @@ const { state, actions } = store(
 store(
 	'woocommerce/add-to-cart-with-options-variation-selector-attribute-options__dropdown',
 	{
-		actions: {
-			handleChange() {
-				const context = getContext< Context >();
-				context.selectedValue = context.option.value;
+		state: {
+			get isOptionDisabled() {
+				const { name, option } = getContext< Context >();
+
+				if ( option.value === '' ) {
+					return false;
+				}
+
+				const { selectedAttributes, availableVariations } =
+					getContext< AddToCartWithOptionsStoreContext >(
+						'woocommerce/add-to-cart-with-options'
+					);
+
+				return ! isAttributeValueValid( {
+					attributeName: name,
+					attributeValue: option.value,
+					selectedAttributes,
+					availableVariations,
+				} );
 			},
+		},
+		actions: {
+			handleChange( event: ChangeEvent< HTMLSelectElement > ) {
+				const context = getContext< Context >();
+				context.selectedValue = event.currentTarget.value;
+				setAttribute( context.name, context.selectedValue );
+			},
+		},
+		callbacks: {
+			setDefaultSelectedAttribute,
 		},
 	},
 	{ lock: true }

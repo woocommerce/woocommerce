@@ -71,7 +71,7 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test it generates css styles for renderer
 	 */
-	public function testItGeneratesCssStylesForRenderer() {
+	public function testItGeneratesCssStylesForRenderer(): void {
 		$css = $this->theme_controller->get_stylesheet_for_rendering();
 		// Font families.
 		$this->assertStringContainsString( '.has-arial-font-family', $css );
@@ -125,7 +125,7 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test if the theme controller translates font size slug to font size value
 	 */
-	public function testItCanTranslateFontSizeSlug() {
+	public function testItCanTranslateFontSizeSlug(): void {
 		$this->assertEquals( '13px', $this->theme_controller->translate_slug_to_font_size( 'small' ) );
 		$this->assertEquals( '16px', $this->theme_controller->translate_slug_to_font_size( 'medium' ) );
 		$this->assertEquals( '28px', $this->theme_controller->translate_slug_to_font_size( 'large' ) );
@@ -136,7 +136,7 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test if the theme controller translates font family slug to font family name
 	 */
-	public function testItCanTranslateColorSlug() {
+	public function testItCanTranslateColorSlug(): void {
 		$this->assertEquals( '#000000', $this->theme_controller->translate_slug_to_color( 'black' ) );
 		$this->assertEquals( '#ffffff', $this->theme_controller->translate_slug_to_color( 'white' ) );
 		$this->assertEquals( '#abb8c3', $this->theme_controller->translate_slug_to_color( 'cyan-bluish-gray' ) );
@@ -147,7 +147,7 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test if the theme controller loads custom user theme
 	 */
-	public function testItLoadsCustomUserTheme() {
+	public function testItLoadsCustomUserTheme(): void {
 		$theme = $this->theme_controller->get_theme();
 		$this->assertEquals( '#123456', $theme->get_raw_data()['styles']['color']['background'] );
 		$this->assertEquals( '#654321', $theme->get_raw_data()['styles']['color']['text'] );
@@ -156,7 +156,7 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test if the theme controller loads custom user theme and applies it to the styles
 	 */
-	public function testItAddCustomUserThemeToStyles() {
+	public function testItAddCustomUserThemeToStyles(): void {
 		$theme  = $this->theme_controller->get_theme();
 		$styles = $theme->get_stylesheet();
 		$this->assertStringContainsString( 'color: #654321', $styles );
@@ -166,7 +166,7 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test if the theme controller returns correct color styles
 	 */
-	public function testGetBaseThemeDoesNotIncludeUserThemeData() {
+	public function testGetBaseThemeDoesNotIncludeUserThemeData(): void {
 		$theme = $this->theme_controller->get_base_theme();
 		$this->assertEquals( '#ffffff', $theme->get_raw_data()['styles']['color']['background'] );
 		$this->assertEquals( '#1e1e1e', $theme->get_raw_data()['styles']['color']['text'] );
@@ -175,7 +175,7 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test if the theme controller returns correct color palette
 	 */
-	public function testItLoadsColorPaletteFromSiteTheme() {
+	public function testItLoadsColorPaletteFromSiteTheme(): void {
 		$settings = $this->theme_controller->get_settings();
 		$this->assertNotEmpty( $settings['color']['palette']['theme'] );
 	}
@@ -183,7 +183,7 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test if the theme controller returns correct preset variables map
 	 */
-	public function testItReturnsCorrectPresetVariablesMap() {
+	public function testItReturnsCorrectPresetVariablesMap(): void {
 		$variable_map = $this->theme_controller->get_variables_values_map();
 		$this->assertSame( '#000000', $variable_map['--wp--preset--color--black'] );
 		$this->assertSame( '20px', $variable_map['--wp--preset--spacing--20'] );

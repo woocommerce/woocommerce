@@ -346,8 +346,10 @@ final class WC_Cart_Totals {
 				$shipping_line->tax_class = get_option( 'woocommerce_shipping_tax_class', 'inherit' );
 				$shipping_line->taxable   = true;
 				$shipping_line->total     = wc_add_number_precision_deep( $shipping_object->cost );
-				$shipping_line->taxes     = wc_add_number_precision_deep( $shipping_object->taxes, false );
-				$shipping_line->taxes     = array_map( array( $this, 'round_item_subtotal' ), $shipping_line->taxes );
+				$shipping_line->taxes     = array_map(
+					array( $this, 'round_item_subtotal' ),
+					wc_add_number_precision_deep( $shipping_object->taxes, false )
+				);
 				$shipping_line->total_tax = array_sum( $shipping_line->taxes );
 				return $shipping_line;
 			},
@@ -662,15 +664,17 @@ final class WC_Cart_Totals {
 			$item->total_tax = 0;
 
 			if ( has_filter( 'woocommerce_get_discounted_price' ) ) {
-				/**
-				 * Allow plugins to filter this price like in the legacy cart class.
-				 *
-				 * This is legacy and should probably be deprecated in the future.
-				 * $item->object is the cart item object.
-				 * $this->cart is the cart object.
-				 */
 				$item->total = wc_add_number_precision(
-					apply_filters( 'woocommerce_get_discounted_price', wc_remove_number_precision( $item->total ), $item->object, $this->cart )
+					/**
+					 * Allow plugins to filter this price like in the legacy cart class.
+					 *
+					 * This is legacy and should probably be deprecated in the future.
+					 * $item->object is the cart item object.
+					 * $this->cart is the cart object.
+					 *
+					 * @since 3.2.0
+					 */
+					(float) apply_filters( 'woocommerce_get_discounted_price', wc_remove_number_precision( $item->total ), $item->object, $this->cart )
 				);
 			}
 

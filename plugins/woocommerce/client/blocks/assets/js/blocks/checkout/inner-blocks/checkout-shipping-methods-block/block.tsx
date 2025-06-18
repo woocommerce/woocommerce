@@ -10,7 +10,7 @@ import { ShippingRatesControl } from '@woocommerce/base-components/cart-checkout
 import {
 	getShippingRatesPackageCount,
 	hasCollectableRate,
-	isAddressComplete,
+	hasAllFieldsForShippingRates,
 } from '@woocommerce/base-utils';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
@@ -55,9 +55,9 @@ const renderShippingRatesControlOption = (
 	return {
 		label: decodeEntities( option.name ),
 		value: option.rate_id,
-		description: decodeEntities( option.description ),
+		description: decodeEntities( option.delivery_time ),
 		secondaryLabel,
-		secondaryDescription: decodeEntities( option.delivery_time ),
+		secondaryDescription: decodeEntities( option.description ),
 	};
 };
 
@@ -120,7 +120,7 @@ const Block = ( {
 	if ( ! hasCalculatedShipping && ! shippingRatesPackageCount ) {
 		return <NoShippingAddressMessage />;
 	}
-	const addressComplete = isAddressComplete( shippingAddress );
+	const addressComplete = hasAllFieldsForShippingRates( shippingAddress );
 
 	return (
 		<>

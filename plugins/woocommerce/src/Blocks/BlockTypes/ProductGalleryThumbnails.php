@@ -39,7 +39,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'postId', 'mode', 'cropImages' ];
+		return array( 'postId' );
 	}
 
 	/**
@@ -68,15 +68,20 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			return '';
 		}
 
-		$product_gallery_thumbnails_data = ProductGalleryUtils::get_product_gallery_image_data( $product );
-		$product_gallery_images          = $product_gallery_thumbnails_data['images'];
+		// We crop the images to square only if the aspect ratio is 1:1.
+		// Otherwise, we show the uncropped and use object-fit to crop them.
+		$image_size             = '1' === $attributes['aspectRatio'] ? 'woocommerce_thumbnail' : 'woocommerce_single';
+		$product_gallery_images = ProductGalleryUtils::get_product_gallery_image_data( $product, $image_size );
+
 		// Don't show the thumbnails block if there is only one image.
 		if ( count( $product_gallery_images ) <= 1 ) {
 			return '';
 		}
 
-		$thumbnail_size   = str_replace( '%', '', $attributes['thumbnailSize'] ?? '33%' );
+		$thumbnail_size   = str_replace( '%', '', $attributes['thumbnailSize'] ?? '25%' );
 		$thumbnails_class = 'wc-block-product-gallery-thumbnails--thumbnails-size-' . $thumbnail_size;
+
+		$img_class = 'wc-block-product-gallery-thumbnails__thumbnail__image';
 
 		ob_start();
 		?>
@@ -90,25 +95,29 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			data-wp-class--wc-block-product-gallery-thumbnails--overflow-right="context.thumbnailsOverflow.right">
 			<div
 				class="wc-block-product-gallery-thumbnails__scrollable"
-				data-wp-init="actions.onScroll"
-				data-wp-on--scroll="actions.onScroll">
-				<template
-					data-wp-each--image="state.thumbnails"
-					data-wp-each-key="context.image.id">
+				data-wp-init="callbacks.initResizeObserver"
+				data-wp-on--scroll="actions.onScroll"
+				role="listbox">
+				<?php foreach ( $product_gallery_images as $index => $image ) : ?>
 					<div class="wc-block-product-gallery-thumbnails__thumbnail">
 						<img
-							class="wc-block-product-gallery-thumbnails__thumbnail__image"
-							data-wp-bind--data-image-id="context.image.id"
-							data-wp-bind--src="context.image.src"
-							data-wp-bind--srcset="context.image.srcset"
-							data-wp-bind--sizes="context.image.sizes"
+							class="<?php echo 0 === $index ? esc_attr( $img_class . ' wc-block-product-gallery-thumbnails__thumbnail__image--is-active' ) : esc_attr( $img_class ); ?>"
+							data-image-id="<?php echo esc_attr( $image['id'] ); ?>"
+							src="<?php echo esc_attr( $image['src'] ); ?>"
+							srcset="<?php echo esc_attr( $image['srcset'] ); ?>"
+							sizes="<?php echo esc_attr( $image['sizes'] ); ?>"
+							alt="<?php echo esc_attr( $image['alt'] ); ?>"
 							data-wp-on--click="actions.selectCurrentImage"
-							data-wp-on--keydown="actions.onThumbnailKeyDown"
+							data-wp-on--keydown="actions.onThumbnailsArrowsKeyDown"
+							data-wp-watch="callbacks.toggleActiveThumbnailAttributes"
 							decoding="async"
-							tabindex="0"
-							loading="lazy" />
+							tabindex="<?php echo 0 === $index ? '0' : '-1'; ?>"
+							draggable="false"
+							loading="lazy"
+							role="option"
+							style="aspect-ratio: <?php echo esc_attr( $attributes['aspectRatio'] ); ?>" />
 					</div>
-				</template>
+				<?php endforeach; ?>
 			</div>
 		</div>
 		<?php

@@ -14,11 +14,9 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 /**
  * Internal dependencies
  */
-import { CustomizeStoreContext } from '../';
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ColorPalette, ColorPanel } from './global-styles';
 import { trackEvent } from '~/customize-store/tracking';
-import { FlowType } from '~/customize-store/types';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
@@ -67,24 +65,11 @@ export const SidebarNavigationScreenColorPalette = ( {
 }: {
 	onNavigateBackClick: () => void;
 } ) => {
-	const {
-		context: { flowType },
-	} = useContext( CustomizeStoreContext );
-
-	const aiOnline = flowType === FlowType.AIOnline;
-
-	const title = aiOnline
-		? __( 'Change the color palette', 'woocommerce' )
-		: __( 'Choose your color palette', 'woocommerce' );
-	const description = aiOnline
-		? __(
-				'Based on the info you shared, our AI tool recommends using this color palette. Want to change it? You can select or add new colors below, or update them later in Editor.',
-				'woocommerce'
-		  )
-		: __(
-				'Choose the color palette that best suits your brand. Want to change it? Create your custom color palette below, or update it later in Editor.',
-				'woocommerce'
-		  );
+	const title = __( 'Choose your color palette', 'woocommerce' );
+	const description = __(
+		'Choose the color palette that best suits your brand. Want to change it? Create your custom color palette below, or update it later in Editor.',
+		'woocommerce'
+	);
 
 	return (
 		<SidebarNavigationScreen

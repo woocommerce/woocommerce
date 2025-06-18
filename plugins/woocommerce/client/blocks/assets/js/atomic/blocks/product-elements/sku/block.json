@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/product-sku",
-	"version": "1.0.0",
 	"title": "Product SKU",
 	"description": "Displays the SKU of a product.",
 	"category": "woocommerce-product-elements",
@@ -8,18 +7,6 @@
 		"productId": {
 			"type": "number",
 			"default": 0
-		},
-		"isDescendentOfQueryLoop": {
-			"type": "boolean",
-			"default": false
-		},
-		"isDescendentOfSingleProductTemplate": {
-			"type": "boolean",
-			"default": false
-		},
-		"isDescendentOfSingleProductBlock": {
-			"type": "boolean",
-			"default": false
 		},
 		"isDescendantOfAllProducts": {
 			"type": "boolean",
@@ -46,6 +33,30 @@
 		"woocommerce/product-template",
 		"core/post-template"
 	],
+	"supports": {
+		"html": false,
+		"interactivity": {
+			"clientNavigation": true
+		},
+		"color": {
+			"text": true,
+			"background": true
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontStyle": true,
+			"__experimentalTextTransform": true,
+			"__experimentalTextDecoration": true,
+			"__experimentalLetterSpacing": true
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true
+		}
+	},
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,

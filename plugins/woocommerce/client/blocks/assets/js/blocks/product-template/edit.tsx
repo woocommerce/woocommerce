@@ -31,7 +31,6 @@ import {
 	useProductCollectionQueryContext,
 	parseTemplateSlug,
 } from './utils';
-import './editor.scss';
 import { getDefaultStockStatuses } from '../product-collection/constants';
 
 const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];

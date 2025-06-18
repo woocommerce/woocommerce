@@ -20,7 +20,11 @@ import FilterSubmitButton from '@woocommerce/base-components/filter-submit-butto
 import FilterResetButton from '@woocommerce/base-components/filter-reset-button';
 import FormTokenField from '@woocommerce/base-components/form-token-field';
 import { addQueryArgs, removeQueryArgs } from '@wordpress/url';
-import { changeUrl, normalizeQueryParams } from '@woocommerce/utils';
+import {
+	changeUrl,
+	normalizeQueryParams,
+	generateUniqueId,
+} from '@woocommerce/utils';
 import clsx from 'clsx';
 import type { ReactElement } from 'react';
 
@@ -30,7 +34,7 @@ import type { ReactElement } from 'react';
 import { previewOptions } from './preview';
 import './style.scss';
 import { Attributes } from './types';
-import { formatSlug, getActiveFilters, generateUniqueId } from './utils';
+import { formatSlug, getActiveFilters } from './utils';
 import { useSetWrapperVisibility } from '../filter-wrapper/context';
 import type { RatingValues } from '../product-collection/types';
 

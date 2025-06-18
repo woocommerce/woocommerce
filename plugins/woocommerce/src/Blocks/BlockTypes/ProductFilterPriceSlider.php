@@ -14,6 +14,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  */
 class ProductFilterPriceSlider extends AbstractBlock {
 
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -33,8 +35,6 @@ class ProductFilterPriceSlider extends AbstractBlock {
 		if ( is_admin() || wp_doing_ajax() || empty( $block->context['filterData'] ) || empty( $block->context['filterData']['price'] ) ) {
 			return '';
 		}
-
-		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		$price_data = $block->context['filterData']['price'];
 		$min_price  = $price_data['minPrice'];
@@ -60,9 +60,10 @@ class ProductFilterPriceSlider extends AbstractBlock {
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class'       => esc_attr( $classes ),
-				'style'       => esc_attr( $style ),
-				'data-wp-key' => wp_unique_prefixed_id( $this->get_full_block_name() ),
+				'data-wp-interactive' => 'woocommerce/product-filters',
+				'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
+				'class'               => esc_attr( $classes ),
+				'style'               => esc_attr( $style ),
 			)
 		);
 
@@ -83,24 +84,37 @@ class ProductFilterPriceSlider extends AbstractBlock {
 			)
 		);
 
+		/**
+		 * Accessibility: Assign the left input to a variable to conditionally
+		 * render it based on the inline input setting. We do this to have the
+		 * correct focus order of the input fields.
+		 */
+		ob_start();
+		?>
+		<div class="wc-block-product-filter-price-slider__left text">
+			<?php if ( $show_input_fields ) : ?>
+				<input
+					class="min"
+					type="text"
+					data-wp-bind--value="state.formattedMinPrice"
+					data-wp-on--focus="actions.selectInputContent"
+					data-wp-on--input="actions.debounceSetMinPrice"
+					aria-label="<?php esc_attr_e( 'Filter products by minimum price', 'woocommerce' ); ?>"
+				/>
+			<?php else : ?>
+				<span data-wp-text="state.formattedMinPrice"></span>
+			<?php endif; ?>
+		</div>
+		<?php
+		$left_input = ob_get_clean();
+
 		ob_start();
 		?>
 		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<div class="<?php echo esc_attr( $content_class ); ?>">
-				<div class="wc-block-product-filter-price-slider__left text">
-					<?php if ( $show_input_fields ) : ?>
-						<input
-							class="min"
-							type="text"
-							data-wp-bind--value="state.formattedMinPrice"
-							data-wp-on--focus="actions.selectInputContent"
-							data-wp-on--input="actions.debounceSetMinPrice"
-							aria-label="<?php esc_attr_e( 'Filter products by minimum price', 'woocommerce' ); ?>"
-						/>
-					<?php else : ?>
-						<span data-wp-text="state.formattedMinPrice"></span>
-					<?php endif; ?>
-				</div>
+				<?php if ( $inline_input ) : ?>
+					<?php echo $left_input; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php endif; ?>
 				<div
 					class="wc-block-product-filter-price-slider__range"
 					data-wp-bind--style="state.rangeStyle"
@@ -131,6 +145,9 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						aria-label="<?php esc_attr_e( 'Filter products by maximum price', 'woocommerce' ); ?>"
 					/>
 				</div>
+				<?php if ( ! $inline_input ) : ?>
+					<?php echo $left_input; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php endif; ?>
 				<div class="wc-block-product-filter-price-slider__right text">
 					<?php if ( $show_input_fields ) : ?>
 						<input
@@ -149,16 +166,5 @@ class ProductFilterPriceSlider extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
-	}
-
-	/**
-	 * Disable the block type script, this uses script modules.
-	 *
-	 * @param string|null $key The key.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
 	}
 }

@@ -42,7 +42,7 @@ const Edit = () => {
 							[
 								'core/heading',
 								{
-									level: 4,
+									level: 3,
 									content: __( 'Price', 'woocommerce' ),
 									style: {
 										spacing: {
