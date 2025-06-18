@@ -52,9 +52,9 @@ Learn more about [contributing](/docs/contribution/contributing)
 
 ## Additional resources
 
-- [WooCommerce Official Website](https://woocommerce.com/)
-- [Woo Marketplace](https://woocommerce.com/marketplace)
-- All [WooCommerce Repositories on GitHub](https://woocommerce.github.io/)
+* [WooCommerce Official Website](https://woocommerce.com/)
+* [Woo Marketplace](https://woocommerce.com/marketplace)
+* All [WooCommerce Repositories on GitHub](https://woocommerce.github.io/)
 
 ---
 

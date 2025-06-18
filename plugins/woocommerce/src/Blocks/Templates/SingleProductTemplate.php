@@ -2,7 +2,9 @@
 namespace Automattic\WooCommerce\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
+use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Blocks\Utils\ProductDataUtils;
 
 /**
  * SingleProductTemplate class.
@@ -10,6 +12,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
  * @internal
  */
 class SingleProductTemplate extends AbstractTemplate {
+	use BlocksSharedState;
 
 	/**
 	 * The slug of the template.
@@ -80,6 +83,19 @@ class SingleProductTemplate extends AbstractTemplate {
 
 			if ( isset( $template ) && BlockTemplateUtils::template_has_legacy_template_block( $template ) ) {
 				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
+			}
+
+			$product = wc_get_product( $post->ID );
+			if ( $product ) {
+				wp_interactivity_state(
+					'woocommerce/product-data',
+					array(
+						'templateState' => array(
+							'originalProductData' => ProductDataUtils::get_product_data( $product ),
+							'productData'         => array(),
+						),
+					)
+				);
 			}
 
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );

@@ -21,6 +21,7 @@ pnpm run lint:js                            # runs eslint on all js and ts files
 pnpm run lint:js-fix                        # fixes errors reported by `pnpm run lint:js`
 pnpm run lint:lang:types                    # runs type check on all typescript files
 pnpm run format                             # runs prettier on files. This uses WordPress coding standards.
+pnpm run test:js                            # runs JS component test using Jest
 ```
 
 ## Development
