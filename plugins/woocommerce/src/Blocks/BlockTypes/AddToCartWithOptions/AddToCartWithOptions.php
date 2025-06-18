@@ -350,7 +350,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				$hooks_before = ob_get_clean();
 
 				ob_start();
-				if ( ProductType::SIMPLE === $product_type && $product->is_in_stock() && $product->is_purchasable() ) {
+				if ( ProductType::SIMPLE === $product_type ) {
 					/**
 					 * Hook: woocommerce_after_add_to_cart_quantity.
 					 *
