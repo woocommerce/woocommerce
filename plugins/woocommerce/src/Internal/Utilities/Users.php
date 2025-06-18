@@ -2,6 +2,9 @@
 
 namespace Automattic\WooCommerce\Internal\Utilities;
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use WP_Error, WP_User;
+
 /**
  * Helper functions for working with users.
  */
@@ -24,6 +27,47 @@ class Users {
 		}
 
 		return is_multisite() ? $user->has_cap( 'manage_sites' ) : $user->has_cap( 'manage_options' );
+	}
+
+	/**
+	 * Get a user from a valid user ID, but only if the active user is able to see them.
+	 *
+	 * In a multisite context, that may mean that they both must be members of the current blog, or else the active
+	 * user must either have special permissions (manage_network_users) or else a special legacy mode
+	 * (woocommerce_network_wide_customers) is enabled.
+	 *
+	 * @param int      $user_id            The ID of the desired user.
+	 * @param int|null $requesting_user_id The ID of the user making the request. Optional, defaults to the current user.
+	 *
+	 * @return WP_User|WP_Error
+	 */
+	public static function get_user_in_current_site( $user_id, ?int $requesting_user_id = null ) {
+		// User ID is expected to be an integer. Cast it if we can (avoiding additional runtime warnings), else treat it as 0.
+		$user_id = is_numeric( $user_id ) ? (int) $user_id : 0;
+
+		$legacy_proxy       = wc_get_container()->get( LegacyProxy::class );
+		$requesting_user_id = $requesting_user_id > 0 ? $requesting_user_id : wp_get_current_user()->ID;
+		$error              = new WP_Error( 'wc_user_invalid_id', __( 'Invalid user ID.', 'woocommerce' ) );
+
+		if ( $user_id <= 0 ) {
+			return $error;
+		}
+
+		$user = get_userdata( $user_id );
+		if ( ! $user instanceof WP_User || ! $user->exists() ) {
+			return $error;
+		}
+
+		if (
+			$legacy_proxy->call_function( 'is_multisite' )
+			&& ! $legacy_proxy->call_function( 'is_user_member_of_blog', $user->ID )
+			&& ! $legacy_proxy->call_function( 'user_can', $requesting_user_id, 'manage_network_users' )
+			&& get_site_option( 'woocommerce_network_wide_customers', 'no' ) !== 'yes'
+		) {
+			return $error;
+		}
+
+		return $user;
 	}
 
 	/**

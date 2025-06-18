@@ -8,7 +8,7 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 
 /**
  * This renderer covers both core/paragraph and core/heading blocks
@@ -17,11 +17,12 @@ class Text extends Abstract_Block_Renderer {
 	/**
 	 * Renders the block content.
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return string
 	 */
-	protected function render_content( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		// Do not render empty blocks.
 		if ( empty( trim( wp_strip_all_tags( $block_content ) ) ) ) {
 			return '';
@@ -55,8 +56,8 @@ class Text extends Abstract_Block_Renderer {
 		// In case of preset they are set on $block_attributes['textColor'] and $block_attributes['backgroundColor'].
 		$color_styles = $block_attributes['style']['color'] ?? array();
 		if ( empty( $color_styles['text'] ) && empty( $block_attributes['textColor'] ) ) {
-			$email_styles         = $settings_controller->get_email_styles();
-			$color_styles['text'] = $email_styles['color']['text'];
+			$email_styles         = $rendering_context->get_theme_styles();
+			$color_styles['text'] = $email_styles['color']['text'] ?? '#000000'; // Fallback for the text color.
 		}
 
 		$block_styles = $this->get_styles_from_block(
