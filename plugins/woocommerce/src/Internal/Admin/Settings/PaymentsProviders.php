@@ -9,16 +9,20 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AfterpayCle
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Airwallex;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AmazonPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Antom;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\GoCardless;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\HelioPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Klarna;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\KlarnaCheckout;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\MercadoPago;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mollie;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Monei;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Payfast;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Paymob;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Payoneer;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PayPal;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Paystack;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Paytrail;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PayUIndia;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Razorpay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Stripe;
@@ -104,6 +108,11 @@ class PaymentsProviders {
 		'vivawallet*'               => Vivacom::class,
 		'tilopay'                   => Tilopay::class,
 		'helio'                     => HelioPay::class,
+		'paytrail'                  => Paytrail::class,
+		'monei'                     => Monei::class,
+		'monei_*'                   => Monei::class,
+		'gocardless'                => GoCardless::class,
+		'kco'                       => KlarnaCheckout::class,
 	);
 
 	/**
@@ -136,6 +145,10 @@ class PaymentsProviders {
 		ExtensionSuggestions::VIVA_WALLET       => Vivacom::class,
 		ExtensionSuggestions::TILOPAY           => Tilopay::class,
 		ExtensionSuggestions::HELIOPAY          => HelioPay::class,
+		ExtensionSuggestions::PAYTRAIL          => Paytrail::class,
+		ExtensionSuggestions::MONEI             => Monei::class,
+		ExtensionSuggestions::GOCARDLESS        => GoCardless::class,
+		ExtensionSuggestions::KLARNA_CHECKOUT   => KlarnaCheckout::class,
 	);
 
 	/**
