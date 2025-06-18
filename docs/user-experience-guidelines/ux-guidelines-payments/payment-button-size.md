@@ -13,7 +13,7 @@ Height for payment buttons ranges from 40px (Small) to 55px (Large). The default
 - Default: Height 48px
 - Large: Height 55px
 
-### Anatomy
+## Anatomy
 
 Payment buttons consist of up to three elements: a button component, payment logo, and optional label.
 
@@ -23,31 +23,31 @@ Don't place any text outside the surface area of the button.
 
 ![Cart layout 2](/img/doc_images/Cart-layout-2.png)
 
-### Layout and spacing
+## Layout and spacing
 
 The spacing between and around the Label and Payment Logo adapts based on the size of the button.
 
 ![Layout and spacing 0.png](/img/doc_images/Layout-and-spacing-Updated.png)
 
-### Adaptive height
+## Adaptive height
 
 The height of the button can adapt based on the needs of the theme.
 
 ![Layout and spacing](/img/doc_images/Layout-and-spacing-1-updated.png)
 
-### Button size
+## Button size
 
 Make payment buttons the same size, no bigger or smaller than other payment buttons, including the CTAs "Add to cart" and "Proceed to checkout".
 
 ![Same button size.png](/img/doc_images/Same-button-size.png)
 
-### Button width
+## Button width
 
 Use the same width size for all payment buttons. Don't make the width larger or smaller than other payment buttons.
 
 ![button width.png](/img/doc_images/Button-width.png)
 
-### Minimum width
+## Minimum width
 
 Buttons have a minimum width to ensure readability.
 
@@ -57,7 +57,7 @@ Follow the minimum width of each payment button size. Don't squeeze payment butt
 
 ![Minimum width.png](/img/doc_images/Minimum-width.png)
 
-### Button Shape
+## Button Shape
 
 Use the same corner radius for all payment buttons. Don't make the corner radius larger or smaller than other payment buttons.
 
@@ -66,7 +66,7 @@ Use the same corner radius for all payment buttons. Don't make the corner radius
 
 ![Corner radius.png](/img/doc_images/Corner-radius.png)
 
-### Button Label
+## Button Label
 
 Provide variant buttons to accommodate merchant needs and payment experiences. 
 

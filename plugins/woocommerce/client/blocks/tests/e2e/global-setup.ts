@@ -68,6 +68,7 @@ async function globalSetup() {
 
 	try {
 		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
+		await wpCLI( `db repair` );
 		console.log( '├ Database snapshot imported, running basic setup…' );
 		databaseImported = true;
 	} catch ( error ) {
