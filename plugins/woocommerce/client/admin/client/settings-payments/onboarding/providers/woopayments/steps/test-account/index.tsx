@@ -130,7 +130,7 @@ const TestAccountStep = () => {
 			// Calculate which phase we should be in based on elapsed time
 			const currentPhase = Math.floor( elapsed / TITLE_CHANGE_INTERVAL );
 
-			// Only update if we're in a valid phase range and it's different from current
+			// Only update if we're in a valid phase range and it's less than the total phases. Otherwise, we keep the last message.
 			if ( currentPhase >= 0 && currentPhase < totalPhases ) {
 				setLoaderTitle( PHASE_MESSAGES[ currentPhase ] );
 			}
