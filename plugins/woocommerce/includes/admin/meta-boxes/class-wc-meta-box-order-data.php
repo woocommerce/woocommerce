@@ -380,15 +380,15 @@ class WC_Meta_Box_Order_Data {
 								$user    = Users::get_user_in_current_site( $user_id );
 
 								if ( ! is_wp_error( $user ) ) {
-								$customer = new WC_Customer( $user_id );
-								/* translators: 1: user display name 2: user ID 3: user email */
-								$user_string = sprintf(
+									$customer = new WC_Customer( $user_id );
+									/* translators: 1: user display name 2: user ID 3: user email */
+									$user_string = sprintf(
 									/* translators: 1: customer name, 2 customer id, 3: customer email */
-									esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
-									$customer->get_first_name() . ' ' . $customer->get_last_name(),
-									$customer->get_id(),
-									$customer->get_email()
-								);
+										esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
+										$customer->get_first_name() . ' ' . $customer->get_last_name(),
+										$customer->get_id(),
+										$customer->get_email()
+									);
 								} else {
 									// print customer not available in the current site.
 									$user_string = esc_html__( '(Not available)', 'woocommerce' );
@@ -432,39 +432,39 @@ class WC_Meta_Box_Order_Data {
 							if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
 								echo '<p>' . esc_html( $details_not_available_message ) . '</p>';
 							} else {
-							if ( $order->get_formatted_billing_address() ) {
-								echo '<p>' . wp_kses( $order->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
-							} else {
-								echo '<p class="none_set"><strong>' . esc_html__( 'Address:', 'woocommerce' ) . '</strong> ' . esc_html__( 'No billing address set.', 'woocommerce' ) . '</p>';
-							}
-
-							$billing_fields = self::get_billing_fields( $order, 'view' );
-
-							foreach ( $billing_fields as $key => $field ) {
-								if ( isset( $field['show'] ) && false === $field['show'] ) {
-									continue;
-								}
-
-								$field_name = 'billing_' . $key;
-
-								if ( isset( $field['value'] ) ) {
-									$field_value = $field['value'];
-								} elseif ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
-									$field_value = $order->{"get_$field_name"}( 'edit' );
+								if ( $order->get_formatted_billing_address() ) {
+									echo '<p>' . wp_kses( $order->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
 								} else {
-									$field_value = $order->get_meta( '_' . $field_name );
+									echo '<p class="none_set"><strong>' . esc_html__( 'Address:', 'woocommerce' ) . '</strong> ' . esc_html__( 'No billing address set.', 'woocommerce' ) . '</p>';
 								}
 
-								if ( 'billing_phone' === $field_name ) {
-									$field_value = wc_make_phone_clickable( $field_value );
-								} elseif ( 'billing_email' === $field_name ) {
-									$field_value = '<a href="' . esc_url( 'mailto:' . $field_value ) . '">' . $field_value . '</a>';
-								} else {
-									$field_value = make_clickable( esc_html( $field_value ) );
-								}
+								$billing_fields = self::get_billing_fields( $order, 'view' );
 
-								if ( $field_value || '0' === $field_value ) {
-									echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . wp_kses_post( $field_value ) . '</p>';
+								foreach ( $billing_fields as $key => $field ) {
+									if ( isset( $field['show'] ) && false === $field['show'] ) {
+										continue;
+									}
+
+									$field_name = 'billing_' . $key;
+
+									if ( isset( $field['value'] ) ) {
+										$field_value = $field['value'];
+									} elseif ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+										$field_value = $order->{"get_$field_name"}( 'edit' );
+									} else {
+										$field_value = $order->get_meta( '_' . $field_name );
+									}
+
+									if ( 'billing_phone' === $field_name ) {
+										$field_value = wc_make_phone_clickable( $field_value );
+									} elseif ( 'billing_email' === $field_name ) {
+										$field_value = '<a href="' . esc_url( 'mailto:' . $field_value ) . '">' . $field_value . '</a>';
+									} else {
+										$field_value = make_clickable( esc_html( $field_value ) );
+									}
+
+									if ( $field_value || '0' === $field_value ) {
+										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . wp_kses_post( $field_value ) . '</p>';
 									}
 								}
 							}
@@ -568,42 +568,42 @@ class WC_Meta_Box_Order_Data {
 							if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
 								echo '<p>' . esc_html( $details_not_available_message ) . '</p>';
 							} else {
-							if ( $order->get_formatted_shipping_address() ) {
-								echo '<p>' . wp_kses( $order->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
-							} else {
-								echo '<p class="none_set"><strong>' . esc_html__( 'Address:', 'woocommerce' ) . '</strong> ' . esc_html__( 'No shipping address set.', 'woocommerce' ) . '</p>';
-							}
+								if ( $order->get_formatted_shipping_address() ) {
+									echo '<p>' . wp_kses( $order->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
+								} else {
+									echo '<p class="none_set"><strong>' . esc_html__( 'Address:', 'woocommerce' ) . '</strong> ' . esc_html__( 'No shipping address set.', 'woocommerce' ) . '</p>';
+								}
 
-							$shipping_fields = self::get_shipping_fields( $order, 'view' );
+								$shipping_fields = self::get_shipping_fields( $order, 'view' );
 
-							if ( ! empty( $shipping_fields ) ) {
-								foreach ( $shipping_fields as $key => $field ) {
-									if ( isset( $field['show'] ) && false === $field['show'] ) {
-										continue;
-									}
+								if ( ! empty( $shipping_fields ) ) {
+									foreach ( $shipping_fields as $key => $field ) {
+										if ( isset( $field['show'] ) && false === $field['show'] ) {
+											continue;
+										}
 
-									$field_name = 'shipping_' . $key;
+										$field_name = 'shipping_' . $key;
 
-									if ( isset( $field['value'] ) ) {
-										$field_value = $field['value'];
-									} elseif ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
-										$field_value = $order->{"get_$field_name"}( 'edit' );
-									} else {
-										$field_value = $order->get_meta( '_' . $field_name );
-									}
+										if ( isset( $field['value'] ) ) {
+											$field_value = $field['value'];
+										} elseif ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+											$field_value = $order->{"get_$field_name"}( 'edit' );
+										} else {
+											$field_value = $order->get_meta( '_' . $field_name );
+										}
 
-									if ( 'shipping_phone' === $field_name ) {
-										$field_value = wc_make_phone_clickable( $field_value );
-									}
+										if ( 'shipping_phone' === $field_name ) {
+											$field_value = wc_make_phone_clickable( $field_value );
+										}
 
-									if ( $field_value || '0' === $field_value ) {
-										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . wp_kses_post( $field_value ) . '</p>';
+										if ( $field_value || '0' === $field_value ) {
+											echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . wp_kses_post( $field_value ) . '</p>';
+										}
 									}
 								}
-							}
 
-							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) && $order->get_customer_note() ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-								echo '<p class="order_note"><strong>' . esc_html( __( 'Customer provided note:', 'woocommerce' ) ) . '</strong> ' . wp_kses( nl2br( esc_html( $order->get_customer_note() ) ), array( 'br' => array() ) ) . '</p>';
+								if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) && $order->get_customer_note() ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+									echo '<p class="order_note"><strong>' . esc_html( __( 'Customer provided note:', 'woocommerce' ) ) . '</strong> ' . wp_kses( nl2br( esc_html( $order->get_customer_note() ) ), array( 'br' => array() ) ) . '</p>';
 								}
 							}
 							?>
