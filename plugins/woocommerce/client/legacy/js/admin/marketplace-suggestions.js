@@ -349,6 +349,20 @@
 		function displaySuggestions( marketplaceSuggestionsApiData ) {
 			var usedSuggestionsContexts = [];
 
+			// Extract recommendations count from the first element if it exists
+			var recommendationsCount = 5; // default fallback
+			if (
+				marketplace_suggestions.suggestions_data &&
+				marketplace_suggestions.suggestions_data[0] &&
+				marketplace_suggestions.suggestions_data[0]['recommendations-count']
+			) {
+				var apiCount = marketplace_suggestions.suggestions_data[0]['recommendations-count'];
+				// Validate that it's a positive number and within reasonable bounds
+				if ( typeof apiCount === 'number' && apiCount > 0 && apiCount <= 50 ) {
+					recommendationsCount = Math.floor( apiCount );
+				}
+			}
+
 			// iterate over all suggestions containers, rendering promos
 			$( '.marketplace-suggestions-container' ).each( function() {
 				// determine the context / placement we're populating
@@ -357,8 +371,8 @@
 				// find promotions that target this context
 				var promos = getRelevantPromotions( marketplaceSuggestionsApiData, context );
 
-				// shuffle/randomly select five suggestions to display
-				var suggestionsToDisplay = _.sample( promos, 5 );
+				// shuffle/randomly select suggestions to display based on API count
+				var suggestionsToDisplay = _.sample( promos, recommendationsCount );
 
 				// render the promo content
 				for ( var i in suggestionsToDisplay ) {

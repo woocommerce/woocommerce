@@ -1,7 +1,7 @@
 ---
-post_title: WooComerce developer tools
+post_title: WooCommerce developer tools
 sidebar_label: Developer tools
-sidebar_position: 4
+sidebar_position: 5
 ---
 
 # Developer tools

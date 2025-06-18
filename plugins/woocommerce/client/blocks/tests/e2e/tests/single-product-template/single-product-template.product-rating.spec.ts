@@ -8,7 +8,7 @@ import { Editor, test as base, expect } from '@woocommerce/e2e-utils';
  */
 
 const blockData = {
-	name: 'Single Product',
+	name: 'Product',
 	slug: 'woocommerce/single-product',
 	product: 'Hoodie',
 	productSlug: 'hoodie',
