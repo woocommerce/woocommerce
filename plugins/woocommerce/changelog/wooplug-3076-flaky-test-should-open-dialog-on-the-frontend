@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Fix flaky e2e test related to template creation.
+
+

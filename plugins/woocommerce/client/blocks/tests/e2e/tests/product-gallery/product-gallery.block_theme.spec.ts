@@ -68,11 +68,38 @@ const getThumbnailImageIdByNth = async (
 
 test.describe( `${ blockData.name }`, () => {
 	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
-		const template = await requestUtils.createTemplate( 'wp_template', {
-			slug: blockData.slug,
-			title: 'Custom Single Product',
-			content: 'placeholder',
-		} );
+		let template;
+		const maxRetries = 3;
+		let retryCount = 0;
+		let lastError;
+
+		while ( retryCount < maxRetries ) {
+			try {
+				template = await requestUtils.createTemplate( 'wp_template', {
+					slug: blockData.slug,
+					title: 'Custom Single Product',
+					content: 'placeholder',
+				} );
+			} catch ( verifyError ) {
+				lastError = verifyError;
+			}
+
+			retryCount++;
+			if ( retryCount < maxRetries ) {
+				// Exponential backoff for retries
+				await new Promise( ( resolve ) =>
+					setTimeout( resolve, Math.pow( 2, retryCount ) * 200 )
+				);
+			}
+		}
+
+		if ( lastError ) {
+			throw lastError;
+		}
+
+		if ( ! template ) {
+			throw new Error( 'Template was not created.' );
+		}
 
 		await admin.visitSiteEditor( {
 			postId: template.id,
