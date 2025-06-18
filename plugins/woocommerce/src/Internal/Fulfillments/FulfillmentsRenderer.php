@@ -449,8 +449,8 @@ class FulfillmentsRenderer {
 		// Check if the current screen is the orders page or the edit order page on the admin side.
 		return $this->should_render_fulfillment_drawer();
 	}
-  
-  /*
+
+	/**
 	 * Fetches the fulfillments for the given order, caching them to avoid multiple fetches.
 	 *
 	 * @param WC_Order $order The order object.
@@ -468,5 +468,5 @@ class FulfillmentsRenderer {
 		$this->fulfillments_cache[ $order->get_id() ] = $fulfillments;
 
 		return $fulfillments;
-  }
+	}
 }
