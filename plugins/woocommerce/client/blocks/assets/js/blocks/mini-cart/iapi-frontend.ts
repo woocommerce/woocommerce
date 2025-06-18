@@ -175,14 +175,14 @@ const { state } = store(
 		state: {
 			// As a workaround for a bug in context of wp-each we use state to find the cart item. Where we need
 			// reactivity for the wp-each, use state.cartItem to get the cart item.
-			get cartItem(): CartItem {
+			get cartItem() {
 				const {
 					cartItem: { id },
 				} = getContext< CartItemContext >();
 
 				return wooStoreState.cart.items.find(
 					( item ) => item.id === id
-				) as CartItem;
+				) as CartItem | undefined;
 			},
 
 			get cartItems() {
@@ -224,30 +224,34 @@ const { state } = store(
 			},
 
 			get lineItemDiscount(): string {
-				const { quantity, prices } = state.cartItem;
+				if ( state.cartItem ) {
+					const { quantity, prices } = state.cartItem;
 
-				const regularAmountSingle = Dinero( {
-					amount: parseInt( prices.raw_prices.regular_price, 10 ),
-					precision: prices.raw_prices.precision,
-				} );
+					const regularAmountSingle = Dinero( {
+						amount: parseInt( prices.raw_prices.regular_price, 10 ),
+						precision: prices.raw_prices.precision,
+					} );
 
-				const purchaseAmountSingle = Dinero( {
-					amount: parseInt( prices.raw_prices.price, 10 ),
-					precision: prices.raw_prices.precision,
-				} );
+					const purchaseAmountSingle = Dinero( {
+						amount: parseInt( prices.raw_prices.price, 10 ),
+						precision: prices.raw_prices.precision,
+					} );
 
-				const saleAmountLineItem = regularAmountSingle
-					.subtract( purchaseAmountSingle )
-					.multiply( quantity );
+					const saleAmountLineItem = regularAmountSingle
+						.subtract( purchaseAmountSingle )
+						.multiply( quantity );
 
-				const totalLineItemDiscount = saleAmountLineItem
-					.convertPrecision( state.currency.minorUnit )
-					.getAmount();
+					const totalLineItemDiscount = saleAmountLineItem
+						.convertPrecision( state.currency.minorUnit )
+						.getAmount();
 
-				return formatPriceWithCurrency(
-					totalLineItemDiscount,
-					state.currency
-				);
+					return formatPriceWithCurrency(
+						totalLineItemDiscount,
+						state.currency
+					);
+				}
+
+				return '';
 			},
 
 			get cartItemHasDiscount(): boolean {
@@ -267,20 +271,29 @@ const { state } = store(
 
 			// Intended to be used in context of a cart item in wp-each
 			get minimumReached(): boolean {
-				const {
-					quantity,
-					quantity_limits: { minimum },
-				} = state.cartItem;
-				return quantity - 1 < minimum;
+				if ( state.cartItem ) {
+					const {
+						quantity,
+						quantity_limits: { minimum },
+					} = state.cartItem;
+
+					return quantity - 1 < minimum;
+				}
+
+				return false;
 			},
 
 			// Intended to be used in context of a cart item in wp-each
 			get maximumReached(): boolean {
-				const {
-					quantity,
-					quantity_limits: { maximum },
-				} = state.cartItem;
-				return quantity + 1 > maximum;
+				if ( state.cartItem ) {
+					const {
+						quantity,
+						quantity_limits: { maximum },
+					} = state.cartItem;
+					return quantity + 1 > maximum;
+				}
+
+				return false;
 			},
 
 			// Intended to be used in context of a cart item in wp-each
@@ -373,18 +386,22 @@ const { state } = store(
 
 			// Intended to be used in context of a cart item in wp-each
 			get lineItemTotal(): string {
-				const { totals } = state.cartItem;
-				const { displayCartPriceIncludingTax } = getConfig(
-					'woocommerce/mini-cart'
-				);
-				const currency = state.currency;
+				if ( state.cartItem ) {
+					const { totals } = state.cartItem;
+					const { displayCartPriceIncludingTax } = getConfig(
+						'woocommerce/mini-cart'
+					);
+					const currency = state.currency;
 
-				const totalLinePrice = displayCartPriceIncludingTax
-					? parseInt( totals.line_subtotal, 10 ) +
-					  parseInt( totals.line_subtotal_tax, 10 )
-					: parseInt( totals.line_subtotal, 10 );
+					const totalLinePrice = displayCartPriceIncludingTax
+						? parseInt( totals.line_subtotal, 10 ) +
+						  parseInt( totals.line_subtotal_tax, 10 )
+						: parseInt( totals.line_subtotal, 10 );
 
-				return formatPriceWithCurrency( totalLinePrice, currency );
+					return formatPriceWithCurrency( totalLinePrice, currency );
+				}
+
+				return '';
 			},
 		},
 
