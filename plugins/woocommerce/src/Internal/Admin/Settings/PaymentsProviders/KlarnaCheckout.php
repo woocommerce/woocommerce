@@ -24,21 +24,7 @@ class KlarnaCheckout extends PaymentGateway {
 	 * @return bool True if the payment gateway needs setup, false otherwise.
 	 */
 	public function needs_setup( WC_Payment_Gateway $payment_gateway ): bool {
-		try {
-			return ! empty( get_option( 'kco_credentials_error' ) );
-		} catch ( Throwable $e ) {
-			// Do nothing but log so we can investigate.
-			SafeGlobalFunctionProxy::wc_get_logger()->debug(
-				'Failed to determine if gateway needs setup: ' . $e->getMessage(),
-				array(
-					'gateway' => $payment_gateway->id,
-					'source'  => 'settings-payments',
-					'error'   => $e,
-				)
-			);
-		}
-
-		return parent::needs_setup( $payment_gateway );
+		return ! empty( get_option( 'kco_credentials_error' ) );
 	}
 
 	/**
@@ -53,7 +39,7 @@ class KlarnaCheckout extends PaymentGateway {
 		try {
 			// Note: Since the credentials used are tied to the WooCommerce store location country (US and non-US),
 			// the account can become disconnected if the store location changes.
-			if ( function_exists( '\KCO_WC' ) ) {
+			if ( function_exists( 'KCO_WC' ) ) {
 				$credentials = \KCO_WC()->credentials;
 				if ( is_object( $credentials ) && is_callable( array( $credentials, 'get_credentials_from_session' ) ) ) {
 					return ! empty( $credentials->get_credentials_from_session() );
