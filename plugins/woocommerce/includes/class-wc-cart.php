@@ -678,7 +678,6 @@ class WC_Cart extends WC_Legacy_Cart {
 		 * Fires after the cart is emptied.
 		 *
 		 * @since 9.7.0
-		 * @see WC_Session_Handler::persistent_cart_destroy()
 		 * @param bool $deprecated Previously used to clear the persistent cart, but this is now handled by the session handler.
 		 */
 		do_action( 'woocommerce_cart_emptied', $deprecated );

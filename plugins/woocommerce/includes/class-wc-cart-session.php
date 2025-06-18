@@ -433,19 +433,19 @@ final class WC_Cart_Session {
 	/**
 	 * Save the persistent cart when the cart is updated.
 	 *
-	 * @deprecated 9.10.0 Data persists in the session table for longer instead of syncing to meta.
+	 * @deprecated 11.0.0 Data persists in the session table for longer instead of syncing to meta.
 	 */
 	public function persistent_cart_update() {
-		wc_deprecated_function( 'persistent_cart_update', '9.10.0', 'Data persists in the session table for longer instead of syncing to meta.' );
+		wc_deprecated_function( 'persistent_cart_update', '11.0.0', 'Data persists in the session table for longer instead of syncing to meta.' );
 	}
 
 	/**
 	 * Delete the persistent cart permanently.
 	 *
-	 * @deprecated 9.10.0 Data persists in the session table for longer instead of syncing to meta.
+	 * @deprecated 11.0.0 Data persists in the session table for longer instead of syncing to meta.
 	 */
 	public function persistent_cart_destroy() {
-		wc_deprecated_function( 'persistent_cart_destroy', '9.10.0', 'Data persists in the session table for longer instead of syncing to meta.' );
+		wc_deprecated_function( 'persistent_cart_destroy', '11.0.0', 'Data persists in the session table for longer instead of syncing to meta.' );
 	}
 
 	/**

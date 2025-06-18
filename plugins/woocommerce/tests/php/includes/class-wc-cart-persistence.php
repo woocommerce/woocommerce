@@ -37,6 +37,7 @@ class WC_Cart_Persistence_Test extends \WC_Unit_Test_Case {
 		}
 		WC()->cart->empty_cart();
 		wp_set_current_user( 0 );
+		wp_delete_user( $this->user_id );
 	}
 
 	/**
