@@ -65,6 +65,22 @@
 					display: none;
 				}
 
+				// Mobile styles - hide sidebar on mobile by default
+				@media screen and (max-width: 782px) {
+					position: fixed;
+					left: -380px;
+					top: 0;
+					height: 100vh;
+					background: #fff;
+					box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+					transition: all 0.3s ease;
+
+					&.is-mobile-open {
+						left: 0;
+						z-index: 999;
+					}
+				}
+
 				.launch-store-sidebar__container {
 					display: flex;
 					flex-direction: column;
@@ -98,6 +114,28 @@
 						gap: 0;
 						width: 348px;
 						z-index: 2;
+
+						// Mobile close button
+						.mobile-sidebar-close {
+							display: none;
+							margin-left: auto;
+							padding: 4px;
+							min-width: 32px;
+							height: 32px;
+							border-radius: 4px;
+							color: #666;
+
+							&:hover {
+								background: #f0f0f0;
+								color: #333;
+							}
+
+							@media screen and (max-width: 782px) {
+								display: flex;
+								align-items: center;
+								justify-content: center;
+							}
+						}
 					}
 
 					.woocommerce-edit-site-layout__view-mode-toggle-icon.edit-site-site-icon {
@@ -353,6 +391,54 @@
 
 			.launch-your-store-layout__content {
 				flex-grow: 1;
+
+				// Mobile toggle button
+				.mobile-sidebar-toggle {
+					display: none;
+					position: fixed;
+					top: 24px;
+					left: 0;
+					z-index: 1000;
+					background: #fff;
+					border: 1px solid #ddd;
+					border-radius: 4px;
+					padding: 8px;
+					box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+					cursor: pointer;
+					transition: all 0.2s ease;
+
+					&:hover {
+						background: #f8f9fa;
+						box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+					}
+
+					@media screen and (max-width: 782px) {
+						display: flex;
+						align-items: center;
+						justify-content: center;
+					}
+				}
+
+				// Mobile overlay
+				.mobile-sidebar-overlay {
+					display: none;
+					position: fixed;
+					top: 0;
+					left: 0;
+					width: 100vw;
+					height: 100vh;
+					z-index: 2;
+					opacity: 0;
+					transition: opacity 0.3s ease;
+
+					@media screen and (max-width: 782px) {
+						display: block;
+
+						&.is-visible {
+							opacity: 1;
+						}
+					}
+				}
 			}
 		}
 	}

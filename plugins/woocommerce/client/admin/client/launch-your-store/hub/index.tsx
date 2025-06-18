@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useMachine } from '@xstate5/react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from '@wordpress/data';
 import { onboardingStore } from '@woocommerce/data';
 import clsx from 'clsx';
@@ -27,6 +27,7 @@ import {
 	MainContentContainer,
 } from './main-content/xstate';
 import { useXStateInspect } from '~/xstate';
+import MobileSidebarToggle from './sidebar/components/mobile-toggle';
 export type LaunchYourStoreComponentProps = {
 	sendEventToSidebar: ( arg0: SidebarMachineEvents ) => void;
 	sendEventToMainContent: ( arg0: MainContentMachineEvents ) => void;
@@ -47,6 +48,9 @@ const LaunchStoreController = () => {
 	const { xstateV5Inspector: inspect } = useXStateInspect( 'V5' );
 	const { invalidateResolutionForStoreSelector } =
 		useDispatch( onboardingStore );
+
+	// Mobile sidebar state
+	const [ isMobileSidebarOpen, setIsMobileSidebarOpen ] = useState( false );
 
 	const [ mainContentState, sendToMainContent, mainContentMachineService ] =
 		useMachine( mainContentMachine, {
@@ -89,12 +93,21 @@ const LaunchStoreController = () => {
 		sendToSidebar( { type: 'RETURN_FROM_PAYMENTS' } );
 	};
 
+	const handleMobileSidebarToggle = () => {
+		setIsMobileSidebarOpen( ! isMobileSidebarOpen );
+	};
+
+	const handleClose = () => {
+		setIsMobileSidebarOpen( false );
+	};
+
 	return (
 		<div className={ 'launch-your-store-layout__container' }>
 			<SetUpPaymentsProvider closeModal={ handlePaymentsClose }>
 				<SidebarContainer
 					className={ clsx( {
 						'is-sidebar-hidden': ! isSidebarVisible,
+						'is-mobile-open': isMobileSidebarOpen,
 					} ) }
 				>
 					{ CurrentSidebarComponent && (
@@ -102,10 +115,16 @@ const LaunchStoreController = () => {
 							sendEventToSidebar={ sendToSidebar }
 							sendEventToMainContent={ sendToMainContent }
 							context={ sidebarState.context }
+							onMobileClose={ handleClose }
 						/>
 					) }
 				</SidebarContainer>
 				<MainContentContainer>
+					{ ! isMobileSidebarOpen && (
+						<MobileSidebarToggle
+							onToggle={ handleMobileSidebarToggle }
+						/>
+					) }
 					{ CurrentMainContentComponent && (
 						<CurrentMainContentComponent
 							key={ mainContentState.value.toString() }

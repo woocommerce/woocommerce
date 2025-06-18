@@ -63,6 +63,7 @@ export type SidebarMachineContext = {
 };
 export type SidebarComponentProps = LaunchYourStoreComponentProps & {
 	context: SidebarMachineContext;
+	onMobileClose?: () => void;
 };
 export type SidebarMachineEvents =
 	| { type: 'EXTERNAL_URL_UPDATE' }

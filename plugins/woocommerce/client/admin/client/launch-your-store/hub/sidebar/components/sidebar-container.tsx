@@ -5,13 +5,14 @@
  */
 import clsx from 'clsx';
 import { isRTL, __ } from '@wordpress/i18n';
-import { chevronRight, chevronLeft } from '@wordpress/icons';
+import { chevronRight, chevronLeft, close } from '@wordpress/icons';
 // @ts-ignore No types for this exist yet.
 import SidebarButton from '@wordpress/edit-site/build-module/components/sidebar-button';
 import {
 	__experimentalHStack as HStack,
 	__experimentalHeading as Heading,
 	__experimentalVStack as VStack,
+	Button,
 } from '@wordpress/components';
 import React from 'react';
 /**
@@ -23,12 +24,14 @@ export type SidebarContainerProps = {
 	description?: React.ReactNode;
 	footer?: React.ReactNode;
 	children: React.ReactNode;
+	onMobileClose?: () => void;
 };
 export const SidebarContainer = ( {
 	title,
 	description,
 	footer,
 	children,
+	onMobileClose,
 }: SidebarContainerProps ) => {
 	const chevronIcon = isRTL() ? chevronRight : chevronLeft;
 
@@ -72,6 +75,16 @@ export const SidebarContainer = ( {
 					>
 						{ title }
 					</Heading>
+
+					{ onMobileClose && (
+						<Button
+							className="mobile-sidebar-close"
+							onClick={ onMobileClose }
+							icon={ close }
+							iconSize={ 20 }
+							aria-label={ __( 'Close sidebar', 'woocommerce' ) }
+						/>
+					) }
 				</HStack>
 
 				<div className="woocommerce-edit-site-sidebar-navigation-screen__content">
