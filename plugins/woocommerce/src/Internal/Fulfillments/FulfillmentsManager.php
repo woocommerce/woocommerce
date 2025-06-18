@@ -21,7 +21,7 @@ class FulfillmentsManager {
 	 */
 	public function __construct() {
 		add_filter( 'wc_fulfillment_translate_meta_key', array( $this, 'translate_fulfillment_meta_key' ), 10, 1 );
-		add_filter( 'wc_custom_fulfillment_statuses', array( $this, 'get_fulfillment_statuses' ), 10, 0 );
+		add_filter( 'wc_fulfillment_get_status', array( $this, 'get_fulfillment_status' ), 10, 1 );
 	}
 
 	/**
@@ -53,10 +53,11 @@ class FulfillmentsManager {
 	/**
 	 * Get fulfillment statuses.
 	 *
+	 * @param string $status_key The key of the fulfillment status to retrieve.
+	 *
 	 * @return array An array of fulfillment statuses.
 	 */
-	public function get_fulfillment_statuses() {
-
+	public function get_fulfillment_status( string $status_key ): array {
 		$core_fulfillment_statuses = array(
 			'unfulfilled'         => array(
 				'key'          => 'unfulfilled',
@@ -97,6 +98,10 @@ class FulfillmentsManager {
 			}
 		}
 
-		return $fulfillment_statuses;
+		return isset( $fulfillment_statuses[ $status_key ] ) ? $fulfillment_statuses[ $status_key ] : array(
+			'key'          => 'unknown',
+			'label'        => __( 'Unknown', 'woocommerce' ),
+			'is_fulfilled' => false,
+		);
 	}
 }
