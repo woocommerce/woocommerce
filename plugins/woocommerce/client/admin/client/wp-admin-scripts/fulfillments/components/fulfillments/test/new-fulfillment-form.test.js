@@ -6,6 +6,7 @@ import { render, screen } from '@testing-library/react';
 /**
  * Internal dependencies
  */
+import '../../../test-helper/global-mock';
 import NewFulfillmentForm from '../new-fulfillment-form';
 import { useFulfillmentDrawerContext } from '../../../context/drawer-context';
 
