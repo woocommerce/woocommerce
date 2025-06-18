@@ -359,7 +359,7 @@ class WC_Product_Variable extends WC_Product {
 	 * @return bool
 	 */
 	public function has_purchasable_variations() {
-		$variation_ids = $this->get_children();
+		$variation_ids = $this->get_variation_ids();
 
 		if ( is_callable( '_prime_post_caches' ) ) {
 			_prime_post_caches( $variation_ids );
@@ -380,6 +380,33 @@ class WC_Product_Variable extends WC_Product {
 
 		// There were either no variations, or they were hidden because of the "continues" above.
 		return false;
+	}
+
+	/**
+	 * Get the variation IDs for the current product.
+	 *
+	 * @return array
+	 */
+	private function get_variation_ids() {
+		global $wpdb;
+		$product_id = $this->get_id();
+
+		$variation_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT v.ID AS variation_id
+				FROM {$wpdb->posts} AS v
+				INNER JOIN {$wpdb->wc_product_meta_lookup} AS ml ON ml.product_id = v.ID
+				INNER JOIN {$wpdb->wc_product_meta_lookup} AS parent_ml ON parent_ml.product_id = v.post_parent
+				WHERE v.post_type = 'product_variation'
+				AND v.post_status = 'publish'
+				AND v.post_parent = %d
+				AND ml.stock_status = 'instock'
+				AND (ml.price > 0 OR parent_ml.price = 0)",
+				$product_id
+			)
+		);
+
+		return array_map( 'absint', $variation_ids );
 	}
 
 	/**
