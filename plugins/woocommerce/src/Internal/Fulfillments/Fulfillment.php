@@ -149,6 +149,42 @@ class Fulfillment extends \WC_Data {
 	}
 
 	/**
+	 * Check if the fulfillment is locked.
+	 *
+	 * @return bool Whether the fulfillment is locked.
+	 */
+	public function is_locked(): bool {
+		return boolval( $this->get_meta( '_is_locked' ) );
+	}
+
+	/**
+	 * Get the lock message.
+	 *
+	 * @return string Lock message.
+	 */
+	public function get_lock_message(): string {
+		return $this->get_meta( '_lock_message' ) ?? '';
+	}
+
+	/**
+	 * Set the lock status and message.
+	 *
+	 * @param bool   $locked  Whether the fulfillment is locked.
+	 * @param string $message Optional. The lock message.
+	 *                        Defaults to an empty string.
+	 *
+	 * @return void
+	 */
+	public function set_locked( bool $locked, string $message = '' ): void {
+		$this->update_meta_data( '_is_locked', $locked );
+		if ( $locked ) {
+			$this->update_meta_data( '_lock_message', $message );
+		} else {
+			$this->delete_meta_data( '_lock_message' );
+		}
+	}
+
+	/**
 	 * Get the date updated.
 	 *
 	 * @return string|null Date updated.
@@ -164,6 +200,22 @@ class Fulfillment extends \WC_Data {
 	 */
 	public function set_date_updated( ?string $date_updated ) {
 		$this->data['date_updated'] = $date_updated;
+	}
+
+	/**
+	 * Get the date the fulfillment was fulfilled.
+	 */
+	public function get_date_fulfilled(): ?string {
+		return $this->meta_exists( '_date_fulfilled' ) ? $this->get_meta( '_date_fulfilled', true ) : null;
+	}
+
+	/**
+	 * Set the date the fulfillment was fulfilled.
+	 *
+	 * @param string $date_fulfilled Date fulfilled.
+	 */
+	public function set_date_fulfilled( string $date_fulfilled ): void {
+		$this->add_meta_data( '_date_fulfilled', $date_fulfilled, true );
 	}
 
 	/**
@@ -201,7 +253,7 @@ class Fulfillment extends \WC_Data {
 	 * @param array $items Fulfillment items.
 	 */
 	public function set_items( array $items ): void {
-		$this->update_meta_data( '_items', $items );
+		$this->update_meta_data( '_items', array_values( $items ) );
 	}
 
 	/**

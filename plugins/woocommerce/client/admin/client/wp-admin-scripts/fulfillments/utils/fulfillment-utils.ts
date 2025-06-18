@@ -28,6 +28,23 @@ export function getFulfillmentItems(
 	) as Array< FulfillmentItem >;
 }
 
+export function getFulfillmentLockState( fulfillment: Fulfillment ): {
+	isLocked: boolean;
+	reason: string;
+} {
+	const isLocked = getFulfillmentMeta< boolean >(
+		fulfillment,
+		'_is_locked',
+		false
+	);
+	const reason = getFulfillmentMeta< string >(
+		fulfillment,
+		'_lock_message',
+		''
+	);
+	return { isLocked, reason };
+}
+
 export function findShipmentProviderName( key: string ) {
 	const shipmentProvider = ShipmentProviders.find(
 		( provider ) => provider.value === key
