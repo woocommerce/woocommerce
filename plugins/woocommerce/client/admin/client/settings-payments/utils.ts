@@ -383,7 +383,7 @@ export const recordPaymentsProviderEvent = (
 		provider.onboarding?.state?.started ?? false;
 	enrichedData.provider_onboarding_completed =
 		provider.onboarding?.state?.completed ?? false;
-	enrichedData.provider_onboarding_test_mode =
+	enrichedData.provider_account_test_mode =
 		provider.onboarding?.state?.test_mode ?? false;
 	// The provider extension data.
 	enrichedData.provider_extension_slug = provider.plugin.slug ?? 'unknown';

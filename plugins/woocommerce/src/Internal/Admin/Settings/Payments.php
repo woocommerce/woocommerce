@@ -576,8 +576,8 @@ class Payments {
 			$this->record_event(
 				'provider_extension_deactivated',
 				array(
-					'suggestion_id'  => $provider['_suggestion_id'],
-					'extension_slug' => $provider['plugin']['slug'],
+					'suggestion_id'           => $provider['_suggestion_id'],
+					'provider_extension_slug' => $provider['plugin']['slug'],
 				)
 			);
 
@@ -586,8 +586,8 @@ class Payments {
 				$this->record_event(
 					'provider_extension_uninstalled',
 					array(
-						'suggestion_id'  => $provider['_suggestion_id'],
-						'extension_slug' => $provider['plugin']['slug'],
+						'suggestion_id'           => $provider['_suggestion_id'],
+						'provider_extension_slug' => $provider['plugin']['slug'],
 					)
 				);
 			}
@@ -595,8 +595,8 @@ class Payments {
 			$this->record_event(
 				'provider_extension_activated',
 				array(
-					'suggestion_id'  => $provider['_suggestion_id'],
-					'extension_slug' => $provider['plugin']['slug'],
+					'suggestion_id'           => $provider['_suggestion_id'],
+					'provider_extension_slug' => $provider['plugin']['slug'],
 				)
 			);
 		}
@@ -606,18 +606,18 @@ class Payments {
 			$this->record_event(
 				'provider_account_disconnected',
 				array(
-					'suggestion_id'     => $provider['_suggestion_id'],
-					'extension_slug'    => $provider['plugin']['slug'],
-					'account_test_mode' => $old_snapshot['account_test_mode'] ? 'yes' : 'no',
+					'suggestion_id'              => $provider['_suggestion_id'],
+					'provider_extension_slug'    => $provider['plugin']['slug'],
+					'provider_account_test_mode' => $old_snapshot['account_test_mode'] ? 'yes' : 'no',
 				)
 			);
 		} elseif ( ! $old_snapshot['account_connected'] && $new_snapshot['account_connected'] ) {
 			$this->record_event(
 				'provider_account_connected',
 				array(
-					'suggestion_id'     => $provider['_suggestion_id'],
-					'extension_slug'    => $provider['plugin']['slug'],
-					'account_test_mode' => $new_snapshot['account_test_mode'] ? 'yes' : 'no',
+					'suggestion_id'              => $provider['_suggestion_id'],
+					'provider_extension_slug'    => $provider['plugin']['slug'],
+					'provider_account_test_mode' => $new_snapshot['account_test_mode'] ? 'yes' : 'no',
 				)
 			);
 		}
@@ -627,18 +627,18 @@ class Payments {
 			$this->record_event(
 				'provider_setup_completed',
 				array(
-					'provider_id'    => $provider['id'],
-					'suggestion_id'  => $provider['_suggestion_id'],
-					'extension_slug' => $provider['plugin']['slug'],
+					'provider_id'             => $provider['id'],
+					'suggestion_id'           => $provider['_suggestion_id'],
+					'provider_extension_slug' => $provider['plugin']['slug'],
 				)
 			);
 		} elseif ( ! $old_snapshot['needs_setup'] && $new_snapshot['needs_setup'] ) {
 			$this->record_event(
 				'provider_setup_required',
 				array(
-					'provider_id'    => $provider['id'],
-					'suggestion_id'  => $provider['_suggestion_id'],
-					'extension_slug' => $provider['plugin']['slug'],
+					'provider_id'             => $provider['id'],
+					'suggestion_id'           => $provider['_suggestion_id'],
+					'provider_extension_slug' => $provider['plugin']['slug'],
 				)
 			);
 		}
@@ -649,16 +649,16 @@ class Payments {
 				$this->record_event(
 					'provider_live_payments_enabled',
 					array(
-						'suggestion_id'  => $provider['_suggestion_id'],
-						'extension_slug' => $provider['plugin']['slug'],
+						'suggestion_id'           => $provider['_suggestion_id'],
+						'provider_extension_slug' => $provider['plugin']['slug'],
 					)
 				);
 			} elseif ( ! $old_snapshot['test_mode'] && $new_snapshot['test_mode'] ) {
 				$this->record_event(
 					'provider_test_payments_enabled',
 					array(
-						'suggestion_id'  => $provider['_suggestion_id'],
-						'extension_slug' => $provider['plugin']['slug'],
+						'suggestion_id'           => $provider['_suggestion_id'],
+						'provider_extension_slug' => $provider['plugin']['slug'],
 					)
 				);
 			}
@@ -670,16 +670,16 @@ class Payments {
 				$this->record_event(
 					'provider_account_live_mode_enabled',
 					array(
-						'suggestion_id'  => $provider['_suggestion_id'],
-						'extension_slug' => $provider['plugin']['slug'],
+						'suggestion_id'           => $provider['_suggestion_id'],
+						'provider_extension_slug' => $provider['plugin']['slug'],
 					)
 				);
 			} elseif ( ! $old_snapshot['account_test_mode'] && $new_snapshot['account_test_mode'] ) {
 				$this->record_event(
 					'provider_account_test_mode_enabled',
 					array(
-						'suggestion_id'  => $provider['_suggestion_id'],
-						'extension_slug' => $provider['plugin']['slug'],
+						'suggestion_id'           => $provider['_suggestion_id'],
+						'provider_extension_slug' => $provider['plugin']['slug'],
 					)
 				);
 			}

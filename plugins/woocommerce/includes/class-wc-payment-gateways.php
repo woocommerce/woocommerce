@@ -181,12 +181,12 @@ class WC_Payment_Gateways {
 			$this->notify_admin_payment_gateway_enabled( $gateway );
 
 			// Track the gateway enable.
-			$this->record_gateway_event( 'enabled', $gateway );
+			$this->record_gateway_event( 'enable', $gateway );
 		}
 
 		if ( $this->was_gateway_disabled( $value, $old_value ) ) {
 			// This is a change to a payment gateway's settings and it was just disabled. Let's track it.
-			$this->record_gateway_event( 'disabled', $gateway );
+			$this->record_gateway_event( 'disable', $gateway );
 		}
 	}
 
@@ -477,13 +477,13 @@ All at %6$s
 		}
 
 		// If the event name is not prefixed, we prefix it.
-		$prefix = SettingsPaymentsService::EVENT_PREFIX . 'gateway_';
+		$prefix = SettingsPaymentsService::EVENT_PREFIX . 'provider_';
 		if ( ! str_starts_with( $name, $prefix ) ) {
 			$name = $prefix . $name;
 		}
 
 		$properties = array(
-			'gateway_id'       => $gateway->id,
+			'provider_id'      => $gateway->id,
 			'business_country' => WC()->countries->get_base_country(),
 		);
 
@@ -505,13 +505,12 @@ All at %6$s
 			$payments_providers_service = wc_get_container()->get( PaymentsProviders::class );
 
 			$gateway_details = $payments_providers_service->get_payment_gateway_details( $gateway, 0, $properties['business_country'] );
-
 			// If the gateway details have a suggestion ID, we add it to the properties.
 			if ( ! empty( $gateway_details['_suggestion_id'] ) ) {
 				$properties['suggestion_id'] = $gateway_details['_suggestion_id'];
 			}
 			if ( ! empty( $gateway_details['plugin']['slug'] ) ) {
-				$properties['extension_slug'] = $gateway_details['plugin']['slug'];
+				$properties['provider_extension_slug'] = $gateway_details['plugin']['slug'];
 			}
 		} catch ( \Throwable $e ) {
 			// Do nothing but log so we can investigate.

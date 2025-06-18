@@ -340,7 +340,7 @@ export const SettingsPaymentsMain = () => {
 						: 'activate',
 				provider_id: paymentsEntity.id,
 				suggestion_id: paymentsEntity?._suggestion_id ?? 'unknown',
-				extension_slug: paymentsEntity.plugin.slug,
+				provider_extension_slug: paymentsEntity.plugin.slug,
 				from: context,
 			} );
 			installAndActivatePlugins( [ paymentsEntity.plugin.slug ] )
@@ -360,7 +360,7 @@ export const SettingsPaymentsMain = () => {
 							provider_id: paymentsEntity.id,
 							suggestion_id:
 								paymentsEntity?._suggestion_id ?? 'unknown',
-							extension_slug: paymentsEntity.plugin.slug,
+							provider_extension_slug: paymentsEntity.plugin.slug,
 							from: context,
 						} );
 					}
