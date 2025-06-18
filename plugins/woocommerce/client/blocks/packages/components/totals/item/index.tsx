@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { isValidElement } from '@wordpress/element';
 import type { ReactElement, ReactNode } from 'react';
 import type { Currency } from '@woocommerce/types';
+import { Skeleton } from '@woocommerce/base-components/skeleton';
 
 /**
  * Internal dependencies
@@ -51,15 +52,14 @@ const TotalsItem = ( {
 	value,
 	description,
 	showSkeleton = false,
-	skeleton,
 }: TotalsItemProps ): ReactElement => {
 	return (
 		<div className={ clsx( 'wc-block-components-totals-item', className ) }>
 			<span className="wc-block-components-totals-item__label">
 				{ label }
 			</span>
-			{ showSkeleton ? (
-				skeleton
+			{ ! value || showSkeleton ? (
+				<Skeleton width="45px" height="1em" />
 			) : (
 				<TotalsItemValue value={ value } currency={ currency } />
 			) }

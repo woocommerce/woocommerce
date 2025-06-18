@@ -9,7 +9,6 @@ import {
 	getSelectedShippingRateNames,
 } from '@woocommerce/base-utils';
 import { useStoreCart } from '@woocommerce/base-context';
-import { Skeleton } from '@woocommerce/base-components/skeleton';
 
 /**
  * Internal dependencies
@@ -57,7 +56,6 @@ export const TotalsShipping = ( {
 				}
 				currency={ getCurrencyFromPriceResponse( cartTotals ) }
 				showSkeleton={ cartIsLoading }
-				skeleton={ <Skeleton width="45px" height="1em" /> }
 			/>
 		</div>
 	);

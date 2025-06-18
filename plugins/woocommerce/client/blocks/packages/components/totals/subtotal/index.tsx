@@ -21,7 +21,6 @@ export interface SubtotalProps {
 	currency: Currency;
 	values: Values | Record< string, never >;
 	showSkeleton?: boolean;
-	skeleton?: ReactElement;
 }
 
 const Subtotal = ( {
@@ -29,7 +28,6 @@ const Subtotal = ( {
 	values,
 	className,
 	showSkeleton,
-	skeleton,
 }: SubtotalProps ): ReactElement => {
 	const { total_items: totalItems, total_items_tax: totalItemsTax } = values;
 	const itemsValue = parseInt( totalItems, 10 );
@@ -46,7 +44,6 @@ const Subtotal = ( {
 					: itemsValue
 			}
 			showSkeleton={ showSkeleton }
-			skeleton={ skeleton }
 		/>
 	);
 };

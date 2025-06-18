@@ -12,7 +12,6 @@ import {
 	Currency,
 	LooselyMustHave,
 } from '@woocommerce/types';
-import { Skeleton } from '@woocommerce/base-components/skeleton';
 
 /**
  * Internal dependencies
@@ -123,7 +122,6 @@ const TotalsDiscount = ( {
 			}
 			value={ discountTotalValue ? discountTotalValue * -1 : '-' }
 			showSkeleton={ isLoading }
-			skeleton={ <Skeleton width="45px" height="1em" /> }
 		/>
 	);
 };
