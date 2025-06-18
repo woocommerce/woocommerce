@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent some block styles being loaded on every page in classic themes
