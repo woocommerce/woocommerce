@@ -134,7 +134,7 @@ class Utils {
 		if ( $product->is_type( 'simple' ) ) {
 			return ! $product->is_in_stock() || ! $product->is_purchasable();
 		} elseif ( $product->is_type( 'variable' ) ) {
-			return ! $product->has_purchasable_variations();
+			return ! $product->is_in_stock() || ! $product->has_purchasable_variations();
 		}
 
 		return false;
