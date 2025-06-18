@@ -133,7 +133,7 @@ export const EllipsisMenuContent = ( {
 
 		if ( ! gatewayToggleNonce ) {
 			createErrorNotice(
-				__( 'Failed to disable the plugin.', 'woocommerce' )
+				__( 'Failed to disable the payments provider.', 'woocommerce' )
 			);
 			return;
 		}
@@ -153,7 +153,10 @@ export const EllipsisMenuContent = ( {
 			} )
 			.catch( () => {
 				createErrorNotice(
-					__( 'Failed to disable the plugin.', 'woocommerce' )
+					__(
+						'Failed to disable the payments provider.',
+						'woocommerce'
+					)
 				);
 				setIsDisabling( false );
 				onToggle();
