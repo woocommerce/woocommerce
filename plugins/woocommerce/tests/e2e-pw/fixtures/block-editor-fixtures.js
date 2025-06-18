@@ -4,7 +4,7 @@
 import { test as baseTest } from './fixtures';
 import { WC_API_PATH } from '../utils/api-client';
 import { ADMIN_STATE_PATH } from '../playwright.config';
-import { wpCLI } from '../utils';
+import { wpCLI } from '../utils/cli';
 
 export const test = baseTest.extend( {
 	page: async ( { page, restApi }, use ) => {
