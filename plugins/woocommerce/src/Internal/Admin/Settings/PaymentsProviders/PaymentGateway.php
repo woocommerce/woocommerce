@@ -382,6 +382,8 @@ class PaymentGateway {
 	/**
 	 * Check if the payment gateway has a payments processor account connected.
 	 *
+	 * Note: Be extra careful if you override this method and rely on needs_setup() since it could lead to an infinite loop.
+	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 *
 	 * @return bool True if the payment gateway account is connected, false otherwise.
