@@ -203,6 +203,22 @@ class Fulfillment extends \WC_Data {
 	}
 
 	/**
+	 * Get the date the fulfillment was fulfilled.
+	 */
+	public function get_date_fulfilled(): ?string {
+		return $this->meta_exists( '_date_fulfilled' ) ? $this->get_meta( '_date_fulfilled', true ) : null;
+	}
+
+	/**
+	 * Set the date the fulfillment was fulfilled.
+	 *
+	 * @param string $date_fulfilled Date fulfilled.
+	 */
+	public function set_date_fulfilled( string $date_fulfilled ): void {
+		$this->add_meta_data( '_date_fulfilled', $date_fulfilled, true );
+	}
+
+	/**
 	 * Get the date deleted.
 	 *
 	 * @return string|null Date deleted.
