@@ -127,9 +127,9 @@ test( 'can bulk edit products', async ( { page, products } ) => {
 			await page
 				.getByLabel( `Select ${ product.name }` )
 				.and(
-					page.getByRole( 'checkbox', {
-						value: product.id.toString(),
-					} )
+					page.locator(
+						`input[type="checkbox"][value="${ product.id }"]`
+					)
 				)
 				.click();
 		}

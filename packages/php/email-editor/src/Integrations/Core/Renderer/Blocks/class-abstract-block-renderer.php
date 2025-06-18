@@ -9,7 +9,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Block_Renderer;
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use WP_Style_Engine;
 
 /**
@@ -73,14 +73,14 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 	/**
 	 * Render the block.
 	 *
-	 * @param string              $block_content The block content.
-	 * @param array               $parsed_block The parsed block.
-	 * @param Settings_Controller $settings_controller The settings controller.
+	 * @param string            $block_content The block content.
+	 * @param array             $parsed_block The parsed block.
+	 * @param Rendering_Context $rendering_context The rendering context.
 	 * @return string
 	 */
-	public function render( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	public function render( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		return $this->add_spacer(
-			$this->render_content( $block_content, $parsed_block, $settings_controller ),
+			$this->render_content( $block_content, $parsed_block, $rendering_context ),
 			$parsed_block['email_attrs'] ?? array()
 		);
 	}
@@ -88,10 +88,10 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 	/**
 	 * Render the block content.
 	 *
-	 * @param string              $block_content The block content.
-	 * @param array               $parsed_block The parsed block.
-	 * @param Settings_Controller $settings_controller The settings controller.
+	 * @param string            $block_content The block content.
+	 * @param array             $parsed_block The parsed block.
+	 * @param Rendering_Context $rendering_context The rendering context.
 	 * @return string
 	 */
-	abstract protected function render_content( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string;
+	abstract protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string;
 }

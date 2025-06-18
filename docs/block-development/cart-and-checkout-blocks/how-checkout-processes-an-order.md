@@ -139,6 +139,6 @@ The `checkPaymentMethodsCanPay()` [function](https://github.com/woocommerce/wooc
 
 The `checkPaymentMethodsCanPay()` [function](https://github.com/woocommerce/woocommerce-blocks/blob/4af2c0916a936369be8a4f0044683b90b3af4f0d/assets/js/data/payment-methods/check-payment-methods.ts#L26) must be called in a few places in order to validate the payment methods before they can be displayed to the user as viable options.
 
--   [Here](https://github.com/woocommerce/woocommerce-blocks/blob/4af2c0916a936369be8a4f0044683b90b3af4f0d/assets/js/data/cart/index.ts#L46-L57), once the cart loads, we want to be able to display express payment methods, so we need to validate them first.
--   [Here](https://github.com/woocommerce/woocommerce-blocks/blob/4af2c0916a936369be8a4f0044683b90b3af4f0d/assets/js/data/cart/index.ts#L42-L43), once the cart changes, we may want to enable/disable certain payment methods
--   [Here](https://github.com/woocommerce/woocommerce-blocks/blob/4af2c0916a936369be8a4f0044683b90b3af4f0d/assets/js/data/checkout/index.ts#L44-L49), once the checkout loads, we want to verify all registered payment methods
+-   [Once the cart loads](https://github.com/woocommerce/woocommerce-blocks/blob/4af2c0916a936369be8a4f0044683b90b3af4f0d/assets/js/data/cart/index.ts#L46-L57), we want to be able to display express payment methods, so we need to validate them first.
+-   [Once the cart changes](https://github.com/woocommerce/woocommerce-blocks/blob/4af2c0916a936369be8a4f0044683b90b3af4f0d/assets/js/data/cart/index.ts#L42-L43), we may want to enable/disable certain payment methods
+-   [once the checkout loads](https://github.com/woocommerce/woocommerce-blocks/blob/4af2c0916a936369be8a4f0044683b90b3af4f0d/assets/js/data/checkout/index.ts#L44-L49), we want to verify all registered payment methods

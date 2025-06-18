@@ -33,13 +33,6 @@ class Content_Renderer {
 	private Process_Manager $process_manager;
 
 	/**
-	 * Settings controller
-	 *
-	 * @var Settings_Controller
-	 */
-	private Settings_Controller $settings_controller;
-
-	/**
 	 * Theme controller
 	 *
 	 * @var Theme_Controller
@@ -86,24 +79,21 @@ class Content_Renderer {
 	/**
 	 * Content_Renderer constructor.
 	 *
-	 * @param Process_Manager     $preprocess_manager Preprocess manager.
-	 * @param Blocks_Registry     $blocks_registry Blocks registry.
-	 * @param Settings_Controller $settings_controller Settings controller.
-	 * @param Css_Inliner         $css_inliner Css inliner.
-	 * @param Theme_Controller    $theme_controller Theme controller.
+	 * @param Process_Manager  $preprocess_manager Preprocess manager.
+	 * @param Blocks_Registry  $blocks_registry Blocks registry.
+	 * @param Css_Inliner      $css_inliner Css inliner.
+	 * @param Theme_Controller $theme_controller Theme controller.
 	 */
 	public function __construct(
 		Process_Manager $preprocess_manager,
 		Blocks_Registry $blocks_registry,
-		Settings_Controller $settings_controller,
 		Css_Inliner $css_inliner,
 		Theme_Controller $theme_controller
 	) {
-		$this->process_manager     = $preprocess_manager;
-		$this->blocks_registry     = $blocks_registry;
-		$this->settings_controller = $settings_controller;
-		$this->theme_controller    = $theme_controller;
-		$this->css_inliner         = $css_inliner;
+		$this->process_manager  = $preprocess_manager;
+		$this->blocks_registry  = $blocks_registry;
+		$this->theme_controller = $theme_controller;
+		$this->css_inliner      = $css_inliner;
 	}
 
 	/**
@@ -167,7 +157,8 @@ class Content_Renderer {
 		if ( ! $renderer ) {
 			$renderer = $this->blocks_registry->get_fallback_renderer();
 		}
-		return $renderer ? $renderer->render( $block_content, $parsed_block, $this->settings_controller ) : $block_content;
+		$context = new Rendering_Context( $this->theme_controller->get_theme() );
+		return $renderer ? $renderer->render( $block_content, $parsed_block, $context ) : $block_content;
 	}
 
 	/**

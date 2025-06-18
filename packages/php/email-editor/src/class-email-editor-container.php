@@ -199,7 +199,6 @@ class Email_Editor_Container {
 				return new Content_Renderer(
 					$container->get( Process_Manager::class ),
 					$container->get( Blocks_Registry::class ),
-					$container->get( Settings_Controller::class ),
 					new Email_Css_Inliner(),
 					$container->get( Theme_Controller::class ),
 				);

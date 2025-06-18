@@ -91,35 +91,37 @@ const Block = ( props: BlockProps ): JSX.Element | null => {
 	const source = getSource( product, showDescriptionIfEmpty );
 	const maxLength = summaryLength || Infinity;
 
+	const summaryClassName = 'wc-block-components-product-summary';
+
 	if ( ! product ) {
 		return (
 			<div
-				className={ clsx(
-					className,
-					`wc-block-components-product-summary`,
-					{
-						[ `${ parentClassName }__product-summary` ]:
-							parentClassName,
-					}
-				) }
+				className={ clsx( className, summaryClassName, {
+					[ `${ parentClassName }__product-summary` ]:
+						parentClassName,
+				} ) }
 			/>
 		);
 	}
 
 	if ( isDescendentOfSingleProductTemplate ) {
 		return (
-			<p>
-				{ __(
-					'This block displays the product summary and all its customizations.',
-					'woocommerce'
-				) }
-			</p>
+			<div className={ summaryClassName }>
+				<p>
+					{ __(
+						'This block displays the product summary and all its customizations.',
+						'woocommerce'
+					) }
+				</p>
+			</div>
 		);
 	}
 
 	if ( ! source ) {
 		return isDescendantOfAllProducts ? null : (
-			<p>{ __( 'No product summary to show.', 'woocommerce' ) }</p>
+			<div className={ summaryClassName }>
+				<p>{ __( 'No product summary to show.', 'woocommerce' ) }</p>
+			</div>
 		);
 	}
 
@@ -129,7 +131,7 @@ const Block = ( props: BlockProps ): JSX.Element | null => {
 				className={ clsx(
 					className,
 					styleProps.className,
-					`wc-block-components-product-summary`,
+					summaryClassName,
 					{
 						[ `${ parentClassName }__product-summary` ]:
 							parentClassName,
