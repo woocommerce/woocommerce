@@ -365,11 +365,25 @@ class FulfillmentsRenderer {
 	public function render_order_details_badges( WC_Order $order ) {
 		echo '<div class="wc-order-fulfillment-badges">';
 
+		// Check if we've already fetched the fulfillments for this order.
+		$fulfillments = $this->fulfillments_cache[ $order->get_id() ] ?? null;
+
+		// If not, fetch them and cache them.
+		if ( null === $fulfillments ) {
+			$data_store                                   = wc_get_container()->get( FulfillmentsDataStore::class );
+			$fulfillments                                 = $data_store->read_fulfillments( WC_Order::class, '' . $order->get_id() );
+			$this->fulfillments_cache[ $order->get_id() ] = $fulfillments;
+		}
+
+		// Get the fulfillment status for the order.
+		$fulfillment_status = FulfillmentUtils::get_fulfillment_status( $order, $fulfillments );
+
 		// Render order status badge.
 		$order_status = $order->get_status();
 		echo '<mark class="order-status status-' . esc_attr( $order_status ) . '"><span>' . esc_html( wc_get_order_status_name( $order_status ) ) . '</span></mark>';
+
 		// Render fulfillment status badge.
-		$this->render_fulfillment_status_badge( $order, FulfillmentUtils::get_fulfillment_status( $order, $this->fulfillments_cache[ $order->get_id() ] ?? array() ) );
+		$this->render_fulfillment_status_badge( $order, $fulfillment_status );
 		echo '</div>';
 	}
 
