@@ -1,0 +1,190 @@
+<?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\DataStores\Fulfillments;
+
+use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
+use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
+use WC_Helper_Order;
+use WC_Order;
+use WC_Unit_Test_Case;
+use WP_REST_Request;
+
+/**
+ * Class OrderFulfillmentsRestControllerHookTest
+ *
+ * @package Automattic\WooCommerce\Tests\Internal\Fulfillments
+ */
+class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
+	/**
+	 * @var FulfillmentsDataStore
+	 */
+	private FulfillmentsDataStore $store;
+
+	/**
+	 * @var WC_Order
+	 */
+	private WC_Order $order;
+
+	/**
+	 * Setup test case.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->store = new FulfillmentsDataStore();
+		$this->order = WC_Helper_Order::create_order( get_current_user_id() );
+	}
+
+	/**
+	 * Tear down test case.
+	 *
+	 * This method is called after each test method is executed.
+	 * It is used to clean up any data created during the tests.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+
+		// Remove any fulfillments added during the tests.
+		global $wpdb;
+		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillments;" );
+		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillment_meta;" );
+	}
+
+	/**
+	 * Test that the fulfillment before create hook is called when creating a fulfillment.
+	 */
+	public function test_fulfillment_before_create_hook_is_called() {
+		$hook_called = false;
+		add_filter(
+			'wc_fulfillment_before_create',
+			function ( $fulfillment ) use ( &$hook_called ) {
+				$hook_called = true;
+				return $fulfillment;
+			}
+		);
+
+		$this->store->create( $this->get_test_fulfillment( $this->order->get_id() ) );
+		$this->assertTrue( $hook_called, 'The fulfillment before create hook was not called.' );
+		$fulfillments = $this->store->read_fulfillments( WC_Order::class, (string) $this->order->get_id() );
+		$this->assertCount( 1, $fulfillments, 'Fulfillment was not created.' );
+	}
+
+	/**
+	 * Test that the fulfillment before create hook can prevent creating a fulfillment.
+	 */
+	public function test_fulfillment_before_create_hook_can_interrupt() {
+		$hook_called = false;
+
+		add_filter(
+			'wc_fulfillment_before_create',
+			function () use ( &$hook_called ) {
+				$hook_called = true;
+				throw new \Exception( 'Fulfillment creation prevented by hook.' );
+			}
+		);
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'Fulfillment creation prevented by hook.' );
+		$this->store->create( $this->get_test_fulfillment( $this->order->get_id() ) );
+
+		$this->assertTrue( $hook_called, 'The fulfillment before create hook was not called.' );
+
+		// Check that no fulfillment was created.
+		$fulfillments = $this->store->read_fulfillments( WC_Order::class, (string) $this->order->get_id() );
+		$this->assertCount( 0, $fulfillments, 'Fulfillment was created.' );
+	}
+
+	/**
+	 * Test that the fulfillment after create hook is called when creating a fulfillment.
+	 */
+	public function test_fulfillment_after_create_hook_is_called() {
+		$hook_called = false;
+
+		add_action(
+			'wc_fulfillment_after_create',
+			function ( $fulfillment ) use ( &$hook_called, &$received_fulfillment ) {
+				$received_fulfillment = $fulfillment;
+				$hook_called          = true;
+				return $fulfillment;
+			},
+			10,
+			2
+		);
+
+		$this->store->create( $this->get_test_fulfillment( $this->order->get_id() ) );
+		$this->assertTrue( $hook_called, 'The fulfillment after create hook was not called.' );
+
+		// Compare the received fulfillment with the expected data.
+		$sent_data = $this->get_test_fulfillment_data( $this->order->get_id() );
+		$this->assertEquals( $received_fulfillment->get_entity_type(), $sent_data['entity_type'], );
+		$this->assertEquals( $received_fulfillment->get_entity_id(), $sent_data['entity_id'], );
+		$this->assertEquals( $received_fulfillment->get_status(), $sent_data['status'], );
+		$this->assertEquals( $received_fulfillment->get_is_fulfilled(), $sent_data['is_fulfilled'], );
+		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_key' ), $sent_data['meta_data'][0]['value'] );
+		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_key_2' ), $sent_data['meta_data'][1]['value'] );
+		$this->assertEquals( $received_fulfillment->get_items(), $sent_data['meta_data'][2]['value'] );
+		$this->assertNotNull( $received_fulfillment->get_id(), 'Fulfillment ID should not be null.' );
+		$this->assertGreaterThan( 0, $received_fulfillment->get_id(), 'Fulfillment ID should be greater than 0.' );
+
+		$fulfillments = $this->store->read_fulfillments( WC_Order::class, (string) $this->order->get_id() );
+		$this->assertCount( 1, $fulfillments, 'Fulfillment was not created.' );
+	}
+
+	/**
+	 * Create a test fulfillment to use in the tests.
+	 *
+	 * @param int $order_id The ID of the order to create a fulfillment for.
+	 *
+	 * @return Fulfillment
+	 */
+	private function get_test_fulfillment( $order_id ): Fulfillment {
+		// Create a fulfillment for the order.
+		$test_data   = $this->get_test_fulfillment_data( $order_id );
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_props( $test_data );
+		$fulfillment->set_meta_data( $test_data['meta_data'] );
+		return $fulfillment;
+	}
+
+	/**
+	 * Get test fulfillment data.
+	 *
+	 * @param int $order_id The ID of the order to create a fulfillment for.
+	 * @return array
+	 */
+	private function get_test_fulfillment_data( $order_id ): array {
+		return array(
+			'entity_type'  => WC_Order::class,
+			'entity_id'    => $order_id,
+			'status'       => 'unfulfilled',
+			'is_fulfilled' => false,
+			'meta_data'    => array(
+				array(
+					'id'    => 0,
+					'key'   => 'test_meta_key',
+					'value' => 'test_meta_value',
+				),
+				array(
+					'id'    => 0,
+					'key'   => 'test_meta_key_2',
+					'value' => 'test_meta_value_2',
+				),
+				array(
+					'id'    => 0,
+					'key'   => '_items',
+					'value' => array(
+						array(
+							'item_id' => 1,
+							'qty'     => 2,
+						),
+						array(
+							'item_id' => 2,
+							'qty'     => 3,
+						),
+					),
+				),
+			),
+		);
+	}
+}

@@ -162,4 +162,26 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( '', $fulfillment->get_meta( 'test_meta_key' ) );
 	}
+
+	/**
+	 * Test fulfillment locking functionality.
+	 */
+	public function test_fulfillment_locking() {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type' => 'order-fulfillment',
+				'entity_id'   => 123,
+			)
+		);
+
+		$this->assertFalse( $fulfillment->is_locked() );
+
+		$fulfillment->set_locked( true, 'Test lock message' );
+		$this->assertTrue( $fulfillment->is_locked() );
+		$this->assertEquals( 'Test lock message', $fulfillment->get_meta( '_lock_message' ) );
+
+		$fulfillment->set_locked( false );
+		$this->assertFalse( $fulfillment->is_locked() );
+		$this->assertEquals( '', $fulfillment->get_meta( '_lock_message' ) );
+	}
 }
