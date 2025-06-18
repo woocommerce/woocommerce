@@ -549,7 +549,7 @@ class Payments {
 				$provider = $this->providers->get_extension_suggestion_by_plugin_slug( $provider_extension_slug );
 				if ( ! empty( $provider['id'] ) ) {
 					// If we found the suggestion, we can use it as a replacement provider.
-					// We need to set the `_suggestion_id`.
+					// We need to set the `_suggestion_id` so we can handle the date more uniformly.
 					$provider['_suggestion_id'] = $provider['id'];
 				}
 			}
