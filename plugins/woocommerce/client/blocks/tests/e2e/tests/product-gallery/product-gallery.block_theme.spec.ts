@@ -80,6 +80,9 @@ test.describe( `${ blockData.name }`, () => {
 					title: 'Custom Single Product',
 					content: 'placeholder',
 				} );
+				// Success – exit the loop and clear previous error.
+				lastError = undefined;
+				break;
 			} catch ( verifyError ) {
 				lastError = verifyError;
 			}
@@ -93,12 +96,8 @@ test.describe( `${ blockData.name }`, () => {
 			}
 		}
 
-		if ( lastError ) {
-			throw lastError;
-		}
-
 		if ( ! template ) {
-			throw new Error( 'Template was not created.' );
+			throw lastError ?? new Error( 'Template was not created.' );
 		}
 
 		await admin.visitSiteEditor( {
