@@ -6,6 +6,7 @@ import { render, screen } from '@testing-library/react';
 /**
  * Internal dependencies
  */
+import '../../../test-helper/global-mock';
 import ShipmentViewer from '../shipment-viewer';
 import { useShipmentFormContext } from '../../../context/shipment-form-context';
 

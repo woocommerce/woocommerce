@@ -230,6 +230,60 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test the print_fulfillments_object method.
+	 */
+	public function test_render_fulfillment_object_renders_on_admin_orders_page() {
+		$renderer = $this->getMockBuilder( FulfillmentsRenderer::class )
+			->onlyMethods( array( 'should_render_fulfillment_object', 'should_render_fulfillment_drawer' ) )
+			->getMock();
+
+		$renderer->method( 'should_render_fulfillment_object' )->willReturn( true );
+		$renderer->method( 'should_render_fulfillment_drawer' )->willReturn( true );
+
+		ob_start();
+		$renderer->print_fulfillments_object();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'wcFulfillmentSettings', $output );
+	}
+
+	/**
+	 * Test the print_fulfillments_object method renders on customer order details page.
+	 */
+	public function test_render_fulfillment_object_renders_on_customer_order_details_page() {
+		$renderer = $this->getMockBuilder( FulfillmentsRenderer::class )
+			->onlyMethods( array( 'should_render_fulfillment_object', 'should_render_fulfillment_drawer' ) )
+			->getMock();
+
+		$renderer->method( 'should_render_fulfillment_object' )->willReturn( true );
+		$renderer->method( 'should_render_fulfillment_drawer' )->willReturn( false );
+
+		ob_start();
+		$renderer->print_fulfillments_object();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'wcFulfillmentSettings', $output );
+	}
+
+	/**
+	 * Test the print_fulfillments_object method does not render on other pages.
+	 */
+	public function test_render_fulfillment_object_does_not_render_on_other_pages() {
+		$renderer = $this->getMockBuilder( FulfillmentsRenderer::class )
+			->onlyMethods( array( 'should_render_fulfillment_object', 'should_render_fulfillment_drawer' ) )
+			->getMock();
+
+		$renderer->method( 'should_render_fulfillment_object' )->willReturn( false );
+		$renderer->method( 'should_render_fulfillment_drawer' )->willReturn( false );
+
+		ob_start();
+		$renderer->print_fulfillments_object();
+		$output = ob_get_clean();
+
+		$this->assertStringNotContainsString( 'wcFulfillmentSettings', $output );
+	}
+
+	/**
 	 * Test the test_handle_fulfillment_bulk_actions method fulfill action on an order without any fulfillments.
 	 */
 	public function test_handle_fulfillment_bulk_actions_fulfill_new_order() {

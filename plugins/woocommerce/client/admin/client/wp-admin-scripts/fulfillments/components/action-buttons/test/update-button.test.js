@@ -7,6 +7,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import '../../../test-helper/global-mock';
 import UpdateButton from '../update-button';
 import { useFulfillmentContext } from '../../../context/fulfillment-context';
 
