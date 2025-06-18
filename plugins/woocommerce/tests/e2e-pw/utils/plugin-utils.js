@@ -1,16 +1,14 @@
-const { APIRequest } = require( '@playwright/test' );
 const axios = require( 'axios' ).default;
 const fs = require( 'fs' );
 const path = require( 'path' );
-const { promisify } = require( 'util' );
-const execAsync = promisify( require( 'child_process' ).exec );
+const { wpCLI } = require( './cli' );
 
 /**
  * Encode basic auth username and password to be used in HTTP Authorization header.
  *
  * @param {string} username
  * @param {string} password
- * @returns Base64-encoded string
+ * @return Base64-encoded string
  */
 export const encodeCredentials = ( username, password ) => {
 	return Buffer.from( `${ username }:${ password }` ).toString( 'base64' );
@@ -19,12 +17,12 @@ export const encodeCredentials = ( username, password ) => {
 /**
  * Deactivate and delete a plugin specified by the given `slug` using the WordPress API.
  *
- * @param {object} params
+ * @param {Object}     params
  * @param {APIRequest} params.request
- * @param {string} params.baseURL
- * @param {string} params.slug
- * @param {string} params.username
- * @param {string} params.password
+ * @param {string}     params.baseURL
+ * @param {string}     params.slug
+ * @param {string}     params.username
+ * @param {string}     params.password
  */
 export const deletePlugin = async ( {
 	request,
@@ -68,18 +66,18 @@ export const deletePlugin = async ( {
 /**
  * Download the zip file from a remote location.
  *
- * @param {object} param
- * @param {string} param.url
- * @param {string} param.repository
- * @param {string} param.authorizationToken
+ * @param {Object}  param
+ * @param {string}  param.url
+ * @param {string}  param.repository
+ * @param {string}  param.authorizationToken
  * @param {boolean} param.prerelease
- * @param {string} param.downloadDir
+ * @param {string}  param.downloadDir
  *
- * @param {string} url The URL where the zip file is located. Takes precedence over `repository`.
- * @param {string} repository The repository owner and name. For example: `woocommerce/woocommerce`. Ignored when `url` was given.
- * @param {string} authorizationToken Authorization token used to authenticate with the GitHub API if required.
- * @param {boolean} prerelease Flag on whether to get a prelease or not. Default `false`.
- * @param {string} downloadDir Relative path to the download directory. Non-existing folders will be auto-created. Defaults to `tmp` under current working directory.
+ * @param {string}  url                      The URL where the zip file is located. Takes precedence over `repository`.
+ * @param {string}  repository               The repository owner and name. For example: `woocommerce/woocommerce`. Ignored when `url` was given.
+ * @param {string}  authorizationToken       Authorization token used to authenticate with the GitHub API if required.
+ * @param {boolean} prerelease               Flag on whether to get a prelease or not. Default `false`.
+ * @param {string}  downloadDir              Relative path to the download directory. Non-existing folders will be auto-created. Defaults to `tmp` under current working directory.
  *
  * @return {string} Absolute path to the downloaded zip.
  */
@@ -149,10 +147,10 @@ export const deleteZip = async ( zipFilePath ) => {
  * Get the download URL of the latest release zip for a plugin using GitHub API.
  *
  * @param {{repository: string, authorizationToken: string, prerelease: boolean, perPage: number}} param
- * @param {string} repository The repository owner and name. For example: `woocommerce/woocommerce`.
- * @param {string} authorizationToken Authorization token used to authenticate with the GitHub API if required.
- * @param {boolean} prerelease Flag on whether to get a prelease or not.
- * @param {number} perPage Limit of entries returned from the latest releases list, defaults to 3.
+ * @param {string}                                                                                 repository         The repository owner and name. For example: `woocommerce/woocommerce`.
+ * @param {string}                                                                                 authorizationToken Authorization token used to authenticate with the GitHub API if required.
+ * @param {boolean}                                                                                prerelease         Flag on whether to get a prelease or not.
+ * @param {number}                                                                                 perPage            Limit of entries returned from the latest releases list, defaults to 3.
  * @return {string} Download URL for the release zip file.
  */
 export const getLatestReleaseZipUrl = async ( {
@@ -221,10 +219,9 @@ export const getLatestReleaseZipUrl = async ( {
 	const { assets } = release;
 	if ( assets && assets.length ) {
 		return assets[ 0 ].url;
-	} else {
-		const tagName = release.tag_name;
-		return `https://github.com/${ repository }/archive/${ tagName }.zip`;
 	}
+	const tagName = release.tag_name;
+	return `https://github.com/${ repository }/archive/${ tagName }.zip`;
 };
 
 /**
@@ -236,25 +233,14 @@ export const getLatestReleaseZipUrl = async ( {
  * @param {string} pluginPath
  */
 export const installPluginThruWpCli = async ( pluginPath ) => {
-	const runWpCliCommand = async ( command ) => {
-		const { stdout, stderr } = await execAsync(
-			`pnpm exec wp-env run tests-cli -- ${ command }`
-		);
-
-		console.log( stdout );
-		console.error( stderr );
-	};
-
 	const wpEnvPluginPath = pluginPath.replace(
 		/.*\/plugins\/woocommerce/,
 		'wp-content/plugins/woocommerce'
 	);
 
-	await runWpCliCommand( `ls  ${ wpEnvPluginPath }` );
+	await wpCLI( `ls  ${ wpEnvPluginPath }` );
 
-	await runWpCliCommand(
-		`wp plugin install --activate --force ${ wpEnvPluginPath }`
-	);
+	await wpCLI( `wp plugin install --activate --force ${ wpEnvPluginPath }` );
 
-	await runWpCliCommand( `wp plugin list` );
+	await wpCLI( `wp plugin list` );
 };
