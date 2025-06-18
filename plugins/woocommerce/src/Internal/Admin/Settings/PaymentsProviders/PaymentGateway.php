@@ -323,10 +323,10 @@ class PaymentGateway {
 					return $test_mode;
 				}
 
-				$mode = $payment_gateway->get_option( 'mode', 'not_found' );
-				if ( 'test' === $mode || 'sandbox' === $mode ) {
+				$mode = strtolower( (string) $payment_gateway->get_option( 'mode', 'not_found' ) );
+				if ( in_array( $mode, array( 'test', 'sandbox', 'dev' ), true ) ) {
 					return true;
-				} elseif ( 'live' === $mode ) {
+				} elseif ( in_array( $mode, array( 'live', 'production', 'prod' ), true ) ) {
 					return false;
 				}
 			}
