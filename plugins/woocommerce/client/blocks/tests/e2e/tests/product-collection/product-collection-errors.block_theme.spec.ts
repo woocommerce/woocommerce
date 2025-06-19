@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { Page } from '@playwright/test';
-import { test as base, expect, Editor, wpCLI } from '@woocommerce/e2e-utils';
+import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -16,7 +15,7 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 			admin,
 			editor,
 		} );
-		await use( pageObject );
+		use( pageObject );
 	},
 } );
 
@@ -33,13 +32,13 @@ test.describe( 'Product Page: error notices', () => {
 		await pageObject.createNewPostAndInsertBlock();
 		await pageObject.publishAndGoToFrontend();
 
-		const productCart = page
+		const productBlock = page
 			.locator( '.wc-block-product' )
 			.filter( { hasText: productName } );
 
-		await expect( productCart ).toBeVisible();
+		await expect( productBlock ).toBeVisible();
 
-		const addButton = productCart.getByRole( 'button', {
+		const addButton = productBlock.getByRole( 'button', {
 			name: 'Add to cart',
 		} );
 		await addButton.click();
