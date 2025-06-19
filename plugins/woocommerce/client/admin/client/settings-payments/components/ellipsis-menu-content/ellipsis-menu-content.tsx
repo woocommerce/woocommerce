@@ -90,15 +90,13 @@ export const EllipsisMenuContent = ( {
 	};
 
 	/**
-	 * Deactivates the payment gateway containing plugin.
+	 * Deactivates the provider extension.
 	 */
-	const deactivateGateway = () => {
-		// Record the event when user clicks on a gateway's deactivate button.
-		recordPaymentsProviderEvent( 'deactivate_click', provider );
-
+	const deactivateProviderExtension = () => {
 		setIsDeactivating( true );
 		deactivatePlugin( pluginFile )
 			.then( () => {
+				// Note: Deactivation is tracked on the backend (the `provider_extension_deactivated` event).
 				createSuccessNotice(
 					__(
 						'The provider plugin was successfully deactivated.',
@@ -110,6 +108,13 @@ export const EllipsisMenuContent = ( {
 				onToggle();
 			} )
 			.catch( () => {
+				recordPaymentsProviderEvent(
+					'extension_deactivation_failed',
+					provider,
+					{
+						reason: 'error',
+					}
+				);
 				createErrorNotice(
 					__(
 						'Failed to deactivate the provider plugin.',
@@ -122,16 +127,16 @@ export const EllipsisMenuContent = ( {
 	};
 
 	/**
-	 * Disables the payment gateway from payment processing.
+	 * Disables the provider from payment processing.
 	 */
-	const disableGateway = () => {
-		// Record the event when user clicks on a gateway's disable button.
-		recordPaymentsProviderEvent( 'disable_click', provider );
-
+	const disableProvider = () => {
 		const gatewayToggleNonce =
 			window.woocommerce_admin.nonces?.gateway_toggle || '';
 
 		if ( ! gatewayToggleNonce ) {
+			recordPaymentsProviderEvent( 'disable_failed', provider, {
+				reason: 'missing_nonce',
+			} );
 			createErrorNotice(
 				__( 'Failed to disable the payments provider.', 'woocommerce' )
 			);
@@ -149,6 +154,9 @@ export const EllipsisMenuContent = ( {
 				onToggle();
 			} )
 			.catch( () => {
+				recordPaymentsProviderEvent( 'disable_failed', provider, {
+					reason: 'error',
+				} );
 				createErrorNotice(
 					__(
 						'Failed to disable the payments provider.',
@@ -161,14 +169,14 @@ export const EllipsisMenuContent = ( {
 	};
 
 	/**
-	 * Hides the payment gateway suggestion.
+	 * Hides the payments extension suggestion.
 	 */
 	const hideSuggestion = () => {
 		const suggestionHideUrl = provider._links?.hide?.href;
 		if ( ! suggestionHideUrl ) {
 			createErrorNotice(
 				__(
-					'Failed to hide the payment extension suggestion.',
+					'Failed to hide the payments extension suggestion.',
 					'woocommerce'
 				)
 			);
@@ -186,7 +194,7 @@ export const EllipsisMenuContent = ( {
 			.catch( () => {
 				createErrorNotice(
 					__(
-						'Failed to hide the payment extension suggestion.',
+						'Failed to hide the payments extension suggestion.',
 						'woocommerce'
 					)
 				);
@@ -249,7 +257,16 @@ export const EllipsisMenuContent = ( {
 					key="hide-suggestion"
 				>
 					<Button
-						onClick={ hideSuggestion }
+						onClick={ () => {
+							recordPaymentsProviderEvent(
+								'context_link_click',
+								provider,
+								{
+									link_type: 'hide_suggestion',
+								}
+							);
+							hideSuggestion();
+						} }
 						isBusy={ isHidingSuggestion }
 						disabled={ isHidingSuggestion }
 					>
@@ -264,6 +281,13 @@ export const EllipsisMenuContent = ( {
 				>
 					<Button
 						onClick={ () => {
+							recordPaymentsProviderEvent(
+								'context_link_click',
+								provider,
+								{
+									link_type: 'reset_onboarding',
+								}
+							);
 							setResetAccountModalVisible( true );
 							onToggle();
 						} }
@@ -280,7 +304,16 @@ export const EllipsisMenuContent = ( {
 				>
 					<Button
 						className={ 'components-button__danger' }
-						onClick={ deactivateGateway }
+						onClick={ () => {
+							recordPaymentsProviderEvent(
+								'context_link_click',
+								provider,
+								{
+									link_type: 'deactivate_extension',
+								}
+							);
+							deactivateProviderExtension();
+						} }
 						isBusy={ isDeactivating }
 						// If the plugin file is not available, the button should be disabled.
 						disabled={ ! pluginFile || isDeactivating }
@@ -296,7 +329,16 @@ export const EllipsisMenuContent = ( {
 				>
 					<Button
 						className={ 'components-button__danger' }
-						onClick={ disableGateway }
+						onClick={ () => {
+							recordPaymentsProviderEvent(
+								'context_link_click',
+								provider,
+								{
+									link_type: 'disable',
+								}
+							);
+							disableProvider();
+						} }
 						isBusy={ isDisabling }
 						disabled={ isDisabling }
 					>
