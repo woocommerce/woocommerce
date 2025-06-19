@@ -59,7 +59,7 @@ class PaymentMethods extends AbstractBlock {
 		foreach ( $available_gateways as $gateway_id => $gateway ) {
 			if ( $gateway->enabled === 'yes' ) {
 				if ( $gateway_id === 'woocommerce_payments' ) {
-					$output .= $this->render_card_brands();
+					$output .= $this->render_card_brands( $attributes );
 				} else {
 					$method_title = $gateway->get_title();
 					$icon_url     = $this->get_payment_method_icon( $gateway_id, $gateway );
@@ -80,11 +80,19 @@ class PaymentMethods extends AbstractBlock {
 		return $output;
 	}
 
-	private function render_card_brands() {
+	private function render_card_brands( $attributes ) {
 		$output = '';
 		$enabled_card_types = $this->get_enabled_card_types();
 
+		$number_of_icons = $attributes['numberOfIcons'] ?? 8;
+
 		foreach ( $enabled_card_types as $card_type => $card_data ) {
+			if ( $number_of_icons > 0 ) {
+				$number_of_icons--;
+			} else {
+				break;
+			}
+
 			$output .= '<div class="payment-method-item">';
 			$output .= '<span class="payment-method-icon" style="background-image: url(\'' . esc_url( $card_data['icon'] ) . '\');">' . esc_attr( $card_data['name'] ) . '</span>';
 

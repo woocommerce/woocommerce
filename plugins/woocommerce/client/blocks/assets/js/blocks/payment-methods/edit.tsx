@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, RangeControl } from '@wordpress/components';
 import { getPaymentMethods } from '@woocommerce/blocks-registry';
 import { __ } from '@wordpress/i18n';
 
@@ -27,8 +28,17 @@ const CardPreview = ( { brand }: { brand: string } ) => {
 	return <div>{ CardIcon }</div>;
 };
 
-const Edit = () => {
+const Edit = ( {
+	attributes,
+	setAttributes,
+}: {
+	attributes: {
+		numberOfIcons: number;
+	};
+	setAttributes: ( attributes: Record< string, unknown > ) => void;
+} ) => {
 	const blockProps = useBlockProps();
+	const { numberOfIcons } = attributes;
 	const paymentMethods = getPaymentMethods();
 	const wooPayments = paymentMethods?.woocommerce_payments;
 	const wooPaymentsCards =
@@ -37,18 +47,50 @@ const Edit = () => {
 		'props' in wooPayments.edit &&
 		wooPayments.edit.props?.paymentMethodId === 'card';
 
+	const availableBrands = [
+		'visa',
+		'mastercard',
+		'amex',
+		'discover',
+		'diners',
+		'jcb',
+		'cartes_bancaires',
+		'unionpay',
+	];
+
+	const iconsToShow = Math.min( numberOfIcons, availableBrands.length );
+
 	if ( wooPaymentsCards ) {
 		return (
 			<div { ...blockProps }>
+				<InspectorControls>
+					<PanelBody
+						title={ __(
+							'Payment Methods Settings',
+							'woocommerce'
+						) }
+					>
+						<RangeControl
+							label={ __( 'Number of icons', 'woocommerce' ) }
+							value={ numberOfIcons }
+							onChange={ ( value ) =>
+								setAttributes( { numberOfIcons: value } )
+							}
+							min={ 1 }
+							max={ availableBrands.length }
+							help={ __(
+								'Choose how many payment method icons to display.',
+								'woocommerce'
+							) }
+						/>
+					</PanelBody>
+				</InspectorControls>
 				<div className="wp-block-woocommerce-payment-methods">
-					<CardPreview brand="visa" />
-					<CardPreview brand="mastercard" />
-					<CardPreview brand="amex" />
-					<CardPreview brand="discover" />
-					<CardPreview brand="diners" />
-					<CardPreview brand="jcb" />
-					<CardPreview brand="cartes_bancaires" />
-					<CardPreview brand="unionpay" />
+					{ availableBrands
+						.slice( 0, iconsToShow )
+						.map( ( brand ) => (
+							<CardPreview key={ brand } brand={ brand } />
+						) ) }
 				</div>
 			</div>
 		);
