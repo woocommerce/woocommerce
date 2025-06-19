@@ -47,19 +47,16 @@ class FulfillmentsRenderer {
 		// Hook into the orders table extra tablenav to render the fulfillment filters.
 		add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'render_fulfillment_filters' ) );
 		add_filter( 'woocommerce_order_list_table_query', 'apply_fulfillment_status_filter_to_orders_list' );
-		// Hook into the admin head to print the fulfillments object, which contains the shipping providers.
-		add_action( 'wp_head', array( $this, 'print_fulfillments_object' ) );
-		add_action( 'admin_head', array( $this, 'print_fulfillments_object' ) );
 		// Hook into the order details before order table to render the fulfillment customer details.
 		add_action( 'woocommerce_order_details_before_order_table', array( $this, 'render_fulfillment_customer_details' ) );
 		// Initialize the renderer for bulk actions.
-		add_action( 'admin_init', array( $this, 'init_bulk_actions' ) );
+		add_action( 'admin_init', array( $this, 'init_admin_hooks' ) );
 	}
 
 	/**
 	 * Initialize the renderer.
 	 */
-	public function init_bulk_actions() {
+	public function init_admin_hooks() {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			// For custom orders table, we need to add the bulk actions to the custom orders table.
 			add_filter( 'bulk_actions-woocommerce_page_wc-orders', array( $this, 'define_fulfillment_bulk_actions' ) );
@@ -92,9 +89,7 @@ class FulfillmentsRenderer {
 	}
 
 	/**
-	 * Render the fulfillment column row data for legacy support.
-	 *
-	 * @deprecated 4.0.0 Use render_fulfillment_column_row_data instead.
+	 * Render the fulfillment column row data for legacy order list support.
 	 *
 	 * @param string $column_name The name of the column.
 	 */
@@ -111,15 +106,7 @@ class FulfillmentsRenderer {
 	 * @param WC_Order $order The order object.
 	 */
 	public function render_fulfillment_column_row_data( string $column_name, WC_Order $order ) {
-		// Check if we've already fetched the fulfillments for this order.
-		$fulfillments = $this->fulfillments_cache[ $order->get_id() ] ?? null;
-
-		// If not, fetch them and cache them.
-		if ( null === $fulfillments ) {
-			$data_store                                   = wc_get_container()->get( FulfillmentsDataStore::class );
-			$fulfillments                                 = $data_store->read_fulfillments( WC_Order::class, '' . $order->get_id() );
-			$this->fulfillments_cache[ $order->get_id() ] = $fulfillments;
-		}
+		$fulfillments = $this->maybe_read_fulfillments( $order );
 
 		// Render the column data based on the column name.
 		switch ( $column_name ) {
@@ -262,8 +249,7 @@ class FulfillmentsRenderer {
 					continue;
 				}
 
-				$data_store   = wc_get_container()->get( FulfillmentsDataStore::class );
-				$fulfillments = $data_store->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+				$fulfillments = $this->maybe_read_fulfillments( $order );
 
 				// Fulfill all existing fulfillments.
 				foreach ( $fulfillments as $fulfillment ) {
@@ -304,8 +290,7 @@ class FulfillmentsRenderer {
 	 * @param WC_Order $order The order object.
 	 */
 	public function render_fulfillment_customer_details( WC_Order $order ) {
-		$fulfillments_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
-		$fulfillments            = $fulfillments_data_store->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+		$fulfillments = $this->maybe_read_fulfillments( $order );
 
 		if ( ! empty( $fulfillments ) ) {
 			?>
@@ -352,14 +337,56 @@ class FulfillmentsRenderer {
 	}
 
 	/**
-	 * Loads the payment method promotions scripts and styles.
+	 * Loads the fulfillments scripts and styles.
 	 */
 	public function load_components() {
 		if ( ! $this->should_render_fulfillment_drawer() ) {
 			return;
 		}
+
+		$this->register_fulfillments_assets();
+		$this->load_fulfillments_js_settings();
+	}
+
+	/**
+	 * Register the fulfillment assets.
+	 */
+	protected function register_fulfillments_assets() {
 		WCAdminAssets::register_style( 'fulfillments', 'style', array( 'wp-components' ) );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'fulfillments', true );
+	}
+
+	/**
+	 * Load the fulfillments JS settings.
+	 *
+	 * @return void
+	 */
+	protected function load_fulfillments_js_settings() {
+		$fulfillment_settings = array(
+			/**
+			 * Filter to modify the shipping providers.
+			 *
+			 * @since 9.9.0
+			 */
+			'providers'        => apply_filters( 'wc_fulfillment_shipping_providers', array() ),
+			/**
+			 * Filter to modify the fulfillment meta key translations.
+			 *
+			 * @since 9.9.0
+			 */
+			'statuses'         => apply_filters(
+				'wc_fulfillment_statuses',
+				array(
+					'unfulfilled'         => __( 'Unfulfilled', 'woocommerce' ),
+					'partially_fulfilled' => __( 'Partially fulfilled', 'woocommerce' ),
+					'fulfilled'           => __( 'Fulfilled', 'woocommerce' ),
+					'no_fulfillments'     => __( 'No fulfillments', 'woocommerce' ),
+				)
+			),
+			'currency_symbols' => get_woocommerce_currency_symbols(),
+		);
+
+		wp_localize_script( 'wc-admin-fulfillments', 'wcFulfillmentSettings', $fulfillment_settings );
 	}
 
 	/**
@@ -418,50 +445,20 @@ class FulfillmentsRenderer {
 	}
 
 	/**
-	 * Prints the fulfillments object in the admin header.
-	 */
-	public function print_fulfillments_object() {
-		if ( ! $this->should_render_fulfillment_object() ) {
-			return;
-		}
-
-		$fulfillment_settings = array(
-			/**
-			 * Filter to modify the shipping providers.
-			 *
-			 * @since 9.9.0
-			 */
-			'providers'        => apply_filters( 'wc_fulfillment_shipping_providers', array() ),
-			/**
-			 * Filter to modify the fulfillment meta key translations.
-			 *
-			 * @since 9.9.0
-			 */
-			'statuses'         => apply_filters(
-				'wc_fulfillment_statuses',
-				array(
-					'unfulfilled'         => __( 'Unfulfilled', 'woocommerce' ),
-					'partially_fulfilled' => __( 'Partially fulfilled', 'woocommerce' ),
-					'fulfilled'           => __( 'Fulfilled', 'woocommerce' ),
-					'no_fulfillments'     => __( 'No fulfillments', 'woocommerce' ),
-				)
-			),
-			'currency_symbols' => get_woocommerce_currency_symbols(),
-		);
-
-		?>
-		<script type="text/javascript">
-			window.wcFulfillmentSettings = <?php echo wp_json_encode( $fulfillment_settings ); ?>;
-		</script>
-		<?php
-	}
-
-	/**
 	 * Check if the fulfillment drawer should be rendered.
+	 * Check if the fulfillment drawer should be rendered (admin only).
 	 *
 	 * @return bool True if the fulfillment drawer should be rendered, false otherwise.
 	 */
 	protected function should_render_fulfillment_drawer(): bool {
+		if ( ! is_admin() ) {
+			return false;
+		}
+
+		if ( ! function_exists( 'get_current_screen' ) ) {
+			return false;
+		}
+
 		$current_screen = get_current_screen();
 		if ( ! $current_screen || ! $current_screen->id ) {
 			return false;
@@ -471,17 +468,23 @@ class FulfillmentsRenderer {
 	}
 
 	/**
-	 * Check if the fulfillment object should be rendered.
+	 * Fetches the fulfillments for the given order, caching them to avoid multiple fetches.
 	 *
-	 * @return bool True if the fulfillment object should be rendered, false otherwise.
+	 * @param WC_Order $order The order object.
+	 *
+	 * @return array The fulfillments for the order.
 	 */
-	protected function should_render_fulfillment_object(): bool {
-		// Check if we are on the order details page in the customer area.
-		if ( ! is_admin() && function_exists( 'is_view_order_page' ) && is_view_order_page() ) {
-			return true;
+	private function maybe_read_fulfillments( WC_Order $order ): array {
+		// Check if we've already fetched the fulfillments for this order.
+		if ( isset( $this->fulfillments_cache[ $order->get_id() ] ) ) {
+			return $this->fulfillments_cache[ $order->get_id() ];
 		}
 
-		// Check if the current screen is the orders page or the edit order page on the admin side.
-		return $this->should_render_fulfillment_drawer();
+		// If not, fetch them and cache them.
+		$data_store                                   = wc_get_container()->get( FulfillmentsDataStore::class );
+		$fulfillments                                 = $data_store->read_fulfillments( WC_Order::class, '' . $order->get_id() );
+		$this->fulfillments_cache[ $order->get_id() ] = $fulfillments;
+
+		return $fulfillments;
 	}
 }
