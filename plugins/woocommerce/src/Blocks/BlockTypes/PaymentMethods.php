@@ -168,15 +168,4 @@ class PaymentMethods extends AbstractBlock {
 		$woopayments_url = \plugins_url() . '/woocommerce-payments/assets/images/payment-method-icons/';
 		return $woopayments_url . $card_type . '.svg';
 	}
-
-	/**
-	 * Enqueue frontend assets for this block, just in time for rendering.
-	 *
-	 * @param array    $attributes Any attributes that currently are available from the block.
-	 * @param string   $content    The block content.
-	 * @param WP_Block $block      The block object.
-	 */
-	protected function enqueue_assets( array $attributes, $content = '', $block = null ) {
-		parent::enqueue_assets( $attributes, $content, $block );
-	}
 }
