@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add ability for developers to disable packages that are developed outside of core (but are enabled in core via the `Packages` class) by using the `woocommerce_merged_packages` filter to unset unwanted packages.
