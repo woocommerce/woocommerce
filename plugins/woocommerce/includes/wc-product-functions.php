@@ -174,7 +174,7 @@ function wc_delete_product_transients( $post_id = 0, $force = false ) {
 				'wc_delete_product_transients() must not be called during normal front‑end rendering. It is intended only for code paths that alter product data (admin, REST writes, CLI, cron).',
 				'woocommerce'
 			),
-			'9.10.0'
+			'10.1.0'
 		);
 		return;
 	}
