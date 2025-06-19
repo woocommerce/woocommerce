@@ -20,7 +20,7 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	},
 } );
 
-test.describe( 'Product Page: error notices when adding out-of-stock products', () => {
+test.describe( 'Product Page: error notices', () => {
 	test( 'displays error notice when attempting to add product beyond stock limit', async ( {
 		page,
 		pageObject,
