@@ -76,6 +76,7 @@ The following booleans are exposed via the checkout provider. They are independe
 There are numerous things that might trigger a recalculation of the total—coupons being added or removed, shipping rates updating, shipping rates being selected, etc. Instead of having to check each of those individual states, you can reliably check if this boolean is true (calculating) or false (not calculating).
 
 What `isCalculating` affects:
+
 - Disables the "Place Order" button in the checkout block
 - Disables the "Proceed to Checkout" button in the cart block
 - Shows a loading state for Express Payment methods while calculations are pending
@@ -204,7 +205,7 @@ import {
 
 The helper functions are described below:
 
--   `isSuccessResponse`, `isErrorResponse` and `isFailResponse`: These are helper functions that receive a value and report via boolean whether the object is a type of response expected. For event emitters that receive responses from registered observers, a `type` property on the returned object from the observer indicates what type of response it is and event emitters will react according to that type. So for instance if an observer returned `{ type: 'success' }` the emitter could feed that to `isSuccessResponse` and it would return `true`. You can see an example of this being implemented for the payment processing emitted event [here](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/34e17c3622637dbe8b02fac47b5c9b9ebf9e3596/assets/js/base/context/cart-checkout/payment-methods/payment-method-data-context.js#L281-L307).
+-   `isSuccessResponse`, `isErrorResponse` and `isFailResponse`: These are helper functions that receive a value and report via boolean whether the object is a type of response expected. For event emitters that receive responses from registered observers, a `type` property on the returned object from the observer indicates what type of response it is and event emitters will react according to that type. So for instance if an observer returned `{ type: 'success' }` the emitter could feed that to `isSuccessResponse` and it would return `true`. You can see an example of this being implemented for the [payment processing emitted event here](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/34e17c3622637dbe8b02fac47b5c9b9ebf9e3596/assets/js/base/context/cart-checkout/payment-methods/payment-method-data-context.js#L281-L307).
 -   `noticeContexts`: This is an object containing properties referencing areas where notices can be targeted in the checkout. The object has the following properties:
     -   `PAYMENTS`: This is a reference to the notice area in the payment methods step.
     -   `EXPRESS_PAYMENTS`: This is a reference to the notice area in the express payment methods step.
