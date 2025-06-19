@@ -277,7 +277,7 @@ CREATE TABLE $meta_table_name (
 					'user_id'               => $notification->get_user_id( 'edit' ),
 					'user_email'            => $notification->get_user_email( 'edit' ),
 					'status'                => $notification->get_status( 'edit' ),
-					'date_created_gmt'      => gmdate( 'Y-m-d H:i:s', $notification->get_date_created( 'edit' )->getTimestamp() ),
+					'date_created_gmt'      => $notification->get_date_created( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_created( 'edit' )->getTimestamp() ) : null,
 					'date_modified_gmt'     => gmdate( 'Y-m-d H:i:s', $notification->get_date_modified( 'edit' )->getTimestamp() ),
 					'date_confirmed_gmt'    => $notification->get_date_confirmed( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_confirmed( 'edit' )->getTimestamp() ) : null,
 					'date_last_attempt_gmt' => $notification->get_date_last_attempt( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_last_attempt( 'edit' )->getTimestamp() ) : null,
@@ -417,8 +417,11 @@ CREATE TABLE $meta_table_name (
 				'product_id' => array(),
 				'user_id'    => 0,
 				'user_email' => '',
+				'start_date' => 0,
+				'end_date'   => 0,
 				'limit'      => -1,
 				'offset'     => 0,
+				'order_by'   => array( 'id' => 'ASC' ),
 				'return'     => 'ids', // i.e. 'count', 'ids', 'objects'.
 			)
 		);
@@ -434,6 +437,7 @@ CREATE TABLE $meta_table_name (
 		// WHERE clauses.
 		$where        = array();
 		$where_values = array();
+
 		if ( $args['status'] ) {
 			$where[]        = 'status = %s';
 			$where_values[] = esc_sql( $args['status'] );
@@ -455,12 +459,33 @@ CREATE TABLE $meta_table_name (
 			$where_values[] = esc_sql( $args['user_email'] );
 		}
 
+		if ( $args['start_date'] ) {
+			$where[]        = 'date_created_gmt >= %s';
+			$where_values[] = esc_sql( $args['start_date'] );
+		}
+
+		if ( $args['end_date'] ) {
+			$where[]        = 'date_created_gmt < %s';
+			$where_values[] = esc_sql( $args['end_date'] );
+		}
+
+		// ORDER BY clauses.
+		$order_by         = '';
+		$order_by_clauses = array();
+
+		if ( $args['order_by'] && is_array( $args['order_by'] ) ) {
+			foreach ( $args['order_by'] as $what => $how ) {
+				$order_by_clauses[] = $table . '.' . esc_sql( strval( $what ) ) . ' ' . esc_sql( strval( $how ) );
+			}
+		}
+
 		// Assemble the query.
-		$where  = implode( ' AND ', $where );
-		$where  = $where ? ' WHERE ' . $where : '';
-		$limit  = $args['limit'] > 0 ? ' LIMIT ' . absint( $args['limit'] ) : '';
-		$offset = $args['offset'] > 0 ? ' OFFSET ' . absint( $args['offset'] ) : '';
-		$sql    = "SELECT $select FROM $table $where $limit $offset";
+		$where    = implode( ' AND ', $where );
+		$where    = $where ? ' WHERE ' . $where : '';
+		$order_by = ! empty( $order_by_clauses ) ? ' ORDER BY ' . implode( ', ', $order_by_clauses ) : '';
+		$limit    = $args['limit'] > 0 ? ' LIMIT ' . absint( $args['limit'] ) : '';
+		$offset   = $args['offset'] > 0 ? ' OFFSET ' . absint( $args['offset'] ) : '';
+		$sql      = "SELECT $select FROM $table $where $order_by $limit $offset";
 
 		// Prepare the query.
 		$prepared_sql = empty( $where_values ) ? $sql : $wpdb->prepare( $sql, $where_values ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
@@ -491,5 +516,28 @@ CREATE TABLE $meta_table_name (
 			},
 			$results
 		);
+	}
+
+	/**
+	 * Get distinct notification creation dates.
+	 *
+	 * @return array
+	 */
+	public function get_distinct_dates() {
+
+		global $wpdb;
+
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT DISTINCT 
+					YEAR(date_created_gmt) AS year, 
+					MONTH(date_created_gmt) AS month 
+				FROM %i
+				ORDER BY year DESC, month DESC',
+				$this->get_table_name()
+			)
+		);
+
+		return $results;
 	}
 }
