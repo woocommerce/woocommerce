@@ -152,6 +152,8 @@ class Packages {
 			$enabled_packages[ $merged_package_name ] = $package_class;
 		}
 
+		$enabled_packages = apply_filters( 'woocommerce_merged_packages', $enabled_packages );
+
 		return array_merge( $enabled_packages, self::$base_packages );
 	}
 
