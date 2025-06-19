@@ -179,6 +179,15 @@ export const EnableGatewayButton = ( {
 								],
 							}
 						);
+
+						// Record the event when the gateway could not be enabled.
+						recordPaymentsProviderEvent(
+							'enable_failed',
+							gatewayProvider,
+							{
+								reason: 'needs_setup',
+							}
+						);
 					}
 				}
 
@@ -191,6 +200,11 @@ export const EnableGatewayButton = ( {
 				setIsUpdating( false );
 			} )
 			.catch( () => {
+				// Record the event when the gateway could not be enabled.
+				recordPaymentsProviderEvent( 'enable_failed', gatewayProvider, {
+					reason: 'error',
+				} );
+
 				// In case of errors, redirect to the gateway settings page.
 				setIsUpdating( false );
 				throwError();
