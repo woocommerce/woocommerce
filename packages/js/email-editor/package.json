@@ -27,6 +27,9 @@
 		"build-types",
 		"assets"
 	],
+	"publishConfig": {
+		"access": "public"
+	},
 	"sideEffects": [
 		"build-style/**",
 		"src/**/*.scss"
