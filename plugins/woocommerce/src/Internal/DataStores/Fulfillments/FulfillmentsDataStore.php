@@ -218,6 +218,14 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	 * @throws \Exception If the fulfillment can't be deleted.
 	 */
 	public function delete( &$data, $args = array() ): void {
+
+		/**
+		 * Filter to modify the fulfillment data before it is updated.
+		 *
+		 * @since 9.9.0
+		 */
+		$data = apply_filters( 'wc_fulfillment_before_delete', $data );
+
 		// Soft Delete the fulfillment from the database.
 		global $wpdb;
 
@@ -237,6 +245,19 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		// Check for errors.
 		if ( $wpdb->last_error ) {
 			throw new \Exception( esc_html__( 'Failed to delete fulfillment.', 'woocommerce' ) );
+		}
+
+		$data->set_date_deleted( $deletion_time );
+		$data->apply_changes();
+		$data->set_object_read( true );
+
+		if ( ! doing_action( 'wc_fulfillment_after_delete', $data ) ) {
+			/**
+			 * Action to perform after a fulfillment is deleted.
+			 *
+			 * @since 9.9.0
+			 */
+			do_action( 'wc_fulfillment_after_delete', $data );
 		}
 
 		// Set the fulfillment object to a fresh state.
