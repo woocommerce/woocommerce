@@ -91,9 +91,7 @@ class FulfillmentsRenderer {
 	}
 
 	/**
-	 * Render the fulfillment column row data for legacy support.
-	 *
-	 * @deprecated 4.0.0 Use render_fulfillment_column_row_data instead.
+	 * Render the fulfillment column row data for legacy order list support.
 	 *
 	 * @param string $column_name The name of the column.
 	 */
@@ -386,7 +384,7 @@ class FulfillmentsRenderer {
 	}
 
 	/**
-	 * Loads the payment method promotions scripts and styles.
+	 * Loads the fulfillments scripts and styles.
 	 */
 	public function load_components() {
 		if ( ! $this->should_render_fulfillment_drawer() ) {
@@ -422,6 +420,7 @@ class FulfillmentsRenderer {
 		wp_localize_script( 'wc-admin-fulfillments', 'wcFulfillmentSettings', $fulfillment_settings );
 	}
 
+
 	/**
 	 * Check if the fulfillment drawer should be rendered (admin only).
 	 *
@@ -449,6 +448,7 @@ class FulfillmentsRenderer {
 	 * Fetches the fulfillments for the given order, caching them to avoid multiple fetches.
 	 *
 	 * @param WC_Order $order The order object.
+	 *
 	 * @return array The fulfillments for the order.
 	 */
 	private function maybe_read_fulfillments( WC_Order $order ): array {
