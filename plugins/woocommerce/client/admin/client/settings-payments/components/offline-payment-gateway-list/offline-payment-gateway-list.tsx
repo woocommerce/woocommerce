@@ -88,7 +88,7 @@ export const OfflinePaymentGatewayListItem = ( {
 							/>
 						) : (
 							<SettingsButton
-								gatewayId={ gateway.id }
+								gatewayProvider={ gateway }
 								settingsHref={
 									gateway.management._links.settings.href
 								}
