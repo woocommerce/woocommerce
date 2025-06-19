@@ -241,14 +241,9 @@ class AddToCartWithOptions extends AbstractBlock {
 				foreach ( $context['groupedProductIds'] as $child_product_id ) {
 					$child_product = wc_get_product( $child_product_id );
 					if ( $child_product ) {
-						/**
-						 * Filter the minimum quantity for a child product in a grouped product.
-						 *
-						 * @since 10.0.0
-						 * @param int $min_quantity The minimum quantity.
-						 * @param WC_Product $child_product The child product object.
-						 */
-						$default_child_quantity                   = apply_filters( 'woocommerce_quantity_input_min', $child_product->get_min_purchase_quantity(), $child_product );
+
+						$default_child_quantity = isset( $_POST['quantity'][ $child_product->get_id() ] ) ? wc_stock_amount( wc_clean( wp_unslash( $_POST['quantity'][ $child_product->get_id() ] ) ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
 						$context['quantity'][ $child_product_id ] = $default_child_quantity;
 
 						// Check for any "sold individually" products and set their default quantity to 0.
