@@ -1,35 +1,36 @@
 name: 'CI'
 on:
-    pull_request:
-    push:
-        paths-ignore:
-            - 'docs/**'
-            - '**/changelog/**'
-            - '.cursor/**'
-            - '**/*.md'
-            - '**/changelog.txt'
-            - '.gitignore'
-            - 'CODEOWNERS'
-            - '.github/**'
-            - '!.github/workflows/ci.yml'
-        branches:
-            - 'trunk'
-            - 'release/*'
-    workflow_call:
-        inputs:
-            trigger:
-                description: 'Type of run to trigger. E.g. nightly-checks, release-checks, etc.'
-                required: true
-                default: 'default'
-                type: string
-            refName:
-                description: 'The ref name to run tests on. It needs to have a corresponding release published.'
-                required: false
-                type: string
-            artifactName:
-                description: 'The release artifact name to download and run tests for.'
-                required: false
-                type: string
+  pull_request:
+  push:
+    paths-ignore:
+      - 'docs/**'
+      - '**/changelog/**'
+      - '.cursor/**'
+      - '**/*.md'
+      - '**/changelog.txt'
+      - '.gitignore'
+      - '.coderabbit.yml'
+      - 'CODEOWNERS'
+      - '.github/**'
+      - '!.github/workflows/ci.yml'
+    branches:
+      - 'trunk'
+      - 'release/*'
+  workflow_call:
+    inputs:
+      trigger:
+        description: 'Type of run to trigger. E.g. nightly-checks, release-checks, etc.'
+        required: true
+        default: 'default'
+        type: string
+      refName:
+        description: 'The ref name to run tests on. It needs to have a corresponding release published.'
+        required: false
+        type: string
+      artifactName:
+        description: 'The release artifact name to download and run tests for.'
+        required: false
+        type: string
 
 concurrency:
     # Cancel concurrent jobs but not for push event. For push use the run_id to have a unique group.
