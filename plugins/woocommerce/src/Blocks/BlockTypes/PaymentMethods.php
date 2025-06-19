@@ -160,7 +160,8 @@ class PaymentMethods extends AbstractBlock {
 	}
 
 	private function get_card_brand_icon_url( $card_type ) {
-		return WC()->plugin_url() . '/assets/images/payment-methods/' . $card_type . '.svg';
+		$woopayments_url = \plugins_url() . '/woocommerce-payments/assets/images/payment-method-icons/';
+		return $woopayments_url . $card_type . '.svg';
 	}
 
 	/**

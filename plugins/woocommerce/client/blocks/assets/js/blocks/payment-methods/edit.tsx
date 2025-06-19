@@ -12,12 +12,17 @@ import { __ } from '@wordpress/i18n';
 import './style.scss';
 
 const CardPreview = ( { brand }: { brand: string } ) => {
+	const pluginUrl = (
+		window?.wcSettings?.wcBlocksConfig as { pluginUrl?: string }
+	 )?.pluginUrl?.replace( 'woocommerce/', '' );
+	const iconUrl = `${ pluginUrl }/woocommerce-payments/assets/images/payment-method-icons/${ brand }.svg`;
+
 	const CardIcon = (
 		<div className="payment-method-item">
 			<span
 				className="payment-method-icon"
 				style={ {
-					backgroundImage: `url(${ window.wcSettings.wcAssetUrl }/images/payment-methods/${ brand }.svg)`,
+					backgroundImage: `url(${ iconUrl })`,
 				} }
 			>
 				{ brand }
@@ -25,7 +30,7 @@ const CardPreview = ( { brand }: { brand: string } ) => {
 		</div>
 	);
 
-	return <div>{ CardIcon }</div>;
+	return CardIcon;
 };
 
 const Edit = ( {
