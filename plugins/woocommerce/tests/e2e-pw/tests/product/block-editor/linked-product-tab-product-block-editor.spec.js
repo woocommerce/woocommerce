@@ -98,8 +98,11 @@ test.describe( 'General tab', { tag: tags.GUTENBERG }, () => {
 			await clickOnTab( 'Organization', page );
 			const waitForCategoriesResponse = page.waitForResponse(
 				( response ) =>
-					response.url().includes( '/wp-json/wp/v2/product_cat' ) &&
-					response.status() === 200
+					response
+						.url()
+						.includes(
+							'/wp/v2/product_cat?context=edit&per_page=30&search=&_locale=user'
+						) && response.status() === 200
 			);
 			await page.getByLabel( 'Categories' ).click();
 			await waitForCategoriesResponse;
