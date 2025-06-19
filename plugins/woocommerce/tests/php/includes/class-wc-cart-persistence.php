@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+// Include the mock session handler.
+require_once __DIR__ . '/class-wc-mock-cart-persistence-session-handler.php';
+
 /**
  * Class WC_Cart_Persistence_Test
  */
@@ -9,10 +12,16 @@ class WC_Cart_Persistence_Test extends \WC_Unit_Test_Case {
 	 * @var int
 	 */
 	private $user_id;
+
 	/**
 	 * @var WC_Product
 	 */
 	private $product;
+
+	/**
+	 * @var WC_Session_Handler
+	 */
+	private $old_session_handler;
 
 	/**
 	 * Setup test user and product.
@@ -23,6 +32,9 @@ class WC_Cart_Persistence_Test extends \WC_Unit_Test_Case {
 		$this->product = WC_Helper_Product::create_simple_product();
 		WC()->cart->empty_cart();
 		wp_set_current_user( 0 ); // Start as guest.
+		$this->old_session_handler = WC()->session;
+		WC()->session              = new WC_Mock_Cart_Persistence_Session_Handler();
+		WC()->session->init();
 	}
 
 	/**
@@ -36,6 +48,7 @@ class WC_Cart_Persistence_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		wp_set_current_user( 0 );
 		wp_delete_user( $this->user_id );
+		WC()->session = $this->old_session_handler;
 	}
 
 	/**
@@ -44,6 +57,7 @@ class WC_Cart_Persistence_Test extends \WC_Unit_Test_Case {
 	 * @param int $user_id User ID to switch to.
 	 */
 	private function simulate_user_switch( $user_id ) {
+		WC()->session->set_customer_session_cookie( true );
 		WC()->session->save_data();
 		if ( get_current_user_id() ) {
 			wp_logout();
@@ -75,15 +89,16 @@ class WC_Cart_Persistence_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Guest cart is preserved after login if not empty.
+	 * Guest cart is merged with user cart after login if not empty.
 	 */
-	public function test_guest_cart_preserved_on_login_if_not_empty() {
+	public function test_guest_cart_merged_on_login_if_not_empty() {
 		WC()->cart->empty_cart();
 
 		// User adds item A.
 		$this->simulate_user_switch( $this->user_id );
 		WC()->cart->add_to_cart( $this->product->get_id(), 1 );
 		WC()->cart->calculate_totals();
+		$user_cart = WC()->cart->get_cart();
 
 		// Log out, as guest add item B.
 		$this->simulate_user_switch( 0 );
@@ -95,7 +110,7 @@ class WC_Cart_Persistence_Test extends \WC_Unit_Test_Case {
 		// Log in again.
 		$this->simulate_user_switch( $this->user_id );
 		$cart_after = WC()->cart->get_cart();
-		$this->assertEquals( $guest_cart, $cart_after );
+		$this->assertEquals( $cart_after, array_merge( $guest_cart, $user_cart ) );
 
 		$guest_product->delete( true );
 	}
