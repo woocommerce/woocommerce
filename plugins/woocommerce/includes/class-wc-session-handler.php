@@ -415,11 +415,42 @@ class WC_Session_Handler extends WC_Session {
 			$cookie_hash  = $this->hash( $this->_customer_id . '|' . $this->_session_expiration );
 			$cookie_value = $this->_customer_id . '|' . $this->_session_expiration . '|' . $this->_session_expiring . '|' . $cookie_hash;
 
-			if ( ! isset( $_COOKIE[ $this->_cookie ] ) || $_COOKIE[ $this->_cookie ] !== $cookie_value ) {
-				wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, $this->use_secure_cookie(), true );
+			if ( $this->get_cookie_value() !== $cookie_value ) {
+				$this->set_cookie_value( $cookie_value );
 			}
 
 			$this->_has_cookie = true;
+		}
+	}
+
+	/**
+	 * Check if the cookie exists in the $_COOKIE superglobal.
+	 *
+	 * @return bool Whether the cookie exists.
+	 */
+	protected function cookie_exists() {
+		return isset( $_COOKIE[ $this->_cookie ] );
+	}
+
+	/**
+	 * Get the cookie value.
+	 *
+	 * @return string The cookie value.
+	 */
+	protected function get_cookie_value() {
+		return $this->cookie_exists() ? wc_clean( wp_unslash( (string) $_COOKIE[ $this->_cookie ] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+	}
+
+	/**
+	 * Set the cookie value if not empty. Unset the cookie if empty. Wrapper for wc_setcookie.
+	 *
+	 * @param string $cookie_value The cookie value to set.
+	 */
+	protected function set_cookie_value( $cookie_value ) {
+		if ( ! empty( $cookie_value ) ) {
+			wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, $this->use_secure_cookie(), true );
+		} else {
+			wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, $this->use_secure_cookie(), true );
 		}
 	}
 
@@ -446,7 +477,7 @@ class WC_Session_Handler extends WC_Session {
 	 * @return bool
 	 */
 	public function has_session() {
-		return isset( $_COOKIE[ $this->_cookie ] ) || $this->_has_cookie || is_user_logged_in();
+		return $this->cookie_exists() || $this->_has_cookie || is_user_logged_in();
 	}
 
 	/**
@@ -531,18 +562,13 @@ class WC_Session_Handler extends WC_Session {
 	 * @return bool|array
 	 */
 	public function get_session_cookie() {
-		$cookie_value = isset( $_COOKIE[ $this->_cookie ] ) ? wc_clean( wp_unslash( (string) $_COOKIE[ $this->_cookie ] ) ) : '';
+		$cookie_value = $this->get_cookie_value();
 
 		if ( empty( $cookie_value ) ) {
 			return false;
 		}
 
-		// Check if the cookie value contains '||' instead of '|' to support older versions of the cookie. This can be removed in WC 11.0.0.
-		if ( strpos( $cookie_value, '||' ) !== false ) {
-			$parsed_cookie = explode( '||', $cookie_value );
-		} else {
-			$parsed_cookie = explode( '|', $cookie_value );
-		}
+		$parsed_cookie = explode( '|', $cookie_value );
 
 		if ( count( $parsed_cookie ) !== 4 ) {
 			return false;
@@ -630,7 +656,7 @@ class WC_Session_Handler extends WC_Session {
 	 * Forget all session data without destroying it.
 	 */
 	public function forget_session() {
-		wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, $this->use_secure_cookie(), true );
+		$this->set_cookie_value( '' );
 
 		if ( ! is_admin() ) {
 			include_once WC_ABSPATH . 'includes/wc-cart-functions.php';
