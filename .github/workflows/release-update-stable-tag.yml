@@ -100,17 +100,17 @@ jobs:
           README_PATH="./trunk/readme.txt"
 
           if [ ! -f "$README_PATH" ]; then
-            echo "❌ ERROR: readme.txt not found at $README_PATH"
+            echo "::error::readme.txt not found at $README_PATH"
             exit 1
           fi
 
           echo "📋 Current stable tag line:"
-          grep "^Stable tag:" "$README_PATH" || echo "Stable tag line not found"
+          grep "^Stable tag:" "$README_PATH" || echo "::error::Stable tag line not found"
           echo "=========================="
 
           if sed -i "s/^Stable tag: .*/Stable tag: $TARGET_VERSION/" "$README_PATH"; then
             echo "📝 Updated stable tag line:"
-            grep "^Stable tag:" "$README_PATH" || echo "Stable tag line not found"
+            grep "^Stable tag:" "$README_PATH" || echo "::error::Stable tag line not found"
             echo "=========================="
 
             echo "📤 Committing changes to SVN..."
