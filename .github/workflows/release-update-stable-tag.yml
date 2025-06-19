@@ -6,19 +6,32 @@ on:
         description: 'Version (in X.Y.Z or X.Y format)'
         required: true
         default: ''
-      dry-run:
-        description: 'Do a dry-run of the stable tag update (if UNCHECKED, it will commit the change!)'
+      confirm-update:
+        description: 'I confirm that I want to update the stable tag (this will update the SNV and GitHub stable tags).'
         type: boolean
-        required: false
-        default: true
+        required: true
+        default: false
 
 permissions:
   contents: write
   pull-requests: write
 
 jobs:
+  validate-confirmation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm-update }}" != "true" ]; then
+            echo "❌ ERROR: You must check the confirmation checkbox to proceed with the stable tag update"
+            exit 1
+          else
+            echo "✅ Confirmation received - proceeding with stable tag update"
+          fi
+
   validate-release-version:
     runs-on: ubuntu-latest
+    needs: validate-confirmation
     outputs:
       version: ${{ steps.extract-version.outputs.version }}
       branch: ${{ steps.extract-version.outputs.branch }}
@@ -100,15 +113,9 @@ jobs:
             grep "^Stable tag:" "$README_PATH" || echo "Stable tag line not found"
             echo "=========================="
 
-            if [ "${{ github.event.inputs.dry-run }}" == "true" ]; then
-              echo "🔍 DRY-RUN MODE: No SVN commit made."
-              echo "📝 Check the updated readme above."
-              echo "✅ To actually update, uncheck 'Do a dry-run' option"
-            else
-              echo "📤 Committing changes to SVN..."
-              svn commit -m "Setting stable tag to $TARGET_VERSION" --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive
-              echo "✅ Successfully committed stable tag update to $TARGET_VERSION"
-            fi
+            echo "📤 Committing changes to SVN..."
+            svn commit -m "Setting stable tag to $TARGET_VERSION" --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive
+            echo "✅ Successfully committed stable tag update to $TARGET_VERSION"
           else
             echo "❌ ERROR: Unable to update stable tag in SVN"
             exit 1
@@ -165,10 +172,6 @@ jobs:
             # Check if file was actually modified
             if git diff --quiet "$README_PATH"; then
               echo "ℹ️ No changes needed on $BRANCH_NAME - stable tag is already $TARGET_VERSION"
-            elif [ "${{ github.event.inputs.dry-run }}" == "true" ]; then
-              echo "🔍 DRY-RUN MODE: No GitHub PR created for $BRANCH_NAME."
-              echo "📝 Check the updated readme above."
-              echo "✅ To actually create the PR, uncheck 'Do a dry-run' option"
             else
               echo "📤 Creating PR for $BRANCH_NAME..."
 
