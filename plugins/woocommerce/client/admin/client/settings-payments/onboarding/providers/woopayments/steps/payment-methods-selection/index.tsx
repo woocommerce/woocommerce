@@ -24,7 +24,7 @@ import {
 import './style.scss';
 
 export default function PaymentMethodsSelection() {
-	const { currentStep, navigateToNextStep, closeModal } =
+	const { currentStep, navigateToNextStep, closeModal, sessionEntryPoint } =
 		useOnboardingContext();
 	const [ isExpanded, setIsExpanded ] = useState( false );
 	const [ paymentMethodsState, setPaymentMethodsState ] = useState< {
@@ -233,6 +233,7 @@ export default function PaymentMethodsSelection() {
 													'unknown',
 												action: 'show_more',
 												hidden_count: hiddenCount,
+												source: sessionEntryPoint,
 											}
 										);
 
@@ -314,6 +315,7 @@ export default function PaymentMethodsSelection() {
 												?.woocommerce_payments_nox_profile
 												?.business_country_code ??
 											'unknown',
+										source: sessionEntryPoint,
 									}
 								);
 								setIsContinueButtonLoading( false );

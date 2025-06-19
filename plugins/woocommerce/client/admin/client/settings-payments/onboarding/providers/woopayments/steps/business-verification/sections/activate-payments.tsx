@@ -16,7 +16,7 @@ import strings from '../strings';
 import { useOnboardingContext } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
 
 const ActivatePayments: React.FC = () => {
-	const { currentStep } = useOnboardingContext();
+	const { currentStep, sessionEntryPoint } = useOnboardingContext();
 	const { nextStep } = useStepperContext();
 	const [ isContinueButtonLoading, setIsContinueButtonLoading ] =
 		useState( false );
@@ -26,6 +26,7 @@ const ActivatePayments: React.FC = () => {
 			step: currentStep?.id || 'unknown',
 			sub_step_id: 'activate',
 			action: 'activate_payments',
+			source: sessionEntryPoint,
 		} );
 
 		setIsContinueButtonLoading( true );

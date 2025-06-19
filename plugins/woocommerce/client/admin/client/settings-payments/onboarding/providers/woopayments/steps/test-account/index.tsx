@@ -86,6 +86,7 @@ const TestAccountStep = () => {
 		closeModal,
 		refreshStoreData,
 		setJustCompletedStepId,
+		sessionEntryPoint,
 	} = useOnboardingContext();
 
 	// Component State.
@@ -119,6 +120,7 @@ const TestAccountStep = () => {
 		recordPaymentsOnboardingEvent( 'woopayments_onboarding_modal_click', {
 			step: currentStep?.id || 'unknown',
 			action: 'activate_payments',
+			source: sessionEntryPoint,
 		} );
 
 		setIsContinueButtonLoading( true );
@@ -260,8 +262,8 @@ const TestAccountStep = () => {
 						}
 
 						// Still pending, update progress and determine next poll.
-						let nextPhase = pollingPhase;
-						let nextInterval = POLLING_INTERVAL_INITIAL;
+						let nextPhase: number;
+						let nextInterval: number;
 						let newProgress = 0;
 
 						// Use functional update to ensure we always increment from the latest progress.
@@ -400,6 +402,7 @@ const TestAccountStep = () => {
 			{
 				step: currentStep?.id || 'unknown',
 				screen: 'ready_to_test_payments',
+				source: sessionEntryPoint,
 			}
 		);
 
@@ -514,6 +517,7 @@ const TestAccountStep = () => {
 										{
 											step: currentStep?.id || 'unknown',
 											action: 'continue_store_setup',
+											source: sessionEntryPoint,
 										}
 									);
 
@@ -574,6 +578,7 @@ const TestAccountStep = () => {
 														'unknown',
 													action: 'try_again_on_error',
 													retries: retryCounter + 1,
+													source: sessionEntryPoint,
 												}
 											);
 
@@ -595,6 +600,7 @@ const TestAccountStep = () => {
 														'unknown',
 													action: 'cancel_on_error',
 													retries: retryCounter,
+													source: sessionEntryPoint,
 												}
 											);
 
