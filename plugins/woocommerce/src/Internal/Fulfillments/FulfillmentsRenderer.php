@@ -129,7 +129,15 @@ class FulfillmentsRenderer {
 	 * @param Fulfillment[] $fulfillments The fulfillments.
 	 */
 	private function render_fulfillment_status_column_row_data( WC_Order $order, array $fulfillments ) {
-		$order_fulfillment_status = FulfillmentUtils::get_fulfillment_status( $order, $fulfillments );
+		$fulfillment_status_meta_exists   = $order->meta_exists( '_fulfillment_status' );
+		$order_fulfillment_status         = $fulfillment_status_meta_exists ? $order->get_meta( '_fulfillment_status' ) : null;
+		$is_fulfillment_status_meta_valid = $fulfillment_status_meta_exists && FulfillmentUtils::is_valid_fulfillment_status( $order_fulfillment_status );
+
+		if ( ! $fulfillment_status_meta_exists || ! $is_fulfillment_status_meta_valid ) {
+			// If the fulfillment status meta does not exist, we calculate the fulfillment status based on the fulfillments.
+			$order_fulfillment_status = FulfillmentUtils::calculate_order_fulfillment_status( $order, $fulfillments );
+		}
+
 		echo "<div class='fulfillment-status-wrapper'>";
 		switch ( $order_fulfillment_status ) {
 			case 'no_fulfillments':
