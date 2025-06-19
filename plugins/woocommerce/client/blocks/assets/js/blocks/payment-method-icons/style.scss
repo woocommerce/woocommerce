@@ -5,8 +5,10 @@
 	align-items: center;
 
 	.wp-block-woocommerce-payment-method-icons__item {
+		display: flex;
 		height: 24px;
 		justify-content: center;
+		align-items: center;
 	}
 
 	.wp-block-woocommerce-payment-method-icons__icon {
