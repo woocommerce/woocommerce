@@ -58,7 +58,7 @@ class PaymentMethodIcons extends AbstractBlock {
 		$output = '';
 
 		if ( $this->is_woo_payments_enabled() ) {
-			$output = '<div class="wp-block-woocommerce-payment-method-icons">';
+			$output  = '<div class="wp-block-woocommerce-payment-method-icons">';
 			$output .= $this->render_card_types( $attributes );
 			$output .= '</div>';
 		}
