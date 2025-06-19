@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStor
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsRenderer;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use WC_Helper_Order;
 use WC_Helper_Product;
 use WC_Order;
@@ -14,7 +15,6 @@ use WC_Order;
  * Tests for Fulfillment object.
  */
 class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
-
 	/**
 	 * Test hooks.
 	 */
@@ -116,10 +116,11 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	public function test_render_fulfillment_column_row_data_uses_cache() {
 		// Mock the FulfillmentsDataStore class.
 		$fulfillments_data_store = $this->createMock( FulfillmentsDataStore::class );
+		$order                   = OrderHelper::create_order( get_current_user_id() );
 
 		$fulfillment = new Fulfillment();
 		$fulfillment->set_entity_type( WC_Order::class );
-		$fulfillment->set_entity_id( '1' );
+		$fulfillment->set_entity_id( (string) $order->get_id() );
 		$fulfillment->add_meta_data( '_tracking_number', '123456789' );
 		$fulfillment->add_meta_data( '_tracking_url', 'https://example.com/track/123456789' );
 		$fulfillment->add_meta_data( '_shipment_provider', 'UPS' );

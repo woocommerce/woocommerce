@@ -290,7 +290,7 @@ class FulfillmentUtils {
 	 *
 	 * @return array An associative array of default order fulfillment statuses.
 	 */
-	protected function get_default_order_fulfillment_statuses(): array {
+	protected static function get_default_order_fulfillment_statuses(): array {
 		return array(
 			'unfulfilled'         => __( 'Unfulfilled', 'woocommerce' ),
 			'partially_fulfilled' => __( 'Partially fulfilled', 'woocommerce' ),
@@ -308,7 +308,7 @@ class FulfillmentUtils {
 	 *
 	 * @return array An associative array of default fulfillment statuses.
 	 */
-	protected function get_default_fulfillment_statuses(): array {
+	protected static function get_default_fulfillment_statuses(): array {
 		return array(
 			'unfulfilled' => __( 'Unfulfilled', 'woocommerce' ),
 			'fulfilled'   => __( 'Fulfilled', 'woocommerce' ),

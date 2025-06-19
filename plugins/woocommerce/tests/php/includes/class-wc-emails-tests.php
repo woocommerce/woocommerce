@@ -68,7 +68,12 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 	 */
 	public function test_fulfillment_meta() {
 		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
-		$fulfillment = FulfillmentsHelper::create_fulfillment();
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_id'   => $order->get_id(),
+				'entity_type' => 'WC_Order',
+			)
+		);
 
 		add_filter(
 			'wc_fulfillment_meta_key_translations',

@@ -136,6 +136,7 @@ class FulfillmentsRenderer {
 		if ( ! $fulfillment_status_meta_exists || ! $is_fulfillment_status_meta_valid ) {
 			// If the fulfillment status meta does not exist, we calculate the fulfillment status based on the fulfillments.
 			$order_fulfillment_status = FulfillmentUtils::calculate_order_fulfillment_status( $order, $fulfillments );
+			$order->update_meta_data( '_fulfillment_status', $order_fulfillment_status );
 		}
 
 		echo "<div class='fulfillment-status-wrapper'>";

@@ -21,7 +21,12 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 	 * Test that the Fulfillment object can be created with an ID.
 	 */
 	public function test_fulfillment_object_with_id_fetches_data_and_metadata() {
-		$db_fulfillment = FulfillmentsHelper::create_fulfillment();
+		$order          = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$db_fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_id' => $order->get_id(),
+			)
+		);
 		$fulfillment    = new Fulfillment( $db_fulfillment->get_id() );
 
 		$this->assertInstanceOf( Fulfillment::class, $fulfillment );

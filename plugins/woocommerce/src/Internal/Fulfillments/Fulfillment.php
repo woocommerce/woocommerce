@@ -273,7 +273,10 @@ class Fulfillment extends \WC_Data {
 		}
 
 		if ( \WC_Order::class === $entity_type ) {
-			return wc_get_order( $entity_id );
+			$order = wc_get_order( (int) $entity_id );
+			if ( $order instanceof \WC_Order ) {
+				return $order;
+			}
 		}
 
 		return null;
