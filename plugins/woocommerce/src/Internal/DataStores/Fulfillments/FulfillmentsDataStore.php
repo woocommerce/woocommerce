@@ -11,7 +11,6 @@ namespace Automattic\WooCommerce\Internal\DataStores\Fulfillments;
 
 use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 use WC_Meta_Data;
-use WP_Error;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -55,6 +54,22 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		 */
 		$data = apply_filters( 'wc_fulfillment_before_create', $data );
 
+		$is_fulfill_action = $data->get_is_fulfilled();
+		// If the fulfillment is fulfilled, set the fulfilled date.
+		if ( $is_fulfill_action ) {
+			$data->set_date_fulfilled( current_time( 'mysql' ) );
+
+			/**
+			 * Filter to modify the fulfillment data before it is fulfilled.
+			 *
+			 * @since 9.9.0
+			 */
+			$data = apply_filters(
+				'wc_fulfillment_before_fulfill',
+				$data
+			);
+		}
+
 		// Save the fulfillment to the database.
 		global $wpdb;
 		$rows_inserted = $wpdb->insert(
@@ -92,12 +107,25 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		$data->apply_changes();
 		$data->set_object_read( true );
 
-		/**
-		 * Action to perform after a fulfillment is created.
-		 *
-		 * @since 9.9.0
-		 */
-		do_action( 'wc_fulfillment_after_create', $data );
+		if ( ! doing_action( 'wc_fulfillment_after_create' ) ) {
+			/**
+			* Action to perform after a fulfillment is created.
+			*
+			* @param Fulfillment $data The fulfillment object that was created.
+			*
+			* @since 9.9.0
+			*/
+			do_action( 'wc_fulfillment_after_create', $data );
+		}
+
+		if ( $is_fulfill_action && ! doing_action( 'wc_fulfillment_after_fulfill' ) ) {
+			/**
+			 * Action to perform after a fulfillment is fulfilled.
+			 *
+			 * @since 9.9.0
+			 */
+			do_action( 'wc_fulfillment_after_fulfill', $data );
+		}
 	}
 
 	/**
@@ -142,11 +170,39 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	 */
 	public function update( &$data ): void {
 		// Update the fulfillment in the database.
-		global $wpdb;
-
 		$data_id = $data->get_id();
 
 		$this->validate_items( $data );
+
+		/**
+		 * Filter to modify the fulfillment data before it is updated.
+		 *
+		 * @param Fulfillment $data The fulfillment object that is being updated.
+		 *
+		 * @since 9.9.0
+		 */
+		$data = apply_filters( 'wc_fulfillment_before_update', $data );
+
+		// If the fulfillment is fulfilled, set the fulfilled date.
+		$is_fulfill_action = false;
+		if ( $data->get_is_fulfilled() && empty( $data->get_date_fulfilled() ) ) {
+			$is_fulfill_action = true;
+			$data->set_date_fulfilled( current_time( 'mysql' ) );
+
+			/**
+			 * Filter to modify the fulfillment data before it is fulfilled.
+			 *
+			 * @param Fulfillment $data The fulfillment object that is being fulfilled.
+			 *
+			 * @since 9.9.0
+			 */
+			$data = apply_filters(
+				'wc_fulfillment_before_fulfill',
+				$data
+			);
+		}
+
+		global $wpdb;
 
 		$wpdb->update(
 			$wpdb->prefix . 'wc_order_fulfillments',
@@ -181,6 +237,28 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		$data->apply_changes();
 
 		$data->set_object_read( true );
+
+		if ( ! doing_action( 'wc_fulfillment_after_update' ) ) {
+			/**
+			 * Action to perform after a fulfillment is updated.
+			 *
+			 * @param Fulfillment $data The fulfillment object that was updated.
+			 *
+			 * @since 9.9.0
+			 */
+			do_action( 'wc_fulfillment_after_update', $data );
+		}
+
+		if ( $is_fulfill_action && ! doing_action( 'wc_fulfillment_after_fulfill' ) ) {
+			/**
+			 * Action to perform after a fulfillment is fulfilled.
+			 *
+			 * @param Fulfillment $data The fulfillment object that was fulfilled.
+			 *
+			 * @since 9.9.0
+			 */
+			do_action( 'wc_fulfillment_after_fulfill', $data );
+		}
 	}
 
 	/**
@@ -194,6 +272,14 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	 * @throws \Exception If the fulfillment can't be deleted.
 	 */
 	public function delete( &$data, $args = array() ): void {
+
+		/**
+		 * Filter to modify the fulfillment data before it is updated.
+		 *
+		 * @since 9.9.0
+		 */
+		$data = apply_filters( 'wc_fulfillment_before_delete', $data );
+
 		// Soft Delete the fulfillment from the database.
 		global $wpdb;
 
@@ -213,6 +299,19 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		// Check for errors.
 		if ( $wpdb->last_error ) {
 			throw new \Exception( esc_html__( 'Failed to delete fulfillment.', 'woocommerce' ) );
+		}
+
+		$data->set_date_deleted( $deletion_time );
+		$data->apply_changes();
+		$data->set_object_read( true );
+
+		if ( ! doing_action( 'wc_fulfillment_after_delete', $data ) ) {
+			/**
+			 * Action to perform after a fulfillment is deleted.
+			 *
+			 * @since 9.9.0
+			 */
+			do_action( 'wc_fulfillment_after_delete', $data );
 		}
 
 		// Set the fulfillment object to a fresh state.

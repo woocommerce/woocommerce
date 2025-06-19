@@ -3,7 +3,7 @@
  */
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, select } from '@wordpress/data';
 import { useState } from 'react';
 
 /**
@@ -24,11 +24,8 @@ export default function UpdateButton( {
 	const { updateFulfillment } = useDispatch( FulfillmentStore );
 	const [ isExecuting, setIsExecuting ] = useState< boolean >( false );
 
-	const handleUpdateFulfillment = () => {
-		setIsExecuting( true );
-		setError( null );
+	const handleUpdateFulfillment = async () => {
 		if ( ! fulfillment || ! order ) {
-			setIsExecuting( false );
 			setError(
 				__(
 					'An unexpected error has occurred. Please refresh the page and try again.',
@@ -38,20 +35,20 @@ export default function UpdateButton( {
 			return;
 		}
 		if ( getFulfillmentItems( fulfillment ).length === 0 ) {
-			setIsExecuting( false );
 			setError( __( 'Select items to be fulfilled.', 'woocommerce' ) );
 			return;
 		}
-		updateFulfillment( order.id, fulfillment, notifyCustomer )
-			.then( () => {
-				setIsEditing( false );
-			} )
-			.catch( ( error ) => {
-				setError( error );
-			} )
-			.finally( () => {
-				setIsExecuting( false );
-			} );
+
+		setError( null );
+		setIsExecuting( true );
+		await updateFulfillment( order.id, fulfillment, notifyCustomer );
+		const error = select( FulfillmentStore ).getError( order.id );
+		if ( error ) {
+			setError( error );
+		} else {
+			setIsEditing( false );
+		}
+		setIsExecuting( false );
 	};
 
 	return (
