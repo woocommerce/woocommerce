@@ -227,7 +227,30 @@ abstract class AbstractBlock {
 
 		// Conditionally override these, otherwise rely on block.json metadata.
 		if ( $this->get_block_type_style() ) {
-			$block_settings['style'] = $this->get_block_type_style();
+			$style_handles = $this->get_block_type_style();
+			$block_name    = $this->get_block_type();
+			if (
+				is_admin() ||
+				wp_is_block_theme() ||
+				false === strpos( $block_name, 'woocommerce/' ) ||
+				empty( $style_handles ) ||
+				( function_exists( 'wp_should_load_block_assets_on_demand' ) && wp_should_load_block_assets_on_demand() ) ||
+				wp_should_load_separate_core_block_assets()
+			) {
+				$block_settings['style'] = $style_handles;
+			} else {
+				add_filter(
+					'render_block',
+					static function ( $html, $block ) use ( $style_handles, $block_name ) {
+						if ( $block['blockName'] === $block_name ) {
+							array_map( 'wp_enqueue_style', $style_handles );
+						}
+					return $html;
+				},
+				10,
+				2
+			);
+			}
 		}
 
 		if ( $this->get_block_type_editor_style() ) {
