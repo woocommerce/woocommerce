@@ -60,17 +60,6 @@ class PaymentMethods extends AbstractBlock {
 			if ( 'yes' === $gateway->enabled ) {
 				if ( 'woocommerce_payments' === $gateway_id ) {
 					$output .= $this->render_card_brands( $attributes );
-				} else {
-					$method_title = $gateway->get_title();
-					$icon_url     = $this->get_payment_method_icon( $gateway_id, $gateway );
-
-					$output .= '<div class="payment-method-item">';
-
-					if ( $icon_url ) {
-						$output .= '<img src="' . esc_url( $icon_url ) . '" alt="' . esc_attr( $method_title ) . '" class="payment-method-icon">';
-					}
-
-					$output .= '</div>';
 				}
 			}
 		}
@@ -89,8 +78,7 @@ class PaymentMethods extends AbstractBlock {
 	private function render_card_brands( $attributes ) {
 		$output             = '';
 		$enabled_card_types = $this->get_enabled_card_types();
-
-		$number_of_icons = $attributes['numberOfIcons'] ?? 8;
+		$number_of_icons    = $attributes['numberOfIcons'] ?? 5;
 
 		foreach ( $enabled_card_types as $card_type => $card_data ) {
 			if ( $number_of_icons > 0 ) {
@@ -136,24 +124,6 @@ class PaymentMethods extends AbstractBlock {
 				'icon' => $this->get_card_brand_icon_url( 'jcb' ),
 			),
 		);
-
-		if ( class_exists( 'WC_Payments_Features' ) && method_exists( 'WC_Payments_Features', 'is_enabled' ) ) {
-			$woopayments_gateway = WC()->payment_gateways->payment_gateways()['woocommerce_payments'] ?? null;
-
-			if ( $woopayments_gateway && method_exists( $woopayments_gateway, 'get_option' ) ) {
-				$enabled_card_types = $woopayments_gateway->get_option( 'enabled_card_types', array() );
-
-				if ( ! empty( $enabled_card_types ) && is_array( $enabled_card_types ) ) {
-					$filtered_cards = array();
-					foreach ( $enabled_card_types as $card_type ) {
-						if ( isset( $card_types[ $card_type ] ) ) {
-							$filtered_cards[ $card_type ] = $card_types[ $card_type ];
-						}
-					}
-					return ! empty( $filtered_cards ) ? $filtered_cards : $card_types;
-				}
-			}
-		}
 
 		return $card_types;
 	}
