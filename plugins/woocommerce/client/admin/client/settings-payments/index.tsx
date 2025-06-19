@@ -259,8 +259,12 @@ export const SettingsPaymentsMethods = () => {
 				<div className="woocommerce-layout__header-wrapper">
 					<BackButton
 						href={ getNewPath( {}, '' ) }
-						title={ __( 'Return to gateways', 'woocommerce' ) }
+						title={ __(
+							'Return to payments settings',
+							'woocommerce'
+						) }
 						isRoute={ true }
+						from={ 'woopayments_payment_methods' }
 					/>
 					<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align">
 						<span className="woocommerce-settings-payments-header__title">
