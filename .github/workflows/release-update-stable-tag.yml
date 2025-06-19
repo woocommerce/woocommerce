@@ -87,7 +87,7 @@ jobs:
     needs: [validate-release-version, verify-release-branch]
     steps:
       - name: Install SVN
-        run: sudo apt-get update && sudo apt-get install -y subversion
+        run: sudo apt-get install -y subversion
 
       - name: Update SVN stable tag
         env:
