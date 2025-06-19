@@ -38,9 +38,9 @@ export class FrontendUtils {
 				},
 				{ timeout }
 			);
-		} catch ( error: any ) {
+		} catch ( error: unknown ) {
 			// If timeout, it means no cart requests are pending, which is fine
-			if ( error.name !== 'TimeoutError' ) {
+			if ( error instanceof Error && error.name !== 'TimeoutError' ) {
 				throw error;
 			}
 		}
