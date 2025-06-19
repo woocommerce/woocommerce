@@ -57,8 +57,8 @@ class PaymentMethods extends AbstractBlock {
 		$output = '<div class="wp-block-woocommerce-payment-methods">';
 
 		foreach ( $available_gateways as $gateway_id => $gateway ) {
-			if ( $gateway->enabled === 'yes' ) {
-				if ( $gateway_id === 'woocommerce_payments' ) {
+			if ( 'yes' === $gateway->enabled ) {
+				if ( 'woocommerce_payments' === $gateway_id ) {
 					$output .= $this->render_card_brands( $attributes );
 				} else {
 					$method_title = $gateway->get_title();
@@ -80,15 +80,21 @@ class PaymentMethods extends AbstractBlock {
 		return $output;
 	}
 
+	/**
+	 * Render the card brands.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return string Rendered block type output.
+	 */
 	private function render_card_brands( $attributes ) {
-		$output = '';
+		$output             = '';
 		$enabled_card_types = $this->get_enabled_card_types();
 
 		$number_of_icons = $attributes['numberOfIcons'] ?? 8;
 
 		foreach ( $enabled_card_types as $card_type => $card_data ) {
 			if ( $number_of_icons > 0 ) {
-				$number_of_icons--;
+				--$number_of_icons;
 			} else {
 				break;
 			}
@@ -102,6 +108,11 @@ class PaymentMethods extends AbstractBlock {
 		return $output;
 	}
 
+	/**
+	 * Get the enabled card types.
+	 *
+	 * @return array Enabled card types.
+	 */
 	private function get_enabled_card_types() {
 		$card_types = array(
 			'visa'       => array(
@@ -147,6 +158,12 @@ class PaymentMethods extends AbstractBlock {
 		return $card_types;
 	}
 
+	/**
+	 * Get the card brand icon URL.
+	 *
+	 * @param string $card_type Card type.
+	 * @return string Card brand icon URL.
+	 */
 	private function get_card_brand_icon_url( $card_type ) {
 		$woopayments_url = \plugins_url() . '/woocommerce-payments/assets/images/payment-method-icons/';
 		return $woopayments_url . $card_type . '.svg';
