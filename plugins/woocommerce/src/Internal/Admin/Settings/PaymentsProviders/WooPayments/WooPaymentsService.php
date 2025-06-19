@@ -71,6 +71,9 @@ class WooPaymentsService {
 	const NOX_PROFILE_OPTION_KEY    = 'woocommerce_woopayments_nox_profile';
 	const NOX_ONBOARDING_LOCKED_KEY = 'woocommerce_woopayments_nox_onboarding_locked';
 
+	const SESSION_ENTRY_DEFAULT = 'settings_payments';
+	const SESSION_ENTRY_LYS     = 'lys';
+
 	const FROM_PAYMENT_SETTINGS = 'WCADMIN_PAYMENT_SETTINGS';
 	const FROM_NOX_IN_CONTEXT   = 'WCADMIN_NOX_IN_CONTEXT';
 	const FROM_KYC              = 'KYC';
@@ -1654,8 +1657,8 @@ class WooPaymentsService {
 		if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $wpcom_step['status'] ) {
 			// Craft the return URL.
 			switch ( $source ) {
-				case 'launch-your-store':
-					// If the source is 'launch-your-store', we return the user to the Launch Your Store flow.
+				case self::SESSION_ENTRY_LYS:
+					// If the source is LYS, we return the user to the Launch Your Store flow.
 					$return_url = $this->proxy->call_function(
 						'admin_url',
 						'admin.php?page=wc-admin&path=/launch-your-store' . self::ONBOARDING_PATH_BASE . '&sidebar=hub&content=payments&wpcom_connection_return=1'
