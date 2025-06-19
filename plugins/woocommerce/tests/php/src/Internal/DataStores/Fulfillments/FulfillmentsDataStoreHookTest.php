@@ -132,6 +132,103 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the fulfillment before update hook is called when updating a fulfillment.
+	 */
+	public function test_fulfillment_before_update_hook_is_called() {
+		// Create a fulfillment for the order.
+		$fulfillment = $this->get_test_fulfillment( $this->order->get_id() );
+		$fulfillment->save();
+		$this->assertNotNull( $fulfillment->get_id(), 'Fulfillment ID should not be null.' );
+
+		$hook_called = false;
+		add_filter(
+			'wc_fulfillment_before_update',
+			function ( $fulfillment ) use ( &$hook_called ) {
+				$hook_called = true;
+				return $fulfillment;
+			}
+		);
+
+		// Add a modification to the saved fulfillment, so we can see the difference.
+		$fulfillment->add_meta_data( 'test_meta_update', 'test_meta_value' );
+
+		$this->store->update( $fulfillment );
+		$this->assertTrue( $hook_called, 'The fulfillment before update hook was not called.' );
+
+		$db_fulfillment = new Fulfillment( $fulfillment->get_id() );
+		$this->assertTrue( $db_fulfillment->meta_exists( 'test_meta_update' ), 'Fulfillment was not updated.' );
+	}
+
+	/**
+	 * Test that the fulfillment before update hook can prevent updating a fulfillment.
+	 */
+	public function test_fulfillment_before_update_hook_can_interrupt() {
+		// Create a fulfillment for the order.
+		$fulfillment = $this->get_test_fulfillment( $this->order->get_id() );
+		$fulfillment->save();
+		$this->assertNotNull( $fulfillment->get_id(), 'Fulfillment ID should not be null.' );
+
+		$hook_called = false;
+		add_filter(
+			'wc_fulfillment_before_update',
+			function () use ( &$hook_called ) {
+				$hook_called = true;
+				throw new \Exception( 'Fulfillment update prevented by hook.' );
+			}
+		);
+
+		// Add a modification to the saved fulfillment, so we can see the difference.
+		$fulfillment->add_meta_data( 'test_meta_update', 'test_meta_value' );
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'Fulfillment update prevented by hook.' );
+		$this->store->update( $fulfillment );
+
+		$this->assertTrue( $hook_called, 'The fulfillment before update hook was not called.' );
+		$db_fulfillment = new Fulfillment( $fulfillment->get_id() );
+		$this->assertFalse( $db_fulfillment->meta_exists( 'test_meta_update' ), 'Fulfillment was updated.' );
+	}
+
+	/**
+	 * Test that the fulfillment after update hook is called after updating a fulfillment.
+	 */
+	public function test_fulfillment_after_update_hook_is_called() {
+		// Create a fulfillment for the order.
+		$fulfillment = $this->get_test_fulfillment( $this->order->get_id() );
+		$fulfillment->save();
+		$this->assertNotNull( $fulfillment->get_id(), 'Fulfillment ID should not be null.' );
+
+		$hook_called = false;
+		add_action(
+			'wc_fulfillment_after_update',
+			function ( $fulfillment ) use ( &$hook_called, &$received_fulfillment ) {
+				$received_fulfillment = $fulfillment;
+				$hook_called          = true;
+				return $fulfillment;
+			},
+			10,
+			2
+		);
+
+		// Add a modification to the saved fulfillment, so we can see the difference.
+		$fulfillment->add_meta_data( 'test_meta_update', 'test_meta_value' );
+
+		$this->store->update( $fulfillment );
+		$this->assertTrue( $hook_called, 'The fulfillment after update hook was not called.' );
+
+		// Compare the received fulfillment with the expected data.
+		$this->assertEquals( $received_fulfillment->get_id(), $fulfillment->get_id() );
+		$this->assertEquals( $received_fulfillment->get_entity_type(), $fulfillment->get_entity_type() );
+		$this->assertEquals( $received_fulfillment->get_entity_id(), $fulfillment->get_entity_id() );
+		$this->assertEquals( $received_fulfillment->get_status(), $fulfillment->get_status() );
+		$this->assertEquals( $received_fulfillment->get_is_fulfilled(), $fulfillment->get_is_fulfilled() );
+		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_key' ), $fulfillment->get_meta( 'test_meta_key' ) );
+		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_key_2' ), $fulfillment->get_meta( 'test_meta_key_2' ) );
+		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_update' ), $fulfillment->get_meta( 'test_meta_update' ) );
+		$this->assertEquals( $received_fulfillment->get_items(), $fulfillment->get_items() );
+	}
+
+	/**
 	 * Create a test fulfillment to use in the tests.
 	 *
 	 * @param int $order_id The ID of the order to create a fulfillment for.
