@@ -319,7 +319,10 @@ export const SettingsPaymentsMethods = () => {
 export const SettingsPaymentsMainWrapper = () => {
 	return (
 		<>
-			<Header title={ __( 'Settings', 'woocommerce' ) } />
+			<Header
+				title={ __( 'Settings', 'woocommerce' ) }
+				context={ 'wc_settings_payments__main' }
+			/>
 			<HistoryRouter history={ getHistory() }>
 				<Routes>
 					<Route
@@ -344,6 +347,7 @@ export const SettingsPaymentsOfflineWrapper = () => {
 				backLink={ getAdminLink(
 					'admin.php?page=wc-settings&tab=checkout'
 				) }
+				context={ 'wc_settings_payments__offline_pms' }
 			/>
 			<Suspense
 				fallback={
@@ -376,7 +380,10 @@ export const SettingsPaymentsOfflineWrapper = () => {
 export const SettingsPaymentsWooPaymentsWrapper = () => {
 	return (
 		<>
-			<Header title={ __( 'Settings', 'woocommerce' ) } />
+			<Header
+				title={ __( 'Settings', 'woocommerce' ) }
+				context={ 'wc_settings_payments__woopayments' }
+			/>
 			<Suspense fallback={ <div>Loading WooPayments settings...</div> }>
 				<SettingsPaymentsWooPaymentsChunk />
 			</Suspense>
@@ -392,6 +399,7 @@ export const SettingsPaymentsBacsWrapper = () => {
 				backLink={ getAdminLink(
 					'admin.php?page=wc-settings&tab=checkout&section=offline'
 				) }
+				context={ 'wc_settings_payments__offline_pms_bacs' }
 			/>
 			<Suspense
 				fallback={
@@ -426,6 +434,7 @@ export const SettingsPaymentsCodWrapper = () => {
 				backLink={ getAdminLink(
 					'admin.php?page=wc-settings&tab=checkout&section=offline'
 				) }
+				context={ 'wc_settings_payments__offline_pms_cod' }
 			/>
 			<Suspense
 				fallback={
@@ -460,6 +469,7 @@ export const SettingsPaymentsChequeWrapper = () => {
 				backLink={ getAdminLink(
 					'admin.php?page=wc-settings&tab=checkout&section=offline'
 				) }
+				context={ 'wc_settings_payments__offline_pms_cheque' }
 			/>
 			<Suspense
 				fallback={
