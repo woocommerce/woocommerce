@@ -2,14 +2,13 @@
  * External dependencies
  */
 import { use, select } from '@wordpress/data';
-import { applyFilters } from '@wordpress/hooks';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { store as editorStore } from '@wordpress/editor';
 import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { recordEvent } from '.';
+import { recordEvent, isEventTrackingEnabled } from '.';
 import { editorCurrentPostType, editorCurrentPostId } from '../store';
 
 /**
@@ -126,12 +125,7 @@ const rewrittenActions = {};
 const originalActions = {};
 
 export const initStoreTracking = () => {
-	const isEventTrackingEnabled = applyFilters(
-		'woocommerce_email_editor_events_tracking_enabled',
-		false
-	);
-
-	if ( ! isEventTrackingEnabled ) {
+	if ( ! isEventTrackingEnabled() ) {
 		return;
 	}
 
