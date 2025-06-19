@@ -620,7 +620,7 @@ final class BlockTypesController {
 	 *
 	 * @internal
 	 *
-	 * @param array $args Block metadata.
+	 * @param array  $args Block metadata.
 	 * @param string $block_name Block name.
 	 *
 	 * @return array Block metadata.
@@ -632,7 +632,7 @@ final class BlockTypesController {
 			( function_exists( 'wp_should_load_block_assets_on_demand' ) && wp_should_load_block_assets_on_demand() ) ||
 			wp_should_load_separate_core_block_assets() ||
 			false === strpos( $block_name, 'woocommerce/' ) ||
-			empty( $args['style_handles'] ) && empty( $args['style'] )
+			( empty( $args['style_handles'] ) && empty( $args['style'] ) )
 		) {
 			return $args;
 		}
@@ -652,7 +652,7 @@ final class BlockTypesController {
 		);
 
 		$args['style_handles'] = array();
-		$args['style'] = array();
+		$args['style']         = array();
 
 		return $args;
 	}
