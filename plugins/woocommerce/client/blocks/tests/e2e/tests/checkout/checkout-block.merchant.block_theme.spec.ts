@@ -100,11 +100,6 @@ test.describe( 'Merchant → Checkout', () => {
 	} );
 
 	test.describe( 'Can adjust T&S and Privacy Policy options', () => {
-		test.beforeEach( async ( { requestUtils } ) => {
-			await requestUtils.activatePlugin(
-				'woocommerce-blocks-test-helper'
-			);
-		} );
 
 		test( 'Merchant can see T&S and Privacy Policy links without checkbox', async ( {
 			page,
