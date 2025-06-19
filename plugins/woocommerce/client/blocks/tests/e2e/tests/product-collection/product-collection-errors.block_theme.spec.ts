@@ -39,16 +39,12 @@ test.describe( 'Product Page: error notices', () => {
 
 		await expect( productCart ).toBeVisible();
 
-		// Add to cart once — succeeds.
-		await productCart
-			.getByRole( 'button', { name: 'Add to cart' } )
-			.click();
+		const addButton = productCart.getByRole( 'button', { name: 'Add to cart' } );
+		await addButton.click();
+		await expect( addButton ).toHaveText( /1 in cart/i ); // Wait until the button reflects the cart state.
 
 		// Add to cart again — triggers out-of-stock error.
-		await productCart
-			.locator( 'button' )
-			.filter( { hasText: '1 in cart' } )
-			.click();
+		await addButton.click();
 
 		// Verify error notice is displayed.
 		await expect( page.getByRole( 'alert' ) ).toBeVisible();
