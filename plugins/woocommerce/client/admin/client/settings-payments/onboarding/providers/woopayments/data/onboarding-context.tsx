@@ -32,7 +32,7 @@ interface URLStrategy {
 		stepPath: string,
 		currentParams?: Record< string, string >
 	) => string;
-	preserveParams?: string[]; // params to preserve when navigating
+	preserveParams?: string[]; // params to preserve when navigating.
 }
 
 /**
@@ -45,6 +45,7 @@ const defaultURLStrategy: URLStrategy = {
 			tab: 'checkout',
 		} );
 	},
+	preserveParams: [ 'source', 'from' ], // params to preserve when navigating.
 };
 
 /**
