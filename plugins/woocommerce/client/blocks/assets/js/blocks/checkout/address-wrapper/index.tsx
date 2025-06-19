@@ -27,7 +27,7 @@ export const AddressWrapper = ( {
 		'wc-block-components-address-address-wrapper',
 		{
 			'is-editing': isEditing,
-			'should-animate': shouldAnimate,
+			'is-animated': shouldAnimate,
 		}
 	);
 
