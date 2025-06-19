@@ -629,9 +629,9 @@ final class BlockTypesController {
 		if (
 			is_admin() ||
 			wp_is_block_theme() ||
-			false === strpos( $block_name, 'woocommerce/' ) ||
 			( function_exists( 'wp_should_load_block_assets_on_demand' ) && wp_should_load_block_assets_on_demand() ) ||
 			wp_should_load_separate_core_block_assets() ||
+			false === strpos( $block_name, 'woocommerce/' ) ||
 			empty( $args['style_handles'] ) && empty( $args['style'] )
 		) {
 			return $args;
