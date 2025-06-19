@@ -118,6 +118,13 @@ class DocumentObjectTests extends TestCase {
 	}
 
 	/**
+	 * Tear down the test environment.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		wc_empty_cart();
+	}
+	/**
 	 * test_default_document_schema.
 	 */
 	public function test_default_document_schema() {

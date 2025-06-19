@@ -5,6 +5,7 @@ import { renderHook } from '@testing-library/react';
 import { createRegistry, RegistryProvider } from '@wordpress/data';
 import type { FormType } from '@woocommerce/settings';
 import Ajv from 'ajv';
+import { WPDataRegistry } from '@wordpress/data/build-types/registry';
 
 /**
  * Internal dependencies
@@ -14,7 +15,6 @@ import checkoutSchema from '../../../../../../../../../docs/_docu-tools/schemas/
 import { CheckoutState } from '../../../data/checkout/default-state';
 import { PaymentState } from '../../../data/payment/default-state';
 import { CartState } from '../../../data/cart/default-state';
-import { WPDataRegistry } from '@wordpress/data/build-types/registry';
 
 // Mock the stores
 jest.mock( '@woocommerce/block-data', () => ( {
