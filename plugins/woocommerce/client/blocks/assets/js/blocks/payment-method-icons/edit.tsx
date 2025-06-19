@@ -44,10 +44,14 @@ const Edit = ( {
 	const blockProps = useBlockProps();
 	const { numberOfIcons } = attributes;
 	const isWooPaymentsEnabled = window.wcSettings.wooPaymentsEnabled;
-	const availableTypes = [ 'visa', 'mastercard', 'amex', 'discover', 'jcb' ];
-	const iconsToShow = Math.min( numberOfIcons, availableTypes.length );
 
 	if ( isWooPaymentsEnabled ) {
+		const { paymentMethodIcons } = window.wcSettings as {
+			paymentMethodIcons: Record< string, { icon: string } >;
+		};
+		const availableTypes = Object.keys( paymentMethodIcons );
+		const iconsToShow = Math.min( numberOfIcons, availableTypes.length );
+
 		return (
 			<div { ...blockProps }>
 				<InspectorControls>

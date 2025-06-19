@@ -75,7 +75,7 @@ class PaymentMethodIcons extends AbstractBlock {
 	private function render_card_types( $attributes ) {
 		$output             = '';
 		$enabled_card_types = $this->get_enabled_card_types();
-		$number_of_icons    = $attributes['numberOfIcons'] ?? 5;
+		$number_of_icons    = max( 1, min( intval( $attributes['numberOfIcons'] ?? 5 ), count( $enabled_card_types ) ) );
 
 		foreach ( $enabled_card_types as $card_type => $card_data ) {
 			if ( $number_of_icons > 0 ) {
@@ -132,8 +132,13 @@ class PaymentMethodIcons extends AbstractBlock {
 	 * @return string Card type icon URL.
 	 */
 	private function get_card_type_icon_url( $card_type ) {
-		$woopayments_url = \plugins_url() . '/woocommerce-payments/assets/images/payment-method-icons/';
-		return $woopayments_url . $card_type . '.svg';
+		$plugin_path = 'woocommerce-payments/assets/images/payment-method-icons/';
+		if ( ! is_dir( WP_PLUGIN_DIR . '/' . dirname( $plugin_path ) ) ) {
+			return '';
+		}
+
+		$icon_url = \plugins_url( $plugin_path . $card_type . '.svg' );
+		return $icon_url;
 	}
 
 	/**
