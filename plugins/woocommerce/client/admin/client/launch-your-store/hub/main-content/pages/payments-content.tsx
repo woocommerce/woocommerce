@@ -40,6 +40,11 @@ const InstallWooPaymentsStep = ( {
 			.getPaymentProviders()
 			.find( ( provider ) => isWooPayments( provider.id ) );
 	}, [] );
+
+	const storeCountry =
+		window.wcSettings?.admin?.woocommerce_payments_nox_profile
+			?.business_country_code || null;
+
 	let buttonText = __( 'Install', 'woocommerce' );
 
 	if ( isPluginInstalled && ! isPluginInstalling ) {
