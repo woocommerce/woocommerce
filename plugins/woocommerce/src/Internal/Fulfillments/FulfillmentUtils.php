@@ -239,20 +239,7 @@ class FulfillmentUtils {
 	 * @return bool True if the status is valid, false otherwise.
 	 */
 	public static function is_valid_order_fulfillment_status( string $status ): bool {
-		/**
-		 * This filter allows plugins to modify the list of order fulfillment statuses.
-		 * It can be used to add, remove, or change the order fulfillment statuses available in the
-		 * WooCommerce Fulfillments system.
-		 *
-		 * @since 9.9.0
-		 *
-		 * @param array $order_fulfillment_statuses The default list of order fulfillment statuses.
-		 */
-		$order_fulfillment_statuses = apply_filters(
-			'wc_fulfillment_order_fulfillment_statuses',
-			self::get_default_order_fulfillment_statuses()
-		);
-
+		$order_fulfillment_statuses = self::get_order_fulfillment_statuses();
 		return in_array( $status, array_keys( $order_fulfillment_statuses ), true );
 	}
 
@@ -264,6 +251,45 @@ class FulfillmentUtils {
 	 * @return bool True if the status is valid, false otherwise.
 	 */
 	public static function is_valid_fulfillment_status( string $status ): bool {
+		$fulfillment_statuses = self::get_fulfillment_statuses();
+		return in_array( $status, array_keys( $fulfillment_statuses ), true );
+	}
+
+	/**
+	 * Get the order fulfillment statuses.
+	 *
+	 * This method provides the order fulfillment statuses that can be used
+	 * in the WooCommerce Fulfillments system. It can be filtered using the
+	 * `wc_fulfillment_order_fulfillment_statuses` filter.
+	 *
+	 * @return array An associative array of order fulfillment statuses.
+	 */
+	public static function get_order_fulfillment_statuses(): array {
+		/**
+		 * This filter allows plugins to modify the list of order fulfillment statuses.
+		 * It can be used to add, remove, or change the order fulfillment statuses available in the
+		 * WooCommerce Fulfillments system.
+		 *
+		 * @since 9.9.0
+		 *
+		 * @param array $order_fulfillment_statuses The default list of order fulfillment statuses.
+		 */
+		return apply_filters(
+			'wc_fulfillment_order_fulfillment_statuses',
+			self::get_default_order_fulfillment_statuses()
+		);
+	}
+
+	/**
+	 * Get the fulfillment statuses.
+	 *
+	 * This method provides the fulfillment statuses that can be used
+	 * in the WooCommerce Fulfillments system. It can be filtered using the
+	 * `wc_fulfillment_fulfillment_statuses` filter.
+	 *
+	 * @return array An associative array of fulfillment statuses.
+	 */
+	public static function get_fulfillment_statuses(): array {
 		/**
 		 * This filter allows plugins to modify the list of fulfillment statuses.
 		 * It can be used to add, remove, or change the fulfillment statuses available in the
@@ -273,12 +299,10 @@ class FulfillmentUtils {
 		 *
 		 * @param array $fulfillment_statuses The default list of fulfillment statuses.
 		 */
-		$fulfillment_statuses = apply_filters(
+		return apply_filters(
 			'wc_fulfillment_fulfillment_statuses',
 			self::get_default_fulfillment_statuses()
 		);
-
-		return in_array( $status, array_keys( $fulfillment_statuses ), true );
 	}
 
 	/**
@@ -292,9 +316,9 @@ class FulfillmentUtils {
 	 */
 	protected static function get_default_order_fulfillment_statuses(): array {
 		return array(
-			'unfulfilled'         => __( 'Unfulfilled', 'woocommerce' ),
-			'partially_fulfilled' => __( 'Partially fulfilled', 'woocommerce' ),
 			'fulfilled'           => __( 'Fulfilled', 'woocommerce' ),
+			'partially_fulfilled' => __( 'Partially fulfilled', 'woocommerce' ),
+			'unfulfilled'         => __( 'Unfulfilled', 'woocommerce' ),
 			'no_fulfillments'     => __( 'No fulfillments', 'woocommerce' ),
 		);
 	}
@@ -310,8 +334,8 @@ class FulfillmentUtils {
 	 */
 	protected static function get_default_fulfillment_statuses(): array {
 		return array(
-			'unfulfilled' => __( 'Unfulfilled', 'woocommerce' ),
 			'fulfilled'   => __( 'Fulfilled', 'woocommerce' ),
+			'unfulfilled' => __( 'Unfulfilled', 'woocommerce' ),
 		);
 	}
 }
