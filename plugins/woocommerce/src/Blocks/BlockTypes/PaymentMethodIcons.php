@@ -43,6 +43,7 @@ class PaymentMethodIcons extends AbstractBlock {
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
 		$this->asset_data_registry->add( 'paymentMethodIcons', $this->get_enabled_card_types() );
+		$this->asset_data_registry->add( 'wooPaymentsEnabled', $this->is_woo_payments_enabled() );
 	}
 
 	/**
@@ -54,25 +55,13 @@ class PaymentMethodIcons extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( ! class_exists( 'WC_Payments' ) ) {
-			return;
+		$output = '';
+
+		if ( $this->is_woo_payments_enabled() ) {
+			$output = '<div class="wp-block-woocommerce-payment-method-icons">';
+			$output .= $this->render_card_types( $attributes );
+			$output .= '</div>';
 		}
-
-		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-
-		if ( empty( $available_gateways ) ) {
-			return;
-		}
-
-		$output = '<div class="wp-block-woocommerce-payment-method-icons">';
-
-		foreach ( $available_gateways as $gateway_id => $gateway ) {
-			if ( 'woocommerce_payments' === $gateway_id && 'yes' === $gateway->enabled && in_array( 'card', $gateway->get_option( 'upe_enabled_payment_method_ids' ), true ) ) {
-				$output .= $this->render_card_types( $attributes );
-			}
-		}
-
-		$output .= '</div>';
 
 		return $output;
 	}
@@ -145,5 +134,30 @@ class PaymentMethodIcons extends AbstractBlock {
 	private function get_card_type_icon_url( $card_type ) {
 		$woopayments_url = \plugins_url() . '/woocommerce-payments/assets/images/payment-method-icons/';
 		return $woopayments_url . $card_type . '.svg';
+	}
+
+	/**
+	 * Check if WooPayments is enabled and has card types enabled.
+	 *
+	 * @return bool WooPayments enabled and has card types enabled.
+	 */
+	private function is_woo_payments_enabled() {
+		if ( ! class_exists( 'WC_Payments' ) ) {
+			return false;
+		}
+
+		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+
+		if ( empty( $available_gateways ) ) {
+			return false;
+		}
+
+		foreach ( $available_gateways as $gateway_id => $gateway ) {
+			if ( 'woocommerce_payments' === $gateway_id && 'yes' === $gateway->enabled && in_array( 'card', $gateway->get_option( 'upe_enabled_payment_method_ids' ), true ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

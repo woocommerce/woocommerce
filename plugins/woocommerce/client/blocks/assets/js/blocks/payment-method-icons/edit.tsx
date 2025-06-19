@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { getPaymentMethods } from '@woocommerce/blocks-registry';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, RangeControl } from '@wordpress/components';
 
@@ -44,18 +43,11 @@ const Edit = ( {
 } ) => {
 	const blockProps = useBlockProps();
 	const { numberOfIcons } = attributes;
-	const paymentMethods = getPaymentMethods();
-	const wooPayments = paymentMethods?.woocommerce_payments;
-	const wooPaymentsCards =
-		wooPayments?.edit &&
-		typeof wooPayments.edit === 'object' &&
-		'props' in wooPayments.edit &&
-		wooPayments.edit.props?.paymentMethodId === 'card';
-
+	const isWooPaymentsEnabled = window.wcSettings.wooPaymentsEnabled;
 	const availableTypes = [ 'visa', 'mastercard', 'amex', 'discover', 'jcb' ];
 	const iconsToShow = Math.min( numberOfIcons, availableTypes.length );
 
-	if ( wooPaymentsCards ) {
+	if ( isWooPaymentsEnabled ) {
 		return (
 			<div { ...blockProps }>
 				<InspectorControls>
