@@ -57,7 +57,7 @@ class PaymentMethodIcons extends AbstractBlock {
 		$output = '<div class="wp-block-woocommerce-payment-method-icons">';
 
 		foreach ( $available_gateways as $gateway_id => $gateway ) {
-			if ( 'woocommerce_payments' === $gateway_id && 'yes' === $gateway->enabled && in_array( 'card', $gateway->get_option( 'upe_enabled_payment_method_ids' ) ) ) {
+			if ( 'woocommerce_payments' === $gateway_id && 'yes' === $gateway->enabled && in_array( 'card', $gateway->get_option( 'upe_enabled_payment_method_ids' ), true ) ) {
 				$output .= $this->render_card_types( $attributes );
 			}
 		}
