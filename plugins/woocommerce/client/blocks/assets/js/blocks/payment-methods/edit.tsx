@@ -52,16 +52,7 @@ const Edit = ( {
 		'props' in wooPayments.edit &&
 		wooPayments.edit.props?.paymentMethodId === 'card';
 
-	const availableBrands = [
-		'visa',
-		'mastercard',
-		'amex',
-		'discover',
-		'diners',
-		'jcb',
-		'cartes_bancaires',
-		'unionpay',
-	];
+	const availableBrands = [ 'visa', 'mastercard', 'amex', 'discover', 'jcb' ];
 
 	const iconsToShow = Math.min( numberOfIcons, availableBrands.length );
 
@@ -84,7 +75,7 @@ const Edit = ( {
 							min={ 1 }
 							max={ availableBrands.length }
 							help={ __(
-								'Choose how many payment method icons to display.',
+								'Choose how many icons to display.',
 								'woocommerce'
 							) }
 						/>

@@ -13,11 +13,10 @@
 		},
 		"numberOfIcons": {
 			"type": "number",
-			"default": 8
+			"default": 5
 		}
 	},
 	"supports": {
-		"html": false,
 		"spacing": {
 			"margin": true,
 			"padding": true

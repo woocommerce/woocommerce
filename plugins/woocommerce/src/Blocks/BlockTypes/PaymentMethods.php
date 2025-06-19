@@ -120,21 +120,9 @@ class PaymentMethods extends AbstractBlock {
 				'name' => 'Discover',
 				'icon' => $this->get_card_brand_icon_url( 'discover' ),
 			),
-			'diners'     => array(
-				'name' => 'Diners Club',
-				'icon' => $this->get_card_brand_icon_url( 'diners' ),
-			),
 			'jcb'        => array(
 				'name' => 'JCB',
 				'icon' => $this->get_card_brand_icon_url( 'jcb' ),
-			),
-			'cartes_bancaires' => array(
-				'name' => 'Cartes Bancaires',
-				'icon' => $this->get_card_brand_icon_url( 'cartes_bancaires' ),
-			),
-			'unionpay'   => array(
-				'name' => 'UnionPay',
-				'icon' => $this->get_card_brand_icon_url( 'unionpay' ),
 			),
 		);
 
