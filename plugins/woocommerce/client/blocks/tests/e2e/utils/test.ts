@@ -139,6 +139,7 @@ const test = base.extend<
 
 		// Reset the database to the initial state via snapshot import.
 		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
+		await wpCLI( `db repair` );
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
