@@ -417,6 +417,19 @@ export const SettingsPaymentsMain = () => {
 					}
 				} )
 				.catch( ( response: { errors: Record< string, string > } ) => {
+					let eventName = 'provider_extension_installation_failed';
+					if ( paymentsEntity.plugin.status !== 'not_installed' ) {
+						eventName = 'provider_extension_activation_failed';
+					}
+					recordPaymentsEvent( eventName, {
+						provider_id: paymentsEntity.id,
+						suggestion_id:
+							paymentsEntity?._suggestion_id ?? 'unknown',
+						provider_extension_slug: paymentsEntity.plugin.slug,
+						from: context,
+						source: context,
+						reason: 'error',
+					} );
 					createNoticesFromResponse( response );
 					setInstallingPlugin( null );
 				} );

@@ -143,6 +143,18 @@ export const PaymentsContent = ( {} ) => {
 			} )
 			.catch( ( response: { errors: Record< string, string > } ) => {
 				// Handle errors during installation
+				let eventName = 'provider_extension_installation_failed';
+				if ( isWooPaymentsInstalled ) {
+					eventName = 'provider_extension_activation_failed';
+				}
+				recordPaymentsEvent( eventName, {
+					provider_id: wooPaymentsProviderId,
+					suggestion_id: wooPaymentsSuggestionId,
+					provider_extension_slug: wooPaymentsExtensionSlug,
+					from: 'lys',
+					source: 'lys',
+					reason: 'error',
+				} );
 				createNoticesFromResponse( response );
 				setIsPluginInstalling( false );
 			} );
