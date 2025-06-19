@@ -15,6 +15,87 @@ export const encodeCredentials = ( username, password ) => {
 };
 
 /**
+ * Get the download URL of the latest release zip for a plugin using GitHub API.
+ *
+ * @param {Object}  param
+ * @param {string}  param.repository
+ * @param {string}  param.authorizationToken
+ * @param {boolean} param.prerelease
+ * @param {number}  param.perPage
+ *
+ * @return {string} Download URL for the release zip file.
+ */
+export const getLatestReleaseZipUrl = async ( {
+	repository,
+	authorizationToken,
+	prerelease = false,
+	perPage = 3,
+} ) => {
+	const requesturl = prerelease
+		? `https://api.github.com/repos/${ repository }/releases?per_page=${ perPage }`
+		: `https://api.github.com/repos/${ repository }/releases/latest`;
+
+	const options = {
+		method: 'get',
+		url: requesturl,
+		headers: {
+			Authorization: authorizationToken
+				? `token ${ authorizationToken }`
+				: '',
+		},
+	};
+
+	// Get the first prerelease, or the latest release.
+	let response;
+	try {
+		response = await axios( options );
+	} catch ( error ) {
+		let errorMessage =
+			'Something went wrong when downloading the plugin.\n';
+
+		if ( error.response ) {
+			// The request was made and the server responded with a status code
+			// that falls out of the range of 2xx
+			errorMessage = errorMessage.concat(
+				`Response status: ${ error.response.status } ${ error.response.statusText }`,
+				'\n',
+				`Response body:`,
+				'\n',
+				JSON.stringify( error.response.data, null, 2 ),
+				'\n'
+			);
+		} else if ( error.request ) {
+			// The request was made but no response was received
+			// `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+			// http.ClientRequest in node.js
+			errorMessage = errorMessage.concat(
+				JSON.stringify( error.request, null, 2 ),
+				'\n'
+			);
+		} else {
+			// Something happened in setting up the request that triggered an Error
+			errorMessage = errorMessage.concat( error.toJSON(), '\n' );
+		}
+
+		throw new Error( errorMessage );
+	}
+
+	const release = prerelease
+		? // eslint-disable-next-line @typescript-eslint/no-shadow
+		  response.data.find( ( { prerelease } ) => prerelease )
+		: response.data;
+
+	// If response contains assets, return URL of first asset.
+	// Otherwise, return the github.com URL from the tag name.
+	const { assets } = release;
+	if ( assets && assets.length ) {
+		return assets[ 0 ].url;
+	}
+	const tagName = release.tag_name;
+	return `https://github.com/${ repository }/archive/${ tagName }.zip`;
+};
+
+/**
  * Deactivate and delete a plugin specified by the given `slug` using the WordPress API.
  *
  * @param {Object}                                params
@@ -88,8 +169,6 @@ export const downloadZip = async ( {
 		: zipFilename.concat( '.zip' );
 	const zipFilePath = path.resolve( downloadDir, zipFilename );
 
-	let response;
-
 	// Create destination folder.
 	fs.mkdirSync( downloadDir, { recursive: true } );
 
@@ -114,7 +193,7 @@ export const downloadZip = async ( {
 		},
 	};
 
-	response = await axios( options ).catch( ( error ) => {
+	const response = await axios( options ).catch( ( error ) => {
 		if ( error.response ) {
 			console.error( error.response.data );
 		}
@@ -135,88 +214,6 @@ export const deleteZip = async ( zipFilePath ) => {
 	await fs.unlink( zipFilePath, ( err ) => {
 		if ( err ) throw err;
 	} );
-};
-
-/**
- * Get the download URL of the latest release zip for a plugin using GitHub API.
- *
- * @param {Object}  param
- * @param {string}  param.repository
- * @param {string}  param.authorizationToken
- * @param {boolean} param.prerelease
- * @param {number}  param.perPage
- *
- * @return {string} Download URL for the release zip file.
- */
-export const getLatestReleaseZipUrl = async ( {
-	repository,
-	authorizationToken,
-	prerelease = false,
-	perPage = 3,
-} ) => {
-	let release;
-
-	const requesturl = prerelease
-		? `https://api.github.com/repos/${ repository }/releases?per_page=${ perPage }`
-		: `https://api.github.com/repos/${ repository }/releases/latest`;
-
-	const options = {
-		method: 'get',
-		url: requesturl,
-		headers: {
-			Authorization: authorizationToken
-				? `token ${ authorizationToken }`
-				: '',
-		},
-	};
-
-	// Get the first prerelease, or the latest release.
-	let response;
-	try {
-		response = await axios( options );
-	} catch ( error ) {
-		let errorMessage =
-			'Something went wrong when downloading the plugin.\n';
-
-		if ( error.response ) {
-			// The request was made and the server responded with a status code
-			// that falls out of the range of 2xx
-			errorMessage = errorMessage.concat(
-				`Response status: ${ error.response.status } ${ error.response.statusText }`,
-				'\n',
-				`Response body:`,
-				'\n',
-				JSON.stringify( error.response.data, null, 2 ),
-				'\n'
-			);
-		} else if ( error.request ) {
-			// The request was made but no response was received
-			// `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-			// http.ClientRequest in node.js
-			errorMessage = errorMessage.concat(
-				JSON.stringify( error.request, null, 2 ),
-				'\n'
-			);
-		} else {
-			// Something happened in setting up the request that triggered an Error
-			errorMessage = errorMessage.concat( error.toJSON(), '\n' );
-		}
-
-		throw new Error( errorMessage );
-	}
-
-	release = prerelease
-		? response.data.find( ( { prerelease } ) => prerelease )
-		: response.data;
-
-	// If response contains assets, return URL of first asset.
-	// Otherwise, return the github.com URL from the tag name.
-	const { assets } = release;
-	if ( assets && assets.length ) {
-		return assets[ 0 ].url;
-	}
-	const tagName = release.tag_name;
-	return `https://github.com/${ repository }/archive/${ tagName }.zip`;
 };
 
 /**

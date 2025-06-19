@@ -7,8 +7,7 @@ const wpCLI = async ( command ) => {
 		`pnpm exec wp-env run tests-cli -- ${ command }`
 	);
 
-	console.log( stdout );
-	console.error( stderr );
+	return { stdout, stderr };
 };
 
 module.exports = {
