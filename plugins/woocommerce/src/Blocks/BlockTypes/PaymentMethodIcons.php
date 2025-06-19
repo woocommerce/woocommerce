@@ -85,7 +85,7 @@ class PaymentMethodIcons extends AbstractBlock {
 			}
 
 			$output .= '<div class="wp-block-woocommerce-payment-method-icons__item">';
-			$output .= '<span class="wp-block-woocommerce-payment-method-icons__icon" style="background-image: url(\'' . esc_url( $card_data['icon'] ) . '\');">' . esc_attr( $card_data['name'] ) . '</span>';
+			$output .= '<span class="wp-block-woocommerce-payment-method-icons__icon" style="background-image: url(\'' . esc_url( $card_data['icon'] ) . '\');" role="img" aria-label="' . esc_attr( $card_data['name'] ) . '"></span>';
 
 			$output .= '</div>';
 		}

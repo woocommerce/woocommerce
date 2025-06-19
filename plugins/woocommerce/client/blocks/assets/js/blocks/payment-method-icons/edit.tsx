@@ -23,9 +23,9 @@ const CardPreview = ( { type }: { type: string } ) => {
 				style={ {
 					backgroundImage: `url(${ iconUrl })`,
 				} }
-			>
-				{ type }
-			</span>
+				role="img"
+				aria-label={ type }
+			/>
 		</div>
 	);
 
