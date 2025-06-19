@@ -81,7 +81,7 @@ jobs:
           TARGET_VERSION: ${{ needs.validate-release-version.outputs.version }}
         run: |
           echo "🔄 Checking out SVN repository..."
-          svn checkout "${{ secrets.SVN_REPO_URL }}" ./svn-woocommerce-repo --username "${{ secrets.SVN_USERNAME }}" --password "${{ secrets.SVN_PASSWORD }}" --non-interactive
+          svn checkout "${{ secrets.WPORG_SVN_URL }}" ./svn-woocommerce-repo --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive
           cd ./svn-woocommerce-repo
 
           README_PATH="./trunk/readme.txt"
@@ -106,7 +106,7 @@ jobs:
               echo "✅ To actually update, uncheck 'Do a dry-run' option"
             else
               echo "📤 Committing changes to SVN..."
-              svn commit -m "Setting stable tag to $TARGET_VERSION" --username "${{ secrets.SVN_USERNAME }}" --password "${{ secrets.SVN_PASSWORD }}" --non-interactive
+              svn commit -m "Setting stable tag to $TARGET_VERSION" --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive
               echo "✅ Successfully committed stable tag update to $TARGET_VERSION"
             fi
           else
