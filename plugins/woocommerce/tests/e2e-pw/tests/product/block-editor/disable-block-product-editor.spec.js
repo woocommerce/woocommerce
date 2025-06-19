@@ -3,7 +3,6 @@ const {
 	clickAddNewMenuItem,
 	expectBlockProductEditor,
 	expectOldProductEditor,
-	toggleBlockProductEditor,
 } = require( '../../../utils/simple-products' );
 const { toggleBlockProductTour } = require( '../../../utils/tours' );
 const { tags } = require( '../../../fixtures/fixtures' );
@@ -76,7 +75,25 @@ test.describe.serial(
 		// expectOldProductEditor function contains the assertion
 		// eslint-disable-next-line playwright/expect-expect
 		test( 'can be disabled from settings', async ( { page } ) => {
-			await toggleBlockProductEditor( 'disable', page );
+			await page.goto(
+				'wp-admin/admin.php?page=wc-settings&tab=advanced&section=features'
+			);
+
+			await page
+				.locator( '#woocommerce_feature_product_block_editor_enabled' )
+				.click();
+
+			await page
+				.getByRole( 'button', {
+					name: 'Save changes',
+				} )
+				.click();
+
+			await expect(
+				page
+					.locator( '#message' )
+					.getByText( 'Your settings have been saved' )
+			).toBeVisible();
 			await page.goto( 'wp-admin/edit.php?post_type=product' );
 			await clickAddNewMenuItem( page );
 			await expectOldProductEditor( page );
