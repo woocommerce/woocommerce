@@ -342,6 +342,7 @@ export const SettingsPaymentsMain = () => {
 				suggestion_id: paymentsEntity?._suggestion_id ?? 'unknown',
 				provider_extension_slug: paymentsEntity.plugin.slug,
 				from: context,
+				source: context,
 			} );
 			installAndActivatePlugins( [ paymentsEntity.plugin.slug ] )
 				.then( async ( response ) => {
@@ -364,7 +365,7 @@ export const SettingsPaymentsMain = () => {
 							from: context,
 						} );
 					}
-					// Note: The provider extension activation is tracked from the backend.
+					// Note: The provider extension activation is tracked from the backend (the `provider_extension_activated` event).
 
 					setInstallingPlugin( null );
 
