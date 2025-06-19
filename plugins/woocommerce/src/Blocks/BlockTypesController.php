@@ -63,7 +63,7 @@ final class BlockTypesController {
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
 		add_action( 'woocommerce_delete_product_transients', array( $this, 'delete_product_transients' ) );
-		add_filter( 'block_type_metadata_settings', array( $this, 'enqueue_block_style_for_classic_themes' ) );
+		add_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10, 2 );
 	}
 
 	/**
@@ -620,27 +620,30 @@ final class BlockTypesController {
 	 *
 	 * @internal
 	 *
-	 * @param array $metadata Block metadata.
+	 * @param array $args Block metadata.
+	 * @param string $block_name Block name.
 	 *
 	 * @return array Block metadata.
 	 */
-	public function enqueue_block_style_for_classic_themes( $metadata ) {
+	public function enqueue_block_style_for_classic_themes( $args, $block_name ) {
 		if (
 			is_admin() ||
 			wp_is_block_theme() ||
-			false === strpos( $metadata['name'], 'woocommerce/' ) ||
-			empty( $metadata['style_handles'] ) ||
+			false === strpos( $block_name, 'woocommerce/' ) ||
 			( function_exists( 'wp_should_load_block_assets_on_demand' ) && wp_should_load_block_assets_on_demand() ) ||
-			wp_should_load_separate_core_block_assets()
+			wp_should_load_separate_core_block_assets() ||
+			empty( $args['style_handles'] ) && empty( $args['style'] )
 		) {
-			return $metadata;
+			return $args;
 		}
+
+		$style_handlers = $args['style_handles'] ?? $args['style'];
 
 		add_filter(
 			'render_block',
-			static function ( $html, $block ) use ( $metadata ) {
-				if ( $block['blockName'] === $metadata['name'] ) {
-					array_map( 'wp_enqueue_style', $metadata['style_handles'] );
+			static function ( $html, $block ) use ( $style_handlers, $block_name ) {
+				if ( $block['blockName'] === $block_name ) {
+					array_map( 'wp_enqueue_style', $style_handlers );
 				}
 				return $html;
 			},
@@ -648,7 +651,9 @@ final class BlockTypesController {
 			2
 		);
 
-		$metadata['style_handles'] = array();
-		return $metadata;
+		$args['style_handles'] = array();
+		$args['style'] = array();
+
+		return $args;
 	}
 }
