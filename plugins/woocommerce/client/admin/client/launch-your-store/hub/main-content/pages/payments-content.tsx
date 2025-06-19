@@ -18,6 +18,7 @@ import { WC_ASSET_URL } from '~/utils/admin-settings';
 import { createNoticesFromResponse } from '~/lib/notices';
 import './payments-content.scss';
 import { useSetUpPaymentsContext } from '~/launch-your-store/data/setup-payments-context';
+import { isWooPayments } from '~/settings-payments/utils';
 
 const InstallWooPaymentsStep = ( {
 	installWooPayments,
@@ -33,6 +34,12 @@ const InstallWooPaymentsStep = ( {
 		return store.getIsWooPayEligible();
 	}, [] );
 
+	const wooPaymentsProvider = useSelect( ( select ) => {
+		const store = select( paymentSettingsStore );
+		return store
+			.getPaymentProviders()
+			.find( ( provider ) => isWooPayments( provider.id ) );
+	}, [] );
 	let buttonText = __( 'Install', 'woocommerce' );
 
 	if ( isPluginInstalled && ! isPluginInstalling ) {
