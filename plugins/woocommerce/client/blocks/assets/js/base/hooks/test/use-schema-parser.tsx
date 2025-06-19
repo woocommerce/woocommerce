@@ -7,13 +7,18 @@
  */
 import { renderHook } from '@testing-library/react';
 import { createRegistry, RegistryProvider } from '@wordpress/data';
+import type { FormType } from '@woocommerce/settings';
 import Ajv from 'ajv';
+
 /**
  * Internal dependencies
  */
 import { useSchemaParser } from '../use-schema-parser';
-import type { FormType } from '@woocommerce/settings';
-import checkoutSchema from '../../../../../../../../../docs/_docu-tools/schemas/checkout-document-schema.json';
+import checkoutSchema from '../../../../../../../../../docs/_docu-tools/schemas/v1/checkout-document-schema.json';
+import { CheckoutState } from '../../../data/checkout/default-state';
+import { PaymentState } from '../../../data/payment/default-state';
+import { CartState } from '../../../data/cart/default-state';
+import { WPDataRegistry } from '@wordpress/data/build-types/registry';
 
 // Mock the stores
 jest.mock( '@woocommerce/block-data', () => ( {
@@ -29,11 +34,17 @@ const mockSchemaParser = {
 	addSchema: jest.fn(),
 };
 
+type DeepPartial< T > = T extends object
+	? {
+			[ P in keyof T ]?: DeepPartial< T[ P ] >;
+	  }
+	: T;
+
 describe( 'useSchemaParser', () => {
-	let registry: any;
-	let mockCartData: any;
-	let mockCheckoutData: any;
-	let mockPaymentData: any;
+	let registry: WPDataRegistry;
+	let mockCartData: DeepPartial< CartState[ 'cartData' ] >;
+	let mockCheckoutData: DeepPartial< CheckoutState >;
+	let mockPaymentData: DeepPartial< PaymentState >;
 
 	const wrapper = ( { children }: { children: React.ReactNode } ) => (
 		<RegistryProvider value={ registry }>{ children }</RegistryProvider>
@@ -85,8 +96,8 @@ describe( 'useSchemaParser', () => {
 			itemsWeight: 2.5,
 			needsShipping: true,
 			totals: {
-				total_price: 9999,
-				total_tax: 899,
+				total_price: '9999',
+				total_tax: '899',
 			},
 			extensions: {
 				custom_extension: { data: 'test' },
@@ -148,7 +159,6 @@ describe( 'useSchemaParser', () => {
 			},
 		} );
 	};
-
 	beforeEach( () => {
 		registry = createRegistry();
 		setupMocks();

@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Cart and Checkout Document Object Schema",
-    "description": "Document object schema for cart, checkout, and customer information, to be used for conditional visibility, requirment, and validation of fields.",
+    "description": "Document object schema for cart, checkout, and customer information, to be used for conditional visibility, requirement, and validation of fields.",
     "type": "object",
     "properties": {
         "cart": {
@@ -25,7 +25,7 @@
                 },
                 "items": {
                     "type": "array",
-                    "description": "List of product IDs in the cart, IDs will be dubplicated depending on the quantity of the product in the cart, so if you have 2 of product ID 1, the array will have 2 entries of product ID 1",
+                    "description": "List of product IDs in the cart, IDs will be duplicated depending on the quantity of the product in the cart, so if you have 2 of product ID 1, the array will have 2 entries of product ID 1",
                     "items": {
                         "type": "integer"
                     }
@@ -134,7 +134,7 @@
                 },
                 "address": {
                     "$ref": "#/definitions/address",
-                    "description": "This is a dynamic field that will be the billing or shipping address depending on the context of the field being evaluted."
+                    "description": "This is a dynamic field that will be the billing or shipping address depending on the context of the field being evaluated."
                 }
             },
             "additionalProperties": false

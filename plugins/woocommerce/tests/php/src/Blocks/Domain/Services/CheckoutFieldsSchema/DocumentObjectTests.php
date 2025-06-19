@@ -22,7 +22,7 @@ use WC_Customer;
  */
 class DocumentObjectTests extends TestCase {
 	/**
-	 * Trait to use for the test_additional_fields_schema est.
+	 * Trait to use for the test_additional_fields_schema test.
 	 *
 	 * Technically, the logic of splitting fields lives in the CheckoutTrait class, but we need to use it here
 	 * to test the DocumentObject class.
@@ -279,6 +279,9 @@ class DocumentObjectTests extends TestCase {
 				'namespace/order_field' => 'Order field',
 			]
 		);
+
+		$this->additional_fields_controller->deregister_checkout_field( 'namespace/contact_field' );
+		$this->additional_fields_controller->deregister_checkout_field( 'namespace/order_field' );
 	}
 
 	/**
@@ -288,7 +291,7 @@ class DocumentObjectTests extends TestCase {
 	 */
 	private function get_schema() {
 		// Temporary because we can't fetch from the docs top level folder.
-		$schema_path = __DIR__ . '/../../../../../../../src/Blocks/Domain/Services/CheckoutFieldsSchema/checkout-document-schema.json';
+		$schema_path = ABSPATH . 'wp-content/plugins/woocommerce/src/Blocks/Domain/Services/CheckoutFieldsSchema/checkout-document-schema.json';
 		return json_decode( file_get_contents( $schema_path ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 	}
 
