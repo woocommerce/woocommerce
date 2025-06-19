@@ -11,7 +11,6 @@ namespace Automattic\WooCommerce\Internal\DataStores\Fulfillments;
 
 use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 use WC_Meta_Data;
-use WP_Error;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
