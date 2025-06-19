@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<hr class="wp-header-end">
 	<?php
-	if ( $table->total_items > 0 ) {
+	if ( $table->has_stock_notifications ) {
 		$table->views();
 		?>
 

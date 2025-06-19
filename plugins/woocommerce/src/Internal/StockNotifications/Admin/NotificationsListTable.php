@@ -63,11 +63,19 @@ class NotificationsListTable extends \WP_List_Table {
 	public $data_store;
 
 	/**
+	 * Has stock notifications.
+	 *
+	 * @var bool
+	 */
+	public $has_stock_notifications = false;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 
-		$this->data_store = \WC_Data_Store::load( 'stock_notification' );
+		$this->data_store              = \WC_Data_Store::load( 'stock_notification' );
+		$this->has_stock_notifications = $this->data_store->query( array( 'return' => 'count' ) ) > 0;
 
 		parent::__construct(
 			array(
