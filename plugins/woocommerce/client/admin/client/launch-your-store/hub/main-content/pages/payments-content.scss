@@ -4,6 +4,12 @@
 	height: 100%;
 	padding: 16px 16px 16px 32px;
 
+	// Mobile styles - adjust padding for mobile
+	@media screen and (max-width: 782px) {
+		overflow-x: hidden;
+		padding: 0;
+	}
+
 	&__canvas {
 		display: block;
 		border: none;
@@ -12,6 +18,10 @@
 		border-radius: 10px;
 		box-shadow: 0 15px 20px 0 rgba(0, 0, 0, 0.04), 0 13px 15px 0 rgba(0, 0, 0, 0.03), 0 6px 10px 0 rgba(0, 0, 0, 0.02), 0 0 1px 0 rgba(0, 0, 0, 0.25);
 		overflow-y: auto;
+
+		@media screen and (max-width: 782px) {
+			box-shadow: none;
+		}
 	}
 
 	.settings-payments-onboarding-modal__content {

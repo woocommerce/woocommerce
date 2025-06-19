@@ -39,6 +39,12 @@
 		min-width: unset;
 	}
 
+	// Mobile styles - remove min-width and overflow constraints
+	@media screen and (max-width: 782px) {
+		min-width: unset;
+		overflow: visible;
+	}
+
 	.woocommerce-layout__primary {
 		margin: 0;
 		padding: 0;
@@ -52,6 +58,12 @@
 			flex-direction: row;
 			background-color: #fcfcfc;
 			min-height: 100vh;
+
+			// Mobile styles - adjust container for full width
+			@media screen and (max-width: 782px) {
+				flex-direction: column;
+				min-height: 100vh;
+			}
 
 			.customize-your-store-edit-site-resizable-frame__inner-content {
 				height: 100%;
@@ -77,7 +89,7 @@
 
 					&.is-mobile-open {
 						left: 0;
-						z-index: 999;
+						z-index: 9999;
 					}
 				}
 
@@ -391,6 +403,13 @@
 
 			.launch-your-store-layout__content {
 				flex-grow: 1;
+
+				// Mobile styles - make content full width
+				@media screen and (max-width: 782px) {
+					width: 100%;
+					min-width: 0;
+					overflow-x: hidden;
+				}
 
 				// Mobile toggle button
 				.mobile-sidebar-toggle {
