@@ -39,7 +39,9 @@ test.describe( 'Product Page: error notices', () => {
 
 		await expect( productCart ).toBeVisible();
 
-		const addButton = productCart.getByRole( 'button', { name: 'Add to cart' } );
+		const addButton = productCart.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
 		await addButton.click();
 		await expect( addButton ).toHaveText( /1 in cart/i ); // Wait until the button reflects the cart state.
 
