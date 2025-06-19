@@ -142,37 +142,4 @@ class WC_Cart_Persistence_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( $user_cart, $cart_after );
 		$guest_product->delete( true );
 	}
-
-	/**
-	 * Cart data is not merged when WOOCOMMERCE_CHECKOUT constant is defined.
-	 */
-	public function test_cart_data_not_merged_when_woocommerce_checkout_constant_defined() {
-		WC()->cart->empty_cart();
-
-		// User adds item A.
-		$this->simulate_user_switch( $this->user_id );
-		WC()->cart->add_to_cart( $this->product->get_id(), 1 );
-		WC()->cart->calculate_totals();
-		$user_cart = WC()->cart->get_cart();
-
-		// Log out, as guest add item B.
-		$this->simulate_user_switch( 0 );
-		$guest_product = WC_Helper_Product::create_simple_product();
-		WC()->cart->add_to_cart( $guest_product->get_id(), 1 );
-		WC()->cart->calculate_totals();
-		$guest_cart = WC()->cart->get_cart();
-
-		// Define WOOCOMMERCE_CHECKOUT constant before login.
-		define( 'WOOCOMMERCE_CHECKOUT', true );
-
-		// Log in again - should not merge carts due to WOOCOMMERCE_CHECKOUT constant.
-		$this->simulate_user_switch( $this->user_id );
-		$cart_after = WC()->cart->get_cart();
-
-		// Should only have guest items when WOOCOMMERCE_CHECKOUT is defined.
-		$this->assertEquals( $guest_cart, $cart_after );
-		$this->assertNotEquals( $user_cart, $cart_after );
-
-		$guest_product->delete( true );
-	}
 }

@@ -316,13 +316,11 @@ class WC_Session_Handler extends WC_Session {
 
 		$guest_cart_is_empty = empty( $data['cart'] );
 
-		// Replace the guest cart with the user cart.
 		if ( $guest_cart_is_empty ) {
+			// Replace the guest cart with the user cart.
 			$data['cart'] = $user_session_data['cart'];
-		}
-
-		// Merge carts unless on the checkout.
-		if ( ! is_checkout() && ! WC()->is_store_api_request() ) {
+		} else {
+			// Merge carts.
 			$data['cart'] = array_filter(
 				array_merge(
 					(array) maybe_unserialize( $data['cart'] ),
