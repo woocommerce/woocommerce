@@ -15,15 +15,15 @@ import {
 	getOnboardingDataError,
 } from './actions';
 
-export function* getOnboardingData( source?: string | null ) {
+export function* getOnboardingData( sessionEntryPoint?: string | null ) {
 	yield getOnboardingDataRequest();
 
 	try {
 		let path = `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding`;
 
-		// Add source parameter if provided
-		if ( source ) {
-			path = addQueryArgs( path, { source } );
+		// Add source parameter if we have a session entry point.
+		if ( sessionEntryPoint ) {
+			path = addQueryArgs( path, { source: sessionEntryPoint } );
 		}
 
 		const response: OnboardingDataResponse = yield apiFetch( {
