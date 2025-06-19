@@ -79,7 +79,7 @@ const blocks = {
 	},
 	'classic-shortcode': {},
 	'page-content-wrapper': {},
-	'payment-methods': {
+	'payment-method-icons': {
 		isExperimental: true,
 	},
 	'price-filter': {},

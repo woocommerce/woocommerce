@@ -1,31 +1,31 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
+import { getPaymentMethods } from '@woocommerce/blocks-registry';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, RangeControl } from '@wordpress/components';
-import { getPaymentMethods } from '@woocommerce/blocks-registry';
-import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 
-const CardPreview = ( { brand }: { brand: string } ) => {
+const CardPreview = ( { type }: { type: string } ) => {
 	const pluginUrl = (
 		window?.wcSettings?.wcBlocksConfig as { pluginUrl?: string }
 	 )?.pluginUrl?.replace( 'woocommerce/', '' );
-	const iconUrl = `${ pluginUrl }/woocommerce-payments/assets/images/payment-method-icons/${ brand }.svg`;
+	const iconUrl = `${ pluginUrl }/woocommerce-payments/assets/images/payment-method-icons/${ type }.svg`;
 
 	const CardIcon = (
-		<div className="payment-method-item">
+		<div className="wp-block-woocommerce-payment-method-icons__item">
 			<span
-				className="payment-method-icon"
+				className="wp-block-woocommerce-payment-method-icons__icon"
 				style={ {
 					backgroundImage: `url(${ iconUrl })`,
 				} }
 			>
-				{ brand }
+				{ type }
 			</span>
 		</div>
 	);
@@ -52,9 +52,8 @@ const Edit = ( {
 		'props' in wooPayments.edit &&
 		wooPayments.edit.props?.paymentMethodId === 'card';
 
-	const availableBrands = [ 'visa', 'mastercard', 'amex', 'discover', 'jcb' ];
-
-	const iconsToShow = Math.min( numberOfIcons, availableBrands.length );
+	const availableTypes = [ 'visa', 'mastercard', 'amex', 'discover', 'jcb' ];
+	const iconsToShow = Math.min( numberOfIcons, availableTypes.length );
 
 	if ( wooPaymentsCards ) {
 		return (
@@ -62,7 +61,7 @@ const Edit = ( {
 				<InspectorControls>
 					<PanelBody
 						title={ __(
-							'Payment Methods Settings',
+							'Payment Method Icon Settings',
 							'woocommerce'
 						) }
 					>
@@ -73,7 +72,7 @@ const Edit = ( {
 								setAttributes( { numberOfIcons: value } )
 							}
 							min={ 1 }
-							max={ availableBrands.length }
+							max={ availableTypes.length }
 							help={ __(
 								'Choose how many icons to display.',
 								'woocommerce'
@@ -81,12 +80,10 @@ const Edit = ( {
 						/>
 					</PanelBody>
 				</InspectorControls>
-				<div className="wp-block-woocommerce-payment-methods">
-					{ availableBrands
-						.slice( 0, iconsToShow )
-						.map( ( brand ) => (
-							<CardPreview key={ brand } brand={ brand } />
-						) ) }
+				<div className="wp-block-woocommerce-payment-method-icons">
+					{ availableTypes.slice( 0, iconsToShow ).map( ( type ) => (
+						<CardPreview key={ type } type={ type } />
+					) ) }
 				</div>
 			</div>
 		);
