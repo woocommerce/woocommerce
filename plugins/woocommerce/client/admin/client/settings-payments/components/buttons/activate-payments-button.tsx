@@ -15,6 +15,11 @@ import {
 	recordPaymentsEvent,
 	recordPaymentsOnboardingEvent,
 } from '~/settings-payments/utils';
+import {
+	wooPaymentsExtensionSlug,
+	wooPaymentsProviderId,
+	wooPaymentsSuggestionId,
+} from '~/settings-payments/constants';
 
 interface ActivatePaymentsButtonProps {
 	/**
@@ -64,8 +69,11 @@ export const ActivatePaymentsButton = ( {
 		setIsUpdating( true );
 
 		recordPaymentsEvent( 'activate_payments_button_click', {
+			provider_id: wooPaymentsProviderId,
+			suggestion_id: wooPaymentsSuggestionId,
 			incentive_id: incentive ? incentive.promo_id : 'none',
 			onboarding_type: onboardingType || 'unknown',
+			provider_extension_slug: wooPaymentsExtensionSlug,
 		} );
 
 		// Disable test account and redirect to the live account setup link.

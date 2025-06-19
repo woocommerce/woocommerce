@@ -19,6 +19,11 @@ import { createNoticesFromResponse } from '~/lib/notices';
 import './payments-content.scss';
 import { useSetUpPaymentsContext } from '~/launch-your-store/data/setup-payments-context';
 import { recordPaymentsEvent } from '~/settings-payments/utils';
+import {
+	wooPaymentsExtensionSlug,
+	wooPaymentsProviderId,
+	wooPaymentsSuggestionId,
+} from '~/settings-payments/constants';
 
 const InstallWooPaymentsStep = ( {
 	installWooPayments,
@@ -102,10 +107,6 @@ export const PaymentsContent = ( {} ) => {
 	const installWooPayments = useCallback( () => {
 		// Set the plugin installation state to true to show a loading indicator.
 		setIsPluginInstalling( true );
-
-		const wooPaymentsExtensionSlug = 'woocommerce-payments';
-		const wooPaymentsProviderId = 'woocommerce_payments';
-		const wooPaymentsSuggestionId = 'woopayments';
 
 		recordPaymentsEvent( 'recommendations_setup', {
 			extension_selected: wooPaymentsExtensionSlug,

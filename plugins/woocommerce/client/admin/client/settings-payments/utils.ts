@@ -14,6 +14,11 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
+import {
+	wooPaymentsProviderId,
+	wooPaymentsProviderSuggestionId,
+	wooPaymentsSuggestionId
+} from '~/settings-payments/constants';
 
 /**
  * Checks whether a payment provider has an incentive.
@@ -96,7 +101,11 @@ export const parseScriptTag = ( elementId: string ) => {
 };
 
 export const isWooPayments = ( id: string ) => {
-	return [ '_wc_pes_woopayments', 'woocommerce_payments' ].includes( id );
+	return [
+		wooPaymentsProviderSuggestionId,
+		wooPaymentsProviderId,
+		wooPaymentsSuggestionId,
+	].includes( id );
 };
 
 /**
