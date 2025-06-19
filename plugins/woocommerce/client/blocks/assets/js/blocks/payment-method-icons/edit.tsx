@@ -12,10 +12,10 @@ import { PanelBody, RangeControl } from '@wordpress/components';
 import './style.scss';
 
 const CardPreview = ( { type }: { type: string } ) => {
-	const pluginUrl = (
-		window?.wcSettings?.wcBlocksConfig as { pluginUrl?: string }
-	 )?.pluginUrl?.replace( 'woocommerce/', '' );
-	const iconUrl = `${ pluginUrl }/woocommerce-payments/assets/images/payment-method-icons/${ type }.svg`;
+	const { paymentMethodIcons } = window.wcSettings as {
+		paymentMethodIcons: Record< string, { icon: string } >;
+	};
+	const iconUrl = paymentMethodIcons[ type ]?.icon;
 
 	const CardIcon = (
 		<div className="wp-block-woocommerce-payment-method-icons__item">
