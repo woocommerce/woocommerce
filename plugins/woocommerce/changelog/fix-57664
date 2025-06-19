@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure coupon error remains visible in Cart and Checkout classic pages until resolved

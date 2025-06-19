@@ -9,15 +9,28 @@
 }
 
 .wc-block-product-filter-chips__item {
-	border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
-	padding: $gap-smallest $gap-smaller;
+	border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+	padding: 0.25em 0.75em;
 	appearance: none;
 	background: transparent;
 	border-radius: 2px;
-	font-size: 0.875em;
+	font-size: 0.8em;
 	font-family: inherit;
 	cursor: pointer;
-	color: var(--wc-product-filter-chips-text, currentColor);
+	color: inherit;
+
+	&:focus {
+		outline: 1px solid currentColor;
+		outline-offset: 1px;
+	}
+
+	&:hover {
+		background-color: color-mix(
+			in srgb,
+			var(--wp--preset--color--contrast) 10%,
+			transparent
+		);
+	}
 
 	.has-chip-text-color & {
 		color: var(--wc-product-filter-chips-text);
@@ -31,7 +44,6 @@
 }
 
 .wc-block-product-filter-chips__item[aria-checked="true"] {
-	background: currentColor;
 
 	.has-selected-chip-text-color & {
 		color: var(--wc-product-filter-chips-selected-text);
@@ -57,12 +69,6 @@
 .wc-block-product-filter-chips__count {
 	display: contents;
 	white-space: nowrap;
-}
-
-.wc-block-product-filter-chips:not(.has-selected-chip-text-color)
-	.wc-block-product-filter-chips__item[aria-checked="true"]
-	> .wc-block-product-filter-chips__label {
-	filter: invert(100%);
 }
 
 .wc-block-product-filter-chips__show-more {

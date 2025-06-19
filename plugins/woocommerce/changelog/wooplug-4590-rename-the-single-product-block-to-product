@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Renamed the “Single Product” block to simply “Product”, allowing it to more readily surface within the inserter search results.
