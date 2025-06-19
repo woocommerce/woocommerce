@@ -328,6 +328,28 @@ export function* installAndActivatePlugins(
 					'woocommerce'
 				);
 			}
+		} else if (
+			installations.success &&
+			! Object.keys( installations.data.results ).length &&
+			activations.success &&
+			activations.data.activated.length === 1
+		) {
+			// If everything was a success, and we only activated one plugin, make the success message more informative.
+			const plugin_slug = activations.data.activated[ 0 ];
+			const plugin = activations.data.plugin_details?.[ plugin_slug ];
+
+			if ( plugin ) {
+				response.message = sprintf(
+					/* translators: %1$s: plugin name */
+					__( '%1$s was successfully activated.', 'woocommerce' ),
+					plugin.name
+				);
+			} else {
+				response.message = __(
+					'A plugin was successfully activated.',
+					'woocommerce'
+				);
+			}
 		}
 
 		return response;
