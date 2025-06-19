@@ -17,7 +17,7 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import {
 	wooPaymentsProviderId,
 	wooPaymentsProviderSuggestionId,
-	wooPaymentsSuggestionId
+	wooPaymentsSuggestionId,
 } from '~/settings-payments/constants';
 
 /**
