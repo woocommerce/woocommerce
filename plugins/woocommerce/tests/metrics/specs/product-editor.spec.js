@@ -130,6 +130,7 @@ test.describe( 'Product editor performance', () => {
 					.getByLabel( 'Close Tour' )
 					.click( { timeout: 3000 } );
 			} catch ( e ) {
+				// eslint-disable-next-line no-console -- We want to see this in the console.
 				console.log( 'Tour was not visible, skipping.' );
 			}
 

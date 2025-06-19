@@ -1,8 +1,5 @@
 const { expect } = require( '@playwright/test' );
 
-const SETTINGS_URL =
-	'wp-admin/admin.php?page=wc-settings&tab=advanced&section=features';
-
 /**
  * This function simulates the clicking of the "Add New" link under the "product" section in the menu.
  *
