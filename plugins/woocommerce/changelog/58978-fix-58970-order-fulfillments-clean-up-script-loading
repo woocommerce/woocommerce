@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Replace script output of wcFulfillmentsSettings with wp_localize_script
+

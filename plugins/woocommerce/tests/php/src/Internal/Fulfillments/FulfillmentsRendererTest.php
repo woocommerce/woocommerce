@@ -406,18 +406,20 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_load_components_doesnt_render_on_other_pages() {
 		$renderer = $this->getMockBuilder( FulfillmentsRenderer::class )
-			->onlyMethods( array( 'should_render_fulfillment_drawer' ) )
+			->onlyMethods( array( 'should_render_fulfillment_drawer', 'register_fulfillments_assets' ) )
 			->getMock();
 		$renderer->method( 'should_render_fulfillment_drawer' )->willReturn( false );
-
-		// Register a dummy script for the test.
-		wp_register_script( 'wc-admin-fulfillments', 'https://example.com/dummy.js' ); // phpcs:ignore
+		$renderer->method( 'register_fulfillments_assets' )->willReturnCallback(
+			function () {
+				wp_enqueue_script( 'wc-admin-fulfillments', 'dummy-path', array(), '1.0.0', array( 'in_footer' => false ) );
+			}
+		);
 
 		ob_start();
 		$renderer->load_components();
 		wp_print_scripts();
 		$output = ob_get_clean();
-		$this->assertStringNotContainsString( 'wc-admin-fulfillments', $output );
+		$this->assertStringNotContainsString( 'wc-admin-fulfillments-js', $output );
 		$this->assertStringNotContainsString( 'var wcFulfillmentSettings', $output );
 	}
 
@@ -426,18 +428,20 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_load_components_renders_on_orders_page() {
 		$renderer = $this->getMockBuilder( FulfillmentsRenderer::class )
-			->onlyMethods( array( 'should_render_fulfillment_drawer' ) )
+			->onlyMethods( array( 'should_render_fulfillment_drawer', 'register_fulfillments_assets' ) )
 			->getMock();
 		$renderer->method( 'should_render_fulfillment_drawer' )->willReturn( true );
-
-		// Register a dummy script for the test.
-		wp_register_script( 'wc-admin-fulfillments', 'https://example.com/dummy.js' ); // phpcs:ignore
+		$renderer->method( 'register_fulfillments_assets' )->willReturnCallback(
+			function () {
+				wp_enqueue_script( 'wc-admin-fulfillments', 'dummy-path', array(), '1.0.0', array( 'in_footer' => false ) );
+			}
+		);
 
 		ob_start();
 		$renderer->load_components();
 		wp_print_scripts();
 		$output = ob_get_clean();
-		$this->assertStringContainsString( 'wc-admin-fulfillments', $output );
+		$this->assertStringContainsString( 'wc-admin-fulfillments-js', $output );
 		$this->assertStringContainsString( 'var wcFulfillmentSettings', $output );
 	}
 }

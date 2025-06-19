@@ -390,9 +390,25 @@ class FulfillmentsRenderer {
 		if ( ! $this->should_render_fulfillment_drawer() ) {
 			return;
 		}
+
+		$this->register_fulfillments_assets();
+		$this->load_fulfillments_js_settings();
+	}
+
+	/**
+	 * Register the fulfillment assets.
+	 */
+	protected function register_fulfillments_assets() {
 		WCAdminAssets::register_style( 'fulfillments', 'style', array( 'wp-components' ) );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'fulfillments', true );
+	}
 
+	/**
+	 * Load the fulfillments JS settings.
+	 *
+	 * @return void
+	 */
+	protected function load_fulfillments_js_settings() {
 		$fulfillment_settings = array(
 			/**
 			 * Filter to modify the shipping providers.
@@ -419,7 +435,6 @@ class FulfillmentsRenderer {
 
 		wp_localize_script( 'wc-admin-fulfillments', 'wcFulfillmentSettings', $fulfillment_settings );
 	}
-
 
 	/**
 	 * Check if the fulfillment drawer should be rendered (admin only).
