@@ -18,9 +18,9 @@
 }
 
 @include cart-checkout-small-container {
-	@include small-medium-styles;
+	@include small-mobile-styles;
 }
 
 @include cart-checkout-mobile-container {
-	@include small-medium-styles;
+	@include small-mobile-styles;
 }
