@@ -34,7 +34,8 @@ const config: Config = {
 	},
 
 	plugins: [
-		'./llms-txt/index.ts'
+		'./llms-txt/index.ts',
+		'./consent-plugin/index.ts'
 	],
 
 	presets: [
@@ -62,9 +63,6 @@ const config: Config = {
 				},
 				theme: {
 					customCss: './src/css/custom.css',
-				},
-				gtag: {
-					trackingID: 'G-GCSNWJNHCT',
 				},
 			} satisfies Preset.Options,
 		],
