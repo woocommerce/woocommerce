@@ -158,7 +158,7 @@ function wc_delete_product_transients( $post_id = 0, $force = false ) {
 		/**
 		* Last‑chance filter. Return `true` to allow, `false` to block.
 		*
-		* @since 9.10.0
+		* @since 10.1.0
 		* @param bool $is_write_context Result of WooCommerce’s own context test.
 		* @param int  $post_id          Product ID for which the flush was requested.
 		*/
