@@ -32,7 +32,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$this->assertNotFalse( has_action( 'manage_woocommerce_page_wc-orders_custom_column', array( $renderer, 'render_fulfillment_column_row_data' ) ) );
 		$this->assertNotFalse( has_action( 'admin_footer', array( $renderer, 'render_fulfillment_drawer_slot' ) ) );
 		$this->assertNotFalse( has_action( 'admin_enqueue_scripts', array( $renderer, 'load_components' ) ) );
-		$this->assertNotFalse( has_action( 'admin_init', array( $renderer, 'init_bulk_actions' ) ) );
+		$this->assertNotFalse( has_action( 'admin_init', array( $renderer, 'init_admin_hooks' ) ) );
 		$container->reset_replacement( CustomOrdersTableController::class );
 	}
 
@@ -54,7 +54,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$this->assertNotFalse( has_action( 'manage_shop_order_posts_custom_column', array( $renderer, 'render_fulfillment_column_row_data_legacy' ) ) );
 		$this->assertNotFalse( has_action( 'admin_footer', array( $renderer, 'render_fulfillment_drawer_slot' ) ) );
 		$this->assertNotFalse( has_action( 'admin_enqueue_scripts', array( $renderer, 'load_components' ) ) );
-		$this->assertNotFalse( has_action( 'admin_init', array( $renderer, 'init_bulk_actions' ) ) );
+		$this->assertNotFalse( has_action( 'admin_init', array( $renderer, 'init_admin_hooks' ) ) );
 		$container->reset_replacement( CustomOrdersTableController::class );
 	}
 
@@ -71,7 +71,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$container->replace( CustomOrdersTableController::class, $cot_mock );
 
 		$renderer = new FulfillmentsRenderer();
-		$renderer->init_bulk_actions();
+		$renderer->init_admin_hooks();
 		$this->assertNotFalse( has_filter( 'bulk_actions-woocommerce_page_wc-orders', array( $renderer, 'define_fulfillment_bulk_actions' ) ) );
 		$this->assertNotFalse( has_filter( 'handle_bulk_actions-woocommerce_page_wc-orders', array( $renderer, 'handle_fulfillment_bulk_actions' ) ) );
 		$container->reset_replacement( CustomOrdersTableController::class );
@@ -90,7 +90,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$container->replace( CustomOrdersTableController::class, $cot_mock );
 
 		$renderer = new FulfillmentsRenderer();
-		$renderer->init_bulk_actions();
+		$renderer->init_admin_hooks();
 		$this->assertNotFalse( has_filter( 'bulk_actions-edit-shop_order', array( $renderer, 'define_fulfillment_bulk_actions' ) ) );
 		$this->assertNotFalse( has_filter( 'handle_bulk_actions-edit-shop_order', array( $renderer, 'handle_fulfillment_bulk_actions' ) ) );
 		$container->reset_replacement( CustomOrdersTableController::class );
@@ -227,60 +227,6 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$renderer->render_fulfillment_drawer_slot();
 		$output = ob_get_clean();
 		$this->assertStringContainsString( '<div id="wc_order_fulfillments_panel_container"></div>', $output );
-	}
-
-	/**
-	 * Test the print_fulfillments_object method.
-	 */
-	public function test_render_fulfillment_object_renders_on_admin_orders_page() {
-		$renderer = $this->getMockBuilder( FulfillmentsRenderer::class )
-			->onlyMethods( array( 'should_render_fulfillment_object', 'should_render_fulfillment_drawer' ) )
-			->getMock();
-
-		$renderer->method( 'should_render_fulfillment_object' )->willReturn( true );
-		$renderer->method( 'should_render_fulfillment_drawer' )->willReturn( true );
-
-		ob_start();
-		$renderer->print_fulfillments_object();
-		$output = ob_get_clean();
-
-		$this->assertStringContainsString( 'wcFulfillmentSettings', $output );
-	}
-
-	/**
-	 * Test the print_fulfillments_object method renders on customer order details page.
-	 */
-	public function test_render_fulfillment_object_renders_on_customer_order_details_page() {
-		$renderer = $this->getMockBuilder( FulfillmentsRenderer::class )
-			->onlyMethods( array( 'should_render_fulfillment_object', 'should_render_fulfillment_drawer' ) )
-			->getMock();
-
-		$renderer->method( 'should_render_fulfillment_object' )->willReturn( true );
-		$renderer->method( 'should_render_fulfillment_drawer' )->willReturn( false );
-
-		ob_start();
-		$renderer->print_fulfillments_object();
-		$output = ob_get_clean();
-
-		$this->assertStringContainsString( 'wcFulfillmentSettings', $output );
-	}
-
-	/**
-	 * Test the print_fulfillments_object method does not render on other pages.
-	 */
-	public function test_render_fulfillment_object_does_not_render_on_other_pages() {
-		$renderer = $this->getMockBuilder( FulfillmentsRenderer::class )
-			->onlyMethods( array( 'should_render_fulfillment_object', 'should_render_fulfillment_drawer' ) )
-			->getMock();
-
-		$renderer->method( 'should_render_fulfillment_object' )->willReturn( false );
-		$renderer->method( 'should_render_fulfillment_drawer' )->willReturn( false );
-
-		ob_start();
-		$renderer->print_fulfillments_object();
-		$output = ob_get_clean();
-
-		$this->assertStringNotContainsString( 'wcFulfillmentSettings', $output );
 	}
 
 	/**
@@ -450,5 +396,45 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( $fulfillments[0]->get_is_fulfilled(), 'Fulfillment is not marked as fulfilled.' );
 
 		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+	/**
+	 * Test that the load_components method doesn't render on other pages.
+	 */
+	public function test_load_components_doesnt_render_on_other_pages() {
+		$renderer = $this->getMockBuilder( FulfillmentsRenderer::class )
+			->onlyMethods( array( 'should_render_fulfillment_drawer' ) )
+			->getMock();
+		$renderer->method( 'should_render_fulfillment_drawer' )->willReturn( false );
+
+		// Register a dummy script for the test.
+		wp_register_script( 'wc-admin-fulfillments', 'https://example.com/dummy.js' ); // phpcs:ignore
+
+		ob_start();
+		$renderer->load_components();
+		wp_print_scripts();
+		$output = ob_get_clean();
+		$this->assertStringNotContainsString( 'wc-admin-fulfillments', $output );
+		$this->assertStringNotContainsString( 'var wcFulfillmentSettings', $output );
+	}
+
+	/**
+	 * Test that the load_components method renders on the orders page.
+	 */
+	public function test_load_components_renders_on_orders_page() {
+		$renderer = $this->getMockBuilder( FulfillmentsRenderer::class )
+			->onlyMethods( array( 'should_render_fulfillment_drawer' ) )
+			->getMock();
+		$renderer->method( 'should_render_fulfillment_drawer' )->willReturn( true );
+
+		// Register a dummy script for the test.
+		wp_register_script( 'wc-admin-fulfillments', 'https://example.com/dummy.js' ); // phpcs:ignore
+
+		ob_start();
+		$renderer->load_components();
+		wp_print_scripts();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'wc-admin-fulfillments', $output );
+		$this->assertStringContainsString( 'var wcFulfillmentSettings', $output );
 	}
 }
