@@ -18,6 +18,7 @@ import { WC_ASSET_URL } from '~/utils/admin-settings';
 import { createNoticesFromResponse } from '~/lib/notices';
 import './payments-content.scss';
 import { useSetUpPaymentsContext } from '~/launch-your-store/data/setup-payments-context';
+import { recordPaymentsEvent } from '~/settings-payments/utils';
 
 const InstallWooPaymentsStep = ( {
 	installWooPayments,
@@ -102,13 +103,41 @@ export const PaymentsContent = ( {} ) => {
 		// Set the plugin installation state to true to show a loading indicator.
 		setIsPluginInstalling( true );
 
+		const wooPaymentsExtensionSlug = 'woocommerce-payments';
+		const wooPaymentsProviderId = 'woocommerce_payments';
+		const wooPaymentsSuggestionId = 'woopayments';
+
+		recordPaymentsEvent( 'recommendations_setup', {
+			extension_selected: wooPaymentsExtensionSlug,
+			extension_action: ! isWooPaymentsInstalled ? 'install' : 'activate',
+			provider_id: wooPaymentsProviderId,
+			suggestion_id: wooPaymentsSuggestionId,
+			provider_extension_slug: wooPaymentsExtensionSlug,
+			from: 'lys',
+			source: 'lys',
+		} );
+
 		// Install and activate the WooPayments plugin.
-		installAndActivatePlugins( [ 'woocommerce-payments' ] )
-			.then( async () => {
+		installAndActivatePlugins( [ wooPaymentsExtensionSlug ] )
+			.then( async ( response ) => {
+				createNoticesFromResponse( response );
 				setWooPaymentsRecentlyActivated( true );
 				// Refresh store data after installation.
 				// This will trigger a re-render and initialize the onboarding flow.
 				refreshStoreData();
+
+				if ( ! isWooPaymentsInstalled ) {
+					// Record the extension installation event.
+					recordPaymentsEvent( 'provider_installed', {
+						provider_id: wooPaymentsProviderId,
+						suggestion_id: wooPaymentsSuggestionId,
+						provider_extension_slug: wooPaymentsExtensionSlug,
+						from: 'lys',
+						source: 'lys',
+					} );
+				}
+				// Note: The provider extension activation is tracked from the backend (the `provider_extension_activated` event).
+
 				setIsPluginInstalling( false );
 			} )
 			.catch( ( response: { errors: Record< string, string > } ) => {
