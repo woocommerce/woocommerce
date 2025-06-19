@@ -4,8 +4,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Admin;
 
-use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
-
 /**
  * Menus controller for Customer Stock Notifications.
  */
@@ -16,17 +14,9 @@ class MenusController {
 	 */
 	public function __construct() {
 
-		// Add Stock Notifications menu item.
 		add_action( 'admin_menu', array( $this, 'add_menu' ), 10 );
-
-		// Add screen id.
-		add_filter( 'woocommerce_screen_ids', array( $this, 'wc_admin_stock_notifications_screen_ids' ) );
-
-		// Add screen options support.
+		add_filter( 'woocommerce_screen_ids', array( $this, 'add_screen_ids' ) );
 		add_filter( 'set-screen-option', array( $this, 'set_screen_option' ), 10, 3 );
-
-		// Output the admin notice.
-		add_action( 'admin_notices', array( $this, 'output_admin_notice' ) );
 	}
 
 	/**
@@ -57,7 +47,7 @@ class MenusController {
 	 *
 	 * @return void
 	 */
-	public function add_screen_options() {
+	public function add_screen_options(): void {
 		$screen = get_current_screen();
 
 		if ( ! $screen ) {
@@ -83,7 +73,7 @@ class MenusController {
 	 *
 	 * @return int
 	 */
-	public function set_screen_option( $status, $option, $value ) {
+	public function set_screen_option( $status, $option, $value ): int {
 		if ( 'stock_notifications_per_page' === $option ) {
 			return (int) $value;
 		}
@@ -94,47 +84,19 @@ class MenusController {
 	 * Displays the Notifications list table.
 	 */
 	public function notifications_page() {
-		new NotificationsPage();
+		$table = new NotificationsListTable();
+		$table->prepare_items();
+		include __DIR__ . '/views/html-admin-notifications.php';
 	}
 
 	/**
 	 * Add screen id to WooCommerce.
 	 *
-	 * @since 0.0.0
 	 * @param array $screen_ids List of screen IDs.
 	 * @return array
 	 */
-	public static function wc_admin_stock_notifications_screen_ids( $screen_ids ) {
+	public static function add_screen_ids( $screen_ids ): array {
 		$screen_ids[] = 'woocommerce_page_wc-customer-stock-notifications';
 		return $screen_ids;
-	}
-
-	/**
-	 * Add admin notices.
-	 *
-	 * @return void
-	 */
-	public static function output_admin_notice(): void {
-
-		if ( ! function_exists( 'wp_admin_notice' ) ) {
-			return;
-		}
-
-		$notice_message = get_option( 'wc_customer_stock_notifications_action_notice' );
-
-		if ( empty( $notice_message ) ) {
-			return;
-		}
-
-		\wp_admin_notice(
-			$notice_message,
-			array(
-				'type'        => 'info',
-				'id'          => 'woocommerce_customer_stock_notifications_action_notice',
-				'dismissible' => false,
-			)
-		);
-
-		delete_option( 'wc_customer_stock_notifications_action_notice' );
 	}
 }

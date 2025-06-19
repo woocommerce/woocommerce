@@ -56,13 +56,6 @@ class NotificationsListTable extends \WP_List_Table {
 	public $total_sent_items = 0;
 
 	/**
-	 * Are there any notifications in the DB?.
-	 *
-	 * @var int
-	 */
-	public $has_stock_notifications = false;
-
-	/**
 	 * Data store.
 	 *
 	 * @var StockNotificationsDataStore
@@ -73,43 +66,8 @@ class NotificationsListTable extends \WP_List_Table {
 	 * Constructor.
 	 */
 	public function __construct() {
-		global $status, $page;
 
-		$this->data_store              = \WC_Data_Store::load( 'stock_notification' );
-		$this->total_items             = $this->data_store->query( array( 'return' => 'count' ) );
-		$this->has_stock_notifications = $this->total_items > 0 ? true : false;
-
-		// Count active notifications.
-		$this->total_active_items = $this->data_store->query(
-			array(
-				'return' => 'count',
-				'status' => NotificationStatus::ACTIVE,
-			)
-		);
-
-		// Count pending notifications.
-		$this->total_pending_items = $this->data_store->query(
-			array(
-				'return' => 'count',
-				'status' => NotificationStatus::PENDING,
-			)
-		);
-
-		// Count cancelled notifications.
-		$this->total_cancelled_items = $this->data_store->query(
-			array(
-				'return' => 'count',
-				'status' => NotificationStatus::CANCELLED,
-			)
-		);
-
-		// Count sent notifications.
-		$this->total_sent_items = $this->data_store->query(
-			array(
-				'return' => 'count',
-				'status' => NotificationStatus::SENT,
-			)
-		);
+		$this->data_store = \WC_Data_Store::load( 'stock_notification' );
 
 		parent::__construct(
 			array(
@@ -117,6 +75,9 @@ class NotificationsListTable extends \WP_List_Table {
 				'plural'   => 'woocommerce_stock_notifications',
 			)
 		);
+
+		// Handle admin notices.
+		add_action( 'admin_notices', array( $this, 'output_admin_notice' ) );
 	}
 
 	/**
@@ -144,15 +105,15 @@ class NotificationsListTable extends \WP_List_Table {
 	 */
 	public function column_id( $notification ) {
 		$actions = array(
-			'edit'   => sprintf( '<a href="' . admin_url( 'admin.php?page=wc-customer-stock-notifications&notification_action=edit&notification=%d' ) . '">%s</a>', $notification->get_id(), __( 'Edit', 'woocommerce' ) ),
-			'delete' => sprintf( '<a href="' . wp_nonce_url( admin_url( 'admin.php?page=wc-customer-stock-notifications&notification_action=delete&notification=%d' ), 'delete_customer_stock_notification' ) . '">%s</a>', $notification->get_id(), __( 'Delete', 'woocommerce' ) ),
+			'edit'   => sprintf( '<a href="' . admin_url( 'admin.php?page=wc-customer-stock-notifications&notification_action=edit&notification_id=%d' ) . '">%s</a>', $notification->get_id(), __( 'Edit', 'woocommerce' ) ),
+			'delete' => sprintf( '<a href="' . wp_nonce_url( admin_url( 'admin.php?page=wc-customer-stock-notifications&notification_action=delete&notification_id=%d' ), 'delete_customer_stock_notification' ) . '">%s</a>', $notification->get_id(), __( 'Delete', 'woocommerce' ) ),
 		);
 
 		$title = $notification->get_id();
 
 		printf(
 			'<a class="row-title" href="%s" aria-label="%s">#%s</a>%s',
-			esc_url( admin_url( 'admin.php?page=wc-customer-stock-notifications&notification_action=edit&notification=' . $notification->get_id() ) ),
+			esc_url( admin_url( 'admin.php?page=wc-customer-stock-notifications&notification_action=edit&notification_id=' . $notification->get_id() ) ),
 			/* translators: %s: Notification code */
 			sprintf( esc_attr__( '&#8220;%s&#8221; (Edit)', 'woocommerce' ), esc_attr( $title ) ),
 			esc_html( $title ),
@@ -376,10 +337,8 @@ class NotificationsListTable extends \WP_List_Table {
 		$hidden                = array();
 		$sortable              = $this->get_sortable_columns();
 		$this->_column_headers = array( $columns, $hidden, $sortable );
-		$has_filters           = false;
 
-		// Process actions.
-		$this->process_bulk_action();
+		$this->process_actions();
 
 		// Setup params.
 		$paged   = isset( $_REQUEST['paged'] ) ? max( 0, (int) wp_unslash( $_REQUEST['paged'] ) - 1 ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -420,27 +379,20 @@ class NotificationsListTable extends \WP_List_Table {
 
 			$end_timestamp          = mktime( 0, 0, 0, (int) $month + 1, 1, (int) $year );
 			$query_args['end_date'] = gmdate( 'Y-m-d H:i:s', $end_timestamp );
-
-			$has_filters = true;
 		}
 
 		if ( ! empty( $_GET['customer_stock_notifications_product_filter'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$filter                   = absint( wp_unslash( $_GET['customer_stock_notifications_product_filter'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$query_args['product_id'] = array( $filter );
-			$has_filters              = true;
 		}
 
 		if ( ! empty( $_GET['customer_stock_notifications_customer_filter'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$filter                = absint( wp_unslash( $_GET['customer_stock_notifications_customer_filter'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$query_args['user_id'] = array( $filter );
-			$has_filters           = true;
 		}
 
-		// Only show existing products.
-		$query_args['product_exists'] = true;
-		$query_args['return']         = 'objects';
-
-		$this->items = $this->data_store->query( $query_args );
+		$query_args['return'] = 'objects';
+		$this->items          = $this->data_store->query( $query_args );
 
 		// Count total items.
 		$query_args['return'] = 'count';
@@ -448,24 +400,21 @@ class NotificationsListTable extends \WP_List_Table {
 		unset( $query_args['offset'] );
 		$this->total_items = $this->data_store->query( $query_args );
 
-		// If has filter, re-calc the views numbers.
-		if ( $has_filters ) {
-			// Count active.
-			$query_args['status']     = NotificationStatus::ACTIVE;
-			$this->total_active_items = $this->data_store->query( $query_args );
+		// Count active.
+		$query_args['status']     = NotificationStatus::ACTIVE;
+		$this->total_active_items = $this->data_store->query( $query_args );
 
-			// Count sent.
-			$query_args['status']   = NotificationStatus::SENT;
-			$this->total_sent_items = $this->data_store->query( $query_args );
+		// Count sent.
+		$query_args['status']   = NotificationStatus::SENT;
+		$this->total_sent_items = $this->data_store->query( $query_args );
 
-			// Count cancelled.
-			$query_args['status']        = NotificationStatus::CANCELLED;
-			$this->total_cancelled_items = $this->data_store->query( $query_args );
+		// Count cancelled.
+		$query_args['status']        = NotificationStatus::CANCELLED;
+		$this->total_cancelled_items = $this->data_store->query( $query_args );
 
-			// Count pending.
-			$query_args['status']      = NotificationStatus::PENDING;
-			$this->total_pending_items = $this->data_store->query( $query_args );
-		}
+		// Count pending.
+		$query_args['status']      = NotificationStatus::PENDING;
+		$this->total_pending_items = $this->data_store->query( $query_args );
 
 		// Configure pagination.
 		$this->set_pagination_args(
@@ -478,84 +427,133 @@ class NotificationsListTable extends \WP_List_Table {
 	}
 
 	/**
+	 * Process actions.
+	 */
+	private function process_actions() {
+		$this->process_delete_action();
+		$this->process_bulk_action();
+	}
+
+	/**
+	 * Process delete action.
+	 *
+	 * @return void
+	 */
+	private function process_delete_action(): void {
+
+		$action = isset( $_GET['notification_action'] ) ? wc_clean( wp_unslash( $_GET['notification_action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		if ( 'delete' !== $action ) {
+			return;
+		}
+
+		$notification_id = isset( $_GET['notification_id'] ) ? absint( $_GET['notification_id'] ) : 0;
+
+		if ( ! $notification_id ) {
+			return;
+		}
+
+		check_admin_referer( 'delete_customer_stock_notification' );
+
+		try {
+
+			$notification = new Notification( $notification_id ); // <- this can throw
+			$this->data_store->delete( $notification );
+
+			$notice_message = __( 'Notification deleted.', 'woocommerce' );
+			update_option( 'wc_customer_stock_notifications_action_notice', $notice_message );
+
+		} catch ( \Exception $e ) {
+
+			$notice_message = __( 'Notification not found.', 'woocommerce' );
+			update_option( 'wc_customer_stock_notifications_action_notice', $notice_message );
+		}
+
+		wp_safe_redirect( admin_url( self::PAGE_URL ) );
+		exit();
+	}
+
+	/**
 	 * Process bulk actions.
 	 *
 	 * @return void
 	 */
 	private function process_bulk_action() {
-		if ( $this->current_action() ) {
-			check_admin_referer( 'bulk-' . $this->_args['plural'] );
-
-			$notifications = isset( $_GET['notification'] ) && is_array( $_GET['notification'] ) ? array_map( 'absint', $_GET['notification'] ) : array();
-
-			if ( empty( $notifications ) ) {
-				return;
-			}
-
-			$redirect_url = self::PAGE_URL;
-
-			if ( 'enable' === $this->current_action() ) {
-				foreach ( $notifications as $id ) {
-
-					$notification = new Notification( $id );
-					$notification->set_status( NotificationStatus::ACTIVE );
-					$this->data_store->update( $notification );
-
-				}
-				$notice_message = sprintf(
-					/* translators: %s: Notifications count */
-					_nx(
-						'%s notification updated.',
-						'%s notifications updated.',
-						count( $notifications ),
-						'notifications_status',
-						'woocommerce'
-					),
-					count( $notifications )
-				);
-				update_option( 'wc_customer_stock_notifications_action_notice', $notice_message );
-			} elseif ( 'cancel' === $this->current_action() ) {
-				foreach ( $notifications as $id ) {
-					$notification = new Notification( $id );
-					$notification->set_status( NotificationStatus::CANCELLED );
-					$this->data_store->update( $notification );
-				}
-
-				$notice_message = sprintf(
-					/* translators: %s: Notifications count */
-					_nx(
-						'%s notification updated.',
-						'%s notifications updated.',
-						count( $notifications ),
-						'notifications_status',
-						'woocommerce'
-					),
-					count( $notifications )
-				);
-				update_option( 'wc_customer_stock_notifications_action_notice', $notice_message );
-			} elseif ( 'delete' === $this->current_action() ) {
-				foreach ( $notifications as $id ) {
-					$notification = new Notification( $id );
-					$this->data_store->delete( $notification );
-				}
-
-				$notice_message = sprintf(
-					/* translators: %s: Notifications count */
-					_nx(
-						'%s notification deleted.',
-						'%s notifications deleted.',
-						count( $notifications ),
-						'notifications_status',
-						'woocommerce'
-					),
-					count( $notifications )
-				);
-				update_option( 'wc_customer_stock_notifications_action_notice', $notice_message );
-			}
-
-			wp_safe_redirect( $redirect_url );
-			exit();
+		if ( ! $this->current_action() ) {
+			return;
 		}
+
+		check_admin_referer( 'bulk-' . $this->_args['plural'] );
+
+		$notifications = isset( $_GET['notification'] ) && is_array( $_GET['notification'] ) ? array_map( 'absint', $_GET['notification'] ) : array();
+
+		if ( empty( $notifications ) ) {
+			return;
+		}
+
+		$redirect_url = self::PAGE_URL;
+
+		if ( 'enable' === $this->current_action() ) {
+			foreach ( $notifications as $id ) {
+
+				$notification = new Notification( $id );
+				$notification->set_status( NotificationStatus::ACTIVE );
+				$this->data_store->update( $notification );
+
+			}
+			$notice_message = sprintf(
+				/* translators: %s: Notifications count */
+				_nx(
+					'%s notification updated.',
+					'%s notifications updated.',
+					count( $notifications ),
+					'notifications_status',
+					'woocommerce'
+				),
+				count( $notifications )
+			);
+			update_option( 'wc_customer_stock_notifications_action_notice', $notice_message );
+		} elseif ( 'cancel' === $this->current_action() ) {
+			foreach ( $notifications as $id ) {
+				$notification = new Notification( $id );
+				$notification->set_status( NotificationStatus::CANCELLED );
+				$this->data_store->update( $notification );
+			}
+
+			$notice_message = sprintf(
+				/* translators: %s: Notifications count */
+				_nx(
+					'%s notification updated.',
+					'%s notifications updated.',
+					count( $notifications ),
+					'notifications_status',
+					'woocommerce'
+				),
+				count( $notifications )
+			);
+			update_option( 'wc_customer_stock_notifications_action_notice', $notice_message );
+		} elseif ( 'delete' === $this->current_action() ) {
+			foreach ( $notifications as $id ) {
+				$notification = new Notification( $id );
+				$this->data_store->delete( $notification );
+			}
+
+			$notice_message = sprintf(
+				/* translators: %s: Notifications count */
+				_nx(
+					'%s notification deleted.',
+					'%s notifications deleted.',
+					count( $notifications ),
+					'notifications_status',
+					'woocommerce'
+				),
+				count( $notifications )
+			);
+			update_option( 'wc_customer_stock_notifications_action_notice', $notice_message );
+		}
+
+		wp_safe_redirect( $redirect_url );
+		exit();
 	}
 
 	/**
@@ -820,5 +818,74 @@ class NotificationsListTable extends \WP_List_Table {
 			?>
 		</select>
 		<?php
+	}
+
+	/**
+	 * Calculate total items.
+	 *
+	 * @return void
+	 */
+	private function calculate_total_items(): void {
+
+		// Count active notifications.
+		$this->total_active_items = $this->data_store->query(
+			array(
+				'return' => 'count',
+				'status' => NotificationStatus::ACTIVE,
+			)
+		);
+
+		// Count pending notifications.
+		$this->total_pending_items = $this->data_store->query(
+			array(
+				'return' => 'count',
+				'status' => NotificationStatus::PENDING,
+			)
+		);
+
+		// Count cancelled notifications.
+		$this->total_cancelled_items = $this->data_store->query(
+			array(
+				'return' => 'count',
+				'status' => NotificationStatus::CANCELLED,
+			)
+		);
+
+		// Count sent notifications.
+		$this->total_sent_items = $this->data_store->query(
+			array(
+				'return' => 'count',
+				'status' => NotificationStatus::SENT,
+			)
+		);
+	}
+
+	/**
+	 * Add admin notices.
+	 *
+	 * @return void
+	 */
+	public static function output_admin_notice(): void {
+
+		if ( ! function_exists( 'wp_admin_notice' ) ) {
+			return;
+		}
+
+		$notice_message = get_option( 'wc_customer_stock_notifications_action_notice' );
+
+		if ( empty( $notice_message ) ) {
+			return;
+		}
+
+		\wp_admin_notice(
+			$notice_message,
+			array(
+				'type'        => 'info',
+				'id'          => 'woocommerce_customer_stock_notifications_action_notice',
+				'dismissible' => false,
+			)
+		);
+
+		delete_option( 'wc_customer_stock_notifications_action_notice' );
 	}
 }
