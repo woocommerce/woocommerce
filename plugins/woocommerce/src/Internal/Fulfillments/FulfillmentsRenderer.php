@@ -46,19 +46,19 @@ class FulfillmentsRenderer {
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_components' ) );
 		// Hook into the order details page to render the fulfillment badges.
 		add_action( 'woocommerce_admin_order_data_header_right', array( $this, 'render_order_details_badges' ) );
-		// Hook into the admin head to print the fulfillments object, which contains the shipping providers.
-		add_action( 'wp_head', array( $this, 'print_fulfillments_object' ) );
-		add_action( 'admin_head', array( $this, 'print_fulfillments_object' ) );
 		// Hook into the order details before order table to render the fulfillment customer details.
 		add_action( 'woocommerce_order_details_before_order_table', array( $this, 'render_fulfillment_customer_details' ) );
 		// Initialize the renderer for bulk actions.
-		add_action( 'admin_init', array( $this, 'init_bulk_actions' ) );
+		add_action( 'admin_init', array( $this, 'init_admin_hooks' ) );
+		// Hook into the order status text to append the fulfillment status.
+		add_filter( 'woocommerce_order_details_status', array( $this, 'render_fulfillment_status_text' ), 10, 2 );
+		add_filter( 'woocommerce_order_tracking_status', array( $this, 'render_fulfillment_status_text' ), 10, 2 );
 	}
 
 	/**
-	 * Initialize the renderer.
+	 * Initialize the hooks that should run after `admin_init` hook.
 	 */
-	public function init_bulk_actions() {
+	public function init_admin_hooks() {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			// For custom orders table, we need to add the bulk actions to the custom orders table.
 			add_filter( 'bulk_actions-woocommerce_page_wc-orders', array( $this, 'define_fulfillment_bulk_actions' ) );
@@ -299,6 +299,20 @@ class FulfillmentsRenderer {
 	}
 
 	/**
+	 * Render the fulfillment status text in the order details page and the order tracking page.
+	 *
+	 * @param string   $order_status The order status text.
+	 * @param WC_Order $order The order object.
+	 *
+	 * @return string The fulfillment status appended order status text.
+	 */
+	public function render_fulfillment_status_text( string $order_status, WC_Order $order ): string {
+		$fulfillments       = $this->maybe_read_fulfillments( $order );
+		$fulfillment_status = FulfillmentUtils::get_order_fulfillment_status_text( $order, $fulfillments );
+		return sprintf( '%s %s', $order_status, $fulfillment_status );
+	}
+
+	/**
 	 * Render the fulfillment customer details in the order details page.
 	 *
 	 * @param WC_Order $order The order object.
@@ -380,15 +394,6 @@ class FulfillmentsRenderer {
 		}
 		WCAdminAssets::register_style( 'fulfillments', 'style', array( 'wp-components' ) );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'fulfillments', true );
-	}
-
-	/**
-	 * Prints the fulfillments object in the admin header.
-	 */
-	public function print_fulfillments_object() {
-		if ( ! $this->should_render_fulfillment_object() ) {
-			return;
-		}
 
 		$fulfillment_settings = array(
 			/**
@@ -414,40 +419,30 @@ class FulfillmentsRenderer {
 			'currency_symbols' => get_woocommerce_currency_symbols(),
 		);
 
-		?>
-		<script type="text/javascript">
-			window.wcFulfillmentSettings = <?php echo wp_json_encode( $fulfillment_settings ); ?>;
-		</script>
-		<?php
+		wp_localize_script( 'wc-admin-fulfillments', 'wcFulfillmentSettings', $fulfillment_settings );
 	}
 
 	/**
-	 * Check if the fulfillment drawer should be rendered.
+	 * Check if the fulfillment drawer should be rendered (admin only).
 	 *
 	 * @return bool True if the fulfillment drawer should be rendered, false otherwise.
 	 */
 	protected function should_render_fulfillment_drawer(): bool {
+		if ( ! is_admin() ) {
+			return false;
+		}
+
+		if ( ! function_exists( 'get_current_screen' ) ) {
+			return false;
+		}
+
 		$current_screen = get_current_screen();
 		if ( ! $current_screen || ! $current_screen->id ) {
 			return false;
 		}
-		return 'woocommerce_page_wc-orders' === $current_screen->id // HPOS support.
-			|| 'edit-shop_order' === $current_screen->id; // Legacy support.
-	}
 
-	/**
-	 * Check if the fulfillment object should be rendered.
-	 *
-	 * @return bool True if the fulfillment object should be rendered, false otherwise.
-	 */
-	protected function should_render_fulfillment_object(): bool {
-		// Check if we are on the order details page in the customer area.
-		if ( ! is_admin() && function_exists( 'is_view_order_page' ) && is_view_order_page() ) {
-			return true;
-		}
-
-		// Check if the current screen is the orders page or the edit order page on the admin side.
-		return $this->should_render_fulfillment_drawer();
+		return 'woocommerce_page_wc-orders' === $current_screen->id // HPOS screen.
+		|| 'edit-shop_order' === $current_screen->id; // Legacy screen.
 	}
 
 	/**
