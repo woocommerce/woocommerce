@@ -634,7 +634,7 @@ When you're writing your rules, you're writing a partial schema for the document
 		"create_account": false,
 		"customer_note": "",
 		"additional_fields": {
-			"namespace/mycontact-field": "myvalue"
+			"namespace/myorder-field": "myvalue"
 		},
 		"payment_method": "bacs"
 	},
@@ -667,6 +667,9 @@ When you're writing your rules, you're writing a partial schema for the document
 			"phone": "1234567890",
 			"namespace/myfield": "myvalue"
 		},
+		"additional_fields": {
+			"namespace/mycontact-field": "myvalue"
+		},
 		"address": {
 			"first_name": "First Name",
 			"last_name": "Last Name",
@@ -696,8 +699,8 @@ It's full schema is this one:
 ```json
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
-	"title": "Cart and Checkout Schema",
-	"description": "Schema for cart, checkout, and customer information",
+	"title": "Cart and Checkout Document Object Schema",
+	"description": "Document object schema for cart, checkout, and customer information, to be used for conditional visibility, requirment, and validation of fields.",
 	"type": "object",
 	"properties": {
 		"cart": {
@@ -755,21 +758,23 @@ It's full schema is this one:
 					"type": "object",
 					"description": "Cart totals information",
 					"properties": {
-						"totalPrice": {
+						"total_price": {
 							"type": "integer",
 							"description": "Total price of the cart in smallest currency unit (e.g., cents), after applying all discounts, shipping, and taxes"
 						},
-						"totalTax": {
+						"total_tax": {
 							"type": "integer",
 							"description": "Total tax amount in smallest currency unit (e.g., cents), after applying all discounts, shipping, and taxes"
 						}
-					}
+					},
+					"additionalProperties": false
 				},
 				"extensions": {
 					"type": "object",
 					"description": "Additional cart extension data, this is similar to what's passed in Store API's extensions parameter"
 				}
-			}
+			},
+			"additionalProperties": false
 		},
 		"checkout": {
 			"type": "object",
@@ -785,7 +790,7 @@ It's full schema is this one:
 				},
 				"additional_fields": {
 					"type": "object",
-					"description": "Additional checkout fields, both applied to the contact or the order locations.",
+					"description": "Additional checkout fields, limited to the order location.",
 					"additionalProperties": {
 						"type": "string"
 					},
@@ -800,7 +805,8 @@ It's full schema is this one:
 					"type": "string",
 					"description": "Selected payment method identifier, this will be the payment method ID regardless if the customer selected a saved payment method or new payment method"
 				}
-			}
+			},
+			"additionalProperties": false
 		},
 		"customer": {
 			"type": "object",
@@ -818,13 +824,22 @@ It's full schema is this one:
 					"$ref": "#/definitions/address",
 					"description": "Customer's shipping address"
 				},
+				"additional_fields": {
+					"type": "object",
+					"description": "Additional checkout fields, limited to the contact location.",
+					"additionalProperties": {
+						"type": "string"
+					}
+				},
 				"address": {
 					"$ref": "#/definitions/address",
 					"description": "This is a dynamic field that will be the billing or shipping address depending on the context of the field being evaluted."
 				}
-			}
+			},
+			"additionalProperties": false
 		}
 	},
+	"additionalProperties": false,
 	"definitions": {
 		"address": {
 			"type": "object",

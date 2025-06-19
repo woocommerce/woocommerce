@@ -153,10 +153,10 @@ class DocumentObject {
 				'needs_shipping'     => $cart_data['needs_shipping'],
 				'prefers_collection' => count( array_intersect( $local_pickup_method_ids, wc_list_pluck( $selected_shipping_rates, 'method_id' ) ) ) > 0,
 				'totals'             => [
-					'total_price' => $cart_data['totals']->total_price,
-					'total_tax'   => $cart_data['totals']->total_tax,
+					'total_price' => (int) $cart_data['totals']->total_price,
+					'total_tax'   => (int) $cart_data['totals']->total_tax,
 				],
-				'extensions'         => (array) $cart_data['extensions'],
+				'extensions'         => (object) $cart_data['extensions'],
 			]
 		);
 	}
@@ -179,14 +179,14 @@ class DocumentObject {
 		$customer_data = [
 			'id'                => $this->request_data['customer']['id'] ?? $this->customer->get_id(),
 			'shipping_address'  => wp_parse_args(
-				$this->request_data['customer']['shipping_address'] ?? [],
+				$this->request_data['customer']['shipping_address'] ?? (object) [],
 				$this->schema_controller->get( ShippingAddressSchema::IDENTIFIER )->get_item_response( $this->customer )
 			),
 			'billing_address'   => wp_parse_args(
-				$this->request_data['customer']['billing_address'] ?? [],
+				$this->request_data['customer']['billing_address'] ?? (object) [],
 				$this->schema_controller->get( BillingAddressSchema::IDENTIFIER )->get_item_response( $this->customer )
 			),
-			'additional_fields' => $this->request_data['customer']['additional_fields'] ?? [],
+			'additional_fields' => $this->request_data['customer']['additional_fields'] ?? (object) [],
 		];
 
 		if ( 'shipping_address' === $this->context ) {
