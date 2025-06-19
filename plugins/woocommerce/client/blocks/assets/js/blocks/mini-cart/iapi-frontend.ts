@@ -65,7 +65,7 @@ type CartItemContext = {
 	cartItem: CartItem;
 };
 
-const { state: woocommerceState } = store< WooCommerce >(
+const { state: woocommerceState, actions } = store< WooCommerce >(
 	'woocommerce',
 	{},
 	{ lock: universalLock }
@@ -196,9 +196,7 @@ const { state: cartItemState } = store(
 			},
 
 			get cartItemDiscount(): string {
-				const {
-					cartItem: { prices },
-				} = getContext< CartItemContext >();
+				const { prices } = cartItemState.cartItem;
 
 				const regularAmountSingle = Dinero( {
 					amount: parseInt( prices.raw_prices.regular_price, 10 ),
@@ -256,8 +254,8 @@ const { state: cartItemState } = store(
 
 			get cartItemHasDiscount(): boolean {
 				return (
-					cartItemState.cartItem?.prices.regular_price !==
-					cartItemState.cartItem?.prices.price
+					cartItemState.cartItem.prices.regular_price !==
+					cartItemState.cartItem.prices.price
 				);
 			},
 
@@ -404,12 +402,6 @@ const { state: cartItemState } = store(
 			},
 
 			*changeQuantity(): Generator< unknown, void > {
-				const { actions } = store< WooCommerce >(
-					'woocommerce',
-					{},
-					{ lock: universalLock }
-				);
-
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity,
@@ -417,22 +409,10 @@ const { state: cartItemState } = store(
 			},
 
 			*removeItemFromCart(): Generator< unknown, void > {
-				const { actions } = store< WooCommerce >(
-					'woocommerce',
-					{},
-					{ lock: universalLock }
-				);
-
 				yield actions.removeCartItem( cartItemState.cartItem.key );
 			},
 
 			*incrementQuantity(): Generator< unknown, void > {
-				const { actions } = store< WooCommerce >(
-					'woocommerce',
-					{},
-					{ lock: universalLock }
-				);
-
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity + 1,
@@ -440,12 +420,6 @@ const { state: cartItemState } = store(
 			},
 
 			*decrementQuantity(): Generator< unknown, void > {
-				const { actions } = store< WooCommerce >(
-					'woocommerce',
-					{},
-					{ lock: universalLock }
-				);
-
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity - 1,
