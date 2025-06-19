@@ -63,6 +63,7 @@ final class BlockTypesController {
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
 		add_action( 'woocommerce_delete_product_transients', array( $this, 'delete_product_transients' ) );
+		add_filter( 'block_type_metadata_settings', array( $this, 'enqueue_block_style_for_classic_themes' ) );
 	}
 
 	/**
@@ -609,5 +610,45 @@ final class BlockTypesController {
 		 * @param array $block_types List of block types.
 		 */
 		return apply_filters( 'woocommerce_get_block_types', $block_types );
+	}
+
+	/**
+	 * By default, when the classic theme is used, block style is always
+	 * enqueued even if the block is not used on the page. We want WooCommerce
+	 * store to always performant so we have to manually enqueue the block style
+	 * on-demand for classic themes.
+	 *
+	 * @internal
+	 *
+	 * @param array $metadata Block metadata.
+	 *
+	 * @return array Block metadata.
+	 */
+	public function enqueue_block_style_for_classic_themes( $metadata ) {
+		if (
+			is_admin() ||
+			wp_is_block_theme() ||
+			false === strpos( $metadata['name'], 'woocommerce/' ) ||
+			empty( $metadata['style_handles'] ) ||
+			( function_exists( 'wp_should_load_block_assets_on_demand' ) && wp_should_load_block_assets_on_demand() ) ||
+			wp_should_load_separate_core_block_assets()
+		) {
+			return $metadata;
+		}
+
+		add_filter(
+			'render_block',
+			static function ( $html, $block ) use ( $metadata ) {
+				if ( $block['blockName'] === $metadata['name'] ) {
+					array_map( 'wp_enqueue_style', $metadata['style_handles'] );
+				}
+				return $html;
+			},
+			10,
+			2
+		);
+
+		$metadata['style_handles'] = array();
+		return $metadata;
 	}
 }
