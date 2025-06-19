@@ -74,7 +74,7 @@ final class WC_Cart_Session {
 		// Cart is loaded from session on wp_loaded. By this time the session is already initialized.
 		add_action( 'wp_loaded', array( $this, 'get_cart_from_session' ) );
 
-		// Destroy cart session on cart emptied.
+		// Destroy cart session when cart emptied.
 		add_action( 'woocommerce_cart_emptied', array( $this, 'destroy_cart_session' ) );
 
 		// Update session when the cart is updated.
@@ -114,13 +114,13 @@ final class WC_Cart_Session {
 		$update_cart_session = is_null( $cart_totals );
 
 		// Flag to indicate whether this is a re-order.
-		$is_order_again_request = false;
+		$order_again = false;
 
 		// Populate cart from order.
 		if ( isset( $_GET['order_again'], $_GET['_wpnonce'] ) && is_user_logged_in() && wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'woocommerce-order_again' ) ) { // WPCS: input var ok, sanitization ok.
-			$cart                   = $this->populate_cart_from_order( absint( $_GET['order_again'] ), $cart ); // WPCS: input var ok.
-			$is_order_again_request = true;
-			$update_cart_session    = true;
+			$cart                = $this->populate_cart_from_order( absint( $_GET['order_again'] ), $cart ); // WPCS: input var ok.
+			$order_again         = true;
+			$update_cart_session = true;
 		}
 
 		// Prime caches to reduce future queries.
@@ -291,7 +291,7 @@ final class WC_Cart_Session {
 		}
 
 		// If this is a re-order, redirect to the cart page to get rid of the `order_again` query string.
-		if ( $is_order_again_request ) {
+		if ( $order_again ) {
 			wp_safe_redirect( wc_get_cart_url() );
 			exit;
 		}
