@@ -16,7 +16,7 @@ export const CartLineItemsSkeleton = ( { rows = 2 }: { rows?: number } ) => {
 	return (
 		<>
 			<VisuallyHidden aria-live="polite">
-				{ __( 'Loading cart line items…', 'woocommerce' ) }
+				{ __( 'Loading your cart…', 'woocommerce' ) }
 			</VisuallyHidden>
 
 			<div className="wc-block-components-skeleton wc-block-components-skeleton--cart-line-items wc-block-cart is-large">
