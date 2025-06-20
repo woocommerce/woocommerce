@@ -12,6 +12,7 @@ export type AvailableVariation = {
 	attributes: Record< string, string >;
 	variation_id: number;
 	price_html: string;
+	is_in_stock: boolean;
 };
 
 export type Context = {
@@ -164,6 +165,19 @@ const addToCartWithOptionsStore = store(
 					selectedAttributes
 				);
 				return matchedVariation?.variation_id || null;
+			},
+			get productIsInStock(): boolean {
+				const context = getContext< Context >();
+				if ( ! context ) {
+					return false;
+				}
+				const { availableVariations, selectedAttributes } = context;
+				const matchedVariation = getMatchedVariation(
+					availableVariations,
+					selectedAttributes
+				);
+
+				return matchedVariation?.is_in_stock || false;
 			},
 		},
 		actions: {

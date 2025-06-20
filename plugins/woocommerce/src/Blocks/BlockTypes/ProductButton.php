@@ -272,9 +272,6 @@ class ProductButton extends AbstractBlock {
 						style="{button_styles}"
 						{attributes}
 						{button_directives}
-						data-wp-init="actions.fetchStockStatus"
-						data-wp-watch="actions.fetchStockStatus"
-						data-wp-bind--disabled="!state.isAddToCartButtonActive"
 					>
 					<span {span_button_directives}>{add_to_cart_text}</span>
 					</{html_element}>
