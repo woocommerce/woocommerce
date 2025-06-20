@@ -69,6 +69,16 @@ function registerAddressAutocompleteProvider( provider ) {
 			);
 		}
 
+		// Check if a provider with the same ID already exists
+		if ( window.wc.addressAutocomplete.providers[ provider.id ] ) {
+			console.warn(
+				'Address provider with ID "' +
+					provider.id +
+					'" is already registered.'
+			);
+			return false;
+		}
+
 		// Freeze and add provider to registry.
 		Object.freeze( provider );
 		window.wc.addressAutocomplete.providers[ provider.id ] = provider;
@@ -373,11 +383,17 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			}
 
 			// Check if the address section exists (shipping may be disabled/hidden)
-			if ( ! addressInputs[ type ] || ! addressInputs[ type ][ 'address_1' ] ) {
+			if (
+				! addressInputs[ type ] ||
+				! addressInputs[ type ][ 'address_1' ]
+			) {
 				return;
 			}
 
-			if ( ! suggestionsLists[ type ] || ! suggestionsContainers[ type ] ) {
+			if (
+				! suggestionsLists[ type ] ||
+				! suggestionsContainers[ type ]
+			) {
 				return;
 			}
 
@@ -481,11 +497,17 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		 */
 		function hideSuggestions( type ) {
 			// Check if the address section exists (shipping may be disabled/hidden)
-			if ( ! addressInputs[ type ] || ! addressInputs[ type ][ 'address_1' ] ) {
+			if (
+				! addressInputs[ type ] ||
+				! addressInputs[ type ][ 'address_1' ]
+			) {
 				return;
 			}
 
-			if ( ! suggestionsLists[ type ] || ! suggestionsContainers[ type ] ) {
+			if (
+				! suggestionsLists[ type ] ||
+				! suggestionsContainers[ type ]
+			) {
 				return;
 			}
 
@@ -612,7 +634,10 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		 */
 		function setActiveSuggestion( type, index ) {
 			// Check if the address section exists (shipping may be disabled/hidden)
-			if ( ! addressInputs[ type ] || ! addressInputs[ type ][ 'address_1' ] ) {
+			if (
+				! addressInputs[ type ] ||
+				! addressInputs[ type ][ 'address_1' ]
+			) {
 				return;
 			}
 
@@ -667,7 +692,10 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 
 				addressInput.addEventListener( 'keydown', async function ( e ) {
 					// Check if suggestions exist before accessing them
-					if ( ! suggestionsLists[ type ] || ! suggestionsContainers[ type ] ) {
+					if (
+						! suggestionsLists[ type ] ||
+						! suggestionsContainers[ type ]
+					) {
 						return;
 					}
 
@@ -724,7 +752,10 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		document.addEventListener( 'click', function ( event ) {
 			addressTypes.forEach( ( type ) => {
 				// Check if the address section exists before accessing elements
-				if ( ! addressInputs[ type ] || ! addressInputs[ type ][ 'address_1' ] ) {
+				if (
+					! addressInputs[ type ] ||
+					! addressInputs[ type ][ 'address_1' ]
+				) {
 					return;
 				}
 
