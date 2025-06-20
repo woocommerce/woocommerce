@@ -394,7 +394,7 @@ describe( 'Address Suggestions Component', () => {
 		mockProvider = {
 			id: 'test-provider',
 			canSearch: jest.fn( ( country ) => country === 'US' ),
-			search: jest.fn( async ( type, query ) => [
+			search: jest.fn( async ( query, country, type ) => [
 				{
 					id: 'addr1',
 					label: '123 Main Street, City, US',
@@ -589,8 +589,9 @@ describe( 'Address Suggestions Component', () => {
 			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
 
 			expect( mockProvider.search ).toHaveBeenCalledWith(
-				'billing',
-				'123'
+				'123',
+				'US',
+				'billing'
 			);
 
 			const suggestionsList = document.querySelector(
@@ -1047,8 +1048,9 @@ describe( 'Address Suggestions Component', () => {
 				'Input was sanitized for security'
 			);
 			expect( mockProvider.search ).toHaveBeenCalledWith(
-				'billing',
-				'alert("xss")'
+				'alert("xss")',
+				'US',
+				'billing'
 			);
 
 			consoleSpy.mockRestore();

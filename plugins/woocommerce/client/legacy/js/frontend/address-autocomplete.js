@@ -359,12 +359,13 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 
 		/**
 		 * Handle searching and displaying autocomplete results below the address input if the value meets the criteria
-		 * of 3 or more characters.
-		 * @param type {string} The address type ('billing' or 'shipping').
+		 * of 3 or more characters. No suggestion is initially highlighted to improve screen reader accessibility.
 		 * @param inputValue {string} The value entered into the address input.
+		 * @param country {string} The country code to pass to the provider's search method.
+		 * @param type {string} The address type ('billing' or 'shipping').
 		 * @return {Promise<void>}
 		 */
-		async function displaySuggestions( type, inputValue ) {
+		async function displaySuggestions( inputValue, country, type ) {
 			// Sanitize input value.
 			const sanitizedInput = sanitizeForDisplay( inputValue );
 			if ( sanitizedInput !== inputValue ) {
@@ -392,7 +393,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 				const filteredSuggestions =
 					await window.wc.addressAutocomplete.activeProvider[
 						type
-					].search( type, sanitizedInput );
+					].search( sanitizedInput, country, type );
 
 				// Validate suggestions array.
 				if ( ! Array.isArray( filteredSuggestions ) ) {
@@ -619,7 +620,8 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		// Initialize event handlers for each address type.
 		addressTypes.forEach( ( type ) => {
 			const addressInput = addressInputs[ type ][ 'address_1' ];
-			if ( addressInput ) {
+			const countryInput = addressInputs[ type ][ 'country' ];
+			if ( addressInput && countryInput ) {
 				let inputTimeout;
 
 				addressInput.addEventListener( 'input', function () {
@@ -627,7 +629,11 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					const inputElement = this;
 					inputTimeout = setTimeout( () => {
 						if ( document.activeElement === inputElement ) {
-							displaySuggestions( type, inputElement.value );
+							displaySuggestions(
+								inputElement.value,
+								countryInput.value,
+								type
+							);
 						}
 					}, 100 );
 				} );
