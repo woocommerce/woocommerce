@@ -10,6 +10,25 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Admin;
 class MenusController {
 
 	/**
+	 * Notifications page.
+	 *
+	 * @var NotificationsPage
+	 */
+	private $notifications_page;
+
+	/**
+	 * Init.
+	 *
+	 * @internal
+	 *
+	 * @param NotificationsPage $notifications_page Notifications page.
+	 * @return void
+	 */
+	final public function init( NotificationsPage $notifications_page ): void {
+		$this->notifications_page = $notifications_page;
+	}
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -84,9 +103,7 @@ class MenusController {
 	 * Displays the Notifications list table.
 	 */
 	public function notifications_page() {
-		$table = new NotificationsListTable();
-		$table->prepare_items();
-		include __DIR__ . '/views/html-admin-notifications.php';
+		$this->notifications_page->output();
 	}
 
 	/**
