@@ -13,7 +13,7 @@ import {
 	// @ts-expect-error Using experimental features
 	__experimentalHStack as HStack,
 	// @ts-expect-error Using experimental features
-	__experimentalHStack as Text,
+	__experimentalText as Text,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
@@ -95,10 +95,18 @@ export const withEditMode =
 			) {
 				setAttributes( { editMode: currEditModeValue } );
 			}
-		}, [ status, isDeleted, attributes.editMode, name ] );
+		}, [ status, isDeleted, attributes.editMode, name, setAttributes ] );
 
 		if ( isLoading ) {
-			return null;
+			return (
+				<Placeholder
+					icon={ <Icon icon={ icon } /> }
+					label={ label }
+					className={ className }
+				>
+					<div>{ __( 'Loading...', 'woocommerce' ) }</div>
+				</Placeholder>
+			);
 		}
 
 		if ( attributes.editMode ) {

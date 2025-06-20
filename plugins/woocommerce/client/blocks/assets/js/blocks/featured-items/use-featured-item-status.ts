@@ -9,12 +9,12 @@ import { store as coreDataStore } from '@wordpress/core-data';
  */
 import { BLOCK_NAMES } from './constants';
 
-interface FeaturedItemProps {
+interface UseFeaturedItemProps {
 	itemId: number | undefined;
 	itemType: string;
 }
 
-interface FeaturedItemReturnType {
+interface UseFeaturedItemReturnType {
 	status: string | null;
 	isDeleted: boolean | null;
 	isLoading: boolean;
@@ -23,30 +23,44 @@ interface FeaturedItemReturnType {
 export const useFeaturedItemStatus = ( {
 	itemId,
 	itemType,
-}: FeaturedItemProps ): FeaturedItemReturnType => {
+}: UseFeaturedItemProps ): UseFeaturedItemReturnType => {
 	return useSelect(
 		( selectFunc ) => {
 			if ( ! itemId ) {
 				return {
 					status: null,
-					isDeleted: null,
+					isDeleted: false,
 					isLoading: false,
 				};
 			}
 
-			const { getEntityRecord, getEntityRecords, hasFinishedResolution } =
-				selectFunc( coreDataStore );
+			const {
+				getEntityRecord,
+				getEntityRecords,
+				hasFinishedResolution,
+				getLastEntitySaveError,
+			} = selectFunc( coreDataStore );
 
 			if ( itemType === BLOCK_NAMES.featuredProduct ) {
 				const productArgs = [ 'postType', 'product', itemId ];
 				const product = getEntityRecord( ...productArgs );
+				const saveError = getLastEntitySaveError( ...productArgs );
 				const isResolved = hasFinishedResolution(
 					'getEntityRecord',
 					productArgs
 				);
 
+				if ( saveError && isResolved ) {
+					return {
+						status: 'deleted',
+						isDeleted: true,
+						isLoading: false,
+					};
+				}
+
 				return {
-					status: product?.status ?? 'deleted',
+					status:
+						product?.status ?? ( isResolved ? 'deleted' : null ),
 					isDeleted: ! product,
 					isLoading: ! isResolved,
 				};
@@ -56,7 +70,7 @@ export const useFeaturedItemStatus = ( {
 				const categoryArgs = [
 					'taxonomy',
 					'product_cat',
-					{ per_page: -1, include: [ itemId ] },
+					{ include: [ itemId ] },
 				];
 				const categories = getEntityRecords( ...categoryArgs );
 				const isResolved = hasFinishedResolution(
