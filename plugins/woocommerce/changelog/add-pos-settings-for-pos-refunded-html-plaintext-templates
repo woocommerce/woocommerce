@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Display store details from Point of Sale (POS) settings in POS refunded order email HTML and plaintext templates, with minor improvements for POS completed/refunded order emails.

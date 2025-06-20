@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Remove test that checks you can access the cart template via the page editor

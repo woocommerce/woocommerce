@@ -14,31 +14,10 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * WooPayments Promotion engine.
+ *
+ * @deprecated 9.9.0 The WooPayments promotion engine is deprecated and will be removed in a future version of WooCommerce.
  */
 class Init extends RemoteSpecsEngine {
-	/**
-	 * Constructor.
-	 */
-	public function __construct() {
-		// If the React-based Payments settings page is enabled, we don't need the old WooPayments promotion system,
-		// as we will show the WooPayments suggestion with the new system.
-		if ( FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
-			return;
-		}
-
-		/* phpcs:disable WordPress.Security.NonceVerification */
-		$is_payments_setting_page = isset( $_GET['page'] ) && 'wc-settings' === $_GET['page'] && isset( $_GET['tab'] ) && 'checkout' === $_GET['tab'];
-
-		if ( ! wp_is_json_request() && ! $is_payments_setting_page ) {
-			return;
-		}
-
-		add_filter( 'woocommerce_payment_gateways', array( __CLASS__, 'possibly_register_pre_install_wc_pay_promotion_gateway' ) );
-		add_filter( 'option_woocommerce_gateway_order', array( __CLASS__, 'set_gateway_top_of_list' ) );
-		add_filter( 'default_option_woocommerce_gateway_order', array( __CLASS__, 'set_gateway_top_of_list' ) );
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'load_payment_method_promotions' ) );
-		add_action( 'update_option_woocommerce_default_country', array( $this, 'delete_specs_transient' ) );
-	}
 
 	/**
 	 * Possibly registers the pre-install WooPayments promoted gateway.

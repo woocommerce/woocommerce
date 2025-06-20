@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Refactor PTKPatternsStore to use options instead of transients for PTK patterns storage.

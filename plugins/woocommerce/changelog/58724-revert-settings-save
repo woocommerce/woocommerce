@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove conditional nonce check for 'settings' feature

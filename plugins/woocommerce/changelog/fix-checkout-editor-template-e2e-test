@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update e2e test to ensure checkout block template is loading

@@ -8,6 +8,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Admin\Notes\Note;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -19,6 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The main entry-point for all things related to the Helper.
  */
 class WC_Helper {
+	const NOTE_NAME = 'wccom-api-failed';
+
 	/**
 	 * A log object returned by wc_get_logger().
 	 *
@@ -51,6 +54,71 @@ class WC_Helper {
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 
 		do_action( 'woocommerce_helper_loaded' );
+	}
+
+	/**
+	 * Remove all notes signaling an error with the WCCOM API, when the request was successful.
+	 */
+	protected static function remove_api_error_notice() {
+		try {
+			$data_store = \WC_Data_Store::load( 'admin-note' );
+		} catch ( Exception $e ) {
+			return;
+		}
+
+		$note_ids = $data_store->get_notes_with_name( self::NOTE_NAME );
+
+		if ( ! empty( $note_ids ) ) {
+			foreach ( $note_ids as $note_id ) {
+				$note = new Note( $note_id );
+				if ( $note->get_id() ) {
+					$data_store->delete( $note );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Adds at most one note signaling that there was an error with the WCCOM API.
+	 */
+	protected static function add_api_error_notice() {
+		try {
+			$data_store = \WC_Data_Store::load( 'admin-note' );
+		} catch ( Exception $e ) {
+			return;
+		}
+
+		$note_ids = $data_store->get_notes_with_name( self::NOTE_NAME );
+
+		if ( ! empty( $note_ids ) ) {
+			$current_notice_id = array_shift( $note_ids );
+
+			foreach ( $note_ids as $note_id ) {
+				$note = new Note( $note_id );
+				if ( $note->get_id() ) {
+					$data_store->delete( $note );
+				}
+			}
+
+			$note = new Note( $current_notice_id );
+		} else {
+			$note = new Note();
+		}
+
+		$note->set_props(
+			array(
+				'title'        => __( 'We’re having trouble connecting to WooCommerce.com', 'woocommerce' ),
+				'content'      => __( 'Some subscription data may be temporarily unavailable. Please refresh the page in a few minutes to try again.', 'woocommerce' ),
+				'type'         => Note::E_WC_ADMIN_NOTE_UPDATE,
+				'name'         => self::NOTE_NAME,
+				'content_data' => (object) array(),
+				'source'       => 'woocommerce-admin',
+				'status'       => Note::E_WC_ADMIN_NOTE_UNACTIONED,
+				'is_deleted'   => false,
+			)
+		);
+
+		$note->save();
 	}
 
 	/**
@@ -1358,16 +1426,12 @@ class WC_Helper {
 				return $installed_subscriptions;
 			}
 
-			try {
-				$installed_subscriptions = array_filter(
-					self::get_subscriptions(),
-					function ( $subscription ) use ( $site_id ) {
-						return in_array( $site_id, $subscription['connections'], true );
-					}
-				);
-			} catch ( Exception $e ) {
-				$installed_subscriptions = array();
-			}
+			$installed_subscriptions = array_filter(
+				self::get_subscriptions(),
+				function ( $subscription ) use ( $site_id ) {
+					return in_array( $site_id, $subscription['connections'], true );
+				}
+			);
 		}
 
 		return $installed_subscriptions;
@@ -1390,16 +1454,12 @@ class WC_Helper {
 				return $unconnected_subscriptions;
 			}
 
-			try {
-				$unconnected_subscriptions = array_filter(
-					self::get_subscriptions(),
-					function ( $subscription ) use ( $site_id ) {
-						return empty( $subscription['connections'] );
-					}
-				);
-			} catch ( Exception $e ) {
-				$unconnected_subscriptions = array();
-			}
+			$unconnected_subscriptions = array_filter(
+				self::get_subscriptions(),
+				function ( $subscription ) use ( $site_id ) {
+					return empty( $subscription['connections'] );
+				}
+			);
 		}
 
 		return $unconnected_subscriptions;
@@ -1442,15 +1502,12 @@ class WC_Helper {
 	 * @return array|bool The array containing sub data or false.
 	 */
 	private static function _get_subscriptions_from_product_id( $product_id, $single = true ) {
-		try {
-			$subscriptions = wp_list_filter( self::get_subscriptions(), array( 'product_id' => $product_id ) );
-		} catch ( Exception $e ) {
-			return false;
-		}
+		$subscriptions = wp_list_filter( self::get_subscriptions(), array( 'product_id' => $product_id ) );
 
 		if ( ! empty( $subscriptions ) ) {
 			return $single ? array_shift( $subscriptions ) : $subscriptions;
 		}
+
 		return false;
 	}
 
@@ -1625,7 +1682,8 @@ class WC_Helper {
 	 * Get rules for displaying notice regarding marketplace product usage.
 	 *
 	 * @return array
-	 * @throws Exception If there is an error getting product usage notice rules.
+	 *
+	 * phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
 	 */
 	public static function get_product_usage_notice_rules() {
 		$cache_key = '_woocommerce_helper_product_usage_notice_rules';
@@ -1646,29 +1704,39 @@ class WC_Helper {
 			if ( is_wp_error( $request ) ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( $request->get_error_message() );
+				throw new Exception( $request->get_error_message(), (int) $request->get_error_data() );
 			}
 
 			$code = wp_remote_retrieve_response_code( $request );
 			if ( 200 !== $code ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( self::get_message_for_response_code( $code ) );
+				throw new Exception( self::get_message_for_response_code( $code ), $code );
 			}
 
 			$data = json_decode( wp_remote_retrieve_body( $request ), true );
 			if ( ! is_array( $data ) ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ) );
+				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ), 422 );
 			}
 
-			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+			set_transient( $cache_key, $data, DAY_IN_SECONDS );
+
+			// Remove notice after successful API call as it's no longer applicable.
+			self::remove_api_error_notice();
 			return $data;
 		} catch ( Exception $e ) {
-			self::log( 'Error getting product usage notice rules: ' . $e->getMessage(), 'error' );
-			throw $e;
+			if ( $e->getCode() < 404 ) {
+				self::remove_api_error_notice();
+			} else {
+				// Only show error notice in case there is no proper communication with WCCOM.
+				self::log( 'Error getting product usage notice rules: ' . $e->getMessage(), 'error' );
+				self::add_api_error_notice();
+			}
 		}
+
+		return array();
 	}
 
 	/**
@@ -1746,12 +1814,12 @@ class WC_Helper {
 		return $connection_data;
 	}
 
-
 	/**
 	 * Get the connected user's subscriptions.
 	 *
 	 * @return array
-	 * @throws Exception If there is an error getting subscriptions.
+	 *
+	 * phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
 	 */
 	public static function get_subscriptions() {
 		$cache_key = '_woocommerce_helper_subscriptions';
@@ -1789,29 +1857,39 @@ class WC_Helper {
 			if ( is_wp_error( $request ) ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( $request->get_error_message() );
+				throw new Exception( $request->get_error_message(), (int) $request->get_error_data() );
 			}
 
 			$code = wp_remote_retrieve_response_code( $request );
 			if ( 200 !== $code ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( self::get_message_for_response_code( $code ) );
+				throw new Exception( self::get_message_for_response_code( $code ), $code );
 			}
 
 			$data = json_decode( wp_remote_retrieve_body( $request ), true );
 			if ( ! is_array( $data ) ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
-				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ) );
+				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ), 422 );
 			}
 
-			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+			set_transient( $cache_key, $data, 3 * HOUR_IN_SECONDS );
+
+			// Remove notice after successful API call as it's no longer applicable.
+			self::remove_api_error_notice();
 			return $data;
 		} catch ( Exception $e ) {
-			self::log( 'Error getting subscriptions: ' . $e->getMessage(), 'error' );
-			throw $e;
+			if ( $e->getCode() < 404 ) {
+				self::remove_api_error_notice();
+			} else {
+				// Only show error notice in case there is no proper communication with WCCOM.
+				self::log( 'Error getting subscriptions: ' . $e->getMessage(), 'error' );
+				self::add_api_error_notice();
+			}
 		}
+
+		return array();
 	}
 
 	/**
@@ -1821,14 +1899,10 @@ class WC_Helper {
 	 * @return array|bool The array containing sub data or false.
 	 */
 	public static function get_subscription( $product_key ) {
-		try {
-			$subscriptions = wp_list_filter(
-				self::get_subscriptions(),
-				array( 'product_key' => $product_key )
-			);
-		} catch ( Exception $e ) {
-			return false;
-		}
+		$subscriptions = wp_list_filter(
+			self::get_subscriptions(),
+			array( 'product_key' => $product_key )
+		);
 
 		if ( empty( $subscriptions ) ) {
 			return false;
@@ -1850,11 +1924,7 @@ class WC_Helper {
 	 */
 	public static function get_subscription_list_data() {
 		// First, connected subscriptions.
-		try {
-			$subscriptions = self::get_subscriptions();
-		} catch ( Exception $e ) {
-			$subscriptions = array();
-		}
+		$subscriptions = self::get_subscriptions();
 
 		// Then, installed plugins and themes, with or without an active subscription.
 		$woo_plugins = self::get_local_woo_plugins();

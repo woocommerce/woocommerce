@@ -18,7 +18,7 @@ import { PaymentMethodListItem } from '~/settings-payments/components/payment-me
 import {
 	combinePaymentMethodsState,
 	combineRequestMethods,
-	decouplePaymentMethodsState,
+	recordPaymentsOnboardingEvent,
 	shouldRenderPaymentMethodInMainList,
 } from '~/settings-payments/utils';
 import './style.scss';
@@ -124,7 +124,7 @@ export default function PaymentMethodsSelection() {
 				url: href,
 				method: 'POST',
 				data: {
-					payment_methods: decouplePaymentMethodsState( state ),
+					payment_methods: state,
 				},
 			} );
 		}
@@ -161,10 +161,10 @@ export default function PaymentMethodsSelection() {
 
 	return (
 		<div className="settings-payments-onboarding-modal__step--content">
-			<div className="woocommerce-layout__header woocommerce-recommended-payment-methods">
-				<div className="woocommerce-layout__header-wrapper">
-					<div className="woocommerce-layout__header-title-and-close">
-						<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align woocommerce-settings-payments-header__title">
+			<div className="woocommerce-recommended-payment-methods">
+				<div className="woocommerce-recommended-payment-methods__header">
+					<div className="woocommerce-recommended-payment-methods__header--title">
+						<h1 className="components-truncate components-text">
 							{ __(
 								'Choose your payment methods',
 								'woocommerce'
@@ -177,8 +177,7 @@ export default function PaymentMethodsSelection() {
 							<Icon icon={ close } />
 						</Button>
 					</div>
-
-					<div className="woocommerce-settings-payments-header__description">
+					<div className="woocommerce-recommended-payment-methods__header--description">
 						{ __(
 							"Select which payment methods you'd like to offer to your shoppers. You can update these at any time.",
 							'woocommerce'
@@ -225,6 +224,17 @@ export default function PaymentMethodsSelection() {
 								<Button
 									className="settings-payments-methods__show-more"
 									onClick={ () => {
+										recordPaymentsOnboardingEvent(
+											'woopayments_onboarding_modal_click',
+											{
+												step:
+													currentStep?.id ||
+													'unknown',
+												action: 'show_more',
+												hidden_count: hiddenCount,
+											}
+										);
+
 										setIsExpanded( ! isExpanded );
 
 										// Check for overflow after expanding hidden payment methods.
@@ -298,7 +308,7 @@ export default function PaymentMethodsSelection() {
 													]
 											)
 											.join( ', ' ),
-										store_country:
+										business_country:
 											window.wcSettings?.admin
 												?.woocommerce_payments_nox_profile
 												?.business_country_code ??

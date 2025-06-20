@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Added `getQueryExcludedScreensUrlUpdate` to exclude updating onclick handler for specific screens.

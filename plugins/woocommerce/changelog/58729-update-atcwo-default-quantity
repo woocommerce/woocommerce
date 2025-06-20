@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Blockified Add to Cart with Options block: set $default_quantity to use the woocommerce_quantity_input_min filter

@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add BlocksSharedState trait to store shared WooCommerce settings with wp_interactivity_config and wp_interactivity_state.

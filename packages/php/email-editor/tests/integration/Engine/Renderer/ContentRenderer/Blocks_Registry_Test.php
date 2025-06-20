@@ -35,7 +35,7 @@ class Blocks_Registry_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test it returns null for unknown renderer.
 	 */
-	public function testItReturnsNullForUnknownRenderer() {
+	public function testItReturnsNullForUnknownRenderer(): void {
 		$stored_renderer = $this->registry->get_block_renderer( 'test' );
 		$this->assertNull( $stored_renderer );
 	}
@@ -43,7 +43,7 @@ class Blocks_Registry_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test it stores added renderer.
 	 */
-	public function testItStoresAddedRenderer() {
+	public function testItStoresAddedRenderer(): void {
 		$renderer = new Text();
 		$this->registry->add_block_renderer( 'test', $renderer );
 		$stored_renderer = $this->registry->get_block_renderer( 'test' );
@@ -53,7 +53,7 @@ class Blocks_Registry_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test it reports which renderers are registered.
 	 */
-	public function testItReportsWhichRenderersAreRegistered() {
+	public function testItReportsWhichRenderersAreRegistered(): void {
 		$renderer = new Text();
 		$this->registry->add_block_renderer( 'test', $renderer );
 		$this->assertTrue( $this->registry->has_block_renderer( 'test' ) );

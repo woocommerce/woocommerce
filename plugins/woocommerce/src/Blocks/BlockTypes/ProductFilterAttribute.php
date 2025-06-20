@@ -191,6 +191,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		$filter_context = array(
 			'showCounts' => $block_attributes['showCounts'] ?? false,
 			'items'      => array(),
+			'groupLabel' => $product_attribute->name,
 		);
 
 		if ( ! empty( $attribute_counts ) ) {
@@ -198,9 +199,9 @@ final class ProductFilterAttribute extends AbstractBlock {
 				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute ) {
 					$term          = (array) $term;
 					$term['count'] = $attribute_counts[ $term['term_id'] ] ?? 0;
+
 					return array(
 						'label'              => $term['name'],
-						'ariaLabel'          => $term['name'],
 						'value'              => $term['slug'],
 						'selected'           => in_array( $term['slug'], $selected_terms, true ),
 						'count'              => $term['count'],

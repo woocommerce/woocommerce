@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+CI: additional environment for API tests.

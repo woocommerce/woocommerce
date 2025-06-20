@@ -145,7 +145,7 @@ class Renderer {
 	 */
 	private function render_text_version( $template ) {
 		$template = ( mb_detect_encoding( $template, 'UTF-8', true ) ) ? $template : mb_convert_encoding( $template, 'UTF-8', mb_list_encodings() );
-		$result   = Html2Text::convert( $template );
+		$result   = Html2Text::convert( (string) $template );
 		if ( ! $result ) {
 			return '';
 		}

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the logic that was marking a step as incorrectly completed in LYS.

@@ -264,9 +264,12 @@ test.describe( 'Shopper → Notice Templates', () => {
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
 		await expect(
-			page.getByText( `Coupon "${ INVALID_COUPON }" does not exist!`, {
-				exact: true,
-			} )
+			page.getByText(
+				`Coupon "${ INVALID_COUPON }" cannot be applied because it does not exist.`,
+				{
+					exact: true,
+				}
+			)
 		).toBeVisible();
 
 		// We're explicitly checking the CSS classes of the block notices, and that the SVG is hidden.

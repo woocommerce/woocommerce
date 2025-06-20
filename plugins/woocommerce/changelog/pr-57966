@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove the old dependency injection container and all the related infrastructure

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed an issue that prevented the Download Limit and Expiry fields from being cleared during product import.

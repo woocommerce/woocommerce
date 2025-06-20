@@ -577,6 +577,7 @@ function wc_price( $price, $args = array() ) {
 				'decimals'           => wc_get_price_decimals(),
 				'price_format'       => get_woocommerce_price_format(),
 				'in_span'            => true,
+				'aria-hidden'        => false,
 			)
 		)
 	);
@@ -615,7 +616,8 @@ function wc_price( $price, $args = array() ) {
 
 	if ( $args['in_span'] ) {
 		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], '<span class="woocommerce-Price-currencySymbol">' . get_woocommerce_currency_symbol( $args['currency'] ) . '</span>', $price );
-		$return          = '<span class="woocommerce-Price-amount amount"><bdi>' . $formatted_price . '</bdi></span>';
+		$aria_hidden     = $args['aria-hidden'] ? ' aria-hidden="true"' : '';
+		$return          = '<span class="woocommerce-Price-amount amount"' . $aria_hidden . '><bdi>' . $formatted_price . '</bdi></span>';
 	} else {
 		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], get_woocommerce_currency_symbol( $args['currency'] ), $price );
 		$return          = $formatted_price;
@@ -1339,7 +1341,15 @@ function wc_format_sale_price( $regular_price, $sale_price ) {
  */
 function wc_format_price_range( $from, $to ) {
 	/* translators: 1: price from 2: price to */
-	$price = sprintf( _x( '%1$s &ndash; %2$s', 'Price range: from-to', 'woocommerce' ), is_numeric( $from ) ? wc_price( $from ) : $from, is_numeric( $to ) ? wc_price( $to ) : $to );
+	$price  = sprintf( _x( '%1$s <span aria-hidden="true">&ndash;</span> %2$s', 'Price range: from-to', 'woocommerce' ), is_numeric( $from ) ? wc_price( $from, array( 'aria-hidden' => true ) ) : $from, is_numeric( $to ) ? wc_price( $to, array( 'aria-hidden' => true ) ) : $to );
+	$price .= '<span class="screen-reader-text">';
+	$price .= sprintf(
+		/* translators: 1: price from 2: price to */
+		__( 'Price range: %1$s through %2$s', 'woocommerce' ),
+		is_numeric( $from ) ? wp_strip_all_tags( wc_price( $from ) ) : wp_strip_all_tags( $from ),
+		is_numeric( $to ) ? wp_strip_all_tags( wc_price( $to ) ) : wp_strip_all_tags( $to )
+	);
+	$price .= '</span>';
 	return apply_filters( 'woocommerce_format_price_range', $price, $from, $to );
 }
 

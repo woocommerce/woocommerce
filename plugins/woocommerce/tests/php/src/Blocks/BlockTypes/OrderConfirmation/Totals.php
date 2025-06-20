@@ -11,7 +11,6 @@ use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\OrderConfirmation\TotalsMock;
-use Automattic\WooCommerce\Tests\Blocks\StoreApi\MockSessionHandler;
 use WC_Gateway_BACS;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
@@ -26,6 +25,8 @@ class Totals extends \WP_UnitTestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+
+		add_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ), 10, 4 );
 
 		global $wp_rest_server;
 		$wp_rest_server = new \Spy_REST_Server();
@@ -100,19 +101,38 @@ class Totals extends \WP_UnitTestCase {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
+		remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
 		WC()->cart->empty_cart();
 		WC()->session->destroy_session();
+	}
+
+	/**
+	 * Filter wc_setcookie() to disable calling setcookie() during the tests but apply the changes to the $_COOKIE global.
+	 *
+	 * @param bool    $enabled Filtered value of whether calls to setcookie() are enabled.
+	 * @param string  $name    Name of the cookie being set.
+	 * @param string  $value   Value of the cookie.
+	 * @param integer $expire  Expiry of the cookie.
+	 *
+	 * @return false
+	 */
+	public function filter_woocommerce_set_cookie_enabled( $enabled, $name, $value, $expire ) {
+		if ( $expire < time() ) {
+			unset( $_COOKIE[ $name ] );
+		} else {
+			$_COOKIE[ $name ] = $value;
+		}
+
+		return false;
 	}
 
 	/**
 	 * We ensure deep sort works with all sort of arrays.
 	 */
 	public function test_order_notes_cleaned() {
-		// We need to replace the WC_Session with a mock because this test relies on cookies being set which
-		// is not easy with PHPUnit. This is a simpler approach.
-		$old_session  = WC()->session;
-		WC()->session = new MockSessionHandler();
-		WC()->session->init();
+		// Since we're making a "request", we need to save the session data to be available during the API request.
+		WC()->session->set_customer_session_cookie( true );
+		WC()->session->save_data();
 
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
@@ -173,7 +193,5 @@ class Totals extends \WP_UnitTestCase {
 		$this->assertStringNotContainsString( '<a href="http://attackerpage.com/csrf.html">', $content );
 		$this->assertStringNotContainsString( '<script>', $content );
 		$this->assertStringContainsString( 'This text should not save inside an anchor.', $content );
-
-		WC()->session = $old_session;
 	}
 }

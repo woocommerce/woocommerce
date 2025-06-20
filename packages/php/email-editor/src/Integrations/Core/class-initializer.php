@@ -41,6 +41,8 @@ class Initializer {
 		$blocks_registry->add_block_renderer( 'core/button', new Renderer\Blocks\Button() );
 		$blocks_registry->add_block_renderer( 'core/group', new Renderer\Blocks\Group() );
 		$blocks_registry->add_block_renderer( 'core/quote', new Renderer\Blocks\Quote() );
+		$blocks_registry->add_block_renderer( 'core/social-link', new Renderer\Blocks\Social_Link() );
+		$blocks_registry->add_block_renderer( 'core/social-links', new Renderer\Blocks\Social_Links() );
 		// Render used for all other blocks.
 		$blocks_registry->add_fallback_renderer( new Renderer\Blocks\Fallback() );
 	}

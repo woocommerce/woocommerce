@@ -15,6 +15,7 @@ import { WooPaymentsProviderOnboardingStep } from '~/settings-payments/onboardin
 export default function Stepper( {
 	active,
 	steps,
+	justCompletedStepId,
 	includeSidebar = false,
 	sidebarTitle,
 }: {
@@ -22,6 +23,11 @@ export default function Stepper( {
 	 * The active step key
 	 */
 	active: string;
+	/**
+	 * The ID of the step that was just completed.
+	 * This can be used by steps to mark themselves as completed but moving to the next step depends on user interaction.
+	 */
+	justCompletedStepId?: string | null;
 	/**
 	 * The steps to render
 	 */
@@ -43,6 +49,28 @@ export default function Stepper( {
 	const activeStepIndex =
 		steps.findIndex( ( step ) => step.id === active ) + 1;
 
+	// Helper function to determine if a step is completed
+	const isStepCompleted = (
+		step: WooPaymentsProviderOnboardingStep
+	): boolean => {
+		return (
+			step.id === justCompletedStepId ||
+			step.status === 'completed' ||
+			activeStepIndex === steps.length
+		);
+	};
+
+	// Sort steps to show completed ones first
+	const sortedSteps = steps.sort( ( a, b ) => {
+		const aCompleted = isStepCompleted( a );
+		const bCompleted = isStepCompleted( b );
+
+		if ( aCompleted === bCompleted ) {
+			return 0;
+		}
+		return aCompleted ? -1 : 1;
+	} );
+
 	// Renders only the active step based on the current step ID.
 	return (
 		<>
@@ -63,14 +91,11 @@ export default function Stepper( {
 						</div>
 					</div>
 					<div className="settings-payments-onboarding-modal__sidebar--list">
-						{ steps.map( ( step ) => (
+						{ sortedSteps.map( ( step ) => (
 							<SidebarItem
 								key={ step.id }
 								label={ step.label }
-								isCompleted={
-									step.status === 'completed' ||
-									activeStepIndex === steps.length
-								}
+								isCompleted={ isStepCompleted( step ) }
 								isActive={ step.id === active }
 							/>
 						) ) }

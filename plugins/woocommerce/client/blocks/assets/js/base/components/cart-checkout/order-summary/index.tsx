@@ -20,11 +20,7 @@ const OrderSummary = ( {
 	cartItems = [],
 	disableProductDescriptions = false,
 }: OrderSummaryProps ): null | JSX.Element => {
-	const { isLarge, hasContainerWidth } = useContainerWidthContext();
-
-	if ( ! hasContainerWidth ) {
-		return null;
-	}
+	const { isLarge } = useContainerWidthContext();
 
 	return (
 		<div

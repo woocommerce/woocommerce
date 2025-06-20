@@ -2,6 +2,9 @@
 	margin: 0;
 	padding-top: $gap-large;
 
+	// Don't remove this, it marks the container for container queries used in inner blocks.
+	container-type: inline-size;
+
 	.with-scroll-to-top__scroll-point {
 		top: -96px;
 	}

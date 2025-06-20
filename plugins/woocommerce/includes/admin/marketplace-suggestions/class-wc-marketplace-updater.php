@@ -43,7 +43,20 @@ class WC_Marketplace_Updater {
 
 		$data['updated'] = time();
 
-		$url     = 'https://woocommerce.com/wp-json/wccom/marketplace-suggestions/1.0/suggestions.json';
+		$request_data = array();
+
+		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking', 'no' );
+		if ( class_exists( 'WC_Marketplace_Suggestions' ) && WC_Marketplace_Suggestions::allow_suggestions() && $allow_tracking ) {
+			$request_data = self::add_personalization_data( $request_data );
+		}
+
+		$url = 'https://woocommerce.com/wp-json/wccom/marketplace-suggestions/2.0/suggestions.json';
+
+		// Add request data as query parameters if it exists.
+		if ( ! empty( $request_data ) ) {
+			$url = add_query_arg( $request_data, $url );
+		}
+
 		$request = wp_safe_remote_get(
 			$url,
 			array(
@@ -79,6 +92,18 @@ class WC_Marketplace_Updater {
 	public static function retry() {
 		WC()->queue()->cancel_all( 'woocommerce_update_marketplace_suggestions' );
 		WC()->queue()->schedule_single( time() + DAY_IN_SECONDS, 'woocommerce_update_marketplace_suggestions' );
+	}
+
+	/**
+	 * Add additional data to the request for personalized suggestions.
+	 *
+	 * @param array $request_params The data to include in the request.
+	 * @return array
+	 */
+	public static function add_personalization_data( $request_params ) {
+		$request_params['country'] = wc_get_base_location()['country'];
+
+		return $request_params;
 	}
 }
 

@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fix Item Label block displaying "Product Title" instead of actual product name in editor for grouped products
+
+

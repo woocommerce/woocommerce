@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
+use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1511,7 +1512,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 		}
 
-		$this->set_shipping_total( array_sum( $shipping_costs ) );
+		$this->set_shipping_total( array_sum( array_filter( $shipping_costs ) ) );
 		$this->set_shipping_tax( array_sum( $merged_taxes ) );
 		$this->set_shipping_taxes( $merged_taxes );
 
@@ -1633,13 +1634,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
-			if ( 'store-api' === $this->cart_context ) {
-				$customer = $this->get_customer();
-
-				if ( ! $customer instanceof \WC_Customer || ! $customer->has_full_shipping_address() ) {
-					return false;
-				}
-			} else {
+			if ( 'shortcode' === $this->cart_context ) {
 				$country = $this->get_customer()->get_shipping_country();
 				if ( ! $country ) {
 					return false;
@@ -1675,6 +1670,17 @@ class WC_Cart extends WC_Legacy_Cart {
 				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
 				$checkout_postcode_field_exists = isset( $checkout_fields['shipping']['shipping_postcode'] );
 				if ( $postcode_enabled && $postcode_required && '' === $this->get_customer()->get_shipping_postcode() && $checkout_postcode_field_exists ) {
+					return false;
+				}
+			} else {
+				// If local pickup is enabled, shipping should be shown so that pickup locations are visible before address entry.
+				if ( LocalPickupUtils::is_local_pickup_enabled() ) {
+					return true;
+				}
+
+				$customer = $this->get_customer();
+
+				if ( ! $customer instanceof \WC_Customer || ! $customer->has_full_shipping_address() ) {
 					return false;
 				}
 			}

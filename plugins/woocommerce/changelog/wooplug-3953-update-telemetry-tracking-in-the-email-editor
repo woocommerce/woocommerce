@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fix email editor PHP error in PHP 7.4 and add test checking selector used for tracking in email editor
+
+

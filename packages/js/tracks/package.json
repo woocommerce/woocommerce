@@ -3,7 +3,7 @@
 	"version": "1.4.0",
 	"description": "WooCommerce user event tracking utilities for Automattic based projects.",
 	"author": "Automattic",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"engines": {
 		"node": "^20.11.1"
 	},
@@ -59,7 +59,6 @@
 		"@types/jest": "27.5.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"concurrently": "^7.6.0",
 		"eslint": "^8.55.0",
 		"jest": "27.5.x",
 		"jest-cli": "27.5.x",

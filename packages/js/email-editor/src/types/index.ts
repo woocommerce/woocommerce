@@ -44,11 +44,23 @@ declare module '@wordpress/data' {
 
 	type TKey = keyof StoreMap;
 	type TStore< T > = T extends keyof StoreMap ? StoreMap[ T ] : never;
-	type TSelectors< T > = CurriedSelectorsOf< TStore< T > >;
+	// Store names whose selectors are already in their final form (without state parameter)
+	// as they are imported from `@types/wordpress__*` packages.
+	type SpecialStoreName =
+		| 'core/block-editor'
+		| 'core/editor'
+		| 'core/notices';
+	type TSelectors< T > = T extends SpecialStoreName
+		? ConfigOf< TStore< T > >[ 'selectors' ]
+		: CurriedSelectorsOf< TStore< T > >;
 	type TActions< T > = ActionCreatorsOf< ConfigOf< TStore< T > > >;
 	type TSelectFunction = < T extends TKey | StoreDescriptor >(
 		store: T
-	) => T extends TKey ? TSelectors< T > : CurriedSelectorsOf< T >;
+	) => T extends TKey
+		? TSelectors< T >
+		: T extends { name: SpecialStoreName }
+		? ConfigOf< T >[ 'selectors' ]
+		: CurriedSelectorsOf< T >;
 	type TMapSelect = (
 		select: TSelectFunction,
 		registry: DataRegistry
@@ -60,7 +72,9 @@ declare module '@wordpress/data' {
 	// fix return type for select(storeDescriptor)
 	export function select< T extends GenericStoreDescriptor< any > >(
 		store: T
-	): CurriedSelectorsOf< T >;
+	): T extends { name: SpecialStoreName }
+		? ConfigOf< T >[ 'selectors' ]
+		: CurriedSelectorsOf< T >;
 
 	// dispatch('store-name')
 	function dispatch< T extends string >( store: T ): TActions< T >;

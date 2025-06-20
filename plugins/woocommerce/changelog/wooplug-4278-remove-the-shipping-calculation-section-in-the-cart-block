@@ -1,0 +1,4 @@
+Significance: major
+Type: enhancement
+
+Streamlined the Cart Block to include only estimated totals and remove complex/confusing shipping selection and calculation UI. Shipping is selected during checkout.

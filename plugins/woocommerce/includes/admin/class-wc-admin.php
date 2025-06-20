@@ -9,8 +9,8 @@
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
-use Automattic\WooCommerce\Internal\EmailEditor\WooContentProcessor;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -26,6 +26,14 @@ class WC_Admin {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'includes' ) );
+
+		// Hook in early (priority 1) to make sure the PageController's hooks are added before any WC admin pages or
+		// menus logic is run, including the enqueuing of assets via \Automattic\WooCommerce\Internal\Admin\WCAdminAssets.
+		// While it may not sound like it, the admin_menu action is triggered quite early,
+		// before the admin_init or admin_enqueue_scripts  action.
+		// @see https://developer.wordpress.org/apis/hooks/action-reference/#actions-run-during-an-admin-page-request.
+		add_action( 'admin_menu', array( $this, 'init_page_controller' ), 1 );
+
 		add_action( 'current_screen', array( $this, 'conditional_includes' ) );
 		add_action( 'admin_init', array( $this, 'buffer' ), 1 );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
@@ -88,6 +96,14 @@ class WC_Admin {
 		// Marketplace suggestions & related REST API.
 		include_once __DIR__ . '/marketplace-suggestions/class-wc-marketplace-suggestions.php';
 		include_once __DIR__ . '/marketplace-suggestions/class-wc-marketplace-updater.php';
+	}
+
+	/**
+	 * Initialize the admin page controller logic.
+	 */
+	public function init_page_controller() {
+		// We only need to make sure the controller is instantiated since the hooking is done in the constructor.
+		PageController::get_instance();
 	}
 
 	/**

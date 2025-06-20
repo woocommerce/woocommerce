@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Fixes a bug where the variation fields for a product become misaligned when both COGS and Manage Stock is enabled.
+

@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Moving text completion hooks into @woocommerce/ai package for reuse.

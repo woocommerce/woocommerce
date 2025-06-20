@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+For orders via Store API, if payment is not needed, clear order payment method field.

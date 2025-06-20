@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Added default fallback when no bg color is present or transparent color is set in theme body

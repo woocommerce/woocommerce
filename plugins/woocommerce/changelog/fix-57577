@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow more file protocols in CSV file check

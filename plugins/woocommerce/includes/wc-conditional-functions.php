@@ -233,6 +233,22 @@ if ( ! function_exists( 'is_order_received_page' ) ) {
 	}
 }
 
+if ( ! function_exists( 'is_payment_methods_page' ) ) {
+
+	/**
+	 * Is_payment_methods_page - Returns true when viewing the payment methods list page.
+	 *
+	 * @return bool
+	 */
+	function is_payment_methods_page() {
+		global $wp;
+
+		$page_id = wc_get_page_id( 'myaccount' );
+
+		return ( $page_id && is_page( $page_id ) && isset( $wp->query_vars['payment-methods'] ) );
+	}
+}
+
 if ( ! function_exists( 'is_add_payment_method_page' ) ) {
 
 	/**
@@ -484,7 +500,7 @@ function wc_is_file_valid_csv( $file, $check_path = true ) {
 	 */
 	$check_import_file_path = apply_filters( 'woocommerce_csv_importer_check_import_file_path', true, $file );
 
-	if ( $check_path && $check_import_file_path && false !== stripos( $file, '://' ) ) {
+	if ( $check_path && $check_import_file_path && false !== stripos( $file, 'file://' ) ) {
 		return false;
 	}
 

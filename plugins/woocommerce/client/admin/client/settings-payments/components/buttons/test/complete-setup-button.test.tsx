@@ -4,8 +4,8 @@
 import { recordEvent } from '@woocommerce/tracks';
 import { render, fireEvent } from '@testing-library/react';
 import {
-	PaymentProviderState,
-	PaymentProviderOnboardingState,
+	PaymentsProviderState,
+	PaymentsProviderOnboardingState,
 } from '@woocommerce/data';
 
 /**
@@ -29,19 +29,20 @@ describe( 'CompleteSetupButton', () => {
 						needs_setup: true,
 						test_mode: false,
 						dev_mode: false,
-					} as PaymentProviderState
+					} as PaymentsProviderState
 				}
 				onboardingState={
 					{
 						started: true,
 						completed: false,
 						test_mode: false,
-					} as PaymentProviderOnboardingState
+					} as PaymentsProviderOnboardingState
 				}
 				settingsHref="/settings"
 				onboardingHref={ '' }
 				gatewayHasRecommendedPaymentMethods={ false }
 				installingPlugin={ null }
+				setOnboardingModalOpen={ jest.fn() }
 			/>
 		);
 
@@ -50,6 +51,7 @@ describe( 'CompleteSetupButton', () => {
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_provider_complete_setup_click',
 			{
+				business_country: expect.any( String ),
 				provider_id: 'test-gateway',
 				onboarding_started: true,
 				onboarding_completed: false,

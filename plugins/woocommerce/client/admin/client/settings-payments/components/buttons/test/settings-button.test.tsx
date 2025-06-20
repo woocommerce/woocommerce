@@ -22,6 +22,7 @@ describe( 'SettingsButton', () => {
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_provider_manage_click',
 			{
+				business_country: expect.any( String ),
 				provider_id: 'test-gateway',
 			}
 		);

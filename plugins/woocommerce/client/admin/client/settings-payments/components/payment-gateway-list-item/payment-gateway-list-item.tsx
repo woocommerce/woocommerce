@@ -116,7 +116,10 @@ export const PaymentGatewayListItem = ( {
 						) }
 						{ /* If the gateway has a matching suggestion, it is an official extension. */ }
 						{ gateway._suggestion_id && (
-							<OfficialBadge variant="expanded" />
+							<OfficialBadge
+								variant="expanded"
+								suggestionId={ gateway._suggestion_id }
+							/>
 						) }
 						{ gateway.supports?.includes( 'subscriptions' ) && (
 							<Tooltip

@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add schema validation for Patterns Toolkit in PTKClient and update PTKPatternsStore to utilize validation.

@@ -65,7 +65,6 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@wordpress/jest-console": "^5.4.0",
-		"concurrently": "^7.6.0",
 		"eslint": "^8.55.0",
 		"jest": "27.5.x",
 		"jest-cli": "27.5.x",
