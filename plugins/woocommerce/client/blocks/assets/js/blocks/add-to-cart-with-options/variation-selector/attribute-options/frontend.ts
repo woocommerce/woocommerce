@@ -153,11 +153,36 @@ const { state } = store(
 				} );
 			},
 			get pillTabIndex(): number {
-				const { selectedValue } = getContext< Context >();
-				const { isPillSelected, index } = state;
-				if ( isPillSelected || ( index === 0 && ! selectedValue ) ) {
+				const { selectedValue, options, name } =
+					getContext< Context >();
+				const { isPillSelected, isPillDisabled, index } = state;
+
+				if ( isPillSelected ) {
 					return 0;
 				}
+
+				if ( ! selectedValue ) {
+					const { selectedAttributes, availableVariations } =
+						getContext< AddToCartWithOptionsStoreContext >(
+							'woocommerce/add-to-cart-with-options'
+						);
+
+					const firstNonDisabledPill = options.findIndex(
+						( option ) => {
+							return isAttributeValueValid( {
+								attributeName: name,
+								attributeValue: option.value,
+								selectedAttributes,
+								availableVariations,
+							} );
+						}
+					);
+
+					if ( index === firstNonDisabledPill && ! isPillDisabled ) {
+						return 0;
+					}
+				}
+
 				return -1;
 			},
 			get index() {
