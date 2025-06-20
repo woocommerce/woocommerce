@@ -91,10 +91,10 @@ jobs:
           TARGET_VERSION: ${{ needs.validate-release-version.outputs.version }}
         run: |
           echo "🔄 Checking out SVN repository..."
-          svn checkout "${{ secrets.WPORG_SVN_URL }}" ./svn-woocommerce-repo --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive
-          cd ./svn-woocommerce-repo
+          svn checkout "${{ secrets.WPORG_SVN_URL }}/trunk" ./svn-trunk --depth files --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive
+          cd ./svn-trunk
 
-          README_PATH="./trunk/readme.txt"
+          README_PATH="./readme.txt"
 
           if [ ! -f "$README_PATH" ]; then
             echo "::error::readme.txt not found at $README_PATH"
