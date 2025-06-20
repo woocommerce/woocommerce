@@ -68,61 +68,6 @@ class FulfillmentsManager {
 	}
 
 	/**
-	 * Get fulfillment statuses.
-	 *
-	 * @param string $status_key The key of the fulfillment status to retrieve.
-	 *
-	 * @return array An array of fulfillment statuses.
-	 */
-	public function get_fulfillment_status( string $status_key ): array {
-		$core_fulfillment_statuses = array(
-			'unfulfilled'         => array(
-				'key'          => 'unfulfilled',
-				'label'        => __( 'Unfulfilled', 'woocommerce' ),
-				'is_fulfilled' => false,
-			),
-			'partially_fulfilled' => array(
-				'key'          => 'partially_fulfilled',
-				'label'        => __( 'Partially fulfilled', 'woocommerce' ),
-				'is_fulfilled' => false,
-			),
-			'fulfilled'           => array(
-				'key'          => 'fulfilled',
-				'label'        => __( 'Fulfilled', 'woocommerce' ),
-				'is_fulfilled' => true,
-			),
-			'no_fulfillments'     => array(
-				'key'          => 'no_fulfillments',
-				'label'        => __( 'No fulfillments', 'woocommerce' ),
-				'is_fulfilled' => false,
-			),
-		);
-
-		/**
-		 * Filter to modify the list of default fulfillment statuses.
-		 *
-		 * This filter allows us to add or modify fulfillment statuses
-		 * that can be used in the WooCommerce fulfillment system.
-		 *
-		 * @since 9.9.0
-		 */
-		$fulfillment_statuses = apply_filters( 'wc_custom_fulfillment_statuses', $core_fulfillment_statuses );
-
-		// Ensure that the default statuses are always included.
-		foreach ( $core_fulfillment_statuses as $key => $status ) {
-			if ( ! isset( $fulfillment_statuses[ $key ] ) ) {
-				$fulfillment_statuses[ $key ] = $status;
-			}
-		}
-
-		return isset( $fulfillment_statuses[ $status_key ] ) ? $fulfillment_statuses[ $status_key ] : array(
-			'key'          => 'unknown',
-			'label'        => __( 'Unknown', 'woocommerce' ),
-			'is_fulfilled' => false,
-		);
-	}
-
-	/**
 	 * Get initial shipping providers.
 	 *
 	 * This method provides the initial shipping providers that feeds the `wc_fulfillment_shipping_providers` filter,

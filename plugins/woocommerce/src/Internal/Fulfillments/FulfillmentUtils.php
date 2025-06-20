@@ -344,27 +344,4 @@ class FulfillmentUtils {
 			'unfulfilled' => __( 'Unfulfilled', 'woocommerce' ),
 		);
 	}
-
-	/**
-	 * Get fulfillment status properties by key.
-	 *
-	 * @param string $key The key of the fulfillment status.
-	 *
-	 * @return array|null An array of properties for the fulfillment status, or null if not found.
-	 */
-	public static function get_fulfillment_status_props( $key ): ?array {
-		/**
-		 * Filter to modify the list of fulfillment statuses.
-		 *
-		 * This filter allows us to add custom fulfillment statuses
-		 * or modify existing ones.
-		 *
-		 * @since 9.9.0
-		 */
-		$statuses = apply_filters( 'wc_fulfillment_statuses', array() );
-		if ( isset( $statuses[ $key ] ) ) {
-			return $statuses[ $key ];
-		}
-		return null;
-	}
 }
