@@ -153,7 +153,8 @@ export const WooPaymentsResetAccountModal = ( {
 									{
 										provider_id: wooPaymentsProviderId,
 										suggestion_id: wooPaymentsSuggestionId,
-										provider_extension_slug: wooPaymentsExtensionSlug,
+										provider_extension_slug:
+											wooPaymentsExtensionSlug,
 									}
 								);
 								handleResetAccount();
