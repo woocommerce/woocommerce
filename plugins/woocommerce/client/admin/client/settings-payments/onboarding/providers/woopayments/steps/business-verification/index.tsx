@@ -17,8 +17,11 @@ import { Stepper } from './components/stepper';
 import Step from './components/step';
 import { getMccFromIndustry, getComingSoonShareKey } from './utils';
 import './style.scss';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
+
 export const BusinessVerificationStep: React.FC = () => {
-	const { currentStep, closeModal } = useOnboardingContext();
+	const { currentStep, closeModal, sessionEntryPoint } =
+		useOnboardingContext();
 
 	const initialData = {
 		business_name: window.wcSettings?.siteTitle,
@@ -35,7 +38,21 @@ export const BusinessVerificationStep: React.FC = () => {
 	};
 	const hasTestAccount = currentStep?.context?.has_test_account ?? false;
 
-	const handleStepChange = () => window.scroll( 0, 0 );
+	const subStepsList = [ 'activate', 'business', 'embedded' ];
+	// Only include the activate step if the user doesn't have a test account.
+	if ( ! hasTestAccount ) {
+		subStepsList.splice( 0, 1 );
+	}
+	// Find the first not completed sub-step.
+	const initialStep = subStepsList.find( ( stepId ) => {
+		return (
+			currentStep?.context?.sub_steps[ stepId ]?.status !== 'completed'
+		);
+	} );
+
+	const handleStepChange = () => {
+		window.scroll( 0, 0 );
+	};
 
 	return (
 		<div className="settings-payments-onboarding-modal__step-business-verification">
@@ -45,8 +62,36 @@ export const BusinessVerificationStep: React.FC = () => {
 					initialData={ initialData }
 				>
 					<Stepper
+						initialStep={ initialStep }
+						onStepView={ ( stepId ) => {
+							recordPaymentsOnboardingEvent(
+								'woopayments_onboarding_modal_step_view',
+								{
+									step: currentStep?.id || 'unknown',
+									sub_step_id: stepId,
+									source: sessionEntryPoint,
+								}
+							);
+						} }
 						onStepChange={ handleStepChange }
-						onExit={ () => {} }
+						onExit={ () => {
+							recordPaymentsOnboardingEvent(
+								'woopayments_onboarding_modal_step_exit',
+								{
+									step: currentStep?.id || 'unknown',
+									source: sessionEntryPoint,
+								}
+							);
+						} }
+						onComplete={ () => {
+							recordPaymentsOnboardingEvent(
+								'woopayments_onboarding_modal_step_complete',
+								{
+									step: currentStep?.id || 'unknown',
+									source: sessionEntryPoint,
+								}
+							);
+						} }
 					>
 						{ hasTestAccount && (
 							<Step name="activate" showHeading={ false }>
