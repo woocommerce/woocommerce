@@ -40,7 +40,7 @@ const productReviewsStore = {
 };
 
 store< typeof productReviewsStore >(
-	'woocommerce/blockified-product-reviews',
+	'woocommerce/product-reviews',
 	productReviewsStore,
 	{
 		lock: true,

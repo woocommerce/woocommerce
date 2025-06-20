@@ -193,12 +193,8 @@ const blocks = {
 	'order-confirmation-create-account': {
 		customDir: 'order-confirmation/create-account',
 	},
-	'blockified-product-reviews': {
-		customDir: 'product-reviews',
-	},
-	'product-specifications': {
-		customDir: 'product-specifications',
-	},
+	'product-reviews': {},
+	'product-specifications': {},
 	'product-review-rating': {
 		customDir: 'product-reviews/inner-blocks/review-rating',
 	},
@@ -334,8 +330,6 @@ const entries = {
 		// Blocks
 		'product-image-gallery':
 			'./assets/js/atomic/blocks/product-elements/product-image-gallery/index.ts',
-		'product-reviews':
-			'./assets/js/atomic/blocks/product-elements/product-reviews/index.tsx',
 		'product-details':
 			'./assets/js/atomic/blocks/product-elements/product-details/index.tsx',
 
