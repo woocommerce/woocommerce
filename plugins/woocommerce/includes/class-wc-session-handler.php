@@ -238,7 +238,7 @@ class WC_Session_Handler extends WC_Session {
 		/**
 		 * Filters the data to be merged into the user session.
 		 *
-		 * @since 9.10.0
+		 * @since 11.0.0
 		 *
 		 * @param array $data The updated session data.
 		 * @param array $guest_session_data The guest session data.
@@ -302,6 +302,8 @@ class WC_Session_Handler extends WC_Session {
 	/**
 	 * Merges the cart data from the guest session to the user session.
 	 *
+	 * When merging, if the same item exists in both carts (same cart item ID), the guest cart data for that item is preserved.
+	 *
 	 * @param array $data The updated session data.
 	 * @param array $user_session_data The user session data that will be overridden.
 	 * @return array The updated session data.
@@ -323,8 +325,8 @@ class WC_Session_Handler extends WC_Session {
 			// Merge carts.
 			$data['cart'] = array_filter(
 				array_merge(
-					(array) maybe_unserialize( $data['cart'] ),
-					(array) maybe_unserialize( $user_session_data['cart'] )
+					(array) maybe_unserialize( $user_session_data['cart'] ),
+					(array) maybe_unserialize( $data['cart'] )
 				)
 			);
 		}
