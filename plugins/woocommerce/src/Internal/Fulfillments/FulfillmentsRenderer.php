@@ -132,7 +132,7 @@ class FulfillmentsRenderer {
 	 */
 	private function render_fulfillment_status_column_row_data( WC_Order $order ) {
 		$fulfillment_status_meta_exists = $order->meta_exists( '_fulfillment_status' );
-		$order_fulfillment_status       = $fulfillment_status_meta_exists ? $order->get_meta( '_fulfillment_status' ) : 'no_fulfillments';
+		$order_fulfillment_status       = $fulfillment_status_meta_exists ? $order->get_meta( '_fulfillment_status', true ) : 'no_fulfillments';
 
 		echo "<div class='fulfillment-status-wrapper'>";
 		switch ( $order_fulfillment_status ) {
