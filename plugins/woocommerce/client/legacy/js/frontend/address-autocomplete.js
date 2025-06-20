@@ -372,6 +372,15 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 				console.warn( 'Input was sanitized for security' );
 			}
 
+			// Check if the address section exists (shipping may be disabled/hidden)
+			if ( ! addressInputs[ type ] || ! addressInputs[ type ][ 'address_1' ] ) {
+				return;
+			}
+
+			if ( ! suggestionsLists[ type ] || ! suggestionsContainers[ type ] ) {
+				return;
+			}
+
 			const addressInput = addressInputs[ type ][ 'address_1' ];
 			const suggestionsList = suggestionsLists[ type ];
 			const suggestionsContainer = suggestionsContainers[ type ];
@@ -471,6 +480,15 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		 * @param type {string} The address type ('billing' or 'shipping').
 		 */
 		function hideSuggestions( type ) {
+			// Check if the address section exists (shipping may be disabled/hidden)
+			if ( ! addressInputs[ type ] || ! addressInputs[ type ][ 'address_1' ] ) {
+				return;
+			}
+
+			if ( ! suggestionsLists[ type ] || ! suggestionsContainers[ type ] ) {
+				return;
+			}
+
 			const suggestionsList = suggestionsLists[ type ];
 			const suggestionsContainer = suggestionsContainers[ type ];
 			const addressInput = addressInputs[ type ][ 'address_1' ];
@@ -593,6 +611,15 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		 * @param index {number} The index of the suggestion to set as active.
 		 */
 		function setActiveSuggestion( type, index ) {
+			// Check if the address section exists (shipping may be disabled/hidden)
+			if ( ! addressInputs[ type ] || ! addressInputs[ type ][ 'address_1' ] ) {
+				return;
+			}
+
+			if ( ! suggestionsLists[ type ] ) {
+				return;
+			}
+
 			const suggestionsList = suggestionsLists[ type ];
 			const addressInput = addressInputs[ type ][ 'address_1' ];
 
@@ -639,6 +666,11 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 				} );
 
 				addressInput.addEventListener( 'keydown', async function ( e ) {
+					// Check if suggestions exist before accessing them
+					if ( ! suggestionsLists[ type ] || ! suggestionsContainers[ type ] ) {
+						return;
+					}
+
 					const items =
 						suggestionsLists[ type ].querySelectorAll( 'li' );
 					if (
@@ -691,6 +723,15 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		// Hide suggestions when clicking outside.
 		document.addEventListener( 'click', function ( event ) {
 			addressTypes.forEach( ( type ) => {
+				// Check if the address section exists before accessing elements
+				if ( ! addressInputs[ type ] || ! addressInputs[ type ][ 'address_1' ] ) {
+					return;
+				}
+
+				if ( ! suggestionsContainers[ type ] ) {
+					return;
+				}
+
 				const target = event.target;
 				if (
 					target !== suggestionsContainers[ type ] &&
