@@ -99,11 +99,7 @@ const productButtonStore = {
 					groupedProductIdsInCart?.some( ( qty ) => qty > 0 ) &&
 					hasPressedButton
 				) {
-					const totalQuantity = groupedProductIdsInCart?.reduce((sum, qty) => sum + qty, 0) || 0;
-					return state.inTheCartText.replace(
-						'###',
-						totalQuantity.toString()
-					);
+					return state.inTheCartText;
 				}
 				return addToCartText;
 			}
