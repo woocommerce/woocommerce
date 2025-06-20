@@ -9,13 +9,18 @@
 ?>
 
 <!-- wp:group {"tagName":"main","metadata":{"name":"Main"},"style":{"spacing":{"blockGap":"0","margin":{"top":"0"}}},"layout":{"type":"default"}} -->
-<main class="wp-block-group" style="margin-top:0">
-<!-- wp:spacer {"height":"var:preset|spacing|60"} -->
+<main class="wp-block-group" style="margin-top:0"><!-- wp:spacer {"height":"var:preset|spacing|60"} -->
 <div style="height:var(--wp--preset--spacing--60)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
 
 <!-- wp:group {"metadata":{"name":"Page Title"},"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group"><!-- wp:post-title {"textAlign":"left","fontSize":"xx-large"} /-->
+<div class="wp-block-group"><!-- wp:post-featured-image /-->
+
+<!-- wp:spacer {"height":"var:preset|spacing|40"} -->
+<div style="height:var(--wp--preset--spacing--40)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:post-title {"textAlign":"left","fontSize":"xx-large"} /-->
 
 <!-- wp:spacer {"height":"var:preset|spacing|40"} -->
 <div style="height:var(--wp--preset--spacing--40)" aria-hidden="true" class="wp-block-spacer"></div>
@@ -26,6 +31,5 @@
 
 <!-- wp:spacer {"height":"var:preset|spacing|80","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
 <div style="margin-top:0;margin-bottom:0;height:var(--wp--preset--spacing--80)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer -->
-</main>
+<!-- /wp:spacer --></main>
 <!-- /wp:group -->
