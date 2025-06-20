@@ -149,10 +149,16 @@ const addToCartWithOptionsStore = store(
 		state: {
 			get isFormValid(): boolean {
 				const { productType } = getContext< Context >();
+
 				if ( productType !== 'variable' ) {
 					return true;
 				}
-				return !! addToCartWithOptionsStore.state.variationId;
+
+				const { productIsInStock, variationId } =
+					addToCartWithOptionsStore.state;
+
+				// Variable products must be in stock and have a selected variation
+				return Boolean( productIsInStock && variationId );
 			},
 			get variationId(): number | null {
 				const context = getContext< Context >();
