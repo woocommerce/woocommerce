@@ -9,24 +9,6 @@
 <!-- wp:group {"metadata":{"name":"Product Archives","patternName":"woostarter/archive-product"},"align":"wide","layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide">
 
-<!-- wp:spacer {"height":"var:preset|spacing|60"} -->
-<div style="height:var(--wp--preset--spacing--60)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer -->
-
-<!-- wp:woocommerce/store-notices /-->
-
-<!-- wp:woocommerce/breadcrumbs /-->
-
-<!-- wp:group {"align":"wide","style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignwide"><!-- wp:query-title {"type":"archive","level":2,"showPrefix":false,"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"fontSize":"xx-large"} /-->
-
-<!-- wp:term-description {"align":"wide"} /--></div>
-<!-- /wp:group -->
-
-<!-- wp:spacer {"height":"var:preset|spacing|60"} -->
-<div style="height:var(--wp--preset--spacing--60)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer -->
-
 <!-- wp:columns {"align":"wide"} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"width":"22%"} -->
 <div class="wp-block-column" style="flex-basis:22%"><!-- wp:heading {"level":3,"style":{"margin":{"top":"0","bottom":"0"},"spacing":{"margin":{"top":"0","bottom":"0"}},"typography":{"lineHeight":1.6,"fontStyle":"normal","fontWeight":"400"}},"fontSize":"medium"} -->

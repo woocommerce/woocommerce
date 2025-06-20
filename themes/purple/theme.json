@@ -498,20 +498,6 @@
 		},
 		"css": "",
 		"elements": {
-			"textInput": {
-				"border": {
-					"radius": "0",
-					"style": "solid",
-					"width": "1px",
-					"color": "red"
-				},
-				"color": {
-					"text": "var(--wp--preset--color--theme-2)"
-				},
-				"typography": {
-					"fontFamily": "var(--wp--preset--font-family--inter)"
-				}
-			},
 			"button": {
 				":hover": {
 					"color": {

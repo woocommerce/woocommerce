@@ -1,9 +1,28 @@
-<!-- wp:group {"metadata":{"name":"Sticky Header"},"style":{"position":{"type":"sticky","top":"0px"}},"layout":{"type":"default"}} -->
-<div class="wp-block-group"><!-- wp:template-part {"slug":"header"} /--></div>
-<!-- /wp:group -->
+<!-- wp:template-part {"slug":"header"} /-->
 
 <!-- wp:group {"tagName":"main","align":"wide","className":"is-style-default","style":{"spacing":{"padding":{"top":"0","bottom":"0"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"default"}} -->
 <main class="wp-block-group alignwide is-style-default" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0">
+
+<!-- wp:group {"align":"wide","style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignwide">
+
+	<!-- wp:spacer {"height":"var:preset|spacing|60"} -->
+	<div style="height:var(--wp--preset--spacing--60)" aria-hidden="true" class="wp-block-spacer"></div>
+	<!-- /wp:spacer -->
+
+	<!-- wp:woocommerce/store-notices /-->
+
+	<!-- wp:woocommerce/breadcrumbs /-->
+	
+	<!-- wp:query-title {"type":"archive","level":2,"showPrefix":false,"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"fontSize":"xx-large"} /-->
+
+	<!-- wp:term-description {"align":"wide"} /-->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:spacer {"height":"var:preset|spacing|60"} -->
+<div style="height:var(--wp--preset--spacing--60)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
 
 <!-- wp:pattern {"slug":"woostarter/product-grid-with-filters"} /-->
 
