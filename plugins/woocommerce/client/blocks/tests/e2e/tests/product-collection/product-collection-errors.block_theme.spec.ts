@@ -15,7 +15,7 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 			admin,
 			editor,
 		} );
-		use( pageObject );
+		await use( pageObject );
 	},
 } );
 
