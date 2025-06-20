@@ -9,9 +9,10 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Css_Inliner;
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
 use WP_Block_Template;
+use WP_Block_Type_Registry;
 use WP_Post;
 
 /**
@@ -40,6 +41,13 @@ class Content_Renderer {
 	private Theme_Controller $theme_controller;
 
 	const CONTENT_STYLES_FILE = 'content.css';
+
+	/**
+	 * WordPress Block Type Registry.
+	 *
+	 * @var WP_Block_Type_Registry
+	 */
+	private WP_Block_Type_Registry $block_type_registry;
 
 	/**
 	 * CSS inliner
@@ -77,6 +85,13 @@ class Content_Renderer {
 	private $backup_query;
 
 	/**
+	 * Fallback renderer that is used when render_email_callback is not set for the rendered blockType.
+	 *
+	 * @var Fallback
+	 */
+	private Fallback $fallback_renderer;
+
+	/**
 	 * Content_Renderer constructor.
 	 *
 	 * @param Process_Manager  $preprocess_manager Preprocess manager.
@@ -90,10 +105,12 @@ class Content_Renderer {
 		Css_Inliner $css_inliner,
 		Theme_Controller $theme_controller
 	) {
-		$this->process_manager  = $preprocess_manager;
-		$this->blocks_registry  = $blocks_registry;
-		$this->theme_controller = $theme_controller;
-		$this->css_inliner      = $css_inliner;
+		$this->process_manager     = $preprocess_manager;
+		$this->blocks_registry     = $blocks_registry;
+		$this->theme_controller    = $theme_controller;
+		$this->css_inliner         = $css_inliner;
+		$this->block_type_registry = WP_Block_Type_Registry::get_instance();
+		$this->fallback_renderer   = new Fallback();
 	}
 
 	/**
@@ -153,12 +170,14 @@ class Content_Renderer {
 	 * @return string
 	 */
 	public function render_block( string $block_content, array $parsed_block ): string {
-		$renderer = $this->blocks_registry->get_block_renderer( $parsed_block['blockName'] );
-		if ( ! $renderer ) {
-			$renderer = $this->blocks_registry->get_fallback_renderer();
-		}
 		$context = new Rendering_Context( $this->theme_controller->get_theme() );
-		return $renderer ? $renderer->render( $block_content, $parsed_block, $context ) : $block_content;
+
+		$block_type = $this->block_type_registry->get_registered( $parsed_block['blockName'] );
+		if ( $block_type && isset( $block_type->render_email_callback ) && is_callable( $block_type->render_email_callback ) ) {
+			return call_user_func( $block_type->render_email_callback, $block_content, $parsed_block, $context );
+		}
+
+		return $this->fallback_renderer->render( $block_content, $parsed_block, $context );
 	}
 
 	/**

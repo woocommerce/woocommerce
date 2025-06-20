@@ -8,8 +8,19 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core;
 
-use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Blocks_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Layout\Flex_Layout_Renderer;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Button;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Buttons;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Column;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Columns;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Group;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Image;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\List_Block;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\List_Item;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Quote;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Social_Link;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Social_Links;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Text;
 
 /**
  * Initializes the core blocks renderers.
@@ -19,32 +30,8 @@ class Initializer {
 	 * Initializes the core blocks renderers.
 	 */
 	public function initialize(): void {
-		add_action( 'woocommerce_email_blocks_renderer_initialized', array( $this, 'register_core_blocks_renderers' ), 10, 1 );
 		add_filter( 'woocommerce_email_editor_theme_json', array( $this, 'adjust_theme_json' ), 10, 1 );
 		add_filter( 'safe_style_css', array( $this, 'allow_styles' ) );
-	}
-
-	/**
-	 * Register core blocks email renderers when the blocks renderer is initialized.
-	 *
-	 * @param Blocks_Registry $blocks_registry Blocks registry.
-	 */
-	public function register_core_blocks_renderers( Blocks_Registry $blocks_registry ): void {
-		$blocks_registry->add_block_renderer( 'core/paragraph', new Renderer\Blocks\Text() );
-		$blocks_registry->add_block_renderer( 'core/heading', new Renderer\Blocks\Text() );
-		$blocks_registry->add_block_renderer( 'core/column', new Renderer\Blocks\Column() );
-		$blocks_registry->add_block_renderer( 'core/columns', new Renderer\Blocks\Columns() );
-		$blocks_registry->add_block_renderer( 'core/list', new Renderer\Blocks\List_Block() );
-		$blocks_registry->add_block_renderer( 'core/list-item', new Renderer\Blocks\List_Item() );
-		$blocks_registry->add_block_renderer( 'core/image', new Renderer\Blocks\Image() );
-		$blocks_registry->add_block_renderer( 'core/buttons', new Renderer\Blocks\Buttons( new Flex_Layout_Renderer() ) );
-		$blocks_registry->add_block_renderer( 'core/button', new Renderer\Blocks\Button() );
-		$blocks_registry->add_block_renderer( 'core/group', new Renderer\Blocks\Group() );
-		$blocks_registry->add_block_renderer( 'core/quote', new Renderer\Blocks\Quote() );
-		$blocks_registry->add_block_renderer( 'core/social-link', new Renderer\Blocks\Social_Link() );
-		$blocks_registry->add_block_renderer( 'core/social-links', new Renderer\Blocks\Social_Links() );
-		// Render used for all other blocks.
-		$blocks_registry->add_fallback_renderer( new Renderer\Blocks\Fallback() );
 	}
 
 	/**
@@ -79,5 +66,55 @@ class Initializer {
 		$allowed_styles[] = 'mso-font-width';
 		$allowed_styles[] = 'mso-text-raise';
 		return $allowed_styles;
+	}
+
+	/**
+	 * Set render_email_callback for supported blocks.
+	 *
+	 * @param array $settings Block settings.
+	 * @return array
+	 */
+	public function update_block_settings( array $settings ): array {
+		switch ( $settings['name'] ) {
+			case 'core/heading':
+			case 'core/paragraph':
+				$settings['render_email_callback'] = array( new Text(), 'render' );
+				break;
+			case 'core/column':
+				$settings['render_email_callback'] = array( new Column(), 'render' );
+				break;
+			case 'core/columns':
+				$settings['render_email_callback'] = array( new Columns(), 'render' );
+				break;
+			case 'core/list':
+				$settings['render_email_callback'] = array( new List_Block(), 'render' );
+				break;
+			case 'core/list-item':
+				$settings['render_email_callback'] = array( new List_Item(), 'render' );
+				break;
+			case 'core/image':
+				$settings['render_email_callback'] = array( new Image(), 'render' );
+				break;
+			case 'core/button':
+				$settings['render_email_callback'] = array( new Button(), 'render' );
+				break;
+			case 'core/buttons':
+				$settings['render_email_callback'] = array( new Buttons( new Flex_Layout_Renderer() ), 'render' );
+				break;
+			case 'core/group':
+				$settings['render_email_callback'] = array( new Group(), 'render' );
+				break;
+			case 'core/quote':
+				$settings['render_email_callback'] = array( new Quote(), 'render' );
+				break;
+			case 'core/social-link':
+				$settings['render_email_callback'] = array( new Social_Link(), 'render' );
+				break;
+			case 'core/social-links':
+				$settings['render_email_callback'] = array( new Social_Links(), 'render' );
+				break;
+		}
+
+		return $settings;
 	}
 }
