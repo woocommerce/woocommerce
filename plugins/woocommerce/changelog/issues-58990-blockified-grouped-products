@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Blockified grouped product quantity inputs start empty by default with a 0 placeholder.
