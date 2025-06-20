@@ -51,15 +51,15 @@ Most regulations require **Level AA**, meaning you need to meet all **A** and **
 The current version of WCAG is **2.2**.  
 **Extension developers should aim for WCAG 2.2 Level AA compliance** as a best practice.
 
-## [Manual compatibility testing](https://www.w3.org/TR/WCAG22)
+## Manual compatibility testing
 
-It’s important to test your extension for WCAG conformance as you design and develop new features. Testing for accessibility is just as important as testing for security or WordPress coding standards. If you have not previously tested your extension for accessibility, start testing today and add accessibility bug fixes in future releases.
+It’s important to test your extension for [WCAG conformance](https://www.w3.org/TR/WCAG22) as you design and develop new features. Testing for accessibility is just as important as testing for security or WordPress coding standards. If you have not previously tested your extension for accessibility, start testing today and add accessibility bug fixes in future releases.
 
 ### Automated Testing
 
 The easiest way to start accessibility testing is with an automated testing tool. Automated tools can quickly identify problems like empty buttons, ambiguous links, color contrast failures, missing alternative text, and more.
 
-[Equalize Digital Accessibility Checker](https://equalizedigital.com/accessibility-checker) is a free WordPress plugin that you can use to test your extension. Simply install it in your test environment and add blocks or shortcodes created by your extension to a page. When you save the page, Accessibility Checker will scan the blocks or rendered shortcodes and provide a list of issues to address.
+[Accessibility Checker](https://wordpress.org/plugins/accessibility-checker/) is a free WordPress plugin that you can use to test your extension. Simply install it in your test environment and add blocks or shortcodes created by your extension to a page. When you save the page, Accessibility Checker will scan the blocks or rendered shortcodes and provide a list of issues to address.
 
 The [WAVE browser extension](https://wave.webaim.org/extension/) is another free automated testing tool. This browser extension can be used on any website and is helpful if you want to find accessibility problems on your extension’s admin pages.
 
