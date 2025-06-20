@@ -56,12 +56,6 @@ const blocks = {
 	},
 	'attribute-filter': {},
 	breadcrumbs: {},
-	'blockified-product-details': {
-		customDir: 'product-details',
-	},
-	'product-description': {
-		customDir: 'product-description',
-	},
 	'catalog-sorting': {},
 	'coming-soon': {},
 	'customer-account': {},
@@ -193,8 +187,10 @@ const blocks = {
 	'order-confirmation-create-account': {
 		customDir: 'order-confirmation/create-account',
 	},
-	'product-reviews': {},
+	'product-details': {},
+	'product-description': {},
 	'product-specifications': {},
+	'product-reviews': {},
 	'product-review-rating': {
 		customDir: 'product-reviews/inner-blocks/review-rating',
 	},
@@ -330,8 +326,6 @@ const entries = {
 		// Blocks
 		'product-image-gallery':
 			'./assets/js/atomic/blocks/product-elements/product-image-gallery/index.ts',
-		'product-details':
-			'./assets/js/atomic/blocks/product-elements/product-details/index.tsx',
 
 		...blockStylingEntries,
 
