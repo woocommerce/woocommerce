@@ -11,6 +11,11 @@ on:
         type: boolean
         required: true
         default: false
+      allow-revert:
+        description: 'Allow setting stable tag to a lower version (revert)'
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: write
@@ -79,14 +84,15 @@ jobs:
           TARGET_VERSION: ${{ steps.extract-version.outputs.version }}
         run: |
           echo "🔄 Checking if SVN tag $TARGET_VERSION exists..."
-          if svn list "${{ secrets.WPORG_SVN_URL }}/tags/$TARGET_VERSION" --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive --trust-server-cert > /dev/null 2>&1; then
+          if svn list "${{ secrets.WPORG_SVN_URL }}/tags/$TARGET_VERSION" --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive > /dev/null 2>&1; then
             echo "✅ SVN tag '$TARGET_VERSION' exists"
           else
             echo "::error::SVN tag '$TARGET_VERSION' does not exist in the repository"
             exit 1
           fi
 
-      - name: Verify stable tag needs updating
+      - name: Extract current stable tag
+        id: current-stable
         env:
           TARGET_VERSION: ${{ steps.extract-version.outputs.version }}
         run: |
@@ -100,13 +106,43 @@ jobs:
 
           echo "📋 Current stable tag: $CURRENT_STABLE"
           echo "📋 Target version: $TARGET_VERSION"
+          echo "current-stable=$CURRENT_STABLE" >> $GITHUB_OUTPUT
 
-          if [ "$CURRENT_STABLE" = "$TARGET_VERSION" ]; then
-            echo "::error::Stable tag is already set to $TARGET_VERSION. No update needed."
-            exit 1
-          else
-            echo "✅ Stable tag needs updating from '$CURRENT_STABLE' to '$TARGET_VERSION'"
-          fi
+      - name: Install compare-versions
+        run: npm install compare-versions
+
+      - name: Compare versions
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const compareVersions = require('compare-versions');
+
+            const currentStable = '${{ steps.current-stable.outputs.current-stable }}';
+            const targetVersion = '${{ steps.extract-version.outputs.version }}';
+            const allowRevert = '${{ github.event.inputs.allow-revert }}' === 'true';
+
+            console.log(`Current stable: ${currentStable}`);
+            console.log(`Target version: ${targetVersion}`);
+
+            if (currentStable === targetVersion) {
+              core.setFailed(`Stable tag is already set to ${targetVersion}. No update needed.`);
+              process.exit(1);
+            }
+
+            const comparison = compareVersions(targetVersion, currentStable);
+
+            if (comparison > 0) {
+              console.log(`✅ Normal upgrade - updating from '${currentStable}' to '${targetVersion}'`);
+              return;
+            }
+
+            console.log(`⚠️ Warning: Target version (${targetVersion}) is lower than current stable tag (${currentStable})`);
+            if (!allowRevert) {
+              core.setFailed('Cannot set stable tag to a lower version without explicit revert confirmation. Please check the "Allow revert" checkbox if this is intentional.');
+              return;
+            }
+
+            console.log(`✅ Revert confirmed - proceeding with downgrade from '${currentStable}' to '${targetVersion}'`);
 
   update-wporg-stable-tag:
     runs-on: ubuntu-latest
