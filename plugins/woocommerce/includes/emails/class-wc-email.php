@@ -321,6 +321,8 @@ class WC_Email extends WC_Settings_API {
 		}
 		add_action( 'phpmailer_init', array( $this, 'handle_multipart' ) );
 		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
+
+		add_filter( 'woocommerce_order_item_thumbnail', array( $this, 'remove_lazy_loading_from_thumbnail' ), 999, 1 );
 	}
 
 	/**
@@ -1490,5 +1492,48 @@ class WC_Email extends WC_Settings_API {
 		/** Service for rendering emails from block content @var BlockEmailRenderer $renderer */
 		$renderer = wc_get_container()->get( BlockEmailRenderer::class );
 		return $renderer->maybe_render_block_email( $this );
+	}
+
+	/**
+	 * Remove lazy loading from product thumbnails in email context.
+	 * This is hooked into the woocommerce_order_item_thumbnail filter.
+	 *
+	 * @param string $thumbnail_html The thumbnail HTML.
+	 * @return string The thumbnail HTML with lazy loading removed.
+	 */
+	public function remove_lazy_loading_from_thumbnail( $thumbnail_html ) {
+		// Only process if we're currently sending an email.
+		if ( ! $this->sending ) {
+			return $thumbnail_html;
+		}
+
+		if ( strpos( $thumbnail_html, 'lazyload' ) === false && strpos( $thumbnail_html, 'data-src' ) === false ) {
+			return $thumbnail_html;
+		}
+
+		return preg_replace_callback(
+			'/<img([^>]*)>/i',
+			function ( $matches ) {
+				$img_attributes = $matches[1];
+
+				// Extract data-src and use it as src if present.
+				if ( preg_match( '/data-src="([^"]*)"/', $img_attributes, $data_src_match ) ) {
+					$img_attributes = preg_replace( '/src="[^"]*"/', 'src="' . $data_src_match[1] . '"', $img_attributes );
+					$img_attributes = preg_replace( '/data-src="[^"]*"/', '', $img_attributes );
+				}
+
+				// Remove lazyload class.
+				$img_attributes = preg_replace( '/class="([^"]*)\s*lazyload\s*([^"]*)"/', 'class="$1 $2"', $img_attributes );
+				$img_attributes = preg_replace( '/class="([^"]*)\s*lazyload"/', 'class="$1"', $img_attributes );
+				$img_attributes = preg_replace( '/class="lazyload\s*([^"]*)"/', 'class="$1"', $img_attributes );
+				$img_attributes = preg_replace( '/class="lazyload"/', '', $img_attributes );
+
+				// Remove any empty class attributes.
+				$img_attributes = preg_replace( '/class="\s*"/', '', $img_attributes );
+
+				return '<img' . $img_attributes . '>';
+			},
+			$thumbnail_html
+		);
 	}
 }

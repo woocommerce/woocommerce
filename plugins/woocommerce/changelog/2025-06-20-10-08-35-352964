@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove lazy loading attributes from product images in transactional emails to ensure proper display in email clients
