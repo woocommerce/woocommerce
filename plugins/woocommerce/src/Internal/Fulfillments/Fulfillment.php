@@ -257,6 +257,32 @@ class Fulfillment extends \WC_Data {
 	}
 
 	/**
+	 * Get the order associated with this fulfillment.
+	 *
+	 * This method retrieves the order based on the entity type and entity ID.
+	 * If the entity type is `WC_Order`, it returns the order object.
+	 *
+	 * @return \WC_Order|null The order object or null if not found.
+	 */
+	public function get_order(): ?\WC_Order {
+		$entity_type = $this->get_entity_type();
+		$entity_id   = $this->get_entity_id();
+
+		if ( ! $entity_type || ! $entity_id ) {
+			return null;
+		}
+
+		if ( \WC_Order::class === $entity_type ) {
+			$order = wc_get_order( (int) $entity_id );
+			if ( $order instanceof \WC_Order ) {
+				return $order;
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Returns all data for this object as an associative array.
 	 *
 	 * @return array
