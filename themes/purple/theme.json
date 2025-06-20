@@ -379,6 +379,11 @@
 					"textTransform": "uppercase"
 				}
 			},
+			"core/term-description": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-4)"
+				}
+			},
 			"woocommerce/product-title": {
 				"typography": {
 					"fontSize":  "var(--wp--preset--font-size--large)",
@@ -405,10 +410,19 @@
 					}
 				},
 				"typography": {
-					"fontSize":  "var(--wp--preset--font-size--medium)"
+					"fontSize":  "var(--wp--preset--font-size--medium)",
+					"fontWeight": "400"
 				}
 			},
 			"woocommerce/accordion-panel": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-4)"
+				}
+			},
+			"woocommerce/breadcrumbs": {
+				"typography": {
+					"fontSize":  "var(--wp--preset--font-size--small)"
+				},
 				"color": {
 					"text": "var(--wp--preset--color--theme-4)"
 				}
@@ -418,6 +432,11 @@
 					"fontSize":  "var(--wp--preset--font-size--large)",
 					"lineHeight": "1.5"
 				},
+				"color": {
+					"text": "var(--wp--preset--color--theme-4)"
+				}
+			},
+			"woocommerce/product-results-count": {
 				"color": {
 					"text": "var(--wp--preset--color--theme-4)"
 				}
