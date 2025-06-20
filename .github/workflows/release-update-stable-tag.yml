@@ -108,14 +108,24 @@ jobs:
           echo "📋 Target version: $TARGET_VERSION"
           echo "current-stable=$CURRENT_STABLE" >> $GITHUB_OUTPUT
 
-      - name: Install compare-versions
-        run: npm install compare-versions
-
       - name: Compare versions
         uses: actions/github-script@v7
         with:
           script: |
-            const compareVersions = require('compare-versions');
+            const compareVersions = (a, b) => {
+              const aParts = a.split('.').map(Number);
+              const bParts = b.split('.').map(Number);
+              const maxLength = Math.max(aParts.length, bParts.length);
+
+              for (let i = 0; i < maxLength; i++) {
+                const aPart = aParts[i] || 0;
+                const bPart = bParts[i] || 0;
+
+                if (aPart > bPart) return 1;
+                if (aPart < bPart) return -1;
+              }
+              return 0;
+            };
 
             const currentStable = '${{ steps.current-stable.outputs.current-stable }}';
             const targetVersion = '${{ steps.extract-version.outputs.version }}';
@@ -126,7 +136,7 @@ jobs:
 
             if (currentStable === targetVersion) {
               core.setFailed(`Stable tag is already set to ${targetVersion}. No update needed.`);
-              process.exit(1);
+              return;
             }
 
             const comparison = compareVersions(targetVersion, currentStable);
