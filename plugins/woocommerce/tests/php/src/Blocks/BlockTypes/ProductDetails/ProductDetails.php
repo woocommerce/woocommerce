@@ -1,16 +1,16 @@
 <?php
 
 declare(strict_types=1);
-namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\BlockifiedProductDetails;
+namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductDetails;
 
 use WC_Helper_Product;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\BlockifiedProductDetailsMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\BlockifiedProductDetailsNoRegisterMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductDetailsMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductDetailsNoRegisterMock;
 
 /**
- * Tests for the BlockifiedProductDetails block type
+ * Tests for the ProductDetails block type
  */
-class BlockifiedProductDetails extends \WP_UnitTestCase {
+class ProductDetails extends \WP_UnitTestCase {
 
 	/**
 	 * Page ID
@@ -44,7 +44,7 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 			true
 		);
 
-		new BlockifiedProductDetailsMock();
+		new ProductDetailsMock();
 	}
 	/**
 	 * Set up product and page for each test, and create an AssetDataRegistryMock.
@@ -162,7 +162,7 @@ class BlockifiedProductDetails extends \WP_UnitTestCase {
 			}
 		);
 
-		new BlockifiedProductDetailsNoRegisterMock();
+		new ProductDetailsNoRegisterMock();
 
 		// Next, we apply the `hooked_block_types` and `hooked_block_{$slug}` filters.
 		// We pretend that we're in the `last_child` position of the `woocommerce/accordion-group` block.
