@@ -4,7 +4,7 @@
 
 ## Adding support for a core block
 
-1. Add block into `ALLOWED_BLOCK_TYPES` in `packages/php/email-editor/src/Engine/SettingsController.php`.
+1. Add block into `ALLOWED_BLOCK_TYPES` in `packages/js/email-editor/src/blocks/core/supported-blocks.ts`.
 2. Make sure the block is registered in the editor. Currently all core blocks are registered in the editor.
 3. If necessary, add BlockRender class (e.g. Heading) into `packages/php/email-editor/src/Integrations/Core/Renderer/Blocks/` folder.
 
