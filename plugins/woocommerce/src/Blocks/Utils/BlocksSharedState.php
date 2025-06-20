@@ -101,7 +101,7 @@ trait BlocksSharedState {
 		if ( null === self::$blocks_shared_cart_state ) {
 			$cart_exists       = isset( WC()->cart );
 			$cart_has_contents = $cart_exists && ! WC()->cart->is_empty();
-			if ( isset( WC()->cart ) ) {
+			if ( $cart_exists ) {
 				$cart_controller = new CartController();
 				$cart_object     = $cart_controller->get_cart_for_response();
 
