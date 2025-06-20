@@ -204,16 +204,6 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					// Add search icon.
 					const searchIcon = document.createElement( 'div' );
 					searchIcon.className = 'address-search-icon';
-					searchIcon.innerHTML =
-						'<svg xmlns="http://www.w3.org/2000/svg" ' +
-						'viewBox="0 0 14 14" ' +
-						'focusable="false" ' +
-						'aria-hidden="true">' +
-						'<circle cx="6" cy="6" r="4"></circle>' +
-						'<path stroke-linecap="round" ' +
-						'stroke-linejoin="round" ' +
-						'd="m9.25 9.25 2.5 2.5"></path>' +
-						'</svg>';
 					addressInput.parentNode.appendChild( searchIcon );
 				}
 
