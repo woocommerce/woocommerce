@@ -3,7 +3,7 @@
 	"description": "Run the beta versions of WooCommerce.",
 	"homepage": "https://woocommerce.com/",
 	"type": "wordpress-plugin",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"prefer-stable": true,
 	"minimum-stability": "dev",
 	"version": "3.0.0",
