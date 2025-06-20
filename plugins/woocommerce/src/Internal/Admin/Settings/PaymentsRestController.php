@@ -574,6 +574,10 @@ class PaymentsRestController extends RestApiControllerBase {
 	 */
 	private function add_suggestion_links( array $suggestions ): array {
 		foreach ( $suggestions as $key => $suggestion ) {
+			if ( empty( $suggestion['id'] ) ) {
+				continue;
+			}
+
 			if ( empty( $suggestion['_links'] ) ) {
 				$suggestions[ $key ]['_links'] = array();
 			}
