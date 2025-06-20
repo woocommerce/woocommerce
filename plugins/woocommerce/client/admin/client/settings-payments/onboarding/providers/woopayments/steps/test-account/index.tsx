@@ -115,6 +115,18 @@ const TestAccountStep = () => {
 
 	// Update loader title based on time intervals
 	useEffect( () => {
+		if ( status === 'success' ) {
+			// This is a pseudo-sub-step so we need to record the event manually.
+			recordPaymentsOnboardingEvent(
+				'woopayments_onboarding_modal_step_view',
+				{
+					step: currentStep?.id || 'unknown',
+					sub_step_id: 'ready_to_test_payments',
+					source: sessionEntryPoint,
+				}
+			);
+		}
+
 		if ( status !== 'polling' && status !== 'initializing' ) {
 			titlePhaseRef.current = 0;
 			return;
@@ -434,15 +446,6 @@ const TestAccountStep = () => {
 	};
 
 	if ( status === 'success' ) {
-		recordPaymentsOnboardingEvent(
-			'woopayments_onboarding_modal_step_view',
-			{
-				step: currentStep?.id || 'unknown',
-				screen: 'ready_to_test_payments',
-				source: sessionEntryPoint,
-			}
-		);
-
 		// Render success state.
 		return (
 			<>
