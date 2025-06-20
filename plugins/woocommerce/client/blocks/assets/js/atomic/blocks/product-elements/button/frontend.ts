@@ -53,7 +53,6 @@ const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 
 const productButtonStore = {
 	state: {
-		isAddToCartButtonActive: true,
 		get quantity(): number {
 			const product = wooState.cart?.items.find(
 				( item ) => item.id === state.productId
@@ -87,10 +86,6 @@ const productButtonStore = {
 			const quantity = showTemporaryNumber
 				? tempQuantity || 0
 				: state.quantity;
-
-			if ( !state.isAddToCartButtonActive ) {
-				return 'Out of stock';
-			}
 
 			if ( productType === 'grouped' ) {
 				const groupedProductIdsInCart = groupedProductIds?.map(
@@ -132,38 +127,6 @@ const productButtonStore = {
 		},
 	},
 	actions: {
-		*fetchStockStatus(): Generator< unknown, void > {
-			const productId = state.productId;
-
-			try {
-				const res = yield fetch(
-					`${ wooState.restUrl }wc/store/v1/products/${ productId }`,
-					{
-						method: 'GET',
-						headers: {
-							'Content-Type': 'application/json',
-						},
-					}
-				);
-
-				if ( ! res.ok ) {
-					throw new Error( `HTTP error: ${ res.status }` );
-				}
-
-				const data = yield res.json();
-
-				// Set it into context so it can be used in the template.
-				state.isAddToCartButtonActive =
-					data.is_purchasable && data.stock_availability?.class === 'out-of-stock'
-						? false //
-						: true; //
-			} catch ( err ) {
-				// If the request fails, we assume something isn't working in server side so disabled the add to cart button.
-				if ( state.isAddToCartButtonActive ) {
-					state.isAddToCartButtonActive = false;
-				}
-			}
-		},
 		*addCartItem(): Generator< unknown, void > {
 			const context = getContext< Context >();
 
