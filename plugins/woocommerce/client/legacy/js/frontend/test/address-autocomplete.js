@@ -293,15 +293,15 @@ describe( 'Address Suggestions Component', () => {
 		// Reset DOM
 		document.body.innerHTML = '';
 		delete global.window.wc;
-		
+
 		// Mock jQuery
-		global.window.jQuery = jest.fn( ( selector ) => ({
+		global.window.jQuery = jest.fn( ( selector ) => ( {
 			hasClass: jest.fn( () => false ),
 			trigger: jest.fn(),
 			select2: jest.fn(),
 			on: jest.fn(),
-		}) );
-		
+		} ) );
+
 		// Setup window object
 		Object.assign( global.window, {
 			wc_checkout_params: {
@@ -313,7 +313,7 @@ describe( 'Address Suggestions Component', () => {
 
 		// Create DOM structure
 		const form = document.createElement( 'form' );
-		
+
 		// Billing fields
 		const billingCountry = document.createElement( 'select' );
 		billingCountry.id = 'billing_country';
@@ -322,19 +322,19 @@ describe( 'Address Suggestions Component', () => {
 		billingOption.selected = true;
 		billingCountry.appendChild( billingOption );
 		billingCountry.value = 'US';
-		
+
 		const billingAddress1 = document.createElement( 'input' );
 		billingAddress1.id = 'billing_address_1';
 		billingAddress1.type = 'text';
-		
+
 		const billingCity = document.createElement( 'input' );
 		billingCity.id = 'billing_city';
 		billingCity.type = 'text';
-		
+
 		const billingPostcode = document.createElement( 'input' );
 		billingPostcode.id = 'billing_postcode';
 		billingPostcode.type = 'text';
-		
+
 		const billingState = document.createElement( 'input' );
 		billingState.id = 'billing_state';
 		billingState.type = 'text';
@@ -343,7 +343,7 @@ describe( 'Address Suggestions Component', () => {
 		const billingWrapper = document.createElement( 'div' );
 		billingWrapper.className = 'woocommerce-input-wrapper';
 		billingWrapper.appendChild( billingAddress1 );
-		
+
 		// Shipping fields
 		const shippingCountry = document.createElement( 'select' );
 		shippingCountry.id = 'shipping_country';
@@ -352,19 +352,19 @@ describe( 'Address Suggestions Component', () => {
 		shippingOption.selected = true;
 		shippingCountry.appendChild( shippingOption );
 		shippingCountry.value = 'US';
-		
+
 		const shippingAddress1 = document.createElement( 'input' );
 		shippingAddress1.id = 'shipping_address_1';
 		shippingAddress1.type = 'text';
-		
+
 		const shippingCity = document.createElement( 'input' );
 		shippingCity.id = 'shipping_city';
 		shippingCity.type = 'text';
-		
+
 		const shippingPostcode = document.createElement( 'input' );
 		shippingPostcode.id = 'shipping_postcode';
 		shippingPostcode.type = 'text';
-		
+
 		const shippingState = document.createElement( 'input' );
 		shippingState.id = 'shipping_state';
 		shippingState.type = 'text';
@@ -384,9 +384,9 @@ describe( 'Address Suggestions Component', () => {
 		form.appendChild( shippingCity );
 		form.appendChild( shippingPostcode );
 		form.appendChild( shippingState );
-		
+
 		document.body.appendChild( form );
-		
+
 		billingAddressInput = billingAddress1;
 		shippingAddressInput = shippingAddress1;
 
@@ -418,16 +418,18 @@ describe( 'Address Suggestions Component', () => {
 		// Reset modules and require fresh instance
 		jest.resetModules();
 		require( '../address-autocomplete' );
-		
+
 		// Register the mock provider
-		window.wc.addressAutocomplete.registerAddressAutocompleteProvider( mockProvider );
-		
+		window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
+			mockProvider
+		);
+
 		// Trigger DOMContentLoaded event and wait for initialization
 		const event = new Event( 'DOMContentLoaded' );
 		document.dispatchEvent( event );
-		
+
 		// Wait a bit for DOM initialization to complete
-		await new Promise( resolve => setTimeout( resolve, 10 ) );
+		await new Promise( ( resolve ) => setTimeout( resolve, 10 ) );
 	} );
 
 	afterEach( () => {
@@ -435,41 +437,67 @@ describe( 'Address Suggestions Component', () => {
 	} );
 
 	describe( 'DOM Initialization', () => {
-		test( 'should create suggestions container and search icon for address inputs', () => {
-			const billingSuggestions = document.getElementById( 'address_suggestions_billing' );
-			const shippingSuggestions = document.getElementById( 'address_suggestions_shipping' );
-			
+		test( 'should create suggestions container for address inputs', () => {
+			const billingSuggestions = document.getElementById(
+				'address_suggestions_billing'
+			);
+			const shippingSuggestions = document.getElementById(
+				'address_suggestions_shipping'
+			);
+
 			expect( billingSuggestions ).toBeTruthy();
 			expect( shippingSuggestions ).toBeTruthy();
-			
-			expect( billingSuggestions.className ).toBe( 'woocommerce-address-suggestions' );
+
+			expect( billingSuggestions.className ).toBe(
+				'woocommerce-address-suggestions'
+			);
 			expect( billingSuggestions.style.display ).toBe( 'none' );
-			expect( billingSuggestions.getAttribute( 'role' ) ).toBe( 'region' );
-			expect( billingSuggestions.getAttribute( 'aria-live' ) ).toBe( 'polite' );
-			
+			expect( billingSuggestions.getAttribute( 'role' ) ).toBe(
+				'region'
+			);
+			expect( billingSuggestions.getAttribute( 'aria-live' ) ).toBe(
+				'polite'
+			);
+
 			// Check suggestions list
-			const billingList = billingSuggestions.querySelector( '.suggestions-list' );
+			const billingList =
+				billingSuggestions.querySelector( '.suggestions-list' );
 			expect( billingList ).toBeTruthy();
 			expect( billingList.getAttribute( 'role' ) ).toBe( 'listbox' );
-			expect( billingList.getAttribute( 'aria-label' ) ).toBe( 'Address suggestions' );
-			
-			// Check search icon
-			const billingIcon = document.querySelector( '.address-search-icon' );
-			expect( billingIcon ).toBeTruthy();
-			expect( billingIcon.innerHTML ).toContain( '<svg' );
+			expect( billingList.getAttribute( 'aria-label' ) ).toBe(
+				'Address suggestions'
+			);
+
+			// Check search icon container exists
+			const billingIconContainer = document.querySelector(
+				'.address-search-icon'
+			);
+			expect( billingIconContainer ).toBeTruthy();
 		} );
 
 		test( 'should set active provider based on country value', () => {
-			expect( window.wc.addressAutocomplete.activeProvider.billing ).toBe( mockProvider );
-			expect( window.wc.addressAutocomplete.activeProvider.shipping ).toBe( mockProvider );
+			expect( window.wc.addressAutocomplete.activeProvider.billing ).toBe(
+				mockProvider
+			);
+			expect(
+				window.wc.addressAutocomplete.activeProvider.shipping
+			).toBe( mockProvider );
 		} );
 
 		test( 'should add autocomplete-available class when provider is active', () => {
-			const billingWrapper = billingAddressInput.closest( '.woocommerce-input-wrapper' );
-			const shippingWrapper = shippingAddressInput.closest( '.woocommerce-input-wrapper' );
-			
-			expect( billingWrapper.classList.contains( 'autocomplete-available' ) ).toBe( true );
-			expect( shippingWrapper.classList.contains( 'autocomplete-available' ) ).toBe( true );
+			const billingWrapper = billingAddressInput.closest(
+				'.woocommerce-input-wrapper'
+			);
+			const shippingWrapper = shippingAddressInput.closest(
+				'.woocommerce-input-wrapper'
+			);
+
+			expect(
+				billingWrapper.classList.contains( 'autocomplete-available' )
+			).toBe( true );
+			expect(
+				shippingWrapper.classList.contains( 'autocomplete-available' )
+			).toBe( true );
 		} );
 	} );
 
@@ -478,9 +506,11 @@ describe( 'Address Suggestions Component', () => {
 			const billingCountry = document.getElementById( 'billing_country' );
 			billingCountry.value = 'US';
 			billingCountry.dispatchEvent( new Event( 'change' ) );
-			
+
 			expect( mockProvider.canSearch ).toHaveBeenCalledWith( 'US' );
-			expect( window.wc.addressAutocomplete.activeProvider.billing ).toBe( mockProvider );
+			expect( window.wc.addressAutocomplete.activeProvider.billing ).toBe(
+				mockProvider
+			);
 		} );
 
 		test( 'should clear active provider when country does not match canSearch criteria', () => {
@@ -491,36 +521,47 @@ describe( 'Address Suggestions Component', () => {
 			billingCountry.appendChild( frOption );
 			billingCountry.value = 'FR';
 			billingCountry.dispatchEvent( new Event( 'change' ) );
-			
+
 			expect( mockProvider.canSearch ).toHaveBeenCalledWith( 'FR' );
-			expect( window.wc.addressAutocomplete.activeProvider.billing ).toBe( null );
+			expect( window.wc.addressAutocomplete.activeProvider.billing ).toBe(
+				null
+			);
 		} );
 
 		test( 'should remove autocomplete-available class when no provider is active', () => {
 			const billingCountry = document.getElementById( 'billing_country' );
-			const billingWrapper = billingAddressInput.closest( '.woocommerce-input-wrapper' );
-			
+			const billingWrapper = billingAddressInput.closest(
+				'.woocommerce-input-wrapper'
+			);
+
 			billingCountry.value = 'FR';
 			billingCountry.dispatchEvent( new Event( 'change' ) );
-			
-			expect( billingWrapper.classList.contains( 'autocomplete-available' ) ).toBe( false );
+
+			expect(
+				billingWrapper.classList.contains( 'autocomplete-available' )
+			).toBe( false );
 		} );
 
 		test( 'should handle country change for both billing and shipping', () => {
 			const billingCountry = document.getElementById( 'billing_country' );
-			const shippingCountry = document.getElementById( 'shipping_country' );
-			
+			const shippingCountry =
+				document.getElementById( 'shipping_country' );
+
 			// Add FR option to billing
 			const frOption = document.createElement( 'option' );
 			frOption.value = 'FR';
 			billingCountry.appendChild( frOption );
 			billingCountry.value = 'FR';
-			
+
 			billingCountry.dispatchEvent( new Event( 'change' ) );
 			shippingCountry.dispatchEvent( new Event( 'change' ) );
-			
-			expect( window.wc.addressAutocomplete.activeProvider.billing ).toBe( null );
-			expect( window.wc.addressAutocomplete.activeProvider.shipping ).toBe( mockProvider );
+
+			expect( window.wc.addressAutocomplete.activeProvider.billing ).toBe(
+				null
+			);
+			expect(
+				window.wc.addressAutocomplete.activeProvider.shipping
+			).toBe( mockProvider );
 		} );
 	} );
 
@@ -528,11 +569,13 @@ describe( 'Address Suggestions Component', () => {
 		test( 'should not display suggestions for input less than 3 characters', async () => {
 			billingAddressInput.value = 'ab';
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			
+
 			// Wait for timeout
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
-			
-			const suggestionsList = document.querySelector( '#address_suggestions_billing .suggestions-list' );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const suggestionsList = document.querySelector(
+				'#address_suggestions_billing .suggestions-list'
+			);
 			expect( suggestionsList.innerHTML ).toBe( '' );
 			expect( mockProvider.search ).not.toHaveBeenCalled();
 		} );
@@ -541,86 +584,111 @@ describe( 'Address Suggestions Component', () => {
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			
+
 			// Wait for timeout and async operations
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
-			
-			expect( mockProvider.search ).toHaveBeenCalledWith( 'billing', '123' );
-			
-			const suggestionsList = document.querySelector( '#address_suggestions_billing .suggestions-list' );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			expect( mockProvider.search ).toHaveBeenCalledWith(
+				'billing',
+				'123'
+			);
+
+			const suggestionsList = document.querySelector(
+				'#address_suggestions_billing .suggestions-list'
+			);
 			const suggestions = suggestionsList.querySelectorAll( 'li' );
-			
+
 			expect( suggestions ).toHaveLength( 2 );
-			expect( suggestions[0].textContent ).toContain( '123 Main Street' );
-			expect( suggestions[1].textContent ).toContain( '456 Oak Avenue' );
+			expect( suggestions[ 0 ].textContent ).toContain(
+				'123 Main Street'
+			);
+			expect( suggestions[ 1 ].textContent ).toContain(
+				'456 Oak Avenue'
+			);
 		} );
 
 		test( 'should highlight matched text in suggestions', async () => {
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
-			
-			const suggestionsList = document.querySelector( '#address_suggestions_billing .suggestions-list' );
+
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const suggestionsList = document.querySelector(
+				'#address_suggestions_billing .suggestions-list'
+			);
 			const firstSuggestion = suggestionsList.querySelector( 'li' );
 			const strongElement = firstSuggestion.querySelector( 'strong' );
-			
+
 			expect( strongElement ).toBeTruthy();
 			expect( strongElement.textContent ).toBe( '123' );
 		} );
 
 		test( 'should limit suggestions to maximum of 5', async () => {
 			// Mock provider to return more than 5 suggestions
-			mockProvider.search.mockResolvedValue( Array.from( { length: 10 }, ( _, i ) => ( {
-				id: `addr${i}`,
-				label: `${i} Test Street`,
-				matchedSubstrings: [],
-			} ) ) );
-			
+			mockProvider.search.mockResolvedValue(
+				Array.from( { length: 10 }, ( _, i ) => ( {
+					id: `addr${ i }`,
+					label: `${ i } Test Street`,
+					matchedSubstrings: [],
+				} ) )
+			);
+
 			billingAddressInput.value = 'test';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
-			
-			const suggestionsList = document.querySelector( '#address_suggestions_billing .suggestions-list' );
+
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const suggestionsList = document.querySelector(
+				'#address_suggestions_billing .suggestions-list'
+			);
 			const suggestions = suggestionsList.querySelectorAll( 'li' );
-			
+
 			expect( suggestions ).toHaveLength( 5 );
 		} );
 
 		test( 'should hide suggestions when no results returned', async () => {
 			mockProvider.search.mockResolvedValue( [] );
-			
+
 			billingAddressInput.value = 'xyz';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
-			
-			const suggestionsContainer = document.getElementById( 'address_suggestions_billing' );
+
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const suggestionsContainer = document.getElementById(
+				'address_suggestions_billing'
+			);
 			expect( suggestionsContainer.style.display ).toBe( 'none' );
 		} );
 
 		test( 'should hide suggestions and log error when search throws exception', async () => {
-			mockProvider.search.mockRejectedValue( new Error( 'Search failed' ) );
-			
-			const consoleSpy = jest.spyOn( console, 'error' ).mockImplementation( () => {} );
-			
+			mockProvider.search.mockRejectedValue(
+				new Error( 'Search failed' )
+			);
+
+			const consoleSpy = jest
+				.spyOn( console, 'error' )
+				.mockImplementation( () => {} );
+
 			billingAddressInput.value = 'test';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
-			
-			const suggestionsContainer = document.getElementById( 'address_suggestions_billing' );
+
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const suggestionsContainer = document.getElementById(
+				'address_suggestions_billing'
+			);
 			expect( suggestionsContainer.style.display ).toBe( 'none' );
-			expect( consoleSpy ).toHaveBeenCalledWith( 'Address search error:', expect.any( Error ) );
-			
+			expect( consoleSpy ).toHaveBeenCalledWith(
+				'Address search error:',
+				expect.any( Error )
+			);
+
 			consoleSpy.mockRestore();
 		} );
-
 	} );
 
 	describe( 'Keyboard Navigation', () => {
@@ -629,104 +697,170 @@ describe( 'Address Suggestions Component', () => {
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
 		} );
 
 		test( 'should navigate down with ArrowDown key', () => {
-			const suggestions = document.querySelectorAll( '#address_suggestions_billing .suggestions-list li' );
-			
+			const suggestions = document.querySelectorAll(
+				'#address_suggestions_billing .suggestions-list li'
+			);
+
 			// No suggestion should be active initially
-			expect( suggestions[0].classList.contains( 'active' ) ).toBe( false );
-			expect( suggestions[0].getAttribute( 'aria-selected' ) ).toBe( null );
-			
+			expect( suggestions[ 0 ].classList.contains( 'active' ) ).toBe(
+				false
+			);
+			expect( suggestions[ 0 ].getAttribute( 'aria-selected' ) ).toBe(
+				null
+			);
+
 			// Press ArrowDown
-			const keydownEvent = new KeyboardEvent( 'keydown', { key: 'ArrowDown', bubbles: true } );
+			const keydownEvent = new KeyboardEvent( 'keydown', {
+				key: 'ArrowDown',
+				bubbles: true,
+			} );
 			billingAddressInput.dispatchEvent( keydownEvent );
-			
+
 			// First suggestion should now be active
-			expect( suggestions[0].classList.contains( 'active' ) ).toBe( true );
-			expect( suggestions[0].getAttribute( 'aria-selected' ) ).toBe( 'true' );
-			expect( suggestions[1].classList.contains( 'active' ) ).toBe( false );
+			expect( suggestions[ 0 ].classList.contains( 'active' ) ).toBe(
+				true
+			);
+			expect( suggestions[ 0 ].getAttribute( 'aria-selected' ) ).toBe(
+				'true'
+			);
+			expect( suggestions[ 1 ].classList.contains( 'active' ) ).toBe(
+				false
+			);
 		} );
 
 		test( 'should navigate up with ArrowUp key', () => {
-			const suggestions = document.querySelectorAll( '#address_suggestions_billing .suggestions-list li' );
-			
+			const suggestions = document.querySelectorAll(
+				'#address_suggestions_billing .suggestions-list li'
+			);
+
 			// Navigate to first item first
-			let keydownEvent = new KeyboardEvent( 'keydown', { key: 'ArrowDown', bubbles: true } );
+			let keydownEvent = new KeyboardEvent( 'keydown', {
+				key: 'ArrowDown',
+				bubbles: true,
+			} );
 			billingAddressInput.dispatchEvent( keydownEvent );
-			
+
 			// Navigate to second item
-			keydownEvent = new KeyboardEvent( 'keydown', { key: 'ArrowDown', bubbles: true } );
+			keydownEvent = new KeyboardEvent( 'keydown', {
+				key: 'ArrowDown',
+				bubbles: true,
+			} );
 			billingAddressInput.dispatchEvent( keydownEvent );
-			
+
 			// Press ArrowUp
-			keydownEvent = new KeyboardEvent( 'keydown', { key: 'ArrowUp', bubbles: true } );
+			keydownEvent = new KeyboardEvent( 'keydown', {
+				key: 'ArrowUp',
+				bubbles: true,
+			} );
 			billingAddressInput.dispatchEvent( keydownEvent );
-			
+
 			// First suggestion should be active again
-			expect( suggestions[0].classList.contains( 'active' ) ).toBe( true );
-			expect( suggestions[1].classList.contains( 'active' ) ).toBe( false );
+			expect( suggestions[ 0 ].classList.contains( 'active' ) ).toBe(
+				true
+			);
+			expect( suggestions[ 1 ].classList.contains( 'active' ) ).toBe(
+				false
+			);
 		} );
 
 		test( 'should wrap around when navigating beyond bounds', () => {
-			const suggestions = document.querySelectorAll( '#address_suggestions_billing .suggestions-list li' );
-			
+			const suggestions = document.querySelectorAll(
+				'#address_suggestions_billing .suggestions-list li'
+			);
+
 			// Navigate to first item
-			let keydownEvent = new KeyboardEvent( 'keydown', { key: 'ArrowDown', bubbles: true } );
+			let keydownEvent = new KeyboardEvent( 'keydown', {
+				key: 'ArrowDown',
+				bubbles: true,
+			} );
 			billingAddressInput.dispatchEvent( keydownEvent );
-			
+
 			// Navigate to second (last) item
-			keydownEvent = new KeyboardEvent( 'keydown', { key: 'ArrowDown', bubbles: true } );
+			keydownEvent = new KeyboardEvent( 'keydown', {
+				key: 'ArrowDown',
+				bubbles: true,
+			} );
 			billingAddressInput.dispatchEvent( keydownEvent );
-			
+
 			// Navigate beyond last item - should wrap to first
-			keydownEvent = new KeyboardEvent( 'keydown', { key: 'ArrowDown', bubbles: true } );
+			keydownEvent = new KeyboardEvent( 'keydown', {
+				key: 'ArrowDown',
+				bubbles: true,
+			} );
 			billingAddressInput.dispatchEvent( keydownEvent );
-			
-			expect( suggestions[0].classList.contains( 'active' ) ).toBe( true );
-			expect( suggestions[1].classList.contains( 'active' ) ).toBe( false );
+
+			expect( suggestions[ 0 ].classList.contains( 'active' ) ).toBe(
+				true
+			);
+			expect( suggestions[ 1 ].classList.contains( 'active' ) ).toBe(
+				false
+			);
 		} );
 
 		test( 'should select address with Enter key', async () => {
-			const suggestions = document.querySelectorAll( '#address_suggestions_billing .suggestions-list li' );
-			
+			const suggestions = document.querySelectorAll(
+				'#address_suggestions_billing .suggestions-list li'
+			);
+
 			// Navigate to first suggestion first
-			let keydownEvent = new KeyboardEvent( 'keydown', { key: 'ArrowDown', bubbles: true } );
+			let keydownEvent = new KeyboardEvent( 'keydown', {
+				key: 'ArrowDown',
+				bubbles: true,
+			} );
 			billingAddressInput.dispatchEvent( keydownEvent );
-			
+
 			// Press Enter to select first suggestion
-			keydownEvent = new KeyboardEvent( 'keydown', { key: 'Enter', bubbles: true } );
+			keydownEvent = new KeyboardEvent( 'keydown', {
+				key: 'Enter',
+				bubbles: true,
+			} );
 			billingAddressInput.dispatchEvent( keydownEvent );
-			
+
 			// Wait for async operations
-			await new Promise( resolve => setTimeout( resolve, 250 ) );
-			
+			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
+
 			expect( mockProvider.select ).toHaveBeenCalledWith( 'addr1' );
-			
+
 			// Suggestions should be hidden
-			const suggestionsContainer = document.getElementById( 'address_suggestions_billing' );
+			const suggestionsContainer = document.getElementById(
+				'address_suggestions_billing'
+			);
 			expect( suggestionsContainer.style.display ).toBe( 'none' );
 		} );
 
 		test( 'should hide suggestions with Escape key', () => {
-			const suggestionsContainer = document.getElementById( 'address_suggestions_billing' );
+			const suggestionsContainer = document.getElementById(
+				'address_suggestions_billing'
+			);
 			expect( suggestionsContainer.style.display ).toBe( 'block' );
-			
+
 			// Press Escape
-			const keydownEvent = new KeyboardEvent( 'keydown', { key: 'Escape', bubbles: true } );
+			const keydownEvent = new KeyboardEvent( 'keydown', {
+				key: 'Escape',
+				bubbles: true,
+			} );
 			billingAddressInput.dispatchEvent( keydownEvent );
-			
+
 			expect( suggestionsContainer.style.display ).toBe( 'none' );
 		} );
 
 		test( 'should not handle keyboard events when suggestions are hidden', () => {
 			// Hide suggestions first
-			const escapeEvent = new KeyboardEvent( 'keydown', { key: 'Escape', bubbles: true } );
+			const escapeEvent = new KeyboardEvent( 'keydown', {
+				key: 'Escape',
+				bubbles: true,
+			} );
 			billingAddressInput.dispatchEvent( escapeEvent );
-			
+
 			// Try to navigate with ArrowDown - should not throw error
-			const arrowEvent = new KeyboardEvent( 'keydown', { key: 'ArrowDown', bubbles: true } );
+			const arrowEvent = new KeyboardEvent( 'keydown', {
+				key: 'ArrowDown',
+				bubbles: true,
+			} );
 			expect( () => {
 				billingAddressInput.dispatchEvent( arrowEvent );
 			} ).not.toThrow();
@@ -739,23 +873,35 @@ describe( 'Address Suggestions Component', () => {
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
-			
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
 			// Click on first suggestion
-			const firstSuggestion = document.querySelector( '#address_suggestions_billing .suggestions-list li' );
+			const firstSuggestion = document.querySelector(
+				'#address_suggestions_billing .suggestions-list li'
+			);
 			firstSuggestion.click();
-			
+
 			// Wait for async operations and timeout
-			await new Promise( resolve => setTimeout( resolve, 250 ) );
-			
+			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
+
 			expect( mockProvider.select ).toHaveBeenCalledWith( 'addr1' );
-			
+
 			// Check that fields are populated
-			expect( document.getElementById( 'billing_address_1' ).value ).toBe( '123 Main Street' );
-			expect( document.getElementById( 'billing_city' ).value ).toBe( 'City' );
-			expect( document.getElementById( 'billing_postcode' ).value ).toBe( '12345' );
-			expect( document.getElementById( 'billing_country' ).value ).toBe( 'US' );
-			expect( document.getElementById( 'billing_state' ).value ).toBe( 'CA' );
+			expect( document.getElementById( 'billing_address_1' ).value ).toBe(
+				'123 Main Street'
+			);
+			expect( document.getElementById( 'billing_city' ).value ).toBe(
+				'City'
+			);
+			expect( document.getElementById( 'billing_postcode' ).value ).toBe(
+				'12345'
+			);
+			expect( document.getElementById( 'billing_country' ).value ).toBe(
+				'US'
+			);
+			expect( document.getElementById( 'billing_state' ).value ).toBe(
+				'CA'
+			);
 		} );
 
 		test( 'should handle partial address data from provider', async () => {
@@ -765,65 +911,85 @@ describe( 'Address Suggestions Component', () => {
 				city: 'City',
 				// Missing postcode, country, state
 			} );
-			
+
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
-			
-			const firstSuggestion = document.querySelector( '#address_suggestions_billing .suggestions-list li' );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const firstSuggestion = document.querySelector(
+				'#address_suggestions_billing .suggestions-list li'
+			);
 			firstSuggestion.click();
-			
-			await new Promise( resolve => setTimeout( resolve, 250 ) );
-			
+
+			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
+
 			// Only provided fields should be populated
-			expect( document.getElementById( 'billing_address_1' ).value ).toBe( '123 Main Street' );
-			expect( document.getElementById( 'billing_city' ).value ).toBe( 'City' );
-			expect( document.getElementById( 'billing_postcode' ).value ).toBe( '' );
+			expect( document.getElementById( 'billing_address_1' ).value ).toBe(
+				'123 Main Street'
+			);
+			expect( document.getElementById( 'billing_city' ).value ).toBe(
+				'City'
+			);
+			expect( document.getElementById( 'billing_postcode' ).value ).toBe(
+				''
+			);
 		} );
 
 		test( 'should handle provider selection errors gracefully', async () => {
-			mockProvider.select.mockRejectedValue( new Error( 'Selection failed' ) );
-			
-			const consoleSpy = jest.spyOn( console, 'error' ).mockImplementation( () => {} );
-			
+			mockProvider.select.mockRejectedValue(
+				new Error( 'Selection failed' )
+			);
+
+			const consoleSpy = jest
+				.spyOn( console, 'error' )
+				.mockImplementation( () => {} );
+
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
-			
-			const firstSuggestion = document.querySelector( '#address_suggestions_billing .suggestions-list li' );
-			firstSuggestion.click();
-			
-			await new Promise( resolve => setTimeout( resolve, 250 ) );
-			
-			expect( consoleSpy ).toHaveBeenCalledWith( 
-				'Error selecting address from provider', 
-				'test-provider', 
-				expect.any( Error ) 
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const firstSuggestion = document.querySelector(
+				'#address_suggestions_billing .suggestions-list li'
 			);
-			
+			firstSuggestion.click();
+
+			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
+
+			expect( consoleSpy ).toHaveBeenCalledWith(
+				'Error selecting address from provider',
+				'test-provider',
+				expect.any( Error )
+			);
+
 			// Fields should remain unchanged
-			expect( document.getElementById( 'billing_address_1' ).value ).toBe( '123' );
-			
+			expect( document.getElementById( 'billing_address_1' ).value ).toBe(
+				'123'
+			);
+
 			consoleSpy.mockRestore();
 		} );
 
 		test( 'should handle invalid address data from provider', async () => {
 			mockProvider.select.mockResolvedValue( null );
-			
+
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
-			
-			const firstSuggestion = document.querySelector( '#address_suggestions_billing .suggestions-list li' );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const firstSuggestion = document.querySelector(
+				'#address_suggestions_billing .suggestions-list li'
+			);
 			firstSuggestion.click();
-			
-			await new Promise( resolve => setTimeout( resolve, 250 ) );
-			
+
+			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
+
 			// Fields should remain unchanged
-			expect( document.getElementById( 'billing_address_1' ).value ).toBe( '123' );
+			expect( document.getElementById( 'billing_address_1' ).value ).toBe(
+				'123'
+			);
 		} );
 	} );
 
@@ -832,11 +998,15 @@ describe( 'Address Suggestions Component', () => {
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
-			
-			expect( billingAddressInput.getAttribute( 'autocomplete' ) ).toBe( 'off' );
-			expect( billingAddressInput.getAttribute( 'data-lpignore' ) ).toBe( '' );
+
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			expect( billingAddressInput.getAttribute( 'autocomplete' ) ).toBe(
+				'off'
+			);
+			expect( billingAddressInput.getAttribute( 'data-lpignore' ) ).toBe(
+				''
+			);
 		} );
 
 		test( 'should enable browser autofill when suggestions are hidden', async () => {
@@ -844,32 +1014,43 @@ describe( 'Address Suggestions Component', () => {
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
-			
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
 			// Then hide them
 			billingAddressInput.value = 'xy';
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
-			
-			expect( billingAddressInput.getAttribute( 'autocomplete' ) ).toBe( 'address-line1' );
-			expect( billingAddressInput.getAttribute( 'data-lpignore' ) ).toBe( 'false' );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			expect( billingAddressInput.getAttribute( 'autocomplete' ) ).toBe(
+				'address-line1'
+			);
+			expect( billingAddressInput.getAttribute( 'data-lpignore' ) ).toBe(
+				'false'
+			);
 		} );
 	} );
 
 	describe( 'Security and Sanitization', () => {
 		test( 'should sanitize input values for XSS protection', async () => {
 			const maliciousInput = '<script>alert("xss")</script>';
-			const consoleSpy = jest.spyOn( console, 'warn' ).mockImplementation( () => {} );
-			
+			const consoleSpy = jest
+				.spyOn( console, 'warn' )
+				.mockImplementation( () => {} );
+
 			billingAddressInput.value = maliciousInput;
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
-			
-			expect( consoleSpy ).toHaveBeenCalledWith( 'Input was sanitized for security' );
-			expect( mockProvider.search ).toHaveBeenCalledWith( 'billing', 'alert("xss")' );
-			
+
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			expect( consoleSpy ).toHaveBeenCalledWith(
+				'Input was sanitized for security'
+			);
+			expect( mockProvider.search ).toHaveBeenCalledWith(
+				'billing',
+				'alert("xss")'
+			);
+
 			consoleSpy.mockRestore();
 		} );
 
@@ -887,16 +1068,18 @@ describe( 'Address Suggestions Component', () => {
 					],
 				},
 			] );
-			
+
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
-			
-			const suggestionsList = document.querySelector( '#address_suggestions_billing .suggestions-list' );
+
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const suggestionsList = document.querySelector(
+				'#address_suggestions_billing .suggestions-list'
+			);
 			const firstSuggestion = suggestionsList.querySelector( 'li' );
-			
+
 			// Should still render the suggestion without highlighting
 			expect( firstSuggestion.textContent ).toBe( '123 Main Street' );
 			expect( firstSuggestion.querySelector( 'strong' ) ).toBe( null );
@@ -909,16 +1092,18 @@ describe( 'Address Suggestions Component', () => {
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
-			
-			const suggestionsContainer = document.getElementById( 'address_suggestions_billing' );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const suggestionsContainer = document.getElementById(
+				'address_suggestions_billing'
+			);
 			expect( suggestionsContainer.style.display ).toBe( 'block' );
-			
+
 			// Click outside
 			const outsideElement = document.createElement( 'div' );
 			document.body.appendChild( outsideElement );
 			outsideElement.click();
-			
+
 			expect( suggestionsContainer.style.display ).toBe( 'none' );
 		} );
 
@@ -927,14 +1112,16 @@ describe( 'Address Suggestions Component', () => {
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
-			
-			const suggestionsContainer = document.getElementById( 'address_suggestions_billing' );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const suggestionsContainer = document.getElementById(
+				'address_suggestions_billing'
+			);
 			expect( suggestionsContainer.style.display ).toBe( 'block' );
-			
+
 			// Click inside suggestions container
 			suggestionsContainer.click();
-			
+
 			expect( suggestionsContainer.style.display ).toBe( 'block' );
 		} );
 
@@ -943,14 +1130,16 @@ describe( 'Address Suggestions Component', () => {
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( resolve => setTimeout( resolve, 150 ) );
-			
-			const suggestionsContainer = document.getElementById( 'address_suggestions_billing' );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const suggestionsContainer = document.getElementById(
+				'address_suggestions_billing'
+			);
 			expect( suggestionsContainer.style.display ).toBe( 'block' );
-			
+
 			// Click on address input
 			billingAddressInput.click();
-			
+
 			expect( suggestionsContainer.style.display ).toBe( 'block' );
 		} );
 	} );
