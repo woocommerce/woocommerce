@@ -23,7 +23,7 @@ jobs:
       - name: Check confirmation
         run: |
           if [ "${{ github.event.inputs.confirm-update }}" != "true" ]; then
-            echo "❌ ERROR: You must check the confirmation checkbox to proceed with the stable tag update"
+            echo "::error::You must check the confirmation checkbox to proceed with the stable tag update"
             exit 1
           else
             echo "✅ Confirmation received - proceeding with stable tag update"
@@ -76,7 +76,7 @@ jobs:
         run: |
           RELEASE_BRANCH="${{ needs.validate-release-version.outputs.branch }}"
           if ! git ls-remote --heads origin "$RELEASE_BRANCH" | grep -q "refs/heads/$RELEASE_BRANCH"; then
-            echo "❌ ERROR: Release branch '$RELEASE_BRANCH' does not exist"
+            echo "::error::Release branch '$RELEASE_BRANCH' does not exist"
             exit 1
           else
             echo "✅ Release branch '$RELEASE_BRANCH' exists"
@@ -108,17 +108,20 @@ jobs:
           grep "^Stable tag:" "$README_PATH" || echo "::error::Stable tag line not found"
           echo "=========================="
 
-          if sed -i "s/^Stable tag: .*/Stable tag: $TARGET_VERSION/" "$README_PATH"; then
-            echo "📝 Updated stable tag line:"
-            grep "^Stable tag:" "$README_PATH" || echo "::error::Stable tag line not found"
-            echo "=========================="
+          # Update the stable tag
+          sed -i "s/^Stable tag: .*/Stable tag: $TARGET_VERSION/" "$README_PATH"
 
-            echo "📤 Committing changes to SVN..."
+          echo "📝 Updated stable tag line:"
+          grep "^Stable tag:" "$README_PATH" || echo "::error::Stable tag line not found"
+          echo "=========================="
+
+          # Check if there are any changes
+          if svn diff --quiet; then
+            echo "ℹ️ No changes detected - stable tag is already $TARGET_VERSION"
+          else
+            echo "📤 Changes detected. Committing changes to SVN..."
             svn commit -m "Setting stable tag to $TARGET_VERSION" --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive
             echo "✅ Successfully committed stable tag update to $TARGET_VERSION"
-          else
-            echo "❌ ERROR: Unable to update stable tag in SVN"
-            exit 1
           fi
 
   update-gh-stable-tag:
@@ -156,40 +159,38 @@ jobs:
           README_PATH="plugins/woocommerce/readme.txt"
 
           if [ ! -f "$README_PATH" ]; then
-            echo "❌ ERROR: readme.txt not found at $README_PATH"
+            echo "::error::readme.txt not found at $README_PATH"
             exit 1
           fi
 
           echo "📋 Current stable tag line on $BRANCH_NAME:"
-          grep "^Stable tag:" "$README_PATH" || echo "Stable tag line not found"
+          grep "^Stable tag:" "$README_PATH" || echo "::error::Stable tag line not found"
           echo "=========================="
 
-          if sed -i "s/^Stable tag: .*/Stable tag: $TARGET_VERSION/" "$README_PATH"; then
-            echo "📝 Updated stable tag line on $BRANCH_NAME:"
-            grep "^Stable tag:" "$README_PATH" || echo "Stable tag line not found"
-            echo "=========================="
+          # Update the stable tag
+          sed -i "s/^Stable tag: .*/Stable tag: $TARGET_VERSION/" "$README_PATH"
 
-            # Check if file was actually modified
-            if git diff --quiet "$README_PATH"; then
-              echo "ℹ️ No changes needed on $BRANCH_NAME - stable tag is already $TARGET_VERSION"
-            else
-              echo "📤 Creating PR for $BRANCH_NAME..."
+          echo "📝 Updated stable tag line on $BRANCH_NAME:"
+          grep "^Stable tag:" "$README_PATH" || echo "::error::Stable tag line not found"
+          echo "=========================="
 
-              UPDATE_BRANCH="update/stable-tag-$TARGET_VERSION-$BRANCH_NAME"
-              git checkout -b "$UPDATE_BRANCH"
-              git add "$README_PATH"
-              git commit -m "Update stable tag to $TARGET_VERSION on $BRANCH_NAME"
-              git push origin "$UPDATE_BRANCH"
-
-              gh pr create \
-                --title "Update stable tag to $TARGET_VERSION ($BRANCH_NAME)" \
-                --body "This PR updates the stable tag to $TARGET_VERSION." \
-                --base "$BRANCH_NAME" \
-                --head "$UPDATE_BRANCH"
-
-              echo "✅ Successfully created PR to update stable tag to $TARGET_VERSION on $BRANCH_NAME"
-            fi
+          # Check if file was actually modified
+          if git diff --quiet "$README_PATH"; then
+            echo "ℹ️ No changes needed on $BRANCH_NAME - stable tag is already $TARGET_VERSION"
           else
-            echo "❌ ERROR: Unable to update stable tag on $BRANCH_NAME"
-            exit 1
+            echo "📤 Changes detected. Creating PR for $BRANCH_NAME..."
+
+            UPDATE_BRANCH="update/stable-tag-$TARGET_VERSION-$BRANCH_NAME"
+            git checkout -b "$UPDATE_BRANCH"
+            git add "$README_PATH"
+            git commit -m "Update stable tag to $TARGET_VERSION on $BRANCH_NAME"
+            git push origin "$UPDATE_BRANCH"
+
+            gh pr create \
+              --title "Update stable tag to $TARGET_VERSION ($BRANCH_NAME)" \
+              --body "This PR updates the stable tag to $TARGET_VERSION." \
+              --base "$BRANCH_NAME" \
+              --head "$UPDATE_BRANCH"
+
+            echo "✅ Successfully created PR to update stable tag to $TARGET_VERSION on $BRANCH_NAME"
           fi
