@@ -20,13 +20,6 @@ use WP_Post;
  */
 class Content_Renderer {
 	/**
-	 * Blocks registry
-	 *
-	 * @var Blocks_Registry
-	 */
-	private Blocks_Registry $blocks_registry;
-
-	/**
 	 * Process manager
 	 *
 	 * @var Process_Manager
@@ -95,18 +88,15 @@ class Content_Renderer {
 	 * Content_Renderer constructor.
 	 *
 	 * @param Process_Manager  $preprocess_manager Preprocess manager.
-	 * @param Blocks_Registry  $blocks_registry Blocks registry.
 	 * @param Css_Inliner      $css_inliner Css inliner.
 	 * @param Theme_Controller $theme_controller Theme controller.
 	 */
 	public function __construct(
 		Process_Manager $preprocess_manager,
-		Blocks_Registry $blocks_registry,
 		Css_Inliner $css_inliner,
 		Theme_Controller $theme_controller
 	) {
 		$this->process_manager     = $preprocess_manager;
-		$this->blocks_registry     = $blocks_registry;
 		$this->theme_controller    = $theme_controller;
 		$this->css_inliner         = $css_inliner;
 		$this->block_type_registry = WP_Block_Type_Registry::get_instance();
@@ -122,8 +112,6 @@ class Content_Renderer {
 		add_filter( 'render_block', array( $this, 'render_block' ), 10, 2 );
 		add_filter( 'block_parser_class', array( $this, 'block_parser' ) );
 		add_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
-
-		do_action( 'woocommerce_email_blocks_renderer_initialized', $this->blocks_registry );
 	}
 
 	/**
@@ -208,7 +196,6 @@ class Content_Renderer {
 	 * so that we don't interfere with possible post rendering that might happen later.
 	 */
 	private function reset(): void {
-		$this->blocks_registry->remove_all_block_renderers();
 		remove_filter( 'render_block', array( $this, 'render_block' ) );
 		remove_filter( 'block_parser_class', array( $this, 'block_parser' ) );
 		remove_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
