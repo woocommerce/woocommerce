@@ -122,7 +122,7 @@ Learn more about coding [prefers-reduced-motion media queries](https://developer
 
 Consider bringing in actual users with disabilities to test your extensions for accessibility. Seeing someone who relies on a screen reader or other assistive device use your products can be very enlightening. Ask your customer base to see if you already have people with disabilities in your audience available to test and provide feedback. Here’s a great resource on [how to run user testing sessions](https://www.w3.org/WAI/test-evaluate/involving-users/).
 
-If you don’t want to run your own user testing sessions, there are [WooExperts](https://woocommerce.com/experts/) who can help with this.
+If you don’t want to run your own user testing sessions, there are [WooExperts](https://woocommerce.com/for-agencies/) who can help with this.
 
 ## Additional Considerations
 
@@ -152,7 +152,7 @@ ACRs are created using a Voluntary Product Accessibility Template (VPAT), a stan
 
 WCAG compliance doesn’t have to feel overwhelming! You can test and fix one issue at a time, incrementally improving your extension. However, accessibility goes faster if you don’t have to memorize WCAG or learn how to test first. Consider hiring an accessibility specialist to help with auditing or user testing your extension. The right company or consultant will help you find problems quickly, prioritize fixes, and train your team so fewer accessibility issues will be added in the future.
 
-You can find accessibility-focused developers in our [WooExperts directory](https://woocommerce.com/experts/).
+You can find accessibility-focused developers in our [WooExperts directory](https://woocommerce.com/for-agencies/).
 
 ## Learning More About Accessibility 
 
@@ -161,6 +161,5 @@ We recommend these resources if you want to learn more about website accessibili
 - [WordPress Accessibility Meetup](https://www.meetup.com/wordpress-accessibility-meetup/)
 - [WP Accessibility Day Conference](https://wpaccessibility.day/)
 - [WordPress Accessibility Ready Requirements](https://make.wordpress.org/themes/handbook/review/accessibility/)
-- [Equalize Digital Blog](https://equalizedigital.com/blog/)
 - [WordCamp Europe Accessibility Testing Workshop](https://europe.wordcamp.org/2023/accessibility-testing-workshop/)
 - [Web Accessibility Specialist Certification from the International Association of Accessibility Professionals](https://www.accessibilityassociation.org/specialist)
