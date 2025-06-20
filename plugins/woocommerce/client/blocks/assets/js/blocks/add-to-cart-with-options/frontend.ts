@@ -165,6 +165,13 @@ const addToCartWithOptionsStore = store(
 				);
 				return matchedVariation?.variation_id || null;
 			},
+			get selectedAttributes(): CartVariationItem[] {
+				const context = getContext< Context >();
+				if ( ! context ) {
+					return [];
+				}
+				return context.selectedAttributes;
+			},
 		},
 		actions: {
 			setQuantity( value: number, childProductId?: number ) {

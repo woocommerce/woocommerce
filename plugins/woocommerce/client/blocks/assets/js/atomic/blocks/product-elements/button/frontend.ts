@@ -2,12 +2,13 @@
  * External dependencies
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
+import type { OptimisticCartItem, Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Internal dependencies
  */
 import type { AddToCartWithOptionsStore } from '../../../../blocks/add-to-cart-with-options/frontend';
+import { CartVariationItem } from '@woocommerce/types';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -51,13 +52,51 @@ const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 	{ lock: universalLock }
 );
 
+const areAttributeSetsEqual = ( cartItem:OptimisticCartItem, selectedItem:CartVariationItem[] ) => {
+	if (
+		! Array.isArray( cartItem.variation ) ||
+		! Array.isArray( selectedItem )
+	)
+		return false;
+	if ( cartItem.variation.length !== selectedItem.length ) return false;
+
+	return cartItem.variation.every(
+		( { attribute, value }: { attribute: string; value: string } ) =>
+			selectedItem.some( ( item ) => {
+				const selectedItemAttr = item.attribute
+					.split( '_' )
+					.reverse()[ 0 ]
+					.toLowerCase();
+				const selectedItemValue = item.value.toLowerCase();
+
+				if (
+					selectedItemAttr === attribute.toLowerCase() &&
+					( selectedItemValue === value.toLowerCase() ||
+						( item.value && value === '' ) )
+				) {
+					return true;
+				}
+			} )
+	);
+};
+
 const productButtonStore = {
 	state: {
 		get quantity(): number {
-			const product = wooState.cart?.items.find(
-				( item ) => item.id === state.productId
+			const selectedAttribute =
+				addToCartWithOptionsState?.selectedAttributes;
+
+			const product = wooState.cart?.items.filter( ( item ) => {
+				if ( item.id === state.productId ) {
+					return item;
+				}
+			} );
+
+			const foundProduct = product.find( ( item ) =>
+				areAttributeSetsEqual( item, selectedAttribute )
 			);
-			return product?.quantity || 0;
+
+			return foundProduct?.quantity || 0;
 		},
 		get slideInAnimation() {
 			const { animationStatus } = getContext< Context >();
