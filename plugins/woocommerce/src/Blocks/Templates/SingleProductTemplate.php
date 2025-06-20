@@ -157,7 +157,7 @@ class SingleProductTemplate extends AbstractTemplate {
 	private static function replace_first_single_product_template_block_with_password_form( $parsed_blocks, $is_already_replaced ) {
 		// We want to replace the first single product template block with the password form. We also want to remove all other single product template blocks.
 		// This array doesn't contains all the blocks. For example, it missing the breadcrumbs blocks: it doesn't make sense replace the breadcrumbs with the password form.
-		$single_product_template_blocks = array( 'woocommerce/product-image-gallery', 'woocommerce/product-details', 'woocommerce/add-to-cart-form', 'woocommerce/product-meta', 'woocommerce/product-rating', 'woocommerce/product-price', 'woocommerce/related-products', 'woocommerce/add-to-cart-with-options', 'woocommerce/product-gallery', 'woocommerce/blockified-product-details', 'woocommerce/product-collection', 'core/post-title', 'core/post-excerpt' );
+		$single_product_template_blocks = array( 'woocommerce/product-image-gallery', 'woocommerce/product-details', 'woocommerce/add-to-cart-form', 'woocommerce/product-meta', 'woocommerce/product-rating', 'woocommerce/product-price', 'woocommerce/related-products', 'woocommerce/add-to-cart-with-options', 'woocommerce/product-gallery', 'woocommerce/product-details', 'woocommerce/product-collection', 'core/post-title', 'core/post-excerpt' );
 
 		return array_reduce(
 			$parsed_blocks,
