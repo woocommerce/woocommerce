@@ -635,25 +635,29 @@ describe( 'Address Suggestions Component', () => {
 		test( 'should navigate down with ArrowDown key', () => {
 			const suggestions = document.querySelectorAll( '#address_suggestions_billing .suggestions-list li' );
 			
-			// First suggestion should be active initially
-			expect( suggestions[0].classList.contains( 'active' ) ).toBe( true );
-			expect( suggestions[0].getAttribute( 'aria-selected' ) ).toBe( 'true' );
+			// No suggestion should be active initially
+			expect( suggestions[0].classList.contains( 'active' ) ).toBe( false );
+			expect( suggestions[0].getAttribute( 'aria-selected' ) ).toBe( null );
 			
 			// Press ArrowDown
 			const keydownEvent = new KeyboardEvent( 'keydown', { key: 'ArrowDown', bubbles: true } );
 			billingAddressInput.dispatchEvent( keydownEvent );
 			
-			// Second suggestion should now be active
-			expect( suggestions[0].classList.contains( 'active' ) ).toBe( false );
-			expect( suggestions[1].classList.contains( 'active' ) ).toBe( true );
-			expect( suggestions[1].getAttribute( 'aria-selected' ) ).toBe( 'true' );
+			// First suggestion should now be active
+			expect( suggestions[0].classList.contains( 'active' ) ).toBe( true );
+			expect( suggestions[0].getAttribute( 'aria-selected' ) ).toBe( 'true' );
+			expect( suggestions[1].classList.contains( 'active' ) ).toBe( false );
 		} );
 
 		test( 'should navigate up with ArrowUp key', () => {
 			const suggestions = document.querySelectorAll( '#address_suggestions_billing .suggestions-list li' );
 			
-			// Navigate to second item first
+			// Navigate to first item first
 			let keydownEvent = new KeyboardEvent( 'keydown', { key: 'ArrowDown', bubbles: true } );
+			billingAddressInput.dispatchEvent( keydownEvent );
+			
+			// Navigate to second item
+			keydownEvent = new KeyboardEvent( 'keydown', { key: 'ArrowDown', bubbles: true } );
 			billingAddressInput.dispatchEvent( keydownEvent );
 			
 			// Press ArrowUp
@@ -668,8 +672,12 @@ describe( 'Address Suggestions Component', () => {
 		test( 'should wrap around when navigating beyond bounds', () => {
 			const suggestions = document.querySelectorAll( '#address_suggestions_billing .suggestions-list li' );
 			
-			// Navigate to last item
+			// Navigate to first item
 			let keydownEvent = new KeyboardEvent( 'keydown', { key: 'ArrowDown', bubbles: true } );
+			billingAddressInput.dispatchEvent( keydownEvent );
+			
+			// Navigate to second (last) item
+			keydownEvent = new KeyboardEvent( 'keydown', { key: 'ArrowDown', bubbles: true } );
 			billingAddressInput.dispatchEvent( keydownEvent );
 			
 			// Navigate beyond last item - should wrap to first
@@ -683,8 +691,12 @@ describe( 'Address Suggestions Component', () => {
 		test( 'should select address with Enter key', async () => {
 			const suggestions = document.querySelectorAll( '#address_suggestions_billing .suggestions-list li' );
 			
+			// Navigate to first suggestion first
+			let keydownEvent = new KeyboardEvent( 'keydown', { key: 'ArrowDown', bubbles: true } );
+			billingAddressInput.dispatchEvent( keydownEvent );
+			
 			// Press Enter to select first suggestion
-			const keydownEvent = new KeyboardEvent( 'keydown', { key: 'Enter', bubbles: true } );
+			keydownEvent = new KeyboardEvent( 'keydown', { key: 'Enter', bubbles: true } );
 			billingAddressInput.dispatchEvent( keydownEvent );
 			
 			// Wait for async operations
