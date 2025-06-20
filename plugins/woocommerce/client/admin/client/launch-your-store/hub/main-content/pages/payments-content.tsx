@@ -5,7 +5,7 @@ import { useCallback } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import React, { useState } from '@wordpress/element';
+import React, { useEffect, useState } from '@wordpress/element';
 import { pluginsStore, paymentSettingsStore } from '@woocommerce/data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
@@ -19,7 +19,11 @@ import { WC_ASSET_URL } from '~/utils/admin-settings';
 import { createNoticesFromResponse } from '~/lib/notices';
 import './payments-content.scss';
 import { useSetUpPaymentsContext } from '~/launch-your-store/data/setup-payments-context';
-import { recordPaymentsEvent, isWooPayments } from '~/settings-payments/utils';
+import {
+	recordPaymentsEvent,
+	isWooPayments,
+	recordPaymentsOnboardingEvent,
+} from '~/settings-payments/utils';
 import {
 	wooPaymentsExtensionSlug,
 	wooPaymentsProviderId,
@@ -35,6 +39,18 @@ const InstallWooPaymentsStep = ( {
 	isPluginInstalling: boolean;
 	isPluginInstalled: boolean;
 } ) => {
+	// Track the step view.
+	useEffect( () => {
+		recordPaymentsOnboardingEvent(
+			'woopayments_onboarding_modal_step_view',
+			{
+				step: 'install_woopayments',
+				from: 'lys',
+				source: 'lys',
+			}
+		);
+	}, [] );
+
 	const isWooPayEligible = useSelect( ( select ) => {
 		const store = select( paymentSettingsStore );
 		return store.getIsWooPayEligible();
