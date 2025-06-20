@@ -15,32 +15,44 @@ import './fulfillment-drawer.scss';
 
 interface Props {
 	isOpen: boolean;
+	hasBackdrop?: boolean;
 	onClose: () => void;
 	orderId: number | null;
 }
 
 const FulfillmentDrawer: React.FC< Props > = ( {
 	isOpen,
+	hasBackdrop = false,
 	onClose,
 	orderId,
 } ) => {
 	return (
-		<div className="woocommerce-fulfillment-drawer">
-			<div
-				className={ [
-					'drawer-panel',
-					isOpen ? 'is-open' : 'is-closed',
-				].join( ' ' ) }
-			>
-				<ErrorBoundary>
-					<FulfillmentDrawerProvider orderId={ orderId }>
-						<FulfillmentsDrawerHeader onClose={ onClose } />
-						<NewFulfillmentForm />
-						<FulfillmentsList />
-					</FulfillmentDrawerProvider>
-				</ErrorBoundary>
+		<>
+			{ hasBackdrop && (
+				<div
+					className="woocommerce-fulfillment-drawer-backdrop"
+					onClick={ onClose }
+					role="presentation"
+					style={ { display: isOpen ? 'block' : 'none' } }
+				/>
+			) }
+			<div className="woocommerce-fulfillment-drawer">
+				<div
+					className={ [
+						'drawer-panel',
+						isOpen ? 'is-open' : 'is-closed',
+					].join( ' ' ) }
+				>
+					<ErrorBoundary>
+						<FulfillmentDrawerProvider orderId={ orderId }>
+							<FulfillmentsDrawerHeader onClose={ onClose } />
+							<NewFulfillmentForm />
+							<FulfillmentsList />
+						</FulfillmentDrawerProvider>
+					</ErrorBoundary>
+				</div>
 			</div>
-		</div>
+		</>
 	);
 };
 
