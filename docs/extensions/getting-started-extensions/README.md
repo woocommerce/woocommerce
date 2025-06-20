@@ -24,7 +24,7 @@ Join the WooCommerce Marketplace and get your extension in front of 3.6M+ active
 
 ### Quality Insights Toolkit (QIT)
 
-**Available to all developers with a WooCommerce.com vendor profile**
+#### Available to all developers with a WooCommerce.com vendor profile
 
 QIT (Quality Insights Toolkit) is a testing platform developed by WooCommerce for plugins and themes. It allows developers to quickly run a variety of managed tests out-of-the-box, as well as integrate their own custom E2E tests to ensure their extensions are reliable, secure, and compatible.
 

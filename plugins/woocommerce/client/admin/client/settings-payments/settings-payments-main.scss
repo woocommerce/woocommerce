@@ -1,3 +1,35 @@
+/* These keyframes and spinner style are copied from the Stripe Spinner component https://docs.stripe.com/stripe-apps/components/spinner?app-sdk-version=8  */
+@keyframes SpinnerAnimationShow {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+@keyframes SpinnerAnimationRotation {
+	0% {
+		transform: scaleX(-1) rotateZ(0deg);
+	}
+	50% {
+		transform: scaleX(-1) rotateZ(-180deg);
+	}
+	100% {
+		transform: scaleX(-1) rotateZ(-360deg);
+	}
+}
+
+.stripe-spinner {
+	animation: SpinnerAnimationShow 250ms ease,
+		SpinnerAnimationRotation 0.7s linear infinite; // The timings are exactly like Stripe Spinner component.
+	transition-timing-function: ease;
+	transition-property: opacity, transform;
+	transform-origin: 50% 50%;
+	display: inline-block;
+	vertical-align: middle; // Support stripe loader inside the buttons.
+}
+
 .woocommerce-embed-page {
 	#wpbody .woocommerce-layout,
 	.woocommerce-layout__notice-list-hide + .wrap {
