@@ -11,6 +11,8 @@ describe( 'Address Autocomplete Provider Registration', () => {
 				address_providers: [
 					{ id: 'test-provider', name: 'Test provider' },
 					{ id: 'wc-payments', name: 'WooCommerce Payments' },
+					{ id: 'provider-1', name: 'Provider 1' },
+					{ id: 'provider-2', name: 'Provider 2' },
 				],
 			},
 		} );
@@ -245,42 +247,98 @@ describe( 'Address Autocomplete Provider Registration', () => {
 	test( 'should not allow duplicate provider registration', () => {
 		const provider1 = {
 			id: 'test-provider',
-			canSearch: () => {},
-			search: () => {},
+			canSearch: () => false,
+			search: () => [ 'original' ],
 			select: () => {},
 		};
 
 		const provider2 = {
 			id: 'test-provider',
-			canSearch: () => {
-				return true;
-			},
-			search: () => {
-				return [];
-			},
-			select: () => {
-				return {};
-			},
+			canSearch: () => true,
+			search: () => [ 'duplicate' ],
+			select: () => {},
 		};
 
+		// Mock console.warn to capture warning message
+		const consoleSpy = jest
+			.spyOn( console, 'warn' )
+			.mockImplementation( () => {} );
+
 		// Register first provider
-		window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-			provider1
-		);
+		const firstResult =
+			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
+				provider1
+			);
+		expect( firstResult ).toBe( true );
 
 		// Try to register second provider with same ID
-		const result =
+		const duplicateResult =
 			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
 				provider2
 			);
-		expect( result ).toBe( true );
+		expect( duplicateResult ).toBe( false );
 
-		// Verify the second provider overwrote the first
+		// Verify warning was logged
+		expect( consoleSpy ).toHaveBeenCalledWith(
+			'Address provider with ID "test-provider" is already registered.'
+		);
+
+		// Verify the original provider is preserved (not overwritten)
 		expect(
 			window.wc.addressAutocomplete.providers[
 				'test-provider'
 			].canSearch()
-		).toBe( true );
+		).toBe( false );
+		expect(
+			window.wc.addressAutocomplete.providers[ 'test-provider' ].search()
+		).toEqual( [ 'original' ] );
+
+		consoleSpy.mockRestore();
+	} );
+
+	test( 'should allow multiple providers with different IDs', () => {
+		const provider1 = {
+			id: 'provider-1',
+			canSearch: () => true,
+			search: () => [ 'provider1-results' ],
+			select: () => {},
+		};
+
+		const provider2 = {
+			id: 'provider-2',
+			canSearch: () => true,
+			search: () => [ 'provider2-results' ],
+			select: () => {},
+		};
+
+		// Register both providers
+		const result1 =
+			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
+				provider1
+			);
+		const result2 =
+			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
+				provider2
+			);
+
+		expect( result1 ).toBe( true );
+		expect( result2 ).toBe( true );
+
+		// Verify both providers are registered
+		expect(
+			window.wc.addressAutocomplete.providers[ 'provider-1' ]
+		).toBeDefined();
+		expect(
+			window.wc.addressAutocomplete.providers[ 'provider-2' ]
+		).toBeDefined();
+
+		// Verify they maintain their separate functionality
+		expect(
+			window.wc.addressAutocomplete.providers[ 'provider-1' ].search()
+		).toEqual( [ 'provider1-results' ] );
+		expect(
+			window.wc.addressAutocomplete.providers[ 'provider-2' ].search()
+		).toEqual( [ 'provider2-results' ] );
 	} );
 } );
 
