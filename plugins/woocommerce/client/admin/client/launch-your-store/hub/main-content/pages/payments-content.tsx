@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useCallback } from 'react';
+import apiFetch from '@wordpress/api-fetch';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import React, { useState } from '@wordpress/element';
@@ -18,7 +19,7 @@ import { WC_ASSET_URL } from '~/utils/admin-settings';
 import { createNoticesFromResponse } from '~/lib/notices';
 import './payments-content.scss';
 import { useSetUpPaymentsContext } from '~/launch-your-store/data/setup-payments-context';
-import { recordPaymentsEvent } from '~/settings-payments/utils';
+import { recordPaymentsEvent, isWooPayments } from '~/settings-payments/utils';
 import {
 	wooPaymentsExtensionSlug,
 	wooPaymentsProviderId,
@@ -38,6 +39,17 @@ const InstallWooPaymentsStep = ( {
 		const store = select( paymentSettingsStore );
 		return store.getIsWooPayEligible();
 	}, [] );
+
+	const wooPaymentsProvider = useSelect( ( select ) => {
+		const store = select( paymentSettingsStore );
+		return store
+			.getPaymentProviders()
+			.find( ( provider ) => isWooPayments( provider.id ) );
+	}, [] );
+
+	const businessCountry =
+		window.wcSettings?.admin?.woocommerce_payments_nox_profile
+			?.business_country_code || null;
 
 	let buttonText = __( 'Install', 'woocommerce' );
 
@@ -79,6 +91,20 @@ const InstallWooPaymentsStep = ( {
 			<Button
 				className="launch-your-store-payments-content__step--install-woopayments-button"
 				onClick={ () => {
+					// Preload the onboarding data in the background.
+					if (
+						wooPaymentsProvider?.onboarding?._links?.preload?.href
+					) {
+						apiFetch( {
+							url: wooPaymentsProvider?.onboarding?._links
+								?.preload?.href,
+							method: 'POST',
+							data: {
+								location: businessCountry,
+							},
+						} );
+					}
+
 					installWooPayments();
 				} }
 				isBusy={ isPluginInstalling }
