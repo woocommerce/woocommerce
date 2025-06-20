@@ -466,7 +466,8 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					`address_suggestions_${ type }_list`
 				);
 				suggestionsList.id = `address_suggestions_${ type }_list`;
-				setActiveSuggestion( type, 0 );
+				// Don't auto-highlight first suggestion for better screen reader accessibility
+				activeSuggestionIndices[ type ] = -1;
 			} catch ( error ) {
 				console.error( 'Address search error:', error );
 				hideSuggestions( type );
