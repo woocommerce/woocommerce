@@ -252,6 +252,13 @@
 			"core/post-terms": {
 				"elements": {
 					"link": {
+						"color": {
+							"background": "var(--wp--preset--color--theme-5)",
+							"text": "var(--wp--preset--color--theme-2)"
+						},
+						"spacing": {
+							"padding": "var(--wp--preset--spacing--20)"
+						},
 						"typography": {
 							"textDecoration": "none"
 						},
@@ -264,9 +271,7 @@
 				},
 				"typography": {
 					"fontSize": "var(--wp--preset--font-size--small)",
-					"lineHeight": "1.28",
-					"letterSpacing": "0.07rem",
-					"textTransform": "uppercase"
+					"lineHeight": "1.28"
 				}
 			},
 			"core/post-title": {
