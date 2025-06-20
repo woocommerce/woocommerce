@@ -115,7 +115,14 @@ class FulfillmentsManager {
 		$fulfillments = $fulfillments_data_store->read_fulfillments( \WC_Order::class, (string) $order->get_id() );
 
 		// Update the fulfillment status of the order.
-		$order->update_meta_data( '_fulfillment_status', FulfillmentUtils::calculate_order_fulfillment_status( $order, $fulfillments ) );
+		$last_status = FulfillmentUtils::calculate_order_fulfillment_status( $order, $fulfillments );
+		if ( 'no_fulfillments' === $last_status ) {
+			$order->delete_meta_data( '_fulfillment_status' );
+		} else {
+			// Update the fulfillment status meta data.
+			$order->update_meta_data( '_fulfillment_status', $last_status );
+		}
+
 		$order->save();
 	}
 }

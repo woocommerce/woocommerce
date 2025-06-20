@@ -192,43 +192,49 @@ class FulfillmentUtils {
 	 * Get the fulfillment status text for an order.
 	 *
 	 * @param WC_Order $order The order object.
-	 * @param array    $fulfillments An array of fulfillments to check.
 	 *
 	 * @return string The fulfillment status text.
 	 */
-	public static function get_order_fulfillment_status_text( WC_Order $order, array $fulfillments = array() ): string {
+	public static function get_order_fulfillment_status_text( WC_Order $order ): string {
 		// Ensure the order is a valid WC_Order object.
 		if ( ! $order instanceof WC_Order ) {
 			return '';
 		}
 
 		// Check if the order meta exists for fulfillment status.
-		$fulfillment_status = $order->get_meta( '_fulfillment_status', true );
-		if ( empty( $fulfillment_status ) || ! self::is_valid_order_fulfillment_status( $fulfillment_status ) ) {
-			// If no fulfillments are provided, fetch them from the data store.
-			if ( empty( $fulfillments ) ) {
-				$fulfillments_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
-				$fulfillments            = $fulfillments_data_store->read_fulfillments( WC_Order::class, (string) $order->get_id() );
-			}
+		$fulfillment_status = $order->meta_exists( '_fulfillment_status' ) ? $order->get_meta( '_fulfillment_status', true ) : 'no_fulfillments';
 
-			// Calculate the fulfillment status of the order.
-			$fulfillment_status = self::calculate_order_fulfillment_status( $order, $fulfillments );
-			// Update the order meta with the calculated fulfillment status.
-			$order->update_meta_data( '_fulfillment_status', $fulfillment_status );
-		}
-
+		$fulfillment_status_text = '';
 		switch ( $fulfillment_status ) {
 			case 'fulfilled':
-				return ' ' . __( 'It has been <mark class="fulfillment-status">Fulfilled</mark>.', 'woocommerce' );
+				$fulfillment_status_text = ' ' . __( 'It has been <mark class="fulfillment-status">Fulfilled</mark>.', 'woocommerce' );
+				break;
 			case 'partially_fulfilled':
-				return ' ' . __( 'It has been <mark class="fulfillment-status">Partially fulfilled</mark>.', 'woocommerce' );
+				$fulfillment_status_text = ' ' . __( 'It has been <mark class="fulfillment-status">Partially fulfilled</mark>.', 'woocommerce' );
+				break;
 			case 'unfulfilled':
-				return ' ' . __( 'It is currently <mark class="fulfillment-status">Unfulfilled</mark>.', 'woocommerce' );
+				$fulfillment_status_text = ' ' . __( 'It is currently <mark class="fulfillment-status">Unfulfilled</mark>.', 'woocommerce' );
+				break;
 			case 'no_fulfillments':
-				return ' ' . __( 'It has <mark class="fulfillment-status">no fulfillments</mark> yet.', 'woocommerce' );
-			default:
-				return '';
+				$fulfillment_status_text = ' ' . __( 'It has <mark class="fulfillment-status">no fulfillments</mark> yet.', 'woocommerce' );
+				break;
 		}
+
+		/**
+		 * This filter allows plugins to modify the fulfillment status text for an order for their custom fulfillment statuses.
+		 *
+		 * @since 9.9.0
+		 *
+		 * @param string $fulfillment_status_text The default fulfillment status text.
+		 * @param string $fulfillment_status The fulfillment status of the order.
+		 * @param WC_Order $order The order object.
+		 */
+		return apply_filters(
+			'wc_fulfillment_order_fulfillment_status_text',
+			$fulfillment_status_text,
+			$fulfillment_status,
+			$order
+		);
 	}
 
 	/**

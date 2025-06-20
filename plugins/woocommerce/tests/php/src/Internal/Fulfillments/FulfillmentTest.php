@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Fulfillments;
 
 use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Tests\Internal\Fulfillments\Helpers\FulfillmentsHelper;
+use WC_Order;
 
 /**
  * Tests for Fulfillment object.
@@ -166,6 +167,22 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 		$fulfillment->save();
 
 		$this->assertEquals( '', $fulfillment->get_meta( 'test_meta_key' ) );
+	}
+
+	/**
+	 * Test getting order from the Fulfillment object.
+	 */
+	public function test_get_order() {
+		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type' => WC_Order::class,
+				'entity_id'   => $order->get_id(),
+			)
+		);
+
+		$this->assertInstanceOf( \WC_Order::class, $fulfillment->get_order() );
+		$this->assertEquals( $order->get_id(), $fulfillment->get_order()->get_id() );
 	}
 
 	/**
