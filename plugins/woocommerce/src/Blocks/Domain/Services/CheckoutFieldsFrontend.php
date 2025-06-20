@@ -95,7 +95,7 @@ class CheckoutFieldsFrontend {
 
 		$context = array(
 			'caller' => 'CheckoutFieldsFrontend::render_order_other_fields',
-			'order'  => $order
+			'order'  => $order,
 		);
 
 		$fields = $this->checkout_fields_controller->filter_fields_for_order_confirmation( $fields, $context );

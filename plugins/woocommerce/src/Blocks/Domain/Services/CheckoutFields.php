@@ -1404,7 +1404,6 @@ class CheckoutFields {
 				 * @param array          $context Additional context for the filter. Data depends in which method filter_fields_for_order_confirmation is called.
 				 * @param CheckoutFields $this    The CheckoutFields instance.
 				 * @since 10.1.0
-				 *
 				 */
 				return apply_filters( 'woocommerce_filter_fields_for_order_confirmation', ! empty( $field['show_in_order_confirmation'] ), $field, $fields, $context, $this );
 			}
