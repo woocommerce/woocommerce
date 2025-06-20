@@ -7,6 +7,10 @@
 		{
 			"name": "template-page-no-title",
 			"title": "Page No Title"
+		},
+		{
+			"name": "template-page-w-cover",
+			"title": "Page with Cover"
 		}
 	],
 	"settings": {
