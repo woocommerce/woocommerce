@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Internal\Fulfillments;
 
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
-use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 
@@ -62,7 +61,6 @@ class FulfillmentsRenderer {
 			// For custom orders table, we need to filter the query to include fulfillment status.
 			add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'render_fulfillment_filters' ) );
 			add_filter( 'woocommerce_order_query_args', array( $this, 'filter_orders_list_table_query' ), 10, 1 );
-
 		} else {
 			// For legacy orders table, we need to add the bulk actions to the legacy orders table.
 			add_filter( 'bulk_actions-edit-shop_order', array( $this, 'define_fulfillment_bulk_actions' ) );
@@ -457,11 +455,25 @@ class FulfillmentsRenderer {
 
 			// Ensure the fulfillment status is one of the allowed values.
 			if ( FulfillmentUtils::is_valid_order_fulfillment_status( $fulfillment_status ) ) {
-				$args['meta_query'][] = array(
-					'key'     => '_fulfillment_status',
-					'value'   => $fulfillment_status,
-					'compare' => '=',
-				);
+				if ( ! isset( $args['meta_query'] ) ) {
+					$args['meta_query'] = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				}
+				if ( 'no_fulfillments' === $fulfillment_status ) {
+					// If the status is 'no_fulfillments', we need to check for orders that have no fulfillments.
+					$args['meta_query'][] = array(
+						'relation' => 'OR',
+						array(
+							'key'     => '_fulfillment_status',
+							'compare' => 'NOT EXISTS',
+						),
+					);
+				} else {
+					$args['meta_query'][] = array(
+						'key'     => '_fulfillment_status',
+						'value'   => $fulfillment_status,
+						'compare' => '=',
+					);
+				}
 			}
 		}
 
@@ -485,6 +497,14 @@ class FulfillmentsRenderer {
 			if ( FulfillmentUtils::is_valid_order_fulfillment_status( $status ) ) {
 				$query->set(
 					'meta_query',
+					'no_fulfillments' === $status ?
+					array(
+						'relation' => 'OR',
+						array(
+							'key'     => '_fulfillment_status',
+							'compare' => 'NOT EXISTS',
+						),
+					) :
 					array(
 						array(
 							'key'     => '_fulfillment_status',
