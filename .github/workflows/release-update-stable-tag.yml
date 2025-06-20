@@ -3,11 +3,11 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version (in X.Y.Z or X.Y format)'
+        description: 'Version (in X.Y.Z format)'
         required: true
         default: ''
       confirm-update:
-        description: 'I confirm that I want to update the stable tag (this will update the SNV and GitHub stable tags).'
+        description: 'I confirm that I want to update the stable tag (this will update the SVN and GitHub stable tags).'
         type: boolean
         required: true
         default: false
@@ -43,23 +43,20 @@ jobs:
           script: |
             const versionInput = '${{ github.event.inputs.version }}';
 
-            // Match X.Y.Z or X.Y formats
-            const versionMatch = versionInput.match(/^(\d+\.\d+)(?:\.(\d+))?$/);
+            // Match X.Y.Z format
+            const versionMatch = versionInput.match(/^(\d+)\.(\d+)\.(\d+)$/);
 
             if (versionMatch) {
-              const major = versionMatch[1]; // X.Y
-              const patch = versionMatch[2] || '0'; // Z (default to 0 if not provided)
-
-              const version = `${major}.${patch}`;
-              const branch = `release/${major}`;
+              const major = versionMatch[1];
+              const minor = versionMatch[2];
+              const branch = `release/${major}.${minor}`;
 
               console.log(`Input version: ${versionInput}`);
-              console.log(`Normalized version: ${version}`);
               console.log(`Release branch: ${branch}`);
-              core.setOutput('version', version);
+              core.setOutput('version', versionInput);
               core.setOutput('branch', branch);
             } else {
-              core.setFailed(`Version ${versionInput} does not match the expected format (X.Y.Z or X.Y)`);
+              core.setFailed(`Version ${versionInput} does not match the expected format (X.Y.Z)`);
               process.exit(1);
             }
 
