@@ -1517,19 +1517,21 @@ class WC_Email extends WC_Settings_API {
 				$img_attributes = $matches[1];
 
 				// Extract data-src and use it as src if present.
-				if ( preg_match( '/data-src="([^"]*)"/', $img_attributes, $data_src_match ) ) {
-					$img_attributes = preg_replace( '/src="[^"]*"/', 'src="' . $data_src_match[1] . '"', $img_attributes );
-					$img_attributes = preg_replace( '/data-src="[^"]*"/', '', $img_attributes );
+				if ( preg_match( '/data-src=(["\']?)([^"\'>\s]*)\1/', $img_attributes, $data_src_match ) ) {
+					$img_attributes = preg_replace( '/src=(["\']?)[^"\'>\s]*\1/', 'src="' . esc_attr( $data_src_match[2] ) . '"', $img_attributes );
+					$img_attributes = preg_replace( '/data-src=(["\']?)[^"\'>\s]*\1/', '', $img_attributes );
 				}
 
-				// Remove lazyload class.
-				$img_attributes = preg_replace( '/class="([^"]*)\s*lazyload\s*([^"]*)"/', 'class="$1 $2"', $img_attributes );
-				$img_attributes = preg_replace( '/class="([^"]*)\s*lazyload"/', 'class="$1"', $img_attributes );
-				$img_attributes = preg_replace( '/class="lazyload\s*([^"]*)"/', 'class="$1"', $img_attributes );
-				$img_attributes = preg_replace( '/class="lazyload"/', '', $img_attributes );
-
-				// Remove any empty class attributes.
-				$img_attributes = preg_replace( '/class="\s*"/', '', $img_attributes );
+				// Remove lazyload class and clean up whitespace.
+				$img_attributes = preg_replace_callback(
+					'/class=(["\']?)([^"\'>\s]*(?:\s+[^"\'>\s]+)*)\1/',
+					function ( $class_matches ) {
+						$classes = array_filter( array_map( 'trim', explode( ' ', $class_matches[2] ) ) );
+						$classes = array_diff( $classes, array( 'lazyload' ) );
+						return empty( $classes ) ? '' : 'class="' . implode( ' ', $classes ) . '"';
+					},
+					$img_attributes
+				);
 
 				return '<img' . $img_attributes . '>';
 			},
