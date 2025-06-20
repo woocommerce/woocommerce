@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Monorepo: build RAM usage optimization (disable types checking for one of processes when build uses multiple tsc processes).
+Monorepo: build RAM usage optimization.
