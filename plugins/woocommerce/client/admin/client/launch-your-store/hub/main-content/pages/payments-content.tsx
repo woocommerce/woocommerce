@@ -95,6 +95,7 @@ const InstallWooPaymentsStep = ( {
 					if (
 						wooPaymentsProvider?.onboarding?._links?.preload?.href
 					) {
+						// We don't need to await this call or handle its response.
 						apiFetch( {
 							url: wooPaymentsProvider?.onboarding?._links
 								?.preload?.href,
