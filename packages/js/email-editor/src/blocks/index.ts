@@ -27,8 +27,12 @@ import { enhanceQuoteBlock } from './core/quote';
 import { filterSetUrlAttribute } from './core/block-edit';
 import { enhanceSocialLinksBlock } from './core/social-links';
 import { modifyMoveToTrashAction } from './core/move-to-trash';
+import { setEmailBlockSupport } from './core/supported-blocks';
+
+export { getAllowedBlockNames } from './utils';
 
 export function initBlocks() {
+	setEmailBlockSupport();
 	filterSetUrlAttribute();
 	deactivateStackOnMobile();
 	hideExpandOnClick();
