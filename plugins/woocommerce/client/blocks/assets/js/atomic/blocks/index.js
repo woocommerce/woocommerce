@@ -15,6 +15,5 @@ import './product-elements/sku';
 import './product-elements/stock-indicator';
 import './product-elements/product-image-gallery';
 import './product-elements/product-details';
-import './product-elements/product-reviews';
 import './product-elements/related-products';
 import './product-elements/product-meta';
