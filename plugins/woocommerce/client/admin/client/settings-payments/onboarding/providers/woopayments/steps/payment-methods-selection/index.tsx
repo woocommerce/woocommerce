@@ -178,7 +178,7 @@ export default function PaymentMethodsSelection() {
 						</Button>
 					</div>
 					<div className="woocommerce-recommended-payment-methods__header--description">
-							{ __(
+						{ __(
 							"Select which payment methods you'd like to offer to your shoppers. You can update these at any time.",
 							'woocommerce'
 						) }
