@@ -9,10 +9,10 @@
 	},
 	"include": [
 		"typings/**/*",
-		"src/**/*",
+		"src/**/*"
 	],
 	"exclude": [
 		"**/test/**",
-		"**/stories/**",
+		"**/stories/**"
 	]
 }

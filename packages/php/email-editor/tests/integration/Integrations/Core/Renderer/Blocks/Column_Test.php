@@ -9,7 +9,8 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 
 /**
  * Integration test for Column class
@@ -51,11 +52,11 @@ class Column_Test extends \Email_Editor_Integration_Test_Case {
 		),
 	);
 	/**
-	 * Instance of Settings_Controller class
+	 * Instance of Rendering_Context class
 	 *
-	 * @var Settings_Controller
+	 * @var Rendering_Context
 	 */
-	private $settings_controller;
+	private $rendering_context;
 
 	/**
 	 * Set up before each test
@@ -63,15 +64,16 @@ class Column_Test extends \Email_Editor_Integration_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->di_container->get( Email_Editor::class )->initialize();
-		$this->column_renderer     = new Column();
-		$this->settings_controller = $this->di_container->get( Settings_Controller::class );
+		$this->column_renderer   = new Column();
+		$theme_controller        = $this->di_container->get( Theme_Controller::class );
+		$this->rendering_context = new Rendering_Context( $theme_controller->get_theme() );
 	}
 
 	/**
 	 * Test it renders column content
 	 */
 	public function testItRendersColumnContent(): void {
-		$rendered = $this->column_renderer->render( '', $this->parsed_column, $this->settings_controller );
+		$rendered = $this->column_renderer->render( '', $this->parsed_column, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'Column content', $rendered );
 	}
@@ -120,7 +122,7 @@ class Column_Test extends \Email_Editor_Integration_Test_Case {
 				),
 			),
 		);
-		$rendered               = $this->column_renderer->render( '', $parsed_column, $this->settings_controller );
+		$rendered               = $this->column_renderer->render( '', $parsed_column, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'background-color:#abcdef;', $rendered );
 		$this->assertStringContainsString( 'border-bottom-left-radius:5px;', $rendered );
@@ -149,7 +151,7 @@ class Column_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItContainsExpectedVerticalAlignment(): void {
 		$parsed_column                               = $this->parsed_column;
 		$parsed_column['attrs']['verticalAlignment'] = 'bottom';
-		$rendered                                    = $this->column_renderer->render( '', $parsed_column, $this->settings_controller );
+		$rendered                                    = $this->column_renderer->render( '', $parsed_column, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'vertical-align:bottom;', $rendered );
 	}
@@ -161,7 +163,7 @@ class Column_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_column                                    = $this->parsed_column;
 		$parsed_column['attrs']['style']['color']['text'] = '#123456';
 		$parsed_column['attrs']['style']['color']['background'] = '#654321';
-		$rendered = $this->column_renderer->render( '', $parsed_column, $this->settings_controller );
+		$rendered = $this->column_renderer->render( '', $parsed_column, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'color:#123456;', $rendered );
 		$this->assertStringContainsString( 'background-color:#654321;', $rendered );
@@ -174,7 +176,7 @@ class Column_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_column = $this->parsed_column;
 		$content       = '<div class="wp-block-column editor-class-1 another-class"></div>';
 		$parsed_column['attrs']['style']['color']['background'] = '#654321';
-		$rendered = $this->column_renderer->render( $content, $parsed_column, $this->settings_controller );
+		$rendered = $this->column_renderer->render( $content, $parsed_column, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'wp-block-column editor-class-1 another-class', $rendered );
 	}
