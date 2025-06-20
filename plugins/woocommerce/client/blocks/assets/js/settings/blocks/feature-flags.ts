@@ -21,3 +21,11 @@ export const isExperimentalBlocksEnabled = (): boolean => {
 
 	return experimentalBlocksEnabled;
 };
+
+export const isExperimentalMiniCartEnabled = (): boolean => {
+	const { experimentalMiniCartEnabled } = getSetting( 'wcBlocksConfig', {
+		experimentalMiniCartEnabled: false,
+	} ) as WcBlocksConfig;
+
+	return experimentalMiniCartEnabled;
+};

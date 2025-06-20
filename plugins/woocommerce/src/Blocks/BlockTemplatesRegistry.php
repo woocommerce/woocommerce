@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CheckoutHeaderTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ComingSoonTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ExperimentalMiniCartTemplate;
 use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
@@ -61,9 +62,15 @@ class BlockTemplatesRegistry {
 		}
 		if ( BlockTemplateUtils::supports_block_templates( 'wp_template_part' ) ) {
 			$template_parts = array(
-				MiniCartTemplate::SLUG       => new MiniCartTemplate(),
 				CheckoutHeaderTemplate::SLUG => new CheckoutHeaderTemplate(),
 			);
+
+			if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
+				$template_parts[ ExperimentalMiniCartTemplate::SLUG ] = new ExperimentalMiniCartTemplate();
+			} else {
+				$template_parts[ MiniCartTemplate::SLUG ] = new MiniCartTemplate();
+			}
+
 			if ( wp_is_block_theme() ) {
 				$product_types = wc_get_product_types();
 				if ( count( $product_types ) > 0 ) {

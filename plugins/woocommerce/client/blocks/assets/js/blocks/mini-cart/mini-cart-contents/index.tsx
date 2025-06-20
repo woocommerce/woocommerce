@@ -13,6 +13,9 @@ import type { BlockConfiguration } from '@wordpress/blocks';
 import edit, { Save as save } from './edit';
 import { blockName, attributes } from './attributes';
 import './inner-blocks';
+import { isExperimentalMiniCartEnabled } from '../../../settings/blocks';
+import Save from '../../coming-soon/save';
+import { InnerBlocks } from '@wordpress/block-editor';
 
 const settings: BlockConfiguration = {
 	apiVersion: 3,
@@ -52,5 +55,11 @@ const settings: BlockConfiguration = {
 	edit,
 	save,
 };
+
+if ( isExperimentalMiniCartEnabled() ) {
+	settings.save = () => {
+		return <InnerBlocks.Content />;
+	};
+}
 
 registerBlockType( blockName, settings );

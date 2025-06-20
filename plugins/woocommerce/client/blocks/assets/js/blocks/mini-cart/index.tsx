@@ -21,7 +21,7 @@ const featurePluginSupport = {
 	},
 };
 
-registerBlockType( metadata, {
+const blockSettings = {
 	icon: {
 		src: (
 			<Icon
@@ -43,7 +43,9 @@ registerBlockType( metadata, {
 	save() {
 		return null;
 	},
-} );
+};
+
+registerBlockType( metadata );
 
 // Remove the Mini Cart template part from the block inserter.
 addFilter(

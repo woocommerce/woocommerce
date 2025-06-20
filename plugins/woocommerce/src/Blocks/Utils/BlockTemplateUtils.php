@@ -221,7 +221,14 @@ class BlockTemplateUtils {
 		$theme_name             = wp_get_theme()->get( 'TextDomain' );
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$template_content  = file_get_contents( $template_file->path );
+		$template_content = file_get_contents( $template_file->path );
+
+		// if ( strpos( $template_file->path, 'mini-cart' ) !== false ) {
+		// echo '<pre>';
+		// echo $template_content;
+		// echo '</pre>';
+		// }
+
 		$template          = new \WP_Block_Template();
 		$template->id      = $template_is_from_theme ? $theme_name . '//' . $template_file->slug : self::PLUGIN_SLUG . '//' . $template_file->slug;
 		$template->theme   = $template_is_from_theme ? $theme_name : self::PLUGIN_SLUG;
@@ -317,12 +324,17 @@ class BlockTemplateUtils {
 		$wp_template_part_filenames = array(
 			'checkout-header.html',
 			'coming-soon-social-links.html',
-			'mini-cart.html',
 			'simple-product-add-to-cart-with-options.html',
 			'external-product-add-to-cart-with-options.html',
 			'variable-product-add-to-cart-with-options.html',
 			'grouped-product-add-to-cart-with-options.html',
 		);
+
+		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
+			$wp_template_part_filenames[] = 'experimental-iapi-mini-cart.html';
+		} else {
+			$wp_template_part_filenames[] = 'mini-cart.html';
+		}
 
 		/*
 		* This may return the blockified directory for wp_templates.

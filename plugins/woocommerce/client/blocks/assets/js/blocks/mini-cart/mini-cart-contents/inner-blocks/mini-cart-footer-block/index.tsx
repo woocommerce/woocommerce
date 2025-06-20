@@ -3,18 +3,16 @@
  */
 import { Icon, payment } from '@wordpress/icons';
 import { createBlock, registerBlockType } from '@wordpress/blocks';
-import { useBlockProps } from '@wordpress/block-editor';
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
 import deprecatedAttributes from './attributes';
+import { isExperimentalMiniCartEnabled } from '../../../../../settings/blocks';
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore -- TypeScript expects some required properties which we already
-// registered in PHP.
-registerBlockType( 'woocommerce/mini-cart-footer-block', {
+const blockSettings = {
 	icon: {
 		src: (
 			<Icon
@@ -63,4 +61,15 @@ registerBlockType( 'woocommerce/mini-cart-footer-block', {
 	],
 	edit: Edit,
 	save: Save,
-} );
+};
+
+if ( isExperimentalMiniCartEnabled() ) {
+	blockSettings.save = () => {
+		return <InnerBlocks.Content />;
+	};
+}
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore -- TypeScript expects some required properties which we already
+// registered in PHP.
+registerBlockType( 'woocommerce/mini-cart-footer-block', blockSettings );

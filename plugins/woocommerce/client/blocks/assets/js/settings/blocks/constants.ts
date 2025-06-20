@@ -21,6 +21,7 @@ export interface WcBlocksConfig {
 	restApiRoutes: Record< string, string[] >;
 	wordCountType: WordCountType;
 	experimentalBlocksEnabled?: boolean;
+	experimentalMiniCartEnabled?: boolean;
 }
 
 export const blocksConfig = getSetting( 'wcBlocksConfig', {

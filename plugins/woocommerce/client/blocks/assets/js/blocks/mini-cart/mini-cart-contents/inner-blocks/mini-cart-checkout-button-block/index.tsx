@@ -9,11 +9,9 @@ import { registerBlockType } from '@wordpress/blocks';
  */
 import { Edit, Save } from './edit';
 import attributes from './attributes';
+import { isExperimentalMiniCartEnabled } from '../../../../../settings/blocks';
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore -- TypeScript expects some required properties which we already
-// registered in PHP.
-registerBlockType( 'woocommerce/mini-cart-checkout-button-block', {
+const blockSettings = {
 	icon: {
 		src: (
 			<Icon
@@ -24,5 +22,19 @@ registerBlockType( 'woocommerce/mini-cart-checkout-button-block', {
 	},
 	attributes,
 	edit: Edit,
-	save: Save,
-} );
+	save() {
+		return null;
+	},
+};
+
+if ( ! isExperimentalMiniCartEnabled() ) {
+	blockSettings.save = Save;
+}
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore -- TypeScript expects some required properties which we already
+// registered in PHP.
+registerBlockType(
+	'woocommerce/mini-cart-checkout-button-block',
+	blockSettings
+);
