@@ -71,6 +71,43 @@ jobs:
             echo "✅ Release branch '$RELEASE_BRANCH' exists"
           fi
 
+      - name: Install SVN
+        run: sudo apt-get install -y subversion
+
+      - name: Verify SVN tag exists
+        env:
+          TARGET_VERSION: ${{ steps.extract-version.outputs.version }}
+        run: |
+          echo "🔄 Checking if SVN tag $TARGET_VERSION exists..."
+          if svn list "${{ secrets.WPORG_SVN_URL }}/tags/$TARGET_VERSION" --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive --trust-server-cert > /dev/null 2>&1; then
+            echo "✅ SVN tag '$TARGET_VERSION' exists"
+          else
+            echo "::error::SVN tag '$TARGET_VERSION' does not exist in the repository"
+            exit 1
+          fi
+
+      - name: Verify stable tag needs updating
+        env:
+          TARGET_VERSION: ${{ steps.extract-version.outputs.version }}
+        run: |
+          echo "🔄 Checking current stable tag in trunk's readme.txt..."
+          CURRENT_STABLE=$(svn cat "${{ secrets.WPORG_SVN_URL }}/trunk/readme.txt" --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive | grep "^Stable tag:" | sed 's/^Stable tag: *//')
+
+          if [ -z "$CURRENT_STABLE" ]; then
+            echo "::error::Could not find stable tag line in trunk's readme.txt"
+            exit 1
+          fi
+
+          echo "📋 Current stable tag: $CURRENT_STABLE"
+          echo "📋 Target version: $TARGET_VERSION"
+
+          if [ "$CURRENT_STABLE" = "$TARGET_VERSION" ]; then
+            echo "::error::Stable tag is already set to $TARGET_VERSION. No update needed."
+            exit 1
+          else
+            echo "✅ Stable tag needs updating from '$CURRENT_STABLE' to '$TARGET_VERSION'"
+          fi
+
   update-wporg-stable-tag:
     runs-on: ubuntu-latest
     needs: validate-release
