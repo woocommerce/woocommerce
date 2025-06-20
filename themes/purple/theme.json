@@ -3,6 +3,10 @@
 		{
 			"name": "template-page-w-title",
 			"title": "Page with Title"
+		},
+		{
+			"name": "template-page-no-title",
+			"title": "Page No Title"
 		}
 	],
 	"settings": {
