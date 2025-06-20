@@ -17,8 +17,11 @@ permissions:
   pull-requests: write
 
 jobs:
-  validate-confirmation:
+  validate-release:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.extract-version.outputs.version }}
+      branch: ${{ steps.extract-version.outputs.branch }}
     steps:
       - name: Check confirmation
         run: |
@@ -29,13 +32,6 @@ jobs:
             echo "✅ Confirmation received - proceeding with stable tag update"
           fi
 
-  validate-release-version:
-    runs-on: ubuntu-latest
-    needs: validate-confirmation
-    outputs:
-      version: ${{ steps.extract-version.outputs.version }}
-      branch: ${{ steps.extract-version.outputs.branch }}
-    steps:
       - name: Validate release version
         id: extract-version
         uses: actions/github-script@v7
@@ -60,10 +56,6 @@ jobs:
               process.exit(1);
             }
 
-  verify-release-branch:
-    runs-on: ubuntu-latest
-    needs: validate-release-version
-    steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -71,7 +63,7 @@ jobs:
 
       - name: Verify release branch exists
         run: |
-          RELEASE_BRANCH="${{ needs.validate-release-version.outputs.branch }}"
+          RELEASE_BRANCH="${{ steps.extract-version.outputs.branch }}"
           if ! git ls-remote --heads origin "$RELEASE_BRANCH" | grep -q "refs/heads/$RELEASE_BRANCH"; then
             echo "::error::Release branch '$RELEASE_BRANCH' does not exist"
             exit 1
@@ -81,16 +73,16 @@ jobs:
 
   update-wporg-stable-tag:
     runs-on: ubuntu-latest
-    needs: [validate-release-version, verify-release-branch]
+    needs: validate-release
     steps:
       - name: Install SVN
         run: sudo apt-get install -y subversion
 
       - name: Update SVN stable tag
         env:
-          TARGET_VERSION: ${{ needs.validate-release-version.outputs.version }}
+          TARGET_VERSION: ${{ needs.validate-release.outputs.version }}
         run: |
-          echo "🔄 Checking out SVN repository..."
+          echo "🔄 Checking out SVN trunk..."
           svn checkout "${{ secrets.WPORG_SVN_URL }}/trunk" ./svn-trunk --depth files --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive
           cd ./svn-trunk
 
@@ -123,12 +115,12 @@ jobs:
 
   update-gh-stable-tag:
     runs-on: ubuntu-latest
-    needs: [validate-release-version, verify-release-branch, update-wporg-stable-tag]
+    needs: [validate-release, update-wporg-stable-tag]
     strategy:
       matrix:
         branch:
           - trunk
-          - ${{ needs.validate-release-version.outputs.branch }}
+          - ${{ needs.validate-release.outputs.branch }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -145,7 +137,7 @@ jobs:
 
       - name: Update stable tag on ${{ matrix.branch }}
         env:
-          TARGET_VERSION: ${{ needs.validate-release-version.outputs.version }}
+          TARGET_VERSION: ${{ needs.validate-release.outputs.version }}
           BRANCH_NAME: ${{ matrix.branch }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
