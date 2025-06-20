@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailTemplatesCont
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\AdminManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\MenusController;
+use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 /**
@@ -37,6 +38,7 @@ class StockNotificationsServiceProvider extends AbstractServiceProvider {
 		AdminManager::class,
 		SettingsController::class,
 		MenusController::class,
+		NotificationsPage::class,
 	);
 
 	/**
@@ -49,6 +51,6 @@ class StockNotificationsServiceProvider extends AbstractServiceProvider {
 		$this->share( EmailTemplatesController::class );
 		$this->share( AdminManager::class );
 		$this->share( SettingsController::class );
-		$this->share( MenusController::class );
+		$this->share( MenusController::class )->addArguments( array( NotificationsPage::class ) );
 	}
 }
