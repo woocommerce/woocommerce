@@ -137,7 +137,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 			)
 		);
 		$fulfillment->set_is_fulfilled( true );
-		$fulfillment->set_status( 'Fulfilled' );
+		$fulfillment->set_status( 'fulfilled' );
 		$fulfillment->save();
 
 		/**
@@ -180,7 +180,8 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$renderer = new FulfillmentsRenderer();
 		$order    = $this->createMock( \WC_Order::class );
 		$order->method( 'get_id' )->willReturn( 1 );
-		$order->method( 'meta_exists' )->willReturn( false );
+		$order->method( 'meta_exists' )->willReturn( true );
+		$order->method( 'get_meta' )->with( '_fulfillment_status' )->willReturn( 'unfulfilled' );
 
 		ob_start();
 		$renderer->render_fulfillment_column_row_data( 'fulfillment_status', $order );

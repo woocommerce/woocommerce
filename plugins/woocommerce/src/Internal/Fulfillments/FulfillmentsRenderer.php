@@ -136,8 +136,7 @@ class FulfillmentsRenderer {
 	 * @param WC_Order $order The order object.
 	 */
 	private function render_fulfillment_status_column_row_data( WC_Order $order ) {
-		$fulfillment_status_meta_exists = $order->meta_exists( '_fulfillment_status' );
-		$order_fulfillment_status       = $fulfillment_status_meta_exists ? $order->get_meta( '_fulfillment_status', true ) : 'no_fulfillments';
+		$order_fulfillment_status = $order->meta_exists( '_fulfillment_status' ) ? $order->get_meta( '_fulfillment_status', true ) : 'no_fulfillments';
 
 		echo "<div class='fulfillment-status-wrapper'>";
 		$this->render_fulfillment_status_badge( $order, $order_fulfillment_status );
@@ -151,20 +150,8 @@ class FulfillmentsRenderer {
 	 * @param string   $order_fulfillment_status The fulfillment status of the order.
 	 */
 	private function render_fulfillment_status_badge( $order, string $order_fulfillment_status ) {
-		switch ( $order_fulfillment_status ) {
-			case 'no_fulfillments':
-			case 'unfulfilled':
-				echo '<mark class="fulfillment-status status-failed"><span>' . esc_html__( 'Unfulfilled', 'woocommerce' ) . '</span></mark>';
-				break;
-			case 'partially_fulfilled':
-				echo '<mark class="fulfillment-status status-completed"><span>' . esc_html__( 'Partially fulfilled', 'woocommerce' ) . '</span></mark>';
-				break;
-			case 'fulfilled':
-				echo '<mark class="fulfillment-status status-processing"><span>' . esc_html__( 'Fulfilled', 'woocommerce' ) . '</span></mark>';
-				break;
-			default:
-				echo '<mark class="fulfillment-status status-completed"><span>' . esc_html__( 'Unknown', 'woocommerce' ) . '</span></mark>';
-		}
+		$status_props = FulfillmentUtils::get_order_fulfillment_statuses()[ $order_fulfillment_status ];
+		echo '<mark class="fulfillment-status" style="background-color:' . esc_attr( $status_props['background_color'] ) . '; color: ' . esc_attr( $status_props['text_color'] ) . '"><span>' . esc_html( $status_props['label'] ) . '</span></mark>';
 		echo "<a href='#' class='fulfillments-trigger' data-order-id='" . esc_attr( $order->get_id() ) . "' title='" . esc_attr__( 'View Fulfillments', 'woocommerce' ) . "'>
 			<svg width='16' height='16' viewBox='0 0 12 14' xmlns='http://www.w3.org/2000/svg'>
 				<path d='M11.8333 2.83301L9.33329 0.333008L2.24996 7.41634L1.41663 10.7497L4.74996 9.91634L11.8333 2.83301ZM5.99996 12.4163H0.166626V13.6663H5.99996V12.4163Z' />

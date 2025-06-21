@@ -319,10 +319,26 @@ class FulfillmentUtils {
 	 */
 	protected static function get_default_order_fulfillment_statuses(): array {
 		return array(
-			'fulfilled'           => __( 'Fulfilled', 'woocommerce' ),
-			'partially_fulfilled' => __( 'Partially fulfilled', 'woocommerce' ),
-			'unfulfilled'         => __( 'Unfulfilled', 'woocommerce' ),
-			'no_fulfillments'     => __( 'No fulfillments', 'woocommerce' ),
+			'fulfilled'           => array(
+				'label'            => __( 'Fulfilled', 'woocommerce' ),
+				'background_color' => '#d4edda',
+				'text_color'       => '#155724',
+			),
+			'partially_fulfilled' => array(
+				'label'            => __( 'Partially fulfilled', 'woocommerce' ),
+				'background_color' => '#fff3cd',
+				'text_color'       => '#856404',
+			),
+			'unfulfilled'         => array(
+				'label'            => __( 'Unfulfilled', 'woocommerce' ),
+				'background_color' => '#f8d7da',
+				'text_color'       => '#721c24',
+			),
+			'no_fulfillments'     => array(
+				'label'            => __( 'No fulfillments', 'woocommerce' ),
+				'background_color' => '#f8f9fa',
+				'text_color'       => '#6c757d',
+			),
 		);
 	}
 
@@ -337,8 +353,18 @@ class FulfillmentUtils {
 	 */
 	protected static function get_default_fulfillment_statuses(): array {
 		return array(
-			'fulfilled'   => __( 'Fulfilled', 'woocommerce' ),
-			'unfulfilled' => __( 'Unfulfilled', 'woocommerce' ),
+			'fulfilled'   => array(
+				'label'            => __( 'Fulfilled', 'woocommerce' ),
+				'is_fulfilled'     => true,
+				'background_color' => '#d4edda',
+				'text_color'       => '#155724',
+			),
+			'unfulfilled' => array(
+				'label'            => __( 'Unfulfilled', 'woocommerce' ),
+				'is_fulfilled'     => false,
+				'background_color' => '#f8d7da',
+				'text_color'       => '#721c24',
+			),
 		);
 	}
 }
