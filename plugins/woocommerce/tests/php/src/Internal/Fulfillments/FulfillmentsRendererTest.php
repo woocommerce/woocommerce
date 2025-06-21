@@ -114,8 +114,6 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	 * Test the render_fulfillment_column_row_data method.
 	 */
 	public function test_render_fulfillment_column_row_data_uses_cache() {
-		// Mock the FulfillmentsDataStore class.
-		$fulfillments_data_store = $this->createMock( FulfillmentsDataStore::class );
 		$order                   = OrderHelper::create_order( get_current_user_id() );
 		$order->update_meta_data( '_fulfillment_status', 'fulfilled' );
 		$order->save();
@@ -165,9 +163,9 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'Fulfilled', $output );
 		$this->assertStringContainsString( '123456789', $output );
 		$this->assertStringContainsString( 'UPS', $output );
-		$this->assertStringContainsString( "<a href='#' class='fulfillments-trigger' data-order-id='" . $order->get_id() . "' title='" . esc_attr__( 'View Fulfillments', 'woocommerce' ) . "'>", $output );
-		$this->assertStringContainsString( "<svg width='16' height='16' viewBox='0 0 12 14' fill='none' xmlns='http://www.w3.org/2000/svg'>", $output );
-		$this->assertStringContainsString( "<path d='M11.8333 2.83301L9.33329 0.333008L2.24996 7.41634L1.41663 10.7497L4.74996 9.91634L11.8333 2.83301ZM5.99996 12.4163H0.166626V13.6663H5.99996V12.4163Z' fill='#3858E9'/>", $output );
+		$this->assertStringContainsString( "<a href='#' class='fulfillments-trigger' data-order-id='1' title='" . esc_attr__( 'View Fulfillments', 'woocommerce' ) . "'>", $output );
+		$this->assertStringContainsString( "<svg width='16' height='16' viewBox='0 0 12 14' xmlns='http://www.w3.org/2000/svg'>", $output );
+		$this->assertStringContainsString( "<path d='M11.8333 2.83301L9.33329 0.333008L2.24996 7.41634L1.41663 10.7497L4.74996 9.91634L11.8333 2.83301ZM5.99996 12.4163H0.166626V13.6663H5.99996V12.4163Z' />", $output );
 		$this->assertStringContainsString( '</svg>', $output );
 		$this->assertStringContainsString( '</a>', $output );
 

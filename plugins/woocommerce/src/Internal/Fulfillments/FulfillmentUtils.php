@@ -16,16 +16,11 @@ class FulfillmentUtils {
 	 * Get pending items for an order.
 	 *
 	 * @param WC_Order $order The order object.
-	 * @param array    $fulfillments Optional. An array of fulfillments to check. If not provided, it will fetch from the data store.
+	 * @param array    $fulfillments An array of fulfillments to check.
 	 *
 	 * @return array An array of pending items.
 	 */
-	public static function get_pending_items( WC_Order $order, $fulfillments = array() ): array {
-		if ( empty( $fulfillments ) ) {
-			// If no fulfillments are provided, fetch them from the data store.
-			$fulfillments_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
-			$fulfillments            = $fulfillments_data_store->read_fulfillments( WC_Order::class, (string) $order->get_id() );
-		}
+	public static function get_pending_items( WC_Order $order, $fulfillments ): array {
 
 		$items_in_fulfillments = self::get_all_items_of_fulfillments( $fulfillments );
 		$order_items           = array_map(
@@ -99,10 +94,12 @@ class FulfillmentUtils {
 	 * Check if an order has pending items.
 	 *
 	 * @param WC_Order $order The order object.
+	 * @param array    $fulfillments An array of fulfillments to check.
+	 *
 	 * @return bool True if there are pending items, false otherwise.
 	 */
-	public static function has_pending_items( WC_Order $order ): bool {
-		$pending_items = self::get_pending_items( $order );
+	public static function has_pending_items( WC_Order $order, array $fulfillments ): bool {
+		$pending_items = self::get_pending_items( $order, $fulfillments );
 		return ! empty( $pending_items );
 	}
 

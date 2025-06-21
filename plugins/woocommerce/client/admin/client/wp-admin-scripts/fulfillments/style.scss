@@ -394,6 +394,9 @@ a.fulfillments-trigger {
 	}
 
 	&:hover {
+		svg {
+			fill: #135e96;
+		}
 		border: 2px solid var(--wp-admin-theme-color, #00a0d2);
 	}
 }
@@ -418,5 +421,23 @@ tr.type-shop_order.is-selected {
 	th.check-column {
 		border-left: 3px solid #3858e9;
 		padding-left: calc(1em - 3px) !important;
+	}
+}
+
+.wc-order-fulfillment-badges {
+	width: auto;
+	display: flex;
+	gap: 12px;
+	.fulfillments-trigger {
+		margin-left: -8px;
+		svg {
+			fill: #949494;
+		}
+		&:hover {
+			svg {
+				fill: #000;
+			}
+			border-color: transparent;
+		}
 	}
 }
