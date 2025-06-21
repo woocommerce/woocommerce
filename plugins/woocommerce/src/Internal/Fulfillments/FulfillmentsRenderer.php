@@ -44,14 +44,19 @@ class FulfillmentsRenderer {
 		add_action( 'admin_footer', array( $this, 'render_fulfillment_drawer_slot' ) );
 		// Hook into the admin enqueue scripts to load the fulfillment drawer component.
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_components' ) );
+		// Hook into the order details page to render the fulfillment badges.
+		add_action( 'woocommerce_admin_order_data_header_right', array( $this, 'render_order_details_badges' ) );
 		// Hook into the order details before order table to render the fulfillment customer details.
 		add_action( 'woocommerce_order_details_before_order_table', array( $this, 'render_fulfillment_customer_details' ) );
 		// Initialize the renderer for bulk actions.
 		add_action( 'admin_init', array( $this, 'init_admin_hooks' ) );
+		// Hook into the order status text to append the fulfillment status.
+		add_filter( 'woocommerce_order_details_status', array( $this, 'render_fulfillment_status_text' ), 10, 2 );
+		add_filter( 'woocommerce_order_tracking_status', array( $this, 'render_fulfillment_status_text' ), 10, 2 );
 	}
 
 	/**
-	 * Initialize the renderer.
+	 * Initialize the hooks that should run after `admin_init` hook.
 	 */
 	public function init_admin_hooks() {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
@@ -135,6 +140,17 @@ class FulfillmentsRenderer {
 		$order_fulfillment_status       = $fulfillment_status_meta_exists ? $order->get_meta( '_fulfillment_status', true ) : 'no_fulfillments';
 
 		echo "<div class='fulfillment-status-wrapper'>";
+		$this->render_fulfillment_status_badge( $order, $order_fulfillment_status );
+		echo '</div>';
+	}
+
+	/**
+	 * Render the fulfillment status badge.
+	 *
+	 * @param WC_Order $order The order object.
+	 * @param string   $order_fulfillment_status The fulfillment status of the order.
+	 */
+	private function render_fulfillment_status_badge( $order, string $order_fulfillment_status ) {
 		switch ( $order_fulfillment_status ) {
 			case 'no_fulfillments':
 			case 'unfulfilled':
@@ -150,11 +166,10 @@ class FulfillmentsRenderer {
 				echo '<mark class="fulfillment-status status-completed"><span>' . esc_html__( 'Unknown', 'woocommerce' ) . '</span></mark>';
 		}
 		echo "<a href='#' class='fulfillments-trigger' data-order-id='" . esc_attr( $order->get_id() ) . "' title='" . esc_attr__( 'View Fulfillments', 'woocommerce' ) . "'>
-			<svg width='16' height='16' viewBox='0 0 12 14' fill='none' xmlns='http://www.w3.org/2000/svg'>
-				<path d='M11.8333 2.83301L9.33329 0.333008L2.24996 7.41634L1.41663 10.7497L4.74996 9.91634L11.8333 2.83301ZM5.99996 12.4163H0.166626V13.6663H5.99996V12.4163Z' fill='#3858E9'/>
+			<svg width='16' height='16' viewBox='0 0 12 14' xmlns='http://www.w3.org/2000/svg'>
+				<path d='M11.8333 2.83301L9.33329 0.333008L2.24996 7.41634L1.41663 10.7497L4.74996 9.91634L11.8333 2.83301ZM5.99996 12.4163H0.166626V13.6663H5.99996V12.4163Z' />
 			</svg>
 		</a>";
-		echo '</div>';
 	}
 
 	/**
@@ -289,6 +304,20 @@ class FulfillmentsRenderer {
 	}
 
 	/**
+	 * Render the fulfillment status text in the order details page and the order tracking page.
+	 *
+	 * @param string   $order_status The order status text.
+	 * @param WC_Order $order The order object.
+	 *
+	 * @return string The fulfillment status appended order status text.
+	 */
+	public function render_fulfillment_status_text( string $order_status, WC_Order $order ): string {
+		$fulfillments       = $this->maybe_read_fulfillments( $order );
+		$fulfillment_status = FulfillmentUtils::get_order_fulfillment_status_text( $order, $fulfillments );
+		return sprintf( '%s %s', $order_status, $fulfillment_status );
+	}
+
+	/**
 	 * Render the fulfillment customer details in the order details page.
 	 *
 	 * @param WC_Order $order The order object.
@@ -338,6 +367,27 @@ class FulfillmentsRenderer {
 </section>
 			<?php
 		}
+	}
+
+	/**
+	 * Render the fulfillment badges in the order details page.
+	 *
+	 * @param WC_Order $order The order object.
+	 */
+	public function render_order_details_badges( WC_Order $order ) {
+		echo '<div class="wc-order-fulfillment-badges">';
+
+		// Get the fulfillment status for the order.
+		$fulfillments       = $this->maybe_read_fulfillments( $order );
+		$fulfillment_status = FulfillmentUtils::get_fulfillment_status( $order, $fulfillments );
+
+		// Render order status badge.
+		$order_status = $order->get_status();
+		echo '<mark class="order-status status-' . esc_attr( $order_status ) . '"><span>' . esc_html( wc_get_order_status_name( $order_status ) ) . '</span></mark>';
+
+		// Render fulfillment status badge.
+		$this->render_fulfillment_status_badge( $order, $fulfillment_status );
+		echo '</div>';
 	}
 
 	/**
@@ -509,7 +559,6 @@ class FulfillmentsRenderer {
 	}
 
 	/**
-	 * Check if the fulfillment drawer should be rendered.
 	 * Check if the fulfillment drawer should be rendered (admin only).
 	 *
 	 * @return bool True if the fulfillment drawer should be rendered, false otherwise.
@@ -527,8 +576,9 @@ class FulfillmentsRenderer {
 		if ( ! $current_screen || ! $current_screen->id ) {
 			return false;
 		}
-		return 'woocommerce_page_wc-orders' === $current_screen->id // HPOS support.
-			|| 'edit-shop_order' === $current_screen->id; // Legacy support.
+
+		return 'woocommerce_page_wc-orders' === $current_screen->id // HPOS screen.
+		|| 'edit-shop_order' === $current_screen->id; // Legacy screen.
 	}
 
 	/**

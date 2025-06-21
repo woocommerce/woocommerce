@@ -3,6 +3,7 @@
  */
 import React, { useLayoutEffect, useState } from 'react';
 import { createRoot } from '@wordpress/element';
+import { getQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -45,8 +46,12 @@ function FulfillmentsController() {
 		} );
 	}, [] ); // eslint-disable-line react-hooks/exhaustive-deps
 
+	const query = getQuery();
+	const isOrderDetailsPage = query.hasOwnProperty( 'id' );
+
 	return (
 		<FulfillmentDrawer
+			hasBackdrop={ isOrderDetailsPage }
 			isOpen={ isOpen }
 			orderId={ orderId }
 			onClose={ () => {
