@@ -14,6 +14,8 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
+use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -985,13 +987,20 @@ class WC_AJAX {
 	 * Get customer details via ajax.
 	 */
 	public static function get_customer_details() {
-		check_ajax_referer( 'get-customer-details', 'security' );
+		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
+		$legacy_proxy->call_function( 'check_ajax_referer', 'get-customer-details', 'security' );
 
-		if ( ! current_user_can( 'edit_shop_orders' ) || ! isset( $_POST['user_id'] ) ) {
+		$user_id = absint(
+			$legacy_proxy->call_function( 'filter_input', INPUT_POST, 'user_id', FILTER_VALIDATE_INT )
+		);
+
+		if (
+			! current_user_can( 'edit_shop_orders' )
+			|| is_wp_error( Users::get_user_in_current_site( $user_id ) )
+		) {
 			wp_die( -1 );
 		}
 
-		$user_id  = absint( $_POST['user_id'] );
 		$customer = new WC_Customer( $user_id );
 
 		if ( has_filter( 'woocommerce_found_customer_details' ) ) {
@@ -1755,12 +1764,14 @@ class WC_AJAX {
 	public static function json_search_customers() {
 		ob_start();
 
-		check_ajax_referer( 'search-customers', 'security' );
+		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
+		$legacy_proxy->call_function( 'check_ajax_referer', 'search-customers', 'security' );
 
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			wp_die( -1 );
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$term  = isset( $_GET['term'] ) ? (string) wc_clean( wp_unslash( $_GET['term'] ) ) : '';
 		$limit = 0;
 
@@ -1773,8 +1784,9 @@ class WC_AJAX {
 		if ( is_numeric( $term ) ) {
 			$customer = new WC_Customer( intval( $term ) );
 
-			// Customer does not exists.
-			if ( 0 !== $customer->get_id() ) {
+			// Only add existing/valid users. In a multisite context, they must be visible to the current user (in
+			// general, this means that they must have been added to the current site).
+			if ( 0 !== $customer->get_id() && ! is_wp_error( Users::get_user_in_current_site( $customer->get_id() ) ) ) {
 				$ids = array( $customer->get_id() );
 			}
 		}
@@ -1788,12 +1800,17 @@ class WC_AJAX {
 			if ( 3 > strlen( $term ) ) {
 				$limit = 20;
 			}
+
+			// Multisite note: via its dependency on WP_User_Query, WC_Customer_Data_Store::search_customers() will only
+			// look for users who have already been added to the current blog.
 			$ids = $data_store->search_customers( $term, $limit );
 		}
 
 		$found_customers = array();
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! empty( $_GET['exclude'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$ids = array_diff( $ids, array_map( 'absint', (array) wp_unslash( $_GET['exclude'] ) ) );
 		}
 

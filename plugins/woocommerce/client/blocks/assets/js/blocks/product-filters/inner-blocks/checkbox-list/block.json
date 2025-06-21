@@ -13,9 +13,6 @@
 		"woocommerce/product-filter-rating"
 	],
 	"supports": {
-		"color": {
-			"enableContrastChecker": false
-		},
 		"interactivity": true
 	},
 	"usesContext": [ "filterData" ],
@@ -41,6 +38,14 @@
 			"default": ""
 		},
 		"customOptionElement": {
+			"type": "string",
+			"default": ""
+		},
+		"labelElement": {
+			"type": "string",
+			"default": ""
+		},
+		"customLabelElement": {
 			"type": "string",
 			"default": ""
 		}

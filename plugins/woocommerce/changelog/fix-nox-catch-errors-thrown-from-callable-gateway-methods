@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent payment gateways that implement __call() to break the payments settings page.

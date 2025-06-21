@@ -31,16 +31,17 @@ class VariationSelectorAttributeName extends AbstractBlock {
 	 * @return string Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ): string {
-		if ( empty( $block->context ) ) {
+		if (
+			! isset(
+				$block->context['woocommerce/attributeId'],
+				$block->context['woocommerce/attributeName']
+			)
+		) {
 			return '';
 		}
 
 		$attribute_id   = $block->context['woocommerce/attributeId'];
 		$attribute_name = $block->context['woocommerce/attributeName'];
-
-		if ( ! isset( $attribute_id ) || ! isset( $attribute_name ) ) {
-			return '';
-		}
 
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 

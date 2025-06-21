@@ -47,9 +47,9 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 				'woopayments_onboarding_modal_kyc_sub_step_completed',
 				{
 					sub_step_id: 'business',
-					country: data.country || '',
-					business_type: data.business_type || '',
-					mcc: data.mcc || '',
+					country: data.country || 'unknown',
+					business_type: data.business_type || 'unknown',
+					mcc: data.mcc || 'unknown',
 				}
 			);
 
@@ -81,7 +81,7 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 					recordPaymentsOnboardingEvent(
 						'woopayments_onboarding_modal_click',
 						{
-							step_id: currentStep?.id ?? '',
+							step_id: currentStep?.id ?? 'unknown',
 							sub_step_id: 'business',
 							action: 'business_form_continue',
 						}

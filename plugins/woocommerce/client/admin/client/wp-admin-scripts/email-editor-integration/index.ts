@@ -6,6 +6,7 @@
 import { addFilter } from '@wordpress/hooks';
 import { registerBlockType } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
+import { initializeEditor } from '@woocommerce/email-editor';
 
 /**
  * Internal dependencies
@@ -28,7 +29,17 @@ addFilter(
 	() => 'https://woocommerce.com/document/email-faq/'
 );
 
+// Add filter to permanently delete emails.
+// This is used to delete email posts from the database instead of moving them to the trash.
+// The email posts can be recreated from the WooCommerce settings email listing page.
+addFilter(
+	'woocommerce_email_editor_trash_modal_should_permanently_delete',
+	NAME_SPACE,
+	() => true
+);
+
 registerBlockType( 'woo/email-content', wooContentPlaceholderBlock );
 modifySidebar();
 modifyTemplateSidebar();
 registerEmailValidationRules();
+initializeEditor( 'woocommerce-email-editor' );

@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-import { PaymentIncentive } from '@woocommerce/data';
+import { PaymentsProviderIncentive } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -28,7 +28,7 @@ interface ActivatePaymentsButtonProps {
 	/**
 	 * Incentive data. If provided, the incentive will be accepted when the button is clicked.
 	 */
-	incentive?: PaymentIncentive | null;
+	incentive?: PaymentsProviderIncentive | null;
 	/**
 	 * ID of the plugin that is being installed.
 	 */

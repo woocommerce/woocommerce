@@ -261,3 +261,12 @@ export type EmailContentValidationRule = {
 	message: string;
 	actions: EmailContentValidationAction[];
 };
+
+export type CoreDataError = { message?: string; code?: string };
+
+export type PostWithPermissions = Post & {
+	permissions: {
+		delete: boolean;
+		update: boolean;
+	};
+};

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make sure HPOS tables are created when running sync manually from settings.

@@ -11,7 +11,7 @@ export interface PluginData {
 	status: 'installed' | 'active' | 'not_installed';
 }
 
-export interface PaymentProviderState {
+export interface PaymentsProviderState {
 	enabled: boolean;
 	account_connected: boolean;
 	needs_setup: boolean;
@@ -29,14 +29,14 @@ export interface ManagementData {
 	};
 }
 
-export enum PaymentProviderType {
+export enum PaymentsProviderType {
 	OfflinePmsGroup = 'offline_pms_group',
 	OfflinePm = 'offline_pm',
 	Suggestion = 'suggestion',
 	Gateway = 'gateway',
 }
 
-export type PaymentIncentive = {
+export type PaymentsProviderIncentive = {
 	id: string;
 	promo_id: string;
 	title: string;
@@ -45,13 +45,13 @@ export type PaymentIncentive = {
 	cta_label: string;
 	tc_url: string;
 	badge: string;
-	_dismissals: PaymentIncentiveDismissal[];
+	_dismissals: PaymentsProviderIncentiveDismissal[];
 	_links: {
 		dismiss: LinkData;
 	};
 };
 
-interface PaymentIncentiveDismissal {
+interface PaymentsProviderIncentiveDismissal {
 	timestamp: number; // timestamp in seconds
 	context: string;
 }
@@ -69,7 +69,7 @@ export type RecommendedPaymentMethod = {
 	extraIcon: string;
 };
 
-export type PaymentProviderOnboardingState = {
+export type PaymentsProviderOnboardingState = {
 	started: boolean;
 	completed: boolean;
 	test_mode: boolean;
@@ -95,17 +95,17 @@ export type PaymentsEntity = {
 	_links: Record< string, LinkData >;
 };
 
-// Represents a payment provider for the main providers list.
-export type PaymentProvider = PaymentsEntity & {
-	_type: PaymentProviderType;
+// Represents a payments provider for the main providers list.
+export type PaymentsProvider = PaymentsEntity & {
+	_type: PaymentsProviderType;
 	_order: number; // Used for sorting the providers in the UI.
 	image?: string;
 	supports?: string[];
 	management?: ManagementData;
-	state?: PaymentProviderState;
+	state?: PaymentsProviderState;
 	links?: PaymentGatewayLink[];
 	onboarding?: {
-		state?: PaymentProviderOnboardingState;
+		state?: PaymentsProviderOnboardingState;
 		_links?: {
 			onboard?: LinkData; // For gateways, this is used to start the onboarding flow.
 		};
@@ -114,17 +114,17 @@ export type PaymentProvider = PaymentsEntity & {
 	};
 	tags?: string[];
 	_suggestion_id?: string;
-	_incentive?: PaymentIncentive;
+	_incentive?: PaymentsProviderIncentive;
 };
 
 // Represents a payment gateway in the main providers list.
-export type PaymentGatewayProvider = PaymentProvider & {
+export type PaymentGatewayProvider = PaymentsProvider & {
 	_order: number;
 	supports: string[];
 	management: ManagementData;
-	state: PaymentProviderState;
+	state: PaymentsProviderState;
 	onboarding: {
-		state: PaymentProviderOnboardingState;
+		state: PaymentsProviderOnboardingState;
 		_links: {
 			onboard: LinkData;
 		};
@@ -134,13 +134,13 @@ export type PaymentGatewayProvider = PaymentProvider & {
 };
 
 // Represents an offline payment method provider in the main providers list.
-export type OfflinePaymentMethodProvider = PaymentProvider & {
+export type OfflinePaymentMethodProvider = PaymentsProvider & {
 	_order: number;
 	supports: string[];
 	management: ManagementData;
-	state: PaymentProviderState;
+	state: PaymentsProviderState;
 	onboarding: {
-		state: PaymentProviderOnboardingState;
+		state: PaymentsProviderOnboardingState;
 		_links: {
 			onboard: LinkData;
 		};
@@ -148,16 +148,16 @@ export type OfflinePaymentMethodProvider = PaymentProvider & {
 };
 
 // Represents an offline payment methods group provider in the main providers list.
-export type OfflinePmsGroupProvider = PaymentProvider & {
+export type OfflinePmsGroupProvider = PaymentsProvider & {
 	_order: number;
 	management: ManagementData;
 };
 
-// Represents a payment extension suggestion provider in the main providers list.
-export type PaymentExtensionSuggestionProvider = PaymentProvider & {
+// Represents a payments extension suggestion provider in the main providers list.
+export type PaymentsExtensionSuggestionProvider = PaymentsProvider & {
 	_order: number;
 	onboarding: {
-		state: PaymentProviderOnboardingState;
+		state: PaymentsProviderOnboardingState;
 		_links: {
 			preload?: LinkData;
 		};
@@ -169,8 +169,8 @@ export type PaymentExtensionSuggestionProvider = PaymentProvider & {
 	};
 };
 
-// Represents a suggested payment extension outside the main providers list.
-export type SuggestedPaymentExtension = PaymentsEntity & {
+// Represents a suggested payments extension outside the main providers list.
+export type SuggestedPaymentsExtension = PaymentsEntity & {
 	_type: string;
 	_priority: number;
 	category: string;
@@ -178,21 +178,21 @@ export type SuggestedPaymentExtension = PaymentsEntity & {
 	short_description: string;
 	tags: string[];
 	links: PaymentGatewayLink[];
-	_incentive?: PaymentIncentive;
+	_incentive?: PaymentsProviderIncentive;
 };
 
-export type SuggestedPaymentExtensionCategory = {
+export type SuggestedPaymentsExtensionCategory = {
 	id: string;
 	_priority: number;
 	title: string;
 	description: string;
 };
 
-export type PaymentSettingsState = {
-	providers: PaymentProvider[];
+export type PaymentsSettingsState = {
+	providers: PaymentsProvider[];
 	offlinePaymentGateways: OfflinePaymentMethodProvider[];
-	suggestions: SuggestedPaymentExtension[];
-	suggestionCategories: SuggestedPaymentExtensionCategory[];
+	suggestions: SuggestedPaymentsExtension[];
+	suggestionCategories: SuggestedPaymentsExtensionCategory[];
 	isFetching: boolean;
 	errors: Record< string, unknown >;
 	isWooPayEligible: boolean;
@@ -201,10 +201,10 @@ export type PaymentSettingsState = {
 export type OrderMap = Record< string, number >;
 
 export type PaymentProvidersResponse = {
-	providers: PaymentProvider[];
+	providers: PaymentsProvider[];
 	offline_payment_methods: OfflinePaymentMethodProvider[];
-	suggestions: SuggestedPaymentExtension[];
-	suggestion_categories: SuggestedPaymentExtensionCategory[];
+	suggestions: SuggestedPaymentsExtension[];
+	suggestion_categories: SuggestedPaymentsExtensionCategory[];
 };
 
 export type EnableGatewayResponse = {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Preselected payment methods were not enabled during direct live account onboarding in the NOX flow.

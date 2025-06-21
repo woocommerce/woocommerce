@@ -1497,6 +1497,91 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The product POST endpoint properly cleans up orphaned images when product creation fails.
+	 */
+	public function test_create_product_with_duplicate_sku_trashed_original_cleans_up_images() {
+		// The manual override is needed because of the way we dispatch the REST request.
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
+		$original_product_sku   = 'DUPLICATE_SKU_TEST_TRASHED';
+		// This image `src` is used in other product API tests, using here for consistency.
+		$shared_image_src = 'http://cldup.com/Dr1Bczxq4q.png';
+
+		// 1. Create the original product with its image.
+		$request_original_product = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request_original_product->set_body_params(
+			array(
+				'name'          => 'Original Trashed Product',
+				'sku'           => $original_product_sku,
+				'type'          => 'simple',
+				'regular_price' => '10',
+				'images'        => array(
+					array(
+						'src' => $shared_image_src,
+					),
+				),
+			)
+		);
+		$response_original_product = $this->server->dispatch( $request_original_product );
+
+		$this->assertEquals( 201, $response_original_product->get_status(), 'Failed to create the initial product with an image.' );
+
+		$original_product_data  = $response_original_product->get_data();
+		$original_product_id    = $original_product_data['id'];
+		$original_attachment_id = $original_product_data['images'][0]['id'];
+
+		// 2. Move the original product to trash.
+		wp_trash_post( $original_product_id );
+
+		$attachments_before_failed_attempt = count(
+			get_posts(
+				array(
+					'post_type'   => 'attachment',
+					'post_status' => 'inherit',
+					'numberposts' => -1,
+				)
+			)
+		);
+
+		// 3. Attempt to create a new product with the same SKU and another image.
+		$create_request_for_failure = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$create_request_for_failure->set_body_params(
+			array(
+				'name'          => 'New Product Attempt That Fails',
+				'sku'           => $original_product_sku, // Duplicate SKU.
+				'type'          => 'simple',
+				'regular_price' => '20',
+				'images'        => array(
+					array(
+						'src' => $shared_image_src,
+						'alt' => 'New Image To Be Cleaned Up',
+					),
+				),
+			)
+		);
+		$failed_creation_response      = $this->server->dispatch( $create_request_for_failure );
+		$failed_creation_response_data = $failed_creation_response->get_data();
+
+		$this->assertEquals( 400, $failed_creation_response->get_status(), 'Product creation attempt with duplicate SKU should return HTTP 400.' );
+		$this->assertEquals( 'woocommerce_rest_product_not_created', $failed_creation_response_data['code'] );
+
+		$attachments_after_failed_attempt = count(
+			get_posts(
+				array(
+					'post_type'   => 'attachment',
+					'post_status' => 'inherit',
+					'numberposts' => -1,
+				)
+			)
+		);
+
+		$this->assertEquals( $attachments_before_failed_attempt, $attachments_after_failed_attempt, 'Number of attachments should remain unchanged after the failed product creation attempt, indicating cleanup of the second image.' );
+		$this->assertNotNull( get_post( $original_attachment_id ), 'Original attachment for the initially created product should still exist.' );
+
+		wp_delete_post( $original_product_id, true );
+		wp_delete_attachment( $original_attachment_id, true );
+	}
+
+	/**
 	 * Perform a REST POST request to update a product.
 	 *
 	 * @param WC_Product $product The product to update.

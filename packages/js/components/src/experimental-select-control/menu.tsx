@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Popover } from '@wordpress/components';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	createElement,
 	useEffect,
@@ -77,7 +77,7 @@ export const Menu = ( {
 				<Popover
 					__unstableSlotName="woocommerce-select-control-menu"
 					focusOnMount={ false }
-					className={ classnames(
+					className={ clsx(
 						'woocommerce-experimental-select-control__popover-menu',
 						{
 							'is-open': isOpen,
@@ -91,7 +91,7 @@ export const Menu = ( {
 				>
 					<ul
 						{ ...getMenuProps() }
-						className={ classnames(
+						className={ clsx(
 							'woocommerce-experimental-select-control__popover-menu-container',
 							className
 						) }

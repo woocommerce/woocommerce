@@ -23,7 +23,7 @@ class Utils {
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
 		// Replacement string to add button BEFORE the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '"type="button" data-wp-on--click="actions.decreaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>$1';
+		$minus_button = '<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.decreaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>$1';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
 		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.increaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
@@ -125,13 +125,19 @@ class Utils {
 	}
 
 	/**
-	 * Check if a product is a simple product that is not purchasable or not in stock.
+	 * Check if a product is not purchasable or not in stock.
 	 *
 	 * @param \WC_Product $product The product to check.
-	 * @return bool True if the product is a simple product that is not purchasable or not in stock.
+	 * @return bool True if the product is not purchasable or not in stock.
 	 */
-	public static function is_not_purchasable_simple_product( $product ) {
-		return ProductType::SIMPLE === $product->get_type() && ( ! $product->is_in_stock() || ! $product->is_purchasable() );
+	public static function is_not_purchasable_product( $product ) {
+		if ( $product->is_type( 'simple' ) ) {
+			return ! $product->is_in_stock() || ! $product->is_purchasable();
+		} elseif ( $product->is_type( 'variable' ) ) {
+			return ! $product->is_in_stock() || ! $product->has_purchasable_variations();
+		}
+
+		return false;
 	}
 
 	/**

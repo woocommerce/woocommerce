@@ -5,8 +5,8 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import {
-	PaymentProviderState,
-	PaymentProviderOnboardingState,
+	PaymentsProviderState,
+	PaymentsProviderOnboardingState,
 	woopaymentsOnboardingStore,
 } from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
@@ -25,11 +25,11 @@ interface CompleteSetupButtonProps {
 	/**
 	 * The state of the gateway.
 	 */
-	gatewayState: PaymentProviderState;
+	gatewayState: PaymentsProviderState;
 	/**
 	 * The onboarding state for this gateway.
 	 */
-	onboardingState: PaymentProviderOnboardingState;
+	onboardingState: PaymentsProviderOnboardingState;
 	/**
 	 * The settings URL to navigate to, if we don't have an onboarding URL.
 	 */

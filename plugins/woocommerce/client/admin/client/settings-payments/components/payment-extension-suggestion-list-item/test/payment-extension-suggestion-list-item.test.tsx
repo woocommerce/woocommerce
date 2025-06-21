@@ -4,7 +4,7 @@
 import { recordEvent } from '@woocommerce/tracks';
 import { render, fireEvent } from '@testing-library/react';
 import {
-	PaymentExtensionSuggestionProvider,
+	PaymentsExtensionSuggestionProvider,
 	PluginData,
 } from '@woocommerce/data';
 
@@ -37,7 +37,7 @@ describe( 'PaymentExtensionSuggestionListItem', () => {
 						} as PluginData,
 						_order: 1,
 						_type: 'test-type',
-					} as unknown as PaymentExtensionSuggestionProvider
+					} as unknown as PaymentsExtensionSuggestionProvider
 				}
 				installingPlugin={ null }
 				setUpPlugin={ () => {} }

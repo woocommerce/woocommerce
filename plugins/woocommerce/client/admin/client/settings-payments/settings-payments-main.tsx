@@ -6,14 +6,14 @@ import { __, sprintf } from '@wordpress/i18n';
 import {
 	pluginsStore,
 	paymentSettingsStore,
-	PaymentProvider,
+	PaymentsProvider,
 	PaymentsEntity,
 } from '@woocommerce/data';
 import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
 import React, { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { Button } from '@wordpress/components';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -40,7 +40,8 @@ import {
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
 import WooPaymentsModal from '~/settings-payments/onboarding/providers/woopayments';
-import { getAdminSetting } from '~/utils/admin-settings';
+import { TrackedLink } from '~/components/tracked-link/tracked-link';
+import { isFeatureEnabled } from '~/utils/features';
 
 /**
  * A component that renders the main settings page for managing payment gateways in WooCommerce.
@@ -53,7 +54,7 @@ export const SettingsPaymentsMain = () => {
 	);
 	// State to hold the sorted providers in case of changing the order, otherwise it will be null
 	const [ sortedProviders, setSortedProviders ] = useState<
-		PaymentProvider[] | null
+		PaymentsProvider[] | null
 	>( null );
 	const { installAndActivatePlugins } = useDispatch( pluginsStore );
 	const { updateProviderOrdering, attachPaymentExtensionSuggestion } =
@@ -71,8 +72,6 @@ export const SettingsPaymentsMain = () => {
 
 	const [ isOnboardingModalOpen, setIsOnboardingModalOpen ] =
 		useState( false );
-
-	const assetUrl = getAdminSetting( 'wcAdminAssetUrl' );
 
 	useEffect( () => {
 		// Record the page view event.
@@ -178,7 +177,7 @@ export const SettingsPaymentsMain = () => {
 		setSortedProviders( null );
 	}, [ providers ] );
 
-	function handleOrderingUpdate( sorted: PaymentProvider[] ) {
+	function handleOrderingUpdate( sorted: PaymentsProvider[] ) {
 		// Extract the existing _order values in the sorted order
 		const updatedOrderValues = sorted
 			.map( ( provider ) => provider._order )
@@ -197,7 +196,7 @@ export const SettingsPaymentsMain = () => {
 	}
 
 	const incentiveProvider = providers.find(
-		( provider: PaymentProvider ) => '_incentive' in provider
+		( provider: PaymentsProvider ) => '_incentive' in provider
 	);
 	const incentive = incentiveProvider ? incentiveProvider._incentive : null;
 
@@ -353,7 +352,7 @@ export const SettingsPaymentsMain = () => {
 
 					// Find the matching provider in the updated list.
 					const updatedPaymentsEntity = updatedProviders.find(
-						( current: PaymentProvider ) =>
+						( current: PaymentsProvider ) =>
 							current.id === paymentsEntity.id ||
 							current?._suggestion_id === paymentsEntity.id || // For suggestions that were replaced by a gateway.
 							current.plugin.slug === paymentsEntity.plugin.slug // Last resort to find the provider.
@@ -447,16 +446,24 @@ export const SettingsPaymentsMain = () => {
 	};
 
 	const morePaymentOptionsLink = (
-		<Button
-			variant={ 'link' }
-			target="_blank"
-			href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/"
-			className="more-payment-options-link"
-			onClick={ trackMorePaymentsOptionsClicked }
-		>
-			<img src={ assetUrl + '/icons/external-link.svg' } alt="" />
-			{ __( 'More payment options', 'woocommerce' ) }
-		</Button>
+		<TrackedLink
+			message={ __(
+				// translators: {{Link}} is a placeholder for a html element.
+				'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find additional payment options.',
+				'woocommerce'
+			) }
+			onClickCallback={ trackMorePaymentsOptionsClicked }
+			targetUrl={
+				isFeatureEnabled( 'marketplace' )
+					? getAdminLink(
+							'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
+					  )
+					: 'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/'
+			}
+			linkType={
+				isFeatureEnabled( 'marketplace' ) ? 'wc-admin' : 'external'
+			}
+		/>
 	);
 
 	return (
@@ -539,7 +546,7 @@ export const SettingsPaymentsMain = () => {
 					setIsOpen={ setIsOnboardingModalOpen }
 					providerData={
 						getWooPaymentsFromProviders( providers ) ||
-						( {} as PaymentProvider )
+						( {} as PaymentsProvider )
 					}
 				/>
 			) }

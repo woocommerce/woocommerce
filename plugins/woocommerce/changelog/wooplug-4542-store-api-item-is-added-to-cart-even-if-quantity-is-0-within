@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent items being added to cart with quantity of 0.

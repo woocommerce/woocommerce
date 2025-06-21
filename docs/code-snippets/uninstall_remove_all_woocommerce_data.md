@@ -1,9 +1,11 @@
 ---
 post_title: Uninstall and remove all WooCommerce Data
-menu_title: Uninstalling and removing data
-tags: code-snippet
+sidebar_label: Uninstalling and removing data
+
 current wccom url: https://woocommerce.com/document/installing-uninstalling-woocommerce/#uninstalling-woocommerce
 ---
+
+# Uninstall and remove all WooCommerce Data
 
 The WooCommerce plugin can be uninstalled like any other WordPress plugin. By default, the WooCommerce data is left in place though. 
 

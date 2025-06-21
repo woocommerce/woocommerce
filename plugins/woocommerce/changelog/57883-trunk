@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Improve cart table accessibility by properly defining column and row headers using scope attributes.

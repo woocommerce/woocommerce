@@ -42,7 +42,7 @@ export const JetpackStep: React.FC = () => {
 							recordPaymentsOnboardingEvent(
 								'woopayments_onboarding_modal_click',
 								{
-									step: currentStep?.id || '',
+									step: currentStep?.id || 'unknown',
 									action: 'connect_to_wpcom',
 								}
 							);

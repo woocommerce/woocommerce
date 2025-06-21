@@ -1,0 +1,10 @@
+{
+    "label": "Extensions",
+    "link": {
+      "type": "generated-index",
+      "title": "Extensions"
+    },
+    "customProps" : {
+      "id" : "extensions"
+    }
+}

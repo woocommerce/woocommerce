@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add a custom hook to properly render the "Add to Cart with Options" block on the frontend for variable product type.

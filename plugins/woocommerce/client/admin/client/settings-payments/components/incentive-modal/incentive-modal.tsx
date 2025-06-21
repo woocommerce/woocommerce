@@ -13,8 +13,8 @@ import { __ } from '@wordpress/i18n';
 import { createInterpolateElement, useState } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import {
-	PaymentIncentive,
-	PaymentProvider,
+	PaymentsProviderIncentive,
+	PaymentsProvider,
 	PaymentsEntity,
 } from '@woocommerce/data';
 
@@ -33,11 +33,11 @@ interface IncentiveModalProps {
 	/**
 	 * Incentive data.
 	 */
-	incentive: PaymentIncentive;
+	incentive: PaymentsProviderIncentive;
 	/**
-	 * Payment provider.
+	 * Payments provider.
 	 */
-	provider: PaymentProvider;
+	provider: PaymentsProvider;
 	/**
 	 * Onboarding URL (if available).
 	 */
@@ -102,7 +102,7 @@ export const IncentiveModal = ( {
 		recordPaymentsEvent( 'incentive_show', {
 			incentive_id: incentive.promo_id,
 			provider_id: provider.id,
-			suggestion_id: provider._suggestion_id ?? '',
+			suggestion_id: provider._suggestion_id ?? 'unknown',
 			display_context: context,
 		} );
 	}, [ incentive, provider ] );
@@ -123,7 +123,7 @@ export const IncentiveModal = ( {
 		recordPaymentsEvent( 'incentive_accept', {
 			incentive_id: incentive.promo_id,
 			provider_id: provider.id,
-			suggestion_id: provider._suggestion_id ?? '',
+			suggestion_id: provider._suggestion_id ?? 'unknown',
 			display_context: context,
 		} );
 

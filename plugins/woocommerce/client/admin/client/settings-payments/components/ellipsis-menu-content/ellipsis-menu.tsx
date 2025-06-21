@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { EllipsisMenu } from '@woocommerce/components';
-import { PaymentProvider } from '@woocommerce/data';
+import { PaymentsProvider } from '@woocommerce/data';
 import { useState } from '@wordpress/element';
 
 /**
@@ -18,9 +18,9 @@ interface EllipsisMenuProps {
 	 */
 	label: string;
 	/**
-	 * The payment provider associated with the menu.
+	 * The payments provider associated with the menu.
 	 */
-	provider: PaymentProvider;
+	provider: PaymentsProvider;
 }
 
 /**
