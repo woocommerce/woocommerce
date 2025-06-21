@@ -26,44 +26,52 @@ class WC_Cache_Helper {
 	 * Hook in methods.
 	 */
 	public static function init() {
-		add_filter( 'nocache_headers', array( __CLASS__, 'additional_nocache_headers' ), 10 );
+		add_action( 'wp_headers', array( __CLASS__, 'prevent_caching' ) );
 		add_action( 'shutdown', array( __CLASS__, 'delete_transients_on_shutdown' ), 10 );
 		add_action( 'template_redirect', array( __CLASS__, 'geolocation_ajax_redirect' ) );
 		add_action( 'wc_ajax_update_order_review', array( __CLASS__, 'update_geolocation_hash' ), 5 );
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
 		add_action( 'delete_version_transients', array( __CLASS__, 'delete_version_transients' ), 10 );
-		add_action( 'wp', array( __CLASS__, 'prevent_caching' ) );
 		add_action( 'clean_term_cache', array( __CLASS__, 'clean_term_cache' ), 10, 2 );
 		add_action( 'edit_terms', array( __CLASS__, 'clean_term_cache' ), 10, 2 );
 	}
 
 	/**
-	 * Set additional nocache headers.
+	 * Prevent caching on certain pages.
 	 *
-	 * @param array $headers Header names and field values.
 	 * @since 3.6.0
+	 *
+	 * @param array<string, string> $headers Header names and field values.
+	 * @return array<string, string> Filtered headers.
 	 */
-	public static function additional_nocache_headers( $headers ) {
-		/**
-		 * Allow plugins to enable nocache headers.
-		 *
-		 * @param bool $enable_nocache_headers Flag indicating whether to add nocache headers. Default: false.
-		 */
-		$set_cache = (bool) apply_filters( 'woocommerce_enable_nocache_headers', false );
-
-		if ( $set_cache ) {
-			$new_directives = array(
-				'no-transform',
-				'no-cache',
-				'no-store',
-				'must-revalidate',
-			);
-			$old_directives = array();
-			if ( isset( $headers['Cache-Control'] ) ) {
-				$old_directives = preg_split( '/\s*,\s*/', $headers['Cache-Control'] );
-			}
-			$headers['Cache-Control'] = implode( ', ', array_unique( array_merge( $old_directives, $new_directives ) ) );
+	public static function prevent_caching( $headers ) {
+		if ( ! is_blog_installed() ) {
+			return $headers;
 		}
+		$page_ids = array_filter( array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ), wc_get_page_id( 'myaccount' ) ) );
+
+		if ( ! is_page( $page_ids ) ) {
+			return $headers;
+		}
+
+		self::set_nocache_constants();
+
+		// These directives are all included in `wp_get_nocache_headers()`, with the exclusion of `no-store` for the sake of bfcache.
+		$new_directives = array(
+			// Prevent caching the response in reverse proxies.
+			'private',
+
+			// Ensure freshness of the response but without `no-store` so that bfcache won't be disabled.
+			'no-cache',
+			'must-revalidate',
+			'max-age=0',
+		);
+		$old_directives = array();
+		if ( isset( $headers['Cache-Control'] ) ) {
+			$old_directives = preg_split( '/\s*,\s*/', $headers['Cache-Control'] );
+		}
+		$headers['Cache-Control'] = implode( ', ', array_unique( array_merge( $old_directives, $new_directives ) ) );
+
 		return $headers;
 	}
 
@@ -129,21 +137,6 @@ class WC_Cache_Helper {
 		 * @param WC_Customer $customer      The current customer object.
 		 */
 		return apply_filters( 'woocommerce_geolocation_ajax_get_location_hash', $location_hash, $location, $customer );
-	}
-
-	/**
-	 * Prevent caching on certain pages
-	 */
-	public static function prevent_caching() {
-		if ( ! is_blog_installed() ) {
-			return;
-		}
-		$page_ids = array_filter( array( wc_get_page_id( 'checkout' ), wc_get_page_id( 'myaccount' ) ) );
-
-		if ( is_page( $page_ids ) ) {
-			self::set_nocache_constants();
-			nocache_headers();
-		}
 	}
 
 	/**
