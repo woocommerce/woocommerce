@@ -152,6 +152,14 @@ const { state } = store(
 					availableVariations,
 				} );
 			},
+			get pillTabIndex(): number {
+				const { selectedValue } = getContext< Context >();
+				const { isPillSelected, index } = state;
+				if ( isPillSelected || ( index === 0 && ! selectedValue ) ) {
+					return 0;
+				}
+				return -1;
+			},
 			get index() {
 				const context = getContext< Context >();
 				return context.options.findIndex(

@@ -95,8 +95,9 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			data-wp-class--wc-block-product-gallery-thumbnails--overflow-right="context.thumbnailsOverflow.right">
 			<div
 				class="wc-block-product-gallery-thumbnails__scrollable"
-				data-wp-init="actions.onScroll"
-				data-wp-on--scroll="actions.onScroll">
+				data-wp-init="callbacks.initResizeObserver"
+				data-wp-on--scroll="actions.onScroll"
+				role="listbox">
 				<?php foreach ( $product_gallery_images as $index => $image ) : ?>
 					<div class="wc-block-product-gallery-thumbnails__thumbnail">
 						<img
@@ -107,12 +108,13 @@ class ProductGalleryThumbnails extends AbstractBlock {
 							sizes="<?php echo esc_attr( $image['sizes'] ); ?>"
 							alt="<?php echo esc_attr( $image['alt'] ); ?>"
 							data-wp-on--click="actions.selectCurrentImage"
-							data-wp-on--keydown="actions.onThumbnailKeyDown"
-							data-wp-watch="callbacks.toggleActiveImageAttributes"
+							data-wp-on--keydown="actions.onThumbnailsArrowsKeyDown"
+							data-wp-watch="callbacks.toggleActiveThumbnailAttributes"
 							decoding="async"
-							tabindex="0"
+							tabindex="<?php echo 0 === $index ? '0' : '-1'; ?>"
 							draggable="false"
 							loading="lazy"
+							role="option"
 							style="aspect-ratio: <?php echo esc_attr( $attributes['aspectRatio'] ); ?>" />
 					</div>
 				<?php endforeach; ?>

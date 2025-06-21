@@ -1,0 +1,5 @@
+Significance: patch
+Type: enhancement
+Comment: Product Filter Rating: replace shared Rating component with local RatingStars component
+
+

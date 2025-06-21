@@ -256,16 +256,70 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'method_title' => '<h1><a href="#">WooPayments</a></h1> <a href="#">Some link</a> ' ) );
 		$this->assertEquals( 'WooPayments Some link', $this->sut->get_title( $fake_gateway ) );
 
-		// Test title with encoded HTML entitites.
+		// Test title with encoded HTML entities.
 		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'method_title' => htmlentities( '<h1><a href="#">WooPayments</a></h1> <a href="#">Some link</a> ' ) ) );
 		$this->assertEquals( 'WooPayments Some link', $this->sut->get_title( $fake_gateway ) );
 
 		// Test title with wrong type.
-		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'method_title' => true ) );
-		$this->assertEquals( 'Unknown', $this->sut->get_title( $fake_gateway ) );
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'method_title' => true,
+				'title'        => 'Public title',
+			)
+		);
+		$this->assertEquals( 'Public title', $this->sut->get_title( $fake_gateway ) );
 
-		// Test title empty.
-		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'method_title' => '' ) );
+		// Test title empty falls back on public-facing title.
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'method_title' => '',
+				'title'        => 'Public title',
+			)
+		);
+		$this->assertEquals( 'Public title', $this->sut->get_title( $fake_gateway ) );
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'method_title' => false,
+				'title'        => 'Public title',
+			)
+		);
+		$this->assertEquals( 'Public title', $this->sut->get_title( $fake_gateway ) );
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'method_title' => array( 'Something' ),
+				'title'        => 'Public title',
+			)
+		);
+		$this->assertEquals( 'Public title', $this->sut->get_title( $fake_gateway ) );
+
+		// Test title empty falls back on Unknown.
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'method_title' => '',
+				'title'        => '',
+			)
+		);
+		$this->assertEquals( 'Unknown', $this->sut->get_title( $fake_gateway ) );
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'method_title' => false,
+				'title'        => '',
+			)
+		);
+		$this->assertEquals( 'Unknown', $this->sut->get_title( $fake_gateway ) );
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'method_title' => array( 'Something' ),
+				'title'        => '',
+			)
+		);
 		$this->assertEquals( 'Unknown', $this->sut->get_title( $fake_gateway ) );
 	}
 
@@ -280,16 +334,70 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'method_description' => '<a href="#">Accept</a> <b>payments</b> <strong><span>with</span> WooPayments. </strong><h1></h1> ' ) );
 		$this->assertEquals( 'Accept payments with WooPayments.', $this->sut->get_description( $fake_gateway ) );
 
-		// Test description with encoded HTML entitites.
+		// Test description with encoded HTML entities.
 		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'method_description' => htmlentities( '<a href="#">Accept</a> <b>payments</b> <strong><span>with</span> WooPayments. </strong><h1></h1> ' ) ) );
 		$this->assertEquals( 'Accept payments with WooPayments.', $this->sut->get_description( $fake_gateway ) );
 
 		// Test description with wrong type.
-		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'method_description' => true ) );
-		$this->assertEquals( '', $this->sut->get_description( $fake_gateway ) );
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'method_description' => true,
+				'description'        => 'Public description',
+			)
+		);
+		$this->assertEquals( 'Public description', $this->sut->get_description( $fake_gateway ) );
 
-		// Test description empty.
-		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array( 'method_description' => '' ) );
+		// Test description empty falls back on public-facing description.
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'method_description' => '',
+				'description'        => 'Public description',
+			)
+		);
+		$this->assertEquals( 'Public description', $this->sut->get_description( $fake_gateway ) );
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'method_description' => false,
+				'description'        => 'Public description',
+			)
+		);
+		$this->assertEquals( 'Public description', $this->sut->get_description( $fake_gateway ) );
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'method_description' => array( 'Something' ),
+				'description'        => 'Public description',
+			)
+		);
+		$this->assertEquals( 'Public description', $this->sut->get_description( $fake_gateway ) );
+
+		// Test description empty falls back on empty string.
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'method_description' => '',
+				'description'        => '',
+			)
+		);
+		$this->assertEquals( '', $this->sut->get_description( $fake_gateway ) );
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'method_description' => false,
+				'description'        => '',
+			)
+		);
+		$this->assertEquals( '', $this->sut->get_description( $fake_gateway ) );
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'method_description' => array( 'Something' ),
+				'description'        => '',
+			)
+		);
 		$this->assertEquals( '', $this->sut->get_description( $fake_gateway ) );
 	}
 

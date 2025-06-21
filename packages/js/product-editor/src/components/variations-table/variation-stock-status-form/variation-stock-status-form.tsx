@@ -11,7 +11,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import {
 	Button,
 	ToggleControl,
@@ -159,7 +159,7 @@ export function VariationStockStatusForm( {
 						value={ value.stock_quantity }
 						onChange={ handleStockQuantityInputControlChange }
 						onBlur={ validateStockQuantity }
-						className={ classNames( {
+						className={ clsx( {
 							'has-error': errors.stock_quantity,
 						} ) }
 					/>

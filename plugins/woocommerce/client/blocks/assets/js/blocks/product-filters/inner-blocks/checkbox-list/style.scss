@@ -1,7 +1,5 @@
-.wc-block-product-filter-checkbox-list__list {
-	list-style: none outside;
-	margin: 0;
-	padding: 0;
+.wc-block-product-filter-checkbox-list fieldset {
+	display: contents;
 }
 
 .wc-block-product-filter-checkbox-list__label {
@@ -102,6 +100,10 @@ input[type="checkbox"].wc-block-product-filter-checkbox-list__input:checked {
 
 .wc-block-product-filter-checkbox-list__text {
 	display: contents;
+	color: var(
+		--wc-product-filter-checkbox-list-label-element,
+		currentColor
+	);
 }
 
 .wc-block-product-filter-checkbox-list__count {

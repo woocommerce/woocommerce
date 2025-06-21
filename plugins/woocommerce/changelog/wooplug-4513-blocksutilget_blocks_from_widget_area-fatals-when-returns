@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+BlocksUtil: fix the fatal error when dealing with unexpected widget_block data.
