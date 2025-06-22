@@ -147,7 +147,7 @@ class NotificationsPage {
 				)
 			);
 
-			// TODO: Redirect to the edit page. phpcs:ignore Generic.Commenting.Todo.TaskFound
+			// TO-DO: Redirect to the edit page.
 			wp_safe_redirect( self::PAGE_URL );
 			exit;
 		}
