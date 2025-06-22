@@ -768,12 +768,18 @@ class ListTable extends \WP_List_Table {
 			$this->data_store->delete( $notification );
 
 			$notice_message = __( 'Notification deleted.', 'woocommerce' );
-			update_option( self::NOTICES_OPTION_NAME, array( 'message' => $notice_message, 'type' => 'success' ) );
+			update_option( self::NOTICES_OPTION_NAME, array( 
+				'message' => $notice_message, 
+				'type' => 'success',
+			) );
 
 		} catch ( \Exception $e ) {
 
 			$notice_message = __( 'Notification not found.', 'woocommerce' );
-			update_option( self::NOTICES_OPTION_NAME, array( 'message' => $notice_message, 'type' => 'error' ) );
+			update_option( self::NOTICES_OPTION_NAME, array( 
+				'message' => $notice_message, 
+				'type' => 'error',
+			) );
 		}
 
 		wp_safe_redirect( admin_url( NotificationsPage::PAGE_URL ) );
@@ -887,9 +893,9 @@ class ListTable extends \WP_List_Table {
 		\wp_admin_notice(
 			$notice_data['message'],
 			array(
-				'type'               => $type,
-				'id'                 => self::NOTICES_OPTION_NAME,
-				'dismissible'        => false,
+				'type'        => $type,
+				'id'          => self::NOTICES_OPTION_NAME,
+				'dismissible' => false,
 			)
 		);
 	

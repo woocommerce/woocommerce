@@ -113,14 +113,7 @@ class MenusController {
 
 		switch ( $action ) {
 			case 'create':
-				$args = array();
-
-				if ( ! empty( $_POST ) ) {
-					check_admin_referer( 'woocommerce-bis-edit', 'bis_edit_security' );
-					$args = $_POST;
-				}
-
-				$this->notifications_page->create( $args );
+				$this->notifications_page->create();
 				break;
 			default:
 				$this->notifications_page->output();

@@ -4,6 +4,7 @@
  *
  * @since 0.0.0
  */
+
 declare( strict_types = 1 );
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -100,7 +101,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 							</select>
 							<div class="divider"></div>
 							<span class="or_relation_label"><?php esc_html_e( '&mdash;&nbsp;or&nbsp;&mdash;', 'woocommerce' ); ?></span>
-							<input type="text" class="or_relation_label__input" placeholder="<?php esc_html_e( 'Enter customer e-mail&hellip;', 'woocommerce' ); ?>" name="user_email" value="<?php echo isset( $args['user_email'] ) ? esc_attr( wc_clean( $args['user_email'] ) ) : ''; ?>"/>
+							<input type="email" class="or_relation_label__input" placeholder="<?php esc_html_e( 'Enter customer e-mail&hellip;', 'woocommerce' ); ?>" name="user_email" value="<?php echo isset( $args['user_email'] ) ? esc_attr( wc_clean( $args['user_email'] ) ) : ''; ?>"/>
 
 							<div class="wp-clearfix"></div>
 						</div>
@@ -127,7 +128,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 								}
 							}
 
-                            $excluded_product_types = array_diff( array_keys( wc_get_product_types() ), array( 'simple', 'variable' ) );
+							$excluded_product_types = array_diff( array_keys( wc_get_product_types() ), array( 'simple', 'variable' ) );
 							?>
 							<select class="wc-product-search" name="product_id" data-action="woocommerce_json_search_products_and_variations" data-exclude_type="<?php echo esc_attr( implode( ',', $excluded_product_types ) ); ?>" data-display_stock="true"data-placeholder="<?php esc_attr_e( 'Select product&hellip;', 'woocommerce' ); ?>" data-allow_clear="true">
 								<?php if ( $product_string && $product_id ) { ?>
