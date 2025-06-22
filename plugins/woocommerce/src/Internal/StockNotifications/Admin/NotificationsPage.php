@@ -80,7 +80,7 @@ class NotificationsPage {
 		// Check if a notification already exists for the same product and customer.
 		if ( ! empty( $args['product_id'] ) && ( ! empty( $args['user_id'] ) || ! empty( $args['user_email'] ) ) ) {
 
-			$notification_ids = \WC_Data_Store::load( 'stock_notification' )->query( 
+			$notification_ids = \WC_Data_Store::load( 'stock_notification' )->query(
 				array(
 					'product_id' => $query_args['product_id'],
 					'user_id'    => isset( $query_args['user_id'] ) ? $query_args['user_id'] : 0,
@@ -89,11 +89,17 @@ class NotificationsPage {
 			);
 
 			if ( count( $notification_ids ) > 0 ) {
-				$notice_message = sprintf( __( 'A <a href="%s">notification</a> for the same product and customer already exists in your database.', 'woocommerce' ), admin_url( self::PAGE_URL . '&notification_action=edit&notification_id=' . $notification_ids[0] ) );
-				update_option( ListTable::NOTICES_OPTION_NAME, 
-					array( 
+				// translators: %s: notification edit url
+				$notice_message = sprintf( 
+					__( 
+						'A <a href="%s">notification</a> for the same product and customer already exists in your database.', 'woocommerce' ), 
+						admin_url( self::PAGE_URL . '&notification_action=edit&notification_id=' . $notification_ids[0] 
+					)
+				);
+				update_option( ListTable::NOTICES_OPTION_NAME,
+					array(
 						'message' => $notice_message, 
-						'type' => 'error' 
+						'type' => 'error',
 					) 
 				);
 				wp_safe_redirect( self::PAGE_URL );
@@ -120,12 +126,22 @@ class NotificationsPage {
 
 		if ( is_wp_error( $result ) ) {
 			$notice_message = $result->get_error_message();
-			update_option( ListTable::NOTICES_OPTION_NAME, array( 'message' => $notice_message, 'type' => 'error' ) );
+			update_option( ListTable::NOTICES_OPTION_NAME, 
+				array( 
+					'message' => $notice_message, 
+					'type' => 'error' 
+				)
+			);
 			wp_safe_redirect( self::PAGE_URL );
 			exit;
 		} else {
 			$notice_message = __( 'Notification created.', 'woocommerce' );
-			update_option( ListTable::NOTICES_OPTION_NAME, array( 'message' => $notice_message, 'type' => 'success' ) );
+			update_option( ListTable::NOTICES_OPTION_NAME, 
+				array( 
+					'message' => $notice_message, 
+					'type' => 'success' 
+				)
+			);
 
 			// TODO: Redirect to the edit page.
 			wp_safe_redirect( self::PAGE_URL );

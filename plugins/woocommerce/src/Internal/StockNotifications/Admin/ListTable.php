@@ -768,18 +768,22 @@ class ListTable extends \WP_List_Table {
 			$this->data_store->delete( $notification );
 
 			$notice_message = __( 'Notification deleted.', 'woocommerce' );
-			update_option( self::NOTICES_OPTION_NAME, array( 
-				'message' => $notice_message, 
-				'type' => 'success',
-			) );
+			update_option( self::NOTICES_OPTION_NAME,
+				array(
+					'message' => $notice_message,
+					'type' => 'success',
+				)
+			);
 
 		} catch ( \Exception $e ) {
 
 			$notice_message = __( 'Notification not found.', 'woocommerce' );
-			update_option( self::NOTICES_OPTION_NAME, array( 
-				'message' => $notice_message, 
-				'type' => 'error',
-			) );
+			update_option( self::NOTICES_OPTION_NAME, 
+				array(
+					'message' => $notice_message,
+					'type' => 'error',				
+				)
+			);
 		}
 
 		wp_safe_redirect( admin_url( NotificationsPage::PAGE_URL ) );
@@ -825,7 +829,14 @@ class ListTable extends \WP_List_Table {
 				),
 				count( $notifications )
 			);
-			update_option( self::NOTICES_OPTION_NAME, array( 'message' => $notice_message, 'type' => 'success' ) );
+
+			update_option( self::NOTICES_OPTION_NAME, 
+				array(
+					'message' => $notice_message,
+					'type' => 'success',
+				)
+			);
+
 		} elseif ( 'cancel' === $this->current_action() ) {
 			foreach ( $notifications as $id ) {
 				$notification = new Notification( $id );
@@ -844,7 +855,14 @@ class ListTable extends \WP_List_Table {
 				),
 				count( $notifications )
 			);
-			update_option( self::NOTICES_OPTION_NAME, array( 'message' => $notice_message, 'type' => 'success' ) );
+
+			update_option( self::NOTICES_OPTION_NAME, 
+				array(
+					'message' => $notice_message,
+					'type' => 'success',
+				)
+			);
+
 		} elseif ( 'delete' === $this->current_action() ) {
 			foreach ( $notifications as $id ) {
 				$notification = new Notification( $id );
@@ -862,7 +880,13 @@ class ListTable extends \WP_List_Table {
 				),
 				count( $notifications )
 			);
-			update_option( self::NOTICES_OPTION_NAME, array( 'message' => $notice_message, 'type' => 'success' ) );
+			
+			update_option( self::NOTICES_OPTION_NAME, 
+				array(
+					'message' => $notice_message,
+					'type' => 'success',
+				)
+			);
 		}
 
 		wp_safe_redirect( $redirect_url );
