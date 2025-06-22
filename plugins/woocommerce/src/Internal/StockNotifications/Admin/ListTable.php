@@ -768,20 +768,22 @@ class ListTable extends \WP_List_Table {
 			$this->data_store->delete( $notification );
 
 			$notice_message = __( 'Notification deleted.', 'woocommerce' );
-			update_option( self::NOTICES_OPTION_NAME,
+			update_option( 
+				self::NOTICES_OPTION_NAME,
 				array(
 					'message' => $notice_message,
-					'type' => 'success',
+					'type'    => 'success',
 				)
 			);
 
 		} catch ( \Exception $e ) {
 
 			$notice_message = __( 'Notification not found.', 'woocommerce' );
-			update_option( self::NOTICES_OPTION_NAME, 
+			update_option( 
+				self::NOTICES_OPTION_NAME, 
 				array(
 					'message' => $notice_message,
-					'type' => 'error',				
+					'type'    => 'error',				
 				)
 			);
 		}
@@ -830,10 +832,11 @@ class ListTable extends \WP_List_Table {
 				count( $notifications )
 			);
 
-			update_option( self::NOTICES_OPTION_NAME, 
+			update_option( 
+				self::NOTICES_OPTION_NAME, 
 				array(
 					'message' => $notice_message,
-					'type' => 'success',
+					'type'    => 'success',
 				)
 			);
 
@@ -856,10 +859,11 @@ class ListTable extends \WP_List_Table {
 				count( $notifications )
 			);
 
-			update_option( self::NOTICES_OPTION_NAME, 
+			update_option( 
+				self::NOTICES_OPTION_NAME, 
 				array(
 					'message' => $notice_message,
-					'type' => 'success',
+					'type'    => 'success',
 				)
 			);
 
@@ -880,11 +884,12 @@ class ListTable extends \WP_List_Table {
 				),
 				count( $notifications )
 			);
-			
-			update_option( self::NOTICES_OPTION_NAME, 
+
+			update_option( 
+				self::NOTICES_OPTION_NAME, 
 				array(
 					'message' => $notice_message,
-					'type' => 'success',
+					'type'    => 'success',
 				)
 			);
 		}
