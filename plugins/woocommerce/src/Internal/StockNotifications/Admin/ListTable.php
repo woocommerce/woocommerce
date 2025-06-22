@@ -768,7 +768,7 @@ class ListTable extends \WP_List_Table {
 			$this->data_store->delete( $notification );
 
 			$notice_message = __( 'Notification deleted.', 'woocommerce' );
-			update_option( 
+			update_option(
 				self::NOTICES_OPTION_NAME,
 				array(
 					'message' => $notice_message,
@@ -779,11 +779,11 @@ class ListTable extends \WP_List_Table {
 		} catch ( \Exception $e ) {
 
 			$notice_message = __( 'Notification not found.', 'woocommerce' );
-			update_option( 
-				self::NOTICES_OPTION_NAME, 
+			update_option(
+				self::NOTICES_OPTION_NAME,
 				array(
 					'message' => $notice_message,
-					'type'    => 'error',				
+					'type'    => 'error',
 				)
 			);
 		}
@@ -832,8 +832,8 @@ class ListTable extends \WP_List_Table {
 				count( $notifications )
 			);
 
-			update_option( 
-				self::NOTICES_OPTION_NAME, 
+			update_option(
+				self::NOTICES_OPTION_NAME,
 				array(
 					'message' => $notice_message,
 					'type'    => 'success',
@@ -859,8 +859,8 @@ class ListTable extends \WP_List_Table {
 				count( $notifications )
 			);
 
-			update_option( 
-				self::NOTICES_OPTION_NAME, 
+			update_option(
+				self::NOTICES_OPTION_NAME,
 				array(
 					'message' => $notice_message,
 					'type'    => 'success',
@@ -885,8 +885,8 @@ class ListTable extends \WP_List_Table {
 				count( $notifications )
 			);
 
-			update_option( 
-				self::NOTICES_OPTION_NAME, 
+			update_option(
+				self::NOTICES_OPTION_NAME,
 				array(
 					'message' => $notice_message,
 					'type'    => 'success',
@@ -908,17 +908,17 @@ class ListTable extends \WP_List_Table {
 		if ( ! function_exists( 'wp_admin_notice' ) ) {
 			return;
 		}
-	
+
 		$notice_data = get_option( self::NOTICES_OPTION_NAME );
-	
+
 		if ( empty( $notice_data ) ) {
 			return;
 		}
-	
+
 		$type = in_array( $notice_data['type'], array( 'error', 'warning', 'success', 'info' ), true )
 			? $notice_data['type']
 			: 'info';
-		
+
 		\wp_admin_notice(
 			$notice_data['message'],
 			array(
@@ -927,7 +927,7 @@ class ListTable extends \WP_List_Table {
 				'dismissible' => false,
 			)
 		);
-	
+
 		delete_option( self::NOTICES_OPTION_NAME );
 	}
 }

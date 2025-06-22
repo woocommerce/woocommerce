@@ -89,21 +89,20 @@ class NotificationsPage {
 			);
 
 			if ( count( $notification_ids ) > 0 ) {
-				$notice_message = sprintf( 
+				$notice_message = sprintf(
 					// translators: %s: notification edit url.
 					__(
-						'A <a href="%s">notification</a> for the same product and customer already exists in your database.', 
+						'A <a href="%s">notification</a> for the same product and customer already exists in your database.',
 						'woocommerce'
-					), 
-						admin_url( self::PAGE_URL . '&notification_action=edit&notification_id=' . $notification_ids[0]
-					)
+					),
+					admin_url( self::PAGE_URL . '&notification_action=edit&notification_id=' . $notification_ids[0] )
 				);
-				update_option( 
+				update_option(
 					ListTable::NOTICES_OPTION_NAME,
 					array(
-						'message' => $notice_message, 
+						'message' => $notice_message,
 						'type'    => 'error',
-					) 
+					)
 				);
 				wp_safe_redirect( self::PAGE_URL );
 				exit;
@@ -129,22 +128,22 @@ class NotificationsPage {
 
 		if ( is_wp_error( $result ) ) {
 			$notice_message = $result->get_error_message();
-			update_option( 
-				ListTable::NOTICES_OPTION_NAME, 
-				array( 
-					'message' => $notice_message, 
-					'type'    => 'error' 
+			update_option(
+				ListTable::NOTICES_OPTION_NAME,
+				array(
+					'message' => $notice_message,
+					'type'    => 'error',
 				)
 			);
 			wp_safe_redirect( self::PAGE_URL );
 			exit;
 		} else {
 			$notice_message = __( 'Notification created.', 'woocommerce' );
-			update_option( 
-				ListTable::NOTICES_OPTION_NAME, 
-				array( 
-					'message' => $notice_message, 
-					'type'    => 'success' 
+			update_option(
+				ListTable::NOTICES_OPTION_NAME,
+				array(
+					'message' => $notice_message,
+					'type'    => 'success',
 				)
 			);
 
