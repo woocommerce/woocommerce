@@ -103,7 +103,29 @@ class MenusController {
 	 * Displays the Notifications list table.
 	 */
 	public function notifications_page() {
-		$this->notifications_page->output();
+		// Select action.
+		$action = '';
+
+		// Nonce is checked in NotificationsPage::delete and NotificationsPage::output just displays the page.
+		if ( isset( $_GET['notification_action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$action = wc_clean( wp_unslash( $_GET['notification_action'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
+
+		switch ( $action ) {
+			case 'create':
+				$args = array();
+
+				if ( ! empty( $_POST ) ) {
+					check_admin_referer( 'woocommerce-bis-edit', 'bis_edit_security' );
+					$args = $_POST;
+				}
+
+				$this->notifications_page->create( $args );
+				break;
+			default:
+				$this->notifications_page->output();
+				break;
+		}
 	}
 
 	/**

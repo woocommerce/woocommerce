@@ -10,11 +10,13 @@ declare( strict_types = 1 );
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 ?>
 <div class="wrap woocommerce-customer-stock-notifications">
 
 	<h1 class="wp-heading-inline"><?php esc_html_e( 'Stock Notifications', 'woocommerce' ); ?></h1>
-	<a href="<?php echo esc_url( add_query_arg( array( 'action' => 'create' ), admin_url( 'customer_stock_notifications' ) ) ); ?>" class="page-title-action"><?php esc_html_e( 'Add New', 'woocommerce' ); ?></a>
+	<a href="<?php echo esc_url( add_query_arg( array( 'notification_action' => 'create' ), NotificationsPage::PAGE_URL ) ); ?>" class="page-title-action"><?php esc_html_e( 'Add New', 'woocommerce' ); ?></a>
 
 	<hr class="wp-header-end">
 	<?php
