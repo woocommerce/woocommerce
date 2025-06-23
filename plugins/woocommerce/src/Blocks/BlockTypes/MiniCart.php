@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
@@ -22,6 +23,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
  * @internal
  */
 class MiniCart extends AbstractBlock {
+
 	use BlockHooksTrait;
 	use BlocksSharedState;
 
@@ -498,7 +500,8 @@ class MiniCart extends AbstractBlock {
 			wp_interactivity_config(
 				$this->get_full_block_name(),
 				array(
-					'addToCartBehaviour' => $attributes['addToCartBehaviour'],
+					'addToCartBehaviour'          => $attributes['addToCartBehaviour'],
+					'experimentalMiniCartEnabled' => true,
 				)
 			);
 
@@ -507,20 +510,20 @@ class MiniCart extends AbstractBlock {
 
 			ob_start();
 			?>
-		
+
 			<div
 				data-wp-interactive="woocommerce/mini-cart"
 				data-wp-init="callbacks.setupOpenDrawerListener"
-				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
+				?>
 				<?php echo wp_interactivity_data_wp_context( $context ); ?>
 				class="<?php echo esc_attr( $wrapper_classes ); ?>"
-				style="<?php echo esc_attr( $wrapper_styles ); ?>"
-			>
+				style="<?php echo esc_attr( $wrapper_styles ); ?>">
 				<button data-wp-on--click="callbacks.openDrawer" class="wc-block-mini-cart__button" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">
 					<span class="wc-block-mini-cart__quantity-badge">
 						<?php
-							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							echo $icon;
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						echo $icon;
 						?>
 						<?php if ( 'never' !== $product_count_visibility ) : ?>
 							<span data-wp-bind--hidden="!state.badgeIsVisible" data-wp-text="state.totalItemsInCart" class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
@@ -531,8 +534,8 @@ class MiniCart extends AbstractBlock {
 						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
 						</span>
 						<?php
-							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							echo $this->get_include_tax_label_markup( $attributes );
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						echo $this->get_include_tax_label_markup( $attributes );
 						?>
 					<?php endif; ?>
 				</button>
@@ -541,8 +544,8 @@ class MiniCart extends AbstractBlock {
 						<div class="wc-block-components-drawer__content">
 							<div class="wc-block-mini-cart__template-part">
 								<?php
-									// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-									echo $template_part_contents;
+								// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+								echo $template_part_contents;
 								?>
 							</div>
 						</div>
@@ -640,8 +643,8 @@ class MiniCart extends AbstractBlock {
 				<div class="wc-block-mini-cart__drawer wc-block-components-drawer">
 					<div class="wc-block-components-drawer__content">
 						<div class="wc-block-mini-cart__template-part">'
-						. wp_kses_post( $template_part_contents ) .
-						'</div>
+			. wp_kses_post( $template_part_contents ) .
+			'</div>
 					</div>
 				</div>
 			</div>

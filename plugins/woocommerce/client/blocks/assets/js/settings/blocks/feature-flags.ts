@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { getSetting } from '@woocommerce/settings';
+import { getConfig } from '@wordpress/interactivity';
 
 /**
  * Internal dependencies
@@ -23,9 +24,8 @@ export const isExperimentalBlocksEnabled = (): boolean => {
 };
 
 export const isExperimentalMiniCartEnabled = (): boolean => {
-	const { experimentalMiniCartEnabled } = getSetting( 'wcBlocksConfig', {
-		experimentalMiniCartEnabled: false,
-	} ) as WcBlocksConfig;
-
-	return experimentalMiniCartEnabled;
+	const miniCartConfig = getConfig( 'woocommerce/mini-cart' ) as {
+		experimentalMiniCartEnabled?: boolean;
+	};
+	return miniCartConfig?.experimentalMiniCartEnabled ?? false;
 };
