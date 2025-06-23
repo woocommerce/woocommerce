@@ -1,14 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Automattic\WooCommerce\Internal\Fulfillments;
+namespace Automattic\WooCommerce\Tests\Internal\Fulfillments;
+
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
 
 /**
  * FulfillmentUtilsTest class.
- *
- * This class contains tests for the FulfillmentUtils class.
- *
- * @since 9.9.0
- * @package WooCommerce\Internal\Fulfillments
  */
 class FulfillmentUtilsTest extends \WP_UnitTestCase {
 	/**
