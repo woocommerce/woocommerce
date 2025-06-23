@@ -169,11 +169,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 9.9.0 2025-07-12 =
+= 9.9.0 2025-06-23 =
 
 **WooCommerce**
 
-* Fix - Fix: ensure block style is always loaded on demand for classic themes. [#58993](https://github.com/woocommerce/woocommerce/pull/58993)
+* Fix - Ensure block style is always loaded on demand for classic themes. [#58993](https://github.com/woocommerce/woocommerce/pull/58993)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
