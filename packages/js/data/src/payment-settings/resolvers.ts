@@ -21,10 +21,9 @@ export function* getPaymentProviders( country?: string ) {
 	try {
 		const paymentProvidersResponse: PaymentProvidersResponse =
 			yield apiFetch( {
-				path:
-					WC_ADMIN_NAMESPACE +
-					'/settings/payments/providers?' +
-					( country ? `location=${ country }` : '' ),
+				method: 'POST',
+				path: WC_ADMIN_NAMESPACE + '/settings/payments/providers',
+				data: country ? { location: country } : {},
 			} );
 		yield getPaymentProvidersSuccess(
 			paymentProvidersResponse.providers,
@@ -43,6 +42,7 @@ export function* getOfflinePaymentGateways( country?: string ) {
 
 export function* getWooPayEligibility() {
 	const response: WooPayEligibilityResponse = yield apiFetch( {
+		method: 'POST',
 		path: `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/woopay-eligibility`,
 	} );
 
