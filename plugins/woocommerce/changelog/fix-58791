@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix: ensure block style is always loaded on demand for classic themes.
