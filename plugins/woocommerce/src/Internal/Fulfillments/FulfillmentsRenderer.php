@@ -418,20 +418,7 @@ class FulfillmentsRenderer {
 			 * @since 9.9.0
 			 */
 			'providers'        => apply_filters( 'wc_fulfillment_shipping_providers', array() ),
-			/**
-			 * Filter to modify the fulfillment meta key translations.
-			 *
-			 * @since 9.9.0
-			 */
-			'statuses'         => apply_filters(
-				'wc_fulfillment_statuses',
-				array(
-					'unfulfilled'         => __( 'Unfulfilled', 'woocommerce' ),
-					'partially_fulfilled' => __( 'Partially fulfilled', 'woocommerce' ),
-					'fulfilled'           => __( 'Fulfilled', 'woocommerce' ),
-					'no_fulfillments'     => __( 'No fulfillments', 'woocommerce' ),
-				)
-			),
+			'statuses'         => FulfillmentUtils::get_fulfillment_statuses(),
 			'currency_symbols' => get_woocommerce_currency_symbols(),
 		);
 
@@ -573,7 +560,8 @@ class FulfillmentsRenderer {
 		}
 
 		return 'woocommerce_page_wc-orders' === $current_screen->id // HPOS screen.
-		|| 'edit-shop_order' === $current_screen->id; // Legacy screen.
+		|| 'edit-shop_order' === $current_screen->id // Legacy screen.
+		|| 'shop_order' === $current_screen->id; // Order details screen (legacy).
 	}
 
 	/**
