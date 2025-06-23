@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-convert cat merchant e2e test to integration test
+Convert cart block e2e tests to integration tests
