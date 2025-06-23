@@ -24,7 +24,7 @@ const blockSettings = {
 };
 
 if ( isExperimentalMiniCartEnabled() ) {
-	// @ts-ignore -- This is valid to return null.
+	// @ts-expect-error -- This is valid to return null.
 	blockSettings.save = () => {
 		return null;
 	};
