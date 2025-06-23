@@ -330,6 +330,10 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	 * Test that wc_wptexturize_order_note_content() preserves URLs with double hyphens.
 	 *
 	 * @dataProvider url_protection_test_data
+	 * @param string $input                            The input string to test.
+	 * @param bool   $expected_contains_double_hyphens Whether the result should contain double hyphens.
+	 * @param bool   $expected_contains_em_dash        Whether the result should contain em-dash.
+	 * @param string $test_description                 Description of the test case.
 	 */
 	public function test_wc_wptexturize_order_note_content( $input, $expected_contains_double_hyphens, $expected_contains_em_dash, $test_description ) {
 		// Test the function.
@@ -462,18 +466,18 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_email_template_processing() {
 		$test_cases = array(
-			'Simple URL' => 'Visit https://api.example.com/status--check',
-			'URL with text' => 'Check https://api.example.com/status--check -- for more info',
-			'Multiple URLs' => 'API 1: https://api1.example.com/endpoint--1 API 2: https://api2.example.com/endpoint--2',
+			'Simple URL'           => 'Visit https://api.example.com/status--check',
+			'URL with text'        => 'Check https://api.example.com/status--check -- for more info',
+			'Multiple URLs'        => 'API 1: https://api1.example.com/endpoint--1 API 2: https://api2.example.com/endpoint--2',
 			'URL with line breaks' => "First line\nVisit https://api.example.com/status--check\nLast line",
 		);
 
 		foreach ( $test_cases as $description => $content ) {
-			// Test HTML email processing (with nl2br)
+			// Test HTML email processing (with nl2br).
 			$html_result = nl2br( wc_wptexturize_customer_note( $content ) );
 			$this->assertStringContainsString( '--', $html_result, $description . ' - HTML email should preserve URL double hyphens' );
-			
-			// Test plain text email processing
+
+			// Test plain text email processing.
 			$plain_result = wc_wptexturize_customer_note( $content );
 			$this->assertStringContainsString( '--', $plain_result, $description . ' - Plain text email should preserve URL double hyphens' );
 		}
