@@ -103,7 +103,7 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 			2
 		);
 
-		$collection_block  = '<!-- wp:woocommerce/product-collection {"query":{"isProductCollectionBlock":true,"woocommerceHandPickedProducts":[' . implode( ',', $product_ids ) . ']}} -->';
+		$collection_block  = '<!-- wp:woocommerce/product-collection {"queryId":0,"query":{"isProductCollectionBlock":true,"woocommerceHandPickedProducts":[' . implode( ',', $product_ids ) . ']}} -->';
 		$collection_block .= '<!-- wp:woocommerce/product-template -->';
 		$collection_block .= '<!-- wp:woocommerce/product-sale-badge /-->';
 		$collection_block .= '<!-- /wp:woocommerce/product-template -->';
