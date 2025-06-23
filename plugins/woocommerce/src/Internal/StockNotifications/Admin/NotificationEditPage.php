@@ -20,8 +20,8 @@ class NotificationEditPage {
 	 * Render page.
 	 */
 	public function output() {
-        $table           = new ListTable();
-		$notification_id = isset( $_GET['notification_id'] ) ? absint( $_GET['notification_id'] ) : 0;
+		$table           = new ListTable();
+		$notification_id = isset( $_GET['notification_id'] ) ? absint( $_GET['notification_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( $notification_id ) {
 			$notification = Factory::get_notification( $notification_id );
 		}
@@ -51,25 +51,25 @@ class NotificationEditPage {
 		$table->process_delete_action();
 	}
 
-    /**
+	/**
 	 * Update notification.
 	 *
 	 * @param Notification $notification The notification object.
 	 * @return void
 	 */
 	public function process_edit_form( $notification ) {
-		
+
 		if ( empty( $_POST ) ) {
 			return;
 		}
 
 		check_admin_referer( 'woocommerce-customer-stock-notification-edit', 'customer_stock_notification_edit_security' );
 
-		if ( empty( $_POST[ 'wc_customer_stock_notification_action' ] ) ) {
+		if ( empty( $_POST['wc_customer_stock_notification_action'] ) ) {
 			return;
 		}
 
-		$action = wc_clean( wp_unslash( $_POST[ 'wc_customer_stock_notification_action' ] ) );
+		$action = wc_clean( wp_unslash( $_POST['wc_customer_stock_notification_action'] ) );
 
 		// Construct edit url.
 		$edit_url = add_query_arg(
@@ -144,6 +144,7 @@ class NotificationEditPage {
 					$email_manager->send_stock_notification_email( $notification );
 					$notification->set_status( NotificationStatus::SENT );
 					$notification->save();
+					// translators: %s user email.
 					$notice_message = sprintf( __( 'Notification sent to "%s".', 'woocommerce' ), $notification->get_user_email() );
 					update_option(
 						NotificationsPage::NOTICES_OPTION_NAME,
@@ -157,6 +158,7 @@ class NotificationEditPage {
 			case 'send_verification_email':
 				$email_manager = new EmailManager();
 				$email_manager->send_stock_verification_email( $notification );
+				// translators: %s user email.
 				$notice_message = sprintf( __( 'Verification email sent to "%s".', 'woocommerce' ), $notification->get_user_email() );
 				update_option(
 					NotificationsPage::NOTICES_OPTION_NAME,
@@ -165,7 +167,7 @@ class NotificationEditPage {
 						'type'    => 'success',
 					)
 				);
-				break;	
+				break;
 		}
 
 		wp_safe_redirect( $edit_url );

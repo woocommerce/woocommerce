@@ -1,10 +1,11 @@
-
 <?php
 /**
  * Admin View: Notification create
  *
  * @since 0.0.0
  */
+
+declare( strict_types = 1 );
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

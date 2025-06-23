@@ -106,7 +106,7 @@ class MenusController {
 		// Select action.
 		$action = '';
 
-		// Nonce is checked in NotificationsPage::delete and NotificationsPage::output just displays the page.
+		// Nonce is checked in individual NotificationsPage methods.
 		if ( isset( $_GET['notification_action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$action = wc_clean( wp_unslash( $_GET['notification_action'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}

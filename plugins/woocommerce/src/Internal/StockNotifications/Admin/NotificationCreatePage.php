@@ -125,7 +125,7 @@ class NotificationCreatePage {
 				),
 				NotificationsPage::PAGE_URL
 			);
-			
+
 			wp_safe_redirect( $edit_url );
 
 			$notice_message = __( 'Notification created.', 'woocommerce' );

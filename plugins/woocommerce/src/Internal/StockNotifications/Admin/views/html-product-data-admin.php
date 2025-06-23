@@ -8,7 +8,7 @@
 declare( strict_types = 1 );
 
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+	exit;
 }
 
 $image              = wp_get_attachment_image_src( $product->get_image_id(), 'woocommerce_thumbnail' );
@@ -39,7 +39,7 @@ if ( ! empty( $product->get_sku() ) ) {
 	<span class="product-details__stock-status <?php echo esc_attr( $stock_availability['class'] ); ?>">
 		<?php
 		if ( empty( $stock_availability['availability'] ) && 'in-stock' === $stock_availability['class'] ) {
-			echo esc_html__( 'In stock', 'woocommerce-back-in-stock-notifications' );
+			echo esc_html__( 'In stock', 'woocommerce' );
 		} else {
 			echo esc_html( $stock_availability['availability'] );
 		}
