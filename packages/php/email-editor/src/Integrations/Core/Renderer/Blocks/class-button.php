@@ -8,7 +8,7 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 
 /**
@@ -63,24 +63,24 @@ class Button extends Abstract_Block_Renderer {
 	/**
 	 * Renders the block.
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	public function render( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
-		return $this->render_content( $block_content, $parsed_block, $settings_controller );
+	public function render( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+		return $this->render_content( $block_content, $parsed_block, $rendering_context );
 	}
 
 	/**
 	 * Renders the block content.
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	protected function render_content( $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		if ( empty( $parsed_block['innerHTML'] ) ) {
 			return '';
 		}
@@ -111,8 +111,8 @@ class Button extends Abstract_Block_Renderer {
 			array(
 				'color' => array_filter(
 					array(
-						'background' => $block_attributes['backgroundColor'] ? $settings_controller->translate_slug_to_color( $block_attributes['backgroundColor'] ) : null,
-						'text'       => $block_attributes['textColor'] ? $settings_controller->translate_slug_to_color( $block_attributes['textColor'] ) : null,
+						'background' => $block_attributes['backgroundColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['backgroundColor'] ) : null,
+						'text'       => $block_attributes['textColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['textColor'] ) : null,
 					)
 				),
 			),
