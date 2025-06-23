@@ -1084,7 +1084,7 @@ describe( 'Address Suggestions Component', () => {
 				'off'
 			);
 			expect( billingAddressInput.getAttribute( 'data-lpignore' ) ).toBe(
-				''
+				'true'
 			);
 		} );
 
@@ -1239,7 +1239,7 @@ describe( 'Address Suggestions Component', () => {
 
 			// Blur the input
 			billingAddressInput.dispatchEvent( new Event( 'blur' ) );
-			
+
 			// Wait for blur timeout
 			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
 
@@ -1261,11 +1261,11 @@ describe( 'Address Suggestions Component', () => {
 			// Create another element to focus
 			const otherElement = document.createElement( 'input' );
 			document.body.appendChild( otherElement );
-			
+
 			// Blur the address input and focus the other element
 			billingAddressInput.blur();
 			otherElement.focus();
-			
+
 			// Wait for blur timeout
 			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
 
@@ -1297,17 +1297,23 @@ describe( 'Address Suggestions Component', () => {
 			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
 
 			// Verify autofill is disabled
-			expect( billingAddressInput.getAttribute( 'autocomplete' ) ).toBe( 'off' );
+			expect( billingAddressInput.getAttribute( 'autocomplete' ) ).toBe(
+				'off'
+			);
 
 			// Blur the input
 			billingAddressInput.dispatchEvent( new Event( 'blur' ) );
-			
+
 			// Wait for blur timeout
 			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
 
 			// Autofill should be re-enabled
-			expect( billingAddressInput.getAttribute( 'autocomplete' ) ).toBe( 'address-line1' );
-			expect( billingAddressInput.getAttribute( 'data-lpignore' ) ).toBe( 'false' );
+			expect( billingAddressInput.getAttribute( 'autocomplete' ) ).toBe(
+				'address-line1'
+			);
+			expect( billingAddressInput.getAttribute( 'data-lpignore' ) ).toBe(
+				'false'
+			);
 		} );
 	} );
 } );
