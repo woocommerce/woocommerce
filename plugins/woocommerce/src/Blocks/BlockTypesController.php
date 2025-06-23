@@ -578,6 +578,7 @@ final class BlockTypesController {
 					'ClassicTemplate',
 					'ProductResultsCount',
 					'ProductDetails',
+					'ProductReviews',
 					'OrderConfirmation\Status',
 					'OrderConfirmation\Summary',
 					'OrderConfirmation\Totals',

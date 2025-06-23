@@ -6,11 +6,6 @@
 	"description": "Display a product's description, attributes, and reviews",
 	"category": "woocommerce",
 	"textdomain": "woocommerce",
-	"ancestor": [
-		"woocommerce/single-product",
-		"woocommerce/product-template",
-		"core/post-template"
-	],
 	"supports": {
 		"interactivity": {
 			"clientNavigation": true
