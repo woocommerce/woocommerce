@@ -38,11 +38,11 @@ export const BusinessVerificationStep: React.FC = () => {
 	};
 	const hasTestAccount = currentStep?.context?.has_test_account ?? false;
 
-	const subStepsList = [ 'activate', 'business', 'embedded' ];
-	// Only include the activate step if the user doesn't have a test account.
-	if ( ! hasTestAccount ) {
-		subStepsList.splice( 0, 1 );
-	}
+	// Only include the activate step if the user has a test account.
+	const subStepsList = hasTestAccount
+		? [ 'activate', 'business', 'embedded' ]
+		: [ 'business', 'embedded' ];
+
 	// Find the first not completed sub-step.
 	const initialStep = subStepsList.find( ( stepId ) => {
 		return (
