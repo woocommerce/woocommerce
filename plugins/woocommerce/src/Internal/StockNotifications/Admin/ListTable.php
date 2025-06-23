@@ -16,11 +16,6 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 class ListTable extends \WP_List_Table {
 
 	/**
-	 * Notices option name.
-	 */
-	const NOTICES_OPTION_NAME = 'wc_customer_stock_notifications_action_notice';
-
-	/**
 	 * Total view records.
 	 *
 	 * @var int
@@ -746,7 +741,7 @@ class ListTable extends \WP_List_Table {
 	 *
 	 * @return void
 	 */
-	private function process_delete_action(): void {
+	public function process_delete_action(): void {
 
 		$action = isset( $_GET['notification_action'] ) ? wc_clean( wp_unslash( $_GET['notification_action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
@@ -769,7 +764,7 @@ class ListTable extends \WP_List_Table {
 
 			$notice_message = __( 'Notification deleted.', 'woocommerce' );
 			update_option(
-				self::NOTICES_OPTION_NAME,
+				NotificationsPage::NOTICES_OPTION_NAME,
 				array(
 					'message' => $notice_message,
 					'type'    => 'success',
@@ -780,7 +775,7 @@ class ListTable extends \WP_List_Table {
 
 			$notice_message = __( 'Notification not found.', 'woocommerce' );
 			update_option(
-				self::NOTICES_OPTION_NAME,
+				NotificationsPage::NOTICES_OPTION_NAME,
 				array(
 					'message' => $notice_message,
 					'type'    => 'error',
@@ -833,7 +828,7 @@ class ListTable extends \WP_List_Table {
 			);
 
 			update_option(
-				self::NOTICES_OPTION_NAME,
+				NotificationsPage::NOTICES_OPTION_NAME,
 				array(
 					'message' => $notice_message,
 					'type'    => 'success',
@@ -860,7 +855,7 @@ class ListTable extends \WP_List_Table {
 			);
 
 			update_option(
-				self::NOTICES_OPTION_NAME,
+				NotificationsPage::NOTICES_OPTION_NAME,
 				array(
 					'message' => $notice_message,
 					'type'    => 'success',
@@ -886,7 +881,7 @@ class ListTable extends \WP_List_Table {
 			);
 
 			update_option(
-				self::NOTICES_OPTION_NAME,
+				NotificationsPage::NOTICES_OPTION_NAME,
 				array(
 					'message' => $notice_message,
 					'type'    => 'success',
@@ -896,38 +891,5 @@ class ListTable extends \WP_List_Table {
 
 		wp_safe_redirect( $redirect_url );
 		exit();
-	}
-
-	/**
-	 * Add admin notices.
-	 *
-	 * @return void
-	 */
-	public static function output_admin_notice(): void {
-
-		if ( ! function_exists( 'wp_admin_notice' ) ) {
-			return;
-		}
-
-		$notice_data = get_option( self::NOTICES_OPTION_NAME );
-
-		if ( empty( $notice_data ) || empty( $notice_data['message'] ) ) {
-			return;
-		}
-
-		$type = in_array( $notice_data['type'], array( 'error', 'warning', 'success', 'info' ), true )
-			? $notice_data['type']
-			: 'info';
-
-		\wp_admin_notice(
-			$notice_data['message'],
-			array(
-				'type'        => $type,
-				'id'          => self::NOTICES_OPTION_NAME,
-				'dismissible' => false,
-			)
-		);
-
-		delete_option( self::NOTICES_OPTION_NAME );
 	}
 }

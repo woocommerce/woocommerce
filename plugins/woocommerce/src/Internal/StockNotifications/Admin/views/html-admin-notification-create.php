@@ -21,7 +21,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 	<hr class="wp-header-end">
 
 	<form method="POST" id="edit-notification-form">
-	<?php wp_nonce_field( 'woocommerce-customer-stock-notification-edit', 'customer_stock_notification_edit_security' ); ?>
+	<?php wp_nonce_field( 'woocommerce-customer-stock-notification-create', 'customer_stock_notification_create_security' ); ?>
 
 	<div id="poststuff">
 		<div id="post-body" class="columns-2">

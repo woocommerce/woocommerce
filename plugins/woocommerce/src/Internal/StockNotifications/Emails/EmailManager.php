@@ -284,4 +284,17 @@ class EmailManager {
 			$emails['WC_Email_Customer_Stock_Notification']->trigger( $notification );
 		}
 	}
+
+	/**
+	 * Send a stock verification email.
+	 *
+	 * @param Notification $notification The notification object.
+	 * @return void
+	 */
+	public function send_stock_verification_email( Notification $notification ) {
+		$emails = WC()->mailer()->get_emails();
+		if ( isset( $emails['WC_Email_Customer_Stock_Notification_Verify'] ) ) {
+			$emails['WC_Email_Customer_Stock_Notification_Verify']->trigger( $notification );
+		}
+	}
 }

@@ -115,6 +115,9 @@ class MenusController {
 			case 'create':
 				$this->notifications_page->create();
 				break;
+			case 'edit':
+				$this->notifications_page->edit();
+				break;
 			default:
 				$this->notifications_page->output();
 				break;
