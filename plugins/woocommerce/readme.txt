@@ -169,18 +169,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 9.9.4 2025-06-16 =
+= 9.9.0 2025-07-12 =
 
 **WooCommerce**
 
-* Security - Prepare admin report query conditional statements. [#58857](https://github.com/woocommerce/woocommerce/pull/58857)
-* Fix - Add proper error handling when WCCOM API is unavailable, don't crash the site. [#58750](https://github.com/woocommerce/woocommerce/pull/58750)
-* Fix - Fixed bug in wc_change_term_counts() that hid empty top level product categories [#58821](https://github.com/woocommerce/woocommerce/pull/58821)
-* Fix - Hide general tab when COGS is disabled in variable products [#58701](https://github.com/woocommerce/woocommerce/pull/58701)
-* Fix - Prevent All Products block breaking when mini cart is not present in site header [#58741](https://github.com/woocommerce/woocommerce/pull/58741)
-* Fix - Prevent shipping rate defaulting to empty string if it has no cost, go to '0' instead. [#58804](https://github.com/woocommerce/woocommerce/pull/58804)
-* Fix - Provide server architecture message when php_uname is disabled [#58734](https://github.com/woocommerce/woocommerce/pull/58734)
-* Update - Pause rollout of email improvements to existing stores [#58828](https://github.com/woocommerce/woocommerce/pull/58828)
+* Fix - Fix: ensure block style is always loaded on demand for classic themes. [#58993](https://github.com/woocommerce/woocommerce/pull/58993)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
