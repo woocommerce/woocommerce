@@ -22,6 +22,10 @@
 				"remove": false,
 				"move": false
 			}
+		},
+		"checkoutButtonLabel": {
+			"type": "string",
+			"default": ""
 		}
 	},
 	"styles": [
@@ -35,9 +39,7 @@
 			"label": "Outline"
 		}
 	],
-	"parent": [
-		"woocommerce/mini-cart-footer-block"
-	],
+	"parent": [ "woocommerce/mini-cart-footer-block" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
