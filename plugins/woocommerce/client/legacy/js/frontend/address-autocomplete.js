@@ -153,6 +153,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		const suggestionsLists = {};
 		let activeSuggestionIndices = {};
 		let addressSelectionTimeout;
+		const blurHandlers = {};
 
 		/**
 		 * Cache address fields for a given type, will re-run when country changes.
@@ -268,7 +269,8 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			}
 
 			input.setAttribute( 'autocomplete', 'off' );
-			input.setAttribute( 'data-lpignore', '' );
+			input.setAttribute( 'data-lpignore', 'true' );
+			input.setAttribute( 'data-op-ignore', 'true' );
 
 			// To prevent 1Password/LastPass and autocomplete clashes, we need to refocus the element.
 			// This is achieved by removing and re-adding the element to trigger browser updates.
@@ -282,14 +284,26 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		/**
 		 * Enable browser autofill for address input.
 		 * @param input {HTMLInputElement} The input element to enable autofill for.
+		 * @param shouldFocus {boolean} Whether to focus the input after enabling autofill.
 		 */
-		function enableBrowserAutofill( input ) {
+		function enableBrowserAutofill( input, shouldFocus = true ) {
 			if ( input.getAttribute( 'autocomplete' ) !== 'off' ) {
 				return;
 			}
 
 			input.setAttribute( 'autocomplete', 'address-line1' );
 			input.setAttribute( 'data-lpignore', 'false' );
+			input.setAttribute( 'data-op-ignore', 'false' );
+
+			// To ensure browser updates and re-enables autofill, we need to refocus the element.
+			// This is achieved by removing and re-adding the element to trigger browser updates.
+			const parentElement = input.parentElement;
+			if ( parentElement ) {
+				parentElement.appendChild( parentElement.removeChild( input ) );
+				if ( shouldFocus ) {
+					input.focus();
+				}
+			}
 		}
 
 		/**
@@ -399,6 +413,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			const suggestionsList = suggestionsLists[ type ];
 			const suggestionsContainer = suggestionsContainers[ type ];
 
+			// Hide suggestions if input has less than 3 characters
 			if ( sanitizedInput.length < 3 ) {
 				hideSuggestions( type );
 				enableBrowserAutofill( addressInput );
@@ -482,6 +497,18 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 				suggestionsList.id = `address_suggestions_${ type }_list`;
 				// Don't auto-highlight first suggestion for better screen reader accessibility
 				activeSuggestionIndices[ type ] = -1;
+
+				// Add blur event listener when suggestions are shown
+				if ( ! blurHandlers[ type ] ) {
+					blurHandlers[ type ] = function () {
+						// Use a small delay to allow clicks on suggestions to register
+						setTimeout( () => {
+							hideSuggestions( type );
+							enableBrowserAutofill( addressInput, false );
+						}, 200 );
+					};
+					addressInput.addEventListener( 'blur', blurHandlers[ type ] );
+				}
 			} catch ( error ) {
 				console.error( 'Address search error:', error );
 				hideSuggestions( type );
@@ -519,6 +546,12 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			addressInput.removeAttribute( 'aria-activedescendant' );
 			addressInput.removeAttribute( 'aria-owns' );
 			activeSuggestionIndices[ type ] = -1;
+
+			// Remove blur event listener when suggestions are hidden
+			if ( blurHandlers[ type ] ) {
+				addressInput.removeEventListener( 'blur', blurHandlers[ type ] );
+				delete blurHandlers[ type ];
+			}
 		}
 
 		/**
