@@ -12,15 +12,8 @@ This section provides guides and resources for building, testing, and distributi
 
 Join the WooCommerce Marketplace and get your extension in front of 3.6M+ active stores worldwide.
 
-[Submit your extension](https://woocommerce.com/document/submitting-your-product-to-the-woo-marketplace/)
+Learn more about [why extension developers are choosing the WooCommerce Marketplace](https://woocommerce.com/partners/) and [submit your extension](https://woocommerce.com/document/submitting-your-product-to-the-woo-marketplace/)
 
-### Why Choose the WooCommerce Marketplace?
-
-- **3.6M+** Woo-powered stores online
-- **1000+** successful products already in our marketplace
-- **95%** partner satisfaction rate
-
-*Source: [Storeleads](https://storeleads.app/reports)*
 
 ### Quality Insights Toolkit (QIT)
 
