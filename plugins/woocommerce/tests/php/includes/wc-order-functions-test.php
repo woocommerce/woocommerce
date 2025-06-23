@@ -466,16 +466,16 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_url_preservation_with_line_breaks() {
 		$content_with_breaks = "Check API status:\nhttps://api.example.com/status--check\n\nThen verify the results -- everything should work.";
-		
+
 		// Test the core function.
 		$result = wc_wptexturize_customer_note( $content_with_breaks );
 		$this->assertStringContainsString( 'status--check', $result, 'URLs should be preserved even with line breaks' );
-		
+
 		// Test that nl2br() doesn't affect URL preservation (used in HTML emails).
 		$html_result = nl2br( $result );
 		$this->assertStringContainsString( 'status--check', $html_result, 'URLs should remain preserved after nl2br()' );
 		$this->assertStringContainsString( '<br />', $html_result, 'Line breaks should be converted to <br> tags' );
-		
+
 		// Verify em-dash conversion still works for non-URL content.
 		$contains_em_dash = strpos( $result, '—' ) !== false || strpos( $result, '&#8212;' ) !== false;
 		$this->assertTrue( $contains_em_dash, 'Non-URL double hyphens should still be converted to em-dash' );
