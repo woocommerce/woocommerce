@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductDetails;
 
 use WC_Helper_Product;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductDetailsMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductDetailsNoRegisterMock;
 
 /**
@@ -36,15 +35,13 @@ class ProductDetails extends \WP_UnitTestCase {
 		WC_Helper_Product::create_product_review( self::$product );
 
 		self::$page_id = wp_insert_post(
-			[
+			array(
 				'post_title'  => 'Test Product Page',
 				'post_type'   => 'page',
 				'post_status' => 'publish',
-			],
+			),
 			true
 		);
-
-		new ProductDetailsMock();
 	}
 	/**
 	 * Set up product and page for each test, and create an AssetDataRegistryMock.
