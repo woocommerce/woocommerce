@@ -13,7 +13,7 @@
 <!-- /wp:spacer -->
 
 <!-- wp:heading {"textAlign":"center","level":1,"align":"wide"} -->
-<h1 class="wp-block-heading alignwide has-text-align-center" id="page-not-found"><?php echo esc_html_x( 'Page Not Found', 'Heading for a web page that is not found', 'woostarter' ); ?></h1>
+<h1 class="wp-block-heading alignwide has-text-align-center" id="page-not-found"><?php echo esc_html_x( 'Page not found', 'Heading for a web page that is not found', 'woostarter' ); ?></h1>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"align":"center","textColor":"theme-4"} -->
