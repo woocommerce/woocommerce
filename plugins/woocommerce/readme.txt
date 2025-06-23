@@ -169,7 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.0.0 2025-06-23 =
+= 10.0.0 2025-07-07 =
 
 **WooCommerce**
 
@@ -192,7 +192,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Ensure login form is rendered on classic checkout for guests [#57557](https://github.com/woocommerce/woocommerce/pull/57557)
 * Fix - Ensure plain text email preview is aligned left when sent to email [#58790](https://github.com/woocommerce/woocommerce/pull/58790)
 * Fix - Ensures checkout notice errors disappear after valid response [#57361](https://github.com/woocommerce/woocommerce/pull/57361)
-* Fix - Fix: ensure block style is always loaded on demand for classic themes. [#59030](https://github.com/woocommerce/woocommerce/pull/59030)
 * Fix - Fix: ensure wp_is_block_theme() is called after theme directories registration. [#58640](https://github.com/woocommerce/woocommerce/pull/58640)
 * Fix - Fix anonymize_refunded_orders args to ignore anonymized orders [#58421](https://github.com/woocommerce/woocommerce/pull/58421)
 * Fix - Fix default attribute selection in dropdown mode for Add to Cart + Options block [#58464](https://github.com/woocommerce/woocommerce/pull/58464)
