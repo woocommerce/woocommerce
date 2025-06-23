@@ -56,7 +56,16 @@ module.exports = {
         </html>`,
 
     plugins: [
-        ...(baseConfig.plugins || []),
+        ...(baseConfig.plugins || []).map((plugin) => {
+            const path = Array.isArray(plugin) ? plugin[0] : plugin;
+            if (typeof path === 'string' && path.startsWith('./')) {
+                const newPath = path.replace(/^\.\//, '../');
+                return Array.isArray(plugin)
+                    ? [newPath, plugin[1]]
+                    : newPath;
+            }
+            return plugin;
+        }),
         function pluginAssetPrefix() {
             return {
                 name: 'set-deploy-asset-prefix',

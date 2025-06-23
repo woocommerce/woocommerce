@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 9.9.3 2025-06-09 =
+
+**WooCommerce**
+
+* Fix - Remove order status validation for order count cache [#58586](https://github.com/woocommerce/woocommerce/pull/58586)
+* Fix - Revert "unsupported_theme_title_filter" Id parameter typing. [#58574](https://github.com/woocommerce/woocommerce/pull/58574)
+
 = 9.9.2 2025-06-04 =
 
 **WooCommerce**

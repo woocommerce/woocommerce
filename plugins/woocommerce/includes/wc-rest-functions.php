@@ -8,6 +8,8 @@
  * @version 2.6.0
  */
 
+use Automattic\WooCommerce\Internal\Utilities\Users;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -248,8 +250,10 @@ function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_
  * Check permissions of users on REST API.
  *
  * @since 2.6.0
+ * @since 9.4.0 Became multisite aware. The function now considers whether the user belongs to the current site.
+ *
  * @param string $context   Request context.
- * @param int    $object_id Post ID.
+ * @param int    $object_id User ID.
  * @return bool
  */
 function wc_rest_check_user_permissions( $context = 'read', $object_id = 0 ) {
@@ -279,6 +283,22 @@ function wc_rest_check_user_permissions( $context = 'read', $object_id = 0 ) {
 		$permission = current_user_can( $contexts[ $context ], $object_id );
 	}
 
+	// Possibly revoke $permission if the user is 'out of bounds' from a multisite-network perspective.
+	if ( $permission && ! Users::get_user_in_current_site( $object_id ) ) {
+		$permission = false;
+	}
+
+	/**
+	 * Provides an opportunity to override the permission check made before acting on an object in relation to
+	 * REST API requests.
+	 *
+	 * @since 2.6.0
+	 *
+	 * @param bool   $permission  If we have permission to act on this object.
+	 * @param string $context     Describes the operation being performed: 'read', 'edit', 'delete', etc.
+	 * @param int    $object_id   Object ID. This could be a user ID, order ID, post ID, etc.
+	 * @param string $object_type Type of object ('user', 'shop_order', etc) for which checks are being made.
+	 */
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, 'user' );
 }
 

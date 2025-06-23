@@ -13,7 +13,7 @@ import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
 import React, { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { Button } from '@wordpress/components';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -40,7 +40,8 @@ import {
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
 import WooPaymentsModal from '~/settings-payments/onboarding/providers/woopayments';
-import { getAdminSetting } from '~/utils/admin-settings';
+import { TrackedLink } from '~/components/tracked-link/tracked-link';
+import { isFeatureEnabled } from '~/utils/features';
 
 /**
  * A component that renders the main settings page for managing payment gateways in WooCommerce.
@@ -71,8 +72,6 @@ export const SettingsPaymentsMain = () => {
 
 	const [ isOnboardingModalOpen, setIsOnboardingModalOpen ] =
 		useState( false );
-
-	const assetUrl = getAdminSetting( 'wcAdminAssetUrl' );
 
 	useEffect( () => {
 		// Record the page view event.
@@ -447,16 +446,24 @@ export const SettingsPaymentsMain = () => {
 	};
 
 	const morePaymentOptionsLink = (
-		<Button
-			variant={ 'link' }
-			target="_blank"
-			href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/"
-			className="more-payment-options-link"
-			onClick={ trackMorePaymentsOptionsClicked }
-		>
-			<img src={ assetUrl + '/icons/external-link.svg' } alt="" />
-			{ __( 'More payment options', 'woocommerce' ) }
-		</Button>
+		<TrackedLink
+			message={ __(
+				// translators: {{Link}} is a placeholder for a html element.
+				'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find additional payment options.',
+				'woocommerce'
+			) }
+			onClickCallback={ trackMorePaymentsOptionsClicked }
+			targetUrl={
+				isFeatureEnabled( 'marketplace' )
+					? getAdminLink(
+							'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
+					  )
+					: 'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/'
+			}
+			linkType={
+				isFeatureEnabled( 'marketplace' ) ? 'wc-admin' : 'external'
+			}
+		/>
 	);
 
 	return (

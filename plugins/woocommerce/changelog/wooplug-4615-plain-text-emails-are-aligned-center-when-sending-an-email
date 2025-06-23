@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure plain text email preview is aligned left when sent to email
