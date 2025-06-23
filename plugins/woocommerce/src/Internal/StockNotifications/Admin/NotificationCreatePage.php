@@ -125,7 +125,7 @@ class NotificationCreatePage {
 					'type'    => 'success',
 				)
 			);
-			
+
 			// Construct edit url.
 			$edit_url = add_query_arg(
 				array(
