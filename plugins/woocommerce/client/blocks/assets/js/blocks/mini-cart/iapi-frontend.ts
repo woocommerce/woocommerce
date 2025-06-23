@@ -391,14 +391,17 @@ const { state } = store(
 					const { displayCartPriceIncludingTax } = getConfig(
 						'woocommerce/mini-cart'
 					);
-					const currency = state.currency;
+					const itemCurrency = state.currency;
 
 					const totalLinePrice = displayCartPriceIncludingTax
 						? parseInt( totals.line_subtotal, 10 ) +
 						  parseInt( totals.line_subtotal_tax, 10 )
 						: parseInt( totals.line_subtotal, 10 );
 
-					return formatPriceWithCurrency( totalLinePrice, currency );
+					return formatPriceWithCurrency(
+						totalLinePrice,
+						itemCurrency
+					);
 				}
 
 				return '';
