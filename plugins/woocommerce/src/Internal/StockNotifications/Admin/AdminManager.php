@@ -78,8 +78,11 @@ class AdminManager {
 			$notification->set_user_email('');
 			$notification->set_user_id( 0 );
 			$notification->save();
-
-			$response['messages'][]    = __( 'Removed customer notification', 'woocommerce' );
+			$response['messages'][] = sprintf(
+				/* translators: %d the numeric product ID */
+				__( 'Removed customer notification for product id: %d', 'woocommerce' ),
+				$notification->get_product_id()
+			);
 			$response['items_removed'] = true;
 		}
 
