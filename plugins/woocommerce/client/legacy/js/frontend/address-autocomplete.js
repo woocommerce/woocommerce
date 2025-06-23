@@ -94,8 +94,6 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 	registerAddressAutocompleteProvider;
 
 ( function () {
-	'use strict';
-
 	/**
 	 * Set the active address provider based on which providers' (queried in order) canSearch returns true.
 	 * Triggers when country changes.
