@@ -119,7 +119,7 @@ class FulfillmentsRenderer {
 		// Render the column data based on the column name.
 		switch ( $column_name ) {
 			case 'fulfillment_status':
-				$this->render_fulfillment_status_column_row_data( $order, $fulfillments );
+				$this->render_order_fulfillment_status_column_row_data( $order, $fulfillments );
 				break;
 			case 'shipment_tracking':
 				$this->render_shipment_tracking_column_row_data( $order, $fulfillments );
@@ -135,11 +135,11 @@ class FulfillmentsRenderer {
 	 *
 	 * @param WC_Order $order The order object.
 	 */
-	private function render_fulfillment_status_column_row_data( WC_Order $order ) {
+	private function render_order_fulfillment_status_column_row_data( WC_Order $order ) {
 		$order_fulfillment_status = $order->meta_exists( '_fulfillment_status' ) ? $order->get_meta( '_fulfillment_status', true ) : 'no_fulfillments';
 
 		echo "<div class='fulfillment-status-wrapper'>";
-		$this->render_fulfillment_status_badge( $order, $order_fulfillment_status );
+		$this->render_order_fulfillment_status_badge( $order, $order_fulfillment_status );
 		echo '</div>';
 	}
 
@@ -149,8 +149,17 @@ class FulfillmentsRenderer {
 	 * @param WC_Order $order The order object.
 	 * @param string   $order_fulfillment_status The fulfillment status of the order.
 	 */
-	private function render_fulfillment_status_badge( $order, string $order_fulfillment_status ) {
+	private function render_order_fulfillment_status_badge( $order, string $order_fulfillment_status ) {
 		$status_props = FulfillmentUtils::get_order_fulfillment_statuses()[ $order_fulfillment_status ];
+		if ( ! $status_props ) {
+			$status_props = array(
+				'label'            => __( 'Unknown', 'woocommerce' ),
+				'background_color' => '#f0f0f0',
+				'text_color'       => '#000',
+			);
+		}
+
+		echo "<div class='fulfillment-status-wrapper'>";
 		echo '<mark class="fulfillment-status" style="background-color:' . esc_attr( $status_props['background_color'] ) . '; color: ' . esc_attr( $status_props['text_color'] ) . '"><span>' . esc_html( $status_props['label'] ) . '</span></mark>';
 		echo "<a href='#' class='fulfillments-trigger' data-order-id='" . esc_attr( $order->get_id() ) . "' title='" . esc_attr__( 'View Fulfillments', 'woocommerce' ) . "'>
 			<svg width='16' height='16' viewBox='0 0 12 14' xmlns='http://www.w3.org/2000/svg'>
@@ -365,15 +374,15 @@ class FulfillmentsRenderer {
 		echo '<div class="wc-order-fulfillment-badges">';
 
 		// Get the fulfillment status for the order.
-		$fulfillments       = $this->maybe_read_fulfillments( $order );
-		$fulfillment_status = FulfillmentUtils::get_fulfillment_status( $order, $fulfillments );
+		$fulfillments             = $this->maybe_read_fulfillments( $order );
+		$order_fulfillment_status = FulfillmentUtils::calculate_order_fulfillment_status( $order, $fulfillments );
 
 		// Render order status badge.
 		$order_status = $order->get_status();
 		echo '<mark class="order-status status-' . esc_attr( $order_status ) . '"><span>' . esc_html( wc_get_order_status_name( $order_status ) ) . '</span></mark>';
 
 		// Render fulfillment status badge.
-		$this->render_fulfillment_status_badge( $order, $fulfillment_status );
+		$this->render_order_fulfillment_status_badge( $order, $order_fulfillment_status );
 		echo '</div>';
 	}
 
