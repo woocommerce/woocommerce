@@ -18,15 +18,6 @@ class ProductDetails extends AbstractBlock {
 	protected $block_name = 'product-details';
 
 	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
-
-	/**
 	 * Initialize the block type.
 	 *
 	 * @return void
