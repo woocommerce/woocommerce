@@ -46,7 +46,6 @@ test.describe( 'Shopper (logged-in) → Order Confirmation', () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
-		await frontendUtils.goToCart();
 		await frontendUtils.goToCheckout();
 		expect(
 			await checkoutPageObject.selectAndVerifyShippingOption(
