@@ -41,13 +41,6 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 			}
 		}
 
-		wp_interactivity_config(
-			$this->get_full_block_name(),
-			array(
-				'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
-			)
-		);
-
 		wp_interactivity_state(
 			$this->get_full_block_name(),
 			array(

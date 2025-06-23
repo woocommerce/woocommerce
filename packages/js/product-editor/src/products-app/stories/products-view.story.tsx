@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
 import {
 	DataViews,
 	FieldType,
@@ -16,7 +15,7 @@ import {
 	PRODUCT_FIELDS,
 	PRODUCT_FIELDS_KEYS,
 	PRODUCTS_DATA,
-} from './utilites/product-data-view-data';
+} from '../utilites/product-data-view-data';
 
 type ProductsViewProps = {
 	productsData: typeof PRODUCTS_DATA;

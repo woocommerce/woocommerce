@@ -17,7 +17,7 @@
 		"test:php:ci": "pnpm test:unit && pnpm test:integration",
 		"test:integration": "composer run-script test:integration"
 	},
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"devDependencies": {
 		"@wordpress/env": "10.17.0",
 		"rimraf": "5.0.5"

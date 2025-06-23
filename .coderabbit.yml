@@ -1,4 +1,9 @@
 reviews:
+    assess_linked_issues: false
+    collapse_walkthrough: true
     high_level_summary: false
+    review_status: false
+    suggested_labels: false
+    suggested_reviewers: false
     path_filters:
         - '!docs/**'
