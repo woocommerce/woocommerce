@@ -55,6 +55,20 @@ class NotificationsPage {
 	}
 
 	/**
+	 * Add a notice to the admin notices.
+	 *
+	 * @param string $message The notice message.
+	 * @param string $type The notice type.
+	 * @return void
+	 */
+	public static function add_notice( $message, $type ) {
+		update_option( self::NOTICES_OPTION_NAME, array(
+			'message' => $message,
+			'type'    => $type,
+		) );
+	}
+
+	/**
 	 * Add admin notices.
 	 *
 	 * @return void

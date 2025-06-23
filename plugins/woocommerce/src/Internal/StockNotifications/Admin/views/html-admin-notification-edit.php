@@ -99,10 +99,10 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 								$notification_status = 'cancelled';
 								$label               = _x( 'Cancelled', 'stock notification status', 'woocommerce' );
 							} elseif ( $notification->get_status() === NotificationStatus::SENT ) {
-								$notification_status = 'sent';
+								$notification_status = 'cancelled';
 								$label               = _x( 'Sent', 'stock notification status', 'woocommerce' );
 							} else {
-								$notification_status = 'active';
+								$notification_status = 'completed';
 								$label               = _x( 'Active', 'stock notification status', 'woocommerce' );
 							}
 

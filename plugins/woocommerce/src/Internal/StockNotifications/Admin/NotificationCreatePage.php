@@ -79,13 +79,7 @@ class NotificationCreatePage {
 					),
 					admin_url( NotificationsPage::PAGE_URL . '&notification_action=edit&notification_id=' . $notification_ids[0] )
 				);
-				update_option(
-					NotificationsPage::NOTICES_OPTION_NAME,
-					array(
-						'message' => $notice_message,
-						'type'    => 'error',
-					)
-				);
+				NotificationsPage::add_notice( $notice_message, 'error' );
 				return;
 			}
 		}
@@ -107,24 +101,12 @@ class NotificationCreatePage {
 
 		if ( is_wp_error( $result ) ) {
 			$notice_message = $result->get_error_message();
-			update_option(
-				NotificationsPage::NOTICES_OPTION_NAME,
-				array(
-					'message' => $notice_message,
-					'type'    => 'error',
-				)
-			);
+			NotificationsPage::add_notice( $notice_message, 'error' );
 			return;
 		} else {
 
 			$notice_message = __( 'Notification created.', 'woocommerce' );
-			update_option(
-				NotificationsPage::NOTICES_OPTION_NAME,
-				array(
-					'message' => $notice_message,
-					'type'    => 'success',
-				)
-			);
+			NotificationsPage::add_notice( $notice_message, 'success' );
 
 			// Construct edit url.
 			$edit_url = add_query_arg(

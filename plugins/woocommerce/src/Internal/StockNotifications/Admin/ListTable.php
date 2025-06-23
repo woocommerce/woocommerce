@@ -763,24 +763,12 @@ class ListTable extends \WP_List_Table {
 			$this->data_store->delete( $notification );
 
 			$notice_message = __( 'Notification deleted.', 'woocommerce' );
-			update_option(
-				NotificationsPage::NOTICES_OPTION_NAME,
-				array(
-					'message' => $notice_message,
-					'type'    => 'success',
-				)
-			);
+			NotificationsPage::add_notice( $notice_message, 'success' );
 
 		} catch ( \Exception $e ) {
 
 			$notice_message = __( 'Notification not found.', 'woocommerce' );
-			update_option(
-				NotificationsPage::NOTICES_OPTION_NAME,
-				array(
-					'message' => $notice_message,
-					'type'    => 'error',
-				)
-			);
+			NotificationsPage::add_notice( $notice_message, 'error' );
 		}
 
 		wp_safe_redirect( admin_url( NotificationsPage::PAGE_URL ) );
@@ -827,13 +815,7 @@ class ListTable extends \WP_List_Table {
 				count( $notifications )
 			);
 
-			update_option(
-				NotificationsPage::NOTICES_OPTION_NAME,
-				array(
-					'message' => $notice_message,
-					'type'    => 'success',
-				)
-			);
+			NotificationsPage::add_notice( $notice_message, 'success' );
 
 		} elseif ( 'cancel' === $this->current_action() ) {
 			foreach ( $notifications as $id ) {
@@ -854,13 +836,7 @@ class ListTable extends \WP_List_Table {
 				count( $notifications )
 			);
 
-			update_option(
-				NotificationsPage::NOTICES_OPTION_NAME,
-				array(
-					'message' => $notice_message,
-					'type'    => 'success',
-				)
-			);
+			NotificationsPage::add_notice( $notice_message, 'success' );
 
 		} elseif ( 'delete' === $this->current_action() ) {
 			foreach ( $notifications as $id ) {
@@ -880,13 +856,7 @@ class ListTable extends \WP_List_Table {
 				count( $notifications )
 			);
 
-			update_option(
-				NotificationsPage::NOTICES_OPTION_NAME,
-				array(
-					'message' => $notice_message,
-					'type'    => 'success',
-				)
-			);
+			NotificationsPage::add_notice( $notice_message, 'success' );
 		}
 
 		wp_safe_redirect( $redirect_url );

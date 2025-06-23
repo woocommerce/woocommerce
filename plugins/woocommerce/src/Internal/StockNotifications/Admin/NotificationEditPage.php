@@ -28,13 +28,7 @@ class NotificationEditPage {
 
 		if ( ! $notification instanceof Notification ) {
 			$notice_message = __( 'Notification not found.', 'woocommerce' );
-			update_option(
-				NotificationsPage::NOTICES_OPTION_NAME,
-				array(
-					'message' => $notice_message,
-					'type'    => 'error',
-				)
-			);
+			NotificationsPage::add_notice( $notice_message, 'error' );
 			wp_safe_redirect( admin_url( NotificationsPage::PAGE_URL ) );
 			exit;
 		}
@@ -86,22 +80,10 @@ class NotificationEditPage {
 				$result = $notification->save();
 				if ( is_wp_error( $result ) ) {
 					$notice_message = $result->get_error_message();
-					update_option(
-						NotificationsPage::NOTICES_OPTION_NAME,
-						array(
-							'message' => $notice_message,
-							'type'    => 'error',
-						)
-					);
+					NotificationsPage::add_notice( $notice_message, 'error' );
 				} else {
 					$notice_message = __( 'Notification updated.', 'woocommerce' );
-					update_option(
-						NotificationsPage::NOTICES_OPTION_NAME,
-						array(
-							'message' => $notice_message,
-							'type'    => 'success',
-						)
-					);
+					NotificationsPage::add_notice( $notice_message, 'success' );
 				}
 				break;
 			case 'cancel_notification':
@@ -109,22 +91,10 @@ class NotificationEditPage {
 				$result = $notification->save();
 				if ( is_wp_error( $result ) ) {
 					$notice_message = $result->get_error_message();
-					update_option(
-						NotificationsPage::NOTICES_OPTION_NAME,
-						array(
-							'message' => $notice_message,
-							'type'    => 'error',
-						)
-					);
+					NotificationsPage::add_notice( $notice_message, 'error' );
 				} else {
 					$notice_message = __( 'Notification updated.', 'woocommerce' );
-					update_option(
-						NotificationsPage::NOTICES_OPTION_NAME,
-						array(
-							'message' => $notice_message,
-							'type'    => 'success',
-						)
-					);
+					NotificationsPage::add_notice( $notice_message, 'success' );
 				}
 				break;
 			case 'send_notification':
@@ -132,13 +102,7 @@ class NotificationEditPage {
 
 				if ( ! $product || ! $product->is_in_stock() ) {
 					$notice_message = __( 'Failed to send notification. Please make sure that the listed product is available.', 'woocommerce' );
-					update_option(
-						NotificationsPage::NOTICES_OPTION_NAME,
-						array(
-							'message' => $notice_message,
-							'type'    => 'error',
-						)
-					);
+					NotificationsPage::add_notice( $notice_message, 'error' );
 				} else {
 					$email_manager = new EmailManager();
 					$email_manager->send_stock_notification_email( $notification );
@@ -146,13 +110,7 @@ class NotificationEditPage {
 					$notification->save();
 					// translators: %s user email.
 					$notice_message = sprintf( __( 'Notification sent to "%s".', 'woocommerce' ), $notification->get_user_email() );
-					update_option(
-						NotificationsPage::NOTICES_OPTION_NAME,
-						array(
-							'message' => $notice_message,
-							'type'    => 'success',
-						)
-					);
+					NotificationsPage::add_notice( $notice_message, 'success' );
 				}
 				break;
 			case 'send_verification_email':
@@ -160,13 +118,7 @@ class NotificationEditPage {
 				$email_manager->send_stock_verification_email( $notification );
 				// translators: %s user email.
 				$notice_message = sprintf( __( 'Verification email sent to "%s".', 'woocommerce' ), $notification->get_user_email() );
-				update_option(
-					NotificationsPage::NOTICES_OPTION_NAME,
-					array(
-						'message' => $notice_message,
-						'type'    => 'success',
-					)
-				);
+				NotificationsPage::add_notice( $notice_message, 'success' );
 				break;
 		}
 
