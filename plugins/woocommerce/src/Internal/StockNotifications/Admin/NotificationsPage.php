@@ -62,10 +62,13 @@ class NotificationsPage {
 	 * @return void
 	 */
 	public static function add_notice( $message, $type ) {
-		update_option( self::NOTICES_OPTION_NAME, array(
-			'message' => $message,
-			'type'    => $type,
-		) );
+		update_option(
+			self::NOTICES_OPTION_NAME,
+			array(
+				'message' => $message,
+				'type'    => $type,
+			)
+		);
 	}
 
 	/**
