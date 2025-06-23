@@ -20,7 +20,7 @@
 <p class="has-text-align-center has-theme-4-color has-text-color"><?php echo esc_html_x( 'The page you\'re looking for could not be found. Maybe try a search?', '404 error message', 'woostarter' ); ?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:search {"label":"Search","showLabel":false,"placeholder":"Search...","buttonText":"Search","buttonUseIcon":true,"style":{"border":{"radius":"100px"},"spacing":{"margin":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}},"borderColor":"theme-4"} /-->
+<!-- wp:search {"label":"Search","showLabel":false,"placeholder":"Search...","buttonText":"Search","buttonUseIcon":true,"style":{"spacing":{"margin":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}},"borderColor":"theme-4"} /-->
 
 <!-- wp:spacer {"height":"var:preset|spacing|80"} -->
 <div style="height:var(--wp--preset--spacing--80)" aria-hidden="true" class="wp-block-spacer"></div>
