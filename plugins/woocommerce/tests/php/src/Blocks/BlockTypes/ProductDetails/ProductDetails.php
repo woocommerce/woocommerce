@@ -203,4 +203,16 @@ class ProductDetails extends \WP_UnitTestCase {
 		$this->assertSame( 'woocommerce/accordion-panel', $hooked_block_custom_info['innerBlocks'][1]['blockName'] );
 		$this->assertSame( parse_blocks( $test_block['content'] ), $hooked_block_custom_info['innerBlocks'][1]['innerBlocks'] );
 	}
+
+	/**
+	 * Test the legacy render of Product Details block. It should render the is-style-minimal class.
+	 */
+	public function test_render_legacy_block_default_titles_visible() {
+		// Legacy usage – block has no inner blocks, so render_legacy_block is triggered.
+		$template = '<!-- wp:woocommerce/product-details {"className":"is-style-minimal"} /-->';
+
+		$serialized_blocks = do_blocks( $template );
+
+		$this->assertStringContainsString( 'is-style-minimal', $serialized_blocks, 'Should contain the is-style-minimal class' );
+	}
 }
