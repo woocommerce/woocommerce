@@ -34,6 +34,7 @@ export type Store = {
 		};
 	};
 	actions: {
+		removeCartItem: ( key: string ) => void;
 		addCartItem: ( args: OptimisticCartItem ) => void;
 		batchAddCartItems: ( items: OptimisticCartItem[] ) => void;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
@@ -88,6 +89,44 @@ const { state, actions } = store< Store >(
 	'woocommerce',
 	{
 		actions: {
+			*removeCartItem( key: string ) {
+				const previousCart = JSON.stringify( state.cart );
+
+				// optimistically update the cart
+				state.cart.items = state.cart.items.filter(
+					( item ) => item.key !== key
+				);
+
+				try {
+					const res: Response = yield fetch(
+						`${ state.restUrl }wc/store/v1/cart/remove-item`,
+						{
+							method: 'POST',
+							headers: {
+								Nonce: state.nonce,
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify( { key } ),
+						}
+					);
+
+					const json: Cart | ApiErrorResponse = yield res.json();
+
+					if ( isApiErrorResponse( res, json ) ) {
+						throw generateError( json );
+					}
+					state.cart = json;
+					emitSyncEvent( {
+						quantityChanges: { cartItemsPendingDelete: [ key ] },
+					} );
+				} catch ( error ) {
+					state.cart = JSON.parse( previousCart );
+
+					// Shows the error notice.
+					actions.showNoticeError( error as Error );
+				}
+			},
+
 			*addCartItem( { id, quantity, variation }: OptimisticCartItem ) {
 				let item = state.cart.items.find(
 					( { id: productId } ) => id === productId
@@ -150,6 +189,7 @@ const { state, actions } = store< Store >(
 					actions.showNoticeError( error as Error );
 				}
 			},
+
 			*batchAddCartItems( items: OptimisticCartItem[] ) {
 				const previousCart = structuredClone( state.cart );
 				const quantityChanges: QuantityChanges = {};
@@ -281,6 +321,7 @@ const { state, actions } = store< Store >(
 					actions.showNoticeError( error as Error );
 				}
 			},
+
 			*refreshCartItems() {
 				// Skips if there's a pending request.
 				if ( pendingRefresh ) return;
@@ -313,6 +354,7 @@ const { state, actions } = store< Store >(
 					pendingRefresh = false;
 				}
 			},
+
 			*showNoticeError( error: Error | ApiErrorResponse ) {
 				// Todo: Use the module exports instead of `store()` once the store-notices
 				// store is public.

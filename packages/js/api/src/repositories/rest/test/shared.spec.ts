@@ -3,7 +3,7 @@
  */
 import { HTTPClient, HTTPResponse } from '../../../http';
 import { ModelTransformer, ModelRepositoryParams } from '../../../framework';
-import { DummyModel } from '../../../__test_data__/dummy-model';
+import { DummyModel } from '../../../test/dummy-model';
 import {
 	restCreate,
 	restDelete,

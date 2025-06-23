@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove usage of `settings.allowedBlockTypes` from the email editor configuration.

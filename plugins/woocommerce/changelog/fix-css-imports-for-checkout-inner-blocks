@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Replace metadata spread on checkout inner blocks registration

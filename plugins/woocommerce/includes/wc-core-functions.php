@@ -1405,14 +1405,26 @@ function wc_get_user_agent() {
  * Generate a rand hash.
  *
  * @since  2.4.0
+ * @param  string $prefix Prefix for the hash.
+ * @param  ?int   $max_length Maximum length of the hash. Excludes the prefix.
  * @return string
  */
-function wc_rand_hash() {
-	if ( ! function_exists( 'openssl_random_pseudo_bytes' ) ) {
-		return sha1( wp_rand() );
+function wc_rand_hash( $prefix = '', $max_length = null ) {
+	try {
+		$random = bin2hex( random_bytes( 20 ) );
+	} catch ( Exception $e ) {
+		if ( function_exists( 'wp_fast_hash' ) ) {
+			$random = bin2hex( substr( wp_fast_hash( wp_rand() ), -20 ) );
+		} else {
+			$random = bin2hex( substr( sha1( wp_rand() ), -20 ) );
+		}
 	}
 
-	return bin2hex( openssl_random_pseudo_bytes( 20 ) ); // @codingStandardsIgnoreLine
+	if ( $max_length && $max_length > 0 ) {
+		$random = substr( $random, 0, $max_length );
+	}
+
+	return $prefix . $random;
 }
 
 /**
