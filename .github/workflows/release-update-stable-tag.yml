@@ -279,4 +279,4 @@ jobs:
           slack-channel: ${{ secrets.WOO_ANNOUNCEMENTS_SLACK_CHANNEL }}
           slack-optional-unfurl_links: false
           slack-text: |
-            :woo-bounce: *WooCommerce ${{ needs.validate-release.outputs.version }}* has been released! :rocket:
+            :woo-bounce: *<${{ github.event.release.html_url }}|WooCommerce ${{ github.event.release.name }}>* has been released! :rocket:
