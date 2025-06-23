@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { DataForm, FieldType, Form } from '@wordpress/dataviews';
 
 /**
@@ -11,7 +11,7 @@ import {
 	PRODUCT_FIELDS,
 	PRODUCT_FIELDS_KEYS,
 	PRODUCTS_DATA,
-} from './utilites/product-data-view-data';
+} from '../utilites/product-data-view-data';
 
 type ProductFormProps = {
 	productData: ( typeof PRODUCTS_DATA )[ 0 ];

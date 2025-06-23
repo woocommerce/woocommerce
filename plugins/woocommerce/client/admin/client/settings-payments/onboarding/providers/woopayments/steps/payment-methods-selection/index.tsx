@@ -161,10 +161,10 @@ export default function PaymentMethodsSelection() {
 
 	return (
 		<div className="settings-payments-onboarding-modal__step--content">
-			<div className="woocommerce-layout__header woocommerce-recommended-payment-methods">
-				<div className="woocommerce-layout__header-wrapper">
-					<div className="woocommerce-layout__header-title-and-close">
-						<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align woocommerce-settings-payments-header__title">
+			<div className="woocommerce-recommended-payment-methods">
+				<div className="woocommerce-recommended-payment-methods__header">
+					<div className="woocommerce-recommended-payment-methods__header--title">
+						<h1 className="components-truncate components-text">
 							{ __(
 								'Choose your payment methods',
 								'woocommerce'
@@ -177,8 +177,7 @@ export default function PaymentMethodsSelection() {
 							<Icon icon={ close } />
 						</Button>
 					</div>
-
-					<div className="woocommerce-settings-payments-header__description">
+					<div className="woocommerce-recommended-payment-methods__header--description">
 						{ __(
 							"Select which payment methods you'd like to offer to your shoppers. You can update these at any time.",
 							'woocommerce'

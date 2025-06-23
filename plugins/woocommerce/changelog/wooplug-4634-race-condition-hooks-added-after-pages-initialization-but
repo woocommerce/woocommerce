@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure usePages includes hooks added before hookAdded action registration
