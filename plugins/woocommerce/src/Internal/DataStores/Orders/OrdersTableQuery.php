@@ -729,6 +729,24 @@ class OrdersTableQuery {
 			'order_total'   => "{$this->tables['orders']}.total_amount",
 		);
 
+		$address_fields = array(
+			'first_name',
+			'last_name',
+			'company',
+			'address_1',
+			'address_2',
+			'city',
+			'state',
+			'postcode',
+			'country',
+			'phone',
+		);
+		foreach( array( 'billing', 'shipping' ) as $address_type ) {
+			foreach ( $address_fields as $address_field ) {
+				$mapping[] = "{$address_type}_{$address_field}";
+			}
+		}
+
 		$order   = $this->args['order'] ?? '';
 		$orderby = $this->args['orderby'] ?? '';
 
@@ -1257,13 +1275,7 @@ class OrdersTableQuery {
 				continue;
 			}
 
-			$this->join(
-				$this->tables['addresses'],
-				$address_type,
-				$wpdb->prepare( "{$this->tables['orders']}.id = {$address_type}.order_id AND {$address_type}.address_type = %s", $address_type ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				'inner',
-				false
-			);
+			$this->join_address_table( $address_type );
 
 			foreach ( $fields as $arg_key ) {
 				$column_name = str_replace( "{$address_type}_", '', $arg_key );
@@ -1312,6 +1324,13 @@ class OrdersTableQuery {
 		foreach ( $this->args['orderby'] as $_orderby => $order ) {
 			if ( in_array( $_orderby, $meta_orderby_keys, true ) ) {
 				$_orderby = $this->meta_query->get_orderby_clause_for_key( $_orderby );
+			} else if (str_starts_with( $_orderby, 'billing_' ) || str_starts_with( $_orderby, 'shipping_' ) ) {
+				list( $address_type, $address_field ) = explode( '_', $_orderby, 2 );
+				if ( ! isset( $this->join[ $address_type ] )) {
+					$this->join_address_table( $address_type );
+				}
+
+				$_orderby = "{$address_type}.{$address_field}";
 			}
 
 			$orderby_array[] = "{$_orderby} {$order}";
@@ -1502,5 +1521,19 @@ class OrdersTableQuery {
 	 */
 	public function get_query_args(): array {
 		return $this->query_args;
+	}
+
+	private function join_address_table( $address_type = 'billing' ): void {
+		global $wpdb;
+
+		if ( isset( $this->join[ $address_type ] ) ) return;
+
+		$this->join(
+			$this->tables['addresses'],
+			$address_type,
+			$wpdb->prepare( "{$this->tables['orders']}.id = {$address_type}.order_id AND {$address_type}.address_type = %s", $address_type ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			'inner',
+			false
+		);
 	}
 }
