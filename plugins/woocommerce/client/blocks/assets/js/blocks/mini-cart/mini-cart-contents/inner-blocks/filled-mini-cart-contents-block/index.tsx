@@ -4,13 +4,13 @@
 import { filledCart } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
 import { registerBlockType } from '@wordpress/blocks';
+import { InnerBlocks } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
 import { isExperimentalMiniCartEnabled } from '../../../../../settings/blocks';
-import { InnerBlocks } from '@wordpress/block-editor';
 
 const blockSettings = {
 	icon: {
