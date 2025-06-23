@@ -500,6 +500,39 @@ const TestAccountStep = () => {
 										</div>
 									</div>
 								</div>
+								<Button
+									variant="primary"
+									onClick={ () => {
+										recordPaymentsOnboardingEvent(
+											'woopayments_onboarding_modal_click',
+											{
+												step:
+													currentStep?.id ||
+													'unknown',
+												action: 'continue_store_setup',
+											}
+										);
+
+										// Navigate to wc-admin page
+										navigateTo( {
+											url: getNewPath( {}, '', {
+												page: 'wc-admin',
+											} ),
+										} );
+									} }
+								>
+									{ __(
+										'Continue store setup',
+										'woocommerce'
+									) }
+								</Button>
+
+								<div className="woocommerce-payments-test-account-step__success_content_or-divider">
+									<hr />
+									{ __( 'OR', 'woocommerce' ) }
+									<hr />
+								</div>
+
 								<div className="woocommerce-woopayments-modal__content__item-flex">
 									<img
 										src={
@@ -537,42 +570,15 @@ const TestAccountStep = () => {
 										</div>
 									</div>
 								</div>
+								<Button
+									variant="secondary"
+									isBusy={ isContinueButtonLoading }
+									disabled={ isContinueButtonLoading }
+									onClick={ handleContinue }
+								>
+									{ __( 'Activate payments', 'woocommerce' ) }
+								</Button>
 							</div>
-							<Button
-								variant="primary"
-								onClick={ () => {
-									recordPaymentsOnboardingEvent(
-										'woopayments_onboarding_modal_click',
-										{
-											step: currentStep?.id || 'unknown',
-											action: 'continue_store_setup',
-										}
-									);
-
-									// Navigate to wc-admin page
-									navigateTo( {
-										url: getNewPath( {}, '', {
-											page: 'wc-admin',
-										} ),
-									} );
-								} }
-							>
-								{ __( 'Continue store setup', 'woocommerce' ) }
-							</Button>
-							<div className="woocommerce-payments-test-account-step__success_content_or-divider">
-								<hr />
-								{ __( 'OR', 'woocommerce' ) }
-								<hr />
-							</div>
-
-							<Button
-								variant="secondary"
-								isBusy={ isContinueButtonLoading }
-								disabled={ isContinueButtonLoading }
-								onClick={ handleContinue }
-							>
-								{ __( 'Activate payments', 'woocommerce' ) }
-							</Button>
 						</div>
 					</div>
 				</div>
