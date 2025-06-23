@@ -115,6 +115,11 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 		$this->assertStringContainsString( 'Limited Time!', $markup, 'Product with sale price >= 20 should show "Limited Time!"' );
 		$this->assertStringNotContainsString( 'Sale', $markup, 'Default "Sale" text should not appear when filter is applied' );
 
+		$this->assertInstanceOf( \WC_Product::class, $received_product, 'The filter received a WC_Product object.' );
+		$this->assertEquals( 'Sale', $default_sale_text, 'The default sale text is not modified.' );
+
+		remove_all_filters( 'woocommerce_sale_badge_text' );
+
 		$product1->delete();
 		$product2->delete();
 	}
