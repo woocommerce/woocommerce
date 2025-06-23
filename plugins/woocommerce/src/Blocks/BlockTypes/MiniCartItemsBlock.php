@@ -80,18 +80,18 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 					</caption>
 					<tbody>
 						<template
-							data-wp-each--cart-item="state.cartItems"
-							data-wp-each-key="context.cartItem.key"
+							data-wp-each--cart-item="woocommerce::state.cart.items"
+							data-wp-each-key="state.cartItem.key"
 						>
 							<tr class="wc-block-cart-items__row" tabindex="-1">
 								<td class="wc-block-cart-item__image" aria-hidden="true">
-									<a data-wp-bind--href="context.cartItem.permalink" tabindex="-1">
+									<a data-wp-bind--href="state.cartItem.permalink" tabindex="-1">
 										<img data-wp-bind--src="state.itemThumbnail" data-wp-bind--alt="state.cartItemName">	
 									</a>
 								</td>
 								<td class="wc-block-cart-item__product">
 									<div class="wc-block-cart-item__wrap">
-										<a data-wp-text="state.cartItemName" data-wp-bind--href="context.cartItem.permalink" class="wc-block-components-product-name"></a>
+										<a data-wp-text="state.cartItemName" data-wp-bind--href="state.cartItem.permalink" class="wc-block-components-product-name"></a>
 										<div class="wc-block-cart-item__prices">
 											<span data-wp-bind--hidden="!state.cartItemHasDiscount" class="price wc-block-components-product-price" hidden>
 												<span class="screen-reader-text">
@@ -132,9 +132,9 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 													data-wp-on--input="actions.overrideInvalidQuantity"
 													data-wp-on--change="actions.changeQuantity" 
 													data-wp-bind--aria-label="state.quantityDescriptionLabel" 
-													data-wp-bind--min="state.cartItemMinimum" 
-													data-wp-bind--max="state.cartItemMaximum"
-													data-wp-bind--value="context.cartItem.quantity" 
+													data-wp-bind--min="state.cartItem.quantity_limits.minimum" 
+													data-wp-bind--max="state.cartItem.quantity_limits.maximum"
+													data-wp-bind--value="state.cartItem.quantity" 
 													class="wc-block-components-quantity-selector__input" 
 													type="number" 
 													step="1"

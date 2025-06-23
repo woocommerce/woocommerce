@@ -96,7 +96,7 @@ interface RenderBlockInContainersParams<
 	// React component to use as a replacement.
 	Block: BlockType< TProps, TAttributes > | null;
 	// Containers to replace with the Block component.
-	containers: NodeListOf< Element >;
+	containers: HTMLElement[];
 	// Function to generate the props object for the block.
 	getProps?: GetPropsFn< TProps, TAttributes >;
 	// Function to generate the props object for the error boundary.
@@ -126,14 +126,13 @@ const renderBlockInContainers = <
 	}
 	const roots: ReactRootWithContainer[] = [];
 
-	// Use Array.forEach for IE11 compatibility.
-	Array.prototype.forEach.call( containers, ( el, i ) => {
+	containers.forEach( ( el, i ) => {
 		const props = getProps( el, i );
 
 		const errorBoundaryProps = getErrorBoundaryProps( el, i );
 		const attributes = {
 			...el.dataset,
-			...( props.attributes || {} ),
+			...( props.attributes || ( {} as TAttributes ) ),
 		};
 
 		roots.push( {
@@ -154,11 +153,10 @@ const renderBlockInContainers = <
 // Given an element and a list of wrappers, check if the element is inside at
 // least one of the wrappers.
 const isElementInsideWrappers = (
-	el: Element,
-	wrappers: NodeListOf< Element >
-): boolean => {
-	return Array.prototype.some.call(
-		wrappers,
+	el: HTMLElement,
+	wrappers: HTMLElement[]
+) => {
+	return wrappers.some(
 		( wrapper ) => wrapper.contains( el ) && ! wrapper.isSameNode( el )
 	);
 };
@@ -168,7 +166,7 @@ interface RenderBlockOutsideWrappersParams<
 	TAttributes extends Record< string, unknown >
 > extends RenderFrontendParams< TProps, TAttributes > {
 	// All elements matched by the selector which are inside the wrapper will be ignored.
-	wrappers?: NodeListOf< Element >;
+	wrappers?: HTMLElement[];
 }
 
 /**
@@ -184,16 +182,25 @@ const renderBlockOutsideWrappers = <
 	getErrorBoundaryProps,
 	selector,
 	wrappers,
+	options,
 }: RenderBlockOutsideWrappersParams<
 	TProps,
 	TAttributes
 > ): ReactRootWithContainer[] => {
-	const containers = document.body.querySelectorAll( selector );
+	let containers: HTMLElement[] = Array.from(
+		document.body.querySelectorAll( selector )
+	);
+
 	// Filter out blocks inside the wrappers.
 	if ( wrappers && wrappers.length > 0 ) {
-		Array.prototype.filter.call( containers, ( el ) => {
+		containers = containers.filter( ( el ) => {
 			return ! isElementInsideWrappers( el, wrappers );
 		} );
+	}
+
+	// Limit to first element if multiple option is false
+	if ( options?.multiple === false ) {
+		containers = containers.slice( 0, 1 );
 	}
 
 	return renderBlockInContainers( {
@@ -225,8 +232,17 @@ const renderBlockInsideWrapper = <
 	getErrorBoundaryProps,
 	selector,
 	wrapper,
+	options,
 }: RenderBlockInsideWrapperParams< TProps, TAttributes > ): void => {
-	const containers = wrapper.querySelectorAll( selector );
+	let containers: HTMLElement[] = Array.from(
+		wrapper.querySelectorAll( selector )
+	);
+
+	// Limit to first element if multiple option is false
+	if ( options?.multiple === false ) {
+		containers = containers.slice( 0, 1 );
+	}
+
 	renderBlockInContainers( {
 		Block,
 		containers,
@@ -234,6 +250,11 @@ const renderBlockInsideWrapper = <
 		getErrorBoundaryProps,
 	} );
 };
+
+export interface RenderFrontendOptions {
+	// Whether to match multiple elements or just the first one found
+	multiple: boolean;
+}
 
 interface RenderFrontendParams<
 	TProps extends Record< string, unknown >,
@@ -250,6 +271,8 @@ interface RenderFrontendParams<
 		el: HTMLElement,
 		i: number
 	) => Record< string, unknown >;
+	// Options to control rendering behavior
+	options?: RenderFrontendOptions;
 }
 
 /**
@@ -266,23 +289,30 @@ export const renderFrontend = <
 		| RenderBlockOutsideWrappersParams< TProps, TAttributes >
 		| RenderBlockInsideWrapperParams< TProps, TAttributes >
 ): ReactRootWithContainer[] => {
-	const wrappersToSkipOnLoad = document.body.querySelectorAll(
-		selectorsToSkipOnLoad.join( ',' )
+	const wrappersToSkipOnLoad: HTMLElement[] = Array.from(
+		document.body.querySelectorAll( selectorsToSkipOnLoad.join( ',' ) )
 	);
 
-	const { Block, getProps, getErrorBoundaryProps, selector } = props;
+	const {
+		Block,
+		getProps,
+		getErrorBoundaryProps,
+		selector,
+		options = { multiple: true },
+	} = props;
 
 	const roots = renderBlockOutsideWrappers( {
 		Block,
 		getProps,
 		getErrorBoundaryProps,
 		selector,
+		options,
 		wrappers: wrappersToSkipOnLoad,
 	} );
 
 	// For each wrapper, add an event listener to render the inner blocks when
 	// `wc-blocks_render_blocks_frontend` event is triggered.
-	Array.prototype.forEach.call( wrappersToSkipOnLoad, ( wrapper ) => {
+	wrappersToSkipOnLoad.forEach( ( wrapper ) => {
 		wrapper.addEventListener( 'wc-blocks_render_blocks_frontend', () => {
 			renderBlockInsideWrapper( { ...props, wrapper } );
 		} );

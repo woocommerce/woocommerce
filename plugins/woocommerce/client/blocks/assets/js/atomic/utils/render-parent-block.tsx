@@ -16,6 +16,7 @@ import {
 } from '@woocommerce/blocks-checkout';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import type { ReactRootWithContainer } from '@woocommerce/base-utils';
+import { RegisteredBlockComponent } from '@woocommerce/types';
 
 /**
  * This file contains logic used on the frontend to convert DOM elements (saved by the block editor) to React
@@ -36,7 +37,7 @@ import type { ReactRootWithContainer } from '@woocommerce/base-utils';
  */
 const getBlockComponentFromMap = (
 	block: string,
-	blockMap: Record< string, React.ReactNode >
+	blockMap: Record< string, RegisteredBlockComponent >
 ): React.ElementType | null => {
 	return block && blockMap[ block ]
 		? ( blockMap[ block ] as React.ElementType )
@@ -54,7 +55,7 @@ const getBlockComponentFromMap = (
  */
 const renderForcedBlocks = (
 	block: string,
-	blockMap: Record< string, React.ReactNode >,
+	blockMap: Record< string, RegisteredBlockComponent >,
 	// Current children from the parent (siblings of the forced block)
 	blockChildren: NodeListOf< ChildNode > | null,
 	// Wrapper for inner components.
@@ -111,11 +112,11 @@ const renderForcedBlocks = (
 	);
 };
 
-interface renderInnerBlocksProps {
+interface RenderInnerBlocksProps {
 	// Block (parent) being rendered. Used for inner block component mapping.
 	block: string;
 	// Map of block names to block components for children.
-	blockMap: Record< string, React.ReactNode >;
+	blockMap: Record< string, RegisteredBlockComponent >;
 	// Wrapper for inner components.
 	blockWrapper?: React.ElementType | undefined;
 	// Elements from the DOM being converted to components.
@@ -138,7 +139,7 @@ const renderInnerBlocks = ( {
 	children,
 	// Current depth of the children. Used to ensure keys are unique.
 	depth = 1,
-}: renderInnerBlocksProps ): ( string | JSX.Element | null )[] | null => {
+}: RenderInnerBlocksProps ): ( string | JSX.Element | null )[] | null => {
 	if ( ! children || children.length === 0 ) {
 		return null;
 	}
@@ -287,19 +288,28 @@ export const renderParentBlock = ( {
 	getProps = () => ( {} ),
 	blockMap,
 	blockWrapper,
+	options,
 }: {
 	// Parent Block Name. Used for inner block component mapping.
 	blockName: string;
 	// Map of block names to block components for children.
-	blockMap: Record< string, React.ReactNode >;
+	blockMap: Record< string, RegisteredBlockComponent >;
 	// Wrapper for inner components.
 	blockWrapper?: React.ElementType;
 	// React component to use as a replacement.
-	Block: React.FunctionComponent;
+	// @TODO There's probably a more suitable type to use here, but since we don't enforce specific
+	// props for this component having any here fixes some of the issues and allows more important
+	// errors to be surfaced (like missing other required parameters: selector, options, etc.)
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	Block: React.FunctionComponent< any >;
 	// CSS selector to match the elements to replace.
 	selector: string;
 	// Function to generate the props object for the block.
 	getProps: ( el: Element, i: number ) => Record< string, unknown >;
+	// Options to control rendering behavior
+	options: NonNullable<
+		Parameters< typeof renderFrontend >[ 0 ][ 'options' ]
+	>;
 } ): ReactRootWithContainer[] => {
 	/**
 	 * In addition to getProps, we need to render and return the children. This adds children to props.
@@ -320,5 +330,6 @@ export const renderParentBlock = ( {
 		Block,
 		selector,
 		getProps: getPropsWithChildren,
+		options,
 	} );
 };

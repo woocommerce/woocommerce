@@ -9,7 +9,8 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 
 /**
  * Integration test for Quote class
@@ -48,11 +49,11 @@ class Quote_Test extends \Email_Editor_Integration_Test_Case {
 		),
 	);
 	/**
-	 * Instance of Settings_Controller class
+	 * Instance of Rendering_Context class
 	 *
-	 * @var Settings_Controller
+	 * @var Rendering_Context
 	 */
-	private $settings_controller;
+	private $rendering_context;
 
 	/**
 	 * Set up before each test
@@ -61,15 +62,16 @@ class Quote_Test extends \Email_Editor_Integration_Test_Case {
 		parent::setUp();
 		$this->di_container->get( Email_Editor::class )->initialize();
 
-		$this->quote_renderer      = new Quote();
-		$this->settings_controller = $this->di_container->get( Settings_Controller::class );
+		$this->quote_renderer    = new Quote();
+		$theme_controller        = $this->di_container->get( Theme_Controller::class );
+		$this->rendering_context = new Rendering_Context( $theme_controller->get_theme() );
 	}
 
 	/**
 	 * Test it renders quote content
 	 */
 	public function testItRendersQuoteContent(): void {
-		$rendered = $this->quote_renderer->render( '', $this->parsed_quote, $this->settings_controller );
+		$rendered = $this->quote_renderer->render( '', $this->parsed_quote, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'Quote content', $rendered );
 	}
@@ -92,7 +94,7 @@ class Quote_Test extends \Email_Editor_Integration_Test_Case {
 				),
 			),
 		);
-		$rendered              = $this->quote_renderer->render( '', $parsed_quote, $this->settings_controller );
+		$rendered              = $this->quote_renderer->render( '', $parsed_quote, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'border-width:1px;', $rendered );
 		$this->assertStringContainsString( 'border-style:solid;', $rendered );
@@ -138,7 +140,7 @@ class Quote_Test extends \Email_Editor_Integration_Test_Case {
 				),
 			),
 		);
-		$rendered              = $this->quote_renderer->render( '', $parsed_quote, $this->settings_controller );
+		$rendered              = $this->quote_renderer->render( '', $parsed_quote, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'background-color:#abcdef;', $rendered );
 		$this->assertStringContainsString( 'border-bottom-left-radius:5px;', $rendered );
@@ -167,7 +169,7 @@ class Quote_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_quote = $this->parsed_quote;
 		$content      = '<blockquote class="wp-block-quote editor-class-1 another-class"></blockquote>';
 		$parsed_quote['attrs']['style']['color']['background'] = '#654321';
-		$rendered = $this->quote_renderer->render( $content, $parsed_quote, $this->settings_controller );
+		$rendered = $this->quote_renderer->render( $content, $parsed_quote, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'wp-block-quote editor-class-1 another-class', $rendered );
 	}
