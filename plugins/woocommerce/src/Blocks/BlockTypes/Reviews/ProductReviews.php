@@ -46,7 +46,11 @@ class ProductReviews extends AbstractBlock {
 	}
 
 	/**
-	 * Render the legacy block.
+	 * Previously, the Product Reviews block was a standalone block. It doesn't
+	 * have any inner blocks and it rendered the tabs directly like the classic
+	 * template. When upgrading, we want the existing stores using the block to
+	 * continue working as before, so we moved the logic the legacy render
+	 * method here.
 	 *
 	 * @param array    $attributes Block attributes.
 	 * @param string   $content Block content.
