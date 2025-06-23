@@ -17,8 +17,7 @@ import { PaymentProvidersResponse, WooPayEligibilityResponse } from './types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
 import { STORE_KEY } from './constants';
 
-const resolveSelect =
-	controls && controls.resolveSelect ? controls.resolveSelect : select;
+const resolveSelect = controls?.resolveSelect ?? select;
 
 export function* getPaymentProviders( businessCountry?: string ) {
 	yield getPaymentProvidersRequest();
