@@ -16,8 +16,8 @@
 <h1 class="wp-block-heading alignwide has-text-align-center" id="page-not-found"><?php echo esc_html_x( 'Page Not Found', 'Heading for a web page that is not found', 'woostarter' ); ?></h1>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"align":"center"} -->
-<p class="has-text-align-center"><?php echo esc_html_x( 'The page you\'re looking for could not be found. Maybe try a search?', '404 error message', 't' ); ?></p>
+<!-- wp:paragraph {"align":"center","textColor":"theme-4"} -->
+<p class="has-text-align-center has-theme-4-color has-text-color"><?php echo esc_html_x( 'The page you\'re looking for could not be found. Maybe try a search?', '404 error message', 'woostarter' ); ?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:search {"label":"Search","showLabel":false,"placeholder":"Search...","buttonText":"Search","buttonUseIcon":true,"style":{"border":{"radius":"100px"},"spacing":{"margin":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}},"borderColor":"theme-4"} /-->
