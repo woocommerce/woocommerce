@@ -22,10 +22,8 @@ export function* getPaymentProviders( country?: string ) {
 		const paymentProvidersResponse: PaymentProvidersResponse =
 			yield apiFetch( {
 				method: 'POST',
-				path:
-					WC_ADMIN_NAMESPACE +
-					'/settings/payments/providers?' +
-					( country ? `location=${ country }` : '' ),
+				path: WC_ADMIN_NAMESPACE + '/settings/payments/providers',
+				data: country ? { location: country } : {},
 			} );
 		yield getPaymentProvidersSuccess(
 			paymentProvidersResponse.providers,
