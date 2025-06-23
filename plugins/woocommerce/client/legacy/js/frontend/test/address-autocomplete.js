@@ -638,6 +638,26 @@ describe( 'Address Suggestions Component', () => {
 			expect( mockProvider.search ).not.toHaveBeenCalled();
 		} );
 
+		test( 'should hide suggestions when input goes from 3+ characters to less than 3', async () => {
+			// First show suggestions with 3+ characters
+			billingAddressInput.value = '123';
+			billingAddressInput.focus();
+			billingAddressInput.dispatchEvent( new Event( 'input' ) );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const suggestionsContainer = document.getElementById(
+				'address_suggestions_billing'
+			);
+			expect( suggestionsContainer.style.display ).toBe( 'block' );
+
+			// Now reduce to less than 3 characters
+			billingAddressInput.value = '12';
+			billingAddressInput.dispatchEvent( new Event( 'input' ) );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			expect( suggestionsContainer.style.display ).toBe( 'none' );
+		} );
+
 		test( 'should display suggestions for input with 3 or more characters', async () => {
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
@@ -1201,6 +1221,93 @@ describe( 'Address Suggestions Component', () => {
 			billingAddressInput.click();
 
 			expect( suggestionsContainer.style.display ).toBe( 'block' );
+		} );
+	} );
+
+	describe( 'Blur Event Behavior', () => {
+		test( 'should hide suggestions when input loses focus', async () => {
+			// Show suggestions first
+			billingAddressInput.value = '123';
+			billingAddressInput.focus();
+			billingAddressInput.dispatchEvent( new Event( 'input' ) );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const suggestionsContainer = document.getElementById(
+				'address_suggestions_billing'
+			);
+			expect( suggestionsContainer.style.display ).toBe( 'block' );
+
+			// Blur the input
+			billingAddressInput.dispatchEvent( new Event( 'blur' ) );
+			
+			// Wait for blur timeout
+			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
+
+			expect( suggestionsContainer.style.display ).toBe( 'none' );
+		} );
+
+		test( 'should not refocus input when blurred with suggestions active', async () => {
+			// Show suggestions first
+			billingAddressInput.value = '123';
+			billingAddressInput.focus();
+			billingAddressInput.dispatchEvent( new Event( 'input' ) );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const suggestionsContainer = document.getElementById(
+				'address_suggestions_billing'
+			);
+			expect( suggestionsContainer.style.display ).toBe( 'block' );
+
+			// Create another element to focus
+			const otherElement = document.createElement( 'input' );
+			document.body.appendChild( otherElement );
+			
+			// Blur the address input and focus the other element
+			billingAddressInput.blur();
+			otherElement.focus();
+			
+			// Wait for blur timeout
+			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
+
+			// The other element should still be focused (address input shouldn't refocus)
+			expect( document.activeElement ).toBe( otherElement );
+			expect( suggestionsContainer.style.display ).toBe( 'none' );
+
+			document.body.removeChild( otherElement );
+		} );
+
+		test( 'should not have blur event listener when suggestions are not shown', () => {
+			// No suggestions should be shown initially
+			const suggestionsContainer = document.getElementById(
+				'address_suggestions_billing'
+			);
+			expect( suggestionsContainer.style.display ).toBe( 'none' );
+
+			// Blur the input - should not cause any issues
+			expect( () => {
+				billingAddressInput.dispatchEvent( new Event( 'blur' ) );
+			} ).not.toThrow();
+		} );
+
+		test( 'should enable browser autofill without refocusing when suggestions are hidden via blur', async () => {
+			// Show suggestions first
+			billingAddressInput.value = '123';
+			billingAddressInput.focus();
+			billingAddressInput.dispatchEvent( new Event( 'input' ) );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			// Verify autofill is disabled
+			expect( billingAddressInput.getAttribute( 'autocomplete' ) ).toBe( 'off' );
+
+			// Blur the input
+			billingAddressInput.dispatchEvent( new Event( 'blur' ) );
+			
+			// Wait for blur timeout
+			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
+
+			// Autofill should be re-enabled
+			expect( billingAddressInput.getAttribute( 'autocomplete' ) ).toBe( 'address-line1' );
+			expect( billingAddressInput.getAttribute( 'data-lpignore' ) ).toBe( 'false' );
 		} );
 	} );
 } );
