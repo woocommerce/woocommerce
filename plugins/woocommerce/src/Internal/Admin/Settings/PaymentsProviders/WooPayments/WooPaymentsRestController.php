@@ -65,7 +65,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			'/' . $this->rest_base . '/onboarding',
 			array(
 				array(
-					'methods'             => \WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => fn( $request ) => $this->run( $request, 'get_onboarding_details' ),
 					'validation_callback' => 'rest_validate_request_arg',
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
@@ -343,7 +343,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			'/' . $this->rest_base . '/woopay-eligibility',
 			array(
 				array(
-					'methods'             => \WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => fn( $request ) => $this->run( $request, 'get_woopay_eligibility' ),
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
 				),
