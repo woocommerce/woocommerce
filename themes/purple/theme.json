@@ -224,6 +224,34 @@
                     "blockGap": "var(--wp--preset--spacing--50)"
                 }
             },
+			"core/comment-author-name": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--medium)"
+				}
+			},
+			"core/comment-content": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-4)"
+				}
+			},
+			"core/comment-date": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--small)"
+				},
+				"color": {
+					"text": "var(--wp--preset--color--theme-4)"
+				}
+			},
+			"core/comment-edit-link": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--small)"
+				}
+			},
+			"core/comment-reply-link": {	
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--small)"
+				}
+			},
 			"core/navigation": {
 				"elements": {
 					"link": {
@@ -247,6 +275,11 @@
 			"core/post-content": {
 				"color": {
 					"text": "var(--wp--preset--color--theme-4)"
+				}
+			},
+			"core/post-date": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--small)" 
 				}
 			},
 			"core/post-terms": {
