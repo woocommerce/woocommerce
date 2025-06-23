@@ -22,6 +22,8 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'wp-block-woocommerce-product-sale-badge', $markup, 'The Single Product Block contains the Product Sale Badge block.' );
 		$this->assertStringContainsString( 'Sale', $markup, 'The Product Sale Badge block contains the sale text.' );
+
+		$product->delete();
 	}
 
 	/**
@@ -63,6 +65,7 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 		$this->assertEquals( 'Sale', $default_sale_text, 'The default sale text is not modified.' );
 
 		remove_all_filters( 'woocommerce_sale_badge_text' );
+		$product->delete();
 	}
 
 	/**
@@ -111,5 +114,8 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 		$this->assertStringContainsString( 'Special Deal!', $markup, 'Product with sale price < 20 should show "Special Deal!"' );
 		$this->assertStringContainsString( 'Limited Time!', $markup, 'Product with sale price >= 20 should show "Limited Time!"' );
 		$this->assertStringNotContainsString( 'Sale', $markup, 'Default "Sale" text should not appear when filter is applied' );
+
+		$product1->delete();
+		$product2->delete();
 	}
 }
