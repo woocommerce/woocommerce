@@ -331,7 +331,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @dataProvider url_protection_test_data
 	 */
-	public function test_wc_wptexturize_order_note_content( $input, $expected_contains_double_hyphens, $expected_contains_en_dash, $test_description ) {
+	public function test_wc_wptexturize_order_note_content( $input, $expected_contains_double_hyphens, $expected_contains_em_dash, $test_description ) {
 		// Test the function.
 		$result = wc_wptexturize_order_note_content( $input );
 
@@ -354,14 +354,14 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 			$this->assertStringNotContainsString( '--', $content_without_urls, $test_description . ' - Should not contain double hyphens outside URLs' );
 		}
 
-		// Check if non-URL double hyphens are converted to en-dashes (either Unicode or HTML entity).
-		if ( $expected_contains_en_dash ) {
-			$contains_en_dash = strpos( $result, '–' ) !== false || strpos( $result, '&#8212;' ) !== false;
-			$this->assertTrue( $contains_en_dash, $test_description . ' - Should convert non-URL double hyphens to en-dashes (found: ' . $result . ')' );
+		// Check if non-URL double hyphens are converted to em-dashes (either Unicode or HTML entity).
+		if ( $expected_contains_em_dash ) {
+			$contains_em_dash = strpos( $result, '—' ) !== false || strpos( $result, '&#8212;' ) !== false;
+			$this->assertTrue( $contains_em_dash, $test_description . ' - Should convert non-URL double hyphens to em-dashes (found: ' . $result . ')' );
 		} else {
-			// If we don't expect en-dash, verify it's not there.
-			$contains_en_dash = strpos( $result, '–' ) !== false || strpos( $result, '&#8212;' ) !== false;
-			$this->assertFalse( $contains_en_dash, $test_description . ' - Should not contain en-dashes (found: ' . $result . ')' );
+			// If we don't expect em-dash, verify it's not there.
+			$contains_em_dash = strpos( $result, '—' ) !== false || strpos( $result, '&#8212;' ) !== false;
+			$this->assertFalse( $contains_em_dash, $test_description . ' - Should not contain em-dashes (found: ' . $result . ')' );
 		}
 
 		// Ensure the result is not empty for non-empty input.
@@ -371,7 +371,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Data provider for URL protection tests.
 	 *
-	 * @return array Test data with format: [input, expected_double_hyphens, expected_en_dash, description]
+	 * @return array Test data with format: [input, expected_double_hyphens, expected_em_dash, description]
 	 */
 	public function url_protection_test_data() {
 		return array(
@@ -379,63 +379,63 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 			array(
 				'Check API status at https://api.example.com/status--check for details',
 				true,  // Should contain double hyphens.
-				false, // Should not contain en-dash (no non-URL double hyphens).
+				false, // Should not contain em-dash (no non-URL double hyphens).
 				'URL with double hyphens in path',
 			),
 			// Multiple URLs with double hyphens.
 			array(
 				'First URL: https://api.test.com/endpoint--1 and second URL: https://api.test.com/endpoint--2',
 				true,  // Should contain double hyphens.
-				false, // Should not contain en-dash.
+				false, // Should not contain em-dash.
 				'Multiple URLs with double hyphens',
 			),
 			// Text with double hyphens (not URLs) should be converted.
 			array(
 				'This is a test -- it should convert to em-dash',
 				false, // Should not contain double hyphens.
-				true,  // Should contain en-dash.
+				true,  // Should contain em-dash.
 				'Non-URL double hyphens should be converted',
 			),
 			// Mixed content: URL with double hyphens + text with double hyphens.
 			array(
 				'Check the API at https://api.example.com/status--check -- this should work properly',
 				true, // Should contain double hyphens (in URL).
-				true, // Should contain en-dash (from text).
+				true, // Should contain em-dash (from text).
 				'Mixed content: URL and text with double hyphens',
 			),
 			// HTTPS URL with complex path.
 			array(
 				'Visit https://example.com/path--with--multiple--hyphens/page.html',
 				true,  // Should contain double hyphens.
-				false, // Should not contain en-dash.
+				false, // Should not contain em-dash.
 				'HTTPS URL with multiple double hyphens in path',
 			),
 			// HTTP URL with double hyphens.
 			array(
 				'API endpoint: http://legacy-api.example.com/v1/status--check',
 				true,  // Should contain double hyphens.
-				false, // Should not contain en-dash.
+				false, // Should not contain em-dash.
 				'HTTP URL with double hyphens',
 			),
 			// No URLs, just regular text formatting.
 			array(
 				'Just some text -- with double hyphens -- to convert',
 				false, // Should not contain double hyphens.
-				true,  // Should contain en-dash.
+				true,  // Should contain em-dash.
 				'Text without URLs should be texturized normally',
 			),
 			// Empty content.
 			array(
 				'',
 				false, // Should not contain double hyphens.
-				false, // Should not contain en-dash.
+				false, // Should not contain em-dash.
 				'Empty content should be handled gracefully',
 			),
 			// URL at end of sentence.
 			array(
 				'Please check https://api.example.com/endpoint--status.',
 				true,  // Should contain double hyphens.
-				false, // Should not contain en-dash.
+				false, // Should not contain em-dash.
 				'URL at end of sentence with punctuation',
 			),
 		);
@@ -452,9 +452,9 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		// Should preserve URL double hyphens.
 		$this->assertStringContainsString( 'status--check', $result, 'Should preserve double hyphens in URLs' );
 
-		// Should convert text double hyphens to en-dash (either Unicode or HTML entity).
-		$contains_en_dash = strpos( $result, '–' ) !== false || strpos( $result, '&#8212;' ) !== false;
-		$this->assertTrue( $contains_en_dash, 'Should convert text double hyphens to en-dash (found: ' . $result . ')' );
+		// Should convert text double hyphens to em-dash (either Unicode or HTML entity).
+		$contains_em_dash = strpos( $result, '—' ) !== false || strpos( $result, '&#8212;' ) !== false;
+		$this->assertTrue( $contains_em_dash, 'Should convert text double hyphens to em-dash (found: ' . $result . ')' );
 	}
 
 	/**
