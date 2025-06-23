@@ -213,7 +213,7 @@ class ProductButton extends AbstractBlock {
 		$anchor_directive  = $is_descendant_of_add_to_cart_form ? '' : 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"';
 
 		$span_button_directives = '
-			data-wp-text="state.addToCartText"
+			data-wp-text="context.addToCartText"
 			data-wp-class--wc-block-slide-in="state.slideInAnimation"
 			data-wp-class--wc-block-slide-out="state.slideOutAnimation"
 			data-wp-on--animationend="actions.handleAnimationEnd"
