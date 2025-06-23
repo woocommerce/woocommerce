@@ -1282,7 +1282,7 @@ function wc_delete_order_note( $note_id ) {
 /**
  * Apply wptexturize while preserving URLs to prevent their content from being altered.
  *
- * @since 10.1
+ * @since 10.1.0
  * @param string $content The order note content.
  * @return string The processed content.
  */
@@ -1318,7 +1318,7 @@ function wc_wptexturize_order_note_content( $content ) {
 /**
  * Apply URL-safe wptexturize to customer note content (simplified version for single content parameter).
  *
- * @since 9.9.6
+ * @since 10.1.0
  * @param string $content The customer note content.
  * @return string The processed content.
  */
