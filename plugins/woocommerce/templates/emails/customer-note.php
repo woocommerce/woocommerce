@@ -41,10 +41,12 @@ if ( ! empty( $order->get_billing_first_name() ) ) {
 </p>
 <p><?php esc_html_e( 'The following note has been added to your order:', 'woocommerce' ); ?></p>
 
-<blockquote><?php 
+<blockquote>
+<?php
 $safe_note = wc_wptexturize_customer_note( $customer_note );
-echo wpautop( make_clickable( $safe_note ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
-?></blockquote>
+echo wpautop( make_clickable( $safe_note ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
+</blockquote>
 
 <p><?php esc_html_e( 'As a reminder, here are your order details:', 'woocommerce' ); ?></p>
 <?php echo $email_improvements_enabled ? '</div>' : ''; ?>
