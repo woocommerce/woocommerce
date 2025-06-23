@@ -332,15 +332,8 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	 * @dataProvider url_protection_test_data
 	 */
 	public function test_wc_wptexturize_order_note_content( $input, $expected_contains_double_hyphens, $expected_contains_en_dash, $test_description ) {
-		// Create a mock note object.
-		$note = (object) array(
-			'content'       => $input,
-			'customer_note' => 1,
-			'added_by'      => 'system',
-		);
-
 		// Test the function.
-		$result = wc_wptexturize_order_note_content( $input, $note );
+		$result = wc_wptexturize_order_note_content( $input );
 
 		// Always make at least one assertion - that we got a string result.
 		$this->assertIsString( $result, $test_description . ' - Result should be a string' );
@@ -480,8 +473,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		);
 
 		foreach ( $edge_cases as $content ) {
-			$note   = (object) array( 'content' => $content );
-			$result = wc_wptexturize_order_note_content( $content, $note );
+			$result = wc_wptexturize_order_note_content( $content );
 
 			// All URLs should preserve their double hyphens.
 			$this->assertStringContainsString( '--', $result, "Edge case should preserve double hyphens: {$content}" );

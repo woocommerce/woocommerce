@@ -1323,7 +1323,5 @@ function wc_wptexturize_order_note_content( $content ) {
  * @return string The processed content.
  */
 function wc_wptexturize_customer_note( $content ) {
-	// Create a dummy note object for consistency with the main function.
-	$dummy_note = (object) array( 'content' => $content );
-	return wc_wptexturize_order_note_content( $content, $dummy_note );
+	return wc_wptexturize_order_note_content( $content );
 }
