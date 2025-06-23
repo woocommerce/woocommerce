@@ -14,7 +14,15 @@ import {
  * Internal dependencies
  */
 import './modals.scss';
-import { resetWooPaymentsAccount } from '~/settings-payments/utils';
+import {
+	recordPaymentsEvent,
+	resetWooPaymentsAccount,
+} from '~/settings-payments/utils';
+import {
+	wooPaymentsExtensionSlug,
+	wooPaymentsProviderId,
+	wooPaymentsSuggestionId,
+} from '~/settings-payments/constants';
 
 interface WooPaymentsResetAccountModalProps {
 	/**
@@ -57,12 +65,23 @@ export const WooPaymentsResetAccountModal = ( {
 
 		resetWooPaymentsAccount()
 			.then( () => {
+				recordPaymentsEvent( 'provider_reset_onboarding_success', {
+					provider_id: wooPaymentsProviderId,
+					suggestion_id: wooPaymentsSuggestionId,
+					provider_extension_slug: wooPaymentsExtensionSlug,
+				} );
 				// Refresh the providers store.
 				invalidatePaymentGateways( 'getPaymentProviders' );
 				// Refresh the WooPayments in-context onboarding store.
 				invalidateWooPaymentsOnboarding( 'getOnboardingData' );
 			} )
 			.catch( () => {
+				recordPaymentsEvent( 'provider_reset_onboarding_failed', {
+					provider_id: wooPaymentsProviderId,
+					suggestion_id: wooPaymentsSuggestionId,
+					provider_extension_slug: wooPaymentsExtensionSlug,
+					reason: 'error',
+				} );
 				createNotice(
 					'error',
 					__(
@@ -128,7 +147,18 @@ export const WooPaymentsResetAccountModal = ( {
 							variant="secondary"
 							isBusy={ isResettingAccount }
 							disabled={ isResettingAccount }
-							onClick={ handleResetAccount }
+							onClick={ () => {
+								recordPaymentsEvent(
+									'provider_reset_onboarding_confirmation_click',
+									{
+										provider_id: wooPaymentsProviderId,
+										suggestion_id: wooPaymentsSuggestionId,
+										provider_extension_slug:
+											wooPaymentsExtensionSlug,
+									}
+								);
+								handleResetAccount();
+							} }
 						>
 							{ __( 'Yes, reset account', 'woocommerce' ) }
 						</Button>
