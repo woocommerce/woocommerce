@@ -55,6 +55,10 @@ class ProductReviews extends AbstractBlock {
 	 * @return string Rendered block output.
 	 */
 	protected function render_legacy_block( $attributes, $content, $block ) {
+		if ( ! is_singular( 'product' ) ) {
+			return $content;
+		}
+
 		ob_start();
 
 		rewind_posts();
