@@ -9,7 +9,7 @@ import '@wordpress/format-library'; // Enables text formatting capabilities
 /**
  * Internal dependencies
  */
-import { initBlocks } from './blocks';
+import { getAllowedBlockNames, initBlocks } from './blocks';
 import { initializeLayout } from './layouts/flex-email';
 import { InnerEditor } from './components/block-editor';
 import { createStore, storeName, editorCurrentPostType } from './store';
@@ -31,6 +31,9 @@ function Editor() {
 		[]
 	);
 	useContentValidation();
+
+	// Set allowed blockTypes to the editor settings.
+	settings.allowedBlockTypes = getAllowedBlockNames();
 
 	return (
 		<StrictMode>
