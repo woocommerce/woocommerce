@@ -29,7 +29,10 @@ class FulfillmentsController {
 	public function register() {
 		$container = wc_get_container();
 		foreach ( $this->provides as $class ) {
-			$container->get( $class );
+			$class = $container->get( $class );
+			if ( method_exists( $class, 'register' ) ) {
+				$class->register();
+			}
 		}
 	}
 }

@@ -17,20 +17,6 @@ class FulfillmentsSettings {
 	public function __construct() {
 		add_filter( 'woocommerce_get_settings_products', array( $this, 'add_auto_fulfill_settings' ), 10, 2 );
 		add_action( 'woocommerce_new_order', array( $this, 'auto_fulfill_items' ), 10, 1 );
-
-		$this->initialize_options();
-	}
-
-	/**
-	 * Initialize settings options.
-	 */
-	private function initialize_options(): void {
-		if ( ! get_option( 'auto_fulfill_downloadable', false ) ) {
-			add_option( 'auto_fulfill_downloadable', 'yes' );
-		}
-		if ( ! get_option( 'auto_fulfill_virtual', false ) ) {
-			add_option( 'auto_fulfill_virtual', 'no' );
-		}
 	}
 
 	/**
@@ -112,8 +98,14 @@ class FulfillmentsSettings {
 		$auto_fulfill_virtual      = 'yes' === get_option( 'auto_fulfill_virtual', 'no' );
 		$auto_fulfill_items        = array();
 
-		foreach ( $order->get_items() as $item_id => $item ) {
-			$product = method_exists( $item, 'get_product' ) ? $item->get_product() : null;
+		foreach ( $order->get_items() as $item ) {
+			/**
+			 * Get the product associated with the item.
+			 *
+			 * @var \WC_Order_Item_Product $item
+			 * @var \WC_Product $product
+			 */
+			$product = $item->get_product();
 			if ( ! $product ) {
 				continue;
 			}
@@ -129,6 +121,7 @@ class FulfillmentsSettings {
 			$fulfillment->set_entity_type( WC_Order::class );
 			$fulfillment->set_entity_id( (string) $order_id );
 			$fulfillment->set_status( 'fulfilled' );
+			$fulfillment->set_is_fulfilled( true );
 			$fulfillment->set_items(
 				array_map(
 					function ( $item ) {
