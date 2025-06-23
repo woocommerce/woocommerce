@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix flaky test for order confirmation

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { apiFetch } from '@wordpress/data-controls';
-import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -19,15 +18,10 @@ export function* getOnboardingData( sessionEntryPoint?: string | null ) {
 	yield getOnboardingDataRequest();
 
 	try {
-		let path = `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding`;
-
-		// Add source parameter if we have a session entry point.
-		if ( sessionEntryPoint ) {
-			path = addQueryArgs( path, { source: sessionEntryPoint } );
-		}
-
 		const response: OnboardingDataResponse = yield apiFetch( {
-			path,
+			method: 'POST', // Use the not-so-semantic POST to avoid caching of response.
+			path: `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding`,
+			data: sessionEntryPoint ? { source: sessionEntryPoint } : {},
 		} );
 
 		yield getOnboardingDataSuccess( response );
