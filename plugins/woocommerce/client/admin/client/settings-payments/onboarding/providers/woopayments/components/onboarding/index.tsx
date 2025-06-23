@@ -26,6 +26,7 @@ export default function WooPaymentsOnboarding( {
 		currentStep,
 		navigateToStep,
 		justCompletedStepId,
+		sessionEntryPoint,
 	} = useOnboardingContext();
 
 	const location = useLocation();
@@ -66,6 +67,9 @@ export default function WooPaymentsOnboarding( {
 									'Set up WooPayments',
 									'woocommerce'
 								) }
+								context={ {
+									sessionEntryPoint,
+								} }
 							/>
 						</div>
 					}
