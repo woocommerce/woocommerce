@@ -3,6 +3,9 @@
 namespace Automattic\WooCommerce\Tests\Internal\Fulfillments;
 
 use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsManager;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Tests\Internal\Fulfillments\Helpers\FulfillmentsHelper;
+use WC_Order;
 
 /**
  * Tests for Fulfillment object.
@@ -120,5 +123,58 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $shipping_providers['custom_provider'] );
 		$this->assertArrayHasKey( 'label', $shipping_providers['custom_provider'] );
 		$this->assertEquals( __( 'Custom Provider', 'woocommerce' ), $shipping_providers['custom_provider']['label'] );
+	}
+
+	/**
+	 * Test that the fulfillment status hooks are initialized correctly.
+	 */
+	public function test_init_fulfillment_status_hooks() {
+		$manager = new FulfillmentsManager();
+		$this->assertNotFalse( has_action( 'wc_fulfillment_after_create', array( $manager, 'update_order_fulfillment_status_on_fulfillment_update' ) ) );
+		$this->assertNotFalse( has_action( 'wc_fulfillment_after_update', array( $manager, 'update_order_fulfillment_status_on_fulfillment_update' ) ) );
+		$this->assertNotFalse( has_action( 'wc_fulfillment_after_delete', array( $manager, 'update_order_fulfillment_status_on_fulfillment_update' ) ) );
+	}
+
+	/**
+	 * Test that the fulfillment status is updated on fulfillment creation.
+	 */
+	public function test_update_order_fulfillment_status_on_fulfillment_updates() {
+		$manager      = new FulfillmentsManager();
+		$fulfillments = array();
+		$product      = \WC_Helper_Product::create_simple_product();
+		$order        = OrderHelper::create_order( get_current_user_id(), $product );
+		$this->assertEmpty( $order->get_meta( '_fulfillment_status' ) );
+
+		$fulfillments[] = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'unfulfilled',
+				'is_fulfilled' => false,
+			),
+			array(
+				'_items' => array(
+					array(
+						'item_id' => $product->get_id(),
+						'qty'     => 1,
+					),
+				),
+			)
+		);
+		$this->assertTrue( did_action( 'wc_fulfillment_after_create' ) > 0 );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'unfulfilled', $order->get_meta( '_fulfillment_status', true ) );
+
+		$fulfillments[0]->set_is_fulfilled( true );
+		$fulfillments[0]->save();
+
+		$this->assertTrue( did_action( 'wc_fulfillment_after_update' ) > 0 );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'partially_fulfilled', $order->get_meta( '_fulfillment_status' ) );
+
+		$fulfillments[0]->delete();
+		$this->assertTrue( did_action( 'wc_fulfillment_after_delete' ) > 0 );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEquals( '', $order->get_meta( '_fulfillment_status' ) );
 	}
 }

@@ -63,10 +63,16 @@ class FulfillmentsRenderer {
 			// For custom orders table, we need to add the bulk actions to the custom orders table.
 			add_filter( 'bulk_actions-woocommerce_page_wc-orders', array( $this, 'define_fulfillment_bulk_actions' ) );
 			add_filter( 'handle_bulk_actions-woocommerce_page_wc-orders', array( $this, 'handle_fulfillment_bulk_actions' ), 10, 3 );
+			// For custom orders table, we need to filter the query to include fulfillment status.
+			add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'render_fulfillment_filters' ) );
+			add_filter( 'woocommerce_order_query_args', array( $this, 'filter_orders_list_table_query' ), 10, 1 );
 		} else {
 			// For legacy orders table, we need to add the bulk actions to the legacy orders table.
 			add_filter( 'bulk_actions-edit-shop_order', array( $this, 'define_fulfillment_bulk_actions' ) );
 			add_filter( 'handle_bulk_actions-edit-shop_order', array( $this, 'handle_fulfillment_bulk_actions' ), 10, 3 );
+			// For legacy orders table, we need to filter the query to include fulfillment status.
+			add_action( 'restrict_manage_posts', array( $this, 'render_fulfillment_filters_legacy' ) );
+			add_action( 'pre_get_posts', array( $this, 'filter_legacy_orders_list_query' ) );
 		}
 	}
 
@@ -113,7 +119,7 @@ class FulfillmentsRenderer {
 		// Render the column data based on the column name.
 		switch ( $column_name ) {
 			case 'fulfillment_status':
-				$this->render_fulfillment_status_column_row_data( $order, $fulfillments );
+				$this->render_order_fulfillment_status_column_row_data( $order, $fulfillments );
 				break;
 			case 'shipment_tracking':
 				$this->render_shipment_tracking_column_row_data( $order, $fulfillments );
@@ -127,13 +133,14 @@ class FulfillmentsRenderer {
 	/**
 	 * Render the fulfillment status column row data.
 	 *
-	 * @param WC_Order      $order The order object.
-	 * @param Fulfillment[] $fulfillments The fulfillments.
+	 * @param WC_Order $order The order object.
 	 */
-	private function render_fulfillment_status_column_row_data( WC_Order $order, array $fulfillments ) {
-		$order_fulfillment_status = FulfillmentUtils::get_fulfillment_status( $order, $fulfillments );
+	private function render_order_fulfillment_status_column_row_data( WC_Order $order ) {
+		$fulfillment_status_meta_exists = $order->meta_exists( '_fulfillment_status' );
+		$order_fulfillment_status       = $fulfillment_status_meta_exists ? $order->get_meta( '_fulfillment_status', true ) : 'no_fulfillments';
+
 		echo "<div class='fulfillment-status-wrapper'>";
-		$this->render_fulfillment_status_badge( $order, $order_fulfillment_status );
+		$this->render_order_fulfillment_status_badge( $order, $order_fulfillment_status );
 		echo '</div>';
 	}
 
@@ -143,21 +150,16 @@ class FulfillmentsRenderer {
 	 * @param WC_Order $order The order object.
 	 * @param string   $order_fulfillment_status The fulfillment status of the order.
 	 */
-	private function render_fulfillment_status_badge( $order, string $order_fulfillment_status ) {
-		switch ( $order_fulfillment_status ) {
-			case 'no_fulfillments':
-			case 'unfulfilled':
-				echo '<mark class="fulfillment-status status-failed"><span>' . esc_html__( 'Unfulfilled', 'woocommerce' ) . '</span></mark>';
-				break;
-			case 'partially_fulfilled':
-				echo '<mark class="fulfillment-status status-completed"><span>' . esc_html__( 'Partially fulfilled', 'woocommerce' ) . '</span></mark>';
-				break;
-			case 'fulfilled':
-				echo '<mark class="fulfillment-status status-processing"><span>' . esc_html__( 'Fulfilled', 'woocommerce' ) . '</span></mark>';
-				break;
-			default:
-				echo '<mark class="fulfillment-status status-completed"><span>' . esc_html__( 'Unknown', 'woocommerce' ) . '</span></mark>';
+	private function render_order_fulfillment_status_badge( $order, string $order_fulfillment_status ) {
+		$status_props = FulfillmentUtils::get_order_fulfillment_statuses()[ $order_fulfillment_status ];
+		if ( ! $status_props ) {
+			$status_props = array(
+				'label'            => __( 'Unknown', 'woocommerce' ),
+				'background_color' => '#f0f0f0',
+				'text_color'       => '#000',
+			);
 		}
+		echo '<mark class="fulfillment-status" style="background-color:' . esc_attr( $status_props['background_color'] ) . '; color: ' . esc_attr( $status_props['text_color'] ) . '"><span>' . esc_html( $status_props['label'] ) . '</span></mark>';
 		echo "<a href='#' class='fulfillments-trigger' data-order-id='" . esc_attr( $order->get_id() ) . "' title='" . esc_attr__( 'View Fulfillments', 'woocommerce' ) . "'>
 			<svg width='16' height='16' viewBox='0 0 12 14' xmlns='http://www.w3.org/2000/svg'>
 				<path d='M11.8333 2.83301L9.33329 0.333008L2.24996 7.41634L1.41663 10.7497L4.74996 9.91634L11.8333 2.83301ZM5.99996 12.4163H0.166626V13.6663H5.99996V12.4163Z' />
@@ -331,25 +333,25 @@ class FulfillmentsRenderer {
 				?>
 			<tr>
 				<th class="woocommerce-table__shipment-info shipment-info" style="font-weight: normal;">
-					<?php
-					printf(
-						/* translators: %1$s is the shipment index, %2$s is the shipment date */
-						wp_kses( __( '<b>Shipment %1$s</b> was shipped on <b>%2$s</b>', 'woocommerce' ), 'b' ),
-						intval( $index ) + 1,
-						esc_html(
-							gmdate(
-								'F j, Y',
-								strtotime(
-									$fulfillment->get_date_fulfilled() // Get the fulfilled date.
-									?? $fulfillment->get_date_updated() // Fallback to the updated date if fulfilled date is not set.
-								)
+				<?php
+				printf(
+					/* translators: %1$s is the shipment index, %2$s is the shipment date */
+					wp_kses( __( '<b>Shipment %1$s</b> was shipped on <b>%2$s</b>', 'woocommerce' ), 'b' ),
+					intval( $index ) + 1,
+					esc_html(
+						gmdate(
+							'F j, Y',
+							strtotime(
+								$fulfillment->get_date_fulfilled() // Get the fulfilled date.
+								?? $fulfillment->get_date_updated() // Fallback to the updated date if fulfilled date is not set.
 							)
 						)
-					);
-					?>
+					)
+				);
+				?>
 				</th>
 				<th class="woocommerce-table__shipment-tracking shipment-tracking" style="font-weight: normal;">
-						<?php echo wp_kses( FulfillmentUtils::get_tracking_info_html( $fulfillment ), 'a' ); ?>
+					<?php echo wp_kses( FulfillmentUtils::get_tracking_info_html( $fulfillment ), 'a' ); ?>
 				</th>
 			</tr>
 				<?php
@@ -371,15 +373,15 @@ class FulfillmentsRenderer {
 		echo '<div class="wc-order-fulfillment-badges">';
 
 		// Get the fulfillment status for the order.
-		$fulfillments       = $this->maybe_read_fulfillments( $order );
-		$fulfillment_status = FulfillmentUtils::get_fulfillment_status( $order, $fulfillments );
+		$fulfillments             = $this->maybe_read_fulfillments( $order );
+		$order_fulfillment_status = FulfillmentUtils::calculate_order_fulfillment_status( $order, $fulfillments );
 
 		// Render order status badge.
 		$order_status = $order->get_status();
 		echo '<mark class="order-status status-' . esc_attr( $order_status ) . '"><span>' . esc_html( wc_get_order_status_name( $order_status ) ) . '</span></mark>';
 
 		// Render fulfillment status badge.
-		$this->render_fulfillment_status_badge( $order, $fulfillment_status );
+		$this->render_order_fulfillment_status_badge( $order, $order_fulfillment_status );
 		echo '</div>';
 	}
 
@@ -434,6 +436,121 @@ class FulfillmentsRenderer {
 		);
 
 		wp_localize_script( 'wc-admin-fulfillments', 'wcFulfillmentSettings', $fulfillment_settings );
+	}
+
+	/**
+	 * Render the fulfillment filters in the orders table.
+	 */
+	public function render_fulfillment_filters() {
+		if ( ! self::should_render_fulfillment_drawer() ) {
+			return;
+		}
+		?>
+		<?php
+		// This is a read-only filter on the admin orders table, so nonce verification is not required.
+		// phpcs:ignore WordPress.Security.NonceVerification ?>
+			<?php $selected_status = isset( $_GET['fulfillment_status'] ) ? sanitize_text_field( wp_unslash( $_GET['fulfillment_status'] ) ) : ''; ?>
+		<select id="fulfillment-status-filter" name="fulfillment_status">
+			<option value="" <?php selected( $selected_status, '' ); ?>><?php esc_html_e( 'Filter by fulfillment', 'woocommerce' ); ?></option>
+				<?php foreach ( FulfillmentUtils::get_order_fulfillment_statuses() as $status => $props ) : ?>
+				<option value="<?php echo esc_attr( $status ); ?>" <?php selected( $selected_status, $status ); ?>>
+					<?php echo esc_html( $props['label'] ?? '' ); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
+			<?php
+	}
+
+	/**
+	 * Render the fulfillment filters in the legacy orders table.
+	 *
+	 * @deprecated 9.9.0 Use render_fulfillment_filters() instead.
+	 */
+	public function render_fulfillment_filters_legacy() {
+		global $typenow;
+
+		if ( 'shop_order' !== $typenow ) {
+			return;
+		}
+
+		$this->render_fulfillment_filters();
+	}
+
+	/**
+	 * Apply the fulfillment status filter to the orders list.
+	 *
+	 * @param array $args The query arguments for the orders list.
+	 * @return array The modified query arguments.
+	 */
+	public function filter_orders_list_table_query( $args ) {
+		// This is a read-only filter on the admin orders table, so nonce verification is not required.
+		// phpcs:ignore WordPress.Security.NonceVerification
+		if ( isset( $_GET['fulfillment_status'] ) && ! empty( $_GET['fulfillment_status'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification
+			$fulfillment_status = sanitize_text_field( wp_unslash( $_GET['fulfillment_status'] ) );
+
+			// Ensure the fulfillment status is one of the allowed values.
+			if ( FulfillmentUtils::is_valid_order_fulfillment_status( $fulfillment_status ) ) {
+				if ( ! isset( $args['meta_query'] ) ) {
+					$args['meta_query'] = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				}
+				if ( 'no_fulfillments' === $fulfillment_status ) {
+					// If the status is 'no_fulfillments', we need to check for orders that have no fulfillments.
+					$args['meta_query'][] = array(
+						'relation' => 'OR',
+						array(
+							'key'     => '_fulfillment_status',
+							'compare' => 'NOT EXISTS',
+						),
+					);
+				} else {
+					$args['meta_query'][] = array(
+						'key'     => '_fulfillment_status',
+						'value'   => $fulfillment_status,
+						'compare' => '=',
+					);
+				}
+			}
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Filter the legacy orders list query to include fulfillment status.
+	 *
+	 * @param \WP_Query $query The WP_Query object.
+	 */
+	public function filter_legacy_orders_list_query( $query ) {
+		if (
+		is_admin()
+		&& $query->is_main_query()
+		&& $query->get( 'post_type' ) === 'shop_order'
+		&& isset( $_GET['fulfillment_status'] ) && ! empty( $_GET['fulfillment_status'] ) // phpcs:ignore WordPress.Security.NonceVerification
+		) {
+			$status = sanitize_text_field( wp_unslash( $_GET['fulfillment_status'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			// Ensure the fulfillment status is one of the allowed values.
+			if ( FulfillmentUtils::is_valid_order_fulfillment_status( $status ) ) {
+				$query->set(
+					'meta_query',
+					'no_fulfillments' === $status ?
+					array(
+						'relation' => 'OR',
+						array(
+							'key'     => '_fulfillment_status',
+							'compare' => 'NOT EXISTS',
+						),
+					) :
+					array(
+						array(
+							'key'     => '_fulfillment_status',
+							'value'   => $status,
+							'compare' => '=',
+						),
+					)
+				);
+			}
+		}
 	}
 
 	/**

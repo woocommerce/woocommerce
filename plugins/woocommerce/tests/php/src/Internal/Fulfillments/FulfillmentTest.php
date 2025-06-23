@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Fulfillments;
 
 use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Tests\Internal\Fulfillments\Helpers\FulfillmentsHelper;
+use WC_Order;
 
 /**
  * Tests for Fulfillment object.
@@ -21,7 +22,12 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 	 * Test that the Fulfillment object can be created with an ID.
 	 */
 	public function test_fulfillment_object_with_id_fetches_data_and_metadata() {
-		$db_fulfillment = FulfillmentsHelper::create_fulfillment();
+		$order          = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$db_fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_id' => $order->get_id(),
+			)
+		);
 		$fulfillment    = new Fulfillment( $db_fulfillment->get_id() );
 
 		$this->assertInstanceOf( Fulfillment::class, $fulfillment );
@@ -161,6 +167,22 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 		$fulfillment->save();
 
 		$this->assertEquals( '', $fulfillment->get_meta( 'test_meta_key' ) );
+	}
+
+	/**
+	 * Test getting order from the Fulfillment object.
+	 */
+	public function test_get_order() {
+		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type' => WC_Order::class,
+				'entity_id'   => $order->get_id(),
+			)
+		);
+
+		$this->assertInstanceOf( \WC_Order::class, $fulfillment->get_order() );
+		$this->assertEquals( $order->get_id(), $fulfillment->get_order()->get_id() );
 	}
 
 	/**
