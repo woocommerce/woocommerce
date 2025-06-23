@@ -488,13 +488,13 @@ const TestAccountStep = () => {
 									<div className="woocommerce-woopayments-modal__content__item-flex__description">
 										<h3>
 											{ __(
-												'Continue your store setup',
+												'Continue setting up your store',
 												'woocommerce'
 											) }
 										</h3>
 										<div>
 											{ __(
-												'Finish completing the tasks required to launch your store.',
+												'Test payments and finish off any other tasks required to launch your store.',
 												'woocommerce'
 											) }
 										</div>
