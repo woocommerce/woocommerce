@@ -270,6 +270,7 @@ jobs:
   notify-release:
     runs-on: ubuntu-latest
     needs: [validate-release, update-wporg-stable-tag, update-gh-stable-tag]
+    if: ${{ github.event.inputs.allow-revert != 'true' }}
     steps:
       - name: 'Notify to announcements channel'
         uses: archive/github-actions-slack@v2.10.0
