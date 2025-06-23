@@ -451,18 +451,51 @@ const TestAccountStep = () => {
 									<div className="woocommerce-woopayments-modal__content__item-flex__description">
 										<h3>
 											{ __(
-												'Continue your store setup',
+												'Continue setting up your store',
 												'woocommerce'
 											) }
 										</h3>
 										<div>
 											{ __(
-												'Finish completing the tasks required to launch your store.',
+												'Test payments and finish off any other tasks required to launch your store.',
 												'woocommerce'
 											) }
 										</div>
 									</div>
 								</div>
+								<Button
+									variant="primary"
+									onClick={ () => {
+										recordPaymentsOnboardingEvent(
+											'woopayments_onboarding_modal_click',
+											{
+												step:
+													currentStep?.id ||
+													'unknown',
+												action: 'continue_store_setup',
+											}
+										);
+
+										// Navigate to wc-admin page
+										navigateTo( {
+											url: getNewPath( {}, '', {
+												page: 'wc-admin',
+											} ),
+										} );
+									} }
+								>
+									{ __(
+										'Continue store setup',
+										'woocommerce'
+									) }
+								</Button>
+
+								<div className="woocommerce-payments-test-account-step__success_content_or-divider">
+									<hr />
+									{ __( 'OR', 'woocommerce' ) }
+									<hr />
+								</div>
+
 								<div className="woocommerce-woopayments-modal__content__item-flex">
 									<img
 										src={
@@ -474,7 +507,7 @@ const TestAccountStep = () => {
 									<div className="woocommerce-woopayments-modal__content__item-flex__description">
 										<h3>
 											{ __(
-												'Activate payments',
+												'Activate real payments',
 												'woocommerce'
 											) }
 										</h3>
@@ -482,7 +515,7 @@ const TestAccountStep = () => {
 											<p>
 												{ interpolateComponents( {
 													mixedString: __(
-														'Provide some additional details about your business so you can begin accepting real payments. {{link}}Learn more{{/link}}',
+														'Provide additional details about your business so you can begin accepting real payments. {{link}}Learn more{{/link}}',
 														'woocommerce'
 													),
 													components: {
@@ -500,42 +533,15 @@ const TestAccountStep = () => {
 										</div>
 									</div>
 								</div>
+								<Button
+									variant="secondary"
+									isBusy={ isContinueButtonLoading }
+									disabled={ isContinueButtonLoading }
+									onClick={ handleContinue }
+								>
+									{ __( 'Activate payments', 'woocommerce' ) }
+								</Button>
 							</div>
-							<Button
-								variant="primary"
-								onClick={ () => {
-									recordPaymentsOnboardingEvent(
-										'woopayments_onboarding_modal_click',
-										{
-											step: currentStep?.id || 'unknown',
-											action: 'continue_store_setup',
-										}
-									);
-
-									// Navigate to wc-admin page
-									navigateTo( {
-										url: getNewPath( {}, '', {
-											page: 'wc-admin',
-										} ),
-									} );
-								} }
-							>
-								{ __( 'Continue store setup', 'woocommerce' ) }
-							</Button>
-							<div className="woocommerce-payments-test-account-step__success_content_or-divider">
-								<hr />
-								{ __( 'OR', 'woocommerce' ) }
-								<hr />
-							</div>
-
-							<Button
-								variant="secondary"
-								isBusy={ isContinueButtonLoading }
-								disabled={ isContinueButtonLoading }
-								onClick={ handleContinue }
-							>
-								{ __( 'Activate payments', 'woocommerce' ) }
-							</Button>
 						</div>
 					</div>
 				</div>
