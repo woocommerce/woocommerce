@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { apiFetch } from '@wordpress/data-controls';
-import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -19,15 +18,10 @@ export function* getOnboardingData( source?: string | null ) {
 	yield getOnboardingDataRequest();
 
 	try {
-		let path = `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding`;
-
-		// Add source parameter if provided
-		if ( source ) {
-			path = addQueryArgs( path, { source } );
-		}
-
 		const response: OnboardingDataResponse = yield apiFetch( {
-			path,
+			method: 'POST',
+			path: `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding`,
+			data: source ? { source } : {},
 		} );
 
 		yield getOnboardingDataSuccess( response );
