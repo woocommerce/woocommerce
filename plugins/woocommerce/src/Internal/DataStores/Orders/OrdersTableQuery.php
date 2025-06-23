@@ -741,7 +741,7 @@ class OrdersTableQuery {
 			'country',
 			'phone',
 		);
-		foreach( array( 'billing', 'shipping' ) as $address_type ) {
+		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
 			foreach ( $address_fields as $address_field ) {
 				$mapping[] = "{$address_type}_{$address_field}";
 			}
@@ -1324,9 +1324,9 @@ class OrdersTableQuery {
 		foreach ( $this->args['orderby'] as $_orderby => $order ) {
 			if ( in_array( $_orderby, $meta_orderby_keys, true ) ) {
 				$_orderby = $this->meta_query->get_orderby_clause_for_key( $_orderby );
-			} else if (str_starts_with( $_orderby, 'billing_' ) || str_starts_with( $_orderby, 'shipping_' ) ) {
+			} elseif ( str_starts_with( $_orderby, 'billing_' ) || str_starts_with( $_orderby, 'shipping_' ) ) {
 				list( $address_type, $address_field ) = explode( '_', $_orderby, 2 );
-				if ( ! isset( $this->join[ $address_type ] )) {
+				if ( ! isset( $this->join[ $address_type ] ) ) {
 					$this->join_address_table( $address_type );
 				}
 
@@ -1526,7 +1526,9 @@ class OrdersTableQuery {
 	private function join_address_table( $address_type = 'billing' ): void {
 		global $wpdb;
 
-		if ( isset( $this->join[ $address_type ] ) ) return;
+		if ( isset( $this->join[ $address_type ] ) ) {
+			return;
+		}
 
 		$this->join(
 			$this->tables['addresses'],
