@@ -1,9 +1,10 @@
 <?php
+declare(strict_types=1);
 
 namespace Automattic\WooCommerce\StoreApi;
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
+use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use WC_Session;
 
 defined( 'ABSPATH' ) || exit;
@@ -53,10 +54,10 @@ final class SessionHandler extends WC_Session {
 	 * Process the token header to load the correct session.
 	 */
 	protected function init_session_from_token() {
-		$payload = JsonWebToken::get_parts( $this->token )->payload;
+		$payload = CartTokenUtils::get_cart_token_payload( $this->token );
 
-		$this->_customer_id       = $payload->user_id;
-		$this->session_expiration = $payload->exp;
+		$this->_customer_id       = $payload['user_id'];
+		$this->session_expiration = $payload['exp'];
 		$this->_data              = (array) $this->get_session( $this->_customer_id, array() );
 	}
 
@@ -64,11 +65,11 @@ final class SessionHandler extends WC_Session {
 	 * Returns the session.
 	 *
 	 * @param string $customer_id Customer ID.
-	 * @param mixed  $default Default session value.
+	 * @param mixed  $default_value Default session value.
 	 *
 	 * @return string|array|bool
 	 */
-	public function get_session( $customer_id, $default = false ) {
+	public function get_session( $customer_id, $default_value = false ) {
 		global $wpdb;
 
 		// This mimics behaviour from default WC_Session_Handler class. There will be no sessions retrieved while WP setup is due.
@@ -78,13 +79,14 @@ final class SessionHandler extends WC_Session {
 
 		$value = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT session_value FROM $this->table WHERE session_key = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				'SELECT session_value FROM %i WHERE session_key = %s',
+				$this->table,
 				$customer_id
 			)
 		);
 
 		if ( is_null( $value ) ) {
-			$value = $default;
+			$value = $default_value;
 		}
 
 		return maybe_unserialize( $value );
@@ -100,7 +102,8 @@ final class SessionHandler extends WC_Session {
 
 			$wpdb->query(
 				$wpdb->prepare(
-					"INSERT INTO $this->table (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d) ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					'INSERT INTO %i (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d) ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)',
+					$this->table,
 					$this->_customer_id,
 					maybe_serialize( $this->_data ),
 					$this->session_expiration

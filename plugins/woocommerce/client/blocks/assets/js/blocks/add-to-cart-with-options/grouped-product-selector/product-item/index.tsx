@@ -10,20 +10,17 @@ import { Icon, button } from '@wordpress/icons';
 import metadata from './block.json';
 import ProductItemTemplateEdit from './edit';
 import ProductItemTemplateSave from './save';
-import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../../utils';
 
-if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
-	registerBlockType( metadata, {
-		edit: ProductItemTemplateEdit,
-		attributes: metadata.attributes,
-		icon: {
-			src: (
-				<Icon
-					icon={ button }
-					className="wc-block-editor-components-block-icon"
-				/>
-			),
-		},
-		save: ProductItemTemplateSave,
-	} );
-}
+registerBlockType( metadata, {
+	edit: ProductItemTemplateEdit,
+	attributes: metadata.attributes,
+	icon: {
+		src: (
+			<Icon
+				icon={ button }
+				className="wc-block-editor-components-block-icon"
+			/>
+		),
+	},
+	save: ProductItemTemplateSave,
+} );

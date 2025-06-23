@@ -9,9 +9,11 @@
 	},
 	"versionGroups": [
 		{
-			"label": "Banned dependencies: classnames(->clsx)",
+			"label": "Banned dependencies: classnames(->clsx), concurrently(->pnpm), cross-env(->wsl)",
 			"dependencies": [
-				"classnames"
+				"classnames",
+				"concurrently",
+				"cross-env"
 			],
 			"packages": [
 				"**"

@@ -41,7 +41,6 @@
 		"launch-your-store": true,
 		"product-editor-template-system": false,
 		"use-wp-horizon": false,
-		"add-to-cart-with-options-stepper-layout": true,
-		"blockified-add-to-cart": false
+		"add-to-cart-with-options-stepper-layout": true
 	}
 }

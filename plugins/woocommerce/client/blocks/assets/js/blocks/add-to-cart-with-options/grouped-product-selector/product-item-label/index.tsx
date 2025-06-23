@@ -12,27 +12,24 @@ import { Spinner } from '@wordpress/components';
  * Internal dependencies
  */
 import metadata from './block.json';
-import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../../utils';
 
-if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
-	registerBlockType( metadata.name, {
-		...metadata,
-		edit: function Edit() {
-			const blockProps = useBlockProps();
-			const { isLoading, product } = useProductDataContext();
+registerBlockType( metadata.name, {
+	...metadata,
+	edit: function Edit() {
+		const blockProps = useBlockProps();
+		const { isLoading, product } = useProductDataContext();
 
-			if ( isLoading ) {
-				return <Spinner />;
-			}
-			return (
-				<div { ...blockProps }>
-					<div className="wp-block-woocommerce-add-to-cart-with-options-grouped-product-item-label">
-						{ product.name }
-					</div>
+		if ( isLoading ) {
+			return <Spinner />;
+		}
+		return (
+			<div { ...blockProps }>
+				<div className="wp-block-woocommerce-add-to-cart-with-options-grouped-product-item-label">
+					{ product.name }
 				</div>
-			);
-		},
-		icon: heading,
-		save: () => null,
-	} as unknown as BlockConfiguration );
-}
+			</div>
+		);
+	},
+	icon: heading,
+	save: () => null,
+} as unknown as BlockConfiguration );

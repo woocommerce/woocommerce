@@ -10,6 +10,7 @@
  * @since    3.0.0
  */
 
+use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Utilities\{ ArrayUtil, NumberUtil, StringUtil };
@@ -452,6 +453,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Prepare a single order for create.
 	 *
+	 * @throws WC_REST_Exception If the customer ID is invalid.
+	 *
 	 * @param  WP_REST_Request $request Request object.
 	 * @return WP_Error|WC_Order $data Object.
 	 */
@@ -460,6 +463,18 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		$order     = new WC_Order( $id );
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
+
+		if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] ) {
+			if ( is_wp_error( Users::get_user_in_current_site( $request['customer_id'] ) ) ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce' ), 400 );
+			}
+
+			// Make sure customer is part of blog.
+			if ( is_multisite() && ! is_user_member_of_blog( $request['customer_id'] ) ) {
+				add_user_to_blog( get_current_blog_id(), $request['customer_id'], 'customer' );
+			}
+		}
 
 		// Handle all writable props
 		foreach ( $data_keys as $key ) {
@@ -535,16 +550,6 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function create_order( $request ) {
 		try {
-			// Make sure customer exists.
-			if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] && false === get_user_by( 'id', $request['customer_id'] ) ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id',__( 'Customer ID is invalid.', 'woocommerce' ), 400 );
-			}
-
-			// Make sure customer is part of blog.
-			if ( is_multisite() && ! is_user_member_of_blog( $request['customer_id'] ) ) {
-				add_user_to_blog( get_current_blog_id(), $request['customer_id'], 'customer' );
-			}
-
 			$order = $this->prepare_item_for_database( $request );
 			$order->set_created_via( 'rest-api' );
 			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );

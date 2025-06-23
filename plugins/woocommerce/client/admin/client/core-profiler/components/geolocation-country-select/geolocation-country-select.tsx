@@ -82,6 +82,7 @@ export const GeolocationCountrySelect = ( {
 				instanceId={ 2 }
 				placeholder={ placeholder }
 				label={ selectedCountry.key === '' ? label : '' }
+				ignoreDiacritics={ true }
 				getSearchExpression={ ( query: string ) => {
 					return new RegExp( `(^${ query }| — (${ query }))`, 'i' );
 				} }

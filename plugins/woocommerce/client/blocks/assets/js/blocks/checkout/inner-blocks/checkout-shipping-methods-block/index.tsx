@@ -13,7 +13,8 @@ import metadata from './block.json';
 import './style.scss';
 
 registerBlockType( 'woocommerce/checkout-shipping-methods-block', {
-	...metadata,
+	apiVersion: metadata.apiVersion,
+	title: metadata.title,
 	icon: {
 		src: (
 			<Icon
