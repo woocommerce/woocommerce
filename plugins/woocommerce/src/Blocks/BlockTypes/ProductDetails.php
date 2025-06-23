@@ -408,6 +408,10 @@ class ProductDetails extends AbstractBlock {
 	 * @return string Rendered block output.
 	 */
 	protected function render_legacy_block( $attributes, $content, $block ) {
+		if ( ! is_singular( 'product' ) ) {
+			return $content;
+		}
+
 		$hide_tab_title = isset( $attributes['hideTabTitle'] ) ? $attributes['hideTabTitle'] : false;
 
 		if ( $hide_tab_title ) {
