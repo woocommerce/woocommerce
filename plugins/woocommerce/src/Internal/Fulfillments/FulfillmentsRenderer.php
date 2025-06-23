@@ -159,7 +159,7 @@ class FulfillmentsRenderer {
 			);
 		}
 
-    echo '<mark class="fulfillment-status" style="background-color:' . esc_attr( $status_props['background_color'] ) . '; color: ' . esc_attr( $status_props['text_color'] ) . '"><span>' . esc_html( $status_props['label'] ) . '</span></mark>';
+		echo '<mark class="fulfillment-status" style="background-color:' . esc_attr( $status_props['background_color'] ) . '; color: ' . esc_attr( $status_props['text_color'] ) . '"><span>' . esc_html( $status_props['label'] ) . '</span></mark>';
 		echo "<a href='#' class='fulfillments-trigger' data-order-id='" . esc_attr( $order->get_id() ) . "' title='" . esc_attr__( 'View Fulfillments', 'woocommerce' ) . "'>
 			<svg width='16' height='16' viewBox='0 0 12 14' xmlns='http://www.w3.org/2000/svg'>
 				<path d='M11.8333 2.83301L9.33329 0.333008L2.24996 7.41634L1.41663 10.7497L4.74996 9.91634L11.8333 2.83301ZM5.99996 12.4163H0.166626V13.6663H5.99996V12.4163Z' />
