@@ -3,7 +3,7 @@
  * Title: Products, 4 column with Heading
  * Slug: woostarter/product-related-4-column
  * Categories: columns, featured
- *
+ * Block Types: woocommerce/product-collection
  */
 ?>
 
@@ -28,4 +28,3 @@
 <!-- wp:spacer {"height":"var:preset|spacing|60"} -->
 <div style="height:var(--wp--preset--spacing--60)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
- 
