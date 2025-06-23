@@ -46,11 +46,11 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 										<option value="cancel_notification"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></option>
 									<?php elseif ( $notification->get_status() === NotificationStatus::PENDING ) : ?>
 										<option value="send_verification_email"><?php esc_html_e( 'Resend verification email', 'woocommerce' ); ?></option>
-                                        <option value="activate_notification"><?php esc_html_e( 'Activate', 'woocommerce' ); ?></option>
+										<option value="activate_notification"><?php esc_html_e( 'Activate', 'woocommerce' ); ?></option>
 									<?php elseif ( $notification->get_status() === NotificationStatus::CANCELLED ) : ?>
 										<option value="activate_notification"><?php esc_html_e( 'Activate', 'woocommerce' ); ?></option>
 									<?php elseif ( $notification->get_status() === NotificationStatus::SENT ) : ?>
-                                        <option value="activate_notification"><?php esc_html_e( 'Activate', 'woocommerce' ); ?></option>
+										<option value="activate_notification"><?php esc_html_e( 'Activate', 'woocommerce' ); ?></option>
 										<option value="cancel_notification"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></option>                                    
 									<?php endif; ?>
 								</select>
@@ -92,21 +92,21 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 
 						<div class="notification-data__status-column">
 							<?php
-								if ( $notification->get_status() === NotificationStatus::PENDING ) {
-									$status = 'cancelled';
-									$label  = _x( 'Pending', 'stock notification status', 'woocommerce' );
-								} elseif ( $notification->get_status() === NotificationStatus::CANCELLED ) {
-									$status = 'cancelled';
-									$label  = _x( 'Cancelled', 'stock notification status', 'woocommerce' );
-								} elseif ( $notification->get_status() === NotificationStatus::SENT ) {
-									$status = 'cancelled';
-									$label  = _x( 'Sent', 'stock notification status', 'woocommerce' );
-								} else {
-									$status = 'completed';
-									$label  = _x( 'Active', 'stock notification status', 'woocommerce' );
-								}
+							if ( $notification->get_status() === NotificationStatus::PENDING ) {
+								$notification_status = 'cancelled';
+								$label               = _x( 'Pending', 'stock notification status', 'woocommerce' );
+							} elseif ( $notification->get_status() === NotificationStatus::CANCELLED ) {
+								$notification_status = 'cancelled';
+								$label               = _x( 'Cancelled', 'stock notification status', 'woocommerce' );
+							} elseif ( $notification->get_status() === NotificationStatus::SENT ) {
+								$notification_status = 'sent';
+								$label               = _x( 'Sent', 'stock notification status', 'woocommerce' );
+							} else {
+								$notification_status = 'active';
+								$label               = _x( 'Active', 'stock notification status', 'woocommerce' );
+							}
 
-								printf( '<mark class="order-status %s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $status ) ), esc_html( $label ) );
+							printf( '<mark class="order-status %s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $notification_status ) ), esc_html( $label ) );
 
 							?>
 						</div>
@@ -136,7 +136,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 								<?php if ( isset( $user ) && is_a( $user, 'WP_User' ) ) { ?>
 									<a href="<?php echo esc_url( get_edit_user_link( $user->ID ) ); ?>"><?php esc_html_e( 'View profile &rarr;', 'woocommerce' ); ?></a>
 								<?php } ?>
-								<a href="<?php echo esc_url( admin_url( NotificationsPage::PAGE_URL . '&s=' . urlencode( $notification->get_user_email() ) ) ); ?>"><?php esc_html_e( 'View notifications &rarr;', 'woocommerce' ); ?></a>
+								<a href="<?php echo esc_url( admin_url( NotificationsPage::PAGE_URL . '&s=' . rawurlencode( $notification->get_user_email() ) ) ); ?>"><?php esc_html_e( 'View notifications &rarr;', 'woocommerce' ); ?></a>
 							</div>
 						</div>
 
@@ -151,7 +151,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 									include __DIR__ . '/html-product-data-admin.php';
 								} else {
 									?>
-									<small><?php esc_html_e( 'Product not found.', 'woocommerce-back-in-stock-notifications' ); ?></small>
+									<small><?php esc_html_e( 'Product not found.', 'woocommerce' ); ?></small>
 									<?php
 								}
 								?>
@@ -177,7 +177,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 											$date_created_timestamp = $notification->get_date_created()->getTimestamp();
 											$t_time                 = date_i18n( _x( 'Y/m/d g:i:s a', 'list table date hover format', 'woocommerce' ), $date_created_timestamp );
 											$time_diff              = time() - $date_created_timestamp;
-								
+
 											if ( $time_diff > 0 && $time_diff < DAY_IN_SECONDS ) {
 												/* translators: %s: human time diff */
 												$h_time = wp_kses_post( human_time_diff( $date_created_timestamp ) );
@@ -190,18 +190,18 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 									</span>
 								</div>
 								<div class="notification-data__meta-data">
-									<label><?php esc_html_e( 'Signed up', 'woocommerce-back-in-stock-notifications' ); ?></label>
+									<label><?php esc_html_e( 'Signed up', 'woocommerce' ); ?></label>
 									<?php
-										$date_created = $notification->get_date_created();
+									$date_created = $notification->get_date_created();
 
-										if ( ! $date_created ) {
-											$t_time = __( '&mdash;', 'woocommerce' );
-											$h_time = $t_time;
-										} else {
-											$date_created = $date_created->getTimestamp();
-											$t_time       = date_i18n( _x( 'Y/m/d g:i:s a', 'list table date hover format', 'woocommerce' ), $date_created );
-											$h_time       = date_i18n( wc_date_format(), $date_created );
-										}
+									if ( ! $date_created ) {
+										$t_time = __( '&mdash;', 'woocommerce' );
+										$h_time = $t_time;
+									} else {
+										$date_created = $date_created->getTimestamp();
+										$t_time       = date_i18n( _x( 'Y/m/d g:i:s a', 'list table date hover format', 'woocommerce' ), $date_created );
+										$h_time       = date_i18n( wc_date_format(), $date_created );
+									}
 									?>
 									<span title="<?php echo esc_attr( $t_time ); ?>"><?php echo esc_html( $h_time ); ?></span>
 								</div>
@@ -211,7 +211,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 								<div class="notification-data__meta-data">
 									<label><?php esc_html_e( 'Signed-up customers', 'woocommerce' ); ?></label>
 									<span>
-										<?php									
+										<?php							
 										echo absint( $signed_up_customers );
 
 										if ( $signed_up_customers > 0 ) {
