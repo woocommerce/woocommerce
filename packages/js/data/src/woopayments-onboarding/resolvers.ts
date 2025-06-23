@@ -27,6 +27,7 @@ export function* getOnboardingData( source?: string | null ) {
 		}
 
 		const response: OnboardingDataResponse = yield apiFetch( {
+			method: 'POST',
 			path,
 		} );
 
