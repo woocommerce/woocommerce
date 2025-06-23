@@ -452,9 +452,9 @@ class FulfillmentsRenderer {
 			<?php $selected_status = isset( $_GET['fulfillment_status'] ) ? sanitize_text_field( wp_unslash( $_GET['fulfillment_status'] ) ) : ''; ?>
 		<select id="fulfillment-status-filter" name="fulfillment_status">
 			<option value="" <?php selected( $selected_status, '' ); ?>><?php esc_html_e( 'Filter by fulfillment', 'woocommerce' ); ?></option>
-				<?php foreach ( FulfillmentUtils::get_order_fulfillment_statuses() as $status => $label ) : ?>
+				<?php foreach ( FulfillmentUtils::get_order_fulfillment_statuses() as $status => $props ) : ?>
 				<option value="<?php echo esc_attr( $status ); ?>" <?php selected( $selected_status, $status ); ?>>
-					<?php echo esc_html( $label ); ?>
+					<?php echo esc_html( $props['label'] ?? '' ); ?>
 				</option>
 			<?php endforeach; ?>
 		</select>
