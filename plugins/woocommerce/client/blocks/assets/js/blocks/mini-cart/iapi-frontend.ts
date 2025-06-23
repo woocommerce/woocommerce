@@ -222,34 +222,30 @@ const { state: cartItemState } = store(
 			},
 
 			get lineItemDiscount(): string {
-				if ( cartItemState.cartItem ) {
-					const { quantity, prices } = cartItemState.cartItem;
+				const { quantity, prices } = cartItemState.cartItem;
 
-					const regularAmountSingle = Dinero( {
-						amount: parseInt( prices.raw_prices.regular_price, 10 ),
-						precision: prices.raw_prices.precision,
-					} );
+				const regularAmountSingle = Dinero( {
+					amount: parseInt( prices.raw_prices.regular_price, 10 ),
+					precision: prices.raw_prices.precision,
+				} );
 
-					const purchaseAmountSingle = Dinero( {
-						amount: parseInt( prices.raw_prices.price, 10 ),
-						precision: prices.raw_prices.precision,
-					} );
+				const purchaseAmountSingle = Dinero( {
+					amount: parseInt( prices.raw_prices.price, 10 ),
+					precision: prices.raw_prices.precision,
+				} );
 
-					const saleAmountLineItem = regularAmountSingle
-						.subtract( purchaseAmountSingle )
-						.multiply( quantity );
+				const saleAmountLineItem = regularAmountSingle
+					.subtract( purchaseAmountSingle )
+					.multiply( quantity );
 
-					const totalLineItemDiscount = saleAmountLineItem
-						.convertPrecision( cartItemState.currency.minorUnit )
-						.getAmount();
+				const totalLineItemDiscount = saleAmountLineItem
+					.convertPrecision( cartItemState.currency.minorUnit )
+					.getAmount();
 
-					return formatPriceWithCurrency(
-						totalLineItemDiscount,
-						cartItemState.currency
-					);
-				}
-
-				return '';
+				return formatPriceWithCurrency(
+					totalLineItemDiscount,
+					cartItemState.currency
+				);
 			},
 
 			get cartItemHasDiscount(): boolean {
@@ -260,28 +256,20 @@ const { state: cartItemState } = store(
 			},
 
 			get minimumReached(): boolean {
-				if ( cartItemState.cartItem ) {
-					const {
-						quantity,
-						quantity_limits: { minimum },
-					} = cartItemState.cartItem;
+				const {
+					quantity,
+					quantity_limits: { minimum },
+				} = cartItemState.cartItem;
 
-					return quantity - 1 < minimum;
-				}
-
-				return false;
+				return quantity - 1 < minimum;
 			},
 
 			get maximumReached(): boolean {
-				if ( cartItemState.cartItem ) {
-					const {
-						quantity,
-						quantity_limits: { maximum },
-					} = cartItemState.cartItem;
-					return quantity + 1 > maximum;
-				}
-
-				return false;
+				const {
+					quantity,
+					quantity_limits: { maximum },
+				} = cartItemState.cartItem;
+				return quantity + 1 > maximum;
 			},
 
 			get reduceQuantityLabel(): string {
@@ -359,19 +347,15 @@ const { state: cartItemState } = store(
 			},
 
 			get lineItemTotal(): string {
-				if ( cartItemState.cartItem ) {
-					const { totals } = cartItemState.cartItem;
-					const currency = cartItemState.currency;
+				const { totals } = cartItemState.cartItem;
+				const currency = cartItemState.currency;
 
-					const totalLinePrice = displayCartPriceIncludingTax
-						? parseInt( totals.line_subtotal, 10 ) +
-						  parseInt( totals.line_subtotal_tax, 10 )
-						: parseInt( totals.line_subtotal, 10 );
+				const totalLinePrice = displayCartPriceIncludingTax
+					? parseInt( totals.line_subtotal, 10 ) +
+					  parseInt( totals.line_subtotal_tax, 10 )
+					: parseInt( totals.line_subtotal, 10 );
 
-					return formatPriceWithCurrency( totalLinePrice, currency );
-				}
-
-				return '';
+				return formatPriceWithCurrency( totalLinePrice, currency );
 			},
 		},
 
