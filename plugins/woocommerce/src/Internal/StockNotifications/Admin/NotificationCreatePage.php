@@ -29,7 +29,6 @@ class NotificationCreatePage {
 			return;
 		}
 
-		// To-do: change this.
 		check_admin_referer( 'woocommerce-customer-stock-notification-create', 'customer_stock_notification_create_security' );
 
 		if ( ! isset( $_POST['save'] ) ) {
@@ -61,7 +60,7 @@ class NotificationCreatePage {
 		}
 
 		// Check if a notification already exists for the same product and customer.
-		if ( ! empty( $args['product_id'] ) && ( ! empty( $args['user_id'] ) || ! empty( $args['user_email'] ) ) ) {
+		if ( ! empty( $query_args['product_id'] ) && ( ! empty( $query_args['user_id'] ) || ! empty( $query_args['user_email'] ) ) ) {
 
 			$notification_ids = \WC_Data_Store::load( 'stock_notification' )->query(
 				array(
@@ -117,6 +116,16 @@ class NotificationCreatePage {
 			);
 			return;
 		} else {
+
+			$notice_message = __( 'Notification created.', 'woocommerce' );
+			update_option(
+				NotificationsPage::NOTICES_OPTION_NAME,
+				array(
+					'message' => $notice_message,
+					'type'    => 'success',
+				)
+			);
+			
 			// Construct edit url.
 			$edit_url = add_query_arg(
 				array(
@@ -127,15 +136,6 @@ class NotificationCreatePage {
 			);
 
 			wp_safe_redirect( $edit_url );
-
-			$notice_message = __( 'Notification created.', 'woocommerce' );
-			update_option(
-				NotificationsPage::NOTICES_OPTION_NAME,
-				array(
-					'message' => $notice_message,
-					'type'    => 'success',
-				)
-			);
 			exit;
 		}
 	}

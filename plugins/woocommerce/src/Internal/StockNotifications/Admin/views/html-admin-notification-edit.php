@@ -211,7 +211,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 								<div class="notification-data__meta-data">
 									<label><?php esc_html_e( 'Signed-up customers', 'woocommerce' ); ?></label>
 									<span>
-										<?php		
+										<?php
 										echo absint( $signed_up_customers );
 
 										if ( $signed_up_customers > 0 ) {

@@ -29,7 +29,7 @@ class NotificationEditPage {
 		if ( ! $notification instanceof Notification ) {
 			$notice_message = __( 'Notification not found.', 'woocommerce' );
 			update_option(
-				ListTable::NOTICES_OPTION_NAME,
+				NotificationsPage::NOTICES_OPTION_NAME,
 				array(
 					'message' => $notice_message,
 					'type'    => 'error',
