@@ -252,11 +252,14 @@ class FulfillmentUtils {
 	/**
 	 * Check if the given fulfillment status is valid.
 	 *
-	 * @param string $status The fulfillment status to check.
+	 * @param string|null $status The fulfillment status to check.
 	 *
 	 * @return bool True if the status is valid, false otherwise.
 	 */
-	public static function is_valid_order_fulfillment_status( string $status ): bool {
+	public static function is_valid_order_fulfillment_status( ?string $status ): bool {
+		if ( is_null( $status ) ) {
+			return false;
+		}
 		$order_fulfillment_statuses = self::get_order_fulfillment_statuses();
 		return in_array( $status, array_keys( $order_fulfillment_statuses ), true );
 	}
@@ -264,11 +267,14 @@ class FulfillmentUtils {
 	/**
 	 * Check if the given fulfillment status is valid.
 	 *
-	 * @param string $status The fulfillment status to check.
+	 * @param string|null $status The fulfillment status to check.
 	 *
 	 * @return bool True if the status is valid, false otherwise.
 	 */
-	public static function is_valid_fulfillment_status( string $status ): bool {
+	public static function is_valid_fulfillment_status( ?string $status ): bool {
+		if ( is_null( $status ) ) {
+			return false;
+		}
 		$fulfillment_statuses = self::get_fulfillment_statuses();
 		return in_array( $status, array_keys( $fulfillment_statuses ), true );
 	}

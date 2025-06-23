@@ -268,7 +268,6 @@ class FulfillmentsRenderer {
 				// Fulfill all existing fulfillments.
 				foreach ( $fulfillments as $fulfillment ) {
 					$fulfillment->set_status( 'fulfilled' );
-					$fulfillment->set_is_fulfilled( true );
 					$fulfillment->save();
 				}
 
@@ -288,7 +287,6 @@ class FulfillmentsRenderer {
 					$fulfillment->set_entity_type( WC_Order::class );
 					$fulfillment->set_entity_id( (string) $order->get_id() );
 					$fulfillment->set_status( 'fulfilled' );
-					$fulfillment->set_is_fulfilled( true );
 					$fulfillment->set_items( $remaining_items );
 					$fulfillment->save();
 				}

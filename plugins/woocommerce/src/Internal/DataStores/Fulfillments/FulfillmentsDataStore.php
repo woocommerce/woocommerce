@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\DataStores\Fulfillments;
 
 use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
 use WC_Meta_Data;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -40,6 +41,9 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		}
 		if ( ! $data->get_entity_id() ) {
 			throw new \Exception( esc_html__( 'Invalid entity ID.', 'woocommerce' ) );
+		}
+		if ( ! FulfillmentUtils::is_valid_fulfillment_status( $data->get_status() ) ) {
+			throw new \Exception( esc_html__( 'Invalid fulfillment status.', 'woocommerce' ) );
 		}
 
 		$this->validate_items( $data );
@@ -171,6 +175,10 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	public function update( &$data ): void {
 		// Update the fulfillment in the database.
 		$data_id = $data->get_id();
+
+		if ( ! FulfillmentUtils::is_valid_fulfillment_status( $data->get_status() ) ) {
+			throw new \Exception( esc_html__( 'Invalid fulfillment status.', 'woocommerce' ) );
+		}
 
 		$this->validate_items( $data );
 

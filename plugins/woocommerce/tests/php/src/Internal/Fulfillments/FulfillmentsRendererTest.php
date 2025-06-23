@@ -136,7 +136,6 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 				),
 			)
 		);
-		$fulfillment->set_is_fulfilled( true );
 		$fulfillment->set_status( 'fulfilled' );
 		$fulfillment->save();
 
@@ -261,7 +260,6 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$fulfillment->set_entity_type( WC_Order::class );
 		$fulfillment->set_entity_id( (string) $order->get_id() );
 		$fulfillment->set_status( 'unfulfilled' );
-		$fulfillment->set_is_fulfilled( false );
 		$fulfillment->set_items(
 			array(
 				array(
@@ -307,7 +305,6 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$fulfillment->set_entity_type( WC_Order::class );
 		$fulfillment->set_entity_id( (string) $order->get_id() );
 		$fulfillment->set_status( 'unfulfilled' );
-		$fulfillment->set_is_fulfilled( false );
 		$fulfillment->set_items(
 			array_map(
 				function ( $item ) {
@@ -355,7 +352,6 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$fulfillment->set_entity_type( WC_Order::class );
 		$fulfillment->set_entity_id( (string) $order->get_id() );
 		$fulfillment->set_status( 'fulfilled' );
-		$fulfillment->set_is_fulfilled( true );
 		$fulfillment->set_items(
 			array_map(
 				function ( $item ) {
