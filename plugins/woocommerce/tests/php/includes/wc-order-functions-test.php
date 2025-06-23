@@ -462,25 +462,23 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test email template processing scenarios.
+	 * Test URL preservation with line breaks (specific to email templates).
 	 */
-	public function test_email_template_processing() {
-		$test_cases = array(
-			'Simple URL'           => 'Visit https://api.example.com/status--check',
-			'URL with text'        => 'Check https://api.example.com/status--check -- for more info',
-			'Multiple URLs'        => 'API 1: https://api1.example.com/endpoint--1 API 2: https://api2.example.com/endpoint--2',
-			'URL with line breaks' => "First line\nVisit https://api.example.com/status--check\nLast line",
-		);
-
-		foreach ( $test_cases as $description => $content ) {
-			// Test HTML email processing (with nl2br).
-			$html_result = nl2br( wc_wptexturize_customer_note( $content ) );
-			$this->assertStringContainsString( '--', $html_result, $description . ' - HTML email should preserve URL double hyphens' );
-
-			// Test plain text email processing.
-			$plain_result = wc_wptexturize_customer_note( $content );
-			$this->assertStringContainsString( '--', $plain_result, $description . ' - Plain text email should preserve URL double hyphens' );
-		}
+	public function test_url_preservation_with_line_breaks() {
+		$content_with_breaks = "Check API status:\nhttps://api.example.com/status--check\n\nThen verify the results -- everything should work.";
+		
+		// Test the core function.
+		$result = wc_wptexturize_customer_note( $content_with_breaks );
+		$this->assertStringContainsString( 'status--check', $result, 'URLs should be preserved even with line breaks' );
+		
+		// Test that nl2br() doesn't affect URL preservation (used in HTML emails).
+		$html_result = nl2br( $result );
+		$this->assertStringContainsString( 'status--check', $html_result, 'URLs should remain preserved after nl2br()' );
+		$this->assertStringContainsString( '<br />', $html_result, 'Line breaks should be converted to <br> tags' );
+		
+		// Verify em-dash conversion still works for non-URL content.
+		$contains_em_dash = strpos( $result, '—' ) !== false || strpos( $result, '&#8212;' ) !== false;
+		$this->assertTrue( $contains_em_dash, 'Non-URL double hyphens should still be converted to em-dash' );
 	}
 
 	/**
