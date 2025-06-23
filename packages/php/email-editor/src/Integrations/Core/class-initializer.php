@@ -27,6 +27,27 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Text;
  */
 class Initializer {
 	/**
+	 * List of supported blocks in the email editor.
+	 */
+	const ALLOWED_BLOCK_TYPES = array(
+		'core/button',
+		'core/buttons',
+		'core/column',
+		'core/columns',
+		'core/group',
+		'core/heading',
+		'core/image',
+		'core/list',
+		'core/list-item',
+		'core/paragraph',
+		'core/quote',
+		'core/spacer',
+		'core/social-link',
+		'core/social-links',
+	);
+
+
+	/**
 	 * Initializes the core blocks renderers.
 	 */
 	public function initialize(): void {
@@ -69,12 +90,16 @@ class Initializer {
 	}
 
 	/**
-	 * Set render_email_callback for supported blocks.
+	 * Set `supports.email = true` and configure render_email_callback for supported blocks.
 	 *
 	 * @param array $settings Block settings.
 	 * @return array
 	 */
 	public function update_block_settings( array $settings ): array {
+		if ( in_array( $settings['name'], self::ALLOWED_BLOCK_TYPES, true ) ) {
+			$settings['supports']['email'] = true;
+		}
+
 		switch ( $settings['name'] ) {
 			case 'core/heading':
 			case 'core/paragraph':
