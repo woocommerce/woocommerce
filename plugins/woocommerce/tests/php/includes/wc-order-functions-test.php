@@ -458,6 +458,28 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test email template processing scenarios.
+	 */
+	public function test_email_template_processing() {
+		$test_cases = array(
+			'Simple URL' => 'Visit https://api.example.com/status--check',
+			'URL with text' => 'Check https://api.example.com/status--check -- for more info',
+			'Multiple URLs' => 'API 1: https://api1.example.com/endpoint--1 API 2: https://api2.example.com/endpoint--2',
+			'URL with line breaks' => "First line\nVisit https://api.example.com/status--check\nLast line",
+		);
+
+		foreach ( $test_cases as $description => $content ) {
+			// Test HTML email processing (with nl2br)
+			$html_result = nl2br( wc_wptexturize_customer_note( $content ) );
+			$this->assertStringContainsString( '--', $html_result, $description . ' - HTML email should preserve URL double hyphens' );
+			
+			// Test plain text email processing
+			$plain_result = wc_wptexturize_customer_note( $content );
+			$this->assertStringContainsString( '--', $plain_result, $description . ' - Plain text email should preserve URL double hyphens' );
+		}
+	}
+
+	/**
 	 * Test edge cases for URL detection regex.
 	 */
 	public function test_url_detection_edge_cases() {

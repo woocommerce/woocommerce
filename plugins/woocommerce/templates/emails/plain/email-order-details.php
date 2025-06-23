@@ -68,9 +68,9 @@ if ( $item_totals ) {
 
 if ( $order->get_customer_note() ) {
 	if ( $email_improvements_enabled ) {
-		echo "\n" . esc_html__( 'Note:', 'woocommerce' ) . "\n" . wp_kses( wptexturize( $order->get_customer_note() ), array() ) . "\n";
+		echo "\n" . esc_html__( 'Note:', 'woocommerce' ) . "\n" . wp_kses( wc_wptexturize_customer_note( $order->get_customer_note() ), array() ) . "\n";
 	} else {
-		echo esc_html__( 'Note:', 'woocommerce' ) . "\t " . wp_kses( wptexturize( $order->get_customer_note() ), array() ) . "\n";
+		echo esc_html__( 'Note:', 'woocommerce' ) . "\t " . wp_kses( wc_wptexturize_customer_note( $order->get_customer_note() ), array() ) . "\n";
 	}
 }
 
