@@ -241,6 +241,7 @@ export const EllipsisMenuContent = ( {
 									provider,
 									{
 										link_type: link._type,
+										link_url: link.url,
 									}
 								);
 							} }
