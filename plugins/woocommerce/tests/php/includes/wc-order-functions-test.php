@@ -325,4 +325,166 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertTrue( $fully_refunded_triggered, 'Fully refunded action should be triggered' );
 		$this->assertFalse( $partially_refunded_triggered, 'Partially refunded action should not be triggered' );
 	}
+
+	/**
+	 * Test that wc_wptexturize_order_note_content() preserves URLs with double hyphens.
+	 *
+	 * @dataProvider url_protection_test_data
+	 */
+	public function test_wc_wptexturize_order_note_content( $input, $expected_contains_double_hyphens, $expected_contains_en_dash, $test_description ) {
+		// Create a mock note object.
+		$note = (object) array(
+			'content'       => $input,
+			'customer_note' => 1,
+			'added_by'      => 'system',
+		);
+
+		// Test the function.
+		$result = wc_wptexturize_order_note_content( $input, $note );
+
+		// Always make at least one assertion - that we got a string result.
+		$this->assertIsString( $result, $test_description . ' - Result should be a string' );
+
+		// For empty input, result should also be empty.
+		if ( empty( $input ) ) {
+			$this->assertEmpty( $result, $test_description . ' - Empty input should produce empty result' );
+			return; // Exit early for empty input case.
+		}
+
+		// Check if URLs with double hyphens are preserved.
+		if ( $expected_contains_double_hyphens ) {
+			$this->assertStringContainsString( '--', $result, $test_description . ' - Should preserve double hyphens in URLs' );
+		} else {
+			// If we don't expect double hyphens, make sure there are none (except in URLs).
+			$url_pattern          = '/\b(?:https?):\/\/[^\s<>"{}|\\^`\[\]]+/i';
+			$content_without_urls = preg_replace( $url_pattern, '', $result );
+			$this->assertStringNotContainsString( '--', $content_without_urls, $test_description . ' - Should not contain double hyphens outside URLs' );
+		}
+
+		// Check if non-URL double hyphens are converted to en-dashes (either Unicode or HTML entity).
+		if ( $expected_contains_en_dash ) {
+			$contains_en_dash = strpos( $result, '–' ) !== false || strpos( $result, '&#8212;' ) !== false;
+			$this->assertTrue( $contains_en_dash, $test_description . ' - Should convert non-URL double hyphens to en-dashes (found: ' . $result . ')' );
+		} else {
+			// If we don't expect en-dash, verify it's not there.
+			$contains_en_dash = strpos( $result, '–' ) !== false || strpos( $result, '&#8212;' ) !== false;
+			$this->assertFalse( $contains_en_dash, $test_description . ' - Should not contain en-dashes (found: ' . $result . ')' );
+		}
+
+		// Ensure the result is not empty for non-empty input.
+		$this->assertNotEmpty( $result, $test_description . ' - Result should not be empty for non-empty input' );
+	}
+
+	/**
+	 * Data provider for URL protection tests.
+	 *
+	 * @return array Test data with format: [input, expected_double_hyphens, expected_en_dash, description]
+	 */
+	public function url_protection_test_data() {
+		return array(
+			// URL with double hyphens should be preserved.
+			array(
+				'Check API status at https://api.example.com/status--check for details',
+				true,  // Should contain double hyphens.
+				false, // Should not contain en-dash (no non-URL double hyphens).
+				'URL with double hyphens in path',
+			),
+			// Multiple URLs with double hyphens.
+			array(
+				'First URL: https://api.test.com/endpoint--1 and second URL: https://api.test.com/endpoint--2',
+				true,  // Should contain double hyphens.
+				false, // Should not contain en-dash.
+				'Multiple URLs with double hyphens',
+			),
+			// Text with double hyphens (not URLs) should be converted.
+			array(
+				'This is a test -- it should convert to em-dash',
+				false, // Should not contain double hyphens.
+				true,  // Should contain en-dash.
+				'Non-URL double hyphens should be converted',
+			),
+			// Mixed content: URL with double hyphens + text with double hyphens.
+			array(
+				'Check the API at https://api.example.com/status--check -- this should work properly',
+				true, // Should contain double hyphens (in URL).
+				true, // Should contain en-dash (from text).
+				'Mixed content: URL and text with double hyphens',
+			),
+			// HTTPS URL with complex path.
+			array(
+				'Visit https://example.com/path--with--multiple--hyphens/page.html',
+				true,  // Should contain double hyphens.
+				false, // Should not contain en-dash.
+				'HTTPS URL with multiple double hyphens in path',
+			),
+			// HTTP URL with double hyphens.
+			array(
+				'API endpoint: http://legacy-api.example.com/v1/status--check',
+				true,  // Should contain double hyphens.
+				false, // Should not contain en-dash.
+				'HTTP URL with double hyphens',
+			),
+			// No URLs, just regular text formatting.
+			array(
+				'Just some text -- with double hyphens -- to convert',
+				false, // Should not contain double hyphens.
+				true,  // Should contain en-dash.
+				'Text without URLs should be texturized normally',
+			),
+			// Empty content.
+			array(
+				'',
+				false, // Should not contain double hyphens.
+				false, // Should not contain en-dash.
+				'Empty content should be handled gracefully',
+			),
+			// URL at end of sentence.
+			array(
+				'Please check https://api.example.com/endpoint--status.',
+				true,  // Should contain double hyphens.
+				false, // Should not contain en-dash.
+				'URL at end of sentence with punctuation',
+			),
+		);
+	}
+
+	/**
+	 * Test that wc_wptexturize_customer_note() works correctly.
+	 */
+	public function test_wc_wptexturize_customer_note() {
+		$content = 'Check API status at https://api.example.com/status--check -- this is important';
+
+		$result = wc_wptexturize_customer_note( $content );
+
+		// Should preserve URL double hyphens.
+		$this->assertStringContainsString( 'status--check', $result, 'Should preserve double hyphens in URLs' );
+
+		// Should convert text double hyphens to en-dash (either Unicode or HTML entity).
+		$contains_en_dash = strpos( $result, '–' ) !== false || strpos( $result, '&#8212;' ) !== false;
+		$this->assertTrue( $contains_en_dash, 'Should convert text double hyphens to en-dash (found: ' . $result . ')' );
+	}
+
+	/**
+	 * Test edge cases for URL detection regex.
+	 */
+	public function test_url_detection_edge_cases() {
+		$edge_cases = array(
+			// URL with query parameters and double hyphens.
+			'https://api.example.com/search--results?query=test&type=--advanced',
+			// URL with fragment and double hyphens.
+			'https://docs.example.com/section--a#subsection--b',
+			// Multiple protocols.
+			'Check http://old.example.com/legacy--api and https://new.example.com/modern--api',
+			// URL with port number.
+			'https://localhost:8080/dev--server/status--check',
+		);
+
+		foreach ( $edge_cases as $content ) {
+			$note   = (object) array( 'content' => $content );
+			$result = wc_wptexturize_order_note_content( $content, $note );
+
+			// All URLs should preserve their double hyphens.
+			$this->assertStringContainsString( '--', $result, "Edge case should preserve double hyphens: {$content}" );
+		}
+	}
 }
