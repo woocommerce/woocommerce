@@ -348,14 +348,14 @@ const { state: cartItemState } = store(
 
 			get lineItemTotal(): string {
 				const { totals } = cartItemState.cartItem;
-				const currency = cartItemState.currency;
+				const itemCurrency = cartItemState.currency;
 
 				const totalLinePrice = displayCartPriceIncludingTax
 					? parseInt( totals.line_subtotal, 10 ) +
 					  parseInt( totals.line_subtotal_tax, 10 )
 					: parseInt( totals.line_subtotal, 10 );
 
-				return formatPriceWithCurrency( totalLinePrice, currency );
+				return formatPriceWithCurrency( totalLinePrice, itemCurrency );
 			},
 		},
 
