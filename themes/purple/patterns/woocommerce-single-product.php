@@ -87,8 +87,8 @@
 	<div style="height:var(--wp--preset--spacing--40)" aria-hidden="true" class="wp-block-spacer"></div>
 	<!-- /wp:spacer -->
 
-	<!-- wp:woocommerce/blockified-product-reviews -->
-	<div class="wp-block-woocommerce-blockified-product-reviews">
+	<!-- wp:woocommerce/product-reviews -->
+	<div class="wp-block-woocommerce-product-reviews">
 		<!-- wp:woocommerce/product-reviews-title {"showProductTitle":false,"showReviewsCount":false,"level":3,"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|50"}}}} /-->
 		<!-- wp:woocommerce/product-review-template -->
 	
@@ -137,7 +137,7 @@
 		<!-- /wp:group -->
 
 	</div>
-	<!-- /wp:woocommerce/blockified-product-reviews -->
+	<!-- /wp:woocommerce/product-reviews -->
 
 </div>
 <!-- /wp:group -->
