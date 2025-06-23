@@ -221,14 +221,7 @@ class BlockTemplateUtils {
 		$theme_name             = wp_get_theme()->get( 'TextDomain' );
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$template_content = file_get_contents( $template_file->path );
-
-		// if ( strpos( $template_file->path, 'mini-cart' ) !== false ) {
-		// echo '<pre>';
-		// echo $template_content;
-		// echo '</pre>';
-		// }
-
+		$template_content  = file_get_contents( $template_file->path );
 		$template          = new \WP_Block_Template();
 		$template->id      = $template_is_from_theme ? $theme_name . '//' . $template_file->slug : self::PLUGIN_SLUG . '//' . $template_file->slug;
 		$template->theme   = $template_is_from_theme ? $theme_name : self::PLUGIN_SLUG;

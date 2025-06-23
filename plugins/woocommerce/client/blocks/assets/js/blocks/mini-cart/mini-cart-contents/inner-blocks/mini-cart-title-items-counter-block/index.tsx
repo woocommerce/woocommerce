@@ -20,13 +20,14 @@ const blockSettings = {
 		),
 	},
 	edit: Edit,
-	save() {
-		return null;
-	},
+	save: Save,
 };
 
-if ( ! isExperimentalMiniCartEnabled() ) {
-	blockSettings.save = Save;
+if ( isExperimentalMiniCartEnabled() ) {
+	// @ts-ignore -- This is valid to return null.
+	blockSettings.save = () => {
+		return null;
+	};
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
