@@ -24,6 +24,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
  */
 class MiniCart extends AbstractBlock {
 
+
 	use BlockHooksTrait;
 	use BlocksSharedState;
 
@@ -500,8 +501,7 @@ class MiniCart extends AbstractBlock {
 			wp_interactivity_config(
 				$this->get_full_block_name(),
 				array(
-					'addToCartBehaviour'          => $attributes['addToCartBehaviour'],
-					'experimentalMiniCartEnabled' => true,
+					'addToCartBehaviour' => $attributes['addToCartBehaviour'],
 				)
 			);
 

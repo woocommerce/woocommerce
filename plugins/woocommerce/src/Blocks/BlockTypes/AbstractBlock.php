@@ -447,8 +447,9 @@ abstract class AbstractBlock {
 						// Note that while we don't have a consolidated way of doing feature-flagging
 						// we are borrowing from the WC Admin Features implementation. Also note we cannot
 						// use the wcAdminFeatures global because it's not always enqueued in the context of blocks.
-						'experimentalBlocksEnabled' => Features::is_enabled( 'experimental-blocks' ),
-						'productCount'              => $published_products,
+						'experimentalBlocksEnabled'   => Features::is_enabled( 'experimental-blocks' ),
+						'experimentalMiniCartEnabled' => Features::is_enabled( 'experimental-iapi-mini-cart' ),
+						'productCount'                => $published_products,
 					]
 				);
 			}
