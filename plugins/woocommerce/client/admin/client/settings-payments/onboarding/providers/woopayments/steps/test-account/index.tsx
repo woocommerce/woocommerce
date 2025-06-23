@@ -511,7 +511,7 @@ const TestAccountStep = () => {
 									<div className="woocommerce-woopayments-modal__content__item-flex__description">
 										<h3>
 											{ __(
-												'Activate payments',
+												'Activate real payments',
 												'woocommerce'
 											) }
 										</h3>
@@ -519,7 +519,7 @@ const TestAccountStep = () => {
 											<p>
 												{ interpolateComponents( {
 													mixedString: __(
-														'Provide some additional details about your business so you can begin accepting real payments. {{link}}Learn more{{/link}}',
+														'Provide additional details about your business so you can begin accepting real payments. {{link}}Learn more{{/link}}',
 														'woocommerce'
 													),
 													components: {
