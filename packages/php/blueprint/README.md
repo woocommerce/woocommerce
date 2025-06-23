@@ -142,6 +142,9 @@ You can extend Blueprint by adding custom exporters, importers, or steps. This a
 
 ## Example: Adding a Custom Exporter
 
+> [!IMPORTANT]
+> Custom exporters added via the `wooblueprint_exporters` filter are **not currently supported in the WooCommerce Blueprint admin UI** (`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=blueprint`). They can only be used via PHP or WP-CLI. We will be working on this in the future.
+
 1. Create a new class that extends `Automattic\WooCommerce\Blueprint\Exporters\StepExporter`.
 
 ```php

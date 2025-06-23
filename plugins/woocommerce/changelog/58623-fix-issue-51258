@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: * Fix   - Consistently apply additional checkout fields `show_in_order_confirmation` property. * Add - Filter woocommerce_filter_fields_for_order_confirmation to dynamically show or hide additional checkout fields.
+

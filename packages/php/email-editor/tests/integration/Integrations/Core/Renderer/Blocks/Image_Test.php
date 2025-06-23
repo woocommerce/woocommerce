@@ -9,7 +9,8 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 
 /**
  * Integration test for Image class
@@ -54,11 +55,11 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 		'innerContent' => array(),
 	);
 	/**
-	 * Settings controller instance
+	 * Instance of Rendering_Context class
 	 *
-	 * @var Settings_Controller
+	 * @var Rendering_Context
 	 */
-	private $settings_controller;
+	private $rendering_context;
 
 	/**
 	 * Set up before each test
@@ -66,8 +67,9 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->di_container->get( Email_Editor::class )->initialize();
-		$this->image_renderer      = new Image();
-		$this->settings_controller = $this->di_container->get( Settings_Controller::class );
+		$this->image_renderer    = new Image();
+		$theme_controller        = $this->di_container->get( Theme_Controller::class );
+		$this->rendering_context = new Rendering_Context( $theme_controller->get_theme() );
 	}
 
 	/**
@@ -77,7 +79,7 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_image              = $this->parsed_image;
 		$parsed_image['innerHTML'] = $this->image_content; // To avoid repetition of the image content in the test we need to add it to the parsed block.
 
-		$rendered = $this->image_renderer->render( $this->image_content, $parsed_image, $this->settings_controller );
+		$rendered = $this->image_renderer->render( $this->image_content, $parsed_image, $this->rendering_context );
 		$this->assertStringNotContainsString( '<figure', $rendered );
 		$this->assertStringNotContainsString( '<figcaption', $rendered );
 		$this->assertStringNotContainsString( '</figure>', $rendered );
@@ -96,7 +98,7 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_image['attrs']['className'] = 'is-style-rounded';
 		$parsed_image['innerHTML']          = $this->image_content; // To avoid repetition of the image content in the test we need to add it to the parsed block.
 
-		$rendered = $this->image_renderer->render( $this->image_content, $parsed_image, $this->settings_controller );
+		$rendered = $this->image_renderer->render( $this->image_content, $parsed_image, $this->rendering_context );
 		$this->assertStringNotContainsString( '<figure', $rendered );
 		$this->assertStringNotContainsString( '<figcaption', $rendered );
 		$this->assertStringNotContainsString( '</figure>', $rendered );
@@ -115,7 +117,7 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_image              = $this->parsed_image;
 		$parsed_image['innerHTML'] = $image_content; // To avoid repetition of the image content in the test we need to add it to the parsed block.
 
-		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->settings_controller );
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
 		$this->assertStringContainsString( '>Caption</span>', $rendered );
 		$this->assertStringContainsString( 'text-align:center;', $rendered );
 	}
@@ -130,7 +132,7 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_image['attrs']['width'] = '400px';
 		$parsed_image['innerHTML']      = $image_content; // To avoid repetition of the image content in the test we need to add it to the parsed block.
 
-		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->settings_controller );
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
 		$this->assertStringContainsString( 'align="center"', $rendered );
 		$this->assertStringContainsString( 'width="400"', $rendered );
 		$this->assertStringContainsString( 'height="300"', $rendered );
@@ -142,7 +144,11 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test it renders image with borders
 	 */
 	public function testItRendersBorders(): void {
-		$image_content                            = $this->image_content;
+		$image_content                            = '
+			<figure class="wp-block-image alignleft size-full is-style-default">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" style="border-width:10px;border-color:#000001;border-radius:20px;height:auto;" srcset="https://test.com/wp-content/uploads/2023/05/image.jpg 1000w"/>
+			</figure>
+		';
 		$parsed_image                             = $this->parsed_image;
 		$parsed_image['attrs']['style']['border'] = array(
 			'width'  => '10px',
@@ -150,7 +156,7 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 			'radius' => '20px',
 		);
 
-		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->settings_controller );
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
 		$html     = new \WP_HTML_Tag_Processor( $rendered );
 		// Border is rendered on the wrapping table cell.
 		$html->next_tag(
@@ -182,7 +188,7 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 			'radius' => '20px',
 		);
 
-		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->settings_controller );
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
 		$html     = new \WP_HTML_Tag_Processor( $rendered );
 		// Border is rendered on the wrapping table cell and the border classes are moved to the wrapping table cell.
 		$html->next_tag(

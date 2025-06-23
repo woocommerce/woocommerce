@@ -21,10 +21,15 @@
 	.woocommerce-recommended-payment-methods {
 		margin-top: 24px;
 		background: transparent;
+		top: $gap-small;
 
-		.woocommerce-layout__header-wrapper {
-			background: transparent;
-			align-items: start;
+		&__header {
+			&--title {
+				h1 {
+					font-weight: 500;
+					font-size: 14px;
+				}
+			}
 		}
 	}
 

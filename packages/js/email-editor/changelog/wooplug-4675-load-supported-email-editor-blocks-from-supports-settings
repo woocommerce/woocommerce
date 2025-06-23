@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add loading allowed blocks in the email editor by metadata `supports.email`.
