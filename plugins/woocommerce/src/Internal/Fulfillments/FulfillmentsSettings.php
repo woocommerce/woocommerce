@@ -91,7 +91,8 @@ class FulfillmentsSettings {
 	 * @param WC_Order $order The order object.
 	 */
 	public function auto_fulfill_items( int $order_id, $order ): void {
-		$order = $order ?? wc_get_order( $order_id );
+		$order = $order instanceof WC_Order ? $order : wc_get_order( $order_id );
+
 		if ( ! $order || empty( $order->get_items() ) ) {
 			return;
 		}
