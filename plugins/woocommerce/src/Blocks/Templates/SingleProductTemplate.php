@@ -169,7 +169,7 @@ class SingleProductTemplate extends AbstractTemplate {
 			'woocommerce/product-gallery',
 			'woocommerce/product-collection',
 			'core/post-title',
-			'core/post-excerpt'
+			'core/post-excerpt',
 		);
 
 		return array_reduce(
