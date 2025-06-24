@@ -103,13 +103,13 @@ class FulfillmentsSettings {
 		 *
 		 * @since 9.9.0
 		 *
-		 * @param array $auto_fulfill_items List of item or variant ID's to auto-fulfill.
+		 * @param array $auto_fulfill_items List of product or variant ID's to auto-fulfill.
 		 * @param \WC_Order $order The order object.
 		 *
-		 * @return array Filtered list of item or variant ID's to auto-fulfill
+		 * @return array Filtered list of product or variant ID's to auto-fulfill
 		 */
-		$auto_fulfill_item_ids = apply_filters( 'woocommerce_auto_fulfill_items', array(), $order );
-		$auto_fulfill_items    = array();
+		$auto_fulfill_product_ids = apply_filters( 'woocommerce_auto_fulfill_products', array(), $order );
+		$auto_fulfill_items       = array();
 
 		foreach ( $order->get_items() as $item ) {
 			/**
@@ -125,7 +125,7 @@ class FulfillmentsSettings {
 
 			if ( ( $product->is_downloadable() && $auto_fulfill_downloadable )
 				|| ( $product->is_virtual() && $auto_fulfill_virtual )
-				|| in_array( $item->get_id(), $auto_fulfill_item_ids, true ) ) {
+				|| in_array( $product->get_id(), $auto_fulfill_product_ids, true ) ) {
 				$auto_fulfill_items[] = $item;
 			}
 		}
