@@ -36,8 +36,8 @@ class CycleStateServiceTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_option_name() {
 		$product_id = 123;
-		$method = $this->get_private_method( $this->sut, 'get_option_name' );
-		$result = $method->invokeArgs( $this->sut, array( $product_id ) );
+		$method     = $this->get_private_method( $this->sut, 'get_option_name' );
+		$result     = $method->invokeArgs( $this->sut, array( $product_id ) );
 		$this->assertEquals( CycleStateService::STATE_OPTION_PREFIX . $product_id, $result );
 	}
 
@@ -46,8 +46,8 @@ class CycleStateServiceTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_option_name_with_product_id_0() {
 		$product_id = 0;
-		$method = $this->get_private_method( $this->sut, 'get_option_name' );
-		$result = $method->invokeArgs( $this->sut, array( $product_id ) );
+		$method     = $this->get_private_method( $this->sut, 'get_option_name' );
+		$result     = $method->invokeArgs( $this->sut, array( $product_id ) );
 		$this->assertEquals( '', $result );
 	}
 
@@ -56,8 +56,8 @@ class CycleStateServiceTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_raw_cycle_state() {
 		$product_id = 123;
-		$method = $this->get_private_method( $this->sut, 'get_raw_cycle_state' );
-		$result = $method->invokeArgs( $this->sut, array( $product_id ) );
+		$method     = $this->get_private_method( $this->sut, 'get_raw_cycle_state' );
+		$result     = $method->invokeArgs( $this->sut, array( $product_id ) );
 		$this->assertEmpty( $result );
 
 		$cycle_state = array(
@@ -78,7 +78,7 @@ class CycleStateServiceTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_or_initialize_cycle_state() {
 		$product_id = 123;
-		$result = $this->sut->get_or_initialize_cycle_state( $product_id );
+		$result     = $this->sut->get_or_initialize_cycle_state( $product_id );
 		$this->assertArrayHasKey( 'cycle_start_time', $result );
 		$this->assertArrayHasKey( 'total_count', $result );
 		$this->assertArrayHasKey( 'sent_count', $result );
@@ -101,7 +101,7 @@ class CycleStateServiceTests extends \WC_Unit_Test_Case {
 	 * Test get_or_initialize_cycle_state method with invalid state.
 	 */
 	public function test_get_or_initialize_cycle_state_with_invalid_state() {
-		$product_id = 123;
+		$product_id  = 123;
 		$cycle_state = array(
 			'cycle_start_time' => time(),
 		);
@@ -114,7 +114,7 @@ class CycleStateServiceTests extends \WC_Unit_Test_Case {
 	 * Test get_or_initialize_cycle_state method with invalid start timestamp.
 	 */
 	public function test_get_or_initialize_cycle_state_with_invalid_start_timestamp() {
-		$product_id = 123;
+		$product_id  = 123;
 		$cycle_state = array(
 			'cycle_start_time' => 'invalid',
 			'total_count'      => 10,
@@ -132,7 +132,7 @@ class CycleStateServiceTests extends \WC_Unit_Test_Case {
 	 * Test save_cycle_state method.
 	 */
 	public function test_save_cycle_state() {
-		$product_id = 123;
+		$product_id  = 123;
 		$cycle_state = array(
 			'cycle_start_time' => time(),
 			'total_count'      => 10,
@@ -159,7 +159,7 @@ class CycleStateServiceTests extends \WC_Unit_Test_Case {
 	 * Test complete_cycle method.
 	 */
 	public function test_complete_cycle() {
-		$product_id = 123;
+		$product_id  = 123;
 		$cycle_state = array(
 			'cycle_start_time' => time(),
 			'total_count'      => 10,
