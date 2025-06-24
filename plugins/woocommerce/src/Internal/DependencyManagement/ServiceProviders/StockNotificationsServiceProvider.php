@@ -18,7 +18,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\MenusController;
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
-use Automattic\WooCommerce\Internal\StockNotifications\Admin\PrivacyEraser;
+use Automattic\WooCommerce\Internal\StockNotifications\Privacy\PrivacyEraser;
 
 /**
  * Service provider for Back in Stock Notification classes.

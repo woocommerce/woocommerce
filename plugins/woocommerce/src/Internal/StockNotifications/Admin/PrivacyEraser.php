@@ -2,9 +2,13 @@
 
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Internal\StockNotifications;
+namespace Automattic\WooCommerce\Internal\StockNotifications\Privacy;
 
 class PrivacyEraser extends \WC_Abstract_Privacy {
+
+	final public function init() {
+		parent::init();
+	}
 
 	public static function erase_notification_data( $response, $customer, $email_address ) {
 		$can_erase = apply_filters( 'woocommerce_can_erase_customer_stock_notifications_data', true );
