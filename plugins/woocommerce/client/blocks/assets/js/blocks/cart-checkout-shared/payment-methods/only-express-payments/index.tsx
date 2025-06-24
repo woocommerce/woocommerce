@@ -20,7 +20,7 @@ const OnlyExpressPayments = () => {
 			status="info"
 		>
 			{ __(
-				'Only express payment methods are available. Please contact us for help placing your order.',
+				'Only express payment methods are available for this order. Please choose one to place your order.',
 				'woocommerce'
 			) }
 		</NoticeBanner>
