@@ -130,7 +130,7 @@ if ( ! function_exists( 'is_checkout_pay_page' ) ) {
 	 * @param bool $check_key Optional. If true, check if the key is set in the URL.
 	 * @return bool
 	 */
-	function is_checkout_pay_page( $check_key = false ) {
+	function is_checkout_pay_page( bool $check_key = false ): bool {
 		global $wp;
 
 		$is_pay_for_order = ( is_checkout() && ! empty( $wp->query_vars['order-pay'] ) ) || is_wc_endpoint_url( 'order-pay' ) || isset( $_GET['pay_for_order'] );  // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -290,7 +290,7 @@ if ( ! function_exists( 'is_admin_settings_page' ) ) {
 	 *
 	 * @return bool
 	 */
-	function is_admin_settings_page() {
+	function is_admin_settings_page(): bool {
 		return is_admin() && isset( $_GET['page'] ) && 'wc-settings' === $_GET['page']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 }
