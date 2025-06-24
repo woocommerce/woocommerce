@@ -168,7 +168,7 @@ class WC_Admin_Menus {
 		global $current_tab, $current_section;
 
 		// We should only save on the settings page.
-		if ( ! is_admin_settings_page() ) {
+		if ( ! is_wc_admin_settings_page() ) {
 			return;
 		}
 

@@ -230,7 +230,7 @@ class WC_Settings_Tracking {
 	 * @param string $hook Page hook.
 	 */
 	public function possibly_add_settings_tracking_scripts( $hook ) {
-		if ( ! is_admin_settings_page() ) {
+		if ( ! is_wc_admin_settings_page() ) {
 			return;
 		}
 

@@ -283,14 +283,14 @@ if ( ! function_exists( 'is_lost_password_page' ) ) {
 	}
 }
 
-if ( ! function_exists( 'is_admin_settings_page' ) ) {
+if ( ! function_exists( 'is_wc_admin_settings_page' ) ) {
 
 	/**
-	 * is_admin_settings_page - Returns true when viewing the admin settings page.
+	 * is_wc_admin_settings_page - Returns true when viewing the admin settings page.
 	 *
 	 * @return bool
 	 */
-	function is_admin_settings_page(): bool {
+	function is_wc_admin_settings_page(): bool {
 		return isset( $_REQUEST['page'] ) && 'wc-settings' === $_REQUEST['page'] && is_admin(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 }
