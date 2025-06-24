@@ -7,7 +7,8 @@ use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\StockSyncController;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
-use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\NotificationsProcessor;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\StockManagementHelper;
 
 /**
  * StockSyncControllerTests data tests.
@@ -24,7 +25,10 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut = new StockSyncController();
+		$this->sut           = new StockSyncController();
+		$eligibility_service = new EligibilityService();
+		$eligibility_service->init( new StockManagementHelper() );
+		$this->sut->init( $eligibility_service );
 	}
 
 	/**
@@ -61,17 +65,17 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( $product->get_id(), $this->get_private_property( $this->sut, 'queue' ) );
 
 		// Check that the product runs the sync.
-		$run_product_id = false;
-		tests_add_filter(
-			'woocommerce_stock_notifications_product_sync',
-			function ( $product_id ) use ( &$run_product_id ) {
-				$run_product_id = $product_id;
+		$run_product_ids = array();
+		\add_action(
+			'woocommerce_customer_stock_notifications_product_sync',
+			function ( $product_ids ) use ( &$run_product_ids ) {
+				$run_product_ids = $product_ids;
 			},
 			100,
 			3
 		);
 		$this->sut->process_queue();
-		$this->assertEquals( $product->get_id(), $run_product_id );
+		$this->assertContains( $product->get_id(), $run_product_ids );
 	}
 
 	/**
