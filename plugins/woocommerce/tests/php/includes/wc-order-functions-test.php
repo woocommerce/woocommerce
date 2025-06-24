@@ -482,6 +482,44 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test handling of duplicate URLs in content.
+	 */
+	public function test_duplicate_url_handling() {
+		// Content with multiple sets of duplicate URLs.
+		$content = 'First URL: https://api.example.com/status--check appears here. ' .
+					'Second URL: https://api.example.com/health--monitor is different. ' .
+					'Third URL: https://api.example.com/debug--console is unique. ' .
+					'Now repeat first: https://api.example.com/status--check again. ' .
+					'And second: https://api.example.com/health--monitor once more. ' .
+					'And first again: https://api.example.com/status--check third time. ' .
+					'Plus some text -- that should convert to em-dash.';
+
+		$result = wc_wptexturize_order_note( $content );
+
+		// Verify each URL appears the correct number of times.
+		$status_count = substr_count( $result, 'https://api.example.com/status--check' );
+		$this->assertEquals( 3, $status_count, 'First URL should appear 3 times' );
+
+		$health_count = substr_count( $result, 'https://api.example.com/health--monitor' );
+		$this->assertEquals( 2, $health_count, 'Second URL should appear 2 times' );
+
+		$debug_count = substr_count( $result, 'https://api.example.com/debug--console' );
+		$this->assertEquals( 1, $debug_count, 'Third URL should appear 1 time' );
+
+		// All double hyphens in URLs should remain intact.
+		$this->assertStringContainsString( 'status--check', $result, 'First URL double hyphens should be preserved' );
+		$this->assertStringContainsString( 'health--monitor', $result, 'Second URL double hyphens should be preserved' );
+		$this->assertStringContainsString( 'debug--console', $result, 'Third URL double hyphens should be preserved' );
+
+		// Verify text double hyphens were converted to em-dash.
+		$contains_em_dash = strpos( $result, '—' ) !== false || strpos( $result, '&#8212;' ) !== false;
+		$this->assertTrue( $contains_em_dash, 'Non-URL double hyphens should be converted to em-dash' );
+
+		// Ensure no placeholders leaked into final output.
+		$this->assertStringNotContainsString( '___WC_URL_PLACEHOLDER_', $result, 'No placeholders should remain in output' );
+	}
+
+	/**
 	 * Test edge cases for URL detection regex.
 	 */
 	public function test_url_detection_edge_cases() {

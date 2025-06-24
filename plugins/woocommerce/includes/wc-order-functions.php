@@ -1298,11 +1298,14 @@ function wc_wptexturize_order_note( $content ) {
 		return wptexturize( $content );
 	}
 
+	// Get unique URLs to avoid issues with duplicate URLs.
+	$unique_urls = array_unique( $urls[0] );
+
 	// Replace URLs with placeholders.
 	$placeholders        = array();
 	$placeholder_content = $content;
 
-	foreach ( $urls[0] as $index => $url ) {
+	foreach ( $unique_urls as $index => $url ) {
 		$placeholder                  = sprintf( '___WC_URL_PLACEHOLDER_%d___', $index );
 		$placeholders[ $placeholder ] = $url;
 		$placeholder_content          = str_replace( $url, $placeholder, $placeholder_content );
@@ -1314,4 +1317,3 @@ function wc_wptexturize_order_note( $content ) {
 	// Restore original URLs.
 	return str_replace( array_keys( $placeholders ), array_values( $placeholders ), $texturized_content );
 }
-
