@@ -118,7 +118,7 @@ class FulfillmentsSettings {
 		 *
 		 * @return array Filtered list of product or variant ID's to auto-fulfill
 		 */
-		$auto_fulfill_product_ids = apply_filters( 'woocommerce_auto_fulfill_products', array(), $order );
+		$auto_fulfill_product_ids = apply_filters( 'wc_fulfillments_auto_fulfill_products', array(), $order );
 		$auto_fulfill_items       = array();
 
 		foreach ( $order->get_items() as $item ) {
