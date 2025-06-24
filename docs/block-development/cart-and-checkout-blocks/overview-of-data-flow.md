@@ -6,8 +6,6 @@ sidebar_label: Data flow overview
 
 # Overview of data flow between client and server
 
-<!-- markdownlint-disable MD041 -->
-
 In the WooCommerce Cart and Checkout blocks, the server is the source of truth for critical transactional and persistent data. This includes:
 
 -   Cart item details (items, quantities, and prices)
