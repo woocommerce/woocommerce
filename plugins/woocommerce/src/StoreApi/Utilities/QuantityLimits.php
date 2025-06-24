@@ -15,11 +15,6 @@ final class QuantityLimits {
 	use DraftOrderTrait;
 
 	/**
-	 * Tolerance for floating point comparisons.
-	 */
-	const FLOAT_TOLERANCE = 0.00001;
-
-	/**
 	 * Get quantity limits (min, max, step/multiple) for a product or cart item.
 	 *
 	 * @param array $cart_item A cart item array.
@@ -50,9 +45,8 @@ final class QuantityLimits {
 		$editable    = $this->filter_boolean_value( $editable, 'editable', $cart_item );
 
 		// Ensure values are compatible with each other.
-		$multiple_of = $multiple_of < self::FLOAT_TOLERANCE ? 1 : $multiple_of;
-		$minimum     = max( $multiple_of, $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ) );
-		$maximum     = max( $minimum, $this->limit_to_multiple( $maximum, $multiple_of, 'floor' ) );
+		$minimum = max( $multiple_of, $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ) );
+		$maximum = max( $minimum, $this->limit_to_multiple( $maximum, $multiple_of, 'floor' ) );
 
 		return [
 			'minimum'     => $minimum,
@@ -80,9 +74,8 @@ final class QuantityLimits {
 		$maximum     = $this->filter_numeric_value( $maximum, 'maximum', $product );
 
 		// Ensure values are compatible with each other.
-		$multiple_of = $multiple_of < self::FLOAT_TOLERANCE ? 1 : $multiple_of;
-		$minimum     = max( $multiple_of, $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ) );
-		$maximum     = max( $minimum, $this->limit_to_multiple( $maximum, $multiple_of, 'floor' ) );
+		$minimum = max( $multiple_of, $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ) );
+		$maximum = max( $minimum, $this->limit_to_multiple( $maximum, $multiple_of, 'floor' ) );
 
 		return [
 			'minimum'     => $minimum,
@@ -94,15 +87,19 @@ final class QuantityLimits {
 	/**
 	 * Fix a quantity violation by adjusting it to the nearest valid quantity.
 	 *
-	 * @param int|float $quantity Quantity to normalise.
-	 * @param array     $cart_item The cart item.
-	 * @return int|float Normalised quantity.
+	 * @param int|float $quantity Quantity.
+	 * @param array     $cart_item Cart item.
+	 * @return int|float
 	 */
 	public function normalize_cart_item_quantity( $quantity, array $cart_item ) {
 		$product = $cart_item['data'] ?? false;
 
 		if ( ! $product instanceof \WC_Product ) {
 			return wc_stock_amount( $quantity );
+		}
+
+		if ( $quantity < 0 || ! is_numeric( $quantity ) ) {
+			return 0;
 		}
 
 		$limits       = $this->get_cart_item_quantity_limits( $cart_item );
@@ -128,19 +125,18 @@ final class QuantityLimits {
 	 * @return int|float
 	 */
 	public function limit_to_multiple( $number, $multiple_of, string $rounding_function = 'round' ) {
-		if ( $multiple_of < self::FLOAT_TOLERANCE || $this->is_multiple_of( $number, $multiple_of ) ) {
+		if ( ! is_numeric( $number ) ) {
 			return wc_stock_amount( $number );
+		}
+
+		if ( 0 === $multiple_of || $this->is_multiple_of( $number, $multiple_of ) || ! is_numeric( $multiple_of ) ) {
+			return $number;
 		}
 
 		// Ensure valid rounding function.
 		$rounding_function = in_array( $rounding_function, [ 'ceil', 'floor', 'round' ], true ) ? $rounding_function : 'round';
 
-		// Calculate the division result and apply rounding.
-		$division_result  = $number / $multiple_of;
-		$rounded_division = $rounding_function( $division_result );
-		$result           = $rounded_division * $multiple_of;
-
-		return wc_stock_amount( $result );
+		return wc_stock_amount( $rounding_function( $number / $multiple_of ) * $multiple_of );
 	}
 
 	/**
@@ -283,17 +279,13 @@ final class QuantityLimits {
 	}
 
 	/**
-	 * Checks if number is a multiple of another number.
+	 * Checks if a number is a multiple of another number.
 	 *
 	 * @param int|float $number The number to check.
 	 * @param int|float $multiple_of The multiple.
 	 * @return bool
 	 */
 	protected function is_multiple_of( $number, $multiple_of ) {
-		// Ensure we have valid numbers. abs() will not work with strings.
-		$number      = is_string( $number ) ? wc_stock_amount( $number ) : $number;
-		$multiple_of = is_string( $multiple_of ) ? wc_stock_amount( $multiple_of ) : $multiple_of;
-
 		// Handle negative numbers by working with absolute values.
 		$number      = abs( $number );
 		$multiple_of = abs( $multiple_of );
@@ -302,19 +294,11 @@ final class QuantityLimits {
 			return true; // Avoid division by zero.
 		}
 
-		// Handle very small multiples that could cause precision issues. Treat as effectively zero.
-		if ( $multiple_of < self::FLOAT_TOLERANCE ) {
-			return true;
-		}
+		// Scale to integers to avoid floating-point precision issues.
+		$scale           = pow( 10, WC_ROUNDING_PRECISION );
+		$scaled_number   = round( $number * $scale );
+		$scaled_multiple = round( $multiple_of * $scale );
 
-		// For integers, use exact modulo comparison.
-		if ( is_int( $number ) && is_int( $multiple_of ) ) {
-			return 0 === $number % $multiple_of;
-		}
-
-		// For floats, use division and check if result is close to an integer.
-		$division_result = $number / $multiple_of;
-		$rounded_result  = round( $division_result );
-		return abs( $division_result - $rounded_result ) < self::FLOAT_TOLERANCE;
+		return 0 === $scaled_number % $scaled_multiple;
 	}
 }

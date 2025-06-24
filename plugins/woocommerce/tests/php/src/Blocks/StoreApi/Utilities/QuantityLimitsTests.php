@@ -485,4 +485,73 @@ class QuantityLimitsTests extends TestCase {
 		// Test edge case where multiple_of is smaller than tolerance.
 		$this->assertTrue( $method->invoke( $quantity_limits, 5, 0.000001 ), 'Multiple smaller than tolerance should return true' );
 	}
+
+	/**
+	 * Test limit_to_multiple with decimal multiples like 1.5, 2.5.
+	 */
+	public function test_limit_to_multiple_with_decimal_multiples() {
+		$this->enable_float_support();
+
+		$quantity_limits = new QuantityLimits();
+
+		// Test with multiple_of = 1.5.
+		$this->assertEquals( 6.0, $quantity_limits->limit_to_multiple( 5.3, 1.5, 'round' ), '5.3 rounded to multiple of 1.5 should be 6.0' );
+		$this->assertEquals( 6.0, $quantity_limits->limit_to_multiple( 5.3, 1.5, 'ceil' ), '5.3 ceiled to multiple of 1.5 should be 6.0' );
+		$this->assertEquals( 4.5, $quantity_limits->limit_to_multiple( 5.3, 1.5, 'floor' ), '5.3 floored to multiple of 1.5 should be 4.5' );
+
+		// Test with multiple_of = 2.5.
+		$this->assertEquals( 5.0, $quantity_limits->limit_to_multiple( 6.0, 2.5, 'round' ), '6.0 rounded to multiple of 2.5 should be 5.0' );
+		$this->assertEquals( 7.5, $quantity_limits->limit_to_multiple( 6.0, 2.5, 'ceil' ), '6.0 ceiled to multiple of 2.5 should be 7.5' );
+		$this->assertEquals( 5.0, $quantity_limits->limit_to_multiple( 6.0, 2.5, 'floor' ), '6.0 floored to multiple of 2.5 should be 5.0' );
+
+		// Test with multiple_of = 0.25.
+		$this->assertEquals( 1.75, $quantity_limits->limit_to_multiple( 1.8, 0.25, 'round' ), '1.8 rounded to multiple of 0.25 should be 1.75' );
+		$this->assertEquals( 2.0, $quantity_limits->limit_to_multiple( 1.8, 0.25, 'ceil' ), '1.8 ceiled to multiple of 0.25 should be 2.0' );
+		$this->assertEquals( 1.75, $quantity_limits->limit_to_multiple( 1.8, 0.25, 'floor' ), '1.8 floored to multiple of 0.25 should be 1.75' );
+	}
+
+	/**
+	 * Test is_multiple_of with decimal multiples.
+	 */
+	public function test_is_multiple_of_with_decimal_multiples() {
+		$quantity_limits = new QuantityLimits();
+
+		// Use reflection to access the private method.
+		$reflection = new \ReflectionClass( $quantity_limits );
+		$method     = $reflection->getMethod( 'is_multiple_of' );
+		$method->setAccessible( true );
+
+		// Test with multiple_of = 1.5.
+		$this->assertTrue( $method->invoke( $quantity_limits, 3.0, 1.5 ), '3.0 should be a multiple of 1.5' );
+		$this->assertTrue( $method->invoke( $quantity_limits, 4.5, 1.5 ), '4.5 should be a multiple of 1.5' );
+		$this->assertTrue( $method->invoke( $quantity_limits, 6.0, 1.5 ), '6.0 should be a multiple of 1.5' );
+		$this->assertFalse( $method->invoke( $quantity_limits, 5.0, 1.5 ), '5.0 should not be a multiple of 1.5' );
+
+		// Test with multiple_of = 2.5.
+		$this->assertTrue( $method->invoke( $quantity_limits, 5.0, 2.5 ), '5.0 should be a multiple of 2.5' );
+		$this->assertTrue( $method->invoke( $quantity_limits, 7.5, 2.5 ), '7.5 should be a multiple of 2.5' );
+		$this->assertFalse( $method->invoke( $quantity_limits, 6.0, 2.5 ), '6.0 should not be a multiple of 2.5' );
+
+		// Test with multiple_of = 0.25.
+		$this->assertTrue( $method->invoke( $quantity_limits, 1.0, 0.25 ), '1.0 should be a multiple of 0.25' );
+		$this->assertTrue( $method->invoke( $quantity_limits, 1.75, 0.25 ), '1.75 should be a multiple of 0.25' );
+		$this->assertFalse( $method->invoke( $quantity_limits, 1.3, 0.25 ), '1.3 should not be a multiple of 0.25' );
+	}
+
+	/**
+	 * Test limit_to_multiple edge cases with zero and negative values.
+	 */
+	public function test_limit_to_multiple_edge_cases() {
+		$quantity_limits = new QuantityLimits();
+
+		// Test with zero multiple_of (should return original number).
+		$this->assertEquals( 5.5, $quantity_limits->limit_to_multiple( 5.5, 0, 'round' ), 'Zero multiple_of should return original number' );
+
+		// Test with non-numeric inputs.
+		$this->assertEquals( 0, $quantity_limits->limit_to_multiple( 'invalid', 1.5, 'round' ), 'Non-numeric number should return 0 via wc_stock_amount' );
+		$this->assertEquals( 5.5, $quantity_limits->limit_to_multiple( 5.5, 'invalid', 'round' ), 'Non-numeric multiple_of should return original number' );
+
+		// Test with invalid rounding function (should default to 'round').
+		$this->assertEquals( 6.0, $quantity_limits->limit_to_multiple( 5.3, 1.5, 'invalid' ), 'Invalid rounding function should default to round' );
+	}
 }
