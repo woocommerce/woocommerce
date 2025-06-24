@@ -406,7 +406,7 @@ export const SettingsPaymentsBacsWrapper = () => {
 			<Header
 				title={ __( 'Direct bank transfer', 'woocommerce' ) }
 				backLink={ getAdminLink(
-					'admin.php?page=wc-settings&tab=checkout&section=offline'
+					'admin.php?page=wc-settings&tab=checkout&path=/offline'
 				) }
 				context={ 'wc_settings_payments__offline_pms_bacs' }
 			/>
@@ -441,7 +441,7 @@ export const SettingsPaymentsCodWrapper = () => {
 			<Header
 				title={ __( 'Cash on delivery', 'woocommerce' ) }
 				backLink={ getAdminLink(
-					'admin.php?page=wc-settings&tab=checkout&section=offline'
+					'admin.php?page=wc-settings&tab=checkout&path=/offline'
 				) }
 				context={ 'wc_settings_payments__offline_pms_cod' }
 			/>
@@ -476,7 +476,7 @@ export const SettingsPaymentsChequeWrapper = () => {
 			<Header
 				title={ __( 'Check payments', 'woocommerce' ) }
 				backLink={ getAdminLink(
-					'admin.php?page=wc-settings&tab=checkout&section=offline'
+					'admin.php?page=wc-settings&tab=checkout&path=/offline'
 				) }
 				context={ 'wc_settings_payments__offline_pms_cheque' }
 			/>
