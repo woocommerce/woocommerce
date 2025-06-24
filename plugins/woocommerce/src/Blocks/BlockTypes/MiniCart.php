@@ -506,9 +506,9 @@ class MiniCart extends AbstractBlock {
 			$price_color             = isset( $attributes['priceColor']['color'] ) ? $attributes['priceColor']['color'] : '';
 			$on_cart_click_behaviour = isset( $attributes['onCartClickBehaviour'] ) ? $attributes['onCartClickBehaviour'] : 'open_drawer';
 
-			// Build the link attribute based on behavior.
+			// Build the link attribute and role based on behavior.
 			$link_attribute = 'open_drawer' === $on_cart_click_behaviour
-				? 'data-wp-on--click="callbacks.openDrawer"'
+				? 'data-wp-on--click="callbacks.openDrawer" role="button"'
 				: 'href="' . esc_url( wc_get_checkout_url() ) . '"';
 
 			ob_start();
