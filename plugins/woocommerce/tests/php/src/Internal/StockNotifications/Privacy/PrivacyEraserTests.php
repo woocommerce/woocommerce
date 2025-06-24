@@ -3,6 +3,7 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Privacy;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Privacy\PrivacyEraser;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 
@@ -23,5 +24,6 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		$anonymous_notification = new Notification( $notification_id );
 
 		$this->assertEquals( $anonymous_notification->get_user_email(), wp_privacy_anonymize_data( 'email', '' ) );
+		$this->assertEquals( NotificationStatus::CANCELLED, $anonymous_notification->get_status() );
 	}
 }
