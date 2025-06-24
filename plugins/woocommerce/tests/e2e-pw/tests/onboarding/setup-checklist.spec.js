@@ -150,7 +150,7 @@ test( 'Can connect to WooCommerce.com', async ( { page } ) => {
 		await expect( page.url() ).toContain( 'wordpress.com/log-in' );
 		await expect(
 			page.getByRole( 'heading', {
-				name: 'Log in to your account',
+				name: 'Log in to Woo with WordPress.com',
 			} )
 		).toBeVisible( { timeout: 30000 } );
 	} );
