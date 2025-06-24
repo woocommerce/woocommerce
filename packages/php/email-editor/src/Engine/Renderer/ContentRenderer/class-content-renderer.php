@@ -186,7 +186,8 @@ class Content_Renderer {
 					'message'      => $error->getMessage(),
 				)
 			);
-			exit();
+			// Returning the original content.
+			return $block_content;
 		}
 
 		return $this->fallback_renderer->render( $block_content, $parsed_block, $context );

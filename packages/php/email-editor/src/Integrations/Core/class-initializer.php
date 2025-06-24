@@ -136,7 +136,7 @@ class Initializer {
 	 * @param string $block_name Block name.
 	 * @return Abstract_Block_Renderer
 	 */
-	public function get_block_renderer( string $block_name ): Abstract_Block_Renderer {
+	private function get_block_renderer( string $block_name ): Abstract_Block_Renderer {
 		if ( isset( $this->renderers[ $block_name ] ) ) {
 			return $this->renderers[ $block_name ];
 		}
