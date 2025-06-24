@@ -1086,6 +1086,12 @@ describe( 'Address Suggestions Component', () => {
 			expect( billingAddressInput.getAttribute( 'data-lpignore' ) ).toBe(
 				'true'
 			);
+			expect( billingAddressInput.getAttribute( 'data-1p-ignore' ) ).toBe(
+				'true'
+			);
+			expect( billingAddressInput.getAttribute( 'data-op-ignore' ) ).toBe(
+				'true'
+			);
 		} );
 
 		test( 'should enable browser autofill when suggestions are hidden', async () => {
@@ -1104,7 +1110,13 @@ describe( 'Address Suggestions Component', () => {
 				'address-line1'
 			);
 			expect( billingAddressInput.getAttribute( 'data-lpignore' ) ).toBe(
-				'false'
+				null
+			);
+			expect( billingAddressInput.getAttribute( 'data-1p-ignore' ) ).toBe(
+				null
+			);
+			expect( billingAddressInput.getAttribute( 'data-op-ignore' ) ).toBe(
+				null
 			);
 		} );
 	} );
@@ -1312,7 +1324,13 @@ describe( 'Address Suggestions Component', () => {
 				'address-line1'
 			);
 			expect( billingAddressInput.getAttribute( 'data-lpignore' ) ).toBe(
-				'false'
+				null
+			);
+			expect( billingAddressInput.getAttribute( 'data-1p-ignore' ) ).toBe(
+				null
+			);
+			expect( billingAddressInput.getAttribute( 'data-op-ignore' ) ).toBe(
+				null
 			);
 		} );
 	} );
