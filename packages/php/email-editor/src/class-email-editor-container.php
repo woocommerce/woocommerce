@@ -193,6 +193,7 @@ class Email_Editor_Container {
 					$container->get( Process_Manager::class ),
 					new Email_Css_Inliner(),
 					$container->get( Theme_Controller::class ),
+					$container->get( Email_Editor_Logger::class )
 				);
 			}
 		);

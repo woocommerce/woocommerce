@@ -8,6 +8,7 @@
 declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer;
 
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Css_Inliner;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
@@ -85,20 +86,30 @@ class Content_Renderer {
 	private Fallback $fallback_renderer;
 
 	/**
+	 * Logger instance.
+	 *
+	 * @var Email_Editor_Logger
+	 */
+	private Email_Editor_Logger $logger;
+
+	/**
 	 * Content_Renderer constructor.
 	 *
-	 * @param Process_Manager  $preprocess_manager Preprocess manager.
-	 * @param Css_Inliner      $css_inliner Css inliner.
-	 * @param Theme_Controller $theme_controller Theme controller.
+	 * @param Process_Manager     $preprocess_manager Preprocess manager.
+	 * @param Css_Inliner         $css_inliner Css inliner.
+	 * @param Theme_Controller    $theme_controller Theme controller.
+	 * @param Email_Editor_Logger $logger Logger instance.
 	 */
 	public function __construct(
 		Process_Manager $preprocess_manager,
 		Css_Inliner $css_inliner,
-		Theme_Controller $theme_controller
+		Theme_Controller $theme_controller,
+		Email_Editor_Logger $logger
 	) {
 		$this->process_manager     = $preprocess_manager;
 		$this->theme_controller    = $theme_controller;
 		$this->css_inliner         = $css_inliner;
+		$this->logger              = $logger;
 		$this->block_type_registry = WP_Block_Type_Registry::get_instance();
 		$this->fallback_renderer   = new Fallback();
 	}
@@ -161,8 +172,21 @@ class Content_Renderer {
 		$context = new Rendering_Context( $this->theme_controller->get_theme() );
 
 		$block_type = $this->block_type_registry->get_registered( $parsed_block['blockName'] );
-		if ( $block_type && isset( $block_type->render_email_callback ) && is_callable( $block_type->render_email_callback ) ) {
-			return call_user_func( $block_type->render_email_callback, $block_content, $parsed_block, $context );
+		try {
+			if ( $block_type && isset( $block_type->render_email_callback ) && is_callable( $block_type->render_email_callback ) ) {
+				return call_user_func( $block_type->render_email_callback, $block_content, $parsed_block, $context );
+			}
+		} catch ( \Exception $error ) {
+			$this->logger->error(
+				'Error thrown while rendering block.',
+				array(
+					'exception'    => $error,
+					'block_name'   => $parsed_block['blockName'],
+					'parsed_block' => $parsed_block,
+					'message'      => $error->getMessage(),
+				)
+			);
+			exit();
 		}
 
 		return $this->fallback_renderer->render( $block_content, $parsed_block, $context );

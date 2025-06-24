@@ -232,6 +232,7 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 					$container->get( Process_Manager::class ),
 					$container->get( Email_Css_Inliner::class ),
 					$container->get( Theme_Controller::class ),
+					$container->get( Email_Editor_Logger::class ),
 				);
 			}
 		);
