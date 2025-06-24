@@ -1,5 +1,4 @@
 Significance: patch
 Type: dev
-Comment: Test update only.
 
-
+e2e tests: fix broken test
