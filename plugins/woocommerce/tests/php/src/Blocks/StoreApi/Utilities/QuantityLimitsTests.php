@@ -12,10 +12,23 @@ use Yoast\PHPUnitPolyfills\TestCases\TestCase;
  */
 class QuantityLimitsTests extends TestCase {
 	/**
+	 * @var string
+	 */
+	private $manage_stock;
+
+	/**
+	 * Set up test environment.
+	 */
+	public function setUp(): void {
+		$this->manage_stock = get_option( 'woocommerce_manage_stock' );
+		parent::setUp();
+	}
+
+	/**
 	 * Clean up test environment.
 	 */
 	public function tearDown(): void {
-		$this->disable_float_support();
+		update_option( 'woocommerce_manage_stock', $this->manage_stock );
 		parent::tearDown();
 	}
 

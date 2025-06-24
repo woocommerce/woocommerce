@@ -563,9 +563,10 @@ class WC_Discounts {
 	 */
 	protected function apply_coupon_remainder( $coupon, $items_to_apply, $amount ) {
 		$total_discount = 0;
-		$quantity       = ceil( $item->quantity );
 
 		foreach ( $items_to_apply as $item ) {
+			$quantity = ceil( $item->quantity );
+
 			for ( $i = 0; $i < $quantity; $i++ ) {
 				// Find out how much price is available to discount for the item.
 				$price_to_discount = $this->get_discounted_price_in_cents( $item );
