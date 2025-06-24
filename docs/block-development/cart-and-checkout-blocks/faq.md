@@ -5,7 +5,6 @@ sidebar_label: Frequently asked questions
 ---
 
 # Frequently Asked Questions
-<!-- markdownlint-disable MD041 -->
 
 This document aims to answer some of the frequently asked questions we see from developers extending WooCommerce Blocks.
 
