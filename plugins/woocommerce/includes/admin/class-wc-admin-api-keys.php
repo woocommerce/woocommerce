@@ -43,7 +43,7 @@ class WC_Admin_API_Keys {
 	 * @return bool
 	 */
 	private function is_api_keys_settings_page() {
-		return is_wc_admin_settings_page() && isset( $_GET['tab'], $_GET['section'] ) && 'advanced' === $_GET['tab'] && 'keys' === $_GET['section']; // WPCS: input var okay, CSRF ok.
+		return is_wc_admin_settings_page() && isset( $_GET['tab'], $_GET['section'] ) && 'advanced' === $_GET['tab'] && 'keys' === $_GET['section']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
