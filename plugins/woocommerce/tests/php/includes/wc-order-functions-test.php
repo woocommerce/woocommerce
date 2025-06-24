@@ -327,7 +327,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that wc_wptexturize_order_note_content() preserves URLs with double hyphens.
+	 * Test that wc_wptexturize_order_note() preserves URLs with double hyphens.
 	 *
 	 * @dataProvider url_protection_test_data
 	 * @param string $input                            The input string to test.
@@ -335,9 +335,9 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	 * @param bool   $expected_contains_em_dash        Whether the result should contain em-dash.
 	 * @param string $test_description                 Description of the test case.
 	 */
-	public function test_wc_wptexturize_order_note_content( $input, $expected_contains_double_hyphens, $expected_contains_em_dash, $test_description ) {
+	public function test_wc_wptexturize_order_note( $input, $expected_contains_double_hyphens, $expected_contains_em_dash, $test_description ) {
 		// Test the function.
-		$result = wc_wptexturize_order_note_content( $input );
+		$result = wc_wptexturize_order_note( $input );
 
 		// Always make at least one assertion - that we got a string result.
 		$this->assertIsString( $result, $test_description . ' - Result should be a string' );
@@ -446,12 +446,12 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that wc_wptexturize_customer_note() works correctly.
+	 * Test that wc_wptexturize_order_note() works correctly with customer note content.
 	 */
-	public function test_wc_wptexturize_customer_note() {
+	public function test_wc_wptexturize_order_note_customer_note() {
 		$content = 'Check API status at https://api.example.com/status--check -- this is important';
 
-		$result = wc_wptexturize_customer_note( $content );
+		$result = wc_wptexturize_order_note( $content );
 
 		// Should preserve URL double hyphens.
 		$this->assertStringContainsString( 'status--check', $result, 'Should preserve double hyphens in URLs' );
@@ -468,7 +468,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$content_with_breaks = "Check API status:\nhttps://api.example.com/status--check\n\nThen verify the results -- everything should work.";
 
 		// Test the core function.
-		$result = wc_wptexturize_customer_note( $content_with_breaks );
+		$result = wc_wptexturize_order_note( $content_with_breaks );
 		$this->assertStringContainsString( 'status--check', $result, 'URLs should be preserved even with line breaks' );
 
 		// Test that nl2br() doesn't affect URL preservation (used in HTML emails).
@@ -497,7 +497,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		);
 
 		foreach ( $edge_cases as $content ) {
-			$result = wc_wptexturize_order_note_content( $content );
+			$result = wc_wptexturize_order_note( $content );
 
 			// All URLs should preserve their double hyphens.
 			$this->assertStringContainsString( '--', $result, "Edge case should preserve double hyphens: {$content}" );

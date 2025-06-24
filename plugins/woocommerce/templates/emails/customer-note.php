@@ -43,7 +43,7 @@ if ( ! empty( $order->get_billing_first_name() ) ) {
 
 <blockquote>
 <?php
-$safe_note = wc_wptexturize_customer_note( $customer_note );
+$safe_note = wc_wptexturize_order_note( $customer_note );
 echo wpautop( make_clickable( $safe_note ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>
 </blockquote>

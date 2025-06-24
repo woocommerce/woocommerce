@@ -1286,7 +1286,7 @@ function wc_delete_order_note( $note_id ) {
  * @param string $content The order note content.
  * @return string The processed content.
  */
-function wc_wptexturize_order_note_content( $content ) {
+function wc_wptexturize_order_note( $content ) {
 	// Pattern to match URLs (http, https protocols).
 	$url_pattern = '/\b(?:https?):\/\/[^\s<>"{}|\\^`\[\]]+/i';
 
@@ -1315,13 +1315,3 @@ function wc_wptexturize_order_note_content( $content ) {
 	return str_replace( array_keys( $placeholders ), array_values( $placeholders ), $texturized_content );
 }
 
-/**
- * Apply URL-safe wptexturize to customer note content (simplified version for single content parameter).
- *
- * @since 10.1.0
- * @param string $content The customer note content.
- * @return string The processed content.
- */
-function wc_wptexturize_customer_note( $content ) {
-	return wc_wptexturize_order_note_content( $content );
-}

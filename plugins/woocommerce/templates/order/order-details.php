@@ -130,7 +130,7 @@ if ( $show_downloads ) {
 					<th><?php esc_html_e( 'Note:', 'woocommerce' ); ?></th>
 					<td>
 					<?php
-					$customer_note = wc_wptexturize_customer_note( $order->get_customer_note() );
+					$customer_note = wc_wptexturize_order_note( $order->get_customer_note() );
 					echo wp_kses( nl2br( $customer_note ), array( 'br' => array() ) );
 					?>
 					</td>

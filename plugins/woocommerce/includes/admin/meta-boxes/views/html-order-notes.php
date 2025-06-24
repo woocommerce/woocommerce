@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 				<div class="note_content">
 					<?php
 					$content = wp_kses_post( $note->content );
-					$content = wc_wptexturize_order_note_content( $content );
+					$content = wc_wptexturize_order_note( $content );
 					// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- the content goes through wp_kses_post above.
 					echo wpautop( $content );
 					?>

@@ -1603,7 +1603,7 @@ class WC_AJAX {
 			<li rel="<?php echo absint( $note->id ); ?>" class="<?php echo esc_attr( implode( ' ', $note_classes ) ); ?>">
 				<div class="note_content">
 					<?php
-					$content = wc_wptexturize_order_note_content( $note->content );
+					$content = wc_wptexturize_order_note( $note->content );
 					echo wp_kses_post( wpautop( make_clickable( $content ) ) );
 					?>
 				</div>
