@@ -4,6 +4,14 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Privacy;
 
+/**
+ * Privacy eraser for WooCommerce Stock Notifications.
+ *
+ * This class handles the erasure of stock notification data for users
+ * who request their personal data to be erased.
+ *
+ * @since x.x.x
+ */
 class PrivacyEraser extends \WC_Abstract_Privacy {
 
 	public function __construct() {
