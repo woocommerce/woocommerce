@@ -5,7 +5,6 @@ import { InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, SelectControl, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
-import { dispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -13,7 +12,7 @@ import { dispatch, useSelect } from '@wordpress/data';
 import type { EditProps, TaxonomyItem } from './types';
 import { DisplayStyleSwitcher } from '../../components/display-style-switcher';
 import metadata from './block.json';
-import { getInnerBlockByName } from '../../utils/get-inner-block-by-name';
+import { updateFilterHeading } from '../../utils/update-filter-heading';
 import { getTaxonomyLabel } from './utils';
 
 export const Inspector = ( {
@@ -33,21 +32,6 @@ export const Inspector = ( {
 		value: item.name,
 	} ) );
 
-	const filterBlock = useSelect(
-		( select ) => {
-			return select( 'core/block-editor' ).getBlock( clientId );
-		},
-		[ clientId ]
-	);
-
-	const filterHeadingBlock = getInnerBlockByName(
-		filterBlock,
-		'core/heading'
-	);
-
-	const { updateBlockAttributes, insertBlock, replaceBlock } =
-		dispatch( 'core/block-editor' );
-
 	return (
 		<InspectorControls>
 			<PanelBody title={ __( 'Taxonomy', 'woocommerce' ) }>
@@ -66,14 +50,10 @@ export const Inspector = ( {
 					] }
 					onChange={ ( value: string ) => {
 						setAttributes( { taxonomy: value } );
-						if ( filterHeadingBlock ) {
-							updateBlockAttributes(
-								filterHeadingBlock.clientId,
-								{
-									content: getTaxonomyLabel( value ),
-								}
-							);
-						}
+						updateFilterHeading(
+							clientId,
+							getTaxonomyLabel( value )
+						);
 					} }
 				/>
 			</PanelBody>
