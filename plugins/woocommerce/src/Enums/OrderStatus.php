@@ -94,9 +94,9 @@ final class OrderStatus {
 	 * @var string[]
 	 */
 	public const PAYMENT_COMPLETE_STATUSES = array(
-		OrderStatus::ON_HOLD,
-		OrderStatus::PENDING,
-		OrderStatus::FAILED,
-		OrderStatus::CANCELLED,
+		self::ON_HOLD,
+		self::PENDING,
+		self::FAILED,
+		self::CANCELLED,
 	);
 }
