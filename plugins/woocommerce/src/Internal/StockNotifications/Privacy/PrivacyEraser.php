@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Privacy;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Notification;
+
 /**
  * Privacy eraser for WooCommerce Stock Notifications.
  *
@@ -43,14 +45,15 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 			)
 		);
 
-		foreach( $notifications as $notification ) {
+		foreach( $notifications as $notification_id ) {
+			$notification = new Notification( $notification_id );
 			$anonymous_email = wp_privacy_anonymize_data( 'email', $email_address );
 			$notification->set_user_email( $anonymous_email );
 			$notification->set_user_id( 0 );
 			$notification->save();
 			$response['messages'][] = sprintf(
 				/* translators: %d the numeric product ID */
-				__( 'Removed customer notification for product id: %d', 'woocommerce' ),
+				__( 'Removed back-in-stock notification for product id: %d', 'woocommerce' ),
 				$notification->get_product_id()
 			);
 			$response['items_removed'] = true;
