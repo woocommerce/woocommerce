@@ -9,10 +9,13 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Layout\Flex_Layout_Renderer;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Abstract_Block_Renderer;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Button;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Buttons;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Column;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Columns;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Group;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Image;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\List_Block;
@@ -97,49 +100,65 @@ class Initializer {
 	 */
 	public function update_block_settings( array $settings ): array {
 		if ( in_array( $settings['name'], self::ALLOWED_BLOCK_TYPES, true ) ) {
-			$settings['supports']['email'] = true;
-		}
-
-		switch ( $settings['name'] ) {
-			case 'core/heading':
-			case 'core/paragraph':
-				$settings['render_email_callback'] = array( new Text(), 'render' );
-				break;
-			case 'core/column':
-				$settings['render_email_callback'] = array( new Column(), 'render' );
-				break;
-			case 'core/columns':
-				$settings['render_email_callback'] = array( new Columns(), 'render' );
-				break;
-			case 'core/list':
-				$settings['render_email_callback'] = array( new List_Block(), 'render' );
-				break;
-			case 'core/list-item':
-				$settings['render_email_callback'] = array( new List_Item(), 'render' );
-				break;
-			case 'core/image':
-				$settings['render_email_callback'] = array( new Image(), 'render' );
-				break;
-			case 'core/button':
-				$settings['render_email_callback'] = array( new Button(), 'render' );
-				break;
-			case 'core/buttons':
-				$settings['render_email_callback'] = array( new Buttons( new Flex_Layout_Renderer() ), 'render' );
-				break;
-			case 'core/group':
-				$settings['render_email_callback'] = array( new Group(), 'render' );
-				break;
-			case 'core/quote':
-				$settings['render_email_callback'] = array( new Quote(), 'render' );
-				break;
-			case 'core/social-link':
-				$settings['render_email_callback'] = array( new Social_Link(), 'render' );
-				break;
-			case 'core/social-links':
-				$settings['render_email_callback'] = array( new Social_Links(), 'render' );
-				break;
+			$settings['supports']['email']     = true;
+			$settings['render_email_callback'] = array( $this, 'render_block' );
 		}
 
 		return $settings;
+	}
+
+	/**
+	 * Returns the block content rendered by the block renderer.
+	 *
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block settings.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return string
+	 */
+	public function render_block( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+		if ( isset( $parsed_block['blockName'] ) ) {
+			$block_renderer = $this->get_block_renderer( $parsed_block['blockName'] );
+			return $block_renderer->render( $block_content, $parsed_block, $rendering_context );
+		}
+
+		return $block_content;
+	}
+
+	/**
+	 * Return an instance of Abstract_Block_Renderer by the block name.
+	 *
+	 * @param string $block_name Block name.
+	 * @return Abstract_Block_Renderer
+	 */
+	public function get_block_renderer( string $block_name ): Abstract_Block_Renderer {
+		switch ( $block_name ) {
+			case 'core/heading':
+			case 'core/paragraph':
+				return new Text();
+			case 'core/column':
+				return new Column();
+			case 'core/columns':
+				return new Columns();
+			case 'core/list':
+				return new List_Block();
+			case 'core/list-item':
+				return new List_Item();
+			case 'core/image':
+				return new Image();
+			case 'core/button':
+				return new Button();
+			case 'core/buttons':
+				return new Buttons( new Flex_Layout_Renderer() );
+			case 'core/group':
+				return new Group();
+			case 'core/quote':
+				return new Quote();
+			case 'core/social-link':
+				return new Social_Link();
+			case 'core/social-links':
+				return new Social_Links();
+		}
+
+		return new Fallback();
 	}
 }
