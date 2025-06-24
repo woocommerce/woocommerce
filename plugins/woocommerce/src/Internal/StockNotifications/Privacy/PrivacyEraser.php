@@ -30,6 +30,13 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 
 
 	public static function erase_notification_data( $email_address ) {
+		$response = array(
+			'items_removed'  => false,
+			'items_retained' => false,
+			'messages'       => array(),
+			'done'           => true,
+		);
+
 		$notifications = \WC_Data_Store::load( 'stock_notification' )->query(
 			array(
 				'user_email' => $email_address,
