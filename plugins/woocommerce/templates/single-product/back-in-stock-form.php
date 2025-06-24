@@ -32,7 +32,7 @@ if ( isset( $available_variations ) && ! empty( $available_variations ) ) {
 	}
 }
 
-?><div id="wc_bis_product_form" data-bis-product-id="<?php echo $product->get_parent_id() ? absint( $product->get_parent_id() ) : absint( $product->get_id() ); ?>" role="form" aria-labelledby="wc_bis_form_title">
+?><form method="post" id="wc_bis_product_form" data-bis-product-id="<?php echo $product->get_parent_id() ? absint( $product->get_parent_id() ) : absint( $product->get_id() ); ?>" role="form" aria-labelledby="wc_bis_form_title">
 
 	<h3 id="wc_bis_form_title" class="wc_bis_form_title">
 		<?php echo wp_kses_post( __( 'Want to be notified when this product is back in stock?', 'woocommerce' ) ); ?>
@@ -46,7 +46,8 @@ if ( isset( $available_variations ) && ! empty( $available_variations ) ) {
 	 *
 	 * @param WC_Product $product The product object.
 	 */
-	do_action( 'woocommerce_customer_stock_notifications_before_form_fields', $product ); ?>
+	do_action( 'woocommerce_customer_stock_notifications_before_form_fields', $product );
+	?>
 
 	<div class="wc_bis_inline_form">
 		<?php if ( ! is_user_logged_in() && ! Config::requires_account() ) : ?>
@@ -64,21 +65,10 @@ if ( isset( $available_variations ) && ! empty( $available_variations ) ) {
 		<button class="<?php echo esc_attr( $button_class ); ?>"
 			type="submit"
 			id="wc_bis_send_form"
-			name="wc_bis_send_form"
 		>
 			<?php echo esc_html( $button_text ); ?>
 		</button>
 	</div>
-
-	<?php
-	/**
-	 * Fires after the form fields in the back in stock notification form.
-	 *
-	 * @since 0.0.0
-	 *
-	 * @param WC_Product $product The product object.
-	 */
-	do_action( 'woocommerce_customer_stock_notifications_after_form_fields', $product ); ?>
 
 	<?php if ( ! is_user_logged_in() && Config::creates_account_on_signup() && ! Config::requires_account() ) : ?>
 		<label for="wc_bis_opt_in" class="wc_bis_opt_in">
@@ -89,4 +79,18 @@ if ( isset( $available_variations ) && ! empty( $available_variations ) ) {
 			<?php echo wp_kses_post( wc_replace_policy_page_link_placeholders( wc_get_privacy_policy_text( 'registration' ) ) ); ?>
 		</label>
 	<?php endif; ?>
-</div>
+
+	<?php
+	/**
+	 * Fires after the form fields in the back in stock notification form.
+	 *
+	 * @since 0.0.0
+	 *
+	 * @param WC_Product $product The product object.
+	 */
+	do_action( 'woocommerce_customer_stock_notifications_after_form_fields', $product );
+	?>
+
+	<input type="hidden" name="action" value="wc_bis_register" />
+	<input type="hidden" name="wc_bis_product_id" value="<?php echo $product->get_parent_id() ? absint( $product->get_parent_id() ) : absint( $product->get_id() ); ?>" />
+</form>

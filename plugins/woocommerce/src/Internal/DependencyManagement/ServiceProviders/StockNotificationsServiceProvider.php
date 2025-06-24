@@ -17,6 +17,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailTemplatesController;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\ProductPageIntegration;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\FormHandlerService;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\SignupService;
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
@@ -41,6 +42,7 @@ class StockNotificationsServiceProvider extends AbstractServiceProvider {
 		SettingsController::class,
 		ProductPageIntegration::class,
 		FormHandlerService::class,
+		SignupService::class,
 	);
 
 	/**
@@ -55,6 +57,6 @@ class StockNotificationsServiceProvider extends AbstractServiceProvider {
 		$this->share( NotificationsProcessor::class )->addArguments( array( EmailManager::class ) );
 		$this->share( SettingsController::class );
 		$this->share( ProductPageIntegration::class );
-		$this->share( FormHandlerService::class );
+		$this->share( FormHandlerService::class )->addArguments( array( SignupService::class ) );
 	}
 }
