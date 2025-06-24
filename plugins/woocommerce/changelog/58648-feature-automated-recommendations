@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-- Change suggestions endpoint to 2.0 (#58187) - Pass country data to suggestions endpoint after checking for tracking consent (#58187) - Get recommendations count from endpoint (#58499) - Update description of 'Show Suggestions' field (#58207)

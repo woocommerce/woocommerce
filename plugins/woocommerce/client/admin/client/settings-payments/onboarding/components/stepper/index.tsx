@@ -2,12 +2,14 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import SidebarItem from './sidebar-item';
 import { WooPaymentsProviderOnboardingStep } from '~/settings-payments/onboarding/types';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 
 /**
  * Stepper component that renders only the active step from its children
@@ -18,6 +20,7 @@ export default function Stepper( {
 	justCompletedStepId,
 	includeSidebar = false,
 	sidebarTitle,
+	context = {},
 }: {
 	/**
 	 * The active step key
@@ -40,9 +43,28 @@ export default function Stepper( {
 	 * Whether to include the sidebar
 	 */
 	includeSidebar?: boolean;
+	/**
+	 * Context for the stepper, including the session entry point.
+	 */
+	context?: {
+		sessionEntryPoint?: string;
+	};
 } ): React.ReactNode {
 	// Find the active step component
 	const activeStep = steps.find( ( step ) => step.id === active );
+
+	// Track the step view.
+	useEffect( () => {
+		if ( activeStep ) {
+			recordPaymentsOnboardingEvent(
+				'woopayments_onboarding_modal_step_view',
+				{
+					step: active,
+					source: context?.sessionEntryPoint || 'unknown',
+				}
+			);
+		}
+	}, [ active ] );
 
 	if ( ! activeStep ) return null;
 

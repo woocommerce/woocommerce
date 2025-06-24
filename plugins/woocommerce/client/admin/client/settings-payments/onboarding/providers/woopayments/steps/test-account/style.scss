@@ -96,8 +96,9 @@
 	&__success-whats-next {
 		display: flex;
 		flex-direction: column;
-		gap: $gap-small;
+		gap: $gap-smaller * 2;
 		border: 1px solid $gray-200;
+		border-radius: 2px;
 		padding: $gap-large;
 
 		.woocommerce-woopayments-modal__content__item h2 {

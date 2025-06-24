@@ -36,7 +36,7 @@ class WooPayments extends PaymentGateway {
 	 * @param int                $order        Optional. The order to assign.
 	 *                                         Defaults to 0 if not provided.
 	 * @param string             $country_code Optional. The country code for which the details are being gathered.
-	 *                                         This should be a ISO 3166-1 alpha-2 country code.
+	 *                                         This should be an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The payment gateway provider details.
 	 */
@@ -140,7 +140,6 @@ class WooPayments extends PaymentGateway {
 					'Failed to get the WooPayments REST controller instance: ' . $e->getMessage(),
 					array(
 						'source' => 'settings-payments',
-						'error'  => $e,
 					)
 				);
 			}
@@ -384,7 +383,7 @@ class WooPayments extends PaymentGateway {
 		// This way we avoid costly DB queries and API calls.
 		$has_orders = get_transient( $store_has_orders_transient_name );
 		if ( false !== $has_orders ) {
-			return filter_var( $has_orders, FILTER_VALIDATE_BOOLEAN );
+			return wc_string_to_bool( $has_orders );
 		}
 
 		// We need to determine the value.
