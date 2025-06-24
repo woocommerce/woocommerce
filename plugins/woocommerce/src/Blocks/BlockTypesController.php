@@ -391,7 +391,6 @@ final class BlockTypesController {
 			'ProductFilterPrice',
 			'ProductFilterPriceSlider',
 			'ProductFilterAttribute',
-			'ProductFilterTaxonomy',
 			'ProductFilterRating',
 			'ProductFilterActive',
 			'ProductFilterRemovableChips',
@@ -461,7 +460,6 @@ final class BlockTypesController {
 			'ProductFilterPrice',
 			'ProductFilterPriceSlider',
 			'ProductFilterAttribute',
-			'ProductFilterTaxonomy',
 			'ProductFilterRating',
 			'ProductFilterActive',
 			'ProductFilterRemovableChips',
@@ -556,6 +554,10 @@ final class BlockTypesController {
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItem';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItemSelector';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItemLabel';
+		}
+
+		if ( Features::is_enabled( 'experimental-blocks' ) ) {
+			$block_types[] = 'ProductFilterTaxonomy';
 		}
 
 		/**
