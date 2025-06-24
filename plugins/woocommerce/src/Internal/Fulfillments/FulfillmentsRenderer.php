@@ -136,8 +136,7 @@ class FulfillmentsRenderer {
 	 * @param WC_Order $order The order object.
 	 */
 	private function render_order_fulfillment_status_column_row_data( WC_Order $order ) {
-		$fulfillment_status_meta_exists = $order->meta_exists( '_fulfillment_status' );
-		$order_fulfillment_status       = $fulfillment_status_meta_exists ? $order->get_meta( '_fulfillment_status', true ) : 'no_fulfillments';
+		$order_fulfillment_status = $order->meta_exists( '_fulfillment_status' ) ? $order->get_meta( '_fulfillment_status', true ) : 'no_fulfillments';
 
 		echo "<div class='fulfillment-status-wrapper'>";
 		$this->render_order_fulfillment_status_badge( $order, $order_fulfillment_status );
@@ -159,6 +158,7 @@ class FulfillmentsRenderer {
 				'text_color'       => '#000',
 			);
 		}
+
 		echo '<mark class="fulfillment-status" style="background-color:' . esc_attr( $status_props['background_color'] ) . '; color: ' . esc_attr( $status_props['text_color'] ) . '"><span>' . esc_html( $status_props['label'] ) . '</span></mark>';
 		echo "<a href='#' class='fulfillments-trigger' data-order-id='" . esc_attr( $order->get_id() ) . "' title='" . esc_attr__( 'View Fulfillments', 'woocommerce' ) . "'>
 			<svg width='16' height='16' viewBox='0 0 12 14' xmlns='http://www.w3.org/2000/svg'>
@@ -268,7 +268,6 @@ class FulfillmentsRenderer {
 				// Fulfill all existing fulfillments.
 				foreach ( $fulfillments as $fulfillment ) {
 					$fulfillment->set_status( 'fulfilled' );
-					$fulfillment->set_is_fulfilled( true );
 					$fulfillment->save();
 				}
 
@@ -288,7 +287,6 @@ class FulfillmentsRenderer {
 					$fulfillment->set_entity_type( WC_Order::class );
 					$fulfillment->set_entity_id( (string) $order->get_id() );
 					$fulfillment->set_status( 'fulfilled' );
-					$fulfillment->set_is_fulfilled( true );
 					$fulfillment->set_items( $remaining_items );
 					$fulfillment->save();
 				}
@@ -418,20 +416,7 @@ class FulfillmentsRenderer {
 			 * @since 9.9.0
 			 */
 			'providers'        => apply_filters( 'wc_fulfillment_shipping_providers', array() ),
-			/**
-			 * Filter to modify the fulfillment meta key translations.
-			 *
-			 * @since 9.9.0
-			 */
-			'statuses'         => apply_filters(
-				'wc_fulfillment_statuses',
-				array(
-					'unfulfilled'         => __( 'Unfulfilled', 'woocommerce' ),
-					'partially_fulfilled' => __( 'Partially fulfilled', 'woocommerce' ),
-					'fulfilled'           => __( 'Fulfilled', 'woocommerce' ),
-					'no_fulfillments'     => __( 'No fulfillments', 'woocommerce' ),
-				)
-			),
+			'statuses'         => FulfillmentUtils::get_fulfillment_statuses(),
 			'currency_symbols' => get_woocommerce_currency_symbols(),
 		);
 
@@ -573,7 +558,8 @@ class FulfillmentsRenderer {
 		}
 
 		return 'woocommerce_page_wc-orders' === $current_screen->id // HPOS screen.
-		|| 'edit-shop_order' === $current_screen->id; // Legacy screen.
+		|| 'edit-shop_order' === $current_screen->id // Legacy screen.
+		|| 'shop_order' === $current_screen->id; // Order details screen (legacy).
 	}
 
 	/**

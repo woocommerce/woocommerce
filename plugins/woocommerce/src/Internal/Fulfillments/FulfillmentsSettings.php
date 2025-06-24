@@ -145,7 +145,6 @@ class FulfillmentsSettings {
 			$fulfillment->set_entity_type( WC_Order::class );
 			$fulfillment->set_entity_id( (string) $order_id );
 			$fulfillment->set_status( 'fulfilled' );
-			$fulfillment->set_is_fulfilled( true );
 			$fulfillment->set_items(
 				array_map(
 					function ( $item ) {

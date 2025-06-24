@@ -165,7 +165,7 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 'unfulfilled', $order->get_meta( '_fulfillment_status', true ) );
 
-		$fulfillments[0]->set_is_fulfilled( true );
+		$fulfillments[0]->set_status( 'fulfilled' );
 		$fulfillments[0]->save();
 
 		$this->assertTrue( did_action( 'wc_fulfillment_after_update' ) > 0 );

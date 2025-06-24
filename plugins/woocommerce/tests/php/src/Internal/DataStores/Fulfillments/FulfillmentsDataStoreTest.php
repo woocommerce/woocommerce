@@ -37,6 +37,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$fulfillment = new Fulfillment();
 		$fulfillment->set_entity_type( 'order-fulfillment' );
 		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items(
 			array(
 				array(
@@ -62,6 +63,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$fulfillment = new Fulfillment();
 		$fulfillment->set_entity_type( '' );
 		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items(
 			array(
 				array(
@@ -84,6 +86,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$fulfillment = new Fulfillment();
 		$fulfillment->set_entity_type( 'order-fulfillment' );
 		$fulfillment->set_entity_id( '' );
+		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items(
 			array(
 				array(
@@ -106,6 +109,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$fulfillment = new Fulfillment();
 		$fulfillment->set_entity_type( 'order-fulfillment' );
 		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_props( array( 'meta_data' => array( '_items' => null ) ) );
 
 		$this->expectException( \Exception::class );
@@ -121,6 +125,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$fulfillment = new Fulfillment();
 		$fulfillment->set_entity_type( 'order-fulfillment' );
 		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items( array() );
 
 		$this->expectException( \Exception::class );
@@ -136,6 +141,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$fulfillment = new Fulfillment();
 		$fulfillment->set_entity_type( 'order-fulfillment' );
 		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items(
 			array(
 				array(
@@ -162,6 +168,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$fulfillment = new Fulfillment();
 		$fulfillment->set_entity_type( 'order-fulfillment' );
 		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items(
 			array(
 				array(
@@ -195,6 +202,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$fulfillment->set_id( 1 );
 		$fulfillment->set_entity_type( 'order-fulfillment' );
 		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items(
 			array(
 				array(
@@ -237,6 +245,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$fulfillment->set_id( 1 );
 		$fulfillment->set_entity_type( 'order-fulfillment' );
 		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items(
 			array(
 				array(
@@ -291,7 +300,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$fulfillment = new Fulfillment();
 		$fulfillment->set_entity_id( '123' );
 		$fulfillment->set_entity_type( 'order-fulfillment' );
-
+		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items( $items );
 		$fulfillment->save();
 
@@ -326,6 +335,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$fulfillment = new Fulfillment();
 		$fulfillment->set_entity_id( '123' );
 		$fulfillment->set_entity_type( 'order-fulfillment' );
+		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items( $items );
 		$fulfillment->save();
 
@@ -367,7 +377,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$fulfillment = new Fulfillment();
 		$fulfillment->set_entity_id( '123' );
 		$fulfillment->set_entity_type( 'order-fulfillment' );
-
+		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items( $items );
 		$fulfillment->save();
 
@@ -422,6 +432,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$fulfillment = new Fulfillment();
 		$fulfillment->set_entity_id( '123' );
 		$fulfillment->set_entity_type( 'order-fulfillment' );
+		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items( $items );
 		$fulfillment->save();
 
@@ -492,6 +503,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$fulfillment->set_id( 0 );
 		$fulfillment->set_entity_type( $entity_type );
 		$fulfillment->set_entity_id( $entity_id );
+		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items( $items );
 		$fulfillment->save();
 		$fulfillment->save_meta_data();

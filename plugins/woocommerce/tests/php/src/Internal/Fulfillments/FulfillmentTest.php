@@ -206,4 +206,27 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 		$this->assertFalse( $fulfillment->is_locked() );
 		$this->assertEquals( '', $fulfillment->get_meta( '_lock_message' ) );
 	}
+
+	/**
+	 * Test that the fulfillment status is validated correctly.
+	 */
+	public function test_fulfillment_status_validation() {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type' => 'order-fulfillment',
+				'entity_id'   => 123,
+			)
+		);
+		$fulfillment->set_status( 'unfulfilled' );
+		$this->assertEquals( 'unfulfilled', $fulfillment->get_status() );
+		$this->assertEquals( false, $fulfillment->get_is_fulfilled() );
+
+		$fulfillment->set_status( 'fulfilled' );
+		$this->assertEquals( 'fulfilled', $fulfillment->get_status() );
+		$this->assertEquals( true, $fulfillment->get_is_fulfilled() );
+
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Invalid fulfillment status: invalid_status' );
+		$fulfillment->set_status( 'invalid_status' );
+	}
 }
