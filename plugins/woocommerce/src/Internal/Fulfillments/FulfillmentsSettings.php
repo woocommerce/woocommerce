@@ -16,21 +16,28 @@ class FulfillmentsSettings {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_filter( 'woocommerce_get_settings_products', array( $this, 'add_auto_fulfill_settings' ), 10, 2 );
+		add_filter( 'admin_init', array( $this, 'init_settings_auto_fulfill' ) );
 		add_action( 'woocommerce_order_status_processing', array( $this, 'auto_fulfill_items_on_processing' ), 10, 2 );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'auto_fulfill_items_on_completed' ), 10, 2 );
 	}
 
 	/**
+	 * Initialize settings for auto-fulfill options.
+	 */
+	public function init_settings_auto_fulfill() {
+		add_filter( 'woocommerce_get_settings_products', array( $this, 'add_auto_fulfill_settings' ), 10, 2 );
+	}
+
+	/**
 	 * Add auto-fulfill settings to the WooCommerce settings.
 	 *
-	 * @param array  $settings The existing settings.
-	 * @param string $current_section The current section being viewed.
+	 * @param array       $settings The existing settings.
+	 * @param string|null $current_section The current section being viewed.
 	 *
 	 * @return array Modified settings with auto-fulfill options added.
 	 */
-	public function add_auto_fulfill_settings( array $settings, string $current_section ): array {
-		if ( '' !== $current_section ) {
+	public function add_auto_fulfill_settings( array $settings, $current_section ): array {
+		if ( ! empty( $current_section ) ) {
 			return $settings;
 		}
 
