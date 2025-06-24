@@ -341,12 +341,12 @@ class CartShippingRateSchema extends AbstractSchema {
 
 		return array_reduce(
 			array_keys( $meta_data ),
-			function ( $return_value, $key ) use ( $meta_data ) {
-				$return_value[] = [
+			function( $return, $key ) use ( $meta_data ) {
+				$return[] = [
 					'key'   => $key,
 					'value' => $meta_data[ $key ],
 				];
-				return $return_value;
+				return $return;
 			},
 			[]
 		);
