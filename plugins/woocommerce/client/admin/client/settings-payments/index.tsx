@@ -461,13 +461,24 @@ export const SettingsPaymentsCodWrapper = () => {
 					<>
 						<div className="settings-payments-cod__container">
 							<div className="settings-payment-gateways">
-								<div className="settings-payment-gateways__header">
-									<div className="settings-payment-gateways__header-title">
-										{ __(
-											'Cash on delivery',
+								<div className="settings-payments-offline__header">
+									<BackButton
+										href={ getNewPath( {}, '' ) }
+										title={ __(
+											'Return to payments settings',
 											'woocommerce'
 										) }
-									</div>
+										isRoute={ true }
+										from={ 'woopayments_payment_methods' }
+									/>
+									<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align">
+										<span className="woocommerce-settings-payments-header__title">
+											{ __(
+												'Cash on delivery',
+												'woocommerce'
+											) }
+										</span>
+									</h1>
 								</div>
 								<Placeholder />
 							</div>
@@ -496,13 +507,24 @@ export const SettingsPaymentsChequeWrapper = () => {
 					<>
 						<div className="settings-payments-cheque__container">
 							<div className="settings-payment-gateways">
-								<div className="settings-payment-gateways__header">
-									<div className="settings-payment-gateways__header-title">
-										{ __(
-											'Check payments',
+								<div className="settings-payments-offline__header">
+									<BackButton
+										href={ getNewPath( {}, '' ) }
+										title={ __(
+											'Return to payments settings',
 											'woocommerce'
 										) }
-									</div>
+										isRoute={ true }
+										from={ 'woopayments_payment_methods' }
+									/>
+									<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align">
+										<span className="woocommerce-settings-payments-header__title">
+											{ __(
+												'Direct bank transfer',
+												'woocommerce'
+											) }
+										</span>
+									</h1>
 								</div>
 								<Placeholder />
 							</div>
