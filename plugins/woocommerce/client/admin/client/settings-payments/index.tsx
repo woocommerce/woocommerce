@@ -415,13 +415,24 @@ export const SettingsPaymentsBacsWrapper = () => {
 					<>
 						<div className="settings-payments-bacs__container">
 							<div className="settings-payment-gateways">
-								<div className="settings-payment-gateways__header">
-									<div className="settings-payment-gateways__header-title">
-										{ __(
-											'Direct bank transfer',
+								<div className="settings-payments-offline__header">
+									<BackButton
+										href={ getNewPath( {}, '' ) }
+										title={ __(
+											'Return to payments settings',
 											'woocommerce'
 										) }
-									</div>
+										isRoute={ true }
+										from={ 'woopayments_payment_methods' }
+									/>
+									<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align">
+										<span className="woocommerce-settings-payments-header__title">
+											{ __(
+												'Direct bank transfer',
+												'woocommerce'
+											) }
+										</span>
+									</h1>
 								</div>
 								<Placeholder />
 							</div>
