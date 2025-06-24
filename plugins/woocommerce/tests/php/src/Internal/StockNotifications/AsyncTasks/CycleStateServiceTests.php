@@ -25,13 +25,6 @@ class CycleStateServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @after
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-	}
-
-	/**
 	 * Test get_option_name method.
 	 */
 	public function test_get_option_name() {
