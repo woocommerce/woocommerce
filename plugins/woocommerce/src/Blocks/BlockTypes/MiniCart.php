@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
@@ -22,6 +23,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
  * @internal
  */
 class MiniCart extends AbstractBlock {
+
 	use BlockHooksTrait;
 	use BlocksSharedState;
 
@@ -455,6 +457,15 @@ class MiniCart extends AbstractBlock {
 
 		$cart = $this->get_cart_instance();
 
+		// Handle cart/checkout page rendering - similar to old get_markup logic.
+		if ( is_cart() || is_checkout() ) {
+			if ( $this->should_not_render_mini_cart( $attributes ) ) {
+				return '';
+			}
+
+			return $this->get_hidden_mini_cart_markup( $attributes );
+		}
+
 		if ( $cart ) {
 			$classes_styles                   = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_weight', 'font_family', 'extra_classes' ) );
 			$icon_color                       = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
@@ -504,23 +515,33 @@ class MiniCart extends AbstractBlock {
 
 			$cart_always_shows_price = isset( $attributes['hasHiddenPrice'] ) && false === $attributes['hasHiddenPrice'];
 			$price_color             = isset( $attributes['priceColor']['color'] ) ? $attributes['priceColor']['color'] : '';
+			$on_cart_click_behaviour = isset( $attributes['onCartClickBehaviour'] ) ? $attributes['onCartClickBehaviour'] : 'open_drawer';
+
+			// Build the link attribute based on behavior.
+			$link_attribute = 'open_drawer' === $on_cart_click_behaviour
+				? 'data-wp-on--click="callbacks.openDrawer"'
+				: 'href="' . esc_url( wc_get_checkout_url() ) . '"';
 
 			ob_start();
 			?>
-		
+
 			<div
 				data-wp-interactive="woocommerce/mini-cart"
 				data-wp-init="callbacks.setupOpenDrawerListener"
-				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
+				?>
 				<?php echo wp_interactivity_data_wp_context( $context ); ?>
 				class="<?php echo esc_attr( $wrapper_classes ); ?>"
-				style="<?php echo esc_attr( $wrapper_styles ); ?>"
-			>
-				<button data-wp-on--click="callbacks.openDrawer" class="wc-block-mini-cart__button" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">
+				style="<?php echo esc_attr( $wrapper_styles ); ?>">
+				<a 
+				<?php
+				echo $link_attribute; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
+				?>
+						class="wc-block-mini-cart__button" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">
 					<span class="wc-block-mini-cart__quantity-badge">
 						<?php
-							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							echo $icon;
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						echo $icon;
 						?>
 						<?php if ( 'never' !== $product_count_visibility ) : ?>
 							<span data-wp-bind--hidden="!state.badgeIsVisible" data-wp-text="state.totalItemsInCart" class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
@@ -531,18 +552,18 @@ class MiniCart extends AbstractBlock {
 						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
 						</span>
 						<?php
-							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							echo $this->get_include_tax_label_markup( $attributes );
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						echo $this->get_include_tax_label_markup( $attributes );
 						?>
 					<?php endif; ?>
-				</button>
+				</a>
 				<div data-wp-on--click="callbacks.overlayCloseDrawer" data-wp-bind--class="state.drawerOverlayClass" class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden">
 					<div class="wc-block-mini-cart__drawer wc-block-components-drawer is-mobile">
 						<div class="wc-block-components-drawer__content">
 							<div class="wc-block-mini-cart__template-part">
 								<?php
-									// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-									echo $template_part_contents;
+								// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+								echo $template_part_contents;
 								?>
 							</div>
 						</div>
@@ -640,8 +661,8 @@ class MiniCart extends AbstractBlock {
 				<div class="wc-block-mini-cart__drawer wc-block-components-drawer">
 					<div class="wc-block-components-drawer__content">
 						<div class="wc-block-mini-cart__template-part">'
-						. wp_kses_post( $template_part_contents ) .
-						'</div>
+			. wp_kses_post( $template_part_contents ) .
+			'</div>
 					</div>
 				</div>
 			</div>
@@ -748,5 +769,43 @@ class MiniCart extends AbstractBlock {
 	 */
 	public function should_not_render_mini_cart( array $attributes ) {
 		return isset( $attributes['cartAndCheckoutRenderStyle'] ) && 'hidden' !== $attributes['cartAndCheckoutRenderStyle'];
+	}
+
+	/**
+	 * Get the markup for a hidden mini cart button on cart/checkout pages.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return string The HTML markup for the hidden mini cart.
+	 */
+	protected function get_hidden_mini_cart_markup( $attributes ) {
+		$classes_styles           = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_weight', 'font_family', 'extra_classes' ) );
+		$icon_color               = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
+		$product_count_color      = isset( $attributes['productCountColor']['color'] ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
+		$styles                   = $product_count_color ? 'background:' . $product_count_color : '';
+		$icon                     = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
+		$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
+		$wrapper_classes          = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
+
+		ob_start();
+		?>
+		<div class="<?php echo esc_attr( $wrapper_classes ); ?>" style="visibility:hidden" aria-hidden="true">
+			<a class="wc-block-mini-cart__button" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">
+				<span class="wc-block-mini-cart__quantity-badge">
+					<?php
+					echo $icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
+					<?php if ( 'never' !== $product_count_visibility ) : ?>
+						<span class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
+						</span>
+					<?php endif; ?>
+				</span>
+				<?php
+				echo $this->get_cart_price_markup( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				?>
+			</a>
+		</div>
+		<?php
+		return ob_get_clean();
 	}
 }
