@@ -59,6 +59,9 @@ class WC_Comments {
 		// Exclude product reviews from general comments.
 		add_filter( 'comments_clauses', array( ReviewsUtil::class, 'comments_clauses_without_product_reviews' ), 10, 2 );
 
+		// Modifies the moderation URLs in the email notifications for product reviews.
+		add_filter( 'comment_moderation_text', array( ReviewsUtil::class, 'modify_product_review_moderation_urls' ), 10, 2 );
+
 		// Count comments.
 		add_filter( 'wp_count_comments', array( __CLASS__, 'wp_count_comments' ), 10, 2 );
 
@@ -161,9 +164,20 @@ class WC_Comments {
 	}
 
 	/**
-	 * Exclude action_log comments from queries and RSS.
+	 * Exclude webhook comments from queries and RSS.
 	 *
 	 * @since  2.1
+	 * @param  string $where The WHERE clause of the query.
+	 * @return string
+	 */
+	public static function exclude_webhook_comments_from_feed_where( $where ) {
+		return $where . ( trim( $where ) ? ' AND ' : '' ) . " comment_type != 'webhook_delivery' ";
+	}
+
+	/**
+	 * Exclude action_log comments from queries and RSS.
+	 *
+	 * @since  9.9
 	 * @param  string $where The WHERE clause of the query.
 	 * @return string
 	 */

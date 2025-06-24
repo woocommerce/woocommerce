@@ -12,10 +12,10 @@ use Automattic\WooCommerce\EmailEditor\Email_Css_Inliner;
 use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Api_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use Automattic\WooCommerce\EmailEditor\Engine\Patterns\Patterns;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
-use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Blocks_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Highlighting_Postprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Variables_Postprocessor;
@@ -106,6 +106,12 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 			Email_Css_Inliner::class,
 			function () {
 				return new Email_Css_Inliner();
+			}
+		);
+		$container->set(
+			Email_Editor_Logger::class,
+			function () {
+				return new Email_Editor_Logger();
 			}
 		);
 		$container->set(
@@ -220,20 +226,13 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 			}
 		);
 		$container->set(
-			Blocks_Registry::class,
-			function () {
-				return new Blocks_Registry();
-			}
-		);
-		$container->set(
 			Content_Renderer::class,
 			function ( $container ) {
 				return new Content_Renderer(
 					$container->get( Process_Manager::class ),
-					$container->get( Blocks_Registry::class ),
-					$container->get( Settings_Controller::class ),
 					$container->get( Email_Css_Inliner::class ),
 					$container->get( Theme_Controller::class ),
+					$container->get( Email_Editor_Logger::class ),
 				);
 			}
 		);
@@ -250,8 +249,10 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 		);
 		$container->set(
 			Personalization_Tags_Registry::class,
-			function () {
-				return new Personalization_Tags_Registry();
+			function ( $container ) {
+				return new Personalization_Tags_Registry(
+					$container->get( Email_Editor_Logger::class )
+				);
 			}
 		);
 		$container->set(
@@ -294,6 +295,7 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 					$container->get( Patterns::class ),
 					$container->get( Send_Preview_Email::class ),
 					$container->get( Personalization_Tags_Registry::class ),
+					$container->get( Email_Editor_Logger::class )
 				);
 			}
 		);

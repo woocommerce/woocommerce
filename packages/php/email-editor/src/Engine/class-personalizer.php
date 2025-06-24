@@ -157,7 +157,7 @@ class Personalizer {
 	 * Parse a personalization tag to the token and attributes.
 	 *
 	 * @param string $token The token to parse.
-	 * @return array{token: string, arguments: array} The parsed token.
+	 * @return array{token: string, arguments: array<string, string>} The parsed token.
 	 */
 	private function parse_token( string $token ): array {
 		$result = array(
@@ -171,7 +171,7 @@ class Personalizer {
 			$attributes_string = $matches[2]; // The attributes part (e.g., 'default="subscriber"').
 
 			// Step 2: Extract attributes from the attribute string.
-			if ( preg_match_all( '/(\w+)=["\']([^"\']+)["\']/', $attributes_string, $attribute_matches, PREG_SET_ORDER ) ) {
+			if ( preg_match_all( '/(\w+)=["\']([^"\']*)["\']/', $attributes_string, $attribute_matches, PREG_SET_ORDER ) ) {
 				foreach ( $attribute_matches as $attribute ) {
 					$result['arguments'][ $attribute[1] ] = $attribute[2];
 				}

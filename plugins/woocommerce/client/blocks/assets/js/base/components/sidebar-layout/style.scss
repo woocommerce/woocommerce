@@ -33,10 +33,8 @@
 	}
 }
 
-.is-medium,
-.is-small,
-.is-mobile {
-	&.wc-block-components-sidebar-layout {
+@include cart-checkout-below-large {
+	.wc-block-components-sidebar-layout {
 		flex-direction: column;
 		margin: 0 auto $gap;
 
@@ -51,7 +49,7 @@
 	}
 }
 
-.is-large {
+@include cart-checkout-large-container {
 	.wc-block-components-sidebar {
 		.wc-block-components-totals-item,
 		.wc-block-components-panel,

@@ -1,15 +1,11 @@
-const { test, expect, request } = require( '@playwright/test' );
-const { setOption } = require( '../../utils/options' );
+/**
+ * Internal dependencies
+ */
+import { setFeatureEmailImprovementsFlag } from './helpers/set-email-improvements-feature-flag';
+
+const { test, expect } = require( '@playwright/test' );
 const { tags } = require( '../../fixtures/fixtures' );
 const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-
-const setFeatureFlag = async ( baseURL, value ) =>
-	await setOption(
-		request,
-		baseURL,
-		'woocommerce_feature_email_improvements_enabled',
-		value
-	);
 
 const pickImageFromLibrary = async ( page, imageName ) => {
 	await page.getByRole( 'tab', { name: 'Media Library' } ).click();
@@ -23,11 +19,11 @@ test.describe( 'WooCommerce Email Settings', () => {
 	const storeName = 'WooCommerce Core E2E Test Suite';
 
 	test.afterAll( async ( { baseURL } ) => {
-		await setFeatureFlag( baseURL, 'no' );
+		await setFeatureEmailImprovementsFlag( baseURL, 'no' );
 	} );
 
 	test( 'See email preview', async ( { page, baseURL } ) => {
-		await setFeatureFlag( baseURL, 'no' );
+		await setFeatureEmailImprovementsFlag( baseURL, 'no' );
 		const emailPreviewElement =
 			'#wc_settings_email_preview_slotfill iframe';
 		const emailSubjectElement = '.wc-settings-email-preview-header-subject';
@@ -72,7 +68,7 @@ test.describe( 'WooCommerce Email Settings', () => {
 		'Email sender options live change in email preview',
 		{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
 		async ( { page, baseURL } ) => {
-			await setFeatureFlag( baseURL, 'no' );
+			await setFeatureEmailImprovementsFlag( baseURL, 'no' );
 			await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
 
 			const fromNameElement = '#woocommerce_email_from_name';
@@ -116,7 +112,7 @@ test.describe( 'WooCommerce Email Settings', () => {
 		'Live preview when changing email settings',
 		{ tag: tags.SKIP_ON_EXTERNAL_ENV },
 		async ( { page, baseURL } ) => {
-			await setFeatureFlag( baseURL, 'no' );
+			await setFeatureEmailImprovementsFlag( baseURL, 'no' );
 			await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
 
 			// Wait for the iframe content to load
@@ -177,7 +173,7 @@ test.describe( 'WooCommerce Email Settings', () => {
 	);
 
 	test( 'Send email preview', async ( { page, baseURL } ) => {
-		await setFeatureFlag( baseURL, 'no' );
+		await setFeatureEmailImprovementsFlag( baseURL, 'no' );
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
 
 		// Click the "Send a test email" button
@@ -398,7 +394,7 @@ test.describe( 'WooCommerce Email Settings', () => {
 	} ) => {
 		const resetButtonElement = '.wc-settings-email-color-palette-buttons';
 
-		await setFeatureFlag( baseURL, 'yes' );
+		await setFeatureEmailImprovementsFlag( baseURL, 'yes' );
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
 
 		await expect( page.locator( resetButtonElement ) ).toBeVisible();

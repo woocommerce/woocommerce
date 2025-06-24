@@ -116,7 +116,10 @@ export const PaymentGatewayListItem = ( {
 						) }
 						{ /* If the gateway has a matching suggestion, it is an official extension. */ }
 						{ gateway._suggestion_id && (
-							<OfficialBadge variant="expanded" />
+							<OfficialBadge
+								variant="expanded"
+								suggestionId={ gateway._suggestion_id }
+							/>
 						) }
 						{ gateway.supports?.includes( 'subscriptions' ) && (
 							<Tooltip
@@ -162,8 +165,7 @@ export const PaymentGatewayListItem = ( {
 						{ ! gateway.state.enabled &&
 							! gatewayNeedsOnboarding && (
 								<EnableGatewayButton
-									gatewayId={ gateway.id }
-									gatewayState={ gateway.state }
+									gatewayProvider={ gateway }
 									settingsHref={
 										gateway.management._links.settings.href
 									}
@@ -186,7 +188,7 @@ export const PaymentGatewayListItem = ( {
 
 						{ ! gatewayNeedsOnboarding && (
 							<SettingsButton
-								gatewayId={ gateway.id }
+								gatewayProvider={ gateway }
 								settingsHref={
 									gateway.management._links.settings.href
 								}
@@ -196,9 +198,7 @@ export const PaymentGatewayListItem = ( {
 
 						{ gatewayNeedsOnboarding && (
 							<CompleteSetupButton
-								gatewayId={ gateway.id }
-								gatewayState={ gateway.state }
-								onboardingState={ gateway.onboarding.state }
+								gatewayProvider={ gateway }
 								settingsHref={
 									gateway.management._links.settings.href
 								}

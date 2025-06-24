@@ -8,6 +8,7 @@ import { useArgs } from '@storybook/preview-api';
  * Internal dependencies
  */
 import { RadioControlAccordion, RadioControlAccordionProps } from '..';
+import './style.stories.scss';
 
 export default {
 	title: 'External Components/RadioControlAccordion',

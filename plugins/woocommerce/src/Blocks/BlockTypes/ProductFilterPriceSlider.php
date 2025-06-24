@@ -84,24 +84,37 @@ class ProductFilterPriceSlider extends AbstractBlock {
 			)
 		);
 
+		/**
+		 * Accessibility: Assign the left input to a variable to conditionally
+		 * render it based on the inline input setting. We do this to have the
+		 * correct focus order of the input fields.
+		 */
+		ob_start();
+		?>
+		<div class="wc-block-product-filter-price-slider__left text">
+			<?php if ( $show_input_fields ) : ?>
+				<input
+					class="min"
+					type="text"
+					data-wp-bind--value="state.formattedMinPrice"
+					data-wp-on--focus="actions.selectInputContent"
+					data-wp-on--input="actions.debounceSetMinPrice"
+					aria-label="<?php esc_attr_e( 'Filter products by minimum price', 'woocommerce' ); ?>"
+				/>
+			<?php else : ?>
+				<span data-wp-text="state.formattedMinPrice"></span>
+			<?php endif; ?>
+		</div>
+		<?php
+		$left_input = ob_get_clean();
+
 		ob_start();
 		?>
 		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<div class="<?php echo esc_attr( $content_class ); ?>">
-				<div class="wc-block-product-filter-price-slider__left text">
-					<?php if ( $show_input_fields ) : ?>
-						<input
-							class="min"
-							type="text"
-							data-wp-bind--value="state.formattedMinPrice"
-							data-wp-on--focus="actions.selectInputContent"
-							data-wp-on--input="actions.debounceSetMinPrice"
-							aria-label="<?php esc_attr_e( 'Filter products by minimum price', 'woocommerce' ); ?>"
-						/>
-					<?php else : ?>
-						<span data-wp-text="state.formattedMinPrice"></span>
-					<?php endif; ?>
-				</div>
+				<?php if ( $inline_input ) : ?>
+					<?php echo $left_input; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php endif; ?>
 				<div
 					class="wc-block-product-filter-price-slider__range"
 					data-wp-bind--style="state.rangeStyle"
@@ -132,6 +145,9 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						aria-label="<?php esc_attr_e( 'Filter products by maximum price', 'woocommerce' ); ?>"
 					/>
 				</div>
+				<?php if ( ! $inline_input ) : ?>
+					<?php echo $left_input; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php endif; ?>
 				<div class="wc-block-product-filter-price-slider__right text">
 					<?php if ( $show_input_fields ) : ?>
 						<input

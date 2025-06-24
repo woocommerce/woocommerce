@@ -133,12 +133,13 @@ final class ProductFilterPrice extends AbstractBlock {
 		$formatted_max_price = html_entity_decode( wp_strip_all_tags( wc_price( $max_price, array( 'decimals' => 0 ) ) ) );
 
 		$filter_context = array(
-			'price' => array(
+			'price'      => array(
 				'minPrice' => $min_price,
 				'maxPrice' => $max_price,
 				'minRange' => $min_range,
 				'maxRange' => $max_range,
 			),
+			'groupLabel' => __( 'Price', 'woocommerce' ),
 		);
 
 		$wrapper_attributes = array(

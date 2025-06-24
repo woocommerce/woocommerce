@@ -4,7 +4,7 @@
 import { type ReactNode } from 'react';
 import {
 	type RecommendedPaymentMethod,
-	type PaymentProvider,
+	type PaymentsProvider,
 } from '@woocommerce/data';
 
 /**
@@ -38,7 +38,7 @@ export interface SidebarItemProps {
 export interface WooPaymentsModalProps {
 	isOpen: boolean;
 	setIsOpen: ( isOpen: boolean ) => void;
-	providerData: PaymentProvider;
+	providerData: PaymentsProvider;
 }
 
 /**
@@ -143,4 +143,5 @@ export interface OnboardingContextType {
 	closeModal: () => void;
 	justCompletedStepId: string | null;
 	setJustCompletedStepId: ( stepId: string ) => void;
+	sessionEntryPoint: string;
 }

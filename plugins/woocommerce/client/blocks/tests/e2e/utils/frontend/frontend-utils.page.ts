@@ -21,15 +21,34 @@ export class FrontendUtils {
 		return this.page.locator( selector );
 	}
 
-	async addToCart( itemName = '' ) {
-		const cartResponsePromise = this.page.waitForResponse( ( response ) => {
-			const url = response.url();
-			return (
-				url.includes( 'cart' ) ||
-				url.includes( 'add_to_cart' ) ||
-				url.includes( 'batch' )
+	/**
+	 * Wait for a single cart-related request to complete
+	 */
+	async waitForCartRequests( timeout = 5000 ): Promise< void > {
+		try {
+			await this.page.waitForResponse(
+				( response ) => {
+					const url = response.url();
+					return (
+						( url.includes( '/cart' ) ||
+							url.includes( '/add_to_cart' ) ||
+							url.includes( '/batch' ) ) &&
+						response.status() < 400
+					);
+				},
+				{ timeout }
 			);
-		} );
+		} catch ( error: unknown ) {
+			// If timeout, it means no cart requests are pending, which is fine
+			if ( error instanceof Error && error.name !== 'TimeoutError' ) {
+				throw error;
+			}
+		}
+	}
+
+	async addToCart( itemName = '' ) {
+		// Wait for any pending cart requests to complete before starting
+		await this.waitForCartRequests();
 
 		if ( itemName !== '' ) {
 			// We can't use `getByRole()` here because the Add to Cart button
@@ -41,16 +60,8 @@ export class FrontendUtils {
 			await this.page.click( 'text=Add to cart' );
 		}
 
-		await cartResponsePromise;
-
-		/**
-		 * There's a race condition where the cart is not fully updated
-		 * immediately when adding multiple items one by one, even though the
-		 * response is received. This timeout ensures the cart is updated before
-		 * the next test step.
-		 */
-		// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
-		await this.page.waitForTimeout( 2000 );
+		// Wait for the cart request triggered by this action to complete
+		await this.waitForCartRequests();
 	}
 
 	async goToCheckout() {

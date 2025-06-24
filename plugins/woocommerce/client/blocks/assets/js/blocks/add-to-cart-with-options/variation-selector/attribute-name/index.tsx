@@ -9,15 +9,12 @@ import { Icon, heading } from '@wordpress/icons';
  */
 import metadata from './block.json';
 import AttributeNameEdit from './edit';
-import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../../utils';
 
-if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
-	registerBlockType( metadata, {
-		edit: AttributeNameEdit,
-		attributes: metadata.attributes,
-		icon: {
-			src: <Icon icon={ heading } />,
-		},
-		save: () => null,
-	} );
-}
+registerBlockType( metadata, {
+	edit: AttributeNameEdit,
+	attributes: metadata.attributes,
+	icon: {
+		src: <Icon icon={ heading } />,
+	},
+	save: () => null,
+} );

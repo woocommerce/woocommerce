@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent rendering multiple instances of the Checkout block
