@@ -1,4 +1,0 @@
-Significance: major
-Type: dev
-
-Monorepo: bump @wordpress/dependency-extraction-webpack-plugin dependency version to the latest (breaking changes, see https://github.com/WordPress/gutenberg/blob/trunk/packages/dependency-extraction-webpack-plugin/CHANGELOG.md for details).
