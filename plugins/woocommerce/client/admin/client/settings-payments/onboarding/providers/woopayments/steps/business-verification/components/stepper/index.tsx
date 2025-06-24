@@ -2,6 +2,7 @@
  * External dependencies
  */
 import React, { createContext, useContext, useState } from 'react';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -11,6 +12,7 @@ import { useOnboardingContext } from '../../../../data/onboarding-context';
 interface UseContextValueParams {
 	steps: Record< string, React.ReactElement >;
 	initialStep?: string;
+	onStepView?: ( step: string ) => void;
 	onStepChange?: ( step: string ) => void;
 	onComplete?: () => void;
 	onExit?: () => void;
@@ -37,6 +39,7 @@ const useContextValue = ( {
 		const index = keys.indexOf( currentStep );
 		const next = keys[ index + 1 ];
 		setCurrentStep( next );
+		onStepChange?.( next );
 	}
 
 	const progress = ( keys.indexOf( currentStep ) + 1 ) / keys.length;
@@ -83,6 +86,7 @@ const StepperContext = createContext< ContextValue | null >( null );
 interface StepperProps {
 	children: React.ReactNode[];
 	initialStep?: string;
+	onStepView?: ( step: string ) => void;
 	onStepChange?: ( step: string ) => void;
 	onComplete?: () => void;
 	onExit?: () => void;
@@ -100,12 +104,21 @@ const childrenToSteps = ( children: StepperProps[ 'children' ] ) => {
 	);
 };
 
-export const Stepper: React.FC< StepperProps > = ( { children, ...rest } ) => {
+export const Stepper: React.FC< StepperProps > = ( {
+	children,
+	onStepView,
+	...rest
+} ) => {
 	const steps = childrenToSteps( children );
 	const value = useContextValue( {
 		steps,
 		...rest,
 	} );
+
+	useEffect( () => {
+		onStepView?.( value.currentStep );
+	}, [ value.currentStep ] );
+
 	const CurrentStep = steps[ value.currentStep ];
 
 	return (

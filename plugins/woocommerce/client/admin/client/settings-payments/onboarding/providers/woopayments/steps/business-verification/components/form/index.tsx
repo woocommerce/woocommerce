@@ -38,7 +38,7 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 } ) => {
 	const { data, errors, touched, setTouched } =
 		useBusinessVerificationContext();
-	const { currentStep } = useOnboardingContext();
+	const { currentStep, sessionEntryPoint } = useOnboardingContext();
 	const { nextStep } = useStepperContext();
 
 	const handleContinue = () => {
@@ -50,6 +50,7 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 					country: data.country || 'unknown',
 					business_type: data.business_type || 'unknown',
 					mcc: data.mcc || 'unknown',
+					source: sessionEntryPoint,
 				}
 			);
 
@@ -84,6 +85,7 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 							step_id: currentStep?.id ?? 'unknown',
 							sub_step_id: 'business',
 							action: 'business_form_continue',
+							source: sessionEntryPoint,
 						}
 					);
 				} }
