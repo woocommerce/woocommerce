@@ -353,17 +353,26 @@ export const SettingsPaymentsOfflineWrapper = () => {
 				fallback={
 					<>
 						<div className="settings-payments-offline__container">
-							<div className="settings-payment-gateways">
-								<div className="settings-payment-gateways__header">
-									<div className="settings-payment-gateways__header-title">
+							<div className="settings-payments-offline__header">
+								<BackButton
+									href={ getNewPath( {}, '' ) }
+									title={ __(
+										'Return to payments settings',
+										'woocommerce'
+									) }
+									isRoute={ true }
+									from={ 'woopayments_payment_methods' }
+								/>
+								<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align">
+									<span className="woocommerce-settings-payments-header__title">
 										{ __(
-											'Payment methods',
+											'Take offline payments',
 											'woocommerce'
 										) }
-									</div>
-								</div>
-								<ListPlaceholder rows={ 3 } />
+									</span>
+								</h1>
 							</div>
+							<ListPlaceholder rows={ 3 } />
 						</div>
 					</>
 				}
