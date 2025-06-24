@@ -42,6 +42,7 @@ import {
 import { taskClickedAction, getLysTasklist } from './tasklist';
 import { fetchCongratsData } from '../main-content/pages/launch-store-success/services';
 import { getTimeFrame } from '~/utils';
+import { isWooPayments } from '~/settings-payments/utils';
 
 export type LYSAugmentedTaskListType = TaskListType & {
 	recentlyActionedTasks: string[];
@@ -149,7 +150,7 @@ export const getWooPaymentsStatus = async () => {
 	// Return true when WooPayments is the only enabled gateway.
 	return (
 		enabledPaymentGateways.length === 1 &&
-		enabledPaymentGateways[ 0 ].id === 'woocommerce_payments'
+		isWooPayments( enabledPaymentGateways[ 0 ].id )
 	);
 };
 

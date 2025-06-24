@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-* Update all instances of "Official WooCommerce Marketplace" copy, and associated tests:     - Marketplace header     - Product preview modal     - Marketplace links in onboarding checklist tasks * Update additional payment options link in new payment settings to point to in-app Marketplace     - This is how the links worked in the old payment recommendation elements. New payment settings introduced a regression by going back to using an external WCCOM URL.     - Added tests for both the link navigation and the Tracks event * Add fallback links to WooCommerce.com for when marketplace features are disabled
