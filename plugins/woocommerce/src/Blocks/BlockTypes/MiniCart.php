@@ -504,6 +504,12 @@ class MiniCart extends AbstractBlock {
 
 			$cart_always_shows_price = isset( $attributes['hasHiddenPrice'] ) && false === $attributes['hasHiddenPrice'];
 			$price_color             = isset( $attributes['priceColor']['color'] ) ? $attributes['priceColor']['color'] : '';
+			$on_cart_click_behaviour = isset( $attributes['onCartClickBehaviour'] ) ? $attributes['onCartClickBehaviour'] : 'open_drawer';
+
+			// Build the link attribute based on behavior.
+			$link_attribute = 'open_drawer' === $on_cart_click_behaviour
+				? 'data-wp-on--click="callbacks.openDrawer"'
+				: 'href="' . esc_url( wc_get_checkout_url() ) . '"';
 
 			ob_start();
 			?>
@@ -516,7 +522,7 @@ class MiniCart extends AbstractBlock {
 				class="<?php echo esc_attr( $wrapper_classes ); ?>"
 				style="<?php echo esc_attr( $wrapper_styles ); ?>"
 			>
-				<button data-wp-on--click="callbacks.openDrawer" class="wc-block-mini-cart__button" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">
+				<a <?php echo $link_attribute; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> class="wc-block-mini-cart__button" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">
 					<span class="wc-block-mini-cart__quantity-badge">
 						<?php
 							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -535,7 +541,7 @@ class MiniCart extends AbstractBlock {
 							echo $this->get_include_tax_label_markup( $attributes );
 						?>
 					<?php endif; ?>
-				</button>
+				</a>
 				<div data-wp-on--click="callbacks.overlayCloseDrawer" data-wp-bind--class="state.drawerOverlayClass" class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden">
 					<div class="wc-block-mini-cart__drawer wc-block-components-drawer is-mobile">
 						<div class="wc-block-components-drawer__content">
