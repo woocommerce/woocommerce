@@ -89,7 +89,7 @@ class NotificationsProcessor {
 	public function __construct() {
 		$this->logger = \wc_get_logger();
 
-		add_action( 'woocommerce_stock_notifications_product_sync', array( $this, 'schedule' ) );
+		add_action( 'woocommerce_customer_stock_notifications_product_sync', array( $this, 'schedule' ) );
 		add_action( self::AS_JOB_SEND_STOCK_NOTIFICATIONS, array( $this, 'process_batch' ) );
 	}
 
