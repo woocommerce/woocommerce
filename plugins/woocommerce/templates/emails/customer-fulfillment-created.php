@@ -2,7 +2,7 @@
 /**
  * Customer fulfillment created email
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/emails/admin-new-order.php.
+ * This template can be overridden by copying it to yourtheme/woocommerce/emails/customer-fulfillment-created.php.
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you
  * (the theme developer) will need to copy the new files to your theme to
@@ -80,9 +80,9 @@ do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_
  * Show user-defined additional content - this is set in each email's settings.
  */
 if ( $additional_content ) {
-	echo $email_improvements_enabled ? '<table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td class="email-additional-content">' : '';
+	echo '<table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td class="email-additional-content">';
 	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
-	echo $email_improvements_enabled ? '</td></tr></table>' : '';
+	echo '</td></tr></table>';
 }
 
 /**

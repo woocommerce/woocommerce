@@ -14,51 +14,38 @@ $order_table_class      = 'email-order-details';
 $order_total_text_align = 'right';
 
 if ( null === $fulfillment->get_date_deleted() ) {
-
 	$tracking_number   = $fulfillment->get_meta( '_tracking_number', true );
 	$tracking_url      = $fulfillment->get_meta( '_tracking_url' );
 	$shipment_provider = $fulfillment->get_meta( '_shipment_provider' );
 	if ( ! $tracking_number && ! $tracking_url && ! $shipment_provider ) {
 		echo '<p>' . esc_html__( 'No tracking information available for this fulfillment at the moment.', 'woocommerce' ) . '</p>';
-		return;
 	} else {
-		?>
-<p><strong>Tracking Number:</strong> <?php echo esc_attr( $tracking_number ); ?></p>
-<p><strong>Shipment Provider:</strong> <?php echo esc_html( $shipment_provider ); ?></p>
-
-<p><a href="<?php echo esc_html( $tracking_url ); ?>" target="_blank">Track your shipment</a></p>
-		<?php
+		echo '<p><strong>' . esc_html__( 'Tracking Number', 'woocommerce' ) . ':</strong> ' . esc_attr( $tracking_number ) . '</p>';
+		echo '<p><strong>' . esc_html__( 'Shipment Provider', 'woocommerce' ) . ':</strong> ' . esc_html( $shipment_provider ) . '</p>';
+		echo '<p><a href="' . esc_url( $tracking_url ) . '" target="_blank">' . esc_attr__( 'Track your shipment', 'woocommerce' ) . '</a></p>';
 	}
-	?>
-<br />
-<p>
-	<?php
-	echo wp_kses(
+	echo '<br />';
+	echo '<p>';
+	echo wp_kses_post(
 		sprintf(
 			/* translators: %s: Link to My Account > Orders page. */
 			__( 'You can access to more details of your order by visiting <a href="%s" target="_blank">My Account > Orders</a> and select the order you wish to see the latest status of the delivery.', 'woocommerce' ),
 			site_url( 'my-account/orders/' )
-		),
-		'strong, a'
+		)
 	);
-	?>
-</p>
-
-	<?php
-
+	echo '</p>';
 }
-
-/**
- * Action hook to add custom content before fulfillment details in email.
- *
- * @param WC_Order $order Order object.
- * @param Fulfillment $fulfillment Fulfillment object.
- * @param bool     $sent_to_admin Whether it's sent to admin or customer.
- * @param bool     $plain_text Whether it's a plain text email.
- * @param WC_Email $email Email object.
- * @since 2.5.0
- */
-do_action( 'woocommerce_email_before_fulfillment_table', $order, $fulfillment, $sent_to_admin, $plain_text, $email );
+	/**
+	 * Action hook to add custom content before fulfillment details in email.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param Fulfillment $fulfillment Fulfillment object.
+	 * @param bool     $sent_to_admin Whether it's sent to admin or customer.
+	 * @param bool     $plain_text Whether it's a plain text email.
+	 * @param WC_Email $email Email object.
+	 * @since 2.5.0
+	 */
+	do_action( 'woocommerce_email_before_fulfillment_table', $order, $fulfillment, $sent_to_admin, $plain_text, $email );
 ?>
 
 <h2 class="<?php echo esc_attr( $heading_class ); ?>">
