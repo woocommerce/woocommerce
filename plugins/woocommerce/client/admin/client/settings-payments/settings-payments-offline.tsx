@@ -7,6 +7,8 @@ import {
 	type OfflinePaymentMethodProvider,
 	paymentSettingsStore,
 } from '@woocommerce/data';
+import { getNewPath } from '@woocommerce/navigation';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -15,6 +17,7 @@ import './settings-payments-offline.scss';
 import './settings-payments-body.scss';
 import { ListPlaceholder } from '~/settings-payments/components/list-placeholder';
 import { OfflinePaymentGatewayList } from '~/settings-payments/components/offline-payment-gateway-list';
+import { BackButton } from './components/buttons/back-button';
 
 /**
  * A component for managing offline payment gateways in WooCommerce.
@@ -67,6 +70,19 @@ export const SettingsPaymentsOffline = () => {
 
 	return (
 		<div className="settings-payments-offline__container">
+			<div className="settings-payments-offline__header">
+				<BackButton
+					href={ getNewPath( {}, '' ) }
+					title={ __( 'Return to payments settings', 'woocommerce' ) }
+					isRoute={ true }
+					from={ 'woopayments_payment_methods' }
+				/>
+				<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align settings-payments-offline__header-title">
+					<span className="woocommerce-settings-payments-header__title">
+						{ __( 'Take offline payments', 'woocommerce' ) }
+					</span>
+				</h1>
+			</div>
 			{ isFetching ? (
 				<ListPlaceholder rows={ 3 } />
 			) : (
