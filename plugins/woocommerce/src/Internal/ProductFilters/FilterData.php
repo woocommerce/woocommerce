@@ -64,20 +64,7 @@ class FilterData {
 
 		global $wpdb;
 
-		add_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10, 2 );
-		add_filter( 'posts_pre_query', '__return_empty_array' );
-
-		$query_vars['no_found_rows']  = true;
-		$query_vars['posts_per_page'] = -1;
-		$query_vars['fields']         = 'ids';
-		$query                        = new \WP_Query();
-
-		$query->query( $query_vars );
-
-		remove_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10 );
-		remove_filter( 'posts_pre_query', '__return_empty_array' );
-
-		$product_ids = $this->get_cached_product_ids( $query->request );
+		$product_ids = $this->get_cached_product_ids( $query_vars );
 
 		$price_filter_sql = "
 		SELECT min( min_price ) as min_price, MAX( max_price ) as max_price
@@ -137,20 +124,7 @@ class FilterData {
 			return $cached_data;
 		}
 
-		add_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10, 2 );
-		add_filter( 'posts_pre_query', '__return_empty_array' );
-
-		$query_vars['no_found_rows']  = true;
-		$query_vars['posts_per_page'] = -1;
-		$query_vars['fields']         = 'ids';
-		$query                        = new \WP_Query();
-
-		$query->query( $query_vars );
-
-		remove_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10 );
-		remove_filter( 'posts_pre_query', '__return_empty_array' );
-
-		$product_ids = $this->get_cached_product_ids( $query->request );
+		$product_ids = $this->get_cached_product_ids( $query_vars );
 
 		global $wpdb;
 		$stock_status_counts = array();
@@ -211,20 +185,7 @@ class FilterData {
 
 		global $wpdb;
 
-		add_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10, 2 );
-		add_filter( 'posts_pre_query', '__return_empty_array' );
-
-		$query_vars['no_found_rows']  = true;
-		$query_vars['posts_per_page'] = -1;
-		$query_vars['fields']         = 'ids';
-		$query                        = new \WP_Query();
-
-		$query->query( $query_vars );
-
-		remove_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10 );
-		remove_filter( 'posts_pre_query', '__return_empty_array' );
-
-		$product_ids = $this->get_cached_product_ids( $query->request );
+		$product_ids = $this->get_cached_product_ids( $query_vars );
 
 		$rating_count_sql = "
 			SELECT COUNT( DISTINCT product_id ) as product_count, ROUND( average_rating, 0 ) as rounded_average_rating
@@ -281,20 +242,7 @@ class FilterData {
 
 		global $wpdb;
 
-		add_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10, 2 );
-		add_filter( 'posts_pre_query', '__return_empty_array' );
-
-		$query_vars['no_found_rows']  = true;
-		$query_vars['posts_per_page'] = -1;
-		$query_vars['fields']         = 'ids';
-		$query                        = new \WP_Query();
-
-		$query->query( $query_vars );
-
-		remove_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10 );
-		remove_filter( 'posts_pre_query', '__return_empty_array' );
-
-		$product_ids = $this->get_cached_product_ids( $query->request );
+		$product_ids = $this->get_cached_product_ids( $query_vars );
 
 		$attributes_to_count_sql = 'AND term_taxonomy.taxonomy IN ("' . esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) ) . '")';
 		$attribute_count_sql     = "
@@ -400,26 +348,39 @@ class FilterData {
 	}
 
 	/**
-	 * Get cached product IDs from a SQL query.
+	 * Get cached product IDs from query vars.
 	 *
-	 * Executes the product query and returns a comma-separated string of product IDs.
+	 * Executes a WP_Query with the given query vars and returns a comma-separated string of product IDs.
 	 * Results are cached to avoid repeated database queries.
 	 *
-	 * @param string $product_query_sql SQL query to get product IDs.
+	 * @param array $query_vars The WP_Query arguments.
 	 * @return string Comma-separated list of product IDs.
 	 */
-	private function get_cached_product_ids( $product_query_sql ) {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5( $product_query_sql );
+	private function get_cached_product_ids( array $query_vars ) {
+		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5( wp_json_encode( $query_vars ) );
 		$cache     = wp_cache_get( $cache_key );
 
 		if ( $cache ) {
 			return $cache;
 		}
 
+		add_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10, 2 );
+		add_filter( 'posts_pre_query', '__return_empty_array' );
+
+		$query_vars['no_found_rows']  = true;
+		$query_vars['posts_per_page'] = -1;
+		$query_vars['fields']         = 'ids';
+		$query                        = new \WP_Query();
+
+		$query->query( $query_vars );
+
+		remove_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses' ), 10 );
+		remove_filter( 'posts_pre_query', '__return_empty_array' );
+
 		global $wpdb;
 
 		// The query is already prepared by WP_Query.
-		$results = $wpdb->get_results( $product_query_sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$results = $wpdb->get_results( $query->request, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 		if ( ! $results ) {
 			$results = array();
