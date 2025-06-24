@@ -86,20 +86,29 @@ class Utils {
 	/**
 	 * Make the quantity input interactive by wrapping it with the necessary data attribute.
 	 *
-	 * @param string $quantity_html The quantity HTML.
-	 * @param string $wrapper_attributes Optional wrapper attributes.
+	 * @param string   $quantity_html The quantity HTML.
+	 * @param string   $wrapper_attributes Optional wrapper attributes.
+	 * @param int|null $child_product_id Optional child product ID.
+	 *
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
-	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = '' ) {
+	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = '', $child_product_id = null ) {
+		$context = array();
+		if ( $child_product_id ) {
+			$context['childProductId'] = $child_product_id;
+		}
+		$context_json = ! empty( $context ) ? " data-wp-context='" . wp_json_encode( $context ) . "'" : '';
+
 		if ( ! empty( $wrapper_attributes ) ) {
 			return sprintf(
-				'<div %1$s data-wp-interactive="woocommerce/add-to-cart-with-options">%2$s</div>',
+				'<div %1$s data-wp-interactive="woocommerce/add-to-cart-with-options"%2$s>%3$s</div>',
 				$wrapper_attributes,
+				$context_json,
 				$quantity_html
 			);
 		}
 
-		return '<div data-wp-interactive="woocommerce/add-to-cart-with-options">' . $quantity_html . '</div>';
+		return '<div data-wp-interactive="woocommerce/add-to-cart-with-options"' . $context_json . '>' . $quantity_html . '</div>';
 	}
 
 	/**
