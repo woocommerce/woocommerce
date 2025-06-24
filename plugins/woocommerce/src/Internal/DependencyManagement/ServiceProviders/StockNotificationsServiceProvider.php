@@ -19,6 +19,8 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\AdminManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\MenusController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\StockManagementHelper;
 
 /**
  * Service provider for Back in Stock Notification classes.
@@ -36,6 +38,8 @@ class StockNotificationsServiceProvider extends AbstractServiceProvider {
 		StockNotificationsMetaDataStore::class,
 		NotificationsProcessor::class,
 		StockSyncController::class,
+		StockManagementHelper::class,
+		EligibilityService::class,
 		EmailManager::class,
 		EmailTemplatesController::class,
 		AdminManager::class,
@@ -47,12 +51,28 @@ class StockNotificationsServiceProvider extends AbstractServiceProvider {
 	 * Register the classes.
 	 */
 	public function register() {
+
+		// Main.
 		$this->share( StockNotifications::class );
-		$this->share( StockNotificationsDataStore::class )->addArguments( array( StockNotificationsMetaDataStore::class, DatabaseUtil::class ) );
+
+		// Data stores.
+		$this->share( StockNotificationsDataStore::class )->addArguments(
+			array(
+				StockNotificationsMetaDataStore::class,
+				DatabaseUtil::class,
+			)
+		);
+
+		// Email.
 		$this->share( EmailManager::class );
 		$this->share( EmailTemplatesController::class );
+
+		// Stock management.
+		$this->share( EligibilityService::class )->addArguments( array( StockManagementHelper::class ) );
 		$this->share( StockSyncController::class );
 		$this->share( NotificationsProcessor::class )->addArguments( array( EmailManager::class ) );
+
+		// Admin.
 		$this->share( AdminManager::class );
 		$this->share( SettingsController::class );
 		$this->share( MenusController::class );

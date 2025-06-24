@@ -4,15 +4,20 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications;
 
-use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\StockNotifications\Config;
-use Automattic\WooCommerce\Internal\StockNotifications\Utilities\StockManagementHelper;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
 use WC_Product;
 
 /**
  * The controller for the stock events.
  */
 class StockSyncController {
+
+	/**
+	 * The meta key for the last sync timestamp.
+	 *
+	 * @var string
+	 */
+	public const LAST_SYNC_TIMESTAMP_META_KEY = '_wc_customer_stock_notifications_last_sync_timestamp';
 
 	/**
 	 * The queue using product IDs as keys.
@@ -22,24 +27,44 @@ class StockSyncController {
 	private array $queue = array();
 
 	/**
+	 * The eligibility service instance.
+	 *
+	 * @var EligibilityService
+	 */
+	private EligibilityService $eligibility_service;
+
+	/**
 	 * Logger instance.
 	 *
-	 * @var \WC_Logger
+	 * @var \WC_Logger_Interface
 	 */
 	protected $logger;
+
+	/**
+	 * Init.
+	 *
+	 * @internal
+	 *
+	 * @param EligibilityService $eligibility_service The eligibility service instance.
+	 */
+	final public function init( EligibilityService $eligibility_service ): void {
+		$this->logger              = \wc_get_logger();
+		$this->eligibility_service = $eligibility_service;
+	}
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->logger = \wc_get_logger();
-
 		// Event handlers.
 		add_action( 'woocommerce_product_set_stock_status', array( $this, 'handle_product_stock_status_change' ), 100, 3 );
 		add_action( 'woocommerce_variation_set_stock_status', array( $this, 'handle_product_stock_status_change' ), 100, 3 );
 
 		// Process the queue on shutdown.
 		add_action( 'shutdown', array( $this, 'process_queue' ) );
+
+		// Output the admin notice.
+		add_action( 'admin_notices', array( $this, 'output_admin_notice' ) );
 	}
 
 	/**
@@ -51,36 +76,34 @@ class StockSyncController {
 	 * @return void
 	 */
 	public function handle_product_stock_status_change( $product_id, $stock_status, $product = null ) {
+
 		try {
 
-			if ( ! in_array( (string) $stock_status, Config::get_eligible_stock_statuses(), true ) ) {
+			if ( ! $this->eligibility_service->is_stock_status_eligible( $stock_status ) ) {
 				return;
 			}
 
-			// Get product if not provided.
 			if ( null === $product ) {
 				$product = \wc_get_product( $product_id );
 			}
 
-			// Validate product exists and is supported.
-			if ( ! $this->validate_product( $product ) ) {
+			if ( ! is_a( $product, 'WC_Product' ) ) {
 				return;
 			}
 
-			$lookup_ids = array( $product_id );
-			// If product is variable, check for the variations that inherit stock management from the parent.
-			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$children_ids = StockManagementHelper::get_managed_variations( $product );
-				$lookup_ids   = array_merge( $lookup_ids, $children_ids );
+			if ( ! $this->eligibility_service->is_product_eligible( $product ) ) {
+				return;
 			}
 
-			if ( ! NotificationQuery::product_has_active_notifications( $lookup_ids ) ) {
+			if ( ! $this->eligibility_service->has_active_notifications( $product ) ) {
 				return;
 			}
 
 			// Add to queue.
-			$this->queue[ $product_id ] = true;
-
+			$target_product_ids = $this->eligibility_service->get_target_product_ids( $product );
+			foreach ( $target_product_ids as $target_product_id ) {
+				$this->queue[ $target_product_id ] = true;
+			}
 		} catch ( \Throwable $e ) {
 			$this->logger->error(
 				sprintf( 'StockSyncController: Failed to process product %d: %s', $product_id, $e->getMessage() ),
@@ -99,48 +122,68 @@ class StockSyncController {
 	 */
 	public function process_queue(): void {
 		if ( empty( $this->queue ) || ! is_array( $this->queue ) ) {
+			$this->queue = array();
 			return;
 		}
 
-		$product_ids = array_keys( $this->queue );
-		foreach ( $product_ids as $product_id ) {
-
-			/**
-			 * Action: woocommerce_stock_notifications_product_sync
-			 *
-			 * @since 0.0.0
-			 *
-			 * @param int $product_id The product ID.
-			 */
-			do_action( 'woocommerce_stock_notifications_product_sync', $product_id );
+		$product_ids = array_filter( array_keys( $this->queue ) );
+		if ( empty( $product_ids ) ) {
+			return;
 		}
 
+		$this->store_admin_notice();
+
+		/**
+		 * Triggers the batch processor to process the product IDs.
+		 *
+		 * @since 0.0.0
+		 *
+		 * @param array $product_ids The product IDs to process.
+		 */
+		do_action( 'woocommerce_customer_stock_notifications_product_sync', $product_ids );
 		$this->queue = array();
 	}
 
 	/**
-	 * Validate product to be synced.
+	 * Store the admin notice.
 	 *
-	 * @param WC_Product|null $product The product object.
-	 * @return bool True if product is valid for sync, false otherwise.
+	 * @return void
 	 */
-	public function validate_product( ?WC_Product $product ): bool {
-		if ( null === $product || ! is_a( $product, 'WC_Product' ) ) {
-			return false;
+	private function store_admin_notice(): void {
+		if ( ! is_admin() || ! function_exists( 'wp_admin_notice' ) ) {
+			return;
 		}
 
-		$valid = $product->is_type( Config::get_supported_product_types() );
+		/* translators: 1 = URL of the Back in Stock Notifications page */
+		$notice_message = sprintf( __( 'Back-in-stock notifications for this product are now being processed. Subscribed customers will receive these emails over the next few minutes. You can monitor or manage individual subscriptions on the <a href="%s">Stock Notifications page</a>.', 'woocommerce' ), admin_url( 'admin.php?page=customer-stock-notifications' ) );
 
-		/**
-		 * Filter: woocommerce_stock_notifications_product_sync_validate
-		 *
-		 * @since 0.0.0
-		 *
-		 * Allow plugins to modify product validation logic.
-		 *
-		 * @param bool       $valid   Whether the product is valid for sync.
-		 * @param WC_Product $product The product object.
-		 */
-		return (bool) apply_filters( 'woocommerce_stock_notifications_product_sync_validate', $valid, $product );
+		update_option( 'wc_customer_stock_notifications_product_sync_notice', $notice_message );
+	}
+
+	/**
+	 * Add admin notices.
+	 *
+	 * @return void
+	 */
+	public function output_admin_notice(): void {
+		if ( ! function_exists( 'wp_admin_notice' ) ) {
+			return;
+		}
+
+		$notice_message = get_option( 'wc_customer_stock_notifications_product_sync_notice' );
+		if ( empty( $notice_message ) ) {
+			return;
+		}
+
+		\wp_admin_notice(
+			$notice_message,
+			array(
+				'type'        => 'info',
+				'id'          => 'woocommerce_customer_stock_notifications_product_sync_notice',
+				'dismissible' => false,
+			)
+		);
+
+		delete_option( 'wc_customer_stock_notifications_product_sync_notice' );
 	}
 }
