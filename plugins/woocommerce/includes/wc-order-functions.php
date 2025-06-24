@@ -1278,3 +1278,42 @@ function wc_delete_order_note( $note_id ) {
 
 	return false;
 }
+
+/**
+ * Apply wptexturize while preserving URLs to prevent their content from being altered.
+ *
+ * @since 10.1.0
+ * @param string $content The order note content.
+ * @return string The processed content.
+ */
+function wc_wptexturize_order_note( $content ) {
+	// Pattern to match URLs (http, https protocols).
+	$url_pattern = '/\b(?:https?):\/\/[^\s<>"{}|\\^`\[\]]+/i';
+
+	// Find all URLs in the content.
+	preg_match_all( $url_pattern, $content, $urls );
+
+	if ( empty( $urls[0] ) ) {
+		// No URLs found, safe to apply wptexturize.
+		return wptexturize( $content );
+	}
+
+	// Get unique URLs to avoid issues with duplicate URLs.
+	$unique_urls = array_unique( $urls[0] );
+
+	// Replace URLs with placeholders.
+	$placeholders        = array();
+	$placeholder_content = $content;
+
+	foreach ( $unique_urls as $index => $url ) {
+		$placeholder                  = sprintf( '___WC_URL_PLACEHOLDER_%d___', $index );
+		$placeholders[ $placeholder ] = $url;
+		$placeholder_content          = str_replace( $url, $placeholder, $placeholder_content );
+	}
+
+	// Apply wptexturize to content with placeholders.
+	$texturized_content = wptexturize( $placeholder_content );
+
+	// Restore original URLs.
+	return str_replace( array_keys( $placeholders ), array_values( $placeholders ), $texturized_content );
+}
