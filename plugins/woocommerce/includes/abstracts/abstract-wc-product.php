@@ -2004,7 +2004,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Get min quantity which can be purchased at once.
 	 *
 	 * @since  3.0.0
-	 * @return int
+	 * @return int|float
 	 */
 	public function get_min_purchase_quantity() {
 		return 1;

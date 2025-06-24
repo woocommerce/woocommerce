@@ -32,17 +32,10 @@ final class QuantityLimits {
 			];
 		}
 
-		// Set defaults. Products that are sold individually need special handling.
-		$minimum     = 1;
-		$multiple_of = 1;
-		$maximum     = $product->is_sold_individually() ? 1 : $this->get_product_quantity_limit( $product );
-		$editable    = ! $product->is_sold_individually();
-
-		// Filter all values.
-		$multiple_of = $this->filter_numeric_value( $multiple_of, 'multiple_of', $cart_item );
-		$minimum     = $this->filter_numeric_value( $minimum, 'minimum', $cart_item );
-		$maximum     = $this->filter_numeric_value( $maximum, 'maximum', $cart_item );
-		$editable    = $this->filter_boolean_value( $editable, 'editable', $cart_item );
+		$minimum     = $this->filter_numeric_value( $product->get_min_purchase_quantity(), 'minimum', $cart_item );
+		$maximum     = $this->filter_numeric_value( $this->get_product_quantity_limit( $product ), 'maximum', $cart_item );
+		$multiple_of = $this->filter_numeric_value( 1, 'multiple_of', $cart_item );
+		$editable    = $this->filter_boolean_value( ! $product->is_sold_individually(), 'editable', $cart_item );
 
 		// Ensure values are compatible with each other.
 		$minimum = max( $multiple_of, $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ) );
@@ -63,15 +56,9 @@ final class QuantityLimits {
 	 * @return array
 	 */
 	public function get_add_to_cart_limits( \WC_Product $product ) {
-		// Set defaults. Products that are sold individually need special handling.
-		$minimum     = 1;
-		$multiple_of = 1;
-		$maximum     = $product->is_sold_individually() ? 1 : $this->get_product_quantity_limit( $product );
-
-		// Filter all values.
-		$multiple_of = $this->filter_numeric_value( $multiple_of, 'multiple_of', $product );
-		$minimum     = $this->filter_numeric_value( $minimum, 'minimum', $product );
-		$maximum     = $this->filter_numeric_value( $maximum, 'maximum', $product );
+		$minimum     = $this->filter_numeric_value( $product->get_min_purchase_quantity(), 'minimum', $product );
+		$maximum     = $this->filter_numeric_value( $this->get_product_quantity_limit( $product ), 'maximum', $product );
+		$multiple_of = $this->filter_numeric_value( 1, 'multiple_of', $product );
 
 		// Ensure values are compatible with each other.
 		$minimum = max( $multiple_of, $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ) );
@@ -187,9 +174,11 @@ final class QuantityLimits {
 	 * @return int|float
 	 */
 	protected function get_product_quantity_limit( \WC_Product $product ) {
-		$limits = [ 9999 ];
+		$purchase_limit = $product->get_max_purchase_quantity();
+		$limits         = [ $purchase_limit > 0 ? $purchase_limit : 9999 ];
 
-		if ( $product->managing_stock() || ! $product->backorders_allowed() ) {
+		// If managing stock and backorders are not allowed, get the remaining stock considering active carts.
+		if ( $product->managing_stock() && ! $product->backorders_allowed() ) {
 			$limits[] = $this->get_remaining_stock( $product );
 		}
 
