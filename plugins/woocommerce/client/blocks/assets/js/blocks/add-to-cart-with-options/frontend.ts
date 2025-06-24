@@ -23,6 +23,7 @@ export type Context = {
 	quantity: Record< number, number >;
 	tempQuantity: number;
 	groupedProductIds: number[];
+	childProductId: number;
 };
 
 interface GroupedCartItem {
@@ -166,15 +167,31 @@ const addToCartWithOptionsStore = store(
 				return matchedVariation?.variation_id || null;
 			},
 			get allowsDecrease() {
-				const inputElement = document.querySelector(
-					'.wc-block-components-quantity-selector__input'
-				) as HTMLInputElement | null;
+				const context = getContext< Context >();
+				const { quantity, childProductId, productType } = context;
+
+				const currentQuantity =
+					productType === 'grouped' && childProductId
+						? quantity[ childProductId ] || 0
+						: quantity[ context.productId ] || 0;
+
+				let inputElement: HTMLInputElement | null = null;
+
+				if ( productType === 'grouped' && childProductId ) {
+					// For grouped products, look for input with name="quantity[childProductId]".
+					inputElement = document.querySelector(
+						`.wc-block-components-quantity-selector__input[name="quantity[${ childProductId }]"]`
+					) as HTMLInputElement | null;
+				} else {
+					// For other product types, look for input with name="quantity".
+					inputElement = document.querySelector(
+						`.wc-block-components-quantity-selector__input[name="quantity"]`
+					) as HTMLInputElement | null;
+				}
 
 				if ( ! inputElement ) {
 					return false;
 				}
-
-				const { quantity } = getContext< Context >();
 
 				const parsedMinValue = parseInt( inputElement.min, 10 );
 				const parsedStep = parseInt( inputElement.step, 10 );
@@ -182,18 +199,34 @@ const addToCartWithOptionsStore = store(
 				const minValue = isNaN( parsedMinValue ) ? 1 : parsedMinValue;
 				const step = isNaN( parsedStep ) ? 1 : parsedStep;
 
-				return quantity - step >= minValue;
+				return currentQuantity - step >= minValue;
 			},
 			get allowsIncrease() {
-				const inputElement = document.querySelector(
-					'.wc-block-components-quantity-selector__input'
-				) as HTMLInputElement | null;
+				const context = getContext< Context >();
+				const { quantity, childProductId, productType } = context;
+
+				const currentQuantity =
+					productType === 'grouped' && childProductId
+						? quantity[ childProductId ] || 0
+						: quantity[ context.productId ] || 0;
+
+				let inputElement: HTMLInputElement | null = null;
+
+				if ( productType === 'grouped' && childProductId ) {
+					// For grouped products, look for input with name="quantity[childProductId]".
+					inputElement = document.querySelector(
+						`.wc-block-components-quantity-selector__input[name="quantity[${ childProductId }]"]`
+					) as HTMLInputElement | null;
+				} else {
+					// For other product types, look for input with name="quantity".
+					inputElement = document.querySelector(
+						`.wc-block-components-quantity-selector__input[name="quantity"]`
+					) as HTMLInputElement | null;
+				}
 
 				if ( ! inputElement ) {
 					return false;
 				}
-
-				const { quantity } = getContext< Context >();
 
 				const parsedMaxValue = parseInt( inputElement.max, 10 );
 				const parsedStep = parseInt( inputElement.step, 10 );
@@ -203,7 +236,9 @@ const addToCartWithOptionsStore = store(
 					: parsedMaxValue;
 				const step = isNaN( parsedStep ) ? 1 : parsedStep;
 
-				return maxValue === undefined || quantity + step <= maxValue;
+				return (
+					maxValue === undefined || currentQuantity + step <= maxValue
+				);
 			},
 		},
 		actions: {
