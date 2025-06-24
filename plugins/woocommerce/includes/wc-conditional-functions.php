@@ -286,7 +286,7 @@ if ( ! function_exists( 'is_lost_password_page' ) ) {
 if ( ! function_exists( 'is_wc_admin_settings_page' ) ) {
 
 	/**
-	 * is_wc_admin_settings_page - Returns true when viewing the admin settings page.
+	 * Is_wc_admin_settings_page - Returns true when viewing the admin settings page.
 	 *
 	 * @return bool
 	 */
