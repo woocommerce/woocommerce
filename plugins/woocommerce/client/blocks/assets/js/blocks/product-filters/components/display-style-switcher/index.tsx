@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { Block, createBlock, getBlockTypes } from '@wordpress/blocks';
+import { createBlock, getBlockTypes } from '@wordpress/blocks';
 import { useState } from '@wordpress/element';
-import { dispatch, useSelect } from '@wordpress/data';
+import { dispatch, select } from '@wordpress/data';
 import {
 	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -26,7 +26,7 @@ export const DisplayStyleSwitcher = ( {
 }: {
 	clientId: string;
 	currentStyle: string;
-	onChange: ( value: string ) => void;
+	onChange: ( value: string | number | undefined ) => void;
 	parentBlockName: string;
 } ) => {
 	const displayStyleOptions = getBlockTypes().filter( ( blockType ) =>
@@ -34,12 +34,6 @@ export const DisplayStyleSwitcher = ( {
 	);
 
 	const { insertBlock, replaceBlock } = dispatch( 'core/block-editor' );
-	const filterBlock = useSelect(
-		( select ) => {
-			return select( 'core/block-editor' ).getBlock( clientId );
-		},
-		[ clientId ]
-	);
 
 	const [ displayStyleBlocksAttributes, setDisplayStyleBlocksAttributes ] =
 		useState< Record< string, unknown > >( {} );
@@ -49,7 +43,12 @@ export const DisplayStyleSwitcher = ( {
 			isBlock
 			__nextHasNoMarginBottom
 			__next40pxDefaultSize
-			onChange={ ( value: string ) => {
+			label=""
+			hideLabelFromVision
+			onChange={ ( value: string | number | undefined ) => {
+				if ( ! value || typeof value !== 'string' ) return;
+				const filterBlock =
+					select( 'core/block-editor' ).getBlock( clientId );
 				if ( ! filterBlock ) return;
 				const currentStyleBlock = getInnerBlockByName(
 					filterBlock,
