@@ -127,25 +127,13 @@ if ( ! function_exists( 'is_checkout_pay_page' ) ) {
 	/**
 	 * Is_checkout_pay - Returns true when viewing the checkout's pay page.
 	 *
-	 * @return bool
-	 */
-	function is_checkout_pay_page() {
-		global $wp;
-
-		return is_checkout() && ! empty( $wp->query_vars['order-pay'] );
-	}
-}
-
-if ( ! function_exists( 'is_pay_for_order_page' ) ) {
-
-	/**
-	 * is_pay_for_order_page - Returns true when viewing the pay for order page.
-	 *
 	 * @param bool $check_key Optional. If true, check if the key is set in the URL.
 	 * @return bool
 	 */
-	function is_pay_for_order_page( $check_key = false ) {
-		$is_pay_for_order = is_checkout_pay_page() || is_wc_endpoint_url( 'order-pay' ) || isset( $_GET['pay_for_order'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	function is_checkout_pay_page( $check_key = false ) {
+		global $wp;
+
+		$is_pay_for_order = ( is_checkout() && ! empty( $wp->query_vars['order-pay'] ) ) || is_wc_endpoint_url( 'order-pay' ) || isset( $_GET['pay_for_order'] );  // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		return $is_pay_for_order && ( ! $check_key || isset( $_GET['key'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 }
