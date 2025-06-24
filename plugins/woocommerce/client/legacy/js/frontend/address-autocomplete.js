@@ -269,25 +269,272 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		} );
 
 		/**
+		 * Replace an input element with a fresh copy to reset browser state.
+		 * @param {HTMLInputElement} input The input element to replace
+		 * @param {Object} attributes Object containing attributes to set on the new element
+		 * @param {boolean} shouldFocus Whether to focus the new element
+		 * @param {boolean} reattachListeners Whether to reattach event listeners (Firefox only)
+		 * @return {HTMLInputElement} The new input element
+		 */
+		function replaceInputElement( input, attributes, shouldFocus = true, reattachListeners = false ) {
+			const parentElement = input.parentElement;
+			if ( ! parentElement ) {
+				return input;
+			}
+
+			// Store cursor position before replacing element
+			const cursorPosition = input.selectionStart;
+
+			// Clone the element to get a fresh copy
+			const newElement = input.cloneNode( true );
+
+			// Set/remove attributes on the new element
+			Object.entries( attributes ).forEach( ( [ key, value ] ) => {
+				if ( value === null ) {
+					newElement.removeAttribute( key );
+				} else {
+					newElement.setAttribute( key, value );
+				}
+			} );
+
+			// Replace the old element with the new one
+			parentElement.removeChild( input );
+			parentElement.appendChild( newElement );
+
+			// Update references to point to the new element
+			const inputId = input.id;
+			if ( inputId ) {
+				// Update addressInputs cache
+				for ( const type of [ 'billing', 'shipping' ] ) {
+					if (
+						addressInputs[ type ] &&
+						addressInputs[ type ][ 'address_1' ] === input
+					) {
+						addressInputs[ type ][ 'address_1' ] = newElement;
+					}
+				}
+			}
+
+			// Re-attach event listeners if needed (Firefox only)
+			if ( reattachListeners ) {
+				reattachEventListeners( newElement );
+			}
+
+			// Restore focus and cursor position
+			if ( shouldFocus ) {
+				newElement.focus();
+				if (
+					typeof cursorPosition === 'number' &&
+					cursorPosition >= 0
+				) {
+					newElement.setSelectionRange(
+						cursorPosition,
+						cursorPosition
+					);
+				}
+			}
+
+			// Reset active suggestion index to prevent auto-selection
+			const elementType = newElement.id.includes( 'billing' )
+				? 'billing'
+				: 'shipping';
+			if (
+				activeSuggestionIndices[ elementType ] !== undefined
+			) {
+				activeSuggestionIndices[ elementType ] = -1;
+			}
+
+			return newElement;
+		}
+
+		/**
 		 * Disable browser autofill for address inputs to prevent conflicts with autocomplete.
 		 * @param input {HTMLInputElement} The input element to disable autofill for.
 		 */
 		function disableBrowserAutofill( input ) {
 			if ( input.getAttribute( 'autocomplete' ) === 'off' ) {
+				return input;
+			}
+
+			if ( needsElementCloning ) {
+				// Firefox and Safari need element cloning to clear password manager state
+				const attributes = {
+					'autocomplete': 'off',
+					'data-lpignore': 'true',
+					'data-op-ignore': 'true',
+					'data-1p-ignore': 'true'
+				};
+
+				// Safari needs additional attributes to fully disable autofill
+				if ( isSafari ) {
+					attributes['data-form-type'] = null;
+					attributes['data-bwignore'] = 'true';
+					attributes['data-protonpass-ignore'] = 'true';
+					// Safari is very stubborn - use a random autocomplete value
+					attributes['autocomplete'] = 'nope-' + Math.random().toString(36).substr(2, 9);
+					attributes['readonly'] = 'true';
+				}
+
+				const newElement = replaceInputElement(
+					input,
+					attributes,
+					true,
+					needsElementCloning // Both Firefox and Safari need event listeners reattached
+				);
+
+				// Remove readonly after a brief delay for Safari
+				if ( isSafari && newElement.hasAttribute( 'readonly' ) ) {
+					setTimeout( () => {
+						newElement.removeAttribute( 'readonly' );
+					}, 100 );
+				}
+
+				return newElement;
+			} else {
+				// Other browsers can use attribute manipulation with DOM refresh
+				input.setAttribute( 'autocomplete', 'off' );
+				input.setAttribute( 'data-lpignore', 'true' );
+				input.setAttribute( 'data-op-ignore', 'true' );
+				input.setAttribute( 'data-1p-ignore', 'true' );
+
+				// To prevent 1Password/LastPass and autocomplete clashes, we need to refocus the element.
+				// This is achieved by removing and re-adding the element to trigger browser updates.
+				const parentElement = input.parentElement;
+				if ( parentElement ) {
+					const removedElement = parentElement.removeChild( input );
+
+					// Force browser repaint/reflow while element is removed
+					// This ensures password managers detect the removal before re-adding
+					parentElement.offsetHeight; // Trigger reflow
+					document.body.offsetHeight; // Force global repaint
+
+					parentElement.appendChild( removedElement );
+					input.focus();
+				}
+			}
+
+			return input;
+		}
+
+		/**
+		 * Re-attach event listeners to a new element (used when cloning in Firefox)
+		 * @param {HTMLElement} newElement The new element to attach listeners to
+		 */
+		function reattachEventListeners( newElement ) {
+			// Find which type this element belongs to
+			let elementType = null;
+			for ( const type of [ 'billing', 'shipping' ] ) {
+				if ( newElement.id === `${ type }_address_1` ) {
+					elementType = type;
+					break;
+				}
+			}
+
+			if ( ! elementType ) {
 				return;
 			}
 
-			input.setAttribute( 'autocomplete', 'off' );
-			input.setAttribute( 'data-lpignore', 'true' );
-			input.setAttribute( 'data-op-ignore', 'true' );
-
-			// To prevent 1Password/LastPass and autocomplete clashes, we need to refocus the element.
-			// This is achieved by removing and re-adding the element to trigger browser updates.
-			const parentElement = input.parentElement;
-			if ( parentElement ) {
-				parentElement.appendChild( parentElement.removeChild( input ) );
-				input.focus();
+			const countryInput = addressInputs[ elementType ][ 'country' ];
+			if ( ! countryInput ) {
+				return;
 			}
+
+			let inputTimeout;
+			let isInitialAttachment = true;
+
+			// Re-attach input event listener with initial delay to prevent immediate triggering
+			newElement.addEventListener( 'input', function () {
+				clearTimeout( inputTimeout );
+				const inputElement = this;
+
+				// Immediately hide suggestions if input is too short
+				if ( inputElement.value.length < 3 ) {
+					hideSuggestions( elementType );
+					const updatedElement =
+						enableBrowserAutofill( inputElement );
+					// Update the cached reference if element was replaced
+					if (
+						updatedElement !== inputElement &&
+						addressInputs[ elementType ]
+					) {
+						addressInputs[ elementType ][ 'address_1' ] =
+							updatedElement;
+					}
+					return;
+				}
+
+				// Add extra delay on first attachment to prevent auto-triggering
+				const delay = isInitialAttachment ? 300 : 100;
+				isInitialAttachment = false;
+
+				inputTimeout = setTimeout( () => {
+					if ( document.activeElement === inputElement ) {
+						displaySuggestions(
+							inputElement.value,
+							countryInput.value,
+							elementType
+						);
+					}
+				}, delay );
+			} );
+
+			// Re-attach keydown event listener
+			newElement.addEventListener( 'keydown', async function ( e ) {
+				// Check if suggestions exist before accessing them
+				if (
+					! suggestionsLists[ elementType ] ||
+					! suggestionsContainers[ elementType ]
+				) {
+					return;
+				}
+
+				const items =
+					suggestionsLists[ elementType ].querySelectorAll( 'li' );
+				if (
+					items.length === 0 ||
+					suggestionsContainers[ elementType ].style.display ===
+						'none'
+				) {
+					return;
+				}
+
+				let newIndex = activeSuggestionIndices[ elementType ];
+
+				if ( e.key === 'ArrowDown' ) {
+					e.preventDefault();
+					newIndex =
+						( activeSuggestionIndices[ elementType ] + 1 ) %
+						items.length;
+					setActiveSuggestion( elementType, newIndex );
+				} else if ( e.key === 'ArrowUp' ) {
+					e.preventDefault();
+					newIndex =
+						( activeSuggestionIndices[ elementType ] -
+							1 +
+							items.length ) %
+						items.length;
+					setActiveSuggestion( elementType, newIndex );
+				} else if ( e.key === 'Enter' ) {
+					if ( activeSuggestionIndices[ elementType ] > -1 ) {
+						e.preventDefault();
+						const selectedItem = suggestionsLists[
+							elementType
+						].querySelector(
+							`li#suggestion-item-${ elementType }-${ activeSuggestionIndices[ elementType ] }`
+						);
+						// Hide suggestions immediately for better UX.
+						hideSuggestions( elementType );
+						enableBrowserAutofill( newElement );
+						await selectAddress(
+							elementType,
+							selectedItem.dataset.id
+						);
+					}
+				} else if ( e.key === 'Escape' ) {
+					hideSuggestions( elementType );
+					enableBrowserAutofill( newElement );
+				}
+			} );
 		}
 
 		/**
@@ -296,23 +543,107 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		 * @param shouldFocus {boolean} Whether to focus the input after enabling autofill.
 		 */
 		function enableBrowserAutofill( input, shouldFocus = true ) {
-			if ( input.getAttribute( 'autocomplete' ) !== 'off' ) {
-				return;
-			}
+			const currentAutocomplete = input.getAttribute( 'autocomplete' );
+			
+			// Check if autofill is already enabled (should be 'address-line1' when enabled)
+			if ( currentAutocomplete === 'address-line1' ) {
+				// Still need to check if ignore attributes are present
+				const hasIgnoreAttrs =
+					input.hasAttribute( 'data-lpignore' ) ||
+					input.hasAttribute( 'data-op-ignore' ) ||
+					input.hasAttribute( 'data-1p-ignore' );
 
-			input.setAttribute( 'autocomplete', 'address-line1' );
-			input.setAttribute( 'data-lpignore', 'false' );
-			input.setAttribute( 'data-op-ignore', 'false' );
-
-			// To ensure browser updates and re-enables autofill, we need to refocus the element.
-			// This is achieved by removing and re-adding the element to trigger browser updates.
-			const parentElement = input.parentElement;
-			if ( parentElement ) {
-				parentElement.appendChild( parentElement.removeChild( input ) );
-				if ( shouldFocus ) {
-					input.focus();
+				if ( ! hasIgnoreAttrs ) {
+					return input;
 				}
 			}
+
+			// For Safari, check if we're in disabled state (random autocomplete value starting with 'nope-')
+			if ( isSafari && currentAutocomplete && currentAutocomplete.startsWith( 'nope-' ) ) {
+				// Force re-enable for Safari disabled state
+				// Continue with normal re-enable logic below
+			}
+
+			if ( needsElementCloning ) {
+				// Firefox and Safari need element cloning to properly re-enable password managers
+				const attributes = {
+					'autocomplete': 'address-line1',
+					'data-lpignore': null,
+					'data-op-ignore': null,
+					'data-1p-ignore': null
+				};
+
+				// Safari needs additional cleanup from disable state
+				if ( isSafari ) {
+					attributes['data-bwignore'] = null;
+					attributes['data-protonpass-ignore'] = null;
+					attributes['data-form-type'] = null;
+					attributes['readonly'] = null;
+				}
+
+				return replaceInputElement(
+					input,
+					attributes,
+					shouldFocus,
+					needsElementCloning // Both Firefox and Safari need event listeners reattached
+				);
+			} else {
+				// Other browsers can use attribute manipulation with DOM refresh
+				input.setAttribute( 'autocomplete', 'address-line1' );
+
+				// Remove all password manager ignore attributes
+				const attrsToRemove = [
+					'data-lpignore',
+					'data-op-ignore',
+					'data-1p-ignore',
+					'data-bwignore',
+					'data-protonpass-ignore',
+					'data-form-type',
+				];
+				attrsToRemove.forEach( ( attr ) => {
+					if ( input.hasAttribute( attr ) ) {
+						input.removeAttribute( attr );
+					}
+				} );
+
+				// To ensure browser updates and re-enables autofill, we need to refocus the element.
+				// This is achieved by removing and re-adding the element to trigger browser updates.
+				const parentElement = input.parentElement;
+				if ( parentElement ) {
+					// Store current value and cursor position
+					const currentValue = input.value;
+					const cursorPosition = input.selectionStart;
+
+					const removedElement = parentElement.removeChild( input );
+
+					// Force browser repaint/reflow while element is removed
+					// This ensures password managers detect the removal before re-adding
+					parentElement.offsetHeight; // Trigger reflow
+					document.body.offsetHeight; // Force global repaint
+
+					parentElement.appendChild( removedElement );
+
+					// Restore value in case it was lost
+					if ( removedElement.value !== currentValue ) {
+						removedElement.value = currentValue;
+					}
+
+					if ( shouldFocus ) {
+						removedElement.focus();
+						if (
+							typeof cursorPosition === 'number' &&
+							cursorPosition >= 0
+						) {
+							removedElement.setSelectionRange(
+								cursorPosition,
+								cursorPosition
+							);
+						}
+					}
+				}
+			}
+
+			return input;
 		}
 
 		/**
@@ -494,12 +825,17 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					suggestionsList.appendChild( li );
 				} );
 
-				disableBrowserAutofill( addressInput );
+				const updatedInput = disableBrowserAutofill( addressInput );
+				// Update the cached reference if element was replaced
+				if ( updatedInput !== addressInput && addressInputs[ type ] ) {
+					addressInputs[ type ][ 'address_1' ] = updatedInput;
+				}
+
 				suggestionsContainer.style.display = 'block';
 				suggestionsContainer.style.marginTop =
 					addressInputs[ type ][ 'address_1' ].offsetHeight + 'px';
-				addressInput.setAttribute( 'aria-expanded', 'true' );
-				addressInput.setAttribute(
+				updatedInput.setAttribute( 'aria-expanded', 'true' );
+				updatedInput.setAttribute(
 					'aria-owns',
 					`address_suggestions_${ type }_list`
 				);
@@ -513,15 +849,21 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 						// Use a small delay to allow clicks on suggestions to register
 						setTimeout( () => {
 							hideSuggestions( type );
-							enableBrowserAutofill( addressInput, false );
+							const currentInput =
+								addressInputs[ type ][ 'address_1' ];
+							enableBrowserAutofill( currentInput, false );
 						}, 200 );
 					};
-					addressInput.addEventListener( 'blur', blurHandlers[ type ] );
+					updatedInput.addEventListener(
+						'blur',
+						blurHandlers[ type ]
+					);
 				}
 			} catch ( error ) {
 				console.error( 'Address search error:', error );
 				hideSuggestions( type );
-				enableBrowserAutofill( addressInput );
+				const currentInput = addressInputs[ type ][ 'address_1' ];
+				enableBrowserAutofill( currentInput );
 			}
 		}
 
@@ -558,7 +900,10 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 
 			// Remove blur event listener when suggestions are hidden
 			if ( blurHandlers[ type ] ) {
-				addressInput.removeEventListener( 'blur', blurHandlers[ type ] );
+				addressInput.removeEventListener(
+					'blur',
+					blurHandlers[ type ]
+				);
 				delete blurHandlers[ type ];
 			}
 		}
@@ -719,6 +1064,23 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 				addressInput.addEventListener( 'input', function () {
 					clearTimeout( inputTimeout );
 					const inputElement = this;
+
+					// Immediately hide suggestions if input is too short
+					if ( inputElement.value.length < 3 ) {
+						hideSuggestions( type );
+						const updatedElement =
+							enableBrowserAutofill( inputElement );
+						// Update the cached reference if element was replaced
+						if (
+							updatedElement !== inputElement &&
+							addressInputs[ type ]
+						) {
+							addressInputs[ type ][ 'address_1' ] =
+								updatedElement;
+						}
+						return;
+					}
+
 					inputTimeout = setTimeout( () => {
 						if ( document.activeElement === inputElement ) {
 							displaySuggestions(
