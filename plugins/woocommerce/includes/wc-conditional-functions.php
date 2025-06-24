@@ -291,7 +291,7 @@ if ( ! function_exists( 'is_admin_settings_page' ) ) {
 	 * @return bool
 	 */
 	function is_admin_settings_page(): bool {
-		return is_admin() && isset( $_GET['page'] ) && 'wc-settings' === $_GET['page']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return isset( $_GET['page'] ) && 'wc-settings' === $_GET['page'] && is_admin(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 }
 
