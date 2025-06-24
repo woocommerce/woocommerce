@@ -5,19 +5,13 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
+use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\JobManager;
 use WC_Product;
 
 /**
  * The controller for the stock events.
  */
 class StockSyncController {
-
-	/**
-	 * The meta key for the last sync timestamp.
-	 *
-	 * @var string
-	 */
-	public const LAST_SYNC_TIMESTAMP_META_KEY = '_wc_customer_stock_notifications_last_sync_timestamp';
 
 	/**
 	 * The queue using product IDs as keys.
@@ -34,6 +28,13 @@ class StockSyncController {
 	private EligibilityService $eligibility_service;
 
 	/**
+	 * The job manager instance.
+	 *
+	 * @var JobManager
+	 */
+	private JobManager $job_manager;
+
+	/**
 	 * Logger instance.
 	 *
 	 * @var \WC_Logger_Interface
@@ -46,10 +47,15 @@ class StockSyncController {
 	 * @internal
 	 *
 	 * @param EligibilityService $eligibility_service The eligibility service instance.
+	 * @param JobManager         $job_manager         The job manager instance.
 	 */
-	final public function init( EligibilityService $eligibility_service ): void {
+	final public function init(
+		EligibilityService $eligibility_service,
+		JobManager $job_manager
+	): void {
 		$this->logger              = \wc_get_logger();
 		$this->eligibility_service = $eligibility_service;
+		$this->job_manager         = $job_manager;
 	}
 
 	/**
@@ -129,6 +135,10 @@ class StockSyncController {
 		$product_ids = array_filter( array_keys( $this->queue ) );
 		if ( empty( $product_ids ) ) {
 			return;
+		}
+
+		foreach ( $product_ids as $product_id ) {
+			$this->job_manager->schedule_initial_job_for_product( $product_id );
 		}
 
 		$this->store_admin_notice();

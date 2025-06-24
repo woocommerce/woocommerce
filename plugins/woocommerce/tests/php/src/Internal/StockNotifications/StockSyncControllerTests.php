@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\StockManagementHelper;
+use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\JobManager;
 
 /**
  * StockSyncControllerTests data tests.
@@ -28,7 +29,8 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 		$this->sut           = new StockSyncController();
 		$eligibility_service = new EligibilityService();
 		$eligibility_service->init( new StockManagementHelper() );
-		$this->sut->init( $eligibility_service );
+		$job_manager = new JobManager();
+		$this->sut->init( $eligibility_service, $job_manager );
 	}
 
 	/**

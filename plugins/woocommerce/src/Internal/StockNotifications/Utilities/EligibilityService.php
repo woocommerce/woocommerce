@@ -95,10 +95,20 @@ class EligibilityService {
 	}
 
 	/**
-	 * Get the target product IDs for a product.
+	 * Get the product IDs that need to be checked for stock notifications.
+	 *
+	 * For simple products, this returns just the product ID. For variable products,
+	 * it returns both the parent product ID and the IDs of all variations whose stock
+	 * is managed by the parent product.
+	 *
+	 * This is used in two key scenarios:
+	 * 1. Checking if a product has any active notifications
+	 * 2. Determining which notifications need to be sent during a stock broadcast
+	 *
+	 * @since 0.0.0
 	 *
 	 * @param WC_Product $product The product to check.
-	 * @return array<int> The target product IDs.
+	 * @return array<int> Array of product IDs to check for notifications.
 	 */
 	public function get_target_product_ids( WC_Product $product ): array {
 		$lookup_ids = array( $product->get_id() );
