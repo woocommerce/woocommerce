@@ -16,7 +16,7 @@ class FulfillmentsSettings {
 	 */
 	public function __construct() {
 		add_filter( 'woocommerce_get_settings_products', array( $this, 'add_auto_fulfill_settings' ), 10, 2 );
-		add_action( 'woocommerce_new_order', array( $this, 'auto_fulfill_items' ), 10, 1 );
+		add_action( 'woocommerce_new_order', array( $this, 'auto_fulfill_items' ), 10, 2 );
 	}
 
 	/**
@@ -87,11 +87,12 @@ class FulfillmentsSettings {
 	/**
 	 * Automatically fulfill items in the order.
 	 *
-	 * @param int $order_id The ID of the order being created.
+	 * @param int      $order_id The ID of the order being created.
+	 * @param WC_Order $order The order object.
 	 */
-	public function auto_fulfill_items( int $order_id ): void {
-		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
+	public function auto_fulfill_items( int $order_id, $order ): void {
+		$order = $order ?? wc_get_order( $order_id );
+		if ( ! $order || empty( $order->get_items() ) ) {
 			return;
 		}
 		$auto_fulfill_downloadable = 'yes' === get_option( 'auto_fulfill_downloadable', 'yes' );
