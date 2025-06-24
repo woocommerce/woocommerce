@@ -49,6 +49,12 @@ class Initializer {
 		'core/social-links',
 	);
 
+	/**
+	 * Cache renderers by block name.
+	 *
+	 * @var array<string, Abstract_Block_Renderer>
+	 */
+	private array $renderers = array();
 
 	/**
 	 * Initializes the core blocks renderers.
@@ -131,34 +137,54 @@ class Initializer {
 	 * @return Abstract_Block_Renderer
 	 */
 	public function get_block_renderer( string $block_name ): Abstract_Block_Renderer {
+		if ( isset( $this->renderers[ $block_name ] ) ) {
+			return $this->renderers[ $block_name ];
+		}
+
 		switch ( $block_name ) {
 			case 'core/heading':
 			case 'core/paragraph':
-				return new Text();
+				$renderer = new Text();
+				break;
 			case 'core/column':
-				return new Column();
+				$renderer = new Column();
+				break;
 			case 'core/columns':
-				return new Columns();
+				$renderer = new Columns();
+				break;
 			case 'core/list':
-				return new List_Block();
+				$renderer = new List_Block();
+				break;
 			case 'core/list-item':
-				return new List_Item();
+				$renderer = new List_Item();
+				break;
 			case 'core/image':
-				return new Image();
+				$renderer = new Image();
+				break;
 			case 'core/button':
-				return new Button();
+				$renderer = new Button();
+				break;
 			case 'core/buttons':
-				return new Buttons( new Flex_Layout_Renderer() );
+				$renderer = new Buttons( new Flex_Layout_Renderer() );
+				break;
 			case 'core/group':
-				return new Group();
+				$renderer = new Group();
+				break;
 			case 'core/quote':
-				return new Quote();
+				$renderer = new Quote();
+				break;
 			case 'core/social-link':
-				return new Social_Link();
+				$renderer = new Social_Link();
+				break;
 			case 'core/social-links':
-				return new Social_Links();
+				$renderer = new Social_Links();
+				break;
+			default:
+				$renderer = new Fallback();
+				break;
 		}
 
-		return new Fallback();
+		$this->renderers[ $block_name ] = $renderer;
+		return $renderer;
 	}
 }
