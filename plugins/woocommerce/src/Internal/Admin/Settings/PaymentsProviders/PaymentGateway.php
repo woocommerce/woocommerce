@@ -11,6 +11,9 @@ use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Throwable;
 use WC_HTTPS;
 use WC_Payment_Gateway;
+use WC_Gateway_BACS;
+use WC_Gateway_COD;
+use WC_Gateway_Cheque;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -539,6 +542,14 @@ class PaymentGateway {
 					'source'    => 'settings-payments',
 					'exception' => $e,
 				)
+			);
+		}
+
+		// Special handling for BACS to use the new path-based approach
+		if ( WC_Gateway_BACS::ID === $payment_gateway->id || WC_Gateway_COD::ID === $payment_gateway->id || WC_Gateway_Cheque::ID === $payment_gateway->id ) {
+			return Utils::wc_payments_settings_url(
+				null,
+				array( 'path' => '/offline/' . strtolower( $payment_gateway->id ), 'from' => Payments::FROM_PAYMENTS_SETTINGS )
 			);
 		}
 
