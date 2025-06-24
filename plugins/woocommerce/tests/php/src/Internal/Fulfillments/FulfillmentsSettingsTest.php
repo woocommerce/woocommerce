@@ -1,8 +1,7 @@
 <?php declare(strict_types=1);
 
-namespace WooCommerce\Tests\Internal\Fulfillments;
+namespace Automattic\WooCommerce\Tests\Internal\Fulfillments;
 
-use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsSettings;
 use WC_Unit_Test_Case;
 
 /**
