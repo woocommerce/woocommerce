@@ -38,6 +38,7 @@ class QuantityLimitsTests extends TestCase {
 		// Add only intval.
 		add_filter( 'woocommerce_stock_amount', 'intval' );
 	}
+
 	/**
 	 * Test quantity limit when stock management is enabled.
 	 */
@@ -268,6 +269,9 @@ class QuantityLimitsTests extends TestCase {
 		$limits          = $quantity_limits->get_add_to_cart_limits( $product );
 
 		$this->assertEquals( 5.5, $limits['maximum'], 'Float quantities should be supported for maximum limits' );
+
+		// Clean up custom filter.
+		remove_all_filters( 'woocommerce_store_api_product_quantity_multiple_of' );
 	}
 
 	/**
