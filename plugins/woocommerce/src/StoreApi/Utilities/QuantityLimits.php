@@ -85,8 +85,8 @@ final class QuantityLimits {
 			return wc_stock_amount( $quantity );
 		}
 
-		if ( $quantity < 0 || ! is_numeric( $quantity ) ) {
-			return 0;
+		if ( ! is_numeric( $quantity ) || $quantity < 0 ) {
+			return wc_stock_amount( 0 );
 		}
 
 		$limits       = $this->get_cart_item_quantity_limits( $cart_item );
@@ -112,11 +112,12 @@ final class QuantityLimits {
 	 * @return int|float
 	 */
 	public function limit_to_multiple( $number, $multiple_of, string $rounding_function = 'round' ) {
-		if ( ! is_numeric( $number ) ) {
-			return wc_stock_amount( $number );
+		// Handle edge cases.
+		if ( ! is_numeric( $number ) || ! is_numeric( $multiple_of ) ) {
+			return wc_stock_amount( 0 );
 		}
 
-		if ( 0 === $multiple_of || $this->is_multiple_of( $number, $multiple_of ) || ! is_numeric( $multiple_of ) ) {
+		if ( 0 >= $multiple_of || $this->is_multiple_of( $number, $multiple_of ) ) {
 			return $number;
 		}
 
@@ -127,6 +128,38 @@ final class QuantityLimits {
 	}
 
 	/**
+	 * Checks if a number is a multiple of another number.
+	 *
+	 * @param int|float $number The number to check.
+	 * @param int|float $multiple_of The multiple.
+	 * @return bool
+	 */
+	protected function is_multiple_of( $number, $multiple_of ) {
+		// Handle edge cases.
+		if ( ! is_numeric( $number ) || ! is_numeric( $multiple_of ) || 0 >= $multiple_of ) {
+			return false;
+		}
+
+		// For integer values, use simple modulo.
+		if ( $this->is_integer_value( $number ) && $this->is_integer_value( $multiple_of ) ) {
+			return 0 === ( (int) $number % (int) $multiple_of );
+		}
+
+		$division_result = $number / $multiple_of;
+		return abs( $division_result - round( $division_result ) ) < 0.0001;
+	}
+
+	/**
+	 * Checks if a number is effectively an integer value (handles floats like 5.0).
+	 *
+	 * @param int|float $number The number to check.
+	 * @return bool
+	 */
+	protected function is_integer_value( $number ) {
+		return is_numeric( $number ) && floor( $number ) === ceil( $number );
+	}
+
+	/**
 	 * Check that a given quantity is valid according to any limits in place.
 	 *
 	 * @param int|float $quantity Quantity to validate.
@@ -134,8 +167,9 @@ final class QuantityLimits {
 	 * @return \WP_Error|true
 	 */
 	public function validate_cart_item_quantity( $quantity, $cart_item ) {
-		$limits  = $this->get_cart_item_quantity_limits( $cart_item );
-		$product = $cart_item['data'] ?? false;
+		$limits   = $this->get_cart_item_quantity_limits( $cart_item );
+		$product  = $cart_item['data'] ?? false;
+		$quantity = wc_stock_amount( $quantity );
 
 		if ( ! $product instanceof \WC_Product ) {
 			return true;
@@ -265,29 +299,5 @@ final class QuantityLimits {
 		$filtered_value = apply_filters( 'woocommerce_store_api_product_quantity_' . $value_type, $value, $product, $cart_item );
 
 		return is_bool( $filtered_value ) ? $filtered_value : (bool) $value;
-	}
-
-	/**
-	 * Checks if a number is a multiple of another number.
-	 *
-	 * @param int|float $number The number to check.
-	 * @param int|float $multiple_of The multiple.
-	 * @return bool
-	 */
-	protected function is_multiple_of( $number, $multiple_of ) {
-		// Handle negative numbers by working with absolute values.
-		$number      = abs( $number );
-		$multiple_of = abs( $multiple_of );
-
-		if ( 0 === $multiple_of ) {
-			return true; // Avoid division by zero.
-		}
-
-		// Scale to integers to avoid floating-point precision issues.
-		$scale           = pow( 10, WC_ROUNDING_PRECISION );
-		$scaled_number   = round( $number * $scale );
-		$scaled_multiple = round( $multiple_of * $scale );
-
-		return 0 === $scaled_number % $scaled_multiple;
 	}
 }

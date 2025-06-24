@@ -29,6 +29,10 @@ class QuantityLimitsTests extends TestCase {
 	 */
 	public function tearDown(): void {
 		update_option( 'woocommerce_manage_stock', $this->manage_stock );
+		// Clean up custom filters.
+		remove_all_filters( 'woocommerce_store_api_product_quantity_multiple_of' );
+		remove_all_filters( 'woocommerce_store_api_product_quantity_maximum' );
+		remove_all_filters( 'woocommerce_store_api_product_quantity_minimum' );
 		parent::tearDown();
 	}
 
@@ -75,7 +79,15 @@ class QuantityLimitsTests extends TestCase {
 		$quantity_limits = new QuantityLimits();
 		$limits          = $quantity_limits->get_add_to_cart_limits( $product );
 
-		$this->assertEquals( 10, $limits['maximum'], 'When stock management is enabled, maximum quantity should be 10' );
+		$this->assertEquals( 9999, $limits['maximum'], 'When stock management is enabled, but backorders are allowed, maximum quantity should be 9999' );
+
+		$product->set_backorders( 'no' );
+		$product->save();
+
+		$quantity_limits = new QuantityLimits();
+		$limits          = $quantity_limits->get_add_to_cart_limits( $product );
+
+		$this->assertEquals( 10, $limits['maximum'], 'When stock management is enabled and backorders are not allowed, maximum quantity should be 10' );
 	}
 
 	/**
@@ -282,9 +294,6 @@ class QuantityLimitsTests extends TestCase {
 		$limits          = $quantity_limits->get_add_to_cart_limits( $product );
 
 		$this->assertEquals( 5.5, $limits['maximum'], 'Float quantities should be supported for maximum limits' );
-
-		// Clean up custom filter.
-		remove_all_filters( 'woocommerce_store_api_product_quantity_multiple_of' );
 	}
 
 	/**
@@ -305,7 +314,7 @@ class QuantityLimitsTests extends TestCase {
 
 		// Test edge cases.
 		$this->assertTrue( $method->invoke( $quantity_limits, 0, 5 ), '0 should be a multiple of any number' );
-		$this->assertTrue( $method->invoke( $quantity_limits, 5, 0 ), 'Any number should be considered a multiple of 0 (avoid division by zero)' );
+		$this->assertFalse( $method->invoke( $quantity_limits, 5, 0 ), '0 is not a multiple of 5' );
 		$this->assertTrue( $method->invoke( $quantity_limits, 5, 1 ), '5 should be a multiple of 1' );
 		$this->assertFalse( $method->invoke( $quantity_limits, 5.5, 1 ), '5.5 should not be a multiple of 1' );
 	}
@@ -409,6 +418,15 @@ class QuantityLimitsTests extends TestCase {
 	public function test_validate_cart_item_quantity_with_floats() {
 		$this->enable_float_support();
 
+		// Make multiple_of 0.5.
+		add_filter(
+			'woocommerce_store_api_product_quantity_multiple_of',
+			function () {
+				return 0.5;
+			},
+			10
+		);
+
 		$fixtures = new FixtureData();
 		$product  = $fixtures->get_simple_product(
 			array(
@@ -478,9 +496,6 @@ class QuantityLimitsTests extends TestCase {
 		// Test invalid multiples.
 		$result = $quantity_limits->validate_cart_item_quantity( 2.3, $cart_item );
 		$this->assertInstanceOf( 'WP_Error', $result, '2.3 should be invalid when multiple_of is 0.5' );
-
-		// Clean up custom filter.
-		remove_all_filters( 'woocommerce_store_api_product_quantity_multiple_of' );
 	}
 
 	/**
@@ -566,7 +581,7 @@ class QuantityLimitsTests extends TestCase {
 
 		// Test with non-numeric inputs.
 		$this->assertEquals( 0, $quantity_limits->limit_to_multiple( 'invalid', 1.5, 'round' ), 'Non-numeric number should return 0 via wc_stock_amount' );
-		$this->assertEquals( 5.5, $quantity_limits->limit_to_multiple( 5.5, 'invalid', 'round' ), 'Non-numeric multiple_of should return original number' );
+		$this->assertEquals( 0, $quantity_limits->limit_to_multiple( 5.5, 'invalid', 'round' ), 'Non-numeric multiple_of should return 0' );
 
 		// Test with invalid rounding function (should default to 'round').
 		$this->assertEquals( 6.0, $quantity_limits->limit_to_multiple( 5.3, 1.5, 'invalid' ), 'Invalid rounding function should default to round' );
