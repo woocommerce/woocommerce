@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\Fulfillments;
 
+use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
 use WC_Order;
 
 /**
@@ -16,7 +17,8 @@ class FulfillmentsSettings {
 	 */
 	public function __construct() {
 		add_filter( 'woocommerce_get_settings_products', array( $this, 'add_auto_fulfill_settings' ), 10, 2 );
-		add_action( 'woocommerce_new_order', array( $this, 'auto_fulfill_items' ), 10, 2 );
+		add_action( 'woocommerce_order_status_processing', array( $this, 'auto_fulfill_items_on_processing' ), 10, 2 );
+		add_action( 'woocommerce_order_status_completed', array( $this, 'auto_fulfill_items_on_completed' ), 10, 2 );
 	}
 
 	/**
@@ -85,12 +87,12 @@ class FulfillmentsSettings {
 	}
 
 	/**
-	 * Automatically fulfill items in the order.
+	 * Automatically fulfill items in the order on the processing state.
 	 *
 	 * @param int      $order_id The ID of the order being created.
 	 * @param WC_Order $order The order object.
 	 */
-	public function auto_fulfill_items( int $order_id, $order ): void {
+	public function auto_fulfill_items_on_processing( int $order_id, $order ): void {
 		$order = $order instanceof WC_Order ? $order : wc_get_order( $order_id );
 
 		if ( ! $order || empty( $order->get_items() ) ) {
@@ -113,7 +115,6 @@ class FulfillmentsSettings {
 			}
 
 			if ( ( $product->is_downloadable() && $auto_fulfill_downloadable ) || ( $product->is_virtual() && $auto_fulfill_virtual ) ) {
-				// Fulfill downloadable items.
 				$auto_fulfill_items[] = $item;
 			}
 		}
@@ -137,5 +138,34 @@ class FulfillmentsSettings {
 			);
 			$fulfillment->save();
 		}
+
+		$order->update_meta_data( '_auto_fulfill_processed', true );
+	}
+
+	/**
+	 * Automatically fulfill items in the order for orders that skip the processing state.
+	 *
+	 * @param int      $order_id The ID of the order being created.
+	 * @param WC_Order $order The order object.
+	 */
+	public function auto_fulfill_items_on_completed( int $order_id, $order ): void {
+		$order = $order instanceof WC_Order ? $order : wc_get_order( $order_id );
+		if ( ! $order || empty( $order->get_items() ) ) {
+			return;
+		}
+
+		// If auto-fulfill already processed, skip.
+		if ( $order->get_meta( '_auto_fulfill_processed', true ) ) {
+			return;
+		}
+
+		// If fulfillments already exist, skip auto-fulfillment.
+		$fulfillments = wc_get_container()->get( FulfillmentsDataStore::class )->read_fulfillments( \WC_Order::class, (string) $order_id );
+		if ( ! empty( $fulfillments ) ) {
+			return;
+		}
+
+		// Auto-fulfill items.
+		$this->auto_fulfill_items_on_processing( $order_id, $order );
 	}
 }
