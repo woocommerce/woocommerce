@@ -314,29 +314,6 @@ export const SettingsPaymentsMethods = () => {
 };
 
 /**
- * Wraps the main payment settings and payment methods settings pages.
- */
-export const SettingsPaymentsMainWrapper = () => {
-	return (
-		<>
-			<Header
-				title={ __( 'Settings', 'woocommerce' ) }
-				context={ 'wc_settings_payments__main' }
-			/>
-			<HistoryRouter history={ getHistory() }>
-				<Routes>
-					<Route
-						path="/payment-methods"
-						element={ <SettingsPaymentsMethods /> }
-					/>
-					<Route path="/*" element={ <SettingsPaymentsMain /> } />
-				</Routes>
-			</HistoryRouter>
-		</>
-	);
-};
-
-/**
  * Wraps the offline payment gateways settings page.
  */
 export const SettingsPaymentsOfflineWrapper = () => {
@@ -537,3 +514,43 @@ export const SettingsPaymentsChequeWrapper = () => {
 		</>
 	);
 };
+
+/**
+ * Wraps the main payment settings and payment methods settings pages.
+ */
+export const SettingsPaymentsMainWrapper = () => {
+	return (
+		<>
+			<Header
+				title={ __( 'Settings', 'woocommerce' ) }
+				context={ 'wc_settings_payments__main' }
+			/>
+			<HistoryRouter history={ getHistory() }>
+				<Routes>
+					<Route
+						path="/payment-methods"
+						element={ <SettingsPaymentsMethods /> }
+					/>
+					<Route
+						path="/offline"
+						element={ <SettingsPaymentsOfflineWrapper /> }
+					/>
+					<Route
+						path="/offline/bacs"
+						element={ <SettingsPaymentsBacsWrapper /> }
+					/>
+					<Route
+						path="/offline/cod"
+						element={ <SettingsPaymentsCodWrapper /> }
+					/>
+					<Route
+						path="/offline/cheque"
+						element={ <SettingsPaymentsChequeWrapper /> }
+					/>
+					<Route path="/*" element={ <SettingsPaymentsMain /> } />
+				</Routes>
+			</HistoryRouter>
+		</>
+	);
+};
+
