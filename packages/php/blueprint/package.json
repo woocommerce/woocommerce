@@ -34,7 +34,8 @@
 						"composer.json",
 						"composer.lock",
 						"**/*.php",
-						"phpunit.xml"
+						"phpunit.xml",
+						".wp-env.json"
 					],
 					"testEnv": {
 						"start": "env:test",
