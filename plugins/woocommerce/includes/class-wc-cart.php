@@ -1985,7 +1985,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				break;
 			}
 		}
-		return wc_cart_round_discount( $tax_amount, wc_get_price_decimals(), PHP_ROUND_HALF_DOWN );
+		return wc_cart_round_discount( $tax_amount, wc_get_price_decimals() );
 	}
 
 	/**

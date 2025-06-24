@@ -2591,11 +2591,10 @@ function wc_decimal_to_fraction( $decimal ) {
  *
  * @param  double $value Amount to round.
  * @param  int    $precision DP to round.
- * @param  int    $round_mode Round mode.
  * @return float
  */
-function wc_round_discount( $value, $precision, $round_mode = WC_DISCOUNT_ROUNDING_MODE ) {
-	return NumberUtil::round( $value, $precision, $round_mode ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
+function wc_round_discount( $value, $precision ) {
+	return NumberUtil::round( $value, $precision, WC_DISCOUNT_ROUNDING_MODE ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
 }
 
 /**
