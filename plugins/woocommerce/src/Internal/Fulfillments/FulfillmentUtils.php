@@ -2,7 +2,6 @@
 
 namespace Automattic\WooCommerce\Internal\Fulfillments;
 
-use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
 use WC_Order;
 
 /**
@@ -129,15 +128,31 @@ class FulfillmentUtils {
 			}
 
 			if ( $all_fulfilled && empty( $pending_items ) ) {
-				return 'fulfilled';
+				$status = 'fulfilled';
 			} elseif ( $some_fulfilled ) {
-				return 'partially_fulfilled';
+				$status = 'partially_fulfilled';
 			} else {
-				return 'unfulfilled';
+				$status = 'unfulfilled';
 			}
 		} else {
-			return 'no_fulfillments';
+			$status = 'no_fulfillments';
 		}
+
+		/**
+		 * This filter allows plugins to modify the fulfillment status of an order.
+		 *
+		 * @since 9.9.0
+		 *
+		 * @param string $status The default fulfillment status.
+		 * @param WC_Order $order The order object.
+		 * @param array $fulfillments An array of fulfillments for the order.
+		 */
+		return apply_filters(
+			'wc_fulfillment_calculate_order_fulfillment_status',
+			$status,
+			$order,
+			$fulfillments
+		);
 	}
 
 	/**
@@ -237,11 +252,14 @@ class FulfillmentUtils {
 	/**
 	 * Check if the given fulfillment status is valid.
 	 *
-	 * @param string $status The fulfillment status to check.
+	 * @param string|null $status The fulfillment status to check.
 	 *
 	 * @return bool True if the status is valid, false otherwise.
 	 */
-	public static function is_valid_order_fulfillment_status( string $status ): bool {
+	public static function is_valid_order_fulfillment_status( ?string $status ): bool {
+		if ( is_null( $status ) ) {
+			return false;
+		}
 		$order_fulfillment_statuses = self::get_order_fulfillment_statuses();
 		return in_array( $status, array_keys( $order_fulfillment_statuses ), true );
 	}
@@ -249,11 +267,14 @@ class FulfillmentUtils {
 	/**
 	 * Check if the given fulfillment status is valid.
 	 *
-	 * @param string $status The fulfillment status to check.
+	 * @param string|null $status The fulfillment status to check.
 	 *
 	 * @return bool True if the status is valid, false otherwise.
 	 */
-	public static function is_valid_fulfillment_status( string $status ): bool {
+	public static function is_valid_fulfillment_status( ?string $status ): bool {
+		if ( is_null( $status ) ) {
+			return false;
+		}
 		$fulfillment_statuses = self::get_fulfillment_statuses();
 		return in_array( $status, array_keys( $fulfillment_statuses ), true );
 	}

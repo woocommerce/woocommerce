@@ -303,7 +303,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 		);
 
 		// Fulfill the fulfillment.
-		$fulfillment->set_is_fulfilled( true );
+		$fulfillment->set_status( 'fulfilled' );
 
 		if ( 'create' === $type ) {
 			// Create the fulfillment.
@@ -345,7 +345,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 		);
 
 		// Fulfill the fulfillment.
-		$fulfillment->set_is_fulfilled( true );
+		$fulfillment->set_status( 'fulfilled' );
 
 		$this->expectException( \Exception::class );
 		$this->expectExceptionMessage( 'Fulfillment fulfill prevented by hook.' );
@@ -400,7 +400,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 		);
 
 		// Fulfill the fulfillment.
-		$fulfillment->set_is_fulfilled( true );
+		$fulfillment->set_status( 'fulfilled' );
 
 		if ( 'create' === $type ) {
 			// Create the fulfillment.

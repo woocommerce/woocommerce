@@ -114,8 +114,23 @@ class Fulfillment extends \WC_Data {
 	 * @param string|null $status Fulfillment status.
 	 *
 	 * @return void
+	 *
+	 * @throws \InvalidArgumentException If the status is invalid.
 	 */
 	public function set_status( ?string $status ): void {
+		$statuses = FulfillmentUtils::get_fulfillment_statuses();
+		if ( ! isset( $statuses[ $status ] ) ) {
+			throw new \InvalidArgumentException(
+				sprintf(
+				/* translators: %s is the invalid fulfillment status. */
+					esc_attr__( 'Invalid fulfillment status: %s', 'woocommerce' ),
+					esc_attr( $status )
+				)
+			);
+		}
+		// Set the fulfillment status.
+		$this->set_is_fulfilled( $statuses[ $status ]['is_fulfilled'] ?? false );
+		// Set the status in the data array.
 		$this->data['status'] = $status;
 	}
 
@@ -129,13 +144,13 @@ class Fulfillment extends \WC_Data {
 	}
 
 	/**
-	 * Set if the fulfillment is fulfilled.
+	 * Set if the fulfillment is fulfilled. This is an internal method which is bound to the fulfillment status.
 	 *
 	 * @param bool $is_fulfilled Whether the fulfillment is fulfilled.
 	 *
 	 *  @return void
 	 */
-	public function set_is_fulfilled( bool $is_fulfilled ): void {
+	private function set_is_fulfilled( bool $is_fulfilled ): void {
 		$this->data['is_fulfilled'] = $is_fulfilled;
 	}
 

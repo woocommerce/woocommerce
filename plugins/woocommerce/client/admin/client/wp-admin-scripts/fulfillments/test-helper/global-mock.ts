@@ -22,9 +22,29 @@ global.window.wcFulfillmentSettings = {
 		EUR: '€',
 	},
 	statuses: {
-		fulfilled: 'Fulfilled',
-		unfulfilled: 'Unfulfilled',
-		partially_fulfilled: 'Partially Fulfilled',
-		no_fulfillments: 'No Fulfillments',
+		fulfilled: {
+			label: 'Fulfilled',
+			is_fulfilled: true,
+			background_color: '#d4edda',
+			text_color: '#155724',
+		},
+		unfulfilled: {
+			label: 'Unfulfilled',
+			is_fulfilled: false,
+			background_color: '#f8d7da',
+			text_color: '#721c24',
+		},
+		partially_fulfilled: {
+			label: 'Partially Fulfilled',
+			is_fulfilled: false,
+			background_color: '#fff3cd',
+			text_color: '#856404',
+		},
+		no_fulfillments: {
+			label: 'No Fulfillments',
+			is_fulfilled: false,
+			background_color: '#f0f0f0',
+			text_color: '#6c757d',
+		},
 	},
 };

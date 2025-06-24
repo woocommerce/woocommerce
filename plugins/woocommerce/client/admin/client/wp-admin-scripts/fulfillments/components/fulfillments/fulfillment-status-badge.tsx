@@ -9,11 +9,22 @@ export default function FulfillmentStatusBadge( {
 	fulfillment: Fulfillment;
 } ) {
 	const statuses = window.wcFulfillmentSettings.statuses;
+	const fulfillmentStatus = statuses[ fulfillment.status ] || {
+		label: fulfillment.status,
+		is_fulfilled: false,
+		background_color: '',
+		text_color: '',
+	};
+
 	return (
 		<div
 			className={ `woocommerce-fulfillment-status-badge woocommerce-fulfillment-status-badge__${ fulfillment.status }` }
+			style={ {
+				backgroundColor: fulfillmentStatus.background_color,
+				color: fulfillmentStatus.text_color,
+			} }
 		>
-			{ statuses[ fulfillment.status ] ?? fulfillment.status }
+			{ fulfillmentStatus.label }
 		</div>
 	);
 }
