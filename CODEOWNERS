@@ -22,3 +22,12 @@
 # Interactivity API - public stores
 /plugins/woocommerce/client/blocks/assets/js/base/stores/ @woocommerce/billow
 /plugins/woocommerce/src/Blocks/Utils/BlocksSharedState.php @woocommerce/billow
+
+# Core cart and checkout related files
+/plugins/woocommerce/includes/class-wc-cart*.php @woocommerce/rubik
+/plugins/woocommerce/includes/class-wc-checkout*.php @woocommerce/rubik
+/plugins/woocommerce/includes/wc-cart-functions.php @woocommerce/rubik
+/plugins/woocommerce/includes/class-wc-session-handler.php @woocommerce/rubik
+
+# Store API related files
+/plugins/woocommerce/src/StoreApi/ @woocommerce/rubik
